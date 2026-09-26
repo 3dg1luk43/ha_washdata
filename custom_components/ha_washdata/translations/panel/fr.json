@@ -35,7 +35,8 @@
     "not_importable": "n/a ici",
     "exists": "existe déjà",
     "backfilled_tip": "Détecté dans un historique de puissance importé. Influence uniquement la correspondance des programmes, non compté dans les statistiques.",
-    "armed": "(s'applique au prochain cycle)"
+    "armed": "(s'applique au prochain cycle)",
+    "duration_outlier": "{n} cycle(s) de durée anormale"
   },
   "btn": {
     "reset_zoom": "Réinitialiser le zoom",
@@ -1039,7 +1040,10 @@
     "odometer_intro": "Ce total ne fait qu'augmenter. Supprimer l'enregistrement d'un cycle ne le modifie pas, et il continue de compter au-delà de la limite d'historique conservé, afin que les rappels d'entretien restent exacts.",
     "odometer_correct_hint": "Renseignez cette valeur si WashData a enregistré un cycle qui n'a jamais eu lieu, ou si l'appareil avait déjà effectué des cycles avant l'installation de WashData.",
     "no_reminders_set": "Aucun rappel d'entretien n'est encore configuré.",
-    "toast_program_armed": "Programme prévu pour le prochain cycle : {program}"
+    "toast_program_armed": "Programme prévu pour le prochain cycle : {program}",
+    "standby_above_stop_title": "Consomme encore {idle} W à la fin du cycle",
+    "standby_above_stop_sub": "{n} des {total} derniers cycles. Le Délai d'arrêt ne démarre qu'une fois la puissance descendue sous le Seuil d'arrêt ({stop} W) : les cycles se terminent donc en retard ou doivent être arrêtés à la main.",
+    "advisory_duration_outlier": "{n} cycle(s) étiquetés '{name}' s'écartent trop de sa durée habituelle pour pouvoir un jour lui correspondre (pire cas : {ratio}x). Ils sont probablement mal étiquetés, ou un enregistrement a capté deux exécutions. Réétiquetez-les ou scindez-les pour qu'ils cessent de fausser l'estimation de temps de ce programme."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
@@ -1063,7 +1067,7 @@
     "duration_weight": "Étape 4 : force avec laquelle la concordance de durée affecte le score final (défaut 0,22)",
     "energy_weight": "Étape 4 : force avec laquelle la concordance d'énergie affecte le score final (défaut 0,22)",
     "profile_match_min_duration_ratio": "Étape 1 : durée de cycle minimale en fraction de la durée du profil ; défaut 0,1 (10 %)",
-    "profile_match_max_duration_ratio": "Étape 1 : durée de cycle maximale en fraction de la durée du profil ; défaut 1,5 (150 %)",
+    "profile_match_max_duration_ratio": "Étape 1 : durée de cycle maximale en fraction de la durée du profil ; défaut 1,8 (180 %)",
     "keep_min_score": "Étape 2 : score plancher pour rester en lice ; le défaut 0,1 admet les candidats faibles, les étapes suivantes sélectionnent le meilleur",
     "dtw_blend": "Étape 3 : 0 = score central uniquement, 1 = score DTW uniquement, 0,5 = mélange égal (défaut)",
     "dtw_ensemble_w": "Étape 3 (mode ensemble) : poids sur L1 normalisé vs DTW dérivé ; le défaut 0,7 favorise la sensibilité au niveau",
@@ -1398,8 +1402,8 @@
       "label": "Délai de rappel de déchargement"
     },
     "notify_unload_repeat": {
-      "doc": "Continue de renvoyer le rappel de déchargement toutes les \"Délai de rappel de déchargement\" minutes jusqu'à ce que vous ouvriez la porte ou appuyiez sur \"Arrêter les rappels\" dans la notification. Nécessite une Entité capteur de porte (le rappel lui-même en a besoin). Le bouton de rejet fonctionne sur les notifications de l'application compagnon (mobile) de Home Assistant.",
-      "label": "Répéter jusqu'à l'ouverture de la porte"
+      "doc": "Continue de renvoyer le rappel de déchargement toutes les \"Délai de rappel de déchargement\" minutes jusqu'à ce que le déchargement soit confirmé ou que vous appuyiez sur \"Arrêter les rappels\" dans la notification. Nécessite un moyen de confirmer le déchargement : une Entité capteur de porte, une Entité de confirmation de déchargement ou l'option \"Confirmer le déchargement manuellement\" ci-dessous. Le bouton de rejet fonctionne sur les notifications de l'application compagnon (mobile) de Home Assistant.",
+      "label": "Répéter jusqu'au déchargement"
     },
     "off_delay": {
       "doc": "Temps d'attente après la coupure de courant avant de déclarer le cycle terminé. Si le courant revient dans cette fenêtre, le cycle continue de manière transparente – cela comble les pauses entre les étapes de lavage. Les lave-vaisselle ont de longues phases de séchage (mise hors tension pendant 20 à 60 minutes), le délai d'arrêt doit donc être supérieur à ce délai pour que l'ensemble du lavage et du séchage se déroule en un seul cycle.",
@@ -1607,6 +1611,14 @@
     "energy_price_dynamic": {
       "label": "Coût pondéré dans le temps",
       "doc": "Facture chaque cycle au prix en vigueur à chaque instant où il a tourné, au lieu du seul prix du moment où il s'est terminé. Ne s'applique qu'à une entité de prix (un prix statique ne peut pas varier). Aucune configuration supplémentaire n'est nécessaire : le prix est suivi en direct pendant le cycle, et Traiter l'historique, dans Diagnostic, recalcule le coût des anciens cycles à partir du recorder. Désactivé = le comportement classique, un seul prix figé à la fin."
+    },
+    "unload_confirm_entity": {
+      "label": "Entité de confirmation de déchargement",
+      "doc": "Entité facultative dont l'activation signifie que la charge a été sortie, pour les machines qui ne peuvent pas avoir de capteur de porte. N'importe quel type convient : un bouton Zigbee ou NFC, une aide input_button, un détecteur de mouvement devant la machine, une scène. Tout changement d'état compte comme une confirmation, sauf l'extinction et le passage à indisponible. Définir cette entité active aussi le rappel de déchargement sur un appareil sans Entité capteur de porte."
+    },
+    "unload_track_without_door": {
+      "label": "Confirmer le déchargement manuellement",
+      "doc": "Exécute le rappel de déchargement sur un appareil sans Entité capteur de porte ni Entité de confirmation de déchargement, et vous confirmez le déchargement depuis votre propre automatisation : appuyez sur l'entité bouton \"Marquer comme déchargé\" ou appelez le service ha_washdata.mark_unloaded. Ignoré lorsqu'une Entité capteur de porte est définie, car elle fournit déjà le signal."
     }
   },
   "setting_group": {
@@ -1839,6 +1851,7 @@
     "store_share_failed": "Échec du partage : {error}",
     "store_shared": "Partagé sur la boutique communautaire, en attente de révision.",
     "appliance_added": "Appareil ajouté, en attente d'approbation",
+    "contrib_device_changed": "Ajouté à la boutique communautaire, mais l'appareil sélectionné a changé pendant que le formulaire était ouvert. Sélectionnez-le dans les Paramètres.",
     "thanks_confirming": "Merci d'avoir confirmé",
     "device_approved": "Approuvé par la communauté",
     "rating_saved": "Évaluation de la qualité enregistrée",
@@ -1962,6 +1975,7 @@
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",
       "reason": {
         "force_stopped": "arrêtés de force",
+        "user_stopped": "arrêtés manuellement",
         "interrupted": "interrompus",
         "incomplete": "incomplets",
         "noise": "bruit",
@@ -2186,6 +2200,11 @@
       "tap_action": "Action au toucher",
       "hold_action": "Action au maintien",
       "double_tap_action": "Action au double toucher"
+    }
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Un cycle terminé attend en réalité {eff} s, et non {delay} s : l'Intervalle d'arrêt minimal ({gap} s) est plus long et prime."
     }
   }
 }

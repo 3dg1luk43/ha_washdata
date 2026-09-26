@@ -60,6 +60,7 @@
         "fair_fit_tip": "Mérsékelt egyezési konzisztencia – néhány ehhez a profilhoz rendelt ciklus alacsonyabb megbízhatósági pontszámmal rendelkezik. Címkézz fel több ciklust, vagy rögzítsd újra a profilt a pontosság javítása érdekében.",
         "feedback_requested": "Visszajelzést kértünk",
         "golden_cycle": "Rögzített referenciaciklus",
+        "duration_outlier": "{n} szokatlan hosszúságú ciklus",
         "improving": "↗ javul",
         "manual": "(manuálisan kiválasztott)",
         "needs_review": "Felülvizsgálatra szorul",
@@ -257,6 +258,11 @@
         "hist_import_n": "{n} ciklus importálása",
         "hist_goto_cycles": "Ciklusok megjelenítése",
         "save_total_cycles": "Összesítés mentése"
+    },
+    "note": {
+        "off_delay": {
+            "effective": "A befejezett ciklus valójában {eff} s-ot vár, nem {delay} s-ot: a Min. kikapcsolási rés ({gap} s) hosszabb, és az élvez elsőbbséget."
+        }
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
         "imported_readonly": "A közösségi boltból importálva. Referenciaként és egyeztetéshez jelenik meg. Nem számít bele a statisztikákba, és nem szerkeszthető.",
         "merge_no_imports": "Az importált felvételek nem egyesíthetők valódi ciklussal. Az egyesítéshez szüntesse meg a kijelölésüket.",
         "store_enable_hint": "A közösségi referenciaciklusok böngészéséhez és importálásához engedélyezze az online funkciókat a Beállításokban.",
+        "advisory_duration_outlier": "A(z) '{name}' címkével ellátott {n} ciklus hossza túlságosan eltér a szokásos hosszától ahhoz, hogy valaha is illeszkedjen hozzá (a legrosszabb: {ratio}x). Valószínűleg rosszul vannak címkézve, vagy egy felvétel két futást rögzített. Címkézze át vagy vágja szét őket, hogy ne torzítsák ennek a programnak az időbecslését.",
+        "standby_above_stop_title": "A ciklus végén még mindig {idle} W-ot vett fel",
+        "standby_above_stop_sub": "Az utolsó {total} ciklusból {n}. A kikapcsolási késleltetés csak akkor indul el, amikor a teljesítmény a Leállítási küszöb ({stop} W) alá esik, így a ciklusok későn fejeződnek be, vagy kézzel kell leállítani őket.",
         "online_intro": "Ossza meg és töltsön le referenciaciklusokat más WashData-felhasználókkal. Minden online funkció opcionális és alapértelmezés szerint ki van kapcsolva.",
         "store_share_intro": "Töltse fel ezt a referenciaciklust, hogy az azonos készülékkel rendelkezők is használhassák. Nyilvános megjelenés előtt ellenőrzésre kerül.",
         "online_intro_global": "Böngésszen és osszon meg referenciafelvételeket más WashData-felhasználókkal, és erősítsen meg készülékbejegyzéseket. Egyetlen kapcsolat a teljes WashData-integrációra vonatkozik; a készülék márkája és modellje eszközönként, az Alapkonfiguráció szakaszban állítható be. Minden online funkció opcionális és alapértelmezés szerint ki van kapcsolva.",
@@ -1406,8 +1415,8 @@
             "label": "Kirakodási emlékeztető késleltetése"
         },
         "notify_unload_repeat": {
-            "doc": "Újraküldi a kirakodási emlékeztetőt \"Kirakodási emlékeztető késleltetése\" percenként, amíg ki nem nyitja az ajtót, vagy meg nem érinti az \"Emlékeztetés leállítása\" gombot az értesítésen. Ajtóérzékelő entitást igényel (ahogyan maga az emlékeztető is). Az elvetés gomb a Home Assistant kísérőalkalmazás (mobil) értesítésein működik.",
-            "label": "Ismétlés az ajtó kinyitásáig"
+            "doc": "Újraküldi a kirakodási emlékeztetőt „Kirakodási emlékeztető késleltetése” percenként, amíg a kirakodás megerősítést nem kap, vagy meg nem érinti az „Emlékeztetés leállítása” gombot az értesítésen. Szükség van a kirakodás megerősítésének valamilyen módjára: Ajtóérzékelő entitás, Kirakodást megerősítő entitás vagy az alábbi „Kirakodás kézi megerősítése” beállítás. Az elvetés gomb a Home Assistant kísérőalkalmazás (mobil) értesítésein működik.",
+            "label": "Ismétlés kirakodásig"
         },
         "off_delay": {
             "doc": "Várakozási idő a teljesítmény csökkenése után, mielőtt befejezettnek nyilvánítaná a ciklust. Ha az áramellátás ezen az ablakon belül folytatódik, a ciklus zökkenőmentesen folytatódik – ez áthidalja a szüneteket a mosási fázisok között. A mosogatógépek hosszú szárítási fázisokkal rendelkeznek (20-60 percre kikapcsolva), így a kikapcsolási késleltetésnek meg kell haladnia ezt, hogy az egész mosás+szárítás egy ciklusban maradjon.",
@@ -1623,6 +1632,14 @@
         "curve_preroll_seconds": {
             "label": "Görbe előfutama",
             "doc": "Hány másodpercnyi leolvasás kerülhet a megszakadt indítási kísérletekből a ciklus görbéjének elejére. A ciklus görbéje általában azzal az indítási kísérlettel kezdődik, amelyik végül sikerül, ezért egy olyan gépnél, amely néhányszor próbálkozik, mielőtt beállna (programválasztás, ajtózár, első vízbeeresztés), minden görbéből hiányzik a tényleges működés első néhány perce. Állítsa ezt az értéket kicsivel a gépénél előforduló leghosszabb ilyen nekifutás fölé (300 mp a legtöbb géphez bőven elég). A 0 kikapcsolja. Vegye figyelembe, hogy bekapcsolva a rögzített kezdés korábbra kerül, így a változtatás előtt és után rögzített ciklusok ugyanahhoz a programhoz eltérő időtartamot hordoznak; a megtanult átlagok addig csúsznak el, amíg a régebbi ciklusok ki nem esnek."
+        },
+        "unload_confirm_entity": {
+            "label": "Kirakodást megerősítő entitás",
+            "doc": "Opcionális entitás, amelynek aktiválása azt jelenti, hogy az adagot kivették, olyan gépekhez, amelyekre nem szerelhető ajtóérzékelő. Bármilyen típus megfelel: Zigbee vagy NFC gomb, input_button segéd, a gép előtti mozgásérzékelő, jelenet. Minden állapotváltozás megerősítésnek számít, kivéve a kikapcsolást és az elérhetetlenné válást. Ennek beállítása bekapcsolja a kirakodási emlékeztetőt olyan eszközön is, amelyhez nincs Ajtóérzékelő entitás."
+        },
+        "unload_track_without_door": {
+            "label": "Kirakodás kézi megerősítése",
+            "doc": "Futtatja a kirakodási emlékeztetőt olyan eszközön, amelyhez nincs Ajtóérzékelő entitás és nincs Kirakodást megerősítő entitás, a kirakodást pedig saját automatizálásból erősíti meg: nyomja meg a „Megjelölés kirakodottként” gombentitást, vagy hívja meg a ha_washdata.mark_unloaded szolgáltatást. Figyelmen kívül marad, ha be van állítva Ajtóérzékelő entitás, mert az már megadja ezt a jelzést."
         }
     },
     "setting_group": {
@@ -1766,6 +1783,7 @@
     },
     "toast": {
         "catalog_refreshed": "A közösségi katalógus frissítve",
+        "contrib_device_changed": "Hozzáadva a közösségi boltba, de a kiválasztott készülék megváltozott, amíg az űrlap nyitva volt. Válassza ki a Beállításokban.",
         "access_saved": "A hozzáférés-szabályozás mentve",
         "all_wiped": "Minden adat törölve",
         "analysis_complete_none": "Az elemzés kész: nincs új javaslat",
@@ -1978,6 +1996,7 @@
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",
             "reason": {
                 "force_stopped": "kényszerrel leállított",
+                "user_stopped": "kézzel leállított",
                 "interrupted": "megszakított",
                 "incomplete": "befejezetlen",
                 "noise": "zaj",
@@ -2023,7 +2042,7 @@
         "duration_weight": "4. szakasz: mennyire befolyásolja a futási idő egyezése a végső pontszámot (alapértelmezett 0.22)",
         "energy_weight": "4. szakasz: mennyire befolyásolja az energia-egyezés a végső pontszámot (alapértelmezett 0.22)",
         "profile_match_min_duration_ratio": "1. szakasz: minimális ciklushossz a profil időtartamának törtjeként; alapértelmezett 0.1 (10%)",
-        "profile_match_max_duration_ratio": "1. szakasz: maximális ciklushossz a profil időtartamának törtjeként; alapértelmezett 1.5 (150%)",
+        "profile_match_max_duration_ratio": "1. szakasz: maximális ciklushossz a profil időtartamának törtjeként; alapértelmezett 1.8 (180%)",
         "keep_min_score": "2. szakasz: minimális pontszám a versenyben maradáshoz; az alapértelmezett 0.1 gyenge egyezéseket is beenged, a következő szakaszok választják ki a legjobbat",
         "dtw_blend": "3. szakasz: 0 = csak alappontszám, 1 = csak DTW-pontszám, 0.5 = egyenlő keverék (alapértelmezett)",
         "dtw_ensemble_w": "3. szakasz (együttes mód): súly a skálázott-L1 és derivált DTW között; alapértelmezett 0.7 a szintfüggőt részesíti előnyben",

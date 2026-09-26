@@ -11,6 +11,10 @@ tuning harnesses - keeps today's behaviour exactly.
 """
 from __future__ import annotations
 
+import math
+
+import pytest
+
 from custom_components.ha_washdata import analysis
 
 # A front-loaded template: the first 30% draws 400 W, the rest 60 W. Both
@@ -105,15 +109,43 @@ def test_duration_term_below_a_candidate_is_unchanged():
     """Suppressing the duration penalty for candidates we have not outlasted yet was
     measured and rejected: +0.7pp mid-cycle for a 3.7pp loss at the 90% checkpoint,
     and it made a dishwasher's 50/65 deg pair ambiguous at the end of the 50 deg,
-    blocking Smart Termination. Only the overrun side changes."""
-    on = _by_name(analysis.compute_matches_worker(
-        _live_trace(), ELAPSED, _snaps(), _cfg(duration_weight=0.85, energy_weight=0.0,
-                                               in_progress=True)))
-    off = _by_name(analysis.compute_matches_worker(
-        _live_trace(), ELAPSED, _snaps(), _cfg(duration_weight=0.85, energy_weight=0.0)))
+    blocking Smart Termination. Only the overrun side changes.
+
+    Pinned against the OVERRUN SCALE rather than against a completed-cycle run:
+    since register item 307 the completed path uses a Gaussian duration kernel and
+    the live path keeps the Lorentzian one, so the two are legitimately no longer
+    equal. The invariant this test exists for is unaffected - mid-cycle, a
+    candidate the cycle has not outlasted is scored on the symmetric scale, so
+    changing the overrun scale must not move it.
+    """
+    base = _cfg(duration_weight=0.85, energy_weight=0.0, in_progress=True)
+    sharp = _by_name(analysis.compute_matches_worker(
+        _live_trace(), ELAPSED, _snaps(), {**base, "duration_scale_overrun": 0.01}))
+    loose = _by_name(analysis.compute_matches_worker(
+        _live_trace(), ELAPSED, _snaps(), {**base, "duration_scale_overrun": 0.40}))
     # Neither candidate has been outlasted at 40% elapsed, so both are untouched.
-    assert on["short"]["score"] == off["short"]["score"]
-    assert on["long"]["score"] == off["long"]["score"]
+    assert sharp["short"]["score"] == loose["short"]["score"]
+    assert sharp["long"]["score"] == loose["long"]["score"]
+
+
+def test_live_duration_kernel_is_unchanged_by_the_gaussian_switch():
+    """The Gaussian is completed-cycle only (register item 307).
+
+    Mid-cycle the observed duration is a PREFIX, necessarily far below the
+    profile mean, and the sharper kernel crushes the correct long candidate:
+    measured -4.1pp at 50% elapsed and -6.4pp at 60%. So the live path must still
+    see the Lorentzian term exactly.
+    """
+    prof_dur = 4080.0
+    elapsed = 0.4 * prof_dur
+    scale = 0.175
+    expected_live = 1.0 / (1.0 + abs(math.log(elapsed / prof_dur)) / scale)
+    assert analysis._agreement(elapsed, prof_dur, scale) == pytest.approx(expected_live)
+    assert analysis._agreement(elapsed, prof_dur, scale, gaussian=False) == pytest.approx(
+        expected_live
+    )
+    # ...and the completed path is the sharper one, i.e. the switch does something.
+    assert analysis._agreement(elapsed, prof_dur, scale, gaussian=True) < expected_live
 
 
 def test_duration_term_penalises_overrun_harder_than_the_symmetric_scale():

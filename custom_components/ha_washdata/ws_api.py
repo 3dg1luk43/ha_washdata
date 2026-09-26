@@ -48,6 +48,7 @@ from .const import (
     ANTI_CREASE_FINALIZE_RATIO_MAX,
     CONF_CURVE_PREROLL_SECONDS,
     CONF_DOOR_SENSOR_ENTITY,
+    CONF_UNLOAD_CONFIRM_ENTITY,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_DURATION_TOLERANCE,
@@ -71,6 +72,9 @@ from .const import (
     CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PUMP_STUCK_DURATION,
     CONF_POWER_OFF_THRESHOLD_W,
+    CONF_POWER_SENSOR,
+    CONF_ENERGY_PRICE_ENTITY,
+    CONF_NOTIFY_PEOPLE,
     CONF_SAMPLING_INTERVAL,
     CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
@@ -83,6 +87,7 @@ from .const import (
     DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
     DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_CURVE_PREROLL_SECONDS,
     CURVE_PREROLL_MAX_SECONDS,
     resolve_sampling_interval_default,
@@ -93,6 +98,8 @@ from .const import (
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
+    resolve_min_off_gap_default,
+    resolve_off_delay_default,
     DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
@@ -415,11 +422,36 @@ def _get_manager(hass: HomeAssistant, entry_id: str) -> Any | None:
 # hass.data (not module-global) so each lock is created inside — and bound to —
 # the running event loop, which keeps it correct across test event loops.
 _WS_WRITE_LOCKS_KEY = f"{DOMAIN}_ws_write_locks"
+_WS_OPTIONS_LOCKS_KEY = f"{DOMAIN}_ws_options_locks"
 
 
 def _entry_write_lock(hass: HomeAssistant, entry_id: str) -> asyncio.Lock:
     """Return the shared per-entry write lock, creating it on first use."""
     locks: dict[str, asyncio.Lock] = hass.data.setdefault(_WS_WRITE_LOCKS_KEY, {})
+    lock = locks.get(entry_id)
+    if lock is None:
+        lock = asyncio.Lock()
+        locks[entry_id] = lock
+    return lock
+
+
+def _entry_options_lock(hass: HomeAssistant, entry_id: str) -> asyncio.Lock:
+    """Per-entry lock for ``entry.options`` read-record-update sections only.
+
+    Deliberately NOT ``_entry_write_lock``. That one is held for the whole run
+    of the long detached tasks - ``_reprocess_task`` across rematching,
+    suggestions, ML training, recosting and health recompute;
+    ``_ml_training_task`` across a full training run; ``_rebuild_envelopes_task``
+    across every profile - so putting a Settings save behind it means the save
+    blocks for as long as the task takes, which on a slow host is minutes with
+    no feedback to the user. Serialising the option writers against each other
+    is all the race needs.
+
+    **Lock order where both are held: write lock first, then this one.** The
+    import handlers are the only place that happens, and they follow it, so the
+    pair cannot deadlock.
+    """
+    locks: dict[str, asyncio.Lock] = hass.data.setdefault(_WS_OPTIONS_LOCKS_KEY, {})
     lock = locks.get(entry_id)
     if lock is None:
         lock = asyncio.Lock()
@@ -486,6 +518,33 @@ _CHANGELOG_SKIP_KEYS = frozenset({CONF_NAME})
 # here; relocating them to entry.data would shadow the option-first reads.
 _OPTIONS_IDENTITY_KEYS = frozenset({CONF_NAME})
 
+# Option keys whose value names an entity or device on THIS Home Assistant.
+# They are ordinary tunables when the panel writes them (the user picks from a
+# selector listing their own entities), but an *imported* export carries the
+# SOURCE system's ids, and applying those re-points this device at entities that
+# do not exist here. ``power_sensor`` is the severe one: the integration goes
+# silently dead, state stuck at "off" and current_power at 0, with nothing in the
+# log but one INFO line. ``ws_import_config`` already refuses to write the
+# exporter's ``entry.data`` for exactly this reason - "blindly applying it would
+# hijack this device's sensor binding" - but the same keys live in entry.options
+# post-3.6, so they arrived through the other door. Found by the test box
+# (devtools/testbox) on its first run; see register item 317.
+#
+# Deliberately NOT here: the notify_*_services lists. They also name the source
+# user's targets, but they are shown plainly in the panel's Notifications
+# section, and carrying them is usually the point when migrating your own setup.
+_IMPORT_LOCAL_BINDING_KEYS = _OPTIONS_IDENTITY_KEYS | frozenset({
+    CONF_POWER_SENSOR,
+    CONF_ENERGY_SENSOR,
+    CONF_ENERGY_PRICE_ENTITY,
+    CONF_DOOR_SENSOR_ENTITY,
+    CONF_UNLOAD_CONFIRM_ENTITY,
+    CONF_SWITCH_ENTITY,
+    CONF_EXTERNAL_END_TRIGGER,
+    CONF_LINKED_DEVICE,
+    CONF_NOTIFY_PEOPLE,
+})
+
 
 def _json_safe(value: Any) -> Any:
     """Best-effort coercion of an option value to a JSON-serializable form."""
@@ -524,6 +583,42 @@ def _diff_option_changes(
             }
         )
     return changes
+
+
+async def _record_option_changes(
+    hass: HomeAssistant, entry: Any, updates: dict[str, Any], source: str
+) -> None:
+    """Record an option write in the settings changelog (#442).
+
+    ``ws_set_options`` did this inline and was the only writer that did, so every
+    other path that writes ``entry.options`` was invisible in the history and its
+    values could not be reverted per setting. The one the reporter hit is "Apply
+    all": nine tunables changed at once with nothing recorded, and the previous
+    values were only recoverable because they happened to have an older
+    diagnostics dump.
+
+    Must be awaited BEFORE ``async_update_entry``, which schedules a reload that
+    rebuilds the store. Never raises: a changelog failure must not cost the write
+    it is describing (same contract as the inline version).
+    """
+    if not updates:
+        return
+    try:
+        old_effective = {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+        changes = _diff_option_changes(old_effective, updates)
+        if not changes:
+            return
+        manager = _get_manager(hass, entry.entry_id)
+        store = getattr(manager, "profile_store", None) if manager else None
+        if store is not None:
+            await store.async_record_settings_changes(changes)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug(
+            "Settings changelog recording failed for %s (%s): %s",
+            getattr(entry, "entry_id", "?"),
+            source,
+            exc,
+        )
 
 
 # ─── Panel config + RBAC ────────────────────────────────────────────────────────
@@ -1186,7 +1281,15 @@ async def ws_store_download_device(hass, connection, msg):
         }
         entry = _get_entry(hass, msg["entry_id"])
         if filtered and entry is not None:
-            hass.config_entries.async_update_entry(entry, options={**entry.options, **filtered})
+            # Same critical section as ws_set_options: the changelog snapshot and
+            # the options write have to be atomic per entry, or a concurrent
+            # writer records the same "old" value and one of the two updates is
+            # silently lost (#442 follow-up).
+            async with _entry_options_lock(hass, msg["entry_id"]):
+                await _record_option_changes(hass, entry, filtered, "store_download")
+                hass.config_entries.async_update_entry(
+                    entry, options={**entry.options, **filtered}
+                )
             settings_applied = len(filtered)
     res = {**res, "settings_applied": settings_applied}
     manager.notify_update()
@@ -1340,6 +1443,10 @@ def ws_get_devices(
             "title": entry.title,
             "detector_state": "unknown",
             "sub_state": None,
+            # Declared non-optional in DeviceInfo, so it is defaulted HERE rather
+            # than at each exit: a device with no loaded manager never reaches
+            # the probe at all, which is the case the contract test caught.
+            "standby_above_stop": None,
             "current_program": None,
             "time_remaining_s": None,
             "total_duration_s": None,
@@ -1360,7 +1467,12 @@ def ws_get_devices(
             # and the branch is skipped for a manager-less entry (mid-setup, stale,
             # or a setup that failed) as well as short-circuited by its own except.
             "envelope_position": None,
-            "options": dict(entry.options),
+            # Merged data+options, matching ``ws_get_options`` and the
+            # options-first resolution in WashDataManager (#450). An entry added
+            # after its last schema migration carries the structural keys in
+            # ``entry.data`` only, so serving bare options handed the panel a
+            # device_type fallback that did not match the running manager.
+            "options": {**entry.data, **entry.options, CONF_NAME: entry.title},
             # Device-resolved defaults for the cadence/ratio fields (#396/#393) so the
             # device-list conflict/suggestion badges score an unset field against the
             # value the integration would actually use, matching the Settings tab.
@@ -1406,12 +1518,18 @@ def ws_get_devices(
 
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
+                    # Assigned per entry and OUTSIDE both probes. It used to be
+                    # set inside the suggestion-badge `try`, after
+                    # `store.get_suggestions()`: if that raised, `merged` kept
+                    # the PREVIOUS entry's options and the standby probe below
+                    # read another device's stop threshold - or, on the first
+                    # entry, raised NameError into a debug-level log.
+                    merged = {**entry.data, **entry.options}
                     try:
                         # Same filters as ws_get_suggestions (muted keys and
                         # no-op values dropped) so the device-pill badge can
                         # never disagree with the Settings tab banner.
                         raw = store.get_suggestions() or {}
-                        merged = {**entry.data, **entry.options}
                         try:
                             muted = set(store.get_locked_suggestions() or [])
                         except Exception:  # pylint: disable=broad-exception-caught
@@ -1431,6 +1549,40 @@ def ws_get_devices(
                         info["suggestions_count"] = len(keys)
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
+                    try:
+                        # Imported here rather than at module scope to keep the
+                        # ws_api import graph free of suggestion_engine, as every
+                        # other use in this file does.
+                        from .suggestion_engine import (  # pylint: disable=import-outside-toplevel
+                            detect_standby_above_stop,
+                        )
+
+                        # #445 cause 1: an appliance whose standby draw sits ABOVE
+                        # stop_threshold_w can never finish a cycle on its own,
+                        # because the off delay only starts once power is below it.
+                        # Surfaced as its own attention card rather than folded into
+                        # a suggestion: no threshold value can fix the case where the
+                        # appliance's idle and working power are the same level, so
+                        # this explains rather than proposes.
+                        # Resolved in steps, not as an inline `.get(key, default)`:
+                        # Python evaluates that default eagerly, so a detector
+                        # without a bound `config` raised AttributeError before the
+                        # option was even consulted - and the handler below turned
+                        # that into a silently absent advisory.
+                        _stop_w = merged.get(CONF_STOP_THRESHOLD_W)
+                        if _stop_w is None:
+                            _cfg = getattr(getattr(manager, "detector", None), "config", None)
+                            _stop_w = getattr(_cfg, "stop_threshold_w", 0.0)
+                        info["standby_above_stop"] = detect_standby_above_stop(
+                            store.get_past_cycles() or [],
+                            float(_stop_w or 0.0),
+                        )
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        # Logged, not swallowed silently: this advisory shipped dead
+                        # for a round because a NameError here was indistinguishable
+                        # from "no pattern found".
+                        _LOGGER.debug("standby_above_stop probe failed", exc_info=True)
+                        # Key already defaulted to None where `info` is built.
                     try:
                         # Count only pending feedback whose cycle still exists, so the
                         # badge cannot outrun the review list after a cycle is deleted,
@@ -1554,6 +1706,23 @@ def _resolved_option_defaults(device_type: str) -> dict[str, Any]:
         # the individual machine), but the panel pre-populates it from the same
         # payload, so it is published here rather than left to the JS default.
         CONF_ANTI_CREASE_FINALIZE_RATIO: DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
+        # Item 311 raised this to 1.8 in Python and the panel's schema literal
+        # stayed at 1.5, so an entry without the key rendered 1.5 while the
+        # matcher used 1.8. Not device-resolved either; published for the same
+        # reason as the line above, so the constant is the only source and the
+        # two cannot drift again. Round 17 removed the migration seed that had
+        # been hiding this for legacy entries.
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO: (
+            DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+        ),
+        # #445: the pair that decides when a cycle is allowed to end. The detector
+        # waits max(off_delay, min_off_gap), so an unset min_off_gap silently
+        # raises a hand-lowered off_delay to the per-device prior - and with the
+        # key absent here the panel rendered an empty field and the cross-field
+        # rule's `!= null` guard short-circuited, so nothing anywhere showed the
+        # number that was actually governing the wait.
+        CONF_MIN_OFF_GAP: resolve_min_off_gap_default(device_type),
+        CONF_OFF_DELAY: resolve_off_delay_default(device_type),
     }
 
 
@@ -1612,179 +1781,201 @@ async def ws_set_options(
     if not entry:
         connection.send_error(msg["id"], "not_found", f"Entry {msg['entry_id']!r} not found")
         return
-    # Build the new options from the *existing* options plus the submitted
-    # values only. Never spread entry.data in: that would copy identity and
-    # data-only keys (name, initial_profile, stale creation-time identity) into
-    # options where they don't belong. Tunables (including device_type /
-    # power_sensor / min_power, which live in options post-3.6) are preserved
-    # from entry.options and overridden by the submission.
-    new_options = {**entry.options, **msg["options"]}
-
-    # Capture the submitted display name for the entry title before it is
-    # stripped out of options below.
-    submitted_name = new_options.get(CONF_NAME)
-
-    # Mirror the OptionsFlow save-time normalization so the panel can never
-    # persist stale or invalid values:
-    #  - a cleared selector (entity / linked device / trigger) becomes None so
-    #    the link or subscription is removed rather than left dangling;
-    #  - pump-only keys are dropped for non-pump device types;
-    #  - the transient "apply suggestions" flag is never stored.
-    for key in (
-        CONF_EXTERNAL_END_TRIGGER,
-        CONF_DOOR_SENSOR_ENTITY,
-        CONF_LINKED_DEVICE,
-        CONF_SWITCH_ENTITY,
-        CONF_ENERGY_SENSOR,
-    ):
-        if key in new_options and not new_options[key]:
-            new_options[key] = None
-
-    # Resolve the effective device type option-first (submission -> existing
-    # options -> data -> default) so the pump-only key is dropped correctly even
-    # when the submission omits device_type.
-    effective_device_type = new_options.get(
-        CONF_DEVICE_TYPE, entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
-    )
-    if effective_device_type != DEVICE_TYPE_PUMP:
-        new_options.pop(CONF_PUMP_STUCK_DURATION, None)
-
-    # Numeric-finite validation for fields that the cycle-detector float()-casts at
-    # build time; coerce bad submissions to the compiled default so storage stays clean.
-    if CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE in new_options:
-        try:
-            _qr = float(new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE])
-            if not math.isfinite(_qr):
-                raise ValueError("non-finite")
-            new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = _qr
-        except (TypeError, ValueError):
-            new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = (
-                DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
-            )
-
-    # Smart-Termination duration ratio (#393): fraction of expected duration, so it
-    # is meaningless outside [0.50, 1.00] - clamp valid submissions to the range.
-    # An empty or non-numeric value drops the key so the device-type default
-    # (resolved in the config builder, 0.99 dishwasher / 0.98 other) applies again;
-    # coercing to a single scalar default here would be wrong for dishwashers.
-    if CONF_SMART_TERMINATION_DURATION_RATIO in new_options:
-        _raw_str = new_options[CONF_SMART_TERMINATION_DURATION_RATIO]
-        if _raw_str in (None, ""):
-            new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
-        else:
-            try:
-                _str = float(_raw_str)
-                if not math.isfinite(_str):
-                    raise ValueError("non-finite")
-                new_options[CONF_SMART_TERMINATION_DURATION_RATIO] = min(
-                    1.0, max(0.5, _str)
-                )
-            except (TypeError, ValueError):
-                new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
-
-    # #429: the anti-crease finalise ratio is the same kind of value against the
-    # same kind of mean, and equally meaningless outside [0.50, 1.00]. An empty or
-    # non-numeric submission drops the key so DEFAULT_ANTI_CREASE_FINALIZE_RATIO
-    # applies again.
-    if CONF_ANTI_CREASE_FINALIZE_RATIO in new_options:
-        _raw_ac = new_options[CONF_ANTI_CREASE_FINALIZE_RATIO]
-        if _raw_ac in (None, ""):
-            new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
-        else:
-            try:
-                _ac = float(_raw_ac)
-                if not math.isfinite(_ac):
-                    raise ValueError("non-finite")
-                new_options[CONF_ANTI_CREASE_FINALIZE_RATIO] = min(
-                    ANTI_CREASE_FINALIZE_RATIO_MAX,
-                    max(ANTI_CREASE_FINALIZE_RATIO_MIN, _ac),
-                )
-            # OverflowError too (register item 194): json parses an integer literal
-            # of any length into an unbounded int, and float() on one of those raises
-            # rather than returning inf. Uncaught it becomes ERR_UNKNOWN_ERROR and
-            # the whole save fails, instead of this key falling back to its default.
-            except (TypeError, ValueError, OverflowError):
-                new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
-
-    # #430: seconds, 0 = off. Clamped to [0, CURVE_PREROLL_MAX_SECONDS] so a
-    # mistyped value cannot drag minutes of unrelated standby into a curve; empty
-    # or non-numeric drops the key and restores the default (off).
-    if CONF_CURVE_PREROLL_SECONDS in new_options:
-        _raw_pr = new_options[CONF_CURVE_PREROLL_SECONDS]
-        if _raw_pr in (None, ""):
-            new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
-        else:
-            try:
-                _pr = float(_raw_pr)
-                if not math.isfinite(_pr):
-                    raise ValueError("non-finite")
-                new_options[CONF_CURVE_PREROLL_SECONDS] = min(
-                    CURVE_PREROLL_MAX_SECONDS, max(0.0, _pr)
-                )
-            except (TypeError, ValueError, OverflowError):
-                new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
-
-    # A None outside the clearable selectors means "not set", not a value: the
-    # per-setting Revert sends the changelog's `old`, which is null for a setting
-    # never saved before. Stored, it would survive options.get(key, DEFAULT) and
-    # break the float()/int() casts at setup, so drop the key and let the default
-    # apply again; this also cleans nulls persisted by earlier builds.
-    _pre_strip_keys = set(new_options)
-    new_options = strip_null_options(new_options)
-    dropped_null_keys = _pre_strip_keys - set(new_options)
-
-    # Partition identity out of options: the display name is carried by the
-    # entry title, never persisted in options (matches the config-flow invariant
-    # that CONF_NAME is absent from options).
-    for key in _OPTIONS_IDENTITY_KEYS:
-        new_options.pop(key, None)
-
-    update_kwargs: dict[str, Any] = {"options": new_options}
-    if isinstance(submitted_name, str) and submitted_name.strip():
-        update_kwargs["title"] = submitted_name.strip()
-
-    # Settings change history (D7): diff the pre-update effective options against
-    # the post-normalization values, but only for keys the user actually
-    # submitted, and persist BEFORE async_update_entry (which schedules a reload
-    # that rebuilds the store). A changelog failure must never block the save.
+    # Serialised per entry (#442 follow-up): the snapshot below, the changelog
+    # write and `async_update_entry` must be one critical section. Without it
+    # two concurrent writers both read the same `entry.options`, both record the
+    # same "old" value in the settings history, and the second update silently
+    # overwrites the first - so a later per-setting revert restores a value that
+    # was never current. The import handlers already hold this lock; the option
+    # writers did not. acquire/release rather than `async with` so the handler
+    # keeps its early-return validation paths. The OPTIONS lock, not the write
+    # lock: see `_entry_options_lock` for why a save must not queue behind a
+    # reprocess or an ML training run.
+    lock = _entry_options_lock(hass, msg["entry_id"])
+    await lock.acquire()
     try:
-        old_effective = {**entry.data, **entry.options}
-        # Keys dropped by the null-strip above are recorded as a change to None
-        # ("reverted to unset") so the history still shows what happened; a
-        # None -> None no-op is skipped by _diff_option_changes.
+        # Build the new options from the *existing* options plus the submitted
+        # values only. Never spread entry.data in: that would copy identity and
+        # data-only keys (name, initial_profile, stale creation-time identity) into
+        # options where they don't belong. Tunables (including device_type /
+        # power_sensor / min_power, which live in options post-3.6) are preserved
+        # from entry.options and overridden by the submission.
+        new_options = {**entry.options, **msg["options"]}
+
+        # Capture the submitted display name for the entry title before it is
+        # stripped out of options below.
+        submitted_name = new_options.get(CONF_NAME)
+
+        # Mirror the OptionsFlow save-time normalization so the panel can never
+        # persist stale or invalid values:
+        #  - a cleared selector (entity / linked device / trigger) becomes None so
+        #    the link or subscription is removed rather than left dangling;
+        #  - pump-only keys are dropped for non-pump device types;
+        #  - the transient "apply suggestions" flag is never stored.
+        for key in (
+            CONF_EXTERNAL_END_TRIGGER,
+            CONF_DOOR_SENSOR_ENTITY,
+            CONF_UNLOAD_CONFIRM_ENTITY,
+            CONF_LINKED_DEVICE,
+            CONF_SWITCH_ENTITY,
+            CONF_ENERGY_SENSOR,
+        ):
+            if key in new_options and not new_options[key]:
+                new_options[key] = None
+
+        # Resolve the effective device type option-first (submission -> existing
+        # options -> data -> default) so the pump-only key is dropped correctly even
+        # when the submission omits device_type.
+        effective_device_type = new_options.get(
+            CONF_DEVICE_TYPE, entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+        )
+        if effective_device_type != DEVICE_TYPE_PUMP:
+            new_options.pop(CONF_PUMP_STUCK_DURATION, None)
+
+        # Numeric-finite validation for fields that the cycle-detector float()-casts at
+        # build time; coerce bad submissions to the compiled default so storage stays clean.
+        if CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE in new_options:
+            try:
+                _qr = float(new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE])
+                if not math.isfinite(_qr):
+                    raise ValueError("non-finite")
+                new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = _qr
+            # OverflowError too, same reason as the anti-crease block below
+            # (register item 194): an unbounded int from JSON raises on float()
+            # rather than returning inf, and uncaught it fails the WHOLE save
+            # with unknown_error instead of dropping this one key.
+            except (TypeError, ValueError, OverflowError):
+                new_options[CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE] = (
+                    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
+                )
+
+        # Smart-Termination duration ratio (#393): fraction of expected duration, so it
+        # is meaningless outside [0.50, 1.00] - clamp valid submissions to the range.
+        # An empty or non-numeric value drops the key so the device-type default
+        # (resolved in the config builder, 0.99 dishwasher / 0.98 other) applies again;
+        # coercing to a single scalar default here would be wrong for dishwashers.
+        if CONF_SMART_TERMINATION_DURATION_RATIO in new_options:
+            _raw_str = new_options[CONF_SMART_TERMINATION_DURATION_RATIO]
+            if _raw_str in (None, ""):
+                new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+            else:
+                try:
+                    _str = float(_raw_str)
+                    if not math.isfinite(_str):
+                        raise ValueError("non-finite")
+                    new_options[CONF_SMART_TERMINATION_DURATION_RATIO] = min(
+                        1.0, max(0.5, _str)
+                    )
+                # OverflowError too, see the anti-crease block below.
+                except (TypeError, ValueError, OverflowError):
+                    new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+
+        # #429: the anti-crease finalise ratio is the same kind of value against the
+        # same kind of mean, and equally meaningless outside [0.50, 1.00]. An empty or
+        # non-numeric submission drops the key so DEFAULT_ANTI_CREASE_FINALIZE_RATIO
+        # applies again.
+        if CONF_ANTI_CREASE_FINALIZE_RATIO in new_options:
+            _raw_ac = new_options[CONF_ANTI_CREASE_FINALIZE_RATIO]
+            if _raw_ac in (None, ""):
+                new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+            else:
+                try:
+                    _ac = float(_raw_ac)
+                    if not math.isfinite(_ac):
+                        raise ValueError("non-finite")
+                    new_options[CONF_ANTI_CREASE_FINALIZE_RATIO] = min(
+                        ANTI_CREASE_FINALIZE_RATIO_MAX,
+                        max(ANTI_CREASE_FINALIZE_RATIO_MIN, _ac),
+                    )
+                # OverflowError too (register item 194): json parses an integer literal
+                # of any length into an unbounded int, and float() on one of those raises
+                # rather than returning inf. Uncaught it becomes ERR_UNKNOWN_ERROR and
+                # the whole save fails, instead of this key falling back to its default.
+                except (TypeError, ValueError, OverflowError):
+                    new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+
+        # #430: seconds, 0 = off. Clamped to [0, CURVE_PREROLL_MAX_SECONDS] so a
+        # mistyped value cannot drag minutes of unrelated standby into a curve; empty
+        # or non-numeric drops the key and restores the default (off).
+        if CONF_CURVE_PREROLL_SECONDS in new_options:
+            _raw_pr = new_options[CONF_CURVE_PREROLL_SECONDS]
+            if _raw_pr in (None, ""):
+                new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
+            else:
+                try:
+                    _pr = float(_raw_pr)
+                    if not math.isfinite(_pr):
+                        raise ValueError("non-finite")
+                    new_options[CONF_CURVE_PREROLL_SECONDS] = min(
+                        CURVE_PREROLL_MAX_SECONDS, max(0.0, _pr)
+                    )
+                except (TypeError, ValueError, OverflowError):
+                    new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
+
+        # A None outside the clearable selectors means "not set", not a value: the
+        # per-setting Revert sends the changelog's `old`, which is null for a setting
+        # never saved before. Stored, it would survive options.get(key, DEFAULT) and
+        # break the float()/int() casts at setup, so drop the key and let the default
+        # apply again; this also cleans nulls persisted by earlier builds.
+        _pre_strip_keys = set(new_options)
+        new_options = strip_null_options(new_options)
+        dropped_null_keys = _pre_strip_keys - set(new_options)
+
+        # Partition identity out of options: the display name is carried by the
+        # entry title, never persisted in options (matches the config-flow invariant
+        # that CONF_NAME is absent from options).
+        for key in _OPTIONS_IDENTITY_KEYS:
+            new_options.pop(key, None)
+
+        update_kwargs: dict[str, Any] = {"options": new_options}
+        if isinstance(submitted_name, str) and submitted_name.strip():
+            update_kwargs["title"] = submitted_name.strip()
+
+        # Settings change history (D7): diff the pre-update effective options against
+        # the post-normalization values, but only for keys the user actually
+        # submitted, and persist BEFORE async_update_entry (which schedules a reload
+        # that rebuilds the store). A changelog failure must never block the save.
+        # Through the shared helper, not a second copy of it. The per-setting
+        # Revert trusts this history, so the two writers have to follow one
+        # contract - and `_record_option_changes`'s own docstring already says it
+        # replaces the inline version that used to live here. Keys dropped by the
+        # null-strip above are still recorded as a change to None ("reverted to
+        # unset"); a None -> None no-op is skipped inside `_diff_option_changes`.
         submitted_post = {
             k: new_options.get(k)
             for k in msg["options"]
             if k in new_options or k in dropped_null_keys
         }
-        changes = _diff_option_changes(old_effective, submitted_post)
-        if changes:
-            manager = _get_manager(hass, msg["entry_id"])
-            store = getattr(manager, "profile_store", None) if manager else None
-            if store is not None:
-                await store.async_record_settings_changes(changes)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug(
-            "Settings changelog recording failed for %s: %s", msg["entry_id"], exc
-        )
+        await _record_option_changes(hass, entry, submitted_post, "set_options")
 
-    # When online features are disabled, clear the persisted store account so the
-    # user's identity isn't silently retained after they opt out.
-    from .const import CONF_ENABLE_ONLINE_FEATURES  # pylint: disable=import-outside-toplevel
-    was_online = bool(entry.options.get(CONF_ENABLE_ONLINE_FEATURES, False))
-    now_online = bool(new_options.get(CONF_ENABLE_ONLINE_FEATURES, False))
-    if was_online and not now_online:
-        try:
-            manager = _get_manager(hass, msg["entry_id"])
-            store = getattr(manager, "profile_store", None) if manager else None
-            if store is not None:
-                await store.clear_store_account()
-                await store.async_save()
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
+        # When online features are disabled, clear the persisted store account so the
+        # user's identity isn't silently retained after they opt out.
+        from .const import CONF_ENABLE_ONLINE_FEATURES  # pylint: disable=import-outside-toplevel
+        was_online = bool(entry.options.get(CONF_ENABLE_ONLINE_FEATURES, False))
+        now_online = bool(new_options.get(CONF_ENABLE_ONLINE_FEATURES, False))
+        if was_online and not now_online:
+            try:
+                manager = _get_manager(hass, msg["entry_id"])
+                store = getattr(manager, "profile_store", None) if manager else None
+                if store is not None:
+                    await store.clear_store_account()
+                    await store.async_save()
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Warning, not a silent pass: the user asked for this identity to
+                # be removed, and a bare `pass` here leaves it in storage with no
+                # trace. A bare `pass` is also what hid the #445 standby advisory
+                # being dead for a whole review round (register item 325).
+                _LOGGER.warning(
+                    "Could not clear the store account for %s after online "
+                    "features were disabled; the stored identity may remain",
+                    msg["entry_id"],
+                    exc_info=True,
+                )
 
-    hass.config_entries.async_update_entry(entry, **update_kwargs)
-    _send_result(connection, msg["id"], "set_options", {"success": True})
+        hass.config_entries.async_update_entry(entry, **update_kwargs)
+        _send_result(connection, msg["id"], "set_options", {"success": True})
+    finally:
+        lock.release()
 
 
 @websocket_api.websocket_command(
@@ -2704,7 +2895,10 @@ def ws_get_phase_catalog(
     {
         vol.Required("type"): "ha_washdata/create_phase",
         vol.Required("entry_id"): str,
-        vol.Required("device_type"): str,
+        # Optional since #450: an omitted or empty device_type resolves to
+        # ``manager.device_type``, the exact value ``ws_get_phase_catalog``
+        # lists against, so create and list can never disagree about scope.
+        vol.Optional("device_type", default=""): str,
         vol.Required("name"): str,
         vol.Optional("description", default=""): str,
     }
@@ -2722,9 +2916,34 @@ async def ws_create_phase(
         _err_not_found(connection, msg["id"], entry_id)
         return
 
+    # #450: a panel served by an entry whose device_type lives only in
+    # ``entry.data`` used to send the ``'washing_machine'`` fallback here, so the
+    # phase was stored under a scope the catalog never lists - invisible, yet
+    # still tripping the duplicate check on the next attempt.
+    device_type = str(msg.get("device_type") or "").strip() or str(
+        getattr(manager, "device_type", "") or ""
+    ).strip()
+    # ...and refuse rather than store under an empty scope. `manager.device_type`
+    # reads `options.get(CONF_DEVICE_TYPE, data.get(..., DEFAULT))`, and `.get`
+    # hands back a persisted empty string or null verbatim instead of the default
+    # - the #389 class that `strip_null_options` exists for. An empty scope is the
+    # worst outcome available here, not a harmless one: `list_phase_catalog` never
+    # lists it, so the phase is invisible, yet it still trips the duplicate check
+    # on the next attempt, so the user cannot create it again either. That is
+    # exactly the #450 symptom the comment above describes, reached from the
+    # entry's own options rather than from the panel's payload.
+    if not device_type:
+        connection.send_error(
+            msg["id"],
+            "invalid_device_type",
+            "This entry has no usable device type, so a phase created now could "
+            "not be listed again. Re-save the device settings and retry.",
+        )
+        return
+
     try:
         await manager.profile_store.async_create_custom_phase(
-            msg["device_type"], msg["name"], msg.get("description", "")
+            device_type, msg["name"], msg.get("description", "")
         )
         _send_result(connection, msg["id"], "create_phase", {"success": True})
     except ValueError as exc:
@@ -3484,9 +3703,12 @@ async def ws_import_config(
             if entry and config_updates:
                 entry_options_updates = dict(config_updates.get("entry_options", {}))
                 # Identity must never be persisted into options; the display name
-                # rides the entry title. device_type/power_sensor/min_power stay
-                # in options and are applied as tunables.
-                for key in _OPTIONS_IDENTITY_KEYS:
+                # rides the entry title. Local entity/device bindings are dropped
+                # too: they are tunables when the panel writes them, but an
+                # import carries the exporter's ids and would repoint this device
+                # at entities that do not exist here (item 317). device_type and
+                # min_power are genuinely portable and stay.
+                for key in _IMPORT_LOCAL_BINDING_KEYS:
                     entry_options_updates.pop(key, None)
                 if entry_options_updates:
                     # Apply the imported tunables on top of the current options;
@@ -3495,16 +3717,37 @@ async def ws_import_config(
                     # one), and a persisted null survives options.get(key, DEFAULT)
                     # and breaks setup (#389), so the same write-boundary strip as
                     # ws_set_options applies here.
-                    new_options = strip_null_options(
-                        {**entry.options, **entry_options_updates}
-                    )
-                    hass.config_entries.async_update_entry(entry, options=new_options)
+                    # Nested inside the write lock this handler already holds;
+                    # order is always write -> options, so no deadlock.
+                    async with _entry_options_lock(hass, entry_id):
+                        # Read INSIDE the lock. Built before it, `new_options`
+                        # is a snapshot of `entry.options` from before the
+                        # `async with` suspended - so a `ws_set_options` that
+                        # committed while we waited would be silently reverted
+                        # by this write, and the changelog would record the
+                        # post-save value as `old`. The other four option
+                        # writers already read inside their lock; this was the
+                        # one that did not.
+                        new_options = strip_null_options(
+                            {**entry.options, **entry_options_updates}
+                        )
+                        await _record_option_changes(
+                            hass, entry, entry_options_updates, "import_config"
+                        )
+                        hass.config_entries.async_update_entry(
+                            entry, options=new_options
+                        )
                 # NB: config_updates["entry_data"] is intentionally NOT written to
                 # entry.data. export_data ships the raw, un-redacted entry.data of
                 # the *source* device (its power_sensor and other identity), so
                 # blindly applying it would hijack this device's sensor binding.
                 # Identity changes must go through the reconfigure flow.
 
+            # An old payload re-arms the one-time banked-tail repair, and the
+            # options write above is the only thing here that could reload the
+            # entry - so an import that carries no options would otherwise leave
+            # the imported tails inflating avg_duration until the next restart.
+            manager.async_schedule_banked_tail_repair()
             manager.notify_update()
             _send_result(connection, msg["id"], "import_config", {"success": True})
         except json.JSONDecodeError as exc:
@@ -3725,12 +3968,23 @@ async def ws_import_config_selective(
                 for key in _OPTIONS_IDENTITY_KEYS:
                     filtered.pop(key, None)
                 if filtered:
-                    hass.config_entries.async_update_entry(
-                        entry, options={**entry.options, **filtered}
-                    )
+                    # Nested inside the write lock this handler already holds;
+                    # order is always write -> options, so no deadlock.
+                    async with _entry_options_lock(hass, entry_id):
+                        await _record_option_changes(
+                            hass, entry, filtered, "store_device_package"
+                        )
+                        hass.config_entries.async_update_entry(
+                            entry, options={**entry.options, **filtered}
+                        )
                     settings_applied = len(filtered)
             summary = {**summary, "settings_applied": settings_applied}
 
+            # Same as the wholesale path: `apply_settings=False` (and any import
+            # whose settings subset comes back empty) skips the options write
+            # above, so nothing reloads the entry and the re-armed repair would
+            # wait for a restart.
+            manager.async_schedule_banked_tail_repair()
             manager.notify_update()
             _send_result(
                 connection, msg["id"], "import_config_selective",
@@ -3900,11 +4154,17 @@ async def ws_apply_suggestions(
             # reload that rebuilds the store, so persist the cleared state first.
             cycle_count = len(manager.profile_store.get_past_cycles())
             manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
-            await manager.profile_store.clear_suggestions()
-            # Suggested values are all tunables -> layer them onto the existing
-            # options; never spread entry.data into options.
-            new_options = {**entry.options, **updates}
-            hass.config_entries.async_update_entry(entry, options=new_options)
+            # Same critical section as ws_set_options (#442 follow-up): the
+            # changelog snapshot and the options write must be atomic per entry.
+            async with _entry_options_lock(hass, entry_id):
+                # Record BEFORE clear_suggestions/async_update_entry: both persist,
+                # and the reload the latter schedules rebuilds the store (#442).
+                await _record_option_changes(hass, entry, updates, "apply_suggestions")
+                await manager.profile_store.clear_suggestions()
+                # Suggested values are all tunables -> layer them onto the existing
+                # options; never spread entry.data into options.
+                new_options = {**entry.options, **updates}
+                hass.config_entries.async_update_entry(entry, options=new_options)
             manager.notify_update()
 
         _send_result(connection, msg["id"], "apply_suggestions", {"success": True, "applied": list(updates.keys())}
@@ -4055,6 +4315,20 @@ async def ws_get_cycle_power_data(
         _LOGGER.debug("Error getting cycle power data %s: %s", cycle_id, exc)
 
     _ds = _downsample(samples)
+    # The matched profile's expected curve, projected onto THIS cycle's time axis
+    # through the same alignment the artifact/conformance comparison used, so the
+    # overlay, the trace and the artifact shading all share one axis. Computed on
+    # the full trace but emitted at the thinned x values the panel plots.
+    if meta.get("profile_name") and len(_ds) >= 4 and len(samples) >= 4:
+        try:
+            meta["expected"] = await hass.async_add_executor_job(
+                manager.profile_store.expected_curve_for_cycle,
+                meta["profile_name"],
+                samples,
+                [float(p[0]) for p in _ds],
+            )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Expected curve for cycle %s failed: %s", cycle_id, exc)
     _send_result(connection, msg["id"], "get_cycle_power_data", {
             "cycle_id": cycle_id,
             "samples": _ds,

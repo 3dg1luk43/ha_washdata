@@ -280,6 +280,16 @@
           "description": "L'appareil WashData pour lequel réentraîner les modèles."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Marquer comme déchargé",
+      "description": "Confirmer que la charge terminée a été sortie d'un appareil WashData, ce qui efface l'état Propre et tout rappel de déchargement.",
+      "fields": {
+        "device_id": {
+          "name": "Appareil",
+          "description": "L'appareil WashData dont la charge terminée a été sortie."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Arrêter l'enregistrement du cycle"
+      },
+      "mark_unloaded": {
+        "name": "Marquer comme déchargé"
       }
     }
   },

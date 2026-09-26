@@ -121,10 +121,15 @@ def test_smart_termination_end_time_independent_of_off_delay() -> None:
 
     assert reason_small == TerminationReason.SMART
     assert reason_large == TerminationReason.SMART
-    # Both fire on the 8730 s sample (window is the fixed 300 s, eligible at
-    # ENDING-entry + 300 s = 8600 s).  With the old max(300, off_delay*0.25)
-    # coupling the large-off_delay run slipped to 9990 s.
-    assert dur_small == pytest.approx(8730.0, abs=1.0)
+    # Both fire on the same sample (window is the fixed 300 s, eligible at
+    # ENDING-entry + 300 s).  With the old max(300, off_delay*0.25) coupling the
+    # large-off_delay run slipped to 9990 s.
+    #
+    # The stored duration is 8700 s rather than the 8730 s this asserted before
+    # register item 297: the cycle's last real activity is at 8700 s, and Smart
+    # Termination used to bank the 30 s it spent confirming as cycle time. The
+    # number the test is about is the AGREEMENT below, not this absolute.
+    assert dur_small == pytest.approx(8700.0, abs=1.0)
     assert dur_large == pytest.approx(dur_small, abs=1.0), (
         f"off_delay changed the end time: {dur_large} vs {dur_small} - Smart "
         "Termination must not scale its confirmation window with off_delay."

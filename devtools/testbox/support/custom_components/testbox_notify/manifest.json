@@ -1,0 +1,9 @@
+{
+  "domain": "testbox_notify",
+  "name": "Test Box Notify Capture",
+  "codeowners": [],
+  "documentation": "https://github.com/3dg1luk43/ha_washdata",
+  "iot_class": "local_push",
+  "requirements": [],
+  "version": "1.0.0"
+}

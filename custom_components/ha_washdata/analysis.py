@@ -23,6 +23,7 @@ from typing import Any, Optional
 import numpy as np
 
 from .const import (
+    DEFAULT_DTW_BANDWIDTH,
     DEFAULT_DTW_MODE,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
@@ -65,11 +66,34 @@ def stage4_energy_mode(device_type: str | None) -> str:
     return "integrated" if device_type in STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES else "mean"
 
 
-def _agreement(observed: float, expected: float, scale: float) -> float:
-    """1.0 when observed==expected, decaying with the |log-ratio| / scale."""
+def _agreement(
+    observed: float, expected: float, scale: float, gaussian: bool = False
+) -> float:
+    """1.0 when observed==expected, decaying with the log-ratio / scale.
+
+    Two kernels over the same log-ratio. The default is Lorentzian/Cauchy-like
+    (``1/(1+|x|)``), which decays slowly and so keeps a badly-sized candidate in
+    contention. ``gaussian`` (``exp(-x^2/2)``) decays fast and separates much
+    harder on size.
+
+    **This is a discrimination choice, not a density fit** (register item 307).
+    Measured on the corpus, the within-profile duration log-residual is decidedly
+    NOT normal - excess kurtosis 16.65, |z|>3 at 2.64% against the 0.27% a normal
+    predicts, and stripping the cycles that cannot match their own profile at all
+    (item 304) makes it heavier still, not lighter. The Gaussian nonetheless wins
+    at cycle end because those extreme cycles are unwinnable either way, so the
+    sharper penalty costs nothing on them and buys separation on the bulk.
+
+    The same sharpness is why it must NOT be used mid-cycle: there the observed
+    duration is a prefix, necessarily far below the profile mean, and a fast kernel
+    crushes the correct long candidate. The slow tail is what keeps it alive.
+    """
     if observed <= 0 or expected <= 0 or scale <= 0:
         return 0.0
-    return 1.0 / (1.0 + abs(np.log(observed / expected)) / scale)
+    ratio = np.log(observed / expected)
+    if gaussian:
+        return float(np.exp(-0.5 * (ratio / scale) ** 2))
+    return 1.0 / (1.0 + abs(ratio) / scale)
 
 _LOGGER = logging.getLogger(__name__)
 ALIGNMENT_CONTEXT_BUFFER = 50
@@ -385,7 +409,12 @@ def compute_matches_worker(
 
     min_duration_ratio = config.get("min_duration_ratio", DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
     max_duration_ratio = config.get("max_duration_ratio", DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
-    dtw_bandwidth = config.get("dtw_bandwidth", 0.1)
+    # Falls back to the OPTION default like every other key here. It used to be a
+    # literal 0.1, which silently ran a weaker Stage 3 than production for any
+    # caller that omitted the key - worth ~0.8pp of top-1, and it is what made
+    # the on-device matching tuner optimise against a pipeline nobody runs
+    # (register item 309).
+    dtw_bandwidth = config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH)
     dtw_mode = config.get("dtw_mode", DEFAULT_DTW_MODE)
     keep_min = float(config.get("keep_min_score", MATCH_KEEP_MIN_SCORE))
     corr_weight = float(config.get("corr_weight", MATCH_CORR_WEIGHT))
@@ -547,7 +576,12 @@ def compute_matches_worker(
                 # rejected (see MATCH_DURATION_SCALE_OVERRUN in const.py).
                 dur_ag = _agreement(current_duration, prof_dur, dur_overrun_scale)
             else:
-                dur_ag = _agreement(current_duration, prof_dur, dur_scale)
+                # Gaussian only on a COMPLETED cycle, where the observed duration
+                # is the real one. Mid-cycle it is a prefix and the sharp kernel
+                # costs -6.4pp at 60% elapsed (item 307).
+                dur_ag = _agreement(
+                    current_duration, prof_dur, dur_scale, gaussian=not in_progress
+                )
             sample = cand.get("sample") or []
             if in_progress:
                 cand_mean, cand_span = prefix_mean(
@@ -703,7 +737,11 @@ def prefix_shape_score(
     corr_weight = float(config.get("corr_weight", MATCH_CORR_WEIGHT))
     score, _metrics, _offset = find_best_alignment(a, b, 1.0, corr_weight=corr_weight)
 
-    dtw_bandwidth = float(config.get("dtw_bandwidth", 0.1))
+    # The SAME default as `compute_matches_worker` (register item 309). Both read
+    # the same unmutated `config` in one match, so a caller that omits the key
+    # would otherwise get DEFAULT_DTW_BANDWIDTH for Stage 3 and the old 0.1 here,
+    # and the two stages would disagree about which candidates look like a prefix.
+    dtw_bandwidth = float(config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH))
     if dtw_bandwidth > 0.0:
         dtw_score, _ = _stage3_dtw_score(
             a,
@@ -910,6 +948,11 @@ def compute_envelope_worker(
             warped onto. Min/max/avg/std bands are still built from all cycles.
     Returns:
         (time_grid, min_curve, max_curve, avg_curve, std_curve, target_duration) or None.
+
+        The bands are the pointwise extremes of the DTW-**warped** members, so
+        only a consumer that re-derives the same warp
+        (:func:`align_trace_to_envelope`) can compare an observed trace against
+        them honestly.
     """
     if not raw_cycles_data:
         return None
@@ -1121,6 +1164,126 @@ def compute_envelope_worker(
         std_curve.tolist(),
         float(target_duration)
     )
+
+
+def align_trace_to_envelope(
+    t_obs: list[float] | np.ndarray,
+    p_obs: list[float] | np.ndarray,
+    time_grid: list[float] | np.ndarray,
+    reference: list[float] | np.ndarray | None,
+    dtw_bandwidth: float,
+) -> tuple[np.ndarray, bool]:
+    """Map each observed sample's time onto an envelope's own time grid.
+
+    Uses the **same DTW warp** :func:`compute_envelope_worker` used to build that
+    envelope's bands, only reduced in the opposite direction (candidate index ->
+    mean reference index instead of reference index -> mean candidate index).
+    That matters: ``min``/``max`` are the pointwise extremes of the *warped*
+    member curves, so a consumer that re-derives the same warp sees every member
+    inside the band by construction, while a consumer that stretches time
+    proportionally does not.
+
+    A proportional stretch is not a cheap approximation of this, it is a worse
+    alignment: real programmes absorb their run-to-run duration variance in one
+    stretch of the cycle (a dishwasher's drying tail), not uniformly, so scaling
+    the whole axis *moves* the fixed-time features. Measured on the maintainer's
+    corpus (register item 324) the final heating block's placement error grew
+    from sd 2.5 min (no scaling at all) to sd 3.7 min under proportional scaling,
+    which is what fabricated the out-of-band ``spike``/``dip`` artifacts.
+
+    Args:
+        t_obs: observed sample offsets (seconds from cycle start, increasing).
+        p_obs: observed power values, parallel to ``t_obs``.
+        time_grid: the envelope's time grid.
+        reference: the curve to warp onto. Callers pass ``envelope["avg"]``; see
+            ``ProfileStore._align_to_envelope`` for why that beats the build's
+            own pre-DTW reference. ``None`` forces the proportional stretch.
+        dtw_bandwidth: Sakoe-Chiba band ratio, same value the build used.
+
+    **Known limit, measured and accepted (register item 347).** The observed span
+    here is ``t_obs[-1]``, while ``_rebuild_envelope_sync`` builds each member
+    over ``manual_duration or max(last_offset, stored_duration)``. Where the
+    stored duration runs past the last sample the build covered a slightly longer
+    span than this re-derivation does, so the warp is not bit-for-bit the build's
+    own. Measured over the 703 stored cycles in the maintainer's corpus it
+    affects **7 of them (1.0%)**, median gap 8.2 s and worst 201 s on a 14040 s
+    cycle (1.4%) - all well inside one grid step. Closing it means threading the
+    authoritative duration through ``compute_envelope_conformance`` and
+    ``detect_cycle_artifacts``, whose signatures take points and no cycle, and
+    through their manager / ws_api / playground callers. Not done: that is a wide
+    change to alignment code whose current behaviour is measured (item 324), for
+    a sub-grid-step effect on 1% of cycles.
+
+    Returns:
+        ``(envelope-space time per observed sample, used_dtw)``. ``used_dtw`` is
+        False when the warp was unavailable and the proportional stretch was
+        used instead, so callers can loosen any judgement they base on it.
+        Never raises: every failure degrades to the proportional stretch.
+    """
+    t_arr = np.asarray(t_obs, dtype=float)
+    p_arr = np.asarray(p_obs, dtype=float)
+    tg = np.asarray(time_grid, dtype=float)
+
+    def _proportional() -> np.ndarray:
+        if tg.size < 2 or t_arr.size < 1:
+            return t_arr
+        obs_dur = float(t_arr[-1])
+        env_dur = float(tg[-1])
+        if obs_dur <= 0 or env_dur <= 0:
+            return np.clip(t_arr, tg[0], tg[-1])
+        return np.clip(t_arr * (env_dur / obs_dur), tg[0], tg[-1])
+
+    try:
+        ref = np.asarray(reference, dtype=float) if reference is not None else None
+        if (
+            ref is None
+            or ref.size != tg.size
+            or tg.size < 2
+            or t_arr.size < 2
+            or t_arr.size != p_arr.size
+            or dtw_bandwidth <= 0
+        ):
+            return _proportional(), False
+
+        obs_dur = float(t_arr[-1])
+        env_dur = float(tg[-1])
+        if not (obs_dur > 0 and env_dur > 0):
+            return _proportional(), False
+
+        # Rebuild the per-cycle grid the same way the envelope build did: one
+        # point per grid step, so an index offset is a time offset on both axes
+        # and the Sakoe-Chiba band means the same span of minutes either side.
+        grid_dt = env_dur / (tg.size - 1)
+        if grid_dt <= 0:
+            return _proportional(), False
+        n_obs = int(min(MAX_ALIGN_GRID_POINTS, max(10, int(obs_dur / grid_dt))))
+        obs_grid = np.linspace(0.0, obs_dur, n_obs)
+        obs_array = np.interp(obs_grid, t_arr, p_arr)
+
+        path = compute_dtw_path(obs_array, ref, band_width_ratio=dtw_bandwidth)
+        if not path:
+            return _proportional(), False
+
+        path_arr = np.array(path)
+        obs_indices = path_arr[:, 0]
+        ref_indices = path_arr[:, 1]
+        # Average the reference indices a single observed index maps onto (DTW
+        # paths repeat indices wherever one axis is stretched).
+        unique_obs, inverse = np.unique(obs_indices, return_inverse=True)
+        mean_ref = np.zeros_like(unique_obs, dtype=float)
+        np.add.at(mean_ref, inverse, ref_indices)
+        mean_ref /= np.bincount(inverse)
+
+        env_idx = np.interp(
+            np.arange(n_obs), unique_obs, mean_ref, left=0, right=tg.size - 1
+        )
+        env_time_on_grid = env_idx * grid_dt
+        mapped = np.interp(t_arr, obs_grid, env_time_on_grid)
+        return np.clip(mapped, tg[0], tg[-1]), True
+    except Exception:  # pylint: disable=broad-exception-caught
+        # Alignment is a comparison aid, never a correctness gate: degrade.
+        return _proportional(), False
+
 
 def verify_profile_alignment_worker(
     current_power: list[float],

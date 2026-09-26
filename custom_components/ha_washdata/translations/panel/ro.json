@@ -35,7 +35,8 @@
     "not_importable": "n/a aici",
     "exists": "există deja",
     "backfilled_tip": "Detectat într-un istoric de putere importat. Influențează doar potrivirea programelor, nu este contabilizat în statistici.",
-    "armed": "(se aplică ciclului următor)"
+    "armed": "(se aplică ciclului următor)",
+    "duration_outlier": "{n} ciclu(ri) cu durată neobișnuită"
   },
   "btn": {
     "reset_zoom": "Resetați zoomul",
@@ -1039,7 +1040,10 @@
     "odometer_intro": "Acest total doar crește. Ștergerea înregistrării unui ciclu nu îl modifică și continuă să numere dincolo de limita istoricului păstrat, astfel încât mementourile de service rămân corecte.",
     "odometer_correct_hint": "Setați această valoare dacă WashData a înregistrat un ciclu care nu a avut loc niciodată sau dacă aparatul efectuase deja cicluri înainte de instalarea WashData.",
     "no_reminders_set": "Încă nu este setat niciun memento de service.",
-    "toast_program_armed": "Program pregătit pentru ciclul următor: {program}"
+    "toast_program_armed": "Program pregătit pentru ciclul următor: {program}",
+    "standby_above_stop_title": "Încă consumă {idle} W când ciclul s-a încheiat",
+    "standby_above_stop_sub": "{n} din ultimele {total} cicluri. Întârzierea la Oprire începe abia după ce puterea scade sub Pragul de Oprire ({stop} W), așa că ciclurile se termină târziu sau trebuie oprite manual.",
+    "advisory_duration_outlier": "{n} ciclu(ri) etichetate '{name}' sunt prea departe de durata sa obișnuită ca să se mai potrivească vreodată cu el (cel mai rău: {ratio}x). Probabil sunt etichetate greșit sau o înregistrare a surprins două rulări. Reetichetați-le sau împărțiți-le, ca să nu mai denatureze estimarea de timp a acestui program."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1366,8 +1370,8 @@
       "label": "Întârziere Reamintire Descărcare"
     },
     "notify_unload_repeat": {
-      "doc": "Continuă să retrimită mementoul de descărcare la fiecare \"Întârziere Reamintire Descărcare\" minute până când deschizi ușa sau atingi \"Oprește mementourile\" în notificare. Necesită o Entitate Senzor Ușă (mementoul în sine o necesită). Butonul de respingere funcționează pe notificările aplicației complementare (mobile) Home Assistant.",
-      "label": "Repetă Până la Deschiderea Ușii"
+      "doc": "Continuă să retrimită mementoul de descărcare la fiecare \"Întârziere Reamintire Descărcare\" minute până când descărcarea este confirmată sau atingi \"Oprește mementourile\" în notificare. Necesită o modalitate de a confirma descărcarea: o Entitate Senzor Ușă, o Entitate Confirmare Descărcare sau opțiunea \"Confirmă Descărcarea Manual\" de mai jos. Butonul de respingere funcționează pe notificările aplicației complementare (mobile) Home Assistant.",
+      "label": "Repetă Până la Confirmarea Descărcării"
     },
     "off_delay": {
       "doc": "Timp de așteptat după căderea energiei înainte de a declara ciclul încheiat. Dacă alimentarea se reia în această fereastră, ciclul continuă fără întreruperi - acest lucru face legătura între etapele de spălare. Mașinile de spălat vase au faze lungi de uscare (oprire pentru 20-60 de minute), așa că întârzierea de oprire trebuie să depășească aceasta pentru a menține întreaga spălare+uscare ca un singur ciclu.",
@@ -1575,6 +1579,14 @@
     "energy_price_dynamic": {
       "label": "Cost Ponderat în Timp",
       "doc": "Taxează fiecare ciclu la prețul în vigoare în fiecare moment în care a rulat, în loc de prețul unic din momentul în care s-a terminat. Se aplică doar unei entități de preț (un preț static nu poate varia). Nu necesită configurare suplimentară: prețul este urmărit în timp real cât timp ciclul rulează, iar Procesare istoric, din Diagnostice, recalculează costul ciclurilor mai vechi pornind de la recorder. Dezactivat = comportamentul clasic, un singur preț fixat la final."
+    },
+    "unload_confirm_entity": {
+      "label": "Entitate Confirmare Descărcare",
+      "doc": "Entitate opțională a cărei activare înseamnă că încărcătura a fost scoasă, pentru mașinile care nu pot avea un senzor de ușă. Merge orice tip: un buton Zigbee sau NFC, un ajutor input_button, un senzor de mișcare în fața mașinii, o scenă. Orice schimbare de stare contează ca o confirmare, cu excepția opririi și a trecerii în indisponibil. Setarea acesteia activează și mementoul de descărcare pe un dispozitiv fără Entitate Senzor Ușă."
+    },
+    "unload_track_without_door": {
+      "label": "Confirmă Descărcarea Manual",
+      "doc": "Rulează mementoul de descărcare pe un dispozitiv fără Entitate Senzor Ușă și fără Entitate Confirmare Descărcare, iar descărcarea o confirmi din propria automatizare: apasă entitatea buton \"Marcați ca descărcat\" sau apelează serviciul ha_washdata.mark_unloaded. Se ignoră când este setată o Entitate Senzor Ușă, care oferă deja semnalul."
     }
   },
   "setting_group": {
@@ -1807,6 +1819,7 @@
     "store_share_failed": "Partajarea a eșuat: {error}",
     "store_shared": "Partajat în magazinul comunității, în așteptarea examinării.",
     "appliance_added": "Aparat adăugat, în așteptarea aprobării",
+    "contrib_device_changed": "Adăugat în magazinul comunității, dar dispozitivul selectat s-a schimbat în timp ce formularul era deschis. Selectați-l în Setări.",
     "thanks_confirming": "Vă mulțumim pentru confirmare",
     "device_approved": "Aprobat de comunitate",
     "rating_saved": "Evaluarea calității a fost salvată",
@@ -1930,6 +1943,7 @@
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",
       "reason": {
         "force_stopped": "oprite forțat",
+        "user_stopped": "oprite manual",
         "interrupted": "întrerupte",
         "incomplete": "incomplete",
         "noise": "zgomot",
@@ -1976,7 +1990,7 @@
     "duration_weight": "Etapa 4: cât de puternic influențează acordul de durată scorul final (implicit 0.22)",
     "energy_weight": "Etapa 4: cât de puternic influențează acordul de energie scorul final (implicit 0.22)",
     "profile_match_min_duration_ratio": "Etapa 1: lungimea minimă a ciclului ca fracție din durata profilului; implicit 0.1 (10%)",
-    "profile_match_max_duration_ratio": "Etapa 1: lungimea maximă a ciclului ca fracție din durata profilului; implicit 1.5 (150%)",
+    "profile_match_max_duration_ratio": "Etapa 1: lungimea maximă a ciclului ca fracție din durata profilului; implicit 1.8 (180%)",
     "keep_min_score": "Etapa 2: prag minim de scor pentru a rămâne în cursă; implicit 0.1 admite potriviri slabe, etapele ulterioare aleg cel mai bun",
     "dtw_blend": "Etapa 3: 0 = doar scor de bază, 1 = doar scor DTW, 0.5 = amestec egal (implicit)",
     "dtw_ensemble_w": "Etapa 3 (modul ansamblu): ponderea pe L1 scalat față de DTW derivativ; implicit 0.7 favorizează nivelul de putere",
@@ -2186,6 +2200,11 @@
       "tap_action": "Acțiune la atingere",
       "hold_action": "Acțiune la apăsare lungă",
       "double_tap_action": "Acțiune la atingere dublă"
+    }
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Un ciclu încheiat așteaptă de fapt {eff} s, nu {delay} s: Pauza Minimă de Oprire ({gap} s) este mai lungă și are prioritate."
     }
   }
 }

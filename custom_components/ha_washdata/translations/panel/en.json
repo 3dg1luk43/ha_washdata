@@ -64,6 +64,7 @@
     "fair_fit_tip": "Moderate match consistency – some cycles assigned to this profile have lower confidence scores. Label more cycles or re-record the profile to improve accuracy.",
     "feedback_requested": "Feedback requested",
     "golden_cycle": "Recorded reference cycle",
+    "duration_outlier": "{n} odd-length cycle(s)",
     "imported_tip": "Imported from the community store. Used for matching only, not counted in stats.",
     "unmatchable": "can't be matched",
     "quiet_tail": "~{mins}m quiet tail",
@@ -257,6 +258,11 @@
     "use": "Use",
     "wipe_all": "Wipe All Data",
     "save_total_cycles": "Save total"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "A finished cycle actually waits {eff} s, not {delay} s: Min Off Gap ({gap} s) is longer and takes precedence."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1051,6 +1057,9 @@
     "store_declare_appliance": "Tell WashData which appliance you own and this tab shows the setups other people have shared for it. You can also type a brand above to look around.",
     "store_download_device_intro": "Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.",
     "store_enable_hint": "Enable online features in Settings to browse and import community reference cycles.",
+    "advisory_duration_outlier": "{n} cycle(s) labelled ‘{name}’ are too far from its usual length to ever match it (worst: {ratio}x). They are probably mislabelled, or one recording captured two runs. Re-label or split them so they stop skewing this program’s time estimate.",
+    "standby_above_stop_title": "Still drawing {idle} W when the cycle ended",
+    "standby_above_stop_sub": "{n} of the last {total} cycles. The off delay only starts once power is below the Stop Threshold ({stop} W), so cycles finish late or need stopping by hand.",
     "store_picker_offline": "Enable online features in the settings gear to pick from the community catalog.",
     "store_share_device_intro": "Upload {brand} {model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.",
     "store_share_intro": "Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.",
@@ -1110,7 +1119,7 @@
     "duration_weight": "Stage 4: how strongly run-length agreement affects the final score (default 0.22)",
     "energy_weight": "Stage 4: how strongly energy agreement affects the final score (default 0.22)",
     "profile_match_min_duration_ratio": "Stage 1: minimum cycle length as a fraction of profile duration; default 0.1 (10%)",
-    "profile_match_max_duration_ratio": "Stage 1: maximum cycle length as a fraction of profile duration; default 1.5 (150%)",
+    "profile_match_max_duration_ratio": "Stage 1: maximum cycle length as a fraction of profile duration; default 1.8 (180%)",
     "keep_min_score": "Stage 2: floor score to stay in the race; default 0.1 admits weak matches, later stages pick the best",
     "dtw_blend": "Stage 3: 0 = core score only, 1 = DTW score only, 0.5 = equal blend (default)",
     "dtw_ensemble_w": "Stage 3 (ensemble mode): weight on scaled-L1 vs derivative DTW; default 0.7 favours level-aware",
@@ -1541,8 +1550,8 @@
       "label": "Unload Nag Delay"
     },
     "notify_unload_repeat": {
-      "doc": "Keep re-sending the unload reminder every \"Unload Nag Delay\" minutes until you open the door or tap \"Stop reminding\" on the notification. Requires a Door Sensor Entity (the reminder itself does). The dismiss button works on Home Assistant companion-app (mobile) notifications.",
-      "label": "Repeat Until Door Opens"
+      "doc": "Keep re-sending the unload reminder every \"Unload Nag Delay\" minutes until the unload is confirmed or you tap \"Stop reminding\" on the notification. Needs a way to confirm the unload: a Door Sensor Entity, an Unload Confirmation Entity, or the \"Confirm Unload Manually\" option below. The dismiss button works on Home Assistant companion-app (mobile) notifications.",
+      "label": "Repeat Until Unloaded"
     },
     "off_delay": {
       "doc": "Time to wait after power drops before declaring the cycle finished. If power resumes within this window the cycle continues seamlessly - this bridges pauses between wash stages. Dishwashers have long drying phases (power off for 20-60 min) so the off-delay must exceed that to keep the whole wash+dry as one cycle.",
@@ -1658,6 +1667,14 @@
     "switch_entity": {
       "doc": "Optional switch toggled off on pause and back on when resuming, used together with \"Pause also cuts power\".",
       "label": "Switch Entity"
+    },
+    "unload_confirm_entity": {
+      "doc": "Optional entity whose activation means the load has been taken out, for machines that cannot have a door sensor. Any kind works: a Zigbee or NFC button, an input_button helper, a motion sensor in front of the machine, a scene. Every state change counts as a confirmation except switching off and going unavailable. Setting this also enables the unload reminder on a device with no Door Sensor Entity.",
+      "label": "Unload Confirmation Entity"
+    },
+    "unload_track_without_door": {
+      "doc": "Run the unload reminder on a device with no Door Sensor Entity and no Unload Confirmation Entity, and confirm the unload from your own automation instead: press the \"Mark Unloaded\" button entity, or call the ha_washdata.mark_unloaded service. Ignored when a Door Sensor Entity is set, which already provides the signal.",
+      "label": "Confirm Unload Manually"
     },
     "watchdog_interval": {
       "doc": "How often the background watchdog checks for stalled sensors and elapsed timeouts. Default 30 s.",
@@ -1874,6 +1891,7 @@
       "summary": "Excluded {total} mis-detected cycle(s): {parts}.",
       "reason": {
         "force_stopped": "force-stopped",
+        "user_stopped": "manually stopped",
         "interrupted": "interrupted",
         "incomplete": "incomplete",
         "noise": "noise",
@@ -1924,6 +1942,7 @@
     "automation_deleted": "Automation deleted",
     "brand_added": "Brand added - awaiting approval",
     "catalog_refreshed": "Community catalog refreshed",
+    "contrib_device_changed": "Added to the community store, but the device changed while the form was open. Select it in Settings.",
     "correction_submitted": "Correction submitted",
     "cycle_deleted": "Cycle deleted",
     "cycle_force_stopped": "Cycle force-stopped",

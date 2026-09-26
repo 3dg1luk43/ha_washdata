@@ -33,7 +33,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `delete_cycle` | entry_id, cycle_id | `SuccessResponse` |
 | `auto_label_cycles` | entry_id, confidence_threshold? | `SuccessResponse` |
 | `get_phase_catalog` | entry_id, device_type? | `GetPhaseCatalogResponse` |
-| `create_phase` | entry_id, device_type, name, description? | `SuccessResponse` |
+| `create_phase` | entry_id, device_type?, name, description? | `SuccessResponse` |
 | `update_phase` | entry_id, phase_id, new_name, description? | `SuccessResponse` |
 | `delete_phase` | entry_id, phase_id | `SuccessResponse` |
 | `get_recording_state` | entry_id | `GetRecordingStateResponse` |
@@ -539,7 +539,7 @@ _None._
 | Param | Required | Type |
 | --- | --- | --- |
 | `entry_id` | yes | str |
-| `device_type` | yes | str |
+| `device_type` | no | str |
 | `name` | yes | str |
 | `description` | no | str |
 
@@ -990,6 +990,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `labelable` | no | bool |
 | `editable` | no | bool |
 | `cycle_origin` | no | str |
+| `expected` | no | list[list[number]] \| null |
 
 ## `ha_washdata/trim_cycle`
 

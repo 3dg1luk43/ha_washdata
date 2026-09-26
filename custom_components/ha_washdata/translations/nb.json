@@ -280,6 +280,16 @@
           "description": "WashData-enheten det skal trenes modeller for."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Merk som utlastet",
+      "description": "Bekreft at den ferdige vasken er tatt ut av en WashData-enhet, noe som fjerner tilstanden \"Rengjøre\" og en eventuell utlastingspåminnelse.",
+      "fields": {
+        "device_id": {
+          "name": "Enhet",
+          "description": "WashData-enheten som har fått den ferdige vasken tatt ut."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Stopp syklusopptak"
+      },
+      "mark_unloaded": {
+        "name": "Merk som utlastet"
       }
     }
   },

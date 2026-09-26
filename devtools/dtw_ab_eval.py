@@ -45,7 +45,11 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from custom_components.ha_washdata import analysis  # noqa: E402
+from custom_components.ha_washdata import analysis
+from custom_components.ha_washdata.signal_processing import (
+    resample_adaptive,
+    resample_uniform,
+)  # noqa: E402
 from custom_components.ha_washdata.signal_processing import resample_adaptive  # noqa: E402
 
 RESAMPLE_L = 150  # length used to build each profile's average sample curve
@@ -96,35 +100,100 @@ def _resample(powers: list[float], length: int) -> list[float]:
 
 
 def _prep_cycles(by_source: dict) -> None:
-    """Cache powers / duration / resampled curve on each cycle once, so the
-    parameter sweep does not recompute them on every leave-one-out fold."""
+    """Cache the time series / duration on each cycle once, so the parameter sweep
+    does not recompute them on every leave-one-out fold.
+
+    Register item 303: this used to cache a fixed-length resample and hand the RAW
+    trace to the matcher as the query. `analysis.find_best_alignment` compares the
+    two curves **index by index** - its `dt` argument is explicitly unused - so
+    that put the two sides on different time axes. Median n_curr/RESAMPLE_L was
+    1.33 and p90 was 9.17, i.e. on the p90 fold Stage 2 scored ~8% of the cycle
+    against a template of the whole cycle. Production never does this: it resamples
+    the current cycle with `resample_adaptive` and re-grids every candidate to that
+    same `used_dt`. Measured cost of the mismatch: ~6 points of top-1, and it made
+    Stage 3 look ~8 points more valuable than it is (DTW resamples both series
+    itself, so it was the only stage still working).
+    """
     for by_profile in by_source.values():
         for cycles in by_profile.values():
             for c in cycles:
                 pw = _powers(c)
                 c["_pw"] = pw
                 c["_dur"] = _duration(c, pw)
+                c["_ts"] = _offsets(c, len(pw))
+                # Length-normalised curve, kept ONLY for profile-to-profile shape
+                # clustering in _profile_aggs/_form_groups ("are these two programs
+                # the same shape?"), which compares profiles of different durations
+                # and therefore wants exactly this normalisation. It is deliberately
+                # NOT used for matching any more - see _prep_cycles' note above.
                 c["_rs"] = np.asarray(_resample(pw, RESAMPLE_L)) if len(pw) >= 4 else None
 
 
-def _build_snapshots(by_profile: dict[str, list[dict]], exclude_key: tuple | None) -> list[dict]:
-    """One snapshot per profile: sample_power = mean of its (training) cycles'
-    resampled curves; avg_duration = mean duration."""
+def _offsets(cycle: dict, n: int) -> np.ndarray | None:
+    """Sample offsets in seconds, or None when the trace carries none."""
+    raw = cycle.get("power_data")
+    if not isinstance(raw, list) or len(raw) != n:
+        return None
+    out = []
+    for p in raw:
+        if not isinstance(p, (list, tuple)) or len(p) < 2:
+            return None
+        try:
+            out.append(float(p[0]))
+        except (TypeError, ValueError):
+            return None
+    return np.asarray(out, dtype=float)
+
+
+def _query_grid(cycle: dict) -> tuple[list[float], float] | None:
+    """The query curve and the dt every candidate must be re-gridded to."""
+    ts = cycle.get("_ts")
+    pw = cycle.get("_pw")
+    if ts is None or not pw or len(pw) < 4:
+        return None
+    segments, used_dt = resample_adaptive(
+        ts, np.asarray(pw, dtype=float), min_dt=5.0, gap_s=21600.0
+    )
+    if not segments:
+        return None
+    seg = max(segments, key=lambda s: len(s.power))
+    if len(seg.power) < 4:
+        return None
+    return seg.power.tolist(), float(used_dt)
+
+
+def _build_snapshots(
+    by_profile: dict[str, list[dict]], exclude_key: tuple | None, dt: float = 0.0
+) -> list[dict]:
+    """One snapshot per profile, on the QUERY's grid (register item 303).
+
+    The template is the training cycle whose duration is closest to the profile
+    mean, mirroring production's single representative sample cycle rather than
+    averaging. Measured difference between the two: about -0.7 points, i.e. nil.
+    """
     snaps = []
     for name, cycles in by_profile.items():
-        curves, durs = [], []
-        for idx, c in enumerate(cycles):
-            if exclude_key is not None and (name, idx) == exclude_key:
-                continue
-            rs = c.get("_rs")
-            if rs is None:
-                continue
-            curves.append(rs)
-            durs.append(c["_dur"])
-        if not curves:
+        pool = [
+            c for idx, c in enumerate(cycles)
+            if exclude_key is None or (name, idx) != exclude_key
+        ]
+        pool = [c for c in pool if c.get("_ts") is not None and c.get("_pw")]
+        if not pool:
             continue
-        avg = np.mean(np.array(curves), axis=0).tolist()
-        snaps.append({"name": name, "avg_duration": float(np.mean(durs)), "sample_power": avg})
+        durs = [c["_dur"] for c in pool]
+        avg = float(np.mean(durs))
+        rep = min(pool, key=lambda c: abs(c["_dur"] - avg))
+        segs = resample_uniform(
+            rep["_ts"], np.asarray(rep["_pw"], dtype=float), dt_s=dt or 5.0, gap_s=21600.0
+        )
+        if not segs:
+            continue
+        seg = max(segs, key=lambda s: len(s.power))
+        if len(seg.power) < 2:
+            continue
+        snaps.append(
+            {"name": name, "avg_duration": avg, "sample_power": seg.power.tolist()}
+        )
     return snaps
 
 
@@ -186,11 +255,12 @@ def evaluate(cycles_by_source: dict, config: dict) -> tuple[int, int, float, int
             if len(cycles) < 2:
                 continue  # need a held-out target while still representing the profile
             for idx, target in enumerate(cycles):
-                pw = target.get("_pw") or _powers(target)
-                if len(pw) < 4:
+                q = _query_grid(target)
+                if q is None:
                     continue
+                pw, used_dt = q
                 dur = target.get("_dur") or _duration(target, pw)
-                snaps = _build_snapshots(by_profile, exclude_key=(name, idx))
+                snaps = _build_snapshots(by_profile, (name, idx), used_dt)
                 if len(snaps) < 2:
                     continue
                 cands = analysis.compute_matches_worker(pw, dur, snaps, cfg)
@@ -228,10 +298,11 @@ def evaluate_precision(by_source: dict, config: dict, threshold: float = DEFAULT
             if len(cycles) < 2:
                 continue
             for idx, target in enumerate(cycles):
-                pw = target.get("_pw")
-                if not pw or len(pw) < 4:
+                q = _query_grid(target)
+                if q is None:
                     continue
-                snaps = _build_snapshots(by_profile, exclude_key=(name, idx))
+                pw, used_dt = q
+                snaps = _build_snapshots(by_profile, (name, idx), used_dt)
                 if len(snaps) < 2:
                     continue
                 cands = analysis.compute_matches_worker(pw, target["_dur"], snaps, cfg)
@@ -255,8 +326,9 @@ def evaluate_precision(by_source: dict, config: dict, threshold: float = DEFAULT
         if len(by_profile) >= 3:  # need >=2 other profiles to remain a fair pool
             for name, cycles in by_profile.items():
                 others = {n: cs for n, cs in by_profile.items() if n != name}
-                snaps = _build_snapshots(others, exclude_key=None)
-                if len(snaps) < 2:
+                # Cheap pre-check on a nominal grid; the real snapshots are built
+                # per target below, since each query now defines the grid.
+                if len(_build_snapshots(others, None, 5.0)) < 2:
                     continue
                 if clean_neg and name in prof_stat:
                     d0, p0 = prof_stat[name]
@@ -269,8 +341,12 @@ def evaluate_precision(by_source: dict, config: dict, threshold: float = DEFAULT
                     if has_sibling:
                         continue  # legit near-duplicate present -> not a clean negative
                 for target in cycles:
-                    pw = target.get("_pw")
-                    if not pw or len(pw) < 4:
+                    q = _query_grid(target)
+                    if q is None:
+                        continue
+                    pw, used_dt = q
+                    snaps = _build_snapshots(others, None, used_dt)
+                    if len(snaps) < 2:
                         continue
                     cands = analysis.compute_matches_worker(pw, target["_dur"], snaps, cfg)
                     if cfg.get("stage5"):
@@ -504,24 +580,44 @@ def _form_groups(aggs: dict, dur_tol: float = 0.12, corr_min: float = 0.9) -> di
     return groups
 
 
-def _build_group_snapshots(by_profile: dict, groups: dict, exclude_key) -> list[dict]:
+def _build_group_snapshots(by_profile: dict, groups: dict, exclude_key, dt: float = 0.0) -> list[dict]:
     """One aggregate snapshot per multi-member group ('GROUP:<root>'), plus a
     normal per-profile snapshot for singletons. Held-out cycle excluded."""
     snaps = []
     for root, members in groups.items():
         if len(members) == 1:
             m = members[0]
-            snaps += _build_snapshots({m: by_profile[m]}, exclude_key if (exclude_key and exclude_key[0] == m) else None)
+            snaps += _build_snapshots(
+                {m: by_profile[m]},
+                exclude_key if (exclude_key and exclude_key[0] == m) else None,
+                dt,
+            )
             continue
-        curves, durs = [], []
-        for m in members:
-            for idx, c in enumerate(by_profile[m]):
-                if exclude_key == (m, idx) or c.get("_rs") is None:
-                    continue
-                curves.append(c["_rs"]); durs.append(c["_dur"])
+        # Register item 303: a group's members are pooled and the one whose
+        # duration is closest to the pooled mean represents it, on the query's
+        # grid. Averaging curves is not possible here any more - at a fixed dt
+        # they have different lengths - and the aggregate mean curve is in any
+        # case the thing #400 reverted.
+        pool = [
+            c
+            for m in members
+            for idx, c in enumerate(by_profile[m])
+            if exclude_key != (m, idx) and c.get("_ts") is not None and c.get("_pw")
+        ]
+        durs = [c["_dur"] for c in pool]
+        curves = pool
         if curves:
-            snaps.append({"name": f"GROUP:{root}", "avg_duration": float(np.mean(durs)),
-                          "sample_power": np.mean(np.array(curves), axis=0).tolist()})
+            _avg = float(np.mean(durs))
+            _rep = min(pool, key=lambda c: abs(c["_dur"] - _avg))
+            _segs = resample_uniform(
+                _rep["_ts"], np.asarray(_rep["_pw"], dtype=float),
+                dt_s=dt or 5.0, gap_s=21600.0,
+            )
+            if not _segs:
+                continue
+            _seg = max(_segs, key=lambda s: len(s.power))
+            snaps.append({"name": f"GROUP:{root}", "avg_duration": _avg,
+                          "sample_power": _seg.power.tolist()})
     return snaps
 
 
@@ -564,18 +660,19 @@ def _grouped_once(by_source: dict, base: dict, dur_tol: float, corr_min: float) 
             if len(cycles) < 2:
                 continue
             for idx, target in enumerate(cycles):
-                pw = target.get("_pw")
-                if not pw or len(pw) < 4:
+                q = _query_grid(target)
+                if q is None:
                     continue
+                pw, used_dt = q
                 dur = target["_dur"]
-                flat_snaps = _build_snapshots(by_profile, exclude_key=(name, idx))
+                flat_snaps = _build_snapshots(by_profile, (name, idx), used_dt)
                 if len(flat_snaps) < 2:
                     continue
                 total += 1
                 fc = analysis.compute_matches_worker(pw, dur, flat_snaps, base)
                 if fc and fc[0]["name"] == name:
                     flat_ok += 1
-                gsnaps = _build_group_snapshots(by_profile, groups, exclude_key=(name, idx))
+                gsnaps = _build_group_snapshots(by_profile, groups, (name, idx), used_dt)
                 gc = analysis.compute_matches_worker(pw, dur, gsnaps, base)
                 if not gc:
                     continue
@@ -653,13 +750,22 @@ def _prefix_at(cycle: dict, frac: float) -> tuple[list[float], float] | None:
     return powers, cutoff
 
 
-def _device_type(source: str) -> str:
-    """Device type from the corpus path (cycle_data/ is organised by appliance).
+def _device_type(source: str, cycles: list | None = None) -> str:
+    """Device type for a corpus source: the DECLARED one when the export carries it.
 
-    The stored cycles carry no device_type, but the Stage-4 energy mode is gated on
-    it (item 100), so the mid-cycle table has to group by it or it averages two
-    different production configurations together.
+    The Stage-4 energy mode is gated on device type (item 100), so getting it wrong
+    silently scores those folds under the wrong production configuration. This used
+    to infer it from the path, which is wrong on 95 folds of the current corpus:
+    `cycle_data/me/washdata_export_01KDMTAA.json` declares `dishwasher` but matches
+    the path rule for a washing machine, and a `Waher-Dryer Combo/` directory holds
+    a declared `washing_machine`. The loader now carries `_device_type` from the
+    export, so use it and keep the path rule only for sources that lack one.
     """
+    if cycles:
+        for c in cycles:
+            declared = c.get("_device_type")
+            if declared:
+                return str(declared)
     s = source.lower()
     if "dishwash" in s:
         return "dishwasher"
@@ -687,7 +793,9 @@ def _run_checkpoints(by_source: dict) -> None:
     fracs = [i / 10 for i in range(1, 10)]
     res: dict[tuple[str, float], list[int]] = {}
     for source, by_profile in by_source.items():
-        dev = _device_type(source)
+        dev = _device_type(
+            source, [c for cs in by_profile.values() for c in cs]
+        )
         base = {
             **_BEST,
             "max_duration_ratio": 1.5,
@@ -700,7 +808,10 @@ def _run_checkpoints(by_source: dict) -> None:
             if len(cycles) < 2:
                 continue
             for idx, target in enumerate(cycles):
-                snaps = _build_snapshots(by_profile, exclude_key=(name, idx))
+                q0 = _query_grid(target)
+                if q0 is None:
+                    continue
+                snaps = _build_snapshots(by_profile, (name, idx), q0[1])
                 if len(snaps) < 2:
                     continue
                 for f in fracs:

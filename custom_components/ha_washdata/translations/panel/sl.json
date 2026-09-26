@@ -60,6 +60,7 @@
     "fair_fit_tip": "Zmerna doslednost ujemanja – nekateri cikli, dodeljeni temu profilu, imajo nižje ocene zaupanja. Označite več ciklov ali znova posnemite profil, da izboljšate natančnost.",
     "feedback_requested": "Zahtevane povratne informacije",
     "golden_cycle": "Posneti referenčni cikel",
+    "duration_outlier": "Cikli nenavadne dolžine: {n}",
     "improving": "↗ se izboljšuje",
     "manual": "(ročno izbrano)",
     "needs_review": "Potrebuje pregled",
@@ -257,6 +258,11 @@
     "hist_import_n": "Uvozi cikle: {n}",
     "hist_goto_cycles": "Pokaži cikle",
     "save_total_cycles": "Shrani skupno število"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Končan cikel v resnici čaka {eff} s in ne {delay} s: Min. presledek izklopa ({gap} s) je daljši in ima prednost."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1032,6 +1038,9 @@
     "imported_readonly": "Uvoženo iz skupnostne trgovine. Prikazano za referenco in ujemanje. Ne šteje se v vašo statistiko in ga ni mogoče urejati.",
     "merge_no_imports": "Uvoženih posnetkov ni mogoče združiti z resničnim ciklom. Za združitev prekličite njihovo izbiro.",
     "store_enable_hint": "Omogočite spletne funkcije v Nastavitvah, da boste lahko brskali in uvažali referenčne cikle skupnosti.",
+    "advisory_duration_outlier": "Cikli, označeni kot '{name}' ({n}), so preveč oddaljeni od njegove običajne dolžine, da bi se z njim kdaj lahko ujemali (največje odstopanje: {ratio}x). Verjetno so napačno označeni ali pa je en posnetek zajel dva zagona. Znova jih označite ali jih razdelite, da nehajo popačiti oceno časa za ta program.",
+    "standby_above_stop_title": "Ob koncu cikla še vedno porablja {idle} W",
+    "standby_above_stop_sub": "{n} od zadnjih {total} ciklov. Zamuda izklopa se začne šteti šele, ko moč pade pod Prag zaustavitve ({stop} W), zato se cikli končajo z zamudo ali jih je treba ustaviti ročno.",
     "online_intro": "Delite in prenašajte referenčne cikle z drugimi uporabniki WashData. Vse spletne funkcije so prostovoljne in privzeto izklopljene.",
     "store_share_intro": "Naložite ta referenčni cikel, da ga bodo lahko uporabljali drugi z enako napravo. Pred javno objavo je pregledan.",
     "online_intro_global": "Brskajte in delite referenčne posnetke z drugimi uporabniki WashData ter potrjujte vnose naprav. Ena povezava velja za celotno integracijo WashData; znamka in model naprave se nastavita za vsako napravo posebej v razdelku Osnovno. Vse spletne funkcije so prostovoljne in privzeto izklopljene.",
@@ -1414,8 +1423,8 @@
       "label": "Zamuda opomnika za raztovarjanje"
     },
     "notify_unload_repeat": {
-      "doc": "Znova pošilja opomnik za raztovarjanje vsakih \"Zamuda opomnika za raztovarjanje\" minut, dokler ne odprete vrat ali v obvestilu ne tapnete \"Nehaj opominjati\". Zahteva Entiteto senzorja vrat (tako kot sam opomnik). Gumb za opustitev deluje pri obvestilih mobilne aplikacije Home Assistant (companion app).",
-      "label": "Ponavljaj, dokler se vrata ne odprejo"
+      "doc": "Znova pošilja opomnik za raztovarjanje vsakih „Zamuda opomnika za raztovarjanje“ minut, dokler raztovarjanje ni potrjeno ali v obvestilu ne tapnete „Nehaj opominjati“. Potrebuje način za potrditev raztovarjanja: Entiteto senzorja vrat, Entiteto potrditve raztovarjanja ali spodnjo možnost „Ročna potrditev raztovarjanja“. Gumb za opustitev deluje pri obvestilih mobilne aplikacije Home Assistant (companion app).",
+      "label": "Ponavljaj do raztovarjanja"
     },
     "off_delay": {
       "doc": "Čas za čakanje po padcu moči, preden razglasite, da je cikel končan. Če se napajanje ponovno vzpostavi v tem oknu, se cikel nemoteno nadaljuje - to premosti premore med stopnjami pranja. Pomivalni stroji imajo dolge faze sušenja (izklop za 20–60 min), zato mora biti zakasnitev izklopa daljša od te, da ostane celotno pranje+sušenje kot en cikel.",
@@ -1623,6 +1632,14 @@
     "energy_price_dynamic": {
       "label": "Časovno tehtani stroški",
       "doc": "Vsak cikel obračuna po ceni, ki je veljala v vsakem trenutku njegovega teka, namesto po eni sami ceni ob zaključku. Velja samo za entiteto cene (statična cena se ne more spreminjati). Ne potrebuje dodatnih nastavitev: cena se med ciklom spremlja v živo, Obdelava zgodovine v Diagnostiki pa starejšim ciklom znova izračuna stroške iz recorderja. Izklopljeno = klasično vedenje, ena cena, zamrznjena ob koncu."
+    },
+    "unload_confirm_entity": {
+      "label": "Entiteta potrditve raztovarjanja",
+      "doc": "Izbirna entiteta, katere sprožitev pomeni, da je bila vsebina vzeta iz naprave, za stroje, na katere ni mogoče namestiti senzorja vrat. Deluje katera koli vrsta: gumb Zigbee ali NFC, pomočnik input_button, senzor gibanja pred strojem, scena. Kot potrditev šteje vsaka sprememba stanja, razen izklopa in prehoda v nedosegljivo stanje. Ta nastavitev omogoči opomnik za raztovarjanje tudi na napravi brez Entitete senzorja vrat."
+    },
+    "unload_track_without_door": {
+      "label": "Ročna potrditev raztovarjanja",
+      "doc": "Zažene opomnik za raztovarjanje na napravi brez Entitete senzorja vrat in brez Entitete potrditve raztovarjanja, raztovarjanje pa potrdite iz lastne avtomatizacije: pritisnite entiteto gumba „Označi kot raztovorjeno“ ali pokličite storitev ha_washdata.mark_unloaded. Prezrto, kadar je nastavljena Entiteta senzorja vrat, ki ta signal že zagotavlja."
     }
   },
   "setting_group": {
@@ -1835,6 +1852,7 @@
       "summary": "Izključeno {total} napačno zaznanih ciklov: {parts}.",
       "reason": {
         "force_stopped": "prisilno ustavljeni",
+        "user_stopped": "ročno ustavljeni",
         "interrupted": "prekinjeni",
         "incomplete": "nepopolni",
         "noise": "šum",
@@ -1965,6 +1983,7 @@
     "store_no_appliance": "Najprej nastavite znamko in model naprave v Nastavitvah.",
     "store_share_failed": "Deljenje ni uspelo: {error}",
     "store_shared": "Deljeno v skupnostno trgovino, čaka na pregled.",
+    "contrib_device_changed": "Dodano v skupnostno trgovino, vendar se je izbrana naprava spremenila, medtem ko je bil obrazec odprt. Izberite jo v Nastavitvah.",
     "appliance_added": "Naprava dodana, čaka na odobritev",
     "thanks_confirming": "Hvala za potrditev",
     "device_approved": "Odobreno s strani skupnosti",
@@ -2024,7 +2043,7 @@
     "duration_weight": "Stopnja 4: kako močno ujemanje trajanja vpliva na končno oceno (privzeto 0,22)",
     "energy_weight": "Stopnja 4: kako močno ujemanje energije vpliva na končno oceno (privzeto 0,22)",
     "profile_match_min_duration_ratio": "Stopnja 1: minimalna dolžina cikla kot del trajanja profila; privzeto 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Stopnja 1: maksimalna dolžina cikla kot del trajanja profila; privzeto 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Stopnja 1: maksimalna dolžina cikla kot del trajanja profila; privzeto 1,8 (180%)",
     "keep_min_score": "Stopnja 2: najnižja ocena za ostanek v izboru; privzeto 0,1 sprejme šibka ujemanja, kasnejše stopnje izberejo najboljše",
     "dtw_blend": "Stopnja 3: 0 = samo osnovna ocena, 1 = samo DTW ocena, 0,5 = enakomerno mešanje (privzeto)",
     "dtw_ensemble_w": "Stopnja 3 (kombinirani način): utež skaliranega L1 v primerjavi z izvedenim DTW; privzeto 0,7 daje prednost ravni",

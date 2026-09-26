@@ -20,7 +20,11 @@ import pytest
 from unittest.mock import Mock, MagicMock
 from datetime import datetime, timedelta
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
-from custom_components.ha_washdata.const import STATE_OFF, STATE_RUNNING, STATE_ENDING, STATE_PAUSED, STATE_FINISHED
+from custom_components.ha_washdata.const import (
+    STATE_OFF, STATE_RUNNING, STATE_ENDING, STATE_PAUSED, STATE_FINISHED,
+    STATE_INTERRUPTED,
+    STANDBY_BAND_MIN_RATIO,
+)
 
 # Helper to create datetime sequence
 def dt(offset_seconds: int) -> datetime:
@@ -114,9 +118,17 @@ def test_long_drying_phase_cycle_continuation(base_config, mock_callbacks):
         assert detector.state in (STATE_ENDING, STATE_RUNNING, STATE_PAUSED)
 
 def test_manual_program_override_termination(base_config, mock_callbacks):
-    """
-    Test that a manual program (with 100% confidence) keeps cycle alive.
+    """A manual program keeps the cycle alive past off_delay, and a power cut
+    10 minutes in is recorded for what it is.
+
     Simulates wrapper return: ("ManualProfile", 1.0, 3600.0, "Manual", False)
+
+    The appliance draws power for 600 s and then nothing for 73 minutes. Before
+    register item 297 this was stored as a COMPLETED 3600 s cycle, because Smart
+    Termination banked its tail all the way to the matched profile's expected
+    end - fabricating 50 minutes of cycle and feeding them into that profile's
+    average. The cycle now ends at the last real activity, which puts it under
+    completion_min_seconds, so it is correctly recorded as interrupted.
     """
     mock_matcher = Mock()
     mock_matcher.side_effect = lambda readings: ("ManualProfile", 1.0, 3600.0, "Manual", False)
@@ -154,8 +166,16 @@ def test_manual_program_override_termination(base_config, mock_callbacks):
     # So we need to go beyond 4500 to ensure it finishes
     detector.process_reading(0.0, dt(5000))
     
-    # Should be OFF
-    assert detector.state == STATE_FINISHED
+    # Alive past off_delay (the point of the test), then closed out. A cycle whose
+    # appliance stopped after 600 s of a 3600 s programme is interrupted, not a
+    # completed 3600 s run.
+    assert detector.state == STATE_INTERRUPTED
+    cycle = mock_callbacks["on_cycle_end"].call_args[0][0]
+    assert cycle["status"] == "interrupted"
+    assert cycle["duration"] == pytest.approx(600.0, abs=30.0), (
+        f"stored {cycle['duration']:.0f}s for an appliance that ran 600s; the "
+        "expected-duration tail must not be banked"
+    )
 
 def test_ambiguous_match_stuck_in_ending_is_hard_finalized(base_config, mock_callbacks):
     """Duration-anchored backstop: an ambiguous match whose fallback energy gate is
@@ -261,8 +281,14 @@ def test_backstop_does_not_truncate_longer_program(base_config, mock_callbacks):
 def test_standby_band_stuck_running_is_finalized(base_config, mock_callbacks):
     """#296: a washer that finishes but holds a flat standby draw ABOVE
     stop_threshold never accumulates below-threshold time, so it never reaches
-    ENDING. The standby-band detector finalizes it (as a normal completion) once
-    the flat plateau has held past 2x the expected duration."""
+    ENDING. The standby-band detector finalizes it as a normal completion once the
+    flat plateau has held past ``STANDBY_BAND_MIN_RATIO`` x the expected duration.
+
+    That ratio dropped from 2.0 to 1.0 in #445 - on the reporter's Miele the old
+    gate meant 91.5 minutes of idle before the cycle closed - so the boundaries
+    below are derived from the constant rather than written out, and the test
+    tracks it.
+    """
     mock_matcher = Mock()
     mock_matcher.side_effect = lambda readings: ("Cotton", 0.9, 1200.0, "Washing", False, False)
 
@@ -281,14 +307,17 @@ def test_standby_band_stuck_running_is_finalized(base_config, mock_callbacks):
 
     # Drop to a flat 5 W anti-crease baseline: above stop_threshold (4.0), so
     # _time_below_threshold never accumulates and the cycle stays RUNNING.
-    for t in range(300, 2000, 30):
+    gate_s = int(1200.0 * STANDBY_BAND_MIN_RATIO)
+    for t in range(300, gate_s - 120, 30):
         detector.process_reading(5.0, dt(t))
-    # Still short of 2x expected (2400s): must still be RUNNING (the #296 bug).
+    # Short of the gate: must still be RUNNING (the #296 bug this guards).
     assert detector.state == STATE_RUNNING
     assert not mock_callbacks["on_cycle_end"].called
 
-    # Cross 2x expected with the flat plateau still held → standby-band finalize.
-    for t in range(2000, 2600, 30):
+    # Cross the gate with the flat plateau still held -> standby-band finalize.
+    # The plateau also has to SPAN STANDBY_BAND_WINDOW_S, which it does: it has
+    # been held since t=300.
+    for t in range(gate_s - 120, gate_s + 600, 30):
         detector.process_reading(5.0, dt(t))
     assert mock_callbacks["on_cycle_end"].called, (
         "Standby-band detector did not finalize the stuck cycle"

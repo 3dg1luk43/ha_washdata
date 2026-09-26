@@ -280,6 +280,16 @@
           "description": "モデルを再トレーニングする WashData デバイス。"
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "取り出し済みとしてマーク",
+      "description": "WashData デバイスから終了した中身を取り出したことを確認し、クリーン状態と取り出しリマインダーを解除します。",
+      "fields": {
+        "device_id": {
+          "name": "デバイス",
+          "description": "終了した中身を取り出した WashData デバイス。"
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "サイクル記録を停止"
+      },
+      "mark_unloaded": {
+        "name": "取り出し済みとしてマーク"
       }
     }
   },

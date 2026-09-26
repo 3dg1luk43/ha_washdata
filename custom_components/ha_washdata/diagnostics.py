@@ -52,6 +52,7 @@ _SENSITIVE_KEYS = {
     "power_sensor",
     "external_end_trigger",
     "door_sensor_entity",
+    "unload_confirm_entity",
     "switch_entity",
     "energy_price_entity",
     "energy_sensor",

@@ -199,3 +199,48 @@ test('cycles tab renders without overflow on mobile', async ({ page }) => {
   });
   expect(overflow).toBeLessThanOrEqual(1);
 });
+
+/**
+ * The Expected overlay must share the cycle's own time axis.
+ *
+ * `get_cycle_power_data` now returns `expected`, the matched profile's curve
+ * already projected onto this cycle's offsets through the same alignment the
+ * artifact shading was computed with. Before that the panel drew
+ * `envelope.avg` at the envelope's absolute times, so on a cycle longer than
+ * the profile's `target_duration` the overlay stopped short and everything
+ * after the first divergence looked shifted - the trace, the overlay and the
+ * shading each sat on a different axis.
+ *
+ * Hovering near the right-hand end is what distinguishes the two: the readout
+ * only lists Expected there if the overlay actually reaches the end of the
+ * cycle.
+ */
+test('the Expected overlay spans the whole cycle, not the envelope duration', async ({ page }) => {
+  await clickTab(page, 'history');
+  const samples = Array.from({ length: 40 }, (_, i) => [i * 60, i < 2 || i > 36 ? 3 : 900]);
+  await page.evaluate((s) => {
+    window.__set_handler('ha_washdata/get_cycle_power_data', {
+      samples: s,
+      full_duration_s: 2340,
+      profile_name: 'Cotton 40°C',
+      // Same x values as the trace: that is the contract the server keeps.
+      expected: s.map(([t]: number[]) => [t, 850]),
+      artifacts: [],
+      envelope_conformance: 0.82,
+    });
+  }, samples as never);
+
+  const row = page.locator('tr[data-cid]').first();
+  await expect(row).toBeVisible({ timeout: 5_000 });
+  await row.click();
+  const canvas = page.locator('.wd-modal #wd-cyc-canvas');
+  await expect(canvas).toBeVisible({ timeout: 5_000 });
+
+  const box = await canvas.boundingBox();
+  expect(box).not.toBeNull();
+  // 92% across: past where an envelope shorter than the cycle would have ended.
+  await page.mouse.move(box!.x + box!.width * 0.92, box!.y + box!.height * 0.5);
+  await page.waitForTimeout(250);
+  const tip = page.locator('.wd-gtip');
+  await expect(tip).toContainText('Expected', { timeout: 3_000 });
+});

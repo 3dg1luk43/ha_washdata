@@ -280,6 +280,16 @@
           "description": "Pajisja WashData për të ritrajnuar modelet."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Shëno si të shkarkuar",
+      "description": "Konfirmo se ngarkesa e përfunduar është hequr nga një pajisje WashData, duke pastruar gjendjen \"I pastër\" dhe çdo kujtesë për shkarkim.",
+      "fields": {
+        "device_id": {
+          "name": "Pajisja",
+          "description": "Pajisja WashData nga e cila është hequr ngarkesa e përfunduar."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Ndalo regjistrimin e ciklit"
+      },
+      "mark_unloaded": {
+        "name": "Shëno si të shkarkuar"
       }
     }
   },

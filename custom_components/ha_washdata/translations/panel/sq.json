@@ -83,7 +83,8 @@
         "not_importable": "s'aplikohet këtu",
         "exists": "ekziston",
         "backfilled_tip": "Zbuluar në historikun e importuar të fuqisë. Ndikon vetëm në përputhjen e programeve, nuk llogaritet në statistika.",
-        "armed": "(zbatohet për ciklin tjetër)"
+        "armed": "(zbatohet për ciklin tjetër)",
+        "duration_outlier": "{n} cikël(e) me kohëzgjatje të pazakontë"
     },
     "btn": {
         "reset_zoom": "Rivendos zmadhimin",
@@ -1087,7 +1088,10 @@
         "odometer_intro": "Ky total vetëm rritet. Fshirja e regjistrimit të një cikli nuk e ndryshon dhe vazhdon të numërojë përtej kufirit të historikut të ruajtur, kështu që kujtesat e servisit mbeten të sakta.",
         "odometer_correct_hint": "Vendosni këtë vlerë nëse WashData regjistroi një cikël që nuk ndodhi kurrë, ose nëse pajisja kishte kryer cikle përpara se WashData të instalohej.",
         "no_reminders_set": "Nuk është caktuar ende asnjë kujtesë servisi.",
-        "toast_program_armed": "Programi u caktua për ciklin tjetër: {program}"
+        "toast_program_armed": "Programi u caktua për ciklin tjetër: {program}",
+        "standby_above_stop_title": "Ende tërheq {idle} W kur cikli përfundoi",
+        "standby_above_stop_sub": "{n} nga {total} ciklet e fundit. Vonesa e fikjes fillon vetëm pasi fuqia bie nën Pragun e ndalimit ({stop} W), prandaj ciklet përfundojnë me vonesë ose duhen ndalur me dorë.",
+        "advisory_duration_outlier": "{n} cikël(e) të etiketuar si '{name}' janë shumë larg kohëzgjatjes së tij të zakonshme për t'u përputhur ndonjëherë me të (rasti më i keq: {ratio}x). Ka të ngjarë të jenë etiketuar gabimisht, ose një regjistrim i vetëm ka kapur dy ekzekutime. Rietiketojini ose ndajini, që të mos e shtrembërojnë më vlerësimin e kohës së këtij programi."
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1410,8 +1414,8 @@
             "label": "Vonesë njoftimi për shkarkim"
         },
         "notify_unload_repeat": {
-            "doc": "Ridërgon kujtesën për shkarkim çdo \"Vonesë njoftimi për shkarkim\" minuta, derisa të hapni derën ose të prekni \"Ndalo kujtesat\" në njoftim. Kërkon Entitetin e sensorit të derës (ashtu si edhe vetë kujtesa). Butoni i largimit funksionon në njoftimet e aplikacionit-shoqërues (celular) të Home Assistant.",
-            "label": "Përsërit derisa të hapet dera"
+            "doc": "Ridërgon kujtesën për shkarkim çdo \"Vonesë njoftimi për shkarkim\" minuta, derisa shkarkimi të konfirmohet ose të prekni \"Ndalo kujtesat\" në njoftim. Nevojitet një mënyrë për të konfirmuar shkarkimin: Entiteti i sensorit të derës, Entiteti i konfirmimit të shkarkimit, ose opsioni \"Konfirmo shkarkimin manualisht\" më poshtë. Butoni i largimit funksionon në njoftimet e aplikacionit-shoqërues (celular) të Home Assistant.",
+            "label": "Përsërit derisa të shkarkohet"
         },
         "off_delay": {
             "doc": "Koha për të pritur pasi të bjerë energjia përpara se të deklaroni ciklin të përfunduar. Nëse rryma rifillon brenda kësaj dritareje, cikli vazhdon pa probleme - kjo lidh pauzat midis fazave të larjes. Enëlarëset kanë faza të gjata tharjeje (fikje për 20-60 min), kështu që vonesa e fikjes duhet ta kalojë atë për të mbajtur të gjithë larjen+tharjen si një cikël.",
@@ -1623,6 +1627,14 @@
         "energy_price_dynamic": {
             "label": "Kosto e ponderuar sipas kohës",
             "doc": "Çdo cikël faturohet me çmimin në fuqi në çdo çast që ai punoi, në vend të një çmimi të vetëm në fuqi kur ai përfundoi. Vlen vetëm për një entitet çmimi (një çmim statik nuk ndryshon). Nuk kërkon konfigurim shtesë: çmimi ndiqet drejtpërdrejt ndërsa cikli po punon, kurse veprimi Proceso historinë te Diagnostikimi rillogarit koston e cikleve më të vjetra nga recorder. Joaktiv = sjellja klasike, një çmim i vetëm i ngrirë në fund."
+        },
+        "unload_confirm_entity": {
+            "label": "Entiteti i konfirmimit të shkarkimit",
+            "doc": "Entitet opsional, aktivizimi i të cilit do të thotë se ngarkesa është hequr, për makinat që nuk mund të kenë sensor dere. Funksionon çdo lloj: një buton Zigbee ose NFC, një ndihmës input_button, një sensor lëvizjeje përpara makinës, një skenë. Çdo ndryshim i gjendjes llogaritet si konfirmim, përveç fikjes dhe kalimit në gjendje të padisponueshme. Vendosja e kësaj aktivizon gjithashtu kujtesën për shkarkim në një pajisje pa Entitetin e sensorit të derës."
+        },
+        "unload_track_without_door": {
+            "label": "Konfirmo shkarkimin manualisht",
+            "doc": "Ekzekuto kujtesën për shkarkim në një pajisje pa Entitetin e sensorit të derës dhe pa Entitetin e konfirmimit të shkarkimit, dhe konfirmo shkarkimin nga automatizimi yt: shtyp entitetin buton \"Shëno si të shkarkuar\", ose thirr shërbimin ha_washdata.mark_unloaded. Shpërfillet kur është vendosur një Entitet i sensorit të derës, i cili tashmë e jep këtë sinjal."
         }
     },
     "setting_group": {
@@ -1766,6 +1778,7 @@
     },
     "toast": {
         "catalog_refreshed": "Katalogu i komunitetit u rifreskua",
+        "contrib_device_changed": "U shtua në dyqanin e komunitetit, por pajisja e zgjedhur ndryshoi ndërsa formulari ishte i hapur. Zgjidheni te Cilësimet.",
         "access_saved": "Kontrolli i aksesit u ruajt",
         "all_wiped": "Të gjitha të dhënat u fshien",
         "analysis_complete_none": "Analiza e plotë: asnjë sugjerim i ri",
@@ -1978,6 +1991,7 @@
             "summary": "U përjashtuan {total} cikle të zbuluar gabimisht: {parts}.",
             "reason": {
                 "force_stopped": "të ndalur me forcë",
+                "user_stopped": "të ndalur manualisht",
                 "interrupted": "të ndërprerë",
                 "incomplete": "të papërfunduar",
                 "noise": "zhurmë",
@@ -2021,7 +2035,7 @@
         "duration_weight": "Etapa 4: sa fortë ndikon marrëveshja e kohëzgjatjes në rezultatin final (parazgjedhja 0.22)",
         "energy_weight": "Etapa 4: sa fortë ndikon marrëveshja e energjisë në rezultatin final (parazgjedhja 0.22)",
         "profile_match_min_duration_ratio": "Etapa 1: gjatësia minimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 0.1 (10%)",
-        "profile_match_max_duration_ratio": "Etapa 1: gjatësia maksimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 1.5 (150%)",
+        "profile_match_max_duration_ratio": "Etapa 1: gjatësia maksimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 1.8 (180%)",
         "keep_min_score": "Etapa 2: rezultati minimal për të qëndruar në garë; parazgjedhja 0.1 pranon përputhje të dobëta, etapat e mëvonshme zgjedhin më të mirën",
         "dtw_blend": "Etapa 3: 0 = vetëm rezultati bazë, 1 = vetëm rezultati DTW, 0.5 = përzierje e barabartë (parazgjedhja)",
         "dtw_ensemble_w": "Etapa 3 (modaliteti ansambël): pesë për L1-e shkallëzuar kundrejt DTW derivativ; parazgjedhja 0.7 favorizon nivelin e fuqisë",
@@ -2186,6 +2200,11 @@
             "skip_forever": "Mos shfaq më",
             "hide_guidance": "Fshih udhëzuesin",
             "show_guidance": "Shfaq udhëzuesin"
+        }
+    },
+    "note": {
+        "off_delay": {
+            "effective": "Një cikël i përfunduar pret në të vërtetë {eff} s, jo {delay} s: Hendeku min. i fikjes ({gap} s) është më i gjatë dhe ka përparësi."
         }
     }
 }

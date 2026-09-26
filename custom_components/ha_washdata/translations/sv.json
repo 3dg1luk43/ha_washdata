@@ -280,6 +280,16 @@
           "description": "WashData-enheten att omskola modeller till."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Markera som lossad",
+      "description": "Bekräfta att den färdiga tvätten har tagits ut ur en WashData-enhet, vilket rensar tillståndet \"Rena\" och en eventuell lossningspåminnelse.",
+      "fields": {
+        "device_id": {
+          "name": "Enhet",
+          "description": "WashData-enheten vars färdiga tvätt har tagits ut."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Stoppa cykelinspelning"
+      },
+      "mark_unloaded": {
+        "name": "Markera som lossad"
       }
     }
   },

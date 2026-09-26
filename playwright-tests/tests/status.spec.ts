@@ -105,6 +105,39 @@ test('clicking the suggestion attention card switches to settings tab', async ({
   await expect(settingsTab).toBeVisible({ timeout: 5_000 });
 });
 
+test('the standby-above-stop card renders on the Status page (#445 cause 1)', async ({ page }) => {
+  // Regression: the card was pushed onto `attn` AFTER `attnHtml` had already been
+  // joined into a string, so it was computed, pushed and then never rendered.
+  await bootPanel(page, {
+    'ha_washdata/get_devices': {
+      devices: [{
+        ...require('../fixtures/mock-data/device-idle.json').devices[0],
+        standby_above_stop: {
+          cycles_above: 5,
+          cycles_checked: 8,
+          idle_w: 3.4,
+          stop_threshold_w: 2.56,
+        },
+      }],
+    },
+  });
+  const card = page.locator('.wd-attn-card').filter({ hasText: '3.4' });
+  await expect(card).toBeVisible({ timeout: 5_000 });
+  await expect(card).toContainText('2.56');
+});
+
+test('no standby-above-stop card when the backend reports no pattern', async ({ page }) => {
+  await bootPanel(page, {
+    'ha_washdata/get_devices': {
+      devices: [{
+        ...require('../fixtures/mock-data/device-idle.json').devices[0],
+        standby_above_stop: null,
+      }],
+    },
+  });
+  await expect(page.locator('.wd-attn-card[data-action="goto-conflicts"]')).toHaveCount(0);
+});
+
 test('device pill badge counts a Calibrated (ML) suggestion', async ({ page }) => {
   // Regression: the pill badge used to render the backend classic count only, so a
   // device whose only tuning suggestions were Calibrated (ML) ones showed no bulb
