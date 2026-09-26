@@ -57,8 +57,6 @@ from .signal_processing import (
     integrate_wh,
 )
 from .const import (
-    STANDBY_BAND_FINALIZE_DEVICE_TYPES,
-    STANDBY_BAND_MAX_FRACTION,
     CONF_ANTI_WRINKLE_ENABLED,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
@@ -132,6 +130,7 @@ from .cycle_detector import (
     CycleDetectorConfig,
     effective_anticrease_finalize_ratio,
     effective_curve_preroll_seconds,
+    terminal_high_for_guards,
 )
 from .profile_store import (
     _ambiguity_from_candidates,
@@ -1075,42 +1074,22 @@ class _DetailSim:
                 tail_power = self.store.profile_tail_power(raw_name)
             except Exception:  # pylint: disable=broad-exception-caught
                 tail_power = None
-            # Element 10 (#399), and the standby-band arm on top of it (register
-            # item 351). Mirrors `manager._terminal_high_for_guards` exactly: the
-            # anti-crease bar is `anti_wrinkle_max_power` and only meaningful
-            # while anti-wrinkle is on, but the standby-band finalise shares the
-            # same predicate and must not be inert just because anti-wrinkle is
-            # off (it defaults off). There the bar is a share of the cycle's own
-            # peak, sent as a QUAD so the detector counts live seconds above the
-            # same number. Kept in step with the manager by
-            # `test_the_playground_mirrors_the_standby_arm`.
+            # Element 10 (#399) and the standby-band arm on top of it (register
+            # item 351). This used to be a hand-copy of the manager's version, and
+            # the two had already drifted in their error handling; it is now the
+            # SAME function, which is the only way this replay can be guaranteed
+            # byte-identical to live on element 10. `end_gate_eval.py` drives the
+            # detector through here, so an arm present in only one of them is
+            # invisible to every measurement made with that harness - exactly how
+            # item 352 first measured as a no-op.
             det = getattr(self, "detector", None)
             if det is not None:
-                try:
-                    if det.config.anti_wrinkle_enabled:
-                        terminal_high = self.store.profile_terminal_high_block(
-                            raw_name, det.config.anti_wrinkle_max_power
-                        )
-                    elif (
-                        det.config.device_type in STANDBY_BAND_FINALIZE_DEVICE_TYPES
-                    ):
-                        _ceiling = (
-                            float(getattr(det, "_cycle_max_power", 0.0) or 0.0)
-                            * STANDBY_BAND_MAX_FRACTION
-                        )
-                        if _ceiling > 0:
-                            _blk = self.store.profile_terminal_high_block(
-                                raw_name, _ceiling
-                            )
-                            if _blk is not None:
-                                terminal_high = (
-                                    float(_blk[0]),
-                                    float(_blk[1]),
-                                    float(_blk[2]),
-                                    _ceiling,
-                                )
-                except Exception:  # pylint: disable=broad-exception-caught
-                    terminal_high = None
+                terminal_high = terminal_high_for_guards(
+                    self.store,
+                    det.config,
+                    getattr(det, "_cycle_max_power", 0.0),
+                    raw_name,
+                )
         # Element 11 (item 297) and element 12 (item 330). Both were missing, so
         # the sim's detector ran without the tail bound Smart Termination uses and
         # without the longest-candidate bar the ENDING gate uses - i.e. the replay

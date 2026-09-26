@@ -205,11 +205,33 @@ def test_the_spin_guard_holds_on_a_plateau_and_releases_on_the_spin() -> None:
 def test_the_playground_mirrors_the_standby_arm() -> None:
     """`end_gate_eval.py` drives the detector through the Playground, so an arm
     that exists only in the manager is invisible to every measurement made with
-    it - which is exactly how this change first measured as a no-op."""
-    from pathlib import Path
+    it - which is exactly how this change first measured as a no-op.
 
-    root = Path(__file__).resolve().parents[1] / "custom_components" / "ha_washdata"
-    pg = (root / "playground.py").read_text()
-    assert "STANDBY_BAND_FINALIZE_DEVICE_TYPES" in pg
-    assert "STANDBY_BAND_MAX_FRACTION" in pg
-    assert "_cycle_max_power" in pg
+    Round 31 turned the two hand-copies into ONE shared function, so this no
+    longer checks that two implementations look alike (it cannot: there is one).
+    It checks that both tuple builders route through it, and that nobody has
+    quietly reintroduced a second copy.
+
+    The previous form of this test asserted three constant names appeared in
+    `playground.py`, and after the extraction it still passed - on imports that
+    had become dead. An assertion that survives the thing it guards being deleted
+    is not guarding it."""
+    import inspect
+
+    from custom_components.ha_washdata import manager as mgr_mod
+    from custom_components.ha_washdata import playground as pg_mod
+    from custom_components.ha_washdata.cycle_detector import terminal_high_for_guards
+
+    assert callable(terminal_high_for_guards)
+
+    pg_src = inspect.getsource(pg_mod._DetailSim._matcher)
+    mgr_src = inspect.getsource(mgr_mod.WashDataManager._terminal_high_for_guards)
+    assert "terminal_high_for_guards(" in pg_src
+    assert "terminal_high_for_guards(" in mgr_src
+
+    # No second implementation: the selection logic must exist in exactly one place.
+    for mod in (pg_mod, mgr_mod):
+        src = inspect.getsource(mod)
+        assert "STANDBY_BAND_MAX_FRACTION" not in src.replace(
+            "same `STANDBY_BAND_MAX_FRACTION` the plateau test uses", ""
+        ), f"{mod.__name__} recomputes the standby ceiling instead of sharing it"

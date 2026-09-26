@@ -433,3 +433,106 @@ async def test_a_resolved_device_type_still_creates_the_phase() -> None:
     manager.profile_store.async_create_custom_phase.assert_awaited_once()
     assert manager.profile_store.async_create_custom_phase.await_args[0][0] == "dishwasher"
     connection.send_error.assert_not_called()
+
+
+# --------------------------------------------------------------------------
+# round 31: the presence flush dismissed the reminder it had just delivered
+# --------------------------------------------------------------------------
+def _flush_mgr(pending):
+    """A manager stub carrying only what `_flush_pending_notifications` touches,
+    recording the ORDER of deliveries and tag clears."""
+    from custom_components.ha_washdata.manager import WashDataManager
+
+    m = WashDataManager.__new__(WashDataManager)
+    m._pending_notifications = list(pending)
+    m._live_activity_started = False
+    m._live_waiting_notification_sent = False
+    m._live_notification_sent_count = 0
+    m._last_live_notification_time = None
+    m._lifecycle_tag = "tag_lifecycle"
+    m.log: list = []
+
+    def _dispatch(message, **kw):
+        m.log.append(("deliver", kw.get("event_type")))
+        return True
+
+    def _clear(tag):
+        m.log.append(("clear", tag))
+
+    m._dispatch_notification = _dispatch
+    m._send_tag_clear = _clear
+    return m
+
+
+def test_a_queued_reminder_is_not_dismissed_by_the_live_handover() -> None:
+    """A deferred LIVE entry replaces earlier live ones and is appended LAST, so a
+    pre_complete reminder queued earlier sits ahead of it. Flushed in order, the
+    reminder was delivered and then cleared a moment later by the #446 handover -
+    and it rides `_lifecycle_tag` at priority high, i.e. the card worth having."""
+    m = _flush_mgr([
+        {"message": "nearly done", "event_type": "pre_complete"},
+        {"message": "live", "event_type": "cycle_live", "extra_vars": {"progress": 80}},
+    ])
+
+    m._flush_pending_notifications(None, None)
+
+    clear_at = next(i for i, e in enumerate(m.log) if e[0] == "clear")
+    deliver_at = next(i for i, e in enumerate(m.log) if e == ("deliver", "pre_complete"))
+    assert clear_at < deliver_at, (
+        "the lifecycle clear must happen before the reminder is delivered, "
+        f"got {m.log}"
+    )
+    assert m._live_activity_started is True
+
+
+def test_a_queued_start_card_is_dropped_rather_than_delivered_then_cleared() -> None:
+    """#446's point is one entry, not a stale 'cycle started' beside the live one."""
+    m = _flush_mgr([
+        {"message": "started", "event_type": "cycle_start"},
+        {"message": "live", "event_type": "cycle_live", "extra_vars": {"progress": 10}},
+    ])
+
+    m._flush_pending_notifications(None, None)
+
+    assert ("deliver", "cycle_start") not in m.log
+    assert ("deliver", "cycle_live") in m.log
+
+
+def test_no_live_entry_means_no_handover_and_nothing_dropped() -> None:
+    """Without a live entry there is no activity to hand over to, so a queued
+    start card and reminder must both still arrive."""
+    m = _flush_mgr([
+        {"message": "started", "event_type": "cycle_start"},
+        {"message": "nearly done", "event_type": "pre_complete"},
+    ])
+
+    m._flush_pending_notifications(None, None)
+
+    assert [e for e in m.log if e[0] == "clear"] == []
+    assert ("deliver", "cycle_start") in m.log
+    assert ("deliver", "pre_complete") in m.log
+    assert m._live_activity_started is False
+
+
+def test_an_already_started_activity_does_not_hand_over_again() -> None:
+    m = _flush_mgr([
+        {"message": "live", "event_type": "cycle_live", "extra_vars": {"progress": 50}},
+    ])
+    m._live_activity_started = True
+
+    m._flush_pending_notifications(None, None)
+
+    assert [e for e in m.log if e[0] == "clear"] == []
+
+
+def test_the_shutdown_docstring_no_longer_claims_both_tags_are_cleared() -> None:
+    """Round 25 gated the lifecycle clear on `_CYCLE_IN_PROGRESS_STATES` because it
+    carries the FINISHED alert. The docstring still said both tags go outright,
+    which is the sentence a maintainer would trust when undoing the gate."""
+    import inspect
+
+    from custom_components.ha_washdata.manager import WashDataManager
+
+    doc = inspect.getdoc(WashDataManager._clear_live_progress_notification) or ""
+    assert "so both tags are cleared outright" not in doc
+    assert "_CYCLE_IN_PROGRESS_STATES" in doc
