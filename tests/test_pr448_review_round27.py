@@ -27,7 +27,7 @@ the ETA and Smart Termination until the user next restarted Home Assistant.
 """
 from __future__ import annotations
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -285,3 +285,151 @@ def test_a_normal_outlier_still_ranks_by_distance_from_one() -> None:
     out = [a for a in st.compute_profile_advisories() if a["code"] == "duration_outlier"]
 
     assert out and out[0]["message_params"]["ratio"] == "0.1"
+
+
+# --------------------------------------------------------------------------
+# round 30: a mid-cycle settings save re-ran the once-per-cycle handover
+# --------------------------------------------------------------------------
+def _live_mgr():
+    """A manager stub carrying only the live-notification flags this touches."""
+    from unittest.mock import MagicMock as _MM
+
+    from custom_components.ha_washdata.manager import WashDataManager
+
+    m = WashDataManager.__new__(WashDataManager)
+    m._live_notification_sent_count = 7
+    m._live_notification_cap = 12
+    m._last_live_notification_time = object()
+    m._live_waiting_notification_sent = True
+    m._live_chronometer_overrun_sent = True
+    m._live_activity_started = True
+    m._lifecycle_tag = "tag_lifecycle"
+    m._notify_live_sticky = False
+    m._notify_live_silent = True
+    m._send_tag_clear = _MM()
+    return m
+
+
+def test_a_settings_save_does_not_re_run_the_lifecycle_handover() -> None:
+    """`async_reload_config` resets live state mid-cycle when the user saves any
+    option. Clearing `_live_activity_started` there made the next live tick look
+    like the first of a new cycle, so `_record_live_activity_started` re-ran the
+    #446 handover and cleared `_lifecycle_tag` - the tag the pre-completion
+    reminder rides at priority high."""
+    m = _live_mgr()
+
+    m._reset_live_notification_state(keep_activity_started=True)
+    m._record_live_activity_started()
+
+    assert m._live_activity_started is True
+    m._send_tag_clear.assert_not_called()
+    # The counters it exists to reset are still reset.
+    assert m._live_notification_sent_count == 0
+    assert m._live_waiting_notification_sent is False
+
+
+def test_a_cycle_boundary_still_resets_the_flag() -> None:
+    """Cycle start/end must keep resetting it, or the handover never runs again."""
+    m = _live_mgr()
+
+    m._reset_live_notification_state()
+
+    assert m._live_activity_started is False
+    m._record_live_activity_started()
+    m._send_tag_clear.assert_called_once_with("tag_lifecycle")
+
+
+def test_preserving_cannot_fake_a_started_activity() -> None:
+    """A reload that ENABLES live notifications mid-cycle must still hand over on
+    the first real tick: the flag is only ever kept at the value it already had."""
+    m = _live_mgr()
+    m._live_activity_started = False
+
+    m._reset_live_notification_state(keep_activity_started=True)
+
+    assert m._live_activity_started is False
+
+
+def test_a_silent_live_update_stays_silent_across_a_reload() -> None:
+    """`_apply_live_notification_prefs` gates `silent`/`push` on the same flag, so
+    losing it made the next tick alert audibly with notify_live_silent on (#417)."""
+    m = _live_mgr()
+
+    m._reset_live_notification_state(keep_activity_started=True)
+    extra: dict = {}
+    m._apply_live_notification_prefs(extra)
+
+    assert extra.get("silent") is True
+    assert extra.get("push") == {"interruption-level": "passive"}
+
+
+def test_the_reload_path_actually_passes_the_flag() -> None:
+    """The tests above pin the MECHANISM and all pass with the call site reverted,
+    which would pin nothing. `async_reload_config` needs a fully built manager,
+    a config entry and a live detector to reach, so the call site is asserted on
+    source - the same pattern the other hard-to-reach call sites here use.
+
+    The complement matters too: every OTHER reset is a cycle boundary and must
+    keep resetting the flag, so exactly one call site may carry the keyword.
+    """
+    import inspect
+
+    from custom_components.ha_washdata.manager import WashDataManager
+
+    reload_src = inspect.getsource(WashDataManager.async_reload_config)
+    assert "_reset_live_notification_state(keep_activity_started=True)" in reload_src
+
+    whole = inspect.getsource(inspect.getmodule(WashDataManager))
+    assert whole.count("_reset_live_notification_state(keep_activity_started=True)") == 1
+
+
+# --------------------------------------------------------------------------
+# round 30: a phase stored under an empty scope is invisible AND unrepeatable
+# --------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_an_unresolved_device_type_is_refused_not_stored() -> None:
+    """`manager.device_type` reads `options.get(CONF_DEVICE_TYPE, ...)`, and `.get`
+    returns a persisted "" or None verbatim rather than the default - the #389
+    class `strip_null_options` exists for. Storing under an empty scope is the
+    worst outcome available: `list_phase_catalog` never lists it, so the phase is
+    invisible, yet it still trips the duplicate check on the next attempt."""
+    from unittest.mock import AsyncMock, MagicMock
+
+    from custom_components.ha_washdata import ws_api
+
+    manager = MagicMock()
+    manager.device_type = ""
+    manager.profile_store.async_create_custom_phase = AsyncMock()
+    hass = MagicMock()
+    connection = MagicMock()
+    msg = {"id": 1, "entry_id": "e1", "device_type": "", "name": "Soak", "description": ""}
+
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        # Wrapped by @async_response; __wrapped__ is the coroutine itself.
+        await ws_api.ws_create_phase.__wrapped__(hass, connection, msg)
+
+    manager.profile_store.async_create_custom_phase.assert_not_called()
+    assert connection.send_error.call_args[0][1] == "invalid_device_type"
+
+
+@pytest.mark.asyncio
+async def test_a_resolved_device_type_still_creates_the_phase() -> None:
+    """The guard must not block the ordinary path."""
+    from unittest.mock import AsyncMock, MagicMock
+
+    from custom_components.ha_washdata import ws_api
+
+    manager = MagicMock()
+    manager.device_type = "dishwasher"
+    manager.profile_store.async_create_custom_phase = AsyncMock()
+    hass = MagicMock()
+    connection = MagicMock()
+    msg = {"id": 1, "entry_id": "e1", "device_type": "", "name": "Soak", "description": ""}
+
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        # Wrapped by @async_response; __wrapped__ is the coroutine itself.
+        await ws_api.ws_create_phase.__wrapped__(hass, connection, msg)
+
+    manager.profile_store.async_create_custom_phase.assert_awaited_once()
+    assert manager.profile_store.async_create_custom_phase.await_args[0][0] == "dishwasher"
+    connection.send_error.assert_not_called()

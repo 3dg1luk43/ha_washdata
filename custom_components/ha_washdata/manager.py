@@ -3097,7 +3097,9 @@ class WashDataManager:
         # user doesn't have to wait for the next power sensor poll.
         if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
             if self._notify_live_services or self._notify_actions:
-                self._reset_live_notification_state()
+                # Counters and timers only: a settings save is not a cycle
+                # boundary, so the live activity must stay "already started".
+                self._reset_live_notification_state(keep_activity_started=True)
                 self._check_live_progress_notification()
 
         # Trigger entity updates to reflect any changes
@@ -7815,14 +7817,40 @@ class WashDataManager:
         # Proportional threshold (7/10 => 0.7)
         return (up_count / total_intervals) >= 0.70
 
-    def _reset_live_notification_state(self) -> None:
-        """Reset per-cycle live notification counters and timers."""
+    def _reset_live_notification_state(
+        self, *, keep_activity_started: bool = False
+    ) -> None:
+        """Reset per-cycle live notification counters and timers.
+
+        ``keep_activity_started`` exists for the single caller that is NOT a cycle
+        boundary. Every other call sites here is one - cycle start, cycle end, and
+        the live-progress clear - so resetting the flag is exactly right for them.
+        `async_reload_config` is different: it re-arms live notifications MID-cycle
+        when the user saves any option, and clearing the flag there makes the next
+        live tick look like the first of a new cycle. Three things follow, all
+        wrong, and none of them visible from this function alone:
+
+        * `_record_live_activity_started` re-runs the #446 handover, which
+          `_send_tag_clear`s `_lifecycle_tag` - and the pre-completion reminder
+          rides that same tag at `priority: high`, so an already-delivered
+          reminder is dismissed off the user's phone.
+        * `_apply_live_notification_prefs` gates `silent` / `push` on this flag, so
+          the next live update alerts audibly even with `notify_live_silent` on:
+          #417 re-entering through the reload door.
+        * the handover is a once-per-cycle event by design, and a settings save
+          does not start a cycle.
+
+        Preserving is safe in both directions: the flag is only ever kept at the
+        value it already had, so a reload that ENABLES live notifications mid-cycle
+        still leaves it False and the handover still runs on the first real tick.
+        """
         self._live_notification_sent_count = 0
         self._live_notification_cap = 0
         self._last_live_notification_time = None
         self._live_waiting_notification_sent = False
         self._live_chronometer_overrun_sent = False
-        self._live_activity_started = False
+        if not keep_activity_started:
+            self._live_activity_started = False
 
     @staticmethod
     def _is_mobile_notify_service(notify_service: str | None) -> bool:

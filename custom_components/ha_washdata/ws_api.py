@@ -2920,9 +2920,26 @@ async def ws_create_phase(
     # ``entry.data`` used to send the ``'washing_machine'`` fallback here, so the
     # phase was stored under a scope the catalog never lists - invisible, yet
     # still tripping the duplicate check on the next attempt.
-    device_type = str(msg.get("device_type") or "").strip() or getattr(
-        manager, "device_type", ""
-    )
+    device_type = str(msg.get("device_type") or "").strip() or str(
+        getattr(manager, "device_type", "") or ""
+    ).strip()
+    # ...and refuse rather than store under an empty scope. `manager.device_type`
+    # reads `options.get(CONF_DEVICE_TYPE, data.get(..., DEFAULT))`, and `.get`
+    # hands back a persisted empty string or null verbatim instead of the default
+    # - the #389 class that `strip_null_options` exists for. An empty scope is the
+    # worst outcome available here, not a harmless one: `list_phase_catalog` never
+    # lists it, so the phase is invisible, yet it still trips the duplicate check
+    # on the next attempt, so the user cannot create it again either. That is
+    # exactly the #450 symptom the comment above describes, reached from the
+    # entry's own options rather than from the panel's payload.
+    if not device_type:
+        connection.send_error(
+            msg["id"],
+            "invalid_device_type",
+            "This entry has no usable device type, so a phase created now could "
+            "not be listed again. Re-save the device settings and retry.",
+        )
+        return
 
     try:
         await manager.profile_store.async_create_custom_phase(
