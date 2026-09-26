@@ -82,10 +82,7 @@ $HACTL restart > /dev/null
 # The restart clears `hass.data`, which re-anchors the unload-confirm replay
 # window (register item 367) - deliberately, since an HA restart IS the moment a
 # retained MQTT value can replay. The first-press check at the end of this script
-# must therefore wait that window out, or it races the boundary: measured, the
-# press landed at almost exactly 120 s and was correctly ignored, which reads as
-# a failure when it is the guard working.
-RESTART_AT=$(date +%s)
+# waits that window out explicitly rather than hoping the cycle work covers it.
 
 # Seed the button AFTER the restart, and before the cycle. Two reasons, and the
 # first one cost a run: a state pushed through the REST API is not restored
@@ -152,8 +149,6 @@ check "Mark Unloaded goes unavailable once nothing is waiting" \
 # restores and writes entity state, which a MagicMock cannot reproduce.
 echo
 echo "== the first ever press of a fresh button (unknown -> timestamp)"
-# Wait out the replay window measured from the restart above, sleeping only the
-# remainder - the cycle work in between usually covers most of it.
 REPLAY_WINDOW=$($PY - <<'PYW'
 import pathlib, re
 src = pathlib.Path("../../custom_components/ha_washdata/const.py").read_text()
@@ -161,13 +156,14 @@ m = re.search(r"^UNLOAD_CONFIRM_REPLAY_GRACE_S\s*=\s*([0-9.]+)", src, re.M)
 print(int(float(m.group(1))) + 5 if m else 125)
 PYW
 )
-REMAIN=$(( REPLAY_WINDOW - ( $(date +%s) - RESTART_AT ) ))
-if [ "$REMAIN" -gt 0 ]; then
-  echo "  [ ..  ] waiting ${REMAIN}s for the replay window to close"
-  sleep "$REMAIN"
-fi
 $HACTL set "$SENSOR" 0 > /dev/null
+# Sending the button to `unknown` is itself a drop-out, and a drop-out RE-ARMS the
+# window (register item 368) - so the wait below is measured from HERE, not from
+# the restart. Measuring it from the restart is what the box caught: the cycle in
+# between was not long enough, the press landed inside the re-armed window, and it
+# was correctly ignored.
 $HACTL set-state "$BUTTON" unknown device_class=button > /dev/null
+UNKNOWN_AT=$(date +%s)
 sleep 2
 # Re-enter Clean: run another short cycle on device A.
 for w in 250 300 320 300; do $HACTL set "$SENSOR" "$w"; sleep 3; done
@@ -178,6 +174,11 @@ for _ in $(seq 1 40); do
   sleep 3
 done
 if [ "$SA" = "clean" ]; then
+  REMAIN=$(( REPLAY_WINDOW - ( $(date +%s) - UNKNOWN_AT ) ))
+  if [ "$REMAIN" -gt 0 ]; then
+    echo "  [ ..  ] waiting ${REMAIN}s for the re-armed replay window to close"
+    sleep "$REMAIN"
+  fi
   $HACTL set-state "$BUTTON" "2026-09-24T12:00:00+00:00" device_class=button > /dev/null
   sleep 3
   check "a first-ever press from unknown clears Clean" \

@@ -307,9 +307,10 @@ from .recorder import CycleRecorder
 from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
 
-# Process-wide anchor for the unload-confirm replay window (register item 367).
-# Lives in `hass.data` so it survives entry reloads and resets on an HA restart.
-_UNLOAD_CONFIRM_ANCHOR_KEY = f"{DOMAIN}_unload_confirm_anchor"
+# Per-entity anchors for the unload-confirm replay window (register items 367, 368).
+# `{entity_id: datetime}` in `hass.data`, so it survives entry reloads, resets on an
+# HA restart, and never carries over between different configured entities.
+_UNLOAD_CONFIRM_ANCHOR_KEY = f"{DOMAIN}_unload_confirm_anchors"
 from .options_utils import option_float, option_int
 from .time_utils import power_data_to_offsets
 from . import analysis
@@ -3314,16 +3315,26 @@ class WashDataManager:
         self._remove_unload_confirm_listener = async_track_state_change_event(
             self.hass, [entity_id], self._handle_unload_confirm_change
         )
-        # Anchor the replay window ONCE PER HA PROCESS, not per subscribe. A
-        # settings save is a full entry reload here (a new manager is built), and
-        # re-arming on it would cost the user a press for two minutes after every
-        # save - the same lost-press bug this window exists beside, just narrower.
-        # An entry reload cannot produce a retained replay anyway: MQTT is not
-        # reloaded with us, so the entity keeps its state and no `unknown -> value`
-        # transition occurs. The risk is tied to MQTT RECONNECT, which tracks HA
-        # start. `hass.data` is cleared on restart and survives reloads, so
-        # `setdefault` gives exactly "when this HA process first subscribed".
-        self.hass.data.setdefault(_UNLOAD_CONFIRM_ANCHOR_KEY, dt_util.now())
+        # Anchor the replay window PER ENTITY, in `hass.data` so it survives entry
+        # reloads and resets on an HA restart.
+        #
+        # Not per subscribe: a settings save is a full entry reload here (the log
+        # shows a fresh `Manager init`), and re-arming on it would cost the user a
+        # press for two minutes after every save - the same lost-press bug this
+        # window exists beside, just narrower. A reload cannot produce a replay
+        # anyway, because MQTT is not reloaded with us and the entity keeps its
+        # state, so no `unknown -> value` transition occurs.
+        #
+        # But not per PROCESS either: keyed on the entity, a newly CONFIGURED
+        # confirmation entity gets its own window instead of inheriting an expired
+        # one from whatever was configured before it. Without that, pointing the
+        # option at a fresh `unknown` entity hours into a session left it with no
+        # protection at all, and its first retained value would clear a waiting
+        # Clean state. Old keys are left behind deliberately - the dict is bounded
+        # by the distinct entities a user has ever chosen here.
+        anchors = self.hass.data.setdefault(_UNLOAD_CONFIRM_ANCHOR_KEY, {})
+        if isinstance(anchors, dict):
+            anchors.setdefault(entity_id, dt_util.now())
 
     async def _setup_price_listener(self) -> None:
         """Subscribe to the dynamic energy price entity (#426).
@@ -3521,7 +3532,17 @@ class WashDataManager:
         old_val = old_state.state
         if new_val == old_val:
             return
-        if new_val in ("unavailable", "unknown", "off", ""):
+        if new_val in ("unavailable", "unknown"):
+            # Going away RE-ARMS the window. The startup anchor alone only covers
+            # the reconnect that follows an HA restart; a broker restart hours
+            # later replays retained values just the same, and the entity passes
+            # through `unavailable`/`unknown` on its way out. Re-anchoring here
+            # means the value that comes back is judged as the replay it may well
+            # be. Costs nothing on the press path: a value arriving straight after
+            # `unavailable` is excluded outright either way.
+            self._rearm_unload_confirm_window()
+            return
+        if new_val in ("off", ""):
             return
         if old_val == "unavailable":
             return
@@ -3536,17 +3557,33 @@ class WashDataManager:
 
         self.mark_unloaded(f"{self._unload_confirm_entity} -> {new_val}")
 
-    def _in_unload_confirm_replay_window(self) -> bool:
-        """Whether this HA process started too recently to trust ``unknown -> value``.
+    def _rearm_unload_confirm_window(self) -> None:
+        """Restart the replay window for the configured entity.
 
-        Measured from the first subscription in this process (see the anchor at
-        `_setup_unload_confirm_listener`), so it survives entry reloads and resets
-        only on an HA restart - which is when a retained MQTT value can replay.
+        Called when it drops to ``unavailable``/``unknown``, because whatever it
+        reports on the way back may be a retained value rather than a press.
+        """
+        entity_id = self._unload_confirm_entity
+        if not entity_id:
+            return
+        anchors = self.hass.data.setdefault(_UNLOAD_CONFIRM_ANCHOR_KEY, {})
+        if isinstance(anchors, dict):
+            anchors[entity_id] = dt_util.now()
+
+    def _in_unload_confirm_replay_window(self) -> bool:
+        """Whether this entity came back too recently to trust ``unknown -> value``.
+
+        Measured from the entity's own anchor: set when this process first
+        subscribed to it, and restarted every time it drops out (see
+        `_rearm_unload_confirm_window`). Survives entry reloads, resets on an HA
+        restart, and does not carry over between different configured entities.
 
         Fails CLOSED (True) if the anchor is missing or unusable: "we do not know
-        when this process started" carries the same risk as "it just started".
+        when this entity came back" carries the same risk as "it just did".
         """
-        anchor = self.hass.data.get(_UNLOAD_CONFIRM_ANCHOR_KEY)
+        entity_id = self._unload_confirm_entity
+        anchors = self.hass.data.get(_UNLOAD_CONFIRM_ANCHOR_KEY)
+        anchor = anchors.get(entity_id) if isinstance(anchors, dict) else None
         if not isinstance(anchor, datetime):
             return True
         try:
