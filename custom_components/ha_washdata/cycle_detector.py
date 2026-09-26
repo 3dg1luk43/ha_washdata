@@ -2903,7 +2903,9 @@ class CycleDetector:
         # returned False immediately and none of the above happened. Measured on
         # the 273-cycle replay corpus: the band fired 14 times, 11 with the guard
         # inert, and 6 of those 11 had a reading above `min_power` still ahead,
-        # i.e. would split. `manager._terminal_high_for_guards` now arms it for
+        # i.e. would split. `terminal_high_for_guards` (module level in this file,
+        # shared by the manager's live match tuple and the Playground's sim tuple
+        # since round 31 - it used to be two hand-copies) now arms it for
         # `STANDBY_BAND_FINALIZE_DEVICE_TYPES` against a share of the cycle's own
         # peak - the same `STANDBY_BAND_MAX_FRACTION` used below, so the rule is
         # "wait while the profile still owes a block above the plateau you are

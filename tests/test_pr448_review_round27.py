@@ -485,8 +485,18 @@ def test_a_queued_reminder_is_not_dismissed_by_the_live_handover() -> None:
     assert m._live_activity_started is True
 
 
-def test_a_queued_start_card_is_dropped_rather_than_delivered_then_cleared() -> None:
-    """#446's point is one entry, not a stale 'cycle started' beside the live one."""
+def test_a_queued_start_card_is_delivered_before_the_clear_not_dropped() -> None:
+    """Round 31 DROPPED queued START entries, which was a regression round 32
+    caught: "superseded by the live activity" is true only of a mobile target that
+    also gets the live card. `_send_tag_clear` only ever addresses
+    `_notify_live_services` (and returns early when it is empty), while START has
+    its own `_notify_start_services` and may be a telegram or e-mail target the
+    clear can never reach - and a notification ACTION fires on delivery, so an
+    automation branching on `event_type == "start"` needs the dispatch to happen.
+
+    Delivering START ahead of the clear gets every case right at once: a mobile
+    start card is swept up by the handover exactly as before, and every other
+    target keeps its notification."""
     m = _flush_mgr([
         {"message": "started", "event_type": "cycle_start"},
         {"message": "live", "event_type": "cycle_live", "extra_vars": {"progress": 10}},
@@ -494,8 +504,25 @@ def test_a_queued_start_card_is_dropped_rather_than_delivered_then_cleared() -> 
 
     m._flush_pending_notifications(None, None)
 
-    assert ("deliver", "cycle_start") not in m.log
+    start_at = m.log.index(("deliver", "cycle_start"))
+    clear_at = next(i for i, e in enumerate(m.log) if e[0] == "clear")
+    assert start_at < clear_at, f"start must be delivered before the clear, got {m.log}"
     assert ("deliver", "cycle_live") in m.log
+
+
+def test_the_reminder_still_survives_alongside_a_start_card() -> None:
+    """Both fixes at once: START ahead of the clear, reminder after it."""
+    m = _flush_mgr([
+        {"message": "started", "event_type": "cycle_start"},
+        {"message": "nearly done", "event_type": "pre_complete"},
+        {"message": "live", "event_type": "cycle_live", "extra_vars": {"progress": 90}},
+    ])
+
+    m._flush_pending_notifications(None, None)
+
+    clear_at = next(i for i, e in enumerate(m.log) if e[0] == "clear")
+    assert m.log.index(("deliver", "cycle_start")) < clear_at
+    assert m.log.index(("deliver", "pre_complete")) > clear_at
 
 
 def test_no_live_entry_means_no_handover_and_nothing_dropped() -> None:

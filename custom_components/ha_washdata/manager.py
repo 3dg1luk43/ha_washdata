@@ -7656,22 +7656,8 @@ class WashDataManager:
         # long before any reminder exists. Only presence deferral can put the two
         # in this order.
         handover_done = False
-        if not self._live_activity_started and any(
-            entry.get("event_type") == NOTIFY_EVENT_LIVE for entry in pending
-        ):
-            self._hand_over_lifecycle_to_live_activity()
-            handover_done = True
-            # A queued START card is superseded by the activity about to render,
-            # and delivering it after the clear above is what the handover exists
-            # to prevent (#446: one entry, not a stale "cycle started" beside the
-            # live one). Dropped rather than delivered-then-cleared.
-            pending = [
-                entry
-                for entry in pending
-                if entry.get("event_type") != NOTIFY_EVENT_START
-            ]
 
-        for entry in pending:
+        def _deliver(entry: dict[str, Any]) -> None:
             sent = self._dispatch_notification(
                 entry["message"],
                 title=entry.get("title"),
@@ -7695,12 +7681,40 @@ class WashDataManager:
                 # paths send, so the phone has a live activity either way and the
                 # cycle-end teardown has to know about it (#446). Recorded only
                 # once the dispatch actually SENT, which is why the flag is not set
-                # next to the hoisted handover above: a failed delivery would
-                # otherwise claim an activity that is not on the phone.
+                # next to the hoisted handover: a failed delivery would otherwise
+                # claim an activity that is not on the phone.
                 if handover_done:
                     self._live_activity_started = True
                 else:
                     self._record_live_activity_started()
+
+        if not self._live_activity_started and any(
+            entry.get("event_type") == NOTIFY_EVENT_LIVE for entry in pending
+        ):
+            # START entries go out FIRST, *before* the clear, and are not dropped.
+            # "Superseded by the live activity" is true only of a mobile target
+            # that also receives the live card: `_send_tag_clear` returns early
+            # when `_notify_live_services` is empty and only ever addresses that
+            # list, while START has its own `_notify_start_services` and may be a
+            # telegram or e-mail target the clear can never reach - and a
+            # notification ACTION fires on delivery, so an automation branching on
+            # `event_type == "start"` needs the dispatch to happen at all.
+            # Delivering them ahead of the clear gets every case right at once: a
+            # mobile start card is delivered and then swept up by the handover
+            # exactly as it was before, and every other target simply keeps its
+            # notification.
+            for entry in [
+                e for e in pending if e.get("event_type") == NOTIFY_EVENT_START
+            ]:
+                _deliver(entry)
+            pending = [
+                e for e in pending if e.get("event_type") != NOTIFY_EVENT_START
+            ]
+            self._hand_over_lifecycle_to_live_activity()
+            handover_done = True
+
+        for entry in pending:
+            _deliver(entry)
 
     def _handle_noise_cycle(self, max_power: float) -> None:
         """Handle a detected noise cycle."""
