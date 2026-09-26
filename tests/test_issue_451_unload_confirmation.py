@@ -387,9 +387,9 @@ def _armed(mgr: WashDataManager, seconds_ago: float) -> None:
 
     from custom_components.ha_washdata.manager import _UNLOAD_CONFIRM_ANCHOR_KEY
 
-    mgr.hass.data[_UNLOAD_CONFIRM_ANCHOR_KEY] = dt_util.now() - timedelta(
-        seconds=seconds_ago
-    )
+    mgr.hass.data[_UNLOAD_CONFIRM_ANCHOR_KEY] = {
+        mgr._unload_confirm_entity: dt_util.now() - timedelta(seconds=seconds_ago)
+    }
 
 
 @pytest.mark.asyncio
@@ -480,7 +480,7 @@ async def test_subscribing_records_the_arm_time(hass: HomeAssistant) -> None:
 
     await mgr._setup_unload_confirm_listener()
 
-    assert mgr.hass.data.get(_UNLOAD_CONFIRM_ANCHOR_KEY) is not None
+    assert mgr.hass.data.get(_UNLOAD_CONFIRM_ANCHOR_KEY, {}).get("event.button")
     assert mgr._in_unload_confirm_replay_window() is True
 
 
@@ -495,7 +495,7 @@ async def test_no_configured_entity_leaves_the_arm_time_clear(
 
     await mgr._setup_unload_confirm_listener()
 
-    assert mgr.hass.data.get(_UNLOAD_CONFIRM_ANCHOR_KEY) is None
+    assert not mgr.hass.data.get(_UNLOAD_CONFIRM_ANCHOR_KEY, {})
 
 
 @pytest.mark.asyncio
@@ -514,7 +514,7 @@ async def test_a_settings_save_does_not_re_arm_the_window(hass: HomeAssistant) -
 
     mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
     _armed(mgr, seconds_ago=UNLOAD_CONFIRM_REPLAY_GRACE_S + 60)
-    anchor_before = hass.data[_UNLOAD_CONFIRM_ANCHOR_KEY]
+    anchor_before = dict(hass.data[_UNLOAD_CONFIRM_ANCHOR_KEY])
 
     # A settings save rebuilds the manager and re-subscribes.
     mgr2 = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
@@ -526,3 +526,81 @@ async def test_a_settings_save_does_not_re_arm_the_window(hass: HomeAssistant) -
     _put_in_clean_state(mgr2)
     mgr2._handle_unload_confirm_change(_event("2026-05-01T09:00:00+00:00", "unknown"))
     assert mgr2.is_clean_state is False, "a press after a settings save must count"
+
+
+@pytest.mark.asyncio
+async def test_a_newly_configured_entity_gets_its_own_window(
+    hass: HomeAssistant,
+) -> None:
+    """Register item 368. A process-wide anchor let a freshly CONFIGURED entity
+    inherit an expired window from whatever was configured before it, so pointing
+    the option at a fresh `unknown` entity hours into a session left it with no
+    protection at all - its first retained value would clear a waiting Clean
+    state. Anchors are keyed by entity."""
+    from custom_components.ha_washdata.manager import _UNLOAD_CONFIRM_ANCHOR_KEY
+
+    old_mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.old_button"})
+    _armed(old_mgr, seconds_ago=UNLOAD_CONFIRM_REPLAY_GRACE_S + 3600)
+
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.new_button"})
+    await mgr._setup_unload_confirm_listener()
+
+    assert mgr._in_unload_confirm_replay_window() is True, (
+        "the new entity must not inherit the old one's expired window"
+    )
+    anchors = hass.data[_UNLOAD_CONFIRM_ANCHOR_KEY]
+    assert anchors["event.old_button"] != anchors["event.new_button"]
+
+    _put_in_clean_state(mgr)
+    mgr._handle_unload_confirm_change(
+        _event("2026-05-01T09:00:00+00:00", "unknown", entity="event.new_button")
+    )
+    assert mgr.is_clean_state is True
+
+
+@pytest.mark.asyncio
+async def test_dropping_out_re_arms_the_window(hass: HomeAssistant) -> None:
+    """Register item 368. The startup anchor only covers the reconnect that
+    follows an HA restart; a broker restart hours later replays retained values
+    just the same. The entity passes through `unavailable`/`unknown` on its way
+    out, so that is where the window restarts."""
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
+    _armed(mgr, seconds_ago=UNLOAD_CONFIRM_REPLAY_GRACE_S + 3600)
+    assert mgr._in_unload_confirm_replay_window() is False
+
+    # The broker drops: the entity goes away.
+    mgr._handle_unload_confirm_change(_event("unknown", "2026-05-01T09:00:00+00:00"))
+
+    assert mgr._in_unload_confirm_replay_window() is True
+
+    # ...and the retained value that comes back is not taken as a press.
+    _put_in_clean_state(mgr)
+    mgr._handle_unload_confirm_change(_event("2026-05-01T09:00:00+00:00", "unknown"))
+    assert mgr.is_clean_state is True
+
+
+@pytest.mark.asyncio
+async def test_going_unavailable_also_re_arms(hass: HomeAssistant) -> None:
+    """The other way out. Costs nothing on the press path, because a value
+    arriving straight after `unavailable` is excluded outright anyway."""
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "event.button"})
+    _armed(mgr, seconds_ago=UNLOAD_CONFIRM_REPLAY_GRACE_S + 3600)
+
+    mgr._handle_unload_confirm_change(
+        _event("unavailable", "2026-05-01T09:00:00+00:00")
+    )
+
+    assert mgr._in_unload_confirm_replay_window() is True
+
+
+@pytest.mark.asyncio
+async def test_a_release_edge_does_not_re_arm(hass: HomeAssistant) -> None:
+    """Only going AWAY re-arms. An `off`/empty release edge is an ordinary part of
+    a contact or action sensor's cycle, and re-arming on it would swallow the next
+    genuine press for two minutes."""
+    mgr = _make_manager(hass, {CONF_UNLOAD_CONFIRM_ENTITY: "binary_sensor.motion"})
+    _armed(mgr, seconds_ago=UNLOAD_CONFIRM_REPLAY_GRACE_S + 3600)
+
+    mgr._handle_unload_confirm_change(_event("off", "on", entity="binary_sensor.motion"))
+
+    assert mgr._in_unload_confirm_replay_window() is False

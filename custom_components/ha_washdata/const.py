@@ -239,8 +239,9 @@ CONF_UNLOAD_CONFIRM_ENTITY = "unload_confirm_entity"
 CONF_UNLOAD_TRACK_WITHOUT_DOOR = "unload_track_without_door"
 DEFAULT_UNLOAD_TRACK_WITHOUT_DOOR = False
 
-# How long after SUBSCRIBING to the confirmation entity a transition out of
-# `unknown` is still treated as a replay rather than a press (register item 367).
+# How long after the confirmation entity is first seen - or comes back from
+# unavailable/unknown - a transition out of `unknown` is still treated as a replay
+# rather than a press (register items 367, 368).
 #
 # A fresh `event.*` / `button.*` / `input_button.*` sits at `unknown` until it is
 # first pressed, so excluding `unknown -> value` outright swallowed the first ever
@@ -252,8 +253,17 @@ DEFAULT_UNLOAD_TRACK_WITHOUT_DOOR = False
 #
 # Measured against the reference point rather than guessed: the replay lands within
 # seconds of the MQTT connection, and the only cost of the window is a genuine press
-# in the first two minutes after subscribing - which is nearly always harmless,
-# because `mark_unloaded` is a no-op unless a Clean state is actually waiting.
+# in the first two minutes after the entity appears - which is nearly always
+# harmless, because `mark_unloaded` is a no-op unless a Clean state is waiting.
+#
+# **The residual is real and deliberate.** An entity that sits at `unknown` for
+# longer than this window and only then receives its first retained value is
+# indistinguishable from a first press: a generic HA state change carries no
+# "this was retained" marker, and the whole point of the option is that it accepts
+# any entity the user already owns (event, button, input_button, binary_sensor,
+# sensor, switch, scene, tag), most of which are not MQTT and have no reconnection
+# signal to consult. The guards narrow it to that one shape; the cost of being
+# wrong is a cleared unload reminder, never lost data.
 UNLOAD_CONFIRM_REPLAY_GRACE_S = 120.0
 
 # Quiet hours (do-not-disturb window). Both hours 0-23; unset/None (or start==end)
