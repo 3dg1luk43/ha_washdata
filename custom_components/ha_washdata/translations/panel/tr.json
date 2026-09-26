@@ -257,7 +257,8 @@
         "hist_scan": "Döngüleri tara",
         "hist_import_n": "{n} döngüyü içe aktar",
         "hist_goto_cycles": "Döngüleri göster",
-        "save_total_cycles": "Toplamı Kaydet"
+        "save_total_cycles": "Toplamı Kaydet",
+        "clear": "Temizle"
     },
     "note": {
         "off_delay": {
@@ -1672,6 +1673,10 @@
         "unload_track_without_door": {
             "label": "Boşaltmayı Elle Onayla",
             "doc": "Kapı Sensörü Varlığı ve Boşaltma Onay Varlığı bulunmayan bir cihazda boşaltma hatırlatıcısını çalıştırır ve boşaltmayı bunun yerine kendi otomasyonunuzdan onaylarsınız: \"Boşaltıldı Olarak İşaretle\" düğme varlığına basın veya ha_washdata.mark_unloaded servisini çağırın. Bir Kapı Sensörü Varlığı ayarlandığında yok sayılır, çünkü sinyali zaten o sağlar."
+        },
+        "notify_icon_color": {
+            "label": "Bildirim Rengi",
+            "doc": "Bu cihazın bildirimleri için vurgu rengi; böylece çamaşır makinesi, kurutma makinesi ve bulaşık makinesi bir bakışta ayırt edilebilir. Android bildirimi renklendirir; iOS ise simgeyi ve Canlı Etkinlik ilerleme çubuğunu Kilitli ekranda ve Dynamic Island'da renklendirir. Her ikisi de Hex kodunu (ör. #03A9F4) anlar. Platform varsayılanı için boş bırakın."
         }
     },
     "setting_group": {

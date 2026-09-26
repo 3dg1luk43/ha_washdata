@@ -257,7 +257,8 @@
         "hist_scan": "扫描周期",
         "hist_import_n": "导入 {n} 个周期",
         "hist_goto_cycles": "查看这些周期",
-        "save_total_cycles": "保存累计值"
+        "save_total_cycles": "保存累计值",
+        "clear": "清除"
     },
     "note": {
         "off_delay": {
@@ -1672,6 +1673,10 @@
         "unload_track_without_door": {
             "label": "手动确认卸载",
             "doc": "在既没有门传感器实体也没有卸载确认实体的设备上运行卸载提醒，改为通过您自己的自动化来确认卸载：按下 \"标记为已卸载\" 按钮实体，或调用 ha_washdata.mark_unloaded 服务。已设置门传感器实体时将忽略此项，因为它已经提供了该信号。"
+        },
+        "notify_icon_color": {
+            "label": "通知颜色",
+            "doc": "此家电通知使用的强调色，让洗衣机、烘干机和洗碗机一眼就能区分开。Android 会为通知着色；iOS 则为图标以及锁定屏幕和灵动岛上的实时活动进度条着色。十六进制（例如 #03A9F4）两者都支持。留空则使用平台默认值。"
         }
     },
     "setting_group": {

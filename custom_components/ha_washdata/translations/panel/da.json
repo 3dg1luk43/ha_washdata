@@ -257,7 +257,8 @@
     "hist_scan": "Scan efter cyklusser",
     "hist_import_n": "Importér {n} cyklusser",
     "hist_goto_cycles": "Vis mig cyklusserne",
-    "save_total_cycles": "Gem total"
+    "save_total_cycles": "Gem total",
+    "clear": "Ryd"
   },
   "note": {
     "off_delay": {
@@ -1672,6 +1673,10 @@
     "unload_track_without_door": {
       "label": "Bekræft aflæsning manuelt",
       "doc": "Kør aflæsningspåmindelsen på en enhed uden Dørsensorenhed og uden Aflæsningsbekræftelsesenhed, og bekræft i stedet aflæsningen fra din egen automatisering: tryk på knapenheden \"Markér som aflæsset\", eller kald handlingen ha_washdata.mark_unloaded. Ignoreres, når en Dørsensorenhed er angivet, da den allerede leverer signalet."
+    },
+    "notify_icon_color": {
+      "label": "Notifikationsfarve",
+      "doc": "Accentfarve til denne enheds notifikationer, så en vaskemaskine, en tørretumbler og en opvaskemaskine kan skelnes fra hinanden på et øjeblik. Android farver notifikationen; iOS farver ikonet og Liveaktivitetens fremdriftslinje på den låste skærm og i Dynamic Island. Begge forstår hex-værdier (f.eks. #03A9F4). Lad stå tomt for platformens standard."
     }
   },
   "setting_group": {

@@ -257,7 +257,8 @@
     "hist_scan": "Szukaj cykli",
     "hist_import_n": "Importuj cykle: {n}",
     "hist_goto_cycles": "Pokaż cykle",
-    "save_total_cycles": "Zapisz łączną liczbę"
+    "save_total_cycles": "Zapisz łączną liczbę",
+    "clear": "Wyczyść"
   },
   "note": {
     "off_delay": {
@@ -1640,6 +1641,10 @@
     "unload_track_without_door": {
       "label": "Ręczne potwierdzanie rozładunku",
       "doc": "Uruchamia przypomnienie o rozładunku na urządzeniu bez Encji Czujnika Drzwi i bez Encji Potwierdzenia Rozładunku, a rozładunek potwierdzasz z własnej automatyzacji: naciśnij encję przycisku „Oznacz jako rozładowane” lub wywołaj usługę ha_washdata.mark_unloaded. Ignorowane, gdy ustawiona jest Encja Czujnika Drzwi, która już dostarcza ten sygnał."
+    },
+    "notify_icon_color": {
+      "label": "Kolor Powiadomienia",
+      "doc": "Kolor akcentu powiadomień tego urządzenia, aby pralkę, suszarkę i zmywarkę można było odróżnić na pierwszy rzut oka. Android koloruje samo powiadomienie; iOS koloruje ikonę oraz pasek postępu Live Activity na ekranie blokady i w Dynamic Island. Obie platformy rozumieją Hex (np. #03A9F4). Pozostaw puste, aby użyć domyślnego koloru platformy."
     }
   },
   "setting_group": {

@@ -257,7 +257,8 @@
     "hist_scan": "Otsi tsükleid",
     "hist_import_n": "Impordi tsüklid ({n})",
     "hist_goto_cycles": "Näita tsükleid",
-    "save_total_cycles": "Salvesta koguarv"
+    "save_total_cycles": "Salvesta koguarv",
+    "clear": "Tühjenda"
   },
   "note": {
     "off_delay": {
@@ -1672,6 +1673,10 @@
     "unload_track_without_door": {
       "label": "Kinnita Mahalaadimine Käsitsi",
       "doc": "Kasutada mahalaadimise meeldetuletust seadmel, millel pole ei Ukse Anduri Olemit ega Mahalaadimise Kinnituse Olemit, ja kinnitada mahalaadimine oma automaatikast: vajutage nupuolemit „Märgi mahalaadituks“ või kutsuge välja teenus ha_washdata.mark_unloaded. Eiratakse, kui Ukse Anduri Olem on määratud, sest see annab signaali juba ise."
+    },
+    "notify_icon_color": {
+      "label": "Teavituse Värv",
+      "doc": "Rõhuvärv selle seadme teavitustele, et pesumasin, kuivati ja nõudepesumasin oleksid ühe pilguga eristatavad. Android värvib teavituse; iOS värvib ikooni ja Live Activity edenemisriba lukustuskuval ning Dynamic Islandis. Mõlemad mõistavad heksakoodi (nt #03A9F4). Platvormi vaikeseade jaoks jätke tühjaks."
     }
   },
   "setting_group": {

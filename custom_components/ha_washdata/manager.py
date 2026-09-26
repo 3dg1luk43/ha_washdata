@@ -24,6 +24,7 @@ import logging
 import hashlib
 import inspect
 import math
+import re
 import uuid
 import asyncio
 from asyncio import Task
@@ -175,6 +176,7 @@ from .const import (
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
     CONF_NOTIFY_TITLE,
     CONF_NOTIFY_ICON,
+    CONF_NOTIFY_ICON_COLOR,
     CONF_NOTIFY_START_MESSAGE,
     CONF_NOTIFY_FINISH_MESSAGE,
     CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
@@ -326,6 +328,11 @@ _LOGGER = logging.getLogger(__name__)
 # alongside a `tag`, and only on mobile_app targets - see _send_notification_service,
 # which must never deliver it as a visible message.
 _CLEAR_NOTIFICATION_MARKER = "clear_notification"
+
+# A notification accent colour (#454) typed without its leading "#". Matches the
+# three CSS hex forms the companion apps accept (RGB, RRGGBB, AARRGGBB) so the
+# "#" can be added back; anything else is left alone.
+_HEX_COLOR_RE = re.compile(r"[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8}")
 
 # Finish-type notification events that would wake someone and are therefore gated by
 # the quiet-hours (do-not-disturb) window. Live-progress ticks (NOTIFY_EVENT_LIVE)
@@ -7466,6 +7473,7 @@ class WashDataManager:
         data: dict[str, Any] = {}
         if icon:
             data["icon"] = icon
+        icon_color = self._notification_icon_color()
 
         # Live-progress-only payload keys (countdown, progress bar, throttle markers).
         # Live updates are already gated to mobile_app targets by the guard below,
@@ -7518,6 +7526,19 @@ class WashDataManager:
             # ignore the key rather than failing, so there is nothing to gate on.
             if icon and self._is_mobile_notify_service(notify_service):
                 svc_data["notification_icon"] = icon
+
+            # #454: with a washer, a dryer and a dishwasher live at once, every
+            # card on the Lock Screen looks the same. One configured colour maps
+            # to the three keys the companion apps actually read: `color` is the
+            # Android notification accent, `notification_icon_color` tints the iOS
+            # icon glyph, and `progress_bar_color` recolours the iOS Live Activity
+            # bar (it falls back to notification_icon_color, but is set explicitly
+            # so the two stay in step). Mobile-only, same as the icon above; unset
+            # leaves the payload byte-identical to before.
+            if icon_color and self._is_mobile_notify_service(notify_service):
+                svc_data["color"] = icon_color
+                svc_data["notification_icon_color"] = icon_color
+                svc_data["progress_bar_color"] = icon_color
 
             state = (
                 self.hass.states.get(notify_service)
@@ -8035,6 +8056,25 @@ class WashDataManager:
         if configured:
             return "" if configured.lower() == "none" else configured
         return f"/{PANEL_URL_PATH}?device={self.entry_id}"
+
+    def _notification_icon_color(self) -> str | None:
+        """Resolve the per-device notification accent colour (#454).
+
+        Returns ``None`` when unset, which is the shipped default and leaves the
+        payload exactly as it was. A bare hex value is accepted without the leading
+        ``#`` because that is how a user pastes one out of a colour picker; anything
+        else (a CSS colour name, which Android accepts and iOS ignores) is passed
+        through untouched rather than rejected - a colour the companion app does not
+        understand is ignored by the app, so there is nothing to fail on here.
+        """
+        configured = str(
+            self.config_entry.options.get(CONF_NOTIFY_ICON_COLOR) or ""
+        ).strip()
+        if not configured:
+            return None
+        if _HEX_COLOR_RE.fullmatch(configured):
+            return f"#{configured}"
+        return configured
 
     @property
     def _timer_pause_action_id(self) -> str:

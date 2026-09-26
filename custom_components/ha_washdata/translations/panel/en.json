@@ -104,6 +104,7 @@
     "back": "Back",
     "browse_community_setups": "Browse community setups",
     "cancel": "Cancel",
+    "clear": "Clear",
     "clear_debug": "Clear Debug Data",
     "clear_splits": "Clear",
     "close": "Close",
@@ -1468,6 +1469,10 @@
     "notify_icon": {
       "doc": "The small icon shown on the notification (e.g. mdi:washing-machine). Android draws it in the status bar; iOS shows it in place of the app icon, and needs the companion app 2026.8 or newer. Leave blank for the platform default.",
       "label": "Notification Icon"
+    },
+    "notify_icon_color": {
+      "doc": "Accent colour for this appliance's notifications, so a washer, a dryer and a dishwasher are tellable apart at a glance. Android tints the notification; iOS tints the icon and the Live Activity progress bar on the Lock Screen and in the Dynamic Island. Hex (e.g. #03A9F4) is understood by both. Leave blank for the platform default.",
+      "label": "Notification Colour"
     },
     "notify_live_chronometer": {
       "doc": "Show a live-updating countdown timer in the notification (on platforms that support it) instead of a static estimate.",

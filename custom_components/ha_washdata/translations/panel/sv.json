@@ -257,7 +257,8 @@
     "hist_scan": "Sök efter cykler",
     "hist_import_n": "Importera {n} cykler",
     "hist_goto_cycles": "Visa mig cyklerna",
-    "save_total_cycles": "Spara total"
+    "save_total_cycles": "Spara total",
+    "clear": "Rensa"
   },
   "note": {
     "off_delay": {
@@ -1672,6 +1673,10 @@
     "unload_track_without_door": {
       "label": "Bekräfta lossning manuellt",
       "doc": "Kör lossningspåminnelsen på en enhet utan Dörrsensorentitet och utan Lossningsbekräftelse-entitet, och bekräfta lossningen från din egen automation i stället: tryck på knappentiteten \"Markera som lossad\", eller anropa åtgärden ha_washdata.mark_unloaded. Ignoreras när en Dörrsensorentitet är angiven, eftersom den redan ger signalen."
+    },
+    "notify_icon_color": {
+      "label": "Meddelandefärg",
+      "doc": "Accentfärg för den här apparatens aviseringar, så att en tvättmaskin, en torktumlare och en diskmaskin går att skilja åt med en blick. Android färgar aviseringen; iOS färgar ikonen och Liveaktivitetens förloppsindikator på den låsta skärmen och i Dynamic Island. Båda förstår hex-värden (t.ex. #03A9F4). Lämna tomt för plattformens standard."
     }
   },
   "setting_group": {

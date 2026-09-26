@@ -257,7 +257,8 @@
     "hist_scan": "Søk etter sykluser",
     "hist_import_n": "Importer {n} sykluser",
     "hist_goto_cycles": "Vis meg syklusene",
-    "save_total_cycles": "Lagre total"
+    "save_total_cycles": "Lagre total",
+    "clear": "Tøm"
   },
   "note": {
     "off_delay": {
@@ -1672,6 +1673,10 @@
     "unload_track_without_door": {
       "label": "Bekreft utlasting manuelt",
       "doc": "Kjør utlastingspåminnelsen på en enhet uten Dørensorenhet og uten Utlastingsbekreftelsesenhet, og bekreft utlastingen fra din egen automasjon i stedet: trykk på knappenheten \"Merk som utlastet\", eller kall handlingen ha_washdata.mark_unloaded. Ignoreres når en Dørensorenhet er angitt, siden den allerede gir signalet."
+    },
+    "notify_icon_color": {
+      "label": "Varselfarge",
+      "doc": "Aksentfarge for varslene fra dette apparatet, slik at en vaskemaskin, en tørketrommel og en oppvaskmaskin er lette å skille fra hverandre. Android farger varselet; iOS farger ikonet og fremdriftslinjen i Liveaktiviteten på låst skjerm og i Dynamic Island. Begge forstår hex-verdier (f.eks. #03A9F4). La stå tomt for plattformens standard."
     }
   },
   "setting_group": {
