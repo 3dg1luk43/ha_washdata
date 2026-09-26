@@ -8746,7 +8746,29 @@ class ProfileStore:
                             # trace span, so without this the tail is baked into
                             # GOLDEN evidence that feeds avg_duration and nothing
                             # ever corrects it.
-                            "termination_reason": c.get("termination_reason"),
+                            #
+                            # **Only when the device types match** (item 365).
+                            # Item 353 argued this was safe by construction
+                            # because the only caller passing a reason is the
+                            # real-history import, i.e. "the user's own history".
+                            # That misses this path: on a MISMATCH the import
+                            # forces `cycle_destination = "reference"`, and
+                            # `real_cycles` carries no `device_specific` flag so
+                            # it survives the category filter - foreign cycles
+                            # land here too. Stamped, `async_repair_banked_tails`
+                            # would treat a dishwasher's cycles as this washer's
+                            # own: the non-dishwasher branch sets `allowance = 0`
+                            # and cuts each trace at its last sample above the
+                            # LOCAL `stop_threshold_w`, deleting the dishwasher's
+                            # passive drying phase from cycles marked `golden`
+                            # and rebuilding the profile from the shortened
+                            # durations. The local threshold says nothing about
+                            # where a different appliance's activity ended.
+                            "termination_reason": (
+                                c.get("termination_reason")
+                                if device_type_match
+                                else None
+                            ),
                         },
                         id_pool=ref_id_pool,
                     )

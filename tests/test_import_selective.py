@@ -577,3 +577,55 @@ async def test_a_store_download_never_gets_a_termination_reason(store):
     refs = store._data["reference_cycles"]
     assert len(refs) == 1
     assert "termination_reason" not in refs[0]
+
+
+# ── item 365: a foreign device's cycles are not this device's own history ────
+
+@pytest.mark.asyncio
+async def test_a_mismatched_device_import_does_not_stamp_termination_reason(store):
+    """Item 353 carried `termination_reason` into reference cycles so the
+    banked-tail repair could reach a pre-v13 import of the device's OWN history.
+    Its safety argument was "only the real-history import passes a reason", which
+    misses this path: on a device-type MISMATCH the import forces
+    `cycle_destination = "reference"`, and `real_cycles` carries no
+    `device_specific` flag so it survives the category filter. Stamped, the repair
+    would treat a dishwasher's cycles as this washer's own - the non-dishwasher
+    branch sets `allowance = 0` and cuts each trace at its last sample above the
+    LOCAL `stop_threshold_w`, deleting the dishwasher's passive drying from cycles
+    marked `golden`."""
+    smart = _cyc("dw1", "Eco", 2000.0)
+    smart["termination_reason"] = "smart"
+    payload = _payload(past=[smart], device_type="dishwasher")
+
+    summary = await store.async_import_data_selective(
+        payload,
+        selection={"categories": ["profiles", "real_cycles"]},
+        local_device_type="washing_machine",
+    )
+
+    assert summary["device_type_match"] is False
+    refs = store._data.get("reference_cycles") or []
+    assert refs, "the mismatch fallback still imports them as reference cycles"
+    for c in refs:
+        assert "termination_reason" not in c, (
+            "a foreign device's cycle must be unreachable to the banked-tail "
+            "repair, exactly like a community-store download"
+        )
+
+
+@pytest.mark.asyncio
+async def test_a_matching_device_import_still_carries_the_reason(store):
+    """The item-353 fix must keep working for the case it was built for."""
+    smart = _cyc("wm1", "Cotton", 2000.0)
+    smart["termination_reason"] = "smart"
+    payload = _payload(past=[smart], device_type="washing_machine")
+
+    summary = await store.async_import_data_selective(
+        payload,
+        selection={"categories": ["profiles", "real_cycles"]},
+        local_device_type="washing_machine",
+    )
+
+    assert summary["device_type_match"] is True
+    refs = store._data.get("reference_cycles") or []
+    assert refs and any(c.get("termination_reason") == "smart" for c in refs)
