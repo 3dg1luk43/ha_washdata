@@ -199,8 +199,22 @@ for cand:
     cand["shape_score"] = cand["score"]            # pre-Stage-4 (post-DTW) score
     cand["score"] = shape_w*score + dur_w*dur_ag + en_w*en_ag
 ```
-`_agreement(observed, expected, scale)` (analysis.py:45-49):
-`1/(1 + |ln(observed/expected)| / scale)`, returns 0 for non-positive inputs.
+`_agreement(observed, expected, scale, gaussian=False)`:
+`1/(1 + |ln(observed/expected)| / scale)` by default (Lorentzian/Cauchy, df=1),
+returns 0 for non-positive inputs.
+
+**The DURATION term passes `gaussian=not in_progress` (register item 307)**, i.e.
+on a COMPLETED cycle it uses `exp(-0.5 (ln r / scale)^2)` instead. The energy term
+is Lorentzian throughout. This is a *discrimination* choice, not a density fit -
+the within-profile duration log-residual is heavy-tailed (excess kurtosis 16.65),
+but the extreme cycles are unwinnable anyway (item 304), so the sharper kernel
+costs nothing on them and buys separation on the bulk: +1.49pp top-1, +2.8pp on
+washing machines.
+
+**The scoping is load-bearing.** Mid-cycle the observed duration is a PREFIX,
+necessarily far below the profile mean, so the sharp kernel crushes the correct
+long candidate: measured -4.1pp at 50% elapsed and -6.4pp at 60%. The slow Cauchy
+tail is exactly what keeps a long candidate alive mid-run.
 Scales: `MATCH_DURATION_SCALE = 0.175`, `MATCH_ENERGY_SCALE = 0.25`
 (const.py:458-459). Then re-sort.
 
@@ -284,7 +298,12 @@ computes the chosen member's own Stage-2 `find_best_alignment` score as a
 ### 4.5 Ambiguity (`_ambiguity_from_candidates`, profile_store.py:878-888)
 ```
 margin = candidates[0].score - candidates[1].score   # 1.0 if only one candidate
-is_ambiguous = margin < MATCH_AMBIGUITY_MARGIN         # 0.05, const.py:429
+is_ambiguous = margin < MATCH_AMBIGUITY_MARGIN         # 0.05
+# NOTE: auto-LABELLING uses a separate, wider MATCH_LABEL_MIN_MARGIN (0.08,
+# item 310). MATCH_AMBIGUITY_MARGIN also reaches the detector and gates Smart
+# Termination, so widening it there would defer cycle ends (item 306).
+# The margin is a far better correctness signal than the absolute score:
+# AUC 0.792 vs 0.625 on completed cycles, 0.773 vs 0.535 mid-cycle (item 305).
 ```
 Single source shared by both match paths and surfaced by the Match Ambiguity
 diagnostic sensor.

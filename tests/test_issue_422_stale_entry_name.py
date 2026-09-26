@@ -194,6 +194,10 @@ async def test_a_full_payload_save_cannot_resurrect_the_creation_time_name():
 
     hass = MagicMock()
     hass.config_entries.async_update_entry = MagicMock()
+    # A real dict, because ws_set_options now takes the per-entry write lock and
+    # `_entry_write_lock` stores it in hass.data - a MagicMock hands back a
+    # MagicMock, which cannot be awaited.
+    hass.data = {}
     connection = MagicMock()
 
     with patch.object(ws_api, "_get_entry", return_value=entry), \

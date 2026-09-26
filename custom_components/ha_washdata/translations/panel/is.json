@@ -60,6 +60,7 @@
     "fair_fit_tip": "Í meðallagi samræmi við samsvörun - sumar lotur sem eru úthlutaðar þessum prófíl hafa lægri öryggisstig. Merktu fleiri lotur eða skráðu sniðið aftur til að bæta nákvæmni.",
     "feedback_requested": "Óskað er eftir umsögn",
     "golden_cycle": "Skráð viðmiðunarlota",
+    "duration_outlier": "{n} lota/lotur með óvenjulega lengd",
     "improving": "↗ batnar",
     "manual": "(handvirkt valið)",
     "needs_review": "Þarfnast endurskoðunar",
@@ -257,6 +258,11 @@
     "hist_import_n": "Flytja inn {n} lotur",
     "hist_goto_cycles": "Sýndu mér loturnar",
     "save_total_cycles": "Vista samtölu"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Lota sem er lokið bíður í raun {eff} s, ekki {delay} s: Lágm. slökkubil ({gap} s) er lengra og gengur fyrir."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Flutt inn úr samfélagsversluninni. Sýnt til viðmiðunar og samsvörunar. Það er ekki talið með í tölfræðinni þinni og ekki hægt að breyta því.",
     "merge_no_imports": "Ekki er hægt að sameina innfluttar upptökur við raunverulega lotu. Afveldu þær til að sameina.",
     "store_enable_hint": "Virkjaðu nettengda eiginleika í Stillingum til að skoða og flytja inn viðmiðunarlotur samfélagsins.",
+    "advisory_duration_outlier": "{n} lota/lotur merktar '{name}' eru of langt frá venjulegri lengd kerfisins til að geta nokkurn tíma fengið samsvörun við það (verst: {ratio}x). Þær eru líklega rangt merktar, eða ein upptaka náði tveimur keyrslum. Merktu þær aftur eða skiptu þeim upp svo þær skekki ekki lengur tímaáætlun þessa kerfis.",
+    "standby_above_stop_title": "Dró enn {idle} W þegar lotunni lauk",
+    "standby_above_stop_sub": "{n} af síðustu {total} lotum. Slökkviðráð fer ekki af stað fyrr en aflið er komið undir Stöðvunarþröskuld ({stop} W), svo lotur enda of seint eða þarf að stöðva handvirkt.",
     "online_intro": "Deildu viðmiðunarlotum með öðrum WashData-notendum og halaðu þeim niður. Allir nettengdir eiginleikar eru valfrjálsir og sjálfgefið óvirkir.",
     "store_share_intro": "Hladdu þessari viðmiðunarlotu upp svo aðrir með sama tæki geti notað hana. Hún er yfirfarin áður en hún birtist opinberlega.",
     "online_intro_global": "Skoðaðu og deildu viðmiðunarupptökum með öðrum WashData-notendum og staðfestu tækjafærslur. Ein tenging gildir fyrir alla WashData-samþættinguna þína; vörumerki og gerð tækis eru stillt fyrir hvert tæki undir Grunnstillingum. Allir nettengdir eiginleikar eru valfrjálsir og sjálfgefið óvirkir.",
@@ -1105,7 +1114,7 @@
     "duration_weight": "Þrep 4: hversu sterklega samræmi í keyrslulengd hefur áhrif á lokaskorið (sjálfgefið 0,22)",
     "energy_weight": "Þrep 4: hversu sterklega samræmi í orkunotkun hefur áhrif á lokaskorið (sjálfgefið 0,22)",
     "profile_match_min_duration_ratio": "Þrep 1: stysta lota sem hlutfall af lotulegð sniðs; sjálfgefið 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Þrep 1: lengsta lota sem hlutfall af lotulegð sniðs; sjálfgefið 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Þrep 1: lengsta lota sem hlutfall af lotulegð sniðs; sjálfgefið 1,8 (180%)",
     "keep_min_score": "Þrep 2: lægsta einkunn til að vera eftir í samsvöruninni; sjálfgefið 0,1 leyfir veika frambjóðendur, síðari þrep velja best",
     "dtw_blend": "Þrep 3: 0 = aðeins kjarnaskor, 1 = aðeins DTW-skor, 0,5 = jöfn blanda (sjálfgefið)",
     "dtw_ensemble_w": "Þrep 3 (ensemble-hamur): þunginn á skaluðum L1 gagnvart afleiðu-DTW; sjálfgefið 0,7 hlynnar að stiga-meðvitund",
@@ -1446,8 +1455,8 @@
       "label": "Losunarminni-seinkun"
     },
     "notify_unload_repeat": {
-      "doc": "Heldur áfram að senda losunaráminninguna aftur á \"Losunarminni-seinkun\" mínútna fresti þar til þú opnar hurðina eða ýtir á \"Hætta að minna\" í tilkynningunni. Krefst Dyraskynjareiningar (áminningin sjálf gerir það). Hunsa-hnappurinn virkar á tilkynningum úr Home Assistant fylgiforritinu (farsíma).",
-      "label": "Endurtaka þar til hurðin opnast"
+      "doc": "Heldur áfram að senda losunaráminninguna aftur á \"Losunarminni-seinkun\" mínútna fresti þar til losunin er staðfest eða þú ýtir á \"Hætta að minna\" í tilkynningunni. Krefst leiðar til að staðfesta losunina: Dyraskynjareiningar, Losunarstaðfestingareiningar eða valkostsins \"Staðfesta losun handvirkt\" hér að neðan. Hunsa-hnappurinn virkar á tilkynningum úr Home Assistant fylgiforritinu (farsíma).",
+      "label": "Endurtaka þar til losað"
     },
     "off_delay": {
       "doc": "Tími til að bíða eftir að kraftur minnkar áður en hringrásinni er lokið. Ef straumur fer aftur innan þessa glugga heldur hringrásin óaðfinnanlega áfram - þetta brúar hlé á milli þvottastiga. Uppþvottavélar eru með langa þurrkunarfasa (slökkt á slökkt í 20-60 mín) þannig að slökkvunartöfin verður að fara yfir það til að halda öllum þvotti+þurrkum sem einni lotu.",
@@ -1655,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Tímaveginn kostnaður",
       "doc": "Reiknar kostnað hverrar lotu á því verði sem gilti á hverri stundu meðan hún keyrði, í stað eins verðs sem gilti þegar henni lauk. Á aðeins við um verðeiningu (fast verð getur ekki breyst). Þarf enga auka uppsetningu: verðinu er fylgt í rauntíma meðan lotan keyrir, og „Vinna úr sögu“ undir Greiningu endurreiknar kostnað eldri lota út frá recorder. Af = klassíska hegðunin, eitt verð fryst við lokin."
+    },
+    "unload_confirm_entity": {
+      "label": "Losunarstaðfestingareining",
+      "doc": "Valfrjáls eining þar sem virkjun merkir að þvotturinn hafi verið tekinn út, fyrir vélar sem geta ekki haft hurðarskynjara. Allar gerðir virka: Zigbee- eða NFC-hnappur, input_button hjálpareining, hreyfiskynjari fyrir framan vélina, sena. Hver stöðubreyting telst sem staðfesting, nema þegar slökkt er á einingunni eða hún verður ótiltæk. Að stilla þetta kveikir einnig á losunaráminningunni á tæki án Dyraskynjareiningar."
+    },
+    "unload_track_without_door": {
+      "label": "Staðfesta losun handvirkt",
+      "doc": "Keyrir losunaráminninguna á tæki án Dyraskynjareiningar og án Losunarstaðfestingareiningar, og þú staðfestir losunina þess í stað úr þinni eigin sjálfvirkni: ýttu á hnappaeininguna \"Merkja sem losað\" eða kallaðu á aðgerðina ha_washdata.mark_unloaded. Hunsað þegar Dyraskynjareining er stillt, því hún gefur merkið nú þegar."
     }
   },
   "setting_group": {
@@ -1867,6 +1884,7 @@
       "summary": "Útilokaði {total} ranggreindar lotur: {parts}.",
       "reason": {
         "force_stopped": "þvingað stöðvaðar",
+        "user_stopped": "stöðvaðar handvirkt",
         "interrupted": "rofnar",
         "incomplete": "ókláraðar",
         "noise": "suð",
@@ -2021,7 +2039,8 @@
     "unlabel_done": "Fjarlægði merkingu af {count} lotu(m)",
     "unlabel_failed": "Fjarlæging merkingar mistókst: {error}",
     "odometer_saved": "Samtala lotna vistuð",
-    "odometer_save_failed": "Ekki tókst að vista samtöluna: {error}"
+    "odometer_save_failed": "Ekki tókst að vista samtöluna: {error}",
+    "contrib_device_changed": "Bætt við samfélagsverslunina, en skipt var um tæki meðan eyðublaðið var opið. Veldu það í Stillingum."
   },
   "trend": {
     "down": "Stefnir niður",

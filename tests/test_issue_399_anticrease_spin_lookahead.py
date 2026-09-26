@@ -720,7 +720,11 @@ def test_sanitize_terminal_high_rejects_a_scalar_string() -> None:
     # A real pair/triple in the same shapes still works, so this only narrows.
     assert det._sanitize_terminal_high((0.95, 200.0)) == (0.95, 200.0)
     assert det._sanitize_terminal_high([0.95, 200.0, 5700.0]) == (0.95, 200.0, 5700.0)
-    assert det._sanitize_terminal_high((0.95, 200.0, 1.0, 2.0)) is None
+    # Arity 4 is the standby-band quad since register item 351: the fourth
+    # element is the watts the block was measured against, so the live counter
+    # can use the same bar. Arity 5 is still garbage.
+    assert det._sanitize_terminal_high((0.95, 200.0, 1.0, 2.0)) == (0.95, 200.0, 1.0, 2.0)
+    assert det._sanitize_terminal_high((0.95, 200.0, 1.0, 2.0, 3.0)) is None
     assert det._sanitize_terminal_high(None) is None
     assert det._sanitize_terminal_high(42) is None
 

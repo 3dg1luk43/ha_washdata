@@ -60,6 +60,7 @@
     "fair_fit_tip": "Umiarkowana spójność dopasowania – niektóre cykle przypisane do tego profilu mają niższy poziom pewności. Oznacz więcej cykli lub ponownie zapisz profil, aby poprawić dokładność.",
     "feedback_requested": "Poproszono o opinię",
     "golden_cycle": "Zarejestrowany cykl referencyjny",
+    "duration_outlier": "Cykle o nietypowej długości: {n}",
     "improving": "↗ poprawa",
     "manual": "(wybierane ręcznie)",
     "needs_review": "Wymaga recenzji",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importuj cykle: {n}",
     "hist_goto_cycles": "Pokaż cykle",
     "save_total_cycles": "Zapisz łączną liczbę"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Zakończony cykl faktycznie czeka {eff} s, a nie {delay} s: Minimalna Przerwa Wyłączenia ({gap} s) jest dłuższa i ma pierwszeństwo."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1032,6 +1038,9 @@
     "imported_readonly": "Zaimportowano ze sklepu społecznościowego. Wyświetlane w celach referencyjnych i do dopasowywania. Nie liczy się do Twoich statystyk i nie można go edytować.",
     "merge_no_imports": "Zaimportowanych nagrań nie można scalić z rzeczywistym cyklem. Odznacz je, aby scalić.",
     "store_enable_hint": "Włącz funkcje online w Ustawieniach, aby przeglądać i importować cykle referencyjne społeczności.",
+    "advisory_duration_outlier": "Cykle oznaczone jako '{name}' ({n}) są zbyt odległe od jego zwykłej długości, aby kiedykolwiek mogły zostać z nim dopasowane (największe odchylenie: {ratio}x). Prawdopodobnie są błędnie oznaczone albo jedno nagranie objęło dwa uruchomienia. Oznacz je ponownie lub podziel, aby przestały zniekształcać szacowany czas tego programu.",
+    "standby_above_stop_title": "Nadal pobiera {idle} W w momencie zakończenia cyklu",
+    "standby_above_stop_sub": "{n} z ostatnich {total} cykli. Opóźnienie Wyłączenia zaczyna biec dopiero wtedy, gdy moc spadnie poniżej Progu Zatrzymania ({stop} W), więc cykle kończą się z opóźnieniem albo trzeba je zatrzymywać ręcznie.",
     "online_intro": "Udostępniaj i pobieraj cykle referencyjne z innymi użytkownikami WashData. Wszystkie funkcje online są dobrowolne i domyślnie wyłączone.",
     "store_share_intro": "Prześlij ten cykl referencyjny, aby inni z tym samym urządzeniem mogli go używać. Zostanie sprawdzony przed publicznym udostępnieniem.",
     "online_intro_global": "Przeglądaj i udostępniaj nagrania referencyjne innym użytkownikom WashData oraz potwierdzaj wpisy urządzeń. Jedno połączenie dotyczy całej integracji WashData; markę i model urządzenia ustawia się osobno dla każdego urządzenia w sekcji Podstawowe. Wszystkie funkcje online są dobrowolne i domyślnie wyłączone.",
@@ -1410,8 +1419,8 @@
       "label": "Opóźnienie Przypomnienia o Rozładunku"
     },
     "notify_unload_repeat": {
-      "doc": "Ponownie wysyła przypomnienie o rozładunku co \"Opóźnienie Przypomnienia o Rozładunku\" minut, dopóki nie otworzysz drzwi lub nie dotkniesz \"Przestań przypominać\" w powiadomieniu. Wymaga Encji Czujnika Drzwi (tak jak samo przypomnienie). Przycisk odrzucenia działa w powiadomieniach aplikacji mobilnej Home Assistant (companion app).",
-      "label": "Powtarzaj, aż otworzą się drzwi"
+      "doc": "Ponownie wysyła przypomnienie o rozładunku co „Opóźnienie Przypomnienia o Rozładunku” minut, dopóki rozładunek nie zostanie potwierdzony lub nie dotkniesz „Przestań przypominać” w powiadomieniu. Wymaga sposobu potwierdzenia rozładunku: Encji Czujnika Drzwi, Encji Potwierdzenia Rozładunku albo opcji „Ręczne potwierdzanie rozładunku” poniżej. Przycisk odrzucenia działa w powiadomieniach aplikacji mobilnej Home Assistant (companion app).",
+      "label": "Powtarzaj do rozładowania"
     },
     "off_delay": {
       "doc": "Czas oczekiwania po spadku mocy przed ogłoszeniem zakończenia cyklu. Jeżeli w tym oknie zasilanie zostanie przywrócone, cykl będzie przebiegał płynnie – eliminując przerwy pomiędzy etapami prania. Zmywarki mają długie fazy suszenia (wyłączenie zasilania na 20–60 minut), więc opóźnienie wyłączenia musi być dłuższe, aby całe pranie+suszenie trwało w jednym cyklu.",
@@ -1623,6 +1632,14 @@
     "curve_preroll_seconds": {
       "doc": "Ile sekund odczytów z przerwanych prób startu WashData może dołączyć na początku krzywej cyklu. Krzywa cyklu zwykle zaczyna się od tej próby startu, która ostatecznie się powiodła, więc w maszynie, która próbuje kilka razy, zanim się rozkręci - wybór programu, blokada drzwi, pierwsze napełnianie - w każdej krzywej brakuje pierwszych minut rzeczywistej pracy. Ustaw tę wartość nieco powyżej najdłuższego takiego rozbiegu Twojej maszyny (300 s w zupełności wystarczy w większości przypadków). 0 wyłącza tę funkcję. Pamiętaj, że jej włączenie przesuwa zapisany początek wcześniej, więc cykle zapisane przed zmianą i po niej mają różne czasy trwania dla tego samego programu; wyuczone średnie będą się przesuwać, dopóki starsze cykle nie wypadną z historii.",
       "label": "Wstępny zapis krzywej"
+    },
+    "unload_confirm_entity": {
+      "label": "Encja Potwierdzenia Rozładunku",
+      "doc": "Opcjonalna encja, której aktywacja oznacza, że wsad został wyjęty, dla maszyn, w których nie da się zamontować czujnika drzwi. Działa dowolny rodzaj: przycisk Zigbee lub NFC, pomocnik input_button, czujnik ruchu przed maszyną, scena. Każda zmiana stanu liczy się jako potwierdzenie, z wyjątkiem wyłączenia i przejścia w stan niedostępny. Ustawienie tej opcji włącza też przypomnienie o rozładunku na urządzeniu bez Encji Czujnika Drzwi."
+    },
+    "unload_track_without_door": {
+      "label": "Ręczne potwierdzanie rozładunku",
+      "doc": "Uruchamia przypomnienie o rozładunku na urządzeniu bez Encji Czujnika Drzwi i bez Encji Potwierdzenia Rozładunku, a rozładunek potwierdzasz z własnej automatyzacji: naciśnij encję przycisku „Oznacz jako rozładowane” lub wywołaj usługę ha_washdata.mark_unloaded. Ignorowane, gdy ustawiona jest Encja Czujnika Drzwi, która już dostarcza ten sygnał."
     }
   },
   "setting_group": {
@@ -1835,6 +1852,7 @@
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",
       "reason": {
         "force_stopped": "zatrzymane przymusowo",
+        "user_stopped": "zatrzymane ręcznie",
         "interrupted": "przerwane",
         "incomplete": "niekompletne",
         "noise": "hałas",
@@ -1965,6 +1983,7 @@
     "store_no_appliance": "Najpierw ustaw markę i model urządzenia w Ustawieniach.",
     "store_share_failed": "Udostępnianie nie powiodło się: {error}",
     "store_shared": "Udostępniono w sklepie społecznościowym, oczekuje na weryfikację.",
+    "contrib_device_changed": "Dodano do sklepu społecznościowego, ale wybrane urządzenie zmieniło się, gdy formularz był otwarty. Wybierz je w Ustawieniach.",
     "appliance_added": "Urządzenie dodane, oczekuje na zatwierdzenie",
     "thanks_confirming": "Dziękujemy za potwierdzenie",
     "device_approved": "Zatwierdzone przez społeczność",
@@ -2024,7 +2043,7 @@
     "duration_weight": "Etap 4: jak mocno zgodność czasu trwania wpływa na wynik końcowy (domyślnie 0,22)",
     "energy_weight": "Etap 4: jak mocno zgodność energii wpływa na wynik końcowy (domyślnie 0,22)",
     "profile_match_min_duration_ratio": "Etap 1: minimalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Etap 1: maksymalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Etap 1: maksymalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 1,8 (180%)",
     "keep_min_score": "Etap 2: minimalny wynik, by pozostać w wyścigu; domyślnie 0,1 dopuszcza słabe dopasowania, późniejsze etapy wybierają najlepsze",
     "dtw_blend": "Etap 3: 0 = tylko wynik główny, 1 = tylko wynik DTW, 0,5 = równe mieszanie (domyślnie)",
     "dtw_ensemble_w": "Etap 3 (tryb kombinacji): waga skalowanego L1 względem pochodnego DTW; domyślnie 0,7 faworyzuje poziom",

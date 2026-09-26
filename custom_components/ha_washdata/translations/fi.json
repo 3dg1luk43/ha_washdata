@@ -280,6 +280,16 @@
           "description": "WashData-laite, jonka malleja koulutetaan uudelleen."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Merkitse puretuksi",
+      "description": "Vahvista, että valmiin syklin sisältö on otettu pois WashData-laitteesta: Puhdas-tila ja purkamismuistutus nollataan.",
+      "fields": {
+        "device_id": {
+          "name": "Laite",
+          "description": "WashData-laite, josta valmiin syklin sisältö on otettu pois."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Lopeta syklin tallennus"
+      },
+      "mark_unloaded": {
+        "name": "Merkitse puretuksi"
       }
     }
   },

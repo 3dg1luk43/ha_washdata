@@ -155,6 +155,18 @@ def _require_str(value: Any, name: str) -> str:
     return value
 
 
+# Options keys that no code reads any more, stripped by the 3.10 -> 3.11 step and
+# again by the one-pass legacy migration. Named once so the two cannot drift.
+# The value `DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO` held before item 311
+# widened it. A stored option equal to this is the migration's own seed, not a
+# user's choice, and the 3.10 -> 3.11 step heals it.
+_OLD_SEEDED_MAX_DURATION_RATIO = 1.5
+
+_DEAD_ABRUPT_KEYS = frozenset(
+    {"abrupt_drop_ratio", "abrupt_drop_watts", "abrupt_high_load_factor"}
+)
+
+
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
@@ -263,6 +275,45 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _healed or "none",
         )
 
+    # 3.10 -> 3.11: drop the abrupt-drop end-detection knobs from options. The bulk
+    # strip below reaches only entries still BELOW the current schema, because of the
+    # early return right under this block - so without a step of its own an entry
+    # created before 558e71e and since migrated to 3.10 keeps the dead keys forever.
+    # Same shape as the 3.7 -> 3.8 running_dead_zone retirement, for the same reason.
+    if version == 3 and minor_version == 10:
+        # Computed BEFORE the update, like the 3.8 -> 3.9 step: async_update_entry
+        # replaces entry.options synchronously, so an intersection taken after it
+        # is always empty and every migration would log "removed nothing".
+        removed = sorted(set(entry.options) & _DEAD_ABRUPT_KEYS)
+        new_opts = {k: v for k, v in entry.options.items() if k not in _DEAD_ABRUPT_KEYS}
+        # Heal the Stage-1 upper gate that item 311 widened 1.5 -> 1.8. The
+        # legacy migration SEEDS this key with `options.setdefault(...,
+        # DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)`, so every entry migrated
+        # before that change has a literal 1.5 frozen in its options and the
+        # manager reads it in preference to the new default - i.e. the widening
+        # reaches nobody who already had WashData installed. It is not rare:
+        # 13 of the 33 real exports in `cycle_data/` carry exactly 1.5.
+        #
+        # Replaced ONLY where it still equals the old seeded default, exactly as
+        # the 3.9 -> 3.10 cadence heal is scoped: a user who tuned this produced
+        # a value like 1.44 or 1.51, not the old constant on the nose. Item 311
+        # measured the wider gate as 4 appliances better and none worse.
+        healed: list[str] = []
+        if new_opts.get(CONF_PROFILE_MATCH_MAX_DURATION_RATIO) == _OLD_SEEDED_MAX_DURATION_RATIO:
+            new_opts[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = (
+                DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+            )
+            healed.append(CONF_PROFILE_MATCH_MAX_DURATION_RATIO)
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=11
+        )
+        minor_version = 11
+        _log.debug(
+            "Migrated WashData entry from 3.10 to 3.11 (removed %s; healed %s)",
+            removed or "nothing",
+            healed or "nothing",
+        )
+
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
@@ -326,9 +377,16 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(
         CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
     )
-    options.setdefault(
-        CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
-    )
+    # CONF_PROFILE_MATCH_MAX_DURATION_RATIO is deliberately NOT seeded here.
+    # Seeding it is what produced `_OLD_SEEDED_MAX_DURATION_RATIO` and the two
+    # heal sites above: entries took the then-default 1.5 as an explicit value,
+    # so item 311's widening to 1.8 reached none of them. Every reader resolves
+    # the key with `DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO` as its fallback
+    # and `ws_get_options` ships `defaults` alongside `options`, so an absent
+    # key behaves identically today and the next change to the default actually
+    # lands. The min ratio above keeps its seed because that gate is inert for
+    # ranking (it has never removed a true candidate on the corpus), so freezing
+    # it costs nothing.
     options.setdefault(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES)
     options.setdefault(
         CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE
@@ -391,6 +449,27 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # were removed (suggestions and pending reviews are surfaced in the panel),
     # so the now-inert "suppress feedback notifications" toggle is stripped.
     options.pop("suppress_feedback_notifications", None)
+
+    # The abrupt-drop end-detection knobs were removed in 558e71e (the state
+    # machine reached the same decision from the energy gates), but nothing ever
+    # stripped them, so they still sit in the options of entries created before
+    # that. Measured across the real exports in cycle_data/: present in 5 of the
+    # 7 full user configurations and read by no Python or panel code. The
+    # surviving "abrupt end" in suggestion_engine is the cycle-artifact
+    # classifier, which is unrelated hardcoded logic, not these tunables.
+    # Entries already on the current schema are handled by the 3.10 -> 3.11 step
+    # above; this covers a one-pass legacy migration.
+    for k in _DEAD_ABRUPT_KEYS:
+        options.pop(k, None)
+
+    # Same heal as the 3.10 -> 3.11 step, for the cohort that never reaches it:
+    # an entry below 3.6 (including v1/v2) takes this one-pass path instead of
+    # the chain, and the `setdefault` above preserves a stored 1.5 rather than
+    # replacing it. Without this those entries keep the pre-item-311 gate.
+    if options.get(CONF_PROFILE_MATCH_MAX_DURATION_RATIO) == _OLD_SEEDED_MAX_DURATION_RATIO:
+        options[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = (
+            DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+        )
 
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
     # Remap any entry still on one of them to DEVICE_TYPE_OTHER (Threshold Device),
@@ -1188,6 +1267,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 )
                 manager._logger.info("Applied imported settings to config entry %s", entry_id)
 
+            # An old payload re-arms the one-time banked-tail repair. Nothing here
+            # reloads the entry unless the payload brought settings with it, so
+            # schedule it directly rather than leaving it for the next restart.
+            manager.async_schedule_banked_tail_repair()
+
             manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
         hass.services.async_register(DOMAIN, "import_config", handle_import_config)
@@ -1320,6 +1404,38 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.services.async_register(DOMAIN, "resume_cycle", handle_resume_cycle)
 
+    # Unload confirmation for a device with no door sensor (#451). Deliberately
+    # not an error when nothing is waiting: an automation wired to a physical
+    # button fires on every press, and "already emptied" is not a failure.
+    if not hass.services.has_service(DOMAIN, "mark_unloaded"):
+        async def handle_mark_unloaded(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="device_not_found",
+                )
+            entry_id = next(
+                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
+                None,
+            )
+            if not entry_id:
+                if any(eid for eid in device.config_entries):
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="integration_not_loaded",
+                    )
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_config_entry",
+                )
+
+            hass.data[DOMAIN][entry_id].mark_unloaded("mark_unloaded service")
+
+        hass.services.async_register(DOMAIN, "mark_unloaded", handle_mark_unloaded)
+
     return True
 
 
@@ -1418,9 +1534,17 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if _cancelled_tasks:
             await asyncio.gather(*_cancelled_tasks, return_exceptions=True)
 
-        # Release the per-entry write lock so it doesn't block the next setup.
-        from .ws_api import _WS_WRITE_LOCKS_KEY, async_clear_history_import
+        # Release the per-entry locks so they don't block the next setup. BOTH of
+        # them: `_entry_options_lock` is a second per-entry lock created the same
+        # way, and dropping only the write lock left one asyncio.Lock per removed
+        # entry in hass.data for the lifetime of the process.
+        from .ws_api import (
+            _WS_OPTIONS_LOCKS_KEY,
+            _WS_WRITE_LOCKS_KEY,
+            async_clear_history_import,
+        )
         hass.data.get(_WS_WRITE_LOCKS_KEY, {}).pop(entry.entry_id, None)
+        hass.data.get(_WS_OPTIONS_LOCKS_KEY, {}).pop(entry.entry_id, None)
 
         # Drop any staged history import (uploaded CSV text or a finished scan's
         # traces). Nothing else owns that memory, so without this an abandoned upload

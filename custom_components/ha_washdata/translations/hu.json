@@ -280,6 +280,16 @@
           "description": "The WashData device to retrain models for."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Megjelölés kirakodottként",
+      "description": "Annak megerősítése, hogy a kész adagot kivették a WashData eszközből, ami törli a „Tiszta” állapotot és a kirakodási emlékeztetőt.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "Az a WashData eszköz, amelyből a kész adagot kivették."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Ciklusrögzítés leállítása"
+      },
+      "mark_unloaded": {
+        "name": "Megjelölés kirakodottként"
       }
     }
   },

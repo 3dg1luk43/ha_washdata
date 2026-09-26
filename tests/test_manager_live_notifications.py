@@ -166,25 +166,59 @@ def test_live_notification_deferral_is_coalesced_when_away(
 def test_clear_live_notification_sends_clear_message(
     manager: WashDataManager, mock_hass: Any
 ) -> None:
-    """Cycle-end clear should send a clear_notification message to mobile app service."""
+    """A shutdown MID-CYCLE must dismiss both surfaces.
+
+    Since #446 the live activity carries its own tag, so one clear no longer
+    covers everything: the activity is ended by a clear on the live tag, and the
+    lifecycle card (start alert) by a clear on the lifecycle tag. While the cycle
+    is still running no finished notification follows, so both have to go - see
+    the sibling test for why that stops being true once it has ended.
+    """
+    from custom_components.ha_washdata.const import STATE_RUNNING
+
     manager._notify_live_services = ["notify.mobile_app_pixel"]
     manager._live_notification_sent_count = 1
+    manager.detector.state = STATE_RUNNING
 
     manager._clear_live_progress_notification()
 
-    mock_hass.services.async_call.assert_called_once()
-    domain, service, payload = mock_hass.services.async_call.call_args[0]
-    assert domain == "notify"
-    assert service == "mobile_app_pixel"
-    assert payload["message"] == "clear_notification"
-    assert payload["data"]["tag"] == manager._live_notification_tag
+    calls = mock_hass.services.async_call.call_args_list
+    assert len(calls) == 2, calls
+    tags = []
+    for call in calls:
+        domain, service, payload = call[0]
+        assert domain == "notify"
+        assert service == "mobile_app_pixel"
+        assert payload["message"] == "clear_notification"
+        tags.append(payload["data"]["tag"])
+    assert tags == [manager._live_notification_tag, manager._lifecycle_tag]
+
+
+def test_clear_after_a_finished_cycle_spares_the_lifecycle_card(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Found in the PR #448 round-25 review. The finished alert uses the
+    lifecycle tag, so a restart or unload after the cycle ended would dismiss the
+    card the user still wants. The live tag still goes: its Live Activity
+    chronometer counts into negative numbers once nothing updates it."""
+    from custom_components.ha_washdata.const import STATE_OFF
+
+    manager._notify_live_services = ["notify.mobile_app_pixel"]
+    manager._live_notification_sent_count = 1
+    manager.detector.state = STATE_OFF
+
+    manager._clear_live_progress_notification()
+
+    tags = [c[0][2]["data"]["tag"] for c in mock_hass.services.async_call.call_args_list]
+    assert tags == [manager._live_notification_tag]
 
 
 def test_finish_path_clear_skips_service_clear(
     manager: WashDataManager, mock_hass: Any
 ) -> None:
-    """On cycle finish the live card is replaced by the finished notification (same
-    tag), so no service-level clear_notification is sent; counters still reset."""
+    """On cycle finish this helper sends no service clear: the caller ends the
+    activity itself, AFTER the finished notification has been delivered, so the
+    lock screen is never momentarily empty (#446). Counters still reset."""
     manager._notify_live_services = ["notify.mobile_app_pixel"]
     manager._live_notification_sent_count = 1
 

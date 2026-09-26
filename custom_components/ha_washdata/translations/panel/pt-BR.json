@@ -35,7 +35,8 @@
     "not_importable": "n/d aqui",
     "exists": "já existe",
     "backfilled_tip": "Detectado em um histórico de potência importado. Influencia apenas a correspondência de programas, não é contabilizado nas estatísticas.",
-    "armed": "(aplica-se ao próximo ciclo)"
+    "armed": "(aplica-se ao próximo ciclo)",
+    "duration_outlier": "{n} ciclo(s) com duração incomum"
   },
   "btn": {
     "reset_zoom": "Redefinir zoom",
@@ -1039,7 +1040,10 @@
     "odometer_intro": "Este total só aumenta. Excluir o registro de um ciclo não o altera e ele continua contando além do limite do histórico armazenado, para que os lembretes de manutenção permaneçam corretos.",
     "odometer_correct_hint": "Defina este valor se o WashData registrou um ciclo que nunca aconteceu, ou se o eletrodoméstico já havia realizado ciclos antes de o WashData ser instalado.",
     "no_reminders_set": "Ainda não há lembretes de manutenção definidos.",
-    "toast_program_armed": "Programa preparado para o próximo ciclo: {program}"
+    "toast_program_armed": "Programa preparado para o próximo ciclo: {program}",
+    "standby_above_stop_title": "Ainda consumindo {idle} W quando o ciclo terminou",
+    "standby_above_stop_sub": "{n} dos últimos {total} ciclos. O Atraso de Desligamento só começa quando a potência fica abaixo do Limite de Parada ({stop} W), então os ciclos terminam tarde ou precisam ser parados na mão.",
+    "advisory_duration_outlier": "{n} ciclo(s) rotulados como '{name}' estão longe demais da duração habitual dele para algum dia corresponderem (pior caso: {ratio}x). Provavelmente estão rotulados errado, ou uma gravação capturou duas execuções. Rotule-os novamente ou divida-os para que parem de distorcer a estimativa de tempo deste programa."
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -1366,8 +1370,8 @@
       "label": "Atraso de Lembrete de Descarga"
     },
     "notify_unload_repeat": {
-      "doc": "Continua reenviando o lembrete de descarga a cada \"Atraso de Lembrete de Descarga\" minutos até você abrir a porta ou tocar em \"Parar de lembrar\" na notificação. Requer uma Entidade do Sensor de Porta (o próprio lembrete a exige). O botão de dispensar funciona nas notificações do aplicativo complementar (móvel) do Home Assistant.",
-      "label": "Repetir Até a Porta Abrir"
+      "doc": "Continua reenviando o lembrete de descarga a cada \"Atraso de Lembrete de Descarga\" minutos até a descarga ser confirmada ou você tocar em \"Parar de lembrar\" na notificação. Requer uma forma de confirmar a descarga: uma Entidade do Sensor de Porta, uma Entidade de Confirmação de Descarga ou a opção \"Confirmar a Descarga Manualmente\" abaixo. O botão de dispensar funciona nas notificações do aplicativo complementar (móvel) do Home Assistant.",
+      "label": "Repetir Até Confirmar a Descarga"
     },
     "off_delay": {
       "doc": "Tempo de espera após a queda de energia antes de declarar o término do ciclo. Se a energia for retomada dentro desta janela, o ciclo continua perfeitamente - isso faz a ponte entre as etapas de lavagem. As máquinas de lavar louça têm longas fases de secagem (desligadas por 20-60 minutos), portanto o atraso no desligamento deve exceder esse valor para manter toda a lavagem + secagem em um único ciclo.",
@@ -1575,6 +1579,14 @@
     "energy_price_dynamic": {
       "label": "Custo Ponderado no Tempo",
       "doc": "Cobra cada ciclo pelo preço em vigor em cada momento em que ele rodou, em vez do preço único do instante em que terminou. Só vale para uma entidade de preço (um preço estático não muda). Não exige configuração extra: o preço é acompanhado ao vivo enquanto o ciclo roda, e Processar histórico, em Diagnósticos, recalcula o custo dos ciclos antigos a partir do recorder. Desativado = o comportamento clássico, um preço congelado no final."
+    },
+    "unload_confirm_entity": {
+      "label": "Entidade de Confirmação de Descarga",
+      "doc": "Entidade opcional cuja ativação significa que a carga foi retirada, para máquinas que não podem ter um sensor de porta. Serve qualquer tipo: um botão Zigbee ou NFC, um auxiliar input_button, um sensor de movimento na frente da máquina, uma cena. Qualquer mudança de estado conta como confirmação, exceto desligar e ficar indisponível. Definir isso também ativa o lembrete de descarga em um dispositivo sem Entidade do Sensor de Porta."
+    },
+    "unload_track_without_door": {
+      "label": "Confirmar a Descarga Manualmente",
+      "doc": "Executa o lembrete de descarga em um dispositivo sem Entidade do Sensor de Porta e sem Entidade de Confirmação de Descarga, e você confirma a descarga pela sua própria automação: pressione a entidade de botão \"Marcar como descarregado\" ou chame o serviço ha_washdata.mark_unloaded. É ignorado quando uma Entidade do Sensor de Porta está definida, pois ela já fornece o sinal."
     }
   },
   "setting_group": {
@@ -1807,6 +1819,7 @@
     "store_share_failed": "Falha no compartilhamento: {error}",
     "store_shared": "Compartilhado na loja da comunidade, aguardando revisão.",
     "appliance_added": "Eletrodoméstico adicionado, aguardando aprovação",
+    "contrib_device_changed": "Adicionado à loja da comunidade, mas o dispositivo selecionado mudou enquanto o formulário estava aberto. Selecione-o em Configurações.",
     "thanks_confirming": "Obrigado por confirmar",
     "device_approved": "Aprovado pela comunidade",
     "rating_saved": "Avaliação de qualidade salva",
@@ -1930,6 +1943,7 @@
       "summary": "Excluído(s) {total} ciclo(s) mal detectado(s): {parts}.",
       "reason": {
         "force_stopped": "parados forçadamente",
+        "user_stopped": "parados manualmente",
         "interrupted": "interrompidos",
         "incomplete": "incompletos",
         "noise": "ruído",
@@ -1976,7 +1990,7 @@
     "duration_weight": "Etapa 4: o quanto a concordância de duração afeta a pontuação final (padrão 0,22)",
     "energy_weight": "Etapa 4: o quanto a concordância de energia afeta a pontuação final (padrão 0,22)",
     "profile_match_min_duration_ratio": "Etapa 1: duração mínima do ciclo como fração da duração do perfil; padrão 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Etapa 1: duração máxima do ciclo como fração da duração do perfil; padrão 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Etapa 1: duração máxima do ciclo como fração da duração do perfil; padrão 1,8 (180%)",
     "keep_min_score": "Etapa 2: pontuação mínima para permanecer na disputa; o padrão 0,1 admite candidatos fracos, etapas posteriores escolhem o melhor",
     "dtw_blend": "Etapa 3: 0 = apenas pontuação central, 1 = apenas pontuação DTW, 0,5 = mistura equilibrada (padrão)",
     "dtw_ensemble_w": "Etapa 3 (modo ensemble): peso em L1 escalado vs DTW derivativo; o padrão 0,7 favorece a sensibilidade ao nível",
@@ -2186,6 +2200,11 @@
       "tap_action": "Ação ao tocar",
       "hold_action": "Ação ao manter pressionado",
       "double_tap_action": "Ação ao tocar duas vezes"
+    }
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Um ciclo concluído espera na verdade {eff} s, e não {delay} s: o Intervalo Mínimo de Desligamento ({gap} s) é maior e tem prioridade."
     }
   }
 }

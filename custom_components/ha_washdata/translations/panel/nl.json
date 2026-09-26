@@ -60,6 +60,7 @@
     "fair_fit_tip": "Matige matchconsistentie: sommige cycli die aan dit profiel zijn toegewezen, hebben lagere betrouwbaarheidsscores. Label meer cycli of neem het profiel opnieuw op om de nauwkeurigheid te verbeteren.",
     "feedback_requested": "Feedback gevraagd",
     "golden_cycle": "Geregistreerde referentiecyclus",
+    "duration_outlier": "{n} cyclus/cycli met afwijkende duur",
     "improving": "↗ verbeteren",
     "manual": "(handmatig geselecteerd)",
     "needs_review": "Moet worden beoordeeld",
@@ -257,6 +258,11 @@
     "hist_import_n": "{n} cycli importeren",
     "hist_goto_cycles": "Toon me de cycli",
     "save_total_cycles": "Totaal opslaan"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Een voltooide cyclus wacht in werkelijkheid {eff} s in plaats van {delay} s: het Min. uitschakelinterval ({gap} s) is langer en heeft voorrang."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Geïmporteerd uit de communitystore. Weergegeven ter referentie en voor matchen. Telt niet mee in je statistieken en kan niet worden bewerkt.",
     "merge_no_imports": "Geïmporteerde opnamen kunnen niet worden samengevoegd met een echte cyclus. Deselecteer ze om samen te voegen.",
     "store_enable_hint": "Schakel onlinefuncties in bij Instellingen om referentiecycli van de community te bekijken en te importeren.",
+    "advisory_duration_outlier": "{n} cyclus/cycli met het label '{name}' wijken te ver af van de gebruikelijke duur om er ooit mee te matchen (ergste geval: {ratio}x). Waarschijnlijk zijn ze verkeerd gelabeld, of heeft één opname twee runs vastgelegd. Label ze opnieuw of splits ze, zodat ze de tijdschatting van dit programma niet langer vertekenen.",
+    "standby_above_stop_title": "Verbruikte nog {idle} W toen de cyclus eindigde",
+    "standby_above_stop_sub": "{n} van de laatste {total} cycli. De uitschakelvertraging start pas zodra het vermogen onder de Stopdrempel ({stop} W) ligt, waardoor cycli te laat eindigen of met de hand gestopt moeten worden.",
     "online_intro": "Deel referentiecycli met andere WashData-gebruikers en download ze. Alle onlinefuncties zijn optioneel en standaard uitgeschakeld.",
     "store_share_intro": "Upload deze referentiecyclus zodat anderen met hetzelfde apparaat hem kunnen gebruiken. Hij wordt beoordeeld voordat hij openbaar verschijnt.",
     "online_intro_global": "Bekijk en deel referentieopnamen met andere WashData-gebruikers en bevestig apparaatvermeldingen. Eén verbinding geldt voor je hele WashData-integratie; merk en model van het apparaat worden per apparaat ingesteld onder Basis. Alle onlinefuncties zijn optioneel en standaard uitgeschakeld.",
@@ -1105,7 +1114,7 @@
     "duration_weight": "Stap 4: hoe sterk de duurovereenkomst de eindscore beïnvloedt (standaard 0,22)",
     "energy_weight": "Stap 4: hoe sterk de energieovereenkomst de eindscore beïnvloedt (standaard 0,22)",
     "profile_match_min_duration_ratio": "Stap 1: minimale cycluslengte als fractie van de profielduur; standaard 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Stap 1: maximale cycluslengte als fractie van de profielduur; standaard 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Stap 1: maximale cycluslengte als fractie van de profielduur; standaard 1,8 (180%)",
     "keep_min_score": "Stap 2: minimale score om in de race te blijven; standaard 0,1 laat zwakke kandidaten toe, latere stappen kiezen de beste",
     "dtw_blend": "Stap 3: 0 = alleen kernscore, 1 = alleen DTW-score, 0,5 = gelijke mix (standaard)",
     "dtw_ensemble_w": "Stap 3 (ensemble-modus): gewicht op geschaalde L1 vs afgeleid DTW; standaard 0,7 geeft voorkeur aan niveauafhankelijke herkenning",
@@ -1446,8 +1455,8 @@
       "label": "Vertraging uitlaadherinnering"
     },
     "notify_unload_repeat": {
-      "doc": "Blijft de uitlaadherinnering elke \"Vertraging uitlaadherinnering\" minuten opnieuw verzenden totdat u de deur opent of in de melding op \"Stop met herinneren\" tikt. Vereist een Deursensorentiteit (de herinnering zelf ook). De sluitknop werkt bij meldingen van de Home Assistant companion-app (mobiel).",
-      "label": "Herhalen tot de deur opengaat"
+      "doc": "Blijft de uitlaadherinnering elke \"Vertraging uitlaadherinnering\" minuten opnieuw verzenden totdat het uitladen is bevestigd of u in de melding op \"Stop met herinneren\" tikt. Vereist een manier om het uitladen te bevestigen: een Deursensorentiteit, een Uitlaadbevestigingsentiteit of de optie \"Uitladen handmatig bevestigen\" hieronder. De sluitknop werkt bij meldingen van de Home Assistant companion-app (mobiel).",
+      "label": "Herhalen tot uitgeladen"
     },
     "off_delay": {
       "doc": "Tijd om te wachten nadat de stroom is uitgevallen voordat de cyclus als voltooid wordt verklaard. Als de stroom binnen dit venster wordt hervat, gaat de cyclus naadloos verder - dit overbrugt pauzes tussen wasfasen. Vaatwassers hebben lange droogfasen (uitschakeling gedurende 20-60 minuten), dus de uitschakelvertraging moet groter zijn dan die om de hele was+droogcyclus als één cyclus te laten verlopen.",
@@ -1655,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Tijdgewogen kosten",
       "doc": "Reken elke cyclus af tegen de prijs die op elk moment van de cyclus gold, in plaats van tegen de ene prijs die gold toen hij klaar was. Geldt alleen voor een prijsentiteit (een statische prijs kan niet bewegen). Vraagt geen extra instellingen: tijdens de cyclus wordt de prijs live bijgehouden, en \"Geschiedenis verwerken\" onder Diagnostiek berekent de kosten van oudere cycli opnieuw uit de recorder. Uit = het klassieke gedrag, één prijs bevroren aan het eind."
+    },
+    "unload_confirm_entity": {
+      "label": "Uitlaadbevestigingsentiteit",
+      "doc": "Optionele entiteit waarvan de activering betekent dat de lading eruit is gehaald, voor machines die geen deursensor kunnen hebben. Elk type werkt: een Zigbee- of NFC-knop, een input_button-helper, een bewegingssensor voor de machine, een scène. Elke statuswijziging telt als bevestiging, behalve uitschakelen en niet beschikbaar worden. Door dit in te stellen wordt de uitlaadherinnering ook ingeschakeld op een apparaat zonder Deursensorentiteit."
+    },
+    "unload_track_without_door": {
+      "label": "Uitladen handmatig bevestigen",
+      "doc": "Voert de uitlaadherinnering uit op een apparaat zonder Deursensorentiteit en zonder Uitlaadbevestigingsentiteit, waarbij u het uitladen in plaats daarvan vanuit uw eigen automatisering bevestigt: druk op de knopentiteit \"Markeren als uitgeladen\" of roep de actie ha_washdata.mark_unloaded aan. Wordt genegeerd wanneer er een Deursensorentiteit is ingesteld, die het signaal al levert."
     }
   },
   "setting_group": {
@@ -1867,6 +1884,7 @@
       "summary": "{total} verkeerd gedetecteerde cyclus(sen) uitgesloten: {parts}.",
       "reason": {
         "force_stopped": "geforceerd gestopt",
+        "user_stopped": "handmatig gestopt",
         "interrupted": "onderbroken",
         "incomplete": "onvolledig",
         "noise": "ruis",
@@ -2021,7 +2039,8 @@
     "unlabel_done": "Label verwijderd van {count} cyclus(sen)",
     "unlabel_failed": "Label verwijderen mislukt: {error}",
     "odometer_saved": "Totaal aantal cycli opgeslagen",
-    "odometer_save_failed": "Kan totaal niet opslaan: {error}"
+    "odometer_save_failed": "Kan totaal niet opslaan: {error}",
+    "contrib_device_changed": "Toegevoegd aan de communitystore, maar er is van apparaat gewisseld terwijl het formulier openstond. Selecteer het bij Instellingen."
   },
   "trend": {
     "down": "Trend naar beneden",

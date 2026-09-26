@@ -120,6 +120,28 @@ def test_option_defaults_reported_per_device_type():
     assert coarse["start_duration_threshold"] == 30.0
 
 
+def test_option_defaults_carry_the_effective_end_wait_pair():
+    """#445: the detector ends a cycle after max(off_delay, min_off_gap), and
+    min_off_gap was absent from this payload entirely.
+
+    With the key missing the panel rendered an empty field for an unset
+    min_off_gap and every cross-field rule's ``!= null`` guard short-circuited, so
+    nothing showed the number actually governing the wait. The reporter set
+    off_delay to 180 s on a washing machine whose real wait was 480 s, waited six
+    minutes, and force-stopped three cycles.
+    """
+    wm = _call_get_devices({}, {})["option_defaults"]
+    assert wm["min_off_gap"] == 480
+    assert wm["off_delay"] == 180
+    # A dishwasher's prior is far longer - this is the one that surprises people.
+    dw = _call_get_devices({}, {"device_type": "dishwasher"})["option_defaults"]
+    assert dw["min_off_gap"] == 3600
+    assert dw["off_delay"] == 1800
+    # Both are ints: the panel renders them into number inputs and compares them.
+    for key in ("min_off_gap", "off_delay"):
+        assert isinstance(wm[key], int) and isinstance(dw[key], int)
+
+
 def test_keys_are_reported_even_when_no_manager_is_loaded():
     # Contract: the field always exists, so the panel never has to guard on it.
     entry = SimpleNamespace(entry_id="e1", title="Washer", data={}, options={})

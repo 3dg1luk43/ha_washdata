@@ -60,6 +60,7 @@
     "fair_fit_tip": "Střední konzistence shody – některé cykly přiřazené k tomuto profilu mají nižší skóre spolehlivosti. Označte více cyklů nebo znovu zaznamenejte profil, abyste zvýšili přesnost.",
     "feedback_requested": "Vyžádána zpětná vazba",
     "golden_cycle": "Zaznamenaný referenční cyklus",
+    "duration_outlier": "Cykly s neobvyklou délkou: {n}",
     "improving": "↗ zlepšování",
     "manual": "(vybráno ručně)",
     "needs_review": "Vyžaduje revizi",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importovat cykly: {n}",
     "hist_goto_cycles": "Zobrazit cykly",
     "save_total_cycles": "Uložit celkový počet"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Dokončený cyklus ve skutečnosti čeká {eff} s, ne {delay} s: Min. mezera vypnutí ({gap} s) je delší a má přednost."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1032,6 +1038,9 @@
     "imported_readonly": "Importováno z komunitního obchodu. Zobrazuje se pro referenci a porovnávání. Nezapočítává se do vašich statistik a nelze jej upravovat.",
     "merge_no_imports": "Importované záznamy nelze sloučit se skutečným cyklem. Zrušte jejich výběr pro sloučení.",
     "store_enable_hint": "Povolte online funkce v Nastavení, abyste mohli procházet a importovat referenční cykly komunity.",
+    "advisory_duration_outlier": "Cykly označené jako '{name}' ({n}) jsou příliš daleko od jeho obvyklé délky, než aby se s ním kdy mohly shodovat (nejhorší: {ratio}x). Pravděpodobně jsou špatně označené, nebo jeden záznam zachytil dva běhy. Označte je znovu nebo je rozdělte, aby přestaly zkreslovat odhad času tohoto programu.",
+    "standby_above_stop_title": "Při ukončení cyklu stále odebírá {idle} W",
+    "standby_above_stop_sub": "{n} z posledních {total} cyklů. Zpoždění vypnutí se začne počítat až ve chvíli, kdy příkon klesne pod Práh zastavení ({stop} W), takže cykly končí pozdě nebo je nutné je zastavit ručně.",
     "online_intro": "Sdílejte a stahujte referenční cykly s ostatními uživateli WashData. Všechny online funkce jsou dobrovolné a ve výchozím nastavení vypnuté.",
     "store_share_intro": "Nahrajte tento referenční cyklus, aby jej mohli používat ostatní se stejným spotřebičem. Před zveřejněním bude zkontrolován.",
     "online_intro_global": "Procházejte a sdílejte referenční záznamy s ostatními uživateli WashData a potvrzujte záznamy spotřebičů. Jedno připojení platí pro celou vaši integraci WashData; značka a model spotřebiče se nastavují pro každé zařízení v sekci Základní. Všechny online funkce jsou dobrovolné a ve výchozím nastavení vypnuté.",
@@ -1410,8 +1419,8 @@
       "label": "Zpoždění připomínky vyložení"
     },
     "notify_unload_repeat": {
-      "doc": "Znovu odesílá připomínku vyložení každých \"Zpoždění připomínky vyložení\" minut, dokud neotevřete dveře nebo v oznámení neklepnete na \"Přestat připomínat\". Vyžaduje Entitu senzoru dveří (stejně jako samotná připomínka). Tlačítko pro zrušení funguje u oznámení mobilní aplikace Home Assistant (companion app).",
-      "label": "Opakovat, dokud se neotevřou dveře"
+      "doc": "Znovu odesílá připomínku vyložení každých „Zpoždění připomínky vyložení“ minut, dokud není vyložení potvrzeno nebo v oznámení neklepnete na „Přestat připomínat“. Vyžaduje způsob, jak vyložení potvrdit: Entitu senzoru dveří, Entitu potvrzení vyložení nebo níže uvedenou možnost „Ruční potvrzení vyložení“. Tlačítko pro zrušení funguje u oznámení mobilní aplikace Home Assistant (companion app).",
+      "label": "Opakovat do vyložení"
     },
     "off_delay": {
       "doc": "Čas čekání po poklesu příkonu před vyhlášením ukončení cyklu. Pokud se příkon obnoví v tomto okně, cyklus plynule pokračuje – to přemostí pauzy mezi fázemi praní. Myčky nádobí mají dlouhé fáze sušení (příkon vypnut po dobu 20–60 minut), takže zpozdění vypnutí musí tuto dobu překročit, aby byl celkový cyklus mytí+sušení zachován jako jeden.",
@@ -1623,6 +1632,14 @@
     "curve_preroll_seconds": {
       "doc": "Kolik sekund odečtů z neúspěšných pokusů o spuštění může WashData přenést na začátek křivky cyklu. Křivka cyklu obvykle začíná u pokusu o spuštění, který nakonec uspěl, takže u stroje, který to před rozběhnutím několikrát zkusí - volba programu, zámek dveří, první napouštění - chybí v každé křivce první minuty skutečné činnosti. Nastavte tuto hodnotu o něco výše, než je nejdelší takový rozběh vašeho stroje (300 s většině bohatě stačí). 0 funkci vypne. Mějte na paměti, že zapnutí posune zaznamenaný začátek dříve, takže cykly zaznamenané před změnou a po ní nesou pro stejný program různé doby trvání; naučené průměry se budou posouvat, dokud starší cykly nevypadnou z historie.",
       "label": "Náběh křivky"
+    },
+    "unload_confirm_entity": {
+      "label": "Entita potvrzení vyložení",
+      "doc": "Volitelná entita, jejíž aktivace znamená, že náplň byla vyjmuta, pro spotřebiče, na které nelze umístit senzor dveří. Funguje jakýkoli typ: tlačítko Zigbee nebo NFC, pomocník input_button, senzor pohybu před spotřebičem, scéna. Za potvrzení se počítá každá změna stavu kromě vypnutí a přechodu do stavu nedostupný. Nastavení této možnosti také zapne připomínku vyložení na zařízení bez Entity senzoru dveří."
+    },
+    "unload_track_without_door": {
+      "label": "Ruční potvrzení vyložení",
+      "doc": "Spustí připomínku vyložení na zařízení bez Entity senzoru dveří a bez Entity potvrzení vyložení, přičemž vyložení potvrdíte z vlastní automatizace: stiskněte entitu tlačítka „Označit jako vyložené“ nebo zavolejte službu ha_washdata.mark_unloaded. Ignorováno, pokud je nastavena Entita senzoru dveří, která tento signál již poskytuje."
     }
   },
   "setting_group": {
@@ -1835,6 +1852,7 @@
       "summary": "Vyloučeno {total} chybně detekovaných cyklů: {parts}.",
       "reason": {
         "force_stopped": "vynuceně zastavené",
+        "user_stopped": "ručně zastavené",
         "interrupted": "přerušené",
         "incomplete": "neúplné",
         "noise": "hluk",
@@ -1965,6 +1983,7 @@
     "store_no_appliance": "Nejprve nastavte značku a model spotřebiče v Nastavení.",
     "store_share_failed": "Sdílení selhalo: {error}",
     "store_shared": "Sdíleno do komunitního obchodu, čeká na kontrolu.",
+    "contrib_device_changed": "Přidáno do komunitního obchodu, ale vybraný spotřebič se změnil, zatímco byl formulář otevřený. Vyberte jej v Nastavení.",
     "appliance_added": "Spotřebič přidán, čeká na schválení",
     "thanks_confirming": "Děkujeme za potvrzení",
     "device_approved": "Schváleno komunitou",
@@ -2024,7 +2043,7 @@
     "duration_weight": "Fáze 4: jak silně shoda délky trvání ovlivňuje výsledné skóre (výchozí 0,22)",
     "energy_weight": "Fáze 4: jak silně shoda energie ovlivňuje výsledné skóre (výchozí 0,22)",
     "profile_match_min_duration_ratio": "Fáze 1: minimální délka cyklu jako zlomek doby trvání profilu; výchozí 0,1 (10 %)",
-    "profile_match_max_duration_ratio": "Fáze 1: maximální délka cyklu jako zlomek doby trvání profilu; výchozí 1,5 (150 %)",
+    "profile_match_max_duration_ratio": "Fáze 1: maximální délka cyklu jako zlomek doby trvání profilu; výchozí 1,8 (180 %)",
     "keep_min_score": "Fáze 2: minimální skóre pro setrvání v závodu; výchozí 0,1 připouští slabé shody, pozdější fáze vyberou nejlepší",
     "dtw_blend": "Fáze 3: 0 = pouze základní skóre, 1 = pouze skóre DTW, 0,5 = rovnoměrné míchání (výchozí)",
     "dtw_ensemble_w": "Fáze 3 (režim kombinace): váha škálovaného L1 oproti derivátnímu DTW; výchozí 0,7 upřednostňuje úroveň",

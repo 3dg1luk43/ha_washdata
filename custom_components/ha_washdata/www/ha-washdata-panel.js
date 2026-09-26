@@ -171,8 +171,8 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Duration Gates', fields: [
       { key: 'profile_match_min_duration_ratio', label: 'Min Duration Ratio', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
         doc: 'Minimum cycle length relative to the profile. 0.9 means a cycle must be at least 90% of the profile duration to match.' },
-      { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.5,
-        doc: 'Maximum cycle length relative to the profile. 1.5 means a cycle must be under 150% of the profile duration to match.' },
+      { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.8,
+        doc: 'Maximum cycle length relative to the profile. 1.3 means a cycle must be under 130% of the profile duration to match.' },
       { key: 'profile_duration_tolerance', label: 'Profile Duration Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.25,
         doc: 'The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.' },
       { key: 'duration_tolerance', label: 'Estimate Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
@@ -266,8 +266,13 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Unload Reminder', fields: [
       { key: 'notify_unload_delay_minutes', label: 'Unload Nag Delay', unit: 'min', type: 'number', min: 0, def: 60, basic: true,
         doc: 'Minutes after a cycle ends before sending the still-waiting "unload the machine" reminder. Set 0 to disable the reminder.' },
-      { key: 'notify_unload_repeat', label: 'Repeat Until Door Opens', type: 'checkbox',
-        doc: 'Keep re-sending the unload reminder every "Unload Nag Delay" minutes until you open the door or tap "Stop reminding" on the notification. Requires a Door Sensor Entity (the reminder itself does). The dismiss button works on Home Assistant companion-app (mobile) notifications.' },
+      { key: 'notify_unload_repeat', label: 'Repeat Until Unloaded', type: 'checkbox',
+        doc: 'Keep re-sending the unload reminder every "Unload Nag Delay" minutes until the unload is confirmed or you tap "Stop reminding" on the notification. Needs a way to confirm the unload: a Door Sensor Entity, an Unload Confirmation Entity, or the "Confirm Unload Manually" option below. The dismiss button works on Home Assistant companion-app (mobile) notifications.' },
+      { key: 'unload_confirm_entity', label: 'Unload Confirmation Entity', type: 'entity',
+        domains: ['event', 'button', 'input_button', 'binary_sensor', 'sensor', 'input_boolean', 'switch', 'scene', 'tag'],
+        doc: 'Optional entity whose activation means the load has been taken out, for machines that cannot have a door sensor. Any kind works: a Zigbee or NFC button, an input_button helper, a motion sensor in front of the machine, a scene. Every state change counts as a confirmation except switching off and going unavailable. Setting this also enables the unload reminder on a device with no Door Sensor Entity.' },
+      { key: 'unload_track_without_door', label: 'Confirm Unload Manually', type: 'checkbox',
+        doc: 'Run the unload reminder on a device with no Door Sensor Entity and no Unload Confirmation Entity, and confirm the unload from your own automation instead: press the "Mark Unloaded" button entity, or call the ha_washdata.mark_unloaded service. Ignored when a Door Sensor Entity is set, which already provides the signal.' },
       { key: 'pump_stuck_duration', label: 'Pump Stuck Duration', unit: 's', type: 'number', min: 0, def: 1800,
         onlyDeviceType: 'pump', doc: 'Seconds a pump may run continuously before it is flagged as possibly stuck (fires the stuck-pump event).' },
     ] },
@@ -379,7 +384,7 @@ for (const sec of _SETTINGS_SECTIONS) {
 // options, so _FIELD_BY_KEY has no entry for them).
 const _PG_MATCH_DEFAULTS = {
   profile_match_min_duration_ratio: 0.1,
-  profile_match_max_duration_ratio: 1.5,
+  profile_match_max_duration_ratio: 1.8,
   corr_weight: 0.45,
   keep_min_score: 0.1,
   dtw_bandwidth: 0.2,
@@ -400,6 +405,29 @@ const _PG_MATCH_DEFAULTS = {
 // suggested value for THAT field (always actionable in the current section).
 // `ctx.stateOf(entity_id)` reaches the hass state for rules that need an entity's
 // attributes; every numeric rule ignores it.
+
+// ─── Setting notes (informational, not conflicts) ─────────────────────────────
+// Same shape as _SETTING_CONFLICTS, but these describe a value the integration
+// DERIVES from more than one setting. They are not violations - nothing here is
+// misconfigured - so they render as a neutral note rather than an error with a
+// fix button, and they never contribute to the section conflict dots.
+const _SETTING_NOTES = [
+  {
+    // #445: the detector waits max(off_delay, min_off_gap), so a min_off_gap
+    // above off_delay silently governs the end of the cycle. The reporter set
+    // off_delay to 180 s, waited 6 minutes and force-stopped three cycles,
+    // because the 480 s their washing machine actually waited was never shown.
+    keys: ['off_delay', 'min_off_gap'],
+    check: v => v.off_delay != null && v.min_off_gap != null && v.min_off_gap > v.off_delay,
+    fieldNotes: v => ({
+      off_delay: {
+        msgKey: 'note.off_delay.effective',
+        msgVars: { eff: v.min_off_gap, gap: v.min_off_gap, delay: v.off_delay },
+        msgFb: `A finished cycle actually waits ${v.min_off_gap} s, not ${v.off_delay} s: Min Off Gap (${v.min_off_gap} s) is longer and takes precedence.`,
+      },
+    }),
+  },
+];
 
 // Device classes and units that prove a sensor is not a price per kWh (#439).
 // Mirrors manager._NON_PRICE_DEVICE_CLASSES / _NON_PRICE_UNITS - keep in step.
@@ -835,6 +863,10 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-auto-pill-x { flex: 0 0 auto; border: none; background: transparent; color: var(--secondary-text-color); cursor: pointer; font-size: 1.15em; line-height: 1; padding: 0 5px; border-radius: 50%; }
 .wd-auto-pill-x:hover { background: var(--error-color, #f44336); color: var(--wd-white); }
 .wd-field-hint { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px; }
+/* Derived-value note (#445): informational, never an error - no red, no fix button. */
+.wd-setting-note { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px;
+  padding: 5px 9px; border-radius: var(--wd-radius-sm);
+  background: var(--secondary-background-color); border-left: 3px solid var(--primary-color); }
 /* Entity-pill multi-picker (compact chips + inline add input) */
 .wd-pillbox { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 5px 6px; min-height: 34px;
   border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--card-background-color); }
@@ -964,7 +996,14 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
   border: 1px solid var(--divider-color, rgba(0,0,0,.08)); cursor: pointer; transition: border-color .15s, transform .1s;
 }
 .wd-profile-card:hover { border-color: var(--primary-color); transform: translateY(-1px); }
-button.wd-attn-card, button.wd-profile-card { appearance: none; font: inherit; text-align: left; width: 100%; }
+/* #444: these are the only cards rendered as a button element, and resetting
+   font without color left them on the UA buttontext system color - which follows
+   the BROWSER/OS color scheme, not the HA theme. On a light HA theme served to a
+   dark-mode browser (Catppuccin Auto Latte Macchiato, the reporter's setup) the
+   profile titles came out near-white on a light card. Everything beside them was
+   readable because it names a theme token explicitly; only the inherited color
+   was wrong. (No backticks in this block: it lives inside a JS template literal.) */
+button.wd-attn-card, button.wd-profile-card { appearance: none; font: inherit; color: inherit; text-align: left; width: 100%; }
 button.wd-profile-card { display: block; }
 .wd-prof-wrap { position: relative; }
 .wd-profile-name { font-weight: 600; font-size: 1em; margin-bottom: 6px; }
@@ -1760,7 +1799,7 @@ function _field(f, value, extra) {
     const lockBtn = `<button type="button" class="wd-sug-lock" data-suglock="${key}" title="${lockTitle}" aria-label="${lockTitle}">🔕</button>`;
     sugHtml = sugHtml.replace(/<\/div>\s*$/, lockBtn + '</div>');
   }
-  return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${chgDot}${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div>${sugHtml}</div>`;
+  return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${chgDot}${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div><div class="wd-setting-note" data-cnote="${key}" hidden></div>${sugHtml}</div>`;
 }
 
 // Are two suggestion/option values effectively equal? Numeric-tolerant so an
@@ -2057,6 +2096,12 @@ class HaWashdataPanel extends HTMLElement {
     this._toolsSubtab = 'recording';
     this._loading = true;
     this._tabLoading = false;
+    // Scroll preservation state (#443, #449). _scrollNavKey is the _navKey() the last
+    // render was for, so _render can tell navigation from a background refresh without
+    // every navigation site having to say so. _scrollCarry holds the position across a
+    // _tabLoading placeholder render, which is too short to clamp against.
+    this._scrollNavKey = null;
+    this._scrollCarry = null;
     this._lastRefresh = null;
     this._powerHistory = [];   // [[elapsedSeconds, watts], ...]
     this._powerT0 = null;
@@ -3964,6 +4009,140 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  // Scroll preservation across a full re-render (#443, #449). Keyed by selector
+  // rather than by element, because the elements themselves do not survive the swap.
+  //
+  // Three questions decide what happens to a scroll position, and they are answered
+  // here rather than at the ~15 sites that trigger a render:
+  //
+  //  1. WHICH containers. The panel scrolls internally, so .wd-main is the page, but
+  //     it is not the only scroller: an open dialog, the log views, a wide table and
+  //     the horizontal tab strip all scroll on their own and all get destroyed by the
+  //     same swap. #443 carried the first two; the rest reset on every poll.
+  //  2. PRESERVE or go home. A re-render is not navigation. The Overview re-renders
+  //     every few seconds while a cycle runs (#449), and so do the background fetches
+  //     that fill a tab in behind its first paint - none of those is the user asking
+  //     to be somewhere else. Changing tab or device is, and only that.
+  //  3. CLAMP or carry. Clamping to the new tree's height is right when the tree
+  //     genuinely got shorter, and wrong when it is the _tabLoading placeholder: that
+  //     one is a spinner a few dozen pixels tall, so clamping against it destroys the
+  //     position a moment before the real tree comes back. Carry it instead.
+
+  // Reset on navigation, preserved across every other re-render.
+  _SCROLLERS = ['.wd-main', '.wd-modal', '.wd-logs', '.wd-log-drawer-body', '.wd-table-wrap', '.wd-sd-tree'];
+  // Navigation chrome: preserved across navigation too. Clicking a tab must not also
+  // scroll the strip the tab is in - on a narrow screen that strip overflows, and
+  // moving it is how the tab you just pressed ends up off-screen.
+  _SCROLLERS_CHROME = ['.wd-tabs'];
+
+  // `sel|i/n` rather than `sel`: several elements can match one selector (tables), and
+  // folding the match count into the key means a list that grew or shrank between
+  // renders simply misses instead of applying row 3's offset to a different table.
+  // Keys are index-based, so a scroller INSIDE a dialog has to be keyed apart
+  // from the page ones or the index shifts as dialogs open and close. It also
+  // has to be recognisable as modal-scoped, because _render drops the modal's
+  // keys when the dialog or its tab changes (see _modalNavKey): filtering only
+  // '.wd-modal|' missed '.wd-table-wrap' and '.wd-sd-tree', so the Cleanup
+  // table, the history-import review table and the export-select /
+  // import-wizard / store-share-device trees all carried one offset between
+  // different dialogs - scroll the export tree, close it, open the import
+  // wizard, and it opens part-way down.
+  _MODAL_KEY_PREFIX = 'modal:';
+
+  _eachScroller(sels, fn) {
+    const sr = this.shadowRoot;
+    if (!sr) return;
+    for (const sel of sels) {
+      const els = Array.from(sr.querySelectorAll(sel));
+      // '.wd-modal' is the dialog itself, not something nested in one.
+      const nested = el => sel !== '.wd-modal' && !!el.closest('.wd-modal');
+      for (const scoped of [false, true]) {
+        const group = els.filter(el => nested(el) === scoped);
+        const prefix = scoped ? this._MODAL_KEY_PREFIX : '';
+        group.forEach((el, i) => fn(el, `${prefix}${sel}|${i}/${group.length}`));
+      }
+    }
+  }
+
+  _captureScroll() {
+    if (!this.shadowRoot) return null;
+    const out = {};
+    this._eachScroller([...this._SCROLLERS, ...this._SCROLLERS_CHROME], (el, key) => {
+      if (el.scrollTop || el.scrollLeft) out[key] = { top: el.scrollTop, left: el.scrollLeft };
+    });
+    return out;
+  }
+
+  // Drop everything but the navigation chrome - what a tab or device change wants.
+  _scrollChromeOnly(saved) {
+    if (!saved) return saved;
+    const out = {};
+    for (const [key, pos] of Object.entries(saved)) {
+      if (this._SCROLLERS_CHROME.some(sel => key.startsWith(`${sel}|`))) out[key] = pos;
+    }
+    return out;
+  }
+
+  _restoreScroll(saved) {
+    if (!saved || !this.shadowRoot) return;
+    this._eachScroller([...this._SCROLLERS, ...this._SCROLLERS_CHROME], (el, key) => {
+      const pos = saved[key];
+      if (!pos) return;
+      // Clamp: the new tree may be shorter (a section collapsed, a list filtered),
+      // in which case the browser would silently clamp anyway - do it explicitly so
+      // the value we write is the value we meant.
+      const maxTop = Math.max(0, el.scrollHeight - el.clientHeight);
+      const maxLeft = Math.max(0, el.scrollWidth - el.clientWidth);
+      el.scrollTop = Math.min(pos.top, maxTop);
+      el.scrollLeft = Math.min(pos.left, maxLeft);
+    });
+  }
+
+  // "Where am I" as one string: the coordinates a *click on a navigation strip*
+  // changes, and nothing else. A change here is the user asking to be somewhere new,
+  // which is the only thing that outranks preserving the scroll position.
+  //
+  // Deliberately excluded: filters and searches (_settingsSearch, _cycleFilter) are
+  // not navigation, and neither is _pgAnalysisTab - the Playground flips that one
+  // itself when a background batch finishes, and jumping to the top for that is
+  // exactly the complaint in #449.
+  _navKey() {
+    return [
+      this._tab, this._selIdx, this._panelSubtab, this._profSubtab,
+      this._toolsSubtab, this._settingsSec, this._storeView,
+    ].join('|');
+  }
+
+  // Which dialog, and which of its tabs, is on screen. _navKey carries no modal
+  // state, and _captureScroll files the dialog's offset under the single key
+  // '.wd-modal|0/1' - identical for every dialog and every dialog tab. So
+  // switching pp-tab-* Overview -> Cleanup restored Overview's offset into
+  // Cleanup, gear-settings did the same, and _closeCycleDetail applied the
+  // cycle inspector's offset to the profile panel underneath it. Those are
+  // navigations the user asked for, so the modal's scrollers start at the top,
+  // exactly as `navigated` does it for the page.
+  _modalNavKey() {
+    const m = this._modal;
+    // `tab` covers profile-panel and gear-settings, but cycle-detail keeps its
+    // Inspect/Trim/Split/Review view in `mode` and the import wizards keep their
+    // step in `step` - without those, switching view inside those dialogs kept
+    // the previous view's offset, which is the same bug one level down.
+    if (!m) return '';
+    // The identity must be STABLE for as long as the dialog is open, so it can
+    // never be read from an editable field. `profile-group` keys on `orig`
+    // (the group being edited, or null for a new one) rather than `name`: the
+    // `wd-pg-name` input writes every keystroke into `m.name` without a render,
+    // and the member-checkbox handler copies that value in again before it calls
+    // `_render()`. Keying on `name` therefore made ticking a member after typing
+    // look like navigation, so the scroll keys were dropped and the dialog jumped
+    // back to the top - the same wrong reset this helper exists to prevent, in the
+    // other direction.
+    const ident = m.type === 'profile-group'
+      ? (m.orig || '')
+      : (m.name || m.cycleId || '');
+    return [m.type, ident, m.tab || m.mode || m.step || ''].join('|');
+  }
+
   _render() {
     if (!this._container) return;
     // Sync the module-level date-display mode from the user's saved preference so
@@ -3981,8 +4160,50 @@ class HaWashdataPanel extends HTMLElement {
     // about to erase, so it would be left floating with stale numbers over the
     // new DOM. Drop it with the crosshair it describes.
     this._hideGraphTip();
+    // #443/#449: the swap below destroys .wd-main - the element that actually
+    // scrolls, since the panel scrolls internally - and the replacement starts at
+    // scrollTop 0. Every re-render therefore threw the user back to the top. Focus is
+    // already carried across the swap a few lines up; scroll is the same problem and
+    // gets the same treatment. See the block above _SCROLLERS for what is preserved
+    // and when.
+    //
+    // A pending carry outranks a fresh capture: it exists precisely because the tree
+    // we are replacing is the _tabLoading placeholder, whose own offset is 0 and would
+    // otherwise overwrite the real position we are holding for it.
+    const navKey = this._navKey();
+    const navigated = this._scrollNavKey != null && this._scrollNavKey !== navKey;
+    this._scrollNavKey = navKey;
+    let scrollBefore = this._scrollCarry || this._captureScroll();
+    // A navigation strip was clicked: landing at the top is the point (see _navKey).
+    if (navigated) scrollBefore = this._scrollChromeOnly(scrollBefore);
+    // Same rule inside a dialog (see _modalNavKey): drop the modal-scoped keys
+    // when the dialog or its tab changes, so the new view is not opened partway
+    // down at the offset the previous one happened to be at.
+    const modalKey = this._modalNavKey();
+    if (
+      this._scrollModalKey !== undefined
+      && modalKey !== this._scrollModalKey
+      && scrollBefore
+    ) {
+      scrollBefore = Object.fromEntries(
+        Object.entries(scrollBefore).filter(
+          ([k]) => !k.startsWith('.wd-modal|') && !k.startsWith(this._MODAL_KEY_PREFIX),
+        ),
+      );
+    }
+    this._scrollModalKey = modalKey;
     this._container.innerHTML = this._buildHtml();
     this._wire();
+    if (this._tabLoading) {
+      // The placeholder is a spinner a few dozen pixels tall, so restoring into it
+      // would clamp the offset to ~0 and lose it for good. Hold it until the tab's
+      // real content is back (_fetchTabData's finally re-renders with the flag clear).
+      this._scrollCarry = scrollBefore;
+      this._restoreScroll(this._scrollChromeOnly(scrollBefore));
+    } else {
+      this._scrollCarry = null;
+      this._restoreScroll(scrollBefore);
+    }
     this._drawStatusCurve();
     this._drawModalCanvas();
     this._drawProfileSparklines();  // D2
@@ -4028,7 +4249,10 @@ class HaWashdataPanel extends HTMLElement {
         const active = sr.activeElement || (this.getRootNode() && this.getRootNode().activeElement) || null;
         if (!active || !modalEl.contains(active)) {
           const f = _focusableEls(modalEl);
-          try { (f[0] || modalEl).focus(); } catch (_) {}
+          // preventScroll (#443): the dialog is already on screen - this branch only
+          // reclaims focus the innerHTML swap dropped. Scrolling here would undo the
+          // modal's own restored scroll position.
+          try { (f[0] || modalEl).focus({ preventScroll: true }); } catch (_) {}
         }
       }
     } else if (this._modalFocusActive) {
@@ -4244,6 +4468,15 @@ class HaWashdataPanel extends HTMLElement {
       if (_sugC.ml) parts.push(this._t('lbl.n_ml_suggestions', {n: _sugC.ml}, `${_sugC.ml} ML`));
       attn.push(`<button class="wd-attn-card" type="button" data-action="goto-suggestions"><span class="wd-attn-icon">💡</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('lbl.n_tuning_suggestions', {n: total}, `${total} tuning suggestion${total > 1 ? 's' : ''}`)}</div><div class="wd-attn-sub">${parts.join(' · ')} · ${this._t('msg.review_in_settings', {}, 'Review in Settings')}</div></div></button>`);
     }
+    // #445 cause 1: the appliance's standby draw sits ABOVE its Stop Threshold, so
+    // the off delay never starts and the cycle cannot finish on its own. Explains
+    // rather than proposes: where idle and working power are the same level no
+    // threshold value fixes it, and the standby detector closes the cycle instead.
+    const sas = dev.standby_above_stop;
+    if (sas && this._canEdit()) {
+      attn.push(`<button class="wd-attn-card" type="button" style="border-color:var(--warning-color,#ff9800)" data-action="goto-standby"><span class="wd-attn-icon">\u26A0</span><div class="wd-attn-body"><div class="wd-attn-title" style="color:var(--warning-color,#ff9800)">${this._t('msg.standby_above_stop_title', {idle: sas.idle_w, stop: sas.stop_threshold_w}, `Still drawing ${sas.idle_w} W when the cycle ended`)}</div><div class="wd-attn-sub">${this._t('msg.standby_above_stop_sub', {n: sas.cycles_above, total: sas.cycles_checked, stop: sas.stop_threshold_w}, `${sas.cycles_above} of the last ${sas.cycles_checked} cycles. The off delay only starts below the Stop Threshold (${sas.stop_threshold_w} W), so cycles finish late.`)}</div></div></button>`);
+    }
+
     const attnHtml = attn.length ? `<div class="wd-attn">${attn.join('')}</div>` : '';
 
     // The one "how far through" figure that is not made of elapsed time: it comes
@@ -4851,7 +5084,15 @@ class HaWashdataPanel extends HTMLElement {
       terminalBadge = `<span class="wd-badge" style="color:var(--secondary-text-color,#888)"`
         + ` title="${_esc(tTip)}">${this._t('badge.quiet_tail', {mins}, `~${mins}m quiet tail`)}</span>`;
     }
-    const badges = [unmatchableBadge, healthBadge, trendBadge, terminalBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
+    // Register item 304: cycles filed under this program that are too far from its
+    // usual length to ever match it. Not cosmetic - they also drag avg_duration, and
+    // with it every future time estimate for this program.
+    const durAdv = (this._profileAdvisories || []).find(a => a && a.profile === p.name && a.code === 'duration_outlier');
+    const durBadge = durAdv
+      ? `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="${_esc(this._t(durAdv.message_key, durAdv.message_params, durAdv.message))}">\u26A0 ${this._t('badge.duration_outlier', {n: (durAdv.message_params || {}).n || 1}, `${(durAdv.message_params || {}).n || 1} odd-length cycle(s)`)}</span>`
+      : '';
+
+    const badges = [unmatchableBadge, durBadge, healthBadge, trendBadge, terminalBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
     // Mini power-signature curve: the profile's real average power shape (from its
     // envelope), so the card thumbnail matches the actual cycle. Painted after
     // render by _drawProfileSparklines. Needs ≥3 envelope points.
@@ -5056,7 +5297,7 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _htmlSettings() {
-    const o = Object.assign({}, this._opts, this._pendingSettings);
+    const o = this._editedOpts();
     if (!Object.keys(o).length)
       return `<div class="wd-empty"><div class="wd-icon">⚙️</div>${this._t('msg.loading_settings', {}, 'Loading settings…')}</div>`;
     const suggestionsErrorBanner = this._suggestionsError ? `<div class="wd-error-state"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-suggestions">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
@@ -5236,7 +5477,7 @@ class HaWashdataPanel extends HTMLElement {
     else if (f.type === 'select') extra.opts = f.opts || [];
     else if (f.type === 'entity') {
       const states = this._hass && this._hass.states ? this._hass.states : {};
-      const domains = f.domain === 'binary_sensor' ? ['binary_sensor', 'sensor'] : (f.domain ? [f.domain] : null);
+      const domains = Array.isArray(f.domains) ? f.domains : (f.domain === 'binary_sensor' ? ['binary_sensor', 'sensor'] : (f.domain ? [f.domain] : null));
       // `notPrice` drops the plug's own power/energy entities from the Energy Price
       // picker (#439) - they are the entities users reach for, and picking one costs
       // every cycle at the meter reading per kWh. Typing one anyway still validates.
@@ -5451,11 +5692,22 @@ class HaWashdataPanel extends HTMLElement {
   // but used to trigger the latter -- measured at 128 documents / 119 KB per open,
   // against a daily read budget the whole community shares.
 
+  // The options as the USER currently sees them: the saved options with the unsaved
+  // Settings edits laid over them. `_opts` alone is the SAVED state (#447), so reading
+  // it directly resolves against the previous value while the form shows the new one -
+  // which is how the appliance badge and device list came to lag the brand picker.
+  // The single source for that overlay: three sites open-coded the same
+  // `Object.assign` and only one of them carried the reason, so a change to the
+  // overlay order could update one and miss the others.
+  _editedOpts() {
+    return Object.assign({}, this._opts, this._pendingSettings);
+  }
+
   // Which appliance the currently-rendered entry describes. Included in the key so a
   // device switch (or an edit to brand/model/type) re-resolves instead of showing the
   // previous appliance's badge.
   _catalogEntryKey() {
-    const o = this._opts || {};
+    const o = this._editedOpts();
     return [
       (o.store_brand || '').trim().toLowerCase(),
       (o.store_model || '').trim().toLowerCase(),
@@ -5486,7 +5738,7 @@ class HaWashdataPanel extends HTMLElement {
 
   async _loadCatalogEntry(wantKey) {
     const dev = this._devices[this._selIdx];
-    const o = this._opts || {};
+    const o = this._editedOpts();
     const brand = (o.store_brand || '').trim();
     const model = (o.store_model || '').trim();
     if (!dev || !this._onlineEnabled() || !brand || !model) {
@@ -5562,7 +5814,7 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
     if (optKey === 'store_model') {
-      const brand = String((this._opts || {}).store_brand || '').trim();
+      const brand = String(this._editedOpts().store_brand || '').trim();
       if (!brand) return;
       if (this._catalog.forBrand !== brand || this._catalog.devices === undefined) {
         this._catalog.forBrand = brand;
@@ -8648,26 +8900,63 @@ class HaWashdataPanel extends HTMLElement {
       if (!dev) return;
       const eid = dev.entry_id;
       // A brand/device just created on the contribute page: preselect it + refresh.
+      // #447: the selection is PERSISTED, not just reflected locally. The popup runs on
+      // the store's own origin and knows nothing about this config entry, so without a
+      // set_options here the integration never learned the appliance the user had just
+      // contributed - the panel showed it, the backend had nothing, and sharing failed
+      // with no_appliance_declared.
       if (d.type === 'washdata-device-created') {
         const patch = {};
         if (d.brand) patch.store_brand = d.brand;
         if (d.model) patch.store_model = d.model;
-        this._opts = { ...this._opts, ...patch };
         this._catalog.brands = undefined; this._catalog.devices = undefined; this._catalog.forBrand = null;
         this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
         this._dropModelCandidates();
         this._catalogEntry = null;
-        this._showToast(this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval'));
+        // Persist only if the device that OPENED the popup is still selected.
+        // The popup is user-paced, so the selection can move while it is open,
+        // and _saveStoreOptions targets whatever is selected NOW - which would
+        // stamp this appliance identity onto another entry and reload it, while
+        // the device that asked for it gets nothing. Before these became real
+        // saves the wrong-device case could not persist anything.
+        const _contribEid = this._storeContribEid || eid;
+        const _hasPatch = Object.keys(patch).length > 0;
+        const _sameDevice = this._isActiveEntry(_contribEid);
+        // Say which happened. The success toast alone claimed the appliance had
+        // been applied here, when the guard had just declined to write it and
+        // nothing told the user to pick it by hand. One toast, not two: the
+        // toast slot is single and a second call replaces the first.
+        this._showToast(
+          _hasPatch && !_sameDevice
+            ? this._t('toast.contrib_device_changed', {}, 'Added to the community store, but the device changed while the form was open. Select it in Settings.')
+            : this._t('toast.appliance_added', {}, 'Appliance added - awaiting approval')
+        );
+        if (_hasPatch && _sameDevice) {
+          await this._saveStoreOptions(patch, { silent: true });
+        }
         this._render();
         return;
       }
       if (d.type === 'washdata-brand-created') {
-        if (d.brand) this._opts = { ...this._opts, store_brand: d.brand };
         this._catalog.brands = undefined;  // reload the brand catalog so it is pickable
         this._catalog.brandsFull = false; this._catalog.brandPrefixes = [];
         this._dropModelCandidates();
         this._catalogEntry = null;         // and re-resolve the badge for the new brand
-        this._showToast(this._t('toast.brand_added', {}, 'Brand added - awaiting approval'));
+        // Same entry guard, and the same reporting, as washdata-device-created above.
+        const _brandSame = this._isActiveEntry(this._storeContribEid || eid);
+        this._showToast(
+          d.brand && !_brandSame
+            ? this._t('toast.contrib_device_changed', {}, 'Added to the community store, but the device changed while the form was open. Select it in Settings.')
+            : this._t('toast.brand_added', {}, 'Brand added - awaiting approval')
+        );
+        if (d.brand && _brandSame) {
+          // Clear the model for the same reason as the brand picker above: a
+          // brand the user just created cannot own the model saved under the
+          // previous one, and this path persists rather than staging.
+          await this._saveStoreOptions(
+            { store_brand: d.brand, store_model: '' }, { silent: true }
+          );
+        }
         this._render();
         return;
       }
@@ -8698,14 +8987,29 @@ class HaWashdataPanel extends HTMLElement {
 
   // Persist a partial set of device options via the shared set_options command
   // (same path the Settings tab uses). Merges the patch into this._opts locally.
-  async _saveStoreOptions(patch) {
+  // `silent` suppresses the success toast for callers that already showed their own
+  // (the store contribute popup), but never the failure one.
+  async _saveStoreOptions(patch, { silent = false } = {}) {
     const dev = this._devices[this._selIdx];
     if (!dev) return false;
     const eid = dev.entry_id;
     try {
       await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: patch });
+      // The save landed on `eid`, but every write below is device-scoped state
+      // for whatever device is selected NOW. Switching device during the await
+      // would fold this patch into the new device's `_opts` - which is the
+      // SAVED-options baseline (#447), so `_changedOptions` would then drop
+      // those keys and a later save would never send them. Same entry guard the
+      // other post-await writers use.
+      if (!this._isActiveEntry(eid)) return true;
       this._opts = { ...this._opts, ...patch };
-      this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
+      // The value is saved now, so a stale pending copy must not shadow it on the
+      // next render of the Settings form.
+      for (const k of Object.keys(patch)) {
+        delete this._pendingSettings[k];
+        this._dirtyOptKeys.delete(k);
+      }
+      if (!silent) this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
       return true;
     } catch (e) {
       this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
@@ -10502,7 +10806,14 @@ class HaWashdataPanel extends HTMLElement {
     // compare the actual trace against what the labelled profile looks like
     // (faint orange, behind the live trace). Hidden during Trim/Split editing.
     const pe = m.profileEnv;
-    if ((m.mode === 'view' || m.mode === 'review') && pe && (pe.avg || []).length) {
+    if ((m.mode === 'view' || m.mode === 'review') && (cur.expected || []).length > 1) {
+      // Server-projected onto this cycle's own time axis via the same alignment
+      // the artifact shading was computed with, so the overlay, the trace and the
+      // shading agree. Do NOT extend `full` - it is already in cycle time.
+      series.push({ points: cur.expected, stroke: '#ff9800', width: 2, alpha: 0.45, name: `${this._t('lbl.expected', {}, 'Expected')} (${cur.profile_name || 'profile'})` });
+    } else if ((m.mode === 'view' || m.mode === 'review') && pe && (pe.avg || []).length) {
+      // Fallback (no stored envelope / projection failed): the envelope on its
+      // own absolute grid, which slides by (duration - target_duration).
       series.push({ points: pe.avg, stroke: '#ff9800', width: 2, alpha: 0.45, name: `${this._t('lbl.expected', {}, 'Expected')} (${cur.profile_name || 'profile'})` });
       full = Math.max(full, pe.target_duration || pe.avg[pe.avg.length - 1][0] || 0);
     }
@@ -10714,22 +11025,53 @@ class HaWashdataPanel extends HTMLElement {
     // on 'change' (blur / datalist pick) only, never mid-typing; the catalog loaders
     // patch the datalists in place so the dropdown is never rebuilt out from under
     // the user. Changing the brand reloads + enables the model field.
+    //
+    // #447: these stage into _pendingSettings, NOT _opts. `_opts` is the panel's copy
+    // of the SAVED options and is what `_changedOptions` diffs the form against before
+    // a save; writing the typed value there made the save see "unchanged" and drop
+    // brand/model from the set_options payload entirely ("No changes to save"). The
+    // panel then showed an appliance the backend had never stored, and every upload
+    // failed with no_appliance_declared. Marking them dirty is what lets
+    // _snapshotFormToPending keep them across a section switch.
+    const stageAppliance = (key, value) => {
+      this._pendingSettings[key] = value;
+      this._dirtyOptKeys.add(key);
+    };
     const brandInput = sr.getElementById('wd-store-brand');
     if (brandInput) brandInput.addEventListener('change', () => {
       const v = brandInput.value.trim();
-      this._opts = { ...this._opts, store_brand: v };
-      // _pendingSettings may hold a stale snapshot of store_brand from an earlier
-      // _snapshotFormToPending call; it would override _opts in the render since
-      // Object.assign merges pending last. Clear it so _opts wins.
-      delete this._pendingSettings.store_brand;
+      // Drop the model with the brand it belonged to. _renderModelPicker reads
+      // store_model from _editedOpts(), so without this the previous brand's
+      // model stays in the field and the next save persists a brand/model pair
+      // that exists in no catalog. Only when the brand actually moved: a change
+      // event that re-picks the same brand must not wipe a chosen model.
+      if (v !== String(this._editedOpts().store_brand || '').trim()) {
+        stageAppliance('store_model', '');
+        // ...and the DOM with it. `_renderPreservingFormEdits` below snapshots
+        // the form BEFORE it renders, and `_snapshotFormToPending` only reads
+        // keys in `_dirtyOptKeys` - which `stageAppliance` has just put
+        // `store_model` into. The input is still in the DOM holding the previous
+        // brand's model, and `storemodel` has no branch there, so the default
+        // `this._pendingSettings[key] = el.value` writes that straight back over
+        // the value staged one line up. Staging alone is not just insufficient
+        // here, it is what arms the overwrite.
+        const staleModel = sr.getElementById('wd-store-model');
+        if (staleModel) staleModel.value = '';
+      }
+      stageAppliance('store_brand', v);
       this._catalog.forBrand = v; this._catalog.devices = undefined;
-      this._render();                 // enable + reset the model field (input has blurred)
+      // Preserving, not plain: since brand/model became PENDING edits rather
+      // than immediate saves, this re-render repaints the whole Basic section.
+      // Device Name / Minimum Power / Off Delay hold a typed value only in the
+      // DOM until _snapshotFormToPending runs, so a plain _render() repaints
+      // them from _opts and silently discards whatever the user had typed
+      // before reaching for the brand picker.
+      this._renderPreservingFormEdits();  // enable + reset the model field (input has blurred)
     });
     const modelInput = sr.getElementById('wd-store-model');
     if (modelInput) modelInput.addEventListener('change', () => {
-      this._opts = { ...this._opts, store_model: modelInput.value.trim() };
-      delete this._pendingSettings.store_model;
-      this._render();
+      stageAppliance('store_model', modelInput.value.trim());
+      this._renderPreservingFormEdits();
     });
 
     // F3: Playground canvas pointer interaction (threshold drag + scrub)
@@ -10933,7 +11275,8 @@ class HaWashdataPanel extends HTMLElement {
           else this._pgParamOverrides[key] = val;
           this._render();
           const again = sr.querySelector(`input[data-pgkey="${key}"]`);
-          if (again) again.focus();
+          // preventScroll (#443): this element already had focus before the re-render, so re-focusing it is bookkeeping, not navigation. A plain .focus() scrolls the element into view and would override the scroll position _render just restored - which is the jump the Playground reporter recorded.
+          if (again) again.focus({ preventScroll: true });
           requestAnimationFrame(() => this._pgDrawCanvas());
           return;
         }
@@ -10960,7 +11303,8 @@ class HaWashdataPanel extends HTMLElement {
         const again = sr.querySelector(`input[data-pgkey="${key}"]`);
         if (again) {
           again.value = rawVal;   // restore raw text incl. trailing "." the browser strips
-          again.focus();
+          // preventScroll (#443): this element already had focus before the re-render, so re-focusing it is bookkeeping, not navigation. A plain .focus() scrolls the element into view and would override the scroll position _render just restored - which is the jump the Playground reporter recorded.
+          again.focus({ preventScroll: true });
           try { again.setSelectionRange(caret, caret); } catch (_) {}
         }
         requestAnimationFrame(() => this._pgDrawCanvas());
@@ -11060,7 +11404,8 @@ class HaWashdataPanel extends HTMLElement {
       this._cycleFilter.text = cycFT.value;
       this._render();
       const el = this.shadowRoot.getElementById('wd-cyc-filter-text');
-      if (el) { el.focus(); el.setSelectionRange(pos, pos); }
+      // See the Playground note above (#443): re-focus without scrolling.
+      if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(pos, pos); }
     });
     const setFT = sr.getElementById('wd-settings-search');
     if (setFT) setFT.addEventListener('input', e => {
@@ -11069,7 +11414,8 @@ class HaWashdataPanel extends HTMLElement {
       if (setFT.value.trim()) this._settingsSugOnly = false;
       this._render();
       const el = this.shadowRoot.getElementById('wd-settings-search');
-      if (el) { el.focus(); el.setSelectionRange(pos, pos); }
+      // See the Playground note above (#443): re-focus without scrolling.
+      if (el) { el.focus({ preventScroll: true }); el.setSelectionRange(pos, pos); }
     });
     const cycFS = sr.getElementById('wd-cyc-filter-status');
     if (cycFS) cycFS.addEventListener('change', () => {
@@ -12265,6 +12611,15 @@ class HaWashdataPanel extends HTMLElement {
       this._settingsSugOnly = true; this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'goto-conflicts') {
       this._tab = 'settings'; this._fetchTabData();
+    } else if (a === 'goto-standby') {
+      // The standby card names the Stop Threshold, so it has to LAND on the
+      // section that holds it. 'goto-conflicts' only flips the tab and keeps
+      // whatever _settingsSec was last open, so from Basic or Notifications the
+      // card opened a page with no Stop Threshold and no highlighted conflict -
+      // and this state is not a conflict, so nothing would have highlighted.
+      this._settingsSec = 'detection';
+      this._settingsSearch = ''; this._settingsSugOnly = false;
+      this._tab = 'settings'; this._fetchTabData();
     } else if (a === 'conf-goto-section') {
       const confKeys = this._conflictKeysFromOpts();
       for (const sec of _SETTINGS_SECTIONS) {
@@ -12616,6 +12971,12 @@ class HaWashdataPanel extends HTMLElement {
         brand: (brandEl && brandEl.value) || this._opts.store_brand || '',
         model: (modelEl && modelEl.value) || this._opts.store_model || '', origin: location.origin,
       }).toString();
+      // Remember WHICH device asked. The popup is user-paced, so the panel's
+      // selection can change while it is open - and since these contributions
+      // became real saves via _saveStoreOptions, returning to a different
+      // device would write this appliance identity onto that entry and reload
+      // it, while the device that asked never gets it.
+      this._storeContribEid = eid;
       window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
 
     } else if (a === 'store-add-brand') {
@@ -12626,6 +12987,7 @@ class HaWashdataPanel extends HTMLElement {
       const q = new URLSearchParams({
         mode: 'brand', brand: (brandEl && brandEl.value) || this._opts.store_brand || '', origin: location.origin,
       }).toString();
+      this._storeContribEid = eid;  // see store-add-appliance
       window.open(origin + '/create.html?' + q, 'washdata_create', 'width=560,height=760');
 
     } else if (a === 'store-confirm-device') {
@@ -13909,9 +14271,7 @@ class HaWashdataPanel extends HTMLElement {
 
   // section-pill dots to surface saved-settings conflicts without needing the form.
   _conflictKeysFromOpts() {
-    return this._conflictKeysForOpts(
-      Object.assign({}, this._opts, this._pendingSettings), this._optDefaults
-    );
+    return this._conflictKeysForOpts(this._editedOpts(), this._optDefaults);
   }
 
   // Collect current numeric form values from DOM, falling back to saved opts (and
@@ -13973,6 +14333,24 @@ class HaWashdataPanel extends HTMLElement {
         (keyErrors[key] = keyErrors[key] || []).push(errInfo);
       }
     }
+
+    // Derived-value notes (#445). Separate list, separate DOM slot: these are not
+    // violations, so they must not highlight the field or feed the section dots.
+    const keyNotes = {};
+    for (const rule of _SETTING_NOTES) {
+      if (!rule.check(vals, ctx)) continue;
+      for (const [key, info] of Object.entries(rule.fieldNotes(vals, ctx))) {
+        (keyNotes[key] = keyNotes[key] || []).push(info);
+      }
+    }
+    form.querySelectorAll('[data-cnote]').forEach(div => {
+      const notes = keyNotes[div.dataset.cnote];
+      if (!notes || !notes.length) { div.hidden = true; div.innerHTML = ''; return; }
+      div.hidden = false;
+      div.innerHTML = notes
+        .map(n => _esc(this._t(n.msgKey, n.msgVars, n.msgFb)))
+        .join('<br>');
+    });
 
     // Update the DOM: show/hide conflict error divs and field highlights.
     form.querySelectorAll('[data-cerr]').forEach(div => {

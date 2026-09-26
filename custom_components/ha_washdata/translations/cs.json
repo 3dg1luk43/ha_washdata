@@ -280,6 +280,16 @@
           "description": "Zařízení WashData pro přetrénování modelů."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Označit jako vyložené",
+      "description": "Potvrďte, že dokončená náplň byla vyjmuta ze zařízení WashData, čímž se zruší stav „Čistý“ i případná připomínka vyložení.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData, ze kterého byla vyjmuta dokončená náplň."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Zastavit záznam cyklu"
+      },
+      "mark_unloaded": {
+        "name": "Označit jako vyložené"
       }
     }
   },

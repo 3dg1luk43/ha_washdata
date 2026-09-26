@@ -32,7 +32,7 @@ pip install -r requirements-dev.txt
 ./run_tests.sh                  # fast suite (default, ~30s - skips slow + benchmark)
 ./run_tests.sh --slow           # real-data replays, stress simulations
 ./run_tests.sh --bench          # benchmarks
-./run_tests.sh --e2e            # Playwright E2E (452 tests, chromium + mobile-chrome, ~90s)
+./run_tests.sh --e2e            # Playwright E2E (618 tests, chromium + mobile-chrome, ~2 min)
 ./run_tests.sh --e2e-min        # same E2E against the minified build (the bytes users download)
 ./run_tests.sh --all            # everything (~13 min)
 
@@ -52,8 +52,61 @@ devtools/release_check.sh               # release preflight (what CI runs)
 devtools/release_check.sh --fix         # regenerate artifacts instead of failing
 devtools/release_check.sh --full --tag v0.5.6
 
+python3 devtools/end_gate_eval.py            # ENDING fallback-gate lag/early-end/split (item 329)
+python3 devtools/decisive_margin_eval.py     # mid-cycle switch bypass, runner-up exposure
+python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
+
 python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG   # mock appliance
+
+cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its README.md)
+cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 20 checks (~12 min)
+cd devtools/testbox && ./check_notify_actions.sh   # the notification-ACTION delivery path (~1 min)
+cd devtools/testbox && ./check_unload_confirm.sh  # unload confirmation button/service/entity (~3 min)
+cd devtools/testbox && ./hactl.py ws ha_washdata/get_profiles entry_id=<id>   # drive it
 ```
+
+### Two tiers of test, and what each can prove
+
+`run_tests.sh` is the fast, deterministic tier: frozen time, 606 recorded cycles, pure
+detection/matching/progress maths. It is where accuracy lives. But **93 of its 237 modules build
+Home Assistant with `MagicMock()`**, and a MagicMock accepts any service call - so code Home
+Assistant rejects outright used to pass every test (register item 316: `title: None` killed every
+`clear_notification` for months while all ten of the tests covering it passed). Two things close
+that gap; keep both working:
+
+- `tests/conftest.py` has an **autouse guard** that replays every recorded service call through
+  Home Assistant's real schemas. Do not "simplify" it away - reintroducing item 316 fails 13 tests
+  because of it. When adding a notification path, assert on the payload *and* let the guard run.
+- `devtools/testbox/` is a **real HA container** (2026.9.x, what users run; the in-process test HA
+  is pinned to 2026.2.3 - which is upstream's newest, so that gap cannot be closed from PyPI, item
+  322) with the working tree bind-mounted in and a notify platform that records every delivered
+  payload. It proves delivery, config flow, storage migration, WS API and entity wiring, and it
+  found three real bugs in its first hours (items 317, 323, and the corrected 320). Timing there is
+  compressed, so it proves behaviour, never minute-accuracy. Read `devtools/testbox/README.md`
+  first: the traps are the hardcoded 30 min dishwasher floor, `interrupted_min_seconds`,
+  `profile_match_interval` and rescaling a seeded export's clock (item 319).
+
+**When a mocked test would not have caught it, reach for the box.** Two classes are invisible to
+the unit tier by construction: anything Home Assistant validates (item 316) and anything that needs
+a real `hass` to work at all - notification-action templates only become `Template` objects via
+`cv.SCRIPT_SCHEMA`, whose `cv.template` resolves the running instance through `async_get_hass()`,
+so under a MagicMock the conversion cannot happen and the bug is unreachable (item 323).
+
+**If a change is worth the slow suite, ask whether it is also worth the box - and if it is, run it
+before pushing.** Not every change: the box is minutes, not seconds, and running it on pure maths or
+a panel string is waste. Run it when the change touches something only a real Home Assistant can
+reject or sequence, which is where "all green, still broken" comes from:
+
+- `async_setup` / `async_unload_entry` / `async_migrate_entry` ordering, or anything spawned from
+  them. Under a MagicMock every coroutine is fast and nothing else is competing for the loop.
+- A service call, notification payload, or entity attribute - anything HA validates against a schema
+  (item 316) or that needs `async_get_hass()` (item 323).
+- Config-flow steps, storage migration against a real `Store`, WS API handlers, entity wiring.
+- Anything whose failure mode is "the integration still loads, it just does nothing".
+
+`smoke.sh` (~12 min) is the default choice; `check_notify_actions.sh` (~1 min) when the change is
+only in the notification-action path. Say in the commit or the report that the box ran and what it
+proved - a slow-suite pass alone is not evidence about any of the above.
 
 ### Generated files - never hand-edit, always regenerate
 
@@ -297,11 +350,11 @@ arrive via [GitLocalize](https://gitlocalize.com/repo/10819) as PRs; merge them 
 Deterministic and idempotent; never drop user data (cycles, labels, corrections); add tests with
 old-schema fixtures. **Two separate layers, tested separately:**
 
-1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.10. `VERSION` /
+1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.11. `VERSION` /
    `MINOR_VERSION` live on the flow class in `config_flow.py` and must be bumped with it. Tested in
    `tests/test_migration_harness.py`. The one-pass legacy path writes the current version directly, so
    a bump also means updating the `minor_version=` at the end of the bulk migration.
-2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->12
+2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->13
    (`STORAGE_VERSION` in `const.py`). Tested in `tests/test_migration_v032.py`. Call
    `_async_migrate_func(old_version, 1, data)` **directly** - do not go through
    `ProfileStore.async_load()` (needs file I/O).
@@ -313,7 +366,8 @@ old-schema fixtures. **Two separate layers, tested separately:**
 
    Per-version steps are listed in reference 02 / the register. Recent: v9->v10 `reference_cycles`,
    v10->v11 marker-only (phase-profile cache self-populates on next envelope rebuild), v11->v12
-   `backfill_cycles` (additive `setdefault`).
+   `backfill_cycles` (additive `setdefault`), v12->v13 marker-only
+   (`BANKED_TAIL_REPAIR_KEY` set so the one-time banked-tail duration repair runs once).
 
 ## Matching Pipeline
 
@@ -321,8 +375,19 @@ All scoring constants live in `const.py` under "Matching pipeline scoring consta
 Tuning provenance, A/B tables and measured accuracies are in reference 02 and
 `devtools/dtw_ab_eval.py` - not repeated here.
 
+**Every harness a tuning claim rests on must be committed.** Item 306's 427-cycle end-lag
+measurement was not, so when a review round proposed tightening that same gate there was no way to
+judge it and the change shipped on reasoning alone (register item 329: re-measured, it was pure
+cost, and the sibling change to the mid-cycle switch bypass was measured actively *worse*).
+`dtw_ab_eval.py` scores **complete** cycles only, so it cannot judge the ENDING gate, the prefix
+guard, or the mid-cycle switch - a byte-identical result there is not evidence about any of them.
+Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for those.
+
 - **Stage 1 - Fast Reject:** duration ratio outside `[min_duration_ratio, max_duration_ratio]`
-  (0.10x-1.5x, some device types override the min).
+  (0.10x-1.8x, some device types override the min). The **lower** gate is inert for ranking
+  (it never removed a true candidate on the corpus) but is kept because real cycles run as
+  short as 0.148x their profile mean; the **upper** one was 1.5x and deleted the true
+  candidate on 2.3% of folds (register item 311).
 - **Stage 2 - Core Similarity:** `MATCH_CORR_WEIGHT * max(0, corr) + (1 - MATCH_CORR_WEIGHT) * mae_score`
   (45% correlation / 55% MAE). The MAE is expressed **relative to the current cycle's peak**, so the
   same proportional error scores equally on low- and high-power appliances. Below
@@ -332,7 +397,10 @@ Tuning provenance, A/B tables and measured accuracies are in reference 02 and
   `MATCH_DTW_BLEND * core + (1 - blend) * dtw`. `dtw_mode`: `scaled` / `ddtw` / `ensemble` (default)
   / `legacy`.
 - **Stage 4 - duration/energy agreement:** `(1 - dur_w - en_w)*shape + dur_w*dur_agreement +
-  en_w*energy_agreement`, `agreement = 1/(1 + |ln(observed/expected)|/scale)`. Weight and scale move
+  en_w*energy_agreement`, `agreement = 1/(1 + |ln(observed/expected)|/scale)`. The **duration**
+  term instead uses a Gaussian `exp(-0.5 (ln r / scale)^2)` on a **completed** cycle
+  (register item 307); energy stays Lorentzian. **The scoping is load-bearing** - mid-cycle
+  the observed duration is a prefix, and the sharp kernel costs -6.4pp at 60% elapsed. Weight and scale move
   **together** (a sharper scale with higher weight separates near-duplicates; raising weight alone was
   net-negative). `energy_agreement` uses mean power by default, **integrated energy** for
   `washing_machine`/`washer_dryer` via `energy_mode`.
@@ -359,6 +427,16 @@ Tuning provenance, A/B tables and measured accuracies are in reference 02 and
 **Match confidence** = the top candidate's final blended pipeline score (`best["score"]`), 0-1. It is
 a similarity score, **not a calibrated probability**. **Ambiguity:**
 `is_ambiguous = (top1 - top2) < MATCH_AMBIGUITY_MARGIN`.
+
+**Prefer the margin over the confidence for any new gate** (register item 305): measured over
+the corpus, `confidence` predicts correctness at AUC 0.625 on completed cycles and only
+**0.535 mid-cycle**, where the margin reaches 0.792 / 0.773. Mid-run the absolute score is
+close to useless because a prefix of a long programme resembles a *finished* short one.
+Two constants already follow from this and are deliberately separate:
+`MATCH_DECISIVE_MARGIN` (0.12) lets a mid-cycle switch skip the persistence wait, and
+`MATCH_LABEL_MIN_MARGIN` (0.08) is required before a finished cycle is auto-labelled.
+`MATCH_AMBIGUITY_MARGIN` itself must stay at 0.05 because it also reaches the detector and
+gates Smart Termination - widening it defers cycle ends (item 306).
 
 **On a Stage-5 group win there are two confidences, and they are not interchangeable.**
 `MatchResult.confidence` stays the winning *group's* score, because the end-detection consumers are

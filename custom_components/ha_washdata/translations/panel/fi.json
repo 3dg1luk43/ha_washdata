@@ -60,6 +60,7 @@
     "fair_fit_tip": "Kohtalainen vastaavuus – joillakin tälle profiilille määritetyillä jaksoilla on alhaisemmat luottamuspisteet. Merkitse lisää jaksoja tai tallenna profiili uudelleen tarkkuuden parantamiseksi.",
     "feedback_requested": "Palautetta pyydetty",
     "golden_cycle": "Tallennettu vertailujakso",
+    "duration_outlier": "{n} poikkeavan pituista jaksoa",
     "improving": "↗ paranee",
     "manual": "(manuaalisesti valittu)",
     "needs_review": "Vaatii tarkistuksen",
@@ -257,6 +258,11 @@
     "hist_import_n": "Tuo {n} sykliä",
     "hist_goto_cycles": "Näytä syklit",
     "save_total_cycles": "Tallenna kokonaismäärä"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Päättynyt jakso odottaa todellisuudessa {eff} s eikä {delay} s: Pienin sammutusväli ({gap} s) on pidempi ja menee edelle."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Tuotu yhteisökaupasta. Näytetään viitteeksi ja täsmäytystä varten. Sitä ei lasketa tilastoihisi eikä sitä voi muokata.",
     "merge_no_imports": "Tuotuja tallennuksia ei voi yhdistää oikeaan sykliin. Poista niiden valinta yhdistääksesi.",
     "store_enable_hint": "Ota verkkotoiminnot käyttöön asetuksista selataksesi ja tuodaksesi yhteisön viitesyklejä.",
+    "advisory_duration_outlier": "{n} jaksoa on merkitty nimellä '{name}', mutta niiden kesto on liian kaukana sen tavallisesta pituudesta, jotta ne voisivat koskaan täsmätä siihen (pahin: {ratio}x). Ne on todennäköisesti merkitty väärin, tai yksi tallenne sisältää kaksi ajoa. Merkitse ne uudelleen tai jaa ne, jotta ne eivät vääristä tämän ohjelman aika-arviota.",
+    "standby_above_stop_title": "Laite otti yhä {idle} W jakson päättyessä",
+    "standby_above_stop_sub": "{n} viimeisestä {total} jaksosta. Sammutusviive alkaa vasta, kun teho on Pysäytyskynnyksen ({stop} W) alapuolella, joten jaksot päättyvät myöhässä tai ne on pysäytettävä käsin.",
     "online_intro": "Jaa ja lataa viitesyklejä muiden WashData-käyttäjien kanssa. Kaikki verkkotoiminnot ovat vapaaehtoisia ja oletuksena pois päältä.",
     "store_share_intro": "Lataa tämä viitesykli, jotta muut samaa laitetta käyttävät voivat hyödyntää sitä. Se tarkistetaan ennen julkaisua.",
     "online_intro_global": "Selaa ja jaa viitetallennuksia muiden WashData-käyttäjien kanssa ja vahvista laitemerkintöjä. Yksi yhteys koskee koko WashData-integraatiotasi; laitteen merkki ja malli asetetaan laitekohtaisesti Perusmääritykset-osiossa. Kaikki verkkotoiminnot ovat vapaaehtoisia ja oletuksena pois päältä.",
@@ -1112,7 +1121,7 @@
     "duration_weight": "Vaihe 4: kuinka vahvasti keston yhdenmukaisuus vaikuttaa lopullisiin pisteisiin (oletus 0,22)",
     "energy_weight": "Vaihe 4: kuinka vahvasti energian yhdenmukaisuus vaikuttaa lopullisiin pisteisiin (oletus 0,22)",
     "profile_match_min_duration_ratio": "Vaihe 1: lyhin sykli profiilinkeston murto-osana; oletus 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Vaihe 1: pisin sykli profiilinkeston murto-osana; oletus 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Vaihe 1: pisin sykli profiilinkeston murto-osana; oletus 1,8 (180%)",
     "keep_min_score": "Vaihe 2: alin pisteet pysyäkseen mukana; oletus 0,1 sallii heikot ehdokkaat, myöhemmät vaiheet valitsevat parhaan",
     "dtw_blend": "Vaihe 3: 0 = vain ydinpisteet, 1 = vain DTW-pisteet, 0,5 = tasainen sekoitus (oletus)",
     "dtw_ensemble_w": "Vaihe 3 (ensemble-tila): skaloidun L1 paino vs. derivatiivinen DTW; oletus 0,7 suosii tasonhavainnoivaa",
@@ -1446,8 +1455,8 @@
       "label": "Purkamismuistutuksen viive"
     },
     "notify_unload_repeat": {
-      "doc": "Lähettää purkamismuistutuksen uudelleen \"Purkamismuistutuksen viive\" minuutin välein, kunnes avaat oven tai napautat ilmoituksen \"Lopeta muistuttaminen\" -painiketta. Vaatii ovianturin entiteetin (kuten itse muistutuskin). Hylkäyspainike toimii Home Assistant -kumppanisovelluksen (mobiili) ilmoituksissa.",
-      "label": "Toista kunnes ovi avautuu"
+      "doc": "Lähettää purkamismuistutuksen uudelleen ”Purkamismuistutuksen viive” minuutin välein, kunnes purkaminen on vahvistettu tai napautat ilmoituksen ”Lopeta muistuttaminen” -painiketta. Vaatii tavan vahvistaa purkaminen: ovianturin entiteetti, purkamisen vahvistusentiteetti tai alla oleva ”Vahvista purkaminen manuaalisesti” -asetus. Hylkäyspainike toimii Home Assistant -kumppanisovelluksen (mobiili) ilmoituksissa.",
+      "label": "Toista kunnes purettu"
     },
     "off_delay": {
       "doc": "Aika odottaa tehon putoamisen jälkeen ennen kuin sykli julistetaan päättyneeksi. Jos virta palaa tämän ikkunan sisällä, jakso jatkuu saumattomasti - tämä siltaa taukoja pesuvaiheiden välillä. Astianpesukoneissa on pitkät kuivausvaiheet (virta pois päältä 20-60 min), joten sammutusviiveen on oltava tätä suurempi, jotta koko pesu+kuivaus pysyy yhtenä jaksona.",
@@ -1655,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Aikapainotettu kustannus",
       "doc": "Veloittaa kunkin syklin sillä hinnalla, joka oli voimassa jokaisella sen käyntihetkellä, yhden päättymishetken hinnan sijaan. Koskee vain hintaentiteettiä (kiinteä hinta ei voi muuttua). Ei vaadi lisäasetuksia: hintaa seurataan reaaliaikaisesti syklin käydessä, ja Diagnostiikan alla oleva toiminto Käsittele historia laskee vanhempien syklien kustannukset uudelleen recorderin tiedoista. Pois = perinteinen toiminta, yksi lopussa lukittu hinta."
+    },
+    "unload_confirm_entity": {
+      "label": "Purkamisen vahvistusentiteetti",
+      "doc": "Valinnainen entiteetti, jonka aktivoituminen tarkoittaa, että sisältö on otettu pois; tarkoitettu laitteille, joihin ei saa ovianturia. Mikä tahansa käy: Zigbee- tai NFC-painike, input_button-apuri, laitteen edessä oleva liiketunnistin, tilanne. Vahvistukseksi lasketaan jokainen tilan muutos paitsi sammuminen ja siirtyminen ei saatavissa -tilaan. Tämän asettaminen ottaa purkamismuistutuksen käyttöön myös laitteessa, jolla ei ole ovianturin entiteettiä."
+    },
+    "unload_track_without_door": {
+      "label": "Vahvista purkaminen manuaalisesti",
+      "doc": "Käytä purkamismuistutusta laitteessa, jolla ei ole ovianturin entiteettiä eikä purkamisen vahvistusentiteettiä, ja vahvista purkaminen omalla automaatiollasi: paina ”Merkitse puretuksi” -painike-entiteettiä tai kutsu palvelua ha_washdata.mark_unloaded. Ohitetaan, kun ovianturin entiteetti on asetettu, koska se antaa signaalin jo valmiiksi."
     }
   },
   "setting_group": {
@@ -1867,6 +1884,7 @@
       "summary": "Suljettu pois {total} väärin tunnistettua sykliä: {parts}.",
       "reason": {
         "force_stopped": "pakotetusti pysäytettyä",
+        "user_stopped": "käsin pysäytettyä",
         "interrupted": "keskeytettyä",
         "incomplete": "keskeneräistä",
         "noise": "kohinaa",
@@ -1909,6 +1927,7 @@
   },
   "toast": {
     "catalog_refreshed": "Yhteisön luettelo päivitetty",
+    "contrib_device_changed": "Lisätty yhteisökauppaan, mutta valittu laite vaihtui lomakkeen ollessa auki. Valitse se asetuksista.",
     "access_saved": "Kulunvalvonta tallennettu",
     "all_wiped": "Kaikki tiedot pyyhitty",
     "analysis_complete_none": "Analyysi valmis: ei uusia ehdotuksia",

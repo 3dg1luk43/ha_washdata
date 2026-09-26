@@ -60,6 +60,7 @@
     "fair_fit_tip": "Moderat matchkonsistens – noen sykluser tilordnet denne profilen har lavere konfidensscore. Merk flere sykluser eller registrer profilen på nytt for å forbedre nøyaktigheten.",
     "feedback_requested": "Tilbakemelding forespurt",
     "golden_cycle": "Registrert referansesyklus",
+    "duration_outlier": "{n} syklus(er) med avvikende lengde",
     "improving": "↗ forbedres",
     "manual": "(valgt manuelt)",
     "needs_review": "Trenger gjennomgang",
@@ -257,6 +258,11 @@
     "hist_import_n": "Importer {n} sykluser",
     "hist_goto_cycles": "Vis meg syklusene",
     "save_total_cycles": "Lagre total"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "En fullført syklus venter i virkeligheten {eff} s, ikke {delay} s: Min. av-intervall ({gap} s) er lengre og har forrang."
+    }
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
     "imported_readonly": "Importert fra fellesskapsbutikken. Vises for referanse og matching. Telles ikke med i statistikken din og kan ikke redigeres.",
     "merge_no_imports": "Importerte opptak kan ikke slås sammen med en ekte syklus. Fjern merkingen for å slå sammen.",
     "store_enable_hint": "Aktiver nettfunksjoner i Innstillinger for å bla gjennom og importere fellesskapets referansesykluser.",
+    "advisory_duration_outlier": "{n} syklus(er) merket '{name}' ligger for langt fra programmets vanlige lengde til noen gang å kunne matche det (verst: {ratio}x). De er sannsynligvis feilmerket, eller ett opptak fanget to kjøringer. Merk dem på nytt, eller del dem opp, slik at de slutter å forskyve tidsestimatet for dette programmet.",
+    "standby_above_stop_title": "Trakk fortsatt {idle} W da syklusen ble avsluttet",
+    "standby_above_stop_sub": "{n} av de siste {total} syklusene. Av-forsinkelsen starter først når effekten er under Stoppterskel ({stop} W), så sykluser avsluttes for sent eller må stoppes for hånd.",
     "online_intro": "Del referansesykluser med andre WashData-brukere, og last dem ned. Alle nettfunksjoner er valgfrie og av som standard.",
     "store_share_intro": "Last opp denne referansesyklusen slik at andre med samme apparat kan bruke den. Den gjennomgås før den vises offentlig.",
     "online_intro_global": "Bla gjennom og del referanseopptak med andre WashData-brukere, og bekreft apparatoppføringer. Én tilkobling gjelder for hele WashData-integrasjonen din; apparatets merke og modell angis per enhet under Grunnleggende. Alle nettfunksjoner er valgfrie og av som standard.",
@@ -1105,7 +1114,7 @@
     "duration_weight": "Trinn 4: hvor sterkt varighetsoverensstemmelse påvirker sluttscoren (standard 0,22)",
     "energy_weight": "Trinn 4: hvor sterkt energioverensstemmelse påvirker sluttscoren (standard 0,22)",
     "profile_match_min_duration_ratio": "Trinn 1: korteste sykel som andel av profilvarighet; standard 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Trinn 1: lengste sykel som andel av profilvarighet; standard 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Trinn 1: lengste sykel som andel av profilvarighet; standard 1,8 (180%)",
     "keep_min_score": "Trinn 2: laveste poengsum for å gå videre; standard 0,1 slipper gjennom svake samsvar, senere trinn velger det beste",
     "dtw_blend": "Trinn 3: 0 = bare kjernepoengscore, 1 = bare DTW-score, 0,5 = lik blanding (standard)",
     "dtw_ensemble_w": "Trinn 3 (ensemble-modus): vekt på skalert L1 kontra derivativ DTW; standard 0,7 foretrekker nivåbevisst",
@@ -1446,8 +1455,8 @@
       "label": "Utlastingspåminnelsesforsinkelse"
     },
     "notify_unload_repeat": {
-      "doc": "Fortsetter å sende utlastingspåminnelsen på nytt hvert \"Utlastingspåminnelsesforsinkelse\" minutt til du åpner døren eller trykker på \"Stopp påminnelser\" i varselet. Krever en Dørensorenhet (det gjør selve påminnelsen). Avvis-knappen fungerer på varsler fra Home Assistant companion-appen (mobil).",
-      "label": "Gjenta til døren åpnes"
+      "doc": "Fortsetter å sende utlastingspåminnelsen på nytt hvert \"Utlastingspåminnelsesforsinkelse\" minutt til utlastingen er bekreftet eller du trykker på \"Stopp påminnelser\" i varselet. Krever en måte å bekrefte utlastingen på: en Dørensorenhet, en Utlastingsbekreftelsesenhet eller alternativet \"Bekreft utlasting manuelt\" nedenfor. Avvis-knappen fungerer på varsler fra Home Assistant companion-appen (mobil).",
+      "label": "Gjenta til utlastet"
     },
     "off_delay": {
       "doc": "På tide å vente etter at strømmen faller før du erklærer at syklusen er fullført. Hvis strømmen gjenopptas innenfor dette vinduet, fortsetter syklusen sømløst - dette slår bro mellom pauser mellom vasketrinn. Oppvaskmaskiner har lange tørkefaser (strøm av i 20-60 min) så avslåingsforsinkelsen må overstige det for å holde hele vask+tørr som én syklus.",
@@ -1655,6 +1664,14 @@
     "energy_price_dynamic": {
       "label": "Tidsvektet kostnad",
       "doc": "Beregn hver syklus til prisen som gjaldt i hvert øyeblikk den kjørte, i stedet for den ene prisen som gjaldt da den var ferdig. Gjelder bare for en prisenhet (en statisk pris kan ikke endre seg). Krever ikke noe ekstra oppsett: prisen følges live mens syklusen kjører, og \"Behandle historikk\" under Diagnostikk beregner kostnaden for eldre sykluser på nytt fra recorderen. Av = den klassiske oppførselen, én pris frosset ved slutten."
+    },
+    "unload_confirm_entity": {
+      "label": "Utlastingsbekreftelsesenhet",
+      "doc": "Valgfri enhet der en aktivering betyr at vasken er tatt ut, for maskiner som ikke kan ha en dørsensor. Alle typer fungerer: en Zigbee- eller NFC-knapp, en input_button-hjelper, en bevegelsessensor foran maskinen, en scene. Enhver tilstandsendring teller som en bekreftelse, bortsett fra å bli slått av og å bli utilgjengelig. Å sette denne aktiverer også utlastingspåminnelsen på en enhet uten Dørensorenhet."
+    },
+    "unload_track_without_door": {
+      "label": "Bekreft utlasting manuelt",
+      "doc": "Kjør utlastingspåminnelsen på en enhet uten Dørensorenhet og uten Utlastingsbekreftelsesenhet, og bekreft utlastingen fra din egen automasjon i stedet: trykk på knappenheten \"Merk som utlastet\", eller kall handlingen ha_washdata.mark_unloaded. Ignoreres når en Dørensorenhet er angitt, siden den allerede gir signalet."
     }
   },
   "setting_group": {
@@ -1867,6 +1884,7 @@
       "summary": "Ekskluderte {total} feildetekterte syklus(er): {parts}.",
       "reason": {
         "force_stopped": "tvangsstoppet",
+        "user_stopped": "stoppet manuelt",
         "interrupted": "avbrutt",
         "incomplete": "ufullstendig",
         "noise": "støy",
@@ -2021,7 +2039,8 @@
     "unlabel_done": "Merking fjernet fra {count} syklus(er)",
     "unlabel_failed": "Fjerning av merking mislyktes: {error}",
     "odometer_saved": "Totalt antall sykluser lagret",
-    "odometer_save_failed": "Kunne ikke lagre totalen: {error}"
+    "odometer_save_failed": "Kunne ikke lagre totalen: {error}",
+    "contrib_device_changed": "Lagt til i fellesskapsbutikken, men apparatet ble byttet mens skjemaet var åpent. Velg det i Innstillinger."
   },
   "trend": {
     "down": "Trender nedover",

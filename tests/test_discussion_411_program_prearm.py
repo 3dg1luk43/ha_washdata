@@ -419,6 +419,7 @@ def _captured_matcher(hass: HomeAssistant, entry: Any) -> tuple[Any, WashDataMan
     mgr.profile_store.check_phase_match = MagicMock(return_value="Spin")
     mgr.profile_store.profile_tail_power = MagicMock(return_value=60.0)
     mgr.profile_store.profile_terminal_high_block = MagicMock(return_value=(0.95, 160.0))
+    mgr.profile_store.profile_terminal_quiet_seconds = MagicMock(return_value=420.0)
     mgr._notify_update = MagicMock()
     return matcher, mgr
 
@@ -443,10 +444,19 @@ def test_a_manual_match_reports_the_profiles_own_tail_and_spin(
     now = dt_util.now()
     result = matcher([(now, 2000.0), (now + timedelta(seconds=60), 2000.0)])
 
-    assert len(result) == 10, f"manual tuple must carry elements 9 and 10, got {len(result)}"
+    # "At least", not "exactly": the detector tolerates longer tuples and the
+    # regression this guards (item 200) was a tuple too SHORT to carry the
+    # profile's own values. Register item 297 appended element 11.
+    assert len(result) >= 11, (
+        f"manual tuple must carry elements 9, 10 and 11, got {len(result)}"
+    )
     assert result[0] == PROGRAM
     assert result[8] == 60.0            # profile_tail_power
     assert result[9] == (0.95, 160.0)   # profile_terminal_high_block
+    # Element 11 must be looked up for the PINNED profile, not left None, or the
+    # kept-tail bound sits inert for every hand-picked program (register item 297).
+    assert result[10] == 420.0          # profile_terminal_quiet_seconds
+    mgr.profile_store.profile_terminal_quiet_seconds.assert_called_with(PROGRAM)
 
 
 def test_a_manual_match_omits_the_spin_block_when_anti_crease_is_off(

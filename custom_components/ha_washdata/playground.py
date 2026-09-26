@@ -130,11 +130,13 @@ from .cycle_detector import (
     CycleDetectorConfig,
     effective_anticrease_finalize_ratio,
     effective_curve_preroll_seconds,
+    terminal_high_for_guards,
 )
 from .profile_store import (
     _ambiguity_from_candidates,
     _match_prefix_ambiguity,
     collapse_group_candidates,
+    longest_candidate_duration,
     decompress_power_data,
 )
 
@@ -974,6 +976,10 @@ class _DetailSim:
         # Mirror of async_match_profile: members are scored individually, then each
         # cohesive family is collapsed to its best member before anything reads the
         # ranking (#400).
+        # Captured before the collapse for element 12, exactly as
+        # async_match_profile does: the collapse drops every sibling but the
+        # best, and a longer one leaving the list lowers the ENDING gate's bar.
+        pre_collapse_candidates = list(candidates)
         candidates = collapse_group_candidates(candidates, self.group_members or {})
         # Stage-5 safeguards #2 and #3, captured here and applied after the
         # top-level ambiguity call below so the ORDER matches async_match_profile.
@@ -1068,16 +1074,34 @@ class _DetailSim:
                 tail_power = self.store.profile_tail_power(raw_name)
             except Exception:  # pylint: disable=broad-exception-caught
                 tail_power = None
-            # Element 10 (#399), guarded the same way: the anti-crease spin guard is
-            # only meaningful for a device that runs anti-wrinkle at all.
+            # Element 10 (#399) and the standby-band arm on top of it (register
+            # item 351). This used to be a hand-copy of the manager's version, and
+            # the two had already drifted in their error handling; it is now the
+            # SAME function, which is the only way this replay can be guaranteed
+            # byte-identical to live on element 10. `end_gate_eval.py` drives the
+            # detector through here, so an arm present in only one of them is
+            # invisible to every measurement made with that harness - exactly how
+            # item 352 first measured as a no-op.
             det = getattr(self, "detector", None)
-            if det is not None and det.config.anti_wrinkle_enabled:
-                try:
-                    terminal_high = self.store.profile_terminal_high_block(
-                        raw_name, det.config.anti_wrinkle_max_power
-                    )
-                except Exception:  # pylint: disable=broad-exception-caught
-                    terminal_high = None
+            if det is not None:
+                terminal_high = terminal_high_for_guards(
+                    self.store,
+                    det.config,
+                    getattr(det, "_cycle_max_power", 0.0),
+                    raw_name,
+                )
+        # Element 11 (item 297) and element 12 (item 330). Both were missing, so
+        # the sim's detector ran without the tail bound Smart Termination uses and
+        # without the longest-candidate bar the ENDING gate uses - i.e. the replay
+        # was NOT byte-identical to live on either, which is the sim's whole
+        # contract. `end_gate_eval.py` drives the detector through here, so a
+        # missing element silently measures the wrong gate.
+        terminal_quiet = None
+        if self.store is not None and raw_name:
+            try:
+                terminal_quiet = self.store.profile_terminal_quiet_seconds(raw_name)
+            except Exception:  # pylint: disable=broad-exception-caught
+                terminal_quiet = None
         return (
             raw_name,
             raw_conf,
@@ -1089,6 +1113,14 @@ class _DetailSim:
             bool(full_shape_hit),
             tail_power,
             terminal_high,
+            terminal_quiet,
+            # The FULL population, matching live: `async_match_profile` computes
+            # `MatchResult.longest_candidate_duration_s` from the candidates as
+            # they stood BEFORE the group collapse and before the [:5]
+            # truncation. An earlier version of this line used `candidates[:5]`
+            # to match what live *then* did - and live was the thing that was
+            # wrong, twice.
+            longest_candidate_duration(pre_collapse_candidates),
         )
 
     def _price_at(self, offset_s: float) -> float | None:
@@ -1137,6 +1169,7 @@ class _DetailSim:
         offset = (ts - self.base).total_seconds()
         if offset - self.last_sample_t < _SIM_SERIES_THROTTLE_S:
             return
+        prev_sample_t = self.last_sample_t
         self.last_sample_t = offset
         state = self.detector.state
         power = 0.0
@@ -1184,6 +1217,12 @@ class _DetailSim:
             result = progress_mod.compute_progress(
                 self.device_type, matched_dur, offset, self.smoothed["v"], phase_result, ml_pct,
                 phase_remaining_s=phase_remaining_s,
+                # Same time-scaled smoothing as live: the sim steps the estimator
+                # at its own throttle, so without this the replay would smooth
+                # over 30 s steps as if they were the manager's 5 s ones.
+                dt_seconds=(
+                    offset - prev_sample_t if prev_sample_t >= 0.0 else None
+                ),
             )
             if result is not None:
                 self.smoothed["v"] = result.smoothed

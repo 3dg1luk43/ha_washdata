@@ -60,6 +60,7 @@
         "fair_fit_tip": "Orta düzeyde eşleşme tutarlılığı – bu profile atanan bazı döngülerin güven puanları daha düşüktür. Doğruluğu artırmak için daha fazla döngü etiketleyin veya profili yeniden kaydedin.",
         "feedback_requested": "Geri bildirim istendi",
         "golden_cycle": "Kaydedilen referans döngüsü",
+        "duration_outlier": "{n} olağandışı uzunlukta döngü",
         "improving": "↗ iyileşiyor",
         "manual": "(manuel seçildi)",
         "needs_review": "İncelenmesi gerekiyor",
@@ -257,6 +258,11 @@
         "hist_import_n": "{n} döngüyü içe aktar",
         "hist_goto_cycles": "Döngüleri göster",
         "save_total_cycles": "Toplamı Kaydet"
+    },
+    "note": {
+        "off_delay": {
+            "effective": "Biten bir döngü gerçekte {delay} s değil {eff} s bekler: Min. Kapalı Aralık ({gap} s) daha uzun ve öncelik onundur."
+        }
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -1027,6 +1033,9 @@
         "imported_readonly": "Topluluk mağazasından içe aktarıldı. Referans ve eşleştirme için gösterilir. İstatistiklerinize sayılmaz ve düzenlenemez.",
         "merge_no_imports": "İçe aktarılan kayıtlar gerçek bir döngüye birleştirilemez. Birleştirmek için seçimlerini kaldırın.",
         "store_enable_hint": "Topluluk referans döngülerine göz atmak ve içe aktarmak için Ayarlar'da çevrimiçi özellikleri etkinleştirin.",
+        "advisory_duration_outlier": "'{name}' olarak etiketlenen {n} çevrimin süresi, bu programın olağan uzunluğuna hiç eşleşemeyecek kadar uzak (en kötüsü: {ratio}x). Muhtemelen yanlış etiketlenmişlerdir ya da tek bir kayıt iki çalışmayı birden içeriyordur. Bu programın süre tahminini bozmamaları için onları yeniden etiketleyin veya bölün.",
+        "standby_above_stop_title": "Döngü bittiğinde hâlâ {idle} W çekiyordu",
+        "standby_above_stop_sub": "Son {total} döngünün {n} tanesi. Kapatma Gecikmesi ancak güç Durdurma Eşiğinin ({stop} W) altına indiğinde başlar, bu yüzden döngüler geç biter veya elle durdurulmaları gerekir.",
         "online_intro": "Diğer WashData kullanıcılarıyla referans döngüleri paylaşın ve indirin. Tüm çevrimiçi özellikler isteğe bağlıdır ve varsayılan olarak kapalıdır.",
         "store_share_intro": "Aynı cihaza sahip diğerlerinin kullanabilmesi için bu referans döngüyü yükleyin. Herkese açık olmadan önce incelenir.",
         "online_intro_global": "Diğer WashData kullanıcılarıyla referans kayıtlarına göz atın ve paylaşın, cihaz girişlerini onaylayın. Tek bir bağlantı tüm WashData entegrasyonunuz için geçerlidir; cihaz markası ve modeli her cihaz için Temel bölümünde ayarlanır. Tüm çevrimiçi özellikler isteğe bağlıdır ve varsayılan olarak kapalıdır.",
@@ -1108,7 +1117,7 @@
         "duration_weight": "Aşama 4: çalışma süresi uyumunun nihai puanı ne kadar etkilediği (varsayılan 0.22)",
         "energy_weight": "Aşama 4: enerji uyumunun nihai puanı ne kadar etkilediği (varsayılan 0.22)",
         "profile_match_min_duration_ratio": "Aşama 1: profil süresinin bir kesri olarak minimum döngü uzunluğu; varsayılan 0.1 (%10)",
-        "profile_match_max_duration_ratio": "Aşama 1: profil süresinin bir kesri olarak maksimum döngü uzunluğu; varsayılan 1.5 (%150)",
+        "profile_match_max_duration_ratio": "Aşama 1: profil süresinin bir kesri olarak maksimum döngü uzunluğu; varsayılan 1.8 (%180)",
         "keep_min_score": "Aşama 2: yarışta kalmak için taban puan; varsayılan 0.1 zayıf eşleşmelere izin verir, sonraki aşamalar en iyisini seçer",
         "dtw_blend": "Aşama 3: 0 = yalnızca çekirdek puan, 1 = yalnızca DTW puanı, 0.5 = eşit karışım (varsayılan)",
         "dtw_ensemble_w": "Aşama 3 (topluluk modu): ölçeklendirilmiş-L1 ile türev DTW arasındaki ağırlık; varsayılan 0.7 düzey farkındalığını tercih eder",
@@ -1434,8 +1443,8 @@
             "label": "Boşaltma Hatırlatıcısı Gecikmesi"
         },
         "notify_unload_repeat": {
-            "doc": "Kapıyı açana veya bildirimdeki \"Hatırlatmayı durdur\" düğmesine dokunana kadar boşaltma hatırlatıcısını \"Boşaltma Hatırlatıcısı Gecikmesi\" dakikada bir yeniden gönderir. Bir Kapı Sensörü Varlığı gerektirir (hatırlatıcının kendisi de gerektirir). Kapatma düğmesi Home Assistant refakatçi uygulaması (mobil) bildirimlerinde çalışır.",
-            "label": "Kapı Açılana Kadar Tekrarla"
+            "doc": "Boşaltma onaylanana veya bildirimdeki \"Hatırlatmayı durdur\" düğmesine dokunana kadar boşaltma hatırlatıcısını \"Boşaltma Hatırlatıcısı Gecikmesi\" dakikada bir yeniden gönderir. Boşaltmayı onaylamak için bir yola ihtiyaç duyar: bir Kapı Sensörü Varlığı, bir Boşaltma Onay Varlığı veya aşağıdaki \"Boşaltmayı Elle Onayla\" seçeneği. Kapatma düğmesi Home Assistant refakatçi uygulaması (mobil) bildirimlerinde çalışır.",
+            "label": "Boşaltılana Kadar Tekrarla"
         },
         "off_delay": {
             "doc": "Güç kesildikten sonra döngünün bittiğini bildirmeden önce beklenecek süre. Bu pencerede güç yeniden gelirse döngü sorunsuz bir şekilde devam eder; bu, yıkama aşamaları arasındaki duraklamaları köprüler. Bulaşık makinelerinin kurutma aşamaları uzundur (20-60 dakika boyunca güç kapalıdır), bu nedenle, tüm yıkama+kuruluğun tek bir döngüde tutulması için kapatma gecikmesinin bunu aşması gerekir.",
@@ -1655,6 +1664,14 @@
         "curve_preroll_seconds": {
             "label": "Eğri Ön Kaydı",
             "doc": "WashData'nın, iptal edilen başlatma denemelerinden gelen kaç saniyelik okumayı bir döngünün eğrisinin başına taşıyabileceği. Bir döngünün eğrisi normalde sonunda başarılı olan başlatma denemesiyle başlar; bu nedenle yerleşmeden önce birkaç kez yoklayan makinelerde (program seçimi, kapak kilidi, ilk su alma) gerçek etkinliğin ilk dakikaları her eğride eksik kalır. Bu değeri, makinenizdeki en uzun hazırlık aşamasının biraz üzerine ayarlayın (çoğu makine için 300 sn fazlasıyla yeter). 0 kapatır. Açmanın kaydedilen başlangıcı öne çektiğini unutmayın: değişiklikten önce ve sonra kaydedilen döngüler aynı program için farklı süreler taşır ve eski döngüler elenene kadar öğrenilen ortalamalar kayar."
+        },
+        "unload_confirm_entity": {
+            "label": "Boşaltma Onay Varlığı",
+            "doc": "Kapı sensörü takılamayan makineler için, etkinleşmesi yükün çıkarıldığı anlamına gelen isteğe bağlı varlık. Her türü çalışır: bir Zigbee veya NFC düğmesi, bir input_button yardımcısı, makinenin önündeki bir hareket sensörü, bir sahne. Kapanma ve kullanılamaz duruma geçme dışındaki her durum değişikliği onay sayılır. Bunu ayarlamak, Kapı Sensörü Varlığı olmayan bir cihazda da boşaltma hatırlatıcısını etkinleştirir."
+        },
+        "unload_track_without_door": {
+            "label": "Boşaltmayı Elle Onayla",
+            "doc": "Kapı Sensörü Varlığı ve Boşaltma Onay Varlığı bulunmayan bir cihazda boşaltma hatırlatıcısını çalıştırır ve boşaltmayı bunun yerine kendi otomasyonunuzdan onaylarsınız: \"Boşaltıldı Olarak İşaretle\" düğme varlığına basın veya ha_washdata.mark_unloaded servisini çağırın. Bir Kapı Sensörü Varlığı ayarlandığında yok sayılır, çünkü sinyali zaten o sağlar."
         }
     },
     "setting_group": {
@@ -1798,6 +1815,7 @@
     },
     "toast": {
         "catalog_refreshed": "Topluluk kataloğu yenilendi",
+        "contrib_device_changed": "Topluluk mağazasına eklendi, ancak form açıkken seçili cihaz değişti. Bunu Ayarlar'dan seçin.",
         "access_saved": "Erişim denetimi kaydedildi",
         "all_wiped": "Tüm veriler silindi",
         "analysis_complete_none": "Analiz tamamlandı: yeni öneri yok",
@@ -2010,6 +2028,7 @@
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",
             "reason": {
                 "force_stopped": "zorla durdurulmuş",
+                "user_stopped": "elle durdurulmuş",
                 "interrupted": "kesintiye uğramış",
                 "incomplete": "tamamlanmamış",
                 "noise": "gürültü",

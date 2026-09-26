@@ -65,6 +65,7 @@ export interface DeviceInfo {
   armed_program: string | null;
   options: Record<string, unknown>;
   option_defaults: Record<string, unknown>;
+  standby_above_stop: Record<string, unknown> | null;
 }
 
 export interface DismissAllFeedbacksResponse {
@@ -130,6 +131,7 @@ export interface GetCyclePowerDataResponse {
   labelable?: boolean;
   editable?: boolean;
   cycle_origin?: string;
+  expected?: number[][] | null;
 }
 
 export interface GetDeviceCyclesResponse {
@@ -694,7 +696,7 @@ export interface GetPhaseCatalogRequest {
 
 export interface CreatePhaseRequest {
   entry_id: string;
-  device_type: string;
+  device_type?: string;
   name: string;
   description?: string;
 }

@@ -172,6 +172,7 @@ screenshot tour.
 | `button.<name>_pause_cycle` | Pause a cycle that is starting, running, finishing, or already auto-paused (converting that into a held pause). Not available during the anti-crease or rinse-hold stages. |
 | `button.<name>_resume_cycle` | Resume a cycle you paused (not an automatic pause) |
 | `button.<name>_force_end_cycle` | Force-terminate a stuck cycle |
+| `button.<name>_mark_unloaded` | Confirm the finished load has been taken out, ending the unload reminder. Available only while the state is `clean`. Needs a Door Sensor Entity, an Unload Confirmation Entity or "Confirm Unload Manually" set. |
 
 ### Services
 
@@ -183,6 +184,7 @@ Most management happens in the panel, but these are available for automations:
 | `ha_washdata.pause_cycle` / `ha_washdata.resume_cycle` | Pause or resume programmatically, e.g. from an energy-tariff automation |
 | `ha_washdata.record_start` / `ha_washdata.record_stop` | Start/stop a recording, e.g. from a physical button |
 | `ha_washdata.label_cycle` | Assign a profile to a cycle in history |
+| `ha_washdata.mark_unloaded` | Confirm the finished load has been taken out, e.g. from a physical button or an NFC tag. Does nothing when no load is waiting. |
 
 ```yaml
 service: ha_washdata.record_start

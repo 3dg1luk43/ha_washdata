@@ -29,6 +29,7 @@ import numpy as np
 from homeassistant.core import HomeAssistant, callback
 
 from .const import (
+    TerminationReason,
     CONF_WATCHDOG_INTERVAL,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_OFF_DELAY,
@@ -221,6 +222,98 @@ def _resumed_low_runs(
     return out
 
 
+def _measured_quiet_span_s(
+    points: list[tuple[float, float]],
+    low_start_s: float,
+    resume_idx: int,
+    quiet_thr: float,
+) -> float:
+    """Longest quiet span inside a resumed low run, as the DETECTOR would time it.
+
+    ``_resumed_low_runs`` locates a pause by asking when the appliance went below
+    ``active_thr`` and when it came back - the right question for *whether* this
+    was a pause. It is the wrong measurement for ``off_delay``, because the run
+    is closed only by a *sustained* resume (``_MIN_RESUME_ACTIVE_S``, 120 s) and
+    any dip re-absorbs the blip. An appliance that works in bursts shorter than
+    that never closes a run: measured on the #445 reporter's Miele (10 s
+    sampling, ~110 W tumble for 20-60 s alternating with 3.4 W dips), the *first*
+    dip opened a run that stayed open for 2070 s until a long heating block
+    finally arrived - and that "pause" contains a 497.9 W peak. The p95 came out
+    at 1973 s, so the suggestion asked for ``off_delay`` 2033 s on a machine
+    whose real pauses are one sample long. Retuning ``active_thr`` does not help:
+    swept over ``0.02*peak`` / ``stop_threshold`` / ``start_threshold`` /
+    ``0.25*median_active`` / ``0.5*median_active``, that p95 stays 1944-1976 s.
+
+    So measure what ``CycleDetector._time_below_threshold`` would actually have
+    accumulated: it resets on *any* reading at or above ``stop_threshold_w``, so
+    the statistic is the longest run of consecutive below-threshold samples. A
+    run whose samples never go below it is not a pause the end gates could ever
+    have seen, and returns 0.0 for the caller to drop.
+
+    Timed like the accumulator too: the interval *preceding* the first
+    below-threshold sample is credited (the detector adds ``dt`` on the reading
+    that takes it below), so a span is ``t[last_below] - t[first_below - 1]``.
+    """
+    return _measured_quiet_span(points, low_start_s, resume_idx, quiet_thr)[0]
+
+
+def _measured_quiet_span(
+    points: list[tuple[float, float]],
+    low_start_s: float,
+    resume_idx: int,
+    quiet_thr: float,
+) -> tuple[float, int | None]:
+    """:func:`_measured_quiet_span_s`, plus the index the winning span ends on.
+
+    The caller needs both, and they can disagree. The low run is bounded by
+    ``active_thr = max(stop_threshold_w, 0.05 * peak)``, so on any normal
+    appliance (peak 2 kW, stop threshold ~2.5 W) a reading anywhere between
+    those two levels splits the run into several below-threshold spans. This
+    function returns the LONGEST of them, while ``points[:resume_idx]`` ends on
+    the LAST one - so scoring that prefix described a different span from the
+    duration reported beside it, and ``_ml_off_delay``'s ``score < 0.4`` filter
+    admitted or rejected the wrong durations.
+    """
+    if resume_idx <= 0 or resume_idx > len(points):
+        return 0.0, None
+    best = 0.0
+    best_end: int | None = None
+    first_below: int | None = None
+    last_below: int | None = None
+
+    def _close(f: int, last: int) -> None:
+        nonlocal best, best_end
+        anchor_t = points[max(0, f - 1)][0]
+        # `_resumed_low_runs` drops a low run that straddles a gap bigger than
+        # `_MAX_PAUSE_GAP_H` and opens a new one at the first reading after it.
+        # If that reading is already below the threshold, anchoring at `f - 1`
+        # reaches back across the outage and folds the whole hole into the span
+        # - which then flows into the p95 that sizes `off_delay` in both
+        # `_suggest_off_delay_from_pauses` and `_ml_off_delay`, where three
+        # pauses are enough for one to dominate. That is precisely the inflation
+        # the `max_gap_s` guard exists to prevent, arriving by the back door.
+        if points[f][0] - anchor_t > _MAX_PAUSE_GAP_H * 3600:
+            anchor_t = points[f][0]
+        span = points[last][0] - anchor_t
+        if span > best:
+            best, best_end = span, last
+
+    for i in range(resume_idx):
+        t, power = points[i]
+        if t < low_start_s:
+            continue
+        if power < quiet_thr:
+            if first_below is None:
+                first_below = i
+            last_below = i
+        elif first_below is not None and last_below is not None:
+            _close(first_below, last_below)
+            first_below = last_below = None
+    if first_below is not None and last_below is not None:
+        _close(first_below, last_below)
+    return max(0.0, best), best_end
+
+
 def _cycle_readings(cycle: dict[str, Any]) -> list[tuple[float, float]]:
     """Normalise a cycle's power_data to [(offset_s, watts), ...]; [] on failure."""
     raw = cycle.get("power_data")
@@ -347,6 +440,18 @@ def select_clean_cycles(
         if status == "force_stopped":
             _bump("force_stopped")
             continue
+        # A cycle the user cut short with "Force cycle end" is stored
+        # status="completed", termination_reason="user" (CycleDetector.user_stop),
+        # so the force_stopped check above never sees it (#445). Its tail is
+        # whatever the appliance happened to be doing when the button was pressed
+        # - usually minutes of standby the user got tired of waiting through - so
+        # every statistic derived from it (sampling cadence, lowest active power,
+        # clean-cycle duration, intra-cycle pauses) describes the user's patience,
+        # not the appliance. Excluded under its own code so the UI can say which
+        # of the two it was.
+        if c.get("termination_reason") == TerminationReason.USER:
+            _bump("user_stopped")
+            continue
         if status == "interrupted" or state == "interrupted":
             _bump("interrupted")
             continue
@@ -387,6 +492,159 @@ def select_clean_cycles(
         clean.append(c)
 
     return clean, excluded
+
+
+# A final reading only counts as standby when it is at most this fraction of the
+# cycle's own peak. Sized to keep every real case in the corpus (the #445
+# reporter's 3.2 W idle against a ~2 kW peak is 0.16%) while rejecting a cycle
+# stopped by hand while the appliance was still working.
+_STANDBY_PEAK_FRACTION = 0.10
+# ...and the observed levels must agree with each other, measured as the median
+# absolute deviation over the median. Outlier-ROBUST on purpose: min/max spread
+# was tried and rejected because #445's own Miele has one 7.5 W reading among
+# [4.1, 3.4, 7.5, 3.2, 3.4] and that single sample put it at 1.26, rejecting the
+# canonical true positive. On MAD the same device scores 0.059 while the corpus
+# washing machine that also passes the all-above test - [8.4, 7.7, 27.0, 8.8,
+# 55.0, 26.8, 6.0, 38.9], where the last stored sample is just wherever the drum
+# stopped - scores 0.548. 0.25 sits with ~4x margin on both sides.
+_STANDBY_MAX_MAD = 0.25
+
+
+def detect_standby_above_stop(
+    cycles: list[dict[str, Any]],
+    stop_threshold_w: float,
+    *,
+    recent: int = 8,
+    min_hits: int = 2,
+) -> dict[str, Any] | None:
+    """Does this appliance idle ABOVE its stop threshold? (#445 cause 1)
+
+    ``CycleDetector`` only counts a cycle as ending once power stays BELOW
+    ``stop_threshold_w``. An appliance whose standby draw sits above it can
+    therefore never end a cycle on its own, however long the off delay: the #445
+    reporter's Miele idles at 3.2-3.5 W against a 2.56 W threshold, and they
+    force-stopped four cycles before reporting it.
+
+    The evidence is in the stored cycles. A cycle that ended by timeout snaps back
+    to the last reading above the threshold, and one the user force-stopped keeps
+    its tail - so in both cases the LAST stored sample is the level the appliance
+    was actually sitting at when the cycle closed. If that is repeatedly above
+    ``stop_threshold_w``, the threshold is below the appliance's standby draw.
+
+    **Two requirements, and both are load-bearing** (PR #448 round 7). The first
+    draft asked only that ``min_hits`` of the recent cycles ended above the
+    threshold, and a peak-relative sanity check was added on top. Measured across
+    the whole corpus that still fired on **4 of 6 real devices** with plainly
+    wrong numbers - it told a dishwasher whose last stored samples are
+    ``[0, 0, 0, 0, 0, 0, 62, 23]`` that it "idles at 42.5 W". The reason is
+    structural: every non-dishwasher end path TRIMS the trailing sub-threshold
+    samples, so the last stored sample is by construction the last sample *above*
+    the threshold - the moment the appliance was last working, not the level it
+    settled at. On a machine that really reaches 0 W that number is meaningless.
+
+    So:
+
+    1. **Every** recent cycle must end above the threshold, not merely
+       ``min_hits`` of them. One cycle that reached 0 W proves the appliance
+       *can* go below, which is the whole question being asked.
+    2. The level must be **consistent**, as median-absolute-deviation over the
+       median, within ``_STANDBY_MAX_MAD``. A real standby draw is a level;
+       "wherever the drum happened to be" ranges 6 W to 55 W across eight cycles,
+       which is what the corpus's washing machines actually look like.
+
+    **Validated against the reporters' own exports, not just the corpus.** Of
+    nine real devices only one passes both tests: #445's Miele, every cycle
+    ending 3.2-7.5 W against a 2.56 W threshold (MAD 0.059). The corpus washing
+    machine that also never reaches 0 W is rejected on consistency (MAD 0.548).
+
+    **#427's AEG and #424's Beko are deliberately NOT reported**, though an
+    earlier version of this docstring cited them as validation at 4/8 each. Their
+    stored cycles end ``[0.0, 1.9, 0.1, 0.9, 0.8, 0.0, 0.0, 0.7]`` and
+    ``[1.2, 1.3, 1.3, 0.0, 0.3, 0.4, 0.2, 1.3]`` - both reach 0 W regularly, so
+    neither idles above its threshold. Their late finishes had a different cause
+    (the keepalive cadence bug, fixed separately), and counting them here was
+    reading a coincidence as a diagnosis.
+
+    User-stopped cycles are still kept: on an appliance with this fault they are
+    often the ONLY way a cycle ever closes, and the #445 reporter force-stopped
+    four.
+
+    Returns None when there is no such pattern, else a summary carrying the
+    observed idle level so the UI can name a number rather than a symptom. Pure
+    statistics, never raises: this is read on the device-list path.
+    """
+    try:
+        if stop_threshold_w <= 0:
+            return None
+        finals: list[float] = []
+        for cycle in list(cycles)[-recent:]:
+            if not isinstance(cycle, dict):
+                continue
+            raw = cycle.get("power_data")
+            if not isinstance(raw, list) or not raw:
+                continue
+            last = raw[-1]
+            if not isinstance(last, (list, tuple)) or len(last) < 2:
+                continue
+            try:
+                final_w = float(last[1])
+            except (TypeError, ValueError, OverflowError):
+                continue
+            # The stored signature already carries this cycle's peak, and it is
+            # what the rest of the integration means by one (Stage 1 rejection
+            # reads the same field), so scanning every sample again is pure
+            # waste. It is not free waste: this runs on the event loop inside the
+            # synchronous `ws_get_devices` callback, which the panel polls every
+            # 20 s per device, and measured over the worst real export in
+            # `cycle_data/` (11454 samples across the last 8 cycles) the scan
+            # costs 1.73 ms a call. Not a hazard at that cadence, which is why
+            # there is no cache here: keying one on cycle count, last id and
+            # threshold buys a millisecond and adds an invalidation path that can
+            # serve a stale advisory. Falling back to the scan keeps a cycle
+            # whose signature is missing or unusable working exactly as before.
+            peak = 0.0
+            _sig = cycle.get("signature")
+            _sig_peak = _sig.get("max_power") if isinstance(_sig, dict) else None
+            try:
+                _sig_peak = float(_sig_peak) if _sig_peak is not None else None
+            except (TypeError, ValueError, OverflowError):
+                _sig_peak = None
+            if _sig_peak is not None and math.isfinite(_sig_peak) and _sig_peak >= 0:
+                peak = _sig_peak
+            else:
+                for pt in raw:
+                    if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+                        try:
+                            peak = max(peak, float(pt[1]))
+                        except (TypeError, ValueError, OverflowError):
+                            continue
+            # Idle-like or nothing: a cycle stopped by hand mid-wash ends at
+            # working power and says nothing about the standby draw.
+            if peak > 0 and final_w > peak * _STANDBY_PEAK_FRACTION:
+                continue
+            finals.append(final_w)
+        if len(finals) < min_hits:
+            return None
+        above = [f for f in finals if f > stop_threshold_w]
+        # Requirement 1: EVERY recent cycle ended above the threshold. One that
+        # reached it proves the appliance can, so it does not idle above it.
+        if len(above) != len(finals) or len(above) < min_hits:
+            return None
+        median = float(np.median(above))
+        if median <= 0:
+            return None
+        # Requirement 2: the levels agree with each other. See _STANDBY_MAX_MAD.
+        mad = float(np.median([abs(f - median) for f in above]))
+        if mad / median > _STANDBY_MAX_MAD:
+            return None
+        return {
+            "cycles_above": len(above),
+            "cycles_checked": len(finals),
+            "idle_w": round(median, 2),
+            "stop_threshold_w": round(float(stop_threshold_w), 2),
+        }
+    except Exception:  # noqa: BLE001 - a statistic must never break the device list
+        return None
 
 
 def _format_exclusions(excluded: dict[str, int]) -> str:
@@ -1358,7 +1616,16 @@ class SuggestionEngine:
             # same sustained-resume + outage-gap gate used by the off_delay
             # heuristics (_suggest_off_delay_from_pauses / _scored_pauses).
             for low_start_s, resume_idx in _resumed_low_runs(readings, active_thr, max_gap_s):
-                if readings[resume_idx][0] - low_start_s >= 60.0:
+                # Same measurement correction as the off_delay heuristic (#445):
+                # a "false end" is quiet time the END GATES would have banked, so
+                # it is timed against stop_threshold_w, not against the
+                # 2%-of-peak activity floor that only decides whether this was a
+                # pause at all. Without it, an appliance that works in bursts
+                # scores a false end in every cycle and end_repeat_count is
+                # driven up on evidence the detector never saw.
+                if _measured_quiet_span_s(
+                    readings, low_start_s, resume_idx, stop_threshold_w
+                ) >= 60.0:
                     n_false_end += 1
                     break
 
@@ -1429,7 +1696,14 @@ class SuggestionEngine:
             # sustain is absorbed, and the trailing dead tail is skipped - so the
             # drying phase never inflates the p95 (see _resumed_low_runs).
             for low_start, resume_idx in _resumed_low_runs(readings, active_thr, max_gap_s):
-                run = readings[resume_idx][0] - low_start
+                # Measure the pause the way the end gates time it, not as the
+                # span between "went quiet" and "came back loud" (#445). See
+                # _measured_quiet_span_s: the sustained-resume rule merges an
+                # entire burst-driven wash phase into one multi-thousand-second
+                # "pause" on appliances whose working power dips between bursts.
+                run = _measured_quiet_span_s(
+                    readings, low_start, resume_idx, stop_threshold_w
+                )
                 if run > 0:
                     pause_durations.append(run)
 
@@ -2121,12 +2395,24 @@ class MLSuggestionEngine:
         # not sustain is not a pause).  ``resume_idx`` is the first active sample of
         # the resume, so the tail prefix ``points[:resume_idx]`` ends in the low run.
         for low_start_s, resume_idx in _resumed_low_runs(points, active_thr, max_gap_s):
-            dur = points[resume_idx - 1][0] - low_start_s
+            # Timed against stop_threshold_w like the classic heuristic (#445), so
+            # the ML-calibrated off_delay is fitted to the same quantity the end
+            # gates measure rather than to burst-phase spans.
+            dur, quiet_end = _measured_quiet_span(
+                points, low_start_s, resume_idx, stop_threshold_w
+            )
             if dur < 30.0:  # ignore motor micro-dips
                 continue
             score: float | None = None
             try:
-                feat = end_feat_fn(points[:resume_idx], expectation)  # tail is the low run
+                # Score the prefix ending on the span `dur` was measured from, not
+                # merely the one before the resume: a low run split by readings
+                # between stop_threshold_w and active_thr holds several quiet
+                # spans, and pairing the longest span's duration with the last
+                # span's score is what made the `score < 0.4` filter keep the
+                # wrong pauses.
+                tail_end = resume_idx if quiet_end is None else quiet_end + 1
+                feat = end_feat_fn(points[:tail_end], expectation)
                 if feat is not None:
                     score = float(end_score_fn(feat))
             except Exception:  # pylint: disable=broad-exception-caught

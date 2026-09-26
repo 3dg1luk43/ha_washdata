@@ -280,6 +280,16 @@
           "description": "WashData seade, mille mudeleid uuesti treenida."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Märgi mahalaadituks",
+      "description": "Kinnitage, et lõpetatud tsükli sisu on WashData seadmest välja võetud: olek „Puhas“ ja mahalaadimise meeldetuletus lähtestatakse.",
+      "fields": {
+        "device_id": {
+          "name": "Seade",
+          "description": "WashData seade, mille lõpetatud tsükli sisu on välja võetud."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Lõpeta tsükli salvestamine"
+      },
+      "mark_unloaded": {
+        "name": "Märgi mahalaadituks"
       }
     }
   },

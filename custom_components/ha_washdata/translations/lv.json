@@ -280,6 +280,16 @@
           "description": "WashData ierīce, kurai pārapmācīt modeļus."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Atzīmēt kā izkrautu",
+      "description": "Apstipriniet, ka pabeigtā cikla saturs ir izņemts no WashData ierīces: stāvoklis „Tīrs“ un izkraušanas atgādinājums tiks notīrīti.",
+      "fields": {
+        "device_id": {
+          "name": "Ierīce",
+          "description": "WashData ierīce, no kuras ir izņemts pabeigtā cikla saturs."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Beigt cikla ierakstīšanu"
+      },
+      "mark_unloaded": {
+        "name": "Atzīmēt kā izkrautu"
       }
     }
   },

@@ -229,6 +229,13 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
     manager._last_real_reading_time = last_real
     manager._current_power = 1.0                    # 1 W: below stop_threshold (2 W)
     manager._current_program = "Tumble Cottons"
+    # A publish-on-change plug that has gone quiet is still AVAILABLE: its last
+    # report sits in hass.states, stamped when it was actually made. Without
+    # this the test simulated an OUTAGE rather than silence, which are the two
+    # cases `observed` now separates. Stubbed rather than `async_set`, because a
+    # freshly-stamped state would look like a missed real reading and
+    # `_resync_power_from_state` would feed it instead of the keepalive firing.
+    manager._live_power_state = MagicMock(return_value=(1.0, last_real))
     manager._low_power_no_update_timeout = 3600.0   # Default - should NOT be what closes the cycle
 
     # Wire detector mock: cycle is in RUNNING state, waiting in low-power.
@@ -252,7 +259,19 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
     # sensor reporting: `_keep_tail_cap` follows real readings past the expected
     # end, so a keepalive counted as real would bank silence as cycle time
     # (register item 238).
-    detector.process_reading.assert_called_once_with(0.0, now, synthetic=True)
+    # The keepalive carries the sensor's OWN last value (1.0 W here, set above
+    # as this machine's standby draw), not a fabricated 0.0. A synthetic reading
+    # is appended to the trace like any other, so injecting zero would write a
+    # sample the appliance never produced - and on a machine idling above its
+    # stop threshold that fabricates a quiet tail and defeats the #445 standby
+    # advisory, which reads exactly that final sample.
+    #
+    # observed=True: the sensor is SILENT, not unavailable. hass.states still
+    # holds its last numeric report, so the interval the keepalive closes really
+    # was seen - which is what lets it skip the outage reset (#424/#427).
+    detector.process_reading.assert_called_once_with(
+        1.0, now, synthetic=True, observed=True
+    )
     # No force-end: the cycle should close gracefully, not be aborted.
     detector.force_end.assert_not_called()
 
@@ -261,13 +280,21 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
 async def test_watchdog_does_not_inject_before_no_update_timeout(
     hass: HomeAssistant, manager: WashDataManager
 ) -> None:
-    """Bug 3 (inverse): injection must NOT fire if real-update silence is shorter than
-    no_update_active_timeout AND shorter than off_delay.
+    """Bug 3 (inverse): injection must not fire while the sensor is still talking.
+
+    #197's fix made the keepalive honour ``no_update_active_timeout`` so a cycle
+    could not linger for the full hour-long ``low_power_no_update_timeout``.
+    Register item 290 tightened the same bound further - the gate is now the
+    watchdog interval - because both of those are stall-detection timeouts and a
+    publish-on-change plug going quiet at standby is not a stall. The direction
+    is #197's own, so the inverse case is now "silence shorter than one watchdog
+    interval": below that the sensor is effectively still reporting and there is
+    nothing to stand in for.
     """
     now = datetime(2026, 3, 28, 12, 0, 0, tzinfo=timezone.utc)
 
-    # Sensor went silent only 80 s ago - below both thresholds (140 s and 120 s).
-    silence_duration = 80
+    # Sensor reported within the last watchdog interval - nothing to stand in for.
+    silence_duration = 10
     last_real = now - timedelta(seconds=silence_duration)
 
     manager._last_reading_time = last_real
@@ -290,9 +317,13 @@ async def test_watchdog_does_not_inject_before_no_update_timeout(
     detector.config.min_power = 10.0
     detector.config.off_delay = 120
 
+    assert manager._watchdog_interval > silence_duration, (
+        "precondition: the sensor spoke more recently than one watchdog tick"
+    )
+
     await manager._watchdog_check_stuck_cycle(now)
 
-    # Too early - neither injection path should have fired yet.
+    # Too early - the injection path must not have fired yet.
     detector.process_reading.assert_not_called()
     detector.force_end.assert_not_called()
 
@@ -301,9 +332,23 @@ async def test_watchdog_does_not_inject_before_no_update_timeout(
 async def test_watchdog_skips_injection_during_verified_pause(
     hass: HomeAssistant, manager: WashDataManager
 ) -> None:
-    """Bug 3 (verified pause guard): when verified_pause is True (e.g. dishwasher
-    drying phase confirmed by envelope), the no_update_active_timeout injection must
-    NOT fire, to avoid prematurely ending a legitimate long drying cycle.
+    """Bug 3 (verified pause guard): a verified pause must not be force-ended.
+
+    The guard used to be phrased as "suppress the no_update_active_timeout
+    injection", but that never suppressed keepalives: the sibling off_delay gate
+    carried no verified-pause check, so a verified pause still got them, just
+    ~210 s apart instead of ~30 s (measured). Since register item 290 there is
+    one gate and it does not special-case a verified pause, because a keepalive
+    cannot end anything early - ``_time_below_threshold`` accrues wall-clock time
+    between readings, so the total after N seconds of quiet is identical whether
+    that arrived as one reading or twenty. Simulated across keepalive cadences of
+    60 s, 30 s and 5 s, a 2 h verified drying pause survives intact in all three.
+
+    What the guard actually has to protect is the *force-end*, and every consumer
+    that honours a verified pause (the ENDING hard finalize, the terminal-drop
+    finalize, the zombie killer, the staleness force-end's extended timeout)
+    reads ``_verified_pause`` directly and is untouched by sampling rate. That is
+    what this test now asserts.
     """
     now = datetime(2026, 3, 28, 12, 0, 0, tzinfo=timezone.utc)
 
@@ -333,7 +378,13 @@ async def test_watchdog_skips_injection_during_verified_pause(
 
     await manager._watchdog_check_stuck_cycle(now)
 
-    # Verified pause is active → no_update_active_timeout path must be suppressed.
-    # The any-update silence (30 s) is also below off_delay (180 s), so nothing fires.
-    detector.process_reading.assert_not_called()
+    # Verified pause is active → the cycle must not be ended, however long the
+    # plug stays silent.
     detector.force_end.assert_not_called()
+    # A keepalive is allowed, but only as a synthetic reading: it may advance the
+    # quiet accumulator, never masquerade as a sensor report.
+    for c in detector.process_reading.call_args_list:
+        assert c.kwargs.get("synthetic") is True, (
+            f"the watchdog may only inject SYNTHETIC readings, got {c}"
+        )
+    assert manager._last_real_reading_time == last_real

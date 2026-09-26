@@ -35,7 +35,8 @@
     "not_importable": "n/d qui",
     "exists": "esiste già",
     "backfilled_tip": "Rilevato in uno storico di potenza importato. Influenza solo la corrispondenza dei programmi, non conteggiato nelle statistiche.",
-    "armed": "(si applica al prossimo ciclo)"
+    "armed": "(si applica al prossimo ciclo)",
+    "duration_outlier": "{n} ciclo/i di durata anomala"
   },
   "btn": {
     "reset_zoom": "Reimposta zoom",
@@ -1039,7 +1040,10 @@
     "odometer_intro": "Questo totale può solo aumentare. L'eliminazione del record di un ciclo non lo modifica e continua a contare oltre il limite dello storico conservato, così i promemoria di servizio restano corretti.",
     "odometer_correct_hint": "Imposta questo valore se WashData ha registrato un ciclo che non è mai avvenuto, oppure se l'elettrodomestico aveva già eseguito dei cicli prima dell'installazione di WashData.",
     "no_reminders_set": "Non è ancora impostato alcun promemoria di servizio.",
-    "toast_program_armed": "Programma preimpostato per il prossimo ciclo: {program}"
+    "toast_program_armed": "Programma preimpostato per il prossimo ciclo: {program}",
+    "standby_above_stop_title": "Assorbe ancora {idle} W alla fine del ciclo",
+    "standby_above_stop_sub": "{n} degli ultimi {total} cicli. Il Ritardo spegnimento parte solo quando la potenza scende sotto la Soglia di arresto ({stop} W), quindi i cicli finiscono in ritardo o vanno fermati a mano.",
+    "advisory_duration_outlier": "{n} ciclo/i etichettati come '{name}' si discostano troppo dalla sua durata abituale per potergli mai corrispondere (caso peggiore: {ratio}x). Probabilmente sono etichettati male, oppure una registrazione ha catturato due esecuzioni. Rietichettali o dividili, così smettono di falsare la stima dei tempi di questo programma."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
@@ -1063,7 +1067,7 @@
     "duration_weight": "Fase 4: quanto la concordanza di durata influisce sul punteggio finale (predefinito 0,22)",
     "energy_weight": "Fase 4: quanto la concordanza di energia influisce sul punteggio finale (predefinito 0,22)",
     "profile_match_min_duration_ratio": "Fase 1: durata minima del ciclo come frazione della durata del profilo; predefinito 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Fase 1: durata massima del ciclo come frazione della durata del profilo; predefinito 1,5 (150%)",
+    "profile_match_max_duration_ratio": "Fase 1: durata massima del ciclo come frazione della durata del profilo; predefinito 1,8 (180%)",
     "keep_min_score": "Fase 2: punteggio minimo per restare in gara; il predefinito 0,1 ammette candidati deboli, le fasi successive scelgono il migliore",
     "dtw_blend": "Fase 3: 0 = solo punteggio centrale, 1 = solo punteggio DTW, 0,5 = mix equilibrato (predefinito)",
     "dtw_ensemble_w": "Fase 3 (modalità ensemble): peso su L1 scalato rispetto a DTW derivato; il predefinito 0,7 favorisce la sensibilità al livello",
@@ -1398,8 +1402,8 @@
       "label": "Ritardo promemoria scarico"
     },
     "notify_unload_repeat": {
-      "doc": "Continua a inviare il promemoria di scarico ogni \"Ritardo promemoria scarico\" minuti finché non apri la porta o tocchi \"Interrompi promemoria\" nella notifica. Richiede un'Entità sensore porta (il promemoria stesso la richiede). Il pulsante di chiusura funziona sulle notifiche dell'app complementare (mobile) di Home Assistant.",
-      "label": "Ripeti finché la porta non si apre"
+      "doc": "Continua a inviare il promemoria di scarico ogni \"Ritardo promemoria scarico\" minuti finché lo scarico non viene confermato o non tocchi \"Interrompi promemoria\" nella notifica. Richiede un modo per confermare lo scarico: un'Entità sensore porta, un'Entità di conferma scarico o l'opzione \"Conferma scarico manualmente\" qui sotto. Il pulsante di chiusura funziona sulle notifiche dell'app complementare (mobile) di Home Assistant.",
+      "label": "Ripeti fino alla conferma di scarico"
     },
     "off_delay": {
       "doc": "È tempo di attendere dopo l'interruzione della corrente prima di dichiarare terminato il ciclo. Se l'alimentazione viene ripristinata entro questo intervallo, il ciclo continua senza interruzioni, consentendo di colmare le pause tra le fasi di lavaggio. Le lavastoviglie hanno fasi di asciugatura lunghe (spegnimento per 20-60 minuti), quindi il ritardo di spegnimento deve superare quello per mantenere l'intero ciclo di lavaggio+asciugatura come un ciclo.",
@@ -1607,6 +1611,14 @@
     "energy_price_dynamic": {
       "label": "Costo ponderato nel tempo",
       "doc": "Addebita ogni ciclo al prezzo in vigore in ogni momento in cui è stato eseguito, invece dell'unico prezzo valido al termine. Vale solo per un'entità di prezzo (un prezzo statico non può variare). Non serve alcuna configurazione aggiuntiva: il prezzo viene seguito in tempo reale mentre il ciclo è in corso, e Elabora storico, in Diagnostica, ricalcola il costo dei cicli più vecchi a partire dal recorder. Disattivato = il comportamento classico, un unico prezzo fissato alla fine."
+    },
+    "unload_confirm_entity": {
+      "label": "Entità di conferma scarico",
+      "doc": "Entità facoltativa la cui attivazione indica che il carico è stato tolto, per le macchine che non possono avere un sensore porta. Va bene qualsiasi tipo: un pulsante Zigbee o NFC, un helper input_button, un sensore di movimento davanti alla macchina, una scena. Ogni cambio di stato conta come conferma, tranne lo spegnimento e il passaggio a non disponibile. Impostarla abilita anche il promemoria di scarico su un dispositivo senza Entità sensore porta."
+    },
+    "unload_track_without_door": {
+      "label": "Conferma scarico manualmente",
+      "doc": "Esegue il promemoria di scarico su un dispositivo senza Entità sensore porta e senza Entità di conferma scarico, e lo scarico lo confermi tu dalla tua automazione: premi l'entità pulsante \"Segna come scaricato\" oppure chiama il servizio ha_washdata.mark_unloaded. Ignorato quando è impostata un'Entità sensore porta, che fornisce già il segnale."
     }
   },
   "setting_group": {
@@ -1839,6 +1851,7 @@
     "store_share_failed": "Condivisione non riuscita: {error}",
     "store_shared": "Condiviso nello store della community, in attesa di revisione.",
     "appliance_added": "Elettrodomestico aggiunto, in attesa di approvazione",
+    "contrib_device_changed": "Aggiunto allo store della community, ma il dispositivo selezionato è cambiato mentre il modulo era aperto. Selezionalo nelle Impostazioni.",
     "thanks_confirming": "Grazie per la conferma",
     "device_approved": "Approvato dalla community",
     "rating_saved": "Valutazione della qualità salvata",
@@ -1962,6 +1975,7 @@
       "summary": "Esclusi {total} cicli rilevati male: {parts}.",
       "reason": {
         "force_stopped": "arrestati forzatamente",
+        "user_stopped": "arrestati manualmente",
         "interrupted": "interrotti",
         "incomplete": "incompleti",
         "noise": "rumore",
@@ -2186,6 +2200,11 @@
       "tap_action": "Azione al tocco",
       "hold_action": "Azione alla pressione prolungata",
       "double_tap_action": "Azione al doppio tocco"
+    }
+  },
+  "note": {
+    "off_delay": {
+      "effective": "Un ciclo terminato attende in realtà {eff} s, non {delay} s: l'Intervallo minimo di spegnimento ({gap} s) è più lungo e ha la precedenza."
     }
   }
 }

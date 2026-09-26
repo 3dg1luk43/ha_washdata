@@ -91,7 +91,13 @@ async def test_watchdog_refreshes_eta_during_silent_tail(
     hass: HomeAssistant, manager: WashDataManager
 ) -> None:
     """On a watchdog tick during an active silent tail, the ETA is recomputed and
-    pushed - without any keepalive injection or force-end."""
+    pushed, and the cycle is not force-ended.
+
+    The refresh sits ahead of the keepalive/force-end branches precisely so that
+    a verified-pause drying tail keeps ticking down; since register item 290 the
+    keepalive fires on the watchdog cadence, so one is expected here too. What
+    must never happen on a tick like this is a force-end.
+    """
     now = datetime(2026, 3, 28, 12, 0, 0, tzinfo=timezone.utc)
     _wire_silent_verified_pause(manager, now)
 
@@ -102,9 +108,18 @@ async def test_watchdog_refreshes_eta_during_silent_tail(
 
     manager._update_remaining_only.assert_called_once()
     manager._notify_update.assert_called()
-    # The cycle must not be disturbed: no synthetic reading, no force-end.
-    manager.detector.process_reading.assert_not_called()
+    # The cycle must not be ENDED. A keepalive may be injected (item 290) - it
+    # only advances the quiet accumulator by wall-clock time that has genuinely
+    # passed - but it must be marked synthetic so it cannot pass for a sensor
+    # report.
     manager.detector.force_end.assert_not_called()
+    for c in manager.detector.process_reading.call_args_list:
+        assert c.kwargs.get("synthetic") is True, (
+            f"the watchdog may only inject SYNTHETIC readings, got {c}"
+        )
+    assert manager._last_real_reading_time == now - timedelta(seconds=500), (
+        "an injected keepalive must not count as the sensor having reported"
+    )
 
 
 @pytest.mark.asyncio

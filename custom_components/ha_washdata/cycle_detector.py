@@ -66,8 +66,13 @@ from .const import (
     ENDING_HARD_FINALIZE_RATIO,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
     GATE_CADENCE_MEDIAN_FACTOR,
+    END_GATE_LATE_RATIO,
+    resolve_end_gate_late_ratio,
+    END_GATE_LATE_SECONDS,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
+    DEVICE_TYPE_DISHWASHER,
+    TERMINAL_QUIET_CAP_S,
     STANDBY_BAND_WINDOW_S,
     STANDBY_BAND_MAX_FRACTION,
     STANDBY_BAND_FLATNESS_FRACTION,
@@ -112,7 +117,11 @@ ML_END_GUARD_MAX_DEFER_SECONDS = 1800.0  # cap the extra wait the guard may add 
 ML_PROVIDER_THROTTLE_SECONDS = 30.0
 if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
     raise ValueError("DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)")
-from .signal_processing import energy_gap_threshold_s, integrate_wh
+from .signal_processing import (
+    energy_gap_threshold_s,
+    integrate_wh,
+    quiet_run_before,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -291,6 +300,61 @@ def trim_zero_readings(
     return readings[start_idx : end_idx + 1]
 
 
+def terminal_high_for_guards(
+    store: Any,
+    config: "CycleDetectorConfig",
+    cycle_max_power: Any,
+    profile_name: str | None,
+) -> tuple[float, ...] | None:
+    """Element 10 of the match tuple: the matched profile's last high-power block.
+
+    Two consumers with two different bars, and the bar has to travel with the
+    block (register item 351):
+
+    * **anti-crease** (#399) measures against ``anti_wrinkle_max_power``, the
+      dryer's "a tumble is below this" level. Only meaningful while anti-wrinkle
+      is on, and it returns a TRIPLE.
+    * **the standby-band finalise** (#296 / #445) shares the same predicate and
+      used to get nothing at all, because element 10 was supplied only when
+      anti-wrinkle was enabled and ``DEFAULT_ANTI_WRINKLE_ENABLED`` is False. So
+      on a washing machine ``_anticrease_spin_pending`` returned False at once
+      and the machine could finalise on the quiet plateau before its final spin,
+      recording that spin as a second cycle. The bar here is a share of the
+      cycle's own peak, and it is returned as a QUAD so
+      ``_high_power_seconds_since`` counts live seconds against the same number.
+
+    **This lives here, module level, because it had two copies.** The manager
+    builds the live match tuple and ``playground`` builds the sim's, and
+    ``end_gate_eval.py`` drives the detector through the Playground - so an arm
+    present in only one of them is invisible to every measurement made with that
+    harness, which is exactly how item 352 first measured as a no-op. The copies
+    had already drifted in their error handling before they were merged.
+
+    Total by construction: every failure path returns None, which leaves the
+    guard exactly as inert as it was. That is the fail-open direction every input
+    here takes, and it is also what lets ``playground`` call it directly while
+    keeping its own never-raise contract.
+    """
+    if not profile_name or store is None:
+        return None
+    try:
+        if config.anti_wrinkle_enabled:
+            return store.profile_terminal_high_block(
+                profile_name, config.anti_wrinkle_max_power
+            )
+        if config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES:
+            return None
+        ceiling = float(cycle_max_power or 0.0) * STANDBY_BAND_MAX_FRACTION
+        if ceiling <= 0:
+            return None
+        block = store.profile_terminal_high_block(profile_name, ceiling)
+        if block is None:
+            return None
+        return (float(block[0]), float(block[1]), float(block[2]), ceiling)
+    except Exception:  # noqa: BLE001 - a guard input must never break matching
+        return None
+
+
 class CycleDetector:
     """Detects washing machine cycles based on power usage.
 
@@ -403,6 +467,13 @@ class CycleDetector:
         self._last_match_time: datetime | None = None
         self._expected_duration: float = 0.0
         self._last_match_confidence: float = 0.0
+        # Element 12: the longest expected duration among the candidates the
+        # matcher still considers plausible. `_match_prefix_ambiguous` means one
+        # of them is materially longer than the winner, so "past the expected
+        # end" might be "mid-soak in that longer programme" - but only up to
+        # THIS duration. Past it there is no longer programme left to be mid-soak
+        # in, and the guard's own rationale is spent.
+        self._longest_candidate_duration: float = 0.0
         self._end_spike_seen: bool = False
         self._end_spike_duration: float = 0.0  # cycle duration (s) when _end_spike_seen was last set
         self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
@@ -423,6 +494,15 @@ class CycleDetector:
         self._matched_terminal_high: (
             tuple[float, float] | tuple[float, float, float] | None
         ) = None
+        # Element 11 (register item 297): how long the matched profile is MEASURED to stay quiet
+        # after its last real activity. Bounds how much of Smart Termination's
+        # confirmation delay may be banked into the stored duration. None means the
+        # profile has not been measured, and for a DISHWASHER the previous
+        # expected-end cap applies. Only a dishwasher gets that far: every other
+        # device type returns `_last_active_time` from `_keep_tail_cap` before
+        # this element is read at all, because nothing legitimate follows their
+        # last activity - so for them the cap can sit EARLIER than expected_end.
+        self._matched_terminal_quiet_s: float | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
@@ -493,6 +573,15 @@ class CycleDetector:
         cannot triple the gate. Only these two gates read it - ``_p95_dt`` itself
         is left alone so every outage ceiling keeps the cadence snapshot it was
         tuned against (register items 213, 215).
+
+        The cap alone was not enough, and the reason is worth keeping: it is
+        computed over the same 20-interval window it is meant to protect. Once a
+        publish-on-change plug falls silent the watchdog's own 0 W keepalives are
+        the only readings left, so the median collapses onto the injection spacing
+        too and ``5 x median`` stops binding - the gate then grows with our
+        injection rate instead of the plug's. Fixed at the source (register item
+        289): ``process_reading`` no longer trains the cadence on synthetic
+        readings, so this window describes the sensor and nothing else.
         """
         if len(self._recent_dts) < 5:
             return self._p95_dt
@@ -640,6 +729,47 @@ class CycleDetector:
         return value
 
     @staticmethod
+    def _sanitize_terminal_quiet(raw: Any) -> float | None:
+        """Coerce a measured post-activity quiet span into a finite, non-negative
+        float, else None (register item 297).
+
+        Same discipline as the two siblings: None means "no opinion", and for a
+        DISHWASHER ``_keep_tail_cap`` then behaves exactly as it did before this
+        element existed. Other device types never reach that branch - they are
+        capped at ``_last_active_time`` higher up - so None changes nothing for
+        them either way. Bounded above by ``TERMINAL_QUIET_CAP_S`` so a corrupted
+        or hand-edited value cannot license an unbounded tail - the one thing
+        this field exists to prevent.
+        """
+        if raw is None:
+            return None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        if not math.isfinite(value) or value < 0:
+            return None
+        return min(value, TERMINAL_QUIET_CAP_S)
+
+    @staticmethod
+    def _sanitize_longest_candidate(raw: Any) -> float:
+        """Coerce the longest plausible candidate duration to a usable bound.
+
+        Unlike the three siblings above, "no opinion" is ``0.0`` rather than
+        ``None``: the ENDING gate reads a non-positive bound as "no information"
+        and keeps the old refusal, which is the safe direction. Not routed
+        through ``_sanitize_expected_duration`` because 0.0 is legitimate here
+        and that helper logs it as invalid.
+        """
+        try:
+            value = float(raw or 0.0)
+        except (TypeError, ValueError, OverflowError):
+            return 0.0
+        if not math.isfinite(value):
+            return 0.0
+        return value if 0.0 < value <= CycleDetector._SANITIZE_MAX_EXPECTED_DURATION else 0.0
+
+    @staticmethod
     def _sanitize_tail_power(raw: Any) -> float | None:
         """Coerce ``raw`` into a finite, positive float, else None (#364).
 
@@ -668,9 +798,21 @@ class CycleDetector:
     @staticmethod
     def _sanitize_terminal_high(
         raw: Any,
-    ) -> tuple[float, float] | tuple[float, float, float] | None:
-        """Coerce ``raw`` into a ``(start_frac, seconds)`` pair or a
-        ``(start_frac, seconds, start_offset_s)`` triple, else None (#399).
+    ) -> (
+        tuple[float, float]
+        | tuple[float, float, float]
+        | tuple[float, float, float, float]
+        | None
+    ):
+        """Coerce ``raw`` into a ``(start_frac, seconds)`` pair, a
+        ``(start_frac, seconds, start_offset_s)`` triple, or a
+        ``(start_frac, seconds, start_offset_s, ceiling_w)`` quad, else None (#399).
+
+        The fourth element is the watts the block was MEASURED against (register
+        item 351). Anti-crease measures against ``anti_wrinkle_max_power`` and
+        sends a triple; the standby-band path measures against a share of the
+        cycle's own peak and must say so, because the live counter has to count
+        seconds above the same bar or the two halves compare different things.
 
         None means "no opinion", which leaves ``_anticrease_spin_pending`` inert and
         the anti-crease finalise exactly as it behaved before the guard existed.
@@ -695,7 +837,7 @@ class CycleDetector:
             values = list(raw)
         except TypeError:
             return None
-        if len(values) not in (2, 3):
+        if len(values) not in (2, 3, 4):
             return None
         try:
             start_frac = float(values[0])
@@ -716,7 +858,19 @@ class CycleDetector:
             return (start_frac, seconds)
         if not math.isfinite(start_offset) or start_offset < 0:
             return (start_frac, seconds)
-        return (start_frac, seconds, start_offset)
+        if len(values) == 3:
+            return (start_frac, seconds, start_offset)
+        try:
+            ceiling = float(values[3])
+        except (TypeError, ValueError, OverflowError):
+            return (start_frac, seconds, start_offset)
+        # A non-positive or non-finite ceiling degrades to the triple rather than
+        # to None: the triple still arms the guard against
+        # ``anti_wrinkle_max_power``, and this method must never be able to
+        # DISARM a guard that would otherwise arm.
+        if not math.isfinite(ceiling) or ceiling <= 0:
+            return (start_frac, seconds, start_offset)
+        return (start_frac, seconds, start_offset, ceiling)
 
     def _trailing_mean_power(self, timestamp: datetime, window_s: float) -> float | None:
         """Time-weighted mean power over the trailing ``window_s``, or None when
@@ -918,6 +1072,23 @@ class CycleDetector:
             self._matched_terminal_high = (
                 self._sanitize_terminal_high(result_seq[9]) if len(result_seq) >= 10 else None
             )
+            # Element 11 (register item 297): cleared by a shorter tuple for the same reason as
+            # elements 9 and 10 - a newly matched programme must not inherit the
+            # previous one's tail.
+            self._matched_terminal_quiet_s = (
+                self._sanitize_terminal_quiet(result_seq[10])
+                if len(result_seq) >= 11
+                else None
+            )
+            # Element 12: longest plausible candidate duration (see the attribute's
+            # own comment). A shorter tuple clears it, like elements 9-11, so a
+            # stale value can never license a shortening for a different match.
+            # Coerced quietly, not through _sanitize_expected_duration: 0.0 is a
+            # legitimate "no candidate durations to compare" here, and that helper
+            # logs it as invalid.
+            self._longest_candidate_duration = self._sanitize_longest_candidate(
+                result_seq[11] if len(result_seq) >= 12 else 0.0
+            )
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -931,6 +1102,7 @@ class CycleDetector:
             self._match_prefix_ambiguous_full_shape = False
             self._matched_tail_power = None
             self._matched_terminal_high = None
+            self._matched_terminal_quiet_s = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -989,6 +1161,15 @@ class CycleDetector:
         self._match_prefix_ambiguous_full_shape = False
         self._matched_tail_power = None
         self._matched_terminal_high = None
+        self._matched_terminal_quiet_s = None
+        # Element 12 belongs with them: its own comment claims a stale value can
+        # never license a shortening for a different match, and that was only
+        # true of the tuple path. Left here across a reset, a small positive
+        # bound survives into the next cycle, where it is neither greater than
+        # `_expected_duration` (so the bar is not raised) nor <= 0 (so the "no
+        # information" refusal does not fire) - the one combination that lets an
+        # ambiguous match shorten `effective_off_delay` on no evidence.
+        self._longest_candidate_duration = 0.0
         self._anticrease_spin_wait_logged = False
         # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
         # line only logs when the reason CHANGES. Carrying the previous cycle's
@@ -1119,22 +1300,42 @@ class CycleDetector:
         return configured_ratio
 
     def process_reading(
-        self, power: float, timestamp: datetime, synthetic: bool = False
+        self,
+        power: float,
+        timestamp: datetime,
+        synthetic: bool = False,
+        observed: bool = True,
     ) -> None:
         """Process a new power reading using robust dt-aware logic.
 
         ``synthetic=True`` marks a reading the *manager* injected rather than one
         the power sensor sent: the watchdog and anti-wrinkle keepalives, which
         exist to advance the quiet timers while a change-only plug says nothing.
-        They must keep doing exactly that, so this flag changes no timing here.
-        It is recorded only so that anything reasoning about what was OBSERVED can
-        tell the two apart. **Nothing consumes it yet**: it was added for
-        `_keep_tail_cap` (register item 238) and that use was implemented,
-        measured and reverted, because after `_last_active_time` every reading is
-        below the stop threshold anyway, so a plug still reporting cannot separate
-        a drying phase from standby - it only shows the plug is chatty. Kept
-        because the distinction is correct and cheap to carry; see item 260 for
-        the two other consumers that were measured and rejected.
+        They must keep doing exactly that, so this flag does not change the quiet
+        accumulators. What it does change is the two places that reason about what
+        the SENSOR did (#424):
+
+        * ``_update_cadence`` is skipped. The cadence estimate feeds
+          ``_gate_cadence`` and therefore the pause/end gates, so training it on
+          our own injections makes those gates a function of how often we inject -
+          see the note on ``_gate_cadence``.
+        * **with ``observed=True``**, the gap-free tally treats the interval as
+          observed, because the watchdog re-anchored on the sensor's live state
+          (``_resync_power_from_state``) before injecting - so the keepalive is a
+          moment we looked rather than a hole in the record.
+
+        ``observed=False`` says the sensor state could NOT be read when this
+        keepalive was injected (unavailable / unknown / non-finite). The second
+        bullet is then false: the interval it closes is a genuine outage, and the
+        gap-free tally is reset like any other hole - at ANY step size, since the
+        watchdog injects far more often than the outage ceiling.
+
+        (The `_keep_tail_cap` use this flag was originally added for, register
+        item 238, was implemented, measured and reverted: after
+        ``_last_active_time`` every reading is below the stop threshold anyway, so
+        a plug still reporting cannot separate a drying phase from standby - it
+        only shows the plug is chatty. See item 260 for two more that were
+        measured and rejected.)
         """
         if not synthetic:
             self._last_real_reading_time = timestamp
@@ -1146,6 +1347,19 @@ class CycleDetector:
 
         # Sanity check for negative dt
         if dt < 0:
+            # Logged because this is the one exit from process_reading that leaves
+            # NO trace: the accumulators do not advance, `_power_readings` does not
+            # grow, and every downstream gate therefore stays silent too. A cycle
+            # wedged behind it looks exactly like a cycle whose end gate is simply
+            # not satisfied - which is how much of register item 320 was spent.
+            self._logger.debug(
+                "Ignoring reading %.1fW: timestamp %s is %.1fs before the last "
+                "processed reading %s",
+                power,
+                timestamp,
+                -dt,
+                self._last_process_time,
+            )
             self._last_process_time = timestamp
             return
 
@@ -1193,7 +1407,19 @@ class CycleDetector:
         # is supposed to catch it (a 120 s gap after a 10 s cadence lifts p95 to
         # ~15.5 s -> ceiling 155 s -> the gap counts as observed quiet).
         self._prior_p95_dt = self._p95_dt
-        self._update_cadence(dt)
+        # Only the SENSOR trains the cadence estimator (#424). The watchdog's 0 W
+        # keepalives exist because the plug fell silent, so once it does every
+        # interval left in `_recent_dts` is one we manufactured: p95 AND the
+        # median both collapse onto the injection spacing, the `5 x median` cap in
+        # `_gate_cadence` stops binding, and the pause/end gates - three times that
+        # cadence - grow with our own injection rate. Measured on the #424
+        # reporter's v0.5.6 cycle: the gate climbed 192 s -> 530 s on injected
+        # readings alone, taking the end gate to 1605 s and holding PAUSED for
+        # 1060 s. Skipping them leaves the estimate describing the plug, which is
+        # the only thing it is supposed to describe; the accumulators below still
+        # advance on every reading, synthetic or not.
+        if not synthetic:
+            self._update_cadence(dt)
         self._last_process_time = timestamp
 
         # 1b. Pre-roll buffer (#430): record every reading seen while no cycle is
@@ -1272,8 +1498,33 @@ class CycleDetector:
             # 3600)) but reuses the maintained p95 cadence to stay O(1) in this
             # per-reading hot path. Uses the cadence as it stood BEFORE this
             # reading, so a gap cannot widen its own acceptance threshold.
+            # A synthetic keepalive is normally not an outage: the watchdog
+            # resyncs against the sensor's live state before injecting, so the
+            # interval it closes IS observed. This matters because the ceiling is
+            # derived from the p95 cadence, which synthetic readings no longer
+            # train - without the exemption a 106 s keepalive on a 2 s-cadence
+            # plug would look like a 106 s hole and reset the tally on every
+            # tick, starving the two consumers that can only ever SHORTEN the
+            # wait (the dishwasher end-spike quiet release and the ENDING hard
+            # finalize).
+            #
+            # `observed` is what makes that premise true rather than assumed.
+            # `_resync_power_from_state` returns early when the sensor is
+            # unavailable / unknown / non-finite, but the watchdog injects anyway
+            # - it only checks the silence interval. So during a real telemetry
+            # outage every keepalive was exempt and the gap-free tally grew
+            # through quiet nobody ever saw, which is exactly what that tally
+            # exists not to count. The caller now says whether the sensor state
+            # could actually be read, and an unread sensor is an outage.
+            # An unread sensor is an outage HOWEVER SHORT each keepalive step
+            # is, which is why this is its own clause and not a qualifier on the
+            # ceiling test. The watchdog injects once per `watchdog_interval`
+            # (floor 30 s, effective 30-60 s) and the ceiling is at least 60 s,
+            # so during a real outage every individual `dt` sits under the
+            # ceiling - qualifying the ceiling test left the tally accumulating
+            # exactly as before, which is the bug this is meant to fix.
             outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
-            if dt > outage_ceiling:
+            if (synthetic and not observed) or (dt > outage_ceiling and not synthetic):
                 self._time_below_threshold_gapfree = 0.0
             else:
                 self._time_below_threshold_gapfree += dt
@@ -1976,9 +2227,9 @@ class CycleDetector:
                             # real pump-out at ~99% arms the end-spike first.  Takes the
                             # SOONER of the two anchors, so it can only ever shorten the
                             # wait, never extend it.
+                            _spike_wait = self._dishwasher_end_spike_wait_s()
                             past_wait_period = current_duration >= (
-                                self._expected_duration
-                                + DISHWASHER_END_SPIKE_WAIT_SECONDS
+                                self._expected_duration + _spike_wait
                             ) or (
                                 current_duration >= self._expected_duration
                                 and self._time_below_threshold_gapfree
@@ -1994,7 +2245,7 @@ class CycleDetector:
                                     "expected %.0fs + %.0fs wait)",
                                     current_duration,
                                     self._expected_duration,
-                                    DISHWASHER_END_SPIKE_WAIT_SECONDS,
+                                    _spike_wait,
                                 )
                                 return  # Don't finish yet, wait for spike
 
@@ -2030,7 +2281,7 @@ class CycleDetector:
                     # resetting the quiet timer) — asymmetric, shorten-only.  Not
                     # for user-paused cycles.
                     required_quiet = max(
-                        ENDING_HARD_FINALIZE_MIN_QUIET_S,
+                        self._ending_hard_finalize_quiet_s(),
                         float(max(self._config.off_delay, self._config.min_off_gap)),
                     )
                     # Require the required_quiet tail to be actually SAMPLED (no
@@ -2079,6 +2330,166 @@ class CycleDetector:
                 # --- FALLBACK TIMEOUT CHECK ---
                 # Rule: To separate cycles, we must wait at least min_off_gap.
                 effective_off_delay = max(self._config.off_delay, self._config.min_off_gap)
+
+                # Progress-aware shortening (register item 306). `min_off_gap` is
+                # there to bridge mid-cycle soak periods; once the run is past the
+                # matched programme's OWN expected length there is no soak left to
+                # bridge, so continuing to wait out a blind per-device prior just
+                # reports the end late.
+                #
+                # Measured on `devtools/end_gate_eval.py`, which IS committed.
+                # **`cycle_data/` is not**, so every n below depends on the local
+                # corpus and two different counts get quoted: cycles REPLAYED,
+                # and the subset that reached an ENDING exit, which is the only
+                # one that yields a lag and is what the harness table's `n`
+                # column reports. Current corpus: 273 replayed, 263 measured.
+                # Figures attributed below to "211/221" predate the #445 / #427 /
+                # #424 reporter exports being added mid-PR-#448, when the same
+                # corpus was 221 replayed / 211 measured. They are the same
+                # harness over a smaller corpus, not a drift.
+                #
+                # Re-cut on the current corpus (`--no-shortening` vs shipped,
+                # paired over 273 cycles): median end lag 13.43 -> 12.00 min
+                # overall and 27.50 -> 26.00 for washing machines, dishwasher p90
+                # 33.50 -> 19.70, and early ends (1.14% / 0.00%) and splits
+                # (2.66%) **identical in every scope**. It moves 32 of 273
+                # cycles: it buys little because it reaches few, and it costs
+                # nothing. Item 306's original figures (427 cycles, washing
+                # machines 12.9 -> 7.5 min, splits 3.75%) came from a harness
+                # that was never committed and **do not reproduce**; the safety
+                # half reproduces exactly. Treat the 427-cycle numbers as
+                # unverified; register item 329 holds that reconciliation, taken
+                # on the 211-measured corpus. Re-cut anything new with
+                # `end_gate_eval.py` rather than a throwaway script.
+                #
+                # Asymmetric and bounded, in the same spirit as _keep_tail_cap: it
+                # can only ever shorten, keeps the user's explicit `off_delay` as
+                # the floor (only the blind prior shrinks), and is inert when
+                # nothing matched. The bar it waits for is DEVICE-RESOLVED, not a
+                # fixed 1.05x (register item 355): `resolve_end_gate_late_ratio`
+                # returns 0.90 for `washing_machine` / `washer_dryer` and
+                # `END_GATE_LATE_RATIO` (1.05) for everything else - so on a washer
+                # the shortening starts BEFORE the expected end. That is the point:
+                # a washer's programme is load-adaptive, so a run sits below its
+                # profile mean about half the time by definition and the median
+                # washer reaches only 0.83 of a 1.05 bar, which put the rule out of
+                # reach for the device type that needed it most. Early ends stayed
+                # at 0.00% for washers at every ratio measured; the dishwashers,
+                # which do produce early ends below 1.0, keep 1.05.
+                # Gated on the SAME guards Smart Termination respects. The rule
+                # keys on `_expected_duration`, so it must not fire while the
+                # matcher says that duration is in doubt: `_match_prefix_ambiguous`
+                # means a much longer look-alike is still plausible, and then "past
+                # the expected end" may really be "mid-soak in a longer programme".
+                # Without this the fallback timeout walks straight through the
+                # prefix-landscape guard and re-opens the #288 split-cycle bug -
+                # caught by test_smart_termination_blocked_by_prefix_ambiguous,
+                # where a 450 s soak dip sits right at the short profile's end.
+                # NOT also gated on `_last_match_confidence >=
+                # match_confidence_threshold`, and that is deliberate, not an
+                # oversight - the paragraph above says "the SAME guards Smart
+                # Termination respects" and means the two ambiguity flags.
+                # Smart Termination does check confidence, because it ENDS a cycle
+                # early on a prediction; this rule only shortens a wait that is
+                # already past the programme's own expected end, so the asymmetry
+                # is intended. Adding the check was tried (PR #448 round 6) and
+                # measured on `devtools/end_gate_eval.py` over 221 replayed real
+                # cycles (211 of them measurable, the pre-reporter-export corpus
+                # described above): it moves **2 of them**, delaying one by 10.5
+                # min and one by 21 min, while early ends (1.42% / 0.00% at the >1
+                # and >5 min marks) and splits (3.32%) stay **exactly** where they
+                # were. It
+                # prevented no split and no early end - pure cost, so it was
+                # reverted. The corpus carries only 4 matched cycles under 0.4
+                # confidence, so it cannot prove the guard harmless either; the
+                # exposure is real (cycle `7c4598310016` is a 3h37m wash matched at
+                # 0.372 to a profile named "1:07", i.e. running the shortened gate
+                # for over two hours) and it still did not split. Re-run the
+                # harness before re-litigating this.
+                if (
+                    self._matched_profile
+                    and self._expected_duration > 0
+                    and self._current_cycle_start is not None
+                ):
+                    _elapsed = (timestamp - self._current_cycle_start).total_seconds()
+                    # The bar this run has to clear. Normally the matched
+                    # programme's own expected end; while the matcher still thinks
+                    # a materially LONGER programme is plausible, that longer one's
+                    # end instead (register item 330).
+                    #
+                    # Blocking outright on the two ambiguity flags - which is what
+                    # this did until item 330 - was costing almost every cycle the
+                    # shortening. Measured on `devtools/end_gate_eval.py`: of the
+                    # 94 cycles that ever pass 1.05x their own expected duration,
+                    # **84 (89%) were blocked by an ambiguity flag**, so the rule
+                    # reached 4.7% of cycles (10 of the 211 measurable on the
+                    # pre-reporter-export corpus) and the median cycle still
+                    # waited out the full `min_off_gap`.
+                    #
+                    # The flags are not wrong, they are too coarse. Both exist to
+                    # protect `_expected_duration` against "this is really a prefix
+                    # of something longer" (#288 / #364) - a statement about
+                    # DURATION, not about which label wins. Two programmes that
+                    # score within the ambiguity margin and run the same length
+                    # leave "past the expected end" true either way. So instead of
+                    # refusing, raise the bar to the longest duration still in
+                    # play: past THAT, no candidate is left for this to be a
+                    # mid-soak of, which is exactly the condition the guard was
+                    # standing in for.
+                    #
+                    # Absent information keeps the OLD refusal. A caller that does
+                    # not send element 12 (an older Playground, most tests, any
+                    # short tuple) leaves `_longest_candidate_duration` at 0.0,
+                    # and an ambiguous match with no candidate durations to
+                    # compare must block exactly as it did before - otherwise the
+                    # #288 split-cycle reproduction
+                    # `test_smart_termination_blocked_by_prefix_ambiguous` walks
+                    # straight through, which is how the first draft of this was
+                    # caught.
+                    _bar = self._expected_duration
+                    _blocked = False
+                    _bar_raised = False
+                    if self._match_prefix_ambiguous or self._match_ambiguous:
+                        if self._longest_candidate_duration > _bar:
+                            _bar = self._longest_candidate_duration
+                            _bar_raised = True
+                        elif self._longest_candidate_duration <= 0.0:
+                            # No information: a caller that does not send element
+                            # 12 keeps the old refusal (see below). The bound
+                            # itself is now derived from the FULL candidate
+                            # population, the same one `_match_prefix_ambiguity`
+                            # judges, so a longer candidate ranked sixth or lower
+                            # can no longer set the flag while hiding from the
+                            # bar - which it could when this read
+                            # `MatchResult.candidates`, i.e. `candidates[:5]`.
+                            _blocked = True
+                    # Device-resolved (register item 355): 1.05 is out of reach
+                    # for a load-adaptive washer, which reaches a median 0.83 of
+                    # its EXPECTED duration before it stops.
+                    #
+                    # **But never against a RAISED bar.** When the match is
+                    # ambiguous and a longer candidate exists, `_bar` is no longer
+                    # the expected duration - it is the longest plausible
+                    # programme, and it was raised precisely to say "a much longer
+                    # look-alike is still on the table, so past the expected end
+                    # does not mean done". Discounting that by 0.90 would shorten
+                    # the wait 10% BEFORE the candidate it represents could even
+                    # finish, and on the shipped washer defaults that drops the
+                    # wait from `min_off_gap` to `max(off_delay, 300)` - one quiet
+                    # interval away from finalising mid-programme and recording the
+                    # rest as a second cycle, which is #288. The item-355 measurement
+                    # was taken against the expected duration and says nothing about
+                    # this case, so a raised bar keeps the original 1.05.
+                    _late_ratio = (
+                        END_GATE_LATE_RATIO
+                        if _bar_raised
+                        else resolve_end_gate_late_ratio(self._config.device_type)
+                    )
+                    if not _blocked and _elapsed >= _late_ratio * _bar:
+                        effective_off_delay = max(
+                            self._config.off_delay,
+                            min(self._config.min_off_gap, END_GATE_LATE_SECONDS),
+                        )
 
                 # Energy gate always looks back off_delay seconds by default;
                 # overridden below for the dishwasher cap case so the window
@@ -2491,6 +2902,46 @@ class CycleDetector:
         current_duration = (timestamp - start).total_seconds()
         if current_duration < self._expected_duration * STANDBY_BAND_MIN_RATIO:
             return False
+        # #399 interaction, load-bearing since the gate above dropped from 2.0x to
+        # 1.0x expected (#445): a washer can sit quiet below anti_wrinkle_max_power
+        # for minutes BEFORE its final spin, and that quiet is a flat sub-10%-of-peak
+        # plateau like any other. Finalising there is exactly the failure #399 fixed
+        # - the spin then arrives and opens a second cycle record. Defer while the
+        # matched profile still owes this run its terminal high-power block. Shares
+        # the predicate with the anti-crease finalise so the two release together,
+        # and it fails open on every missing input (no profile block, non-terminal
+        # block, past the ANTI_CREASE_SPIN_WAIT_MAX_RATIO cap), so an appliance that
+        # never spins - the #445 Miele, which has no terminal block at all - is not
+        # delayed by it.
+        #
+        # **This used to be inert on the devices it exists for (register item
+        # 351).** `_anticrease_spin_pending` needs element 10, and the manager
+        # supplied it only when `anti_wrinkle_enabled` was true -
+        # `DEFAULT_ANTI_WRINKLE_ENABLED` is False, so on a washer the predicate
+        # returned False immediately and none of the above happened. Measured on
+        # the 273-cycle replay corpus: the band fired 14 times, 11 with the guard
+        # inert, and 6 of those 11 had a reading above `min_power` still ahead,
+        # i.e. would split. `terminal_high_for_guards` (module level in this file,
+        # shared by the manager's live match tuple and the Playground's sim tuple
+        # since round 31 - it used to be two hand-copies) now arms it for
+        # `STANDBY_BAND_FINALIZE_DEVICE_TYPES` against a share of the cycle's own
+        # peak - the same `STANDBY_BAND_MAX_FRACTION` used below, so the rule is
+        # "wait while the profile still owes a block above the plateau you are
+        # sitting on" and there is no new tunable. The bar travels WITH the block
+        # as element 4, because `_high_power_seconds_since` has to count live
+        # seconds above the same number.
+        #
+        # Measured end to end on `devtools/end_gate_eval.py`: washing-machine
+        # splits 4.49% -> 1.90%, median end lag 26.00 -> 24.74 min (it does not
+        # cost time - a cycle that used to split now finishes once), match rate
+        # 89.7% -> 92.4%, early ends unchanged at 0.00%, dishwashers identical.
+        # A ceiling of 0.15 caught the 6th split too but deferred 10 of the 11
+        # firings, and a deferral with no spin ahead waits out
+        # ANTI_CREASE_SPIN_WAIT_MAX_RATIO (1.25x expected, ~32 min on a 2:09
+        # wash), so it bought the last split for three long waits. 0.10 was the
+        # maintainer's call.
+        if self._anticrease_spin_pending(timestamp):
+            return False
         peak = float(self._cycle_max_power)
         if peak <= 0:
             return False
@@ -2757,18 +3208,27 @@ class CycleDetector:
         # exposure). The fallback keeps a pre-196 payload - an old state snapshot, the
         # Playground, older callers - behaving exactly as before.
         offset_s = float(block[2]) if len(block) >= 3 else start_frac * expected
-        seen = self._high_power_seconds_since(offset_s)
+        # Element 4, when the store sent one, is the watts the block was measured
+        # against. Count the live seconds above the SAME bar or the two halves
+        # describe different things (register item 351).
+        ceiling_w = float(block[3]) if len(block) >= 4 else None
+        seen = self._high_power_seconds_since(offset_s, ceiling_w=ceiling_w)
         if seen >= needed:
             return False
         if not self._anticrease_spin_wait_logged:
             self._anticrease_spin_wait_logged = True
             self._logger.debug(
-                "Anti-crease finalize held: '%s' ends with a %.0fs block above %.0fW "
-                "at %.0f%% of its run (scanning from %.0fs); this cycle has %.0fs of "
-                "it so far (elapsed %.0fs of %.0fs expected).",
+                "Finalize held, terminal high-power block still owed: '%s' ends "
+                "with a %.0fs block above %.0fW at %.0f%% of its run (scanning "
+                "from %.0fs); this cycle has %.0fs of it so far (elapsed %.0fs of "
+                "%.0fs expected).",
                 self._matched_profile,
                 block_seconds,
-                float(self._config.anti_wrinkle_max_power),
+                (
+                    float(self._config.anti_wrinkle_max_power)
+                    if ceiling_w is None
+                    else ceiling_w
+                ),
                 start_frac * 100.0,
                 offset_s,
                 seen,
@@ -2777,9 +3237,16 @@ class CycleDetector:
             )
         return True
 
-    def _high_power_seconds_since(self, offset_s: float) -> float:
-        """Seconds this cycle has spent above ``anti_wrinkle_max_power`` at or after
-        ``offset_s`` from its start (#399).
+    def _high_power_seconds_since(
+        self, offset_s: float, ceiling_w: float | None = None
+    ) -> float:
+        """Seconds this cycle has spent above ``ceiling_w`` at or after ``offset_s``
+        from its start (#399); ``anti_wrinkle_max_power`` when None.
+
+        The caller supplies the ceiling so both halves of the comparison use one
+        bar: the profile's block was measured against it too. The standby-band
+        path passes a share of the cycle's own peak (register item 351), the
+        anti-crease path passes nothing and keeps the dryer's tumble level.
 
         Walks the readings backwards and stops at the offset, so the scan is bounded
         by the tail of the trace rather than its whole length. Each reading covers
@@ -2805,7 +3272,11 @@ class CycleDetector:
         start = self._current_cycle_start
         if start is None or not self._power_readings:
             return 0.0
-        ceiling = float(self._config.anti_wrinkle_max_power)
+        ceiling = (
+            float(self._config.anti_wrinkle_max_power)
+            if ceiling_w is None
+            else float(ceiling_w)
+        )
         max_gap = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
         total = 0.0
         readings = self._power_readings
@@ -2864,12 +3335,18 @@ class CycleDetector:
             # The tumble tail itself is never cut into, which is why this is safe
             # here: an anti-crease baseline sits ABOVE stop_threshold
             # (const.py:811-812, a ~2.5-3.2 W draw against a ~1.2 W threshold), so
-            # every one of those readings refreshes `_last_active_time` and the cap
-            # - max(expected_end, _last_active_time) - lands at the last tumble. A
-            # real tail therefore loses only the trailing quiet gap between its last
-            # reading and this finalize, which is time the appliance drew nothing.
-            # A tail of genuinely-0 W readings is clipped back to the matched
-            # profile's expected end. Shorten-only, never earlier than expected_end.
+            # every one of those readings refreshes `_last_active_time`, and for a
+            # non-dishwasher `_keep_tail_cap` returns exactly that - the last
+            # tumble. A real tail therefore loses only the trailing quiet gap
+            # between its last reading and this finalize, which is time the
+            # appliance drew nothing, and a tail of genuinely-0 W readings is
+            # dropped at `_last_active_time`.
+            #
+            # NB: the cap is no longer `max(expected_end, _last_active_time)` and
+            # so is NOT bounded below by the expected end - on a washer or dryer
+            # the stored end can now land earlier than the matched profile's
+            # expected duration. Shorten-only still holds; "never earlier than
+            # expected_end" no longer does, and this paragraph used to claim it.
             tail_cap=self._keep_tail_cap(start_time),
         )
         return True
@@ -2921,14 +3398,42 @@ class CycleDetector:
         # dishwasher cycle should never end before it has crossed the minimum
         # reasonable programme duration.  This prevents a dip during the fill or
         # early wash phase from being read as the end of a complete cycle.
+        #
+        # A MATCHED profile overrides the blanket constant with its own learned
+        # length, because the constant is a stand-in for exactly the knowledge a
+        # match supplies - as this comment's own "even without a matched profile"
+        # says. Blanket, it is wrong for real hardware: the community catalogue
+        # carries a 6.0 min Smeg "Delay- prewash", which a 30 min floor defers by
+        # half an hour. The floor still applies unmatched, and a matched profile
+        # can only ever LOWER it (`min`), never license a longer deferral - the
+        # 39.4 min Electrolux "Rapido" already clears it and is unaffected.
+        #
+        # Gated on a TRUSTED match, not merely a present one. This floor is an
+        # anti-premature-end guard, so the risk is the opposite way round from
+        # the ENDING fallback gate (item 329, where a confidence check measured
+        # as pure cost): getting this wrong ends a dishwasher during its fill or
+        # early-wash dip and records the rest of the programme as a second
+        # cycle, which is the expensive failure. A low-confidence match to a
+        # short look-alike is exactly how that happens, so it does not get to
+        # lower the bar. Uses the WIDER `_match_prefix_ambiguous`, not the
+        # narrow full-shape flag Smart Termination takes: a false block here
+        # only keeps the 30 min floor, where for the anti-crease finalize it can
+        # re-hang the cycle (#296). No-op on the whole corpus either way - every
+        # corpus dishwasher profile is over 90 minutes.
+        _dw_floor = DISHWASHER_MIN_CYCLE_DURATION_S
         if (
-            self._config.device_type == "dishwasher"
-            and duration < DISHWASHER_MIN_CYCLE_DURATION_S
+            self._matched_profile
+            and self._expected_duration > 0
+            and self._last_match_confidence >= self._config.match_confidence_threshold
+            and not self._match_ambiguous
+            and not self._match_prefix_ambiguous
         ):
+            _dw_floor = min(_dw_floor, float(self._expected_duration))
+        if self._config.device_type == "dishwasher" and duration < _dw_floor:
             self._logger.debug(
                 "Deferring dishwasher cycle end: elapsed %.0fs < minimum %.0fs",
                 duration,
-                DISHWASHER_MIN_CYCLE_DURATION_S,
+                _dw_floor,
             )
             return True
 
@@ -3028,7 +3533,7 @@ class CycleDetector:
             and self._expected_duration > 0
             and not self._end_spike_seen
             and duration
-            < (self._expected_duration + DISHWASHER_END_SPIKE_WAIT_SECONDS)
+            < (self._expected_duration + self._dishwasher_end_spike_wait_s())
             and not quiet_released
         ):
             # Report the gap-free tally: that is what `quiet_released` above reads,
@@ -3040,7 +3545,7 @@ class CycleDetector:
                 "%.0fs of %.0fs needed, profile: %s)",
                 duration,
                 self._expected_duration,
-                DISHWASHER_END_SPIKE_WAIT_SECONDS,
+                self._dishwasher_end_spike_wait_s(),
                 self._time_below_threshold_gapfree,
                 self._config.dishwasher_end_spike_quiet_release,
                 self._matched_profile,
@@ -3087,6 +3592,40 @@ class CycleDetector:
         # Tertiary check: If duration exceeded max tolerance, allow finish (failsafe).
         return False
 
+    def _dishwasher_end_spike_wait_s(self) -> float:
+        """Grace past the expected end while waiting for the terminal pump-out.
+
+        Capped at the programme's OWN expected length - the same ``min()`` shape
+        register item 331 gave ``DISHWASHER_MIN_CYCLE_DURATION_S``, for the same
+        reason. A flat 1800 s is 20% of a 150 min ECO cycle but **five times** a
+        6 min Smeg "Delay- prewash", and the community catalogue carries exactly
+        that programme. Asymmetric: the cap can only ever SHORTEN the wait, never
+        extend it, so no cycle waits longer than it does today.
+
+        A no-op across the maintainer's corpus, where every dishwasher profile is
+        >90 min and the cap therefore never binds (register item 357). Unmatched
+        cycles keep the flat constant: with no expected duration there is nothing
+        to be proportional to.
+        """
+        expected = float(self._expected_duration or 0.0)
+        if expected <= 0:
+            return DISHWASHER_END_SPIKE_WAIT_SECONDS
+        return min(DISHWASHER_END_SPIKE_WAIT_SECONDS, expected)
+
+    def _ending_hard_finalize_quiet_s(self) -> float:
+        """Continuous sub-threshold span the ENDING backstop requires.
+
+        Same cap, same reason: 600 s of required quiet is a third of a 30 min
+        programme and longer than a 6 min one, which would disarm the backstop
+        entirely on a short programme - the opposite of what a safety net is for.
+        The ``off_delay`` / ``min_off_gap`` floor is applied by the caller and is
+        unaffected.
+        """
+        expected = float(self._expected_duration or 0.0)
+        if expected <= 0:
+            return ENDING_HARD_FINALIZE_MIN_QUIET_S
+        return min(ENDING_HARD_FINALIZE_MIN_QUIET_S, expected)
+
     def _keep_tail_cap(self, start_time: datetime) -> datetime | None:
         """Latest end time a *kept* tail may claim (#424).
 
@@ -3107,19 +3646,93 @@ class CycleDetector:
         which delays the next Smart Termination further (the second reporter's
         profile had already drifted 63 -> 70.5 min).
 
-        So cap the kept tail at whichever is later: the last above-threshold
-        reading, or the matched profile's expected end. Time after *both* is time
-        the appliance drew nothing AND that lies beyond the known length of the
-        programme it matched, so nothing real can live there. Asymmetric -
-        shorten-only, and never earlier than the expected end, so a genuine
-        passive drying phase still lands inside the stored cycle. Returns None
-        for an unmatched cycle, which has no expected end to anchor against and
-        is left exactly as before.
+        The cap used to be the matched profile's **expected end**. That is the
+        mean of these same stored durations, so it moved with the thing it was
+        bounding: a banked tail raised ``avg_duration``, the higher average
+        allowed a longer tail, and the reported end drifted later every run.
+        Measured over 375 cycles from 16 devices, smart-terminated cycles banked a
+        median **12.6 min** of post-appliance time (washing machines **22.7 min**,
+        p90 40.4 min) against ~0 min for every other termination path, and the
+        profiles carried a mean **+5.3%** duration inflation as a result - on the
+        #427 reporter's washer, +20.2 min on a 108 min programme, which is also
+        why their ETA read 131 min for a ~105 min wash.
+
+        So anchor on the last real activity instead. Where a passive phase can
+        legitimately follow it, allow only what this programme has been
+        **measured** to do (``profile_terminal_quiet_seconds``, element 11) - a
+        statistic taken from the traces, not from the stored durations, so it
+        cannot be inflated by the tail it bounds, and gated on having been seen
+        repeatedly rather than once.
+
+        **Only a dishwasher has a passive terminal phase.** Every other type ends
+        on activity - a washer's spin, a dryer's drum - which ``_last_active_time``
+        already marks, so there is nothing legitimate to bank after it. That is
+        not a new assumption: the fallback-timeout path beside this one has always
+        read ``keep_tail = device_type == "dishwasher"``. Smart Termination was
+        the one path that kept a tail for every type, which is exactly where the
+        22.7 min washing-machine median came from.
+
+        Within the dishwasher case, two sub-cases, and the difference matters:
+
+        * the run produced its terminal pump-out (``_end_spike_seen``).
+          ``_last_active_time`` already sits on it, so that IS the end.
+        * it did not, so the programme ended in its passive drying phase. Allow up
+          to the profile's measured quiet span past the last activity.
+
+        Falls back to the old expected-end cap when that span has not been
+        measured, rather than truncating a drying phase on no evidence - the
+        measured corpus shows the pump-out missing in a substantial minority of
+        runs on some machines, and in those runs the drying IS the tail. Still
+        asymmetric and shorten-only; still None for an unmatched cycle.
         """
         if self._expected_duration <= 0:
             return None
         expected_end = start_time + timedelta(seconds=self._expected_duration)
-        return max(expected_end, self._last_active_time or expected_end)
+        last_active = self._last_active_time
+        if last_active is None:
+            return expected_end
+        if self._config.device_type != DEVICE_TYPE_DISHWASHER:
+            return last_active
+        # Only a spike LATE enough to be the terminal pump-out licenses snapping
+        # the stored end back to the last activity. `_end_spike_seen` is set from
+        # DISHWASHER_END_SPIKE_MIN_PROGRESS (0.85), but this file does not treat
+        # every such spike as terminal: `_resolve_smart_ratio` relaxes its gate
+        # only at `>= expected * 0.90`, because below that the spike can be the
+        # pre-final-rinse drain with a passive Dry phase still to come. Capping
+        # at `last_active` for an 87% drain cuts that drying off, which lowers
+        # `avg_duration`, which makes the NEXT Smart Termination fire earlier -
+        # the error compounds in the direction that splits cycles. Same 0.90
+        # test here, so a pre-rinse drain falls through to the measured quiet
+        # span or the expected-end fallback below.
+        if getattr(self, "_end_spike_seen", False) and getattr(
+            self, "_end_spike_duration", 0.0
+        ) >= self._expected_duration * 0.90:
+            return last_active
+        quiet = self._matched_terminal_quiet_s
+        if quiet is None:
+            return max(expected_end, last_active)
+        # ...and if the drying ALREADY happened, adding the allowance on top
+        # counts the same quiet twice. The 0.90 test above only catches a spike
+        # late enough to be unambiguously terminal; a pump-out at 85-90% of
+        # expected falls through it, and on a machine that dries BEFORE its final
+        # drain that banks a second drying period into the stored duration, which
+        # feeds `avg_duration` - the exact drift item 297 exists to remove.
+        # `ProfileStore.async_repair_banked_tails` has always asked the trace this
+        # question; this path did not, so the same cycle got one duration live and
+        # another when the repair re-judged it. Same helper, same 0.5 bar, so the
+        # two cannot drift again (register item 347).
+        if self._current_cycle_start is not None and self._power_readings:
+            _start = self._current_cycle_start
+            _pts = [
+                ((ts - _start).total_seconds(), float(pw))
+                for ts, pw in self._power_readings
+            ]
+            _last_off = (last_active - _start).total_seconds()
+            if quiet_run_before(
+                _pts, _last_off, self._config.stop_threshold_w
+            ) >= 0.5 * float(quiet):
+                return last_active
+        return last_active + timedelta(seconds=min(quiet, TERMINAL_QUIET_CAP_S))
 
     def _finish_cycle(
         self,
@@ -3287,6 +3900,8 @@ class CycleDetector:
             "match_prefix_ambiguous_full_shape": self._match_prefix_ambiguous_full_shape,
             "matched_tail_power": self._matched_tail_power,
             "matched_terminal_high": self._matched_terminal_high,
+            "matched_terminal_quiet_s": self._matched_terminal_quiet_s,
+            "longest_candidate_duration": self._longest_candidate_duration,
             "ml_defer_start_duration": self._ml_defer_start_duration,
         }
 
@@ -3359,6 +3974,17 @@ class CycleDetector:
             )
             self._matched_terminal_high = self._sanitize_terminal_high(
                 snapshot.get("matched_terminal_high")
+            )
+            self._matched_terminal_quiet_s = self._sanitize_terminal_quiet(
+                snapshot.get("matched_terminal_quiet_s")
+            )
+            # Unconditionally, because the hazard is the value already on the
+            # object, not the one in the snapshot: this restores the ambiguity
+            # flags the ENDING gate reads, so leaving the bound untouched pairs
+            # them with whatever a previous cycle left behind. A snapshot written
+            # before this key existed yields 0.0, i.e. the old refusal.
+            self._longest_candidate_duration = self._sanitize_longest_candidate(
+                snapshot.get("longest_candidate_duration")
             )
             self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")
 

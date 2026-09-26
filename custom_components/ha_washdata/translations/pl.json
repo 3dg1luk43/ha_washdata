@@ -280,6 +280,16 @@
           "description": "Urządzenie WashData, dla którego mają być przetrenowane modele."
         }
       }
+    },
+    "mark_unloaded": {
+      "name": "Oznacz jako rozładowane",
+      "description": "Potwierdź, że gotowy wsad został wyjęty z urządzenia WashData, co kasuje stan „Czysty” i ewentualne przypomnienie o rozładunku.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData, z którego wyjęto gotowy wsad."
+        }
+      }
     }
   },
   "entity": {
@@ -388,6 +398,9 @@
       },
       "record_stop": {
         "name": "Zatrzymaj nagrywanie cyklu"
+      },
+      "mark_unloaded": {
+        "name": "Oznacz jako rozładowane"
       }
     }
   },

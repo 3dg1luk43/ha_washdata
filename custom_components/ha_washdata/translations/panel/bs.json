@@ -60,6 +60,7 @@
         "fair_fit_tip": "Umjerena konzistentnost podudaranja – neki ciklusi dodijeljeni ovom profilu imaju niže rezultate pouzdanosti. Označite više ciklusa ili ponovo snimite profil da biste poboljšali preciznost.",
         "feedback_requested": "Zatražena je povratna informacija",
         "golden_cycle": "Snimljeni referentni ciklus",
+        "duration_outlier": "Ciklusi neobične dužine: {n}",
         "improving": "↗ poboljšanje",
         "manual": "(ručno odabrano)",
         "needs_review": "Potreban pregled",
@@ -257,6 +258,11 @@
         "hist_import_n": "Uvezi cikluse: {n}",
         "hist_goto_cycles": "Prikaži cikluse",
         "save_total_cycles": "Sačuvaj ukupan broj"
+    },
+    "note": {
+        "off_delay": {
+            "effective": "Završen ciklus zapravo čeka {eff} s, a ne {delay} s: Min razmak isključivanja ({gap} s) je duži i ima prednost."
+        }
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -1032,6 +1038,9 @@
         "imported_readonly": "Uvezeno iz zajedničke trgovine. Prikazano za referencu i podudaranje. Ne broji se u vašu statistiku i ne može se uređivati.",
         "merge_no_imports": "Uvezene snimke ne mogu se spojiti sa stvarnim ciklusom. Poništite njihov odabir da biste ih spojili.",
         "store_enable_hint": "Omogućite online funkcije u Postavkama da biste mogli pregledavati i uvoziti referentne cikluse zajednice.",
+        "advisory_duration_outlier": "Ciklusi označeni kao '{name}' ({n}) previše odstupaju od njegove uobičajene dužine da bi se ikada mogli podudariti s njim (najveće odstupanje: {ratio}x). Vjerovatno su pogrešno označeni ili je jedno snimanje obuhvatilo dva pokretanja. Ponovo ih označite ili ih podijelite kako bi prestali iskrivljavati procjenu vremena za ovaj program.",
+        "standby_above_stop_title": "Još uvijek povlači {idle} W kada je ciklus završio",
+        "standby_above_stop_sub": "{n} od posljednjih {total} ciklusa. Kašnjenje isključivanja počinje tek kada snaga padne ispod Praga zaustavljanja ({stop} W), pa se ciklusi završavaju sa zakašnjenjem ili ih treba zaustaviti ručno.",
         "online_intro": "Dijelite i preuzimajte referentne cikluse s drugim korisnicima WashData. Sve online funkcije su dobrovoljne i podrazumijevano isključene.",
         "store_share_intro": "Otpremite ovaj referentni ciklus kako bi ga mogli koristiti drugi s istim uređajem. Pregleda se prije nego što postane javno dostupan.",
         "online_intro_global": "Pregledavajte i dijelite referentne snimke s drugim korisnicima WashData te potvrđujte unose uređaja. Jedna veza vrijedi za cijelu vašu WashData integraciju; marka i model uređaja postavljaju se za svaki uređaj u odjeljku Osnovno. Sve online funkcije su dobrovoljne i podrazumijevano isključene.",
@@ -1414,8 +1423,8 @@
             "label": "Kašnjenje podsjetnika za istovar"
         },
         "notify_unload_repeat": {
-            "doc": "Ponovo šalje podsjetnik za istovar svakih \"Kašnjenje podsjetnika za istovar\" minuta dok ne otvorite vrata ili ne dodirnete \"Prestani podsjećati\" na obavijesti. Zahtijeva Entitet senzora vrata (kao i sam podsjetnik). Dugme za odbacivanje radi na obavijestima mobilne aplikacije Home Assistant (companion app).",
-            "label": "Ponavljaj dok se vrata ne otvore"
+            "doc": "Ponovo šalje podsjetnik za istovar svakih \"Kašnjenje podsjetnika za istovar\" minuta dok se istovar ne potvrdi ili dok ne dodirnete \"Prestani podsjećati\" na obavijesti. Potreban je način za potvrdu istovara: Entitet senzora vrata, Entitet potvrde istovara ili opcija \"Ručno potvrdi istovar\" ispod. Dugme za odbacivanje radi na obavijestima mobilne aplikacije Home Assistant (companion app).",
+            "label": "Ponavljaj do istovara"
         },
         "off_delay": {
             "doc": "Vrijeme čekanja nakon pada struje prije nego što se ciklus proglasi završenim. Ako se napajanje nastavi unutar ovog prozora, ciklus se nastavlja neometano - ovo premošćuje pauze između faza pranja. Mašine za pranje posuđa imaju duge faze sušenja (isključenje na 20-60 min) tako da kašnjenje isključenja mora premašiti to da bi se cijelo pranje+sušilo kao jedan ciklus.",
@@ -1623,6 +1632,14 @@
         "energy_price_dynamic": {
             "label": "Vremenski ponderisan trošak",
             "doc": "Naplaćuje svaki ciklus po cijeni koja je važila u svakom trenutku njegovog rada, umjesto po jednoj cijeni koja je važila kada je završio. Odnosi se samo na entitet cijene (statična cijena se ne može mijenjati). Ne treba dodatno podešavanje: cijena se prati uživo dok ciklus traje, a Obrada historije u Dijagnostici ponovo obračunava starije cikluse iz recordera. Isključeno = klasično ponašanje, jedna cijena zamrznuta na kraju."
+        },
+        "unload_confirm_entity": {
+            "label": "Entitet potvrde istovara",
+            "doc": "Opcioni entitet čije aktiviranje znači da je sadržaj izvađen, za mašine koje ne mogu imati senzor vrata. Radi bilo koja vrsta: Zigbee ili NFC dugme, input_button pomoćnik, senzor pokreta ispred mašine, scena. Svaka promjena stanja broji se kao potvrda, osim isključivanja i prelaska u nedostupno stanje. Postavljanje ovoga ujedno omogućava podsjetnik za istovar na uređaju bez Entiteta senzora vrata."
+        },
+        "unload_track_without_door": {
+            "label": "Ručno potvrdi istovar",
+            "doc": "Pokrenite podsjetnik za istovar na uređaju bez Entiteta senzora vrata i bez Entiteta potvrde istovara, a istovar potvrdite iz vlastite automatizacije: pritisnite entitet dugmeta \"Označi kao istovareno\" ili pozovite uslugu ha_washdata.mark_unloaded. Zanemaruje se kada je postavljen Entitet senzora vrata, koji već daje taj signal."
         }
     },
     "setting_group": {
@@ -1835,6 +1852,7 @@
             "summary": "Isključeno {total} pogrešno otkrivenih ciklusa: {parts}.",
             "reason": {
                 "force_stopped": "prisilno zaustavljeni",
+                "user_stopped": "ručno zaustavljeni",
                 "interrupted": "prekinuti",
                 "incomplete": "nepotpuni",
                 "noise": "buka",
@@ -1965,6 +1983,7 @@
         "store_no_appliance": "Prvo postavite marku i model uređaja u Postavkama.",
         "store_share_failed": "Dijeljenje nije uspjelo: {error}",
         "store_shared": "Podijeljeno u zajedničku trgovinu, čeka pregled.",
+        "contrib_device_changed": "Dodano u zajedničku trgovinu, ali se odabrani uređaj promijenio dok je obrazac bio otvoren. Odaberite ga u Postavkama.",
         "appliance_added": "Uređaj dodan, čeka odobrenje",
         "thanks_confirming": "Hvala na potvrdi",
         "device_approved": "Odobreno od strane zajednice",
@@ -2024,7 +2043,7 @@
         "duration_weight": "Faza 4: koliko jako slaganje trajanja utječe na konačnu ocjenu (zadano 0,22)",
         "energy_weight": "Faza 4: koliko jako slaganje energije utječe na konačnu ocjenu (zadano 0,22)",
         "profile_match_min_duration_ratio": "Faza 1: minimalna dužina ciklusa kao udio trajanja profila; zadano 0,1 (10%)",
-        "profile_match_max_duration_ratio": "Faza 1: maksimalna dužina ciklusa kao udio trajanja profila; zadano 1,5 (150%)",
+        "profile_match_max_duration_ratio": "Faza 1: maksimalna dužina ciklusa kao udio trajanja profila; zadano 1,8 (180%)",
         "keep_min_score": "Faza 2: minimalna ocjena za ostanak u utrci; zadano 0,1 dopušta slabe podudarnosti, kasniji koraci biraju najbolje",
         "dtw_blend": "Faza 3: 0 = samo osnovna ocjena, 1 = samo DTW ocjena, 0,5 = jednako miješanje (zadano)",
         "dtw_ensemble_w": "Faza 3 (kombinirani način): težina skaliranog L1 nasuprot derivatnog DTW; zadano 0,7 favorizira nivo",
