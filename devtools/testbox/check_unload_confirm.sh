@@ -79,6 +79,10 @@ echo "device id (service route): $DEVICE_B"
 echo
 echo "== restart (the listener has to come back with it)"
 $HACTL restart > /dev/null
+# The restart clears `hass.data`, which re-anchors the unload-confirm replay
+# window (register item 367) - deliberately, since an HA restart IS the moment a
+# retained MQTT value can replay. The first-press check at the end of this script
+# waits that window out explicitly rather than hoping the cycle work covers it.
 
 # Seed the button AFTER the restart, and before the cycle. Two reasons, and the
 # first one cost a run: a state pushed through the REST API is not restored
@@ -135,6 +139,53 @@ check "a button press cleared Clean" sensor.unload_entity_state finished
 check "the service cleared Clean" sensor.unload_service_state finished
 check "Mark Unloaded goes unavailable once nothing is waiting" \
   button.unload_service_mark_unloaded unavailable
+
+# ── register item 367: the FIRST EVER press of a fresh button ────────────────
+# A fresh event/button/input_button entity sits at `unknown` until it is pressed,
+# and the handler used to exclude `unknown -> value` outright, swallowing that
+# press. It is accepted once we are past UNLOAD_CONFIRM_REPLAY_GRACE_S from the
+# subscription, which a full cycle replay has long exceeded by this point. Real
+# HA is the only tier that can show this: the transition depends on how HA itself
+# restores and writes entity state, which a MagicMock cannot reproduce.
+echo
+echo "== the first ever press of a fresh button (unknown -> timestamp)"
+REPLAY_WINDOW=$($PY - <<'PYW'
+import pathlib, re
+src = pathlib.Path("../../custom_components/ha_washdata/const.py").read_text()
+m = re.search(r"^UNLOAD_CONFIRM_REPLAY_GRACE_S\s*=\s*([0-9.]+)", src, re.M)
+print(int(float(m.group(1))) + 5 if m else 125)
+PYW
+)
+$HACTL set "$SENSOR" 0 > /dev/null
+# Sending the button to `unknown` is itself a drop-out, and a drop-out RE-ARMS the
+# window (register item 368) - so the wait below is measured from HERE, not from
+# the restart. Measuring it from the restart is what the box caught: the cycle in
+# between was not long enough, the press landed inside the re-armed window, and it
+# was correctly ignored.
+$HACTL set-state "$BUTTON" unknown device_class=button > /dev/null
+UNKNOWN_AT=$(date +%s)
+sleep 2
+# Re-enter Clean: run another short cycle on device A.
+for w in 250 300 320 300; do $HACTL set "$SENSOR" "$w"; sleep 3; done
+$HACTL set "$SENSOR" 0
+for _ in $(seq 1 40); do
+  SA=$($HACTL state sensor.unload_entity_state | $PY -c 'import json,sys; print(json.load(sys.stdin)["state"])')
+  [ "$SA" = "clean" ] && break
+  sleep 3
+done
+if [ "$SA" = "clean" ]; then
+  REMAIN=$(( REPLAY_WINDOW - ( $(date +%s) - UNKNOWN_AT ) ))
+  if [ "$REMAIN" -gt 0 ]; then
+    echo "  [ ..  ] waiting ${REMAIN}s for the re-armed replay window to close"
+    sleep "$REMAIN"
+  fi
+  $HACTL set-state "$BUTTON" "2026-09-24T12:00:00+00:00" device_class=button > /dev/null
+  sleep 3
+  check "a first-ever press from unknown clears Clean" \
+    sensor.unload_entity_state finished
+else
+  echo "  [ ..  ] could not re-enter Clean in time; first-press check skipped"
+fi
 
 echo
 echo "== the service was accepted by the bus (item 316 class)"

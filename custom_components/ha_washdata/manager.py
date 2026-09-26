@@ -217,6 +217,7 @@ from .const import (
     NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS,
     CONF_UNLOAD_CONFIRM_ENTITY,
     CONF_UNLOAD_TRACK_WITHOUT_DOOR,
+    UNLOAD_CONFIRM_REPLAY_GRACE_S,
     DEFAULT_UNLOAD_TRACK_WITHOUT_DOOR,
     CONF_NOTIFY_MILESTONES,
     CONF_NOTIFY_MILESTONE_MESSAGE,
@@ -305,6 +306,11 @@ from .signal_processing import (
 from .recorder import CycleRecorder
 from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
+
+# Per-entity anchors for the unload-confirm replay window (register items 367, 368).
+# `{entity_id: datetime}` in `hass.data`, so it survives entry reloads, resets on an
+# HA restart, and never carries over between different configured entities.
+_UNLOAD_CONFIRM_ANCHOR_KEY = f"{DOMAIN}_unload_confirm_anchors"
 from .options_utils import option_float, option_int
 from .time_utils import power_data_to_offsets
 from . import analysis
@@ -3309,6 +3315,26 @@ class WashDataManager:
         self._remove_unload_confirm_listener = async_track_state_change_event(
             self.hass, [entity_id], self._handle_unload_confirm_change
         )
+        # Anchor the replay window PER ENTITY, in `hass.data` so it survives entry
+        # reloads and resets on an HA restart.
+        #
+        # Not per subscribe: a settings save is a full entry reload here (the log
+        # shows a fresh `Manager init`), and re-arming on it would cost the user a
+        # press for two minutes after every save - the same lost-press bug this
+        # window exists beside, just narrower. A reload cannot produce a replay
+        # anyway, because MQTT is not reloaded with us and the entity keeps its
+        # state, so no `unknown -> value` transition occurs.
+        #
+        # But not per PROCESS either: keyed on the entity, a newly CONFIGURED
+        # confirmation entity gets its own window instead of inheriting an expired
+        # one from whatever was configured before it. Without that, pointing the
+        # option at a fresh `unknown` entity hours into a session left it with no
+        # protection at all, and its first retained value would clear a waiting
+        # Clean state. Old keys are left behind deliberately - the dict is bounded
+        # by the distinct entities a user has ever chosen here.
+        anchors = self.hass.data.setdefault(_UNLOAD_CONFIRM_ANCHOR_KEY, {})
+        if isinstance(anchors, dict):
+            anchors.setdefault(entity_id, dt_util.now())
 
     async def _setup_price_listener(self) -> None:
         """Subscribe to the dynamic energy price entity (#426).
@@ -3474,10 +3500,25 @@ class WashDataManager:
         Any change to a real state counts, because the entity is whatever the user
         had to hand: an ``event.*`` button writes a fresh timestamp per press, an
         ``input_button`` the same, a ``sensor.*`` action sensor writes "single" and
-        resets. Two kinds of change are excluded - a transition into or out of
-        unknown/unavailable (a restart or a flat battery is not a press) and a
-        transition *to* ``off`` or empty, which is the release half of a contact or
-        motion sensor rather than its trigger.
+        resets.
+
+        Excluded: a transition *to* unknown/unavailable/``off``/empty (the release
+        half of a contact or motion sensor, or a device dropping off), a transition
+        *out of* ``unavailable`` (a flat battery coming back is not a press), and an
+        entity that has only just appeared (``old_state is None``, which is what a
+        restored last-press timestamp looks like on HA start).
+
+        **``unknown`` is the interesting one, and it is time-scoped rather than
+        excluded outright (register item 367).** A fresh ``event.*`` / ``button.*``
+        / ``input_button.*`` sits at ``unknown`` until it is first pressed, so a
+        blanket exclusion swallowed the FIRST EVER press - and that reads as "the
+        feature does not work", which is the #445 failure one layer down. Accepting
+        it outright is not safe either: a z2m action sensor publishes its action as
+        a RETAINED MQTT message, replayed by the broker on reconnect, arriving as
+        precisely this transition. The restart case is already covered above, so
+        the only gap left is the moment just after we subscribe - hence
+        ``UNLOAD_CONFIRM_REPLAY_GRACE_S`` from the subscription, after which an
+        ``unknown -> value`` change is taken at face value.
         """
         new_state = event.data.get("new_state")
         old_state = event.data.get("old_state")
@@ -3491,13 +3532,65 @@ class WashDataManager:
         old_val = old_state.state
         if new_val == old_val:
             return
-        if new_val in ("unavailable", "unknown", "off", "") or old_val in (
-            "unavailable",
-            "unknown",
-        ):
+        if new_val in ("unavailable", "unknown"):
+            # Going away RE-ARMS the window. The startup anchor alone only covers
+            # the reconnect that follows an HA restart; a broker restart hours
+            # later replays retained values just the same, and the entity passes
+            # through `unavailable`/`unknown` on its way out. Re-anchoring here
+            # means the value that comes back is judged as the replay it may well
+            # be. Costs nothing on the press path: a value arriving straight after
+            # `unavailable` is excluded outright either way.
+            self._rearm_unload_confirm_window()
+            return
+        if new_val in ("off", ""):
+            return
+        if old_val == "unavailable":
+            return
+        if old_val == "unknown" and self._in_unload_confirm_replay_window():
+            self._logger.debug(
+                "Ignoring %s -> %s within the unload-confirm replay window; a "
+                "retained value can arrive this soon after subscribing",
+                old_val,
+                new_val,
+            )
             return
 
         self.mark_unloaded(f"{self._unload_confirm_entity} -> {new_val}")
+
+    def _rearm_unload_confirm_window(self) -> None:
+        """Restart the replay window for the configured entity.
+
+        Called when it drops to ``unavailable``/``unknown``, because whatever it
+        reports on the way back may be a retained value rather than a press.
+        """
+        entity_id = self._unload_confirm_entity
+        if not entity_id:
+            return
+        anchors = self.hass.data.setdefault(_UNLOAD_CONFIRM_ANCHOR_KEY, {})
+        if isinstance(anchors, dict):
+            anchors[entity_id] = dt_util.now()
+
+    def _in_unload_confirm_replay_window(self) -> bool:
+        """Whether this entity came back too recently to trust ``unknown -> value``.
+
+        Measured from the entity's own anchor: set when this process first
+        subscribed to it, and restarted every time it drops out (see
+        `_rearm_unload_confirm_window`). Survives entry reloads, resets on an HA
+        restart, and does not carry over between different configured entities.
+
+        Fails CLOSED (True) if the anchor is missing or unusable: "we do not know
+        when this entity came back" carries the same risk as "it just did".
+        """
+        entity_id = self._unload_confirm_entity
+        anchors = self.hass.data.get(_UNLOAD_CONFIRM_ANCHOR_KEY)
+        anchor = anchors.get(entity_id) if isinstance(anchors, dict) else None
+        if not isinstance(anchor, datetime):
+            return True
+        try:
+            elapsed = (dt_util.now() - anchor).total_seconds()
+        except (TypeError, ValueError, OverflowError):
+            return True
+        return elapsed < UNLOAD_CONFIRM_REPLAY_GRACE_S
 
     def mark_unloaded(self, source: str = "manual") -> bool:
         """Clear the Clean state: the load has been taken out (#153, #451).
