@@ -209,7 +209,8 @@
     "hist_scan": "Rechercher des cycles",
     "hist_import_n": "Importer {n} cycles",
     "hist_goto_cycles": "Voir les cycles",
-    "save_total_cycles": "Enregistrer le total"
+    "save_total_cycles": "Enregistrer le total",
+    "clear": "Effacer"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1619,6 +1620,10 @@
     "unload_track_without_door": {
       "label": "Confirmer le déchargement manuellement",
       "doc": "Exécute le rappel de déchargement sur un appareil sans Entité capteur de porte ni Entité de confirmation de déchargement, et vous confirmez le déchargement depuis votre propre automatisation : appuyez sur l'entité bouton \"Marquer comme déchargé\" ou appelez le service ha_washdata.mark_unloaded. Ignoré lorsqu'une Entité capteur de porte est définie, car elle fournit déjà le signal."
+    },
+    "notify_icon_color": {
+      "label": "Couleur de notification",
+      "doc": "Couleur d'accentuation des notifications de cet appareil, afin de distinguer d'un coup d'œil un lave-linge, un sèche-linge et un lave-vaisselle. Android colore la notification ; iOS colore l'icône ainsi que la barre de progression de l'activité en direct sur l'écran verrouillé et dans la Dynamic Island. Le format hexadécimal (par exemple #03A9F4) est compris par les deux. Laissez vide pour la valeur par défaut de la plateforme."
     }
   },
   "setting_group": {

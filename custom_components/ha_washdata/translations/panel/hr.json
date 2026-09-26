@@ -257,7 +257,8 @@
     "hist_scan": "Traži cikluse",
     "hist_import_n": "Uvezi cikluse: {n}",
     "hist_goto_cycles": "Prikaži cikluse",
-    "save_total_cycles": "Spremi ukupan broj"
+    "save_total_cycles": "Spremi ukupan broj",
+    "clear": "Očisti"
   },
   "note": {
     "off_delay": {
@@ -1640,6 +1641,10 @@
     "unload_track_without_door": {
       "label": "Ručno potvrdi istovar",
       "doc": "Pokrenite podsjetnik za istovar na uređaju bez Entiteta senzora vrata i bez Entiteta potvrde istovara te istovar potvrdite iz vlastite automatizacije: pritisnite entitet gumba \"Označi kao istovareno\" ili pozovite uslugu ha_washdata.mark_unloaded. Zanemaruje se kada je postavljen Entitet senzora vrata, koji već daje taj signal."
+    },
+    "notify_icon_color": {
+      "label": "Boja obavijesti",
+      "doc": "Naglasna boja obavijesti ovog uređaja, kako bi se perilica rublja, sušilica i perilica posuđa razlikovale na prvi pogled. Android oboji samu obavijest; iOS oboji ikonu i traku napretka Live Activity na zaključanom zaslonu i u Dynamic Island. Obje platforme razumiju Hex (npr. #03A9F4). Ostavite prazno za zadanu boju platforme."
     }
   },
   "setting_group": {

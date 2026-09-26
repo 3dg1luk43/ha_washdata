@@ -257,7 +257,8 @@
         "hist_scan": "Kërko cikle",
         "hist_import_n": "Importo {n} cikle",
         "hist_goto_cycles": "Shfaq ciklet",
-        "save_total_cycles": "Ruaj totalin"
+        "save_total_cycles": "Ruaj totalin",
+        "clear": "Pastro"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -1635,6 +1636,10 @@
         "unload_track_without_door": {
             "label": "Konfirmo shkarkimin manualisht",
             "doc": "Ekzekuto kujtesën për shkarkim në një pajisje pa Entitetin e sensorit të derës dhe pa Entitetin e konfirmimit të shkarkimit, dhe konfirmo shkarkimin nga automatizimi yt: shtyp entitetin buton \"Shëno si të shkarkuar\", ose thirr shërbimin ha_washdata.mark_unloaded. Shpërfillet kur është vendosur një Entitet i sensorit të derës, i cili tashmë e jep këtë sinjal."
+        },
+        "notify_icon_color": {
+            "label": "Ngjyra e njoftimit",
+            "doc": "Ngjyrë theksuese për njoftimet e kësaj pajisjeje, që makina larëse, tharësja dhe pjatalarësja të dallohen me një shikim. Android e ngjyros njoftimin; iOS ngjyros ikonën dhe shiritin e progresit të Live Activity në ekranin e kyçjes dhe në Dynamic Island. Të dyja e kuptojnë kodin Hex (p.sh. #03A9F4). Lëreni bosh për parazgjedhjen e platformës."
         }
     },
     "setting_group": {

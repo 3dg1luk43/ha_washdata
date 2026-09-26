@@ -257,7 +257,8 @@
     "hist_scan": "Potraži cikluse",
     "hist_import_n": "Uvezi cikluse: {n}",
     "hist_goto_cycles": "Prikaži cikluse",
-    "save_total_cycles": "Sačuvaj ukupan broj"
+    "save_total_cycles": "Sačuvaj ukupan broj",
+    "clear": "Obriši"
   },
   "note": {
     "off_delay": {
@@ -1640,6 +1641,10 @@
     "unload_track_without_door": {
       "label": "Ručno potvrdi istovar",
       "doc": "Pokreni podsetnik za istovar na uređaju bez Entiteta senzora vrata i bez Entiteta potvrde istovara, a istovar potvrdi iz sopstvene automatizacije: pritisni entitet dugmeta \"Označi kao istovareno\" ili pozovi uslugu ha_washdata.mark_unloaded. Zanemaruje se kada je postavljen Entitet senzora vrata, koji već daje taj signal."
+    },
+    "notify_icon_color": {
+      "label": "Boja obaveštenja",
+      "doc": "Akcentna boja obaveštenja ovog uređaja, kako bi se mašina za pranje veša, mašina za sušenje i mašina za pranje sudova razlikovale na prvi pogled. Android boji samo obaveštenje; iOS boji ikonu i traku napretka Live Activity na zaključanom ekranu i u Dynamic Island. Obe platforme razumeju Hex (npr. #03A9F4). Ostavite prazno za podrazumevanu boju platforme."
     }
   },
   "setting_group": {

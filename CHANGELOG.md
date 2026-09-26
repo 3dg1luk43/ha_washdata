@@ -16,15 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - An appliance idling above its Stop Threshold closes in minutes, and is flagged.
 - Saner Off Delay suggestions, and the real end wait shown in Settings.
 - Live notifications cleared at cycle end; the countdown reaches zero.
+- A colour per appliance for its notifications and iOS Live Activities.
 - The unload reminder now works without a door sensor: confirm with a button or an automation.
 - Min Off Gap and Profile Duration Tolerance now take effect when you change them.
 - Notification actions render their variables; brand and model are saved.
 - Imports keep your own power sensor and are revertible per setting.
-- Cycle graphs line up, and the false out-of-band markers are gone.
+- Cycle graphs line up, the false out-of-band markers are gone, and power labels scale to the reading.
 - A phase you create shows up in the list instead of vanishing.
 - The panel stays where you scrolled it, even while a cycle runs.
 
 ### Fixes
+
+- **A chart's power labels scale to the power it is showing** ([#453](https://github.com/3dg1luk43/ha_washdata/issues/453)): The reporter's washer-dryer idles at 0.3 W, and all three labels down the side of the Live Power chart read "0W" next to a perfectly legible curve. Every label was rounded to whole watts regardless of the scale, so anything under half a watt printed as zero. Labels now carry as many decimals as the gap between them needs: the same chart reads 0.32W, 0.16W, 0W. A normal 2 kW cycle is unchanged. The same rounding is fixed on the Playground chart and its threshold lines, where a 0.8 W Stop Threshold was labelled 1W, and on the power chip of the Lovelace card. Thanks to @testpaul999 for the screenshot and the export.
 
 - **A short dishwasher programme no longer waits half an hour for a pump-out it has already done** (found while auditing the dishwasher end path): after a dishwasher passes its program's expected length, WashData allows up to 30 more minutes for the final drain before closing the cycle, and its stuck-cycle safety net asks for 10 minutes of continuous quiet first. Both suit a two-hour eco program. On a short one they do not: the community catalogue carries a 6-minute pre-rinse, where 30 minutes is five times the program and the 10-minute quiet window is longer than the program itself, which switched the safety net off exactly where it was most needed. Both now stop at the program's own learned length, so neither can ever wait longer than before and long programs are completely unaffected. Verified unchanged across every recorded cycle available, all of which are longer than 90 minutes.
 
@@ -83,6 +86,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Profile card titles are readable on light themes** ([#444](https://github.com/3dg1luk43/ha_washdata/issues/444)): On a light theme the titles on the Profiles tab were near-white and invisible, while everything else on the same card rendered correctly. Those cards are buttons, and their text colour was falling back to the browser's own default instead of the theme's, which shows up when Home Assistant serves a light theme to a device in dark mode. They now follow the theme. Thanks to @Vize2012 for the screenshots.
 
 ### Features
+
+- **A colour per appliance for its notifications** ([#454](https://github.com/3dg1luk43/ha_washdata/issues/454)): With a washer, a dryer and a dishwasher live at the same time, every card on the iOS Lock Screen renders in the same default blue and only the per-device icon tells them apart. **Notification Colour**, in Settings > Notifications next to Notification Icon, sets an accent colour per appliance, with a colour picker beside the hex field. Android tints the notification; iOS tints the icon and the Live Activity progress bar on the Lock Screen and in the Dynamic Island. It is sent to `mobile_app` targets only, so strict-schema platforms are untouched, and leaving it blank keeps the notification payload exactly as it was. Thanks to @Glenbeulah for the request and for naming the companion-app fields.
 
 - **Two settings that did nothing until a restart now take effect when you change them** (found by the new test box while verifying [#451](https://github.com/3dg1luk43/ha_washdata/issues/451)): an appliance's detector settings are filled in twice, once when Home Assistant starts and once when you save a change, and the two lists had drifted apart in both directions. **Min Off Gap** was only in the first, so changing it in Settings did nothing until the next restart. That is the longer half of the wait that ends every cycle, and this is the release that made it visible and started telling you when it is the setting in charge, so anyone who followed that advice and lowered it saw no effect at all. **Profile Duration Tolerance** was only in the second, the same fault the other way round: after every restart the appliance ran at the 0.25 default regardless of what you had set, until you happened to save something else. Both now apply from both paths. Nothing changes unless you had tuned one of them, and a test now compares the two lists in full rather than the two keys, so a future setting cannot be added to one and forgotten in the other.
 

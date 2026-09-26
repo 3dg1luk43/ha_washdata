@@ -257,7 +257,8 @@
     "hist_scan": "Vyhľadať cykly",
     "hist_import_n": "Importovať cykly: {n}",
     "hist_goto_cycles": "Zobraziť cykly",
-    "save_total_cycles": "Uložiť celkový počet"
+    "save_total_cycles": "Uložiť celkový počet",
+    "clear": "Vymazať"
   },
   "note": {
     "off_delay": {
@@ -1640,6 +1641,10 @@
     "unload_track_without_door": {
       "label": "Ručné potvrdenie vyloženia",
       "doc": "Spustí pripomienku vyloženia na zariadení bez Entity senzora dverí a bez Entity potvrdenia vyloženia, pričom vyloženie potvrdíte z vlastnej automatizácie: stlačte entitu tlačidla „Označiť ako vyložené“ alebo zavolajte službu ha_washdata.mark_unloaded. Ignoruje sa, keď je nastavená Entita senzora dverí, ktorá tento signál už poskytuje."
+    },
+    "notify_icon_color": {
+      "label": "Farba upozornenia",
+      "doc": "Farba zvýraznenia upozornení tohto spotrebiča, aby sa práčka, sušička a umývačka riadu dali na prvý pohľad rozlíšiť. Android zafarbí samotné upozornenie; iOS zafarbí ikonu a ukazovateľ priebehu Live Activity na zamknutej obrazovke a v Dynamic Island. Obe platformy rozumejú formátu Hex (napr. #03A9F4). Nechajte prázdne pre predvolenú farbu platformy."
     }
   },
   "setting_group": {

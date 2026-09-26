@@ -257,7 +257,8 @@
     "hist_scan": "Meklēt ciklus",
     "hist_import_n": "Importēt ciklus ({n})",
     "hist_goto_cycles": "Parādīt ciklus",
-    "save_total_cycles": "Saglabāt kopējo skaitu"
+    "save_total_cycles": "Saglabāt kopējo skaitu",
+    "clear": "Notīrīt"
   },
   "note": {
     "off_delay": {
@@ -1640,6 +1641,10 @@
     "unload_track_without_door": {
       "label": "Apstiprināt izkraušanu manuāli",
       "doc": "Izmantot izkraušanas atgādinājumu ierīcei, kurai nav ne Durvju sensora entītijas, ne Izkraušanas apstiprinājuma entītijas, un apstiprināt izkraušanu ar savu automatizāciju: nospiediet pogas entītiju „Atzīmēt kā izkrautu“ vai izsauciet pakalpojumu ha_washdata.mark_unloaded. Tiek ignorēts, ja ir iestatīta Durvju sensora entītija, kas šo signālu jau nodrošina."
+    },
+    "notify_icon_color": {
+      "label": "Paziņojuma krāsa",
+      "doc": "Akcenta krāsa šīs ierīces paziņojumiem, lai veļas mašīnu, žāvētāju un trauku mazgājamo mašīnu varētu atšķirt ar vienu acu uzmetienu. Android iekrāso paziņojumu; iOS iekrāso ikonu un Live Activity progresa joslu bloķēšanas ekrānā un Dynamic Island. Abas platformas saprot hex kodu (piem., #03A9F4). Atstājiet tukšu, lai izmantotu platformas noklusējuma krāsu."
     }
   },
   "setting_group": {

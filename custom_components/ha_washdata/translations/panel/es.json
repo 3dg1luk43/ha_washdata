@@ -209,7 +209,8 @@
     "hist_scan": "Buscar ciclos",
     "hist_import_n": "Importar {n} ciclos",
     "hist_goto_cycles": "Ver los ciclos",
-    "save_total_cycles": "Guardar total"
+    "save_total_cycles": "Guardar total",
+    "clear": "Borrar"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1619,6 +1620,10 @@
     "unload_track_without_door": {
       "label": "Confirmar la descarga manualmente",
       "doc": "Ejecuta el recordatorio de descarga en un dispositivo sin Entidad de sensor de puerta ni Entidad de confirmación de descarga, y confirmas tú la descarga desde tu propia automatización: pulsa la entidad de botón \"Marcar como descargado\" o llama al servicio ha_washdata.mark_unloaded. Se ignora cuando hay una Entidad de sensor de puerta configurada, que ya proporciona la señal."
+    },
+    "notify_icon_color": {
+      "label": "Color de notificación",
+      "doc": "Color de acento para las notificaciones de este electrodoméstico, para distinguir de un vistazo una lavadora, una secadora y un lavavajillas. Android tiñe la notificación; iOS tiñe el icono y la barra de progreso de la Actividad en vivo en la pantalla bloqueada y en la Dynamic Island. Ambos entienden el formato hexadecimal (por ejemplo, #03A9F4). Déjelo en blanco para el valor predeterminado de la plataforma."
     }
   },
   "setting_group": {

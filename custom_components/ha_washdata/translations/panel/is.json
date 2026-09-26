@@ -257,7 +257,8 @@
     "hist_scan": "Leita að lotum",
     "hist_import_n": "Flytja inn {n} lotur",
     "hist_goto_cycles": "Sýndu mér loturnar",
-    "save_total_cycles": "Vista samtölu"
+    "save_total_cycles": "Vista samtölu",
+    "clear": "Hreinsa"
   },
   "note": {
     "off_delay": {
@@ -1672,6 +1673,10 @@
     "unload_track_without_door": {
       "label": "Staðfesta losun handvirkt",
       "doc": "Keyrir losunaráminninguna á tæki án Dyraskynjareiningar og án Losunarstaðfestingareiningar, og þú staðfestir losunina þess í stað úr þinni eigin sjálfvirkni: ýttu á hnappaeininguna \"Merkja sem losað\" eða kallaðu á aðgerðina ha_washdata.mark_unloaded. Hunsað þegar Dyraskynjareining er stillt, því hún gefur merkið nú þegar."
+    },
+    "notify_icon_color": {
+      "label": "Tilkynningalitur",
+      "doc": "Áherslulitur fyrir tilkynningar frá þessu tæki, svo að þvottavél, þurrkari og uppþvottavél þekkist í sjónhendingu. Android litar tilkynninguna; iOS litar táknið og framvindustikuna í Live Activity á lásskjánum og í Dynamic Island. Bæði kerfin skilja hex-gildi (t.d. #03A9F4). Skildu eftir autt fyrir sjálfgefinn lit kerfisins."
     }
   },
   "setting_group": {

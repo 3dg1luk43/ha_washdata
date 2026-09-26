@@ -257,7 +257,8 @@
     "hist_scan": "Nach Zyklen suchen",
     "hist_import_n": "{n} Zyklen importieren",
     "hist_goto_cycles": "Zeig mir die Zyklen",
-    "save_total_cycles": "Gesamtzahl speichern"
+    "save_total_cycles": "Gesamtzahl speichern",
+    "clear": "Leeren"
   },
   "note": {
     "off_delay": {
@@ -1672,6 +1673,10 @@
     "unload_track_without_door": {
       "label": "Entladung manuell bestätigen",
       "doc": "Führt die Entladeerinnerung auf einem Gerät ohne Türsensor-Entität und ohne Entladebestätigungs-Entität aus; die Entladung bestätigen Sie stattdessen aus Ihrer eigenen Automatisierung: die Schaltflächen-Entität \"Als entladen markieren\" drücken oder die Aktion ha_washdata.mark_unloaded aufrufen. Wird ignoriert, wenn eine Türsensor-Entität festgelegt ist, die das Signal bereits liefert."
+    },
+    "notify_icon_color": {
+      "label": "Benachrichtigungsfarbe",
+      "doc": "Akzentfarbe für die Benachrichtigungen dieses Geräts, damit Waschmaschine, Trockner und Geschirrspüler auf einen Blick unterscheidbar sind. Android färbt die Benachrichtigung ein; iOS färbt das Symbol und den Fortschrittsbalken der Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Beide verstehen Hex-Werte (z. B. #03A9F4). Für den Plattformstandard lassen Sie das Feld leer."
     }
   },
   "setting_group": {

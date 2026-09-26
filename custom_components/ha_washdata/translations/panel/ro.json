@@ -209,7 +209,8 @@
     "hist_scan": "Căutați cicluri",
     "hist_import_n": "Importați {n} cicluri",
     "hist_goto_cycles": "Vedeți ciclurile",
-    "save_total_cycles": "Salvați totalul"
+    "save_total_cycles": "Salvați totalul",
+    "clear": "Ștergeți"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1587,6 +1588,10 @@
     "unload_track_without_door": {
       "label": "Confirmă Descărcarea Manual",
       "doc": "Rulează mementoul de descărcare pe un dispozitiv fără Entitate Senzor Ușă și fără Entitate Confirmare Descărcare, iar descărcarea o confirmi din propria automatizare: apasă entitatea buton \"Marcați ca descărcat\" sau apelează serviciul ha_washdata.mark_unloaded. Se ignoră când este setată o Entitate Senzor Ușă, care oferă deja semnalul."
+    },
+    "notify_icon_color": {
+      "label": "Culoare Notificare",
+      "doc": "Culoare de accent pentru notificările acestui aparat, astfel încât o mașină de spălat rufe, un uscător și o mașină de spălat vase să poată fi deosebite dintr-o privire. Android colorează notificarea; iOS colorează pictograma și bara de progres a Activității live de pe ecranul blocat și din Dynamic Island. Formatul hexazecimal (de exemplu, #03A9F4) este înțeles de ambele. Lăsați necompletat pentru valoarea prestabilită a platformei."
     }
   },
   "setting_group": {

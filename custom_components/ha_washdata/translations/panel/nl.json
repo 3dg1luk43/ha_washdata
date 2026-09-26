@@ -257,7 +257,8 @@
     "hist_scan": "Zoeken naar cycli",
     "hist_import_n": "{n} cycli importeren",
     "hist_goto_cycles": "Toon me de cycli",
-    "save_total_cycles": "Totaal opslaan"
+    "save_total_cycles": "Totaal opslaan",
+    "clear": "Wissen"
   },
   "note": {
     "off_delay": {
@@ -1672,6 +1673,10 @@
     "unload_track_without_door": {
       "label": "Uitladen handmatig bevestigen",
       "doc": "Voert de uitlaadherinnering uit op een apparaat zonder Deursensorentiteit en zonder Uitlaadbevestigingsentiteit, waarbij u het uitladen in plaats daarvan vanuit uw eigen automatisering bevestigt: druk op de knopentiteit \"Markeren als uitgeladen\" of roep de actie ha_washdata.mark_unloaded aan. Wordt genegeerd wanneer er een Deursensorentiteit is ingesteld, die het signaal al levert."
+    },
+    "notify_icon_color": {
+      "label": "Meldingskleur",
+      "doc": "Accentkleur voor de meldingen van dit apparaat, zodat een wasmachine, een droger en een vaatwasser in één oogopslag te onderscheiden zijn. Android kleurt de melding; iOS kleurt het pictogram en de voortgangsbalk van de Live-activiteit op het toegangsscherm en in de Dynamic Island. Beide begrijpen hex-waarden (bijvoorbeeld #03A9F4). Laat dit leeg voor de platformstandaard."
     }
   },
   "setting_group": {
