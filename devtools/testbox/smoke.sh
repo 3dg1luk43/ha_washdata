@@ -110,6 +110,7 @@ $HACTL set-options "$ENTRY" \
   notify_finish_services='["notify.mobile_app_testbox","notify.plain_testbox"]' \
   notify_live_services='["notify.mobile_app_testbox","notify.plain_testbox"]' \
   notify_live_interval_seconds=30 \
+  notify_icon_color='#4CAF50' \
   notify_live_chronometer=true \
   notify_before_end_minutes=20 \
   profile_match_interval=10 \

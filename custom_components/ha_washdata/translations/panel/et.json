@@ -257,7 +257,10 @@
     "hist_scan": "Otsi tsükleid",
     "hist_import_n": "Impordi tsüklid ({n})",
     "hist_goto_cycles": "Näita tsükleid",
-    "save_total_cycles": "Salvesta koguarv"
+    "save_total_cycles": "Salvesta koguarv",
+    "clear": "Tühjenda",
+    "add_brand": "Lisa bränd",
+    "add_appliance": "Lisa seade"
   },
   "note": {
     "off_delay": {
@@ -384,7 +387,8 @@
     "community_store": "Kogukonna pood",
     "online_account": "Kogukonna pood ja veebifunktsioonid",
     "import_power_history": "Võimsuse ajaloo import",
-    "service_status": "Hoolduse olek"
+    "service_status": "Hoolduse olek",
+    "online_account_tab": "Veeb ja kogukond"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -524,7 +528,8 @@
     "pg_tile_matched_tip": "Tsüklid, mis on õigesti seostatud tuntud programmiga",
     "pg_time_left": "Aega jäänud",
     "pg_weak_match": "Nõrk vaste",
-    "phase_name": "Nimi",
+    "phase_name": "Faasi nimi",
+    "name": "Nimi",
     "phase_timeline": "Faaside ajajoon",
     "power": "Võimsus",
     "profile": "Profiil",
@@ -1096,7 +1101,9 @@
     "odometer_intro": "See koguarv saab ainult kasvada. Tsüklikirje kustutamine seda ei muuda ja loendamine jätkub ka üle salvestatud ajaloo piiri, nii et hoolduse meeldetuletused jäävad õigeks.",
     "odometer_correct_hint": "Määra see, kui WashData salvestas käituse, mida kunagi ei toimunud, või kui seade oli tsükleid läbinud juba enne WashData paigaldamist.",
     "no_reminders_set": "Hoolduse meeldetuletusi pole veel määratud.",
-    "toast_program_armed": "Programm seatud järgmise tsükli jaoks: {program}"
+    "toast_program_armed": "Programm seatud järgmise tsükli jaoks: {program}",
+    "toast_range_required": "Määra kehtiv Alates/Kuni vahemik.",
+    "no_profiles_option": "(profiile veel pole, lisa uus)"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
@@ -1672,6 +1679,10 @@
     "unload_track_without_door": {
       "label": "Kinnita Mahalaadimine Käsitsi",
       "doc": "Kasutada mahalaadimise meeldetuletust seadmel, millel pole ei Ukse Anduri Olemit ega Mahalaadimise Kinnituse Olemit, ja kinnitada mahalaadimine oma automaatikast: vajutage nupuolemit „Märgi mahalaadituks“ või kutsuge välja teenus ha_washdata.mark_unloaded. Eiratakse, kui Ukse Anduri Olem on määratud, sest see annab signaali juba ise."
+    },
+    "notify_icon_color": {
+      "label": "Teavituse Värv",
+      "doc": "Rõhuvärv selle seadme teavitustele, et pesumasin, kuivati ja nõudepesumasin oleksid ühe pilguga eristatavad. iOS värvib ikooni ja Live Activity edenemisriba lukustuskuval ning Dynamic Islandis. Androidile saadetakse sama värv, kuid mida sellega tehakse, sõltub telefonist: mõni värvib ikooni ja paljud (eriti Samsung One UI) eiravad seda täielikult. Mõlemad mõistavad heksakoodi (nt #03A9F4). Platvormi vaikeseade jaoks jätke tühjaks."
     }
   },
   "setting_group": {
@@ -1765,7 +1776,7 @@
     "all_statuses": "Kõik olekud",
     "ambiguous": "Mitmetähenduslik",
     "auto_detect": "Automaatne tuvastamine",
-    "clear": "Selge",
+    "clear": "Ühemõtteline",
     "completed": "Lõpetatud",
     "fine_tuning": "kohe peenhäälestus...",
     "force_stopped": "Jõud peatus",
@@ -1928,7 +1939,9 @@
     "unlabel_done": "{count} tsükli märgistus eemaldatud",
     "unlabel_failed": "Märgistuse eemaldamine ebaõnnestus: {error}",
     "odometer_saved": "Tsüklite koguarv salvestatud",
-    "odometer_save_failed": "Koguarvu ei õnnestunud salvestada: {error}"
+    "odometer_save_failed": "Koguarvu ei õnnestunud salvestada: {error}",
+    "store_pick_profile_share": "Vali profiil, kuhu jagada",
+    "remove_failed": "Eemaldamine ebaõnnestus: {error}"
   },
   "suggestion": {
     "both_agree": "WashData soovitab",

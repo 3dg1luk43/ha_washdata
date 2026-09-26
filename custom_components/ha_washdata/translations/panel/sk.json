@@ -257,7 +257,10 @@
     "hist_scan": "Vyhľadať cykly",
     "hist_import_n": "Importovať cykly: {n}",
     "hist_goto_cycles": "Zobraziť cykly",
-    "save_total_cycles": "Uložiť celkový počet"
+    "save_total_cycles": "Uložiť celkový počet",
+    "clear": "Vymazať",
+    "add_brand": "Pridať značku",
+    "add_appliance": "Pridať spotrebič"
   },
   "note": {
     "off_delay": {
@@ -384,7 +387,8 @@
     "community_store": "Komunitný obchod",
     "online_account": "Komunitný obchod a online funkcie",
     "import_power_history": "Import histórie výkonu",
-    "service_status": "Stav servisu"
+    "service_status": "Stav servisu",
+    "online_account_tab": "Online a komunita"
   },
   "health": {
     "fair": "Prijateľná kvalita profilu",
@@ -525,7 +529,8 @@
     "pg_tile_matched_tip": "Cykly správne priradené k známemu programu",
     "pg_time_left": "Zostávajúci čas",
     "pg_weak_match": "Slabá zhoda",
-    "phase_name": "Názov",
+    "phase_name": "Názov fázy",
+    "name": "Názov",
     "phase_timeline": "Časová os fáz",
     "power": "Výkon",
     "profile": "Profil",
@@ -1096,7 +1101,9 @@
     "odometer_intro": "Tento celkový počet iba rastie. Odstránenie záznamu o cykle ho nezmení a počíta ďalej aj za limitom uloženej histórie, takže pripomienky servisu zostávajú správne.",
     "odometer_correct_hint": "Nastavte, ak WashData zaznamenalo cyklus, ktorý nikdy neprebehol, alebo ak spotrebič už absolvoval cykly pred inštaláciou WashData.",
     "no_reminders_set": "Zatiaľ nie sú nastavené žiadne pripomienky servisu.",
-    "toast_program_armed": "Program nastavený pre ďalší cyklus: {program}"
+    "toast_program_armed": "Program nastavený pre ďalší cyklus: {program}",
+    "toast_range_required": "Nastavte platný rozsah Od/Do",
+    "no_profiles_option": "(zatiaľ žiadne profily, pridajte nový)"
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1640,6 +1647,10 @@
     "unload_track_without_door": {
       "label": "Ručné potvrdenie vyloženia",
       "doc": "Spustí pripomienku vyloženia na zariadení bez Entity senzora dverí a bez Entity potvrdenia vyloženia, pričom vyloženie potvrdíte z vlastnej automatizácie: stlačte entitu tlačidla „Označiť ako vyložené“ alebo zavolajte službu ha_washdata.mark_unloaded. Ignoruje sa, keď je nastavená Entita senzora dverí, ktorá tento signál už poskytuje."
+    },
+    "notify_icon_color": {
+      "label": "Farba upozornenia",
+      "doc": "Farba zvýraznenia upozornení tohto spotrebiča, aby sa práčka, sušička a umývačka riadu dali na prvý pohľad rozlíšiť. iOS zafarbí ikonu a ukazovateľ priebehu Live Activity na zamknutej obrazovke a v Dynamic Island. Android dostane rovnakú farbu, ale čo s ňou urobí, závisí od telefónu: niektoré zafarbia ikonu a mnohé (najmä Samsung One UI) ju úplne ignorujú. Obe platformy rozumejú formátu Hex (napr. #03A9F4). Nechajte prázdne pre predvolenú farbu platformy."
     }
   },
   "setting_group": {
@@ -1733,7 +1744,7 @@
     "all_statuses": "Všetky stavy",
     "ambiguous": "Nejednoznačný",
     "auto_detect": "Automatické zisťovanie",
-    "clear": "Vymazať",
+    "clear": "Jednoznačný",
     "completed": "Dokončené",
     "fine_tuning": "dolaďovanie…",
     "force_stopped": "Nútene zastavené",
@@ -2008,7 +2019,9 @@
     "unlabel_done": "Odobratý štítok pre {count} cyklov",
     "unlabel_failed": "Odobratie štítka zlyhalo: {error}",
     "odometer_saved": "Celkový počet cyklov uložený",
-    "odometer_save_failed": "Celkový počet sa nepodarilo uložiť: {error}"
+    "odometer_save_failed": "Celkový počet sa nepodarilo uložiť: {error}",
+    "store_pick_profile_share": "Vyberte profil na zdieľanie",
+    "remove_failed": "Odstránenie zlyhalo: {error}"
   },
   "trend": {
     "down": "Klesajúci trend",

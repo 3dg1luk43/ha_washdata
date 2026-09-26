@@ -57,7 +57,7 @@
     "auto_label_cycles_tip": "Atribuiți automat nume de profil ciclurilor neetichetate a căror încredere de potrivire depășește pragul",
     "cancel": "Anulați",
     "clear_debug": "Curățați datele de depanare",
-    "clear_splits": "Curățați",
+    "clear_splits": "Ștergeți",
     "close": "Închide",
     "compare": "Comparați",
     "confirm": "Confirmați",
@@ -209,7 +209,10 @@
     "hist_scan": "Căutați cicluri",
     "hist_import_n": "Importați {n} cicluri",
     "hist_goto_cycles": "Vedeți ciclurile",
-    "save_total_cycles": "Salvați totalul"
+    "save_total_cycles": "Salvați totalul",
+    "clear": "Ștergeți",
+    "add_brand": "Adăugați marcă",
+    "add_appliance": "Adăugați aparat"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -331,7 +334,8 @@
     "community_store": "Magazinul comunității",
     "online_account": "Magazinul comunității și funcții online",
     "import_power_history": "Importați istoricul de putere",
-    "service_status": "Starea întreținerii"
+    "service_status": "Starea întreținerii",
+    "online_account_tab": "Online și comunitate"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -471,7 +475,8 @@
     "pg_tile_matched_tip": "Cicluri atribuite corect unui program cunoscut",
     "pg_time_left": "Timp rămas",
     "pg_weak_match": "Potrivire slabă",
-    "phase_name": "Nume",
+    "phase_name": "Numele fazei",
+    "name": "Nume",
     "phase_timeline": "Cronologie faze",
     "power": "Putere",
     "profile": "Profil",
@@ -1043,7 +1048,9 @@
     "toast_program_armed": "Program pregătit pentru ciclul următor: {program}",
     "standby_above_stop_title": "Încă consumă {idle} W când ciclul s-a încheiat",
     "standby_above_stop_sub": "{n} din ultimele {total} cicluri. Întârzierea la Oprire începe abia după ce puterea scade sub Pragul de Oprire ({stop} W), așa că ciclurile se termină târziu sau trebuie oprite manual.",
-    "advisory_duration_outlier": "{n} ciclu(ri) etichetate '{name}' sunt prea departe de durata sa obișnuită ca să se mai potrivească vreodată cu el (cel mai rău: {ratio}x). Probabil sunt etichetate greșit sau o înregistrare a surprins două rulări. Reetichetați-le sau împărțiți-le, ca să nu mai denatureze estimarea de timp a acestui program."
+    "advisory_duration_outlier": "{n} ciclu(ri) etichetate '{name}' sunt prea departe de durata sa obișnuită ca să se mai potrivească vreodată cu el (cel mai rău: {ratio}x). Probabil sunt etichetate greșit sau o înregistrare a surprins două rulări. Reetichetați-le sau împărțiți-le, ca să nu mai denatureze estimarea de timp a acestui program.",
+    "toast_range_required": "Setați un interval De la/Până la valid",
+    "no_profiles_option": "(niciun profil, adăugați unul)"
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1587,6 +1594,10 @@
     "unload_track_without_door": {
       "label": "Confirmă Descărcarea Manual",
       "doc": "Rulează mementoul de descărcare pe un dispozitiv fără Entitate Senzor Ușă și fără Entitate Confirmare Descărcare, iar descărcarea o confirmi din propria automatizare: apasă entitatea buton \"Marcați ca descărcat\" sau apelează serviciul ha_washdata.mark_unloaded. Se ignoră când este setată o Entitate Senzor Ușă, care oferă deja semnalul."
+    },
+    "notify_icon_color": {
+      "label": "Culoare Notificare",
+      "doc": "Culoare de accent pentru notificările acestui aparat, astfel încât o mașină de spălat rufe, un uscător și o mașină de spălat vase să poată fi deosebite dintr-o privire. iOS colorează pictograma și bara de progres a Activității live de pe ecranul blocat și din Dynamic Island. Android primește aceeași culoare, dar ce face cu ea depinde de telefon: unele colorează pictograma, iar multe (în special Samsung One UI) o ignoră complet. Formatul hexazecimal (de exemplu, #03A9F4) este înțeles de ambele. Lăsați necompletat pentru valoarea prestabilită a platformei."
     }
   },
   "setting_group": {
@@ -1680,7 +1691,7 @@
     "all_statuses": "Toate stările",
     "ambiguous": "Ambiguu",
     "auto_detect": "Detectare automată",
-    "clear": "Curățați",
+    "clear": "Clar",
     "completed": "Finalizat",
     "fine_tuning": "se ajustează…",
     "force_stopped": "Oprit forțat",
@@ -1843,7 +1854,9 @@
     "unlabel_done": "Etichetă eliminată de la {count} ciclu(ri)",
     "unlabel_failed": "Eliminarea etichetei a eșuat: {error}",
     "odometer_saved": "Totalul ciclurilor a fost salvat",
-    "odometer_save_failed": "Nu s-a putut salva totalul: {error}"
+    "odometer_save_failed": "Nu s-a putut salva totalul: {error}",
+    "store_pick_profile_share": "Alegeți un profil în care să partajați",
+    "remove_failed": "Eliminarea a eșuat: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomandă",

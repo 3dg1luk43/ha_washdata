@@ -257,7 +257,10 @@
     "hist_scan": "Scan efter cyklusser",
     "hist_import_n": "Importér {n} cyklusser",
     "hist_goto_cycles": "Vis mig cyklusserne",
-    "save_total_cycles": "Gem total"
+    "save_total_cycles": "Gem total",
+    "clear": "Ryd",
+    "add_brand": "Tilføj mærke",
+    "add_appliance": "Tilføj apparat"
   },
   "note": {
     "off_delay": {
@@ -384,7 +387,8 @@
     "community_store": "Fællesskabsbutik",
     "online_account": "Fællesskabsbutik og onlinefunktioner",
     "import_power_history": "Importér effekthistorik",
-    "service_status": "Servicestatus"
+    "service_status": "Servicestatus",
+    "online_account_tab": "Online & fællesskab"
   },
   "health": {
     "fair": "Acceptabel matchkvalitet",
@@ -529,7 +533,8 @@
     "pg_tile_matched_tip": "Cyklusser der er korrekt tilskrevet et kendt program",
     "pg_time_left": "Tid tilbage",
     "pg_weak_match": "Svagt match",
-    "phase_name": "Navn",
+    "phase_name": "Fasenavn",
+    "name": "Navn",
     "phase_timeline": "Fasetidslinje",
     "power": "Effekt",
     "profile": "Profil",
@@ -1096,7 +1101,9 @@
     "odometer_intro": "Denne total kan kun stige. Sletning af en cyklusregistrering ændrer den ikke, og den tæller videre ud over grænsen for den gemte historik, så servicepåmindelser bliver ved med at være korrekte.",
     "odometer_correct_hint": "Angiv dette, hvis WashData har registreret en kørsel, der aldrig har fundet sted, eller hvis apparatet allerede havde kørt cyklusser, før WashData blev installeret.",
     "no_reminders_set": "Der er endnu ikke angivet nogen servicepåmindelser.",
-    "toast_program_armed": "Program valgt til næste cyklus: {program}"
+    "toast_program_armed": "Program valgt til næste cyklus: {program}",
+    "toast_range_required": "Angiv et gyldigt Fra/Til-interval.",
+    "no_profiles_option": "(ingen profiler endnu, tilføj en)"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
@@ -1672,6 +1679,10 @@
     "unload_track_without_door": {
       "label": "Bekræft aflæsning manuelt",
       "doc": "Kør aflæsningspåmindelsen på en enhed uden Dørsensorenhed og uden Aflæsningsbekræftelsesenhed, og bekræft i stedet aflæsningen fra din egen automatisering: tryk på knapenheden \"Markér som aflæsset\", eller kald handlingen ha_washdata.mark_unloaded. Ignoreres, når en Dørsensorenhed er angivet, da den allerede leverer signalet."
+    },
+    "notify_icon_color": {
+      "label": "Notifikationsfarve",
+      "doc": "Accentfarve til denne enheds notifikationer, så en vaskemaskine, en tørretumbler og en opvaskemaskine kan skelnes fra hinanden på et øjeblik. iOS farver ikonet og Liveaktivitetens fremdriftslinje på den låste skærm og i Dynamic Island. Android får den samme farve sendt, men hvad telefonen bruger den til, er op til den: nogle farver ikonet, og mange (især Samsung One UI) ignorerer den helt. Begge forstår hex-værdier (f.eks. #03A9F4). Lad stå tomt for platformens standard."
     }
   },
   "setting_group": {
@@ -1765,7 +1776,7 @@
     "all_statuses": "Alle statusser",
     "ambiguous": "Tvetydigt",
     "auto_detect": "Automatisk registrering",
-    "clear": "Klar",
+    "clear": "Entydigt",
     "completed": "Afsluttet",
     "fine_tuning": "finjusterer nu...",
     "force_stopped": "Tvunget stoppet",
@@ -2040,7 +2051,9 @@
     "unlabel_failed": "Fjernelse af mærkning mislykkedes: {error}",
     "odometer_saved": "Samlet antal cyklusser gemt",
     "odometer_save_failed": "Kunne ikke gemme totalen: {error}",
-    "contrib_device_changed": "Tilføjet til fællesskabsbutikken, men apparatet blev skiftet, mens formularen var åben. Vælg det i Indstillinger."
+    "contrib_device_changed": "Tilføjet til fællesskabsbutikken, men apparatet blev skiftet, mens formularen var åben. Vælg det i Indstillinger.",
+    "store_pick_profile_share": "Vælg en profil at dele til",
+    "remove_failed": "Fjernelse mislykkedes: {error}"
   },
   "trend": {
     "down": "Trend nedad",

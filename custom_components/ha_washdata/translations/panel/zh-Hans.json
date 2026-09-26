@@ -257,7 +257,10 @@
         "hist_scan": "扫描周期",
         "hist_import_n": "导入 {n} 个周期",
         "hist_goto_cycles": "查看这些周期",
-        "save_total_cycles": "保存累计值"
+        "save_total_cycles": "保存累计值",
+        "clear": "清除",
+        "add_brand": "添加品牌",
+        "add_appliance": "添加家电"
     },
     "note": {
         "off_delay": {
@@ -384,7 +387,8 @@
         "community_store": "社区商店",
         "online_account": "社区商店与在线功能",
         "import_power_history": "导入功率历史",
-        "service_status": "保养状态"
+        "service_status": "保养状态",
+        "online_account_tab": "在线与社区"
     },
     "health": {
         "fair": "配置文件质量尚可",
@@ -524,7 +528,8 @@
         "pg_tile_matched_tip": "正确归属到已知程序的周期",
         "pg_time_left": "剩余时间",
         "pg_weak_match": "弱匹配",
-        "phase_name": "名称",
+        "phase_name": "阶段名称",
+        "name": "名称",
         "phase_timeline": "阶段时间线",
         "power": "功率",
         "profile": "配置文件",
@@ -1096,7 +1101,9 @@
         "odometer_intro": "此累计值只会增加。删除某条周期记录不会改变它，并且它会在保存的历史记录上限之外继续累加，因此保养提醒始终准确。",
         "odometer_correct_hint": "如果 WashData 记录了从未发生的运行，或者设备在安装 WashData 之前已经运行过周期，请设置此值。",
         "no_reminders_set": "尚未设置保养提醒。",
-        "toast_program_armed": "已为下一个周期设置程序：{program}"
+        "toast_program_armed": "已为下一个周期设置程序：{program}",
+        "toast_range_required": "请设置有效的起始/结束范围。",
+        "no_profiles_option": "（暂无配置文件，请添加）"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1672,6 +1679,10 @@
         "unload_track_without_door": {
             "label": "手动确认卸载",
             "doc": "在既没有门传感器实体也没有卸载确认实体的设备上运行卸载提醒，改为通过您自己的自动化来确认卸载：按下 \"标记为已卸载\" 按钮实体，或调用 ha_washdata.mark_unloaded 服务。已设置门传感器实体时将忽略此项，因为它已经提供了该信号。"
+        },
+        "notify_icon_color": {
+            "label": "通知颜色",
+            "doc": "此家电通知使用的强调色，让洗衣机、烘干机和洗碗机一眼就能区分开。iOS 会为图标以及锁定屏幕和灵动岛上的实时活动进度条着色。Android 也会收到同样的颜色，但如何处理取决于手机：有些会为图标着色，也有不少（尤其是 Samsung One UI）完全忽略。十六进制（例如 #03A9F4）两者都支持。留空则使用平台默认值。"
         }
     },
     "setting_group": {
@@ -1765,7 +1776,7 @@
         "all_statuses": "所有状态",
         "ambiguous": "不明确",
         "auto_detect": "自动检测",
-        "clear": "正常",
+        "clear": "明确",
         "completed": "已完成",
         "fine_tuning": "正在微调…",
         "force_stopped": "强制停止",
@@ -1928,7 +1939,9 @@
         "unlabel_failed": "取消标记失败：{error}",
         "odometer_saved": "已保存累计周期数",
         "odometer_save_failed": "无法保存累计值：{error}",
-        "contrib_device_changed": "已添加到社区商店，但表单打开期间所选设备已更改。请在设置中选择。"
+        "contrib_device_changed": "已添加到社区商店，但表单打开期间所选设备已更改。请在设置中选择。",
+        "store_pick_profile_share": "请选择要分享到的配置文件",
+        "remove_failed": "移除失败：{error}"
     },
     "suggestion": {
         "both_agree": "WashData建议",

@@ -257,7 +257,10 @@
         "hist_scan": "Ciklusok keresése",
         "hist_import_n": "{n} ciklus importálása",
         "hist_goto_cycles": "Ciklusok megjelenítése",
-        "save_total_cycles": "Összesítés mentése"
+        "save_total_cycles": "Összesítés mentése",
+        "clear": "Törlés",
+        "add_brand": "Márka hozzáadása",
+        "add_appliance": "Készülék hozzáadása"
     },
     "note": {
         "off_delay": {
@@ -384,7 +387,8 @@
         "community_store": "Közösségi bolt",
         "online_account": "Közösségi bolt és online funkciók",
         "import_power_history": "Teljesítményelőzmények importálása",
-        "service_status": "Szerviz állapota"
+        "service_status": "Szerviz állapota",
+        "online_account_tab": "Online és közösség"
     },
     "health": {
         "fair": "Elfogadható profilminőség",
@@ -524,7 +528,8 @@
         "pg_tile_matched_tip": "Ismert programhoz helyesen hozzárendelt ciklusok",
         "pg_time_left": "Hátralévő idő",
         "pg_weak_match": "Gyenge egyezés",
-        "phase_name": "Név",
+        "phase_name": "Fázis neve",
+        "name": "Név",
         "phase_timeline": "Fázisidővonal",
         "power": "Teljesítmény",
         "profile": "Profil",
@@ -1096,7 +1101,9 @@
         "odometer_intro": "Ez az összesítés csak növekedhet. Egy ciklusbejegyzés törlése nem változtatja meg, és a tárolt előzmények korlátján túl is számol tovább, így a szerviz emlékeztetők pontosak maradnak.",
         "odometer_correct_hint": "Akkor állítsa be, ha a WashData olyan futást rögzített, amely soha nem történt meg, vagy ha a készülék már a WashData telepítése előtt is futtatott ciklusokat.",
         "no_reminders_set": "Még nincs beállítva szerviz emlékeztető.",
-        "toast_program_armed": "Program beállítva a következő ciklushoz: {program}"
+        "toast_program_armed": "Program beállítva a következő ciklushoz: {program}",
+        "toast_range_required": "Adjon meg érvényes Ettől/Eddig tartományt.",
+        "no_profiles_option": "(még nincs profil, adjon hozzá egyet)"
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1640,6 +1647,10 @@
         "unload_track_without_door": {
             "label": "Kirakodás kézi megerősítése",
             "doc": "Futtatja a kirakodási emlékeztetőt olyan eszközön, amelyhez nincs Ajtóérzékelő entitás és nincs Kirakodást megerősítő entitás, a kirakodást pedig saját automatizálásból erősíti meg: nyomja meg a „Megjelölés kirakodottként” gombentitást, vagy hívja meg a ha_washdata.mark_unloaded szolgáltatást. Figyelmen kívül marad, ha be van állítva Ajtóérzékelő entitás, mert az már megadja ezt a jelzést."
+        },
+        "notify_icon_color": {
+            "label": "Értesítés színe",
+            "doc": "Kiemelőszín ennek a készüléknek az értesítéseihez, így a mosógép, a szárítógép és a mosogatógép egyetlen pillantással megkülönböztethető. Az iOS az ikont, valamint az Élő tevékenység folyamatjelzőjét színezi a Zárolási képernyőn és a Dynamic Islanden. Az Android ugyanazt a színt kapja meg, de hogy mit kezd vele, az a telefontól függ: egyesek az ikont színezik, sok készülék pedig (különösen a Samsung One UI) teljesen figyelmen kívül hagyja. Mindkettő érti a hexa kódot (pl. #03A9F4). Hagyja üresen a platform alapértelmezett beállításához."
         }
     },
     "setting_group": {
@@ -1733,7 +1744,7 @@
         "all_statuses": "Minden állapot",
         "ambiguous": "Kétértelmű",
         "auto_detect": "Automatikus felismerés",
-        "clear": "Világos",
+        "clear": "Egyértelmű",
         "completed": "Befejezve",
         "fine_tuning": "finomhangolás most…",
         "force_stopped": "Az erő megállt",
@@ -1896,7 +1907,9 @@
         "unlabel_done": "{count} ciklus címkéje eltávolítva",
         "unlabel_failed": "A címke eltávolítása sikertelen: {error}",
         "odometer_saved": "Összesített ciklusszám mentve",
-        "odometer_save_failed": "Nem sikerült menteni az összesítést: {error}"
+        "odometer_save_failed": "Nem sikerült menteni az összesítést: {error}",
+        "store_pick_profile_share": "Válassza ki a profilt, amelybe megosztja",
+        "remove_failed": "Az eltávolítás sikertelen: {error}"
     },
     "suggestion": {
         "both_agree": "A WashData javasolja",

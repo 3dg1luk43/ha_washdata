@@ -257,7 +257,10 @@
     "hist_scan": "Nach Zyklen suchen",
     "hist_import_n": "{n} Zyklen importieren",
     "hist_goto_cycles": "Zeig mir die Zyklen",
-    "save_total_cycles": "Gesamtzahl speichern"
+    "save_total_cycles": "Gesamtzahl speichern",
+    "clear": "Leeren",
+    "add_brand": "Marke hinzufügen",
+    "add_appliance": "Gerät hinzufügen"
   },
   "note": {
     "off_delay": {
@@ -384,7 +387,8 @@
     "community_store": "Community-Store",
     "online_account": "Community-Store und Onlinefunktionen",
     "import_power_history": "Leistungsverlauf importieren",
-    "service_status": "Wartungsstatus"
+    "service_status": "Wartungsstatus",
+    "online_account_tab": "Online & Community"
   },
   "health": {
     "fair": "Akzeptable Übereinstimmungsqualität",
@@ -529,7 +533,8 @@
     "pg_tile_matched_tip": "Zyklen, die korrekt einem bekannten Programm zugeordnet wurden",
     "pg_time_left": "Verbleibende Zeit",
     "pg_weak_match": "Schwache Übereinstimmung",
-    "phase_name": "Name",
+    "phase_name": "Phasenname",
+    "name": "Name",
     "phase_timeline": "Phasen-Zeitachse",
     "power": "Leistung",
     "profile": "Profil",
@@ -1096,7 +1101,9 @@
     "odometer_intro": "Diese Gesamtzahl steigt immer nur an. Das Löschen eines Zyklus-Eintrags ändert sie nicht, und sie zählt auch über die Grenze des gespeicherten Verlaufs hinaus weiter, damit Wartungserinnerungen korrekt bleiben.",
     "odometer_correct_hint": "Setzen Sie diesen Wert, wenn WashData einen Lauf erfasst hat, der nie stattgefunden hat, oder wenn das Gerät schon vor der Installation von WashData Zyklen absolviert hat.",
     "no_reminders_set": "Es sind noch keine Service-Erinnerungen eingerichtet.",
-    "toast_program_armed": "Programm für den nächsten Zyklus vorgemerkt: {program}"
+    "toast_program_armed": "Programm für den nächsten Zyklus vorgemerkt: {program}",
+    "toast_range_required": "Legen Sie einen gültigen Von/Bis-Bereich fest.",
+    "no_profiles_option": "(noch keine Profile, eines hinzufügen)"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
@@ -1672,6 +1679,10 @@
     "unload_track_without_door": {
       "label": "Entladung manuell bestätigen",
       "doc": "Führt die Entladeerinnerung auf einem Gerät ohne Türsensor-Entität und ohne Entladebestätigungs-Entität aus; die Entladung bestätigen Sie stattdessen aus Ihrer eigenen Automatisierung: die Schaltflächen-Entität \"Als entladen markieren\" drücken oder die Aktion ha_washdata.mark_unloaded aufrufen. Wird ignoriert, wenn eine Türsensor-Entität festgelegt ist, die das Signal bereits liefert."
+    },
+    "notify_icon_color": {
+      "label": "Benachrichtigungsfarbe",
+      "doc": "Akzentfarbe für die Benachrichtigungen dieses Geräts, damit Waschmaschine, Trockner und Geschirrspüler auf einen Blick unterscheidbar sind. iOS färbt das Symbol und den Fortschrittsbalken der Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. An Android wird dieselbe Farbe gesendet, aber was damit geschieht, entscheidet das Telefon: manche färben das Symbol ein, viele (insbesondere Samsung One UI) ignorieren sie ganz. Beide verstehen Hex-Werte (z. B. #03A9F4). Für den Plattformstandard lassen Sie das Feld leer."
     }
   },
   "setting_group": {
@@ -1765,7 +1776,7 @@
     "all_statuses": "Alle Status",
     "ambiguous": "Mehrdeutig",
     "auto_detect": "Automatische Erkennung",
-    "clear": "Klar",
+    "clear": "Eindeutig",
     "completed": "Abgeschlossen",
     "fine_tuning": "Jetzt Feinabstimmung…",
     "force_stopped": "Zwangsweise gestoppt",
@@ -2040,7 +2051,9 @@
     "unlabel_failed": "Entfernen der Beschriftung fehlgeschlagen: {error}",
     "odometer_saved": "Gesamtzahl der Zyklen gespeichert",
     "odometer_save_failed": "Gesamtzahl konnte nicht gespeichert werden: {error}",
-    "contrib_device_changed": "Zum Community-Store hinzugefügt, aber das Gerät wurde gewechselt, während das Formular offen war. Wählen Sie es in den Einstellungen aus."
+    "contrib_device_changed": "Zum Community-Store hinzugefügt, aber das Gerät wurde gewechselt, während das Formular offen war. Wählen Sie es in den Einstellungen aus.",
+    "store_pick_profile_share": "Wählen Sie ein Profil zum Teilen aus",
+    "remove_failed": "Entfernen fehlgeschlagen: {error}"
   },
   "trend": {
     "down": "Abwärtstrend",

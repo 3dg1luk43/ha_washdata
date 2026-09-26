@@ -257,7 +257,10 @@
     "hist_scan": "Sök efter cykler",
     "hist_import_n": "Importera {n} cykler",
     "hist_goto_cycles": "Visa mig cyklerna",
-    "save_total_cycles": "Spara total"
+    "save_total_cycles": "Spara total",
+    "clear": "Rensa",
+    "add_brand": "Lägg till märke",
+    "add_appliance": "Lägg till apparat"
   },
   "note": {
     "off_delay": {
@@ -384,7 +387,8 @@
     "community_store": "Gemenskapsbutik",
     "online_account": "Gemenskapsbutik och onlinefunktioner",
     "import_power_history": "Importera effekthistorik",
-    "service_status": "Servicestatus"
+    "service_status": "Servicestatus",
+    "online_account_tab": "Online & gemenskap"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -529,7 +533,8 @@
     "pg_tile_matched_tip": "Cykler som korrekt tillskrivits ett känt program",
     "pg_time_left": "Tid kvar",
     "pg_weak_match": "Svag matchning",
-    "phase_name": "Namn",
+    "phase_name": "Fasnamn",
+    "name": "Namn",
     "phase_timeline": "Fastidslinje",
     "power": "Effekt",
     "profile": "Profil",
@@ -1096,7 +1101,9 @@
     "odometer_intro": "Den här totalsumman kan bara öka. Att ta bort en cykelpost ändrar den inte, och den fortsätter räkna även utöver gränsen för sparad historik, så att servicepåminnelserna fortsätter stämma.",
     "odometer_correct_hint": "Ange detta om WashData har registrerat en körning som aldrig ägde rum, eller om apparaten redan hade kört cykler innan WashData installerades.",
     "no_reminders_set": "Inga servicepåminnelser är inställda än.",
-    "toast_program_armed": "Program valt för nästa cykel: {program}"
+    "toast_program_armed": "Program valt för nästa cykel: {program}",
+    "toast_range_required": "Ange ett giltigt Från/Till-intervall.",
+    "no_profiles_option": "(inga profiler ännu, lägg till en)"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
@@ -1672,6 +1679,10 @@
     "unload_track_without_door": {
       "label": "Bekräfta lossning manuellt",
       "doc": "Kör lossningspåminnelsen på en enhet utan Dörrsensorentitet och utan Lossningsbekräftelse-entitet, och bekräfta lossningen från din egen automation i stället: tryck på knappentiteten \"Markera som lossad\", eller anropa åtgärden ha_washdata.mark_unloaded. Ignoreras när en Dörrsensorentitet är angiven, eftersom den redan ger signalen."
+    },
+    "notify_icon_color": {
+      "label": "Meddelandefärg",
+      "doc": "Accentfärg för den här apparatens aviseringar, så att en tvättmaskin, en torktumlare och en diskmaskin går att skilja åt med en blick. iOS färgar ikonen och Liveaktivitetens förloppsindikator på den låsta skärmen och i Dynamic Island. Android får samma färg skickad till sig, men vad telefonen gör med den varierar: vissa färgar ikonen, och många (särskilt Samsung One UI) struntar helt i den. Båda förstår hex-värden (t.ex. #03A9F4). Lämna tomt för plattformens standard."
     }
   },
   "setting_group": {
@@ -1765,7 +1776,7 @@
     "all_statuses": "Alla statusar",
     "ambiguous": "Tvetydig",
     "auto_detect": "Autoidentifiera",
-    "clear": "Tydlig",
+    "clear": "Entydig",
     "completed": "Klar",
     "fine_tuning": "finjusterar nu…",
     "force_stopped": "Tvångsstoppad",
@@ -2040,7 +2051,9 @@
     "unlabel_failed": "Borttagning av märkning misslyckades: {error}",
     "odometer_saved": "Totalt antal cykler sparat",
     "odometer_save_failed": "Kunde inte spara totalen: {error}",
-    "contrib_device_changed": "Tillagd i gemenskapsbutiken, men apparaten byttes medan formuläret var öppet. Välj den i Inställningar."
+    "contrib_device_changed": "Tillagd i gemenskapsbutiken, men apparaten byttes medan formuläret var öppet. Välj den i Inställningar.",
+    "store_pick_profile_share": "Välj en profil att dela till",
+    "remove_failed": "Borttagning misslyckades: {error}"
   },
   "trend": {
     "down": "Nedåtgående trend",
