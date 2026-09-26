@@ -3651,7 +3651,21 @@ class ProfileStore:
             # which is what keeps it rare: measured over 420 cycles in 63 profiles
             # from the whole corpus it flags 5 cycles (1.2%) in 5 profiles (7.9%).
             for name, offenders in self._self_unmatchable_cycles().items():
-                worst = max(offenders, key=lambda o: abs(math.log(o["ratio"])))
+                # `ratio` is stored as `round(dur / avg, 3)`, so it lands on
+                # exactly 0.0 once `dur / avg < 0.0005` - reachable with a
+                # hand-set or corrupt `target_duration` over ~33 h against the
+                # 60 s floor `_self_unmatchable_cycles` applies. `math.log(0.0)`
+                # then raises ValueError into `compute_profile_advisories`'s own
+                # broad `except`, and the cost is wildly out of proportion to the
+                # cause: the handler returns [], so ONE outlier cycle removes
+                # every advisory for every profile - the `unmatchable` warnings
+                # appended above this loop included. Clamped only in the sort key,
+                # which just ranks "furthest from 1.0x"; the displayed ratio is
+                # left as measured.
+                worst = max(
+                    offenders,
+                    key=lambda o: abs(math.log(max(float(o["ratio"]), 1e-9))),
+                )
                 advisories.append({
                     "profile": name,
                     "severity": "warning",
