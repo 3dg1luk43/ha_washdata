@@ -57,7 +57,7 @@
     "auto_label_cycles_tip": "Asignar automáticamente nombres de perfil a ciclos sin etiquetar cuya confianza de coincidencia supera el umbral",
     "cancel": "Cancelar",
     "clear_debug": "Borrar datos de depuración",
-    "clear_splits": "Claro",
+    "clear_splits": "Borrar",
     "close": "Cerrar",
     "compare": "Comparar",
     "confirm": "Confirmar",
@@ -210,7 +210,9 @@
     "hist_import_n": "Importar {n} ciclos",
     "hist_goto_cycles": "Ver los ciclos",
     "save_total_cycles": "Guardar total",
-    "clear": "Borrar"
+    "clear": "Borrar",
+    "add_brand": "Añadir marca",
+    "add_appliance": "Añadir electrodoméstico"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -332,7 +334,8 @@
     "community_store": "Tienda de la comunidad",
     "online_account": "Tienda de la comunidad y funciones en línea",
     "import_power_history": "Importar historial de potencia",
-    "service_status": "Estado del mantenimiento"
+    "service_status": "Estado del mantenimiento",
+    "online_account_tab": "En línea y comunidad"
   },
   "health": {
     "fair": "Calidad de perfil aceptable",
@@ -472,7 +475,8 @@
     "pg_tile_matched_tip": "Ciclos correctamente atribuidos a un programa conocido",
     "pg_time_left": "Tiempo restante",
     "pg_weak_match": "Coincidencia débil",
-    "phase_name": "Nombre",
+    "phase_name": "Nombre de la fase",
+    "name": "Nombre",
     "phase_timeline": "Cronología de fases",
     "power": "Potencia",
     "profile": "Perfil",
@@ -1044,7 +1048,9 @@
     "toast_program_armed": "Programa preparado para el siguiente ciclo: {program}",
     "standby_above_stop_title": "Sigue consumiendo {idle} W cuando el ciclo ha terminado",
     "standby_above_stop_sub": "{n} de los últimos {total} ciclos. El Retardo de apagado solo empieza cuando la potencia baja del Umbral de parada ({stop} W), así que los ciclos terminan tarde o hay que detenerlos a mano.",
-    "advisory_duration_outlier": "{n} ciclo(s) etiquetados como '{name}' se alejan demasiado de su duración habitual para poder coincidir alguna vez con él (el peor: {ratio}x). Probablemente estén mal etiquetados, o una grabación captó dos ejecuciones. Vuelve a etiquetarlos o divídelos para que dejen de distorsionar la estimación de tiempo de este programa."
+    "advisory_duration_outlier": "{n} ciclo(s) etiquetados como '{name}' se alejan demasiado de su duración habitual para poder coincidir alguna vez con él (el peor: {ratio}x). Probablemente estén mal etiquetados, o una grabación captó dos ejecuciones. Vuelve a etiquetarlos o divídelos para que dejen de distorsionar la estimación de tiempo de este programa.",
+    "toast_range_required": "Establezca un rango Desde/Hasta válido",
+    "no_profiles_option": "(aún no hay perfiles, añade uno)"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
@@ -1717,7 +1723,7 @@
     "all_statuses": "Todos los estados",
     "ambiguous": "Ambiguo",
     "auto_detect": "Detección automática",
-    "clear": "Claro",
+    "clear": "Inequívoco",
     "completed": "Terminado",
     "fine_tuning": "afinando ahora...",
     "force_stopped": "Fuerza detenida",
@@ -1880,7 +1886,9 @@
     "unlabel_done": "Etiqueta quitada de {count} ciclo(s)",
     "unlabel_failed": "Error al quitar la etiqueta: {error}",
     "odometer_saved": "Total de ciclos guardado",
-    "odometer_save_failed": "No se pudo guardar el total: {error}"
+    "odometer_save_failed": "No se pudo guardar el total: {error}",
+    "store_pick_profile_share": "Elija un perfil en el que compartir",
+    "remove_failed": "Error al quitar: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomienda",

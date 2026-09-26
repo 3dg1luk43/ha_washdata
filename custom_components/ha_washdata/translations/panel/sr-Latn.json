@@ -258,7 +258,9 @@
     "hist_import_n": "Uvezi cikluse: {n}",
     "hist_goto_cycles": "Prikaži cikluse",
     "save_total_cycles": "Sačuvaj ukupan broj",
-    "clear": "Obriši"
+    "clear": "Obriši",
+    "add_brand": "Dodaj marku",
+    "add_appliance": "Dodaj uređaj"
   },
   "note": {
     "off_delay": {
@@ -385,7 +387,8 @@
     "community_store": "Prodavnica zajednice",
     "online_account": "Prodavnica zajednice i online funkcije",
     "import_power_history": "Uvoz istorije snage",
-    "service_status": "Status servisa"
+    "service_status": "Status servisa",
+    "online_account_tab": "Online i zajednica"
   },
   "health": {
     "fair": "Prihvatljiva kvaliteta profila",
@@ -526,7 +529,8 @@
     "pg_tile_matched_tip": "Ciklusi ispravno pripisani poznatom programu",
     "pg_time_left": "Preostalo vreme",
     "pg_weak_match": "Slabo poklapanje",
-    "phase_name": "Naziv",
+    "phase_name": "Naziv faze",
+    "name": "Naziv",
     "phase_timeline": "Vremenska osa faza",
     "power": "Snaga",
     "profile": "Profil",
@@ -1097,7 +1101,9 @@
     "odometer_intro": "Ovaj ukupan broj samo raste. Brisanje zapisa o ciklusu ga ne menja i nastavlja da broji i preko ograničenja sačuvane istorije, tako da podsetnici za servis ostaju tačni.",
     "odometer_correct_hint": "Postavite ovo ako je WashData zabeležio ciklus koji se nikada nije dogodio ili ako je uređaj već obavio cikluse pre instaliranja WashData.",
     "no_reminders_set": "Još nema postavljenih podsetnika za servis.",
-    "toast_program_armed": "Program podešen za sledeći ciklus: {program}"
+    "toast_program_armed": "Program podešen za sledeći ciklus: {program}",
+    "toast_range_required": "Postavite ispravan raspon Od/Do",
+    "no_profiles_option": "(nema profila, dodajte novi)"
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka okretanja nakon završetka radi smanjenja gužvanja.",
@@ -1738,7 +1744,7 @@
     "all_statuses": "Svi statusi",
     "ambiguous": "Višeznačan",
     "auto_detect": "Automatska detekcija",
-    "clear": "Jasno",
+    "clear": "Jednoznačan",
     "completed": "Završeno",
     "fine_tuning": "fino podešavanje…",
     "force_stopped": "Prisilno zaustavljeno",
@@ -2013,7 +2019,9 @@
     "unlabel_done": "Uklonjena oznaka sa {count} ciklus(a)",
     "unlabel_failed": "Uklanjanje oznake nije uspelo: {error}",
     "odometer_saved": "Ukupan broj ciklusa sačuvan",
-    "odometer_save_failed": "Nije moguće sačuvati ukupan broj: {error}"
+    "odometer_save_failed": "Nije moguće sačuvati ukupan broj: {error}",
+    "store_pick_profile_share": "Izaberite profil za deljenje",
+    "remove_failed": "Uklanjanje nije uspelo: {error}"
   },
   "trend": {
     "down": "Opadajući trend",

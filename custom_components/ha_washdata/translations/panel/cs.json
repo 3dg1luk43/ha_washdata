@@ -258,7 +258,9 @@
     "hist_import_n": "Importovat cykly: {n}",
     "hist_goto_cycles": "Zobrazit cykly",
     "save_total_cycles": "Uložit celkový počet",
-    "clear": "Vymazat"
+    "clear": "Vymazat",
+    "add_brand": "Přidat značku",
+    "add_appliance": "Přidat spotřebič"
   },
   "note": {
     "off_delay": {
@@ -385,7 +387,8 @@
     "community_store": "Komunitní obchod",
     "online_account": "Komunitní obchod a online funkce",
     "import_power_history": "Import historie výkonu",
-    "service_status": "Stav servisu"
+    "service_status": "Stav servisu",
+    "online_account_tab": "Online a komunita"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -526,7 +529,8 @@
     "pg_tile_matched_tip": "Cykly správně přiřazené ke známému programu",
     "pg_time_left": "Zbývající čas",
     "pg_weak_match": "Slabá shoda",
-    "phase_name": "Jméno",
+    "phase_name": "Název fáze",
+    "name": "Jméno",
     "phase_timeline": "Časová osa fází",
     "power": "Výkon",
     "profile": "Profil",
@@ -1097,7 +1101,9 @@
     "odometer_intro": "Tento celkový počet pouze roste. Smazání záznamu o cyklu jej nezmění a počítá dál i za limitem uložené historie, takže připomínky servisu zůstávají správné.",
     "odometer_correct_hint": "Nastavte, pokud WashData zaznamenala cyklus, který nikdy neproběhl, nebo pokud spotřebič už absolvoval cykly před instalací WashData.",
     "no_reminders_set": "Zatím nejsou nastaveny žádné připomínky servisu.",
-    "toast_program_armed": "Program nastaven pro další cyklus: {program}"
+    "toast_program_armed": "Program nastaven pro další cyklus: {program}",
+    "toast_range_required": "Nastavte platný rozsah Od/Do",
+    "no_profiles_option": "(zatím žádné profily, přidejte nový)"
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1738,7 +1744,7 @@
     "all_statuses": "Všechny stavy",
     "ambiguous": "Dvojznačný",
     "auto_detect": "Automatická detekce",
-    "clear": "Čistý",
+    "clear": "Jednoznačný",
     "completed": "Dokončeno",
     "fine_tuning": "teď dolaďuji…",
     "force_stopped": "Vynuceně zastaveno",
@@ -2013,7 +2019,9 @@
     "unlabel_done": "Odznačeno cyklů: {count}",
     "unlabel_failed": "Odznačení selhalo: {error}",
     "odometer_saved": "Celkový počet cyklů uložen",
-    "odometer_save_failed": "Celkový počet nelze uložit: {error}"
+    "odometer_save_failed": "Celkový počet nelze uložit: {error}",
+    "store_pick_profile_share": "Vyberte profil pro sdílení",
+    "remove_failed": "Odstranění selhalo: {error}"
   },
   "trend": {
     "down": "Klesající trend",

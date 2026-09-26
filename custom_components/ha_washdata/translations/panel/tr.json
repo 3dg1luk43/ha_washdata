@@ -258,7 +258,9 @@
         "hist_import_n": "{n} döngüyü içe aktar",
         "hist_goto_cycles": "Döngüleri göster",
         "save_total_cycles": "Toplamı Kaydet",
-        "clear": "Temizle"
+        "clear": "Temizle",
+        "add_brand": "Marka ekle",
+        "add_appliance": "Cihaz ekle"
     },
     "note": {
         "off_delay": {
@@ -385,7 +387,8 @@
         "community_store": "Topluluk Mağazası",
         "online_account": "Topluluk Mağazası ve çevrimiçi özellikler",
         "import_power_history": "Güç geçmişini içe aktar",
-        "service_status": "Bakım Durumu"
+        "service_status": "Bakım Durumu",
+        "online_account_tab": "Çevrimiçi ve Topluluk"
     },
     "health": {
         "fair": "Kabul edilebilir profil kalitesi",
@@ -525,7 +528,8 @@
         "pg_tile_matched_tip": "Bilinen bir programa doğru şekilde atfedilen döngüler",
         "pg_time_left": "Kalan süre",
         "pg_weak_match": "Zayıf eşleşme",
-        "phase_name": "Ad",
+        "phase_name": "Aşama Adı",
+        "name": "Ad",
         "phase_timeline": "Aşama zaman çizelgesi",
         "power": "Güç",
         "profile": "Profil",
@@ -1097,7 +1101,9 @@
         "odometer_intro": "Bu toplam yalnızca artar. Bir döngü kaydını silmek onu değiştirmez ve saklanan geçmiş sınırının ötesinde saymaya devam eder, böylece servis hatırlatıcıları doğru kalır.",
         "odometer_correct_hint": "WashData gerçekleşmemiş bir çalışma kaydettiyse veya cihaz WashData kurulmadan önce zaten döngü çalıştırmışsa bu değeri ayarlayın.",
         "no_reminders_set": "Henüz servis hatırlatıcısı ayarlanmadı.",
-        "toast_program_armed": "Program sonraki döngü için ayarlandı: {program}"
+        "toast_program_armed": "Program sonraki döngü için ayarlandı: {program}",
+        "toast_range_required": "Geçerli bir Başlangıç/Bitiş aralığı belirleyin",
+        "no_profiles_option": "(henüz profil yok, bir tane ekleyin)"
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1770,7 +1776,7 @@
         "all_statuses": "Tüm durumlar",
         "ambiguous": "Belirsiz",
         "auto_detect": "Otomatik algıla",
-        "clear": "Temiz",
+        "clear": "Net",
         "completed": "Tamamlandı",
         "fine_tuning": "ince ayar yapılıyor…",
         "force_stopped": "Zorla durduruldu",
@@ -1933,7 +1939,9 @@
         "unlabel_done": "{count} döngünün etiketi kaldırıldı",
         "unlabel_failed": "Etiket kaldırma başarısız: {error}",
         "odometer_saved": "Toplam döngü sayısı kaydedildi",
-        "odometer_save_failed": "Toplam kaydedilemedi: {error}"
+        "odometer_save_failed": "Toplam kaydedilemedi: {error}",
+        "store_pick_profile_share": "Paylaşılacak bir profil seçin",
+        "remove_failed": "Kaldırma başarısız: {error}"
     },
     "suggestion": {
         "both_agree": "WashData öneriyor",

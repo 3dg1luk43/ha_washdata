@@ -258,7 +258,9 @@
         "hist_import_n": "Importo {n} cikle",
         "hist_goto_cycles": "Shfaq ciklet",
         "save_total_cycles": "Ruaj totalin",
-        "clear": "Pastro"
+        "clear": "Pastro",
+        "add_brand": "Shto markë",
+        "add_appliance": "Shto pajisje"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -380,7 +382,8 @@
         "community_store": "Dyqani i Komunitetit",
         "online_account": "Dyqani i Komunitetit dhe veçoritë online",
         "import_power_history": "Importo historikun e fuqisë",
-        "service_status": "Statusi i mirëmbajtjes"
+        "service_status": "Statusi i mirëmbajtjes",
+        "online_account_tab": "Online dhe komuniteti"
     },
     "health": {
         "fair": "Cilësi e pranueshme e profilit",
@@ -520,7 +523,8 @@
         "pg_tile_matched_tip": "Cikle të atribuara saktë një programi të njohur",
         "pg_time_left": "Koha e mbetur",
         "pg_weak_match": "Përputhje e dobët",
-        "phase_name": "Emri",
+        "phase_name": "Emri i fazës",
+        "name": "Emri",
         "phase_timeline": "Kronologjia e fazave",
         "power": "Fuqia",
         "profile": "Profili",
@@ -1092,7 +1096,9 @@
         "toast_program_armed": "Programi u caktua për ciklin tjetër: {program}",
         "standby_above_stop_title": "Ende tërheq {idle} W kur cikli përfundoi",
         "standby_above_stop_sub": "{n} nga {total} ciklet e fundit. Vonesa e fikjes fillon vetëm pasi fuqia bie nën Pragun e ndalimit ({stop} W), prandaj ciklet përfundojnë me vonesë ose duhen ndalur me dorë.",
-        "advisory_duration_outlier": "{n} cikël(e) të etiketuar si '{name}' janë shumë larg kohëzgjatjes së tij të zakonshme për t'u përputhur ndonjëherë me të (rasti më i keq: {ratio}x). Ka të ngjarë të jenë etiketuar gabimisht, ose një regjistrim i vetëm ka kapur dy ekzekutime. Rietiketojini ose ndajini, që të mos e shtrembërojnë më vlerësimin e kohës së këtij programi."
+        "advisory_duration_outlier": "{n} cikël(e) të etiketuar si '{name}' janë shumë larg kohëzgjatjes së tij të zakonshme për t'u përputhur ndonjëherë me të (rasti më i keq: {ratio}x). Ka të ngjarë të jenë etiketuar gabimisht, ose një regjistrim i vetëm ka kapur dy ekzekutime. Rietiketojini ose ndajini, që të mos e shtrembërojnë më vlerësimin e kohës së këtij programi.",
+        "toast_range_required": "Vendosni një interval të vlefshëm Nga/Deri",
+        "no_profiles_option": "(asnjë profil, shtoni një)"
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1896,7 +1902,9 @@
         "unlabel_done": "U hoq etiketa nga {count} cikël(e)",
         "unlabel_failed": "Heqja e etiketës dështoi: {error}",
         "odometer_saved": "Totali i cikleve u ruajt",
-        "odometer_save_failed": "Nuk u ruajt dot totali: {error}"
+        "odometer_save_failed": "Nuk u ruajt dot totali: {error}",
+        "store_pick_profile_share": "Zgjidhni një profil për ndarje",
+        "remove_failed": "Heqja dështoi: {error}"
     },
     "suggestion": {
         "both_agree": "WashData rekomandon",

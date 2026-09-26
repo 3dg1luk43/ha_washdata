@@ -258,7 +258,9 @@
     "hist_import_n": "Importuj cykle: {n}",
     "hist_goto_cycles": "Pokaż cykle",
     "save_total_cycles": "Zapisz łączną liczbę",
-    "clear": "Wyczyść"
+    "clear": "Wyczyść",
+    "add_brand": "Dodaj markę",
+    "add_appliance": "Dodaj urządzenie"
   },
   "note": {
     "off_delay": {
@@ -385,7 +387,8 @@
     "community_store": "Sklep społecznościowy",
     "online_account": "Sklep społecznościowy i funkcje online",
     "import_power_history": "Import historii mocy",
-    "service_status": "Status serwisu"
+    "service_status": "Status serwisu",
+    "online_account_tab": "Online i społeczność"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -526,7 +529,8 @@
     "pg_tile_matched_tip": "Cykle poprawnie przypisane do znanego programu",
     "pg_time_left": "Pozostały czas",
     "pg_weak_match": "Słabe dopasowanie",
-    "phase_name": "Nazwa",
+    "phase_name": "Nazwa fazy",
+    "name": "Nazwa",
     "phase_timeline": "Oś czasu faz",
     "power": "Moc",
     "profile": "Profil",
@@ -1097,7 +1101,9 @@
     "odometer_intro": "Ta łączna liczba tylko rośnie. Usunięcie zapisu cyklu jej nie zmienia, a licznik działa dalej także po przekroczeniu limitu przechowywanej historii, więc przypomnienia serwisowe pozostają prawidłowe.",
     "odometer_correct_hint": "Ustaw tę wartość, jeśli WashData zapisał cykl, który nigdy się nie odbył, albo jeśli urządzenie wykonało już cykle przed instalacją WashData.",
     "no_reminders_set": "Nie ustawiono jeszcze żadnych przypomnień serwisowych.",
-    "toast_program_armed": "Program ustawiony na następny cykl: {program}"
+    "toast_program_armed": "Program ustawiony na następny cykl: {program}",
+    "toast_range_required": "Ustaw prawidłowy zakres Od/Do",
+    "no_profiles_option": "(brak profili, dodaj nowy)"
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1738,7 +1744,7 @@
     "all_statuses": "Wszystkie statusy",
     "ambiguous": "Dwuznaczny",
     "auto_detect": "Automatyczne wykrywanie",
-    "clear": "Jasne",
+    "clear": "Jednoznaczny",
     "completed": "Zakończony",
     "fine_tuning": "teraz dostrajanie…",
     "force_stopped": "Wymuszone zatrzymanie",
@@ -2013,7 +2019,9 @@
     "unlabel_done": "Usunięto etykietę z {count} cykli",
     "unlabel_failed": "Usunięcie etykiety nie powiodło się: {error}",
     "odometer_saved": "Łączna liczba cykli zapisana",
-    "odometer_save_failed": "Nie udało się zapisać łącznej liczby: {error}"
+    "odometer_save_failed": "Nie udało się zapisać łącznej liczby: {error}",
+    "store_pick_profile_share": "Wybierz profil do udostępnienia",
+    "remove_failed": "Usuwanie nie powiodło się: {error}"
   },
   "trend": {
     "down": "Trend w dół",

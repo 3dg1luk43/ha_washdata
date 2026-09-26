@@ -210,7 +210,9 @@
     "hist_import_n": "Importar {n} ciclos",
     "hist_goto_cycles": "Ver os ciclos",
     "save_total_cycles": "Salvar total",
-    "clear": "Limpar"
+    "clear": "Limpar",
+    "add_brand": "Adicionar marca",
+    "add_appliance": "Adicionar eletrodoméstico"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -332,7 +334,8 @@
     "community_store": "Loja da comunidade",
     "online_account": "Loja da comunidade e recursos online",
     "import_power_history": "Importar histórico de potência",
-    "service_status": "Status da manutenção"
+    "service_status": "Status da manutenção",
+    "online_account_tab": "Online e comunidade"
   },
   "health": {
     "fair": "Qualidade de perfil aceitável",
@@ -472,7 +475,8 @@
     "pg_tile_matched_tip": "Ciclos atribuídos corretamente a um programa conhecido",
     "pg_time_left": "Tempo restante",
     "pg_weak_match": "Correspondência fraca",
-    "phase_name": "Nome",
+    "phase_name": "Nome da fase",
+    "name": "Nome",
     "phase_timeline": "Linha do tempo de fases",
     "power": "Potência",
     "profile": "Perfil",
@@ -1044,7 +1048,9 @@
     "toast_program_armed": "Programa preparado para o próximo ciclo: {program}",
     "standby_above_stop_title": "Ainda consumindo {idle} W quando o ciclo terminou",
     "standby_above_stop_sub": "{n} dos últimos {total} ciclos. O Atraso de Desligamento só começa quando a potência fica abaixo do Limite de Parada ({stop} W), então os ciclos terminam tarde ou precisam ser parados na mão.",
-    "advisory_duration_outlier": "{n} ciclo(s) rotulados como '{name}' estão longe demais da duração habitual dele para algum dia corresponderem (pior caso: {ratio}x). Provavelmente estão rotulados errado, ou uma gravação capturou duas execuções. Rotule-os novamente ou divida-os para que parem de distorcer a estimativa de tempo deste programa."
+    "advisory_duration_outlier": "{n} ciclo(s) rotulados como '{name}' estão longe demais da duração habitual dele para algum dia corresponderem (pior caso: {ratio}x). Provavelmente estão rotulados errado, ou uma gravação capturou duas execuções. Rotule-os novamente ou divida-os para que parem de distorcer a estimativa de tempo deste programa.",
+    "toast_range_required": "Defina um intervalo De/Até válido",
+    "no_profiles_option": "(sem perfis, adicione um)"
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -1685,7 +1691,7 @@
     "all_statuses": "Todos os status",
     "ambiguous": "Ambíguo",
     "auto_detect": "Detectar automaticamente",
-    "clear": "Limpar",
+    "clear": "Inequívoco",
     "completed": "Concluído",
     "fine_tuning": "ajustando…",
     "force_stopped": "Parado forçadamente",
@@ -1848,7 +1854,9 @@
     "unlabel_done": "Rótulo removido de {count} ciclo(s)",
     "unlabel_failed": "Falha ao remover o rótulo: {error}",
     "odometer_saved": "Total de ciclos salvo",
-    "odometer_save_failed": "Não foi possível salvar o total: {error}"
+    "odometer_save_failed": "Não foi possível salvar o total: {error}",
+    "store_pick_profile_share": "Escolha um perfil no qual compartilhar",
+    "remove_failed": "Falha ao remover: {error}"
   },
   "suggestion": {
     "both_agree": "WashData recomenda",
