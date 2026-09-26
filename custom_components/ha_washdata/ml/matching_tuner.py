@@ -181,39 +181,32 @@ def _snaps(
     ``used_dt`` via ``_get_cached_sample_segment``, so index *i* is the same
     elapsed time on both sides.
 
-    The template is the training cycle whose duration is closest to the profile
-    mean, rather than an average of all of them. (Measured difference between
-    those two choices on the full corpus: about -0.7 points, i.e. nil - but that
-    figure is an inline claim with no committed harness behind it, so treat it
-    the way register item 329 says to treat the 427-cycle numbers.)
+    **The template follows production's three-way rule, in production's order**
+    (`ProfileStore.async_match_profile`), which is register item 356 closing item
+    347(e): a pinned golden cycle's own sharp trace, else the DTW-warped ENVELOPE
+    AVERAGE once the pool holds >= 2 cycles, else the single representative
+    sample - which is also the safety net when an envelope will not build. The
+    middle branch is the common case, and it is the one that used to be missing:
+    scoring one representative cycle where live matching scores the envelope
+    average can favour weights that win on a trace nothing is matched against.
 
-    **This is NOT what production scores against, and the gap is deliberate for
-    now (register item 347, deferred).** `ProfileStore.async_match_profile` picks
-    a template in three ways: a pinned golden cycle's own trace, else the
-    ENVELOPE AVERAGE once a profile has >= 2 confirmed cycles, else a single
-    sample cycle. Only the first and last resemble what this function builds, and
-    the middle one is the common case. So the tuner can favour weights that win
-    on a representative trace and lose on the curve live matching actually uses.
+    **Cost, and the trap inside it.** An envelope is built from traces, so it does
+    not depend on the weights being tuned and survives the whole grid search plus
+    every holdout call; and leave-one-out excludes exactly ONE cycle, so only the
+    target's own profile gets a different template while every other profile
+    keeps the full-pool one, shared by every target. Distinct templates are
+    therefore `profiles + targets`, not `folds x profiles` - measured on the worst
+    real export in `cycle_data/` (12 profiles with >= 2 cycles, 63 targets), 75
+    templates at 79 ms a DTW warp, ~5.9 s one-off. **That figure only holds if the
+    cache outlives one `_top1` call.** It did not at first: `_top1` built a fresh
+    cache and is called ~59 times (1 base + 48 grid + 10 holdout), which measured
+    16.1 s -> 360.6 s on a real export. Hence the `cache` argument threaded
+    through the whole run - nothing in it depends on `cfg`. Do not re-scope it.
 
-    Making it faithful is **cheaper than this docstring used to claim**, and the
-    claim is worth correcting because it was the stated reason for deferring. It
-    said "an envelope rebuild per fold, O(folds x profiles)". Two things make
-    that wrong: an envelope is built from traces, so it does not depend on the
-    config being tuned and survives the whole grid search; and leave-one-out
-    excludes ONE cycle, so only the target's OWN profile has a different
-    template - every other profile keeps the full-pool one, shared by every
-    target. Distinct templates are therefore `profiles + targets`, not
-    `folds x profiles`. Measured on the worst real export in `cycle_data/` (12
-    profiles with >= 2 cycles, 63 targets): **75 templates, ~5.9 s** of DTW at
-    79 ms a warp, against the 756 / ~60 s the old wording implied - affordable
-    inside a background training job.
+    The cheap approximation (averaging the pool's regridded curves without the
+    DTW warp) is measured WORSE and is not what `_envelope_avg` does.
 
-    What still argues for care rather than speed: the cheap approximation
-    (averaging the pool's regridded curves) is the option already measured WORSE
-    above, so a faithful version has to build the real warped envelope and honour
-    production's three-way template rule (pinned golden cycle, else envelope
-    average once >= 2 cycles are confirmed, else the single sample). The
-    exposure is bounded meanwhile: `tune_matching_config` can
+    The exposure is bounded regardless: `tune_matching_config` can
     only move the bounded scoring weights, never structural matching behaviour,
     `revert_matching_config` undoes it, and promotion is gated on **held-out
     top-1 accuracy**: `tune_matching_config` promotes only when the tuned config

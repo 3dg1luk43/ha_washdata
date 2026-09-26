@@ -134,3 +134,77 @@ def test_an_old_selective_import_arms_the_marker() -> None:
 
     assert _export_predates_banked_tail_repair({"version": 12}) is True
     assert _export_predates_banked_tail_repair({"version": 13}) is False
+
+
+# --------------------------------------------------------------------------
+# round 28: the second per-entry WS lock was never released on unload
+# --------------------------------------------------------------------------
+def test_unload_releases_both_per_entry_ws_locks() -> None:
+    """`_entry_options_lock` is a second per-entry lock built exactly like the
+    write lock, and `async_unload_entry` popped only the write one - so every
+    removed config entry left an asyncio.Lock in `hass.data` for the lifetime of
+    the process. Asserted on source: the pop sits inside a long unload coroutine
+    that needs a fully built entry to reach."""
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "__init__.py"
+    ).read_text()
+    assert "hass.data.get(_WS_WRITE_LOCKS_KEY, {}).pop(entry.entry_id, None)" in src
+    assert "hass.data.get(_WS_OPTIONS_LOCKS_KEY, {}).pop(entry.entry_id, None)" in src
+
+
+def test_the_two_lock_keys_are_distinct() -> None:
+    """Popping the same key twice would look like a fix and change nothing."""
+    from custom_components.ha_washdata.ws_api import (
+        _WS_OPTIONS_LOCKS_KEY,
+        _WS_WRITE_LOCKS_KEY,
+    )
+
+    assert _WS_OPTIONS_LOCKS_KEY != _WS_WRITE_LOCKS_KEY
+
+
+# --------------------------------------------------------------------------
+# round 28: three docs describing pre-item-355/356/353 behaviour
+# --------------------------------------------------------------------------
+def test_the_end_gate_comment_does_not_claim_a_fixed_ratio() -> None:
+    """Item 355 made the bar device-resolved (0.90 for washers), so "never fires
+    before 1.05x expected" became false for exactly the device type the change
+    was made for."""
+    import inspect
+
+    from custom_components.ha_washdata import cycle_detector
+
+    src = inspect.getsource(cycle_detector)
+    assert "never fires before 1.05x expected" not in src
+    assert "resolve_end_gate_late_ratio" in src
+
+
+def test_the_tuner_docstring_describes_the_implemented_rule() -> None:
+    """Item 356 implemented the three-way template rule; the docstring still
+    called it deferred, which would tell a maintainer item 347 is open."""
+    import inspect
+
+    from custom_components.ha_washdata.ml import matching_tuner
+
+    doc = inspect.getdoc(matching_tuner._snaps) or ""
+    assert "deferred" not in doc
+    assert "duration is closest to the profile" not in doc
+    assert "three-way" in doc
+
+
+def test_the_repair_docstring_admits_it_rewrites_reference_cycles() -> None:
+    """Item 353 put `reference_cycles` in scope, golden ones included. The first
+    paragraph still said only `past_cycles` is touched, which is the paragraph a
+    maintainer reads first."""
+    import inspect
+
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+    doc = inspect.getdoc(ProfileStore.async_repair_banked_tails) or ""
+    assert "Only ``past_cycles`` is touched" not in doc
+    assert "reference_cycles" in doc
+    assert "golden" in doc
