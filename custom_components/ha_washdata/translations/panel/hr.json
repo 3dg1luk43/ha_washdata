@@ -1644,7 +1644,7 @@
     },
     "notify_icon_color": {
       "label": "Boja obavijesti",
-      "doc": "Naglasna boja obavijesti ovog uređaja, kako bi se perilica rublja, sušilica i perilica posuđa razlikovale na prvi pogled. Android oboji samu obavijest; iOS oboji ikonu i traku napretka Live Activity na zaključanom zaslonu i u Dynamic Island. Obje platforme razumiju Hex (npr. #03A9F4). Ostavite prazno za zadanu boju platforme."
+      "doc": "Naglasna boja obavijesti ovog uređaja, kako bi se perilica rublja, sušilica i perilica posuđa razlikovale na prvi pogled. iOS oboji ikonu i traku napretka Live Activity na zaključanom zaslonu i u Dynamic Island. Android dobiva istu boju, ali što će s njom učiniti ovisi o telefonu: neki oboje ikonu, a mnogi (osobito Samsung One UI) je potpuno zanemaruju. Obje platforme razumiju Hex (npr. #03A9F4). Ostavite prazno za zadanu boju platforme."
     }
   },
   "setting_group": {

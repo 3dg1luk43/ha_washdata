@@ -1644,7 +1644,7 @@
         },
         "notify_icon_color": {
             "label": "Értesítés színe",
-            "doc": "Kiemelőszín ennek a készüléknek az értesítéseihez, így a mosógép, a szárítógép és a mosogatógép egyetlen pillantással megkülönböztethető. Az Android az értesítést színezi; az iOS az ikont, valamint az Élő tevékenység folyamatjelzőjét színezi a Zárolási képernyőn és a Dynamic Islanden. Mindkettő érti a hexa kódot (pl. #03A9F4). Hagyja üresen a platform alapértelmezett beállításához."
+            "doc": "Kiemelőszín ennek a készüléknek az értesítéseihez, így a mosógép, a szárítógép és a mosogatógép egyetlen pillantással megkülönböztethető. Az iOS az ikont, valamint az Élő tevékenység folyamatjelzőjét színezi a Zárolási képernyőn és a Dynamic Islanden. Az Android ugyanazt a színt kapja meg, de hogy mit kezd vele, az a telefontól függ: egyesek az ikont színezik, sok készülék pedig (különösen a Samsung One UI) teljesen figyelmen kívül hagyja. Mindkettő érti a hexa kódot (pl. #03A9F4). Hagyja üresen a platform alapértelmezett beállításához."
         }
     },
     "setting_group": {

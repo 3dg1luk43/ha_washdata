@@ -1676,7 +1676,7 @@
     },
     "notify_icon_color": {
       "label": "Ilmoituksen väri",
-      "doc": "Korostusväri tämän laitteen ilmoituksille, jotta pesukone, kuivausrumpu ja astianpesukone erottuvat toisistaan yhdellä silmäyksellä. Android värittää ilmoituksen; iOS värittää kuvakkeen ja Liveseurannan edistymispalkin lukitulla näytöllä ja Dynamic Islandissa. Molemmat ymmärtävät heksakoodin (esim. #03A9F4). Jätä tyhjäksi alustan oletusta varten."
+      "doc": "Korostusväri tämän laitteen ilmoituksille, jotta pesukone, kuivausrumpu ja astianpesukone erottuvat toisistaan yhdellä silmäyksellä. iOS värittää kuvakkeen ja Liveseurannan edistymispalkin lukitulla näytöllä ja Dynamic Islandissa. Androidille lähetetään sama väri, mutta puhelin päättää, mitä se sillä tekee: jotkin värittävät kuvakkeen ja monet (erityisesti Samsung One UI) jättävät sen kokonaan huomiotta. Molemmat ymmärtävät heksakoodin (esim. #03A9F4). Jätä tyhjäksi alustan oletusta varten."
     }
   },
   "setting_group": {

@@ -1644,7 +1644,7 @@
     },
     "notify_icon_color": {
       "label": "Barva obvestila",
-      "doc": "Poudarna barva obvestil te naprave, da so pralni stroj, sušilni stroj in pomivalni stroj razpoznavni na prvi pogled. Android obarva samo obvestilo; iOS obarva ikono in vrstico napredka Live Activity na zaklenjenem zaslonu in v Dynamic Island. Obe platformi razumeta Hex (npr. #03A9F4). Pustite prazno za privzeto barvo platforme."
+      "doc": "Poudarna barva obvestil te naprave, da so pralni stroj, sušilni stroj in pomivalni stroj razpoznavni na prvi pogled. iOS obarva ikono in vrstico napredka Live Activity na zaklenjenem zaslonu in v Dynamic Island. Android prejme enako barvo, a kaj bo z njo naredil, je odvisno od telefona: nekateri obarvajo ikono, mnogi (zlasti Samsung One UI) pa jo povsem prezrejo. Obe platformi razumeta Hex (npr. #03A9F4). Pustite prazno za privzeto barvo platforme."
     }
   },
   "setting_group": {

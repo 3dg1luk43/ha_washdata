@@ -1676,7 +1676,7 @@
     },
     "notify_icon_color": {
       "label": "Teavituse Värv",
-      "doc": "Rõhuvärv selle seadme teavitustele, et pesumasin, kuivati ja nõudepesumasin oleksid ühe pilguga eristatavad. Android värvib teavituse; iOS värvib ikooni ja Live Activity edenemisriba lukustuskuval ning Dynamic Islandis. Mõlemad mõistavad heksakoodi (nt #03A9F4). Platvormi vaikeseade jaoks jätke tühjaks."
+      "doc": "Rõhuvärv selle seadme teavitustele, et pesumasin, kuivati ja nõudepesumasin oleksid ühe pilguga eristatavad. iOS värvib ikooni ja Live Activity edenemisriba lukustuskuval ning Dynamic Islandis. Androidile saadetakse sama värv, kuid mida sellega tehakse, sõltub telefonist: mõni värvib ikooni ja paljud (eriti Samsung One UI) eiravad seda täielikult. Mõlemad mõistavad heksakoodi (nt #03A9F4). Platvormi vaikeseade jaoks jätke tühjaks."
     }
   },
   "setting_group": {

@@ -1644,7 +1644,7 @@
     },
     "notify_icon_color": {
       "label": "Pranešimo spalva",
-      "doc": "Akcentinė spalva šio prietaiso pranešimams, kad skalbimo mašiną, džiovintuvą ir indaplovę būtų galima atskirti iš pirmo žvilgsnio. Android nuspalvina pranešimą; iOS nuspalvina piktogramą ir Live Activity eigos juostą užrakto ekrane bei Dynamic Island. Abi platformos supranta hex kodą (pvz., #03A9F4). Palikite tuščią, kad būtų naudojama numatytoji platformos spalva."
+      "doc": "Akcentinė spalva šio prietaiso pranešimams, kad skalbimo mašiną, džiovintuvą ir indaplovę būtų galima atskirti iš pirmo žvilgsnio. iOS nuspalvina piktogramą ir Live Activity eigos juostą užrakto ekrane bei Dynamic Island. Android siunčiama ta pati spalva, tačiau ką su ja daryti, sprendžia pats telefonas: vieni nuspalvina piktogramą, o daugelis (ypač Samsung One UI) ją visiškai ignoruoja. Abi platformos supranta hex kodą (pvz., #03A9F4). Palikite tuščią, kad būtų naudojama numatytoji platformos spalva."
     }
   },
   "setting_group": {

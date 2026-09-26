@@ -1591,7 +1591,7 @@
     },
     "notify_icon_color": {
       "label": "Cor da Notificação",
-      "doc": "Cor de destaque para as notificações deste eletrodoméstico, para distinguir de relance uma lavadora, uma secadora e uma lava-louças. O Android colore a notificação; o iOS colore o ícone e a barra de progresso da Atividade ao Vivo na Tela Bloqueada e na Dynamic Island. Ambos entendem o formato hexadecimal (por exemplo, #03A9F4). Deixe em branco para o padrão da plataforma."
+      "doc": "Cor de destaque para as notificações deste eletrodoméstico, para distinguir de relance uma lavadora, uma secadora e uma lava-louças. O iOS colore o ícone e a barra de progresso da Atividade ao Vivo na Tela Bloqueada e na Dynamic Island. O Android recebe a mesma cor, mas o que ele faz com ela depende do celular: alguns colorem o ícone e muitos (em especial o Samsung One UI) a ignoram por completo. Ambos entendem o formato hexadecimal (por exemplo, #03A9F4). Deixe em branco para o padrão da plataforma."
     }
   },
   "setting_group": {

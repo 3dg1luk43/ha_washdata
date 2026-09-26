@@ -1644,7 +1644,7 @@
     },
     "notify_icon_color": {
       "label": "Boja obaveštenja",
-      "doc": "Akcentna boja obaveštenja ovog uređaja, kako bi se mašina za pranje veša, mašina za sušenje i mašina za pranje sudova razlikovale na prvi pogled. Android boji samo obaveštenje; iOS boji ikonu i traku napretka Live Activity na zaključanom ekranu i u Dynamic Island. Obe platforme razumeju Hex (npr. #03A9F4). Ostavite prazno za podrazumevanu boju platforme."
+      "doc": "Akcentna boja obaveštenja ovog uređaja, kako bi se mašina za pranje veša, mašina za sušenje i mašina za pranje sudova razlikovale na prvi pogled. iOS boji ikonu i traku napretka Live Activity na zaključanom ekranu i u Dynamic Island. Android dobija istu boju, ali šta će s njom uraditi zavisi od telefona: neki oboje ikonu, a mnogi (naročito Samsung One UI) je potpuno ignorišu. Obe platforme razumeju Hex (npr. #03A9F4). Ostavite prazno za podrazumevanu boju platforme."
     }
   },
   "setting_group": {

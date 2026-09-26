@@ -316,7 +316,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_icon', label: 'Notification Icon', type: 'text', def: '',
         doc: 'The small icon shown on the notification (e.g. mdi:washing-machine). Android draws it in the status bar; iOS shows it in place of the app icon, and needs the companion app 2026.8 or newer. Leave blank for the platform default.' },
       { key: 'notify_icon_color', label: 'Notification Colour', type: 'color', def: '', placeholder: '#03A9F4',
-        doc: 'Accent colour for this appliance\'s notifications, so a washer, a dryer and a dishwasher are tellable apart at a glance. Android tints the notification; iOS tints the icon and the Live Activity progress bar on the Lock Screen and in the Dynamic Island. Hex (e.g. #03A9F4) is understood by both. Leave blank for the platform default.' },
+        doc: 'Accent colour for this appliance\'s notifications, so a washer, a dryer and a dishwasher are tellable apart at a glance. iOS tints the icon and the Live Activity progress bar on the Lock Screen and in the Dynamic Island. Android is sent the same colour, but what it does with it is up to the phone: some tint the icon, and many (Samsung One UI especially) ignore it entirely. Hex (e.g. #03A9F4) is understood by both. Leave blank for the platform default.' },
       { key: 'notify_start_message', label: 'Start Message', type: 'textarea', def: '{device} started.',
         doc: `Body sent when a cycle starts. Template variables: ${_NOTIFY_VARS}.` },
       { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration}m.', basic: true,
