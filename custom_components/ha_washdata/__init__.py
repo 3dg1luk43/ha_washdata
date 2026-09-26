@@ -1534,9 +1534,17 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if _cancelled_tasks:
             await asyncio.gather(*_cancelled_tasks, return_exceptions=True)
 
-        # Release the per-entry write lock so it doesn't block the next setup.
-        from .ws_api import _WS_WRITE_LOCKS_KEY, async_clear_history_import
+        # Release the per-entry locks so they don't block the next setup. BOTH of
+        # them: `_entry_options_lock` is a second per-entry lock created the same
+        # way, and dropping only the write lock left one asyncio.Lock per removed
+        # entry in hass.data for the lifetime of the process.
+        from .ws_api import (
+            _WS_OPTIONS_LOCKS_KEY,
+            _WS_WRITE_LOCKS_KEY,
+            async_clear_history_import,
+        )
         hass.data.get(_WS_WRITE_LOCKS_KEY, {}).pop(entry.entry_id, None)
+        hass.data.get(_WS_OPTIONS_LOCKS_KEY, {}).pop(entry.entry_id, None)
 
         # Drop any staged history import (uploaded CSV text or a finished scan's
         # traces). Nothing else owns that memory, so without this an abandoned upload

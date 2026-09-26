@@ -2308,9 +2308,19 @@ class CycleDetector:
                 # `end_gate_eval.py` rather than a throwaway script.
                 #
                 # Asymmetric and bounded, in the same spirit as _keep_tail_cap: it
-                # can only ever shorten, never fires before 1.05x expected, keeps the
-                # user's explicit `off_delay` as the floor (only the blind prior
-                # shrinks), and is inert when nothing matched.
+                # can only ever shorten, keeps the user's explicit `off_delay` as
+                # the floor (only the blind prior shrinks), and is inert when
+                # nothing matched. The bar it waits for is DEVICE-RESOLVED, not a
+                # fixed 1.05x (register item 355): `resolve_end_gate_late_ratio`
+                # returns 0.90 for `washing_machine` / `washer_dryer` and
+                # `END_GATE_LATE_RATIO` (1.05) for everything else - so on a washer
+                # the shortening starts BEFORE the expected end. That is the point:
+                # a washer's programme is load-adaptive, so a run sits below its
+                # profile mean about half the time by definition and the median
+                # washer reaches only 0.83 of a 1.05 bar, which put the rule out of
+                # reach for the device type that needed it most. Early ends stayed
+                # at 0.00% for washers at every ratio measured; the dishwashers,
+                # which do produce early ends below 1.0, keep 1.05.
                 # Gated on the SAME guards Smart Termination respects. The rule
                 # keys on `_expected_duration`, so it must not fire while the
                 # matcher says that duration is in doubt: `_match_prefix_ambiguous`

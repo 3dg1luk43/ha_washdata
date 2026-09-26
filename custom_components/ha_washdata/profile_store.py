@@ -5775,11 +5775,14 @@ class ProfileStore:
           when that span is not trustworthy, rather than truncating a real drying
           phase on no evidence.
 
-        Only ``past_cycles`` is touched, and within it only cycles recorded as
-        ``TerminationReason.SMART``. ``backfill_cycles`` were replayed from raw
-        history and never went through Smart Termination at all, so they cannot
-        carry a banked tail; a user-stopped, unattributed, or hand-corrected cycle
-        is left alone for the reasons given at the filter.
+        ``past_cycles`` AND ``reference_cycles`` are scanned - see the item-353
+        paragraph below for why the second list is in scope, and note that this
+        means the repair CAN rewrite cycles marked ``golden``. Within both, only
+        cycles recorded as ``TerminationReason.SMART`` are touched.
+        ``backfill_cycles`` were replayed from raw history and never went through
+        Smart Termination at all, so they cannot carry a banked tail; a
+        user-stopped, unattributed, or hand-corrected cycle is left alone for the
+        reasons given at the filter.
 
         **``reference_cycles`` are NOT all community templates (register item
         353).** `async_import_data_selective` defaults `cycle_destination` to
