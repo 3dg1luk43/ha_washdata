@@ -3673,7 +3673,13 @@ class ProfileStore:
                     "message": (
                         f"{len(offenders)} cycle(s) labelled '{name}' are too far "
                         f"from its usual length to ever match it (worst: "
-                        f"{worst['ratio']:.1f}x). They are probably mislabelled, or "
+                        # Two decimals, not one: the values that reach this
+                        # advisory are by definition the ones far from 1.0, and
+                        # `.1f` collapsed the informative end of that range - a
+                        # cycle at 0.04x its profile rendered as "0.0x", which
+                        # states the cycle had no length and reads like a bug.
+                        # Real corpus cycles run as short as 0.148x (item 311).
+                        f"{worst['ratio']:.2f}x). They are probably mislabelled, or "
                         "one recording captured two runs. Re-label or split them so "
                         "they stop skewing this program's time estimate."
                     ),
@@ -3681,7 +3687,9 @@ class ProfileStore:
                     "message_params": {
                         "name": name,
                         "n": len(offenders),
-                        "ratio": f"{worst['ratio']:.1f}",
+                        # Same format as the English fallback above, so a
+                        # localized render and the fallback cannot disagree.
+                        "ratio": f"{worst['ratio']:.2f}",
                     },
                     "cycle_ids": [o["id"] for o in offenders if o.get("id")],
                 })

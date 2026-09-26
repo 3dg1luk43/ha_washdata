@@ -7703,13 +7703,37 @@ class WashDataManager:
             # mobile start card is delivered and then swept up by the handover
             # exactly as it was before, and every other target simply keeps its
             # notification.
+            # SPLIT the queue at the last START; do not pull STARTs forward.
+            # Round 32 hoisted them to the front, which silently reordered every
+            # lifecycle-tagged entry queued BEFORE one - and FINISH survives the
+            # `_clear_live_progress_notification` purge (which drops LIVE, START
+            # and `pre_complete`, not FINISH). So `[FINISH(A), START(B), LIVE(B)]`
+            # is reachable: nobody home, cycle A ends, cycle B starts. Hoisting
+            # sent START(B) first, cleared the tag, and then delivered FINISH(A)
+            # AFTER it, leaving "cycle A finished" pinned to the lifecycle tag for
+            # the whole of cycle B while B's own start card had already been
+            # cleared. Delivering in order gets it right for free: FINISH(A)
+            # lands, START(B) replaces it on the same tag, and the handover then
+            # clears the one card that is left.
+            _last_start = max(
+                (
+                    i
+                    for i, e in enumerate(pending)
+                    if e.get("event_type") == NOTIFY_EVENT_START
+                ),
+                default=-1,
+            )
+            _head = pending[: _last_start + 1]
             for entry in [
-                e for e in pending if e.get("event_type") == NOTIFY_EVENT_START
+                e for e in _head if e.get("event_type") != NOTIFY_EVENT_LIVE
             ]:
                 _deliver(entry)
+            # A LIVE entry sitting before that START (possible across cycles, since
+            # the dedup only re-appends within one queue) still belongs after the
+            # clear, with the rest of the tail.
             pending = [
-                e for e in pending if e.get("event_type") != NOTIFY_EVENT_START
-            ]
+                e for e in _head if e.get("event_type") == NOTIFY_EVENT_LIVE
+            ] + pending[_last_start + 1 :]
             self._hand_over_lifecycle_to_live_activity()
             handover_done = True
 

@@ -269,7 +269,13 @@ def test_the_zero_ratio_case_is_actually_reachable() -> None:
 
 
 def test_a_normal_outlier_still_ranks_by_distance_from_one() -> None:
-    """The clamp must not disturb ordinary ranking."""
+    """The clamp must not disturb ordinary ranking.
+
+    The expected string is "0.09", not "0.1": round 35 widened the display to two
+    decimals because `.1f` collapsed the informative end of the range (0.04x read
+    as "0.0x", i.e. "this cycle had no length"). Under the old format this
+    assertion could not tell 0.09 from 0.12, which is the distinction it exists
+    to make."""
     st = _advisory_store(avg_duration=1000.0)
     st.iter_evidence_cycles = lambda: iter(
         [
@@ -284,7 +290,8 @@ def test_a_normal_outlier_still_ranks_by_distance_from_one() -> None:
 
     out = [a for a in st.compute_profile_advisories() if a["code"] == "duration_outlier"]
 
-    assert out and out[0]["message_params"]["ratio"] == "0.1"
+    assert out and out[0]["message_params"]["ratio"] == "0.09"
+    assert "0.09x" in out[0]["message"], "fallback and param must agree"
 
 
 # --------------------------------------------------------------------------
@@ -563,3 +570,68 @@ def test_the_shutdown_docstring_no_longer_claims_both_tags_are_cleared() -> None
     doc = inspect.getdoc(WashDataManager._clear_live_progress_notification) or ""
     assert "so both tags are cleared outright" not in doc
     assert "_CYCLE_IN_PROGRESS_STATES" in doc
+
+
+# --------------------------------------------------------------------------
+# round 35: hoisting START reordered the FINISH entry queued before it
+# --------------------------------------------------------------------------
+def test_a_previous_cycles_finish_card_is_not_left_pinned_by_the_next_start() -> None:
+    """Round 32 pulled START entries to the FRONT, which silently reordered every
+    lifecycle-tagged entry queued before one. FINISH survives the
+    `_clear_live_progress_notification` purge (it drops LIVE, START and
+    `pre_complete`, not FINISH), so `[FINISH(A), START(B), LIVE(B)]` is reachable:
+    nobody home, cycle A ends, cycle B starts.
+
+    Hoisting sent START(B) first, cleared the tag, then delivered FINISH(A) AFTER
+    it - leaving "cycle A finished" pinned to the lifecycle tag for the whole of
+    cycle B, with B's own start card already cleared. Delivering in order fixes it
+    for free: FINISH(A) lands, START(B) replaces it on the same tag, and the
+    handover clears the single card that remains."""
+    m = _flush_mgr([
+        {"message": "A finished", "event_type": "cycle_finish"},
+        {"message": "B started", "event_type": "cycle_start"},
+        {"message": "live", "event_type": "cycle_live", "extra_vars": {"progress": 5}},
+    ])
+
+    m._flush_pending_notifications(None, None)
+
+    clear_at = next(i for i, e in enumerate(m.log) if e[0] == "clear")
+    finish_at = m.log.index(("deliver", "cycle_finish"))
+    start_at = m.log.index(("deliver", "cycle_start"))
+    assert finish_at < start_at < clear_at, (
+        "queue order must be preserved and both must precede the clear, "
+        f"got {m.log}"
+    )
+
+
+def test_a_reminder_after_the_start_still_survives_the_clear() -> None:
+    """The split must not undo round 31: only entries up to the last START go
+    before the handover."""
+    m = _flush_mgr([
+        {"message": "A finished", "event_type": "cycle_finish"},
+        {"message": "B started", "event_type": "cycle_start"},
+        {"message": "nearly done", "event_type": "pre_complete"},
+        {"message": "live", "event_type": "cycle_live", "extra_vars": {"progress": 90}},
+    ])
+
+    m._flush_pending_notifications(None, None)
+
+    clear_at = next(i for i, e in enumerate(m.log) if e[0] == "clear")
+    assert m.log.index(("deliver", "cycle_finish")) < clear_at
+    assert m.log.index(("deliver", "cycle_start")) < clear_at
+    assert m.log.index(("deliver", "pre_complete")) > clear_at
+
+
+def test_a_live_entry_before_the_last_start_still_waits_for_the_clear() -> None:
+    """The dedup only re-appends within one queue, so a LIVE can precede a later
+    cycle's START. It still belongs after the handover."""
+    m = _flush_mgr([
+        {"message": "live", "event_type": "cycle_live", "extra_vars": {"progress": 40}},
+        {"message": "B started", "event_type": "cycle_start"},
+    ])
+
+    m._flush_pending_notifications(None, None)
+
+    clear_at = next(i for i, e in enumerate(m.log) if e[0] == "clear")
+    assert m.log.index(("deliver", "cycle_start")) < clear_at
+    assert m.log.index(("deliver", "cycle_live")) > clear_at
