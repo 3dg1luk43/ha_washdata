@@ -315,6 +315,8 @@ const _SETTINGS_SECTIONS = [
         doc: `Notification title. Template variables: ${_NOTIFY_VARS}.` },
       { key: 'notify_icon', label: 'Notification Icon', type: 'text', def: '',
         doc: 'The small icon shown on the notification (e.g. mdi:washing-machine). Android draws it in the status bar; iOS shows it in place of the app icon, and needs the companion app 2026.8 or newer. Leave blank for the platform default.' },
+      { key: 'notify_icon_color', label: 'Notification Colour', type: 'color', def: '', placeholder: '#03A9F4',
+        doc: 'Accent colour for this appliance\'s notifications, so a washer, a dryer and a dishwasher are tellable apart at a glance. Android tints the notification; iOS tints the icon and the Live Activity progress bar on the Lock Screen and in the Dynamic Island. Hex (e.g. #03A9F4) is understood by both. Leave blank for the platform default.' },
       { key: 'notify_start_message', label: 'Start Message', type: 'textarea', def: '{device} started.',
         doc: `Body sent when a cycle starts. Template variables: ${_NOTIFY_VARS}.` },
       { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration}m.', basic: true,
@@ -1223,6 +1225,19 @@ button.wd-profile-card { display: block; }
 .wd-combo-item:hover, .wd-combo-item.kbd { background: var(--secondary-background-color); }
 .wd-combo-row { display: flex; gap: 6px; align-items: center; }
 .wd-combo-row .wd-combo { flex: 1 1 auto; }
+/* Colour field: swatch + hex text box + clear (#454) */
+.wd-colorfield { display: flex; gap: 6px; align-items: center; width: 100%; }
+.wd-colorfield input[type="text"] { flex: 1 1 auto; min-width: 0; }
+.wd-color-sw { flex: 0 0 auto; width: 34px; height: 34px; padding: 2px; cursor: pointer;
+  border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md);
+  background: var(--secondary-background-color); }
+.wd-color-sw::-webkit-color-swatch-wrapper { padding: 0; }
+.wd-color-sw::-webkit-color-swatch { border: none; border-radius: 4px; }
+.wd-color-sw::-moz-color-swatch { border: none; border-radius: 4px; }
+.wd-color-clear { flex: 0 0 auto; width: 30px; height: 34px; border-radius: var(--wd-radius-md);
+  border: 1px solid var(--divider-color); background: var(--secondary-background-color);
+  color: var(--secondary-text-color); font-size: 1.1em; line-height: 1; cursor: pointer; }
+.wd-color-clear:hover { color: var(--primary-text-color); }
 .wd-addbtn { flex: 0 0 auto; width: 34px; height: 34px; border-radius: var(--wd-radius-md); border: 1px solid var(--divider-color); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: 1.25em; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .wd-addbtn:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
 .wd-loglvl { font-weight: 700; margin-right: 6px; }
@@ -1411,6 +1426,26 @@ function _fmtDuration(s) {
 function _fmtPower(w) {
   if (w == null) return '-';
   return w >= 100 ? `${Math.round(w)} W` : `${w.toFixed(1)} W`;
+}
+// Watt label for a chart axis / grid line. #453: a fixed Math.round() prints "0W"
+// on every tick of a standby trace, so an appliance idling at 0.3 W got three
+// identical zero labels next to a perfectly legible curve. The decimal count
+// follows the distance between ticks rather than the value, so the labels always
+// resolve one grid step (capped at 4 decimals to keep them inside the axis gutter).
+function _fmtAxisW(v, step) {
+  const s = Math.abs(step || v || 0);
+  const dec = s > 0 ? Math.min(4, Math.max(0, Math.ceil(-Math.log10(s)) + 1)) : 0;
+  return `${Number(v.toFixed(dec))}W`;
+}
+// Round grid step (1/2/2.5/5 x 10^n) covering `span` in about `divisions` lines.
+// Scale free, so it gives 500 W steps on a 2 kW cycle and 0.1 W steps on a standby
+// tail, and always lands on a value that reads as a round number.
+function _niceStep(span, divisions) {
+  const raw = Math.abs(span) / Math.max(1, divisions);
+  if (!(raw > 0) || !isFinite(raw)) return 1;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const norm = raw / mag;
+  return (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
 }
 function _fmtEnergy(kwh) {
   if (kwh == null) return '-';
@@ -1630,6 +1665,11 @@ function _valueAt(pts, x) {
   return pts[pts.length - 1][1];
 }
 
+// A full `#rrggbb` value, which is the only form `<input type="color">` accepts.
+// Anything else the user types (a CSS name, a short #rgb) stays in the text box and
+// simply leaves the swatch showing the placeholder colour.
+const _COLOR_HEX_RE = /^#[0-9a-fA-F]{6}$/;
+
 // Build one form field group. `f` is a schema field; opts are resolved by caller.
 function _field(f, value, extra) {
   extra = extra || {};
@@ -1714,6 +1754,19 @@ function _field(f, value, extra) {
     const rows = timers.map((t, i) => mkRow(t, i)).join('');
     input = `<div class="wd-timerlist" data-opt="${key}" data-ftype="timerlist">${rows}` +
       `<button type="button" class="wd-btn wd-btn-sm wd-btn-secondary wd-timer-add">${_esc(tAddTimer)}</button></div>`;
+  } else if (f.type === 'color') {
+    // A native <input type="color"> cannot express "unset" - it always reports a
+    // colour - so the text box stays the stored value and the swatch only writes
+    // into it. Clearing the text box is how the user goes back to the platform
+    // default. Only the text box carries data-opt, so the swatch is never collected.
+    const ph = f.placeholder ? ` placeholder="${_esc(f.placeholder)}"` : '';
+    const swatch = _COLOR_HEX_RE.test(String(v)) ? String(v) : (f.placeholder || '#03A9F4');
+    const clearLbl = extra.t ? extra.t('btn.clear', {}, 'Clear') : 'Clear';
+    input = `<div class="wd-colorfield">` +
+      `<input type="color" class="wd-color-sw" value="${_esc(swatch)}" aria-label="${_esc(f.label)}" tabindex="-1">` +
+      `<input type="text" data-opt="${key}" data-ftype="color" value="${_esc(v)}" autocomplete="off" spellcheck="false"${ph}>` +
+      `<button type="button" class="wd-color-clear" aria-label="${_esc(clearLbl)}" title="${_esc(clearLbl)}">×</button>` +
+      `</div>`;
   } else if (f.type === 'entity') {
     const ph = f.placeholder ? ` placeholder="${_esc(f.placeholder)}"` : '';
     input = `<div class="wd-combo">` +
@@ -7729,13 +7782,17 @@ class HaWashdataPanel extends HTMLElement {
 
     // Grid lines (solid, not dashed)
     ctx.strokeStyle = 'rgba(127,127,127,0.12)'; ctx.lineWidth = dpr; ctx.setLineDash([]);
-    const gridWatts = [0.25, 0.5, 0.75, 1.0].map(f => Math.round(f * maxW / 100) * 100 || Math.round(f * maxW));
+    // #453: the old step was `round(f * maxW / 100) * 100`, which collapsed to a
+    // stack of 0 W lines below ~50 W peak and produced duplicate lines in between.
+    const gridStep = _niceStep(maxW, 5);
+    const gridWatts = [];
+    for (let i = 1; i * gridStep <= maxW * 1.0001; i++) gridWatts.push(i * gridStep);
     gridWatts.forEach(w => {
       const y = toY(w);
       if (y < padT || y > padT + powerH) return;
       ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cw - padR, y); ctx.stroke();
       ctx.fillStyle = txtCol; ctx.font = `${9*dpr}px sans-serif`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-      ctx.fillText(w + 'W', padL - 4*dpr, y);
+      ctx.fillText(_fmtAxisW(w, gridStep), padL - 4*dpr, y);
     });
 
     // Clip the plotting region so zoomed/panned curves never overflow the axes.
@@ -7857,7 +7914,9 @@ class HaWashdataPanel extends HTMLElement {
       ctx.setLineDash([]);
       ctx.fillStyle = color; ctx.beginPath(); ctx.arc(padL + (cw - padL - padR) * 0.06, y, 5*dpr, 0, Math.PI*2); ctx.fill();
       ctx.fillStyle = color; ctx.font = `bold ${9*dpr}px sans-serif`; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-      ctx.fillText(label + ' ' + Math.round(watts) + 'W', padL + 14*dpr, y - 2*dpr);
+      // #453: a 0.8 W stop threshold rounded to "1W", labelling the dashed line
+      // with a value the detector never uses.
+      ctx.fillText(label + ' ' + _fmtAxisW(watts), padL + 14*dpr, y - 2*dpr);
       ctx.restore();
     };
     drawThrLine(+threshStart, '#2a78d6', this._t('lbl.start', {}, 'Start'));
@@ -8008,7 +8067,7 @@ class HaWashdataPanel extends HTMLElement {
       ctx.fillStyle = '#e34948'; ctx.beginPath(); ctx.arc(hx, hy, 3.5*dpr, 0, Math.PI*2); ctx.fill();
       // Readout box.
       const fmtT = t => { const m = Math.floor(t/60); return `${m}:${String(Math.round(t%60)).padStart(2,'0')}`; };
-      const fmtW = w => w >= 1000 ? (w/1000).toFixed(2) + ' kW' : Math.round(w) + ' W';
+      const fmtW = w => w >= 1000 ? (w/1000).toFixed(2) + ' kW' : _fmtPower(w);
       const lines = [
         `${this._t('lbl.from_start', {}, 'From start')} ${fmtT(this._pgHoverT)}`,
         `${this._t('lbl.to_end', {}, 'To end')} ${fmtT(Math.max(0, totalDur - this._pgHoverT))}`,
@@ -8119,7 +8178,7 @@ class HaWashdataPanel extends HTMLElement {
     const phase = sp && sp.phase ? sp.phase : '—';
     const fmtTime = s => { const m = Math.floor(s/60); return m + ':' + String(Math.round(s%60)).padStart(2,'0'); };
     const fmtE = wh => wh >= 1000 ? (wh/1000).toFixed(2) + ' kWh' : wh.toFixed(0) + ' Wh';
-    const fmtP = w => w >= 1000 ? (w/1000).toFixed(1) + ' kW' : Math.round(w) + ' W';
+    const fmtP = w => w >= 1000 ? (w/1000).toFixed(1) + ' kW' : _fmtPower(w);
     const sr = this.shadowRoot;
     const $id = id => sr && sr.getElementById(id);
     const set = (id, v) => { const el = $id(id); if (el) el.textContent = v; };
@@ -9098,7 +9157,7 @@ class HaWashdataPanel extends HTMLElement {
     for (let i = 0; i <= 2; i++) {
       const yy = padT + (i / 2) * (ch - padT - padB);
       ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(cw - padR, yy); ctx.stroke();
-      ctx.fillText(Math.round(yMax * (1 - i / 2)) + 'W', padL - 4 * dpr, yy);
+      ctx.fillText(_fmtAxisW(yMax * (1 - i / 2), yMax / 2), padL - 4 * dpr, yy);
     }
 
     // Clip series/bands to the plot area so zoomed data doesn't bleed into margins.
@@ -9543,7 +9602,7 @@ class HaWashdataPanel extends HTMLElement {
     }
     if (wd.band) {
       const lo = _valueAt(wd.band.min, x), hi = _valueAt(wd.band.max, x);
-      if (lo != null && hi != null) lines.push(`${this._t('lbl.envelope', {}, 'Envelope')}: ${lo.toFixed(0)}–${hi.toFixed(0)} W`);
+      if (lo != null && hi != null) lines.push(`${this._t('lbl.envelope', {}, 'Envelope')}: ${lo.toFixed(hi < 100 ? 1 : 0)}–${hi.toFixed(hi < 100 ? 1 : 0)} W`);
     }
     // Anomaly detail when hovering inside a detected artifact span.
     (wd.artifacts || []).forEach(a => {
@@ -11866,11 +11925,40 @@ class HaWashdataPanel extends HTMLElement {
       const el = e.target && e.target.closest ? e.target.closest('[data-opt]') : null;
       if (el && el.dataset.opt) this._dirtyOptKeys.add(el.dataset.opt);
     };
+    // Colour field (#454): the swatch and the text box are two views of one value.
+    // Neither is inside the other, so the swatch has no data-opt for markDirty to
+    // find - it writes into the text box and marks that key dirty itself, the same
+    // way the suggestion "Use" buttons do for a programmatic write.
+    const syncColorField = (e) => {
+      const t = e.target;
+      if (!t || !t.closest) return;
+      const wrap = t.closest('.wd-colorfield');
+      if (!wrap) return;
+      const txt = wrap.querySelector('input[data-opt]');
+      const sw = wrap.querySelector('.wd-color-sw');
+      if (!txt || !sw) return;
+      if (t === sw) {
+        txt.value = String(sw.value).toUpperCase();
+        this._dirtyOptKeys.add(txt.dataset.opt);
+      } else if (t === txt && _COLOR_HEX_RE.test(txt.value.trim())) {
+        sw.value = txt.value.trim().toLowerCase();
+      }
+    };
     if (settingsForm) {
       settingsForm.addEventListener('submit', e => e.preventDefault());
       // Live conflict validation: re-check on any field change.
-      settingsForm.addEventListener('input', (e) => { markDirty(e); this._liveValidateSettings(sr); });
-      settingsForm.addEventListener('change', (e) => { markDirty(e); this._liveValidateSettings(sr); });
+      settingsForm.addEventListener('input', (e) => { syncColorField(e); markDirty(e); this._liveValidateSettings(sr); });
+      settingsForm.addEventListener('change', (e) => { syncColorField(e); markDirty(e); this._liveValidateSettings(sr); });
+      // Clear button on a colour field: blank means "platform default".
+      settingsForm.addEventListener('click', e => {
+        const btn = e.target.closest && e.target.closest('.wd-color-clear');
+        if (!btn) return;
+        const txt = btn.parentElement && btn.parentElement.querySelector('input[data-opt]');
+        if (!txt) return;
+        txt.value = '';
+        this._dirtyOptKeys.add(txt.dataset.opt);
+        this._liveValidateSettings(sr);
+      });
       // Conflict fix-button delegation: apply the fix then cascade any downstream conflicts.
       settingsForm.addEventListener('click', e => {
         const btn = e.target.closest('.wd-conflict-fix');

@@ -205,6 +205,15 @@ Each of these is unreachable from a mocked Home Assistant:
 
 ## Current known state
 
+**`smoke.sh` does not restart a box that is already up, so it can assert against
+stale code.** It only calls `up.sh` when the container is unreachable; Python is
+loaded once at startup, so a box left running from before your edit runs the OLD
+module while the bind mount shows the new source. The failure reads as a code
+bug: a newly added payload key is simply absent, and `docker exec ... grep` finds
+it in the file. Run `./hactl.py restart` (or `./smoke.sh --fresh`) after editing
+the integration and before trusting a run. Cost of learning this: one full
+12-minute run and a real feature reported as broken when it worked (#454).
+
 **Run `./smoke.sh --fresh` between comparison runs.** `setup-device` reuses an
 entry by name and `--type X` names the device `Test X`, so a washing-machine run
 followed by a dishwasher run leaves **both** devices in the box, driven from the

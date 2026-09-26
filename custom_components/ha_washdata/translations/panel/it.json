@@ -209,7 +209,8 @@
     "hist_scan": "Cerca cicli",
     "hist_import_n": "Importa {n} cicli",
     "hist_goto_cycles": "Mostrami i cicli",
-    "save_total_cycles": "Salva totale"
+    "save_total_cycles": "Salva totale",
+    "clear": "Cancella"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -1619,6 +1620,10 @@
     "unload_track_without_door": {
       "label": "Conferma scarico manualmente",
       "doc": "Esegue il promemoria di scarico su un dispositivo senza Entità sensore porta e senza Entità di conferma scarico, e lo scarico lo confermi tu dalla tua automazione: premi l'entità pulsante \"Segna come scaricato\" oppure chiama il servizio ha_washdata.mark_unloaded. Ignorato quando è impostata un'Entità sensore porta, che fornisce già il segnale."
+    },
+    "notify_icon_color": {
+      "label": "Colore notifica",
+      "doc": "Colore d'accento per le notifiche di questo elettrodomestico, così da distinguere a colpo d'occhio una lavatrice, un'asciugatrice e una lavastoviglie. Android colora la notifica; iOS colora l'icona e la barra di avanzamento dell'Attività in tempo reale sulla schermata di blocco e nella Dynamic Island. Il formato esadecimale (es. #03A9F4) è compreso da entrambi. Lascia vuoto per l'impostazione predefinita della piattaforma."
     }
   },
   "setting_group": {

@@ -181,6 +181,39 @@ async def main() -> int:
                 f"tags seen: {tags}",
             )
 
+        # #454: one configured colour, three companion-app keys, mobile only.
+        # A MagicMock accepts any payload, so the unit suite can prove the keys
+        # are BUILT but never that they survive a real notify service call; and
+        # `color` in particular is a documented Android key, so a schema that
+        # rejected it would only show up here.
+        colour_keys = ("color", "notification_icon_color", "progress_bar_color")
+        mobile = [r for r in titled if r["service"].startswith("mobile_app_")]
+        plain = [r for r in titled if not r["service"].startswith("mobile_app_")]
+        checks.check(
+            bool(mobile)
+            and all(
+                all((r.get("data") or {}).get(k) == "#4CAF50" for k in colour_keys)
+                for r in mobile
+            ),
+            f"the notification colour reached every mobile payload ({len(mobile)})",
+            "missing/wrong: "
+            + str([
+                {k: (r.get("data") or {}).get(k) for k in colour_keys}
+                for r in mobile
+                if any((r.get("data") or {}).get(k) != "#4CAF50" for k in colour_keys)
+            ][:3]),
+        )
+        checks.check(
+            all(
+                not any(k in (r.get("data") or {}) for k in colour_keys)
+                for r in plain
+            ),
+            "the colour never reached a non-mobile target",
+            "Strict-schema platforms received mobile-only colour keys: "
+            + str(sorted({r["service"] for r in plain
+                          if any(k in (r.get("data") or {}) for k in colour_keys)})),
+        )
+
         # The MATCHED live payload, which is what a user sees for most of a
         # cycle: the Android progress bar and countdown, and the iOS Live
         # Activity's content_state. Until the matcher fires, live updates carry

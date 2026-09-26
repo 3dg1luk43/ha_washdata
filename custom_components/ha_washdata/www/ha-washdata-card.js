@@ -867,7 +867,11 @@ class WashDataCard extends HTMLElement {
       if (flags.showPhase && vm.phase && vm.isActive) addChip(vm.phase);
       if (flags.showEnergy && vm.energyText) addChip(vm.energyText);
       if (flags.showEnergy && vm.costText) addChip(vm.costText);
-      if (vm.isRunning && vm.powerW !== null) addChip(Math.round(vm.powerW) + " W");
+      // #453: Math.round() printed "0 W" for an appliance drawing a fraction of a
+      // watt. Below 100 W one decimal is the difference between a readable value
+      // and a zero; above it the decimal is noise.
+      if (vm.isRunning && vm.powerW !== null)
+        addChip((vm.powerW >= 100 ? Math.round(vm.powerW) : vm.powerW.toFixed(1)) + " W");
       if (flags.showAnomaly && vm.anomaly) {
         const ratio = vm.anomaly.ratio ? " (" + Math.round((vm.anomaly.ratio - 1) * 100) + "%)" : "";
         addChip(this._t("card.running_long", null, "Running long") + ratio, true);

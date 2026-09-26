@@ -257,7 +257,8 @@
     "hist_scan": "Poišči cikle",
     "hist_import_n": "Uvozi cikle: {n}",
     "hist_goto_cycles": "Pokaži cikle",
-    "save_total_cycles": "Shrani skupno število"
+    "save_total_cycles": "Shrani skupno število",
+    "clear": "Počisti"
   },
   "note": {
     "off_delay": {
@@ -1640,6 +1641,10 @@
     "unload_track_without_door": {
       "label": "Ročna potrditev raztovarjanja",
       "doc": "Zažene opomnik za raztovarjanje na napravi brez Entitete senzorja vrat in brez Entitete potrditve raztovarjanja, raztovarjanje pa potrdite iz lastne avtomatizacije: pritisnite entiteto gumba „Označi kot raztovorjeno“ ali pokličite storitev ha_washdata.mark_unloaded. Prezrto, kadar je nastavljena Entiteta senzorja vrat, ki ta signal že zagotavlja."
+    },
+    "notify_icon_color": {
+      "label": "Barva obvestila",
+      "doc": "Poudarna barva obvestil te naprave, da so pralni stroj, sušilni stroj in pomivalni stroj razpoznavni na prvi pogled. Android obarva samo obvestilo; iOS obarva ikono in vrstico napredka Live Activity na zaklenjenem zaslonu in v Dynamic Island. Obe platformi razumeta Hex (npr. #03A9F4). Pustite prazno za privzeto barvo platforme."
     }
   },
   "setting_group": {
