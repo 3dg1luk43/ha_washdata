@@ -4127,9 +4127,20 @@ class HaWashdataPanel extends HTMLElement {
     // Inspect/Trim/Split/Review view in `mode` and the import wizards keep their
     // step in `step` - without those, switching view inside those dialogs kept
     // the previous view's offset, which is the same bug one level down.
-    return m
-      ? [m.type, m.name || m.cycleId || '', m.tab || m.mode || m.step || ''].join('|')
-      : '';
+    if (!m) return '';
+    // The identity must be STABLE for as long as the dialog is open, so it can
+    // never be read from an editable field. `profile-group` keys on `orig`
+    // (the group being edited, or null for a new one) rather than `name`: the
+    // `wd-pg-name` input writes every keystroke into `m.name` without a render,
+    // and the member-checkbox handler copies that value in again before it calls
+    // `_render()`. Keying on `name` therefore made ticking a member after typing
+    // look like navigation, so the scroll keys were dropped and the dialog jumped
+    // back to the top - the same wrong reset this helper exists to prevent, in the
+    // other direction.
+    const ident = m.type === 'profile-group'
+      ? (m.orig || '')
+      : (m.name || m.cycleId || '');
+    return [m.type, ident, m.tab || m.mode || m.step || ''].join('|');
   }
 
   _render() {

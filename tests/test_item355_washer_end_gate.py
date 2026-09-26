@@ -27,7 +27,10 @@ dishwasher.
 
 Scoped to washers rather than lowered globally because every early end in the
 global sweep was a DISHWASHER. At 0.90, washers only: median end lag
-24.74 -> 13.69 min, early ends 0.00%, splits unchanged, dishwashers identical.
+24.74 -> 16.92 min, early ends 0.00%, splits unchanged, dishwashers identical.
+(The first cut of this read 13.69, but ~3.2 min of that came from applying the
+0.90 ratio to an ambiguity-RAISED bar, which defeats the bar's purpose and was
+corrected in round 33 - see register item 364.)
 """
 from __future__ import annotations
 
@@ -87,3 +90,42 @@ def test_the_baseline_arm_of_the_harness_still_disables_the_rule() -> None:
     assert "_const.END_GATE_LATE_RATIO = 1e9" in src
     assert "_const.END_GATE_LATE_RATIO_BY_DEVICE = {}" in src
     assert "_cd.END_GATE_LATE_RATIO = 1e9" not in src
+
+
+def test_the_device_ratio_never_discounts_a_raised_ambiguity_bar() -> None:
+    """Register item 364, found by CodeRabbit round 33 on PR #448.
+
+    When the match is ambiguous and a longer candidate exists, `_bar` stops being
+    the expected duration and becomes the LONGEST PLAUSIBLE programme - raised
+    precisely to say "a much longer look-alike is still on the table, so past the
+    expected end does not mean done". Applying the washer's 0.90 to that would
+    shorten the wait 10% before the candidate it represents could even finish,
+    and on the shipped washer defaults that drops the wait from `min_off_gap` to
+    `max(off_delay, 300)`: one quiet interval from finalising mid-programme and
+    recording the rest as a second cycle, which is #288.
+
+    Item 355's measurement was taken against the expected duration and says
+    nothing about the raised case, so a raised bar keeps the original 1.05.
+    Asserted on source because reaching this branch needs a full detector in
+    ENDING with an ambiguous match and a populated element 12.
+    """
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "cycle_detector.py"
+    ).read_text()
+
+    # The raise and the ratio choice must be linked by the same flag.
+    assert "_bar_raised = True" in src
+    block = src[src.index("_late_ratio = ("):][:400]
+    assert "END_GATE_LATE_RATIO" in block
+    assert "_bar_raised" in block
+    assert "resolve_end_gate_late_ratio" in block
+
+    # The flag must be set where the bar is raised, not anywhere else.
+    raise_at = src.index("_bar = self._longest_candidate_duration")
+    flag_at = src.index("_bar_raised = True")
+    assert 0 < flag_at - raise_at < 120, "the flag must sit with the raise it describes"
