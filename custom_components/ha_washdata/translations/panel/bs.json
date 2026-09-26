@@ -258,7 +258,9 @@
         "hist_import_n": "Uvezi cikluse: {n}",
         "hist_goto_cycles": "Prikaži cikluse",
         "save_total_cycles": "Sačuvaj ukupan broj",
-        "clear": "Očisti"
+        "clear": "Očisti",
+        "add_brand": "Dodaj marku",
+        "add_appliance": "Dodaj uređaj"
     },
     "note": {
         "off_delay": {
@@ -385,7 +387,8 @@
         "community_store": "Zajednička trgovina",
         "online_account": "Zajednička trgovina i online funkcije",
         "import_power_history": "Uvoz historije snage",
-        "service_status": "Status servisa"
+        "service_status": "Status servisa",
+        "online_account_tab": "Online i zajednica"
     },
     "health": {
         "fair": "Prihvatljiva kvaliteta podudaranja",
@@ -526,7 +529,8 @@
         "pg_tile_matched_tip": "Ciklusi ispravno pripisani poznatom programu",
         "pg_time_left": "Preostalo vrijeme",
         "pg_weak_match": "Slabo podudaranje",
-        "phase_name": "Ime",
+        "phase_name": "Ime faze",
+        "name": "Ime",
         "phase_timeline": "Vremenska linija faza",
         "power": "Snaga",
         "profile": "Profil",
@@ -1097,7 +1101,9 @@
         "odometer_intro": "Ovaj ukupan broj samo raste. Brisanje zapisa o ciklusu ga ne mijenja i nastavlja se povećavati i nakon ograničenja sačuvane historije, tako da podsjetnici za servis ostaju tačni.",
         "odometer_correct_hint": "Postavite ovo ako je WashData zabilježio ciklus koji se nikada nije dogodio ili ako je uređaj već obavio cikluse prije instaliranja WashData.",
         "no_reminders_set": "Još nema postavljenih podsjetnika za servis.",
-        "toast_program_armed": "Program postavljen za sljedeći ciklus: {program}"
+        "toast_program_armed": "Program postavljen za sljedeći ciklus: {program}",
+        "toast_range_required": "Postavite ispravan raspon Od/Do",
+        "no_profiles_option": "(nema profila, dodajte novi)"
     },
     "phase_desc": {
         "anti_crease": "Povremena kratka spuštanja nakon završetka za smanjenje bora.",
@@ -1738,7 +1744,7 @@
         "all_statuses": "Svi statusi",
         "ambiguous": "Dvosmisleno",
         "auto_detect": "Automatsko otkrivanje",
-        "clear": "Jasno",
+        "clear": "Jednoznačno",
         "completed": "Završeno",
         "fine_tuning": "sada fino podešavanje…",
         "force_stopped": "Prisilno zaustavljeno",
@@ -2013,7 +2019,9 @@
         "unlabel_done": "Uklonjena oznaka s ciklusa: {count}",
         "unlabel_failed": "Uklanjanje oznake nije uspjelo: {error}",
         "odometer_saved": "Ukupan broj ciklusa je sačuvan",
-        "odometer_save_failed": "Nije moguće sačuvati ukupan broj: {error}"
+        "odometer_save_failed": "Nije moguće sačuvati ukupan broj: {error}",
+        "store_pick_profile_share": "Odaberite profil za dijeljenje",
+        "remove_failed": "Uklanjanje nije uspjelo: {error}"
     },
     "trend": {
         "down": "Opadajući trend",

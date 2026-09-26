@@ -5646,7 +5646,7 @@ class HaWashdataPanel extends HTMLElement {
           <input type="text" id="wd-store-brand" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
           <div class="wd-combo-drop" hidden></div>
         </div>
-        <button type="button" class="wd-addbtn" data-action="store-add-brand" title="${_esc(this._t('tip.add_brand', {}, 'Brand not listed? Add it to the community catalog'))}" aria-label="${_esc(this._t('tip.add_brand', {}, 'Add brand'))}">+</button>
+        <button type="button" class="wd-addbtn" data-action="store-add-brand" title="${_esc(this._t('tip.add_brand', {}, 'Brand not listed? Add it to the community catalog'))}" aria-label="${_esc(this._t('btn.add_brand', {}, 'Add brand'))}">+</button>
       </div></div>`;
   }
 
@@ -5701,7 +5701,7 @@ class HaWashdataPanel extends HTMLElement {
           <input type="text" id="wd-store-model" class="wd-combo-inp" data-opt="${key}" data-ftype="text" value="${_esc(val)}" placeholder="${ph}" autocomplete="off" spellcheck="false">
           <div class="wd-combo-drop" hidden></div>
         </div>
-        <button type="button" class="wd-addbtn" data-action="store-add-appliance" title="${_esc(this._t('tip.add_appliance', {}, 'Model not listed? Add your appliance to the community catalog'))}" aria-label="${_esc(this._t('tip.add_appliance', {}, 'Add appliance'))}">+</button>
+        <button type="button" class="wd-addbtn" data-action="store-add-appliance" title="${_esc(this._t('tip.add_appliance', {}, 'Model not listed? Add your appliance to the community catalog'))}" aria-label="${_esc(this._t('btn.add_appliance', {}, 'Add appliance'))}">+</button>
       </div>
       ${extra}${storeActions}</div>`;
   }
@@ -7354,7 +7354,7 @@ class HaWashdataPanel extends HTMLElement {
     const dev = this._devices[this._selIdx];
     if (!dev) return;
     const fromN = parseFloat(this._pgSweepFrom), toN = parseFloat(this._pgSweepTo);
-    if (isNaN(fromN) || isNaN(toN) || fromN === toN) { this._showToast(this._t('msg.toast_name_required', {}, 'Set a valid From/To range.'), 'error'); return; }
+    if (isNaN(fromN) || isNaN(toN) || fromN === toN) { this._showToast(this._t('msg.toast_range_required', {}, 'Set a valid From/To range.'), 'error'); return; }
     const steps = Math.max(2, Math.min(12, this._pgSweepSteps || 5));
     const values = Array.from({length: steps}, (_, i) => +(fromN + (toN - fromN) * i / (steps - 1)).toFixed(3));
     const param = this._pgSweepParam || 'off_delay';
@@ -8268,7 +8268,7 @@ class HaWashdataPanel extends HTMLElement {
         <p class="wd-info" style="margin-bottom:14px">${this._t('msg.phase_catalog_intro', {}, 'Named segments of a cycle (Pre-wash, Heating, Spin…). Assign them to a profile from its control panel.')}</p>
         ${newPhaseBtn}
         ${this._phases.length === 0 ? `<p class="wd-info">${this._t('msg.no_phases', {}, 'No phases defined.')}</p>`
-          : `<table class="wd-table"><thead><tr><th>${this._t('lbl.phase_name', {}, 'Name')}</th><th>${this._t('lbl.description', {}, 'Description')}</th>${actionsHeader}</tr></thead><tbody>${rows}</tbody></table>`}
+          : `<table class="wd-table"><thead><tr><th>${this._t('lbl.name', {}, 'Name')}</th><th>${this._t('lbl.description', {}, 'Description')}</th>${actionsHeader}</tr></thead><tbody>${rows}</tbody></table>`}
       </div>`;
   }
 
@@ -8767,7 +8767,7 @@ class HaWashdataPanel extends HTMLElement {
     const admin = this._isAdmin();
     const tabs = [['prefs', this._t('hdr.my_preferences', {}, 'My Preferences')]];
     if (admin) tabs.push(['panel', this._t('hdr.panel_settings', {}, 'Panel Settings')], ['access', this._t('hdr.access_control', {}, 'Access Control')]);
-    if (admin && this._constants && this._constants.storeOnlineAvailable) tabs.push(['online', this._t('hdr.online_account', {}, 'Online & Community')]);
+    if (admin && this._constants && this._constants.storeOnlineAvailable) tabs.push(['online', this._t('hdr.online_account_tab', {}, 'Online & Community')]);
     let tab = m.tab;
     if (!tabs.some(([id]) => id === tab)) tab = m.tab = 'prefs';
     const nav = tabs.map(([id, lbl]) => `<button class="wd-subtab ${tab === id ? 'active' : ''}" data-gtab="${id}">${lbl}</button>`).join('');
@@ -9912,7 +9912,7 @@ class HaWashdataPanel extends HTMLElement {
       const loading = m.profiles == null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
       const opts = names.length
         ? names.map(n => `<option value="${_esc(n)}" ${n === m.program ? 'selected' : ''}>${_esc(n)}</option>`).join('')
-        : `<option value="">${this._t('msg.no_profiles_yet', {}, '(no profiles yet - add one)')}</option>`;
+        : `<option value="">${this._t('msg.no_profiles_option', {}, '(no profiles yet - add one)')}</option>`;
       body = `<h2>${this._t('modal.store_share', {}, 'Share to community store')}</h2>
         <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_intro', {}, 'Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.')}</p>
         <div class="wd-field"><label>${this._t('lbl.profile', {}, 'Profile')}${loading}</label>
@@ -12614,7 +12614,7 @@ class HaWashdataPanel extends HTMLElement {
         }) };
       this._render();
     } else if (a === 'clear-debug') {
-      this._modal = { type: 'confirm', title: this._t('modal.clear_debug_title', {}, 'Clear Debug Data'), message: this._t('modal.clear_debug_msg', {}, 'Delete all stored debug traces?'), okLabel: this._t('status.clear', {}, 'Clear'),
+      this._modal = { type: 'confirm', title: this._t('modal.clear_debug_title', {}, 'Clear Debug Data'), message: this._t('modal.clear_debug_msg', {}, 'Delete all stored debug traces?'), okLabel: this._t('btn.clear', {}, 'Clear'),
         onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
       this._render();
     } else if (a === 'wipe-history') {
@@ -13283,7 +13283,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { notify_actions: [] } });
             this._opts = { ...this._opts, notify_actions: [] };
             this._showToast(this._t('toast.legacy_removed', {}, 'Legacy actions removed'));
-          } catch (e) { this._showToast(this._t('toast.delete_failed', {error: e.message || e}, 'Remove failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._t('toast.remove_failed', {error: e.message || e}, 'Remove failed: ' + (e.message || e)), 'error'); }
         } };
       this._render();
 
@@ -13875,7 +13875,7 @@ class HaWashdataPanel extends HTMLElement {
       if (action === 'store-share-ok') {
         const program = (sr.getElementById('wd-store-share-prog')?.value || '').trim();
         const description = (sr.getElementById('wd-store-share-desc')?.value || '').trim();
-        if (!program) { this._showToast(this._t('toast.store_pick_profile', {}, 'Pick a profile to share into'), 'error'); return; }
+        if (!program) { this._showToast(this._t('toast.store_pick_profile_share', {}, 'Pick a profile to share into'), 'error'); return; }
         await this._busyRun('store-share', async () => {
           try {
             const r = await this._ws({ type: `${_DOMAIN}/store_upload_cycle`, entry_id: eid, local_cycle_id: m.cycleId, program, description });

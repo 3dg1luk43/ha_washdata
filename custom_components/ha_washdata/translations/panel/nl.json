@@ -258,7 +258,9 @@
     "hist_import_n": "{n} cycli importeren",
     "hist_goto_cycles": "Toon me de cycli",
     "save_total_cycles": "Totaal opslaan",
-    "clear": "Wissen"
+    "clear": "Wissen",
+    "add_brand": "Merk toevoegen",
+    "add_appliance": "Apparaat toevoegen"
   },
   "note": {
     "off_delay": {
@@ -385,7 +387,8 @@
     "community_store": "Communitystore",
     "online_account": "Communitystore en onlinefuncties",
     "import_power_history": "Vermogensgeschiedenis importeren",
-    "service_status": "Onderhoudsstatus"
+    "service_status": "Onderhoudsstatus",
+    "online_account_tab": "Online & community"
   },
   "health": {
     "fair": "Acceptabele profielkwaliteit",
@@ -530,7 +533,8 @@
     "pg_tile_matched_tip": "Cycli die correct aan een bekend programma zijn toegewezen",
     "pg_time_left": "Resterende tijd",
     "pg_weak_match": "Zwakke match",
-    "phase_name": "Naam",
+    "phase_name": "Fasenaam",
+    "name": "Naam",
     "phase_timeline": "Fasetijdlijn",
     "power": "Vermogen",
     "profile": "Profiel",
@@ -1097,7 +1101,9 @@
     "odometer_intro": "Dit totaal loopt alleen omhoog. Een cyclusregistratie verwijderen verandert het niet, en het blijft doortellen voorbij de limiet van de opgeslagen geschiedenis, zodat serviceherinneringen juist blijven.",
     "odometer_correct_hint": "Stel dit in als WashData een draaibeurt heeft geregistreerd die nooit heeft plaatsgevonden, of als het apparaat al cycli had uitgevoerd voordat WashData werd geïnstalleerd.",
     "no_reminders_set": "Er zijn nog geen serviceherinneringen ingesteld.",
-    "toast_program_armed": "Programma klaargezet voor de volgende cyclus: {program}"
+    "toast_program_armed": "Programma klaargezet voor de volgende cyclus: {program}",
+    "toast_range_required": "Stel een geldig Van/Tot-bereik in.",
+    "no_profiles_option": "(nog geen profielen, voeg er een toe)"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: stille seconden na de verwachte duur voordat de wachttijd op het wegpompen aan het einde van de cyclus wordt vrijgegeven",
@@ -1770,7 +1776,7 @@
     "all_statuses": "Alle statussen",
     "ambiguous": "Ambigu",
     "auto_detect": "Automatische detectie",
-    "clear": "Duidelijk",
+    "clear": "Eenduidig",
     "completed": "Voltooid",
     "fine_tuning": "nu aan het finetunen...",
     "force_stopped": "Geforceerd gestopt",
@@ -2045,7 +2051,9 @@
     "unlabel_failed": "Label verwijderen mislukt: {error}",
     "odometer_saved": "Totaal aantal cycli opgeslagen",
     "odometer_save_failed": "Kan totaal niet opslaan: {error}",
-    "contrib_device_changed": "Toegevoegd aan de communitystore, maar er is van apparaat gewisseld terwijl het formulier openstond. Selecteer het bij Instellingen."
+    "contrib_device_changed": "Toegevoegd aan de communitystore, maar er is van apparaat gewisseld terwijl het formulier openstond. Selecteer het bij Instellingen.",
+    "store_pick_profile_share": "Kies een profiel om naar te delen",
+    "remove_failed": "Verwijderen mislukt: {error}"
   },
   "trend": {
     "down": "Trend naar beneden",

@@ -1072,3 +1072,65 @@ def test_changing_the_brand_clears_the_staged_model():
     listener = src[src.index("washdata-brand-created"):]
     listener = listener[: listener.index("washdata-profile-created")]
     assert "store_model: ''" in listener
+
+
+# --------------------------------------------------------------------------
+# PR #456 round 2: one translation key must not carry two different strings
+# --------------------------------------------------------------------------
+
+def test_no_panel_key_is_used_for_two_different_strings():
+    """``_t(key, vars, fallback)`` resolves ONE translated value per key, so a key
+    used at two sites with genuinely different English shows the wrong text at one
+    of them - and no translator can fix it, because there is only one slot.
+
+    Catches the six keys found this way in PR #456: a tab label vs a card title, a
+    table header vs a form label, an empty-state sentence vs a ``<select>`` option,
+    two buttons whose ``title`` explanation doubled as their ``aria-label`` name,
+    and delete-vs-remove on one error toast.
+
+    Differences that are only capitalisation, trailing punctuation or an ellipsis
+    are allowed, as is one fallback being a prefix of a longer one: those render
+    acceptably from a single translation.
+
+    **What this canNOT catch, stated because it is the case that started the
+    hunt:** ``status.clear`` was the adjective opposite of "Ambiguous" at one site
+    and the verb on the Clear-Debug-Data confirm button at another. Both wrote the
+    fallback ``'Clear'``, so the English is identical and only the SENSE differs -
+    invisible here, and every one of the 34 languages was wrong at one of the two
+    sites. Same-string-different-meaning needs a human; this test is the cheap half.
+    """
+    import re
+    from collections import defaultdict
+    from pathlib import Path
+
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "www"
+        / "ha-washdata-panel.js"
+    ).read_text()
+
+    pattern = re.compile(
+        r"_t\(\s*'([^']+)'\s*,\s*(?:\{[^{}]*\}|[A-Za-z_$][\w$]*)\s*,\s*'((?:[^'\\]|\\.)*)'"
+    )
+    fallbacks = defaultdict(set)
+    for key, fallback in pattern.findall(src):
+        fallbacks[key].add(fallback)
+
+    def norm(text):
+        return text.strip().rstrip(".:… ").lower()
+
+    overloaded = {}
+    for key, seen in fallbacks.items():
+        variants = sorted({norm(s) for s in seen})
+        if len(variants) < 2:
+            continue
+        if all(variants[-1].startswith(v) for v in variants[:-1]):
+            continue
+        overloaded[key] = sorted(seen)
+
+    assert not overloaded, (
+        "these panel keys are used for two different English strings, so one site "
+        f"renders the wrong text in every language: {overloaded}"
+    )

@@ -57,7 +57,7 @@
     "auto_label_cycles_tip": "Assegna automaticamente nomi di profilo ai cicli senza etichetta la cui confidenza di corrispondenza supera la soglia",
     "cancel": "Cancellare",
     "clear_debug": "Cancella dati di debug",
-    "clear_splits": "Chiaro",
+    "clear_splits": "Cancella",
     "close": "Chiudi",
     "compare": "Confrontare",
     "confirm": "Confermare",
@@ -210,7 +210,9 @@
     "hist_import_n": "Importa {n} cicli",
     "hist_goto_cycles": "Mostrami i cicli",
     "save_total_cycles": "Salva totale",
-    "clear": "Cancella"
+    "clear": "Cancella",
+    "add_brand": "Aggiungi marca",
+    "add_appliance": "Aggiungi elettrodomestico"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -332,7 +334,8 @@
     "community_store": "Store della community",
     "online_account": "Store della community e funzionalità online",
     "import_power_history": "Importa lo storico di potenza",
-    "service_status": "Stato della manutenzione"
+    "service_status": "Stato della manutenzione",
+    "online_account_tab": "Online e community"
   },
   "health": {
     "fair": "Qualità profilo accettabile",
@@ -472,7 +475,8 @@
     "pg_tile_matched_tip": "Cicli correttamente attribuiti a un programma noto",
     "pg_time_left": "Tempo rimanente",
     "pg_weak_match": "Abbinamento debole",
-    "phase_name": "Nome",
+    "phase_name": "Nome della fase",
+    "name": "Nome",
     "phase_timeline": "Cronologia fasi",
     "power": "Energia",
     "profile": "Profilo",
@@ -1044,7 +1048,9 @@
     "toast_program_armed": "Programma preimpostato per il prossimo ciclo: {program}",
     "standby_above_stop_title": "Assorbe ancora {idle} W alla fine del ciclo",
     "standby_above_stop_sub": "{n} degli ultimi {total} cicli. Il Ritardo spegnimento parte solo quando la potenza scende sotto la Soglia di arresto ({stop} W), quindi i cicli finiscono in ritardo o vanno fermati a mano.",
-    "advisory_duration_outlier": "{n} ciclo/i etichettati come '{name}' si discostano troppo dalla sua durata abituale per potergli mai corrispondere (caso peggiore: {ratio}x). Probabilmente sono etichettati male, oppure una registrazione ha catturato due esecuzioni. Rietichettali o dividili, così smettono di falsare la stima dei tempi di questo programma."
+    "advisory_duration_outlier": "{n} ciclo/i etichettati come '{name}' si discostano troppo dalla sua durata abituale per potergli mai corrispondere (caso peggiore: {ratio}x). Probabilmente sono etichettati male, oppure una registrazione ha catturato due esecuzioni. Rietichettali o dividili, così smettono di falsare la stima dei tempi di questo programma.",
+    "toast_range_required": "Imposta un intervallo Da/A valido",
+    "no_profiles_option": "(nessun profilo, aggiungine uno)"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
@@ -1717,7 +1723,7 @@
     "all_statuses": "Tutti gli stati",
     "ambiguous": "Ambiguo",
     "auto_detect": "Rilevamento automatico",
-    "clear": "Chiaro",
+    "clear": "Univoco",
     "completed": "Completato",
     "fine_tuning": "messa a punto ora...",
     "force_stopped": "La forza si è fermata",
@@ -1880,7 +1886,9 @@
     "unlabel_done": "Etichetta rimossa da {count} cicli",
     "unlabel_failed": "Rimozione dell'etichetta non riuscita: {error}",
     "odometer_saved": "Totale dei cicli salvato",
-    "odometer_save_failed": "Impossibile salvare il totale: {error}"
+    "odometer_save_failed": "Impossibile salvare il totale: {error}",
+    "store_pick_profile_share": "Scegli un profilo in cui condividere",
+    "remove_failed": "Rimozione non riuscita: {error}"
   },
   "suggestion": {
     "both_agree": "WashData consiglia",

@@ -258,7 +258,9 @@
         "hist_import_n": "Увези циклуси ({n})",
         "hist_goto_cycles": "Прикажи ги циклусите",
         "save_total_cycles": "Зачувај го вкупниот број",
-        "clear": "Исчисти"
+        "clear": "Исчисти",
+        "add_brand": "Додај бренд",
+        "add_appliance": "Додај уред"
     },
     "note": {
         "off_delay": {
@@ -385,7 +387,8 @@
         "community_store": "Продавница на заедницата",
         "online_account": "Продавница на заедницата и онлајн функции",
         "import_power_history": "Увоз на историја на моќност",
-        "service_status": "Статус на сервисот"
+        "service_status": "Статус на сервисот",
+        "online_account_tab": "Онлајн и заедница"
     },
     "health": {
         "fair": "Прифатлив квалитет на профилот",
@@ -526,7 +529,8 @@
         "pg_tile_matched_tip": "Циклуси правилно припишани на позната програма",
         "pg_time_left": "Преостанато време",
         "pg_weak_match": "Слабо совпаѓање",
-        "phase_name": "Име",
+        "phase_name": "Име на фазата",
+        "name": "Име",
         "phase_timeline": "Временска линија на фази",
         "power": "Моќ",
         "profile": "Профил",
@@ -976,9 +980,9 @@
         "toast_error": "Грешка: {error}",
         "toast_failed": "Неуспешно: {error}",
         "toast_force_stop_failed": "Принудното запирање неуспешно: {error}",
-        "toast_name_required": "Потребно е ime",
+        "toast_name_required": "Потребно е име",
         "toast_no_automation": "Тука не може да се создаде автоматизација",
-        "toast_profile_name_required": "Потребно е ime на профил",
+        "toast_profile_name_required": "Потребно е име на профил",
         "toast_program_set": "Поставена програма: {program}",
         "toast_rebuild_failed": "Реконструкцијата неуспешна: {error}",
         "toast_resume_failed": "Продолжувањето неуспешно: {error}",
@@ -1097,7 +1101,9 @@
         "odometer_intro": "Овој вкупен број само расте. Бришењето на запис за циклус не го менува и продолжува да брои и над ограничувањето на зачуваната историја, така што потсетниците за сервис остануваат точни.",
         "odometer_correct_hint": "Поставете го ова ако WashData сними циклус што никогаш не се случил или ако апаратот веќе извршувал циклуси пред да се инсталира WashData.",
         "no_reminders_set": "Сè уште нема поставени потсетници за сервис.",
-        "toast_program_armed": "Поставена програма за следниот циклус: {program}"
+        "toast_program_armed": "Поставена програма за следниот циклус: {program}",
+        "toast_range_required": "Поставете валиден опсег Од/До",
+        "no_profiles_option": "(нема профили, додајте нов)"
     },
     "phase_desc": {
         "anti_crease": "Повремени кратки превртувања по завршувањето за да се намалат брчките.",
@@ -1738,7 +1744,7 @@
         "all_statuses": "Сите статуси",
         "ambiguous": "Двосмислена",
         "auto_detect": "Автоматско откривање",
-        "clear": "Јасно",
+        "clear": "Недвосмислена",
         "completed": "Завршено",
         "fine_tuning": "фино подесување сега…",
         "force_stopped": "Силата запре",
@@ -1901,7 +1907,9 @@
         "unlabel_done": "Отстранета етикета од {count} циклуси",
         "unlabel_failed": "Отстранувањето на етикетата не успеа: {error}",
         "odometer_saved": "Вкупниот број циклуси е зачуван",
-        "odometer_save_failed": "Вкупниот број не можеше да се зачува: {error}"
+        "odometer_save_failed": "Вкупниот број не можеше да се зачува: {error}",
+        "store_pick_profile_share": "Изберете профил во кој да споделите",
+        "remove_failed": "Отстранувањето не успеа: {error}"
     },
     "suggestion": {
         "both_agree": "WashData препорачува",
