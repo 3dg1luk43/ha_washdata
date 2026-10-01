@@ -539,21 +539,11 @@ def has_resumed_pause(
     Timed on the wall clock from the first below-threshold sample to the next one at
     or above it, so a change-only plug that reports one 0 W row and then nothing
     still counts its silence. A run still open at the end of the trace never
-    resumed: that is the cycle's own end, not a pause. Pure; never raises.
+    resumed: that is the cycle's own end, not a pause. A run that starts on the
+    first sample is the standby before the cycle (a curve pre-roll), not a pause
+    either. Pure; never raises.
     """
-    try:
-        first_below: float | None = None
-        for offset, power in points:
-            if power < threshold_w:
-                if first_below is None:
-                    first_below = offset
-            elif first_below is not None:
-                if offset - first_below >= min_pause_s:
-                    return True
-                first_below = None
-        return False
-    except Exception:  # noqa: BLE001
-        return False
+    return longest_resumed_pause_s(points, threshold_w, skip_leading=True) >= min_pause_s
 
 
 def longest_resumed_pause_s(
