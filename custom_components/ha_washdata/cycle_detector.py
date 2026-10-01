@@ -31,6 +31,7 @@ from homeassistant.util import dt as dt_util
 from .log_utils import DeviceLoggerAdapter
 from .const import (
     TERMINAL_EVENT_PEAK_FRAC,
+    DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN,
     ANTI_WRINKLE_ELIGIBLE_REASONS,
     TerminationReason,
     STATE_OFF,
@@ -77,6 +78,7 @@ from .const import (
     STANDBY_BAND_NEAR_STOP_W,
     DEVICE_TYPE_DISHWASHER,
     TERMINAL_QUIET_CAP_S,
+    TRUSTED_LENGTH_FLOOR_FRAC,
     STANDBY_BAND_WINDOW_S,
     STANDBY_BAND_MAX_FRACTION,
     STANDBY_BAND_FLATNESS_FRACTION,
@@ -124,6 +126,7 @@ if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
 from .signal_processing import (
     energy_gap_threshold_s,
     integrate_wh,
+    terminal_event_end,
     terminal_quiet_seen,
 )
 
@@ -507,6 +510,14 @@ class CycleDetector:
         # this element is read at all, because nothing legitimate follows their
         # last activity - so for them the cap can sit EARLIER than expected_end.
         self._matched_terminal_quiet_s: float | None = None
+        # Element 13 (register item 384): the shortest length the user has vouched
+        # for in the matched profile (a corrected `manual_duration`, a recorder
+        # capture, a golden cycle). A dishwasher's kept tail never ends before
+        # TRUSTED_LENGTH_FLOOR_FRAC of it - the same floor the banked-tail repair
+        # applies - because element 11 can be wrong in the direction that deletes
+        # a drying phase. None: nothing vouched, no floor.
+        self._matched_trusted_min_s: float | None = None
+        self._terminal_quiet_memo: tuple[Any, bool] | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
@@ -754,6 +765,19 @@ class CycleDetector:
         if not math.isfinite(value) or value < 0:
             return None
         return min(value, TERMINAL_QUIET_CAP_S)
+
+    @staticmethod
+    def _sanitize_trusted_min(raw: Any) -> float | None:
+        """Coerce element 13 to a positive duration or None ("nothing vouched")."""
+        if raw is None or isinstance(raw, bool):
+            return None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        if not math.isfinite(value) or not 0.0 < value <= CycleDetector._SANITIZE_MAX_EXPECTED_DURATION:
+            return None
+        return value
 
     @staticmethod
     def _sanitize_longest_candidate(raw: Any) -> float:
@@ -1093,20 +1117,31 @@ class CycleDetector:
             self._longest_candidate_duration = self._sanitize_longest_candidate(
                 result_seq[11] if len(result_seq) >= 12 else 0.0
             )
+            # Element 13: cleared by a shorter tuple, like elements 9-12.
+            self._matched_trusted_min_s = self._sanitize_trusted_min(
+                result_seq[12] if len(result_seq) >= 13 else None
+            )
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
             return
 
         if is_match_mismatch and self._matched_profile:
-            # Confident non-match - revert to detecting if previously matched
+            # Confident non-match - revert to detecting if previously matched.
+            # The expected duration goes with it, as in reset(): the duration-
+            # anchored hard finalize, the dishwasher end-spike arm gate, the
+            # keep-tail cap and the manager's zombie killer read it without
+            # checking `_matched_profile`, so a revoked programme's length kept
+            # steering an unmatched cycle.
             self._matched_profile = None
+            self._expected_duration = 0.0
             self._match_ambiguous = False
             self._match_prefix_ambiguous = False
             self._match_prefix_ambiguous_full_shape = False
             self._matched_tail_power = None
             self._matched_terminal_high = None
             self._matched_terminal_quiet_s = None
+            self._matched_trusted_min_s = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -1166,6 +1201,7 @@ class CycleDetector:
         self._matched_tail_power = None
         self._matched_terminal_high = None
         self._matched_terminal_quiet_s = None
+        self._matched_trusted_min_s = None
         # Element 12 belongs with them: its own comment claims a stale value can
         # never license a shortening for a different match, and that was only
         # true of the tuple path. Left here across a reset, a small positive
@@ -2014,7 +2050,7 @@ class CycleDetector:
                     self._expected_duration <= 0
                     or current_duration
                     >= self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS
-                ):
+                ) and self._spike_follows_terminal_quiet(timestamp):
                     self._end_spike_seen = True
                     self._end_spike_duration = current_duration
                     self._logger.debug(
@@ -2241,7 +2277,7 @@ class CycleDetector:
                             ) or (
                                 current_duration >= self._expected_duration
                                 and self._time_below_threshold_gapfree
-                                >= self._config.dishwasher_end_spike_quiet_release
+                                >= self._dishwasher_quiet_release_s()
                             )
                             if (
                                 self._config.device_type == "dishwasher"
@@ -3552,7 +3588,7 @@ class CycleDetector:
         quiet_released = (
             duration >= self._expected_duration
             and self._time_below_threshold_gapfree
-            >= self._config.dishwasher_end_spike_quiet_release
+            >= self._dishwasher_quiet_release_s()
         )
         if (
             self._config.device_type == "dishwasher"
@@ -3574,7 +3610,7 @@ class CycleDetector:
                 self._expected_duration,
                 self._dishwasher_end_spike_wait_s(),
                 self._time_below_threshold_gapfree,
-                self._config.dishwasher_end_spike_quiet_release,
+                self._dishwasher_quiet_release_s(),
                 self._matched_profile,
             )
             return True
@@ -3618,6 +3654,78 @@ class CycleDetector:
 
         # Tertiary check: If duration exceeded max tolerance, allow finish (failsafe).
         return False
+
+    def _dishwasher_quiet_release_s(self) -> float:
+        """Sustained quiet past expected that releases the pump-out wait (#379).
+
+        The configured value - raised to DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN x
+        the matched profile's measured quiet before its terminal event while this
+        run has NOT yet been through that quiet (register item 392). The release
+        exists for a pump-out that already happened or never comes; a run still
+        short of the quiet its programme always has before the pump-out has not
+        reached that point. A run that has been through it - #424's Beko and the
+        Hatton ECO, whose terminal event sits mid-cycle - keeps the configured
+        value, so their ends do not move. Lengthen-only; the 30 min spike wait
+        still bounds the whole wait.
+        """
+        base = float(self._config.dishwasher_end_spike_quiet_release)
+        quiet = self._matched_terminal_quiet_s
+        if not (self._matched_profile and quiet) or not self._power_readings:
+            return base
+        now = self._power_readings[-1][0]
+        if self._spike_follows_terminal_quiet(now, latest=True):
+            return base
+        return max(base, DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN * float(quiet))
+
+    def _spike_follows_terminal_quiet(
+        self, timestamp: datetime, *, latest: bool = False
+    ) -> bool:
+        """May this ENDING spike be the dishwasher's terminal pump-out? (item 392)
+
+        True unless the matched profile's quiet before its terminal event has been
+        measured (element 11) and this run has not yet been through it - asked
+        with the same `terminal_quiet_seen` the keep-tail cap and the banked-tail
+        repair use. On the corpus's "65° full" (934 s measured, 17/17 cycles) a
+        24 W fan blip 211 s after the last heating armed the end at 85% of
+        expected, and Smart Termination closed the cycle 12 min before the real
+        pump-out. Only ever withholds the arm, so it can delay an end, never
+        bring one forward; every other device type, and an unmeasured profile,
+        is unaffected.
+        """
+        quiet = self._matched_terminal_quiet_s
+        start = self._current_cycle_start
+        if (
+            self._config.device_type != DEVICE_TYPE_DISHWASHER
+            or not self._matched_profile
+            or not quiet
+            or start is None
+            or not self._power_readings
+        ):
+            return True
+        # Memoised per reading: the release asks this on every ENDING reading past
+        # the expected end, and the answer only changes when a reading arrives.
+        key = (len(self._power_readings), timestamp, latest)
+        hit = self._terminal_quiet_memo
+        if hit is not None and hit[0] == key:
+            return hit[1]
+        pts = [((ts - start).total_seconds(), float(pw)) for ts, pw in self._power_readings]
+        last_off = (timestamp - start).total_seconds()
+        if latest:
+            # "Has the run been through it by now?": measured from the last
+            # activity, not from a spike that has not happened.
+            last_active = self._last_active_time
+            if last_active is None:
+                return True
+            last_off = (last_active - start).total_seconds()
+        seen = terminal_quiet_seen(
+            pts,
+            last_off,
+            self._config.stop_threshold_w,
+            float(quiet),
+            TERMINAL_EVENT_PEAK_FRAC,
+        )
+        self._terminal_quiet_memo = (key, seen)
+        return seen
 
     def _dishwasher_end_spike_wait_s(self) -> float:
         """Grace past the expected end while waiting for the terminal pump-out.
@@ -3720,6 +3828,29 @@ class CycleDetector:
             return expected_end
         if self._config.device_type != DEVICE_TYPE_DISHWASHER:
             return last_active
+        cap = self._dishwasher_tail_cap(start_time, expected_end, last_active)
+        # Never before the length the user has vouched for (register item 384),
+        # the floor `ProfileStore.async_repair_banked_tails` applies, so live and
+        # the repair store the same duration. Element 11 is measured from the
+        # profile's own traces, and on a machine that dries silently AFTER its
+        # last activity it reads the pre-drying pause instead: the Hatton ECO
+        # export stores 230-235 min (one corrected to 234), and without this the
+        # cap snapped three of its four cycles to their last activity at ~120 min.
+        # Lengthen-only, and only for a run that has itself lasted that long: a
+        # cancelled or short run never reaches the floor, and lifting its cap
+        # would bank its whole post-appliance wait (#424). Same outcome as the
+        # repair, which never lengthens a cycle.
+        trusted = self._matched_trusted_min_s
+        if trusted and self._power_readings:
+            floor = start_time + timedelta(seconds=TRUSTED_LENGTH_FLOOR_FRAC * trusted)
+            if cap < floor <= self._power_readings[-1][0]:
+                return floor
+        return cap
+
+    def _dishwasher_tail_cap(
+        self, start_time: datetime, expected_end: datetime, last_active: datetime
+    ) -> datetime:
+        """The dishwasher half of :meth:`_keep_tail_cap`, before the trusted floor."""
         # Only a spike LATE enough to be the terminal pump-out licenses snapping
         # the stored end back to the last activity. `_end_spike_seen` is set from
         # DISHWASHER_END_SPIKE_MIN_PROGRESS (0.85), but this file does not treat
@@ -3767,7 +3898,11 @@ class CycleDetector:
                 float(quiet),
                 TERMINAL_EVENT_PEAK_FRAC,
             ):
-                return last_active
+                # ...at the terminal event, which may sit below the stop
+                # threshold and so after `last_active` (register item 384).
+                return _start + timedelta(
+                    seconds=terminal_event_end(_pts, _last_off, TERMINAL_EVENT_PEAK_FRAC)
+                )
         return last_active + timedelta(seconds=min(quiet, TERMINAL_QUIET_CAP_S))
 
     def _finish_cycle(
@@ -3830,6 +3965,19 @@ class CycleDetector:
         if final_readings:
             last_t, last_p = final_readings[-1]
             if last_t < end_time:
+                # Not at ACTIVE power when a capped tail ends past the last kept
+                # sample: interpolation would read the whole drying allowance (up
+                # to TERMINAL_QUIET_CAP_S) as full draw, in the stored trace and in
+                # every envelope built from it. Readings past a cap at or after
+                # `_last_active_time` are quiet by construction, so the first of
+                # them is a real observation of this level - the rule the
+                # banked-tail repair applies to the same point (register item 384).
+                if last_p >= self._config.stop_threshold_w:
+                    later = next(
+                        (p for t, p in self._power_readings if t > end_time), None
+                    )
+                    if later is not None and later < self._config.stop_threshold_w:
+                        last_p = later
                 final_readings.append((end_time, last_p))
 
         start_ts = self._current_cycle_start.timestamp()
@@ -3937,6 +4085,7 @@ class CycleDetector:
             "matched_tail_power": self._matched_tail_power,
             "matched_terminal_high": self._matched_terminal_high,
             "matched_terminal_quiet_s": self._matched_terminal_quiet_s,
+            "matched_trusted_min_s": self._matched_trusted_min_s,
             "longest_candidate_duration": self._longest_candidate_duration,
             "ml_defer_start_duration": self._ml_defer_start_duration,
         }
@@ -4013,6 +4162,9 @@ class CycleDetector:
             )
             self._matched_terminal_quiet_s = self._sanitize_terminal_quiet(
                 snapshot.get("matched_terminal_quiet_s")
+            )
+            self._matched_trusted_min_s = self._sanitize_trusted_min(
+                snapshot.get("matched_trusted_min_s")
             )
             # Unconditionally, because the hazard is the value already on the
             # object, not the one in the snapshot: this restores the ambiguity

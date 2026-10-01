@@ -84,6 +84,7 @@ from .const import (
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
+    CONF_WATCHDOG_INTERVAL,
     CYCLE_OVERRUN_ANOMALY_RATIO,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
     DEFAULT_DTW_BANDWIDTH,
@@ -125,6 +126,7 @@ from .const import (
     STATE_STARTING,
     STATE_UNKNOWN,
     TerminationReason,
+    resolve_watchdog_interval_default,
 )
 from .cycle_detector import (
     CycleDetector,
@@ -420,6 +422,15 @@ def _cycle_label(cycle: dict[str, Any]) -> str | None:
     return None
 
 
+# The grid a replay's snapshots are first built on: `resample_adaptive`'s floor,
+# which is what most cycles resolve to (it is max(5 s, the trace's median step)).
+_PLAYGROUND_START_DT = 5.0
+
+# Bound on the keepalives emulated inside one silent stretch (8 h at a 30 s
+# watchdog): the detector's own 8 h cap ends any cycle long before this.
+_MAX_KEEPALIVES_PER_GAP = 960
+
+
 def _build_match_snapshots(
     store: Any,
 ) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, list[str]], dict[str, Any]]:
@@ -444,6 +455,23 @@ def _build_match_snapshots(
     dicts and behaviour is identical to before.
     """
     snapshots: list[dict[str, Any]] = []
+    # The live builder when the store has one (item 387a), on the grid a replayed
+    # cycle starts on; `_DetailSim._matcher` re-grids per match, as live does. Looked
+    # up on the TYPE so a MagicMock store (tests) keeps the legacy path below.
+    if callable(getattr(type(store), "build_match_snapshots", None)):
+        try:
+            snapshots = store.build_match_snapshots(_PLAYGROUND_START_DT)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Playground: live snapshot builder failed: %s", exc)
+            snapshots = []
+        try:
+            grouped_snaps, group_members, member_snaps = store._grouped_snapshots(  # pylint: disable=protected-access
+                snapshots
+            )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Playground: _grouped_snapshots failed: %s", exc)
+            grouped_snaps, group_members, member_snaps = snapshots, {}, {}
+        return grouped_snaps, _matching_config(store, in_progress=True), group_members, member_snaps
     try:
         data = getattr(store, "_data", {}) or {}
         # Snapshot the profiles dict before iterating: this runs in an executor thread
@@ -807,6 +835,9 @@ class _DetailSim:
         self.match_config = apply_match_overrides(match_config, settings_override)
         self.group_members = group_members
         self.member_snaps = member_snaps
+        # Snapshots per query grid (item 387a): live re-grids a sample-cycle
+        # template to every match's `used_dt`; so does the sim, once per distinct dt.
+        self._snap_by_dt: dict[float, tuple[Any, Any, Any]] = {}
 
         self.ready = len(self.readings) >= 5
         # Per-sim end-expectation cache, threaded through the shared progress helpers
@@ -849,6 +880,20 @@ class _DetailSim:
 
         self.last_sample_t = -1e9
         self._aborted = False
+        # Watchdog cadence (item 390). Live injects a keepalive on this cadence
+        # while a cycle sits below the stop threshold and the plug is silent; the
+        # sim does the same inside a silent stretch of the trace (see step()).
+        try:
+            _wd = float(
+                {**self.options, **(settings_override or {})}.get(
+                    CONF_WATCHDOG_INTERVAL,
+                    resolve_watchdog_interval_default(self.device_type),
+                )
+            )
+        except (TypeError, ValueError):
+            _wd = float(resolve_watchdog_interval_default(self.device_type))
+        self.watchdog_s = _wd if math.isfinite(_wd) and _wd > 0 else 0.0
+        self._last_real: tuple[datetime, float] | None = None
 
         if self.ready:
             self.detector = CycleDetector(
@@ -923,6 +968,35 @@ class _DetailSim:
         # match-persistence streak, mirroring the live manager (per-cycle reset).
         self.flags["pending_reset"] = True
 
+    def _regrid_snapshots(self, used_dt: float) -> None:
+        """Put sample-cycle templates on this match's grid, as live does (387a).
+
+        Only snapshots from the live builder carry ``sample_dt``; envelope and
+        golden templates are grid-free, and a prebuilt or legacy set without the
+        field is left exactly as it was.
+        """
+        builder = getattr(type(self.store), "build_match_snapshots", None)
+        if not callable(builder):
+            return
+        key = round(float(used_dt), 2)
+        stale = any(
+            s.get("sample_dt") is not None and round(float(s["sample_dt"]), 2) != key
+            for s in [*(self.snapshots or []), *((self.member_snaps or {}).values())]
+            if isinstance(s, dict)
+        )
+        if not stale:
+            return
+        cached = self._snap_by_dt.get(key)
+        if cached is None:
+            try:
+                snaps = self.store.build_match_snapshots(used_dt)
+                cached = self.store._grouped_snapshots(snaps)  # noqa: SLF001
+            except Exception:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("Playground: re-grid failed", exc_info=True)
+                return
+            self._snap_by_dt[key] = cached
+        self.snapshots, self.group_members, self.member_snaps = cached
+
     def _matcher(self, det_readings: list[tuple[datetime, float]]):
         if len(det_readings) < 5 or not self.snapshots:
             return (None, 0.0, 0.0, None, False, False)
@@ -960,6 +1034,7 @@ class _DetailSim:
         except Exception:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("Playground detail resample failed", exc_info=True)
             return (None, 0.0, 0.0, None, False, False)
+        self._regrid_snapshots(float(_used_dt))
         try:
             candidates = analysis.compute_matches_worker(
                 powers, duration, self.snapshots, self.match_config
@@ -1111,11 +1186,17 @@ class _DetailSim:
         # contract. `end_gate_eval.py` drives the detector through here, so a
         # missing element silently measures the wrong gate.
         terminal_quiet = None
+        trusted_min = None
         if self.store is not None and raw_name:
             try:
                 terminal_quiet = self.store.profile_terminal_quiet_seconds(raw_name)
             except Exception:  # pylint: disable=broad-exception-caught
                 terminal_quiet = None
+            # Element 13 (item 384), as live sends it.
+            try:
+                trusted_min = self.store.profile_trusted_min_duration(raw_name)
+            except Exception:  # pylint: disable=broad-exception-caught
+                trusted_min = None
         return (
             raw_name,
             raw_conf,
@@ -1135,6 +1216,7 @@ class _DetailSim:
             # to match what live *then* did - and live was the thing that was
             # wrong, twice.
             longest_candidate_duration(pre_collapse_candidates),
+            trusted_min,
         )
 
     def _price_at(self, offset_s: float) -> float | None:
@@ -1274,14 +1356,46 @@ class _DetailSim:
             return
         try:
             for ts, power in self.readings[i0:i1]:
+                self._watchdog_keepalives(ts)
                 self.cursor["t"] = (ts - self.base).total_seconds()
                 self.detector.process_reading(power, ts)
+                self._last_real = (ts, power)
                 self._sample(ts)
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._aborted = True
             _LOGGER.debug(
                 "Playground detail replay failed for %s: %s", self.cycle.get("id"), exc
             )
+
+    def _watchdog_keepalives(self, until: datetime) -> None:
+        """Inject the keepalives live would have injected before ``until`` (item 390).
+
+        Mirrors the low-power branch of ``manager._watchdog_check_stuck_cycle``:
+        while the detector waits below the stop threshold and the plug has been
+        silent for more than ``watchdog_interval``, each tick feeds the sensor's
+        last value as an observed synthetic reading. Without it a silent stretch
+        reached the detector as one interval at the next real reading - after the
+        power had already come back - so the end gates were never evaluated
+        inside it, and a soak that live 0.5.7 ends on (item 290 credits the
+        silence) replayed as one cycle. Ticks sit half an interval into each
+        period, the mean phase of a free-running timer. Traces recorded on 0.5.7+
+        already hold these readings, so for them this is a no-op. The watchdog's
+        staleness force-end and ghost/zombie branches are not emulated.
+        """
+        last = self._last_real
+        step = self.watchdog_s
+        if last is None or step <= 0:
+            return
+        prev_ts, prev_w = last
+        k = 1
+        while k <= _MAX_KEEPALIVES_PER_GAP:
+            ts = prev_ts + timedelta(seconds=step * (k + 0.5))
+            if ts >= until or not self.detector.is_waiting_low_power():
+                return
+            self.cursor["t"] = (ts - self.base).total_seconds()
+            self.detector.process_reading(prev_w, ts, synthetic=True, observed=True)
+            self._sample(ts)
+            k += 1
 
     def _derive_idle_level(self) -> tuple[float, float]:
         """Derive (idle_w, fluct_w) from the standby floor of the real cycle tail.

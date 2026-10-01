@@ -184,6 +184,11 @@ measures absolute *level/spread*.
   **never raises** (returns `{"error": ...}`). Replays stored cycles through a *fresh* real
   `CycleDetector` + the real matcher - no client-side detection copy. History/optimize run as
   detached, registry-tracked background tasks, chunked across small executor jobs. Reference 09.
+  **Replay parity is what every replay harness measures, so keep it exact:** candidates come from
+  `ProfileStore.build_match_snapshots` (re-gridded per query, as live), and the live watchdog's
+  keepalives are emulated inside silent stretches. Until 0.5.8 neither was true - top-1 differed
+  from live on 26.5% of matches and a silent soak could never split - so replay figures taken
+  before register items 387a/390 measured a different matcher and different end gates.
 - **`history_import.py`** (#344) - turns raw power history into candidate cycles. Same contract:
   pure, executor-safe, hass-free, never raises. A raw HA history **cannot** be fed to one detector
   (it is change-based, so steady 0 W emits no rows and the detector force-stops instead), hence the
@@ -420,8 +425,9 @@ Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for
   temperature). Three safeguards, all applied on a group win *before* the result is built: the
   top-level ambiguity gate, the member-fit backstop (`member_fit < 0.55 * best["score"]`), and the
   overrun guard (`current_duration > best_duration * 1.05`). The last two set `is_ambiguous`, which
-  blocks Smart Termination (register item 214) - but **not** the cycle-end label gate, which reads
-  only `label_confidence` and the margin, so those two safeguards never stop a label (item 387b).
+  blocks Smart Termination (register item 214) and every label path: both cycle-end gates and
+  `auto_label_cycles` check `is_ambiguous` as well as `label_confidence` and the margin (item 387b/c;
+  until 0.5.8 they read only the last two, so these safeguards never stopped a label).
   **The additive tie-break `_stage5_rerank` was tried and rejected (hurt net, redundant with Stage-4).
   It survives only in `devtools/dtw_ab_eval.py` as a documented negative result - do not re-add it.**
   Design rationale: register item 99 and

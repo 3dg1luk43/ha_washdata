@@ -392,6 +392,10 @@ MIN_FULL_TRACES = 1
 # `has_trace = 0` row, which no model was trained on.
 ML_HEALTH_MIN_TRACE_POINTS = 4
 DEFAULT_WATCHDOG_INTERVAL = 30  # Floor; effective default is resolved per device
+# A watchdog keepalive closing more than this many ticks was injected late (host
+# suspend, loop stall, restart): the interval it closes is unobserved (item 391).
+# On time it closes at most two (the first after a real reading), then one.
+WATCHDOG_LATE_TICK_FACTOR = 2.5
 # as max(this, 2*sampling_interval + 1) - see resolve_watchdog_interval_default (#396).
 DEFAULT_MATCH_PERSISTENCE = 3
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
@@ -1019,6 +1023,11 @@ BANKED_TAIL_REPAIR_KEY = "_banked_tail_repair_pending"
 # span is worth correcting. Measured median banking was 12.6 min, so this only
 # skips noise.
 BANKED_TAIL_REPAIR_MIN_S = 60.0
+# A dishwasher's stored end never falls before this fraction of the shortest
+# length the user has vouched for in its profile (`manual_duration`, a recorder
+# capture, a golden cycle). Shared by the banked-tail repair and the live
+# `_keep_tail_cap` (register item 384), so the two store the same duration.
+TRUSTED_LENGTH_FLOOR_FRAC = 0.9
 STANDBY_BAND_WINDOW_S = 600.0         # require a >=10 min flat plateau
 STANDBY_BAND_MAX_FRACTION = 0.10      # plateau level <= 10% of the cycle's peak
 STANDBY_BAND_FLATNESS_FRACTION = 0.03  # window (max-min) <= 3% of the cycle's peak
@@ -1184,6 +1193,12 @@ DISHWASHER_MATCH_FREEZE_QUIET_SECONDS = 300.0
 # caught by the end-spike arm first.  Smaller than the 30-min window but large enough
 # to confirm a terminal tail rather than an inter-phase gap.
 DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS = 600.0
+# ...but never shorter than this multiple of the matched profile's MEASURED quiet
+# before its terminal event (`profile_terminal_quiet_seconds`, match element 11):
+# a release after 600 s of quiet is premature on a programme measured to wait
+# 934-1810 s before its pump-out, and ended the corpus's "65° full" 12 min early
+# (register item 392). Lengthen-only, and bounded by the 30 min spike wait.
+DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN = 1.1
 
 # Confirmation window a dishwasher must spend in ENDING before Smart Termination
 # fires.  This is deliberately a FIXED constant and NOT derived from off_delay:
@@ -1369,9 +1384,18 @@ def resolve_min_off_gap_default(device_type: str) -> int:
     return int(DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(device_type, DEFAULT_MIN_OFF_GAP))
 
 
-def resolve_off_delay_default(device_type: str) -> int:
-    """Device-resolved off delay (#445), published for the same reason."""
-    return int(DEFAULT_OFF_DELAY_BY_DEVICE.get(device_type, DEFAULT_OFF_DELAY))
+def resolve_off_delay_default(device_type: str) -> int:  # noqa: ARG001
+    """The off delay a device runs on when it has none set (#445).
+
+    ``DEFAULT_OFF_DELAY`` for every type. ``DEFAULT_OFF_DELAY_BY_DEVICE`` is the
+    suggestion engine's FLOOR for a proposed value, not a runtime default: no
+    device has ever run on it, because the config flow does not store an off
+    delay and the manager falls back to the scalar. Publishing the table here
+    made the panel show a dishwasher's unset Off Delay as 1800 s while the
+    detector used 180 s - and 180 is the floor of the late ENDING shortening, so
+    the difference is not cosmetic. The parameter is kept for the call sites.
+    """
+    return int(DEFAULT_OFF_DELAY)
 
 
 def resolve_start_duration_default(device_type: str) -> float:

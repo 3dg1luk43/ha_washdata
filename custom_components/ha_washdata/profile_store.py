@@ -74,6 +74,7 @@ from .const import (
     SMART_TERM_LANDSCAPE_MIN_SHAPE,
     SMART_TERM_PREFIX_MARGIN,
     SMART_TERM_PREFIX_MIN_RATIO,
+    MATCH_LABEL_MIN_MARGIN,
     SMART_TERM_PREFIX_MIN_PAUSE_S,
     SMART_TERM_PREFIX_MIN_SHAPE,
     SMART_TERM_TAIL_WINDOW_FRAC,
@@ -88,6 +89,7 @@ from .const import (
     PROFILE_EVIDENCE_SOURCES,
     DEFAULT_DTW_BANDWIDTH,
     TerminationReason,
+    TRUSTED_LENGTH_FLOOR_FRAC,
 )
 from .features import compute_signature
 from .signal_processing import (
@@ -97,6 +99,7 @@ from .signal_processing import (
     integrate_wh,
     energy_gap_threshold_s,
     has_resumed_pause as _has_resumed_pause,
+    terminal_event_end as _terminal_event_end,
     terminal_quiet_seen as _terminal_quiet_seen,
 )
 from . import analysis
@@ -146,6 +149,37 @@ CycleDict: TypeAlias = dict[str, Any]
 _AUTO_LABEL_SOURCES = (
     "auto_match", "auto_label_post", "auto_label_service", "auto_label_backfill",
 )
+
+
+def _trusted_min_by_profile(cycles: Any) -> dict[str, float]:
+    """Shortest length the USER has vouched for, per profile name (item 384).
+
+    A cycle is vouched for when it carries a corrected ``manual_duration``, came
+    from the manual recorder, or is pinned golden. Shared by the banked-tail
+    repair and the live keep-tail floor (match tuple element 13), which both stop
+    a dishwasher's stored end from falling below ``TRUSTED_LENGTH_FLOOR_FRAC`` of
+    it. Metadata only, no trace decompression. Never raises.
+    """
+    out: dict[str, float] = {}
+    for c in cycles or []:
+        try:
+            if not isinstance(c, dict) or not c.get("profile_name"):
+                continue
+            rev = c.get("ml_review")
+            vouched = (
+                c.get("manual_duration")
+                or _is_recorded_cycle(c)
+                or (isinstance(rev, dict) and rev.get("golden"))
+            )
+            if not vouched:
+                continue
+            d = float(c.get("manual_duration") or c.get("duration") or 0.0)
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if math.isfinite(d) and d > 0:
+            n = str(c["profile_name"])
+            out[n] = min(out.get(n, d), d)
+    return out
 
 
 def _is_recorded_cycle(cycle: dict[str, Any]) -> bool:
@@ -251,12 +285,18 @@ def _parse_start_dt(value: Any) -> datetime | None:
         except (OSError, OverflowError, ValueError):
             return None
     if isinstance(value, str) and value:
-        parsed = dt_util.parse_datetime(value)
+        # `parse_datetime` RAISES for a well-formed but impossible value (month 13,
+        # a +99:00 offset) rather than returning None; one such row aborted the
+        # banked-tail repair halfway through (register item 384).
+        try:
+            parsed = dt_util.parse_datetime(value)
+        except (TypeError, ValueError, OverflowError):
+            parsed = None
         if parsed is not None:
             return parsed
         try:
             return datetime.fromtimestamp(float(value), tz=dt_util.UTC)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OSError, OverflowError):
             return None
     return None
 
@@ -2277,6 +2317,12 @@ class ProfileStore:
         _reason = meta.get("termination_reason")
         if isinstance(_reason, str) and _reason:
             cycle["termination_reason"] = _reason
+        _manual = meta.get("manual_duration")
+        if _manual is not None and not isinstance(_manual, bool):
+            with contextlib.suppress(TypeError, ValueError, OverflowError):
+                _md = float(_manual)
+                if math.isfinite(_md) and _md > 0:
+                    cycle["manual_duration"] = _md
         # A reference cycle implies its program exists locally; create a minimal profile
         # entry if absent so the matcher iterates it and the rebuild can set its template.
         profiles = self._data.setdefault("profiles", {})
@@ -4803,6 +4849,17 @@ class ProfileStore:
                         if key:
                             affected_profiles.add(key)
 
+        # 3) Debug traces (register item 380). `debug_data` is the matcher's full
+        # ranking and details for one cycle, read by nothing but a human looking at
+        # that cycle, so it goes with the trace it describes - and with every one
+        # while "save debug traces" is off, which until now only stopped NEW cycles
+        # getting one. The nightly-maintenance help text has always promised this;
+        # one real export carried 345 KB of it against 114 KB of traces.
+        keep_debug = getattr(self, "_save_debug_traces", True)
+        for cy in cycles:
+            if "debug_data" in cy and (not keep_debug or not cy.get("power_data")):
+                cy.pop("debug_data", None)
+
         return affected_profiles
 
 
@@ -5911,25 +5968,7 @@ class ProfileStore:
             # ECO cycles from ~235 min to ~121 min - irreversibly, the trace past the
             # cut is deleted - while the user's own correction of a sibling said
             # 234 min. Taken from the pre-repair history, like `quiet_by_profile`.
-            trusted_min: dict[str, float] = {}
-            for _c in cycles:
-                if not isinstance(_c, dict) or not _c.get("profile_name"):
-                    continue
-                _rev = _c.get("ml_review")
-                _vouched = (
-                    _c.get("manual_duration")
-                    or _is_recorded_cycle(_c)
-                    or (isinstance(_rev, dict) and _rev.get("golden"))
-                )
-                if not _vouched:
-                    continue
-                try:
-                    _d = float(_c.get("manual_duration") or _c.get("duration") or 0.0)
-                except (TypeError, ValueError):
-                    continue
-                if _d > 0:
-                    _n = str(_c["profile_name"])
-                    trusted_min[_n] = min(trusted_min.get(_n, _d), _d)
+            trusted_min = _trusted_min_by_profile(cycles)
             for cycle in cycles:
                 if not isinstance(cycle, dict):
                     continue
@@ -6024,18 +6063,33 @@ class ProfileStore:
                         TERMINAL_EVENT_PEAK_FRAC,
                     ):
                         allowance = 0.0
+                        # The terminal event may sit below the stop threshold,
+                        # after `last_active`; keep it (register item 384).
+                        last_active = _terminal_event_end(
+                            points, last_active, TERMINAL_EVENT_PEAK_FRAC
+                        )
                 new_duration = last_active + allowance
                 if is_dishwasher:
                     _floor = trusted_min.get(str(cycle.get("profile_name") or ""))
                     if _floor:
-                        new_duration = max(new_duration, 0.9 * _floor)
+                        new_duration = max(new_duration, TRUSTED_LENGTH_FLOOR_FRAC * _floor)
                 try:
                     old_duration = float(cycle.get("duration") or 0.0)
                 except (TypeError, ValueError):
                     continue
                 if old_duration - new_duration < BANKED_TAIL_REPAIR_MIN_S:
                     continue
-                self._apply_repaired_duration(cycle, new_duration)
+                # One malformed row is skipped, not allowed to abort the pass: an
+                # abort left every cycle before it repaired, every one after it
+                # not, and the pending key set, so each restart stopped on the
+                # same row (register item 384).
+                try:
+                    self._apply_repaired_duration(cycle, new_duration)
+                except Exception:  # noqa: BLE001
+                    self._logger.debug(
+                        "Banked-tail repair: skipped cycle %s", cycle.get("id"), exc_info=True
+                    )
+                    continue
                 summary["repaired"] += 1
                 summary["reclaimed_s"] += old_duration - new_duration
                 name = cycle.get("profile_name")
@@ -6066,7 +6120,6 @@ class ProfileStore:
         the shortened cycles, the template and its duration would describe
         different traces until the next restart.
         """
-        cycle["duration"] = round(float(new_duration), 3)
         cycle_id = str(cycle.get("id") or "")
         if cycle_id:
             for key in [
@@ -6152,6 +6205,30 @@ class ProfileStore:
                         cycle.get("id"),
                         exc_info=True,
                     )
+        # Last, so a row that fails above keeps its old duration with its old trace
+        # rather than a cut duration over an uncut one (register item 384).
+        cycle["duration"] = round(float(new_duration), 3)
+
+    def profile_trusted_min_duration(self, profile_name: str) -> float | None:
+        """Shortest user-vouched length of this profile, or None (item 384).
+
+        Element 13 of the live match tuple. Read from ``past_cycles`` and
+        ``reference_cycles``, the lists the banked-tail repair takes it from, so
+        the live floor and the repair's floor are the same number. Never raises.
+        """
+        try:
+            past = self._data.get("past_cycles")
+            refs = self._data.get("reference_cycles")
+            cycles = [
+                c for c in (
+                    *(past if isinstance(past, list) else []),
+                    *(refs if isinstance(refs, list) else []),
+                )
+                if isinstance(c, dict) and c.get("profile_name") == profile_name
+            ]
+            return _trusted_min_by_profile(cycles).get(profile_name)
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
+            return None
 
     def profile_terminal_quiet_seconds(self, profile_name: str) -> float | None:
         """How long this programme is measured to stay quiet after its last real
@@ -7217,6 +7294,169 @@ class ProfileStore:
 
         return candidates
 
+    def build_match_snapshots(self, used_dt: float) -> list[dict[str, Any]]:
+        """The candidate templates a match scores against, on the query's grid.
+
+        One builder for live matching and the Playground (register item 387a). The
+        Playground used to build its own - always the sample cycle's raw, unevenly
+        spaced points sized by ``avg_duration`` - while live matching uses the
+        envelope average (sized by ``target_duration``) once a profile has two
+        cycles, or the pinned golden cycle, and re-grids a sample cycle to
+        ``used_dt``. Top-1 differed on 26.5% of matches, so every replay harness
+        measured a different matcher from the one users run.
+
+        Reads the store but writes only the sample-segment cache; iterates a copy of
+        the profile map so it is safe from the executor (the Playground's thread).
+        Does not group: callers pass the result to ``_grouped_snapshots``.
+        """
+        # Prepare Snapshots. Imported reference cycles and backfilled history
+        # cycles are eligible as matching templates alongside real cycles (so an
+        # import-only profile can match) - subject to the user's evidence choice, so
+        # the pool and the envelope always agree about what a profile looks like.
+        all_cycles = self.iter_evidence_cycles()
+        # Precompute per-profile lookups ONCE so the loop below is O(profiles),
+        # not O(profiles x cycles). Rescanning all_cycles with next()/any() for
+        # every profile made matching quadratic and stalled low-power hosts on
+        # auto-label (many matches x many cycles) - issue #311. Selections are
+        # byte-identical: cycles_by_id keeps the FIRST occurrence (== next()),
+        # labeled_by_profile keeps the first eligible cycle in all_cycles order,
+        # and golden_profiles mirrors the any(...) golden test.
+        cycles_by_id: dict[str, CycleDict] = {}
+        labeled_by_profile: dict[str, CycleDict] = {}
+        golden_profiles: set[str] = set()
+        for c in all_cycles:
+            cid = c.get("id")
+            if cid is not None and cid not in cycles_by_id:
+                cycles_by_id[cid] = c
+            pname = c.get("profile_name")
+            if not pname or not c.get("power_data"):
+                continue
+            if (
+                pname not in labeled_by_profile
+                and c.get("status") in ("completed", "force_stopped")
+            ):
+                labeled_by_profile[pname] = c
+            rev = c.get("ml_review")
+            if isinstance(rev, dict) and rev.get("golden"):
+                golden_profiles.add(pname)
+
+        snapshots: list[dict[str, Any]] = []
+        skipped_profiles: list[str] = []
+        for name, profile in list((self._data.get("profiles") or {}).items()):
+            # Try sample_cycle_id first, fall back to any labeled cycle
+            sample_id = profile.get("sample_cycle_id")
+            sample_cycle = cycles_by_id.get(sample_id) if sample_id else None
+            # Fallback: find ANY completed cycle labeled with this profile
+            if not sample_cycle:
+                sample_cycle = labeled_by_profile.get(name)
+            # Boost user-pinned "golden" cycles: when a profile has one, use
+            # its sharp single-cycle trace as the matching template instead
+            # of the envelope average. The envelope average smears the
+            # wash-phase peaks (each cycle's spikes land at slightly
+            # different times), which hurts correlation for sharply-shaped
+            # programs; a trusted golden cycle preserves that shape.
+            has_golden = name in golden_profiles
+
+            # Prefer envelope avg curve when ≥2 labeled cycles have been
+            # confirmed - it gives a more representative reference signal
+            # than the original sample alone, so confidence improves over
+            # time as the user keeps confirming correct detections. Skipped
+            # when a golden cycle is pinned (see above).
+            envelope = self._data.get("envelopes", {}).get(name)
+            _env_avg = envelope.get("avg") if envelope else None
+            if (
+                not has_golden
+                and envelope
+                and envelope.get("cycle_count", 0) >= 2
+                and _env_avg
+                and isinstance(_env_avg[0], (list, tuple))
+                and len(_env_avg[0]) >= 2
+            ):
+                avg_y = [float(p[1]) for p in _env_avg]
+                _env_ts_duration = (
+                    float(_env_avg[-1][0]) - float(_env_avg[0][0])
+                    if len(_env_avg) > 1 else 0.0
+                )
+                avg_duration = (
+                    envelope.get("target_duration") or
+                    profile.get("avg_duration") or
+                    _env_ts_duration or
+                    None
+                )
+                if not avg_duration:
+                    skipped_profiles.append(
+                        f"{name}: no valid duration (envelope has no target_duration, avg_duration, or timestamp span)"
+                    )
+                    continue
+                snapshots.append({
+                    "name": name,
+                    "avg_duration": float(avg_duration),
+                    "sample_power": avg_y,
+                    # True wall-clock span of `sample_power` (#364). NOT the same
+                    # as avg_duration, which prefers target_duration / the
+                    # profile's rolling mean - so index fraction only equals time
+                    # fraction against this. Needed to truncate the curve to an
+                    # elapsed duration for prefix scoring.
+                    "sample_span_s": float(_env_ts_duration or avg_duration),
+                })
+                continue
+
+            if not sample_cycle:
+                skipped_profiles.append(
+                    f"{name}: no sample cycle (sample_id={sample_id})"
+                )
+                continue
+
+            # Prepare sample segment (using cache)
+            sample_seg = self._get_cached_sample_segment(sample_cycle, used_dt)
+            if not sample_seg:
+                skipped_profiles.append(
+                    f"{name}: failed to resample cycle {sample_cycle.get('id')}"
+                )
+                continue
+            # avg_duration preference order:
+            #   1. profile["avg_duration"] (rolling average, most accurate)
+            #   2. sample_cycle["duration"] (raw cycle field)
+            #   3. timestamp span of sample_seg (estimate from the resampled data)
+            # Profiles created before avg_duration tracking was added may have
+            # 0 or a missing value; falling back to the segment estimate prevents
+            # update_match() from always seeing expected_duration=0, which
+            # silences time-remaining estimates and logs a misleading warning.
+            _seg_ts_duration = (
+                float(sample_seg.timestamps[-1]) - float(sample_seg.timestamps[0])
+                if len(sample_seg.timestamps) > 1 else 0.0
+            )
+            avg_dur = (
+                profile.get("avg_duration") or
+                sample_cycle.get("duration") or
+                _seg_ts_duration
+            )
+            if not avg_dur:
+                skipped_profiles.append(
+                    f"{name}: no valid duration (avg_duration, cycle duration, and timestamp span all zero/missing)"
+                )
+                continue
+            snapshots.append({
+                "name": name,
+                "avg_duration": float(avg_dur),
+                "sample_power": sample_seg.power.tolist(),
+                "sample_dt": used_dt,
+                # True wall-clock span of `sample_power` (#364). _get_cached_sample_segment
+                # keeps only the LONGEST gap-free segment, so a cycle with an internal
+                # outage yields a curve covering less than avg_dur - truncating by a
+                # fraction of avg_dur would then cut the wrong place.
+                "sample_span_s": float(_seg_ts_duration or avg_dur),
+            })
+
+        if skipped_profiles:
+            self._logger.debug(
+                "Profile matching skipped %d profiles: %s",
+                len(skipped_profiles),
+                "; ".join(skipped_profiles)
+            )
+
+        return snapshots
+
     def _get_cached_sample_segment(
         self, sample_cycle: dict[str, Any], dt: float
     ) -> Segment | None:
@@ -7317,151 +7557,7 @@ class ProfileStore:
 
             current_power_list = current_seg.power.tolist()
 
-            # Prepare Snapshots. Imported reference cycles and backfilled history
-            # cycles are eligible as matching templates alongside real cycles (so an
-            # import-only profile can match) - subject to the user's evidence choice, so
-            # the pool and the envelope always agree about what a profile looks like.
-            all_cycles = self.iter_evidence_cycles()
-            # Precompute per-profile lookups ONCE so the loop below is O(profiles),
-            # not O(profiles x cycles). Rescanning all_cycles with next()/any() for
-            # every profile made matching quadratic and stalled low-power hosts on
-            # auto-label (many matches x many cycles) - issue #311. Selections are
-            # byte-identical: cycles_by_id keeps the FIRST occurrence (== next()),
-            # labeled_by_profile keeps the first eligible cycle in all_cycles order,
-            # and golden_profiles mirrors the any(...) golden test.
-            cycles_by_id: dict[str, CycleDict] = {}
-            labeled_by_profile: dict[str, CycleDict] = {}
-            golden_profiles: set[str] = set()
-            for c in all_cycles:
-                cid = c.get("id")
-                if cid is not None and cid not in cycles_by_id:
-                    cycles_by_id[cid] = c
-                pname = c.get("profile_name")
-                if not pname or not c.get("power_data"):
-                    continue
-                if (
-                    pname not in labeled_by_profile
-                    and c.get("status") in ("completed", "force_stopped")
-                ):
-                    labeled_by_profile[pname] = c
-                rev = c.get("ml_review")
-                if isinstance(rev, dict) and rev.get("golden"):
-                    golden_profiles.add(pname)
-
-            snapshots: list[dict[str, Any]] = []
-            skipped_profiles: list[str] = []
-            for name, profile in self._data["profiles"].items():
-                # Try sample_cycle_id first, fall back to any labeled cycle
-                sample_id = profile.get("sample_cycle_id")
-                sample_cycle = cycles_by_id.get(sample_id) if sample_id else None
-                # Fallback: find ANY completed cycle labeled with this profile
-                if not sample_cycle:
-                    sample_cycle = labeled_by_profile.get(name)
-                # Boost user-pinned "golden" cycles: when a profile has one, use
-                # its sharp single-cycle trace as the matching template instead
-                # of the envelope average. The envelope average smears the
-                # wash-phase peaks (each cycle's spikes land at slightly
-                # different times), which hurts correlation for sharply-shaped
-                # programs; a trusted golden cycle preserves that shape.
-                has_golden = name in golden_profiles
-
-                # Prefer envelope avg curve when ≥2 labeled cycles have been
-                # confirmed - it gives a more representative reference signal
-                # than the original sample alone, so confidence improves over
-                # time as the user keeps confirming correct detections. Skipped
-                # when a golden cycle is pinned (see above).
-                envelope = self._data.get("envelopes", {}).get(name)
-                _env_avg = envelope.get("avg") if envelope else None
-                if (
-                    not has_golden
-                    and envelope
-                    and envelope.get("cycle_count", 0) >= 2
-                    and _env_avg
-                    and isinstance(_env_avg[0], (list, tuple))
-                    and len(_env_avg[0]) >= 2
-                ):
-                    avg_y = [float(p[1]) for p in _env_avg]
-                    _env_ts_duration = (
-                        float(_env_avg[-1][0]) - float(_env_avg[0][0])
-                        if len(_env_avg) > 1 else 0.0
-                    )
-                    avg_duration = (
-                        envelope.get("target_duration") or
-                        profile.get("avg_duration") or
-                        _env_ts_duration or
-                        None
-                    )
-                    if not avg_duration:
-                        skipped_profiles.append(
-                            f"{name}: no valid duration (envelope has no target_duration, avg_duration, or timestamp span)"
-                        )
-                        continue
-                    snapshots.append({
-                        "name": name,
-                        "avg_duration": float(avg_duration),
-                        "sample_power": avg_y,
-                        # True wall-clock span of `sample_power` (#364). NOT the same
-                        # as avg_duration, which prefers target_duration / the
-                        # profile's rolling mean - so index fraction only equals time
-                        # fraction against this. Needed to truncate the curve to an
-                        # elapsed duration for prefix scoring.
-                        "sample_span_s": float(_env_ts_duration or avg_duration),
-                    })
-                    continue
-
-                if not sample_cycle:
-                    skipped_profiles.append(
-                        f"{name}: no sample cycle (sample_id={sample_id})"
-                    )
-                    continue
-
-                # Prepare sample segment (using cache)
-                sample_seg = self._get_cached_sample_segment(sample_cycle, used_dt)
-                if not sample_seg:
-                    skipped_profiles.append(
-                        f"{name}: failed to resample cycle {sample_cycle.get('id')}"
-                    )
-                    continue
-                # avg_duration preference order:
-                #   1. profile["avg_duration"] (rolling average, most accurate)
-                #   2. sample_cycle["duration"] (raw cycle field)
-                #   3. timestamp span of sample_seg (estimate from the resampled data)
-                # Profiles created before avg_duration tracking was added may have
-                # 0 or a missing value; falling back to the segment estimate prevents
-                # update_match() from always seeing expected_duration=0, which
-                # silences time-remaining estimates and logs a misleading warning.
-                _seg_ts_duration = (
-                    float(sample_seg.timestamps[-1]) - float(sample_seg.timestamps[0])
-                    if len(sample_seg.timestamps) > 1 else 0.0
-                )
-                avg_dur = (
-                    profile.get("avg_duration") or
-                    sample_cycle.get("duration") or
-                    _seg_ts_duration
-                )
-                if not avg_dur:
-                    skipped_profiles.append(
-                        f"{name}: no valid duration (avg_duration, cycle duration, and timestamp span all zero/missing)"
-                    )
-                    continue
-                snapshots.append({
-                    "name": name,
-                    "avg_duration": float(avg_dur),
-                    "sample_power": sample_seg.power.tolist(),
-                    "sample_dt": used_dt,
-                    # True wall-clock span of `sample_power` (#364). _get_cached_sample_segment
-                    # keeps only the LONGEST gap-free segment, so a cycle with an internal
-                    # outage yields a curve covering less than avg_dur - truncating by a
-                    # fraction of avg_dur would then cut the wrong place.
-                    "sample_span_s": float(_seg_ts_duration or avg_dur),
-                })
-
-            if skipped_profiles:
-                self._logger.debug(
-                    "Profile matching skipped %d profiles: %s",
-                    len(skipped_profiles),
-                    "; ".join(skipped_profiles)
-                )
+            snapshots = self.build_match_snapshots(used_dt)
 
             # Stage 5: map cohesive near-duplicate groups to their members (loose
             # groups stay individual). The members are scored individually and the
@@ -8285,7 +8381,17 @@ class ProfileStore:
             result = await self.async_match_profile(power_data, cycle["duration"])
 
             # Honor the ambiguity safeguard: never auto-label a close/ambiguous match.
-            if result.best_profile and result.confidence >= confidence_threshold and not result.is_ambiguous:
+            # The same gates the cycle-end labeller applies (item 387c): the
+            # member-aware `label_confidence`, not the Stage-5 group's score (item
+            # 206), and a clear margin over the runner-up (item 310) - this path
+            # labels in bulk without asking, so it may not be the laxest of the three.
+            _margin = getattr(result, "ambiguity_margin", None)
+            if (
+                result.best_profile
+                and result.label_confidence >= confidence_threshold
+                and not result.is_ambiguous
+                and (_margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN)
+            ):
                 current_label = cycle.get("profile_name")
                 # Sanitize: strip heavy current/sample arrays before persisting.
                 ranking_top5 = [
@@ -8323,7 +8429,7 @@ class ProfileStore:
                         )
                     else:
                         target["profile_name"] = match.best_profile
-                    target["match_confidence"] = float(match.confidence)
+                    target["match_confidence"] = float(match.label_confidence)
                     target["label_source"] = source
                     if ranking:
                         target["match_ranking_top5"] = ranking
@@ -8343,7 +8449,7 @@ class ProfileStore:
                             cycle["id"],
                             current_label,
                             result.best_profile,
-                            result.confidence,
+                            result.label_confidence,
                         )
                 else:
                     _apply()
@@ -8352,7 +8458,7 @@ class ProfileStore:
                         "Auto-labeled cycle %s as '%s' (confidence: %.2f)",
                         cycle["id"],
                         result.best_profile,
-                        result.confidence,
+                        result.label_confidence,
                     )
             else:
                 stats["skipped"] += 1
@@ -8400,8 +8506,9 @@ class ProfileStore:
                 )
             except Exception:  # pylint: disable=broad-exception-caught
                 continue
-            if result.best_profile == profile_name and result.confidence > 0:
-                cycle["match_confidence"] = float(result.confidence)
+            # Member-aware, like every other writer of this field (item 387c).
+            if result.best_profile == profile_name and result.label_confidence > 0:
+                cycle["match_confidence"] = float(result.label_confidence)
                 updated += 1
         if updated:
             await self.async_save()
@@ -8942,6 +9049,17 @@ class ProfileStore:
                             # where a different appliance's activity ended.
                             "termination_reason": (
                                 c.get("termination_reason")
+                                if device_type_match
+                                else None
+                            ),
+                            # The user's own length correction (register item
+                            # 384). The envelope build prefers it over the trace
+                            # span and the banked-tail repair exempts a cycle that
+                            # carries it; dropped here, the repair could cut a
+                            # cycle the user had made longer, and the live floor
+                            # lost its vouched length. Same device gate as above.
+                            "manual_duration": (
+                                c.get("manual_duration")
                                 if device_type_match
                                 else None
                             ),
