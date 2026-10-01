@@ -420,7 +420,8 @@ Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for
   temperature). Three safeguards, all applied on a group win *before* the result is built: the
   top-level ambiguity gate, the member-fit backstop (`member_fit < 0.55 * best["score"]`), and the
   overrun guard (`current_duration > best_duration * 1.05`). The last two set `is_ambiguous`, which
-  is what blocks confident labelling and Smart Termination (register item 214).
+  blocks Smart Termination (register item 214) - but **not** the cycle-end label gate, which reads
+  only `label_confidence` and the margin, so those two safeguards never stop a label (item 387b).
   **The additive tie-break `_stage5_rerank` was tried and rejected (hurt net, redundant with Stage-4).
   It survives only in `devtools/dtw_ab_eval.py` as a documented negative result - do not re-add it.**
   Design rationale: register item 99 and

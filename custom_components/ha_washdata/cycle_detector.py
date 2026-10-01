@@ -72,6 +72,9 @@ from .const import (
     END_GATE_LATE_SECONDS,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
+    STANDBY_BAND_LOOSE_MIN_RATIO,
+    STANDBY_BAND_NEAR_STOP_FACTOR,
+    STANDBY_BAND_NEAR_STOP_W,
     DEVICE_TYPE_DISHWASHER,
     TERMINAL_QUIET_CAP_S,
     STANDBY_BAND_WINDOW_S,
@@ -1895,18 +1898,22 @@ class CycleDetector:
             # the plateau and finalize as a normal completion (so anti-wrinkle
             # still engages).  Cheaply gated on being well past expected before
             # the window scan runs.
-            if self._is_standby_band_stuck(timestamp):
+            _plateau_hi = self._standby_band_plateau(timestamp)
+            if _plateau_hi is not None:
                 start_time = self._current_cycle_start or timestamp
                 current_duration = (timestamp - start_time).total_seconds()
                 # The plateau sits ABOVE stop_threshold, so it keeps advancing
                 # _last_active_time and the default keep_tail=False trim would NOT
                 # remove it - inflating the stored duration/energy with minutes of
-                # standby. Snap the end back to the last real activity (the last
-                # reading above the plateau ceiling) and drop the trailing plateau.
-                level_ceiling = float(self._cycle_max_power) * STANDBY_BAND_MAX_FRACTION
+                # standby. Snap the end back to the last reading above the PLATEAU
+                # and drop only the plateau run. This used to snap back to the last
+                # reading above 10% of the cycle's peak, which cut every lower-power
+                # phase after the last heating burst - 31 min of a Miele's rinse and
+                # spin in one replayed cycle.
+                trim_ceiling = _plateau_hi + max(0.5, 0.1 * _plateau_hi)
                 plateau_start_idx = None
                 for i in range(len(self._power_readings) - 1, -1, -1):
-                    if float(self._power_readings[i][1]) > level_ceiling:
+                    if float(self._power_readings[i][1]) > trim_ceiling:
                         plateau_start_idx = i
                         break
                 if (
@@ -2873,7 +2880,13 @@ class CycleDetector:
         return energy_gap_threshold_s(all_ts)
 
     def _is_standby_band_stuck(self, timestamp: datetime) -> bool:
-        """Whether a RUNNING cycle is stuck on a flat standby plateau (#296).
+        """Whether a RUNNING cycle is stuck on a flat standby plateau (#296)."""
+        return self._standby_band_plateau(timestamp) is not None
+
+    def _standby_band_plateau(self, timestamp: datetime) -> float | None:
+        """The stuck plateau's highest reading, or None when the cycle is not stuck.
+
+        Whether a RUNNING cycle is stuck on a flat standby plateau (#296).
 
         Returns True only when ALL of the following hold, so this can never end
         an active low-power phase:
@@ -2892,17 +2905,17 @@ class CycleDetector:
         so normal cycles never pay for it.
         """
         if self._config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES:
-            return False
+            return None
         if getattr(self, "_verified_pause", False):
-            return False
+            return None
         if not (self._matched_profile and self._expected_duration > 0):
-            return False
+            return None
         start = self._current_cycle_start
         if start is None:
-            return False
+            return None
         current_duration = (timestamp - start).total_seconds()
         if current_duration < self._expected_duration * STANDBY_BAND_MIN_RATIO:
-            return False
+            return None
         # #399 interaction, load-bearing since the gate above dropped from 2.0x to
         # 1.0x expected (#445): a washer can sit quiet below anti_wrinkle_max_power
         # for minutes BEFORE its final spin, and that quiet is a flat sub-10%-of-peak
@@ -2942,10 +2955,10 @@ class CycleDetector:
         # wash), so it bought the last split for three long waits. 0.10 was the
         # maintainer's call.
         if self._anticrease_spin_pending(timestamp):
-            return False
+            return None
         peak = float(self._cycle_max_power)
         if peak <= 0:
-            return False
+            return None
 
         level_ceiling = peak * STANDBY_BAND_MAX_FRACTION
         # Walk the tail; readings are chronological so we can break once outside
@@ -2984,17 +2997,30 @@ class CycleDetector:
                 else window_ts
             )
         ):
-            return False
+            return None
         hi = max(window)
         lo = min(window)
         if hi > level_ceiling:
-            return False  # a real active reading in the window - not standby
+            return None  # a real active reading in the window - not standby
         flatness_limit = max(
             STANDBY_BAND_FLATNESS_FLOOR_W, peak * STANDBY_BAND_FLATNESS_FRACTION
         )
         if (hi - lo) > flatness_limit:
-            return False  # fluctuating - still doing work
-        return True
+            return None  # fluctuating - still doing work
+        # Two tiers. At or just above the stop threshold is the #445 shape - an
+        # appliance whose standby the end gates cannot see - and it closes at the
+        # expected duration. Anything else that passed the loose test above (a 0 W
+        # soak, a 60 W rinse; flat and under 10% of a heater peak) waits for twice
+        # the expected duration, as it did before 0.5.7. See the constants.
+        stop = float(self._config.stop_threshold_w)
+        near_stop_ceiling = max(
+            STANDBY_BAND_NEAR_STOP_FACTOR * stop, stop + STANDBY_BAND_NEAR_STOP_W
+        )
+        if stop > 0 and float(np.median(window)) >= stop and hi <= near_stop_ceiling:
+            return hi
+        if current_duration >= self._expected_duration * STANDBY_BAND_LOOSE_MIN_RATIO:
+            return hi
+        return None
 
     def _anticrease_gate_open(self, timestamp: datetime) -> bool:
         """Core anti-crease gate (#296): everything except the current power level

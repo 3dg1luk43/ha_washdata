@@ -253,6 +253,10 @@ class LearningManager:
         ):
             self._update_operational_suggestions(now)
 
+    def discard_cycle_cadence(self) -> None:
+        """Drop held intervals without committing them (a new start from idle)."""
+        self._pending_intervals.clear()
+
     def close_cycle_cadence(self, cycle_data: dict[str, Any] | None) -> bool:
         """Commit or drop the update intervals held for the cycle that just ended.
 

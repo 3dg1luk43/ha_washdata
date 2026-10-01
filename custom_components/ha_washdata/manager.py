@@ -5260,6 +5260,11 @@ class WashDataManager:
         # the expiry timer right away, so the UI leaves "Finished" and the unload
         # nag stops immediately instead of waiting for the reset window - and so
         # the expiry timer cannot race the new cycle and reset us to OFF (#267).
+        # A start from idle owns no update intervals yet: drop anything a false
+        # start (STARTING -> OFF, which ends no cycle) left pending, so it is not
+        # committed with this cycle (#458).
+        if new_state == STATE_STARTING and old_state in (STATE_OFF, STATE_UNKNOWN):
+            self.learning_manager.discard_cycle_cadence()
         if new_state == STATE_STARTING and self._cycle_completed_time is not None:
             self._cycle_completed_time = None
             self._is_clean_state = False
@@ -5434,6 +5439,16 @@ class WashDataManager:
         """Handle cycle end - clear all active timers and state."""
         duration = cycle_data["duration"]
         max_power = cycle_data.get("max_power", 0)
+
+        # First, and synchronously: every end - ghost, pump-out, persisted or not
+        # - commits this cycle's update intervals to the cadence model or drops
+        # them, so they can never ride into the next cycle (#458). It used to run
+        # at the end of the async pipeline, which the ghost and pump-out branches
+        # below return before.
+        try:
+            self.learning_manager.close_cycle_cadence(cycle_data)
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Cadence commit failed", exc_info=True)
 
         # IMMEDIATELY stop all active timers when cycle determined to have ended
         self._stop_watchdog()  # Stop active cycle watchdog
@@ -6858,13 +6873,6 @@ class WashDataManager:
         # has no store entry to reference, so a pending-feedback record would
         # dangle forever. Use THIS cycle's captured match context (not the live
         # fields, which may already belong to a newly-started cycle after the awaits).
-        # Every cycle end, persisted or not, so its update intervals are either
-        # committed to the cadence model or dropped - never carried into the next
-        # cycle (#458).
-        try:
-            self.learning_manager.close_cycle_cadence(cycle_data)
-        except Exception:  # pylint: disable=broad-exception-caught
-            self._logger.debug("Cadence commit failed", exc_info=True)
         if cycle_persisted:
             self.learning_manager.process_cycle_end(
                 cycle_data,

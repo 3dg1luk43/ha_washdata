@@ -1126,7 +1126,10 @@ def _match_prefix_ambiguity(
     profile_pauses_below``). A candidate it answers ``False`` for cannot be the
     programme this quiet belongs to, so it sets neither term. ``None`` (no
     callable, or no traced evidence for that name) keeps the old behaviour - see
-    ``SMART_TERM_PREFIX_MIN_PAUSE_S`` for the measurement.
+    ``SMART_TERM_PREFIX_MIN_PAUSE_S`` for the measurement. A collapsed Stage-5
+    family arrives under its ``__group__`` key, which owns no cycles, so it always
+    reads as no evidence and keeps the guard: deliberately, since any one sibling
+    pausing would have to keep it anyway.
     """
     if best_duration <= 0 or len(candidates) < 2:
         return False, False
@@ -5898,10 +5901,45 @@ class ProfileStore:
             # history this very loop has been rewriting. One value per profile,
             # taken from the pre-repair history, removes both.
             quiet_by_profile: dict[str, float | None] = {}
+            # The shortest length the USER has vouched for, per profile: a
+            # corrected `manual_duration`, a recorder capture, or a pinned golden
+            # cycle. A dishwasher repair never cuts below 0.9 x that. The terminal
+            # quiet statistic can be wrong in exactly the direction that destroys
+            # data: on a machine whose drying runs ~113 min silent before the
+            # pump-out, three of the four cycles it was measured on had been closed
+            # early by Smart Termination, so it read 649 s and the repair cut three
+            # ECO cycles from ~235 min to ~121 min - irreversibly, the trace past the
+            # cut is deleted - while the user's own correction of a sibling said
+            # 234 min. Taken from the pre-repair history, like `quiet_by_profile`.
+            trusted_min: dict[str, float] = {}
+            for _c in cycles:
+                if not isinstance(_c, dict) or not _c.get("profile_name"):
+                    continue
+                _rev = _c.get("ml_review")
+                _vouched = (
+                    _c.get("manual_duration")
+                    or _is_recorded_cycle(_c)
+                    or (isinstance(_rev, dict) and _rev.get("golden"))
+                )
+                if not _vouched:
+                    continue
+                try:
+                    _d = float(_c.get("manual_duration") or _c.get("duration") or 0.0)
+                except (TypeError, ValueError):
+                    continue
+                if _d > 0:
+                    _n = str(_c["profile_name"])
+                    trusted_min[_n] = min(trusted_min.get(_n, _d), _d)
             for cycle in cycles:
                 if not isinstance(cycle, dict):
                     continue
                 summary["examined"] += 1
+                # A cycle the user trimmed by hand is theirs, like `manual_duration`
+                # below - the trim deletes `manual_duration`, so that exemption no
+                # longer covers it and the repair re-cut user trims.
+                _meta = cycle.get("meta")
+                if isinstance(_meta, dict) and (_meta.get("edited") or _meta.get("trim")):
+                    continue
                 # Smart Termination is where the confirmation delay was banked
                 # (item 297). `user_stop` also
                 # finishes with `keep_tail=True` but DELIBERATELY uncapped - "User
@@ -5987,6 +6025,10 @@ class ProfileStore:
                     ):
                         allowance = 0.0
                 new_duration = last_active + allowance
+                if is_dishwasher:
+                    _floor = trusted_min.get(str(cycle.get("profile_name") or ""))
+                    if _floor:
+                        new_duration = max(new_duration, 0.9 * _floor)
                 try:
                     old_duration = float(cycle.get("duration") or 0.0)
                 except (TypeError, ValueError):

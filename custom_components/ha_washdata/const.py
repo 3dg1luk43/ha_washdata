@@ -979,6 +979,20 @@ STANDBY_BAND_FINALIZE_DEVICE_TYPES = (
 # safe - past expected AND >=10 min flat AND <=10% of the cycle's own peak is
 # an appliance that has finished, not one still working.
 STANDBY_BAND_MIN_RATIO = 1.0          # only past the expected duration
+# ...but only for a plateau that IS the #445 shape: sitting at or just above the
+# stop threshold, within max(STANDBY_BAND_NEAR_STOP_FACTOR x stop,
+# stop + STANDBY_BAND_NEAR_STOP_W). 0.5.7 dropped the ratio for EVERY plateau the
+# loose test below accepts - flat and under 10% of the heater peak, i.e. anything
+# from a 0 W soak to a 70 W rinse on a 2 kW machine - so a run matched to a shorter
+# programme was finalised mid-wash. Replaying the local corpus at 0.5.7 it fired on
+# 8 washer cycles (0 at 0.5.6): 2 split, 6 lost 6-31 min of real activity, and none
+# of the 8 plateaus sat within a few watts of the stop threshold. The #445 Miele
+# (3.2-3.5 W idle on a 2.56 W stop), #458 (2.2 W on 1.76 W) and #427's AEG (0.7 W on
+# 0.6 W) all do.
+STANDBY_BAND_NEAR_STOP_FACTOR = 2.0
+STANDBY_BAND_NEAR_STOP_W = 3.0
+# Any other flat low plateau keeps the 0.5.6 gate: twice the expected duration.
+STANDBY_BAND_LOOSE_MIN_RATIO = 2.0
 
 # Ceiling on the measured post-activity quiet span a stored cycle may bank
 # (register item 297). `profile_terminal_quiet_seconds` is a median over that profile's own

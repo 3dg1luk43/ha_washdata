@@ -9,14 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### TL;DR
 
+- Washers no longer end mid-wash or lose their rinse when the program runs longer than expected.
 - Dishwashers stop banking ten minutes of standby into every cycle; history corrected once.
 - A dishwasher whose programmes never pause reaches Smart Termination again instead of an hour-long fallback.
+- The history correction can no longer cut a dishwasher's drying phase short.
 - A Stop Threshold stuck below the appliance's standby is corrected by a suggestion.
 - Force-stopped cycles no longer feed the watchdog and timeout suggestions.
 - Cycles whose power trace retention removed no longer show 1% health or join the review queue.
 - How many power traces each program keeps is now a setting.
 
 ### Fixes
+
+- **A washer could be ended mid-wash, or lose its last half hour** (0.5.7 regression): the "appliance finished but idles above its Stop Threshold" close fired at the matched program's expected end on any flat stretch under 10% of the heater's peak - a soak at 0 W, a 60 W rinse - so a wash matched to a shorter program was closed early, and the stored end was cut back to the last heating burst. Replaying 263 cycles: it fired on 8 washer cycles (none in 0.5.6), splitting 2 and cutting 6 by 6 to 31 minutes. It now closes at the expected end only on a plateau at or just above the Stop Threshold, keeps the old twice-expected wait for anything else, and trims only the plateau. All 8 are stored as in 0.5.6 again, with 0.5.7's quicker finishes kept.
+
+- **The one-time history correction could cut a dishwasher's drying phase** (0.5.7): on a machine with a long silent drying phase it trimmed ~235 min ECO cycles to ~121 min, deleting the trace past the cut. It no longer trims a dishwasher below 90% of the shortest length you have confirmed for that program (a corrected duration, a recording or a golden cycle), and it leaves cycles you trimmed by hand alone.
 
 - **A dishwasher stored about ten minutes of standby in every cycle** ([#424](https://github.com/3dg1luk43/ha_washdata/issues/424)): the check for "this run already dried" ran at the Stop Threshold, while the drying allowance it guards is measured at 0.4% of the cycle's peak. On a Beko that ends drain, 1.3 W, 0.3 W, the check found no quiet and every cycle kept the full 611 s allowance (249 min stored for a 239 min wash). Both now use the same level; the one-time history correction runs again on upgrade and now also covers dishwasher timeout finishes. Replaying the reporter's 26 cycles: stored tail 10.0 to 0.0 min, nothing else moved. Thanks to @KoLSMS.
 
