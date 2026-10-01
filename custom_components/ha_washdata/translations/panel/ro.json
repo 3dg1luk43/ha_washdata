@@ -1424,6 +1424,14 @@
       "doc": "Dacă o potrivire live de la mijlocul ciclului scade sub acest scor, identificarea provizorie este ștearsă. Păstrați-l puțin sub Pragul de potrivire, astfel încât o scădere scurtă a similitudinii să nu readucă afișajul la starea fără potrivire.",
       "label": "Prag de Nepotrivire"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Câte cicluri recente ale fiecărui program își păstrează urma de putere completă. Ciclurile mai vechi păstrează durata, energia și eticheta, dar pierd curba; graficul lor devine gol și nu mai contribuie la curba, calitatea sau sugestiile programului. Creșterea acestei valori permite inspectarea unui istoric mai extins pe seama spațiului de stocare (de obicei 3-15 KB per ciclu). Scăderea ei șterge urmele suplimentare la următoarea curățare, iar creșterea ulterioară nu le poate recupera.",
+      "label": "Urme de putere păstrate per program"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Aceeași limită pentru ciclurile care nu au încă o etichetă de program.",
+      "label": "Urme de putere păstrate (neetichetate)"
+    },
     "progress_reset_delay": {
       "doc": "După terminare, mențineți progresul la 100% pentru acest timp, astfel încât Finalizat să fie vizibil pe tablourile de bord înainte de a reveni la Inactiv.",
       "label": "Întârziere Resetare Progres"
@@ -1947,6 +1955,7 @@
       "sampling_interval": "Intervalul median de actualizare observat pe {cycles} cicluri curate ({si}s).{excl}",
       "smoothing_window": "Dimensionat pentru a netezi ~30s de citiri la eșantionare de {si}s ({samples} eșantioane).",
       "start_duration": "Păstrat scurt (~un interval de eșantionare de {si}s), astfel încât detectarea să înceapă cât mai devreme posibil, ignorând totuși vârfurile de un singur eșantion.",
+      "standby_floor": "Fiecare ciclu recent consuma încă {idle}W la final, deci un prag mai mic nu va putea detecta niciodată că aparatul se oprește. Menținut deasupra; cele {cycles} cicluri curate înregistrate nu au scăzut niciodată sub acest prag mai mult de {pause}s.",
       "thr_batch": "Păstrat chiar deasupra celei mai mici puteri active p05 pe {cycles} cicluri ({p05}W), astfel încât o pornire să fie surprinsă cât mai devreme posibil, iar pragul de oprire să rămână sub cea mai mică putere de funcționare a mașinii.",
       "tol_per_profile": "p75 al varianței duratei per profil pe {profiles} profiluri ({cycles} cicluri); profilurile stabile nu sunt penalizate.",
       "tol_pooled": "Pe baza varianței combinate a duratei a {cycles} cicluri recente etichetate (deviație p95={dev}).",

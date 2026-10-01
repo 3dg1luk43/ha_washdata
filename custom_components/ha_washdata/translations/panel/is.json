@@ -1509,6 +1509,14 @@
       "doc": "Ef bein samsvörun á miðri lotu fer niður fyrir þetta skor er bráðabirgðaauðkenningin hreinsuð. Haltu því aðeins undir samsvörunarþröskuldinum svo stutt dýfa í líkindum snúi skjánum ekki aftur í „Engin samsvörun“.",
       "label": "Ósamsvarþröskuldur"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Hversu margar af nýjustu lotum hvers kerfis geyma fulla aflrekninguna sína. Eldri lotur geyma lengd, orku og merkingu en missa ferilinn - myndriti þeirra er þá tómt og þær teljast ekki lengur með í ferli kerfisins, heilsu eða tillögum. Hærra gildi heldur meiri sögu aðgengilegri til skoðunar, á kostnað geymslu (venjulega 3-15 KB á lotu). Lægra gildi eyðir aukalegum sporum við næstu þrif; að hækka það aftur getur ekki endurreist þau.",
+      "label": "Geymd aflspor á kerfi"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Sama takmörkunin á lotur sem hafa ekki enn fengið kerfismerki.",
+      "label": "Geymd aflspor (ómerkt)"
+    },
     "progress_reset_delay": {
       "doc": "Eftir að hafa lokið, haltu framvindu við 100% í þetta lengi svo Lokið sé sýnilegt á mælaborðum áður en þú endurstillir í aðgerðalaus.",
       "label": "Framfaraendurstillingðráð"
@@ -1886,6 +1894,7 @@
       "sampling_interval": "Miðgildi uppfærslubils sem mældist yfir {cycles} hreinar lotur ({si}s).{excl}",
       "smoothing_window": "Stærðin valin til að jafna út um það bil 30s af mælingum við {si}s sýnatökubil ({samples} sýni).",
       "start_duration": "Haldið stuttu (~eitt {si}s sýnatökubil) svo að greining hefjist eins snemma og hægt er en hunsi samt staka toppa.",
+      "standby_floor": "Sérhver nýleg lota dró enn {idle}W þegar henni lauk, þannig að þröskuldur undir því getur aldrei séð að tækið slökkni. Haldið yfir því; {cycles} hreinar lotur í yfirlitinu hafa aldrei gert hlé undir því í meira en {pause}s.",
       "thr_batch": "Haldið rétt yfir lægsta virka afli við p05 yfir {cycles} lotur ({p05}W) svo að ræsing náist eins snemma og hægt er og stöðvunarþröskuldurinn haldist undir lægsta gangafli vélarinnar.",
       "tol_per_profile": "p75 af dreifni lengdar á hvert snið yfir {profiles} snið ({cycles} lotur); þröngum sniðum er ekki refsað.",
       "tol_pooled": "Byggt á sameinaðri dreifni lengdar {cycles} nýjustu merktu lota (p95 frávik={dev}).",

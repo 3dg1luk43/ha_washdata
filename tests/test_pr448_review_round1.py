@@ -648,8 +648,10 @@ def test_an_old_export_re_arms_the_banked_tail_repair():
 
     assert _export_predates_banked_tail_repair({"version": 12}) is True
     assert _export_predates_banked_tail_repair({"version": 1}) is True
-    assert _export_predates_banked_tail_repair({"version": 13}) is False
+    # v13 (0.5.7) predates the #424 re-run of the repair, so it re-arms too.
+    assert _export_predates_banked_tail_repair({"version": 13}) is True
     assert _export_predates_banked_tail_repair({"version": 14}) is False
+    assert _export_predates_banked_tail_repair({"version": 15}) is False
     # Unreadable version is treated as old: an idempotent repair on an already
     # repaired history costs one pass, skipping it on an unrepaired one is
     # permanent. (An oversized integer literal is NOT unreadable - Python ints

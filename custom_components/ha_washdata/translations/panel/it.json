@@ -1456,6 +1456,14 @@
       "doc": "Se una corrispondenza in tempo reale a metà ciclo scende al di sotto di questo punteggio, l'identificazione provvisoria viene cancellata. Mantienilo leggermente al di sotto della Soglia di corrispondenza in modo che un breve calo nella somiglianza non riporti la visualizzazione su senza corrispondenza.",
       "label": "Soglia di non corrispondenza"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Quanti dei cicli più recenti di ciascun programma conservano la traccia di potenza completa. I cicli più vecchi mantengono durata, energia ed etichetta ma perdono la curva; il loro grafico risulta vuoto e non contribuiscono più alla curva, alla qualità o ai suggerimenti del programma. Aumentare questo valore permette di esaminare più storico a costo di spazio di archiviazione (in genere 3-15 KB per ciclo). Diminuirlo elimina le tracce in eccesso alla prossima pulizia, e aumentarlo di nuovo non potrà ripristinarle.",
+      "label": "Tracce di potenza mantenute per programma"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Lo stesso limite per i cicli che non hanno ancora un'etichetta di programma.",
+      "label": "Tracce di potenza mantenute (senza etichetta)"
+    },
     "progress_reset_delay": {
       "doc": "Al termine, mantieni l'avanzamento al 100% per questo tempo in modo che Completato sia visibile sui dashboard prima di reimpostare su Inattivo.",
       "label": "Ritardo reset avanzamento"
@@ -1979,6 +1987,7 @@
       "sampling_interval": "Intervallo di aggiornamento mediano osservato su {cycles} cicli puliti ({si}s).{excl}",
       "smoothing_window": "Dimensionato per lisciare ~30s di letture con campionamento a {si}s ({samples} campioni).",
       "start_duration": "Mantenuto breve (~un intervallo di campionamento di {si}s) affinché il rilevamento inizi il prima possibile ignorando comunque i picchi di un solo campione.",
+      "standby_floor": "Ogni ciclo recente consumava ancora {idle}W alla fine, quindi una soglia inferiore a questo valore non potrà mai rilevare lo spegnimento dell'elettrodomestico. Mantenuta sopra; i {cycles} cicli puliti registrati non sono mai scesi al di sotto per più di {pause}s.",
       "thr_batch": "Mantenuto appena sopra la potenza attiva più bassa al p05 su {cycles} cicli ({p05}W) affinché un avvio venga rilevato il prima possibile e la soglia di arresto resti sotto la potenza di funzionamento più bassa della macchina.",
       "tol_per_profile": "p75 della varianza di durata per profilo su {profiles} profili ({cycles} cicli); i profili stretti non vengono penalizzati.",
       "tol_pooled": "In base alla varianza di durata aggregata di {cycles} cicli etichettati di recente (deviazione p95={dev}).",

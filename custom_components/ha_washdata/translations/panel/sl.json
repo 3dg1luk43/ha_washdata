@@ -1477,6 +1477,14 @@
       "doc": "Če ujemanje v živo sredi cikla pade pod ta rezultat, se začasna identifikacija počisti. Naj bo malo pod Pragom ujemanja, tako da kratek padec podobnosti prikaza ne vrne nazaj na stanje brez ujemanja.",
       "label": "Prag neujemanja"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Koliko od zadnjih ciklov vsakega programa ohrani polno sled moči. Starejši cikli ohranijo trajanje, energijo in oznako, toda izgubijo krivuljo, zato je njihov grafikon prazen in se ne upoštevajo pri krivulji, kakovosti ali predlogih programa. Povečanje vrednosti omogoča pregled večje zgodovine na račun prostora v shrambi (navadno 3–15 KB na cikel). Zmanjšanje izbriše odvečne sledi pri naslednjem nočnem čiščenju in ponovnega povečanja jih ni mogoče vrniti.",
+      "label": "Sledi moči, ohranjene na program"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Enaka omejitev za cikle, ki še nimajo oznake programa.",
+      "label": "Sledi moči, ohranjene (brez oznake)"
+    },
     "progress_reset_delay": {
       "doc": "Ko končate, tako dolgo zadržite napredek pri 100 %, tako da je na nadzornih ploščah vidno Končano, preden se ponastavite na stanje mirovanja.",
       "label": "Zamuda ponastavitve napredka"
@@ -1854,6 +1862,7 @@
       "sampling_interval": "Mediana intervala posodobitev, opažena čez {cycles} čistih ciklov ({si}s).{excl}",
       "smoothing_window": "Nastavljeno za glajenje ~30s meritev pri vzorčenju {si}s ({samples} vzorcev).",
       "start_duration": "Ohranjeno kratko (~en interval vzorčenja {si}s), da se zaznavanje začne čim prej, hkrati pa še vedno prezre posamezne konice.",
+      "standby_floor": "Vsak nedavni cikel je ob koncu še vedno porabil {idle}W, zato prag pod to vrednostjo ne more zaznati izklopa naprave. Ohranjen je nad njo; {cycles} čistih ciklov v evidenci ni nikoli padlo pod njega za več kot {pause}s.",
       "thr_batch": "Ohranjeno tik nad najnižjo delovno močjo p05 čez {cycles} ciklov ({p05}W), da se začetek zazna čim prej in da prag ustavitve ostane pod najnižjo delovno močjo naprave.",
       "tol_per_profile": "p75 variance trajanja po posameznih profilih čez {profiles} profilov ({cycles} ciklov); dosledni profili niso kaznovani.",
       "tol_pooled": "Na podlagi združene variance trajanja {cycles} nedavnih označenih ciklov (p95 odklon={dev}).",

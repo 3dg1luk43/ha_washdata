@@ -1469,6 +1469,14 @@
             "doc": "Ha egy élő, ciklus közbeni egyezés pontszáma ez alá csökken, az ideiglenes azonosítás törlődik. Tartsa kicsivel az Egyezési küszöb alatt, hogy a hasonlóság rövid visszaesése ne állítsa vissza a kijelzőt a nincs egyezés állapotba.",
             "label": "Nem egyező küszöb"
         },
+        "max_full_traces_per_profile": {
+            "doc": "Hány legutóbbi ciklus tartja meg a teljes teljesítménynyomot az egyes programokhoz. A régebbi ciklusok megőrzik a tartamot, az energiát és a címkét, de elveszítik a görbét, így a diagramjuk üres, és már nem számítanak a program görbéjéhez, egészségéhez vagy javaslataihoz. A növelés több előzményt tesz megtekinthetővé a tárhely rovására (jellemzően 3-15 KB/ciklus). A csökkentés törli a felesleges nyomokat a következő éjszakai tisztításkor; az újbóli növelés nem tudja visszaállítani őket.",
+            "label": "Programonként megőrzött teljesítménynyomok"
+        },
+        "max_full_traces_unlabeled": {
+            "doc": "Ugyanez a korlát az olyan ciklusokra vonatkozik, amelyeknek még nincs programcímkéjük.",
+            "label": "Megőrzött teljesítménynyomok (Címkézetlen)"
+        },
         "progress_reset_delay": {
             "doc": "A befejezés után tartsa 100%-on az előrehaladást ennyi ideig, hogy a Befejezett felirat látható legyen az irányítópulton, mielőtt visszaállítaná az üresjárati állapotot.",
             "label": "Folyamat visszaállítási késleltetés"
@@ -1998,6 +2006,7 @@
             "sampling_interval": "A(z) {cycles} tiszta cikluson át megfigyelt médián frissítési intervallum ({si}s).{excl}",
             "smoothing_window": "Úgy méretezve, hogy ~30s-nyi mérést simítson {si}s mintavételezésnél ({samples} minta).",
             "start_duration": "Rövidre hagyva (~egy {si}s mintavételi intervallum), hogy az észlelés a lehető legkorábban induljon, miközben az egyetlen mintás kiugrásokat figyelmen kívül hagyja.",
+            "standby_floor": "Minden legutóbbi ciklus még {idle} W-ot fogyasztott, amikor befejezte, így az ez alatti küszöb soha nem látja, ahogy a készülék kikapcsol. Az érték ez felett marad; a rögzített {cycles} tiszta ciklus egyike sem szünetelt alatta {pause} másodpercnél tovább.",
             "thr_batch": "Éppen a p05 legkisebb aktív teljesítmény fölött tartva {cycles} cikluson át ({p05}W), hogy az indítás a lehető legkorábban észlelhető legyen, a leállítási küszöb pedig a gép legkisebb üzemi teljesítménye alatt maradjon.",
             "tol_per_profile": "A profilonkénti időtartam-szórás p75 értéke {profiles} profilon át ({cycles} ciklus); a stabil profilok nem kapnak büntetést.",
             "tol_pooled": "{cycles} legutóbbi címkézett ciklus összevont időtartam-szórása alapján (p95 szórás={dev}).",

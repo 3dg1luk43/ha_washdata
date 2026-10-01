@@ -127,7 +127,11 @@ def test_watchdog_suggestion(learning_manager):
     for _ in range(30):
         learning_manager.process_power_reading(100, now, now - timedelta(seconds=3))
         now += timedelta(seconds=3)
-    
+    # Intervals are held until the cycle ends on its own (#458).
+    assert learning_manager.close_cycle_cadence(
+        {"status": "completed", "termination_reason": "timeout"}
+    )
+
     # Trigger update
     learning_manager._update_operational_suggestions(now)
     

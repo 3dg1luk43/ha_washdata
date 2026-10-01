@@ -35,6 +35,7 @@ All top-level entry points are defensive: they never raise, returning an
 """
 from __future__ import annotations
 
+import functools
 import logging
 import math
 from dataclasses import replace
@@ -1062,7 +1063,20 @@ class _DetailSim:
         # Elements 7-9 (#364): without them the prefix-landscape and power-plausibility
         # guards were never exercised in a simulation, so the exact failure the
         # Playground exists to reproduce was invisible here.
-        full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(candidates, raw_expected)
+        # Same pause evidence as `async_match_profile` (#424), at the SIM's stop
+        # threshold so a what-if threshold sees its own consequence.
+        _pauses = None
+        _det_cfg = getattr(getattr(self, "detector", None), "config", None)
+        if self.store is not None and _det_cfg is not None and hasattr(
+            self.store, "profile_pauses_below"
+        ):
+            _pauses = functools.partial(
+                self.store.profile_pauses_below,
+                stop_threshold_w=float(_det_cfg.stop_threshold_w),
+            )
+        full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(
+            candidates, raw_expected, _pauses
+        )
         # Guard the store call like iter_evidence_cycles above: on an older store or a
         # partial test double without profile_tail_power the AttributeError would
         # bubble through _try_profile_match, which drops the match at debug - so EVERY

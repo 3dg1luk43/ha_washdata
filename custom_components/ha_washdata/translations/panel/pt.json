@@ -1456,6 +1456,14 @@
       "doc": "Se uma correspondência em direto a meio do ciclo descer abaixo desta pontuação, a identificação provisória é apagada. Mantenha-o um pouco abaixo do Limiar de Correspondência para que uma breve queda na semelhança não faça a apresentação voltar a sem correspondência.",
       "label": "Limiar de Não Correspondência"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Quantos ciclos mais recentes de cada programa conservam o seu traço de potência completo. Os ciclos mais antigos mantêm a duração, a energia e o rótulo, mas perdem a curva; o gráfico fica vazio e deixam de contribuir para a curva, a qualidade de perfil ou as sugestões do programa. Aumentar este valor permite inspecionar mais histórico ao custo de armazenamento (tipicamente 3-15 KB por ciclo). Diminuí-lo elimina os traços extra na próxima limpeza, e aumentá-lo novamente não os pode recuperar.",
+      "label": "Traços de potência guardados por programa"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "O mesmo limite para os ciclos que ainda não têm nome de programa.",
+      "label": "Traços de potência guardados (sem rótulo)"
+    },
     "progress_reset_delay": {
       "doc": "Depois de terminar, mantenha o progresso em 100% por esse tempo para que Concluído fique visível nos painéis antes de redefinir para Inativo.",
       "label": "Atraso de Reposição de Progresso"
@@ -1979,6 +1987,7 @@
       "sampling_interval": "Intervalo de atualização mediano observado ao longo de {cycles} ciclos limpos ({si}s).{excl}",
       "smoothing_window": "Dimensionado para suavizar ~30s de leituras com uma amostragem de {si}s ({samples} amostras).",
       "start_duration": "Mantido curto (~um intervalo de amostragem de {si}s) para que a deteção comece o mais cedo possível, ignorando ainda assim os picos de uma única amostra.",
+      "standby_floor": "Cada ciclo recente ainda consumia {idle}W quando terminou, pelo que um limiar abaixo disso nunca poderá detetar o desligamento do eletrodoméstico. Mantido acima; os {cycles} ciclos limpos registados nunca ficaram abaixo desse valor por mais de {pause}s.",
       "thr_batch": "Mantido logo acima da potência ativa mais baixa no p05 ao longo de {cycles} ciclos ({p05}W) para que um arranque seja captado o mais cedo possível e o limiar de paragem se mantenha abaixo da potência de funcionamento mais baixa da máquina.",
       "tol_per_profile": "p75 da variância de duração por perfil em {profiles} perfis ({cycles} ciclos); os perfis restritos não são penalizados.",
       "tol_pooled": "Com base na variância de duração agrupada de {cycles} ciclos rotulados recentes (desvio p95={dev}).",

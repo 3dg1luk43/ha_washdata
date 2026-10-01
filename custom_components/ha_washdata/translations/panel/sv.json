@@ -1509,6 +1509,14 @@
       "doc": "Om en pågående matchning mitt i cykeln sjunker under denna poäng rensas den preliminära identifieringen. Håll den lite under Matchningströskeln så att ett kort fall i likhet inte får visningen att gå tillbaka till Ingen matchning.",
       "label": "Omatchningströskel"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Hur många av varje programs senaste cykler som behåller sina fullständiga effektspår. Äldre cykler behåller varaktighet, energi och märkning men förlorar kurvan - deras diagram är då tomt och de räknas inte längre mot programmets kurva, hälsa eller förslag. En högre inställning håller mer historik inspekterbar, på bekostnad av lagringsutrymme (vanligtvis 3-15 KB per cykel). En lägre inställning raderar de extra spåren vid nästa städning; att höja den igen kan inte återskapa dem.",
+      "label": "Sparade effektspår per program"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Samma gräns för cykler som ännu inte har en programetikett.",
+      "label": "Sparade effektspår (omärkt)"
+    },
     "progress_reset_delay": {
       "doc": "När du är klar håller du framsteg på 100 % så länge så att Slutfört är synligt på instrumentpanelerna innan du återställer till viloläge.",
       "label": "Förloppåterställningsfördröjning"
@@ -1886,6 +1894,7 @@
       "sampling_interval": "Median för uppdateringsintervallet observerat över {cycles} rena cykler ({si}s).{excl}",
       "smoothing_window": "Dimensionerad för att jämna ut ~30s avläsningar vid {si}s samplingsintervall ({samples} sampel).",
       "start_duration": "Hålls kort (~ett samplingsintervall på {si}s) så att detekteringen börjar så tidigt som möjligt men fortfarande ignorerar enstaka toppar.",
+      "standby_floor": "Varje nylig cykel drog fortfarande {idle}W när den avslutades, så ett tröskelvärde under det kan aldrig registrera att apparaten slår av sig. Hålls ovan det; de {cycles} rena cyklerna i registret pausade aldrig under det i mer än {pause}s.",
       "thr_batch": "Hålls precis över den lägsta aktiva effekten vid p05 över {cycles} cykler ({p05}W) så att en start fångas så tidigt som möjligt och stopptröskeln stannar under maskinens lägsta driftseffekt.",
       "tol_per_profile": "p75 för varaktighetsvariansen per profil över {profiles} profiler ({cycles} cykler); snäva profiler bestraffas inte.",
       "tol_pooled": "Baserat på sammanslagen varaktighetsvarians för {cycles} senaste märkta cykler (p95 avvikelse={dev}).",

@@ -734,10 +734,12 @@ def test_the_live_cap_and_the_repair_use_one_helper() -> None:
     """They answer the same question, so they must not be able to drift."""
     from custom_components.ha_washdata import cycle_detector as _cd
     from custom_components.ha_washdata import profile_store as _ps
-    from custom_components.ha_washdata.signal_processing import quiet_run_before
+    from custom_components.ha_washdata.signal_processing import terminal_quiet_seen
 
-    assert _cd.quiet_run_before is quiet_run_before
-    assert _ps._quiet_run_before is quiet_run_before
+    # #424: the helper now also asks at the signature's own threshold, so it is
+    # `terminal_quiet_seen` both sides share rather than `quiet_run_before`.
+    assert _cd.terminal_quiet_seen is terminal_quiet_seen
+    assert _ps._terminal_quiet_seen is terminal_quiet_seen
 
 
 @pytest.mark.asyncio

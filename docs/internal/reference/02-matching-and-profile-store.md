@@ -570,6 +570,11 @@ N`; cumulative + idempotent):
 - **v9→v10** (809) — *not in CLAUDE.md*: `setdefault("reference_cycles", [])`.
 - **v10→v11** (816) — *not in CLAUDE.md*: **marker only** — per-phase profiles
   are a derived cache built by `async_rebuild_envelope`, nothing to migrate.
+- **v11→v12**: `setdefault("backfill_cycles", [])` (#344).
+- **v12→v13**: marker only, `BANKED_TAIL_REPAIR_KEY` via `setdefault` (register item 297).
+- **v13→v14**: marker only, `BANKED_TAIL_REPAIR_KEY = True` by assignment, re-running the
+  banked-tail repair after its threshold fix and dishwasher-timeout scope (register item 374).
+  `STORAGE_VERSION` is now **14**; the "= 11" above is the value this section was written against.
 
 **Recorded==golden detection** (`_is_recorded_cycle`, profile_store.py:98-129):
 explicit `meta.source=="recorder"`/`meta.original_samples`, OR structural

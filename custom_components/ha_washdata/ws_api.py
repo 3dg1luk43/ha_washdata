@@ -37,6 +37,8 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CONF_MAX_FULL_TRACES_PER_PROFILE,
+    CONF_MAX_FULL_TRACES_UNLABELED,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_NAME,
     CONF_COMPLETION_MIN_SECONDS,
@@ -103,6 +105,8 @@ from .const import (
     DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
+    MIN_FULL_TRACES,
+    ML_HEALTH_MIN_TRACE_POINTS,
     DEVICE_TYPES,
     DOMAIN,
     ENABLE_ML_SUGGESTIONS,
@@ -1911,6 +1915,25 @@ async def ws_set_options(
                     )
                 except (TypeError, ValueError, OverflowError):
                     new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
+
+        # #459: the two trace-retention caps. Below 1 the retention slice
+        # `full_indices[-cap:]` keeps every trace at 0 and strips in no chosen
+        # order when negative, so clamp to MIN_FULL_TRACES; empty or non-numeric
+        # drops the key and the default applies again.
+        for _cap_key in (CONF_MAX_FULL_TRACES_PER_PROFILE, CONF_MAX_FULL_TRACES_UNLABELED):
+            if _cap_key not in new_options:
+                continue
+            _raw_cap = new_options[_cap_key]
+            if _raw_cap in (None, ""):
+                new_options.pop(_cap_key, None)
+                continue
+            try:
+                _cap = float(_raw_cap)
+                if not math.isfinite(_cap):
+                    raise ValueError("non-finite")
+                new_options[_cap_key] = max(MIN_FULL_TRACES, int(_cap))
+            except (TypeError, ValueError, OverflowError):
+                new_options.pop(_cap_key, None)
 
         # A None outside the clearable selectors means "not set", not a value: the
         # per-setting Revert sends the changelog's `old`, which is null for a setting
@@ -4308,7 +4331,8 @@ async def ws_get_cycle_power_data(
                 artifacts = await hass.async_add_executor_job(
                     store.detect_cycle_artifacts, cycle["profile_name"], samples
                 )
-            meta["artifacts"] = artifacts or []
+            # Only with a trace to draw them on (#459).
+            meta["artifacts"] = (artifacts or []) if samples else []
             # HA restart gaps recorded during this cycle (for panel shading).
             meta["restart_gaps"] = cycle.get("restart_gaps") or []
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -5317,7 +5341,47 @@ def _compute_ml_comparison(
         # current model (unless a recompute is forced). This is what keeps the
         # panel from re-scoring every cycle on every load.
         cached = cycle.get("ml_health")
-        if (
+        has_trace = len(points) >= ML_HEALTH_MIN_TRACE_POINTS
+        if not has_trace:
+            # #459: a cycle whose trace was pruned by retention cannot be scored.
+            # `quality_features` falls back to a `has_trace = 0` row that no model
+            # was trained on (the baseline sits ~38 sigma away from it), so every
+            # pruned cycle came back as ~0.99 / "review" at the next forced
+            # recompute and joined the review queue. Keep the last assessment that
+            # was made WITH a trace; anything else (never scored, or scored after
+            # the trace was gone, which is what the nightly run did until now) is
+            # "no data". Checked before the cache so polluted entries heal on the
+            # next panel load rather than at the next maintenance run.
+            if isinstance(cached, dict) and cached.get("has_trace"):
+                ml_quality = cached.get("score")
+                quality_label = cached.get("label", "no_data")
+                ml_end_conf = cached.get("end_score")
+                end_label = cached.get("end_label", "no_event")
+                events = cached.get("events") or []
+            else:
+                ml_quality = None
+                quality_label = "no_data"
+                ml_end_conf = None
+                end_label = "no_event"
+                events = []
+                cycle_id_key = cycle.get("id", "")
+                if cycle_id_key and not (
+                    isinstance(cached, dict)
+                    and cached.get("label") == "no_data"
+                    and cached.get("score") is None
+                ):
+                    health_updates[cycle_id_key] = {
+                        "score": None,
+                        "label": "no_data",
+                        "end_score": None,
+                        "end_label": "no_event",
+                        "events": [],
+                        "model_sig": model_sig,
+                        "has_trace": False,
+                        "at": dt_util.now().isoformat(),
+                    }
+                    health_dirty = True
+        elif (
             not force_recompute
             and isinstance(cached, dict)
             and cached.get("model_sig") == model_sig
@@ -5395,6 +5459,9 @@ def _compute_ml_comparison(
                     "end_label": end_label,
                     "events": events,
                     "model_sig": model_sig,
+                    # #459: marks a score as trace-backed, so it survives the
+                    # trace being pruned later instead of being re-scored blind.
+                    "has_trace": True,
                     "at": dt_util.now().isoformat(),
                 }
             health_dirty = True
@@ -5413,7 +5480,7 @@ def _compute_ml_comparison(
             "ml_quality_label": quality_label,
             "ml_end_confidence": round(ml_end_conf, 3) if ml_end_conf is not None else None,
             "ml_end_label": end_label,
-            "has_power_data": len(points) > 0,
+            "has_power_data": has_trace,
             "events": events,
             "ml_review": cycle.get("ml_review") or {},
         })
