@@ -133,7 +133,9 @@ def test_an_old_selective_import_arms_the_marker() -> None:
     )
 
     assert _export_predates_banked_tail_repair({"version": 12}) is True
-    assert _export_predates_banked_tail_repair({"version": 13}) is False
+    # v13 re-arms as well since the #424 re-run (STORAGE_VERSION 14).
+    assert _export_predates_banked_tail_repair({"version": 13}) is True
+    assert _export_predates_banked_tail_repair({"version": 14}) is False
 
 
 # --------------------------------------------------------------------------

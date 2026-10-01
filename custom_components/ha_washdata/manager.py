@@ -28,7 +28,7 @@ import re
 import uuid
 import asyncio
 from asyncio import Task
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable, Coroutine, Mapping
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
 import numpy as np
@@ -56,6 +56,7 @@ from homeassistant.helpers import script as script_helper
 from homeassistant.helpers import translation
 
 from .const import (
+    MIN_FULL_TRACES,
     DOMAIN,
     CONF_POWER_SENSOR,
     CONF_PROFILE_EVIDENCE_SOURCES,
@@ -1315,6 +1316,9 @@ class WashDataManager:
                  readings,
                  current_duration,
                  in_progress=True,
+                 # Lets the prefix guard ignore longer programmes that never pause
+                 # below this threshold, so cannot explain an ENDING quiet (#424).
+                 stop_threshold_w=float(self.detector.config.stop_threshold_w),
             )
 
             # 2. UPDATE MANAGER STATE (Estimates, Program Name, etc.)
@@ -2385,6 +2389,28 @@ class WashDataManager:
             profile_name,
         )
 
+    def _apply_retention_limits(self, options: Mapping[str, Any]) -> None:
+        """Push the history / trace retention caps from ``options`` to the store."""
+        self.profile_store.set_retention_limits(
+            max_past_cycles=int(options.get(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES)),
+            max_full_traces_per_profile=max(
+                MIN_FULL_TRACES,
+                int(
+                    options.get(
+                        CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE
+                    )
+                ),
+            ),
+            max_full_traces_unlabeled=max(
+                MIN_FULL_TRACES,
+                int(
+                    options.get(
+                        CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED
+                    )
+                ),
+            ),
+        )
+
     async def async_setup(self) -> None:
         """Set up the manager."""
         await self.profile_store.async_load()
@@ -2414,25 +2440,7 @@ class WashDataManager:
         # Apply configurable duration tolerance to profile store
         try:
             self.profile_store.set_duration_tolerance(self._profile_duration_tolerance)
-            self.profile_store.set_retention_limits(
-                max_past_cycles=int(
-                    self.config_entry.options.get(
-                        CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES
-                    )
-                ),
-                max_full_traces_per_profile=int(
-                    self.config_entry.options.get(
-                        CONF_MAX_FULL_TRACES_PER_PROFILE,
-                        DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
-                    )
-                ),
-                max_full_traces_unlabeled=int(
-                    self.config_entry.options.get(
-                        CONF_MAX_FULL_TRACES_UNLABELED,
-                        DEFAULT_MAX_FULL_TRACES_UNLABELED,
-                    )
-                ),
-            )
+            self._apply_retention_limits(self.config_entry.options)
         except Exception:
             pass
 
@@ -2738,6 +2746,12 @@ class WashDataManager:
         self.profile_store.save_debug_traces = config_entry.options.get(
             CONF_SAVE_DEBUG_TRACES, False
         )
+        # Same reason (#459): the trace caps are now panel settings, and they were
+        # read at setup only.
+        try:
+            self._apply_retention_limits(config_entry.options)
+        except (TypeError, ValueError):
+            pass
         # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
@@ -6844,6 +6858,13 @@ class WashDataManager:
         # has no store entry to reference, so a pending-feedback record would
         # dangle forever. Use THIS cycle's captured match context (not the live
         # fields, which may already belong to a newly-started cycle after the awaits).
+        # Every cycle end, persisted or not, so its update intervals are either
+        # committed to the cadence model or dropped - never carried into the next
+        # cycle (#458).
+        try:
+            self.learning_manager.close_cycle_cadence(cycle_data)
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Cadence commit failed", exc_info=True)
         if cycle_persisted:
             self.learning_manager.process_cycle_end(
                 cycle_data,

@@ -5,6 +5,31 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.8 - Unreleased
+
+### TL;DR
+
+- Dishwashers stop banking ten minutes of standby into every cycle; history corrected once.
+- A dishwasher whose programmes never pause reaches Smart Termination again instead of an hour-long fallback.
+- A Stop Threshold stuck below the appliance's standby is corrected by a suggestion.
+- Force-stopped cycles no longer feed the watchdog and timeout suggestions.
+- Cycles whose power trace retention removed no longer show 1% health or join the review queue.
+- How many power traces each program keeps is now a setting.
+
+### Fixes
+
+- **A dishwasher stored about ten minutes of standby in every cycle** ([#424](https://github.com/3dg1luk43/ha_washdata/issues/424)): the check for "this run already dried" ran at the Stop Threshold, while the drying allowance it guards is measured at 0.4% of the cycle's peak. On a Beko that ends drain, 1.3 W, 0.3 W, the check found no quiet and every cycle kept the full 611 s allowance (249 min stored for a 239 min wash). Both now use the same level; the one-time history correction runs again on upgrade and now also covers dishwasher timeout finishes. Replaying the reporter's 26 cycles: stored tail 10.0 to 0.0 min, nothing else moved. Thanks to @KoLSMS.
+
+- **A dishwasher that never pauses mid-programme reached Smart Termination never** ([#424](https://github.com/3dg1luk43/ha_washdata/issues/424)): the guard against ending one program early because it looks like the start of a longer one blocked every cycle, because a three-hour program shares the first hour of the two-hour one. Each cycle then waited out the fallback, an hour on dishwasher defaults. A longer program now only blocks when its own recorded cycles have paused below the Stop Threshold; this one never drops below 1.44 W until the machine switches off. Over 689 replayed cycle ends the guard's false blocks fall from 27.0% to 20.6% with the same split protection, and on 255 full replays no cycle ends earlier or splits. Thanks to @TRON4R for the exports and the analysis.
+
+- **A Stop Threshold below standby now corrects itself** ([#458](https://github.com/3dg1luk43/ha_washdata/issues/458)): the suggested Stop Threshold is 0.8 x the lowest power seen in a cycle, and a standby reading inside the trace made that 0.8 x standby (1.76 W on a 2.2 W idle), so no cycle could end and each ran to the 6 hour limit. When every recent cycle ends at standby, WashData now suggests a threshold 25% above it, only if your clean cycles never paused under that for half the Off Delay, and never one at or below standby. Thanks to @protik77.
+
+- **Force-stopped cycles stopped producing suggestions** ([#458](https://github.com/3dg1luk43/ha_washdata/issues/458)): hours of a stuck cycle's standby readings filled the update-interval statistics behind the Watchdog Interval and No-Update Timeout suggestions. Intervals now count only once a cycle ends on its own, and force- or user-stopped cycles no longer trigger the suggestion passes.
+
+- **A cycle whose trace was pruned kept getting flagged for review** ([#459](https://github.com/3dg1luk43/ha_washdata/issues/459)): the nightly health check scored cycles without their trace, which the model reads as ~99% suspect, so each new cycle past the trace limit put one old cycle in the review queue at 1% health. A cycle without a trace keeps its last real score, or shows none, and no longer counts towards the queue; its stale anomaly markers go with the trace. Thanks to @TRON4R.
+
+- **Power traces kept per program is now a setting** ([#459](https://github.com/3dg1luk43/ha_washdata/issues/459)): Settings, Timing & Watchdog, Housekeeping. Default 20, minimum 1; a change applies without a restart.
+
 ## 0.5.7 - Unreleased
 
 ### TL;DR

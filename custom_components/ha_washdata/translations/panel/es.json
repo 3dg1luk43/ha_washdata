@@ -1456,6 +1456,14 @@
       "doc": "Si una coincidencia en vivo a mitad de ciclo cae por debajo de esta puntuación, se borra la identificación provisional. Manténgalo un poco por debajo del Umbral de coincidencia para que una breve caída de la similitud no devuelva la pantalla al estado sin coincidencia.",
       "label": "Umbral de no coincidencia"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Cuántos ciclos más recientes de cada programa conservan su traza de potencia completa. Los ciclos más antiguos conservan su duración, energía y etiqueta, pero pierden la curva; su gráfico queda vacío y dejan de contribuir a la curva, el estado del perfil o las sugerencias del programa. Aumentar este valor permite inspeccionar más historial a costa de almacenamiento (normalmente 3-15 KB por ciclo). Reducirlo elimina las trazas adicionales en la siguiente limpieza, y volver a aumentarlo no podrá recuperarlas.",
+      "label": "Trazas de potencia conservadas por programa"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "El mismo límite para los ciclos que aún no tienen etiqueta de programa.",
+      "label": "Trazas de potencia conservadas (sin etiquetar)"
+    },
     "progress_reset_delay": {
       "doc": "Después de terminar, mantenga el progreso al 100% durante este tiempo para que Completado sea visible en los paneles antes de restablecerlo a Inactivo.",
       "label": "Retardo de reinicio de progreso"
@@ -1979,6 +1987,7 @@
       "sampling_interval": "Intervalo de actualización mediano observado en {cycles} ciclos limpios ({si}s).{excl}",
       "smoothing_window": "Dimensionado para suavizar ~30s de lecturas con un muestreo de {si}s ({samples} muestras).",
       "start_duration": "Se mantiene corto (~un intervalo de muestreo de {si}s) para que la detección empiece lo antes posible sin dejar de ignorar los picos de una sola muestra.",
+      "standby_floor": "Cada ciclo reciente seguía consumiendo {idle}W cuando terminó, por lo que un umbral por debajo de eso nunca podrá detectar que el electrodoméstico se apaga. Mantenido por encima; los {cycles} ciclos limpios registrados nunca bajaron por debajo durante más de {pause}s.",
       "thr_batch": "Se mantiene justo por encima de la potencia activa más baja en el p05 en {cycles} ciclos ({p05}W) para captar un arranque lo antes posible y que el umbral de parada quede por debajo de la potencia de funcionamiento más baja de la máquina.",
       "tol_per_profile": "p75 de la varianza de duración por perfil en {profiles} perfiles ({cycles} ciclos); los perfiles ajustados no se penalizan.",
       "tol_pooled": "Según la varianza de duración agrupada de {cycles} ciclos etiquetados recientes (desviación p95={dev}).",

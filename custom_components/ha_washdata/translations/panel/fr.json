@@ -1456,6 +1456,14 @@
       "doc": "Si une correspondance en direct en milieu de cycle tombe en dessous de ce score, l'identification provisoire est effacée. Gardez-le un peu en dessous du Seuil de correspondance afin qu'une brève baisse de similarité ne fasse pas repasser l'affichage à l'état sans correspondance.",
       "label": "Seuil de non-correspondance"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Combien de cycles les plus récents de chaque programme conservent leur trace de puissance complète. Les cycles plus anciens gardent leur durée, leur énergie et leur étiquette, mais perdent la courbe ; leur graphique devient vide et ils ne contribuent plus à la courbe, la qualité de profil ou les suggestions du programme. Augmenter cette valeur permet d'inspecter davantage l'historique au prix du stockage (généralement 3-15 KB par cycle). La diminuer supprime les traces supplémentaires lors du prochain nettoyage, et l'augmenter à nouveau ne permettra pas de les récupérer.",
+      "label": "Traces de puissance conservées par programme"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "La même limite pour les cycles qui n'ont pas encore de nom de programme.",
+      "label": "Traces de puissance conservées (sans étiquette)"
+    },
     "progress_reset_delay": {
       "doc": "Une fois terminé, maintenez la progression à 100 % pendant ce temps afin que Terminé soit visible sur les tableaux de bord avant de réinitialiser en mode veille.",
       "label": "Délai de réinitialisation de progression"
@@ -1979,6 +1987,7 @@
       "sampling_interval": "Intervalle de mise à jour médian observé sur {cycles} cycles propres ({si}s).{excl}",
       "smoothing_window": "Dimensionné pour lisser ~30s de mesures à un échantillonnage de {si}s ({samples} échantillons).",
       "start_duration": "Maintenu court (~un intervalle d'échantillonnage de {si}s) pour que la détection démarre le plus tôt possible tout en ignorant les pics ponctuels d'un seul échantillon.",
+      "standby_floor": "Chaque cycle récent consommait encore {idle}W à sa fin, donc un seuil en dessous ne pourra jamais détecter que l'appareil s'éteint. Maintenu au-dessus ; les {cycles} cycles propres enregistrés n'ont jamais chuté en dessous pendant plus de {pause}s.",
       "thr_batch": "Maintenu juste au-dessus de la puissance active la plus basse au p05 sur {cycles} cycles ({p05}W) pour qu'un démarrage soit détecté le plus tôt possible et que le seuil d'arrêt reste sous la puissance de fonctionnement la plus basse de la machine.",
       "tol_per_profile": "p75 de la variance de durée par profil sur {profiles} profils ({cycles} cycles) ; les profils resserrés ne sont pas pénalisés.",
       "tol_pooled": "D'après la variance de durée regroupée de {cycles} cycles récemment étiquetés (écart p95={dev}).",

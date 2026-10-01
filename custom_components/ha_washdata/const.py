@@ -383,6 +383,14 @@ DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.8
 DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
+# Lower bound for both trace caps (#459). 0 does not mean "keep none": the
+# retention slice `full_indices[-0:]` is the whole list, so it kept every trace,
+# and a negative cap stripped in an order nobody chose. Clamped on write.
+MIN_FULL_TRACES = 1
+# A cycle needs at least this many trace points before its ML health is scored
+# (#459). It is the same floor `quality_features` uses before it falls back to a
+# `has_trace = 0` row, which no model was trained on.
+ML_HEALTH_MIN_TRACE_POINTS = 4
 DEFAULT_WATCHDOG_INTERVAL = 30  # Floor; effective default is resolved per device
 # as max(this, 2*sampling_interval + 1) - see resolve_watchdog_interval_default (#396).
 DEFAULT_MATCH_PERSISTENCE = 3
@@ -756,6 +764,23 @@ SMART_TERM_PREFIX_MIN_RATIO = 1.10     # noise guard: ignore near-equal duration
 SMART_TERM_PREFIX_MAX_CANDIDATES = 3   # cap prefix scorings per match (cost control)
 SMART_TERM_PREFIX_MIN_POINTS = 12      # mirrors the matcher's >=12-sample floor
 SMART_TERM_PREFIX_MIN_COVERAGE = 0.90  # template span must cover >=90% of its duration
+
+# (c) Pause evidence (#424).  Both terms above ask whether the trace LOOKS like the
+# start of a longer programme; neither asks whether that programme could be quiet
+# right now.  Smart Termination only runs in ENDING, i.e. after the power has sat
+# below `stop_threshold_w`, so a longer candidate can only explain the moment if it
+# is a programme that pauses below that threshold mid-cycle.  A candidate whose
+# stored cycles never once did is not a prefix explanation, and it no longer blocks.
+# Measured with `devtools/prefix_guard_eval.py --quiet-cuts` (leave-one-out, on the
+# item-303 grid, every genuine end judged after 300 s of ENDING quiet): the two
+# terms fired on 186 of 689 genuine cycle ends (27.0%), each one pushed onto the
+# fallback timeout - for a dishwasher on defaults, an hour.  With this, 142
+# (20.6%).  The population a split can actually come from - a below-threshold
+# mid-cycle pause of >= 300 s that power later resumed from, with a shorter
+# programme winning at >= 0.9x its own length - occurs only 3 times in the corpus,
+# and is caught exactly as before (1 of 3).  Any stored pause of this length keeps
+# the guard; a programme with no traced evidence keeps it too.
+SMART_TERM_PREFIX_MIN_PAUSE_S = 60.0
 
 # (b) Power plausibility (fixes 1, the untrained case, which no candidate-pool guard
 # can reach).  Both Smart-Termination paths key on `elapsed >= 0.98 * expected` and
@@ -1457,7 +1482,10 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 # training labels and the feedback queue, and is retention-evicted oldest-first) nor
 # `reference_cycles` (curated community-store templates, golden by construction).
 # Additive `setdefault`, so it is idempotent and loses nothing.
-STORAGE_VERSION = 13
+# v13: marker-only, arms the one-time banked-tail repair (register item 297).
+# v14: marker-only, re-arms it (#424): the v13 pass judged the drying phase at the
+# wrong threshold and skipped dishwasher timeout finishes.
+STORAGE_VERSION = 14
 STORAGE_KEY = "ha_washdata"
 
 # ─── Config-entry schema version (NOT the storage version above) ───────────────

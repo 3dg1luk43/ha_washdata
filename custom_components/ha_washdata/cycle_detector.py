@@ -30,6 +30,7 @@ from homeassistant.util import dt as dt_util
 
 from .log_utils import DeviceLoggerAdapter
 from .const import (
+    TERMINAL_EVENT_PEAK_FRAC,
     ANTI_WRINKLE_ELIGIBLE_REASONS,
     TerminationReason,
     STATE_OFF,
@@ -120,7 +121,7 @@ if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
 from .signal_processing import (
     energy_gap_threshold_s,
     integrate_wh,
-    quiet_run_before,
+    terminal_quiet_seen,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -3721,6 +3722,11 @@ class CycleDetector:
         # question; this path did not, so the same cycle got one duration live and
         # another when the repair re-judged it. Same helper, same 0.5 bar, so the
         # two cannot drift again (register item 347).
+        #
+        # And it has to ask at the threshold the allowance was MEASURED at (#424):
+        # see `terminal_quiet_seen` for the Beko that banked 10 min on every cycle
+        # because this test ran at the stop threshold while the statistic it
+        # guards is taken at a fraction of the cycle's peak.
         if self._current_cycle_start is not None and self._power_readings:
             _start = self._current_cycle_start
             _pts = [
@@ -3728,9 +3734,13 @@ class CycleDetector:
                 for ts, pw in self._power_readings
             ]
             _last_off = (last_active - _start).total_seconds()
-            if quiet_run_before(
-                _pts, _last_off, self._config.stop_threshold_w
-            ) >= 0.5 * float(quiet):
+            if terminal_quiet_seen(
+                _pts,
+                _last_off,
+                self._config.stop_threshold_w,
+                float(quiet),
+                TERMINAL_EVENT_PEAK_FRAC,
+            ):
                 return last_active
         return last_active + timedelta(seconds=min(quiet, TERMINAL_QUIET_CAP_S))
 

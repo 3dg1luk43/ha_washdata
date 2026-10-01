@@ -206,6 +206,10 @@ const _SETTINGS_SECTIONS = [
         doc: 'After finishing, hold progress at 100% for this long so Completed is visible on dashboards before resetting to Idle.' },
       { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', type: 'checkbox', def: true,
         doc: 'Run nightly housekeeping: rebuild profile envelopes, recompute cycle health, prune debug traces and retain the most recent cycles.' },
+      { key: 'max_full_traces_per_profile', label: 'Power Traces Kept per Program', type: 'number', min: 1, step: 1, def: 20,
+        doc: 'How many of each program\'s most recent cycles keep their full power trace. Older cycles keep their duration, energy and label but lose the curve, so their chart is empty and they no longer count towards the program\'s curve, health or suggestions. Raising this keeps more history inspectable at the cost of storage (typically 3-15 KB per cycle). Lowering it deletes the extra traces at the next cleanup, and raising it again cannot bring them back.' },
+      { key: 'max_full_traces_unlabeled', label: 'Power Traces Kept (Unlabelled)', type: 'number', min: 1, step: 1, def: 20,
+        doc: 'The same limit for cycles that have no program label yet.' },
       { key: 'power_profile_interval_min', label: 'Power Profile Interval', unit: 'min', type: 'number', min: 1, def: 15,
         doc: 'Bucket size for the per-profile power_profile sensor attribute (the flat per-slot average-watts array consumed by external planners such as EMHASS and tibber_prices). Smaller buckets keep short power spikes sharp; larger buckets smooth the shape. Default 15 min. Read-time only; does not affect detection.' },
     ] },
@@ -4868,7 +4872,9 @@ class HaWashdataPanel extends HTMLElement {
       if (fbIds.has(c.id)) return true;
       if (isReviewed(c)) return false;
       const m = mlOf(c);
-      const lbl = m && m.ml_quality_label;
+      // A health label only counts while the trace it judged is still stored
+      // (#459): retention pruning is a storage decision, not a quality finding.
+      const lbl = m && m.has_power_data !== false && m.ml_quality_label;
       return ['uncertain', 'review'].includes(lbl) || ['force_stopped', 'interrupted'].includes(c.status);
     };
     const needsReviewCount = allCycles.filter(needsReview).length;
@@ -10477,7 +10483,8 @@ class HaWashdataPanel extends HTMLElement {
     // user who saw the "needs review" dot there knows to click Review here.)
     const rvw = (ml && ml.ml_review) || {};
     const hasPendingFb = (this._feedbacks || []).some(f => f.cycle_id === m.cycleId);
-    const qLabel = ml && ml.ml_quality_label;
+    // Same trace rule as the Cycles list (#459).
+    const qLabel = ml && ml.has_power_data !== false && ml.ml_quality_label;
     const needsReview = !rvw.reviewed_at && (
       hasPendingFb ||
       ['uncertain', 'review'].includes(qLabel) ||

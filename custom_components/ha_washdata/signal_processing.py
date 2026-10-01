@@ -475,3 +475,110 @@ def quiet_run_before(
     if prev_active is None:
         return 0.0
     return max(0.0, run_start - prev_active)
+
+
+def terminal_quiet_seen(
+    points: list[tuple[float, float]],
+    last_active: float,
+    stop_threshold_w: float,
+    quiet_s: float,
+    peak_frac: float,
+) -> bool:
+    """Has this trace ALREADY been through the quiet phase its profile ends with?
+
+    ``quiet_s`` is ``compute_profile_terminal_signature``'s ``quiet_before_s``: the
+    quiet measured before the LAST run above ``peak * peak_frac`` of each cycle.
+    A kept tail may add up to that much past the last activity, on the reasoning
+    that a run which has not yet dried is still drying - so the allowance must be
+    withheld when this run already did.
+
+    Asked two ways, and either one answers yes (shorten-only):
+
+    * at ``stop_threshold_w``, from ``last_active`` - the original test (register
+      item 347);
+    * at the SIGNATURE'S OWN threshold, from the last sample above it (#424). The
+      statistic and the test of whether it has happened must use the same level.
+      On #424's Beko the quiet is measured at 7.9 W (0.4% of a 1.97 kW peak) while
+      its stop threshold is 0.96 W; its run ends 15-20 W drain -> 1.3 W -> 0.3 W,
+      so at the stop threshold the last activity is the 1.3 W wind-down sample,
+      preceded by the drain, and the test found no quiet at all. Every cycle then
+      banked the full 611 s allowance as cycle time. At 7.9 W the same traces show
+      605-630 s of quiet, i.e. the phase had happened.
+
+    Shared by ``CycleDetector._keep_tail_cap`` and the banked-tail repair so a
+    cycle is judged the same way live and in history. Pure; never raises.
+    """
+    try:
+        if quiet_s <= 0 or not points:
+            return False
+        need = 0.5 * float(quiet_s)
+        if quiet_run_before(points, last_active, stop_threshold_w) >= need:
+            return True
+        peak = max(p for _o, p in points)
+        if peak <= 0:
+            return False
+        thr = peak * peak_frac
+        last_event: float | None = None
+        for offset, power in reversed(points):
+            if power > thr:
+                last_event = offset
+                break
+        if last_event is None:
+            return False
+        return quiet_run_before(points, last_event, thr) >= need
+    except Exception:  # noqa: BLE001 - a statistic must never break a finish
+        return False
+
+
+def has_resumed_pause(
+    points: Sequence[tuple[float, float]], threshold_w: float, min_pause_s: float
+) -> bool:
+    """Does this trace hold a pause below ``threshold_w`` of ``min_pause_s`` or more
+    that power later came back from? (#424)
+
+    Timed on the wall clock from the first below-threshold sample to the next one at
+    or above it, so a change-only plug that reports one 0 W row and then nothing
+    still counts its silence. A run still open at the end of the trace never
+    resumed: that is the cycle's own end, not a pause. Pure; never raises.
+    """
+    try:
+        first_below: float | None = None
+        for offset, power in points:
+            if power < threshold_w:
+                if first_below is None:
+                    first_below = offset
+            elif first_below is not None:
+                if offset - first_below >= min_pause_s:
+                    return True
+                first_below = None
+        return False
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def longest_resumed_pause_s(
+    points: Sequence[tuple[float, float]], threshold_w: float, *, skip_leading: bool = True
+) -> float:
+    """Longest pause below ``threshold_w`` that power later came back from (#458).
+
+    Timed like :func:`has_resumed_pause`. With ``skip_leading`` a run that starts on
+    the trace's first sample is ignored: that is standby before the cycle began (a
+    curve pre-roll), which the end gates never see. A run still open at the end of
+    the trace is the cycle's own end and is ignored too. Pure; never raises.
+    """
+    try:
+        best = 0.0
+        first_below: float | None = None
+        leading = True
+        for offset, power in points:
+            if power < threshold_w:
+                if first_below is None:
+                    first_below = offset
+            else:
+                if first_below is not None and not (skip_leading and leading):
+                    best = max(best, offset - first_below)
+                first_below = None
+                leading = False
+        return best
+    except Exception:  # noqa: BLE001
+        return 0.0

@@ -1473,6 +1473,14 @@
       "doc": "Ak živá zhoda v strede cyklu klesne pod toto skóre, predbežná identifikácia sa vymaže. Udržujte ho trochu pod Prahom zhody, aby krátky pokles podobnosti neprepol zobrazenie späť na stav bez zhody.",
       "label": "Prah nezhody"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Koľko najnovších cyklov každého programu si uchováva úplný priebeh výkonu. Staršie cykly si uchovávajú trvanie, energiu a štítok, ale prichádzajú o krivku, takže ich graf je prázdny a do krivky, zdravia ani návrhov programu sa viac nezapočítavajú. Zvýšením sa uchová viac histórie na prehliadanie za cenu väčšieho úložiska (zvyčajne 3–15 KB na cyklus). Znížením sa priebehy odstrania pri ďalšom nočnom čistení a opätovným zvýšením ich nemožno obnoviť.",
+      "label": "Priebehy výkonu uchovávané na program"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Rovnaký limit pre cykly, ktoré ešte nemajú štítok programu.",
+      "label": "Priebehy výkonu uchovávané (bez štítku)"
+    },
     "progress_reset_delay": {
       "doc": "Po dokončení podržte priebeh na 100 % na túto dlhú dobu, aby sa pred resetovaním do stavu nečinnosti na paneloch zobrazilo Dokončené.",
       "label": "Oneskorenie obnovenia priebehu"
@@ -1854,6 +1862,7 @@
       "sampling_interval": "Mediánový interval aktualizácie pozorovaný naprieč {cycles} čistými cyklami ({si}s).{excl}",
       "smoothing_window": "Nastavené na vyhladenie ~30s odčítaní pri vzorkovaní {si}s ({samples} vzoriek).",
       "start_duration": "Ponechané krátke (~jeden interval vzorkovania {si}s), aby detekcia začínala čo najskôr a pritom ignorovala jednotlivé špičky.",
+      "standby_floor": "Každý nedávny cyklus stále odoberával {idle}W v okamihu ukončenia, takže prah pod touto hodnotou nikdy nezaznamená vypnutie spotrebiča. Bol ponechaný nad ňou; {cycles} čistých cyklov v zázname nikdy nekleslo pod neho na dlhšie ako {pause}s.",
       "thr_batch": "Ponechané tesne nad najnižším činným výkonom p05 naprieč {cycles} cyklami ({p05}W), aby sa štart zachytil čo najskôr a prah zastavenia zostal pod najnižším prevádzkovým výkonom stroja.",
       "tol_per_profile": "p75 rozptylu dĺžky podľa profilu naprieč {profiles} profilmi ({cycles} cyklov); konzistentné profily nie sú penalizované.",
       "tol_pooled": "Na základe zlúčeného rozptylu dĺžky {cycles} nedávnych označených cyklov (odchýlka p95={dev}).",

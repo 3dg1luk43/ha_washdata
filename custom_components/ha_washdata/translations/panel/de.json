@@ -1505,6 +1505,14 @@
       "doc": "Wenn eine laufende Übereinstimmung mitten im Zyklus unter diesen Wert fällt, wird die vorläufige Identifizierung gelöscht. Halten Sie den Wert etwas unter dem Abgleichschwellenwert, damit ein kurzer Rückgang der Ähnlichkeit die Anzeige nicht wieder auf „Nicht zugeordnet“ zurückspringen lässt.",
       "label": "Nichtübereinstimmungsschwellenwert"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Wie viele der neuesten Zyklen jedes Programms ihren vollständigen Leistungs-Trace behalten. Ältere Zyklen behalten Dauer, Energie und Label, verlieren jedoch die Kurve - ihr Diagramm ist dann leer und sie zählen nicht mehr zur Kurve, Gesundheit oder Vorschlägen des Programms. Ein höherer Wert hält mehr Verlauf inspizierbar, auf Kosten des Speichers (typischerweise 3-15 KB pro Zyklus). Ein niedrigerer Wert löscht die überzähligen Traces bei der nächsten Bereinigung; ein erneutes Erhöhen kann sie nicht wiederherstellen.",
+      "label": "Leistungs-Traces je Programm"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Dasselbe Limit für Zyklen, denen noch kein Programm-Label zugewiesen wurde.",
+      "label": "Leistungs-Traces (unbeschriftet)"
+    },
     "progress_reset_delay": {
       "doc": "Halten Sie den Fortschritt nach Abschluss so lange auf 100 %, damit „Abgeschlossen“ auf den Dashboards angezeigt wird, bevor Sie auf „Leerlauf“ zurücksetzen.",
       "label": "Fortschritts-Reset-Verzögerung"
@@ -1886,6 +1894,7 @@
       "sampling_interval": "Median-Aktualisierungsintervall, beobachtet über {cycles} saubere Zyklen ({si}s).{excl}",
       "smoothing_window": "So bemessen, dass ~30s an Messwerten bei {si}s-Abtastung geglättet werden ({samples} Messwerte).",
       "start_duration": "Kurz gehalten (~ein {si}s-Abtastintervall), damit die Erkennung so früh wie möglich beginnt, einzelne Messwertspitzen aber weiterhin ignoriert werden.",
+      "standby_floor": "Jeder aktuelle Zyklus zog beim Ende noch {idle}W, sodass ein Schwellenwert darunter niemals das Ausschalten des Geräts erkennen kann. Über diesem Wert gehalten; die {cycles} sauberen Zyklen im Verlauf haben darunter nie länger als {pause}s pausiert.",
       "thr_batch": "Knapp über der p05-niedrigsten aktiven Leistung über {cycles} Zyklen ({p05}W) gehalten, damit ein Start so früh wie möglich erkannt wird und die Stopp-Schwelle unter der niedrigsten Betriebsleistung der Maschine bleibt.",
       "tol_per_profile": "p75 der Dauervarianz pro Profil über {profiles} Profile ({cycles} Zyklen); enge Profile werden nicht benachteiligt.",
       "tol_pooled": "Basierend auf der zusammengefassten Dauervarianz von {cycles} kürzlich gelabelten Zyklen (p95-Abweichung={dev}).",

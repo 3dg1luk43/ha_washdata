@@ -1624,6 +1624,14 @@
       "doc": "If a live mid-cycle match drops below this score, the tentative identification is cleared. Keep it a little below the Match Threshold so a brief dip in similarity does not flip the display back to unmatched.",
       "label": "Unmatch Threshold"
     },
+    "max_full_traces_per_profile": {
+      "doc": "How many of each program's most recent cycles keep their full power trace. Older cycles keep their duration, energy and label but lose the curve, so their chart is empty and they no longer count towards the program's curve, health or suggestions. Raising this keeps more history inspectable at the cost of storage (typically 3-15 KB per cycle). Lowering it deletes the extra traces at the next cleanup, and raising it again cannot bring them back.",
+      "label": "Power Traces Kept per Program"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "The same limit for cycles that have no program label yet.",
+      "label": "Power Traces Kept (Unlabelled)"
+    },
     "progress_reset_delay": {
       "doc": "After finishing, hold progress at 100% for this long so Completed is visible on dashboards before resetting to Idle.",
       "label": "Progress Reset Delay"
@@ -1890,6 +1898,7 @@
       "min_active": "Based on minimum active power ({min}W) observed in last cycle.",
       "end_energy_default": "Default recommended baseline for end-of-cycle noise gate.",
       "dead_zone_from_dip": "Based on early power dip detected at {s}s.",
+      "standby_floor": "Every recent cycle was still drawing {idle}W when it ended, so a threshold below that can never see the appliance switch off. Kept above it; the {cycles} clean cycles on record never paused under it for more than {pause}s.",
       "thr_batch": "Kept just above the p05 lowest active power across {cycles} cycles ({p05}W) so a start is caught as early as possible and the stop threshold stays below the machine's lowest running power.",
       "end_energy_false": "p95 false-end energy ({p95}Wh) across {cycles} cycles, floored at 0.2% of median cycle energy ({floor}Wh).",
       "end_energy_no_false": "No false ends across {cycles} cycles; floored at 0.2% of median cycle energy ({floor}Wh).",

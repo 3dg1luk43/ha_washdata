@@ -1509,6 +1509,14 @@
       "doc": "Kui reaalajas tsükli keskel toimuv matš langeb sellest punktist allapoole, siis esialgne tuvastamine kustutatakse. Hoidke seda veidi allpool sobivusläve, nii et lühike sarnasuse langus ei muudaks ekraani uuesti võrreldamatuks.",
       "label": "Mitte-Vaste Lävi"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Mitu viimast tsüklit säilivad iga programmi korral koos täieliku võimsusjäljega. Vanemad tsüklid säilitavad kestuse, energia ja märgistuse, kuid kaotavad kõvera – nende graafik jääb tühjaks ja need ei arvesta enam programmi kõvera, tervise ega soovituste juures. Väärtuse suurendamine hoiab rohkem ajalugu vaadeldavana salvestusruumi arvel (tavaliselt 3-15 KB tsükli kohta). Vähendamine kustutab üleliigsed jäljed järgmisel öisel puhastamisel; suurendamine ei suuda neid tagasi tuua.",
+      "label": "Salvestatavad Võimsusjäljed Programmi Kohta"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Sama piirang tsüklite jaoks, millele ei ole veel programmi märgistust määratud.",
+      "label": "Salvestatavad Võimsusjäljed (Märgistamata)"
+    },
     "progress_reset_delay": {
       "doc": "Pärast lõpetamist hoidke edenemist nii kaua 100% juures, et enne jõudeolekule lähtestamist oleks armatuurlaudadel näha tekst Lõpetatud.",
       "label": "Edenemise Lähtestamise Viivitus"
@@ -2032,6 +2040,7 @@
       "sampling_interval": "Uuendusintervalli mediaan, mis täheldati {cycles} puhta tsükli lõikes ({si}s).{excl}",
       "smoothing_window": "Mõõdetud silumaks umbes 30s lugemeid {si}s diskreetimissammuga ({samples} näidet).",
       "start_duration": "Hoitakse lühike (~üks {si}s diskreetimissamm), et tuvastus algaks võimalikult vara, kuid eiraks siiski üksiknäite piike.",
+      "standby_floor": "Iga viimane tsükkel tarbis lõppedes endiselt {idle} W, seega alla selle jääv lävi ei tuvasta kunagi seadme väljalülitumist. Hoitud sellest kõrgemal; salvestatud {cycles} puhast tsüklit ei ole kunagi peatunud selle all üle {pause} s.",
       "thr_batch": "Hoitakse veidi üle madalaima aktiivvõimsuse p05 juures {cycles} tsükli lõikes ({p05}W), et käivitus tuvastataks võimalikult vara ja seiskamislävi jääks alla masina madalaima töövõimsuse.",
       "tol_per_profile": "p75 profiilipõhisest kestuse dispersioonist {profiles} profiili lõikes ({cycles} tsüklit); kitsaid profiile ei karistata.",
       "tol_pooled": "Põhineb {cycles} viimase märgistatud tsükli koondkestuse dispersioonil (p95 hälve={dev}).",

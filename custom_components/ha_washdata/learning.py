@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections import deque
 from datetime import datetime
 from collections.abc import Callable
 from typing import Any, Optional, TYPE_CHECKING
@@ -40,6 +41,7 @@ from .const import (
     MIN_SUGGESTION_COOLDOWN_CYCLES,
     MIN_SUGGESTION_REL_DELTA,
     ML_QUALITY_SUSPICIOUS_THRESHOLD,
+    TerminationReason,
 )
 from .suggestion_engine import SuggestionEngine
 from .log_utils import DeviceLoggerAdapter
@@ -68,6 +70,14 @@ def _suggestion_min_abs_delta(key: str) -> float:
     if key.endswith(("_count", "_window", "_repeat")):
         return 1.0      # Integer count: less than 1 is a no-op
     return 0.05
+
+
+def _ended_on_its_own(cycle: dict[str, Any]) -> bool:
+    """Completed, and not cut short by the user (#458; cf. ``select_clean_cycles``)."""
+    return (
+        cycle.get("status") == "completed"
+        and cycle.get("termination_reason") != TerminationReason.USER
+    )
 
 
 class StatisticalModel:
@@ -138,6 +148,13 @@ class LearningManager:
 
         # Operational Stats
         self._sample_interval_model = StatisticalModel(max_samples=200)
+        # Update intervals seen during the CURRENT cycle, held back until it ends
+        # (#458). A cycle that never ends on its own - force-stopped after hours of
+        # a plug reporting standby at its idle cadence - would otherwise fill the
+        # whole 200-sample window with that idle cadence, and the watchdog and
+        # no-update timeouts would be re-suggested from it every five minutes.
+        # Bounded like the model itself: only its last 200 survive a commit anyway.
+        self._pending_intervals: deque[tuple[float, datetime]] = deque(maxlen=200)
         self._last_suggestion_update: datetime | None = None
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
         self._last_suggestions_labeled_count: int = 0  # gate model/detection passes
@@ -204,7 +221,7 @@ class LearningManager:
                         # After the user applies suggestions, wait for a few more
                         # cycles before surfacing new ones (avoids immediately
                         # re-suggesting a slightly-different value on the next cycle).
-                        if cooldown_active:
+                        if cooldown_active and not data.get("corrective"):
                             continue
 
                     except (TypeError, ValueError):
@@ -226,7 +243,8 @@ class LearningManager:
             delta = (now - last_reading_time).total_seconds()
             # Ignore ultra-small jitter (<0.1s) and massive gaps (>1800s - likely downtime)
             if 0.1 < delta < 1800:
-                self._sample_interval_model.add_sample(delta, now)
+                # Held until the cycle's outcome is known (#458): see close_cycle_cadence.
+                self._pending_intervals.append((delta, now))
 
         # Periodically update suggestions based on operational stats
         if (
@@ -234,6 +252,35 @@ class LearningManager:
             or (now - self._last_suggestion_update).total_seconds() > 300  # Check every 5 mins
         ):
             self._update_operational_suggestions(now)
+
+    def close_cycle_cadence(self, cycle_data: dict[str, Any] | None) -> bool:
+        """Commit or drop the update intervals held for the cycle that just ended.
+
+        Committed only when the cycle ended on its own (``status == "completed"``
+        and not user-stopped): the same line ``select_clean_cycles`` draws, and for
+        the same reason (#458). A force-stopped or user-stopped cycle's intervals
+        describe however long the plug sat reporting standby before something gave
+        up, not how the appliance reports while it works. Called for EVERY cycle
+        end, persisted or not, so one cycle's intervals can never leak into the
+        next. Returns whether anything was committed.
+        """
+        pending = list(self._pending_intervals)
+        self._pending_intervals.clear()
+        if not pending or not isinstance(cycle_data, dict):
+            return False
+        if cycle_data.get("status") != "completed":
+            return False
+        if cycle_data.get("termination_reason") in (
+            TerminationReason.USER,
+            TerminationReason.FORCE_STOPPED,
+        ):
+            return False
+        for delta, ts in pending:
+            self._sample_interval_model.add_sample(delta, ts)
+        # The periodic refresh only runs while a cycle is active, so surface what
+        # this cycle taught now rather than at the start of the next one.
+        self._update_operational_suggestions(pending[-1][1])
+        return True
 
     def process_cycle_end(
         self,
@@ -265,6 +312,13 @@ class LearningManager:
         if _is_clean:
             self.hass.async_create_task(self._async_run_simulation(cycle_data))
 
+        # 1b. Standby above the stop threshold (#458). Every cycle end, whatever its
+        # status: a force-stopped cycle is the evidence this pass exists for.
+        self._dispatch_scan_and_apply(
+            self.suggestion_engine.for_job().generate_standby_floor_suggestions,
+            "Standby floor",
+        )
+
         # 2. Check if we should request feedback
         self._maybe_request_feedback(
             cycle_data, detected_profile, confidence, predicted_duration, match_result
@@ -273,12 +327,15 @@ class LearningManager:
         # 3+3b. Heavy per-profile suggestion passes — only run when the labeled
         # cycle count has grown since the last update (skips passes for unlabeled /
         # noise / duplicate ends with no new data).
+        # New EVIDENCE, not new rows (#458): a force-stopped or user-stopped cycle
+        # is dropped by `select_clean_cycles` inside every pass this gates, so
+        # counting it re-ran them on unchanged data.
         labeled_count = sum(
             1 for c in self.profile_store.get_past_cycles()
             if isinstance(c, dict)
             and c.get("profile_name")
             and c.get("profile_name") != "noise"
-            and c.get("status") in ("completed", "force_stopped")
+            and _ended_on_its_own(c)
         )
         if labeled_count > self._last_suggestions_labeled_count:
             self._last_suggestions_labeled_count = labeled_count
@@ -301,7 +358,10 @@ class LearningManager:
             and c.get("power_data")
             and c.get("status") in ("completed", "force_stopped")
         ]
-        current_count = len(labeled_cycles)
+        # The list still carries force-stopped cycles - the min_off_gap merge
+        # ceiling needs the user's real turnaround - but only cycles that ended
+        # on their own are new evidence for the re-run cadence (#458).
+        current_count = sum(1 for c in labeled_cycles if _ended_on_its_own(c))
 
         if current_count < _BATCH_MIN:
             return

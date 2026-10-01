@@ -1497,6 +1497,14 @@
             "doc": "Canlı bir döngü ortası eşleşme puanı bu puanın altına düşerse, geçici tanımlama silinir. Eşleşme Eşiğinin biraz altında tutun, böylece benzerlikteki kısa bir düşüş ekranı yeniden eşleşmedi durumuna döndürmez.",
             "label": "Eşleşmeme Eşiği"
         },
+        "max_full_traces_per_profile": {
+            "doc": "Her programın en son döngülerinden kaç tanesinin tam güç izini sakladığını belirler. Eski döngüler süre, enerji ve etiket bilgilerini korur ancak eğriyi kaybeder; grafikleri boş kalır ve programın eğrisine, sağlığına veya önerilerine artık katkıda bulunmazlar. Bu değeri artırmak, daha fazla geçmişin incelenebilir kalmasını sağlar; ancak depolama alanı kullanımını artırır (genellikle döngü başına 3-15 KB). Düşürmek, bir sonraki temizlikte fazladan izleri siler; yeniden artırmak ise onları geri getiremez.",
+            "label": "Program Başına Saklanan Güç İzleri"
+        },
+        "max_full_traces_unlabeled": {
+            "doc": "Program etiketi henüz atanmamış döngüler için aynı sınır.",
+            "label": "Saklanan Güç İzleri (Etiketsiz)"
+        },
         "progress_reset_delay": {
             "doc": "Bitirdikten sonra, bu süre boyunca ilerlemeyi %100'de tutun; böylece Tamamlandı, Boşta durumuna sıfırlamadan önce kontrol panellerinde görünür.",
             "label": "İlerleme Sıfırlama Gecikmesi"
@@ -2030,6 +2038,7 @@
             "sampling_interval": "{cycles} temiz çevrim boyunca gözlemlenen medyan güncelleme aralığı ({si}s).{excl}",
             "smoothing_window": "{si}s örnekleme ile ~30s'lik okumaları yumuşatacak şekilde boyutlandırıldı ({samples} örnek).",
             "start_duration": "Kısa tutuldu (~bir {si}s örnekleme aralığı), böylece tek örneklik ani sıçramalar yok sayılırken algılama olabildiğince erken başlar.",
+            "standby_floor": "Son döngülerin her biri bittiğinde hâlâ {idle} W çekiyordu; dolayısıyla bunun altındaki bir eşik, cihazın kapandığını hiçbir zaman göremez. Eşik bunun üzerinde tutuldu; kayıttaki {cycles} temiz döngü hiçbir zaman bunun altında {pause} saniyeden uzun süre kalmadı.",
             "thr_batch": "{cycles} çevrim boyunca p05 en düşük aktif gücün ({p05}W) hemen üzerinde tutuldu; böylece başlangıç olabildiğince erken yakalanır ve durdurma eşiği makinenin en düşük çalışma gücünün altında kalır.",
             "tol_per_profile": "{profiles} profil boyunca ({cycles} çevrim) profil başına süre varyansının p75'i; tutarlı profiller cezalandırılmaz.",
             "tol_pooled": "{cycles} son etiketli çevrimin birleştirilmiş süre varyansına dayalı (p95 sapma={dev}).",

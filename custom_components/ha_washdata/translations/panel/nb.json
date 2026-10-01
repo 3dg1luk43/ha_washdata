@@ -1509,6 +1509,14 @@
       "doc": "Hvis et direkte samsvar midt i syklusen faller under denne poengsummen, slettes den tentative identifikasjonen. Hold den litt under Samsvarsterskel, slik at et kort fall i likhet ikke setter visningen tilbake til uten treff.",
       "label": "Ikke-samsvarsterskel"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Hvor mange av hvert programs nyeste sykluser som beholder sine fullstendige effektspor. Eldre sykluser beholder varighet, energi og etikett, men mister kurven - diagrammet er da tomt og de teller ikke lenger med i programmets kurve, helse eller forslag. En høyere verdi gjør mer historikk inspiserbar, på bekostning av lagringsplass (vanligvis 3-15 KB per syklus). En lavere verdi sletter de ekstra sporene ved neste opprydding; å heve den igjen kan ikke gjenopprette dem.",
+      "label": "Lagrede effektspor per program"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Den samme grensen for sykluser som ennå ikke har en programetikett.",
+      "label": "Lagrede effektspor (umerket)"
+    },
     "progress_reset_delay": {
       "doc": "Etter å ha fullført, hold fremdriften på 100 % så lenge, slik at Fullført er synlig på dashbord før du tilbakestiller til inaktiv.",
       "label": "Fremdriftsreset-forsinkelse"
@@ -1886,6 +1894,7 @@
       "sampling_interval": "Median for oppdateringsintervallet observert på tvers av {cycles} rene sykluser ({si}s).{excl}",
       "smoothing_window": "Dimensjonert for å jevne ut ~30s med avlesninger ved {si}s sampling ({samples} prøver).",
       "start_duration": "Holdt kort (~ett samplingsintervall på {si}s) slik at deteksjonen starter så tidlig som mulig, men fortsatt ignorerer enkelttopper.",
+      "standby_floor": "Alle nylige sykluser trakk fortsatt {idle}W da de ble avsluttet, slik at en terskel under dette aldri kan registrere at apparatet slår seg av. Holdt over dette nivået; de {cycles} rene syklusene i oversikten pauserte aldri under det i mer enn {pause}s.",
       "thr_batch": "Holdt like over den laveste aktive effekten ved p05 på tvers av {cycles} sykluser ({p05}W) slik at en start fanges så tidlig som mulig og stoppterskelen holder seg under maskinens laveste driftseffekt.",
       "tol_per_profile": "p75 for varighetsvariansen per profil på tvers av {profiles} profiler ({cycles} sykluser); stramme profiler straffes ikke.",
       "tol_pooled": "Basert på samlet varighetsvarians for {cycles} nyeste merkede sykluser (p95 avvik={dev}).",

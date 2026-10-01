@@ -1477,6 +1477,14 @@
       "doc": "Ako podudaranje uživo usred ciklusa padne ispod ovog rezultata, privremena identifikacija se briše. Držite ga malo ispod Praga podudaranja kako kratak pad sličnosti ne bi vratio prikaz nazad na stanje bez podudaranja.",
       "label": "Prag nepodudaranja"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Koliko od najnovijih ciklusa svakog programa zadržava pun trag snage. Stariji ciklusi zadržavaju trajanje, energiju i oznaku, ali gube krivu, pa je njihov grafikon prazan i više ne doprinose krivoj, zdravlju ni predlozima programa. Povećanje čuva više istorije za pregled uz veće korišćenje prostora za skladištenje (obično 3–15 KB po ciklusu). Smanjenje briše dodatne tragove pri sledećem noćnom čišćenju, i ponovnim povećanjem ih nije moguće vratiti.",
+      "label": "Tragovi snage zadržani po programu"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Isti limit za cikluse koji još nemaju oznaku programa.",
+      "label": "Tragovi snage zadržani (neoznačeno)"
+    },
     "progress_reset_delay": {
       "doc": "Nakon što završite, držite napredak na 100% toliko dugo kako bi Završeno bilo vidljivo na kontrolnoj tabli pre nego što se vratite na stanje mirovanja.",
       "label": "Kašnjenje resetovanja napretka"
@@ -1854,6 +1862,7 @@
       "sampling_interval": "Medijana intervala ažuriranja uočena kroz {cycles} čistih ciklusa ({si}s).{excl}",
       "smoothing_window": "Postavljeno za izglađivanje ~30s očitavanja pri uzorkovanju od {si}s ({samples} uzoraka).",
       "start_duration": "Zadržano kratkim (~jedan interval uzorkovanja od {si}s) kako bi prepoznavanje počelo što ranije, uz zanemarivanje pojedinačnih skokova.",
+      "standby_floor": "Svaki nedavni ciklus je još uvek trošio {idle}W kada je završio, pa prag ispod toga nikad ne može registrovati isključenje uređaja. Zadržan je iznad te vrednosti; {cycles} čistih ciklusa u evidenciji nikada nije palo ispod njega na duže od {pause}s.",
       "thr_batch": "Zadržano tik iznad najniže radne snage p05 kroz {cycles} ciklusa ({p05}W) kako bi se početak uhvatio što ranije, a prag zaustavljanja ostao ispod najniže radne snage mašine.",
       "tol_per_profile": "p75 varijanse trajanja po profilu kroz {profiles} profila ({cycles} ciklusa); dosledni profili nisu kažnjeni.",
       "tol_pooled": "Na osnovu objedinjene varijanse trajanja {cycles} novijih označenih ciklusa (p95 odstupanje={dev}).",

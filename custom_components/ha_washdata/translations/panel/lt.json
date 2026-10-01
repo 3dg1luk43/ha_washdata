@@ -1477,6 +1477,14 @@
       "doc": "Jei tiesioginės atitikties balas ciklo viduryje nukrenta žemiau šio balo, preliminarus identifikavimas išvalomas. Laikykite jį šiek tiek žemiau Atitikimo slenksčio, kad trumpas panašumo sumažėjimas negrąžintų ekrano į būseną be atitikties.",
       "label": "Neatitikimo slenkstis"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Kiek naujausių kiekvienos programos ciklų saugo pilną galios seką. Senesni ciklai išlaiko trukmę, energiją ir etiketę, tačiau praranda kreivę, todėl jų diagrama tuščia ir jie nebėra įtraukiami į programos kreivę, sveikatą ar pasiūlymus. Padidinimas leidžia peržiūrėti daugiau istorijos saugyklos sąskaita (paprastai 3–15 KB per ciklą). Sumažinimas ištrina papildomas sekas per kitą naktinį valymą, ir pakartotinas padidinimas jų negrąžins.",
+      "label": "Galios sekos saugomos programai"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Ta pati riba ciklams, kuriems dar nėra priskirta programos etiketė.",
+      "label": "Galios sekos saugomos (be etiketės)"
+    },
     "progress_reset_delay": {
       "doc": "Baigę palaikykite 100 % pažangą tiek laiko, kad prieš iš naujo nustatant į neveiklumą prietaisų skydeliuose būtų rodoma baigta.",
       "label": "Pažangos atstatymo delsimas"
@@ -2000,6 +2008,7 @@
       "sampling_interval": "Medianinis atnaujinimo intervalas, stebėtas per {cycles} švarius ciklus ({si}s).{excl}",
       "smoothing_window": "Nustatyta taip, kad išlygintų ~30s rodmenų esant {si}s diskretizavimui ({samples} pavyzdžiai).",
       "start_duration": "Paliktas trumpas (~vienas {si}s pavyzdžių intervalas), kad aptikimas prasidėtų kuo anksčiau, tačiau būtų ignoruojami pavieniai pavyzdžio šuoliai.",
+      "standby_floor": "Kiekvienas pastarasis ciklas vis dar naudojo {idle}W, kai baigėsi, todėl slenkstis žemiau šios vertės niekada nepastebės prietaiso išsijungimo. Paliktas aukščiau šios vertės; {cycles} švarūs ciklai įrašuose niekada nenukrito žemiau jo daugiau nei {pause}s.",
       "thr_batch": "Paliktas šiek tiek virš p05 mažiausios aktyvios galios per {cycles} ciklus ({p05}W), kad pradžia būtų aptikta kuo anksčiau, o sustabdymo slenkstis liktų žemiau mažiausios veikiančios mašinos galios.",
       "tol_per_profile": "p75 kiekvieno profilio trukmės dispersijos per {profiles} profilius ({cycles} ciklai); stabilūs profiliai nebaudžiami.",
       "tol_pooled": "Pagrįsta sujungta {cycles} naujausių pažymėtų ciklų trukmės dispersija (p95 nuokrypis={dev}).",

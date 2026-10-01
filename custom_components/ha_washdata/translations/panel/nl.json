@@ -1509,6 +1509,14 @@
       "doc": "Als een live match tijdens de cyclus onder deze score zakt, wordt de voorlopige identificatie gewist. Houd hem iets onder de Afstemmingsdrempel, zodat een korte dip in gelijkenis het scherm niet terugzet naar geen match.",
       "label": "Niet-afstemmingsdrempel"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Hoeveel van de meest recente cycli per programma hun volledig vermogensspoor bewaren. Oudere cycli bewaren duur, energie en label, maar verliezen de curve - hun diagram is dan leeg en ze tellen niet meer mee voor de curve, gezondheid of suggesties van het programma. Een hogere waarde houdt meer geschiedenis inspecteerbaar, ten koste van opslagruimte (doorgaans 3-15 KB per cyclus). Een lagere waarde verwijdert de extra sporen bij de volgende opruiming; ze zijn daarna niet meer terug te halen door de waarde opnieuw te verhogen.",
+      "label": "Bewaarde vermogenssporen per programma"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Dezelfde beperking voor cycli die nog geen programmalabel hebben.",
+      "label": "Bewaarde vermogenssporen (zonder label)"
+    },
     "progress_reset_delay": {
       "doc": "Nadat u klaar bent, houdt u de voortgang zo lang op 100% vast, zodat Voltooid zichtbaar is op dashboards voordat u terugzet naar Inactief.",
       "label": "Voortgangsreset vertraging"
@@ -1886,6 +1894,7 @@
       "sampling_interval": "Mediaan-updateinterval waargenomen over {cycles} schone cycli ({si}s).{excl}",
       "smoothing_window": "Zo gedimensioneerd dat ~30s aan metingen bij {si}s-bemonstering wordt afgevlakt ({samples} metingen).",
       "start_duration": "Kort gehouden (~één bemonsteringsinterval van {si}s) zodat de detectie zo vroeg mogelijk begint, maar losse pieken van één meting toch worden genegeerd.",
+      "standby_floor": "Elke recente cyclus verbruikte nog {idle}W toen die eindigde, zodat een drempel eronder nooit kan registreren dat het apparaat uitschakelt. Boven die waarde gehouden; de {cycles} schone cycli in het overzicht hebben er nooit meer dan {pause}s onder gepauzeerd.",
       "thr_batch": "Net boven het laagste actieve vermogen op p05 over {cycles} cycli ({p05}W) gehouden zodat een start zo vroeg mogelijk wordt opgemerkt en de stopdrempel onder het laagste draaivermogen van de machine blijft.",
       "tol_per_profile": "p75 van de duurvariantie per profiel over {profiles} profielen ({cycles} cycli); strakke profielen worden niet benadeeld.",
       "tol_pooled": "Op basis van de gebundelde duurvariantie van {cycles} recent gelabelde cycli (p95-afwijking={dev}).",

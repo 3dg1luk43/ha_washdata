@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import contextlib
 import dataclasses
+import functools
 import hashlib
 import json
 import logging
@@ -29,6 +30,7 @@ import re
 import statistics
 import threading
 import uuid
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import Any, TypeAlias, cast
 
@@ -72,6 +74,7 @@ from .const import (
     SMART_TERM_LANDSCAPE_MIN_SHAPE,
     SMART_TERM_PREFIX_MARGIN,
     SMART_TERM_PREFIX_MIN_RATIO,
+    SMART_TERM_PREFIX_MIN_PAUSE_S,
     SMART_TERM_PREFIX_MIN_SHAPE,
     SMART_TERM_TAIL_WINDOW_FRAC,
     STORAGE_KEY,
@@ -93,7 +96,8 @@ from .signal_processing import (
     Segment,
     integrate_wh,
     energy_gap_threshold_s,
-    quiet_run_before as _quiet_run_before,
+    has_resumed_pause as _has_resumed_pause,
+    terminal_quiet_seen as _terminal_quiet_seen,
 )
 from . import analysis
 from .time_utils import (
@@ -984,6 +988,23 @@ class WashDataStore(Store[JSONDict]):
             )
             old_data.setdefault(BANKED_TAIL_REPAIR_KEY, True)
 
+        if old_major_version < 14:
+            # Marker-only, and deliberately an assignment, not a `setdefault`
+            # (#424). The v13 repair has already run and cleared the key on every
+            # 0.5.7 store, but it judged "did the drying already happen?" at the
+            # stop threshold while the allowance it withholds is measured at a
+            # fraction of the cycle's peak - so on #424's Beko it banked 10 min of
+            # standby into every cycle instead of removing it, and it never
+            # looked at a dishwasher's fallback-timeout finishes at all. Re-arm
+            # it once so the corrected rule (`terminal_quiet_seen`) re-judges
+            # history. Idempotent: the repair only ever trims, and re-running it
+            # on a repaired cycle reclaims nothing.
+            _LOGGER.info(
+                "Migrating storage from v%s to v14 (banked-tail repair re-run)",
+                old_major_version,
+            )
+            old_data[BANKED_TAIL_REPAIR_KEY] = True
+
         return old_data
 
 def longest_candidate_duration(candidates: Any) -> float:
@@ -1069,7 +1090,9 @@ def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
 
 
 def _match_prefix_ambiguity(
-    candidates: list[dict], best_duration: float
+    candidates: list[dict],
+    best_duration: float,
+    pauses_below: Callable[[str], bool | None] | None = None,
 ) -> tuple[bool, bool]:
     """``(full_shape_hit, prefix_fit_hit)`` for the prefix-landscape guard.
 
@@ -1097,6 +1120,13 @@ def _match_prefix_ambiguity(
     Pure function, no I/O. ``prefix_score`` absent (Stage 4 skipped, a mocked
     executor, an older snapshot) degrades to the legacy term alone, so this can
     never fire *less* often than the #288 predicate did.
+
+    ``pauses_below`` (#424) maps a candidate name to whether that programme has
+    ever paused below the stop threshold mid-cycle (``ProfileStore.
+    profile_pauses_below``). A candidate it answers ``False`` for cannot be the
+    programme this quiet belongs to, so it sets neither term. ``None`` (no
+    callable, or no traced evidence for that name) keeps the old behaviour - see
+    ``SMART_TERM_PREFIX_MIN_PAUSE_S`` for the measurement.
     """
     if best_duration <= 0 or len(candidates) < 2:
         return False, False
@@ -1112,18 +1142,25 @@ def _match_prefix_ambiguity(
     prefix_fit_hit = False
     for cand in candidates[1:]:
         prof_dur = float(cand.get("profile_duration") or 0)
-        if prof_dur > best_duration * SMART_TERM_LANDSCAPE_RATIO and float(
+        full_hit = prof_dur > best_duration * SMART_TERM_LANDSCAPE_RATIO and float(
             cand.get("shape_score", cand.get("score", 0))
-        ) >= SMART_TERM_LANDSCAPE_MIN_SHAPE:
-            full_shape_hit = True
+        ) >= SMART_TERM_LANDSCAPE_MIN_SHAPE
         prefix_score = cand.get("prefix_score")
-        if (
+        fit_hit = (
             prefix_score is not None
             and prof_dur > best_duration * SMART_TERM_PREFIX_MIN_RATIO
             and float(prefix_score) >= SMART_TERM_PREFIX_MIN_SHAPE
             and float(prefix_score) >= best_score + SMART_TERM_PREFIX_MARGIN
-        ):
-            prefix_fit_hit = True
+        )
+        if (full_hit or fit_hit) and pauses_below is not None:
+            try:
+                paused = pauses_below(str(cand.get("name") or ""))
+            except Exception:  # noqa: BLE001 - no opinion, keep the guard
+                paused = None
+            if paused is False:
+                continue
+        full_shape_hit = full_shape_hit or full_hit
+        prefix_fit_hit = prefix_fit_hit or fit_hit
         if full_shape_hit and prefix_fit_hit:
             break
     return full_shape_hit, prefix_fit_hit
@@ -1306,7 +1343,7 @@ def _scan_data(data_dict: Any, entry_options: Any = None) -> dict[str, dict[str,
 
 
 def _export_predates_banked_tail_repair(meta: dict[str, Any]) -> bool:
-    """Does this import payload predate the v12 -> v13 banked-tail repair?
+    """Does this import payload predate the current banked-tail repair (v14)?
 
     Only `WashDataStore._async_migrate_func` sets `BANKED_TAIL_REPAIR_KEY`, and
     only on storage LOAD - the import paths assign `_data` directly and never run
@@ -1321,7 +1358,7 @@ def _export_predates_banked_tail_repair(meta: dict[str, Any]) -> bool:
     it on an unrepaired one is permanent.
     """
     try:
-        return int(meta.get("version") or 1) < 13
+        return int(meta.get("version") or 1) < 14
     except (TypeError, ValueError, OverflowError):
         return True
 
@@ -4756,6 +4793,10 @@ class ProfileStore:
                     if c.get("power_data"):
                         c.pop("power_data", None)
                         c.pop("sampling_interval", None)
+                        # The artifacts are marks ON the trace (#459): without it
+                        # the cycle list kept saying "open to see them on the
+                        # graph" over an empty chart.
+                        c.pop("artifacts", None)
                         if key:
                             affected_profiles.add(key)
 
@@ -4876,6 +4917,10 @@ class ProfileStore:
                     continue
                 pairs = decompress_power_data(cycle)
                 if len(pairs) < 6:
+                    # No trace left to mark (#459): retention pruned it, so a list
+                    # computed while it existed points at nothing.
+                    if not pairs and cycle.get("artifacts") is not None:
+                        pending.append((cycle, []))
                     continue
                 fresh = self.detect_cycle_artifacts(str(name), pairs)
                 if fresh != (cycle.get("artifacts") or []):
@@ -5800,7 +5845,9 @@ class ProfileStore:
         ``past_cycles`` AND ``reference_cycles`` are scanned - see the item-353
         paragraph below for why the second list is in scope, and note that this
         means the repair CAN rewrite cycles marked ``golden``. Within both, only
-        cycles recorded as ``TerminationReason.SMART`` are touched.
+        cycles recorded as ``TerminationReason.SMART`` are touched - plus, on a
+        dishwasher, ``TerminationReason.TIMEOUT``, whose finish keeps its tail
+        through the same cap (#424).
         ``backfill_cycles`` were replayed from raw history and never went through
         Smart Termination at all, so they cannot carry a banked tail; a
         user-stopped, unattributed, or hand-corrected cycle is left alone for the
@@ -5855,9 +5902,8 @@ class ProfileStore:
                 if not isinstance(cycle, dict):
                     continue
                 summary["examined"] += 1
-                # Only Smart Termination ever banked a confirmation delay, and it
-                # is the only live path that passes a `tail_cap` (`_keep_tail_cap`
-                # at cycle_detector.py:2133/2372/2394/3094). `user_stop` also
+                # Smart Termination is where the confirmation delay was banked
+                # (item 297). `user_stop` also
                 # finishes with `keep_tail=True` but DELIBERATELY uncapped - "User
                 # implies Done Now" - so repairing it would truncate a tail the
                 # user asked to keep, and rewrite the profile statistics with it.
@@ -5866,7 +5912,19 @@ class ProfileStore:
                 # rewrite must never guess about history it cannot verify. This
                 # also matches what was measured (item 297): smart-terminated
                 # cycles banked a median 12.6 min, every other path ~0.
-                if cycle.get("termination_reason") != TerminationReason.SMART:
+                #
+                # But it is not the only path that passes a `tail_cap`: a
+                # dishwasher's fallback-timeout finishes keep their tail too
+                # (`keep_tail = device_type == "dishwasher"`, same `_keep_tail_cap`),
+                # so on a dishwasher they are in scope as well
+                # (#424): the Samsung in that report banked 10.3 min on a timeout
+                # finish exactly the way the Beko did on its smart ones. Every
+                # other type's timeout snaps back to the last activity, so there
+                # is nothing to repair there.
+                _reason = cycle.get("termination_reason")
+                if _reason != TerminationReason.SMART and not (
+                    is_dishwasher and _reason == TerminationReason.TIMEOUT
+                ):
                     continue
                 # A corrected duration is the same kind of statement `user_stop`
                 # is, and gets the same exemption. `manual_duration` is what the
@@ -5920,8 +5978,12 @@ class ProfileStore:
                     # Double-counting here shrinks the reclaim below
                     # BANKED_TAIL_REPAIR_MIN_S and leaves the banked tail in
                     # place, so the bug hides itself.
-                    if _quiet_run_before(points, last_active, stop_threshold_w) >= (
-                        0.5 * float(quiet)
+                    if _terminal_quiet_seen(
+                        points,
+                        last_active,
+                        stop_threshold_w,
+                        float(quiet),
+                        TERMINAL_EVENT_PEAK_FRAC,
                     ):
                         allowance = 0.0
                 new_duration = last_active + allowance
@@ -6127,6 +6189,60 @@ class ProfileStore:
         except Exception:  # noqa: BLE001 - a statistic must never break matching
             # Deliberately NOT cached: a failure is not a measurement, and
             # remembering one would pin "no opinion" until the evidence changes.
+            return None
+
+    def profile_pauses_below(
+        self, profile_name: str, stop_threshold_w: float
+    ) -> bool | None:
+        """Has this programme ever paused below ``stop_threshold_w`` mid-cycle? (#424)
+
+        True when at least one of its traced evidence cycles holds a run below the
+        threshold lasting ``SMART_TERM_PREFIX_MIN_PAUSE_S`` that power later
+        RESUMED from - a soak, a passive drying phase, anything the end gates could
+        mistake for an end. False when it has traced evidence and none of it ever
+        did. None when there is no traced evidence: no opinion.
+
+        Read by the prefix-landscape guard. Smart Termination is only consulted in
+        ENDING, after the power has sat below this threshold, so a longer
+        candidate that has never paused there cannot be the programme this quiet
+        belongs to. Measured on #424's second reporter: a dishwasher whose
+        programmes never drop below 1.44 W until it switches itself off had every
+        cycle blocked by a three-hour programme sharing its first hour, and ended
+        on a one-hour fallback.
+
+        Any single pause keeps the guard (the strictest reading, and the one the
+        measurement used); see ``signal_processing.has_resumed_pause`` for how a
+        pause is timed. Cached on the evidence fingerprint and the threshold.
+        Never raises.
+        """
+        try:
+            stop = float(stop_threshold_w)
+            if not math.isfinite(stop) or stop <= 0:
+                return None
+            cache = getattr(self, "_pause_cache", None)
+            if cache is None:
+                cache = self._pause_cache = {}
+            key = (profile_name, round(stop, 4))
+            fingerprint = self._terminal_quiet_fingerprint(profile_name)
+            hit = cache.get(key)
+            if hit is not None and hit[0] == fingerprint:
+                return hit[1]
+            traced = 0
+            seen = False
+            for cycle in self.iter_evidence_cycles():
+                if cycle.get("profile_name") != profile_name or not cycle.get("power_data"):
+                    continue
+                points = decompress_power_data(cast(Any, cycle))
+                if len(points) < 2:
+                    continue
+                traced += 1
+                if _has_resumed_pause(points, stop, SMART_TERM_PREFIX_MIN_PAUSE_S):
+                    seen = True
+                    break
+            value: bool | None = seen if traced else None
+            cache[key] = (fingerprint, value)
+            return value
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
             return None
 
     def _terminal_quiet_fingerprint(self, profile_name: str) -> tuple[int, str, int]:
@@ -7104,6 +7220,7 @@ class ProfileStore:
         current_power_data: list[tuple[str, float]] | list[tuple[datetime, float]] | list[tuple[float, float]] | list[list[float]],
         current_duration: float,
         in_progress: bool = False,
+        stop_threshold_w: float | None = None,
     ) -> MatchResult:
         """Run profile matching asynchronously in executor.
 
@@ -7112,6 +7229,10 @@ class ProfileStore:
         instead of against its complete duration/energy (#400). Defaults to False
         so the final match at cycle end - where the cycle IS complete - and every
         other caller keep their existing behaviour.
+
+        ``stop_threshold_w`` lets the prefix-landscape guard drop longer candidates
+        that have never paused below it (#424, ``profile_pauses_below``). Omitted,
+        the guard behaves as before.
         """
         # 1. Prepare data in main thread (Access ProfileStore state safely)
         group_members: dict[str, list[str]] = {}
@@ -7463,8 +7584,13 @@ class ProfileStore:
         # current trace may be a prefix of that longer program, not a complete
         # short cycle. Signal cycle_detector to block Smart Termination; the
         # power-based fallback timeout will decide instead.
+        pauses_fn: Callable[[str], bool | None] | None = None
+        if stop_threshold_w is not None:
+            pauses_fn = functools.partial(
+                self.profile_pauses_below, stop_threshold_w=float(stop_threshold_w)
+            )
         full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(
-            candidates, best_duration or 0.0
+            candidates, best_duration or 0.0, pauses_fn
         )
         is_prefix_ambiguous = full_shape_hit or prefix_fit_hit
         # From the pre-collapse population, not just before the [:5] truncation

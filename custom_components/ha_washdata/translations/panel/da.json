@@ -1509,6 +1509,14 @@
       "doc": "Hvis et live-match midt i cyklussen falder under denne score, slettes den foreløbige identifikation. Hold den lidt under Matchtærskel, så et kort dyk i lighed ikke sætter visningen tilbage til uden match.",
       "label": "Fejlmatchtærskel"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Hvor mange af hvert programs nyeste cyklusser der bevarer deres fulde effektspor. Ældre cyklusser bevarer varighed, energi og mærkning, men mister kurven - deres diagram er da tomt og de tæller ikke længere med til programmets kurve, sundhed eller forslag. En højere værdi holder mere historik inspicerbar på bekostning af lagerplads (typisk 3-15 KB pr. cyklus). En lavere værdi sletter de ekstra spor ved næste oprydning; de kan ikke genskabes ved at hæve værdien igen.",
+      "label": "Gemte effektspor pr. program"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Den samme grænse for cyklusser, der endnu ikke har en programetiket.",
+      "label": "Gemte effektspor (umærket)"
+    },
     "progress_reset_delay": {
       "doc": "Når du er færdig, skal du holde status på 100 % så længe, så fuldført er synlig på dashboards, før du nulstiller til inaktiv.",
       "label": "Forsinkelse ved nulstilling af fremskridt"
@@ -1886,6 +1894,7 @@
       "sampling_interval": "Median for opdateringsintervallet observeret på tværs af {cycles} rene cyklusser ({si}s).{excl}",
       "smoothing_window": "Dimensioneret til at udjævne ~30s aflæsninger ved {si}s sampling ({samples} prøver).",
       "start_duration": "Holdt kort (~ét samplingsinterval på {si}s), så detekteringen starter så tidligt som muligt, men stadig ignorerer enkelte spidser.",
+      "standby_floor": "Alle nylige cyklusser trak stadig {idle}W, da de sluttede, så en tærskel derunder aldrig vil kunne registrere, at apparatet slukker. Holdt over denne grænse; de {cycles} rene cyklusser i oversigten pauserede aldrig under den i mere end {pause}s.",
       "thr_batch": "Holdt lige over den laveste aktive effekt ved p05 på tværs af {cycles} cyklusser ({p05}W), så en start fanges så tidligt som muligt, og stoptærsklen forbliver under maskinens laveste driftseffekt.",
       "tol_per_profile": "p75 for varighedsvariansen pr. profil på tværs af {profiles} profiler ({cycles} cyklusser); stramme profiler straffes ikke.",
       "tol_pooled": "Baseret på samlet varighedsvarians for {cycles} seneste mærkede cyklusser (p95 afvigelse={dev}).",

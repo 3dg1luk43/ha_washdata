@@ -29,6 +29,7 @@ import numpy as np
 from homeassistant.core import HomeAssistant, callback
 
 from .const import (
+    resolve_off_delay_default,
     TerminationReason,
     CONF_WATCHDOG_INTERVAL,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -75,6 +76,7 @@ from .const import (
     MATCH_INTERVAL_SUGGESTION_MIN_S,
 )
 from .options_utils import option_int
+from .signal_processing import longest_resumed_pause_s
 from .time_utils import power_data_to_offsets
 
 # ─── Clean-cycle selection ────────────────────────────────────────────────────
@@ -645,6 +647,127 @@ def detect_standby_above_stop(
         }
     except Exception:  # noqa: BLE001 - a statistic must never break the device list
         return None
+
+
+# Self-correcting stop threshold (#458). When `detect_standby_above_stop` shows the
+# appliance idling ABOVE the stop threshold, no cycle can end on its own, and the
+# batch/single-cycle anchor (`0.8 x p05 lowest active`) lands at exactly 0.8 x that
+# standby draw once standby-level samples sit inside the stored cycles - which is
+# how #458 (2.2 W -> 1.76 W) and #445 (3.2 W -> 2.56 W) were configured into it. The
+# floor is the standby level plus a margin for plug jitter: any single reading at or
+# above the threshold resets the end timer.
+STANDBY_FLOOR_RATIO = 1.25
+STANDBY_FLOOR_MIN_MARGIN_W = 0.2
+# ...and it is only proposed when the appliance's own clean history says it cannot
+# end a cycle early: no paused stretch below the floor that power later resumed
+# from may reach this fraction of the off delay (the detector's time-below-threshold
+# has to reach the whole off delay before a fallback finish).  Measured with the
+# floor at 1.25 x standby: real washers' in-cycle low plateaus sit at 1.8-2x their
+# standby, so they clear it, while the #445 Miele - whose 3.4 W dips between tumble
+# bursts ARE its standby level - pauses 110 s under a 180 s off delay and is left
+# with the advisory alone.  Too few clean cycles to check means no proposal.
+STANDBY_FLOOR_MAX_PAUSE_FRAC = 0.5
+STANDBY_FLOOR_MIN_CLEAN_CYCLES = 5
+
+
+def standby_stop_floor(
+    cycles: list[dict[str, Any]], stop_threshold_w: float, off_delay_s: float
+) -> dict[str, Any] | None:
+    """The lowest stop threshold this appliance's standby allows, if it needs one.
+
+    None unless ``detect_standby_above_stop`` fires on ``cycles`` (which must
+    include the force- and user-stopped ones: on an appliance with this fault they
+    are often the only cycles there are). Otherwise::
+
+        idle_w           the standby level the advisory measured
+        floor_w          max(idle * STANDBY_FLOOR_RATIO, idle + STANDBY_FLOOR_MIN_MARGIN_W)
+        safe             whether the clean history allows it (see the constants)
+        clean_cycles     how many clean traced cycles were checked
+        longest_pause_s  the longest resumed in-cycle pause below ``floor_w``
+
+    Pure statistics, executor-safe, never raises.
+    """
+    try:
+        adv = detect_standby_above_stop(cycles, stop_threshold_w)
+        if adv is None:
+            return None
+        idle = float(adv["idle_w"])
+        floor = round(max(idle * STANDBY_FLOOR_RATIO, idle + STANDBY_FLOOR_MIN_MARGIN_W), 2)
+        clean, _excl = select_clean_cycles(cycles, stop_threshold_w=stop_threshold_w)
+        checked = 0
+        longest = 0.0
+        for cycle in clean:
+            points = _cycle_readings(cycle)
+            if len(points) < 5:
+                continue
+            checked += 1
+            longest = max(longest, longest_resumed_pause_s(points, floor))
+        safe = (
+            checked >= STANDBY_FLOOR_MIN_CLEAN_CYCLES
+            and off_delay_s > 0
+            and longest < STANDBY_FLOOR_MAX_PAUSE_FRAC * float(off_delay_s)
+        )
+        return {
+            "idle_w": idle,
+            "floor_w": floor,
+            "safe": bool(safe),
+            "clean_cycles": checked,
+            "longest_pause_s": round(longest, 1),
+        }
+    except Exception:  # noqa: BLE001 - a statistic must never break a suggestion pass
+        return None
+
+
+def apply_standby_floor(
+    suggestions: dict[str, Any], floor: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Keep stop/start suggestions out of the standby band (#458). Mutates and returns.
+
+    With a ``safe`` floor, a stop suggestion is raised to it and a start suggestion
+    to ``STANDBY_FLOOR_RATIO`` above it, so the reconciler's start-is-primary rule
+    cannot pull the stop back under. Without one, a stop or start suggestion at or
+    below the standby level is dropped: it is provably wrong (no cycle could ever
+    end), and the advisory already says so.
+    """
+    if not floor:
+        return suggestions
+    idle = float(floor["idle_w"])
+    stop_entry = suggestions.get(CONF_STOP_THRESHOLD_W)
+    start_entry = suggestions.get(CONF_START_THRESHOLD_W)
+    if floor.get("safe"):
+        stop_min = float(floor["floor_w"])
+        start_min = round(stop_min * STANDBY_FLOOR_RATIO, 2)
+        for key, minimum in ((CONF_STOP_THRESHOLD_W, stop_min), (CONF_START_THRESHOLD_W, start_min)):
+            entry = suggestions.get(key)
+            if isinstance(entry, dict) and _num(entry.get("value")) is not None and _num(entry.get("value")) < minimum:
+                suggestions[key] = _standby_floor_entry(minimum, floor)
+        return suggestions
+    for key, entry in ((CONF_STOP_THRESHOLD_W, stop_entry), (CONF_START_THRESHOLD_W, start_entry)):
+        if isinstance(entry, dict) and (_num(entry.get("value")) or 0.0) <= idle:
+            suggestions.pop(key, None)
+    return suggestions
+
+
+def _standby_floor_entry(value: float, floor: dict[str, Any]) -> dict[str, Any]:
+    idle = float(floor["idle_w"])
+    return {
+        "value": round(value, 2),
+        "reason": (
+            f"Every recent cycle was still drawing {idle:.1f}W when it ended, so a "
+            f"threshold below that can never see the appliance switch off. Kept above "
+            f"it; the {int(floor.get('clean_cycles') or 0)} clean cycles on record "
+            f"never paused under it for more than {float(floor.get('longest_pause_s') or 0):.0f}s."
+        ),
+        "reason_key": "suggestion.reason.standby_floor",
+        "reason_params": {
+            "idle": f"{idle:.1f}",
+            "cycles": int(floor.get("clean_cycles") or 0),
+            "pause": f"{float(floor.get('longest_pause_s') or 0):.0f}",
+        },
+        # Corrects a setting no cycle can finish under, so it is not held back by
+        # the post-apply cooldown (learning._apply_suggestions_and_notify).
+        "corrective": True,
+    }
 
 
 def _format_exclusions(excluded: dict[str, int]) -> str:
@@ -1381,6 +1504,38 @@ class SuggestionEngine:
                 return val
         return 2.0
 
+    def _standby_floor(self, options: dict[str, Any]) -> dict[str, Any] | None:
+        """``standby_stop_floor`` over this device's recent history (#458)."""
+        stop = self._current_stop_threshold(options)
+        off_delay = _num(options.get(CONF_OFF_DELAY))
+        if off_delay is None or off_delay <= 0:
+            off_delay = float(resolve_off_delay_default(self.device_type or ""))
+        cycles = self.profile_store.get_past_cycles()[-200:]
+        return standby_stop_floor(list(cycles), stop, off_delay)
+
+    def generate_standby_floor_suggestions(self) -> dict[str, Any]:
+        """Raise a stop threshold that sits under the appliance's standby (#458).
+
+        Runs after every cycle end, including force-stopped and user-stopped ones:
+        those are exactly the cycles this fault produces, and on such an appliance
+        they may be the only ones there are, so waiting for clean evidence would
+        wait forever. Proposes nothing unless ``standby_stop_floor`` judges the
+        floor safe against the device's clean history. Executor-safe.
+        """
+        options = self._entry_options()
+        floor = self._standby_floor(options)
+        if not floor or not floor.get("safe"):
+            return {}
+        floor_w = float(floor["floor_w"])
+        if self._current_stop_threshold(options) >= floor_w:
+            return {}
+        out: dict[str, Any] = {CONF_STOP_THRESHOLD_W: _standby_floor_entry(floor_w, floor)}
+        start_min = round(floor_w * STANDBY_FLOOR_RATIO, 2)
+        start = _num(options.get(CONF_START_THRESHOLD_W))
+        if start is None or start < start_min:
+            out[CONF_START_THRESHOLD_W] = _standby_floor_entry(start_min, floor)
+        return out
+
     def generate_detection_suggestions(self) -> dict[str, Any]:
         """Statistical suggestions for detection/model settings not covered by
         the operational or model passes.
@@ -2072,7 +2227,7 @@ class SuggestionEngine:
         # over the off_delay window, so the end gate never fired (#343 gap D). The
         # batch path (run_batch_simulation) derives a cycle-energy-proportional floor
         # from actual false-end events once 5+ cycles exist; use that instead.
-        return {
+        single = {
             CONF_STOP_THRESHOLD_W: {
                 "value": suggested_stop,
                 "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle.",
@@ -2086,6 +2241,9 @@ class SuggestionEngine:
                 "reason_params": {"min": f"{min_active:.1f}"},
             },
         }
+        # A standby-level sample in this cycle makes `min_active` the standby draw,
+        # and 0.8 x that can never see the appliance switch off (#458).
+        return apply_standby_floor(single, self._standby_floor(self._entry_options()))
 
     def run_batch_simulation(self, cycles: list[dict[str, Any]]) -> dict[str, Any]:
         """Derive parameter suggestions from a collection of labeled cycles.
@@ -2270,7 +2428,9 @@ class SuggestionEngine:
         if min_off_gap is not None:
             suggestions[CONF_MIN_OFF_GAP] = min_off_gap
 
-        return suggestions
+        # The p05 anchor above is the standby draw whenever standby-level samples
+        # sit inside the cycles, so 0.8 x it is under standby (#458).
+        return apply_standby_floor(suggestions, self._standby_floor(_batch_opts))
 
     def apply_suggestions(self, suggestions: dict[str, Any]) -> None:
         """Persist suggestions to the profile store, then reconcile the full set.

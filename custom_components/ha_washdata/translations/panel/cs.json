@@ -1473,6 +1473,14 @@
       "doc": "Pokud živé párování během cyklu klesne pod toto skóre, prozatímní identifikace se vymaže. Udržujte trochu pod prahem shody, aby krátký pokles podobnosti nepřepnul zobrazení zpět na nepárované.",
       "label": "Práh neshody"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Kolik nejnovějších cyklů každého programu si uchovává plný průběh výkonu. Starší cykly uchovávají dobu trvání, energii a štítek, ale přicházejí o křivku, takže jejich graf je prázdný a do křivky, zdraví ani návrhů programu se vícekrát nezapočítávají. Zvýšením se uchovává více historie pro prohlídku za cenu většího úložiště (obvykle 3–15 KB na cyklus). Snížením se přebytečné průběhy při příštím nočním čištění odstraní a opětovným zvýšením je nelze obnovit.",
+      "label": "Průběhy výkonu uchovávané na program"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Stejný limit pro cykly, které dosud nemají žádný štítek programu.",
+      "label": "Průběhy výkonu uchovávané (neoznačené)"
+    },
     "progress_reset_delay": {
       "doc": "Po ukončení držte průběh na 100 % po tuto dobu, aby bylo Dokončeno viditelné na panelech před resetem na Nečinný.",
       "label": "Zpoždění resetu průběhu"
@@ -1854,6 +1862,7 @@
       "sampling_interval": "Mediánový interval aktualizace pozorovaný napříč {cycles} čistými cykly ({si}s).{excl}",
       "smoothing_window": "Nastaveno pro vyhlazení ~30s odečtů při vzorkování {si}s ({samples} vzorků).",
       "start_duration": "Ponecháno krátké (~jeden interval vzorkování {si}s), aby detekce začínala co nejdříve a přitom ignorovala jednotlivé špičky.",
+      "standby_floor": "Každý nedávný cyklus stále odebíral {idle}W v okamžiku ukončení, takže práh pod touto hodnotou nikdy nezaznamená vypnutí spotřebiče. Byl ponechán nad ní; {cycles} čistých cyklů v záznamu nikdy neklesly pod něj na déle než {pause}s.",
       "thr_batch": "Ponecháno těsně nad nejnižším činným výkonem p05 napříč {cycles} cykly ({p05}W), aby byl start zachycen co nejdříve a práh zastavení zůstal pod nejnižším provozním výkonem stroje.",
       "tol_per_profile": "p75 rozptylu délky podle profilu napříč {profiles} profily ({cycles} cyklů); konzistentní profily nejsou penalizovány.",
       "tol_pooled": "Na základě sloučeného rozptylu délky {cycles} nedávných označených cyklů (odchylka p95={dev}).",

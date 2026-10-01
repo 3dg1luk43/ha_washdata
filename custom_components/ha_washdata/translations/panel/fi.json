@@ -1509,6 +1509,14 @@
       "doc": "Jos reaaliaikainen, kesken syklin tehty täsmäytys putoaa tämän pistemäärän alle, alustava tunnistus tyhjennetään. Pidä se hieman Täsmäytyskynnystä pienempänä, jotta lyhyt notkahdus samankaltaisuudessa ei palauta näyttöä tilaan Ei osumaa.",
       "label": "Eritäsmäytyskynnys"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Kuinka monella kunkin ohjelman viimeisimmistä sykleistä säilyy täysi tehojälki. Vanhemmilla sykleillä säilyvät kesto, energia ja merkintä, mutta käyrä katoaa, joten niiden kaavio on tyhjä eivätkä ne enää laske ohjelman käyrään, terveyteen tai suosituksiin. Arvon nostaminen pitää enemmän historiaa tarkasteltavissa tallennustilan kustannuksella (yleensä 3-15 KB/sykli). Arvon laskeminen poistaa ylimääräiset jäljet seuraavassa yösiivouksessa, eikä arvon nostaminen uudelleen palauta niitä.",
+      "label": "Ohjelmaa kohden säilytettävät tehojäljet"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Sama raja sykleille, joilla ei vielä ole ohjelmamerkintää.",
+      "label": "Säilytettävät tehojäljet (merkitsemättömät)"
+    },
     "progress_reset_delay": {
       "doc": "Kun olet valmis, pidä edistymistä 100 %:ssa näin kauan, jotta Valmis näkyy kojelaudoissa, ennen kuin palautat sen tyhjäkäynnille.",
       "label": "Edistymisen nollausviive"
@@ -1886,6 +1894,7 @@
       "sampling_interval": "Päivitysvälin mediaani {cycles} puhtaan jakson joukossa ({si}s).{excl}",
       "smoothing_window": "Mitoitettu tasoittamaan noin 30s lukemia {si}s näytteenottovälillä ({samples} näytettä).",
       "start_duration": "Pidetään lyhyenä (~yksi {si}s näytteenottoväli), jotta tunnistus alkaa mahdollisimman aikaisin mutta jättää silti yksittäiset piikit huomiotta.",
+      "standby_floor": "Jokainen viimeinen sykli otti yhä {idle} W loppuessaan, joten sen alapuolella oleva kynnys ei koskaan näe laitteen sammuvan. Pidetään sen yläpuolella; tallennetuista {cycles} puhtaista sykleistä mikään ei koskaan pysähtynyt sen alle yli {pause} sekunniksi.",
       "thr_batch": "Pidetään juuri pienimmän aktiivisen tehon yläpuolella p05:ssä {cycles} jakson joukossa ({p05}W), jotta käynnistys havaitaan mahdollisimman aikaisin ja pysäytyskynnys pysyy koneen pienimmän käyntitehon alapuolella.",
       "tol_per_profile": "p75 profiilikohtaisesta keston varianssista {profiles} profiilin joukossa ({cycles} jaksoa); tiiviitä profiileja ei rangaista.",
       "tol_pooled": "Perustuu {cycles} viimeisimmän merkityn jakson yhdistettyyn keston varianssiin (p95 poikkeama={dev}).",

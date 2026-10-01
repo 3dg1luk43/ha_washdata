@@ -1477,6 +1477,14 @@
       "doc": "Ja tiešraides atbilstības rezultāts cikla vidū noslīd zem šī rezultāta, provizoriskā identifikācija tiek dzēsta. Turiet to nedaudz zem Atbilstības sliekšņa, lai īss līdzības kritums nepārslēgtu attēlojumu atpakaļ uz stāvokli bez atbilstības.",
       "label": "Neatbilstības slieksnis"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Cik no katras programmas jaunākajiem cikliem saglabā pilno jaudas trasi. Vecāki cikli saglabā ilgumu, enerģiju un birku, bet zaudē līkni, tādēļ to diagramma ir tukša un tie vairs netiek ieskaitīti programmas līknē, veselībā vai ieteikumos. Palielināšana ļauj aplūkot vairāk vēstures, taču palielina krātuves izmantojumu (parasti 3–15 KB vienam ciklam). Samazināšana dzēš lieko trases nākamās nakts tīrīšanas laikā, un atkārtota palielināšana nevar tās atjaunot.",
+      "label": "Saglabātās jaudas trases vienai programmai"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Tāds pats ierobežojums cikliem, kuriem vēl nav programmas birkas.",
+      "label": "Saglabātās jaudas trases (bez etiķetes)"
+    },
     "progress_reset_delay": {
       "doc": "Pēc pabeigšanas saglabājiet progresu 100% līmenī tik ilgi, lai informācijas paneļos būtu redzams paziņojums Pabeigts pirms atiestatīšanas uz dīkstāvi.",
       "label": "Progresa atiestatīšanas aizkave"
@@ -2000,6 +2008,7 @@
       "sampling_interval": "Mediānais atjaunināšanas intervāls, kas novērots {cycles} tīros ciklos ({si}s).{excl}",
       "smoothing_window": "Aprēķināts, lai izlīdzinātu ~30s rādījumu pie {si}s nolases intervāla ({samples} paraugi).",
       "start_duration": "Saglabāts īss (~viens {si}s nolases intervāls), lai noteikšana sāktos pēc iespējas agrāk, vienlaikus ignorējot atsevišķu paraugu izlēcienus.",
+      "standby_floor": "Katrs nesens cikls vēl joprojām patērēja {idle}W, kad beidzās, tādēļ slieksnis zem šīs vērtības nekad nevar konstatēt ierīces izslēgšanos. Saglabāts virs tās; {cycles} tīrie cikli ierakstā nekad nav nokrituši zem tā ilgāk par {pause}s.",
       "thr_batch": "Saglabāts nedaudz virs p05 zemākās aktīvās jaudas {cycles} ciklos ({p05}W), lai sākums tiktu uztverts pēc iespējas agrāk un apturēšanas slieksnis paliktu zem mašīnas zemākās darbības jaudas.",
       "tol_per_profile": "p75 no katra profila ilguma dispersijas {profiles} profilos ({cycles} cikli); stabili profili netiek sodīti.",
       "tol_pooled": "Pamatots ar apvienoto ilguma dispersiju {cycles} nesen marķētiem cikliem (p95 novirze={dev}).",

@@ -1473,6 +1473,14 @@
       "doc": "Jeśli dopasowanie na żywo w trakcie cyklu spadnie poniżej tego wyniku, wstępna identyfikacja zostanie wyczyszczona. Trzymaj je nieco poniżej Progu Dopasowania, aby krótki spadek podobieństwa nie przełączył wyświetlania z powrotem na brak dopasowania.",
       "label": "Próg Niedopasowania"
     },
+    "max_full_traces_per_profile": {
+      "doc": "Ile z najnowszych cykli każdego programu zachowuje pełny przebieg mocy. Starsze cykle zachowują czas trwania, energię i etykietę, ale tracą krzywą, przez co ich wykres jest pusty i nie wliczają się już do krzywej, kondycji ani sugestii programu. Zwiększenie wartości pozwala przeglądać więcej historii kosztem miejsca w pamięci (zazwyczaj 3–15 KB na cykl). Zmniejszenie usuwa nadmiarowe przebiegi podczas następnego nocnego czyszczenia i ponowne zwiększenie nie może ich przywrócić.",
+      "label": "Przebiegi mocy przechowywane na program"
+    },
+    "max_full_traces_unlabeled": {
+      "doc": "Ten sam limit dla cykli, które nie mają jeszcze etykiety programu.",
+      "label": "Przebiegi mocy przechowywane (nieoznakowane)"
+    },
     "progress_reset_delay": {
       "doc": "Po zakończeniu utrzymaj postęp na poziomie 100% przez tak długi czas, aby na pulpitach nawigacyjnych pojawił się komunikat Ukończono, zanim przejdziesz do stanu bezczynności.",
       "label": "Opóźnienie Resetowania Postępu"
@@ -1854,6 +1862,7 @@
       "sampling_interval": "Mediana interwału aktualizacji zaobserwowana w {cycles} poprawnych cyklach ({si}s).{excl}",
       "smoothing_window": "Dobrane do wygładzania ~30s odczytów przy próbkowaniu {si}s ({samples} próbek).",
       "start_duration": "Utrzymane krótkie (~jeden interwał próbkowania {si}s), aby wykrywanie rozpoczynało się jak najwcześniej, jednocześnie ignorując pojedyncze skoki.",
+      "standby_floor": "Każdy ostatni cykl nadal pobierał {idle}W w chwili zakończenia, więc próg poniżej tej wartości nigdy nie wykryje wyłączenia urządzenia. Utrzymany powyżej niej; {cycles} czystych cykli w historii nigdy nie spadło poniżej niego na dłużej niż {pause}s.",
       "thr_batch": "Utrzymane tuż powyżej najniższej mocy czynnej p05 w {cycles} cyklach ({p05}W), aby start był wykrywany jak najwcześniej, a próg zatrzymania pozostawał poniżej najniższej mocy pracy urządzenia.",
       "tol_per_profile": "p75 wariancji czasu trwania na profil w {profiles} profilach ({cycles} cykli); spójne profile nie są karane.",
       "tol_pooled": "Na podstawie łącznej wariancji czasu trwania {cycles} ostatnich oznaczonych cykli (odchylenie p95={dev}).",

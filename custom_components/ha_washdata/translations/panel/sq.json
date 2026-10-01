@@ -1468,6 +1468,14 @@
             "doc": "Nëse një përputhje e drejtpërdrejtë në mes të ciklit bie nën këtë rezultat, identifikimi paraprak pastrohet. Mbajeni pak më poshtë Pragut të përputhjes, në mënyrë që një rënie e shkurtër e ngjashmërisë të mos e kthejë ekranin përsëri në gjendjen pa përputhje.",
             "label": "Pragu i mosperputhjeve"
         },
+        "max_full_traces_per_profile": {
+            "doc": "Sa cikle të fundit të çdo programi ruajnë gjurmën e tyre të plotë të fuqisë. Ciklet e vjetra ruajnë kohëzgjatjen, energjinë dhe etiketën, por humbasin kurbën; grafiku i tyre mbetet bosh dhe nuk kontribuojnë më në kurbën, shëndetin apo sugjerimet e programit. Rritja e kësaj vlere lejon inspektimin e më shumë historiku me koston e hapësirës së ruajtjes (zakonisht 3-15 KB për cikël). Ulja e saj fshin gjurmët shtesë në pastrimin e ardhshëm, dhe rritja e saj sërish nuk mund t'i rikthejë.",
+            "label": "Gjurmë fuqie të ruajtura për program"
+        },
+        "max_full_traces_unlabeled": {
+            "doc": "I njëjti kufi për ciklet që nuk kanë akoma etiketë programi.",
+            "label": "Gjurmë fuqie të ruajtura (të paetiketuara)"
+        },
         "progress_reset_delay": {
             "doc": "Pas përfundimit, mbajeni progresin në 100% për këtë kohë, në mënyrë që \"Përfunduar\" të jetë i dukshëm në panelet e kontrollit përpara se ta rivendosni në \"Idle\".",
             "label": "Vonesë rivendosjeje të progresit"
@@ -1995,6 +2003,7 @@
             "sampling_interval": "Intervali mesatar i përditësimit i vëzhguar në {cycles} cikle të pastra ({si}s).{excl}",
             "smoothing_window": "Përcaktuar që të zbusë ~30s leximesh me kampionim {si}s ({samples} kampione).",
             "start_duration": "Mbahet i shkurtër (~një interval kampionimi {si}s) që zbulimi të fillojë sa më herët të jetë e mundur, duke injoruar njëkohësisht majat e një kampioni të vetëm.",
+            "standby_floor": "Çdo cikël i fundit shpenzonte akoma {idle}W kur mbaroi, kështu që një prag nën atë nuk mund të zbulojë kurrë fikjen e pajisjes. Mbajtur mbi të; {cycles} ciklet e pastra të regjistruara nuk ranë asnjëherë nën të për më shumë se {pause}s.",
             "thr_batch": "Mbahet pak mbi fuqinë aktive më të ulët p05 në {cycles} cikle ({p05}W) që një nisje të kapet sa më herët të jetë e mundur dhe pragu i ndalimit të mbetet nën fuqinë më të ulët të punës së makinës.",
             "tol_per_profile": "p75 e variancës së kohëzgjatjes për profil në {profiles} profile ({cycles} cikle); profilet e qëndrueshme nuk penalizohen.",
             "tol_pooled": "Bazuar në variancën e bashkuar të kohëzgjatjes së {cycles} cikleve të fundit të etiketuara (devijimi p95={dev}).",
