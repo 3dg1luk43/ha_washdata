@@ -9,20 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### TL;DR
 
-- Washers no longer end mid-wash or lose their rinse when the program runs longer than expected.
-- Dishwashers stop banking ten minutes of standby into every cycle; history corrected once.
-- A dishwasher whose programmes never pause reaches Smart Termination again instead of an hour-long fallback.
-- The history correction can no longer cut a dishwasher's drying phase short.
-- A Stop Threshold stuck below the appliance's standby is corrected by a suggestion.
-- Force-stopped cycles no longer feed the watchdog and timeout suggestions.
-- Cycles whose power trace retention removed no longer show 1% health or join the review queue.
-- How many power traces each program keeps is now a setting.
+- Washers no longer end mid-wash or lose their rinse when the program runs long.
+- Dishwashers no longer end before their final pump-out, or bank standby into every cycle.
+- A dishwasher's silent drying phase is no longer cut, live or by the history correction.
+- A dishwasher whose programmes never pause reaches Smart Termination again.
+- Saving any setting no longer resets a new device's Min Power and Off Delay.
+- Uncertain matches are no longer auto-labelled.
+- The Playground now replays exactly what live detection and matching would do.
+- A Stop Threshold stuck below standby is corrected by a suggestion.
+- Force-stopped and trace-pruned cycles no longer skew suggestions or the review queue.
+- Power traces kept per program is now a setting; nightly maintenance prunes debug traces.
 
 ### Fixes
 
 - **A washer could be ended mid-wash, or lose its last half hour** (0.5.7 regression): the "appliance finished but idles above its Stop Threshold" close fired at the matched program's expected end on any flat stretch under 10% of the heater's peak - a soak at 0 W, a 60 W rinse - so a wash matched to a shorter program was closed early, and the stored end was cut back to the last heating burst. Replaying 263 cycles: it fired on 8 washer cycles (none in 0.5.6), splitting 2 and cutting 6 by 6 to 31 minutes. It now closes at the expected end only on a plateau at or just above the Stop Threshold, keeps the old twice-expected wait for anything else, and trims only the plateau. All 8 are stored as in 0.5.6 again, with 0.5.7's quicker finishes kept.
 
-- **The one-time history correction could cut a dishwasher's drying phase** (0.5.7): on a machine with a long silent drying phase it trimmed ~235 min ECO cycles to ~121 min, deleting the trace past the cut. It no longer trims a dishwasher below 90% of the shortest length you have confirmed for that program (a corrected duration, a recording or a golden cycle), and it leaves cycles you trimmed by hand alone.
+- **A dishwasher's silent drying phase could be cut, live and by the history correction** (0.5.7): on a machine that dries silently after its last activity, the measured drying allowance read the pause before it, so the one-time correction trimmed ~235 min ECO cycles to ~121 min (deleting the trace past the cut) and live finishes stored them at ~120 min too. Neither now stores a dishwasher below 90% of the shortest length you have confirmed for that program (a corrected duration, a recording or a golden cycle), once the run has lasted that long. The correction also leaves cycles you trimmed by hand alone, keeps a pump-out that sits below the Stop Threshold, skips a cycle with a broken start time instead of stopping halfway, and an import of your own history keeps your corrected durations.
+
+- **A dishwasher could end about 12 minutes before its final pump-out**: a fan blip a few minutes after the last heating was taken for the pump-out once the run was past 85% of its expected time. A blip now counts only after the quiet spell that program is measured to have before its pump-out, and the early release after the expected time waits for that spell too. Replaying 116 dishwasher cycles: early ends 4 to 0, mean finish delay +0.4 min, only one machine's cycles moved.
+
+- **Saving any setting reset a new device's Min Power and Off Delay**: a device keeps those two in its setup data until the first save, and applying a save read only the saved settings, so the first unrelated change fell back to the defaults (a 10 W device started cycles on a 5 W load; reproduced on a real Home Assistant). Saving now applies exactly what a restart does. A save during a cycle no longer rewinds it to the last snapshot, nine settings that needed a restart now apply at once, a new cycle no longer starts from the last one's progress, and the settings page shows an unset dishwasher Off Delay as the 180 s in force, not 1800 s.
+
+- **Uncertain matches were auto-labelled**: when the program family matched but the chosen member did not fit, or the run was already longer than that member, the match was flagged uncertain but the cycle-end labelling ignored the flag; 7 of the 12 cycles labelled that way got the wrong program. Those cycles now ask for confirmation, and the bulk auto-label service applies the same checks.
+
+- **The Playground replayed a different matcher**: it built its own program templates, so its pick differed from live on 26.5% of real matches, and it never ran the watchdog inside a silent stretch, so a soak long enough to split a wash replayed as one cycle. Both now match live exactly (0 of 592 picks differ). The replay showed one washer whose 28 minute soak exceeds its Minimum Off Gap and splits; that behaviour is unchanged, so raise the setting if your machine soaks that long.
+
+- **Nightly maintenance now prunes debug traces**, as its description always said: a cycle's matcher debug data goes with its power trace, and all of it while "save debug traces" is off.
 
 - **A dishwasher stored about ten minutes of standby in every cycle** ([#424](https://github.com/3dg1luk43/ha_washdata/issues/424)): the check for "this run already dried" ran at the Stop Threshold, while the drying allowance it guards is measured at 0.4% of the cycle's peak. On a Beko that ends drain, 1.3 W, 0.3 W, the check found no quiet and every cycle kept the full 611 s allowance (249 min stored for a 239 min wash). Both now use the same level; the one-time history correction runs again on upgrade and now also covers dishwasher timeout finishes. Replaying the reporter's 26 cycles: stored tail 10.0 to 0.0 min, nothing else moved. Thanks to @KoLSMS.
 

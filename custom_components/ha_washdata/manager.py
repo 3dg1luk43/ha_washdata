@@ -56,6 +56,7 @@ from homeassistant.helpers import script as script_helper
 from homeassistant.helpers import translation
 
 from .const import (
+    resolve_off_delay_default,
     MIN_FULL_TRACES,
     DOMAIN,
     CONF_POWER_SENSOR,
@@ -248,6 +249,7 @@ from .const import (
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
     DEFAULT_WATCHDOG_INTERVAL,
+    WATCHDOG_LATE_TICK_FACTOR,
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
@@ -511,6 +513,29 @@ def _pn_dismiss(hass: HomeAssistant, notification_id: str) -> None:
             hass.async_create_task(result)
     except Exception:  # noqa: BLE001 - best-effort; surface the failure in logs
         _LOGGER.debug("persistent_notification dismiss failed (id=%s)", notification_id, exc_info=True)
+
+
+def _option_then_data(config_entry: Any, key: str, default: Any) -> Any:
+    """``options[key]``, else ``data[key]``, else ``default``.
+
+    A device added after its last schema migration keeps its structural keys
+    (min_power, off_delay) in ``entry.data`` only, and ``ws_set_options`` writes
+    ``{**options, **changes}`` - so options-only reads on reload reset them to the
+    defaults at the first unrelated settings save (register item 388a).
+    """
+    return config_entry.options.get(key, config_entry.data.get(key, default))
+
+
+def _default_start_threshold_w(min_power: float) -> float:
+    return float(min_power) + max(1.0, 0.1 * float(min_power))
+
+
+def _default_stop_threshold_w(min_power: float) -> float:
+    """One formula for both writers (item 388a): reload used
+    ``min_power - max(0.5, 0.1*min_power)`` and setup ``0.6*min_power``, so an
+    unset stop threshold moved 1.2 -> 1.5 W (6 -> 9 W at 10 W) on every save
+    and back on every restart."""
+    return float(min_power) * 0.6 if float(min_power) > 0 else 2.0
 
 
 class WashDataManager:
@@ -778,22 +803,13 @@ class WashDataManager:
         min_power = config_entry.options.get(
             CONF_MIN_POWER, config_entry.data.get(CONF_MIN_POWER, DEFAULT_MIN_POWER)
         )
-        off_delay = config_entry.options.get(
-            CONF_OFF_DELAY, config_entry.data.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY)
+        off_delay = _option_then_data(
+            config_entry, CONF_OFF_DELAY, resolve_off_delay_default(self.device_type)
         )
         progress_reset_delay = config_entry.options.get(
             CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY
         )
-        self._no_update_active_timeout = float(
-            config_entry.options.get(
-                CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-                DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
-            )
-        )
-        self._low_power_no_update_timeout = float(
-            config_entry.options.get(CONF_LOW_POWER_NO_UPDATE_TIMEOUT, 3600.0)
-        )
-        self._off_delay = float(config_entry.options.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY))
+        self._load_runtime_options(config_entry)
         # Device-scaled ceiling for the unmatched (expected == 0) zombie guard (#404).
         # Not a user option; purely a function of device_type, so it is recomputed
         # alongside device_type on reconfigure.
@@ -809,17 +825,6 @@ class WashDataManager:
         # before async_add_cycle and losing the whole cycle. Same #389 failure shape,
         # one step later. Falls back to the default rather than to 0, which would
         # silently auto-label everything.
-        self._learning_confidence = option_float(
-            config_entry.options.get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
-            DEFAULT_LEARNING_CONFIDENCE,
-        )
-        self._duration_tolerance = config_entry.options.get(
-            CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE
-        )
-        self._auto_label_confidence = option_float(
-            config_entry.options.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
-            DEFAULT_AUTO_LABEL_CONFIDENCE,
-        )
 
         self._profile_match_interval = int(
             config_entry.options.get(
@@ -887,7 +892,11 @@ class WashDataManager:
         )
 
         # Advanced options
-        smoothing_window = int(config_entry.options.get("smoothing_window", 5))
+        # Same default as the reload path (item 388): the literal 5 here made the
+        # first settings save log "smoothing 5->2". Display-only buffer either way.
+        smoothing_window = int(
+            config_entry.options.get(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
+        )
         interrupted_min_seconds = int(
             config_entry.options.get("interrupted_min_seconds", 150)
         )
@@ -951,14 +960,12 @@ class WashDataManager:
             ),
             start_threshold_w=float(
                 config_entry.options.get(
-                    CONF_START_THRESHOLD_W,
-                    float(min_power) + max(1.0, 0.1 * float(min_power)),
+                    CONF_START_THRESHOLD_W, _default_start_threshold_w(float(min_power))
                 )
             ),
             stop_threshold_w=float(
                 config_entry.options.get(
-                    CONF_STOP_THRESHOLD_W,
-                    float(min_power) * 0.6 if float(min_power) > 0 else 2.0,
+                    CONF_STOP_THRESHOLD_W, _default_stop_threshold_w(float(min_power))
                 )
             ),
             power_off_threshold_w=float(
@@ -1131,6 +1138,13 @@ class WashDataManager:
                     self.profile_store.profile_terminal_quiet_seconds(
                         self._current_program
                     ),
+                    # Element 12: no candidates on a manual pin; 0.0 is "none".
+                    0.0,
+                    # Element 13 (register item 384): the pinned profile's
+                    # user-vouched length, which floors a dishwasher's kept tail.
+                    self.profile_store.profile_trusted_min_duration(
+                        self._current_program
+                    ),
                 )
 
             if not readings:
@@ -1171,19 +1185,6 @@ class WashDataManager:
                 CONF_WATCHDOG_INTERVAL,
                 resolve_watchdog_interval_default(self.device_type),
             )
-        )
-        # option_int, not a bare int(): this runs in __init__, so a hand-edited
-        # import putting a non-numeric or oversized value here raised before the
-        # manager existed and the entry could never finish setup. The floor of 1 is
-        # what `SuggestionEngine` already applies to the same key - and it has to,
-        # because its interval cap is computed FROM this number, so an unclamped 0
-        # here would have the suggestion describe a persistence the matcher is not
-        # using. Zero also disables the gate rather than tightening it: every
-        # `counter >= 0` is true, so the first match commits.
-        self._match_persistence = option_int(
-            config_entry.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE),
-            DEFAULT_MATCH_PERSISTENCE,
-            minimum=1,
         )
         self._sampling_interval = float(
             config_entry.options.get(
@@ -1305,6 +1306,14 @@ class WashDataManager:
             end_time = readings[-1][0]
             start_time = readings[0][0]
             current_duration = (end_time - start_time).total_seconds()
+            # Which cycle this match is FOR (item 388e). The await below yields the
+            # loop, and the cycle can end - or the next one start - before it
+            # returns; applying the result then rewrote `_current_program` and the
+            # expected duration on a finished cycle, and pushed it into the
+            # detector, so the next cycle reached RUNNING already "matched".
+            _cycle_token = self._ranking_snapshot_cycle_id
+            _active = (STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+            _was_active = self.detector.state in _active
 
             # 1. RUN BETTER ASYNC MATCHING
             # in_progress: this is the live match on a cycle that is still running,
@@ -1320,6 +1329,15 @@ class WashDataManager:
                  # below this threshold, so cannot explain an ENDING quiet (#424).
                  stop_threshold_w=float(self.detector.config.stop_threshold_w),
             )
+
+            if self._ranking_snapshot_cycle_id != _cycle_token or (
+                _was_active and self.detector.state not in _active
+            ):
+                self._logger.debug(
+                    "Discarding a live match that returned after its cycle ended "
+                    "(detector %s)", self.detector.state,
+                )
+                return
 
             # 2. UPDATE MANAGER STATE (Estimates, Program Name, etc.)
             self._last_match_result = result
@@ -1830,7 +1848,12 @@ class WashDataManager:
                  # From the FULL candidate population, carried on the result -
                  # `result.candidates` is `candidates[:5]` and would hide the
                  # very programme `_match_prefix_ambiguous` is warning about.
-                 float(getattr(result, "longest_candidate_duration_s", 0.0) or 0.0))
+                 float(getattr(result, "longest_candidate_duration_s", 0.0) or 0.0),
+                 # Element 13 (register item 384): the shortest length the user
+                 # has vouched for in this profile, which floors a dishwasher's
+                 # kept tail exactly as the banked-tail repair does.
+                 self.profile_store.profile_trusted_min_duration(profile_name)
+                 if profile_name else None)
             )
 
             # --- LOGGING (Unified) ---
@@ -2389,6 +2412,59 @@ class WashDataManager:
             profile_name,
         )
 
+    def _load_runtime_options(self, config_entry: Any) -> None:
+        """Manager-level tunables, read the same way at setup and on reload (388c)."""
+        options = config_entry.options
+        self._no_update_active_timeout = float(
+            options.get(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
+        )
+        self._low_power_no_update_timeout = float(
+            options.get(CONF_LOW_POWER_NO_UPDATE_TIMEOUT, 3600.0)
+        )
+        self._off_delay = float(
+            _option_then_data(
+                config_entry, CONF_OFF_DELAY, resolve_off_delay_default(self.device_type)
+            )
+        )
+        # Coerced here rather than at the point of use. Both thresholds are compared
+        # against a match confidence inside the cycle-end tail, and that tail runs as
+        # a spawned task: a non-numeric option (an import file is hand-editable, and
+        # strip_null_options only removes nulls) raised there instead, killing the task
+        # before async_add_cycle and losing the whole cycle. Same #389 failure shape,
+        # one step later. Falls back to the default rather than to 0, which would
+        # silently auto-label everything.
+        self._learning_confidence = option_float(
+            options.get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
+            DEFAULT_LEARNING_CONFIDENCE,
+        )
+        self._duration_tolerance = options.get(
+            CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE
+        )
+        self._auto_label_confidence = option_float(
+            options.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
+            DEFAULT_AUTO_LABEL_CONFIDENCE,
+        )
+        # Clamped to >= 1, the same floor `SuggestionEngine` applies to this key:
+        # its interval cap is computed FROM this number, and zero would disable the
+        # gate rather than tighten it (every `counter >= 0` is true).
+        self._match_persistence = option_int(
+            options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE),
+            DEFAULT_MATCH_PERSISTENCE,
+            minimum=1,
+        )
+        self._unmatch_threshold = options.get(
+            CONF_PROFILE_UNMATCH_THRESHOLD, DEFAULT_PROFILE_UNMATCH_THRESHOLD
+        )
+        store = getattr(self, "profile_store", None)
+        if store is not None and hasattr(store, "_unmatch_threshold"):
+            store._unmatch_threshold = self._unmatch_threshold  # pylint: disable=protected-access
+            store._match_threshold = options.get(  # pylint: disable=protected-access
+                CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
+            )
+        self._progress_reset_delay = int(
+            options.get(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
+        )
+
     def _apply_retention_limits(self, options: Mapping[str, Any]) -> None:
         """Push the history / trace retention caps from ``options`` to the store."""
         self.profile_store.set_retention_limits(
@@ -2706,9 +2782,13 @@ class WashDataManager:
 
         # Get new values from config
         new_min_power = float(
-            config_entry.options.get(CONF_MIN_POWER, DEFAULT_MIN_POWER)
+            _option_then_data(config_entry, CONF_MIN_POWER, DEFAULT_MIN_POWER)
         )
-        new_off_delay = int(config_entry.options.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY))
+        new_off_delay = int(
+            _option_then_data(
+                config_entry, CONF_OFF_DELAY, resolve_off_delay_default(self.device_type)
+            )
+        )
         # Device-resolved, like the constructor: the default is 8 min on a washing
         # machine and an hour on a dishwasher, so falling back to the scalar would
         # silently shorten the bridge on a reload.
@@ -2794,14 +2874,12 @@ class WashDataManager:
         # Power Hysteresis Thresholds
         new_start_threshold_w = float(
             config_entry.options.get(
-                CONF_START_THRESHOLD_W,
-                float(new_min_power) + max(1.0, 0.1 * float(new_min_power)),
+                CONF_START_THRESHOLD_W, _default_start_threshold_w(new_min_power)
             )
         )
         new_stop_threshold_w = float(
             config_entry.options.get(
-                CONF_STOP_THRESHOLD_W,
-                max(0.0, float(new_min_power) - max(0.5, 0.1 * float(new_min_power))),
+                CONF_STOP_THRESHOLD_W, _default_stop_threshold_w(new_min_power)
             )
         )
         new_power_off_threshold_w = float(
@@ -3163,8 +3241,25 @@ class WashDataManager:
                 self._stop_watchdog()
                 self._start_watchdog()
 
-        # RESTORE STATE (only if recent enough, otherwise treat as stale)
-        await self._attempt_state_restoration()
+        # Manager-level settings the reload used to skip (item 388c): one loader
+        # shared with __init__, so the two cannot drift again.
+        self._load_runtime_options(config_entry)
+
+        # RESTORE STATE (only if recent enough, otherwise treat as stale) - but
+        # never over a cycle that is running right now (item 388b). An options
+        # reload keeps the live detector; restoring the snapshot (up to 60 s old)
+        # over it rolled the cycle back: readings dropped, a phantom restart gap
+        # written onto the cycle, the quiet timers reset.
+        if self.detector.state in (
+            STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING
+        ):
+            self._logger.debug(
+                "Options reload during an active cycle (%s): keeping the live "
+                "detector state, not restoring the snapshot",
+                self.detector.state,
+            )
+        else:
+            await self._attempt_state_restoration()
 
         self._logger.info("Configuration reloaded successfully")
 
@@ -5147,6 +5242,15 @@ class WashDataManager:
             # is untouched by how often we sample.
             if time_since_real_update > self._watchdog_interval:
                 _ka_w, _ka_obs = self._keepalive_reading()
+                # On time, this tick closes at most two intervals (the first one
+                # after a real reading) and then one. A longer one means the tick
+                # itself was late - host suspend, event-loop stall, a restart -
+                # and nobody watched the sensor in between, so the gap-free tally
+                # must not bank it (register item 391). Only the two shorten-only
+                # consumers of that tally read `observed`, so a false "late"
+                # costs end lag, never an early end.
+                if time_since_any_update > WATCHDOG_LATE_TICK_FACTOR * self._watchdog_interval:
+                    _ka_obs = False
                 self._logger.debug(
                     "Watchdog: Low-power sensor silence (%.0fs > watchdog interval "
                     "%ss). Injecting %.2fW keepalive (observed=%s) to advance "
@@ -5301,6 +5405,11 @@ class WashDataManager:
                 self._time_remaining = None
                 self._total_duration = None
                 self._cycle_progress = 0
+                # ...and the EMA behind it (item 388d): an armed program sets the
+                # duration before the "no profile" reset can run, so the new
+                # cycle started from the previous one's smoothed figure (89% two
+                # minutes into a two-hour wash).
+                self._smoothed_progress = 0.0
                 self._matched_profile_duration = None
                 self._last_estimate_time = None
                 self._score_history = {}  # Reset score history on new cycle
@@ -6385,10 +6494,17 @@ class WashDataManager:
             _no_winner = match_result is not None and _margin_owner is None
             if _no_winner:
                 _margin = None
+            # Stage-5 safeguards #2 (member fit) and #3 (overrun) flag a group win
+            # `is_ambiguous` WITHOUT moving the margin, so a margin-only gate let
+            # them label anyway (item 387b): of the cycles labelled in that state
+            # over the corpus, 7 of 12 got the wrong program. `is True`, not
+            # truthiness, so a result object without the field cannot block.
+            _ambiguous = getattr(match_result, "is_ambiguous", False) is True
             _margin_ok = (
                 not _no_winner
                 and _margin_owner == program
                 and (_margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN)
+                and not _ambiguous
             )
             if manual_program:
                 cycle_data["profile_name"] = program
@@ -6422,6 +6538,15 @@ class WashDataManager:
                         "on a number that was never measured for it.",
                         program, _margin_owner, program,
                     )
+            elif label_confidence >= float(self._learning_confidence or 0.0) and _ambiguous and (
+                _margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN
+            ):
+                self._logger.info(
+                    "Not labeling cycle as '%s': the matcher flagged its own pick as "
+                    "uncertain (a profile-group member that fits poorly, or a run "
+                    "past that member's length), so it stays unlabelled.",
+                    program,
+                )
             elif label_confidence >= float(self._learning_confidence or 0.0):
                 self._logger.info(
                     "Not labeling cycle as '%s': confident enough (%.2f) but only "
@@ -6479,9 +6604,11 @@ class WashDataManager:
             # Without it a cycle refused a label for finishing too close to the
             # runner-up was relabelled here a few lines later, on the same data.
             _post_margin = getattr(res, "ambiguity_margin", None)
+            # ...and the same Stage-5 ambiguity the live gate now honours (387b).
+            _post_ambiguous = getattr(res, "is_ambiguous", False) is True
             _post_margin_ok = (
                 _post_margin is None or float(_post_margin) >= MATCH_LABEL_MIN_MARGIN
-            )
+            ) and not _post_ambiguous
             if (
                 res.best_profile
                 and res.label_confidence >= self._auto_label_confidence
@@ -6505,12 +6632,13 @@ class WashDataManager:
             elif res.best_profile and res.label_confidence >= self._auto_label_confidence:
                 self._logger.info(
                     "Not post-cycle labeling as '%s': confident enough (%.2f) but "
-                    "only %.3f clear of the next candidate, under the %.2f a label "
-                    "needs. It is offered for confirmation instead.",
+                    "%s. It is offered for confirmation instead.",
                     res.best_profile,
                     res.label_confidence,
-                    float(_post_margin or 0.0),
-                    MATCH_LABEL_MIN_MARGIN,
+                    "the matcher flagged its own pick as uncertain"
+                    if _post_ambiguous
+                    else f"only {float(_post_margin or 0.0):.3f} clear of the next "
+                    f"candidate, under the {MATCH_LABEL_MIN_MARGIN:.2f} a label needs",
                 )
 
         # Back-fill confirmed label on any ranking snapshots captured during this cycle

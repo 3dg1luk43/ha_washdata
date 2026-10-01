@@ -530,6 +530,31 @@ def terminal_quiet_seen(
         return False
 
 
+def terminal_event_end(
+    points: Sequence[tuple[float, float]], last_active: float, peak_frac: float
+) -> float:
+    """Where a run that has been through its terminal quiet actually ends.
+
+    ``last_active`` (the last sample above the stop threshold), or the last sample
+    above ``peak * peak_frac`` when that is later: a stop threshold above the
+    signature's level leaves a quiet pump-out BELOW it, and when only
+    :func:`terminal_quiet_seen`'s peak-fraction test fires, ending at
+    ``last_active`` cut that pump-out off (register item 384). Shared by the live
+    cap and the banked-tail repair, like ``terminal_quiet_seen``. Never raises.
+    """
+    try:
+        peak = max((p for _o, p in points), default=0.0)
+        if peak <= 0:
+            return last_active
+        thr = peak * peak_frac
+        for offset, power in reversed(points):
+            if power > thr:
+                return max(float(last_active), float(offset))
+        return last_active
+    except Exception:  # noqa: BLE001
+        return last_active
+
+
 def has_resumed_pause(
     points: Sequence[tuple[float, float]], threshold_w: float, min_pause_s: float
 ) -> bool:

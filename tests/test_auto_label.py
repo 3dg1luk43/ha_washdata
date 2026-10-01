@@ -99,7 +99,10 @@ async def test_auto_label_cycles_basic(store):
             matched_phase=None,
             candidates=[],
             is_ambiguous=False,
-            ambiguity_margin=0.0
+            # A lone candidate's margin is 1.0 (`_ambiguity_from_candidates`); 0.0
+            # with is_ambiguous=False is a result the matcher cannot produce, and
+            # since item 387c this gate reads the margin too.
+            ambiguity_margin=1.0
         )
         
         stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=False)
@@ -137,7 +140,10 @@ async def test_auto_label_cycles_overwrite(store):
             matched_phase=None,
             candidates=[],
             is_ambiguous=False,
-            ambiguity_margin=0.0
+            # A lone candidate's margin is 1.0 (`_ambiguity_from_candidates`); 0.0
+            # with is_ambiguous=False is a result the matcher cannot produce, and
+            # since item 387c this gate reads the margin too.
+            ambiguity_margin=1.0
         )
         
         stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=True)
@@ -174,7 +180,8 @@ async def test_auto_label_cycles_no_overwrite(store):
 def _confident(profile="DetectedProfile", confidence=0.9, ambiguous=False):
     return MatchResult(
         best_profile=profile, confidence=confidence, expected_duration=3600.0,
-        matched_phase=None, candidates=[], is_ambiguous=ambiguous, ambiguity_margin=0.0,
+        matched_phase=None, candidates=[], is_ambiguous=ambiguous,
+        ambiguity_margin=0.0 if ambiguous else 1.0,  # what the matcher pairs (item 387c)
     )
 
 

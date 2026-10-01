@@ -878,3 +878,45 @@ async def test_an_uncorrected_sibling_is_still_repaired() -> None:
     assert res["repaired"] == 1
     assert data["past_cycles"][0]["duration"] == pytest.approx(4200.0)
     assert data["past_cycles"][1]["duration"] == pytest.approx(2970.0, abs=31.0)
+
+
+@pytest.mark.asyncio
+async def test_one_impossible_start_time_does_not_stop_the_repair() -> None:
+    """Register item 384: `parse_datetime` RAISES for month 13; the repair aborted
+    on that row with the cycles before it cut, the ones after it not, and the
+    pending key still set, so every restart stopped on the same row."""
+    bad = _cycle("bad", 3000, 1200)
+    bad["start_time"] = "2026-13-45T08:00:00+00:00"
+    data = {
+        "past_cycles": [_cycle("a", 3000, 1200), bad, _cycle("b", 3000, 1200)],
+        BANKED_TAIL_REPAIR_KEY: True,
+    }
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 3
+    assert all(c["duration"] == pytest.approx(2970.0, abs=31.0) for c in data["past_cycles"])
+    assert "end_time" not in bad  # nothing to anchor it on; duration and trace still agree
+    assert bad["power_data"][-1][0] <= bad["duration"] + 1e-6
+    assert not st.banked_tail_repair_pending()
+
+
+@pytest.mark.asyncio
+async def test_a_pump_out_below_the_stop_threshold_is_kept() -> None:
+    """Register item 384: a stop threshold above the signature's level (0.4% of
+    peak) left a quiet pump-out below it; when only the peak-fraction quiet test
+    fired, the repair ended the cycle at the last ABOVE-stop sample and cut the
+    drying and the pump-out off."""
+    pts = [[float(t), 2000.0] for t in range(0, 3000, 30)]
+    pts += [[float(t), 0.3] for t in range(3000, 4200, 30)]   # 20 min drying
+    pts += [[4200.0, 9.0], [4230.0, 9.0], [4260.0, 0.3], [4800.0, 0.3]]  # 9 W pump-out
+    cyc = {"id": "d", "profile_name": "Eco", "start_time": T0.isoformat(), "duration": 4800.0,
+           "termination_reason": "smart", "power_data": pts}
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+    st.profile_terminal_quiet_seconds = MagicMock(return_value=1200.0)
+
+    await st.async_repair_banked_tails(10.0, "dishwasher")  # stop 10 W > the 9 W pump-out
+
+    assert cyc["duration"] == pytest.approx(4230.0, abs=1.0)
