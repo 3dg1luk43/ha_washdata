@@ -37,7 +37,6 @@ def mock_hass():
     async def run_coro(coro):
         return await coro
     hass.async_create_task = MagicMock(side_effect=lambda coro: hass.loop.create_task(coro))
-    hass.components.persistent_notification.async_create = MagicMock()
     hass.config_entries.async_get_entry = MagicMock()
     return hass
 

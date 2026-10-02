@@ -68,7 +68,9 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_COMPLETION_MIN_SECONDS,
-    CONF_END_REPEAT_COUNT,
+    CONF_END_ENERGY_THRESHOLD,
+    CONF_PROFILE_MATCH_INTERVAL,
+    CONF_PROFILE_MATCH_THRESHOLD,
     CONF_INTERRUPTED_MIN_SECONDS,
     CONF_MATCH_PERSISTENCE,
     CONF_MIN_OFF_GAP,
@@ -137,8 +139,8 @@ from .cycle_detector import (
 )
 from .profile_store import (
     _ambiguity_from_candidates,
-    _match_prefix_ambiguity,
     collapse_group_candidates,
+    match_prefix_flags,
     longest_candidate_duration,
     decompress_power_data,
 )
@@ -200,11 +202,14 @@ _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
     CONF_OFF_DELAY: ("off_delay", int),
     CONF_MIN_OFF_GAP: ("min_off_gap", int),
     CONF_COMPLETION_MIN_SECONDS: ("completion_min_seconds", int),
-    CONF_END_REPEAT_COUNT: ("end_repeat_count", int),
     CONF_START_THRESHOLD_W: ("start_threshold_w", float),
     CONF_STOP_THRESHOLD_W: ("stop_threshold_w", float),
     CONF_START_DURATION_THRESHOLD: ("start_duration_threshold", float),
     CONF_INTERRUPTED_MIN_SECONDS: ("interrupted_min_seconds", int),
+    # Suggested settings the Playground could not what-if (audit SUGGEST-19).
+    CONF_END_ENERGY_THRESHOLD: ("end_energy_threshold", float),
+    CONF_PROFILE_MATCH_THRESHOLD: ("match_confidence_threshold", float),
+    CONF_PROFILE_MATCH_INTERVAL: ("match_interval", int),
 }
 
 # Matching options the Playground honours, mapped to the ``match_config`` key
@@ -862,7 +867,7 @@ class _DetailSim:
             self.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
         ))
         self.commit_state: dict[str, Any] = {"candidate": None, "count": 0, "name": None}
-        self.smoothed = {"v": 0.0}
+        self.smoothed: dict[str, Any] = {"v": 0.0, "program": None}
         self.flags = {"detected": False, "pre_complete": False, "start": False}
 
         # --- notification config (decisions reuse notification_rules) ---
@@ -931,8 +936,10 @@ class _DetailSim:
             )
 
     def _held(self, offset: float) -> bool:
+        # Quiet hours are local clock hours and replay timestamps are UTC, so
+        # `.hour` on the raw stamp held the wrong hours (audit PROGRESS-13).
         return notif_rules.in_quiet_hours(
-            self.quiet_bounds, self.base + timedelta(seconds=offset)
+            self.quiet_bounds, dt_util.as_local(self.base + timedelta(seconds=offset))
         )
 
     def _on_state_change(self, old_state: str, new_state: str) -> None:
@@ -1109,6 +1116,8 @@ class _DetailSim:
         commit_event = decide_commit(
             raw_name, is_ambiguous, self.commit_state, self.match_persistence
         )
+        # Same half-interval-until-commit schedule as live (audit LIVE-17).
+        self.detector.set_match_committed(bool(self.commit_state["name"]))
         if commit_event:
             self._emit(commit_event, f"{raw_name} (conf={raw_conf:.2f})")
             self.last_logged.update(kind="matched", name=raw_name)
@@ -1149,9 +1158,9 @@ class _DetailSim:
                 self.store.profile_pauses_below,
                 stop_threshold_w=float(_det_cfg.stop_threshold_w),
             )
-        full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(
-            candidates, raw_expected, _pauses
-        )
+        # The SAME composition live sends (audit LIVE-18): composing the wide
+        # flag here as `full or fit` kept the #288 term in every replay.
+        prefix_wide, full_shape_hit = match_prefix_flags(candidates, raw_expected, _pauses)
         # Guard the store call like iter_evidence_cycles above: on an older store or a
         # partial test double without profile_tail_power the AttributeError would
         # bubble through _try_profile_match, which drops the match at debug - so EVERY
@@ -1197,6 +1206,15 @@ class _DetailSim:
                 trusted_min = self.store.profile_trusted_min_duration(raw_name)
             except Exception:  # pylint: disable=broad-exception-caught
                 trusted_min = None
+        # Element 14 (audit DETECT-16), as live sends it.
+        pause_catalogue = None
+        if self.store is not None and raw_name and _det_cfg is not None:
+            try:
+                pause_catalogue = self.store.profile_pause_catalogue(
+                    raw_name, float(_det_cfg.stop_threshold_w)
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                pause_catalogue = None
         return (
             raw_name,
             raw_conf,
@@ -1204,7 +1222,7 @@ class _DetailSim:
             None,
             False,
             bool(is_ambiguous),
-            bool(full_shape_hit or prefix_fit_hit),
+            bool(prefix_wide),
             bool(full_shape_hit),
             tail_power,
             terminal_high,
@@ -1217,6 +1235,7 @@ class _DetailSim:
             # wrong, twice.
             longest_candidate_duration(pre_collapse_candidates),
             trusted_min,
+            pause_catalogue,
         )
 
     def _price_at(self, offset_s: float) -> float | None:
@@ -1311,7 +1330,9 @@ class _DetailSim:
                 if pr is not None:
                     phase_remaining_s = pr.get("remaining_s")
             result = progress_mod.compute_progress(
-                self.device_type, matched_dur, offset, self.smoothed["v"], phase_result, ml_pct,
+                self.device_type, matched_dur, offset,
+                progress_mod.ema_seed(self.smoothed["v"], self.smoothed["program"], program),
+                phase_result, ml_pct,
                 phase_remaining_s=phase_remaining_s,
                 # Same time-scaled smoothing as live: the sim steps the estimator
                 # at its own throttle, so without this the replay would smooth
@@ -1322,6 +1343,7 @@ class _DetailSim:
             )
             if result is not None:
                 self.smoothed["v"] = result.smoothed
+                self.smoothed["program"] = program
                 pt["progress"] = round(result.progress, 1)
                 pt["remaining_s"] = round(result.remaining, 0)
                 pt["phase"] = progress_mod.current_phase(

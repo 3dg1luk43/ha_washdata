@@ -260,7 +260,8 @@
     "save_total_cycles": "Lagre total",
     "clear": "Tøm",
     "add_brand": "Legg til merke",
-    "add_appliance": "Legg til apparat"
+    "add_appliance": "Legg til apparat",
+    "retry": "Prøv igjen"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Samplingsintervall bør være høyst halvparten av vaktbikkjeintervallet ({wi} s)"
     },
     "settings_banner": "Innstillingskonflikter: {n}. Sjekk de fremhevede seksjonene og rett dem opp før du lagrer.",
-    "settings_banner_btn": "Gå til første"
+    "settings_banner_btn": "Gå til første",
+    "end_energy": {
+      "energy": "For streng for Stoppterskel ({w} W) i løpet av Av-forsinkelse ({d} s); syklusen kan bare avsluttes via en reservevei",
+      "stop": "Sluttenergi ({e} Wh på {d} s) tillater bare {p} W"
+    }
   },
   "hdr": {
     "ab_comparison": "Sammenligning av innstillinger A/B",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "knip for å zoome · dobbelttrykk for å tilbakestille",
     "cycles_since_service": "{since} / {total} sykluser",
     "total_cycles_run": "sykluser totalt",
-    "correct_total_cycles": "Korriger totalen"
+    "correct_total_cycles": "Korriger totalen",
+    "hist_reason_already_recorded": "overlapper en syklus WashData allerede har registrert",
+    "share_consent": "Jeg bekrefter at disse syklusene ble fullført normalt uten avbrudd"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -771,7 +778,8 @@
       "total_energy": "Energiestimat"
     },
     "metric_auc": "AUC {auc} på valideringsdata",
-    "metric_mae": "feil {model} mot baseline {baseline}"
+    "metric_mae": "feil {model} mot baseline {baseline}",
+    "fine_tuned_at": "finjustert {when}"
   },
   "modal": {
     "auto_label": "Automatiske etikettsykluser",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Ingen servicepåminnelser er satt opp ennå.",
     "toast_program_armed": "Program valgt for neste syklus: {program}",
     "toast_range_required": "Angi et gyldig Fra/Til-område.",
-    "no_profiles_option": "(ingen profiler ennå, legg til en)"
+    "no_profiles_option": "(ingen profiler ennå, legg til en)",
+    "compare_cycles_title": "Sammenlign {count} sykluser",
+    "edit_builtin_phase": "Dette er en innebygd fase. Når du lagrer, opprettes en egendefinert overstyring; originalen beholdes og kan gjenopprettes ved å slette overstyringen.",
+    "fetch_error": "Kunne ikke laste inn data."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",
@@ -1526,7 +1537,7 @@
       "label": "Pumpe fastsittingsvarighet"
     },
     "sampling_interval": {
-      "doc": "Forventet tid mellom sensoravlesninger - brukes til å dimensjonere utjevningsvinduet og starte avsprettingen riktig. Hver sensoroppdatering registreres uavhengig av denne verdien; den kalibrerer bare nedstrømsberegningene. Forslagsmotoren måler sensorens faktiske tråkkfrekvens fra tidligere sykluser og setter denne automatisk.",
+      "doc": "Minste tid mellom behandlede målinger. En måling som kommer tidligere enn dette etter den forrige, hoppes over (lave målinger under en syklus beholdes alltid), så sett den til støpselets faktiske rapporteringsintervall eller lavere: en høyere verdi kaster bare målinger. WashData foreslår ikke denne verdien, fordi det eneste den kan måle, er intervallet som er igjen etter at denne innstillingen allerede har forkastet målinger.",
       "label": "Sampling-intervall"
     },
     "save_debug_traces": {
@@ -1803,7 +1814,8 @@
     "deleting": "Sletter…",
     "imported": "Importert",
     "preparing": "Forbereder…",
-    "unlabelling": "Fjerner merking…"
+    "unlabelling": "Fjerner merking…",
+    "working": "Arbeider…"
   },
   "suggestion": {
     "both_agree": "WashData anbefaler",
@@ -1898,7 +1910,10 @@
       "thr_batch": "Holdt like over den laveste aktive effekten ved p05 på tvers av {cycles} sykluser ({p05}W) slik at en start fanges så tidlig som mulig og stoppterskelen holder seg under maskinens laveste driftseffekt.",
       "tol_per_profile": "p75 for varighetsvariansen per profil på tvers av {profiles} profiler ({cycles} sykluser); stramme profiler straffes ikke.",
       "tol_pooled": "Basert på samlet varighetsvarians for {cycles} nyeste merkede sykluser (p95 avvik={dev}).",
-      "watchdog": "Holdt så lavt som forsvarlig (like over p95-oppdateringsmellomrommet på {p95}s og minst 2x samplingsintervallet på {median}s, min. 30s) slik at stans fanges raskt uten falske stopp."
+      "watchdog": "Holdt så lavt som forsvarlig (like over p95-oppdateringsmellomrommet på {p95}s og minst 2x samplingsintervallet på {median}s, min. 30s) slik at stans fanges raskt uten falske stopp.",
+      "end_energy_floor": "Hevet til den nedre grensen som stoppterskelen ({stop} W) i løpet av av-forsinkelsen ({off_delay} s) gir; under den kan syklusen bare avsluttes via en reservevei.",
+      "max_duration_ratio_default": "Tilbake til standardverdien: et lavere tak avviser riktig program hver gang en kjøring varer lenger enn vanlig.",
+      "min_duration_ratio_default": "Tilbake til standardverdien: et høyere gulv hindrer at en pågående syklus gjenkjennes før den er godt i gang."
     },
     "exclusions": {
       "summary": "Ekskluderte {total} feildetekterte syklus(er): {parts}.",
@@ -2062,7 +2077,36 @@
     "odometer_save_failed": "Kunne ikke lagre totalen: {error}",
     "contrib_device_changed": "Lagt til i fellesskapsbutikken, men apparatet ble byttet mens skjemaet var åpent. Velg det i Innstillinger.",
     "store_pick_profile_share": "Velg en profil å dele til",
-    "remove_failed": "Fjerning mislyktes: {error}"
+    "remove_failed": "Fjerning mislyktes: {error}",
+    "analysis_complete": "Analysen er fullført: {count} forslag",
+    "analysis_failed": "Analyse mislyktes: {error}",
+    "auto_detect_failed": "Automatisk gjenkjenning mislyktes: {error}",
+    "auto_label_failed": "Automatisk merking mislyktes: {error}",
+    "could_not_load_cycle": "Kunne ikke laste inn syklus: {error}",
+    "create_failed": "Oppretting mislyktes: {error}",
+    "cycles_deleted": "{count} syklus(er) slettet",
+    "debug_cleared": "{count} feilsøkingsspor fjernet",
+    "discard_failed": "Forkasting mislyktes: {error}",
+    "error": "Feil: {error}",
+    "export_failed": "Eksport mislyktes: {error}",
+    "import_failed": "Import mislyktes: {error}",
+    "invalid_json": "\"{key}\" er ikke gyldig JSON - rett det eller tøm feltet før du lagrer.",
+    "label_failed": "Merking mislyktes: {error}",
+    "ml_training_promoted": "Trening fullført: {count} modell(er) aktivert",
+    "pause_failed": "Pause mislyktes: {error}",
+    "phase_created": "Fase \"{name}\" opprettet",
+    "phase_deleted": "Fase \"{name}\" slettet",
+    "profile_created": "Profil \"{name}\" opprettet",
+    "rename_failed": "Omdøping mislyktes: {error}",
+    "revert_failed": "Tilbakestilling mislyktes: {error}",
+    "save_failed": "Lagring mislyktes: {error}",
+    "split_complete": "Delt i {count} sykluser",
+    "start_failed": "Start mislyktes: {error}",
+    "stop_failed": "Stopp mislyktes: {error}",
+    "update_failed": "Oppdatering mislyktes: {error}",
+    "store_download_skipped": "{n} opptak hoppet over: for korte, med for mange hull eller allerede på apparatet ditt.",
+    "store_import_low_quality": "Dette opptaket er for kort, har for mange hull eller er urealistisk og kan ikke importeres.",
+    "store_import_duplicate": "Dette opptaket er allerede på apparatet ditt."
   },
   "trend": {
     "down": "Trender nedover",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Skjul veiledning",
       "show_guidance": "Vis veiledning"
     }
+  },
+  "access": {
+    "edit": "Rediger",
+    "full": "Full",
+    "inherit": "Arv",
+    "none": "Ingen (skjult)",
+    "read": "Les"
   }
 }

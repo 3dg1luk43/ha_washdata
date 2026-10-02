@@ -42,7 +42,7 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     DOMAIN,
-    SHAREABLE_SETTING_KEYS,
+    sanitize_shared_settings,
     STORE_API_KEY,
     STORE_PROJECT_ID,
     SUPPORTED_CYCLE_SCHEMA_VERSIONS,
@@ -1028,11 +1028,7 @@ class StoreClient:
             # Defense in depth at the store boundary: keep only allow-listed, numeric
             # settings (never trust the caller to have filtered) so nothing arbitrary is
             # ever written to the shared device doc.
-            filtered = {
-                str(k): v for k, v in settings.items()
-                if k in SHAREABLE_SETTING_KEYS
-                and isinstance(v, (int, float)) and not isinstance(v, bool)
-            }
+            filtered = sanitize_shared_settings(settings, appliance)
             if filtered:
                 device_fields["settings"] = filtered
         ok = ok and await self._commit_create(token, f"devices/{d_id}", device_fields)

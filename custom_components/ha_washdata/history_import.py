@@ -68,6 +68,7 @@ from .const import (
     DEVICE_COMPLETION_THRESHOLDS,
     HISTORY_IMPORT_DENSIFY_STEP_S,
     HISTORY_IMPORT_EDGE_GAP_S,
+    HISTORY_IMPORT_MAX_BRIDGE_S,
     HISTORY_IMPORT_MAX_BLOCK_SPAN_S,
     HISTORY_IMPORT_MAX_MEDIAN_INTERVAL_S,
     HISTORY_IMPORT_MAX_ROWS,
@@ -398,8 +399,10 @@ def find_activity_blocks(
 
     Three independent cut rules, unioned:
 
-    * a stream break (``power is None``) - the sensor went away, so nothing may be
-      carried across the hole;
+    * a stream break (``power is None``) longer than ``HISTORY_IMPORT_MAX_BRIDGE_S``
+      (or the cut threshold, if shorter) - the sensor went away, so nothing may be
+      carried across the hole. A shorter break is bridged: it is a blip or a restart,
+      not the end of anything;
     * **quiet accumulation** - the carried-forward value has been below the stop
       threshold for longer than ``cut_after_s``;
     * **no activity** - no sample has reached the start threshold for longer than
@@ -432,11 +435,24 @@ def find_activity_blocks(
             skipped.append(block.summary(reason="idle"))
         current = []
 
+    in_break = False
     for timestamp, power in samples:
         if power is None:
-            _close()
-            quiet_s = idle_s = 0.0
+            # Do not cut yet: a 2 s Wi-Fi blip or an HA restart writes the same
+            # `unavailable` row, and cutting there split one wash into two
+            # "completed" candidates, both pre-ticked (audit PLAYGROUND-06). The
+            # next real sample decides: a short hole is bridged as a plain gap
+            # (the detector's own outage logic judges it), a long one cuts.
+            in_break = True
             continue
+        if in_break:
+            in_break = False
+            hole = (
+                (timestamp - current[-1][0]).total_seconds() if current else float("inf")
+            )
+            if hole > min(limit, HISTORY_IMPORT_MAX_BRIDGE_S):
+                _close()
+                quiet_s = idle_s = 0.0
         if current:
             gap = (timestamp - current[-1][0]).total_seconds()
             carried = current[-1][1]
@@ -885,6 +901,67 @@ def existing_dedup_keys(cycles: Iterable[dict[str, Any]]) -> set[tuple[int, int]
         if key is not None:
             out.add(key)
     return out
+
+
+def stored_intervals(cycles: Iterable[dict[str, Any]]) -> list[tuple[float, float]]:
+    """``(start, end)`` unix-second spans of every stored cycle, sorted by start."""
+    out: list[tuple[float, float]] = []
+    for cycle in cycles or []:
+        start = _dedup_start_dt(cycle.get("start_time"))
+        if start is None:
+            continue
+        try:
+            duration = max(0.0, float(cycle.get("duration") or 0.0))
+        except (TypeError, ValueError):
+            continue
+        t0 = start.timestamp()
+        out.append((t0, t0 + duration))
+    out.sort()
+    return out
+
+
+def overlaps_stored(
+    start_time: Any, duration: Any, intervals: Sequence[tuple[float, float]]
+) -> bool:
+    """True when a candidate's span overlaps any stored cycle's span.
+
+    The exact ``dedup_key`` alone missed 81% of re-detected cycles: a cycle recorded
+    live ends via Smart Termination and a tail trim, the same run replayed from raw
+    history ends unmatched on the timeout, so start and duration rarely agree to the
+    second (audit PLAYGROUND-05; Beko 14205 s stored vs 17805 s imported). Any real
+    overlap means the run is already on record. Touching endpoints do not count.
+    """
+    start = _dedup_start_dt(start_time)
+    if start is None:
+        return False
+    try:
+        t0 = start.timestamp()
+        t1 = t0 + max(0.0, float(duration or 0.0))
+    except (TypeError, ValueError):
+        return False
+    for s0, s1 in intervals:
+        if s0 >= t1:
+            break
+        if s1 > t0 and s0 < t1:
+            return True
+    return False
+
+
+def mark_already_recorded(
+    segments: Iterable[dict[str, Any]], intervals: Sequence[tuple[float, float]]
+) -> int:
+    """Untick preview rows that overlap a stored cycle; returns how many were marked.
+
+    Shown, never pre-ticked: a labelled copy double-weights the real cycle in its
+    profile's envelope (audit PLAYGROUND-05).
+    """
+    marked = 0
+    for seg in segments or []:
+        if overlaps_stored(seg.get("start_time"), seg.get("duration_s"), intervals):
+            seg["accept"] = False
+            seg["reason"] = "already_recorded"
+            marked += 1
+    return marked
 
 
 def build_backfill_cycle(cycle_data: dict[str, Any]) -> dict[str, Any]:

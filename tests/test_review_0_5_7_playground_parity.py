@@ -72,9 +72,13 @@ def test_the_playground_starts_from_the_live_templates() -> None:
     st = _store()
     snaps, _cfg, _gm, _ms = playground._build_match_snapshots(st)
     cotton = next(s for s in snaps if s["name"] == "Cotton")
-    # The envelope, sized by target_duration - not the sample's raw points.
+    # The envelope, sized by target_duration - not the sample's raw points - and
+    # re-gridded onto the query step like every other template (audit
+    # MATCH-CORE-01: envelope templates used to keep their own grid).
     assert cotton["avg_duration"] == 7200.0
-    assert len(cotton["sample_power"]) == 240
+    avg = st._data["envelopes"]["Cotton"]["avg"]
+    span = float(avg[-1][0]) - float(avg[0][0])
+    assert len(cotton["sample_power"]) == int(round(span / playground._PLAYGROUND_START_DT)) + 1
     assert _key(snaps) == _key(st.build_match_snapshots(playground._PLAYGROUND_START_DT))
 
 

@@ -670,7 +670,9 @@ async def test_upload_reference_cycle_attaches_settings():
                for w in kw["json"]["writes"] if "/devices/" in w.get("update", {}).get("name", ""))
     setmap = dev["update"]["fields"]["settings"]["mapValue"]["fields"]
     assert setmap["start_threshold_w"] == {"doubleValue": 12.0}
-    assert setmap["off_delay"] == {"integerValue": "180"}
+    # off_delay is the sharer's plug cadence, not the model's: never uploaded
+    # (audit STORE-06).
+    assert "off_delay" not in setmap
 
 
 @pytest.mark.asyncio

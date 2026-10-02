@@ -260,7 +260,8 @@
     "save_total_cycles": "Spara total",
     "clear": "Rensa",
     "add_brand": "Lägg till märke",
-    "add_appliance": "Lägg till apparat"
+    "add_appliance": "Lägg till apparat",
+    "retry": "Försök igen"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Samplingsintervall bör vara högst hälften av vakthundsintervallet ({wi} s)"
     },
     "settings_banner": "Inställningskonflikter: {n}. Kontrollera de markerade avsnitten och åtgärda dem innan du sparar.",
-    "settings_banner_btn": "Gå till första"
+    "settings_banner_btn": "Gå till första",
+    "end_energy": {
+      "energy": "För strikt för Stopptröskel ({w} W) under Avfördröjning ({d} s); cykeln kan bara avslutas via en reservväg",
+      "stop": "Slutenergi ({e} Wh på {d} s) tillåter bara {p} W"
+    }
   },
   "hdr": {
     "ab_comparison": "A/B-inställningsjämförelse",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "nyp för att zooma · dubbeltryck för att återställa",
     "cycles_since_service": "{since} / {total} cykler",
     "total_cycles_run": "cykler totalt",
-    "correct_total_cycles": "Korrigera totalen"
+    "correct_total_cycles": "Korrigera totalen",
+    "hist_reason_already_recorded": "överlappar en cykel som WashData redan har registrerat",
+    "share_consent": "Jag bekräftar att dessa cykler slutfördes normalt utan avbrott"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -771,7 +778,8 @@
       "total_energy": "Energiuppskattning"
     },
     "metric_auc": "AUC {auc} på valideringsdata",
-    "metric_mae": "fel {model} mot baslinje {baseline}"
+    "metric_mae": "fel {model} mot baslinje {baseline}",
+    "fine_tuned_at": "finjusterad {when}"
   },
   "modal": {
     "auto_label": "Automatisk märkning av cykler",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Inga servicepåminnelser är inställda än.",
     "toast_program_armed": "Program valt för nästa cykel: {program}",
     "toast_range_required": "Ange ett giltigt Från/Till-intervall.",
-    "no_profiles_option": "(inga profiler ännu, lägg till en)"
+    "no_profiles_option": "(inga profiler ännu, lägg till en)",
+    "compare_cycles_title": "Jämför {count} cykler",
+    "edit_builtin_phase": "Det här är en inbyggd fas. När du sparar skapas en anpassad åsidosättning; originalet bevaras och kan återställas genom att ta bort åsidosättningen.",
+    "fetch_error": "Det gick inte att läsa in data."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
@@ -1526,7 +1537,7 @@
       "label": "Pumpens fastnadsvaraktighet"
     },
     "sampling_interval": {
-      "doc": "Förväntad tid mellan sensoravläsningarna - används för att dimensionera utjämningsfönstret och starta avstudsningen korrekt. Varje sensoruppdatering registreras oavsett detta värde; den kalibrerar bara nedströmsberäkningarna. Förslagsmotorn mäter din sensors faktiska kadens från tidigare cykler och ställer in denna automatiskt.",
+      "doc": "Minsta tid mellan bearbetade mätvärden. Ett mätvärde som kommer tidigare än så efter det föregående hoppas över (låga mätvärden under en cykel behålls alltid), så ställ in det på uttagets faktiska rapporteringsintervall eller lägre: ett högre värde slänger bara mätvärden. WashData föreslår inte detta värde, eftersom det enda den kan mäta är intervallet som återstår efter att den här inställningen redan har slängt mätvärden.",
       "label": "Samplingsintervall"
     },
     "save_debug_traces": {
@@ -1803,7 +1814,8 @@
     "deleting": "Raderar…",
     "imported": "Importerad",
     "preparing": "Förbereder…",
-    "unlabelling": "Tar bort märkning…"
+    "unlabelling": "Tar bort märkning…",
+    "working": "Arbetar…"
   },
   "suggestion": {
     "both_agree": "WashData rekommenderar",
@@ -1898,7 +1910,10 @@
       "thr_batch": "Hålls precis över den lägsta aktiva effekten vid p05 över {cycles} cykler ({p05}W) så att en start fångas så tidigt som möjligt och stopptröskeln stannar under maskinens lägsta driftseffekt.",
       "tol_per_profile": "p75 för varaktighetsvariansen per profil över {profiles} profiler ({cycles} cykler); snäva profiler bestraffas inte.",
       "tol_pooled": "Baserat på sammanslagen varaktighetsvarians för {cycles} senaste märkta cykler (p95 avvikelse={dev}).",
-      "watchdog": "Hålls så lågt som är säkert (strax över p95-uppdateringsmellanrummet på {p95}s och minst 2x samplingsintervallet på {median}s, min. 30s) så att stillestånd upptäcks snabbt utan falska stopp."
+      "watchdog": "Hålls så lågt som är säkert (strax över p95-uppdateringsmellanrummet på {p95}s och minst 2x samplingsintervallet på {median}s, min. 30s) så att stillestånd upptäcks snabbt utan falska stopp.",
+      "end_energy_floor": "Höjd till den nedre gräns som stopptröskeln ({stop} W) under avfördröjningen ({off_delay} s) ger; lägre än så kan cykeln bara avslutas via en reservväg.",
+      "max_duration_ratio_default": "Tillbaka till standardvärdet: ett lägre tak avvisar rätt program så fort en körning tar längre tid än vanligt.",
+      "min_duration_ratio_default": "Tillbaka till standardvärdet: ett högre golv gör att en pågående cykel inte känns igen förrän den har kommit en bra bit."
     },
     "exclusions": {
       "summary": "Uteslöt {total} feldetekterade cykler: {parts}.",
@@ -2062,7 +2077,36 @@
     "odometer_save_failed": "Kunde inte spara totalen: {error}",
     "contrib_device_changed": "Tillagd i gemenskapsbutiken, men apparaten byttes medan formuläret var öppet. Välj den i Inställningar.",
     "store_pick_profile_share": "Välj en profil att dela till",
-    "remove_failed": "Borttagning misslyckades: {error}"
+    "remove_failed": "Borttagning misslyckades: {error}",
+    "analysis_complete": "Analys klar: {count} förslag",
+    "analysis_failed": "Analys misslyckades: {error}",
+    "auto_detect_failed": "Autoidentifiering misslyckades: {error}",
+    "auto_label_failed": "Automatisk märkning misslyckades: {error}",
+    "could_not_load_cycle": "Kunde inte läsa in cykel: {error}",
+    "create_failed": "Skapande misslyckades: {error}",
+    "cycles_deleted": "Borttagna cykler: {count}",
+    "debug_cleared": "Rensade felsökningsspår: {count}",
+    "discard_failed": "Kassering misslyckades: {error}",
+    "error": "Fel: {error}",
+    "export_failed": "Export misslyckades: {error}",
+    "import_failed": "Importen misslyckades: {error}",
+    "invalid_json": "\"{key}\" är inte giltig JSON - rätta det eller töm fältet innan du sparar.",
+    "label_failed": "Märkning misslyckades: {error}",
+    "ml_training_promoted": "Träning klar: {count} modell(er) aktiverade",
+    "pause_failed": "Paus misslyckades: {error}",
+    "phase_created": "Fasen \"{name}\" skapad",
+    "phase_deleted": "Fasen \"{name}\" borttagen",
+    "profile_created": "Profilen \"{name}\" skapad",
+    "rename_failed": "Namnbyte misslyckades: {error}",
+    "revert_failed": "Återställning misslyckades: {error}",
+    "save_failed": "Sparning misslyckades: {error}",
+    "split_complete": "Delad i {count} cykler",
+    "start_failed": "Start misslyckades: {error}",
+    "stop_failed": "Stopp misslyckades: {error}",
+    "update_failed": "Uppdatering misslyckades: {error}",
+    "store_download_skipped": "{n} inspelning(ar) överhoppade: för korta, med för många luckor eller redan på din apparat.",
+    "store_import_low_quality": "Den här inspelningen är för kort, har för många luckor eller är orimlig och kan inte importeras.",
+    "store_import_duplicate": "Den här inspelningen finns redan på din apparat."
   },
   "trend": {
     "down": "Nedåtgående trend",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Dölj vägledning",
       "show_guidance": "Visa vägledning"
     }
+  },
+  "access": {
+    "edit": "Redigera",
+    "full": "Fullständig",
+    "inherit": "Ärv",
+    "none": "Ingen (dold)",
+    "read": "Läs"
   }
 }

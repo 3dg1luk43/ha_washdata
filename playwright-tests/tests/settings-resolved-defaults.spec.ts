@@ -82,18 +82,19 @@ test('saving an untouched section does not persist fields still equal to their r
 
   // Open Detection (renders sampling_interval, start_duration_threshold,
   // smart_termination_duration_ratio - all showing their resolved defaults - plus
-  // smoothing_window, which we change to make the form dirty).
+  // end_energy_threshold, which we change to make the form dirty; smoothing_window
+  // used to play that part and was removed as a dead setting).
   await page.locator('button[data-sec="detection"]').first().click();
-  const smoothing = page.locator('input[data-opt="smoothing_window"]').first();
-  await expect(smoothing).toBeVisible({ timeout: 8_000 });
-  await smoothing.fill('4');
+  const endEnergy = page.locator('input[data-opt="end_energy_threshold"]').first();
+  await expect(endEnergy).toBeVisible({ timeout: 8_000 });
+  await endEnergy.fill('0.15');  // above the 0.1 Wh 3 W x 120 s implies (conflict rule)
 
   await page.locator('#wd-settings-save').first().click();
   const calls = await assertWsCalled(page, 'ha_washdata/set_options');
   const options = calls[calls.length - 1].options as Record<string, unknown>;
 
   // The changed, non-resolved-default field is saved...
-  expect(options.smoothing_window).toBe(4);
+  expect(options.end_energy_threshold).toBe(0.15);
   // ...but untouched fields still equal to their resolved default are NOT persisted,
   // so they keep resolving per device type.
   expect(options).not.toHaveProperty('sampling_interval');

@@ -260,7 +260,8 @@
         "save_total_cycles": "保存累计值",
         "clear": "清除",
         "add_brand": "添加品牌",
-        "add_appliance": "添加家电"
+        "add_appliance": "添加家电",
+        "retry": "重试"
     },
     "note": {
         "off_delay": {
@@ -334,7 +335,11 @@
             "sampling": "采样间隔应最多为看门狗间隔 ({wi} 秒) 的一半"
         },
         "settings_banner": "设置冲突：{n}。请检查高亮显示的部分，并在保存前修复。",
-        "settings_banner_btn": "前往第一处"
+        "settings_banner_btn": "前往第一处",
+        "end_energy": {
+            "energy": "对于停止阈值 ({w} W) 和关闭延迟 ({d} s) 而言过于严格；周期只能通过备用路径结束",
+            "stop": "结束能耗 ({d} s 内 {e} Wh) 只允许 {p} W"
+        }
     },
     "hdr": {
         "ab_comparison": "A/B 设置对比",
@@ -735,7 +740,9 @@
         "zoom_hint_touch_zoomed": "双指缩放 · 双击重置",
         "cycles_since_service": "{since} / {total} 个周期",
         "total_cycles_run": "累计运行周期",
-        "correct_total_cycles": "更正累计值"
+        "correct_total_cycles": "更正累计值",
+        "hist_reason_already_recorded": "与 WashData 已记录的周期重叠",
+        "share_consent": "我确认这些周期均正常完成，无中断"
     },
     "log": {
         "all_levels": "所有级别",
@@ -771,7 +778,8 @@
             "total_energy": "能耗估算"
         },
         "metric_auc": "留出验证数据上的 AUC {auc}",
-        "metric_mae": "误差 {model} vs 基线 {baseline}"
+        "metric_mae": "误差 {model} vs 基线 {baseline}",
+        "fine_tuned_at": "微调于 {when}"
     },
     "modal": {
         "auto_label": "自动标记周期",
@@ -1103,7 +1111,10 @@
         "no_reminders_set": "尚未设置保养提醒。",
         "toast_program_armed": "已为下一个周期设置程序：{program}",
         "toast_range_required": "请设置有效的起始/结束范围。",
-        "no_profiles_option": "（暂无配置文件，请添加）"
+        "no_profiles_option": "（暂无配置文件，请添加）",
+        "compare_cycles_title": "比较 {count} 个周期",
+        "edit_builtin_phase": "这是内置阶段。保存会创建自定义覆盖；原始阶段会保留，删除该覆盖即可恢复。",
+        "fetch_error": "加载数据失败。"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1514,7 +1525,7 @@
             "label": "泵卡住时长"
         },
         "sampling_interval": {
-            "doc": "传感器读数之间的预期时间 - 用于调整平滑窗口的大小并正确启动去抖。无论该值如何，都会捕获每个传感器更新；它仅校准下游计算。建议引擎会测量传感器过去周期的实际踏频并自动设置。",
+            "doc": "两次处理读数之间的最短时间。距上一次读数不到此时间就到达的读数会被跳过（周期中的低读数始终保留），因此请将其设为插座的实际上报间隔或更低：更高的值只会丢弃读数。WashData 不会建议此值，因为它能测量到的只是此设置丢弃读数之后剩下的间隔。",
             "label": "采样间隔"
         },
         "save_debug_traces": {
@@ -1803,7 +1814,8 @@
         "deleting": "删除中…",
         "imported": "已导入",
         "preparing": "正在准备…",
-        "unlabelling": "取消标记中…"
+        "unlabelling": "取消标记中…",
+        "working": "处理中…"
     },
     "tab": {
         "advanced": "高级",
@@ -1949,7 +1961,36 @@
         "odometer_save_failed": "无法保存累计值：{error}",
         "contrib_device_changed": "已添加到社区商店，但表单打开期间所选设备已更改。请在设置中选择。",
         "store_pick_profile_share": "请选择要分享到的配置文件",
-        "remove_failed": "移除失败：{error}"
+        "remove_failed": "移除失败：{error}",
+        "analysis_complete": "分析完成：{count} 条建议",
+        "analysis_failed": "分析失败：{error}",
+        "auto_detect_failed": "自动检测失败：{error}",
+        "auto_label_failed": "自动标记失败：{error}",
+        "could_not_load_cycle": "无法加载周期：{error}",
+        "create_failed": "创建失败：{error}",
+        "cycles_deleted": "已删除 {count} 个周期",
+        "debug_cleared": "已清除 {count} 条调试追踪",
+        "discard_failed": "丢弃失败：{error}",
+        "error": "错误：{error}",
+        "export_failed": "导出失败：{error}",
+        "import_failed": "导入失败：{error}",
+        "invalid_json": "“{key}”不是有效的 JSON - 请在保存前修正或清空该字段。",
+        "label_failed": "标记失败：{error}",
+        "ml_training_promoted": "训练完成：已升级 {count} 个模型",
+        "pause_failed": "暂停失败：{error}",
+        "phase_created": "已创建阶段“{name}”",
+        "phase_deleted": "已删除阶段“{name}”",
+        "profile_created": "已创建配置文件“{name}”",
+        "rename_failed": "重命名失败：{error}",
+        "revert_failed": "恢复失败：{error}",
+        "save_failed": "保存失败：{error}",
+        "split_complete": "已拆分为 {count} 个周期",
+        "start_failed": "启动失败：{error}",
+        "stop_failed": "停止失败：{error}",
+        "update_failed": "更新失败：{error}",
+        "store_download_skipped": "已跳过 {n} 个录制：过短、空缺过多或已在您的设备上。",
+        "store_import_low_quality": "此录制过短、空缺过多或不合理，无法导入。",
+        "store_import_duplicate": "此录制已在您的设备上。"
     },
     "suggestion": {
         "both_agree": "WashData建议",
@@ -2044,7 +2085,10 @@
             "tol_pooled": "基于 {cycles} 个近期已标注周期的合并时长方差（p95 偏差={dev}）。",
             "watchdog": "在安全范围内保持尽可能低（略高于 p95 更新间隔 {p95}s，且至少为采样间隔 {median}s 的 2 倍，最小 30s），以便快速捕捉到停滞而不产生误停止。",
             "match_interval_capped": "已设上限，使 {persistence} 次连续匹配能落在最短程序（{shortest}s）的 {pct}% 之内；仅按更新频率（中位数={median}s）计算本会建议更长的间隔。",
-            "match_interval_floored": "仅按最短程序（{shortest} 秒）计算，上限会是 {cap} 秒，低于 {minimum} 秒的最小值，因此保持在最小值：{persistence} 次连续匹配需要 {budget} 秒，超过该程序的 {pct}%。匹配只在有读数到达时才运行（中位数={median} 秒），因此使用最小值不会带来额外开销。"
+            "match_interval_floored": "仅按最短程序（{shortest} 秒）计算，上限会是 {cap} 秒，低于 {minimum} 秒的最小值，因此保持在最小值：{persistence} 次连续匹配需要 {budget} 秒，超过该程序的 {pct}%。匹配只在有读数到达时才运行（中位数={median} 秒），因此使用最小值不会带来额外开销。",
+            "end_energy_floor": "已提高到停止阈值（{stop} W）和关闭延迟（{off_delay} s）所决定的下限；低于该值，周期只能通过备用路径结束。",
+            "max_duration_ratio_default": "已恢复默认值：上限较低时，只要某次运行比平时长，就会排除正确的程序。",
+            "min_duration_ratio_default": "已恢复默认值：下限较高时，运行中的周期要进行到相当程度后才会被识别。"
         },
         "exclusions": {
             "summary": "已排除 {total} 个误检测周期：{parts}。",
@@ -2228,5 +2272,12 @@
             "hide_guidance": "隐藏指南",
             "show_guidance": "显示指南"
         }
+    },
+    "access": {
+        "edit": "编辑",
+        "full": "完全",
+        "inherit": "继承",
+        "none": "无（隐藏）",
+        "read": "读取"
     }
 }

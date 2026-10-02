@@ -37,6 +37,7 @@ def _store_with_envelope(envelope: dict | None) -> ProfileStore:
     store.get_profile_power_profile = (
         ProfileStore.get_profile_power_profile.__get__(store, ProfileStore)
     )
+    store._compute_profile_power_profile = ProfileStore._compute_profile_power_profile
     return store
 
 

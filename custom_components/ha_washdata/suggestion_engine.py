@@ -29,6 +29,11 @@ import numpy as np
 from homeassistant.core import HomeAssistant, callback
 
 from .const import (
+    DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
+    DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
+    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
     resolve_off_delay_default,
     TerminationReason,
     CONF_WATCHDOG_INTERVAL,
@@ -37,23 +42,15 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_DURATION_TOLERANCE,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
-    CONF_SAMPLING_INTERVAL,
-    CONF_SMOOTHING_WINDOW,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_AUTO_LABEL_CONFIDENCE,
-    CONF_LEARNING_CONFIDENCE,
-    CONF_PROFILE_MATCH_THRESHOLD,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_END_REPEAT_COUNT,
-    CONF_START_DURATION_THRESHOLD,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_ENABLED,
@@ -70,7 +67,6 @@ from .const import (
     DEFAULT_OFF_DELAY,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MIN_OFF_GAP,
-    DEFAULT_SAMPLING_INTERVAL,
     DEFAULT_MATCH_PERSISTENCE,
     MATCH_INTERVAL_SUGGESTION_DECISION_FRAC,
     MATCH_INTERVAL_SUGGESTION_MIN_S,
@@ -948,66 +944,19 @@ def reconcile_suggestions(
         if off_delay is not None and min_gap is not None and min_gap < off_delay and in_out(CONF_MIN_OFF_GAP, CONF_OFF_DELAY):
             adjust(CONF_MIN_OFF_GAP, off_delay, "the off delay")
 
-        # ── Rule 3a: watchdog_interval >= 2 × sampling_interval ───────────────
-        sampling = eff(CONF_SAMPLING_INTERVAL)
+        # (Rule 3a, watchdog >= 2 x sampling_interval, is gone with the
+        # sampling_interval suggestion - audit SUGGEST-04: chained to a ratcheting
+        # throttle it lifted the watchdog with it.)
         watchdog = eff(CONF_WATCHDOG_INTERVAL)
-        if sampling is not None and watchdog is not None and watchdog < 2.0 * sampling and in_out(CONF_SAMPLING_INTERVAL, CONF_WATCHDOG_INTERVAL):
-            adjust(CONF_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0, "the sampling interval")
-            watchdog = eff(CONF_WATCHDOG_INTERVAL)
 
         # ── Rule 3b: no_update_active_timeout > watchdog_interval ─────────────
         timeout = eff(CONF_NO_UPDATE_ACTIVE_TIMEOUT)
         if watchdog is not None and timeout is not None and timeout <= watchdog and in_out(CONF_WATCHDOG_INTERVAL, CONF_NO_UPDATE_ACTIVE_TIMEOUT):
             adjust(CONF_NO_UPDATE_ACTIVE_TIMEOUT, round(watchdog * 2.0, 1), "the watchdog interval")
 
-        # ── Rule 4: start_duration_threshold >= sampling_interval ─────────────
-        start_dur = eff(CONF_START_DURATION_THRESHOLD)
-        if sampling is not None and start_dur is not None and start_dur < sampling and in_out(CONF_SAMPLING_INTERVAL, CONF_START_DURATION_THRESHOLD):
-            adjust(CONF_START_DURATION_THRESHOLD, sampling, "the sampling interval")
-
-        # ── Rule 5: match_threshold <= learning_confidence, match <= auto_label ─
-        # The confidence ladder is unmatch < match < learning < auto_label (#396):
-        # the verify-band floor (learning) sits AT OR ABOVE the live match-trust
-        # gate (match), which itself sits at or below the auto-label ceiling.
-        # Reconcile match<=auto first so a later fix cannot re-break the ordering.
-        match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
-        auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
-        if match_thr is not None and auto is not None and match_thr > auto and in_out(CONF_PROFILE_MATCH_THRESHOLD, CONF_AUTO_LABEL_CONFIDENCE):
-            # Anchor on whichever the engine actually proposed, like every other
-            # two-sided rule. match_threshold now drives detection (it is
-            # CycleDetectorConfig.match_confidence_threshold), so when the engine
-            # deliberately RAISED it, lift the auto-label ceiling to keep it rather
-            # than silently undoing the raise; only cascade it downward when it was
-            # not the proposed key.
-            if is_original(CONF_PROFILE_MATCH_THRESHOLD):
-                # raise the ceiling to (>=) match: ceil so 2-dp rounding can't drop it back under
-                adjust(CONF_AUTO_LABEL_CONFIDENCE, match_thr, "the profile match threshold", "up")
-                auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
-            else:
-                # lower match to (<=) auto: floor so it stays at/below the ceiling
-                adjust(CONF_PROFILE_MATCH_THRESHOLD, auto, "the auto-label confidence", "down")
-                match_thr = eff(CONF_PROFILE_MATCH_THRESHOLD)
-        learn = eff(CONF_LEARNING_CONFIDENCE)
-        if learn is not None and match_thr is not None and learn < match_thr and in_out(CONF_LEARNING_CONFIDENCE, CONF_PROFILE_MATCH_THRESHOLD):
-            # raise learning to (>=) match: ceil
-            adjust(CONF_LEARNING_CONFIDENCE, match_thr, "the profile match threshold", "up")
-        # Top of the ladder: learning <= auto. `_add_confidence_suggestions` derives the
-        # two independently (learning from p05 of manual labels, auto from p15 of
-        # uncorrected auto-labels), so a device with few high-confidence manual labels can
-        # yield learning > auto. Cascade-RAISE the auto ceiling to the verify floor (the
-        # conservative direction — never lower the verify band); keeps the full declared
-        # ordering intact instead of enforcing only its middle two rungs.
-        learn = eff(CONF_LEARNING_CONFIDENCE)
-        auto = eff(CONF_AUTO_LABEL_CONFIDENCE)
-        if learn is not None and auto is not None and learn > auto and in_out(CONF_LEARNING_CONFIDENCE, CONF_AUTO_LABEL_CONFIDENCE):
-            # raise the auto ceiling to (>=) learning: ceil
-            adjust(CONF_AUTO_LABEL_CONFIDENCE, learn, "the learning confidence", "up")
-
-        # ── Rule 6: profile_unmatch_threshold < profile_match_threshold ────────
-        unmatch = eff(CONF_PROFILE_UNMATCH_THRESHOLD)
-        match_thr2 = eff(CONF_PROFILE_MATCH_THRESHOLD)
-        if unmatch is not None and match_thr2 is not None and unmatch >= match_thr2 and in_out(CONF_PROFILE_UNMATCH_THRESHOLD, CONF_PROFILE_MATCH_THRESHOLD):
-            adjust(CONF_PROFILE_UNMATCH_THRESHOLD, round(match_thr2 - 0.05, 2), "the profile match threshold")
+        # (Rules 4-6 - start debounce vs sampling interval, the confidence ladder,
+        # unmatch < match - are gone with the suggestions they reconciled; audit
+        # SUGGEST-01/04. The panel's own conflict checks still guard hand edits.)
 
         # ── Rule 7: power_off_threshold_w < stop_threshold_w (when > 0) ───────
         pot = eff(CONF_POWER_OFF_THRESHOLD_W)
@@ -1172,7 +1121,14 @@ class SuggestionEngine:
         }
 
         # 2. No Update Timeout
-        suggested_timeout = int(max(60, p95_dt * 20))
+        # Never below the device's own default (register item 165): a dishwasher's
+        # 4 h is deliberate (drying), and p95 x 20 took it to 10-30 min.
+        timeout_floor = int(
+            DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(
+                self.device_type or "", DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT
+            )
+        )
+        suggested_timeout = int(max(60, timeout_floor, p95_dt * 20))
         suggestions[CONF_NO_UPDATE_ACTIVE_TIMEOUT] = {
             "value": suggested_timeout,
             "reason": f"Based on observed update cadence (p95={p95_dt:.1f}s) * 20 (min 60s).",
@@ -1215,11 +1171,19 @@ class SuggestionEngine:
             # devices the update gap is dominated by the inter-burst quiet period, so
             # the result often exceeds the burst interval and resets the end timer on
             # every tumble burst. Skip it when anti-crease is enabled (#343 gap B).
-            suggested_off_delay = int(max(device_floor, p95_dt * 5))
+            # With real traces on hand (and no long pause among them) the blind
+            # per-device prior is stale evidence: the dishwasher's 1800 s was handed
+            # to a device whose 5 traced cycles showed no pause at all (audit
+            # SUGGEST-07). Floor at the measured-path minimum instead.
+            traced = sum(1 for c in clean if c.get("power_data"))
+            fallback_floor = (
+                _measured_off_delay_floor(device_floor) if traced >= 5 else device_floor
+            )
+            suggested_off_delay = int(max(fallback_floor, p95_dt * 5))
             reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
             reason_off_key: str = "suggestion.reason.off_delay_cadence"
             reason_off_params: dict[str, Any] = {"p95": f"{p95_dt:.1f}"}
-            if suggested_off_delay == device_floor:
+            if suggested_off_delay == fallback_floor == device_floor:
                 if self.device_type and self.device_type in DEFAULT_OFF_DELAY_BY_DEVICE:
                     reason_off = (
                         f"Used device-specific safe minimum for {self.device_type} ({device_floor}s)."
@@ -1390,75 +1354,60 @@ class SuggestionEngine:
 
         if len(ratios) >= 10:
             arr: np.ndarray[Any, np.dtype[np.float64]] = np.array(ratios, dtype=float)
-
-            # Per-profile tolerance: each profile contributes its own p95
-            # duration deviation, so a tight profile is not penalised by a loose
-            # one. The global suggestion is the p75 across profiles (covers most
-            # without over-widening). Falls back to the pooled p95 when no
-            # profile has enough cycles for its own estimate.
-            per_profile_p95: list[float] = []
-            for _pname, prs in ratios_by_profile.items():
-                if len(prs) >= 2:
-                    devs = np.abs(np.array(prs, dtype=float) - 1.0)
-                    per_profile_p95.append(float(np.percentile(devs, 95)))
-            if per_profile_p95:
-                agg_dev = float(np.percentile(per_profile_p95, 75))
-                reason_tol = (
-                    f"p75 of per-profile duration variance across "
-                    f"{len(per_profile_p95)} profiles ({len(ratios)} cycles); "
-                    f"tight profiles not penalised."
-                )
-                reason_tol_key = "suggestion.reason.tol_per_profile"
-                reason_tol_params: dict[str, Any] = {
-                    "profiles": len(per_profile_p95),
-                    "cycles": len(ratios),
-                }
-            else:
-                agg_dev = float(np.percentile(np.abs(arr - 1.0), 95))
-                reason_tol = (
-                    f"Based on pooled duration variance of {len(ratios)} recent "
-                    f"labeled cycles (p95 dev={agg_dev:.2f})."
-                )
-                reason_tol_key = "suggestion.reason.tol_pooled"
-                reason_tol_params = {"cycles": len(ratios), "dev": f"{agg_dev:.2f}"}
-
-            suggested_tol = min(0.50, max(0.10, round(agg_dev + 0.05, 2)))
-
-            suggestions[CONF_DURATION_TOLERANCE] = {
-                "value": suggested_tol,
-                "reason": reason_tol,
-                "reason_key": reason_tol_key,
-                "reason_params": reason_tol_params,
-            }
-            suggestions[CONF_PROFILE_DURATION_TOLERANCE] = {
-                "value": suggested_tol,
-                "reason": reason_tol,
-                "reason_key": reason_tol_key,
-                "reason_params": reason_tol_params,
-            }
-
             p95_ratio = float(np.percentile(arr, 95))
+            options = self._entry_options()
 
-            # min_duration_ratio governs how EARLY a running cycle may match a
-            # profile. Goal: as low as possible so a program is recognised ASAP.
-            # It is not bounded by full-cycle duration variance - the confidence
-            # and ambiguity gates already prevent premature commits - so keep it
-            # aggressively low rather than tied to p05 of observed durations.
-            min_r = 0.05
+            # (No duration_tolerance / profile_duration_tolerance suggestions - audit
+            # SUGGEST-12: the first only feeds a cosmetic flag, the second is read
+            # by nothing that changes an outcome.)
+
+            # max_duration_ratio is the Stage-1 fast reject. Never below the shipped
+            # 1.8 (register item 311 measured 1.5 deleting the true candidate on
+            # 2.3% of folds; p95 + 0.1 landed at 1.15-1.52 on every corpus device,
+            # undoing it - audit SUGGEST-09). Only ever widen, for a device whose
+            # cycles genuinely run that long.
             max_r = min(3.0, round(p95_ratio + 0.1, 2))
-
-            if min_r < max_r - 0.2:
-                suggestions[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] = {
-                    "value": min_r,
-                    "reason": "Kept as low as possible so a program is recognised early in the cycle; the confidence and ambiguity gates prevent premature commits.",
-                    "reason_key": "suggestion.reason.min_duration_ratio",
-                    "reason_params": {},
-                }
+            if max_r > DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO:
                 suggestions[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = {
                     "value": max_r,
                     "reason": f"Based on labeled cycle durations (p95={p95_ratio:.2f}).",
                     "reason_key": "suggestion.reason.max_duration_ratio",
                     "reason_params": {"p95": f"{p95_ratio:.2f}"},
+                }
+            else:
+                current_max = _num(options.get(CONF_PROFILE_MATCH_MAX_DURATION_RATIO))
+                if (
+                    current_max is not None
+                    and current_max < DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+                ):
+                    suggestions[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = {
+                        "value": DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+                        "reason": (
+                            "Back to the default: a lower ceiling rejects the right "
+                            "programme whenever a run is longer than usual."
+                        ),
+                        "reason_key": "suggestion.reason.max_duration_ratio_default",
+                        "reason_params": {},
+                        "corrective": True,
+                    }
+            # min_duration_ratio: corrective only. A raised floor rejects the right
+            # programme for the first part of every cycle (one corpus device at 0.63
+            # had no candidate at all for most of a run; forcing the shipped value
+            # was +3.84pp top-1 at 50% elapsed - audit MATCH-EVAL-03).
+            default_min = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
+                self.device_type or "", DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
+            )
+            current_min = _num(options.get(CONF_PROFILE_MATCH_MIN_DURATION_RATIO))
+            if current_min is not None and current_min > default_min:
+                suggestions[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] = {
+                    "value": default_min,
+                    "reason": (
+                        "Back to the default: a higher floor stops a running cycle "
+                        "from being recognised until it is well under way."
+                    ),
+                    "reason_key": "suggestion.reason.min_duration_ratio_default",
+                    "reason_params": {},
+                    "corrective": True,
                 }
 
         # Min-off-gap: measured bridge requirement, capped by back-to-back headroom
@@ -1557,61 +1506,13 @@ class SuggestionEngine:
 
         suggestions: dict[str, dict[str, Any]] = {}
 
-        # --- Observed sampling interval (drives smoothing + start debounce) ---
-        sampling_vals: list[float] = []
-        for c in clean:
-            try:
-                si = float(c.get("sampling_interval") or 0.0)
-            except (TypeError, ValueError):
-                continue
-            if si > 0:
-                sampling_vals.append(si)
-        observed_si: float | None = None
-        if len(sampling_vals) >= 5:
-            observed_si = float(np.median(sampling_vals))
-            suggestions[CONF_SAMPLING_INTERVAL] = {
-                "value": round(observed_si, 1),
-                "reason": (
-                    f"Median update interval observed across {len(sampling_vals)} "
-                    f"clean cycles ({observed_si:.1f}s).{excl_note}"
-                ),
-                "reason_key": "suggestion.reason.sampling_interval",
-                "reason_params": {
-                    "cycles": len(sampling_vals),
-                    "si": f"{observed_si:.1f}",
-                    "excl": excl_note,
-                },
-                "exclusions": excl_summary,
-            }
-
-        si_for_calc = observed_si if observed_si else DEFAULT_SAMPLING_INTERVAL
-
-        # --- Smoothing window: ~30 s of readings ---
-        suggested_smooth = int(min(15, max(2, round(30.0 / max(si_for_calc, 1.0)))))
-        suggestions[CONF_SMOOTHING_WINDOW] = {
-            "value": suggested_smooth,
-            "reason": (
-                f"Sized to smooth ~30s of readings at {si_for_calc:.0f}s sampling "
-                f"({suggested_smooth} samples)."
-            ),
-            "reason_key": "suggestion.reason.smoothing_window",
-            "reason_params": {"si": f"{si_for_calc:.0f}", "samples": suggested_smooth},
-        }
-
-        # --- Start debounce ---
-        # Goal: begin capturing a cycle as soon as possible. Set to one sampling
-        # interval - the minimum that still needs a sustained (not single-sample
-        # transient) reading to confirm a start.
-        suggested_start_dur = round(max(2.0, si_for_calc), 1)
-        suggestions[CONF_START_DURATION_THRESHOLD] = {
-            "value": suggested_start_dur,
-            "reason": (
-                f"Kept short (~one {si_for_calc:.0f}s sample interval) so detection "
-                f"starts as early as possible while still ignoring single-sample spikes."
-            ),
-            "reason_key": "suggestion.reason.start_duration",
-            "reason_params": {"si": f"{si_for_calc:.0f}"},
-        }
+        # (No sampling_interval / smoothing_window / start_duration_threshold
+        # suggestions - audit SUGGEST-04/12. The stored per-cycle sampling interval
+        # is measured AFTER the manager's reading throttle, which is set by the very
+        # option suggested, so applying it ratcheted the throttle without bound
+        # (2 -> 34 s on one washer, unbounded on 6 of 16 devices) and dragged the
+        # watchdog and start debounce up with it; smoothing_window sizes a buffer
+        # nothing reads.)
 
         # --- min_power: keep the noise gate below the lowest genuine draw ---
         # Strip the anti-crease tail before taking the per-cycle minimum so that the
@@ -1645,9 +1546,23 @@ class SuggestionEngine:
             }
 
         # --- completion_min_seconds: filter ghosts below half the shortest run ---
+        # The basis includes LABELLED interrupted cycles: a cycle shorter than this
+        # setting is stored `interrupted`, which `select_clean_cycles` drops, so
+        # judging it on clean cycles alone erased the shortest programme from its
+        # own evidence and the next suggestion rose again - a ratchet that turned a
+        # 48 min "Quick wash" interrupted (audit SUGGEST-03). And it never exceeds
+        # half the shortest learned programme.
         durations = [
             float(c["duration"])
-            for c in clean
+            for c in [
+                *clean,
+                *(
+                    c for c in all_cycles
+                    if isinstance(c, dict)
+                    and c.get("status") == "interrupted"
+                    and c.get("profile_name")
+                ),
+            ]
             if isinstance(c.get("duration"), (int, float))
             and not isinstance(c.get("duration"), bool)
             and float(c["duration"]) > 0
@@ -1655,6 +1570,9 @@ class SuggestionEngine:
         if len(durations) >= 10:
             p05d = float(np.percentile(durations, 5))
             suggested_cms = int(max(120, round(p05d * 0.5)))
+            shortest = self._shortest_profile_duration()
+            if shortest is not None and shortest > 0:
+                suggested_cms = int(min(suggested_cms, max(120, round(shortest * 0.5))))
             suggestions[CONF_COMPLETION_MIN_SECONDS] = {
                 "value": suggested_cms,
                 "reason": (
@@ -1670,143 +1588,15 @@ class SuggestionEngine:
                 "exclusions": excl_summary,
             }
 
-        # --- Confidence-calibrated thresholds (labeled clean cycles only) ---
-        self._add_confidence_suggestions(clean, suggestions)
-
-        # --- end_repeat_count: false-end pressure ---
-        erc = self._suggest_end_repeat_count(clean, stop_thr)
-        if erc is not None:
-            suggestions[CONF_END_REPEAT_COUNT] = erc
+        # (No learning / auto-label / match-threshold suggestions - audit SUGGEST-01.
+        # They were low percentiles of "uncorrected auto-labels", which only exist
+        # ABOVE the thresholds already in force, so every apply pulled the ladder
+        # down: on every device with >= 15 auto labels it collapsed to ~0.6-0.77
+        # within 1-3 applies, review requests fell from 47-100% to 0-12%, and the
+        # match threshold - which gates Smart Termination - followed. No
+        # end_repeat_count suggestion either: the detector never reads that key.)
 
         return suggestions
-
-    def _add_confidence_suggestions(
-        self, clean: list[dict[str, Any]], suggestions: dict[str, dict[str, Any]]
-    ) -> None:
-        """Derive confidence thresholds from the match_confidence distribution.
-
-        Uses the ``label_source`` provenance (auto vs manual) so we can tell
-        which cycles the user trusted. Auto-labels the user never corrected are
-        the ground truth for "matching was reliable at this confidence".
-        """
-        manual_conf: list[float] = []
-        auto_ok_conf: list[float] = []
-        for c in clean:
-            raw_conf = c.get("match_confidence")
-            if (
-                not isinstance(raw_conf, (int, float))
-                or isinstance(raw_conf, bool)
-                or raw_conf <= 0
-            ):
-                continue
-            conf = float(raw_conf)
-            src = c.get("label_source")
-            if src == "manual":
-                manual_conf.append(conf)
-            elif src in ("auto_match", "auto_label_post", "auto_label_service") and not c.get(
-                "original_auto_label"
-            ):
-                auto_ok_conf.append(conf)
-
-        if len(manual_conf) >= 10:
-            p05c = float(np.percentile(manual_conf, 5))
-            suggestions[CONF_LEARNING_CONFIDENCE] = {
-                "value": round(min(max(p05c, 0.3), 0.9), 2),
-                "reason": (
-                    f"p05 confidence of {len(manual_conf)} user-labeled cycles "
-                    f"({p05c:.2f}); below this, request verification."
-                ),
-                "reason_key": "suggestion.reason.learning_confidence",
-                "reason_params": {"cycles": len(manual_conf), "p05": f"{p05c:.2f}"},
-            }
-
-        if len(auto_ok_conf) >= 15:
-            p15 = float(np.percentile(auto_ok_conf, 15))
-            suggestions[CONF_AUTO_LABEL_CONFIDENCE] = {
-                "value": round(min(max(p15, 0.5), 0.98), 2),
-                "reason": (
-                    f"15th-percentile confidence of {len(auto_ok_conf)} auto-labels "
-                    f"the user never corrected ({p15:.2f})."
-                ),
-                "reason_key": "suggestion.reason.auto_label_confidence",
-                "reason_params": {"cycles": len(auto_ok_conf), "p15": f"{p15:.2f}"},
-            }
-            p10 = float(np.percentile(auto_ok_conf, 10))
-            suggestions[CONF_PROFILE_MATCH_THRESHOLD] = {
-                "value": round(min(max(p10, 0.3), 0.9), 2),
-                "reason": (
-                    f"p10 confidence of {len(auto_ok_conf)} correct auto-labels "
-                    f"({p10:.2f}); safe live-commit floor."
-                ),
-                "reason_key": "suggestion.reason.profile_match_threshold",
-                "reason_params": {"cycles": len(auto_ok_conf), "p10": f"{p10:.2f}"},
-            }
-
-    def _suggest_end_repeat_count(
-        self, clean: list[dict[str, Any]], stop_threshold_w: float
-    ) -> dict[str, Any] | None:
-        """Recommend how many end confirmations to require, from false-end rate.
-
-        A "false end" is an internal low-power run (>= 60 s) that resumed - the
-        kind of pause that can trip a premature cycle end. If many clean cycles
-        contain one, requiring extra end confirmations avoids splitting cycles.
-        """
-        n_total = 0
-        n_false_end = 0
-        for c in clean:
-            readings = _cycle_readings(c)
-            if len(readings) < 10:
-                continue
-            n_total += 1
-            powers = [p for _, p in readings]
-            peak = max(powers) if powers else 0.0
-            if peak <= 0:
-                continue
-            active_thr = max(stop_threshold_w, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
-            max_gap_s = _MAX_PAUSE_GAP_H * 3600
-            # A "false end" is a >=60 s internal quiet run that resumed into
-            # *sustained* activity. Reuse the shared pause locator so a brief
-            # terminal blip (a pump-out / drying tick after a soak) is absorbed
-            # back into the quiet tail rather than mis-counted as a resume -- the
-            # same sustained-resume + outage-gap gate used by the off_delay
-            # heuristics (_suggest_off_delay_from_pauses / _scored_pauses).
-            for low_start_s, resume_idx in _resumed_low_runs(readings, active_thr, max_gap_s):
-                # Same measurement correction as the off_delay heuristic (#445):
-                # a "false end" is quiet time the END GATES would have banked, so
-                # it is timed against stop_threshold_w, not against the
-                # 2%-of-peak activity floor that only decides whether this was a
-                # pause at all. Without it, an appliance that works in bursts
-                # scores a false end in every cycle and end_repeat_count is
-                # driven up on evidence the detector never saw.
-                if _measured_quiet_span_s(
-                    readings, low_start_s, resume_idx, stop_threshold_w
-                ) >= 60.0:
-                    n_false_end += 1
-                    break
-
-        if n_total < 15:
-            return None
-        frac = n_false_end / n_total
-        if frac >= 0.55:
-            val = 3
-        elif frac >= 0.30:
-            val = 2
-        else:
-            val = 1
-        return {
-            "value": val,
-            "reason": (
-                f"{n_false_end}/{n_total} clean cycles ({frac * 100:.0f}%) had a "
-                f">60s internal pause that resumed; require {val} end confirmation(s)."
-            ),
-            "reason_key": "suggestion.reason.end_repeat_count",
-            "reason_params": {
-                "false": n_false_end,
-                "total": n_total,
-                "pct": f"{frac * 100:.0f}",
-                "val": val,
-            },
-        }
 
     def _suggest_off_delay_from_pauses(
         self,
@@ -2101,45 +1891,6 @@ class SuggestionEngine:
         DEVICE_TYPE_WASHER_DRYER,
     )
 
-    def _strip_anti_crease_tail(
-        self,
-        ordered_powers: np.ndarray,
-        options: dict[str, Any] | None = None,
-    ) -> np.ndarray:
-        """Drop the post-cycle anti-crease tail from an ordered power trace (#343).
-
-        Stop/start thresholds detect the MAIN cycle; the anti-crease tumble-pulse
-        tail is governed by its own ``anti_wrinkle_*`` settings, but its near-zero
-        between-pulse baseline is the global minimum of the stored trace and used
-        to poison the min-active statistic (the tuner then proposes thresholds just
-        above that baseline, breaking end-detection).
-
-        The tail is everything after the last sample that reaches
-        ``anti_wrinkle_max_power`` - by the config's own rule a pulse above that
-        ends anti-wrinkle, so nothing in the tail can reach it. Returns the trace
-        unchanged when anti-crease is off, the device type is ineligible, or no
-        sample reaches the ceiling (no identifiable main phase) - so it can never
-        over-exclude for a non-anti-crease device or a gentle program.
-
-        Pass ``options`` when calling from a loop to avoid repeated config-entry
-        reads (``hass.config_entries.async_get_entry`` is loop-affine).
-        """
-        if self.device_type not in self._ANTI_CREASE_DEVICE_TYPES:
-            return ordered_powers
-        opts = options if options is not None else self._entry_options()
-        if not opts.get(CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED):
-            return ordered_powers
-        try:
-            max_power = float(opts.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
-        except (TypeError, ValueError):
-            max_power = DEFAULT_ANTI_WRINKLE_MAX_POWER
-        if max_power <= 0 or ordered_powers.size == 0:
-            return ordered_powers
-        above = np.flatnonzero(ordered_powers >= max_power)
-        if above.size == 0:
-            return ordered_powers  # no main high-power phase -> nothing to strip
-        return ordered_powers[: int(above[-1]) + 1]
-
     def _is_anti_crease_enabled(self, options: dict[str, Any] | None = None) -> bool:
         """True when anti-crease mode is active on an eligible device type."""
         if self.device_type not in self._ANTI_CREASE_DEVICE_TYPES:
@@ -2152,7 +1903,7 @@ class SuggestionEngine:
         readings: list[tuple[float, float]],
         options: dict[str, Any] | None = None,
     ) -> list[tuple[float, float]]:
-        """Time-domain equivalent of _strip_anti_crease_tail for (offset, power) pairs.
+        """Trim (offset, power) readings to the main cycle, before the anti-crease tail.
 
         Returns the readings list trimmed to the last sample >= anti_wrinkle_max_power
         so that pause-duration and min-power statistics ignore the anti-crease tail
@@ -2181,74 +1932,13 @@ class SuggestionEngine:
             return readings  # no main high-power phase identifiable
         return readings[: last_above + 1]
 
-    def run_simulation(self, cycle_data: dict[str, Any]) -> dict[str, Any]:
-        """Replay a single cycle with varied parameters to find optimal settings.
-
-        For richer, multi-cycle suggestions use :meth:`run_batch_simulation`.
-        """
-        power_data_raw: Any = cycle_data.get("power_data", [])
-        if not isinstance(power_data_raw, list):
-            return {}
-        power_data = cast(list[list[float] | tuple[Any, float]], power_data_raw)
-        if len(power_data) < 10:
-            return {}
-
-        start_time_raw = cycle_data.get("start_time")
-        start_time_iso = (
-            start_time_raw if isinstance(start_time_raw, str) and start_time_raw else None
-        )
-
-        # Normalise power_data to [[offset_sec, power], ...] regardless of source format.
-        readings_list = power_data_to_offsets(power_data, start_time_iso)
-
-        readings: list[tuple[float, float]] = [
-            (float(offset), float(power)) for offset, power in readings_list
-        ]
-
-        if not readings:
-            return {}
-
-        powers = np.array([p[1] for p in readings])
-        # Exclude the anti-crease tail so its near-zero baseline does not poison the
-        # stop/start thresholds on anti-crease devices (#343). No-op otherwise.
-        main_powers = self._strip_anti_crease_tail(powers)
-        active_powers = main_powers[main_powers > 0.5]
-
-        if len(active_powers) < 5:
-            return {}
-
-        min_active = float(np.min(active_powers))
-
-        suggested_stop = round(min_active * 0.8, 2)
-        suggested_start = round(min_active * 1.2, 2)
-
-        # end_energy_threshold is intentionally NOT suggested from a single cycle:
-        # a context-free 0.05 Wh was below the anti-crease baseline energy accumulated
-        # over the off_delay window, so the end gate never fired (#343 gap D). The
-        # batch path (run_batch_simulation) derives a cycle-energy-proportional floor
-        # from actual false-end events once 5+ cycles exist; use that instead.
-        single = {
-            CONF_STOP_THRESHOLD_W: {
-                "value": suggested_stop,
-                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle.",
-                "reason_key": "suggestion.reason.min_active",
-                "reason_params": {"min": f"{min_active:.1f}"},
-            },
-            CONF_START_THRESHOLD_W: {
-                "value": suggested_start,
-                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle.",
-                "reason_key": "suggestion.reason.min_active",
-                "reason_params": {"min": f"{min_active:.1f}"},
-            },
-        }
-        # A standby-level sample in this cycle makes `min_active` the standby draw,
-        # and 0.8 x that can never see the appliance switch off (#458).
-        return apply_standby_floor(single, self._standby_floor(self._entry_options()))
-
     def run_batch_simulation(self, cycles: list[dict[str, Any]]) -> dict[str, Any]:
         """Derive parameter suggestions from a collection of labeled cycles.
 
-        Unlike :meth:`run_simulation` (single-cycle heuristics), this method
+        Stop/start come ONLY from here, across many cycles: the per-cycle
+        ``run_simulation`` that re-derived them from the last cycle alone made them a
+        random walk (changed after 19 of 19 cycles on one dishwasher; audit
+        SUGGEST-06). This method
         aggregates statistics across *multiple* cycles for robustness:
 
         - Power thresholds from the 5th-percentile minimum active power.
@@ -2387,40 +2077,37 @@ class SuggestionEngine:
                 "reason_params": reason_thr_params,
             }
 
-        # End-energy: p95 of resuming-pause energies (outlier-robust) with a
-        # floor proportional to the cycle's own energy, not a fixed Wh value.
-        median_energy = float(np.median(cycle_energies)) if cycle_energies else 0.0
-        prop_floor = 0.002 * median_energy  # 0.2% of a typical cycle
-        if false_end_energies:
-            p95_false = float(np.percentile(false_end_energies, 95))
-            suggested_end = round(max(0.01, prop_floor, p95_false * 1.1), 4)
-            reason_end = (
-                f"p95 false-end energy ({p95_false:.4f}Wh) across {len(valid_cycles)} "
-                f"cycles, floored at 0.2% of median cycle energy ({prop_floor:.4f}Wh)."
+        # End-energy: corrective only (audit SUGGEST-12). The end gate is checked
+        # only once the run has been below stop for the whole off_delay window, so
+        # any value at or above stop x off_delay / 3600 never decides anything - the
+        # false-end statistic that used to be suggested here changed the value by a
+        # median 1759% for no effect. A value BELOW that floor forbids what the
+        # power gate allows (#376), so that one is corrected.
+        try:
+            cur_stop = float(_batch_opts.get(CONF_STOP_THRESHOLD_W) or stop_thr)
+            cur_off_delay = float(
+                _batch_opts.get(CONF_OFF_DELAY)
+                or resolve_off_delay_default(self.device_type or "")
             )
-            reason_end_key = "suggestion.reason.end_energy_false"
-            reason_end_params: dict[str, Any] = {
-                "p95": f"{p95_false:.4f}",
-                "cycles": len(valid_cycles),
-                "floor": f"{prop_floor:.4f}",
-            }
-        else:
-            suggested_end = round(max(0.01, prop_floor), 4)
-            reason_end = (
-                f"No false ends across {len(valid_cycles)} cycles; floored at 0.2% "
-                f"of median cycle energy ({prop_floor:.4f}Wh)."
-            )
-            reason_end_key = "suggestion.reason.end_energy_no_false"
-            reason_end_params = {
-                "cycles": len(valid_cycles),
-                "floor": f"{prop_floor:.4f}",
-            }
-        suggestions[CONF_END_ENERGY_THRESHOLD] = {
-            "value": suggested_end,
-            "reason": reason_end,
-            "reason_key": reason_end_key,
-            "reason_params": reason_end_params,
-        }
+            cur_end = _num(_batch_opts.get(CONF_END_ENERGY_THRESHOLD))
+        except (TypeError, ValueError):
+            cur_end = None
+        if cur_end is not None and cur_off_delay > 0:
+            floor_wh = math.ceil(cur_stop * cur_off_delay / 36.0) / 100.0
+            if cur_end < floor_wh:
+                suggestions[CONF_END_ENERGY_THRESHOLD] = {
+                    "value": floor_wh,
+                    "reason": (
+                        f"Raised to the floor the stop threshold ({cur_stop:g} W) over "
+                        f"the off delay ({cur_off_delay:.0f} s) implies; below it the "
+                        f"cycle can only end through a fallback path."
+                    ),
+                    "reason_key": "suggestion.reason.end_energy_floor",
+                    "reason_params": {
+                        "stop": f"{cur_stop:g}", "off_delay": f"{cur_off_delay:.0f}",
+                    },
+                    "corrective": True,
+                }
 
         min_off_gap = self._suggest_min_off_gap(
             cycles, stop_threshold_w=stop_thr, gap_cycles=raw_cycles

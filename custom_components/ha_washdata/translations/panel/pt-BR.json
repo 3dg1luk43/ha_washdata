@@ -212,7 +212,8 @@
     "save_total_cycles": "Salvar total",
     "clear": "Limpar",
     "add_brand": "Adicionar marca",
-    "add_appliance": "Adicionar eletrodoméstico"
+    "add_appliance": "Adicionar eletrodoméstico",
+    "retry": "Tentar novamente"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -281,6 +282,10 @@
     "watchdog": {
       "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)",
       "sampling": "O Intervalo de amostragem deve ser no máximo metade do Intervalo watchdog ({wi} s)"
+    },
+    "end_energy": {
+      "energy": "Restritivo demais para o Limite de Parada ({w} W) durante o Atraso de Desligamento ({d} s); o ciclo só pode terminar por um mecanismo alternativo",
+      "stop": "A Energia de Fim ({e} Wh em {d} s) só permite {p} W"
     }
   },
   "hdr": {
@@ -682,7 +687,9 @@
     "zoom_hint_touch_zoomed": "gesto de pinça para dar zoom · toque duplo para redefinir",
     "cycles_since_service": "{since} / {total} ciclos",
     "total_cycles_run": "ciclos realizados no total",
-    "correct_total_cycles": "Corrigir o total"
+    "correct_total_cycles": "Corrigir o total",
+    "hist_reason_already_recorded": "se sobrepõe a um ciclo que o WashData já registrou",
+    "share_consent": "Confirmo que estes ciclos terminaram normalmente, sem interrupção"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -718,7 +725,8 @@
       "total_energy": "Estimativa de energia"
     },
     "metric_auc": "AUC {auc} em dados de validação",
-    "metric_mae": "erro {model} vs. linha de base {baseline}"
+    "metric_mae": "erro {model} vs. linha de base {baseline}",
+    "fine_tuned_at": "ajustado em {when}"
   },
   "modal": {
     "auto_label": "Rotulagem automática de ciclos",
@@ -1050,7 +1058,10 @@
     "standby_above_stop_sub": "{n} dos últimos {total} ciclos. O Atraso de Desligamento só começa quando a potência fica abaixo do Limite de Parada ({stop} W), então os ciclos terminam tarde ou precisam ser parados na mão.",
     "advisory_duration_outlier": "{n} ciclo(s) rotulados como '{name}' estão longe demais da duração habitual dele para algum dia corresponderem (pior caso: {ratio}x). Provavelmente estão rotulados errado, ou uma gravação capturou duas execuções. Rotule-os novamente ou divida-os para que parem de distorcer a estimativa de tempo deste programa.",
     "toast_range_required": "Defina um intervalo De/Até válido",
-    "no_profiles_option": "(sem perfis, adicione um)"
+    "no_profiles_option": "(sem perfis, adicione um)",
+    "compare_cycles_title": "Comparar {count} ciclos",
+    "edit_builtin_phase": "Esta é uma fase integrada. Salvar cria uma versão personalizada que a substitui; o original é preservado e pode ser restaurado excluindo essa versão personalizada.",
+    "fetch_error": "Falha ao carregar os dados."
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -1441,7 +1452,7 @@
       "label": "Duração da Bomba Travada"
     },
     "sampling_interval": {
-      "doc": "Tempo esperado entre as leituras do sensor - usado para dimensionar a janela de suavização e iniciar o debounce corretamente. Cada atualização do sensor é capturada independentemente deste valor; ele apenas calibra os cálculos posteriores. O mecanismo de sugestão mede a cadência real do seu sensor em ciclos anteriores e define isso automaticamente.",
+      "doc": "Tempo mínimo entre leituras processadas. Uma leitura que chega antes desse tempo após a anterior é ignorada (leituras baixas durante um ciclo são sempre mantidas), então defina-o como o intervalo de envio real da sua tomada ou menor: um valor mais alto só descarta leituras. O WashData não sugere esse valor, porque o que ele consegue medir é o intervalo que sobra depois que essa configuração já descartou leituras.",
       "label": "Intervalo de Amostragem"
     },
     "save_debug_traces": {
@@ -1718,7 +1729,8 @@
     "deleting": "Excluindo…",
     "imported": "Importado",
     "preparing": "Preparando…",
-    "unlabelling": "Removendo rótulo…"
+    "unlabelling": "Removendo rótulo…",
+    "working": "Processando…"
   },
   "tab": {
     "advanced": "Avançado",
@@ -1864,7 +1876,36 @@
     "odometer_saved": "Total de ciclos salvo",
     "odometer_save_failed": "Não foi possível salvar o total: {error}",
     "store_pick_profile_share": "Escolha um perfil no qual compartilhar",
-    "remove_failed": "Falha ao remover: {error}"
+    "remove_failed": "Falha ao remover: {error}",
+    "analysis_complete": "Análise concluída: {count} sugestão(ões)",
+    "analysis_failed": "Falha na análise: {error}",
+    "auto_detect_failed": "Falha na detecção automática: {error}",
+    "auto_label_failed": "Falha na rotulagem automática: {error}",
+    "could_not_load_cycle": "Não foi possível carregar o ciclo: {error}",
+    "create_failed": "Falha ao criar: {error}",
+    "cycles_deleted": "{count} ciclo(s) excluído(s)",
+    "debug_cleared": "{count} rastros de depuração limpos",
+    "discard_failed": "Falha ao descartar: {error}",
+    "error": "Erro: {error}",
+    "export_failed": "Falha ao exportar: {error}",
+    "import_failed": "Falha ao importar: {error}",
+    "invalid_json": "\"{key}\" não é um JSON válido; corrija ou limpe o campo antes de salvar.",
+    "label_failed": "Falha ao rotular: {error}",
+    "ml_training_promoted": "Treinamento concluído: {count} modelo(s) promovido(s)",
+    "pause_failed": "Falha ao pausar: {error}",
+    "phase_created": "Fase \"{name}\" criada",
+    "phase_deleted": "Fase \"{name}\" excluída",
+    "profile_created": "Perfil \"{name}\" criado",
+    "rename_failed": "Falha ao renomear: {error}",
+    "revert_failed": "Falha ao reverter: {error}",
+    "save_failed": "Falha ao salvar: {error}",
+    "split_complete": "Dividido em {count} ciclos",
+    "start_failed": "Falha ao iniciar: {error}",
+    "stop_failed": "Falha ao parar: {error}",
+    "update_failed": "Falha ao atualizar: {error}",
+    "store_download_skipped": "{n} gravação(ões) ignorada(s): muito curtas, com lacunas demais ou já presentes no seu dispositivo.",
+    "store_import_low_quality": "Esta gravação é muito curta, tem lacunas demais ou é implausível para ser importada.",
+    "store_import_duplicate": "Esta gravação já está no seu dispositivo."
   },
   "suggestion": {
     "both_agree": "WashData recomenda",
@@ -1959,7 +2000,10 @@
       "thr_batch": "Mantido logo acima da menor potência ativa p05 em {cycles} ciclos ({p05}W) para que um início seja captado o mais cedo possível e o limiar de parada permaneça abaixo da menor potência de funcionamento da máquina.",
       "tol_per_profile": "p75 da variância de duração por perfil em {profiles} perfis ({cycles} ciclos); perfis consistentes não são penalizados.",
       "tol_pooled": "Com base na variância de duração agregada de {cycles} ciclos rotulados recentes (desvio p95={dev}).",
-      "watchdog": "Mantido tão baixo quanto é seguro (logo acima do intervalo de atualização p95 de {p95}s e pelo menos 2x o intervalo de amostragem de {median}s, mín. 30s) para que travamentos sejam detectados rapidamente sem paradas falsas."
+      "watchdog": "Mantido tão baixo quanto é seguro (logo acima do intervalo de atualização p95 de {p95}s e pelo menos 2x o intervalo de amostragem de {median}s, mín. 30s) para que travamentos sejam detectados rapidamente sem paradas falsas.",
+      "end_energy_floor": "Elevado ao mínimo implicado pelo limite de parada ({stop} W) durante o atraso de desligamento ({off_delay} s); abaixo dele, o ciclo só pode terminar por um mecanismo alternativo.",
+      "max_duration_ratio_default": "De volta ao padrão: um teto mais baixo rejeita o programa certo sempre que um ciclo dura mais que o normal.",
+      "min_duration_ratio_default": "De volta ao padrão: um piso mais alto impede que um ciclo em andamento seja reconhecido até que esteja bem adiantado."
     },
     "exclusions": {
       "summary": "Excluído(s) {total} ciclo(s) mal detectado(s): {parts}.",
@@ -2228,5 +2272,12 @@
     "off_delay": {
       "effective": "Um ciclo concluído espera na verdade {eff} s, e não {delay} s: o Intervalo Mínimo de Desligamento ({gap} s) é maior e tem prioridade."
     }
+  },
+  "access": {
+    "edit": "Edição",
+    "full": "Total",
+    "inherit": "Herdar",
+    "none": "Nenhum (oculto)",
+    "read": "Leitura"
   }
 }

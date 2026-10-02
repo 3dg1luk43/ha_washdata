@@ -515,10 +515,19 @@ def test_option_writers_do_not_queue_behind_the_long_background_tasks():
     # Lock ORDER where both are held must be write -> options. The import
     # handlers are the only place both are taken; assert the options lock is
     # acquired INSIDE their write-lock block, not around it.
-    for handler in ("async def ws_import_config(", "async def ws_import_config_selective("):
+    # ws_import_config takes the options lock through the helper it shares with
+    # the import_config service (audit PLATFORM-02), so follow it there.
+    helper = src.split("async def async_apply_imported_entry_options(", 1)[1].split(
+        "\n@websocket_api", 1
+    )[0]
+    assert "_entry_options_lock(" in helper
+    for handler, options_marker in (
+        ("async def ws_import_config(", "async_apply_imported_entry_options("),
+        ("async def ws_import_config_selective(", "_entry_options_lock("),
+    ):
         body = src.split(handler, 1)[1].split("\n@websocket_api", 1)[0]
         w = body.find("_entry_write_lock(")
-        o = body.find("_entry_options_lock(")
+        o = body.find(options_marker)
         assert w != -1 and o != -1, handler
         assert w < o, f"{handler}: options lock must be nested inside the write lock"
 

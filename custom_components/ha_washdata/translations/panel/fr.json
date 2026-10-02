@@ -212,7 +212,8 @@
     "save_total_cycles": "Enregistrer le total",
     "clear": "Effacer",
     "add_brand": "Ajouter une marque",
-    "add_appliance": "Ajouter un appareil"
+    "add_appliance": "Ajouter un appareil",
+    "retry": "Réessayer"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -281,6 +282,10 @@
     "watchdog": {
       "interval": "Devrait être au moins 2x l'Intervalle d'échantillonnage ({si} s)",
       "sampling": "L'Intervalle d'échantillonnage devrait être au plus la moitié de l'Intervalle watchdog ({wi} s)"
+    },
+    "end_energy": {
+      "energy": "Trop strict pour le Seuil d'arrêt ({w} W) sur le Délai d'arrêt ({d} s) ; le cycle ne peut se terminer que par une voie de secours",
+      "stop": "L'Énergie de fin ({e} Wh sur {d} s) n'autorise que {p} W"
     }
   },
   "hdr": {
@@ -682,7 +687,9 @@
     "zoom_hint_touch_zoomed": "pincer pour zoomer · appuyer deux fois pour réinitialiser",
     "cycles_since_service": "{since} / {total} cycles",
     "total_cycles_run": "cycles effectués au total",
-    "correct_total_cycles": "Corriger le total"
+    "correct_total_cycles": "Corriger le total",
+    "hist_reason_already_recorded": "chevauche un cycle déjà enregistré par WashData",
+    "share_consent": "Je confirme que ces cycles se sont terminés normalement, sans interruption"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -718,7 +725,8 @@
       "total_energy": "Estimation de l'énergie"
     },
     "metric_auc": "AUC {auc} sur les données de validation",
-    "metric_mae": "erreur {model} vs référence {baseline}"
+    "metric_mae": "erreur {model} vs référence {baseline}",
+    "fine_tuned_at": "affiné le {when}"
   },
   "modal": {
     "auto_label": "Cycles d'étiquetage automatique",
@@ -1050,7 +1058,10 @@
     "standby_above_stop_sub": "{n} des {total} derniers cycles. Le Délai d'arrêt ne démarre qu'une fois la puissance descendue sous le Seuil d'arrêt ({stop} W) : les cycles se terminent donc en retard ou doivent être arrêtés à la main.",
     "advisory_duration_outlier": "{n} cycle(s) étiquetés '{name}' s'écartent trop de sa durée habituelle pour pouvoir un jour lui correspondre (pire cas : {ratio}x). Ils sont probablement mal étiquetés, ou un enregistrement a capté deux exécutions. Réétiquetez-les ou scindez-les pour qu'ils cessent de fausser l'estimation de temps de ce programme.",
     "toast_range_required": "Définissez une plage De/À valide",
-    "no_profiles_option": "(aucun profil, ajoutez-en un)"
+    "no_profiles_option": "(aucun profil, ajoutez-en un)",
+    "compare_cycles_title": "Comparer {count} cycles",
+    "edit_builtin_phase": "Ceci est une phase intégrée. L'enregistrement crée une version personnalisée qui la remplace ; l'original est conservé et peut être restauré en supprimant cette version personnalisée.",
+    "fetch_error": "Échec du chargement des données."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
@@ -1473,7 +1484,7 @@
       "label": "Durée de blocage de la pompe"
     },
     "sampling_interval": {
-      "doc": "Temps prévu entre les lectures du capteur - utilisé pour dimensionner la fenêtre de lissage et démarrer correctement l'anti-rebond. Chaque mise à jour du capteur est capturée quelle que soit cette valeur ; il calibre uniquement les calculs en aval. Le moteur de suggestion mesure la cadence réelle de votre capteur à partir des cycles passés et la définit automatiquement.",
+      "doc": "Temps minimal entre deux lectures traitées. Une lecture qui arrive plus tôt que ce délai après la précédente est ignorée (les lectures basses pendant un cycle sont toujours conservées) ; réglez-le donc sur l'intervalle de rapport réel de votre prise ou en dessous : une valeur plus élevée ne fait que jeter des lectures. WashData ne suggère pas cette valeur, car ce qu'il peut mesurer, c'est l'intervalle qui reste une fois que ce réglage a déjà écarté des lectures.",
       "label": "Intervalle d'échantillonnage"
     },
     "save_debug_traces": {
@@ -1750,7 +1761,8 @@
     "deleting": "Suppression…",
     "imported": "Importé",
     "preparing": "Préparation…",
-    "unlabelling": "Retrait de l'étiquette…"
+    "unlabelling": "Retrait de l'étiquette…",
+    "working": "Traitement…"
   },
   "tab": {
     "advanced": "Avancé",
@@ -1896,7 +1908,36 @@
     "odometer_saved": "Total des cycles enregistré",
     "odometer_save_failed": "Impossible d'enregistrer le total : {error}",
     "store_pick_profile_share": "Choisissez un profil dans lequel partager",
-    "remove_failed": "Échec du retrait : {error}"
+    "remove_failed": "Échec du retrait : {error}",
+    "analysis_complete": "Analyse terminée : {count} suggestion(s)",
+    "analysis_failed": "Échec de l'analyse : {error}",
+    "auto_detect_failed": "Échec de la détection automatique : {error}",
+    "auto_label_failed": "Échec de l'étiquetage automatique : {error}",
+    "could_not_load_cycle": "Impossible de charger le cycle : {error}",
+    "create_failed": "Échec de la création : {error}",
+    "cycles_deleted": "{count} cycle(s) supprimé(s)",
+    "debug_cleared": "{count} traces de débogage effacées",
+    "discard_failed": "Échec de l'abandon : {error}",
+    "error": "Erreur : {error}",
+    "export_failed": "Échec de l'exportation : {error}",
+    "import_failed": "Échec de l'importation : {error}",
+    "invalid_json": "« {key} » n'est pas un JSON valide ; corrigez-le ou videz le champ avant d'enregistrer.",
+    "label_failed": "Échec de l'étiquetage : {error}",
+    "ml_training_promoted": "Entraînement terminé : {count} modèle(s) promu(s)",
+    "pause_failed": "Échec de la mise en pause : {error}",
+    "phase_created": "Phase « {name} » créée",
+    "phase_deleted": "Phase « {name} » supprimée",
+    "profile_created": "Profil « {name} » créé",
+    "rename_failed": "Échec du renommage : {error}",
+    "revert_failed": "Échec du rétablissement : {error}",
+    "save_failed": "Échec de l'enregistrement : {error}",
+    "split_complete": "Divisé en {count} cycles",
+    "start_failed": "Échec du démarrage : {error}",
+    "stop_failed": "Échec de l'arrêt : {error}",
+    "update_failed": "Échec de la mise à jour : {error}",
+    "store_download_skipped": "{n} enregistrement(s) ignoré(s) : trop court(s), trop lacunaire(s) ou déjà sur votre appareil.",
+    "store_import_low_quality": "Cet enregistrement est trop court, trop lacunaire ou invraisemblable pour être importé.",
+    "store_import_duplicate": "Cet enregistrement est déjà sur votre appareil."
   },
   "suggestion": {
     "both_agree": "WashData recommande",
@@ -1991,7 +2032,10 @@
       "thr_batch": "Maintenu juste au-dessus de la puissance active la plus basse au p05 sur {cycles} cycles ({p05}W) pour qu'un démarrage soit détecté le plus tôt possible et que le seuil d'arrêt reste sous la puissance de fonctionnement la plus basse de la machine.",
       "tol_per_profile": "p75 de la variance de durée par profil sur {profiles} profils ({cycles} cycles) ; les profils resserrés ne sont pas pénalisés.",
       "tol_pooled": "D'après la variance de durée regroupée de {cycles} cycles récemment étiquetés (écart p95={dev}).",
-      "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s et au moins 2x l'intervalle d'échantillonnage de {median}s, min 30s) pour détecter rapidement les blocages sans faux arrêts."
+      "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s et au moins 2x l'intervalle d'échantillonnage de {median}s, min 30s) pour détecter rapidement les blocages sans faux arrêts.",
+      "end_energy_floor": "Relevé au plancher qu'impliquent le seuil d'arrêt ({stop} W) sur le délai d'arrêt ({off_delay} s) ; en dessous, le cycle ne peut se terminer que par une voie de secours.",
+      "max_duration_ratio_default": "Retour à la valeur par défaut : un plafond plus bas rejette le bon programme chaque fois qu'un cycle dure plus longtemps que d'habitude.",
+      "min_duration_ratio_default": "Retour à la valeur par défaut : un plancher plus haut empêche de reconnaître un cycle en cours tant qu'il n'est pas bien avancé."
     },
     "exclusions": {
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",
@@ -2228,5 +2272,12 @@
     "off_delay": {
       "effective": "Un cycle terminé attend en réalité {eff} s, et non {delay} s : l'Intervalle d'arrêt minimal ({gap} s) est plus long et prime."
     }
+  },
+  "access": {
+    "edit": "Modification",
+    "full": "Complet",
+    "inherit": "Hériter",
+    "none": "Aucun (masqué)",
+    "read": "Lecture"
   }
 }

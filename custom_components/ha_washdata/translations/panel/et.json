@@ -260,7 +260,8 @@
     "save_total_cycles": "Salvesta koguarv",
     "clear": "Tühjenda",
     "add_brand": "Lisa bränd",
-    "add_appliance": "Lisa seade"
+    "add_appliance": "Lisa seade",
+    "retry": "Proovi uuesti"
   },
   "note": {
     "off_delay": {
@@ -334,6 +335,10 @@
     "watchdog": {
       "interval": "Peaks olema vähemalt 2x proovivõtu intervall ({si} s)",
       "sampling": "Proovivõtu intervall peaks olema maksimaalselt pool valvekoera intervallist ({wi} s)"
+    },
+    "end_energy": {
+      "energy": "Liiga range, kui Peatumise Lävi on {w} W ja Väljalülitumise Viivitus {d} s; tsükkel saab lõppeda ainult varumehhanismi kaudu",
+      "stop": "Lõpu Energia ({e} Wh {d} s jooksul) lubab ainult {p} W"
     }
   },
   "hdr": {
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "näpista suumimiseks · topeltpuudutus lähtestamiseks",
     "cycles_since_service": "{since} / {total} tsüklit",
     "total_cycles_run": "tsüklit kokku",
-    "correct_total_cycles": "Paranda koguarv"
+    "correct_total_cycles": "Paranda koguarv",
+    "hist_reason_already_recorded": "kattub tsükliga, mille WashData on juba salvestanud",
+    "share_consent": "Kinnitan, et need tsüklid jõudsid tavapäraselt lõpuni ilma katkestusteta"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -771,7 +778,8 @@
       "total_energy": "Energiahinnang"
     },
     "metric_auc": "AUC {auc} valideerimisandmetel",
-    "metric_mae": "viga {model} vs. baasjoon {baseline}"
+    "metric_mae": "viga {model} vs. baasjoon {baseline}",
+    "fine_tuned_at": "peenhäälestatud {when}"
   },
   "modal": {
     "auto_label": "Automaatsed sildistamise tsüklid",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Hoolduse meeldetuletusi pole veel määratud.",
     "toast_program_armed": "Programm seatud järgmise tsükli jaoks: {program}",
     "toast_range_required": "Määra kehtiv Alates/Kuni vahemik.",
-    "no_profiles_option": "(profiile veel pole, lisa uus)"
+    "no_profiles_option": "(profiile veel pole, lisa uus)",
+    "compare_cycles_title": "Võrdle tsükleid ({count})",
+    "edit_builtin_phase": "See on sisseehitatud faas. Salvestamine loob kohandatud alistuse; originaal säilib ja selle saab taastada alistuse kustutamisega.",
+    "fetch_error": "Andmete laadimine ebaõnnestus."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
@@ -1526,7 +1537,7 @@
       "label": "Pumba Kinnijäämise Kestus"
     },
     "sampling_interval": {
-      "doc": "Eeldatav aeg andurite näitude vahel – kasutatakse silumisakna suuruse määramiseks ja tagasilöögi õigeks alustamiseks. Iga anduri värskendus salvestatakse olenemata sellest väärtusest; see kalibreerib ainult allavoolu arvutusi. Soovitusmootor mõõdab teie anduri tegelikku sagedust eelmiste tsüklite põhjal ja määrab selle automaatselt.",
+      "doc": "Minimaalne aeg töödeldud näitude vahel. Näit, mis saabub eelmisest lühema aja jooksul, jäetakse vahele (madalad näidud tsükli ajal säilitatakse alati), seega määrake see oma pistiku tegelikule teavitusintervallile või väiksemaks: suurem väärtus ainult viskab näite ära. WashData seda väärtust ei soovita, sest mõõta saab ainult intervalli, mis jääb alles pärast seda, kui see säte on näite juba kõrvale jätnud.",
       "label": "Proovivõtu Intervall"
     },
     "save_debug_traces": {
@@ -1803,7 +1814,8 @@
     "deleting": "Kustutamine…",
     "imported": "Imporditud",
     "preparing": "Ettevalmistamine…",
-    "unlabelling": "Märgistuse eemaldamine…"
+    "unlabelling": "Märgistuse eemaldamine…",
+    "working": "Töötlemine…"
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -1949,7 +1961,36 @@
     "odometer_saved": "Tsüklite koguarv salvestatud",
     "odometer_save_failed": "Koguarvu ei õnnestunud salvestada: {error}",
     "store_pick_profile_share": "Vali profiil, kuhu jagada",
-    "remove_failed": "Eemaldamine ebaõnnestus: {error}"
+    "remove_failed": "Eemaldamine ebaõnnestus: {error}",
+    "analysis_complete": "Analüüs on lõpetatud: ettepanekuid: {count}",
+    "analysis_failed": "Analüüs ebaõnnestus: {error}",
+    "auto_detect_failed": "Automaatne tuvastamine ebaõnnestus: {error}",
+    "auto_label_failed": "Automaatne sildistamine ebaõnnestus: {error}",
+    "could_not_load_cycle": "Tsüklit ei õnnestunud laadida: {error}",
+    "create_failed": "Loomine ebaõnnestus: {error}",
+    "cycles_deleted": "Kustutatud tsükleid: {count}",
+    "debug_cleared": "Tühjendatud silumisjälgi: {count}",
+    "discard_failed": "Äraviskamine ebaõnnestus: {error}",
+    "error": "Viga: {error}",
+    "export_failed": "Eksport ebaõnnestus: {error}",
+    "import_failed": "Import ebaõnnestus: {error}",
+    "invalid_json": "\"{key}\" ei ole kehtiv JSON - parandage see või tühjendage väli enne salvestamist.",
+    "label_failed": "Sildistamine ebaõnnestus: {error}",
+    "ml_training_promoted": "Treening lõpetatud: aktiveeritud mudeleid: {count}",
+    "pause_failed": "Pausile panemine ebaõnnestus: {error}",
+    "phase_created": "Faas \"{name}\" loodud",
+    "phase_deleted": "Faas \"{name}\" kustutatud",
+    "profile_created": "Profiil \"{name}\" loodud",
+    "rename_failed": "Ümbernimetamine ebaõnnestus: {error}",
+    "revert_failed": "Taastamine ebaõnnestus: {error}",
+    "save_failed": "Salvestamine ebaõnnestus: {error}",
+    "split_complete": "Jagatud tsükliteks: {count}",
+    "start_failed": "Käivitamine ebaõnnestus: {error}",
+    "stop_failed": "Peatamine ebaõnnestus: {error}",
+    "update_failed": "Värskendamine ebaõnnestus: {error}",
+    "store_download_skipped": "{n} salvestist vahele jäetud: liiga lühikesed, liiga lünklikud või juba teie seadmel.",
+    "store_import_low_quality": "See salvestis on importimiseks liiga lühike, liiga lünklik või ebausutav.",
+    "store_import_duplicate": "See salvestis on juba teie seadmel."
   },
   "suggestion": {
     "both_agree": "WashData soovitab",
@@ -2044,7 +2085,10 @@
       "thr_batch": "Hoitakse veidi üle madalaima aktiivvõimsuse p05 juures {cycles} tsükli lõikes ({p05}W), et käivitus tuvastataks võimalikult vara ja seiskamislävi jääks alla masina madalaima töövõimsuse.",
       "tol_per_profile": "p75 profiilipõhisest kestuse dispersioonist {profiles} profiili lõikes ({cycles} tsüklit); kitsaid profiile ei karistata.",
       "tol_pooled": "Põhineb {cycles} viimase märgistatud tsükli koondkestuse dispersioonil (p95 hälve={dev}).",
-      "watchdog": "Hoitakse nii madal kui ohutu (veidi üle p95 uuendusintervalli {p95}s ja vähemalt 2x proovivõtu intervall {median}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta."
+      "watchdog": "Hoitakse nii madal kui ohutu (veidi üle p95 uuendusintervalli {p95}s ja vähemalt 2x proovivõtu intervall {median}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta.",
+      "end_energy_floor": "Tõstetud miinimumini, mis tuleneb peatumise lävest ({stop} W) väljalülitumise viivituse ({off_delay} s) jooksul; sellest madalamal saab tsükkel lõppeda ainult varumehhanismi kaudu.",
+      "max_duration_ratio_default": "Taastatud vaikeväärtus: madalam ülempiir lükkab õige programmi tagasi alati, kui tsükkel kestab tavalisest kauem.",
+      "min_duration_ratio_default": "Taastatud vaikeväärtus: kõrgem alampiir takistab käimasoleva tsükli tuvastamist, kuni see on juba hästi käima läinud."
     },
     "exclusions": {
       "summary": "Välja jäetud {total} valesti tuvastatud tsüklit: {parts}.",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Peida juhised",
       "show_guidance": "Näita juhiseid"
     }
+  },
+  "access": {
+    "edit": "Muutmine",
+    "full": "Täielik",
+    "inherit": "Päri",
+    "none": "Puudub (peidetud)",
+    "read": "Lugemine"
   }
 }

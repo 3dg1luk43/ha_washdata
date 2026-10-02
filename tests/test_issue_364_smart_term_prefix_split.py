@@ -161,6 +161,19 @@ def _arm_ending_then_keep_washing(
     return t
 
 
+def _stay_quiet(detector: CycleDetector, t: int, seconds: int = 250) -> None:
+    """Quiet after the decision sample, long enough for the washer's 240 s Smart
+    debounce but short of the 480 s fallback timeout.
+
+    Since audit DETECT-04 the washer debounce counts QUIET time, not time in ENDING,
+    so the washing resumed inside ENDING no longer pre-pays it: the decision sample
+    alone ends nothing, whatever the #364 guard says. These tests keep judging the
+    guard and the threshold on a genuinely quiet tail instead.
+    """
+    for k in range(1, seconds // 10 + 1):
+        detector.process_reading(1.0, _dt(t + 10 * k))
+
+
 def test_path_a_blocked_while_still_washing() -> None:
     """The reported case: ENDING Smart Termination must not fire at the short
     profile's 0.98 anchor while the drum is still pulling ~150 W."""
@@ -199,12 +212,14 @@ def test_guard_inert_without_tail_power() -> None:
     detector = _make_detector(completed)
     _run_wash(detector, None)
     assert detector._matched_tail_power is None
-    _arm_ending_then_keep_washing(detector, None)
+    t = _arm_ending_then_keep_washing(detector, None)
+    _stay_quiet(detector, t)
 
-    # Pre-fix behaviour, asserted deliberately: with no tail power the guard has no
-    # opinion and the split still happens. This is what pins the fix to the guard
-    # rather than to some incidental change in the surrounding state machine - the
-    # identical trace with a tail power does NOT split (test above).
+    # With no tail power the guard has no opinion, so Smart Termination ends the
+    # cycle on the quiet tail exactly as it would without the guard. (The identical
+    # trace WITH a tail power is blocked mid-wash - test above. Since audit DETECT-04
+    # the decision sample alone no longer splits either way: the washer debounce
+    # counts quiet time, which `_stay_quiet` provides.)
     assert completed, "with no tail power the guard must stay out of the way"
     assert completed[0]["termination_reason"] == TerminationReason.SMART
 
@@ -279,7 +294,7 @@ def test_match_confidence_threshold_is_honoured() -> None:
     completed: list[dict] = []
     detector = _make_detector(completed, match_confidence_threshold=0.75)
     _run_wash(detector, None)  # guard inert, so only the threshold can block
-    _arm_ending_then_keep_washing(detector, None)
+    _stay_quiet(detector, _arm_ending_then_keep_washing(detector, None))
 
     assert not completed, (
         "conf 0.60 is below the configured 0.75 threshold, so the fast end-path "
@@ -290,7 +305,7 @@ def test_match_confidence_threshold_is_honoured() -> None:
     baseline: list[dict] = []
     det2 = _make_detector(baseline, match_confidence_threshold=0.4)
     _run_wash(det2, None)
-    _arm_ending_then_keep_washing(det2, None)
+    _stay_quiet(det2, _arm_ending_then_keep_washing(det2, None))
     assert baseline and baseline[0]["termination_reason"] == TerminationReason.SMART
 
 

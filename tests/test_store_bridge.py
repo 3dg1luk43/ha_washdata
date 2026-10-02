@@ -26,6 +26,11 @@ from custom_components.ha_washdata import store_account
 from custom_components.ha_washdata.profile_store import ProfileStore
 from custom_components.ha_washdata.store import StoreBridge, _cycle_upload_stats
 
+
+def _trace(peak: int, n: int = 40, step: int = 60) -> list[list[int]]:
+    """A store trace that clears the import quality bar (>= 30 points, audit STORE-03)."""
+    return [[i * step, peak if i < n - 2 else (100 if i == n - 2 else 0)] for i in range(n)]
+
 BASE = datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
 
 
@@ -203,7 +208,7 @@ async def test_import_cycle_adds_reference(bridge):
     br, ps, hass = bridge
     br._client.cycle = {
         "id": "storecyc", "program_lc": "cotton-40", "createdAt": "2026-01-01T00:00:00Z",
-        "importable": [[0, 2000], [60, 100], [120, 0]],
+        "importable": _trace(2000),
         "trace": {"points": [[0, 2000]], "sampleIntervalSec": 60},
     }
     res = await br.import_cycle("storecyc", new_profile_name="Cotton 40")
@@ -214,7 +219,7 @@ async def test_import_cycle_adds_reference(bridge):
     # The full importable waveform must be persisted (not truncated/wrong): all three
     # samples survive the store round-trip.
     stored = ps.get_cycle_power_data(refs[0]["id"])
-    assert [[round(o), round(w)] for o, w in stored] == [[0, 2000], [60, 100], [120, 0]]
+    assert [[round(o), round(w)] for o, w in stored] == _trace(2000)
 
 
 @pytest.mark.asyncio
@@ -301,16 +306,16 @@ async def test_download_device_adopts_bundle(bridge):
     br, ps, hass = bridge
     br._client.bundle = {"device_id": "d1", "profiles": [
         {"id": "p1", "program": "Cotton 40", "cycles": [
-            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+            {"id": "c1", "importable": _trace(2000), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
         ]},
         {"id": "p2", "program": "Eco 50", "cycles": [
-            {"id": "c2", "importable": [[0, 1500], [60, 50], [120, 0]], "createdAt": "t",
+            {"id": "c2", "importable": _trace(1500), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
         ]},
     ]}
     res = await br.download_device("d1")
-    assert res == {"profiles_adopted": 2, "cycles_imported": 2, "phases_applied": 0, "settings": {}}
+    assert res == {"profiles_adopted": 2, "cycles_imported": 2, "cycles_skipped": 0, "phases_applied": 0, "settings": {}}
     refs = ps.get_reference_cycles()
     assert {r["profile_name"] for r in refs} == {"Cotton 40", "Eco 50"}
     assert ps.get_past_cycles() == []  # real data untouched
@@ -321,15 +326,15 @@ async def test_download_device_is_idempotent(bridge):
     br, ps, hass = bridge
     br._client.bundle = {"device_id": "d1", "profiles": [
         {"id": "p1", "program": "Cotton 40", "cycles": [
-            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+            {"id": "c1", "importable": _trace(2000), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
         ]},
     ]}
     first = await br.download_device("d1")
-    assert first == {"profiles_adopted": 1, "cycles_imported": 1, "phases_applied": 0, "settings": {}}
+    assert first == {"profiles_adopted": 1, "cycles_imported": 1, "cycles_skipped": 0, "phases_applied": 0, "settings": {}}
     # Re-downloading the same device must not duplicate the already-imported cycle.
     second = await br.download_device("d1")
-    assert second == {"profiles_adopted": 0, "cycles_imported": 0, "phases_applied": 0, "settings": {}}
+    assert second == {"profiles_adopted": 0, "cycles_imported": 0, "cycles_skipped": 0, "phases_applied": 0, "settings": {}}
     assert len(ps.get_reference_cycles()) == 1
 
 
@@ -377,7 +382,7 @@ async def test_download_device_applies_phases(bridge):
     br._client.bundle = {"device_id": "d1", "profiles": [
         {"id": "p1", "program": "Cotton 40", "phases": [{"name": "Rinse", "start": 0, "end": 300}],
          "cycles": [
-            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+            {"id": "c1", "importable": _trace(2000), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
          ]},
     ]}
@@ -411,7 +416,7 @@ async def test_download_device_returns_settings(bridge):
     br, ps, hass = bridge
     br._client.bundle = {"device_id": "d1", "settings": {"off_delay": 180}, "profiles": [
         {"id": "p1", "program": "Cotton 40", "cycles": [
-            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+            {"id": "c1", "importable": _trace(2000), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
         ]},
     ]}

@@ -260,7 +260,8 @@
         "save_total_cycles": "Összesítés mentése",
         "clear": "Törlés",
         "add_brand": "Márka hozzáadása",
-        "add_appliance": "Készülék hozzáadása"
+        "add_appliance": "Készülék hozzáadása",
+        "retry": "Újrapróbálás"
     },
     "note": {
         "off_delay": {
@@ -334,6 +335,10 @@
         "watchdog": {
             "interval": "Legalább kétszerese kell legyen a Mintavételezési intervallumnak ({si} s)",
             "sampling": "A Mintavételezési intervallum legfeljebb a Felügyelő intervallum fele lehet ({wi} s)"
+        },
+        "end_energy": {
+            "energy": "Túl szigorú a Leállítási küszöbhöz ({w} W) a Kikapcsolási késleltetés ({d} s) alatt; a ciklus csak tartalék úton érhet véget",
+            "stop": "A Záró energia ({e} Wh {d} s alatt) csak {p} W-ot enged meg"
         }
     },
     "hdr": {
@@ -735,7 +740,9 @@
         "zoom_hint_touch_zoomed": "csippentés a nagyításhoz · dupla koppintás a visszaállításhoz",
         "cycles_since_service": "{since} / {total} ciklus",
         "total_cycles_run": "lefutott ciklus összesen",
-        "correct_total_cycles": "Összesített ciklusszám javítása"
+        "correct_total_cycles": "Összesített ciklusszám javítása",
+        "hist_reason_already_recorded": "átfedésben van egy ciklussal, amelyet a WashData már rögzített",
+        "share_consent": "Megerősítem, hogy ezek a ciklusok normálisan, megszakítás nélkül fejeződtek be"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -771,7 +778,8 @@
             "total_energy": "Energiabecslés"
         },
         "metric_auc": "AUC {auc} a félretett adatokon",
-        "metric_mae": "hiba: {model} a(z) {baseline} referenciához képest"
+        "metric_mae": "hiba: {model} a(z) {baseline} referenciához képest",
+        "fine_tuned_at": "finomhangolva: {when}"
     },
     "modal": {
         "auto_label": "Automatikus címkézési ciklusok",
@@ -1103,7 +1111,10 @@
         "no_reminders_set": "Még nincs beállítva szerviz emlékeztető.",
         "toast_program_armed": "Program beállítva a következő ciklushoz: {program}",
         "toast_range_required": "Adjon meg érvényes Ettől/Eddig tartományt.",
-        "no_profiles_option": "(még nincs profil, adjon hozzá egyet)"
+        "no_profiles_option": "(még nincs profil, adjon hozzá egyet)",
+        "compare_cycles_title": "{count} ciklus összehasonlítása",
+        "edit_builtin_phase": "Ez egy beépített fázis. A mentés egyéni felülírást hoz létre; az eredeti megmarad, és a felülírás törlésével visszaállítható.",
+        "fetch_error": "Nem sikerült betölteni az adatokat."
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1486,7 +1497,7 @@
             "label": "Elakadt szivattyú időtartama"
         },
         "sampling_interval": {
-            "doc": "Várható idő az érzékelő leolvasásai között – a simítóablak méretére és a visszapattanás helyes elindítására szolgál. Ettől az értéktől függetlenül minden érzékelőfrissítés rögzítésre kerül; csak a downstream számításokat kalibrálja. A javaslatmotor méri az érzékelő tényleges ütemét az elmúlt ciklusokból, és automatikusan beállítja ezt.",
+            "doc": "A feldolgozott leolvasások közötti minimális idő. Az előző után ennél hamarabb érkező leolvasást a rendszer kihagyja (a ciklus alatti alacsony leolvasások mindig megmaradnak), ezért állítsa a konnektor valós jelentési intervallumára vagy alacsonyabbra: a magasabb érték csak eldobja a leolvasásokat. A WashData nem javasol értéket ehhez a beállításhoz, mert csak azt az intervallumot tudja mérni, amely azután marad, hogy ez a beállítás már eldobott leolvasásokat.",
             "label": "Mintavételezési intervallum"
         },
         "save_debug_traces": {
@@ -1771,7 +1782,8 @@
         "deleting": "Törlés…",
         "imported": "Importált",
         "preparing": "Előkészítés…",
-        "unlabelling": "Címke eltávolítása…"
+        "unlabelling": "Címke eltávolítása…",
+        "working": "Folyamatban…"
     },
     "tab": {
         "advanced": "Fejlett",
@@ -1917,7 +1929,36 @@
         "odometer_saved": "Összesített ciklusszám mentve",
         "odometer_save_failed": "Nem sikerült menteni az összesítést: {error}",
         "store_pick_profile_share": "Válassza ki a profilt, amelybe megosztja",
-        "remove_failed": "Az eltávolítás sikertelen: {error}"
+        "remove_failed": "Az eltávolítás sikertelen: {error}",
+        "analysis_complete": "Az elemzés kész: {count} javaslat",
+        "analysis_failed": "Elemzés sikertelen: {error}",
+        "auto_detect_failed": "Automatikus felismerés sikertelen: {error}",
+        "auto_label_failed": "Automatikus címkézés sikertelen: {error}",
+        "could_not_load_cycle": "Nem sikerült betölteni a ciklust: {error}",
+        "create_failed": "Létrehozás sikertelen: {error}",
+        "cycles_deleted": "{count} ciklus törölve",
+        "debug_cleared": "{count} hibakeresési nyom törölve",
+        "discard_failed": "Elvetés sikertelen: {error}",
+        "error": "Hiba: {error}",
+        "export_failed": "Exportálás sikertelen: {error}",
+        "import_failed": "Importálás sikertelen: {error}",
+        "invalid_json": "A(z) \"{key}\" nem érvényes JSON - javítsa ki, vagy ürítse ki a mezőt mentés előtt.",
+        "label_failed": "Címkézés sikertelen: {error}",
+        "ml_training_promoted": "A tanítás befejeződött: {count} modell előléptetve",
+        "pause_failed": "Szüneteltetés sikertelen: {error}",
+        "phase_created": "A(z) \"{name}\" fázis létrehozva",
+        "phase_deleted": "A(z) \"{name}\" fázis törölve",
+        "profile_created": "A(z) \"{name}\" profil létrehozva",
+        "rename_failed": "Átnevezés sikertelen: {error}",
+        "revert_failed": "Visszaállítás sikertelen: {error}",
+        "save_failed": "Mentés sikertelen: {error}",
+        "split_complete": "Felosztva {count} ciklusra",
+        "start_failed": "Indítás sikertelen: {error}",
+        "stop_failed": "Leállítás sikertelen: {error}",
+        "update_failed": "Frissítés sikertelen: {error}",
+        "store_download_skipped": "{n} felvétel kihagyva: túl rövid, túl hézagos vagy már megvan az eszközön.",
+        "store_import_low_quality": "Ez a felvétel túl rövid, túl hézagos vagy valószerűtlen, ezért nem importálható.",
+        "store_import_duplicate": "Ez a felvétel már megvan az eszközön."
     },
     "suggestion": {
         "both_agree": "A WashData javasolja",
@@ -2012,7 +2053,10 @@
             "tol_pooled": "{cycles} legutóbbi címkézett ciklus összevont időtartam-szórása alapján (p95 szórás={dev}).",
             "watchdog": "A biztonságosan lehető legalacsonyabbra állítva (épp a p95 frissítési szünet, azaz {p95}s felett, és legalább a mintavételezési intervallum ({median}s) kétszerese, min. 30s), hogy az elakadások gyorsan észlelhetők legyenek téves leállítások nélkül.",
             "match_interval_capped": "Korlátozva, hogy {persistence} egymást követő egyezés beleférjen a legrövidebb program ({shortest}s) {pct}%-ába; önmagában a frissítési ütem (médián={median}s) hosszabb intervallumot javasolt volna.",
-            "match_interval_floored": "Önmagában a legrövidebb program ({shortest}s) {cap}s értékre korlátozná ezt, ami a(z) {minimum}s minimum alatt van, ezért a minimumon marad: {persistence} egymást követő egyezés {budget}s időt vesz igénybe, ami a program {pct}%-ánál több. Az egyeztetés csak akkor fut, amikor új mérés érkezik (médián={median}s), így a minimum semmibe sem kerül."
+            "match_interval_floored": "Önmagában a legrövidebb program ({shortest}s) {cap}s értékre korlátozná ezt, ami a(z) {minimum}s minimum alatt van, ezért a minimumon marad: {persistence} egymást követő egyezés {budget}s időt vesz igénybe, ami a program {pct}%-ánál több. Az egyeztetés csak akkor fut, amikor új mérés érkezik (médián={median}s), így a minimum semmibe sem kerül.",
+            "end_energy_floor": "Megemelve arra az alsó határra, amelyet a Leállítási küszöb ({stop} W) a Kikapcsolási késleltetés ({off_delay} s) alatt megkövetel; ez alatt a ciklus csak tartalék úton érhet véget.",
+            "max_duration_ratio_default": "Vissza az alapértékre: egy alacsonyabb felső határ elveti a helyes programot, ha egy futás a szokásosnál tovább tart.",
+            "min_duration_ratio_default": "Vissza az alapértékre: egy magasabb alsó határ miatt a futó ciklus csak akkor ismerhető fel, amikor már jócskán előrehaladt."
         },
         "exclusions": {
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",
@@ -2228,5 +2272,12 @@
             "hide_guidance": "Útmutatás elrejtése",
             "show_guidance": "Útmutatás megjelenítése"
         }
+    },
+    "access": {
+        "edit": "Szerkesztés",
+        "full": "Teljes",
+        "inherit": "Öröklés",
+        "none": "Nincs (rejtett)",
+        "read": "Olvasás"
     }
 }

@@ -212,7 +212,8 @@
     "save_total_cycles": "Salva totale",
     "clear": "Cancella",
     "add_brand": "Aggiungi marca",
-    "add_appliance": "Aggiungi elettrodomestico"
+    "add_appliance": "Aggiungi elettrodomestico",
+    "retry": "Riprova"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -281,6 +282,10 @@
     "watchdog": {
       "interval": "Dovrebbe essere almeno 2x l'Intervallo di campionamento ({si} s)",
       "sampling": "L'Intervallo di campionamento dovrebbe essere al massimo la metà dell'Intervallo watchdog ({wi} s)"
+    },
+    "end_energy": {
+      "energy": "Troppo restrittiva per la Soglia di arresto ({w} W) nell'arco del Ritardo spegnimento ({d} s); il ciclo può terminare solo tramite un percorso di riserva",
+      "stop": "Energia fine ciclo ({e} Wh in {d} s) consente solo {p} W"
     }
   },
   "hdr": {
@@ -682,7 +687,9 @@
     "zoom_hint_touch_zoomed": "pizzica per ingrandire · doppio tocco per reimpostare",
     "cycles_since_service": "{since} / {total} cicli",
     "total_cycles_run": "cicli eseguiti in totale",
-    "correct_total_cycles": "Correggi il totale"
+    "correct_total_cycles": "Correggi il totale",
+    "hist_reason_already_recorded": "si sovrappone a un ciclo già registrato da WashData",
+    "share_consent": "Confermo che questi cicli sono terminati normalmente, senza interruzioni"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -718,7 +725,8 @@
       "total_energy": "Stima dell'energia"
     },
     "metric_auc": "AUC {auc} sui dati di validazione",
-    "metric_mae": "errore {model} vs baseline {baseline}"
+    "metric_mae": "errore {model} vs baseline {baseline}",
+    "fine_tuned_at": "ottimizzato il {when}"
   },
   "modal": {
     "auto_label": "Cicli di etichettatura automatica",
@@ -1050,7 +1058,10 @@
     "standby_above_stop_sub": "{n} degli ultimi {total} cicli. Il Ritardo spegnimento parte solo quando la potenza scende sotto la Soglia di arresto ({stop} W), quindi i cicli finiscono in ritardo o vanno fermati a mano.",
     "advisory_duration_outlier": "{n} ciclo/i etichettati come '{name}' si discostano troppo dalla sua durata abituale per potergli mai corrispondere (caso peggiore: {ratio}x). Probabilmente sono etichettati male, oppure una registrazione ha catturato due esecuzioni. Rietichettali o dividili, così smettono di falsare la stima dei tempi di questo programma.",
     "toast_range_required": "Imposta un intervallo Da/A valido",
-    "no_profiles_option": "(nessun profilo, aggiungine uno)"
+    "no_profiles_option": "(nessun profilo, aggiungine uno)",
+    "compare_cycles_title": "Confronta {count} cicli",
+    "edit_builtin_phase": "Questa è una fase integrata. Il salvataggio crea una versione personalizzata che la sostituisce; l'originale viene conservato e può essere ripristinato eliminando la versione personalizzata.",
+    "fetch_error": "Impossibile caricare i dati."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
@@ -1473,7 +1484,7 @@
       "label": "Durata pompa bloccata"
     },
     "sampling_interval": {
-      "doc": "Tempo previsto tra le letture del sensore: utilizzato per dimensionare la finestra di livellamento e avviare correttamente il rimbalzo. Ogni aggiornamento del sensore viene acquisito indipendentemente da questo valore; calibra solo i calcoli a valle. Il motore dei suggerimenti misura la cadenza effettiva del sensore dai cicli precedenti e la imposta automaticamente.",
+      "doc": "Tempo minimo tra due letture elaborate. Una lettura che arriva prima di questo intervallo dalla precedente viene scartata (le letture basse durante un ciclo vengono sempre mantenute), quindi va impostato sull'intervallo di invio reale della presa o su un valore inferiore: un valore più alto non fa che scartare letture. WashData non suggerisce questo valore, perché ciò che può misurare è l'intervallo rimasto dopo che questa impostazione ha già scartato delle letture.",
       "label": "Intervallo di campionamento"
     },
     "save_debug_traces": {
@@ -1750,7 +1761,8 @@
     "deleting": "Eliminazione…",
     "imported": "Importato",
     "preparing": "Preparazione…",
-    "unlabelling": "Rimozione etichetta…"
+    "unlabelling": "Rimozione etichetta…",
+    "working": "Elaborazione…"
   },
   "tab": {
     "advanced": "Avanzato",
@@ -1896,7 +1908,36 @@
     "odometer_saved": "Totale dei cicli salvato",
     "odometer_save_failed": "Impossibile salvare il totale: {error}",
     "store_pick_profile_share": "Scegli un profilo in cui condividere",
-    "remove_failed": "Rimozione non riuscita: {error}"
+    "remove_failed": "Rimozione non riuscita: {error}",
+    "analysis_complete": "Analisi completata: {count} suggerimento/i",
+    "analysis_failed": "Analisi non riuscita: {error}",
+    "auto_detect_failed": "Rilevamento automatico non riuscito: {error}",
+    "auto_label_failed": "Etichettatura automatica non riuscita: {error}",
+    "could_not_load_cycle": "Impossibile caricare il ciclo: {error}",
+    "create_failed": "Creazione non riuscita: {error}",
+    "cycles_deleted": "Cicli eliminati: {count}",
+    "debug_cleared": "Tracce di debug cancellate: {count}",
+    "discard_failed": "Impossibile scartare: {error}",
+    "error": "Errore: {error}",
+    "export_failed": "Esportazione non riuscita: {error}",
+    "import_failed": "Importazione non riuscita: {error}",
+    "invalid_json": "\"{key}\" non è un JSON valido: correggerlo o svuotare il campo prima di salvare.",
+    "label_failed": "Etichettatura non riuscita: {error}",
+    "ml_training_promoted": "Addestramento completato, modelli promossi: {count}",
+    "pause_failed": "Pausa non riuscita: {error}",
+    "phase_created": "Fase \"{name}\" creata",
+    "phase_deleted": "Fase \"{name}\" eliminata",
+    "profile_created": "Profilo \"{name}\" creato",
+    "rename_failed": "Rinomina non riuscita: {error}",
+    "revert_failed": "Ripristino non riuscito: {error}",
+    "save_failed": "Salvataggio non riuscito: {error}",
+    "split_complete": "Diviso in {count} cicli",
+    "start_failed": "Avvio non riuscito: {error}",
+    "stop_failed": "Arresto non riuscito: {error}",
+    "update_failed": "Aggiornamento non riuscito: {error}",
+    "store_download_skipped": "{n} registrazione/i saltata/e: troppo brevi, troppo lacunose o già sul tuo dispositivo.",
+    "store_import_low_quality": "Questa registrazione è troppo breve, troppo lacunosa o non plausibile per essere importata.",
+    "store_import_duplicate": "Questa registrazione è già sul tuo dispositivo."
   },
   "suggestion": {
     "both_agree": "WashData consiglia",
@@ -1991,7 +2032,10 @@
       "thr_batch": "Mantenuto appena sopra la potenza attiva più bassa al p05 su {cycles} cicli ({p05}W) affinché un avvio venga rilevato il prima possibile e la soglia di arresto resti sotto la potenza di funzionamento più bassa della macchina.",
       "tol_per_profile": "p75 della varianza di durata per profilo su {profiles} profili ({cycles} cicli); i profili stretti non vengono penalizzati.",
       "tol_pooled": "In base alla varianza di durata aggregata di {cycles} cicli etichettati di recente (deviazione p95={dev}).",
-      "watchdog": "Mantenuto il più basso possibile in sicurezza (poco sopra l'intervallo di aggiornamento p95 di {p95}s e almeno 2x l'intervallo di campionamento di {median}s, min 30s) per rilevare rapidamente i blocchi senza arresti falsi."
+      "watchdog": "Mantenuto il più basso possibile in sicurezza (poco sopra l'intervallo di aggiornamento p95 di {p95}s e almeno 2x l'intervallo di campionamento di {median}s, min 30s) per rilevare rapidamente i blocchi senza arresti falsi.",
+      "end_energy_floor": "Portato al minimo implicato dalla soglia di arresto ({stop} W) nell'arco del ritardo spegnimento ({off_delay} s); al di sotto, il ciclo può terminare solo tramite un percorso di riserva.",
+      "max_duration_ratio_default": "Ripristinato il valore predefinito: un limite superiore più basso scarta il programma giusto ogni volta che un ciclo dura più del solito.",
+      "min_duration_ratio_default": "Ripristinato il valore predefinito: un limite inferiore più alto impedisce di riconoscere un ciclo in corso finché non è ben avviato."
     },
     "exclusions": {
       "summary": "Esclusi {total} cicli rilevati male: {parts}.",
@@ -2228,5 +2272,12 @@
     "off_delay": {
       "effective": "Un ciclo terminato attende in realtà {eff} s, non {delay} s: l'Intervallo minimo di spegnimento ({gap} s) è più lungo e ha la precedenza."
     }
+  },
+  "access": {
+    "edit": "Modifica",
+    "full": "Completo",
+    "inherit": "Eredita",
+    "none": "Nessuno (nascosto)",
+    "read": "Lettura"
   }
 }

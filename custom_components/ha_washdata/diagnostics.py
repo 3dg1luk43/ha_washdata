@@ -59,10 +59,21 @@ _SENSITIVE_KEYS = {
 }
 
 
+# A record that names a setting in a field instead of using it as the dict key -
+# a settings-changelog row is `{"key": "power_sensor", "old": ..., "new": ...}` -
+# carries the sensitive value under these generic names, which slipped past the
+# key-based redaction: entity ids, person.* and notify targets (audit PLATFORM-08).
+_VALUE_FIELDS = ("old", "new", "value")
+
+
 def _redact(obj: Any) -> Any:
     if isinstance(obj, dict):
+        named = obj.get("key")
+        names_sensitive = isinstance(named, str) and named in _SENSITIVE_KEYS
         return {
-            k: "**REDACTED**" if k in _SENSITIVE_KEYS else _redact(v)
+            k: "**REDACTED**"
+            if k in _SENSITIVE_KEYS or (names_sensitive and k in _VALUE_FIELDS)
+            else _redact(v)
             for k, v in obj.items()
         }
     if isinstance(obj, list):
@@ -74,7 +85,11 @@ async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
-    manager: WashDataManager = hass.data[DOMAIN][entry.entry_id]
+    manager: WashDataManager | None = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if manager is None:
+        # Setup failed or the entry is unloaded: the download must still work - it
+        # is how such a failure gets reported (audit PLATFORM-14).
+        return {"entry": _redact(entry.as_dict()), "manager_state": None}
 
     # Full store export - same payload as the export_config service, but the
     # entry_data / entry_options pass through the redactor to strip personal keys.

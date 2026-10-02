@@ -69,7 +69,7 @@ from .const import (
     SHAPE_DRIFT_MIN_CYCLES,
     SHAPE_DRIFT_RESAMPLE_N,
     SHAPE_DRIFT_THRESHOLD,
-    SHAREABLE_SETTING_KEYS,
+    sanitize_shared_settings,
     SMART_TERM_LANDSCAPE_RATIO,
     SMART_TERM_LANDSCAPE_MIN_SHAPE,
     SMART_TERM_PREFIX_MARGIN,
@@ -99,6 +99,7 @@ from .signal_processing import (
     integrate_wh,
     energy_gap_threshold_s,
     has_resumed_pause as _has_resumed_pause,
+    resumed_pauses as _resumed_pauses,
     terminal_event_end as _terminal_event_end,
     terminal_quiet_seen as _terminal_quiet_seen,
 )
@@ -149,6 +150,33 @@ CycleDict: TypeAlias = dict[str, Any]
 _AUTO_LABEL_SOURCES = (
     "auto_match", "auto_label_post", "auto_label_service", "auto_label_backfill",
 )
+
+
+def label_verdict(result: Any, floor: float) -> tuple[str | None, str]:
+    """May ``result`` label its cycle? Returns ``(profile, reason)``; profile None = no.
+
+    The one gate every auto-label path applies to a COMPLETE-cycle match (audit
+    MATCH-DECIDE-02/F-12): a winner, the member-aware ``label_confidence`` at or
+    above ``floor`` (item 206), a clear margin over the runner-up (item 310) and
+    no Stage-5 safeguard flag (item 387b). ``is True`` so a result without the
+    field cannot block. Reasons: ``ok``, ``no_winner``, ``below_floor``,
+    ``ambiguous``, ``margin``.
+    """
+    best = getattr(result, "best_profile", None) if result is not None else None
+    if not best:
+        return None, "no_winner"
+    try:
+        conf = float(getattr(result, "label_confidence", 0.0) or 0.0)
+    except (TypeError, ValueError):
+        conf = 0.0
+    if conf < float(floor or 0.0):
+        return None, "below_floor"
+    if getattr(result, "is_ambiguous", False) is True:
+        return None, "ambiguous"
+    margin = getattr(result, "ambiguity_margin", None)
+    if margin is not None and float(margin) < MATCH_LABEL_MIN_MARGIN:
+        return None, "margin"
+    return str(best), "ok"
 
 
 def _trusted_min_by_profile(cycles: Any) -> dict[str, float]:
@@ -445,12 +473,12 @@ class MatchResult:
     debug_details: dict[str, Any] = dataclasses.field(default_factory=_empty_debug_details)
     is_confident_mismatch: bool = False
     mismatch_reason: str | None = None
+    # The #364 prefix-fit term: read by the ENDING gates (Smart Termination, the
+    # fallback bar, the dishwasher floor). The #288 full-shape term was dropped
+    # from it (audit LIVE-18): it was every false block at a genuine end.
     is_prefix_ambiguous: bool = False
-    # The LEGACY (#288-only, full-envelope shape) half of the verdict above.
-    # `is_prefix_ambiguous` is widened by #364's prefix scoring, which is safe for
-    # the ENDING Smart-Termination gate (a false fire only delays the finish) but
-    # NOT for the anti-crease finalize, where blocking can re-hang a cycle the way
-    # #296 described. That consumer reads this narrower flag instead.
+    # The LEGACY #288 full-envelope-shape term, read only by the anti-crease
+    # finalize, where blocking can re-hang a cycle the way #296 described.
     is_prefix_ambiguous_full_shape: bool = False
     # Stage 5 only (None for every non-group match): the blended pipeline score
     # the SELECTED member earned on its own curve. `confidence` deliberately stays
@@ -1045,7 +1073,70 @@ class WashDataStore(Store[JSONDict]):
             )
             old_data[BANKED_TAIL_REPAIR_KEY] = True
 
+        if old_major_version < 15:
+            # Label provenance repair (audit MANAGER-01). Confirming or correcting a
+            # cycle from the review queue set only `profile_name`, so the user's
+            # answer kept the matcher's `label_source` and the panel's Auto-label
+            # (overwrite=True) re-matched and replaced it, storing the answer as
+            # `original_auto_label`. Pure data, idempotent: re-running finds every
+            # answered cycle already stamped.
+            summary = _repair_answered_feedback_provenance(old_data)
+            _LOGGER.info(
+                "Migrating storage from v%s to v15 (review-queue answers stamped "
+                "manual: %d stamped, %d restored)",
+                old_major_version, summary["stamped"], summary["restored"],
+            )
+
         return old_data
+
+def _repair_answered_feedback_provenance(data: JSONDict) -> dict[str, int]:
+    """Stamp ``label_source="manual"`` on cycles the user answered in the review queue.
+
+    For every ``feedback_history`` record where the user confirmed the detected
+    programme or corrected it, the user's answer is ground truth:
+
+    * the cycle still carries that answer -> stamp it ``manual``;
+    * the panel's Auto-label replaced it (``label_source == "auto_label_service"``
+      with the answer saved as ``original_auto_label``) -> put the answer back,
+      keep the matcher's replacement as ``original_auto_label``, stamp ``manual``.
+
+    A cycle relabelled by hand since (already ``manual``) and dismissed requests
+    are left alone. Never raises.
+    """
+    summary = {"stamped": 0, "restored": 0}
+    try:
+        history = data.get("feedback_history")
+        past = data.get("past_cycles")
+        if not isinstance(history, dict) or not isinstance(past, list):
+            return summary
+        by_id = {c.get("id"): c for c in past if isinstance(c, dict)}
+        for cycle_id, record in history.items():
+            if not isinstance(record, dict):
+                continue
+            if record.get("user_confirmed"):
+                answer = record.get("original_detected_profile")
+            else:
+                answer = record.get("corrected_profile")
+            if not isinstance(answer, str) or not answer:
+                continue
+            cycle = by_id.get(record.get("cycle_id") or cycle_id)
+            if cycle is None or cycle.get("label_source") == "manual":
+                continue
+            if cycle.get("profile_name") == answer:
+                cycle["label_source"] = "manual"
+                summary["stamped"] += 1
+            elif (
+                cycle.get("label_source") == "auto_label_service"
+                and cycle.get("original_auto_label") == answer
+            ):
+                cycle["original_auto_label"] = cycle.get("profile_name")
+                cycle["profile_name"] = answer
+                cycle["label_source"] = "manual"
+                summary["restored"] += 1
+    except Exception:  # noqa: BLE001 - a repair must never cost the user their store
+        _LOGGER.warning("Review-answer provenance repair failed", exc_info=True)
+    return summary
+
 
 def longest_candidate_duration(candidates: Any) -> float:
     """Longest expected duration among the candidates still in play.
@@ -1154,12 +1245,11 @@ def _match_prefix_ambiguity(
     The full-envelope term alone has three structural false negatives on real
     devices (see the #364 block in const.py); the prefix term exists because a
     trace part-way through a longer programme cannot score well against that
-    programme's whole curve. Returned separately because the widened verdict is
-    only safe for the ENDING gate - see ``MatchResult.is_prefix_ambiguous_full_shape``.
+    programme's whole curve. Returned separately: the ENDING gate reads the
+    prefix term alone (audit LIVE-18) and the anti-crease finalize the #288 term
+    alone - see ``MatchResult.is_prefix_ambiguous_full_shape``.
 
-    Pure function, no I/O. ``prefix_score`` absent (Stage 4 skipped, a mocked
-    executor, an older snapshot) degrades to the legacy term alone, so this can
-    never fire *less* often than the #288 predicate did.
+    Pure function, no I/O.
 
     ``pauses_below`` (#424) maps a candidate name to whether that programme has
     ever paused below the stop threshold mid-cycle (``ProfileStore.
@@ -1262,13 +1352,7 @@ def _shareable_settings(opts: Any) -> dict[str, Any]:
     only options that may travel with an export are recognition/matching thresholds,
     never identity keys or the power-sensor binding.
     """
-    if not isinstance(opts, dict):
-        return {}
-    return {
-        k: opts[k]
-        for k in SHAREABLE_SETTING_KEYS
-        if k in opts and isinstance(opts[k], (int, float)) and not isinstance(opts[k], bool)
-    }
+    return sanitize_shared_settings(opts)
 
 
 def _selected_categories(selection: Any) -> set[str]:
@@ -1548,6 +1632,94 @@ def _usable_reference_pairs(points: Any) -> list[list[float]] | None:
     if float(pairs[-1][0] - pairs[0][0]) <= 0:
         return None
     return pairs
+
+
+#: Community-store import quality bounds (audit STORE-03). The census of 427
+#: harvested store cycles held 2-point straight lines, a 36 s "cycle", a 77 h wool
+#: wash and traces with one gap over 30 min; each enters the profile's envelope.
+STORE_TRACE_MIN_POINTS = 30
+STORE_TRACE_MAX_SPAN_S = 6 * 3600.0
+STORE_TRACE_MIN_GAP_CAP_S = 900.0
+STORE_TRACE_GAP_CAP_FRAC = 0.10
+
+
+def _store_trace_ok(pairs: list[list[float]]) -> bool:
+    """Whether a validated store trace is fit to shape a profile (audit STORE-03).
+
+    Span in (0, 6 h], at least 30 points, no single gap over max(15 min, 10% of
+    the span), and a peak above the degenerate-power floor.
+    """
+    if len(pairs) < STORE_TRACE_MIN_POINTS:
+        return False
+    span = float(pairs[-1][0] - pairs[0][0])
+    if not 0.0 < span <= STORE_TRACE_MAX_SPAN_S:
+        return False
+    gaps = np.diff(np.asarray([p[0] for p in pairs], dtype=float))
+    if gaps.size and float(gaps.max()) > max(
+        STORE_TRACE_MIN_GAP_CAP_S, STORE_TRACE_GAP_CAP_FRAC * span
+    ):
+        return False
+    return max(p[1] for p in pairs) >= _DEGENERATE_POWER_FLOOR
+
+
+def trace_content_hash(pairs: Any) -> str | None:
+    """Profile-agnostic hash of a trace's content (audit STORE-05).
+
+    Offsets re-based to the first sample and rounded to the second, watts to the
+    watt, so the same recording filed under another program name, device or id
+    hashes alike. None for a trace with fewer than two usable points.
+    """
+    pts = _usable_reference_pairs(pairs)
+    if pts is None:
+        return None
+    t0 = pts[0][0]
+    body = ";".join(f"{round(t - t0)}:{round(w)}" for t, w in pts)
+    return hashlib.sha1(body.encode(), usedforsecurity=False).hexdigest()
+
+
+def _is_store_import(cycle: Any) -> bool:
+    meta = cycle.get("meta") if isinstance(cycle, dict) else None
+    src = meta.get("source") if isinstance(meta, dict) else None
+    return isinstance(src, str) and src.startswith("store")
+
+
+def _effective_golden_flags(cycles: list[Any]) -> list[bool]:
+    """Which of a profile's cycles define its reference shape and template.
+
+    The user's own golden cycles (pinned, or recorded). A community-store import
+    counts only in a profile with no cycle of the user's own (audit STORE-04):
+    forced golden, one import became the shape every real cycle was warped onto
+    and the matching template, costing 31-43% of the user's own margins.
+    """
+    user = [
+        bool(isinstance(c.get("ml_review"), dict) and c["ml_review"].get("golden"))
+        and not _is_store_import(c)
+        for c in cycles
+    ]
+    if any(user):
+        return user
+    if cycles and all(_is_store_import(c) for c in cycles):
+        return [True] * len(cycles)
+    return [False] * len(cycles)
+
+
+def match_prefix_flags(
+    candidates: list[dict],
+    best_duration: float,
+    pauses_below: Callable[[str], bool | None] | None = None,
+) -> tuple[bool, bool]:
+    """``(is_prefix_ambiguous, is_prefix_ambiguous_full_shape)`` - the one rule
+    live matching and the Playground both send the detector (elements 7 and 8).
+
+    The wide ENDING flag is the #364 prefix term alone (audit LIVE-18): in
+    production-config replays every false block at a genuine end was the #288
+    full-shape term. The narrow #288 flag still guards the anti-crease finalize,
+    whose failure mode (#296) is a hang.
+    """
+    full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(
+        candidates, best_duration, pauses_below
+    )
+    return prefix_fit_hit, full_shape_hit
 
 
 def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
@@ -2073,10 +2245,10 @@ class ProfileStore:
 
 
     def get_profile(self, name: str) -> JSONDict | None:
-        """Return a single profile by name with calculated stats (via list_profiles)."""
-        # Reuse list_profiles logic to ensure consistency and avoid duplication
-        all_profiles = self.list_profiles()
-        return next((p for p in all_profiles if p["name"] == name), None)
+        """Return a single profile by name with calculated stats (as list_profiles)."""
+        _rows, by_name = self._profile_summaries()
+        row = by_name.get(name)
+        return dict(row) if row is not None else None
 
     def get_profiles(self) -> dict[str, JSONDict]:
         """Return mutable profiles mapping (profile_name -> profile data)."""
@@ -2265,23 +2437,66 @@ class ProfileStore:
         out.sort(key=lambda r: r.get("start_time") or "", reverse=True)
         return out
 
+    def stored_trace_hashes(self) -> set[str]:
+        """Content hashes of every stored cycle's trace (audit STORE-05)."""
+        out: set[str] = set()
+        for c in self.iter_stored_cycles():
+            try:
+                h = trace_content_hash(decompress_power_data(c))
+            except Exception:  # noqa: BLE001 - one bad trace must not block imports
+                h = None
+            if h:
+                out.add(h)
+        return out
+
+    def reference_import_verdict(
+        self, points: Any, meta: dict[str, Any], known_hashes: set[str] | None = None
+    ) -> str:
+        """``ok``, ``invalid``, ``low_quality`` or ``duplicate`` for an import.
+
+        The quality and duplicate checks apply to community-store downloads only
+        (``meta.community``, set by the store bridge). Not ``store_cycle_id``: the
+        selective import passes one for the user's own exported cycles too, and
+        the user's own data is never second-guessed.
+        """
+        pairs = _usable_reference_pairs(points)
+        if pairs is None:
+            return "invalid"
+        if not meta.get("community"):
+            return "ok"
+        if not _store_trace_ok(pairs):
+            return "low_quality"
+        h = trace_content_hash(pairs)
+        hashes = known_hashes if known_hashes is not None else self.stored_trace_hashes()
+        if h and h in hashes:
+            return "duplicate"
+        return "ok"
+
     def _add_reference_cycle_nosave(
         self, profile_name: str, points: list[list[float]], meta: dict[str, Any],
-        *, id_pool: set[Any] | None = None,
+        *, id_pool: set[Any] | None = None, known_hashes: set[str] | None = None,
     ) -> str:
         """Validate + append one reference cycle. NO envelope rebuild, NO save.
 
         The mutation core shared by ``add_reference_cycle`` (single-cycle: rebuild +
         save after) and ``async_import_data_selective`` (bulk: rebuild each touched
         profile once + a single save at the end). Returns the new cycle id, or ``""``
-        when the trace is unusable (mutating nothing).
+        when the trace is unusable, or a store trace fails the quality bar or is
+        already stored (mutating nothing). ``known_hashes`` lets a bulk caller hash
+        the store once; it is updated with each import, so a bundle dedups itself.
         """
         # Validate the trace BEFORE creating any persistent state (profile entry / reference
         # cycle): a garbage trace returns "" and mutates nothing. Same rule the import guard
         # uses to decide whether a replace has anything usable to refill a destination with.
+        if self.reference_import_verdict(points, meta, known_hashes) != "ok":
+            return ""
         pairs = _usable_reference_pairs(points)
         if pairs is None:
             return ""
+        if known_hashes is not None and meta.get("community"):
+            h = trace_content_hash(pairs)
+            if h:
+                known_hashes.add(h)
         duration = float(pairs[-1][0] - pairs[0][0])
         # Re-base to offset 0 so envelope reconstruction and DTW work correctly.
         if pairs[0][0] != 0.0:
@@ -2298,7 +2513,8 @@ class ProfileStore:
             "end_time": (now + timedelta(seconds=duration)).isoformat(),
             "duration": duration,
             "status": "completed",
-            "ml_review": {"golden": True},
+            # Not golden (audit STORE-04): `_effective_golden_flags` lets a store
+            # import define the shape only in a profile with none of the user's own.
             "meta": {
                 "source": f"store:{store_id}" if store_id else "store",
                 "store_uploaded_at": meta.get("store_uploaded_at"),
@@ -2332,18 +2548,20 @@ class ProfileStore:
         return str(cycle.get("id", ""))
 
     async def add_reference_cycle(
-        self, profile_name: str, points: list[list[float]], meta: dict[str, Any]
+        self, profile_name: str, points: list[list[float]], meta: dict[str, Any],
+        *, known_hashes: set[str] | None = None,
     ) -> str:
         """Import a reference cycle downloaded from the store into ``reference_cycles``.
 
         ``points`` is a raw trace of ``[offset_seconds, watts]`` pairs. ``meta`` may carry
         ``store_cycle_id`` (-> ``meta.source = "store:<id>"``), ``store_uploaded_at`` and
         ``sampling_interval``. The cycle is stamped with import-time timestamps (its real
-        run time is meaningless locally), forced ``status="completed"`` and
-        ``ml_review.golden=True`` so it seeds the envelope shape, then the envelope is
-        rebuilt. Never accumulates lifetime energy or touches ``past_cycles``.
+        run time is meaningless locally) and forced ``status="completed"``, then the
+        envelope is rebuilt. Never accumulates lifetime energy or touches ``past_cycles``.
         """
-        cid = self._add_reference_cycle_nosave(profile_name, points, meta)
+        cid = self._add_reference_cycle_nosave(
+            profile_name, points, meta, known_hashes=known_hashes
+        )
         if not cid:
             return ""
         await self.async_rebuild_envelope(profile_name)
@@ -2545,6 +2763,7 @@ class ProfileStore:
         self, current_power: list[float], current_duration: float,
         members: list[str], member_snaps: dict[str, dict[str, Any]],
         in_progress: bool = False,
+        preferred: str | None = None,
     ) -> tuple[str, float | None, float | None]:
         """Within a winning group, pick the member whose integrated ENERGY best
         matches the cycle.
@@ -2569,6 +2788,12 @@ class ProfileStore:
         stage exists to fix, one stage later. Off at cycle end, where the whole-cycle
         comparison is the correct one and item 99's validation applies unchanged.
 
+        While the cycle is RUNNING, ``preferred`` - the sibling the full pipeline
+        scored best (``group_best_member``) - wins instead: mid-cycle the energy
+        pick lost to it, 29.8% vs 63.8% right member at 90% elapsed over 47 group
+        wins, and on user groups 51.0% vs 62.7% (audit MATCH-DECIDE-04, MR-04). At
+        cycle end the energy pick stands; the two measurements there disagree.
+
         Returns (member_name, individual_fit_score, member_avg_duration). The fit
         score is the chosen member's own alignment score, used as a sanity check."""
         cur = np.asarray(current_power, dtype=float)
@@ -2587,7 +2812,13 @@ class ProfileStore:
             return 1.0 / (1.0 + abs(math.log(a / b)) / scale)
 
         best_m, best_sc, best_dur = members[0], -1.0, None
-        for m in members:
+        use_preferred = bool(
+            in_progress and preferred in members and member_snaps.get(preferred)
+        )
+        if use_preferred:
+            best_m = str(preferred)
+            best_dur = float(member_snaps[best_m].get("avg_duration") or 0.0) or None
+        for m in () if use_preferred else members:
             snap = member_snaps.get(m)
             if not snap:
                 continue
@@ -5232,18 +5463,16 @@ class ProfileStore:
         # can judge degeneracy relative to the profile (works for both a 2000W
         # dishwasher and a low-power pump).
         parsed: list[tuple[list[float], list[float], float, bool, float]] = []
-        for cycle in labeled_cycles:
-            pairs = decompress_power_data(cycle)
-            if len(pairs) < 3:
-                continue
+        decoded = [(c, decompress_power_data(c)) for c in labeled_cycles]
+        decoded = [(c, p) for c, p in decoded if len(p) >= 3]
+        flags = _effective_golden_flags([c for c, _ in decoded])
+        for (cycle, pairs), is_golden in zip(decoded, flags):
             offsets = [p[0] for p in pairs]
             values = [p[1] for p in pairs]
             stored_dur = float(cycle.get("duration", 0.0) or 0.0)
             authoritative_dur = float(max(offsets[-1], stored_dur))
             man_dur = cycle.get("manual_duration")
             final_dur = float(man_dur) if man_dur else authoritative_dur
-            review = cycle.get("ml_review")
-            is_golden = bool(review.get("golden")) if isinstance(review, dict) else False
             peak = max(values) if values else 0.0
             parsed.append((offsets, values, final_dur, is_golden, peak))
 
@@ -5325,10 +5554,7 @@ class ProfileStore:
         med_peak = sorted(peaks.values())[len(peaks) // 2] if peaks else 0.0
         degen_floor = max(_DEGENERATE_POWER_FLOOR, 0.10 * med_peak)
 
-        golden = [
-            c for c in cands
-            if isinstance(c.get("ml_review"), dict) and c["ml_review"].get("golden")
-        ]
+        golden = [c for c, g in zip(cands, _effective_golden_flags(cands)) if g]
         if golden:
             pool = golden
         else:
@@ -6364,6 +6590,45 @@ class ProfileStore:
         except Exception:  # noqa: BLE001 - a statistic must never break matching
             return None
 
+    def profile_pause_catalogue(
+        self, profile_name: str, stop_threshold_w: float
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """``(traced cycles, pauses)`` for the hazard end gate (audit DETECT-16).
+
+        Every below-``stop_threshold_w`` pause that power later resumed from, as
+        ``(start_fraction, seconds)``, across the profile's traced evidence cycles.
+        The detector asks "has this programme ever paused this long from this far
+        in?" and waits only that long. None without traced evidence. Cached on the
+        evidence fingerprint and the threshold; never raises.
+        """
+        try:
+            stop = float(stop_threshold_w)
+            if not math.isfinite(stop) or stop <= 0:
+                return None
+            cache = getattr(self, "_pause_catalogue_cache", None)
+            if cache is None:
+                cache = self._pause_catalogue_cache = {}
+            key = (profile_name, round(stop, 4))
+            fingerprint = self._terminal_quiet_fingerprint(profile_name)
+            hit = cache.get(key)
+            if hit is not None and hit[0] == fingerprint:
+                return hit[1]
+            traced = 0
+            pauses: list[tuple[float, float]] = []
+            for cycle in self.iter_evidence_cycles():
+                if cycle.get("profile_name") != profile_name or not cycle.get("power_data"):
+                    continue
+                points = decompress_power_data(cast(Any, cycle))
+                if len(points) < 10:
+                    continue
+                traced += 1
+                pauses.extend(_resumed_pauses(points, stop))
+            value = (traced, tuple(pauses)) if traced else None
+            cache[key] = (fingerprint, value)
+            return value
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
+            return None
+
     def _terminal_quiet_fingerprint(self, profile_name: str) -> tuple[int, str, int]:
         """Cheap stand-in for "has this profile's evidence changed?".
 
@@ -6612,6 +6877,27 @@ class ProfileStore:
             env = self.get_envelope(profile_name)
             if not isinstance(env, dict):
                 return []
+            # Memoised per envelope revision: every profile sensor reads this on
+            # every state write, and the envelope only changes on a rebuild, which
+            # replaces the dict (audit PERF-01).
+            memo_key = (profile_name, id(env), env.get("updated"), float(interval_s))
+            memo = getattr(self, "_power_profile_memo", None)
+            if memo is None:
+                memo = self._power_profile_memo = {}
+            if memo_key in memo:
+                return list(memo[memo_key])
+            result = self._compute_profile_power_profile(env, interval_s)
+            if len(memo) > 256:
+                memo.clear()
+            memo[memo_key] = result
+            return list(result)
+        except Exception:  # noqa: BLE001
+            return []
+
+    @staticmethod
+    def _compute_profile_power_profile(env: JSONDict, interval_s: float) -> list[float]:
+        """Fixed-interval bucket means of an envelope's avg curve (see caller)."""
+        try:
             avg = env.get("avg")
             if (
                 not isinstance(avg, list)
@@ -7294,6 +7580,48 @@ class ProfileStore:
 
         return candidates
 
+    def _envelope_template_on_grid(
+        self, name: str, envelope: JSONDict, used_dt: float
+    ) -> list[float]:
+        """The envelope's average curve resampled onto the query's grid.
+
+        Stage 2 compares template and query sample by sample, so both must share a
+        time step. Sample-cycle templates were re-gridded to ``used_dt``; envelope
+        templates - the template for every profile with two or more cycles - were
+        passed on their own grid (the raw median cadence of the members), so the
+        comparison paired different moments of the cycle wherever the two cadences
+        differed: item 303's bug, still live for the common case. 31% of cycles with
+        an envelope sat more than 20% off-grid; re-gridding measured +1.28 to
+        +1.44pp complete-cycle top-1 (8-10 better, 0-1 worse; audit MATCH-CORE-01,
+        MR-01, MATCH-EVAL-02). Cached per envelope revision and grid step.
+        """
+        avg = envelope.get("avg") or []
+        key = (name, id(envelope), envelope.get("updated"), float(round(used_dt, 2)))
+        cache = getattr(self, "_envelope_template_cache", None)
+        if cache is None:
+            cache = self._envelope_template_cache = {}
+        hit = cache.get(key)
+        if hit is not None:
+            return hit
+        values = [float(p[1]) for p in avg]
+        try:
+            ts = np.asarray([float(p[0]) for p in avg], dtype=float)
+            pw = np.asarray(values, dtype=float)
+            finite = np.isfinite(ts) & np.isfinite(pw)
+            ts, pw = ts[finite], pw[finite]
+            if ts.size >= 2 and used_dt > 0:
+                segs = resample_uniform(ts, pw, dt_s=used_dt, gap_s=21600.0)
+                if segs:
+                    seg = max(segs, key=lambda q: len(q.power))
+                    if len(seg.power) >= 2:
+                        values = [float(v) for v in seg.power]
+        except Exception:  # noqa: BLE001 - fall back to the raw curve, never fail a match
+            pass
+        if len(cache) > 512:
+            cache.clear()
+        cache[key] = values
+        return values
+
     def build_match_snapshots(self, used_dt: float) -> list[dict[str, Any]]:
         """The candidate templates a match scores against, on the query's grid.
 
@@ -7372,7 +7700,7 @@ class ProfileStore:
                 and isinstance(_env_avg[0], (list, tuple))
                 and len(_env_avg[0]) >= 2
             ):
-                avg_y = [float(p[1]) for p in _env_avg]
+                avg_y = self._envelope_template_on_grid(name, envelope, used_dt)
                 _env_ts_duration = (
                     float(_env_avg[-1][0]) - float(_env_avg[0][0])
                     if len(_env_avg) > 1 else 0.0
@@ -7479,8 +7807,16 @@ class ProfileStore:
 
         try:
             if len(sample_data) > 0 and isinstance(sample_data[0], (list, tuple)):
-                s_ts = np.array([x[0] for x in sample_data])
-                s_p = np.array([x[1] for x in sample_data])
+                s_ts = np.array([x[0] for x in sample_data], dtype=float)
+                s_p = np.array([x[1] for x in sample_data], dtype=float)
+                # Imported data can carry NaN (json.loads accepts it); envelopes
+                # already drop non-finite rows, the sample template did not
+                # (audit MATCH-CORE-05).
+                finite = np.isfinite(s_ts) & np.isfinite(s_p)
+                if not finite.all():
+                    s_ts, s_p = s_ts[finite], s_p[finite]
+                if s_ts.size < 2:
+                    return None
             else:
                 return None
 
@@ -7639,6 +7975,7 @@ class ProfileStore:
             chosen, member_fit, member_dur = self._stage5_pick_member(
                 current_power_list, current_duration, group_members[best_name], member_snaps,
                 in_progress=in_progress,
+                preferred=best.get("group_best_member"),
             )
             best_name = chosen
             if member_dur:
@@ -7727,10 +8064,9 @@ class ProfileStore:
             pauses_fn = functools.partial(
                 self.profile_pauses_below, stop_threshold_w=float(stop_threshold_w)
             )
-        full_shape_hit, prefix_fit_hit = _match_prefix_ambiguity(
+        is_prefix_ambiguous, full_shape_hit = match_prefix_flags(
             candidates, best_duration or 0.0, pauses_fn
         )
-        is_prefix_ambiguous = full_shape_hit or prefix_fit_hit
         # From the pre-collapse population, not just before the [:5] truncation
         # below: see `pre_collapse_candidates` above for why the collapse is the
         # more dangerous of the two filters here.
@@ -7915,21 +8251,95 @@ class ProfileStore:
         }
         return bool(assigned.intersection(profile_names))
 
-    def list_profiles(self) -> list[dict[str, Any]]:
-        """List all profiles with metadata."""
+    def _profiles_fingerprint(self) -> tuple[Any, ...]:
+        """Everything :meth:`list_profiles` reads, in a cheap comparable form.
+
+        The summaries are rebuilt only when this changes, so the cache is correct
+        by construction rather than relying on every mutation site to invalidate
+        it. Building it is O(profiles + cycles) tuple work, far below the summary
+        build it guards (audit PERF-01).
+        """
+        data = self._data
+        raw_profiles = data.get("profiles", {})
+        raw_envs = data.get("envelopes", {})
+        past = data.get("past_cycles", [])
+        prof_fp: tuple[Any, ...] = ()
+        if isinstance(raw_profiles, dict):
+            prof_fp = tuple(
+                (
+                    name,
+                    id(meta),
+                    meta.get("avg_duration"),
+                    meta.get("min_duration"),
+                    meta.get("max_duration"),
+                    meta.get("sample_cycle_id"),
+                )
+                if isinstance(meta, dict)
+                else (name, None)
+                for name, meta in raw_profiles.items()
+            )
+        env_fp: tuple[Any, ...] = ()
+        if isinstance(raw_envs, dict):
+            env_fp = tuple(
+                (name, id(env), env.get("updated") if isinstance(env, dict) else None)
+                for name, env in raw_envs.items()
+            )
+        past_fp: tuple[Any, ...] = ()
+        if isinstance(past, list):
+            past_fp = tuple(
+                (c.get("profile_name"), c.get("start_time"), c.get("cost"))
+                for c in past
+                if isinstance(c, dict)
+            )
+        ref_fp = tuple(c.get("profile_name") for c in self.get_reference_cycles())
+        bf_fp = tuple(c.get("profile_name") for c in self.get_backfill_cycles())
+        return (
+            id(raw_profiles), prof_fp, id(raw_envs), env_fp, id(past), past_fp,
+            ref_fp, bf_fp,
+        )
+
+    def _profile_summaries(self) -> tuple[list[JSONDict], dict[str, JSONDict]]:
+        """Cached profile summaries (sorted list + by-name map); see list_profiles.
+
+        Every entity write used to rebuild every profile's statistics: ``get_profile``
+        was ``list_profiles()`` plus a scan, called 3x per profile sensor per power
+        reading, so a 13-profile washer spent ~200 ms of event loop per reading
+        (audit PERF-01). Returned rows are shared; callers get copies.
+        """
+        fingerprint = self._profiles_fingerprint()
+        cached = getattr(self, "_profile_summary_cache", None)
+        if cached is not None and cached[0] == fingerprint:
+            return cached[1], cached[2]
+        rows = self._build_profile_summaries()
+        by_name = {row["name"]: row for row in rows}
+        self._profile_summary_cache = (fingerprint, rows, by_name)
+        return rows, by_name
+
+    def _build_profile_summaries(self) -> list[JSONDict]:
+        """Build one summary per profile in a single pass over the cycle lists."""
         profiles: list[JSONDict] = []
         raw_profiles = self._data.get("profiles", {})
         profiles_map = (
             cast(dict[str, Any], raw_profiles) if isinstance(raw_profiles, dict) else {}
         )
+        cycles_by_profile: dict[str, list[CycleDict]] = {}
+        for c in self._data.get("past_cycles", []):
+            if isinstance(c, dict):
+                cycles_by_profile.setdefault(c.get("profile_name"), []).append(c)
+        reference_names = {
+            c.get("profile_name") for c in self.get_reference_cycles() if isinstance(c, dict)
+        }
+        backfill_counts: dict[Any, int] = {}
+        for c in self.get_backfill_cycles():
+            if isinstance(c, dict):
+                key = c.get("profile_name")
+                backfill_counts[key] = backfill_counts.get(key, 0) + 1
+
         for name, data in profiles_map.items():
             profile_meta = cast(JSONDict, data) if isinstance(data, dict) else {}
 
             # Calculate count and last_run
-            p_cycles = [
-                c for c in self._data.get("past_cycles", [])
-                if c.get("profile_name") == name
-            ]
+            p_cycles = cycles_by_profile.get(name, [])
             cycle_count = len(p_cycles)
 
             last_run = None
@@ -7988,17 +8398,19 @@ class ProfileStore:
                     "avg_cost": avg_cost,
                     "total_cost": total_cost,
                     "signature_curve": sig_curve,
-                    "is_imported": self.profile_has_reference_cycles(name),
+                    "is_imported": name in reference_names,
                     # Cycles recovered from imported history (#344). Reported separately
                     # from cycle_count, which counts only real observed cycles, so a
                     # profile built purely from backfilled history does not look empty.
-                    "backfill_count": sum(
-                        1 for c in self.get_backfill_cycles()
-                        if c.get("profile_name") == name
-                    ),
+                    "backfill_count": backfill_counts.get(name, 0),
                 }
             )
         return sorted(profiles, key=lambda p: profile_sort_key(p.get("name", "")))
+
+    def list_profiles(self) -> list[dict[str, Any]]:
+        """List all profiles with metadata (copies of the cached summaries)."""
+        rows, _by_name = self._profile_summaries()
+        return [dict(row) for row in rows]
 
     async def create_profile_standalone(
         self,
@@ -8380,18 +8792,8 @@ class ProfileStore:
             # Try to match
             result = await self.async_match_profile(power_data, cycle["duration"])
 
-            # Honor the ambiguity safeguard: never auto-label a close/ambiguous match.
-            # The same gates the cycle-end labeller applies (item 387c): the
-            # member-aware `label_confidence`, not the Stage-5 group's score (item
-            # 206), and a clear margin over the runner-up (item 310) - this path
-            # labels in bulk without asking, so it may not be the laxest of the three.
-            _margin = getattr(result, "ambiguity_margin", None)
-            if (
-                result.best_profile
-                and result.label_confidence >= confidence_threshold
-                and not result.is_ambiguous
-                and (_margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN)
-            ):
+            # The same verdict the cycle-end labeller applies (item 387c).
+            if label_verdict(result, confidence_threshold)[0]:
                 current_label = cycle.get("profile_name")
                 # Sanitize: strip heavy current/sample arrays before persisting.
                 ranking_top5 = [

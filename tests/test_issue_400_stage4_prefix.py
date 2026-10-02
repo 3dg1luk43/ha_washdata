@@ -50,6 +50,11 @@ def _cfg(**over) -> dict:
         "energy_mode": "integrated",   # washing_machine / washer_dryer (item 100)
     }
     cfg.update(over)
+    # These tests isolate a Stage-4 term through `duration_weight`; a live match
+    # (in_progress) reads its own `duration_weight_in_progress` (audit MR-03), so
+    # mirror the isolating value there too.
+    if "duration_weight" in over and "duration_weight_in_progress" not in over:
+        cfg["duration_weight_in_progress"] = over["duration_weight"]
     return cfg
 
 

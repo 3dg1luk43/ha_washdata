@@ -260,7 +260,8 @@
     "save_total_cycles": "Išsaugoti bendrą skaičių",
     "clear": "Išvalyti",
     "add_brand": "Pridėti prekės ženklą",
-    "add_appliance": "Pridėti prietaisą"
+    "add_appliance": "Pridėti prietaisą",
+    "retry": "Bandyti dar kartą"
   },
   "note": {
     "off_delay": {
@@ -334,6 +335,10 @@
     "watchdog": {
       "interval": "Turi būti bent 2 kartus didesnis nei mėginių ėmimo intervalas ({si} s)",
       "sampling": "Mėginių ėmimo intervalas turi būti ne daugiau kaip pusė stebėjimo intervalo ({wi} s)"
+    },
+    "end_energy": {
+      "energy": "Per griežta, kai Sustabdymo slenkstis yra {w} W, o Išjungimo delsimas {d} s; ciklas gali baigtis tik atsarginiu būdu",
+      "stop": "Pabaigos energija ({e} Wh per {d} s) leidžia tik {p} W"
     }
   },
   "hdr": {
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "priartinkite dviem pirštais · dukart palieskite atstatymui",
     "cycles_since_service": "{since} / {total} ciklų",
     "total_cycles_run": "ciklų iš viso",
-    "correct_total_cycles": "Pataisyti bendrą skaičių"
+    "correct_total_cycles": "Pataisyti bendrą skaičių",
+    "hist_reason_already_recorded": "persidengia su ciklu, kurį WashData jau įrašė",
+    "share_consent": "Patvirtinu, kad šie ciklai normaliai baigėsi be pertraukimų"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -771,7 +778,8 @@
       "total_energy": "Energijos įvertis"
     },
     "metric_auc": "AUC {auc} patikros duomenimis",
-    "metric_mae": "paklaida: {model} palyginti su {baseline} baze"
+    "metric_mae": "paklaida: {model} palyginti su {baseline} baze",
+    "fine_tuned_at": "tiksliai suderinta {when}"
   },
   "modal": {
     "auto_label": "Automatinio etikečių ciklai",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Kol kas nenustatyta jokių aptarnavimo priminimų.",
     "toast_program_armed": "Programa nustatyta kitam ciklui: {program}",
     "toast_range_required": "Nustatykite tinkamą Nuo/Iki diapazoną.",
-    "no_profiles_option": "(profilių dar nėra, pridėkite)"
+    "no_profiles_option": "(profilių dar nėra, pridėkite)",
+    "compare_cycles_title": "Palyginti ciklus ({count})",
+    "edit_builtin_phase": "Tai įmontuota fazė. Išsaugojus sukuriamas pasirinktinis pakeitimas; originalas išsaugomas ir jį galima atkurti ištrynus pakeitimą.",
+    "fetch_error": "Nepavyko įkelti duomenų."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1494,7 +1505,7 @@
       "label": "Siurblio įstrigimo trukmė"
     },
     "sampling_interval": {
-      "doc": "Numatomas laikas tarp jutiklio rodmenų – naudojamas išlyginimo lango dydžiui nustatyti ir tinkamai pradėti atšokti. Kiekvienas jutiklio atnaujinimas fiksuojamas neatsižvelgiant į šią reikšmę; tai tik kalibruoja tolesnius skaičiavimus. Pasiūlymų variklis matuoja tikrąją jutiklio kadenciją iš praėjusių ciklų ir nustato ją automatiškai.",
+      "doc": "Mažiausias laikas tarp apdorojamų rodmenų. Rodmuo, gautas anksčiau nei praėjus šiam laikui po ankstesniojo, praleidžiamas (žemi rodmenys ciklo metu visada išsaugomi), todėl nustatykite tikrąjį savo kištuko ataskaitų intervalą arba mažesnį: didesnė reikšmė tik išmeta rodmenis. WashData šios reikšmės nesiūlo, nes gali išmatuoti tik intervalą, likusį po to, kai šis nustatymas jau atmetė rodmenis.",
       "label": "Mėginių ėmimo intervalas"
     },
     "save_debug_traces": {
@@ -1771,7 +1782,8 @@
     "deleting": "Trinama…",
     "imported": "Importuota",
     "preparing": "Ruošiama…",
-    "unlabelling": "Naikinamas žymėjimas…"
+    "unlabelling": "Naikinamas žymėjimas…",
+    "working": "Vykdoma…"
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1917,7 +1929,36 @@
     "odometer_saved": "Bendras ciklų skaičius išsaugotas",
     "odometer_save_failed": "Nepavyko išsaugoti bendro skaičiaus: {error}",
     "store_pick_profile_share": "Pasirinkite profilį, į kurį bendrinti",
-    "remove_failed": "Nepavyko pašalinti: {error}"
+    "remove_failed": "Nepavyko pašalinti: {error}",
+    "analysis_complete": "Analizė baigta: pasiūlymų: {count}",
+    "analysis_failed": "Nepavyko atlikti analizės: {error}",
+    "auto_detect_failed": "Nepavyko automatiškai aptikti: {error}",
+    "auto_label_failed": "Nepavyko automatiškai pažymėti: {error}",
+    "could_not_load_cycle": "Nepavyko įkelti ciklo: {error}",
+    "create_failed": "Nepavyko sukurti: {error}",
+    "cycles_deleted": "Ištrinta ciklų: {count}",
+    "debug_cleared": "Išvalyta derinimo pėdsakų: {count}",
+    "discard_failed": "Nepavyko išmesti: {error}",
+    "error": "Klaida: {error}",
+    "export_failed": "Nepavyko eksportuoti: {error}",
+    "import_failed": "Nepavyko importuoti: {error}",
+    "invalid_json": "„{key}“ nėra tinkamas JSON - pataisykite jį arba prieš išsaugodami išvalykite lauką.",
+    "label_failed": "Nepavyko pažymėti: {error}",
+    "ml_training_promoted": "Mokymas baigtas: aktyvuota modelių: {count}",
+    "pause_failed": "Nepavyko pristabdyti: {error}",
+    "phase_created": "Fazė „{name}“ sukurta",
+    "phase_deleted": "Fazė „{name}“ ištrinta",
+    "profile_created": "Profilis „{name}“ sukurtas",
+    "rename_failed": "Nepavyko pervadinti: {error}",
+    "revert_failed": "Nepavyko grąžinti: {error}",
+    "save_failed": "Nepavyko išsaugoti: {error}",
+    "split_complete": "Padalinta į ciklus: {count}",
+    "start_failed": "Nepavyko paleisti: {error}",
+    "stop_failed": "Nepavyko sustabdyti: {error}",
+    "update_failed": "Nepavyko atnaujinti: {error}",
+    "store_download_skipped": "Praleista įrašų: {n} (per trumpi, su per daug spragų arba jau yra jūsų įrenginyje).",
+    "store_import_low_quality": "Šis įrašas per trumpas, turi per daug spragų arba yra neįtikimas, todėl jo negalima importuoti.",
+    "store_import_duplicate": "Šis įrašas jau yra jūsų įrenginyje."
   },
   "suggestion": {
     "both_agree": "WashData rekomenduoja",
@@ -2012,7 +2053,10 @@
       "thr_batch": "Paliktas šiek tiek virš p05 mažiausios aktyvios galios per {cycles} ciklus ({p05}W), kad pradžia būtų aptikta kuo anksčiau, o sustabdymo slenkstis liktų žemiau mažiausios veikiančios mašinos galios.",
       "tol_per_profile": "p75 kiekvieno profilio trukmės dispersijos per {profiles} profilius ({cycles} ciklai); stabilūs profiliai nebaudžiami.",
       "tol_pooled": "Pagrįsta sujungta {cycles} naujausių pažymėtų ciklų trukmės dispersija (p95 nuokrypis={dev}).",
-      "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s ir bent 2x mėginių ėmimo intervalas {median}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų."
+      "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s ir bent 2x mėginių ėmimo intervalas {median}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų.",
+      "end_energy_floor": "Padidinta iki minimumo, kurį lemia sustabdymo slenkstis ({stop} W) per išjungimo delsimą ({off_delay} s); žemiau jo ciklas gali baigtis tik atsarginiu būdu.",
+      "max_duration_ratio_default": "Grąžinta numatytoji reikšmė: žemesnė viršutinė riba atmeta teisingą programą kiekvieną kartą, kai ciklas trunka ilgiau nei įprastai.",
+      "min_duration_ratio_default": "Grąžinta numatytoji reikšmė: aukštesnė apatinė riba neleidžia atpažinti vykstančio ciklo, kol jis gerokai neįsibėgėja."
     },
     "exclusions": {
       "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Slėpti nurodymus",
       "show_guidance": "Rodyti nurodymus"
     }
+  },
+  "access": {
+    "edit": "Redagavimas",
+    "full": "Visiška",
+    "inherit": "Paveldėti",
+    "none": "Nėra (paslėpta)",
+    "read": "Skaitymas"
   }
 }

@@ -260,7 +260,8 @@
     "save_total_cycles": "Shrani skupno število",
     "clear": "Počisti",
     "add_brand": "Dodaj znamko",
-    "add_appliance": "Dodaj napravo"
+    "add_appliance": "Dodaj napravo",
+    "retry": "Poskusi znova"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Interval vzorčenja mora biti največ polovica Intervala nadzornika ({wi} s)"
     },
     "settings_banner": "Konflikti nastavitev: {n}. Preverite označene razdelke in jih popravite pred shranjevanjem.",
-    "settings_banner_btn": "Pojdi na prvega"
+    "settings_banner_btn": "Pojdi na prvega",
+    "end_energy": {
+      "energy": "Prestrogo za Prag zaustavitve ({w} W) v času Zamude izklopa ({d} s); cikel se lahko konča le po nadomestni poti",
+      "stop": "Energija konca ({e} Wh v {d} s) dovoljuje le {p} W"
+    }
   },
   "hdr": {
     "ab_comparison": "Primerjava nastavitev A/B",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "povečajte z dvema prstoma · dvakrat tapnite za ponastavitev",
     "cycles_since_service": "{since} / {total} ciklov",
     "total_cycles_run": "ciklov skupaj",
-    "correct_total_cycles": "Popravi skupno število"
+    "correct_total_cycles": "Popravi skupno število",
+    "hist_reason_already_recorded": "se prekriva s ciklom, ki ga je WashData že zabeležil",
+    "share_consent": "Potrjujem, da so se ti cikli normalno izvedli do konca brez prekinitve"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -771,7 +778,8 @@
       "total_energy": "Ocena porabe energije"
     },
     "metric_auc": "AUC {auc} na ločenih podatkih",
-    "metric_mae": "napaka {model} v primerjavi z izhodiščem {baseline}"
+    "metric_mae": "napaka {model} v primerjavi z izhodiščem {baseline}",
+    "fine_tuned_at": "natančno prilagojeno {when}"
   },
   "modal": {
     "auto_label": "Samodejno označevanje ciklov",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Opomniki za servis še niso nastavljeni.",
     "toast_program_armed": "Program nastavljen za naslednji cikel: {program}",
     "toast_range_required": "Nastavite veljaven obseg Od/Do",
-    "no_profiles_option": "(ni profilov, dodajte novega)"
+    "no_profiles_option": "(ni profilov, dodajte novega)",
+    "compare_cycles_title": "Primerjaj cikle ({count})",
+    "edit_builtin_phase": "To je vgrajena faza. Shranjevanje ustvari prilagojeno preglasitev; izvirnik ostane ohranjen in ga je mogoče obnoviti z izbrisom preglasitve.",
+    "fetch_error": "Nalaganje podatkov ni uspelo."
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1494,7 +1505,7 @@
       "label": "Trajanje zataknjenosti črpalke"
     },
     "sampling_interval": {
-      "doc": "Pričakovan čas med odčitki senzorja – uporablja se za velikost okna za glajenje in pravilen začetek odboja. Vsaka posodobitev senzorja je zajeta ne glede na to vrednost; kalibrira le spodnje izračune. Mehanizem predlogov meri dejansko kadenco vašega senzorja iz preteklih ciklov in jo samodejno nastavi.",
+      "doc": "Najkrajši čas med obdelanimi odčitki. Odčitek, ki prispe prej kot v tem času po prejšnjem, se preskoči (nizki odčitki med ciklom se vedno ohranijo), zato ga nastavite na dejanski interval poročanja vašega vtiča ali nižje: višja vrednost le zavrže odčitke. WashData te vrednosti ne predlaga, ker lahko izmeri le interval, ki ostane, ko je ta nastavitev odčitke že zavrgla.",
       "label": "Interval vzorčenja"
     },
     "save_debug_traces": {
@@ -1771,7 +1782,8 @@
     "deleting": "Brisanje…",
     "imported": "Uvoženo",
     "preparing": "Pripravljanje…",
-    "unlabelling": "Odstranjevanje oznake…"
+    "unlabelling": "Odstranjevanje oznake…",
+    "working": "Obdelava…"
   },
   "suggestion": {
     "both_agree": "WashData priporoča",
@@ -1866,7 +1878,10 @@
       "thr_batch": "Ohranjeno tik nad najnižjo delovno močjo p05 čez {cycles} ciklov ({p05}W), da se začetek zazna čim prej in da prag ustavitve ostane pod najnižjo delovno močjo naprave.",
       "tol_per_profile": "p75 variance trajanja po posameznih profilih čez {profiles} profilov ({cycles} ciklov); dosledni profili niso kaznovani.",
       "tol_pooled": "Na podlagi združene variance trajanja {cycles} nedavnih označenih ciklov (p95 odklon={dev}).",
-      "watchdog": "Ohranjeno tako nizko, kot je varno (tik nad vrzeljo posodobitve p95 {p95}s in vsaj 2× interval vzorčenja {median}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev."
+      "watchdog": "Ohranjeno tako nizko, kot je varno (tik nad vrzeljo posodobitve p95 {p95}s in vsaj 2× interval vzorčenja {median}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev.",
+      "end_energy_floor": "Zvišano na minimum, ki izhaja iz praga zaustavitve ({stop} W) v času zamude izklopa ({off_delay} s); pod njim se cikel lahko konča le po nadomestni poti.",
+      "max_duration_ratio_default": "Vrnjeno na privzeto vrednost: nižja zgornja meja zavrne pravi program vsakič, ko cikel traja dlje kot običajno.",
+      "min_duration_ratio_default": "Vrnjeno na privzeto vrednost: višja spodnja meja prepreči prepoznavanje cikla, ki teče, dokler ne napreduje precej daleč."
     },
     "exclusions": {
       "summary": "Izključeno {total} napačno zaznanih ciklov: {parts}.",
@@ -2030,7 +2045,36 @@
     "odometer_saved": "Skupno število ciklov shranjeno",
     "odometer_save_failed": "Skupnega števila ni bilo mogoče shraniti: {error}",
     "store_pick_profile_share": "Izberite profil za deljenje",
-    "remove_failed": "Odstranjevanje ni uspelo: {error}"
+    "remove_failed": "Odstranjevanje ni uspelo: {error}",
+    "analysis_complete": "Analiza zaključena: predlogi: {count}",
+    "analysis_failed": "Analiza ni uspela: {error}",
+    "auto_detect_failed": "Samodejno zaznavanje ni uspelo: {error}",
+    "auto_label_failed": "Samodejno označevanje ni uspelo: {error}",
+    "could_not_load_cycle": "Cikla ni bilo mogoče naložiti: {error}",
+    "create_failed": "Ustvarjanje ni uspelo: {error}",
+    "cycles_deleted": "Izbrisani cikli: {count}",
+    "debug_cleared": "Počiščena sledenja za odpravljanje napak: {count}",
+    "discard_failed": "Zavrženje ni uspelo: {error}",
+    "error": "Napaka: {error}",
+    "export_failed": "Izvoz ni uspel: {error}",
+    "import_failed": "Uvoz ni uspel: {error}",
+    "invalid_json": "\"{key}\" ni veljaven JSON - popravite ga ali počistite polje pred shranjevanjem.",
+    "label_failed": "Označevanje ni uspelo: {error}",
+    "ml_training_promoted": "Učenje zaključeno: aktivirani modeli: {count}",
+    "pause_failed": "Začasna ustavitev ni uspela: {error}",
+    "phase_created": "Faza \"{name}\" ustvarjena",
+    "phase_deleted": "Faza \"{name}\" izbrisana",
+    "profile_created": "Profil \"{name}\" ustvarjen",
+    "rename_failed": "Preimenovanje ni uspelo: {error}",
+    "revert_failed": "Povrnitev ni uspela: {error}",
+    "save_failed": "Shranjevanje ni uspelo: {error}",
+    "split_complete": "Razdeljeno na cikle: {count}",
+    "start_failed": "Zagon ni uspel: {error}",
+    "stop_failed": "Ustavitev ni uspela: {error}",
+    "update_failed": "Posodobitev ni uspela: {error}",
+    "store_download_skipped": "Preskočeni posnetki: {n} (prekratki, s preveč vrzelmi ali že na vaši napravi).",
+    "store_import_low_quality": "Ta posnetek je prekratek, ima preveč vrzeli ali je neverodostojen, zato ga ni mogoče uvoziti.",
+    "store_import_duplicate": "Ta posnetek je že na vaši napravi."
   },
   "trend": {
     "down": "Padajoči trend",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Skrij navodila",
       "show_guidance": "Prikaži navodila"
     }
+  },
+  "access": {
+    "edit": "Urejanje",
+    "full": "Polno",
+    "inherit": "Podeduj",
+    "none": "Brez (skrito)",
+    "read": "Branje"
   }
 }

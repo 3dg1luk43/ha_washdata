@@ -104,16 +104,6 @@ def test_shipped_confidence_defaults_form_the_correct_ladder():
 # reconcile_suggestions: the inverted learning>=match invariant
 # ---------------------------------------------------------------------------
 
-def test_reconcile_raises_learning_up_to_match_when_below():
-    # A suggested learning_confidence below the (current) match threshold is a
-    # violation of learning >= match; reconcile raises learning to match.
-    out, changed = reconcile_suggestions(
-        {CONF_LEARNING_CONFIDENCE: {"value": 0.3, "reason": "x"}},
-        {CONF_PROFILE_MATCH_THRESHOLD: 0.4},
-    )
-    assert out[CONF_LEARNING_CONFIDENCE]["value"] == 0.4
-    assert CONF_LEARNING_CONFIDENCE in changed
-
 
 def test_reconcile_leaves_learning_above_match_untouched():
     out, changed = reconcile_suggestions(
@@ -134,68 +124,6 @@ def test_reconcile_does_not_touch_defaults():
     assert CONF_LEARNING_CONFIDENCE not in changed
 
 
-def test_reconcile_preserves_an_engine_proposed_match_raise():
-    # match_threshold is a live detection knob. When the engine deliberately raises
-    # it above the current auto-label ceiling, reconcile must keep the raise and lift
-    # the ceiling to it, not silently discard it by lowering match to auto.
-    out, changed = reconcile_suggestions(
-        {CONF_PROFILE_MATCH_THRESHOLD: {"value": 0.7, "reason": "tighten"}},
-        {CONF_AUTO_LABEL_CONFIDENCE: 0.5},
-    )
-    assert out[CONF_PROFILE_MATCH_THRESHOLD]["value"] == 0.7
-    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] == 0.7
-    assert out[CONF_AUTO_LABEL_CONFIDENCE].get("cascade") is True
-    assert CONF_PROFILE_MATCH_THRESHOLD not in changed
-
-
-def test_reconcile_still_lowers_match_when_it_was_not_proposed():
-    # When only auto is proposed (below the live match), the ladder is enforced by
-    # cascading match down: match was not the engine's own proposal here.
-    out, changed = reconcile_suggestions(
-        {CONF_AUTO_LABEL_CONFIDENCE: {"value": 0.5, "reason": "loosen"}},
-        {CONF_PROFILE_MATCH_THRESHOLD: 0.7},
-    )
-    assert out[CONF_PROFILE_MATCH_THRESHOLD]["value"] == 0.5
-    assert out[CONF_PROFILE_MATCH_THRESHOLD].get("cascade") is True
-
-
-def test_reconcile_rounding_preserves_the_inequality():
-    # adjust() rounds to 2 dp; a naive round() could land back on a violating value
-    # (raise auto to 0.901 -> round 0.90, still < match 0.901). Raising must ceil.
-    out, _ = reconcile_suggestions(
-        {CONF_PROFILE_MATCH_THRESHOLD: {"value": 0.901, "reason": "tighten"}},
-        {CONF_AUTO_LABEL_CONFIDENCE: 0.90},
-    )
-    assert out[CONF_PROFILE_MATCH_THRESHOLD]["value"] == 0.901
-    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] == 0.91  # ceil(0.901) -> 0.91 >= match
-    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] >= out[CONF_PROFILE_MATCH_THRESHOLD]["value"]
-
-
-def test_reconcile_directional_rounding_is_fp_exact_at_cent_boundaries():
-    # Binary FP could nudge an already-2dp value off its cent (0.58*100 = 57.9999...),
-    # making floor return 0.57. Decimal quantization keeps a value that raises to a
-    # 2dp bound unchanged rather than over/under-shooting.
-    out, _ = reconcile_suggestions(
-        {CONF_PROFILE_MATCH_THRESHOLD: {"value": 0.58, "reason": "tighten"}},
-        {CONF_AUTO_LABEL_CONFIDENCE: 0.57},
-    )
-    # raising auto to match 0.58 must land exactly on 0.58, not 0.59.
-    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] == 0.58
-
-
-def test_reconcile_raises_auto_ceiling_to_the_learning_floor():
-    # Top of the ladder: learning <= auto. A high learning suggestion above a lower
-    # auto ceiling must lift the ceiling (conservative), not be left contradicting
-    # the declared ordering.
-    out, changed = reconcile_suggestions(
-        {
-            CONF_LEARNING_CONFIDENCE: {"value": 0.9, "reason": "few high-conf manual labels"},
-            CONF_AUTO_LABEL_CONFIDENCE: {"value": 0.5, "reason": "lower auto labels"},
-        },
-        {},
-    )
-    assert out[CONF_LEARNING_CONFIDENCE]["value"] == 0.9
-    assert out[CONF_AUTO_LABEL_CONFIDENCE]["value"] == 0.9
 
 
 # ---------------------------------------------------------------------------

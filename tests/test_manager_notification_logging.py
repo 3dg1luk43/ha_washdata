@@ -43,7 +43,6 @@ def mock_hass() -> Any:
     hass.async_create_task = MagicMock(
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()
     )
-    hass.components.persistent_notification.async_create = MagicMock()
     hass.config_entries.async_get_entry = MagicMock()
     hass.states.get = MagicMock(return_value=MagicMock(state="home"))
     return hass

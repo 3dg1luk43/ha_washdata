@@ -70,12 +70,14 @@ def _recorded(manager: MagicMock) -> dict[str, dict[str, Any]]:
 
 async def test_apply_all_suggestions_is_recorded_and_revertible() -> None:
     """The reporter's case, with their own before/after values."""
-    entry = _entry({"off_delay": 1780, "min_power": 1.2, "smoothing_window": 2})
+    # (The reporter's third key, smoothing_window, is no longer suggested - it sizes
+    # a buffer nothing reads, audit SUGGEST-12 - so min_off_gap stands in for it.)
+    entry = _entry({"off_delay": 1780, "min_power": 1.2, "min_off_gap": 2000})
     hass, manager = _hass()
     manager.profile_store.get_suggestions.return_value = {
         "off_delay": {"value": 1327},
         "min_power": {"value": 1.0},
-        "smoothing_window": {"value": 7},
+        "min_off_gap": {"value": 2400},
     }
 
     ws_fn = ws_api.ws_apply_suggestions.__wrapped__
@@ -86,16 +88,16 @@ async def test_apply_all_suggestions_is_recorded_and_revertible() -> None:
             {
                 "id": 1,
                 "entry_id": "e1",
-                "keys": ["off_delay", "min_power", "smoothing_window"],
+                "keys": ["off_delay", "min_power", "min_off_gap"],
             },
         )
 
     rec = _recorded(manager)
-    assert set(rec) == {"off_delay", "min_power", "smoothing_window"}
+    assert set(rec) == {"off_delay", "min_power", "min_off_gap"}
     # old/new must both be present, or "revert to previous value" has no target.
     assert rec["off_delay"]["old"] == 1780 and rec["off_delay"]["new"] == 1327
     assert rec["min_power"]["old"] == 1.2 and rec["min_power"]["new"] == 1.0
-    assert rec["smoothing_window"]["old"] == 2 and rec["smoothing_window"]["new"] == 7
+    assert rec["min_off_gap"]["old"] == 2000 and rec["min_off_gap"]["new"] == 2400
     for ch in rec.values():
         assert ch["timestamp"]
 

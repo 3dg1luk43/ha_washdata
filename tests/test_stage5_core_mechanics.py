@@ -201,31 +201,12 @@ def test_reconcile_end_energy_consistent_pair_unchanged() -> None:
 def test_reconcile_watchdog_and_timeout() -> None:
     s = {CONF_WATCHDOG_INTERVAL: _sug(20.0), CONF_NO_UPDATE_ACTIVE_TIMEOUT: _sug(25.0)}
     out, changed = reconcile_suggestions(s, {CONF_SAMPLING_INTERVAL: 30})
-    assert out[CONF_WATCHDOG_INTERVAL]["value"] >= 2 * 30
+    # Rule 3a (watchdog >= 2 x sampling) is gone with the sampling suggestion
+    # (audit SUGGEST-04); Rule 3b still keeps the timeout above the watchdog.
+    assert out[CONF_WATCHDOG_INTERVAL]["value"] == 20.0
     assert out[CONF_NO_UPDATE_ACTIVE_TIMEOUT]["value"] > out[CONF_WATCHDOG_INTERVAL]["value"]
 
 
-def test_reconcile_start_duration_vs_sampling() -> None:
-    s = {CONF_START_DURATION_THRESHOLD: _sug(5.0)}
-    out, changed = reconcile_suggestions(s, {CONF_SAMPLING_INTERVAL: 30})
-    assert out[CONF_START_DURATION_THRESHOLD]["value"] >= 30
-
-
-def test_reconcile_confidence_ordering() -> None:
-    s = {
-        CONF_LEARNING_CONFIDENCE: _sug(0.8),
-        CONF_PROFILE_MATCH_THRESHOLD: _sug(0.6),
-        CONF_AUTO_LABEL_CONFIDENCE: _sug(0.5),
-    }
-    out, changed = reconcile_suggestions(s, {})
-    lc = out[CONF_LEARNING_CONFIDENCE]["value"]
-    mt = out[CONF_PROFILE_MATCH_THRESHOLD]["value"]
-    al = out[CONF_AUTO_LABEL_CONFIDENCE]["value"]
-    # #396: the confidence ladder is unmatch < match < learning < auto_label, so
-    # the enforced invariants are match <= learning and match <= auto_label
-    # (the old rule flagged learning ABOVE match, which was backwards).
-    assert mt <= lc
-    assert mt <= al
 
 
 def test_reconcile_coherent_set_unchanged() -> None:

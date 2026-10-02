@@ -260,7 +260,8 @@
     "unlabel_selected_tip": "Remove the profile label from the selected cycles. They stay in your history and can be labelled again later - they just stop shaping this profile.",
     "use": "Use",
     "wipe_all": "Wipe All Data",
-    "save_total_cycles": "Save total"
+    "save_total_cycles": "Save total",
+    "retry": "Retry"
   },
   "note": {
     "off_delay": {
@@ -334,6 +335,10 @@
     "watchdog": {
       "interval": "Should be at least 2x Sampling Interval ({si} s)",
       "sampling": "Sampling Interval should be at most half of Watchdog Interval ({wi} s)"
+    },
+    "end_energy": {
+      "energy": "Too strict for Stop Threshold ({w} W) over Off Delay ({d} s); the cycle can only end through a fallback path",
+      "stop": "End Energy Threshold ({e} Wh over {d} s) only permits {p} W"
     }
   },
   "hdr": {
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "pinch to zoom · double-tap to reset",
     "cycles_since_service": "{since} / {total} cycles",
     "total_cycles_run": "cycles run in total",
-    "correct_total_cycles": "Correct the total"
+    "correct_total_cycles": "Correct the total",
+    "hist_reason_already_recorded": "overlaps a cycle WashData already recorded",
+    "share_consent": "I confirm these cycles ran to normal completion without interruption"
   },
   "log": {
     "all_levels": "All levels",
@@ -778,7 +785,8 @@
       "total_energy": "Predicting total energy and cost"
     },
     "metric_auc": "AUC {auc} on held-out data",
-    "metric_mae": "error {model} vs {baseline} baseline"
+    "metric_mae": "error {model} vs {baseline} baseline",
+    "fine_tuned_at": "fine-tuned {when}"
   },
   "modal": {
     "auto_label": "Auto-Label Cycles",
@@ -1110,7 +1118,10 @@
     "updated": "Updated",
     "warmup_badge": "Still learning ({done}/{needed} cycles)",
     "warmup_detail": "This profile needs {needed} labelled cycles before auto-matching begins. Every confirmed cycle helps it learn.",
-    "wipe_history_warning": "Permanently delete all cycles and profiles. Cannot be undone."
+    "wipe_history_warning": "Permanently delete all cycles and profiles. Cannot be undone.",
+    "compare_cycles_title": "Compare {count} cycles",
+    "edit_builtin_phase": "This is a built-in phase. Saving creates a custom override; the original is preserved and can be restored by deleting the override.",
+    "fetch_error": "Failed to load data."
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1641,7 +1652,7 @@
       "label": "Pump Stuck Duration"
     },
     "sampling_interval": {
-      "doc": "Expected time between sensor readings - used to size the smoothing window and start debounce correctly. Every sensor update is captured regardless of this value; it only calibrates the downstream calculations. The suggestion engine measures your sensor's actual cadence from past cycles and sets this automatically.",
+      "doc": "Minimum time between processed readings. A reading that arrives sooner than this after the last one is skipped (low readings during a cycle are always kept), so set it to your plug's real reporting interval or lower: a higher value only throws readings away. WashData does not suggest this value, because what it can measure is the interval left after this setting has already dropped readings.",
       "label": "Sampling Interval"
     },
     "save_debug_traces": {
@@ -1810,7 +1821,8 @@
     "splitting": "Splitting…",
     "training": "Training…",
     "trimming": "Trimming…",
-    "unlabelling": "Unlabelling…"
+    "unlabelling": "Unlabelling…",
+    "working": "Working…"
   },
   "suggestion": {
     "both_agree": "WashData recommends",
@@ -1905,7 +1917,10 @@
       "dead_zone_batch": "Kept short (median startup-instability window across {cycles} cycles = {s}s) so a real end is detected promptly.",
       "ml_off_delay": "End-detector-confirmed pauses: p95 {p95}s + 60s buffer, from {pauses} model-verified pauses across {cycles} cycles (floor {floor}s).",
       "ml_end_repeat": "{false}/{total} cycles ({pct}%) had a pause the end-detector scored >50%; require {val} end confirmation(s).",
-      "ml_auto_label": "Lowest confidence the quality model still rated clean (p10 of {cycles} clean cycles = {p10})."
+      "ml_auto_label": "Lowest confidence the quality model still rated clean (p10 of {cycles} clean cycles = {p10}).",
+      "max_duration_ratio_default": "Back to the default: a lower ceiling rejects the right programme whenever a run is longer than usual.",
+      "min_duration_ratio_default": "Back to the default: a higher floor stops a running cycle from being recognised until it is well under way.",
+      "end_energy_floor": "Raised to the floor the stop threshold ({stop} W) over the off delay ({off_delay} s) implies; below it the cycle can only end through a fallback path."
     },
     "exclusions": {
       "summary": "Excluded {total} mis-detected cycle(s): {parts}.",
@@ -2069,7 +2084,36 @@
     "task_cancelled": "Cancelled.",
     "thanks_confirming": "Thanks for confirming",
     "unlabel_done": "Unlabelled {count} cycle(s)",
-    "unlabel_failed": "Unlabel failed: {error}"
+    "unlabel_failed": "Unlabel failed: {error}",
+    "analysis_complete": "Analysis complete: {count} suggestion(s)",
+    "analysis_failed": "Analysis failed: {error}",
+    "auto_detect_failed": "Auto-detect failed: {error}",
+    "auto_label_failed": "Auto-label failed: {error}",
+    "could_not_load_cycle": "Could not load cycle: {error}",
+    "create_failed": "Create failed: {error}",
+    "cycles_deleted": "Deleted {count} cycle(s)",
+    "debug_cleared": "Cleared {count} debug traces",
+    "discard_failed": "Discard failed: {error}",
+    "error": "Error: {error}",
+    "export_failed": "Export failed: {error}",
+    "import_failed": "Import failed: {error}",
+    "invalid_json": "\"{key}\" is not valid JSON - fix it or clear the field before saving.",
+    "label_failed": "Label failed: {error}",
+    "ml_training_promoted": "Training complete: promoted {count} model(s)",
+    "pause_failed": "Pause failed: {error}",
+    "phase_created": "Phase \"{name}\" created",
+    "phase_deleted": "Phase \"{name}\" deleted",
+    "profile_created": "Profile \"{name}\" created",
+    "rename_failed": "Rename failed: {error}",
+    "revert_failed": "Revert failed: {error}",
+    "save_failed": "Save failed: {error}",
+    "split_complete": "Split into {count} cycles",
+    "start_failed": "Start failed: {error}",
+    "stop_failed": "Stop failed: {error}",
+    "update_failed": "Update failed: {error}",
+    "store_download_skipped": "{n} recording(s) skipped: too short, too gappy or already on your device.",
+    "store_import_low_quality": "This recording is too short, too gappy or implausible to import.",
+    "store_import_duplicate": "This recording is already on your device."
   },
   "trend": {
     "down": "Trending down",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Hide guidance",
       "show_guidance": "Show guidance"
     }
+  },
+  "access": {
+    "edit": "Edit",
+    "full": "Full",
+    "inherit": "Inherit",
+    "none": "None (hidden)",
+    "read": "Read"
   }
 }

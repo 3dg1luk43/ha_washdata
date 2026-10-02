@@ -260,7 +260,8 @@
     "save_total_cycles": "Saglabāt kopējo skaitu",
     "clear": "Notīrīt",
     "add_brand": "Pievienot zīmolu",
-    "add_appliance": "Pievienot ierīci"
+    "add_appliance": "Pievienot ierīci",
+    "retry": "Mēģināt vēlreiz"
   },
   "note": {
     "off_delay": {
@@ -334,6 +335,10 @@
     "watchdog": {
       "interval": "Jābūt vismaz 2x lielākam par paraugu ņemšanas intervālu ({si} s)",
       "sampling": "Paraugu ņemšanas intervālam jābūt ne vairāk kā pusei sargsuna intervāla ({wi} s)"
+    },
+    "end_energy": {
+      "energy": "Pārāk stingrs, ja Apstāšanās slieksnis ir {w} W un Izslēgšanas aizkave ir {d} s; cikls var beigties tikai ar rezerves mehānismu",
+      "stop": "Beigu enerģija ({e} Wh {d} s laikā) pieļauj tikai {p} W"
     }
   },
   "hdr": {
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "tuviniet ar diviem pirkstiem · divreiz pieskarieties, lai atiestatītu",
     "cycles_since_service": "{since} / {total} cikli",
     "total_cycles_run": "cikli kopā",
-    "correct_total_cycles": "Labot kopējo skaitu"
+    "correct_total_cycles": "Labot kopējo skaitu",
+    "hist_reason_already_recorded": "pārklājas ar ciklu, ko WashData jau ir ierakstījis",
+    "share_consent": "Apstiprinu, ka šie cikli normāli noritēja līdz beigām bez pārtraukumiem"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -771,7 +778,8 @@
       "total_energy": "Enerģijas novērtējums"
     },
     "metric_auc": "AUC {auc} uz validācijas datiem",
-    "metric_mae": "kļūda: {model} pret {baseline} bāzlīniju"
+    "metric_mae": "kļūda: {model} pret {baseline} bāzlīniju",
+    "fine_tuned_at": "precizēts {when}"
   },
   "modal": {
     "auto_label": "Automātiskās etiķetes cikli",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Vēl nav iestatīts neviens apkopes atgādinājums.",
     "toast_program_armed": "Programma iestatīta nākamajam ciklam: {program}",
     "toast_range_required": "Iestatiet derīgu No/Līdz diapazonu.",
-    "no_profiles_option": "(vēl nav profilu, pievienojiet vienu)"
+    "no_profiles_option": "(vēl nav profilu, pievienojiet vienu)",
+    "compare_cycles_title": "Salīdzināt ciklus ({count})",
+    "edit_builtin_phase": "Šī ir iebūvēta fāze. Saglabājot tiek izveidots pielāgots aizstājums; oriģināls tiek saglabāts, un to var atjaunot, izdzēšot aizstājumu.",
+    "fetch_error": "Neizdevās ielādēt datus."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1494,7 +1505,7 @@
       "label": "Iestrēgušā sūkņa ilgums"
     },
     "sampling_interval": {
-      "doc": "Paredzamais laiks starp sensora rādījumiem – tiek izmantots, lai izlīdzinātu logu un sāktu pareizu atlēcienu. Katrs sensora atjauninājums tiek fiksēts neatkarīgi no šīs vērtības; tas tikai kalibrē pakārtotos aprēķinus. Ieteikumu programma mēra jūsu sensora faktisko ritmu no iepriekšējiem cikliem un iestata to automātiski.",
+      "doc": "Minimālais laiks starp apstrādātajiem rādījumiem. Rādījums, kas pienāk ātrāk par šo laiku pēc iepriekšējā, tiek izlaists (zemi rādījumi cikla laikā vienmēr tiek saglabāti), tāpēc iestatiet to uz jūsu spraudņa reālo ziņošanas intervālu vai mazāku: lielāka vērtība tikai izmet rādījumus. WashData šo vērtību neiesaka, jo var izmērīt tikai intervālu, kas paliek pēc tam, kad šis iestatījums jau ir atmetis rādījumus.",
       "label": "Paraugu ņemšanas intervāls"
     },
     "save_debug_traces": {
@@ -1771,7 +1782,8 @@
     "deleting": "Dzēš…",
     "imported": "Importēts",
     "preparing": "Sagatavo…",
-    "unlabelling": "Noņem marķējumu…"
+    "unlabelling": "Noņem marķējumu…",
+    "working": "Notiek apstrāde…"
   },
   "tab": {
     "advanced": "Papildu",
@@ -1917,7 +1929,36 @@
     "odometer_saved": "Kopējais ciklu skaits saglabāts",
     "odometer_save_failed": "Neizdevās saglabāt kopējo skaitu: {error}",
     "store_pick_profile_share": "Izvēlieties profilu, kurā kopīgot",
-    "remove_failed": "Noņemšana neizdevās: {error}"
+    "remove_failed": "Noņemšana neizdevās: {error}",
+    "analysis_complete": "Analīze pabeigta: ieteikumi: {count}",
+    "analysis_failed": "Analīze neizdevās: {error}",
+    "auto_detect_failed": "Automātiskā noteikšana neizdevās: {error}",
+    "auto_label_failed": "Automātiskā iezīmēšana neizdevās: {error}",
+    "could_not_load_cycle": "Neizdevās ielādēt ciklu: {error}",
+    "create_failed": "Izveide neizdevās: {error}",
+    "cycles_deleted": "Dzēsti cikli: {count}",
+    "debug_cleared": "Notīrītas atkļūdošanas pēdas: {count}",
+    "discard_failed": "Izmešana neizdevās: {error}",
+    "error": "Kļūda: {error}",
+    "export_failed": "Eksportēšana neizdevās: {error}",
+    "import_failed": "Importēšana neizdevās: {error}",
+    "invalid_json": "\"{key}\" nav derīgs JSON - izlabojiet to vai notīriet lauku pirms saglabāšanas.",
+    "label_failed": "Iezīmēšana neizdevās: {error}",
+    "ml_training_promoted": "Apmācība pabeigta: aktivizēti modeļi: {count}",
+    "pause_failed": "Pauzēšana neizdevās: {error}",
+    "phase_created": "Fāze \"{name}\" izveidota",
+    "phase_deleted": "Fāze \"{name}\" dzēsta",
+    "profile_created": "Profils \"{name}\" izveidots",
+    "rename_failed": "Pārdēvēšana neizdevās: {error}",
+    "revert_failed": "Atgriešana neizdevās: {error}",
+    "save_failed": "Saglabāšana neizdevās: {error}",
+    "split_complete": "Sadalīts ciklos: {count}",
+    "start_failed": "Palaišana neizdevās: {error}",
+    "stop_failed": "Apturēšana neizdevās: {error}",
+    "update_failed": "Atjaunināšana neizdevās: {error}",
+    "store_download_skipped": "Izlaisti ieraksti: {n} (pārāk īsi, ar pārāk daudziem pārtraukumiem vai jau ir jūsu ierīcē).",
+    "store_import_low_quality": "Šis ieraksts ir pārāk īss, tajā ir pārāk daudz pārtraukumu vai tas ir neticams, tāpēc to nevar importēt.",
+    "store_import_duplicate": "Šis ieraksts jau ir jūsu ierīcē."
   },
   "suggestion": {
     "both_agree": "WashData iesaka",
@@ -2012,7 +2053,10 @@
       "thr_batch": "Saglabāts nedaudz virs p05 zemākās aktīvās jaudas {cycles} ciklos ({p05}W), lai sākums tiktu uztverts pēc iespējas agrāk un apturēšanas slieksnis paliktu zem mašīnas zemākās darbības jaudas.",
       "tol_per_profile": "p75 no katra profila ilguma dispersijas {profiles} profilos ({cycles} cikli); stabili profili netiek sodīti.",
       "tol_pooled": "Pamatots ar apvienoto ilguma dispersiju {cycles} nesen marķētiem cikliem (p95 novirze={dev}).",
-      "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (tikai nedaudz virs p95 atjaunināšanas intervāla {p95}s un vismaz 2x paraugu ņemšanas intervāls {median}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas."
+      "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (tikai nedaudz virs p95 atjaunināšanas intervāla {p95}s un vismaz 2x paraugu ņemšanas intervāls {median}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas.",
+      "end_energy_floor": "Paaugstināts līdz minimumam, ko nosaka apstāšanās slieksnis ({stop} W) izslēgšanas aizkaves laikā ({off_delay} s); zem tā cikls var beigties tikai ar rezerves mehānismu.",
+      "max_duration_ratio_default": "Atjaunota noklusējuma vērtība: zemāka augšējā robeža noraida pareizo programmu ikreiz, kad cikls ilgst ilgāk nekā parasti.",
+      "min_duration_ratio_default": "Atjaunota noklusējuma vērtība: augstāka apakšējā robeža neļauj atpazīt notiekošu ciklu, līdz tas ir krietni pavirzījies uz priekšu."
     },
     "exclusions": {
       "summary": "Izslēgti {total} kļūdaini atpazīti cikli: {parts}.",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Slēpt norādījumus",
       "show_guidance": "Rādīt norādījumus"
     }
+  },
+  "access": {
+    "edit": "Rediģēšana",
+    "full": "Pilna",
+    "inherit": "Mantot",
+    "none": "Nav (paslēpts)",
+    "read": "Lasīšana"
   }
 }

@@ -176,3 +176,28 @@ test('Phase 2 cluster nudge shows with create_profile_from_cluster CTA', async (
   await expect(page.locator('[data-phase="phase2"]')).toBeVisible({ timeout: 5_000 });
   await expect(page.locator('[data-cta-action="create_profile_from_cluster"]')).toBeVisible({ timeout: 5_000 });
 });
+
+test('the setup card shows on an idle device that still has recent readings (audit UI-01)', async ({ page }) => {
+  // The default mock power history carries 20 idle readings (hasCurve = true),
+  // which is what every real idle install looks like: `live` holds the last
+  // 15 min of readings. The card used to be gated on !hasCurve and so was hidden
+  // on almost every install; it is gated on a running cycle now, and the idle
+  // chart still renders under it.
+  await bootPanel(page, {
+    'ha_washdata/get_setup_status': {
+      phase: 'phase0',
+      message_key: 'setup.phase0.washer',
+      message_params: {},
+      cta_label_key: 'setup.cta.start_recording',
+      cta_action: 'open_recorder',
+      secondary_label_key: null,
+      secondary_action: null,
+      skippable: false,
+      dismissible: false,
+      step_key: null,
+    },
+  });
+  await loadStatusTabData(page);
+  await expect(page.locator('[data-phase="phase0"]')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('#wd-status-canvas')).toHaveCount(1);
+});

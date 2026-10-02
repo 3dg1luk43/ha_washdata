@@ -295,16 +295,18 @@ def test_prefix_ambiguous_true_exact_ratio_boundary():
     assert _is_prefix_ambiguous(candidates, 2000.0) is True
 
 
-async def test_async_match_profile_sets_is_prefix_ambiguous():
-    """End-to-end: async_match_profile returns is_prefix_ambiguous=True when the
-    executor-returned candidates include a qualifying longer runner-up."""
+@pytest.mark.parametrize("prefix_score", [None, 0.90])
+async def test_async_match_profile_sets_is_prefix_ambiguous(prefix_score):
+    """End-to-end: a qualifying longer runner-up sets the narrow #288 flag (the
+    anti-crease guard); the wide ENDING flag needs the #364 prefix fit as well
+    (audit LIVE-18: the #288 term alone was every false block at a genuine end)."""
     from unittest.mock import AsyncMock
     from custom_components.ha_washdata.profile_store import ProfileStore
 
-    mock_candidates = [
-        _cand("Quick", 2760, 0.70, 0.61),
-        _cand("Normal", 5280, 0.70, 0.44),
-    ]
+    longer = _cand("Normal", 5280, 0.70, 0.44)
+    if prefix_score is not None:
+        longer["prefix_score"] = prefix_score
+    mock_candidates = [_cand("Quick", 2760, 0.70, 0.61), longer]
 
     with patch("custom_components.ha_washdata.profile_store.WashDataStore"):
         ps = ProfileStore(MagicMock(), "entry")
@@ -324,7 +326,8 @@ async def test_async_match_profile_sets_is_prefix_ambiguous():
         power_data = [(float(i * 2), 80.0) for i in range(300)]
         result = await ps.async_match_profile(power_data, 2760.0)
 
-    assert result.is_prefix_ambiguous is True
+    assert result.is_prefix_ambiguous_full_shape is True
+    assert result.is_prefix_ambiguous is (prefix_score is not None)
 
 
 async def test_async_match_profile_no_prefix_ambiguous_when_only_short_runner_up():

@@ -212,7 +212,8 @@
     "save_total_cycles": "Salvați totalul",
     "clear": "Ștergeți",
     "add_brand": "Adăugați marcă",
-    "add_appliance": "Adăugați aparat"
+    "add_appliance": "Adăugați aparat",
+    "retry": "Reîncercați"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -281,6 +282,10 @@
     "watchdog": {
       "interval": "Ar trebui să fie de cel puțin 2x Intervalul de eșantionare ({si} s)",
       "sampling": "Intervalul de eșantionare ar trebui să fie cel mult jumătate din Intervalul watchdog ({wi} s)"
+    },
+    "end_energy": {
+      "energy": "Prea strict pentru Pragul de Oprire ({w} W) pe durata Întârzierii la Oprire ({d} s); ciclul se poate încheia doar printr-o cale de rezervă",
+      "stop": "Energia de Sfârșit ({e} Wh în {d} s) permite doar {p} W"
     }
   },
   "hdr": {
@@ -682,7 +687,9 @@
     "zoom_hint_touch_zoomed": "folosiți două degete pentru zoom · dublă atingere pentru resetare",
     "cycles_since_service": "{since} / {total} cicluri",
     "total_cycles_run": "cicluri efectuate în total",
-    "correct_total_cycles": "Corectați totalul"
+    "correct_total_cycles": "Corectați totalul",
+    "hist_reason_already_recorded": "se suprapune cu un ciclu deja înregistrat de WashData",
+    "share_consent": "Confirm că aceste cicluri s-au încheiat normal, fără întreruperi"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -718,7 +725,8 @@
       "total_energy": "Estimarea energiei"
     },
     "metric_auc": "AUC {auc} pe datele de validare",
-    "metric_mae": "eroare: {model} față de referința {baseline}"
+    "metric_mae": "eroare: {model} față de referința {baseline}",
+    "fine_tuned_at": "ajustat pe {when}"
   },
   "modal": {
     "auto_label": "Etichetare automată a ciclurilor",
@@ -1050,7 +1058,10 @@
     "standby_above_stop_sub": "{n} din ultimele {total} cicluri. Întârzierea la Oprire începe abia după ce puterea scade sub Pragul de Oprire ({stop} W), așa că ciclurile se termină târziu sau trebuie oprite manual.",
     "advisory_duration_outlier": "{n} ciclu(ri) etichetate '{name}' sunt prea departe de durata sa obișnuită ca să se mai potrivească vreodată cu el (cel mai rău: {ratio}x). Probabil sunt etichetate greșit sau o înregistrare a surprins două rulări. Reetichetați-le sau împărțiți-le, ca să nu mai denatureze estimarea de timp a acestui program.",
     "toast_range_required": "Setați un interval De la/Până la valid",
-    "no_profiles_option": "(niciun profil, adăugați unul)"
+    "no_profiles_option": "(niciun profil, adăugați unul)",
+    "compare_cycles_title": "Comparați {count} cicluri",
+    "edit_builtin_phase": "Aceasta este o fază integrată. Salvarea creează o versiune personalizată care o înlocuiește; originalul este păstrat și poate fi restaurat prin ștergerea versiunii personalizate.",
+    "fetch_error": "Încărcarea datelor a eșuat."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1441,7 +1452,7 @@
       "label": "Durata Pompei Blocate"
     },
     "sampling_interval": {
-      "doc": "Timp așteptat între citirile senzorului - utilizat pentru a dimensiona fereastra de netezire și pentru a începe corect să renunțe. Fiecare actualizare a senzorului este capturată indiferent de această valoare; calibrează doar calculele din aval. Motorul de sugestii măsoară cadența reală a senzorului dvs. din ciclurile trecute și o setează automat.",
+      "doc": "Timpul minim dintre citirile procesate. O citire care sosește mai devreme de acest interval după cea anterioară este ignorată (citirile scăzute din timpul unui ciclu sunt păstrate întotdeauna), așa că setați-l la intervalul real de raportare al prizei sau mai mic: o valoare mai mare doar aruncă citiri. WashData nu sugerează această valoare, deoarece ceea ce poate măsura este intervalul rămas după ce această setare a eliminat deja citiri.",
       "label": "Interval de Eșantionare"
     },
     "save_debug_traces": {
@@ -1718,7 +1729,8 @@
     "deleting": "Se șterge…",
     "imported": "Importat",
     "preparing": "Se pregătește…",
-    "unlabelling": "Se elimină eticheta…"
+    "unlabelling": "Se elimină eticheta…",
+    "working": "Se procesează…"
   },
   "tab": {
     "advanced": "Avansat",
@@ -1864,7 +1876,36 @@
     "odometer_saved": "Totalul ciclurilor a fost salvat",
     "odometer_save_failed": "Nu s-a putut salva totalul: {error}",
     "store_pick_profile_share": "Alegeți un profil în care să partajați",
-    "remove_failed": "Eliminarea a eșuat: {error}"
+    "remove_failed": "Eliminarea a eșuat: {error}",
+    "analysis_complete": "Analiză finalizată, sugestii: {count}",
+    "analysis_failed": "Analiza a eșuat: {error}",
+    "auto_detect_failed": "Detectarea automată a eșuat: {error}",
+    "auto_label_failed": "Etichetarea automată a eșuat: {error}",
+    "could_not_load_cycle": "Ciclul nu a putut fi încărcat: {error}",
+    "create_failed": "Crearea a eșuat: {error}",
+    "cycles_deleted": "Cicluri șterse: {count}",
+    "debug_cleared": "Urme de depanare șterse: {count}",
+    "discard_failed": "Renunțarea a eșuat: {error}",
+    "error": "Eroare: {error}",
+    "export_failed": "Exportul a eșuat: {error}",
+    "import_failed": "Importul a eșuat: {error}",
+    "invalid_json": "\"{key}\" nu este un JSON valid; corectați-l sau goliți câmpul înainte de salvare.",
+    "label_failed": "Etichetarea a eșuat: {error}",
+    "ml_training_promoted": "Antrenare finalizată, modele promovate: {count}",
+    "pause_failed": "Punerea în pauză a eșuat: {error}",
+    "phase_created": "Faza \"{name}\" a fost creată",
+    "phase_deleted": "Faza \"{name}\" a fost ștearsă",
+    "profile_created": "Profilul \"{name}\" a fost creat",
+    "rename_failed": "Redenumirea a eșuat: {error}",
+    "revert_failed": "Revenirea a eșuat: {error}",
+    "save_failed": "Salvarea a eșuat: {error}",
+    "split_complete": "Împărțit în {count} cicluri",
+    "start_failed": "Pornirea a eșuat: {error}",
+    "stop_failed": "Oprirea a eșuat: {error}",
+    "update_failed": "Actualizarea a eșuat: {error}",
+    "store_download_skipped": "{n} înregistrare(i) omise: prea scurte, cu prea multe întreruperi sau deja pe dispozitivul dvs.",
+    "store_import_low_quality": "Această înregistrare este prea scurtă, are prea multe întreruperi sau este neverosimilă pentru a fi importată.",
+    "store_import_duplicate": "Această înregistrare este deja pe dispozitivul dvs."
   },
   "suggestion": {
     "both_agree": "WashData recomandă",
@@ -1959,7 +2000,10 @@
       "thr_batch": "Păstrat chiar deasupra celei mai mici puteri active p05 pe {cycles} cicluri ({p05}W), astfel încât o pornire să fie surprinsă cât mai devreme posibil, iar pragul de oprire să rămână sub cea mai mică putere de funcționare a mașinii.",
       "tol_per_profile": "p75 al varianței duratei per profil pe {profiles} profiluri ({cycles} cicluri); profilurile stabile nu sunt penalizate.",
       "tol_pooled": "Pe baza varianței combinate a duratei a {cycles} cicluri recente etichetate (deviație p95={dev}).",
-      "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s și cel puțin 2x intervalul de eșantionare de {median}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false."
+      "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s și cel puțin 2x intervalul de eșantionare de {median}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false.",
+      "end_energy_floor": "Ridicat la minimul implicat de pragul de oprire ({stop} W) pe durata întârzierii la oprire ({off_delay} s); sub acesta, ciclul se poate încheia doar printr-o cale de rezervă.",
+      "max_duration_ratio_default": "Revenire la valoarea implicită: o limită superioară mai mică respinge programul corect ori de câte ori un ciclu durează mai mult decât de obicei.",
+      "min_duration_ratio_default": "Revenire la valoarea implicită: o limită inferioară mai mare împiedică recunoașterea unui ciclu în desfășurare până când acesta este bine avansat."
     },
     "exclusions": {
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",
@@ -2228,5 +2272,12 @@
     "off_delay": {
       "effective": "Un ciclu încheiat așteaptă de fapt {eff} s, nu {delay} s: Pauza Minimă de Oprire ({gap} s) este mai lungă și are prioritate."
     }
+  },
+  "access": {
+    "edit": "Editare",
+    "full": "Complet",
+    "inherit": "Moștenire",
+    "none": "Niciunul (ascuns)",
+    "read": "Citire"
   }
 }

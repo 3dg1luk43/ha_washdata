@@ -29,6 +29,7 @@ import numpy as np
 from homeassistant.util import dt as dt_util
 
 from .log_utils import DeviceLoggerAdapter
+from .time_utils import utc_now
 from .const import (
     TERMINAL_EVENT_PEAK_FRAC,
     DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN,
@@ -71,6 +72,9 @@ from .const import (
     END_GATE_LATE_RATIO,
     resolve_end_gate_late_ratio,
     END_GATE_LATE_SECONDS,
+    END_GATE_HAZARD_MARGIN,
+    END_GATE_HAZARD_MIN_CYCLES,
+    END_GATE_HAZARD_POSITION_SLACK,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
     STANDBY_BAND_LOOSE_MIN_RATIO,
@@ -200,7 +204,10 @@ class CycleDetectorConfig:
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
     stop_threshold_w: float = 2.0
-    min_duration_ratio: float = 0.8  # Default deferred finish ratio
+    # The FINISH-DEFERRAL ratio (`_should_defer_finish`), despite the name: not the
+    # matcher's Stage-1 `profile_match_min_duration_ratio`. Built from
+    # const.DEFAULT_DEFER_FINISH_RATIO (audit DETECT-02).
+    min_duration_ratio: float = 0.8
     # Minimum live-match confidence for a match to be trusted by Smart Termination
     # and the anti-crease gate. Fed from the `profile_match_threshold` option, which
     # up to 0.5.5 was stored and never read - so raising it (the workaround the #288
@@ -453,6 +460,7 @@ class CycleDetector:
         self._state_enter_time: datetime | None = None
         self._matched_profile: str | None = None
         self._verified_pause: bool = False
+        self._user_paused: bool = False
 
         self._last_power: float | None = None
         self._time_in_state: float = 0.0
@@ -472,6 +480,8 @@ class CycleDetector:
 
         # Profile Matching Tracker
         self._last_match_time: datetime | None = None
+        # Whether the manager has committed a program this cycle (set_match_committed).
+        self._match_committed: bool = False
         self._expected_duration: float = 0.0
         self._last_match_confidence: float = 0.0
         # Element 12: the longest expected duration among the candidates the
@@ -517,6 +527,10 @@ class CycleDetector:
         # applies - because element 11 can be wrong in the direction that deletes
         # a drying phase. None: nothing vouched, no floor.
         self._matched_trusted_min_s: float | None = None
+        # Element 14 (audit DETECT-16): the matched profile's pause catalogue,
+        # (traced cycles, ((start_fraction, seconds), ...)), for the hazard end
+        # gate. None: no catalogue, the fallback waits as before.
+        self._matched_pause_catalogue: tuple[int, tuple[tuple[float, float], ...]] | None = None
         self._terminal_quiet_memo: tuple[Any, bool] | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
@@ -675,7 +689,10 @@ class CycleDetector:
         # Rate limiting
         if not force and self._last_match_time:
             elapsed = (timestamp - self._last_match_time).total_seconds()
-            if elapsed < self._config.match_interval:
+            interval = float(self._config.match_interval)
+            if not getattr(self, "_match_committed", True):
+                interval /= 2.0
+            if elapsed < interval:
                 return
 
         self._last_match_time = timestamp
@@ -778,6 +795,49 @@ class CycleDetector:
         if not math.isfinite(value) or not 0.0 < value <= CycleDetector._SANITIZE_MAX_EXPECTED_DURATION:
             return None
         return value
+
+    @staticmethod
+    def _sanitize_pause_catalogue(
+        raw: Any,
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """Coerce element 14 to ``(traced, ((fraction, seconds), ...))`` or None."""
+        try:
+            traced, pauses = raw
+            out = tuple(
+                (float(f), float(d)) for f, d in pauses
+                if math.isfinite(float(f)) and math.isfinite(float(d)) and float(d) >= 0
+            )
+            return (int(traced), out) if int(traced) > 0 else None
+        except (TypeError, ValueError, OverflowError):
+            return None
+
+    def _hazard_wait(self, timestamp: datetime, base: float) -> float:
+        """The ENDING fallback wait the matched profile's own pauses justify.
+
+        Audit DETECT-16: "no soak left after 1.05x expected" generalised to "no
+        soak this programme has ever shown from this position": END_GATE_HAZARD_
+        MARGIN x the longest resumed pause its traced evidence began at or after
+        this quiet's start (less a slack), clamped to [off_delay, base]. Shorten-
+        only, unambiguous matches only, and only with END_GATE_HAZARD_MIN_CYCLES
+        traced cycles; otherwise ``base``. Measured (prototype, 292 cycles): washer
+        median lag 16.17 -> 12.50 min, early ends 0 -> 0, splits unchanged.
+        """
+        cat = self._matched_pause_catalogue
+        if (
+            cat is None
+            or cat[0] < END_GATE_HAZARD_MIN_CYCLES
+            or not self._matched_profile
+            or self._expected_duration <= 0
+            or self._current_cycle_start is None
+            or self._match_ambiguous
+            or self._match_prefix_ambiguous
+        ):
+            return base
+        elapsed = (timestamp - self._current_cycle_start).total_seconds()
+        position = max(0.0, (elapsed - self._time_below_threshold) / self._expected_duration)
+        later = [d for f, d in cat[1] if f >= position - END_GATE_HAZARD_POSITION_SLACK]
+        need = END_GATE_HAZARD_MARGIN * max(later) if later else 0.0
+        return max(float(self._config.off_delay), min(float(base), need))
 
     @staticmethod
     def _sanitize_longest_candidate(raw: Any) -> float:
@@ -1121,6 +1181,10 @@ class CycleDetector:
             self._matched_trusted_min_s = self._sanitize_trusted_min(
                 result_seq[12] if len(result_seq) >= 13 else None
             )
+            # Element 14: cleared by a shorter tuple, like elements 9-13.
+            self._matched_pause_catalogue = self._sanitize_pause_catalogue(
+                result_seq[13] if len(result_seq) >= 14 else None
+            )
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -1142,6 +1206,7 @@ class CycleDetector:
             self._matched_terminal_high = None
             self._matched_terminal_quiet_s = None
             self._matched_trusted_min_s = None
+            self._matched_pause_catalogue = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -1169,9 +1234,41 @@ class CycleDetector:
         """Set or clear the verified pause flag."""
         self._verified_pause = verified
 
-    def reset(self, target_state: str = STATE_OFF) -> None:
-        """Force reset the detector state to target state."""
-        self._transition_to(target_state, dt_util.now())
+    def set_match_committed(self, committed: bool) -> None:
+        """Mirror whether the caller has committed a program this cycle.
+
+        Until it has, matches run at half ``match_interval`` (audit LIVE-17): at
+        the shipped 300 s, 12 resampled points on a 30 s plug need 330 s, so the
+        300 s try was empty too and the first commit came a median 25 min in.
+        Measured: right programme shown 56.2 -> 61.0% of cycle time, never
+        committed 8 -> 4 of 247, +19% matcher CPU. Persistence stays a match
+        count, as in the measured arm.
+        """
+        self._match_committed = bool(committed)
+
+    def set_user_paused(self, paused: bool) -> None:
+        """Mirror the user's Pause Cycle state (set by the manager).
+
+        Kept apart from ``_verified_pause`` on purpose: the envelope auto-pause
+        writes that one too, and freezing Smart Termination on it would re-open
+        the #375 hang class. Only a USER pause blocks Smart Termination.
+        """
+        self._user_paused = bool(paused)
+
+    def reset(
+        self, target_state: str = STATE_OFF, timestamp: datetime | None = None
+    ) -> None:
+        """Force reset the detector state to target state.
+
+        ``timestamp`` is the reading that caused the reset. The state entered here
+        is timed from it (ANTI_WRINKLE's 2 h exit reads ``_state_enter_time``), so a
+        replay with historical timestamps must pass it: stamping the host clock
+        left a replayed dryer in ANTI_WRINKLE forever (audit DETECT-10).
+        """
+        self._transition_to(
+            target_state,
+            dt_util.as_utc(timestamp) if timestamp is not None else utc_now(),
+        )
         self._power_readings = []
         # #430: the pre-roll buffer is pre-CYCLE context, never cross-cycle. A
         # reset that left it populated would let the previous cycle's tail be
@@ -1189,6 +1286,7 @@ class CycleDetector:
             self._time_below_threshold = 0.0
             self._time_below_threshold_gapfree = 0.0
         self._last_match_time = None
+        self._match_committed = False
         self._matched_profile = None
         # Clear stale match state so the next cycle starts with clean defaults.
         # _expected_duration left at 0 tells the dishwasher end-spike gate that
@@ -1202,6 +1300,7 @@ class CycleDetector:
         self._matched_terminal_high = None
         self._matched_terminal_quiet_s = None
         self._matched_trusted_min_s = None
+        self._matched_pause_catalogue = None
         # Element 12 belongs with them: its own comment claims a stale value can
         # never license a shortening for a different match, and that was only
         # true of the tuple path. Left here across a reset, a small positive
@@ -1377,6 +1476,13 @@ class CycleDetector:
         only shows the plug is chatty. See item 260 for two more that were
         measured and rejected.)
         """
+        # Every interval below is a datetime subtraction. Two aware datetimes that
+        # share one tzinfo instance - which every `dt_util.now()` stamp does - are
+        # subtracted on their WALL-CLOCK fields, so across a DST change dt, elapsed
+        # and the stored duration are off by an hour (a spring-forward soak was
+        # credited 3960 s of quiet and split the wash; audit DETECT-01). UTC has no
+        # transitions, and mixed-zone comparisons elsewhere stay correct.
+        timestamp = dt_util.as_utc(timestamp)
         if not synthetic:
             self._last_real_reading_time = timestamp
 
@@ -2202,6 +2308,11 @@ class CycleDetector:
                         and is_confident_match
                         and not self._match_ambiguous
                         and not self._match_prefix_ambiguous
+                        # A user pause is authoritative: every other finisher honours
+                        # it, and the paused time itself pushes elapsed past the
+                        # ratio, so a washer paused near its end was finished by
+                        # Smart Termination while the plug sat at 0 W (DETECT-05).
+                        and not getattr(self, "_user_paused", False)
                         # #364: the clock says "done", but if we are still drawing
                         # several times what this profile draws at its own end, the
                         # match is a shorter look-alike and we are mid-wash. Block;
@@ -2235,7 +2346,20 @@ class CycleDetector:
                         else:
                             smart_debounce = 120.0
 
-                        if self._time_in_state >= smart_debounce:
+                        # Quiet time, not time in ENDING, for everything but a
+                        # dishwasher: a wash that resumes after > 120 s in ENDING
+                        # stays in ENDING, so `_time_in_state` had the debounce
+                        # pre-paid by washing time and Smart fired on the next dip,
+                        # turning the final spin into a second cycle (DETECT-04;
+                        # 0/295 corpus cycles move). A dishwasher keeps state time,
+                        # or every pump-out would add up to 300 s.
+                        if self._config.device_type == "dishwasher":
+                            _smart_quiet = self._time_in_state
+                        else:
+                            _smart_quiet = min(
+                                self._time_in_state, self._time_below_threshold
+                            )
+                        if _smart_quiet >= smart_debounce:
                             # --- END SPIKE WAIT PERIOD (Dishwashers) ---
                             # Dishwashers should see the real end-of-cycle
                             # pump-out (which arms _end_spike_seen via the 85%
@@ -2373,7 +2497,9 @@ class CycleDetector:
 
                 # --- FALLBACK TIMEOUT CHECK ---
                 # Rule: To separate cycles, we must wait at least min_off_gap.
-                effective_off_delay = max(self._config.off_delay, self._config.min_off_gap)
+                effective_off_delay = self._hazard_wait(
+                    timestamp, max(self._config.off_delay, self._config.min_off_gap)
+                )
 
                 # Progress-aware shortening (register item 306). `min_off_gap` is
                 # there to bridge mid-cycle soak periods; once the run is past the
@@ -3630,12 +3756,6 @@ class CycleDetector:
             )
             return False
 
-        # Also use profile tolerance to handle variable cycle lengths (e.g. long drying)
-        # Allow deferral up to Expected * (1 + tolerance)
-        upper_threshold = self._expected_duration * (
-            1.0 + self._config.profile_duration_tolerance
-        )
-
         # Primary check: Is duration significantly below expectation?
         if duration < (self._expected_duration * ratio):
             self._logger.debug(
@@ -3648,11 +3768,8 @@ class CycleDetector:
             )
             return True
 
-        # Secondary check: If within valid completion window (ratio to tolerance), allow finish.
-        if duration <= upper_threshold:
-            return False
-
-        # Tertiary check: If duration exceeded max tolerance, allow finish (failsafe).
+        # (A "ratio to 1 + profile_duration_tolerance" window used to follow, but both
+        # of its branches returned False - the tolerance changed nothing here.)
         return False
 
     def _dishwasher_quiet_release_s(self) -> float:
@@ -3940,7 +4057,7 @@ class CycleDetector:
             end_time = self._last_active_time or timestamp
 
         if not self._current_cycle_start:
-            self.reset()
+            self.reset(timestamp=timestamp)
             return
 
         duration = (end_time - self._current_cycle_start).total_seconds()
@@ -4015,14 +4132,14 @@ class CycleDetector:
         ):
             target = STATE_ANTI_WRINKLE
 
-        self.reset(target_state=target)
+        self.reset(target_state=target, timestamp=timestamp)
 
     # Stub methods for compatibility or simpler logic
     def force_end(self, timestamp: datetime) -> None:
         """Force the cycle to end immediately."""
         if self._state != STATE_OFF:
             self._finish_cycle(
-                timestamp,
+                dt_util.as_utc(timestamp),
                 status="force_stopped",
                 termination_reason=TerminationReason.FORCE_STOPPED,
                 keep_tail=False,  # Force stop usually implies snap back to reality
@@ -4032,12 +4149,26 @@ class CycleDetector:
     def user_stop(self) -> None:
         """Handle user-initiated stop."""
         if self._state != STATE_OFF:
-            now = dt_util.now()
+            now = utc_now()
+            # "Done now" keeps the tail only while the machine is still running.
+            # Pressed after the wash had already gone quiet - which is exactly when
+            # a user stops it, because WashData missed the end - the whole wait was
+            # banked as cycle time (30 min late -> a 60 min wash stored as 90) and
+            # fed avg_duration like item 297's Smart tail. Cap it the same way
+            # (audit DETECT-06).
+            below_stop = bool(self._power_readings) and (
+                self._power_readings[-1][1] < self._config.stop_threshold_w
+            )
             self._finish_cycle(
                 now,
                 status="completed",
                 termination_reason=TerminationReason.USER,
                 keep_tail=True,  # User implies "Done Now"
+                tail_cap=(
+                    self._keep_tail_cap(self._current_cycle_start or now)
+                    if below_stop
+                    else None
+                ),
             )
             # Prevent immediate restart if power is still high
             self._ignore_power_until_idle = True
@@ -4088,12 +4219,16 @@ class CycleDetector:
             "matched_trusted_min_s": self._matched_trusted_min_s,
             "longest_candidate_duration": self._longest_candidate_duration,
             "ml_defer_start_duration": self._ml_defer_start_duration,
+            # Without it a restart dropped the confidence to 0.0: Smart Termination
+            # was then blocked as low_confidence, and a dishwasher restored into
+            # its terminal-tail match freeze could never re-match (DETECT-09).
+            "last_match_confidence": self._last_match_confidence,
         }
 
     def get_elapsed_seconds(self) -> float:
         """Return seconds elapsed in current cycle."""
         if self._current_cycle_start:
-            return (dt_util.now() - self._current_cycle_start).total_seconds()
+            return (utc_now() - self._current_cycle_start).total_seconds()
         return 0.0
 
     def is_waiting_low_power(self) -> bool:
@@ -4175,6 +4310,12 @@ class CycleDetector:
                 snapshot.get("longest_candidate_duration")
             )
             self._ml_defer_start_duration = snapshot.get("ml_defer_start_duration")
+            try:
+                self._last_match_confidence = float(
+                    snapshot.get("last_match_confidence") or 0.0
+                )
+            except (TypeError, ValueError):
+                self._last_match_confidence = 0.0
 
             # Restore state enter time and recompute time_in_state from it
             enter_time = snapshot.get("state_enter_time")
@@ -4182,7 +4323,12 @@ class CycleDetector:
                 try:
                     self._state_enter_time = dt_util.parse_datetime(enter_time)
                     if self._state_enter_time:
-                        elapsed = (dt_util.now() - self._state_enter_time).total_seconds()
+                        if self._state_enter_time.tzinfo is None:
+                            self._state_enter_time = self._state_enter_time.replace(
+                                tzinfo=dt_util.now().tzinfo
+                            )
+                        self._state_enter_time = dt_util.as_utc(self._state_enter_time)
+                        elapsed = (utc_now() - self._state_enter_time).total_seconds()
                         self._time_in_state = max(0.0, elapsed)
                 except Exception: # pylint: disable=broad-exception-caught
                     self._logger.warning("Failed to parse state enter time")
@@ -4196,7 +4342,7 @@ class CycleDetector:
                         # Fix Naive Timestamp (Legacy Data)
                         dt_start = dt_start.replace(tzinfo=dt_util.now().tzinfo)
                         self._logger.warning("Restored Naive start_time, assuming local: %s", dt_start)
-                    self._current_cycle_start = dt_start
+                    self._current_cycle_start = dt_util.as_utc(dt_start) if dt_start else None
                 except Exception:  # pylint: disable=broad-exception-caught
                     self._logger.warning("Failed to parse start time: %s", start)
 
@@ -4219,7 +4365,7 @@ class CycleDetector:
                                 has_naive_readings = True
                             value = float(reading[1])
                             if math.isfinite(value):
-                                self._power_readings.append((t, value))
+                                self._power_readings.append((dt_util.as_utc(t), value))
                     except (TypeError, ValueError) as exc:
                         self._logger.debug("Skipping malformed power reading %s: %s", r, exc)
 
@@ -4235,7 +4381,7 @@ class CycleDetector:
                 dt_last = dt_util.parse_datetime(last_active)
                 if dt_last and dt_last.tzinfo is None:
                     dt_last = dt_last.replace(tzinfo=dt_util.now().tzinfo)
-                self._last_active_time = dt_last
+                self._last_active_time = dt_util.as_utc(dt_last) if dt_last else None
             else:
                 self._last_active_time = self._current_cycle_start
 

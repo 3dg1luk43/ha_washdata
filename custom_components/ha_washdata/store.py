@@ -280,11 +280,18 @@ class StoreBridge:
         profile = raw_profile.strip() if isinstance(raw_profile, str) else ""
         if not profile:
             return {"error": "profile_name_required"}
-        local_id = await self._ps.add_reference_cycle(profile, pts, {
+        meta = {
             "store_cycle_id": cyc.get("id"),
             "store_uploaded_at": cyc.get("createdAt"),
             "sampling_interval": (cyc.get("trace") or {}).get("sampleIntervalSec"),
-        })
+            "community": True,
+        }
+        # Too short / gappy / implausible, or a copy of a trace already stored
+        # under any name (audit STORE-03/05): refused before it shapes a profile.
+        verdict = self._ps.reference_import_verdict(pts, meta)
+        if verdict != "ok":
+            return {"error": "invalid_trace" if verdict == "invalid" else verdict}
+        local_id = await self._ps.add_reference_cycle(profile, pts, meta)
         if not local_id:  # trace failed validation in add_reference_cycle
             return {"error": "invalid_trace"}
         # Credit the download on the source store cycle + record one community-wide
@@ -427,8 +434,12 @@ class StoreBridge:
             str((c.get("meta") or {}).get("source") or "")
             for c in self._ps.get_reference_cycles()
         }
+        # Hashed once for the whole bundle; each import adds its own, so two
+        # programs carrying the same recording keep only the first (STORE-05).
+        known_hashes = self._ps.stored_trace_hashes()
         profiles_adopted = 0
         cycles_imported = 0
+        cycles_skipped = 0
         phases_applied = 0
         imported_store_ids: list[str] = []
         for prof in bundle.get("profiles", []) or []:
@@ -447,12 +458,15 @@ class StoreBridge:
                     "store_cycle_id": store_cid,
                     "store_uploaded_at": cyc.get("createdAt"),
                     "sampling_interval": (cyc.get("trace") or {}).get("sampleIntervalSec"),
-                })
+                    "community": True,
+                }, known_hashes=known_hashes)
                 if local_id:
                     cycles_imported += 1
                     adopted_any = True
                     if store_cid:
                         imported_store_ids.append(store_cid)
+                else:
+                    cycles_skipped += 1
             if adopted_any:
                 profiles_adopted += 1
             # Stage 2: apply the bundled phase map (replace) + reconcile labels. Never
@@ -473,6 +487,8 @@ class StoreBridge:
         return {
             "profiles_adopted": profiles_adopted,
             "cycles_imported": cycles_imported,
+            # Refused by the quality bar or as a duplicate (audit STORE-03/05).
+            "cycles_skipped": cycles_skipped,
             "phases_applied": phases_applied,
             "settings": settings,
         }

@@ -260,7 +260,8 @@
     "save_total_cycles": "Uložit celkový počet",
     "clear": "Vymazat",
     "add_brand": "Přidat značku",
-    "add_appliance": "Přidat spotřebič"
+    "add_appliance": "Přidat spotřebič",
+    "retry": "Zkusit znovu"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Interval vzorkování by měl být nejvýše polovina Intervalu hlídače ({wi} s)"
     },
     "settings_banner": "Konflikty nastavení: {n}. Zkontrolujte zvýrazněné sekce a opravte je před uložením.",
-    "settings_banner_btn": "Přejít na první"
+    "settings_banner_btn": "Přejít na první",
+    "end_energy": {
+      "energy": "Příliš přísné pro Práh zastavení ({w} W) po dobu Zpoždění vypnutí ({d} s); cyklus může skončit jen záložní cestou",
+      "stop": "Energie konce ({e} Wh za {d} s) povoluje jen {p} W"
+    }
   },
   "hdr": {
     "ab_comparison": "Porovnání nastavení A/B",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "dvěma prsty přiblížíte · dvojitým klepnutím obnovíte",
     "cycles_since_service": "{since} / {total} cyklů",
     "total_cycles_run": "cyklů celkem",
-    "correct_total_cycles": "Opravit celkový počet"
+    "correct_total_cycles": "Opravit celkový počet",
+    "hist_reason_already_recorded": "překrývá se s cyklem, který WashData již zaznamenal",
+    "share_consent": "Potvrzuji, že tyto cykly proběhly normálně až do konce bez přerušení"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -771,7 +778,8 @@
       "total_energy": "Odhad spotřeby energie"
     },
     "metric_auc": "AUC {auc} na validačních datech",
-    "metric_mae": "chyba {model} oproti základnímu modelu {baseline}"
+    "metric_mae": "chyba {model} oproti základnímu modelu {baseline}",
+    "fine_tuned_at": "doladěno {when}"
   },
   "modal": {
     "auto_label": "Cykly automatického označování",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Zatím nejsou nastaveny žádné připomínky servisu.",
     "toast_program_armed": "Program nastaven pro další cyklus: {program}",
     "toast_range_required": "Nastavte platný rozsah Od/Do",
-    "no_profiles_option": "(zatím žádné profily, přidejte nový)"
+    "no_profiles_option": "(zatím žádné profily, přidejte nový)",
+    "compare_cycles_title": "Porovnat cykly ({count})",
+    "edit_builtin_phase": "Toto je vestavěná fáze. Uložením se vytvoří vlastní přepsání; originál zůstane zachován a lze jej obnovit smazáním přepsání.",
+    "fetch_error": "Načtení dat se nezdařilo."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1490,7 +1501,7 @@
       "label": "Délka zaseknutého čerpadla"
     },
     "sampling_interval": {
-      "doc": "Očekávaný čas mezi čteními senzoru – používá se ke správnému nastavení okna vyhlazení a debounce startu. Každá aktualizace senzoru je zachycena bez ohledu na tuto hodnotu; jen kalibruje následné výpočty. Engine návrhů měří skutečnou kadenci vašeho senzoru z minulých cyklů a nastavuje tuto hodnotu automaticky.",
+      "doc": "Minimální doba mezi zpracovanými měřeními. Měření, které přijde dříve, než od předchozího uplyne tato doba, se přeskočí (nízká měření během cyklu se vždy ponechají), proto ji nastavte na skutečný interval hlášení vaší zástrčky nebo nižší: vyšší hodnota jen zahazuje měření. WashData tuto hodnotu nenavrhuje, protože dokáže změřit jen interval, který zbude poté, co toto nastavení už měření vyřadilo.",
       "label": "Interval vzorkování"
     },
     "save_debug_traces": {
@@ -1771,7 +1782,8 @@
     "deleting": "Mazání…",
     "imported": "Importováno",
     "preparing": "Příprava…",
-    "unlabelling": "Odznačování…"
+    "unlabelling": "Odznačování…",
+    "working": "Pracuji…"
   },
   "suggestion": {
     "both_agree": "WashData doporučuje",
@@ -1866,7 +1878,10 @@
       "thr_batch": "Ponecháno těsně nad nejnižším činným výkonem p05 napříč {cycles} cykly ({p05}W), aby byl start zachycen co nejdříve a práh zastavení zůstal pod nejnižším provozním výkonem stroje.",
       "tol_per_profile": "p75 rozptylu délky podle profilu napříč {profiles} profily ({cycles} cyklů); konzistentní profily nejsou penalizovány.",
       "tol_pooled": "Na základě sloučeného rozptylu délky {cycles} nedávných označených cyklů (odchylka p95={dev}).",
-      "watchdog": "Ponecháno co nejnižší při zachování bezpečnosti (těsně nad intervalem aktualizace p95 ve výši {p95}s a alespoň 2x nad intervalem vzorkování {median}s, min. 30s), aby byla zaseknutí rychle odhalena bez falešných zastavení."
+      "watchdog": "Ponecháno co nejnižší při zachování bezpečnosti (těsně nad intervalem aktualizace p95 ve výši {p95}s a alespoň 2x nad intervalem vzorkování {median}s, min. 30s), aby byla zaseknutí rychle odhalena bez falešných zastavení.",
+      "end_energy_floor": "Zvýšeno na minimum, které vyplývá z prahu zastavení ({stop} W) po dobu zpoždění vypnutí ({off_delay} s); pod ním může cyklus skončit jen záložní cestou.",
+      "max_duration_ratio_default": "Vráceno na výchozí hodnotu: nižší horní mez odmítne správný program pokaždé, když běh trvá déle než obvykle.",
+      "min_duration_ratio_default": "Vráceno na výchozí hodnotu: vyšší dolní mez brání rozpoznání běžícího cyklu, dokud není v plném proudu."
     },
     "exclusions": {
       "summary": "Vyloučeno {total} chybně detekovaných cyklů: {parts}.",
@@ -2030,7 +2045,36 @@
     "odometer_saved": "Celkový počet cyklů uložen",
     "odometer_save_failed": "Celkový počet nelze uložit: {error}",
     "store_pick_profile_share": "Vyberte profil pro sdílení",
-    "remove_failed": "Odstranění selhalo: {error}"
+    "remove_failed": "Odstranění selhalo: {error}",
+    "analysis_complete": "Analýza dokončena: návrhy: {count}",
+    "analysis_failed": "Analýza selhala: {error}",
+    "auto_detect_failed": "Automatická detekce selhala: {error}",
+    "auto_label_failed": "Automatické označení selhalo: {error}",
+    "could_not_load_cycle": "Cyklus nelze načíst: {error}",
+    "create_failed": "Vytvoření selhalo: {error}",
+    "cycles_deleted": "Smazané cykly: {count}",
+    "debug_cleared": "Vymazaná trasování ladění: {count}",
+    "discard_failed": "Vyřazení selhalo: {error}",
+    "error": "Chyba: {error}",
+    "export_failed": "Export selhal: {error}",
+    "import_failed": "Import selhal: {error}",
+    "invalid_json": "\"{key}\" není platný JSON - opravte jej nebo před uložením pole vymažte.",
+    "label_failed": "Označení selhalo: {error}",
+    "ml_training_promoted": "Trénování dokončeno: nasazené modely: {count}",
+    "pause_failed": "Pozastavení selhalo: {error}",
+    "phase_created": "Fáze \"{name}\" vytvořena",
+    "phase_deleted": "Fáze \"{name}\" smazána",
+    "profile_created": "Profil \"{name}\" vytvořen",
+    "rename_failed": "Přejmenování selhalo: {error}",
+    "revert_failed": "Vrácení selhalo: {error}",
+    "save_failed": "Uložení selhalo: {error}",
+    "split_complete": "Rozděleno na cykly: {count}",
+    "start_failed": "Spuštění selhalo: {error}",
+    "stop_failed": "Zastavení selhalo: {error}",
+    "update_failed": "Aktualizace selhala: {error}",
+    "store_download_skipped": "Přeskočeno záznamů: {n} (příliš krátké, s příliš mnoha mezerami nebo na vašem zařízení již existují).",
+    "store_import_low_quality": "Tento záznam je příliš krátký, má příliš mnoho mezer nebo je nevěrohodný, proto jej nelze importovat.",
+    "store_import_duplicate": "Tento záznam na vašem zařízení již existuje."
   },
   "trend": {
     "down": "Klesající trend",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Skrýt pokyny",
       "show_guidance": "Zobrazit pokyny"
     }
+  },
+  "access": {
+    "edit": "Úpravy",
+    "full": "Plný",
+    "inherit": "Zdědit",
+    "none": "Žádný (skryto)",
+    "read": "Čtení"
   }
 }

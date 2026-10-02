@@ -49,8 +49,13 @@ def _setup(hass, bundle_settings):
 @pytest.mark.asyncio
 async def test_download_applies_only_allowlisted_settings_when_opted_in():
     hass = MagicMock()
-    # off_delay is allow-listed; notify_title / power_sensor are NOT -> must be dropped.
-    manager, entry = _setup(hass, {"off_delay": 200, "notify_title": "x", "power_sensor": "sensor.p"})
+    # stop_threshold_w is allow-listed; notify_title / power_sensor are NOT, and
+    # off_delay is the sharer's plug cadence (audit STORE-06) -> all dropped. A max
+    # ratio below the shipped 1.8 is floored to it (register item 311).
+    manager, entry = _setup(hass, {
+        "stop_threshold_w": 2.0, "off_delay": 200, "profile_match_max_duration_ratio": 1.5,
+        "notify_title": "x", "power_sensor": "sensor.p",
+    })
     conn = _conn()
     with patch.object(ws_api, "_store_ctx", return_value=(manager, dict(entry.options))), \
          patch.object(ws_api, "_get_entry", return_value=entry), \
@@ -58,13 +63,14 @@ async def test_download_applies_only_allowlisted_settings_when_opted_in():
         await ws_api.ws_store_download_device.__wrapped__(
             hass, conn, {"id": 1, "entry_id": "e", "device_id": "d1", "include_settings": True}
         )
-    # Only off_delay applied; the non-allowlisted keys were filtered out.
     hass.config_entries.async_update_entry.assert_called_once()
     applied_opts = hass.config_entries.async_update_entry.call_args.kwargs["options"]
-    assert applied_opts["off_delay"] == 200
+    assert applied_opts["stop_threshold_w"] == 2.0
+    assert applied_opts["profile_match_max_duration_ratio"] == 1.8
+    assert applied_opts["off_delay"] == 90  # the device's own value survives
     assert "notify_title" not in applied_opts and "power_sensor" not in applied_opts
     payload = conn.send_result.call_args.args[1]
-    assert payload["settings_applied"] == 1
+    assert payload["settings_applied"] == 2
 
 
 @pytest.mark.asyncio

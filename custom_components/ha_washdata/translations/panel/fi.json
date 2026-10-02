@@ -260,7 +260,8 @@
     "save_total_cycles": "Tallenna kokonaismäärä",
     "clear": "Tyhjennä",
     "add_brand": "Lisää merkki",
-    "add_appliance": "Lisää laite"
+    "add_appliance": "Lisää laite",
+    "retry": "Yritä uudelleen"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Näytteenottovälin tulee olla enintään puolet tarkkailijavälistä ({wi} s)"
     },
     "settings_banner": "Asetusten ristiriitoja: {n}. Tarkista korostetut osiot ja korjaa ne ennen tallentamista.",
-    "settings_banner_btn": "Siirry ensimmäiseen"
+    "settings_banner_btn": "Siirry ensimmäiseen",
+    "end_energy": {
+      "energy": "Liian tiukka Pysäytyskynnykselle ({w} W) Sammutusviiveen ({d} s) aikana; sykli voi päättyä vain varapolun kautta",
+      "stop": "Lopetuksen energiakynnys ({e} Wh / {d} s) sallii vain {p} W"
+    }
   },
   "hdr": {
     "ab_comparison": "A/B-asetusten vertailu",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "nipistä zoomataksesi · kaksoisnapauta nollataksesi",
     "cycles_since_service": "{since} / {total} sykliä",
     "total_cycles_run": "sykliä yhteensä",
-    "correct_total_cycles": "Korjaa kokonaismäärä"
+    "correct_total_cycles": "Korjaa kokonaismäärä",
+    "hist_reason_already_recorded": "on päällekkäin syklin kanssa, jonka WashData on jo tallentanut",
+    "share_consent": "Vahvistan, että nämä syklit suoritettiin normaalisti loppuun ilman keskeytystä"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -771,7 +778,8 @@
       "total_energy": "Energia-arvio"
     },
     "metric_auc": "AUC {auc} validointidatalla",
-    "metric_mae": "virhe {model} vs. perustaso {baseline}"
+    "metric_mae": "virhe {model} vs. perustaso {baseline}",
+    "fine_tuned_at": "hienosäädetty {when}"
   },
   "modal": {
     "auto_label": "Automaattiset etikettisyklit",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Huoltomuistutuksia ei ole vielä asetettu.",
     "toast_program_armed": "Ohjelma asetettu seuraavaa sykliä varten: {program}",
     "toast_range_required": "Aseta kelvollinen Mistä/Mihin-alue.",
-    "no_profiles_option": "(ei vielä profiileja, lisää uusi)"
+    "no_profiles_option": "(ei vielä profiileja, lisää uusi)",
+    "compare_cycles_title": "Vertaa {count} sykliä",
+    "edit_builtin_phase": "Tämä on sisäänrakennettu vaihe. Tallentaminen luo mukautetun ohituksen; alkuperäinen säilyy, ja sen voi palauttaa poistamalla ohituksen.",
+    "fetch_error": "Tietojen lataaminen epäonnistui."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
@@ -1526,7 +1537,7 @@
       "label": "Pumpun jumiutumiskesto"
     },
     "sampling_interval": {
-      "doc": "Odotettu aika anturin lukemien välillä - käytetään tasoitusikkunan mitoittamiseen ja oikeaan palautumiseen. Jokainen anturin päivitys tallennetaan tästä arvosta riippumatta; se vain kalibroi alavirran laskelmia. Ehdotusmoottori mittaa anturin todellisen poljinnopeuden aiemmista sykleistä ja asettaa sen automaattisesti.",
+      "doc": "Käsiteltyjen lukemien välinen vähimmäisaika. Lukema, joka saapuu aiemmin kuin tämä edellisen jälkeen, ohitetaan (syklin aikaiset matalat lukemat säilytetään aina), joten aseta arvoksi pistokkeen todellinen raportointiväli tai pienempi: suurempi arvo vain heittää lukemia pois. WashData ei ehdota tätä arvoa, koska se pystyy mittaamaan vain välin, joka jää jäljelle sen jälkeen, kun tämä asetus on jo pudottanut lukemia pois.",
       "label": "Näytteenottoväli"
     },
     "save_debug_traces": {
@@ -1803,7 +1814,8 @@
     "deleting": "Poistetaan…",
     "imported": "Tuotu",
     "preparing": "Valmistellaan…",
-    "unlabelling": "Poistetaan merkintää…"
+    "unlabelling": "Poistetaan merkintää…",
+    "working": "Käsitellään…"
   },
   "suggestion": {
     "both_agree": "WashData suosittelee",
@@ -1898,7 +1910,10 @@
       "thr_batch": "Pidetään juuri pienimmän aktiivisen tehon yläpuolella p05:ssä {cycles} jakson joukossa ({p05}W), jotta käynnistys havaitaan mahdollisimman aikaisin ja pysäytyskynnys pysyy koneen pienimmän käyntitehon alapuolella.",
       "tol_per_profile": "p75 profiilikohtaisesta keston varianssista {profiles} profiilin joukossa ({cycles} jaksoa); tiiviitä profiileja ei rangaista.",
       "tol_pooled": "Perustuu {cycles} viimeisimmän merkityn jakson yhdistettyyn keston varianssiin (p95 poikkeama={dev}).",
-      "watchdog": "Pidetään niin matalana kuin on turvallista (hieman yli p95-päivitysvälin {p95}s ja vähintään 2x näytteenottoväli {median}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä."
+      "watchdog": "Pidetään niin matalana kuin on turvallista (hieman yli p95-päivitysvälin {p95}s ja vähintään 2x näytteenottoväli {median}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä.",
+      "end_energy_floor": "Nostettu alarajaan, jonka pysäytyskynnys ({stop} W) sammutusviiveen ({off_delay} s) aikana edellyttää; sen alapuolella sykli voi päättyä vain varapolun kautta.",
+      "max_duration_ratio_default": "Takaisin oletusarvoon: matalampi yläraja hylkää oikean ohjelman aina, kun ajo kestää tavallista pidempään.",
+      "min_duration_ratio_default": "Takaisin oletusarvoon: korkeampi alaraja estää käynnissä olevan syklin tunnistamisen, kunnes se on jo pitkällä."
     },
     "exclusions": {
       "summary": "Suljettu pois {total} väärin tunnistettua sykliä: {parts}.",
@@ -2062,7 +2077,36 @@
     "odometer_saved": "Syklien kokonaismäärä tallennettu",
     "odometer_save_failed": "Kokonaismäärän tallennus epäonnistui: {error}",
     "store_pick_profile_share": "Valitse profiili, johon jaetaan",
-    "remove_failed": "Poisto epäonnistui: {error}"
+    "remove_failed": "Poisto epäonnistui: {error}",
+    "analysis_complete": "Analyysi valmis: ehdotuksia {count}",
+    "analysis_failed": "Analyysi epäonnistui: {error}",
+    "auto_detect_failed": "Automaattinen tunnistus epäonnistui: {error}",
+    "auto_label_failed": "Automaattinen merkintä epäonnistui: {error}",
+    "could_not_load_cycle": "Syklin lataaminen epäonnistui: {error}",
+    "create_failed": "Luominen epäonnistui: {error}",
+    "cycles_deleted": "Syklejä poistettu: {count}",
+    "debug_cleared": "Virheenkorjausjälkiä tyhjennetty: {count}",
+    "discard_failed": "Hylkääminen epäonnistui: {error}",
+    "error": "Virhe: {error}",
+    "export_failed": "Vienti epäonnistui: {error}",
+    "import_failed": "Tuonti epäonnistui: {error}",
+    "invalid_json": "\"{key}\" ei ole kelvollista JSONia - korjaa se tai tyhjennä kenttä ennen tallentamista.",
+    "label_failed": "Merkintä epäonnistui: {error}",
+    "ml_training_promoted": "Koulutus valmis: malleja otettu käyttöön {count}",
+    "pause_failed": "Tauolle asettaminen epäonnistui: {error}",
+    "phase_created": "Vaihe \"{name}\" luotu",
+    "phase_deleted": "Vaihe \"{name}\" poistettu",
+    "profile_created": "Profiili \"{name}\" luotu",
+    "rename_failed": "Uudelleennimeäminen epäonnistui: {error}",
+    "revert_failed": "Palautus epäonnistui: {error}",
+    "save_failed": "Tallennus epäonnistui: {error}",
+    "split_complete": "Jaettu {count} sykliin",
+    "start_failed": "Käynnistys epäonnistui: {error}",
+    "stop_failed": "Pysäytys epäonnistui: {error}",
+    "update_failed": "Päivitys epäonnistui: {error}",
+    "store_download_skipped": "{n} tallennus(ta) ohitettu: liian lyhyitä, liian katkonaisia tai jo laitteellasi.",
+    "store_import_low_quality": "Tämä tallennus on liian lyhyt, liian katkonainen tai epäuskottava tuotavaksi.",
+    "store_import_duplicate": "Tämä tallennus on jo laitteellasi."
   },
   "trend": {
     "down": "Trendikäs alaspäin",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Piilota opastus",
       "show_guidance": "Näytä opastus"
     }
+  },
+  "access": {
+    "edit": "Muokkaus",
+    "full": "Täysi",
+    "inherit": "Peri",
+    "none": "Ei mitään (piilotettu)",
+    "read": "Luku"
   }
 }
