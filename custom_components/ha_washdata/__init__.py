@@ -28,10 +28,15 @@ from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
+from homeassistant.exceptions import (
+    HomeAssistantError,
+    ServiceValidationError,
+    Unauthorized,
+)
 from homeassistant.helpers import device_registry as dr
 
 from .const import (
+    DEVICE_COMPLETION_THRESHOLDS,
     DOMAIN,
     CONFIG_ENTRY_MINOR_VERSION,
     CONFIG_ENTRY_VERSION,
@@ -401,7 +406,14 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(
         CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD
     )
-    options.setdefault(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)
+    # The device's own floor, not the scalar 600 s: seeded for a pump it made every
+    # run shorter than 10 min `interrupted` (audit DETECT-07).
+    options.setdefault(
+        CONF_COMPLETION_MIN_SECONDS,
+        DEVICE_COMPLETION_THRESHOLDS.get(
+            options[CONF_DEVICE_TYPE], DEFAULT_COMPLETION_MIN_SECONDS
+        ),
+    )
     options.setdefault(
         CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
     )
@@ -727,6 +739,71 @@ async def _async_setup_shared(
         hass.data["ha_washdata_intents_registered"] = True
 
 
+# Panel access levels, lowest first (ws_api._effective_level resolves a user's).
+_SERVICE_LEVEL_ORDER = {"none": 0, "read": 1, "edit": 2, "full": 3}
+
+# Services that read or write files / replace a whole device's data: admin-only,
+# like their WS twins in ws_api._ADMIN_COMMANDS.
+_ADMIN_SERVICES = frozenset({"export_config", "import_config", "trigger_ml_training"})
+
+
+def _service_entry_id(hass: HomeAssistant, call: ServiceCall) -> str | None:
+    """The config entry a device-scoped service call addresses, if any."""
+    entry_id = call.data.get("entry_id")
+    if isinstance(entry_id, str) and entry_id:
+        return entry_id
+    device_id = call.data.get("device_id")
+    if isinstance(device_id, str) and device_id:
+        device = dr.async_get(hass).async_get(device_id)
+        if device is not None:
+            loaded = hass.data.get(DOMAIN, {})
+            return next(
+                (e for e in device.config_entries if e in loaded),
+                next(iter(device.config_entries), None),
+            )
+    return None
+
+
+async def _async_check_service_access(
+    hass: HomeAssistant, call: ServiceCall, level: str
+) -> None:
+    """Authorize a service call the way the panel authorizes its WS twin.
+
+    Every service used to skip both the WS admin gate and the panel RBAC: a
+    read-only user could run ``import_config`` (replace all data) or
+    ``export_config`` (write the store under ``/config/www``, served without
+    login at ``/local/``), and an RBAC "read" user could delete profiles
+    (audit PLATFORM-03). Calls without a user (automations, scripts, the system)
+    stay allowed, as for every HA admin service.
+    """
+    user_id = call.context.user_id
+    if user_id is None:
+        return
+    user = await hass.auth.async_get_user(user_id)
+    if user is None:
+        raise Unauthorized(context=call.context)
+    if user.is_admin:
+        return
+    if level == "admin":
+        raise Unauthorized(context=call.context)
+    from .ws_api import _effective_level  # pylint: disable=import-outside-toplevel
+
+    granted = _effective_level(hass, user, _service_entry_id(hass, call))
+    if _SERVICE_LEVEL_ORDER.get(granted, 0) < _SERVICE_LEVEL_ORDER.get(level, 2):
+        raise Unauthorized(context=call.context)
+
+
+def _guarded_service(hass: HomeAssistant, name: str, handler: Any) -> Any:
+    """Wrap a service handler with the access check for its level."""
+    level = "admin" if name in _ADMIN_SERVICES else "edit"
+
+    async def _wrapped(call: ServiceCall) -> Any:
+        await _async_check_service_access(hass, call, level)
+        return await handler(call)
+
+    return _wrapped
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WashData from a config entry."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
@@ -878,7 +955,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             manager.notify_update()
 
-        hass.services.async_register(DOMAIN, "label_cycle", handle_label_cycle)
+        hass.services.async_register(
+            DOMAIN, "label_cycle", _guarded_service(hass, "label_cycle", handle_label_cycle)
+        )
 
     # Register create_profile service
     if not hass.services.has_service(DOMAIN, "create_profile"):
@@ -912,7 +991,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 ) from exc
             manager.notify_update()
 
-        hass.services.async_register(DOMAIN, "create_profile", handle_create_profile)
+        hass.services.async_register(
+            DOMAIN, "create_profile", _guarded_service(hass, "create_profile", handle_create_profile)
+        )
 
     # Register delete_profile service
     if not hass.services.has_service(DOMAIN, "delete_profile"):
@@ -937,7 +1018,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await manager.profile_store.delete_profile(profile_name, unlabel_cycles)
             manager.notify_update()
 
-        hass.services.async_register(DOMAIN, "delete_profile", handle_delete_profile)
+        hass.services.async_register(
+            DOMAIN, "delete_profile", _guarded_service(hass, "delete_profile", handle_delete_profile)
+        )
 
     # Register auto_label_cycles service
     if not hass.services.has_service(DOMAIN, "auto_label_cycles"):
@@ -970,7 +1053,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
 
         hass.services.async_register(
-            DOMAIN, "auto_label_cycles", handle_auto_label_cycles
+            DOMAIN,
+            "auto_label_cycles",
+            _guarded_service(hass, "auto_label_cycles", handle_auto_label_cycles),
         )
 
     # Register trim_cycle service
@@ -1032,7 +1117,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 )
             manager.notify_update()
 
-        hass.services.async_register(DOMAIN, "trim_cycle", handle_trim_cycle)
+        hass.services.async_register(
+            DOMAIN, "trim_cycle", _guarded_service(hass, "trim_cycle", handle_trim_cycle)
+        )
 
     # Belt and braces for the hoist above: the panel's static routes need
     # hass.http, which is an after_dependencies entry rather than a hard one, so
@@ -1104,7 +1191,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.services.async_register(
             DOMAIN,
             SERVICE_SUBMIT_FEEDBACK.rsplit(".", maxsplit=1)[-1],
-            handle_submit_feedback,
+            _guarded_service(hass, "submit_cycle_feedback", handle_submit_feedback),
         )
 
     # Export store to file (per entry/device)
@@ -1185,7 +1272,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await hass.async_add_executor_job(_dump_and_write)
             manager._logger.info("Exported ha_washdata entry %s to %s", entry_id, target)
 
-        hass.services.async_register(DOMAIN, "export_config", handle_export_config)
+        hass.services.async_register(
+            DOMAIN, "export_config", _guarded_service(hass, "export_config", handle_export_config)
+        )
 
     # Import store from file into the target entry/device
     if not hass.services.has_service(DOMAIN, "import_config"):
@@ -1236,36 +1325,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             except Exception as err:  # noqa: BLE001
                 raise ValueError(f"Failed to read import file: {err}") from err
 
-            config_updates = await manager.profile_store.async_import_data(payload)
+            # Same path as the WS import (audit PLATFORM-02): under the per-entry
+            # write lock, local sensor/device bindings dropped, options written
+            # under their lock with a changelog entry, entry.data left alone. The
+            # service used to copy the exporter's power and door sensors over this
+            # device's, which silently disconnects it (register item 317).
+            from .ws_api import (  # pylint: disable=import-outside-toplevel
+                _entry_write_lock,
+                async_apply_imported_entry_options,
+            )
 
-            # Apply imported settings to config entry if present
-            entry_data = config_updates.get("entry_data", {})
-            entry_options = config_updates.get("entry_options", {})
-
-            if entry_data or entry_options:
-                new_data: dict[str, Any] = dict(entry.data)
-                new_options: dict[str, Any] = dict(entry.options)
-
-                # Only update min_power/off_delay from data (don't overwrite power_sensor/name)
-                for key in [CONF_MIN_POWER, CONF_OFF_DELAY]:
-                    if key in entry_data:
-                        new_data[key] = entry_data[key]
-
-                # Update all options from import, then strip any option persisted as
-                # null: an export taken from an already-broken entry (or a hand-edited
-                # file) can carry a `null`, which `.get()` hands back verbatim and the
-                # numeric casts that build CycleDetectorConfig then raise on - the #389
-                # bricked-setup failure. The WS import paths already do this; the legacy
-                # import_config service is the last writer that did not.
-                new_options.update(entry_options)
-                new_options = strip_null_options(new_options)
-
-                hass.config_entries.async_update_entry(
-                    entry,
-                    data=new_data,
-                    options=new_options,
-                )
-                manager._logger.info("Applied imported settings to config entry %s", entry_id)
+            async with _entry_write_lock(hass, entry_id):
+                config_updates = await manager.profile_store.async_import_data(payload)
+                if config_updates:
+                    await async_apply_imported_entry_options(
+                        hass, entry, config_updates, "import_config_service"
+                    )
+                    manager._logger.info(
+                        "Applied imported settings to config entry %s", entry_id
+                    )
 
             # An old payload re-arms the one-time banked-tail repair. Nothing here
             # reloads the entry unless the payload brought settings with it, so
@@ -1274,7 +1352,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
-        hass.services.async_register(DOMAIN, "import_config", handle_import_config)
+        hass.services.async_register(
+            DOMAIN, "import_config", _guarded_service(hass, "import_config", handle_import_config)
+        )
 
     # Register recorder services
     if not hass.services.has_service(DOMAIN, "record_start"):
@@ -1291,7 +1371,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager = hass.data[DOMAIN][entry_id]
             await manager.async_start_recording()
 
-        hass.services.async_register(DOMAIN, "record_start", handle_record_start)
+        hass.services.async_register(
+            DOMAIN, "record_start", _guarded_service(hass, "record_start", handle_record_start)
+        )
 
     if not hass.services.has_service(DOMAIN, "record_stop"):
         async def handle_record_stop(call: ServiceCall) -> None:
@@ -1307,7 +1389,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager = hass.data[DOMAIN][entry_id]
             await manager.async_stop_recording()
 
-        hass.services.async_register(DOMAIN, "record_stop", handle_record_stop)
+        hass.services.async_register(
+            DOMAIN, "record_stop", _guarded_service(hass, "record_stop", handle_record_stop)
+        )
 
     # Register on-device ML training trigger (Stage 4, gated by ENABLE_ML_TRAINING)
     from .const import ENABLE_ML_TRAINING, SERVICE_TRIGGER_ML_TRAINING
@@ -1330,7 +1414,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager._logger.info("Manual ML training: %s", summary)
 
         hass.services.async_register(
-            DOMAIN, SERVICE_TRIGGER_ML_TRAINING, handle_trigger_ml_training
+            DOMAIN,
+            SERVICE_TRIGGER_ML_TRAINING,
+            _guarded_service(hass, "trigger_ml_training", handle_trigger_ml_training),
         )
 
     # Register pause/resume services
@@ -1367,7 +1453,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_key="no_active_cycle",
                 )
 
-        hass.services.async_register(DOMAIN, "pause_cycle", handle_pause_cycle)
+        hass.services.async_register(
+            DOMAIN, "pause_cycle", _guarded_service(hass, "pause_cycle", handle_pause_cycle)
+        )
 
     if not hass.services.has_service(DOMAIN, "resume_cycle"):
         async def handle_resume_cycle(call: ServiceCall) -> None:
@@ -1402,7 +1490,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_key="no_active_cycle",
                 )
 
-        hass.services.async_register(DOMAIN, "resume_cycle", handle_resume_cycle)
+        hass.services.async_register(
+            DOMAIN, "resume_cycle", _guarded_service(hass, "resume_cycle", handle_resume_cycle)
+        )
 
     # Unload confirmation for a device with no door sensor (#451). Deliberately
     # not an error when nothing is waiting: an automation wired to a physical
@@ -1434,7 +1524,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             hass.data[DOMAIN][entry_id].mark_unloaded("mark_unloaded service")
 
-        hass.services.async_register(DOMAIN, "mark_unloaded", handle_mark_unloaded)
+        hass.services.async_register(
+            DOMAIN, "mark_unloaded", _guarded_service(hass, "mark_unloaded", handle_mark_unloaded)
+        )
 
     return True
 

@@ -148,11 +148,17 @@ async def test_b_a_save_mid_cycle_does_not_restore_the_snapshot(mock_hass) -> No
 
 
 @pytest.mark.asyncio
-async def test_b_an_idle_reload_still_restores(mock_hass) -> None:
+async def test_b_an_idle_reload_does_not_restore_either(mock_hass) -> None:
+    """Audit 2026-10-02 MANAGER-04: an in-place reload never restores.
+
+    An idle detector with a snapshot still stored means the cycle-end tail has
+    not cleared it yet; restoring it there re-opened the finished cycle and ended
+    it a second time (two stored copies, two pushes, double lifetime energy).
+    """
     mgr = _build(mock_hass, _entry({}))
     assert mgr.detector.state in (STATE_OFF, "unknown")
     restore = await _reload(mgr, _entry({"notify_live_interval_seconds": 60}))
-    restore.assert_awaited_once()
+    restore.assert_not_awaited()
 
 
 # --- (c) ---------------------------------------------------------------------

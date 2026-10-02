@@ -38,6 +38,21 @@ import homeassistant.util.dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 
+
+def utc_now() -> datetime:
+    """Return the current time as an aware UTC datetime, for interval arithmetic.
+
+    Two aware datetimes that share one tzinfo instance are subtracted on their
+    wall-clock fields, and every ``dt_util.now()`` stamp shares HA's ZoneInfo, so
+    ``now() - earlier_now()`` is an hour wrong across a DST change (audit
+    DETECT-01). Use this for anything that is subtracted, compared or stored to
+    be subtracted later; keep ``dt_util.now()`` only where the LOCAL clock is the
+    point (quiet hours, "finished at 14:05"). It reads ``dt_util.now()`` rather
+    than ``dt_util.utcnow()`` so tests that freeze ``dt_util.now`` keep
+    controlling the clock.
+    """
+    return dt_util.as_utc(dt_util.now())
+
 # Type aliases
 PowerPoint = list[Any] | tuple[Any, ...]
 PowerData = list[PowerPoint]

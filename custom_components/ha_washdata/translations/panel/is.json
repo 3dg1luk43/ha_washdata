@@ -260,7 +260,8 @@
     "save_total_cycles": "Vista samtölu",
     "clear": "Hreinsa",
     "add_brand": "Bæta við vörumerki",
-    "add_appliance": "Bæta við tæki"
+    "add_appliance": "Bæta við tæki",
+    "retry": "Reyna aftur"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Sýnitakabil ætti að vera í mesta lagi helmingur Gæsluabils ({wi} s)"
     },
     "settings_banner": "Árekstrar í stillingum: {n}. Skoðaðu auðkenndu hlutana og lagaðu þá áður en þú vistar.",
-    "settings_banner_btn": "Fara á fyrsta"
+    "settings_banner_btn": "Fara á fyrsta",
+    "end_energy": {
+      "energy": "Of strangt fyrir Stöðvunarþröskuld ({w} W) yfir Slökkviðráð ({d} s); lotan getur aðeins endað eftir varaleið",
+      "stop": "Lokaorka ({e} Wh á {d} s) leyfir aðeins {p} W"
+    }
   },
   "hdr": {
     "ab_comparison": "Samanburður á stillingum A/B",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "þysjaðu með tveimur fingrum · pikkaðu tvisvar til að endurstilla",
     "cycles_since_service": "{since} / {total} lotur",
     "total_cycles_run": "lotur samtals",
-    "correct_total_cycles": "Leiðréttu samtöluna"
+    "correct_total_cycles": "Leiðréttu samtöluna",
+    "hist_reason_already_recorded": "skarast á við lotu sem WashData hefur þegar skráð",
+    "share_consent": "Ég staðfesti að þessar lotur kláruðust eðlilega án truflana"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -771,7 +778,8 @@
       "total_energy": "Orkumat"
     },
     "metric_auc": "AUC {auc} á staðfestingargögnum",
-    "metric_mae": "villa {model} á móti grunnlínu {baseline}"
+    "metric_mae": "villa {model} á móti grunnlínu {baseline}",
+    "fine_tuned_at": "fínstillt {when}"
   },
   "modal": {
     "auto_label": "Sjálfvirk merkingarlotur",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Engar þjónustuáminningar hafa enn verið stilltar.",
     "toast_program_armed": "Kerfi stillt fyrir næstu lotu: {program}",
     "toast_range_required": "Stilltu gilt Frá/Til-svið.",
-    "no_profiles_option": "(engir prófílar ennþá, bættu einum við)"
+    "no_profiles_option": "(engir prófílar ennþá, bættu einum við)",
+    "compare_cycles_title": "Bera saman {count} lotur",
+    "edit_builtin_phase": "Þetta er innbyggður fasi. Við vistun er búin til sérsniðin yfirskrift; upprunalega útgáfan varðveitist og hægt er að endurheimta hana með því að eyða yfirskriftinni.",
+    "fetch_error": "Ekki tókst að hlaða gögnum."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
@@ -1526,7 +1537,7 @@
       "label": "Fastri dælu-lengd"
     },
     "sampling_interval": {
-      "doc": "Væntanlegur tími á milli skynjaralestra - notaður til að stærð sléttunargluggans og hefja frákast á réttan hátt. Sérhver skynjarauppfærsla er tekin óháð þessu gildi; það kvarðar aðeins niðurstreymisútreikningana. Tillöguvélin mælir raunverulegt hraðafall skynjarans frá fyrri lotum og stillir þetta sjálfkrafa.",
+      "doc": "Lágmarkstími milli unninna mælinga. Mælingu sem berst fyrr en þetta eftir þá síðustu er sleppt (lágum mælingum meðan á lotu stendur er alltaf haldið), svo stilltu þetta á raunverulegt tilkynningabil innstungunnar eða lægra: hærra gildi hendir aðeins mælingum. WashData leggur ekki til þetta gildi, því það eina sem hún getur mælt er bilið sem eftir stendur eftir að þessi stilling hefur þegar hent mælingum.",
       "label": "Sýnitakabil"
     },
     "save_debug_traces": {
@@ -1803,7 +1814,8 @@
     "deleting": "Eyði…",
     "imported": "Flutt inn",
     "preparing": "Undirbý…",
-    "unlabelling": "Fjarlægi merkingu…"
+    "unlabelling": "Fjarlægi merkingu…",
+    "working": "Í vinnslu…"
   },
   "suggestion": {
     "both_agree": "WashData mælir með",
@@ -1898,7 +1910,10 @@
       "thr_batch": "Haldið rétt yfir lægsta virka afli við p05 yfir {cycles} lotur ({p05}W) svo að ræsing náist eins snemma og hægt er og stöðvunarþröskuldurinn haldist undir lægsta gangafli vélarinnar.",
       "tol_per_profile": "p75 af dreifni lengdar á hvert snið yfir {profiles} snið ({cycles} lotur); þröngum sniðum er ekki refsað.",
       "tol_pooled": "Byggt á sameinaðri dreifni lengdar {cycles} nýjustu merktu lota (p95 frávik={dev}).",
-      "watchdog": "Haldið eins lágu og óhætt er (rétt yfir p95-uppfærslubilinu {p95}s og að minnsta kosti 2x sýnatökubilinu {median}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana."
+      "watchdog": "Haldið eins lágu og óhætt er (rétt yfir p95-uppfærslubilinu {p95}s og að minnsta kosti 2x sýnatökubilinu {median}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana.",
+      "end_energy_floor": "Hækkað upp í lágmarkið sem Stöðvunarþröskuldur ({stop} W) yfir Slökkviðráð ({off_delay} s) felur í sér; fyrir neðan það getur lotan aðeins endað eftir varaleið.",
+      "max_duration_ratio_default": "Aftur í sjálfgefið gildi: lægra hámark hafnar réttu kerfi í hvert sinn sem keyrsla er lengri en venjulega.",
+      "min_duration_ratio_default": "Aftur í sjálfgefið gildi: hærra lágmark kemur í veg fyrir að lota í gangi þekkist fyrr en hún er vel á veg komin."
     },
     "exclusions": {
       "summary": "Útilokaði {total} ranggreindar lotur: {parts}.",
@@ -2062,7 +2077,36 @@
     "odometer_save_failed": "Ekki tókst að vista samtöluna: {error}",
     "contrib_device_changed": "Bætt við samfélagsverslunina, en skipt var um tæki meðan eyðublaðið var opið. Veldu það í Stillingum.",
     "store_pick_profile_share": "Veldu prófíl til að deila",
-    "remove_failed": "Fjarlæging mistókst: {error}"
+    "remove_failed": "Fjarlæging mistókst: {error}",
+    "analysis_complete": "Greiningu lokið: {count} tillögur",
+    "analysis_failed": "Greining mistókst: {error}",
+    "auto_detect_failed": "Sjálfvirk skynjun mistókst: {error}",
+    "auto_label_failed": "Sjálfvirk merking mistókst: {error}",
+    "could_not_load_cycle": "Ekki tókst að hlaða lotu: {error}",
+    "create_failed": "Stofnun mistókst: {error}",
+    "cycles_deleted": "Lotum eytt: {count}",
+    "debug_cleared": "Villuleitarspor hreinsuð: {count}",
+    "discard_failed": "Ekki tókst að henda: {error}",
+    "error": "Villa: {error}",
+    "export_failed": "Útflutningur mistókst: {error}",
+    "import_failed": "Innflutningur mistókst: {error}",
+    "invalid_json": "\"{key}\" er ekki gilt JSON - lagaðu það eða hreinsaðu reitinn áður en þú vistar.",
+    "label_failed": "Merking mistókst: {error}",
+    "ml_training_promoted": "Þjálfun lokið: {count} líkön virkjuð",
+    "pause_failed": "Ekki tókst að gera hlé: {error}",
+    "phase_created": "Fasi \"{name}\" búinn til",
+    "phase_deleted": "Fasa \"{name}\" eytt",
+    "profile_created": "Prófíll \"{name}\" búinn til",
+    "rename_failed": "Endurnefning mistókst: {error}",
+    "revert_failed": "Endurstilling mistókst: {error}",
+    "save_failed": "Vistun mistókst: {error}",
+    "split_complete": "Skipt í {count} lotur",
+    "start_failed": "Ræsing mistókst: {error}",
+    "stop_failed": "Stöðvun mistókst: {error}",
+    "update_failed": "Uppfærsla mistókst: {error}",
+    "store_download_skipped": "{n} upptöku/upptökum sleppt: of stuttar, of gloppóttar eða þegar á tækinu þínu.",
+    "store_import_low_quality": "Þessi upptaka er of stutt, of gloppótt eða ótrúverðug til að hægt sé að flytja hana inn.",
+    "store_import_duplicate": "Þessi upptaka er þegar á tækinu þínu."
   },
   "trend": {
     "down": "Stefnir niður",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Fela leiðbeiningar",
       "show_guidance": "Sýna leiðbeiningar"
     }
+  },
+  "access": {
+    "edit": "Breyta",
+    "full": "Fullt",
+    "inherit": "Erfa",
+    "none": "Ekkert (falið)",
+    "read": "Lesa"
   }
 }

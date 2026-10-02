@@ -310,11 +310,11 @@ def test_the_second_reporters_dishwasher_reaches_smart_termination() -> None:
     ids = {"ec51d2e7a961", "2ddb931416f4", "de0b0fd8c2c6", "d1a8cfc03436", "c7592ce87b51"}
     recent = [r for r in rows if r["id"] in ids]
     assert len(recent) == 5, json.dumps(rows)[:400]
-    # Four reach Smart Termination. `2ddb931416f4` did too while the Playground
-    # built its own candidate templates; on the ones live matching uses (register
-    # item 387a) its top two programmes score within MATCH_AMBIGUITY_MARGIN, and
-    # that block - not the prefix guard this file fixes - sends it to the timeout.
+    # All five reach Smart Termination. `2ddb931416f4` was held at the timeout by
+    # top-1/top-2 ambiguity (item 393b) until the 0.5.8 matcher fixes (envelope
+    # templates on the query grid, audit MATCH-CORE-01, among them) separated
+    # its two programmes.
     smart = {r["id"] for r in recent if r["termination_reason"] == "smart"}
-    assert smart == ids - {"2ddb931416f4"}, [
+    assert smart == ids, [
         (r["id"], r["termination_reason"]) for r in recent
     ]

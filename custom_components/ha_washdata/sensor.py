@@ -214,6 +214,9 @@ class WasherBaseSensor(SensorEntity):
     """Base sensor for ha_washdata."""
 
     _attr_has_entity_name = True
+    # Pushed by the manager's update signal. Polling re-wrote every entity every
+    # 30 s, idle included (audit PERF-02); only clock-driven values poll.
+    _attr_should_poll = False
 
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize."""
@@ -533,6 +536,9 @@ class WasherPowerSensor(WasherBaseSensor):
 class WasherElapsedTimeSensor(WasherBaseSensor):
     """Sensor for elapsed cycle time."""
 
+    # Elapsed time advances with the clock even when a quiet plug sends nothing.
+    _attr_should_poll = True
+
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the elapsed time sensor."""
         self.entity_description = SensorEntityDescription(
@@ -713,11 +719,33 @@ class WasherProfileCountSensor(WasherBaseSensor):
         # Override unique ID to be profile specific
         self._attr_unique_id = f"{entry.entry_id}_profile_count_{self._profile_token}"
 
+    # One state write reads `available`, `native_value` and
+    # `extra_state_attributes`; take one profile snapshot for all three instead of
+    # three lookups per write (audit PERF-01).
+    _write_snapshot: dict[str, Any] | None = None
+    _write_snapshot_valid: bool = False
+
+    def _profile(self) -> dict[str, Any] | None:
+        if self._write_snapshot_valid:
+            return self._write_snapshot
+        return self._manager.profile_store.get_profile(self._profile_name)
+
+    @callback
+    def _update_callback(self) -> None:
+        """Write state from a single profile snapshot."""
+        self._write_snapshot = self._manager.profile_store.get_profile(self._profile_name)
+        self._write_snapshot_valid = True
+        try:
+            self.async_write_ha_state()
+        finally:
+            self._write_snapshot = None
+            self._write_snapshot_valid = False
+
     @property
     def native_value(self) -> int:  # type: ignore[override]
         """Return the cycle count."""
         # Fetch fresh count from store if available
-        profile = self._manager.profile_store.get_profile(self._profile_name)
+        profile = self._profile()
         if profile:
             return profile.get("cycle_count", 0)
         return 0
@@ -725,12 +753,12 @@ class WasherProfileCountSensor(WasherBaseSensor):
     @property
     def available(self) -> bool:  # type: ignore[override]
         """Return True if profile still exists."""
-        return self._manager.profile_store.get_profile(self._profile_name) is not None
+        return self._profile() is not None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:  # type: ignore[override]
         """Return profile statistics."""
-        profile = self._manager.profile_store.get_profile(self._profile_name)
+        profile = self._profile()
         if not profile:
             return None
 
@@ -968,6 +996,8 @@ class PumpRunsTodaySensor(WasherBaseSensor):
 
     Only created when device type is ``pump``.
     """
+    # A rolling 24 h count: runs age out with the clock, not with an update.
+    _attr_should_poll = True
 
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         self.entity_description = SensorEntityDescription(

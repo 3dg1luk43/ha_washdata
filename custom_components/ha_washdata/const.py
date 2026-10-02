@@ -16,7 +16,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Constants for the WashData integration."""
 
+import math
 from enum import StrEnum
+from typing import Any
 
 DOMAIN = "ha_washdata"
 
@@ -456,6 +458,15 @@ PREROLL_CHAIN_BREAK_SECONDS = 90.0
 # Matching & Termination Stability
 DEFAULT_MATCH_REVERT_RATIO = 0.4  # Drop from peak score to revert to detecting
 DEFAULT_DEFER_FINISH_CONFIDENCE = 0.55  # Minimum confidence to defer cycle finish
+# Fraction of the matched programme's expected duration below which a confident
+# match holds a fallback end (`CycleDetector._should_defer_finish`). Its OWN
+# constant, not a user option: since Feb 2026 the detector was fed the matcher's
+# Stage-1 `profile_match_min_duration_ratio` (0.10, or 0.05 once the suggestion was
+# applied) through a field of the same name, so a confident match only held an end
+# below 5-10% of expected - never in practice. Restoring 0.8 is the live fix for
+# item 390's split: splits 1.37 -> 1.03% over 295 replayed cycles, early ends
+# unchanged, dishwashers byte-identical (audit DETECT-02).
+DEFAULT_DEFER_FINISH_RATIO = 0.8
 
 # ML live-match commit gate: P(top-1 is correct) threshold to commit a match
 # before the persistence counter is satisfied.  Set high to avoid false-early
@@ -835,6 +846,31 @@ REFERENCE_PROFILE_CURVE_POINTS = 50
 # actually DROPPING (62.7%->59.9%). Raising weight alone at the old loose scale
 # inflated both recall and FP (net-negative), so both knobs move together.
 MATCH_DURATION_WEIGHT = 0.22
+# Stage-4 duration weight while the cycle is still RUNNING (live match). Mid-cycle
+# the duration term compares elapsed time with each candidate's FULL duration, a
+# systematic pull toward shorter programmes (80% of 50%-elapsed errors picked a
+# shorter one), so it carries less weight there. Measured leave-one-out on the
+# shipped path: +0.97pp mid-cycle top-1 [+0.11, +1.86], completed cycles and the
+# ambiguity rate unchanged (audit MR-03). The completed-cycle weight stays.
+MATCH_DURATION_WEIGHT_IN_PROGRESS = 0.15
+# The Stage-1 LOWER duration-ratio gate is skipped for a live match during the first
+# this-many seconds of a cycle. Matching starts as soon as the cycle runs, and at
+# 5-10 min elapsed/avg_duration is below the 0.10 floor for every programme longer
+# than 50-100 min, so only short programmes could compete: the gate removed the
+# true programme on 69/114 user folds at 5 min and 35/243 at 10 min. Composed from
+# the measured records: 5 min +83/-2, 10 min +63/-6, 15 min +17/-7, 25% of the cycle
+# +0/-1 (audit MATCH-CORE-02). From 15 min on the gate stays, where it stops a much
+# longer programme stealing the match.
+MATCH_MIN_RATIO_GRACE_S = 900.0
+
+# Hazard end gate (audit DETECT-16). Past an unambiguous match the ENDING fallback
+# waits MARGIN x the longest below-stop pause the matched profile's traced
+# evidence ever resumed from at or after this quiet's position (less SLACK of the
+# run), never less than off_delay and never longer than before. Needs MIN_CYCLES
+# traced cycles: a catalogue of one or two runs has not seen the programme's soaks.
+END_GATE_HAZARD_MARGIN = 1.25
+END_GATE_HAZARD_MIN_CYCLES = 3
+END_GATE_HAZARD_POSITION_SLACK = 0.05
 # Despite the name, "energy" here means mean power (W), not Wh — the Stage-4
 # agreement term compares cur_energy=mean(curr_arr) vs profile_mean_power.
 MATCH_ENERGY_WEIGHT = 0.22
@@ -880,6 +916,16 @@ STATE_ANTI_WRINKLE = "anti_wrinkle"
 STATE_INTERRUPTED = "interrupted"
 STATE_FORCE_STOPPED = "force_stopped"
 STATE_RINSE = "rinse"
+
+# States in which a cycle is in progress: what `binary_sensor.*_running` reports.
+# Only `running` used to count, so the sensor turned off during every soak, pause
+# and the end wait, and automations that treat "off" as "done" fired mid-cycle
+# (audit PLATFORM-06). STARTING is excluded (not yet a confirmed cycle), as is
+# ANTI_WRINKLE (the cycle has finished; the drum only tumbles the load).
+CYCLE_IN_PROGRESS_STATES = frozenset(
+    {STATE_RUNNING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_RINSE}
+)
+
 STATE_UNKNOWN = "unknown"
 STATE_CLEAN = "clean"  # Cycle ended but door not yet opened (laundry still inside)
 
@@ -1523,7 +1569,10 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 # v13: marker-only, arms the one-time banked-tail repair (register item 297).
 # v14: marker-only, re-arms it (#424): the v13 pass judged the drying phase at the
 # wrong threshold and skipped dishwasher timeout finishes.
-STORAGE_VERSION = 14
+# v15: label provenance repair (audit MANAGER-01): cycles the user confirmed or
+# corrected in the review queue are stamped `label_source="manual"`, and an answer
+# the panel's Auto-label had replaced is put back. Pure data, idempotent.
+STORAGE_VERSION = 15
 STORAGE_KEY = "ha_washdata"
 
 # ─── Config-entry schema version (NOT the storage version above) ───────────────
@@ -1563,8 +1612,16 @@ SERVICE_SUBMIT_FEEDBACK = (
 # are always on - they only improve the existing suggestion engine and add no
 # new surfaces, so they need no flag.
 SHOW_ML_LAB = True
-ENABLE_ML_SUGGESTIONS = True
+# Off (audit SUGGEST-18): measured over 26 devices it differed from the classic
+# engine on 7 values, 5 of them within 0.02 of it; its auto-label value fed the
+# match confidence into its own features, and the comparison it drives cost up to
+# 3.5 s per Settings/Cycles/ML-Lab load.
+ENABLE_ML_SUGGESTIONS = False
 ENABLE_ML_TRAINING = True
+# Frozen off even when a device enables ML models (audit ML-05): replayed on 292
+# real cycles the end-guard prevented no premature stop and raised the washer
+# median end lag 12.2 -> 17.5 min, every deferral the full 30 min cap.
+ENABLE_ML_END_GUARD = False
 
 # ─── Community store (online features) ────────────────────────────────────────
 # Opt-in browsing/importing/sharing of reference cycles via the WashData Store.
@@ -1585,27 +1642,54 @@ DEFAULT_ENABLE_ONLINE_FEATURES = False
 SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
     # Detection / recognition
     CONF_MIN_POWER,
-    CONF_OFF_DELAY,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_ENERGY_THRESHOLD,
     CONF_COMPLETION_MIN_SECONDS,
-    CONF_MIN_OFF_GAP,
     CONF_END_ENERGY_THRESHOLD,
-    CONF_POWER_OFF_THRESHOLD_W,
-    CONF_POWER_OFF_DELAY,
+    # (off_delay, min_off_gap, power_off_*, profile_match_interval dropped: they
+    # are functions of the SHARER'S plug cadence, not the model - a 94 s plug's
+    # 1800 s off_delay is a 30 min end lag on a 1 s plug. Audit STORE-06.)
     # Matching
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_UNMATCH_THRESHOLD,
-    CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-    CONF_PROFILE_DURATION_TOLERANCE,
+    # (profile_duration_tolerance dropped: nothing reads it - audit DOCS-01.)
     CONF_DURATION_TOLERANCE,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
 )
+
+
+def sanitize_shared_settings(
+    settings: Any, device_type: str | None = None
+) -> dict[str, float]:
+    """The allow-listed, finite, numeric subset of a shared settings map.
+
+    Every share/adopt/export site goes through this. The duration ratios are also
+    held to the shipped bounds (audit STORE-06): 25/25 store bundles carried a max
+    ratio below 1.8 (12 at the 1.5 measured to delete the true candidate on 2.3% of
+    folds, register item 311), and min ratios up to 0.81 forbid any match before
+    81% of a programme.
+    """
+    if not isinstance(settings, dict):
+        return {}
+    out: dict[str, float] = {}
+    for key, value in settings.items():
+        if key not in SHAREABLE_SETTING_KEYS or isinstance(value, bool):
+            continue
+        if not isinstance(value, (int, float)) or not math.isfinite(value):
+            continue
+        if key == CONF_PROFILE_MATCH_MAX_DURATION_RATIO:
+            value = max(value, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
+        elif key == CONF_PROFILE_MATCH_MIN_DURATION_RATIO:
+            value = min(value, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
+                str(device_type or ""), DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
+            ))
+        out[str(key)] = value
+    return out
 
 # Public Firebase web config for the community store (NOT secret - identifies the
 # project; access is enforced by the store's Firestore rules).
@@ -1773,6 +1857,9 @@ HISTORY_IMPORT_EDGE_GAP_S: float = 60.0              # leading samples this far 
                                                      # are hourly-average debris and are trimmed
                                                      # (leading edge ONLY - trimming the trailing
                                                      # edge eats a real cycle's low-power tail)
+HISTORY_IMPORT_MAX_BRIDGE_S: float = 300.0           # an `unavailable` hole up to this long inside
+                                                     # a block is bridged as a plain gap (Wi-Fi
+                                                     # blip, HA restart), not a cut (PLAYGROUND-06)
 HISTORY_IMPORT_MAX_BLOCK_SPAN_S: float = 12 * 3600.0 # a block longer than this can only produce the
                                                      # detector's 8 h `force_stopped` blob, so it is
                                                      # reported rather than replayed

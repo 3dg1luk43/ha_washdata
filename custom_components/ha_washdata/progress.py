@@ -46,14 +46,19 @@ from .const import (
     STATE_PAUSED,
     STATE_RUNNING,
 )
-from .profile_store import decompress_power_data
+from .profile_store import _envelope_y, decompress_power_data
 from .time_utils import power_data_to_offsets
 
 _LOGGER = logging.getLogger(__name__)
 
-# Minimum progress before an energy projection is trusted (mirrors the manager
-# class constant of the same purpose).
-PROJECTION_MIN_PROGRESS = 3.0
+# Minimum progress before an energy projection is shown. 10, not 3 (audit
+# PROGRESS-04): at 3% both divisors were off by 77-101% MAPE over 670 LOO folds
+# (devtools/energy_projection_eval.py), at 10% the energy-share divisor is 50%.
+PROJECTION_MIN_PROGRESS = 10.0
+
+# Floor on the matched profile's cumulative-energy share used as the projection
+# divisor: below it the curve's start is noise and the division explodes.
+PROJECTION_MIN_ENERGY_FRACTION = 0.05
 
 # The progress EMA weights below are per *estimate*, and were chosen against the
 # manager's 5 s estimate throttle. See :func:`_dt_scaled_alpha`.
@@ -615,6 +620,21 @@ def _dt_scaled_alpha(alpha: float, dt_s: float | None) -> float:
     return 1.0 - (1.0 - alpha) ** steps
 
 
+def ema_seed(
+    prev_smoothed: float, prev_program: str | None, program: str | None
+) -> float:
+    """The EMA state an estimate for ``program`` continues from (audit PROGRESS-09).
+
+    A programme switch or a pin re-seeds to 0.0 (a cold start, i.e. the raw
+    estimate for the new programme). Carrying the old percent onto the new
+    duration read 62-67 min against a 90 min truth and took up to 12 min to
+    settle; an honest backwards jump at a switch is the correct information.
+    """
+    if prev_program is not None and program != prev_program:
+        return 0.0
+    return prev_smoothed
+
+
 def _compute_progress_base(
     device_type: str,
     matched_duration: float,
@@ -684,6 +704,11 @@ def _compute_progress_base(
 
         remaining = matched_duration * (1.0 - (progress / 100.0))
         remaining = max(0.0, remaining)
+        if duration_so_far >= matched_duration:
+            # Overrun: the 99% cap would pin remaining at 1% of the profile for as
+            # long as the run lasts, re-arming the live chronometer "now + 36 s"
+            # every tick (audit PROGRESS-06). The linear branch already says 0.
+            remaining = 0.0
         total = duration_so_far + remaining
 
         logger.debug(
@@ -710,7 +735,10 @@ def _compute_progress_base(
     else:
         smoothed = progress
 
-    progress = max(0.0, min(smoothed, 100.0))
+    # Clamped in the carried state too: unclamped, a run past a short mis-match
+    # carried 146% into the correct longer programme (audit PROGRESS-09).
+    smoothed = max(0.0, min(smoothed, 100.0))
+    progress = smoothed
     remaining = max(matched_dur * (1.0 - progress / 100.0), 0.0)
     total = duration_so_far + remaining
     logger.debug(
@@ -823,6 +851,52 @@ def current_phase(
         return None
 
 
+_ENERGY_CURVES: dict[tuple[str, int, Any], tuple[np.ndarray, np.ndarray] | None] = {}
+
+
+def envelope_energy_fraction(
+    store: Any, program: str | None, progress_pct: float
+) -> float | None:
+    """Share of the matched profile's energy used by ``progress_pct`` (audit PROGRESS-04).
+
+    The cumulative integral of the envelope's ``avg`` curve, read at the same
+    fraction of its time grid. Energy does not accrue linearly in time - heaters
+    front-load it - so ``energy / time_fraction`` projected washers 1.89x too high
+    at 25%. None without a usable envelope (the caller falls back to that).
+    """
+    if not program or store is None:
+        return None
+    try:
+        env = store.get_envelope(program)
+    except Exception:  # noqa: BLE001 - a projection input, never fatal
+        return None
+    if not isinstance(env, dict):
+        return None
+    key = (program, id(env), env.get("updated"))
+    if key not in _ENERGY_CURVES:
+        if len(_ENERGY_CURVES) > 64:
+            _ENERGY_CURVES.clear()
+        curve = None
+        try:
+            tg = np.asarray(env.get("time_grid") or [], dtype=float)
+            avg = _envelope_y(env.get("avg"))
+            if tg.size >= 2 and avg.size == tg.size and np.all(np.isfinite(avg)):
+                cum = np.concatenate(
+                    ([0.0], np.cumsum(np.diff(tg) * (avg[1:] + avg[:-1]) / 2.0))
+                )
+                if cum[-1] > 0 and tg[-1] > tg[0]:
+                    curve = (tg, cum / cum[-1])
+        except (TypeError, ValueError):
+            curve = None
+        _ENERGY_CURVES[key] = curve
+    curve = _ENERGY_CURVES[key]
+    if curve is None:
+        return None
+    tg, frac = curve
+    x = tg[0] + (tg[-1] - tg[0]) * min(max(float(progress_pct) / 100.0, 0.0), 1.0)
+    return max(float(np.interp(x, tg, frac)), PROJECTION_MIN_ENERGY_FRACTION)
+
+
 def projected_energy(
     store: Any,
     options: Any,
@@ -839,8 +913,10 @@ def projected_energy(
 ) -> tuple[float | None, float | None]:
     """Project total energy (Wh) and cost for the running cycle.
 
-    Prefers the on-device ``total_energy`` regressor; otherwise falls back to
-    ``energy_so_far / progress_fraction``. Returns ``(wh, cost)``; both values are
+    Prefers the on-device ``total_energy`` regressor; otherwise divides
+    ``energy_so_far`` by the matched profile's cumulative-energy share at this
+    progress (:func:`envelope_energy_fraction`), and by the time fraction only
+    when the profile has no usable envelope. Returns ``(wh, cost)``; both values are
     ``None`` when progress is too low or there is no energy yet. Never raises.
 
     ``cost_so_far`` is the dynamic-tariff cost already incurred (#426): the energy
@@ -868,7 +944,10 @@ def projected_energy(
             end_expectation_fn, logger,
         )
         if projected_wh is None:
-            projected_wh = energy_so_far / (progress / 100.0)
+            fraction = envelope_energy_fraction(store, current_program, progress)
+            projected_wh = energy_so_far / (
+                fraction if fraction is not None else progress / 100.0
+            )
         projected_wh = max(projected_wh, energy_so_far)
         # A valid price of 0 (free/zero tariff) must yield cost 0.0, not None; only an
         # absent or non-numeric price is "unknown".

@@ -260,7 +260,8 @@
     "save_total_cycles": "Totaal opslaan",
     "clear": "Wissen",
     "add_brand": "Merk toevoegen",
-    "add_appliance": "Apparaat toevoegen"
+    "add_appliance": "Apparaat toevoegen",
+    "retry": "Opnieuw proberen"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Bemonsteringsinterval moet maximaal de helft van het watchdog-interval ({wi} s) zijn"
     },
     "settings_banner": "Instellingsconflicten: {n}. Controleer de gemarkeerde secties en los ze op voordat u opslaat.",
-    "settings_banner_btn": "Ga naar eerste"
+    "settings_banner_btn": "Ga naar eerste",
+    "end_energy": {
+      "energy": "Te streng voor Stopdrempel ({w} W) gedurende Uitschakelvertraging ({d} s); de cyclus kan alleen via een terugvalpad eindigen",
+      "stop": "Eindenergie ({e} Wh in {d} s) staat slechts {p} W toe"
+    }
   },
   "hdr": {
     "ab_comparison": "Vergelijking van instellingen A/B",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "knijp om te zoomen · dubbeltik om te resetten",
     "cycles_since_service": "{since} / {total} cycli",
     "total_cycles_run": "cycli in totaal",
-    "correct_total_cycles": "Totaal corrigeren"
+    "correct_total_cycles": "Totaal corrigeren",
+    "hist_reason_already_recorded": "overlapt met een cyclus die WashData al heeft vastgelegd",
+    "share_consent": "Ik bevestig dat deze cycli normaal zijn voltooid zonder onderbreking"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -771,7 +778,8 @@
       "total_energy": "Schatting van het energieverbruik"
     },
     "metric_auc": "AUC {auc} op validatiegegevens",
-    "metric_mae": "fout {model} vs. referentie {baseline}"
+    "metric_mae": "fout {model} vs. referentie {baseline}",
+    "fine_tuned_at": "verfijnd: {when}"
   },
   "modal": {
     "auto_label": "Automatische labelcycli",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Er zijn nog geen serviceherinneringen ingesteld.",
     "toast_program_armed": "Programma klaargezet voor de volgende cyclus: {program}",
     "toast_range_required": "Stel een geldig Van/Tot-bereik in.",
-    "no_profiles_option": "(nog geen profielen, voeg er een toe)"
+    "no_profiles_option": "(nog geen profielen, voeg er een toe)",
+    "compare_cycles_title": "{count} cycli vergelijken",
+    "edit_builtin_phase": "Dit is een ingebouwde fase. Bij opslaan wordt een aangepaste overschrijving gemaakt; het origineel blijft behouden en kan worden hersteld door de overschrijving te verwijderen.",
+    "fetch_error": "Laden van gegevens mislukt."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: stille seconden na de verwachte duur voordat de wachttijd op het wegpompen aan het einde van de cyclus wordt vrijgegeven",
@@ -1526,7 +1537,7 @@
       "label": "Duur pomp vastzitten"
     },
     "sampling_interval": {
-      "doc": "Verwachte tijd tussen sensormetingen - gebruikt om het afvlakkingsvenster te vergroten en de debounce correct te starten. Elke sensorupdate wordt ongeacht deze waarde vastgelegd; het kalibreert alleen de stroomafwaartse berekeningen. De suggestie-engine meet de werkelijke cadans van uw sensor uit eerdere cycli en stelt deze automatisch in.",
+      "doc": "Minimale tijd tussen verwerkte metingen. Een meting die eerder dan deze tijd na de vorige binnenkomt, wordt overgeslagen (lage metingen tijdens een cyclus worden altijd bewaard). Stel deze waarde daarom in op het werkelijke rapportage-interval van uw stekker of lager: een hogere waarde gooit alleen metingen weg. WashData stelt deze waarde niet voor, omdat het alleen het interval kan meten dat overblijft nadat deze instelling al metingen heeft weggegooid.",
       "label": "Samplinginterval"
     },
     "save_debug_traces": {
@@ -1803,7 +1814,8 @@
     "deleting": "Verwijderen…",
     "imported": "Geïmporteerd",
     "preparing": "Voorbereiden…",
-    "unlabelling": "Label verwijderen…"
+    "unlabelling": "Label verwijderen…",
+    "working": "Bezig…"
   },
   "suggestion": {
     "both_agree": "WashData raadt aan",
@@ -1898,7 +1910,10 @@
       "thr_batch": "Net boven het laagste actieve vermogen op p05 over {cycles} cycli ({p05}W) gehouden zodat een start zo vroeg mogelijk wordt opgemerkt en de stopdrempel onder het laagste draaivermogen van de machine blijft.",
       "tol_per_profile": "p75 van de duurvariantie per profiel over {profiles} profielen ({cycles} cycli); strakke profielen worden niet benadeeld.",
       "tol_pooled": "Op basis van de gebundelde duurvariantie van {cycles} recent gelabelde cycli (p95-afwijking={dev}).",
-      "watchdog": "Zo laag als veilig gehouden (net boven de p95-updatekloof van {p95}s en minstens 2x het meetinterval van {median}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops."
+      "watchdog": "Zo laag als veilig gehouden (net boven de p95-updatekloof van {p95}s en minstens 2x het meetinterval van {median}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops.",
+      "end_energy_floor": "Verhoogd tot de ondergrens die volgt uit de stopdrempel ({stop} W) gedurende de uitschakelvertraging ({off_delay} s); daaronder kan de cyclus alleen via een terugvalpad eindigen.",
+      "max_duration_ratio_default": "Terug naar de standaardwaarde: een lager plafond wijst het juiste programma af zodra een cyclus langer duurt dan gebruikelijk.",
+      "min_duration_ratio_default": "Terug naar de standaardwaarde: een hogere ondergrens zorgt ervoor dat een lopende cyclus pas wordt herkend als hij al ver gevorderd is."
     },
     "exclusions": {
       "summary": "{total} verkeerd gedetecteerde cyclus(sen) uitgesloten: {parts}.",
@@ -2062,7 +2077,36 @@
     "odometer_save_failed": "Kan totaal niet opslaan: {error}",
     "contrib_device_changed": "Toegevoegd aan de communitystore, maar er is van apparaat gewisseld terwijl het formulier openstond. Selecteer het bij Instellingen.",
     "store_pick_profile_share": "Kies een profiel om naar te delen",
-    "remove_failed": "Verwijderen mislukt: {error}"
+    "remove_failed": "Verwijderen mislukt: {error}",
+    "analysis_complete": "Analyse voltooid: {count} suggestie(s)",
+    "analysis_failed": "Analyse mislukt: {error}",
+    "auto_detect_failed": "Automatische detectie mislukt: {error}",
+    "auto_label_failed": "Automatisch labelen mislukt: {error}",
+    "could_not_load_cycle": "Kan cyclus niet laden: {error}",
+    "create_failed": "Aanmaken mislukt: {error}",
+    "cycles_deleted": "Verwijderde cycli: {count}",
+    "debug_cleared": "Gewiste debugsporen: {count}",
+    "discard_failed": "Verwerpen mislukt: {error}",
+    "error": "Fout: {error}",
+    "export_failed": "Exporteren mislukt: {error}",
+    "import_failed": "Importeren mislukt: {error}",
+    "invalid_json": "\"{key}\" is geen geldige JSON - corrigeer het of maak het veld leeg voordat u opslaat.",
+    "label_failed": "Labelen mislukt: {error}",
+    "ml_training_promoted": "Training voltooid: {count} model(len) geactiveerd",
+    "pause_failed": "Pauzeren mislukt: {error}",
+    "phase_created": "Fase \"{name}\" aangemaakt",
+    "phase_deleted": "Fase \"{name}\" verwijderd",
+    "profile_created": "Profiel \"{name}\" aangemaakt",
+    "rename_failed": "Hernoemen mislukt: {error}",
+    "revert_failed": "Terugzetten mislukt: {error}",
+    "save_failed": "Opslaan mislukt: {error}",
+    "split_complete": "Gesplitst in {count} cycli",
+    "start_failed": "Starten mislukt: {error}",
+    "stop_failed": "Stoppen mislukt: {error}",
+    "update_failed": "Bijwerken mislukt: {error}",
+    "store_download_skipped": "{n} opname(s) overgeslagen: te kort, met te veel gaten of al op uw apparaat.",
+    "store_import_low_quality": "Deze opname is te kort, bevat te veel gaten of is onaannemelijk en kan niet worden geïmporteerd.",
+    "store_import_duplicate": "Deze opname staat al op uw apparaat."
   },
   "trend": {
     "down": "Trend naar beneden",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Begeleiding verbergen",
       "show_guidance": "Begeleiding weergeven"
     }
+  },
+  "access": {
+    "edit": "Bewerken",
+    "full": "Volledig",
+    "inherit": "Overnemen",
+    "none": "Geen (verborgen)",
+    "read": "Lezen"
   }
 }

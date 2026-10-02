@@ -45,6 +45,8 @@ from .const import (
 )
 from .suggestion_engine import SuggestionEngine
 from .log_utils import DeviceLoggerAdapter
+from .profile_store import _AUTO_LABEL_SOURCES
+from .detector_config import effective_option_values
 
 if TYPE_CHECKING:
     from .profile_store import ProfileStore
@@ -171,12 +173,18 @@ class LearningManager:
             current_options = {**entry.data, **entry.options}
 
         # Cooldown: how many cycles have elapsed since the user last applied suggestions?
-        past_cycles = self.profile_store.get_past_cycles()
+        # Counted on the odometer, not len(past_cycles): at the retention cap the
+        # list length stops growing, so one Apply-all silenced every non-corrective
+        # suggestion forever (audit SUGGEST-05).
+        cycles_now = self.profile_store.get_lifetime_cycle_count()
         last_apply_count = self.profile_store.get_suggestion_apply_cycle_count()
         cooldown_active = (
             last_apply_count > 0
-            and (len(past_cycles) - last_apply_count) < MIN_SUGGESTION_COOLDOWN_CYCLES
+            and (cycles_now - last_apply_count) < MIN_SUGGESTION_COOLDOWN_CYCLES
         )
+        # Compare against what each key RUNS with when it is unset (audit
+        # SUGGEST-10), not against None, which skipped every gate below.
+        effective = effective_option_values(current_options, self.device_type)
 
         # Locked keys (#343): the user has told the auto-tuner to stop proposing
         # these (e.g. thresholds that break an anti-crease-tuned device). Drop them
@@ -197,6 +205,8 @@ class LearningManager:
                 continue
             if isinstance(data, dict) and "value" in data:
                 current_val = current_options.get(key)
+                if current_val is None:
+                    current_val = effective.get(key)
                 suggested_val = data["value"]
                 if current_val is not None and suggested_val is not None:
                     try:
@@ -293,8 +303,14 @@ class LearningManager:
         confidence: float = 0.0,
         predicted_duration: float | None = None,
         match_result: Any | None = None,
+        label_allowed: bool = True,
     ) -> None:
         """Analyze completed cycle for learning.
+
+        ``label_allowed`` is the manager's cycle-end label gate verdict (margin,
+        ambiguity and margin owner). When it refused, this pass must not label the
+        cycle anyway on confidence alone (audit MANAGER-02 / MATCH-DECIDE-01); it
+        asks the user instead.
         
         Args:
             cycle_data: Completed cycle data
@@ -303,18 +319,9 @@ class LearningManager:
             predicted_duration: Expected duration in seconds
             match_result: MatchResult from profile_store.async_match_profile() (optional)
         """
-        # 1. Trigger single-cycle simulation — only for cleanly-completed, labeled,
-        # non-noise cycles. Skipping force_stopped/unlabeled/noise avoids deriving
-        # start/stop thresholds from mis-detected or truncated cycles.
-        _profile = detected_profile or cycle_data.get("profile_name")
-        _is_clean = (
-            cycle_data.get("power_data")
-            and _profile
-            and _profile != "noise"
-            and cycle_data.get("status") == "completed"
-        )
-        if _is_clean:
-            self.hass.async_create_task(self._async_run_simulation(cycle_data))
+        # (No per-cycle stop/start simulation: re-deriving both from the last cycle
+        # alone made them a random walk - audit SUGGEST-06. The batch pass below
+        # derives them across cycles.)
 
         # 1b. Standby above the stop threshold (#458). Every cycle end, whatever its
         # status: a force-stopped cycle is the evidence this pass exists for.
@@ -325,7 +332,8 @@ class LearningManager:
 
         # 2. Check if we should request feedback
         self._maybe_request_feedback(
-            cycle_data, detected_profile, confidence, predicted_duration, match_result
+            cycle_data, detected_profile, confidence, predicted_duration, match_result,
+            label_allowed=label_allowed,
         )
 
         # 3+3b. Heavy per-profile suggestion passes — only run when the labeled
@@ -391,21 +399,6 @@ class LearningManager:
                 )
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Batch simulation failed: %s", e)
-
-    async def _async_run_simulation(self, cycle_data: dict[str, Any]) -> None:
-        """Run simulation asynchronously."""
-        try:
-            # Simulation runner derives optimal thresholds
-            # Offload to executor since simulation can be heavy (CPU bound)
-            engine = self.suggestion_engine.for_job()
-            new_suggestions = await self.hass.async_add_executor_job(
-                engine.run_simulation, cycle_data
-            )
-            if new_suggestions:
-                self._apply_suggestions_and_notify(new_suggestions)
-                self._logger.debug("Post-cycle simulation completed with suggestions: %s", new_suggestions.keys())
-        except Exception as e:
-            self._logger.error("Background simulation failed: %s", e)
 
     def _update_operational_suggestions(self, now: datetime) -> None:
         """Generate suggestions for operational parameters (intervals, timeouts).
@@ -551,6 +544,7 @@ class LearningManager:
         confidence: float,
         predicted_duration: float | None,
         match_result: Any | None = None,
+        label_allowed: bool = True,
     ) -> None:
         """Check if feedback should be requested for this completed cycle."""
         if (
@@ -645,8 +639,30 @@ class LearningManager:
             )
         except (TypeError, ValueError):
             envelope_suspicious = False
+        # The cycle-end pass already labelled this cycle with a DIFFERENT programme
+        # (the post-cycle match on the complete trace), or the user picked it by
+        # hand: re-labelling here would overwrite that label - or its "manual"
+        # provenance - with this pass's guess.
+        _existing_label = cycle_data.get("profile_name")
+        if route_conf >= auto_label_conf and _existing_label and (
+            _existing_label != detected_profile
+            or cycle_data.get("label_source") == "manual"
+        ):
+            self._logger.debug(
+                "Cycle %s already labelled '%s' at cycle end; not auto-labelling it",
+                cycle_id, _existing_label,
+            )
+            return
         if route_conf >= auto_label_conf:
-            if ml_suspicious or envelope_suspicious:
+            if not label_allowed:
+                self._logger.info(
+                    "Cycle %s: the label gate refused '%s' (too close to the runner-up "
+                    "or flagged ambiguous); requesting confirmation instead of "
+                    "auto-labelling it.",
+                    cycle_id, detected_profile,
+                )
+                # Fall through to the feedback-request path below.
+            elif ml_suspicious or envelope_suspicious:
                 if ml_suspicious:
                     self._logger.info(
                         "ML quality model flagged cycle %s as suspicious (score=%.3f >= %.2f); "
@@ -831,7 +847,9 @@ class LearningManager:
         elif user_confirmed:
             profile_name = pending.get("detected_profile")
             if isinstance(profile_name, str) and profile_name:
-                self._auto_label_cycle(cycle_id, profile_name, duration_sec)
+                self._auto_label_cycle(
+                    cycle_id, profile_name, duration_sec, source="manual"
+                )
                 if duration_sec is not None:
                     cycles = self.profile_store.get_past_cycles()
                     confirmed_cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
@@ -1010,12 +1028,37 @@ class LearningManager:
         )
         return True
 
-    def _auto_label_cycle(self, cycle_id: str, profile_name: str, manual_duration: float | None = None) -> None:
+    def _auto_label_cycle(
+        self,
+        cycle_id: str,
+        profile_name: str,
+        manual_duration: float | None = None,
+        *,
+        source: str = "auto_match",
+    ) -> None:
+        """Write a label and its provenance.
+
+        ``source`` is ``"manual"`` when the user answered a review request (confirm
+        or correct) and ``"auto_match"`` when the matcher's guess is recorded.
+        These paths used to set only ``profile_name``, so a user's correction still
+        read as a matcher guess and the panel's Auto-label reverted it - storing the
+        user's answer as ``original_auto_label`` (audit MANAGER-01).
+        """
         cycles = self.profile_store.get_past_cycles()
         cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
         if cycle:
+            old = cycle.get("profile_name")
+            if (
+                source == "manual"
+                and old
+                and old != profile_name
+                and not cycle.get("original_auto_label")
+                and cycle.get("label_source") in _AUTO_LABEL_SOURCES
+            ):
+                cycle["original_auto_label"] = old
             cycle["profile_name"] = profile_name
             cycle["auto_labeled"] = True
+            cycle["label_source"] = source
             if manual_duration:
                 cycle["manual_duration"] = manual_duration
 
@@ -1031,7 +1074,9 @@ class LearningManager:
         rebuild in async_submit_cycle_feedback() will recalculate all statistics
         (min/max/avg) from labeled cycles, ensuring accuracy.
         """
-        self._auto_label_cycle(cycle_id, corrected_profile, corrected_duration)
+        self._auto_label_cycle(
+            cycle_id, corrected_profile, corrected_duration, source="manual"
+        )
         if corrected_duration is not None:
             cycles = self.profile_store.get_past_cycles()
             cycle = next((c for c in cycles if c.get("id") == cycle_id), None)

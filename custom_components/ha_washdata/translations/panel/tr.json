@@ -260,7 +260,8 @@
         "save_total_cycles": "Toplamı Kaydet",
         "clear": "Temizle",
         "add_brand": "Marka ekle",
-        "add_appliance": "Cihaz ekle"
+        "add_appliance": "Cihaz ekle",
+        "retry": "Yeniden dene"
     },
     "note": {
         "off_delay": {
@@ -334,6 +335,10 @@
         "watchdog": {
             "interval": "En az 2 kat Örnekleme Aralığı olmalıdır ({si} s)",
             "sampling": "Örnekleme Aralığı, Bekçi Aralığının en fazla yarısı olmalıdır ({wi} s)"
+        },
+        "end_energy": {
+            "energy": "Kapatma Gecikmesi ({d} s) boyunca Durdurma Eşiği ({w} W) için fazla katı; döngü yalnızca bir yedek yoldan bitebilir",
+            "stop": "Bitiş Enerjisi ({d} s içinde {e} Wh) yalnızca {p} W değerine izin verir"
         }
     },
     "hdr": {
@@ -735,7 +740,9 @@
         "zoom_hint_touch_zoomed": "iki parmakla yakınlaştırın · sıfırlamak için çift dokunun",
         "cycles_since_service": "{since} / {total} döngü",
         "total_cycles_run": "toplamda çalıştırılan döngü",
-        "correct_total_cycles": "Toplamı düzelt"
+        "correct_total_cycles": "Toplamı düzelt",
+        "hist_reason_already_recorded": "WashData'nın zaten kaydettiği bir döngüyle çakışıyor",
+        "share_consent": "Bu döngülerin kesintisiz ve normal şekilde tamamlandığını onaylıyorum"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -771,7 +778,8 @@
             "total_energy": "Enerji tahmini"
         },
         "metric_auc": "Ayrılmış doğrulama verisinde AUC {auc}",
-        "metric_mae": "hata {model} - temel model {baseline}"
+        "metric_mae": "hata {model} - temel model {baseline}",
+        "fine_tuned_at": "ince ayar: {when}"
     },
     "modal": {
         "auto_label": "Döngüleri Otomatik Etiketle",
@@ -1103,7 +1111,10 @@
         "no_reminders_set": "Henüz servis hatırlatıcısı ayarlanmadı.",
         "toast_program_armed": "Program sonraki döngü için ayarlandı: {program}",
         "toast_range_required": "Geçerli bir Başlangıç/Bitiş aralığı belirleyin",
-        "no_profiles_option": "(henüz profil yok, bir tane ekleyin)"
+        "no_profiles_option": "(henüz profil yok, bir tane ekleyin)",
+        "compare_cycles_title": "{count} döngüyü karşılaştır",
+        "edit_builtin_phase": "Bu yerleşik bir aşamadır. Kaydetmek özel bir geçersiz kılma oluşturur; orijinal korunur ve geçersiz kılma silinerek geri yüklenebilir.",
+        "fetch_error": "Veriler yüklenemedi."
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1514,7 +1525,7 @@
             "label": "Pompa Takılma Süresi"
         },
         "sampling_interval": {
-            "doc": "Sensör okumaları arasında beklenen süre - yumuşatma penceresini boyutlandırmak ve geri dönmeyi doğru şekilde başlatmak için kullanılır. Her sensör güncellemesi bu değere bakılmaksızın yakalanır; yalnızca aşağı yöndeki hesaplamaları kalibre eder. Öneri motoru, sensörünüzün geçmiş döngülerdeki gerçek temposunu ölçer ve bunu otomatik olarak ayarlar.",
+            "doc": "İşlenen okumalar arasındaki en kısa süre. Bir öncekinden sonra bu süreden daha erken gelen okuma atlanır (döngü sırasındaki düşük okumalar her zaman korunur); bu yüzden bunu prizinizin gerçek raporlama aralığına veya daha düşük bir değere ayarlayın: daha yüksek bir değer yalnızca okumaları çöpe atar. WashData bu değeri önermez, çünkü ölçebildiği şey, bu ayar okumaları zaten eledikten sonra kalan aralıktır.",
             "label": "Örnekleme Aralığı"
         },
         "save_debug_traces": {
@@ -1803,7 +1814,8 @@
         "deleting": "Siliniyor…",
         "imported": "İçe aktarıldı",
         "preparing": "Hazırlanıyor…",
-        "unlabelling": "Etiket kaldırılıyor…"
+        "unlabelling": "Etiket kaldırılıyor…",
+        "working": "İşleniyor…"
     },
     "tab": {
         "advanced": "Gelişmiş",
@@ -1949,7 +1961,36 @@
         "odometer_saved": "Toplam döngü sayısı kaydedildi",
         "odometer_save_failed": "Toplam kaydedilemedi: {error}",
         "store_pick_profile_share": "Paylaşılacak bir profil seçin",
-        "remove_failed": "Kaldırma başarısız: {error}"
+        "remove_failed": "Kaldırma başarısız: {error}",
+        "analysis_complete": "Analiz tamamlandı: {count} öneri",
+        "analysis_failed": "Analiz başarısız: {error}",
+        "auto_detect_failed": "Otomatik algılama başarısız: {error}",
+        "auto_label_failed": "Otomatik etiketleme başarısız: {error}",
+        "could_not_load_cycle": "Döngü yüklenemedi: {error}",
+        "create_failed": "Oluşturma başarısız: {error}",
+        "cycles_deleted": "{count} döngü silindi",
+        "debug_cleared": "{count} hata ayıklama izi temizlendi",
+        "discard_failed": "İptal başarısız: {error}",
+        "error": "Hata: {error}",
+        "export_failed": "Dışa aktarma başarısız: {error}",
+        "import_failed": "İçe aktarma başarısız: {error}",
+        "invalid_json": "\"{key}\" geçerli bir JSON değil; kaydetmeden önce düzeltin veya alanı temizleyin.",
+        "label_failed": "Etiketleme başarısız: {error}",
+        "ml_training_promoted": "Eğitim tamamlandı: {count} model yükseltildi",
+        "pause_failed": "Duraklatma başarısız: {error}",
+        "phase_created": "\"{name}\" aşaması oluşturuldu",
+        "phase_deleted": "\"{name}\" aşaması silindi",
+        "profile_created": "\"{name}\" profili oluşturuldu",
+        "rename_failed": "Yeniden adlandırma başarısız: {error}",
+        "revert_failed": "Geri alma başarısız: {error}",
+        "save_failed": "Kaydetme başarısız: {error}",
+        "split_complete": "{count} döngüye bölündü",
+        "start_failed": "Başlatma başarısız: {error}",
+        "stop_failed": "Durdurma başarısız: {error}",
+        "update_failed": "Güncelleme başarısız: {error}",
+        "store_download_skipped": "{n} kayıt atlandı: çok kısa, çok fazla boşluk içeriyor veya zaten cihazınızda.",
+        "store_import_low_quality": "Bu kayıt çok kısa, çok fazla boşluk içeriyor veya gerçekçi değil; içe aktarılamaz.",
+        "store_import_duplicate": "Bu kayıt zaten cihazınızda."
     },
     "suggestion": {
         "both_agree": "WashData öneriyor",
@@ -2044,7 +2085,10 @@
             "tol_pooled": "{cycles} son etiketli çevrimin birleştirilmiş süre varyansına dayalı (p95 sapma={dev}).",
             "watchdog": "Güvenli olduğu kadar düşük tutuldu (p95 güncelleme boşluğu {p95}s değerinin hemen üzerinde ve örnekleme aralığı {median}s değerinin en az 2 katı, en az 30s); böylece takılmalar yanlış durdurmalar olmadan hızlıca yakalanır.",
             "match_interval_capped": "{persistence} ardışık eşleşme en kısa programın ({shortest}s) %{pct} kadarlık bölümüne sığsın diye sınırlandırıldı; yalnızca güncelleme sıklığı (medyan={median}s) daha uzun bir aralık önerirdi.",
-            "match_interval_floored": "Yalnızca en kısa program ({shortest}s) bunu {cap}s ile sınırlardı; bu da {minimum}s alt sınırının altında kaldığından değer alt sınırda tutuluyor: {persistence} ardışık eşleşme {budget}s sürüyor, bu da o programın %{pct} kadarlık bölümünden fazla. Eşleştirme yalnızca yeni bir ölçüm geldiğinde çalışır (medyan={median}s), bu yüzden alt sınırın bir maliyeti yok."
+            "match_interval_floored": "Yalnızca en kısa program ({shortest}s) bunu {cap}s ile sınırlardı; bu da {minimum}s alt sınırının altında kaldığından değer alt sınırda tutuluyor: {persistence} ardışık eşleşme {budget}s sürüyor, bu da o programın %{pct} kadarlık bölümünden fazla. Eşleştirme yalnızca yeni bir ölçüm geldiğinde çalışır (medyan={median}s), bu yüzden alt sınırın bir maliyeti yok.",
+            "end_energy_floor": "Kapatma gecikmesi ({off_delay} s) boyunca durdurma eşiğinin ({stop} W) gerektirdiği alt sınıra yükseltildi; bunun altında döngü yalnızca bir yedek yoldan bitebilir.",
+            "max_duration_ratio_default": "Varsayılana döndürüldü: daha düşük bir üst sınır, bir döngü her zamankinden uzun sürdüğünde doğru programı reddeder.",
+            "min_duration_ratio_default": "Varsayılana döndürüldü: daha yüksek bir alt sınır, çalışan bir döngünün iyice ilerleyene kadar tanınmasını engeller."
         },
         "exclusions": {
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",
@@ -2228,5 +2272,12 @@
             "hide_guidance": "Rehberi gizle",
             "show_guidance": "Rehberi göster"
         }
+    },
+    "access": {
+        "edit": "Düzenleme",
+        "full": "Tam",
+        "inherit": "Devral",
+        "none": "Yok (gizli)",
+        "read": "Okuma"
     }
 }

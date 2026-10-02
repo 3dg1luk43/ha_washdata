@@ -581,8 +581,28 @@ def longest_resumed_pause_s(
     curve pre-roll), which the end gates never see. A run still open at the end of
     the trace is the cycle's own end and is ignored too. Pure; never raises.
     """
+    return max(
+        (d for _f, d in resumed_pauses(points, threshold_w, skip_leading=skip_leading)),
+        default=0.0,
+    )
+
+
+def resumed_pauses(
+    points: Sequence[tuple[float, float]], threshold_w: float, *, skip_leading: bool = True
+) -> list[tuple[float, float]]:
+    """``(start_fraction, seconds)`` of every pause below ``threshold_w`` that power
+    later came back from, timed like :func:`has_resumed_pause`.
+
+    ``start_fraction`` is where the pause began as a share of the trace's span: the
+    hazard end gate's per-profile pause catalogue (audit DETECT-16). Pure; never
+    raises.
+    """
     try:
-        best = 0.0
+        out: list[tuple[float, float]] = []
+        if not points:
+            return out
+        t0 = float(points[0][0])
+        span = float(points[-1][0]) - t0
         first_below: float | None = None
         leading = True
         for offset, power in points:
@@ -591,9 +611,12 @@ def longest_resumed_pause_s(
                     first_below = offset
             else:
                 if first_below is not None and not (skip_leading and leading):
-                    best = max(best, offset - first_below)
+                    out.append((
+                        (first_below - t0) / span if span > 0 else 0.0,
+                        offset - first_below,
+                    ))
                 first_below = None
                 leading = False
-        return best
+        return out
     except Exception:  # noqa: BLE001
-        return 0.0
+        return []

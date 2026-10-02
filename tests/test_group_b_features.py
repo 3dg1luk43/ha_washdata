@@ -60,7 +60,13 @@ def _list_profiles_store(profiles: dict, past_cycles: list[dict]) -> ProfileStor
     store = MagicMock(spec=ProfileStore)
     store._data = {"profiles": profiles, "past_cycles": past_cycles}
     store.get_envelope = MagicMock(return_value=None)
-    store.list_profiles = ProfileStore.list_profiles.__get__(store, ProfileStore)
+    # Bind every real collaborator list_profiles reaches (a spec mock would hand
+    # back a MagicMock for an unbound one and the test would measure nothing).
+    for name in (
+        "list_profiles", "_profile_summaries", "_profiles_fingerprint",
+        "_build_profile_summaries", "get_reference_cycles", "get_backfill_cycles",
+    ):
+        setattr(store, name, getattr(ProfileStore, name).__get__(store, ProfileStore))
     return store
 
 

@@ -20,6 +20,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Optional
 
+import math
+
 import numpy as np
 
 from .const import (
@@ -38,6 +40,8 @@ from .const import (
     MATCH_DURATION_SCALE_OVERRUN,
     MATCH_PREFIX_SHAPE_MAX_RATIO,
     MATCH_DURATION_WEIGHT,
+    MATCH_DURATION_WEIGHT_IN_PROGRESS,
+    MATCH_MIN_RATIO_GRACE_S,
     MATCH_ENERGY_SCALE,
     MATCH_ENERGY_WEIGHT,
     MATCH_KEEP_MIN_SCORE,
@@ -398,6 +402,15 @@ def _stage3_dtw_score(
     ), 0.0
 
 
+def _rank_key(candidate: dict[str, Any]) -> float:
+    """Sort key for candidate ranking: a non-finite score ranks last, never first."""
+    try:
+        score = float(candidate.get("score", 0.0))
+    except (TypeError, ValueError):
+        return float("-inf")
+    return score if math.isfinite(score) else float("-inf")
+
+
 def compute_matches_worker(
     current_power: list[float],
     current_duration: float,
@@ -419,6 +432,10 @@ def compute_matches_worker(
     keep_min = float(config.get("keep_min_score", MATCH_KEEP_MIN_SCORE))
     corr_weight = float(config.get("corr_weight", MATCH_CORR_WEIGHT))
     dur_weight = float(config.get("duration_weight", MATCH_DURATION_WEIGHT))
+    if config.get("in_progress"):
+        dur_weight = float(
+            config.get("duration_weight_in_progress", MATCH_DURATION_WEIGHT_IN_PROGRESS)
+        )
     en_weight = float(config.get("energy_weight", MATCH_ENERGY_WEIGHT))
     dur_scale = float(config.get("duration_scale", MATCH_DURATION_SCALE))
     dur_overrun_scale = float(
@@ -432,6 +449,7 @@ def compute_matches_worker(
     # match path only) so the final match at cycle end - where the whole-cycle
     # figures are the right comparison - is byte-identical.
     in_progress = bool(config.get("in_progress"))
+    min_ratio_grace_s = float(config.get("min_ratio_grace_s", MATCH_MIN_RATIO_GRACE_S))
     # ...and Stages 2/3 score the SHAPE against the same truncated stretch, while the
     # cycle is still clearly mid-run (MATCH_PREFIX_SHAPE_MAX_RATIO). On by default
     # for a live match; `prefix_shape: False` turns it off for the A/B harnesses.
@@ -447,10 +465,14 @@ def compute_matches_worker(
         profile_duration = item["avg_duration"]
         sample_power = item["sample_power"]
 
-        # Duration Check
+        # Duration Check. The lower bound waits out MATCH_MIN_RATIO_GRACE_S of a live
+        # match: early on it rejects every programme longer than the cycle is old.
         if profile_duration > 0:
             ratio = current_duration / profile_duration
-            if ratio < min_duration_ratio or ratio > max_duration_ratio:
+            lower_applies = not (
+                in_progress and current_duration < min_ratio_grace_s
+            )
+            if (lower_applies and ratio < min_duration_ratio) or ratio > max_duration_ratio:
                 continue
 
         # Core Similarity. While the cycle is mid-run this compares it against the
@@ -495,7 +517,7 @@ def compute_matches_worker(
                 "offset": offset
             })
 
-    candidates.sort(key=lambda x: x["score"], reverse=True)
+    candidates.sort(key=_rank_key, reverse=True)
 
     # Stage 3: DTW Refinement on the top N candidates
     if dtw_bandwidth > 0.0 and len(candidates) > 0:
@@ -537,7 +559,7 @@ def compute_matches_worker(
             cand["score"] = float(blend * cand["score"] + (1.0 - blend) * dtw_score)
             cand["dtw_dist"] = float(norm_dist)
 
-        candidates.sort(key=lambda x: x["score"], reverse=True)
+        candidates.sort(key=_rank_key, reverse=True)
 
     # The truncated pair is scratch for the two shape stages; it must not reach the
     # MatchResult ranking (numpy arrays, and the store/WS serialise that dict).
@@ -604,7 +626,12 @@ def compute_matches_worker(
                 + dur_w * dur_ag
                 + en_w * en_ag
             )
-        candidates.sort(key=lambda x: x["score"], reverse=True)
+        candidates.sort(key=_rank_key, reverse=True)
+
+    # A non-finite score (a NaN in an imported template, a NaN avg_duration) used to
+    # sort to rank 1 with a NaN margin that was never "ambiguous" (audit
+    # MATCH-CORE-05). It carries no evidence: drop it.
+    candidates[:] = [c for c in candidates if math.isfinite(float(c.get("score", 0.0)))]
 
     # Stage 6 (#364): prefix scores for the few candidates materially LONGER than
     # the winner. Purely additive - it writes `prefix_score` and never touches

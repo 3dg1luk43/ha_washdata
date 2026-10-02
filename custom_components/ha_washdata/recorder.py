@@ -31,6 +31,7 @@ from .const import (
     STORAGE_KEY,
 )
 from .log_utils import DeviceLoggerAdapter
+from .time_utils import utc_now
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ class CycleRecorder:
     def current_duration(self) -> float:
         """Return current recording duration in seconds."""
         if self._start_time:
-            return (dt_util.now() - self._start_time).total_seconds()
+            return (utc_now() - self._start_time).total_seconds()
         return 0.0
 
     async def async_load(self) -> None:
@@ -188,7 +189,7 @@ class CycleRecorder:
             "last_run": self._last_run,
         }
         await self._store.async_save(data)
-        self._last_save = dt_util.now()
+        self._last_save = utc_now()
 
     async def start_recording(self) -> None:
         """Start a new recording."""
@@ -200,7 +201,7 @@ class CycleRecorder:
         # Previous recordings are kept until explicitly cleared or overwritten
 
         self._is_recording = True
-        self._start_time = dt_util.now()
+        self._start_time = utc_now()
         self._buffer = []
         await self._async_save()
 
@@ -209,7 +210,7 @@ class CycleRecorder:
         if not self._is_recording:
             return
 
-        now = dt_util.now()
+        now = utc_now()
         # Append to buffer
         self._buffer.append((now.isoformat(), float(power)))
 

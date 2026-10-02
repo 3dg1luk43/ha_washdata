@@ -260,7 +260,8 @@
     "save_total_cycles": "Gesamtzahl speichern",
     "clear": "Leeren",
     "add_brand": "Marke hinzufügen",
-    "add_appliance": "Gerät hinzufügen"
+    "add_appliance": "Gerät hinzufügen",
+    "retry": "Erneut versuchen"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Abtastintervall sollte höchstens die Hälfte des Watchdog-Intervalls ({wi} s) betragen"
     },
     "settings_banner": "Einstellungskonflikte: {n}. Prüfen Sie die markierten Abschnitte und beheben Sie sie vor dem Speichern.",
-    "settings_banner_btn": "Zum ersten"
+    "settings_banner_btn": "Zum ersten",
+    "end_energy": {
+      "energy": "Zu streng für Stoppschwellenwert ({w} W) während der Abschaltverzögerung ({d} s); der Zyklus kann nur über einen Ausweichpfad enden",
+      "stop": "Endenergie ({e} Wh in {d} s) lässt nur {p} W zu"
+    }
   },
   "hdr": {
     "ab_comparison": "A/B-Einstellungsvergleich",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "mit zwei Fingern zoomen · Doppeltippen zum Zurücksetzen",
     "cycles_since_service": "{since} / {total} Zyklen",
     "total_cycles_run": "Zyklen insgesamt",
-    "correct_total_cycles": "Gesamtzahl korrigieren"
+    "correct_total_cycles": "Gesamtzahl korrigieren",
+    "hist_reason_already_recorded": "überschneidet sich mit einem Zyklus, den WashData bereits aufgezeichnet hat",
+    "share_consent": "Ich bestätige, dass diese Zyklen normal und ohne Unterbrechung abgeschlossen wurden"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -771,7 +778,8 @@
       "total_energy": "Energieschätzung"
     },
     "metric_auc": "AUC {auc} auf Validierungsdaten",
-    "metric_mae": "Fehler {model} vs. Baseline {baseline}"
+    "metric_mae": "Fehler {model} vs. Baseline {baseline}",
+    "fine_tuned_at": "feinabgestimmt: {when}"
   },
   "modal": {
     "auto_label": "Auto-Label-Zyklen",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Es sind noch keine Service-Erinnerungen eingerichtet.",
     "toast_program_armed": "Programm für den nächsten Zyklus vorgemerkt: {program}",
     "toast_range_required": "Legen Sie einen gültigen Von/Bis-Bereich fest.",
-    "no_profiles_option": "(noch keine Profile, eines hinzufügen)"
+    "no_profiles_option": "(noch keine Profile, eines hinzufügen)",
+    "compare_cycles_title": "{count} Zyklen vergleichen",
+    "edit_builtin_phase": "Dies ist eine integrierte Phase. Beim Speichern wird eine benutzerdefinierte Überschreibung erstellt; das Original bleibt erhalten und kann durch Löschen der Überschreibung wiederhergestellt werden.",
+    "fetch_error": "Daten konnten nicht geladen werden."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
@@ -1522,7 +1533,7 @@
       "label": "Dauer der feststeckenden Pumpe"
     },
     "sampling_interval": {
-      "doc": "Erwartete Zeit zwischen Sensorablesungen – wird verwendet, um das Glättungsfenster zu dimensionieren und die Entprellung korrekt zu starten. Unabhängig von diesem Wert wird jede Sensoraktualisierung erfasst; es kalibriert nur die nachgelagerten Berechnungen. Die Vorschlags-Engine misst die tatsächliche Trittfrequenz Ihres Sensors aus vergangenen Zyklen und stellt diese automatisch ein.",
+      "doc": "Mindestzeit zwischen verarbeiteten Messwerten. Ein Messwert, der früher als diese Zeit nach dem letzten eintrifft, wird übersprungen (niedrige Messwerte während eines Zyklus werden immer behalten). Stellen Sie den Wert daher auf das tatsächliche Meldeintervall Ihrer Steckdose oder niedriger ein: Ein höherer Wert verwirft nur Messwerte. WashData schlägt diesen Wert nicht vor, weil es nur das Intervall messen kann, das übrig bleibt, nachdem diese Einstellung bereits Messwerte verworfen hat.",
       "label": "Abtastintervall"
     },
     "save_debug_traces": {
@@ -1803,7 +1814,8 @@
     "deleting": "Wird gelöscht…",
     "imported": "Importiert",
     "preparing": "Wird vorbereitet…",
-    "unlabelling": "Beschriftung wird entfernt…"
+    "unlabelling": "Beschriftung wird entfernt…",
+    "working": "Wird ausgeführt…"
   },
   "suggestion": {
     "both_agree": "WashData empfiehlt",
@@ -1898,7 +1910,10 @@
       "thr_batch": "Knapp über der p05-niedrigsten aktiven Leistung über {cycles} Zyklen ({p05}W) gehalten, damit ein Start so früh wie möglich erkannt wird und die Stopp-Schwelle unter der niedrigsten Betriebsleistung der Maschine bleibt.",
       "tol_per_profile": "p75 der Dauervarianz pro Profil über {profiles} Profile ({cycles} Zyklen); enge Profile werden nicht benachteiligt.",
       "tol_pooled": "Basierend auf der zusammengefassten Dauervarianz von {cycles} kürzlich gelabelten Zyklen (p95-Abweichung={dev}).",
-      "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s und mindestens 2x dem Abtastintervall von {median}s, min. 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen."
+      "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s und mindestens 2x dem Abtastintervall von {median}s, min. 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen.",
+      "end_energy_floor": "Auf die Untergrenze angehoben, die sich aus dem Stoppschwellenwert ({stop} W) während der Abschaltverzögerung ({off_delay} s) ergibt; darunter kann der Zyklus nur über einen Ausweichpfad enden.",
+      "max_duration_ratio_default": "Zurück auf den Standardwert: Eine niedrigere Obergrenze verwirft das richtige Programm, sobald ein Durchlauf länger als üblich dauert.",
+      "min_duration_ratio_default": "Zurück auf den Standardwert: Eine höhere Untergrenze verhindert, dass ein laufender Zyklus erkannt wird, bevor er weit fortgeschritten ist."
     },
     "exclusions": {
       "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",
@@ -2062,7 +2077,36 @@
     "odometer_save_failed": "Gesamtzahl konnte nicht gespeichert werden: {error}",
     "contrib_device_changed": "Zum Community-Store hinzugefügt, aber das Gerät wurde gewechselt, während das Formular offen war. Wählen Sie es in den Einstellungen aus.",
     "store_pick_profile_share": "Wählen Sie ein Profil zum Teilen aus",
-    "remove_failed": "Entfernen fehlgeschlagen: {error}"
+    "remove_failed": "Entfernen fehlgeschlagen: {error}",
+    "analysis_complete": "Analyse abgeschlossen: {count} Vorschlag/Vorschläge",
+    "analysis_failed": "Analyse fehlgeschlagen: {error}",
+    "auto_detect_failed": "Automatische Erkennung fehlgeschlagen: {error}",
+    "auto_label_failed": "Automatische Beschriftung fehlgeschlagen: {error}",
+    "could_not_load_cycle": "Zyklus konnte nicht geladen werden: {error}",
+    "create_failed": "Erstellen fehlgeschlagen: {error}",
+    "cycles_deleted": "Gelöschte Zyklen: {count}",
+    "debug_cleared": "Gelöschte Debug-Traces: {count}",
+    "discard_failed": "Verwerfen fehlgeschlagen: {error}",
+    "error": "Fehler: {error}",
+    "export_failed": "Export fehlgeschlagen: {error}",
+    "import_failed": "Import fehlgeschlagen: {error}",
+    "invalid_json": "\"{key}\" ist kein gültiges JSON - korrigieren Sie es oder leeren Sie das Feld vor dem Speichern.",
+    "label_failed": "Beschriften fehlgeschlagen: {error}",
+    "ml_training_promoted": "Training abgeschlossen: {count} Modell(e) aktiviert",
+    "pause_failed": "Pausieren fehlgeschlagen: {error}",
+    "phase_created": "Phase \"{name}\" erstellt",
+    "phase_deleted": "Phase \"{name}\" gelöscht",
+    "profile_created": "Profil \"{name}\" erstellt",
+    "rename_failed": "Umbenennen fehlgeschlagen: {error}",
+    "revert_failed": "Zurücksetzen fehlgeschlagen: {error}",
+    "save_failed": "Speichern fehlgeschlagen: {error}",
+    "split_complete": "In {count} Zyklen aufgeteilt",
+    "start_failed": "Starten fehlgeschlagen: {error}",
+    "stop_failed": "Stoppen fehlgeschlagen: {error}",
+    "update_failed": "Aktualisieren fehlgeschlagen: {error}",
+    "store_download_skipped": "{n} Aufnahme(n) übersprungen: zu kurz, zu lückenhaft oder bereits auf Ihrem Gerät.",
+    "store_import_low_quality": "Diese Aufnahme ist zu kurz, zu lückenhaft oder unplausibel und kann nicht importiert werden.",
+    "store_import_duplicate": "Diese Aufnahme ist bereits auf Ihrem Gerät."
   },
   "trend": {
     "down": "Abwärtstrend",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Anleitung ausblenden",
       "show_guidance": "Anleitung einblenden"
     }
+  },
+  "access": {
+    "edit": "Bearbeiten",
+    "full": "Vollzugriff",
+    "inherit": "Erben",
+    "none": "Keine (ausgeblendet)",
+    "read": "Lesen"
   }
 }

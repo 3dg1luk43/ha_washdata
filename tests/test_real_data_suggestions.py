@@ -174,28 +174,6 @@ class TestBatchSimulation:
         if stop is not None and start is not None:
             assert 0 < stop < start, f"threshold inversion: stop={stop}, start={start}"
 
-    def test_batch_more_robust_than_single(self, all_cycles, mock_hass):
-        """Batch simulation should not produce worse stop threshold than single-cycle."""
-        store = _build_mock_store(all_cycles)
-        engine = SuggestionEngine(mock_hass, "test", store)
-
-        single_results = [engine.run_simulation(c) for c in all_cycles if c.get("power_data")]
-        single_stops = [
-            r.get(CONF_STOP_THRESHOLD_W, {}).get("value")
-            for r in single_results
-            if r.get(CONF_STOP_THRESHOLD_W)
-        ]
-
-        batch = engine.run_batch_simulation(all_cycles)
-        batch_stop = batch.get(CONF_STOP_THRESHOLD_W, {}).get("value")
-
-        if single_stops and batch_stop is not None:
-            avg_single = sum(single_stops) / len(single_stops)
-            # Batch should be in the same ballpark - not wildly different
-            assert abs(batch_stop - avg_single) < avg_single * 2, (
-                f"Batch stop ({batch_stop}) far from mean single ({avg_single:.2f})"
-            )
-
     def test_empty_input_returns_empty(self, mock_hass):
         store = _build_mock_store([])
         engine = SuggestionEngine(mock_hass, "test", store)
@@ -272,9 +250,12 @@ class TestModelSuggestionsMinOffGap:
 # ---------------------------------------------------------------------------
 
 class TestDurationToleranceSuggestions:
-    """Validate that duration variance from real data produces sensible tolerances."""
+    """The tolerance suggestions are gone (audit SUGGEST): `duration_tolerance`
+    only sizes the feedback prompt's "close match" badge and
+    `profile_duration_tolerance` has no reader, so suggesting them from real
+    variance changed nothing the user could see."""
 
-    def test_duration_tolerance_from_real_data(self, all_cycles, mock_hass):
+    def test_no_duration_tolerance_is_suggested_from_real_data(self, all_cycles, mock_hass):
         # Build profiles dict from labeled cycles' average duration
         from collections import defaultdict
         import statistics
@@ -311,9 +292,5 @@ class TestDurationToleranceSuggestions:
         engine = SuggestionEngine(mock_hass, "test", store)
         result = engine.generate_model_suggestions()
 
-        assert CONF_DURATION_TOLERANCE in result, "Expected duration_tolerance suggestion"
-        tol = result[CONF_DURATION_TOLERANCE]["value"]
-        assert 0.05 <= tol <= 0.50, f"duration_tolerance={tol} out of expected [0.05, 0.50]"
-
-        assert CONF_PROFILE_DURATION_TOLERANCE in result
-        assert result[CONF_PROFILE_DURATION_TOLERANCE]["value"] == tol
+        assert CONF_DURATION_TOLERANCE not in result
+        assert CONF_PROFILE_DURATION_TOLERANCE not in result

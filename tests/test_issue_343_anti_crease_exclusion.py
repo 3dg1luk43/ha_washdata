@@ -34,7 +34,7 @@ import pytest
 
 from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
 from custom_components.ha_washdata.const import (
-    CONF_STOP_THRESHOLD_W, CONF_ANTI_WRINKLE_ENABLED, CONF_ANTI_WRINKLE_MAX_POWER,
+    CONF_ANTI_WRINKLE_ENABLED, CONF_ANTI_WRINKLE_MAX_POWER,
     DEVICE_TYPE_DRYER, DEVICE_TYPE_DISHWASHER,
 )
 
@@ -54,35 +54,39 @@ def _engine(device_type, options):
     return eng
 
 
+def _main_min(eng, options) -> float:
+    """Lowest active (> 0.5 W) sample the stop-threshold statistics would see."""
+    readings = [(float(t), float(p)) for t, p in _CYCLE["power_data"]]
+    kept = eng._strip_anti_crease_readings(readings, options=options)
+    return min(p for _, p in kept if p > 0.5)
+
+
+# The per-cycle `run_simulation` these used to go through is gone (audit SUGGEST-06:
+# re-deriving stop/start from the LAST cycle alone made them a random walk). The
+# exclusion still matters for the batch and detection passes, which strip the tail
+# with `_strip_anti_crease_readings`; the four cases are kept against it.
+
+
 def test_anti_crease_tail_excluded_for_dryer():
-    """A dryer with anti-crease on: stop reflects the MAIN min (200 W), not 3 W."""
-    eng = _engine(DEVICE_TYPE_DRYER, {CONF_ANTI_WRINKLE_ENABLED: True, CONF_ANTI_WRINKLE_MAX_POWER: 400.0})
-    out = eng.run_simulation(_CYCLE)
-    stop = out[CONF_STOP_THRESHOLD_W]["value"]
-    # 200 W * 0.8 = 160, NOT 3 W * 0.8 = 2.4.
-    assert stop == pytest.approx(160.0, abs=1.0), stop
+    """A dryer with anti-crease on: the statistics see the MAIN min (200 W), not 3 W."""
+    opts = {CONF_ANTI_WRINKLE_ENABLED: True, CONF_ANTI_WRINKLE_MAX_POWER: 400.0}
+    assert _main_min(_engine(DEVICE_TYPE_DRYER, opts), opts) == pytest.approx(200.0)
 
 
 def test_tail_kept_when_anti_crease_disabled():
-    """Anti-crease off: behaviour unchanged, the 3 W baseline still drives it."""
-    eng = _engine(DEVICE_TYPE_DRYER, {CONF_ANTI_WRINKLE_ENABLED: False, CONF_ANTI_WRINKLE_MAX_POWER: 400.0})
-    out = eng.run_simulation(_CYCLE)
-    stop = out[CONF_STOP_THRESHOLD_W]["value"]
-    assert stop == pytest.approx(2.4, abs=0.5), stop
+    """Anti-crease off: behaviour unchanged, the 3 W baseline is still seen."""
+    opts = {CONF_ANTI_WRINKLE_ENABLED: False, CONF_ANTI_WRINKLE_MAX_POWER: 400.0}
+    assert _main_min(_engine(DEVICE_TYPE_DRYER, opts), opts) == pytest.approx(3.0)
 
 
 def test_tail_kept_for_ineligible_device_type():
     """A dishwasher is not an anti-crease device: no exclusion even if the flag is on."""
-    eng = _engine(DEVICE_TYPE_DISHWASHER, {CONF_ANTI_WRINKLE_ENABLED: True, CONF_ANTI_WRINKLE_MAX_POWER: 400.0})
-    out = eng.run_simulation(_CYCLE)
-    stop = out[CONF_STOP_THRESHOLD_W]["value"]
-    assert stop == pytest.approx(2.4, abs=0.5), stop
+    opts = {CONF_ANTI_WRINKLE_ENABLED: True, CONF_ANTI_WRINKLE_MAX_POWER: 400.0}
+    assert _main_min(_engine(DEVICE_TYPE_DISHWASHER, opts), opts) == pytest.approx(3.0)
 
 
 def test_no_high_power_sample_is_safe_noop():
     """If nothing reaches anti_wrinkle_max_power there is no identifiable tail, so
     the whole trace is used (no accidental over-exclusion)."""
-    eng = _engine(DEVICE_TYPE_DRYER, {CONF_ANTI_WRINKLE_ENABLED: True, CONF_ANTI_WRINKLE_MAX_POWER: 9999.0})
-    out = eng.run_simulation(_CYCLE)
-    stop = out[CONF_STOP_THRESHOLD_W]["value"]
-    assert stop == pytest.approx(2.4, abs=0.5), stop
+    opts = {CONF_ANTI_WRINKLE_ENABLED: True, CONF_ANTI_WRINKLE_MAX_POWER: 9999.0}
+    assert _main_min(_engine(DEVICE_TYPE_DRYER, opts), opts) == pytest.approx(3.0)

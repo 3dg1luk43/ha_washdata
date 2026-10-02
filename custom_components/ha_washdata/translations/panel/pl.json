@@ -260,7 +260,8 @@
     "save_total_cycles": "Zapisz łączną liczbę",
     "clear": "Wyczyść",
     "add_brand": "Dodaj markę",
-    "add_appliance": "Dodaj urządzenie"
+    "add_appliance": "Dodaj urządzenie",
+    "retry": "Ponów"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Interwał Próbkowania powinien wynosić co najwyżej połowę Interwału Watchdog ({wi} s)"
     },
     "settings_banner": "Konflikty ustawień: {n}. Sprawdź podświetlone sekcje i popraw je przed zapisaniem.",
-    "settings_banner_btn": "Przejdź do pierwszego"
+    "settings_banner_btn": "Przejdź do pierwszego",
+    "end_energy": {
+      "energy": "Zbyt restrykcyjne dla Progu Zatrzymania ({w} W) w czasie Opóźnienia Wyłączenia ({d} s); cykl może się zakończyć tylko ścieżką awaryjną",
+      "stop": "Energia Zakończenia ({e} Wh w ciągu {d} s) dopuszcza tylko {p} W"
+    }
   },
   "hdr": {
     "ab_comparison": "Porównanie ustawień A/B",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "przybliż dwoma palcami · dotknij dwukrotnie, aby zresetować",
     "cycles_since_service": "{since} / {total} cykli",
     "total_cycles_run": "cykli łącznie",
-    "correct_total_cycles": "Popraw łączną liczbę"
+    "correct_total_cycles": "Popraw łączną liczbę",
+    "hist_reason_already_recorded": "nakłada się na cykl już zarejestrowany przez WashData",
+    "share_consent": "Potwierdzam, że te cykle przebiegły normalnie do końca, bez przerwania"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -771,7 +778,8 @@
       "total_energy": "Szacowanie energii"
     },
     "metric_auc": "AUC {auc} na danych walidacyjnych",
-    "metric_mae": "błąd {model} względem modelu bazowego {baseline}"
+    "metric_mae": "błąd {model} względem modelu bazowego {baseline}",
+    "fine_tuned_at": "dostrojono {when}"
   },
   "modal": {
     "auto_label": "Cykle automatycznego etykietowania",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Nie ustawiono jeszcze żadnych przypomnień serwisowych.",
     "toast_program_armed": "Program ustawiony na następny cykl: {program}",
     "toast_range_required": "Ustaw prawidłowy zakres Od/Do",
-    "no_profiles_option": "(brak profili, dodaj nowy)"
+    "no_profiles_option": "(brak profili, dodaj nowy)",
+    "compare_cycles_title": "Porównaj cykle ({count})",
+    "edit_builtin_phase": "To jest wbudowana faza. Zapisanie tworzy własne nadpisanie; oryginał zostaje zachowany i można go przywrócić, usuwając nadpisanie.",
+    "fetch_error": "Nie udało się załadować danych."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1490,7 +1501,7 @@
       "label": "Czas Zacięcia Pompy"
     },
     "sampling_interval": {
-      "doc": "Oczekiwany czas pomiędzy odczytami czujnika – używany do określenia rozmiaru okna wygładzającego i prawidłowego rozpoczęcia odbijania. Każda aktualizacja czujnika jest rejestrowana niezależnie od tej wartości; kalibruje jedynie dalsze obliczenia. Silnik sugestii mierzy rzeczywistą kadencję czujnika z poprzednich cykli i ustawia ją automatycznie.",
+      "doc": "Minimalny czas między przetwarzanymi odczytami. Odczyt, który nadejdzie wcześniej, niż upłynie ten czas od poprzedniego, jest pomijany (niskie odczyty w trakcie cyklu są zawsze zachowywane), więc ustaw tu rzeczywisty interwał raportowania swojej wtyczki lub mniej: wyższa wartość tylko odrzuca odczyty. WashData nie sugeruje tej wartości, ponieważ może zmierzyć jedynie interwał pozostały po tym, jak to ustawienie już odrzuciło odczyty.",
       "label": "Interwał Próbkowania"
     },
     "save_debug_traces": {
@@ -1771,7 +1782,8 @@
     "deleting": "Usuwanie…",
     "imported": "Zaimportowano",
     "preparing": "Przygotowywanie…",
-    "unlabelling": "Usuwanie etykiety…"
+    "unlabelling": "Usuwanie etykiety…",
+    "working": "Przetwarzanie…"
   },
   "suggestion": {
     "both_agree": "WashData zaleca",
@@ -1866,7 +1878,10 @@
       "thr_batch": "Utrzymane tuż powyżej najniższej mocy czynnej p05 w {cycles} cyklach ({p05}W), aby start był wykrywany jak najwcześniej, a próg zatrzymania pozostawał poniżej najniższej mocy pracy urządzenia.",
       "tol_per_profile": "p75 wariancji czasu trwania na profil w {profiles} profilach ({cycles} cykli); spójne profile nie są karane.",
       "tol_pooled": "Na podstawie łącznej wariancji czasu trwania {cycles} ostatnich oznaczonych cykli (odchylenie p95={dev}).",
-      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s i co najmniej 2x powyżej interwału próbkowania {median}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
+      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s i co najmniej 2x powyżej interwału próbkowania {median}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań.",
+      "end_energy_floor": "Podniesiono do minimum wynikającego z progu zatrzymania ({stop} W) w czasie opóźnienia wyłączenia ({off_delay} s); poniżej niego cykl może się zakończyć tylko ścieżką awaryjną.",
+      "max_duration_ratio_default": "Przywrócono wartość domyślną: niższy górny limit odrzuca właściwy program za każdym razem, gdy cykl trwa dłużej niż zwykle.",
+      "min_duration_ratio_default": "Przywrócono wartość domyślną: wyższy dolny limit uniemożliwia rozpoznanie trwającego cyklu, dopóki nie jest on mocno zaawansowany."
     },
     "exclusions": {
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",
@@ -2030,7 +2045,36 @@
     "odometer_saved": "Łączna liczba cykli zapisana",
     "odometer_save_failed": "Nie udało się zapisać łącznej liczby: {error}",
     "store_pick_profile_share": "Wybierz profil do udostępnienia",
-    "remove_failed": "Usuwanie nie powiodło się: {error}"
+    "remove_failed": "Usuwanie nie powiodło się: {error}",
+    "analysis_complete": "Analiza ukończona: sugestie: {count}",
+    "analysis_failed": "Analiza nie powiodła się: {error}",
+    "auto_detect_failed": "Automatyczne wykrywanie nie powiodło się: {error}",
+    "auto_label_failed": "Automatyczne oznaczanie nie powiodło się: {error}",
+    "could_not_load_cycle": "Nie można załadować cyklu: {error}",
+    "create_failed": "Tworzenie nie powiodło się: {error}",
+    "cycles_deleted": "Usunięte cykle: {count}",
+    "debug_cleared": "Wyczyszczone ślady debugowania: {count}",
+    "discard_failed": "Odrzucenie nie powiodło się: {error}",
+    "error": "Błąd: {error}",
+    "export_failed": "Eksport nie powiódł się: {error}",
+    "import_failed": "Import nie powiódł się: {error}",
+    "invalid_json": "\"{key}\" nie jest prawidłowym JSON - popraw go lub wyczyść pole przed zapisaniem.",
+    "label_failed": "Oznaczanie nie powiodło się: {error}",
+    "ml_training_promoted": "Trening ukończony: wdrożone modele: {count}",
+    "pause_failed": "Wstrzymanie nie powiodło się: {error}",
+    "phase_created": "Utworzono fazę \"{name}\"",
+    "phase_deleted": "Usunięto fazę \"{name}\"",
+    "profile_created": "Utworzono profil \"{name}\"",
+    "rename_failed": "Zmiana nazwy nie powiodła się: {error}",
+    "revert_failed": "Cofnięcie nie powiodło się: {error}",
+    "save_failed": "Zapisywanie nie powiodło się: {error}",
+    "split_complete": "Podzielono na cykle: {count}",
+    "start_failed": "Uruchomienie nie powiodło się: {error}",
+    "stop_failed": "Zatrzymanie nie powiodło się: {error}",
+    "update_failed": "Aktualizacja nie powiodła się: {error}",
+    "store_download_skipped": "Pominięto nagrań: {n} (zbyt krótkie, ze zbyt wieloma przerwami lub już są na Twoim urządzeniu).",
+    "store_import_low_quality": "To nagranie jest zbyt krótkie, ma zbyt wiele przerw lub jest niewiarygodne, więc nie można go zaimportować.",
+    "store_import_duplicate": "To nagranie jest już na Twoim urządzeniu."
   },
   "trend": {
     "down": "Trend w dół",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Ukryj wskazówki",
       "show_guidance": "Pokaż wskazówki"
     }
+  },
+  "access": {
+    "edit": "Edycja",
+    "full": "Pełny",
+    "inherit": "Dziedzicz",
+    "none": "Brak (ukryte)",
+    "read": "Odczyt"
   }
 }

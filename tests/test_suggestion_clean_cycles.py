@@ -274,16 +274,11 @@ def test_detection_suggestions_basic_keys() -> None:
     ]
     out = engine_out = _engine(cycles).generate_detection_suggestions()
 
-    assert CONF_SAMPLING_INTERVAL in out
-    assert out[CONF_SAMPLING_INTERVAL]["value"] == pytest.approx(30.0, abs=0.5)
-
-    assert CONF_SMOOTHING_WINDOW in out
-    assert out[CONF_SMOOTHING_WINDOW]["value"] == 2  # 30s / 30s sampling
-
-    assert CONF_START_DURATION_THRESHOLD in out
-    # Goal-aware: kept as short as one sampling interval (~30s) so detection
-    # starts as early as possible while still ignoring single-sample spikes.
-    assert out[CONF_START_DURATION_THRESHOLD]["value"] == pytest.approx(30.0, abs=1.0)
+    # Audit SUGGEST-04/12: no sampling_interval (it read back its own throttle and
+    # ratcheted), smoothing_window (dead) or start debounce (derived from it).
+    assert CONF_SAMPLING_INTERVAL not in out
+    assert CONF_SMOOTHING_WINDOW not in out
+    assert CONF_START_DURATION_THRESHOLD not in out
 
     assert CONF_MIN_POWER in out
     assert 1.0 <= out[CONF_MIN_POWER]["value"] <= 10.0
@@ -291,54 +286,11 @@ def test_detection_suggestions_basic_keys() -> None:
     assert CONF_COMPLETION_MIN_SECONDS in out
     assert out[CONF_COMPLETION_MIN_SECONDS]["value"] == 1800  # half of 3600s p05
 
-    assert CONF_END_REPEAT_COUNT in out
-    assert out[CONF_END_REPEAT_COUNT]["value"] == 1  # clean cycles have no false ends
+    # The detector never reads end_repeat_count (audit DETECT-11).
+    assert CONF_END_REPEAT_COUNT not in out
     assert isinstance(engine_out, dict)
 
 
-def test_end_repeat_count_raised_by_false_ends() -> None:
-    # Every clean cycle carries a ~90s internal pause that resumes -> false end.
-    cycles = [
-        _cycle(_pause_trace(), cid=f"p{i}", sampling_interval=30.0) for i in range(16)
-    ]
-    out = _engine(cycles).generate_detection_suggestions()
-    assert out[CONF_END_REPEAT_COUNT]["value"] >= 2
-
-
-def test_confidence_suggestions_from_label_source() -> None:
-    cycles: list[dict[str, Any]] = []
-    # 12 user-labeled cycles with a spread of confidences
-    for i in range(12):
-        cycles.append(
-            _cycle(
-                _ramp_trace(),
-                cid=f"m{i}",
-                sampling_interval=30.0,
-                label_source="manual",
-                match_confidence=0.6 + 0.02 * i,
-            )
-        )
-    # 16 auto-labeled cycles the user never corrected
-    for i in range(16):
-        cycles.append(
-            _cycle(
-                _ramp_trace(),
-                cid=f"a{i}",
-                sampling_interval=30.0,
-                label_source="auto_match",
-                match_confidence=0.8 + 0.005 * i,
-            )
-        )
-    out = _engine(cycles).generate_detection_suggestions()
-
-    assert CONF_LEARNING_CONFIDENCE in out
-    assert 0.3 <= out[CONF_LEARNING_CONFIDENCE]["value"] <= 0.9
-
-    assert CONF_AUTO_LABEL_CONFIDENCE in out
-    assert 0.5 <= out[CONF_AUTO_LABEL_CONFIDENCE]["value"] <= 0.98
-
-    assert CONF_PROFILE_MATCH_THRESHOLD in out
-    assert 0.3 <= out[CONF_PROFILE_MATCH_THRESHOLD]["value"] <= 0.9
 
 
 def test_corrected_auto_labels_are_ignored_for_confidence() -> None:

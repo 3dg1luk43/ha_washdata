@@ -260,7 +260,8 @@
         "save_total_cycles": "Ruaj totalin",
         "clear": "Pastro",
         "add_brand": "Shto markë",
-        "add_appliance": "Shto pajisje"
+        "add_appliance": "Shto pajisje",
+        "retry": "Riprovo"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -329,7 +330,11 @@
             "sampling": "Intervali i Kampionimit duhet të jetë të paktën gjysma e Intervalit të Rojtarit ({wi} s)"
         },
         "settings_banner": "Konflikte cilësimesh: {n}. Kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
-        "settings_banner_btn": "Shko te i pari"
+        "settings_banner_btn": "Shko te i pari",
+        "end_energy": {
+            "energy": "Shumë e rreptë për Pragun e ndalimit ({w} W) gjatë Vonesës së fikjes ({d} s); cikli mund të përfundojë vetëm përmes një rruge rezervë",
+            "stop": "Energjia e fundit ({e} Wh gjatë {d} s) lejon vetëm {p} W"
+        }
     },
     "hdr": {
         "ab_comparison": "Krahasimi i cilësimeve A/B",
@@ -730,7 +735,9 @@
         "zoom_hint_touch_zoomed": "zmadho me dy gishta · trokit dy herë për rivendosje",
         "cycles_since_service": "{since} / {total} cikle",
         "total_cycles_run": "cikle të kryera gjithsej",
-        "correct_total_cycles": "Korrigjo totalin"
+        "correct_total_cycles": "Korrigjo totalin",
+        "hist_reason_already_recorded": "mbivendoset me një cikël që WashData e ka regjistruar tashmë",
+        "share_consent": "Konfirmoj që këto cikle përfunduan normalisht, pa ndërprerje"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -766,7 +773,8 @@
             "total_energy": "Vlerësimi i energjisë"
         },
         "metric_auc": "AUC {auc} në të dhënat e vlerësimit",
-        "metric_mae": "gabimi: {model} kundrejt bazës {baseline}"
+        "metric_mae": "gabimi: {model} kundrejt bazës {baseline}",
+        "fine_tuned_at": "rregulluar mirë më {when}"
     },
     "modal": {
         "auto_label": "Etiketim automatik i cikleve",
@@ -1098,7 +1106,10 @@
         "standby_above_stop_sub": "{n} nga {total} ciklet e fundit. Vonesa e fikjes fillon vetëm pasi fuqia bie nën Pragun e ndalimit ({stop} W), prandaj ciklet përfundojnë me vonesë ose duhen ndalur me dorë.",
         "advisory_duration_outlier": "{n} cikël(e) të etiketuar si '{name}' janë shumë larg kohëzgjatjes së tij të zakonshme për t'u përputhur ndonjëherë me të (rasti më i keq: {ratio}x). Ka të ngjarë të jenë etiketuar gabimisht, ose një regjistrim i vetëm ka kapur dy ekzekutime. Rietiketojini ose ndajini, që të mos e shtrembërojnë më vlerësimin e kohës së këtij programi.",
         "toast_range_required": "Vendosni një interval të vlefshëm Nga/Deri",
-        "no_profiles_option": "(asnjë profil, shtoni një)"
+        "no_profiles_option": "(asnjë profil, shtoni një)",
+        "compare_cycles_title": "Krahaso {count} cikle",
+        "edit_builtin_phase": "Kjo është një fazë e integruar. Ruajtja krijon një mbivendosje të personalizuar; origjinali ruhet dhe mund të rikthehet duke fshirë mbivendosjen.",
+        "fetch_error": "Ngarkimi i të dhënave dështoi."
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1485,7 +1496,7 @@
             "label": "Kohëzgjatja e pompës së bllokuar"
         },
         "sampling_interval": {
-            "doc": "Koha e pritshme midis leximeve të sensorit - përdoret për madhësinë e dritares së zbutjes dhe fillimin e debouncimit në mënyrë korrekte. Çdo përditësim i sensorit kapet pavarësisht nga kjo vlerë; ai kalibron vetëm llogaritjet e rrjedhës së poshtme. Motori i sugjerimeve mat kadencën aktuale të sensorit tuaj nga ciklet e kaluara dhe e vendos këtë automatikisht.",
+            "doc": "Koha minimale ndërmjet leximeve të përpunuara. Një lexim që mbërrin më herët se kjo kohë pas leximit të mëparshëm anashkalohet (leximet e ulëta gjatë një cikli ruhen gjithmonë), ndaj vendoseni në intervalin real të raportimit të prizës suaj ose më poshtë: një vlerë më e lartë vetëm hedh poshtë lexime. WashData nuk e sugjeron këtë vlerë, sepse ajo që mund të masë është intervali që mbetet pasi ky cilësim ka hedhur tashmë poshtë lexime.",
             "label": "Intervali i kampionimit"
         },
         "save_debug_traces": {
@@ -1766,7 +1777,8 @@
         "deleting": "Po fshihet…",
         "imported": "Importuar",
         "preparing": "Po përgatitet…",
-        "unlabelling": "Po hiqet etiketa…"
+        "unlabelling": "Po hiqet etiketa…",
+        "working": "Po përpunohet…"
     },
     "tab": {
         "advanced": "I avancuar",
@@ -1912,7 +1924,36 @@
         "odometer_saved": "Totali i cikleve u ruajt",
         "odometer_save_failed": "Nuk u ruajt dot totali: {error}",
         "store_pick_profile_share": "Zgjidhni një profil për ndarje",
-        "remove_failed": "Heqja dështoi: {error}"
+        "remove_failed": "Heqja dështoi: {error}",
+        "analysis_complete": "Analiza përfundoi: {count} sugjerim(e)",
+        "analysis_failed": "Analiza dështoi: {error}",
+        "auto_detect_failed": "Zbulimi automatik dështoi: {error}",
+        "auto_label_failed": "Etiketimi automatik dështoi: {error}",
+        "could_not_load_cycle": "Cikli nuk mund të ngarkohej: {error}",
+        "create_failed": "Krijimi dështoi: {error}",
+        "cycles_deleted": "Cikle të fshira: {count}",
+        "debug_cleared": "U pastruan {count} gjurmë korrigjimi",
+        "discard_failed": "Hedhja poshtë dështoi: {error}",
+        "error": "Gabim: {error}",
+        "export_failed": "Eksportimi dështoi: {error}",
+        "import_failed": "Importimi dështoi: {error}",
+        "invalid_json": "\"{key}\" nuk është JSON i vlefshëm; korrigjojeni ose pastroni fushën para ruajtjes.",
+        "label_failed": "Etiketimi dështoi: {error}",
+        "ml_training_promoted": "Trajnimi përfundoi: {count} model(e) të promovuar",
+        "pause_failed": "Pauzimi dështoi: {error}",
+        "phase_created": "Faza \"{name}\" u krijua",
+        "phase_deleted": "Faza \"{name}\" u fshi",
+        "profile_created": "Profili \"{name}\" u krijua",
+        "rename_failed": "Riemërtimi dështoi: {error}",
+        "revert_failed": "Kthimi prapa dështoi: {error}",
+        "save_failed": "Ruajtja dështoi: {error}",
+        "split_complete": "U nda në {count} cikle",
+        "start_failed": "Nisja dështoi: {error}",
+        "stop_failed": "Ndalimi dështoi: {error}",
+        "update_failed": "Përditësimi dështoi: {error}",
+        "store_download_skipped": "{n} regjistrim(e) u anashkaluan: tepër të shkurtra, me tepër boshllëqe ose tashmë në pajisjen tuaj.",
+        "store_import_low_quality": "Ky regjistrim është tepër i shkurtër, ka tepër boshllëqe ose është i pabesueshëm për t'u importuar.",
+        "store_import_duplicate": "Ky regjistrim është tashmë në pajisjen tuaj."
     },
     "suggestion": {
         "both_agree": "WashData rekomandon",
@@ -2007,7 +2048,10 @@
             "thr_batch": "Mbahet pak mbi fuqinë aktive më të ulët p05 në {cycles} cikle ({p05}W) që një nisje të kapet sa më herët të jetë e mundur dhe pragu i ndalimit të mbetet nën fuqinë më të ulët të punës së makinës.",
             "tol_per_profile": "p75 e variancës së kohëzgjatjes për profil në {profiles} profile ({cycles} cikle); profilet e qëndrueshme nuk penalizohen.",
             "tol_pooled": "Bazuar në variancën e bashkuar të kohëzgjatjes së {cycles} cikleve të fundit të etiketuara (devijimi p95={dev}).",
-            "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (pak mbi boshllëkun e përditësimit p95 prej {p95}s dhe të paktën 2× intervalin e kampionimit prej {median}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme."
+            "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (pak mbi boshllëkun e përditësimit p95 prej {p95}s dhe të paktën 2× intervalin e kampionimit prej {median}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme.",
+            "end_energy_floor": "U ngrit në minimumin që nënkuptojnë pragu i ndalimit ({stop} W) gjatë vonesës së fikjes ({off_delay} s); nën të, cikli mund të përfundojë vetëm përmes një rruge rezervë.",
+            "max_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i sipërm më i ulët refuzon programin e duhur sa herë që një cikël zgjat më shumë se zakonisht.",
+            "min_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i poshtëm më i lartë pengon njohjen e një cikli në zhvillim derisa të ketë përparuar mjaft."
         },
         "exclusions": {
             "summary": "U përjashtuan {total} cikle të zbuluar gabimisht: {parts}.",
@@ -2228,5 +2272,12 @@
         "off_delay": {
             "effective": "Një cikël i përfunduar pret në të vërtetë {eff} s, jo {delay} s: Hendeku min. i fikjes ({gap} s) është më i gjatë dhe ka përparësi."
         }
+    },
+    "access": {
+        "edit": "Redaktim",
+        "full": "I plotë",
+        "inherit": "Trashëgo",
+        "none": "Asnjë (i fshehur)",
+        "read": "Lexim"
     }
 }

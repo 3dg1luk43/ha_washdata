@@ -53,8 +53,11 @@ def _det_in_ending(*, ambiguous: bool, expected: float = 3600.0, conf: float = 0
     det._state = STATE_ENDING
     det._current_cycle_start = _ts(0)
     det._state_enter_time = _ts(3300)
-    det._time_in_state = 200.0            # > WM smart_debounce (120s)
-    det._time_below_threshold = 0.0       # below off_delay -> fallback won't fire
+    det._time_in_state = 200.0            # > WM smart_debounce (180 s here)
+    # Quiet for as long as the detector has been in ENDING: the Smart debounce is
+    # quiet time for a washer (audit DETECT-04), and 200 s is still below the
+    # 300 s effective off delay, so the fallback timeout cannot fire instead.
+    det._time_below_threshold = 200.0
     det._last_reading_time = _ts(3564 - 30)
     return det, completed
 

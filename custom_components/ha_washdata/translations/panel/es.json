@@ -212,7 +212,8 @@
     "save_total_cycles": "Guardar total",
     "clear": "Borrar",
     "add_brand": "Añadir marca",
-    "add_appliance": "Añadir electrodoméstico"
+    "add_appliance": "Añadir electrodoméstico",
+    "retry": "Reintentar"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -281,6 +282,10 @@
     "watchdog": {
       "interval": "Debería ser al menos 2x el Intervalo de muestreo ({si} s)",
       "sampling": "El Intervalo de muestreo debería ser como máximo la mitad del Intervalo watchdog ({wi} s)"
+    },
+    "end_energy": {
+      "energy": "Demasiado estricto para el Umbral de parada ({w} W) durante el Retardo de apagado ({d} s); el ciclo solo puede terminar mediante una vía de respaldo",
+      "stop": "La Energía de fin ({e} Wh en {d} s) solo permite {p} W"
     }
   },
   "hdr": {
@@ -682,7 +687,9 @@
     "zoom_hint_touch_zoomed": "pellizcar para hacer zoom · doble toque para restablecer",
     "cycles_since_service": "{since} / {total} ciclos",
     "total_cycles_run": "ciclos realizados en total",
-    "correct_total_cycles": "Corregir el total"
+    "correct_total_cycles": "Corregir el total",
+    "hist_reason_already_recorded": "se solapa con un ciclo que WashData ya registró",
+    "share_consent": "Confirmo que estos ciclos terminaron con normalidad, sin interrupciones"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -718,7 +725,8 @@
       "total_energy": "Estimación de la energía"
     },
     "metric_auc": "AUC {auc} en datos de validación",
-    "metric_mae": "error {model} frente a referencia {baseline}"
+    "metric_mae": "error {model} frente a referencia {baseline}",
+    "fine_tuned_at": "ajustado el {when}"
   },
   "modal": {
     "auto_label": "Ciclos de etiquetado automático",
@@ -1050,7 +1058,10 @@
     "standby_above_stop_sub": "{n} de los últimos {total} ciclos. El Retardo de apagado solo empieza cuando la potencia baja del Umbral de parada ({stop} W), así que los ciclos terminan tarde o hay que detenerlos a mano.",
     "advisory_duration_outlier": "{n} ciclo(s) etiquetados como '{name}' se alejan demasiado de su duración habitual para poder coincidir alguna vez con él (el peor: {ratio}x). Probablemente estén mal etiquetados, o una grabación captó dos ejecuciones. Vuelve a etiquetarlos o divídelos para que dejen de distorsionar la estimación de tiempo de este programa.",
     "toast_range_required": "Establezca un rango Desde/Hasta válido",
-    "no_profiles_option": "(aún no hay perfiles, añade uno)"
+    "no_profiles_option": "(aún no hay perfiles, añade uno)",
+    "compare_cycles_title": "Comparar {count} ciclos",
+    "edit_builtin_phase": "Esta es una fase integrada. Al guardar se crea una versión personalizada que la sustituye; el original se conserva y puede restaurarse eliminando esa versión personalizada.",
+    "fetch_error": "No se pudieron cargar los datos."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
@@ -1473,7 +1484,7 @@
       "label": "Duración de bomba atascada"
     },
     "sampling_interval": {
-      "doc": "Tiempo esperado entre lecturas del sensor: se utiliza para dimensionar la ventana de suavizado e iniciar el rebote correctamente. Cada actualización del sensor se captura independientemente de este valor; solo calibra los cálculos posteriores. El motor de sugerencias mide la cadencia real de su sensor de ciclos anteriores y la configura automáticamente.",
+      "doc": "Tiempo mínimo entre lecturas procesadas. Una lectura que llega antes de este tiempo desde la anterior se omite (las lecturas bajas durante un ciclo siempre se conservan), así que ajústelo al intervalo de informe real de su enchufe o a un valor menor: un valor más alto solo descarta lecturas. WashData no sugiere este valor, porque lo que puede medir es el intervalo que queda después de que este ajuste ya haya descartado lecturas.",
       "label": "Intervalo de muestreo"
     },
     "save_debug_traces": {
@@ -1750,7 +1761,8 @@
     "deleting": "Eliminando…",
     "imported": "Importado",
     "preparing": "Preparando…",
-    "unlabelling": "Quitando etiqueta…"
+    "unlabelling": "Quitando etiqueta…",
+    "working": "Procesando…"
   },
   "tab": {
     "advanced": "Avanzado",
@@ -1896,7 +1908,36 @@
     "odometer_saved": "Total de ciclos guardado",
     "odometer_save_failed": "No se pudo guardar el total: {error}",
     "store_pick_profile_share": "Elija un perfil en el que compartir",
-    "remove_failed": "Error al quitar: {error}"
+    "remove_failed": "Error al quitar: {error}",
+    "analysis_complete": "Análisis completo: {count} sugerencia(s)",
+    "analysis_failed": "Error en el análisis: {error}",
+    "auto_detect_failed": "Error en la detección automática: {error}",
+    "auto_label_failed": "Error en el etiquetado automático: {error}",
+    "could_not_load_cycle": "No se pudo cargar el ciclo: {error}",
+    "create_failed": "Error al crear: {error}",
+    "cycles_deleted": "{count} ciclo(s) eliminado(s)",
+    "debug_cleared": "{count} rastros de depuración borrados",
+    "discard_failed": "Error al descartar: {error}",
+    "error": "Error: {error}",
+    "export_failed": "Error al exportar: {error}",
+    "import_failed": "Error al importar: {error}",
+    "invalid_json": "\"{key}\" no es un JSON válido; corríjalo o vacíe el campo antes de guardar.",
+    "label_failed": "Error al etiquetar: {error}",
+    "ml_training_promoted": "Entrenamiento completo: {count} modelo(s) promovido(s)",
+    "pause_failed": "Error al pausar: {error}",
+    "phase_created": "Fase \"{name}\" creada",
+    "phase_deleted": "Fase \"{name}\" eliminada",
+    "profile_created": "Perfil \"{name}\" creado",
+    "rename_failed": "Error al renombrar: {error}",
+    "revert_failed": "Error al revertir: {error}",
+    "save_failed": "Error al guardar: {error}",
+    "split_complete": "Dividido en {count} ciclos",
+    "start_failed": "Error al iniciar: {error}",
+    "stop_failed": "Error al detener: {error}",
+    "update_failed": "Error al actualizar: {error}",
+    "store_download_skipped": "Grabaciones omitidas: {n} (demasiado cortas, con demasiados huecos o ya presentes en tu dispositivo).",
+    "store_import_low_quality": "Esta grabación es demasiado corta, tiene demasiados huecos o es poco plausible y no se puede importar.",
+    "store_import_duplicate": "Esta grabación ya está en tu dispositivo."
   },
   "suggestion": {
     "both_agree": "WashData recomienda",
@@ -1991,7 +2032,10 @@
       "thr_batch": "Se mantiene justo por encima de la potencia activa más baja en el p05 en {cycles} ciclos ({p05}W) para captar un arranque lo antes posible y que el umbral de parada quede por debajo de la potencia de funcionamiento más baja de la máquina.",
       "tol_per_profile": "p75 de la varianza de duración por perfil en {profiles} perfiles ({cycles} ciclos); los perfiles ajustados no se penalizan.",
       "tol_pooled": "Según la varianza de duración agrupada de {cycles} ciclos etiquetados recientes (desviación p95={dev}).",
-      "watchdog": "Se mantiene lo más bajo que resulta seguro (justo por encima del intervalo de actualización p95 de {p95}s y al menos 2x el intervalo de muestreo de {median}s, mín. 30s) para detectar rápido los bloqueos sin paradas falsas."
+      "watchdog": "Se mantiene lo más bajo que resulta seguro (justo por encima del intervalo de actualización p95 de {p95}s y al menos 2x el intervalo de muestreo de {median}s, mín. 30s) para detectar rápido los bloqueos sin paradas falsas.",
+      "end_energy_floor": "Elevado al mínimo que implican el umbral de parada ({stop} W) durante el retardo de apagado ({off_delay} s); por debajo, el ciclo solo puede terminar mediante una vía de respaldo.",
+      "max_duration_ratio_default": "Vuelta al valor predeterminado: un techo más bajo rechaza el programa correcto siempre que un ciclo dura más de lo habitual.",
+      "min_duration_ratio_default": "Vuelta al valor predeterminado: un mínimo más alto impide reconocer un ciclo en marcha hasta que está bien avanzado."
     },
     "exclusions": {
       "summary": "Excluido(s) {total} ciclo(s) mal detectado(s): {parts}.",
@@ -2228,5 +2272,12 @@
     "off_delay": {
       "effective": "Un ciclo terminado espera en realidad {eff} s, no {delay} s: la Brecha mínima de apagado ({gap} s) es mayor y tiene prioridad."
     }
+  },
+  "access": {
+    "edit": "Edición",
+    "full": "Completo",
+    "inherit": "Heredar",
+    "none": "Ninguno (oculto)",
+    "read": "Lectura"
   }
 }

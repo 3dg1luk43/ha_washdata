@@ -32,6 +32,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant.components import websocket_api
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
@@ -58,27 +59,22 @@ from .const import (
     CONF_END_REPEAT_COUNT,
     CONF_ENERGY_SENSOR,
     CONF_EXTERNAL_END_TRIGGER,
-    CONF_LEARNING_CONFIDENCE,
     CONF_LINKED_DEVICE,
     CONF_MAINTENANCE_REMINDER_CYCLES,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_OFF_DELAY,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_MIN_WARMUP_CYCLES,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PUMP_STUCK_DURATION,
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_POWER_SENSOR,
     CONF_ENERGY_PRICE_ENTITY,
     CONF_NOTIFY_PEOPLE,
     CONF_SAMPLING_INTERVAL,
-    CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
@@ -86,23 +82,18 @@ from .const import (
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_DEVICE_TYPE,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
-    DEFAULT_SMART_TERMINATION_DURATION_RATIO,
-    DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
     DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-    DEFAULT_CURVE_PREROLL_SECONDS,
     CURVE_PREROLL_MAX_SECONDS,
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
     resolve_smart_termination_duration_ratio_default,
     DEFAULT_MAINTENANCE_REMINDER_CYCLES,
-    DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_OFF_DELAY_BY_DEVICE,
     resolve_min_off_gap_default,
     resolve_off_delay_default,
-    DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
     MIN_FULL_TRACES,
@@ -128,9 +119,8 @@ from . import playground
 from . import task_registry
 from .cycle_detector import (
     CycleDetectorConfig,
-    effective_anticrease_finalize_ratio,
-    effective_curve_preroll_seconds,
 )
+from .detector_config import build_detector_config, effective_option_values
 from .options_utils import strip_null_options
 from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
@@ -208,31 +198,24 @@ _CYCLE_STRIP_KEYS = frozenset({"power_data", "power_trace", "debug_data", "sampl
 
 # Settings keys that can be staged from suggestions. Mirrors the OptionsFlow's
 # _suggestion_keys_to_apply so the panel and the flow agree on what is tunable.
+# The keys the suggestion engine can still produce. A stored suggestion for any
+# other key - one written by an older version for a setting no longer suggested
+# (sampling_interval, smoothing_window, start debounce, the confidence ladder, the
+# tolerances, end_repeat_count; audit SUGGEST-01/04/12) - is never shown or applied.
 _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_WATCHDOG_INTERVAL,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_SAMPLING_INTERVAL,
     CONF_PROFILE_MATCH_INTERVAL,
-    CONF_AUTO_LABEL_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_MIN_OFF_GAP,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_END_ENERGY_THRESHOLD,
-    # Stage 1 detection suggestions
-    CONF_SMOOTHING_WINDOW,
-    CONF_START_DURATION_THRESHOLD,
     CONF_COMPLETION_MIN_SECONDS,
-    CONF_LEARNING_CONFIDENCE,
-    CONF_PROFILE_MATCH_THRESHOLD,
-    CONF_END_REPEAT_COUNT,
     # Device-class-specific suggestions from reconcile_suggestions
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
@@ -246,9 +229,7 @@ _SUGGESTION_INT_KEYS: frozenset[str] = frozenset({
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_MIN_OFF_GAP,
-    CONF_SMOOTHING_WINDOW,
     CONF_COMPLETION_MIN_SECONDS,
-    CONF_END_REPEAT_COUNT,
     CONF_PUMP_STUCK_DURATION,
 })
 
@@ -296,6 +277,39 @@ _ML_COMPARE_SETTINGS: tuple[tuple[str, str, str], ...] = (
     (CONF_MIN_OFF_GAP, "Min Off Gap", "s"),
     (CONF_DURATION_TOLERANCE, "Duration Tolerance", ""),
 )
+
+
+def _visible_suggestions(
+    store: Any, merged: dict[str, Any], device_type: str
+) -> list[tuple[str, dict[str, Any], Any, Any]]:
+    """``(key, stored item, suggested, current)`` for every suggestion worth showing.
+
+    The ONE filter behind the Settings list, the device-pill badge, Apply-all and
+    the setup advisor, which had drifted (audit SUGGEST-11/17): a muted key could
+    be re-created by the reconcile cascade and applied by Apply-all, and the setup
+    card counted stale keys nothing would show. Drops keys the engine no longer
+    produces, muted keys, and values equal to what the key already RUNS with - the
+    effective default when it is unset, not ``None`` (SUGGEST-10).
+    """
+    raw = store.get_suggestions() or {}
+    try:
+        muted = set(store.get_locked_suggestions() or [])
+    except Exception:  # pylint: disable=broad-exception-caught
+        muted = set()
+    effective = effective_option_values(merged, device_type)
+    out: list[tuple[str, dict[str, Any], Any, Any]] = []
+    for key in _SUGGESTION_KEYS:
+        item = raw.get(key)
+        if key in muted or not isinstance(item, dict) or item.get("value") is None:
+            continue
+        suggested = _coerce_suggested(key, item["value"])
+        current = merged.get(key)
+        if current is None:
+            current = effective.get(key)
+        if _suggestion_equivalent(suggested, current):
+            continue
+        out.append((key, item, suggested, current))
+    return out
 
 
 def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
@@ -1231,7 +1245,7 @@ async def ws_store_upload_device(hass, connection, msg):
     ``include_settings`` bundles the allow-listed recognition/matching settings."""
     from .const import (
         CONF_STORE_BRAND, CONF_STORE_MODEL, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE,
-        SHAREABLE_SETTING_KEYS,
+        sanitize_shared_settings,
     )
     ctx = _store_ctx(hass, msg["entry_id"])
     if ctx is None:
@@ -1247,7 +1261,7 @@ async def ws_store_upload_device(hass, connection, msg):
     settings = None
     if msg.get("include_settings"):
         # Only the allow-listed numeric thresholds; the WS layer owns entry.options.
-        settings = {k: opts[k] for k in SHAREABLE_SETTING_KEYS if k in opts}
+        settings = sanitize_shared_settings(dict(opts), appliance)
     res = await manager.store_bridge.share_device(
         brand, model, appliance, msg["items"],
         include_phases=msg.get("include_phases"), settings=settings,
@@ -1264,7 +1278,7 @@ async def ws_store_download_device(hass, connection, msg):
     """Adopt a whole-device bundle into this device's reference cycles (merge/upsert).
     When ``include_settings`` is set, also apply the bundle's allow-listed
     recognition/matching settings onto this device's options (overwrites live tuning)."""
-    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE, SHAREABLE_SETTING_KEYS
+    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE, sanitize_shared_settings
     ctx = _store_ctx(hass, msg["entry_id"])
     if ctx is None:
         _send_result(connection, msg["id"], "store_download_device", {"disabled": True})
@@ -1278,11 +1292,7 @@ async def ws_store_download_device(hass, connection, msg):
         # Accept only allow-listed, numeric (non-bool) values - matching what the
         # upload side ever writes - so a malformed/hostile bundle can't inject a
         # string/list/bool into this device's live options.
-        filtered = {
-            k: v for k, v in bundle_settings.items()
-            if k in SHAREABLE_SETTING_KEYS
-            and isinstance(v, (int, float)) and not isinstance(v, bool)
-        }
+        filtered = sanitize_shared_settings(bundle_settings, device_type)
         entry = _get_entry(hass, msg["entry_id"])
         if filtered and entry is not None:
             # Same critical section as ws_set_options: the changelog snapshot and
@@ -1530,23 +1540,12 @@ def ws_get_devices(
                     # entry, raised NameError into a debug-level log.
                     merged = {**entry.data, **entry.options}
                     try:
-                        # Same filters as ws_get_suggestions (muted keys and
-                        # no-op values dropped) so the device-pill badge can
-                        # never disagree with the Settings tab banner.
-                        raw = store.get_suggestions() or {}
-                        try:
-                            muted = set(store.get_locked_suggestions() or [])
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            muted = set()
+                        # The same filter as the Settings list, so the device-pill
+                        # badge can never disagree with the Settings tab banner.
                         keys = [
-                            k for k in _SUGGESTION_KEYS
-                            if k not in muted
-                            and isinstance(raw.get(k), dict)
-                            and raw[k].get("value") is not None
-                            # Coerce first, exactly like ws_get_suggestions, so the pill
-                            # and the Settings list agree on int-key rounding.
-                            and not _suggestion_equivalent(
-                                _coerce_suggested(k, raw[k]["value"]), merged.get(k)
+                            k for k, _i, _s, _c in _visible_suggestions(
+                                store, merged,
+                                getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
                             )
                         ]
                         info["suggestion_keys"] = keys
@@ -2074,7 +2073,13 @@ async def ws_get_setup_status(
     coverage_gap = await hass.async_add_executor_job(store.suggest_coverage_gaps)
     # suggestions: read from the store (cheap dict lookup; heavy computation happens
     # in the SuggestionEngine background task, not here).
-    suggestions = list((store.get_suggestions() or {}).values())
+    _entry = _get_entry(hass, msg["entry_id"])
+    _merged = {**_entry.data, **_entry.options} if _entry is not None else {}
+    suggestions = [
+        item for _k, item, _s, _c in _visible_suggestions(
+            store, _merged, getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE
+        )
+    ]
     pg_data = store._data.get("profile_groups", {})
     pending_groups = (pg_data.get("suggestions") or []) if isinstance(pg_data, dict) else []
 
@@ -2875,7 +2880,11 @@ async def ws_auto_label_cycles(
 
     threshold: float = msg.get("confidence_threshold", 0.75)
     try:
-        await manager.profile_store.auto_label_cycles(threshold, overwrite=True)
+        # Never overwrite (audit MANAGER-01 / UI-10): the button is "auto-label
+        # unlabelled cycles", and the service already defaults to False. With True
+        # every label without a "manual" stamp - which review-queue answers lacked -
+        # was re-matched and could be replaced.
+        await manager.profile_store.auto_label_cycles(threshold, overwrite=False)
         manager.notify_update()
         _send_result(connection, msg["id"], "auto_label_cycles", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -3682,6 +3691,41 @@ async def ws_export_config(
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
+async def async_apply_imported_entry_options(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    config_updates: dict[str, Any],
+    source: str,
+) -> None:
+    """Apply an import payload's tunables to ``entry.options``, the one safe way.
+
+    Shared by the ``import_config`` WS command and the ``import_config`` service,
+    which had drifted: the service still rebound the device to the EXPORTER's
+    power and door sensors (the item-317 "integration silently goes dead"
+    failure), skipped the options lock and wrote no settings changelog
+    (audit PLATFORM-02).
+
+    Identity never lands in options and local entity/device bindings are dropped:
+    an import carries the exporter's ids. ``config_updates["entry_data"]`` is
+    deliberately NOT written to ``entry.data`` - it is the source device's raw,
+    un-redacted identity; identity changes go through the reconfigure flow.
+    The caller holds the per-entry write lock; order is always write -> options.
+    """
+    entry_options_updates = dict(config_updates.get("entry_options", {}) or {})
+    for key in _IMPORT_LOCAL_BINDING_KEYS:
+        entry_options_updates.pop(key, None)
+    if not entry_options_updates:
+        return
+    async with _entry_options_lock(hass, entry.entry_id):
+        # Read INSIDE the lock: a snapshot taken before the `async with` suspended
+        # would silently revert a ws_set_options that committed while we waited.
+        # A persisted null survives options.get(key, DEFAULT) and breaks setup
+        # (#389), so the same write-boundary strip as ws_set_options applies.
+        new_options = strip_null_options({**entry.options, **entry_options_updates})
+        await _record_option_changes(hass, entry, entry_options_updates, source)
+        hass.config_entries.async_update_entry(entry, options=new_options)
+
+
 @websocket_api.websocket_command(
     {
         vol.Required("type"): "ha_washdata/import_config",
@@ -3724,47 +3768,9 @@ async def ws_import_config(
 
             entry = _get_entry(hass, entry_id)
             if entry and config_updates:
-                entry_options_updates = dict(config_updates.get("entry_options", {}))
-                # Identity must never be persisted into options; the display name
-                # rides the entry title. Local entity/device bindings are dropped
-                # too: they are tunables when the panel writes them, but an
-                # import carries the exporter's ids and would repoint this device
-                # at entities that do not exist here (item 317). device_type and
-                # min_power are genuinely portable and stay.
-                for key in _IMPORT_LOCAL_BINDING_KEYS:
-                    entry_options_updates.pop(key, None)
-                if entry_options_updates:
-                    # Apply the imported tunables on top of the current options;
-                    # never spread entry.data into options. An import payload can
-                    # carry a null (an export taken from an entry that still held
-                    # one), and a persisted null survives options.get(key, DEFAULT)
-                    # and breaks setup (#389), so the same write-boundary strip as
-                    # ws_set_options applies here.
-                    # Nested inside the write lock this handler already holds;
-                    # order is always write -> options, so no deadlock.
-                    async with _entry_options_lock(hass, entry_id):
-                        # Read INSIDE the lock. Built before it, `new_options`
-                        # is a snapshot of `entry.options` from before the
-                        # `async with` suspended - so a `ws_set_options` that
-                        # committed while we waited would be silently reverted
-                        # by this write, and the changelog would record the
-                        # post-save value as `old`. The other four option
-                        # writers already read inside their lock; this was the
-                        # one that did not.
-                        new_options = strip_null_options(
-                            {**entry.options, **entry_options_updates}
-                        )
-                        await _record_option_changes(
-                            hass, entry, entry_options_updates, "import_config"
-                        )
-                        hass.config_entries.async_update_entry(
-                            entry, options=new_options
-                        )
-                # NB: config_updates["entry_data"] is intentionally NOT written to
-                # entry.data. export_data ships the raw, un-redacted entry.data of
-                # the *source* device (its power_sensor and other identity), so
-                # blindly applying it would hijack this device's sensor binding.
-                # Identity changes must go through the reconfigure flow.
+                await async_apply_imported_entry_options(
+                    hass, entry, config_updates, "import_config"
+                )
 
             # An old payload re-arms the one-time banked-tail repair, and the
             # options write above is the only thing here that could reload the
@@ -3927,7 +3933,7 @@ async def ws_import_config_selective(
     msg: dict[str, Any],
 ) -> None:
     """Selectively import chosen categories/items, merging into existing data."""
-    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE, SHAREABLE_SETTING_KEYS
+    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE, sanitize_shared_settings
 
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
@@ -3983,11 +3989,9 @@ async def ws_import_config_selective(
             settings = summary.get("settings") if isinstance(summary.get("settings"), dict) else {}
             settings_applied = 0
             if entry is not None and settings:
-                filtered = {
-                    k: v for k, v in settings.items()
-                    if k in SHAREABLE_SETTING_KEYS
-                    and isinstance(v, (int, float)) and not isinstance(v, bool)
-                }
+                filtered = sanitize_shared_settings(
+                    settings, getattr(_get_manager(hass, entry_id), "device_type", None)
+                )
                 for key in _OPTIONS_IDENTITY_KEYS:
                     filtered.pop(key, None)
                 if filtered:
@@ -4093,17 +4097,10 @@ def ws_get_suggestions(
 
     out: list[dict[str, Any]] = []
     try:
-        raw: dict[str, Any] = manager.profile_store.get_suggestions() or {}
-        for key in _SUGGESTION_KEYS:
-            item = raw.get(key)
-            if not isinstance(item, dict) or item.get("value") is None:
-                continue
-            val = item["value"]
-            suggested = _coerce_suggested(key, val)
-            current = merged.get(key)
-            # Hide suggestions that would not change the current value.
-            if _suggestion_equivalent(suggested, current):
-                continue
+        for key, item, suggested, current in _visible_suggestions(
+            manager.profile_store, merged,
+            getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+        ):
             out.append(
                 {
                     "key": key,
@@ -4159,12 +4156,19 @@ async def ws_apply_suggestions(
         return
 
     try:
-        raw: dict[str, Any] = manager.profile_store.get_suggestions() or {}
+        merged = {**entry.data, **entry.options}
+        # Only what the Settings list would show: a muted key re-created by the
+        # reconcile cascade used to be applied here (audit SUGGEST-11).
+        visible = {
+            key: item
+            for key, item, _s, _c in _visible_suggestions(
+                manager.profile_store, merged,
+                getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+            )
+        }
         updates: dict[str, Any] = {}
         for key in msg["keys"]:
-            if key not in _SUGGESTION_KEYS:
-                continue
-            item = raw.get(key)
+            item = visible.get(key)
             if not isinstance(item, dict) or item.get("value") is None:
                 continue
             val = item["value"]
@@ -4175,7 +4179,9 @@ async def ws_apply_suggestions(
         if updates:
             # Clear before updating the entry: async_update_entry schedules a
             # reload that rebuilds the store, so persist the cleared state first.
-            cycle_count = len(manager.profile_store.get_past_cycles())
+            # The odometer, like the cooldown check (audit SUGGEST-05): at the
+            # retention cap len(past_cycles) never grows past the stamp again.
+            cycle_count = manager.profile_store.get_lifetime_cycle_count()
             manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
             # Same critical section as ws_set_options (#442 follow-up): the
             # changelog snapshot and the options write must be atomic per entry.
@@ -6100,47 +6106,15 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
     cfg = getattr(detector, "config", None)
     if isinstance(cfg, CycleDetectorConfig):
         return cfg
-    opts: dict[str, Any] = {}
-    if entry is not None:
-        opts = {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
-    min_power = float(opts.get(CONF_MIN_POWER, DEFAULT_MIN_POWER) or DEFAULT_MIN_POWER)
-    return CycleDetectorConfig(
-        min_power=min_power,
-        off_delay=int(opts.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY)),
-        device_type=str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)),
-        completion_min_seconds=int(opts.get(CONF_COMPLETION_MIN_SECONDS, 600)),
-        end_repeat_count=int(opts.get(CONF_END_REPEAT_COUNT, 1)),
-        min_off_gap=int(opts.get(CONF_MIN_OFF_GAP, 60)),
-        start_threshold_w=float(opts.get(CONF_START_THRESHOLD_W, min_power)),
-        stop_threshold_w=float(
-            opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)
-        ),
-        dishwasher_end_spike_quiet_release=_safe_float_finite(
-            opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE),
-            DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
-        ),
-        smart_termination_duration_ratio=_safe_float_finite(
-            opts.get(CONF_SMART_TERMINATION_DURATION_RATIO),
-            resolve_smart_termination_duration_ratio_default(
-                str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
-            ),
-        ),
-        # The same helpers the detector reads these through, not a bare float:
-        # this branch builds the sim config when the live detector is unavailable,
-        # and an imported or stale option would otherwise give the Playground a
-        # value production would have clamped (register items 244, 249).
-        anti_crease_finalize_ratio=effective_anticrease_finalize_ratio(
-            opts.get(CONF_ANTI_CREASE_FINALIZE_RATIO, DEFAULT_ANTI_CREASE_FINALIZE_RATIO)
-        ),
-        curve_preroll_seconds=effective_curve_preroll_seconds(
-            opts.get(CONF_CURVE_PREROLL_SECONDS, DEFAULT_CURVE_PREROLL_SECONDS)
-        ),
-        # Match the live detector's tuned gate, not the dataclass 0.4, so the sim's
-        # Smart-Termination / anti-crease confidence checks reproduce production.
-        match_confidence_threshold=_safe_float_finite(
-            opts.get(CONF_PROFILE_MATCH_THRESHOLD), DEFAULT_PROFILE_MATCH_THRESHOLD
-        ),
+    # The same builder the manager uses (audit F2): this fallback had its own
+    # defaults (min_off_gap 60 s for every device, scalar completion floor) and
+    # gave a not-yet-initialised device a configuration no detector runs.
+    options = dict(getattr(entry, "options", {}) or {}) if entry is not None else {}
+    data = dict(getattr(entry, "data", {}) or {}) if entry is not None else {}
+    device_type = str(
+        options.get(CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
     )
+    return build_detector_config(options, data, device_type)
 
 
 def _playground_context(hass: HomeAssistant, entry_id: str):
@@ -7270,6 +7244,14 @@ async def _history_import_scan_task(
         payload = await hass.async_add_executor_job(
             functools.partial(runner.finalize, partial=task.cancel_requested)
         )
+        # A candidate that overlaps a cycle WashData already holds is that cycle
+        # replayed from raw history: show it, but never pre-tick it (audit
+        # PLAYGROUND-05 - 81% of them slipped past the exact start/duration key, and
+        # a labelled copy double-weights the real cycle in its envelope).
+        history_import.mark_already_recorded(
+            payload.get("segments") or [],
+            history_import.stored_intervals(manager.profile_store.iter_stored_cycles()),
+        )
         # Split the payload: traces stay server-side, keyed by this task so a reconnect
         # can still apply them; only the preview rows travel.
         cycles = payload.pop("cycles", [])
@@ -7381,6 +7363,9 @@ async def _history_import_apply_task(
             target = store.get_backfill_cycles()
             room = max(0, HISTORY_IMPORT_MAX_TOTAL_CYCLES - len(target))
             existing = history_import.existing_dedup_keys(store.iter_stored_cycles())
+            # Time overlap, not just the exact key: the same run recorded live and
+            # replayed from history rarely agrees to the second (PLAYGROUND-05).
+            intervals = history_import.stored_intervals(store.iter_stored_cycles())
             id_pool = {c.get("id") for c in target if isinstance(c, dict)}
             imported = 0
             duplicates = 0
@@ -7390,7 +7375,9 @@ async def _history_import_apply_task(
                     break
                 raw = cycles[index]
                 key = history_import.dedup_key(raw.get("start_time"), raw.get("duration"))
-                if key is not None and key in existing:
+                if (key is not None and key in existing) or history_import.overlaps_stored(
+                    raw.get("start_time"), raw.get("duration"), intervals
+                ):
                     duplicates += 1
                     reg.update(task, done=done)
                     continue
@@ -7403,6 +7390,9 @@ async def _history_import_apply_task(
                 )
                 if key is not None:
                     existing.add(key)
+                interval = history_import.stored_intervals([raw])
+                if interval:
+                    intervals = sorted([*intervals, *interval])
                 imported += 1
                 reg.update(task, done=done)
             if imported:

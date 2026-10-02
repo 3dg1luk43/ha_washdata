@@ -32,15 +32,25 @@ and the real Stage 1-5 matcher over the cycle's own trace.  So
 ``_last_match_confidence`` is whatever the shipped matcher actually produces -
 which is the whole point, since the guard under test reads exactly that.
 
-**Running the A/B.**  The gate is an inline condition, and the obvious knob for
-turning the confidence guard off - setting ``match_confidence_threshold`` to 0 -
-also relaxes Smart Termination, which would confound the comparison.  So the two
-arms are two states of the working tree:
+**Configuration (audit F2 / DETECT-12).**  Each export is replayed with the
+configuration its own options produce in production: the detector config and the
+ProfileStore come from a real ``WashDataManager`` built on the export's entry
+data and options (the same ``build_detector_config`` the manager uses), and every
+envelope is rebuilt with the current code (exports carry stale ones). The old
+hand-rolled config defaulted ``min_off_gap`` to 480 s for every device and read a
+key no option is stored under, which understated washer end lag 16.2 -> 12.2 min.
 
-    git stash                       # or check out the pre-guard commit
-    python3 devtools/end_gate_eval.py --json /tmp/before.json
-    git stash pop
-    python3 devtools/end_gate_eval.py --json /tmp/after.json
+``--loo`` matches each cycle against profiles rebuilt WITHOUT it (leave-one-out),
+like ``devtools/eval.py``. Without it each cycle is matched against an envelope it
+helped build, which flatters confidence and ambiguity - use ``--loo`` for any
+figure you quote.
+
+**Running the A/B.**  The two arms are two states of the code. Do not ``git
+stash`` in a shared working tree; check the other arm out in a worktree:
+
+    git worktree add --detach /tmp/before <ref> && ln -s "$PWD/cycle_data" /tmp/before/
+    (cd /tmp/before && python3 devtools/end_gate_eval.py --loo --json /tmp/before.json)
+    python3 devtools/end_gate_eval.py --loo --json /tmp/after.json
     python3 devtools/end_gate_eval.py --compare /tmp/before.json /tmp/after.json
 
 ``--no-shortening`` patches ``const.END_GATE_LATE_RATIO`` (and the per-device
@@ -52,7 +62,9 @@ Run from the repo root.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
+import logging
 import sys
 from pathlib import Path
 from typing import Any
@@ -78,41 +90,78 @@ MIN_READINGS = 10
 MIN_CYCLES = 5
 
 
-def _cfg(opts: dict[str, Any], device_type: str) -> CycleDetectorConfig:
-    """Detector config from an export's own options - the user's real settings."""
-    g = opts.get
-    return CycleDetectorConfig(
-        min_power=float(g("min_power", 2.0)),
-        off_delay=int(g("off_delay", 180)),
-        device_type=device_type,
-        completion_min_seconds=int(g("completion_min_seconds", 600)),
-        start_duration_threshold=float(g("start_duration_threshold", 5.0)),
-        start_energy_threshold=float(g("start_energy_threshold", 0.2)),
-        end_energy_threshold=float(g("end_energy_threshold", 0.05)),
-        end_repeat_count=int(g("end_repeat_count", 1)),
-        min_off_gap=int(g("min_off_gap", 480)),
-        start_threshold_w=float(g("start_threshold_w", 2.0)),
-        stop_threshold_w=float(g("stop_threshold_w", 2.0)),
-        power_off_threshold_w=float(g("power_off_threshold_w", 0.0)),
-        power_off_delay=float(g("power_off_delay", 30.0)),
-        anti_wrinkle_enabled=bool(g("anti_wrinkle_enabled", False)),
-        delay_detect_enabled=bool(g("delay_start_detect_enabled", False)),
-        match_confidence_threshold=float(g("match_confidence_threshold", 0.4)),
-        min_duration_ratio=float(g("profile_match_min_duration_ratio", 0.10)),
-    )
+class _Entry:
+    def __init__(self, data: dict, options: dict, title: str) -> None:
+        self.data, self.options, self.title = data, options, title
+        self.entry_id, self.domain = "end-gate-eval", "ha_washdata"
+
+    def async_on_unload(self, *_a: Any, **_k: Any) -> None:
+        return None
+
+    def add_update_listener(self, *_a: Any, **_k: Any) -> Any:
+        return lambda: None
 
 
-def _store_from(data: dict[str, Any], opts: dict[str, Any]) -> ProfileStore:
-    store = ProfileStore(MagicMock(), "end-gate-eval")
-    store._data = data  # noqa: SLF001 - the documented harness pattern
-    store._min_duration_ratio = float(  # noqa: SLF001
-        opts.get("profile_match_min_duration_ratio", 0.10)
-    )
-    store._max_duration_ratio = float(  # noqa: SLF001
-        opts.get("profile_match_max_duration_ratio", 1.8)
-    )
-    store.dtw_bandwidth = float(opts.get("dtw_bandwidth", 0.20))
-    return store
+class _InlineHass:
+    """Executor jobs run inline: deterministic, and nothing else is reachable."""
+
+    async def async_add_executor_job(self, fn: Any, *args: Any) -> Any:
+        return fn(*args)
+
+
+class _NullStore:
+    """Replaces the WashDataStore: every save is dropped."""
+
+    async def async_save(self, _data: Any) -> None:
+        return None
+
+    async def async_load(self) -> None:
+        return None
+
+
+def _run(coro: Any) -> Any:
+    loop = asyncio.new_event_loop()
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
+
+
+def _production(doc: dict[str, Any], data: dict[str, Any]) -> tuple[CycleDetectorConfig, ProfileStore, dict[str, Any]]:
+    """(detector config, ProfileStore, options) exactly as the manager builds them."""
+    from custom_components.ha_washdata.manager import WashDataManager  # noqa: PLC0415
+
+    entry_data = {"power_sensor": "sensor.end_gate_eval", "name": "eval",
+                  **{k: v for k, v in (doc.get("entry_data") or {}).items() if v is not None}}
+    opts = {k: v for k, v in (doc.get("entry_options") or {}).items() if v is not None}
+    device_type = (doc.get("device_fingerprint") or {}).get("device_type")
+    if device_type:
+        opts.setdefault("device_type", device_type)
+    mgr = WashDataManager(MagicMock(), _Entry(entry_data, opts, "eval"))
+    store = mgr.profile_store
+    store.hass = _InlineHass()
+    store._store = _NullStore()  # noqa: SLF001
+    store._data = data  # noqa: SLF001
+    return mgr.detector.config, store, {**entry_data, **opts}
+
+
+def _rebuild_envelopes(store: ProfileStore, names: Any) -> None:
+    async def _go() -> None:
+        for name in names:
+            await store.async_rebuild_envelope(name)
+
+    _run(_go())
+
+
+def _fold_data(base: dict[str, Any], cycle: dict[str, Any]) -> dict[str, Any]:
+    """The store without ``cycle`` (by identity), sharing what it does not touch."""
+    d = dict(base)
+    for key in ("past_cycles", "reference_cycles", "backfill_cycles"):
+        d[key] = [c for c in (base.get(key) or []) if c is not cycle]
+    d["profiles"] = {k: dict(v) if isinstance(v, dict) else v
+                     for k, v in (base.get("profiles") or {}).items()}
+    d["envelopes"] = dict(base.get("envelopes") or {})
+    return d
 
 
 def _end_offset(events: list[dict[str, Any]]) -> float | None:
@@ -136,7 +185,7 @@ def _active_span(points: list[tuple[float, float]], stop: float) -> float:
     return (active[-1] - active[0]) if len(active) >= 2 else 0.0
 
 
-def _measure_export(path: Path, no_shortening: bool) -> list[dict[str, Any]]:
+def _measure_export(path: Path, no_shortening: bool, loo: bool = False) -> list[dict[str, Any]]:
     """Replay every usable cycle in one export; one row per cycle."""
     try:
         doc = json.loads(path.read_text(encoding="utf-8"))
@@ -147,15 +196,22 @@ def _measure_export(path: Path, no_shortening: bool) -> list[dict[str, Any]]:
     cycles = data.get("past_cycles") or []
     if not device_type or len(cycles) < MIN_CYCLES:
         return []
-    opts = doc.get("entry_options") or {}
-    stop = float(opts.get("stop_threshold_w") or 1.0)
-    store = _store_from(data, opts)
-    cfg = _cfg(opts, device_type)
+    base = dict(data)
+    for key in ("past_cycles", "reference_cycles", "backfill_cycles"):
+        base[key] = list(base.get(key) or [])
+    base["profiles"] = {k: dict(v) if isinstance(v, dict) else v
+                        for k, v in (base.get("profiles") or {}).items()}
+    base["envelopes"] = dict(base.get("envelopes") or {})
+    cfg, store, opts = _production(doc, base)
+    stop = float(cfg.stop_threshold_w)
+    # Exports carry the envelopes the exporting version built; rebuild them with
+    # the code under test, as the live store would after an upgrade.
+    _rebuild_envelopes(store, list(base["profiles"]))
     try:
         prebuilt = playground._build_match_snapshots(store)  # noqa: SLF001
     except Exception:
         prebuilt = None
-
+    cycles = base["past_cycles"]
     rows: list[dict[str, Any]] = []
     for cyc in cycles:
         pts = _cycle_readings(cyc)
@@ -164,10 +220,19 @@ def _measure_export(path: Path, no_shortening: bool) -> list[dict[str, Any]]:
         span = _active_span(pts, stop)
         if span <= 0:
             continue
+        fold_store, fold_prebuilt = store, prebuilt
+        name = cyc.get("profile_name")
+        if loo and name and name in base["profiles"]:
+            _cfg_f, fold_store, _o = _production(doc, _fold_data(base, cyc))
+            _rebuild_envelopes(fold_store, [name])
+            try:
+                fold_prebuilt = playground._build_match_snapshots(fold_store)  # noqa: SLF001
+            except Exception:
+                fold_prebuilt = None
         try:
             sim = playground.simulate_cycle_detail(
-                cyc, cfg, None, store, opts, price=None,
-                compute_series=False, prebuilt=prebuilt,
+                cyc, cfg, None, fold_store, opts, price=None,
+                compute_series=False, prebuilt=fold_prebuilt,
             )
         except Exception:
             continue
@@ -192,6 +257,7 @@ def _measure_export(path: Path, no_shortening: bool) -> list[dict[str, Any]]:
             "off_delay": cfg.off_delay,
             "min_off_gap": cfg.min_off_gap,
             "no_shortening": no_shortening,
+            "loo": loo,
         })
     return rows
 
@@ -303,6 +369,10 @@ def main() -> int:
         "--no-shortening", action="store_true",
         help="pre-306 arm: patch END_GATE_LATE_RATIO out of reach",
     )
+    ap.add_argument(
+        "--loo", action="store_true",
+        help="leave-one-out: match each cycle against profiles rebuilt without it",
+    )
     args = ap.parse_args()
 
     if args.compare:
@@ -321,9 +391,10 @@ def main() -> int:
         _const.END_GATE_LATE_RATIO = 1e9
         _const.END_GATE_LATE_RATIO_BY_DEVICE = {}
 
+    logging.getLogger("custom_components.ha_washdata").setLevel(logging.ERROR)
     rows: list[dict[str, Any]] = []
     for path in sorted((REPO / "cycle_data").rglob("*.json")):
-        rows.extend(_measure_export(path, args.no_shortening))
+        rows.extend(_measure_export(path, args.no_shortening, args.loo))
 
     if not rows:
         print("no replayable cycles found - is cycle_data/ present?")

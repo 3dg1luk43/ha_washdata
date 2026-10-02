@@ -260,7 +260,8 @@
         "save_total_cycles": "누적 값 저장",
         "clear": "지우기",
         "add_brand": "브랜드 추가",
-        "add_appliance": "가전제품 추가"
+        "add_appliance": "가전제품 추가",
+        "retry": "다시 시도"
     },
     "note": {
         "off_delay": {
@@ -334,7 +335,11 @@
             "sampling": "샘플링 간격은 워치독 간격 ({wi} 초)의 절반 이하이어야 합니다"
         },
         "settings_banner": "설정 충돌: {n}. 강조 표시된 섹션을 확인하고 저장 전에 수정하세요.",
-        "settings_banner_btn": "첫 번째로"
+        "settings_banner_btn": "첫 번째로",
+        "end_energy": {
+            "energy": "중지 임계값 ({w} W)과 오프 지연 ({d} s)에 비해 너무 엄격합니다. 사이클이 대체 경로로만 종료될 수 있습니다",
+            "stop": "종료 에너지 ({d} s 동안 {e} Wh)로는 {p} W까지만 허용됩니다"
+        }
     },
     "hdr": {
         "ab_comparison": "A/B 설정 비교",
@@ -735,7 +740,9 @@
         "zoom_hint_touch_zoomed": "두 손가락으로 확대/축소 · 두 번 탭하여 초기화",
         "cycles_since_service": "{since} / {total} 사이클",
         "total_cycles_run": "누적 실행 사이클",
-        "correct_total_cycles": "누적 값 수정"
+        "correct_total_cycles": "누적 값 수정",
+        "hist_reason_already_recorded": "WashData가 이미 기록한 사이클과 겹침",
+        "share_consent": "이 사이클들이 중단 없이 정상적으로 완료되었음을 확인합니다"
     },
     "log": {
         "all_levels": "모든 레벨",
@@ -771,7 +778,8 @@
             "total_energy": "에너지 추정"
         },
         "metric_auc": "검증 데이터 기준 AUC {auc}",
-        "metric_mae": "오차 {model} vs 기준선 {baseline}"
+        "metric_mae": "오차 {model} vs 기준선 {baseline}",
+        "fine_tuned_at": "{when}에 미세 조정됨"
     },
     "modal": {
         "auto_label": "자동 라벨 주기",
@@ -1103,7 +1111,10 @@
         "no_reminders_set": "설정된 서비스 알림이 아직 없습니다.",
         "toast_program_armed": "다음 사이클용 프로그램이 설정됨: {program}",
         "toast_range_required": "유효한 시작/끝 범위를 설정하세요.",
-        "no_profiles_option": "(프로필 없음, 하나 추가하세요)"
+        "no_profiles_option": "(프로필 없음, 하나 추가하세요)",
+        "compare_cycles_title": "사이클 {count}개 비교",
+        "edit_builtin_phase": "기본 제공 단계입니다. 저장하면 사용자 지정 재정의가 생성됩니다. 원본은 보존되며 재정의를 삭제하면 복원할 수 있습니다.",
+        "fetch_error": "데이터를 불러오지 못했습니다."
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -1514,7 +1525,7 @@
             "label": "펌프 정지 지속 시간"
         },
         "sampling_interval": {
-            "doc": "센서 판독 사이의 예상 시간 - 스무딩 창의 크기를 조정하고 디바운싱을 올바르게 시작하는 데 사용됩니다. 모든 센서 업데이트는 이 값에 관계없이 캡처됩니다. 다운스트림 계산만 보정합니다. 제안 엔진은 과거 주기에서 센서의 실제 케이던스를 측정하고 이를 자동으로 설정합니다.",
+            "doc": "처리되는 측정값 사이의 최소 시간입니다. 직전 측정값 이후 이 시간보다 빨리 도착한 측정값은 건너뜁니다(사이클 중의 낮은 측정값은 항상 유지됩니다). 따라서 플러그의 실제 보고 간격 이하로 설정하세요. 값이 더 크면 측정값을 버릴 뿐입니다. WashData는 이 값을 제안하지 않습니다. WashData가 측정할 수 있는 것은 이 설정이 이미 측정값을 버린 뒤에 남은 간격이기 때문입니다.",
             "label": "샘플링 간격"
         },
         "save_debug_traces": {
@@ -1803,7 +1814,8 @@
         "deleting": "삭제 중…",
         "imported": "가져옴",
         "preparing": "준비 중…",
-        "unlabelling": "라벨 해제 중…"
+        "unlabelling": "라벨 해제 중…",
+        "working": "처리 중…"
     },
     "tab": {
         "advanced": "고급",
@@ -1949,7 +1961,36 @@
         "odometer_save_failed": "누적 값을 저장할 수 없습니다: {error}",
         "contrib_device_changed": "커뮤니티 스토어에 추가했지만 입력 양식이 열려 있는 동안 기기가 변경되었습니다. 설정에서 선택하세요.",
         "store_pick_profile_share": "공유할 프로필을 선택하세요",
-        "remove_failed": "제거 실패: {error}"
+        "remove_failed": "제거 실패: {error}",
+        "analysis_complete": "분석 완료: 제안 {count}개",
+        "analysis_failed": "분석 실패: {error}",
+        "auto_detect_failed": "자동 감지 실패: {error}",
+        "auto_label_failed": "자동 라벨 지정 실패: {error}",
+        "could_not_load_cycle": "사이클을 불러올 수 없습니다: {error}",
+        "create_failed": "생성 실패: {error}",
+        "cycles_deleted": "사이클 {count}개를 삭제했습니다",
+        "debug_cleared": "디버그 추적 {count}개를 지웠습니다",
+        "discard_failed": "폐기 실패: {error}",
+        "error": "오류: {error}",
+        "export_failed": "내보내기 실패: {error}",
+        "import_failed": "가져오기 실패: {error}",
+        "invalid_json": "\"{key}\"은(는) 유효한 JSON이 아닙니다. 저장하기 전에 수정하거나 필드를 비우세요.",
+        "label_failed": "라벨 지정 실패: {error}",
+        "ml_training_promoted": "훈련 완료: 모델 {count}개 승격됨",
+        "pause_failed": "일시정지 실패: {error}",
+        "phase_created": "단계 \"{name}\"이(가) 생성되었습니다",
+        "phase_deleted": "단계 \"{name}\"이(가) 삭제되었습니다",
+        "profile_created": "프로필 \"{name}\"이(가) 생성되었습니다",
+        "rename_failed": "이름 변경 실패: {error}",
+        "revert_failed": "되돌리기 실패: {error}",
+        "save_failed": "저장 실패: {error}",
+        "split_complete": "사이클 {count}개로 분할했습니다",
+        "start_failed": "시작 실패: {error}",
+        "stop_failed": "중지 실패: {error}",
+        "update_failed": "업데이트 실패: {error}",
+        "store_download_skipped": "기록 {n}개 건너뜀: 너무 짧거나, 공백이 너무 많거나, 이미 기기에 있습니다.",
+        "store_import_low_quality": "이 기록은 너무 짧거나, 공백이 너무 많거나, 타당하지 않아 가져올 수 없습니다.",
+        "store_import_duplicate": "이 기록은 이미 기기에 있습니다."
     },
     "suggestion": {
         "both_agree": "WashData 권장",
@@ -2044,7 +2085,10 @@
             "tol_pooled": "{cycles}개 최근 라벨 사이클의 통합 시간 분산 기반(p95 편차={dev}).",
             "watchdog": "안전한 범위에서 최대한 낮게 유지(p95 업데이트 간격 {p95}s보다 약간 크고, 샘플링 간격 {median}s의 2배 이상, 최소 30s). 잘못된 정지 없이 멈춤을 빠르게 감지합니다.",
             "match_interval_capped": "연속 {persistence}회 매칭이 최단 프로그램({shortest}s)의 {pct}% 안에 들어가도록 상한을 적용했습니다. 업데이트 주기(중앙값={median}s)만 고려했다면 더 긴 간격이 제안되었을 것입니다.",
-            "match_interval_floored": "최단 프로그램({shortest} 초)만으로 계산하면 상한이 {cap} 초가 되어 최소값 {minimum} 초보다 낮으므로 최소값에서 멈춥니다. 연속 {persistence}회 매칭에는 {budget} 초가 걸리며, 이는 해당 프로그램의 {pct}%를 넘습니다. 매칭은 측정값이 도착할 때만 실행되므로(중앙값={median} 초) 최소값으로 두어도 부담이 없습니다."
+            "match_interval_floored": "최단 프로그램({shortest} 초)만으로 계산하면 상한이 {cap} 초가 되어 최소값 {minimum} 초보다 낮으므로 최소값에서 멈춥니다. 연속 {persistence}회 매칭에는 {budget} 초가 걸리며, 이는 해당 프로그램의 {pct}%를 넘습니다. 매칭은 측정값이 도착할 때만 실행되므로(중앙값={median} 초) 최소값으로 두어도 부담이 없습니다.",
+            "end_energy_floor": "중지 임계값 ({stop} W)과 오프 지연 ({off_delay} s)이 의미하는 하한으로 올렸습니다. 이보다 낮으면 사이클이 대체 경로로만 종료될 수 있습니다.",
+            "max_duration_ratio_default": "기본값으로 되돌렸습니다. 상한이 낮으면 운전이 평소보다 길어질 때마다 올바른 프로그램이 제외됩니다.",
+            "min_duration_ratio_default": "기본값으로 되돌렸습니다. 하한이 높으면 실행 중인 사이클이 상당히 진행될 때까지 인식되지 않습니다."
         },
         "exclusions": {
             "summary": "잘못 감지된 사이클 {total}개를 제외했습니다: {parts}.",
@@ -2228,5 +2272,12 @@
             "hide_guidance": "안내 숨기기",
             "show_guidance": "안내 표시"
         }
+    },
+    "access": {
+        "edit": "편집",
+        "full": "전체",
+        "inherit": "상속",
+        "none": "없음 (숨김)",
+        "read": "읽기"
     }
 }

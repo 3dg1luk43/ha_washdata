@@ -64,7 +64,7 @@ def test_no_cost_when_no_price():
 
 
 def test_cleared_below_progress_floor():
-    mgr, fn = _bound(progress=1.0, energy_wh=200.0, price=0.30)  # < 3% floor
+    mgr, fn = _bound(progress=5.0, energy_wh=200.0, price=0.30)  # < 10% floor
     fn()
     assert mgr._projected_energy_wh is None
     assert mgr._projected_cost is None

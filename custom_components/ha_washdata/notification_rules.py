@@ -99,7 +99,11 @@ def seconds_until_quiet_end(
     if target <= when:
         # End hour is earlier today (wrap-around window) -> it lands tomorrow.
         target = target + timedelta(days=1)
-    return max(0.0, (target - when).total_seconds())
+    # The target is a local wall-clock time, but the wait is real seconds:
+    # subtracting two datetimes that share one ZoneInfo uses their wall-clock
+    # fields, so on a DST night the hold ended an hour early (autumn) or late
+    # (spring). `timestamp()` honours each side's own UTC offset.
+    return max(0.0, target.timestamp() - when.timestamp())
 
 
 def milestone_crossed(prev_count: int, cur_count: int, milestones: Any) -> int | None:

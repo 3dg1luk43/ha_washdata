@@ -29,7 +29,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
     DOMAIN,
-    STATE_RUNNING,
+    CYCLE_IN_PROGRESS_STATES,
     SIGNAL_WASHER_UPDATE,
     CONF_EXPOSE_DEBUG_ENTITIES,
 )
@@ -56,6 +56,8 @@ async def async_setup_entry(
 class WasherRunningBinarySensor(BinarySensorEntity):
     """Binary sensor indicating if washer is running."""
 
+    _attr_should_poll = False  # pushed by the manager's update signal (PERF-02)
+
     _attr_has_entity_name = True
 
     _attr_translation_key = "running"
@@ -74,7 +76,9 @@ class WasherRunningBinarySensor(BinarySensorEntity):
     @property
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
-        return self._manager.check_state() == STATE_RUNNING
+        # Any in-progress state, not only `running`: a soak, a pause or the end
+        # wait is not "done" (audit PLATFORM-06).
+        return self._manager.check_state() in CYCLE_IN_PROGRESS_STATES
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""

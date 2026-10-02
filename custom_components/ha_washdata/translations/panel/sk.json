@@ -260,7 +260,8 @@
     "save_total_cycles": "Uložiť celkový počet",
     "clear": "Vymazať",
     "add_brand": "Pridať značku",
-    "add_appliance": "Pridať spotrebič"
+    "add_appliance": "Pridať spotrebič",
+    "retry": "Skúsiť znova"
   },
   "note": {
     "off_delay": {
@@ -334,7 +335,11 @@
       "sampling": "Interval vzorkovania by mal byť najviac polovica Intervalu watchdog ({wi} s)"
     },
     "settings_banner": "Konflikty nastavení: {n}. Skontrolujte zvýraznené sekcie a opravte ich pred uložením.",
-    "settings_banner_btn": "Prejsť na prvý"
+    "settings_banner_btn": "Prejsť na prvý",
+    "end_energy": {
+      "energy": "Príliš prísne pre Prah zastavenia ({w} W) počas Oneskorenia vypnutia ({d} s); cyklus môže skončiť len záložnou cestou",
+      "stop": "Energia ukončenia ({e} Wh za {d} s) povoľuje len {p} W"
+    }
   },
   "hdr": {
     "ab_comparison": "Porovnanie nastavení A/B",
@@ -735,7 +740,9 @@
     "zoom_hint_touch_zoomed": "dvoma prstami priblížite · dvojitým ťuknutím obnovíte",
     "cycles_since_service": "{since} / {total} cyklov",
     "total_cycles_run": "cyklov celkom",
-    "correct_total_cycles": "Opraviť celkový počet"
+    "correct_total_cycles": "Opraviť celkový počet",
+    "hist_reason_already_recorded": "prekrýva sa s cyklom, ktorý WashData už zaznamenal",
+    "share_consent": "Potvrdzujem, že tieto cykly prebehli normálne až do konca bez prerušenia"
   },
   "log": {
     "all_levels": "Všetky úrovne",
@@ -771,7 +778,8 @@
       "total_energy": "Odhad spotreby energie"
     },
     "metric_auc": "AUC {auc} na validačných dátach",
-    "metric_mae": "chyba {model} oproti základnému modelu {baseline}"
+    "metric_mae": "chyba {model} oproti základnému modelu {baseline}",
+    "fine_tuned_at": "doladené {when}"
   },
   "modal": {
     "auto_label": "Automatické označovanie cyklov",
@@ -1103,7 +1111,10 @@
     "no_reminders_set": "Zatiaľ nie sú nastavené žiadne pripomienky servisu.",
     "toast_program_armed": "Program nastavený pre ďalší cyklus: {program}",
     "toast_range_required": "Nastavte platný rozsah Od/Do",
-    "no_profiles_option": "(zatiaľ žiadne profily, pridajte nový)"
+    "no_profiles_option": "(zatiaľ žiadne profily, pridajte nový)",
+    "compare_cycles_title": "Porovnať cykly ({count})",
+    "edit_builtin_phase": "Toto je vstavaná fáza. Uložením sa vytvorí vlastné prepísanie; originál zostane zachovaný a dá sa obnoviť odstránením prepísania.",
+    "fetch_error": "Načítanie údajov zlyhalo."
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1490,7 +1501,7 @@
       "label": "Trvanie zaseknutia čerpadla"
     },
     "sampling_interval": {
-      "doc": "Očakávaný čas medzi snímaniami snímača – používa sa na nastavenie veľkosti vyhladzovacieho okna a správne spustenie odrazu. Každá aktualizácia snímača sa zaznamená bez ohľadu na túto hodnotu; kalibruje iba následné výpočty. Nástroj návrhov meria skutočnú kadenciu vášho senzora z minulých cyklov a automaticky ju nastavuje.",
+      "doc": "Minimálny čas medzi spracovanými meraniami. Meranie, ktoré príde skôr, než od predchádzajúceho uplynie tento čas, sa preskočí (nízke merania počas cyklu sa vždy ponechajú), preto ho nastavte na skutočný interval hlásenia vašej zástrčky alebo nižší: vyššia hodnota len zahadzuje merania. WashData túto hodnotu nenavrhuje, pretože dokáže zmerať len interval, ktorý zostane po tom, čo toto nastavenie už merania vyradilo.",
       "label": "Interval vzorkovania"
     },
     "save_debug_traces": {
@@ -1771,7 +1782,8 @@
     "deleting": "Odstraňovanie…",
     "imported": "Importované",
     "preparing": "Príprava…",
-    "unlabelling": "Odoberanie štítka…"
+    "unlabelling": "Odoberanie štítka…",
+    "working": "Spracúva sa…"
   },
   "suggestion": {
     "both_agree": "WashData odporúča",
@@ -1866,7 +1878,10 @@
       "thr_batch": "Ponechané tesne nad najnižším činným výkonom p05 naprieč {cycles} cyklami ({p05}W), aby sa štart zachytil čo najskôr a prah zastavenia zostal pod najnižším prevádzkovým výkonom stroja.",
       "tol_per_profile": "p75 rozptylu dĺžky podľa profilu naprieč {profiles} profilmi ({cycles} cyklov); konzistentné profily nie sú penalizované.",
       "tol_pooled": "Na základe zlúčeného rozptylu dĺžky {cycles} nedávnych označených cyklov (odchýlka p95={dev}).",
-      "watchdog": "Ponechané čo najnižšie pri zachovaní bezpečnosti (tesne nad intervalom aktualizácie p95 vo výške {p95}s a aspoň 2x nad intervalom vzorkovania {median}s, min. 30s), aby sa zaseknutia rýchlo odhalili bez falešných zastavení."
+      "watchdog": "Ponechané čo najnižšie pri zachovaní bezpečnosti (tesne nad intervalom aktualizácie p95 vo výške {p95}s a aspoň 2x nad intervalom vzorkovania {median}s, min. 30s), aby sa zaseknutia rýchlo odhalili bez falešných zastavení.",
+      "end_energy_floor": "Zvýšené na minimum, ktoré vyplýva z prahu zastavenia ({stop} W) počas oneskorenia vypnutia ({off_delay} s); pod ním môže cyklus skončiť len záložnou cestou.",
+      "max_duration_ratio_default": "Vrátené na predvolenú hodnotu: nižšia horná hranica odmietne správny program vždy, keď cyklus trvá dlhšie než zvyčajne.",
+      "min_duration_ratio_default": "Vrátené na predvolenú hodnotu: vyššia dolná hranica bráni rozpoznaniu bežiaceho cyklu, kým nie je v plnom prúde."
     },
     "exclusions": {
       "summary": "Vylúčených {total} chybne zistených cyklov: {parts}.",
@@ -2030,7 +2045,36 @@
     "odometer_saved": "Celkový počet cyklov uložený",
     "odometer_save_failed": "Celkový počet sa nepodarilo uložiť: {error}",
     "store_pick_profile_share": "Vyberte profil na zdieľanie",
-    "remove_failed": "Odstránenie zlyhalo: {error}"
+    "remove_failed": "Odstránenie zlyhalo: {error}",
+    "analysis_complete": "Analýza dokončená: návrhy: {count}",
+    "analysis_failed": "Analýza zlyhala: {error}",
+    "auto_detect_failed": "Automatické zisťovanie zlyhalo: {error}",
+    "auto_label_failed": "Automatické označenie zlyhalo: {error}",
+    "could_not_load_cycle": "Cyklus sa nepodarilo načítať: {error}",
+    "create_failed": "Vytvorenie zlyhalo: {error}",
+    "cycles_deleted": "Odstránené cykly: {count}",
+    "debug_cleared": "Vymazané ladiace záznamy: {count}",
+    "discard_failed": "Zahodenie zlyhalo: {error}",
+    "error": "Chyba: {error}",
+    "export_failed": "Export zlyhal: {error}",
+    "import_failed": "Import zlyhal: {error}",
+    "invalid_json": "\"{key}\" nie je platný JSON - opravte ho alebo pred uložením pole vymažte.",
+    "label_failed": "Označenie zlyhalo: {error}",
+    "ml_training_promoted": "Trénovanie dokončené: nasadené modely: {count}",
+    "pause_failed": "Pozastavenie zlyhalo: {error}",
+    "phase_created": "Fáza \"{name}\" vytvorená",
+    "phase_deleted": "Fáza \"{name}\" odstránená",
+    "profile_created": "Profil \"{name}\" vytvorený",
+    "rename_failed": "Premenovanie zlyhalo: {error}",
+    "revert_failed": "Vrátenie zlyhalo: {error}",
+    "save_failed": "Uloženie zlyhalo: {error}",
+    "split_complete": "Rozdelené na cykly: {count}",
+    "start_failed": "Spustenie zlyhalo: {error}",
+    "stop_failed": "Zastavenie zlyhalo: {error}",
+    "update_failed": "Aktualizácia zlyhala: {error}",
+    "store_download_skipped": "Preskočených nahrávok: {n} (príliš krátke, s príliš veľkými medzerami alebo už sú na vašom zariadení).",
+    "store_import_low_quality": "Táto nahrávka je príliš krátka, má príliš veľa medzier alebo je nevierohodná, preto ju nemožno importovať.",
+    "store_import_duplicate": "Táto nahrávka sa už nachádza na vašom zariadení."
   },
   "trend": {
     "down": "Klesajúci trend",
@@ -2228,5 +2272,12 @@
       "hide_guidance": "Skryť pokyny",
       "show_guidance": "Zobraziť pokyny"
     }
+  },
+  "access": {
+    "edit": "Úpravy",
+    "full": "Plný",
+    "inherit": "Zdediť",
+    "none": "Žiadny (skryté)",
+    "read": "Čítanie"
   }
 }

@@ -260,7 +260,8 @@
         "save_total_cycles": "累計を保存",
         "clear": "クリア",
         "add_brand": "ブランドを追加",
-        "add_appliance": "家電を追加"
+        "add_appliance": "家電を追加",
+        "retry": "再試行"
     },
     "note": {
         "off_delay": {
@@ -334,7 +335,11 @@
             "sampling": "サンプリング間隔はウォッチドッグ間隔 ({wi} 秒) の半分以下である必要があります"
         },
         "settings_banner": "設定の競合: {n}。強調表示されたセクションを確認し、保存前に修正してください。",
-        "settings_banner_btn": "最初へ"
+        "settings_banner_btn": "最初へ",
+        "end_energy": {
+            "energy": "停止しきい値 ({w} W) とオフ遅延 ({d} s) に対して厳しすぎます。サイクルはフォールバック経路でしか終了できません",
+            "stop": "終了エネルギー ({d} s で {e} Wh) では {p} W までしか許容されません"
+        }
     },
     "hdr": {
         "ab_comparison": "A/B 設定の比較",
@@ -735,7 +740,9 @@
         "zoom_hint_touch_zoomed": "ピンチでズーム · ダブルタップでリセット",
         "cycles_since_service": "{since} / {total} サイクル",
         "total_cycles_run": "累計サイクル数",
-        "correct_total_cycles": "累計を修正"
+        "correct_total_cycles": "累計を修正",
+        "hist_reason_already_recorded": "WashData が既に記録したサイクルと重なっている",
+        "share_consent": "これらのサイクルが中断なく正常に完了したことを確認します"
     },
     "log": {
         "all_levels": "すべてのレベル",
@@ -771,7 +778,8 @@
             "total_energy": "エネルギー推定"
         },
         "metric_auc": "検証データでの AUC {auc}",
-        "metric_mae": "誤差 {model} vs ベースライン {baseline}"
+        "metric_mae": "誤差 {model} vs ベースライン {baseline}",
+        "fine_tuned_at": "{when} に微調整"
     },
     "modal": {
         "auto_label": "自動ラベル付けサイクル",
@@ -1103,7 +1111,10 @@
         "no_reminders_set": "サービスリマインダーはまだ設定されていません。",
         "toast_program_armed": "次のサイクル用にプログラムを設定しました: {program}",
         "toast_range_required": "有効な開始/終了の範囲を設定してください。",
-        "no_profiles_option": "(プロファイルなし、追加してください)"
+        "no_profiles_option": "(プロファイルなし、追加してください)",
+        "compare_cycles_title": "{count} 件のサイクルを比較",
+        "edit_builtin_phase": "これは組み込みのフェーズです。保存するとカスタムの上書きが作成されます。元のフェーズは保持され、上書きを削除すると元に戻せます。",
+        "fetch_error": "データの読み込みに失敗しました。"
     },
     "pg_desc": {
         "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -1514,7 +1525,7 @@
             "label": "ポンプ停止継続時間"
         },
         "sampling_interval": {
-            "doc": "センサー読み取り間の予想時間 - スムージング ウィンドウのサイズを調整し、デバウンスを正しく開始するために使用されます。この値に関係なく、すべてのセンサーの更新がキャプチャされます。下流の計算のみを調整します。提案エンジンは、過去のサイクルからセンサーの実際のケイデンスを測定し、これを自動的に設定します。",
+            "doc": "処理する測定値どうしの最小間隔です。前回の測定値からこの時間より早く届いた測定値はスキップされます（サイクル中の低い測定値は常に保持されます）。そのため、プラグの実際の報告間隔以下に設定してください。これより大きい値は測定値を捨てるだけです。WashData はこの値を提案しません。WashData が測定できるのは、この設定によって既に測定値が間引かれた後に残る間隔だけだからです。",
             "label": "サンプリング間隔"
         },
         "save_debug_traces": {
@@ -1803,7 +1814,8 @@
         "deleting": "削除中…",
         "imported": "インポート済み",
         "preparing": "準備中…",
-        "unlabelling": "ラベル解除中…"
+        "unlabelling": "ラベル解除中…",
+        "working": "処理中…"
     },
     "tab": {
         "advanced": "高度な",
@@ -1949,7 +1961,36 @@
         "odometer_save_failed": "累計を保存できませんでした: {error}",
         "contrib_device_changed": "コミュニティストアに追加しましたが、入力フォームを開いている間にデバイスが変更されました。設定で選択してください。",
         "store_pick_profile_share": "共有先のプロファイルを選択してください",
-        "remove_failed": "削除に失敗しました: {error}"
+        "remove_failed": "削除に失敗しました: {error}",
+        "analysis_complete": "分析が完了しました: {count} 件の提案",
+        "analysis_failed": "分析に失敗しました: {error}",
+        "auto_detect_failed": "自動検出に失敗しました: {error}",
+        "auto_label_failed": "自動ラベル付けに失敗しました: {error}",
+        "could_not_load_cycle": "サイクルを読み込めませんでした: {error}",
+        "create_failed": "作成に失敗しました: {error}",
+        "cycles_deleted": "{count} 件のサイクルを削除しました",
+        "debug_cleared": "{count} 件のデバッグトレースを消去しました",
+        "discard_failed": "破棄に失敗しました: {error}",
+        "error": "エラー: {error}",
+        "export_failed": "エクスポートに失敗しました: {error}",
+        "import_failed": "インポートに失敗しました: {error}",
+        "invalid_json": "「{key}」は有効な JSON ではありません。保存する前に修正するか、フィールドを空にしてください。",
+        "label_failed": "ラベル付けに失敗しました: {error}",
+        "ml_training_promoted": "トレーニング完了: {count} 件のモデルを昇格しました",
+        "pause_failed": "一時停止に失敗しました: {error}",
+        "phase_created": "フェーズ「{name}」を作成しました",
+        "phase_deleted": "フェーズ「{name}」を削除しました",
+        "profile_created": "プロファイル「{name}」を作成しました",
+        "rename_failed": "名前の変更に失敗しました: {error}",
+        "revert_failed": "元に戻せませんでした: {error}",
+        "save_failed": "保存に失敗しました: {error}",
+        "split_complete": "{count} 件のサイクルに分割しました",
+        "start_failed": "開始に失敗しました: {error}",
+        "stop_failed": "停止に失敗しました: {error}",
+        "update_failed": "更新に失敗しました: {error}",
+        "store_download_skipped": "{n}件の記録をスキップしました。短すぎるか、欠落が多すぎるか、既にデバイスにあります。",
+        "store_import_low_quality": "この記録は短すぎるか、欠落が多すぎるか、妥当性に欠けるためインポートできません。",
+        "store_import_duplicate": "この記録は既にデバイスにあります。"
     },
     "suggestion": {
         "both_agree": "WashDataの推奨",
@@ -2044,7 +2085,10 @@
             "tol_pooled": "{cycles} 件の直近のラベル付きサイクルの統合時間分散に基づく（p95 偏差={dev}）。",
             "watchdog": "安全な範囲でできるだけ低く設定（p95 の更新間隔 {p95}s をわずかに上回り、かつサンプリング間隔 {median}s の 2 倍以上、最小 30s）。誤った停止なしに停滞を素早く検出します。",
             "match_interval_capped": "{persistence} 回連続のマッチが最短プログラム（{shortest}s）の {pct}% 以内に収まるよう上限を設けました。更新間隔（中央値={median}s）だけならより長い間隔が提案されていました。",
-            "match_interval_floored": "最短プログラム（{shortest} 秒）だけで計算すると上限は {cap} 秒となり、最小値の {minimum} 秒を下回るため、最小値で止めています。{persistence} 回連続のマッチングには {budget} 秒かかり、これはそのプログラムの {pct}% を超えます。マッチングは測定値が届いたときにのみ実行されるため（中央値={median} 秒）、最小値にしてもコストはかかりません。"
+            "match_interval_floored": "最短プログラム（{shortest} 秒）だけで計算すると上限は {cap} 秒となり、最小値の {minimum} 秒を下回るため、最小値で止めています。{persistence} 回連続のマッチングには {budget} 秒かかり、これはそのプログラムの {pct}% を超えます。マッチングは測定値が届いたときにのみ実行されるため（中央値={median} 秒）、最小値にしてもコストはかかりません。",
+            "end_energy_floor": "停止しきい値 ({stop} W) とオフ遅延 ({off_delay} s) から導かれる下限まで引き上げました。これを下回ると、サイクルはフォールバック経路でしか終了できません。",
+            "max_duration_ratio_default": "既定値に戻しました。上限を下げると、運転がいつもより長引くたびに正しいプログラムが除外されてしまいます。",
+            "min_duration_ratio_default": "既定値に戻しました。下限を上げると、実行中のサイクルがかなり進むまで認識されなくなります。"
         },
         "exclusions": {
             "summary": "{total} 件の誤検出サイクルを除外しました: {parts}。",
@@ -2228,5 +2272,12 @@
             "hide_guidance": "ガイダンスを非表示",
             "show_guidance": "ガイダンスを表示"
         }
+    },
+    "access": {
+        "edit": "編集",
+        "full": "フル",
+        "inherit": "継承",
+        "none": "なし（非表示）",
+        "read": "読み取り"
     }
 }

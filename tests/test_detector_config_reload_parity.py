@@ -201,7 +201,10 @@ async def test_b_every_field_actually_moved_off_its_default(mock_hass) -> None:
     unchanged = sorted(k for k, v in default_cfg.items() if tuned_cfg[k] == v)
     # device_type is the one field OPTIONS_B deliberately leaves alone: changing it
     # re-resolves half the device-type defaults and would mask a real difference.
-    assert unchanged == ["device_type"], (
+    # min_duration_ratio is the FINISH-DEFERRAL ratio, a constant since audit
+    # DETECT-02: it used to be fed from profile_match_min_duration_ratio, the
+    # matcher's Stage-1 bound, which made the deferral inert.
+    assert unchanged == ["device_type", "min_duration_ratio"], (
         f"these detector settings ignore their option: {unchanged}"
     )
 

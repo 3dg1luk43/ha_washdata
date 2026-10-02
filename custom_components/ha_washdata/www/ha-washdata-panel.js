@@ -141,8 +141,6 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Cycle End', fields: [
       { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,
         doc: 'During the off-delay countdown, accumulated energy (watts x time) is compared to this threshold. If exceeded, the countdown resets - keeping anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Raise it if cycles end too early during cool-down; lower it if detection is sluggish.' },
-      { key: 'end_repeat_count', label: 'End Repeat Count', type: 'number', min: 1, def: 1,
-        doc: 'Number of consecutive below-stop-threshold readings required before the cycle ends. 1 is fine for most plugs. Raise to 2-3 if your smart plug occasionally reports a false-zero sample mid-cycle and your cycles are ending prematurely.' },
       { key: 'smart_termination_duration_ratio', label: 'Smart Termination Ratio', type: 'number', step: 0.01, min: 0.5, max: 1.0,
         doc: 'How far into the matched program\'s expected duration a cycle must be before Smart Termination may end it early once power drops. The expected duration is the program\'s average, so on appliances whose runtime varies a lot - washers on cold winter vs warm summer inlet water, sensor-dry dryers, load-dependent programs - about half of all runs finish shorter than that average and never get the fast finish, ending only via the fallback timeout minutes late. Lower this (e.g. 0.85) on those machines so the early finish still fires; raise it toward 1.0 to be more conservative. Leave empty for the default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never fires on an ambiguous or low-confidence match.' },
     ] },
@@ -154,9 +152,7 @@ const _SETTINGS_SECTIONS = [
     ] },
     { sub: 'Signal Processing', fields: [
       { key: 'sampling_interval', label: 'Sampling Interval', unit: 's', type: 'number', min: 1, def: 30,
-        doc: 'Expected time between sensor readings - used to size the smoothing window and start debounce correctly. Every sensor update is captured regardless of this value; it only calibrates the downstream calculations. The suggestion engine measures your sensor\'s actual cadence from past cycles and sets this automatically.' },
-      { key: 'smoothing_window', label: 'Smoothing Window', type: 'number', min: 1, def: 2,
-        doc: 'How much the raw power signal is smoothed. Low (2) is responsive but noisy; high (5) smooths spikes but adds lag.' },
+        doc: 'Minimum time between processed readings. A reading that arrives sooner than this after the last one is skipped (low readings during a cycle are always kept), so set it to your plug\'s real reporting interval or lower: a higher value only throws readings away. WashData does not suggest this value, because what it can measure is the interval left after this setting has already dropped readings.' },
     ] },
   ] },
   { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', notDeviceTypes: ['other'], groups: [
@@ -173,8 +169,6 @@ const _SETTINGS_SECTIONS = [
         doc: 'Minimum cycle length relative to the profile. 0.9 means a cycle must be at least 90% of the profile duration to match.' },
       { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', type: 'number', step: 0.01, min: 0, def: 1.8,
         doc: 'Maximum cycle length relative to the profile. 1.3 means a cycle must be under 130% of the profile duration to match.' },
-      { key: 'profile_duration_tolerance', label: 'Profile Duration Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.25,
-        doc: 'The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.' },
       { key: 'duration_tolerance', label: 'Estimate Tolerance', type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
         doc: 'Tolerance for time-remaining estimates (learning feedback, not matching). If the actual duration is within +/-X% of the estimate it counts as a good match.' },
     ] },
@@ -621,7 +615,7 @@ const _SETTING_CONFLICTS = [
       end_energy_threshold: { msgKey: 'conflict.end_energy.energy', msgVars: {w: v.stop_threshold_w, d: v.off_delay},
         msgFb: `Too strict for Stop Threshold (${v.stop_threshold_w} W) over Off Delay (${v.off_delay} s); the cycle can only end through a fallback path`,
         fixVal: Math.ceil(v.stop_threshold_w * v.off_delay / 3600 * 1000) / 1000 },
-      stop_threshold_w: { msgKey: 'conflict.end_energy.stop', msgVars: {e: v.end_energy_threshold, d: v.off_delay},
+      stop_threshold_w: { msgKey: 'conflict.end_energy.stop', msgVars: {e: v.end_energy_threshold, d: v.off_delay, p: +(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)},
         msgFb: `End Energy Threshold (${v.end_energy_threshold} Wh over ${v.off_delay} s) only permits ${+(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)} W`,
         fixVal: Math.floor(v.end_energy_threshold * 3600 / v.off_delay * 10) / 10 },
     }),
@@ -4571,20 +4565,23 @@ class HaWashdataPanel extends HTMLElement {
       ${this._pref('show_raw', false) ? `<label class="wd-leg-i"><input type="checkbox" data-statustoggle="show_raw_active" ${showRawLeg ? 'checked' : ''}><span class="wd-leg-sw" style="background:#9e9e9e"></span> ${this._t('lbl.raw_socket', {}, 'Raw socket')}</label>` : ''}
     </div>`;
     // Setup card: phase-aware guidance replacing the old getting-started card.
-    // A live cycle (hasCurve) always wins so the user sees their appliance.
+    // A running cycle always wins so the user sees their appliance. Gated on the
+    // cycle, not on hasCurve: while idle `live` still holds the last 15 min of
+    // readings, so the card was hidden on almost every install (audit UI-01).
     const cycleCount = this._cyclesTotal || 0;
     const profileCount = (this._profiles || []).length;
     const setupDismissed = this._pref('setup_card_dismissed', false);
     const setupStatus = this._setupStatus;
     // Phase 3 and 4 collapse to a chip when dismissed; earlier phases always show
     // the full guidance card regardless of the dismissed pref.
-    const showSetupCard = setupStatus && !hasCurve;
+    const showSetupCard = setupStatus && !isRunning;
     const setupCardHtml = showSetupCard ? this._htmlSetupCard(setupStatus, setupDismissed) : '';
-    const curveHtml = hasCurve
+    const chartHtml = hasCurve
       ? `<div class="wd-canvas-wrap" style="margin-top:14px"><canvas id="wd-status-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_power_chart', {}, 'Power consumption chart'))}" style="height:160px"></canvas></div>${legend}`
-      : (showSetupCard
-          ? setupCardHtml
-          : `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`);
+      : '';
+    const curveHtml = showSetupCard
+      ? setupCardHtml + chartHtml
+      : (chartHtml || `<p class="wd-info" style="margin-top:12px">${this._t('msg.live_chart_loading', {}, 'Live power chart appears as readings arrive.')}</p>`);
 
     const showDebug = this._pref('show_debug', false);
     let debugHtml = '';
@@ -6589,7 +6586,6 @@ class HaWashdataPanel extends HTMLElement {
       ['min_off_gap',             'Min Off Gap',           's', 'Gap required to separate two cycles',          'timing'],
       ['completion_min_seconds',  'Min Cycle Duration',    's', 'Shortest run that counts as a real cycle',     'timing'],
       ['start_duration_threshold','Start Duration',        's', 'Seconds above threshold to confirm start',     'timing'],
-      ['end_repeat_count',        'End Repeat Count',      '',  'Low readings in a row before ending',          'advanced'],
       ['interrupted_min_seconds', 'Interrupted Min',       's', 'Short cycles flagged as interrupted',          'advanced'],
       ['anti_wrinkle_enabled',    'Enable Anti-Wrinkle Detection', '', 'Absorb the tumble pulses after the main phase instead of reading them as new cycles', 'advanced', 'bool'],
       ['anti_wrinkle_max_power',  'Max Anti-Wrinkle Power','W', 'A pulse above this ends anti-wrinkle and opens a new cycle', 'advanced'],
@@ -9840,7 +9836,7 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="create-phase-ok">${this._t('btn.create', {}, 'Create')}</button></div>`;
     } else if (m.type === 'edit-phase') {
-      const builtinNote = m.isDefault ? `<p class="wd-info" style="margin:0 0 12px">${this._t('msg.edit_builtin_phase', {}, 'This is a built-in phase. Saving creates a custom override — the original is preserved and can be restored by deleting the override.')}</p>` : '';
+      const builtinNote = m.isDefault ? `<p class="wd-info" style="margin:0 0 12px">${this._t('msg.edit_builtin_phase', {}, 'This is a built-in phase. Saving creates a custom override; the original is preserved and can be restored by deleting the override.')}</p>` : '';
       body = `<h2>${this._t('modal.edit_phase', {}, 'Edit Phase')} ${m.isDefault ? `<span class="wd-tag">${this._t('badge.built_in_tag', {}, 'built-in')}</span>` : ''}</h2>
         ${builtinNote}
         <div class="wd-field"><label>${this._t('lbl.phase_name', {}, 'Phase Name')}</label><input type="text" id="wd-eph-name" value="${_esc(m.phaseName)}"></div>
@@ -10286,6 +10282,7 @@ class HaWashdataPanel extends HTMLElement {
     const map = {
       shorter_than_minimum: this._t('lbl.hist_reason_short', {}, 'shorter than this appliance\'s shortest real cycle'),
       no_clean_end: this._t('lbl.hist_reason_no_end', {}, 'never ended cleanly'),
+      already_recorded: this._t('lbl.hist_reason_already_recorded', {}, 'overlaps a cycle WashData already recorded'),
     };
     return map[reason] || '';
   }
@@ -13171,17 +13168,21 @@ class HaWashdataPanel extends HTMLElement {
           if (r && (r.error || r.disabled)) { const why = r.error || 'unavailable'; this._showToast(this._t('toast.store_download_failed', {error: why}, 'Download failed: ' + why), 'error'); return; }
           const p = (r && r.profiles_adopted) || 0, c = (r && r.cycles_imported) || 0;
           const sa = (r && r.settings_applied) || 0;
+          const sk = (r && r.cycles_skipped) || 0;
+          const skipped = sk ? this._t('toast.store_download_skipped', {n: sk}, `${sk} recording(s) skipped: too short, too gappy or already on your device.`) : '';
           if (!p && !c && !sa) {
             // Nothing adopted: either already imported, or the fetch came back empty.
-            this._showToast(this._t('toast.store_download_nothing', {}, 'Nothing new to download - this setup is already on your device.'), 'info');
+            this._showToast(skipped || this._t('toast.store_download_nothing', {}, 'Nothing new to download - this setup is already on your device.'), 'info');
             return;
           }
           await this._fetchProfiles(eid);
           await this._fetchCycles(eid);
           const ph = (r && r.phases_applied) || 0;
-          if (sa) this._showToast(this._t('toast.store_device_downloaded_settings', {p, c, ph, s: sa}, `${p} program(s), ${c} recording(s), ${ph} phase map(s), ${sa} setting(s) added`));
-          else if (ph) this._showToast(this._t('toast.store_device_downloaded_phases', {p, c, ph}, `${p} program(s), ${c} recording(s), ${ph} phase map(s) added`));
-          else this._showToast(this._t('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`));
+          let done;
+          if (sa) done = this._t('toast.store_device_downloaded_settings', {p, c, ph, s: sa}, `${p} program(s), ${c} recording(s), ${ph} phase map(s), ${sa} setting(s) added`);
+          else if (ph) done = this._t('toast.store_device_downloaded_phases', {p, c, ph}, `${p} program(s), ${c} recording(s), ${ph} phase map(s) added`);
+          else done = this._t('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`);
+          this._showToast(skipped ? `${done}. ${skipped}` : done);
         } catch (e) { this._showToast(this._t('toast.store_download_failed', {error: e.message || e}, 'Download failed: ' + (e.message || e)), 'error'); }
       });
 
@@ -13867,6 +13868,8 @@ class HaWashdataPanel extends HTMLElement {
         await this._busyRun('store-import', async () => {
           try {
             const r = await this._ws(msg);
+            if (r && r.error === 'low_quality') { this._showToast(this._t('toast.store_import_low_quality', {}, 'This recording is too short, too gappy or implausible to import.'), 'error'); return; }
+            if (r && r.error === 'duplicate') { this._showToast(this._t('toast.store_import_duplicate', {}, 'This recording is already on your device.'), 'info'); return; }
             if (r && r.error) { this._showToast(this._t('toast.store_import_failed', {error: r.error}, 'Import failed: ' + r.error), 'error'); return; }
             this._modal = null;
             this._showToast(this._t('toast.store_imported', {profile: (r && r.profile) || ''}, `Imported into ${(r && r.profile) || 'profile'}`));

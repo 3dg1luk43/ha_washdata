@@ -52,7 +52,10 @@ devtools/release_check.sh               # release preflight (what CI runs)
 devtools/release_check.sh --fix         # regenerate artifacts instead of failing
 devtools/release_check.sh --full --tag v0.5.6
 
-python3 devtools/end_gate_eval.py            # ENDING fallback-gate lag/early-end/split (item 329)
+python3 devtools/eval.py run --mode fast     # LOO matcher accuracy on the SHIPPED path (audit F1)
+python3 devtools/eval.py compare BASE.json NEW.json   # paired deltas, McNemar, guarded metrics
+python3 devtools/end_gate_eval.py --loo      # ENDING fallback-gate lag/early-end/split (item 329)
+python3 devtools/energy_projection_eval.py   # projected-energy accuracy, LOO (audit PROGRESS-04)
 python3 devtools/decisive_margin_eval.py     # mid-cycle switch bypass, runner-up exposure
 python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
 
@@ -163,7 +166,8 @@ measures absolute *level/spread*.
 - **`progress.py`** - **single source of truth** for progress / remaining-time / phase /
   projected-energy math. Pure, no HA. `manager.py`'s equivalents are thin wrappers and the Playground
   `SimRunner` calls the same functions, so the what-if replay is byte-identical to the live estimator.
-  Locked by a golden snapshot; **never fork this math**.
+  Locked by `tests/test_progress_module.py` and the Playground parity tests (there is no separate
+  golden snapshot file); **never fork this math**.
 - **`notification_rules.py`** - pure notification *decision* predicates shared by `manager.py` and the
   Playground sim. **Delivery stays in the manager**; only thresholds/gating live here.
 - **`learning.py`** - feedback system with confidence tracking. Label provenance in
@@ -229,7 +233,7 @@ provenance:
 | | `past_cycles` | `reference_cycles` | `backfill_cycles` |
 |---|---|---|---|
 | origin | observed live | community-store download | replayed from raw history (#344) |
-| trust | real | curated, **golden by construction** | auto-detected, unverified |
+| trust | real | community download; **reference shape only in a profile with none of your own** (`_effective_golden_flags`, audit STORE-04), quality-gated + content-deduped on download | auto-detected, unverified |
 | shapes envelopes + matching once labelled | yes | yes | yes |
 | lifetime energy / cycle count, ML training, feedback queue | yes | no | no |
 | shareable to the store | golden only | no | never |
@@ -257,12 +261,14 @@ shipped as base64 blobs; on-device training writes specs into the profile store 
 the baseline files**. Full detail in reference 07 and `ml/README.md`.
 
 **Feature flags (`const.py`):** `SHOW_ML_LAB` (panel ML insights + the consolidated **ML Training**
-tab), `ENABLE_ML_SUGGESTIONS`, `ENABLE_ML_TRAINING`, and the per-device `CONF_ENABLE_ML_MODELS`
+tab), `ENABLE_ML_SUGGESTIONS` (**off** since audit SUGGEST-18), `ENABLE_ML_TRAINING`, and the per-device `CONF_ENABLE_ML_MODELS`
 (`ml_models_enabled(options)`, default off) which gates feeding ML into live decisions.
 
 **Five gated runtime consumers** of `CONF_ENABLE_ML_MODELS`:
 
 1. **ML end-detection guard** - asymmetric anti-premature-stop: can only **defer, never end early**.
+   **Frozen off by `ENABLE_ML_END_GUARD = False`** whatever the device option (audit ML-05: 0
+   premature ends prevented on 292 replayed cycles, washer median lag +5.3 min).
 2. **ML early match commit** - commits the initial match without the persistence counter at
    `ML_MATCH_COMMIT_THRESHOLD`.
 3. **ML quality gate** - downgrades auto-labeling to a feedback request at cycle end.
@@ -302,7 +308,12 @@ any promotion. The integration is self-sufficient at test/run time (parity fixtu
 
 ### Datetime and energy
 
-- **Always `dt_util.now()`** for timezone-aware datetimes, never `datetime.now()`.
+- **Always `dt_util.now()`** for timezone-aware datetimes, never `datetime.now()`. For any
+  **interval** (elapsed, `dt`, durations, timers) use `time_utils.utc_now()` and `dt_util.as_utc()`:
+  two aware datetimes sharing HA's one ZoneInfo subtract on wall-clock fields, so local stamps are
+  an hour off across a DST change (audit DETECT-01: a spring-forward soak split a wash). The
+  detector converts every reading to UTC at `process_reading`; keep `as_local` for display and
+  quiet-hours only.
 - All time/energy calculations must be dt-aware (timestamps, not sample counts).
 - Energy integration: use the shared `signal_processing.integrate_wh(ts, power, max_gap_s=...)` +
   `energy_gap_threshold_s(ts)`. Both persistence paths route through it - **do not reintroduce an
@@ -359,7 +370,7 @@ old-schema fixtures. **Two separate layers, tested separately:**
    `MINOR_VERSION` live on the flow class in `config_flow.py` and must be bumped with it. Tested in
    `tests/test_migration_harness.py`. The one-pass legacy path writes the current version directly, so
    a bump also means updating the `minor_version=` at the end of the bulk migration.
-2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->14
+2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->15
    (`STORAGE_VERSION` in `const.py`). Tested in `tests/test_migration_v032.py`. Call
    `_async_migrate_func(old_version, 1, data)` **directly** - do not go through
    `ProfileStore.async_load()` (needs file I/O).
@@ -374,13 +385,17 @@ old-schema fixtures. **Two separate layers, tested separately:**
    `backfill_cycles` (additive `setdefault`), v12->v13 marker-only
    (`BANKED_TAIL_REPAIR_KEY` set so the one-time banked-tail duration repair runs once), v13->v14
    marker-only by **assignment** (re-arms that repair after its #424 correction; v13 had already
-   cleared the key).
+   cleared the key), v14->v15 pure data repair (review-queue answers stamped `manual`, audit
+   MANAGER-01; idempotent).
 
 ## Matching Pipeline
 
 All scoring constants live in `const.py` under "Matching pipeline scoring constants" (`MATCH_*`).
 Tuning provenance, A/B tables and measured accuracies are in reference 02 and
-`devtools/dtw_ab_eval.py` - not repeated here.
+`devtools/dtw_ab_eval.py` - not repeated here. **`dtw_ab_eval.py` does not run the shipped matcher**
+(audit MATCH-EVAL-01: no envelope templates, partial config); measure matcher changes with
+`devtools/eval.py`, which drives `ProfileStore.async_match_profile` leave-one-out with the config a
+real `WashDataManager` builds, and use `end_gate_eval.py --loo` (in-sample flatters confidence).
 
 **Every harness a tuning claim rests on must be committed.** Item 306's 427-cycle end-lag
 measurement was not, so when a review round proposed tightening that same gate there was no way to
@@ -454,6 +469,17 @@ calibrated against it. The chosen member's own score is `member_confidence`, and
 member_confidence)`. Using `confidence` to gate a label is register item 206: the cycle got labelled
 with a member the matcher was far less sure of than the number suggested.
 
+**Every auto-label goes through `profile_store.label_verdict(result, floor)`** (margin >=
+`MATCH_LABEL_MIN_MARGIN`, not `is_ambiguous`, `label_confidence >= floor`). At cycle end the manager
+runs **one complete-cycle match** and labels from it (audit MATCH-DECIDE-02); the last live tick is
+a prefix match whose winner differed from the complete one on 17.5% of cycles. The live `program`
+is display only. Do not reintroduce a second cycle-end label path.
+
+**Prefix guard flags (audit LIVE-18):** `is_prefix_ambiguous` (Smart Termination, the fallback bar,
+the dishwasher floor, the hazard gate) is the #364 prefix-fit term only; the #288 full-shape term
+survives only as `is_prefix_ambiguous_full_shape` for the anti-crease finalize. Both are composed by
+`profile_store.match_prefix_flags`, which the Playground calls too - compose them nowhere else.
+
 ## Known Technical Debt
 
 The `[FIXED]` register in `docs/internal/INTEGRATION_REFERENCE.md` §7 is the live tracker - read it
@@ -470,7 +496,7 @@ naming traps, and doc inaccuracies.
 **Maintenance rule (critical):** every time a bug is fixed, a feature is added, a constant changes
 value, a module grows significantly, or a naming trap is resolved, **update the register**: mark
 fixed items `[FIXED]` with the commit hash, add new `[CODE]` items, update `[NOTE]` items, update
-module map line counts if a file grows by >100 lines, and update the §7 quick-reference table.
+module map line counts if a file grows by >100 lines.
 
 Deep-dives under `docs/internal/reference/` are supplementary; the register is what matters most to
 keep current.

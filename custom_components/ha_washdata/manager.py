@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import logging
 import hashlib
-import inspect
 import math
 import re
 import uuid
@@ -36,6 +35,7 @@ import numpy as np
 if TYPE_CHECKING:
     from .store import StoreBridge
 
+from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Context, Event, HomeAssistant, State, callback
 from homeassistant.helpers.event import (
@@ -75,9 +75,7 @@ from .const import (
     CONF_NOTIFY_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_LOW_POWER_NO_UPDATE_TIMEOUT, # Import new constant
-    CONF_SMOOTHING_WINDOW,
     CONF_PROFILE_DURATION_TOLERANCE,
-    CONF_INTERRUPTED_MIN_SECONDS,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -93,43 +91,16 @@ from .const import (
     CONF_MAX_FULL_TRACES_UNLABELED,
     CONF_WATCHDOG_INTERVAL,
     CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
-    CONF_COMPLETION_MIN_SECONDS,
     CONF_NOTIFY_BEFORE_END_MINUTES,
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_DEVICE_TYPE,
-    CONF_START_DURATION_THRESHOLD,
-    CONF_END_REPEAT_COUNT,
-    CONF_MIN_OFF_GAP,
-    CONF_START_ENERGY_THRESHOLD,
-    CONF_END_ENERGY_THRESHOLD,
-    CONF_START_THRESHOLD_W,
-    CONF_STOP_THRESHOLD_W,
-    CONF_POWER_OFF_THRESHOLD_W,
-    CONF_POWER_OFF_DELAY,
     CONF_SAMPLING_INTERVAL,
     CONF_SAVE_DEBUG_TRACES,
     CONF_DTW_BANDWIDTH,
     CONF_EXTERNAL_END_TRIGGER_ENABLED,
     CONF_EXTERNAL_END_TRIGGER,
     CONF_EXTERNAL_END_TRIGGER_INVERTED,
-    CONF_ANTI_WRINKLE_ENABLED,
-    CONF_ANTI_WRINKLE_MAX_POWER,
-    CONF_ANTI_WRINKLE_MAX_DURATION,
-    CONF_ANTI_WRINKLE_EXIT_POWER,
-    CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
-    CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
-    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
-    CONF_SMART_TERMINATION_DURATION_RATIO,
-    CONF_ANTI_CREASE_FINALIZE_RATIO,
-    CONF_CURVE_PREROLL_SECONDS,
-    DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
-    DEFAULT_CURVE_PREROLL_SECONDS,
-    DEFAULT_SMART_TERMINATION_DURATION_RATIO,
-    DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
-    CONF_DELAY_START_DETECT_ENABLED,
-    CONF_DELAY_CONFIRM_SECONDS,
-    CONF_DELAY_TIMEOUT_HOURS,
     CONF_PUMP_STUCK_DURATION,
     DEFAULT_PUMP_STUCK_DURATION,
     EVENT_PUMP_STUCK,
@@ -146,18 +117,12 @@ from .const import (
     DEFAULT_OFF_DELAY,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
-    DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
-    DEFAULT_INTERRUPTED_MIN_SECONDS,
-    DEFAULT_COMPLETION_MIN_SECONDS,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEFAULT_PROFILE_UNMATCH_THRESHOLD,
-    DEFAULT_SAMPLING_INTERVAL,
     DEFAULT_PROGRESS_RESET_DELAY,
-    DEFAULT_POWER_OFF_THRESHOLD_W,
     DEFAULT_PROFILE_EVIDENCE_SOURCES,
-    DEFAULT_POWER_OFF_DELAY,
     DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
@@ -165,14 +130,6 @@ from .const import (
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
-    DEFAULT_ANTI_WRINKLE_ENABLED,
-    DEFAULT_ANTI_WRINKLE_MAX_POWER,
-    DEFAULT_ANTI_WRINKLE_MAX_DURATION,
-    DEFAULT_ANTI_WRINKLE_EXIT_POWER,
-    DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT,
-    DEFAULT_DELAY_START_DETECT_ENABLED,
-    DEFAULT_DELAY_CONFIRM_SECONDS,
-    DEFAULT_DELAY_TIMEOUT_HOURS,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_MAX_PAST_CYCLES,
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
@@ -248,29 +205,21 @@ from .const import (
 
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
-    DEFAULT_WATCHDOG_INTERVAL,
     WATCHDOG_LATE_TICK_FACTOR,
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
-    resolve_start_duration_default,
-    resolve_smart_termination_duration_ratio_default,
     CONF_MATCH_PERSISTENCE,
     DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_MATCH_REVERT_RATIO,
     MATCH_DECISIVE_MARGIN,
     MATCH_LABEL_MIN_MARGIN,
+    ENABLE_ML_END_GUARD,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
-    DEFAULT_START_DURATION_THRESHOLD,
-    DEFAULT_END_REPEAT_COUNT,
-    resolve_min_off_gap_default,
     DEFAULT_UNMATCHED_WATCHDOG_CEILING,
     DEFAULT_UNMATCHED_WATCHDOG_CEILING_BY_DEVICE,
     DEFAULT_MAX_DEFERRAL_SECONDS,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
-    DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
-    DEFAULT_END_ENERGY_THRESHOLD,
-    DEVICE_COMPLETION_THRESHOLDS,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
     ENERGY_ANOMALY_Z_THRESHOLD,
     TERMINAL_DROP_MIN_CLEAN_CYCLES,
@@ -290,16 +239,18 @@ from .const import (
     STATE_IDLE,
     STATE_UNKNOWN,
 )
+from .detector_config import apply_detector_config, build_detector_config
 from .cycle_detector import (
     CycleDetector,
-    CycleDetectorConfig,
     terminal_high_for_guards,
 )
 from .learning import LearningManager
 from .profile_store import (
+    MatchResult,
     ProfileStore,
     decompress_power_data,
     is_terminal_drop,
+    label_verdict,
     terminal_drop_baseline,
 )
 from .signal_processing import (
@@ -317,7 +268,7 @@ from .log_utils import DeviceLoggerAdapter
 # HA restart, and never carries over between different configured entities.
 _UNLOAD_CONFIRM_ANCHOR_KEY = f"{DOMAIN}_unload_confirm_anchors"
 from .options_utils import option_float, option_int
-from .time_utils import power_data_to_offsets
+from .time_utils import power_data_to_offsets, utc_now
 from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
@@ -475,44 +426,36 @@ def _pn_create(
     *,
     title: str | None = None,
     notification_id: str | None = None,
-) -> None:
-    """Best-effort persistent notification creation.
+) -> bool:
+    """Best-effort persistent notification creation; True when it was posted.
 
-    Deliberately goes through ``hass.components.persistent_notification`` rather than
-    a direct ``homeassistant.components.persistent_notification`` import: the test
-    suite stubs out the whole ``homeassistant`` module and mocks this dynamic
-    attribute, so a direct import would both fail under test and bypass those mocks.
-    Failures are logged at debug (not silently swallowed) so a stuck notification is
-    at least visible in the logs.
+    Calls ``homeassistant.components.persistent_notification`` directly. This used
+    to go through the ``components`` accessor on ``hass``, which Home Assistant
+    removed: ``getattr`` found nothing and the helper returned silently, so every
+    sidebar card (the fallback for users with no notify target, the auto-pause
+    timer card) was dropped while the caller logged it as delivered - and the 12
+    test modules that mocked that accessor kept passing (audit PLATFORM-01).
     """
     try:
-        components = getattr(cast(Any, hass), "components", None)
-        pn = getattr(cast(Any, components), "persistent_notification", None)
-        if pn is None:
-            return
-        result = pn.async_create(message, title=title, notification_id=notification_id)
-        if inspect.iscoroutine(result):
-            hass.async_create_task(result)
+        persistent_notification.async_create(
+            hass, message, title=title, notification_id=notification_id
+        )
+        return True
     except Exception:  # noqa: BLE001 - best-effort; surface the failure in logs
-        _LOGGER.debug("persistent_notification create failed (id=%s)", notification_id, exc_info=True)
+        _LOGGER.warning(
+            "persistent_notification create failed (id=%s)", notification_id, exc_info=True
+        )
+        return False
 
 
 def _pn_dismiss(hass: HomeAssistant, notification_id: str) -> None:
-    """Best-effort persistent notification dismissal.
-
-    Uses the ``hass.components`` accessor for the same test-mocking reason as
-    :func:`_pn_create`; failures are logged at debug rather than swallowed.
-    """
+    """Best-effort persistent notification dismissal (see :func:`_pn_create`)."""
     try:
-        components = getattr(cast(Any, hass), "components", None)
-        pn = getattr(cast(Any, components), "persistent_notification", None)
-        if pn is None:
-            return
-        result = pn.async_dismiss(notification_id)
-        if inspect.iscoroutine(result):
-            hass.async_create_task(result)
+        persistent_notification.async_dismiss(hass, notification_id)
     except Exception:  # noqa: BLE001 - best-effort; surface the failure in logs
-        _LOGGER.debug("persistent_notification dismiss failed (id=%s)", notification_id, exc_info=True)
+        _LOGGER.warning(
+            "persistent_notification dismiss failed (id=%s)", notification_id, exc_info=True
+        )
 
 
 def _option_then_data(config_entry: Any, key: str, default: Any) -> Any:
@@ -635,7 +578,7 @@ class WashDataManager:
         # Pause tracking (user-triggered)
         self._user_pause_start: datetime | None = None
         self._total_user_paused_seconds: float = 0.0
-        self._is_user_paused: bool = False
+        self._user_paused_flag: bool = False
         self._pause_cuts_power: bool = bool(
             config_entry.options.get(CONF_PAUSE_CUTS_POWER, False)
         )
@@ -891,35 +834,6 @@ class WashDataManager:
             )
         )
 
-        # Advanced options
-        # Same default as the reload path (item 388): the literal 5 here made the
-        # first settings save log "smoothing 5->2". Display-only buffer either way.
-        smoothing_window = int(
-            config_entry.options.get(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
-        )
-        interrupted_min_seconds = int(
-            config_entry.options.get("interrupted_min_seconds", 150)
-        )
-        # Get device specific default for completion threshold
-        device_default_completion = DEVICE_COMPLETION_THRESHOLDS.get(
-            self.device_type, DEFAULT_COMPLETION_MIN_SECONDS
-        )
-        completion_min_seconds = int(
-            config_entry.options.get(
-                CONF_COMPLETION_MIN_SECONDS, device_default_completion
-            )
-        )
-
-        start_duration_threshold = float(
-            config_entry.options.get(
-                CONF_START_DURATION_THRESHOLD,
-                resolve_start_duration_default(self.device_type),
-            )
-        )
-        end_repeat_count = int(
-            config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
-        )
-
         self._logger.info(
             "Manager init: min_power=%sW, off_delay=%ss, type=%s",
             min_power,
@@ -927,153 +841,10 @@ class WashDataManager:
             self.device_type,
         )
 
-        config = CycleDetectorConfig(
-            min_power=float(min_power),
-            off_delay=int(off_delay),
-            smoothing_window=smoothing_window,
-            interrupted_min_seconds=interrupted_min_seconds,
-            completion_min_seconds=completion_min_seconds,
-            start_duration_threshold=start_duration_threshold,
-            end_repeat_count=end_repeat_count,
-            min_off_gap=int(
-                config_entry.options.get(
-                    CONF_MIN_OFF_GAP, resolve_min_off_gap_default(self.device_type)
-                )
-            ),
-            # Read here as well as on reload (item 351): the reload path was the
-            # only writer, so until the user next saved a setting the detector ran
-            # a tolerance of 0.25 no matter what the panel showed - and the
-            # deferral ceiling in `_should_defer_finish` reads it live.
-            profile_duration_tolerance=float(
-                config_entry.options.get(
-                    CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE
-                )
-            ),
-            start_energy_threshold=float(
-                config_entry.options.get(
-                    CONF_START_ENERGY_THRESHOLD,
-                    DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(self.device_type, 0.2)
-                )
-            ),
-            end_energy_threshold=float(
-                config_entry.options.get(CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD)
-            ),
-            start_threshold_w=float(
-                config_entry.options.get(
-                    CONF_START_THRESHOLD_W, _default_start_threshold_w(float(min_power))
-                )
-            ),
-            stop_threshold_w=float(
-                config_entry.options.get(
-                    CONF_STOP_THRESHOLD_W, _default_stop_threshold_w(float(min_power))
-                )
-            ),
-            power_off_threshold_w=float(
-                config_entry.options.get(
-                    CONF_POWER_OFF_THRESHOLD_W, DEFAULT_POWER_OFF_THRESHOLD_W
-                )
-            ),
-            power_off_delay=float(
-                config_entry.options.get(CONF_POWER_OFF_DELAY, DEFAULT_POWER_OFF_DELAY)
-            ),
-            min_duration_ratio=float(
-                config_entry.options.get(
-                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
-                        self.device_type, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
-                    ),
-                )
-            ),
-            match_interval=int(
-                config_entry.options.get(
-                    CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
-                )
-            ),
-            # `profile_match_threshold` was stored on the ProfileStore and never read
-            # anywhere, so the #288 workaround (raise it so near-duplicate profiles
-            # stop being trusted mid-cycle) silently did nothing. Wire it to the gate
-            # it was always documented to control; the default is the value that used
-            # to be hard-coded there, so nothing changes unless it was tuned.
-            match_confidence_threshold=float(
-                config_entry.options.get(
-                    CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
-                )
-            ),
-            anti_wrinkle_enabled=bool(
-                config_entry.options.get(
-                    CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED
-                )
-            ),
-            anti_wrinkle_max_power=float(
-                config_entry.options.get(
-                    CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER
-                )
-            ),
-            anti_wrinkle_max_duration=float(
-                config_entry.options.get(
-                    CONF_ANTI_WRINKLE_MAX_DURATION, DEFAULT_ANTI_WRINKLE_MAX_DURATION
-                )
-            ),
-            anti_wrinkle_exit_power=float(
-                config_entry.options.get(
-                    CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
-                )
-            ),
-            anti_wrinkle_idle_timeout=float(
-                config_entry.options.get(
-                    CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
-                )
-            ),
-            dishwasher_end_spike_quiet_release=float(
-                config_entry.options.get(
-                    CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
-                    DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
-                )
-            ),
-            # #393: resolve the device-type default HERE (not in the gate) so the
-            # field always carries a real float - playground.effective_settings()
-            # skips a None-valued field, which would desync the sim from the detector.
-            smart_termination_duration_ratio=float(
-                config_entry.options.get(
-                    CONF_SMART_TERMINATION_DURATION_RATIO,
-                    resolve_smart_termination_duration_ratio_default(self.device_type),
-                )
-            ),
-            # #429: same reasoning, different gate - this one gates the finalise
-            # into STATE_ANTI_WRINKLE, not Smart Termination. Scalar default: the
-            # safe value is per-machine, not per-device-type.
-            anti_crease_finalize_ratio=float(
-                config_entry.options.get(
-                    CONF_ANTI_CREASE_FINALIZE_RATIO,
-                    DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
-                )
-            ),
-            # #430: 0 = off, which is the default and leaves the stored-duration
-            # convention exactly as it was.
-            curve_preroll_seconds=float(
-                config_entry.options.get(
-                    CONF_CURVE_PREROLL_SECONDS, DEFAULT_CURVE_PREROLL_SECONDS
-                )
-            ),
-            delay_detect_enabled=bool(
-                config_entry.options.get(
-                    CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
-                )
-            ),
-            delay_confirm_seconds=float(
-                config_entry.options.get(
-                    CONF_DELAY_CONFIRM_SECONDS, DEFAULT_DELAY_CONFIRM_SECONDS
-                )
-            ),
-            delay_timeout_seconds=float(
-                config_entry.options.get(
-                    CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
-                )
-            ) * 3600.0,
-            # #378: without this the detector keeps the WASHING_MACHINE default and
-            # every non-washing-machine device runs the washing-machine detection
-            # path (the whole dishwasher/#43 branch is otherwise dead in production).
-            device_type=self.device_type,
+        # One builder for the constructor, the options reload and every replay
+        # harness (audit F2 / DETECT-12; item 351 was these copies drifting).
+        config = build_detector_config(
+            config_entry.options, config_entry.data, self.device_type
         )
         self._config = config
 
@@ -1150,10 +921,15 @@ class WashDataManager:
             if not readings:
                 return None
 
-            # Snapshotted for thread safety indirectly by task logic
-            # We don't need a wrapper task if we unify with _update_estimates matching
-            # but for now let's keep the detector callback as a trigger
-            self._spawn_tracked(self._async_perform_combined_matching(readings))
+            # Which cycle this match is FOR, captured NOW: the detector calls this
+            # synchronously from an active state. The task body runs later, and on
+            # the reading that finishes the cycle the detector has already reset by
+            # then, so identity captured inside the task described the NEXT state
+            # and the stale result re-armed the finished detector (audit LIVE-01).
+            identity = self._match_identity()
+            self._spawn_tracked(
+                self._async_perform_combined_matching(readings, identity)
+            )
             return None
 
         self.detector = CycleDetector(
@@ -1204,6 +980,7 @@ class WashDataManager:
         self._last_total_duration_update: datetime | None = None
         self._cycle_progress: float = 0.0
         self._smoothed_progress: float = 0.0  # Smoothed progress tracking for EMA
+        self._smoothed_for_program: str | None = None  # the program that EMA tracks
         # Live projected total energy/cost for the running cycle (None until a
         # reliable progress estimate exists). Derived from accumulated energy and
         # the (ML-blended) progress fraction; surfaced as progress-sensor attrs.
@@ -1271,8 +1048,34 @@ class WashDataManager:
         self._unmatch_persistence_counter: int = 0  # Tracks consecutive low-confidence matches
         self._current_match_candidate: str | None = None  # Pending profile name
 
+    _MATCH_ACTIVE_STATES = (STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+
+    def _match_identity(self) -> tuple[str, datetime | None, bool]:
+        """The cycle a live match belongs to: snapshot id, cycle start, active."""
+        return (
+            self._ranking_snapshot_cycle_id,
+            self.detector.current_cycle_start,
+            self.detector.state in self._MATCH_ACTIVE_STATES,
+        )
+
+    def _match_still_current(self, identity: tuple[str, datetime | None, bool]) -> bool:
+        """True while the cycle a live match was dispatched for is still running.
+
+        Checked after EVERY await in the match task (items 388e, audit LIVE-01/02):
+        the cycle can end, or the next one start, while the matcher or the
+        alignment check is in the executor. A match dispatched while no cycle was
+        active (a direct call) only requires the same cycle identity.
+        """
+        token, start, was_active = identity
+        cur_token, cur_start, is_active = self._match_identity()
+        if cur_token != token or cur_start != start:
+            return False
+        return is_active or not was_active
+
     async def _async_perform_combined_matching(
-        self, readings: list[tuple[datetime, float]]
+        self,
+        readings: list[tuple[datetime, float]],
+        identity: tuple[str, datetime | None, bool] | None = None,
     ) -> None:
         """PRIMARY matching task: Updates both Manager and Detector using best method."""
         self._logger.debug(
@@ -1296,24 +1099,32 @@ class WashDataManager:
                 self._logger.debug("Matching skipped: no real profiles configured yet")
                 return
 
-            self._matching_task = self.hass.async_create_task(self._async_do_perform_matching(readings))
+            self._matching_task = self.hass.async_create_task(
+                self._async_do_perform_matching(
+                    readings, identity if identity is not None else self._match_identity()
+                )
+            )
         except Exception as e:
             self._logger.error("Perform combined matching trigger failed: %s", e)
 
-    async def _async_do_perform_matching(self, readings: list[tuple[datetime, float]]) -> None:
+    async def _async_do_perform_matching(
+        self,
+        readings: list[tuple[datetime, float]],
+        identity: tuple[str, datetime | None, bool] | None = None,
+    ) -> None:
         """Inner task to handle actual matching logic."""
+        if identity is None:
+            identity = self._match_identity()
         try:
             end_time = readings[-1][0]
             start_time = readings[0][0]
             current_duration = (end_time - start_time).total_seconds()
-            # Which cycle this match is FOR (item 388e). The await below yields the
-            # loop, and the cycle can end - or the next one start - before it
-            # returns; applying the result then rewrote `_current_program` and the
-            # expected duration on a finished cycle, and pushed it into the
-            # detector, so the next cycle reached RUNNING already "matched".
-            _cycle_token = self._ranking_snapshot_cycle_id
-            _active = (STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
-            _was_active = self.detector.state in _active
+            # Which cycle this match is FOR (item 388e) is `identity`, captured at
+            # dispatch. The await below yields the loop, and the cycle can end - or
+            # the next one start - before it returns; applying the result then
+            # rewrote `_current_program` and the expected duration on a finished
+            # cycle, and pushed it into the detector, so the next cycle reached
+            # RUNNING already "matched".
 
             # 1. RUN BETTER ASYNC MATCHING
             # in_progress: this is the live match on a cycle that is still running,
@@ -1330,9 +1141,7 @@ class WashDataManager:
                  stop_threshold_w=float(self.detector.config.stop_threshold_w),
             )
 
-            if self._ranking_snapshot_cycle_id != _cycle_token or (
-                _was_active and self.detector.state not in _active
-            ):
+            if not self._match_still_current(identity):
                 self._logger.debug(
                     "Discarding a live match that returned after its cycle ended "
                     "(detector %s)", self.detector.state,
@@ -1398,6 +1207,8 @@ class WashDataManager:
                             self._current_program = "detecting..."
                             self._matched_profile_duration = None
                             self._unmatch_persistence_counter = 0
+                            self._match_persistence_counter.pop(profile_name, None)
+                            self._current_match_candidate = None
                             self._logger.info(
                                 "Divergence detected for profile '%s' (confidence %.3f < 60%% of peak %.3f). "
                                 "Reverting to detection.",
@@ -1502,9 +1313,14 @@ class WashDataManager:
             )
 
             # Case 1: Initial Match from "detecting..."
+            # The commit floor is at least the unmatch threshold: committing a
+            # 0.15-0.35 match only for Case 3 to drop it four ticks later (and the
+            # still-persistent counter to re-commit it at once) made a stable
+            # low-confidence top-1 flip program <-> "detecting..." every few ticks,
+            # dropping the ETA each time (audit MATCH-DECIDE-05; 38 of 580 cycles).
             if (
                 profile_name
-                and confidence >= 0.15
+                and confidence >= max(0.15, float(self._unmatch_threshold or 0.0))
                 and (not result.is_ambiguous or is_persistent)
                 and (not self._matched_profile_duration or self._current_program == "detecting...")
             ):
@@ -1594,6 +1410,10 @@ class WashDataManager:
                     self._current_program = "detecting..."
                     self._matched_profile_duration = None
                     self._unmatch_persistence_counter = 0
+                    # Start persistence over: left at its locked value the very
+                    # next tick re-committed the profile just dropped.
+                    self._match_persistence_counter.pop(profile_name, None)
+                    self._current_match_candidate = None
                     self._logger.info(
                         "Unmatched profile '%s' (confidence %.3f < threshold %.3f persistent %dx). "
                         "Reverting to detection.",
@@ -1641,7 +1461,7 @@ class WashDataManager:
             elif not self._matched_profile_duration:
                 self._current_program = "detecting..."
 
-            self._last_estimate_time = dt_util.now()
+            self._last_estimate_time = utc_now()
 
             # Update score history for all candidates to track trends
             for cand in result.candidates:
@@ -1674,6 +1494,15 @@ class WashDataManager:
                     is_confirmed, mapped_time, _ = (
                         await verify_alignment(current_matched, formatted)
                     )
+                    if not self._match_still_current(identity):
+                        # Same race as the matcher await above (audit LIVE-02): a
+                        # verified pause and the old match must not land on a
+                        # finished detector and carry into the next cycle.
+                        self._logger.debug(
+                            "Discarding a live match whose alignment check returned "
+                            "after its cycle ended"
+                        )
+                        return
                 except Exception as e: # pylint: disable=broad-exception-caught
                     self._logger.error(
                         "Alignment verification crashed for profile %s: %s",
@@ -1792,8 +1621,19 @@ class WashDataManager:
                 verified_pause = True
 
             # --- Consistency Override ---
-            # If envelope verified or mismatched, ensure manager program matches
-            if profile_name != self._current_program and (verified_pause or result.is_confident_mismatch):
+            # If envelope verified or mismatched, ensure manager program matches.
+            # A verified pause alone is not evidence for a NEW program: it used to
+            # adopt every tick's raw top-1 there, so an ambiguous A/B pair under a
+            # user pause displayed B, A, B, A... (audit MATCH-DECIDE-06). Require
+            # the same persistence and non-ambiguity a normal switch needs.
+            _pause_switch_ok = (
+                verified_pause
+                and not result.is_ambiguous
+                and bool(is_persistent)
+            )
+            if profile_name != self._current_program and (
+                _pause_switch_ok or result.is_confident_mismatch
+            ):
                 if profile_name:
                     self._current_program = profile_name
                     self._last_match_confidence = confidence
@@ -1829,6 +1669,12 @@ class WashDataManager:
             # bounds the tail Smart Termination may bank (register item 297). The detector
             # tolerates shorter tuples, so other callers stay valid.
             terminal_high = self._terminal_high_for_guards(profile_name)
+            # Half-interval matching until the first commit (audit LIVE-17).
+            self.detector.set_match_committed(
+                self._current_program not in (
+                    "detecting...", "restored...", "off", "starting", "unknown", None
+                )
+            )
             self.detector.update_match(
                 (profile_name, confidence, matched_duration, phase_name,
                  result.is_confident_mismatch, result.is_ambiguous,
@@ -1853,7 +1699,12 @@ class WashDataManager:
                  # has vouched for in this profile, which floors a dishwasher's
                  # kept tail exactly as the banked-tail repair does.
                  self.profile_store.profile_trusted_min_duration(profile_name)
-                 if profile_name else None)
+                 if profile_name else None,
+                 # Element 14 (audit DETECT-16): the matched profile's pause
+                 # catalogue, for the hazard end gate.
+                 self.profile_store.profile_pause_catalogue(
+                     profile_name, float(self.detector.config.stop_threshold_w)
+                 ) if profile_name else None)
             )
 
             # --- LOGGING (Unified) ---
@@ -1877,7 +1728,7 @@ class WashDataManager:
                             "device_type": self.device_type,
                             "program": self._current_program,
                             "start_time": (
-                                self._cycle_start_time or dt_util.now()
+                                self._cycle_start_time or utc_now()
                             ).isoformat(),
                         },
                     )
@@ -2022,7 +1873,7 @@ class WashDataManager:
 
         # Helper to check if a snapshot is viable
         def is_viable_restore(last_save_time: datetime) -> bool:
-            now = dt_util.now()
+            now = utc_now()
             # Handle timezone mismatch gracefully
             if last_save_time.tzinfo is None:
                 # Assume naive means local system time, convert to aware
@@ -2049,8 +1900,8 @@ class WashDataManager:
 
         if active_snapshot_to_restore is not None and last_save and is_viable_restore(last_save):
             should_restore = True
-            age = (dt_util.now() - last_save).total_seconds()
-            age = (dt_util.now() - last_save).total_seconds()
+            age = (utc_now() - last_save).total_seconds()
+            age = (utc_now() - last_save).total_seconds()
             self._logger.info(
                 "Found recently saved active cycle (last_save=%s, age=%.0fs), restoring...",
                 last_save,
@@ -2064,84 +1915,43 @@ class WashDataManager:
             # might have missed data
             active_snapshot_to_restore["dynamic_min_duration"] = None
 
-        # FALLBACK: Resurrection Logic
-        if not should_restore:
-            past_cycles = self.profile_store.get_past_cycles()
-            if past_cycles:
-                last_cycle = past_cycles[-1]
-                last_end_str = last_cycle.get("end_time")
-                if last_end_str:
-                    last_end = dt_util.parse_datetime(last_end_str)
-                    if last_end:
-                        gap = (dt_util.now() - last_end).total_seconds()
-                        is_recent = gap < 1200  # 20 mins
-                        status = last_cycle.get("status")
+        # A snapshot of a cycle that is already stored is not an active cycle: an
+        # HA restart between the cycle-end tail persisting the cycle and clearing
+        # the snapshot used to restore it, so the cycle ended twice - two stored
+        # copies, two "finished" pushes and lifetime energy counted twice on a
+        # TOTAL_INCREASING sensor (audit MANAGER-04).
+        if should_restore and active_snapshot_to_restore is not None:
+            snap_start = dt_util.parse_datetime(
+                str(active_snapshot_to_restore.get("current_cycle_start") or "")
+            )
+            if snap_start is not None and snap_start.tzinfo is None:
+                snap_start = snap_start.replace(tzinfo=dt_util.now().tzinfo)
+            if snap_start is not None:
+                for stored in self.profile_store.get_past_cycles()[-5:]:
+                    stored_start = dt_util.parse_datetime(
+                        str(stored.get("start_time") or "")
+                    )
+                    if stored_start is not None and stored_start.tzinfo is None:
+                        stored_start = stored_start.replace(tzinfo=dt_util.now().tzinfo)
+                    if stored_start is not None and abs(
+                        (stored_start - snap_start).total_seconds()
+                    ) < 1.0:
+                        self._logger.info(
+                            "Active-cycle snapshot belongs to stored cycle %s; "
+                            "not restoring it",
+                            stored.get("id"),
+                        )
+                        should_restore = False
+                        active_snapshot_to_restore = None
+                        await self.profile_store.async_clear_active_cycle()
+                        break
 
-                        if is_recent and status != "completed":
-                            self._logger.info(
-                                "Found recent interrupted cycle in history "
-                                "(id=%s, gap=%.0fs). Resurrecting...",
-                                last_cycle["id"],
-                                gap,
-                            )
-                            try:
-                                power_data = decompress_power_data(last_cycle)
-                                if power_data:
-                                    # decompress_power_data returns (offset_seconds, watts)
-                                    # tuples, but restore_state_snapshot parses reading[0]
-                                    # as an ISO datetime. Convert offsets to absolute ISO
-                                    # timestamps (base = cycle start) so the resurrected
-                                    # trace is not silently dropped (B4).
-                                    _res_start = dt_util.parse_datetime(
-                                        last_cycle["start_time"]
-                                    )
-                                    if _res_start is not None:
-                                        if _res_start.tzinfo is None:
-                                            _res_start = _res_start.replace(
-                                                tzinfo=dt_util.now().tzinfo
-                                            )
-                                        power_readings = [
-                                            (
-                                                (
-                                                    _res_start
-                                                    + timedelta(seconds=float(off))
-                                                ).isoformat(),
-                                                p,
-                                            )
-                                            for off, p in power_data
-                                        ]
-                                    else:
-                                        power_readings = power_data
-                                    active_snapshot_to_restore = {
-                                        # Reconstruct basic running state
-                                        "state": "running",
-                                        "sub_state": "Resurrected",
-                                        "current_cycle_start": last_cycle["start_time"],
-                                        "last_active_time": last_cycle["end_time"],
-                                        "low_power_start": None,
-                                        "cycle_max_power": (
-                                            max([p for _, p in power_data])
-                                            if power_data
-                                            else 0
-                                        ),
-                                        "power_readings": power_readings,
-                                        "ma_buffer": (
-                                            [p for _, p in power_data[-10:]]
-                                            if power_data
-                                            else []
-                                        ),
-                                        "end_condition_count": 0,
-                                        "extension_count": 0,
-                                        "dynamic_min_duration": None,
-                                        "matched_profile": last_cycle.get(
-                                            "profile_name"
-                                        ),
-                                    }
-                                    should_restore = True
-                                    past_cycles.pop()
-                                    await self.profile_store.async_save()
-                            except Exception as e:
-                                self._logger.error("Failed to resurrect cycle: %s", e)
+        # (The "resurrection" fallback that re-opened the last stored cycle when it
+        # was interrupted or force-stopped less than 20 min ago is gone: it popped
+        # the stored cycle and re-ended it on any restart or settings save, so the
+        # lifetime energy was counted twice, a second "finished" push went out and
+        # a force_stopped cycle was re-stored as completed - audit MANAGER-03. The
+        # 60 s active-cycle snapshot is what covers a mid-cycle restart.)
 
         if should_restore and active_snapshot_to_restore:
             try:
@@ -2294,7 +2104,7 @@ class WashDataManager:
                     # gap-fill analysis); synthetic fill is intentionally NOT added
                     # to _power_readings to prevent circular-bias inflation.
                     if last_save:
-                        gap_end = dt_util.now()
+                        gap_end = utc_now()
                         gap_secs = (gap_end - last_save).total_seconds()
                         if gap_secs > 30:
                             self._restart_gaps.append({
@@ -2302,8 +2112,11 @@ class WashDataManager:
                                 "end_ts": gap_end.isoformat(),
                                 "gap_seconds": round(gap_secs, 1),
                                 "profile": self.detector.matched_profile,
+                                # `_last_match_confidence`: the detector has no
+                                # `match_confidence` attribute, so this was always
+                                # None (audit DETECT-09).
                                 "match_confidence": getattr(
-                                    self.detector, "match_confidence", None
+                                    self.detector, "_last_match_confidence", None
                                 ),
                             })
                             self._logger.info(
@@ -2321,7 +2134,7 @@ class WashDataManager:
                 await self.profile_store.async_clear_active_cycle()
         else:
             if last_save:
-                age = (dt_util.now() - last_save).total_seconds()
+                age = (utc_now() - last_save).total_seconds()
                 self._logger.info("Active cycle too stale (age=%.0fs), clearing", age)
             await self.profile_store.async_clear_active_cycle()
 
@@ -2602,7 +2415,7 @@ class WashDataManager:
             power = _finite_power(state.state)
             if power is not None:
                 try:
-                    now = dt_util.now()
+                    now = utc_now()
                     self.detector.process_reading(power, now)
                     # Seed the reading cache from the sensor itself (#409). The
                     # reading was already fed to the detector; leaving the manager's
@@ -2749,7 +2562,7 @@ class WashDataManager:
                 if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
                     _reload_power = _finite_power(state.state)
                     if _reload_power is not None:
-                        self.detector.process_reading(_reload_power, dt_util.now())
+                        self.detector.process_reading(_reload_power, utc_now())
                     else:
                         self._logger.debug(
                             "Initial power value for %s after config reload is not a "
@@ -2780,43 +2593,18 @@ class WashDataManager:
         old_smoothing = self.detector.config.smoothing_window
         old_interrupted_min = self.detector.config.interrupted_min_seconds
 
-        # Get new values from config
-        new_min_power = float(
-            _option_then_data(config_entry, CONF_MIN_POWER, DEFAULT_MIN_POWER)
+        # Every detector field from the one builder the constructor uses, applied
+        # onto the live config object in place (audit F2): the field-by-field copy
+        # that lived here is how the reload drifted from setup (items 351, 388a).
+        new_detector_config = build_detector_config(
+            config_entry.options, config_entry.data, self.device_type
         )
-        new_off_delay = int(
-            _option_then_data(
-                config_entry, CONF_OFF_DELAY, resolve_off_delay_default(self.device_type)
-            )
-        )
-        # Device-resolved, like the constructor: the default is 8 min on a washing
-        # machine and an hour on a dishwasher, so falling back to the scalar would
-        # silently shorten the bridge on a reload.
-        new_min_off_gap = int(
-            config_entry.options.get(
-                CONF_MIN_OFF_GAP, resolve_min_off_gap_default(self.device_type)
-            )
-        )
-        new_smoothing = int(
-            config_entry.options.get(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
-        )
-        new_interrupted_min = int(
-            config_entry.options.get(
-                CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS
-            )
-        )
-        self.detector.config.match_interval = int(
-            config_entry.options.get(
-                CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
-            )
-        )
-        # Keep the detector's copy in sync so a panel edit takes effect without a
-        # restart, exactly like min_duration_ratio below.
-        self.detector.config.match_confidence_threshold = float(
-            config_entry.options.get(
-                CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
-            )
-        )
+        new_min_power = new_detector_config.min_power
+        new_off_delay = new_detector_config.off_delay
+        new_smoothing = new_detector_config.smoothing_window
+        new_interrupted_min = new_detector_config.interrupted_min_seconds
+        apply_detector_config(self.detector.config, new_detector_config)
+
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
         )
@@ -2852,149 +2640,6 @@ class WashDataManager:
             # reload/unload mid-rebuild must be able to cancel it before the store is
             # swapped out (see _spawn_tracked).
             self._spawn_tracked(self.profile_store.async_rebuild_all_envelopes())
-
-        # Device default
-        dev_def = DEVICE_COMPLETION_THRESHOLDS.get(
-            self.device_type, DEFAULT_COMPLETION_MIN_SECONDS
-        )
-        new_completion_min = int(
-            config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, dev_def)
-        )
-
-        new_start_threshold = float(
-            config_entry.options.get(
-                CONF_START_DURATION_THRESHOLD,
-                resolve_start_duration_default(self.device_type),
-            )
-        )
-        new_end_repeat_count = int(
-            config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
-        )
-
-        # Power Hysteresis Thresholds
-        new_start_threshold_w = float(
-            config_entry.options.get(
-                CONF_START_THRESHOLD_W, _default_start_threshold_w(new_min_power)
-            )
-        )
-        new_stop_threshold_w = float(
-            config_entry.options.get(
-                CONF_STOP_THRESHOLD_W, _default_stop_threshold_w(new_min_power)
-            )
-        )
-        new_power_off_threshold_w = float(
-            config_entry.options.get(
-                CONF_POWER_OFF_THRESHOLD_W, DEFAULT_POWER_OFF_THRESHOLD_W
-            )
-        )
-        new_power_off_delay = float(
-            config_entry.options.get(CONF_POWER_OFF_DELAY, DEFAULT_POWER_OFF_DELAY)
-        )
-
-        new_start_energy = float(
-            config_entry.options.get(
-                CONF_START_ENERGY_THRESHOLD,
-                DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(self.device_type, 0.2)
-            )
-        )
-        new_end_energy = float(
-            config_entry.options.get(CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD)
-        )
-
-        new_anti_wrinkle_enabled = bool(
-            config_entry.options.get(
-                CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED
-            )
-        )
-        new_anti_wrinkle_max_power = float(
-            config_entry.options.get(
-                CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER
-            )
-        )
-        new_anti_wrinkle_max_duration = float(
-            config_entry.options.get(
-                CONF_ANTI_WRINKLE_MAX_DURATION, DEFAULT_ANTI_WRINKLE_MAX_DURATION
-            )
-        )
-        new_anti_wrinkle_exit_power = float(
-            config_entry.options.get(
-                CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
-            )
-        )
-        new_anti_wrinkle_idle_timeout = float(
-            config_entry.options.get(
-                CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT
-            )
-        )
-        new_dishwasher_end_spike_quiet_release = float(
-            config_entry.options.get(
-                CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
-                DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
-            )
-        )
-        new_smart_termination_duration_ratio = float(
-            config_entry.options.get(
-                CONF_SMART_TERMINATION_DURATION_RATIO,
-                resolve_smart_termination_duration_ratio_default(self.device_type),
-            )
-        )
-        new_anti_crease_finalize_ratio = float(
-            config_entry.options.get(
-                CONF_ANTI_CREASE_FINALIZE_RATIO,
-                DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
-            )
-        )
-        new_curve_preroll_seconds = float(
-            config_entry.options.get(
-                CONF_CURVE_PREROLL_SECONDS, DEFAULT_CURVE_PREROLL_SECONDS
-            )
-        )
-        new_delay_detect_enabled = bool(
-            config_entry.options.get(
-                CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
-            )
-        )
-        new_delay_confirm_seconds = float(
-            config_entry.options.get(
-                CONF_DELAY_CONFIRM_SECONDS, DEFAULT_DELAY_CONFIRM_SECONDS
-            )
-        )
-        new_delay_timeout_seconds = float(
-            config_entry.options.get(
-                CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
-            )
-        ) * 3600.0
-
-        # Apply all detector config updates
-        # #378: keep the detector's device_type in sync when the appliance type
-        # is changed in the UI, so the correct detection branch runs after reload.
-        self.detector.config.device_type = self.device_type
-        self.detector.config.min_power = new_min_power
-        self.detector.config.off_delay = new_off_delay
-        self.detector.config.min_off_gap = new_min_off_gap
-        self.detector.config.smoothing_window = new_smoothing
-        self.detector.config.interrupted_min_seconds = new_interrupted_min
-        self.detector.config.completion_min_seconds = new_completion_min
-        self.detector.config.start_duration_threshold = new_start_threshold
-        self.detector.config.end_repeat_count = new_end_repeat_count
-        self.detector.config.start_threshold_w = new_start_threshold_w
-        self.detector.config.stop_threshold_w = new_stop_threshold_w
-        self.detector.config.power_off_threshold_w = new_power_off_threshold_w
-        self.detector.config.power_off_delay = new_power_off_delay
-        self.detector.config.start_energy_threshold = new_start_energy
-        self.detector.config.end_energy_threshold = new_end_energy
-        self.detector.config.anti_wrinkle_enabled = new_anti_wrinkle_enabled
-        self.detector.config.anti_wrinkle_max_power = new_anti_wrinkle_max_power
-        self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
-        self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
-        self.detector.config.anti_wrinkle_idle_timeout = new_anti_wrinkle_idle_timeout
-        self.detector.config.dishwasher_end_spike_quiet_release = new_dishwasher_end_spike_quiet_release
-        self.detector.config.smart_termination_duration_ratio = new_smart_termination_duration_ratio
-        self.detector.config.anti_crease_finalize_ratio = new_anti_crease_finalize_ratio
-        self.detector.config.curve_preroll_seconds = new_curve_preroll_seconds
-        self.detector.config.delay_detect_enabled = new_delay_detect_enabled
-        self.detector.config.delay_confirm_seconds = new_delay_confirm_seconds
-        self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds
 
         # Pump Monitor setting
         self._pump_stuck_duration = int(
@@ -3042,10 +2687,6 @@ class WashDataManager:
             self.profile_store.set_duration_ratio_limits(
                 min_ratio=new_min_ratio, max_ratio=new_max_ratio
             )
-            # Keep the detector's copy in sync: _should_defer_finish() reads
-            # detector.config.min_duration_ratio, which otherwise keeps the
-            # construction-time value until a restart (diverging from the matcher).
-            self.detector.config.min_duration_ratio = new_min_ratio
             self._logger.info(
                 "Updated duration ratios: min %.2f→%.2f, max %.2f→%.2f",
                 old_min_ratio,
@@ -3250,16 +2891,16 @@ class WashDataManager:
         # reload keeps the live detector; restoring the snapshot (up to 60 s old)
         # over it rolled the cycle back: readings dropped, a phantom restart gap
         # written onto the cycle, the quiet timers reset.
-        if self.detector.state in (
-            STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING
-        ):
-            self._logger.debug(
-                "Options reload during an active cycle (%s): keeping the live "
-                "detector state, not restoring the snapshot",
-                self.detector.state,
-            )
-        else:
-            await self._attempt_state_restoration()
+        # The in-place reload never restores the snapshot at all (audit MANAGER-04):
+        # the live detector is always fresher than a snapshot of up to 60 s ago, and
+        # an IDLE detector with a snapshot still present means the cycle-end tail
+        # has not cleared it yet - restoring then re-opened the finished cycle and
+        # ended it a second time (two stored copies, two pushes, double energy).
+        self._logger.debug(
+            "Options reload: keeping the live detector state (%s), not restoring "
+            "the snapshot",
+            self.detector.state,
+        )
 
         self._logger.info("Configuration reloaded successfully")
 
@@ -3450,7 +3091,7 @@ class WashDataManager:
         # by the distinct entities a user has ever chosen here.
         anchors = self.hass.data.setdefault(_UNLOAD_CONFIRM_ANCHOR_KEY, {})
         if isinstance(anchors, dict):
-            anchors.setdefault(entity_id, dt_util.now())
+            anchors.setdefault(entity_id, utc_now())
 
     async def _setup_price_listener(self) -> None:
         """Subscribe to the dynamic energy price entity (#426).
@@ -3526,7 +3167,7 @@ class WashDataManager:
             return
         if self._price_timeline and self._price_timeline[-1][1] == value:
             return
-        self._price_timeline.append((dt_util.now().timestamp(), value))
+        self._price_timeline.append((utc_now().timestamp(), value))
         # Hard bound so a pathologically chatty price entity cannot grow the
         # in-memory list without limit during a long cycle; the stored timeline is
         # compacted again (by price step) at cycle end.
@@ -3599,7 +3240,7 @@ class WashDataManager:
                 self.detector.set_verified_pause(True)
                 if not self._is_user_paused:
                     self._is_user_paused = True
-                    self._user_pause_start = dt_util.now()
+                    self._user_pause_start = utc_now()
                 self._notify_update()
         else:
             # Door closed: cancel a pending auto-open finalize (it was a brief open,
@@ -3684,7 +3325,7 @@ class WashDataManager:
             return
         anchors = self.hass.data.setdefault(_UNLOAD_CONFIRM_ANCHOR_KEY, {})
         if isinstance(anchors, dict):
-            anchors[entity_id] = dt_util.now()
+            anchors[entity_id] = utc_now()
 
     def _in_unload_confirm_replay_window(self) -> bool:
         """Whether this entity came back too recently to trust ``unknown -> value``.
@@ -3703,7 +3344,7 @@ class WashDataManager:
         if not isinstance(anchor, datetime):
             return True
         try:
-            elapsed = (dt_util.now() - anchor).total_seconds()
+            elapsed = (utc_now() - anchor).total_seconds()
         except (TypeError, ValueError, OverflowError):
             return True
         return elapsed < UNLOAD_CONFIRM_REPLAY_GRACE_S
@@ -4054,7 +3695,7 @@ class WashDataManager:
             )
             last = self._last_ml_training_at()
             if last is not None:
-                age_days = (dt_util.now() - last).total_seconds() / 86400.0
+                age_days = (utc_now() - last).total_seconds() / 86400.0
                 if age_days < interval_days:
                     self._logger.debug(
                         "Skipping scheduled ML training: retrained %.1fd ago (<%dd)",
@@ -4101,7 +3742,7 @@ class WashDataManager:
         # beat the baseline previously left the timestamp stuck at the last
         # promotion). Never let a persistence hiccup break the run.
         try:
-            _run_iso = dt_util.now().isoformat()
+            _run_iso = utc_now().isoformat()
             await self.profile_store.set_ml_last_training_run(_run_iso)
             # Track each capability's held-out score over time (drift/fit trend).
             await self.profile_store.append_ml_training_history(
@@ -4153,7 +3794,7 @@ class WashDataManager:
         if result.get("promoted") and result.get("config"):
             record = {
                 "config": result["config"],
-                "trained_at": dt_util.now().isoformat(),
+                "trained_at": utc_now().isoformat(),
                 "cycle_count": len(cycles),
                 "baseline_test_top1": result.get("baseline_test_top1"),
                 "tuned_test_top1": result.get("tuned_test_top1"),
@@ -4262,7 +3903,7 @@ class WashDataManager:
             keep_days = float(getattr(get_instance(self.hass), "keep_days", 10) or 10)
         except Exception:  # noqa: BLE001 - recorder optional; the default stands
             pass
-        horizon = dt_util.now() - timedelta(days=min(max(keep_days, 1.0), 365.0))
+        horizon = utc_now() - timedelta(days=min(max(keep_days, 1.0), 365.0))
         candidates = [c for c in candidates if c[2] >= horizon]
         if not candidates:
             return 0
@@ -4394,11 +4035,11 @@ class WashDataManager:
         if self.recorder.is_recording:
             self.recorder.process_reading(power)
             self._current_power = power
-            self._last_reading_time = dt_util.now()
+            self._last_reading_time = utc_now()
             self._notify_update()
             return
 
-        now = dt_util.now()
+        now = utc_now()
 
         # Throttle updates to avoid CPU overload on noisy sensors.
         # Low-power readings bypass throttling when:
@@ -4486,11 +4127,13 @@ class WashDataManager:
             )
             self._last_state_save = now
 
-    async def _run_final_match_from_cycle_data(self, cycle_data: dict[str, Any]) -> None:
-        """Run final profile match using the cycle's power data before it's saved.
+    async def _run_final_match_from_cycle_data(
+        self, cycle_data: dict[str, Any]
+    ) -> MatchResult | None:
+        """Match the COMPLETE cycle once, before it is saved; None if too short.
 
-        This is called from _on_cycle_end when _current_program is still 'detecting...'
-        to ensure we try matching with complete cycle data before persistence.
+        No side effects: the caller decides what to adopt, because a new cycle can
+        start during the await and the live fields would then belong to it (B1).
         """
         # Cycle data from detector stores power_data as [[offset_seconds, power], ...],
         # where offsets are relative to cycle start.
@@ -4499,39 +4142,14 @@ class WashDataManager:
 
         if not power_data or len(power_data) < 10:
             self._logger.debug("Insufficient power data for final match (< 10 readings)")
-            return
+            return None
 
-        # power_data is already in [[offset_seconds, power], ...] format for matching.
-        self._logger.info(
+        self._logger.debug(
             "Running final match from cycle data: %s samples, %.0fs duration",
             len(power_data),
             duration,
         )
-
-        result = await self.profile_store.async_match_profile(power_data, duration)
-        profile_name = result.best_profile
-        confidence = result.confidence
-
-        # Store result for debug data
-        self._last_match_result = result
-
-        # Accept match at lower threshold since cycle is complete
-        # Also ignore ambiguity for completed cycles - pick the best match
-        if profile_name and confidence >= 0.15:
-            self._logger.info(
-                "Final match from cycle data: '%s' with confidence %.3f",
-                profile_name,
-                confidence,
-            )
-            self._current_program = profile_name
-            self._last_match_confidence = confidence
-            self._last_member_confidence = result.member_confidence
-        else:
-            self._logger.info(
-                "No confident match from cycle data (best: %s, conf=%.3f)",
-                profile_name,
-                confidence,
-            )
+        return await self.profile_store.async_match_profile(power_data, duration)
 
     def _start_watchdog(self) -> None:
         """Start the watchdog timer when a cycle begins."""
@@ -4870,11 +4488,11 @@ class WashDataManager:
         if self._power_off_below_since is None or self._current_power >= pot:
             return
         if (
-            dt_util.now() - self._power_off_below_since
+            utc_now() - self._power_off_below_since
         ).total_seconds() < cfg.power_off_delay:
             return
         # Honour the clean-laundry unload nag hold (mirrors the poll path).
-        if self._unload_nag_active(dt_util.now()):
+        if self._unload_nag_active(utc_now()):
             return
         self._logger.debug(
             "Power-based Off (one-shot timer): %.2fW below %.2fW for >= %.0fs in %s. "
@@ -5357,7 +4975,7 @@ class WashDataManager:
         """Handle state change from detector."""
         self._logger.debug("Washer state changed: %s -> %s", old_state, new_state)
         self.diag_buffer.record_state(
-            old_state, new_state, self._current_program, dt_util.now()
+            old_state, new_state, self._current_program, utc_now()
         )
         # A new cycle starting while we are still showing the completed/Clean
         # overlay (the progress-reset window) must clear that overlay and cancel
@@ -5419,7 +5037,7 @@ class WashDataManager:
                 self._notified_start = False # Reset start notification state
                 self._start_event_fired = False
                 self._last_cycle_post_anomaly = {}  # Clear previous cycle's anomaly cache
-                self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
+                self._cycle_start_time = self.detector.current_cycle_start or utc_now()
                 self._ranking_snapshot_cycle_id = str(uuid.uuid4())
                 self._reset_live_notification_state()
                 # Snapshot the external energy meter (issue #316) so cycle end can
@@ -5541,7 +5159,7 @@ class WashDataManager:
         self._spawn_tracked(self.profile_store.async_clear_active_cycle())
         # Anchor the terminal state so _handle_state_expiry (and power-off) can act,
         # then arm the expiry timer that resets terminal -> Off after the reset delay.
-        self._cycle_completed_time = dt_util.now()
+        self._cycle_completed_time = utc_now()
         self._start_state_expiry_timer()
 
     def _on_cycle_end(self, cycle_data: dict[str, Any]) -> None:
@@ -5565,7 +5183,7 @@ class WashDataManager:
         self._clear_timer_pause_notification()
         self._cancel_door_end_dwell()  # Discard stale auto-open dwell (#342)
         prev_cycle_end_time = self._last_cycle_end_time
-        self._last_cycle_end_time = dt_util.now()
+        self._last_cycle_end_time = utc_now()
         self._pump_stuck = False  # Reset for next pump cycle
 
         # Auto-Tune: Check for ghost cycles (short duration AND low energy)
@@ -5668,6 +5286,8 @@ class WashDataManager:
         features are unavailable. ``None`` means the detector keeps its existing
         power/energy-based behavior, so this can only ever *defer* a completion.
         """
+        if not ENABLE_ML_END_GUARD:
+            return None
         try:
             from .ml.engine import ml_models_enabled, resolve_scorer
 
@@ -6379,201 +5999,132 @@ class WashDataManager:
         moment and for the same reason; None means "read the live one".
         """
 
-        # FINAL PROFILE MATCH: If still detecting, try one last match with complete cycle data
-        if self._current_program in ("detecting...", "restored..."):
-            await self._run_final_match_from_cycle_data(cycle_data)
-
-        # B1: freeze THIS cycle's live context into immutable locals now, before the
-        # persistence / auto-label / lifetime-energy awaits below. A new cycle can
-        # start synchronously during any of those awaits (a back-to-back load drives
-        # the detector into a fresh RUNNING via _on_state_change, which rolls
-        # _current_program back to "detecting..." and resets the match fields). The
-        # tail (event payload, finish notification, learning inputs) must describe the
-        # cycle that just finished, not whatever the live fields hold by the time each
-        # await returns. The final match above is what determines these values for
-        # this cycle, so capture right after it.
+        # B1: freeze THIS cycle's live context into immutable locals BEFORE the first
+        # await. A new cycle can start synchronously during any await below (a
+        # back-to-back load drives the detector into a fresh RUNNING via
+        # _on_state_change, which rolls _current_program back to "detecting..." and
+        # resets the match fields). The tail (event payload, finish notification,
+        # learning inputs) must describe the cycle that just finished, not whatever
+        # the live fields hold by the time each await returns.
         program = self._current_program
-        match_result = self._last_match_result
+        live_result = self._last_match_result
         match_confidence = self._last_match_confidence
         member_confidence = self._last_member_confidence
         matched_profile_duration = self._matched_profile_duration
-        # The number EVERY label / persistence decision for this cycle gates on.
-        #
-        # A Stage-5 group win reports the group's score, i.e. the best-scoring
-        # SIBLING's, while the member the cycle would be labelled as is chosen
-        # separately by integrated energy - so the two can be different profiles
-        # (item 206; measured 16.7% of whole-cycle group wins, gap up to 0.157).
-        # A label makes the cycle evidence for that ONE member, so it has to clear
-        # the bar on its own blended score, not on its sibling's. Both are blended
-        # pipeline scores over the same trace, so they compare directly.
-        #
-        # Computed once here because three gates read it and they must agree: the
-        # cycle-end gate below, the post-cycle auto-label pass (via
-        # MatchResult.label_confidence on its own fresh match), and the learning
-        # handoff - whose `_maybe_request_feedback` can auto-label without ever
-        # asking the user, so a member that fell short of `auto_label_confidence`
-        # on its own score has to be queued for confirmation instead.
-        #
-        # `member_confidence` is None for every non-group match, which leaves this
-        # exactly equal to the `match_confidence or 0.0` passed down before.
-        label_confidence = float(match_confidence or 0.0)
-        if member_confidence is not None:
-            label_confidence = min(label_confidence, float(member_confidence))
         manual_program = self._manual_program_active
         cycle_anomaly = self._cycle_anomaly
         overrun_ratio = self._overrun_ratio
 
-        # Record which program this cycle ran - but only when we actually know it.
-        #
-        # A label is not a display value. It makes the cycle *evidence* for that
-        # profile (the async_rebuild_envelope right after the persist below), which
-        # moves the profile's avg_duration / target_duration - and those are what arm
-        # Smart Termination and the anti-crease finalize. So a weak guess recorded as
-        # fact seeds the next mis-detection: #400 measured a program's target_duration
-        # snapping to the duration of a fragment mis-assigned to it.
-        #
-        # The bar is the learning threshold, i.e. the ladder the panel already enforces
-        # (unmatch < match < learning < auto-label): a match that is not confident
-        # enough for WashData to ASK about is not confident enough to record as fact.
-        # Below it the cycle stays unlabelled and the auto-label pass below gets its
-        # turn on the COMPLETE trace at its own (higher) threshold, which is the better
-        # judge - previously any live commit, or a final match scraping its 0.15 floor,
-        # pre-empted that path entirely.
-        #
-        # A hand-picked program bypasses the gate: it is the user's own statement, not a
-        # guess. It is stamped "manual" rather than "auto_match" for the same reason -
-        # "auto_match" means "the matcher guessed this", which is what lets bulk
-        # auto-labelling overwrite a label later.
-        if (
-            program
-            and program not in ("off", "detecting...", "restored...")
-            and program in self.profile_store.get_profiles()
-        ):
-            # `label_confidence` (computed above) is the member-aware number, not
-            # the group's. See its definition for why a label may not rely on a
-            # sibling's score.
-            if label_confidence > 0:
-                # Recorded whether or not we label, so the panel can show what
-                # WashData suspected without the cycle claiming it as its program.
-                cycle_data["match_confidence"] = label_confidence
-            # How far clear of the runner-up the winner finished. The absolute
-            # score is a weak guide to being right (AUC 0.625) where this margin
-            # is a strong one (0.792), and labelling is the asymmetric decision:
-            # a wrong label reshapes avg_duration and every future estimate,
-            # while a missed one only asks the user. Register item 310.
-            #
-            # A separate constant from MATCH_AMBIGUITY_MARGIN on purpose - that
-            # one also gates Smart Termination, so widening it would defer
-            # cycle ends and undo item 306.
-            #
-            # The margin describes the RESULT's own winner, and that is not
-            # always `program`. `match_result` is `_last_match_result`, which the
-            # live matcher overwrites on every run whether or not a switch
-            # commits, while `program` (`_current_program`) only moves through
-            # the persistence / decisive-margin / consistency paths. Inside a
-            # persistence window the newest result can have challenger X winning
-            # while P is still displayed - and then `ambiguity_margin` says how
-            # far X leads ITS runner-up, which may be P itself. Reading it as
-            # evidence for P inverts the gate: the more decisively X won, the
-            # more readily P got labelled. Require the margin's owner to be the
-            # programme being labelled. The post-cycle gate below has no such
-            # problem, because there `res.best_profile` is what it labels.
-            _margin = getattr(match_result, "ambiguity_margin", None)
-            _margin_owner = (
-                getattr(match_result, "best_profile", None)
-                if match_result is not None
-                else program
-            )
-            # A result with NO winner is not a challenger. `best_profile is None`
-            # comes with `confidence` and `ambiguity_margin` both 0.0, so it
-            # carries no evidence about any programme - yet the owner check below
-            # treats it as "someone else won" and reports `%r` as None. The
-            # outcome is right either way (no label), the stated reason is not.
-            # Drop the margin too, so nothing downstream can read a
-            # no-winner 0.0 as a measured one; a real challenger keeps its margin.
-            _no_winner = match_result is not None and _margin_owner is None
-            if _no_winner:
-                _margin = None
-            # Stage-5 safeguards #2 (member fit) and #3 (overrun) flag a group win
-            # `is_ambiguous` WITHOUT moving the margin, so a margin-only gate let
-            # them label anyway (item 387b): of the cycles labelled in that state
-            # over the corpus, 7 of 12 got the wrong program. `is True`, not
-            # truthiness, so a result object without the field cannot block.
-            _ambiguous = getattr(match_result, "is_ambiguous", False) is True
-            _margin_ok = (
-                not _no_winner
-                and _margin_owner == program
-                and (_margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN)
-                and not _ambiguous
-            )
-            if manual_program:
-                cycle_data["profile_name"] = program
-                cycle_data["label_source"] = "manual"
-            elif label_confidence >= float(self._learning_confidence or 0.0) and _margin_ok:
-                cycle_data["profile_name"] = program
-                cycle_data["label_source"] = "auto_match"
-            elif (
-                label_confidence >= float(self._learning_confidence or 0.0)
-                and _margin_owner != program
-            ):
-                # Distinct branch: `_margin_ok` is False for two different
-                # reasons and the message below only describes one of them. When
-                # the owner differs, `_margin` is the CHALLENGER's lead and can
-                # be large, so that message reads "only 0.400 clear of the next
-                # candidate, under the 0.08 a label needs" - self-contradictory,
-                # and it hides the actual reason.
-                if _no_winner:
-                    self._logger.info(
-                        "Not labeling cycle as '%s': the latest match produced no "
-                        "winner at all, so there is no margin to judge it by. It "
-                        "stays unlabelled rather than reshaping '%s' on the "
-                        "confidence of an earlier tick.",
-                        program, program,
-                    )
-                else:
-                    self._logger.info(
-                        "Not labeling cycle as '%s': the latest match was won by "
-                        "%r, so its margin is evidence about that program, not "
-                        "this one. It stays unlabelled rather than reshaping '%s' "
-                        "on a number that was never measured for it.",
-                        program, _margin_owner, program,
-                    )
-            elif label_confidence >= float(self._learning_confidence or 0.0) and _ambiguous and (
-                _margin is None or float(_margin) >= MATCH_LABEL_MIN_MARGIN
-            ):
+        # ONE match over the complete trace; every label decision below reads it
+        # (audit MATCH-DECIDE-02). The last live tick is a PREFIX match (prefix
+        # shapes, the in-progress duration kernel, up to profile_match_interval
+        # stale, the ENDING quiet tail inside its duration), and its winner differed
+        # from the complete-cycle winner on 17.5% of corpus cycles, while
+        # MATCH_LABEL_MIN_MARGIN was calibrated on complete folds (item 310).
+        final_result = await self._run_final_match_from_cycle_data(cycle_data)
+        same_cycle = cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token
+        if program in ("detecting...", "restored...") and final_result is not None:
+            # Never committed live: the complete match names the program for DISPLAY
+            # at a low floor, since the trace is complete. Labelling is decided below.
+            if final_result.best_profile and final_result.confidence >= 0.15:
+                program = final_result.best_profile
+                match_confidence = final_result.confidence
+                member_confidence = final_result.member_confidence
+                if same_cycle:
+                    self._current_program = program
+                    self._last_match_result = final_result
+                    self._last_match_confidence = match_confidence
+                    self._last_member_confidence = member_confidence
                 self._logger.info(
-                    "Not labeling cycle as '%s': the matcher flagged its own pick as "
-                    "uncertain (a profile-group member that fits poorly, or a run "
-                    "past that member's length), so it stays unlabelled.",
-                    program,
-                )
-            elif label_confidence >= float(self._learning_confidence or 0.0):
-                self._logger.info(
-                    "Not labeling cycle as '%s': confident enough (%.2f) but only "
-                    "%.3f clear of the next candidate, under the %.2f a label needs. "
-                    "It stays unlabelled rather than reshaping that program's "
-                    "statistics on a coin flip.",
-                    program, label_confidence, float(_margin or 0.0),
-                    MATCH_LABEL_MIN_MARGIN,
+                    "Final match from cycle data: '%s' with confidence %.3f",
+                    program, match_confidence,
                 )
             else:
                 self._logger.info(
+                    "No confident match from cycle data (best: %s, conf=%.3f)",
+                    final_result.best_profile, final_result.confidence,
+                )
+        match_result = final_result if final_result is not None else live_result
+
+        # The number every label / persistence decision gates on: the member-aware
+        # score (item 206), not a Stage-5 group's, which is its best SIBLING's.
+        try:
+            label_confidence = float(getattr(match_result, "label_confidence", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            label_confidence = 0.0
+        if label_confidence > 0 and (
+            not manual_program or getattr(match_result, "best_profile", None) == program
+        ):
+            # Recorded whether or not we label, so the panel can show what WashData
+            # suspected without the cycle claiming it as its program. Not on a
+            # hand-picked cycle the matcher would have called something else: the
+            # number would read as confidence in the user's pick.
+            cycle_data["match_confidence"] = label_confidence
+
+        # A label is not a display value: it makes the cycle evidence for that
+        # profile, moving avg_duration / target_duration, which arm Smart
+        # Termination and the anti-crease finalize - so a weak guess recorded as fact
+        # seeds the next mis-detection (#400). The verdict is the learning floor (the
+        # panel's ladder: unmatch < match < learning < auto-label) plus the margin
+        # and Stage-5 checks, on the complete match; the label is that match's own
+        # winner. A hand-picked program bypasses it and is stamped "manual", since
+        # "auto_match" is what lets bulk auto-labelling overwrite a label later.
+        # The verdict also reaches learning.process_cycle_end, which must not
+        # auto-label a cycle refused here (audit MANAGER-02 / MATCH-DECIDE-01).
+        profiles = self.profile_store.get_profiles()
+        learning_floor = float(self._learning_confidence or 0.0)
+        label_gate_ok = False
+        if manual_program and program and program in profiles:
+            cycle_data["profile_name"] = program
+            cycle_data["label_source"] = "manual"
+            label_gate_ok = True
+        else:
+            verdict, reason = label_verdict(match_result, learning_floor)
+            if verdict and verdict not in profiles:
+                verdict, reason = None, "unknown_profile"
+            best = getattr(match_result, "best_profile", None)
+            if verdict:
+                cycle_data["profile_name"] = verdict
+                cycle_data["label_source"] = "auto_match"
+                label_gate_ok = True
+                if verdict != program:
+                    self._logger.info(
+                        "Labelled cycle as '%s' (the complete-cycle winner, %.2f) "
+                        "although '%s' was shown while it ran.",
+                        verdict, label_confidence, program,
+                    )
+            elif reason == "below_floor":
+                _group_conf = float(getattr(match_result, "confidence", 0.0) or 0.0)
+                self._logger.info(
                     "Not labeling cycle as '%s': match confidence %.2f is below the "
-                    "learning threshold %.2f, so it stays unlabelled rather than "
-                    "reshaping that program's statistics.%s",
-                    program,
-                    label_confidence,
-                    float(self._learning_confidence or 0.0),
-                    ""
-                    if member_confidence is None
-                    or float(member_confidence) >= float(match_confidence or 0.0)
-                    else (
-                        f" (its profile group scored {float(match_confidence or 0.0):.2f}, "
-                        f"but that was a different member of the group)"
-                    ),
+                    "learning threshold %.2f.%s",
+                    best, label_confidence, learning_floor,
+                    f" (its profile group scored {_group_conf:.2f}, but that was a "
+                    "different member of the group)"
+                    if _group_conf > label_confidence + 1e-9 else "",
+                )
+            elif reason == "ambiguous":
+                self._logger.info(
+                    "Not labeling cycle as '%s': the matcher flagged its own pick as "
+                    "uncertain (a profile-group member that fits poorly, or a run "
+                    "past that member's length).",
+                    best,
+                )
+            elif reason == "margin":
+                self._logger.info(
+                    "Not labeling cycle as '%s': confident enough (%.2f) but only "
+                    "%.3f clear of the next candidate, under the %.2f a label needs.",
+                    best, label_confidence,
+                    float(getattr(match_result, "ambiguity_margin", 0.0) or 0.0),
+                    MATCH_LABEL_MIN_MARGIN,
+                )
+            elif reason == "unknown_profile":
+                self._logger.info(
+                    "Not labeling cycle as '%s': that profile no longer exists.", best
                 )
 
-        # Attach extensive debug data if available (and configured)
+        # Attach extensive debug data if available (and configured). From the
+        # complete match, so the stored ranking describes the finished cycle.
         if match_result:
             ranking = getattr(match_result, "ranking", [])
             # Top-5 ranking stored unconditionally (small, high training value).
@@ -6585,61 +6136,6 @@ class WashDataManager:
                 "details": getattr(match_result, "debug_details", {}),
                 "ambiguous": getattr(match_result, "is_ambiguous", False),
             }
-
-        # Post-Cycle Auto-Labeling (if not already matched)
-        # Offload this match too if needed
-        if not cycle_data.get("profile_name") and self._auto_label_confidence > 0:
-            res = await self.profile_store.async_match_profile(
-                cycle_data["power_data"], cycle_data["duration"]
-            )
-            # label_confidence == confidence for everything except a Stage-5 group
-            # win whose selected member scored below the sibling that set the group's
-            # score (item 206). This is the highest-stakes gate of the three: it
-            # labels without ever asking the user.
-            # The SAME margin gate the live label gate applies (item 310). The
-            # comment above calls this pass "the better judge" because it sees the
-            # complete trace at a higher confidence threshold - but confidence is
-            # the weak axis (AUC 0.625 against the margin's 0.792), and this path
-            # runs precisely when the live gate declined, margin refusals included.
-            # Without it a cycle refused a label for finishing too close to the
-            # runner-up was relabelled here a few lines later, on the same data.
-            _post_margin = getattr(res, "ambiguity_margin", None)
-            # ...and the same Stage-5 ambiguity the live gate now honours (387b).
-            _post_ambiguous = getattr(res, "is_ambiguous", False) is True
-            _post_margin_ok = (
-                _post_margin is None or float(_post_margin) >= MATCH_LABEL_MIN_MARGIN
-            ) and not _post_ambiguous
-            if (
-                res.best_profile
-                and res.label_confidence >= self._auto_label_confidence
-                and _post_margin_ok
-            ):
-                cycle_data["profile_name"] = res.best_profile
-                cycle_data["label_source"] = "auto_label_post"
-                cycle_data["match_confidence"] = float(res.label_confidence)
-                # Top-5 from post-cycle match (may differ from live match ranking).
-                # Sanitize: strip heavy current/sample arrays (these fields are NOT
-                # in the fired-event exclusion set, so they must stay small to keep
-                # EVENT_CYCLE_ENDED under HA's 32KB event-data limit).
-                cycle_data["match_ranking_top5"] = _sanitize_ranking(
-                    getattr(res, "ranking", [])
-                )
-                self._logger.info(
-                    "Post-cycle auto-labeled as '%s' (confidence: %.2f)",
-                    res.best_profile,
-                    res.label_confidence,
-                )
-            elif res.best_profile and res.label_confidence >= self._auto_label_confidence:
-                self._logger.info(
-                    "Not post-cycle labeling as '%s': confident enough (%.2f) but "
-                    "%s. It is offered for confirmation instead.",
-                    res.best_profile,
-                    res.label_confidence,
-                    "the matcher flagged its own pick as uncertain"
-                    if _post_ambiguous
-                    else f"only {float(_post_margin or 0.0):.3f} clear of the next "
-                    f"candidate, under the {MATCH_LABEL_MIN_MARGIN:.2f} a label needs",
-                )
 
         # Back-fill confirmed label on any ranking snapshots captured during this cycle
         # so the live_match on-device trainer can use them as labelled examples.
@@ -6794,6 +6290,14 @@ class WashDataManager:
         # We could offload signature calc to analysis logic if really needed, but let's
         # stick to match profile optimization first.
         cycle_persisted = False
+        # Read the odometer BEFORE the add: its getter floors at len(past_cycles), so
+        # read afterwards it already counted this cycle and `+ 1` double-stepped - a
+        # fresh install read 2/3/4 after 1/2/3 cycles and milestones fired one cycle
+        # early (audit MANAGER-05).
+        try:
+            odometer_before_add: int | None = self._lifetime_cycle_count()
+        except Exception:  # noqa: BLE001 - counter must never break cycle end
+            odometer_before_add = None
         try:
             await self.profile_store.async_add_cycle(cycle_data)
             cycle_persisted = True
@@ -6816,9 +6320,9 @@ class WashDataManager:
         # save immediately after (same store, one save).
         prev_lifetime_count: int | None = None
         cur_lifetime_count: int | None = None
-        if cycle_persisted:
+        if cycle_persisted and odometer_before_add is not None:
             try:
-                prev_lifetime_count = self._lifetime_cycle_count()
+                prev_lifetime_count = odometer_before_add
                 cur_lifetime_count = prev_lifetime_count + 1
                 # In-memory only; persisted by the batched lifetime-energy save below.
                 self.profile_store.set_lifetime_cycle_count(cur_lifetime_count)
@@ -6866,10 +6370,18 @@ class WashDataManager:
             k: v for k, v in cycle_data.items() if k not in excluded_fields
         }
         event_cycle_data["device_type"] = self.device_type
-        # Add program if missing or generic (use THIS cycle's captured program, not
-        # the live field which may already belong to a newly-started cycle).
-        if "profile_name" not in event_cycle_data and program:
-            event_cycle_data["profile_name"] = program
+        # The program to SHOW: the stored label, else THIS cycle's captured live
+        # program (not the live field, which may already belong to a newly-started
+        # cycle). `_add_cycle_data` always writes `profile_name` (None when the
+        # label gate refused), so the old "key missing" fill-in never ran and every
+        # unlabelled cycle announced "Washer finished None" (audit MANAGER-06).
+        # The stored cycle keeps profile_name None: this is display, not a label.
+        display_program = event_cycle_data.get("profile_name")
+        if not display_program and program and program not in (
+            "off", "detecting...", "restored...", "starting", "unknown"
+        ):
+            display_program = program
+        display_program = display_program or "unknown"
 
         if self._notify_fire_events:
             self.hass.bus.async_fire(
@@ -6878,10 +6390,10 @@ class WashDataManager:
                     "entry_id": self.entry_id,
                     "device_name": self.config_entry.title,
                     "cycle_data": event_cycle_data,
-                    "program": event_cycle_data.get("profile_name", "unknown"),
+                    "program": display_program,
                     "duration": event_cycle_data.get("duration"),
                     "start_time": event_cycle_data.get("start_time"),
-                    "end_time": event_cycle_data.get("end_time") or dt_util.now().isoformat(),
+                    "end_time": event_cycle_data.get("end_time") or utc_now().isoformat(),
                 },
             )
 
@@ -6914,7 +6426,7 @@ class WashDataManager:
         if self._notify_finish_services or self._notify_actions:
             msg_template = self.config_entry.options.get(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE)
             duration_min = int(cycle_data['duration'] / 60)
-            program_name = event_cycle_data.get("profile_name", "unknown")
+            program_name = display_program
 
             energy_kwh = round(self._cycle_report_energy_wh(cycle_data) / 1000, 3)
 
@@ -7002,12 +6514,24 @@ class WashDataManager:
         # dangle forever. Use THIS cycle's captured match context (not the live
         # fields, which may already belong to a newly-started cycle after the awaits).
         if cycle_persisted:
+            # Ask about what the complete match picked, not the live tick's program.
+            feedback_profile = (
+                cycle_data.get("profile_name")
+                or getattr(match_result, "best_profile", None)
+                or program
+            )
+            feedback_duration = (
+                matched_profile_duration
+                if feedback_profile == program
+                else (profiles.get(feedback_profile) or {}).get("avg_duration")
+            )
             self.learning_manager.process_cycle_end(
                 cycle_data,
-                detected_profile=program,
+                detected_profile=feedback_profile,
                 confidence=label_confidence,
-                predicted_duration=matched_profile_duration,
+                predicted_duration=feedback_duration,
                 match_result=match_result,
+                label_allowed=label_gate_ok or bool(cycle_data.get("profile_name")),
             )
 
         # B1: a new cycle may have started while the heavy post-processing above was
@@ -7039,7 +6563,7 @@ class WashDataManager:
         self._last_estimate_time = None
         self._last_match_result = None  # Clear so phase sensor resets to "Off" (issue #192)
         self._cycle_progress = 100.0  # 100% = cycle complete
-        self._cycle_completed_time = dt_util.now()
+        self._cycle_completed_time = utc_now()
         self._cycle_start_time = None
         self._ranking_snapshot_cycle_id = ""
         self._reset_live_notification_state()
@@ -7058,7 +6582,7 @@ class WashDataManager:
             door_state = self.hass.states.get(self._door_sensor_entity)
             if door_state and door_state.state == "off":  # binary_sensor: off = closed
                 self._is_clean_state = True
-                self._clean_state_start = dt_util.now()
+                self._clean_state_start = utc_now()
                 self._logger.debug(
                     "Cycle ended with door closed: entering Clean state"
                 )
@@ -7067,7 +6591,7 @@ class WashDataManager:
             # other way (#451): a button entity, or the Mark Unloaded button /
             # service driven by their own automation.
             self._is_clean_state = True
-            self._clean_state_start = dt_util.now()
+            self._clean_state_start = utc_now()
             self._logger.debug(
                 "Cycle ended, unload confirmation configured: entering Clean state"
             )
@@ -7104,8 +6628,10 @@ class WashDataManager:
         22:00-06:59). The end hour is exclusive at the hour granularity, so a window
         of start=22, end=7 covers hours 22, 23, 0..6.
         """
+        # Quiet hours are local clock hours; interval stamps in this module are
+        # UTC (audit DETECT-01), so convert whatever the caller passes.
         return notif_rules.in_quiet_hours(
-            self._quiet_hours_bounds(), when or dt_util.now()
+            self._quiet_hours_bounds(), dt_util.as_local(when or utc_now())
         )
 
     def _seconds_until_quiet_end(self, when: datetime | None = None) -> float:
@@ -7113,8 +6639,10 @@ class WashDataManager:
 
         Returns 0.0 when the feature is off or when not currently in quiet hours.
         """
+        # Quiet hours are local clock hours; interval stamps in this module are
+        # UTC (audit DETECT-01), so convert whatever the caller passes.
         return notif_rules.seconds_until_quiet_end(
-            self._quiet_hours_bounds(), when or dt_util.now()
+            self._quiet_hours_bounds(), dt_util.as_local(when or utc_now())
         )
 
     def _queue_quiet_hours_notification(
@@ -7788,13 +7316,12 @@ class WashDataManager:
             # Reuse the notification's tag as a stable persistent-notification id so
             # the HA notifications tab collapses the lifecycle thread to one entry
             # instead of accumulating a new card per cycle (issue #248/#249 clutter).
-            _pn_create(
+            return _pn_create(
                 self.hass,
                 message,
                 title=title,
                 notification_id=ev.get("tag"),
             )
-            return True
 
         return sent
 
@@ -7955,7 +7482,7 @@ class WashDataManager:
                     self._live_waiting_notification_sent = True
                 else:
                     self._live_notification_sent_count += 1
-                    self._last_live_notification_time = dt_util.now()
+                    self._last_live_notification_time = utc_now()
                 # The queued entry carries the same `activity: "start"` the direct
                 # paths send, so the phone has a live activity either way and the
                 # cycle-end teardown has to know about it (#446). Recorded only
@@ -8022,7 +7549,7 @@ class WashDataManager:
     def _handle_noise_cycle(self, max_power: float) -> None:
         """Handle a detected noise cycle."""
         # Clean up old noise events > 24h
-        now = dt_util.now()
+        now = utc_now()
         self._noise_events = [
             t
             for t in getattr(self, "_noise_events", [])
@@ -8100,7 +7627,7 @@ class WashDataManager:
             self._notify_update()
             return
 
-        now = dt_util.now()
+        now = utc_now()
 
         # Throttle heavy matching to configured interval (default: 5 minutes)
         effective_match_interval = self._profile_match_interval
@@ -8347,7 +7874,7 @@ class WashDataManager:
             return
 
         interval = max(30, int(self._notify_live_interval_seconds))
-        now = dt_util.now()
+        now = utc_now()
         if self._last_live_notification_time and (
             now - self._last_live_notification_time
         ).total_seconds() < interval:
@@ -8871,7 +8398,7 @@ class WashDataManager:
             self._envelope_position = None
             return
 
-        now = dt_util.now()
+        now = utc_now()
         # The 5 s throttle guards the heavy phase estimate, but the FIRST estimate
         # after a match must not wait it out (#437): the match callback calls this
         # and then _check_live_progress_notification(), which now stays in the
@@ -8957,7 +8484,9 @@ class WashDataManager:
             self.device_type,
             float(self._matched_profile_duration),
             duration_so_far,
-            self._smoothed_progress,
+            progress_mod.ema_seed(
+                self._smoothed_progress, self._smoothed_for_program, self._current_program
+            ),
             phase_result,
             ml_pct,
             self._logger,
@@ -8972,6 +8501,7 @@ class WashDataManager:
 
         self._cycle_progress = result.progress
         self._smoothed_progress = result.smoothed
+        self._smoothed_for_program = self._current_program
         self._time_remaining = result.remaining
         self._total_duration = result.total
         self._last_total_duration_update = now
@@ -9150,6 +8680,21 @@ class WashDataManager:
         return self._is_user_paused
 
     @property
+    def _is_user_paused(self) -> bool:
+        return self._user_paused_flag
+
+    @_is_user_paused.setter
+    def _is_user_paused(self, value: bool) -> None:
+        # Mirrored into the detector so Smart Termination honours a user pause too:
+        # it was the one finisher that did not, and the pause itself carried the
+        # elapsed time past the ratio (audit DETECT-05).
+        self._user_paused_flag = bool(value)
+        detector = getattr(self, "detector", None)
+        setter = getattr(detector, "set_user_paused", None)
+        if callable(setter):
+            setter(self._user_paused_flag)
+
+    @property
     def is_clean_state(self) -> bool:
         """Return True if machine is in Clean state (cycle ended, door not yet opened)."""
         return self._is_clean_state
@@ -9160,7 +8705,7 @@ class WashDataManager:
         raw = float(self.detector.get_elapsed_seconds())
         paused = self._total_user_paused_seconds
         if self._user_pause_start is not None:
-            paused += (dt_util.now() - self._user_pause_start).total_seconds()
+            paused += (utc_now() - self._user_pause_start).total_seconds()
         return max(0.0, raw - paused)
 
     def check_state(self):
@@ -9343,7 +8888,7 @@ class WashDataManager:
         """
         if self.device_type != DEVICE_TYPE_PUMP:
             return 0
-        cutoff = dt_util.now().timestamp() - 86400.0
+        cutoff = utc_now().timestamp() - 86400.0
         count = 0
         for cycle in self.profile_store.get_past_cycles():
             start_raw = cycle.get("start_time")
@@ -9619,7 +9164,7 @@ class WashDataManager:
         self._logger.info("Cycle paused by user")
         prev_verified = self.detector._verified_pause
         self._is_user_paused = True
-        self._user_pause_start = dt_util.now()
+        self._user_pause_start = utc_now()
         self.detector.set_verified_pause(True)
 
         if self._pause_cuts_power:
@@ -9665,7 +9210,7 @@ class WashDataManager:
             self._logger.debug("async_resume_cycle: not user-paused, ignoring")
             return False
 
-        now = dt_util.now()
+        now = utc_now()
         prev_pause_start = self._user_pause_start
         accumulated = (
             (now - prev_pause_start).total_seconds()

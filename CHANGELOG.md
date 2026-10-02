@@ -9,16 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### TL;DR
 
-- Washers no longer end mid-wash or lose their rinse when the program runs long.
-- Dishwashers no longer end before their final pump-out, or bank standby into every cycle.
-- A dishwasher's silent drying phase is no longer cut, live or by the history correction.
-- A dishwasher whose programmes never pause reaches Smart Termination again.
-- Saving any setting no longer resets a new device's Min Power and Off Delay.
-- Uncertain matches are no longer auto-labelled.
-- The Playground now replays exactly what live detection and matching would do.
-- A Stop Threshold stuck below standby is corrected by a suggestion.
-- Force-stopped and trace-pruned cycles no longer skew suggestions or the review queue.
-- Power traces kept per program is now a setting; nightly maintenance prunes debug traces.
+- Washers and dishwashers report the end sooner; no cycle ends early in replays.
+- Labels come from a match on the whole cycle; matching is more accurate.
+- The program shows sooner; time remaining and projected energy are realistic.
+- No splits or hour-short records across daylight-saving changes.
+- A finished cycle can no longer be reopened and counted twice.
+- Your review answers are never overwritten by Auto-label.
+- Store downloads are quality-checked, deduplicated and cannot take over your programs.
+- Services respect user permissions; sidebar notifications work again.
+- Suggestions that drifted devices worse are gone; three no-op settings removed.
+- Earlier 0.5.8 fixes: washer and dishwasher end fixes, setting saves, Playground parity.
 
 ### Fixes
 
@@ -47,6 +47,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **A cycle whose trace was pruned kept getting flagged for review** ([#459](https://github.com/3dg1luk43/ha_washdata/issues/459)): the nightly health check scored cycles without their trace, which the model reads as ~99% suspect, so each new cycle past the trace limit put one old cycle in the review queue at 1% health. A cycle without a trace keeps its last real score, or shows none, and no longer counts towards the queue; its stale anomaly markers go with the trace. Thanks to @TRON4R.
 
 - **Power traces kept per program is now a setting** ([#459](https://github.com/3dg1luk43/ha_washdata/issues/459)): Settings, Timing & Watchdog, Housekeeping. Default 20, minimum 1; a change applies without a restart.
+
+- **Across a daylight-saving change a wash could split in two or be stored an hour short**: elapsed time was computed on local clock time, so a soak over the spring-forward hour counted an hour too much quiet and a fall-back cycle stored 31 minutes for a 91 minute run. Quiet hours were released an hour off on those nights, on fall-back inside the quiet window. All interval arithmetic now runs in UTC.
+
+- **Sidebar notifications never appeared**: the fallback for devices without a notify target and the auto-pause timer card went through an API Home Assistant has removed, so they failed silently. They now reach Home Assistant.
+
+- **A finished cycle could be reopened and counted twice**: within 20 minutes of an interrupted or force-stopped cycle, any restart or settings save reopened it, so its energy was added to the lifetime total twice and a second "finished" notification went out. A save during the end of a cycle could also restore its snapshot. Both are gone.
+
+- **A match from the previous cycle could carry into the next one**: a match started on the reading that ended a cycle finished after it, so the next cycle began already matched. Such results are now dropped.
+
+- **Your answers in the review queue could be overwritten**: confirming or correcting a cycle kept the matcher's label source, so Auto-label replaced your answer. Answers are now stored as yours, and existing ones are repaired on upgrade. A cycle the label gate refused is no longer auto-labelled by the learning step instead.
+
+- **Labels now come from the finished cycle**: the label was decided on the last mid-cycle match, whose winner differed from a match on the whole cycle in 17.5% of cycles. Every cycle end now runs one match on the complete trace and labels from it, with the same margin and uncertainty checks everywhere.
+
+- **The displayed program flickered**: a weak match was shown and dropped again on every check (38 of 580 cycles), and during a pause two close programs could alternate. Both now need the usual agreement before they show.
+
+- **Matching is more accurate, measured on real cycles**: program templates now sit on the same time grid as the cycle being matched, the shortest-duration check waits 15 minutes, and mid-cycle the duration counts less than at the end. Leave-one-out over 2478 cycle cuts, correct program: complete cycle 75.1% to 76.4%, at 75% elapsed 66.2% to 68.1%, at 25% 55.6% to 57.3%.
+
+- **The program shows sooner**: until the first program is committed, WashData matches every 150 s instead of 300 s, because on a plug reporting every 30 s the 300 s try had too few points. The right program is shown for 61% of the cycle instead of 56%.
+
+- **Washers end sooner after their last pause**: once a program is matched with confidence, the wait for the end is sized from the longest pause that program's own recorded cycles ever made from that point on, instead of the device's Minimum Off Gap. Replaying 293 cycles: washer median finish delay 10.6 to 10.0 minutes, dishwashers 5.0 to 4.5, no early ends or splits added.
+
+- **Smart Termination is blocked less often by a longer look-alike program**: a longer program whose overall shape resembled the run blocked the quick finish even when the run did not fit its start, which cost washers a median 3.9 minutes per cycle. Only a longer program that fits the run so far blocks it now. Across this release, replaying 293 cycles: washer median finish delay 15.8 to 10.0 minutes, no cycle ends early any more (one ended two hours early before), and splits are unchanged.
+
+- **Time remaining could stay at 36 s through a long overrun, and jumped wrongly after a program switch**: it now reaches 0 once the program's time is up, and starts fresh for the new program after a switch or a manual pick.
+
+- **Projected energy was up to 2.5x too high early in a cycle**: it assumed energy is used evenly over time, but heating comes first. It now follows the matched program's own energy curve and appears from 10% progress. Average error at 25% progress: 112% to 20%; at 50%: 45% to 10%.
+
+- **A resumed wash could end at the next pause, and Stop stored the time after the wash**: the final spin could become a second cycle; Smart Termination ignored a user pause; pressing Stop 30 minutes after a wash ended stored those 30 minutes; and after a restart Smart Termination waited for the timeout.
+
+- **Store downloads are checked before they shape your programs**: a shared recording now needs at least 30 readings, no gap over 15 minutes and a plausible length, and a recording you already have under any name is skipped (14% of the community recordings are copies). A downloaded recording no longer becomes the template of a program that has your own cycles; one could cost up to half of a program's correct matches. Adopted settings no longer include another plug's timing (Off Delay, Minimum Off Gap, power-off and match interval), and duration ratios stay within the shipped bounds.
+
+- **Services ignored user permissions**: a read-only user could import or export the whole configuration, including to a public web folder, and the import service replaced this device's power and door sensors with the exporter's. Services now apply the same admin and access checks as the panel.
+
+- **History import offered cycles you already had**, and one "unavailable" reading split a wash in two. Recorded cycles are now recognised by overlap, and short dropouts are bridged.
+
+- **The running sensor turned off during soaks and pauses**, so automations treating "off" as done fired mid-cycle. It now stays on for the whole cycle.
+
+- **Smaller fixes**: the cycle counter counted two per cycle on new installs and milestones fired one early; an unlabelled cycle announced "finished None"; a broken imported template could win a match; diagnostics did not redact changelog rows for sensitive settings; 40 panel texts had no translation; every entity was rewritten every 30 seconds and each power reading rebuilt every program's statistics about 40 times.
+
+### Suggestions
+
+- **Suggestions that made devices worse are gone**: the confidence thresholds (each apply lowered them), Sampling Interval (each apply raised it), smoothing, start duration, end repeat count, the two duration tolerances, the per-cycle stop/start simulation and the ML-driven suggestions. Completion minimum no longer creeps up until short programs count as interrupted; suggestions no longer stop for good at 200 stored cycles; a muted setting is never applied by Apply all; a setting you never changed is no longer suggested at the value it already has; the maximum duration ratio is never suggested below 1.8; dishwasher Off Delay uses your measured cycles; the end-energy threshold is only raised when it makes an end impossible.
+
+- **Settings removed from the panel**: End Repeat Count, Smoothing Window and Profile Duration Tolerance did nothing measurable.
+
+- **The ML end guard is off**, even with ML models enabled: replayed on 292 cycles it prevented no early end and delayed washer ends by 5 minutes.
 
 ## 0.5.7 - Unreleased
 

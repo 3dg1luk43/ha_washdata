@@ -39,7 +39,6 @@ def mock_hass() -> MagicMock:
         await coro
         return MagicMock(done=lambda: True)
     hass.async_create_task = mock_create_task
-    hass.components.persistent_notification.async_create = MagicMock()
     return hass
 
 @pytest.fixture

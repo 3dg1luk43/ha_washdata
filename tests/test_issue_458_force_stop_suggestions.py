@@ -234,6 +234,7 @@ def test_a_correction_is_not_held_back_by_the_cooldown() -> None:
     lm = _learning()
     store = lm.profile_store
     store.get_past_cycles.return_value = [{}] * 10
+    store.get_lifetime_cycle_count.return_value = 10  # the cooldown reads the odometer
     store.get_suggestion_apply_cycle_count.return_value = 9  # applied one cycle ago
     store.get_locked_suggestions.return_value = []
     store.get_suggestions.return_value = {}

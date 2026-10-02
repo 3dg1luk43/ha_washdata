@@ -94,9 +94,10 @@ async def test_smart_termination_with_manager(mock_hass, mock_entry, data_file):
     profiles = store_data.get("profiles", {})
     past_cycles = store_data.get("past_cycles", [])
 
-    # Identify a cycle and profile
+    # Identify a cycle and profile. A community-store export keeps its cycles in
+    # reference_cycles (audit TESTING-17: reading only past_cycles skipped it).
     profiles = store_data.get("profiles", {})
-    past_cycles = store_data.get("past_cycles", [])
+    past_cycles = store_data.get("past_cycles") or store_data.get("reference_cycles") or []
 
     if not profiles or not past_cycles:
         pytest.skip(f"Insufficient data in {data_file}")
