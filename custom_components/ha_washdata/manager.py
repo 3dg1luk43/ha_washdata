@@ -57,7 +57,6 @@ from homeassistant.helpers import translation
 
 from .const import (
     resolve_off_delay_default,
-    MIN_FULL_TRACES,
     DOMAIN,
     CONF_POWER_SENSOR,
     CONF_PROFILE_EVIDENCE_SOURCES,
@@ -84,9 +83,6 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-    CONF_MAX_PAST_CYCLES,
-    CONF_MAX_FULL_TRACES_PER_PROFILE,
-    CONF_MAX_FULL_TRACES_UNLABELED,
     CONF_WATCHDOG_INTERVAL,
     CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     CONF_NOTIFY_BEFORE_END_MINUTES,
@@ -127,8 +123,6 @@ from .const import (
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-    DEFAULT_MAX_PAST_CYCLES,
-    DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
     CONF_NOTIFY_TITLE,
     CONF_NOTIFY_ICON,
     CONF_NOTIFY_ICON_COLOR,
@@ -199,7 +193,6 @@ from .const import (
     DEFAULT_NOTIFY_CHANNEL,
     DEFAULT_NOTIFY_FINISH_CHANNEL,
 
-    DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
     WATCHDOG_LATE_TICK_FACTOR,
     resolve_sampling_interval_default,
@@ -768,6 +761,9 @@ class WashDataManager:
         self._last_match_result = None
         self._last_phase_estimate_time = None
         self._matching_task: Task[Any] | None = None
+        # True while a power reading is being handled: the handler refreshes the
+        # entities once when it returns, so what it calls does not (register item 456).
+        self._in_power_event = False
         self._cycle_end_task: Task[Any] | None = None
         self._banked_tail_repair_task: Task[Any] | None = None
         # Detached store-touching tasks (matching trigger, active-cycle clear,
@@ -1542,7 +1538,7 @@ class WashDataManager:
                     self._check_pre_completion_notification()
 
             self._check_live_progress_notification()
-            self._notify_update()
+            self._notify_update_deferrable()
 
         except Exception as e:
             self._logger.error("Perform combined matching failed: %s", e, exc_info=True)
@@ -2067,28 +2063,6 @@ class WashDataManager:
             options.get(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
         )
 
-    def _apply_retention_limits(self, options: Mapping[str, Any]) -> None:
-        """Push the history / trace retention caps from ``options`` to the store."""
-        self.profile_store.set_retention_limits(
-            max_past_cycles=int(options.get(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES)),
-            max_full_traces_per_profile=max(
-                MIN_FULL_TRACES,
-                int(
-                    options.get(
-                        CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE
-                    )
-                ),
-            ),
-            max_full_traces_unlabeled=max(
-                MIN_FULL_TRACES,
-                int(
-                    options.get(
-                        CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED
-                    )
-                ),
-            ),
-        )
-
     async def async_setup(self) -> None:
         """Set up the manager."""
         await self.profile_store.async_load()
@@ -2114,10 +2088,6 @@ class WashDataManager:
                 }.items()
             }
         except Exception:  # noqa: BLE001
-            pass
-        try:
-            self._apply_retention_limits(self.config_entry.options)
-        except Exception:
             pass
 
         # Re-scope custom phases stranded under another device type (#450). Cheap,
@@ -2399,12 +2369,6 @@ class WashDataManager:
         self.profile_store.save_debug_traces = config_entry.options.get(
             CONF_SAVE_DEBUG_TRACES, False
         )
-        # Same reason (#459): the trace caps are now panel settings, and they were
-        # read at setup only.
-        try:
-            self._apply_retention_limits(config_entry.options)
-        except (TypeError, ValueError):
-            pass
         # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
@@ -2777,6 +2741,15 @@ class WashDataManager:
         if self.detector.state in {STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING}:
             snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
             await self.profile_store.async_save_active_cycle(snapshot)
+
+        # A debounced cycle-end write still pending must land before a reload loads
+        # this store again from disk (HA's own final write covers only a stop), and
+        # nothing may be debounced past this point.
+        try:
+            self.profile_store.coalesce_saves(0)
+            await self.profile_store.async_flush_saves()
+        except Exception:  # noqa: BLE001 - never block an unload on a save
+            self._logger.debug("Flushing pending store writes failed", exc_info=True)
 
         self._last_reading_time = None
 
@@ -3867,22 +3840,30 @@ class WashDataManager:
         self._last_reading_time = now
         self._last_real_reading_time = now # Track real update
         self._current_power = power
-        self.detector.process_reading(power, now)
+        # One entity refresh per reading, the one at the end (register item 456):
+        # _update_estimates and a match that completes inside process_reading (a
+        # trace still too short to score returns without awaiting) each sent their
+        # own first, all of ~20 entities rewritten 2-4 times for one reading.
+        self._in_power_event = True
+        try:
+            self.detector.process_reading(power, now)
 
-        if self._cycle_start_time is None and self.detector.current_cycle_start is not None:
-            self._cycle_start_time = self.detector.current_cycle_start
+            if self._cycle_start_time is None and self.detector.current_cycle_start is not None:
+                self._cycle_start_time = self.detector.current_cycle_start
 
-        # If running (or paused/ending), try to match profile and update estimates
-        if self.detector.state in (
-            STATE_RUNNING,
-            STATE_PAUSED,
-            STATE_ENDING,
-            STATE_STARTING,
-        ):
-            self._update_estimates()
-            # Periodically save state every 60s to avoid flash wear
-            # We need a tracker.
-            self._check_state_save(now)
+            # If running (or paused/ending), try to match profile and update estimates
+            if self.detector.state in (
+                STATE_RUNNING,
+                STATE_PAUSED,
+                STATE_ENDING,
+                STATE_STARTING,
+            ):
+                self._update_estimates()
+                # Periodically save state every 60s to avoid flash wear
+                # We need a tracker.
+                self._check_state_save(now)
+        finally:
+            self._in_power_event = False
 
         self._notify_update()
 
@@ -4938,6 +4919,13 @@ class WashDataManager:
         """Handle cycle end - clear all active timers and state."""
         duration = cycle_data["duration"]
         max_power = cycle_data.get("max_power", 0)
+
+        # Coalesce this cycle end's store writes from its first one: the cadence
+        # commit below already spawns a suggestion pass that saves (item 456).
+        try:
+            self.profile_store.coalesce_saves()
+        except Exception:  # noqa: BLE001 - a save policy must never break cycle end
+            self._logger.debug("Could not coalesce cycle-end saves", exc_info=True)
 
         # First, and synchronously: every end - ghost, pump-out, persisted or not
         # - commits this cycle's update intervals to the cadence model or drops
@@ -6017,8 +6005,20 @@ class WashDataManager:
             odometer_before_add: int | None = self._lifetime_cycle_count()
         except Exception:  # noqa: BLE001 - counter must never break cycle end
             odometer_before_add = None
+        # Every save from here until the follow-up work has settled is debounced,
+        # and what has to be durable is written once by async_flush_saves below:
+        # this pipeline and the tasks it spawns used to rewrite the whole store six
+        # times (register item 456). Re-armed here (_on_cycle_end opened it) so
+        # the window runs from the add, however long the final match took.
+        self.profile_store.coalesce_saves()
+        # The envelopes this cycle end changed: the labelled profile's, and those of
+        # any profile retention trimmed. Nothing else needs rebuilding (the nightly
+        # maintenance still rebuilds them all).
+        touched_profiles: list[str] = []
         try:
-            await self.profile_store.async_add_cycle(cycle_data)
+            retained = await self.profile_store.async_add_cycle(
+                cycle_data, defer_rebuilds=True
+            )
             cycle_persisted = True
             # The cycle (with its restart_gaps) is now durably stored, so it is safe
             # to drop the live buffer. Doing this only after a confirmed persist means
@@ -6027,7 +6027,20 @@ class WashDataManager:
                 self._restart_gaps.clear()
             profile_name = cycle_data.get("profile_name")
             if profile_name:
+                touched_profiles.append(profile_name)
                 await self.profile_store.async_rebuild_envelope(profile_name)
+            if isinstance(retained, (set, frozenset, list, tuple)):
+                for name in sorted(p for p in retained if isinstance(p, str)):
+                    if not name or name in touched_profiles:
+                        continue
+                    touched_profiles.append(name)
+                    try:
+                        await self.profile_store.async_rebuild_envelope(name)
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        self._logger.debug(
+                            "Envelope rebuild after retention failed for %s",
+                            name, exc_info=True,
+                        )
         except Exception as e: # pylint: disable=broad-exception-caught
             self._logger.error("Failed to add cycle to store: %s", e)
 
@@ -6074,8 +6087,8 @@ class WashDataManager:
         if cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
             self._spawn_tracked(self.profile_store.async_clear_active_cycle())
 
-        # Auto post-process: merge fragmented cycles from last 3 hours
-        self._spawn_tracked(self._run_post_cycle_processing())
+        # Refresh the artifacts that read the envelopes rebuilt above.
+        self._spawn_tracked(self._run_post_cycle_processing(touched_profiles))
 
         # Prepare cycle data for event (enrich if needed)
         # IMPORTANT: Exclude large fields to prevent exceeding HA's 32KB event data limit
@@ -6252,6 +6265,16 @@ class WashDataManager:
                 match_result=match_result,
                 label_allowed=label_gate_ok or bool(cycle_data.get("profile_name")),
             )
+
+        # The one immediate write of this cycle end: the cycle, its counters, the
+        # rebuilt envelopes and the feedback request the learning pass just queued.
+        # No await since the lifetime-energy save that used to write first, so the
+        # cycle is durable at the same point as before. Only what the follow-ups
+        # derive (refreshed artifacts, suggestions) waits for the debounced write.
+        try:
+            await self.profile_store.async_flush_saves()
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Failed to save the finished cycle: %s", e)
 
         # B1: a new cycle may have started while the heavy post-processing above was
         # awaiting. If so, the manager's live-cycle fields (_current_program,
@@ -7343,7 +7366,7 @@ class WashDataManager:
             self._overrun_ratio = 0.0
             self._envelope_position = None
             self._last_match_result = None
-            self._notify_update()
+            self._notify_update_deferrable()
             return
 
         now = utc_now()
@@ -7368,7 +7391,7 @@ class WashDataManager:
             # Also check notifications in loop
             self._check_pre_completion_notification()
             self._check_live_progress_notification()
-            self._notify_update()
+            self._notify_update_deferrable()
             return
 
         # No matching task trigger here anymore!
@@ -7377,7 +7400,7 @@ class WashDataManager:
         self._update_remaining_only()
         self._check_pre_completion_notification()
         self._check_live_progress_notification()
-        self._notify_update()
+        self._notify_update_deferrable()
 
     # _async_run_matching removed in favor of _async_perform_combined_matching
 
@@ -8366,6 +8389,12 @@ class WashDataManager:
         """Notify entities of update."""
         async_dispatcher_send(self.hass, SIGNAL_WASHER_UPDATE.format(self.entry_id))
 
+    def _notify_update_deferrable(self) -> None:
+        """Notify, unless a power reading is being handled: its handler notifies
+        once when it returns, after everything this caller changed."""
+        if not getattr(self, "_in_power_event", False):
+            self._notify_update()
+
     def notify_update(self) -> None:
         """Public method to notify entities of update."""
         self._notify_update()
@@ -9036,20 +9065,19 @@ class WashDataManager:
         self._notify_update()
         self._logger.info("Manual program cleared, reverting to auto-detection")
 
-    async def _run_post_cycle_processing(self) -> None:
-        """Run post-cycle processing (merge fragments, split anomalies)."""
+    async def _run_post_cycle_processing(self, profiles: Any = ()) -> None:
+        """Refresh what the cycle that just ended invalidated (``profiles``' artifacts).
+
+        Not the full maintenance any more (register item 456): that rebuilt every
+        envelope, recomputed every cycle's artifacts and re-matched every unlabelled
+        cycle at each cycle end. Those global passes run nightly.
+        """
         try:
-            # User Feedback: Use 5 hour lookback and configured gap settings
-            stats = await self.profile_store.async_run_maintenance()
-
-            # Log significant actions
-            merged = stats.get("merged_cycles", 0)
-            split = stats.get("split_cycles", 0)
-            if merged > 0 or split > 0:
+            stats = await self.profile_store.async_post_cycle_refresh(profiles)
+            if stats.get("orphaned_profiles"):
                 self._logger.info(
-                    "Post-cycle processing: Merged %s, Split %s cycle(s)", merged, split
+                    "Post-cycle processing: removed %s orphaned profile(s)",
+                    stats["orphaned_profiles"],
                 )
-
-            # Note: async_run_maintenance saves automatically if changes occur
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Post-cycle processing failed: %s", e)

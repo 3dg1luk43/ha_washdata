@@ -207,11 +207,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'progress_reset_delay', label: 'Progress Reset Delay', unit: 's', type: 'number', min: 0, def: 1800,
         doc: 'After finishing, hold progress at 100% for this long so Completed is visible on dashboards before resetting to Idle.' },
       { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', type: 'checkbox', def: true,
-        doc: 'Run nightly housekeeping: rebuild profile envelopes, recompute cycle health, prune debug traces and retain the most recent cycles.' },
-      { key: 'max_full_traces_per_profile', label: 'Power Traces Kept per Program', type: 'number', min: 1, step: 1, def: 20,
-        doc: 'How many of each program\'s most recent cycles keep their full power trace. Older cycles keep their duration, energy and label but lose the curve, so their chart is empty and they no longer count towards the program\'s curve, health or suggestions. Raising this keeps more history inspectable at the cost of storage (typically 3-15 KB per cycle). Lowering it deletes the extra traces at the next cleanup, and raising it again cannot bring them back.' },
-      { key: 'max_full_traces_unlabeled', label: 'Power Traces Kept (Unlabelled)', type: 'number', min: 1, step: 1, def: 20,
-        doc: 'The same limit for cycles that have no program label yet.' },
+        doc: 'Run nightly housekeeping: label older unlabelled cycles that now clearly match a program, rebuild program curves, refresh anomaly marks, recompute cycle health and remove debug traces while Save Debug Traces is off. Every cycle and its full power trace is kept.' },
       { key: 'power_profile_interval_min', label: 'Power Profile Interval', unit: 'min', type: 'number', min: 1, def: 15,
         doc: 'Bucket size for the per-profile power_profile sensor attribute (the flat per-slot average-watts array consumed by external planners such as EMHASS and tibber_prices). Smaller buckets keep short power spikes sharp; larger buckets smooth the shape. Default 15 min. Read-time only; does not affect detection.' },
     ] },
@@ -219,7 +215,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'expose_debug_entities', label: 'Expose Debug Entities', internal: true, type: 'checkbox',
         doc: 'Publish extra diagnostic HA entities (match confidence, ambiguity, state internals). Off keeps the entity list clean for normal use.' },
       { key: 'save_debug_traces', label: 'Save Debug Traces', type: 'checkbox',
-        doc: 'Store the full power trace and matching debug data for each cycle. Useful for troubleshooting but increases storage size.' },
+        doc: 'Also store the matcher\'s debug data (every candidate\'s scores) with each cycle. Useful for troubleshooting; it adds about 20 KB per cycle, kept for as long as the cycle is.' },
     ] },
   ] },
   { id: 'anti_wrinkle', label: 'Anti-Wrinkle', intro: 'Anti-wrinkle / anti-crease mode detects low-power tumble pulses after the main phase and keeps them attached to the finished cycle instead of reading them as new cycles.', onlyDeviceTypes: ['washing_machine', 'dryer', 'washer_dryer'], fields: [
@@ -2374,6 +2370,14 @@ class HaWashdataPanel extends HTMLElement {
     this._onLocChanged = () => this._onLocationChanged();
     window.addEventListener('location-changed', this._onLocChanged);
     window.addEventListener('popstate', this._onLocChanged);
+    // Unsaved Settings edits: hold links that leave the panel, and ask the browser
+    // to confirm a reload or close.
+    this._onOutboundClick = (e) => this._maybeGuardOutboundClick(e);
+    window.addEventListener('click', this._onOutboundClick, true);
+    this._onBeforeUnload = (e) => {
+      if (this._unsavedSettingsCount()) { e.preventDefault(); e.returnValue = ''; }
+    };
+    window.addEventListener('beforeunload', this._onBeforeUnload);
     // Rotating a phone or opening the on-screen keyboard changes the usable height
     // without always firing a window resize.
     if (window.visualViewport) window.visualViewport.addEventListener('resize', this._onResize);
@@ -2415,6 +2419,8 @@ class HaWashdataPanel extends HTMLElement {
       window.removeEventListener('popstate', this._onLocChanged);
       this._onLocChanged = null;
     }
+    if (this._onOutboundClick) { window.removeEventListener('click', this._onOutboundClick, true); this._onOutboundClick = null; }
+    if (this._onBeforeUnload) { window.removeEventListener('beforeunload', this._onBeforeUnload); this._onBeforeUnload = null; }
     this._stopPoll();
     if (this._hassUpdateThrottle) { clearTimeout(this._hassUpdateThrottle); this._hassUpdateThrottle = null; }
     if (this._pgRestartRetryTimer) { clearTimeout(this._pgRestartRetryTimer); this._pgRestartRetryTimer = null; }
@@ -3496,6 +3502,51 @@ class HaWashdataPanel extends HTMLElement {
   // True while the browser is still on this panel's own path. `location-changed`
   // is a global event that also fires on the way OUT of the panel, and that
   // navigation's URL must not be mistaken for a deep link of ours.
+  // Unsaved Settings edits: real differences from the saved options, not touched
+  // fields (opening a combo and leaving its value is not an edit). Snapshots the
+  // form first so a value still only in the DOM counts.
+  _unsavedSettingsCount() {
+    if (this._tab !== 'settings' || !this.shadowRoot) return 0;
+    this._snapshotFormToPending(this.shadowRoot);
+    return Object.keys(this._changedOptions(this._pendingSettings || {})).length;
+  }
+
+  // Run `go` now, or once the user confirms discarding unsaved Settings edits.
+  // One guard for a tab switch, a device switch, a deep link and leaving the panel.
+  _guardUnsaved(go) {
+    const n = this._unsavedSettingsCount();
+    if (!n) { go(); return; }
+    this._modal = {
+      type: 'confirm',
+      title: this._t('modal.discard_settings_title', {}, 'Discard unsaved changes?'),
+      message: this._tText('modal.discard_settings_msg', {n}, `${n} setting change(s) are not saved yet. Leave Settings and discard them?`),
+      okLabel: this._t('btn.discard', {}, 'Discard'),
+      onOk: () => { this._pendingSettings = {}; this._dirtyOptKeys = new Set(); go(); },
+    };
+    this._render();
+  }
+
+  // A click on a same-origin link that leaves this panel (the HA sidebar, a link
+  // to the automation editor, ...) while Settings holds unsaved edits: hold the
+  // navigation and ask first. Capture phase on window, so it runs before HA's
+  // router; composedPath() reaches anchors inside other shadow roots. Browser
+  // reload/close is `beforeunload`; the browser Back button cannot be held.
+  _maybeGuardOutboundClick(e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+    const a = path.find(n => n && n.tagName === 'A' && n.getAttribute && n.getAttribute('href'));
+    if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+    let url;
+    try { url = new URL(a.getAttribute('href'), window.location.href); } catch (_) { return; }
+    if (url.origin !== window.location.origin) return;   // external: beforeunload covers it
+    const own = this._panel && this._panel.url_path;
+    if (own && url.pathname.split('/').filter(Boolean)[0] === own) return;   // staying here
+    if (!this._unsavedSettingsCount()) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    this._guardUnsaved(() => this._navigate(url.pathname + url.search + url.hash));
+  }
+
   _onOwnPath() {
     const p = this._panel && this._panel.url_path;
     if (!p) return true;   // test shell / no panel info: assume ours
@@ -3514,7 +3565,7 @@ class HaWashdataPanel extends HTMLElement {
     this._deepLinkApplied = token;
     const idx = this._deepLinkIdx(token);
     if (idx < 0) { console.warn(`[WashData panel] ?device=${token} matches no WashData device`); return; }
-    if (idx !== this._selIdx) this._selectDevice(idx);   // persists the choice itself
+    if (idx !== this._selIdx) this._guardUnsaved(() => this._selectDevice(idx));   // persists the choice itself
   }
 
   async _selectDevice(idx) {
@@ -3613,7 +3664,7 @@ class HaWashdataPanel extends HTMLElement {
       const fresh = tmp.firstElementChild;
       if (fresh) {
         bar.replaceWith(fresh);
-        fresh.querySelectorAll('.wd-devcard[data-idx]').forEach(b => b.addEventListener('click', () => this._selectDevice(parseInt(b.dataset.idx, 10))));
+        fresh.querySelectorAll('.wd-devcard[data-idx]').forEach(b => b.addEventListener('click', () => this._guardUnsaved(() => this._selectDevice(parseInt(b.dataset.idx, 10)))));
       }
     }
     // _lastRefresh kept for internal use; header no longer shows the timestamp.
@@ -10892,7 +10943,7 @@ class HaWashdataPanel extends HTMLElement {
       this.dispatchEvent(new CustomEvent('hass-toggle-menu', { bubbles: true, composed: true }));
     });
 
-    sr.querySelectorAll('.wd-devcard[data-idx]').forEach(btn => btn.addEventListener('click', () => this._selectDevice(parseInt(btn.dataset.idx, 10))));
+    sr.querySelectorAll('.wd-devcard[data-idx]').forEach(btn => btn.addEventListener('click', () => this._guardUnsaved(() => this._selectDevice(parseInt(btn.dataset.idx, 10)))));
 
     sr.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
@@ -10901,24 +10952,8 @@ class HaWashdataPanel extends HTMLElement {
         this._tab = target; this._fetchTabData();
       };
       // Leaving Settings with unsaved edits used to drop them without a word
-      // (audit UI-15). Snapshot the form first so a value still only in the DOM counts.
-      if (this._tab === 'settings' && target !== 'settings') {
-        this._snapshotFormToPending(sr);
-        // Count real differences from the saved options, not touched fields: opening
-        // a combo and leaving the value as it was is not an unsaved change.
-        const n = Object.keys(this._changedOptions(this._pendingSettings || {})).length;
-        if (n) {
-          this._modal = {
-            type: 'confirm',
-            title: this._t('modal.discard_settings_title', {}, 'Discard unsaved changes?'),
-            message: this._tText('modal.discard_settings_msg', {n}, `${n} setting change(s) are not saved yet. Leave Settings and discard them?`),
-            okLabel: this._t('btn.discard', {}, 'Discard'),
-            onOk: () => go(),
-          };
-          this._render();
-          return;
-        }
-      }
+      // (audit UI-15); the same guard covers device switches and leaving the panel.
+      if (this._tab === 'settings' && target !== 'settings') { this._guardUnsaved(go); return; }
       go();
     }));
     sr.querySelectorAll('[data-sec]').forEach(btn => btn.addEventListener('click', () => { this._snapshotFormToPending(sr); this._settingsSec = btn.dataset.sec; this._settingsSearch = ''; this._settingsSugOnly = false; this._render(); }));

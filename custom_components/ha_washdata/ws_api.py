@@ -41,8 +41,6 @@ from .const import (
     coerce_numeric_option,
     drop_invalid_numeric_options,
     numeric_option_keys,
-    CONF_MAX_FULL_TRACES_PER_PROFILE,
-    CONF_MAX_FULL_TRACES_UNLABELED,
     CONF_NAME,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
@@ -94,7 +92,6 @@ from .const import (
     resolve_off_delay_default,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
-    MIN_FULL_TRACES,
     ML_HEALTH_MIN_TRACE_POINTS,
     DEVICE_TYPES,
     DOMAIN,
@@ -1972,25 +1969,6 @@ async def ws_set_options(
                     )
                 except (TypeError, ValueError, OverflowError):
                     new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
-
-        # #459: the two trace-retention caps. Below 1 the retention slice
-        # `full_indices[-cap:]` keeps every trace at 0 and strips in no chosen
-        # order when negative, so clamp to MIN_FULL_TRACES; empty or non-numeric
-        # drops the key and the default applies again.
-        for _cap_key in (CONF_MAX_FULL_TRACES_PER_PROFILE, CONF_MAX_FULL_TRACES_UNLABELED):
-            if _cap_key not in new_options:
-                continue
-            _raw_cap = new_options[_cap_key]
-            if _raw_cap in (None, ""):
-                new_options.pop(_cap_key, None)
-                continue
-            try:
-                _cap = float(_raw_cap)
-                if not math.isfinite(_cap):
-                    raise ValueError("non-finite")
-                new_options[_cap_key] = max(MIN_FULL_TRACES, int(_cap))
-            except (TypeError, ValueError, OverflowError):
-                new_options.pop(_cap_key, None)
 
         # A None outside the clearable selectors means "not set", not a value: the
         # per-setting Revert sends the changelog's `old`, which is null for a setting

@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Mot slutet blir det här programmet tyst i cirka {mins} min och drar sedan omkring {watts} W i {secs} s innan det är klart. Sett i {seen} av {measured} uppmätta cykler: apparaten gör det inte vid varje körning.",
     "quiet_tail": "~{mins} min tyst slutfas",
-    "artifact_tip": "{n} anomalier upptäckta (t.ex. dörren öppnades mitt i cykeln) – öppna för att se dem i diagrammet",
+    "artifact_tip": "{n} anomalier upptäckta (t.ex. dörren öppnades mitt i cykeln) - öppna för att se dem i diagrammet",
     "artifact_tip_one": "{n} anomali upptäckt (t.ex. dörren öppnades mitt i cykeln) - öppna för att se den i diagrammet",
     "artifact_tip_other": "{n} anomalier upptäckta (t.ex. dörren öppnades mitt i cykeln) - öppna för att se dem i diagrammet",
     "auto": "(automatiskt identifierat)",
@@ -66,7 +66,7 @@
     "needs_review": "Behöver granskning",
     "overrun": "Pågick längre än vanligt",
     "poor_fit": "dålig kvalitet",
-    "restart_gap_tip": "{n} HA-omstartslucka: effektspåret har ett hål",
+    "restart_gap_tip": "{n} HA-omstartsluckor: effektspåret har hål",
     "restart_gap_tip_one": "{n} HA-omstartslucka: effektspåret har ett hål",
     "restart_gap_tip_other": "{n} HA-omstartsluckor: effektspåret har hål",
     "reviewed": "Granskad",
@@ -766,7 +766,7 @@
     "group_modal_help": "Gruppera program med samma form som skiljer sig i temperatur/centrifugering (längderna kan variera). Matchning ger gruppen poäng som en kandidat och väljer sedan den medlem som passar bäst. Välj minst 2; överlägget visar hur lika de är.",
     "group_not_cohesive": "Dessa profiler är inte tillräckligt lika för att gruppera på ett tillförlitligt sätt, så matchning behandlar dem individuellt tills du tar bort avvikelsen eller delar upp gruppen.",
     "group_preview_hint": "Markera 2 eller fler medlemmar för att förhandsgranska och jämföra deras effektkurvor.",
-    "legacy_actions_title": "{count} äldre anpassad åtgärd körs fortfarande",
+    "legacy_actions_title": "{count} äldre anpassade åtgärder körs fortfarande",
     "legacy_actions_title_one": "{count} äldre anpassad åtgärd körs fortfarande",
     "legacy_actions_title_other": "{count} äldre anpassade åtgärder körs fortfarande",
     "live_chart_loading": "Direkteffektdiagrammet visas när avläsningarna kommer in.",
@@ -830,7 +830,7 @@
     "recording_in_progress": "Inspelning pågår",
     "reminders_intro": "Visa en påminnelse i panelen så här många cykler efter senaste servicen. Lämna tomt eller 0 för att stänga av en påminnelse.",
     "restart_gap_footer": "Markerat i diagrammet. Effektdata saknas för dessa intervall; matchning använde bara faktiska avläsningar.",
-    "restart_gap_header": "{n} HA-omstartslucka under denna cykel",
+    "restart_gap_header": "{n} HA-omstartsluckor under denna cykel",
     "restart_gap_header_one": "{n} HA-omstartslucka under denna cykel",
     "restart_gap_header_other": "{n} HA-omstartsluckor under denna cykel",
     "restart_gap_item": "{dur} lucka",
@@ -850,7 +850,7 @@
     "setting_changed": "Ändrad från {old} till {new} den {date}",
     "settings_basic_note": "Visar väsentliga inställningar. Byt till Avancerat för hela listan.",
     "show_all_settings": "Visa alla inställningar",
-    "showing_suggestions": "Visar {count} inställning med förslag.",
+    "showing_suggestions": "Visar {count} inställningar med förslag.",
     "showing_suggestions_one": "Visar {count} inställning med förslag.",
     "showing_suggestions_other": "Visar {count} inställningar med förslag.",
     "split_intro": "Klicka på diagrammet för att lägga till eller ta bort en delningspunkt, eller autoidentifiera via tomma luckor. Varje resulterande segment kan få sin egen profil.",
@@ -880,7 +880,7 @@
     "trend_energy_up": "Energitrend uppåt ({pct}%/cykel) – senaste snitt {avg}",
     "trim_destructive_confirm": "Endast {pct}% av cykeln behålls. Detta kan inte ångras. Fortsätta?",
     "trim_intro": "Dra de röda handtagen eller ange värden. Allt utanför fönstret tas bort.",
-    "tuning_suggestions_available": "{count} inställningsförslag tillgängligt från observerade cykler. De visas bredvid de relevanta fälten.",
+    "tuning_suggestions_available": "{count} inställningsförslag tillgängliga från observerade cykler. De visas bredvid de relevanta fälten.",
     "tuning_suggestions_available_one": "{count} inställningsförslag tillgängligt från observerade cykler. Det visas bredvid det relevanta fältet.",
     "tuning_suggestions_available_other": "{count} inställningsförslag tillgängliga från observerade cykler. De visas bredvid de relevanta fälten.",
     "unsure_detected_prefix": "WashData är osäker på att den identifierade",
@@ -944,7 +944,7 @@
     "sug_muted": "Kommer inte att föreslå den här inställningen igen",
     "sug_mute_failed": "Kunde inte tysta förslaget",
     "sug_unmuted_all": "Tysta förslag återställda",
-    "n_suggestions_muted": "{count} tystade; auto-tunern föreslår inte dessa.",
+    "n_suggestions_muted": "{count} förslag tystade; auto-tunern föreslår inte dessa.",
     "n_suggestions_muted_one": "{count} förslag tystat; auto-tunern föreslår det inte.",
     "n_suggestions_muted_other": "{count} förslag tystade; auto-tunern föreslår inte dessa.",
     "font_size_hint": "Gör allt i den här panelen större eller mindre. Gäller för ditt konto på den här enheten.",
@@ -1127,7 +1127,7 @@
       "label": "Automärkningskonfidens"
     },
     "auto_maintenance": {
-      "doc": "Kör nattlig städning: bygg om profilkuvert, beräkna om cykelns hälsa, beskära felsökningsspår och behåll de senaste cyklerna.",
+      "doc": "Kör nattlig städning: märk äldre omärkta cykler som nu tydligt matchar ett program, bygg om programkurvor, uppdatera anomalimarkeringar, beräkna om cykelhälsan och ta bort felsökningsspår medan \"Spara felsökningsspår\" är avstängt. Varje cykel behålls med hela sitt effektspår.",
       "label": "Automatiskt underhåll (nattlig städning)"
     },
     "completion_min_seconds": {
@@ -1366,14 +1366,6 @@
       "doc": "Om en pågående matchning mitt i cykeln sjunker under denna poäng rensas den preliminära identifieringen. Håll den lite under Matchningströskeln så att ett kort fall i likhet inte får visningen att gå tillbaka till Ingen matchning.",
       "label": "Omatchningströskel"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Hur många av varje programs senaste cykler som behåller sina fullständiga effektspår. Äldre cykler behåller varaktighet, energi och märkning men förlorar kurvan - deras diagram är då tomt och de räknas inte längre mot programmets kurva, hälsa eller förslag. En högre inställning håller mer historik inspekterbar, på bekostnad av lagringsutrymme (vanligtvis 3-15 KB per cykel). En lägre inställning raderar de extra spåren vid nästa städning; att höja den igen kan inte återskapa dem.",
-      "label": "Sparade effektspår per program"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Samma gräns för cykler som ännu inte har en programetikett.",
-      "label": "Sparade effektspår (omärkt)"
-    },
     "progress_reset_delay": {
       "doc": "När du är klar håller du framsteg på 100 % så länge så att Slutfört är synligt på instrumentpanelerna innan du återställer till viloläge.",
       "label": "Förloppåterställningsfördröjning"
@@ -1387,7 +1379,7 @@
       "label": "Samplingsintervall"
     },
     "save_debug_traces": {
-      "doc": "Lagra spårningen av full effekt och matchande felsökningsdata för varje cykel. Användbar för felsökning men ökar lagringsstorleken.",
+      "doc": "Spara även matcharens felsökningsdata (alla kandidaters poäng) med varje cykel. Användbart vid felsökning; det tar cirka 20 KB per cykel och sparas så länge cykeln finns kvar.",
       "label": "Spara felsökningsspår"
     },
     "smart_termination_duration_ratio": {

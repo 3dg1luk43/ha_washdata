@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Lõpu poole jääb see programm umbes {mins} minutiks vaikseks ja tarbib siis enne lõpetamist {secs} s jooksul umbes {watts} W. Täheldatud {seen} korral {measured} mõõdetud tsüklist: seade ei tee seda igal käivitusel.",
     "quiet_tail": "vaikne lõpp ~{mins} min",
-    "artifact_tip": "Tuvastati {n} anomaaliat (nt uks avati tsükli keskel) – avage, et näha neid graafikul",
+    "artifact_tip": "Tuvastati {n} anomaaliat (nt uks avati tsükli keskel) - avage, et neid graafikul näha",
     "artifact_tip_one": "Tuvastati {n} anomaalia (nt uks avati tsükli keskel) - avage, et seda graafikul näha",
     "artifact_tip_other": "Tuvastati {n} anomaaliat (nt uks avati tsükli keskel) - avage, et neid graafikul näha",
     "auto": "(tuvastatud automaatselt)",
@@ -66,7 +66,7 @@
     "needs_review": "Vajab ülevaatamist",
     "overrun": "Jooks kauem kui tavaliselt",
     "poor_fit": "kehv kvaliteet",
-    "restart_gap_tip": "{n} HA taaskäivituslünk: võimsusjälg on katkenud",
+    "restart_gap_tip": "{n} HA taaskäivituslünka: võimsusjäljes on katkestusi",
     "restart_gap_tip_one": "{n} HA taaskäivituslünk: võimsusjälg on katkenud",
     "restart_gap_tip_other": "{n} HA taaskäivituslünka: võimsusjäljes on katkestusi",
     "reviewed": "Üle vaadatud",
@@ -442,7 +442,7 @@
     "mode_new_profile": "Loo uus profiil",
     "models_fine_tuned": "(peenhäälestatud mudelid: {count})",
     "n_selected": "{n} valitud",
-    "n_tuning_suggestions": "{n} häälestussoovitus",
+    "n_tuning_suggestions": "{n} häälestussoovitust",
     "n_tuning_suggestions_one": "{n} häälestussoovitus",
     "n_tuning_suggestions_other": "{n} häälestussoovitust",
     "new_profile_name": "Uus profiilinimi",
@@ -766,7 +766,7 @@
     "group_modal_help": "Rühmitage sama kujuga programme, mis erinevad temperatuuri/tsentrifuugimise poolest (kestus võib erineda). Matching annab rühmale ühe kandidaadi ja valib seejärel kõige sobivama liikme. Valige vähemalt 2; ülekate näitab, kui sarnased need on.",
     "group_not_cohesive": "Need profiilid ei ole piisavalt sarnased, et neid usaldusväärselt rühmitada, nii et sobitamine käsitleb neid üksikult, kuni eemaldate kõrvalekalde või jagate rühma.",
     "group_preview_hint": "Märkige 2+ liiget nende võimenduskõverate eelvaatamiseks ja võrdlemiseks.",
-    "legacy_actions_title": "{count} pärand kohandatud toiming töötab endiselt",
+    "legacy_actions_title": "{count} pärand kohandatud toimingut töötavad endiselt",
     "legacy_actions_title_one": "{count} pärand kohandatud toiming töötab endiselt",
     "legacy_actions_title_other": "{count} pärand kohandatud toimingut töötavad endiselt",
     "live_chart_loading": "Reaalajas võimsuse diagramm kuvatakse näitude saabumisel.",
@@ -830,7 +830,7 @@
     "recording_in_progress": "Salvestamine on pooleli",
     "reminders_intro": "Näita paneelil meeldetuletust nii mitu tsüklit pärast viimast hooldust. Meeldetuletuse väljalülitamiseks jäta tühjaks või pane 0.",
     "restart_gap_footer": "Esile tõstetud graafikul. Võimsusandmed puuduvad nende intervalide jaoks; sobitamine kasutas ainult tegelikke näite.",
-    "restart_gap_header": "{n} HA taaskäivituslünk selle tsükli ajal",
+    "restart_gap_header": "{n} HA taaskäivituslünka selle tsükli ajal",
     "restart_gap_header_one": "{n} HA taaskäivituslünk selle tsükli ajal",
     "restart_gap_header_other": "{n} HA taaskäivituslünka selle tsükli ajal",
     "restart_gap_item": "{dur} lünk",
@@ -850,7 +850,7 @@
     "setting_changed": "Muudetud {old} → {new} kuupäeval {date}",
     "settings_basic_note": "Kuvatakse olulisi seadeid. Täieliku loendi nägemiseks vali Täpsemalt.",
     "show_all_settings": "Kuva kõik seaded",
-    "showing_suggestions": "Kuvatakse seade {count} koos soovitustega.",
+    "showing_suggestions": "Kuvatakse {count} soovitustega seadet.",
     "showing_suggestions_one": "Kuvatakse {count} soovitustega seade.",
     "showing_suggestions_other": "Kuvatakse {count} soovitustega seadet.",
     "split_intro": "Jaotuspunkti lisamiseks või eemaldamiseks või tühikäigu automaatseks tuvastamiseks klõpsake graafikul. Iga saadud segment võib saada oma profiili.",
@@ -880,7 +880,7 @@
     "trend_energy_up": "Energiatrend tõuseb ({pct}%/tsükkel) – hiljutine keskmine {avg}",
     "trim_destructive_confirm": "See säilitab tsüklist ainult {pct}% ja seda ei saa tagasi võtta. Kas jätkata?",
     "trim_intro": "Lohistage punaseid käepidemeid või sisestage väärtused. Kõik väljaspool akent eemaldatakse.",
-    "tuning_suggestions_available": "Vaadeldud tsüklitest on saadaval {count} häälestamise soovitus. Need kuvatakse asjakohaste väljade kõrval.",
+    "tuning_suggestions_available": "Vaadeldud tsüklitest on saadaval {count} häälestussoovitust. Need kuvatakse asjakohaste väljade kõrval.",
     "tuning_suggestions_available_one": "Vaadeldud tsüklitest on saadaval {count} häälestussoovitus. See kuvatakse asjakohase välja kõrval.",
     "tuning_suggestions_available_other": "Vaadeldud tsüklitest on saadaval {count} häälestussoovitust. Need kuvatakse asjakohaste väljade kõrval.",
     "unsure_detected_prefix": "WashData pole kindel, et see tuvastas",
@@ -944,7 +944,7 @@
     "sug_muted": "Seda seadet enam ei soovitata",
     "sug_mute_failed": "Soovituse vaigistamine ebaõnnestus",
     "sug_unmuted_all": "Vaigistatud soovitused lähtestatud",
-    "n_suggestions_muted": "{count} vaigistatud; automaatne häälestaja ei paku neid enam.",
+    "n_suggestions_muted": "{count} soovitust vaigistatud; automaatne häälestaja ei paku neid enam.",
     "n_suggestions_muted_one": "{count} soovitus vaigistatud; automaatne häälestaja ei paku seda enam.",
     "n_suggestions_muted_other": "{count} soovitust vaigistatud; automaatne häälestaja ei paku neid enam.",
     "font_size_hint": "Muuda kõik selles paneelil suuremaks või väiksemaks. Kehtib sinu kontole sellel seadmel.",
@@ -1127,7 +1127,7 @@
       "label": "Automaatse Sildi Usaldus"
     },
     "auto_maintenance": {
-      "doc": "Korraldage igaõhtust majapidamist: koostage profiiliümbrised, arvutage uuesti tsükli seisukord, pügake silumisjälgi ja säilitage uusimad tsüklid.",
+      "doc": "Käivitab öise hoolduse: märgistab vanemad märgistamata tsüklid, mis nüüd selgelt sobivad mõne programmiga, koostab programmide kõverad uuesti, värskendab anomaaliate tähiseid, arvutab tsüklite tervise ümber ja eemaldab silumisjäljed, kui \"Salvesta Silumise Jäljed\" on välja lülitatud. Iga tsükkel ja selle täielik võimsusjälg säilitatakse.",
       "label": "Automaatne Hooldus (öine puhastus)"
     },
     "completion_min_seconds": {
@@ -1366,14 +1366,6 @@
       "doc": "Kui reaalajas tsükli keskel toimuv matš langeb sellest punktist allapoole, siis esialgne tuvastamine kustutatakse. Hoidke seda veidi allpool sobivusläve, nii et lühike sarnasuse langus ei muudaks ekraani uuesti võrreldamatuks.",
       "label": "Mitte-Vaste Lävi"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Mitu viimast tsüklit säilivad iga programmi korral koos täieliku võimsusjäljega. Vanemad tsüklid säilitavad kestuse, energia ja märgistuse, kuid kaotavad kõvera – nende graafik jääb tühjaks ja need ei arvesta enam programmi kõvera, tervise ega soovituste juures. Väärtuse suurendamine hoiab rohkem ajalugu vaadeldavana salvestusruumi arvel (tavaliselt 3-15 KB tsükli kohta). Vähendamine kustutab üleliigsed jäljed järgmisel öisel puhastamisel; suurendamine ei suuda neid tagasi tuua.",
-      "label": "Salvestatavad Võimsusjäljed Programmi Kohta"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Sama piirang tsüklite jaoks, millele ei ole veel programmi märgistust määratud.",
-      "label": "Salvestatavad Võimsusjäljed (Märgistamata)"
-    },
     "progress_reset_delay": {
       "doc": "Pärast lõpetamist hoidke edenemist nii kaua 100% juures, et enne jõudeolekule lähtestamist oleks armatuurlaudadel näha tekst Lõpetatud.",
       "label": "Edenemise Lähtestamise Viivitus"
@@ -1387,7 +1379,7 @@
       "label": "Proovivõtu Intervall"
     },
     "save_debug_traces": {
-      "doc": "Salvestage iga tsükli täielik võimsusjälg ja vastavad silumisandmed. Kasulik tõrkeotsinguks, kuid suurendab salvestusruumi mahtu.",
+      "doc": "Salvestab iga tsükliga ka sobitamise silumisandmed (iga kandidaatprogrammi skoorid). Kasulik tõrkeotsinguks; lisab tsükli kohta umbes 20 KB, mida hoitakse alles sama kaua kui tsüklit ennast.",
       "label": "Salvesta Silumise Jäljed"
     },
     "smart_termination_duration_ratio": {

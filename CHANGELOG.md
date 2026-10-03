@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The program shows sooner; time remaining and projected energy are realistic.
 - No splits or hour-short records across daylight-saving changes.
 - A finished cycle can no longer be reopened and counted twice; review answers stay yours.
-- Much less disk and CPU; the panel opens faster and stays smooth on phones.
+- Every cycle and its full power trace are kept.
+- Far fewer store writes and much less CPU; the panel opens faster and stays smooth on phones.
 - Store downloads are quality-checked, deduplicated and cannot take over your programs.
 - Services validate their input and respect user permissions; sidebar notifications work again.
 - A simpler panel: internals hidden, one suggestion list, fewer review prompts, leaner Playground.
@@ -28,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Services validate their input**: a value of the wrong type is now a validation error instead of being guessed or crashing, and `export_config`, `import_config` and `trigger_ml_training` are administrator-only.
 - **Store**: publishing, rating and confirming are administrator-only, and adopting a shared setup no longer copies Off Delay, Minimum Off Gap, the power-off settings or the match interval (they depend on the sharer's plug).
 - **Removed settings**: End Repeat Count, Smoothing Window, Profile Duration Tolerance and Phase-aware time remaining. Stored values are ignored.
+- **Every cycle and its full power trace are kept**: the 200-cycle limit and the "Power Traces Kept" settings are gone, so your history and its charts keep growing (about 1 MB per appliance per year, about 3 MB with Save Debug Traces on). Cycles whose trace an earlier version already dropped stay without one. Program curves draw on the whole history once a program has more than about 20 recorded cycles.
+- **Older unlabelled cycles are labelled by the nightly maintenance**, not at every cycle end, when a new program makes them a clear match.
 - **Removed suggestions**: the confidence thresholds, Sampling Interval, smoothing, start duration, end repeat count and the duration tolerances are no longer suggested.
 - **Experimental ML**: the end guard, early program commit, quality gate and time-remaining model are off even with ML models enabled; the "Calibrated" suggestions and the per-cycle "Cycle health" are gone.
 - **Review queue**: WashData asks you to confirm a cycle only when it could not label it with a clear margin over the next-best program, or for a program's first 2 cycles (was 5). A labelled cycle between 0.6 and 0.9 confidence used to be queued too. "Needs review" lists the cycles waiting for your answer, the same number as the Overview card; interrupted and force-stopped cycles keep their own filters.
@@ -127,7 +130,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **A program you picked by hand is never queued for review**: during a program's first cycles, or when the match was too close to call, WashData still asked you to confirm its own guess over your choice.
 
-- **Less work on every Home Assistant start and cycle end**: each start re-ran the matcher on every labelled cycle it disagreed with (typically ones you relabelled), for good; it now tries each once. A cycle end decompresses about a third fewer stored traces.
+- **Less work on every Home Assistant start and cycle end**: each start re-ran the matcher on every labelled cycle it disagreed with (typically ones you relabelled), for good; it now tries each once. A cycle end now writes the store once instead of six times (each write is the whole file), rebuilds only the program that got the cycle and reads a quarter of the stored traces; between cycles a power reading refreshes the entities once.
+
+- **Apply all no longer sets the stop or start threshold at the appliance's resting draw**: on a dishwasher that dries at 0.8 W or a washer that idles at 3.3 W between tumbles, the suggested thresholds landed at or below that level, so cycles ended up to 30 minutes late, were force-stopped or split in two. Those suggestions are now withheld; on the other 18 test devices nothing changes.
 
 - **Less recorder churn**: the state sensor no longer carries `samples_recorded` (it changed on every reading; the debug sensor still has it), and elapsed time moves in whole minutes. The manual recorder saves every 5 minutes instead of every minute.
 
@@ -142,7 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The Playground shows one match score**, the replay's own confidence, and notes that its notification markers skip live updates, reminders and overrun alerts.
 - **Far fewer review requests, and the ones left matter**: every cycle matched at 0.6 to 0.9 confidence was queued for review, 81% of cycles on the test corpus, although most were already labelled correctly at cycle end. What predicts a wrong label is a small margin over the next-best program, not a modest confidence: leave-one-out over 604 cycle ends, a clear margin at 0.7-0.9 is 93-96% right, a small one 33-54%. Only those and a new program's first cycles are queued now, about 19% of cycles. A trace that sits outside its program's usual power band no longer asks on its own: such labels are still 86% right. Requests already waiting that the new rule would not raise are cleared once on upgrade (a cycle carrying the detected program with a clear margin, past its program's warm-up), without being recorded as your answer; near-ties and cycles relabelled differently stay.
 - **Deleting an appliance deletes its stored data**: there was no clean-up step, so every deleted appliance left its programs, cycles and power traces in Home Assistant's `.storage` for good (6.9 MB from 15 deleted devices on one install). Files left by appliances deleted earlier are removed once at startup.
-- **Leaving Settings with unsaved changes asks first**: switching to another tab dropped them without a word.
+- **Leaving Settings with unsaved changes asks first**: switching to another tab or device, following a link out of WashData (the sidebar, the automation editor) or reloading the page dropped them without a word.
 - **The Playground replays what the integration does**: it ran its own copy of the matching and program-switching rules, which had drifted (188 of 1180 matches differed) and never held a confirmed pause, so 17 of 176 replayed cycles ended at a different time and 15 showed a different program than the live integration would. It now runs the integration's own code for both: 0 of 176 differ. Each replay also says whether the cycle would be auto-labelled and why not, and marks confirmed pauses and dropped matches on the graph. A dishwasher what-if with a low Off Delay no longer stops the replay before its last pump-out could arrive, and Optimize marks today's value for every setting it can sweep.
 - **The Playground phase bar draws again**: it looked for phases the panel was never sent, so it stayed empty. It now shows the phase the live readout would have named at each point of the replay.
 - **The dashboard card works by keyboard and picks up new translations after an upgrade**: it can be focused and opened with Enter or Space like Home Assistant's own tile card, and its translation files are no longer cached for a month past an update. It also stops re-scanning every entity in Home Assistant on each state change.

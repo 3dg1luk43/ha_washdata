@@ -30,6 +30,7 @@ import os
 import re
 import statistics
 import threading
+import time
 import uuid
 from collections.abc import Callable
 from datetime import datetime, timedelta
@@ -75,9 +76,6 @@ from .const import (
     SMART_TERM_TAIL_WINDOW_FRAC,
     STORAGE_KEY,
     STORAGE_VERSION,
-    DEFAULT_MAX_PAST_CYCLES,
-    DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
-    DEFAULT_MAX_FULL_TRACES_UNLABELED,
     EVIDENCE_BACKFILL_CYCLES,
     EVIDENCE_REAL_CYCLES,
     EVIDENCE_REFERENCE_CYCLES,
@@ -125,6 +123,14 @@ _DEGENERATE_POWER_FLOOR = 15.0  # watts
 # trim_cycle service), so one second is exactly the input's own resolution -- it
 # absorbs that rounding without letting the kept window grow measurably.
 _TRIM_SNAP_TOLERANCE_S = 1.0
+
+# Cycle-end save coalescing (register item 456, see ProfileStore.coalesce_saves).
+# The window covers the executor jobs a cycle end spawns (suggestion scans, the
+# artifact refresh); the delay is HA's own convention for debounced Store writes.
+# Only what those follow-ups derive (suggestions, refreshed artifacts) waits for
+# the delay: the cycle itself is flushed at once.
+_BURST_SAVE_WINDOW_S = 120.0
+_BURST_SAVE_DELAY_S = 10.0
 
 JSONDict: TypeAlias = dict[str, Any]
 CycleDict: TypeAlias = dict[str, Any]
@@ -1865,9 +1871,6 @@ class ProfileStore:
         self._cohesion_cache_lock = threading.Lock()
         # Profile duration tolerance (set by manager; reserved for duration-based heuristics)
         # Retention policy: cap total cycles and number of full-resolution traces per profile
-        self._max_past_cycles = DEFAULT_MAX_PAST_CYCLES
-        self._max_full_traces_per_profile = DEFAULT_MAX_FULL_TRACES_PER_PROFILE
-        self._max_full_traces_unlabeled = DEFAULT_MAX_FULL_TRACES_UNLABELED
         # Separate store for each entry to avoid giant files
         # Use WashDataStore to handle migration
         self._store: Store[JSONDict] = WashDataStore(
@@ -3179,8 +3182,8 @@ class ProfileStore:
             "notes": str(notes or ""),
             # Odometer reading at the moment of servicing (#414). "Cycles since" is
             # then a subtraction against the monotonic lifetime counter instead of a
-            # scan of `past_cycles`, which is capped at max_past_cycles and shrinks
-            # when the user deletes a record - both of which silently froze the
+            # scan of `past_cycles`, which shrinks when the user deletes a record (and
+            # was capped at 200 until 0.5.8) - both of which silently froze the
             # reminder. Derived from the event's own date rather than from "now", so
             # a back-dated entry ("descaled it three months ago") still reports the
             # cycles run since that date instead of collapsing to zero.
@@ -3211,8 +3214,8 @@ class ProfileStore:
     ) -> int:
         """Stored cycles that started after *since* (all of them if None).
 
-        A scan of the retained history, so it is bounded by ``max_past_cycles`` and
-        shrinks when a record is deleted. Used only to place a maintenance event on
+        A scan of the stored history, so it shrinks when a record is deleted (and was
+        capped at 200 cycles until 0.5.8). Used only to place a maintenance event on
         the odometer at log time, and as the legacy fallback for events logged
         before that stamp existed. Never raises.
 
@@ -3288,8 +3291,8 @@ class ProfileStore:
         Measured against the monotonic lifetime odometer
         (:meth:`get_lifetime_cycle_count`): the reading now minus the reading stamped
         on the most recent matching event. That is retention-proof and
-        deletion-proof, which the previous ``past_cycles`` scan was not - past
-        ``max_past_cycles`` it stopped rising and every deleted record set the
+        deletion-proof, which the previous ``past_cycles`` scan was not - past the
+        old 200-cycle cap it stopped rising and every deleted record set the
         reminder back (#414).
 
         Events logged before the stamp existed have no reading to subtract, so they
@@ -4565,21 +4568,6 @@ class ProfileStore:
         profile["phases"] = normalized
         await self.async_save()
 
-    def set_retention_limits(
-        self,
-        *,
-        max_past_cycles: int,
-        max_full_traces_per_profile: int,
-        max_full_traces_unlabeled: int,
-    ) -> None:
-        """Set retention caps for stored cycles and full-resolution traces."""
-        try:
-            self._max_past_cycles = int(max_past_cycles)
-            self._max_full_traces_per_profile = int(max_full_traces_per_profile)
-            self._max_full_traces_unlabeled = int(max_full_traces_unlabeled)
-        except (TypeError, ValueError):
-            pass
-
     def get_duration_ratio_limits(self) -> tuple[float, float]:
         """Return (min_duration_ratio, max_duration_ratio) used for duration matching."""
         return (float(self._min_duration_ratio), float(self._max_duration_ratio))
@@ -4762,8 +4750,41 @@ class ProfileStore:
         return stats
 
     async def async_save(self) -> None:
-        """Save data to storage."""
+        """Save data to storage.
+
+        Inside a cycle-end burst (:meth:`coalesce_saves`) the write is debounced
+        instead: HA's Store rewrites the whole file on every save (MBs on a real
+        store), and one cycle end used to write it six times (register item 456).
+        """
+        if time.monotonic() < getattr(self, "_coalesce_until", 0.0):
+            self._delayed_save_pending = True
+            self._store.async_delay_save(self._data_for_delayed_write, _BURST_SAVE_DELAY_S)
+            return
+        self._delayed_save_pending = False
         await self._store.async_save(self._data)
+
+    def _data_for_delayed_write(self) -> JSONDict:
+        """What a debounced write serialises: the store as it is when it fires."""
+        self._delayed_save_pending = False
+        return self._data
+
+    def coalesce_saves(self, window_s: float = _BURST_SAVE_WINDOW_S) -> None:
+        """Debounce every save of the next ``window_s`` seconds into one write.
+
+        Opened by the cycle end. The work that follows it - the post-cycle artifact
+        refresh, the learning pass's feedback request and the suggestion passes it
+        spawns as executor jobs - each used to write the whole store on its own.
+        What must be durable at once is written by :meth:`async_flush_saves`; a
+        debounced write that has not fired yet is flushed by HA's final write on
+        shutdown and by the manager on unload.
+        """
+        self._coalesce_until = time.monotonic() + max(0.0, float(window_s))
+
+    async def async_flush_saves(self) -> None:
+        """Write now if a debounced save is pending (no-op otherwise)."""
+        if getattr(self, "_delayed_save_pending", False):
+            self._delayed_save_pending = False
+            await self._store.async_save(self._data)
 
     async def _async_load_active(self) -> None:
         """Load the active-cycle file; adopt a snapshot the main store still holds.
@@ -4826,10 +4847,17 @@ class ProfileStore:
         self._add_cycle_data(cycle_data)
         self.hass.async_create_task(self.async_enforce_retention())
 
-    async def async_add_cycle(self, cycle_data: CycleDict) -> None:
-        """Add a completed cycle to history asynchronously."""
+    async def async_add_cycle(
+        self, cycle_data: CycleDict, *, defer_rebuilds: bool = False
+    ) -> set[str]:
+        """Add a completed cycle to history asynchronously.
+
+        Returns the profiles retention changed. Since 0.5.8 retention keeps every
+        cycle and trace (register item 463), so this is empty; ``defer_rebuilds``
+        still lets the cycle end rebuild before it saves if that ever changes.
+        """
         self._add_cycle_data(cycle_data)
-        await self.async_enforce_retention()
+        return await self.async_enforce_retention(defer_rebuilds=defer_rebuilds)
 
     def _add_cycle_data(
         self,
@@ -4975,158 +5003,39 @@ class ProfileStore:
         # Apply retention after adding
 
 
-    async def async_enforce_retention(self) -> None:
-        """Apply retention policy asynchronously."""
+    async def async_enforce_retention(self, *, defer_rebuilds: bool = False) -> set[str]:
+        """Apply retention policy; returns the profiles it changed (see async_add_cycle)."""
         affected = self._enforce_retention_data()
+        if defer_rebuilds:
+            return affected
         for p in affected:
             try:
                 # Use async rebuild task
                 self.hass.async_create_task(self.async_rebuild_envelope(p))
             except Exception as e: # pylint: disable=broad-exception-caught
                 self._logger.warning("Failed to schedule envelope rebuild for %s: %s", p, e)
+        return affected
 
     def _enforce_retention_data(self) -> set[str]:
-        """Internal retention logic (data operations only).
-        Returns set of affected profile names."""
+        """Retention, data operations only. Returns the profiles it changed.
+
+        Since 0.5.8 every cycle and its full power trace are kept: the 200-cycle cap
+        and the per-program trace caps are gone (register item 463), so nothing here
+        can change what shapes a profile and the result is always empty. What is
+        left is the debug-trace rule (register item 380): ``debug_data`` is the
+        matcher's full ranking for one cycle, read by nothing but a human looking at
+        that cycle, so it goes with a trace that is missing (older stores pruned
+        some) and with every one while "save debug traces" is off.
+        """
         raw_cycles = self._data.get("past_cycles", [])
         cycles: list[CycleDict] = (
             cast(list[CycleDict], raw_cycles) if isinstance(raw_cycles, list) else []
         )
-        if not cycles:
-            return set()
-
-        def _start_time(cycle: CycleDict) -> str:
-            return str(cycle.get("start_time", ""))
-
-        affected_profiles: set[str] = set()
-
-        # 1) Cap total cycles
-        if len(cycles) > self._max_past_cycles:
-            # Sort by start_time and drop oldest beyond cap
-            try:
-                cycles.sort(key=_start_time)
-            except Exception:  # pylint: disable=broad-exception-caught
-                pass
-            drop_count = len(cycles) - self._max_past_cycles
-            to_drop = cycles[:drop_count]
-
-            # Maintain profile sample references when dropping
-            sample_refs = {
-                name: p.get("sample_cycle_id")
-                for name, p in self._data.get("profiles", {}).items()
-            }
-            for cy in to_drop:
-                # Track affected profile
-                p_name = cy.get("profile_name")
-                if p_name:
-                    affected_profiles.add(p_name)
-
-                cy_id = cy.get("id")
-                # If a profile sample points here, try to move to most recent cycle of that profile
-                for name, ref_id in list(sample_refs.items()):
-                    if ref_id == cy_id:
-                        # find newest cycle for that profile
-                        newest = next(
-                            (
-                                c
-                                for c in reversed(cycles)
-                                if c.get("profile_name") == name and c not in to_drop
-                            ),
-                            None,
-                        )
-                        if newest:
-                            self._data["profiles"][name]["sample_cycle_id"] = (
-                                newest.get("id")
-                            )
-                        else:
-                            # No replacement available
-                            self._data["profiles"][name].pop("sample_cycle_id", None)
-            # Actually drop
-            del cycles[:drop_count]
-
-        # 2) Strip older full traces per profile
-        by_profile: dict[str | None, list[CycleDict]] = {}
-        for cy in cycles:
-            key_any = cy.get("profile_name")  # None for unlabeled
-            key: str | None = key_any if isinstance(key_any, str) and key_any else None
-            by_profile.setdefault(key, []).append(cy)
-
-        # Collect cycle IDs that have pending feedback - never strip their power_data
-        pending_feedback_ids: set[str] = set(self._data.get("pending_feedback", {}).keys())
-
-        for key, group in by_profile.items():
-            # newest first based on start_time
-            try:
-                group.sort(key=_start_time)
-            except Exception: # pylint: disable=broad-exception-caught
-                pass
-            # determine cap
-            cap = (
-                self._max_full_traces_unlabeled
-                if key
-                in (
-                    None,
-                    "",
-                )
-                else self._max_full_traces_per_profile
-            )
-            # count existing full traces
-            full_indices = [i for i, c in enumerate(group) if c.get("power_data")]
-            if len(full_indices) > cap:
-                # preserve last 'cap' full traces (newest at end after sort), strip older ones
-                keep_set = set(full_indices[-cap:])
-
-                # Get sample cycle ID for this profile
-                sample_id: str | None = None
-                if key and key in self._data.get("profiles", {}):
-                    sample_id = self._data["profiles"][key].get("sample_cycle_id")
-
-                for i, c in enumerate(group):
-                    if i in keep_set:
-                        continue
-
-                    # EXEMPTION: Never strip power data from the profile's sample cycle!
-                    if sample_id and c.get("id") == sample_id:
-                        continue
-
-                    # EXEMPTION: Never strip power data from cycles awaiting feedback review
-                    if c.get("id") in pending_feedback_ids:
-                        continue
-
-                    # EXEMPTION: Never strip power data from user-pinned "golden" cycles.
-                    # The matcher uses a golden trace as the sharp single-cycle template
-                    # (has_golden in the snapshot builder), and golden_profiles membership
-                    # is gated on the trace still being present — trimming it would flip
-                    # has_golden false and silently drop the profile back to the smeared
-                    # envelope average.
-                    rev = c.get("ml_review")
-                    if isinstance(rev, dict) and rev.get("golden"):
-                        continue
-
-                    if c.get("power_data"):
-                        c.pop("power_data", None)
-                        c.pop("sampling_interval", None)
-                        # The artifacts are marks ON the trace (#459): without it
-                        # the cycle list kept saying "open to see them on the
-                        # graph" over an empty chart.
-                        c.pop("artifacts", None)
-                        if key:
-                            affected_profiles.add(key)
-
-        # 3) Debug traces (register item 380). `debug_data` is the matcher's full
-        # ranking and details for one cycle, read by nothing but a human looking at
-        # that cycle, so it goes with the trace it describes - and with every one
-        # while "save debug traces" is off, which until now only stopped NEW cycles
-        # getting one. The nightly-maintenance help text has always promised this;
-        # one real export carried 345 KB of it against 114 KB of traces.
         keep_debug = getattr(self, "_save_debug_traces", True)
         for cy in cycles:
             if "debug_data" in cy and (not keep_debug or not cy.get("power_data")):
                 cy.pop("debug_data", None)
-
-        return affected_profiles
-
-
+        return set()
 
     def cleanup_orphaned_profiles(self) -> int:
         """Remove profiles that reference non-existent cycles.
@@ -5211,10 +5120,46 @@ class ProfileStore:
 
         return stats
 
+    async def async_post_cycle_refresh(self, profiles: Any) -> dict[str, int]:
+        """What one finished cycle invalidates, and nothing more (register item 456).
+
+        The cycle end used to run :meth:`async_run_maintenance`: every envelope
+        rebuilt, every stored cycle's artifacts recomputed (a decompression each),
+        every unlabelled cycle re-matched, two whole-store writes - work that grew
+        with the store and repeated at every cycle end. A cycle end changes only the
+        envelopes of the profiles it touched (the labelled one, and any retention
+        trimmed), which the manager rebuilds before it saves; this refreshes the
+        artifacts that read those envelopes. The global passes stay in the nightly
+        maintenance.
+
+        Kept here: the orphaned-profile GC. It is O(cycles) with no decompression,
+        and it is the safety net for a sample pointer the cycle lists' changes left
+        dangling (retention re-points the ones it drops, so normally a no-op).
+        """
+        names = frozenset(p for p in (profiles or ()) if isinstance(p, str) and p)
+        stats = {
+            "orphaned_profiles": self.cleanup_orphaned_profiles(),
+            "refreshed_artifacts": 0,
+        }
+        if names:
+            stats["refreshed_artifacts"] = self._apply_cycle_artifact_updates(
+                await self.hass.async_add_executor_job(
+                    self._collect_cycle_artifact_updates, names
+                )
+            )
+        if any(stats.values()):
+            await self.async_save()
+        return stats
+
     def _collect_cycle_artifact_updates(
         self,
+        profiles: frozenset[str] | None = None,
     ) -> list[tuple[CycleDict, list[dict[str, Any]]]]:
         """Recompute every stored cycle's cached ``artifacts`` against today's bands.
+
+        ``profiles`` narrows it to the cycles labelled with one of those profiles:
+        a cycle's artifacts read only its own profile's envelope, so after a cycle
+        end that rebuilt one envelope nothing else can have changed.
 
         Computes only; the caller applies the updates on the event loop. This
         runs in an executor over dictionaries that live inside ``self._data``,
@@ -5233,6 +5178,8 @@ class ProfileStore:
         try:
             for cycle in self.iter_stored_cycles():
                 name = cycle.get("profile_name")
+                if profiles is not None and name not in profiles:
+                    continue
                 if not name:
                     # Unlabelled: there is no envelope to judge it against, so a
                     # stale list from a label since removed has to go.
@@ -5695,11 +5642,78 @@ class ProfileStore:
             )
         return repaired
 
+    def _envelope_inputs(
+        self, profile_name: str
+    ) -> tuple[tuple[Any, ...], tuple[Any, ...], list[Any]]:
+        """What :meth:`async_rebuild_envelope` reads for ``profile_name``.
+
+        ``(evidence, built, refs)``: ``evidence`` is everything the build is
+        computed from (the evidence setting, the DTW band, and per stored cycle of
+        the profile, in list order: the dict and its trace by identity plus the
+        trace's length and end points - the key ``_cycle_peak`` already trusts -
+        and every field the build or the reference pick reads); ``built`` is what
+        the build itself writes (the profile's stats, the envelope object).
+        ``refs`` keeps every object whose ``id()`` is in the key alive, so an id
+        can never be recycled into a false match. O(stored cycles), no decoding.
+        """
+        refs: list[Any] = []
+        rows: list[tuple[Any, ...]] = []
+        for list_name in ("past_cycles", "reference_cycles", "backfill_cycles"):
+            seq = self._data.get(list_name)
+            if not isinstance(seq, list):
+                continue
+            for c in seq:
+                if not isinstance(c, dict) or c.get("profile_name") != profile_name:
+                    continue
+                pd = c.get("power_data")
+                rev = c.get("ml_review")
+                meta = c.get("meta")
+                refs.append(c)
+                refs.append(pd)
+                has_pts = isinstance(pd, list) and bool(pd)
+                rows.append((
+                    list_name, id(c), id(pd),
+                    len(pd) if isinstance(pd, list) else -1,
+                    repr(pd[0]) if has_pts else None,
+                    repr(pd[-1]) if has_pts else None,
+                    c.get("id"), c.get("status"), c.get("duration"),
+                    c.get("manual_duration"), c.get("energy_wh"), c.get("start_time"),
+                    repr(rev.get("golden")) if isinstance(rev, dict) else None,
+                    repr(meta.get("source")) if isinstance(meta, dict) else None,
+                ))
+        profiles = self._data.get("profiles")
+        prof = profiles.get(profile_name) if isinstance(profiles, dict) else None
+        envelopes = self._data.get("envelopes")
+        env = envelopes.get(profile_name) if isinstance(envelopes, dict) else None
+        refs.extend((prof, env))
+        built: tuple[Any, ...] = (id(env), id(prof))
+        if isinstance(prof, dict):
+            built += tuple(
+                repr(prof.get(k))
+                for k in ("min_duration", "max_duration", "avg_duration", "sample_cycle_id")
+            )
+        evidence = (tuple(self._evidence_sources), self.dtw_bandwidth, tuple(rows))
+        return evidence, built, refs
+
     async def async_rebuild_envelope(self, profile_name: str) -> bool:
         """
         Build/rebuild statistical envelope for a profile asynchronously.
         Offloads heavy DTW/normalization to executor.
+
+        A no-op when nothing it reads changed since this profile's last successful
+        build (:meth:`_envelope_inputs`): the build is deterministic, so it would
+        reproduce the same envelope and stats. A cycle end used to rebuild the
+        labelled profile twice (the manager, then the learning pass confirming the
+        same label) and every other profile once more (register item 456).
         """
+        before = self._envelope_inputs(profile_name)
+        memo: dict[str, tuple[tuple[Any, ...], tuple[Any, ...], list[Any]]] = (
+            self.__dict__.setdefault("_envelope_built_from", {})
+        )
+        last = memo.get(profile_name)
+        if last is not None and last[0] == before[0] and last[1] == before[1]:
+            return True
+        memo.pop(profile_name, None)
         # A rebuild changes this profile's curve, which feeds group cohesion, so
         # invalidate the cohesion cache (not only on group mutations) to avoid stale
         # cohesion approving/rejecting a collapse against outdated shapes.
@@ -5843,6 +5857,15 @@ class ProfileStore:
             self._data["envelopes"] = {}
         self._data["envelopes"][profile_name] = envelope_data
 
+        # Remember what this build was computed from, unless the evidence moved
+        # while the executor job ran (then the next request must build again).
+        after = self._envelope_inputs(profile_name)
+        if after[0] == before[0]:
+            memo[profile_name] = after
+        # A deleted profile's entry would pin its old cycles in memory.
+        live = self._data.get("profiles")
+        for stale in [k for k in memo if not isinstance(live, dict) or k not in live]:
+            memo.pop(stale, None)
         return True
 
     def get_envelope(self, profile_name: str) -> JSONDict | None:
@@ -6072,8 +6095,8 @@ class ProfileStore:
             # `profile_terminal_quiet_seconds` runs
             # `compute_profile_terminal_signature`, which decompresses and scans
             # every evidence cycle of the profile - quadratic over the loop, on
-            # the event loop, with up to `max_past_cycles` long dishwasher
-            # traces. Worse, calling it per cycle makes the result ORDER
+            # the event loop, with every stored long dishwasher trace (unbounded
+            # since 0.5.8). Worse, calling it per cycle makes the result ORDER
             # DEPENDENT: a cycle repaired earlier in this loop has a trimmed
             # trace and an appended terminal sample, so later calls measure a
             # history this very loop has been rewriting. One value per profile,
@@ -6379,8 +6402,9 @@ class ProfileStore:
             # decompresses and scans every evidence cycle of the profile, and this
             # runs on the EVENT LOOP: it is element 11 of the live match tuple, so
             # a match tick pays for it. Measured on the worst export in
-            # `cycle_data/` (20 cycles, 24172 samples) it is 0.77 ms, but at the
-            # 200-cycle retention cap with long dishwasher traces it is **91 ms**,
+            # `cycle_data/` (20 cycles, 24172 samples) it is 0.77 ms, but at 200
+            # long dishwasher traces it is **91 ms** (and history is unbounded since
+            # 0.5.8),
             # which is a visible stall however rare the tick. The repair loop
             # already memoises this per run for the same reason plus determinism.
             #
@@ -6711,11 +6735,35 @@ class ProfileStore:
 
         Pure statistics (no ML); never raises - returns ``None`` when the
         envelope is missing or too short to be meaningful.
+
+        Memoised per envelope revision: the program sensor reads it on every
+        state write, and a rebuild replaces the envelope dict (register item 456).
+        The memo holds the envelope itself, so the identity test cannot be fooled
+        by a recycled ``id()``.
         """
         try:
             env = self.get_envelope(profile_name)
             if not isinstance(env, dict):
                 return None
+            memo = self.__dict__.setdefault("_reference_curve_memo", {})
+            hit = memo.get((profile_name, n))
+            if hit is None or hit[0] is not env or hit[1] != env.get("updated"):
+                if len(memo) > 256:
+                    memo.clear()
+                hit = (env, env.get("updated"), ProfileStore._compute_reference_curve(env, n))
+                memo[(profile_name, n)] = hit
+            curve = hit[2]
+            if curve is None:
+                return None
+            # A copy: the attribute dict goes to HA's state machine.
+            return {**curve, "points": [list(p) for p in curve["points"]]}
+        except Exception:  # pragma: no cover - defensive; never break the sensor
+            return None
+
+    @staticmethod
+    def _compute_reference_curve(env: JSONDict, n: int) -> JSONDict | None:
+        """Downsampled avg curve of one envelope (see :meth:`reference_curve`)."""
+        try:
             avg = env.get("avg")
             if (
                 not isinstance(avg, list)
@@ -8211,6 +8259,16 @@ class ProfileStore:
         self._profile_summary_cache = (fingerprint, rows, by_name)
         return rows, by_name
 
+    def profile_summaries_revision(self) -> object:
+        """A token that is a new object whenever the profile summaries are rebuilt.
+
+        Compare with ``is``. The per-profile sensors read only the summaries and
+        the envelopes, both covered by the summary cache's fingerprint, so they
+        need a state write only when this changes (register item 456). The caller
+        holds the old token, which keeps its identity unique.
+        """
+        return self._profile_summaries()[0]
+
     def _build_profile_summaries(self) -> list[JSONDict]:
         """Build one summary per profile in a single pass over the cycle lists."""
         profiles: list[JSONDict] = []
@@ -8543,7 +8601,7 @@ class ProfileStore:
             await self.async_rebuild_envelope(old_profile)  # Old profile lost a cycle
         if profile_name:
             await self.async_rebuild_envelope(profile_name)  # New profile gained a cycle
-            # Apply retention after labeling, in case profile now exceeds cap
+            # Retention after labelling: only the debug-trace rule is left (item 463).
             await self.async_enforce_retention()
 
         await self.async_save()

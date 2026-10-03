@@ -67,7 +67,7 @@
     "needs_review": "Potreban pregled",
     "overrun": "Trajao duže nego obično",
     "poor_fit": "loša kvaliteta",
-    "restart_gap_tip": "{n} HA praznina ponovnog pokretanja: trag snage ima rupu",
+    "restart_gap_tip": "{n} HA praznina ponovnog pokretanja: trag snage ima rupe",
     "restart_gap_tip_one": "{n} HA praznina ponovnog pokretanja: trag snage ima rupu",
     "restart_gap_tip_few": "{n} HA praznine ponovnog pokretanja: trag snage ima rupe",
     "restart_gap_tip_other": "{n} HA praznina ponovnog pokretanja: trag snage ima rupe",
@@ -444,7 +444,7 @@
     "mode_new_profile": "Napravi novi profil",
     "models_fine_tuned": "(fino podešeni modeli: {count})",
     "n_selected": "{n} izabrano",
-    "n_tuning_suggestions": "{n} predlog podešavanja",
+    "n_tuning_suggestions": "{n} predloga podešavanja",
     "n_tuning_suggestions_one": "{n} predlog podešavanja",
     "n_tuning_suggestions_few": "{n} predloga podešavanja",
     "n_tuning_suggestions_other": "{n} predloga podešavanja",
@@ -770,7 +770,7 @@
     "group_modal_help": "Grupni programi istog oblika koji se razlikuju po temperaturi/centrifugiranju (trajanja mogu varirati). Podudaranje ocenjuje grupu kao jednog kandidata, a zatim bira najfitijeg člana. Izaberite najmanje 2; preklop pokazuje koliko su slični.",
     "group_not_cohesive": "Ovi profili nisu dovoljno slični da bi se pouzdano grupisali, tako da ih podudaranje tretira pojedinačno sve dok ne uklonite izuzetak ili ne podelite grupu.",
     "group_preview_hint": "Označite 2 ili više članova za pregled i poređenje krivulja snage.",
-    "legacy_actions_title": "{count} zastarela prilagođena radnja je još uvek u toku",
+    "legacy_actions_title": "{count} zastarelih prilagođenih radnji je još uvek u toku",
     "legacy_actions_title_one": "{count} zastarela prilagođena radnja je još uvek u toku",
     "legacy_actions_title_few": "{count} zastarele prilagođene radnje su još uvek u toku",
     "legacy_actions_title_other": "{count} zastarelih prilagođenih radnji je još uvek u toku",
@@ -857,7 +857,7 @@
     "setting_changed": "Promenjeno sa {old} na {new} dana {date}",
     "settings_basic_note": "Prikazuju se osnovna podešavanja. Prebacite na Napredno za potpunu listu.",
     "show_all_settings": "Prikaži sva podešavanja",
-    "showing_suggestions": "Prikazuje se podešavanje {count} sa prijedlozima.",
+    "showing_suggestions": "Prikazuje se {count} podešavanja sa predlozima.",
     "showing_suggestions_one": "Prikazuje se {count} podešavanje sa predlozima.",
     "showing_suggestions_few": "Prikazuju se {count} podešavanja sa predlozima.",
     "showing_suggestions_other": "Prikazuje se {count} podešavanja sa predlozima.",
@@ -866,7 +866,7 @@
     "sug_muted": "Ovo podešavanje neće biti predlagano ponovo",
     "sug_mute_failed": "Predlog nije mogao biti utišan",
     "sug_unmuted_all": "Utišani predlozi su resetovani",
-    "n_suggestions_muted": "{count} utišano; auto-podešivač neće predlagati ova podešavanja.",
+    "n_suggestions_muted": "{count} predloga je utišano; auto-podešivač ih neće predlagati.",
     "n_suggestions_muted_one": "{count} predlog je utišan; auto-podešivač ga neće predlagati.",
     "n_suggestions_muted_few": "{count} predloga su utišana; auto-podešivač ih neće predlagati.",
     "n_suggestions_muted_other": "{count} predloga je utišano; auto-podešivač ih neće predlagati.",
@@ -895,7 +895,7 @@
     "trend_energy_up": "Energetski trend raste ({pct}%/ciklus) – nedavni prosek {avg}",
     "trim_destructive_confirm": "Ovo zadržava samo {pct}% ciklusa i ne može se poništiti. Nastaviti?",
     "trim_intro": "Prevuci crvene ručice ili unesi vrednosti. Sve izvan prozora se uklanja.",
-    "tuning_suggestions_available": "{count} prijedlog podešavanja dostupan je iz posmatranih ciklusa. Pojavljuju se pored relevantnih polja.",
+    "tuning_suggestions_available": "{count} predloga podešavanja dostupno je na osnovu posmatranih ciklusa. Pojavljuju se pored relevantnih polja.",
     "tuning_suggestions_available_one": "{count} predlog podešavanja dostupan je na osnovu posmatranih ciklusa. Pojavljuje se pored relevantnog polja.",
     "tuning_suggestions_available_few": "{count} predloga podešavanja dostupna su na osnovu posmatranih ciklusa. Pojavljuju se pored relevantnih polja.",
     "tuning_suggestions_available_other": "{count} predloga podešavanja dostupno je na osnovu posmatranih ciklusa. Pojavljuju se pored relevantnih polja.",
@@ -1116,7 +1116,7 @@
       "label": "Pouzdanost automatskog označavanja"
     },
     "auto_maintenance": {
-      "doc": "Pokrenite noćno održavanje domaćinstva: ponovo napravite koverte profila, ponovo izračunajte zdravlje ciklusa, smanjite tragove otklanjanja grešaka i zadržite najnovije cikluse.",
+      "doc": "Pokrenite noćno održavanje: označite starije neoznačene cikluse koji sada jasno odgovaraju nekom programu, ponovo izgradite krive programa, osvežite oznake anomalija, ponovo izračunajte zdravlje ciklusa i uklonite tragove za otklanjanje grešaka dok je „Sačuvaj tragove za otklanjanje grešaka“ isključeno. Svi ciklusi i njihovi potpuni tragovi snage se čuvaju.",
       "label": "Automatsko održavanje (noćno čišćenje)"
     },
     "completion_min_seconds": {
@@ -1355,14 +1355,6 @@
       "doc": "Ako podudaranje uživo usred ciklusa padne ispod ovog rezultata, privremena identifikacija se briše. Držite ga malo ispod Praga podudaranja kako kratak pad sličnosti ne bi vratio prikaz nazad na stanje bez podudaranja.",
       "label": "Prag nepodudaranja"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Koliko od najnovijih ciklusa svakog programa zadržava pun trag snage. Stariji ciklusi zadržavaju trajanje, energiju i oznaku, ali gube krivu, pa je njihov grafikon prazan i više ne doprinose krivoj, zdravlju ni predlozima programa. Povećanje čuva više istorije za pregled uz veće korišćenje prostora za skladištenje (obično 3–15 KB po ciklusu). Smanjenje briše dodatne tragove pri sledećem noćnom čišćenju, i ponovnim povećanjem ih nije moguće vratiti.",
-      "label": "Tragovi snage zadržani po programu"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Isti limit za cikluse koji još nemaju oznaku programa.",
-      "label": "Tragovi snage zadržani (neoznačeno)"
-    },
     "progress_reset_delay": {
       "doc": "Nakon što završite, držite napredak na 100% toliko dugo kako bi Završeno bilo vidljivo na kontrolnoj tabli pre nego što se vratite na stanje mirovanja.",
       "label": "Kašnjenje resetovanja napretka"
@@ -1376,7 +1368,7 @@
       "label": "Interval uzorkovanja"
     },
     "save_debug_traces": {
-      "doc": "Sačuvajte kompletan trag napajanja i odgovarajuće podatke za otklanjanje grešaka za svaki ciklus. Korisno za rešavanje problema, ali povećava veličinu skladišta.",
+      "doc": "Uz svaki ciklus sačuvajte i podatke mehanizma podudaranja za otklanjanje grešaka (ocene svakog kandidata). Korisno za rešavanje problema; dodaje oko 20 kB po ciklusu, a podaci se čuvaju onoliko dugo koliko i ciklus.",
       "label": "Sačuvaj tragove za otklanjanje grešaka"
     },
     "start_duration_threshold": {

@@ -32,18 +32,20 @@ def _cycle(i: int, traced: bool) -> dict:
 
 def _store(save_debug: bool) -> ProfileStore:
     st = ProfileStore(MagicMock(), "dbg", save_debug_traces=save_debug)
-    st._max_full_traces_per_profile = 2
     st._data = {"profiles": {"Cotton": {}}, "past_cycles": [_cycle(i, True) for i in range(4)]
                 + [_cycle(9, False)]}
     return st
 
 
-def test_a_cycle_losing_its_trace_loses_its_debug_data_too() -> None:
+def test_debug_data_stays_with_its_trace_and_goes_without_one() -> None:
+    """Traces are never stripped since register item 463, so every traced cycle
+    keeps its debug data while "save debug traces" is on; a cycle whose trace an
+    older version pruned (c9) loses its debug data too."""
     st = _store(save_debug=True)
     st._enforce_retention_data()
     by_id = {c["id"]: c for c in st._data["past_cycles"]}
-    assert [i for i, c in by_id.items() if "power_data" in c] == ["c2", "c3"]
-    assert [i for i, c in by_id.items() if "debug_data" in c] == ["c2", "c3"]
+    assert [i for i, c in by_id.items() if "power_data" in c] == ["c0", "c1", "c2", "c3"]
+    assert [i for i, c in by_id.items() if "debug_data" in c] == ["c0", "c1", "c2", "c3"]
 
 
 def test_with_debug_traces_off_none_survive() -> None:

@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Pabaigos link ši programa maždaug {mins} min nutyla, tada prieš baigdama {secs} s naudoja apie {watts} W. Pastebėta {seen} iš {measured} išmatuotų ciklų: prietaisas tai daro ne kiekvieną kartą.",
     "quiet_tail": "tyli pabaiga ~{mins} min",
-    "artifact_tip": "Aptikta {n} anomalijų (pvz., durys atidarytos ciklo viduryje) – atidarykite, kad pamatytumėte juos diagramoje",
+    "artifact_tip": "Aptikta {n} anomalijų (pvz., durys atidarytos ciklo viduryje) - atidarykite, kad pamatytumėte jas diagramoje",
     "artifact_tip_one": "Aptikta {n} anomalija (pvz., durys atidarytos ciklo viduryje) - atidarykite, kad pamatytumėte ją diagramoje",
     "artifact_tip_few": "Aptiktos {n} anomalijos (pvz., durys atidarytos ciklo viduryje) - atidarykite, kad pamatytumėte jas diagramoje",
     "artifact_tip_many": "Aptikta {n} anomalijos (pvz., durys atidarytos ciklo viduryje) - atidarykite, kad pamatytumėte jas diagramoje",
@@ -68,7 +68,7 @@
     "needs_review": "Reikia peržiūros",
     "overrun": "Bėgo ilgiau nei įprastai",
     "poor_fit": "prastai tinka",
-    "restart_gap_tip": "{n} HA paleidimo iš naujo spraga: galios kreivė turi skylę",
+    "restart_gap_tip": "{n} HA paleidimo iš naujo spragų: galios kreivė turi skylių",
     "restart_gap_tip_one": "{n} HA paleidimo iš naujo spraga: galios kreivė turi skylę",
     "restart_gap_tip_few": "{n} HA paleidimo iš naujo spragos: galios kreivė turi skylių",
     "restart_gap_tip_many": "{n} HA paleidimo iš naujo spragos: galios kreivė turi skylių",
@@ -446,7 +446,7 @@
     "mode_new_profile": "Sukurti naują profilį",
     "models_fine_tuned": "(tiksliai suderinti modeliai: {count})",
     "n_selected": "Pasirinkta: {n}",
-    "n_tuning_suggestions": "{n} derinimo pasiūlymas",
+    "n_tuning_suggestions": "{n} derinimo pasiūlymų",
     "n_tuning_suggestions_one": "{n} derinimo pasiūlymas",
     "n_tuning_suggestions_few": "{n} derinimo pasiūlymai",
     "n_tuning_suggestions_many": "{n} derinimo pasiūlymo",
@@ -749,7 +749,7 @@
     "appliance_monitor": "Prietaisų monitorius",
     "artifact_dip_detail": "Nukrito žemiau įprastos galios juostos maždaug {n}s.",
     "artifact_footer": "Paryškinta aukščiau esančiame grafike. Tai yra trumpalaikiai artefaktai (pvz., durys atidarytos ciklo viduryje), nebūtinai problemos.",
-    "artifact_header": "Per šį ciklą aptikta anomalijų: {n}",
+    "artifact_header": "Per šį ciklą aptikta {n} anomalijų",
     "artifact_header_one": "Per šį ciklą aptikta {n} anomalija",
     "artifact_header_few": "Per šį ciklą aptiktos {n} anomalijos",
     "artifact_header_many": "Per šį ciklą aptikta {n} anomalijos",
@@ -774,7 +774,7 @@
     "group_modal_help": "Grupuoti tos pačios formos programas, kurios skiriasi temperatūra / sukimu (trukmė gali skirtis). Atitikimas įvertina grupę kaip vieną kandidatą, tada parenka geriausiai tinkantį narį. Pasirinkite bent 2; perdanga parodo, kokie jie panašūs.",
     "group_not_cohesive": "Šie profiliai nėra pakankamai panašūs, kad būtų galima patikimai sugrupuoti, todėl derinant jie traktuojami atskirai, kol pašalinsite nuokrypį arba padalinsite grupę.",
     "group_preview_hint": "Pažymėkite 2+ narius, kad peržiūrėtumėte ir palygintumėte jų galios kreives.",
-    "legacy_actions_title": "{count} senas priskirtas veiksmas vis dar vykdomas",
+    "legacy_actions_title": "{count} senų priskirtų veiksmų vis dar vykdoma",
     "legacy_actions_title_one": "{count} senas priskirtas veiksmas vis dar vykdomas",
     "legacy_actions_title_few": "{count} seni priskirti veiksmai vis dar vykdomi",
     "legacy_actions_title_many": "{count} seno priskirto veiksmo vis dar vykdoma",
@@ -840,7 +840,7 @@
     "recording_in_progress": "Įrašymas vyksta",
     "reminders_intro": "Rodyti priminimą skydelyje praėjus tiek ciklų po paskutinio aptarnavimo. Palikite tuščią arba 0, kad priminimas būtų išjungtas.",
     "restart_gap_footer": "Paryškinta grafike. Galios duomenų trūksta šiems intervalams; suderinimas naudojo tik tikrus rodmenis.",
-    "restart_gap_header": "{n} HA paleidimo iš naujo spraga šio ciklo metu",
+    "restart_gap_header": "{n} HA paleidimo iš naujo spragų šio ciklo metu",
     "restart_gap_header_one": "{n} HA paleidimo iš naujo spraga šio ciklo metu",
     "restart_gap_header_few": "{n} HA paleidimo iš naujo spragos šio ciklo metu",
     "restart_gap_header_many": "{n} HA paleidimo iš naujo spragos šio ciklo metu",
@@ -862,7 +862,7 @@
     "setting_changed": "Pakeista iš {old} į {new} {date}",
     "settings_basic_note": "Rodomi esminiai nustatymai. Norėdami pamatyti visą sąrašą, perjunkite į „Išplėstinė“.",
     "show_all_settings": "Rodyti visus nustatymus",
-    "showing_suggestions": "Rodomas {count} nustatymas su pasiūlymais.",
+    "showing_suggestions": "Rodoma {count} nustatymų su pasiūlymais.",
     "showing_suggestions_one": "Rodomas {count} nustatymas su pasiūlymais.",
     "showing_suggestions_few": "Rodomi {count} nustatymai su pasiūlymais.",
     "showing_suggestions_many": "Rodoma {count} nustatymo su pasiūlymais.",
@@ -894,7 +894,7 @@
     "trend_energy_up": "Energijos augimas ({pct} % per ciklą) – pastaruoju metu vid. {avg}",
     "trim_destructive_confirm": "Bus išsaugota tik {pct}% ciklo ir to nebus galima atšaukti. Tęsti?",
     "trim_intro": "Vilkite raudonas rankenas arba įveskite vertes. Viskas, kas yra už lango, pašalinama.",
-    "tuning_suggestions_available": "Galimas {count} derinimo pasiūlymas iš stebimų ciklų. Jie rodomi šalia atitinkamų laukų.",
+    "tuning_suggestions_available": "Galima {count} derinimo pasiūlymų iš stebimų ciklų. Jie rodomi šalia atitinkamų laukų.",
     "tuning_suggestions_available_one": "Galimas {count} derinimo pasiūlymas iš stebimų ciklų. Jis rodomas šalia atitinkamo lauko.",
     "tuning_suggestions_available_few": "Galimi {count} derinimo pasiūlymai iš stebimų ciklų. Jie rodomi šalia atitinkamų laukų.",
     "tuning_suggestions_available_many": "Galima {count} derinimo pasiūlymo iš stebimų ciklų. Jie rodomi šalia atitinkamų laukų.",
@@ -960,7 +960,7 @@
     "sug_muted": "Šio nustatymo daugiau nebesiūlys",
     "sug_mute_failed": "Nepavyko nutildyti pasiūlymo",
     "sug_unmuted_all": "Nutildyti pasiūlymai atstatyti",
-    "n_suggestions_muted": "{count} nutildyti; automatinis derintuvas jų nebesiūlys.",
+    "n_suggestions_muted": "{count} pasiūlymų nutildyta; automatinis derintuvas jų nebesiūlys.",
     "n_suggestions_muted_one": "{count} pasiūlymas nutildytas; automatinis derintuvas jo nebesiūlys.",
     "n_suggestions_muted_few": "{count} pasiūlymai nutildyti; automatinis derintuvas jų nebesiūlys.",
     "n_suggestions_muted_many": "{count} pasiūlymo nutildyta; automatinis derintuvas jų nebesiūlys.",
@@ -1125,7 +1125,7 @@
       "label": "Automatinio žymėjimo pasitikėjimas"
     },
     "auto_maintenance": {
-      "doc": "Naktį tvarkykite: perkurkite profilio vokus, perskaičiuokite ciklo būseną, apkarpykite derinimo pėdsakus ir išsaugokite naujausius ciklus.",
+      "doc": "Vykdo naktinę priežiūrą: pažymi senesnius nepažymėtus ciklus, kurie dabar aiškiai atitinka programą, iš naujo sukuria programų kreives, atnaujina anomalijų žymes, perskaičiuoja ciklų sveikatą ir pašalina derinimo pėdsakus, kai parinktis \"Įrašyti derinimo pėdsakus\" išjungta. Kiekvienas ciklas ir visas jo galios įrašas išsaugomi.",
       "label": "Automatinė priežiūra (naktinis valymas)"
     },
     "completion_min_seconds": {
@@ -1364,14 +1364,6 @@
       "doc": "Jei tiesioginės atitikties balas ciklo viduryje nukrenta žemiau šio balo, preliminarus identifikavimas išvalomas. Laikykite jį šiek tiek žemiau Atitikimo slenksčio, kad trumpas panašumo sumažėjimas negrąžintų ekrano į būseną be atitikties.",
       "label": "Neatitikimo slenkstis"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Kiek naujausių kiekvienos programos ciklų saugo pilną galios seką. Senesni ciklai išlaiko trukmę, energiją ir etiketę, tačiau praranda kreivę, todėl jų diagrama tuščia ir jie nebėra įtraukiami į programos kreivę, sveikatą ar pasiūlymus. Padidinimas leidžia peržiūrėti daugiau istorijos saugyklos sąskaita (paprastai 3–15 KB per ciklą). Sumažinimas ištrina papildomas sekas per kitą naktinį valymą, ir pakartotinas padidinimas jų negrąžins.",
-      "label": "Galios sekos saugomos programai"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Ta pati riba ciklams, kuriems dar nėra priskirta programos etiketė.",
-      "label": "Galios sekos saugomos (be etiketės)"
-    },
     "progress_reset_delay": {
       "doc": "Baigę palaikykite 100 % pažangą tiek laiko, kad prieš iš naujo nustatant į neveiklumą prietaisų skydeliuose būtų rodoma baigta.",
       "label": "Pažangos atstatymo delsimas"
@@ -1385,7 +1377,7 @@
       "label": "Mėginių ėmimo intervalas"
     },
     "save_debug_traces": {
-      "doc": "Išsaugokite visą galios pėdsaką ir atitinkamus kiekvieno ciklo derinimo duomenis. Naudinga trikčių šalinimui, bet padidina saugyklos dydį.",
+      "doc": "Kartu su kiekvienu ciklu įrašo ir atitikimo derinimo duomenis (kiekvienos kandidatės programos balus). Naudinga trikčių šalinimui; prideda apie 20 KB kiekvienam ciklui, kurie saugomi tol, kol saugomas ciklas.",
       "label": "Įrašyti derinimo pėdsakus"
     },
     "smart_termination_duration_ratio": {

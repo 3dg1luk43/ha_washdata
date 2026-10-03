@@ -105,11 +105,9 @@ async def test_create_profile(store):
 
 
 @pytest.mark.asyncio
-async def test_retention_policy(store):
-    """Test that old cycles are dropped."""
-    store._max_past_cycles = 5
-
-    for i in range(10):
+async def test_every_cycle_is_kept(store):
+    """Register item 463: no retention cap. Past the old 200 every cycle stays."""
+    for i in range(210):
         t_str = dt_str(i * 60)
         await store.async_add_cycle({
             "start_time": t_str,
@@ -118,11 +116,9 @@ async def test_retention_policy(store):
             "power_data": [[t_str, 10]],
         })
 
-    assert len(store._data["past_cycles"]) == 5
-
+    assert len(store._data["past_cycles"]) == 210
     times = [c["start_time"] for c in store._data["past_cycles"]]
-    assert dt_str(540) in times
-    assert dt_str(0) not in times
+    assert dt_str(0) in times and dt_str(209 * 60) in times
 
 
 @pytest.mark.asyncio

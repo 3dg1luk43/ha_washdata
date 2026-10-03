@@ -33,7 +33,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.const import EntityCategory, UnitOfEnergy
 from homeassistant.helpers import entity_registry
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.dispatcher import (
+    async_dispatcher_connect,
+    async_dispatcher_send,
+)
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
@@ -79,6 +82,12 @@ from .const import (
 from .manager import WashDataManager
 
 _LOGGER = logging.getLogger(__name__)
+
+# The per-profile count sensors' own signal (register item 456). They read only
+# the profile summaries and envelopes, which change at a cycle end or a profile
+# edit, so rewriting all of them on every live refresh was pure cost (audit
+# PERF-01). Sent by WasherProfileSensorManager when the summaries change.
+SIGNAL_WASHER_PROFILES_UPDATE = "ha_washdata_profiles_update_{}"
 
 
 _STATIC_DIAGNOSTIC_SUFFIXES = {
@@ -736,6 +745,16 @@ class WasherProfileCountSensor(WasherBaseSensor):
             return self._write_snapshot
         return self._manager.profile_store.get_profile(self._profile_name)
 
+    async def async_added_to_hass(self) -> None:
+        """Listen to the profiles signal, not the live one (register item 456)."""
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass,
+                SIGNAL_WASHER_PROFILES_UPDATE.format(self._entry.entry_id),
+                self._update_callback,
+            )
+        )
+
     @callback
     def _update_callback(self) -> None:
         """Write state from a single profile snapshot."""
@@ -837,10 +856,16 @@ class WasherProfileSensorManager:
         self._signal = SIGNAL_WASHER_UPDATE.format(entry.entry_id)
         self._update_task: Task[None] | None = None
         self._pending_update: bool = False
+        # The summaries revision last acted on; held, so `is` stays meaningful.
+        # Seeded with today's: the sensors about to be created are written from it.
+        self._seen_revision: object | None = None
+        try:
+            self._seen_revision = manager.profile_store.profile_summaries_revision()
+        except Exception:  # noqa: BLE001 - None just means "refresh on first notify"
+            self._seen_revision = None
 
-        # Register callback for ALL updates (simplest hook we have)
-        # Ideally we'd have a specific profile update signal, but general update is fine
-        # as long as we debounce or check efficiently.
+        # Every live refresh comes through here; it is turned into the profiles
+        # signal only when the profile summaries actually changed.
         self._unsub_dispatcher = async_dispatcher_connect(
             manager.hass,
             self._signal,
@@ -868,7 +893,18 @@ class WasherProfileSensorManager:
 
     @callback
     def _update_callback(self) -> None:
-        """Handle updates."""
+        """Handle updates: act only when the profile summaries changed."""
+        try:
+            revision = self._manager.profile_store.profile_summaries_revision()
+        except Exception:  # noqa: BLE001 - a failed check must not freeze the sensors
+            revision = object()
+        if revision is self._seen_revision:
+            return
+        self._seen_revision = revision
+        async_dispatcher_send(
+            self._manager.hass,
+            SIGNAL_WASHER_PROFILES_UPDATE.format(self._entry.entry_id),
+        )
         if self._update_task and not self._update_task.done():
             self._pending_update = True
             return
@@ -1023,8 +1059,8 @@ class WasherCycleCountSensor(WasherBaseSensor):
     """Odometer: how many cycles this appliance has run, ever.
 
     Reports the monotonic lifetime counter, not ``len(stored history)`` (#414). The
-    stored-history number is capped at ``max_past_cycles`` and shrinks when the user
-    deletes a record, so as a state it was unusable for the thing people build on it:
+    stored-history number shrinks when the user deletes a record (and was capped at
+    200 until 0.5.8), so as a state it was unusable for the thing people build on it:
     an "every N cycles" maintenance schedule, whether WashData's own reminders or an
     external integration's. The old number is still available as the
     ``stored_cycles`` attribute.

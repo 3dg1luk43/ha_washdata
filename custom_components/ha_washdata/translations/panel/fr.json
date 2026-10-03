@@ -2,7 +2,7 @@
   "badge": {
     "quiet_tail_tip": "Vers la fin, ce programme reste silencieux pendant environ {mins} min, puis consomme environ {watts} W pendant {secs} s avant de se terminer. Observé sur {seen} des {measured} cycles mesurés : l'appareil ne le fait pas à chaque utilisation.",
     "quiet_tail": "silence final ~{mins} min",
-    "artifact_tip": "{n} anomalies détectées (par exemple, porte ouverte en cours de cycle) : ouvrez-les pour les voir sur le graphique",
+    "artifact_tip": "{n} anomalies détectées (par exemple, porte ouverte en cours de cycle) : ouvrez pour les voir sur le graphique",
     "artifact_tip_one": "{n} anomalie détectée (par exemple, porte ouverte en cours de cycle) : ouvrez pour la voir sur le graphique",
     "artifact_tip_many": "{n} anomalies détectées (par exemple, porte ouverte en cours de cycle) : ouvrez pour les voir sur le graphique",
     "artifact_tip_other": "{n} anomalies détectées (par exemple, porte ouverte en cours de cycle) : ouvrez pour les voir sur le graphique",
@@ -18,7 +18,7 @@
     "needs_review": "Besoin d'un examen",
     "overrun": "A couru plus longtemps que d'habitude",
     "poor_fit": "qualité médiocre",
-    "restart_gap_tip": "{n} coupure redémarrage HA : la courbe de puissance a un trou",
+    "restart_gap_tip": "{n} coupures redémarrage HA : la courbe de puissance a des trous",
     "restart_gap_tip_one": "{n} coupure redémarrage HA : la courbe de puissance a un trou",
     "restart_gap_tip_many": "{n} coupures redémarrage HA : la courbe de puissance a des trous",
     "restart_gap_tip_other": "{n} coupures redémarrage HA : la courbe de puissance a des trous",
@@ -390,7 +390,7 @@
     "mode_new_profile": "Créer un nouveau profil",
     "models_fine_tuned": "(modèles affinés : {count})",
     "n_selected": "{n} sélectionné(s)",
-    "n_tuning_suggestions": "{n} suggestion de réglage",
+    "n_tuning_suggestions": "{n} suggestions de réglage",
     "n_tuning_suggestions_one": "{n} suggestion de réglage",
     "n_tuning_suggestions_many": "{n} suggestions de réglage",
     "n_tuning_suggestions_other": "{n} suggestions de réglage",
@@ -717,7 +717,7 @@
     "group_modal_help": "Programmes groupés de même forme qui diffèrent en température/essorage (les durées peuvent varier). L'appariement note le groupe comme un seul candidat, puis sélectionne le membre le mieux adapté. Choisissez-en au moins 2 ; la superposition montre à quel point ils se ressemblent.",
     "group_not_cohesive": "Ces profils ne sont pas suffisamment similaires pour être regroupés de manière fiable. La correspondance les traite donc individuellement jusqu'à ce que vous supprimiez la valeur aberrante ou divisiez le groupe.",
     "group_preview_hint": "Cochez 2 membres ou plus pour prévisualiser et comparer leurs courbes de puissance.",
-    "legacy_actions_title": "{count} action personnalisée héritée toujours en cours d'exécution",
+    "legacy_actions_title": "{count} actions personnalisées héritées toujours en cours d'exécution",
     "legacy_actions_title_one": "{count} action personnalisée héritée toujours en cours d'exécution",
     "legacy_actions_title_many": "{count} actions personnalisées héritées toujours en cours d'exécution",
     "legacy_actions_title_other": "{count} actions personnalisées héritées toujours en cours d'exécution",
@@ -782,7 +782,7 @@
     "recording_in_progress": "Enregistrement en cours",
     "reminders_intro": "Affiche un rappel dans le panneau autant de cycles après le dernier entretien. Laissez vide ou 0 pour désactiver un rappel.",
     "restart_gap_footer": "Mis en évidence sur le graphique. Les données de puissance sont manquantes pour ces intervalles ; la correspondance n'a utilisé que les relevés réels.",
-    "restart_gap_header": "{n} coupure redémarrage HA pendant ce cycle",
+    "restart_gap_header": "{n} coupures redémarrage HA pendant ce cycle",
     "restart_gap_header_one": "{n} coupure redémarrage HA pendant ce cycle",
     "restart_gap_header_many": "{n} coupures redémarrage HA pendant ce cycle",
     "restart_gap_header_other": "{n} coupures redémarrage HA pendant ce cycle",
@@ -803,7 +803,7 @@
     "setting_changed": "Modifié de {old} à {new} le {date}",
     "settings_basic_note": "Affichage des paramètres essentiels. Passez à Avancé pour la liste complète.",
     "show_all_settings": "Afficher tous les paramètres",
-    "showing_suggestions": "Affichage du paramètre {count} avec des suggestions.",
+    "showing_suggestions": "Affichage de {count} paramètres avec des suggestions.",
     "showing_suggestions_one": "Affichage de {count} paramètre avec des suggestions.",
     "showing_suggestions_many": "Affichage de {count} paramètres avec des suggestions.",
     "showing_suggestions_other": "Affichage de {count} paramètres avec des suggestions.",
@@ -834,7 +834,7 @@
     "trend_energy_up": "Tendance énergétique à la hausse ({pct} %/cycle) – moyenne récente {avg}",
     "trim_destructive_confirm": "Cela ne conserve que {pct} % du cycle et est irréversible. Continuer ?",
     "trim_intro": "Faites glisser les poignées rouges ou entrez des valeurs. Tout ce qui se trouve à l'extérieur de la fenêtre est supprimé.",
-    "tuning_suggestions_available": "{count} suggestion de réglage disponible à partir des cycles observés. Ils apparaissent à côté des champs concernés.",
+    "tuning_suggestions_available": "{count} suggestions de réglage disponibles à partir des cycles observés. Elles apparaissent à côté des champs concernés.",
     "tuning_suggestions_available_one": "{count} suggestion de réglage disponible à partir des cycles observés. Elle apparaît à côté du champ concerné.",
     "tuning_suggestions_available_many": "{count} suggestions de réglage disponibles à partir des cycles observés. Elles apparaissent à côté des champs concernés.",
     "tuning_suggestions_available_other": "{count} suggestions de réglage disponibles à partir des cycles observés. Elles apparaissent à côté des champs concernés.",
@@ -896,7 +896,7 @@
     "sug_muted": "Ce paramètre ne sera plus suggéré",
     "sug_mute_failed": "Impossible de masquer la suggestion",
     "sug_unmuted_all": "Les suggestions masquées ont été réinitialisées",
-    "n_suggestions_muted": "{count} masquée(s) ; le réglage automatique ne proposera plus ces suggestions.",
+    "n_suggestions_muted": "{count} suggestions masquées ; le réglage automatique ne les proposera plus.",
     "n_suggestions_muted_one": "{count} suggestion masquée ; le réglage automatique ne la proposera plus.",
     "n_suggestions_muted_many": "{count} suggestions masquées ; le réglage automatique ne les proposera plus.",
     "n_suggestions_muted_other": "{count} suggestions masquées ; le réglage automatique ne les proposera plus.",
@@ -1083,7 +1083,7 @@
       "label": "Confiance d'étiquetage automatique"
     },
     "auto_maintenance": {
-      "doc": "Effectuez un entretien ménager nocturne : reconstruisez les enveloppes de profil, recalculez l’état du cycle, élaguez les traces de débogage et conservez les cycles les plus récents.",
+      "doc": "Exécute l'entretien nocturne : étiquette les anciens cycles sans étiquette qui correspondent désormais clairement à un programme, reconstruit les courbes des programmes, actualise les marques d'anomalie, recalcule la santé des cycles et supprime les traces de débogage tant que l'option Enregistrer les traces de débogage est désactivée. Chaque cycle et sa courbe de puissance complète sont conservés.",
       "label": "Maintenance automatique (nettoyage nocturne)"
     },
     "completion_min_seconds": {
@@ -1322,14 +1322,6 @@
       "doc": "Si une correspondance en direct en milieu de cycle tombe en dessous de ce score, l'identification provisoire est effacée. Gardez-le un peu en dessous du Seuil de correspondance afin qu'une brève baisse de similarité ne fasse pas repasser l'affichage à l'état sans correspondance.",
       "label": "Seuil de non-correspondance"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Combien de cycles les plus récents de chaque programme conservent leur trace de puissance complète. Les cycles plus anciens gardent leur durée, leur énergie et leur étiquette, mais perdent la courbe ; leur graphique devient vide et ils ne contribuent plus à la courbe, la qualité de profil ou les suggestions du programme. Augmenter cette valeur permet d'inspecter davantage l'historique au prix du stockage (généralement 3-15 KB par cycle). La diminuer supprime les traces supplémentaires lors du prochain nettoyage, et l'augmenter à nouveau ne permettra pas de les récupérer.",
-      "label": "Traces de puissance conservées par programme"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "La même limite pour les cycles qui n'ont pas encore de nom de programme.",
-      "label": "Traces de puissance conservées (sans étiquette)"
-    },
     "progress_reset_delay": {
       "doc": "Une fois terminé, maintenez la progression à 100 % pendant ce temps afin que Terminé soit visible sur les tableaux de bord avant de réinitialiser en mode veille.",
       "label": "Délai de réinitialisation de progression"
@@ -1343,7 +1335,7 @@
       "label": "Intervalle d'échantillonnage"
     },
     "save_debug_traces": {
-      "doc": "Stockez la trace de puissance complète et les données de débogage correspondantes pour chaque cycle. Utile pour le dépannage mais augmente la taille du stockage.",
+      "doc": "Enregistre aussi avec chaque cycle les données de débogage de la reconnaissance (les scores de chaque candidat). Utile pour le dépannage ; ajoute environ 20 Ko par cycle, conservés aussi longtemps que le cycle.",
       "label": "Enregistrer les traces de débogage"
     },
     "smart_termination_duration_ratio": {

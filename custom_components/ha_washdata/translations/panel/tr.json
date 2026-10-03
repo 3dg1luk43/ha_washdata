@@ -50,7 +50,7 @@
     "badge": {
         "quiet_tail_tip": "Sona yaklaşırken bu program yaklaşık {mins} dk sessizleşir, ardından bitmeden önce {secs} sn boyunca yaklaşık {watts} W çeker. Ölçülen {measured} döngüden {seen} tanesinde görüldü: cihaz bunu her çalışmada yapmaz.",
         "quiet_tail": "~{mins} dk sessiz bitiş",
-        "artifact_tip": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) – bunları grafikte görmek için açın",
+        "artifact_tip": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) - bunları grafikte görmek için açın",
         "artifact_tip_one": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) - grafikte görmek için açın",
         "artifact_tip_other": "{n} anormallik algılandı (ör. döngünün ortasında kapının açılması) - bunları grafikte görmek için açın",
         "auto": "(otomatik algılandı)",
@@ -66,7 +66,7 @@
         "needs_review": "İncelenmesi gerekiyor",
         "overrun": "Normalden daha uzun sürdü",
         "poor_fit": "düşük kalite",
-        "restart_gap_tip": "{n} HA yeniden başlatma boşluğu: güç izinde bir delik var",
+        "restart_gap_tip": "{n} HA yeniden başlatma boşluğu: güç izinde delikler var",
         "restart_gap_tip_one": "{n} HA yeniden başlatma boşluğu: güç izinde bir delik var",
         "restart_gap_tip_other": "{n} HA yeniden başlatma boşluğu: güç izinde delikler var",
         "reviewed": "İncelendi",
@@ -830,7 +830,7 @@
         "recording_in_progress": "Kayıt devam ediyor",
         "reminders_intro": "Son servisten bu kadar döngü sonra panelde bir hatırlatma göster. Bir hatırlatmayı kapatmak için boş bırakın veya 0 girin.",
         "restart_gap_footer": "Grafikte vurgulandı. Bu aralıklar için güç verisi eksik; eşleştirme yalnızca gerçek okumaları kullandı.",
-        "restart_gap_header": "{n} HA yeniden başlatma boşluğu bu döngü sırasında",
+        "restart_gap_header": "Bu döngü sırasında {n} HA yeniden başlatma boşluğu",
         "restart_gap_header_one": "Bu döngü sırasında {n} HA yeniden başlatma boşluğu",
         "restart_gap_header_other": "Bu döngü sırasında {n} HA yeniden başlatma boşluğu",
         "restart_gap_item": "{dur} boşluk",
@@ -850,7 +850,7 @@
         "setting_changed": "{date} tarihinde {old} değerinden {new} değerine değiştirildi",
         "settings_basic_note": "Temel ayarlar gösteriliyor. Tam liste için Gelişmiş'e geçin.",
         "show_all_settings": "Tüm ayarları göster",
-        "showing_suggestions": "Önerilerle birlikte {count} ayarı gösteriliyor.",
+        "showing_suggestions": "Öneri içeren {count} ayar gösteriliyor.",
         "showing_suggestions_one": "Öneri içeren {count} ayar gösteriliyor.",
         "showing_suggestions_other": "Öneri içeren {count} ayar gösteriliyor.",
         "split_intro": "Bölme noktası eklemek veya kaldırmak için grafiğe tıklayın veya boşta kalma aralıklarına göre otomatik algılayın. Her elde edilen bölüm kendi profilini alabilir.",
@@ -944,7 +944,7 @@
         "sug_muted": "Bu ayar bir daha önerilmeyecek",
         "sug_mute_failed": "Öneri susturulamadı",
         "sug_unmuted_all": "Susturulan öneriler sıfırlandı",
-        "n_suggestions_muted": "{count} susturuldu; öneri motoru bunları önermeyecek.",
+        "n_suggestions_muted": "{count} öneri susturuldu; öneri motoru bunları önermeyecek.",
         "n_suggestions_muted_one": "{count} öneri susturuldu; öneri motoru bunu önermeyecek.",
         "n_suggestions_muted_other": "{count} öneri susturuldu; öneri motoru bunları önermeyecek.",
         "font_size_hint": "Bu paneldeki her şeyi büyütün veya küçültün. Bu cihazdaki hesabınıza uygulanır.",
@@ -1119,7 +1119,7 @@
             "label": "Otomatik Etiket Güveni"
         },
         "auto_maintenance": {
-            "doc": "Gecelik temizlik yapın: profil zarflarını yeniden oluşturun, döngü sağlığını yeniden hesaplayın, hata ayıklama izlerini budayın ve en son döngüleri koruyun.",
+            "doc": "Gece bakımını çalıştırın: artık bir programla açıkça eşleşen eski etiketsiz döngüleri etiketleyin, program eğrilerini yeniden oluşturun, anomali işaretlerini yenileyin, döngü sağlığını yeniden hesaplayın ve \"Hata Ayıklama İzlerini Kaydet\" kapalıyken hata ayıklama izlerini kaldırın. Her döngü ve onun tam güç izi saklanır.",
             "label": "Otomatik Bakım (gece temizliği)"
         },
         "completion_min_seconds": {
@@ -1354,14 +1354,6 @@
             "doc": "Canlı bir döngü ortası eşleşme puanı bu puanın altına düşerse, geçici tanımlama silinir. Eşleşme Eşiğinin biraz altında tutun, böylece benzerlikteki kısa bir düşüş ekranı yeniden eşleşmedi durumuna döndürmez.",
             "label": "Eşleşmeme Eşiği"
         },
-        "max_full_traces_per_profile": {
-            "doc": "Her programın en son döngülerinden kaç tanesinin tam güç izini sakladığını belirler. Eski döngüler süre, enerji ve etiket bilgilerini korur ancak eğriyi kaybeder; grafikleri boş kalır ve programın eğrisine, sağlığına veya önerilerine artık katkıda bulunmazlar. Bu değeri artırmak, daha fazla geçmişin incelenebilir kalmasını sağlar; ancak depolama alanı kullanımını artırır (genellikle döngü başına 3-15 KB). Düşürmek, bir sonraki temizlikte fazladan izleri siler; yeniden artırmak ise onları geri getiremez.",
-            "label": "Program Başına Saklanan Güç İzleri"
-        },
-        "max_full_traces_unlabeled": {
-            "doc": "Program etiketi henüz atanmamış döngüler için aynı sınır.",
-            "label": "Saklanan Güç İzleri (Etiketsiz)"
-        },
         "progress_reset_delay": {
             "doc": "Bitirdikten sonra, bu süre boyunca ilerlemeyi %100'de tutun; böylece Tamamlandı, Boşta durumuna sıfırlamadan önce kontrol panellerinde görünür.",
             "label": "İlerleme Sıfırlama Gecikmesi"
@@ -1375,7 +1367,7 @@
             "label": "Örnekleme Aralığı"
         },
         "save_debug_traces": {
-            "doc": "Her döngü için tam güç takibini ve eşleşen hata ayıklama verilerini saklayın. Sorun giderme için kullanışlıdır ancak depolama boyutunu artırır.",
+            "doc": "Her döngüyle birlikte eşleştiricinin hata ayıklama verilerini de (her aday programın puanları) saklayın. Sorun giderme için kullanışlıdır; döngü başına yaklaşık 20 KB ekler ve döngü saklandığı sürece saklanır.",
             "label": "Hata Ayıklama İzlerini Kaydet"
         },
         "smart_termination_duration_ratio": {

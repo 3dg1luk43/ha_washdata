@@ -50,7 +50,7 @@
     "badge": {
         "quiet_tail_tip": "이 프로그램은 끝날 무렵 약 {mins}분 동안 전력을 거의 쓰지 않다가, 종료 전에 약 {secs}초 동안 약 {watts} W를 사용합니다. 측정된 {measured}회 사이클 중 {seen}회에서 확인되었습니다: 기기가 매번 이렇게 동작하지는 않습니다.",
         "quiet_tail": "조용한 마무리 ~{mins}분",
-        "artifact_tip": "{n} 이상 현상이 감지되었습니다(예: 사이클 중간에 문이 열림) - 열어서 그래프에서 확인",
+        "artifact_tip": "이상 현상 {n}건이 감지되었습니다(예: 사이클 중간에 문이 열림) - 열어서 그래프에서 확인하세요",
         "artifact_tip_other": "이상 현상 {n}건이 감지되었습니다(예: 사이클 중간에 문이 열림) - 열어서 그래프에서 확인하세요",
         "auto": "(자동 감지)",
         "built_in_tag": "내장",
@@ -65,7 +65,7 @@
         "needs_review": "검토 필요",
         "overrun": "평소보다 오래 작동함",
         "poor_fit": "품질 낮음",
-        "restart_gap_tip": "{n} HA 재시작 공백: 전력 그래프에 빈 구간이 있습니다",
+        "restart_gap_tip": "HA 재시작 공백 {n}개: 전력 그래프에 빈 구간이 있습니다",
         "restart_gap_tip_other": "HA 재시작 공백 {n}개: 전력 그래프에 빈 구간이 있습니다",
         "reviewed": "검토됨",
         "steady": "→ 안정",
@@ -439,7 +439,7 @@
         "mode_new_profile": "새 프로필 만들기",
         "models_fine_tuned": "(미세 조정된 모델: {count})",
         "n_selected": "{n}개 선택됨",
-        "n_tuning_suggestions": "{n} 조정 제안",
+        "n_tuning_suggestions": "조정 제안 {n}개",
         "n_tuning_suggestions_other": "조정 제안 {n}개",
         "new_profile_name": "새 프로필 이름",
         "notes": "메모",
@@ -740,7 +740,7 @@
         "appliance_monitor": "가전제품 모니터",
         "artifact_dip_detail": "일반 전력 범위 아래로 약 {n}초 동안 내려갔습니다.",
         "artifact_footer": "위 그래프에 강조표시되어 있습니다. 이는 일시적인 아티팩트(예: 사이클 중간에 문이 열림)이며 반드시 문제가 되는 것은 아닙니다.",
-        "artifact_header": "이 주기 동안 {n}개의 이상 현상이 감지되었습니다.",
+        "artifact_header": "이 사이클 동안 이상 현상 {n}건이 감지되었습니다.",
         "artifact_header_other": "이 사이클 동안 이상 현상 {n}건이 감지되었습니다.",
         "artifact_pause_detail": "전력이 약 {n}초 동안 거의 0으로 떨어진 후 재개되었습니다. 사이클 도중 문이 열리거나 일시 정지된 것으로 보입니다.",
         "artifact_spike_detail": "일반 전력 범위 위로 약 {n}초 동안 나타났습니다.",
@@ -762,7 +762,7 @@
         "group_modal_help": "온도/회전이 다른 동일한 모양의 프로그램을 그룹화합니다(기간은 다를 수 있음). 매칭은 그룹을 하나의 후보로 평가한 다음 가장 적합한 멤버를 선택합니다. 최소 2개를 선택하세요. 오버레이는 얼마나 유사한지 보여줍니다.",
         "group_not_cohesive": "이러한 프로필은 안정적으로 그룹화할 만큼 유사하지 않으므로 일치는 이상값을 제거하거나 그룹을 분할할 때까지 프로필을 개별적으로 처리합니다.",
         "group_preview_hint": "2명 이상의 멤버를 선택하여 전력 곡선을 미리 보고 비교하세요.",
-        "legacy_actions_title": "{count} 레거시 맞춤 작업이 아직 실행 중입니다.",
+        "legacy_actions_title": "레거시 맞춤 작업 {count}개가 아직 실행 중입니다.",
         "legacy_actions_title_other": "레거시 맞춤 작업 {count}개가 아직 실행 중입니다.",
         "live_chart_loading": "판독값이 도착하면 실시간 전력 차트가 나타납니다.",
         "loading": "로드 중…",
@@ -825,7 +825,7 @@
         "recording_in_progress": "녹음 진행 중",
         "reminders_intro": "마지막 서비스 이후 지정한 사이클 수가 지나면 패널에 알림을 표시합니다. 비워 두거나 0으로 설정하면 알림이 꺼집니다.",
         "restart_gap_footer": "그래프에서 강조 표시됩니다. 이 구간에 전력 데이터가 없습니다. 매칭에는 실제 측정값만 사용되었습니다.",
-        "restart_gap_header": "{n} HA 재시작 공백 (이 사이클 중)",
+        "restart_gap_header": "이 사이클 중 HA 재시작 공백 {n}개",
         "restart_gap_header_other": "이 사이클 중 HA 재시작 공백 {n}개",
         "restart_gap_item": "{dur} 공백",
         "review_confirm_help": "이 주기가 올바르게 감지되었는지 확인하십시오. 귀하의 리뷰는 귀하의 기계에서 모델을 훈련시킵니다. 더 많은 주기를 확인할수록 더 나은 일치 및 상태 점수를 얻을 수 있습니다. 빠른 좋음/나쁨이면 충분합니다.",
@@ -844,7 +844,7 @@
         "setting_changed": "{date}에 {old}에서 {new}(으)로 변경됨",
         "settings_basic_note": "필수 설정만 표시하고 있습니다. 전체 목록을 보려면 고급으로 전환하세요.",
         "show_all_settings": "모든 설정 표시",
-        "showing_suggestions": "제안사항과 함께 {count} 설정을 표시합니다.",
+        "showing_suggestions": "제안이 있는 설정 {count}개를 표시합니다.",
         "showing_suggestions_other": "제안이 있는 설정 {count}개를 표시합니다.",
         "split_intro": "그래프를 클릭하여 분할 지점을 추가 또는 제거하거나 유휴 간격으로 자동 감지합니다. 각 결과 세그먼트는 자체 프로필을 얻을 수 있습니다.",
         "sug_staged": "{key} = {val} 설정됨. 저장하면 적용됩니다.",
@@ -873,7 +873,7 @@
         "trend_energy_up": "에너지 상승 추세({pct}%/주기) – 최근 평균 {avg}",
         "trim_destructive_confirm": "사이클의 {pct}%만 남으며 이 작업은 취소할 수 없습니다. 계속하시겠습니까?",
         "trim_intro": "빨간색 핸들을 드래그하거나 값을 입력합니다. 창 밖의 모든 것이 제거됩니다.",
-        "tuning_suggestions_available": "관찰된 주기에서 사용할 수 있는 {count} 조정 제안입니다. 관련 필드 옆에 표시됩니다.",
+        "tuning_suggestions_available": "관찰된 사이클에서 조정 제안 {count}개를 사용할 수 있습니다. 관련 필드 옆에 표시됩니다.",
         "tuning_suggestions_available_other": "관찰된 사이클에서 조정 제안 {count}개를 사용할 수 있습니다. 관련 필드 옆에 표시됩니다.",
         "unsure_detected_prefix": "WashData가 감지되었는지 확실하지 않습니다.",
         "warmup_badge": "학습 중 ({done}/{needed} 사이클)",
@@ -936,7 +936,7 @@
         "sug_muted": "이 설정은 더 이상 제안되지 않습니다",
         "sug_mute_failed": "제안을 음소거할 수 없습니다",
         "sug_unmuted_all": "뮤트된 제안을 초기화했습니다",
-        "n_suggestions_muted": "{count}개 뮤트됨. 자동 튜너가 이 설정들을 제안하지 않습니다.",
+        "n_suggestions_muted": "제안 {count}개가 뮤트됨. 자동 튜너가 이 제안들을 다시 제안하지 않습니다.",
         "n_suggestions_muted_other": "제안 {count}개가 뮤트됨. 자동 튜너가 이 제안들을 다시 제안하지 않습니다.",
         "font_size_hint": "이 패널의 모든 내용을 크거나 작게 표시합니다. 이 기기의 내 계정에 적용됩니다.",
         "import_history_description": "WashData를 사용하기 전에도 스마트 플러그를 쓰고 있었나요? 해당 전력 센서의 이력 내보내기 파일을 업로드하거나 Home Assistant에서 바로 읽어오면 평소와 같은 감지가 그 데이터에 실행되어, 과거 사이클이 사이클 목록에 나타나 이름을 지정할 수 있습니다.",
@@ -1110,7 +1110,7 @@
             "label": "자동 라벨 신뢰도"
         },
         "auto_maintenance": {
-            "doc": "야간 관리 실행: 프로필 봉투 재구축, 주기 상태 재계산, 디버그 추적 정리 및 최신 주기 유지.",
+            "doc": "야간 하우스키핑을 실행합니다. 이제 특정 프로그램과 명확히 일치하는 오래된 미라벨 사이클에 라벨을 지정하고, 프로그램 곡선을 재구축하고, 이상 표시를 새로 고치고, 사이클 건강을 재계산하며, \"디버그 추적 저장\"이 꺼져 있는 동안 디버그 추적을 제거합니다. 모든 사이클과 그 전체 전력 기록은 보존됩니다.",
             "label": "자동 유지 관리 (야간 정리)"
         },
         "completion_min_seconds": {
@@ -1345,14 +1345,6 @@
             "doc": "사이클 진행 중의 실시간 매칭 점수가 이 값 아래로 떨어지면 임시 식별이 해제됩니다. 매칭 임계값보다 약간 낮게 유지하여 유사도가 잠시 떨어지더라도 표시가 매칭 안 됨 상태로 되돌아가지 않도록 하세요.",
             "label": "언매칭 임계값"
         },
-        "max_full_traces_per_profile": {
-            "doc": "각 프로그램의 최근 사이클 중 몇 개가 전체 전력 추적을 보관할지 설정합니다. 오래된 사이클은 지속 시간, 에너지, 라벨을 보관하지만 곡선을 잃어버려 차트가 비어 있게 되고, 해당 프로그램의 곡선, 건강 또는 제안에 더 이상 반영되지 않습니다. 값을 높이면 더 많은 기록을 확인할 수 있지만 저장 용량이 늘어납니다(일반적으로 사이클당 3~15 KB). 값을 낮추면 다음 정리 작업 시 추가 추적이 삭제되며, 다시 값을 높여도 복구할 수 없습니다.",
-            "label": "프로그램당 보관되는 전력 추적"
-        },
-        "max_full_traces_unlabeled": {
-            "doc": "아직 프로그램 라벨이 없는 사이클에 대한 동일한 제한입니다.",
-            "label": "보관되는 전력 추적 (라벨 없음)"
-        },
         "progress_reset_delay": {
             "doc": "완료 후에는 진행 상태를 오랫동안 100%로 유지하여 유휴 상태로 재설정하기 전에 완료됨이 대시보드에 표시되도록 합니다.",
             "label": "진행 초기화 지연"
@@ -1366,7 +1358,7 @@
             "label": "샘플링 간격"
         },
         "save_debug_traces": {
-            "doc": "각 사이클에 대해 전체 전력 추적 및 일치하는 디버그 데이터를 저장합니다. 문제 해결에 유용하지만 저장소 크기가 늘어납니다.",
+            "doc": "각 사이클과 함께 매칭 디버그 데이터(모든 후보 프로그램의 점수)도 저장합니다. 문제 해결에 유용하며, 사이클당 약 20KB가 추가되고 해당 사이클이 보존되는 동안 함께 보존됩니다.",
             "label": "디버그 추적 저장"
         },
         "smart_termination_duration_ratio": {

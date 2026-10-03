@@ -742,6 +742,41 @@ def apply_standby_floor(
     return suggestions
 
 
+def resting_level_w(
+    cycles: list[list[tuple[float, float]]], stop_threshold_w: float
+) -> float | None:
+    """Where the appliance rests while ``stop_threshold_w`` reads it as quiet (#455).
+
+    Per cycle: the time-weighted median of the readings below the threshold, each
+    held until the next reading (an outage-sized gap carries no weight). That is
+    the level the end gates actually time - the drum stopped between tumbles, a
+    dishwasher's passive drying, the draw a Smart Termination tail kept. Device
+    level: the median over the cycles that show one, None below
+    ``STANDBY_FLOOR_MIN_CLEAN_CYCLES`` of them. Pure; never raises.
+    """
+    try:
+        max_gap_s = _MAX_PAUSE_GAP_H * 3600
+        levels: list[float] = []
+        for points in cycles:
+            vals: list[float] = []
+            weights: list[float] = []
+            for (t0, p0), (t1, _p1) in zip(points, points[1:]):
+                dt = float(t1) - float(t0)
+                if p0 < stop_threshold_w and 0 < dt <= max_gap_s:
+                    vals.append(float(p0))
+                    weights.append(dt)
+            if not weights:
+                continue
+            order = np.argsort(vals)
+            cum = np.cumsum(np.asarray(weights)[order])
+            levels.append(float(np.asarray(vals)[order][np.searchsorted(cum, cum[-1] / 2.0)]))
+        if len(levels) < STANDBY_FLOOR_MIN_CLEAN_CYCLES:
+            return None
+        return float(np.median(levels))
+    except Exception:  # noqa: BLE001 - a statistic must never break a suggestion pass
+        return None
+
+
 def _standby_floor_entry(value: float, floor: dict[str, Any]) -> dict[str, Any]:
     idle = float(floor["idle_w"])
     return {
@@ -1938,7 +1973,8 @@ class SuggestionEngine:
         SUGGEST-06). This method
         aggregates statistics across *multiple* cycles for robustness:
 
-        - Power thresholds from the 5th-percentile minimum active power.
+        - Power thresholds from the 5th-percentile minimum active power, withheld
+          when that minimum is where the appliance rests (:func:`resting_level_w`).
         - End-energy threshold from the maximum false-end energy seen.
         - Min-off-gap from the 5th-percentile inter-cycle gap.
 
@@ -1988,6 +2024,7 @@ class SuggestionEngine:
 
         # --- Power thresholds ---
         lowest_active: list[float] = []
+        main_cycles: list[list[tuple[float, float]]] = []
         cycle_energies: list[float] = []      # per-cycle total energy (Wh) for proportional floor
         false_end_energies: list[float] = []
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
@@ -1998,6 +2035,7 @@ class SuggestionEngine:
             # non-anti-crease devices. Trim the (offset, power) readings once so the
             # threshold stat and the energy scan consume the same main-cycle data.
             main_readings = self._strip_anti_crease_readings(readings, options=_batch_opts)
+            main_cycles.append(main_readings)
             powers = np.array([p for _, p in main_readings])
             active = powers[powers > 0.5]
             peak = float(np.max(powers)) if powers.size else 0.0
@@ -2054,24 +2092,51 @@ class SuggestionEngine:
             # correctly per appliance (a few W for washers, ~steady load for pumps).
             suggested_stop = round(p05_min * 0.8, 2)
             suggested_start = round(max(suggested_stop + 0.1, p05_min * 1.05), 2)
-            reason_thr = (
-                f"Kept just above the p05 lowest active power across {n} cycles "
-                f"({p05_min:.1f}W) so a start is caught as early as possible and the "
-                f"stop threshold stays below the machine's lowest running power."
+            # ...but "active" here is any reading over 0.5 W, so on an appliance
+            # that RESTS above that (drum stopped between tumbles, passive drying,
+            # the draw a Smart Termination tail kept) the p05 is the resting level
+            # itself and both values land on or under it (#455). The resting draw
+            # then reads as running - no end gate can time it, so a cycle that used
+            # to end there waits for the appliance to switch off - and once the
+            # cycle is over it reads as a start. Measured with
+            # devtools/suggestion_loop_eval.py: a dishwasher resting at 0.8 W was
+            # offered stop 0.56 W (10 Eco cycles then had nothing left to end on), a
+            # washer resting at 3.3 W start 3.23 W / stop 2.46 W (its post-end draw
+            # split two labelled cycles). There the anchor says nothing about the
+            # lowest RUNNING power, so it proposes nothing: the thresholds in force
+            # demonstrably end cycles at that level. Same margin as the standby
+            # floor (#458), so plug jitter at the resting level stays quiet.
+            resting = resting_level_w(main_cycles, stop_thr)
+            resting_floor = (
+                max(resting * STANDBY_FLOOR_RATIO, resting + STANDBY_FLOOR_MIN_MARGIN_W)
+                if resting is not None and resting > 0
+                else None
             )
-            reason_thr_params = {"cycles": n, "p05": f"{p05_min:.1f}"}
-            suggestions[CONF_STOP_THRESHOLD_W] = {
-                "value": suggested_stop,
-                "reason": reason_thr,
-                "reason_key": "suggestion.reason.thr_batch",
-                "reason_params": reason_thr_params,
-            }
-            suggestions[CONF_START_THRESHOLD_W] = {
-                "value": suggested_start,
-                "reason": reason_thr,
-                "reason_key": "suggestion.reason.thr_batch",
-                "reason_params": reason_thr_params,
-            }
+            if resting_floor is not None and suggested_stop < resting_floor:
+                _LOGGER.debug(
+                    "Stop/start suggestion withheld: p05 lowest active %.2fW is the "
+                    "resting level (%.2fW), stop %.2fW would sit under %.2fW",
+                    p05_min, resting, suggested_stop, resting_floor,
+                )
+            else:
+                reason_thr = (
+                    f"Kept just above the p05 lowest active power across {n} cycles "
+                    f"({p05_min:.1f}W) so a start is caught as early as possible and the "
+                    f"stop threshold stays below the machine's lowest running power."
+                )
+                reason_thr_params = {"cycles": n, "p05": f"{p05_min:.1f}"}
+                suggestions[CONF_STOP_THRESHOLD_W] = {
+                    "value": suggested_stop,
+                    "reason": reason_thr,
+                    "reason_key": "suggestion.reason.thr_batch",
+                    "reason_params": reason_thr_params,
+                }
+                suggestions[CONF_START_THRESHOLD_W] = {
+                    "value": suggested_start,
+                    "reason": reason_thr,
+                    "reason_key": "suggestion.reason.thr_batch",
+                    "reason_params": reason_thr_params,
+                }
 
         # End-energy: corrective only (audit SUGGEST-12). The end gate is checked
         # only once the run has been below stop for the whole off_delay window, so

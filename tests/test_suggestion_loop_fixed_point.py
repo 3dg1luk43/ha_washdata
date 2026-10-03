@@ -21,7 +21,13 @@ require the harness to fail them: Sampling Interval as a ladder, Completion Mini
 as erased evidence (it climbs, then stops once it has deleted the programme it was
 sized from). If it cannot, a passing fixed-point test proves nothing.
 
-Runtime: ~7 min on 8 cores (the corpus run), ~1.5 min for the revert checks.
+Register item 455: a fixed point can still cost detection. The batch stop/start
+anchor read a resting draw as the lowest running power, so Apply all put the stop
+threshold under a dishwasher's 0.8 W drying phase (10 Eco cycles stranded, force-
+stopped under ``--idle-hold``) and the start under a washer's 3.3 W post-end draw (2
+labelled cycles split). Both are failures now, and pinned below.
+
+Runtime: ~7 min on 8 cores (the corpus run), ~2 min for the revert and idle checks.
 """
 from __future__ import annotations
 
@@ -119,3 +125,33 @@ def test_revert_check_the_removed_completion_minimum_erases_its_own_evidence():
     assert len(values) >= 3 and all(b > a for a, b in zip(values, values[1:])), values
     assert res[0]["erased"], res[0]["keys"]
     assert any("erased" in line for line in loop.failures(res))
+
+
+@needs_corpus
+def test_issue_455_apply_all_never_splits_or_strands_a_labelled_cycle(results):
+    """(b) a start under the post-end draw splits; (a) a stop under it strands."""
+    for r in results:
+        assert not r["fragmented"], (r["device"], r["fragmented"], r["keys"])
+        idle = [row["replay"]["idle_above_stop"] for row in r["rounds"]]
+        assert idle[-1] <= idle[0], (r["device"], idle, r["keys"])
+
+
+@needs_corpus
+def test_issue_455a_the_drying_phase_still_ends_cycles_when_it_is_standby():
+    """``--idle-hold``: read every kept tail at or above the new stop as standby.
+
+    The contributed dishwasher rests at 0.8 W through its drying phase; with stop
+    0.56 W this run force-stopped its 10 Eco cycles whose Smart Termination fired
+    there. Its stop threshold now stays put, so nothing is erased.
+    """
+    res = loop.run(
+        _CORPUS, rounds=ROUNDS, jobs=min(8, os.cpu_count() or 1), only=[_RATCHET_DEVICE],
+        lock_probe=False, idle_hold=True,
+    )
+    if not res:
+        pytest.skip("contributed dishwasher export not in cycle_data/")
+    assert res[0]["erased"] == [], res[0]["erased"]
+    stop = res[0]["keys"].get("stop_threshold_w")
+    # Above the 0.8 W rest with the standby floor's margin, if it moves at all.
+    assert stop is None or stop["values"][-1] >= 1.0, stop
+    assert loop.failures(res) == []

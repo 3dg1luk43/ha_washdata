@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Gegen Ende wird dieses Programm für etwa {mins} Min. still und zieht dann noch rund {watts} W für {secs} s, bevor es fertig ist. In {seen} von {measured} gemessenen Zyklen beobachtet: das Gerät macht das nicht bei jedem Durchlauf.",
     "quiet_tail": "~{mins} Min. Ruhephase",
-    "artifact_tip": "{n} Anomalien erkannt (z. B. Tür mitten im Zyklus geöffnet) – öffnen Sie sie, um sie in der Grafik anzuzeigen",
+    "artifact_tip": "{n} Anomalien erkannt (z. B. Tür mitten im Zyklus geöffnet) - öffnen, um sie in der Grafik anzuzeigen",
     "artifact_tip_one": "{n} Anomalie erkannt (z. B. Tür mitten im Zyklus geöffnet) - öffnen, um sie in der Grafik anzuzeigen",
     "artifact_tip_other": "{n} Anomalien erkannt (z. B. Tür mitten im Zyklus geöffnet) - öffnen, um sie in der Grafik anzuzeigen",
     "auto": "(automatisch erkannt)",
@@ -67,7 +67,7 @@
     "overrun": "Bin länger gelaufen als gewöhnlich",
     "underrun": "Schneller als gewöhnlich abgeschlossen",
     "poor_fit": "schlechte Qualität",
-    "restart_gap_tip": "{n} HA-Neustart-Lücke: Leistungsverlauf hat eine Lücke",
+    "restart_gap_tip": "{n} HA-Neustart-Lücken: Leistungsverlauf hat Lücken",
     "restart_gap_tip_one": "{n} HA-Neustart-Lücke: Leistungsverlauf hat eine Lücke",
     "restart_gap_tip_other": "{n} HA-Neustart-Lücken: Leistungsverlauf hat Lücken",
     "reviewed": "Bewertet",
@@ -441,7 +441,7 @@
     "mode_new_profile": "Neues Profil erstellen",
     "models_fine_tuned": "(feinabgestimmte Modelle: {count})",
     "n_selected": "{n} ausgewählt",
-    "n_tuning_suggestions": "{n} Abstimmungsvorschlag",
+    "n_tuning_suggestions": "{n} Abstimmungsvorschläge",
     "n_tuning_suggestions_one": "{n} Abstimmungsvorschlag",
     "n_tuning_suggestions_other": "{n} Abstimmungsvorschläge",
     "new_profile_name": "Neuer Profilname",
@@ -766,7 +766,7 @@
     "group_modal_help": "Gruppieren Sie Programme mit derselben Form, die sich in Temperatur/Schleudergang unterscheiden (Dauer kann variieren). Matching bewertet die Gruppe als einen Kandidaten und wählt dann das am besten passende Mitglied aus. Wählen Sie mindestens 2; Die Überlagerung zeigt, wie ähnlich sie sind.",
     "group_not_cohesive": "Diese Profile sind nicht ähnlich genug, um zuverlässig gruppiert zu werden. Beim Matching werden sie daher einzeln behandelt, bis Sie den Ausreißer entfernen oder die Gruppe aufteilen.",
     "group_preview_hint": "Mindestens 2 Mitglieder auswählen, um deren Leistungskurven in der Vorschau zu vergleichen.",
-    "legacy_actions_title": "{count} alte benutzerdefinierte Aktion wird noch ausgeführt",
+    "legacy_actions_title": "{count} alte benutzerdefinierte Aktionen werden noch ausgeführt",
     "legacy_actions_title_one": "{count} alte benutzerdefinierte Aktion wird noch ausgeführt",
     "legacy_actions_title_other": "{count} alte benutzerdefinierte Aktionen werden noch ausgeführt",
     "live_chart_loading": "Sobald die Messwerte eintreffen, wird ein Live-Leistungsdiagramm angezeigt.",
@@ -830,7 +830,7 @@
     "recording_in_progress": "Aufnahme läuft",
     "reminders_intro": "Eine Erinnerung im Panel so viele Zyklen nach der letzten Wartung anzeigen. Leer lassen oder 0, um eine Erinnerung auszuschalten.",
     "restart_gap_footer": "Im Diagramm hervorgehoben. Leistungsdaten fehlen für diese Intervalle; die Erkennung verwendete nur echte Messwerte.",
-    "restart_gap_header": "{n} HA-Neustart-Lücke während dieses Zyklus",
+    "restart_gap_header": "{n} HA-Neustart-Lücken während dieses Zyklus",
     "restart_gap_header_one": "{n} HA-Neustart-Lücke während dieses Zyklus",
     "restart_gap_header_other": "{n} HA-Neustart-Lücken während dieses Zyklus",
     "restart_gap_item": "{dur} Lücke",
@@ -850,7 +850,7 @@
     "setting_changed": "Geändert von {old} zu {new} am {date}",
     "settings_basic_note": "Es werden die wesentlichen Einstellungen angezeigt. Wechseln Sie zu Erweitert für die vollständige Liste.",
     "show_all_settings": "Alle Einstellungen anzeigen",
-    "showing_suggestions": "{count} Einstellung mit Vorschlägen wird angezeigt.",
+    "showing_suggestions": "{count} Einstellungen mit Vorschlägen werden angezeigt.",
     "showing_suggestions_one": "{count} Einstellung mit Vorschlägen wird angezeigt.",
     "showing_suggestions_other": "{count} Einstellungen mit Vorschlägen werden angezeigt.",
     "split_intro": "Klicken Sie auf das Diagramm, um einen Teilungspunkt hinzuzufügen oder zu entfernen oder eine automatische Erkennung anhand von Leerlauflücken durchzuführen. Jedes resultierende Segment kann ein eigenes Profil erhalten.",
@@ -880,7 +880,7 @@
     "trend_energy_up": "Energietrend steigt ({pct} %/Zyklus) – aktueller Durchschnitt {avg}",
     "trim_destructive_confirm": "Dadurch werden nur {pct}% des Zyklus behalten. Dies kann nicht rückgängig gemacht werden. Fortfahren?",
     "trim_intro": "Ziehen Sie die roten Ziehpunkte oder geben Sie Werte ein. Alles außerhalb des Fensters wird entfernt.",
-    "tuning_suggestions_available": "{count} Optimierungsvorschlag aus beobachteten Zyklen verfügbar. Sie erscheinen neben den relevanten Feldern.",
+    "tuning_suggestions_available": "{count} Optimierungsvorschläge aus beobachteten Zyklen verfügbar. Sie erscheinen neben den relevanten Feldern.",
     "tuning_suggestions_available_one": "{count} Optimierungsvorschlag aus beobachteten Zyklen verfügbar. Er erscheint neben dem relevanten Feld.",
     "tuning_suggestions_available_other": "{count} Optimierungsvorschläge aus beobachteten Zyklen verfügbar. Sie erscheinen neben den relevanten Feldern.",
     "unsure_detected_prefix": "WashData ist sich nicht sicher, ob es erkannt wurde",
@@ -944,7 +944,7 @@
     "sug_muted": "Diese Einstellung wird nicht mehr vorgeschlagen",
     "sug_mute_failed": "Einstellung konnte nicht stummgeschaltet werden",
     "sug_unmuted_all": "Stummgeschaltete Vorschläge zurückgesetzt",
-    "n_suggestions_muted": "{count} stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",
+    "n_suggestions_muted": "{count} Vorschläge stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",
     "n_suggestions_muted_one": "{count} Vorschlag stummgeschaltet; der Autotuner schlägt ihn nicht mehr vor.",
     "n_suggestions_muted_other": "{count} Vorschläge stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",
     "font_size_hint": "Alles in diesem Panel vergrößern oder verkleinern. Gilt für Ihr Konto auf diesem Gerät.",
@@ -1123,7 +1123,7 @@
       "label": "Automatische Beschriftungskonfidenz"
     },
     "auto_maintenance": {
-      "doc": "Führen Sie die nächtliche Verwaltung durch: Erstellen Sie Profilumschläge neu, berechnen Sie den Zykluszustand neu, bereinigen Sie Debug-Traces und behalten Sie die neuesten Zyklen bei.",
+      "doc": "Nächtliche Wartung ausführen: ältere unbeschriftete Zyklen beschriften, die jetzt eindeutig zu einem Programm passen, Programmkurven neu erstellen, Anomalie-Markierungen aktualisieren, Zyklusgesundheit neu berechnen und Debug-Traces entfernen, solange „Debug-Traces speichern“ deaktiviert ist. Jeder Zyklus bleibt mit seinem vollständigen Leistungsverlauf erhalten.",
       "label": "Automatische Wartung (nächtliche Bereinigung)"
     },
     "completion_min_seconds": {
@@ -1362,14 +1362,6 @@
       "doc": "Wenn eine laufende Übereinstimmung mitten im Zyklus unter diesen Wert fällt, wird die vorläufige Identifizierung gelöscht. Halten Sie den Wert etwas unter dem Abgleichschwellenwert, damit ein kurzer Rückgang der Ähnlichkeit die Anzeige nicht wieder auf „Nicht zugeordnet“ zurückspringen lässt.",
       "label": "Nichtübereinstimmungsschwellenwert"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Wie viele der neuesten Zyklen jedes Programms ihren vollständigen Leistungs-Trace behalten. Ältere Zyklen behalten Dauer, Energie und Label, verlieren jedoch die Kurve - ihr Diagramm ist dann leer und sie zählen nicht mehr zur Kurve, Gesundheit oder Vorschlägen des Programms. Ein höherer Wert hält mehr Verlauf inspizierbar, auf Kosten des Speichers (typischerweise 3-15 KB pro Zyklus). Ein niedrigerer Wert löscht die überzähligen Traces bei der nächsten Bereinigung; ein erneutes Erhöhen kann sie nicht wiederherstellen.",
-      "label": "Leistungs-Traces je Programm"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Dasselbe Limit für Zyklen, denen noch kein Programm-Label zugewiesen wurde.",
-      "label": "Leistungs-Traces (unbeschriftet)"
-    },
     "progress_reset_delay": {
       "doc": "Halten Sie den Fortschritt nach Abschluss so lange auf 100 %, damit „Abgeschlossen“ auf den Dashboards angezeigt wird, bevor Sie auf „Leerlauf“ zurücksetzen.",
       "label": "Fortschritts-Reset-Verzögerung"
@@ -1383,7 +1375,7 @@
       "label": "Abtastintervall"
     },
     "save_debug_traces": {
-      "doc": "Speichern Sie für jeden Zyklus die vollständige Leistungsverfolgung und die entsprechenden Debug-Daten. Nützlich zur Fehlerbehebung, erhöht jedoch die Speichergröße.",
+      "doc": "Speichert zusätzlich die Debug-Daten des Abgleichs (die Bewertungen aller Kandidaten) mit jedem Zyklus. Nützlich zur Fehlerbehebung; belegt etwa 20 KB pro Zyklus und bleibt so lange erhalten wie der Zyklus.",
       "label": "Debug-Traces speichern"
     },
     "smart_termination_duration_ratio": {

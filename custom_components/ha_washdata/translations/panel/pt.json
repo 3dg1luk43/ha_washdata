@@ -2,7 +2,7 @@
   "badge": {
     "quiet_tail_tip": "Perto do fim, este programa fica em silêncio durante cerca de {mins} min e depois consome cerca de {watts} W durante {secs} s antes de terminar. Observado em {seen} de {measured} ciclos medidos: o aparelho não o faz em todas as utilizações.",
     "quiet_tail": "silêncio final ~{mins} min",
-    "artifact_tip": "{n} anomalias detectadas (por exemplo, porta aberta a meio do ciclo) – abra para as ver no gráfico",
+    "artifact_tip": "{n} anomalias detectadas (por exemplo, porta aberta a meio do ciclo) - abra para as ver no gráfico",
     "artifact_tip_one": "{n} anomalia detectada (por exemplo, porta aberta a meio do ciclo) - abra para a ver no gráfico",
     "artifact_tip_many": "{n} anomalias detectadas (por exemplo, porta aberta a meio do ciclo) - abra para as ver no gráfico",
     "artifact_tip_other": "{n} anomalias detectadas (por exemplo, porta aberta a meio do ciclo) - abra para as ver no gráfico",
@@ -18,7 +18,7 @@
     "needs_review": "Precisa de revisão",
     "overrun": "Demorou mais do que o habitual",
     "poor_fit": "qualidade fraca",
-    "restart_gap_tip": "{n} lacuna de reinício do HA: o traçado de potência tem uma lacuna",
+    "restart_gap_tip": "{n} lacunas de reinício do HA: o traçado de potência tem lacunas",
     "restart_gap_tip_one": "{n} lacuna de reinício do HA: o traçado de potência tem uma lacuna",
     "restart_gap_tip_many": "{n} lacunas de reinício do HA: o traçado de potência tem lacunas",
     "restart_gap_tip_other": "{n} lacunas de reinício do HA: o traçado de potência tem lacunas",
@@ -390,7 +390,7 @@
     "mode_new_profile": "Criar novo perfil",
     "models_fine_tuned": "(modelos ajustados: {count})",
     "n_selected": "{n} selecionados",
-    "n_tuning_suggestions": "{n} sugestão de ajuste",
+    "n_tuning_suggestions": "{n} sugestões de ajuste",
     "n_tuning_suggestions_one": "{n} sugestão de ajuste",
     "n_tuning_suggestions_many": "{n} sugestões de ajuste",
     "n_tuning_suggestions_other": "{n} sugestões de ajuste",
@@ -717,7 +717,7 @@
     "group_modal_help": "Agrupe programas com a mesma forma que diferem em temperatura/centrifugação (as durações podem variar). A correspondência pontua o grupo como um candidato e, em seguida, escolhe o membro mais adequado. Escolha pelo menos 2; a sobreposição mostra o grau de semelhança.",
     "group_not_cohesive": "Estes perfis não são suficientemente semelhantes para serem agrupados de forma fiável, pelo que a correspondência os trata individualmente até remover o valor aberrante ou dividir o grupo.",
     "group_preview_hint": "Selecione 2 ou mais membros para pré-visualizar e comparar as suas curvas de potência.",
-    "legacy_actions_title": "{count} acção personalizada legada ainda em execução",
+    "legacy_actions_title": "{count} ações personalizadas legadas ainda em execução",
     "legacy_actions_title_one": "{count} ação personalizada legada ainda em execução",
     "legacy_actions_title_many": "{count} ações personalizadas legadas ainda em execução",
     "legacy_actions_title_other": "{count} ações personalizadas legadas ainda em execução",
@@ -782,7 +782,7 @@
     "recording_in_progress": "Gravação em curso",
     "reminders_intro": "Mostrar um lembrete no painel este número de ciclos após a última manutenção. Deixe em branco ou 0 para desativar um lembrete.",
     "restart_gap_footer": "Destacado no gráfico. Dados de potência estão em falta para estes intervalos; a correspondência usou apenas leituras reais.",
-    "restart_gap_header": "{n} lacuna de reinício do HA durante este ciclo",
+    "restart_gap_header": "{n} lacunas de reinício do HA durante este ciclo",
     "restart_gap_header_one": "{n} lacuna de reinício do HA durante este ciclo",
     "restart_gap_header_many": "{n} lacunas de reinício do HA durante este ciclo",
     "restart_gap_header_other": "{n} lacunas de reinício do HA durante este ciclo",
@@ -803,7 +803,7 @@
     "setting_changed": "Alterado de {old} para {new} em {date}",
     "settings_basic_note": "A mostrar as definições essenciais. Mude para Avançado para ver a lista completa.",
     "show_all_settings": "Mostrar todas as definições",
-    "showing_suggestions": "A mostrar a definição {count} com sugestões.",
+    "showing_suggestions": "A mostrar {count} definições com sugestões.",
     "showing_suggestions_one": "A mostrar {count} definição com sugestões.",
     "showing_suggestions_many": "A mostrar {count} definições com sugestões.",
     "showing_suggestions_other": "A mostrar {count} definições com sugestões.",
@@ -834,7 +834,7 @@
     "trend_energy_up": "Energia com tendência crescente ({pct}%/ciclo) – média recente {avg}",
     "trim_destructive_confirm": "Isto mantém apenas {pct}% do ciclo e esta ação não pode ser anulada. Continuar?",
     "trim_intro": "Arraste os puxadores vermelhos ou introduza valores. Tudo o que estiver fora da janela é removido.",
-    "tuning_suggestions_available": "{count} sugestão de ajuste disponível a partir dos ciclos observados. Aparecem junto dos campos relevantes.",
+    "tuning_suggestions_available": "{count} sugestões de ajuste disponíveis a partir dos ciclos observados. Aparecem junto dos campos relevantes.",
     "tuning_suggestions_available_one": "{count} sugestão de ajuste disponível a partir dos ciclos observados. Aparece junto do campo relevante.",
     "tuning_suggestions_available_many": "{count} sugestões de ajuste disponíveis a partir dos ciclos observados. Aparecem junto dos campos relevantes.",
     "tuning_suggestions_available_other": "{count} sugestões de ajuste disponíveis a partir dos ciclos observados. Aparecem junto dos campos relevantes.",
@@ -896,7 +896,7 @@
     "sug_muted": "Esta definição não será sugerida novamente",
     "sug_mute_failed": "Não foi possível silenciar a sugestão",
     "sug_unmuted_all": "Sugestões silenciadas repostas",
-    "n_suggestions_muted": "{count} silenciadas; o ajustador automático não proporá estas definições.",
+    "n_suggestions_muted": "{count} sugestões silenciadas; o ajustador automático não as proporá.",
     "n_suggestions_muted_one": "{count} sugestão silenciada; o ajustador automático não a proporá.",
     "n_suggestions_muted_many": "{count} sugestões silenciadas; o ajustador automático não as proporá.",
     "n_suggestions_muted_other": "{count} sugestões silenciadas; o ajustador automático não as proporá.",
@@ -1083,7 +1083,7 @@
       "label": "Confiança de Rotulagem Automática"
     },
     "auto_maintenance": {
-      "doc": "Execute a limpeza noturna: recrie envelopes de perfil, recalcule a integridade do ciclo, remova rastros de depuração e retenha os ciclos mais recentes.",
+      "doc": "Executa a limpeza noturna: atribui rótulos aos ciclos mais antigos sem rótulo que agora correspondem claramente a um programa, reconstrói as curvas dos programas, atualiza as marcas de anomalia, recalcula a saúde dos ciclos e remove os traços de depuração enquanto a opção Guardar Traços de Depuração estiver desativada. Todos os ciclos são mantidos com o respetivo traçado de potência completo.",
       "label": "Manutenção Automática (limpeza nocturna)"
     },
     "completion_min_seconds": {
@@ -1322,14 +1322,6 @@
       "doc": "Se uma correspondência em direto a meio do ciclo descer abaixo desta pontuação, a identificação provisória é apagada. Mantenha-o um pouco abaixo do Limiar de Correspondência para que uma breve queda na semelhança não faça a apresentação voltar a sem correspondência.",
       "label": "Limiar de Não Correspondência"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Quantos ciclos mais recentes de cada programa conservam o seu traço de potência completo. Os ciclos mais antigos mantêm a duração, a energia e o rótulo, mas perdem a curva; o gráfico fica vazio e deixam de contribuir para a curva, a qualidade de perfil ou as sugestões do programa. Aumentar este valor permite inspecionar mais histórico ao custo de armazenamento (tipicamente 3-15 KB por ciclo). Diminuí-lo elimina os traços extra na próxima limpeza, e aumentá-lo novamente não os pode recuperar.",
-      "label": "Traços de potência guardados por programa"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "O mesmo limite para os ciclos que ainda não têm nome de programa.",
-      "label": "Traços de potência guardados (sem rótulo)"
-    },
     "progress_reset_delay": {
       "doc": "Depois de terminar, mantenha o progresso em 100% por esse tempo para que Concluído fique visível nos painéis antes de redefinir para Inativo.",
       "label": "Atraso de Reposição de Progresso"
@@ -1343,7 +1335,7 @@
       "label": "Intervalo de Amostragem"
     },
     "save_debug_traces": {
-      "doc": "Armazene o rastreamento de energia completo e os dados de depuração correspondentes para cada ciclo. Útil para solução de problemas, mas aumenta o tamanho do armazenamento.",
+      "doc": "Guarda também com cada ciclo os dados de depuração do reconhecimento (as pontuações de cada candidato). Útil para a resolução de problemas; acrescenta cerca de 20 KB por ciclo, guardados durante o mesmo tempo que o ciclo.",
       "label": "Guardar Traços de Depuração"
     },
     "smart_termination_duration_ratio": {

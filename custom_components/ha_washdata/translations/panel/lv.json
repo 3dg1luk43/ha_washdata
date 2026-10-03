@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Beigu daļā šī programma uz aptuveni {mins} min apklust, pēc tam pirms pabeigšanas {secs} s patērē aptuveni {watts} W. Novērots {seen} no {measured} izmērītajiem cikliem: ierīce to nedara katrā reizē.",
     "quiet_tail": "klusās beigas ~{mins} min",
-    "artifact_tip": "Konstatētas {n} anomālijas (piemēram, durvis atvērtas cikla vidū) – atveriet, lai tās skatītu diagrammā",
+    "artifact_tip": "Konstatētas {n} anomālijas (piemēram, durvis atvērtas cikla vidū) - atveriet, lai tās skatītu diagrammā",
     "artifact_tip_zero": "Konstatētas {n} anomālijas (piemēram, durvis atvērtas cikla vidū) - atveriet, lai tās skatītu diagrammā",
     "artifact_tip_one": "Konstatēta {n} anomālija (piemēram, durvis atvērtas cikla vidū) - atveriet, lai to skatītu diagrammā",
     "artifact_tip_other": "Konstatētas {n} anomālijas (piemēram, durvis atvērtas cikla vidū) - atveriet, lai tās skatītu diagrammā",
@@ -67,7 +67,7 @@
     "needs_review": "Nepieciešama pārskatīšana",
     "overrun": "Skrēja ilgāk nekā parasti",
     "poor_fit": "slikta atbilstība",
-    "restart_gap_tip": "{n} HA restartēšanas atstarpe: jaudas trasē ir caurums",
+    "restart_gap_tip": "{n} HA restartēšanas atstarpes: jaudas trasē ir caurumi",
     "restart_gap_tip_zero": "{n} HA restartēšanas atstarpes: jaudas trasē ir caurumi",
     "restart_gap_tip_one": "{n} HA restartēšanas atstarpe: jaudas trasē ir caurums",
     "restart_gap_tip_other": "{n} HA restartēšanas atstarpes: jaudas trasē ir caurumi",
@@ -444,7 +444,7 @@
     "mode_new_profile": "Izveidot jaunu profilu",
     "models_fine_tuned": "(precizētie modeļi: {count})",
     "n_selected": "Atlasīti: {n}",
-    "n_tuning_suggestions": "{n} regulēšanas ieteikums",
+    "n_tuning_suggestions": "{n} regulēšanas ieteikumi",
     "n_tuning_suggestions_zero": "{n} regulēšanas ieteikumi",
     "n_tuning_suggestions_one": "{n} regulēšanas ieteikums",
     "n_tuning_suggestions_other": "{n} regulēšanas ieteikumi",
@@ -770,7 +770,7 @@
     "group_modal_help": "Grupējiet programmas ar vienādu formu, kas atšķiras pēc temperatūras/griešanās (ilgums var atšķirties). Atbilstības gadījumā grupa tiek vērtēta kā viens kandidāts, pēc tam tiek izvēlēts atbilstošākais dalībnieks. Izvēlieties vismaz 2; pārklājums parāda, cik tie ir līdzīgi.",
     "group_not_cohesive": "Šie profili nav pietiekami līdzīgi, lai tos varētu droši grupēt, tāpēc saskaņošanas funkcija tos apstrādā atsevišķi, līdz noņemat novirzi vai sadalāt grupu.",
     "group_preview_hint": "Atzīmējiet 2+ dalībniekus, lai priekšskatītu un salīdzinātu to jaudas līknes.",
-    "legacy_actions_title": "Joprojām darbojas {count} mantotā pielāgotā darbība",
+    "legacy_actions_title": "Joprojām darbojas {count} mantotās pielāgotās darbības",
     "legacy_actions_title_zero": "Joprojām darbojas {count} mantotās pielāgotās darbības",
     "legacy_actions_title_one": "Joprojām darbojas {count} mantotā pielāgotā darbība",
     "legacy_actions_title_other": "Joprojām darbojas {count} mantotās pielāgotās darbības",
@@ -835,7 +835,7 @@
     "recording_in_progress": "Notiek ierakstīšana",
     "reminders_intro": "Rādīt atgādinājumu panelī pēc tik cikliem kopš pēdējās apkopes. Atstājiet tukšu vai 0, lai izslēgtu atgādinājumu.",
     "restart_gap_footer": "Izcelts diagrammā. Jaudas dati trūkst šiem intervāliem; atbilstības noteikšana izmantoja tikai faktiskos rādījumus.",
-    "restart_gap_header": "{n} HA restartēšanas atstarpe šī cikla laikā",
+    "restart_gap_header": "{n} HA restartēšanas atstarpes šī cikla laikā",
     "restart_gap_header_zero": "{n} HA restartēšanas atstarpes šī cikla laikā",
     "restart_gap_header_one": "{n} HA restartēšanas atstarpe šī cikla laikā",
     "restart_gap_header_other": "{n} HA restartēšanas atstarpes šī cikla laikā",
@@ -856,7 +856,7 @@
     "setting_changed": "Mainīts no {old} uz {new} {date}",
     "settings_basic_note": "Tiek rādīti būtiskākie iestatījumi. Pārslēdzieties uz Papildu, lai skatītu pilnu sarakstu.",
     "show_all_settings": "Rādīt visus iestatījumus",
-    "showing_suggestions": "Tiek rādīts {count} iestatījums ar ieteikumiem.",
+    "showing_suggestions": "Tiek rādīti {count} iestatījumi ar ieteikumiem.",
     "showing_suggestions_zero": "Tiek rādīti {count} iestatījumi ar ieteikumiem.",
     "showing_suggestions_one": "Tiek rādīts {count} iestatījums ar ieteikumiem.",
     "showing_suggestions_other": "Tiek rādīti {count} iestatījumi ar ieteikumiem.",
@@ -887,7 +887,7 @@
     "trend_energy_up": "Enerģijas tendence pieaug ({pct}%/ciklā) – nesenā vidējā {avg}",
     "trim_destructive_confirm": "Tas saglabā tikai {pct}% no cikla, un šo nevar atsaukt. Turpināt?",
     "trim_intro": "Velciet sarkanos rokturus vai ievadiet vērtības. Viss, kas atrodas ārpus loga, tiek noņemts.",
-    "tuning_suggestions_available": "No novērotajiem cikliem pieejams {count} regulēšanas ieteikums. Tie parādās blakus attiecīgajiem laukiem.",
+    "tuning_suggestions_available": "No novērotajiem cikliem pieejami {count} regulēšanas ieteikumi. Tie parādās blakus attiecīgajiem laukiem.",
     "tuning_suggestions_available_zero": "No novērotajiem cikliem pieejami {count} regulēšanas ieteikumi. Tie parādās blakus attiecīgajiem laukiem.",
     "tuning_suggestions_available_one": "No novērotajiem cikliem pieejams {count} regulēšanas ieteikums. Tas parādās blakus attiecīgajam laukam.",
     "tuning_suggestions_available_other": "No novērotajiem cikliem pieejami {count} regulēšanas ieteikumi. Tie parādās blakus attiecīgajiem laukiem.",
@@ -952,7 +952,7 @@
     "sug_muted": "Šis iestatījums vairs netiks ieteikts",
     "sug_mute_failed": "Neizdevās klusināt ieteikumu",
     "sug_unmuted_all": "Klusināto ieteikumu atiestatīšana pabeigta",
-    "n_suggestions_muted": "{count} klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
+    "n_suggestions_muted": "{count} ieteikumi klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
     "n_suggestions_muted_zero": "{count} ieteikumi klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
     "n_suggestions_muted_one": "{count} ieteikums klusināts; automātiskais regulētājs to vairs nepiedāvās.",
     "n_suggestions_muted_other": "{count} ieteikumi klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
@@ -1116,7 +1116,7 @@
       "label": "Automātiskās marķēšanas pārliecība"
     },
     "auto_maintenance": {
-      "doc": "Veiciet nakts uzkopšanu: atjaunojiet profila aploksnes, pārrēķiniet cikla stāvokli, izgrieziet atkļūdošanas pēdas un saglabājiet jaunākos ciklus.",
+      "doc": "Veic nakts uzkopšanu: marķē vecākus nemarķētus ciklus, kas tagad skaidri atbilst kādai programmai, pārbūvē programmu līknes, atsvaidzina anomāliju atzīmes, pārrēķina ciklu veselību un noņem atkļūdošanas pēdas, kamēr \"Saglabāt atkļūdošanas pēdas\" ir izslēgts. Katrs cikls un tā pilnā jaudas trase tiek saglabāti.",
       "label": "Automātiskā apkope (nakts tīrīšana)"
     },
     "completion_min_seconds": {
@@ -1355,14 +1355,6 @@
       "doc": "Ja tiešraides atbilstības rezultāts cikla vidū noslīd zem šī rezultāta, provizoriskā identifikācija tiek dzēsta. Turiet to nedaudz zem Atbilstības sliekšņa, lai īss līdzības kritums nepārslēgtu attēlojumu atpakaļ uz stāvokli bez atbilstības.",
       "label": "Neatbilstības slieksnis"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Cik no katras programmas jaunākajiem cikliem saglabā pilno jaudas trasi. Vecāki cikli saglabā ilgumu, enerģiju un birku, bet zaudē līkni, tādēļ to diagramma ir tukša un tie vairs netiek ieskaitīti programmas līknē, veselībā vai ieteikumos. Palielināšana ļauj aplūkot vairāk vēstures, taču palielina krātuves izmantojumu (parasti 3–15 KB vienam ciklam). Samazināšana dzēš lieko trases nākamās nakts tīrīšanas laikā, un atkārtota palielināšana nevar tās atjaunot.",
-      "label": "Saglabātās jaudas trases vienai programmai"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Tāds pats ierobežojums cikliem, kuriem vēl nav programmas birkas.",
-      "label": "Saglabātās jaudas trases (bez etiķetes)"
-    },
     "progress_reset_delay": {
       "doc": "Pēc pabeigšanas saglabājiet progresu 100% līmenī tik ilgi, lai informācijas paneļos būtu redzams paziņojums Pabeigts pirms atiestatīšanas uz dīkstāvi.",
       "label": "Progresa atiestatīšanas aizkave"
@@ -1376,7 +1368,7 @@
       "label": "Paraugu ņemšanas intervāls"
     },
     "save_debug_traces": {
-      "doc": "Saglabājiet pilnas jaudas izsekošanu un atbilstošos atkļūdošanas datus katram ciklam. Noderīgs problēmu novēršanai, bet palielina krātuves apjomu.",
+      "doc": "Kopā ar katru ciklu saglabā arī saskaņotāja atkļūdošanas datus (katras kandidātprogrammas punktu skaitu). Noderīgi problēmu novēršanai; pievieno apmēram 20 KB katram ciklam, un tie tiek glabāti tik ilgi, cik pats cikls.",
       "label": "Saglabāt atkļūdošanas pēdas"
     },
     "smart_termination_duration_ratio": {

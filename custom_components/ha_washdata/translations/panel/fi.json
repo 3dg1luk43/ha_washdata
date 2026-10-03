@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Loppua kohti tämä ohjelma on hiljaa noin {mins} min, minkä jälkeen se ottaa noin {watts} W {secs} s ajan ennen valmistumista. Havaittu {seen}/{measured} mitatussa syklissä: laite ei tee näin joka ajolla.",
     "quiet_tail": "~{mins} min hiljainen loppu",
-    "artifact_tip": "{n} poikkeavaa havaittu (esim. oven avautuminen kesken syklin) – avaa nähdäksesi ne kaaviossa",
+    "artifact_tip": "{n} poikkeamaa havaittu (esim. ovi avattu kesken syklin) - avaa nähdäksesi ne kaaviossa",
     "artifact_tip_one": "{n} poikkeama havaittu (esim. ovi avattu kesken syklin) - avaa nähdäksesi sen kaaviossa",
     "artifact_tip_other": "{n} poikkeamaa havaittu (esim. ovi avattu kesken syklin) - avaa nähdäksesi ne kaaviossa",
     "auto": "(tunnistettu automaattisesti)",
@@ -66,7 +66,7 @@
     "needs_review": "Vaatii tarkistuksen",
     "overrun": "Juoksi tavallista pidempään",
     "poor_fit": "heikko laatu",
-    "restart_gap_tip": "{n} HA-uudelleenkäynnistyskatkos: tehoviivan datassa on aukko",
+    "restart_gap_tip": "{n} HA-uudelleenkäynnistyskatkosta: tehoviivan datassa on aukkoja",
     "restart_gap_tip_one": "{n} HA-uudelleenkäynnistyskatkos: tehoviivan datassa on aukko",
     "restart_gap_tip_other": "{n} HA-uudelleenkäynnistyskatkosta: tehoviivan datassa on aukkoja",
     "reviewed": "Tarkistettu",
@@ -442,7 +442,7 @@
     "mode_new_profile": "Luo uusi profiili",
     "models_fine_tuned": "(hienosäädetyt mallit: {count})",
     "n_selected": "{n} valittu",
-    "n_tuning_suggestions": "{n} viritysehdotus",
+    "n_tuning_suggestions": "{n} viritysehdotusta",
     "n_tuning_suggestions_one": "{n} viritysehdotus",
     "n_tuning_suggestions_other": "{n} viritysehdotusta",
     "new_profile_name": "Uusi profiilinimi",
@@ -743,7 +743,7 @@
     "appliance_monitor": "Laitteen näyttö",
     "artifact_dip_detail": "Alitti tavallisen tehon alarajan noin {n} sekunnin ajan.",
     "artifact_footer": "Korostettu yllä olevassa kaaviossa. Nämä ovat ohimeneviä esineitä (esim. ovi avautui kesken syklin), eivät välttämättä ongelmia.",
-    "artifact_header": "{n} poikkeavaa havaittu tämän jakson aikana",
+    "artifact_header": "{n} poikkeamaa havaittu tämän syklin aikana",
     "artifact_header_one": "{n} poikkeama havaittu tämän syklin aikana",
     "artifact_header_other": "{n} poikkeamaa havaittu tämän syklin aikana",
     "artifact_pause_detail": "Teho laski lähes nollaan noin {n} sekunniksi ja jatkui sitten – todennäköisesti ovi avattiin syklin aikana tai sykli pysäytettiin.",
@@ -766,7 +766,7 @@
     "group_modal_help": "Ryhmäohjelmat, joilla on sama muoto ja jotka eroavat lämpötilassa/linkouksessa (kesto voi vaihdella). Matching antaa ryhmän yhdeksi ehdokkaaksi ja valitsee sitten parhaiten sopivan jäsenen. Valitse vähintään 2; peittokuva osoittaa, kuinka samanlaisia ne ovat.",
     "group_not_cohesive": "Nämä profiilit eivät ole riittävän samankaltaisia ryhmittelemään niitä luotettavasti, joten vastaavuudessa käsitellään niitä yksitellen, kunnes poistat poikkeaman tai jaat ryhmän.",
     "group_preview_hint": "Valitse vähintään 2 jäsentä esikatsellaksesi ja vertaillaksesi tehokäyriä.",
-    "legacy_actions_title": "{count} vanha muokattu toiminto on edelleen käynnissä",
+    "legacy_actions_title": "{count} vanhaa muokattua toimintoa on edelleen käynnissä",
     "legacy_actions_title_one": "{count} vanha muokattu toiminto on edelleen käynnissä",
     "legacy_actions_title_other": "{count} vanhaa muokattua toimintoa on edelleen käynnissä",
     "live_chart_loading": "Live-tehokaavio tulee näkyviin lukemien saapuessa.",
@@ -830,7 +830,7 @@
     "recording_in_progress": "Tallennus käynnissä",
     "reminders_intro": "Näytä paneelissa muistutus näin monta sykliä viimeisen huollon jälkeen. Poista muistutus käytöstä jättämällä tyhjäksi tai asettamalla 0.",
     "restart_gap_footer": "Korostettu kuvaajalla. Tehodata puuttuu näiltä väleiltä; tunnistus käytti vain todellisia lukemia.",
-    "restart_gap_header": "{n} HA-uudelleenkäynnistyskatkos tämän syklin aikana",
+    "restart_gap_header": "{n} HA-uudelleenkäynnistyskatkosta tämän syklin aikana",
     "restart_gap_header_one": "{n} HA-uudelleenkäynnistyskatkos tämän syklin aikana",
     "restart_gap_header_other": "{n} HA-uudelleenkäynnistyskatkosta tämän syklin aikana",
     "restart_gap_item": "{dur} katkos",
@@ -850,7 +850,7 @@
     "setting_changed": "Muutettu {old} → {new} {date}",
     "settings_basic_note": "Näytetään olennaiset asetukset. Vaihda Edistynyt-tilaan nähdäksesi koko luettelon.",
     "show_all_settings": "Näytä kaikki asetukset",
-    "showing_suggestions": "Näytetään asetus {count} ja ehdotuksia.",
+    "showing_suggestions": "Näytetään {count} asetusta, joilla on ehdotuksia.",
     "showing_suggestions_one": "Näytetään {count} asetus, jolla on ehdotuksia.",
     "showing_suggestions_other": "Näytetään {count} asetusta, joilla on ehdotuksia.",
     "split_intro": "Napsauta kaaviota lisätäksesi tai poistaaksesi jakopisteen tai tunnistaa automaattisesti tyhjäkäynnin väliltä. Jokainen tuloksena oleva segmentti voi saada oman profiilinsa.",
@@ -880,7 +880,7 @@
     "trend_energy_up": "Energiatrendi nousussa ({pct} %/sykli) – viimeaikainen keskiarvo {avg}",
     "trim_destructive_confirm": "Tämä säilyttää vain {pct}% syklistä. Tätä ei voi kumota. Jatketaanko?",
     "trim_intro": "Vedä punaisia kahvoja tai syötä arvot. Kaikki ikkunan ulkopuolella oleva poistetaan.",
-    "tuning_suggestions_available": "{count} viritysehdotus saatavilla havaituista sykleistä. Ne näkyvät asianmukaisten kenttien vieressä.",
+    "tuning_suggestions_available": "{count} viritysehdotusta saatavilla havaituista sykleistä. Ne näkyvät asianmukaisten kenttien vieressä.",
     "tuning_suggestions_available_one": "{count} viritysehdotus saatavilla havaituista sykleistä. Se näkyy asianmukaisen kentän vieressä.",
     "tuning_suggestions_available_other": "{count} viritysehdotusta saatavilla havaituista sykleistä. Ne näkyvät asianmukaisten kenttien vieressä.",
     "unsure_detected_prefix": "WashData ei ole varma, onko se havaittu",
@@ -944,7 +944,7 @@
     "sug_muted": "Tätä asetusta ei enää ehdoteta",
     "sug_mute_failed": "Ehdotuksen vaimennus epäonnistui",
     "sug_unmuted_all": "Vaiennetut ehdotukset palautettu",
-    "n_suggestions_muted": "{count} vaimennettu; automaattinen virittäjä ei ehdota näitä.",
+    "n_suggestions_muted": "{count} ehdotusta vaimennettu; automaattinen virittäjä ei ehdota näitä.",
     "n_suggestions_muted_one": "{count} ehdotus vaimennettu; automaattinen virittäjä ei ehdota sitä.",
     "n_suggestions_muted_other": "{count} ehdotusta vaimennettu; automaattinen virittäjä ei ehdota näitä.",
     "font_size_hint": "Suurenna tai pienennä kaikkea tässä paneelissa. Koskee tiliäsi tällä laitteella.",
@@ -1127,7 +1127,7 @@
       "label": "Automaattimerkinnän varmuus"
     },
     "auto_maintenance": {
-      "doc": "Suorita iltasiivous: rakenna profiilikuoret uudelleen, laske syklin kunto uudelleen, karsi virheenkorjausjälkiä ja säilytä viimeisimmät jaksot.",
+      "doc": "Suorita yöllinen ylläpito: merkitse vanhemmat merkitsemättömät syklit, jotka nyt vastaavat selvästi jotakin ohjelmaa, rakenna ohjelmien käyrät uudelleen, päivitä poikkeamamerkinnät, laske syklien kunto uudelleen ja poista virheenkorjausjäljet, kun \"Tallenna virheenkorjausjäljet\" on pois päältä. Jokainen sykli ja sen koko tehokäyrä säilytetään.",
       "label": "Automaattinen huolto (yösiivous)"
     },
     "completion_min_seconds": {
@@ -1366,14 +1366,6 @@
       "doc": "Jos reaaliaikainen, kesken syklin tehty täsmäytys putoaa tämän pistemäärän alle, alustava tunnistus tyhjennetään. Pidä se hieman Täsmäytyskynnystä pienempänä, jotta lyhyt notkahdus samankaltaisuudessa ei palauta näyttöä tilaan Ei osumaa.",
       "label": "Eritäsmäytyskynnys"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Kuinka monella kunkin ohjelman viimeisimmistä sykleistä säilyy täysi tehojälki. Vanhemmilla sykleillä säilyvät kesto, energia ja merkintä, mutta käyrä katoaa, joten niiden kaavio on tyhjä eivätkä ne enää laske ohjelman käyrään, terveyteen tai suosituksiin. Arvon nostaminen pitää enemmän historiaa tarkasteltavissa tallennustilan kustannuksella (yleensä 3-15 KB/sykli). Arvon laskeminen poistaa ylimääräiset jäljet seuraavassa yösiivouksessa, eikä arvon nostaminen uudelleen palauta niitä.",
-      "label": "Ohjelmaa kohden säilytettävät tehojäljet"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Sama raja sykleille, joilla ei vielä ole ohjelmamerkintää.",
-      "label": "Säilytettävät tehojäljet (merkitsemättömät)"
-    },
     "progress_reset_delay": {
       "doc": "Kun olet valmis, pidä edistymistä 100 %:ssa näin kauan, jotta Valmis näkyy kojelaudoissa, ennen kuin palautat sen tyhjäkäynnille.",
       "label": "Edistymisen nollausviive"
@@ -1387,7 +1379,7 @@
       "label": "Näytteenottoväli"
     },
     "save_debug_traces": {
-      "doc": "Tallenna täyden tehon jäljitys ja vastaavat virheenkorjaustiedot jokaiselle jaksolle. Hyödyllinen vianetsinnässä, mutta lisää tallennustilaa.",
+      "doc": "Tallenna jokaisen syklin mukana myös täsmäytyksen virheenkorjaustiedot (jokaisen ehdokasohjelman pisteet). Hyödyllinen vianetsinnässä; lisää noin 20 KB sykliä kohden, ja tiedot säilytetään yhtä kauan kuin sykli.",
       "label": "Tallenna virheenkorjausjäljet"
     },
     "smart_termination_duration_ratio": {

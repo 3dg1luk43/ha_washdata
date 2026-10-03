@@ -18,7 +18,7 @@
     "needs_review": "Necessita di revisione",
     "overrun": "Ha funzionato più a lungo del solito",
     "poor_fit": "scarsa vestibilità",
-    "restart_gap_tip": "{n} interruzione riavvio HA: il tracciato di potenza ha un buco",
+    "restart_gap_tip": "{n} interruzioni riavvio HA: il tracciato di potenza ha dei buchi",
     "restart_gap_tip_one": "{n} interruzione riavvio HA: il tracciato di potenza ha un buco",
     "restart_gap_tip_many": "{n} interruzioni riavvio HA: il tracciato di potenza ha dei buchi",
     "restart_gap_tip_other": "{n} interruzioni riavvio HA: il tracciato di potenza ha dei buchi",
@@ -390,7 +390,7 @@
     "mode_new_profile": "Crea nuovo profilo",
     "models_fine_tuned": "(modelli ottimizzati: {count})",
     "n_selected": "{n} selezionati",
-    "n_tuning_suggestions": "{n} suggerimento di ottimizzazione",
+    "n_tuning_suggestions": "{n} suggerimenti di ottimizzazione",
     "n_tuning_suggestions_one": "{n} suggerimento di ottimizzazione",
     "n_tuning_suggestions_many": "{n} suggerimenti di ottimizzazione",
     "n_tuning_suggestions_other": "{n} suggerimenti di ottimizzazione",
@@ -717,7 +717,7 @@
     "group_modal_help": "Raggruppare programmi con la stessa forma che differiscono per temperatura/centrifuga (le durate possono variare). La corrispondenza valuta il gruppo come un candidato, quindi sceglie il membro più adatto. Scegline almeno 2; la sovrapposizione mostra quanto sono simili.",
     "group_not_cohesive": "Questi profili non sono sufficientemente simili per essere raggruppati in modo affidabile, quindi la corrispondenza li tratta individualmente finché non rimuovi il valore anomalo o dividi il gruppo.",
     "group_preview_hint": "Seleziona 2 o più membri per visualizzare in anteprima e confrontare le loro curve di potenza.",
-    "legacy_actions_title": "{count} azione personalizzata precedente ancora in esecuzione",
+    "legacy_actions_title": "{count} azioni personalizzate precedenti ancora in esecuzione",
     "legacy_actions_title_one": "{count} azione personalizzata precedente ancora in esecuzione",
     "legacy_actions_title_many": "{count} azioni personalizzate precedenti ancora in esecuzione",
     "legacy_actions_title_other": "{count} azioni personalizzate precedenti ancora in esecuzione",
@@ -782,7 +782,7 @@
     "recording_in_progress": "Registrazione in corso",
     "reminders_intro": "Mostra un promemoria nel pannello dopo questo numero di cicli dall'ultimo servizio. Lascia vuoto o 0 per disattivare un promemoria.",
     "restart_gap_footer": "Evidenziato nel grafico. I dati di potenza mancano per questi intervalli; il riconoscimento ha usato solo letture reali.",
-    "restart_gap_header": "{n} interruzione riavvio HA durante questo ciclo",
+    "restart_gap_header": "{n} interruzioni riavvio HA durante questo ciclo",
     "restart_gap_header_one": "{n} interruzione riavvio HA durante questo ciclo",
     "restart_gap_header_many": "{n} interruzioni riavvio HA durante questo ciclo",
     "restart_gap_header_other": "{n} interruzioni riavvio HA durante questo ciclo",
@@ -803,7 +803,7 @@
     "setting_changed": "Modificato da {old} a {new} il {date}",
     "settings_basic_note": "Vengono mostrate le impostazioni essenziali. Passa ad Avanzato per l'elenco completo.",
     "show_all_settings": "Mostra tutte le impostazioni",
-    "showing_suggestions": "Visualizzazione dell'impostazione {count} con suggerimenti.",
+    "showing_suggestions": "Visualizzazione di {count} impostazioni con suggerimenti.",
     "showing_suggestions_one": "Visualizzazione di {count} impostazione con suggerimenti.",
     "showing_suggestions_many": "Visualizzazione di {count} impostazioni con suggerimenti.",
     "showing_suggestions_other": "Visualizzazione di {count} impostazioni con suggerimenti.",
@@ -834,7 +834,7 @@
     "trend_energy_up": "Energia in aumento ({pct}%/ciclo) – media recente {avg}",
     "trim_destructive_confirm": "Questo mantiene solo il {pct}% del ciclo e l'operazione non può essere annullata. Continuare?",
     "trim_intro": "Trascina le maniglie rosse o inserisci i valori. Tutto fuori dalla finestra viene rimosso.",
-    "tuning_suggestions_available": "{count} suggerimento di ottimizzazione disponibile dai cicli osservati. Appaiono accanto ai campi pertinenti.",
+    "tuning_suggestions_available": "{count} suggerimenti di ottimizzazione disponibili dai cicli osservati. Appaiono accanto ai campi pertinenti.",
     "tuning_suggestions_available_one": "{count} suggerimento di ottimizzazione disponibile dai cicli osservati. Appare accanto al campo pertinente.",
     "tuning_suggestions_available_many": "{count} suggerimenti di ottimizzazione disponibili dai cicli osservati. Appaiono accanto ai campi pertinenti.",
     "tuning_suggestions_available_other": "{count} suggerimenti di ottimizzazione disponibili dai cicli osservati. Appaiono accanto ai campi pertinenti.",
@@ -896,7 +896,7 @@
     "sug_muted": "Non verrà più suggerita questa impostazione",
     "sug_mute_failed": "Impossibile silenziare il suggerimento",
     "sug_unmuted_all": "Suggerimenti silenziati ripristinati",
-    "n_suggestions_muted": "{count} silenziati; il sistema di ottimizzazione automatica non proporrà questi.",
+    "n_suggestions_muted": "{count} suggerimenti silenziati; il sistema di ottimizzazione automatica non li proporrà.",
     "n_suggestions_muted_one": "{count} suggerimento silenziato; il sistema di ottimizzazione automatica non lo proporrà.",
     "n_suggestions_muted_many": "{count} suggerimenti silenziati; il sistema di ottimizzazione automatica non li proporrà.",
     "n_suggestions_muted_other": "{count} suggerimenti silenziati; il sistema di ottimizzazione automatica non li proporrà.",
@@ -1083,7 +1083,7 @@
       "label": "Confidenza etichettatura automatica"
     },
     "auto_maintenance": {
-      "doc": "Esegui le pulizie notturne: ricostruisci le buste del profilo, ricalcola l'integrità del ciclo, elimina le tracce di debug e conserva i cicli più recenti.",
+      "doc": "Esegue le pulizie notturne: etichetta i cicli meno recenti senza etichetta che ora corrispondono chiaramente a un programma, ricostruisce le curve dei programmi, aggiorna i contrassegni delle anomalie, ricalcola la salute dei cicli e rimuove le tracce di debug finché l'opzione Salva tracce di debug è disattivata. Ogni ciclo viene conservato con il suo tracciato di potenza completo.",
       "label": "Manutenzione automatica (pulizia notturna)"
     },
     "completion_min_seconds": {
@@ -1322,14 +1322,6 @@
       "doc": "Se una corrispondenza in tempo reale a metà ciclo scende al di sotto di questo punteggio, l'identificazione provvisoria viene cancellata. Mantienilo leggermente al di sotto della Soglia di corrispondenza in modo che un breve calo nella somiglianza non riporti la visualizzazione su senza corrispondenza.",
       "label": "Soglia di non corrispondenza"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Quanti dei cicli più recenti di ciascun programma conservano la traccia di potenza completa. I cicli più vecchi mantengono durata, energia ed etichetta ma perdono la curva; il loro grafico risulta vuoto e non contribuiscono più alla curva, alla qualità o ai suggerimenti del programma. Aumentare questo valore permette di esaminare più storico a costo di spazio di archiviazione (in genere 3-15 KB per ciclo). Diminuirlo elimina le tracce in eccesso alla prossima pulizia, e aumentarlo di nuovo non potrà ripristinarle.",
-      "label": "Tracce di potenza mantenute per programma"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Lo stesso limite per i cicli che non hanno ancora un'etichetta di programma.",
-      "label": "Tracce di potenza mantenute (senza etichetta)"
-    },
     "progress_reset_delay": {
       "doc": "Al termine, mantieni l'avanzamento al 100% per questo tempo in modo che Completato sia visibile sui dashboard prima di reimpostare su Inattivo.",
       "label": "Ritardo reset avanzamento"
@@ -1343,7 +1335,7 @@
       "label": "Intervallo di campionamento"
     },
     "save_debug_traces": {
-      "doc": "Memorizzare la traccia di potenza completa e i dati di debug corrispondenti per ciascun ciclo. Utile per la risoluzione dei problemi ma aumenta le dimensioni dello spazio di archiviazione.",
+      "doc": "Salva anche con ogni ciclo i dati di debug del riconoscimento (i punteggi di ogni candidato). Utile per la risoluzione dei problemi; aggiunge circa 20 KB per ciclo, conservati finché viene conservato il ciclo.",
       "label": "Salva tracce di debug"
     },
     "smart_termination_duration_ratio": {

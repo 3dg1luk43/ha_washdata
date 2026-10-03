@@ -2,7 +2,7 @@
   "badge": {
     "quiet_tail_tip": "Spre final, acest program rămâne în liniște aproximativ {mins} min, apoi consumă aproximativ {watts} W timp de {secs} s înainte de a se încheia. Observat în {seen} din {measured} cicluri măsurate: aparatul nu face asta la fiecare utilizare.",
     "quiet_tail": "liniște finală ~{mins} min",
-    "artifact_tip": "{n} anomalii detectate (de exemplu, ușa deschisă la jumătatea ciclului) – deschideți pentru a le vedea pe grafic",
+    "artifact_tip": "{n} de anomalii detectate (de exemplu, ușa deschisă la jumătatea ciclului) - deschideți pentru a le vedea pe grafic",
     "artifact_tip_one": "{n} anomalie detectată (de exemplu, ușa deschisă la jumătatea ciclului) - deschideți pentru a o vedea pe grafic",
     "artifact_tip_few": "{n} anomalii detectate (de exemplu, ușa deschisă la jumătatea ciclului) - deschideți pentru a le vedea pe grafic",
     "artifact_tip_other": "{n} de anomalii detectate (de exemplu, ușa deschisă la jumătatea ciclului) - deschideți pentru a le vedea pe grafic",
@@ -18,7 +18,7 @@
     "needs_review": "Necesită revizuire",
     "overrun": "A durat mai mult decât de obicei",
     "poor_fit": "calitate slabă",
-    "restart_gap_tip": "{n} gol la repornirea HA: traseul de putere are o lipsă",
+    "restart_gap_tip": "{n} de goluri la repornirea HA: traseul de putere are lipsuri",
     "restart_gap_tip_one": "{n} gol la repornirea HA: traseul de putere are o lipsă",
     "restart_gap_tip_few": "{n} goluri la repornirea HA: traseul de putere are lipsuri",
     "restart_gap_tip_other": "{n} de goluri la repornirea HA: traseul de putere are lipsuri",
@@ -390,7 +390,7 @@
     "mode_new_profile": "Creați un profil nou",
     "models_fine_tuned": "(modele ajustate: {count})",
     "n_selected": "{n} selectate",
-    "n_tuning_suggestions": "{n} sugestie de reglaj",
+    "n_tuning_suggestions": "{n} de sugestii de reglaj",
     "n_tuning_suggestions_one": "{n} sugestie de reglaj",
     "n_tuning_suggestions_few": "{n} sugestii de reglaj",
     "n_tuning_suggestions_other": "{n} de sugestii de reglaj",
@@ -693,7 +693,7 @@
     "appliance_monitor": "Monitor de aparate",
     "artifact_dip_detail": "A scăzut sub banda de putere obișnuită timp de ~{n}s.",
     "artifact_footer": "Evidențiate în graficul de mai sus. Acestea sunt artefacte tranzitorii (de exemplu, ușa deschisă la jumătatea ciclului), nu neapărat probleme.",
-    "artifact_header": "{n} anomalii detectate în timpul acestui ciclu",
+    "artifact_header": "{n} de anomalii detectate în timpul acestui ciclu",
     "artifact_header_one": "{n} anomalie detectată în timpul acestui ciclu",
     "artifact_header_few": "{n} anomalii detectate în timpul acestui ciclu",
     "artifact_header_other": "{n} de anomalii detectate în timpul acestui ciclu",
@@ -717,7 +717,7 @@
     "group_modal_help": "Grupați programe cu aceeași formă care diferă ca temperatură/centrifugare (duratele pot varia). Potrivirea evaluează grupul ca un singur candidat, apoi alege membrul cel mai potrivit. Alegeți cel puțin 2; suprapunerea arată cât de asemănătoare sunt.",
     "group_not_cohesive": "Aceste profiluri nu sunt suficient de similare pentru a fi grupate în mod fiabil, deci potrivirea le tratează individual până când eliminați valoarea aberantă sau împărțiți grupul.",
     "group_preview_hint": "Bifați 2 sau mai mulți membri pentru a previzualiza și compara curbele lor de putere.",
-    "legacy_actions_title": "{count} acțiune personalizată veche încă rulează",
+    "legacy_actions_title": "{count} de acțiuni personalizate vechi încă rulează",
     "legacy_actions_title_one": "{count} acțiune personalizată veche încă rulează",
     "legacy_actions_title_few": "{count} acțiuni personalizate vechi încă rulează",
     "legacy_actions_title_other": "{count} de acțiuni personalizate vechi încă rulează",
@@ -782,7 +782,7 @@
     "recording_in_progress": "Înregistrare în curs",
     "reminders_intro": "Afișați un memento în panou după acest număr de cicluri de la ultimul service. Lăsați necompletat sau 0 pentru a dezactiva un memento.",
     "restart_gap_footer": "Evidențiat pe grafic. Datele de putere lipsesc pentru aceste intervale; potrivirea a folosit numai citiri reale.",
-    "restart_gap_header": "{n} gol la repornirea HA în timpul acestui ciclu",
+    "restart_gap_header": "{n} de goluri la repornirea HA în timpul acestui ciclu",
     "restart_gap_header_one": "{n} gol la repornirea HA în timpul acestui ciclu",
     "restart_gap_header_few": "{n} goluri la repornirea HA în timpul acestui ciclu",
     "restart_gap_header_other": "{n} de goluri la repornirea HA în timpul acestui ciclu",
@@ -803,7 +803,7 @@
     "setting_changed": "Modificat de la {old} la {new} pe {date}",
     "settings_basic_note": "Se afișează setările esențiale. Comutați la Avansat pentru lista completă.",
     "show_all_settings": "Afișați toate setările",
-    "showing_suggestions": "Se afișează setarea {count} cu sugestii.",
+    "showing_suggestions": "Se afișează {count} de setări cu sugestii.",
     "showing_suggestions_one": "Se afișează {count} setare cu sugestii.",
     "showing_suggestions_few": "Se afișează {count} setări cu sugestii.",
     "showing_suggestions_other": "Se afișează {count} de setări cu sugestii.",
@@ -834,7 +834,7 @@
     "trend_energy_up": "Energia este în creștere ({pct}%/ciclu) – medie recentă {avg}",
     "trim_destructive_confirm": "Se păstrează doar {pct}% din ciclu, iar această acțiune nu poate fi anulată. Continuați?",
     "trim_intro": "Trageți mânerele roșii sau introduceți valori. Tot ceea ce este în afara ferestrei este eliminat.",
-    "tuning_suggestions_available": "{count} sugestie de ajustare disponibilă din ciclurile observate. Acestea apar lângă câmpurile relevante.",
+    "tuning_suggestions_available": "{count} de sugestii de ajustare disponibile din ciclurile observate. Acestea apar lângă câmpurile relevante.",
     "tuning_suggestions_available_one": "{count} sugestie de ajustare disponibilă din ciclurile observate. Apare lângă câmpul relevant.",
     "tuning_suggestions_available_few": "{count} sugestii de ajustare disponibile din ciclurile observate. Acestea apar lângă câmpurile relevante.",
     "tuning_suggestions_available_other": "{count} de sugestii de ajustare disponibile din ciclurile observate. Acestea apar lângă câmpurile relevante.",
@@ -896,7 +896,7 @@
     "sug_muted": "Această setare nu va mai fi sugerată",
     "sug_mute_failed": "Nu s-a putut dezactiva sugestia",
     "sug_unmuted_all": "Sugestiile dezactivate au fost resetate",
-    "n_suggestions_muted": "{count} dezactivate; reglajul automat nu le va propune.",
+    "n_suggestions_muted": "{count} de sugestii dezactivate; reglajul automat nu le va propune.",
     "n_suggestions_muted_one": "{count} sugestie dezactivată; reglajul automat nu o va propune.",
     "n_suggestions_muted_few": "{count} sugestii dezactivate; reglajul automat nu le va propune.",
     "n_suggestions_muted_other": "{count} de sugestii dezactivate; reglajul automat nu le va propune.",
@@ -1063,7 +1063,7 @@
       "label": "Încredere Etichetare Automată"
     },
     "auto_maintenance": {
-      "doc": "Efectuați întreținerea de noapte: reconstruiți plicurile de profil, recalculați starea ciclului, eliminați urmele de depanare și păstrați cele mai recente cicluri.",
+      "doc": "Rulează întreținerea de noapte: etichetează ciclurile mai vechi neetichetate care acum corespund clar unui program, reconstruiește curbele programelor, actualizează marcajele de anomalii, recalculează sănătatea ciclurilor și elimină urmele de depanare cât timp opțiunea Salvați Urmele de Depanare este dezactivată. Fiecare ciclu este păstrat împreună cu traseul său complet de putere.",
       "label": "Întreținere Automată (curățare nocturnă)"
     },
     "completion_min_seconds": {
@@ -1302,14 +1302,6 @@
       "doc": "Dacă o potrivire live de la mijlocul ciclului scade sub acest scor, identificarea provizorie este ștearsă. Păstrați-l puțin sub Pragul de potrivire, astfel încât o scădere scurtă a similitudinii să nu readucă afișajul la starea fără potrivire.",
       "label": "Prag de Nepotrivire"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Câte cicluri recente ale fiecărui program își păstrează urma de putere completă. Ciclurile mai vechi păstrează durata, energia și eticheta, dar pierd curba; graficul lor devine gol și nu mai contribuie la curba, calitatea sau sugestiile programului. Creșterea acestei valori permite inspectarea unui istoric mai extins pe seama spațiului de stocare (de obicei 3-15 KB per ciclu). Scăderea ei șterge urmele suplimentare la următoarea curățare, iar creșterea ulterioară nu le poate recupera.",
-      "label": "Urme de putere păstrate per program"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Aceeași limită pentru ciclurile care nu au încă o etichetă de program.",
-      "label": "Urme de putere păstrate (neetichetate)"
-    },
     "progress_reset_delay": {
       "doc": "După terminare, mențineți progresul la 100% pentru acest timp, astfel încât Finalizat să fie vizibil pe tablourile de bord înainte de a reveni la Inactiv.",
       "label": "Întârziere Resetare Progres"
@@ -1323,7 +1315,7 @@
       "label": "Interval de Eșantionare"
     },
     "save_debug_traces": {
-      "doc": "Stocați urmărirea completă a puterii și datele de depanare corespunzătoare pentru fiecare ciclu. Util pentru depanare, dar mărește dimensiunea de stocare.",
+      "doc": "Stochează, împreună cu fiecare ciclu, și datele de depanare ale recunoașterii (scorurile fiecărui candidat). Util pentru depanare; adaugă aproximativ 20 KB per ciclu, păstrate atâta timp cât este păstrat ciclul.",
       "label": "Salvați Urmele de Depanare"
     },
     "smart_termination_duration_ratio": {

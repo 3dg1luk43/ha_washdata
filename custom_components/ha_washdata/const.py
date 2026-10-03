@@ -79,9 +79,6 @@ CONF_AUTO_MAINTENANCE = "auto_maintenance"
 CONF_PROFILE_MATCH_INTERVAL = "profile_match_interval"
 CONF_PROFILE_MATCH_MIN_DURATION_RATIO = "profile_match_min_duration_ratio"
 CONF_PROFILE_MATCH_MAX_DURATION_RATIO = "profile_match_max_duration_ratio"
-CONF_MAX_PAST_CYCLES = "max_past_cycles"
-CONF_MAX_FULL_TRACES_PER_PROFILE = "max_full_traces_per_profile"
-CONF_MAX_FULL_TRACES_UNLABELED = "max_full_traces_unlabeled"
 CONF_WATCHDOG_INTERVAL = "watchdog_interval"  # Derived from sampling_interval
 CONF_MATCH_PERSISTENCE = "match_persistence"
 CONF_COMPLETION_MIN_SECONDS = "completion_min_seconds"
@@ -358,13 +355,6 @@ DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.10  # Allow match after 10% of expe
 # 2.5 measures slightly higher (+0.83pp) but regresses one device; 1.8 is the
 # point at which nothing gets worse.
 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.8
-DEFAULT_MAX_PAST_CYCLES = 200
-DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
-DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
-# Lower bound for both trace caps (#459). 0 does not mean "keep none": the
-# retention slice `full_indices[-0:]` is the whole list, so it kept every trace,
-# and a negative cap stripped in an order nobody chose. Clamped on write.
-MIN_FULL_TRACES = 1
 # A cycle needs at least this many trace points before its ML health is scored
 # (#459). It is the same floor `quality_features` uses before it falls back to a
 # `has_trace = 0` row, which no model was trained on.

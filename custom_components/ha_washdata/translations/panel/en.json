@@ -1130,7 +1130,7 @@
       "label": "Auto-Label Confidence"
     },
     "auto_maintenance": {
-      "doc": "Run nightly housekeeping: rebuild profile envelopes, recompute cycle health, prune debug traces and retain the most recent cycles.",
+      "doc": "Run nightly housekeeping: label older unlabelled cycles that now clearly match a program, rebuild program curves, refresh anomaly marks, recompute cycle health and remove debug traces while Save Debug Traces is off. Every cycle and its full power trace is kept.",
       "label": "Auto Maintenance (nightly cleanup)"
     },
     "completion_min_seconds": {
@@ -1433,14 +1433,6 @@
       "doc": "If a live mid-cycle match drops below this score, the tentative identification is cleared. Keep it a little below the Match Threshold so a brief dip in similarity does not flip the display back to unmatched.",
       "label": "Unmatch Threshold"
     },
-    "max_full_traces_per_profile": {
-      "doc": "How many of each program's most recent cycles keep their full power trace. Older cycles keep their duration, energy and label but lose the curve, so their chart is empty and they no longer count towards the program's curve, health or suggestions. Raising this keeps more history inspectable at the cost of storage (typically 3-15 KB per cycle). Lowering it deletes the extra traces at the next cleanup, and raising it again cannot bring them back.",
-      "label": "Power Traces Kept per Program"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "The same limit for cycles that have no program label yet.",
-      "label": "Power Traces Kept (Unlabelled)"
-    },
     "progress_reset_delay": {
       "doc": "After finishing, hold progress at 100% for this long so Completed is visible on dashboards before resetting to Idle.",
       "label": "Progress Reset Delay"
@@ -1454,7 +1446,7 @@
       "label": "Sampling Interval"
     },
     "save_debug_traces": {
-      "doc": "Store the full power trace and matching debug data for each cycle. Useful for troubleshooting but increases storage size.",
+      "doc": "Also store the matcher's debug data (every candidate's scores) with each cycle. Useful for troubleshooting; it adds about 20 KB per cycle, kept for as long as the cycle is.",
       "label": "Save Debug Traces"
     },
     "show_contributor": {

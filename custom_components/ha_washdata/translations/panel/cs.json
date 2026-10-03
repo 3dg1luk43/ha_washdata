@@ -69,7 +69,7 @@
     "overrun": "Běžel déle než obvykle",
     "underrun": "Dokončil rychleji než obvykle",
     "poor_fit": "špatná shoda",
-    "restart_gap_tip": "{n} mezera při restartu HA: průběh výkonu má díru",
+    "restart_gap_tip": "{n} mezer při restartu HA: průběh výkonu má díry",
     "restart_gap_tip_one": "{n} mezera při restartu HA: průběh výkonu má díru",
     "restart_gap_tip_few": "{n} mezery při restartu HA: průběh výkonu má díry",
     "restart_gap_tip_many": "{n} mezery při restartu HA: průběh výkonu má díry",
@@ -446,7 +446,7 @@
     "mode_new_profile": "Vytvořit nový profil",
     "models_fine_tuned": "(doladěné modely: {count})",
     "n_selected": "{n} vybráno",
-    "n_tuning_suggestions": "{n} návrh ladění",
+    "n_tuning_suggestions": "{n} návrhů ladění",
     "n_tuning_suggestions_one": "{n} návrh ladění",
     "n_tuning_suggestions_few": "{n} návrhy ladění",
     "n_tuning_suggestions_many": "{n} návrhu ladění",
@@ -774,7 +774,7 @@
     "group_modal_help": "Skupinové programy se stejným tvarem, které se liší teplotou/odstřeďováním (doba trvání se může lišit). Shoda hodnotí skupinu jako jednoho kandidáta a poté vybere nejlépe padnoucího člena. Vyberte alespoň 2; překrytí ukazuje, jak jsou si podobné.",
     "group_not_cohesive": "Tyto profily nejsou dostatečně podobné, aby se daly spolehlivě seskupit, takže shoda s nimi zachází individuálně, dokud neodstraníte odlehlou hodnotu nebo nerozdělíte skupinu.",
     "group_preview_hint": "Zaškrtněte 2 nebo více členů pro náhled a porovnání jejich výkonových křivek.",
-    "legacy_actions_title": "Stále běží starší vlastní akce {count}",
+    "legacy_actions_title": "Stále běží {count} starších vlastních akcí",
     "legacy_actions_title_one": "Stále běží {count} starší vlastní akce",
     "legacy_actions_title_few": "Stále běží {count} starší vlastní akce",
     "legacy_actions_title_many": "Stále běží {count} starší vlastní akce",
@@ -841,7 +841,7 @@
     "recording_in_progress": "Probíhá nahrávání",
     "reminders_intro": "Zobrazit připomínku v panelu tolik cyklů po posledním servisu. Ponechte prázdné nebo 0 pro vypnutí připomínky.",
     "restart_gap_footer": "Zvýrazněno v grafu. Data o výkonu pro tyto intervaly chybí; párování použilo pouze skutečná měření.",
-    "restart_gap_header": "{n} mezera při restartu HA během tohoto cyklu",
+    "restart_gap_header": "{n} mezer při restartu HA během tohoto cyklu",
     "restart_gap_header_one": "{n} mezera při restartu HA během tohoto cyklu",
     "restart_gap_header_few": "{n} mezery při restartu HA během tohoto cyklu",
     "restart_gap_header_many": "{n} mezery při restartu HA během tohoto cyklu",
@@ -863,7 +863,7 @@
     "setting_changed": "Změněno z {old} na {new} dne {date}",
     "settings_basic_note": "Zobrazují se základní nastavení. Přepněte na Pokročilé pro úplný seznam.",
     "show_all_settings": "Zobrazit všechna nastavení",
-    "showing_suggestions": "Zobrazuje se nastavení {count} s návrhy.",
+    "showing_suggestions": "Zobrazuje se {count} nastavení s návrhy.",
     "showing_suggestions_one": "Zobrazuje se {count} nastavení s návrhy.",
     "showing_suggestions_few": "Zobrazují se {count} nastavení s návrhy.",
     "showing_suggestions_many": "Zobrazuje se {count} nastavení s návrhy.",
@@ -873,7 +873,7 @@
     "sug_muted": "Toto nastavení již nebude navrhováno",
     "sug_mute_failed": "Skrytí návrhu se nezdařilo",
     "sug_unmuted_all": "Skryté návrhy obnoveny",
-    "n_suggestions_muted": "{count} skrytých; automatický ladicí nástroj tato nastavení nebude navrhovat.",
+    "n_suggestions_muted": "{count} návrhů je skryto; automatický ladicí nástroj je nebude navrhovat.",
     "n_suggestions_muted_one": "{count} návrh je skrytý; automatický ladicí nástroj ho nebude navrhovat.",
     "n_suggestions_muted_few": "{count} návrhy jsou skryté; automatický ladicí nástroj je nebude navrhovat.",
     "n_suggestions_muted_many": "{count} návrhu je skryto; automatický ladicí nástroj je nebude navrhovat.",
@@ -903,7 +903,7 @@
     "trend_energy_up": "Trend energie stoupá ({pct} %/cyklus) – poslední průměr {avg}",
     "trim_destructive_confirm": "Tímto zůstane jen {pct}% cyklu a akci nelze vrátit zpět. Pokračovat?",
     "trim_intro": "Přetáhněte červené úchyty nebo zadejte hodnoty. Vše mimo okno je odstraněno.",
-    "tuning_suggestions_available": "{count} návrh ladění dostupný z pozorovaných cyklů. Zobrazují se vedle příslušných polí.",
+    "tuning_suggestions_available": "{count} návrhů ladění je k dispozici na základě pozorovaných cyklů. Zobrazují se vedle příslušných polí.",
     "tuning_suggestions_available_one": "{count} návrh ladění je k dispozici na základě pozorovaných cyklů. Zobrazuje se vedle příslušného pole.",
     "tuning_suggestions_available_few": "{count} návrhy ladění jsou k dispozici na základě pozorovaných cyklů. Zobrazují se vedle příslušných polí.",
     "tuning_suggestions_available_many": "{count} návrhu ladění je k dispozici na základě pozorovaných cyklů. Zobrazují se vedle příslušných polí.",
@@ -1125,7 +1125,7 @@
       "label": "Důvěra auto-označení"
     },
     "auto_maintenance": {
-      "doc": "Spusťte noční údržbu: obnověte obálky profilů, přepočítejte zdraví cyklů, ořízněte ladicí stopy a zachovejte nejnovější cykly.",
+      "doc": "Spusťte noční údržbu: označte starší neoznačené cykly, které nyní jasně odpovídají některému programu, obnovte křivky programů, aktualizujte značky anomálií, přepočítejte zdraví cyklů a odstraňte ladicí stopy, dokud je vypnuto „Uložit ladící stopy“. Všechny cykly i jejich úplné záznamy příkonu zůstávají zachovány.",
       "label": "Automatická údržba (noční čištění)"
     },
     "completion_min_seconds": {
@@ -1360,14 +1360,6 @@
       "doc": "Pokud živé párování během cyklu klesne pod toto skóre, prozatímní identifikace se vymaže. Udržujte trochu pod prahem shody, aby krátký pokles podobnosti nepřepnul zobrazení zpět na nepárované.",
       "label": "Práh neshody"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Kolik nejnovějších cyklů každého programu si uchovává plný průběh výkonu. Starší cykly uchovávají dobu trvání, energii a štítek, ale přicházejí o křivku, takže jejich graf je prázdný a do křivky, zdraví ani návrhů programu se vícekrát nezapočítávají. Zvýšením se uchovává více historie pro prohlídku za cenu většího úložiště (obvykle 3–15 KB na cyklus). Snížením se přebytečné průběhy při příštím nočním čištění odstraní a opětovným zvýšením je nelze obnovit.",
-      "label": "Průběhy výkonu uchovávané na program"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Stejný limit pro cykly, které dosud nemají žádný štítek programu.",
-      "label": "Průběhy výkonu uchovávané (neoznačené)"
-    },
     "progress_reset_delay": {
       "doc": "Po ukončení držte průběh na 100 % po tuto dobu, aby bylo Dokončeno viditelné na panelech před resetem na Nečinný.",
       "label": "Zpoždění resetu průběhu"
@@ -1381,7 +1373,7 @@
       "label": "Interval vzorkování"
     },
     "save_debug_traces": {
-      "doc": "Ukládejte plný záznam příkonu a ladicí data párování pro každý cyklus. Užitečné pro odstraňování problémů, ale zvyšuje velikost úložiště.",
+      "doc": "Ke každému cyklu ukládejte také ladicí data porovnávacího mechanismu (skóre všech kandidátů). Užitečné pro odstraňování problémů; přidává asi 20 kB na cyklus a data se uchovávají stejně dlouho jako samotný cyklus.",
       "label": "Uložit ladící stopy"
     },
     "smart_termination_duration_ratio": {

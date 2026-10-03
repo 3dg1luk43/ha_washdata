@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Ku koncu tento program asi na {mins} min stíchne a pred dokončením odoberá približne {watts} W počas {secs} s. Zaznamenané pri {seen} z {measured} zmeraných cyklov: spotrebič to nerobí pri každom behu.",
     "quiet_tail": "tichý koniec ~{mins} min",
-    "artifact_tip": "Zistilo sa {n} anomálií (napr. dvere otvorené uprostred cyklu) – otvorte ich, aby ste ich videli na grafe",
+    "artifact_tip": "Zistilo sa {n} anomálií (napr. dvere otvorené uprostred cyklu) – otvorte, aby ste ich videli na grafe",
     "artifact_tip_one": "Zistila sa {n} anomália (napr. dvere otvorené uprostred cyklu) – otvorte, aby ste ju videli na grafe",
     "artifact_tip_few": "Zistili sa {n} anomálie (napr. dvere otvorené uprostred cyklu) – otvorte, aby ste ich videli na grafe",
     "artifact_tip_many": "Zistilo sa {n} anomálie (napr. dvere otvorené uprostred cyklu) – otvorte, aby ste ich videli na grafe",
@@ -68,7 +68,7 @@
     "needs_review": "Vyžaduje preskúmanie",
     "overrun": "Trvalo dlhšie ako zvyčajne",
     "poor_fit": "zlá kvalita",
-    "restart_gap_tip": "{n} medzera reštartu HA: priebeh výkonu má dieru",
+    "restart_gap_tip": "{n} medzier reštartu HA: priebeh výkonu má diery",
     "restart_gap_tip_one": "{n} medzera reštartu HA: priebeh výkonu má dieru",
     "restart_gap_tip_few": "{n} medzery reštartu HA: priebeh výkonu má diery",
     "restart_gap_tip_many": "{n} medzery reštartu HA: priebeh výkonu má diery",
@@ -446,7 +446,7 @@
     "mode_new_profile": "Vytvoriť nový profil",
     "models_fine_tuned": "(doladené modely: {count})",
     "n_selected": "{n} vybraných",
-    "n_tuning_suggestions": "{n} návrh ladenia",
+    "n_tuning_suggestions": "{n} návrhov ladenia",
     "n_tuning_suggestions_one": "{n} návrh ladenia",
     "n_tuning_suggestions_few": "{n} návrhy ladenia",
     "n_tuning_suggestions_many": "{n} návrhu ladenia",
@@ -749,7 +749,7 @@
     "appliance_monitor": "Monitor spotrebiča",
     "artifact_dip_detail": "Poklesol pod bežné pásmo výkonu počas ~{n} s.",
     "artifact_footer": "Zvýraznené na grafe vyššie. Sú to prechodné artefakty (napr. dvere otvorené uprostred cyklu), nie nevyhnutne problémy.",
-    "artifact_header": "Počet anomálií zistených počas tohto cyklu: {n}",
+    "artifact_header": "Počas tohto cyklu sa zistilo {n} anomálií",
     "artifact_header_one": "Počas tohto cyklu sa zistila {n} anomália",
     "artifact_header_few": "Počas tohto cyklu sa zistili {n} anomálie",
     "artifact_header_many": "Počas tohto cyklu sa zistilo {n} anomálie",
@@ -774,7 +774,7 @@
     "group_modal_help": "Skupinové programy s rovnakým tvarom, ktoré sa líšia teplotou/odstreďovaním (trvanie sa môže líšiť). Porovnanie ohodnotí skupinu ako jedného kandidáta a potom vyberie najlepšieho člena. Vyberte aspoň 2; prekrytie ukazuje, nakoľko sú si podobné.",
     "group_not_cohesive": "Tieto profily nie sú dostatočne podobné na to, aby sa dali spoľahlivo zoskupiť, takže zhoda s nimi zaobchádza individuálne, kým neodstránite odľahlú hodnotu alebo nerozdelíte skupinu.",
     "group_preview_hint": "Zaškrtnite aspoň 2 členov na náhľad a porovnanie ich výkonových kriviek.",
-    "legacy_actions_title": "Stará vlastná akcia {count} je stále spustená",
+    "legacy_actions_title": "{count} starých vlastných akcií je stále spustených",
     "legacy_actions_title_one": "{count} stará vlastná akcia je stále spustená",
     "legacy_actions_title_few": "{count} staré vlastné akcie sú stále spustené",
     "legacy_actions_title_many": "Stále spustené staré vlastné akcie: {count}",
@@ -841,7 +841,7 @@
     "recording_in_progress": "Nahrávanie prebieha",
     "reminders_intro": "Zobraziť pripomienku v paneli po tomto počte cyklov od posledného servisu. Ponechajte prázdne alebo 0 na vypnutie pripomienky.",
     "restart_gap_footer": "Zvýraznené v grafe. Údaje o výkone chýbajú pre tieto intervaly; párovanie použilo iba skutočné merania.",
-    "restart_gap_header": "{n} medzera reštartu HA počas tohto cyklu",
+    "restart_gap_header": "{n} medzier reštartu HA počas tohto cyklu",
     "restart_gap_header_one": "{n} medzera reštartu HA počas tohto cyklu",
     "restart_gap_header_few": "{n} medzery reštartu HA počas tohto cyklu",
     "restart_gap_header_many": "{n} medzery reštartu HA počas tohto cyklu",
@@ -863,7 +863,7 @@
     "setting_changed": "Zmenené z {old} na {new} dňa {date}",
     "settings_basic_note": "Zobrazujú sa základné nastavenia. Prepnite na Rozšírené pre úplný zoznam.",
     "show_all_settings": "Zobraziť všetky nastavenia",
-    "showing_suggestions": "Zobrazuje sa nastavenie {count} s návrhmi.",
+    "showing_suggestions": "Zobrazuje sa {count} nastavení s návrhmi.",
     "showing_suggestions_one": "Zobrazuje sa {count} nastavenie s návrhmi.",
     "showing_suggestions_few": "Zobrazujú sa {count} nastavenia s návrhmi.",
     "showing_suggestions_many": "Zobrazuje sa {count} nastavenia s návrhmi.",
@@ -873,7 +873,7 @@
     "sug_muted": "Toto nastavenie sa už nebude navrhovať",
     "sug_mute_failed": "Nastavenie sa nepodarilo stíšiť",
     "sug_unmuted_all": "Stíšené návrhy obnovené",
-    "n_suggestions_muted": "{count} stíšených; automatický ladiaci nástroj tieto nastavenia nebude navrhovať.",
+    "n_suggestions_muted": "{count} návrhov je stíšených; automatický ladiaci nástroj ich nebude navrhovať.",
     "n_suggestions_muted_one": "{count} návrh je stíšený; automatický ladiaci nástroj ho nebude navrhovať.",
     "n_suggestions_muted_few": "{count} návrhy sú stíšené; automatický ladiaci nástroj ich nebude navrhovať.",
     "n_suggestions_muted_many": "Stíšené návrhy: {count}; automatický ladiaci nástroj ich nebude navrhovať.",
@@ -903,7 +903,7 @@
     "trend_energy_up": "Energetický trend stúpa ({pct} %/cyklus) – posledný priemer {avg}",
     "trim_destructive_confirm": "Týmto zostane len {pct}% cyklu a túto akciu nie je možné vrátiť späť. Pokračovať?",
     "trim_intro": "Potiahnite červené rukoväti alebo zadajte hodnoty. Všetko mimo okna sa odstráni.",
-    "tuning_suggestions_available": "{count} návrh ladenia dostupný z pozorovaných cyklov. Zobrazujú sa vedľa príslušných polí.",
+    "tuning_suggestions_available": "{count} návrhov ladenia je k dispozícii na základe pozorovaných cyklov. Zobrazujú sa vedľa príslušných polí.",
     "tuning_suggestions_available_one": "{count} návrh ladenia je k dispozícii na základe pozorovaných cyklov. Zobrazuje sa vedľa príslušného poľa.",
     "tuning_suggestions_available_few": "{count} návrhy ladenia sú k dispozícii na základe pozorovaných cyklov. Zobrazujú sa vedľa príslušných polí.",
     "tuning_suggestions_available_many": "{count} návrhu ladenia je k dispozícii na základe pozorovaných cyklov. Zobrazujú sa vedľa príslušných polí.",
@@ -1125,7 +1125,7 @@
       "label": "Spoľahlivosť autooznačovania"
     },
     "auto_maintenance": {
-      "doc": "Spustite nočnú upratovaciu službu: prestavte obálky profilu, prepočítajte stav cyklu, odstráňte stopy ladenia a uchovávajte najnovšie cykly.",
+      "doc": "Spustite nočnú údržbu: označte staršie neoznačené cykly, ktoré teraz jasne zodpovedajú niektorému programu, obnovte krivky programov, aktualizujte značky anomálií, prepočítajte kvalitu cyklov a odstráňte ladiace záznamy, kým je vypnuté „Uložiť ladiace záznamy“. Všetky cykly aj ich úplné záznamy výkonu zostávajú zachované.",
       "label": "Automatická údržba (nočné čistenie)"
     },
     "completion_min_seconds": {
@@ -1360,14 +1360,6 @@
       "doc": "Ak živá zhoda v strede cyklu klesne pod toto skóre, predbežná identifikácia sa vymaže. Udržujte ho trochu pod Prahom zhody, aby krátky pokles podobnosti neprepol zobrazenie späť na stav bez zhody.",
       "label": "Prah nezhody"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Koľko najnovších cyklov každého programu si uchováva úplný priebeh výkonu. Staršie cykly si uchovávajú trvanie, energiu a štítok, ale prichádzajú o krivku, takže ich graf je prázdny a do krivky, zdravia ani návrhov programu sa viac nezapočítavajú. Zvýšením sa uchová viac histórie na prehliadanie za cenu väčšieho úložiska (zvyčajne 3–15 KB na cyklus). Znížením sa priebehy odstrania pri ďalšom nočnom čistení a opätovným zvýšením ich nemožno obnoviť.",
-      "label": "Priebehy výkonu uchovávané na program"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Rovnaký limit pre cykly, ktoré ešte nemajú štítok programu.",
-      "label": "Priebehy výkonu uchovávané (bez štítku)"
-    },
     "progress_reset_delay": {
       "doc": "Po dokončení podržte priebeh na 100 % na túto dlhú dobu, aby sa pred resetovaním do stavu nečinnosti na paneloch zobrazilo Dokončené.",
       "label": "Oneskorenie obnovenia priebehu"
@@ -1381,7 +1373,7 @@
       "label": "Interval vzorkovania"
     },
     "save_debug_traces": {
-      "doc": "Uložte úplnú stopu výkonu a zodpovedajúce údaje ladenia pre každý cyklus. Užitočné pri riešení problémov, ale zvyšuje veľkosť úložiska.",
+      "doc": "Ku každému cyklu ukladajte aj ladiace údaje porovnávacieho mechanizmu (skóre všetkých kandidátov). Užitočné pri riešení problémov; pridáva asi 20 kB na cyklus a údaje sa uchovávajú rovnako dlho ako samotný cyklus.",
       "label": "Uložiť ladiace záznamy"
     },
     "smart_termination_duration_ratio": {

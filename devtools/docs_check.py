@@ -129,7 +129,6 @@ PROSE_CLAIMS = (
      (("DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO", 1), ("DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO", 1))),
     (re.compile(rf"\(({_NUM})% correlation / ({_NUM})% MAE\)"),
      (("MATCH_CORR_WEIGHT", 100), ("1-MATCH_CORR_WEIGHT", 100))),
-    (re.compile(r"retention eviction \(cap (\d+)"), (("DEFAULT_MAX_PAST_CYCLES", 1),)),
     (re.compile(r"profile matching every (\d+) min"), (("DEFAULT_PROFILE_MATCH_INTERVAL", 1 / 60),)),
 )
 

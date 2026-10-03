@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Proti koncu ta program za približno {mins} min utihne, nato pa pred zaključkom {secs} s porablja okoli {watts} W. Zaznano pri {seen} od {measured} izmerjenih ciklov: naprava tega ne stori ob vsakem zagonu.",
     "quiet_tail": "tih konec ~{mins} min",
-    "artifact_tip": "{n} zaznanih nepravilnosti (npr. odprta vrata sredi cikla) – odprite, da jih vidite na grafu",
+    "artifact_tip": "Zaznanih je {n} nepravilnosti (npr. odprta vrata sredi cikla) – odprite, da jih vidite na grafu",
     "artifact_tip_one": "Zaznana je {n} nepravilnost (npr. odprta vrata sredi cikla) – odprite, da jo vidite na grafu",
     "artifact_tip_two": "Zaznani sta {n} nepravilnosti (npr. odprta vrata sredi cikla) – odprite, da ju vidite na grafu",
     "artifact_tip_few": "Zaznane so {n} nepravilnosti (npr. odprta vrata sredi cikla) – odprite, da jih vidite na grafu",
@@ -68,7 +68,7 @@
     "needs_review": "Potrebuje pregled",
     "overrun": "Trajalo dlje kot običajno",
     "poor_fit": "slaba kakovost",
-    "restart_gap_tip": "{n} vrzel ponovnega zagona HA: sled moči ima luknjo",
+    "restart_gap_tip": "{n} vrzeli ponovnega zagona HA: sled moči ima luknje",
     "restart_gap_tip_one": "{n} vrzel ponovnega zagona HA: sled moči ima luknjo",
     "restart_gap_tip_two": "{n} vrzeli ponovnega zagona HA: sled moči ima luknji",
     "restart_gap_tip_few": "{n} vrzeli ponovnega zagona HA: sled moči ima luknje",
@@ -446,7 +446,7 @@
     "mode_new_profile": "Ustvari nov profil",
     "models_fine_tuned": "(natančno prilagojeni modeli: {count})",
     "n_selected": "{n} izbranih",
-    "n_tuning_suggestions": "{n} predlog za nastavljanje",
+    "n_tuning_suggestions": "{n} predlogov za nastavljanje",
     "n_tuning_suggestions_one": "{n} predlog za nastavljanje",
     "n_tuning_suggestions_two": "{n} predloga za nastavljanje",
     "n_tuning_suggestions_few": "{n} predlogi za nastavljanje",
@@ -774,7 +774,7 @@
     "group_modal_help": "Skupinske programe enake oblike, ki se razlikujejo po temperaturi/ožemanju (trajanje se lahko razlikuje). Ujemanje oceni skupino kot enega kandidata, nato pa izbere najbolj primernega člana. Izberite vsaj 2; prekrivanje kaže, kako si sta podobna.",
     "group_not_cohesive": "Ti profili si niso dovolj podobni, da bi jih lahko zanesljivo združevali, zato jih ujemanje obravnava posamično, dokler ne odstranite odstopanja ali razdelite skupine.",
     "group_preview_hint": "Izberite vsaj 2 člana za predogled in primerjavo njihovih krivulj porabe moči.",
-    "legacy_actions_title": "{count} podedovano dejanje po meri se še vedno izvaja",
+    "legacy_actions_title": "{count} podedovanih dejanj po meri se še vedno izvaja",
     "legacy_actions_title_one": "{count} podedovano dejanje po meri se še vedno izvaja",
     "legacy_actions_title_two": "{count} podedovani dejanji po meri se še vedno izvajata",
     "legacy_actions_title_few": "{count} podedovana dejanja po meri se še vedno izvajajo",
@@ -841,7 +841,7 @@
     "recording_in_progress": "Snemanje poteka",
     "reminders_intro": "Prikaži opomnik v plošči po tem številu ciklov od zadnjega servisa. Pustite prazno ali 0, da opomnik izklopite.",
     "restart_gap_footer": "Označeno na grafu. Podatki o moči manjkajo za te intervale; ujemanje je uporabilo samo dejanske meritve.",
-    "restart_gap_header": "{n} vrzel ponovnega zagona HA med tem ciklom",
+    "restart_gap_header": "{n} vrzeli ponovnega zagona HA med tem ciklom",
     "restart_gap_header_one": "{n} vrzel ponovnega zagona HA med tem ciklom",
     "restart_gap_header_two": "{n} vrzeli ponovnega zagona HA med tem ciklom",
     "restart_gap_header_few": "{n} vrzeli ponovnega zagona HA med tem ciklom",
@@ -863,7 +863,7 @@
     "setting_changed": "Spremenjeno iz {old} v {new} dne {date}",
     "settings_basic_note": "Prikazane so bistvene nastavitve. Za celoten seznam preklopite na Napredno.",
     "show_all_settings": "Pokaži vse nastavitve",
-    "showing_suggestions": "Prikaz nastavitve {count} s predlogi.",
+    "showing_suggestions": "Prikazanih je {count} nastavitev s predlogi.",
     "showing_suggestions_one": "Prikazana je {count} nastavitev s predlogi.",
     "showing_suggestions_two": "Prikazani sta {count} nastavitvi s predlogi.",
     "showing_suggestions_few": "Prikazane so {count} nastavitve s predlogi.",
@@ -873,7 +873,7 @@
     "sug_muted": "Te nastavitve ne bo več predlagalo",
     "sug_mute_failed": "Utišanje predloga ni uspelo",
     "sug_unmuted_all": "Utišani predlogi ponastavljeni",
-    "n_suggestions_muted": "{count} utišanih; samodejni nastavjalnik teh nastavitev ne bo predlagal.",
+    "n_suggestions_muted": "{count} predlogov je utišanih; samodejni nastavljalnik jih ne bo predlagal.",
     "n_suggestions_muted_one": "{count} predlog je utišan; samodejni nastavljalnik ga ne bo predlagal.",
     "n_suggestions_muted_two": "{count} predloga sta utišana; samodejni nastavljalnik ju ne bo predlagal.",
     "n_suggestions_muted_few": "{count} predlogi so utišani; samodejni nastavljalnik jih ne bo predlagal.",
@@ -903,7 +903,7 @@
     "trend_energy_up": "Energija narašča ({pct}%/cikel) – zadnje povprečje {avg}",
     "trim_destructive_confirm": "S tem ostane samo {pct}% cikla in tega dejanja ni mogoče razveljaviti. Nadaljujem?",
     "trim_intro": "Povlecite rdeče ročke ali vnesite vrednosti. Vse zunaj okna se odstrani.",
-    "tuning_suggestions_available": "{count} predlog za nastavitev je na voljo iz opazovanih ciklov. Pojavijo se poleg ustreznih polj.",
+    "tuning_suggestions_available": "Na voljo je {count} predlogov za nastavitev na podlagi opazovanih ciklov. Pojavijo se poleg ustreznih polj.",
     "tuning_suggestions_available_one": "Na voljo je {count} predlog za nastavitev na podlagi opazovanih ciklov. Pojavi se poleg ustreznega polja.",
     "tuning_suggestions_available_two": "Na voljo sta {count} predloga za nastavitev na podlagi opazovanih ciklov. Pojavita se poleg ustreznih polj.",
     "tuning_suggestions_available_few": "Na voljo so {count} predlogi za nastavitev na podlagi opazovanih ciklov. Pojavijo se poleg ustreznih polj.",
@@ -1125,7 +1125,7 @@
       "label": "Zaupanje samodejnega označevanja"
     },
     "auto_maintenance": {
-      "doc": "Zaženite nočno čiščenje: obnovite ovojnice profila, znova izračunajte stanje cikla, odstranite sledi odpravljanja napak in obdržite najnovejše cikle.",
+      "doc": "Zaženite nočno vzdrževanje: označite starejše neoznačene cikle, ki zdaj jasno ustrezajo nekemu programu, obnovite krivulje programov, osvežite oznake nepravilnosti, znova izračunajte kakovost ciklov in odstranite sledove za odpravljanje napak, dokler je »Shrani sledove za odpravljanje napak« izklopljeno. Vsi cikli in njihovi celotni zapisi moči se ohranijo.",
       "label": "Samodejno vzdrževanje (nočno čiščenje)"
     },
     "completion_min_seconds": {
@@ -1364,14 +1364,6 @@
       "doc": "Če ujemanje v živo sredi cikla pade pod ta rezultat, se začasna identifikacija počisti. Naj bo malo pod Pragom ujemanja, tako da kratek padec podobnosti prikaza ne vrne nazaj na stanje brez ujemanja.",
       "label": "Prag neujemanja"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Koliko od zadnjih ciklov vsakega programa ohrani polno sled moči. Starejši cikli ohranijo trajanje, energijo in oznako, toda izgubijo krivuljo, zato je njihov grafikon prazen in se ne upoštevajo pri krivulji, kakovosti ali predlogih programa. Povečanje vrednosti omogoča pregled večje zgodovine na račun prostora v shrambi (navadno 3–15 KB na cikel). Zmanjšanje izbriše odvečne sledi pri naslednjem nočnem čiščenju in ponovnega povečanja jih ni mogoče vrniti.",
-      "label": "Sledi moči, ohranjene na program"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Enaka omejitev za cikle, ki še nimajo oznake programa.",
-      "label": "Sledi moči, ohranjene (brez oznake)"
-    },
     "progress_reset_delay": {
       "doc": "Ko končate, tako dolgo zadržite napredek pri 100 %, tako da je na nadzornih ploščah vidno Končano, preden se ponastavite na stanje mirovanja.",
       "label": "Zamuda ponastavitve napredka"
@@ -1385,7 +1377,7 @@
       "label": "Interval vzorčenja"
     },
     "save_debug_traces": {
-      "doc": "Shranite celotno sled moči in ustrezne podatke o odpravljanju napak za vsak cikel. Uporabno za odpravljanje težav, vendar poveča velikost pomnilnika.",
+      "doc": "Ob vsakem ciklu shranite tudi podatke mehanizma ujemanja za odpravljanje napak (ocene vseh kandidatov). Uporabno za odpravljanje težav; doda približno 20 kB na cikel, podatki pa se hranijo tako dolgo kot sam cikel.",
       "label": "Shrani sledove za odpravljanje napak"
     },
     "smart_termination_duration_ratio": {

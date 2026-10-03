@@ -286,7 +286,7 @@ async def test_per_notify_work(
     mgr._current_program = "Program 2"  # noqa: SLF001 - the program sensor's attribute path
     c = calls(
         ProfileStore, "_build_profile_summaries", "_profiles_fingerprint",
-        "_compute_profile_power_profile", "reference_curve",
+        "_compute_profile_power_profile", "_compute_reference_curve",
     )
     mgr._notify_update()  # noqa: SLF001 - warm-up: settle what setup left pending
     await hass.async_block_till_done()
@@ -302,19 +302,23 @@ async def test_per_notify_work(
         # Guards PERF-01: list_profiles/get_profile rebuilding every profile's stats.
         ("summary rebuilds", c["_build_profile_summaries"], 0),
         # Every profile lookup still fingerprints the store, O(profiles + cycles).
-        # Measured P + 4 per notify (one per profile-count sensor, program options,
-        # select options, the profile-sensor manager); budget P + 6. Guards the
-        # one-snapshot-per-write fix: one lookup per property read is 3P + 4.
-        ("profile lookups", c["_profiles_fingerprint"], n * (PROFILES + 6)),
+        # Measured 4 per notify, independent of P (the program sensor's options,
+        # read twice per write, the select's, the profile-sensor manager's change
+        # check); budget 5. Guards item 456 (d): with the profile-count sensors
+        # back on the live signal it is P + 4, one lookup per property read 3P + 4.
+        ("profile lookups", c["_profiles_fingerprint"], n * 5),
         # The power_profile attribute is memoised per envelope revision. Measured
         # 0; budget 0. Guards a NumPy resample of every profile's envelope per notify.
         ("power_profile builds", c["_compute_profile_power_profile"], 0),
-        # The program sensor's reference curve (not memoised). Measured 1 per
-        # notify; budget 1. Guards a second full-envelope reader per state write.
-        ("reference curves", c["reference_curve"], n),
-        # One state write per subscribed entity. Measured 18 + P per notify; budget
-        # 19 + P (room for one new entity). Guards duplicate subscriptions/signals.
-        ("state writes", sum(state_writes.values()), n * (19 + PROFILES)),
+        # The program sensor's reference curve, memoised per envelope revision
+        # (item 456 b). Measured 0; budget 0. Guards a full-envelope
+        # interpolation per state write (1 per notify unmemoised).
+        ("reference curves", c["_compute_reference_curve"], 0),
+        # One state write per entity on the live signal. Measured 18 per notify;
+        # budget 19 (room for one new entity). The P profile-count sensors have
+        # their own signal and are written only when the profile summaries change
+        # (item 456 d); guards them, or a duplicate subscription, returning (18 + P).
+        ("state writes", sum(state_writes.values()), n * 19),
     )
 
 
@@ -401,11 +405,14 @@ async def test_running_cycle_work(
     active = [b for k, b in store_writes if k == f"{main_key(entry)}.active"]
 
     within_budget(
-        # Entity refreshes caused by power events (timers excluded). Measured 49
-        # for 30 readings: one per reading, two to four on a match tick (the
-        # result, and the estimate whose throttle the tick re-opens). Budget 52.
-        # Guards PERF-01's fan-out: every notify rewrites all ~22 entities.
-        ("event notifies", event_notifies, 52),
+        # Entity refreshes caused by power events (timers excluded). Measured 42
+        # for 30 readings: one per reading (30), the detector's two state changes
+        # (2), and on 5 match ticks the result, which lands a loop turn later, plus
+        # a watchdog tick inside the same 60 s step (10). Budget 44. Guards item
+        # 456 (c): _update_estimates and a match completing inside the reading
+        # each refreshing before the reading's own refresh (49), and PERF-01's
+        # fan-out (every notify rewrites ~20 entities).
+        ("event notifies", event_notifies, 44),
         # One per match interval, half that until a program commits. Measured 8;
         # budget 10. Guards the detector's rate limit (unthrottled: every reading).
         ("matcher runs", c["async_match_profile"], 10),
@@ -449,7 +456,7 @@ async def test_cycle_end_work(
     for _t, w in program_trace(PROFILES - 1, 1):
         await report(hass, freezer, w)
         await fire_timers(hass)
-    c = calls(ProfileStore, "async_rebuild_envelope")
+    c = calls(ProfileStore, "async_rebuild_envelope", "_rebuild_envelope_sync")
     decompressions.clear()
     store_writes.clear()
     for _ in range(5):
@@ -459,18 +466,26 @@ async def test_cycle_end_work(
 
     within_budget(
         # Every main-store write rewrites every trace and envelope (HA's Store is
-        # whole-file). Measured 6 (suggestions x2, lifetime energy, history pass,
-        # profile rebuild, maintenance); budget 8. Guards save sites multiplying
-        # in the cycle-end path (the audit counted ~10 on a real store, 6.7 MB each).
-        ("main-store writes", sum(k == main_key(entry) for k, _ in store_writes), 8),
-        # Post-cycle maintenance rebuilds every profile, plus the labelled one.
-        # Measured P + 2; budget P + 3. Guards a second full pass.
-        ("envelope rebuilds", c["async_rebuild_envelope"], PROFILES + 3),
-        # Envelope rebuilds, artifact recompute, refreshed match statistics. Measured
-        # 35 (55 before `_cycle_peak` was memoised: the reference-cycle pick
-        # decompressed every cycle of a profile on each rebuild); budget 40. Guards
-        # that memo and a pass that decompresses every stored trace again.
-        ("trace decompressions", decompressions["decompress"], 40),
+        # whole-file). Measured 1: the cycle end's one immediate write, which here
+        # also carries every follow-up's change; budget 2, room for the debounced
+        # write a follow-up landing after it makes (suggestion scans, artifact
+        # refresh). Guards item 456 (a): six writes before (suggestions x2,
+        # lifetime energy, history pass, profile rebuild, maintenance; the audit
+        # counted ~10 on a real store, 6.7 MB each).
+        ("main-store writes", sum(k == main_key(entry) for k, _ in store_writes), 2),
+        # Requests: the labelled profile's, and the learning pass confirming the
+        # same label. Measured 2; budget 2. Guards a pass over every profile at
+        # cycle end (the full maintenance made it P + 2).
+        ("envelope rebuild requests", c["async_rebuild_envelope"], 2),
+        # Builds: the second request finds nothing changed. Measured 1; budget 1.
+        # Guards the rebuild memo (2 without it).
+        ("envelope builds", c["_rebuild_envelope_sync"], 1),
+        # The labelled profile's build (one per cycle of it), the new cycle's peak,
+        # and that profile's artifacts. Measured 9 (35 before item 456: every
+        # envelope rebuilt and every stored cycle's artifacts recomputed; 55
+        # before `_cycle_peak` was memoised); budget 11. Guards a pass that
+        # decompresses every stored trace again (the store size, not the profile's).
+        ("trace decompressions", decompressions["decompress"], 11),
     )
 
 

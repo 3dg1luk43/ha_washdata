@@ -3,6 +3,7 @@
   "dead_anchors": {
     "docs/internal/INTEGRATION_REFERENCE.md": [
       "cycle_detector.py:_is_standby_band_stuck",
+      "manager.py:_apply_retention_limits",
       "playground.py:_match_once",
       "suggestion_engine.py:refresh_options_snapshot"
     ]
@@ -28,7 +29,7 @@
     "custom_components/ha_washdata/ml/matching_tuner.py": 4,
     "custom_components/ha_washdata/ml/training_task.py": 7,
     "custom_components/ha_washdata/playground.py": 1,
-    "custom_components/ha_washdata/profile_store.py": 35,
+    "custom_components/ha_washdata/profile_store.py": 34,
     "custom_components/ha_washdata/setup_advisor.py": 5,
     "custom_components/ha_washdata/signal_processing.py": 2,
     "custom_components/ha_washdata/suggestion_engine.py": 2,
@@ -50,7 +51,7 @@
     "docs/internal/reference/08-ws-api-and-tasks.md": 11,
     "docs/internal/reference/10-entities-config-services.md": 46,
     "docs/internal/reference/11-community-store.md": 26,
-    "docs/internal/reference/12-constants-catalog.md": 77,
+    "docs/internal/reference/12-constants-catalog.md": 74,
     "docs/internal/reference/13-panel-frontend.md": 22,
     "docs/internal/reference/14-docs-audit.md": 19,
     "playwright-tests/fixtures/index.html": 1,

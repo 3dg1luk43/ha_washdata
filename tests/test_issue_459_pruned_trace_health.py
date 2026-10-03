@@ -16,8 +16,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """#459: a cycle whose trace retention pruned was re-scored to ~1% health.
 
-`_enforce_retention_data` strips `power_data` past `max_full_traces_per_profile`
-and keeps the record. The nightly forced recompute then scored it anyway:
+Until 0.5.8 `_enforce_retention_data` stripped `power_data` past
+`max_full_traces_per_profile` and kept the record (traces are kept for good since
+register item 463, but stores from before still carry pruned cycles). The nightly forced recompute then scored it anyway:
 `quality_features([])` falls back to a `has_trace = 0` row no model was trained on,
 the baseline put it at ~0.99, and the cycle landed in the review queue with an
 empty chart - one false entry per new cycle once a profile reached the cap. Its
@@ -26,18 +27,11 @@ empty chart - one false entry per new cycle once a profile reached the cap. Its
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from custom_components.ha_washdata import ws_api
-from custom_components.ha_washdata.const import CONF_POWER_SENSOR, DOMAIN
 
-from custom_components.ha_washdata.const import (
-    CONF_MAX_FULL_TRACES_PER_PROFILE,
-    CONF_MAX_FULL_TRACES_UNLABELED,
-    MIN_FULL_TRACES,
-)
 from custom_components.ha_washdata.ml.feature_extraction import quality_features
 from custom_components.ha_washdata.profile_store import ProfileStore
 from custom_components.ha_washdata.ws_api import _compute_ml_comparison
@@ -153,27 +147,9 @@ class _Store(ProfileStore):
         self._data = data
         self._logger = MagicMock()
         self._cached_sample_segments = {}
-        self._max_past_cycles = 200
-        self._max_full_traces_per_profile = 2
-        self._max_full_traces_unlabeled = 2
 
     def iter_stored_cycles(self):
         yield from (self._data.get("past_cycles") or [])
-
-
-def test_retention_strips_the_artifacts_with_the_trace() -> None:
-    cycles = []
-    for i in range(4):
-        c = _cycle(f"c{i}")
-        c["start_time"] = f"2026-09-1{i}T10:00:00+00:00"
-        c["artifacts"] = [{"type": "band_high", "start_s": 100, "end_s": 200}]
-        cycles.append(c)
-    st = _Store({"past_cycles": cycles, "profiles": {"Eco": {}}, "pending_feedback": {}})
-    st._enforce_retention_data()
-    stripped = [c for c in cycles if "power_data" not in c]
-    assert len(stripped) == 2
-    assert all("artifacts" not in c for c in stripped)
-    assert all(c.get("artifacts") for c in cycles if "power_data" in c)
 
 
 def test_the_artifact_refresh_clears_a_traceless_cycle() -> None:
@@ -183,61 +159,3 @@ def test_the_artifact_refresh_clears_a_traceless_cycle() -> None:
     st = _Store({"past_cycles": [c]})
     pending = st._collect_cycle_artifact_updates()
     assert pending == [(c, [])]
-
-
-# ---------------------------------------------------------------------------
-# The caps are settable, and bounded
-# ---------------------------------------------------------------------------
-
-
-def test_the_trace_caps_have_a_floor() -> None:
-    """0 kept every trace (`full_indices[-0:]` is the whole list); negative stripped
-    in no chosen order."""
-    assert MIN_FULL_TRACES == 1
-    assert CONF_MAX_FULL_TRACES_PER_PROFILE == "max_full_traces_per_profile"
-    assert CONF_MAX_FULL_TRACES_UNLABELED == "max_full_traces_unlabeled"
-
-
-def test_a_reload_applies_new_trace_caps() -> None:
-    """They were read at setup only, so a panel change waited for a restart."""
-    from custom_components.ha_washdata.manager import WashDataManager
-
-    mgr = MagicMock(spec=WashDataManager)
-    mgr.profile_store = MagicMock()
-    WashDataManager._apply_retention_limits(
-        mgr, {CONF_MAX_FULL_TRACES_PER_PROFILE: 50, CONF_MAX_FULL_TRACES_UNLABELED: 0}
-    )
-    kwargs = mgr.profile_store.set_retention_limits.call_args.kwargs
-    assert kwargs["max_full_traces_per_profile"] == 50
-    assert kwargs["max_full_traces_unlabeled"] == MIN_FULL_TRACES
-
-
-async def _set_options(options: dict) -> dict:
-    entry = MagicMock()
-    entry.entry_id = "e1"
-    entry.data = {CONF_POWER_SENSOR: "sensor.power"}
-    entry.options = {}
-    manager = MagicMock()
-    manager.profile_store.async_record_settings_changes = AsyncMock()
-    hass = MagicMock()
-    hass.data = {DOMAIN: {"e1": manager}}
-    with patch.object(ws_api, "_get_entry", return_value=entry):
-        await ws_api.ws_set_options.__wrapped__(
-            hass, MagicMock(), {"id": 1, "entry_id": "e1", "options": options}
-        )
-    return hass.config_entries.async_update_entry.call_args.kwargs["options"]
-
-
-@pytest.mark.parametrize(
-    ("submitted", "stored"),
-    [(50, 50), (0, MIN_FULL_TRACES), (-3, MIN_FULL_TRACES), (7.9, 7), ("", None),
-     ("abc", None), (float("inf"), None), (10**400, None)],
-)
-async def test_a_trace_cap_is_clamped_or_dropped_on_save(submitted, stored) -> None:
-    saved = await _set_options({CONF_MAX_FULL_TRACES_PER_PROFILE: submitted,
-                                CONF_MAX_FULL_TRACES_UNLABELED: submitted})
-    for key in (CONF_MAX_FULL_TRACES_PER_PROFILE, CONF_MAX_FULL_TRACES_UNLABELED):
-        if stored is None:
-            assert key not in saved
-        else:
-            assert saved[key] == stored

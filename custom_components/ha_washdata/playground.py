@@ -753,7 +753,7 @@ def _simulate_cycle_detail_inner(
     :class:`_DetailSim` and calls ``step``/``run_tail``/``finalize`` across many
     small executor jobs so the event loop breathes on very long cycles (issue
     #311). Because both paths drive the identical object in the identical order,
-    the timeline is byte-for-byte the same (golden test in test_playground_detail).
+    the timeline is byte-for-byte the same (tests/test_playground_chunked_parity.py).
     """
     sim = _DetailSim(
         cycle, base_config, settings_override, store, options, price,

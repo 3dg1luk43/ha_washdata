@@ -18,7 +18,7 @@
     "needs_review": "Necesita revisión",
     "overrun": "Corrió más de lo habitual",
     "poor_fit": "calidad deficiente",
-    "restart_gap_tip": "{n} brecha de reinicio de HA: el trazado de potencia tiene un hueco",
+    "restart_gap_tip": "{n} brechas de reinicio de HA: el trazado de potencia tiene huecos",
     "restart_gap_tip_one": "{n} brecha de reinicio de HA: el trazado de potencia tiene un hueco",
     "restart_gap_tip_many": "{n} brechas de reinicio de HA: el trazado de potencia tiene huecos",
     "restart_gap_tip_other": "{n} brechas de reinicio de HA: el trazado de potencia tiene huecos",
@@ -390,7 +390,7 @@
     "mode_new_profile": "Crear nuevo perfil",
     "models_fine_tuned": "(modelos ajustados: {count})",
     "n_selected": "{n} seleccionados",
-    "n_tuning_suggestions": "{n} sugerencia de ajuste",
+    "n_tuning_suggestions": "{n} sugerencias de ajuste",
     "n_tuning_suggestions_one": "{n} sugerencia de ajuste",
     "n_tuning_suggestions_many": "{n} sugerencias de ajuste",
     "n_tuning_suggestions_other": "{n} sugerencias de ajuste",
@@ -717,7 +717,7 @@
     "group_modal_help": "Programas grupales con la misma forma que difieren en temperatura/centrifugado (las duraciones pueden variar). El emparejamiento califica al grupo como un candidato y luego elige al miembro que mejor se adapta. Elija al menos 2; la superposición muestra cuán parecidos son.",
     "group_not_cohesive": "Estos perfiles no son lo suficientemente similares como para agruparlos de manera confiable, por lo que la comparación los trata individualmente hasta que se elimina el valor atípico o se divide el grupo.",
     "group_preview_hint": "Marque 2 o más miembros para previsualizar y comparar sus curvas de potencia.",
-    "legacy_actions_title": "{count} acción personalizada heredada aún en ejecución",
+    "legacy_actions_title": "{count} acciones personalizadas heredadas aún en ejecución",
     "legacy_actions_title_one": "{count} acción personalizada heredada aún en ejecución",
     "legacy_actions_title_many": "{count} acciones personalizadas heredadas aún en ejecución",
     "legacy_actions_title_other": "{count} acciones personalizadas heredadas aún en ejecución",
@@ -782,7 +782,7 @@
     "recording_in_progress": "Grabación en curso",
     "reminders_intro": "Muestra un recordatorio en el panel tantos ciclos después del último servicio. Deje en blanco o 0 para desactivar un recordatorio.",
     "restart_gap_footer": "Resaltado en el gráfico. Faltan datos de potencia para estos intervalos; la correspondencia usó solo lecturas reales.",
-    "restart_gap_header": "{n} brecha de reinicio de HA durante este ciclo",
+    "restart_gap_header": "{n} brechas de reinicio de HA durante este ciclo",
     "restart_gap_header_one": "{n} brecha de reinicio de HA durante este ciclo",
     "restart_gap_header_many": "{n} brechas de reinicio de HA durante este ciclo",
     "restart_gap_header_other": "{n} brechas de reinicio de HA durante este ciclo",
@@ -803,7 +803,7 @@
     "setting_changed": "Cambiado de {old} a {new} el {date}",
     "settings_basic_note": "Mostrando ajustes esenciales. Cambie a Avanzado para ver la lista completa.",
     "show_all_settings": "Mostrar todas las configuraciones",
-    "showing_suggestions": "Mostrando configuración {count} con sugerencias.",
+    "showing_suggestions": "Mostrando {count} configuraciones con sugerencias.",
     "showing_suggestions_one": "Mostrando {count} configuración con sugerencias.",
     "showing_suggestions_many": "Mostrando {count} configuraciones con sugerencias.",
     "showing_suggestions_other": "Mostrando {count} configuraciones con sugerencias.",
@@ -834,7 +834,7 @@
     "trend_energy_up": "Tendencia de energía al alza ({pct}%/ciclo): promedio reciente {avg}",
     "trim_destructive_confirm": "Esto conserva solo el {pct}% del ciclo y no se puede deshacer. ¿Continuar?",
     "trim_intro": "Arrastre los controles rojos o ingrese valores. Se elimina todo lo que está fuera de la ventana.",
-    "tuning_suggestions_available": "{count} sugerencia de ajuste disponible de los ciclos observados. Aparecen al lado de los campos relevantes.",
+    "tuning_suggestions_available": "{count} sugerencias de ajuste disponibles de los ciclos observados. Aparecen al lado de los campos relevantes.",
     "tuning_suggestions_available_one": "{count} sugerencia de ajuste disponible de los ciclos observados. Aparece al lado del campo relevante.",
     "tuning_suggestions_available_many": "{count} sugerencias de ajuste disponibles de los ciclos observados. Aparecen al lado de los campos relevantes.",
     "tuning_suggestions_available_other": "{count} sugerencias de ajuste disponibles de los ciclos observados. Aparecen al lado de los campos relevantes.",
@@ -896,7 +896,7 @@
     "sug_muted": "Este ajuste no volverá a sugerirse",
     "sug_mute_failed": "No se pudo silenciar la sugerencia",
     "sug_unmuted_all": "Sugerencias silenciadas restablecidas",
-    "n_suggestions_muted": "{count} silenciadas; el ajustador automático no propondrá estas.",
+    "n_suggestions_muted": "{count} sugerencias silenciadas; el ajustador automático no las propondrá.",
     "n_suggestions_muted_one": "{count} sugerencia silenciada; el ajustador automático no la propondrá.",
     "n_suggestions_muted_many": "{count} sugerencias silenciadas; el ajustador automático no las propondrá.",
     "n_suggestions_muted_other": "{count} sugerencias silenciadas; el ajustador automático no las propondrá.",
@@ -1083,7 +1083,7 @@
       "label": "Confianza de etiquetado automático"
     },
     "auto_maintenance": {
-      "doc": "Ejecute la limpieza nocturna: reconstruya los sobres del perfil, vuelva a calcular el estado del ciclo, elimine los rastros de depuración y conserve los ciclos más recientes.",
+      "doc": "Ejecuta la limpieza nocturna: etiqueta los ciclos antiguos sin etiquetar que ahora coinciden claramente con un programa, reconstruye las curvas de los programas, actualiza las marcas de anomalías, recalcula la salud de los ciclos y elimina las trazas de depuración mientras Guardar trazas de depuración esté desactivado. Se conservan todos los ciclos con su trazado de potencia completo.",
       "label": "Mantenimiento automático (limpieza nocturna)"
     },
     "completion_min_seconds": {
@@ -1322,14 +1322,6 @@
       "doc": "Si una coincidencia en vivo a mitad de ciclo cae por debajo de esta puntuación, se borra la identificación provisional. Manténgalo un poco por debajo del Umbral de coincidencia para que una breve caída de la similitud no devuelva la pantalla al estado sin coincidencia.",
       "label": "Umbral de no coincidencia"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Cuántos ciclos más recientes de cada programa conservan su traza de potencia completa. Los ciclos más antiguos conservan su duración, energía y etiqueta, pero pierden la curva; su gráfico queda vacío y dejan de contribuir a la curva, el estado del perfil o las sugerencias del programa. Aumentar este valor permite inspeccionar más historial a costa de almacenamiento (normalmente 3-15 KB por ciclo). Reducirlo elimina las trazas adicionales en la siguiente limpieza, y volver a aumentarlo no podrá recuperarlas.",
-      "label": "Trazas de potencia conservadas por programa"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "El mismo límite para los ciclos que aún no tienen etiqueta de programa.",
-      "label": "Trazas de potencia conservadas (sin etiquetar)"
-    },
     "progress_reset_delay": {
       "doc": "Después de terminar, mantenga el progreso al 100% durante este tiempo para que Completado sea visible en los paneles antes de restablecerlo a Inactivo.",
       "label": "Retardo de reinicio de progreso"
@@ -1343,7 +1335,7 @@
       "label": "Intervalo de muestreo"
     },
     "save_debug_traces": {
-      "doc": "Almacene el seguimiento de potencia total y los datos de depuración coincidentes para cada ciclo. Útil para solucionar problemas pero aumenta el tamaño de almacenamiento.",
+      "doc": "Guarda también con cada ciclo los datos de depuración del reconocimiento (las puntuaciones de cada candidato). Útil para solucionar problemas; añade unos 20 KB por ciclo, que se conservan mientras se conserve el ciclo.",
       "label": "Guardar trazas de depuración"
     },
     "smart_termination_duration_ratio": {

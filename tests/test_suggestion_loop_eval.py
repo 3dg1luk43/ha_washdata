@@ -66,6 +66,25 @@ def test_post_cycle_level_reads_only_a_kept_tail():
     assert loop.post_cycle_level(work + [(600.0, 0.8), (610.0, 0.8)], 1.5) is None
 
 
+def _result(idle: list[int], fragmented: list[dict] | None = None) -> dict:
+    return {
+        "device": "d", "keys": {}, "cooldown_leaks": [], "lock_probe": None, "erased": [],
+        "fragmented": fragmented or [],
+        "rounds": [{"cooldown_active_after_expiry": False, "replay": {"idle_above_stop": n}}
+                   for n in idle],
+    }
+
+
+def test_failures_flag_a_split_and_a_stranded_tail():
+    """Register item 455: both were only reported, so the fixed-point test passed."""
+    assert loop.failures([_result([0, 0])]) == []
+    assert loop.failures([_result([2, 2])]) == []  # already there before any apply
+    split = loop.failures([_result([0], [{"label": "Jeans 30", "after": [2, "completed"]}])])
+    assert len(split) == 1 and "split 1 labelled" in split[0]
+    stranded = loop.failures([_result([0, 10])])
+    assert len(stranded) == 1 and "0 -> 10" in stranded[0]
+
+
 def test_legacy_patch_restores_the_shipped_engine():
     gen, keys = SuggestionEngine.generate_detection_suggestions, ws_api._SUGGESTION_KEYS  # noqa: SLF001
     with loop.legacy_patch(("sampling_interval", "confidence")):
@@ -135,6 +154,12 @@ def test_loop_runs_end_to_end_on_a_synthetic_device(synth_results):
     assert first["applied"]
     assert res["fixed_point"] is True
     assert loop.failures(synth_results) == []
+    # Every replayed cycle has an end lag: its last work to the detected end, which
+    # on this 180 s off delay is at least the off delay (#455c: the metric a Smart
+    # Termination count stood in for).
+    assert len(first["replay"]["lag"]) == 8
+    assert all(180 <= v < 1800 for v in first["replay"]["lag"].values()), first["replay"]["lag"]
+    assert res["lag_median_s"][0] is not None
 
 
 def test_a_muted_key_is_never_applied(synth_results):

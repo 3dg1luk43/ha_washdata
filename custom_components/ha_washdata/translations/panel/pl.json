@@ -68,7 +68,7 @@
     "needs_review": "Wymaga recenzji",
     "overrun": "Trwało dłużej niż zwykle",
     "poor_fit": "słabe dopasowanie",
-    "restart_gap_tip": "{n} przerwa restartu HA: przebieg mocy ma lukę",
+    "restart_gap_tip": "{n} przerwy restartu HA: przebieg mocy ma luki",
     "restart_gap_tip_one": "{n} przerwa restartu HA: przebieg mocy ma lukę",
     "restart_gap_tip_few": "{n} przerwy restartu HA: przebieg mocy ma luki",
     "restart_gap_tip_many": "{n} przerw restartu HA: przebieg mocy ma luki",
@@ -446,7 +446,7 @@
     "mode_new_profile": "Utwórz nowy profil",
     "models_fine_tuned": "(dostrojone modele: {count})",
     "n_selected": "Wybrano {n}",
-    "n_tuning_suggestions": "{n} sugestia dostrajania",
+    "n_tuning_suggestions": "{n} sugestii dostrajania",
     "n_tuning_suggestions_one": "{n} sugestia dostrajania",
     "n_tuning_suggestions_few": "{n} sugestie dostrajania",
     "n_tuning_suggestions_many": "{n} sugestii dostrajania",
@@ -774,7 +774,7 @@
     "group_modal_help": "Grupuj programy o tym samym kształcie, różniące się temperaturą/wirowaniem (czas trwania może się różnić). Dopasowanie ocenia grupę jako jednego kandydata, a następnie wybiera najlepiej dopasowanego członka. Wybierz co najmniej 2; nakładka pokazuje, jak bardzo są podobni.",
     "group_not_cohesive": "Te profile nie są na tyle podobne, aby można było je bezpiecznie grupować, więc dopasowywanie traktuje je indywidualnie, dopóki nie usuniesz wartości odstającej lub nie podzielisz grupy.",
     "group_preview_hint": "Zaznacz co najmniej 2 członków, aby podejrzeć i porównać ich krzywe mocy.",
-    "legacy_actions_title": "{count} starsze działanie niestandardowe nadal działa",
+    "legacy_actions_title": "Starsze działania niestandardowe nadal działające: {count}",
     "legacy_actions_title_one": "{count} starsze działanie niestandardowe nadal działa",
     "legacy_actions_title_few": "{count} starsze działania niestandardowe nadal działają",
     "legacy_actions_title_many": "{count} starszych działań niestandardowych nadal działa",
@@ -841,7 +841,7 @@
     "recording_in_progress": "Trwa nagrywanie",
     "reminders_intro": "Pokaż przypomnienie w panelu po tylu cyklach od ostatniego serwisu. Pozostaw puste lub 0, aby wyłączyć przypomnienie.",
     "restart_gap_footer": "Zaznaczone na wykresie. Dane mocy są niedostępne dla tych przedziałów; dopasowanie używało tylko rzeczywistych odczytów.",
-    "restart_gap_header": "{n} przerwa restartu HA podczas tego cyklu",
+    "restart_gap_header": "{n} przerwy restartu HA podczas tego cyklu",
     "restart_gap_header_one": "{n} przerwa restartu HA podczas tego cyklu",
     "restart_gap_header_few": "{n} przerwy restartu HA podczas tego cyklu",
     "restart_gap_header_many": "{n} przerw restartu HA podczas tego cyklu",
@@ -863,7 +863,7 @@
     "setting_changed": "Zmieniono z {old} na {new} dnia {date}",
     "settings_basic_note": "Wyświetlane są podstawowe ustawienia. Przełącz na Zaawansowane, aby zobaczyć pełną listę.",
     "show_all_settings": "Pokaż wszystkie ustawienia",
-    "showing_suggestions": "Wyświetlam ustawienie {count} z sugestiami.",
+    "showing_suggestions": "Wyświetlam {count} ustawienia z sugestiami.",
     "showing_suggestions_one": "Wyświetlam {count} ustawienie z sugestiami.",
     "showing_suggestions_few": "Wyświetlam {count} ustawienia z sugestiami.",
     "showing_suggestions_many": "Wyświetlam {count} ustawień z sugestiami.",
@@ -873,7 +873,7 @@
     "sug_muted": "To ustawienie nie będzie więcej sugerowane",
     "sug_mute_failed": "Nie udało się wyciszyć sugestii",
     "sug_unmuted_all": "Wyciszone sugestie przywrócone",
-    "n_suggestions_muted": "{count} wyciszonych; automatyczny tuner nie będzie proponować tych ustawień.",
+    "n_suggestions_muted": "Wyciszono {count} sugestii; automatyczny tuner nie będzie ich proponować.",
     "n_suggestions_muted_one": "Wyciszono {count} sugestię; automatyczny tuner nie będzie jej proponować.",
     "n_suggestions_muted_few": "Wyciszono {count} sugestie; automatyczny tuner nie będzie ich proponować.",
     "n_suggestions_muted_many": "Wyciszono {count} sugestii; automatyczny tuner nie będzie ich proponować.",
@@ -903,7 +903,7 @@
     "trend_energy_up": "Trend wzrostowy w zakresie energii ({pct}%/cykl) – ostatnia średnia {avg}",
     "trim_destructive_confirm": "To zachowa tylko {pct}% cyklu i tej operacji nie można cofnąć. Kontynuować?",
     "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko poza oknem jest usuwane.",
-    "tuning_suggestions_available": "Sugestia dostrojenia {count} dostępna z obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
+    "tuning_suggestions_available": "Dostępne sugestie dostrojenia na podstawie obserwowanych cykli: {count}. Pojawiają się obok odpowiednich pól.",
     "tuning_suggestions_available_one": "Dostępna jest {count} sugestia dostrojenia na podstawie obserwowanych cykli. Pojawia się obok odpowiedniego pola.",
     "tuning_suggestions_available_few": "Dostępne są {count} sugestie dostrojenia na podstawie obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
     "tuning_suggestions_available_many": "Dostępnych jest {count} sugestii dostrojenia na podstawie obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
@@ -1125,7 +1125,7 @@
       "label": "Pewność Automatycznego Etykietowania"
     },
     "auto_maintenance": {
-      "doc": "Wykonuj nocne porządki: odbuduj obwiednie profili, ponownie oblicz kondycję cykli, usuń ślady debugowania i zachowaj najnowsze cykle.",
+      "doc": "Wykonuj nocne porządki: oznaczaj starsze nieoznakowane cykle, które teraz wyraźnie pasują do programu, odbudowuj krzywe programów, odświeżaj oznaczenia anomalii, ponownie obliczaj zdrowie cykli i usuwaj ślady debugowania, gdy „Zapisuj Ślady Debugowania” jest wyłączone. Wszystkie cykle i ich pełne przebiegi mocy są zachowywane.",
       "label": "Automatyczna Konserwacja (nocne czyszczenie)"
     },
     "completion_min_seconds": {
@@ -1360,14 +1360,6 @@
       "doc": "Jeśli dopasowanie na żywo w trakcie cyklu spadnie poniżej tego wyniku, wstępna identyfikacja zostanie wyczyszczona. Trzymaj je nieco poniżej Progu Dopasowania, aby krótki spadek podobieństwa nie przełączył wyświetlania z powrotem na brak dopasowania.",
       "label": "Próg Niedopasowania"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Ile z najnowszych cykli każdego programu zachowuje pełny przebieg mocy. Starsze cykle zachowują czas trwania, energię i etykietę, ale tracą krzywą, przez co ich wykres jest pusty i nie wliczają się już do krzywej, kondycji ani sugestii programu. Zwiększenie wartości pozwala przeglądać więcej historii kosztem miejsca w pamięci (zazwyczaj 3–15 KB na cykl). Zmniejszenie usuwa nadmiarowe przebiegi podczas następnego nocnego czyszczenia i ponowne zwiększenie nie może ich przywrócić.",
-      "label": "Przebiegi mocy przechowywane na program"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Ten sam limit dla cykli, które nie mają jeszcze etykiety programu.",
-      "label": "Przebiegi mocy przechowywane (nieoznakowane)"
-    },
     "progress_reset_delay": {
       "doc": "Po zakończeniu utrzymaj postęp na poziomie 100% przez tak długi czas, aby na pulpitach nawigacyjnych pojawił się komunikat Ukończono, zanim przejdziesz do stanu bezczynności.",
       "label": "Opóźnienie Resetowania Postępu"
@@ -1381,7 +1373,7 @@
       "label": "Interwał Próbkowania"
     },
     "save_debug_traces": {
-      "doc": "Przechowuj ślad pełnej mocy i pasujące dane debugowania dla każdego cyklu. Przydatne do rozwiązywania problemów, ale zwiększa rozmiar pamięci.",
+      "doc": "Zapisuj też przy każdym cyklu dane debugowania mechanizmu dopasowania (wyniki wszystkich kandydatów). Przydatne do rozwiązywania problemów; dodaje około 20 kB na cykl, przechowywane tak długo jak sam cykl.",
       "label": "Zapisuj Ślady Debugowania"
     },
     "smart_termination_duration_ratio": {

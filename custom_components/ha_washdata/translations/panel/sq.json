@@ -50,7 +50,7 @@
     "badge": {
         "quiet_tail_tip": "Afër fundit ky program bie në qetësi për rreth {mins} min, pastaj tërheq rreth {watts} W për {secs} s përpara se të përfundojë. Vërejtur në {seen}/{measured} cikle të matura: pajisja nuk e bën këtë në çdo nisje.",
         "quiet_tail": "~{mins} min qetësi në fund",
-        "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) – hapeni për t'i parë ato në grafik",
+        "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) - hapeni për t'i parë në grafik",
         "artifact_tip_one": "U zbulua {n} anomali (p.sh. dera e hapur në mes të ciklit) - hapeni për ta parë në grafik",
         "artifact_tip_other": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) - hapeni për t'i parë në grafik",
         "auto": "(zbuluar automatikisht)",
@@ -65,7 +65,7 @@
         "needs_review": "Ka nevojë për rishikim",
         "overrun": "Zgjati më shumë se zakonisht",
         "poor_fit": "cilësi e keqe",
-        "restart_gap_tip": "{n} boshllëk rinisje të HA: gjurma e energjisë ka një vrimë",
+        "restart_gap_tip": "{n} boshllëqe rinisje të HA: gjurma e energjisë ka vrima",
         "restart_gap_tip_one": "{n} boshllëk rinisje të HA: gjurma e energjisë ka një vrimë",
         "restart_gap_tip_other": "{n} boshllëqe rinisje të HA: gjurma e energjisë ka vrima",
         "reviewed": "Shqyrtuar",
@@ -436,7 +436,7 @@
         "mode_new_profile": "Krijo profil të ri",
         "models_fine_tuned": "(modele të rregulluara mirë: {count})",
         "n_selected": "{n} të zgjedhura",
-        "n_tuning_suggestions": "{n} sugjerim rregullimi",
+        "n_tuning_suggestions": "{n} sugjerime rregullimi",
         "n_tuning_suggestions_one": "{n} sugjerim rregullimi",
         "n_tuning_suggestions_other": "{n} sugjerime rregullimi",
         "new_profile_name": "Emër i ri profili",
@@ -761,7 +761,7 @@
         "group_modal_help": "Gruponi programe me të njëjtën formë që ndryshojnë në temperaturë/centrifugim (kohëzgjatja mund të ndryshojë). Përputhja shënon grupin si një kandidat dhe më pas zgjedh anëtarin më të përshtatshëm. Zgjidhni të paktën 2; mbivendosja tregon se sa të ngjashëm janë.",
         "group_not_cohesive": "Këto profile nuk janë mjaft të ngjashme për t'u grupuar në mënyrë të besueshme, kështu që përputhja i trajton ato individualisht derisa të hiqni pjesën e jashtme ose të ndani grupin.",
         "group_preview_hint": "Shënoni 2+ anëtarë për të parë dhe krahasuar kurbat e tyre të fuqisë.",
-        "legacy_actions_title": "Veprimi i personalizuar i trashëguar i {count} është ende duke u ekzekutuar",
+        "legacy_actions_title": "{count} veprime të personalizuara të trashëguara janë ende në ekzekutim",
         "legacy_actions_title_one": "{count} veprim i personalizuar i trashëguar është ende në ekzekutim",
         "legacy_actions_title_other": "{count} veprime të personalizuara të trashëguara janë ende në ekzekutim",
         "live_chart_loading": "Grafiku i fuqisë live shfaqet ndërsa mbërrijnë leximet.",
@@ -825,7 +825,7 @@
         "recording_in_progress": "Regjistrimi në progres",
         "reminders_intro": "Shfaq një kujtesë në panel pas kaq cikleve nga servisimi i fundit. Lëreni bosh ose 0 për ta çaktivizuar një kujtesë.",
         "restart_gap_footer": "Evidentuar në grafik. Të dhënat e energjisë mungojnë për këto intervale; përputhja përdori vetëm lexime reale.",
-        "restart_gap_header": "{n} boshllëk rinisje të HA gjatë këtij cikli",
+        "restart_gap_header": "{n} boshllëqe rinisje të HA gjatë këtij cikli",
         "restart_gap_header_one": "{n} boshllëk rinisje të HA gjatë këtij cikli",
         "restart_gap_header_other": "{n} boshllëqe rinisje të HA gjatë këtij cikli",
         "restart_gap_item": "{dur} boshllëk",
@@ -845,7 +845,7 @@
         "setting_changed": "Ndryshuar nga {old} në {new} më {date}",
         "settings_basic_note": "Po shfaqen cilësimet thelbësore. Kaloni te Të avancuara për listën e plotë.",
         "show_all_settings": "Shfaq të gjitha cilësimet",
-        "showing_suggestions": "Po shfaq cilësimin e {count} me sugjerime.",
+        "showing_suggestions": "Po shfaqen {count} cilësime me sugjerime.",
         "showing_suggestions_one": "Po shfaqet {count} cilësim me sugjerime.",
         "showing_suggestions_other": "Po shfaqen {count} cilësime me sugjerime.",
         "split_intro": "Kliko grafikun për të shtuar ose hequr një pikë ndarjeje, ose zbulo automatikisht sipas ndërprerjeve. Çdo segment që rezulton mund të ketë profilin e tij.",
@@ -875,7 +875,7 @@
         "trend_energy_up": "Tendenca e energjisë në rritje ({pct}%/cikël) - mesatarisht kohët e fundit {avg}",
         "trim_destructive_confirm": "Kjo ruan vetëm {pct}% të ciklit dhe nuk mund të zhbëhet. Vazhdoni?",
         "trim_intro": "Zvarrit dorëzat e kuqe ose futo vlerat. Gjithçka jashtë dritares hiqet.",
-        "tuning_suggestions_available": "Ofrohet {count} sugjerim akordimi nga ciklet e vëzhguara. Ato shfaqen pranë fushave përkatëse.",
+        "tuning_suggestions_available": "Ofrohen {count} sugjerime rregullimi nga ciklet e vëzhguara. Ato shfaqen pranë fushave përkatëse.",
         "tuning_suggestions_available_one": "Ofrohet {count} sugjerim rregullimi nga ciklet e vëzhguara. Ai shfaqet pranë fushës përkatëse.",
         "tuning_suggestions_available_other": "Ofrohen {count} sugjerime rregullimi nga ciklet e vëzhguara. Ato shfaqen pranë fushave përkatëse.",
         "unsure_detected_prefix": "WashData nuk është i sigurt se ka zbuluar",
@@ -936,7 +936,7 @@
         "sug_muted": "Ky cilësim nuk do të sugjerohet më",
         "sug_mute_failed": "Nuk mund të heshtte sugjerimi",
         "sug_unmuted_all": "Sugjerime të heshtura u rivendosën",
-        "n_suggestions_muted": "{count} të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",
+        "n_suggestions_muted": "{count} sugjerime të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",
         "n_suggestions_muted_one": "{count} sugjerim i heshtur; motori i sugjerimeve nuk do ta propozojë.",
         "n_suggestions_muted_other": "{count} sugjerime të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",
         "font_size_hint": "Bëni gjithçka në këtë panel më të madhe ose më të vogël. Aplikohet për llogarinë tuaj në këtë pajisje.",
@@ -1098,7 +1098,7 @@
             "label": "Besueshmëria e etiketimit automatik"
         },
         "auto_maintenance": {
-            "doc": "Drejtoni mbajtjen e shtëpisë gjatë natës: rindërtoni zarfet e profilit, rillogaritni shëndetin e ciklit, krasitni gjurmët e korrigjimit dhe ruani ciklet më të fundit.",
+            "doc": "Kryen mirëmbajtjen e natës: etiketon ciklet më të vjetra të paetiketuara që tani përputhen qartë me një program, rindërton kurbat e programeve, rifreskon shenjat e anomalive, rillogarit shëndetin e cikleve dhe heq gjurmët e korrigjimit kur \"Ruaj gjurmët e korrigjimit\" është joaktive. Çdo cikël dhe gjurma e tij e plotë e fuqisë ruhen.",
             "label": "Mirëmbajtje automatike (pastrimi nate)"
         },
         "completion_min_seconds": {
@@ -1337,14 +1337,6 @@
             "doc": "Nëse një përputhje e drejtpërdrejtë në mes të ciklit bie nën këtë rezultat, identifikimi paraprak pastrohet. Mbajeni pak më poshtë Pragut të përputhjes, në mënyrë që një rënie e shkurtër e ngjashmërisë të mos e kthejë ekranin përsëri në gjendjen pa përputhje.",
             "label": "Pragu i mosperputhjeve"
         },
-        "max_full_traces_per_profile": {
-            "doc": "Sa cikle të fundit të çdo programi ruajnë gjurmën e tyre të plotë të fuqisë. Ciklet e vjetra ruajnë kohëzgjatjen, energjinë dhe etiketën, por humbasin kurbën; grafiku i tyre mbetet bosh dhe nuk kontribuojnë më në kurbën, shëndetin apo sugjerimet e programit. Rritja e kësaj vlere lejon inspektimin e më shumë historiku me koston e hapësirës së ruajtjes (zakonisht 3-15 KB për cikël). Ulja e saj fshin gjurmët shtesë në pastrimin e ardhshëm, dhe rritja e saj sërish nuk mund t'i rikthejë.",
-            "label": "Gjurmë fuqie të ruajtura për program"
-        },
-        "max_full_traces_unlabeled": {
-            "doc": "I njëjti kufi për ciklet që nuk kanë akoma etiketë programi.",
-            "label": "Gjurmë fuqie të ruajtura (të paetiketuara)"
-        },
         "progress_reset_delay": {
             "doc": "Pas përfundimit, mbajeni progresin në 100% për këtë kohë, në mënyrë që \"Përfunduar\" të jetë i dukshëm në panelet e kontrollit përpara se ta rivendosni në \"Idle\".",
             "label": "Vonesë rivendosjeje të progresit"
@@ -1358,7 +1350,7 @@
             "label": "Intervali i kampionimit"
         },
         "save_debug_traces": {
-            "doc": "Ruani gjurmën e plotë të fuqisë dhe të dhënat e korrigjimit që përputhen për çdo cikël. I dobishëm për zgjidhjen e problemeve, por rrit madhësinë e ruajtjes.",
+            "doc": "Ruan gjithashtu me çdo cikël të dhënat e korrigjimit të përputhjes (pikët e çdo programi kandidat). E dobishme për zgjidhjen e problemeve; shton rreth 20 KB për cikël, të cilat ruhen për aq kohë sa ruhet cikli.",
             "label": "Ruaj gjurmët e korrigjimit"
         },
         "start_duration_threshold": {

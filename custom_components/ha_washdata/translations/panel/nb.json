@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Mot slutten blir dette programmet stille i omtrent {mins} min og trekker deretter rundt {watts} W i {secs} s før det er ferdig. Sett i {seen} av {measured} målte sykluser: apparatet gjør det ikke ved hver kjøring.",
     "quiet_tail": "~{mins} min stille sluttfase",
-    "artifact_tip": "{n} avvik oppdaget (f.eks. dør åpnet midt i syklusen) – åpne for å se dem på grafen",
+    "artifact_tip": "{n} avvik oppdaget (f.eks. dør åpnet midt i syklusen) - åpne for å se dem på grafen",
     "artifact_tip_one": "{n} avvik oppdaget (f.eks. dør åpnet midt i syklusen) - åpne for å se det på grafen",
     "artifact_tip_other": "{n} avvik oppdaget (f.eks. dør åpnet midt i syklusen) - åpne for å se dem på grafen",
     "auto": "(automatisk oppdaget)",
@@ -66,7 +66,7 @@
     "needs_review": "Trenger gjennomgang",
     "overrun": "Løp lenger enn vanlig",
     "poor_fit": "dårlig kvalitet",
-    "restart_gap_tip": "{n} HA-omstartsgap: strømsporet har et hull",
+    "restart_gap_tip": "{n} HA-omstartsgap: strømsporet har hull",
     "restart_gap_tip_one": "{n} HA-omstartsgap: strømsporet har et hull",
     "restart_gap_tip_other": "{n} HA-omstartsgap: strømsporet har hull",
     "reviewed": "Gjennomgått",
@@ -766,7 +766,7 @@
     "group_modal_help": "Grupper programmer med samme form som varierer i temperatur/spinn (varigheten kan variere). Matching scorer gruppen som én kandidat, og velger deretter det best passende medlemmet. Velg minst 2; overlegget viser hvor like de er.",
     "group_not_cohesive": "Disse profilene er ikke like nok til å gruppere pålitelig, så matching behandler dem individuelt inntil du fjerner uteliggeren eller deler gruppen.",
     "group_preview_hint": "Kryss av 2 eller flere medlemmer for å forhåndsvise og sammenligne effektkurvene.",
-    "legacy_actions_title": "{count} eldre tilpasset handling kjører fortsatt",
+    "legacy_actions_title": "{count} eldre tilpassede handlinger kjører fortsatt",
     "legacy_actions_title_one": "{count} eldre tilpasset handling kjører fortsatt",
     "legacy_actions_title_other": "{count} eldre tilpassede handlinger kjører fortsatt",
     "live_chart_loading": "Direkte strømdiagram vises når avlesningene kommer.",
@@ -850,7 +850,7 @@
     "setting_changed": "Endret fra {old} til {new} den {date}",
     "settings_basic_note": "Viser de viktigste innstillingene. Bytt til Avansert for hele listen.",
     "show_all_settings": "Vis alle innstillinger",
-    "showing_suggestions": "Viser {count}-innstilling med forslag.",
+    "showing_suggestions": "Viser {count} innstillinger med forslag.",
     "showing_suggestions_one": "Viser {count} innstilling med forslag.",
     "showing_suggestions_other": "Viser {count} innstillinger med forslag.",
     "split_intro": "Klikk på grafen for å legge til eller fjerne et delt punkt, eller automatisk oppdage ved tomgangshull. Hvert resulterende segment kan få sin egen profil.",
@@ -880,7 +880,7 @@
     "trend_energy_up": "Energi på vei opp ({pct} %/syklus) – nylig gjennomsnittlig {avg}",
     "trim_destructive_confirm": "Kun {pct}% av syklusen beholdes. Dette kan ikke angres. Fortsette?",
     "trim_intro": "Dra de røde håndtakene, eller skriv inn verdier. Alt utenfor vinduet fjernes.",
-    "tuning_suggestions_available": "{count} justeringsforslag tilgjengelig fra observerte sykluser. De vises ved siden av de relevante feltene.",
+    "tuning_suggestions_available": "{count} justeringsforslag tilgjengelige fra observerte sykluser. De vises ved siden av de relevante feltene.",
     "tuning_suggestions_available_one": "{count} justeringsforslag tilgjengelig fra observerte sykluser. Det vises ved siden av det relevante feltet.",
     "tuning_suggestions_available_other": "{count} justeringsforslag tilgjengelige fra observerte sykluser. De vises ved siden av de relevante feltene.",
     "unsure_detected_prefix": "WashData er usikker på om det er oppdaget",
@@ -944,7 +944,7 @@
     "sug_muted": "Vil ikke foreslå denne innstillingen igjen",
     "sug_mute_failed": "Kunne ikke dempe forslaget",
     "sug_unmuted_all": "Dempede forslag tilbakestilt",
-    "n_suggestions_muted": "{count} dempet; autotuner vil ikke foreslå disse.",
+    "n_suggestions_muted": "{count} forslag dempet; autotuneren vil ikke foreslå disse.",
     "n_suggestions_muted_one": "{count} forslag dempet; autotuneren vil ikke foreslå det.",
     "n_suggestions_muted_other": "{count} forslag dempet; autotuneren vil ikke foreslå disse.",
     "font_size_hint": "Gjør alt i dette panelet større eller mindre. Gjelder for kontoen din på denne enheten.",
@@ -1127,7 +1127,7 @@
       "label": "Auto-merking konfidensgrad"
     },
     "auto_maintenance": {
-      "doc": "Kjør nattlig rengjøring: gjenoppbygg profilkonvolutter, beregn syklushelsen på nytt, beskjær feilsøkingsspor og behold de siste syklusene.",
+      "doc": "Kjør nattlig opprydding: merk eldre umerkede sykluser som nå tydelig samsvarer med et program, gjenoppbygg programkurver, oppdater avviksmarkeringer, beregn syklushelsen på nytt og fjern feilsøkingsspor mens «Lagre feilsøkingsspor» er slått av. Alle sykluser beholdes med hele effektsporet sitt.",
       "label": "Automatisk vedlikehold (nattlig opprydding)"
     },
     "completion_min_seconds": {
@@ -1366,14 +1366,6 @@
       "doc": "Hvis et direkte samsvar midt i syklusen faller under denne poengsummen, slettes den tentative identifikasjonen. Hold den litt under Samsvarsterskel, slik at et kort fall i likhet ikke setter visningen tilbake til uten treff.",
       "label": "Ikke-samsvarsterskel"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Hvor mange av hvert programs nyeste sykluser som beholder sine fullstendige effektspor. Eldre sykluser beholder varighet, energi og etikett, men mister kurven - diagrammet er da tomt og de teller ikke lenger med i programmets kurve, helse eller forslag. En høyere verdi gjør mer historikk inspiserbar, på bekostning av lagringsplass (vanligvis 3-15 KB per syklus). En lavere verdi sletter de ekstra sporene ved neste opprydding; å heve den igjen kan ikke gjenopprette dem.",
-      "label": "Lagrede effektspor per program"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Den samme grensen for sykluser som ennå ikke har en programetikett.",
-      "label": "Lagrede effektspor (umerket)"
-    },
     "progress_reset_delay": {
       "doc": "Etter å ha fullført, hold fremdriften på 100 % så lenge, slik at Fullført er synlig på dashbord før du tilbakestiller til inaktiv.",
       "label": "Fremdriftsreset-forsinkelse"
@@ -1387,7 +1379,7 @@
       "label": "Sampling-intervall"
     },
     "save_debug_traces": {
-      "doc": "Lagre full effektsporing og samsvarende feilsøkingsdata for hver syklus. Nyttig for feilsøking, men øker lagringsstørrelsen.",
+      "doc": "Lagre også matcherens feilsøkingsdata (poengsummene til alle kandidater) med hver syklus. Nyttig for feilsøking; det bruker omtrent 20 KB per syklus og beholdes så lenge syklusen finnes.",
       "label": "Lagre feilsøkingsspor"
     },
     "smart_termination_duration_ratio": {

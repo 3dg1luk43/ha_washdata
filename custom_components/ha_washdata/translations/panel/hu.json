@@ -50,7 +50,7 @@
     "badge": {
         "quiet_tail_tip": "A vége felé ez a program körülbelül {mins} percre elcsendesedik, majd a befejezés előtt {secs} másodpercig körülbelül {watts} W-ot vesz fel. {measured} mért ciklusból {seen} esetben fordult elő: a készülék nem minden futásnál csinálja.",
         "quiet_tail": "záró csend ~{mins} perc",
-        "artifact_tip": "{n} rendellenesség észlelve (pl. ajtónyitás a ciklus közepén) – nyissa meg, hogy megtekinthesse őket a grafikonon",
+        "artifact_tip": "{n} rendellenesség észlelve (pl. ajtónyitás a ciklus közepén) - nyissa meg, hogy megtekinthesse őket a grafikonon",
         "artifact_tip_one": "{n} rendellenesség észlelve (pl. ajtónyitás a ciklus közepén) - nyissa meg, hogy megtekinthesse a grafikonon",
         "artifact_tip_other": "{n} rendellenesség észlelve (pl. ajtónyitás a ciklus közepén) - nyissa meg, hogy megtekinthesse őket a grafikonon",
         "auto": "(automatikusan észlelve)",
@@ -66,7 +66,7 @@
         "needs_review": "Felülvizsgálatra szorul",
         "overrun": "A szokásosnál tovább futott",
         "poor_fit": "rossz illeszkedés",
-        "restart_gap_tip": "{n} HA-újraindítás-rés: a teljesítménygörbén van egy lyuk",
+        "restart_gap_tip": "{n} HA-újraindítás-rés: a teljesítménygörbén lyukak vannak",
         "restart_gap_tip_one": "{n} HA-újraindítás-rés: a teljesítménygörbén van egy lyuk",
         "restart_gap_tip_other": "{n} HA-újraindítás-rés: a teljesítménygörbén lyukak vannak",
         "reviewed": "Áttekintve",
@@ -944,7 +944,7 @@
         "sug_muted": "Ezt a beállítást nem javasolja többé",
         "sug_mute_failed": "Nem sikerült elhallgattatni a javaslatot",
         "sug_unmuted_all": "Az elhallgattatott javaslatok visszaállítva",
-        "n_suggestions_muted": "{count} elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",
+        "n_suggestions_muted": "{count} javaslat elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",
         "n_suggestions_muted_one": "{count} javaslat elhallgattatva; az automatikus finomhangolás nem fogja javasolni.",
         "n_suggestions_muted_other": "{count} javaslat elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",
         "font_size_hint": "Tegye nagyobbá vagy kisebbé mindent a panelen. Az ezen az eszközön lévő fiókjára vonatkozik.",
@@ -1103,7 +1103,7 @@
             "label": "Automatikus jelölési megbízhatóság"
         },
         "auto_maintenance": {
-            "doc": "Futtasson éjszakai takarítást: újjáépítse a profilborítékokat, újraszámolja a ciklus állapotát, törölje a hibakeresési nyomokat és őrizze meg a legutóbbi ciklusokat.",
+            "doc": "Éjszakai karbantartást futtat: felcímkézi azokat a régebbi címkézetlen ciklusokat, amelyek már egyértelműen egy programhoz illeszkednek, újraépíti a programgörbéket, frissíti a rendellenesség-jelöléseket, újraszámolja a ciklusok egészségét, és eltávolítja a hibakeresési nyomokat, amíg a \"Hibakeresési nyomok mentése\" ki van kapcsolva. Minden ciklus és annak teljes teljesítménygörbéje megmarad.",
             "label": "Automatikus karbantartás (éjszakai tisztítás)"
         },
         "completion_min_seconds": {
@@ -1338,14 +1338,6 @@
             "doc": "Ha egy élő, ciklus közbeni egyezés pontszáma ez alá csökken, az ideiglenes azonosítás törlődik. Tartsa kicsivel az Egyezési küszöb alatt, hogy a hasonlóság rövid visszaesése ne állítsa vissza a kijelzőt a nincs egyezés állapotba.",
             "label": "Nem egyező küszöb"
         },
-        "max_full_traces_per_profile": {
-            "doc": "Hány legutóbbi ciklus tartja meg a teljes teljesítménynyomot az egyes programokhoz. A régebbi ciklusok megőrzik a tartamot, az energiát és a címkét, de elveszítik a görbét, így a diagramjuk üres, és már nem számítanak a program görbéjéhez, egészségéhez vagy javaslataihoz. A növelés több előzményt tesz megtekinthetővé a tárhely rovására (jellemzően 3-15 KB/ciklus). A csökkentés törli a felesleges nyomokat a következő éjszakai tisztításkor; az újbóli növelés nem tudja visszaállítani őket.",
-            "label": "Programonként megőrzött teljesítménynyomok"
-        },
-        "max_full_traces_unlabeled": {
-            "doc": "Ugyanez a korlát az olyan ciklusokra vonatkozik, amelyeknek még nincs programcímkéjük.",
-            "label": "Megőrzött teljesítménynyomok (Címkézetlen)"
-        },
         "progress_reset_delay": {
             "doc": "A befejezés után tartsa 100%-on az előrehaladást ennyi ideig, hogy a Befejezett felirat látható legyen az irányítópulton, mielőtt visszaállítaná az üresjárati állapotot.",
             "label": "Folyamat visszaállítási késleltetés"
@@ -1359,7 +1351,7 @@
             "label": "Mintavételezési intervallum"
         },
         "save_debug_traces": {
-            "doc": "Tárolja a teljes teljesítmény nyomkövetést és a megfelelő hibakeresési adatokat minden ciklushoz. Hasznos hibaelhárításhoz, de növeli a tárhely méretét.",
+            "doc": "Minden ciklushoz az egyeztetés hibakeresési adatait (minden jelölt program pontszámait) is eltárolja. Hibaelhárításhoz hasznos; ciklusonként körülbelül 20 KB-ot ad hozzá, amely addig marad meg, amíg maga a ciklus.",
             "label": "Hibakeresési nyomok mentése"
         },
         "smart_termination_duration_ratio": {

@@ -50,7 +50,7 @@
   "badge": {
     "quiet_tail_tip": "Undir lokin verður þetta kerfi kyrrt í um það bil {mins} mín. og dregur svo um {watts} W í {secs} s áður en því lýkur. Sést í {seen} af {measured} mældum lotum: tækið gerir þetta ekki í hverri keyrslu.",
     "quiet_tail": "~{mins} mín. kyrr lokaáfangi",
-    "artifact_tip": "{n} frávik fundust (t.d. hurð opnuð í miðjum lotu) – opnaðu til að sjá þau á línuritinu",
+    "artifact_tip": "{n} frávik fundust (t.d. hurð opnuð í miðri lotu) - opnaðu til að sjá þau á línuritinu",
     "artifact_tip_one": "{n} frávik fannst (t.d. hurð opnuð í miðri lotu) - opnaðu til að sjá frávik á línuritinu",
     "artifact_tip_other": "{n} frávik fundust (t.d. hurð opnuð í miðri lotu) - opnaðu til að sjá þau á línuritinu",
     "auto": "(sjálfvirkt greint)",
@@ -66,7 +66,7 @@
     "needs_review": "Þarfnast endurskoðunar",
     "overrun": "Keyrði lengur en venjulega",
     "poor_fit": "léleg gæði",
-    "restart_gap_tip": "{n} HA endurræsingarbil: aflsporið hefur gat",
+    "restart_gap_tip": "{n} HA endurræsingarbil: aflsporið hefur göt",
     "restart_gap_tip_one": "{n} HA endurræsingarbil: aflsporið hefur gat",
     "restart_gap_tip_other": "{n} HA endurræsingarbil: aflsporið hefur göt",
     "reviewed": "Farið yfir",
@@ -441,7 +441,7 @@
     "mode_new_profile": "Búðu til nýjan prófíl",
     "models_fine_tuned": "(fínstillt líkön: {count})",
     "n_selected": "{n} valin",
-    "n_tuning_suggestions": "{n} stillinga­tillaga",
+    "n_tuning_suggestions": "{n} stillinga­tillögur",
     "n_tuning_suggestions_one": "{n} stillinga­tillaga",
     "n_tuning_suggestions_other": "{n} stillinga­tillögur",
     "new_profile_name": "Nýtt prófílnafn",
@@ -766,7 +766,7 @@
     "group_modal_help": "Flokkaðu kerfi með sömu lögun sem eru mismunandi hvað varðar hitastig/snúning (lengd getur verið mismunandi). Samsvörun gefur hópnum eina einkunn og velur síðan þann meðlim sem passar best. Veldu að minnsta kosti 2; yfirlagið sýnir hversu lík þau eru.",
     "group_not_cohesive": "Þessir snið eru ekki nógu lík til að hópa á áreiðanlegan hátt, þannig að samsvörun meðhöndlar þá hver fyrir sig þar til þú fjarlægir frávikið eða skiptir hópnum.",
     "group_preview_hint": "Merktu 2+ meðlimi til að forskoða og bera saman aflferla þeirra.",
-    "legacy_actions_title": "{count} eldri sérsniðin aðgerð enn í gangi",
+    "legacy_actions_title": "{count} eldri sérsniðnar aðgerðir enn í gangi",
     "legacy_actions_title_one": "{count} eldri sérsniðin aðgerð enn í gangi",
     "legacy_actions_title_other": "{count} eldri sérsniðnar aðgerðir enn í gangi",
     "live_chart_loading": "Lifandi aflkort birtist þegar álestur berast.",
@@ -850,7 +850,7 @@
     "setting_changed": "Breytt úr {old} í {new} þann {date}",
     "settings_basic_note": "Sýni nauðsynlegar stillingar. Skiptu yfir í Ítarlegri fyrir allan listann.",
     "show_all_settings": "Sýna allar stillingar",
-    "showing_suggestions": "Sýnir {count} stillingu með tillögum.",
+    "showing_suggestions": "Sýnir {count} stillingar með tillögum.",
     "showing_suggestions_one": "Sýnir {count} stillingu með tillögum.",
     "showing_suggestions_other": "Sýnir {count} stillingar með tillögum.",
     "split_intro": "Smelltu á línuritið til að bæta við eða fjarlægja skiptingarpunkt, eða greina sjálfvirkt með aðgerðalausum eyðum. Hver hluti sem myndast getur fengið sinn eigin prófíl.",
@@ -880,7 +880,7 @@
     "trend_energy_up": "Orka hækkar ({pct}%/lotu) – nýleg meðaltal {avg}",
     "trim_destructive_confirm": "Aðeins {pct}% af lotunni verður eftir. Þetta er ekki hægt að afturkalla. Halda áfram?",
     "trim_intro": "Dragðu rauðu handföngin eða sláðu inn gildi. Allt utan valda tímabilsins er fjarlægt.",
-    "tuning_suggestions_available": "{count} uppástunga að stilla í boði frá athuguðum lotum. Þau birtast við hlið viðkomandi reita.",
+    "tuning_suggestions_available": "{count} stillingatillögur í boði út frá athuguðum lotum. Þær birtast við hlið viðkomandi reita.",
     "tuning_suggestions_available_one": "{count} stillingatillaga í boði út frá athuguðum lotum. Hún birtist við hlið viðkomandi reits.",
     "tuning_suggestions_available_other": "{count} stillingatillögur í boði út frá athuguðum lotum. Þær birtast við hlið viðkomandi reita.",
     "unsure_detected_prefix": "WashData er ekki viss um að það hafi fundist",
@@ -944,7 +944,7 @@
     "sug_muted": "Mun ekki stinga upp á þessari stillingu aftur",
     "sug_mute_failed": "Gat ekki þaggað tillögu",
     "sug_unmuted_all": "Þaggaðar tillögur endurstilltar",
-    "n_suggestions_muted": "{count} þaggaðar; sjálfvirki stillirinn leggur ekki til þessar.",
+    "n_suggestions_muted": "{count} tillögur þaggaðar; sjálfvirki stillirinn leggur þær ekki til.",
     "n_suggestions_muted_one": "{count} tillaga þögguð; sjálfvirki stillirinn leggur hana ekki til.",
     "n_suggestions_muted_other": "{count} tillögur þaggaðar; sjálfvirki stillirinn leggur þær ekki til.",
     "font_size_hint": "Gerðu allt á þessum glugga stærra eða minna. Gildir fyrir reikning þinn á þessum tæki.",
@@ -1127,7 +1127,7 @@
       "label": "Sjálfvirk merkingaöryggi"
     },
     "auto_maintenance": {
-      "doc": "Keyrðu næturþrif: endurbyggðu aflsvið prófíla, endurreiknaðu heilsu lotanna, fjarlægðu kembiferla og geymdu nýjustu loturnar.",
+      "doc": "Keyrðu næturþrif: merktu eldri ómerktar lotur sem passa nú greinilega við kerfi, endurbyggðu aflferla kerfa, uppfærðu fráviksmerkingar, endurreiknaðu heilsu lotanna og fjarlægðu villuleitarspor á meðan slökkt er á „Vista villuleitarspor“. Hver lota er geymd ásamt fullum aflferli sínum.",
       "label": "Sjálfvirkt viðhald (næturþrif)"
     },
     "completion_min_seconds": {
@@ -1366,14 +1366,6 @@
       "doc": "Ef bein samsvörun á miðri lotu fer niður fyrir þetta skor er bráðabirgðaauðkenningin hreinsuð. Haltu því aðeins undir samsvörunarþröskuldinum svo stutt dýfa í líkindum snúi skjánum ekki aftur í „Engin samsvörun“.",
       "label": "Ósamsvarþröskuldur"
     },
-    "max_full_traces_per_profile": {
-      "doc": "Hversu margar af nýjustu lotum hvers kerfis geyma fulla aflrekninguna sína. Eldri lotur geyma lengd, orku og merkingu en missa ferilinn - myndriti þeirra er þá tómt og þær teljast ekki lengur með í ferli kerfisins, heilsu eða tillögum. Hærra gildi heldur meiri sögu aðgengilegri til skoðunar, á kostnað geymslu (venjulega 3-15 KB á lotu). Lægra gildi eyðir aukalegum sporum við næstu þrif; að hækka það aftur getur ekki endurreist þau.",
-      "label": "Geymd aflspor á kerfi"
-    },
-    "max_full_traces_unlabeled": {
-      "doc": "Sama takmörkunin á lotur sem hafa ekki enn fengið kerfismerki.",
-      "label": "Geymd aflspor (ómerkt)"
-    },
     "progress_reset_delay": {
       "doc": "Eftir að lotu lýkur er framvindu haldið í 100% svona lengi, svo Lokið sjáist á mælaborðum áður en staðan fer aftur í Aðgerðarlaus.",
       "label": "Töf á endurstillingu framvindu"
@@ -1387,7 +1379,7 @@
       "label": "Sýnitakabil"
     },
     "save_debug_traces": {
-      "doc": "Geymdu fulla aflrekningu og samsvarandi villuleitargögn fyrir hverja lotu. Gagnlegt fyrir bilanaleit en eykur geymslustærð.",
+      "doc": "Geymdu einnig villuleitargögn samsvörunarinnar (skor allra valkosta) með hverri lotu. Gagnlegt fyrir bilanaleit; gögnin taka um 20 KB á hverja lotu og eru geymd jafn lengi og lotan.",
       "label": "Vista villuleitarspor"
     },
     "smart_termination_duration_ratio": {

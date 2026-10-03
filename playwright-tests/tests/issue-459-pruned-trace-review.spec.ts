@@ -40,9 +40,11 @@ test('an ML health label alone never queues a cycle for review (#459, audit ML-0
   await expect(page.locator('tr[data-cid="cyc-001"]')).toHaveCount(0);
 });
 
-test('the trace caps are editable in Housekeeping (#459)', async ({ page }) => {
+test('there are no retention caps to set (register item 463)', async ({ page }) => {
+  // Every cycle and its full trace are kept since 0.5.8; the #459 trace-cap fields are gone.
   await clickTab(page, 'settings');
   await page.locator('button[data-sec="timing"]').first().click();
-  await expect(page.locator('input[data-opt="max_full_traces_per_profile"]').first()).toBeVisible({ timeout: 5_000 });
-  await expect(page.locator('input[data-opt="max_full_traces_unlabeled"]').first()).toBeVisible();
+  await expect(page.locator('input[data-opt="auto_maintenance"]').first()).toBeAttached({ timeout: 5_000 });
+  await expect(page.locator('input[data-opt="max_full_traces_per_profile"]')).toHaveCount(0);
+  await expect(page.locator('input[data-opt="max_full_traces_unlabeled"]')).toHaveCount(0);
 });

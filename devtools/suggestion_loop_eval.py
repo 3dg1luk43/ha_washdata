@@ -74,8 +74,17 @@ has eaten its own evidence: ``erased`` lists the labelled cycles stored complete
 under the export's options that the fixed point's options turn interrupted,
 force-stopped or unstored, which every pass then ignores (the SUGGEST-03 ratchet:
 Completion Minimum turned the shortest programme interrupted, so the next value rose
-again). That is a failure too. ``fragmented`` (still completed, plus an extra record)
-is only reported.
+again). That is a failure too, and so is ``fragmented`` (still completed, plus an
+extra record: register item 455b, a start threshold under the post-end draw) and an
+``idle_above_stop`` count that rises (455a, a stop threshold under the draw kept tails
+show after the end). ``delayed`` lists the labelled cycles whose end is detected more
+than ``DELAY_REPORT_S`` later at the fixed point, from the per-cycle end lag (detected
+end minus the source's last reading at or above the recorded stop threshold; its
+median per device is ``lag_median_s``). Only reported: a later end is a cost, not lost
+evidence. A Smart Termination count is no proxy for it - lowering ``off_delay`` lets
+the progress-shortened fallback timeout end a washer before the Smart debounce
+(>= 180 s of quiet) can, so Smart Terminations drop while every end gets earlier
+(455c).
 
 **Revert check** (``--legacy``): re-enables a suggestion removed in 0.5.8 with its old
 logic copied verbatim from ``c006c92~1:custom_components/ha_washdata/suggestion_engine.py``
@@ -100,7 +109,8 @@ earlier one (a pure function) is answered from a per-process memo. Serial and
 parallel runs give identical results.
 
 Exit codes: 0 every setting stable/converged, 1 a ladder / oscillation / unsettled
-setting, erased evidence, a cooldown leak or a muted key applied, 2 no corpus.
+setting, erased or split evidence, a rising ``idle_above_stop``, a cooldown leak or a
+muted key applied, 2 no corpus.
 """
 from __future__ import annotations
 
@@ -193,6 +203,8 @@ _LABEL_FIELDS = (
 _AUTO_SOURCES = ("auto_match", "auto_label_post", "auto_label_service")
 #: The replay's quiet tail is at least this long (see run_tail).
 _TAIL_MIN_S = 7200.0
+#: A labelled cycle whose end is detected this much later at the fixed point is reported.
+DELAY_REPORT_S = 300.0
 #: A kept tail must be at least this long to say where the appliance idles.
 _POST_LEVEL_MIN_S = 60.0
 _POST_LEVEL_MIN_SAMPLES = 3
@@ -594,7 +606,9 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
 
     Returns what the detector emitted (``captured``), when each end was detected
     (``ends``, seconds from ``base``), the cadence intervals the manager would have
-    committed and ``idle_above_stop``; None when the trace is too short to replay.
+    committed, ``idle_above_stop`` and ``work_end`` (the source's last reading at or
+    above the recorded stop threshold, the anchor of the end lag); None when the
+    trace is too short to replay.
     """
     cyc = src
     if throttle_s:
@@ -609,6 +623,8 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
         return None
     tap = _ManagerTap(sim)
     sim.step(0, sim.n_readings)
+    src_readings, _pts, src_base = playground._readings_from_cycle(src)  # noqa: SLF001
+    work = [ts for ts, p in src_readings if p >= recorded_stop]
     level = post_cycle_level(_cycle_readings(src), recorded_stop)
     idle_above = level is not None and level >= float(cfg.stop_threshold_w)
     if idle_hold and idle_above:
@@ -618,6 +634,7 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
     return {
         "captured": copy.deepcopy(sim.captured), "ends": list(tap.ends),
         "committed": list(tap.committed), "base": sim.base, "idle_above_stop": idle_above,
+        "work_end": (work[-1] - src_base).total_seconds() if work else None,
     }
 
 
@@ -639,10 +656,13 @@ def assemble(
                          "interrupted": 0, "smart": 0, "ghosts": 0, "idle_above_stop": 0}
     # Per stored cycle: [cycles it became, status of the main one or None if lost].
     outcome: dict[int, list[Any]] = {}
+    # Per stored cycle: seconds from its last work to the detected end of its main record.
+    lag: dict[int, float] = {}
     prev_end = None  # wall clock of the previous end detection (pump-out rule)
     learning = float(options.get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE))
     auto = float(options.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE))
     m["outcome"] = outcome
+    m["lag"] = lag
     for idx, src in enumerate(sources):
         rep = replays.get(idx)
         if rep is None:
@@ -652,6 +672,7 @@ def assemble(
         m["idle_above_stop"] += bool(rep.get("idle_above_stop"))
         intervals.extend(rep["committed"])
         kept: list[dict] = []
+        end_at: dict[int, float] = {}
         for i, cd in enumerate(rep["captured"]):
             duration = float(cd.get("duration") or 0.0)
             energy = _energy_wh(cd.get("power_data") or [])
@@ -674,6 +695,8 @@ def assemble(
                 continue
             cd = copy.deepcopy(cd)
             cd["energy_wh"] = round(energy, 3)
+            if i < len(ends):
+                end_at[id(cd)] = float(ends[i])
             kept.append(cd)
         if not kept:
             m["lost"] += 1
@@ -685,6 +708,8 @@ def assemble(
             kept, key=lambda d: (d.get("status") == "completed", float(d.get("duration") or 0.0))
         )
         outcome[idx] = [len(kept), primary.get("status")]
+        if rep.get("work_end") is not None and id(primary) in end_at:
+            lag[idx] = end_at[id(primary)] - float(rep["work_end"])
         span = _active_span(_cycle_readings(src), stop)
         if span > 0 and float(primary.get("duration") or 0.0) < 0.9 * span:
             m["truncated"] += 1
@@ -1045,6 +1070,19 @@ class DeviceLoop:
         # `fragmented` ones are still completed but shed an extra record.
         first = self.history[0]["replay"]["outcome"] if self.history else {}
         last = self.history[-1]["replay"]["outcome"] if self.history else {}
+        lag0 = self.history[0]["replay"]["lag"] if self.history else {}
+        lag1 = self.history[-1]["replay"]["lag"] if self.history else {}
+        both = sorted(set(lag0) & set(lag1))
+        # `delayed`: the end of a labelled cycle is detected > DELAY_REPORT_S later at
+        # the fixed point than under the export's options. Reported only: a later end
+        # is a cost, not lost evidence (a Smart Termination count is no proxy for it:
+        # an earlier fallback end replaces it whenever off_delay drops, register item 455c).
+        delayed = [
+            {"id": self.past[i].get("id"), "label": self.past[i].get("profile_name"),
+             "lag_s": [round(lag0[i]), round(lag1[i])]}
+            for i in both
+            if self.past[i].get("profile_name") and lag1[i] - lag0[i] > DELAY_REPORT_S
+        ]
         erased, fragmented = [], []
         for idx, before in first.items():
             src = self.past[idx]
@@ -1061,7 +1099,11 @@ class DeviceLoop:
             "device": self.title, "device_type": self.device_type, "cycles": len(self.past),
             "replayable": sum(1 for c in self.past if _replayable(c)),
             "rounds": self.history, "keys": keys, "fixed_point": not final_updates,
-            "erased": erased, "fragmented": fragmented,
+            "erased": erased, "fragmented": fragmented, "delayed": delayed,
+            "lag_median_s": [
+                round(float(np.median([lag0[i] for i in both]))) if both else None,
+                round(float(np.median([lag1[i] for i in both]))) if both else None,
+            ],
             "cooldown_leaks": self.leaks, "lock_probe": self.lock_result,
             "legacy": list(self.legacy), "cpu_s": round(self.cpu, 1),
         }
@@ -1195,6 +1237,17 @@ def failures(results: list[dict]) -> list[str]:
                 f"{r['device']}: the loop erased {len(r['erased'])} labelled cycle(s) "
                 f"{[(d['label'], d['after']) for d in r['erased']]}"
             )
+        if r.get("fragmented"):
+            out.append(
+                f"{r['device']}: the loop split {len(r['fragmented'])} labelled cycle(s) "
+                f"{[(d['label'], d['after']) for d in r['fragmented']]}"
+            )
+        idle = [row["replay"]["idle_above_stop"] for row in r["rounds"]]
+        if idle and idle[-1] > idle[0]:
+            out.append(
+                f"{r['device']}: {idle[-1] - idle[0]} more kept tail(s) sit at or above the"
+                f" fixed point's stop threshold ({idle[0]} -> {idle[-1]})"
+            )
     return out
 
 
@@ -1202,6 +1255,10 @@ def _fmt(v: Any) -> str:
     if isinstance(v, float):
         return f"{v:g}"
     return str(v)
+
+
+def _fmt_s(v: Any) -> str:
+    return "-" if v is None else f"{v}s"
 
 
 def print_report(results: list[dict], rounds: int) -> None:
@@ -1213,9 +1270,12 @@ def print_report(results: list[dict], rounds: int) -> None:
             f"{k}={first[k]}->{last[k]}" if first[k] != last[k] else f"{k}={first[k]}"
             for k in ("splits", "lost", "truncated", "interrupted", "smart", "idle_above_stop")
         )
+        lag = r.get("lag_median_s") or [None, None]
+        lag_s = (f" lag_med={_fmt_s(lag[0])}->{_fmt_s(lag[1])}" if lag[0] != lag[1]
+                 else f" lag_med={_fmt_s(lag[0])}")
         print(f"\n{r['device']} [{r['device_type']}] cycles={r['cycles']} replayable={r['replayable']}"
               f" applies={len(r['rounds']) - 1} fixed_point={r['fixed_point']} cpu={r['cpu_s']}s"
-              f"\n    replay first->last round: {moved}")
+              f"\n    replay first->last round: {moved}{lag_s}")
         for key, k in r["keys"].items():
             seq = " -> ".join(_fmt(v) for v in k["values"])
             print(f"    {key:34s} {k['verdict']:10s} applies={k['applies']}  {seq}")
@@ -1223,6 +1283,9 @@ def print_report(results: list[dict], rounds: int) -> None:
             if r.get(kind):
                 print(f"    labelled cycles {kind}: {len(r[kind])}"
                       f" {[(d['label'], d['after']) for d in r[kind]]}")
+        if r.get("delayed"):
+            print(f"    labelled cycles ending > {DELAY_REPORT_S / 60:g} min later: {len(r['delayed'])}"
+                  f" {[(d['label'], d['lag_s']) for d in r['delayed']]}")
         lp = r.get("lock_probe")
         if lp:
             print(f"    lock probe: muted={len(lp['locked'])} stored_by_cascade={lp['stored_by_cascade']}"

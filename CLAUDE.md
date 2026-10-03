@@ -251,7 +251,7 @@ provenance:
 | shapes envelopes + matching once labelled | yes | yes | yes |
 | lifetime energy / cycle count, ML training, feedback queue | yes | no | no |
 | shareable to the store | golden only | no | never |
-| retention eviction (cap 200, oldest first) | yes | no | no (capped per import) |
+| kept | every cycle with its full trace (no retention cap since 0.5.8, item 463) | all | all (capped per import) |
 
 **Two views over those lists, not interchangeable:**
 
