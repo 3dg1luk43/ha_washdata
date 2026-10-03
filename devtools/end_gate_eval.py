@@ -31,6 +31,12 @@ Replay is the real thing, not a model of it: every cycle goes through
 and the real Stage 1-5 matcher over the cycle's own trace.  So
 ``_last_match_confidence`` is whatever the shipped matcher actually produces -
 which is the whole point, since the guard under test reads exactly that.
+Since audit F7 each match is also applied with the manager's own post-match
+rules (``match_rules``: the envelope verified pause and its releases, the
+confident-mismatch revoke, the switching that names the program), and every
+candidate template is re-gridded to the query's step as live does. Figures
+taken before that never saw a verified pause, so they under-report the end lag
+of devices that engage one (the #427 AEG washer: 1.5-15.5 min per cycle).
 
 **Configuration (audit F2 / DETECT-12).**  Each export is replayed with the
 configuration its own options produce in production: the detector config and the

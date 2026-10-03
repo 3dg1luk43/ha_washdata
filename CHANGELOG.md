@@ -14,10 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The program shows sooner; time remaining and projected energy are realistic.
 - No splits or hour-short records across daylight-saving changes.
 - A finished cycle can no longer be reopened and counted twice; review answers stay yours.
-- Much less disk and CPU during a cycle; the panel stays smooth on phones.
+- Much less disk and CPU; the panel opens faster and stays smooth on phones.
 - Store downloads are quality-checked, deduplicated and cannot take over your programs.
 - Services validate their input and respect user permissions; sidebar notifications work again.
 - A simpler panel: internals hidden, one suggestion list, fewer review prompts, leaner Playground.
+- Counts, numbers and costs read right in every language.
 - Suggestions that drifted devices worse are gone; four no-op settings removed.
 
 ### Breaking changes
@@ -120,6 +121,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Reconfiguring a device restarted it twice**, interrupting a running cycle. It now applies in place.
 
+- **A dishwasher could stay running for hours after it finished**: when the live alignment had confirmed a pause shortly before the end, the release that ends it only ran on a match, and a dishwasher stops matching once it has been quiet for 5 minutes. The cycle then waited for the force stop, about 8 hours on a plug that keeps reporting 0 W. The release now runs there too; in replays one such cycle ends 224 minutes sooner and nothing else moves.
+
+- **A program dropped mid-cycle could still end the cycle**: when a match faded and the display went back to detecting, the end detection kept that program's expected length and Smart Termination. It now forgets the match, as it does when nothing matches. A non-numeric unmatch threshold (from an imported config) no longer stops matching.
+
+- **A program you picked by hand is never queued for review**: during a program's first cycles, or when the match was too close to call, WashData still asked you to confirm its own guess over your choice.
+
+- **Less work on every Home Assistant start and cycle end**: each start re-ran the matcher on every labelled cycle it disagreed with (typically ones you relabelled), for good; it now tries each once. A cycle end decompresses about a third fewer stored traces.
+
 - **Less recorder churn**: the state sensor no longer carries `samples_recorded` (it changed on every reading; the debug sensor still has it), and elapsed time moves in whole minutes. The manual recorder saves every 5 minutes instead of every minute.
 
 ### Panel
@@ -134,11 +143,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Far fewer review requests, and the ones left matter**: every cycle matched at 0.6 to 0.9 confidence was queued for review, 81% of cycles on the test corpus, although most were already labelled correctly at cycle end. What predicts a wrong label is a small margin over the next-best program, not a modest confidence: leave-one-out over 604 cycle ends, a clear margin at 0.7-0.9 is 93-96% right, a small one 33-54%. Only those and a new program's first cycles are queued now, about 19% of cycles. A trace that sits outside its program's usual power band no longer asks on its own: such labels are still 86% right. Requests already waiting that the new rule would not raise are cleared once on upgrade (a cycle carrying the detected program with a clear margin, past its program's warm-up), without being recorded as your answer; near-ties and cycles relabelled differently stay.
 - **Deleting an appliance deletes its stored data**: there was no clean-up step, so every deleted appliance left its programs, cycles and power traces in Home Assistant's `.storage` for good (6.9 MB from 15 deleted devices on one install). Files left by appliances deleted earlier are removed once at startup.
 - **Leaving Settings with unsaved changes asks first**: switching to another tab dropped them without a word.
+- **The Playground replays what the integration does**: it ran its own copy of the matching and program-switching rules, which had drifted (188 of 1180 matches differed) and never held a confirmed pause, so 17 of 176 replayed cycles ended at a different time and 15 showed a different program than the live integration would. It now runs the integration's own code for both: 0 of 176 differ. Each replay also says whether the cycle would be auto-labelled and why not, and marks confirmed pauses and dropped matches on the graph. A dishwasher what-if with a low Off Delay no longer stops the replay before its last pump-out could arrive, and Optimize marks today's value for every setting it can sweep.
 - **The Playground phase bar draws again**: it looked for phases the panel was never sent, so it stayed empty. It now shows the phase the live readout would have named at each point of the replay.
 - **The dashboard card works by keyboard and picks up new translations after an upgrade**: it can be focused and opened with Enter or Space like Home Assistant's own tile card, and its translation files are no longer cached for a month past an update. It also stops re-scanning every entity in Home Assistant on each state change.
 - **"Reset muted" works for settings that are no longer suggested**: muting one of the suggestions removed in this release (Estimate Tolerance, the confidence thresholds, ...) made Reset fail with "1 suggestion(s) failed to unlock".
 - **Appliance brand and model are in Basic settings**, so a second device can declare the same appliance without switching to Advanced.
 - **Saving no longer rewrites switches you never touched**: a default-on switch such as Time-Weighted Cost was saved on every save once its section was on screen.
+- **Text typed into settings search can no longer inject markup** once a translation is loaded: translated messages inserted values without escaping them.
+- **Counts read correctly in every language** ("1 tuning suggestion", "2 tuning suggestions", and the forms Polish, Russian, Lithuanian and others need), and numbers, costs and dates follow your Home Assistant number, time and language settings: a cost shows as "€0.21", as on the card, instead of "0.21 EUR".
+- **Settings search finds the words you see** in your language, not only the English names.
+- **The panel opens faster**: it asks for its data in parallel and shows the Status tab before the rest arrives, and translation files are sent compressed (about 70% smaller).
+- **An edited built-in phase can be reset**: its Delete button failed every time. It is now a Reset button that restores the built-in phase, and programs keep their ranges.
+- **The Status phase timeline names the same phase as the phase sensor**: it placed phases on the program's average length, the sensor on the last phase's end, so the two could disagree.
+- **Icelandic**: a cycle is "lota" throughout (it was partly "hringrás", a circuit), and the pump-stuck setting warnings are readable again.
 
 ### Suggestions
 
@@ -152,7 +169,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - WebSocket: `auto_label_cycles` and `store_download_device` now return `{task_id}` (the result is the task's); `list_tasks`, `store_get_device_quality`, the three one-shot `run_playground_*` commands and the Playground sweep's second parameter (`param_y`/`values_y`) are removed; `start_playground_sweep` takes at most 20 values. See `docs/WS_API.md`.
 - WebSocket, panel removals: `get_dtw_debug`, `save_playground_preset` and `delete_playground_preset` are removed, as are `start_playground_cycle_detail`'s `stress_tail`/`stress_idle_w`. Responses drop `get_profile_groups.suggestions`, `get_playground_settings.presets`/`preset_limit`/`ml_suggestions`/`ml_suggestions_enabled`, `get_constants.ml_suggestions_enabled` and `get_ml_comparison.settings_comparison`/`ml_suggestions_enabled`. `store_get_cycles` ratings come from each cycle's stored totals. `get_ml_training_status.on_device_models` lists only capabilities with a live consumer. Playground overrides accept only real options (the Stage 2-4 matcher weights are ignored).
-- `devtools/docs_check.py` (CI and `release_check.sh`) checks doc anchors, constants and register ids against the code; `tests/test_e2e_mock_contract.py` holds the Playwright mocks to the WebSocket contract.
+- `devtools/docs_check.py` (CI and `release_check.sh`) checks doc anchors, constants, register ids and the deep-dives' identifiers against the code; `tests/test_e2e_mock_contract.py` holds the Playwright mocks to the WebSocket contract, which now requires the keys `get_panel_config`, `get_power_history`, `get_cycle_power_data` and `get_recording_state` always send.
+- Panel strings: `_t()` escapes substituted values; wrap deliberate markup in `_html()` and use `_tText()` for plain-text sinks. Plurals resolve `key_<category>` through `Intl.PluralRules`.
+- `match_rules.py` holds the manager's post-match rules (switching, verified pause, cycle-end label verdict) for the manager and the Playground; `devtools/playground_parity_eval.py` measures replay against the real manager. Playground detail outcomes and history rows gain `would_label`, `label_profile` and `label_reason`; events gain `verified_pause` and `match_reverted`.
+- Tests: tests that could not fail were replaced by mutation-checked ones; `tests/test_perf_budgets.py` counts work (no timing); `devtools/suggestion_loop_eval.py` simulates Apply all to a fixed point. The timing benchmarks are gone.
 
 ## 0.5.7 - Unreleased
 

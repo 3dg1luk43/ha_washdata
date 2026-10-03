@@ -59,7 +59,10 @@ def test_synthesizer_amplitude_scaling():
     assert all(80 <= p <= 120 for p in peaks)
 
 def test_synthesizer_duration_scaling():
-    """Test that total duration scaling is applied."""
+    """Variability stretches/compresses the run within its +/- bound.
+
+    Used to collect 100 durations and assert nothing (audit TESTING-13).
+    """
     template = {
         "power_data": [
             [0, 100],
@@ -67,15 +70,21 @@ def test_synthesizer_duration_scaling():
             [200, 0]
         ]
     }
-    # Currently variability scales segments, but we want a more explicit 
-    # overall duration scaling if possible, or just verify variability works.
-    syn = CycleSynthesizer(variability=0.2)
-    
-    durations = []
-    for _ in range(100):
-        readings = syn.synthesize(template)
-        durations.append(len(readings))
-    
+    # 201 one-second samples; each of the 5 segments scales by U(0.8, 1.2).
+    assert len(CycleSynthesizer(variability=0.0).synthesize(template)) == 201
+
+    state = random.getstate()
+    random.seed(20261003)
+    try:
+        syn = CycleSynthesizer(variability=0.2)
+        durations = [len(syn.synthesize(template)) for _ in range(100)]
+    finally:
+        random.setstate(state)
+
+    assert len(set(durations)) > 10, "variability did not vary the duration"
+    assert min(durations) < 201 < max(durations)
+    assert all(0.8 * 200 <= d <= 1.2 * 200 + 1 for d in durations), durations
+
 def test_synthesizer_early_low_value():
     """Test that low values can arrive earlier than expected."""
     template = {

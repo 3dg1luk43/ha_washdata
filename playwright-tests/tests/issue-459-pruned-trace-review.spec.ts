@@ -23,10 +23,11 @@ const ML_COMPARISON = {
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
+  // Advanced: the Housekeeping trace caps are not Basic fields (audit UI-22).
   await bootPanel(page, {
     'ha_washdata/get_feedbacks': { feedbacks: [] },
     'ha_washdata/get_ml_comparison': ML_COMPARISON,
-  });
+  }, {}, { settingsLevel: 'advanced' });
 });
 
 test('an ML health label alone never queues a cycle for review (#459, audit ML-03)', async ({ page }) => {

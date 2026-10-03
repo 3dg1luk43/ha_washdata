@@ -105,17 +105,14 @@ def test_long_drying_phase_cycle_continuation(base_config, mock_callbacks):
     for t in range(1810, 1870, 10):
         detector.process_reading(1.0, dt(t))
     
-    # CURRENT BUGGY BEHAVIOR: Cycle ends because power is low, ignoring 3600s expectation.
-    # If this passes 'completed', it confirms the "bug" (default behavior).
-    # After fix, this should stay RUNNING or ENDING.
-    
-    if detector.state == STATE_OFF:
-        # Now this means failure (bug persisted)
-        cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
-        pytest.fail(f"Cycle ended prematurely at {cycle_data['duration']}s (Expected ~3600s)")
-    else:
-        # Success! Kept alive.
-        assert detector.state in (STATE_ENDING, STATE_RUNNING, STATE_PAUSED)
+    # Power is low, but the 3600 s expectation keeps the cycle open. A finished
+    # cycle lands in FINISHED/INTERRUPTED, never OFF, so "alive" is asserted as
+    # "not ended and still in a cycle state" (audit TESTING-13 Q-05).
+    assert not mock_callbacks["on_cycle_end"].called, (
+        "Cycle ended prematurely at "
+        f"{mock_callbacks['on_cycle_end'].call_args[0][0]['duration']}s (expected ~3600s)"
+    )
+    assert detector.state in (STATE_ENDING, STATE_RUNNING, STATE_PAUSED)
 
 def test_manual_program_override_termination(base_config, mock_callbacks):
     """A manual program keeps the cycle alive past off_delay, and a power cut
@@ -159,8 +156,10 @@ def test_manual_program_override_termination(base_config, mock_callbacks):
     for t in range(610, 710, 10):
         detector.process_reading(0.0, dt(t))
     
-    # Should be alive
-    assert detector.state != STATE_OFF
+    # Should be alive: still ENDING, nothing reported. (`!= STATE_OFF` held for a
+    # cycle that had already ended too: a finished cycle never enters OFF.)
+    assert detector.state == STATE_ENDING
+    assert not mock_callbacks["on_cycle_end"].called
     
     # Warp to expected duration end + tolerance (3600 * 1.25 = 4500)
     # So we need to go beyond 4500 to ensure it finishes
@@ -398,55 +397,107 @@ def test_standby_band_excludes_non_wet_device(mock_callbacks):
 
 
 def test_fix_duration_keeps_alive(base_config, mock_callbacks):
+    """A matched 3600 s profile keeps the cycle open through a low-power stretch
+    at 50% of expected, and Smart Termination closes it once the expected
+    duration is reached - recording the real 1800 s, not the profile's length.
+
+    Was `if state == STATE_OFF: fail` - vacuous, since a finished cycle lands in
+    FINISHED and never OFF - followed by an "ends eventually" with no assert
+    (audit TESTING-13 Q-05).
     """
-    Test that will PASS only after the fix.
-    Cycle should remain alive during low power if (elapsed / expected) < ratio.
-    """
-    # 1. Setup detector with mocked profile match
     mock_matcher = Mock()
-    # Expect 3600s
     mock_matcher.side_effect = lambda readings: ("Heavy", 0.9, 3600.0, "Drying", False)
-    
-    # We need to set min_duration_ratio in config (will add this field in implementation)
-    # For now, we rely on default or modify config object after init if needed
-    # base_config.min_duration_ratio = 0.8 (Not yet in dataclass)
-    
     detector = CycleDetector(
         config=base_config,
         on_state_change=mock_callbacks["on_state_change"],
         on_cycle_end=mock_callbacks["on_cycle_end"],
-        profile_matcher=mock_matcher
+        profile_matcher=mock_matcher,
     )
-    
-    # Start
+
     detector.process_reading(100.0, dt(0))
-    detector.process_reading(100.0, dt(10)) # Transition to RUNNING
-    detector.process_reading(100.0, dt(60)) # Trigger match
-    
+    detector.process_reading(100.0, dt(10))  # RUNNING
+    detector.process_reading(100.0, dt(60))  # match
     assert detector.matched_profile == "Heavy"
-    
-    # Feed "Running" power every 10s until 1800
-    for t in range(20, 1800, 10):
+    for t in range(70, 1800, 10):
         detector.process_reading(100.0, dt(t))
-    
-    # Drop power at 30 mins (1800s)
-    detector.process_reading(0.0, dt(1800))
-    
-    # Advance past off_delay (60s) -> 1900s
-    for t in range(1810, 1910, 10):
+
+    # Drop at 30 min and wait well past off_delay (60 s).
+    for t in range(1800, 1910, 10):
         detector.process_reading(0.0, dt(t))
-    
-    # ASSERTION FOR DESIRED BEHAVIOR:
-    # Should NOT be OFF. Should be ENDING (waiting) or RUNNING (if we deem it running).
-    # Usually 'ENDING' is the low-power waiting state.
-    
-    # Note: THIS WILL FAIL currently (step 1 of TDD)
-    if detector.state == STATE_OFF:
-        pytest.fail("Cycle terminated prematurely! Fix not working.")
-    
-    # Ensure it ends eventually
-    # 1h + off_delay -> 3600 + 100 = 3700
+    assert not mock_callbacks["on_cycle_end"].called, "cycle ended at 50% of expected"
+    assert detector.state == STATE_ENDING
+
+    # Past the expected duration: Smart Termination ends it.
     detector.process_reading(0.0, dt(3700))
-    
-    # Now it should end
-    # assert detector.state == STATE_OFF (Might need to implement the check correctly first)
+    assert mock_callbacks["on_cycle_end"].call_count == 1
+    cycle = mock_callbacks["on_cycle_end"].call_args[0][0]
+    assert detector.state == STATE_FINISHED
+    assert cycle["status"] == "completed"
+    assert cycle["termination_reason"] == "smart"
+    assert cycle["duration"] == pytest.approx(1800.0, abs=30.0)
+
+
+# ---------------------------------------------------------------------------
+# The REAL Smart Termination gate (audit TESTING-13 Q-05). The #346 tests cover
+# `_smart_term_block_reason`, a diagnostic COPY of these conditions that only
+# feeds a debug log; these drive `process_reading` itself.
+# ---------------------------------------------------------------------------
+
+# Smart's washer debounce is 180 s of quiet; a 900 s off_delay holds the
+# power fallback back long enough that the two exits are told apart by time.
+_GATE_EXPECTED = 1200.0
+_DROP_AT = 1170
+
+
+def _run_gate_case(base_config, match: tuple) -> tuple[int | None, dict]:
+    base_config.off_delay = 900
+    on_end = Mock()
+    detector = CycleDetector(
+        config=base_config,
+        on_state_change=Mock(),
+        on_cycle_end=on_end,
+        profile_matcher=lambda readings: match,
+    )
+    for t in range(0, _DROP_AT, 10):
+        detector.process_reading(100.0, dt(t))
+    assert detector.matched_profile == match[0]
+    ended_at = None
+    for t in range(_DROP_AT, 4000, 10):
+        detector.process_reading(0.0, dt(t))
+        if on_end.called and ended_at is None:
+            ended_at = t
+    assert on_end.call_count == 1
+    return ended_at, on_end.call_args[0][0]
+
+
+def test_smart_termination_fires_on_a_trusted_match(base_config):
+    thr = base_config.match_confidence_threshold
+    for conf in (0.9, thr):  # the threshold itself is trusted (>=)
+        ended_at, cycle = _run_gate_case(
+            base_config, ("Cotton", conf, _GATE_EXPECTED, "W", False, False, False)
+        )
+        assert cycle["termination_reason"] == "smart", conf
+        assert cycle["status"] == "completed"
+        # 180 s debounce after the drop, not the 900 s fallback.
+        assert ended_at < _DROP_AT + 900, (conf, ended_at)
+
+
+@pytest.mark.parametrize(
+    "case",
+    ["below_confidence", "ambiguous", "prefix_ambiguous"],
+)
+def test_smart_termination_is_blocked_by_each_gate_condition(base_config, case):
+    """Each blocked case is closed by the power fallback instead, later."""
+    conf = 0.9
+    ambiguous = prefix = False
+    if case == "below_confidence":
+        conf = base_config.match_confidence_threshold - 0.01
+    elif case == "ambiguous":
+        ambiguous = True
+    else:
+        prefix = True
+    ended_at, cycle = _run_gate_case(
+        base_config, ("Cotton", conf, _GATE_EXPECTED, "W", False, ambiguous, prefix)
+    )
+    assert cycle["termination_reason"] != "smart", case
+    assert ended_at >= _DROP_AT + 900, (case, ended_at)

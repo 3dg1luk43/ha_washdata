@@ -32,7 +32,6 @@ All top-level entry points are defensive: they never raise, returning an
 """
 from __future__ import annotations
 
-import functools
 import logging
 import math
 from dataclasses import replace
@@ -43,11 +42,11 @@ import numpy as np
 
 from homeassistant.util import dt as dt_util
 
-from . import analysis
+from . import match_rules
 from . import notification_rules as notif_rules
 from . import progress as progress_mod
+from .options_utils import option_float, option_int
 from .signal_processing import (
-    resample_adaptive,
     compact_price_timeline,
     cycle_cost,
     energy_gap_threshold_s,
@@ -68,6 +67,7 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_INTERRUPTED_MIN_SECONDS,
+    CONF_LEARNING_CONFIDENCE,
     CONF_MATCH_PERSISTENCE,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
@@ -79,23 +79,25 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_WATCHDOG_INTERVAL,
     CYCLE_OVERRUN_ANOMALY_RATIO,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
+    DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_MATCH_PERSISTENCE,
+    DEFAULT_MAX_DEFERRAL_SECONDS,
+    DISHWASHER_END_SPIKE_WAIT_SECONDS,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_NOTIFY_MILESTONES,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-    MATCH_MIN_RESAMPLED_POINTS,
-    STATE_ENDING,
+    DEFAULT_PROFILE_UNMATCH_THRESHOLD,
     STATE_FINISHED,
     STATE_IDLE,
     STATE_OFF,
-    STATE_PAUSED,
     STATE_RUNNING,
     STATE_STARTING,
     STATE_UNKNOWN,
@@ -111,12 +113,11 @@ from .cycle_detector import (
     terminal_high_for_guards,
 )
 from .profile_store import (
-    _ambiguity_from_candidates,
-    collapse_group_candidates,
-    match_prefix_flags,
-    longest_candidate_duration,
+    MatchResult,
+    ProfileStore,
     decompress_power_data,
 )
+from .time_utils import power_data_to_offsets
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -398,7 +399,7 @@ def _build_match_snapshots(
     """
     snapshots: list[dict[str, Any]] = []
     # The live builder when the store has one (item 387a), on the grid a replayed
-    # cycle starts on; `_DetailSim._matcher` re-grids per match, as live does. Looked
+    # cycle starts on; `_SimStore` re-grids per match, as live does. Looked
     # up on the TYPE so a MagicMock store (tests) keeps the legacy path below.
     if callable(getattr(type(store), "build_match_snapshots", None)):
         try:
@@ -509,34 +510,142 @@ def _matching_config(store: Any, in_progress: bool = False) -> dict[str, Any]:
     return config
 
 
-def decide_commit(
-    raw_name: str | None,
-    is_ambiguous: bool,
-    commit_state: dict[str, Any],
-    persistence: int,
-) -> str | None:
-    """Advance the persistence-gated match-commit state (mirror of the manager's
-    core rule) and report the event to emit.
+class _InlineExecutor:
+    """``hass`` for :class:`_SimStore`: an executor job runs inline, in this thread.
 
-    Mutates ``commit_state`` (``candidate``/``count``/``name``): a candidate must
-    be the non-ambiguous top-1 for ``persistence`` consecutive calls before it is
-    committed, and the committed ``name`` is held (a one-off wobble resets the
-    streak but never switches the commit). Returns ``"match_commit"`` on the first
-    commit, ``"match_changed"`` on a later switch, or ``None`` otherwise. Pure +
-    unit-testable; event emission / reporting stay in the caller.
+    The replay is already in an executor thread (or a harness with no loop), and
+    the store's real ``hass`` belongs to the event loop, so it must not be used.
     """
-    if not raw_name or is_ambiguous:
-        return None
-    if raw_name == commit_state["candidate"]:
-        commit_state["count"] += 1
-    else:
-        commit_state["candidate"] = raw_name
-        commit_state["count"] = 1
-    if commit_state["count"] >= persistence and commit_state["name"] != raw_name:
-        prev = commit_state["name"]
-        commit_state["name"] = raw_name
-        return "match_changed" if prev else "match_commit"
-    return None
+
+    async def async_add_executor_job(self, fn: Callable[..., Any], *args: Any) -> Any:
+        return fn(*args)
+
+
+def _run_inline(coro: Any) -> Any:
+    """Drive a store coroutine whose only awaits are :class:`_InlineExecutor` jobs.
+
+    Those complete without suspending, so the coroutine finishes on its first step.
+    If a future change gives it a real suspension point this raises instead of
+    returning a wrong answer, and the replay reports the failure.
+    """
+    try:
+        coro.send(None)
+    except StopIteration as stop:
+        return stop.value
+    coro.close()
+    raise RuntimeError("store coroutine suspended; the Playground cannot await it")
+
+
+#: Distinct query grids a replay keeps candidate templates for.
+_MAX_SNAPSHOT_GRIDS = 64
+#: How long the synthetic tail may wait out a held verified pause: the watchdog's
+#: own limit for silence under one (``manager._watchdog_check_stuck_cycle``).
+_TAIL_VERIFIED_PAUSE_CAP_S = DEFAULT_MAX_DEFERRAL_SECONDS + 1800.0
+
+
+def _tail_span_s(config: Any) -> float:
+    """How long the synthetic 0 W tail runs so a natural end can fire.
+
+    Past the longest ordinary end gate (off delay / min off gap), plus margin. A
+    dishwasher also waits up to ``DISHWASHER_END_SPIKE_WAIT_SECONDS`` for a late
+    pump-out, so its tail covers that: sized on the two settings alone, a what-if
+    that lowered them (as Apply all does) force-stopped a cycle the detector would
+    have ended normally (one Eco cycle needed 1530 s against a 600 s tail; found by
+    devtools/suggestion_loop_eval.py, register item 455).
+    """
+    gate = max(float(config.off_delay or 0.0), float(config.min_off_gap or 0.0))
+    if getattr(config, "device_type", None) == "dishwasher":
+        gate = max(gate, DISHWASHER_END_SPIKE_WAIT_SECONDS)
+    return gate * 1.5 + 300.0
+
+
+class _SimStore:
+    """The device's store as the live matcher sees it, callable from a replay.
+
+    The replay runs the REAL ``ProfileStore.async_match_profile`` and
+    ``ProfileStore.async_verify_alignment`` with this object as ``self`` (item 387a,
+    audit PLAYGROUND-01): every attribute not defined here is the store's own, so
+    the candidate pool, Stage 1-5 (incl. the in-progress member preference), the
+    12-point floor, ambiguity, the prefix flags, the member confidence, the phase
+    lookup and the alignment thresholds are the live code rather than a copy that
+    can drift. Three things differ, all deliberate:
+
+    * ``hass`` runs executor jobs inline (:class:`_InlineExecutor`);
+    * the matcher config is the sim's - the live config plus any what-if override
+      of the Stage-1 ratios - returned from ``_matching_overrides``, which
+      ``async_match_profile`` merges last;
+    * candidate templates are cached per query grid, seeded with the prebuilt 5 s
+      set a batch shares. A store without the live builder (a MagicMock in tests)
+      gets the prebuilt set whatever the grid, as before.
+    """
+
+    def __init__(
+        self,
+        store: Any,
+        match_config: dict[str, Any],
+        prebuilt: tuple[Any, Any, Any, Any],
+    ) -> None:
+        self._store = store
+        self.hass = _InlineExecutor()
+        self._config = {k: v for k, v in (match_config or {}).items() if k != "in_progress"}
+        self.dtw_bandwidth = self._config.get(
+            "dtw_bandwidth", getattr(store, "dtw_bandwidth", 0.2)
+        )
+        snaps, _cfg, group_members, member_snaps = prebuilt
+        self._prebuilt = (snaps, (snaps, group_members or {}, member_snaps or {}))
+        self._live_builder = callable(getattr(type(store), "build_match_snapshots", None))
+        self._grids: dict[float, tuple[Any, Any]] = (
+            {float(_PLAYGROUND_START_DT): self._prebuilt} if self._live_builder else {}
+        )
+        self._pending: tuple[Any, Any] | None = None
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._store, name)
+
+    def _matching_overrides(self) -> dict[str, Any]:
+        return dict(self._config)
+
+    def build_match_snapshots(self, used_dt: float) -> list[dict[str, Any]]:
+        if not self._live_builder:
+            self._pending = self._prebuilt
+            return self._prebuilt[0]
+        key = float(used_dt)
+        hit = self._grids.get(key)
+        if hit is None:
+            snaps = self._store.build_match_snapshots(used_dt)
+            hit = (snaps, self._store._grouped_snapshots(snaps))  # noqa: SLF001
+            if len(self._grids) >= _MAX_SNAPSHOT_GRIDS:
+                self._grids.clear()
+            self._grids[key] = hit
+        self._pending = hit
+        return hit[0]
+
+    def _grouped_snapshots(self, snapshots: list[dict[str, Any]]) -> Any:
+        pending = self._pending
+        if pending is not None and pending[0] is snapshots:
+            return pending[1]
+        return self._store._grouped_snapshots(snapshots)  # noqa: SLF001
+
+    def match(
+        self,
+        readings: Any,
+        duration: float,
+        in_progress: bool = False,
+        stop_threshold_w: float | None = None,
+    ) -> MatchResult:
+        """``ProfileStore.async_match_profile`` on this view, run to completion."""
+        return _run_inline(
+            ProfileStore.async_match_profile(
+                self, readings, duration,  # type: ignore[arg-type]
+                in_progress=in_progress, stop_threshold_w=stop_threshold_w,
+            )
+        )
+
+    def verify_alignment(self, profile_name: str, trace: Any) -> tuple[bool, float, float]:
+        """``ProfileStore.async_verify_alignment`` on this view, run to completion."""
+        return _run_inline(
+            ProfileStore.async_verify_alignment(self, profile_name, trace)  # type: ignore[arg-type]
+        )
 
 
 def _readings_from_cycle(
@@ -552,7 +661,6 @@ def _readings_from_cycle(
 # ─── Single-cycle faithful simulation (Simulate mode) ───────────────────────────
 
 
-_PROGRESS_STATES = (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
 # States in which no progress estimate is shown (mirrors _update_remaining_only).
 _DEAD_STATES = (STATE_OFF, STATE_UNKNOWN, STATE_IDLE)
 _SIM_SERIES_THROTTLE_S = 30.0  # cap estimator calls; 5s matched cadence made this a no-op
@@ -570,10 +678,11 @@ def simulate_cycle_detail(
 ) -> dict[str, Any]:
     """Faithful single-cycle replay for the Playground "Simulate" view.
 
-    Drives the REAL :class:`CycleDetector` + real Stage 1-4 matcher over the
-    cycle's own trace and, at production's 5s cadence, calls the SAME
+    Drives the REAL :class:`CycleDetector`, the real matcher and the manager's
+    :mod:`match_rules` over the cycle's own trace, and calls the SAME
     :mod:`progress` and :mod:`notification_rules` functions the live integration
-    uses - so the returned timeline is byte-for-byte what would happen live. No
+    uses (the estimator every ``_SIM_SERIES_THROTTLE_S`` = 30 s of replay time, with
+    the live per-second EMA scaling) - so the timeline is what would happen live. No
     detection/progress/notification math is implemented here; this only
     orchestrates the shared code. Never raises; returns ``{"error": ...}`` on
     failure. Read-only: nothing is persisted and no notifications are sent.
@@ -594,32 +703,6 @@ def simulate_cycle_detail(
 
 def _device_type_of(config: CycleDetectorConfig) -> str:
     return getattr(config, "device_type", "washing_machine")
-
-
-def simulate_cycle_detail_by_id(
-    store: Any,
-    cycle_id: str,
-    base_config: CycleDetectorConfig,
-    settings_override: dict[str, Any] | None,
-    options: dict[str, Any] | None,
-    price: float | None = None,
-) -> dict[str, Any]:
-    """Find a stored cycle by id and simulate it. Runs the (in-memory) store
-    lookup and the replay together so the WS handler can offload the whole thing
-    to an executor thread. Returns ``{"error": "not_found", ...}`` when the id is
-    unknown. Never raises."""
-    try:
-        cycle = next(
-            (c for c in store.get_past_cycles() if c.get("id") == cycle_id), None
-        )
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground detail lookup failed for %s: %s", cycle_id, exc)
-        return {"error": str(exc), "cycle_id": cycle_id}
-    if cycle is None:
-        return {"error": "not_found", "cycle_id": cycle_id}
-    return simulate_cycle_detail(
-        cycle, base_config, settings_override, store, options, price
-    )
 
 
 def build_cycle_detail_sim_by_id(
@@ -686,13 +769,14 @@ def _simulate_cycle_detail_inner(
 class _DetailSim:
     """Resumable single-cycle Playground "Simulate" replay.
 
-    Drives the REAL :class:`CycleDetector` + real Stage 1-4 matcher over the
-    cycle's own trace and, at production's 5s cadence, calls the SAME
-    :mod:`progress` and :mod:`notification_rules` functions the live integration
-    uses - so the returned timeline is byte-for-byte what would happen live. No
-    detection/progress/notification math is implemented here; this only
-    orchestrates the shared code. Read-only: nothing is persisted and no
-    notifications are sent.
+    Drives the REAL :class:`CycleDetector` + the real matcher
+    (``ProfileStore.async_match_profile``, via :class:`_SimStore`) over the
+    cycle's own trace, applies each match with the manager's own rules
+    (:mod:`match_rules`: switching, verified pause, confident-mismatch revoke)
+    and calls the SAME :mod:`progress` and :mod:`notification_rules` functions
+    the live integration uses. No detection/matching/progress/notification math
+    is implemented here; this only orchestrates the shared code. Read-only:
+    nothing is persisted and no notifications are sent.
 
     The replay is split into :meth:`step` (a slice of the real readings),
     :meth:`run_tail` (the synthetic quiet tail + flush) and :meth:`finalize`
@@ -746,21 +830,24 @@ class _DetailSim:
             "overrun_ratio": None,
             "projected_energy_wh": None,
             "projected_cost": None,
+            # Would the manager auto-label the (primary) finished cycle, as which
+            # profile, and why not: match_rules.cycle_end_label_verdict reasons
+            # (ok / no_winner / below_floor / ambiguous / margin / unknown_profile),
+            # plus no_cycle / no_store / error from the replay itself.
+            "would_label": False,
+            "label_profile": None,
+            "label_reason": "no_cycle",
         }
-        if prebuilt is not None:
-            snapshots, match_config, group_members, member_snaps = prebuilt
-        else:
-            snapshots, match_config, group_members, member_snaps = _build_match_snapshots(store)
+        if prebuilt is None:
+            prebuilt = _build_match_snapshots(store)
         # Overlay any matcher-knob overrides. Because history/sweep run through this
         # same class, a swept matching value flows in via settings_override too;
         # applying to a copy keeps the shared prebuilt match_config untouched.
-        self.snapshots = snapshots
-        self.match_config = apply_match_overrides(match_config, settings_override)
-        self.group_members = group_members
-        self.member_snaps = member_snaps
-        # Snapshots per query grid (item 387a): live re-grids a sample-cycle
-        # template to every match's `used_dt`; so does the sim, once per distinct dt.
-        self._snap_by_dt: dict[float, tuple[Any, Any, Any]] = {}
+        self.match_config = apply_match_overrides(prebuilt[1], settings_override)
+        # The live matcher and alignment check, run inline (see _SimStore).
+        self.view: _SimStore | None = (
+            _SimStore(store, self.match_config, prebuilt) if store is not None else None
+        )
 
         self.ready = len(self.readings) >= 5
         # Per-sim end-expectation cache, threaded through the shared progress helpers
@@ -775,16 +862,29 @@ class _DetailSim:
             "name": None, "conf": 0.0, "ambiguous": False, "expected": 0.0,
         }
         self.last_logged = {"kind": None, "name": None}
-        # Persistence-gated commit mirroring the manager: a candidate must be top-1
-        # for `match_persistence` consecutive matches (and not ambiguous) before it
-        # is committed, and the committed match is HELD (a one-off wobble doesn't
-        # switch it). The detector still receives the raw top-1 (detection
-        # unchanged); only the reported series/events use the committed match, so the
-        # Playground shows what the live integration would show - not raw churn.
-        self.match_persistence = max(1, int(
-            self.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
-        ))
-        self.commit_state: dict[str, Any] = {"candidate": None, "count": 0, "name": None}
+        # The manager's switching state and the options its rules read, resolved
+        # exactly as `manager._load_runtime_options` resolves them (audit
+        # PLAYGROUND-03): the reported program is the one live would display.
+        self.switch = match_rules.SwitchState()
+        self.match_persistence = option_int(
+            self.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE),
+            DEFAULT_MATCH_PERSISTENCE,
+            minimum=1,
+        )
+        self.unmatch_threshold = self.options.get(
+            CONF_PROFILE_UNMATCH_THRESHOLD, DEFAULT_PROFILE_UNMATCH_THRESHOLD
+        )
+        self.learning_floor = float(
+            option_float(
+                self.options.get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
+                DEFAULT_LEARNING_CONFIDENCE,
+            )
+            or 0.0
+        )
+        # The last live MatchResult (manager._last_match_result) and, per finished
+        # cycle, what the manager held when it ended (its cycle-end inputs).
+        self._last_result: Any = None
+        self.cycle_ends: list[dict[str, Any]] = []
         self.smoothed: dict[str, Any] = {"v": 0.0, "program": None}
         self.flags = {"detected": False, "pre_complete": False, "start": False}
 
@@ -862,12 +962,11 @@ class _DetailSim:
 
     def _on_state_change(self, old_state: str, new_state: str) -> None:
         self._emit("state", f"{old_state}->{new_state}")
-        # A new cycle is starting after a previous one ended: clear the inherited
-        # match-persistence streak so this cycle matches fresh (see _on_cycle_end).
-        # PAUSED->RUNNING resumes don't arm pending_reset, so they are unaffected.
-        if new_state == STATE_RUNNING and self.flags.get("pending_reset"):
-            self.flags["pending_reset"] = False
-            self.commit_state.update(candidate=None, count=0, name=None)
+        # A new cycle: the switching state starts fresh, exactly when
+        # `manager._on_state_change` resets it (RUNNING from OFF / STARTING /
+        # UNKNOWN). PAUSED/ENDING -> RUNNING is a resume and keeps it.
+        if new_state == STATE_RUNNING and old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN):
+            self.switch.start_cycle()
             self.last_match.update(name=None, conf=0.0, expected=0.0, ambiguous=False)
             self.last_logged.update(kind=None, name=None)
         if (
@@ -887,270 +986,227 @@ class _DetailSim:
         self.captured.append(cycle_data)
         reason = cycle_data.get("termination_reason")
         self._emit("finished", f"reason={reason} status={cycle_data.get('status')}", "info")
-        # Arm a match-state reset for the NEXT cycle. We reset at the next cycle's
-        # start (not here) so the final cycle's committed match survives to be read
-        # into `outcome` after the loop; a second sub-cycle then starts a fresh
-        # match-persistence streak, mirroring the live manager (per-cycle reset).
-        self.flags["pending_reset"] = True
+        # What `manager._async_process_cycle_end` freezes before its first await:
+        # the displayed program and the last live match (its label inputs).
+        st = self.switch
+        program = st.current_program if match_rules.program_is_committed(st.current_program) else None
+        self.cycle_ends.append({
+            "program": program,
+            "confidence": st.last_confidence if program else None,
+            "expected": st.matched_duration if program else None,
+            "ambiguous": bool(self.last_match.get("ambiguous")),
+            "live_result": self._last_result,
+        })
+        # ...and the terminal reset at its tail: the next cycle starts from "off"
+        # with no live result, as live does once the cycle has been processed.
+        st.current_program = "off"
+        st.matched_duration = None
+        self._last_result = None
 
-    def _regrid_snapshots(self, used_dt: float) -> None:
-        """Put sample-cycle templates on this match's grid, as live does (387a).
-
-        Only snapshots from the live builder carry ``sample_dt``; envelope and
-        golden templates are grid-free, and a prebuilt or legacy set without the
-        field is left exactly as it was.
-        """
-        builder = getattr(type(self.store), "build_match_snapshots", None)
-        if not callable(builder):
-            return
-        key = round(float(used_dt), 2)
-        stale = any(
-            s.get("sample_dt") is not None and round(float(s["sample_dt"]), 2) != key
-            for s in [*(self.snapshots or []), *((self.member_snaps or {}).values())]
-            if isinstance(s, dict)
-        )
-        if not stale:
-            return
-        cached = self._snap_by_dt.get(key)
-        if cached is None:
-            try:
-                snaps = self.store.build_match_snapshots(used_dt)
-                cached = self.store._grouped_snapshots(snaps)  # noqa: SLF001
-            except Exception:  # pylint: disable=broad-exception-caught
-                _LOGGER.debug("Playground: re-grid failed", exc_info=True)
-                return
-            self._snap_by_dt[key] = cached
-        self.snapshots, self.group_members, self.member_snaps = cached
-
-    def _matcher(self, det_readings: list[tuple[datetime, float]]):
-        if len(det_readings) < 5 or not self.snapshots:
-            return (None, 0.0, 0.0, None, False, False)
-        duration = (det_readings[-1][0] - det_readings[0][0]).total_seconds()
-        # Resample onto a uniform TIME grid exactly as async_match_profile does
-        # before calling the worker. Without this the sim fed the matcher a
-        # sample-weighted series: on a change-based plug a quiet stretch emits
-        # almost no rows, so its mean power was biased toward the busy part of the
-        # cycle while every candidate curve is uniform in time. That divergence
-        # only showed up once Stage 4 started comparing like with like (#400) - it
-        # flipped a dishwasher onto its hotter sibling in the sim while production,
-        # which resamples, kept the right one.
-        # The three ways production declines to match are reproduced exactly, because
-        # a sim that matches where production returns nothing is worse than useless
-        # for the question the Playground exists to answer. async_match_profile
-        # returns an empty MatchResult when resampling yields no segment, when the
-        # longest segment is under MATCH_MIN_RESAMPLED_POINTS, and when preprocessing
-        # raises; falling back to the raw series here instead let the sim match a
-        # 5-point stretch that production rejects (the detector calls this from 5
-        # readings up).
+    def _has_real_profiles(self) -> bool:
+        """The gate `manager._async_perform_combined_matching` checks first."""
+        if self.store is None:
+            return False
         try:
-            t0 = det_readings[0][0].timestamp()
-            segments, _used_dt = resample_adaptive(
-                np.array([r[0].timestamp() - t0 for r in det_readings]),
-                np.array([float(r[1]) for r in det_readings]),
-                min_dt=5.0,
-                gap_s=21600.0,
-            )
-            if not segments:
-                return (None, 0.0, 0.0, None, False, False)
-            current_seg = max(segments, key=lambda s: len(s.power))
-            if len(current_seg.power) < MATCH_MIN_RESAMPLED_POINTS:
-                return (None, 0.0, 0.0, None, False, False)
-            powers = current_seg.power.tolist()
+            return bool(self.store.has_real_profiles)
         except Exception:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Playground detail resample failed", exc_info=True)
-            return (None, 0.0, 0.0, None, False, False)
-        self._regrid_snapshots(float(_used_dt))
+            return False
+
+    def _verify_alignment(
+        self, profile_name: str, det_readings: list[tuple[datetime, float]]
+    ) -> tuple[bool, float]:
+        """The live alignment check; a failure counts as unconfirmed, as live."""
         try:
-            candidates = analysis.compute_matches_worker(
-                powers, duration, self.snapshots, self.match_config
-            )
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Playground detail match failed: %s", exc)
-            candidates = []
-        if not candidates:
+            assert self.view is not None
+            formatted = power_data_to_offsets(det_readings)  # type: ignore[arg-type]
+            is_confirmed, mapped_time, _ = self.view.verify_alignment(profile_name, formatted)
+            return bool(is_confirmed), mapped_time
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Playground alignment check failed", exc_info=True)
+            return False, 0.0
+
+    def _get_profile(self, name: str) -> Any:
+        return self.store.get_profile(name)
+
+    def _matcher(self, det_readings: list[tuple[datetime, float]]) -> Any:
+        """One live match tick: ``manager._async_do_perform_matching`` in sequence.
+
+        The real matcher (``ProfileStore.async_match_profile`` via
+        :class:`_SimStore`), then the manager's own rules from
+        :mod:`match_rules`: switching, the envelope verified pause and its
+        releases, the consistency override (which is also how a confident mismatch
+        drops the program) and the phase heuristic. Like the manager it pushes the
+        verified pause and the commit flag to the detector, and hands it the
+        tick's name - which after a divergence revert is "detecting...", as live -
+        not the displayed program. Returns the match context the detector applies,
+        or None where live would not have matched at all (no real profiles).
+
+        The alignment check runs synchronously here. Live awaits it, and the
+        matcher, while readings keep arriving; the replay applies the tick at the
+        reading that triggered it.
+        """
+        if not det_readings or not self._has_real_profiles():
+            return None
+        assert self.view is not None
+        det = self.detector
+        current_duration = (det_readings[-1][0] - det_readings[0][0]).total_seconds()
+        stop_w = float(det.config.stop_threshold_w)
+        result = self.view.match(
+            det_readings, current_duration, in_progress=True, stop_threshold_w=stop_w
+        )
+        self._last_result = result
+
+        st = self.switch
+        prev_program = st.current_program
+        tick = match_rules.begin_tick(st, result, self.match_persistence, current_duration)
+        match_rules.decide_switch(
+            st, tick, result, self.match_persistence, self.unmatch_threshold
+        )
+        match_rules.record_scores(st, result.candidates)
+
+        current_matched = det.matched_profile
+        prev_verified = getattr(det, "_verified_pause", False)
+        current_power = det_readings[-1][1]
+        alignment: tuple[bool, float] | None = None
+        if match_rules.needs_alignment_check(current_matched, current_power, stop_w, False):
+            alignment = self._verify_alignment(current_matched, det_readings)
+        pause = match_rules.decide_alignment_pause(
+            verified_pause=prev_verified,
+            current_matched=current_matched,
+            alignment=alignment,
+            envelope_span=self.view.envelope_time_span,
+        )
+        pause = match_rules.decide_pause_release(
+            verified_pause=pause.verified_pause,
+            current_matched=current_matched,
+            current_power=current_power,
+            stop_threshold_w=getattr(det.config, "stop_threshold_w", 5.0),
+            user_paused=False,
+            expected_duration=det.expected_duration_seconds,
+            current_duration=current_duration,
+            time_below=getattr(
+                det, "_time_below_threshold_gapfree", getattr(det, "_time_below_threshold", 0.0)
+            ),
+            program=st.current_program,
+        )
+        verified = pause.verified_pause
+        match_rules.consistency_override(st, tick, result, verified, self._get_profile)
+        phase_name = match_rules.heuristic_phase(
+            tick.phase_name, self.device_type, current_power, det.is_waiting_low_power
+        )
+        det.set_verified_pause(verified)
+        det.set_match_committed(match_rules.program_is_committed(st.current_program))
+        self._report_tick(prev_program, bool(prev_verified), bool(verified), result)
+        return self._match_context(tick, phase_name, result)
+
+    def _report_tick(
+        self, prev_program: Any, prev_verified: bool, verified: bool, result: Any
+    ) -> None:
+        """Events + the reported match after a tick: what live would display."""
+        st = self.switch
+        program = st.current_program if match_rules.program_is_committed(st.current_program) else None
+        before = prev_program if match_rules.program_is_committed(prev_program) else None
+        if program != before:
+            if program and not before:
+                self._emit("match_commit", f"{program} (conf={float(st.last_confidence):.2f})")
+            elif program:
+                self._emit(
+                    "match_changed",
+                    f"{before} -> {program} (conf={float(st.last_confidence):.2f})",
+                )
+            else:
+                self._emit("match_reverted", f"{before} -> detecting")
+            self.last_logged.update(kind="matched" if program else "reverted", name=program)
+        if result.is_confident_mismatch:
             if self.last_logged["kind"] != "unmatched":
                 self._emit("unmatched", "no candidate")
                 self.last_logged["kind"] = "unmatched"
-            # Hold any committed match on a transient miss (as the manager does).
-            self.last_match.update(ambiguous=False)
-            return (None, 0.0, 0.0, None, False, False)
-        # Mirror of async_match_profile: members are scored individually, then each
-        # cohesive family is collapsed to its best member before anything reads the
-        # ranking (#400).
-        # Captured before the collapse for element 12, exactly as
-        # async_match_profile does: the collapse drops every sibling but the
-        # best, and a longer one leaving the list lowers the ENDING gate's bar.
-        pre_collapse_candidates = list(candidates)
-        candidates = collapse_group_candidates(candidates, self.group_members or {})
-        # Stage-5 safeguards #2 and #3, captured here and applied after the
-        # top-level ambiguity call below so the ORDER matches async_match_profile.
-        stage5_member_fit: float | None = None
-        stage5_group_win = False
-        if self.group_members and candidates[0].get("name", "").startswith("__group__"):
-            gkey = candidates[0]["name"]
-            members = self.group_members.get(gkey, [])
-            if members and self.store is not None:
-                try:
-                    member_name, member_fit, member_dur = self.store._stage5_pick_member(  # noqa: SLF001
-                        list(powers), duration, members, self.member_snaps or {},
-                        in_progress=bool(self.match_config.get("in_progress")),
-                    )
-                    stage5_member_fit = member_fit
-                    stage5_group_win = True
-                    # Carry the member's duration as well, exactly as
-                    # `async_match_profile` relabels the winner: leaving the group's
-                    # aggregate duration here fed the wrong expected value to the
-                    # detector AND to the #364 prefix guard below.
-                    resolved = dict(candidates[0], name=member_name)
-                    if member_dur:
-                        resolved["profile_duration"] = float(member_dur)
-                    candidates[0] = resolved
-                except Exception:  # pylint: disable=broad-exception-caught
-                    pass
-        best = candidates[0]
-        margin, is_ambiguous = _ambiguity_from_candidates(candidates)
-        if stage5_group_win:
-            # Safeguard #2: the family matched, but the chosen member does not
-            # individually fit near the group score, so the real program may be a
-            # different single profile. Same 0.55x coarse backstop as production.
-            _bscore = float(best.get("score") or 0.0)
-            if stage5_member_fit is not None and _bscore > 0 and stage5_member_fit < 0.55 * _bscore:
-                is_ambiguous = True
-            # Safeguard #3 (overrun): already past the chosen member's expected
-            # duration, so this may be the LONGER member of the family.
-            _bdur = float(best.get("profile_duration") or 0.0)
-            if _bdur and duration > _bdur * 1.05:
-                is_ambiguous = True
-            # Without these two the sim reports a confident match exactly where
-            # production downgrades to uncertain, and `is_ambiguous` is what blocks
-            # Smart Termination - so the replay would finalise where the real
-            # detector falls through to the power timeout.
-        raw_name = best.get("name")
-        raw_conf = float(best.get("score") or 0.0)
-        raw_expected = float(best.get("profile_duration") or 0.0)
-
-        # Persistence-gated commit (mirror of the manager's core rule), extracted
-        # into decide_commit() for unit-testability.
-        commit_event = decide_commit(
-            raw_name, is_ambiguous, self.commit_state, self.match_persistence
+        elif result.is_ambiguous and not program and result.best_profile:
+            # Ambiguous before any commit: stay 'detecting', surface it once per name.
+            raw = result.best_profile
+            if self.last_logged["kind"] != "ambiguous" or self.last_logged["name"] != raw:
+                cands = result.candidates or []
+                runner = cands[1].get("name") if len(cands) > 1 else None
+                self._emit(
+                    "match_ambiguous",
+                    f"{raw} vs {runner} (margin={float(result.ambiguity_margin):.3f})",
+                    "warn",
+                )
+                self.last_logged.update(kind="ambiguous", name=raw)
+        if verified != prev_verified:
+            self._emit("verified_pause", "engaged" if verified else "released")
+        self.last_match.update(
+            name=program,
+            conf=float(st.last_confidence or 0.0) if program else 0.0,
+            expected=float(st.matched_duration or 0.0) if program else 0.0,
+            # The raw tick's flag, as `manager._last_match_ambiguous` holds it.
+            ambiguous=bool(result.is_ambiguous),
         )
-        # Same half-interval-until-commit schedule as live (audit LIVE-17).
-        self.detector.set_match_committed(bool(self.commit_state["name"]))
-        if commit_event:
-            self._emit(commit_event, f"{raw_name} (conf={raw_conf:.2f})")
-            self.last_logged.update(kind="matched", name=raw_name)
-        elif is_ambiguous and not self.commit_state["name"]:
-            # Ambiguous before any commit: stay 'detecting', surface it once.
-            if self.last_logged["kind"] != "ambiguous" or self.last_logged["name"] != raw_name:
-                runner = candidates[1].get("name") if len(candidates) > 1 else None
-                self._emit("match_ambiguous", f"{raw_name} vs {runner} (margin={margin:.3f})", "warn")
-                self.last_logged.update(kind="ambiguous", name=raw_name)
 
-        # Reported state = the COMMITTED match (held); its confidence/expected are
-        # that profile's own values this interval (looked up among the candidates).
-        cname = self.commit_state["name"]
-        if cname:
-            cc = next((c for c in candidates if c.get("name") == cname), None)
-            self.last_match.update(
-                name=cname,
-                conf=float(cc.get("score") or 0.0) if cc else (self.last_match.get("conf") or 0.0),
-                expected=float(cc.get("profile_duration") or 0.0) if cc else (self.last_match.get("expected") or 0.0),
-                ambiguous=False,
-            )
-        else:
-            self.last_match.update(name=None, conf=0.0, expected=0.0, ambiguous=bool(is_ambiguous))
+    def _match_context(self, tick: Any, phase_name: str | None, result: Any) -> MatchContext:
+        """The named context the manager builds for ``update_match`` (DETECT-15)."""
+        store = self.store
+        det = self.detector
+        # The manager's own rule: a divergence revert revokes the detector's match.
+        name, revoke = match_rules.detector_match(tick, result)
 
-        # The DETECTOR still receives the RAW top-1, so detection / smart-termination
-        # behaviour is byte-identical to before this reporting change.
-        # Elements 7-9 (#364): without them the prefix-landscape and power-plausibility
-        # guards were never exercised in a simulation, so the exact failure the
-        # Playground exists to reproduce was invisible here.
-        # Same pause evidence as `async_match_profile` (#424), at the SIM's stop
-        # threshold so a what-if threshold sees its own consequence.
-        _pauses = None
-        _det_cfg = getattr(getattr(self, "detector", None), "config", None)
-        if self.store is not None and _det_cfg is not None and hasattr(
-            self.store, "profile_pauses_below"
-        ):
-            _pauses = functools.partial(
-                self.store.profile_pauses_below,
-                stop_threshold_w=float(_det_cfg.stop_threshold_w),
-            )
-        # The SAME composition live sends (audit LIVE-18): composing the wide
-        # flag here as `full or fit` kept the #288 term in every replay.
-        prefix_wide, full_shape_hit = match_prefix_flags(candidates, raw_expected, _pauses)
-        # Guard the store call like iter_evidence_cycles above: on an older store or a
-        # partial test double without profile_tail_power the AttributeError would
-        # bubble through _try_profile_match, which drops the match at debug - so EVERY
-        # match in the sim would be silently reported as unmatched.
-        tail_power = None
-        terminal_high = None
-        if self.store is not None and raw_name:
+        def _ask(fn: Callable[[], Any]) -> Any:
+            # Guarded like the rest of the sim: a partial test double without one
+            # of these methods must not turn every match into "unmatched".
             try:
-                tail_power = self.store.profile_tail_power(raw_name)
+                return fn()
             except Exception:  # pylint: disable=broad-exception-caught
-                tail_power = None
-            # Element 10 (#399) and the standby-band arm on top of it (register
-            # item 351). This used to be a hand-copy of the manager's version, and
-            # the two had already drifted in their error handling; it is now the
-            # SAME function, which is the only way this replay can be guaranteed
-            # byte-identical to live on element 10. `end_gate_eval.py` drives the
-            # detector through here, so an arm present in only one of them is
-            # invisible to every measurement made with that harness - exactly how
-            # item 352 first measured as a no-op.
-            det = getattr(self, "detector", None)
-            if det is not None:
-                terminal_high = terminal_high_for_guards(
-                    self.store,
-                    det.config,
-                    getattr(det, "_cycle_max_power", 0.0),
-                    raw_name,
-                )
-        # Element 11 (item 297) and element 12 (item 330). Both were missing, so
-        # the sim's detector ran without the tail bound Smart Termination uses and
-        # without the longest-candidate bar the ENDING gate uses - i.e. the replay
-        # was NOT byte-identical to live on either, which is the sim's whole
-        # contract. `end_gate_eval.py` drives the detector through here, so a
-        # missing element silently measures the wrong gate.
-        terminal_quiet = None
-        trusted_min = None
-        if self.store is not None and raw_name:
-            try:
-                terminal_quiet = self.store.profile_terminal_quiet_seconds(raw_name)
-            except Exception:  # pylint: disable=broad-exception-caught
-                terminal_quiet = None
-            # Element 13 (item 384), as live sends it.
-            try:
-                trusted_min = self.store.profile_trusted_min_duration(raw_name)
-            except Exception:  # pylint: disable=broad-exception-caught
-                trusted_min = None
-        # Element 14 (audit DETECT-16), as live sends it.
-        pause_catalogue = None
-        if self.store is not None and raw_name and _det_cfg is not None:
-            try:
-                pause_catalogue = self.store.profile_pause_catalogue(
-                    raw_name, float(_det_cfg.stop_threshold_w)
-                )
-            except Exception:  # pylint: disable=broad-exception-caught
-                pause_catalogue = None
-        # The SAME named context live builds (audit DETECT-15). Its
-        # longest_candidate_s is the FULL population, matching live:
-        # `async_match_profile` computes it from the candidates as they stood
-        # BEFORE the group collapse and the [:5] truncation.
+                return None
+
+        stop_w = float(det.config.stop_threshold_w)
         return MatchContext(
-            profile_name=raw_name,
-            confidence=raw_conf,
-            expected_duration=raw_expected,
-            is_ambiguous=bool(is_ambiguous),
-            is_prefix_ambiguous=bool(prefix_wide),
-            is_prefix_ambiguous_full_shape=bool(full_shape_hit),
-            tail_power=tail_power,
-            terminal_high=terminal_high,
-            terminal_quiet_s=terminal_quiet,
-            longest_candidate_s=longest_candidate_duration(pre_collapse_candidates),
-            trusted_min_s=trusted_min,
-            pause_catalogue=pause_catalogue,
+            profile_name=name,
+            confidence=tick.confidence,
+            expected_duration=tick.matched_duration,
+            phase_name=phase_name,
+            is_confident_mismatch=revoke,
+            is_ambiguous=result.is_ambiguous,
+            is_prefix_ambiguous=result.is_prefix_ambiguous,
+            is_prefix_ambiguous_full_shape=result.is_prefix_ambiguous_full_shape,
+            tail_power=_ask(lambda: store.profile_tail_power(name)) if name else None,
+            # One implementation with the manager's `_terminal_high_for_guards`.
+            terminal_high=_ask(lambda: terminal_high_for_guards(
+                store, det.config, getattr(det, "_cycle_max_power", 0.0), name
+            )),
+            terminal_quiet_s=(
+                _ask(lambda: store.profile_terminal_quiet_seconds(name)) if name else None
+            ),
+            longest_candidate_s=float(getattr(result, "longest_candidate_duration_s", 0.0) or 0.0),
+            trusted_min_s=(
+                _ask(lambda: store.profile_trusted_min_duration(name)) if name else None
+            ),
+            pause_catalogue=(
+                _ask(lambda: store.profile_pause_catalogue(name, stop_w)) if name else None
+            ),
         )
+
+    def _label_decision(self, cycle_data: dict[str, Any], live_result: Any) -> tuple[str | None, str]:
+        """Would the manager auto-label this finished cycle? ``(profile, reason)``.
+
+        The manager's cycle-end path: ONE complete-cycle match on the stored trace
+        (``match_rules.final_match_input`` + ``async_match_profile``, not in
+        progress), falling back to the last live match when the trace is too short,
+        then ``match_rules.cycle_end_label_verdict`` at the learning floor.
+        """
+        if self.view is None:
+            return None, "no_store"
+        try:
+            final = None
+            final_input = match_rules.final_match_input(cycle_data)
+            if final_input is not None:
+                final = self.view.match(final_input[0], final_input[1])
+            match_result = final if final is not None else live_result
+            return match_rules.cycle_end_label_verdict(
+                match_result, self.learning_floor, self.store.get_profiles()
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Playground label decision failed", exc_info=True)
+            return None, "error"
 
     def _price_at(self, offset_s: float) -> float | None:
         """The tariff in force at a replay offset, or the flat price with no timeline.
@@ -1321,25 +1377,37 @@ class _DetailSim:
             k += 1
 
     def run_tail(self) -> None:
-        """Synthetic quiet tail so a natural end can fire."""
+        """Synthetic quiet tail so a natural end can fire.
+
+        While the detector holds an envelope-verified pause every ENDING finalize is
+        deferred, and live keeps waiting - its watchdog extends its own silence
+        limit to ``DEFAULT_MAX_DEFERRAL_SECONDS`` + 30 min for the same reason. So
+        the tail runs on for as long as one is held (bounded by that same limit),
+        then the usual span, instead of force-ending a cycle the release rules
+        (95% of the envelope, #375) would have ended a few minutes later.
+        """
         if self._aborted or not self.ready:
             return
         try:
             last_ts = self.readings[-1][0]
-            tail_span = max(
-                float(self.config.off_delay or 0.0), float(self.config.min_off_gap or 0.0)
-            ) * 1.5 + 300.0
+            tail_span = _tail_span_s(self.config)
             step = 30.0
             n_steps = min(int(tail_span / step) + 1, 400)
-            for i in range(1, n_steps + 1):
+            max_steps = n_steps + int(_TAIL_VERIFIED_PAUSE_CAP_S / step)
+            budget = n_steps
+            i = 0
+            while i < budget:
+                i += 1
                 ts = last_ts + timedelta(seconds=step * i)
                 self.cursor["t"] = (ts - self.base).total_seconds()
                 self.detector.process_reading(0.0, ts)
                 self._sample(ts)
                 if self.detector.state in (STATE_OFF, STATE_FINISHED) and self.captured:
                     break
+                if getattr(self.detector, "_verified_pause", False):
+                    budget = min(max_steps, max(budget, i + n_steps))
             if not self.captured and self.detector.state != STATE_OFF:
-                flush_ts = last_ts + timedelta(seconds=step * (n_steps + 2))
+                flush_ts = last_ts + timedelta(seconds=step * (i + 2))
                 self.cursor["t"] = (flush_ts - self.base).total_seconds()
                 self.detector.force_end(flush_ts)
         except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1349,15 +1417,33 @@ class _DetailSim:
 
     def finalize(self) -> dict[str, Any]:
         outcome = self.outcome
-        last_match = self.last_match
+        last_match = dict(self.last_match)
         # --- outcome ---
         if self.captured:
-            primary = max(self.captured, key=lambda c: float(c.get("duration") or 0.0))
+            idx = max(
+                range(len(self.captured)),
+                key=lambda i: float(self.captured[i].get("duration") or 0.0),
+            )
+            primary = self.captured[idx]
             outcome["detected"] = True
             outcome["detected_count"] = len(self.captured)
             outcome["termination_reason"] = primary.get("termination_reason")
             outcome["status"] = primary.get("status")
             outcome["final_duration_s"] = _safe_float(primary.get("duration"))
+            # The program the manager displayed when THAT cycle ended, not whatever
+            # a later sub-cycle left behind.
+            end = self.cycle_ends[idx] if idx < len(self.cycle_ends) else None
+            if end is not None:
+                last_match.update(
+                    name=end["program"],
+                    conf=float(end["confidence"] or 0.0),
+                    expected=float(end["expected"] or 0.0),
+                    ambiguous=end["ambiguous"],
+                )
+                label, reason = self._label_decision(primary, end["live_result"])
+                outcome["would_label"] = label is not None
+                outcome["label_profile"] = label
+                outcome["label_reason"] = reason
         outcome["matched_profile"] = last_match["name"]
         outcome["confidence"] = (
             round(float(last_match["conf"]), 3) if last_match["name"] else None
@@ -1515,6 +1601,9 @@ def _detail_to_row(detail: dict[str, Any]) -> dict[str, Any]:
         "stored_duration_s": detail.get("duration_s"),
         "expected_s": o.get("expected_s"),
         "overrun_ratio": o.get("overrun_ratio"),
+        "would_label": bool(o.get("would_label")),
+        "label_profile": o.get("label_profile"),
+        "label_reason": o.get("label_reason"),
         "alerts": [a.get("code") for a in detail.get("alerts", [])],
     }
 
@@ -1800,6 +1889,16 @@ def run_playground_sweep(
     current_x = _sim_config_summary(base_config).get(
         _OVERRIDE_FIELD_MAP.get(param, (param,))[0]
     )
+    if current_x is None:
+        # The summary carries only part of the config, so 8 sweepable keys (the
+        # completion/interrupted/start-duration thresholds, the two ratios, ...)
+        # reported no current value and the panel drew no marker for it.
+        try:
+            current_x = effective_settings(
+                base_config, prebuilt[1] if prebuilt else None
+            ).get(param)
+        except Exception:  # pylint: disable=broad-exception-caught
+            current_x = None
 
     points: list[dict[str, Any]] = []
     best_1d: dict[str, Any] | None = None

@@ -74,11 +74,9 @@ def washing_machine_config():
     return CycleDetectorConfig(
         min_power=2.0,
         off_delay=120,
-        smoothing_window=2,
         interrupted_min_seconds=150,
         completion_min_seconds=600,
         start_duration_threshold=5.0,
-        end_repeat_count=1,
     )
 
 def test_real_washing_machine_cycle(washing_machine_config):
@@ -123,11 +121,9 @@ def mock_socket_config():
     return CycleDetectorConfig(
         min_power=2.0,
         off_delay=120,
-        smoothing_window=2,
         interrupted_min_seconds=150,
         completion_min_seconds=600,
         start_duration_threshold=5.0,
-        end_repeat_count=1,
     )
 
 def test_mock_socket_cycle(mock_socket_config):

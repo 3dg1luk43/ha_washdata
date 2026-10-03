@@ -5,6 +5,7 @@
 
 import { Page, Locator, expect } from '@playwright/test';
 import { buildHandlers } from './ws-handlers';
+import panelConfig from '../fixtures/mock-data/panel-config.json';
 
 export type Handlers = Record<string, unknown>;
 
@@ -22,13 +23,25 @@ export async function bootPanel(
   page: Page,
   overrides: Handlers = {},
   hassExtra: Record<string, unknown> = {},
+  opts: { translations?: Record<string, unknown>; settingsLevel?: 'basic' | 'advanced' } = {},
 ): Promise<void> {
   // Intercept the per-language translation fetches so tests don't need network.
   // Returning an empty dict makes _t() fall back to the JS-embedded English.
-  await page.route('**/panel-translations/**', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }),
-  );
+  // `opts.translations` maps a language tag to the dict served for it, for tests
+  // that must exercise the loaded-translation path rather than the JS fallback.
+  const dicts = opts.translations || {};
+  await page.route('**/panel-translations/**', (route) => {
+    const lang = new URL(route.request().url()).pathname.split('/').pop()!.replace(/\.json$/, '');
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(dicts[lang] || {}) });
+  });
 
+  // The fixture boots Settings in Basic, the production default (audit UI-22).
+  // A spec that exercises Advanced-only fields says so with settingsLevel.
+  if (opts.settingsLevel) {
+    const key = 'ha_washdata/get_panel_config';
+    const cfg = (overrides[key] as Record<string, any>) || panelConfig;
+    overrides = { ...overrides, [key]: { ...cfg, prefs: { ...(cfg.prefs || {}), settings_level: opts.settingsLevel } } };
+  }
   const handlers = buildHandlers(overrides);
 
   await page.evaluate((arg: { h: Handlers; hass: Record<string, unknown> }) => {

@@ -17,38 +17,41 @@ same mid-cycle checkpoints production matches at.
 
 For each labelled cycle it runs the REAL matcher over a prefix at each
 checkpoint and reproduces the manager's own runner-up arithmetic
-(`manager._async_do_perform_matching`), reporting:
+(`match_rules.begin_tick`, which `manager._async_do_perform_matching` calls),
+reporting:
 
   * checkpoints with a single scored candidate (where the sentinel applies)
   * of those, how many would have taken the bypass before the fix
   * how many would still take it after
 
+The match is ``ProfileStore.async_match_profile`` itself (audit PLAYGROUND-04),
+on a store built by a real ``WashDataManager`` from the export's options
+(``end_gate_eval._production``): ``energy_mode`` is what the manager sets
+(integrated energy for washers), candidate templates are re-gridded to each
+query's step, and the runner-up is read from the same post-collapse,
+Stage-5-relabelled ``candidates`` the manager reads. Until 0.5.8 it called the
+worker directly with mean-power energy, 5 s templates whatever the plug's
+cadence, and a group win named ``__group__...``, so its figures predate that.
+
 Run from the repo root:  python3 devtools/decisive_margin_eval.py
 """
 from __future__ import annotations
 
+import asyncio
 import json
+import logging
 import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(REPO / "devtools"))
 
-import numpy as np  # noqa: E402
+from end_gate_eval import _production  # noqa: E402
 
-from custom_components.ha_washdata import analysis, playground  # noqa: E402
-from custom_components.ha_washdata.const import (  # noqa: E402
-    MATCH_DECISIVE_MARGIN,
-    MATCH_MIN_RESAMPLED_POINTS,
-)
-from custom_components.ha_washdata.profile_store import (  # noqa: E402
-    ProfileStore,
-    collapse_group_candidates,
-)
-from custom_components.ha_washdata.signal_processing import resample_adaptive  # noqa: E402
+from custom_components.ha_washdata.const import MATCH_DECISIVE_MARGIN  # noqa: E402
 from custom_components.ha_washdata.suggestion_engine import _cycle_readings  # noqa: E402
 
 #: Elapsed fractions to probe, mirroring a 5 min match interval over a wash.
@@ -88,25 +91,13 @@ def _scan_export(path: Path) -> Counter:
     cycles = data.get("past_cycles") or []
     if not device_type or len(cycles) < MIN_CYCLES:
         return tally
-    opts = doc.get("entry_options") or {}
-
-    store = ProfileStore(MagicMock(), "decisive-margin-eval")
-    store._data = data  # noqa: SLF001
-    store._min_duration_ratio = float(  # noqa: SLF001
-        opts.get("profile_match_min_duration_ratio", 0.10)
-    )
-    store._max_duration_ratio = float(  # noqa: SLF001
-        opts.get("profile_match_max_duration_ratio", 1.8)
-    )
-    store.dtw_bandwidth = float(opts.get("dtw_bandwidth", 0.20))
     try:
-        snapshots, match_config, group_members, _member_snaps = (
-            playground._build_match_snapshots(store)  # noqa: SLF001
-        )
+        _cfg, store, _opts = _production(doc, data)
     except Exception:
         return tally
-    if not snapshots:
+    if not store.has_real_profiles:
         return tally
+    loop = asyncio.new_event_loop()
 
     for cyc in cycles:
         label = cyc.get("profile_name")
@@ -123,33 +114,18 @@ def _scan_export(path: Path) -> Counter:
                 continue
             duration = prefix[-1][0] - prefix[0][0]
             try:
-                segments, _dt = resample_adaptive(
-                    np.array([t for t, _ in prefix], dtype=float),
-                    np.array([p for _, p in prefix], dtype=float),
-                    min_dt=5.0,
-                    gap_s=21600.0,
+                result = loop.run_until_complete(
+                    store.async_match_profile(prefix, duration, in_progress=frac < 1.0)
                 )
-                if not segments:
-                    tally["unmatched"] += 1
-                    continue
-                seg = max(segments, key=lambda s: len(s.power))
-                if len(seg.power) < MATCH_MIN_RESAMPLED_POINTS:
-                    tally["unmatched"] += 1
-                    continue
-                cands = analysis.compute_matches_worker(
-                    seg.power.tolist(), duration, snapshots,
-                    {**match_config, "in_progress": frac < 1.0},
-                )
-                cands = collapse_group_candidates(cands, group_members or {})
             except Exception:
                 tally["error"] += 1
                 continue
-            if not cands:
+            cands = list(result.candidates or [])
+            if not result.best_profile or not cands:
                 tally["unmatched"] += 1
                 continue
-            best = cands[0]
-            best_name = best.get("name")
-            confidence = float(best.get("score") or 0.0)
+            best_name = result.best_profile
+            confidence = float(result.confidence or 0.0)
             tally["checkpoints"] += 1
             runner_up = _runner_up_of(list(cands), best_name)
             correct = bool(label) and str(best_name).strip() == str(label).strip()
@@ -169,10 +145,12 @@ def _scan_export(path: Path) -> Counter:
                     if label:
                         tally["real_margin_labelled"] += 1
                         tally["real_margin_correct"] += int(correct)
+    loop.close()
     return tally
 
 
 def main() -> int:
+    logging.disable(logging.CRITICAL)
     total: Counter = Counter()
     for path in sorted((REPO / "cycle_data").rglob("*.json")):
         total.update(_scan_export(path))

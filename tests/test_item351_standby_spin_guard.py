@@ -224,7 +224,7 @@ def test_the_playground_mirrors_the_standby_arm() -> None:
 
     assert callable(terminal_high_for_guards)
 
-    pg_src = inspect.getsource(pg_mod._DetailSim._matcher)
+    pg_src = inspect.getsource(pg_mod._DetailSim._match_context)
     mgr_src = inspect.getsource(mgr_mod.WashDataManager._terminal_high_for_guards)
     assert "terminal_high_for_guards(" in pg_src
     assert "terminal_high_for_guards(" in mgr_src

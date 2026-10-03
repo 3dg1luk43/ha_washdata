@@ -21,7 +21,7 @@ import pytest
 # from tests import mock_imports
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch, PropertyMock
-from datetime import timedelta, datetime, timezone
+from datetime import timedelta
 from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
@@ -75,8 +75,6 @@ def manager(mock_hass: Any, mock_entry: Any) -> WashDataManager:
     # Setup mock_hass to return our mock_entry
     mock_hass.config_entries.async_get_entry.return_value = mock_entry
     
-    # Ensure dt_util.now returns real datetimes for comparisons
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
 
     # Patch ProfileStore and CycleDetector to avoid disk/logic issues
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
@@ -274,33 +272,66 @@ async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, m
     assert pn.async_create.call_count == 0
 
 
-def test_cycle_end_skips_feedback_low_confidence(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
-    """Low-confidence matches should neither auto-label nor request user feedback."""
-    manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
+@pytest.mark.asyncio
+async def test_cycle_end_skips_feedback_low_confidence(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
+    """Low-confidence matches should neither auto-label nor request user feedback.
+
+    Awaits the real cycle-end pipeline. The old version called the sync
+    `_on_cycle_end`, whose spawned `_async_process_cycle_end` the closing
+    `mock_hass` discarded unrun, so both `assert_not_called` lines held for any
+    pipeline (audit TESTING-13 Q-04).
+    """
+    profiles = {"Heavy Duty": {"avg_duration": 3600}}
+    manager.profile_store._data["profiles"] = profiles
+    manager.profile_store.get_profiles = MagicMock(return_value=profiles)
     manager._current_program = "Heavy Duty"
     manager._matched_profile_duration = 3600
     manager._last_match_confidence = 0.40
     manager._learning_confidence = 0.70
     manager._auto_label_confidence = 0.95
+    manager._notify_finish_services = []
+    manager._notify_actions = []
 
     manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=False)
     manager.learning_manager.request_cycle_verification = MagicMock()
+    process_spy = MagicMock(wraps=manager.learning_manager.process_cycle_end)
+    manager.learning_manager.process_cycle_end = process_spy
+
+    low = MagicMock()
+    low.best_profile = "Heavy Duty"
+    low.confidence = 0.40
+    low.label_confidence = 0.40
+    low.member_confidence = None
+    low.ambiguity_margin = 0.5
+    low.is_ambiguous = False
+    low.ranking = []
+    manager.profile_store.async_match_profile = AsyncMock(return_value=low)
+    manager.profile_store.async_add_cycle = AsyncMock()
+    manager.profile_store.async_rebuild_envelope = AsyncMock()
+    manager.profile_store.async_clear_active_cycle = AsyncMock()
+    manager._run_post_cycle_processing = AsyncMock()
 
     cycle_data = {
         "start_time": "2025-12-21T10:00:00",
         "end_time": "2025-12-21T11:00:00",
         "duration": 3600,
         "max_power": 500,
-        "power_data": [[0.0, 5.0], [60.0, 200.0], [120.0, 50.0]],
+        "power_data": [[i * 60.0, 200.0] for i in range(12)],
         "status": "completed",
     }
 
-    manager._on_cycle_end(dict(cycle_data))
+    await manager._async_process_cycle_end(dict(cycle_data))
+
+    # The pipeline really ran to the learning step, with the gate's verdict.
+    manager.profile_store.async_add_cycle.assert_awaited_once()
+    process_spy.assert_called_once()
+    stored = manager.profile_store.async_add_cycle.await_args.args[0]
+    assert stored.get("profile_name") is None, "a 0.40 match must not label the cycle"
+    assert process_spy.call_args.kwargs["confidence"] == pytest.approx(0.40)
+    assert process_spy.call_args.kwargs["label_allowed"] is False
 
     manager.learning_manager.auto_label_high_confidence.assert_not_called()
     manager.learning_manager.request_cycle_verification.assert_not_called()
-
-    # assert "ha_washdata_feedback_requested" not in fired_events
     assert pn.async_create.call_count == 0
 
 

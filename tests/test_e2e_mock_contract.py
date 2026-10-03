@@ -189,8 +189,13 @@ def test_validator_flags_missing_unexpected_and_wrong_types():
     groups["groups"][0].pop("cohesive")
     assert any("groups[0]: missing required keys ['cohesive']" in p
                for p in contract_problems("get_profile_groups", groups))
-    assert contract_problems("get_power_history", {"live": [{"t": 0, "p": 1}]}) == [
+    history = {"cycle_active": False, "cycle_elapsed_s": 0.0, "raw": [], "restart_gaps": []}
+    assert contract_problems("get_power_history", {**history, "live": [{"t": 0, "p": 1}]}) == [
         "get_power_history.live[0]: expected list, got dict"
+    ]
+    # Keys the handler always sends are required, so a mock that drops one fails.
+    assert contract_problems("get_power_history", {"live": []}) == [
+        "get_power_history: missing required keys ['cycle_active', 'cycle_elapsed_s', 'raw', 'restart_gaps']"
     ]
     assert contract_problems("set_lifetime_cycle_count", {"success": True, "lifetime_cycle_count": True}) == [
         "set_lifetime_cycle_count.lifetime_cycle_count: expected int, got bool"

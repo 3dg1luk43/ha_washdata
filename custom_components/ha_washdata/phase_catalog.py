@@ -326,6 +326,9 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
                 "name": normalized_name,
                 "description": str(item.get("description", "")).strip(),
                 "is_default": False,
+                # An edited built-in: deleting it restores the built-in, so the
+                # panel offers "Reset" rather than "Delete" on it.
+                "is_override": True,
             }
             continue
 

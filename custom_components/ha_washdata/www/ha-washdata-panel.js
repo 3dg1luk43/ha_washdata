@@ -1405,7 +1405,7 @@ function _fmtDuration(s) {
 }
 function _fmtPower(w) {
   if (w == null) return '-';
-  return w >= 100 ? `${Math.round(w)} W` : `${w.toFixed(1)} W`;
+  return w >= 100 ? `${_fmtNum(Math.round(w), 0)} W` : `${_fmtNum(w, 1)} W`;
 }
 // Watt label for a chart axis / grid line. #453: a fixed Math.round() prints "0W"
 // on every tick of a standby trace, so an appliance idling at 0.3 W got three
@@ -1429,11 +1429,72 @@ function _niceStep(span, divisions) {
 }
 function _fmtEnergy(kwh) {
   if (kwh == null) return '-';
-  return `${kwh.toFixed(2)} kWh`;
+  return `${_fmtNum(kwh, 2)} kWh`;
 }
 // Current cycle-date display mode ('relative' | 'absolute'), synced from the
 // user's persisted "Cycle date display" preference by _render() on each paint.
 let _datePref = 'relative';
+
+// The HA user's display locale (audit UI-08), synced by _render() like _datePref
+// so the module-level formatters follow the user's language and number format
+// instead of the browser's. `undefined` means "browser default", which is what
+// HA itself does for the "system" choices.
+let _uiDateLocale;       // panel language (lang_override, else HA language)
+let _uiNumLocale;        // HA number_format mapped to a locale, as HA's frontend does
+let _uiNumGrouping = true;
+let _uiHour12;           // HA time_format '12' / '24'; undefined = locale default
+const _nfCache = new Map();
+function _syncUiLocale(lang, locale) {
+  const loc = locale || {};
+  _uiDateLocale = lang || undefined;
+  const nf = loc.number_format;
+  _uiNumLocale = nf === 'comma_decimal' ? ['en-US', 'en']
+    : nf === 'decimal_comma' ? ['de', 'es', 'it']
+    : nf === 'space_comma' ? ['fr', 'sv', 'cs']
+    : nf === 'quote_decimal' ? ['de-CH']
+    : nf === 'system' ? undefined
+    : (lang || undefined);
+  _uiNumGrouping = nf !== 'none';
+  _uiHour12 = loc.time_format === '12' ? true : loc.time_format === '24' ? false : undefined;
+}
+function _numFmt(opts) {
+  const key = JSON.stringify([_uiNumLocale, _uiNumGrouping, opts]);
+  let f = _nfCache.get(key);
+  if (!f) {
+    const o = Object.assign({ useGrouping: _uiNumGrouping }, opts);
+    try { f = new Intl.NumberFormat(_uiNumLocale, o); } catch (_) { f = new Intl.NumberFormat(undefined, o); }
+    _nfCache.set(key, f);
+  }
+  return f;
+}
+// Display-only number: `dec` fraction digits (fixed, like toFixed). Never use the
+// result for a value that is sent back to the backend.
+function _fmtNum(v, dec = 0) {
+  const n = Number(v);
+  if (!isFinite(n)) return String(v);
+  return _numFmt({ minimumFractionDigits: dec, maximumFractionDigits: dec }).format(n);
+}
+// Money in HA's configured currency, formatted for the user's locale ("€0.21",
+// "0,21 €"). A currency that is not an ISO 4217 code keeps the old "0.21 XYZ".
+function _fmtCost(v, cur) {
+  const n = Number(v);
+  if (v == null || !isFinite(n)) return '-';
+  if (cur) {
+    try { return _numFmt({ style: 'currency', currency: cur }).format(n); } catch (_) { /* not ISO 4217 */ }
+  }
+  return `${_fmtNum(n, 2)}${cur ? ' ' + cur : ''}`;
+}
+function _dateOpts(opts) {
+  return _uiHour12 === undefined ? opts : Object.assign({ hour12: _uiHour12 }, opts);
+}
+function _fmtTimeOfDay(d) {
+  const opts = _dateOpts({ hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  try { return d.toLocaleTimeString(_uiDateLocale, opts); } catch (_) { return d.toLocaleTimeString(undefined, opts); }
+}
+function _fmtDay(ts) {
+  const d = new Date(ts);
+  try { return d.toLocaleDateString(_uiDateLocale); } catch (_) { return d.toLocaleDateString(); }
+}
 
 // ─── History-import date picker helpers ──────────────────────────────────────
 // The recorder read is bounded by a start DATE ("import since ..."), which is what a
@@ -1459,7 +1520,7 @@ function _histMinSince() { return _histShiftDays(_HIST_MAX_DAYS - 1); }
 function _relTime(ms) {
   const diffSec = Math.round((ms - Date.now()) / 1000);  // < 0 = in the past
   let rtf;
-  try { rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' }); }
+  try { rtf = new Intl.RelativeTimeFormat(_uiDateLocale, { numeric: 'auto' }); }
   catch (_) { return _fmtAbsDate(ms); }
   const abs = Math.abs(diffSec);
   const units = [['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]];
@@ -1469,7 +1530,9 @@ function _relTime(ms) {
   return rtf.format(diffSec, 'second');
 }
 function _fmtAbsDate(ms) {
-  return new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const opts = _dateOpts({ month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  try { return new Date(ms).toLocaleString(_uiDateLocale, opts); }
+  catch (_) { return new Date(ms).toLocaleString(undefined, opts); }
 }
 // Normalize any timestamp (ISO string, unix seconds, unix millis, or a bare
 // YYYY-MM-DD calendar date) to epoch millis, then format per the date-display
@@ -1514,6 +1577,25 @@ function _wsErrText(err) {
 
 function _esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+// A _t() var that is markup on purpose (built from escaped parts). _t() escapes
+// every other var, so wrapping one in _html() is the explicit, greppable opt-out
+// (audit UI-21: a raw search term reached innerHTML through a translated string).
+class _TrustedHtml {
+  constructor(html) { this.html = String(html == null ? '' : html); }
+  toString() { return this.html; }
+}
+function _html(s) { return new _TrustedHtml(s); }
+// CLDR plural category ('one', 'few', 'other', ...) of `n` in `lang`; one cached
+// Intl.PluralRules per language. An unknown tag degrades to English rules.
+const _pluralRules = new Map();
+function _pluralCat(lang, n) {
+  let pr = _pluralRules.get(lang);
+  if (pr === undefined) {
+    try { pr = new Intl.PluralRules(lang || 'en'); } catch (_) { pr = null; }
+    _pluralRules.set(lang, pr);
+  }
+  return pr ? pr.select(n) : (n === 1 ? 'one' : 'other');
 }
 // Allow only http(s) links. Community-supplied URLs (e.g. a device's manualUrl)
 // must never render a `javascript:`/`data:` href, which _esc does not neutralise.
@@ -1798,7 +1880,9 @@ function _field(f, value, extra) {
   if (classicVal != null) {
     // Resolve localized reason text (reason_key + reason_params) with the English
     // reason as fallback. _tip() escapes, so interpolated values are safe.
-    const sugReason = sug.reason_key ? t(sug.reason_key, sug.reason_params || {}, sug.reason || '') : (sug.reason || '');
+    // Plain text (tText): _tip() escapes it, so _t()'s HTML escaping would double up.
+    const tt = extra.tText || t;
+    const sugReason = sug.reason_key ? tt(sug.reason_key, sug.reason_params || {}, sug.reason || '') : (sug.reason || '');
     const reason = sugReason ? _tip(sugReason) : '';
     const nowNote = value != null && value !== '' ? ` <span style="opacity:.6;font-size:.9em">(now ${_esc(value)}${_u})</span>` : '';
     const impact = _sugImpact(t, key, classicVal, value);
@@ -2258,7 +2342,7 @@ class HaWashdataPanel extends HTMLElement {
       this._startPoll();
       // Restore WS push subscriptions (cycle events + task registry) that
       // disconnectedCallback tore down. Without this, navigate-away/back leaves
-      // the panel relying only on the 30s fallback poll — live cycle transitions
+      // the panel relying only on the _POLL_MS (20 s) fallback poll - live cycle transitions
       // and task progress no longer update, and modal Escape/Tab are dead.
       this._setupSubscriptions();
       // Immediately refresh state so a navigate-away/back shows current data
@@ -2395,7 +2479,7 @@ class HaWashdataPanel extends HTMLElement {
     this._tasksSubscribed = false;
     // Subscribe to WashData cycle events for immediate push-refresh.
     // These fire when a cycle starts/ends so the UI updates instantly
-    // instead of waiting for the 30s fallback poll.
+    // instead of waiting for the _POLL_MS (20 s) fallback poll.
     const conn = this._hass && this._hass.connection;
     if (conn && conn.subscribeMessage) {
       const handleCycleEvent = (ev) => {
@@ -2553,14 +2637,14 @@ class HaWashdataPanel extends HTMLElement {
       this._addProvisionalTask(tid, kind, msg.entry_id, 0);
     } catch (e) {
       this._busy.delete(busyKey);
-      this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
       this._render();
       return;
     }
     this._taskCallbacks[tid] = async (t) => {
       this._busy.delete(busyKey);
       if (t.state === 'error') {
-        this._showToast(this._t('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
+        this._showToast(this._tText('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
         this._render();
         return;
       }
@@ -2663,7 +2747,7 @@ class HaWashdataPanel extends HTMLElement {
     const parts = (ex.items || []).map(([code, n]) =>
       `${n} ${this._t('suggestion.exclusions.reason.' + code, {}, String(code).replace(/_/g, ' '))}`
     ).join(', ');
-    return ' ' + this._t('suggestion.exclusions.summary', { total: ex.total, parts },
+    return ' ' + this._tText('suggestion.exclusions.summary', { total: ex.total, parts },
       `Excluded ${ex.total} mis-detected cycle(s): ${parts}.`);
   }
 
@@ -2679,7 +2763,7 @@ class HaWashdataPanel extends HTMLElement {
     return running.map(t => {
       const cancelling = this._cancellingTasks.has(t.id);
       const dev = this._deviceName(t.entry_id);
-      const action = t.label_key ? this._t(t.label_key, t.label_params || {}, t.label || this._taskActionLabel(t.kind)) : this._taskActionLabel(t.kind);
+      const action = t.label_key ? this._tText(t.label_key, t.label_params || {}, t.label || this._taskActionLabel(t.kind)) : this._taskActionLabel(t.kind);
       const label = (dev ? dev + ' · ' : '') + action;
       const pct = t.progress != null ? Math.round(t.progress * 100) + '%' : '';
       const eta = (t.eta_s != null && t.eta_s > 0) ? this._fmtEta(t.eta_s) : '';
@@ -2742,7 +2826,7 @@ class HaWashdataPanel extends HTMLElement {
     // device's result into the now-active device or clobber its batch state.
     if (!this._isActiveEntry(t.entry_id)) return;
     if (t.state === 'error') {
-      this._showToast(this._t('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
+      this._showToast(this._tText('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
     } else if (result) {
       if (isHistory) this._pgHistory = result;
       else this._pgSweepNew = (result && !result.error) ? result : null;
@@ -2846,16 +2930,23 @@ class HaWashdataPanel extends HTMLElement {
   async _fetchAll() {
     if (!this._hass) return;
     const firstLoad = this._loading;
+    let painted = false;   // first load only: the early Status paint already ran
     try {
       if (!this._constantsLoaded) {
-        try {
-          const c = await this._ws({ type: `${_DOMAIN}/get_constants` });
+        // Independent of each other, so one round trip instead of two (audit UI-19).
+        const [c, cfg] = await Promise.all([
+          this._ws({ type: `${_DOMAIN}/get_constants` }).catch(() => null),
+          this._ws({ type: `${_DOMAIN}/get_panel_config` }).catch(() => null),
+        ]);
+        if (c) {
           this._constants = { stateColors: c.state_colors || {}, deviceTypes: c.device_types || [], mlLabEnabled: !!(c.ml_lab_enabled), mlTrainingAvailable: !!(c.ml_training_available), storeOnlineAvailable: !!(c.store_online_available), storeOnlineEnabled: !!(c.store_online_enabled), storeWebOrigin: c.store_web_origin || '', storePrefs: c.store_prefs || {}, pgMatchDefaults: c.pg_match_defaults || {}, PROFILE_MIN_WARMUP_CYCLES: c.PROFILE_MIN_WARMUP_CYCLES, version: c.version || '', iconUrl: c.icon_url || '' };
-        } catch (_) { /* fall back to humanized labels */ }
-        try {
-          this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
-          this._applyPanelConfig();
-        } catch (_) { /* panel config optional */ }
+        }  // else: fall back to humanized labels
+        if (cfg) {
+          try {
+            this._panelCfg = cfg;
+            this._applyPanelConfig();
+          } catch (_) { /* panel config optional */ }
+        }
         this._constantsLoaded = true;
       }
 
@@ -2886,60 +2977,81 @@ class HaWashdataPanel extends HTMLElement {
       }
 
       const dev = this._devices[this._selIdx];
-      // Live chart is served from the integration so it survives a refresh:
-      // fetch it whenever the Status tab is visible.
-      if (dev && this._tab === 'status') {
-        try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) }); } catch (_) { /* keep previous */ }
-        if (this._pref('show_debug', false)) {
-          try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
+      // The live chart and the matched program's overlay are independent reads, so
+      // they go out together rather than one after the other (audit UI-19).
+      const statusData = async () => {
+        // Live chart is served from the integration so it survives a refresh:
+        // fetch it whenever the Status tab is visible.
+        if (dev && this._tab === 'status') {
+          try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) }); } catch (_) { /* keep previous */ }
+          if (this._pref('show_debug', false)) {
+            try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
+          }
+          // Keep the Manual Recording widget's live duration / sample count fresh
+          // while a recording is running (the backend reports them live; without
+          // this poll the widget stays frozen at its start-of-recording snapshot).
+          // Gate on the authoritative dev.recording flag rather than the polled
+          // _recState, which is null on first load and would otherwise never be
+          // populated -- leaving the widget showing "Start Recording" during an
+          // active recording (#313).
+          if (this._canEdit() && dev.recording) {
+            try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
+          }
         }
-        // Keep the Manual Recording widget's live duration / sample count fresh
-        // while a recording is running (the backend reports them live; without
-        // this poll the widget stays frozen at its start-of-recording snapshot).
-        // Gate on the authoritative dev.recording flag rather than the polled
-        // _recState, which is null on first load and would otherwise never be
-        // populated -- leaving the widget showing "Start Recording" during an
-        // active recording (#313).
-        if (this._canEdit() && dev.recording) {
-          try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
+      };
+      const overlayData = async () => {
+        // When a program is matched, keep its expected envelope for the status overlay.
+        if (dev && dev.current_program) {
+          if (this._statusEnvName !== dev.current_program) {
+            this._statusEnvName = dev.current_program;
+            try {
+              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: dev.entry_id, profile_name: dev.current_program });
+              this._statusEnv = r.envelope || null;
+            } catch (_) { this._statusEnv = null; }
+          }
+          // D1: keep the matched profile's phase ranges for the Status timeline.
+          await this._ensureStatusPhases(dev.entry_id, dev.current_program);
+        } else {
+          this._statusEnv = null; this._statusEnvName = null;
+          this._statusPhases = []; this._statusPhasesName = null;
         }
-      }
-      // When a program is matched, keep its expected envelope for the status overlay.
-      if (dev && dev.current_program) {
-        if (this._statusEnvName !== dev.current_program) {
-          this._statusEnvName = dev.current_program;
-          try {
-            const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: dev.entry_id, profile_name: dev.current_program });
-            this._statusEnv = r.envelope || null;
-          } catch (_) { this._statusEnv = null; }
-        }
-        // D1: keep the matched profile's phase ranges for the Status timeline.
-        await this._ensureStatusPhases(dev.entry_id, dev.current_program);
-      } else {
-        this._statusEnv = null; this._statusEnvName = null;
-        this._statusPhases = []; this._statusPhasesName = null;
-      }
+      };
+      await Promise.all([statusData(), overlayData()]);
       // Cycles/suggestions load per-tab; only prime them on the very first paint.
       if (firstLoad && dev) {
-        await this._fetchCycles(dev.entry_id);
-        await this._fetchSuggestions(dev.entry_id);
-        await this._fetchProfiles(dev.entry_id);
-        // Prime the Setup Card on the very first paint so it appears immediately
-        // without requiring a tab click or device switch.
+        const eid = dev.entry_id;
+        const primed = Promise.all([
+          this._fetchCycles(eid),
+          this._fetchSuggestions(eid),
+          this._fetchProfiles(eid),
+          // Prime the Setup Card on the very first paint so it appears without
+          // requiring a tab click or device switch.
+          this._tab === 'status'
+            ? this._ws({ type: `${_DOMAIN}/get_setup_status`, entry_id: eid })
+              .then(r => { if (this._isActiveEntry(eid)) this._setupStatus = r; },
+                () => { if (this._isActiveEntry(eid)) this._setupStatus = null; })
+            : null,
+          // The Store tab's visibility depends on this._onlineEnabled(), which is
+          // normally loaded per-tab. Prime it at boot ONLY when the backend exposes
+          // online features, so the tab can appear without visiting Settings. Also
+          // cache store connection state so the "Share to store" cycle action knows
+          // whether an account is connected regardless of the current tab.
+          this._constants.storeOnlineAvailable ? (async () => {
+            try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (this._isActiveEntry(eid)) this._opts = r.options || {}; } catch (_) {}
+            if (this._onlineEnabled()) await this._loadStoreStatus(eid);
+          })() : null,
+        ]);
+        // First paint (audit UI-19): the Status tab has everything it needs once the
+        // device list and its live data are in, so paint it while the reads above
+        // are in flight and fill in the rest when they land. Every other tab is
+        // built from the primed data, so it shows the header and tabs over the
+        // spinner (`_loading` still set) rather than flashing an empty state.
         if (this._tab === 'status') {
-          try {
-            this._setupStatus = await this._ws({ type: `${_DOMAIN}/get_setup_status`, entry_id: dev.entry_id });
-          } catch (_) { this._setupStatus = null; }
+          this._loading = false;
+          painted = true;
         }
-        // The Store tab's visibility depends on this._onlineEnabled(),
-        // which is normally loaded per-tab. Prime it at boot ONLY when the backend
-        // exposes online features, so the tab can appear without visiting Settings.
-        // Also cache store connection state so the "Share to store" cycle action
-        // knows whether an account is connected regardless of the current tab.
-        if (this._constants.storeOnlineAvailable) {
-          try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: dev.entry_id }); if (this._isActiveEntry(dev.entry_id)) this._opts = r.options || {}; } catch (_) {}
-          if (this._onlineEnabled()) await this._loadStoreStatus(dev.entry_id);
-        }
+        this._render();
+        await primed;
       }
       // Log drawer: fetch asynchronously so it never delays the main poll;
       // _refreshLogDrawer patches just the drawer body when the fetch resolves.
@@ -2947,8 +3059,8 @@ class HaWashdataPanel extends HTMLElement {
         this._fetchLogs().then(() => this._refreshLogDrawer()).catch(() => {});
       }
     } catch (err) {
-      // Collapse repeats: a poll failure is usually transient and identical every
-      // 5 s, and six copies of the same line buries whatever else is in the console.
+      // Collapse repeats: a poll failure is usually transient and identical on
+      // every poll, and six copies of the same line buries whatever else is in the console.
       const text = _wsErrText(err);
       if (text !== this._lastFetchErr) {
         this._lastFetchErr = text;
@@ -2960,11 +3072,15 @@ class HaWashdataPanel extends HTMLElement {
     } finally {
       this._loading = false;
       this._refreshStaleChip();
-      // The 5s poll must never clobber editing on another tab or inside a modal.
+      // The poll must never clobber editing on another tab or inside a modal.
       const sr = this.shadowRoot;
       const ae = sr && sr.activeElement;
       const interacting = !!(ae && ['SELECT', 'INPUT', 'TEXTAREA', 'OPTION'].includes(ae.tagName));
-      if (firstLoad) {
+      if (firstLoad && !painted) {
+        this._render();
+      } else if (firstLoad && !this._modal && !interacting) {
+        // The primed data landed after the early paint: render it in, unless the
+        // user is already inside a field or a modal (handled like a poll below).
         this._render();
       } else if (this._tab === 'status' && !this._modal && !interacting) {
         this._render();
@@ -2986,6 +3102,9 @@ class HaWashdataPanel extends HTMLElement {
     this._cyclesError = false;
     try {
       const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: _CYCLE_PAGE_SIZE, offset: 0 });
+      // The first paint no longer waits for this read (UI-19), so the device can
+      // change under it: a late answer for the previous device is dropped.
+      if (!this._isActiveEntry(entryId)) return;
       this._cycles = res.cycles || [];
       // Imported store recordings and cycles recovered from raw power history are
       // returned once (first page) and kept out of the paginated `cycles`/offset math
@@ -2995,7 +3114,10 @@ class HaWashdataPanel extends HTMLElement {
       this._cycleOffset = this._cycles.length;
       this._cyclesTotal = (res.total != null) ? res.total : this._cycles.length;
       this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : false;
-    } catch (_) { this._cyclesError = true; this._cycles = []; this._refCycles = []; this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false; }
+    } catch (_) {
+      if (!this._isActiveEntry(entryId)) return;
+      this._cyclesError = true; this._cycles = []; this._refCycles = []; this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false;
+    }
   }
 
   // D3: fetch the next page and append (deduping by id so optimistic removals or
@@ -3079,7 +3201,7 @@ class HaWashdataPanel extends HTMLElement {
       const failed = await e.commit();
       if (failed && failed.length) restoreFailed(failed, this._t('toast.delete_partial_failed', {}, 'Some items could not be deleted and were restored'));
     } catch (err) {
-      restoreFailed(null, this._t('toast.delete_failed', { error: (err && err.message) || err }, 'Delete failed: ' + ((err && err.message) || err)));
+      restoreFailed(null, this._tText('toast.delete_failed', { error: (err && err.message) || err }, 'Delete failed: ' + ((err && err.message) || err)));
     }
   }
 
@@ -3148,7 +3270,7 @@ class HaWashdataPanel extends HTMLElement {
       return failed;
     };
     const token = this._registerUndo({ eid, restore, commit });
-    this._showToast(this._t('msg.cycles_deleted', { count: removed.length }, `${removed.length} cycle(s) deleted`), 'success',
+    this._showToast(this._tText('msg.cycles_deleted', { count: removed.length }, `${removed.length} cycle(s) deleted`), 'success',
       { actionLabel: this._t('btn.undo', {}, 'Undo'), actionToken: token, duration: 10000 });
   }
 
@@ -3176,7 +3298,7 @@ class HaWashdataPanel extends HTMLElement {
       return [];
     };
     const token = this._registerUndo({ eid, restore, commit });
-    this._showToast(this._t('msg.profile_deleted', { name }, 'Profile deleted'), 'success',
+    this._showToast(this._tText('msg.profile_deleted', { name }, 'Profile deleted'), 'success',
       { actionLabel: this._t('btn.undo', {}, 'Undo'), actionToken: token, duration: 10000 });
   }
 
@@ -3294,6 +3416,7 @@ class HaWashdataPanel extends HTMLElement {
     this._profilesError = false;
     try {
       const r = await this._ws({ type: `${_DOMAIN}/get_profiles`, entry_id: entryId });
+      if (!this._isActiveEntry(entryId)) return this._profiles;  // device switched mid-flight
       this._profiles = r.profiles || [];
       this._profileHealth = r.profile_health || {};
       this._profileTrends = r.profile_trends || {};
@@ -3470,8 +3593,8 @@ class HaWashdataPanel extends HTMLElement {
     const last = this._lastRefresh;
     const old = last && (Date.now() - last.getTime()) > 2.5 * this._pollMs;
     if (!this._devices.length || !(this._fetchFailed || old)) return '<div id="wd-stale" hidden></div>';
-    const time = last ? last.toLocaleTimeString() : '';
-    return `<div id="wd-stale" class="wd-stale" role="status">${_esc(this._t('msg.connection_lost', {time}, `Connection lost - showing data from ${time}.`))}</div>`;
+    const time = last ? _fmtTimeOfDay(last) : '';
+    return `<div id="wd-stale" class="wd-stale" role="status">${_esc(this._tText('msg.connection_lost', {time}, `Connection lost - showing data from ${time}.`))}</div>`;
   }
 
   _refreshStaleChip() {
@@ -3496,7 +3619,7 @@ class HaWashdataPanel extends HTMLElement {
     // _lastRefresh kept for internal use; header no longer shows the timestamp.
   }
 
-  // Patch only the log drawer body in-place — called on every 5s poll when the
+  // Patch only the log drawer body in-place - called on every poll when the
   // drawer is open, so logs stay live without a full page re-render.
   _refreshLogDrawer() {
     if (!this._logOpen) return;
@@ -3756,7 +3879,7 @@ class HaWashdataPanel extends HTMLElement {
         : `<p class="wd-info" style="margin:8px 0">${this._t('msg.no_logs', {}, 'No log records buffered yet.')}</p>`;
     }
     return recs.slice().reverse().map(r => {
-      const t = new Date(r.ts * 1000).toLocaleTimeString();
+      const t = _fmtTimeOfDay(new Date(r.ts * 1000));
       const dev = r.device ? `<span class="wd-logdev">${_esc(r.device)}</span>` : '';
       return `<div class="wd-logline"><span class="wd-logts">${t}</span><span class="wd-loglvl wd-lvl-${_esc(r.level)}">${_esc(r.level)}</span><span class="wd-logcomp">${_esc(r.logger || '')}</span>${dev}${_esc(r.msg)}</div>`;
     }).join('');
@@ -3826,19 +3949,58 @@ class HaWashdataPanel extends HTMLElement {
     return (val && typeof val === 'string') ? val : null;
   }
 
-  _t(key, vars = {}, fallback = '') {
-    let s;
+  // The language the user reads the panel in: the per-user override, else HA's.
+  _uiLang() {
     const langOverride = this._panelCfg && this._panelCfg.prefs && this._panelCfg.prefs.lang_override;
-    const lang = langOverride || (this._hass && this._hass.locale && this._hass.locale.language);
+    return langOverride || (this._hass && this._hass.locale && this._hass.locale.language) || '';
+  }
+
+  // Plural-aware lookup (audit UI-08): with a count, try `key_<category>` for the
+  // language's own CLDR category, then `key_other`, then the plain key, so a
+  // language that ships a single form keeps working unchanged.
+  _tResolve(key, lang, count) {
+    if (count != null) {
+      const cat = _pluralCat(lang, count);
+      const hit = this._tLookup(`${key}_${cat}`, lang)
+        || (cat !== 'other' ? this._tLookup(`${key}_other`, lang) : null);
+      if (hit) return hit;
+    }
+    return this._tLookup(key, lang);
+  }
+
+  // Translate `key` for an HTML context. Every var is HTML-escaped (audit UI-21):
+  // translated templates are trusted, substituted values are not. A var that is
+  // markup on purpose must be wrapped in _html(). For a sink that escapes on its
+  // own or is plain text (toast, confirm modal, native confirm(), title/aria via
+  // _esc, textContent) use _tText, or the value is escaped twice.
+  //
+  // Plurals: a numeric `count` (else `n`) var selects key_one / key_other / ...
+  _t(key, vars = {}, fallback = '') { return this._tr(key, vars, fallback, true); }
+
+  // Same as _t, but substitutes vars verbatim: the result is plain text.
+  _tText(key, vars = {}, fallback = '') { return this._tr(key, vars, fallback, false); }
+
+  _tr(key, vars, fallback, html) {
+    let s;
+    vars = vars || {};
+    const lang = this._uiLang();
+    const c = typeof vars.count === 'number' ? vars.count : vars.n;
+    const count = (typeof c === 'number' && isFinite(c)) ? c : null;
     if (this._panelTrans) {
       // Explicit user-language lookup: user pref → en → JS fallback
-      s = (lang && this._tLookup(key, lang)) || this._tLookup(key, 'en') || fallback;
+      s = (lang && this._tResolve(key, lang, count)) || this._tResolve(key, 'en', count) || fallback;
     } else {
       // Bundle not yet loaded: use HA's localize (also user-language) or JS fallback
       s = this._localize(`component.${_DOMAIN}.panel.${key}`, fallback);
     }
+    if (typeof s !== 'string') return s;
     for (const [k, v] of Object.entries(vars)) {
-      s = s.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      const token = `{${k}}`;
+      if (!s.includes(token)) continue;
+      const val = v instanceof _TrustedHtml ? v.html : (html ? _esc(String(v)) : String(v));
+      // split/join, not String.replace: a value containing `$&` or `$1` must not be
+      // read as a replacement pattern.
+      s = s.split(token).join(val);
     }
     return s;
   }
@@ -3899,7 +4061,7 @@ class HaWashdataPanel extends HTMLElement {
     });
     if (current && String(current) !== selfId
         && !out.some(([id]) => String(id) === String(current))) {
-      out.push([current, this._t('lbl.device_unresolved', {id: current}, `Unavailable device (${current})`)]);
+      out.push([current, this._tText('lbl.device_unresolved', {id: current}, `Unavailable device (${current})`)]);
     }
     return out;
   }
@@ -4156,6 +4318,7 @@ class HaWashdataPanel extends HTMLElement {
     // _fmtDate (a module helper) honors relative/absolute without threading it
     // through every call site.
     _datePref = this._pref('date_format', 'relative');
+    _syncUiLocale(this._uiLang(), this._hass && this._hass.locale);
     // Capture the element that had focus BEFORE we replace the DOM: innerHTML wipes
     // it, so this is the only chance to remember the trigger to return focus to when
     // a modal closes (a11y). Passed into _syncModalFocus below.
@@ -4502,7 +4665,7 @@ class HaWashdataPanel extends HTMLElement {
     const envPos = dev.envelope_position;
     const envPct = envPos != null ? Math.round(envPos * 100) : null;
     const envPosHtml = envPct != null
-      ? ` <span style="opacity:.75" title="${_esc(this._t('lbl.envelope_position_tip', {pct: envPct},
+      ? ` <span style="opacity:.75" title="${_esc(this._tText('lbl.envelope_position_tip', {pct: envPct},
           `Position on the matched program's own recorded curve, ${envPct}%. Measured by aligning `
           + `this cycle against the profile instead of counting time, so it stays right when a run `
           + `is longer or shorter than usual. It refreshes while the appliance is quiet, so it can `
@@ -4511,7 +4674,7 @@ class HaWashdataPanel extends HTMLElement {
       : '';
     const progressHtml = (isRunning && prog != null) ? `
       <div class="wd-prog-bg"><div class="wd-prog-fill" style="width:${Math.min(100, prog)}%"></div></div>
-      <div class="wd-prog-row"><span>${prog.toFixed(1)}%${envPosHtml}</span>${rem != null ? `<span>${this._t('lbl.time_remaining', {v: _fmtDuration(rem)}, `~${_fmtDuration(rem)} remaining`)}</span>` : ''}</div>
+      <div class="wd-prog-row"><span>${_fmtNum(prog, 1)}%${envPosHtml}</span>${rem != null ? `<span>${this._t('lbl.time_remaining', {v: _fmtDuration(rem)}, `~${_fmtDuration(rem)} remaining`)}</span>` : ''}</div>
     ` : '';
     const pd = this._powerData || {};
     const hasCurve = (pd.live || []).length > 1;
@@ -4585,7 +4748,7 @@ class HaWashdataPanel extends HTMLElement {
         ${programCtl}
         <div class="wd-stats">
           <div class="wd-stat"><div class="wd-stat-val">${_fmtPower(dev.current_power_w)}</div><div class="wd-stat-lbl">${this._t('lbl.power', {}, 'Power')}</div></div>
-          <div class="wd-stat"><div class="wd-stat-val">${prog != null ? prog.toFixed(0) + '%' : '-'}</div><div class="wd-stat-lbl">${this._t('lbl.progress', {}, 'Progress')}</div></div>
+          <div class="wd-stat"><div class="wd-stat-val">${prog != null ? _fmtNum(prog, 0) + '%' : '-'}</div><div class="wd-stat-lbl">${this._t('lbl.progress', {}, 'Progress')}</div></div>
           <div class="wd-stat"><div class="wd-stat-val">${_fmtDuration(rem)}</div><div class="wd-stat-lbl">${this._t('lbl.remaining', {}, 'Remaining')}</div></div>
         </div>
         ${progressHtml}
@@ -4630,7 +4793,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>`;
     }
 
-    const msg = this._t(message_key, message_params || {}, '');
+    const msg = this._tText(message_key, message_params || {}, '');
     const ctaLabel = this._t(cta_label_key, {}, 'Continue');
     const secLabel = secondary_label_key
       ? this._t(secondary_label_key, {}, '')
@@ -4731,10 +4894,11 @@ class HaWashdataPanel extends HTMLElement {
   _htmlPhaseTimeline(dev, prog, isRunning) {
     const phases = this._statusPhases || [];
     if (!isRunning || !phases.length || !dev.current_program) return '';
-    // Total expected duration for placing phases (fractions of the cycle).
-    let total = (this._statusEnv && this._statusEnv.target_duration) || 0;
-    if (!total) { const p = (this._profiles || []).find(x => x.name === dev.current_program); total = (p && p.avg_duration) || 0; }
-    if (!total) total = Math.max(1, ...phases.map(p => p.end || 0));
+    // Same scale as the live phase sensor (progress.current_phase): progress maps onto
+    // the LAST range end, not the profile's average duration. Scaling by the duration
+    // here named a different "current phase" than the sensor whenever the ranges did
+    // not end exactly at the average.
+    const total = Math.max(0, ...phases.map(p => p.end || 0));
     if (total <= 0) return '';
     const curFrac = (prog != null) ? Math.min(1, Math.max(0, prog / 100)) : null;
     let curPhase = '';
@@ -4878,12 +5042,12 @@ class HaWashdataPanel extends HTMLElement {
     };
     const overrunBadge = c => {
       if (c.anomaly !== 'overrun') return '';
-      const r = c.overrun_ratio ? ' ' + this._t('badge.overrun_ratio', {x: Number(c.overrun_ratio).toFixed(1)}, `(${Number(c.overrun_ratio).toFixed(1)}x expected)`) : '';
+      const r = c.overrun_ratio ? ' ' + this._tText('badge.overrun_ratio', {x: Number(c.overrun_ratio).toFixed(1)}, `(${Number(c.overrun_ratio).toFixed(1)}x expected)`) : '';
       return ` <span title="${_esc(this._t('badge.overrun', {}, 'Ran longer than usual'))}${_esc(r)}" style="color:var(--warning-color,#ff9800)">⏱</span>`;
     };
     const underrunBadge = c => {
       if (c.anomaly !== 'underrun') return '';
-      const r = c.underrun_ratio ? ' ' + this._t('badge.underrun_ratio', {pct: Math.round(c.underrun_ratio * 100)}, `(${Math.round(c.underrun_ratio * 100)}% of expected)`) : '';
+      const r = c.underrun_ratio ? ' ' + this._tText('badge.underrun_ratio', {pct: Math.round(c.underrun_ratio * 100)}, `(${Math.round(c.underrun_ratio * 100)}% of expected)`) : '';
       return ` <span title="${_esc(this._t('badge.underrun', {}, 'Finished faster than usual'))}${_esc(r)}" style="color:var(--info-color,#2196f3)">⚡</span>`;
     };
     const energyAnomalyBadge = c => {
@@ -4899,23 +5063,23 @@ class HaWashdataPanel extends HTMLElement {
     const artifactBadge = c => {
       const n = Array.isArray(c.artifacts) ? c.artifacts.length : 0;
       if (!n) return '';
-      return ` <span title="${_esc(this._t('badge.artifact_tip', {n}, `${n} anomal${n > 1 ? 'ies' : 'y'} detected (e.g. door opened mid-cycle) — open to see them on the graph`))}" style="color:var(--warning-color,#ff9800)">⚠</span>`;
+      return ` <span title="${_esc(this._tText('badge.artifact_tip', {n}, `${n} anomal${n > 1 ? 'ies' : 'y'} detected (e.g. door opened mid-cycle) - open to see them on the graph`))}" style="color:var(--warning-color,#ff9800)">⚠</span>`;
     };
     const restartGapBadge = c => {
       const n = Array.isArray(c.restart_gaps) ? c.restart_gaps.length : 0;
       if (!n) return '';
-      return ` <span title="${_esc(this._t('badge.restart_gap_tip', {n}, `${n} HA restart gap${n > 1 ? 's' : ''} during this cycle — power trace has a hole`))}" style="color:var(--info-color,#2196f3)">↻</span>`;
+      return ` <span title="${_esc(this._tText('badge.restart_gap_tip', {n}, `${n} HA restart gap${n > 1 ? 's' : ''} during this cycle - power trace has a hole`))}" style="color:var(--info-color,#2196f3)">↻</span>`;
     };
 
     const cur = (this._hass && this._hass.config && this._hass.config.currency) || '';
     const costCell = c => {
       if (c.cost == null) return '-';
-      const txt = `${c.cost.toFixed(2)}${cur ? ' ' + cur : ''}`;
+      const txt = _fmtCost(c.cost, cur);
       // A time-weighted cost (#426) is a different claim than a flat one, so say
       // which price produced it rather than leaving the two indistinguishable.
       if (c.energy_price_mode === 'dynamic' && c.energy_price != null) {
-        const tip = this._t('col.cost_dynamic_tip', { price: c.energy_price.toFixed(4), cur },
-          `Time-weighted: charged at the price in force during the cycle (effective ${c.energy_price.toFixed(4)} ${cur}/kWh).`);
+        const tip = this._tText('col.cost_dynamic_tip', { price: _fmtNum(c.energy_price, 4), cur },
+          'Time-weighted: charged at the price in force during the cycle (effective {price} {cur}/kWh).');
         return `<span title="${_esc(tip)}" style="border-bottom:1px dotted var(--secondary-text-color)">${txt}</span>`;
       }
       return txt;
@@ -4940,7 +5104,7 @@ class HaWashdataPanel extends HTMLElement {
         <td class="wd-tc-num">${_fmtDuration(c.duration)}</td>
         <td class="wd-tc-num">${kwh != null ? _fmtEnergy(kwh) : '-'}</td>
         <td class="wd-tc-num">${costCell(c)}</td>
-        <td class="wd-tc-num">${conf != null ? conf.toFixed(0) + '%' : '-'}</td>
+        <td class="wd-tc-num">${conf != null ? _fmtNum(conf, 0) + '%' : '-'}</td>
       </tr>`;
     }).join('');
 
@@ -5024,7 +5188,7 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   _advisoryText(a) {
-    return this._t(a.message_key, a.message_params || {}, a.message || '');
+    return this._tText(a.message_key, a.message_params || {}, a.message || '');
   }
 
   _trendIcon(trend) {
@@ -5039,7 +5203,7 @@ class HaWashdataPanel extends HTMLElement {
     const total = (p.avg_energy != null && p.cycle_count)
       ? ` · <strong>${_fmtEnergy(p.avg_energy * p.cycle_count)}</strong> total` : '';
     const cur = (this._hass && this._hass.config && this._hass.config.currency) || '';
-    const cost = p.avg_cost != null ? ` · ${this._t('lbl.avg_cost', {}, 'Avg')} ${p.avg_cost.toFixed(2)}${cur ? ' ' + cur : ''}/${this._t('lbl.per_cycle_short', {}, 'cycle')}` : '';
+    const cost = p.avg_cost != null ? ` · ${this._t('lbl.avg_cost', {}, 'Avg')} ${_fmtCost(p.avg_cost, cur)}/${this._t('lbl.per_cycle_short', {}, 'cycle')}` : '';
     const h = (this._profileHealth || {})[p.name];
     const t = (this._profileTrends || {})[p.name];
     const poorAdv = this._profileAdvisory(p.name, 'poor_health');
@@ -5056,7 +5220,7 @@ class HaWashdataPanel extends HTMLElement {
     // match immediately), shown with an "Imported" badge instead of "Still learning".
     const isWarmup = cycleCount < warmupThreshold && !p.is_imported;
     const warmupBadge = isWarmup
-      ? `<span class="wd-badge" title="${_esc(this._t('msg.warmup_detail', {needed: warmupThreshold}, `Matching already runs. WashData asks you to confirm the first ${warmupThreshold} cycles of this profile before it labels them on its own.`))}" style="background:var(--info-color,#2196f3);color:#fff">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
+      ? `<span class="wd-badge" title="${_esc(this._tText('msg.warmup_detail', {needed: warmupThreshold}, `Matching already runs. WashData asks you to confirm the first ${warmupThreshold} cycles of this profile before it labels them on its own.`))}" style="background:var(--info-color,#2196f3);color:#fff">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
       : '';
     const importedBadge = p.is_imported
       ? `<span class="wd-badge" title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="background:var(--info-color,#2196f3);color:#fff">📥 ${this._t('status.imported', {}, 'Imported')}</span>`
@@ -5066,7 +5230,7 @@ class HaWashdataPanel extends HTMLElement {
     // to be a debug log only, so it is called out here, on the program itself.
     const unmatchableAdv = this._profileAdvisory(p.name, 'unmatchable');
     const unmatchableBadge = unmatchableAdv
-      ? `<span class="wd-badge" style="color:var(--error-color,#f44336);background:rgba(244,67,54,.12)" title="${_esc(this._t(unmatchableAdv.message_key, unmatchableAdv.message_params, unmatchableAdv.message))}">⚠ ${this._t('badge.unmatchable', {}, "can't be matched")}</span>`
+      ? `<span class="wd-badge" style="color:var(--error-color,#f44336);background:rgba(244,67,54,.12)" title="${_esc(this._tText(unmatchableAdv.message_key, unmatchableAdv.message_params, unmatchableAdv.message))}">⚠ ${this._t('badge.unmatchable', {}, "can't be matched")}</span>`
       : '';
     // How this program ends, measured from its own cycles. A dishwasher that has
     // gone quiet for its drying phase is the commonest "is it finished?" question,
@@ -5079,7 +5243,7 @@ class HaWashdataPanel extends HTMLElement {
       const mins = Math.max(1, Math.round(term.quiet_before_s / 60));
       const watts = Number(term.event_watts || 0).toFixed(0);
       const secs = Math.round(term.event_seconds || 0);
-      const tTip = this._t('badge.quiet_tail_tip',
+      const tTip = this._tText('badge.quiet_tail_tip',
         {mins, secs, watts, seen: term.seen_in, measured: term.measured},
         `Near the end this program goes quiet for about ${mins} min, then draws about `
         + `${watts} W for ${secs} s before finishing. Seen in ${term.seen_in} of `
@@ -5092,7 +5256,7 @@ class HaWashdataPanel extends HTMLElement {
     // with it every future time estimate for this program.
     const durAdv = this._profileAdvisory(p.name, 'duration_outlier');
     const durBadge = durAdv
-      ? `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="${_esc(this._t(durAdv.message_key, durAdv.message_params, durAdv.message))}">\u26A0 ${this._t('badge.duration_outlier', {n: (durAdv.message_params || {}).n || 1}, `${(durAdv.message_params || {}).n || 1} odd-length cycle(s)`)}</span>`
+      ? `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="${_esc(this._tText(durAdv.message_key, durAdv.message_params, durAdv.message))}">\u26A0 ${this._t('badge.duration_outlier', {n: (durAdv.message_params || {}).n || 1}, `${(durAdv.message_params || {}).n || 1} odd-length cycle(s)`)}</span>`
       : '';
 
     const badges = [unmatchableBadge, durBadge, healthBadge, trendBadge, terminalBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
@@ -5100,7 +5264,7 @@ class HaWashdataPanel extends HTMLElement {
     // envelope), so the card thumbnail matches the actual cycle. Painted after
     // render by _drawProfileSparklines. Needs ≥3 envelope points.
     const spark = (Array.isArray(p.signature_curve) && p.signature_curve.length >= 3)
-      ? `<canvas class="wd-prof-spark" data-spark-prof="${_esc(p.name)}" width="64" height="20" aria-label="${_esc(this._t('lbl.sparkline', { name: p.name }, 'Average power curve'))}"></canvas>`
+      ? `<canvas class="wd-prof-spark" data-spark-prof="${_esc(p.name)}" width="64" height="20" aria-label="${_esc(this._tText('lbl.sparkline', { name: p.name }, 'Average power curve'))}"></canvas>`
       : '';
     return `
       <div class="wd-prof-wrap">
@@ -5552,11 +5716,12 @@ class HaWashdataPanel extends HTMLElement {
 
     extra.useBtnLabel = this._t('btn.use', {}, 'Use');
     extra.t = this._t.bind(this);
+    extra.tText = this._tText.bind(this);
     // D7: "what changed" marker — a dot with a tooltip when this field appears in
     // the settings changelog.
     const chg = (this._settingsChangeByKey || {})[f.key];
     if (chg) {
-      extra.changed = this._t('msg.setting_changed',
+      extra.changed = this._tText('msg.setting_changed',
         { old: _chgVal(chg.old), new: _chgVal(chg.new), date: _fmtDate(chg.timestamp) },
         `Changed from ${_chgVal(chg.old)} to ${_chgVal(chg.new)} on ${_fmtDate(chg.timestamp)}`);
     }
@@ -5645,7 +5810,7 @@ class HaWashdataPanel extends HTMLElement {
       if (manualUrl) bits.push(`<a href="${_esc(manualUrl)}" target="_blank" rel="noopener noreferrer nofollow">${this._t('link.manual', {}, 'Manual ↗')}</a>`);
       // "by <contributor>" attribution is optional (Online & Community pref).
       if (((this._constants && this._constants.storePrefs) || {}).show_contributor !== false) {
-        bits.push(this._t('store.contributed_by', {name: _esc(match.createdByName || this._t('lbl.anonymous', {}, 'Anonymous'))}, `by ${_esc(match.createdByName || 'Anonymous')}`));
+        bits.push(this._t('store.contributed_by', {name: match.createdByName || this._tText('lbl.anonymous', {}, 'Anonymous')}, 'by {name}'));
       }
       const connected = !!(this._storeStatus && this._storeStatus.connected);
       let actions = '';
@@ -6039,7 +6204,7 @@ class HaWashdataPanel extends HTMLElement {
       </div>` : '';
     return `
       <div class="wd-subhead">${this._t('hdr.automations', {}, 'Automations')}</div>
-      <p class="wd-info" style="margin-bottom:10px">${this._t('msg.automations_intro', {start: '<code>ha_washdata_cycle_started</code>', end: '<code>ha_washdata_cycle_ended</code>'}, 'WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.')}</p>
+      <p class="wd-info" style="margin-bottom:10px">${this._t('msg.automations_intro', {start: _html('<code>ha_washdata_cycle_started</code>'), end: _html('<code>ha_washdata_cycle_ended</code>')}, 'WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.')}</p>
       ${legacyBlock}
       <div class="wd-auto-pills" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">${pills}</div>
       <div class="wd-auto-new" style="display:flex;gap:6px;align-items:center;margin-bottom:18px">
@@ -6113,7 +6278,7 @@ class HaWashdataPanel extends HTMLElement {
         this._navigate('/config/automation/edit/new');
       }
     } catch (e) {
-      this._showToast(this._t('msg.toast_automation_failed', {error: e.message || e}, 'Could not create automation: ' + (e.message || e)), 'error');
+      this._showToast(this._tText('msg.toast_automation_failed', {error: e.message || e}, 'Could not create automation: ' + (e.message || e)), 'error');
     }
   }
 
@@ -6152,7 +6317,7 @@ class HaWashdataPanel extends HTMLElement {
       const errTxt = e.message || e;
       if (!created) {
         // Automation was never created — a plain retry is safe.
-        this._showToast(this._t('msg.toast_convert_failed', {error: errTxt}, 'Convert failed: ' + errTxt), 'error');
+        this._showToast(this._tText('msg.toast_convert_failed', {error: errTxt}, 'Convert failed: ' + errTxt), 'error');
         return;
       }
       // The automation WAS created but the follow-up clear threw. The clear may have
@@ -6180,7 +6345,7 @@ class HaWashdataPanel extends HTMLElement {
         // user the automation exists (don't retry).
         try {
           await hass.callApi('DELETE', 'config/automation/config/' + id);
-          this._showToast(this._t('msg.toast_convert_rolled_back', {error: errTxt}, 'Migration failed and was rolled back (no automation left behind): ' + errTxt), 'error');
+          this._showToast(this._tText('msg.toast_convert_rolled_back', {error: errTxt}, 'Migration failed and was rolled back (no automation left behind): ' + errTxt), 'error');
         } catch (_) {
           this._showToast(this._t('msg.toast_convert_orphan', {}, 'The automation was created, but clearing the old actions failed. Do not retry: remove the legacy actions manually to avoid a duplicate automation.'), 'error');
         }
@@ -6211,7 +6376,7 @@ class HaWashdataPanel extends HTMLElement {
     const trainCard = '';
 
     if (sec.id === 'notifications') {
-      const varsHint = `<p class="wd-info" style="margin-bottom:16px">${this._t('msg.notify_services_hint', {entity: '<code>notify.&lt;name&gt;</code>', vars: '<code>' + _esc(_NOTIFY_VARS) + '</code>'}, 'Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.')}</p>`;
+      const varsHint = `<p class="wd-info" style="margin-bottom:16px">${this._t('msg.notify_services_hint', {entity: _html('<code>notify.&lt;name&gt;</code>'), vars: _html('<code>' + _esc(_NOTIFY_VARS) + '</code>')}, 'Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.')}</p>`;
       const groups = sec.groups.map(grp => {
         const fields = (grp.fields || []).filter(f => this._settingFieldVisible(f)).map(f => this._renderField(f, o)).filter(Boolean).join('');
         return fields ? `<div class="wd-subhead">${_esc(this._t('setting_group.' + _slugSub(grp.sub) + '.label', {}, grp.sub))}</div><div class="wd-form-grid">${fields}</div>` : '';
@@ -6244,7 +6409,14 @@ class HaWashdataPanel extends HTMLElement {
       if (currentDeviceType && s.onlyDeviceTypes && !s.onlyDeviceTypes.includes(currentDeviceType)) return false;
       return true;
     });
-    const match = f => (`${f.label || ''} ${f.key || ''} ${f.doc || ''} ${f.hint || ''}`).toLowerCase().includes(q);
+    // Match what the user actually reads (audit UI-09): the translated label and
+    // doc, plus the key and the English schema text, so English terms still work.
+    const match = f => {
+      const tr = f.key
+        ? `${this._tText('setting.' + f.key + '.label', {}, '')} ${f.doc != null ? this._tText('setting.' + f.key + '.doc', {}, '') : ''}`
+        : '';
+      return (`${f.label || ''} ${f.key || ''} ${f.doc || ''} ${f.hint || ''} ${tr}`).toLowerCase().includes(q);
+    };
     let out = '';
     let count = 0;
     for (const sec of sections) {
@@ -6256,7 +6428,7 @@ class HaWashdataPanel extends HTMLElement {
       count += hits.length;
       out += `<div class="wd-subhead">${_esc(this._t('section.' + sec.id + '.label', {}, sec.label))}</div><div class="wd-form-grid">${rendered}</div>`;
     }
-    return count ? out : `<p class="wd-info" style="padding:12px">${this._t('msg.no_settings_match', {q}, `No settings match "${_esc(q)}"`)}</p>`;
+    return count ? out : `<p class="wd-info" style="padding:12px">${this._t('msg.no_settings_match', {q}, 'No settings match "{q}"')}</p>`;
   }
 
   // Tuning suggestions waiting on one device-list entry: the backend's key list
@@ -6378,7 +6550,7 @@ class HaWashdataPanel extends HTMLElement {
         return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--divider-color)">
           <div style="flex:1;min-width:0">
             <div style="font-weight:600">${_esc(m.label_key ? this._t(m.label_key, {}, m.label || cap) : (m.label || cap))}${this._mlTrendBadge(m.trend)}</div>
-            <div class="wd-info" style="font-size:.8em;margin:0">${_esc(m.blurb_key ? this._t(m.blurb_key, {}, m.blurb || '') : (m.blurb || ''))} · ${this._t('ml.fine_tuned_at', {when: _esc(when)}, 'fine-tuned ' + _esc(when))}</div>
+            <div class="wd-info" style="font-size:.8em;margin:0">${_esc(m.blurb_key ? this._t(m.blurb_key, {}, m.blurb || '') : (m.blurb || ''))} · ${this._t('ml.fine_tuned_at', {when}, 'fine-tuned {when}')}</div>
           </div>
           ${this._mlQualityChip(m)}
         </div>`;
@@ -6399,7 +6571,7 @@ class HaWashdataPanel extends HTMLElement {
   // the exact metric on hover. Classifiers use held-out AUC; regressors use how
   // much they beat the baseline estimate.
   _mlQualityChip(m) {
-    let pct = 0, word = '', title = m.metric_key ? this._t(m.metric_key, m.metric_params || {}, m.metric || '') : (m.metric || '');
+    let pct = 0, word = '', title = m.metric_key ? this._tText(m.metric_key, m.metric_params || {}, m.metric || '') : (m.metric || '');
     if (m.auc != null) {
       pct = Math.max(0, Math.min(1, (m.auc - 0.5) / 0.5)) * 100;
       word = m.auc >= 0.85 ? this._t('ml.fit_strong',{},'Strong') : m.auc >= 0.75 ? this._t('ml.fit_good',{},'Good') : m.auc >= 0.65 ? this._t('ml.fit_fair',{},'Fair') : this._t('ml.fit_weak',{},'Weak');
@@ -6407,7 +6579,7 @@ class HaWashdataPanel extends HTMLElement {
       const impr = Math.max(0, (m.naive_mae - m.model_mae) / m.naive_mae);
       pct = Math.min(1, impr) * 100;
       word = impr >= 0.5 ? this._t('ml.fit_strong',{},'Strong') : impr >= 0.2 ? this._t('ml.fit_good',{},'Good') : this._t('ml.fit_slight',{},'Slight');
-      title = this._t('ml.better_than_baseline', {pct: (impr * 100).toFixed(0), metric: title}, `${(impr * 100).toFixed(0)}% better than the baseline estimate (${title})`);
+      title = this._tText('ml.better_than_baseline', {pct: (impr * 100).toFixed(0), metric: title}, `${(impr * 100).toFixed(0)}% better than the baseline estimate (${title})`);
     } else {
       return '';
     }
@@ -6675,7 +6847,7 @@ class HaWashdataPanel extends HTMLElement {
     const dev = this._devices[this._selIdx];
     if (!dev) return;
     const changed = this._pgChangedKeys();
-    if (changed.length && !confirm(this._t('msg.pg_load_live_confirm', {n: changed.length}, `Discard ${changed.length} Playground edit(s) and reload the integration's current settings?`))) return;
+    if (changed.length && !confirm(this._tText('msg.pg_load_live_confirm', {n: changed.length}, `Discard ${changed.length} Playground edit(s) and reload the integration's current settings?`))) return;
     await this._busyRun('pg-load-live', async () => {
       this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
       await this._pgFetchSettings(dev.entry_id);
@@ -6702,7 +6874,7 @@ class HaWashdataPanel extends HTMLElement {
     if (staged === 0) {
       this._showToast(this._t('msg.pg_sugg_none', {}, 'All suggestions already match the current settings'));
     } else {
-      this._showToast(this._t('toast.pg_sugg_loaded', {n: staged}, `Staged ${staged} suggested value(s) - run the Playground to compare`));
+      this._showToast(this._tText('toast.pg_sugg_loaded', {n: staged}, `Staged ${staged} suggested value(s) - run the Playground to compare`));
     }
     this._render();
     requestAnimationFrame(() => this._pgDrawCanvas());
@@ -6715,7 +6887,7 @@ class HaWashdataPanel extends HTMLElement {
     const val = this._pgStagedVal(key);
     if (val === undefined || val === null) return;
     const lbl = this._t('setting.' + key + '.label', {}, key);
-    if (!confirm(this._t('msg.pg_publish_one_confirm', {label: lbl, value: val}, `Save ${lbl} = ${val} to this device's settings?`))) return;
+    if (!confirm(this._tText('msg.pg_publish_one_confirm', {label: lbl, value: val}, `Save ${lbl} = ${val} to this device's settings?`))) return;
     await this._busyRun('pg-publish-' + key, async () => {
       try {
         await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { [key]: val } });
@@ -6728,7 +6900,7 @@ class HaWashdataPanel extends HTMLElement {
         this._pgClearStaged(key);
         this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
       } catch (e) {
-        this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+        this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
       }
     });
     this._render();
@@ -6866,7 +7038,7 @@ class HaWashdataPanel extends HTMLElement {
       const isChanged = staged !== undefined && staged !== null
         && !(liveVal !== '' && liveVal !== null && liveVal !== undefined && this._pgSameVal(staged, liveVal));
       const pubBtn = (this._canEdit() && isChanged && this._pgIsPublishable(key))
-        ? `<button class="wd-pg-pub" data-action="pg-publish-one" data-pgkey="${_esc(key)}" aria-label="${_esc(this._t('btn.pg_publish_one', {label: lbl}, 'Publish ' + lbl + ' to the integration'))}" title="${_esc(this._t('btn.pg_publish_one', {label: lbl}, 'Publish ' + lbl + ' to the integration'))}">↑</button>`
+        ? `<button class="wd-pg-pub" data-action="pg-publish-one" data-pgkey="${_esc(key)}" aria-label="${_esc(this._tText('btn.pg_publish_one', {label: lbl}, 'Publish ' + lbl + ' to the integration'))}" title="${_esc(this._tText('btn.pg_publish_one', {label: lbl}, 'Publish ' + lbl + ' to the integration'))}">↑</button>`
         : `<span class="wd-pg-pub-slot" aria-hidden="true"></span>`;
       return `${header}<div style="display:flex;align-items:flex-start;gap:6px;margin:0 0 6px 11px">
         <div style="flex:1;min-width:0">
@@ -6906,13 +7078,13 @@ class HaWashdataPanel extends HTMLElement {
     const alertRows = alerts.length
       ? alerts.map(a => `<div class="wd-pg-alert" style="border-left-color:${sevColor[a.severity] || sevColor.info}">
           <span style="font-weight:600">${_esc(this._pgAlertLabel(a.code))}</span>
-          <div style="font-size:.78em;color:var(--secondary-text-color)">${_esc(a.detail_key ? this._t(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || ''))}</div>
+          <div style="font-size:.78em;color:var(--secondary-text-color)">${_esc(a.detail_key ? this._tText(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || ''))}</div>
         </div>`).join('')
       : `<div style="font-size:.82em;color:var(--success-color,#4caf50)">✓ ${this._t('msg.pg_no_alerts', {}, 'No issues detected in this run.')}</div>`;
     const term = o.termination_reason ? String(o.termination_reason) : '—';
     const dur = o.final_duration_s ? Math.round(o.final_duration_s / 60) + ' min' : '—';
     const proj = o.projected_energy_wh != null
-      ? (o.projected_energy_wh >= 1000 ? (o.projected_energy_wh / 1000).toFixed(2) + ' kWh' : Math.round(o.projected_energy_wh) + ' Wh')
+      ? (o.projected_energy_wh >= 1000 ? _fmtNum(o.projected_energy_wh / 1000, 2) + ' kWh' : _fmtNum(Math.round(o.projected_energy_wh), 0) + ' Wh')
       : '—';
     const hasNotify = (d.events || []).some(e => String(e.type || '').startsWith('notify_'));
     const outcomeChip = (label, val) => `<div class="wd-pg-outcome-item"><div class="wd-pg-outcome-val">${_esc(val)}</div><div class="wd-pg-outcome-lbl">${_esc(label)}</div></div>`;
@@ -6922,10 +7094,30 @@ class HaWashdataPanel extends HTMLElement {
         ${outcomeChip(this._t('lbl.pg_ended', {}, 'Ended'), term)}
         ${outcomeChip(this._t('lbl.duration', {}, 'Duration'), dur)}
         ${outcomeChip(this._t('lbl.pg_proj_energy', {}, 'Proj. energy'), proj)}
+        ${o.label_reason ? outcomeChip(this._t('lbl.pg_autolabel', {}, 'Auto-label'), this._pgLabelVerdict(o).short) : ''}
       </div>
       <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">${alertRows}</div>
       ${hasNotify ? `<p class="wd-info" style="margin:8px 0 0;font-size:.72em">🔔 ${this._t('msg.pg_notify_partial', {}, 'Notification markers cover start, almost-done, finish, milestones and quiet hours only. Live progress updates, unload reminders and overrun alerts are not simulated.')}</p>` : ''}
     </div>`;
+  }
+
+  // Would the manager auto-label this replayed cycle at cycle end? The same
+  // label_verdict the live cycle end runs (playground outcome, audit F7).
+  _pgLabelVerdict(o) {
+    if (o.would_label && o.label_profile) {
+      return { ok: true, short: String(o.label_profile),
+        tip: this._tText('msg.pg_label_yes', {name: o.label_profile}, `Would be labelled "${o.label_profile}" at cycle end`) };
+    }
+    const reasons = {
+      no_winner: this._tText('pg_label_reason.no_winner', {}, 'No program fit'),
+      below_floor: this._tText('pg_label_reason.below_floor', {}, 'Below the learning confidence'),
+      ambiguous: this._tText('pg_label_reason.ambiguous', {}, 'Flagged ambiguous'),
+      margin: this._tText('pg_label_reason.margin', {}, 'Too close to the runner-up'),
+      unknown_profile: this._tText('pg_label_reason.unknown_profile', {}, 'Program no longer exists'),
+    };
+    const why = reasons[o.label_reason] || this._tText('pg_label_reason.not_evaluated', {}, 'Not evaluated');
+    return { ok: false, short: this._tText('lbl.pg_label_review', {}, 'Asks for review'),
+      tip: this._tText('msg.pg_label_no', {reason: why}, `Would ask for review: ${why}`) };
   }
 
   _pgAlertLabel(code) {
@@ -6984,6 +7176,8 @@ class HaWashdataPanel extends HTMLElement {
       const match = r.matched_profile || this._t('lbl.unlabelled', {}, 'Unlabelled');
       const durM = r.duration_s ? Math.round(r.duration_s / 60) + 'm' : '—';
       const over = r.overrun_ratio != null ? ` (${Math.round(r.overrun_ratio * 100)}%)` : '';
+      const lv = r.label_reason ? this._pgLabelVerdict(r) : null;
+      const labelGlyph = lv ? ` <span class="wd-pg-label-glyph" title="${_esc(lv.tip)}" style="color:${lv.ok ? 'var(--success-color,#4caf50)' : 'var(--warning-color,#ff9800)'}">${lv.ok ? '🏷' : '?'}</span>` : '';
       const alertGlyph = (r.alerts && r.alerts.length) ? ` <span title="${_esc(r.alerts.join(', '))}" style="color:var(--warning-color,#ff9800)">⚠</span>` : '';
       const b = baseById[r.cycle_id];
       let deltaCol = '';
@@ -6995,7 +7189,7 @@ class HaWashdataPanel extends HTMLElement {
       const sel = r.cycle_id === this._pgCycleId ? ' selected' : '';
       return `<tr class="wd-pg-hrow${sel}" data-action="pg-open-cycle" data-cid="${_esc(r.cycle_id)}" title="${_esc(this._t('msg.pg_row_load_hint', {}, 'Load this cycle in the graph above'))}">
         <td>${_esc(when)}</td>
-        <td><span style="color:${okColor};font-weight:700">${ok}</span> ${_esc(match)}</td>
+        <td><span style="color:${okColor};font-weight:700">${ok}</span> ${_esc(match)}${labelGlyph}</td>
         <td>${_esc(String(r.termination_reason || '—'))}</td>
         <td style="font-variant-numeric:tabular-nums">${durM}${over}${alertGlyph}</td>
         ${h.diff ? `<td>${deltaCol}</td>` : ''}
@@ -7060,7 +7254,7 @@ class HaWashdataPanel extends HTMLElement {
     } catch (e) {
       this._busy.delete('pg-history'); this._pgBatchProgress = null;
       if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
-      else this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      else this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
       this._render();
     }
   }
@@ -7150,7 +7344,7 @@ class HaWashdataPanel extends HTMLElement {
     } catch (e) {
       this._busy.delete('pg-sweep'); this._pgBatchProgress = null;
       if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
-      else this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      else this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
       this._render();
     }
   }
@@ -7173,7 +7367,7 @@ class HaWashdataPanel extends HTMLElement {
     const keys = Object.keys(opts);
     if (!keys.length) return;
     const labels = keys.map(k => this._t('setting.' + k + '.label', {}, k)).join(', ');
-    if (!confirm(this._t('msg.pg_apply_settings_confirm', {n: keys.length, list: labels}, `Save these ${keys.length} setting(s) to this device? ${labels}`))) return;
+    if (!confirm(this._tText('msg.pg_apply_settings_confirm', {n: keys.length, list: labels}, `Save these ${keys.length} setting(s) to this device? ${labels}`))) return;
     await this._busyRun('pg-apply-settings', async () => {
       try {
         await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: opts });
@@ -7186,7 +7380,7 @@ class HaWashdataPanel extends HTMLElement {
         for (const key of keys) this._pgClearStaged(key);
         this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
       } catch (e) {
-        this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+        this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
       }
     });
     this._render();
@@ -7197,7 +7391,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!dev || !this._canEdit() || val == null) return;
     const paramKey = this._pgSweepParam;
     const lbl = this._t('setting.' + paramKey + '.label', {}, paramKey);
-    if (!confirm(this._t('msg.pg_apply_confirm', {label: lbl, value: val}, 'Apply best value: ' + lbl + ' = ' + val + '?'))) return;
+    if (!confirm(this._tText('msg.pg_apply_confirm', {label: lbl, value: val}, 'Apply best value: ' + lbl + ' = ' + val + '?'))) return;
     await this._busyRun('pg-sweep-apply', async () => {
       try {
         await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { [paramKey]: +val } });
@@ -7209,7 +7403,7 @@ class HaWashdataPanel extends HTMLElement {
         else this._pgParamOverrides[paramKey] = +val;
         this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
         this._render();
-      } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+      } catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
     });
   }
 
@@ -7298,7 +7492,7 @@ class HaWashdataPanel extends HTMLElement {
       const simProf = this._pgDetail && this._pgDetail.outcome && this._pgDetail.outcome.matched_profile;
       if (!profName && simProf && seq === this._pgLoadSeq) await this._pgFetchEnvelope(dev.entry_id, simProf);
     } catch (e) {
-      this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
     }
     if (seq !== this._pgLoadSeq) return;  // a Cancel (or device switch) supersedes this run
     this._pgLoading = false;
@@ -7730,7 +7924,7 @@ class HaWashdataPanel extends HTMLElement {
       ctx.fillStyle = '#e34948'; ctx.beginPath(); ctx.arc(hx, hy, 3.5*dpr, 0, Math.PI*2); ctx.fill();
       // Readout box.
       const fmtT = t => { const m = Math.floor(t/60); return `${m}:${String(Math.round(t%60)).padStart(2,'0')}`; };
-      const fmtW = w => w >= 1000 ? (w/1000).toFixed(2) + ' kW' : _fmtPower(w);
+      const fmtW = w => w >= 1000 ? _fmtNum(w / 1000, 2) + ' kW' : _fmtPower(w);
       const lines = [
         `${this._t('lbl.from_start', {}, 'From start')} ${fmtT(this._pgHoverT)}`,
         `${this._t('lbl.to_end', {}, 'To end')} ${fmtT(Math.max(0, totalDur - this._pgHoverT))}`,
@@ -7773,6 +7967,8 @@ class HaWashdataPanel extends HTMLElement {
       match_changed: ['◇', '#eda100', this._t('lbl.pg_ev_match_changed', {}, 'Match changed')],
       match_ambiguous: ['◈', '#eda100', this._t('lbl.pg_ev_ambiguous', {}, 'Ambiguous')],
       unmatched:     ['○', '#9e9e9e', this._t('lbl.pg_ev_unmatched', {}, 'Unmatched')],
+      match_reverted: ['↺', '#9e9e9e', this._t('lbl.pg_ev_match_reverted', {}, 'Match reverted')],
+      verified_pause: ['⏸', '#7e57c2', this._t('lbl.pg_ev_verified_pause', {}, 'Verified pause')],
       notify_start:  ['🔔', '#2a78d6', this._t('lbl.pg_ev_notify_start', {}, 'Start notification')],
       notify_pre_complete: ['🔔', '#2a78d6', this._t('lbl.pg_ev_notify_pre', {}, 'Almost-done notification')],
       notify_finish: ['🔔', '#2a78d6', this._t('lbl.pg_ev_notify_finish', {}, 'Finish notification')],
@@ -7792,6 +7988,8 @@ class HaWashdataPanel extends HTMLElement {
       match_changed: this._t('pg_evd.match_changed', {}, 'The leading program changed as more of the cycle was seen.'),
       match_ambiguous: this._t('pg_evd.match_ambiguous', {}, 'Two programs scored close together, so the match was uncertain.'),
       unmatched: this._t('pg_evd.unmatched', {}, 'No saved program fit this cycle.'),
+      match_reverted: this._t('pg_evd.match_reverted', {}, 'The program fell back to detecting: its score dropped well below its own peak.'),
+      verified_pause: this._t('pg_evd.verified_pause', {}, 'The live alignment confirmed (or released) a pause inside the program. While it holds, the cycle is not ended.'),
       notify_start: this._t('pg_evd.notify_start', {}, 'A start notification would be sent.'),
       notify_pre_complete: this._t('pg_evd.notify_pre_complete', {}, 'An almost-done notification would be sent.'),
       notify_finish: this._t('pg_evd.notify_finish', {}, 'A finish notification would be sent.'),
@@ -7840,8 +8038,8 @@ class HaWashdataPanel extends HTMLElement {
     const confDisp = sp && sp.confidence != null ? Math.round(sp.confidence * 100) + '%' : '—';
     const phase = sp && sp.phase ? sp.phase : '—';
     const fmtTime = s => { const m = Math.floor(s/60); return m + ':' + String(Math.round(s%60)).padStart(2,'0'); };
-    const fmtE = wh => wh >= 1000 ? (wh/1000).toFixed(2) + ' kWh' : wh.toFixed(0) + ' Wh';
-    const fmtP = w => w >= 1000 ? (w/1000).toFixed(1) + ' kW' : _fmtPower(w);
+    const fmtE = wh => wh >= 1000 ? _fmtNum(wh / 1000, 2) + ' kWh' : _fmtNum(wh, 0) + ' Wh';
+    const fmtP = w => w >= 1000 ? _fmtNum(w / 1000, 1) + ' kW' : _fmtPower(w);
     const sr = this.shadowRoot;
     const $id = id => sr && sr.getElementById(id);
     const set = (id, v) => { const el = $id(id); if (el) el.textContent = v; };
@@ -7909,7 +8107,9 @@ class HaWashdataPanel extends HTMLElement {
       const actionsCell = canEdit ? `
         <td>
             <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="edit-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" data-pdesc="${_esc(p.description || '')}" data-pisdefault="${isDefault}">${this._t('btn.edit', {}, 'Edit')}</button>
-            ${!isDefault ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="del-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" style="margin-left:4px">${this._t('btn.delete', {}, 'Delete')}</button>` : ''}
+            ${p.is_override
+              ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="del-phase" data-reset="1" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" style="margin-left:4px" title="${_esc(this._t('btn.reset_phase_tip', {}, 'Undo your edit and restore the built-in phase'))}">${this._t('btn.reset', {}, 'Reset')}</button>`
+              : !isDefault ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="del-phase" data-pid="${_esc(p.id)}" data-pname="${_esc(p.name)}" style="margin-left:4px">${this._t('btn.delete', {}, 'Delete')}</button>` : ''}
         </td>` : '';
       return `<tr>
         <td>${_esc(p.name)} ${isDefault ? `<span class="wd-tag">${this._t('badge.built_in_tag', {}, 'built-in')}</span>` : ''}</td>
@@ -7933,7 +8133,7 @@ class HaWashdataPanel extends HTMLElement {
     const d = this._diag;
     let statsHtml;
     if (d && d._error) {
-      statsHtml = `<p class="wd-info" style="color:var(--error-color)">${this._t('msg.diagnostics_load_failed', {error: _esc(d._error)}, 'Could not load diagnostics: ' + _esc(d._error))}</p>`;
+      statsHtml = `<p class="wd-info" style="color:var(--error-color)">${this._t('msg.diagnostics_load_failed', {error: d._error}, 'Could not load diagnostics: {error}')}</p>`;
     } else if (d) {
       statsHtml = `<div class="wd-diag-grid">
         <div class="wd-diag-stat"><div class="wd-diag-val">${d.total_cycles ?? '-'}</div><div class="wd-diag-lbl">${this._t('lbl.cycles_count', {}, 'Cycles')}</div></div>
@@ -7997,7 +8197,7 @@ class HaWashdataPanel extends HTMLElement {
     const canEdit = this._canEdit();
     const mt = this._maintenance;
     if (mt && mt._error) {
-      return `<div class="wd-card"><p class="wd-info" style="color:var(--error-color)">${this._t('msg.maintenance_load_error', { error: mt._error }, 'Could not load maintenance data: ' + mt._error)}</p></div>`;
+      return `<div class="wd-card"><p class="wd-info" style="color:var(--error-color)">${this._t('msg.maintenance_load_error', { error: mt._error }, 'Could not load maintenance data: {error}')}</p></div>`;
     }
     if (!mt) {
       return `<div class="wd-card"><p class="wd-info">${this._t('msg.loading', {}, 'Loading…')}</p></div>`;
@@ -8014,7 +8214,7 @@ class HaWashdataPanel extends HTMLElement {
     const dueBanner = due.length ? (() => {
       const items = due.map(t => this._maintLabel(t)).join(', ');
       return `<div style="margin-bottom:14px;padding:10px 12px;border-radius:6px;background:rgba(255,152,0,.10);border-left:3px solid var(--warning-color,#ff9800)">
-        <span style="font-weight:600;color:var(--warning-color,#ff9800)">${this._t('msg.maintenance_due', { items: _esc(items) }, 'Maintenance due: ' + items)}</span>
+        <span style="font-weight:600;color:var(--warning-color,#ff9800)">${this._t('msg.maintenance_due', { items }, 'Maintenance due: {items}')}</span>
       </div>`;
     })() : '';
 
@@ -8150,7 +8350,7 @@ class HaWashdataPanel extends HTMLElement {
     const dateOptHtml = dateOpts.map(([v, l]) => `<option value="${v}" ${(cur.date_format || 'relative') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
     const langOverride = cur.lang_override || '';
     const langOpts = [
-      ['', this._t('pref.lang_auto', {lang: sysLang.toUpperCase()}, 'System default (' + sysLang.toUpperCase() + ')')],
+      ['', this._tText('pref.lang_auto', {lang: sysLang.toUpperCase()}, 'System default (' + sysLang.toUpperCase() + ')')],
       ['en', this._t('pref.lang_en', {}, 'English')],
     ].map(([v, l]) => `<option value="${v}" ${langOverride === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
     return `<div class="wd-card">
@@ -8374,7 +8574,7 @@ class HaWashdataPanel extends HTMLElement {
       const dur = stats.duration != null ? _fmtDuration(stats.duration) : '-';
       const energy = stats.energy_wh != null ? _fmtEnergy(stats.energy_wh / 1000) : '-';
       const peak = stats.peak_w != null ? _fmtPower(stats.peak_w) : '-';
-      const uploader = _esc(c.uploaderName || this._t('store.anon', {}, 'anonymous'));
+      const uploader = c.uploaderName || this._tText('store.anon', {}, 'anonymous');
       const tag = this._statusTag(c);  // awaiting-approval / approved pill (cycles carry confirmCount)
       const rat = c.rating || {};
       const rating = (rat.avg != null && rat.count)
@@ -8385,7 +8585,7 @@ class HaWashdataPanel extends HTMLElement {
           ${spark}
           <div class="wd-store-cycle-stats">
             <div><b>${dur}</b> · ${energy} · ${peak} ${tag}</div>
-            <div class="wd-info">${this._t('store.uploaded_by', {name: uploader}, `Shared by ${uploader}`)} · ⬇ ${c.downloads || 0} · ${rating}</div>
+            <div class="wd-info">${this._t('store.uploaded_by', {name: uploader}, 'Shared by {name}')} · ⬇ ${c.downloads || 0} · ${rating}</div>
           </div>
           <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-import" data-cycle-id="${_esc(c.id)}">${this._t('btn.import', {}, 'Import')}</button>
         </div>
@@ -8448,7 +8648,7 @@ class HaWashdataPanel extends HTMLElement {
     const busy = this._busy.has('store-account');
     const connBlock = !on ? '' : (connected
       ? `<div class="wd-store-conn">
-          <span class="wd-info">${this._t('store.connected_as', {name: _esc(st.name || st.uid || '')}, `Connected as ${_esc(st.name || st.uid || '')}`)}</span>
+          <span class="wd-info">${this._t('store.connected_as', {name: st.name || st.uid || ''}, 'Connected as {name}')}</span>
           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-disconnect" ${busy ? 'disabled' : ''}>${this._t('btn.disconnect', {}, 'Disconnect')}</button>
         </div>`
       : `<div class="wd-store-conn">
@@ -8574,7 +8774,7 @@ class HaWashdataPanel extends HTMLElement {
       if (r && r.disabled) { this._storeStatus = { enabled: false }; this._storeDevices = []; }
       else this._storeDevices = this._sortStoreDevices((r && r.items) || []);
     } catch (e) {
-      if (this._isActiveEntry(eid)) { this._storeDevices = []; this._showToast(this._t('toast.store_search_failed', {error: e.message || e}, 'Search failed: ' + (e.message || e)), 'error'); }
+      if (this._isActiveEntry(eid)) { this._storeDevices = []; this._showToast(this._tText('toast.store_search_failed', {error: e.message || e}, 'Search failed: ' + (e.message || e)), 'error'); }
     } finally {
       if (this._isActiveEntry(eid)) { this._storeLoading = false; this._renderKeepingStoreQFocus(); }
     }
@@ -8693,13 +8893,13 @@ class HaWashdataPanel extends HTMLElement {
       if (d.type !== 'washdata-connect') return;
       try {
         const r = await this._ws({ type: `${_DOMAIN}/store_connect`, entry_id: eid, refresh_token: d.refreshToken, uid: d.uid, name: d.displayName });
-        if (r && r.error) { this._showToast(this._t('toast.store_connect_failed', {error: r.error}, 'Connect failed: ' + r.error), 'error'); return; }
+        if (r && r.error) { this._showToast(this._tText('toast.store_connect_failed', {error: r.error}, 'Connect failed: ' + r.error), 'error'); return; }
         await this._loadStoreStatus(eid);
         if (!this._isActiveEntry(eid)) return;
         this._showToast(this._t('toast.store_connected', {}, 'Connected to the community store'));
         this._render();
       } catch (err) {
-        this._showToast(this._t('toast.store_connect_failed', {error: err.message || err}, 'Connect failed: ' + (err.message || err)), 'error');
+        this._showToast(this._tText('toast.store_connect_failed', {error: err.message || err}, 'Connect failed: ' + (err.message || err)), 'error');
       }
     };
     window.addEventListener('message', this._storeConnectListener);
@@ -8732,7 +8932,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!silent) this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
       return true;
     } catch (e) {
-      this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+      this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
       return false;
     }
   }
@@ -9255,20 +9455,20 @@ class HaWashdataPanel extends HTMLElement {
         ctx.strokeStyle = col; ctx.lineWidth = 3 * wd.dpr; ctx.beginPath();
         (best.s.points || []).forEach((p, i) => i ? ctx.lineTo(wd.Xpx(p[0]), wd.Ypx(p[1])) : ctx.moveTo(wd.Xpx(p[0]), wd.Ypx(p[1]))); ctx.stroke();
         dot(best.v, col);
-        lines.push(`${_esc(best.s.name || '')}: <b>${best.v.toFixed(best.v < 100 ? 1 : 0)} W</b>`);
+        lines.push(`${_esc(best.s.name || '')}: <b>${_fmtNum(best.v, best.v < 100 ? 1 : 0)} W</b>`);
         if (best.s.cid) { lines.push(`<span style="opacity:.7">${this._t('lbl.click_to_select', {}, 'click to select')}</span>`); this._hoverNearest = { id, cid: best.s.cid }; }
       }
     } else {
-      series.forEach(s => { const v = _valueAt(s.points, x); if (v == null) return; dot(v, colOf(s)); lines.push(`${_esc(s.name || this._t('lbl.power', {}, 'Power'))}: <b>${v.toFixed(v < 100 ? 1 : 0)} W</b>`); });
+      series.forEach(s => { const v = _valueAt(s.points, x); if (v == null) return; dot(v, colOf(s)); lines.push(`${_esc(s.name || this._t('lbl.power', {}, 'Power'))}: <b>${_fmtNum(v, v < 100 ? 1 : 0)} W</b>`); });
     }
     if (wd.band) {
       const lo = _valueAt(wd.band.min, x), hi = _valueAt(wd.band.max, x);
-      if (lo != null && hi != null) lines.push(`${this._t('lbl.envelope', {}, 'Envelope')}: ${lo.toFixed(lo < 100 ? 1 : 0)}–${hi.toFixed(hi < 100 ? 1 : 0)} W`);
+      if (lo != null && hi != null) lines.push(`${this._t('lbl.envelope', {}, 'Envelope')}: ${_fmtNum(lo, lo < 100 ? 1 : 0)}–${_fmtNum(hi, hi < 100 ? 1 : 0)} W`);
     }
     // Anomaly detail when hovering inside a detected artifact span.
     (wd.artifacts || []).forEach(a => {
       if (x >= a.start_s && x <= a.end_s) {
-        const detail = a.detail_key ? this._t(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || '');
+        const detail = a.detail_key ? this._tText(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || '');
         lines.push(`<span style="color:var(--warning-color,#ff9800)">⚠ ${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</span>: ${_esc(detail)}`);
       }
     });
@@ -9639,8 +9839,8 @@ class HaWashdataPanel extends HTMLElement {
         </div>`;
       }).join('');
     }
-    const brand = _esc((this._opts.store_brand || '').trim());
-    const model = _esc((this._opts.store_model || '').trim());
+    const brand = (this._opts.store_brand || '').trim();
+    const model = (this._opts.store_model || '').trim();
     // Device-level opt-in: bundle this device's recognition/matching settings.
     const settingsRow = `<label class="wd-sd-settings">
         <input type="checkbox" data-maction="sd-toggle-settings" ${m.includeSettings ? 'checked' : ''} ${busy ? 'disabled' : ''}>
@@ -9660,7 +9860,7 @@ class HaWashdataPanel extends HTMLElement {
       <span>${this._t('lbl.share_consent', {}, 'I confirm these cycles ran to normal completion without interruption')}</span>
     </label>` : '';
     return `<h2 id="wd-modal-title">${this._t('modal.store_share_device', {}, 'Share this device')}</h2>
-      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_device_intro', {brand, model}, `Upload ${brand} ${model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.`)}</p>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_device_intro', {brand, model}, `Upload {brand} {model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.`)}</p>
       ${guideBlock}
       <div class="wd-sd-tree">${tree}</div>
       ${hasShareableGroups ? settingsRow : ''}
@@ -9863,10 +10063,10 @@ class HaWashdataPanel extends HTMLElement {
     // Escape: source_device_type comes verbatim from the imported/shared file's
     // device_fingerprint and is unvalidated; _t() does raw {var} substitution, so an
     // un-escaped value would inject markup into innerHTML (XSS via a crafted import).
-    const srcDt = _esc(man.source_device_type || '?');
-    const localDt = _esc(man.local_device_type || '?');
+    const srcDt = man.source_device_type || '?';
+    const localDt = man.local_device_type || '?';
     const warnBanner = mismatch ? `<div class="wd-banner wd-banner-warn" style="margin-bottom:12px;padding:8px 12px;border-radius:8px;background:var(--warning-color,#e6a700);color:#111">
-      ${this._t('msg.device_type_mismatch_warn', { src: srcDt, local: localDt }, 'This export is from a different appliance type (' + srcDt + ' vs ' + localDt + '). Programs and cycles can still be imported as reference data, but device-specific settings and real-history import are disabled.')}
+      ${this._t('msg.device_type_mismatch_warn', { src: srcDt, local: localDt }, 'This export is from a different appliance type ({src} vs {local}). Programs and cycles can still be imported as reference data, but device-specific settings and real-history import are disabled.')}
     </div>` : '';
     const tree = this._htmlSelectionTree(m, man, { importableOnly: true, conflicts: true });
     // Merge / replace mode toggle.
@@ -9984,8 +10184,8 @@ class HaWashdataPanel extends HTMLElement {
     if (m.step === 'done') {
       const d = m.done || {};
       const lines = [
-        this._t('msg.hist_imported_count', { n: d.imported || 0 }, `${d.imported || 0} cycles imported.`),
-        d.duplicates ? this._t('msg.hist_duplicates', { n: d.duplicates }, `${d.duplicates} were already imported and were skipped.`) : '',
+        this._tText('msg.hist_imported_count', { n: d.imported || 0 }, `${d.imported || 0} cycles imported.`),
+        d.duplicates ? this._tText('msg.hist_duplicates', { n: d.duplicates }, `${d.duplicates} were already imported and were skipped.`) : '',
         d.capped ? this._t('msg.hist_capped', {}, 'The per-device limit for imported cycles was reached; the rest were not stored.') : '',
       ].filter(Boolean);
       return `${title}
@@ -10007,14 +10207,14 @@ class HaWashdataPanel extends HTMLElement {
     // Account for every row the file contained, so "nothing found" is explained
     // rather than just reported.
     const facts = [];
-    if (parse.rows_total) facts.push(this._t('msg.hist_rows_read', { n: parse.rows_total }, `${parse.rows_total} readings read`));
+    if (parse.rows_total) facts.push(this._tText('msg.hist_rows_read', { n: parse.rows_total }, `${parse.rows_total} readings read`));
     if (parse.first && parse.last) facts.push(`${_fmtDate(parse.first)} – ${_fmtDate(parse.last)}`);
-    if (parse.breaks) facts.push(this._t('msg.hist_breaks', { n: parse.breaks }, `${parse.breaks} gaps where the sensor was unavailable`));
-    if (parse.rows_other_entity) facts.push(this._t('msg.hist_other_entity', { n: parse.rows_other_entity }, `${parse.rows_other_entity} readings for other entities ignored`));
+    if (parse.breaks) facts.push(this._tText('msg.hist_breaks', { n: parse.breaks }, `${parse.breaks} gaps where the sensor was unavailable`));
+    if (parse.rows_other_entity) facts.push(this._tText('msg.hist_other_entity', { n: parse.rows_other_entity }, `${parse.rows_other_entity} readings for other entities ignored`));
     // The file held one sensor and it was not this device's: it was read anyway, but say
     // so plainly - it is the difference between "my export" and "the wrong export".
     if (parse.entity_substituted_from) {
-      facts.push(this._t(
+      facts.push(this._tText(
         'msg.hist_entity_substituted',
         { used: parse.entity_id || '?', wanted: parse.entity_substituted_from },
         `read ${parse.entity_id || '?'} (this device is configured for ${parse.entity_substituted_from})`,
@@ -10028,7 +10228,7 @@ class HaWashdataPanel extends HTMLElement {
 
     const settings = res.settings || {};
     const settingsLine = settings.min_power != null
-      ? this._t('msg.hist_settings_used', { w: settings.min_power, s: settings.off_delay },
+      ? this._tText('msg.hist_settings_used', { w: settings.min_power, s: settings.off_delay },
           `Detected using this device's current settings (minimum power ${settings.min_power} W, off delay ${settings.off_delay} s).`)
       : '';
 
@@ -10051,7 +10251,7 @@ class HaWashdataPanel extends HTMLElement {
         <td><input type="checkbox" data-hist-pick="${seg.index}" ${on ? 'checked' : ''} aria-label="${_esc(this._t('lbl.hist_keep', {}, 'Keep this cycle'))}"></td>
         <td>${_esc(_fmtDate(seg.start_time))}</td>
         <td>${_esc(_fmtDuration(seg.duration_s))}</td>
-        <td>${seg.energy_wh != null ? _esc((seg.energy_wh / 1000).toFixed(2)) + ' kWh' : '–'}</td>
+        <td>${seg.energy_wh != null ? _esc(_fmtNum(seg.energy_wh / 1000, 2)) + ' kWh' : '–'}</td>
         <td>${_esc(String(Math.round(seg.peak_w)))} W</td>
         <td><canvas class="wd-prof-spark" data-hist-spark="${seg.index}" width="64" height="20" aria-hidden="true"></canvas></td>
         <td>${reason ? `<span title="${_esc(reason)}" style="color:var(--warning-color,#ff9800)">⚠</span> <span class="wd-info">${_esc(reason)}</span>` : `<span class="wd-info">${_esc(this._t('lbl.hist_looks_complete', {}, 'complete'))}</span>`}</td>
@@ -10239,7 +10439,7 @@ class HaWashdataPanel extends HTMLElement {
         ['sensor_gap', this._t('tag.sensor_gap', {}, 'Sensor gap')],
       ];
       const tagChecks = TAGS.map(([v, l]) => `<label class="wd-rev-tag"><input type="checkbox" class="wd-cyc-rev-tag" value="${v}" ${(rv.tags || []).includes(v) ? 'checked' : ''}> ${l}</label>`).join('');
-      const reviewedBadge = rv.reviewed_at ? `<span style="font-size:.75em;color:var(--secondary-text-color)">${this._t('lbl.reviewed_on', {date: new Date(rv.reviewed_at).toLocaleDateString()}, `reviewed ${new Date(rv.reviewed_at).toLocaleDateString()}`)}</span>` : '';
+      const reviewedBadge = rv.reviewed_at ? `<span style="font-size:.75em;color:var(--secondary-text-color)">${this._t('lbl.reviewed_on', {date: _fmtDay(rv.reviewed_at)}, 'reviewed {date}')}</span>` : '';
       // Pending-feedback banner (Confirm/Correct/Ignore) is built in the shared
       // scope above and rendered here as well as in Inspect mode (#331).
       const tProfile = _tip(this._t('msg.review_profile_tip', {}, 'The program this cycle is labelled as. If the auto-detected program was wrong, correct it here - labelling teaches matching for future cycles.'));
@@ -10284,7 +10484,7 @@ class HaWashdataPanel extends HTMLElement {
     const arts = (m.mode === 'view' || m.mode === 'review') ? (cur.artifacts || []) : [];
     if (arts.length) {
       const items = arts.map(a => {
-        const detail = a.detail_key ? this._t(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || '');
+        const detail = a.detail_key ? this._tText(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || '');
         return `<li><b>${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</b> ${this._t('lbl.at', {}, 'at')} ${_fmtClock(a.start_s)}–${_fmtClock(a.end_s)} — ${_esc(detail)}</li>`;
       }).join('');
       artifactBox = `<div class="wd-card" style="margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--warning-color,#ff9800)">
@@ -10389,8 +10589,8 @@ class HaWashdataPanel extends HTMLElement {
           </div>
           ${st.avg_cost != null ? `<div class="wd-sg">
             <div class="wd-sg-h">${this._t('lbl.avg_cost', {}, 'Avg cost')}</div>
-            <div class="wd-sg-main">${st.avg_cost.toFixed(2)}${cur ? ' ' + cur : ''}<span>${this._t('stat.avg', {}, 'avg')}</span></div>
-            <div class="wd-sg-sub">${this._t('stat.total', {v: st.total_cost != null ? st.total_cost.toFixed(2) + (cur ? ' ' + cur : '') : '-'}, `total ${st.total_cost != null ? st.total_cost.toFixed(2) + (cur ? ' ' + cur : '') : '-'}`)}</div>
+            <div class="wd-sg-main">${_fmtCost(st.avg_cost, cur)}<span>${this._t('stat.avg', {}, 'avg')}</span></div>
+            <div class="wd-sg-sub">${this._t('stat.total', {v: _fmtCost(st.total_cost, cur)}, 'total {v}')}</div>
           </div>` : ''}
           <div class="wd-sg">
             <div class="wd-sg-h">${this._t('lbl.activity', {}, 'Activity')}</div>
@@ -10711,7 +10911,7 @@ class HaWashdataPanel extends HTMLElement {
           this._modal = {
             type: 'confirm',
             title: this._t('modal.discard_settings_title', {}, 'Discard unsaved changes?'),
-            message: this._t('modal.discard_settings_msg', {n}, `${n} setting change(s) are not saved yet. Leave Settings and discard them?`),
+            message: this._tText('modal.discard_settings_msg', {n}, `${n} setting change(s) are not saved yet. Leave Settings and discard them?`),
             okLabel: this._t('btn.discard', {}, 'Discard'),
             onOk: () => go(),
           };
@@ -11365,11 +11565,11 @@ class HaWashdataPanel extends HTMLElement {
             val === 'auto_detect'
               ? this._t('msg.toast_auto_detect_enabled', {}, 'Auto-detect enabled')
               : willArm
-                ? this._t('msg.toast_program_armed', {program: val}, `Program armed for the next cycle: ${val}`)
-                : this._t('msg.toast_program_set', {program: val}, `Program set: ${val}`));
+                ? this._tText('msg.toast_program_armed', {program: val}, `Program armed for the next cycle: ${val}`)
+                : this._tText('msg.toast_program_set', {program: val}, `Program set: ${val}`));
           return this._fetchAll();
         })
-        .catch(e => this._showToast(this._t('msg.toast_failed', {error: e.message || e}, 'Failed: ' + (e.message || e)), 'error'));
+        .catch(e => this._showToast(this._tText('msg.toast_failed', {error: e.message || e}, 'Failed: ' + (e.message || e)), 'error'));
     });
 
     // Compact cycle rows: toggle selection in select mode, else open the cycle.
@@ -11645,7 +11845,7 @@ class HaWashdataPanel extends HTMLElement {
           this._dirtyOptKeys = new Set();
           this._showToast(this._t('toast.settings_reverted', {}, 'Settings reverted; integration reloading'));
           this._render();
-        } catch (e) { this._showToast(this._t('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
       });
     });
     const reloadBtn = sr.getElementById('wd-settings-reload');
@@ -11726,7 +11926,7 @@ class HaWashdataPanel extends HTMLElement {
       // "N tuning suggestions" count update immediately. Not persisted - a
       // refresh without saving re-fetches suggestions and restores it.
       this._suggestions = this._suggestions.filter(s => s.key !== k);
-      this._showToast(this._t('msg.sug_staged', {key: k, val: v}, `Set ${k} = ${v}. Save to apply.`), 'info');
+      this._showToast(this._tText('msg.sug_staged', {key: k, val: v}, `Set ${k} = ${v}. Save to apply.`), 'info');
       this._render();
       // Auto-cascade: fix any downstream conflicts the staged value introduced.
       // _render() is synchronous, so the new form DOM is immediately available.
@@ -12026,7 +12226,7 @@ class HaWashdataPanel extends HTMLElement {
           const b = sr.querySelector(`[data-maction="${act}"]`);
           if (!b) continue;
           b.disabled = sel.size === 0;
-          b.textContent = this._t(key, {n: sel.size}, fb);
+          b.textContent = this._tText(key, {n: sel.size}, fb);
         }
       }
       this._drawSpaghetti();
@@ -12092,7 +12292,7 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
       this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
         .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._render(); if (r.profile_name) this._fetchCycleProfileEnv(eid, r.profile_name); } })
-        .catch(e => this._showToast(this._t('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
+        .catch(e => this._showToast(this._tText('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
 
     } else if (a === 'cleanup-edit-cycle') {
       const cid = btn.dataset.cid;
@@ -12102,7 +12302,7 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
       this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
         .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._render(); if (r.profile_name) this._fetchCycleProfileEnv(eid, r.profile_name); } })
-        .catch(e => this._showToast(this._t('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
+        .catch(e => this._showToast(this._tText('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
 
     } else if (a === 'open-profile') {
       const name = btn.dataset.pname;
@@ -12207,25 +12407,25 @@ class HaWashdataPanel extends HTMLElement {
       );
 
     } else if (a === 'rec-start') {
-      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
+      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
     } else if (a === 'rec-stop') {
-      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
+      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
     } else if (a === 'rec-process-open') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'process-recording' }; this._render(); });
     } else if (a === 'rec-discard') {
       this._modal = { type: 'confirm', title: this._t('modal.discard_recording_title', {}, 'Discard Recording'), message: this._t('modal.discard_recording_msg', {}, 'Discard the saved recording? This cannot be undone.'), okLabel: this._t('btn.discard', {}, 'Discard'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._t('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._tText('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
     } else if (a === 'fb-confirm') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
     } else if (a === 'fb-ignore') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
     } else if (a === 'fb-correct') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'correct-feedback', cycleId: btn.dataset.cid, detectedProfile: btn.dataset.prof }; this._render(); });
     } else if (a === 'fb-dismiss-all') {
-      this._modal = { type: 'confirm', title: this._t('modal.dismiss_all_title', {}, 'Dismiss All Feedbacks'), message: this._t('modal.dismiss_all_msg', {count: this._feedbacks.length}, `Dismiss all ${this._feedbacks.length} pending feedback requests?`), okLabel: this._t('modal.dismiss_all_ok', {}, 'Dismiss All'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } } };
+      this._modal = { type: 'confirm', title: this._t('modal.dismiss_all_title', {}, 'Dismiss All Feedbacks'), message: this._tText('modal.dismiss_all_msg', {count: this._feedbacks.length}, `Dismiss all ${this._feedbacks.length} pending feedback requests?`), okLabel: this._t('modal.dismiss_all_ok', {}, 'Dismiss All'),
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/dismiss_all_feedbacks`, entry_id: eid }); this._showToast(this._t('toast.feedback_all_dismissed', {}, 'All feedbacks dismissed')); await this._fetchFeedbacks(eid); } catch (e) { this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } } };
       this._render();
 
     } else if (a === 'create-phase') {
@@ -12234,8 +12434,17 @@ class HaWashdataPanel extends HTMLElement {
       this._modal = { type: 'edit-phase', phaseId: btn.dataset.pid, phaseName: btn.dataset.pname, phaseDesc: btn.dataset.pdesc, isDefault: btn.dataset.pisdefault === 'true' }; this._render();
     } else if (a === 'del-phase') {
       const pname = btn.dataset.pname, pid = btn.dataset.pid;
-      this._modal = { type: 'confirm', title: this._t('modal.delete_phase_title', {}, 'Delete Phase'), message: this._t('modal.delete_phase_msg', {name: pname}, `Delete phase "${pname}"?`), okLabel: this._t('btn.delete', {}, 'Delete'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(this._t('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`)); await this._fetchPhases(eid); } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); } } };
+      // An edited built-in: delete_phase drops the override, which restores the
+      // built-in and keeps profiles' ranges on it (it used to fail every time).
+      const reset = btn.dataset.reset === '1';
+      const msg = reset
+        ? this._tText('modal.reset_phase_msg', {name: pname}, `Undo your edit of "${pname}" and restore the built-in phase? Programs keep their ranges.`)
+        : this._tText('modal.delete_phase_msg', {name: pname}, `Delete phase "${pname}"?`);
+      const done = reset
+        ? this._tText('toast.phase_reset', {name: pname}, `"${pname}" restored to the built-in phase`)
+        : this._tText('toast.phase_deleted', {name: pname}, `Phase "${pname}" deleted`);
+      this._modal = { type: 'confirm', title: reset ? this._t('modal.reset_phase_title', {}, 'Reset Phase') : this._t('modal.delete_phase_title', {}, 'Delete Phase'), message: msg, okLabel: reset ? this._t('btn.reset', {}, 'Reset') : this._t('btn.delete', {}, 'Delete'),
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/delete_phase`, entry_id: eid, phase_id: pid }); this._showToast(done); await this._fetchPhases(eid); } catch (e) { this._showToast(this._tText('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
     } else if (a === 'diag-refresh') {
@@ -12245,21 +12454,21 @@ class HaWashdataPanel extends HTMLElement {
       this._modal = { type: 'confirm', title: this._t('modal.process_history_title', {}, 'Process History'), message: this._t('modal.process_history_msg', {}, 'Re-run matching, refresh suggestions, retrain ML (if enabled), recost cycles against recorded energy prices and recompute cycle health across all stored cycles. This may take a while.'), okLabel: this._t('modal.process_history_ok', {}, 'Process'),
         onOk: () => this._kickAndTrack({ type: `${_DOMAIN}/reprocess_history`, entry_id: eid }, 'reprocess', async (r) => {
           const nc = r.count || 0;
-          const bits = [this._t('toast.processed_cycles', {n: nc}, nc + ' cycles')];
-          if (r.suggestions != null) bits.push(this._t('toast.processed_suggestions', {n: r.suggestions}, r.suggestions + ' suggestion(s)'));
+          const bits = [this._tText('toast.processed_cycles', {n: nc}, nc + ' cycles')];
+          if (r.suggestions != null) bits.push(this._tText('toast.processed_suggestions', {n: r.suggestions}, r.suggestions + ' suggestion(s)'));
           const np = (r.ml_training && r.ml_training.ok && (r.ml_training.promoted || []).length) || 0;
-          if (np) bits.push(this._t('toast.processed_models', {n: np}, np + ' model(s) promoted'));
-          this._showToast(this._t('toast.processed', {bits: bits.join(', ')}, 'Processed ' + bits.join(', ')));
+          if (np) bits.push(this._tText('toast.processed_models', {n: np}, np + ' model(s) promoted'));
+          this._showToast(this._tText('toast.processed', {bits: bits.join(', ')}, 'Processed ' + bits.join(', ')));
           await this._fetchToolsData(eid);
         }) };
       this._render();
     } else if (a === 'clear-debug') {
       this._modal = { type: 'confirm', title: this._t('modal.clear_debug_title', {}, 'Clear Debug Data'), message: this._t('modal.clear_debug_msg', {}, 'Delete all stored debug traces?'), okLabel: this._t('btn.clear', {}, 'Clear'),
-        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._t('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
+        onOk: () => this._busyRun('clear-debug', async () => { try { const r = await this._ws({ type: `${_DOMAIN}/clear_debug_data`, entry_id: eid }); this._showToast(this._tText('toast.debug_cleared', {count: r.count || 0}, `Cleared ${r.count || 0} debug traces`)); await this._fetchToolsData(eid); } catch (e) { this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
       this._render();
     } else if (a === 'wipe-history') {
       this._modal = { type: 'confirm', title: this._t('modal.wipe_all_title', {}, 'Wipe All Data'), message: this._t('modal.wipe_all_msg', {}, '⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.'), okLabel: this._t('modal.wipe_all_ok', {}, 'Wipe Everything'),
-        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
+        onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
       this._render();
 
     } else if (a === 'export-config') {
@@ -12270,7 +12479,7 @@ class HaWashdataPanel extends HTMLElement {
         a2.href = url; a2.download = `washdata_export_${eid.slice(0, 8)}.json`;
         document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
         this._showToast(this._t('toast.export_downloaded', {}, 'Export downloaded'));
-      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
+      }).catch(e => this._showToast(this._tText('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
     } else if (a === 'export-select-open') {
       // Open the export wizard: fetch this device's inventory, default everything on.
       this._modal = { type: 'export-select', inventory: null, loading: true, sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }, expanded: new Set() };
@@ -12278,7 +12487,7 @@ class HaWashdataPanel extends HTMLElement {
       (async () => {
         let inv = null;
         try { const r = await this._ws({ type: `${_DOMAIN}/get_export_inventory`, entry_id: eid }); inv = (r && r.manifest) || null; }
-        catch (e) { this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
+        catch (e) { this._showToast(this._tText('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
         if (!this._isActiveEntry(eid) || !this._modal || this._modal.type !== 'export-select') return;
         if (!inv) { this._modal = null; this._render(); return; }
         this._modal.inventory = inv;
@@ -12305,7 +12514,7 @@ class HaWashdataPanel extends HTMLElement {
       // D3: append the next page, preserving current sort/filter.
       this._busyRun('cyc-load-more', async () => {
         try { await this._loadMoreCycles(eid); }
-        catch (e) { this._showToast(this._t('toast.load_more_failed', { error: e.message || e }, 'Could not load more: ' + (e.message || e)), 'error'); }
+        catch (e) { this._showToast(this._tText('toast.load_more_failed', { error: e.message || e }, 'Could not load more: ' + (e.message || e)), 'error'); }
       });
     } else if (a === 'task-cancel') {
       const tid = btn.dataset.taskId;
@@ -12381,10 +12590,10 @@ class HaWashdataPanel extends HTMLElement {
         .then(() => this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }))
         .then(r => { this._opts = r.options || {}; this._optDefaults = r.defaults || {}; return this._fetchSettingsChangelog(eid); })
         .then(() => {
-          this._showToast(this._t('msg.toast_reverted', { key: this._t('setting.' + key + '.label', {}, key) }, '{key} reverted'), 'success');
+          this._showToast(this._tText('msg.toast_reverted', { key: this._t('setting.' + key + '.label', {}, key) }, '{key} reverted'), 'success');
           this._render();
         })
-        .catch(e => this._showToast(this._t('msg.toast_error', { error: e.message || e }, 'Error: ' + (e.message || e)), 'error'));
+        .catch(e => this._showToast(this._tText('msg.toast_error', { error: e.message || e }, 'Error: ' + (e.message || e)), 'error'));
 
     } else if (a === 'toggle-log-drawer') {
       this._logOpen = !this._logOpen;
@@ -12408,7 +12617,7 @@ class HaWashdataPanel extends HTMLElement {
         a2.href = url; a2.download = `washdata_logs_${Date.now()}.txt`;
         document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
         this._showToast(this._t('toast.logs_exported', {}, 'Logs exported'));
-      }).catch(e => this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
+      }).catch(e => this._showToast(this._tText('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
     } else if (a === 'import-config-open') {
       // Open the import wizard at the paste/upload step.
       this._modal = { type: 'import-wizard', step: 'input', jsonText: '', manifest: null, error: null,
@@ -12445,7 +12654,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._loadPanelLang(effLang);
           this._render();
           this._showToast(this._t('toast.preferences_saved', {}, 'Preferences saved'));
-        } catch (e) { this._showToast(this._t('toast.save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'save-panel') {
@@ -12460,7 +12669,7 @@ class HaWashdataPanel extends HTMLElement {
           this._tabInitialized = true;  // keep the user on the current tab
           this._applyPanelConfig();
           this._showToast(this._t('toast.panel_settings_saved', {}, 'Panel settings saved'));
-        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'pause-cycle') {
@@ -12470,7 +12679,7 @@ class HaWashdataPanel extends HTMLElement {
           this._showToast(this._t('toast.cycle_paused', {}, 'Cycle paused'));
           return this._fetchAll();
         })
-        .catch(e => this._showToast(this._t('toast.pause_failed', {error: e.message || e}, 'Pause failed: ' + (e.message || e)), 'error'));
+        .catch(e => this._showToast(this._tText('toast.pause_failed', {error: e.message || e}, 'Pause failed: ' + (e.message || e)), 'error'));
 
     } else if (a === 'resume-cycle') {
       this._ws({ type: `${_DOMAIN}/resume_cycle`, entry_id: eid })
@@ -12479,7 +12688,7 @@ class HaWashdataPanel extends HTMLElement {
           this._showToast(this._t('toast.cycle_resumed', {}, 'Cycle resumed'));
           return this._fetchAll();
         })
-        .catch(e => this._showToast(this._t('msg.toast_resume_failed', {error: e.message || e}, 'Resume failed: ' + (e.message || e)), 'error'));
+        .catch(e => this._showToast(this._tText('msg.toast_resume_failed', {error: e.message || e}, 'Resume failed: ' + (e.message || e)), 'error'));
 
     } else if (a === 'terminate-cycle') {
       this._modal = {
@@ -12492,7 +12701,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/terminate_cycle`, entry_id: eid });
             this._showToast(this._t('toast.cycle_force_stopped', {}, 'Cycle force-stopped'));
             await this._fetchAll();
-          } catch (e) { this._showToast(this._t('msg.toast_force_stop_failed', {error: e.message || e}, 'Force stop failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('msg.toast_force_stop_failed', {error: e.message || e}, 'Force stop failed: ' + (e.message || e)), 'error'); }
         },
       };
       this._render();
@@ -12512,7 +12721,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._ws({ type: `${_DOMAIN}/set_panel_config`, rbac: { enabled, default_level, users: usersMap } });
           this._panelCfg = await this._ws({ type: `${_DOMAIN}/get_panel_config` });
           this._showToast(this._t('toast.access_saved', {}, 'Access control saved'));
-        } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       });
     }
   }
@@ -12529,7 +12738,7 @@ class HaWashdataPanel extends HTMLElement {
         this._prevOpts = null;
         this._cascadePending = {};
         this._preCascadeOpts = null;
-      } catch (e) { this._showToast(this._t('toast.apply_failed', {error: e.message || e}, 'Apply failed: ' + (e.message || e)), 'error'); }
+      } catch (e) { this._showToast(this._tText('toast.apply_failed', {error: e.message || e}, 'Apply failed: ' + (e.message || e)), 'error'); }
     });
   }
 
@@ -12549,7 +12758,7 @@ class HaWashdataPanel extends HTMLElement {
       this._modal = {
         type: 'confirm', okPrimary: true, items,
         title: this._t('modal.apply_suggestions_title', {}, 'Apply suggestions'),
-        message: this._t('modal.apply_suggestions_msg', {n: items.length}, `Change these ${items.length} settings? The integration reloads after saving.`),
+        message: this._tText('modal.apply_suggestions_msg', {n: items.length}, `Change these ${items.length} settings? The integration reloads after saving.`),
         okLabel: this._t('btn.apply_all', {}, 'Apply all'),
         onOk: () => this._applyAllSuggestions(eid, keys),
       };
@@ -12562,7 +12771,7 @@ class HaWashdataPanel extends HTMLElement {
       this._settingsSugOnly = false;
       this._busyRun('save-settings', async () => {
         try { await this._ws({ type: `${_DOMAIN}/clear_suggestions`, entry_id: eid }); this._suggestions = []; this._showToast(this._t('toast.suggestions_dismissed', {}, 'Suggestions dismissed')); }
-        catch (e) { this._showToast(this._t('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
+        catch (e) { this._showToast(this._tText('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'sug-unmute-all') {
@@ -12579,11 +12788,11 @@ class HaWashdataPanel extends HTMLElement {
           this._lockedSuggestions = (lastOk && lastOk.value && lastOk.value.locked_suggestions) || [];
           await this._fetchSuggestions(eid);
           if (failed) {
-            this._showToast(this._t('toast.error', {error: `${failed} suggestion(s) failed to unlock`}, `${failed} suggestion(s) failed to unlock`), 'error');
+            this._showToast(this._tText('toast.error', {error: `${failed} suggestion(s) failed to unlock`}, `${failed} suggestion(s) failed to unlock`), 'error');
           } else {
             this._showToast(this._t('msg.sug_unmuted_all', {}, 'Muted suggestions reset'), 'success');
           }
-        } catch (e) { this._showToast(this._t('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'sug-analyze') {
@@ -12591,9 +12800,9 @@ class HaWashdataPanel extends HTMLElement {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/run_suggestion_analysis`, entry_id: eid });
           const n = (r && r.count) || 0;
-          this._showToast(n ? this._t('toast.analysis_complete', {count: n}, `Analysis complete: ${n} suggestion(s)`) : this._t('toast.analysis_complete_none', {}, 'Analysis complete: no new suggestions'));
+          this._showToast(n ? this._tText('toast.analysis_complete', {count: n}, `Analysis complete: ${n} suggestion(s)`) : this._t('toast.analysis_complete_none', {}, 'Analysis complete: no new suggestions'));
           await this._fetchSuggestions(eid);
-        } catch (e) { this._showToast(this._t('toast.analysis_failed', {error: e.message || e}, 'Analysis failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.analysis_failed', {error: e.message || e}, 'Analysis failed: ' + (e.message || e)), 'error'); }
       });
     }
   }
@@ -12605,7 +12814,7 @@ class HaWashdataPanel extends HTMLElement {
       this._kickAndTrack({ type: `${_DOMAIN}/trigger_ml_training`, entry_id: eid }, 'ml-train-now:' + eid, async (r) => {
         if (r && r.ok) {
           const promoted = (r.promoted || []).length;
-          this._showToast(promoted ? this._t('toast.ml_training_promoted', {count: promoted}, `Training complete: promoted ${promoted} model(s)`) : this._t('toast.ml_training_no_improvement', {}, 'Training complete: baseline kept (no improvement)'));
+          this._showToast(promoted ? this._tText('toast.ml_training_promoted', {count: promoted}, `Training complete: promoted ${promoted} model(s)`) : this._t('toast.ml_training_no_improvement', {}, 'Training complete: baseline kept (no improvement)'));
         } else {
           this._showToast(this._t('toast.ml_training_no_improvement', {}, 'Training complete: baseline kept (no improvement)'), 'info');
         }
@@ -12618,7 +12827,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._ws({ type: `${_DOMAIN}/revert_matching_config`, entry_id: eid });
           this._showToast(this._t('toast.matching_reverted', {}, 'Matching weights reverted to defaults'));
           await this._loadMlTrainingStatus(eid);
-        } catch (e) { this._showToast(this._t('toast.revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'ml-revert-models') {
@@ -12627,7 +12836,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._ws({ type: `${_DOMAIN}/revert_ml_models`, entry_id: eid });
           this._showToast(this._t('toast.models_reverted', {}, 'On-device models reverted to baseline'));
           await this._loadMlTrainingStatus(eid);
-        } catch (e) { this._showToast(this._t('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('msg.toast_revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
       });
     }
   }
@@ -12644,7 +12853,7 @@ class HaWashdataPanel extends HTMLElement {
           if (this._constants.storeOnlineEnabled) { await this._loadStoreStatus(eid); this._ensureStoreConnectListener(); }
           else { this._storeStatus = { enabled: false }; this._storeConnected = false; }
         } catch (e) {
-          this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+          this._showToast(this._tText('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
         }
       });
 
@@ -12658,7 +12867,7 @@ class HaWashdataPanel extends HTMLElement {
           const r = await this._ws({ type: `${_DOMAIN}/store_set_prefs`, entry_id: eid, prefs: { [key]: val } });
           if (r && r.prefs) this._constants = { ...this._constants, storePrefs: r.prefs };
         } catch (e) {
-          this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+          this._showToast(this._tText('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
         }
       });
 
@@ -12691,7 +12900,7 @@ class HaWashdataPanel extends HTMLElement {
           }
           this._showToast(this._t('toast.catalog_refreshed', {}, 'Community catalog refreshed'));
         } catch (e) {
-          this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+          this._showToast(this._tText('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
         }
       });
 
@@ -12707,7 +12916,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._ws({ type: `${_DOMAIN}/store_disconnect`, entry_id: eid });
           await this._loadStoreStatus(eid);
           this._showToast(this._t('toast.store_disconnected', {}, 'Disconnected from the community store'));
-        } catch (e) { this._showToast(this._t('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'store-add-appliance') {
@@ -12745,7 +12954,7 @@ class HaWashdataPanel extends HTMLElement {
       this._busyRun('store-account', async () => {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/store_confirm_device`, entry_id: eid, device_id: did });
-          if (r && r.error) { this._showToast(this._t('toast.store_error', {error: r.error}, 'Error: ' + r.error), 'error'); return; }
+          if (r && r.error) { this._showToast(this._tText('toast.store_error', {error: r.error}, 'Error: ' + r.error), 'error'); return; }
           // Patch every copy of the row the UI may be showing: the picker's badge now
           // reads the resolved catalog entry, while the Store tab reads the browse list.
           const rows = [
@@ -12758,7 +12967,7 @@ class HaWashdataPanel extends HTMLElement {
           }
           this._showToast(r && r.status === 'approved' ? this._t('toast.device_approved', {}, 'Approved by the community') : this._t('toast.thanks_confirming', {}, 'Thanks for confirming'));
           this._render();
-        } catch (e2) { this._showToast(this._t('toast.store_error', {error: e2.message || e2}, 'Error: ' + (e2.message || e2)), 'error'); }
+        } catch (e2) { this._showToast(this._tText('toast.store_error', {error: e2.message || e2}, 'Error: ' + (e2.message || e2)), 'error'); }
       });
 
     } else if (a === 'store-rate-device') {
@@ -12768,9 +12977,9 @@ class HaWashdataPanel extends HTMLElement {
       this._busyRun('store-account', async () => {
         try {
           const r = await this._ws({ type: `${_DOMAIN}/store_rate_device`, entry_id: eid, device_id: did, rating });
-          if (r && r.error) { this._showToast(this._t('toast.store_error', {error: r.error}, 'Error: ' + r.error), 'error'); return; }
+          if (r && r.error) { this._showToast(this._tText('toast.store_error', {error: r.error}, 'Error: ' + r.error), 'error'); return; }
           this._showToast(this._t('toast.rating_saved', {}, 'Quality rating saved'));
-        } catch (e2) { this._showToast(this._t('toast.store_error', {error: e2.message || e2}, 'Error: ' + (e2.message || e2)), 'error'); }
+        } catch (e2) { this._showToast(this._tText('toast.store_error', {error: e2.message || e2}, 'Error: ' + (e2.message || e2)), 'error'); }
       });
 
     } else if (a === 'store-nav') {
@@ -12813,11 +13022,11 @@ class HaWashdataPanel extends HTMLElement {
           const started = await this._ws({ type: `${_DOMAIN}/store_download_device`, entry_id: eid, device_id: did, include_settings: withSettings });
           // A registry task now (audit STORE-10); its result is the old reply.
           const r = started && started.task_id ? ((await this._awaitTask(started.task_id)) || {}).result : started;
-          if (r && (r.error || r.disabled)) { const why = r.error || 'unavailable'; this._showToast(this._t('toast.store_download_failed', {error: why}, 'Download failed: ' + why), 'error'); return; }
+          if (r && (r.error || r.disabled)) { const why = r.error || 'unavailable'; this._showToast(this._tText('toast.store_download_failed', {error: why}, 'Download failed: ' + why), 'error'); return; }
           const p = (r && r.profiles_adopted) || 0, c = (r && r.cycles_imported) || 0;
           const sa = (r && r.settings_applied) || 0;
           const sk = (r && r.cycles_skipped) || 0;
-          const skipped = sk ? this._t('toast.store_download_skipped', {n: sk}, `${sk} recording(s) skipped: too short, too gappy or already on your device.`) : '';
+          const skipped = sk ? this._tText('toast.store_download_skipped', {n: sk}, `${sk} recording(s) skipped: too short, too gappy or already on your device.`) : '';
           if (!p && !c && !sa) {
             // Nothing adopted: either already imported, or the fetch came back empty.
             this._showToast(skipped || this._t('toast.store_download_nothing', {}, 'Nothing new to download - this setup is already on your device.'), 'info');
@@ -12827,11 +13036,11 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchCycles(eid);
           const ph = (r && r.phases_applied) || 0;
           let done;
-          if (sa) done = this._t('toast.store_device_downloaded_settings', {p, c, ph, s: sa}, `${p} program(s), ${c} recording(s), ${ph} phase map(s), ${sa} setting(s) added`);
-          else if (ph) done = this._t('toast.store_device_downloaded_phases', {p, c, ph}, `${p} program(s), ${c} recording(s), ${ph} phase map(s) added`);
-          else done = this._t('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`);
+          if (sa) done = this._tText('toast.store_device_downloaded_settings', {p, c, ph, s: sa}, `${p} program(s), ${c} recording(s), ${ph} phase map(s), ${sa} setting(s) added`);
+          else if (ph) done = this._tText('toast.store_device_downloaded_phases', {p, c, ph}, `${p} program(s), ${c} recording(s), ${ph} phase map(s) added`);
+          else done = this._tText('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`);
           this._showToast(skipped ? `${done}. ${skipped}` : done);
-        } catch (e) { this._showToast(this._t('toast.store_download_failed', {error: e.message || e}, 'Download failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.store_download_failed', {error: e.message || e}, 'Download failed: ' + (e.message || e)), 'error'); }
       });
 
     } else if (a === 'store-import') {
@@ -12919,13 +13128,13 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'auto-delete') {
       const autoId = btn.dataset.autoid, autoName = btn.dataset.autoname || 'this automation';
-      this._modal = { type: 'confirm', title: this._t('modal.delete_automation_title', {}, 'Delete Automation'), message: this._t('modal.delete_automation_msg', {name: autoName}, `Delete the automation "${autoName}" from Home Assistant? This cannot be undone.`), okLabel: this._t('btn.delete', {}, 'Delete'),
+      this._modal = { type: 'confirm', title: this._t('modal.delete_automation_title', {}, 'Delete Automation'), message: this._tText('modal.delete_automation_msg', {name: autoName}, `Delete the automation "${autoName}" from Home Assistant? This cannot be undone.`), okLabel: this._t('btn.delete', {}, 'Delete'),
         onOk: async () => {
           try {
             await this._hass.callApi('DELETE', 'config/automation/config/' + autoId);
             this._showToast(this._t('toast.automation_deleted', {}, 'Automation deleted'));
             await this._loadDeviceAutomations(eid);
-          } catch (e) { this._showToast(this._t('toast.delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('toast.delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
         } };
       this._render();
 
@@ -12939,7 +13148,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { notify_actions: [] } });
             this._opts = { ...this._opts, notify_actions: [] };
             this._showToast(this._t('toast.legacy_removed', {}, 'Legacy actions removed'));
-          } catch (e) { this._showToast(this._t('toast.remove_failed', {error: e.message || e}, 'Remove failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('toast.remove_failed', {error: e.message || e}, 'Remove failed: ' + (e.message || e)), 'error'); }
         } };
       this._render();
 
@@ -12947,7 +13156,7 @@ class HaWashdataPanel extends HTMLElement {
       const thr = parseFloat(sr.getElementById('wd-auto-label-threshold')?.value || '0.75');
       this._busyRun('auto-label', async () => {
         try { const st = await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); if (st && st.task_id) await this._awaitTask(st.task_id); this._showToast(this._t('toast.auto_label_complete', {}, 'Auto-label complete')); await this._fetchCycles(eid); }
-        catch (e) { this._showToast(this._t('toast.auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
+        catch (e) { this._showToast(this._tText('toast.auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
       });
     }
   }
@@ -12957,7 +13166,7 @@ class HaWashdataPanel extends HTMLElement {
       const eventType = sr.getElementById('wd-maint-type')?.value || '';
       const date = sr.getElementById('wd-maint-date')?.value || '';
       const notes = (sr.getElementById('wd-maint-notes')?.value || '').trim();
-      if (!eventType) { this._showToast(this._t('toast.maint_add_failed', { error: this._t('lbl.event_type', {}, 'Event type') }, 'Could not add event: Event type'), 'error'); return; }
+      if (!eventType) { this._showToast(this._tText('toast.maint_add_failed', { error: this._t('lbl.event_type', {}, 'Event type') }, 'Could not add event: Event type'), 'error'); return; }
       this._busyRun('maint-add', async () => {
         try {
           const payload = { type: `${_DOMAIN}/add_maintenance_event`, entry_id: eid, event_type: eventType };
@@ -12967,7 +13176,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchMaintenance(eid);
           this._showToast(this._t('toast.maint_added', {}, 'Maintenance event added'));
           this._render();
-        } catch (e) { this._showToast(this._t('toast.maint_add_failed', { error: e.message || e }, 'Could not add event: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.maint_add_failed', { error: e.message || e }, 'Could not add event: ' + (e.message || e)), 'error'); }
       });
     } else if (a === 'maint-delete') {
       const mid = btn.dataset.mid;
@@ -12977,20 +13186,20 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/delete_maintenance_event`, entry_id: eid, event_id: mid });
             await this._fetchMaintenance(eid);
             this._showToast(this._t('toast.maint_deleted', {}, 'Maintenance event deleted'));
-          } catch (e) { this._showToast(this._t('toast.maint_delete_failed', { error: e.message || e }, 'Could not delete event: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('toast.maint_delete_failed', { error: e.message || e }, 'Could not delete event: ' + (e.message || e)), 'error'); }
         }) };
       this._render();
     } else if (a === 'maint-save-odometer') {
       const raw = sr.getElementById('wd-maint-odometer')?.value;
       const count = parseInt(raw, 10);
-      if (isNaN(count) || count < 0) { this._showToast(this._t('toast.odometer_save_failed', { error: this._t('lbl.total_cycles_run', {}, 'cycles run in total') }, 'Could not save total: cycles run in total'), 'error'); return; }
+      if (isNaN(count) || count < 0) { this._showToast(this._tText('toast.odometer_save_failed', { error: this._t('lbl.total_cycles_run', {}, 'cycles run in total') }, 'Could not save total: cycles run in total'), 'error'); return; }
       this._busyRun('maint-save-odometer', async () => {
         try {
           await this._ws({ type: `${_DOMAIN}/set_lifetime_cycle_count`, entry_id: eid, count: count });
           await this._fetchMaintenance(eid);
           this._showToast(this._t('toast.odometer_saved', {}, 'Total cycles saved'));
           this._render();
-        } catch (e) { this._showToast(this._t('toast.odometer_save_failed', { error: e.message || e }, 'Could not save total: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.odometer_save_failed', { error: e.message || e }, 'Could not save total: ' + (e.message || e)), 'error'); }
       });
     } else if (a === 'maint-save-reminders') {
       const dict = {};
@@ -13005,7 +13214,7 @@ class HaWashdataPanel extends HTMLElement {
           await this._fetchMaintenance(eid);
           this._showToast(this._t('toast.reminders_saved', {}, 'Service reminders saved'));
           this._render();
-        } catch (e) { this._showToast(this._t('toast.reminders_save_failed', { error: e.message || e }, 'Could not save reminders: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.reminders_save_failed', { error: e.message || e }, 'Could not save reminders: ' + (e.message || e)), 'error'); }
       });
     }
   }
@@ -13095,7 +13304,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/save_profile_group`, entry_id: eid, name, members });
             this._showToast(this._t('toast.group_saved', {}, 'Group saved')); this._modal = null;
             await this._fetchProfileGroups(eid);
-          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13105,7 +13314,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/delete_profile_group`, entry_id: eid, name: m.orig });
             this._showToast(this._t('toast.group_deleted', {}, 'Group deleted')); this._modal = null;
             await this._fetchProfileGroups(eid);
-          } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13135,7 +13344,7 @@ class HaWashdataPanel extends HTMLElement {
           document.body.appendChild(a2); a2.click(); document.body.removeChild(a2); URL.revokeObjectURL(url);
           this._modal = null;
           this._showToast(this._t('toast.export_selective_done', {}, 'Export downloaded'));
-        } catch (e) { this._showToast(this._t('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'); }
       });
       return;
     }
@@ -13171,7 +13380,7 @@ class HaWashdataPanel extends HTMLElement {
       // Re-fetch feedbacks too: labelling a review cycle now resolves its pending
       // feedback backend-side (#331), so the "needs review" queue must refresh.
       try { await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: m.cycleId, profile_name: profileName || null, new_profile_name: newName }); this._showToast(this._t('toast.cycle_labelled', {}, 'Cycle labelled')); await this._fetchCycles(eid); await this._fetchProfiles(eid); await this._fetchFeedbacks(eid); }
-      catch (e) { this._showToast(this._t('toast.label_failed', {error: e.message || e}, 'Label failed: ' + (e.message || e)), 'error'); }
+      catch (e) { this._showToast(this._tText('toast.label_failed', {error: e.message || e}, 'Label failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'create-profile-ok' && eid) {
       const name = sr.getElementById('wd-cp-name')?.value?.trim();
@@ -13182,16 +13391,16 @@ class HaWashdataPanel extends HTMLElement {
       // A reference cycle sets the duration from its own length, so never send a
       // manual duration alongside one (issue #303 — no silently-ignored field).
       const manualDur = (!cycle && dur > 0) ? dur : null;
-      try { await this._ws({ type: `${_DOMAIN}/create_profile`, entry_id: eid, name, reference_cycle: cycle || null, manual_duration_min: manualDur }); this._showToast(this._t('toast.profile_created', {name}, `Profile "${name}" created`)); await this._fetchProfiles(eid); }
-      catch (e) { this._showToast(this._t('toast.create_failed', {error: e.message || e}, 'Create failed: ' + (e.message || e)), 'error'); }
+      try { await this._ws({ type: `${_DOMAIN}/create_profile`, entry_id: eid, name, reference_cycle: cycle || null, manual_duration_min: manualDur }); this._showToast(this._tText('toast.profile_created', {name}, `Profile "${name}" created`)); await this._fetchProfiles(eid); }
+      catch (e) { this._showToast(this._tText('toast.create_failed', {error: e.message || e}, 'Create failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'create-phase-ok' && eid) {
       const name = sr.getElementById('wd-ph-name')?.value?.trim();
       const desc = sr.getElementById('wd-ph-desc')?.value?.trim() || '';
       this._modal = null;
       if (!name) { this._showToast(this._t('toast.phase_name_required', {}, 'Phase name is required'), 'error'); this._render(); return; }
-      try { await this._ws({ type: `${_DOMAIN}/create_phase`, entry_id: eid, device_type: m.deviceType || '', name, description: desc }); this._showToast(this._t('toast.phase_created', {name}, `Phase "${name}" created`)); await this._fetchPhases(eid); }
-      catch (e) { this._showToast(this._t('msg.toast_create_failed', {error: e.message || e}, 'Create failed: ' + (e.message || e)), 'error'); }
+      try { await this._ws({ type: `${_DOMAIN}/create_phase`, entry_id: eid, device_type: m.deviceType || '', name, description: desc }); this._showToast(this._tText('toast.phase_created', {name}, `Phase "${name}" created`)); await this._fetchPhases(eid); }
+      catch (e) { this._showToast(this._tText('msg.toast_create_failed', {error: e.message || e}, 'Create failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'edit-phase-ok' && eid) {
       const newName = sr.getElementById('wd-eph-name')?.value?.trim();
@@ -13199,7 +13408,7 @@ class HaWashdataPanel extends HTMLElement {
       this._modal = null;
       if (!newName) { this._showToast(this._t('toast.name_required', {}, 'Name required'), 'error'); this._render(); return; }
       try { await this._ws({ type: `${_DOMAIN}/update_phase`, entry_id: eid, phase_id: m.phaseId, new_name: newName, description: desc }); this._showToast(this._t('toast.phase_updated', {}, 'Phase updated')); await this._fetchPhases(eid); }
-      catch (e) { this._showToast(this._t('toast.update_failed', {error: e.message || e}, 'Update failed: ' + (e.message || e)), 'error'); }
+      catch (e) { this._showToast(this._tText('toast.update_failed', {error: e.message || e}, 'Update failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'process-rec-ok' && eid) {
       const mode = sr.getElementById('wd-pr-mode')?.value;
@@ -13210,21 +13419,21 @@ class HaWashdataPanel extends HTMLElement {
       this._modal = null;
       if (!profileName) { this._showToast(this._t('msg.toast_profile_name_required', {}, 'Profile name is required'), 'error'); this._render(); return; }
       try { await this._ws({ type: `${_DOMAIN}/process_recording`, entry_id: eid, profile_name: profileName, save_mode: mode, head_trim: head, tail_trim: tail }); this._showToast(this._t('toast.recording_saved', {}, 'Recording saved to profile')); await this._fetchRecState(eid); await this._fetchProfiles(eid); }
-      catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+      catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'correct-fb-ok' && eid) {
       const corrected = sr.getElementById('wd-fb-profile')?.value;
       const dur = parseFloat(sr.getElementById('wd-fb-dur')?.value || 0) || null;
       this._modal = null;
       try { await this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: m.cycleId, action: 'correct', corrected_profile: corrected, corrected_duration_min: dur }); this._showToast(this._t('toast.correction_submitted', {}, 'Correction submitted')); await this._fetchFeedbacks(eid); }
-      catch (e) { this._showToast(this._t('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
+      catch (e) { this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'auto-run' && eid) {
       const thr = parseFloat(sr.getElementById('wd-al-thr')?.value || '0.75');
       this._modal = null; this._render();
       await this._busyRun('auto-label', async () => {
         try { const st = await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); if (st && st.task_id) await this._awaitTask(st.task_id); this._showToast(this._t('msg.toast_auto_label_complete', {}, 'Auto-label complete')); await this._fetchCycles(eid); }
-        catch (e) { this._showToast(this._t('msg.toast_auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
+        catch (e) { this._showToast(this._tText('msg.toast_auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
       });
     } else if (action === 'merge-ok' && eid) {
       const target = sr.getElementById('wd-merge-prof')?.value || '';
@@ -13251,11 +13460,11 @@ class HaWashdataPanel extends HTMLElement {
       await this._busyRun('cyc-relabel', async () => {
         try {
           for (const cid of ids) await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: profileName || null });
-          this._showToast(this._t('toast.relabel_done', { count: ids.length }, `Relabelled ${ids.length} cycle(s)`));
+          this._showToast(this._tText('toast.relabel_done', { count: ids.length }, `Relabelled ${ids.length} cycle(s)`));
           this._cycleSel.clear(); this._selectMode = false;
           // Bulk relabel resolves any pending feedback on those cycles (#331).
           await this._fetchCycles(eid); await this._fetchProfiles(eid); await this._fetchFeedbacks(eid);
-        } catch (e) { this._showToast(this._t('toast.relabel_failed', { error: e.message || e }, 'Relabel failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.relabel_failed', { error: e.message || e }, 'Relabel failed: ' + (e.message || e)), 'error'); }
       });
     }
   }
@@ -13495,11 +13704,11 @@ class HaWashdataPanel extends HTMLElement {
             const r = await this._ws(msg);
             if (r && r.error === 'low_quality') { this._showToast(this._t('toast.store_import_low_quality', {}, 'This recording is too short, too gappy or implausible to import.'), 'error'); return; }
             if (r && r.error === 'duplicate') { this._showToast(this._t('toast.store_import_duplicate', {}, 'This recording is already on your device.'), 'info'); return; }
-            if (r && r.error) { this._showToast(this._t('toast.store_import_failed', {error: r.error}, 'Import failed: ' + r.error), 'error'); return; }
+            if (r && r.error) { this._showToast(this._tText('toast.store_import_failed', {error: r.error}, 'Import failed: ' + r.error), 'error'); return; }
             this._modal = null;
-            this._showToast(this._t('toast.store_imported', {profile: (r && r.profile) || ''}, `Imported into ${(r && r.profile) || 'profile'}`));
+            this._showToast(this._tText('toast.store_imported', {profile: (r && r.profile) || ''}, `Imported into ${(r && r.profile) || 'profile'}`));
             await this._fetchProfiles(eid);
-          } catch (e) { this._showToast(this._t('toast.store_import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('toast.store_import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13516,12 +13725,12 @@ class HaWashdataPanel extends HTMLElement {
             const r = await this._ws({ type: `${_DOMAIN}/store_upload_cycle`, entry_id: eid, local_cycle_id: m.cycleId, program, description });
             if (r && r.error) {
               if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
-              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
+              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._tText('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
               return;
             }
             this._modal = null;
             this._showToast(this._t('toast.store_shared', {}, 'Shared to the community store - pending review.'));
-          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13637,13 +13846,13 @@ class HaWashdataPanel extends HTMLElement {
               conflict_resolutions: m.conflicts, cycle_destination: m.cycleDest, apply_settings: true });
             const s = (r && r.summary) || {};
             this._modal = null;
-            this._showToast(this._t('toast.import_selective_done', {
+            this._showToast(this._tText('toast.import_selective_done', {
               profiles: s.profiles_imported || 0,
               cycles: (s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0),
             }, `Imported ${s.profiles_imported || 0} profile(s) and ${(s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0)} cycle(s)`));
             await this._fetchCycles(eid);
             await this._fetchProfiles(eid);
-          } catch (e) { this._showToast(this._t('toast.import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('toast.import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13697,7 +13906,7 @@ class HaWashdataPanel extends HTMLElement {
             // Pre-flight gate error (not connected / no appliance): keep the modal open.
             if (r && r.error) {
               if (r.error === 'no_appliance_declared') this._showToast(this._t('toast.store_no_appliance', {}, 'Set your appliance brand and model in Settings first.'), 'error');
-              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
+              else { const why = r.detail ? `${r.error} - ${r.detail}` : r.error; this._showToast(this._tText('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error'); }
               return;
             }
             const n = (r && r.cycle_ids && r.cycle_ids.length) || 0;
@@ -13707,15 +13916,15 @@ class HaWashdataPanel extends HTMLElement {
             if (!n) {
               // Nothing uploaded: surface the first error and keep the modal for retry.
               const why = (r && r.errors && r.errors[0]) || (r && r.detail) || 'upload_failed';
-              this._showToast(this._t('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error');
+              this._showToast(this._tText('toast.store_share_failed', {error: why}, 'Share failed: ' + why), 'error');
               return;
             }
             this._modal = null;
-            if (failed) this._showToast(this._t('toast.store_device_shared_partial', {n, failed}, `Shared ${n} cycle(s); ${failed} could not be uploaded.`), 'info');
-            else if (dup && !created) this._showToast(this._t('toast.store_device_shared_all_dup', {n: dup}, `All ${dup} cycle(s) were already in the community store.`), 'info');
-            else if (dup) this._showToast(this._t('toast.store_device_shared_some_dup', {created, dup}, `Shared ${created} cycle(s); ${dup} were already in the store.`));
-            else this._showToast(this._t('toast.store_device_shared', {n: created}, `Shared ${created} cycle(s) to the community store - pending review.`));
-          } catch (e) { this._showToast(this._t('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
+            if (failed) this._showToast(this._tText('toast.store_device_shared_partial', {n, failed}, `Shared ${n} cycle(s); ${failed} could not be uploaded.`), 'info');
+            else if (dup && !created) this._showToast(this._tText('toast.store_device_shared_all_dup', {n: dup}, `All ${dup} cycle(s) were already in the community store.`), 'info');
+            else if (dup) this._showToast(this._tText('toast.store_device_shared_some_dup', {created, dup}, `Shared ${created} cycle(s); ${dup} were already in the store.`));
+            else this._showToast(this._tText('toast.store_device_shared', {n: created}, `Shared ${created} cycle(s) to the community store - pending review.`));
+          } catch (e) { this._showToast(this._tText('toast.store_share_failed', {error: e.message || e}, 'Share failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13750,7 +13959,7 @@ class HaWashdataPanel extends HTMLElement {
             if (newLabel !== curLabel) await this._fetchFeedbacks(eid);
             await this._loadMlIndex(eid);
             if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
-          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13770,7 +13979,7 @@ class HaWashdataPanel extends HTMLElement {
         const gap = parseInt(sr.getElementById('wd-split-gap')?.value || '900', 10);
         await this._busyRun('cyc-auto', async () => {
           try { const r = await this._ws({ type: `${_DOMAIN}/analyze_split`, entry_id: eid, cycle_id: m.cycleId, gap_seconds: gap }); m.split.offsets = (r.split_offsets || []).slice(); m.split.profiles = []; if (!m.split.offsets.length) this._showToast(this._t('toast.no_split_found', {}, 'No idle gaps found to split on'), 'info'); }
-          catch (e) { this._showToast(this._t('toast.auto_detect_failed', {error: e.message || e}, 'Auto-detect failed: ' + (e.message || e)), 'error'); }
+          catch (e) { this._showToast(this._tText('toast.auto_detect_failed', {error: e.message || e}, 'Auto-detect failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13783,7 +13992,7 @@ class HaWashdataPanel extends HTMLElement {
         // a single click (#373).
         const full = (m.curve && m.curve.full_duration_s) || 0;
         const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
-        if (keptPct < 50 && !confirm(this._t('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
+        if (keptPct < 50 && !confirm(this._tText('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
         this._kickAndTrack(
           { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
           'cyc-trim-apply',
@@ -13803,7 +14012,7 @@ class HaWashdataPanel extends HTMLElement {
           { type: `${_DOMAIN}/apply_split`, entry_id: eid, cycle_id: cid, split_offsets: offs, segment_profiles: profs },
           'cyc-split-apply',
           async (result) => {
-            this._showToast(this._t('toast.split_complete', {count: (result.new_ids || []).length}, `Split into ${(result.new_ids || []).length} cycles`));
+            this._showToast(this._tText('toast.split_complete', {count: (result.new_ids || []).length}, `Split into ${(result.new_ids || []).length} cycles`));
             await this._closeCycleDetail(eid);
             await this._fetchCycles(eid);
             await this._fetchProfiles(eid);
@@ -13828,7 +14037,7 @@ class HaWashdataPanel extends HTMLElement {
         const phases = m.phases.filter(p => p.name).map(p => ({ name: p.name, start: p.start, end: p.end }));
         await this._busyRun('pp-phase-save', async () => {
           try { await this._ws({ type: `${_DOMAIN}/set_profile_phases`, entry_id: eid, profile_name: m.name, phases }); this._showToast(this._t('toast.phases_saved', {}, 'Phases saved')); }
-          catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+          catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13838,11 +14047,11 @@ class HaWashdataPanel extends HTMLElement {
         await this._busyRun('pp-cleanup-del', async () => {
           try {
             for (const cid of sel) await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: cid });
-            this._showToast(this._t('toast.cycles_deleted', {count: sel.length}, `Deleted ${sel.length} cycle(s)`));
+            this._showToast(this._tText('toast.cycles_deleted', {count: sel.length}, `Deleted ${sel.length} cycle(s)`));
             const r = await this._ws({ type: `${_DOMAIN}/get_profile_cycles`, entry_id: eid, profile_name: m.name });
             if (this._modal) this._modal.cleanup = { cycles: r.cycles || [], selected: new Set() };
             await this._fetchProfiles(eid);
-          } catch (e) { this._showToast(this._t('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('msg.toast_delete_failed', {error: e.message || e}, 'Delete failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13856,7 +14065,7 @@ class HaWashdataPanel extends HTMLElement {
         await this._busyRun('pp-cleanup-unlabel', async () => {
           try {
             for (const cid of sel) await this._ws({ type: `${_DOMAIN}/label_cycle`, entry_id: eid, cycle_id: cid, profile_name: null });
-            this._showToast(this._t('toast.unlabel_done', {count: sel.length}, `Unlabelled ${sel.length} cycle(s)`));
+            this._showToast(this._tText('toast.unlabel_done', {count: sel.length}, `Unlabelled ${sel.length} cycle(s)`));
             const r = await this._ws({ type: `${_DOMAIN}/get_profile_cycles`, entry_id: eid, profile_name: m.name });
             // Only adopt the fresh list if this very modal is still the open one; the
             // user may have closed it or moved to another profile while we ran.
@@ -13864,7 +14073,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._fetchProfiles(eid);
             await this._fetchCycles(eid);
             await this._fetchFeedbacks(eid);
-          } catch (e) { this._showToast(this._t('toast.unlabel_failed', {error: e.message || e}, 'Unlabel failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('toast.unlabel_failed', {error: e.message || e}, 'Unlabel failed: ' + (e.message || e)), 'error'); }
         });
         return;
       }
@@ -13881,7 +14090,7 @@ class HaWashdataPanel extends HTMLElement {
           // resaving that stale modal would drop it for real.
           await Promise.all([this._fetchProfiles(eid), this._fetchProfileGroups(eid)]);
           m.stats = (this._profiles || []).find(p => p.name === nn) || m.stats; this._render();
-        } catch (e) { this._showToast(this._t('toast.rename_failed', {error: e.message || e}, 'Rename failed: ' + (e.message || e)), 'error'); }
+        } catch (e) { this._showToast(this._tText('toast.rename_failed', {error: e.message || e}, 'Rename failed: ' + (e.message || e)), 'error'); }
         return;
       }
       if (action === 'pp-rebuild') {
@@ -14083,7 +14292,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!notes || !notes.length) { div.hidden = true; div.innerHTML = ''; return; }
       div.hidden = false;
       div.innerHTML = notes
-        .map(n => _esc(this._t(n.msgKey, n.msgVars, n.msgFb)))
+        .map(n => _esc(this._tText(n.msgKey, n.msgVars, n.msgFb)))
         .join('<br>');
     });
 
@@ -14100,7 +14309,7 @@ class HaWashdataPanel extends HTMLElement {
         div.hidden = false;
         if (fieldEl) fieldEl.classList.add('wd-has-conflict');
         div.innerHTML = errs.map(e => {
-          const msg = this._t(e.msgKey, e.msgVars, e.msgFb);
+          const msg = this._tText(e.msgKey, e.msgVars, e.msgFb);
           let fixHtml = '';
           if (e.suggFix != null) {
             const displaySug = +e.suggFix.toFixed(2);
@@ -14157,7 +14366,7 @@ class HaWashdataPanel extends HTMLElement {
     this._snapshotFormToPending(sr);
     if (autoChanged.size > 0) {
       const n = autoChanged.size, s = n > 1 ? 's' : '';
-      this._showToast(this._t('conflict.cascade_toast', {n}, `Other settings adjusted for consistency: ${n}`), 'success');
+      this._showToast(this._tText('conflict.cascade_toast', {n}, `Other settings adjusted for consistency: ${n}`), 'success');
     }
   }
 
@@ -14260,7 +14469,7 @@ class HaWashdataPanel extends HTMLElement {
     }
 
     if (this._invalidJson) {
-      this._showToast(this._t('toast.invalid_json', {key: this._invalidJson}, `"${this._invalidJson}" is not valid JSON - fix it or clear the field before saving.`), 'error');
+      this._showToast(this._tText('toast.invalid_json', {key: this._invalidJson}, `"${this._invalidJson}" is not valid JSON - fix it or clear the field before saving.`), 'error');
       return;
     }
     const conflicts = this._liveValidateSettings(sr);
@@ -14283,7 +14492,7 @@ class HaWashdataPanel extends HTMLElement {
             await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: safe });
             this._opts = { ...this._opts, ...safe };
             this._showToast(this._t('toast.saved_except_conflicts', {}, 'Saved. Fix the highlighted conflicts to save the rest.'), 'info');
-          } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+          } catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
         });
       } else {
         this._showToast(this._t('toast.settings_conflicts', {}, 'Fix the highlighted setting conflicts before saving.'), 'error');
@@ -14322,7 +14531,7 @@ class HaWashdataPanel extends HTMLElement {
           this._stagedSuggestions = false; this._suggestions = [];
         }
         this._showToast(this._t('toast.settings_saved', {}, 'Settings saved; integration reloading'));
-      } catch (e) { this._showToast(this._t('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
+      } catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
     });
   }
 }

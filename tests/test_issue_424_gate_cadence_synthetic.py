@@ -44,7 +44,6 @@ def _detector(**over) -> CycleDetector:
         min_power=0.1,
         off_delay=1800,
         device_type="dishwasher",
-        smoothing_window=1,
         completion_min_seconds=900,
         min_off_gap=3600,
         start_threshold_w=1.44,

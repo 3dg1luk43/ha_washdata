@@ -41,7 +41,7 @@ HEAT_W = 1500.0
 def _det(stop: float, ended: list) -> CycleDetector:
     cfg = CycleDetectorConfig(
         min_power=stop, off_delay=180, min_off_gap=480, device_type="washing_machine",
-        smoothing_window=1, completion_min_seconds=600,
+        completion_min_seconds=600,
         start_threshold_w=stop * 1.3 + 0.2, stop_threshold_w=stop,
     )
     match = ("30 / 2:09", 0.9, EXPECTED, None, False, False)

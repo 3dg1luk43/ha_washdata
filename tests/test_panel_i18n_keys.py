@@ -16,7 +16,7 @@ EN = (
     Path(__file__).resolve().parents[1]
     / "custom_components" / "ha_washdata" / "translations" / "panel" / "en.json"
 )
-_KEY = re.compile(r"_t\(\s*['\"`]([a-zA-Z0-9_.\-]+)['\"`]")
+_KEY = re.compile(r"_t(?:Text)?\(\s*['\"`]([a-zA-Z0-9_.\-]+)['\"`]")
 
 
 def _flatten(node: dict, prefix: str = "") -> set[str]:

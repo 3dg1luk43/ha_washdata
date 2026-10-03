@@ -143,8 +143,6 @@ def test_a_new_start_drops_what_a_false_start_left_pending() -> None:
 def _manager():
     from unittest.mock import AsyncMock, patch
 
-    from homeassistant.util import dt as dt_util
-
     from custom_components.ha_washdata.const import (
         CONF_DEVICE_TYPE,
         CONF_POWER_SENSOR,
@@ -162,7 +160,6 @@ def _manager():
     entry.options = {CONF_POWER_SENSOR: "sensor.p", CONF_DEVICE_TYPE: DEVICE_TYPE_WASHING_MACHINE}
     entry.data = {}
     hass.config_entries.async_get_entry.return_value = entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"):
         mgr = WashDataManager(hass, entry)
     mgr.learning_manager = MagicMock()

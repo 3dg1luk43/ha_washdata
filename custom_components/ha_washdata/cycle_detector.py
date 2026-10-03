@@ -28,6 +28,7 @@ import numpy as np
 
 from homeassistant.util import dt as dt_util
 
+from . import match_rules
 from .log_utils import DeviceLoggerAdapter
 from .time_utils import utc_now
 from .const import (
@@ -239,13 +240,11 @@ class CycleDetectorConfig:
     min_power: float
     off_delay: int
     device_type: str = DEVICE_TYPE_WASHING_MACHINE
-    smoothing_window: int = 5
     interrupted_min_seconds: int = 150
     completion_min_seconds: int = 600
     start_duration_threshold: float = 5.0
     start_energy_threshold: float = 0.005
     end_energy_threshold: float = 0.05  # 0.05 Wh (50 mWh) threshold for "still active"
-    end_repeat_count: int = 1
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
     stop_threshold_w: float = 2.0
@@ -718,6 +717,28 @@ class CycleDetector:
             and self._matched_profile
             and self._time_below_threshold >= DISHWASHER_MATCH_FREEZE_QUIET_SECONDS
         ):
+            # The freeze also stops the manager's match tick, the only place the #375
+            # sustained-quiet release ran: a verified pause engaged before the freeze
+            # was never released, and every ENDING finalize stayed blocked until the
+            # force stop (~8 h on a plug that keeps reporting 0 W; found by the F7
+            # parity harness on three TRON4R dishwasher cycles). Run the same rule here.
+            if self._verified_pause and not self._user_paused and self._power_readings:
+                pause = match_rules.decide_pause_release(
+                    verified_pause=True,
+                    current_matched=self._matched_profile,
+                    current_power=float(self._power_readings[-1][1]),
+                    stop_threshold_w=float(self._config.stop_threshold_w),
+                    user_paused=False,
+                    expected_duration=float(self._expected_duration or 0.0),
+                    current_duration=(
+                        self._power_readings[-1][0] - self._power_readings[0][0]
+                    ).total_seconds(),
+                    time_below=self._time_below_threshold_gapfree,
+                    program=self._matched_profile,
+                )
+                for level, msg, args in pause.log:
+                    self._logger.log(level, msg, *args)
+                self._verified_pause = pause.verified_pause
             return
 
         # Terminal-tail match freeze (anti-crease, #296): once a washer/dryer with

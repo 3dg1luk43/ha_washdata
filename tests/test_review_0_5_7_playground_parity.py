@@ -82,18 +82,29 @@ def test_the_playground_starts_from_the_live_templates() -> None:
     assert _key(snaps) == _key(st.build_match_snapshots(playground._PLAYGROUND_START_DT))
 
 
-def test_the_sim_regrids_a_sample_template_to_the_query_grid() -> None:
+def test_the_sim_regrids_every_template_to_the_query_grid() -> None:
+    """The sim's store view asks the live builder for each query grid.
+
+    Before, the sim re-gridded only when a template carried `sample_dt`, so a pool
+    of envelope templates (no `sample_dt`) stayed on the 5 s grid for a 13 s query
+    while live re-grids envelopes too (audit MATCH-CORE-01).
+    """
     st = _store()
-    snaps, _cfg, gm, ms = playground._build_match_snapshots(st)
-    sim = object.__new__(playground._DetailSim)
-    sim.store, sim.snapshots, sim.group_members, sim.member_snaps = st, snaps, gm, ms
-    sim._snap_by_dt = {}
+    prebuilt = playground._build_match_snapshots(st)
+    view = playground._SimStore(st, prebuilt[1], prebuilt)
 
-    sim._regrid_snapshots(13.0)
+    snaps = view.build_match_snapshots(13.0)
 
-    assert _key(sim.snapshots) == _key(st.build_match_snapshots(13.0))
-    quick = next(s for s in sim.snapshots if s["name"] == "Quick")
+    assert _key(snaps) == _key(st.build_match_snapshots(13.0))
+    quick = next(s for s in snaps if s["name"] == "Quick")
     assert quick["sample_dt"] == 13.0
+    cotton = next(s for s in snaps if s["name"] == "Cotton")
+    avg = st._data["envelopes"]["Cotton"]["avg"]
+    span = float(avg[-1][0]) - float(avg[0][0])
+    # On the 13 s grid (~552 points), not the 5 s one it was prebuilt on (1435).
+    assert abs(len(cotton["sample_power"]) - span / 13.0) <= 1.5
+    # The grouped view of the same grid is the one async_match_profile reads next.
+    assert view._grouped_snapshots(snaps)[0] is snaps
 
 
 def test_a_store_without_the_builder_keeps_the_legacy_path() -> None:

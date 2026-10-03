@@ -561,6 +561,15 @@ class LearningManager:
             self._logger.warning("Cycle data missing ID, cannot request feedback")
             return
 
+        # The user already chose this cycle's programme. Asking them to confirm the
+        # matcher's guess on top of it (warm-up, or a gate-refused match) is the
+        # request the v16 cleanup drops (_dismiss_unneeded_feedback); never raise it.
+        if cycle_data.get("label_source") == "manual":
+            self._logger.debug(
+                "Cycle %s was labelled by hand; no confirmation needed", cycle_id
+            )
+            return
+
         # Get Configured Thresholds
         entry = self.hass.config_entries.async_get_entry(self.entry_id)
         if not entry:
@@ -642,14 +651,11 @@ class LearningManager:
         except (TypeError, ValueError):
             envelope_suspicious = False
         # The cycle-end pass already labelled this cycle with a DIFFERENT programme
-        # (the post-cycle match on the complete trace), or the user picked it by
-        # hand: re-labelling here would overwrite that label - or its "manual"
-        # provenance - with this pass's guess.
+        # (the post-cycle match on the complete trace): re-labelling here would
+        # overwrite that label with this pass's guess. (A hand-picked label returned
+        # at the top.)
         _existing_label = cycle_data.get("profile_name")
-        if route_conf >= auto_label_conf and _existing_label and (
-            _existing_label != detected_profile
-            or cycle_data.get("label_source") == "manual"
-        ):
+        if route_conf >= auto_label_conf and _existing_label and _existing_label != detected_profile:
             self._logger.debug(
                 "Cycle %s already labelled '%s' at cycle end; not auto-labelling it",
                 cycle_id, _existing_label,
@@ -672,9 +678,11 @@ class LearningManager:
                         cycle_id, ml_quality, ML_QUALITY_SUSPICIOUS_THRESHOLD,
                     )
                 if envelope_suspicious:
+                    # Not a review request on its own (register item 433): a cycle
+                    # the cycle-end gate already labelled returns below unasked.
                     self._logger.info(
                         "Envelope conformance for cycle %s is low (%.2f < 0.40); "
-                        "downgrading auto-label to feedback request.",
+                        "not auto-labelling it here.",
                         cycle_id, _conformance,
                     )
                 # Fall through to feedback-request path below.

@@ -187,10 +187,13 @@ class GetPhaseCatalogResponse(TypedDict):
 
 # ─── Recording ─────────────────────────────────────────────────────────────────
 
-class GetRecordingStateResponse(TypedDict, total=False):
+class _GetRecordingStateBase(TypedDict):
+    state: str
+
+
+class GetRecordingStateResponse(_GetRecordingStateBase, total=False):
     """``state`` is always present; the remaining keys depend on the state."""
 
-    state: str
     duration_s: int
     sample_count: int
     start_time: str | None
@@ -279,17 +282,20 @@ class RunSuggestionAnalysisResponse(TypedDict, total=False):
 
 # ─── Cycle curve / interactive editing ─────────────────────────────────────────
 
-class GetCyclePowerDataResponse(TypedDict, total=False):
-    """``cycle_id`` / ``samples`` / ``sample_count`` / ``decimated`` /
-    ``full_duration_s`` are always present; the metadata keys are present only
-    when the cycle is found. ``sample_count`` is the stored point count and
-    ``decimated`` is True when ``samples`` was thinned below it (#395)."""
-
+class _GetCyclePowerDataBase(TypedDict):
     cycle_id: str
     samples: list[list[float]]
     sample_count: int
     decimated: bool
     full_duration_s: float
+
+
+class GetCyclePowerDataResponse(_GetCyclePowerDataBase, total=False):
+    """``cycle_id`` / ``samples`` / ``sample_count`` / ``decimated`` /
+    ``full_duration_s`` are always present (the required base); the metadata keys
+    are present only when the cycle is found. ``sample_count`` is the stored point
+    count and ``decimated`` is True when ``samples`` was thinned below it (#395)."""
+
     start_time: str | None
     end_time: str | None
     duration: float | None
@@ -343,14 +349,17 @@ class GetProfileCyclesResponse(TypedDict):
 
 # ─── Panel config + RBAC ───────────────────────────────────────────────────────
 
-class GetPanelConfigResponse(TypedDict, total=False):
-    """``panel`` / ``is_admin`` / ``user`` / ``prefs`` are always present;
-    ``rbac`` and ``users`` are added for admins only."""
-
+class _GetPanelConfigBase(TypedDict):
     panel: dict[str, Any]
     is_admin: bool
     user: dict[str, Any]
     prefs: dict[str, Any]
+
+
+class GetPanelConfigResponse(_GetPanelConfigBase, total=False):
+    """``panel`` / ``is_admin`` / ``user`` / ``prefs`` are always present (the
+    required base); ``rbac`` and ``users`` are added for admins only."""
+
     rbac: dict[str, Any]
     users: list[dict[str, Any]]
 
@@ -365,14 +374,17 @@ class GetMatchDebugResponse(TypedDict):
 
 # ─── Live power history ────────────────────────────────────────────────────────
 
-class GetPowerHistoryResponse(TypedDict, total=False):
-    """Base keys are always present; ``cycle_start_iso`` only while a cycle runs."""
-
+class _GetPowerHistoryBase(TypedDict):
     cycle_active: bool
     cycle_elapsed_s: float
     live: list[list[float]]
     raw: list[list[float]]
     restart_gaps: list[Any]
+
+
+class GetPowerHistoryResponse(_GetPowerHistoryBase, total=False):
+    """Base keys are always present; ``cycle_start_iso`` only while a cycle runs."""
+
     cycle_start_iso: str
 
 

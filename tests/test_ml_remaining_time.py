@@ -390,8 +390,12 @@ def test_end_to_end_prediction_rises_with_prefix() -> None:
     rng = np.random.default_rng(11)
     cycles = [_cycle(i, float(2400 + int(rng.integers(0, 3000)))) for i in range(24)]
     summary = train_from_cycles(cycles, "washing_machine", 2.0, "2026-07-03T02:00:00+00:00")
-    if not summary["promoted"].get("remaining_time"):
-        pytest.skip("regressor did not promote on this synthetic data")
+    # Seeded data and seeded splits: this promotes deterministically, so a failure
+    # to promote is the regression this test guards, not a reason to skip it
+    # (audit TESTING-13).
+    assert summary["promoted"].get("remaining_time"), (
+        "the remaining-time regressor did not promote on data it beats naive on"
+    )
     spec = summary["promoted"]["remaining_time"]["spec"]
 
     store = MagicMock()

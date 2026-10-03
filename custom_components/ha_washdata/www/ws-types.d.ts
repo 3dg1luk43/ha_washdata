@@ -93,11 +93,11 @@ export interface GetConstantsResponse {
 }
 
 export interface GetCyclePowerDataResponse {
-  cycle_id?: string;
-  samples?: number[][];
-  sample_count?: number;
-  decimated?: boolean;
-  full_duration_s?: number;
+  cycle_id: string;
+  samples: number[][];
+  sample_count: number;
+  decimated: boolean;
+  full_duration_s: number;
   start_time?: string | null;
   end_time?: string | null;
   duration?: number | null;
@@ -186,10 +186,10 @@ export interface GetOptionsResponse {
 }
 
 export interface GetPanelConfigResponse {
-  panel?: Record<string, unknown>;
-  is_admin?: boolean;
-  user?: Record<string, unknown>;
-  prefs?: Record<string, unknown>;
+  panel: Record<string, unknown>;
+  is_admin: boolean;
+  user: Record<string, unknown>;
+  prefs: Record<string, unknown>;
   rbac?: Record<string, unknown>;
   users?: Record<string, unknown>[];
 }
@@ -206,11 +206,11 @@ export interface GetPlaygroundSettingsResponse {
 }
 
 export interface GetPowerHistoryResponse {
-  cycle_active?: boolean;
-  cycle_elapsed_s?: number;
-  live?: number[][];
-  raw?: number[][];
-  restart_gaps?: unknown[];
+  cycle_active: boolean;
+  cycle_elapsed_s: number;
+  live: number[][];
+  raw: number[][];
+  restart_gaps: unknown[];
   cycle_start_iso?: string;
 }
 
@@ -241,7 +241,7 @@ export interface GetProfilesResponse {
 }
 
 export interface GetRecordingStateResponse {
-  state?: string;
+  state: string;
   duration_s?: number;
   sample_count?: number;
   start_time?: string | null;

@@ -51,6 +51,7 @@
         "quiet_tail_tip": "接近结束时，该程序会静默约 {mins} 分钟，然后在结束前以约 {watts} W 运行约 {secs} 秒。在已测量的 {measured} 个周期中有 {seen} 个出现过：设备并非每次运行都会如此。",
         "quiet_tail": "结尾静默约 {mins} 分钟",
         "artifact_tip": "检测到 {n} 个异常（例如，门在周期中打开）– 打开以在图表上查看",
+        "artifact_tip_other": "检测到 {n} 个异常（例如周期中途开门）- 打开即可在图表上查看",
         "auto": "（自动检测）",
         "built_in_tag": "内置",
         "declining": "↘ 下降中",
@@ -65,6 +66,7 @@
         "overrun": "运行时间超出正常",
         "poor_fit": "质量差",
         "restart_gap_tip": "{n} HA 重启间隙 - 电源跟踪有漏洞",
+        "restart_gap_tip_other": "{n} 个 HA 重启间隙：功率曲线存在缺口",
         "reviewed": "已审核",
         "steady": "→ 稳定",
         "underrun": "完成比通常更快",
@@ -222,6 +224,7 @@
         "back": "返回",
         "mute_suggestion": "停止建议此设置",
         "reset_muted": "重置已屏蔽",
+        "reset_phase_tip": "撤销您的编辑并恢复内置阶段",
         "import_power_history": "导入功率历史",
         "hist_read_recorder": "从 Home Assistant 读取",
         "hist_scan": "扫描周期",
@@ -437,6 +440,7 @@
         "models_fine_tuned": "（已微调的模型：{count}）",
         "n_selected": "已选 {n} 个",
         "n_tuning_suggestions": "{n} 调整建议",
+        "n_tuning_suggestions_other": "{n} 条调整建议",
         "new_profile_name": "新配置文件名称",
         "notes": "备注",
         "panel_default_tab": "默认标签",
@@ -634,7 +638,11 @@
         "show_internal": "显示内部设置",
         "show_internal_tip": "由集成自动为您设置的调校项（采样、看门狗、匹配频率、阈值）。当此设备有自定义值、冲突或建议时会自动显示。",
         "rate_n": "{n} 星",
-        "rate_quality": "评价质量"
+        "rate_quality": "评价质量",
+        "pg_autolabel": "自动标记",
+        "pg_label_review": "请求审查",
+        "pg_ev_match_reverted": "匹配已撤回",
+        "pg_ev_verified_pause": "已验证暂停"
     },
     "log": {
         "all_levels": "所有级别",
@@ -694,6 +702,8 @@
         "delete_automation_title": "删除自动化",
         "delete_automation_msg": "从 Home Assistant 中删除自动化“{name}”吗？此操作无法撤销。",
         "remove_legacy_title": "移除旧版操作",
+        "reset_phase_msg": "撤销对“{name}”的编辑并恢复内置阶段吗？程序会保留其范围。",
+        "reset_phase_title": "重置阶段",
         "remove_legacy_msg": "移除旧版自定义操作吗？它们将不再在周期事件上触发。此操作无法从面板撤销。",
         "discard_recording_title": "丢弃录制",
         "discard_recording_msg": "丢弃已保存的录制吗？此操作无法撤销。",
@@ -731,6 +741,7 @@
         "artifact_dip_detail": "跌破通常功率范围约 {n} 秒。",
         "artifact_footer": "在上图中高亮显示。这些是瞬态异常（例如门在周期中打开），不一定是问题。",
         "artifact_header": "此周期中检测到 {n} 个异常",
+        "artifact_header_other": "此周期中检测到 {n} 个异常",
         "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复 – 可能是周期中途开门或周期被暂停。",
         "artifact_spike_detail": "超出通常功率范围约 {n} 秒。",
         "auto_label_intro": "为置信度达到阈值的未标记周期分配配置文件。",
@@ -752,6 +763,7 @@
         "group_not_cohesive": "这些配置文件不够相似，无法可靠分组，因此匹配会单独处理它们，直到您移除离群值或拆分组。",
         "group_preview_hint": "勾选 2+ 个成员以预览并比较其功率曲线。",
         "legacy_actions_title": "{count} 个旧版自定义操作仍在运行",
+        "legacy_actions_title_other": "{count} 个旧版自定义操作仍在运行",
         "live_chart_loading": "实时功率图表将随读数到达而显示。",
         "loading": "加载中…",
         "loading_curve": "加载曲线…",
@@ -814,6 +826,7 @@
         "reminders_intro": "在上次保养后经过这么多个周期时在面板中显示提醒。留空或填 0 可关闭提醒。",
         "restart_gap_footer": "在图表上突出显示。这些间隔的功率数据缺失––仅使用真实读数进行匹配。",
         "restart_gap_header": "{n} 此周期内的 HA 重新启动间隔",
+        "restart_gap_header_other": "此周期内有 {n} 个 HA 重启间隙",
         "restart_gap_item": "{dur}间隙",
         "review_confirm_help": "确认此周期是否被正确检测。您的审查可在您的机器上训练模型 – 确认的周期越多，匹配和健康评分越好。快速的好/差就足够了。",
         "review_in_settings": "在设置中审查",
@@ -832,6 +845,7 @@
         "settings_basic_note": "正在显示基本设置。切换到高级可查看完整列表。",
         "show_all_settings": "显示所有设置",
         "showing_suggestions": "显示 {count} 个有建议的设置。",
+        "showing_suggestions_other": "正在显示 {count} 个有建议的设置。",
         "split_intro": "点击图表添加或删除分割点，或通过空闲间隔自动检测。每个结果片段可获得自己的配置文件。",
         "sug_staged": "已设置 {key} = {val}。保存以应用。",
         "toast_auto_detect_enabled": "自动检测已启用",
@@ -860,6 +874,7 @@
         "trim_destructive_confirm": "这将仅保留该周期的 {pct}%，且此操作无法撤销。是否继续？",
         "trim_intro": "拖动红色控制柄，或输入值。窗口外的所有内容将被移除。",
         "tuning_suggestions_available": "来自观察周期的 {count} 个调整建议可用。它们显示在相关字段旁边。",
+        "tuning_suggestions_available_other": "根据观察到的周期，共有 {count} 条调整建议可用。它们显示在相关字段旁边。",
         "unsure_detected_prefix": "WashData 不确定是否检测到",
         "warmup_badge": "仍在学习中（{done}/{needed} 个周期）",
         "warmup_detail": "匹配已在运行。在 WashData 自行标记之前，请先确认该配置文件的前 {needed} 个周期。",
@@ -922,6 +937,7 @@
         "sug_mute_failed": "无法屏蔽建议",
         "sug_unmuted_all": "已重置屏蔽的建议",
         "n_suggestions_muted": "已屏蔽 {count} 项，自动调整器将不再提议这些设置。",
+        "n_suggestions_muted_other": "已屏蔽 {count} 条建议，自动调整器将不再提议这些建议。",
         "font_size_hint": "调整此面板所有内容的字体大小，仅对您在此设备上的账户生效。",
         "import_history_description": "在使用 WashData 之前就已经有智能插座了？上传其功率传感器的历史导出文件，或直接从 Home Assistant 读取，常规检测会在这些数据上运行，过去的周期便会出现在您的周期列表中，等待命名。",
         "hist_input_hint": "上传从历史面板下载的 CSV（entity、state、last changed），或让 WashData 直接读取该传感器的历史。随后检测会像实时运行时一样在这些数据上运行，并由您选择保留其中哪些周期。",
@@ -957,11 +973,12 @@
         "connection_lost": "连接已断开，正在显示 {time} 的数据。",
         "pg_notify_partial": "通知标记仅涵盖开始、即将完成、完成、里程碑和免打扰时段。实时进度更新、卸载提醒和超时警报不会被模拟。",
         "connect_to_confirm": "在设置齿轮中连接以确认或评分。",
-        "coverage_gap_cluster": "最近有 {count} 个未标记周期（约 {min} 分钟）看起来是同一个您尚未创建的程序。"
+        "coverage_gap_cluster": "最近有 {count} 个未标记周期（约 {min} 分钟）看起来是同一个您尚未创建的程序。",
+        "pg_label_yes": "周期结束时将被标记为“{name}”",
+        "pg_label_no": "将请求审查：{reason}"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
-        "end_repeat_count": "结束前连续的低读数次数",
         "interrupted_min_seconds": "短周期标记为中断",
         "min_off_gap": "区分两个周期所需的间隔",
         "off_delay": "周期结束前低功率持续的秒数",
@@ -1644,6 +1661,7 @@
         "panel_settings_saved": "面板设置已保存",
         "pg_sugg_loaded": "已载入 {n} 个建议值 - 运行试验场以比较效果",
         "phase_name_required": "需要阶段名称",
+        "phase_reset": "“{name}”已恢复为内置阶段",
         "phase_updated": "阶段已更新",
         "phases_saved": "阶段已保存",
         "preferences_saved": "偏好已保存",
@@ -1886,7 +1904,9 @@
         "notify_finish": "将发送完成通知。",
         "notify_milestone": "将发送里程碑通知。",
         "notify_held": "由于处于免打扰时段，通知已被暂缓。",
-        "finished": "循环到达终止状态并已结束。"
+        "finished": "循环到达终止状态并已结束。",
+        "match_reverted": "程序退回到检测中：其得分已远低于自身峰值。",
+        "verified_pause": "实时对齐确认（或解除）了程序内的一次暂停。暂停保持期间，循环不会结束。"
     },
     "store": {
         "search_ph2": "按品牌或型号搜索…",
@@ -2010,5 +2030,13 @@
         "inherit": "继承",
         "none": "无（隐藏）",
         "read": "读取"
+    },
+    "pg_label_reason": {
+        "no_winner": "没有合适的程序",
+        "below_floor": "低于学习置信度",
+        "ambiguous": "被判定为不明确",
+        "margin": "与第二名过于接近",
+        "unknown_profile": "程序已不存在",
+        "not_evaluated": "未评估"
     }
 }

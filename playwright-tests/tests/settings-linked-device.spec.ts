@@ -13,6 +13,7 @@
 import { test, expect } from '@playwright/test';
 import { buildHandlers } from '../helpers/ws-handlers';
 import optionsData from '../fixtures/mock-data/options.json';
+import panelConfig from '../fixtures/mock-data/panel-config.json';
 import de from '../../custom_components/ha_washdata/translations/panel/de.json';
 
 const LINKED = 'dev-plug-1';
@@ -204,6 +205,8 @@ test('the #406 strings render from the German panel translation', async ({ page 
 
   const handlers = buildHandlers({
     'ha_washdata/get_options': { options: { ...optionsData, linked_device: 'dev-gone-42' } },
+    // Group Under Device is an Advanced field; the fixture boots Basic (audit UI-22).
+    'ha_washdata/get_panel_config': { ...panelConfig, prefs: { ...panelConfig.prefs, settings_level: 'advanced' } },
   });
   await page.evaluate(([h]: any) => { (window as any).__boot_panel(h, { devices: {} }); },
     [handlers] as any);

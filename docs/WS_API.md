@@ -584,7 +584,7 @@ _None._
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `state` | no | str |
+| `state` | yes | str |
 | `duration_s` | no | number |
 | `sample_count` | no | number |
 | `start_time` | no | str \| null |
@@ -963,11 +963,11 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `cycle_id` | no | str |
-| `samples` | no | list[list[number]] |
-| `sample_count` | no | number |
-| `decimated` | no | bool |
-| `full_duration_s` | no | number |
+| `cycle_id` | yes | str |
+| `samples` | yes | list[list[number]] |
+| `sample_count` | yes | number |
+| `decimated` | yes | bool |
+| `full_duration_s` | yes | number |
 | `start_time` | no | str \| null |
 | `end_time` | no | str \| null |
 | `duration` | no | number \| null |
@@ -1095,10 +1095,10 @@ _None._
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `panel` | no | dict[str, any] |
-| `is_admin` | no | bool |
-| `user` | no | dict[str, any] |
-| `prefs` | no | dict[str, any] |
+| `panel` | yes | dict[str, any] |
+| `is_admin` | yes | bool |
+| `user` | yes | dict[str, any] |
+| `prefs` | yes | dict[str, any] |
 | `rbac` | no | dict[str, any] |
 | `users` | no | list[dict[str, any]] |
 
@@ -1175,11 +1175,11 @@ _None._
 
 | Field | Always present | Type |
 | --- | --- | --- |
-| `cycle_active` | no | bool |
-| `cycle_elapsed_s` | no | number |
-| `live` | no | list[list[number]] |
-| `raw` | no | list[list[number]] |
-| `restart_gaps` | no | list[any] |
+| `cycle_active` | yes | bool |
+| `cycle_elapsed_s` | yes | number |
+| `live` | yes | list[list[number]] |
+| `raw` | yes | list[list[number]] |
+| `restart_gaps` | yes | list[any] |
 | `cycle_start_iso` | no | str |
 
 ## `ha_washdata/get_logs`

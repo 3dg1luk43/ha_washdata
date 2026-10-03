@@ -43,7 +43,6 @@ def _cfg(device_type: str = "washing_machine", min_power: float = 2.0, **over):
         min_power=float(min_power),
         off_delay=int(C.resolve_off_delay_default(device_type)),
         device_type=device_type,
-        smoothing_window=C.DEFAULT_SMOOTHING_WINDOW,
         interrupted_min_seconds=150,
         completion_min_seconds=C.DEVICE_COMPLETION_THRESHOLDS.get(
             device_type, C.DEFAULT_COMPLETION_MIN_SECONDS

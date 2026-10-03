@@ -18,7 +18,7 @@
 
 Single source of truth for the cycle-progress math. Both the live integration
 (``manager.WashDataManager`` - thin wrappers over these functions) and the
-Playground's headless simulation (``playground.SimRunner``) call the SAME
+Playground's headless replay (``playground.py``) call the SAME
 functions here, so the panel's what-if replay is byte-for-byte what the running
 integration computes. Nothing here touches Home Assistant; every function is
 pure given a ``ProfileStore`` (read-only), the entry options mapping, and a
@@ -788,7 +788,7 @@ def compute_progress(
     dt_seconds: float | None = None,
 ) -> ProgressResult | None:
     """Progress/remaining estimate: the one entry point for the manager and the
-    Playground SimRunner (the phase-resolved ETA blend that used to sit here was
+    Playground replay (the phase-resolved ETA blend that used to sit here was
     removed, audit PROGRESS-01/02: it never ran in production, and revived it was
     10% worse at 25% on washers)."""
     return _compute_progress_base(

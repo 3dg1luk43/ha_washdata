@@ -153,26 +153,38 @@ async def test_import_never_writes_the_display_name_into_options():
     assert CONF_NAME not in saved
 
 
-def test_the_guard_covers_the_keys_a_selector_can_clear():
-    """`ws_set_options` already enumerates the entity-selector options so a
-    cleared field becomes None. That list is the definition of "names a local
-    entity", so the import guard must not be narrower than it.
-    """
-    import inspect
+async def test_the_guard_covers_the_keys_a_selector_can_clear():
+    """`ws_set_options` turns a cleared entity selector into None, so the keys it
+    treats that way are the definition of "names a local entity". The import
+    guard must not be narrower than that set.
 
-    src = inspect.getsource(ws_api.ws_set_options)
-    selector_keys = {
-        name for name in (
-            "CONF_EXTERNAL_END_TRIGGER",
-            "CONF_DOOR_SENSOR_ENTITY",
-            "CONF_LINKED_DEVICE",
-            "CONF_SWITCH_ENTITY",
-            "CONF_ENERGY_SENSOR",
-        )
-        if name in src
-    }
-    guarded = {
-        name for name in selector_keys
-        if getattr(ws_api, name) in ws_api._IMPORT_LOCAL_BINDING_KEYS
-    }
-    assert guarded == selector_keys, f"not guarded on import: {selector_keys - guarded}"
+    The set is found by behaviour: every option key is saved once with a local
+    entity id and then cleared with "", and the ones the save unbinds are
+    collected. This replaced a search of `ws_set_options`' source text for five
+    hard-coded names, which could not see a sixth selector at all (audit
+    TESTING-13).
+    """
+    from custom_components.ha_washdata import const
+
+    numeric = ws_api.numeric_option_keys()
+    candidates = sorted({
+        value for name, value in vars(const).items()
+        if name.startswith("CONF_") and isinstance(value, str) and value not in numeric
+    })
+    cleared: set[str] = set()
+    for key in candidates:
+        entry = _entry({key: "binary_sensor.local_thing"})
+        hass, manager = _hass()
+        manager.profile_store.clear_store_account = AsyncMock()
+        with patch.object(ws_api, "_get_entry", return_value=entry):
+            await ws_api.ws_set_options.__wrapped__(
+                hass, MagicMock(), {"id": 1, "entry_id": "e1", "options": {key: ""}}
+            )
+        call = hass.config_entries.async_update_entry.call_args
+        if call is not None and call.kwargs["options"].get(key) is None:
+            cleared.add(key)
+
+    # Sanity: the discovery really finds the selectors the panel offers.
+    assert {CONF_DOOR_SENSOR_ENTITY, CONF_SWITCH_ENTITY} <= cleared, cleared
+    not_guarded = cleared - ws_api._IMPORT_LOCAL_BINDING_KEYS
+    assert not not_guarded, f"not guarded on import: {sorted(not_guarded)}"

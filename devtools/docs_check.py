@@ -25,11 +25,24 @@ checks, all stdlib-only, deterministic and network-free (CI runs this before any
    summaries and are skipped.
 4. **Em dash ratchet.** U+2014 per git-tracked text file must not rise (repo rule:
    no em dashes anywhere). A file not in the baseline is allowed zero.
+5. **Deep-dive identifiers.** In ``docs/internal/reference/*.md`` (outside fenced
+   code blocks), every identifier inside an inline code span that is a call
+   (``name(``), private (``_name``, ``self._name``) or an UPPER_SNAKE constant must
+   occur as a word in ``custom_components/ha_washdata/**/*.py``,
+   ``custom_components/ha_washdata/www/*.js`` (not the derived ``*.min.js``) or
+   ``devtools/**/*.py``. ``NAME_*``, a trailing ``_`` and the head of a slash
+   shorthand (``A_MIN/MAX_B``) are prefixes; a file name (``_x.py``), a glob or
+   placeholder suffix (``*_model``, ``{x}_y``, ``<id>_z``) and the tail of a slash
+   shorthand are not checked. History is how a deep-dive names removed code on
+   purpose: a block (paragraph, list item, table row or heading) that says
+   "removed in X.Y.Z" (or deleted / retired) AND cites a register item ("item 411")
+   is exempt; such a heading exempts its whole section. Same contract as FIXED
+   register rows: the register keeps the detail, the deep-dive keeps one pointer.
 
 Known historical failures live in ``devtools/docs_check_baseline.json`` (dead anchors
 that FIXED register rows name on purpose, the duplicate register ids, the em dash
-counts). Only NEW failures fail; an entry that is no longer needed is reported as a
-note so the baseline can be tightened.
+counts, deep-dive identifiers not yet refreshed). Only NEW failures fail; an entry
+that is no longer needed is reported as a note so the baseline can be tightened.
 
     python3 devtools/docs_check.py                    # report; exit 1 on any failure
     python3 devtools/docs_check.py --update-baseline  # rewrite the baseline from the tree
@@ -42,8 +55,10 @@ from __future__ import annotations
 
 import argparse
 import ast
+import bisect
 import json
 import operator
+import os
 import re
 import subprocess
 import sys
@@ -59,6 +74,9 @@ REFERENCE = "docs/internal/INTEGRATION_REFERENCE.md"
 ANCHOR_DOCS = ("CLAUDE.md", "README.md", REFERENCE)
 CONSTANT_DOCS = ("CLAUDE.md", "README.md")
 ANCHOR_ROOTS = (COMPONENT, "devtools", "tests")
+DEEP_DIVES = "docs/internal/reference"
+# (directory, suffix, recursive): the files whose words a deep-dive identifier must be among.
+IDENT_SOURCES = ((COMPONENT, ".py", True), (f"{COMPONENT}/www", ".js", False), ("devtools", ".py", True))
 EM_DASH = "\N{EM DASH}".encode()  # spelled by name so this file holds none
 TEXT_SUFFIXES = frozenset({
     ".md", ".py", ".js", ".mjs", ".cjs", ".ts", ".json", ".yaml", ".yml",
@@ -92,6 +110,17 @@ CONFIG_RANGE_RE = re.compile(r"schema v1->(\d+)\.(\d+)")
 # | <id> | <STATUS> | <KIND> | ...   (KIND is occasionally "-")
 REGISTER_ROW_RE = re.compile(r"^\|\s*(\d+[a-z]?(?:-\d+[a-z]?)?)\s*\|\s*[A-Z][^|\n]*\|[^|\n]+\|", re.M)
 
+# Deep-dive identifiers (check 5).
+CODE_SPAN_RE = re.compile(r"`([^`]+)`")
+IDENT_RE = re.compile(r"(?<![\w$])[A-Za-z_]\w*")
+UPPER_SNAKE_RE = re.compile(r"[A-Z][A-Z0-9]*_(?:[A-Z0-9]+_?)*")  # NAME_ (a prefix) included
+CALL_AFTER_RE = re.compile(r"\s*\(")
+FILE_AFTER_RE = re.compile(r"\.(?:py|js|mjs|cjs|ts|json|md|ya?ml|sh|txt|csv)\b")
+HEADING_RE = re.compile(r"^(#{1,6})\s")
+LIST_ITEM_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s")
+REMOVED_IN_RE = re.compile(r"\b(?:removed|deleted|retired)\s+in\s+v?\d+\.\d+(?:\.\d+)?\b", re.I)
+REGISTER_CITE_RE = re.compile(r"\bitems?\s+\d+[a-z]?\b", re.I)
+
 # Numbers CLAUDE.md states in prose, tied to the constant they come from:
 # (pattern, ((CONST or "1-CONST", scale), ...)) - one entry per capture group,
 # doc value == scale * const value. A pattern that no longer matches is skipped.
@@ -107,7 +136,8 @@ PROSE_CLAIMS = (
 
 FIX_HINT = (
     "-> fix the doc (or the code). Only history may be accepted instead: a FIXED register row "
-    "naming a since-removed symbol goes in the baseline via --update-baseline."
+    "naming a since-removed symbol goes in the baseline via --update-baseline; a deep-dive names "
+    "removed code in a block that says 'removed in X.Y.Z' and cites the register item."
 )
 
 
@@ -120,6 +150,7 @@ class Report:
     dead_anchors: list[tuple[str, str, int, str]] = field(default_factory=list)  # doc, anchor, line, why
     register_counts: Counter = field(default_factory=Counter)
     em_dash: dict[str, int] = field(default_factory=dict)
+    dead_identifiers: list[tuple[str, str, int]] = field(default_factory=list)  # doc, name, line
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -452,6 +483,118 @@ def check_em_dash(root: Path, report: Report) -> None:
     report.stats["em dashes"] = sum(counts.values())
 
 
+_WORD_BYTES = frozenset(b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")
+# bytes.translate + split tokenizes ~4 MB of source in a tenth of the time a regex takes.
+_NON_WORD_TO_SPACE = bytes(c if c in _WORD_BYTES else 0x20 for c in range(256))
+
+
+def _code_words(root: Path) -> set[str]:
+    """Every identifier-shaped word in IDENT_SOURCES (comments and strings included)."""
+    words: set[bytes] = set()
+    for base, suffix, recursive in IDENT_SOURCES:
+        for dirpath, dirnames, filenames in os.walk(root / base):
+            dirnames[:] = [] if not recursive else [
+                d for d in dirnames if d not in ("node_modules", "__pycache__") and not d.startswith(".")
+            ]
+            for name in filenames:
+                if name.endswith(suffix) and not name.endswith(".min.js"):
+                    data = (Path(dirpath) / name).read_bytes()
+                    words.update(data.translate(_NON_WORD_TO_SPACE).split())
+    return {w.decode("ascii") for w in words}
+
+
+def _blocks(lines: list[str]) -> list[tuple[list[int], bool]]:
+    """Paragraphs, list items, table rows and headings as line indexes, each with its history flag.
+
+    A block is history when it says "removed in X.Y.Z" and cites a register item; a
+    history heading makes everything up to the next heading of its level history too.
+    """
+    def is_history(text: str) -> bool:
+        return bool(REMOVED_IN_RE.search(text) and REGISTER_CITE_RE.search(text))
+
+    blocks: list[tuple[list[int], bool]] = []
+    block: list[int] = []
+    section: int | None = None  # level of the heading that opened a history section
+
+    def flush() -> None:
+        if block:
+            text = " ".join(lines[i] for i in block)
+            blocks.append((list(block), section is not None or is_history(text)))
+            block.clear()
+
+    for i, line in enumerate(lines):
+        heading = HEADING_RE.match(line)
+        if heading:
+            flush()
+            level = len(heading.group(1))
+            if section is not None and level <= section:
+                section = None
+            if section is None and is_history(line):
+                section = level
+            blocks.append(([i], section is not None))
+            continue
+        if not line.strip():
+            flush()
+            continue
+        row = line.lstrip().startswith("|")
+        if row or LIST_ITEM_RE.match(line):
+            flush()
+        block.append(i)
+        if row:
+            flush()
+    flush()
+    return blocks
+
+
+def _span_identifiers(span: str) -> list[tuple[str, bool]]:
+    """(name, is_prefix) for each call, private name or UPPER_SNAKE constant in a code span."""
+    out: list[tuple[str, bool]] = []
+    for m in IDENT_RE.finditer(span):
+        name, start, end = m.group(), m.start(), m.end()
+        before = span[start - 1] if start else ""
+        after = span[end: end + 1]
+        if before in ("*", "}", ">") or (before == "/" and start > 1 and _is_word(span[start - 2])):
+            continue  # glob / placeholder suffix, or the tail of a slash shorthand
+        if FILE_AFTER_RE.match(span, end):
+            continue  # a file name such as _parity.json
+        call = bool(CALL_AFTER_RE.match(span, end))
+        if not (call or name.startswith("_") or UPPER_SNAKE_RE.fullmatch(name)):
+            continue
+        prefix = after == "*" or name.endswith("_") or (after == "/" and _is_word(span[end + 1: end + 2]))
+        out.append((name, prefix))
+    return out
+
+
+def _is_word(ch: str) -> bool:
+    return ch.isalnum() or ch == "_"
+
+
+def check_deep_dive_identifiers(root: Path, report: Report) -> None:
+    docs = sorted((root / DEEP_DIVES).glob("*.md"))
+    words = _code_words(root) if docs else set()
+    ordered = sorted(words)
+    checked = 0
+    for path in docs:
+        doc = path.relative_to(root).as_posix()
+        lines = _strip_fences(path.read_text(encoding="utf-8")).split("\n")
+        for idxs, history in _blocks(lines):
+            text = "\n".join(lines[i] for i in idxs)
+            if history or "`" not in text:
+                continue
+            for m in CODE_SPAN_RE.finditer(text):  # a span may wrap onto the next line
+                line = idxs[0] + text.count("\n", 0, m.start()) + 1
+                for name, prefix in _span_identifiers(m.group(1).replace("\n", " ")):
+                    checked += 1
+                    if prefix:
+                        j = bisect.bisect_left(ordered, name)
+                        if j < len(ordered) and ordered[j].startswith(name):
+                            continue
+                    elif name in words:
+                        continue
+                    report.dead_identifiers.append((doc, name, line))
+    report.stats["deep-dive identifiers checked"] = checked
+
+
 # ── baseline ─────────────────────────────────────────────────────────────────
 
 
@@ -472,7 +615,17 @@ def baseline_from(report: Report) -> dict:
             i: n for i, n in sorted(report.register_counts.items(), key=lambda kv: _id_key(kv[0])) if n > 1
         },
         "em_dash": dict(sorted(report.em_dash.items())),
+        "deep_dive_identifiers": {
+            doc: sorted(names) for doc, names in sorted(_identifiers_by_doc(report).items())
+        },
     }
+
+
+def _identifiers_by_doc(report: Report) -> dict[str, set[str]]:
+    out: dict[str, set[str]] = defaultdict(set)
+    for doc, name, _line in report.dead_identifiers:
+        out[doc].add(name)
+    return out
 
 
 def _anchors_by_doc(report: Report) -> dict[str, set[str]]:
@@ -515,6 +668,18 @@ def apply_baseline(report: Report, baseline: dict) -> None:
     if shrunk:
         report.notes.append(f"em dash count fell in {shrunk} file(s); --update-baseline locks that in")
 
+    known_ids = {doc: set(v) for doc, v in baseline.get("deep_dive_identifiers", {}).items()}
+    for doc, name, line in report.dead_identifiers:
+        if name not in known_ids.get(doc, set()):
+            report.failures.append(
+                f"{doc}:{line}: `{name}` is not in the code - describe what the code does now, "
+                "or make the block history ('removed in X.Y.Z' + 'item N')"
+            )
+    found_ids = _identifiers_by_doc(report)
+    for doc, names in sorted(known_ids.items()):
+        for name in sorted(names - found_ids.get(doc, set())):
+            report.notes.append(f"baseline deep-dive identifier {doc}: `{name}` now resolves or is gone")
+
 
 def load_baseline(path: Path = BASELINE_PATH) -> dict:
     if not path.is_file():
@@ -528,6 +693,7 @@ def collect(root: Path = ROOT) -> Report:
     check_constants(root, report)
     check_register(root, report)
     check_em_dash(root, report)
+    check_deep_dive_identifiers(root, report)
     return report
 
 

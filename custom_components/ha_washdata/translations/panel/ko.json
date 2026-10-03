@@ -51,6 +51,7 @@
         "quiet_tail_tip": "이 프로그램은 끝날 무렵 약 {mins}분 동안 전력을 거의 쓰지 않다가, 종료 전에 약 {secs}초 동안 약 {watts} W를 사용합니다. 측정된 {measured}회 사이클 중 {seen}회에서 확인되었습니다: 기기가 매번 이렇게 동작하지는 않습니다.",
         "quiet_tail": "조용한 마무리 ~{mins}분",
         "artifact_tip": "{n} 이상 현상이 감지되었습니다(예: 사이클 중간에 문이 열림) - 열어서 그래프에서 확인",
+        "artifact_tip_other": "이상 현상 {n}건이 감지되었습니다(예: 사이클 중간에 문이 열림) - 열어서 그래프에서 확인하세요",
         "auto": "(자동 감지)",
         "built_in_tag": "내장",
         "declining": "↘ 악화",
@@ -65,6 +66,7 @@
         "overrun": "평소보다 오래 작동함",
         "poor_fit": "품질 낮음",
         "restart_gap_tip": "{n} HA 재시작 공백: 전력 그래프에 빈 구간이 있습니다",
+        "restart_gap_tip_other": "HA 재시작 공백 {n}개: 전력 그래프에 빈 구간이 있습니다",
         "reviewed": "검토됨",
         "steady": "→ 안정",
         "underrun": "평소보다 빨리 완료됨",
@@ -222,6 +224,7 @@
         "back": "뒤로",
         "mute_suggestion": "이 설정 제안 중지",
         "reset_muted": "뮤트 초기화",
+        "reset_phase_tip": "편집을 취소하고 기본 제공 단계를 복원합니다",
         "import_power_history": "전력 이력 가져오기",
         "hist_read_recorder": "Home Assistant에서 읽기",
         "hist_scan": "사이클 검색",
@@ -437,6 +440,7 @@
         "models_fine_tuned": "(미세 조정된 모델: {count})",
         "n_selected": "{n}개 선택됨",
         "n_tuning_suggestions": "{n} 조정 제안",
+        "n_tuning_suggestions_other": "조정 제안 {n}개",
         "new_profile_name": "새 프로필 이름",
         "notes": "메모",
         "panel_default_tab": "기본 탭",
@@ -634,7 +638,11 @@
         "show_internal": "내부 설정 표시",
         "show_internal_tip": "통합이 자동으로 설정하는 조정 항목입니다(샘플링, 워치독, 매칭 주기, 임계값). 이 기기에 자체 값, 충돌 또는 제안이 있으면 자동으로 표시됩니다.",
         "rate_n": "별 {n}개",
-        "rate_quality": "품질 평가"
+        "rate_quality": "품질 평가",
+        "pg_autolabel": "자동 라벨",
+        "pg_label_review": "검토 요청",
+        "pg_ev_match_reverted": "매칭 취소",
+        "pg_ev_verified_pause": "확인된 일시 중지"
     },
     "log": {
         "all_levels": "모든 레벨",
@@ -694,6 +702,8 @@
         "delete_automation_title": "자동화 삭제",
         "delete_automation_msg": "Home Assistant에서 자동화 \"{name}\"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
         "remove_legacy_title": "레거시 작업 제거",
+        "reset_phase_msg": "\"{name}\"에 대한 편집을 취소하고 기본 제공 단계를 복원하시겠습니까? 프로그램의 범위는 유지됩니다.",
+        "reset_phase_title": "단계 초기화",
         "remove_legacy_msg": "레거시 맞춤 작업을 제거하시겠습니까? 사이클 이벤트에서 더 이상 실행되지 않습니다. 이 작업은 패널에서 취소할 수 없습니다.",
         "discard_recording_title": "녹음 삭제",
         "discard_recording_msg": "저장된 녹음을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
@@ -731,6 +741,7 @@
         "artifact_dip_detail": "일반 전력 범위 아래로 약 {n}초 동안 내려갔습니다.",
         "artifact_footer": "위 그래프에 강조표시되어 있습니다. 이는 일시적인 아티팩트(예: 사이클 중간에 문이 열림)이며 반드시 문제가 되는 것은 아닙니다.",
         "artifact_header": "이 주기 동안 {n}개의 이상 현상이 감지되었습니다.",
+        "artifact_header_other": "이 사이클 동안 이상 현상 {n}건이 감지되었습니다.",
         "artifact_pause_detail": "전력이 약 {n}초 동안 거의 0으로 떨어진 후 재개되었습니다. 사이클 도중 문이 열리거나 일시 정지된 것으로 보입니다.",
         "artifact_spike_detail": "일반 전력 범위 위로 약 {n}초 동안 나타났습니다.",
         "auto_label_intro": "일치 신뢰도가 임계값을 클리어하는 레이블이 없는 주기에 프로필을 할당합니다.",
@@ -752,6 +763,7 @@
         "group_not_cohesive": "이러한 프로필은 안정적으로 그룹화할 만큼 유사하지 않으므로 일치는 이상값을 제거하거나 그룹을 분할할 때까지 프로필을 개별적으로 처리합니다.",
         "group_preview_hint": "2명 이상의 멤버를 선택하여 전력 곡선을 미리 보고 비교하세요.",
         "legacy_actions_title": "{count} 레거시 맞춤 작업이 아직 실행 중입니다.",
+        "legacy_actions_title_other": "레거시 맞춤 작업 {count}개가 아직 실행 중입니다.",
         "live_chart_loading": "판독값이 도착하면 실시간 전력 차트가 나타납니다.",
         "loading": "로드 중…",
         "loading_curve": "곡선 로드 중…",
@@ -814,6 +826,7 @@
         "reminders_intro": "마지막 서비스 이후 지정한 사이클 수가 지나면 패널에 알림을 표시합니다. 비워 두거나 0으로 설정하면 알림이 꺼집니다.",
         "restart_gap_footer": "그래프에서 강조 표시됩니다. 이 구간에 전력 데이터가 없습니다. 매칭에는 실제 측정값만 사용되었습니다.",
         "restart_gap_header": "{n} HA 재시작 공백 (이 사이클 중)",
+        "restart_gap_header_other": "이 사이클 중 HA 재시작 공백 {n}개",
         "restart_gap_item": "{dur} 공백",
         "review_confirm_help": "이 주기가 올바르게 감지되었는지 확인하십시오. 귀하의 리뷰는 귀하의 기계에서 모델을 훈련시킵니다. 더 많은 주기를 확인할수록 더 나은 일치 및 상태 점수를 얻을 수 있습니다. 빠른 좋음/나쁨이면 충분합니다.",
         "review_in_settings": "설정에서 검토",
@@ -832,6 +845,7 @@
         "settings_basic_note": "필수 설정만 표시하고 있습니다. 전체 목록을 보려면 고급으로 전환하세요.",
         "show_all_settings": "모든 설정 표시",
         "showing_suggestions": "제안사항과 함께 {count} 설정을 표시합니다.",
+        "showing_suggestions_other": "제안이 있는 설정 {count}개를 표시합니다.",
         "split_intro": "그래프를 클릭하여 분할 지점을 추가 또는 제거하거나 유휴 간격으로 자동 감지합니다. 각 결과 세그먼트는 자체 프로필을 얻을 수 있습니다.",
         "sug_staged": "{key} = {val} 설정됨. 저장하면 적용됩니다.",
         "toast_auto_detect_enabled": "자동 감지 활성화됨",
@@ -860,6 +874,7 @@
         "trim_destructive_confirm": "사이클의 {pct}%만 남으며 이 작업은 취소할 수 없습니다. 계속하시겠습니까?",
         "trim_intro": "빨간색 핸들을 드래그하거나 값을 입력합니다. 창 밖의 모든 것이 제거됩니다.",
         "tuning_suggestions_available": "관찰된 주기에서 사용할 수 있는 {count} 조정 제안입니다. 관련 필드 옆에 표시됩니다.",
+        "tuning_suggestions_available_other": "관찰된 사이클에서 조정 제안 {count}개를 사용할 수 있습니다. 관련 필드 옆에 표시됩니다.",
         "unsure_detected_prefix": "WashData가 감지되었는지 확실하지 않습니다.",
         "warmup_badge": "학습 중 ({done}/{needed} 사이클)",
         "warmup_detail": "매칭은 이미 실행 중입니다. WashData가 이 프로필의 사이클을 스스로 라벨링하기 전에 처음 {needed}개 사이클을 확인해 주세요.",
@@ -922,6 +937,7 @@
         "sug_mute_failed": "제안을 음소거할 수 없습니다",
         "sug_unmuted_all": "뮤트된 제안을 초기화했습니다",
         "n_suggestions_muted": "{count}개 뮤트됨. 자동 튜너가 이 설정들을 제안하지 않습니다.",
+        "n_suggestions_muted_other": "제안 {count}개가 뮤트됨. 자동 튜너가 이 제안들을 다시 제안하지 않습니다.",
         "font_size_hint": "이 패널의 모든 내용을 크거나 작게 표시합니다. 이 기기의 내 계정에 적용됩니다.",
         "import_history_description": "WashData를 사용하기 전에도 스마트 플러그를 쓰고 있었나요? 해당 전력 센서의 이력 내보내기 파일을 업로드하거나 Home Assistant에서 바로 읽어오면 평소와 같은 감지가 그 데이터에 실행되어, 과거 사이클이 사이클 목록에 나타나 이름을 지정할 수 있습니다.",
         "hist_input_hint": "이력 패널에서 다운로드한 CSV(entity, state, last changed)를 업로드하거나, WashData가 센서 이력을 직접 읽도록 하세요. 그러면 실시간과 똑같은 감지가 실행되고, 찾은 사이클 중 어떤 것을 보관할지 직접 선택합니다.",
@@ -957,11 +973,12 @@
         "connection_lost": "연결이 끊어졌습니다. {time} 기준 데이터를 표시합니다.",
         "pg_notify_partial": "알림 마커는 시작, 거의 완료, 완료, 마일스톤, 방해 금지 시간만 표시합니다. 실시간 진행 상황 업데이트, 꺼내기 알림, 초과 경고는 시뮬레이션되지 않습니다.",
         "connect_to_confirm": "확인하거나 평가하려면 설정(톱니바퀴)에서 연결하세요.",
-        "coverage_gap_cluster": "약 {min}분 길이의 최근 라벨 없는 사이클 {count}개가 아직 만들지 않은 하나의 프로그램으로 보입니다."
+        "coverage_gap_cluster": "약 {min}분 길이의 최근 라벨 없는 사이클 {count}개가 아직 만들지 않은 하나의 프로그램으로 보입니다.",
+        "pg_label_yes": "사이클 종료 시 \"{name}\"(으)로 라벨이 지정됩니다",
+        "pg_label_no": "검토를 요청합니다: {reason}"
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
-        "end_repeat_count": "종료 전 연속되는 낮은 측정값 횟수",
         "interrupted_min_seconds": "짧은 사이클은 중단으로 표시",
         "min_off_gap": "두 사이클을 구분하는 데 필요한 간격",
         "off_delay": "사이클 종료 전 저전력 지속 초",
@@ -1644,6 +1661,7 @@
         "panel_settings_saved": "패널 설정이 저장되었습니다.",
         "pg_sugg_loaded": "{n}개 제안 값을 적용했습니다 - 플레이그라운드에서 비교해 보세요",
         "phase_name_required": "단계 이름은 필수 항목입니다.",
+        "phase_reset": "\"{name}\"이(가) 기본 제공 단계로 복원되었습니다",
         "phase_updated": "단계가 업데이트되었습니다.",
         "phases_saved": "저장된 단계",
         "preferences_saved": "환경설정이 저장되었습니다.",
@@ -1886,7 +1904,9 @@
         "notify_finish": "완료 알림이 전송됩니다.",
         "notify_milestone": "마일스톤 알림이 전송됩니다.",
         "notify_held": "방해 금지 시간대라서 알림이 보류되었습니다.",
-        "finished": "사이클이 종료 상태에 도달하여 끝났습니다."
+        "finished": "사이클이 종료 상태에 도달하여 끝났습니다.",
+        "match_reverted": "프로그램이 감지 중 상태로 되돌아갔습니다. 점수가 자체 최고치보다 크게 떨어졌습니다.",
+        "verified_pause": "실시간 정렬이 프로그램 내부의 일시 중지를 확인(또는 해제)했습니다. 이 상태가 유지되는 동안에는 사이클이 종료되지 않습니다."
     },
     "store": {
         "search_ph2": "제조사 또는 모델명 검색…",
@@ -2010,5 +2030,13 @@
         "inherit": "상속",
         "none": "없음 (숨김)",
         "read": "읽기"
+    },
+    "pg_label_reason": {
+        "no_winner": "맞는 프로그램 없음",
+        "below_floor": "학습 신뢰도 미만",
+        "ambiguous": "모호함으로 표시됨",
+        "margin": "차순위와의 차이가 너무 작음",
+        "unknown_profile": "프로그램이 더 이상 존재하지 않음",
+        "not_evaluated": "평가되지 않음"
     }
 }

@@ -29,6 +29,15 @@ test('settings tab shows Basic/Advanced toggle', async ({ page }) => {
   await expect(toggle).toBeVisible({ timeout: 5_000 });
 });
 
+test('Basic, the production default, shows the device identity and power sensor (UI-22)', async ({ page }) => {
+  // The fixture now boots in Basic, as a fresh install does (audit UI-22); this
+  // is the screen most users see, and it once hid name and sensor (UI-02).
+  await expect(page.locator('#wd-settings-level-chk')).not.toBeChecked({ timeout: 5_000 });
+  await expect(page.locator('input[data-opt="name"]')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('input[data-opt="power_sensor"]')).toBeVisible();
+  await expect(page.locator('input[data-opt="name"]')).toHaveValue('Test Washer');
+});
+
 test('advanced mode shows more fields than basic mode', async ({ page }) => {
   const chk = page.locator('#wd-settings-level-chk');
   await expect(chk).toHaveCount(1, { timeout: 5_000 });
@@ -230,7 +239,15 @@ test('settings tab renders without overflow on mobile', async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(1);
 });
 
+// The fixture boots Basic, the production default (audit UI-22). Tests of
+// Advanced-only fields re-boot in Advanced explicitly.
+async function rebootAdvanced(page) {
+  await bootPanel(page, {}, {}, { settingsLevel: 'advanced' });
+  await clickTab(page, 'settings');
+}
+
 test('notification fields are present in settings', async ({ page }) => {
+  await rebootAdvanced(page);
   // Navigate to the Notifications section (separate from the default basic section)
   const notifSec = page.locator('button[data-sec="notifications"]').first();
   await expect(notifSec).toBeVisible({ timeout: 8_000 });
@@ -255,6 +272,7 @@ test('revert button appears when changes have been staged', async ({ page }) => 
 // see a single field - if that ever regresses, three bogus option keys get persisted.
 
 async function openProfileEvidence(page) {
+  await rebootAdvanced(page);
   const sec = page.locator('button[data-sec="matching"]').first();
   await expect(sec).toBeVisible({ timeout: 8_000 });
   await sec.click();

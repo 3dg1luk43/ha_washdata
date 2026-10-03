@@ -272,14 +272,26 @@ def test_ensure_gzip_leaves_no_temp_files(tmp_path: Path) -> None:
 
 
 def test_ensure_gzip_survives_readonly_dir(tmp_path: Path) -> None:
-    """A read-only install must serve uncompressed, not raise."""
+    """A read-only install must serve uncompressed, not raise.
+
+    The directory's refusal is injected rather than produced with `chmod 0o500`:
+    root ignores directory permissions, and both the dev box and the testbox run
+    as root, so the chmod version never saw a refused write (audit TESTING-13).
+    Both writes a read-only directory refuses are refused here: creating the
+    temp file, and removing a sibling that could be stale.
+    """
+    from unittest.mock import patch
+
     target = tmp_path / "asset.js"
     target.write_text("data\n")
-    os.chmod(tmp_path, 0o500)
-    try:
+    refused = PermissionError(13, "Read-only file system")
+    with patch("tempfile.mkstemp", side_effect=refused) as mkstemp, \
+            patch.object(Path, "unlink", side_effect=refused) as unlink:
         fe._ensure_gzip(target)  # must not raise
-    finally:
-        os.chmod(tmp_path, 0o700)
+
+    mkstemp.assert_called_once()
+    unlink.assert_called_once()
+    assert not (tmp_path / "asset.js.gz").exists()
 
 
 def test_prepare_asset_returns_served_path_and_compresses(tmp_path: Path) -> None:

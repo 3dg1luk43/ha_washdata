@@ -61,7 +61,7 @@ CONF_NOTIFY_LIVE_SERVICES = "notify_live_services"
 CONF_NOTIFY_CYCLE_TIMERS = "notify_cycle_timers"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
 CONF_LOW_POWER_NO_UPDATE_TIMEOUT = "low_power_no_update_timeout"
-CONF_SMOOTHING_WINDOW = "smoothing_window"
+CONF_SMOOTHING_WINDOW = "smoothing_window"  # Removed in 0.5.8: never read; key kept for old migrations
 CONF_SAMPLING_INTERVAL = "sampling_interval"
 CONF_START_DURATION_THRESHOLD = (
     "start_duration_threshold"  # Debounce for start detection
@@ -87,7 +87,7 @@ CONF_MATCH_PERSISTENCE = "match_persistence"
 CONF_COMPLETION_MIN_SECONDS = "completion_min_seconds"
 CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
 CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # REMOVED in 0.5.3 — was never wired to detection
-CONF_END_REPEAT_COUNT = "end_repeat_count"  # Number of times end condition must be met
+CONF_END_REPEAT_COUNT = "end_repeat_count"  # Removed in 0.5.8: the detector never read it; stored values are ignored
 CONF_MIN_OFF_GAP = "min_off_gap"  # Minimum gap to separate cycles (seconds)
 CONF_START_ENERGY_THRESHOLD = "start_energy_threshold"  # Wh required to confirm start
 CONF_END_ENERGY_THRESHOLD = "end_energy_threshold"  # Wh allowed during end candidates
@@ -376,7 +376,7 @@ DEFAULT_WATCHDOG_INTERVAL = 30  # Floor; effective default is resolved per devic
 WATCHDOG_LATE_TICK_FACTOR = 2.5
 # as max(this, 2*sampling_interval + 1) - see resolve_watchdog_interval_default (#396).
 DEFAULT_MATCH_PERSISTENCE = 3
-DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
+DEFAULT_END_REPEAT_COUNT = 1  # Removed setting (see CONF_END_REPEAT_COUNT)
 
 # Share of the SHORTEST known profile that the match-interval suggestion is
 # allowed to spend before a program can first be committed (#431).  The
@@ -1495,14 +1495,14 @@ def resolve_smart_termination_duration_ratio_default(device_type: str) -> float:
         device_type, DEFAULT_SMART_TERMINATION_DURATION_RATIO
     )
 
-# Profile groups (Stage 5): the matcher only collapses a group into one
-# aggregate candidate when its members' minimum pairwise shape similarity is at
-# least this. Similarity is DTW/Sakoe-Chiba on peak-normalised envelopes, so it
-# tolerates the duration (longer heating/draining) and amplitude (temp/spin)
-# variation between real members. Looser groups stay individual (a blurry generic
-# aggregate could out-match unrelated profiles) and are flagged in the UI.
-# Calibrated on real profiles: genuine temp/spin variants score ~0.86-0.95,
-# distinct programs <~0.6; 0.80 leaves margin below the 0.85 suggestion bar.
+# Profile groups (Stage 5): a group is mapped to its members (and so collapsed into
+# one family after every member is scored on its own curve) only when the members'
+# minimum pairwise shape similarity is at least this. There is no aggregate
+# candidate any more (#400). Similarity is DTW/Sakoe-Chiba on peak-normalised
+# envelopes, so it tolerates the duration (longer heating/draining) and amplitude
+# (temp/spin) variation between real members. Looser groups stay individual and are
+# flagged in the UI. Calibrated on real profiles: genuine temp/spin variants score
+# ~0.86-0.95, distinct programs <~0.6.
 GROUP_MIN_COHESION = 0.80
 
 # Per-profile terminal signature (`profile_store.compute_profile_terminal_signature`).
@@ -1535,9 +1535,9 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 # v9: pre-initialize additive top-level keys (lifetime_energy_wh,
 # settings_changelog, maintenance_log) so they are present from first load
 # rather than only appearing lazily on first use.
-# v11 is a marker-only bump: per-phase profiles (envelope["phase_profile"]) are
-# derived cache populated by async_rebuild_envelope, so no data migration is
-# needed - they self-populate on the next envelope rebuild.
+# v11 is a marker-only bump. It introduced a per-phase envelope cache for the
+# phase-resolved ETA, removed with that stack in 0.5.8 (register item 411); the
+# version stays because a store version can never go back down.
 # v12: initialize `backfill_cycles`, the third cycle list (issue #344). Cycles
 # recovered from raw power history predating the integration are auto-detected and
 # unverified, so they belong in neither `past_cycles` (which feeds lifetime stats, ML
@@ -1550,6 +1550,8 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 # v15: label provenance repair (audit MANAGER-01): cycles the user confirmed or
 # corrected in the review queue are stamped `label_source="manual"`, and an answer
 # the panel's Auto-label had replaced is put back. Pure data, idempotent.
+# v16: review-queue cleanup (register item 433): pending requests the new rule
+# would not raise are dropped, without recording an answer. Idempotent.
 STORAGE_VERSION = 16
 STORAGE_KEY = "ha_washdata"
 

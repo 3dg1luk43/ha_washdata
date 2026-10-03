@@ -48,7 +48,6 @@ from .const import (
     CONF_DELAY_TIMEOUT_HOURS,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     CONF_END_ENERGY_THRESHOLD,
-    CONF_END_REPEAT_COUNT,
     CONF_INTERRUPTED_MIN_SECONDS,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
@@ -60,7 +59,6 @@ from .const import (
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_SMART_TERMINATION_DURATION_RATIO,
-    CONF_SMOOTHING_WINDOW,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_WATCHDOG_INTERVAL,
@@ -80,7 +78,6 @@ from .const import (
     DEFAULT_DELAY_START_DETECT_ENABLED,
     DEFAULT_DELAY_TIMEOUT_HOURS,
     DEFAULT_END_ENERGY_THRESHOLD,
-    DEFAULT_END_REPEAT_COUNT,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
     DEFAULT_MIN_POWER,
     DEFAULT_POWER_OFF_DELAY,
@@ -94,7 +91,6 @@ from .const import (
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-    DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
     DEVICE_COMPLETION_THRESHOLDS,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
@@ -172,7 +168,6 @@ def build_detector_config(
     return CycleDetectorConfig(
         min_power=min_power,
         off_delay=off_delay,
-        smoothing_window=int(opt(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)),
         # Never above the device's own completion floor: the flat 150 s overrode a
         # pump's 5 s, so every pump run under 150 s was stored `interrupted` and
         # dropped from cadence learning, suggestions and baselines (DETECT-07). For
@@ -197,7 +192,6 @@ def build_detector_config(
         start_duration_threshold=float(
             opt(CONF_START_DURATION_THRESHOLD, resolve_start_duration_default(device_type))
         ),
-        end_repeat_count=int(opt(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)),
         min_off_gap=int(opt(CONF_MIN_OFF_GAP, resolve_min_off_gap_default(device_type))),
         profile_duration_tolerance=float(
             opt(CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE)

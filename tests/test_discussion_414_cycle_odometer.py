@@ -484,13 +484,21 @@ async def test_concurrent_corrections_are_serialized(store):
     save fails, and A restores 10 over it.
     """
     _seed(store, 10)
+    in_flight = {"now": 0, "max": 0}
+    recorded: list[dict] = []
 
     async def record(changes):
-        new = changes[0]["new"]
-        await asyncio.sleep(0)  # yield, so an unlocked handler really interleaves
-        if new == 4000:
-            raise OSError("disk full")
-        store._data["settings_changelog"] = list(changes)
+        in_flight["now"] += 1
+        in_flight["max"] = max(in_flight["max"], in_flight["now"])
+        try:
+            new = changes[0]["new"]
+            await asyncio.sleep(0)  # yield, so an unlocked handler really interleaves
+            if new == 4000:
+                raise OSError("disk full")
+            store._data["settings_changelog"] = list(changes)
+            recorded.extend(changes)
+        finally:
+            in_flight["now"] -= 1
 
     store.async_record_settings_changes = AsyncMock(side_effect=record)
 
@@ -510,6 +518,12 @@ async def test_concurrent_corrections_are_serialized(store):
     conn_a.send_error.assert_called_once()
     conn_b.send_error.assert_not_called()
     assert store.get_lifetime_cycle_count() == 5000
+    # Serialized, not merely surviving: the compare-and-swap rollback alone keeps
+    # 5000 above, so that assert passes without the lock too (audit TESTING-13
+    # Q-09). Without it B read A's never-committed 4000 as its `previous` and
+    # recorded a changelog step from a value the store never held.
+    assert in_flight["max"] == 1, "the two corrections' saves overlapped"
+    assert recorded == [{"key": "lifetime_cycle_count", "old": 10, "new": 5000}]
 
 
 async def test_a_reload_during_the_save_does_not_notify_a_detached_manager(store):

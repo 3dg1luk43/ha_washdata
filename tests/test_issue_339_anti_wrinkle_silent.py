@@ -35,7 +35,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 
 import pytest
 
-from homeassistant.util import dt as dt_util
+from homeassistant.core import State
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_OFF_DELAY, STATE_ANTI_WRINKLE,
@@ -72,7 +72,6 @@ def mock_entry() -> Any:
 @pytest.fixture
 def manager(mock_hass: Any, mock_entry: Any) -> WashDataManager:
     mock_hass.config_entries.async_get_entry.return_value = mock_entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
          patch("custom_components.ha_washdata.manager.CycleDetector"):
         mgr = WashDataManager(mock_hass, mock_entry)
@@ -82,19 +81,33 @@ def manager(mock_hass: Any, mock_entry: Any) -> WashDataManager:
 
 @pytest.mark.asyncio
 async def test_keepalive_injects_zero_when_sensor_silent(manager: WashDataManager) -> None:
-    """A silent anti-wrinkle tail gets a synthetic 0 W reading so the mode can exit."""
+    """A silent anti-wrinkle tail gets a synthetic 0 W reading so the mode can exit.
+
+    The sensor's last report is a real 150 W tumble pulse, so "0 W, not the
+    sensor's last value" is observable. Under a bare MagicMock hass the state
+    lookup fails (its `last_reported` is not a datetime), the keepalive's read
+    falls back to 0.0, and injecting the sensor value instead was
+    indistinguishable from the contract (audit TESTING-13 Q-07).
+    """
     now = datetime.now(timezone.utc)
     manager.detector.state = STATE_ANTI_WRINKLE
     manager._cycle_completed_time = now - timedelta(minutes=30)
     # Real sensor last reported well beyond off_delay ago -> genuinely silent.
-    manager._last_real_reading_time = now - timedelta(seconds=manager._off_delay + 120)
+    silent_since = now - timedelta(seconds=manager._off_delay + 120)
+    manager._last_real_reading_time = silent_since
+    pulse = State("sensor.test_power", "150.0", last_reported=silent_since,
+                  last_updated=silent_since, last_changed=silent_since)
+    manager.hass.states.get = MagicMock(return_value=pulse)
+    assert manager._keepalive_reading() == (150.0, True)
 
     await manager._handle_state_expiry(now)
 
     manager.detector.process_reading.assert_called_once()
     args = manager.detector.process_reading.call_args.args
-    assert args[0] == 0.0
+    kwargs = manager.detector.process_reading.call_args.kwargs
+    assert args[0] == 0.0, "the keepalive must inject 0 W, not the stale pulse"
     assert args[1] == now
+    assert kwargs == {"synthetic": True, "observed": True}
 
 
 @pytest.mark.asyncio
@@ -137,7 +150,6 @@ async def test_restore_into_anti_wrinkle_seeds_keepalive_anchor(
     last-save time (which is itself driven by real readings).
     """
     mock_hass.config_entries.async_get_entry.return_value = mock_entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
          patch("custom_components.ha_washdata.manager.CycleDetector"):
         mgr = WashDataManager(mock_hass, mock_entry)

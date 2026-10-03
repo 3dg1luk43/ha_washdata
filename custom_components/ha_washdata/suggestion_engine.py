@@ -1100,11 +1100,10 @@ class SuggestionEngine:
         # derivation for a publish-on-change sensor that skips at most one
         # sample.  The old 3x multiple polled ~6x slower than the sensor updates
         # and delayed end detection for no safety benefit.
-        # Floor at 2 x median + 1 so the suggestion pre-satisfies reconciler
-        # Rule 3a (watchdog >= 2 x sampling_interval) when CONF_SAMPLING_INTERVAL
-        # is suggested from the same median_dt.  Without this, a regular sensor
-        # (p95 ≈ median) would produce ceil(p95)+1 which Rule 3a then silently
-        # overwrites, leaving a stored value whose reason text no longer matches.
+        # Floor at 2 x median + 1: a publish-on-change sensor can skip one sample,
+        # so the watchdog must outlast two update intervals. (This used to also
+        # pre-satisfy reconciler Rule 3a, removed with the sampling_interval
+        # suggestion, audit SUGGEST-04.)
         suggested_watchdog = int(max(30, max(math.ceil(p95_dt) + 1,
                                             2 * math.ceil(median_dt) + 1)))
         suggestions[CONF_WATCHDOG_INTERVAL] = {
@@ -1940,7 +1939,6 @@ class SuggestionEngine:
         aggregates statistics across *multiple* cycles for robustness:
 
         - Power thresholds from the 5th-percentile minimum active power.
-        - Dead zone from the 75th-percentile of early dips across cycles.
         - End-energy threshold from the maximum false-end energy seen.
         - Min-off-gap from the 5th-percentile inter-cycle gap.
 

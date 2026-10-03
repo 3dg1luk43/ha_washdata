@@ -78,7 +78,6 @@ def _cfg(opts: dict, device_type: str, min_off_gap: int) -> CycleDetectorConfig:
         start_duration_threshold=float(g("start_duration_threshold", 5.0)),
         start_energy_threshold=float(g("start_energy_threshold", 0.2)),
         end_energy_threshold=float(g("end_energy_threshold", 0.05)),
-        end_repeat_count=int(g("end_repeat_count", 1)),
         min_off_gap=min_off_gap,
         start_threshold_w=float(g("start_threshold_w", 2.0)),
         stop_threshold_w=float(g("stop_threshold_w", 2.0)),

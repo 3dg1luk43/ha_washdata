@@ -275,64 +275,52 @@ def test_force_end(detector_config, mock_callbacks):
     
     # Old assertion removed: 300 < 600 check is no longer valid for 1200s test
 
-def test_end_repeat_count_accumulates_across_periods(mock_callbacks):
-    """Test that end_condition_count accumulates across low-power periods.
-    
-    When end_repeat_count > 1, the counter should persist across resets of
-    low_power_start. This allows the detector to require multiple periods
-    of low power (each >= off_delay) before ending the cycle.
+def test_low_power_end_waits_out_the_off_delay(mock_callbacks):
+    """A drop to idle is not the end until the quiet has lasted the off_delay.
+
+    This used to be `test_end_repeat_count_accumulates_across_periods`, built with
+    `end_repeat_count=2` and asserting "need 2 periods". The detector never reads
+    `end_repeat_count` (`CycleDetectorConfig.end_repeat_count` is a dead field),
+    so the test certified a knob that does nothing; its timeline passes the same
+    with the default (audit TESTING-13 Q-11). What it actually pins is the quiet
+    wait, so that is what it now says.
     """
     config = CycleDetectorConfig(
         min_power=5.0,
         off_delay=60,
         interrupted_min_seconds=150,
         completion_min_seconds=600,
-        end_repeat_count=2,  # Require 2 periods of low power
         start_duration_threshold=0.0,  # Disable start debounce
     )
-    
+
     detector = CycleDetector(
         config=config,
         on_state_change=mock_callbacks["on_state_change"],
         on_cycle_end=mock_callbacks["on_cycle_end"],
     )
-    
-    # Start cycle
+
     detector.process_reading(100.0, dt(0))
-    detector.process_reading(100.0, dt(1)) # Confirm start
+    detector.process_reading(100.0, dt(1))  # Confirm start
     assert detector.state == STATE_RUNNING
-    
-    # Run for 15 mins (enough to exceed completion_min_seconds of 600)
+    # Run for 15 mins (past completion_min_seconds of 600)
     for t in range(10, 900, 10):
         detector.process_reading(100.0, dt(t))
-    
-    # Enter first low-power period at t=900
-    detector.process_reading(1.0, dt(900))
-    # In vNext, this transitions to ENDING (waiting for confirmation) or PAUSED?
-    # If off_delay=60, it likely enters ENDING state logic internally but state remains RUNNING/ENDING?
-    # Check if detector helper method exists or removed.
-    # Assuming removed, we check behaviour via state or internal flag if accessible.
-    # For now, let's skip is_waiting_low_power check or verify state is NOT OFF.
-    assert detector.state != STATE_OFF
-    
-    # Wait past first off_delay (60s) -> counter should increment to 1
-    detector.process_reading(1.0, dt(961))
-    # Cycle should NOT end yet (need 2 periods)
-    # Cycle should NOT end yet (need 2 periods)
-    assert detector.state in (STATE_RUNNING, STATE_ENDING, STATE_PAUSED)
+
+    # Drop to idle, reporting every 10 s. The run pauses, then waits in ENDING;
+    # none of that is an end while the quiet is shorter than off_delay (60 s).
+    states = []
+    for t in range(900, 960, 10):
+        detector.process_reading(1.0, dt(t))
+        states.append(detector.state)
+    assert states[0] == STATE_RUNNING
+    assert STATE_PAUSED in states
+    assert states[-1] == STATE_ENDING
     mock_callbacks["on_cycle_end"].assert_not_called()
-    
-    # low_power_start should now be reset, but counter should persist
-    # Next reading at t=962 should start a new low-power period
-    detector.process_reading(1.0, dt(962))
-    
-    # Wait past second off_delay -> counter should increment to 2
-    detector.process_reading(1.0, dt(1023))  # 962 + 61 = 1023
-    
-    # Now cycle should end
+
+    # 60 s of quiet: the cycle ends once, completed.
+    detector.process_reading(1.0, dt(960))
     assert detector.state == STATE_FINISHED
     mock_callbacks["on_cycle_end"].assert_called_once()
-    
     cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
     assert cycle_data["status"] == "completed"
 

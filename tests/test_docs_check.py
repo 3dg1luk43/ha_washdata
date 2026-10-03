@@ -1,7 +1,7 @@
 """devtools/docs_check.py: the docs consistency gate (audit F9).
 
-The first test is the gate itself: the real CLAUDE.md / README.md / register against the
-real code and the committed baseline. The rest pin each check's behaviour on a tiny
+The first test is the gate itself: the real CLAUDE.md / README.md / register / deep-dives
+against the real code and the committed baseline. The rest pin each check's behaviour on a tiny
 synthetic tree, so a regex that silently stops matching cannot turn the gate into a no-op.
 """
 from __future__ import annotations
@@ -38,6 +38,7 @@ def test_docs_match_the_code() -> None:
     assert report.stats["anchors checked"] > 100
     assert report.stats["constant claims checked"] >= 10
     assert report.stats["register ids"] > 300
+    assert report.stats["deep-dive identifiers checked"] > 1000
 
 
 def test_anchor_check(tmp_path: Path) -> None:
@@ -124,3 +125,61 @@ def test_em_dash_ratchet_and_round_trip() -> None:
     fresh = dc.Report(em_dash=dict(report.em_dash), dead_anchors=list(report.dead_anchors))
     dc.apply_baseline(fresh, dc.baseline_from(fresh))
     assert fresh.failures == []
+
+
+def test_deep_dive_identifier_check(tmp_path: Path) -> None:
+    _write(tmp_path, f"{dc.COMPONENT}/mod.py", (
+        "LIMIT_LOW = 1\n"
+        "def alive():\n    pass\n"
+        "class Box:\n    def lid(self):\n        self._hinge = 21_600\n"
+        "# _comment_only is named in a comment\n"
+    ))
+    _write(tmp_path, f"{dc.COMPONENT}/ml/engine.py", "def resolve_scorer():\n    pass\n")
+    _write(tmp_path, f"{dc.COMPONENT}/www/panel.js", "function _jsHelper() { return PANEL_KEY_X; }\n")
+    _write(tmp_path, f"{dc.COMPONENT}/www/panel.min.js", "MIN_ONLY_NAME\n")  # derived build: not a source
+    _write(tmp_path, "devtools/eval.py", "def _tool_fn():\n    pass\n")
+    _write(tmp_path, "devtools/node_modules/pkg/x.py", "NODE_ONLY_NAME = 1\n")
+    _write(tmp_path, "tests/test_x.py", "TEST_ONLY_NAME = 1\n")  # tests are not a source either
+    _write(tmp_path, f"{dc.DEEP_DIVES}/01-x.md", (
+        "# Title\n"                                                                  # 1
+        "Alive: `alive()`, `Box.lid()`, `self._hinge`, `LIMIT_LOW`, `LIMIT_*`, `resolve_scorer(x)`,\n"
+        "`_jsHelper()`, `PANEL_KEY_X`, `_tool_fn`, `_comment_only`, `LIMIT_LOW/HIGH_X`.\n"
+        "Unchecked: `plain_name`, `CamelCase`, `_parity.json`, `*_model.py`, `test_{a,b}_cols`,\n"
+        "`<id>_state`, `alive/_tail_dead`, `21_600`, `mod.py:alive`.\n"     # 5
+        "Dead: `gone()`, `_dead`, `DEAD_CONST`, `NOPE_*`, `MIN_ONLY_NAME`, `NODE_ONLY_NAME`,\n"
+        "`TEST_ONLY_NAME`, `obj.method_gone(1)`, `wrapped_dead(a,\nb)`.\n"   # 7-8
+        "```\nfenced_dead()\n```\n"                                         # 9-11
+        "\n`hist_dead()` was removed in 0.5.8 (register item 411),\n"       # 12-13
+        "and `hist_wrapped_dead` with it.\n"                                 # 14
+        "\n`no_cite_dead()` was removed in 0.5.8.\n"                         # 15-16
+        "\n- `item_hist_dead()` removed in 0.5.2 (item 27).\n"               # 17-18
+        "- `item_live_dead()` is still described.\n"                         # 19
+        "\n| `_row_hist_dead` | removed in 0.5.8, item 418 |\n"               # 20-21
+        "| `_row_live_dead` | current |\n"                                    # 22
+        "\n## Old stack (removed in 0.5.8, item 411)\n"                      # 23-24
+        "`section_dead()` and\n\n### Detail\n`subsection_dead()`.\n"        # 25-28
+        "\n## Current\n`after_section_dead()`\n"                             # 29-31
+    ))
+    report = dc.Report()
+    dc.check_deep_dive_identifiers(tmp_path, report)
+    dead = {(name, line) for _doc, name, line in report.dead_identifiers}
+    assert dead == {
+        ("gone", 6), ("_dead", 6), ("DEAD_CONST", 6), ("NOPE_", 6), ("MIN_ONLY_NAME", 6),
+        ("NODE_ONLY_NAME", 6), ("TEST_ONLY_NAME", 7), ("method_gone", 7), ("wrapped_dead", 7),
+        ("no_cite_dead", 16), ("item_live_dead", 19), ("_row_live_dead", 22),
+        ("after_section_dead", 31),
+    }
+    assert {doc for doc, _name, _line in report.dead_identifiers} == {f"{dc.DEEP_DIVES}/01-x.md"}
+
+    dc.apply_baseline(report, {})
+    assert len(report.failures) == len(report.dead_identifiers)
+    assert "01-x.md:6: `gone` is not in the code" in report.failures[0]
+
+    # The ratchet: a baselined name passes anywhere in its doc; one that resolves is a note.
+    baseline = dc.baseline_from(report)
+    assert baseline["deep_dive_identifiers"][f"{dc.DEEP_DIVES}/01-x.md"][:2] == ["DEAD_CONST", "MIN_ONLY_NAME"]
+    baseline["deep_dive_identifiers"][f"{dc.DEEP_DIVES}/01-x.md"].append("since_fixed")
+    report.failures.clear()
+    dc.apply_baseline(report, baseline)
+    assert report.failures == []
+    assert any("`since_fixed` now resolves or is gone" in n for n in report.notes)

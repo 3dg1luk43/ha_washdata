@@ -51,6 +51,8 @@
         "quiet_tail_tip": "Afër fundit ky program bie në qetësi për rreth {mins} min, pastaj tërheq rreth {watts} W për {secs} s përpara se të përfundojë. Vërejtur në {seen}/{measured} cikle të matura: pajisja nuk e bën këtë në çdo nisje.",
         "quiet_tail": "~{mins} min qetësi në fund",
         "artifact_tip": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) – hapeni për t'i parë ato në grafik",
+        "artifact_tip_one": "U zbulua {n} anomali (p.sh. dera e hapur në mes të ciklit) - hapeni për ta parë në grafik",
+        "artifact_tip_other": "U zbuluan {n} anomali (p.sh. dera e hapur në mes të ciklit) - hapeni për t'i parë në grafik",
         "auto": "(zbuluar automatikisht)",
         "built_in_tag": "i integruar",
         "declining": "↘ në rënie",
@@ -64,6 +66,8 @@
         "overrun": "Zgjati më shumë se zakonisht",
         "poor_fit": "cilësi e keqe",
         "restart_gap_tip": "{n} boshllëk rinisje të HA: gjurma e energjisë ka një vrimë",
+        "restart_gap_tip_one": "{n} boshllëk rinisje të HA: gjurma e energjisë ka një vrimë",
+        "restart_gap_tip_other": "{n} boshllëqe rinisje të HA: gjurma e energjisë ka vrima",
         "reviewed": "Shqyrtuar",
         "steady": "→ i qëndrueshëm",
         "underrun": "Përfundoi më shpejt se zakonisht",
@@ -222,6 +226,7 @@
         "back": "Prapa",
         "mute_suggestion": "Mos e sugjeroni këtë cilësim",
         "reset_muted": "Rivendos të heshturat",
+        "reset_phase_tip": "Zhbëj ndryshimin tënd dhe rikthe fazën e integruar",
         "import_power_history": "Importo historikun e fuqisë",
         "hist_read_recorder": "Lexo nga Home Assistant",
         "hist_scan": "Kërko cikle",
@@ -432,6 +437,8 @@
         "models_fine_tuned": "(modele të rregulluara mirë: {count})",
         "n_selected": "{n} të zgjedhura",
         "n_tuning_suggestions": "{n} sugjerim rregullimi",
+        "n_tuning_suggestions_one": "{n} sugjerim rregullimi",
+        "n_tuning_suggestions_other": "{n} sugjerime rregullimi",
         "new_profile_name": "Emër i ri profili",
         "notes": "Shënime",
         "panel_default_tab": "Skeda e parazgjedhur",
@@ -629,7 +636,11 @@
         "show_internal": "Shfaq cilësimet e brendshme",
         "show_internal_tip": "Rregullime që integrimi i vendos për ju (kampionimi, rojtari, shpeshtësia e përputhjes, pragjet). Shfaqen automatikisht kur kjo pajisje ka vlerën e vet, një konflikt ose një sugjerim.",
         "rate_n": "{n} yje",
-        "rate_quality": "Vlerëso cilësinë"
+        "rate_quality": "Vlerëso cilësinë",
+        "pg_autolabel": "Etiketim automatik",
+        "pg_label_review": "Kërkon rishikim",
+        "pg_ev_match_reverted": "Përputhja u anulua",
+        "pg_ev_verified_pause": "Pauzë e verifikuar"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -689,6 +700,8 @@
         "delete_automation_title": "Fshi Automatizimin",
         "delete_automation_msg": "Të fshihet automatizimi \"{name}\" nga Home Assistant? Kjo nuk mund të zhbëhet.",
         "remove_legacy_title": "Hiq Veprimet e Vjetra",
+        "reset_phase_msg": "Të zhbëhet ndryshimi yt i fazës \"{name}\" dhe të rikthehet faza e integruar? Programet i ruajnë intervalet e tyre.",
+        "reset_phase_title": "Rivendos Fazën",
         "remove_legacy_msg": "Të hiqen veprimet e personalizuara të vjetra? Ato do të ndalojnë së aktivizuari në ngjarjet e cikleve. Kjo nuk mund të zhbëhet nga paneli.",
         "discard_recording_title": "Hidh Poshtë Regjistrimin",
         "discard_recording_msg": "Të hidhet poshtë regjistrimi i ruajtur? Kjo nuk mund të zhbëhet.",
@@ -726,6 +739,8 @@
         "artifact_dip_detail": "Ra nën brezin e zakonshëm të fuqisë për ~{n} s.",
         "artifact_footer": "E theksuar në grafikun e mësipërm. Këto janë objekte kalimtare (p.sh. dera e hapur në mes të ciklit), jo domosdoshmërisht probleme.",
         "artifact_header": "{n} anomali të zbuluara gjatë këtij cikli",
+        "artifact_header_one": "{n} anomali e zbuluar gjatë këtij cikli",
+        "artifact_header_other": "{n} anomali të zbuluara gjatë këtij cikli",
         "artifact_pause_detail": "Fuqia ra pothuajse në zero për ~{n} s dhe u rikuperua – ndoshta dera u hap në mes të ciklit ose cikli u ndërpre.",
         "artifact_spike_detail": "Shkoi mbi brezin e zakonshëm të fuqisë për ~{n} s.",
         "auto_label_intro": "Cakto profile te ciklet e paetiketuara që besueshmëria e tyre e përputhjes tejkalon pragun.",
@@ -747,6 +762,8 @@
         "group_not_cohesive": "Këto profile nuk janë mjaft të ngjashme për t'u grupuar në mënyrë të besueshme, kështu që përputhja i trajton ato individualisht derisa të hiqni pjesën e jashtme ose të ndani grupin.",
         "group_preview_hint": "Shënoni 2+ anëtarë për të parë dhe krahasuar kurbat e tyre të fuqisë.",
         "legacy_actions_title": "Veprimi i personalizuar i trashëguar i {count} është ende duke u ekzekutuar",
+        "legacy_actions_title_one": "{count} veprim i personalizuar i trashëguar është ende në ekzekutim",
+        "legacy_actions_title_other": "{count} veprime të personalizuara të trashëguara janë ende në ekzekutim",
         "live_chart_loading": "Grafiku i fuqisë live shfaqet ndërsa mbërrijnë leximet.",
         "loading": "Duke ngarkuar…",
         "loading_curve": "Duke ngarkuar kurbën…",
@@ -809,6 +826,8 @@
         "reminders_intro": "Shfaq një kujtesë në panel pas kaq cikleve nga servisimi i fundit. Lëreni bosh ose 0 për ta çaktivizuar një kujtesë.",
         "restart_gap_footer": "Evidentuar në grafik. Të dhënat e energjisë mungojnë për këto intervale; përputhja përdori vetëm lexime reale.",
         "restart_gap_header": "{n} boshllëk rinisje të HA gjatë këtij cikli",
+        "restart_gap_header_one": "{n} boshllëk rinisje të HA gjatë këtij cikli",
+        "restart_gap_header_other": "{n} boshllëqe rinisje të HA gjatë këtij cikli",
         "restart_gap_item": "{dur} boshllëk",
         "review_confirm_help": "Konfirmoni nëse ky cikël është zbuluar saktë. Komentet tuaja e trajnojnë modelin në kompjuterin tuaj - sa më shumë cikle të konfirmoni, aq më i mirë do të jetë përputhja dhe rezultatet shëndetësore. Mjafton një mirë/e keqe e shpejtë.",
         "review_in_settings": "Rishiko në Cilësime",
@@ -827,6 +846,8 @@
         "settings_basic_note": "Po shfaqen cilësimet thelbësore. Kaloni te Të avancuara për listën e plotë.",
         "show_all_settings": "Shfaq të gjitha cilësimet",
         "showing_suggestions": "Po shfaq cilësimin e {count} me sugjerime.",
+        "showing_suggestions_one": "Po shfaqet {count} cilësim me sugjerime.",
+        "showing_suggestions_other": "Po shfaqen {count} cilësime me sugjerime.",
         "split_intro": "Kliko grafikun për të shtuar ose hequr një pikë ndarjeje, ose zbulo automatikisht sipas ndërprerjeve. Çdo segment që rezulton mund të ketë profilin e tij.",
         "sug_staged": "Vendosur {key} = {val}. Ruani për të aplikuar.",
         "toast_auto_detect_enabled": "Zbulimi automatik u aktivizua",
@@ -855,6 +876,8 @@
         "trim_destructive_confirm": "Kjo ruan vetëm {pct}% të ciklit dhe nuk mund të zhbëhet. Vazhdoni?",
         "trim_intro": "Zvarrit dorëzat e kuqe ose futo vlerat. Gjithçka jashtë dritares hiqet.",
         "tuning_suggestions_available": "Ofrohet {count} sugjerim akordimi nga ciklet e vëzhguara. Ato shfaqen pranë fushave përkatëse.",
+        "tuning_suggestions_available_one": "Ofrohet {count} sugjerim rregullimi nga ciklet e vëzhguara. Ai shfaqet pranë fushës përkatëse.",
+        "tuning_suggestions_available_other": "Ofrohen {count} sugjerime rregullimi nga ciklet e vëzhguara. Ato shfaqen pranë fushave përkatëse.",
         "unsure_detected_prefix": "WashData nuk është i sigurt se ka zbuluar",
         "warmup_badge": "Akoma duke mësuar ({done}/{needed} cikle)",
         "warmup_detail": "Përputhja tashmë po funksionon. WashData ju kërkon të konfirmoni {needed} ciklet e para të këtij profili përpara se t'i etiketojë vetë.",
@@ -914,6 +937,8 @@
         "sug_mute_failed": "Nuk mund të heshtte sugjerimi",
         "sug_unmuted_all": "Sugjerime të heshtura u rivendosën",
         "n_suggestions_muted": "{count} të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",
+        "n_suggestions_muted_one": "{count} sugjerim i heshtur; motori i sugjerimeve nuk do ta propozojë.",
+        "n_suggestions_muted_other": "{count} sugjerime të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",
         "font_size_hint": "Bëni gjithçka në këtë panel më të madhe ose më të vogël. Aplikohet për llogarinë tuaj në këtë pajisje.",
         "import_history_description": "Kishit priz inteligjent edhe përpara WashData? Ngarkoni një eksport të historikut të sensorit të fuqisë, ose lexojeni drejtpërdrejt nga Home Assistant, dhe zbulimi i zakonshëm kalon mbi të, kështu ciklet e kaluara shfaqen në listën e Cikleve, gati për t'u emërtuar.",
         "hist_input_hint": "Ngarkoni një CSV të shkarkuar nga paneli i Historikut (entity, state, last changed), ose lini WashData t'i lexojë drejtpërdrejt historikun e sensorit. Më pas zbulimi kalon mbi të saktësisht si në kohë reale, dhe ju zgjidhni cilat nga ciklet e gjetura do të mbani.",
@@ -952,7 +977,9 @@
         "connection_lost": "Lidhja humbi - po shfaqen të dhënat e orës {time}.",
         "pg_notify_partial": "Shënuesit e njoftimeve mbulojnë vetëm fillimin, afër përfundimit, përfundimin, piketat dhe orët e qeta. Përditësimet e drejtpërdrejta të progresit, kujtuesit e shkarkimit dhe sinjalizimet e tejkalimit nuk simulohen.",
         "connect_to_confirm": "Lidhuni te ingranazhi i cilësimeve për të konfirmuar ose vlerësuar.",
-        "coverage_gap_cluster": "{count} cikle të fundit të paetiketuara, me kohëzgjatje rreth {min} min, duken si një program që ende nuk e keni krijuar."
+        "coverage_gap_cluster": "{count} cikle të fundit të paetiketuara, me kohëzgjatje rreth {min} min, duken si një program që ende nuk e keni krijuar.",
+        "pg_label_yes": "Do të etiketohej \"{name}\" në fund të ciklit",
+        "pg_label_no": "Do të kërkonte rishikim: {reason}"
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1619,6 +1646,7 @@
         "panel_settings_saved": "Cilësimet e panelit u ruajtën",
         "pg_sugg_loaded": "{n} vlera të sugjeruara u ngarkuan - ekzekuto zonën e provave për krahasim",
         "phase_name_required": "Kërkohet emri i fazës",
+        "phase_reset": "\"{name}\" u rikthye në fazën e integruar",
         "phase_updated": "Faza u përditësua",
         "phases_saved": "Fazat u ruajtën",
         "preferences_saved": "Preferencat u ruajtën",
@@ -1829,7 +1857,6 @@
     },
     "pg_desc": {
         "completion_min_seconds": "Ekzekutimi më i shkurtër që llogaritet si cikël i vërtetë",
-        "end_repeat_count": "Lexime të ulëta radhazi para përfundimit",
         "interrupted_min_seconds": "Ciklet e shkurtra shënohen si të ndërprera",
         "min_off_gap": "Hendeku i nevojshëm për të ndarë dy cikle",
         "off_delay": "Sekonda me fuqi të ulët para se të mbarojë cikli",
@@ -1881,7 +1908,9 @@
         "notify_finish": "Do të dërgohej një njoftim përfundimi.",
         "notify_milestone": "Do të dërgohej një njoftim për një moment kyç.",
         "notify_held": "Një njoftim u mbajt për shkak të orëve të qeta.",
-        "finished": "Cikli arriti gjendjen përfundimtare dhe përfundoi."
+        "finished": "Cikli arriti gjendjen përfundimtare dhe përfundoi.",
+        "match_reverted": "Programi u kthye te zbulimi: rezultati i tij ra shumë nën kulmin e vet.",
+        "verified_pause": "Përafrimi në kohë reale konfirmoi (ose liroi) një pauzë brenda programit. Për sa kohë mbetet në fuqi, cikli nuk përfundohet."
     },
     "store": {
         "search_ph2": "Kërko sipas markës ose modelit…",
@@ -2010,5 +2039,13 @@
         "inherit": "Trashëgo",
         "none": "Asnjë (i fshehur)",
         "read": "Lexim"
+    },
+    "pg_label_reason": {
+        "no_winner": "Asnjë program nuk u përshtat",
+        "below_floor": "Nën Besueshmërinë e të Mësuarit",
+        "ambiguous": "Shënuar si e paqartë",
+        "margin": "Shumë afër vendit të dytë",
+        "unknown_profile": "Programi nuk ekziston më",
+        "not_evaluated": "Nuk u vlerësua"
     }
 }

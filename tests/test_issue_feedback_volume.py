@@ -37,6 +37,20 @@ def test_warm_up_still_asks_for_a_labelled_cycle(mock_hass_learning):  # noqa: F
     assert _end(mgr, store, labelled=True, allowed=True) is True
 
 
+def test_a_hand_picked_programme_is_never_queued(mock_hass_learning):  # noqa: F811
+    # Warm-up and a refused gate both used to queue it, asking the user to confirm
+    # the matcher's guess over their own choice (the request v16 drops).
+    for labeled_count, allowed in ((1, True), (6, False)):
+        mgr, store = _learning_manager(mock_hass_learning, labeled_count=labeled_count)
+        cyc = {"id": "c1", "duration": 3600.0, "profile_name": "Eco", "label_source": "manual"}
+        store.past_cycles.append(cyc)
+        mgr._maybe_request_feedback(  # noqa: SLF001
+            cyc, detected_profile="Cotton 60", confidence=0.75, predicted_duration=3600.0,
+            label_allowed=allowed,
+        )
+        assert "c1" not in store.pending, (labeled_count, allowed)
+
+
 def test_low_conformance_alone_does_not_ask(mock_hass_learning):  # noqa: F811
     # Labelled cycles under 0.40 conformance are still 85.6% right leave-one-out:
     # 7 questions per wrong label, and a loose-envelope device re-queued every cycle.

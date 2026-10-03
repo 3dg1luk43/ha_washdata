@@ -27,13 +27,11 @@ itself is unchanged and still wins over the per-device default; see
 `tests/test_issue_435_438_notification_icon_tap_target.py`.
 """
 
-from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch
 
 import pytest
 
-from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager, _MOBILE_ONLY_EXTRA_KEYS
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_NOTIFY_LIVE_STICKY, CONF_NOTIFY_LIVE_CLICK_ACTION,
@@ -56,7 +54,6 @@ def _make_manager(mock_hass, options) -> WashDataManager:
     entry.title = "Test Washer"
     entry.options = {CONF_MIN_POWER: 2.0, "power_sensor": "sensor.p", **options}
     mock_hass.config_entries.async_get_entry.return_value = entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
          patch("custom_components.ha_washdata.manager.CycleDetector"):
         return WashDataManager(mock_hass, entry)

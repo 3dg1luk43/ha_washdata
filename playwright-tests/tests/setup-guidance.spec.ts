@@ -2,19 +2,15 @@
  * Setup Card (Adoption Guidance) tests.
  *
  * The Setup Card is rendered in the Status/Overview tab when get_setup_status
- * returns a non-null phase and there is no live power curve (hasCurve = false).
+ * returns a non-null phase and no cycle is running. It used to be gated on "no
+ * live power curve", which hid it on every plug that had reported in the last
+ * 15 minutes (audit UI-01); the idle-with-samples test below locks the fix.
  *
  * Phase 4 renders as a compact .wd-setup-chip--healthy chip.
  * Phases 0–3 render as a full .wd-setup-card[data-phase="phaseN"] card.
  *
- * Implementation note: get_setup_status is fetched by _fetchTabData (tab
- * switches / device changes), NOT by the initial _fetchAll boot sequence.
- * Each test must call loadStatusTabData() after bootPanel to populate the
- * setup status and trigger the re-render that shows the card.
- *
- * The default IDLE_POWER_HISTORY has 20 live points (hasCurve = true), so all
- * tests also override get_power_history with an empty live array so that
- * hasCurve = false and the setup card is visible.
+ * Most tests below override get_power_history with an empty live array and call
+ * loadStatusTabData(); both predate the UI-01 fix and are kept as they are.
  */
 
 import { test, expect } from '@playwright/test';
@@ -31,9 +27,8 @@ const NO_CURVE_POWER = {
 };
 
 /**
- * Trigger _fetchTabData on the panel so that get_setup_status is fetched and
- * the re-render shows the setup card. Must be called after bootPanel because
- * the initial _fetchAll boot sequence does not call _fetchTabData.
+ * Trigger _fetchTabData on the panel so that get_setup_status is re-fetched and
+ * the card re-rendered (the boot sequence primes it too; see the first test).
  */
 async function loadStatusTabData(page: Page): Promise<void> {
   await page.evaluate(async () => {
@@ -44,6 +39,29 @@ async function loadStatusTabData(page: Page): Promise<void> {
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
+});
+
+test('the boot sequence alone shows the Setup Card while idle with recent samples (UI-01, UI-22)', async ({ page }) => {
+  // The default fixture's power history: 20 idle readings, no cycle running -
+  // what most plugs report. Unlike the UI-01 test further down, no manual tab
+  // fetch: the first-load prime (get_setup_status) has to put the card on screen.
+  await bootPanel(page, {
+    'ha_washdata/get_setup_status': {
+      phase: 'phase0',
+      message_key: 'setup.phase0.washer',
+      message_params: {},
+      cta_label_key: 'setup.cta.start_recording',
+      cta_action: 'open_recorder',
+      secondary_label_key: null,
+      secondary_action: null,
+      skippable: false,
+      dismissible: false,
+      step_key: null,
+    },
+  });
+  await expect(page.locator('.wd-setup-card[data-phase="phase0"]')).toBeVisible({ timeout: 5_000 });
+  // ...and the idle chart is still there alongside it.
+  await expect(page.locator('#wd-status-canvas')).toBeVisible();
 });
 
 test('Phase 0 card appears with open_recorder CTA button', async ({ page }) => {

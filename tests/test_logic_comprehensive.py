@@ -207,8 +207,10 @@ def test_variance_locking_prediction(manager):
     manager._matched_profile_duration = 3600.0
     manager._smoothed_progress = 50.0
     
-    with patch.object(manager, '_estimate_phase_progress', return_value=(80.0, 200.0)):
-        dt_util.now = MagicMock(return_value=datetime.now(timezone.utc))
+    # patch.object, not `dt_util.now = MagicMock(...)`: the bare assignment was never
+    # restored and froze the manager's clock for every later test in the process.
+    with patch.object(manager, '_estimate_phase_progress', return_value=(80.0, 200.0)), \
+            patch.object(dt_util, 'now', return_value=datetime.now(timezone.utc)):
         manager.detector.get_power_trace.return_value = [1]*10
         manager.detector.get_elapsed_seconds.return_value = 1800
         
@@ -224,8 +226,10 @@ def test_normal_prediction_low_variance(manager):
     manager._matched_profile_duration = 3600.0
     manager._smoothed_progress = 50.0
     
-    with patch.object(manager, '_estimate_phase_progress', return_value=(55.0, 5.0)):
-        dt_util.now = MagicMock(return_value=datetime.now(timezone.utc))
+    # patch.object, not `dt_util.now = MagicMock(...)`: the bare assignment was never
+    # restored and froze the manager's clock for every later test in the process.
+    with patch.object(manager, '_estimate_phase_progress', return_value=(55.0, 5.0)), \
+            patch.object(dt_util, 'now', return_value=datetime.now(timezone.utc)):
         manager.detector.get_power_trace.return_value = [1]*10
         manager.detector.get_elapsed_seconds.return_value = 1800
         

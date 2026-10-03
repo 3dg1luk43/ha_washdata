@@ -108,7 +108,15 @@ case "$mode" in
     --bench|--benchmark|bench)
         [ "$#" -gt 0 ] && shift
         echo "Running BENCHMARK tests only..."
-        exec "$VENV_PYTHON" -m pytest tests/ -m benchmark "$@"
+        rc=0
+        "$VENV_PYTHON" -m pytest tests/ -m benchmark "$@" || rc=$?
+        # Exit 5 = nothing collected: the timing benchmarks were replaced by
+        # deterministic work budgets that run in the fast suite (audit PERF-08).
+        if [ "$rc" -eq 5 ]; then
+            echo "No benchmark tests; work budgets run in the fast suite (tests/test_perf_budgets.py)."
+            exit 0
+        fi
+        exit "$rc"
         ;;
     --e2e|e2e)
         [ "$#" -gt 0 ] && shift

@@ -2382,8 +2382,8 @@ async def ws_get_profile_groups(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Return profile groups with member lists, cohesion, and near-duplicate
-    suggestions the user can act on."""
+    """Return profile groups with member lists and cohesion. (Near-duplicate group
+    suggestions were deleted in 0.5.8, register item 432.)"""
     from .const import GROUP_MIN_COHESION  # pylint: disable=import-outside-toplevel
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)

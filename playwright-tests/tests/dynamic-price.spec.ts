@@ -109,11 +109,12 @@ test('a time-weighted cycle shows its effective price, a fixed-price one does no
 
   const marked = dynamicRow.locator('td.wd-tc-num span[title*="Time-weighted"]');
   await expect(marked).toHaveCount(1);
-  await expect(marked).toHaveText('0.21 EUR');
+  // Currency formatted for the HA user's locale (audit UI-08), as the card does.
+  await expect(marked).toHaveText('€0.21');
   await expect(marked).toHaveAttribute('title', /0\.2471/);
 
   // The frozen-price cycle shows the same kind of number with no such claim on it.
   const fixedRow = page.locator('tr[data-cid="cyc-002"]');
   await expect(fixedRow.locator('td.wd-tc-num span[title*="Time-weighted"]')).toHaveCount(0);
-  await expect(fixedRow.locator('td.wd-tc-num').nth(2)).toHaveText('0.34 EUR');
+  await expect(fixedRow.locator('td.wd-tc-num').nth(2)).toHaveText('€0.34');
 });

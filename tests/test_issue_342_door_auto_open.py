@@ -26,13 +26,11 @@ finalizes the cycle (completed, like the External End Trigger); a brief open
 set for these devices.
 """
 
-from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch
 
 import pytest
 
-from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata import manager as mgr_mod
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
@@ -60,7 +58,6 @@ def _make_manager(mock_hass, options) -> WashDataManager:
         CONF_DOOR_SENSOR_ENTITY: "binary_sensor.door", **options,
     }
     mock_hass.config_entries.async_get_entry.return_value = entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
          patch("custom_components.ha_washdata.manager.CycleDetector"):
         mgr = WashDataManager(mock_hass, entry)

@@ -1004,13 +1004,10 @@ class WashDataStore(Store[JSONDict]):
             old_data.setdefault("reference_cycles", [])
 
         if old_major_version < 11:
-            # Marker-only bump. Per-phase profiles (envelope["phase_profile"], used
-            # by phase-segmented matching / phase-resolved ETA) are DERIVED CACHE
-            # built by async_rebuild_envelope, not stored data - so there is nothing
-            # to migrate. They self-populate on the next envelope rebuild (which
-            # runs on every cycle end / label change); until then consumers fall
-            # back to the existing estimator via lazy absent-key handling. No data
-            # is added, removed, or altered here.
+            # Marker-only bump. It introduced a per-phase envelope cache for the
+            # phase-resolved ETA, which 0.5.8 removed (register item 411); the step
+            # stays so older stores still pass through it. No data is added,
+            # removed, or altered here.
             _LOGGER.info("Migrating storage from v%s to v11 (phase-profile cache marker)",
                          old_major_version)
 
@@ -2644,9 +2641,10 @@ class ProfileStore:
         """Return mutable profile-groups mapping (group_name -> {members, created_at}).
 
         A group bundles near-duplicate profiles (e.g. the same program at
-        different temperature/spin). The matcher treats the group as one
-        aggregate candidate and only picks the exact member once the group wins.
-        Groups with fewer than 2 present members are ignored by the matcher.
+        different temperature/spin). The matcher scores every member on its own
+        curve, collapses a cohesive group into one family afterwards, and picks the
+        exact member once the group wins (no aggregate curve since #400). Groups
+        with fewer than 2 present members are ignored by the matcher.
         """
         raw = self._data.setdefault("profile_groups", {})
         if not isinstance(raw, dict):
@@ -4429,19 +4427,39 @@ class ProfileStore:
         """Delete a custom phase by id and remove matching profile assignments.
 
         Returns number of removed assignments.
-        Raises ValueError('phase_not_found') if no custom phase has this id.
-        Raises ValueError('cannot_delete_builtin') if the id is a built-in phase.
+        Raises ValueError('phase_not_found') if no custom phase has this id, which
+        includes an unedited built-in.
+
+        An edited built-in is stored as an override under the built-in's id (see
+        async_update_custom_phase) and listed as editable, so the panel offers
+        Delete on it. Deleting it used to raise 'cannot_delete_builtin' every time;
+        it now drops the override, which restores the built-in, and points the
+        profiles' ranges back at the built-in name instead of removing them.
         """
         phases = self._get_shared_custom_phases()
         found = next((p for p in phases if str(p.get("id", "")) == phase_id), None)
         if found is None:
             raise ValueError("phase_not_found")
-        if get_builtin_phase_by_id(phase_id) is not None:
-            raise ValueError("cannot_delete_builtin")
 
         phase_name = str(found.get("name", ""))
         phase_scope = str(found.get("device_type", "")).strip()
         self._data["custom_phases"] = [p for p in phases if str(p.get("id", "")) != phase_id]
+
+        builtin = get_builtin_phase_by_id(phase_id)
+        if builtin is not None:
+            builtin_name = str(builtin.get("name", ""))
+            for profile in self.get_profiles().values():
+                profile_device_type = str(profile.get("device_type", "")).strip()
+                if phase_scope and profile_device_type != phase_scope:
+                    continue
+                assigned = profile.get("phases", [])
+                if not isinstance(assigned, list):
+                    continue
+                for p in cast(list[dict[str, Any]], assigned):
+                    if str(p.get("name", "")).casefold() == phase_name.casefold():
+                        p["name"] = builtin_name
+            await self.async_save()
+            return 0
 
         removed_assignments = 0
         for profile in self.get_profiles().values():
@@ -5542,9 +5560,27 @@ class ProfileStore:
         return result, durations
 
     def _cycle_peak(self, cycle: CycleDict) -> float:
-        """Peak power of a cycle's trace (0.0 if it has none)."""
+        """Peak power of a cycle's trace (0.0 if it has none).
+
+        Memoised per cycle on the stored trace's shape (length and end points): the
+        reference-cycle pick calls this for every cycle of a profile on every
+        envelope rebuild, on the event loop, and each call decompressed the whole
+        trace (audit PERF-08 budgets: ~4 decompressions per stored cycle per cycle
+        end). A trim, split or repair changes the key, so a stale peak is never read.
+        """
+        raw = cycle.get("power_data")
+        key = None
+        if isinstance(raw, list) and raw:
+            key = (str(cycle.get("id") or ""), len(raw), repr(raw[0]), repr(raw[-1]))
+            cache = self.__dict__.setdefault("_peak_cache", {})
+            hit = cache.get(key[0])
+            if hit is not None and hit[0] == key:
+                return hit[1]
         pairs = decompress_power_data(cycle)
-        return max((p[1] for p in pairs), default=0.0) if pairs else 0.0
+        peak = max((p[1] for p in pairs), default=0.0) if pairs else 0.0
+        if key is not None:
+            self.__dict__.setdefault("_peak_cache", {})[key[0]] = (key, peak)
+        return peak
 
     def _select_reference_cycle_id(
         self, profile_name: str, target_duration: float | None = None
@@ -8763,12 +8799,18 @@ class ProfileStore:
         Runs the matcher once per cycle with profile_name set but no
         match_confidence, and persists the resulting confidence if the same
         profile is returned. Returns the number of cycles updated. Safe to
-        call repeatedly - already-backfilled cycles are skipped.
+        call repeatedly - already-backfilled cycles are skipped, and so is a
+        cycle the matcher already disagreed with: it runs on every setup, and
+        without the marker each such cycle (typically one the user relabelled by
+        hand) cost one full match per Home Assistant start, forever.
         """
         cycles = self._data.get("past_cycles", []) or []
         updated = 0
+        tried = 0
         for cycle in cycles:
             if cycle.get("match_confidence") is not None:
+                continue
+            if cycle.get("match_confidence_backfill_tried"):
                 continue
             profile_name = cycle.get("profile_name")
             if not profile_name:
@@ -8786,7 +8828,10 @@ class ProfileStore:
             if result.best_profile == profile_name and result.label_confidence > 0:
                 cycle["match_confidence"] = float(result.label_confidence)
                 updated += 1
-        if updated:
+            else:
+                cycle["match_confidence_backfill_tried"] = True
+                tried += 1
+        if updated or tried:
             await self.async_save()
             self._logger.info("Backfilled match_confidence on %d cycles", updated)
         return updated

@@ -30,7 +30,6 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata import manager as mgr_mod
 from custom_components.ha_washdata.const import (
@@ -81,7 +80,6 @@ def _entry(options: dict[str, Any], data: dict[str, Any] | None = None) -> Any:
 
 def _build(hass: Any, entry: Any) -> WashDataManager:
     hass.config_entries.async_get_entry.return_value = entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"):
         return WashDataManager(hass, entry)
 

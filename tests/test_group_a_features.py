@@ -150,53 +150,116 @@ def test_a1_get_profile_median_duration_ignores_other_profiles():
     assert store.get_profile_median_duration("Cotton 60") == pytest.approx(100.0)
 
 
+class _StubStore:
+    """The two ProfileStore lookups the post-cycle anomaly rules read."""
+
+    def __init__(self, median=None, stats=None, raise_median=False):
+        self.median = median
+        self.stats = stats
+        self.raise_median = raise_median
+        self.median_calls: list[str] = []
+        self.stats_calls: list[str] = []
+
+    def get_profile_median_duration(self, name):
+        self.median_calls.append(name)
+        if self.raise_median:
+            raise RuntimeError("store broke")
+        return self.median
+
+    def get_profile_energy_stats(self, name):
+        self.stats_calls.append(name)
+        return self.stats
+
+
+def _post_cycle(cycle_data: dict, store) -> dict:
+    """Run the REAL A1/A2 block `_async_process_cycle_end` calls."""
+    from custom_components.ha_washdata.manager import _apply_post_cycle_anomalies
+
+    _apply_post_cycle_anomalies(cycle_data, store)
+    return cycle_data
+
+
 def test_a1_underrun_logic_50_pct_of_median():
-    """Core logic: cycle at 50% of median triggers underrun."""
-    profile_median = 3600.0
-    duration = profile_median * 0.50
-
-    # Simulate the A1 block from _async_process_cycle_end
-    cycle_data: dict = {
-        "profile_name": "Cotton 60",
-        "duration": duration,
-    }
-    median = profile_median
-    if median and median > 0 and duration < median * CYCLE_UNDERRUN_ANOMALY_RATIO:
-        cycle_data["anomaly"] = "underrun"
-        cycle_data["underrun_ratio"] = round(duration / median, 3)
-
-    assert cycle_data.get("anomaly") == "underrun"
-    assert cycle_data["underrun_ratio"] == pytest.approx(0.5, abs=0.001)
+    """A cycle at 50% of its profile's median is an underrun."""
+    cd = _post_cycle(
+        {"profile_name": "Cotton 60", "duration": 1800.0}, _StubStore(median=3600.0)
+    )
+    assert cd.get("anomaly") == "underrun"
+    assert cd["underrun_ratio"] == pytest.approx(0.5, abs=0.001)
 
 
 def test_a1_underrun_logic_80_pct_does_not_trigger():
-    """A cycle at 80% of median (above 55% threshold) should NOT trigger underrun."""
-    profile_median = 3600.0
-    duration = profile_median * 0.80
+    """80% of the median (above the 55% threshold) is not an underrun."""
+    cd = _post_cycle(
+        {"profile_name": "Cotton 60", "duration": 2880.0}, _StubStore(median=3600.0)
+    )
+    assert "anomaly" not in cd
+    assert "underrun_ratio" not in cd
 
-    cycle_data: dict = {
-        "profile_name": "Cotton 60",
-        "duration": duration,
-    }
-    median = profile_median
-    if median and median > 0 and duration < median * CYCLE_UNDERRUN_ANOMALY_RATIO:
-        cycle_data["anomaly"] = "underrun"
-        cycle_data["underrun_ratio"] = round(duration / median, 3)
 
-    assert "anomaly" not in cycle_data
+def test_a1_underrun_threshold_is_strict():
+    """Exactly at the ratio is not an underrun; just under it is."""
+    median = 3600.0
+    at = median * CYCLE_UNDERRUN_ANOMALY_RATIO
+    assert "anomaly" not in _post_cycle(
+        {"profile_name": "P", "duration": at}, _StubStore(median=median)
+    )
+    assert _post_cycle(
+        {"profile_name": "P", "duration": at - 1.0}, _StubStore(median=median)
+    ).get("anomaly") == "underrun"
 
 
 def test_a1_underrun_requires_profile_match():
-    """Without a profile match there is no median and no underrun."""
-    cycle_data: dict = {"duration": 100.0}  # no profile_name
+    """Without a label there is no median lookup and no underrun."""
+    store = _StubStore(median=3600.0)
+    cd = _post_cycle({"duration": 100.0}, store)
+    assert "anomaly" not in cd
+    assert store.median_calls == []
 
-    _uc_profile = cycle_data.get("profile_name")
-    _uc_dur = float(cycle_data.get("duration", 0))
-    # Guard: profile_name required
-    if _uc_profile and _uc_dur > 0:
-        cycle_data["anomaly"] = "underrun"
 
-    assert "anomaly" not in cycle_data
+def test_a1_runtime_overrun_is_never_replaced_by_underrun():
+    """Overrun (frozen from the live run) and underrun are mutually exclusive."""
+    store = _StubStore(median=36000.0)
+    cd = _post_cycle(
+        {"profile_name": "P", "duration": 100.0, "anomaly": "overrun"}, store
+    )
+    assert cd["anomaly"] == "overrun"
+    assert "underrun_ratio" not in cd
+    assert store.median_calls == []
+    # ...but a "none" placeholder does not block it.
+    cd = _post_cycle({"profile_name": "P", "duration": 100.0, "anomaly": "none"}, store)
+    assert cd["anomaly"] == "underrun"
+
+
+@pytest.mark.parametrize("median", [None, 0.0, -5.0, True, "3600"])
+def test_a1_no_underrun_without_a_usable_median(median):
+    # 0.1 s is under 0.55 x True (== 1), so a bool median would otherwise count.
+    cd = _post_cycle({"profile_name": "P", "duration": 0.1}, _StubStore(median=median))
+    assert "anomaly" not in cd
+
+
+def test_a1_a_failing_lookup_does_not_stop_the_energy_rule():
+    store = _StubStore(
+        raise_median=True, stats={"avg_wh": 500.0, "std_wh": 50.0, "n": 5}
+    )
+    cd = _post_cycle(
+        {"profile_name": "P", "duration": 100.0, "energy_wh": 700.0}, store
+    )
+    assert "anomaly" not in cd
+    assert cd["energy_anomaly"] == "energy_spike"
+
+
+def test_a1_underrun_from_the_real_store_median():
+    """End to end with the real median lookup over stored cycles."""
+    store = _ps_with_method_median([
+        _labeled_cycle("Cotton 60", duration=3600.0),
+        _labeled_cycle("Cotton 60", duration=3800.0),
+        _labeled_cycle("Cotton 60", duration=4000.0),
+    ])
+    store.get_profile_energy_stats = MagicMock(return_value=None)
+    cd = _post_cycle({"profile_name": "Cotton 60", "duration": 1900.0}, store)
+    assert cd["anomaly"] == "underrun"
+    assert cd["underrun_ratio"] == pytest.approx(0.5, abs=0.001)
 
 
 # ---------------------------------------------------------------------------
@@ -236,65 +299,73 @@ def test_a2_energy_stats_fewer_than_3_returns_none():
     assert store.get_profile_energy_stats("Eco 30") is None
 
 
+_STATS = {"avg_wh": 500.0, "std_wh": 50.0, "n": 5}
+
+
 def test_a2_energy_spike_detection():
-    """Energy 3*std above mean → energy_spike."""
-    avg = 500.0
-    std = 50.0
-    cycle_energy = avg + 3.0 * std  # z = +3.0
-
-    # Simulate A2 block
-    stats: dict = {"avg_wh": avg, "std_wh": std, "n": 5}
-    cycle_data: dict = {"profile_name": "Cotton 60", "energy_wh": cycle_energy}
-
-    _ea_z = (cycle_energy - stats["avg_wh"]) / stats["std_wh"]
-    cycle_data["energy_z_score"] = round(_ea_z, 2)
-    if _ea_z > ENERGY_ANOMALY_Z_THRESHOLD:
-        cycle_data["energy_anomaly"] = "energy_spike"
-    elif _ea_z < -ENERGY_ANOMALY_Z_THRESHOLD:
-        cycle_data["energy_anomaly"] = "energy_low"
-
-    assert cycle_data.get("energy_anomaly") == "energy_spike"
-    assert cycle_data["energy_z_score"] == pytest.approx(3.0, abs=0.01)
+    """Energy 3 std above the profile mean is a spike."""
+    cd = _post_cycle(
+        {"profile_name": "Cotton 60", "energy_wh": 650.0}, _StubStore(stats=_STATS)
+    )
+    assert cd.get("energy_anomaly") == "energy_spike"
+    assert cd["energy_z_score"] == pytest.approx(3.0, abs=0.01)
 
 
 def test_a2_energy_low_detection():
-    """Energy 3*std below mean → energy_low."""
-    avg = 500.0
-    std = 50.0
-    cycle_energy = avg - 3.0 * std  # z = -3.0
-
-    stats: dict = {"avg_wh": avg, "std_wh": std, "n": 5}
-    cycle_data: dict = {"profile_name": "Cotton 60", "energy_wh": cycle_energy}
-
-    _ea_z = (cycle_energy - stats["avg_wh"]) / stats["std_wh"]
-    cycle_data["energy_z_score"] = round(_ea_z, 2)
-    if _ea_z > ENERGY_ANOMALY_Z_THRESHOLD:
-        cycle_data["energy_anomaly"] = "energy_spike"
-    elif _ea_z < -ENERGY_ANOMALY_Z_THRESHOLD:
-        cycle_data["energy_anomaly"] = "energy_low"
-
-    assert cycle_data.get("energy_anomaly") == "energy_low"
-    assert cycle_data["energy_z_score"] == pytest.approx(-3.0, abs=0.01)
+    """Energy 3 std below the profile mean is low."""
+    cd = _post_cycle(
+        {"profile_name": "Cotton 60", "energy_wh": 350.0}, _StubStore(stats=_STATS)
+    )
+    assert cd.get("energy_anomaly") == "energy_low"
+    assert cd["energy_z_score"] == pytest.approx(-3.0, abs=0.01)
 
 
 def test_a2_no_anomaly_within_normal_range():
-    """Energy within 2 std → no anomaly."""
-    avg = 500.0
-    std = 50.0
-    cycle_energy = avg + 1.5 * std  # z = +1.5, well within ±2.5
+    """z = +1.5 records the score but no anomaly."""
+    cd = _post_cycle(
+        {"profile_name": "Cotton 60", "energy_wh": 575.0}, _StubStore(stats=_STATS)
+    )
+    assert "energy_anomaly" not in cd
+    assert cd["energy_z_score"] == pytest.approx(1.5, abs=0.01)
 
-    stats: dict = {"avg_wh": avg, "std_wh": std, "n": 5}
-    cycle_data: dict = {"profile_name": "Cotton 60", "energy_wh": cycle_energy}
 
-    _ea_z = (cycle_energy - stats["avg_wh"]) / stats["std_wh"]
-    cycle_data["energy_z_score"] = round(_ea_z, 2)
-    if _ea_z > ENERGY_ANOMALY_Z_THRESHOLD:
-        cycle_data["energy_anomaly"] = "energy_spike"
-    elif _ea_z < -ENERGY_ANOMALY_Z_THRESHOLD:
-        cycle_data["energy_anomaly"] = "energy_low"
+def test_a2_threshold_is_strict_both_ways():
+    edge = ENERGY_ANOMALY_Z_THRESHOLD * _STATS["std_wh"]
+    for energy in (500.0 + edge, 500.0 - edge):
+        cd = _post_cycle({"profile_name": "P", "energy_wh": energy}, _StubStore(stats=_STATS))
+        assert "energy_anomaly" not in cd, energy
 
-    assert "energy_anomaly" not in cycle_data
-    assert cycle_data["energy_z_score"] == pytest.approx(1.5, abs=0.01)
+
+@pytest.mark.parametrize(
+    "stats",
+    [
+        None,
+        {"avg_wh": 500.0, "std_wh": 0.0, "n": 5},
+        {"avg_wh": 500.0, "std_wh": -50.0, "n": 5},
+        {"avg_wh": 500.0, "n": 5},
+    ],
+)
+def test_a2_no_score_without_a_spread(stats):
+    cd = _post_cycle({"profile_name": "P", "energy_wh": 5000.0}, _StubStore(stats=stats))
+    assert "energy_z_score" not in cd
+    assert "energy_anomaly" not in cd
+
+
+def test_a2_requires_a_label_and_energy():
+    store = _StubStore(stats=_STATS)
+    assert "energy_z_score" not in _post_cycle({"energy_wh": 5000.0}, store)
+    assert "energy_z_score" not in _post_cycle({"profile_name": "P", "energy_wh": 0}, store)
+    assert store.stats_calls == []
+
+
+def test_a2_independent_of_the_duration_anomaly():
+    """An overrun cycle still gets its energy verdict."""
+    cd = _post_cycle(
+        {"profile_name": "P", "energy_wh": 650.0, "anomaly": "overrun"},
+        _StubStore(stats=_STATS),
+    )
+    assert cd["anomaly"] == "overrun"
+    assert cd["energy_anomaly"] == "energy_spike"
 
 
 def test_a2_fewer_than_3_cycles_means_no_stats():
@@ -700,3 +771,40 @@ def test_a5_health_result_still_has_standard_fields_with_drift():
     # Standard fields always present
     for field in ("cycle_count", "confidence_mean", "duration_cv", "health_score", "health_status"):
         assert field in ph, f"Missing standard field: {field}"
+
+
+# ---------------------------------------------------------------------------
+# A1/A2 wiring: the cycle-end tail of a REAL manager stamps and caches them
+# ---------------------------------------------------------------------------
+
+
+async def test_a1_a2_reach_the_stored_cycle_and_the_idle_cache(hass, freezer):
+    from .real_manager import boot, feed, make_entry, record_notify
+
+    record_notify(hass)
+    mgr = await boot(hass, make_entry(hass))
+    await feed(hass, freezer, 500, 900)
+    await feed(hass, freezer, 0, 300)
+    await hass.async_block_till_done()
+    first = mgr.profile_store.get_past_cycles()[0]
+    await mgr.profile_store.create_profile("Cotton", first["id"])
+
+    # A profile that usually runs 10x longer and uses ~1 Wh +- 1.
+    mgr.profile_store.get_profile_median_duration = lambda name: 10 * first["duration"]
+    mgr.profile_store.get_profile_energy_stats = lambda name: {
+        "avg_wh": 1.0, "std_wh": 1.0, "n": 5,
+    }
+    await feed(hass, freezer, 500, 900)
+    await feed(hass, freezer, 0, 300)
+    await hass.async_block_till_done()
+
+    second = mgr.profile_store.get_past_cycles()[-1]
+    assert second["profile_name"] == "Cotton"
+    assert second["anomaly"] == "underrun"
+    assert second["underrun_ratio"] == pytest.approx(0.1, abs=0.01)
+    assert second["energy_anomaly"] == "energy_spike"
+    assert mgr._last_cycle_post_anomaly == {
+        k: second[k]
+        for k in ("anomaly", "underrun_ratio", "energy_anomaly", "energy_z_score")
+    }
+    await mgr.async_shutdown()

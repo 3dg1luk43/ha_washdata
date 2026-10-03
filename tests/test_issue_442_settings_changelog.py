@@ -189,20 +189,105 @@ async def test_helper_never_raises_without_a_manager() -> None:
     await ws_api._record_option_changes(hass, entry, {"min_power": 1.0}, "test")
 
 
-async def test_every_option_writer_is_wired_to_the_helper() -> None:
-    """Guard against a fifth writer being added without a changelog call.
+async def _drive_set_options(hass, manager, entry):
+    with patch.object(ws_api, "_get_entry", return_value=entry):
+        await ws_api.ws_set_options.__wrapped__(
+            hass, MagicMock(), {"id": 1, "entry_id": "e1", "options": {"min_power": 3.5}}
+        )
+
+
+async def _drive_apply_suggestions(hass, manager, entry):
+    manager.profile_store.get_suggestions.return_value = {"min_power": {"value": 3.5}}
+    with patch.object(ws_api, "_get_entry", return_value=entry):
+        await ws_api.ws_apply_suggestions.__wrapped__(
+            hass, MagicMock(), {"id": 1, "entry_id": "e1", "keys": ["min_power"]}
+        )
+
+
+async def _drive_import(hass, manager, entry):
+    manager.profile_store.async_import_data = AsyncMock(
+        return_value={"entry_options": {"min_power": 3.5}}
+    )
+    with patch.object(ws_api, "_get_manager", return_value=manager), \
+            patch.object(ws_api, "_get_entry", return_value=entry):
+        await ws_api.ws_import_config.__wrapped__(
+            hass, MagicMock(), {"id": 1, "entry_id": "e1", "json_data": "{}"}
+        )
+
+
+async def _drive_selective_import(hass, manager, entry):
+    manager.profile_store.async_import_data_selective = AsyncMock(
+        return_value={"settings": {"min_power": 3.5}}
+    )
+    manager.device_type = "washing_machine"
+    with patch.object(ws_api, "_get_manager", return_value=manager), \
+            patch.object(ws_api, "_get_entry", return_value=entry):
+        await ws_api.ws_import_config_selective.__wrapped__(
+            hass, MagicMock(),
+            {"id": 1, "entry_id": "e1", "json_data": "{}", "selection": {},
+             "mode": "merge", "conflict_resolutions": {},
+             "cycle_destination": "reference", "apply_settings": True},
+        )
+
+
+async def _drive_store_download(hass, manager, entry):
+    with patch.object(ws_api, "_get_entry", return_value=entry):
+        applied = await ws_api._apply_store_settings(
+            hass, "e1", {"settings": {"min_power": 3.5}}, "washing_machine", True
+        )
+    assert applied == 1
+
+
+@pytest.mark.parametrize(
+    "drive",
+    [
+        _drive_set_options,
+        _drive_apply_suggestions,
+        _drive_import,
+        _drive_selective_import,
+        _drive_store_download,
+    ],
+    ids=["set_options", "apply_suggestions", "import", "selective_import", "store_download"],
+)
+async def test_every_option_writer_records_before_it_writes(drive) -> None:
+    """Each of the five `entry.options` writers, driven: the change is recorded
+    (old and new) BEFORE `async_update_entry` schedules the reload that rebuilds
+    the store. Two of them (store download, selective import) had no test of it
+    until this replaced a source-text count (audit TESTING-13)."""
+    entry = _entry({"min_power": 1.2})
+    hass, manager = _hass()
+    hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
+    order: list[str] = []
+    manager.profile_store.async_record_settings_changes = AsyncMock(
+        side_effect=lambda ch: order.append("record")
+    )
+    hass.config_entries.async_update_entry = MagicMock(
+        side_effect=lambda *a, **k: order.append("update")
+    )
+
+    await drive(hass, manager, entry)
+
+    assert "update" in order, "the writer did not write"
+    assert "record" in order, "the write was not recorded in the changelog"
+    assert order.index("record") < order.index("update"), order
+    rec = _recorded(manager)
+    assert rec["min_power"]["old"] == 1.2
+    assert rec["min_power"]["new"] == 3.5
+
+
+async def test_no_sixth_option_writer_bypasses_the_helper() -> None:
+    """Structural lint, kept on purpose: the behaviour test above covers the five
+    known writers, but a NEW writer cannot be found by driving known handlers.
 
     The count is the contract, and since the PR #448 round-15 review it is a
     clean one: ALL five writers go through `_record_option_changes`.
-    `ws_set_options` used to keep its own inline copy of the snapshot/diff/record
-    sequence - which is two implementations of a history the per-setting Revert
-    trusts, and the helper's own docstring already claimed to have replaced it.
     """
     import inspect
 
     src = inspect.getsource(ws_api)
     assert src.count("async_update_entry(") == 5, (
-        "a new entry.options writer appeared; wire it to _record_option_changes"
+        "a new entry.options writer appeared; wire it to _record_option_changes "
+        "and add it to test_every_option_writer_records_before_it_writes"
     )
     assert src.count("await _record_option_changes(") == 5, (
         "every option writer records through the helper; no inline copies"

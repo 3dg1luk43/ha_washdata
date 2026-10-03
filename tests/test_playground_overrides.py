@@ -28,12 +28,13 @@ from __future__ import annotations
 
 import pytest
 
-from datetime import datetime, timedelta
-from unittest.mock import patch
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, patch
 
-from custom_components.ha_washdata import playground
+from custom_components.ha_washdata import analysis, playground
 from custom_components.ha_washdata.const import MATCH_MIN_RESAMPLED_POINTS
 from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
+from custom_components.ha_washdata.profile_store import ProfileStore
 
 
 def test_build_sim_config_honours_override_keys_and_ignores_unknown():
@@ -117,56 +118,6 @@ def test_apply_match_overrides_rejects_negative_and_nonfinite_values():
     assert base == original
 
 
-def test_decide_commit_persistence_and_hold():
-    """The Playground match report mirrors the manager: commit only after N
-    consecutive non-ambiguous top-1s, then HOLD through a one-off wobble."""
-    st = {"candidate": None, "count": 0, "name": None}
-    # Persistence 3: two hits don't commit, the third does (as "match_commit").
-    assert playground.decide_commit("A", False, st, 3) is None
-    assert playground.decide_commit("A", False, st, 3) is None
-    assert playground.decide_commit("A", False, st, 3) == "match_commit"
-    assert st["name"] == "A"
-    # Ambiguous / empty candidates never advance and never emit.
-    assert playground.decide_commit("A", True, st, 3) is None
-    assert playground.decide_commit(None, False, st, 3) is None
-    # A single wobble to B resets the streak but does NOT switch the commit …
-    assert playground.decide_commit("B", False, st, 3) is None
-    assert st["name"] == "A"
-    # … and going back to A doesn't re-emit (already committed to A).
-    for _ in range(3):
-        assert playground.decide_commit("A", False, st, 3) is None
-    # A genuine sustained switch to B emits "match_changed".
-    assert playground.decide_commit("B", False, st, 3) is None
-    assert playground.decide_commit("B", False, st, 3) is None
-    assert playground.decide_commit("B", False, st, 3) == "match_changed"
-    assert st["name"] == "B"
-
-
-def test_decide_commit_persistence_one_commits_immediately():
-    st = {"candidate": None, "count": 0, "name": None}
-    assert playground.decide_commit("X", False, st, 1) == "match_commit"
-
-
-def test_decide_commit_ambiguous_and_falsy_dont_disrupt_streak():
-    """During an UNcommitted streak, an ambiguous or empty candidate must neither
-    reset nor advance the count - it is simply ignored, so an intermittent wobble
-    doesn't stop a genuine candidate from reaching the persistence threshold."""
-    st = {"candidate": None, "count": 0, "name": None}
-    # A builds one count …
-    assert playground.decide_commit("A", False, st, 3) is None
-    assert st["candidate"] == "A" and st["count"] == 1
-    # … an ambiguous A (same name) leaves candidate/count untouched (not advanced) …
-    assert playground.decide_commit("A", True, st, 3) is None
-    assert st["candidate"] == "A" and st["count"] == 1
-    # … an empty candidate likewise leaves the streak intact (not reset) …
-    assert playground.decide_commit(None, False, st, 3) is None
-    assert st["candidate"] == "A" and st["count"] == 1
-    # … so two more clean A hits still complete the threshold and commit.
-    assert playground.decide_commit("A", False, st, 3) is None
-    assert playground.decide_commit("A", False, st, 3) == "match_commit"
-    assert st["name"] == "A"
-
-
 def test_finalize_history_aggregates_rows_and_diff():
     rows = [
         {"cycle_id": "a", "label": "X", "detected": True, "detected_count": 1, "matched_profile": "X", "match_correct": True, "termination_reason": "smart", "duration_s": 1000},
@@ -231,7 +182,6 @@ def test_effective_settings_reads_back_what_build_sim_config_writes():
         start_threshold_w=33.0,
         stop_threshold_w=4.5,
         completion_min_seconds=900,
-        end_repeat_count=2,
         start_duration_threshold=8.0,
         interrupted_min_seconds=200,
         anti_wrinkle_enabled=True,
@@ -290,34 +240,44 @@ def test_sanitize_setting_values_drops_unknown_and_malformed_entries():
 #
 # async_match_profile returns an empty MatchResult when resampling yields no
 # segment and when the longest segment is shorter than MATCH_MIN_RESAMPLED_POINTS.
-# The sim's matcher used to fall back to the raw series instead, so it scored
-# short stretches that production had already rejected - the sim then reported a
-# match for a cycle the live matcher would have left unmatched.
+# The sim's matcher used to keep its own copy of those guards (and of the rest of
+# async_match_profile), and the copy drifted. It now runs the store's real
+# coroutine (playground._SimStore), so these pin that it does - and that the
+# guards still decide before any scoring.
 # ---------------------------------------------------------------------------
 
-_BASE = datetime(2026, 1, 1, 12, 0, 0)
+_BASE = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
 
 
-def _sim(readings_n: int = 60) -> playground._DetailSim:
-    """A _DetailSim with dummy snapshots, so _matcher's own guards are what decide."""
+def _store() -> ProfileStore:
+    store = ProfileStore(MagicMock(), "pg-guards")
+    trace = [[i * 60.0, 500.0] for i in range(61)]
+    store._data = {
+        "profiles": {"Eco": {"avg_duration": 3600.0, "sample_cycle_id": "s1"}},
+        "past_cycles": [{
+            "id": "s1", "profile_name": "Eco", "status": "completed",
+            "duration": 3600.0, "start_time": _BASE.isoformat(), "power_data": trace,
+        }],
+        "envelopes": {},
+    }
+    return store
+
+
+def _sim(store: ProfileStore | None = None) -> playground._DetailSim:
     cycle = {
         "id": "c1",
         "duration": 3600.0,
         "status": "completed",
         "start_time": _BASE.isoformat(),
-        "power_data": [[i * 60.0, 500.0] for i in range(readings_n)],
+        "power_data": [[i * 60.0, 500.0] for i in range(60)],
     }
-    # A non-empty snapshot pool: _matcher returns early on an empty one for its own
-    # reasons, and that is not the guard under test.
-    prebuilt = ([{"name": "Eco", "power": [500.0] * 200, "duration": 3600.0}], {}, {}, {})
     return playground._DetailSim(
         cycle=cycle,
         base_config=CycleDetectorConfig(min_power=10.0, off_delay=180),
         settings_override=None,
-        store=None,
+        store=store if store is not None else _store(),
         options={},
         price=None,
-        prebuilt=prebuilt,
     )
 
 
@@ -326,43 +286,51 @@ def _readings(n: int, step_s: float) -> list[tuple[datetime, float]]:
 
 
 def test_matcher_declines_a_series_too_short_to_resample():
-    """5 readings 1s apart resample to well under the 12-point floor."""
+    """6 readings 1 s apart resample to well under the 12-point floor."""
     sim = _sim()
-    with patch.object(
-        playground.analysis, "compute_matches_worker"
-    ) as worker:
-        result = sim._matcher(_readings(6, 1.0))
-    assert result == (None, 0.0, 0.0, None, False, False)
-    # Declined BEFORE scoring, exactly as async_match_profile does.
+    with patch.object(analysis, "compute_matches_worker") as worker:
+        ctx = sim._matcher(_readings(6, 1.0))
+    # Declined BEFORE scoring, exactly as async_match_profile does: an empty
+    # result, which is not a confident mismatch.
+    assert ctx.profile_name is None
+    assert ctx.is_confident_mismatch is False
     worker.assert_not_called()
 
 
-def test_matcher_declines_when_preprocessing_raises():
+def test_matcher_runs_the_live_coroutine():
+    """The sim's match is ProfileStore.async_match_profile, called as live calls it."""
     sim = _sim()
-    with patch.object(
-        playground, "resample_adaptive", side_effect=ValueError("boom")
-    ), patch.object(playground.analysis, "compute_matches_worker") as worker:
-        result = sim._matcher(_readings(60, 60.0))
-    assert result == (None, 0.0, 0.0, None, False, False)
-    worker.assert_not_called()
-
-
-def test_matcher_declines_when_resampling_yields_no_segment():
-    sim = _sim()
-    with patch.object(playground, "resample_adaptive", return_value=([], 5.0)), \
-         patch.object(playground.analysis, "compute_matches_worker") as worker:
-        result = sim._matcher(_readings(60, 60.0))
-    assert result == (None, 0.0, 0.0, None, False, False)
-    worker.assert_not_called()
+    readings = _readings(60, 60.0)
+    real = ProfileStore.async_match_profile
+    with patch.object(ProfileStore, "async_match_profile", autospec=True, side_effect=real) as spy:
+        sim._matcher(readings)
+    spy.assert_called_once()
+    _view, got_readings, duration = spy.call_args[0]
+    assert got_readings is readings
+    assert duration == pytest.approx(59 * 60.0)
+    assert spy.call_args[1] == {
+        "in_progress": True,
+        "stop_threshold_w": float(sim.detector.config.stop_threshold_w),
+    }
 
 
 def test_matcher_still_scores_a_long_enough_series():
     """The guards must not swallow the normal path."""
     sim = _sim()
-    with patch.object(
-        playground.analysis, "compute_matches_worker", return_value=[]
-    ) as worker:
-        sim._matcher(_readings(60, 60.0))
+    with patch.object(analysis, "compute_matches_worker", return_value=[]) as worker:
+        ctx = sim._matcher(_readings(60, 60.0))
     worker.assert_called_once()
     powers = worker.call_args[0][0]
     assert len(powers) >= MATCH_MIN_RESAMPLED_POINTS
+    # Every candidate rejected: live's confident mismatch, forwarded as element 5.
+    assert ctx.is_confident_mismatch is True
+
+
+def test_matcher_skips_a_store_without_real_profiles():
+    """Live never dispatches a match then (`has_real_profiles` gate)."""
+    store = _store()
+    store._data["profiles"] = {}
+    sim = _sim(store)
+    with patch.object(ProfileStore, "async_match_profile") as spy:
+        assert sim._matcher(_readings(60, 60.0)) is None
+    spy.assert_not_called()

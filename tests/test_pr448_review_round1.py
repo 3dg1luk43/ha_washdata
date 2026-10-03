@@ -360,6 +360,43 @@ def test_the_end_gate_is_deliberately_not_gated_on_confidence():
     assert "_longest_candidate_duration" in code
 
 
+def _switch_result(candidates: list[tuple[str, float]]) -> object:
+    from custom_components.ha_washdata.profile_store import MatchResult
+
+    cands = [{"name": n, "score": sc, "profile_duration": 3600.0} for n, sc in candidates]
+    best, conf = candidates[0]
+    margin = conf - candidates[1][1] if len(candidates) > 1 else 1.0
+    return MatchResult(best, conf, 3600.0, None, cands, margin < 0.05, margin)
+
+
+def _switch_from_a_to(candidates: list[tuple[str, float]]) -> str:
+    """Run the REAL switching rules once, with "A" committed mid-cycle.
+
+    The challenger is seen for the first time, so it is not persistent: only the
+    decisive-margin bypass can switch to it on this tick.
+    """
+    from custom_components.ha_washdata import match_rules
+
+    state = match_rules.SwitchState(
+        current_program="A",
+        matched_duration=3600.0,
+        last_confidence=0.6,
+        score_history={"A": [0.6, 0.6, 0.6, 0.6, 0.6]},
+        persistence_counter={"A": 3},
+        current_candidate="A",
+    )
+    result = _switch_result(candidates)
+    tick = match_rules.begin_tick(state, result, 3, 1800.0)
+    match_rules.decide_switch(state, tick, result, 3, 0.35)
+    return state.current_program
+
+
+def test_a_decisive_margin_bypasses_persistence():
+    """Register item 305: a winner far clear of the runner-up switches at once."""
+    assert _switch_from_a_to([("B", 0.80), ("A", 0.40)]) == "B"  # genuinely decisive
+    assert _switch_from_a_to([("B", 0.80), ("A", 0.75)]) == "A"  # crowded field: waits
+
+
 def test_a_sole_surviving_candidate_still_bypasses_persistence():
     """Requiring a real runner-up was measured worse than the sentinel.
 
@@ -369,31 +406,7 @@ def test_a_sole_surviving_candidate_still_bypasses_persistence():
     real-margin bypass it would have been held to. Stage 1/2 rejecting every
     other profile is evidence, not the absence of it.
     """
-    from custom_components.ha_washdata.const import MATCH_DECISIVE_MARGIN
-
-    def bypasses(runner_up: float | None, confidence: float, current: float) -> bool:
-        margin = 1.0 if runner_up is None else confidence - runner_up
-        return margin > MATCH_DECISIVE_MARGIN and confidence > current
-
-    assert bypasses(0.40, 0.80, 0.50) is True   # genuinely decisive
-    assert bypasses(0.75, 0.80, 0.50) is False  # crowded field, unchanged
-    assert bypasses(None, 0.55, 0.0) is True    # sole survivor: 94% correct
-
-
-def test_the_decisive_margin_bypass_does_not_require_a_runner_up():
-    from pathlib import Path
-
-    src = (
-        Path(__file__).resolve().parents[1]
-        / "custom_components"
-        / "ha_washdata"
-        / "manager.py"
-    ).read_text()
-    block = src.split("Decisive Margin Override", 1)[1].split("should_switch = True", 1)[0]
-    assert "_runner_up is not None" not in block, (
-        "the sole-surviving-candidate case is 94% correct - see "
-        "devtools/decisive_margin_eval.py"
-    )
+    assert _switch_from_a_to([("B", 0.55)]) == "B"
 
 
 def test_both_measurement_harnesses_are_checked_in():
@@ -404,6 +417,45 @@ def test_both_measurement_harnesses_are_checked_in():
     devtools = Path(__file__).resolve().parents[1] / "devtools"
     assert (devtools / "end_gate_eval.py").is_file()
     assert (devtools / "decisive_margin_eval.py").is_file()
+    assert (devtools / "playground_parity_eval.py").is_file()
+
+
+def _dishwasher_defers(
+    duration: float,
+    matched: str | None = None,
+    expected: float = 0.0,
+    conf: float = 0.9,
+    ambiguous: bool = False,
+    prefix_ambiguous: bool = False,
+) -> bool:
+    """The REAL ``CycleDetector._should_defer_finish`` on a dishwasher.
+
+    The end-spike wait is marked done so the floor is the only dishwasher rule
+    that can defer at these durations (the drying guard needs < 85% of expected).
+    """
+    from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
+
+    det = CycleDetector(
+        CycleDetectorConfig(
+            min_power=2.0, off_delay=300, device_type="dishwasher",
+            match_confidence_threshold=0.4, min_duration_ratio=0.8,
+        ),
+        lambda *_a: None,
+        lambda *_a: None,
+    )
+    det._matched_profile = matched  # noqa: SLF001
+    det._expected_duration = expected  # noqa: SLF001
+    det._last_match_confidence = conf  # noqa: SLF001
+    det._match_ambiguous = ambiguous  # noqa: SLF001
+    det._match_prefix_ambiguous = prefix_ambiguous  # noqa: SLF001
+    det._end_spike_seen = True  # noqa: SLF001
+    return det._should_defer_finish(duration)  # noqa: SLF001
+
+
+def test_the_unmatched_dishwasher_floor_is_thirty_minutes():
+    """An unmatched dishwasher never ends before 30 min (fill / early-wash dips)."""
+    assert _dishwasher_defers(1799.0) is True
+    assert _dishwasher_defers(1801.0) is False
 
 
 def test_a_matched_dishwasher_profile_lowers_the_minimum_duration_floor():
@@ -414,44 +466,15 @@ def test_a_matched_dishwasher_profile_lowers_the_minimum_duration_floor():
     A matched profile may only ever LOWER the floor, never raise it - the
     39.4 min Electrolux "Rapido" already clears it and is unaffected.
     """
-    from custom_components.ha_washdata.const import DISHWASHER_MIN_CYCLE_DURATION_S
-
-    def floor(
-        matched: str | None,
-        expected: float,
-        conf: float = 0.9,
-        ambiguous: bool = False,
-        prefix_ambiguous: bool = False,
-        threshold: float = 0.4,
-    ) -> float:
-        out = DISHWASHER_MIN_CYCLE_DURATION_S
-        if (
-            matched
-            and expected > 0
-            and conf >= threshold
-            and not ambiguous
-            and not prefix_ambiguous
-        ):
-            out = min(out, float(expected))
-        return out
-
+    # A trusted short programme lowers it to its own length.
+    assert _dishwasher_defers(400.0, "Delay- prewash", 360.0) is False
     # An UNTRUSTED match may not lower it: this is an anti-premature-end guard,
     # and a weak match to a short look-alike is how a fill dip ends the cycle.
-    assert floor("Delay- prewash", 360.0, conf=0.2) == DISHWASHER_MIN_CYCLE_DURATION_S
-    assert floor("Delay- prewash", 360.0, ambiguous=True) == DISHWASHER_MIN_CYCLE_DURATION_S
-    assert (
-        floor("Delay- prewash", 360.0, prefix_ambiguous=True)
-        == DISHWASHER_MIN_CYCLE_DURATION_S
-    )
-
-    # Unmatched: the blanket floor still applies.
-    assert floor(None, 0.0) == DISHWASHER_MIN_CYCLE_DURATION_S
-    # A programme shorter than the floor lowers it to its own length.
-    assert floor("Delay- prewash", 360.0) == 360.0
-    # One that already clears the floor is unaffected...
-    assert floor("Rapido", 2364.0) == DISHWASHER_MIN_CYCLE_DURATION_S
-    # ...and a long one cannot raise it above the constant.
-    assert floor("ECO", 13962.0) == DISHWASHER_MIN_CYCLE_DURATION_S
+    assert _dishwasher_defers(400.0, "Delay- prewash", 360.0, conf=0.2) is True
+    assert _dishwasher_defers(400.0, "Delay- prewash", 360.0, ambiguous=True) is True
+    assert _dishwasher_defers(400.0, "Delay- prewash", 360.0, prefix_ambiguous=True) is True
+    # A programme just over the floor cannot RAISE it above the constant.
+    assert _dishwasher_defers(1900.0, "Rapido", 2000.0) is False
 
 
 # --------------------------------------------------------------------------
@@ -982,6 +1005,7 @@ def test_every_english_panel_key_reaches_every_language():
     why this is asserted rather than eyeballed per key.
     """
     import json
+    import re
     from pathlib import Path
 
     root = (
@@ -1003,11 +1027,16 @@ def test_every_english_panel_key_reaches_every_language():
         return out
 
     en = flat(json.loads((root / "en.json").read_text()))
+    # Plural forms (audit UI-08) are per language: CLDR gives Japanese only
+    # `other` and Polish `few`/`many` too, so English's `_one`/`_other` cannot be
+    # required everywhere. The panel falls back to the plain key, which must exist.
+    plural = re.compile(r"_(zero|one|two|few|many|other)$")
+    required = {k for k in en if not (plural.search(k) and plural.sub("", k) in en)}
     gaps = {}
     for path in sorted(root.glob("*.json")):
         if path.name == "en.json":
             continue
-        missing = sorted(set(en) - set(flat(json.loads(path.read_text()))))
+        missing = sorted(required - set(flat(json.loads(path.read_text()))))
         if missing:
             gaps[path.stem] = missing
     assert not gaps, f"keys missing from other languages: {gaps}"
@@ -1022,13 +1051,15 @@ def test_the_ending_bound_is_taken_before_the_group_collapse():
     ENDING gate's bar exactly while the match is ambiguous, which is when Stage
     5's own safeguards say the selected member may be the wrong one, so reading
     the collapsed list can end a cycle while a longer sibling is still plausible.
-    Asserted on source order in both the live matcher and the Playground mirror,
-    because reaching it needs a grouped profile and a full match run.
+    Asserted on source order in the live matcher, because reaching it needs a
+    grouped profile and a full match run. The Playground no longer mirrors it: it
+    runs ``ProfileStore.async_match_profile`` itself (audit PLAYGROUND-01).
     """
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[1] / "custom_components" / "ha_washdata"
-    for mod in ("profile_store.py", "playground.py"):
+    assert "collapse_group_candidates(" not in (root / "playground.py").read_text()
+    for mod in ("profile_store.py",):
         src = (root / mod).read_text()
         capture = src.index("pre_collapse_candidates = list(candidates)")
         collapse = src.index("candidates = collapse_group_candidates(")
@@ -1098,7 +1129,8 @@ def test_no_panel_key_is_used_for_two_different_strings():
     ).read_text()
 
     pattern = re.compile(
-        r"_t\(\s*'([^']+)'\s*,\s*(?:\{[^{}]*\}|[A-Za-z_$][\w$]*)\s*,\s*'((?:[^'\\]|\\.)*)'"
+        # _tText (audit UI-21) is the same lookup for plain-text sinks.
+        r"_t(?:Text)?\(\s*'([^']+)'\s*,\s*(?:\{[^{}]*\}|[A-Za-z_$][\w$]*)\s*,\s*'((?:[^'\\]|\\.)*)'"
     )
     fallbacks = defaultdict(set)
     for key, fallback in pattern.findall(src):

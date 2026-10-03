@@ -206,8 +206,6 @@ from .const import (
     resolve_watchdog_interval_default,
     CONF_MATCH_PERSISTENCE,
     DEFAULT_MATCH_PERSISTENCE,
-    DEFAULT_MATCH_REVERT_RATIO,
-    MATCH_DECISIVE_MARGIN,
     MATCH_LABEL_MIN_MARGIN,
     ENABLE_ML_END_GUARD,
     ENABLE_ML_EARLY_COMMIT,
@@ -217,7 +215,6 @@ from .const import (
     DEFAULT_UNMATCHED_WATCHDOG_CEILING,
     DEFAULT_UNMATCHED_WATCHDOG_CEILING_BY_DEVICE,
     DEFAULT_MAX_DEFERRAL_SECONDS,
-    ENDING_HARD_FINALIZE_MIN_QUIET_S,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
     ENERGY_ANOMALY_Z_THRESHOLD,
     TERMINAL_DROP_MIN_CLEAN_CYCLES,
@@ -249,7 +246,6 @@ from .profile_store import (
     ProfileStore,
     decompress_power_data,
     is_terminal_drop,
-    label_verdict,
     terminal_drop_baseline,
 )
 from .signal_processing import (
@@ -273,6 +269,7 @@ from .time_utils import power_data_to_offsets, utc_now
 from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
+from . import match_rules
 from .frontend import PANEL_URL_PATH
 
 _LOGGER = logging.getLogger(__name__)
@@ -398,6 +395,55 @@ def _sanitize_ranking(raw_list: list[dict[str, Any]], limit: int = 5) -> list[di
         })
     return out
 
+
+def _apply_post_cycle_anomalies(cycle_data: dict[str, Any], store: Any) -> None:
+    """Stamp the post-cycle A1 underrun and A2 energy anomalies onto ``cycle_data``.
+
+    Runs at cycle end after the runtime overrun anomaly is frozen onto the cycle.
+    ``store`` is the device's ProfileStore (only its median-duration and energy-stats
+    lookups are used, and only when the guards pass). Each rule is independent and
+    never raises: a failure leaves that rule's fields unset. Purely informational,
+    never a notification.
+    """
+    # A1: Underrun check - computed post-cycle only, not a live signal.
+    # Only applied when no runtime anomaly was detected (underrun and overrun are mutually exclusive).
+    try:
+        if not cycle_data.get("anomaly") or cycle_data["anomaly"] == "none":
+            _uc_profile = cycle_data.get("profile_name")
+            _uc_dur = float(cycle_data.get("duration", 0))
+            if _uc_profile and _uc_dur > 0:
+                _uc_median = store.get_profile_median_duration(_uc_profile)
+                if (
+                    isinstance(_uc_median, (int, float))
+                    and not isinstance(_uc_median, bool)
+                    and _uc_median > 0
+                    and _uc_dur < _uc_median * CYCLE_UNDERRUN_ANOMALY_RATIO
+                ):
+                    cycle_data["anomaly"] = "underrun"
+                    cycle_data["underrun_ratio"] = round(_uc_dur / _uc_median, 3)
+    except Exception:  # noqa: BLE001
+        pass
+
+    # A2: Energy spike/low anomaly - stored separately from duration anomaly.
+    try:
+        _ea_profile = cycle_data.get("profile_name")
+        _ea_energy = float(cycle_data.get("energy_wh", 0))
+        if _ea_profile and _ea_energy > 0:
+            _ea_stats = store.get_profile_energy_stats(_ea_profile)
+            if (
+                isinstance(_ea_stats, dict)
+                and isinstance(_ea_stats.get("std_wh"), (int, float))
+                and _ea_stats["std_wh"] > 0
+            ):
+                _ea_z = (_ea_energy - _ea_stats["avg_wh"]) / _ea_stats["std_wh"]
+                cycle_data["energy_z_score"] = round(_ea_z, 2)
+                if _ea_z > ENERGY_ANOMALY_Z_THRESHOLD:
+                    cycle_data["energy_anomaly"] = "energy_spike"
+                elif _ea_z < -ENERGY_ANOMALY_Z_THRESHOLD:
+                    cycle_data["energy_anomaly"] = "energy_low"
+    except Exception:  # noqa: BLE001
+        pass
+
 # Notification-data keys that may only be forwarded to mobile_app_* notify targets.
 # Strict-schema platforms (e.g. Signal) reject unknown keys, so these are added per
 # service only when the target is a mobile app. Includes the iOS Live Activity
@@ -456,6 +502,45 @@ def _pn_dismiss(hass: HomeAssistant, notification_id: str) -> None:
         _LOGGER.warning(
             "persistent_notification dismiss failed (id=%s)", notification_id, exc_info=True
         )
+
+
+def _read_switch_state(mgr: Any) -> match_rules.SwitchState:
+    """The manager's switching fields as the shared rules read them.
+
+    Module-level, not a method, so a test binding only
+    ``_async_do_perform_matching`` onto a stub manager still runs the real path.
+    The two dicts are passed by reference, as the rules always mutated them.
+    """
+    return match_rules.SwitchState(
+        current_program=mgr._current_program,
+        matched_duration=mgr._matched_profile_duration,
+        last_confidence=mgr._last_match_confidence,
+        last_member_confidence=mgr._last_member_confidence,
+        score_history=mgr._score_history,
+        persistence_counter=mgr._match_persistence_counter,
+        unmatch_counter=mgr._unmatch_persistence_counter,
+        current_candidate=mgr._current_match_candidate,
+    )
+
+
+def _write_switch_state(
+    mgr: Any, state: match_rules.SwitchState, log: list[match_rules.LogLine]
+) -> None:
+    """Write back what the shared rules decided, then emit their log lines."""
+    mgr._current_program = state.current_program
+    mgr._matched_profile_duration = state.matched_duration
+    mgr._last_match_confidence = state.last_confidence
+    mgr._last_member_confidence = state.last_member_confidence
+    mgr._score_history = state.score_history
+    mgr._match_persistence_counter = state.persistence_counter
+    mgr._unmatch_persistence_counter = state.unmatch_counter
+    mgr._current_match_candidate = state.current_candidate
+    _emit_rule_log(mgr._logger, log)
+
+
+def _emit_rule_log(logger: Any, log: list[match_rules.LogLine]) -> None:
+    for level, msg, args in log:
+        logger.log(level, msg, *args)
 
 
 def _option_then_data(config_entry: Any, key: str, default: Any) -> Any:
@@ -698,8 +783,11 @@ class WashDataManager:
         match_threshold = config_entry.options.get(
             CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
         )
-        unmatch_threshold = config_entry.options.get(
-            CONF_PROFILE_UNMATCH_THRESHOLD, DEFAULT_PROFILE_UNMATCH_THRESHOLD
+        # Coerced (audit F7 finding): a non-numeric stored value raised inside every
+        # match tick (`float()` in the initial commit, `<` in the unmatch check).
+        unmatch_threshold = option_float(
+            config_entry.options.get(CONF_PROFILE_UNMATCH_THRESHOLD),
+            DEFAULT_PROFILE_UNMATCH_THRESHOLD,
         )
         self._unmatch_threshold = unmatch_threshold
 
@@ -1143,84 +1231,21 @@ class WashDataManager:
             self._last_match_result = result
             self._last_match_ambiguous = result.is_ambiguous
 
-            profile_name = result.best_profile
-            confidence = result.confidence
-            matched_duration = result.expected_duration
-            phase_name = result.matched_phase
-
             # --- Switching Logic (Temporal Persistence) ---
-            should_switch = False
-            switch_reason = ""
-
-            # Identify current program score from results
-            current_program_score = 0.0
-            for c in result.candidates:
-                if c.get("name") == self._current_program:
-                    current_program_score = c.get("score", 0.0)
-                    break
-
-            # How far clear of the runner-up the winner is. Measured over 594
-            # cycles x 10 checkpoints, this separates right from wrong far better
-            # than the absolute score does mid-cycle (AUC 0.773 vs 0.535), which is
-            # why the mid-cycle switch below keys on it. Register item 305.
-            # Measured against the best OTHER candidate rather than by list index:
-            # Stage-5 group collapsing rebuilds the result, so `best_profile` is not
-            # guaranteed to be `candidates[0]`.
-            match_margin = 1.0
-            _runner_up = None
-            for c in result.candidates:
-                if c.get("name") == profile_name:
-                    continue
-                try:
-                    cs = float(c.get("score", 0.0) or 0.0)
-                except (TypeError, ValueError):
-                    continue
-                if _runner_up is None or cs > _runner_up:
-                    _runner_up = cs
-            if _runner_up is not None:
-                match_margin = float(confidence) - _runner_up
-
-            # CASE: Divergence Detection (Score Drop)
-            # If current matched program has a significant drop from its own peak score,
-            # we should consider unmatching it even if it's still the "best" candidate.
-            if (
-                self._current_program not in ("detecting...", "off", "starting", "unknown")
-                and profile_name == self._current_program
-            ):
-                history: list[float] = self._score_history.get(self._current_program, [])
-                if len(history) > 3:
-                    peak_score = max(history)
-                    # If score drops by more than 40% from peak AND is below threshold, unmatch.
-                    # This catches divergence faster than waiting for fixed unmatch_threshold.
-                    if confidence < peak_score * (1.0 - DEFAULT_MATCH_REVERT_RATIO):
-                        self._unmatch_persistence_counter += 1
-                        if self._unmatch_persistence_counter >= self._match_persistence:
-                            self._current_program = "detecting..."
-                            self._matched_profile_duration = None
-                            self._unmatch_persistence_counter = 0
-                            self._match_persistence_counter.pop(profile_name, None)
-                            self._current_match_candidate = None
-                            self._logger.info(
-                                "Divergence detected for profile '%s' (confidence %.3f < 60%% of peak %.3f). "
-                                "Reverting to detection.",
-                                profile_name, confidence, peak_score
-                            )
-                            # Reset profile_name so Case 3 doesn't re-trigger
-                            profile_name = "detecting..."
-
-            # Update persistence for the best profile
-            if profile_name and profile_name != "detecting...":
-                self._match_persistence_counter[profile_name] = self._match_persistence_counter.get(profile_name, 0) + 1
-
-                # Check if this is the same candidate as before
-                if profile_name != self._current_match_candidate:
-                    # Reset counter for old candidate if it wasn't locked in
-                    self._current_match_candidate = profile_name
-                    self._match_persistence_counter[profile_name] = 1
-            else:
-                self._current_match_candidate = None
-
-            is_persistent = profile_name and self._match_persistence_counter.get(profile_name, 0) >= self._match_persistence
+            # The rules live in `match_rules` (audit PLAYGROUND-01/03), shared with
+            # the Playground replay so it makes the decisions made here. Step 1:
+            # margin, divergence revert, persistence. `profile_name` is the tick's
+            # name from here on - "detecting..." after a divergence revert, which is
+            # also what the detector is handed below.
+            switch_state = _read_switch_state(self)
+            tick = match_rules.begin_tick(
+                switch_state, result, self._match_persistence, current_duration
+            )
+            _write_switch_state(self, switch_state, tick.log)
+            profile_name = tick.profile_name
+            confidence = tick.confidence
+            matched_duration = tick.matched_duration
+            phase_name = tick.phase_name
 
             # --- Live-match features: compute always for ranking history + ML gate ---
             # Features are cheap scalars derived from the current trace.  We compute
@@ -1303,165 +1328,24 @@ class WashDataManager:
                 and confidence >= 0.30
             )
 
-            # Case 1: Initial Match from "detecting..."
-            # The commit floor is at least the unmatch threshold: committing a
-            # 0.15-0.35 match only for Case 3 to drop it four ticks later (and the
-            # still-persistent counter to re-commit it at once) made a stable
-            # low-confidence top-1 flip program <-> "detecting..." every few ticks,
-            # dropping the ETA each time (audit MATCH-DECIDE-05; 38 of 580 cycles).
-            if (
-                profile_name
-                and confidence >= max(0.15, float(self._unmatch_threshold or 0.0))
-                and (not result.is_ambiguous or is_persistent)
-                and (not self._matched_profile_duration or self._current_program == "detecting...")
-            ):
-                if is_persistent:
-                    should_switch = True
-                    switch_reason = f"initial_match (persistent {self._match_persistence_counter[profile_name]}x)"
-                elif ml_early_commit:
-                    should_switch = True
-                    switch_reason = (
-                        f"initial_match (ML commit score {ml_commit_score:.3f} >= {ML_MATCH_COMMIT_THRESHOLD})"
-                    )
-                else:
-                    self._logger.debug(
-                        "Match persistence: %s at %d/%d matches. Stay at detecting...",
-                        profile_name, self._match_persistence_counter.get(profile_name, 0), self._match_persistence
-                    )
-
-            # Case 2: Mid-cycle override (different profile)
-            elif (
-                profile_name
-                and self._current_program != profile_name
-                and self._current_program not in ("detecting...", "off", "starting", "unknown")
-            ):
-                # Decisive Margin Override: bypass persistence when the winner is
-                # far clear of the runner-up (register item 305).
-                #
-                # This replaces a "High Confidence Override" keyed on
-                # `confidence > 0.8`, whose premise - a very strong match needs no
-                # confirmation - is backwards mid-cycle. Mid-run the query is a
-                # PREFIX, and a prefix of a long programme looks exactly like a
-                # *finished* short one, so a score above 0.8 measured 31.5% correct
-                # (n=73) against 69.6% for the 0.6-0.8 band it was skipping the wait
-                # for; those cases pick a shorter programme 46% of the time (vs 16.5%
-                # at large). Replaying all 594 cycles through this switching logic,
-                # the old rule was also **unreachable in practice** - its outcomes
-                # land within 0.2pp of having no override at all.
-                #
-                # The margin is the signal that works: mid-cycle AUC 0.773 vs 0.535
-                # for the absolute score. Replayed, keying the bypass on it lifts
-                # end-of-cycle correctness 70.4% -> 72.6% (16 cycles better, 3 worse,
-                # McNemar p = 0.0044) for 0.14 displayed switches per cycle against
-                # 0.07. The sweep is monotone, so this is the conservative end of an
-                # accuracy/stability trade: 0.05 -> +6.7pp at 0.27 flips/cycle,
-                # 0.08 -> +5.1, 0.10 -> +3.0, 0.12 -> +2.2, 0.15 -> +1.7.
-                # The `> current_program_score` guard measured neutral (it never binds
-                # at this margin) and is kept because switching to something scoring
-                # below what is already displayed is never right.
-                # The 1.0 sentinel `match_margin` carries when nothing else scored
-                # is LOAD-BEARING, not a gap. Requiring a real runner-up here was
-                # tried (PR #448 round 6) and measured on
-                # `devtools/decisive_margin_eval.py` over 1977 mid-cycle
-                # checkpoints from the real corpus: a single surviving candidate
-                # occurs at 2.58% of them and is the **correct** programme
-                # **94.0% (47/50)** of the time, against **77.8% (669/860)** for
-                # the real-margin bypass it would have been held to. Stage 1/2
-                # rejecting every other profile is strong evidence, not absent
-                # evidence, so making those checkpoints wait for persistence
-                # delays the matcher's most reliable signal. Reverted.
-                if (
-                    match_margin > MATCH_DECISIVE_MARGIN
-                    and confidence > current_program_score
-                ):
-                    should_switch = True
-                    switch_reason = (
-                        f"decisive_margin (margin {match_margin:.3f} > "
-                        f"{MATCH_DECISIVE_MARGIN}, {confidence:.3f} vs {current_program_score:.3f})"
-                    )
-
-                # Normal Switch: Requires persistence AND either better score + trend
-                elif is_persistent:
-                    if confidence > current_program_score and self._analyze_trend(profile_name):
-                        # Add a minimum score gap for mid-cycle switching (0.05) to prevent flapping
-                        if (confidence - current_program_score) > 0.05:
-                            should_switch = True
-                            switch_reason = f"positive_trend_persistent ({confidence:.3f} > {current_program_score:.3f})"
-
-            # Case 3: Unmatching (confidence drop)
-            elif (
-                self._current_program not in ("detecting...", "off", "starting", "unknown")
-                and profile_name == self._current_program
-                and confidence < self._unmatch_threshold
-            ):
-                self._unmatch_persistence_counter += 1
-                is_unmatch_persistent = self._unmatch_persistence_counter >= self._match_persistence
-
-                if is_unmatch_persistent:
-                    self._current_program = "detecting..."
-                    self._matched_profile_duration = None
-                    self._unmatch_persistence_counter = 0
-                    # Start persistence over: left at its locked value the very
-                    # next tick re-committed the profile just dropped.
-                    self._match_persistence_counter.pop(profile_name, None)
-                    self._current_match_candidate = None
-                    self._logger.info(
-                        "Unmatched profile '%s' (confidence %.3f < threshold %.3f persistent %dx). "
-                        "Reverting to detection.",
-                        profile_name,
-                        confidence,
-                        self._unmatch_threshold,
-                        self._match_persistence
-                    )
-                else:
-                    self._logger.debug(
-                        "Unmatch persistence: %s at %d/%d low-confidence matches. Stay at %s...",
-                        profile_name, self._unmatch_persistence_counter, self._match_persistence, profile_name
-                    )
-
-            # Reset unmatch counter if confidence is healthy
-            # AND we didn't just detect a divergence
-            elif (
-                profile_name == self._current_program
-                and confidence >= self._unmatch_threshold
-                and not (len(self._score_history.get(self._current_program, [])) > 3 and confidence < max(self._score_history[self._current_program]) * (1.0 - DEFAULT_MATCH_REVERT_RATIO))
-            ):
-                self._unmatch_persistence_counter = 0
-
-            if should_switch:
-                if profile_name is None:
-                    self._current_program = "detecting..."
-                else:
-                    self._current_program = profile_name
-                self._last_match_confidence = confidence
-                self._last_member_confidence = result.member_confidence
-                self._unmatch_persistence_counter = 0 # Reset on switch
-                if profile_name in self._match_persistence_counter:
-                    self._match_persistence_counter[profile_name] = self._match_persistence # Lock it in
-
-                self._matched_profile_duration = self._profile_duration(matched_duration)
-                avg_duration = self._matched_profile_duration or 0.0
-                self._logger.info(
-                     "Switching to profile '%s' (reason: %s). Expected duration: %.0fs (%smin)",
-                     profile_name, switch_reason, avg_duration, int(avg_duration / 60),
-                )
-            elif profile_name == self._current_program:
-                # Same program, but update confidence for sensors
-                self._last_match_confidence = confidence
-                self._last_member_confidence = result.member_confidence
-            elif not self._matched_profile_duration:
-                self._current_program = "detecting..."
+            # Step 2 (match_rules.decide_switch): Case 1 initial commit, Case 2
+            # decisive-margin / trend switch, Case 3 unmatch, and the switch itself.
+            switch_state = _read_switch_state(self)
+            switch_log = match_rules.decide_switch(
+                switch_state,
+                tick,
+                result,
+                self._match_persistence,
+                self._unmatch_threshold,
+                ml_early_commit=ml_early_commit,
+                ml_commit_score=ml_commit_score,
+            )
+            _write_switch_state(self, switch_state, switch_log)
 
             self._last_estimate_time = utc_now()
 
             # Update score history for all candidates to track trends
-            for cand in result.candidates:
-                cname = cand.get("name")
-                if cname:
-                    history = self._score_history.setdefault(cname, [])
-                    history.append(float(cand.get("score", 0.0)))
-                    if len(history) > 20:
-                        history.pop(0)
+            match_rules.record_scores(switch_state, result.candidates)
 
             # Note: _update_remaining_only() and notify move to end of flow
 
@@ -1477,7 +1361,10 @@ class WashDataManager:
             # authoritative and must not be re-judged by the envelope heuristic
             # (see the verified_pause override below).
             stop_thresh = float(self.detector.config.stop_threshold_w)
-            if current_matched and current_power < stop_thresh and not self._is_user_paused:
+            alignment: tuple[bool, float] | None = None
+            if match_rules.needs_alignment_check(
+                current_matched, current_power, stop_thresh, self._is_user_paused
+            ):
                 formatted = power_data_to_offsets(cast(list[list[Any] | tuple[Any, ...]], readings))
                 try:
                     profile_store_any = cast(Any, self.profile_store)
@@ -1501,172 +1388,68 @@ class WashDataManager:
                     )
                     is_confirmed = False
                     mapped_time = 0.0
+                alignment = (is_confirmed, mapped_time)
 
-                if is_confirmed:
-                    if not verified_pause:
-                        self._logger.info(
-                            "Envelope verified expected low power phase for %s. Enabling verified pause.",
-                            current_matched
-                        )
-                    verified_pause = True
-                    # Smart Termination within Envelope block. Compare the mapped
-                    # position against the envelope's OWN time span (not avg_duration,
-                    # a differently-derived trimmed mean): mapped_time is capped at the
-                    # grid span, so span/avg_duration < 1 would make the 0.95 release
-                    # unreachable and the cycle would hang to the deferral cap (#348).
-                    try:
-                        span = self.profile_store.envelope_time_span(current_matched)
-                        if span > 0:
-                            # The same ratio the release below tests, kept for the
-                            # state attribute. It is the only continuous "how far
-                            # through this programme are we" figure the integration
-                            # has that is independent of elapsed time, so it stays
-                            # meaningful when a run over- or under-shoots its mean.
-                            self._envelope_position = round(
-                                min(1.0, max(0.0, mapped_time / span)), 3
-                            )
-                        if span > 0 and (mapped_time / span) > 0.95:
-                            verified_pause = False
-                            self._logger.info(
-                                "Smart Termination: near end of profile (%.0f/%.0fs). Releasing pause lock.",
-                                mapped_time, span,
-                            )
-                        else:
-                            # Diagnostic (#346): the release is held; show how far the
-                            # trace mapped vs the 95%% release point (no behaviour change).
-                            self._logger.debug(
-                                "Smart Termination held for %s: mapped %.0f/%.0fs (%.0f%%) below 95%% release%s",
-                                current_matched, mapped_time, span,
-                                (100.0 * mapped_time / span) if span > 0 else 0.0,
-                                "" if span > 0 else " (envelope span unavailable)",
-                            )
-                    except Exception as e:
-                        self._logger.debug("Smart Termination alignment verification failed: %s", e)
-                else:
-                    if verified_pause:
-                        self._logger.info(
-                            "Envelope indicates UNEXPECTED low power for %s. Disabling verified pause.",
-                            current_matched
-                        )
-                    verified_pause = False
-
-            # --- High Power Clear ---
-            stop_threshold = getattr(self.detector.config, "stop_threshold_w", 5.0)
-
-            if current_power > stop_threshold * 10:
-                verified_pause = False
-
-            # --- Sustained-quiet release of an auto-detected pause (issue #375) ---
-            # An envelope-verified pause bridges a genuine low-power phase (e.g. a
-            # dishwasher's passive drying).  When the appliance instead goes truly
-            # silent at the real end, the envelope alignment can keep re-confirming
-            # against a long near-zero drying tail baked into the profile by earlier
-            # force-stopped cycles, and Smart Termination's >95%-of-span release is
-            # unreachable because the trace goes quiet BEFORE that learned tail ends.
-            # The flag then freezes True and every ENDING finalize backstop (all
-            # gated on `not _verified_pause`) is defeated, so the cycle hangs for
-            # hours until the watchdog's multi-hour silence limit force-ends it.
-            # Release the auto-pause once the cycle has completed its expected
-            # duration AND has been continuously sub-threshold for the finalize
-            # quiet floor: the drying (if any) is over, so let the normal end path
-            # finalize.  This mirrors the dishwasher `quiet_released` gate the
-            # detector already trusts in `_should_defer_finish`.  A real user pause
-            # is authoritative and re-asserted below, so it is never released here.
-            expected_dur = self.detector.expected_duration_seconds
-            # Gap-free tally only: a telemetry outage is unobserved time and must
-            # not satisfy the quiet floor that releases the auto-detected pause
-            # (mirrors the detector's dishwasher quiet-release gates). Fall back to
-            # the plain tally if the attribute is missing (older detector).
-            time_below = getattr(
-                self.detector,
-                "_time_below_threshold_gapfree",
-                getattr(self.detector, "_time_below_threshold", 0.0),
+            # Confirmed alignment, the 95%-of-span release, the high-power clear,
+            # the #375 sustained-quiet release and the user-pause override
+            # (match_rules.decide_verified_pause). The quiet tally is the GAP-FREE
+            # one: a telemetry outage is unobserved time and must not satisfy the
+            # #375 quiet floor (falls back to the plain tally on an older detector).
+            pause = match_rules.decide_alignment_pause(
+                verified_pause=verified_pause,
+                current_matched=current_matched,
+                alignment=alignment,
+                envelope_span=self.profile_store.envelope_time_span,
             )
-            if (
-                verified_pause
-                and not self._is_user_paused
-                and expected_dur > 0
-                and current_duration >= expected_dur
-                and time_below >= ENDING_HARD_FINALIZE_MIN_QUIET_S
-            ):
-                self._logger.info(
-                    "Releasing auto-detected pause for %s: reached expected "
-                    "duration (%.0fs >= %.0fs) and sustained-quiet %.0fs - "
-                    "allowing normal cycle finish (issue #375).",
-                    current_matched or self._current_program,
-                    current_duration,
-                    expected_dur,
-                    time_below,
-                )
-                verified_pause = False
-
-            # A user-initiated pause (Pause Cycle button, or the door-open soft
-            # pause) stays in force until the user resumes (issue #306).  The
-            # heuristics above only govern *auto-detected* low-power phases; without
-            # this override they clear verified_pause and the cycle is finalized
-            # (leaving the "Paused by user" state, e.g. a dishwasher closes at the
-            # 1 h min-off-gap timeout) instead of waiting for Resume.  Re-asserting
-            # here also repairs the flag after a restart, since the detector state
-            # snapshot does not persist _verified_pause.
-            if self._is_user_paused:
-                verified_pause = True
-
-            # --- Consistency Override ---
-            # If envelope verified or mismatched, ensure manager program matches.
-            # A verified pause alone is not evidence for a NEW program: it used to
-            # adopt every tick's raw top-1 there, so an ambiguous A/B pair under a
-            # user pause displayed B, A, B, A... (audit MATCH-DECIDE-06). Require
-            # the same persistence and non-ambiguity a normal switch needs.
-            _pause_switch_ok = (
-                verified_pause
-                and not result.is_ambiguous
-                and bool(is_persistent)
+            if pause.envelope_position is not None:
+                self._envelope_position = pause.envelope_position
+            _emit_rule_log(self._logger, pause.log)
+            pause = match_rules.decide_pause_release(
+                verified_pause=pause.verified_pause,
+                current_matched=current_matched,
+                current_power=current_power,
+                stop_threshold_w=getattr(self.detector.config, "stop_threshold_w", 5.0),
+                user_paused=self._is_user_paused,
+                expected_duration=self.detector.expected_duration_seconds,
+                current_duration=current_duration,
+                time_below=getattr(
+                    self.detector,
+                    "_time_below_threshold_gapfree",
+                    getattr(self.detector, "_time_below_threshold", 0.0),
+                ),
+                program=self._current_program,
             )
-            if profile_name != self._current_program and (
-                _pause_switch_ok or result.is_confident_mismatch
-            ):
-                if profile_name:
-                    self._current_program = profile_name
-                    self._last_match_confidence = confidence
-                    self._last_member_confidence = result.member_confidence
-                    # Try to fetch duration if we switched back to matched
-                    try:
-                        prof = self.profile_store.get_profile(profile_name)
-                        if prof:
-                            self._matched_profile_duration = self._profile_duration(
-                                prof.get("avg_duration")
-                            )
-                    except Exception as e:
-                        self._logger.debug("Failed to fetch profile duration on switch: %s", e)
-                else:
-                    self._current_program = "detecting..."
-                    self._matched_profile_duration = None
+            _emit_rule_log(self._logger, pause.log)
+            verified_pause = pause.verified_pause
+
+            # --- Consistency Override (verified pause / confident mismatch) ---
+            switch_state = _read_switch_state(self)
+            override_log = match_rules.consistency_override(
+                switch_state, tick, result, verified_pause, self.profile_store.get_profile
+            )
+            _write_switch_state(self, switch_state, override_log)
 
             # --- HEURISTICS (Descriptive Phases) ---
-            if not phase_name:
-                if self.device_type == "dishwasher" and self.detector.is_waiting_low_power():
-                    phase_name = "Drying"
-                elif self.device_type == "washing_machine" and current_power > 200:
-                    phase_name = "Spinning"
-                elif self.device_type == "washing_machine" and self.detector.is_waiting_low_power():
-                    phase_name = "Rinsing/Soaking"
+            phase_name = match_rules.heuristic_phase(
+                phase_name, self.device_type, current_power, self.detector.is_waiting_low_power
+            )
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
+            # A divergence revert revokes the detector's match (no name, revoke flag).
+            profile_name, revoke = match_rules.detector_match(tick, result)
             # Built by name (audit DETECT-15); see CycleDetector.MatchContext.
             terminal_high = self._terminal_high_for_guards(profile_name)
             # Half-interval matching until the first commit (audit LIVE-17).
             self.detector.set_match_committed(
-                self._current_program not in (
-                    "detecting...", "restored...", "off", "starting", "unknown", None
-                )
+                match_rules.program_is_committed(self._current_program)
             )
             self.detector.update_match(MatchContext(
                 profile_name=profile_name,
                 confidence=confidence,
                 expected_duration=matched_duration,
                 phase_name=phase_name,
-                is_confident_mismatch=result.is_confident_mismatch,
+                is_confident_mismatch=revoke,
                 is_ambiguous=result.is_ambiguous,
                 is_prefix_ambiguous=result.is_prefix_ambiguous,
                 is_prefix_ambiguous_full_shape=result.is_prefix_ambiguous_full_shape,
@@ -2271,8 +2054,8 @@ class WashDataManager:
             DEFAULT_MATCH_PERSISTENCE,
             minimum=1,
         )
-        self._unmatch_threshold = options.get(
-            CONF_PROFILE_UNMATCH_THRESHOLD, DEFAULT_PROFILE_UNMATCH_THRESHOLD
+        self._unmatch_threshold = option_float(
+            options.get(CONF_PROFILE_UNMATCH_THRESHOLD), DEFAULT_PROFILE_UNMATCH_THRESHOLD
         )
         store = getattr(self, "profile_store", None)
         if store is not None and hasattr(store, "_unmatch_threshold"):
@@ -2594,7 +2377,6 @@ class WashDataManager:
         # Update detector config in-place
         old_min_power = self.detector.config.min_power
         old_off_delay = self.detector.config.off_delay
-        old_smoothing = self.detector.config.smoothing_window
         old_interrupted_min = self.detector.config.interrupted_min_seconds
 
         # Every detector field from the one builder the constructor uses, applied
@@ -2605,7 +2387,6 @@ class WashDataManager:
         )
         new_min_power = new_detector_config.min_power
         new_off_delay = new_detector_config.off_delay
-        new_smoothing = new_detector_config.smoothing_window
         new_interrupted_min = new_detector_config.interrupted_min_seconds
         apply_detector_config(self.detector.config, new_detector_config)
 
@@ -2653,18 +2434,15 @@ class WashDataManager:
         if (
             old_min_power != new_min_power
             or old_off_delay != new_off_delay
-            or old_smoothing != new_smoothing
             or old_interrupted_min != new_interrupted_min
         ):
             self._logger.info(
                 "Updated detector config: min_power %.1fW->%.1fW, off_delay %ds->%ds, "
-                "smoothing %d->%d, interrupted_min %ds->%ds",
+                "interrupted_min %ds->%ds",
                 old_min_power,
                 new_min_power,
                 old_off_delay,
                 new_off_delay,
-                old_smoothing,
-                new_smoothing,
                 old_interrupted_min,
                 new_interrupted_min,
             )
@@ -4130,13 +3908,13 @@ class WashDataManager:
         start during the await and the live fields would then belong to it (B1).
         """
         # Cycle data from detector stores power_data as [[offset_seconds, power], ...],
-        # where offsets are relative to cycle start.
-        power_data = cycle_data.get("power_data", [])
-        duration = cycle_data.get("duration", 0)
-
-        if not power_data or len(power_data) < 10:
+        # where offsets are relative to cycle start. Shared with the Playground's
+        # would_label (match_rules.final_match_input).
+        final_input = match_rules.final_match_input(cycle_data)
+        if final_input is None:
             self._logger.debug("Insufficient power data for final match (< 10 readings)")
             return None
+        power_data, duration = final_input
 
         self._logger.debug(
             "Running final match from cycle data: %s samples, %.0fs duration",
@@ -6055,9 +5833,10 @@ class WashDataManager:
             cycle_data["label_source"] = "manual"
             label_gate_ok = True
         else:
-            verdict, reason = label_verdict(match_result, learning_floor)
-            if verdict and verdict not in profiles:
-                verdict, reason = None, "unknown_profile"
+            # Shared with the Playground's would_label (match_rules).
+            verdict, reason = match_rules.cycle_end_label_verdict(
+                match_result, learning_floor, profiles
+            )
             best = getattr(match_result, "best_profile", None)
             if verdict:
                 cycle_data["profile_name"] = verdict
@@ -6175,44 +5954,8 @@ class WashDataManager:
             if overrun_ratio > 0:
                 cycle_data["overrun_ratio"] = round(float(overrun_ratio), 3)
 
-        # A1: Underrun check — computed post-cycle only, not a live signal.
-        # Only applied when no runtime anomaly was detected (underrun and overrun are mutually exclusive).
-        try:
-            if not cycle_data.get("anomaly") or cycle_data["anomaly"] == "none":
-                _uc_profile = cycle_data.get("profile_name")
-                _uc_dur = float(cycle_data.get("duration", 0))
-                if _uc_profile and _uc_dur > 0:
-                    _uc_median = self.profile_store.get_profile_median_duration(_uc_profile)
-                    if (
-                        isinstance(_uc_median, (int, float))
-                        and not isinstance(_uc_median, bool)
-                        and _uc_median > 0
-                        and _uc_dur < _uc_median * CYCLE_UNDERRUN_ANOMALY_RATIO
-                    ):
-                        cycle_data["anomaly"] = "underrun"
-                        cycle_data["underrun_ratio"] = round(_uc_dur / _uc_median, 3)
-        except Exception:  # noqa: BLE001
-            pass
-
-        # A2: Energy spike/low anomaly — stored separately from duration anomaly.
-        try:
-            _ea_profile = cycle_data.get("profile_name")
-            _ea_energy = float(cycle_data.get("energy_wh", 0))
-            if _ea_profile and _ea_energy > 0:
-                _ea_stats = self.profile_store.get_profile_energy_stats(_ea_profile)
-                if (
-                    isinstance(_ea_stats, dict)
-                    and isinstance(_ea_stats.get("std_wh"), (int, float))
-                    and _ea_stats["std_wh"] > 0
-                ):
-                    _ea_z = (_ea_energy - _ea_stats["avg_wh"]) / _ea_stats["std_wh"]
-                    cycle_data["energy_z_score"] = round(_ea_z, 2)
-                    if _ea_z > ENERGY_ANOMALY_Z_THRESHOLD:
-                        cycle_data["energy_anomaly"] = "energy_spike"
-                    elif _ea_z < -ENERGY_ANOMALY_Z_THRESHOLD:
-                        cycle_data["energy_anomaly"] = "energy_low"
-        except Exception:  # noqa: BLE001
-            pass
+        # A1 underrun + A2 energy spike/low (post-cycle only, never raises).
+        _apply_post_cycle_anomalies(cycle_data, self.profile_store)
 
         # Cache post-cycle anomaly data so sensor attributes surface it while idle.
         self._last_cycle_post_anomaly = {
@@ -7642,22 +7385,10 @@ class WashDataManager:
         """Analyze score history to detect positive trend.
 
         Returns True if score has increased in at least 7 of the last 10 intervals.
-        Requires at least 5 samples history to make a determination.
+        Requires at least 5 samples history to make a determination. The rule is
+        ``match_rules.analyze_trend``, shared with the Playground replay.
         """
-        history = self._score_history.get(profile_name, [])
-        if len(history) < 5:
-            return False
-
-        # Use last 11 points to get 10 intervals (or fewer if history short)
-        recent = history[-11:]
-        if len(recent) < 2:
-            return False
-
-        up_count = sum(1 for i in range(1, len(recent)) if recent[i] > recent[i - 1])
-        total_intervals = len(recent) - 1
-
-        # Proportional threshold (7/10 => 0.7)
-        return (up_count / total_intervals) >= 0.70
+        return match_rules.analyze_trend(self._score_history.get(profile_name, []))
 
     def _reset_live_notification_state(
         self, *, keep_activity_started: bool = False
@@ -9001,15 +8732,10 @@ class WashDataManager:
         raises instead of returning ``inf``, so the non-finite filter below is
         never reached and the raise escapes a ``@callback`` WS handler. ``1e400``
         parses to ``inf`` and is the case the filter covers; the two are different
-        inputs (register items 279/280).
+        inputs (register items 279/280). The rule is ``match_rules.profile_duration``,
+        shared with the switching rules and the Playground replay.
         """
-        try:
-            avg = float(value)
-        except (TypeError, ValueError, OverflowError):
-            return None
-        if not math.isfinite(avg) or avg <= 0:
-            return None
-        return avg
+        return match_rules.profile_duration(value)
 
     def _apply_manual_program(
         self, profile_name: str, profile: dict[str, Any] | None

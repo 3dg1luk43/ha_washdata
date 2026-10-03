@@ -124,7 +124,7 @@ const out = [
   `Auto-generated ${now} from \`www/ha-washdata-panel.js\` (${total} lines, ${methods.length} methods).`,
   `Regenerate: \`node devtools/gen_panel_map.mjs\``,
   ``,
-  `Each entry: **Method name** — line number (method size in lines).`,
+  `Each entry: **Method name** - line number (method size in lines).`,
   `Methods >${OVERSIZE} lines are flagged ⚠ and summarised in the table at the bottom.`,
   ``,
   `---`,
@@ -137,7 +137,7 @@ for (const g of GROUPS) {
   out.push(`## ${g.label}`);
   out.push(``);
   for (const m of members) {
-    out.push(`- **${m.name}** — L${m.line} (${m.size} lines)${m.size > OVERSIZE ? ' ⚠' : ''}`);
+    out.push(`- **${m.name}** - L${m.line} (${m.size} lines)${m.size > OVERSIZE ? ' ⚠' : ''}`);
   }
   out.push(``);
 }

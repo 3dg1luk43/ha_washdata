@@ -110,10 +110,32 @@ def test_leave_one_out_changes_only_the_targets_own_profile() -> None:
 
 def test_the_cache_is_shared_across_configs() -> None:
     """Nothing in the cache depends on the config being tuned, and rebuilding
-    per config measured 16 s -> 361 s on a real export."""
-    import inspect
+    per config measured 16 s -> 361 s on a real export.
 
-    src = inspect.getsource(MT.tune_matching_config)
-    assert "shared: dict = {}" in src
-    assert src.count("shared)") >= 4, "not every _top1 call shares the cache"
-    assert "cache: dict = {}" not in inspect.getsource(MT._top1)
+    Counted, not read: a whole `tune_matching_config` run (one base, the grid,
+    both holdout arms) may build each (profile, excluded cycle) envelope once,
+    so at most `profiles + targets` builds. Was a search of the source for
+    `shared: dict = {}` (audit TESTING-13).
+    """
+    from unittest.mock import patch
+
+    cycles = [_cycle(f"p{i}", "P", 400.0 + 10 * i, dur=3600.0 + 20 * i) for i in range(3)]
+    cycles += [_cycle(f"q{i}", "Q", 900.0 + 10 * i, dur=2400.0 + 20 * i) for i in range(3)]
+    real = MT.analysis.compute_envelope_worker
+    # Two grid configs instead of ~48 keep this fast; the base config and the
+    # holdout arms still call `_top1` a dozen more times.
+    two_configs = MT._grid()[:2]
+    with patch.object(MT, "_grid", return_value=two_configs), patch.object(
+        MT.analysis, "compute_envelope_worker", side_effect=real
+    ) as build:
+        result = MT.tune_matching_config(
+            cycles, "washing_machine", min_cycles=6, min_targets=4
+        )
+
+    assert "reason" not in result or result["reason"] not in (
+        "insufficient data", "too few targets"
+    ), result
+    profiles, targets = 2, len(cycles)
+    assert 0 < build.call_count <= profiles + targets, (
+        f"{build.call_count} envelope builds for {profiles + targets} distinct templates"
+    )

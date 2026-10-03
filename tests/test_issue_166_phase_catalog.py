@@ -81,3 +81,29 @@ async def test_issue_166_rename_default_conflict_is_atomic(store: ProfileStore) 
     assert assigned == "Dry"
 
 
+
+
+@pytest.mark.asyncio
+async def test_deleting_an_edited_builtin_restores_it(store: ProfileStore) -> None:
+    """An edited built-in is listed as editable and offered Delete, but deleting it
+    always raised 'cannot_delete_builtin'. It now drops the override, so the
+    built-in is back, and the profile keeps its range under the built-in name."""
+    store._data["profiles"] = {
+        "Eco": {"device_type": "dishwasher", "phases": [{"name": "Dry", "start": 0.0, "end": 100.0}]}
+    }
+    await store.async_update_custom_phase("dishwasher.dry", "Drying", "")
+    row = next(p for p in store.list_phase_catalog("dishwasher") if p["id"] == "dishwasher.dry")
+    assert row["name"] == "Drying" and row["is_default"] is False
+    assert row["is_override"] is True  # the panel offers Reset, not Delete
+
+    assert await store.async_delete_custom_phase("dishwasher.dry") == 0
+
+    row = next(p for p in store.list_phase_catalog("dishwasher") if p["id"] == "dishwasher.dry")
+    assert row["name"] == "Dry" and row["is_default"] is True and "is_override" not in row
+    assert store._data["profiles"]["Eco"]["phases"] == [{"name": "Dry", "start": 0.0, "end": 100.0}]
+
+
+@pytest.mark.asyncio
+async def test_an_unedited_builtin_still_cannot_be_deleted(store: ProfileStore) -> None:
+    with pytest.raises(ValueError, match="phase_not_found"):
+        await store.async_delete_custom_phase("dishwasher.dry")

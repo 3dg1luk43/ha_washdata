@@ -31,7 +31,7 @@ pip install -r requirements-dev.txt
 ```bash
 ./run_tests.sh                  # fast suite (default, ~30s - skips slow + benchmark)
 ./run_tests.sh --slow           # real-data replays, stress simulations
-./run_tests.sh --bench          # benchmarks
+./run_tests.sh --bench          # none left: work budgets run in the fast suite (tests/test_perf_budgets.py)
 ./run_tests.sh --e2e            # Playwright E2E (chromium + mobile-chrome, ~2 min)
 ./run_tests.sh --e2e-min        # same E2E against the minified build (the bytes users download)
 ./run_tests.sh --all            # everything (~13 min)
@@ -51,7 +51,7 @@ node devtools/build_panel.mjs --check   # verify only; non-zero if stale
 devtools/release_check.sh               # release preflight (what CI runs)
 devtools/release_check.sh --fix         # regenerate artifacts instead of failing
 devtools/release_check.sh --full --tag v0.5.6
-python3 devtools/docs_check.py          # doc anchors/constants/register ids/em-dash ratchet vs code
+python3 devtools/docs_check.py          # doc anchors/constants/register ids/deep-dive identifiers/em-dash ratchet vs code
 
 python3 devtools/eval.py run --mode fast     # LOO matcher accuracy on the SHIPPED path (audit F1)
 python3 devtools/eval.py compare BASE.json NEW.json   # paired deltas, McNemar, guarded metrics
@@ -59,6 +59,8 @@ python3 devtools/end_gate_eval.py --loo      # ENDING fallback-gate lag/early-en
 python3 devtools/energy_projection_eval.py   # projected-energy accuracy, LOO (audit PROGRESS-04)
 python3 devtools/decisive_margin_eval.py     # mid-cycle switch bypass, runner-up exposure
 python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
+python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)
+python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed point / ladder / oscillation / erased cycles (F10)
 
 python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG   # mock appliance
 
@@ -169,11 +171,17 @@ measures absolute *level/spread*.
   `compact_price_timeline`; #426). No filtering, **no DTW** (that is in `analysis.py`).
 - **`progress.py`** - **single source of truth** for progress / remaining-time / phase /
   projected-energy math. Pure, no HA. `manager.py`'s equivalents are thin wrappers and the Playground
-  `SimRunner` calls the same functions, so the what-if replay is byte-identical to the live estimator.
+  replay calls the same functions, so the what-if replay is byte-identical to the live estimator.
   Locked by `tests/test_progress_module.py` and the Playground parity tests (there is no separate
   golden snapshot file); **never fork this math**.
 - **`notification_rules.py`** - pure notification *decision* predicates shared by `manager.py` and the
   Playground sim. **Delivery stays in the manager**; only thresholds/gating live here.
+- **`match_rules.py`** (audit F7) - the manager's post-match rules as pure functions: program
+  switching (initial commit, decisive-margin and trend switches, divergence/unmatch reverts), the
+  envelope verified pause and its releases, the consistency override, the cycle-end label verdict.
+  `manager._async_do_perform_matching` and the Playground replay both call them (the alignment await
+  stays in the manager), and the detector's dishwasher match freeze calls the pause release too.
+  **Never re-implement a rule in either caller**; `devtools/playground_parity_eval.py` measures it.
 - **`learning.py`** - feedback system with confidence tracking. Label provenance in
   `profile_store._AUTO_LABEL_SOURCES` (`auto_match`/`auto_label_post`/`auto_label_service`/
   `auto_label_backfill`): anything in that tuple means "the matcher guessed this", which the
@@ -191,11 +199,14 @@ measures absolute *level/spread*.
   **never raises** (returns `{"error": ...}`). Replays stored cycles through a *fresh* real
   `CycleDetector` + the real matcher - no client-side detection copy. History/optimize run as
   detached, registry-tracked background tasks, chunked across small executor jobs. Reference 09.
-  **Replay parity is what every replay harness measures, so keep it exact:** candidates come from
-  `ProfileStore.build_match_snapshots` (re-gridded per query, as live), and the live watchdog's
-  keepalives are emulated inside silent stretches. Until 0.5.8 neither was true - top-1 differed
-  from live on 26.5% of matches and a silent soak could never split - so replay figures taken
-  before register items 387a/390 measured a different matcher and different end gates.
+  **Replay parity is what every replay harness measures, so keep it exact:** the sim runs the real
+  `ProfileStore.async_match_profile` / `async_verify_alignment` through a `_SimStore` view and the
+  manager's own `match_rules`, and the live watchdog's keepalives are emulated inside silent
+  stretches. Before 0.5.8 top-1 differed from live on 26.5% of matches and a silent soak could never
+  split (items 387a/390); until audit F7 the sim kept its own matcher copy (188/1180 calls differed)
+  and never set the verified pause (17/176 replays ended differently). Replay figures taken before
+  either measured a different matcher and different end gates. The outcome carries `would_label` /
+  `label_reason` from the cycle-end label verdict.
 - **`history_import.py`** (#344) - turns raw power history into candidate cycles. Same contract:
   pure, executor-safe, hass-free, never raises. A raw HA history **cannot** be fed to one detector
   (it is change-based, so steady 0 W emits no rows and the detector force-stops instead), hence the
@@ -333,6 +344,15 @@ any promotion. The integration is self-sufficient at test/run time (parity fixtu
   templates, `title=`, `placeholder=`, `aria-label=`, settings schema labels/docs/intros, or tooltips.
   The English value goes in `translations/panel/en.json` as canonical source and as the `_t()`
   fallback. Only exception: the hardcoded `'WashData'` brand name.
+- **`_t()` HTML-escapes every substituted var** (audit UI-21: a translated string put typed
+  search text into the page raw). Wrap a var that is markup on purpose in `_html(...)`; use
+  `_tText(...)` for a sink that escapes itself or is plain text (toast, confirm modal, native
+  `confirm()`, `title`/`aria-label` through `_esc`, `textContent`), or the value is escaped twice.
+  Pass raw values, not pre-escaped ones.
+- **Plurals:** a numeric `count` (else `n`) var selects `key_<category>` via
+  `Intl.PluralRules(lang)`, then `key_other`, then the plain key. Add `key_one`/`key_other` to
+  `en.json` and every category each language needs (`_few`/`_many` for pl/cs/ru, ...); keep the
+  plain key as the fallback.
 - Settings schema strings auto-resolve at render time (`setting.{key}.label`, `setting.{key}.doc`,
   `section.{id}.label`, `section.{id}.intro`, `setting_group.{slug}.label`) - adding the key to
   `translations/panel/en.json` is all that is needed.

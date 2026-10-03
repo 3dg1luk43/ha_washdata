@@ -53,8 +53,6 @@ _LOGGER = logging.getLogger(__name__)
 
 _APPLIANCE_TYPES = {"washer", "dryer", "dishwasher", "washer_dryer"}
 
-# Max concurrent per-cycle rating aggregations when listing a profile's cycles.
-
 # Max profiles hydrated concurrently when downloading a whole-device bundle. One query
 # each (the bundle skips the per-cycle rating fan-out), kept small to stay well under the
 # store's rate limiter on devices that carry many profiles.

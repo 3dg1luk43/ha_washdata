@@ -80,6 +80,25 @@ test('workbench: the phase bar paints the replay\'s live phase runs', async ({ p
   }), { timeout: 8_000 }).toBeGreaterThan(20);
 });
 
+test('workbench: the outcome says whether the cycle would be auto-labelled', async ({ page }) => {
+  // The replay now runs the manager's own cycle-end label verdict (audit F7).
+  await clickTab(page, 'playground');
+  await page.locator('button[data-action="pg-run"]').click();
+  const card = page.locator('.wd-pg-alerts-card');
+  await expect(card).toContainText('Auto-label', { timeout: 8_000 });
+  await expect(card).toContainText('Cotton 40°C');
+});
+
+test('drawer/history: a row says why it would ask for review', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const runBtn = page.locator('button[data-action="pg-run-history"]');
+  await expect(runBtn).toBeVisible({ timeout: 8_000 });
+  await runBtn.click();
+  const glyph = page.locator('.wd-pg-label-glyph').first();
+  await expect(glyph).toBeAttached({ timeout: 8_000 });
+  await expect(glyph).toHaveAttribute('title', /Too close to the runner-up/);
+});
+
 test('workbench: outcome + alerts card appears after a sim run', async ({ page }) => {
   await clickTab(page, 'playground');
   await page.locator('button[data-action="pg-run"]').click();

@@ -205,3 +205,19 @@ test('a zero curve position is rendered, not swallowed as falsy', async ({ page 
   await bootPanel(page, { 'ha_washdata/get_devices': dev });
   await expect(page.locator('.wd-prog-row').first()).toContainText('curve 0%', { timeout: 8_000 });
 });
+
+// ─── Phase timeline uses the live phase sensor's scale ───────────────────────
+
+test('the phase timeline names the phase the live sensor names', async ({ page }) => {
+  // progress.current_phase maps progress onto the LAST range end (1000 s here), so
+  // 45.2% is 452 s = Spin. The timeline used to scale by the profile's 6500 s
+  // average instead and named no phase (or a different one) at the same moment.
+  await bootPanel(page, {
+    'ha_washdata/get_devices': deviceRunning,
+    'ha_washdata/get_profile_phases': { phases: [
+      { name: 'Wash', start: 0, end: 400 },
+      { name: 'Spin', start: 400, end: 1000 },
+    ] },
+  });
+  await expect(page.locator('.wd-ptl-cur')).toContainText('Spin', { timeout: 8_000 });
+});

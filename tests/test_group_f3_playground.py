@@ -94,7 +94,6 @@ def _base_config(**overrides) -> CycleDetectorConfig:
         min_off_gap=60,
         start_threshold_w=10.0,
         stop_threshold_w=5.0,
-        end_repeat_count=1,
     )
     cfg.update(overrides)
     return CycleDetectorConfig(**cfg)

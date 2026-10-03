@@ -183,11 +183,11 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
       { t: 1700, type: 'finished', detail: 'reason=smart', severity: 'info' },
     ],
     alerts: [],
-    outcome: { detected: true, detected_count: 1, termination_reason: 'smart', status: 'completed', final_duration_s: 1740, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, expected_s: 1720, overrun_ratio: 1.01, projected_energy_wh: 485, projected_cost: 2.5 },
+    outcome: { detected: true, detected_count: 1, termination_reason: 'smart', status: 'completed', final_duration_s: 1740, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, expected_s: 1720, overrun_ratio: 1.01, projected_energy_wh: 485, projected_cost: 2.5, would_label: true, label_profile: 'Cotton 40°C', label_reason: 'ok' },
   },
   'ha_washdata/run_playground_history': {
     rows: [
-      { cycle_id: 'cyc-001', label: 'Cotton 40°C', detected: true, detected_count: 1, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, termination_reason: 'smart', duration_s: 1740, expected_s: 1720, overrun_ratio: 1.01, alerts: [] },
+      { cycle_id: 'cyc-001', label: 'Cotton 40°C', detected: true, detected_count: 1, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, termination_reason: 'smart', duration_s: 1740, expected_s: 1720, overrun_ratio: 1.01, alerts: [], would_label: false, label_profile: null, label_reason: 'margin' },
     ],
     summary: { cycles: 1, detected: 1, labelled: 1, match_correct: 1, match_wrong: 0, unmatched: 0, false_end: 0 },
   },
