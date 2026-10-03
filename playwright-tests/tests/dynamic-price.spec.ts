@@ -31,7 +31,7 @@ const PRICE_STATES = {
 
 async function openEnergySection(page) {
   await clickTab(page, 'settings');
-  const sec = page.locator('button[data-sec="notifications"]').first();
+  const sec = page.locator('button[data-sec="basic"]').first();
   await expect(sec).toBeVisible({ timeout: 8_000 });
   await sec.click();
 }
@@ -77,9 +77,9 @@ test('a real tariff sensor in the price field raises nothing', async ({ page }) 
   await expect(page.locator('[data-cerr="energy_price_entity"]')).toBeHidden();
 });
 
-test('the time-weighted cost toggle renders under Notifications -> Energy', async ({ page }) => {
+test('the time-weighted cost toggle renders under Basic -> Energy', async ({ page }) => {
   await clickTab(page, 'settings');
-  const sec = page.locator('button[data-sec="notifications"]').first();
+  const sec = page.locator('button[data-sec="basic"]').first();
   await expect(sec).toBeVisible({ timeout: 8_000 });
   await sec.click();
   const toggle = page.locator('input[data-opt="energy_price_dynamic"]').first();
@@ -90,7 +90,7 @@ test('the time-weighted cost toggle renders under Notifications -> Energy', asyn
 
 test('turning the toggle off saves it as false', async ({ page }) => {
   await clickTab(page, 'settings');
-  await page.locator('button[data-sec="notifications"]').first().click();
+  await page.locator('button[data-sec="basic"]').first().click();
   const field = page.locator('.wd-field-switch:has(input[data-opt="energy_price_dynamic"])').first();
   await expect(field).toBeVisible({ timeout: 8_000 });
   await field.locator('label').first().click();

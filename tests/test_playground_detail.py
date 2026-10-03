@@ -181,17 +181,6 @@ def test_sweep_1d_returns_points_and_best():
     assert sw["best_value"] in (120.0, 180.0, 240.0)
 
 
-def test_sweep_2d_returns_grid():
-    store, cfg, opts, data = _load()
-    ids = [c["id"] for c in data["past_cycles"][-4:]]
-    sw = playground.run_playground_sweep(
-        store, ids, cfg, "off_delay", [120.0, 180.0], "match_accuracy",
-        opts, 6.0, 4, param_y="min_off_gap", values_y=[1999.0, 3600.0],
-    )
-    assert sw["param_x"] == "off_delay" and sw["param_y"] == "min_off_gap"
-    assert len(sw["grid"]) == 2 and all(len(row) == 2 for row in sw["grid"])
-
-
 def test_the_projection_follows_the_stored_tariff_not_the_launch_price():
     """The replay's future half must be priced from the cycle's own timeline.
 

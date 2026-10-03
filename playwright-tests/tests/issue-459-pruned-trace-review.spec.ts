@@ -6,7 +6,7 @@
  * ("review"), so one old cycle joined the queue per new cycle once a program
  * reached its trace cap. The backend no longer does that, but the panel also
  * refuses to treat an ML label as a review finding when the trace it judged is
- * gone (`has_power_data: false`).
+ * gone (`has_power_data: false`). Since 0.5.8 the label never queues a cycle.
  */
 
 import { test, expect } from '@playwright/test';
@@ -16,7 +16,7 @@ const ML_COMPARISON = {
   cycles: [
     // Pruned: an ML label from before the fix, no trace behind it.
     { id: 'cyc-001', ml_quality_label: 'review', ml_quality_score: 0.989, has_power_data: false, ml_review: {} },
-    // Traced: a real finding, still flagged.
+    // Traced: flagged by the model, still not queued (the label is not a finding).
     { id: 'cyc-002', ml_quality_label: 'review', ml_quality_score: 0.8, has_power_data: true, ml_review: {} },
   ],
 };
@@ -29,12 +29,13 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('a pruned cycle is not in the review queue, a traced one is (#459)', async ({ page }) => {
+test('an ML health label alone never queues a cycle for review (#459, audit ML-03)', async ({ page }) => {
+  // Since 0.5.8 the label is not a review finding at all, traced or not.
   await clickTab(page, 'history');
   const statusSel = page.locator('#wd-cyc-filter-status');
   await expect(statusSel).toBeVisible({ timeout: 5_000 });
   await statusSel.selectOption('needs_review');
-  await expect(page.locator('tr[data-cid="cyc-002"]')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('tr[data-cid="cyc-002"]')).toHaveCount(0);
   await expect(page.locator('tr[data-cid="cyc-001"]')).toHaveCount(0);
 });
 

@@ -321,6 +321,85 @@ def compute_dtw_lite(
         _LOGGER.debug("compute_dtw_lite vectorized path failed; using scalar fallback", exc_info=True)
         return _dtw_lite_scalar(xf, yf, n, m, w)
 
+def dtw_lite_batch(x: np.ndarray, y: np.ndarray, band_width_ratio: float) -> np.ndarray:
+    """``compute_dtw_lite`` for ``k`` equal-length pairs at once (rows of ``x``, ``y``).
+
+    The Stage-3 refines are all 200x200 with one band, so the ``top_n x 2`` DP
+    fills run as one row scan (audit MR-05): within a row, ``cell[j] = min(c[j],
+    local[j] + cell[j-1])`` with ``c = local + min(up, diag)`` unrolls to ``S[j] +
+    cummin(c[k] - S[k])`` over the row's prefix sums ``S``. ~8x faster for 10 DTWs;
+    the prefix sums reorder the additions, so results agree to ~1e-15 relative,
+    not bit for bit.
+    """
+    xs = np.asarray(x, dtype=float)
+    ys = np.asarray(y, dtype=float)
+    k, n = xs.shape
+    m = ys.shape[1]
+    if n == 0 or m == 0:
+        return np.full(k, np.inf)
+    w = max(1, int(min(n, m) * band_width_ratio))
+    centers = (np.arange(1, n + 1, dtype=float) * (m / n)).astype(np.intp)
+    start_js = np.maximum(1, centers - w)
+    end_js = np.minimum(m, centers + w + 1)
+    prev = np.full((k, m + 1), np.inf)
+    prev[:, 0] = 0.0
+    zeros = np.zeros((k, 1))
+    for i in range(n):
+        a, b = int(start_js[i]), int(end_js[i])
+        local = np.abs(xs[:, i:i + 1] - ys[:, a - 1:b])
+        up_diag = np.minimum(prev[:, a:b + 1], prev[:, a - 1:b])
+        csum = np.cumsum(local, axis=1)
+        before = np.concatenate((zeros, csum[:, :-1]), axis=1)
+        row = csum + np.minimum.accumulate(up_diag - before, axis=1)
+        cur = np.full((k, m + 1), np.inf)
+        cur[:, a:b + 1] = row
+        prev = cur
+    return prev[:, m]
+
+
+def _stage3_scores_batched(
+    pairs: list[tuple[np.ndarray, np.ndarray]],
+    current_peak: float,
+    *,
+    dtw_mode: str,
+    dtw_bandwidth: float,
+    l1_scale: float,
+    ddtw_scale: float,
+    ensemble_w: float,
+) -> list[float]:
+    """Stage-3 scores for ``scaled`` / ``ddtw`` / ``ensemble`` in one batched DTW.
+
+    ``pairs`` are each candidate's (current, sample) series already on the
+    ``MATCH_DTW_RESAMPLE_N`` grid; the arithmetic is `_dtw_component_score`'s.
+    """
+    level = dtw_mode in ("scaled", "ensemble")
+    deriv = dtw_mode in ("ddtw", "ensemble")
+    xs: list[np.ndarray] = []
+    ys: list[np.ndarray] = []
+    if level:
+        xs.extend(a for a, _ in pairs)
+        ys.extend(b for _, b in pairs)
+    if deriv:
+        xs.extend(np.gradient(a) for a, _ in pairs)
+        ys.extend(np.gradient(b) for _, b in pairs)
+    dists = dtw_lite_batch(np.vstack(xs), np.vstack(ys), dtw_bandwidth)
+    peak = max(current_peak, MATCH_MAE_PEAK_FLOOR)
+
+    def _score(dist: float, scale: float) -> float:
+        scaled = (dist / MATCH_DTW_RESAMPLE_N) * MATCH_MAE_REF_PEAK / peak
+        return scale / (scale + scaled)
+
+    k = len(pairs)
+    if dtw_mode == "ensemble":
+        return [
+            ensemble_w * _score(float(dists[i]), l1_scale)
+            + (1.0 - ensemble_w) * _score(float(dists[k + i]), ddtw_scale)
+            for i in range(k)
+        ]
+    scale = ddtw_scale if deriv else l1_scale
+    return [_score(float(d), scale) for d in dists]
+
+
 def _resample_to(arr: np.ndarray, n: int) -> np.ndarray:
     """Linearly resample a 1-D array to exactly ``n`` points over its index span.
 
@@ -534,7 +613,36 @@ def compute_matches_worker(
         # Resample the current trace once — it's the same for every candidate.
         curr_resampled = _resample_to(curr_arr, MATCH_DTW_RESAMPLE_N)
 
-        for cand in to_refine:
+        batched: list[float] | None = None
+        if dtw_mode in ("scaled", "ddtw", "ensemble") and to_refine:
+            # One batched DTW for every refine (audit MR-05: Stage 3 was ~89% of
+            # matcher CPU). Falls back to the per-candidate path on any error.
+            try:
+                grid_pairs = []
+                for cand in to_refine:
+                    pair = cand.get("_shape_pair")
+                    if pair is not None:
+                        a = _resample_to(pair[0], MATCH_DTW_RESAMPLE_N)
+                        b = _resample_to(pair[1], MATCH_DTW_RESAMPLE_N)
+                    else:
+                        a = curr_resampled
+                        b = _resample_to(np.array(cand["sample"]), MATCH_DTW_RESAMPLE_N)
+                    grid_pairs.append((a, b))
+                batched = _stage3_scores_batched(
+                    grid_pairs, current_peak, dtw_mode=dtw_mode,
+                    dtw_bandwidth=dtw_bandwidth, l1_scale=l1_scale,
+                    ddtw_scale=ddtw_scale, ensemble_w=ensemble_w,
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("batched Stage-3 DTW failed; per-candidate path", exc_info=True)
+                batched = None
+
+        for idx, cand in enumerate(to_refine):
+            if batched is not None:
+                cand["original_score"] = float(cand["score"])
+                cand["score"] = float(blend * cand["score"] + (1.0 - blend) * batched[idx])
+                cand["dtw_dist"] = 0.0
+                continue
             pair = cand.get("_shape_pair")
             if pair is not None:
                 warp_curr, sample_arr, cand_resampled = pair[0], pair[1], None
@@ -1312,6 +1420,28 @@ def align_trace_to_envelope(
         return _proportional(), False
 
 
+_DTW_PATH_CELL_BUDGET = 10_000_000  # compute_dtw_path's matrix cap
+
+
+def _closed_end_path_exists(n: int, m: int, band_width_ratio: float) -> bool:
+    """Whether ``compute_dtw_path`` would return a path for an ``n x m`` pair.
+
+    Exactly its three failure cases without filling the matrix: an empty side,
+    the cell budget, and an end cell the Sakoe-Chiba band cannot reach. Each row's
+    band is ``[lo, hi]`` (the fill's own truncation); cells are reachable left to
+    right from the diagonal, so the end is reachable iff no row's band starts more
+    than one column past where the previous row's ends (row 0 is the origin).
+    """
+    if n == 0 or m == 0 or (n + 1) * (m + 1) > _DTW_PATH_CELL_BUDGET:
+        return False
+    w = max(1, int(min(n, m) * band_width_ratio))
+    center = np.arange(1, n + 1) * (m / n)
+    lo = np.maximum(1, (center - w).astype(np.int64))
+    hi = np.minimum(m, (center + w).astype(np.int64) + 1)
+    prev_hi = np.concatenate(([0], hi[:-1]))
+    return bool(np.all(lo <= prev_hi + 1) and np.all(lo <= hi) and hi[-1] == m)
+
+
 def verify_profile_alignment_worker(
     current_power: list[float],
     envelope_avg_curve: list[float],
@@ -1348,17 +1478,19 @@ def verify_profile_alignment_worker(
     if offset < 0:
         curr_seg = curr[-offset:]
 
-    path = compute_dtw_path(curr_seg, ref_seg, band_width_ratio=dtw_bandwidth)
-
-    if not path:
+    # The DTW that used to run here was closed-end: its backtrack starts at the last
+    # cell, so the mapped index was ALWAYS the window's last index whenever a path
+    # existed - 34x the CPU and a 33-42 MiB matrix per tick for a constant (audit
+    # LIVE-03). Same answer, same fallback, no matrix: a path exists unless the
+    # window is empty, over the old cell budget, or the band cannot reach the end
+    # cell. The resulting position runs ALIGNMENT_CONTEXT_BUFFER // 2 steps ahead
+    # of the trace; measured harmless-to-helpful, so it is kept, not "fixed".
+    if _closed_end_path_exists(len(curr_seg), len(ref_seg), dtw_bandwidth):
+        mapped_idx = end_ref - 1
+    else:
         # Fallback to linear mapping based on offset
         mapped_idx = min(len(ref)-1, offset + len(curr) - 1)
         mapped_idx = max(0, mapped_idx)
-    else:
-        # Map the final point of the current trace to the reference index
-        last_pair = path[-1]
-        ref_seg_idx = last_pair[1]
-        mapped_idx = start_ref + ref_seg_idx
 
     # Ensure sequences are non-empty before indexing
     if not envelope_time_grid or len(ref) == 0:

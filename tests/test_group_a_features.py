@@ -318,6 +318,7 @@ def _store_with_coverage_gaps_method(cycles: list[dict]) -> ProfileStore:
     store = MagicMock(spec=ProfileStore)
     store.get_past_cycles.return_value = cycles
     store.suggest_coverage_gaps = ProfileStore.suggest_coverage_gaps.__get__(store, ProfileStore)
+    store._coverage_shape_clusters = ProfileStore._coverage_shape_clusters.__get__(store, ProfileStore)
     return store
 
 
@@ -508,8 +509,8 @@ def mock_hass_learning():
 
 
 def test_a4_warmup_prevents_auto_label(mock_hass_learning):
-    """Profile with 2 labeled cycles (< 5 warmup) must NOT auto-label even at high confidence."""
-    mgr, store = _learning_manager(mock_hass_learning, labeled_count=2)
+    """Profile with 1 labeled cycle (< 2 warmup) must NOT auto-label even at high confidence."""
+    mgr, store = _learning_manager(mock_hass_learning, labeled_count=1)
 
     cycle_data = {"id": "cyc_warmup", "duration": 3600.0, "profile_name": None}
     store.past_cycles.append(cycle_data)
@@ -529,7 +530,7 @@ def test_a4_warmup_prevents_auto_label(mock_hass_learning):
 
 
 def test_a4_sufficient_cycles_allows_auto_label(mock_hass_learning):
-    """Profile with 5+ labeled cycles auto-labels normally at high confidence."""
+    """Profile past the warm-up (2+ labeled cycles) auto-labels normally at high confidence."""
     mgr, store = _learning_manager(mock_hass_learning, labeled_count=5)
 
     cycle_data = {"id": "cyc_mature", "duration": 3600.0, "profile_name": None}

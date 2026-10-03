@@ -32,7 +32,7 @@ pip install -r requirements-dev.txt
 ./run_tests.sh                  # fast suite (default, ~30s - skips slow + benchmark)
 ./run_tests.sh --slow           # real-data replays, stress simulations
 ./run_tests.sh --bench          # benchmarks
-./run_tests.sh --e2e            # Playwright E2E (618 tests, chromium + mobile-chrome, ~2 min)
+./run_tests.sh --e2e            # Playwright E2E (chromium + mobile-chrome, ~2 min)
 ./run_tests.sh --e2e-min        # same E2E against the minified build (the bytes users download)
 ./run_tests.sh --all            # everything (~13 min)
 
@@ -70,8 +70,8 @@ cd devtools/testbox && ./hactl.py ws ha_washdata/get_profiles entry_id=<id>   # 
 
 ### Two tiers of test, and what each can prove
 
-`run_tests.sh` is the fast, deterministic tier: frozen time, 606 recorded cycles, pure
-detection/matching/progress maths. It is where accuracy lives. But **93 of its 237 modules build
+`run_tests.sh` is the fast, deterministic tier: frozen time, the recorded `cycle_data/` corpus, pure
+detection/matching/progress maths. It is where accuracy lives. But **about a third of its modules build
 Home Assistant with `MagicMock()`**, and a MagicMock accepts any service call - so code Home
 Assistant rejects outright used to pass every test (register item 316: `title: None` killed every
 `clear_notification` for months while all ten of the tests covering it passed). Two things close
@@ -133,27 +133,30 @@ because the usual miss is rebuilding and then committing only the source. `--no-
 
 ### Core components
 
-- **`manager.py`** (~8580 lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
+- **`manager.py`** (~9.3k lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
   async profile matching every 5 min, entity updates. Runs its own long jobs (ML training, health
   recompute) as plain executor/`async_create_task` jobs; the `task_registry` wiring lives in `ws_api.py`.
-- **`cycle_detector.py`** (~3400 lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
+- **`cycle_detector.py`** (~4.4k lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
   power thresholds + energy gates, dryer anti-wrinkle, external triggers.
-- **`profile_store.py`** (~9690 lines) - learned profiles + matching pipeline orchestration (numeric
+- **`profile_store.py`** (~10k lines) - learned profiles + matching pipeline orchestration (numeric
   Stages 1-4 run in `analysis.py::compute_matches_worker`; profile_store adds Stage-5 grouping and
   rebuilds the `MatchResult`). Also match ranking history (`record_match_ranking_snapshot` /
   `confirm_match_ranking_snapshots`), the training dataset for `live_match` retraining.
 - **`config_flow.py`** (~260 lines) - minimal HA flow (setup, reconfigure, small options flow). The
   180+ tunables are edited in the **panel** and persisted via `ws_set_options`, not HA flows.
-- **`__init__.py`** (~1420 lines) - entry point, services, config migration. Every registered service
-  needs matching entries in `services.yaml` and `strings.json`.
+- **`__init__.py`** (~1.6k lines) - entry point, services, config migration. Every registered service
+  needs matching entries in `services.yaml` and `strings.json`, **and a schema in `_SERVICE_SCHEMAS`**
+  (enforced by `tests/test_audit_service_schemas.py`); resolve its device with `_service_manager`.
 
 **Pure-statistics per-profile heuristics** (no ML, never raise, surfaced via `ws_get_profiles`):
-`compute_profile_health`, `compute_profile_trends`, `suggest_coverage_gaps`,
-`compute_profile_advisories`, `compute_envelope_conformance`, `detect_cycle_artifacts`,
-`compute_profile_terminal_signature`. Detail in
-reference 02. Two traps: **there is no generic "Recommendations" banner** - advisories render per
-code, and `poor_health`/`shape_drift`/`duration_trend_up`/`energy_trend_up` ship over the WS but
-render nowhere, so a new code needs its render path too (register item 161). Conformance is
+`compute_profile_health`, `compute_profile_trends`,
+`suggest_coverage_gaps`, `compute_profile_advisories`, `compute_envelope_conformance`,
+`detect_cycle_artifacts`, `compute_profile_terminal_signature`. Detail in reference 02. Two traps:
+**there is no generic "Recommendations" banner** - advisories render per code, and since 0.5.8 the
+panel's poor-fit / trend / shape-drift warnings render **only** from `profile_advisories` (register
+item 428), so the maintenance-log suppression applies; a new code needs its render path too. Coverage
+gaps render on Profiles (measured useful, item 432); profile-group *suggestions* were measured harmful
+and deleted - do not re-add them without `devtools/advisory_usefulness_eval.py`. Conformance is
 complementary to `MatchResult.confidence`: confidence measures shape *correlation*, conformance
 measures absolute *level/spread*.
 
@@ -177,12 +180,11 @@ measures absolute *level/spread*.
 - **`phase_catalog.py`** - phase labels mapped to time ranges. Live phase is indexed by the
   **ML-blended progress fraction** (not raw elapsed), so the readout survives overrun/underrun.
   Separate from phase-*segmented matching* below.
-- **`phase_segmenter.py`** / **`phase_match.py`** (0.5.1) - unsupervised regime segmenter and per-role
-  duration/energy agreement + `phase_eta`. Consumed **only** by the opt-in phase-resolved ETA blend in
-  `progress.py`; does **not** change program (Stage 1-5) matching. Gated by `enable_phase_matching`
-  AND `LIVE_PHASE_DEVICE_TYPES`.
+- The 0.5.1 phase-resolved ETA stack (`phase_segmenter.py`, `phase_match.py`, `enable_phase_matching`)
+  was **removed** in 0.5.8 (audit PROGRESS-01/02): it never ran (no profile carried `device_type`), and
+  revived it missed its own Phase-0 bar on washers. The live phase readout is `phase_catalog.py`.
 - **`suggestion_engine.py`** - `select_clean_cycles()` filters mis-detected cycles first;
-  `SuggestionEngine` (classic) and `MLSuggestionEngine` (gated) produce suggestions;
+  `SuggestionEngine` produces suggestions (the ML-calibrated engine was deleted in 0.5.8, item 424);
   `reconcile_suggestions()` enforces cross-parameter invariants.
 - **`playground.py`** - headless, executor-safe backend for the Playground tab. Never touches HA,
   **never raises** (returns `{"error": ...}`). Replays stored cycles through a *fresh* real
@@ -261,7 +263,7 @@ shipped as base64 blobs; on-device training writes specs into the profile store 
 the baseline files**. Full detail in reference 07 and `ml/README.md`.
 
 **Feature flags (`const.py`):** `SHOW_ML_LAB` (panel ML insights + the consolidated **ML Training**
-tab), `ENABLE_ML_SUGGESTIONS` (**off** since audit SUGGEST-18), `ENABLE_ML_TRAINING`, and the per-device `CONF_ENABLE_ML_MODELS`
+tab), `ENABLE_ML_TRAINING`, and the per-device `CONF_ENABLE_ML_MODELS`
 (`ml_models_enabled(options)`, default off) which gates feeding ML into live decisions.
 
 **Five gated runtime consumers** of `CONF_ENABLE_ML_MODELS`:
@@ -270,16 +272,19 @@ tab), `ENABLE_ML_SUGGESTIONS` (**off** since audit SUGGEST-18), `ENABLE_ML_TRAIN
    **Frozen off by `ENABLE_ML_END_GUARD = False`** whatever the device option (audit ML-05: 0
    premature ends prevented on 292 replayed cycles, washer median lag +5.3 min).
 2. **ML early match commit** - commits the initial match without the persistence counter at
-   `ML_MATCH_COMMIT_THRESHOLD`.
-3. **ML quality gate** - downgrades auto-labeling to a feedback request at cycle end.
+   `ML_MATCH_COMMIT_THRESHOLD`. **Frozen off** (`ENABLE_ML_EARLY_COMMIT`, audit ML-01/02: 31% wrong).
+3. **ML quality gate** - downgrades auto-labeling to a feedback request at cycle end. **Frozen off**
+   (`ENABLE_ML_QUALITY_GATE`, audit ML-06: 0 fires on eligible cycles).
 4. **ML remaining-time regressor** - blends a completion fraction into the phase-aware progress
-   *before* EMA smoothing. No shipped baseline, inert until on-device training promotes one.
+   *before* EMA smoothing. **Frozen off** (`ENABLE_ML_REMAINING_TIME`, audit ML-07: worse than naive
+   on 7 of 8 installs). The code stays; each consumer's tests patch its flag on.
 5. **Terminal-drop fast finalize** - pure statistics, no trained model. **Asymmetric, the opposite of
    the end-guard: it can only ever shorten the wait**, and only for an anomalously-early drop on a
    *familiar* cycle (peak within the learned range, else it may be a NEW program and is deferred).
 
-Panel `ml_health` and `MLSuggestionEngine` go through `resolve_scorer` directly and are **not** gated
-on `CONF_ENABLE_ML_MODELS`.
+Panel `ml_health` goes through `resolve_scorer` directly and is **not** gated on
+`CONF_ENABLE_ML_MODELS` (its "Cycle health" chip and review-queue role were removed in 0.5.8, item 426;
+the per-cycle score is still computed). The ML Training tab lists only capabilities with a live consumer.
 
 **Modules:** `engine.py` exposes `resolve_scorer(capability, store)` (classifiers) and
 `resolve_regressor` (regressors). **All ML inference must go through them** so trained models are
@@ -370,7 +375,7 @@ old-schema fixtures. **Two separate layers, tested separately:**
    `MINOR_VERSION` live on the flow class in `config_flow.py` and must be bumped with it. Tested in
    `tests/test_migration_harness.py`. The one-pass legacy path writes the current version directly, so
    a bump also means updating the `minor_version=` at the end of the bulk migration.
-2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->15
+2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->16
    (`STORAGE_VERSION` in `const.py`). Tested in `tests/test_migration_v032.py`. Call
    `_async_migrate_func(old_version, 1, data)` **directly** - do not go through
    `ProfileStore.async_load()` (needs file I/O).
@@ -386,7 +391,8 @@ old-schema fixtures. **Two separate layers, tested separately:**
    (`BANKED_TAIL_REPAIR_KEY` set so the one-time banked-tail duration repair runs once), v13->v14
    marker-only by **assignment** (re-arms that repair after its #424 correction; v13 had already
    cleared the key), v14->v15 pure data repair (review-queue answers stamped `manual`, audit
-   MANAGER-01; idempotent).
+   MANAGER-01; idempotent), v15->v16 review-queue cleanup (drops pending requests the item-433
+   rule would not raise; records no answer; idempotent).
 
 ## Matching Pipeline
 

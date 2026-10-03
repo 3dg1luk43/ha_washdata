@@ -23,6 +23,8 @@ Constraint: Resampling must be segment-based (no interpolation across gaps).
 
 from __future__ import annotations
 
+import math
+
 from dataclasses import dataclass
 from collections.abc import Sequence
 from typing import List, Tuple
@@ -620,3 +622,34 @@ def resumed_pauses(
         return out
     except Exception:  # noqa: BLE001
         return []
+
+
+def percentile_linear(values: Sequence[float], q: float) -> float:
+    """``np.percentile(values, q)`` (linear method) without NumPy, bit for bit.
+
+    For the detector's 20-interval cadence window, where NumPy's per-call
+    overhead (40-185 us) dwarfed the arithmetic (audit PERF-07). Same virtual
+    index ``(n - 1) * q`` and the same two-sided lerp NumPy uses. ``values``
+    must be non-empty.
+    """
+    a = sorted(float(v) for v in values)
+    n = len(a)
+    virtual = (n - 1) * (q / 100.0)
+    lo = math.floor(virtual)
+    hi = min(lo + 1, n - 1)
+    lo = min(max(lo, 0), n - 1)
+    t = virtual - lo
+    x, y = a[lo], a[hi]
+    diff = y - x
+    return y - diff * (1.0 - t) if t >= 0.5 else x + diff * t
+
+
+def median_fast(values: Sequence[float]) -> float:
+    """``np.median(values)`` without NumPy, bit for bit; ``values`` non-empty."""
+    a = sorted(float(v) for v in values)
+    n = len(a)
+    mid = n // 2
+    if n % 2:
+        return a[mid]
+    return (a[mid - 1] + a[mid]) / 2.0
+

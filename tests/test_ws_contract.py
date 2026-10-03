@@ -197,13 +197,8 @@ def test_validate_ws_contract_allows_extras_on_open_responses():
     assert ws_api._validate_ws_contract(
         "run_suggestion_analysis", {"ok": True, "count": 3, "anything_else": 42}
     ) == []
-    # The Playground one-shot commands return large open result dicts (rows / series
-    # / sweep grids / an {"error": ...} marker), so they are also open responses -
-    # extra keys must not be flagged.
-    for cmd in ("run_playground_cycle_detail", "run_playground_history", "run_playground_sweep"):
-        assert cmd in ws_schema.WS_OPEN_RESPONSES
-        assert ws_api._validate_ws_contract(cmd, {"whatever": 1, "series": []}) == []
-        assert ws_api._validate_ws_contract(cmd, {"error": "boom"}) == []
+    # The task snapshot splats a variant key set, so it is open too.
+    assert "get_task_result" in ws_schema.WS_OPEN_RESPONSES
 
 
 def test_validate_ws_contract_task_start_commands_are_strict():
@@ -281,10 +276,10 @@ def test_generated_files_exist_and_are_current():
     assert ts.strip() and md.strip()
 
     # Spot-check that known commands / types made it into both artifacts.
-    for token in ("GetProfilesResponse", "RunPlaygroundCycleDetailResponse",
+    for token in ("GetProfilesResponse", "StartTaskResponse",
                   "WashDataWsResponses"):
         assert token in ts, token
-    for command in ("run_playground_cycle_detail", "get_dtw_debug", "get_devices"):
+    for command in ("start_playground_cycle_detail", "get_playground_settings", "get_devices"):
         assert command in md, command
 
     # The committed files must be up to date with the schema (idempotent gen).
@@ -293,3 +288,28 @@ def test_generated_files_exist_and_are_current():
         "Generated WS type artifacts are out of date; run "
         "`python3 devtools/generate_ws_types.py`"
     )
+
+
+def test_every_handler_param_matches_ws_commands():
+    """Audit PLATFORM-17: names-only parity let a param added to one side ship a
+    wrong ws-types.d.ts / WS_API.md. Walk each handler's voluptuous schema."""
+    import voluptuous as vol
+
+    mismatches = []
+    for name in dir(ws_api):
+        handler = getattr(ws_api, name)
+        if not (name.startswith("ws_") and hasattr(handler, "_ws_command")):
+            continue
+        cmd = handler._ws_command.split("/", 1)[-1]
+        spec = ws_schema.WS_COMMANDS.get(cmd)
+        assert spec is not None, cmd
+        have = {}
+        if isinstance(handler._ws_schema, vol.Schema):
+            for key in handler._ws_schema.schema:
+                key_name = str(key.schema) if isinstance(key, vol.Marker) else str(key)
+                if key_name not in ("id", "type"):
+                    have[key_name] = isinstance(key, vol.Required)
+        want = {p["name"]: p["required"] for p in spec["params"]}
+        if have != want:
+            mismatches.append((cmd, have, want))
+    assert mismatches == []

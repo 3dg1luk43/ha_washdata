@@ -130,6 +130,8 @@ if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
 from .signal_processing import (
     energy_gap_threshold_s,
     integrate_wh,
+    median_fast,
+    percentile_linear,
     terminal_event_end,
     terminal_quiet_seen,
 )
@@ -185,6 +187,49 @@ def effective_curve_preroll_seconds(value: Any) -> float:
     if not math.isfinite(window) or window <= 0:
         return 0.0
     return min(window, CURVE_PREROLL_MAX_SECONDS)
+
+
+@dataclass(frozen=True)
+class MatchContext:
+    """One live match as the detector consumes it (audit DETECT-15).
+
+    Producers build this by name; ``update_match`` still reads the positional
+    sequence it always did (``as_sequence``), so a field can no longer be put in
+    the wrong slot or left out of one producer. Every field after the first five
+    defaults to "no evidence", exactly what a shorter legacy tuple meant.
+    """
+
+    profile_name: str | None
+    confidence: float
+    expected_duration: float
+    phase_name: str | None = None
+    is_confident_mismatch: bool = False
+    is_ambiguous: bool = False
+    # Element 7: the #364 prefix-fit term (Smart Termination, fallback bar, floors).
+    is_prefix_ambiguous: bool = False
+    # Element 8: the #288 full-shape term (anti-crease finalize only).
+    is_prefix_ambiguous_full_shape: bool = False
+    tail_power: Any = None            # 9 (#364 power guard)
+    terminal_high: Any = None         # 10 (#399 anti-crease spin look-ahead)
+    terminal_quiet_s: Any = None      # 11 (item 297 keep-tail cap)
+    longest_candidate_s: float = 0.0  # 12 (item 330 fallback bar)
+    trusted_min_s: Any = None         # 13 (item 384 trusted-length floor)
+    pause_catalogue: Any = None       # 14 (DETECT-16 hazard gate)
+
+    def __getitem__(self, index: Any) -> Any:
+        return self.as_sequence()[index]
+
+    def __len__(self) -> int:
+        return 14
+
+    def as_sequence(self) -> tuple[Any, ...]:
+        return (
+            self.profile_name, self.confidence, self.expected_duration, self.phase_name,
+            self.is_confident_mismatch, self.is_ambiguous, self.is_prefix_ambiguous,
+            self.is_prefix_ambiguous_full_shape, self.tail_power, self.terminal_high,
+            self.terminal_quiet_s, self.longest_candidate_s, self.trusted_min_s,
+            self.pause_catalogue,
+        )
 
 
 @dataclass
@@ -466,7 +511,6 @@ class CycleDetector:
         self._time_in_state: float = 0.0
 
         # Smoothing buffer
-        self._ma_buffer: list[float] = []
 
         # Adaptive Sampling Tracker
         self._recent_dts: list[float] = []  # Track last 20 dt values
@@ -614,7 +658,7 @@ class CycleDetector:
         """
         if len(self._recent_dts) < 5:
             return self._p95_dt
-        median_dt = float(np.median(self._recent_dts))
+        median_dt = median_fast(self._recent_dts)
         return min(self._p95_dt, GATE_CADENCE_MEDIAN_FACTOR * median_dt)
 
     @property
@@ -642,7 +686,9 @@ class CycleDetector:
 
         # Calculate p95 if enough samples
         if len(self._recent_dts) >= 5:
-            self._p95_dt = float(np.percentile(self._recent_dts, 95))
+            # Pure Python, bit-identical to np.percentile (audit PERF-07): on 20
+            # values NumPy's call overhead was the detector's top per-sample cost.
+            self._p95_dt = percentile_linear(self._recent_dts, 95)
         else:
             self._p95_dt = max(dt, 1.0)
 
@@ -1069,6 +1115,8 @@ class CycleDetector:
             and self._in_anticrease_freeze(self._power_readings[-1][0])
         ):
             return
+        if isinstance(result, MatchContext):
+            result = result.as_sequence()
         # Unpack 5 elements (or 4 for backward compatibility if needed, but wrapper is updated)
         # wrapper returns (name, confidence, duration, phase, is_mismatch)
         # Or MatchResult object if refactored, but currently wrapper returns tuple.
@@ -1277,7 +1325,6 @@ class CycleDetector:
         self._current_cycle_start = None
         self._last_active_time = None
         self._cycle_max_power = 0.0
-        self._ma_buffer = []
         self._energy_since_idle_wh = 0.0
         self._time_above_threshold = 0.0
         # Only reset time_below_threshold if not transitioning to ANTI_WRINKLE
@@ -1572,11 +1619,6 @@ class CycleDetector:
         # open, so a start that needed several probes can recover what the aborted
         # ones took with them. Cheap and bounded; inert while the option is off.
         self._record_preroll(power, timestamp)
-
-        # 1. Smoothing (Legacy buffer for debug/display, logic uses raw + time accumulators)
-        self._ma_buffer.append(power)
-        if len(self._ma_buffer) > self._config.smoothing_window:
-            self._ma_buffer.pop(0)
 
         # 2. Accumulators Update
         # Hysteresis Logic
@@ -3041,10 +3083,6 @@ class CycleDetector:
         )
         return energy_gap_threshold_s(all_ts)
 
-    def _is_standby_band_stuck(self, timestamp: datetime) -> bool:
-        """Whether a RUNNING cycle is stuck on a flat standby plateau (#296)."""
-        return self._standby_band_plateau(timestamp) is not None
-
     def _standby_band_plateau(self, timestamp: datetime) -> float | None:
         """The stuck plateau's highest reading, or None when the cycle is not stuck.
 
@@ -3323,7 +3361,7 @@ class CycleDetector:
         # it) and have enough points to judge - not just a couple of recent samples.
         # ``saw_older`` plus a coverage sanity and an adjacent-gap check
         # (``_window_has_outage_gap``) is robust to sample phase/granularity while
-        # rejecting a dropout-sized hole (mirrors _is_standby_band_stuck).
+        # rejecting a dropout-sized hole (mirrors _standby_band_plateau).
         if (
             oldest_in_window is None
             or not saw_older

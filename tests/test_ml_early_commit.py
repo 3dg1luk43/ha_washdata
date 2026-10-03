@@ -44,6 +44,14 @@ from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.profile_store import MatchResult
 
 
+@pytest.fixture(autouse=True)
+def _consumer_unfrozen(monkeypatch):
+    """The consumer ships frozen off (audit ML-01/02/06/07); these tests cover
+    what it does when switched back on."""
+    from custom_components.ha_washdata import manager as _mod
+    monkeypatch.setattr(_mod, "ENABLE_ML_EARLY_COMMIT", True)
+
+
 PROFILE_A = "Cotton 60°C"
 PROFILE_B = "Eco 40°C"
 

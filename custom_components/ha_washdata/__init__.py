@@ -33,7 +33,9 @@ from homeassistant.exceptions import (
     ServiceValidationError,
     Unauthorized,
 )
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
+import voluptuous as vol
 
 from .const import (
     DEVICE_COMPLETION_THRESHOLDS,
@@ -158,6 +160,75 @@ def _require_str(value: Any, name: str) -> str:
             translation_key=f"{name}_required",
         )
     return value
+
+
+def _svc(fields: dict[Any, Any]) -> vol.Schema:
+    # ALLOW_EXTRA: type the declared fields without rejecting a key an automation
+    # already passes (submit_cycle_feedback's `dismiss` is read but undeclared).
+    return vol.Schema({vol.Required("device_id"): cv.string, **fields}, extra=vol.ALLOW_EXTRA)
+
+
+# One schema per service, mirroring services.yaml (audit PLATFORM-10): none had
+# one, so `profile_name: 123` raised AttributeError, a non-numeric trim_start_s a
+# ValueError traceback, and `unlabel_cycles: "false"` read as true.
+_OPT_STR = vol.Any(None, cv.string)
+_OPT_NUM = vol.Any(None, vol.Coerce(float))
+_SERVICE_SCHEMAS: dict[str, vol.Schema] = {
+    "label_cycle": _svc({vol.Required("cycle_id"): cv.string,
+                         vol.Optional("profile_name"): _OPT_STR}),
+    "create_profile": _svc({vol.Required("profile_name"): cv.string,
+                            vol.Optional("reference_cycle_id"): _OPT_STR}),
+    "delete_profile": _svc({vol.Required("profile_name"): cv.string,
+                            vol.Optional("unlabel_cycles"): cv.boolean}),
+    "auto_label_cycles": _svc({vol.Optional("confidence_threshold"): vol.All(
+        vol.Coerce(float), vol.Range(min=0.0, max=1.0))}),
+    "export_config": _svc({vol.Optional("path"): _OPT_STR}),
+    "import_config": _svc({vol.Required("path"): cv.string}),
+    "submit_cycle_feedback": vol.Schema({
+        vol.Optional("device_id"): _OPT_STR,
+        vol.Optional("entry_id"): _OPT_STR,
+        vol.Required("cycle_id"): cv.string,
+        vol.Optional("user_confirmed"): cv.boolean,
+        vol.Optional("corrected_profile"): _OPT_STR,
+        vol.Optional("corrected_duration"): _OPT_NUM,
+        vol.Optional("notes"): _OPT_STR,
+        vol.Optional("dismiss"): cv.boolean,
+    }, extra=vol.ALLOW_EXTRA),
+    "record_start": _svc({}),
+    "record_stop": _svc({}),
+    "trim_cycle": _svc({vol.Required("cycle_id"): cv.string,
+                        vol.Optional("trim_start_s"): vol.Coerce(float),
+                        vol.Optional("trim_end_s"): _OPT_NUM}),
+    "pause_cycle": _svc({}),
+    "resume_cycle": _svc({}),
+    "mark_unloaded": _svc({}),
+    "trigger_ml_training": _svc({}),
+}
+
+
+def _service_manager(hass: HomeAssistant, device_id: str) -> tuple[str, Any]:
+    """``(entry_id, manager)`` for a service call's device (audit PLATFORM-10).
+
+    One resolver for every service: each used to copy-paste it, nine raising a bare
+    ValueError (an "unknown error" plus traceback in the UI) and all taking
+    ``next(iter(device.config_entries))`` - an arbitrary entry of the device, not
+    necessarily ours.
+    """
+    device = dr.async_get(hass).async_get(device_id)
+    if not device:
+        raise ServiceValidationError(
+            translation_domain=DOMAIN, translation_key="device_not_found"
+        )
+    loaded = hass.data.get(DOMAIN, {})
+    entry_id = next((eid for eid in device.config_entries if eid in loaded), None)
+    if entry_id is None:
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key=(
+                "integration_not_loaded" if device.config_entries else "no_config_entry"
+            ),
+        )
+    return entry_id, loaded[entry_id]
 
 
 # Options keys that no code reads any more, stripped by the 3.10 -> 3.11 step and
@@ -889,6 +960,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         ent_reg.async_remove(old_entity)
 
+    # Heal a non-numeric numeric setting stored by an older version (audit
+    # PLATFORM-13 / register item 279): it raised in the manager's constructor,
+    # so the entry could never set up again. Dropped, so its default applies.
+    from .const import drop_invalid_numeric_options  # pylint: disable=import-outside-toplevel
+
+    _clean, _dropped = drop_invalid_numeric_options(dict(entry.options))
+    if _dropped:
+        _log.warning(
+            "Dropped non-numeric value(s) for %s; their defaults apply", ", ".join(_dropped)
+        )
+        hass.config_entries.async_update_entry(entry, options=_clean)
+
     # pylint: disable=import-outside-toplevel
     from .manager import WashDataManager
 
@@ -917,21 +1000,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async def handle_label_cycle(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
             cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
-            profile_name = call.data.get("profile_name", "").strip()
+            profile_name = (call.data.get("profile_name") or "").strip()
 
             # Find the config entry for this device
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ValueError("Device not found")
-
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id:
-                raise ValueError("No config entry found for device")
-            if entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded for this device")
-
-            manager = hass.data[DOMAIN][entry_id]
+            entry_id, manager = _service_manager(hass, device_id)
 
             # Assign existing profile or remove label
             target_profile = profile_name if profile_name else None
@@ -956,7 +1028,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager.notify_update()
 
         hass.services.async_register(
-            DOMAIN, "label_cycle", _guarded_service(hass, "label_cycle", handle_label_cycle)
+            DOMAIN, "label_cycle", _guarded_service(hass, "label_cycle", handle_label_cycle),
+            schema=_SERVICE_SCHEMAS["label_cycle"]
         )
 
     # Register create_profile service
@@ -967,18 +1040,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             profile_name = _require_str(call.data.get("profile_name"), "profile_name")
             reference_cycle_id = call.data.get("reference_cycle_id")
 
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ValueError("Device not found")
-
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id:
-                raise ValueError("No config entry found for device")
-            if entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded for this device")
-
-            manager = hass.data[DOMAIN][entry_id]
+            entry_id, manager = _service_manager(hass, device_id)
             try:
                 await manager.profile_store.create_profile_standalone(
                     profile_name, reference_cycle_id
@@ -992,7 +1054,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager.notify_update()
 
         hass.services.async_register(
-            DOMAIN, "create_profile", _guarded_service(hass, "create_profile", handle_create_profile)
+            DOMAIN, "create_profile", _guarded_service(hass, "create_profile", handle_create_profile),
+            schema=_SERVICE_SCHEMAS["create_profile"]
         )
 
     # Register delete_profile service
@@ -1003,23 +1066,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             profile_name = _require_str(call.data.get("profile_name"), "profile_name")
             unlabel_cycles = call.data.get("unlabel_cycles", True)
 
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ValueError("Device not found")
-
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id:
-                raise ValueError("No config entry found for device")
-            if entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded for this device")
-
-            manager = hass.data[DOMAIN][entry_id]
+            entry_id, manager = _service_manager(hass, device_id)
             await manager.profile_store.delete_profile(profile_name, unlabel_cycles)
             manager.notify_update()
 
         hass.services.async_register(
-            DOMAIN, "delete_profile", _guarded_service(hass, "delete_profile", handle_delete_profile)
+            DOMAIN, "delete_profile", _guarded_service(hass, "delete_profile", handle_delete_profile),
+            schema=_SERVICE_SCHEMAS["delete_profile"]
         )
 
     # Register auto_label_cycles service
@@ -1029,33 +1082,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device_id = _require_str(call.data.get("device_id"), "device_id")
             confidence_threshold = call.data.get("confidence_threshold", 0.75)
 
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ValueError("Device not found")
+            entry_id, _manager = _service_manager(hass, device_id)
 
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id:
-                raise ValueError("No config entry found for device")
-            if entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded for this device")
+            # The same registry task the panel starts (audit PLATFORM-05): under
+            # the write lock, visible as a header pill, cancellable; awaited so an
+            # automation step still waits for the result.
+            from .ws_api import start_auto_label_task  # noqa: PLC0415
 
-            manager = hass.data[DOMAIN][entry_id]
-            stats = await manager.profile_store.auto_label_cycles(
-                confidence_threshold
-            )
-            manager.notify_update()
-
-            manager._logger.info(
-                "Auto-label complete: %s labeled, %s skipped",
-                stats["labeled"],
-                stats["skipped"],
-            )
+            _task, raw = start_auto_label_task(hass, entry_id, float(confidence_threshold))
+            if raw is not None:
+                await raw
 
         hass.services.async_register(
             DOMAIN,
             "auto_label_cycles",
             _guarded_service(hass, "auto_label_cycles", handle_auto_label_cycles),
+            schema=_SERVICE_SCHEMAS["auto_label_cycles"],
         )
 
     # Register trim_cycle service
@@ -1066,27 +1108,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
             trim_start_s = max(0.0, float(call.data.get("trim_start_s", 0)))
 
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ServiceValidationError(
-                    translation_domain=DOMAIN,
-                    translation_key="device_not_found",
-                )
-
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id:
-                raise ServiceValidationError(
-                    translation_domain=DOMAIN,
-                    translation_key="no_config_entry",
-                )
-            if entry_id not in hass.data[DOMAIN]:
-                raise ServiceValidationError(
-                    translation_domain=DOMAIN,
-                    translation_key="integration_not_loaded",
-                )
-
-            manager = hass.data[DOMAIN][entry_id]
+            entry_id, manager = _service_manager(hass, device_id)
             store = manager.profile_store
 
             # Determine trim end - default to full cycle duration if not supplied
@@ -1118,7 +1140,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager.notify_update()
 
         hass.services.async_register(
-            DOMAIN, "trim_cycle", _guarded_service(hass, "trim_cycle", handle_trim_cycle)
+            DOMAIN, "trim_cycle", _guarded_service(hass, "trim_cycle", handle_trim_cycle),
+            schema=_SERVICE_SCHEMAS["trim_cycle"]
         )
 
     # Belt and braces for the hoist above: the panel's static routes need
@@ -1144,26 +1167,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             if entry_id is None:
                 # Prefer device_id for user-facing workflows.
                 device_id = _require_str(device_id_raw, "device_id")
-                registry = dr.async_get(hass)
-                device = registry.async_get(device_id)
-                if not device:
-                    raise ValueError("Device not found")
-                entry_id = next(iter(device.config_entries), None)
-                if not entry_id:
-                    raise ValueError("No config entry found for device")
-
-            if not entry_id:
-                raise ValueError("entry_id or device_id is required")
+                entry_id, _manager = _service_manager(hass, device_id)
 
             cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
             user_confirmed = call.data.get("user_confirmed", False)
             corrected_profile = call.data.get("corrected_profile")
             corrected_duration = call.data.get("corrected_duration")  # in seconds
-            notes = call.data.get("notes", "")
+            notes = call.data.get("notes") or ""
             dismiss = call.data.get("dismiss", False)
 
             if entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded for this entry")
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN, translation_key="integration_not_loaded"
+                )
 
             manager = hass.data[DOMAIN][entry_id]
             success = await manager.learning_manager.async_submit_cycle_feedback(
@@ -1192,6 +1208,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             DOMAIN,
             SERVICE_SUBMIT_FEEDBACK.rsplit(".", maxsplit=1)[-1],
             _guarded_service(hass, "submit_cycle_feedback", handle_submit_feedback),
+            schema=_SERVICE_SCHEMAS["submit_cycle_feedback"],
         )
 
     # Export store to file (per entry/device)
@@ -1201,18 +1218,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device_id = _require_str(call.data.get("device_id"), "device_id")
             file_path = call.data.get("path")
 
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ValueError("Device not found")
-
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id:
-                raise ValueError("No config entry found for device")
-            if entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded for this device")
-
-            manager = hass.data[DOMAIN][entry_id]
+            entry_id, manager = _service_manager(hass, device_id)
             entry = hass.config_entries.async_get_entry(entry_id)
             if entry is None:
                 raise ValueError(f"Config entry not found: {entry_id}")
@@ -1273,7 +1279,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager._logger.info("Exported ha_washdata entry %s to %s", entry_id, target)
 
         hass.services.async_register(
-            DOMAIN, "export_config", _guarded_service(hass, "export_config", handle_export_config)
+            DOMAIN, "export_config", _guarded_service(hass, "export_config", handle_export_config),
+            schema=_SERVICE_SCHEMAS["export_config"]
         )
 
     # Import store from file into the target entry/device
@@ -1286,18 +1293,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             if not file_path:
                 raise ValueError("path is required for import")
 
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ValueError("Device not found")
-
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id:
-                raise ValueError("No config entry found for device")
-            if entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded for this device")
-
-            manager = hass.data[DOMAIN][entry_id]
+            entry_id, manager = _service_manager(hass, device_id)
             entry = hass.config_entries.async_get_entry(entry_id)
             if entry is None:
                 raise ValueError(f"Config entry not found: {entry_id}")
@@ -1353,44 +1349,31 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
         hass.services.async_register(
-            DOMAIN, "import_config", _guarded_service(hass, "import_config", handle_import_config)
+            DOMAIN, "import_config", _guarded_service(hass, "import_config", handle_import_config),
+            schema=_SERVICE_SCHEMAS["import_config"]
         )
 
     # Register recorder services
     if not hass.services.has_service(DOMAIN, "record_start"):
         async def handle_record_start(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ValueError("Device not found")
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id or entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded")
-
-            manager = hass.data[DOMAIN][entry_id]
+            entry_id, manager = _service_manager(hass, device_id)
             await manager.async_start_recording()
 
         hass.services.async_register(
-            DOMAIN, "record_start", _guarded_service(hass, "record_start", handle_record_start)
+            DOMAIN, "record_start", _guarded_service(hass, "record_start", handle_record_start),
+            schema=_SERVICE_SCHEMAS["record_start"]
         )
 
     if not hass.services.has_service(DOMAIN, "record_stop"):
         async def handle_record_stop(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ValueError("Device not found")
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id or entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded")
-
-            manager = hass.data[DOMAIN][entry_id]
+            entry_id, manager = _service_manager(hass, device_id)
             await manager.async_stop_recording()
 
         hass.services.async_register(
-            DOMAIN, "record_stop", _guarded_service(hass, "record_stop", handle_record_stop)
+            DOMAIN, "record_stop", _guarded_service(hass, "record_stop", handle_record_stop),
+            schema=_SERVICE_SCHEMAS["record_stop"]
         )
 
     # Register on-device ML training trigger (Stage 4, gated by ENABLE_ML_TRAINING)
@@ -1401,15 +1384,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     ):
         async def handle_trigger_ml_training(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
-            registry = dr.async_get(hass)
-            device = registry.async_get(device_id)
-            if not device:
-                raise ValueError("Device not found")
-            entry_id = next(iter(device.config_entries), None)
-            if not entry_id or entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded")
-
-            manager = hass.data[DOMAIN][entry_id]
+            entry_id, manager = _service_manager(hass, device_id)
             summary = await manager.async_run_ml_training(force=True)
             manager._logger.info("Manual ML training: %s", summary)
 
@@ -1417,6 +1392,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             DOMAIN,
             SERVICE_TRIGGER_ML_TRAINING,
             _guarded_service(hass, "trigger_ml_training", handle_trigger_ml_training),
+            schema=_SERVICE_SCHEMAS["trigger_ml_training"],
         )
 
     # Register pause/resume services
@@ -1454,7 +1430,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 )
 
         hass.services.async_register(
-            DOMAIN, "pause_cycle", _guarded_service(hass, "pause_cycle", handle_pause_cycle)
+            DOMAIN, "pause_cycle", _guarded_service(hass, "pause_cycle", handle_pause_cycle),
+            schema=_SERVICE_SCHEMAS["pause_cycle"]
         )
 
     if not hass.services.has_service(DOMAIN, "resume_cycle"):
@@ -1491,7 +1468,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 )
 
         hass.services.async_register(
-            DOMAIN, "resume_cycle", _guarded_service(hass, "resume_cycle", handle_resume_cycle)
+            DOMAIN, "resume_cycle", _guarded_service(hass, "resume_cycle", handle_resume_cycle),
+            schema=_SERVICE_SCHEMAS["resume_cycle"]
         )
 
     # Unload confirmation for a device with no door sensor (#451). Deliberately
@@ -1525,7 +1503,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             hass.data[DOMAIN][entry_id].mark_unloaded("mark_unloaded service")
 
         hass.services.async_register(
-            DOMAIN, "mark_unloaded", _guarded_service(hass, "mark_unloaded", handle_mark_unloaded)
+            DOMAIN, "mark_unloaded", _guarded_service(hass, "mark_unloaded", handle_mark_unloaded),
+            schema=_SERVICE_SCHEMAS["mark_unloaded"]
         )
 
     return True

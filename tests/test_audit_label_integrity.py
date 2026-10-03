@@ -114,18 +114,19 @@ async def test_learning_does_not_label_what_the_gate_refused(hass, freezer, marg
 
 
 async def test_panel_auto_label_never_overwrites(monkeypatch) -> None:
+    from custom_components.ha_washdata import task_registry
+
     hass = MagicMock()
+    hass.data = {}
     manager = MagicMock()
-    manager.profile_store.auto_label_cycles = AsyncMock(return_value={})
-    connection = MagicMock()
+    manager.profile_store.auto_label_cycles = AsyncMock(return_value={"labeled": 2})
     monkeypatch.setattr(ws_api, "_get_manager", MagicMock(return_value=manager))
-    try:
-        handler = ws_api.ws_auto_label_cycles.__wrapped__  # type: ignore[attr-defined]
-    except AttributeError:
-        handler = ws_api.ws_auto_label_cycles
-    await handler(hass, connection, {"id": 1, "entry_id": "e", "confidence_threshold": 0.8})
+    # The WS command and the service both start this runner (audit PLATFORM-05).
+    task = task_registry.get_registry(hass).create("e", "auto_label", "x")
+    await ws_api._auto_label_task(hass, task, "e", 0.8)  # noqa: SLF001
     _args, kwargs = manager.profile_store.auto_label_cycles.call_args
     assert kwargs.get("overwrite") is False
+    assert task.state == task_registry.STATE_DONE and task.result == {"labeled": 2}
 
 
 def _store_data(**cycle: Any) -> dict[str, Any]:

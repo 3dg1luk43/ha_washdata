@@ -29,7 +29,6 @@ def compute_setup_phase(
     ref_profile_names: set[str],
     coverage_gap: dict | None,
     suggestions: list[dict],
-    profile_groups: list[dict],
     skipped_steps: dict[str, str | None],
     now: datetime,
 ) -> SetupPhaseResult:
@@ -42,7 +41,6 @@ def compute_setup_phase(
         ref_profile_names: Profile names that have reference cycles (store-adopted).
         coverage_gap: Result of profile_store.suggest_coverage_gaps(), or None.
         suggestions: Actionable suggestions from SuggestionEngine (empty list = none).
-        profile_groups: Profile groups list from store (empty list = none pending).
         skipped_steps: Dict of step_key -> "never" | ISO timestamp | None.
         now: Current aware datetime for snooze comparisons.
     """
@@ -114,7 +112,7 @@ def compute_setup_phase(
         )
 
     # ── Phase 3 — tuning items ────────────────────────────────────────────────
-    item = _phase3_pending_item(suggestions, profile_groups, skipped_steps, now)
+    item = _phase3_pending_item(suggestions, skipped_steps, now)
     if item:
         return item
 
@@ -221,7 +219,6 @@ def _phase2_active(coverage_gap: dict | None, skipped_steps: dict, now: datetime
 
 def _phase3_pending_item(
     suggestions: list[dict],
-    profile_groups: list[dict],
     skipped_steps: dict,
     now: datetime,
 ) -> SetupPhaseResult | None:
@@ -234,15 +231,5 @@ def _phase3_pending_item(
             skippable=True,
             dismissible=True,
             step_key="setup_skip_phase3_suggestions",
-        )
-    if profile_groups and not _is_step_suppressed("setup_skip_phase3_groups", skipped_steps, now):
-        return SetupPhaseResult(
-            phase="phase3",
-            message_key="setup.phase3.groups",
-            cta_label_key="setup.cta.organise_profiles",
-            cta_action="open_profiles_groups",
-            skippable=True,
-            dismissible=True,
-            step_key="setup_skip_phase3_groups",
         )
     return None

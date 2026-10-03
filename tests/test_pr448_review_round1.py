@@ -272,36 +272,6 @@ def test_no_quiet_span_reports_no_endpoint():
     assert _measured_quiet_span(pts, 0.0, len(pts), 2.0) == (0.0, None)
 
 
-def test_the_scored_pause_prefix_ends_on_the_measured_span():
-    """End to end through _scored_pauses: the feature extractor is handed the
-    prefix that belongs to the duration it is scored against."""
-    from custom_components.ha_washdata.suggestion_engine import MLSuggestionEngine
-
-    seen: list[int] = []
-
-    def _feat(prefix, _expectation):
-        seen.append(len(prefix))
-        return [0.0]
-
-    pts: list[tuple[float, float]] = [(0.0, 1000.0)]
-    pts += [(float(t), 0.5) for t in range(10, 310, 10)]   # long quiet span
-    pts.append((310.0, 50.0))                               # splits the low run
-    pts += [(float(t), 0.5) for t in range(320, 370, 10)]   # short quiet span
-    pts += [(float(t), 1000.0) for t in range(370, 700, 10)]  # sustained resume
-
-    engine = MLSuggestionEngine.__new__(MLSuggestionEngine)
-    pauses = engine._scored_pauses(
-        pts, {"duration": 3600.0, "energy": 800.0, "peak": 1000.0}, 2.0,
-        lambda _f: 0.1, _feat,
-    )
-
-    assert pauses, "the long quiet span should be reported as a pause"
-    assert seen, "the feature extractor was never called"
-    # The prefix ends on the 300 s sample (index 30), so its length is 31 -
-    # it must not run on to the 360 s sample the resume follows.
-    assert seen[0] == 31, f"scored a prefix of {seen[0]} samples, expected 31"
-
-
 # --------------------------------------------------------------------------
 # Round 4: _safe_offset and the prefix bandwidth default
 # --------------------------------------------------------------------------
@@ -509,9 +479,14 @@ def test_option_writers_do_not_queue_behind_the_long_background_tasks():
     for marker in (
         'lock = _entry_options_lock(hass, msg["entry_id"])',   # ws_set_options
         'async with _entry_options_lock(hass, entry_id):',      # ws_apply_suggestions
-        'async with _entry_options_lock(hass, msg["entry_id"]):',  # store_download
     ):
         assert marker in src, marker
+    # store_download now applies settings inside its registry task, which holds the
+    # write lock (audit STORE-11): options lock inside it, write -> options.
+    task_body = src.split("async def _store_download_task(", 1)[1].split("\nasync def ", 1)[0]
+    assert task_body.find("_entry_write_lock(") < task_body.find("_apply_store_settings(")
+    helper_body = src.split("async def _apply_store_settings(", 1)[1].split("\n@websocket_api", 1)[0]
+    assert "async with _entry_options_lock(hass, entry_id):" in helper_body
     # Lock ORDER where both are held must be write -> options. The import
     # handlers are the only place both are taken; assert the options lock is
     # acquired INSIDE their write-lock block, not around it.

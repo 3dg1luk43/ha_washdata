@@ -24,7 +24,6 @@ def test_phase0_no_profiles_washer():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -41,7 +40,6 @@ def test_phase0_dishwasher_gets_own_message():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -57,7 +55,6 @@ def test_phase0_generic_device():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -74,7 +71,6 @@ def test_phase0_stub_profile_not_counted():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -91,7 +87,6 @@ def test_phase1a_labelled_cycle():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -115,7 +110,6 @@ def test_phase1a_with_empty_coverage_gap():
         ref_profile_names=set(),
         coverage_gap={},  # real return value when not enough unmatched cycles
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -131,7 +125,6 @@ def test_phase1b_with_empty_coverage_gap():
         ref_profile_names=set(),
         coverage_gap={},
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -150,7 +143,6 @@ def test_phase1a_skipped_when_suggest_create_true():
         ref_profile_names=set(),
         coverage_gap=cg,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={"setup_skip_phase2": "never"},  # phase2 suppressed
         now=_NOW,
     )
@@ -166,7 +158,6 @@ def test_phase1b_recorded_cycle():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -182,7 +173,6 @@ def test_phase1c_store_adopted():
         ref_profile_names={"Cotton 60°"},
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -198,7 +188,6 @@ def test_phase1c_advances_once_self_cycle_added():
         ref_profile_names={"Cotton 60°"},
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -218,7 +207,6 @@ def test_phase2_cluster_nudge():
         ref_profile_names=set(),
         coverage_gap=cg,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -238,7 +226,6 @@ def test_phase2_nudge_b_single_unmatched():
         ref_profile_names=set(),
         coverage_gap=cg,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
@@ -258,7 +245,6 @@ def test_phase2_skipped_snoozed_not_yet_expired():
         ref_profile_names=set(),
         coverage_gap=cg,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={"setup_skip_phase2": future},
         now=_NOW,
     )
@@ -275,7 +261,6 @@ def test_phase2_skipped_never():
         ref_profile_names=set(),
         coverage_gap=cg,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={"setup_skip_phase2": "never"},
         now=_NOW,
     )
@@ -293,7 +278,6 @@ def test_phase2_snooze_expired_resurfaces():
         ref_profile_names=set(),
         coverage_gap=cg,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={"setup_skip_phase2": past},
         now=_NOW,
     )
@@ -310,28 +294,11 @@ def test_phase3_suggestions_first():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[{"key": "off_delay", "current": 600, "suggested": 900}],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )
     assert r.phase == "phase3"
     assert r.message_key == "setup.phase3.suggestions"
-
-
-def test_phase3_groups_after_suggestions_skipped():
-    r = compute_setup_phase(
-        device_type="washing_machine",
-        profile_names=["Cotton 60°"],
-        past_cycles=[_cycle("Cotton 60°")],
-        ref_profile_names=set(),
-        coverage_gap=None,
-        suggestions=[{"key": "off_delay"}],
-        profile_groups=[{"members": ["A", "B"]}],
-        skipped_steps={"setup_skip_phase3_suggestions": "never"},
-        now=_NOW,
-    )
-    assert r.phase == "phase3"
-    assert r.message_key == "setup.phase3.groups"
 
 
 # ── Phase 4 ───────────────────────────────────────────────────────────────────
@@ -344,7 +311,6 @@ def test_phase4_all_clear():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={"setup_skip_phase1": "never"},
         now=_NOW,
     )
@@ -361,7 +327,6 @@ def test_phase1_auto_graduated_two_profiles():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},  # Phase 1 never explicitly dismissed
         now=_NOW,
     )
@@ -377,7 +342,6 @@ def test_phase1_auto_graduated_five_cycles():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},  # Phase 1 never explicitly dismissed
         now=_NOW,
     )
@@ -393,7 +357,6 @@ def test_phase1a_still_shows_for_fresh_device():
         ref_profile_names=set(),
         coverage_gap=None,
         suggestions=[],
-        profile_groups=[],
         skipped_steps={},
         now=_NOW,
     )

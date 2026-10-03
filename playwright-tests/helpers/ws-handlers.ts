@@ -164,8 +164,7 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
     points: [{ value: 120, metric: 0.9, summary: {} }, { value: 180, metric: 0.8, summary: {} }],
   },
   // Playground settings control panel: the live effective values the sandbox opens
-  // on, plus this device's saved presets. `publishable` mirrors the backend
-  // allow-list (real config options only; Stage 2-4 matcher knobs are absent).
+  // on. `publishable` mirrors the backend allow-list (every key is a real option).
   'ha_washdata/get_playground_settings': {
     effective: {
       min_power: 2,
@@ -185,21 +184,7 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
       dishwasher_end_spike_quiet_release: 600,
       profile_match_min_duration_ratio: 0.1,
       profile_match_max_duration_ratio: 1.5,
-      corr_weight: 0.45,
-      keep_min_score: 0.1,
-      dtw_bandwidth: 0.2,
-      dtw_blend: 0.5,
-      dtw_ensemble_w: 0.7,
-      dtw_ddtw_scale: 30,
-      dtw_refine_top_n: 5,
-      duration_weight: 0.22,
-      energy_weight: 0.22,
-      duration_scale: 0.175,
-      energy_scale: 0.25,
     },
-    presets: [
-      { name: 'Quiet nights', values: { off_delay: 300, min_off_gap: 240 }, created_at: '2026-08-01T10:00:00+00:00', updated_at: '2026-08-01T10:00:00+00:00' },
-    ],
     publishable: [
       'min_power', 'off_delay', 'min_off_gap', 'start_threshold_w', 'stop_threshold_w',
       'completion_min_seconds', 'start_duration_threshold', 'end_repeat_count',
@@ -208,26 +193,7 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
       'dishwasher_end_spike_quiet_release',
       'profile_match_min_duration_ratio', 'profile_match_max_duration_ratio',
     ],
-    preset_limit: 30,
     classic_suggestions: { off_delay: 90, min_off_gap: 240 },
-    ml_suggestions: { off_delay: 85, end_repeat_count: 2 },
-    ml_suggestions_enabled: true,
-  },
-  'ha_washdata/save_playground_preset': {
-    success: true,
-    presets: [
-      { name: 'Quiet nights', values: { off_delay: 300 }, created_at: '2026-08-01T10:00:00+00:00', updated_at: '2026-08-01T10:00:00+00:00' },
-      { name: 'My preset', values: { off_delay: 222 }, created_at: '2026-08-16T10:00:00+00:00', updated_at: '2026-08-16T10:00:00+00:00' },
-    ],
-  },
-  'ha_washdata/delete_playground_preset': { success: true, presets: [] },
-  'ha_washdata/get_dtw_debug': {
-    stage2: { correlation: 0.91, mae_score: 0.88, score: 0.90 },
-    dtw: { l1_score: 0.87, ddtw_score: 0.85, blend_weight: 0.7, blended_score: 0.86 },
-    stage4: { duration_agreement: 0.94, energy_agreement: 0.88, final_score: 0.91 },
-    cycle_trace: Array.from({ length: 30 }, (_, i) => Math.sin(i / 5) * 500 + 600),
-    profile_trace: Array.from({ length: 30 }, (_, i) => Math.sin(i / 5) * 480 + 590),
-    warp_path: [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]],
   },
 };
 

@@ -67,6 +67,8 @@ window.__create_mock_hass = function (extra) {
           'ha_washdata/trigger_ml_training': { kind: 'ml_training', resKey: 'ha_washdata/trigger_ml_training' },
           'ha_washdata/start_history_import_scan': { kind: 'history_import', resKey: 'ha_washdata/__history_import_scan_result' },
           'ha_washdata/apply_history_import': { kind: 'history_import_apply', resKey: 'ha_washdata/__history_import_apply_result' },
+          'ha_washdata/auto_label_cycles': { kind: 'auto_label', resKey: 'ha_washdata/auto_label_cycles' },
+          'ha_washdata/store_download_device': { kind: 'store_download', resKey: 'ha_washdata/store_download_device' },
         };
         if (TASK_START[msg.type]) {
           const spec = TASK_START[msg.type];

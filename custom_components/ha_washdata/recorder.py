@@ -38,6 +38,10 @@ _LOGGER = logging.getLogger(__name__)
 STORAGE_KEY_RECORDER = f"{STORAGE_KEY}.recorder"
 
 
+# Seconds between buffer saves while recording (audit PLATFORM-18).
+_SAVE_INTERVAL_S = 300.0
+
+
 class RecorderStore(Store[dict[str, Any]]):
     """Store for recorder data with migration support."""
 
@@ -214,10 +218,11 @@ class CycleRecorder:
         # Append to buffer
         self._buffer.append((now.isoformat(), float(power)))
 
-        # Periodic save every 60s to ensure data persistence
-        # Better safe than sorry: save if last save was > 1 minute ago
-        if self._last_save and (now - self._last_save).total_seconds() > 60:
-            self.hass.add_job(self._async_save)
-        elif not self._last_save:
+        # Periodic save every 5 min (audit PLATFORM-18): each save rewrites the
+        # whole buffer and the previous recording, ~200 MB to the SD card over a
+        # 4 h recording at 60 s. Stamped when SCHEDULED, not when the write
+        # finishes, so the readings that arrive meanwhile cannot each schedule one.
+        if not self._last_save or (now - self._last_save).total_seconds() > _SAVE_INTERVAL_S:
+            self._last_save = now
             self.hass.add_job(self._async_save)
 

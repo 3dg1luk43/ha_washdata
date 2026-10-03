@@ -40,6 +40,7 @@ import numpy as np
 
 from .const import (
     CYCLE_OVERRUN_ANOMALY_RATIO,
+    ENABLE_ML_REMAINING_TIME,
     DEVICE_SMOOTHING_THRESHOLDS,
     ML_PROGRESS_BLEND_WEIGHT,
     STATE_ENDING,
@@ -139,7 +140,7 @@ def ml_progress_percent(
     try:
         from .ml.engine import ml_models_enabled, resolve_regressor
 
-        if not ml_models_enabled(options):
+        if not ENABLE_ML_REMAINING_TIME or not ml_models_enabled(options):
             return None
         if (
             not profile_name
@@ -230,37 +231,13 @@ def ml_energy_total(
         return None
 
 
-def estimate_phase_progress(
-    store: Any,
-    current_power_data: list[tuple[datetime, float]] | list[tuple[str, float]],
-    current_duration: float,
-    profile_name: str,
-    logger: logging.Logger | None = None,
-    quiet_threshold_w: float = 0.0,
-) -> tuple[float, float] | None:
-    """Estimate cycle progress by analyzing which phase we're in.
+_PHASE_ENVELOPE_CACHE: dict[tuple[Any, int, Any], tuple[Any, tuple[dict[str, Any], Any, float]]] = {}
 
-    Uses cached statistical envelope built from ALL cycles labeled with this
-    profile, normalized by TIME to account for different sampling rates. Returns
-    ``(progress_pct, variance_watts)`` or ``None`` if estimation fails.
 
-    ``quiet_threshold_w`` is the detector's own off-noise floor
-    (``CycleDetectorConfig.stop_threshold_w``, itself derived from the configured
-    minimum power). A window that never rises above it is *not* the appliance
-    doing something, so it carries no phase information and the scan declines
-    rather than guessing (#386); a dead-flat window declines for the same reason
-    at any power level. The default 0.0 leaves only the flatness rule for callers
-    that do not know the floor.
-    """
-    logger = logger or _LOGGER
-    # Get cached envelope (fast - already computed and stored)
-    envelope = store.get_envelope(profile_name)
-
-    if envelope is None:
-        logger.debug("No envelope cached for profile %s", profile_name)
-        return None
-
-    # Convert cached lists back to numpy arrays
+def _parse_phase_envelope(
+    envelope: dict[str, Any], profile_name: str, logger: logging.Logger
+) -> tuple[dict[str, Any], Any, float] | None:
+    """``(arrays, time_grid, target_duration)`` of a stored envelope, read-only."""
     try:
         env_min = envelope.get("min", [])
         env_max = envelope.get("max", [])
@@ -295,6 +272,57 @@ def estimate_phase_progress(
     except (KeyError, ValueError, TypeError, IndexError) as e:
         logger.warning("Invalid envelope format for %s: %s", profile_name, e)
         return None
+    for _arr in (*envelope_arrays.values(), time_grid):
+        _arr.setflags(write=False)
+    return envelope_arrays, time_grid, target_duration
+
+
+def estimate_phase_progress(
+    store: Any,
+    current_power_data: list[tuple[datetime, float]] | list[tuple[str, float]],
+    current_duration: float,
+    profile_name: str,
+    logger: logging.Logger | None = None,
+    quiet_threshold_w: float = 0.0,
+) -> tuple[float, float] | None:
+    """Estimate cycle progress by analyzing which phase we're in.
+
+    Uses cached statistical envelope built from ALL cycles labeled with this
+    profile, normalized by TIME to account for different sampling rates. Returns
+    ``(progress_pct, variance_watts)`` or ``None`` if estimation fails.
+
+    ``quiet_threshold_w`` is the detector's own off-noise floor
+    (``CycleDetectorConfig.stop_threshold_w``, itself derived from the configured
+    minimum power). A window that never rises above it is *not* the appliance
+    doing something, so it carries no phase information and the scan declines
+    rather than guessing (#386); a dead-flat window declines for the same reason
+    at any power level. The default 0.0 leaves only the flatness rule for callers
+    that do not know the floor.
+    """
+    logger = logger or _LOGGER
+    # Get cached envelope (fast - already computed and stored)
+    envelope = store.get_envelope(profile_name)
+
+    if envelope is None:
+        logger.debug("No envelope cached for profile %s", profile_name)
+        return None
+
+    # Parse the stored lists into arrays once per envelope build, not on every
+    # 5 s estimate (audit PERF-06: ~20% of a 17 ms call, on the event loop).
+    # Keyed on the envelope object and its `updated` stamp; arrays are read-only.
+    _key = (profile_name, id(envelope), envelope.get("updated"))
+    _hit = _PHASE_ENVELOPE_CACHE.get(_key)
+    if _hit is not None and _hit[0] is envelope:
+        _parsed = _hit[1]
+    else:
+        _parsed = _parse_phase_envelope(envelope, profile_name, logger)
+        if _parsed is None:
+            return None
+        if len(_PHASE_ENVELOPE_CACHE) > 32:
+            _PHASE_ENVELOPE_CACHE.clear()
+        # The envelope itself is held, so its id cannot be recycled while cached.
+        _PHASE_ENVELOPE_CACHE[_key] = (envelope, _parsed)
+    envelope_arrays, time_grid, target_duration = _parsed
 
     if len(time_grid) == 0 or target_duration <= 0:
         if target_duration > 0 and len(envelope_arrays["avg"]) > 0:
@@ -757,66 +785,15 @@ def compute_progress(
     phase_result: tuple[float, float] | None,
     ml_pct: float | None,
     logger: logging.Logger | None = None,
-    phase_remaining_s: float | None = None,
     dt_seconds: float | None = None,
 ) -> ProgressResult | None:
-    """Progress/remaining estimate, optionally blended with a phase-resolved ETA.
-
-    When ``phase_remaining_s`` is provided (opt-in phase matching for a supported
-    device type), the phase-budget remaining is converted to a completion PERCENT
-    and blended into the phase-progress signal **before** delegating to
-    :func:`_compute_progress_base` - so the blend rides the proven, golden-locked
-    EMA + monotonicity + back-calculation guards (design §8, "one smoothing
-    implementation"), rather than re-deriving a raw, unsmoothed progress. The
-    blend leans on the phase budget early (low base progress) and on the proven
-    phase estimate late::
-
-        phase_pct = duration_so_far / (duration_so_far + phase_remaining_s) * 100
-        f = base_phase_progress / 100
-        blended = (1 - f) * phase_pct + f * base_phase_progress
-
-    Because this feeds the percent-domain smoothing, the displayed progress stays
-    monotone/smoothed (no tick-to-tick jitter or collapse-to-99%), and remaining
-    is re-derived by the base from ``matched_duration``.
-
-    Behaviour is BYTE-IDENTICAL to before when ``phase_remaining_s is None`` (the
-    default) - the golden progress snapshot and every existing caller are
-    unaffected. This is the single implementation of the blend; the manager and
-    the Playground SimRunner both go through it.
-    """
-    blended = False
-    if phase_remaining_s is not None and matched_duration and matched_duration > 0:
-        try:
-            pr = float(phase_remaining_s)
-        except (TypeError, ValueError):
-            pr = float("nan")
-        if math.isfinite(pr) and pr >= 0.0:
-            denom = duration_so_far + pr
-            phase_pct = (duration_so_far / denom * 100.0) if denom > 0 else 0.0
-            phase_pct = max(0.0, min(100.0, phase_pct))
-            if phase_result is not None:
-                base_pp, variance = phase_result
-                f = max(0.0, min(1.0, float(base_pp) / 100.0))
-                phase_result = ((1.0 - f) * phase_pct + f * float(base_pp), variance)
-            else:
-                # No envelope phase-progress: blend the phase budget's implied
-                # percent with the linear (elapsed/matched) percent, still leaning
-                # on the phase budget early and the linear estimate late.
-                lin_pct = max(0.0, min(100.0, duration_so_far / matched_duration * 100.0))
-                f = lin_pct / 100.0
-                phase_result = ((1.0 - f) * phase_pct + f * lin_pct, 0.0)
-            blended = True
-
-    base = _compute_progress_base(
+    """Progress/remaining estimate: the one entry point for the manager and the
+    Playground SimRunner (the phase-resolved ETA blend that used to sit here was
+    removed, audit PROGRESS-01/02: it never ran in production, and revived it was
+    10% worse at 25% on washers)."""
+    return _compute_progress_base(
         device_type, matched_duration, duration_so_far, prev_smoothed,
         phase_result, ml_pct, logger, dt_seconds,
-    )
-    if base is None or not blended:
-        return base
-    # Relabel the source for diagnostics; values already reflect the blend.
-    return ProgressResult(
-        base.progress, base.smoothed, base.remaining, base.total,
-        base.phase_progress, "phase_blend",
     )
 
 
@@ -851,7 +828,7 @@ def current_phase(
         return None
 
 
-_ENERGY_CURVES: dict[tuple[str, int, Any], tuple[np.ndarray, np.ndarray] | None] = {}
+_ENERGY_CURVES: dict[tuple[str, int, Any], tuple[Any, tuple[np.ndarray, np.ndarray] | None]] = {}
 
 
 def envelope_energy_fraction(
@@ -873,7 +850,8 @@ def envelope_energy_fraction(
     if not isinstance(env, dict):
         return None
     key = (program, id(env), env.get("updated"))
-    if key not in _ENERGY_CURVES:
+    hit = _ENERGY_CURVES.get(key)
+    if hit is None or hit[0] is not env:
         if len(_ENERGY_CURVES) > 64:
             _ENERGY_CURVES.clear()
         curve = None
@@ -888,8 +866,9 @@ def envelope_energy_fraction(
                     curve = (tg, cum / cum[-1])
         except (TypeError, ValueError):
             curve = None
-        _ENERGY_CURVES[key] = curve
-    curve = _ENERGY_CURVES[key]
+        # The envelope itself is held, so its id cannot be recycled while cached.
+        _ENERGY_CURVES[key] = (env, curve)
+    curve = _ENERGY_CURVES[key][1]
     if curve is None:
         return None
     tg, frac = curve

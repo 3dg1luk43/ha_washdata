@@ -80,7 +80,7 @@ class _FakeStore:
 
 
 def _health(store: _FakeStore, force: bool) -> dict[str, dict[str, Any]]:
-    result = _compute_ml_comparison(store, 1800, force_recompute=force)
+    result = _compute_ml_comparison(store, force_recompute=force)
     assert result.get("enabled", True) is not False, result
     return result.get("_health_updates") or {}
 
@@ -117,7 +117,7 @@ def test_a_trace_backed_score_survives_the_trace_being_pruned() -> None:
     cycles[-1]["ml_health"] = first["c"]
     cycles[-1].pop("power_data")
 
-    result = _compute_ml_comparison(store, 1800, force_recompute=True)
+    result = _compute_ml_comparison(store, force_recompute=True)
 
     assert "c" not in (result.get("_health_updates") or {}), "must not be re-scored blind"
     row = _row(result["cycles"], "c")
@@ -139,7 +139,7 @@ def test_a_healed_entry_is_not_rewritten_every_load() -> None:
     healed = {"score": None, "label": "no_data", "has_trace": False,
               "model_sig": "quality:base|end:base"}
     cycles = [_cycle(f"t{i}") for i in range(5)] + [_cycle("old", trace=False, health=healed)]
-    result = _compute_ml_comparison(_FakeStore(cycles), 1800)
+    result = _compute_ml_comparison(_FakeStore(cycles))
     assert "old" not in (result.get("_health_updates") or {})
 
 

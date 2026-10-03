@@ -207,11 +207,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
                 # NB: intentionally do NOT write entry.data here — post-3.6 the
                 # structural fields live in options and the display name is carried
                 # by the entry title (see test_reconfigure_saves_and_aborts_on_valid_input).
-                return self.async_update_reload_and_abort(
-                    entry,
-                    title=user_input[CONF_NAME],
-                    options=new_options,
+                # Update only (audit PLATFORM-15): the entry's update listener
+                # already reloads in place (sensor swap included, item 61);
+                # async_update_reload_and_abort ALSO scheduled a full unload/setup,
+                # which interrupted a running cycle and raced the in-place reload.
+                self.hass.config_entries.async_update_entry(
+                    entry, title=user_input[CONF_NAME], options=new_options
                 )
+                return self.async_abort(reason="reconfigure_successful")
 
         schema = _structural_schema(entry)
 

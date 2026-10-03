@@ -74,3 +74,4 @@ devtools/testbox/__pycache__
 # The notify platform under support/ IS committed - ignore only its bytecode.
 devtools/testbox/support/**/__pycache__/
 docs/internal/plans
+MagicMock
