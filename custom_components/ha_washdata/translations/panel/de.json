@@ -716,7 +716,9 @@
     "import_wizard": "Import - Daten wählen",
     "history_import": "Leistungsverlauf importieren",
     "apply_suggestions_title": "Vorschläge anwenden",
-    "apply_suggestions_msg": "Diese {n} Einstellungen ändern? Die Integration wird nach dem Speichern neu geladen."
+    "apply_suggestions_msg": "Diese {n} Einstellungen ändern? Die Integration wird nach dem Speichern neu geladen.",
+    "discard_settings_title": "Ungespeicherte Änderungen verwerfen?",
+    "discard_settings_msg": "Ungespeicherte Einstellungsänderungen: {n}. Einstellungen verlassen und Änderungen verwerfen?"
   },
   "msg": {
     "pg_canvas_empty3": "Wähle oben einen Zyklus und drücke auf Ausführen, um ihn zu simulieren. Fahre dann mit dem Zeiger darüber, um Werte abzulesen, scrolle oder zoome mit zwei Fingern und ziehe zum Verschieben.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Starten Sie Home Assistant neu, um die Simulationstools zu aktivieren.",
     "phase_catalog_intro": "Benannte Segmente eines Zyklus (Vorwäsche, Erhitzen, Schleudern…). Weisen Sie über das Bedienfeld einem Profil zu.",
     "phase_ranges_intro": "Phasenbereiche (Minuten ab Zyklusbeginn), überlagert mit der Durchschnittskurve. Bearbeiten Sie die Werte, um eine Live-Vorschau anzuzeigen.",
-    "playground_intro": "Eine sichere Sandbox, um vergangene Zyklen mit anderen Einstellungen abzuspielen, zwei Konfigurationen nebeneinander zu vergleichen und zu untersuchen, wie ein Zyklus zu einem Profil passt. Nichts hier verändert Ihre Live-Daten, bis Sie es ausdrücklich anwenden.",
+    "playground_intro": "Untersuchen Sie, wie sich Einstellungen auf die Erkennung anhand Ihrer echten Zyklusdaten auswirken. Nichts hier verändert die Live-Konfiguration, bis Sie es ausdrücklich anwenden.",
     "prefs_personal": "Diese gelten nur für Ihr Home Assistant-Konto.",
     "process_history_hint": "Gleiche alle gespeicherten Zyklen erneut ab, aktualisiere Abstimmungsvorschläge, trainiere ML-Modelle neu (falls aktiviert), berechne die Zykluskosten anhand deiner erfassten Energiepreise neu und ermittle den Zykluszustand neu. Nach einer Stapelüberprüfung ausführen.",
     "profile_deleted": "Profil gelöscht",
@@ -1138,10 +1140,6 @@
       "doc": "Während des Countdowns zur Ausschaltverzögerung wird die kumulierte Energie (Watt x Zeit) mit diesem Schwellenwert verglichen. Bei Überschreitung wird der Countdown zurückgesetzt – so bleiben Knitterschutz-Wäschetrockner und Spülmaschinentrocknungsschwänze im Zyklus, anstatt sie abzubrechen. Erhöhen Sie den Wert, wenn die Zyklen während des Abkühlens zu früh enden. Verringern Sie den Wert, wenn die Erkennung langsam ist.",
       "label": "Endenergie"
     },
-    "end_repeat_count": {
-      "doc": "Anzahl der aufeinanderfolgenden Messwerte unterhalb des Stoppschwellenwerts, die erforderlich sind, bevor der Zyklus endet. 1 reicht für die meisten Stecker aus. Erhöhen Sie den Wert auf 2–3, wenn Ihr Smart Plug mitten im Zyklus gelegentlich eine falsche Nullprobe meldet und Ihre Zyklen vorzeitig enden.",
-      "label": "End-Wiederholungsanzahl"
-    },
     "energy_price_entity": {
       "doc": "Sensor mit dem aktuellen Strompreis pro kWh (z. B. ein dynamischer Tarif). Muss ein Preis sein, nicht der Leistungs- oder Energiesensor der Steckdose selbst: Er hat Vorrang vor dem untenstehenden statischen Preis, sodass ein kWh-Zähler an dieser Stelle jeden Zyklus zum Zählerstand statt zu Ihrem Tarif berechnet. Wenn Zeitgewichtete Kosten aktiviert ist, wird jeder Zyklus zu dem Preis berechnet, der in jedem Moment seines Laufs galt; andernfalls wird der bei Zyklusende gültige Preis auf ihm eingefroren.",
       "label": "Energiepreis-Entität"
@@ -1318,10 +1316,6 @@
       "doc": "Die Sensoreinheit, die Live-Leistung in Watt für dieses Gerät meldet (z. B. sensor.washer_power). Die gesamte Zykluserkennung basiert auf diesem Signal.",
       "label": "Leistungssensor"
     },
-    "profile_duration_tolerance": {
-      "doc": "Das +/--Band um die durchschnittliche Dauer eines Profils, das beim Abgleich verwendet wird. 0,25 bedeutet, dass ein 60-Minuten-Profil 45-75-Minuten-Zyklen entspricht.",
-      "label": "Profildauertoleranz"
-    },
     "profile_match_interval": {
       "doc": "Wie oft soll während eines laufenden Zyklus versucht werden, einen Profilabgleich durchzuführen? Der Standardwert von 300 s (5 Minuten) gleicht Erkennungsgeschwindigkeit und CPU aus.",
       "label": "Abgleichintervall"
@@ -1369,10 +1363,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Wie weit ein Zyklus in die erwartete Dauer des zugeordneten Programms fortgeschritten sein muss, bevor die intelligente Beendigung ihn bei einem Leistungsabfall vorzeitig beenden darf. Die erwartete Dauer ist der Durchschnitt des Programms; bei Geräten mit stark schwankender Laufzeit - Waschmaschinen bei kaltem Winter- gegenüber warmem Sommer-Zulaufwasser, Trockner mit Feuchtesensor, lastabhängige Programme - endet daher etwa die Hälfte aller Läufe kürzer als dieser Durchschnitt und erhält nie die schnelle Beendigung, sondern endet erst Minuten später über den Rückfall-Timeout. Senken Sie diesen Wert (z. B. 0,85) bei solchen Geräten, damit die vorzeitige Beendigung dennoch auslöst; erhöhen Sie ihn Richtung 1,0, um vorsichtiger zu sein. Leer lassen für den Standard (0,98 bzw. 0,99 für Geschirrspüler). Er kann einen Zyklus nur früher beenden, niemals später, und löst nie bei einer mehrdeutigen oder unsicheren Zuordnung aus.",
       "label": "Verhältnis für intelligente Beendigung"
-    },
-    "smoothing_window": {
-      "doc": "Wie stark wird das Rohleistungssignal geglättet? Niedrig (2) reagiert, ist aber laut; Hoch (5) glättet Spitzen, fügt aber Verzögerung hinzu.",
-      "label": "Glättungsfenster"
     },
     "start_duration_threshold": {
       "doc": "Die Leistung muss so lange über dem Startschwellenwert bleiben, um einen echten Start zu bestätigen, wodurch verhindert wird, dass sekundenschnelle Ein-/Ausschaltvorgänge einen Zyklus starten.",

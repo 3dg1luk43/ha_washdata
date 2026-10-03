@@ -716,7 +716,9 @@
         "import_wizard": "Importálás - adatok kiválasztása",
         "history_import": "Teljesítményelőzmények importálása",
         "apply_suggestions_title": "Javaslatok alkalmazása",
-        "apply_suggestions_msg": "Módosítja ezt a(z) {n} beállítást? Az integráció mentés után újratöltődik."
+        "apply_suggestions_msg": "Módosítja ezt a(z) {n} beállítást? Az integráció mentés után újratöltődik.",
+        "discard_settings_title": "Eldobja a nem mentett módosításokat?",
+        "discard_settings_msg": "Nem mentett beállításmódosítások: {n}. Kilép a Beállításokból, és eldobja őket?"
     },
     "msg": {
         "pg_canvas_empty3": "Válassz ki egy ciklust fent, és nyomd meg a Futtatás gombot a szimulációhoz. Ezután vidd rá a mutatót az értékek leolvasásához, görgess vagy csippents a nagyításhoz, és húzd az eltoláshoz.",
@@ -802,7 +804,7 @@
         "pg_restart_note": "Indítsa újra a Home Assistantot a szimulációs eszközök engedélyezéséhez.",
         "phase_catalog_intro": "Egy ciklus elnevezett szegmensei (Előmosás, Fűtés, Centrifugálás…). Rendelje hozzá őket egy profilhoz a vezérlőpultjáról.",
         "phase_ranges_intro": "A fázistartományok (a ciklus kezdetétől számított percek) átfedik az átlaggörbét. Szerkessze az értékeket az élő előnézethez.",
-        "playground_intro": "Biztonságos homokozó a korábbi ciklusok különböző beállításokkal való lejátszásához, két konfiguráció egymás melletti összehasonlításához, és annak vizsgálatához, hogyan illeszkedik egy ciklus egy profilhoz. Itt semmi sem változtatja meg az élő adatait, amíg kifejezetten nem alkalmazza.",
+        "playground_intro": "Fedezze fel, hogyan befolyásolják a beállítások az érzékelést a valós ciklusadatain. Itt semmi sem módosítja az élő konfigurációt, amíg kifejezetten nem alkalmazza.",
         "prefs_personal": "Ezek csak a Home Assistant-fiókra vonatkoznak.",
         "process_history_hint": "Futtassa újra az egyeztetést az összes tárolt cikluson, frissítse a hangolási javaslatokat, tanítsa újra az ML-modelleket (ha engedélyezve van), számolja újra a ciklusok költségét a rögzített energiaárak alapján, és számolja újra a ciklusok egészségét. Futtassa ezt egy köteg felülvizsgálat után.",
         "profile_deleted": "Profil törölve",
@@ -1113,10 +1115,6 @@
             "doc": "A kikapcsolási késleltetés visszaszámlálása során a felhalmozott energia (watt x idő) ehhez a küszöbértékhez kerül összehasonlításra. Ha túllépi, a visszaszámlálás újraindul – a gyűrődésgátló szárak és a mosogatógépes szárítószárak a ciklushoz rögzítve maradnak, ahelyett, hogy rövidre vágnák őket. Emelje fel, ha a ciklusok túl korán érnek véget a lehűlés során; csökkentse, ha az észlelés lassú.",
             "label": "Záró energia"
         },
-        "end_repeat_count": {
-            "doc": "Az egymást követő leállási küszöbérték alatti leolvasások száma a ciklus vége előtt. Az 1 megfelelő a legtöbb csatlakozóhoz. Emelje 2-3-ra, ha az intelligens csatlakozó időnként hamis nullát jelez a ciklus közepén, és a ciklusok idő előtt véget érnek.",
-            "label": "Záró ismétlések száma"
-        },
         "energy_price_entity": {
             "doc": "Érzékelő az aktuális elektromos áram kWh-nkénti árával (pl. dinamikus tarifa). Árnak kell lennie, nem a konnektor saját teljesítmény- vagy energiaentitásának: elsőbbséget élvez az alábbi statikus árral szemben, így egy ide megadott kWh-számláló minden ciklust a mérőóra állása szerint számol el a tarifája helyett. Ha az Időben súlyozott költség be van kapcsolva, minden ciklus azon az áron kerül elszámolásra, amely a futása minden pillanatában érvényes volt; egyébként a befejezéskor érvényes ár rögzül rá.",
             "label": "Energiaár entitás"
@@ -1293,10 +1291,6 @@
             "doc": "Az érzékelő entitás, amely a készülék élő teljesítményét jelenti wattban (pl. sensor.washer_power). Minden ciklusérzékelés ezen a jelen alapul.",
             "label": "Teljesítmény érzékelő"
         },
-        "profile_duration_tolerance": {
-            "doc": "Az egyeztetés során használt profil átlagos időtartama körüli +/- sáv. A 0,25 azt jelenti, hogy a 60 perces profil 45-75 perces ciklusoknak felel meg.",
-            "label": "Profil időtartam tolerancia"
-        },
         "profile_match_interval": {
             "doc": "Milyen gyakran próbálja meg a profilegyeztetést egy futási ciklus során. Az alapértelmezett 300 s (5 perc) egyensúlyban tartja az észlelési sebességet és a CPU-t.",
             "label": "Egyezési intervallum"
@@ -1344,10 +1338,6 @@
         "smart_termination_duration_ratio": {
             "doc": "Mennyire kell előrehaladnia a ciklusnak az egyeztetett program várható időtartamán belül, mielőtt az intelligens leállítás a teljesítmény csökkenésekor korábban befejezheti azt. A várható időtartam a program átlaga, így azokon a készülékeken, amelyek futásideje sokat ingadozik - mosógépek hideg téli és meleg nyári befolyó vízzel, szárazságérzékelős szárítógépek, terheléstől függő programok - az összes futás nagyjából fele ennél az átlagnál rövidebben fejeződik be, és soha nem kapja meg a gyors befejezést, csak a tartalék időtúllépésen keresztül ér véget, percekkel később. Csökkentse ezt (pl. 0.85) ezeken a gépeken, hogy a korai befejezés így is elinduljon; emelje 1.0 felé az óvatosabb működéshez. Hagyja üresen az alapértelmezett értékhez (0.98, mosogatógépeknél 0.99). Csak korábban fejezhet be egy ciklust, soha nem később, és soha nem indul el bizonytalan vagy alacsony megbízhatóságú egyezésnél.",
             "label": "Intelligens leállítási arány"
-        },
-        "smoothing_window": {
-            "doc": "Mennyire van simítva a nyers teljesítményjel. Alacsony (2) érzékeny, de zajos; magas (5) kisimítja a tüskéket, de növeli a késést.",
-            "label": "Simítási ablak"
         },
         "start_duration_threshold": {
             "doc": "A teljesítménynek ennyi ideig az indítási küszöb felett kell maradnia, hogy megerősítse a valódi indítást, és megakadályozza, hogy a másodperc törtrészes be/ki kapcsolói elindítsák a ciklust.",

@@ -716,7 +716,9 @@
     "import_wizard": "Import - vybrat data",
     "history_import": "Import historie výkonu",
     "apply_suggestions_title": "Použít návrhy",
-    "apply_suggestions_msg": "Změnit tato nastavení ({n})? Integrace se po uložení znovu načte."
+    "apply_suggestions_msg": "Změnit tato nastavení ({n})? Integrace se po uložení znovu načte.",
+    "discard_settings_title": "Zahodit neuložené změny?",
+    "discard_settings_msg": "Neuložené změny nastavení: {n}. Opustit Nastavení a změny zahodit?"
   },
   "msg": {
     "pg_canvas_empty3": "Vyberte cyklus výše a stisknutím Spustit jej nasimulujte. Poté najetím zobrazíte hodnoty, kolečkem nebo dvěma prsty přiblížíte a tažením posunete.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Restartujte Home Assistant, abyste povolili nástroje simulace.",
     "phase_catalog_intro": "Pojmenované segmenty cyklu (Předpírka, Ohřev, Odstřeďování…). Přiřaďte je k profilu z jeho ovládacího panelu.",
     "phase_ranges_intro": "Fázové rozsahy (minuty od začátku cyklu) překrývající průměrnou křivku. Upravte hodnoty pro živý náhled.",
-    "playground_intro": "Bezpečné prostředí pro přehrávání minulých cyklů s jiným nastavením, porovnání dvou konfigurací vedle sebe a prozkoumání, jak se cyklus zarovná k profilu. Nic zde nezmění vaše aktivní data, dokud to výslovně nepoužijete.",
+    "playground_intro": "Prozkoumejte, jak nastavení ovlivňuje detekci na datech vašich skutečných cyklů. Nic zde nezmění aktivní konfiguraci, dokud to výslovně nepoužijete.",
     "prefs_personal": "Platí pouze pro váš účet Home Assistant.",
     "font_size_hint": "Zvětšete nebo zmenšete vše v tomto panelu. Platí pro váš účet na tomto zařízení.",
     "process_history_hint": "Znovu spustí vyhodnocení shody u všech uložených cyklů, obnoví návrhy ladění, přetrénuje modely ML (je-li povoleno), přepočítá náklady cyklů podle zaznamenaných cen energie a přepočítá zdraví cyklů. Spusťte po sérii kontrol.",
@@ -1117,10 +1119,6 @@
       "doc": "Během odpočtu zpozdění vypnutí je akumulovaná energie (watty × čas) porovávána s tímto prahem. Pokud je překročena, odpočet se resetuje – zachovává otočení ochrany před mačkáním a doby sušení myčky připojené k cyklu místo jejich předčasného přerušení. Zvyšte, pokud cykly končí příliš brzy během chladnutí; snižte, pokud je detekce pomalá.",
       "label": "Energie konce"
     },
-    "end_repeat_count": {
-      "doc": "Počet po sobě jdoucích čtení pod prahem zastavení, potřebných před ukončením cyklu. 1 je v pořádku pro většinu zástrček. Zvyšte na 2–3, pokud vaše chytrá zástrčka občas hlásí falešně nulový vzorek během cyklu a vaše cykly předčasně končí.",
-      "label": "Počet opakování konce"
-    },
     "energy_price_entity": {
       "doc": "Senzor s aktuální cenou elektřiny za kWh (např. dynamický tarif). Musí to být cena, ne vlastní entita výkonu nebo energie zásuvky: má přednost před statickou cenou níže, takže počítadlo kWh zadané zde účtuje každý cyklus podle stavu měřiče místo podle vašeho tarifu. Když jsou Časově vážené náklady zapnuté, každý cyklus se účtuje cenou platnou v každém okamžiku jeho běhu; jinak se na něj zafixuje cena platná v okamžiku jeho dokončení.",
       "label": "Entita ceny energie"
@@ -1297,10 +1295,6 @@
       "doc": "Entita senzoru hlásící okamžitý příkon ve wattech pro tento spotřebič (např. sensor.washer_power). Veškerá detekce cyklu je založena na tomto signálu.",
       "label": "Snímač výkonu"
     },
-    "profile_duration_tolerance": {
-      "doc": "Pásmo +/− kolem průměrné doby trvání profilu používané během párování. 0,25 znamená, že profil 60 min odpovídá cyklům 45–75 min.",
-      "label": "Tolerance délky profilu"
-    },
     "profile_match_interval": {
       "doc": "Jak často se pokušet o párování profilu během běžícího cyklu. Výchozí 300 s (5 minut) vyvažuje rychlost detekce a nároky na CPU.",
       "label": "Interval shody"
@@ -1348,10 +1342,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Jak daleko v očekávané době trvání přiřazeného programu musí cyklus být, než jej Chytré ukončení může po poklesu příkonu ukončit dříve. Očekávaná doba trvání je průměr programu, takže u spotřebičů, jejichž doba běhu hodně kolísá - pračky se studenou přiváděnou vodou v zimě oproti teplé v létě, sušičky se senzorovým sušením, programy závislé na náplni - skončí zhruba polovina všech běhů dříve než tento průměr a nikdy se rychlého ukončení nedočká, takže skončí až o několik minut později přes záložní časový limit. U takových strojů tuto hodnotu snižte (např. 0,85), aby se dřívější ukončení přesto spustilo; pro opatrnější chování ji zvyšte směrem k 1,0. Ponechte prázdné pro výchozí hodnotu (0,98, u myček nádobí 0,99). Cyklus může vždy jen ukončit dříve, nikdy později, a nikdy se nespustí u nejednoznačné shody nebo shody s nízkou spolehlivostí.",
       "label": "Poměr chytrého ukončení"
-    },
-    "smoothing_window": {
-      "doc": "Míra vyhlazení nezpracovaného signálu příkonu. Nízká hodnota (2) je citlivá, ale hlučná; vysoká (5) vyhlazuje špičky, ale přidává zpozdění.",
-      "label": "Okno vyhlazení"
     },
     "start_duration_threshold": {
       "doc": "Příkon musí zůstat nad prahem spouštění po tuto dobu pro potvrzení skutečného startu, čímž se brání okamžitým zap/vyp přepnutím v zahájení cyklu.",

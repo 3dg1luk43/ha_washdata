@@ -82,8 +82,16 @@ function loadConstants(hass) {
 
 const _panelTrans = {}; // lang -> dict
 const _panelTransPending = {}; // lang -> Promise
+// The card is loaded as ha-washdata-card.js?v=<cache buster>; reuse it for the
+// translation files, as the panel does. Without it HA serves them with a 31-day
+// cache, so an upgraded card kept last release's strings (audit UI-17).
+const _CARD_VERSION = (() => {
+  try { return new URL(import.meta.url).searchParams.get("v") || ""; }
+  catch (_) { return ""; }
+})();
 function _panelTransUrl(lang) {
-  return "/" + DOMAIN + "/panel-translations/" + encodeURIComponent(lang) + ".json";
+  const base = "/" + DOMAIN + "/panel-translations/" + encodeURIComponent(lang) + ".json";
+  return _CARD_VERSION ? base + "?v=" + encodeURIComponent(_CARD_VERSION) : base;
 }
 async function _fetchPanelLang(lang) {
   if (!lang) return null;
@@ -292,7 +300,24 @@ class WashDataCard extends HTMLElement {
   }
 
   // ── Entity discovery ──────────────────────────────────────────────────────
+  // Memoised per registry object: HA replaces `hass.entities` only when the entity
+  // registry changes, but calls `set hass` on every state change in the house, and
+  // each call walked the whole registry once per card (audit UI-16). Results from
+  // the suffix fallback read live states, so only registry-resolved roles are kept.
   _resolveRoles(primaryEntity) {
+    const reg = (this._hass && this._hass.entities) || null;
+    const key = primaryEntity || (this._cfg && this._cfg.entity) || "";
+    let c = this._rolesCache;
+    if (!c || c.reg !== reg || c.cfg !== this._cfg) {
+      c = this._rolesCache = { reg, cfg: this._cfg, map: new Map() };
+    }
+    if (c.map.has(key)) return c.map.get(key);
+    const roles = this._computeRoles(primaryEntity);
+    if (reg && roles._deviceId) c.map.set(key, roles);
+    return roles;
+  }
+
+  _computeRoles(primaryEntity) {
     const hass = this._hass;
     const cfg = this._cfg || {};
     const reg = (hass && hass.entities) || {};
@@ -580,6 +605,7 @@ class WashDataCard extends HTMLElement {
   _baseStyle() {
     return (
       ":host{display:block;height:100%}" +
+      "[role=button]:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}" +
       "ha-card{padding:0;background:var(--ha-card-background,var(--card-background-color,white));" +
       "border-radius:var(--ha-card-border-radius,12px);box-shadow:var(--ha-card-box-shadow,none);" +
       "overflow:hidden;cursor:pointer;height:100%;box-sizing:border-box;" +
@@ -612,6 +638,18 @@ class WashDataCard extends HTMLElement {
   }
 
   _attachGestures(cardEl) {
+    // Keyboard: focusable with Enter / Space running the tap action, as HA's own
+    // tile card does (audit UI-17: pointer-only until 0.5.8).
+    const tapCfg = (this._cfg && this._cfg.tap_action) || { action: "more-info" };
+    if (tapCfg.action !== "none") {
+      cardEl.tabIndex = 0;
+      cardEl.setAttribute("role", "button");
+      cardEl.addEventListener("keydown", (ev) => {
+        if (ev.target !== cardEl || (ev.key !== "Enter" && ev.key !== " ")) return;
+        ev.preventDefault();
+        this._executeAction((this._cfg && this._cfg.tap_action) || { action: "more-info" });
+      });
+    }
     cardEl.addEventListener("pointerdown", this._onPointerDown);
     cardEl.addEventListener("pointermove", this._onPointerMove);
     cardEl.addEventListener("pointerup", this._onPointerUp);

@@ -20,7 +20,8 @@ name: Checks
 #
 # The panel parse/smoke step is here for the same reason: a stray backtick in the
 # panel's CSS-in-template-literal blanks the whole panel at runtime, and it costs
-# a second to rule out.
+# a second to rule out. `devtools/docs_check.py` likewise: stdlib-only, under a
+# second, and it catches hand-written docs drifting from the code they name.
 
 on:
   push:
@@ -55,6 +56,8 @@ jobs:
         run: node devtools/build_panel.mjs --check
       - name: WS type artifacts match ws_schema.py
         run: python devtools/generate_ws_types.py --check
+      - name: Docs match the code (anchors, constants, register ids, em dashes)
+        run: python devtools/docs_check.py
       - name: Panel JS parses and renders
         run: |
           node --check custom_components/ha_washdata/www/ha-washdata-panel.js

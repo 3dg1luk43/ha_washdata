@@ -305,3 +305,29 @@ test('unticking every evidence category saves the full default set, not an empty
     ['real_cycles', 'reference_cycles', 'backfill_cycles'],
   );
 });
+
+test('leaving Settings with an unsaved edit asks before discarding it (audit UI-15)', async ({ page }) => {
+  await clickTab(page, 'settings');
+  const inp = page.locator('input[data-opt="min_power"]').first();
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('3.5');
+  await inp.dispatchEvent('change');
+  await page.locator('button.wd-tab[data-tab="history"]').click();
+  // Still on Settings, with a confirm.
+  await expect(page.locator('.wd-modal h2')).toContainText(/unsaved/i);
+  await page.locator('[data-maction="cancel"]').click();
+  await expect(page.locator('button.wd-tab[data-tab="settings"].active')).toBeVisible();
+  await expect(page.locator('input[data-opt="min_power"]').first()).toHaveValue('3.5');
+  // Confirming discards and leaves.
+  await page.locator('button.wd-tab[data-tab="history"]').click();
+  await page.locator('[data-maction="ok"]').click();
+  await expect(page.locator('button.wd-tab[data-tab="history"].active')).toBeVisible();
+});
+
+test('leaving Settings without edits does not ask', async ({ page }) => {
+  await clickTab(page, 'settings');
+  await expect(page.locator('input[data-opt="min_power"]').first()).toBeVisible({ timeout: 8_000 });
+  await page.locator('button.wd-tab[data-tab="history"]').click();
+  await expect(page.locator('button.wd-tab[data-tab="history"].active')).toBeVisible();
+  await expect(page.locator('.wd-modal')).toHaveCount(0);
+});

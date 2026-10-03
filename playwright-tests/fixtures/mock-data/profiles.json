@@ -2,58 +2,60 @@
   "profiles": [
     {
       "name": "Cotton 40°C",
-      "cycle_count": 8,
-      "labeled_count": 8,
       "avg_duration": 6500,
-      "avg_energy_wh": 840,
-      "total_energy_wh": 6720,
+      "min_duration": 6300,
+      "max_duration": 6700,
+      "sample_cycle_id": "cyc-001",
+      "cycle_count": 8,
+      "last_run": "2026-07-10T08:15:00+00:00",
+      "avg_energy": 0.84,
+      "duration_std_dev": 120.0,
       "avg_cost": 0.14,
       "total_cost": 1.12,
-      "health_score": 0.82,
-      "health_status": "healthy",
-      "shape_drift": false,
-      "phases": [
-        {"name": "Fill",    "start": 0,    "end": 600},
-        {"name": "Heat",    "start": 600,  "end": 2400},
-        {"name": "Wash",    "start": 2400, "end": 4800},
-        {"name": "Rinse",   "start": 4800, "end": 6000},
-        {"name": "Spin",    "start": 6000, "end": 6500}
-      ]
+      "signature_curve": [],
+      "is_imported": false,
+      "backfill_count": 0
     },
     {
       "name": "Eco 60°C",
-      "cycle_count": 3,
-      "labeled_count": 2,
       "avg_duration": 9600,
-      "avg_energy_wh": 1100,
-      "total_energy_wh": 3300,
+      "min_duration": 9300,
+      "max_duration": 9900,
+      "sample_cycle_id": "cyc-002",
+      "cycle_count": 3,
+      "last_run": "2026-07-09T09:00:00+00:00",
+      "avg_energy": 1.1,
+      "duration_std_dev": 240.0,
       "avg_cost": 0.18,
       "total_cost": 0.54,
-      "health_score": 0.45,
-      "health_status": "fair",
-      "shape_drift": false,
-      "phases": []
+      "signature_curve": [],
+      "is_imported": false,
+      "backfill_count": 0
     },
     {
       "name": "Quick 30°C",
-      "cycle_count": 1,
-      "labeled_count": 1,
       "avg_duration": 2400,
-      "avg_energy_wh": 220,
-      "total_energy_wh": 220,
+      "min_duration": 2400,
+      "max_duration": 2400,
+      "sample_cycle_id": "cyc-004",
+      "cycle_count": 1,
+      "last_run": "2026-07-07T11:00:00+00:00",
+      "avg_energy": 0.22,
+      "duration_std_dev": 0.0,
       "avg_cost": 0.04,
       "total_cost": 0.04,
-      "health_score": null,
-      "health_status": "unknown",
-      "shape_drift": false,
-      "phases": []
+      "signature_curve": [],
+      "is_imported": false,
+      "backfill_count": 0
     }
   ],
-  "advisories": [],
-  "coverage_gap": {
-    "suggest_create": false,
-    "unmatched_count": 1,
-    "unmatched_rate": 0.2,
-    "profile_suggestions": []
-  }
+  "profile_health": {
+    "Cotton 40°C": {"cycle_count": 8, "confidence_mean": 0.86, "duration_cv": 0.02, "health_score": 0.82, "health_status": "healthy", "shape_drift": false, "shape_drift_correlation": 0.97},
+    "Eco 60°C": {"cycle_count": 3, "confidence_mean": 0.61, "duration_cv": 0.03, "health_score": 0.45, "health_status": "fair"},
+    "Quick 30°C": {"cycle_count": 1, "health_status": "unknown"}
+  },
+  "profile_trends": {},
+  "coverage_gaps": {},
+  "profile_advisories": [],
+  "profile_terminal": {}
 }

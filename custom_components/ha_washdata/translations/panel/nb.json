@@ -716,7 +716,9 @@
     "import_wizard": "Import - velg data",
     "history_import": "Importer effekthistorikk",
     "apply_suggestions_title": "Bruk forslag",
-    "apply_suggestions_msg": "Endre disse {n} innstillingene? Integrasjonen lastes inn på nytt etter lagring."
+    "apply_suggestions_msg": "Endre disse {n} innstillingene? Integrasjonen lastes inn på nytt etter lagring.",
+    "discard_settings_title": "Forkaste ulagrede endringer?",
+    "discard_settings_msg": "Ulagrede innstillingsendringer: {n}. Forlate Innstillinger og forkaste dem?"
   },
   "msg": {
     "pg_canvas_empty3": "Velg en syklus ovenfor og trykk på Kjør for å simulere den. Hold deretter pekeren over for å lese av verdier, rull eller knip for å zoome, og dra for å panorere.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Start Home Assistant på nytt for å aktivere simuleringsverktøyene.",
     "phase_catalog_intro": "Navngitte segmenter av en syklus (forvask, oppvarming, sentrifugering...). Tilordne dem til en profil fra kontrollpanelet.",
     "phase_ranges_intro": "Faseområder (minutter fra syklusstart) er lagt over gjennomsnittskurven. Rediger verdier for å forhåndsvise live.",
-    "playground_intro": "En trygg sandkasse for å spille av tidligere sykluser med ulike innstillinger, sammenligne to oppsett side om side og se hvordan en syklus justeres mot en profil. Ingenting her endrer de aktive dataene dine før du uttrykkelig tar det i bruk.",
+    "playground_intro": "Utforsk hvordan innstillinger påvirker deteksjon på de faktiske syklusdataene dine. Ingenting her endrer den aktive konfigurasjonen før du uttrykkelig tar det i bruk.",
     "prefs_personal": "Disse gjelder kun for Home Assistant-kontoen din.",
     "process_history_hint": "Kjør matching på nytt for alle lagrede sykluser, oppdater justeringsforslag, tren ML-modellene på nytt (hvis aktivert), beregn kostnaden for syklusene på nytt ut fra de registrerte energiprisene dine, og beregn syklusenes tilstand på nytt. Kjør dette etter en batch med gjennomganger.",
     "profile_deleted": "Profil slettet",
@@ -1142,10 +1144,6 @@
       "doc": "Under nedtellingen med avbruddsforsinkelse sammenlignes akkumulert energi (watt x tid) med denne terskelen. Hvis den overskrides, nullstilles nedtellingen - og holder anti-krøll-trommel og oppvaskmaskinens tørkehaler festet til syklusen i stedet for å klippe dem korte. Hev den hvis syklusene avsluttes for tidlig under nedkjøling; senke den hvis deteksjonen er treg.",
       "label": "Sluttenergi"
     },
-    "end_repeat_count": {
-      "doc": "Antall påfølgende avlesninger under stoppterskel som kreves før syklusen avsluttes. 1 er greit for de fleste plugger. Øk til 2-3 hvis smartpluggen av og til rapporterer en prøve med falsk null midt i syklusen og syklusene dine avsluttes for tidlig.",
-      "label": "Slutt gjentaksantall"
-    },
     "energy_price_entity": {
       "doc": "Sensor med gjeldende strømpris per kWh (f.eks. en dynamisk tariff). Må være en pris, ikke støpselets egen strøm- eller energienhet: den går foran den statiske prisen nedenfor, så en kWh-teller her beregner hver syklus til måleravlesningen i stedet for til tariffen din. Med Tidsvektet kostnad på beregnes hver syklus til prisen som gjaldt i hvert øyeblikk den kjørte; ellers fryses prisen som gjaldt da den var ferdig, fast på den.",
       "label": "Energiprisenhet"
@@ -1322,10 +1320,6 @@
       "doc": "Sensorenheten rapporterer levende effekt i watt for dette apparatet (f.eks. sensor.washer_power). All syklusdeteksjon er basert på dette signalet.",
       "label": "Strømsensor"
     },
-    "profile_duration_tolerance": {
-      "doc": "+/--båndet rundt en profilgjennomsnittlig varighet brukt under matching. 0,25 betyr at en 60 min profil matcher 45-75 min sykluser.",
-      "label": "Profil varighetstoleranse"
-    },
     "profile_match_interval": {
       "doc": "Hvor ofte du skal forsøke profiltilpasning under en løpesyklus. Standard 300 s (5 minutter) balanserer deteksjonshastighet og CPU.",
       "label": "Samsvarsintervall"
@@ -1373,10 +1367,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Hvor langt inn i det gjenkjente programmets forventede varighet en syklus må være før smart avslutning kan avslutte den tidlig når effekten faller. Den forventede varigheten er programmets gjennomsnitt, så på apparater med sterkt varierende kjøretid - vaskemaskiner med kaldt vinter- kontra varmt sommerinnløpsvann, tørketromler med fuktsensor, lastavhengige programmer - avslutter omtrent halvparten av alle kjøringer kortere enn dette gjennomsnittet og får aldri den raske avslutningen, men avsluttes først minutter senere via reserve-tidsavbruddet. Senk denne verdien (f.eks. 0,85) på slike maskiner slik at den tidlige avslutningen fortsatt utløses; øk den mot 1,0 for å være mer forsiktig. La feltet stå tomt for standarden (0,98, eller 0,99 for oppvaskmaskiner). Den kan bare avslutte en syklus tidligere, aldri senere, og utløses aldri ved en tvetydig eller usikker gjenkjenning.",
       "label": "Forhold for smart avslutning"
-    },
-    "smoothing_window": {
-      "doc": "Hvor mye råeffektsignalet jevnes ut. Lav (2) er responsiv, men støyende; høy (5) jevner ut pigger, men legger til etterslep.",
-      "label": "Utjevningsvindu"
     },
     "start_duration_threshold": {
       "doc": "Strømmen må holde seg over startterskelen så lenge for å bekrefte en reell start, og forhindre at av/på-brytere på et brøkdel sekund starter en syklus.",

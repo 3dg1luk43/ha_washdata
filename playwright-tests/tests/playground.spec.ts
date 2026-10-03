@@ -62,6 +62,24 @@ test('workbench: model time-left readout and phase field are present', async ({ 
   await expect(page.locator('#wd-pg-phase')).toBeAttached();
 });
 
+test('workbench: the phase bar paints the replay\'s live phase runs', async ({ page }) => {
+  // It read `phases` off the profile rows, which get_profiles never sends, so it
+  // could not draw. It now draws runs of series[].phase (Wash, then Spin).
+  await clickTab(page, 'playground');
+  await page.locator('button[data-action="pg-run"]').click();
+  await expect(page.locator('.wd-pg-alerts-card')).toBeVisible({ timeout: 8_000 });
+  const canvas = page.locator('canvas#wd-pg-canvas');
+  await expect.poll(() => canvas.evaluate((c: HTMLCanvasElement) => {
+    const ctx = c.getContext('2d');
+    if (!ctx) return 0;
+    const band = Math.max(4, Math.round(c.height * 0.03));
+    const d = ctx.getImageData(0, c.height - band, c.width, band).data;
+    let tinted = 0;
+    for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 0 && d[i] - d[i + 1] > 40) tinted++;
+    return tinted;
+  }), { timeout: 8_000 }).toBeGreaterThan(20);
+});
+
 test('workbench: outcome + alerts card appears after a sim run', async ({ page }) => {
   await clickTab(page, 'playground');
   await page.locator('button[data-action="pg-run"]').click();

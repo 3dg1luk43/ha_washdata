@@ -716,7 +716,9 @@
     "import_wizard": "Uvoz - izberi podatke",
     "history_import": "Uvoz zgodovine moči",
     "apply_suggestions_title": "Uporabi predloge",
-    "apply_suggestions_msg": "Želite spremeniti te nastavitve ({n})? Integracija se po shranjevanju znova naloži."
+    "apply_suggestions_msg": "Želite spremeniti te nastavitve ({n})? Integracija se po shranjevanju znova naloži.",
+    "discard_settings_title": "Zavržem neshranjene spremembe?",
+    "discard_settings_msg": "Neshranjene spremembe nastavitev: {n}. Zapustim Nastavitve in jih zavržem?"
   },
   "msg": {
     "pg_canvas_empty3": "Izberite cikel zgoraj in pritisnite Zaženi za simulacijo. Nato pomaknite kazalec za prikaz vrednosti, drsajte ali uporabite dva prsta za povečavo in povlecite za premikanje.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Znova zaženite Home Assistant, da omogočite orodja simulacije.",
     "phase_catalog_intro": "Poimenovani segmenti cikla (predhodno pranje, ogrevanje, ožemanje…). Dodelite jih profilu iz nadzorne plošče.",
     "phase_ranges_intro": "Razponi faz (minute od začetka cikla) naloženi na povprečno krivuljo. Urejajte vrednosti za živahni predogled.",
-    "playground_intro": "Varen peskovnik za ponovno predvajanje preteklih ciklov z drugačnimi nastavitvami, primerjavo dveh konfiguracij drug ob drugem in pregled, kako se cikel poravna s profilom. Nič tukaj ne spremeni vaših aktivnih podatkov, dokler tega izrecno ne uporabite.",
+    "playground_intro": "Raziščite, kako nastavitve vplivajo na zaznavanje na resničnih podatkih vaših ciklov. Nič tukaj ne spremeni aktivne konfiguracije, dokler tega izrecno ne uporabite.",
     "prefs_personal": "Veljajo samo za vaš račun Home Assistant.",
     "font_size_hint": "Povečajte ali pomanjšajte vse v tej plošči. Velja za vaš račun na tej napravi.",
     "process_history_hint": "Znova zaženite ujemanje za vse shranjene cikle, osvežite predloge nastavljanja, znova naučite modele ML (če so omogočeni), znova izračunajte stroške ciklov glede na zabeležene cene energije in znova izračunajte zdravje ciklov. Zaženite to po seriji pregledov.",
@@ -1121,10 +1123,6 @@
       "doc": "Med odštevanjem zakasnitve izklopa se akumulirana energija (vati x čas) primerja s tem pragom. Če je preseženo, se odštevanje ponastavi – sušilni stroji proti mečkanju in konci sušenja v pomivalnem stroju ostanejo pritrjeni na cikel, namesto da bi jih skrajšali. Zvišajte ga, če se cikli končajo prezgodaj med ohlajanjem; znižajte, če je zaznavanje počasno.",
       "label": "Energija konca"
     },
-    "end_repeat_count": {
-      "doc": "Število zaporednih odčitkov pod mejno vrednostjo, potrebnih pred koncem cikla. 1 je primeren za večino vtičev. Povečajte na 2-3, če vaš pametni vtič občasno poroča o vzorcu napačne ničle sredi cikla in se vaši cikli končajo predčasno.",
-      "label": "Število ponovitev konca"
-    },
     "energy_price_entity": {
       "doc": "Senzor s trenutno ceno elektrike na kWh (npr. dinamična tarifa). Biti mora cena, ne lastna entiteta moči ali energije vtičnice: ima prednost pred statično ceno spodaj, zato bi tukaj vpisan števec kWh vsak cikel obračunal po odčitku merilnika namesto po vaši tarifi. Ko so Časovno tehtani stroški vklopljeni, se vsak cikel obračuna po ceni, ki je veljala v vsakem trenutku njegovega teka; sicer se nanj zamrzne cena, ki je veljala ob zaključku.",
       "label": "Entiteta cene energije"
@@ -1301,10 +1299,6 @@
       "doc": "Entiteta senzorja, ki poroča o trenutni moči v vatih za to napravo (npr. sensor.washer_power). Zaznavanje vseh ciklov temelji na tem signalu.",
       "label": "Senzor moči"
     },
-    "profile_duration_tolerance": {
-      "doc": "Pas +/- okoli povprečnega trajanja profila, uporabljenega med ujemanjem. 0,25 pomeni, da se 60-minutni profil ujema s 45-75-minutnimi cikli.",
-      "label": "Toleranca trajanja profila"
-    },
     "profile_match_interval": {
       "doc": "Kako pogosto poskušati ujemati profile med ciklom teka. Privzetih 300 s (5 minut) uravnava hitrost zaznavanja in CPE.",
       "label": "Interval ujemanja"
@@ -1352,10 +1346,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Kako daleč v pričakovanem trajanju ujemajočega programa mora biti cikel, preden ga Pametni zaključek lahko po padcu moči predčasno konča. Pričakovano trajanje je povprečje programa, zato se pri napravah, katerih čas delovanja močno niha - pralni stroji s hladno dovodno vodo pozimi v primerjavi s toplo poleti, sušilni stroji s senzorskim sušenjem, programi, odvisni od količine perila - približno polovica vseh zagonov konča prej kot to povprečje in nikoli ne dobi hitrega zaključka, temveč se konča šele prek nadomestnega časovnega zamika, nekaj minut prepozno. Pri takih strojih to vrednost znižajte (npr. 0,85), da se predčasni zaključek vseeno sproži; za bolj konservativno delovanje jo zvišajte proti 1,0. Pustite prazno za privzeto vrednost (0,98 ali 0,99 za pomivalne stroje). Cikel lahko vedno le predčasno konča, nikoli pozneje, in se nikoli ne sproži pri nejasnem ujemanju ali ujemanju z nizko zanesljivostjo.",
       "label": "Razmerje pametnega zaključka"
-    },
-    "smoothing_window": {
-      "doc": "Koliko je zglajen signal neobdelane moči. Nizka (2) je odzivna, a hrupna; visoko (5) zgladi konice, vendar doda zamik.",
-      "label": "Okno glajenja"
     },
     "start_duration_threshold": {
       "doc": "Moč mora ostati nad začetnim pragom tako dolgo, da se potrdi dejanski začetek, s čimer se prepreči, da bi stikala za vklop/izklop za delčke sekunde začela cikel.",

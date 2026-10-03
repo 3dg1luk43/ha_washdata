@@ -716,7 +716,9 @@
     "import_wizard": "Uvoz - izbor podataka",
     "history_import": "Uvoz istorije snage",
     "apply_suggestions_title": "Primeni predloge",
-    "apply_suggestions_msg": "Promeniti ova podešavanja ({n})? Integracija se ponovo učitava nakon čuvanja."
+    "apply_suggestions_msg": "Promeniti ova podešavanja ({n})? Integracija se ponovo učitava nakon čuvanja.",
+    "discard_settings_title": "Odbaciti nesačuvane izmene?",
+    "discard_settings_msg": "Nesačuvane izmene podešavanja: {n}. Napustiti Podešavanja i odbaciti ih?"
   },
   "msg": {
     "pg_canvas_empty3": "Izaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim pređite mišem za prikaz vrednosti, pomerajte točkić ili koristite dva prsta za zumiranje i prevucite za pomeranje.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Ponovo pokrenite Home Assistant da biste omogućili alatke za simulaciju.",
     "phase_catalog_intro": "Nazvani segmenti ciklusa (Pranje, Grejanje, Centrifugiranje…). Dodeli ih profilu iz kontrolnog panela.",
     "phase_ranges_intro": "Opsezi faza (minuti od početka ciklusa) preklopljeni na prosečnoj krivoj. Uredi vrednosti za pregled uživo.",
-    "playground_intro": "Bezbedno testno okruženje za ponovno puštanje prošlih ciklusa sa različitim podešavanjima, poređenje dve konfiguracije jedne pored druge i pregled kako se ciklus poravnava sa profilom. Ništa ovde ne menja vaše aktivne podatke dok to izričito ne primenite.",
+    "playground_intro": "Istražite kako podešavanja utiču na otkrivanje na stvarnim podacima vaših ciklusa. Ništa ovde ne menja aktivnu konfiguraciju dok to izričito ne primenite.",
     "prefs_personal": "Ovo se odnosi samo na vaš Home Assistant nalog.",
     "font_size_hint": "Povećajte ili smanjite sve u ovom panelu. Primenjuje se na vaš nalog na ovom uređaju.",
     "process_history_hint": "Ponovo pokrenite podudaranje na svim sačuvanim ciklusima, osvežite predloge podešavanja, ponovo trenirajte ML modele (ako su omogućeni), ponovo izračunajte troškove prema zabeleženim cenama energije i ponovo izračunajte zdravlje ciklusa. Pokrenite ovo nakon niza pregleda.",
@@ -1121,10 +1123,6 @@
       "doc": "Tokom odbrojavanja sa kašnjenjem, akumulirana energija (vati k vreme) se upoređuje sa ovim pragom. Ako je prekoračeno, odbrojavanje se resetuje - držeći klupe protiv gužvanja i repove za sušenje u mašini za pranje sudova pričvršćene za ciklus umesto da ih skrate. Podignite ga ako se ciklusi završe prerano tokom hlađenja; spustite ga ako je detekcija spora.",
       "label": "Energija kraja"
     },
-    "end_repeat_count": {
-      "doc": "Broj uzastopnih očitavanja ispod praga zaustavljanja potrebnih pre završetka ciklusa. 1 je u redu za većinu utikača. Povećajte na 2-3 ako vaš pametni priključak povremeno prijavi uzorak lažne nule usred ciklusa i vaši ciklusi se prerano završavaju.",
-      "label": "Broj ponavljanja kraja"
-    },
     "energy_price_entity": {
       "doc": "Senzor sa trenutnom cenom struje po kWh (npr. dinamična tarifa). Mora biti cena, a ne sopstveni entitet snage ili energije utičnice: ima prednost nad statičnom cenom ispod, pa bi brojilo kWh ovde obračunalo svaki ciklus po očitavanju brojila umesto po vašoj tarifi. Kada je Vremenski ponderisan trošak uključen, svaki ciklus se naplaćuje po ceni koja je važila u svakom trenutku njegovog rada; u suprotnom se na njega zamrzava cena koja je važila kada je završio.",
       "label": "Entiteta cene energije"
@@ -1301,10 +1299,6 @@
       "doc": "Entitet senzora koji izveštava o snazi u vatima za ovaj uređaj (npr. sensor.washer_power). Sve detekcije ciklusa se zasnivaju na ovom signalu.",
       "label": "Senzor snage"
     },
-    "profile_duration_tolerance": {
-      "doc": "Opseg +/- oko prosečnog trajanja profila koji se koristi tokom uparivanja. 0,25 znači da profil od 60 minuta odgovara ciklusima od 45-75 minuta.",
-      "label": "Tolerancija trajanja profila"
-    },
     "profile_match_interval": {
       "doc": "Koliko često pokušavati uparivanje profila tokom ciklusa trčanja. Podrazumevanih 300 s (5 minuta) balansira brzinu detekcije i CPU.",
       "label": "Interval podudaranja"
@@ -1348,10 +1342,6 @@
     "save_debug_traces": {
       "doc": "Sačuvajte kompletan trag napajanja i odgovarajuće podatke za otklanjanje grešaka za svaki ciklus. Korisno za rešavanje problema, ali povećava veličinu skladišta.",
       "label": "Sačuvaj tragove za otklanjanje grešaka"
-    },
-    "smoothing_window": {
-      "doc": "Koliko je signal sirove snage izglađen. Nizak (2) je osetljiv, ali bučan; high (5) izglađuje šiljke, ali dodaje zaostajanje.",
-      "label": "Prozor za glačanje"
     },
     "start_duration_threshold": {
       "doc": "Snaga mora da ostane iznad početne granice ovoliko dugo da bi se potvrdio pravi početak, sprečavajući prekidače za uključivanje/isključivanje u deliću sekunde da započnu ciklus.",

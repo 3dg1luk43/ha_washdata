@@ -716,7 +716,9 @@
     "import_wizard": "Import - wybierz dane",
     "history_import": "Import historii mocy",
     "apply_suggestions_title": "Zastosuj sugestie",
-    "apply_suggestions_msg": "Zmienić te ustawienia ({n})? Integracja zostanie przeładowana po zapisaniu."
+    "apply_suggestions_msg": "Zmienić te ustawienia ({n})? Integracja zostanie przeładowana po zapisaniu.",
+    "discard_settings_title": "Odrzucić niezapisane zmiany?",
+    "discard_settings_msg": "Niezapisane zmiany ustawień: {n}. Opuścić Ustawienia i je odrzucić?"
   },
   "msg": {
     "pg_canvas_empty3": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń lub użyj dwóch palców, aby powiększyć, i przeciągnij, aby przesunąć.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Uruchom ponownie Home Assistant, aby włączyć narzędzia symulacji.",
     "phase_catalog_intro": "Nazwane segmenty cyklu (pranie wstępne, podgrzewanie, wirowanie…). Przypisz je do profilu z panelu sterowania.",
     "phase_ranges_intro": "Zakresy faz (minuty od początku cyklu) nałożone na krzywą średnią. Edytuj wartości, aby wyświetlić podgląd na żywo.",
-    "playground_intro": "Bezpieczna piaskownica do odtwarzania wcześniejszych cykli z innymi ustawieniami, porównywania dwóch konfiguracji obok siebie i sprawdzania, jak cykl dopasowuje się do profilu. Nic tutaj nie zmienia Twoich aktywnych danych, dopóki wyraźnie tego nie zastosujesz.",
+    "playground_intro": "Sprawdź, jak ustawienia wpływają na wykrywanie na podstawie rzeczywistych danych Twoich cykli. Nic tutaj nie zmienia aktywnej konfiguracji, dopóki wyraźnie tego nie zastosujesz.",
     "prefs_personal": "Dotyczą one wyłącznie Twojego konta Home Assistant.",
     "font_size_hint": "Powiększ lub pomniejsz wszystko w tym panelu. Dotyczy Twojego konta na tym urządzeniu.",
     "process_history_hint": "Ponownie uruchom dopasowywanie na wszystkich zapisanych cyklach, odśwież sugestie dostrajania, ponownie wytrenuj modele ML (jeśli włączone), przelicz koszty cykli według zapisanych cen energii i przelicz kondycję cykli. Uruchom to po serii przeglądów.",
@@ -1117,10 +1119,6 @@
       "doc": "Podczas odliczania opóźnienia wyłączenia skumulowana energia (waty x czas) jest porównywana z tym progiem. Jeśli zostanie przekroczony, odliczanie zostanie zresetowane – utrzymując bębny zapobiegające zagnieceniom i końcówki suszące w zmywarce dołączone do cyklu, zamiast je skracać. Podnieś go, jeśli cykle kończą się zbyt wcześnie podczas schładzania; obniż ją, jeśli wykrywanie jest powolne.",
       "label": "Energia Zakończenia"
     },
-    "end_repeat_count": {
-      "doc": "Liczba kolejnych odczytów poniżej progu wymaganych przed zakończeniem cyklu. 1 jest odpowiedni dla większości wtyczek. Zwiększ do 2-3, jeśli inteligentna wtyczka czasami zgłasza w połowie cyklu próbkę fałszywie zerową, a cykle kończą się przedwcześnie.",
-      "label": "Liczba Powtórzeń Zakończenia"
-    },
     "energy_price_entity": {
       "doc": "Sensor z aktualną ceną energii elektrycznej za kWh (np. taryfa dynamiczna). Musi to być cena, a nie własna encja mocy lub energii wtyczki: ma pierwszeństwo przed statyczną ceną poniżej, więc licznik kWh wskazany tutaj wycenia każdy cykl według wskazania licznika zamiast Twojej taryfy. Gdy Koszt ważony czasem jest włączony, każdy cykl jest naliczany według ceny obowiązującej w każdej chwili jego trwania; w przeciwnym razie zostaje na nim zamrożona cena obowiązująca w momencie zakończenia.",
       "label": "Encja Ceny Energii"
@@ -1297,10 +1295,6 @@
       "doc": "Jednostka czujnika zgłaszająca moc bieżącą tego urządzenia w watach (np. sensor.washer_power). Cała detekcja cykli opiera się na tym sygnale.",
       "label": "Czujnik Mocy"
     },
-    "profile_duration_tolerance": {
-      "doc": "Pasmo +/- wokół średniego czasu trwania profilu używanego podczas dopasowywania. Wartość 0,25 oznacza, że profil 60-minutowy odpowiada cyklom 45-75-minutowym.",
-      "label": "Tolerancja Czasu Profilu"
-    },
     "profile_match_interval": {
       "doc": "Jak często podejmować próby dopasowania profilu podczas cyklu biegowego. Domyślnie 300 s (5 minut) równoważy szybkość wykrywania i procesor.",
       "label": "Interwał Dopasowania"
@@ -1348,10 +1342,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Jak daleko w oczekiwanym czasie trwania dopasowanego programu musi znajdować się cykl, zanim Inteligentne zakończenie może go zakończyć wcześniej po spadku mocy. Oczekiwany czas trwania to średnia programu, więc w urządzeniach, których czas pracy bardzo się waha - pralki z zimną wodą dopływową zimą wobec ciepłej latem, suszarki z suszeniem czujnikowym, programy zależne od wsadu - około połowa wszystkich uruchomień kończy się krócej niż ta średnia i nigdy nie doczeka się szybkiego zakończenia, kończąc dopiero przez awaryjny limit czasu, kilka minut później. W takich maszynach obniż tę wartość (np. 0,85), aby wcześniejsze zakończenie nadal się uruchamiało; zwiększ ją w stronę 1,0, aby zachować większą ostrożność. Pozostaw puste dla wartości domyślnej (0,98, a dla zmywarek 0,99). Może jedynie zakończyć cykl wcześniej, nigdy później, i nigdy nie uruchamia się przy niejednoznacznym dopasowaniu lub dopasowaniu o niskiej pewności.",
       "label": "Współczynnik inteligentnego zakończenia"
-    },
-    "smoothing_window": {
-      "doc": "W jakim stopniu surowy sygnał mocy jest wygładzany. Niski (2) reaguje, ale jest głośny; wysoki (5) wygładza skoki, ale dodaje opóźnienia.",
-      "label": "Okno Wygładzania"
     },
     "start_duration_threshold": {
       "doc": "Moc musi pozostać powyżej progu rozruchu przez tak długi czas, aby potwierdzić prawdziwy start i zapobiec rozpoczęciu cyklu przez przełączniki włączania/wyłączania trwające ułamek sekundy.",

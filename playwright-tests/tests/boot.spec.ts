@@ -31,7 +31,7 @@ test('shows empty state when no devices returned', async ({ page }) => {
   // Boot with no devices — the panel skips the tab bar and shows a .wd-empty message
   await page.evaluate(() => {
     window.__boot_panel({
-      'ha_washdata/get_constants': window.__DEFAULT_CONSTANTS || { device_types: [], state_colors: {}, ml_training_available: true, ml_lab_enabled: true, ml_suggestions_enabled: true },
+      'ha_washdata/get_constants': window.__DEFAULT_CONSTANTS || { device_types: [], state_colors: {}, ml_training_available: true, ml_lab_enabled: true },
       'ha_washdata/get_panel_config': { is_admin: true, access_level: 'full', prefs: {}, panel: { hidden_tabs: [] }, rbac: { enabled: false, default_level: 'edit', users: {} }, users: [] },
       'ha_washdata/get_devices': { devices: [] },
     });

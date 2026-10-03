@@ -716,7 +716,9 @@
         "import_wizard": "İçe aktarma - veri seçin",
         "history_import": "Güç geçmişini içe aktar",
         "apply_suggestions_title": "Önerileri uygula",
-        "apply_suggestions_msg": "Bu {n} ayar değiştirilsin mi? Entegrasyon kaydettikten sonra yeniden yüklenir."
+        "apply_suggestions_msg": "Bu {n} ayar değiştirilsin mi? Entegrasyon kaydettikten sonra yeniden yüklenir.",
+        "discard_settings_title": "Kaydedilmemiş değişiklikler atılsın mı?",
+        "discard_settings_msg": "Kaydedilmemiş {n} ayar değişikliği var. Ayarlar'dan çıkılıp bu değişiklikler atılsın mı?"
     },
     "msg": {
         "pg_canvas_empty3": "Yukarıdan bir döngü seçin ve simüle etmek için Çalıştır'a basın. Ardından değerleri okumak için üzerine gelin, yakınlaştırmak için kaydırın veya iki parmak kullanın ve kaydırmak için sürükleyin.",
@@ -802,7 +804,7 @@
         "pg_restart_note": "Simülasyon araçlarını etkinleştirmek için Home Assistant'ı yeniden başlatın.",
         "phase_catalog_intro": "Bir döngünün adlandırılmış bölümleri (Ön yıkama, Isınma, Sıkma…). Denetim panelinden bir profile atayın.",
         "phase_ranges_intro": "Ortalama eğri üzerinde bindirilen faz aralıkları (döngü başlangıcından dakikalar). Canlı önizleme için değerleri düzenleyin.",
-        "playground_intro": "Geçmiş döngüleri farklı ayarlarla yeniden oynatmak, iki kurulumu yan yana karşılaştırmak ve bir döngünün bir profile nasıl hizalandığını incelemek için güvenli bir test alanı. Siz açıkça uygulamadıkça buradaki hiçbir şey canlı verilerinizi değiştirmez.",
+        "playground_intro": "Ayarların gerçek döngü verilerinizde algılamayı nasıl etkilediğini keşfedin. Siz açıkça uygulamadıkça buradaki hiçbir şey canlı yapılandırmayı değiştirmez.",
         "prefs_personal": "Bunlar yalnızca Home Assistant hesabınıza uygulanır.",
         "process_history_hint": "Tüm saklanan döngülerde eşleştirmeyi yeniden çalıştırın, ayar önerilerini yenileyin, ML modellerini yeniden eğitin (etkinleştirilmişse), döngü maliyetlerini kayıtlı enerji fiyatlarına göre yeniden hesaplayın ve döngü sağlığını yeniden hesaplayın. Bunu bir grup incelemenin ardından çalıştırın.",
         "profile_deleted": "Profil silindi",
@@ -1130,10 +1132,6 @@
             "doc": "Düşmede gecikme geri sayımı sırasında biriken enerji (watt x zaman) bu eşikle karşılaştırılır. Aşılması durumunda geri sayım sıfırlanır; kırışık önleyici tamburlar ve bulaşık makinesi kurutma kuyrukları kısa kesilmek yerine döngüye bağlı kalır. Soğutma sırasında döngüler çok erken biterse yükseltin; algılama yavaşsa düşürün.",
             "label": "Bitiş Enerjisi"
         },
-        "end_repeat_count": {
-            "doc": "Döngü sona ermeden önce gereken ardışık durma eşiği altı okumalarının sayısı. Çoğu fiş için 1 uygundur. Akıllı priziniz ara sıra döngünün ortasında yanlış sıfır örneği bildiriyorsa ve döngüleriniz zamanından önce sona eriyorsa 2-3'e yükseltin.",
-            "label": "Bitiş Tekrar Sayısı"
-        },
         "energy_price_entity": {
             "doc": "kWh başına güncel elektrik fiyatını gösteren sensör (örn. dinamik tarife). Bir fiyat olmalıdır, prizin kendi güç veya enerji varlığı değil: aşağıdaki statik fiyata göre önceliklidir, bu nedenle buraya konan bir kWh sayacı her döngüyü tarifeniz yerine sayaç okumasıyla ücretlendirir. Zaman Ağırlıklı Maliyet açıkken her döngü, çalıştığı her an geçerli olan fiyattan ücretlendirilir; aksi halde bittiğinde geçerli olan fiyat üzerine dondurulur.",
             "label": "Enerji Fiyatı Varlığı"
@@ -1310,10 +1308,6 @@
             "doc": "Bu cihaz için canlı gücü watt cinsinden bildiren sensör varlığı (ör. sensor.washer_power). Tüm döngü tespiti bu sinyale dayanır.",
             "label": "Güç Sensörü"
         },
-        "profile_duration_tolerance": {
-            "doc": "Eşleştirme sırasında kullanılan profil ortalama süresi etrafındaki +/- bandı. 0,25, 60 dakikalık bir profilin 45-75 dakikalık döngülerle eşleştiği anlamına gelir.",
-            "label": "Profil Süre Toleransı"
-        },
         "profile_match_interval": {
             "doc": "Çalışan bir döngü sırasında profil eşleştirmenin ne sıklıkla deneneceği. Varsayılan 300 sn (5 dakika), algılama hızını ve CPU'yu dengeler.",
             "label": "Eşleşme Aralığı"
@@ -1361,10 +1355,6 @@
         "smart_termination_duration_ratio": {
             "doc": "Güç düştüğünde Akıllı Sonlandırma'nın bir döngüyü erken bitirebilmesi için, döngünün eşleşen programın beklenen süresinin ne kadarına ilerlemiş olması gerektiğini belirler. Beklenen süre, programın ortalamasıdır; bu nedenle çalışma süresi çok değişen cihazlarda (kışın soğuk, yazın sıcak şebeke suyuyla çalışan çamaşır makineleri, sensörle kurutan kurutucular, yüke bağlı programlar) tüm çalışmaların yaklaşık yarısı bu ortalamadan daha kısa biter ve hızlı bitişi hiç alamaz, yalnızca yedek zaman aşımıyla dakikalar sonra sona erer. Bu makinelerde erken bitişin yine de devreye girmesi için bu değeri düşürün (örn. 0,85); daha ihtiyatlı olmak için 1,0'a doğru yükseltin. Varsayılan (0,98, bulaşık makineleri için 0,99) için boş bırakın. Bir döngüyü yalnızca daha erken bitirebilir, asla daha geç bitiremez ve belirsiz veya düşük güvenilirlikli bir eşleşmede asla devreye girmez.",
             "label": "Akıllı Sonlandırma Oranı"
-        },
-        "smoothing_window": {
-            "doc": "Ham güç sinyalinin ne kadar yumuşatıldığı. Düşük (2) duyarlıdır ancak gürültülüdür; yüksek (5) ani artışları yumuşatır ancak gecikme ekler.",
-            "label": "Yumuşatma Penceresi"
         },
         "start_duration_threshold": {
             "doc": "Gerçek bir başlatmayı onaylamak için gücün, başlatma eşiğinin bu kadar uzun süre üzerinde kalması gerekir; böylece anlık açma/kapama geçişlerinin bir döngü başlatması önlenir.",

@@ -716,7 +716,9 @@
     "import_wizard": "Import - vali andmed",
     "history_import": "Võimsuse ajaloo import",
     "apply_suggestions_title": "Rakenda soovitused",
-    "apply_suggestions_msg": "Kas muuta neid seadeid ({n})? Integratsioon laaditakse pärast salvestamist uuesti."
+    "apply_suggestions_msg": "Kas muuta neid seadeid ({n})? Integratsioon laaditakse pärast salvestamist uuesti.",
+    "discard_settings_title": "Kas loobuda salvestamata muudatustest?",
+    "discard_settings_msg": "Salvestamata seadete muudatused: {n}. Kas lahkuda vahekaardilt Seaded ja muudatustest loobuda?"
   },
   "msg": {
     "pg_canvas_empty3": "Vali ülalt tsükkel ja vajuta Käivita, et seda simuleerida. Seejärel hõljuta väärtuste lugemiseks, keri või näpista suumimiseks ja lohista liigutamiseks.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Simulatsioonitööriistade lubamiseks taaskäivita Home Assistant.",
     "phase_catalog_intro": "Nimetatud tsükli segmendid (eelpesu, kuumutamine, tsentrifuugimine…). Määrake need juhtpaneelilt profiilile.",
     "phase_ranges_intro": "Faasivahemikud (minutid alates tsükli algusest) kattuvad keskmise kõveraga. Reaalajas eelvaate kuvamiseks muutke väärtusi.",
-    "playground_intro": "Turvaline katseala varasemate tsüklite uuesti esitamiseks erinevate seadetega, kahe seadistuse kõrvuti võrdlemiseks ja selle uurimiseks, kuidas tsükkel profiiliga joondub. Miski siin ei muuda su otseandmeid enne, kui sa selle sõnaselgelt rakendad.",
+    "playground_intro": "Uuri, kuidas seaded mõjutavad tuvastamist sinu tegelike tsüklite andmetel. Miski siin ei muuda kasutusel olevat seadistust enne, kui sa selle sõnaselgelt rakendad.",
     "prefs_personal": "Need kehtivad ainult teie koduabilise konto kohta.",
     "process_history_hint": "Käivitage sobitamine uuesti kõigi salvestatud tsüklite jaoks, värskendage häälestamise soovitusi, treenige ML-mudeleid uuesti (kui lubatud), arvutage tsüklite maksumus salvestatud energiahindade järgi ümber ja arvutage tsükli tervis ümber. Käivitage see pärast hulga ülevaatuste tegemist.",
     "profile_deleted": "Profiil kustutatud",
@@ -1142,10 +1144,6 @@
       "doc": "Väljalülitusviivituse loenduse ajal võrreldakse kogunenud energiat (vatti x aeg) selle lävega. Ületamise korral pöördloendus lähtestub – kortsumisvastased trumlid ja nõudepesumasina kuivatussabad jäävad tsükli külge, selle asemel et neid lühikeseks lõigata. Tõstke seda, kui tsüklid lõpevad jahtumise ajal liiga vara; alandage seda, kui tuvastamine on aeglane.",
       "label": "Lõpu Energia"
     },
-    "end_repeat_count": {
-      "doc": "Enne tsükli lõppu on vajalik järjestikuste alla stopp-läve näitude arv. 1 sobib enamiku pistikute jaoks. Tõstke väärtuseni 2–3, kui teie nutipistik teatab aeg-ajalt valenull-näidist tsükli keskel ja teie tsüklid lõpevad enneaegselt.",
-      "label": "Lõpu Kordusloendur"
-    },
     "energy_price_entity": {
       "doc": "Andur praeguse elektrihinnaga kWh kohta (nt dünaamiline tariif). See peab olema hind, mitte pistiku enda võimsuse või energia olem: see on ülimuslik alloleva staatilise hinna suhtes, seega siia määratud kWh loendur arvestab iga tsükli maksumuse arvesti näidu, mitte teie tariifi järgi. Kui Ajaliselt Kaalutud Maksumus on sees, arvestatakse iga tsükkel hinna järgi, mis kehtis igal selle töötamise hetkel; muidu fikseeritakse sellele hind, mis kehtis lõpetamise hetkel.",
       "label": "Energia Hinna Olem"
@@ -1322,10 +1320,6 @@
       "doc": "Anduri olem, mis teatab selle seadme reaalajas võimsust vattides (nt sensor.washer_power). Kogu tsükli tuvastamine põhineb sellel signaalil.",
       "label": "Võimsusandur"
     },
-    "profile_duration_tolerance": {
-      "doc": "+/- riba profiili keskmise kestuse ümber, mida kasutatakse sobitamise ajal. 0,25 tähendab, et 60-minutiline profiil vastab 45-75-minutistele tsüklitele.",
-      "label": "Profiili Kestuse Tolerants"
-    },
     "profile_match_interval": {
       "doc": "Kui sageli proovite jooksutsükli jooksul profiili sobitada. Vaikimisi 300 s (5 minutit) tasakaalustab tuvastamise kiiruse ja protsessori.",
       "label": "Vaste Intervall"
@@ -1373,10 +1367,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Kui kaugele vastendatud programmi eeldatavast kestusest peab tsükkel jõudma, enne kui nutikas lõpetamine tohib selle võimsuse langedes ennetähtaegselt lõpetada. Eeldatav kestus on programmi keskmine, seega seadmetel, mille tööaeg kõigub palju - pesumasinad külma talvise vs sooja suvise sissevoolava veega, andurkuivatusega kuivatid, koormusest sõltuvad programmid - lõpeb umbes pool kõigist tsüklitest sellest keskmisest lühemalt ega saa kunagi kiiret lõpetamist, lõppedes alles tagavara-aegumise kaudu minuteid hiljem. Vähendage seda (nt 0,85) neil masinatel, et varajane lõpetamine ikkagi käivituks; tõstke seda 1,0 poole, et olla ettevaatlikum. Jätke tühjaks vaikeväärtuse jaoks (0,98 või nõudepesumasinatel 0,99). See saab tsükli üksnes varem lõpetada, mitte kunagi hiljem, ega käivitu kunagi ebaselge või madala kindlusega vaste korral.",
       "label": "Nutika lõpetamise suhe"
-    },
-    "smoothing_window": {
-      "doc": "Kui palju toorvõimsussignaali tasandatakse. Madal (2) on tundlik, kuid lärmakas; kõrge (5) silub naelu, kuid lisab mahajäämust.",
-      "label": "Silumisaken"
     },
     "start_duration_threshold": {
       "doc": "Tõelise käivituse kinnitamiseks peab võimsus püsima nii kaua üle käivitusläve, vältides sekundi murdosa sisse-/väljalülituslülititel tsükli käivitamist.",

@@ -21,6 +21,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +39,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 import voluptuous as vol
 
+from .const import STORAGE_KEY
 from .const import (
     DEVICE_COMPLETION_THRESHOLDS,
     DOMAIN,
@@ -104,13 +107,11 @@ from .const import (
     DEFAULT_MAX_PAST_CYCLES,
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
-    DEFAULT_WATCHDOG_INTERVAL,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_COMPLETION_MIN_SECONDS,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_DEVICE_TYPE,
     DEVICE_TYPE_OTHER,
-    DEFAULT_START_DURATION_THRESHOLD,
     CONF_START_DURATION_THRESHOLD,
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
@@ -710,6 +711,14 @@ async def _async_setup_shared(
     the panel logs and retries on the next setup), so a missing UI never fails
     the entry.
     """
+    # Files left behind by appliances deleted before 0.5.8 (no remove hook then):
+    # swept once per start, in the background, so setup never waits on disk I/O.
+    if not hass.data.get(_ORPHAN_SWEEP_KEY):
+        hass.data[_ORPHAN_SWEEP_KEY] = True
+        hass.async_create_background_task(
+            _async_sweep_orphaned_stores(hass), "ha_washdata orphaned store sweep"
+        )
+
     # Register custom card via frontend.py - once per HA instance only.
     if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
         "ha_washdata_card_deferred"
@@ -1587,6 +1596,82 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
         # Full reload if manager not found
         await async_unload_entry(hass, entry)
         await async_setup_entry(hass, entry)
+
+
+_ORPHAN_SWEEP_KEY = "ha_washdata_orphan_sweep"
+# Per-appliance store keys: the profile store, its active-cycle snapshot (0.5.8) and
+# the manual recorder. Global keys (``ha_washdata_panel``, ``ha_washdata_online``)
+# use an underscore and never match.
+_ENTRY_STORE_RE = re.compile(r"^ha_washdata\.(?:recorder\.)?([0-9A-Za-z]{20,40})(?:\.active)?$")
+
+
+def _entry_store_keys(entry_id: str) -> list[str]:
+    return [
+        f"{STORAGE_KEY}.{entry_id}",
+        f"{STORAGE_KEY}.{entry_id}.active",
+        f"{STORAGE_KEY}.recorder.{entry_id}",
+    ]
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Delete an appliance's stored data when the user deletes the appliance.
+
+    Until 0.5.8 there was no remove hook, so every deleted appliance left its
+    profiles, cycles and traces in ``.storage`` for good (6.9 MB from 15 deleted
+    devices on one install). HA calls this only for a deliberate delete, after the
+    entry has unloaded; an unload or a reload never reaches it.
+    """
+    from homeassistant.helpers.storage import Store  # noqa: PLC0415
+
+    for key in _entry_store_keys(entry.entry_id):
+        try:
+            await Store(hass, 1, key).async_remove()
+        except Exception:  # noqa: BLE001 - a leftover file must not block the delete
+            _LOGGER.warning("Could not delete WashData store %s", key, exc_info=True)
+
+
+async def _async_sweep_orphaned_stores(hass: HomeAssistant) -> None:
+    """Delete per-appliance store files whose config entry no longer exists.
+
+    Every entry (loaded, disabled or failed) is listed by the config-entries
+    manager before any integration sets up, so a file whose id matches none of them
+    belongs to an appliance the user deleted. Never raises.
+    """
+    try:
+        known = {e.entry_id for e in hass.config_entries.async_entries(DOMAIN)}
+        if not known:
+            return
+        storage_dir = hass.config.path(".storage")
+
+        def _orphans() -> list[tuple[str, int]]:
+            out = []
+            for name in os.listdir(storage_dir):
+                m = _ENTRY_STORE_RE.match(name)
+                if m and m.group(1) not in known:
+                    try:
+                        out.append((name, os.path.getsize(os.path.join(storage_dir, name))))
+                    except OSError:
+                        continue
+            return out
+
+        orphans = await hass.async_add_executor_job(_orphans)
+        if not orphans:
+            return
+        from homeassistant.helpers.storage import Store  # noqa: PLC0415
+
+        removed = 0
+        for name, _size in orphans:
+            try:
+                await Store(hass, 1, name).async_remove()
+                removed += 1
+            except Exception:  # noqa: BLE001
+                _LOGGER.debug("Could not delete orphaned store %s", name, exc_info=True)
+        _LOGGER.info(
+            "Deleted %d WashData store file(s) left by deleted appliances (%.1f MB)",
+            removed, sum(size for _n, size in orphans) / 1e6,
+        )
+    except Exception:  # noqa: BLE001
+        _LOGGER.debug("Orphaned store sweep failed", exc_info=True)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

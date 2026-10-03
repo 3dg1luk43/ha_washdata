@@ -716,7 +716,9 @@
     "import_wizard": "Importas - pasirinkti duomenis",
     "history_import": "Galios istorijos importavimas",
     "apply_suggestions_title": "Taikyti pasiūlymus",
-    "apply_suggestions_msg": "Pakeisti šiuos nustatymus ({n})? Išsaugojus integracija bus įkelta iš naujo."
+    "apply_suggestions_msg": "Pakeisti šiuos nustatymus ({n})? Išsaugojus integracija bus įkelta iš naujo.",
+    "discard_settings_title": "Išmesti neišsaugotus pakeitimus?",
+    "discard_settings_msg": "Neišsaugoti nustatymų pakeitimai: {n}. Išeiti iš Nustatymų ir juos išmesti?"
   },
   "msg": {
     "pg_canvas_empty3": "Pasirinkite ciklą aukščiau ir paspauskite Vykdyti, kad jį simuliuotumėte. Tada užveskite žymeklį, kad nuskaitytumėte reikšmes, slinkite arba priartinkite dviem pirštais ir vilkite, kad pastumtumėte.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Iš naujo paleiskite „Home Assistant“, kad įjungtumėte simuliavimo įrankius.",
     "phase_catalog_intro": "Pavadinti ciklo segmentai (išankstinis plovimas, šildymas, gręžimas…). Priskirkite juos profiliui iš valdymo skydelio.",
     "phase_ranges_intro": "Fazių diapazonai (minutės nuo ciklo pradžios) perdengti vidurkio kreive. Redaguokite vertes, kad galėtumėte peržiūrėti tiesiogiai.",
-    "playground_intro": "Saugi bandymų aplinka, kurioje galima iš naujo paleisti ankstesnius ciklus su kitais nustatymais, palyginti dvi konfigūracijas greta ir peržiūrėti, kaip ciklas sutampa su profiliu. Niekas čia nekeičia jūsų tikrųjų duomenų, kol to aiškiai nepritaikysite.",
+    "playground_intro": "Ištirkite, kaip nustatymai veikia aptikimą jūsų tikruose ciklų duomenyse. Niekas čia nekeičia veikiančios konfigūracijos, kol to aiškiai nepritaikysite.",
     "prefs_personal": "Tai galioja tik jūsų namų asistento paskyrai.",
     "process_history_hint": "Pakartotinai paleisti atitikimą visiems saugomiems ciklams, atnaujinti derinimo pasiūlymus, iš naujo apmokyti ML modelius (jei įjungta), perskaičiuoti ciklų kainą pagal įrašytas energijos kainas ir perskaičiuoti ciklų sveikatą. Paleiskite tai atlikę keletą peržiūrų.",
     "profile_deleted": "Profilis ištrintas",
@@ -1121,10 +1123,6 @@
       "doc": "Išjungimo delsos atgalinio skaičiavimo metu sukaupta energija (vatai x laikas) lyginama su šia riba. Jei viršijamas, atgalinis skaičiavimas nustatomas iš naujo – prie ciklo lieka pritvirtintos nesiglamžančios būgninės ir indaplovės džiovinimo uodegėlės, o ne trumpinamos. Pakelkite, jei ciklai baigiasi per anksti vėsinimo metu; sumažinkite jį, jei aptikimas yra vangus.",
       "label": "Pabaigos energija"
     },
-    "end_repeat_count": {
-      "doc": "Iš eilės mažesnių nei sustojimo slenksčio rodmenų skaičius, reikalingas iki ciklo pabaigos. 1 tinka daugeliui kištukų. Padidinkite iki 2–3, jei jūsų išmanusis kištukas ciklo viduryje kartais praneša apie klaidingą nulį, o ciklai baigiasi anksčiau laiko.",
-      "label": "Pabaigos pakartojimų sk."
-    },
     "energy_price_entity": {
       "doc": "Jutiklis su esama elektros kaina už kWh (pvz., dinaminis tarifas). Tai turi būti kaina, o ne paties kištuko galios ar energijos objektas: ši reikšmė turi pirmenybę prieš toliau nurodytą statinę kainą, todėl čia nurodytas kWh skaitiklis kiekvieną ciklą įkainoja pagal skaitiklio rodmenį, o ne pagal jūsų tarifą. Kai įjungta „Pagal laiką svertinė kaina“, kiekvienas ciklas įkainojamas pagal kainą, galiojusią kiekvieną jo veikimo akimirką; priešingu atveju jam užfiksuojama kaina, galiojusi jam pasibaigus.",
       "label": "Energijos kainos objektas"
@@ -1301,10 +1299,6 @@
       "doc": "Jutiklio subjektas, pranešantis šio prietaiso tiesioginę galią vatais (pvz., sensor.washer_power). Visas ciklo aptikimas pagrįstas šiuo signalu.",
       "label": "Galios jutiklis"
     },
-    "profile_duration_tolerance": {
-      "doc": "+/- juosta aplink vidutinę profilio trukmę, naudojamą derinant. 0,25 reiškia, kad 60 minučių profilis atitinka 45–75 minučių ciklus.",
-      "label": "Profilio trukmės tolerancija"
-    },
     "profile_match_interval": {
       "doc": "Kaip dažnai bandyti suderinti profilį bėgimo ciklo metu. Numatytoji 300 s (5 minutės) subalansuoja aptikimo greitį ir procesorių.",
       "label": "Atitikimo intervalas"
@@ -1352,10 +1346,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Kaip toli į atitiktos programos numatytą trukmę ciklas turi būti pažengęs, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau, kai sumažėja galia. Numatyta trukmė yra programos vidurkis, todėl prietaisuose, kurių veikimo laikas labai svyruoja - skalbyklės su šaltu žiemos ir šiltu vasaros tiekiamu vandeniu, jutiklinio džiovinimo džiovyklės, nuo apkrovos priklausančios programos - maždaug pusė visų paleidimų baigiasi trumpiau nei šis vidurkis ir niekada nesulaukia greito užbaigimo, o baigiasi tik per atsarginį skirtąjį laiką, kelias minutes vėliau. Sumažinkite tai (pvz., 0,85) tose mašinose, kad ankstyvas užbaigimas vis tiek suveiktų; padidinkite jį link 1,0, kad veiktų atsargiau. Palikite tuščią numatytajai vertei (0,98 arba 0,99 indaplovėms). Jis gali užbaigti ciklą tik anksčiau, niekada ne vėliau, ir niekada nesuveikia esant neaiškiai ar mažo patikimumo atitikčiai.",
       "label": "Išmaniojo užbaigimo santykis"
-    },
-    "smoothing_window": {
-      "doc": "Kiek išlyginamas neapdorotos galios signalas. Žemas (2) yra jautrus, bet triukšmingas; aukštas (5) išlygina smailes, bet padidina atsilikimą.",
-      "label": "Išlyginimo langas"
     },
     "start_duration_threshold": {
       "doc": "Galia turi taip ilgai išlikti virš paleidimo slenksčio, kad būtų patvirtintas tikras startas, kad sekundės įjungimo/išjungimo jungikliai nepradėtų ciklo.",

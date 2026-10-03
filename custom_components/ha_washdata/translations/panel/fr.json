@@ -663,7 +663,9 @@
     "import_wizard": "Importer - choisir les données",
     "history_import": "Importer l'historique de puissance",
     "apply_suggestions_title": "Appliquer les suggestions",
-    "apply_suggestions_msg": "Modifier ces {n} paramètres ? L'intégration se recharge après l'enregistrement."
+    "apply_suggestions_msg": "Modifier ces {n} paramètres ? L'intégration se recharge après l'enregistrement.",
+    "discard_settings_title": "Abandonner les modifications non enregistrées ?",
+    "discard_settings_msg": "Modifications de paramètres non enregistrées : {n}. Quitter Paramètres et les abandonner ?"
   },
   "msg": {
     "pg_canvas_empty3": "Choisissez un cycle ci-dessus et appuyez sur Exécuter pour le simuler. Survolez ensuite pour lire les valeurs, faites défiler ou pincez pour zoomer et faites glisser pour vous déplacer.",
@@ -749,7 +751,7 @@
     "pg_restart_note": "Redémarrez Home Assistant pour activer les outils de simulation.",
     "phase_catalog_intro": "Segments nommés d'un cycle (Prélavage, Chauffage, Essorage…). Attribuez-les à un profil depuis son panneau de contrôle.",
     "phase_ranges_intro": "Plages de phases (minutes à partir du début du cycle) superposées sur la courbe moyenne. Modifiez les valeurs pour prévisualiser en direct.",
-    "playground_intro": "Un bac à sable sûr pour rejouer les cycles passés avec différents paramètres, comparer deux configurations côte à côte et examiner comment un cycle s'aligne sur un profil. Rien ici ne modifie vos données en direct tant que vous ne l'appliquez pas explicitement.",
+    "playground_intro": "Explorez l'effet des paramètres sur la détection avec les données réelles de vos cycles. Rien ici ne modifie la configuration active tant que vous ne l'appliquez pas explicitement.",
     "prefs_personal": "Celles-ci s'appliquent uniquement à votre compte Home Assistant.",
     "process_history_hint": "Relancez la correspondance sur tous les cycles enregistrés, actualisez les suggestions de réglage, réentraînez les modèles ML (si activés), recalculez le coût des cycles d'après les prix de l'énergie enregistrés et recalculez la santé des cycles. À exécuter après un lot de révisions.",
     "profile_deleted": "Profil supprimé",
@@ -1089,10 +1091,6 @@
       "doc": "Pendant le compte à rebours, l'énergie accumulée (watts x temps) est comparée à ce seuil. En cas de dépassement, le compte à rebours se réinitialise – gardant les sèche-linge anti-froissage et les queues de séchage du lave-vaisselle attachés au cycle au lieu de les couper court. Augmentez-le si les cycles se terminent trop tôt pendant le refroidissement ; baissez-le si la détection est lente.",
       "label": "Énergie de fin"
     },
-    "end_repeat_count": {
-      "doc": "Nombre de lectures consécutives inférieures au seuil d'arrêt requises avant la fin du cycle. 1 convient à la plupart des prises. Augmentez à 2-3 si votre prise intelligente signale occasionnellement un échantillon faux zéro en cours de cycle et que vos cycles se terminent prématurément.",
-      "label": "Nombre de répétitions de fin"
-    },
     "energy_price_entity": {
       "doc": "Capteur avec le prix actuel de l'électricité par kWh (par exemple un tarif dynamique). Doit être un prix, pas le capteur de puissance ni le compteur d'énergie de la prise elle-même : il prévaut sur le prix statique ci-dessous, donc un compteur kWh placé ici facture chaque cycle à la valeur du compteur au lieu de votre tarif. Avec Coût pondéré dans le temps activé, chaque cycle est facturé au prix en vigueur à chaque instant où il a tourné ; sinon, le prix en vigueur à sa fin lui est figé.",
       "label": "Entité de prix de l'énergie"
@@ -1269,10 +1267,6 @@
       "doc": "L'entité de capteur signalant la puissance réelle en watts pour cet appareil (par exemple, sensor.washer_power). Toute détection de cycle est basée sur ce signal.",
       "label": "Capteur de puissance"
     },
-    "profile_duration_tolerance": {
-      "doc": "La bande +/- autour d'une durée moyenne de profil utilisée lors de la mise en correspondance. 0,25 signifie qu'un profil de 60 minutes correspond à des cycles de 45 à 75 minutes.",
-      "label": "Tolérance de durée du profil"
-    },
     "profile_match_interval": {
       "doc": "À quelle fréquence tenter une correspondance de profil au cours d’un cycle en cours d’exécution. La valeur par défaut de 300 s (5 minutes) équilibre la vitesse de détection et le processeur.",
       "label": "Intervalle de correspondance"
@@ -1320,10 +1314,6 @@
     "smart_termination_duration_ratio": {
       "doc": "À quel point un cycle doit avoir progressé dans la durée prévue du programme correspondant avant que la Terminaison intelligente puisse le terminer plus tôt une fois la puissance retombée. La durée prévue est la moyenne du programme ; ainsi, sur les appareils dont le temps de fonctionnement varie beaucoup - lave-linge selon l'eau d'arrivée froide en hiver ou tiède en été, sèche-linge à sonde d'humidité, programmes dépendant de la charge - environ la moitié des cycles se terminent plus tôt que cette moyenne et ne bénéficient jamais de la fin rapide, s'achevant seulement via le délai de secours avec plusieurs minutes de retard. Abaissez cette valeur (p. ex. 0,85) sur ces machines pour que la fin anticipée se déclenche quand même ; augmentez-la vers 1,0 pour être plus prudent. Laissez vide pour la valeur par défaut (0,98, ou 0,99 pour les lave-vaisselle). Elle ne peut que terminer un cycle plus tôt, jamais plus tard, et ne se déclenche jamais sur une correspondance ambiguë ou peu fiable.",
       "label": "Ratio de terminaison intelligente"
-    },
-    "smoothing_window": {
-      "doc": "Dans quelle mesure le signal de puissance brute est lissé. Low (2) est réactif mais bruyant ; high (5) lisse les pointes mais ajoute du décalage.",
-      "label": "Fenêtre de lissage"
     },
     "start_duration_threshold": {
       "doc": "La puissance doit rester au-dessus du seuil de démarrage aussi longtemps pour confirmer un démarrage réel, empêchant ainsi les bascules marche/arrêt d'une fraction de seconde de démarrer un cycle.",
