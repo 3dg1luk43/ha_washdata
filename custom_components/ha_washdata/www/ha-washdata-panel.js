@@ -900,7 +900,8 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
   box-shadow: 0 4px 18px rgba(0,0,0,.35); z-index: 60;
   text-align: left; font-weight: 400; text-transform: none; letter-spacing: normal;
 }
-.wd-tip:hover .wd-tip-pop { display: block; }
+.wd-tip:hover .wd-tip-pop, .wd-tip:focus .wd-tip-pop { display: block; }
+.wd-tip:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 1px; }
 .wd-tip-txt { font-size: 12px; line-height: 1.5; display: block; }
 .wd-dg { display: block; width: 100%; height: auto; margin-bottom: 8px; background: var(--secondary-background-color); border-radius: 6px; }
 .wd-dg .ln { fill: none; stroke: var(--primary-color); stroke-width: 2.5; }
@@ -1552,6 +1553,18 @@ function _withAlpha(col, alpha) {
 }
 function _num(v, def) { const n = parseFloat(v); return isNaN(n) ? def : n; }
 // Visible, keyboard-focusable descendants of `root` (for modal focus trapping).
+// A selector that finds "the same control" after a full re-render: its id, else the
+// data-* attributes the panel uses to identify buttons, rows and inputs.
+const _FOCUS_ATTRS = ['data-action', 'data-cid', 'data-idx', 'data-tab', 'data-sec', 'data-gtab',
+  'data-ptab', 'data-hsub', 'data-proftab', 'data-opt', 'data-pgkey', 'data-gname', 'data-sugkey'];
+function _focusKey(el) {
+  if (!el || !el.getAttribute || el.tagName === 'BODY') return null;
+  const esc = (v) => (window.CSS && CSS.escape) ? CSS.escape(v) : String(v).replace(/["\\]/g, '\\$&');
+  if (el.id) return '#' + esc(el.id);
+  const parts = _FOCUS_ATTRS.filter(a => el.hasAttribute(a)).map(a => `[${a}="${esc(el.getAttribute(a))}"]`);
+  return parts.length ? el.tagName.toLowerCase() + parts.join('') : null;
+}
+
 function _focusableEls(root) {
   if (!root) return [];
   const sel = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
@@ -1797,6 +1810,10 @@ function _field(f, value, extra) {
     const lockBtn = key ? `<button type="button" class="wd-sug-lock" data-suglock="${key}" title="${lockTitle}" aria-label="${lockTitle}">🔕</button>` : '';
     sugHtml = `<div class="wd-sug"><span class="wd-sug-chip wd-sug-chip-obs">💡 ${_esc(t('suggestion.observed_label', {}, 'Observed'))}</span><span class="wd-sug-val">${_esc(classicVal)}${_u}</span>${nowNote}${useBtn}${reason}${lockBtn}${impact ? `<div class="wd-sug-impact-line">${_esc(impact)}</div>` : ''}</div>`;
   }
+  // Accessible name for the control: the <label> is not tied to it (audit UI-05).
+  if (labelText && input) {
+    input = input.replace(/<(input|select|textarea)\b(?![^>]*\baria-label=)/, `<$1 aria-label="${_esc(labelText)}"`);
+  }
   return `<div class="wd-field" data-field="${key}"><div class="wd-label-row"><label style="margin:0">${_esc(labelText)}</label>${chgDot}${tip}</div>${input}${f.hint ? `<div class="wd-field-hint">${_esc(f.hint)}</div>` : ''}<div class="wd-conflict-err" data-cerr="${key}" hidden></div><div class="wd-setting-note" data-cnote="${key}" hidden></div>${sugHtml}</div>`;
 }
 
@@ -1819,17 +1836,16 @@ function _sugImpact(t, key, suggested, current) {
 
 // Map setting key -> conceptual diagram id (drawn in the hover tooltip).
 const _DIAGRAM_BY_KEY = {
-  min_power: 'min_power', off_delay: 'off_delay', smoothing_window: 'smoothing',
+  min_power: 'min_power', off_delay: 'off_delay',
   start_threshold_w: 'hysteresis', stop_threshold_w: 'hysteresis',
   start_energy_threshold: 'start_energy', running_dead_zone: 'dead_zone',
-  profile_duration_tolerance: 'duration_tolerance',
   profile_match_min_duration_ratio: 'match_ratios', profile_match_max_duration_ratio: 'match_ratios',
   progress_reset_delay: 'progress_reset', completion_min_seconds: 'min_duration',
   // New diagrams
   min_off_gap: 'min_off_gap',
+  duration_tolerance: 'duration_tolerance',
   start_duration_threshold: 'start_duration',
   end_energy_threshold: 'end_energy_thresh',
-  end_repeat_count: 'end_repeat',
   profile_match_threshold: 'confidence', profile_unmatch_threshold: 'confidence',
   auto_label_confidence: 'confidence', learning_confidence: 'confidence',
   no_update_active_timeout: 'watchdog_timeout',
@@ -1871,7 +1887,9 @@ function _clipRectFor(el) {
 // Tooltip popover with an optional JS-drawn SVG diagram above the text.
 function _tip(text, diagram) {
   const dg = diagram ? _diagram(diagram) : '';
-  return `<span class="wd-tip">i<span class="wd-tip-pop">${dg}<span class="wd-tip-txt">${_esc(text)}</span></span></span>`;
+  // Focusable, with the text as its accessible name: the 100+ setting docs were
+  // hover-only, unreachable by keyboard or screen reader (audit UI-05).
+  return `<span class="wd-tip" tabindex="0" role="note" aria-label="${_esc(text)}">i<span class="wd-tip-pop">${dg}<span class="wd-tip-txt">${_esc(text)}</span></span></span>`;
 }
 
 // Settings-style toggle switch, reused everywhere instead of raw checkboxes.
@@ -1893,11 +1911,6 @@ function _diagram(id) {
   const wrap = inner => `<svg class="wd-dg" viewBox="0 0 200 90" preserveAspectRatio="xMidYMid meet">${inner}</svg>`;
   const base = `<line class="ax" x1="8" y1="78" x2="192" y2="78"/>`;
   switch (id) {
-    case 'smoothing':
-      return wrap(`${base}
-        <polyline class="ln2" points="8,60 22,30 36,66 50,28 64,62 78,34 92,64 106,30 120,60 134,36 148,62 162,32 176,58 190,40"/>
-        <polyline class="ln" points="8,58 30,48 52,44 74,42 96,42 118,44 140,42 162,44 190,46"/>
-        <text x="10" y="14">raw vs smoothed</text>`);
     case 'min_power':
       return wrap(`${base}
         <rect class="fb" x="8" y="64" width="184" height="14"/>
@@ -1978,17 +1991,6 @@ function _diagram(id) {
         <text x="10" y="14">tail energy above thresh: timer resets</text>
         <text x="78" y="56">accum</text>
         <text x="168" y="65">thr</text>`);
-    case 'end_repeat':
-      // N consecutive readings below stop threshold before end is confirmed.
-      return wrap(`${base}
-        <line class="bad dash" x1="8" y1="54" x2="192" y2="54"/>
-        <polyline class="ln" points="8,78 16,78 28,30 78,30 88,60 108,60 128,60 148,60 162,78 192,78"/>
-        <line class="ax" x1="88" y1="54" x2="88" y2="78"/>
-        <line class="ax" x1="108" y1="54" x2="108" y2="78"/>
-        <line class="ax" x1="128" y1="54" x2="128" y2="78"/>
-        <line class="ax" x1="148" y1="54" x2="148" y2="78"/>
-        <text x="90" y="48">R1 R2 R3</text>
-        <text x="10" y="14">N reads below stop = end</text>`);
     case 'confidence':
       // Horizontal 0-1 score bar: red = no match, orange = feedback zone, blue = auto-label.
       return wrap(`
@@ -4161,6 +4163,10 @@ class HaWashdataPanel extends HTMLElement {
     const focusedBefore = sr0
       ? (sr0.activeElement || (this.getRootNode() && this.getRootNode().activeElement) || null)
       : null;
+    // Outside dialogs, a background refresh (every 6-20 s during a cycle) dropped
+    // keyboard focus to <body> (audit UI-04). Remember the control by its identity
+    // so the matching control in the new DOM can take it back.
+    const focusKeyBefore = (!this._modalFocusActive && sr0 && sr0.activeElement) ? _focusKey(sr0.activeElement) : null;
     // A pinned touch readout (#413) is anchored to a crosshair this swap is
     // about to erase, so it would be left floating with stale numbers over the
     // new DOM. Drop it with the crosshair it describes.
@@ -4217,6 +4223,12 @@ class HaWashdataPanel extends HTMLElement {
     ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pgroup-canvas']
       .forEach(id => this._attachGraphGestures(id));
     this._syncModalFocus(focusedBefore);
+    if (focusKeyBefore && !this._modalFocusActive) {
+      const again = this.shadowRoot.querySelector(focusKeyBefore);
+      if (again && this.shadowRoot.activeElement !== again) {
+        try { again.focus({ preventScroll: true }); } catch (_) {}
+      }
+    }
     requestAnimationFrame(() => this._resizeLogsPage());
   }
 
@@ -4783,8 +4795,8 @@ class HaWashdataPanel extends HTMLElement {
   _htmlHistoryTab() {
     const sub = this._historySub === 'maintenance' ? 'maintenance' : 'cycles';
     const nav = [['cycles', this._t('tab.history', {}, 'Cycles')], ['maintenance', this._t('tab.maintenance', {}, 'Maintenance')]]
-      .map(([id, lbl]) => `<button class="wd-subtab ${sub === id ? 'active' : ''}" data-hsub="${id}">${lbl}</button>`).join('');
-    return `<div class="wd-subtabs">${nav}</div>${sub === 'maintenance' ? this._htmlMaintenance() : this._htmlHistory()}`;
+      .map(([id, lbl]) => `<button class="wd-subtab ${sub === id ? 'active' : ''}" role="tab" aria-selected="${sub === id ? 'true' : 'false'}" data-hsub="${id}">${lbl}</button>`).join('');
+    return `<div class="wd-subtabs" role="tablist">${nav}</div>${sub === 'maintenance' ? this._htmlMaintenance() : this._htmlHistory()}`;
   }
 
   _htmlHistory() {
@@ -4919,7 +4931,7 @@ class HaWashdataPanel extends HTMLElement {
         : `<span class="wd-devdot" style="background:${statusDotColor(st)}" title="${_esc(st)}"></span>`;
       const stLabel = { completed: this._t('status.completed',{},'Completed'), interrupted: this._t('status.interrupted',{},'Interrupted'), force_stopped: this._t('status.force_stopped',{},'Force stopped'), active: this._t('status.active',{},'Active') }[st] || st;
       const flags = `${importedBadge(c)}${reviewBadge(c)}${overrunBadge(c)}${underrunBadge(c)}${energyAnomalyBadge(c)}${artifactBadge(c)}${restartGapBadge(c)}`.trim();
-      return `<tr data-cid="${_esc(c.id)}" data-selmode="${rowSel ? 1 : 0}" style="cursor:pointer">
+      return `<tr data-cid="${_esc(c.id)}" data-selmode="${rowSel ? 1 : 0}" tabindex="0" role="button" style="cursor:pointer">
         <td style="width:26px;padding:6px 4px 6px 8px">${check}</td>
         <td>${prog ? _esc(prog) : `<span style="color:var(--secondary-text-color)">${this._t('lbl.unlabelled', {}, 'Unlabelled')}</span>`}</td>
         <td class="wd-tc-flags">${flags}</td>
@@ -4998,7 +5010,7 @@ class HaWashdataPanel extends HTMLElement {
         ${loadMore}
       </div>`;
 
-    const cyclesErrorBanner = this._cyclesError ? `<div class="wd-error-state"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-cycles">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
+    const cyclesErrorBanner = this._cyclesError ? `<div class="wd-error-state" role="alert"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-cycles">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
     return cyclesErrorBanner + cyclesHtml;
   }
 
@@ -5216,11 +5228,11 @@ class HaWashdataPanel extends HTMLElement {
     const subtabBtns = [
       ['profiles', this._t('tab.subtab_profiles', {}, 'Profiles')],
       ['phase-catalog', this._t('tab.subtab_phase_catalog', {}, 'Phase Catalog')],
-    ].map(([id, lbl]) => `<button class="wd-subtab ${this._profSubtab === id ? 'active' : ''}" data-proftab="${id}">${lbl}</button>`).join('');
+    ].map(([id, lbl]) => `<button class="wd-subtab ${this._profSubtab === id ? 'active' : ''}" role="tab" aria-selected="${this._profSubtab === id ? 'true' : 'false'}" data-proftab="${id}">${lbl}</button>`).join('');
 
-    const profilesErrorBanner = (this._profilesError || this._profileGroupsError) ? `<div class="wd-error-state"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-profiles">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
+    const profilesErrorBanner = (this._profilesError || this._profileGroupsError) ? `<div class="wd-error-state" role="alert"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-profiles">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
     return `
-      <div class="wd-subtabs">${subtabBtns}</div>
+      <div class="wd-subtabs" role="tablist">${subtabBtns}</div>
       ${this._profSubtab === 'phase-catalog' ? this._htmlPhases() : (profilesErrorBanner + profilesHtml)}
     `;
   }
@@ -5329,7 +5341,7 @@ class HaWashdataPanel extends HTMLElement {
       return `<div class="wd-error-state" role="alert"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-tab">${this._t('btn.retry', {}, 'Retry')}</button></div>`;
     if (!Object.keys(o).length)
       return `<div class="wd-empty"><div class="wd-icon">⚙️</div>${this._t('msg.loading_settings', {}, 'Loading settings…')}</div>`;
-    const suggestionsErrorBanner = this._suggestionsError ? `<div class="wd-error-state"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-suggestions">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
+    const suggestionsErrorBanner = this._suggestionsError ? `<div class="wd-error-state" role="alert"><span>${this._t('msg.fetch_error', {}, 'Failed to load data.')}</span><button class="wd-btn" type="button" data-action="retry-suggestions">${this._t('btn.retry', {}, 'Retry')}</button></div>` : '';
     const level = this._settingsLevel();
     const basicMode = level === 'basic';
     this._internalReveal = this._computeInternalReveal(o);
@@ -7585,15 +7597,22 @@ class HaWashdataPanel extends HTMLElement {
     });
     ctx.restore();
 
-    // Phase bar
-    const cycle = (this._cycles || []).find(c => c.id === this._pgCycleId);
-    const profN = this._pgProfileName || cycle?.profile_name || (this._pgDetail && this._pgDetail.outcome && this._pgDetail.outcome.matched_profile);
-    const prof = profN ? (this._profiles || []).find(p => p.name === profN) : null;
+    // Phase bar: runs of the replay's own live phase readout (series[].phase), the
+    // same thing the running integration shows. It used to read `phases` off the
+    // profile rows, which get_profiles never sends, and treated their seconds as
+    // fractions, so the bar could not draw.
     const phaseY = ch - phaseBandH;
-    if (prof && Array.isArray(prof.phases) && prof.phases.length) {
+    const phaseSegs = [];
+    for (const p of (this._pgDetail && this._pgDetail.series) || []) {
+      const last = phaseSegs[phaseSegs.length - 1];
+      if (last && last.name === (p.phase || null)) { last.end = p.t; continue; }
+      if (last) last.end = p.t;
+      phaseSegs.push({ name: p.phase || null, start: p.t, end: p.t });
+    }
+    if (phaseSegs.some(sg => sg.name)) {
       ctx.save(); ctx.beginPath(); ctx.rect(padL, phaseY, plotW, phaseBandH); ctx.clip();
-      prof.phases.forEach((ph, i) => {
-        const x1 = toX((ph.start || 0) * totalDur), x2 = toX((ph.end || 1) * totalDur);
+      phaseSegs.filter(sg => sg.name).forEach((ph, i) => {
+        const x1 = toX(ph.start), x2 = toX(ph.end);
         const hue = (i * 47) % 360;
         ctx.fillStyle = `hsla(${hue},60%,55%,0.55)`;
         ctx.fillRect(x1, phaseY, Math.max(1, x2 - x1), phaseBandH);
@@ -8103,10 +8122,10 @@ class HaWashdataPanel extends HTMLElement {
     if (!allowed.has(sub)) sub = this._panelSubtab = 'diagnostics';
     const subtabs = [['diagnostics', this._t('tab.diagnostics', {}, 'Diagnostics')]];
     if (mlAvail) subtabs.push(['ml', this._t('tab.ml', {}, 'ML Training')]);
-    const stBtns = subtabs.map(([id, lbl]) => `<button class="wd-subtab ${sub === id ? 'active' : ''}" data-ptab="${id}">${lbl}</button>`).join('');
+    const stBtns = subtabs.map(([id, lbl]) => `<button class="wd-subtab ${sub === id ? 'active' : ''}" role="tab" aria-selected="${sub === id ? 'true' : 'false'}" data-ptab="${id}">${lbl}</button>`).join('');
     if (!canEdit) return '';
     const body = sub === 'ml' && mlAvail ? this._htmlMlTab() : this._htmlDiagnostics();
-    return `<div class="wd-subtabs">${stBtns}</div>${body}`;
+    return `<div class="wd-subtabs" role="tablist">${stBtns}</div>${body}`;
   }
 
   _levelSelect(attrs, val, withInherit) {
@@ -8406,13 +8425,13 @@ class HaWashdataPanel extends HTMLElement {
     if (admin && this._constants && this._constants.storeOnlineAvailable) tabs.push(['online', this._t('hdr.online_account_tab', {}, 'Online & Community')]);
     let tab = m.tab;
     if (!tabs.some(([id]) => id === tab)) tab = m.tab = 'prefs';
-    const nav = tabs.map(([id, lbl]) => `<button class="wd-subtab ${tab === id ? 'active' : ''}" data-gtab="${id}">${lbl}</button>`).join('');
+    const nav = tabs.map(([id, lbl]) => `<button class="wd-subtab ${tab === id ? 'active' : ''}" role="tab" aria-selected="${tab === id ? 'true' : 'false'}" data-gtab="${id}">${lbl}</button>`).join('');
     const body = tab === 'panel' && admin ? this._htmlPanelSettings()
       : tab === 'access' && admin ? this._htmlPanelAccess()
       : tab === 'online' && admin ? this._htmlOnlineSettings()
       : this._htmlPanelPrefs();
     return `<h2 id="wd-modal-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>${this._t('settings.gear.title', {}, 'Preferences')}<button class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="cancel" aria-label="${_esc(this._t('btn.close', {}, 'Close'))}" style="margin-left:auto">✕</button></h2>
-      <div class="wd-subtabs">${nav}</div>
+      <div class="wd-subtabs" role="tablist">${nav}</div>
       <div class="wd-gear-body">${body}</div>`;
   }
 
@@ -10675,7 +10694,33 @@ class HaWashdataPanel extends HTMLElement {
 
     sr.querySelectorAll('.wd-devcard[data-idx]').forEach(btn => btn.addEventListener('click', () => this._selectDevice(parseInt(btn.dataset.idx, 10))));
 
-    sr.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => { if (btn.dataset.tab !== 'settings') { this._pendingSettings = {}; this._dirtyOptKeys = new Set(); } this._tab = btn.dataset.tab; this._fetchTabData(); }));
+    sr.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => {
+      const target = btn.dataset.tab;
+      const go = () => {
+        if (target !== 'settings') { this._pendingSettings = {}; this._dirtyOptKeys = new Set(); }
+        this._tab = target; this._fetchTabData();
+      };
+      // Leaving Settings with unsaved edits used to drop them without a word
+      // (audit UI-15). Snapshot the form first so a value still only in the DOM counts.
+      if (this._tab === 'settings' && target !== 'settings') {
+        this._snapshotFormToPending(sr);
+        // Count real differences from the saved options, not touched fields: opening
+        // a combo and leaving the value as it was is not an unsaved change.
+        const n = Object.keys(this._changedOptions(this._pendingSettings || {})).length;
+        if (n) {
+          this._modal = {
+            type: 'confirm',
+            title: this._t('modal.discard_settings_title', {}, 'Discard unsaved changes?'),
+            message: this._t('modal.discard_settings_msg', {n}, `${n} setting change(s) are not saved yet. Leave Settings and discard them?`),
+            okLabel: this._t('btn.discard', {}, 'Discard'),
+            onOk: () => go(),
+          };
+          this._render();
+          return;
+        }
+      }
+      go();
+    }));
     sr.querySelectorAll('[data-sec]').forEach(btn => btn.addEventListener('click', () => { this._snapshotFormToPending(sr); this._settingsSec = btn.dataset.sec; this._settingsSearch = ''; this._settingsSugOnly = false; this._render(); }));
     sr.querySelectorAll('[data-ptab]').forEach(btn => btn.addEventListener('click', () => {
       const sub = this._panelSubtab = btn.dataset.ptab;
@@ -11340,6 +11385,13 @@ class HaWashdataPanel extends HTMLElement {
       } else {
         this._onAction({ dataset: { action: 'open-cycle', cid } });
       }
+    }));
+    // Keyboard: a focused cycle row opens (or toggles) on Enter / Space, the same as
+    // a click (audit UI-04: the core "open or label a cycle" flow was mouse-only).
+    sr.querySelectorAll('tr[data-cid][role="button"]').forEach(row => row.addEventListener('keydown', e => {
+      if (e.target !== row || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      row.click();
     }));
     // Cycle-review comparison overlays: toggle a profile's envelope on the chart.
     sr.querySelectorAll('.wd-cyc-overlay').forEach(cb => cb.addEventListener('change', () => {

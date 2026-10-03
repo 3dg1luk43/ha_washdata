@@ -46,15 +46,33 @@ test('clicking a profile card opens the profile detail modal', async ({ page }) 
 });
 
 test('health badge shows on profile card based on health status', async ({ page }) => {
+  // The card's health badge is driven by the backend's `poor_health` advisory
+  // (profile_store.compute_profile_advisories), not by profile_health directly.
+  // This used to pass only because the fixture lacked profile_health, so every
+  // card carried a bogus "Still learning (0/5)" badge that the locator matched.
+  await setHandler(page, 'ha_washdata/get_profiles', {
+    ...profilesData,
+    profile_advisories: [{
+      profile: 'Eco 60°C',
+      severity: 'warning',
+      code: 'poor_health',
+      message: "'Eco 60°C' has a low fit score - its recent cycles vary a lot or match weakly.",
+      message_key: 'msg.advisory_poor_health',
+      message_params: { name: 'Eco 60°C' },
+    }],
+  });
   await clickTab(page, 'profiles');
-  // Cotton 40°C has health_status: "healthy" — should show a health badge
+  const ecoCard = page.locator('.wd-profile-card').filter({ hasText: 'Eco 60°C' });
+  await expect(ecoCard.locator('.wd-badge', { hasText: 'poor fit' })).toBeVisible({ timeout: 5_000 });
+  // Cotton 40°C is healthy: no health badge, and no warm-up badge either (8 cycles).
   const cottonCard = page.locator('.wd-profile-card').filter({ hasText: 'Cotton 40°C' });
-  await expect(cottonCard.locator('.wd-badge, [class*="health"]').first()).toBeVisible({ timeout: 5_000 });
+  await expect(cottonCard.locator('.wd-badge', { hasText: 'poor fit' })).toHaveCount(0);
+  await expect(cottonCard.locator('.wd-badge', { hasText: 'Still learning' })).toHaveCount(0);
 });
 
 test('warmup badge shows on profiles with few labeled cycles', async ({ page }) => {
   await clickTab(page, 'profiles');
-  // Quick 30°C has labeled_count: 1 (below warmup threshold of 5)
+  // Quick 30°C has profile_health.cycle_count 1 (below PROFILE_MIN_WARMUP_CYCLES = 2)
   const quickCard = page.locator('.wd-profile-card').filter({ hasText: 'Quick 30°C' });
   await expect(quickCard).toBeVisible({ timeout: 5_000 });
   // Warmup badge renders as .wd-badge with text "Still learning (n/N cycles)"
@@ -64,8 +82,8 @@ test('warmup badge shows on profiles with few labeled cycles', async ({ page }) 
 
 test('empty profiles state shows create profile button', async ({ page }) => {
   await bootPanel(page, {
-    'ha_washdata/get_profiles': { profiles: [], advisories: [], coverage_gaps: null },
-    'ha_washdata/get_profile_groups': { groups: [], suggestions: [], min_cohesion: 0.85 },
+    'ha_washdata/get_profiles': { profiles: [], profile_health: {}, profile_trends: {}, coverage_gaps: {}, profile_advisories: [], profile_terminal: {} },
+    'ha_washdata/get_profile_groups': { groups: [], min_cohesion: 0.85 },
   });
   await clickTab(page, 'profiles');
   const createBtn = page.locator('button[data-action="create-profile"]').first();

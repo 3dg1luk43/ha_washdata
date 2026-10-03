@@ -1,14 +1,16 @@
 {
+  "version": "0.5.8",
+  "icon_url": null,
   "device_types": [
-    {"value": "washing_machine", "label": "Washing Machine"},
-    {"value": "dryer",           "label": "Dryer"},
-    {"value": "washer_dryer",    "label": "Washer-Dryer Combo"},
-    {"value": "dishwasher",      "label": "Dishwasher"},
-    {"value": "air_fryer",       "label": "Air Fryer"},
-    {"value": "bread_maker",     "label": "Bread Maker"},
-    {"value": "pump",            "label": "Pump / Sump Pump"},
-    {"value": "generic",         "label": "Other (Advanced)"},
-    {"value": "other",           "label": "Threshold Device"}
+    {"id": "washing_machine", "label": "Washing Machine"},
+    {"id": "dryer",           "label": "Dryer"},
+    {"id": "washer_dryer",    "label": "Washer-Dryer Combo"},
+    {"id": "dishwasher",      "label": "Dishwasher"},
+    {"id": "air_fryer",       "label": "Air Fryer"},
+    {"id": "bread_maker",     "label": "Bread Maker"},
+    {"id": "pump",            "label": "Pump / Sump Pump"},
+    {"id": "generic",         "label": "Other (Advanced)"},
+    {"id": "other",           "label": "Threshold Device"}
   ],
   "state_colors": {
     "off":            "var(--state-inactive-color, #9e9e9e)",
@@ -29,6 +31,14 @@
     "recording":      "var(--error-color, #f44336)"
   },
   "ml_lab_enabled": true,
-  "ml_suggestions_enabled": true,
-  "ml_training_available": true
+  "ml_training_available": true,
+  "PROFILE_MIN_WARMUP_CYCLES": 2,
+  "pg_match_defaults": {
+    "profile_match_min_duration_ratio": 0.1,
+    "profile_match_max_duration_ratio": 1.8
+  },
+  "store_online_available": true,
+  "store_online_enabled": false,
+  "store_web_origin": "https://3dg1luk43.github.io/washdata-store",
+  "store_prefs": {"show_contributor": true}
 }

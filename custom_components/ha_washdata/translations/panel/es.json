@@ -663,7 +663,9 @@
     "import_wizard": "Importar - elegir datos",
     "history_import": "Importar historial de potencia",
     "apply_suggestions_title": "Aplicar sugerencias",
-    "apply_suggestions_msg": "¿Cambiar estos {n} ajustes? La integración se recarga después de guardar."
+    "apply_suggestions_msg": "¿Cambiar estos {n} ajustes? La integración se recarga después de guardar.",
+    "discard_settings_title": "¿Descartar los cambios sin guardar?",
+    "discard_settings_msg": "Cambios de ajustes sin guardar: {n}. ¿Salir de Ajustes y descartarlos?"
   },
   "msg": {
     "pg_canvas_empty3": "Elige un ciclo de arriba y pulsa Ejecutar para simularlo. Después, pasa el cursor para leer los valores, desplázate o pellizca para hacer zoom y arrastra para desplazarte.",
@@ -749,7 +751,7 @@
     "pg_restart_note": "Reinicie Home Assistant para habilitar las herramientas de simulación.",
     "phase_catalog_intro": "Segmentos de un ciclo con nombre (Prelavado, Calentamiento, Centrifugado…). Asígnalos a un perfil desde su panel de control.",
     "phase_ranges_intro": "Rangos de fase (minutos desde el inicio del ciclo) superpuestos en la curva promedio. Edite valores para obtener una vista previa en vivo.",
-    "playground_intro": "Un entorno de pruebas seguro para reproducir ciclos anteriores con distintos ajustes, comparar dos configuraciones en paralelo e inspeccionar cómo se alinea un ciclo con un perfil. Nada de esto cambia sus datos en vivo hasta que lo aplique explícitamente.",
+    "playground_intro": "Explore cómo afectan los ajustes a la detección con los datos reales de sus ciclos. Nada de esto cambia la configuración en vivo hasta que lo aplique explícitamente.",
     "prefs_personal": "Estos se aplican únicamente a su cuenta de Home Assistant.",
     "process_history_hint": "Vuelva a ejecutar la coincidencia en todos los ciclos almacenados, actualice las sugerencias de ajuste, vuelva a entrenar los modelos ML (si están habilitados), vuelva a calcular el costo de los ciclos según los precios de energía registrados y recalcule el estado de los ciclos. Ejecútelo después de un lote de revisiones.",
     "profile_deleted": "Perfil eliminado",
@@ -1089,10 +1091,6 @@
       "doc": "Durante la cuenta atrás del retardo de apagado, la energía acumulada (vatios x tiempo) se compara con este umbral. Si se excede, la cuenta regresiva se reinicia, manteniendo las secadoras antiarrugas y las colas de secado en lavavajillas adheridas al ciclo en lugar de acortarlas. Auméntelo si los ciclos terminan demasiado pronto durante el enfriamiento; bájelo si la detección es lenta.",
       "label": "Energía de fin"
     },
-    "end_repeat_count": {
-      "doc": "Número de lecturas consecutivas por debajo del umbral requerido antes de que finalice el ciclo. 1 está bien para la mayoría de los enchufes. Aumente a 2-3 si su enchufe inteligente ocasionalmente informa una muestra de cero falso a mitad del ciclo y sus ciclos terminan prematuramente.",
-      "label": "Recuento de repetición de fin"
-    },
     "energy_price_entity": {
       "doc": "Sensor con el precio actual de la electricidad por kWh (por ejemplo, una tarifa dinámica). Debe ser un precio, no la propia entidad de potencia o de energía del enchufe: tiene prioridad sobre el precio estático a continuación, por lo que un contador de kWh aquí cobra cada ciclo a la lectura del medidor en lugar de a su tarifa. Con Costo ponderado en el tiempo activado, cada ciclo se cobra al precio vigente en cada momento de su ejecución; si no, se le congela el precio vigente cuando terminó.",
       "label": "Entidad de precio de energía"
@@ -1269,10 +1267,6 @@
       "doc": "La entidad del sensor que informa la potencia activa en vatios para este electrodoméstico (por ejemplo, sensor.washer_power). Toda la detección de ciclos se basa en esta señal.",
       "label": "Sensor de potencia"
     },
-    "profile_duration_tolerance": {
-      "doc": "La banda +/- alrededor de la duración promedio de un perfil utilizada durante la coincidencia. 0,25 significa que un perfil de 60 minutos coincide con ciclos de 45 a 75 minutos.",
-      "label": "Tolerancia de duración del perfil"
-    },
     "profile_match_interval": {
       "doc": "Con qué frecuencia intentar hacer coincidir el perfil durante un ciclo de ejecución. El valor predeterminado de 300 s (5 minutos) equilibra la velocidad de detección y la CPU.",
       "label": "Intervalo de coincidencia"
@@ -1320,10 +1314,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Cuánto debe haber avanzado un ciclo dentro de la duración esperada del programa coincidente antes de que la Terminación inteligente pueda finalizarlo antes de tiempo una vez que la potencia cae. La duración esperada es el promedio del programa, por lo que en aparatos cuyo tiempo de funcionamiento varía mucho - lavadoras según el agua de entrada fría en invierno o templada en verano, secadoras con sensor de humedad, programas que dependen de la carga - cerca de la mitad de las ejecuciones terminan antes que ese promedio y nunca obtienen el final rápido, finalizando solo mediante el tiempo de espera de reserva con minutos de retraso. Baje este valor (p. ej. 0,85) en esas máquinas para que el final anticipado siga activándose; súbalo hacia 1,0 para ser más conservador. Déjelo vacío para el valor predeterminado (0,98, o 0,99 para lavavajillas). Solo puede finalizar un ciclo antes, nunca después, y nunca se activa en una coincidencia ambigua o de baja confianza.",
       "label": "Proporción de terminación inteligente"
-    },
-    "smoothing_window": {
-      "doc": "Cuánto se suaviza la señal de potencia bruta. Bajo (2) responde pero es ruidoso; alto (5) suaviza los picos pero agrega retraso.",
-      "label": "Ventana de suavizado"
     },
     "start_duration_threshold": {
       "doc": "La potencia debe permanecer por encima del Umbral de inicio durante este tiempo para confirmar un inicio real, evitando que los cambios de encendido/apagado en fracciones de segundo inicien un ciclo.",

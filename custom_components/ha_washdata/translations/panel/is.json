@@ -275,8 +275,8 @@
       "watchdog": "Verður að vera minna en Engin-uppfærsla-tímamark ({to} s)"
     },
     "off_delay": {
-      "gap": "Lágm. slökkubil ætti að vera að minnsta kosti Slökkviðráð ({delay} s)",
-      "off_delay": "Slökkviðráð ({off_delay} s) fer yfir Lágm. slökkubil ({gap} s); samliggjandi lotur gætu sameinast"
+      "gap": "Lágm. slökkubil ætti að vera að minnsta kosti Slökkvitöf ({delay} s)",
+      "off_delay": "Slökkvitöf ({off_delay} s) fer yfir Lágm. slökkubil ({gap} s); samliggjandi lotur gætu sameinast"
     },
     "power_off": {
       "stop": "Verður að vera yfir Slökkunarþröskuldi ({pot} W)",
@@ -290,7 +290,7 @@
     },
     "pump_stuck": {
       "duration": "Verður að vera minna en Engin-uppfærsla-tímamark ({to} s) svo fasadæluvísbending kvikni áður en gæslan drepur lotuna",
-      "timeout": "Verður að vera meira en Fastri dælu-lengd ({ps} s) svo fasadæluvísbending kvikni áður en lotunni er þvingað stöðvað"
+      "timeout": "Verður að vera meira en Tímamörk fastrar dælu ({ps} s) svo fasadæluvísbending kvikni áður en lotunni er þvingað stöðvað"
     },
     "start_dur": {
       "sampling": "Sýnitakabil fer yfir Ræsingarlengd ({sdt} s); einstaks sýnis toppar gætu opnað lotu",
@@ -310,7 +310,7 @@
     "settings_banner": "Árekstrar í stillingum: {n}. Skoðaðu auðkenndu hlutana og lagaðu þá áður en þú vistar.",
     "settings_banner_btn": "Fara á fyrsta",
     "end_energy": {
-      "energy": "Of strangt fyrir Stöðvunarþröskuld ({w} W) yfir Slökkviðráð ({d} s); lotan getur aðeins endað eftir varaleið",
+      "energy": "Of strangt fyrir Stöðvunarþröskuld ({w} W) yfir Slökkvitöf ({d} s); lotan getur aðeins endað eftir varaleið",
       "stop": "Lokaorka ({e} Wh á {d} s) leyfir aðeins {p} W"
     }
   },
@@ -716,7 +716,9 @@
     "import_wizard": "Innflutningur - velja gögn",
     "history_import": "Flytja inn aflsögu",
     "apply_suggestions_title": "Beita tillögum",
-    "apply_suggestions_msg": "Breyta þessum {n} stillingum? Samþættingin endurhleðst eftir vistun."
+    "apply_suggestions_msg": "Breyta þessum {n} stillingum? Samþættingin endurhleðst eftir vistun.",
+    "discard_settings_title": "Henda óvistuðum breytingum?",
+    "discard_settings_msg": "Óvistaðar stillingabreytingar: {n}. Fara úr Stillingum og henda þeim?"
   },
   "msg": {
     "pg_canvas_empty3": "Veldu lotu að ofan og ýttu á Keyra til að herma hana. Haltu svo bendlinum yfir til að lesa gildi, skrunaðu eða þysjaðu með tveimur fingrum og dragðu til að hliðra.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Endurræstu Home Assistant til að virkja hermitólin.",
     "phase_catalog_intro": "Nafngreindir hlutar hringrásar (Forþvottur, Upphitun, Snúning…). Úthlutaðu þeim á prófíl frá stjórnborði þess.",
     "phase_ranges_intro": "Áfangasvið (mínútur frá upphafi lotu) lögð yfir meðalferilinn. Breyttu gildum til að forskoða í beinni.",
-    "playground_intro": "Öruggt tilraunasvæði til að spila fyrri lotur aftur með mismunandi stillingum, bera saman tvær uppsetningar hlið við hlið og skoða hvernig lota samræmist sniði. Ekkert hér breytir raungögnunum þínum fyrr en þú beitir því sérstaklega.",
+    "playground_intro": "Kannaðu hvernig stillingar hafa áhrif á greiningu á raunverulegum lotugögnum þínum. Ekkert hér breytir virku uppsetningunni fyrr en þú beitir því sérstaklega.",
     "prefs_personal": "Þetta á aðeins við um Home Assistant reikninginn þinn.",
     "process_history_hint": "Keyra samsvörun aftur á öllum geymdum lotum, uppfæra fínstillingartillögur, þjálfa ML líkönin aftur (ef virkt), endurreikna kostnað lotanna út frá skráðum orkuverðum og endurreikna heilsu lotanna. Keyrðu þetta eftir hóp yfirferða.",
     "profile_deleted": "Sniði eytt",
@@ -891,7 +893,7 @@
     "store_enable_hint": "Virkjaðu nettengda eiginleika í Stillingum til að skoða og flytja inn viðmiðunarlotur samfélagsins.",
     "advisory_duration_outlier": "{n} lota/lotur merktar '{name}' eru of langt frá venjulegri lengd kerfisins til að geta nokkurn tíma fengið samsvörun við það (verst: {ratio}x). Þær eru líklega rangt merktar, eða ein upptaka náði tveimur keyrslum. Merktu þær aftur eða skiptu þeim upp svo þær skekki ekki lengur tímaáætlun þessa kerfis.",
     "standby_above_stop_title": "Dró enn {idle} W þegar lotunni lauk",
-    "standby_above_stop_sub": "{n} af síðustu {total} lotum. Slökkviðráð fer ekki af stað fyrr en aflið er komið undir Stöðvunarþröskuld ({stop} W), svo lotur enda of seint eða þarf að stöðva handvirkt.",
+    "standby_above_stop_sub": "{n} af síðustu {total} lotum. Slökkvitöf fer ekki af stað fyrr en aflið er komið undir Stöðvunarþröskuld ({stop} W), svo lotur enda of seint eða þarf að stöðva handvirkt.",
     "store_share_intro": "Hladdu þessari viðmiðunarlotu upp svo aðrir með sama tæki geti notað hana. Hún er yfirfarin áður en hún birtist opinberlega.",
     "online_intro_global": "Skoðaðu og deildu viðmiðunarupptökum með öðrum WashData-notendum og staðfestu tækjafærslur. Ein tenging gildir fyrir alla WashData-samþættinguna þína; vörumerki og gerð tækis eru stillt fyrir hvert tæki undir Grunnstillingum. Allir nettengdir eiginleikar eru valfrjálsir og sjálfgefið óvirkir.",
     "online_unavailable": "Nettengdir eiginleikar eru ekki í boði á þessum netþjóni.",
@@ -934,7 +936,7 @@
     "hist_breaks": "{n} göt þar sem mælirinn var ekki tiltækur",
     "hist_other_entity": "{n} mælingum fyrir aðrar einingar var sleppt",
     "hist_skipped_spans": "Bil sem var sleppt",
-    "hist_settings_used": "Greint með núverandi stillingum þessa tækis (lágmarksafl {w} W, slökkviðráð {s} s).",
+    "hist_settings_used": "Greint með núverandi stillingum þessa tækis (lágmarksafl {w} W, slökkvitöf {s} s).",
     "hist_none_found": "Engar lotur greindust í þeirri sögu.",
     "hist_found": "Fann {n} lotur. Taktu hakið af öllu sem lítur ekki út eins og raunveruleg keyrsla - ekkert er vistað fyrr en þú flytur inn.",
     "hist_scan_capped": "Aðeins fyrstu lotutillögurnar eru sýndar ({n} fundust).",
@@ -1075,11 +1077,11 @@
       "doc": "Hversu langt inn í væntanlega lengd samsvaraða kerfisins lota þarf að vera komin áður en WashData má ákveða að lágaflsveltan sem hún sér sé hrukkuvarnarhalinn og ljúka lotunni þar. Væntanlega lengdin er meðaltal kerfisins, þannig að í þurrkara þar sem keyrslutími með rakaskynjara ræðst af magni þvottarins ná flestar keyrslur aldrei 98% af henni og halinn situr þess í stað þar til vara-tímamörkin renna út - oft 15 til 40 mínútum eftir að vélin stöðvaðist í raun. Lækkaðu þetta gildi (t.d. 0,75) í slíkum þurrkara. Skildu þvottavélar eftir á sjálfgefna gildinu: þvottavél er undir Hám. hrukkuleys-afli mestallan sinn tíma, þannig að þetta hlutfall er það eina sem skilur rólegan áfanga í miðjum þvotti frá halanum, og lækkun getur helmingað þvott. Skildu eftir autt fyrir sjálfgefið gildi (0,98). Þetta er önnur stilling en Hlutfall snjallrar lokunar, sem stýrir sjálfstæðri athugun á snemmbúinni lokun."
     },
     "anti_wrinkle_enabled": {
-      "doc": "Viðurkenndu stuttu lág-afls þurrkarapúlsana sem þurrkari gefur frá sér eftir aðalhitafasann og haltu þeim tengdum við lokið lotu í stað þess að lesa þá sem nýjar lotur.",
-      "label": "Virkja hrukkuleysi-greiningu"
+      "doc": "Þekkir stuttu, aflitlu veltipúlsana sem þurrkari gefur frá sér eftir aðalhitunarfasann og tengir þá við lotuna sem lauk í stað þess að túlka þá sem nýjar lotur.",
+      "label": "Virkja hrukkuleysisgreiningu"
     },
     "anti_wrinkle_exit_power": {
-      "doc": "Krafturinn verður að falla undir þetta á milli púlsa til að hrukkuvarnarstilling haldist virkur.",
+      "doc": "Aflið verður að falla undir þetta gildi á milli púlsa til að hrukkuleysisstillingin haldist virk.",
       "label": "Útgönguaflþröskuldur"
     },
     "anti_wrinkle_idle_timeout": {
@@ -1087,11 +1089,11 @@
       "label": "Hám. púlsbil"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Púlsar sem eru lengri en þetta eru meðhöndlaðir sem alvöru hringrás frekar en hrukkuvörn.",
+      "doc": "Púlsar sem eru lengri en þetta eru meðhöndlaðir sem raunveruleg lota frekar en hrukkuvarnarvelta.",
       "label": "Hámarkslengd"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Púls yfir þessum krafti er meðhöndluð sem alvöru ný hringrás, ekki hrukkuvörn. Stillt rétt fyrir ofan fallpúlsaflið.",
+      "doc": "Púls yfir þessu afli er meðhöndlaður sem raunveruleg ný lota, ekki hrukkuvarnarvelta. Stilltu þetta rétt yfir afl veltipúlsanna.",
       "label": "Hám. hrukkuleys-afl"
     },
     "auto_label_confidence": {
@@ -1103,7 +1105,7 @@
       "label": "Sjálfvirkt viðhald (næturþrif)"
     },
     "completion_min_seconds": {
-      "doc": "Hringrásum sem eru styttri en þetta er fleygt sem draugalotum (prófun, opnun á hurðinni til að bæta við sokk).",
+      "doc": "Lotum sem eru styttri en þetta er fleygt sem draugalotum (prufukeyrslur, hurð opnuð til að bæta við sokki).",
       "label": "Lágm. lotulengd"
     },
     "curve_preroll_seconds": {
@@ -1111,40 +1113,36 @@
       "doc": "Hversu margar sekúndur af mælingum úr misheppnuðum ræsitilraunum WashData má taka með fremst í ferli lotu. Ferill lotu byrjar venjulega á þeirri ræsitilraun sem loks tekst, þannig að í vél sem þreifar sig áfram nokkrum sinnum áður en hún fer almennilega í gang - kerfisval, hurðarlæsing, fyrsta vatnsinntak - vantar fyrstu mínúturnar af raunverulegri virkni í hvern feril. Stilltu þetta aðeins hærra en lengsti slíkur aðdragandi vélarinnar þinnar (300 s duga flestum). 0 slekkur á þessu. Athugaðu að þegar kveikt er á því færist skráð upphaf framar, þannig að lotur fyrir og eftir breytinguna bera ólíka lengd fyrir sama kerfi; lærðu meðaltölin skekkjast þar til eldri loturnar detta út."
     },
     "delay_confirm_seconds": {
-      "doc": "Rafmagn verður að vera í biðstöðu í þetta lengi áður en heimilistækið er meðhöndlað sem bið eftir að ræsa sig frekar en í gangi.",
+      "doc": "Aflið verður að haldast á biðstöðubilinu svona lengi áður en litið er svo á að tækið bíði eftir ræsingu frekar en að það sé í gangi.",
       "label": "Staðfestingarsekúndur"
     },
     "delay_start_detect_enabled": {
-      "doc": "Finndu þegar kveikt er á heimilistækinu og bíður (seinkað ræsingu / biðstöðu) en hefur ekki hafið lotuna, þannig að biðhleðsla telst ekki vera í gangi.",
-      "label": "Virkja seinkuð-ræsing-greiningu"
+      "doc": "Greinir þegar kveikt er á tækinu og það bíður (seinkuð ræsing / biðstaða) en hefur ekki hafið lotuna, svo biðstöðunotkun sé ekki talin vera lota í gangi.",
+      "label": "Virkja greiningu seinkaðrar ræsingar"
     },
     "delay_timeout_hours": {
-      "doc": "Hættu að bíða í seinkaðri ræsingu eftir þessa marga klukkutíma og farðu aftur í aðgerðalausa stöðu, þannig að vél sem er eftir afl en aldrei ræst bíður ekki að eilífu.",
+      "doc": "Hættir að bíða í seinkaðri ræsingu eftir svona marga klukkutíma og fer aftur í stöðuna Aðgerðarlaus, svo vél sem kveikt er á en aldrei er ræst bíði ekki endalaust.",
       "label": "Tímamarksklst."
     },
     "device_type": {
-      "doc": "Tækjaflokkur. Stillir skynsamlegar sjálfgefnar greiningar (þröskuldar, slökkt á seinkun, lokameðferð) stillt fyrir þá tegund tækis; breyta því aðeins ef tækið var upphaflega sett upp sem ranga gerð.",
+      "doc": "Flokkur tækisins. Setur skynsamleg sjálfgefin greiningargildi (þröskulda, slökkvitöf, meðhöndlun loka) sem eru stillt fyrir þá tegund tækja; breyttu því aðeins ef röng tegund var valin þegar tækið var sett upp.",
       "label": "Tegund tækis"
     },
     "door_sensor_entity": {
-      "doc": "Valfrjáls hurð tvöfaldur skynjari. Notað til að greina hvenær heimilistækið hefur verið opnað/affermt eftir lotu.",
+      "doc": "Valfrjáls tvíundarskynjari á hurð tækisins. Notaður til að greina hvenær tækið hefur verið opnað/losað eftir lotu.",
       "label": "Dyraskynjareining"
     },
     "duration_tolerance": {
-      "doc": "Umburðarlyndi fyrir mati sem eftir er af tíma (námsendurgjöf, ekki samsvörun). Ef raunveruleg tímalengd er innan +/-X% af áætluninni telst það góð samsvörun.",
-      "label": "Matþolinmæði"
+      "doc": "Vikmörk fyrir mat á tíma sem eftir er (endurgjöf í námi, ekki samsvörun). Ef raunveruleg lengd er innan +/-X% af matinu telst það góð samsvörun.",
+      "label": "Vikmörk mats"
     },
     "enable_ml_models": {
-      "doc": "Á meðan lota er í gangi, láttu líkan sem er fínstillt fyrir þessa vél spá fyrir um heildarorku og kostnað, og láttu lotu þar sem aflið fellur óvenju snemma, á kerfi sem WashData þekkir vel, ljúka án þess að bíða alla slökkvitöfina (Slökkviðráð). Slökkt = aðeins klassíska aflbyggða rökfræðin.",
+      "doc": "Á meðan lota er í gangi, láttu líkan sem er fínstillt fyrir þessa vél spá fyrir um heildarorku og kostnað, og láttu lotu þar sem aflið fellur óvenju snemma, á kerfi sem WashData þekkir vel, ljúka án þess að bíða alla slökkvitöfina. Slökkt = aðeins klassíska aflbyggða rökfræðin.",
       "label": "Nota greind líkön meðan á lotu stendur"
     },
     "end_energy_threshold": {
-      "doc": "Meðan á niðurtalningunni stendur er uppsöfnuð orka (vött x tími) borin saman við þennan þröskuld. Ef farið er yfir það endurstillist niðurtalningin - þannig að krumluvörn og uppþvottavélarþurrkunarhalar eru festir við hringrásina í stað þess að stytta þær. Hækka það ef lotum lýkur of snemma meðan á kólnun stendur; lækka það ef uppgötvun er treg.",
+      "doc": "Á meðan slökkvitöfin telur niður er uppsöfnuð orka (vött x tími) borin saman við þennan þröskuld. Ef farið er yfir hann byrjar niðurtalningin upp á nýtt - þannig haldast hrukkuvarnarveltur og þurrkunarhalar uppþvottavéla áfram hluti af lotunni í stað þess að lotan sé stytt. Hækkaðu gildið ef lotur enda of snemma meðan á kælingu stendur; lækkaðu það ef greiningin er of sein.",
       "label": "Lokaorka"
-    },
-    "end_repeat_count": {
-      "doc": "Fjöldi samfelldra aflestra undir stöðvunarþröskuldi sem þarf áður en lotunni lýkur. 1 er fínt fyrir flestar innstungur. Hækkaðu í 2-3 ef snjalltappið þitt tilkynnir stundum um rangt núll sýni í miðjum lotu og loturnar þínar eru að ljúka of snemma.",
-      "label": "Fjöldi lokakorna"
     },
     "energy_price_entity": {
       "doc": "Skynjari með núverandi raforkuverði á kWh (t.d. breytileg gjaldskrá). Verður að vera verð, ekki aflseining eða orkueining innstungunnar sjálfrar: hann tekur fram yfir fasta verðið hér að neðan, þannig að kWh-teljari hér reiknar hverja lotu á stöðu mælisins í stað gjaldskrárinnar þinnar. Þegar Tímaveginn kostnaður er kveiktur er hver lota reiknuð á því verði sem gilti á hverri stundu meðan hún keyrði; annars er verðið sem gilti þegar henni lauk fryst á hana.",
@@ -1159,11 +1157,11 @@
       "label": "Orkumælieining"
     },
     "expose_debug_entities": {
-      "doc": "Birtu auka greiningar HA einingar (samsvörun, tvíræðni, innri hluti ríkisins). Slökkt heldur einingarlistanum hreinum fyrir venjulega notkun.",
+      "doc": "Birtir auka greiningareiningar í HA (samsvörunaröryggi, tvíræðni, innra ástand). Slökkt heldur einingalistanum hreinum við venjulega notkun.",
       "label": "Birta villuleitareiningar"
     },
     "external_end_trigger": {
-      "doc": "Tvöfaldur skynjari þar sem ástandsbreytingin markar lok lotunnar (t.d. „lokið“ tengiliður tækis eða fylgisamþætting).",
+      "doc": "Tvíundarskynjari þar sem stöðubreyting markar lok lotunnar (t.d. „lokið“-merki frá tækinu eða fylgisamþætting).",
       "label": "Ytri kveikjaeining"
     },
     "external_end_trigger_enabled": {
@@ -1179,11 +1177,11 @@
       "label": "Námsöryggi"
     },
     "linked_device": {
-      "doc": "Hægt er að hreiða þetta WashData tæki undir annað tæki (t.d. snjalltappið) í HA tækjaskránni, sýnt sem „Tengt í gegnum ...“.",
+      "doc": "Valfrjálst er hægt að setja þetta WashData-tæki undir annað tæki (t.d. snjalltengilinn) í tækjaskrá HA, sem birtist sem „Tengt í gegnum ...“.",
       "label": "Flokka undir tæki"
     },
     "min_off_gap": {
-      "doc": "Ef vélin slekkur á sér í skemmri tíma en þennan tíma er kveikt/slökkt/kveikt röð meðhöndluð sem eina samfellda lotu. Kemur í veg fyrir að þvottakerfi (vélin slekkur á sér í nokkrar mínútur í miðjum þvotti) skiptist í tvær aðskildar lotur. Stilltu það styttra en bilið á milli bak-til-baks álags ef þú vilt að þær teljist sem aðskildar lotur. Sjálfgefnar stillingar tækis vernda dæmigerða hlé í hringrás fyrir hvert tæki.",
+      "doc": "Ef slökkt er á vélinni skemur en þetta er röðin kveikt/slökkt/kveikt meðhöndluð sem ein samfelld lota. Kemur í veg fyrir að bleytikerfi (vélin slekkur á sér í nokkrar mínútur í miðjum þvotti) skiptist í tvær aðskildar lotur. Stilltu þetta styttra en bilið á milli þvotta sem þú keyrir hvern á eftir öðrum ef þú vilt að þeir teljist aðskildar lotur. Sjálfgefin gildi hverrar tækjategundar ná yfir dæmigerð hlé innan lotu hjá hverju tæki.",
       "label": "Lágm. slökkubil"
     },
     "min_power": {
@@ -1191,8 +1189,8 @@
       "label": "Lágmarksafl"
     },
     "ml_training_enabled": {
-      "doc": "Skoðaðu endurskoðaða lotur þínar reglulega yfir nótt og fínstilltu módelin að þessari tilteknu vél. Breytingu er aðeins haldið þegar hún skorar raunverulega betur á úthaldslotum, þannig að þetta getur aðeins hjálpað eða verið óbreytt - aldrei dregið til baka.",
-      "label": "Læra frá þessar vél"
+      "doc": "Rýnir reglulega, að næturlagi, í loturnar sem þú hefur yfirfarið og fínstillir líkönin að þessari tilteknu vél. Breyting er aðeins geymd ef hún skorar í raun betur á lotum sem haldið var utan við þjálfunina, svo þetta getur aðeins hjálpað eða haldist óbreytt - aldrei versnað.",
+      "label": "Læra af þessari vél"
     },
     "ml_training_hour": {
       "doc": "Staðbundinn klukkutími dags (0-23) til að gera fínstillingu á einni nóttu. Veldu rólegan tíma eins og 2 (02:00).",
@@ -1211,7 +1209,7 @@
       "label": "Nafn tækis"
     },
     "no_update_active_timeout": {
-      "doc": "Ef engar afluppfærslur berast í svona langan tíma á meðan hún er í gangi, gerðu ráð fyrir að innstungan hafi dottið úr sambandi og þvingað til að stöðva til að forðast uppvakningahring. Sjálfgefin 600 s gerir ráð fyrir skýja- eða möskvatöf.",
+      "doc": "Ef engar afluppfærslur berast svona lengi á meðan lota er í gangi gerir WashData ráð fyrir að innstungan hafi dottið út af netinu og stöðvar lotuna, svo hún haldist ekki opin endalaust. Sjálfgefið gildi, 600 s, gefur svigrúm fyrir töf í skýjaþjónustu eða möskvaneti.",
       "label": "Engin-uppfærsla-tímamark"
     },
     "notify_before_end_minutes": {
@@ -1219,7 +1217,7 @@
       "label": "Forlokaviðvörun"
     },
     "notify_channel": {
-      "doc": "Nafn Android tilkynningarásar fyrir upphaf/bein skilaboð (stýrir hljóði á hverja rás og forgang í farsímaforritinu). Blank notar sjálfgefið fylgiforrit.",
+      "doc": "Heiti Android-tilkynningarásar fyrir upphafsskilaboð og skilaboð í beinni (stýrir hljóði og forgangi hverrar rásar í farsímaforritinu). Autt notar sjálfgefna rás fylgiforritsins.",
       "label": "Android rás (ræsing/bein)"
     },
     "notify_cycle_timers": {
@@ -1227,7 +1225,7 @@
       "label": "Lotuklukka"
     },
     "notify_finish_channel": {
-      "doc": "Nafn Android tilkynningarásar fyrir lokaskilaboðin. Blank endurnotar upphafs-/beinarásina.",
+      "doc": "Heiti Android-tilkynningarásar fyrir lokaskilaboðin. Autt notar sömu rás og upphafsskilaboð og skilaboð í beinni.",
       "label": "Android rás (lok)"
     },
     "notify_finish_message": {
@@ -1235,7 +1233,7 @@
       "label": "Lokaskilaboð"
     },
     "notify_finish_services": {
-      "doc": "tilkynna.* þjónustu kallað þegar lotu lýkur. Bættu við einu við hvert markmið; skildu eftir tómt fyrir tilkynningu um að ekki sé lokið.",
+      "doc": "notify.* tilkynningaþjónustur sem kallað er á þegar lotu lýkur. Bættu við einni fyrir hvern viðtakanda; skildu eftir autt til að sleppa lokatilkynningu.",
       "label": "Lokaþjónustur"
     },
     "notify_fire_events": {
@@ -1251,7 +1249,7 @@
       "label": "Nota beina tímamæling"
     },
     "notify_live_interval_seconds": {
-      "doc": "Hversu oft tilkynningar um framvindu í beinni eru endurnýjaðar á meðan hringrás er í gangi.",
+      "doc": "Hversu oft framvindutilkynningar í beinni eru uppfærðar á meðan lota er í gangi.",
       "label": "Bein uppfærsluabil"
     },
     "notify_live_overrun_percent": {
@@ -1259,7 +1257,7 @@
       "label": "Bein yfirkeyrð % áður en viðvörun"
     },
     "notify_live_services": {
-      "doc": "tilkynna.* þjónustu kallað á lifandi framvinduuppfærslur á meðan hringrás keyrir. Skildu eftir autt til að slökkva á tilkynningum um framvindu í beinni.",
+      "doc": "notify.* tilkynningaþjónustur sem kallað er á til að senda framvinduuppfærslur í beinni á meðan lota er í gangi. Skildu eftir autt til að slökkva á framvindutilkynningum í beinni.",
       "label": "Beinar framfaraþjónustur"
     },
     "notify_only_when_home": {
@@ -1283,11 +1281,11 @@
       "label": "Ræsingarskilaboð"
     },
     "notify_start_services": {
-      "doc": "tilkynna.* þjónustu sem hringt er í þegar hringrás hefst. Bættu við einu við hvert markmið (sími, mælaborð osfrv.); skildu eftir tómt fyrir engin byrjunartilkynning.",
+      "doc": "notify.* tilkynningaþjónustur sem kallað er á þegar lota hefst. Bættu við einni fyrir hvern viðtakanda (sími, mælaborð o.s.frv.); skildu eftir autt til að sleppa upphafstilkynningu.",
       "label": "Ræsingarþjónustur"
     },
     "notify_timeout_seconds": {
-      "doc": "Hunsaðu tilkynninguna sjálfkrafa eftir þessar margar sekúndur (á kerfum sem styðja hana). 0 geymir það þar til henni er vísað frá handvirkt.",
+      "doc": "Fjarlægir tilkynninguna sjálfkrafa eftir svona margar sekúndur (á tækjum sem styðja það). 0 heldur henni þar til hún er fjarlægð handvirkt.",
       "label": "Sjálfvirk lokun eftir"
     },
     "notify_title": {
@@ -1303,11 +1301,11 @@
       "label": "Endurtaka þar til losað"
     },
     "off_delay": {
-      "doc": "Tími til að bíða eftir að kraftur minnkar áður en hringrásinni er lokið. Ef straumur fer aftur innan þessa glugga heldur hringrásin óaðfinnanlega áfram - þetta brúar hlé á milli þvottastiga. Uppþvottavélar eru með langa þurrkunarfasa (slökkt á slökkt í 20-60 mín) þannig að slökkvunartöfin verður að fara yfir það til að halda öllum þvotti+þurrkum sem einni lotu.",
-      "label": "Slökkviðráð"
+      "doc": "Biðtími frá því að aflið fellur þar til lotan telst lokin. Ef aflið kemur aftur innan þessa tíma heldur lotan áfram óslitið - þetta brúar hlé á milli þvottastiga. Í uppþvottavélum tekur þurrkunin langan tíma (ekkert afl í 20-60 mín), svo slökkvitöfin þarf að vera lengri en hún til að þvottur og þurrkun teljist ein lota.",
+      "label": "Slökkvitöf"
     },
     "pause_cuts_power": {
-      "doc": "Þegar gert er hlé á lotu skaltu einnig slökkva á Switch Entity fyrir neðan. Aðeins fyrir tæki þar sem hægt er að skera úr klóinu á öruggan hátt í miðjum lotu.",
+      "doc": "Þegar gert er hlé á lotu er einnig slökkt á Rofaeiningunni hér fyrir neðan. Aðeins fyrir tæki þar sem óhætt er að rjúfa strauminn í miðri lotu.",
       "label": "Hlé slær einnig af straum (með rofa)"
     },
     "power_off_delay": {
@@ -1315,27 +1313,23 @@
       "label": "Slökkunartöf"
     },
     "power_off_threshold_w": {
-      "doc": "Valfrjáls aflbyggð greining á slökkun. Þegar gildið er yfir 0 telst tækið slökkt og staðan fer aftur í Slökkt um leið og lotu er lokið og aflið helst undir þessu marki alla Slökkunartöfina. Hafðu á 0 til að slökkva á þessu (sjálfgefið). Stilltu það yfir raunverulegt slökkt-núllstig og undir Stöðvunarþröskuld og undir biðstöðunotkun tækisins í stöðunni lokið-en-kveikt; ef það er ekki undir Stöðvunarþröskuldi er það hunsað. Þegar kveikt er á því kemur það í stað framfaraendurstillingartafarinnar við að fara aftur í Slökkt, þannig að tæki sem er búið helst í Lokið/Hreint þar til raunverulega er slökkt á því.",
+      "doc": "Valfrjáls aflbyggð greining á slökkun. Þegar gildið er yfir 0 telst tækið slökkt og staðan fer aftur í Slökkt um leið og lotu er lokið og aflið helst undir þessu marki alla Slökkunartöfina. Hafðu á 0 til að slökkva á þessu (sjálfgefið). Stilltu það yfir raunverulegt slökkt-núllstig og undir Stöðvunarþröskuld og undir biðstöðunotkun tækisins í stöðunni lokið-en-kveikt; ef það er ekki undir Stöðvunarþröskuldi er það hunsað. Þegar kveikt er á því kemur það í stað Tafar á endurstillingu framvindu við að fara aftur í Slökkt, þannig að tæki sem er búið helst í Lokið/Hreint þar til raunverulega er slökkt á því.",
       "label": "Slökkunarþröskuldur"
     },
     "power_sensor": {
-      "doc": "Skynjaraeiningin tilkynnir um lifandi afl í vöttum fyrir þetta tæki (t.d. sensor.washer_power). Öll hringrásargreining byggist á þessu merki.",
+      "doc": "Skynjaraeiningin sem gefur upp núverandi afl tækisins í vöttum (t.d. sensor.washer_power). Öll lotugreining byggist á þessu merki.",
       "label": "Aflskynjari"
     },
-    "profile_duration_tolerance": {
-      "doc": "+/- bandið í kringum meðallengd prófíls sem notuð er við samsvörun. 0,25 þýðir að 60 mín prófíl passar við 45-75 mín lotur.",
-      "label": "Þolinmæði lotulendar sniðs"
-    },
     "profile_match_interval": {
-      "doc": "Hversu oft á að reyna prófílsamsvörun meðan á hlaupi stendur. Sjálfgefin 300 s (5 mínútur) jafnvægi skynjunarhraða og CPU.",
+      "doc": "Hversu oft reynt er að finna samsvarandi snið á meðan lota er í gangi. Sjálfgefið gildi, 300 s (5 mínútur), er málamiðlun milli greiningarhraða og örgjörvaálags.",
       "label": "Samsvarabil"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "Hámarks hringrásarlengd miðað við sniðið. 1.3 þýðir að hringrás verður að vera undir 130% af lengd prófílsins til að passa.",
+      "doc": "Hámarkslengd lotu miðað við sniðið. 1,3 þýðir að lota verður að vera styttri en 130% af lengd sniðsins til að passa.",
       "label": "Hám. lengdarhlutfall"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "Lágmarks hringrásarlengd miðað við sniðið. 0,9 þýðir að hringrás verður að vera að minnsta kosti 90% af lengd prófílsins til að passa.",
+      "doc": "Lágmarkslengd lotu miðað við sniðið. 0,9 þýðir að lota verður að vera að minnsta kosti 90% af lengd sniðsins til að passa.",
       "label": "Lágm. lengdarhlutfall"
     },
     "profile_match_threshold": {
@@ -1355,12 +1349,12 @@
       "label": "Geymd aflspor (ómerkt)"
     },
     "progress_reset_delay": {
-      "doc": "Eftir að hafa lokið, haltu framvindu við 100% í þetta lengi svo Lokið sé sýnilegt á mælaborðum áður en þú endurstillir í aðgerðalaus.",
-      "label": "Framfaraendurstillingðráð"
+      "doc": "Eftir að lotu lýkur er framvindu haldið í 100% svona lengi, svo Lokið sjáist á mælaborðum áður en staðan fer aftur í Aðgerðarlaus.",
+      "label": "Töf á endurstillingu framvindu"
     },
     "pump_stuck_duration": {
-      "doc": "Sekúndur sem dæla gæti keyrt samfellt áður en hún er merkt sem hugsanlega föst (kveikir dælutilvikinu sem festist).",
-      "label": "Fastri dælu-lengd"
+      "doc": "Hve margar sekúndur dæla má ganga samfellt áður en hún er merkt sem hugsanlega föst (sendir atburðinn um fasta dælu).",
+      "label": "Tímamörk fastrar dælu"
     },
     "sampling_interval": {
       "doc": "Lágmarkstími milli unninna mælinga. Mælingu sem berst fyrr en þetta eftir þá síðustu er sleppt (lágum mælingum meðan á lotu stendur er alltaf haldið), svo stilltu þetta á raunverulegt tilkynningabil innstungunnar eða lægra: hærra gildi hendir aðeins mælingum. WashData leggur ekki til þetta gildi, því það eina sem hún getur mælt er bilið sem eftir stendur eftir að þessi stilling hefur þegar hent mælingum.",
@@ -1374,16 +1368,12 @@
       "doc": "Hversu langt inn í væntanlega lengd samsvaraða kerfisins lota þarf að vera komin áður en snjöll lokun má ljúka henni snemma þegar aflið fellur. Væntanlega lengdin er meðaltal kerfisins, þannig að á tækjum þar sem keyrslutími er mjög breytilegur - þvottavélar með köldu inntaksvatni að vetri á móti heitu að sumri, þurrkarar með rakaskynjara, álagsháð kerfi - ljúka um það bil helmingur allra keyrslna styttri en það meðaltal og fá aldrei hina hröðu lokun, heldur ljúka fyrst mínútum síðar með vara-tímamörkunum. Lækkaðu þetta gildi (t.d. 0,85) á slíkum vélum svo að snemmbúna lokunin virkist samt; hækkaðu það í átt að 1,0 til að vera varkárari. Skildu eftir autt fyrir sjálfgefið gildi (0,98, eða 0,99 fyrir uppþvottavélar). Hún getur aðeins lokið lotu fyrr, aldrei síðar, og virkist aldrei við óljósa eða óörugga samsvörun.",
       "label": "Hlutfall snjallrar lokunar"
     },
-    "smoothing_window": {
-      "doc": "Hversu mikið hráorkumerkið er sléttað. Low (2) er móttækilegur en hávær; hár (5) sléttir toppa en bætir við töf.",
-      "label": "Jöfnunargluggi"
-    },
     "start_duration_threshold": {
       "doc": "Krafturinn verður að vera fyrir ofan upphafsþröskuldinn svona lengi til að staðfesta raunverulega byrjun, sem kemur í veg fyrir að kveikja/slökkva á sekúndubroti geti hafið lotu.",
       "label": "Ræsingarlengd"
     },
     "start_energy_threshold": {
-      "doc": "Orka (afl x tími) sem heimilistækið verður að eyða áður en það er í gangi. Stuttur aflmikill toppur hefur mjög litla orku og er hunsuð, sem kemur í veg fyrir rangræsingar.",
+      "doc": "Orka (afl x tími) sem tækið þarf að nota áður en það fer í stöðuna Í gangi. Stuttur afltoppur ber mjög litla orku og er hunsaður, sem kemur í veg fyrir rangar ræsingar.",
       "label": "Ræsingaorka"
     },
     "start_threshold_w": {
@@ -1391,15 +1381,15 @@
       "label": "Ræsingarþröskuldur"
     },
     "stop_threshold_w": {
-      "doc": "Afl verður að falla niður fyrir þetta stig áður en niðurtalning frá töf hefst. Stilltu það undir Start Threshold - bilið á milli þeirra er hysteresis bandið sem kemur í veg fyrir flökt. Ef stillt er of hátt, ræsa lágt afl fasar (skolunartímar, hrukkuvörn) ranglega af stað lokaröðinni.",
+      "doc": "Aflið verður að falla niður fyrir þetta gildi áður en niðurtalning slökkvitafar hefst. Stilltu það undir Ræsingarþröskuldi - bilið á milli þeirra kemur í veg fyrir að staðan flökti fram og til baka. Sé það stillt of hátt geta lágaflsfasar (skolunarhlé, hrukkuvörn) ranglega sett lokaferlið af stað.",
       "label": "Stöðvunarþröskuldur"
     },
     "switch_entity": {
-      "doc": "Valfrjáls rofi slökkt á hléi og aftur kveikt á þegar haldið er áfram, notaður ásamt „Hlé slekkur líka á rafmagni“.",
+      "doc": "Valfrjáls rofi sem slökkt er á við hlé og kveikt aftur á þegar haldið er áfram, notaður ásamt „Hlé slær einnig af straum (með rofa)“.",
       "label": "Rofaeining"
     },
     "watchdog_interval": {
-      "doc": "Hversu oft bakgrunnsvaktin athugar hvort skynjarar hafi verið stöðvaðir og liðinn tími. Sjálfgefið 30 s.",
+      "doc": "Hversu oft bakgrunnsgæslan athugar hvort skynjarar hafi hætt að senda og hvort tímamörk séu útrunnin. Sjálfgefið 30 s.",
       "label": "Gæsluabil"
     },
     "notify_milestone_message": {
@@ -1439,11 +1429,11 @@
     },
     "power_profile_interval_min": {
       "label": "Aflaprófíl-bil",
-      "doc": "Fötustærð fyrir eigindið power_profile á prófílskynjaraskynjara (flatt fylki meðalwattsgilda á hólf sem notast af ytri skipuleggjendum eins og EMHASS og tibber_prices). Minni fötur halda stuttum aflgöllum skörpum; stærri fötur jafna út ferilinn. Sjálfgefið 15 mín. Eingöngu til birtingar; hefur engin áhrif á greiningu."
+      "doc": "Lengd hvers tímabils í eigindinu power_profile á skynjara hvers sniðs (flatt fylki með meðalafli í vöttum fyrir hvert tímabil, sem ytri skipuleggjendur á borð við EMHASS og tibber_prices nota). Styttri tímabil halda stuttum afltoppum skörpum; lengri tímabil jafna út ferilinn. Sjálfgefið 15 mín. Reiknað við lestur; hefur engin áhrif á greiningu."
     },
     "notify_live_silent": {
       "label": "Hljóðlausar lifandi uppfærslur",
-      "doc": "Eingöngu iOS. Uppfærir lifandi framvindu hljóðlaust: hver uppfærsla berst án hljóðs eða titrings, með lægri forgangi sem sparar rafhlöðu og iOS getur safnað saman í stutta stund. Fyrsta uppfærsla hringrásar (sú sem ræsir Live Activity) og upphafs- og lokatilkynningarnar láta áfram vita eins og venjulega. Slökktu á þessu til að fá tilkynningu við hverja uppfærslu."
+      "doc": "Eingöngu iOS. Uppfærir lifandi framvindu hljóðlaust: hver uppfærsla berst án hljóðs eða titrings, með lægri forgangi sem sparar rafhlöðu og iOS getur safnað saman í stutta stund. Fyrsta uppfærsla lotu (sú sem ræsir Live Activity) og upphafs- og lokatilkynningarnar láta áfram vita eins og venjulega. Slökktu á þessu til að fá tilkynningu við hverja uppfærslu."
     },
     "notify_live_sticky": {
       "label": "Halda lifandi tilkynningu við snertingu",
@@ -1451,15 +1441,15 @@
     },
     "notify_live_click_action": {
       "label": "Snertimarkmið tilkynningar",
-      "doc": "Hvert snerting á tilkynningu frá þessu tæki opnar, á Android og iOS. Autt opnar WashData pallborðið á þessu tæki. Sláðu inn slóð á mælaborð (t.d. /lovelace/laundry) eða fulla URL-slóð til að senda það annað, eða „none“ fyrir ekkert snertimarkmið."
+      "doc": "Hvað opnast þegar ýtt er á tilkynningu frá þessu tæki, á Android og iOS. Autt opnar WashData-spjaldið á þessu tæki. Sláðu inn slóð á mælaborð (t.d. /lovelace/laundry) eða fulla vefslóð til að opna eitthvað annað, eða „none“ til að ekkert opnist."
     },
     "door_opens_at_end": {
       "label": "Hurð opnast sjálfkrafa í lok",
-      "doc": "Fyrir uppþvottavélar sem spretta hurðinni upp í lok hringsins til þurrkunar (AirDry og svipað). Þegar þetta er virkt setur hurðaropnun á yfirstandandi hring hann ekki í bið að eilífu; ef hurðin helst opin í stillt dvaltími meðhöndlar WashData hringinn sem lokinn. Stutt opnun (að bæta við fat) er hundsuð. Krefst hurðarskynjaraeiningar."
+      "doc": "Fyrir uppþvottavélar sem opna hurðina sjálfar í lok lotu til að þurrka (AirDry og sambærilegt). Þegar þetta er virkt setur opnun hurðarinnar ekki lengur lotu sem er í gangi í bið endalaust; ef hurðin helst opin lengur en dvaltíminn hér að neðan lítur WashData svo á að lotunni sé lokið. Stutt opnun (til að bæta einhverju við) er hunsuð. Krefst Dyraskynjareiningar."
     },
     "door_end_dwell_seconds": {
       "label": "Dvaltími hurðar við lok",
-      "doc": "Hversu lengi hurðin þarf að vera opin áður en WashData lýkur hringnum, þegar \"Hurð opnast sjálfkrafa í lok\" er virkt. Nógu lengi til að hunsa hraða tilbúningu fats (sjálfgefið 60 s), nógu stutt til að ljúka fljótt þegar vél spretter hurðinni upp."
+      "doc": "Hversu lengi hurðin þarf að vera opin áður en WashData lýkur lotunni, þegar „Hurð opnast sjálfkrafa í lok“ er virkt. Nógu lengi til að hunsa stutta opnun til að bæta við diski (sjálfgefið 60 s), nógu stutt til að lotunni ljúki fljótt eftir að vélin opnar hurðina."
     },
     "profile_evidence_sources": {
       "label": "Lotur sem móta kerfi",
@@ -1661,7 +1651,7 @@
       "standby_floor": "Sérhver nýleg lota dró enn {idle}W þegar henni lauk, þannig að þröskuldur undir því getur aldrei séð að tækið slökkni. Haldið yfir því; {cycles} hreinar lotur í yfirlitinu hafa aldrei gert hlé undir því í meira en {pause}s.",
       "thr_batch": "Haldið rétt yfir lægsta virka afli við p05 yfir {cycles} lotur ({p05}W) svo að ræsing náist eins snemma og hægt er og stöðvunarþröskuldurinn haldist undir lægsta gangafli vélarinnar.",
       "watchdog": "Haldið eins lágu og óhætt er (rétt yfir p95-uppfærslubilinu {p95}s og að minnsta kosti 2x sýnatökubilinu {median}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana.",
-      "end_energy_floor": "Hækkað upp í lágmarkið sem Stöðvunarþröskuldur ({stop} W) yfir Slökkviðráð ({off_delay} s) felur í sér; fyrir neðan það getur lotan aðeins endað eftir varaleið.",
+      "end_energy_floor": "Hækkað upp í lágmarkið sem Stöðvunarþröskuldur ({stop} W) yfir Slökkvitöf ({off_delay} s) felur í sér; fyrir neðan það getur lotan aðeins endað eftir varaleið.",
       "max_duration_ratio_default": "Aftur í sjálfgefið gildi: lægra hámark hafnar réttu kerfi í hvert sinn sem keyrsla er lengri en venjulega.",
       "min_duration_ratio_default": "Aftur í sjálfgefið gildi: hærra lágmark kemur í veg fyrir að lota í gangi þekkist fyrr en hún er vel á veg komin."
     },

@@ -711,7 +711,9 @@
         "import_wizard": "Importo - zgjidh të dhënat",
         "history_import": "Importo historikun e fuqisë",
         "apply_suggestions_title": "Apliko sugjerimet",
-        "apply_suggestions_msg": "Të ndryshohen këto {n} cilësime? Integrimi ringarkohet pas ruajtjes."
+        "apply_suggestions_msg": "Të ndryshohen këto {n} cilësime? Integrimi ringarkohet pas ruajtjes.",
+        "discard_settings_title": "Të hidhen poshtë ndryshimet e paruajtura?",
+        "discard_settings_msg": "Ndryshime të paruajtura të cilësimeve: {n}. Të dilet nga Cilësimet dhe të hidhen poshtë?"
     },
     "msg": {
         "pg_canvas_empty3": "Zgjidhni një cikël më sipër dhe shtypni Ekzekuto për ta simuluar. Pastaj kaloni kursorin për të lexuar vlerat, rrëshqitni ose zmadhoni me dy gishta dhe tërhiqni për të lëvizur.",
@@ -797,7 +799,7 @@
         "pg_restart_note": "Rinisni Home Assistant për të aktivizuar mjetet e simulimit.",
         "phase_catalog_intro": "Segmente të emërtuara të një cikli (Para-larje, Ngrohje, Centrifugim…). Caktojini ato profilit nga paneli i kontrollit.",
         "phase_ranges_intro": "Intervalët e fazës (minuta nga fillimi i ciklit) mbivendosur mbi kurbën mesatare. Redakto vlerat për pamje paraprake live.",
-        "playground_intro": "Një zonë e sigurt provash për të riluajtur ciklet e kaluara me cilësime të ndryshme, për të krahasuar dy konfigurime krah për krah dhe për të inspektuar si përputhet një cikël me një profil. Asgjë këtu nuk i ndryshon të dhënat tuaja aktive derisa ta aplikoni shprehimisht.",
+        "playground_intro": "Eksploroni si ndikojnë cilësimet në zbulim mbi të dhënat reale të cikleve tuaja. Asgjë këtu nuk e ndryshon konfigurimin aktiv derisa ta aplikoni shprehimisht.",
         "prefs_personal": "Këto vlejnë vetëm për llogarinë tuaj të Asistentit në Shtëpi.",
         "process_history_hint": "Riekzekutoni përputhjen në të gjitha ciklet e ruajtura, rifreskoni sugjerimet e sintonizimit, ristërvitni modelet ML (nëse janë aktivizuara), rillogaritni koston e cikleve sipas çmimeve të regjistruara të energjisë dhe rillogaritni shëndetin e cikleve. Ekzekutoni këtë pas një grupi rishikimesh.",
         "profile_deleted": "Profili u fshi",
@@ -1112,10 +1114,6 @@
             "doc": "Gjatë numërimit jashtë vonesës, energjia e akumuluar (vat x kohë) krahasohet me këtë prag. Nëse tejkalohet, numërimi mbrapsht rivendoset - duke i mbajtur bishtat kundër rrudhave dhe tharjen e lavastoviljes të lidhura me ciklin në vend që t'i shkurtoni ato. Rriteni nëse ciklet përfundojnë shumë herët gjatë ftohjes; uleni nëse zbulimi është i ngadaltë.",
             "label": "Energjia e fundit"
         },
-        "end_repeat_count": {
-            "doc": "Numri i leximeve të njëpasnjëshme nën pragun e ndalimit të kërkuar para përfundimit të ciklit. 1 është e mirë për shumicën e prizave. Rriteni në 2-3 nëse spina juaj inteligjente raporton herë pas here një mostër të rreme me zero në mes të ciklit dhe ciklet tuaja mbarojnë para kohe.",
-            "label": "Numri i përsëritjeve të fundit"
-        },
         "energy_price_entity": {
             "doc": "Sensori me çmimin aktual të energjisë elektrike për kWh (p.sh. një tarifë dinamike). Duhet të jetë një çmim, jo entiteti i fuqisë ose i energjisë së vetë prizës: ka përparësi ndaj çmimit statik më poshtë, prandaj një numërues kWh i vendosur këtu e faturon çdo cikël me leximin e matësit në vend të tarifës suaj. Kur është aktive Kosto e ponderuar sipas kohës, çdo cikël faturohet me çmimin në fuqi në çdo çast që ai punoi; përndryshe mbi të ngrihet çmimi në fuqi kur ai përfundoi.",
             "label": "Entiteta e çmimit të energjisë"
@@ -1292,10 +1290,6 @@
             "doc": "Subjekti sensor që raporton fuqinë e drejtpërdrejtë në vat për këtë pajisje (p.sh. sensor.washer_power). I gjithë zbulimi i ciklit bazohet në këtë sinjal.",
             "label": "Sensori i fuqisë"
         },
-        "profile_duration_tolerance": {
-            "doc": "Brezi +/- rreth një kohëzgjatjeje mesatare të profilit të përdorur gjatë përputhjes. 0.25 do të thotë që një profil 60 min përputhet me ciklet 45-75 min.",
-            "label": "Toleranca e kohëzgjatjes së profilit"
-        },
         "profile_match_interval": {
             "doc": "Sa shpesh të provoni përputhjen e profilit gjatë një cikli vrapimi. 300 s (5 minuta) e parazgjedhur balancon shpejtësinë e zbulimit dhe CPU.",
             "label": "Intervali i përputhjes"
@@ -1339,10 +1333,6 @@
         "save_debug_traces": {
             "doc": "Ruani gjurmën e plotë të fuqisë dhe të dhënat e korrigjimit që përputhen për çdo cikël. I dobishëm për zgjidhjen e problemeve, por rrit madhësinë e ruajtjes.",
             "label": "Ruaj gjurmët e korrigjimit"
-        },
-        "smoothing_window": {
-            "doc": "Sa zbutet sinjali i fuqisë së papërpunuar. I ulët (2) është i përgjegjshëm, por i zhurmshëm; i lartë (5) zbut pikat, por shton vonesën.",
-            "label": "Dritarja e zbutjes"
         },
         "start_duration_threshold": {
             "doc": "Fuqia duhet të qëndrojë mbi pragun e fillimit për një kohë të gjatë për të konfirmuar një fillim të vërtetë, duke parandaluar kyçet e ndezjes/fikjes së sekondës nga fillimi i një cikli.",

@@ -74,6 +74,14 @@ else
   else fail "WS type artifacts are out of date" "$PY devtools/generate_ws_types.py"; fi
 fi
 
+# Hand-written docs cannot be regenerated, so --fix does not apply: symbol anchors,
+# the constants CLAUDE.md quotes, register id uniqueness, the em dash ratchet (audit F9).
+if DOCS_OUT=$("$PY" devtools/docs_check.py 2>&1); then pass "docs match the code (anchors, constants, register ids, em dashes)"
+else
+  fail "docs drifted from the code" "$PY devtools/docs_check.py"
+  grep '^FAIL' <<<"$DOCS_OUT" | head -12 | sed 's/^/        | /'
+fi
+
 # ── 3. version agreement ─────────────────────────────────────────────────────
 # manifest.json is what HACS and Home Assistant report; the CHANGELOG's top
 # heading is what humans read; the tag is what GitHub publishes. All three

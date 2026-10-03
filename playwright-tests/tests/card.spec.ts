@@ -241,3 +241,25 @@ test('detail: a foreign integration\'s entry id is never used as the token', asy
   await mount(page, { entity: 'sensor.wm_state', layout: 'detail', buttons: ['open_panel'] }, data);
   expect(await clickOpenPanel(page)).toEqual(['/ha-washdata?device=Washing%20Machine']);
 });
+
+test('tile: keyboard Enter opens more-info like a tap (audit UI-17)', async ({ page }) => {
+  await mount(page, { entity: 'sensor.wm_state', layout: 'tile' }, RUN);
+  const got = await page.evaluate(() => {
+    const card = (window as any).__card;
+    const el = card.shadowRoot.querySelector('[role="button"]');
+    if (!el) return { focusable: false, fired: null };
+    let fired: string | null = null;
+    card.addEventListener('hass-more-info', (ev: any) => { fired = ev.detail && ev.detail.entityId; });
+    el.focus();
+    el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    return { focusable: el.tabIndex === 0, fired };
+  });
+  expect(got.focusable).toBe(true);
+  expect(got.fired).toBe('sensor.wm_state');
+});
+
+test('tile: tap_action none leaves the card out of the tab order', async ({ page }) => {
+  await mount(page, { entity: 'sensor.wm_state', layout: 'tile', tap_action: { action: 'none' } }, RUN);
+  const n = await page.evaluate(() => (window as any).__card.shadowRoot.querySelectorAll('[role="button"]').length);
+  expect(n).toBe(0);
+});

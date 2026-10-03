@@ -15,3 +15,7 @@ pytest-homeassistant-custom-component==0.13.316
 
 # The one runtime dependency, needed so the numeric pipeline imports under test.
 numpy>=1.24
+
+# Property-based tests (tests/test_detector_properties.py: DST, time-shift and
+# reporting-cadence invariance of the cycle detector). Test-time only.
+hypothesis>=6.100

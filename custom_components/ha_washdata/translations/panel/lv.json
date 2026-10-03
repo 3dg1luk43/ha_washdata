@@ -716,7 +716,9 @@
     "import_wizard": "Imports - izvēlēties datus",
     "history_import": "Jaudas vēstures importēšana",
     "apply_suggestions_title": "Lietot ieteikumus",
-    "apply_suggestions_msg": "Mainīt šos iestatījumus ({n})? Pēc saglabāšanas integrācija tiks ielādēta no jauna."
+    "apply_suggestions_msg": "Mainīt šos iestatījumus ({n})? Pēc saglabāšanas integrācija tiks ielādēta no jauna.",
+    "discard_settings_title": "Izmest nesaglabātās izmaiņas?",
+    "discard_settings_msg": "Nesaglabātas iestatījumu izmaiņas: {n}. Pamest Iestatījumus un izmest tās?"
   },
   "msg": {
     "pg_canvas_empty3": "Izvēlieties ciklu augšā un nospiediet Palaist, lai to simulētu. Pēc tam turiet kursoru virs, lai nolasītu vērtības, ritiniet vai tuviniet ar diviem pirkstiem un velciet, lai pārvietotu.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Restartējiet Home Assistant, lai iespējotu simulācijas rīkus.",
     "phase_catalog_intro": "Nosauktie cikla segmenti (priekšmazgāšana, sildīšana, izgriešana…). Piešķiriet tos profilam no tā vadības paneļa.",
     "phase_ranges_intro": "Fāžu diapazoni (minūtes no cikla sākuma), kas pārklāti ar vidējo līkni. Rediģējiet vērtības, lai priekšskatītu tiešraidē.",
-    "playground_intro": "Droša izmēģinājumu vide, kur atkārtoti palaist iepriekšējos ciklus ar citiem iestatījumiem, salīdzināt divas konfigurācijas blakus un pārbaudīt, kā cikls saskan ar profilu. Nekas šeit nemaina jūsu reālos datus, kamēr to nepārprotami nelietojat.",
+    "playground_intro": "Izpētiet, kā iestatījumi ietekmē noteikšanu, izmantojot jūsu reālos ciklu datus. Nekas šeit nemaina aktīvo konfigurāciju, kamēr to nepārprotami nepiemērojat.",
     "prefs_personal": "Tie attiecas tikai uz jūsu Home Assistant kontu.",
     "process_history_hint": "Atkārtoti palaist atbilstību visiem saglabātajiem cikliem, atjaunināt precizēšanas ieteikumus, pārtrenēt ML modeļus (ja iespējots), pārrēķināt ciklu izmaksas pēc reģistrētajām enerģijas cenām un pārrēķināt ciklu veselību. Palaidiet to pēc vairāku ciklu pārskatīšanas.",
     "profile_deleted": "Profils dzēsts",
@@ -1121,10 +1123,6 @@
       "doc": "Izslēgšanas aizkaves atpakaļskaitīšanas laikā uzkrātā enerģija (vati x laiks) tiek salīdzināta ar šo slieksni. Ja tas tiek pārsniegts, atpakaļskaitīšanas laiks tiek atiestatīts – ciklam tiek pievienotas pretburzīšanās un trauku mazgājamās mašīnas žāvēšanas astes, nevis saīsinātas. Paceliet to, ja atdzišanas laikā cikli beidzas pārāk agri; samaziniet to, ja noteikšana ir gausa.",
       "label": "Beigu enerģija"
     },
-    "end_repeat_count": {
-      "doc": "Pirms cikla beigām nepieciešamo secīgo rādījumu skaits zem apstāšanās sliekšņa. 1 ir piemērots lielākajai daļai spraudņu. Palieliniet vērtību līdz 2–3, ja viedā spraudnis cikla vidū laiku pa laikam ziņo par nepatiesu nulli un cikli beidzas priekšlaicīgi.",
-      "label": "Beigu atkārtojumu skaits"
-    },
     "energy_price_entity": {
       "doc": "Sensors ar pašreizējo elektroenerģijas cenu par kWh (piemēram, dinamisks tarifs). Tai jābūt cenai, nevis pašas kontaktligzdas jaudas vai enerģijas entītijai: tam ir prioritāte pār zemāk norādīto statisko cenu, tāpēc šeit norādīts kWh skaitītājs katru ciklu aprēķina pēc skaitītāja rādījuma, nevis pēc jūsu tarifa. Ja ieslēgtas Laikā svērtās izmaksas, katrs cikls tiek rēķināts pēc cenas, kas bija spēkā katrā tā darbības brīdī; pretējā gadījumā tam tiek fiksēta cena, kas bija spēkā tā beigās.",
       "label": "Enerģijas cenas entītija"
@@ -1301,10 +1299,6 @@
       "doc": "Sensora entītija, kas ziņo par šīs ierīces jaudu vatos (piem., sensor.washer_power). Visa cikla noteikšana ir balstīta uz šo signālu.",
       "label": "Jaudas sensors"
     },
-    "profile_duration_tolerance": {
-      "doc": "+/- josla ap profila vidējo ilgumu, ko izmanto atbilstības noteikšanas laikā. 0,25 nozīmē, ka 60 minūšu profils atbilst 45–75 minūšu cikliem.",
-      "label": "Profila ilguma tolerance"
-    },
     "profile_match_interval": {
       "doc": "Cik bieži ir jāmēģina izveidot profila saskaņošanu skriešanas cikla laikā. Noklusējuma 300 s (5 minūtes) līdzsvaro noteikšanas ātrumu un centrālo procesoru.",
       "label": "Atbilstības intervāls"
@@ -1352,10 +1346,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Cik tālu atbilstošās programmas paredzētajā ilgumā ciklam jābūt nonākušam, pirms vieda pabeigšana drīkst to pabeigt agrāk, kad jauda samazinās. Paredzētais ilgums ir programmas vidējais rādītājs, tāpēc ierīcēs, kuru darbības laiks stipri mainās - veļas mašīnas ar aukstu ziemas un siltu vasaras ieplūstošo ūdeni, žāvētāji ar sensora žāvēšanu, no slodzes atkarīgas programmas - apmēram puse no visiem cikliem beidzas īsāk par šo vidējo un nekad nesaņem ātro pabeigšanu, beidzoties tikai caur rezerves noildzi, dažas minūtes vēlāk. Samaziniet to (piem., 0,85) šajās mašīnās, lai agrā pabeigšana tomēr nostrādātu; palieliniet to virzienā uz 1,0, lai būtu piesardzīgāks. Atstājiet tukšu noklusējuma vērtībai (0,98 vai 0,99 trauku mazgājamām mašīnām). Tā var pabeigt ciklu tikai agrāk, nekad ne vēlāk, un nekad nenostrādā pie neskaidras vai zemas pārliecības atbilstības.",
       "label": "Viedas pabeigšanas attiecība"
-    },
-    "smoothing_window": {
-      "doc": "Cik daudz neapstrādāts jaudas signāls ir izlīdzināts. Zems (2) ir atsaucīgs, bet trokšņains; augsts (5) izlīdzina tapas, bet palielina nobīdi.",
-      "label": "Izlīdzināšanas logs"
     },
     "start_duration_threshold": {
       "doc": "Jaudai ir jāpaliek virs sākuma sliekšņa tik ilgi, lai apstiprinātu īstu palaišanu, neļaujot sekundes ieslēgšanas/izslēgšanas slēdžiem sākt ciklu.",

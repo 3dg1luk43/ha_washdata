@@ -51,6 +51,7 @@ node devtools/build_panel.mjs --check   # verify only; non-zero if stale
 devtools/release_check.sh               # release preflight (what CI runs)
 devtools/release_check.sh --fix         # regenerate artifacts instead of failing
 devtools/release_check.sh --full --tag v0.5.6
+python3 devtools/docs_check.py          # doc anchors/constants/register ids/em-dash ratchet vs code
 
 python3 devtools/eval.py run --mode fast     # LOO matcher accuracy on the SHIPPED path (audit F1)
 python3 devtools/eval.py compare BASE.json NEW.json   # paired deltas, McNemar, guarded metrics

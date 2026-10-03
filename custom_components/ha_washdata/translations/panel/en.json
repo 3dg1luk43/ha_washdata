@@ -723,7 +723,9 @@
     "wipe_all_ok": "Wipe Everything",
     "wipe_all_title": "Wipe All Data",
     "apply_suggestions_title": "Apply suggestions",
-    "apply_suggestions_msg": "Change these {n} settings? The integration reloads after saving."
+    "apply_suggestions_msg": "Change these {n} settings? The integration reloads after saving.",
+    "discard_settings_title": "Discard unsaved changes?",
+    "discard_settings_msg": "{n} setting change(s) are not saved yet. Leave Settings and discard them?"
   },
   "msg": {
     "adopt_settings_hint": "Overwrite this device's detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.",
@@ -870,7 +872,7 @@
     "phase_catalog_intro": "Named segments of a cycle (Pre-wash, Heating, Spin…). Assign them to a profile from its control panel.",
     "phase_ranges_intro": "Phase ranges (minutes from cycle start) overlaid on the average curve. Edit values to preview live.",
     "pick_brand_first": "Pick an appliance brand first.",
-    "playground_intro": "A safe sandbox to replay past cycles with different settings, compare two setups side by side, and inspect how a cycle aligns to a profile. Nothing here changes your live data until you explicitly apply it.",
+    "playground_intro": "Explore how settings affect detection on your real cycle data. Nothing here changes live configuration until you explicitly apply it.",
     "prefs_personal": "These apply to your Home Assistant account only.",
     "process_history_hint": "Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), recost cycles against your recorded energy prices, and recompute cycle health. Run this after a batch of reviews.",
     "profile_deleted": "Profile deleted",
@@ -1157,10 +1159,6 @@
       "doc": "During the off-delay countdown, accumulated energy (watts x time) is compared to this threshold. If exceeded, the countdown resets - keeping anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Raise it if cycles end too early during cool-down; lower it if detection is sluggish.",
       "label": "End Energy"
     },
-    "end_repeat_count": {
-      "doc": "Number of consecutive below-stop-threshold readings required before the cycle ends. 1 is fine for most plugs. Raise to 2-3 if your smart plug occasionally reports a false-zero sample mid-cycle and your cycles are ending prematurely.",
-      "label": "End Repeat Count"
-    },
     "energy_price_dynamic": {
       "doc": "Charge each cycle at the price in force at every moment it ran, instead of the single price current when it finished. Only applies to a price entity (a static price cannot move). Needs no extra setup: the price is tracked live while the cycle runs, and Process History under Diagnostics recosts older cycles from the recorder. Off = the classic behaviour, one price frozen at the end.",
       "label": "Time-Weighted Cost"
@@ -1385,10 +1383,6 @@
       "doc": "The sensor entity reporting live power in watts for this appliance (e.g. sensor.washer_power). All cycle detection is based on this signal.",
       "label": "Power Sensor"
     },
-    "profile_duration_tolerance": {
-      "doc": "The +/- band around a profile average duration used during matching. 0.25 means a 60 min profile matches 45-75 min cycles.",
-      "label": "Profile Duration Tolerance"
-    },
     "profile_evidence_sources": {
       "label": "Cycles that shape a program",
       "doc": "Which cycles are used to build each program's power curve, and to match a finished cycle against it. Unticking a kind stops it shaping your programs without deleting anything - the cycles stay in your Cycles list and can still be labelled or removed. Useful if you do not trust imported data. Statistics are unaffected: they always count only the cycles this machine actually ran. Unticking everything is ignored, since a program with no cycles behind it could never match."
@@ -1443,10 +1437,6 @@
     "smart_termination_duration_ratio": {
       "doc": "How far into the matched program's expected duration a cycle must be before Smart Termination may end it early once power drops. The expected duration is the program's average, so on appliances whose runtime varies a lot - washers on cold winter vs warm summer inlet water, sensor-dry dryers, load-dependent programs - about half of all runs finish shorter than that average and never get the fast finish, ending only via the fallback timeout minutes late. Lower this (e.g. 0.85) on those machines so the early finish still fires; raise it toward 1.0 to be more conservative. Leave empty for the default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never fires on an ambiguous or low-confidence match.",
       "label": "Smart Termination Ratio"
-    },
-    "smoothing_window": {
-      "doc": "How much the raw power signal is smoothed. Low (2) is responsive but noisy; high (5) smooths spikes but adds lag.",
-      "label": "Smoothing Window"
     },
     "start_duration_threshold": {
       "doc": "Power must stay above the start threshold this long to confirm a real start, preventing split-second on/off toggles from starting a cycle.",

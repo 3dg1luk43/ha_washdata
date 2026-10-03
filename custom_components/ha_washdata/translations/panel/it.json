@@ -663,7 +663,9 @@
     "import_wizard": "Importa - scegli i dati",
     "history_import": "Importa lo storico di potenza",
     "apply_suggestions_title": "Applica suggerimenti",
-    "apply_suggestions_msg": "Modificare queste {n} impostazioni? L'integrazione si ricarica dopo il salvataggio."
+    "apply_suggestions_msg": "Modificare queste {n} impostazioni? L'integrazione si ricarica dopo il salvataggio.",
+    "discard_settings_title": "Scartare le modifiche non salvate?",
+    "discard_settings_msg": "Modifiche alle impostazioni non salvate: {n}. Uscire da Impostazioni e scartarle?"
   },
   "msg": {
     "pg_canvas_empty3": "Scegli un ciclo qui sopra e premi Esegui per simularlo. Poi passa il puntatore per leggere i valori, scorri o pizzica per ingrandire e trascina per spostarti.",
@@ -749,7 +751,7 @@
     "pg_restart_note": "Riavvia Home Assistant per abilitare gli strumenti di simulazione.",
     "phase_catalog_intro": "Segmenti con nome di un ciclo (Prelavaggio, Riscaldamento, Centrifuga...). Assegnali a un profilo dal suo pannello di controllo.",
     "phase_ranges_intro": "Intervalli di fasi (minuti dall'inizio del ciclo) sovrapposti alla curva media. Modifica i valori per visualizzare l'anteprima dal vivo.",
-    "playground_intro": "Un ambiente sicuro per riprodurre i cicli passati con impostazioni diverse, confrontare due configurazioni affiancate ed esaminare come un ciclo si allinea a un profilo. Nulla qui modifica i tuoi dati reali finché non lo applichi esplicitamente.",
+    "playground_intro": "Scopri come le impostazioni influiscono sul rilevamento usando i dati reali dei tuoi cicli. Nulla qui modifica la configurazione attiva finché non applichi esplicitamente le modifiche.",
     "prefs_personal": "Questi si applicano solo al tuo account Home Assistant.",
     "process_history_hint": "Riesegui la corrispondenza su tutti i cicli memorizzati, aggiorna i suggerimenti di ottimizzazione, riaddestra i modelli ML (se abilitati), ricalcola il costo dei cicli in base ai prezzi dell'energia registrati e ricalcola lo stato dei cicli. Da eseguire dopo una serie di revisioni.",
     "profile_deleted": "Profilo eliminato",
@@ -1089,10 +1091,6 @@
       "doc": "Durante il conto alla rovescia del ritardo di spegnimento, l'energia accumulata (watt x tempo) viene confrontata con questa soglia. Se superato, il conto alla rovescia si azzera, mantenendo i capi antipiega e i residui di asciugatura della lavastoviglie attaccati al ciclo invece di tagliarli. Alzarlo se i cicli terminano troppo presto durante il raffreddamento; abbassarlo se il rilevamento è lento.",
       "label": "Energia fine ciclo"
     },
-    "end_repeat_count": {
-      "doc": "Numero di letture consecutive al di sotto della soglia di arresto richieste prima della fine del ciclo. 1 va bene per la maggior parte delle prese. Aumenta a 2-3 se la tua presa intelligente segnala occasionalmente un campione di falsi zero a metà ciclo e i tuoi cicli terminano prematuramente.",
-      "label": "Conteggio ripetizioni fine"
-    },
     "energy_price_entity": {
       "doc": "Sensore con il prezzo attuale dell'elettricità per kWh (ad esempio una tariffa dinamica). Deve essere un prezzo, non l'entità di potenza o di energia della presa stessa: ha la precedenza sul prezzo statico riportato di seguito, quindi un contatore di kWh inserito qui addebita ogni ciclo alla lettura del contatore invece che alla tua tariffa. Con Costo ponderato nel tempo attivo, ogni ciclo viene addebitato al prezzo in vigore in ogni momento in cui è stato eseguito; altrimenti gli viene fissato il prezzo in vigore al termine.",
       "label": "Entità prezzo energia"
@@ -1269,10 +1267,6 @@
       "doc": "L'entità sensore che segnala la potenza in tempo reale in watt per questo elettrodomestico (ad esempio sensor.washer_power). Tutto il rilevamento del ciclo si basa su questo segnale.",
       "label": "Sensore di potenza"
     },
-    "profile_duration_tolerance": {
-      "doc": "La fascia +/- attorno alla durata media del profilo utilizzata durante la corrispondenza. 0,25 significa che un profilo di 60 minuti corrisponde a cicli di 45-75 minuti.",
-      "label": "Tolleranza durata profilo"
-    },
     "profile_match_interval": {
       "doc": "La frequenza con cui tentare la corrispondenza del profilo durante un ciclo di esecuzione. Il valore predefinito di 300 s (5 minuti) bilancia la velocità di rilevamento e la CPU.",
       "label": "Intervallo di corrispondenza"
@@ -1320,10 +1314,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Quanto un ciclo deve essere avanzato nella durata prevista del programma corrispondente prima che la Terminazione intelligente possa concluderlo in anticipo una volta che la potenza cala. La durata prevista è la media del programma, quindi sugli apparecchi il cui tempo di funzionamento varia molto - lavatrici a seconda dell'acqua di ingresso fredda d'inverno o tiepida d'estate, asciugatrici con sensore di umidità, programmi che dipendono dal carico - circa la metà dei cicli termina prima di quella media e non ottiene mai la conclusione rapida, terminando solo tramite il timeout di riserva con minuti di ritardo. Abbassa questo valore (ad es. 0,85) su quelle macchine affinché la conclusione anticipata si attivi comunque; alzalo verso 1,0 per essere più prudente. Lascia vuoto per il valore predefinito (0,98, o 0,99 per le lavastoviglie). Può solo concludere un ciclo prima, mai dopo, e non si attiva mai su una corrispondenza ambigua o a bassa affidabilità.",
       "label": "Rapporto di terminazione intelligente"
-    },
-    "smoothing_window": {
-      "doc": "Quanto viene attenuato il segnale di potenza grezza. Basso (2) è reattivo ma rumoroso; alto (5) attenua i picchi ma aggiunge ritardo.",
-      "label": "Finestra di smussamento"
     },
     "start_duration_threshold": {
       "doc": "La potenza deve rimanere al di sopra della soglia di avvio per questo tempo per confermare un avvio reale, impedendo che gli interruttori di accensione/spegnimento in frazioni di secondo avviino un ciclo.",

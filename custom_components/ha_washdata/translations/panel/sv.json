@@ -716,7 +716,9 @@
     "import_wizard": "Import - välj data",
     "history_import": "Importera effekthistorik",
     "apply_suggestions_title": "Tillämpa förslag",
-    "apply_suggestions_msg": "Ändra dessa {n} inställningar? Integrationen laddas om efter att du har sparat."
+    "apply_suggestions_msg": "Ändra dessa {n} inställningar? Integrationen laddas om efter att du har sparat.",
+    "discard_settings_title": "Kasta osparade ändringar?",
+    "discard_settings_msg": "Osparade inställningsändringar: {n}. Lämna Inställningar och kasta dem?"
   },
   "msg": {
     "pg_canvas_empty3": "Välj en cykel ovan och tryck på Kör för att simulera den. Hovra sedan för att avläsa värden, skrolla eller nyp för att zooma och dra för att panorera.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Starta om Home Assistant för att aktivera simuleringsverktygen.",
     "phase_catalog_intro": "Namngivna segment av en cykel (Förhandstvätt, Uppvärmning, Centrifugering…). Tilldela dem till en profil från dess kontrollpanel.",
     "phase_ranges_intro": "Fasintervall (minuter från cykelstart) överlagda på genomsnittskurvan. Redigera värden för förhandsvisning live.",
-    "playground_intro": "En säker testyta för att spela upp tidigare cykler med olika inställningar, jämföra två konfigurationer sida vid sida och granska hur en cykel matchar en profil. Inget här ändrar dina aktiva data förrän du uttryckligen tillämpar det.",
+    "playground_intro": "Utforska hur inställningar påverkar detekteringen på dina verkliga cykeldata. Inget här ändrar den aktiva konfigurationen förrän du uttryckligen tillämpar det.",
     "prefs_personal": "Dessa gäller endast ditt Home Assistant-konto.",
     "process_history_hint": "Kör matchningen igen på alla lagrade cykler, uppdatera justeringsförslagen, träna om ML-modellerna (om aktiverat), räkna om cyklernas kostnad mot dina registrerade energipriser och beräkna om cyklernas hälsa. Kör detta efter en omgång granskningar.",
     "profile_deleted": "Profil borttagen",
@@ -1142,10 +1144,6 @@
       "doc": "Under nedräkningen av frånslagsfördröjningen jämförs ackumulerad energi (watt x tid) med denna tröskel. Om den överskrids återställs nedräkningen - bibehåller skrynkelskydd och diskmaskinstorkande svansar på cykeln istället för att korta dem. Höj den om cyklerna slutar för tidigt under nedkylning; sänk den om detekteringen är trög.",
       "label": "Slutenergi"
     },
-    "end_repeat_count": {
-      "doc": "Antalet på varandra följande avläsningar under stopptröskelvärdet som krävs innan cykeln avslutas. 1 är bra för de flesta pluggar. Höj till 2-3 om din smarta kontakt då och då rapporterar ett prov med falskt noll i mitten av cykeln och dina cykler slutar i förtid.",
-      "label": "Antal slutrepetitioner"
-    },
     "energy_price_entity": {
       "doc": "Sensor med aktuellt elpris per kWh (t.ex. en dynamisk tariff). Måste vara ett pris, inte uttagets egen effekt- eller energientitet: det har företräde framför det statiska priset nedan, så en kWh-räknare här debiterar varje cykel till mätarställningen i stället för till din tariff. Med Tidsviktad kostnad på debiteras varje cykel till det pris som gällde i varje ögonblick den kördes; annars fryses det pris som gällde när den var klar fast på den.",
       "label": "Energiprisentitet"
@@ -1322,10 +1320,6 @@
       "doc": "Sensorenheten rapporterar levande effekt i watt för denna apparat (t.ex. sensor.washer_power). All cykeldetektering baseras på denna signal.",
       "label": "Effektsensor"
     },
-    "profile_duration_tolerance": {
-      "doc": "+/- bandet runt en profils genomsnittliga varaktighet som används under matchning. 0,25 betyder att en 60 min profil matchar 45-75 min cykler.",
-      "label": "Profilvaraktighetstolerans"
-    },
     "profile_match_interval": {
       "doc": "Hur ofta man ska försöka profilmatcha under en löpcykel. Standard 300 s (5 minuter) balanserar detekteringshastighet och CPU.",
       "label": "Matchningsintervall"
@@ -1373,10 +1367,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Hur långt in i det matchade programmets förväntade varaktighet en cykel måste vara innan smart avslutning får avsluta den i förtid när effekten sjunker. Den förväntade varaktigheten är programmets genomsnitt, så på apparater vars körtid varierar mycket - tvättmaskiner med kallt vinter- kontra varmt sommarinloppsvatten, torktumlare med fuktsensor, lastberoende program - avslutas ungefär hälften av alla körningar kortare än det genomsnittet och får aldrig den snabba avslutningen, utan avslutas först minuter senare via reserv-timeouten. Sänk detta värde (t.ex. 0,85) på sådana maskiner så att den tidiga avslutningen ändå utlöses; höj det mot 1,0 för att vara mer försiktig. Lämna tomt för standardvärdet (0,98, eller 0,99 för diskmaskiner). Den kan bara avsluta en cykel tidigare, aldrig senare, och utlöses aldrig vid en tvetydig eller osäker matchning.",
       "label": "Kvot för smart avslutning"
-    },
-    "smoothing_window": {
-      "doc": "Hur mycket råeffektsignalen utjämnas. Låg (2) är lyhörd men bullrig; hög (5) jämnar ut spikar men lägger till eftersläpning.",
-      "label": "Utjämningsfönster"
     },
     "start_duration_threshold": {
       "doc": "Strömmen måste ligga över starttröskeln så här länge för att bekräfta en riktig start, vilket förhindrar att på/av-växlar på en sekund startar en cykel.",

@@ -663,7 +663,9 @@
     "import_wizard": "Importă - alege datele",
     "history_import": "Importați istoricul de putere",
     "apply_suggestions_title": "Aplicați sugestiile",
-    "apply_suggestions_msg": "Modificați aceste {n} setări? Integrarea se reîncarcă după salvare."
+    "apply_suggestions_msg": "Modificați aceste {n} setări? Integrarea se reîncarcă după salvare.",
+    "discard_settings_title": "Renunțați la modificările nesalvate?",
+    "discard_settings_msg": "Modificări nesalvate ale setărilor: {n}. Părăsiți Setări și renunțați la ele?"
   },
   "msg": {
     "pg_canvas_empty3": "Alege un ciclu de mai sus și apasă Rulează pentru a-l simula. Apoi treci cu cursorul pentru a citi valorile, derulează sau folosește două degete pentru a mări și trage pentru a te deplasa.",
@@ -749,7 +751,7 @@
     "pg_restart_note": "Reporniți Home Assistant pentru a activa instrumentele de simulare.",
     "phase_catalog_intro": "Segmente denumite ale unui ciclu (Pre-spălare, Încălzire, Centrifugare…). Atribuiți-le unui profil din panoul de control al acestuia.",
     "phase_ranges_intro": "Intervale de fază (minute de la pornirea ciclului) suprapuse pe curba medie. Editați valorile pentru a previzualiza în timp real.",
-    "playground_intro": "Un spațiu sigur de testare pentru a reda ciclurile anterioare cu setări diferite, a compara două configurații una lângă alta și a inspecta cum se aliniază un ciclu la un profil. Nimic de aici nu vă modifică datele active până când nu aplicați în mod explicit.",
+    "playground_intro": "Explorați modul în care setările influențează detectarea pe datele reale ale ciclurilor dumneavoastră. Nimic de aici nu modifică configurația activă până când nu aplicați explicit modificările.",
     "prefs_personal": "Se aplică numai contului dvs. Home Assistant.",
     "process_history_hint": "Reexecutați potrivirea pe toate ciclurile stocate, actualizați sugestiile de reglaj, reantrenați modelele ML (dacă sunt activate), recalculați costul ciclurilor pe baza prețurilor energiei înregistrate și recalculați starea ciclurilor. Rulați după un lot de revizuiri.",
     "profile_deleted": "Profil șters",
@@ -1068,10 +1070,6 @@
       "doc": "În timpul numărătoarei inverse pentru oprire, energia acumulată (wați x timp) este comparată cu acest prag. Dacă este depășită, numărătoarea inversă se resetează - menținând robinetele anti-șifonare și cozile de uscare a mașinii de spălat vase atașate la ciclu în loc să le tăiați scurt. Ridicați-l dacă ciclurile se termină prea devreme în timpul răcirii; coborâți-l dacă detectarea este lentă.",
       "label": "Energia de Sfârșit"
     },
-    "end_repeat_count": {
-      "doc": "Numărul de citiri consecutive sub pragul de oprire necesare înainte de încheierea ciclului. 1 este în regulă pentru majoritatea prizei. Ridicați la 2-3 dacă mufa dvs. inteligentă raportează ocazional un eșantion fals zero la jumătatea ciclului și ciclurile dumneavoastră se termină prematur.",
-      "label": "Număr de Repetări la Sfârșit"
-    },
     "energy_price_entity": {
       "doc": "Senzor cu prețul curent al energiei electrice pe kWh (de exemplu, un tarif dinamic). Trebuie să fie un preț, nu entitatea de putere sau de energie a prizei: are prioritate față de prețul static de mai jos, așa că un contor de kWh pus aici taxează fiecare ciclu la valoarea contorului în loc de tariful dumneavoastră. Cu Cost Ponderat în Timp activat, fiecare ciclu este taxat la prețul în vigoare în fiecare moment în care a rulat; altfel, i se fixează prețul în vigoare când s-a terminat.",
       "label": "Entitate Preț Energie"
@@ -1248,10 +1246,6 @@
       "doc": "Entitatea senzor care raportează puterea activă în wați pentru acest aparat (de exemplu, sensor.washer_power). Detectarea tuturor ciclurilor se bazează pe acest semnal.",
       "label": "Senzor de Putere"
     },
-    "profile_duration_tolerance": {
-      "doc": "Banda +/- din jurul unei durate medii de profil utilizată în timpul potrivirii. 0,25 înseamnă că un profil de 60 de minute se potrivește cu cicluri de 45-75 de minute.",
-      "label": "Toleranță Durată Profil"
-    },
     "profile_match_interval": {
       "doc": "Cât de des să încercați potrivirea profilului în timpul unui ciclu de rulare. Implicit 300 s (5 minute) echilibrează viteza de detectare și CPU.",
       "label": "Interval de Potrivire"
@@ -1299,10 +1293,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Cât de mult trebuie să fi avansat un ciclu în durata așteptată a programului corespunzător înainte ca Terminarea inteligentă să îl poată încheia mai devreme odată ce puterea scade. Durata așteptată este media programului, așa că pe aparatele al căror timp de funcționare variază mult - mașini de spălat în funcție de apa de alimentare rece iarna sau caldă vara, uscătoare cu senzor de umiditate, programe care depind de încărcătură - aproximativ jumătate dintre rulări se termină mai devreme decât acea medie și nu beneficiază niciodată de încheierea rapidă, terminându-se doar prin expirarea de rezervă cu minute întârziere. Reduceți această valoare (de ex. 0,85) pe acele mașini pentru ca încheierea anticipată să se declanșeze totuși; măriți-o spre 1,0 pentru a fi mai conservator. Lăsați gol pentru valoarea implicită (0,98 sau 0,99 pentru mașinile de spălat vase). Poate doar să încheie un ciclu mai devreme, niciodată mai târziu, și nu se declanșează niciodată la o potrivire ambiguă sau cu încredere scăzută.",
       "label": "Raport de terminare inteligentă"
-    },
-    "smoothing_window": {
-      "doc": "Cât de mult este netezit semnalul de putere brută. Scăzut (2) este receptiv, dar zgomotos; ridicat (5) netezește vârfurile, dar adaugă lag.",
-      "label": "Fereastră de Netezire"
     },
     "start_duration_threshold": {
       "doc": "Puterea trebuie să rămână peste pragul de pornire atât de mult pentru a confirma o pornire reală, împiedicând comutatoarele de pornire/oprire în fracțiuni de secundă să înceapă un ciclu.",

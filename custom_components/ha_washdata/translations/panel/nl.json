@@ -716,7 +716,9 @@
     "import_wizard": "Import - gegevens kiezen",
     "history_import": "Vermogensgeschiedenis importeren",
     "apply_suggestions_title": "Suggesties toepassen",
-    "apply_suggestions_msg": "Deze {n} instellingen wijzigen? De integratie wordt na het opslaan herladen."
+    "apply_suggestions_msg": "Deze {n} instellingen wijzigen? De integratie wordt na het opslaan herladen.",
+    "discard_settings_title": "Niet-opgeslagen wijzigingen weggooien?",
+    "discard_settings_msg": "Niet-opgeslagen instellingswijzigingen: {n}. Instellingen verlaten en de wijzigingen weggooien?"
   },
   "msg": {
     "pg_canvas_empty3": "Kies hierboven een cyclus en druk op Uitvoeren om deze te simuleren. Beweeg vervolgens de muis erover om waarden af te lezen, scroll of knijp om te zoomen en sleep om te verschuiven.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Start Home Assistant opnieuw op om de simulatiehulpmiddelen in te schakelen.",
     "phase_catalog_intro": "Benoemde segmenten van een cyclus (Voorwas, Verwarming, Centrifugeren…). Wijs ze toe aan een profiel vanuit het configuratiescherm.",
     "phase_ranges_intro": "Fasebereiken (minuten vanaf het begin van de cyclus) over de gemiddelde curve heen. Bewerk waarden om live een voorbeeld te bekijken.",
-    "playground_intro": "Een veilige speeltuin om eerdere cycli met andere instellingen opnieuw af te spelen, twee configuraties naast elkaar te vergelijken en te bekijken hoe een cyclus wordt uitgelijnd met een profiel. Niets hier verandert je actieve gegevens totdat je het expliciet toepast.",
+    "playground_intro": "Ontdek hoe instellingen de detectie beïnvloeden op je echte cyclusgegevens. Niets hier verandert de actieve configuratie totdat je het expliciet toepast.",
     "prefs_personal": "Deze zijn alleen van toepassing op uw Home Assistant-account.",
     "process_history_hint": "Voer de matching opnieuw uit op alle opgeslagen cycli, vernieuw de afstemmingssuggesties, train de ML-modellen opnieuw (indien ingeschakeld), herbereken de kosten van de cycli op basis van uw geregistreerde energieprijzen en herbereken de cyclusgezondheid. Uitvoeren na een reeks beoordelingen.",
     "profile_deleted": "Profiel verwijderd",
@@ -1142,10 +1144,6 @@
       "doc": "Tijdens het aftellen van de uitschakelvertraging wordt de verzamelde energie (watt x tijd) vergeleken met deze drempel. Bij overschrijding wordt het aftellen gereset, waardoor anti-kreukdroogtrommels en vaatwasserdroogstukken aan het programma blijven gekoppeld in plaats van ze kort te knippen. Verhoog deze als de cycli tijdens het afkoelen te vroeg eindigen; verlaag deze als de detectie traag is.",
       "label": "Eindenergie"
     },
-    "end_repeat_count": {
-      "doc": "Aantal opeenvolgende metingen onder de stopdrempel vereist voordat de cyclus eindigt. 1 is prima voor de meeste stekkers. Verhoog naar 2-3 als uw slimme stekker halverwege de cyclus af en toe een vals-nulmonster rapporteert en uw cycli voortijdig eindigen.",
-      "label": "Eindherhalingsaantal"
-    },
     "energy_price_entity": {
       "doc": "Sensor met de actuele elektriciteitsprijs per kWh (bijvoorbeeld een dynamisch tarief). Moet een prijs zijn, niet de vermogens- of energie-entiteit van de stekker zelf: hij heeft voorrang op de onderstaande statische prijs, dus een kWh-teller hier rekent elke cyclus af tegen de meterstand in plaats van tegen je tarief. Met Tijdgewogen kosten aan wordt elke cyclus afgerekend tegen de prijs die op elk moment van de cyclus gold; anders wordt de prijs die gold toen hij klaar was erop bevroren.",
       "label": "Energieprijsentiteit"
@@ -1322,10 +1320,6 @@
       "doc": "De sensorentiteit die het live vermogen in watt voor dit apparaat rapporteert (bijvoorbeeld sensor.washer_power). Alle cyclusdetectie is gebaseerd op dit signaal.",
       "label": "Vermogenssensor"
     },
-    "profile_duration_tolerance": {
-      "doc": "De +/- band rond een gemiddelde profielduur die wordt gebruikt tijdens het matchen. 0,25 betekent dat een profiel van 60 minuten overeenkomt met cycli van 45-75 minuten.",
-      "label": "Profiel duurtoleratie"
-    },
     "profile_match_interval": {
       "doc": "Hoe vaak profielmatching moet worden geprobeerd tijdens een hardloopcyclus. Standaard 300 s (5 minuten) balanceert detectiesnelheid en CPU.",
       "label": "Afstemmingsinterval"
@@ -1373,10 +1367,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Hoe ver een cyclus in de verwachte duur van het herkende programma moet zijn voordat de slimme beëindiging hem vroegtijdig mag afsluiten zodra het vermogen daalt. De verwachte duur is het gemiddelde van het programma, dus bij apparaten waarvan de looptijd sterk varieert - wasmachines met koud toevoerwater in de winter versus warm in de zomer, drogers met vochtsensor, belastingafhankelijke programma's - eindigt ongeveer de helft van alle draaien korter dan dat gemiddelde en krijgt nooit de snelle beëindiging, maar eindigt pas minuten later via de fallback-time-out. Verlaag deze waarde (bijv. 0,85) op zulke machines zodat de vroegtijdige beëindiging toch wordt geactiveerd; verhoog hem richting 1,0 om voorzichtiger te zijn. Laat leeg voor de standaard (0,98, of 0,99 voor vaatwassers). Hij kan een cyclus alleen eerder beëindigen, nooit later, en wordt nooit geactiveerd bij een dubbelzinnige of onzekere herkenning.",
       "label": "Verhouding slimme beëindiging"
-    },
-    "smoothing_window": {
-      "doc": "Hoeveel het ruwe stroomsignaal wordt afgevlakt. Laag (2) is responsief maar luidruchtig; hoog (5) verzacht pieken maar voegt vertraging toe.",
-      "label": "Afvlakkingsvenster"
     },
     "start_duration_threshold": {
       "doc": "Het vermogen moet zo lang boven de startdrempel blijven om een echte start te bevestigen, waardoor wordt voorkomen dat aan/uit-schakelaars van een fractie van een seconde een cyclus starten.",

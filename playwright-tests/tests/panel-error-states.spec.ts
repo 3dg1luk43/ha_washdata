@@ -28,12 +28,15 @@ test('a failed device list shows an error with Retry, not "no devices"', async (
 
 test('a failed get_options shows Retry instead of loading forever', async ({ page }) => {
   await page.goto('/');
-  await bootPanel(page);
-  await page.evaluate(() => (window as any).__set_error('ha_washdata/get_options'));
+  // get_options fails from boot on: the backend always advertises
+  // store_online_available, so a successful boot already primes the options and
+  // only a failure that starts at boot can leave Settings with nothing to show.
+  const options = buildHandlers({})['ha_washdata/get_options'];
+  await bootPanel(page, { 'ha_washdata/get_options': null });
   await page.locator('button.wd-tab[data-tab="settings"]').click();
   const retry = page.locator('.wd-error-state [data-action="retry-tab"]');
   await expect(retry).toBeVisible({ timeout: 8_000 });
-  await page.evaluate(() => { delete (window as any).__ws_errors['ha_washdata/get_options']; });
+  await page.evaluate((o: any) => (window as any).__set_handler('ha_washdata/get_options', o), options);
   await retry.click();
   await expect(page.locator('input[data-opt="name"]').first()).toBeVisible({ timeout: 8_000 });
 });

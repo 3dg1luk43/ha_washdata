@@ -716,7 +716,9 @@
     "import_wizard": "Tuonti - valitse tiedot",
     "history_import": "Tuo tehohistoria",
     "apply_suggestions_title": "Ota ehdotukset käyttöön",
-    "apply_suggestions_msg": "Muutetaanko nämä asetukset ({n})? Integraatio ladataan uudelleen tallennuksen jälkeen."
+    "apply_suggestions_msg": "Muutetaanko nämä asetukset ({n})? Integraatio ladataan uudelleen tallennuksen jälkeen.",
+    "discard_settings_title": "Hävitetäänkö tallentamattomat muutokset?",
+    "discard_settings_msg": "Tallentamattomat asetusmuutokset: {n}. Poistutaanko Asetuksista ja hävitetäänkö muutokset?"
   },
   "msg": {
     "pg_canvas_empty3": "Valitse jakso yltä ja paina Suorita simuloidaksesi sen. Vie sitten osoitin päälle lukeaksesi arvoja, vieritä tai nipistä zoomataksesi ja vedä panoroidaksesi.",
@@ -802,7 +804,7 @@
     "pg_restart_note": "Käynnistä Home Assistant uudelleen ottaaksesi simulointityökalut käyttöön.",
     "phase_catalog_intro": "Jakson nimetyt osat (esipesu, lämmitys, linkous…). Määritä ne profiiliin sen ohjauspaneelista.",
     "phase_ranges_intro": "Vaihealueet (minuutit syklin alusta) peittyvät keskiarvokäyrällä. Muokkaa arvoja esikatsellaksesi livenä.",
-    "playground_intro": "Turvallinen testialue aiempien syklien toistamiseen eri asetuksilla, kahden kokoonpanon vertailuun rinnakkain ja sen tarkasteluun, miten sykli kohdistuu profiiliin. Mikään tässä ei muuta live-tietojasi ennen kuin otat sen nimenomaisesti käyttöön.",
+    "playground_intro": "Tutki, miten asetukset vaikuttavat tunnistukseen todellisten syklitietojesi perusteella. Mikään tässä ei muuta käytössä olevaa kokoonpanoa ennen kuin otat sen nimenomaisesti käyttöön.",
     "prefs_personal": "Nämä koskevat vain Home Assistant -tiliäsi.",
     "process_history_hint": "Suorita täsmäytys uudelleen kaikille tallennetuille sykleille, päivitä virityssuositukset, kouluta ML-mallit uudelleen (jos käytössä), laske syklien kustannukset uudelleen tallennettujen energiahintojen mukaan ja laske syklien kunto uudelleen. Suorita tämä arviointierän jälkeen.",
     "profile_deleted": "Profiili poistettu",
@@ -1142,10 +1144,6 @@
       "doc": "Off-viivelaskennan aikana kertynyttä energiaa (wattia x aika) verrataan tähän kynnykseen. Jos se ylittyy, lähtölaskenta nollautuu – rypistymisenestorummut ja astianpesukoneen kuivauspäät pysyvät kiinni syklissä sen sijaan, että niitä leikattaisiin lyhyiksi. Nosta sitä, jos jaksot päättyvät liian aikaisin jäähdytyksen aikana; alenna sitä, jos tunnistus on hidasta.",
       "label": "Lopetuksen energiakynnys"
     },
-    "end_repeat_count": {
-      "doc": "Peräkkäisten pysäytyskynnyksen alapuolella olevien lukemien määrä, joka vaaditaan ennen syklin päättymistä. 1 sopii useimpiin pistokkeisiin. Nosta arvoon 2–3, jos älypistoke ilmoittaa toisinaan väärän nollan näytteen kesken jakson ja syklisi päättyvät ennenaikaisesti.",
-      "label": "Lopetuksen toistomäärä"
-    },
     "energy_price_entity": {
       "doc": "Anturi nykyisellä sähkön hinnalla kWh (esim. dynaaminen tariffi). Sen on oltava hinta, ei pistokkeen oma teho- tai energiaentiteetti: se on ensisijainen alla olevaan staattiseen hintaan nähden, joten tähän valittu kWh-laskuri veloittaa jokaisesta syklistä mittarin lukeman oman tariffisi sijaan. Kun Aikapainotettu kustannus on käytössä, kukin sykli veloitetaan sillä hinnalla, joka oli voimassa jokaisella sen käyntihetkellä; muuten siihen lukitaan hinta, joka oli voimassa sen päättyessä.",
       "label": "Energiahinnan entiteetti"
@@ -1322,10 +1320,6 @@
       "doc": "Anturientiteetti, joka raportoi tämän laitteen reaaliaikaisen tehon watteina (esim. sensor.washer_power). Kaikki syklin tunnistus perustuu tähän signaaliin.",
       "label": "Tehoanturi"
     },
-    "profile_duration_tolerance": {
-      "doc": "+/- nauha profiilin keskimääräisen keston ympärillä, jota käytetään täsmäämisen aikana. 0,25 tarkoittaa, että 60 minuutin profiili vastaa 45-75 minuutin jaksoja.",
-      "label": "Profiilin kestotoleranssi"
-    },
     "profile_match_interval": {
       "doc": "Kuinka usein profiilin täsmäämistä yritetään juoksujakson aikana. Oletusarvo 300 s (5 minuuttia) tasapainottaa tunnistusnopeuden ja suorittimen.",
       "label": "Täsmäytysväli"
@@ -1373,10 +1367,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Kuinka pitkälle täsmätyn ohjelman odotettuun kestoon syklin on edettävä, ennen kuin älykäs lopetus voi päättää sen ennenaikaisesti tehon pudottua. Odotettu kesto on ohjelman keskiarvo, joten laitteilla, joiden ajoaika vaihtelee paljon - pesukoneet kylmällä talven tulovedellä vs. lämpimällä kesän tulovedellä, anturikuivaavat kuivausrummut, kuormasta riippuvat ohjelmat - noin puolet kaikista ajoista päättyy tätä keskiarvoa lyhyempinä eivätkä koskaan saa nopeaa lopetusta, vaan päättyvät vasta vara-aikakatkaisun kautta minuutteja myöhässä. Laske tätä (esim. 0,85) näissä koneissa, jotta ennenaikainen lopetus silti laukeaa; nosta sitä kohti arvoa 1,0 ollaksesi varovaisempi. Jätä tyhjäksi käyttääksesi oletusta (0,98, tai astianpesukoneilla 0,99). Se voi ainoastaan päättää syklin aiemmin, ei koskaan myöhemmin, eikä koskaan laukea epäselvässä tai matalan varmuuden täsmäyksessä.",
       "label": "Älykkään lopetuksen suhde"
-    },
-    "smoothing_window": {
-      "doc": "Kuinka paljon raakatehosignaali tasoittuu. Matala (2) on herkkä, mutta meluisa; korkea (5) tasoittaa piikkejä, mutta lisää viivettä.",
-      "label": "Tasoitusikkuna"
     },
     "start_duration_threshold": {
       "doc": "Tehon on pysyttävä käynnistyskynnyksen yläpuolella näin kauan varmistaakseen todellisen käynnistyksen, estäen sekunnin osan päälle/pois-kytkimiä käynnistämästä sykliä.",

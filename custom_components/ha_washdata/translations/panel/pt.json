@@ -663,7 +663,9 @@
     "import_wizard": "Importar - escolher dados",
     "history_import": "Importar histórico de potência",
     "apply_suggestions_title": "Aplicar sugestões",
-    "apply_suggestions_msg": "Alterar estas {n} definições? A integração é recarregada depois de guardar."
+    "apply_suggestions_msg": "Alterar estas {n} definições? A integração é recarregada depois de guardar.",
+    "discard_settings_title": "Descartar alterações não guardadas?",
+    "discard_settings_msg": "Alterações de definições não guardadas: {n}. Sair das Definições e descartá-las?"
   },
   "msg": {
     "pg_canvas_empty3": "Escolha um ciclo acima e prima Executar para o simular. Depois passe o cursor para ler os valores, percorra ou use o gesto de pinça para ampliar e arraste para deslocar.",
@@ -749,7 +751,7 @@
     "pg_restart_note": "Reinicie o Home Assistant para ativar as ferramentas de simulação.",
     "phase_catalog_intro": "Segmentos nomeados de um ciclo (Pré-lavagem, Aquecimento, Centrifugação…). Atribua-os a um perfil a partir do seu painel de controlo.",
     "phase_ranges_intro": "Intervalos de fase (minutos desde o início do ciclo) sobrepostos na curva média. Edite os valores para pré-visualizar em tempo real.",
-    "playground_intro": "Um ambiente seguro para reproduzir ciclos anteriores com definições diferentes, comparar duas configurações lado a lado e ver como um ciclo se alinha a um perfil. Nada aqui altera os seus dados ativos até que o aplique explicitamente.",
+    "playground_intro": "Explore como as definições afetam a deteção nos dados reais dos seus ciclos. Nada aqui altera a configuração ativa até que aplique explicitamente as alterações.",
     "prefs_personal": "Aplicam-se apenas à sua conta do Home Assistant.",
     "process_history_hint": "Reexecute a correspondência em todos os ciclos armazenados, atualize as sugestões de ajuste, retreine os modelos ML (se ativados), recalcule o custo dos ciclos com base nos preços de energia registados e recalcule o estado dos ciclos. Execute após um lote de revisões.",
     "profile_deleted": "Perfil eliminado",
@@ -1089,10 +1091,6 @@
       "doc": "Durante a contagem regressiva do atraso de desligamento, a energia acumulada (watts x tempo) é comparada a esse limite. Se excedido, a contagem regressiva é reiniciada - mantendo os rolos anti-rugas e os restos de secagem da máquina de lavar louça presos ao ciclo, em vez de cortá-los. Aumente se os ciclos terminarem muito cedo durante o resfriamento; abaixe-o se a detecção for lenta.",
       "label": "Energia de Fim"
     },
-    "end_repeat_count": {
-      "doc": "Número de leituras consecutivas abaixo do limite de parada necessárias antes do término do ciclo. 1 é adequado para a maioria dos plugues. Aumente para 2-3 se o seu plugue inteligente ocasionalmente relatar uma amostra de falso zero no meio do ciclo e seus ciclos estiverem terminando prematuramente.",
-      "label": "Contagem de Repetições de Fim"
-    },
     "energy_price_entity": {
       "doc": "Sensor com o preço atual da eletricidade por kWh (por exemplo, uma tarifa dinâmica). Tem de ser um preço, não a própria entidade de potência ou de energia da tomada: tem precedência sobre o preço estático abaixo, pelo que um contador de kWh aqui cobra cada ciclo à leitura do contador em vez da sua tarifa. Com o Custo Ponderado no Tempo ativado, cada ciclo é cobrado ao preço em vigor em cada momento em que decorreu; caso contrário, fica-lhe fixado o preço em vigor quando terminou.",
       "label": "Entidade de Preço de Energia"
@@ -1269,10 +1267,6 @@
       "doc": "A entidade do sensor que relata a potência ativa em watts para este aparelho (por exemplo, sensor.washer_power). Toda a detecção de ciclo é baseada neste sinal.",
       "label": "Sensor de Potência"
     },
-    "profile_duration_tolerance": {
-      "doc": "A banda +/- em torno da duração média de um perfil usada durante a correspondência. 0,25 significa que um perfil de 60 minutos corresponde a ciclos de 45 a 75 minutos.",
-      "label": "Tolerância de Duração do Perfil"
-    },
     "profile_match_interval": {
       "doc": "Com que frequência tentar a correspondência de perfil durante um ciclo de execução. O padrão de 300 s (5 minutos) equilibra a velocidade de detecção e a CPU.",
       "label": "Intervalo de Correspondência"
@@ -1320,10 +1314,6 @@
     "smart_termination_duration_ratio": {
       "doc": "Até que ponto um ciclo deve ter avançado na duração esperada do programa correspondente antes de a Terminação inteligente o poder terminar mais cedo assim que a potência cai. A duração esperada é a média do programa, por isso em aparelhos cujo tempo de funcionamento varia muito - máquinas de lavar consoante a água de entrada fria no inverno ou morna no verão, secadores com sensor de humidade, programas que dependem da carga - cerca de metade das execuções termina mais cedo do que essa média e nunca beneficia do fim rápido, terminando apenas através do tempo limite de reserva com minutos de atraso. Reduza este valor (p. ex. 0,85) nessas máquinas para que o fim antecipado continue a disparar; aumente-o para perto de 1,0 para ser mais conservador. Deixe vazio para o valor predefinido (0,98, ou 0,99 para máquinas de lavar louça). Só pode terminar um ciclo mais cedo, nunca mais tarde, e nunca dispara numa correspondência ambígua ou de baixa confiança.",
       "label": "Rácio de terminação inteligente"
-    },
-    "smoothing_window": {
-      "doc": "Quanto o sinal de potência bruta é suavizado. Baixo (2) é responsivo, mas barulhento; alto (5) suaviza os picos, mas adiciona atraso.",
-      "label": "Janela de Suavização"
     },
     "start_duration_threshold": {
       "doc": "A potência deve permanecer acima do Limiar de Início durante este tempo para confirmar uma partida real, evitando que comutações liga/desliga em frações de segundo iniciem um ciclo.",

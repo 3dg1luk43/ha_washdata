@@ -1060,8 +1060,8 @@ class SuggestionEngine:
         self.entry_id = entry_id
         self.profile_store = profile_store
         self.device_type = device_type
-        # Loop-affine config snapshot, refreshed by refresh_options_snapshot()
-        # immediately before an executor dispatch. See _entry_options().
+        # Loop-affine config snapshot, set by for_job() on a per-job copy
+        # before an executor dispatch. See _entry_options().
         self._options_snapshot: dict[str, Any] | None = None
 
     @callback

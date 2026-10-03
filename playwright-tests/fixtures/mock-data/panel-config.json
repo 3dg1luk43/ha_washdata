@@ -1,6 +1,6 @@
 {
   "is_admin": true,
-  "access_level": "full",
+  "user": {"id": "user-admin", "name": "Admin"},
   "prefs": {
     "settings_level": "advanced",
     "onboarding_dismissed": false,
