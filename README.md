@@ -17,7 +17,7 @@ profiles, and estimates completion time using shape-correlation matching.
 
 ## ✨ Features
 
-- **Automatic detection and program matching** - detects cycle start/stop from the power trace and identifies *which program* ran by curve shape, duration, and energy. You teach it your programs once (it never auto-creates profiles); it recognises them thereafter and gives phase-aware time-remaining estimates.
+- **Automatic detection and program matching** - detects cycle start/stop from the power trace and identifies *which program* ran by curve shape, duration, and energy. You teach it your programs once (it never auto-creates profiles); it recognises them thereafter and estimates the time remaining from the matched program's own phases.
 - **Full-screen management panel** - a **WashData** sidebar entry for live status, cycles, profiles, settings, diagnostics, and logs.
 - **Many appliance types** - washing machines, dryers, washer-dryer combos, dishwashers, air fryers, bread makers, and pumps, each with tuned defaults, plus two catch-all buckets you tune yourself: **Other (Advanced)** (full matching and learning) and **Threshold Device** (threshold-only, no matching).
 - **Per-cycle energy and cost** - with a dynamic tariff, each cycle is charged at the price in force at every moment it ran, not the one price current when it finished; a fixed price still works as before. Either way the figure is frozen once the cycle ends, so later price changes don't rewrite history. Per-profile average cost and a lifetime **Energy dashboard** sensor included.
@@ -87,11 +87,6 @@ matcher uses correlation and energy differences to separate them, but:
 - On first run it may pick the wrong variant. Correct it from the **feedback attention card** on Overview.
 - It learns from corrections; 3-5 per variant pair is usually enough.
 - If your machine's draw barely changes between temperatures, pick the program manually from the Program Selector.
-
-> **Phase-aware time remaining (opt-in).** Temperature variants differ mostly in how long they spend
-> *heating*. WashData can budget each stage (heating / wash / spin) separately so the **ETA** stays
-> accurate across variants. Enable **"Use phase-aware time remaining"** in Settings (washing machines
-> and washer-dryers). It only refines the ETA; it never changes which program is matched.
 
 **Washer-dryer combos:** create separate profiles per wash+dry combination. Drying adds so much
 duration and energy that wash-only vs wash+dry is one of the easiest distinctions to make.

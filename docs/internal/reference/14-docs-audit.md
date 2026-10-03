@@ -1,5 +1,9 @@
 # WashData Documentation Audit — 0.5.1 Branch
 
+> **Obsolete (audit 2026-10-02, DOCS).** A one-off 0.5.1 snapshot: its inventory, line
+> counts and stale-doc list no longer match the tree, and its tiered plan was executed.
+> Kept for history; do not use it to judge what is current.
+
 **Audit date:** 2026-07-18  
 **Branch:** 0.5.1 (ahead of main)  
 **Auditor:** automated doc-vs-code cross-check

@@ -258,9 +258,13 @@ async def test_reconfigure_saves_and_aborts_on_valid_input():
         CONF_POWER_SENSOR: "sensor.dryer_power",
         CONF_MIN_POWER: 3.0,
     }
+    flow.async_abort = MagicMock(return_value={"type": "abort"})
     result = await flow.async_step_reconfigure(user_input)
-    assert flow.async_update_reload_and_abort.called
-    call_kwargs = flow.async_update_reload_and_abort.call_args[1]
+    # Update only, no scheduled full reload on top of the listener's in-place one
+    # (audit PLATFORM-15).
+    assert not flow.async_update_reload_and_abort.called
+    flow.async_abort.assert_called_once_with(reason="reconfigure_successful")
+    call_kwargs = flow.hass.config_entries.async_update_entry.call_args[1]
     assert call_kwargs["title"] == "Renamed Washer"
     # After migration 3.6, device_type/power_sensor/min_power live in options, not data.
     assert "data" not in call_kwargs, "reconfigure must not write to entry.data"

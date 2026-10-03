@@ -31,3 +31,11 @@ def test_the_manager_end_guard_provider_is_inert_with_ml_enabled() -> None:
         assert mgr._ml_end_confidence([(0.0, 500.0), (3500.0, 1.0)], 3600.0) is None
     scorer.assert_not_called()
     assert C.ENABLE_ML_END_GUARD is False
+
+
+def test_the_other_harmful_or_inert_consumers_ship_frozen() -> None:
+    """Audit ML-01/02/06/07: early commit (31% wrong), quality gate (0 fires on
+    eligible cycles) and the remaining-time regressor (worse than naive)."""
+    assert C.ENABLE_ML_EARLY_COMMIT is False
+    assert C.ENABLE_ML_QUALITY_GATE is False
+    assert C.ENABLE_ML_REMAINING_TIME is False

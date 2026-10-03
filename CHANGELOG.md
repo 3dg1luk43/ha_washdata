@@ -5,7 +5,7 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.5.8 - Unreleased
+## 0.5.8 - trimming the fat - Unreleased
 
 ### TL;DR
 
@@ -13,12 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Labels come from a match on the whole cycle; matching is more accurate.
 - The program shows sooner; time remaining and projected energy are realistic.
 - No splits or hour-short records across daylight-saving changes.
-- A finished cycle can no longer be reopened and counted twice.
-- Your review answers are never overwritten by Auto-label.
+- A finished cycle can no longer be reopened and counted twice; review answers stay yours.
+- Much less disk and CPU during a cycle; the panel stays smooth on phones.
 - Store downloads are quality-checked, deduplicated and cannot take over your programs.
-- Services respect user permissions; sidebar notifications work again.
-- Suggestions that drifted devices worse are gone; three no-op settings removed.
-- Earlier 0.5.8 fixes: washer and dishwasher end fixes, setting saves, Playground parity.
+- Services validate their input and respect user permissions; sidebar notifications work again.
+- A simpler panel: internals hidden, one suggestion list, fewer review prompts, leaner Playground.
+- Suggestions that drifted devices worse are gone; four no-op settings removed.
+
+### Breaking changes
+
+- **`binary_sensor.<device>_running` stays on for the whole cycle**, through soaks, pauses and the end wait. It used to turn off in each of them; automations that treat "off" as finished now fire only when the cycle is over.
+- **The state sensor no longer has a `samples_recorded` attribute** (it changed on every reading; the debug sensor still has `samples`). **Elapsed time** updates in whole minutes.
+- **Services validate their input**: a value of the wrong type is now a validation error instead of being guessed or crashing, and `export_config`, `import_config` and `trigger_ml_training` are administrator-only.
+- **Store**: publishing, rating and confirming are administrator-only, and adopting a shared setup no longer copies Off Delay, Minimum Off Gap, the power-off settings or the match interval (they depend on the sharer's plug).
+- **Removed settings**: End Repeat Count, Smoothing Window, Profile Duration Tolerance and Phase-aware time remaining. Stored values are ignored.
+- **Removed suggestions**: the confidence thresholds, Sampling Interval, smoothing, start duration, end repeat count and the duration tolerances are no longer suggested.
+- **Experimental ML**: the end guard, early program commit, quality gate and time-remaining model are off even with ML models enabled; the "Calibrated" suggestions and the per-cycle "Cycle health" are gone.
+- **Review queue**: WashData asks you to confirm a cycle only when it could not label it with a clear margin over the next-best program, or for a program's first 2 cycles (was 5). A labelled cycle between 0.6 and 0.9 confidence used to be queued too. "Needs review" lists the cycles waiting for your answer, the same number as the Overview card; interrupted and force-stopped cycles keep their own filters.
+- **Panel moves**: Maintenance is under Cycles, energy price and cost under Settings > Basic, the gear dialog is called Preferences, and low-level tuning (sampling, watchdog, match cadence, start thresholds) is behind "Show internal settings" unless the device has its own value.
+- **Panel removals**: the Playground's matcher weights, presets, idle-termination test and DTW / Envelope-fit view; the Overview "Tools & Data" card; the raw "replace all from JSON" import (the selective import and the `import_config` service remain). Saved Playground presets stay in storage but are no longer shown.
+- **Labels** come from a match on the whole finished cycle, so a cycle can be labelled with a different program than the one shown while it ran.
+- **Projected energy** appears from 10% progress (was 3%).
+- **WebSocket API**: see "For developers" below.
 
 ### Fixes
 
@@ -76,6 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **A resumed wash could end at the next pause, and Stop stored the time after the wash**: the final spin could become a second cycle; Smart Termination ignored a user pause; pressing Stop 30 minutes after a wash ended stored those 30 minutes; and after a restart Smart Termination waited for the timeout.
 
+- **Ratings given from Home Assistant now count in the store**: rating an appliance wrote only your rating, never the totals the store and website show, so it was invisible there. Both now go in one write, as on the website. Opening a shared program's cycles also costs one store read instead of one per cycle: ratings come from the totals on each cycle.
+
 - **Store downloads are checked before they shape your programs**: a shared recording now needs at least 30 readings, no gap over 15 minutes and a plausible length, and a recording you already have under any name is skipped (14% of the community recordings are copies). A downloaded recording no longer becomes the template of a program that has your own cycles; one could cost up to half of a program's correct matches. Adopted settings no longer include another plug's timing (Off Delay, Minimum Off Gap, power-off and match interval), and duration ratios stay within the shipped bounds.
 
 - **Services ignored user permissions**: a read-only user could import or export the whole configuration, including to a public web folder, and the import service replaced this device's power and door sensors with the exporter's. Services now apply the same admin and access checks as the panel.
@@ -86,13 +104,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Smaller fixes**: the cycle counter counted two per cycle on new installs and milestones fired one early; an unlabelled cycle announced "finished None"; a broken imported template could win a match; diagnostics did not redact changelog rows for sensitive settings; 40 panel texts had no translation; every entity was rewritten every 30 seconds and each power reading rebuilt every program's statistics about 40 times.
 
+- **Every minute of every cycle rewrote the whole WashData store**: the in-flight snapshot lived in the main file, 6.7 MB per save and over 1 GB across a 4 hour cycle on a large install, freezing Home Assistant briefly each time and wearing SD cards. It now has its own small file.
+
+- **The panel rebuilt every tab on every refresh**, up to a quarter second with many cycles loaded and over a second on a phone. Only the open tab is built now. A failed load shows an error with Retry instead of "No devices configured yet" or an endless "Loading settings", and a lost connection shows a "Connection lost" note instead of a frozen "Running".
+
+- **Auto-label and "Download this setup" run in the background**, with progress in the header and a cancel button, instead of holding the panel for up to a minute. A download now saves once instead of once per recording.
+
+- **A restart re-sent cycle reminders**: "Add softener" arrived twice, and an auto-pause timer could pause the cycle (and cut its power) again. A reminder held by quiet hours is no longer delivered after the cycle finished.
+
+- **The Store search reads the published catalog**, so it costs the free store budget almost nothing, and every model of an appliance type is found. On the store website, brands after the 60th (Miele, Siemens, Samsung, Whirlpool...) appear again with "Load more".
+
+- **A non-numeric value in a numeric setting stopped the device from loading** at the next restart. Saves and imports now drop such values, and a device that already has one loads again with the default.
+
+- **Services check their input**: a wrong type now gives a clear validation error instead of a crash, and a service always acts on this integration's own entry of the device. Read-only users can no longer cancel an administrator's import, and only administrators can publish to the store.
+
+- **Reconfiguring a device restarted it twice**, interrupting a running cycle. It now applies in place.
+
+- **Less recorder churn**: the state sensor no longer carries `samples_recorded` (it changed on every reading; the debug sensor still has it), and elapsed time moves in whole minutes. The manual recorder saves every 5 minutes instead of every minute.
+
+### Panel
+
+- **Settings show what you set up, internals on request**: Basic lists name, type, power sensor, Min Power, Off Delay, notifications and quiet hours; Advanced hides 13 internal fields behind "Show internal settings", and shows any of them that has its own value, a conflict or a suggestion. Search always finds them.
+- **One place for suggestions**: the field pill (now with a line on what the change does) and the Settings banner. Apply all opens a preview of every change, old to new, before saving. The tab bulb and device badges are gone; the Overview card shows one count.
+- **Profile warnings follow your maintenance log**: poor fit, trending longer or more energy, and shape drift render only from the advisories, so logging a descale clears them.
+- **Profiles shows programs you have not created yet**: when recent unlabelled cycles look like one program, a banner offers "Create profile" with one of them preselected. The setup card's "create from cluster" now lands on it. The finder also catches far more: it needs 3 such cycles instead of 5, no longer splits one program's runs at a 15-minute boundary, tolerates one odd cycle in a group, and ignores a cycle that matched a known program well but was only refused for a close runner-up. Measured on 44 hidden programmes with the real label gate: 23% -> 39% caught (55% when the hidden program's own cycles are the only unlabelled ones), 82% of hints correct, and none on a store with nothing missing.
+- **Group suggestions are gone**: computed on every Profiles visit but never shown, and measured: 29% of the suggested groups were real near-duplicates, and accepting them lowered the right-program rate from 76.4% to 74.6% (p=0.019).
+- **ML Training lists only models something uses**: fine-tuned models whose consumer is off are not shown as learned, and the matching-tuner card appears only while a tuned set is live.
+- **The Playground shows one match score**, the replay's own confidence, and notes that its notification markers skip live updates, reminders and overrun alerts.
+- **Far fewer review requests, and the ones left matter**: every cycle matched at 0.6 to 0.9 confidence was queued for review, 81% of cycles on the test corpus, although most were already labelled correctly at cycle end. What predicts a wrong label is a small margin over the next-best program, not a modest confidence: leave-one-out over 604 cycle ends, a clear margin at 0.7-0.9 is 93-96% right, a small one 33-54%. Only those and a new program's first cycles are queued now, about 19% of cycles. A trace that sits outside its program's usual power band no longer asks on its own: such labels are still 86% right. Requests already waiting that the new rule would not raise are cleared once on upgrade (a cycle carrying the detected program with a clear margin, past its program's warm-up), without being recorded as your answer; near-ties and cycles relabelled differently stay.
+- **"Reset muted" works for settings that are no longer suggested**: muting one of the suggestions removed in this release (Estimate Tolerance, the confidence thresholds, ...) made Reset fail with "1 suggestion(s) failed to unlock".
+- **Appliance brand and model are in Basic settings**, so a second device can declare the same appliance without switching to Advanced.
+- **Saving no longer rewrites switches you never touched**: a default-on switch such as Time-Weighted Cost was saved on every save once its section was on screen.
+
 ### Suggestions
 
 - **Suggestions that made devices worse are gone**: the confidence thresholds (each apply lowered them), Sampling Interval (each apply raised it), smoothing, start duration, end repeat count, the two duration tolerances, the per-cycle stop/start simulation and the ML-driven suggestions. Completion minimum no longer creeps up until short programs count as interrupted; suggestions no longer stop for good at 200 stored cycles; a muted setting is never applied by Apply all; a setting you never changed is no longer suggested at the value it already has; the maximum duration ratio is never suggested below 1.8; dishwasher Off Delay uses your measured cycles; the end-energy threshold is only raised when it makes an end impossible.
 
-- **Settings removed from the panel**: End Repeat Count, Smoothing Window and Profile Duration Tolerance did nothing measurable.
+- **Settings removed from the panel**: End Repeat Count, Smoothing Window and Profile Duration Tolerance did nothing measurable, and "Phase-aware time remaining" never ran (its data was never built); the feature behind it is removed.
 
-- **The ML end guard is off**, even with ML models enabled: replayed on 292 cycles it prevented no early end and delayed washer ends by 5 minutes.
+- **Experimental ML is off where it measured harmful**, even with ML models enabled: the end guard (no early end prevented, washer ends 5 minutes later), early program commit (31% of its early picks wrong), the quality gate (never fired where it could act) and the time-remaining model (worse than the standard estimate on 7 of 8 installs).
+
+### For developers
+
+- WebSocket: `auto_label_cycles` and `store_download_device` now return `{task_id}` (the result is the task's); `list_tasks`, `store_get_device_quality`, the three one-shot `run_playground_*` commands and the Playground sweep's second parameter (`param_y`/`values_y`) are removed; `start_playground_sweep` takes at most 20 values. See `docs/WS_API.md`.
+- WebSocket, panel removals: `get_dtw_debug`, `save_playground_preset` and `delete_playground_preset` are removed, as are `start_playground_cycle_detail`'s `stress_tail`/`stress_idle_w`. Responses drop `get_profile_groups.suggestions`, `get_playground_settings.presets`/`preset_limit`/`ml_suggestions`/`ml_suggestions_enabled`, `get_constants.ml_suggestions_enabled` and `get_ml_comparison.settings_comparison`/`ml_suggestions_enabled`. `store_get_cycles` ratings come from each cycle's stored totals. `get_ml_training_status.on_device_models` lists only capabilities with a live consumer. Playground overrides accept only real options (the Stage 2-4 matcher weights are ignored).
 
 ## 0.5.7 - Unreleased
 

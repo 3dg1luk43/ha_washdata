@@ -1,5 +1,11 @@
 # WashData Phase Subsystem — Technical Reference
 
+> **0.5.8: part (b) is removed.** `phase_segmenter.py`, `phase_match.py`, `ProfileStore.phase_remaining`,
+> the `progress.compute_progress` blend, the `enable_phase_matching` toggle and the `phase_inconsistent`
+> advisory are gone (register item 411, audit PROGRESS-01/02). They never ran in production: no profile
+> carried `device_type`, so the phase-profile cache was never built. Part (a), the phase catalog and the
+> live phase readout, is unchanged. Sections about (b) are kept for history only.
+
 Scope: the phase subsystem of the WashData HA integration (`/root/ha_washdata`).
 Covers (a) the *legacy* per-profile phase-range data model + live phase readout,
 and (b) the *new* phase-segmented-matching / phase-resolved-ETA work landed in

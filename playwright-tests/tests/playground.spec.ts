@@ -8,7 +8,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { bootPanel, clickTab, assertWsCalled } from '../helpers/panel';
+import { bootPanel, clickTab, assertWsCalled, assertWsNotCalled } from '../helpers/panel';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -89,7 +89,7 @@ test('workbench: editing a param reveals Save-to-settings and it persists', asyn
   await assertWsCalled(page, 'ha_washdata/set_options');
 });
 
-// ─── Settings control panel: live source, presets, per-setting publish ───────
+// ─── Settings control panel: live source, per-setting publish ─────────────────
 
 test('control panel: loads the integration\'s live settings on tab entry', async ({ page }) => {
   await clickTab(page, 'playground');
@@ -116,16 +116,14 @@ test('control panel: editing a value marks it changed and reveals its publish bu
   await expect(page.locator('.wd-pg-ctrl')).toContainText('Matches live settings');
 });
 
-test('control panel: sandbox-only matcher knobs get no publish button', async ({ page }) => {
+test('removed Playground controls stay gone', async ({ page }) => {
+  // 0.5.8: matcher knobs, presets, the idle stress toggle and the DTW scorer.
   await clickTab(page, 'playground');
-  const corr = page.locator('.wd-pg-param-inp[data-pgkey="corr_weight"]');
-  await expect(corr).toBeVisible({ timeout: 8_000 });
-  await corr.fill('0.6');
-  // It IS a staged change (the sim honours it) but it is not a real config option.
-  await expect(page.locator('.wd-pg-ctrl')).toContainText('1 changed');
-  await expect(page.locator('.wd-pg-pub[data-pgkey="corr_weight"]')).toHaveCount(0);
-  // ...and the bulk publish button must not offer it either.
-  await expect(page.locator('button[data-action="pg-apply-settings"]')).toHaveCount(0);
+  await expect(page.locator('.wd-pg-ctrl')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="corr_weight"]')).toHaveCount(0);
+  await expect(page.locator('#wd-pg-preset-sel')).toHaveCount(0);
+  await expect(page.locator('#wd-pg-stress-toggle')).toHaveCount(0);
+  await assertWsNotCalled(page, 'ha_washdata/get_dtw_debug');
 });
 
 test('control panel: Load live settings discards sandbox edits', async ({ page }) => {
@@ -140,30 +138,6 @@ test('control panel: Load live settings discards sandbox edits', async ({ page }
   await expect(page.locator('.wd-pg-ctrl')).toContainText('Matches live settings');
 });
 
-test('control panel: save a preset, then load it back', async ({ page }) => {
-  await clickTab(page, 'playground');
-  const inp = page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]');
-  await expect(inp).toBeVisible({ timeout: 8_000 });
-  await inp.fill('222');
-  await page.locator('#wd-pg-preset-name').fill('My preset');
-  await page.locator('button[data-action="pg-preset-save"]').click();
-  await assertWsCalled(page, 'ha_washdata/save_playground_preset');
-  // The saved preset is selectable; loading it overwrites the sandbox values.
-  await inp.fill('120');
-  await page.locator('#wd-pg-preset-sel').selectOption('My preset');
-  await page.locator('button[data-action="pg-preset-load"]').click();
-  await expect(inp).toHaveValue('222');
-});
-
-test('control panel: delete a preset', async ({ page }) => {
-  await clickTab(page, 'playground');
-  await expect(page.locator('#wd-pg-preset-sel')).toBeVisible({ timeout: 8_000 });
-  await page.locator('#wd-pg-preset-sel').selectOption('Quiet nights');
-  page.once('dialog', d => d.accept());   // confirm()
-  await page.locator('button[data-action="pg-preset-delete"]').click();
-  await assertWsCalled(page, 'ha_washdata/delete_playground_preset');
-});
-
 test('control panel: Load suggested stages classic suggestion values', async ({ page }) => {
   await clickTab(page, 'playground');
   // Mock has classic_suggestions: {off_delay: 90, min_off_gap: 240}.
@@ -176,25 +150,13 @@ test('control panel: Load suggested stages classic suggestion values', async ({ 
   await expect(inp).toHaveValue('90');
 });
 
-test('control panel: Load Calibrated (ML) stages ML suggestion values', async ({ page }) => {
-  await clickTab(page, 'playground');
-  // Mock has ml_suggestions: {off_delay: 85, end_repeat_count: 2}.
-  const btn = page.locator('button[data-action="pg-load-calibrated"]');
-  await expect(btn).toBeVisible({ timeout: 8_000 });
-  await btn.click();
-  const inp = page.locator('input[data-pgkey="off_delay"]');
-  await expect(inp).toHaveValue('85');
-});
-
-test('control panel: suggestion buttons show the suggestion count in their label', async ({ page }) => {
-  // Mock returns 2 classic and 2 ML suggestions — count must appear in label.
+test('control panel: the suggestion button shows the suggestion count in its label', async ({ page }) => {
+  // Mock returns 2 classic suggestions — the count must appear in the label.
   await clickTab(page, 'playground');
   const classic = page.locator('button[data-action="pg-load-suggested"]');
   await expect(classic).toBeVisible({ timeout: 8_000 });
   await expect(classic).toContainText('(2)');
-  const ml = page.locator('button[data-action="pg-load-calibrated"]');
-  await expect(ml).toBeVisible();
-  await expect(ml).toContainText('(2)');
+  await expect(page.locator('button[data-action="pg-load-calibrated"]')).toHaveCount(0);
 });
 
 // ─── "Across your cycles" drawer: History + Optimize sub-tabs ────────────────

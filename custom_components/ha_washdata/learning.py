@@ -585,7 +585,9 @@ class LearningManager:
         # remains the real match score that gets displayed and persisted, so warmup
         # clamping never fabricates the value shown to the user.
         route_conf = confidence
-        if confidence >= auto_label_conf:
+        # Warm-up applies wherever the cycle would otherwise go unasked: the
+        # auto-label band, and (since 0.5.8) a cycle the cycle-end gate labelled.
+        if confidence >= auto_label_conf or (label_allowed and confidence >= learning_conf):
             _wm_count = self.profile_store.get_profile_labeled_count(detected_profile)
             # Imported reference profiles are trusted downloaded templates: the user
             # expects to match immediately, so they skip the local warm-up gate.
@@ -690,6 +692,29 @@ class LearningManager:
                     )
                     self._logger.debug("Auto-labeled high-confidence cycle %s", cycle_id)
                 return
+
+        # A cycle the cycle-end gate already labelled with this programme (a clear
+        # margin over the runner-up, not ambiguous, above the learning floor) needs no
+        # confirmation. Measured leave-one-out over 604 cycle ends, those labels are
+        # 91.5% right; asking about every 0.6-0.9 match instead put 81% of all
+        # cycles in the review queue, most of them already labelled correctly. What
+        # predicts a wrong label is a small margin, not a modest confidence: at
+        # 0.7-0.9 a clear margin is 93-96% right and a refused gate 33-54%
+        # (register item 433). Warm-up still asks. Low envelope conformance does
+        # NOT: labelled cycles under 0.40 are still 85.6% right, so asking about them
+        # costs 7 questions per wrong label (and on a device with loose envelopes it
+        # re-queued nearly every cycle).
+        if (
+            label_allowed
+            and not warmup_request
+            and not ml_suspicious
+            and cycle_data.get("profile_name") == detected_profile
+        ):
+            self._logger.debug(
+                "Cycle %s labelled '%s' at cycle end with a clear margin; no confirmation needed",
+                cycle_id, detected_profile,
+            )
+            return
 
         # Skip low-confidence matches below learning threshold — but a warmup cycle
         # always requests confirmation, even if the thresholds are misconfigured.

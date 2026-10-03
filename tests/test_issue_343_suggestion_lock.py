@@ -140,3 +140,36 @@ def test_all_locked_triggers_save(mock_hass):
     mgr.suggestion_engine.apply_suggestions.assert_not_called()
     # A save task was scheduled so the deletions reach disk.
     assert len(created_tasks) == 1
+
+
+@pytest.mark.asyncio
+async def test_a_mute_on_a_key_no_longer_suggested_can_be_reset():
+    """0.5.8 stopped suggesting several settings; a mute stored on one of them made
+    "Reset muted" fail forever ("1 suggestion(s) failed to unlock"), because the WS
+    handler only accepted keys the engine still suggests. Unlocking takes any key;
+    locking still needs a suggestible one."""
+    from custom_components.ha_washdata import ws_api
+
+    store = MagicMock()
+    store.get_locked_suggestions = MagicMock(return_value=[])
+    store.set_suggestion_locked = AsyncMock()
+    manager = MagicMock()
+    manager.profile_store = store
+
+    async def _call(key, locked):
+        conn = MagicMock()
+        with patch.object(ws_api, "_get_manager", return_value=manager):
+            await ws_api.ws_set_suggestion_lock.__wrapped__(
+                MagicMock(), conn, {"id": 1, "entry_id": "e", "key": key, "locked": locked}
+            )
+        return conn
+
+    retired = "learning_confidence"
+    assert retired not in ws_api._SUGGESTION_KEYS
+    conn = await _call(retired, False)
+    store.set_suggestion_locked.assert_awaited_once_with(retired, False)
+    conn.send_error.assert_not_called()
+
+    conn = await _call(retired, True)
+    conn.send_error.assert_called_once()
+    assert store.set_suggestion_locked.await_count == 1

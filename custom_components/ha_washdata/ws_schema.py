@@ -151,7 +151,6 @@ class ProfileGroupInfo(TypedDict):
 class GetProfileGroupsResponse(TypedDict):
     groups: list[ProfileGroupInfo]
     min_cohesion: float
-    suggestions: list[dict[str, Any]]
 
 
 class GetProfilePhasesResponse(TypedDict):
@@ -245,7 +244,6 @@ class GetConstantsResponse(TypedDict):
     device_types: list[dict[str, Any]]
     state_colors: dict[str, Any]
     ml_lab_enabled: bool
-    ml_suggestions_enabled: bool
     ml_training_available: bool
     PROFILE_MIN_WARMUP_CYCLES: Any
     store_online_available: bool
@@ -388,17 +386,15 @@ class GetLogsResponse(TypedDict):
 
 class GetMlComparisonResponse(TypedDict, total=False):
     """Two shapes: a disabled report (``enabled=False`` + ``error``) and an
-    enabled report; both carry ``cycles`` + ``settings_comparison``."""
+    enabled report; both carry ``cycles``."""
 
     enabled: bool
     error: str
     cycles: list[dict[str, Any]]
-    settings_comparison: dict[str, Any]
     cycle_count: int
     evaluated_count: int
     model_source: dict[str, Any]
     profile_stats: dict[str, Any]
-    ml_suggestions_enabled: bool
 
 
 # ─── On-device ML training ─────────────────────────────────────────────────────
@@ -418,110 +414,17 @@ class GetMlTrainingStatusResponse(TypedDict):
 
 # ─── Playground (F3) ───────────────────────────────────────────────────────────
 
-class RunPlaygroundCycleDetailResponse(TypedDict, total=False):
-    cycle_id: Any
-    label: str | None
-    duration_s: float | None
-    config_summary: dict[str, Any]
-    series: list[dict[str, Any]]
-    events: list[dict[str, Any]]
-    alerts: list[dict[str, Any]]
-    outcome: dict[str, Any]
-    error: str
-
-
-class RunPlaygroundHistoryResponse(TypedDict, total=False):
-    rows: list[dict[str, Any]]
-    summary: dict[str, Any]
-    baseline_rows: list[dict[str, Any]]
-    baseline_summary: dict[str, Any]
-    diff: dict[str, list[str]]
-
-
-class RunPlaygroundSweepResponse(TypedDict, total=False):
-    param: str
-    objective: str
-    points: list[dict[str, Any]]
-    current_value: Any
-    best_value: Any
-    best_metric: float | None
-    param_x: str
-    param_y: str
-    x_values: list[float]
-    y_values: list[float]
-    grid: list[list[Any]]
-    best: dict[str, Any]
-    current: dict[str, Any]
-    error: str
-
-
-class DtwStage2Scores(TypedDict):
-    correlation: float
-    mae_score: float
-    score: float
-
-
-class DtwScores(TypedDict):
-    l1_score: float
-    ddtw_score: float
-    ensemble_score: float
-    blend_weight: float
-    blended_score: float
-
-
-class DtwStage4Scores(TypedDict):
-    duration_agreement: float
-    energy_agreement: float
-    final_score: float
-
-
-class GetDtwDebugResponse(TypedDict):
-    cycle_id: Any
-    profile_name: str
-    grid_n: int
-    cycle_duration_s: float
-    profile_duration_s: float
-    cycle_trace: list[list[float]]
-    profile_trace: list[list[float]]
-    stage2: DtwStage2Scores
-    dtw: DtwScores
-    stage4: DtwStage4Scores
-    warp_path: list[list[int]]
-
-
-class PlaygroundPreset(TypedDict):
-    """One saved Playground settings snapshot."""
-
-    name: str
-    values: dict[str, Any]
-    created_at: Any
-    updated_at: Any
-
-
 class GetPlaygroundSettingsResponse(TypedDict):
-    """Live effective Playground settings + the device's saved presets.
+    """Live effective Playground settings.
 
-    ``classic_suggestions`` and ``ml_suggestions`` are filtered to keys the
-    Playground exposes so the panel can stage them directly.  ``ml_suggestions``
-    is ``None`` when ``ENABLE_ML_SUGGESTIONS`` is off - the key is still always
-    present, so every field here is required (total=True) and
+    ``classic_suggestions`` is filtered to keys the Playground exposes so the
+    panel can stage them directly. Every field here is required (total=True) so
     ``_validate_ws_contract()`` can catch a handler that drops one.
     """
 
     effective: dict[str, Any]
-    presets: list[PlaygroundPreset]
     publishable: list[str]
-    preset_limit: int
     classic_suggestions: dict[str, Any]
-    ml_suggestions: dict[str, Any] | None
-    ml_suggestions_enabled: bool
-
-
-class PlaygroundPresetsResponse(TypedDict):
-    """Acknowledgement carrying the post-mutation preset list."""
-
-    success: bool
-    presets: list[PlaygroundPreset]
 
 
 class TaskSnapshot(TypedDict, total=False):
@@ -540,10 +443,6 @@ class TaskSnapshot(TypedDict, total=False):
     error: str | None
     has_result: bool
     result: Any
-
-
-class ListTasksResponse(TypedDict):
-    tasks: list[TaskSnapshot]
 
 
 class CancelTaskResponse(TypedDict):
@@ -631,13 +530,6 @@ class StoreSimpleResponse(TypedDict, total=False):
     brand: str | None
     model: str | None
     error: str
-    disabled: bool
-
-
-class StoreQualityResponse(TypedDict, total=False):
-    """Device 5-star quality summary (count + average)."""
-    avg: float | None
-    count: int
     disabled: bool
 
 
@@ -757,7 +649,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "set_lifetime_cycle_count": SetLifetimeCycleCountResponse,
     "label_cycle": SuccessResponse,
     "delete_cycle": SuccessResponse,
-    "auto_label_cycles": SuccessResponse,
+    "auto_label_cycles": StartTaskResponse,
     "get_phase_catalog": GetPhaseCatalogResponse,
     "create_phase": SuccessResponse,
     "update_phase": SuccessResponse,
@@ -809,14 +701,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "pause_cycle": OkResponse,
     "resume_cycle": OkResponse,
     "terminate_cycle": OkResponse,
-    "run_playground_cycle_detail": RunPlaygroundCycleDetailResponse,
-    "run_playground_history": RunPlaygroundHistoryResponse,
-    "run_playground_sweep": RunPlaygroundSweepResponse,
-    "get_dtw_debug": GetDtwDebugResponse,
     "get_playground_settings": GetPlaygroundSettingsResponse,
-    "save_playground_preset": PlaygroundPresetsResponse,
-    "delete_playground_preset": PlaygroundPresetsResponse,
-    "list_tasks": ListTasksResponse,
     "subscribe_tasks": SubscribeTasksResponse,
     "cancel_task": CancelTaskResponse,
     "get_task_result": TaskSnapshot,
@@ -834,19 +719,18 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_search_devices": StoreItemsResponse,
     "store_get_profiles": StoreItemsResponse,
     "store_get_cycles": StoreItemsResponse,
+    "store_confirm_device": StoreConfirmResponse,
+    "store_rate_device": StoreOnlineResponse,
     "store_import_cycle": StoreImportResponse,
     "store_upload_cycle": StoreUploadResponse,
     "store_list_brands": StoreItemsResponse,
-    "store_get_device_quality": StoreQualityResponse,
-    "store_confirm_device": StoreConfirmResponse,
-    "store_rate_device": StoreOnlineResponse,
     "store_set_online": StoreOnlineResponse,
     "store_set_prefs": StorePrefsResponse,
     "store_get_device_profiles": StoreDeviceProfilesResponse,
     "store_get_catalog_entry": StoreCatalogEntryResponse,
     "store_refresh_catalog": StoreRefreshCatalogResponse,
     "store_upload_device": StoreUploadDeviceResponse,
-    "store_download_device": StoreDownloadDeviceResponse,
+    "store_download_device": StartTaskResponse,
     "get_shareable_cycles": GetShareableCyclesResponse,
 }
 
@@ -855,11 +739,6 @@ WS_RESPONSE_TYPES: dict[str, type] = {
 #: for these but does not flag extra keys.
 WS_OPEN_RESPONSES: frozenset[str] = frozenset({
     "run_suggestion_analysis",
-    # Playground what-if responses carry nested/variant shapes (incl. an error
-    # variant); skip strict extra-key validation.
-    "run_playground_cycle_detail",
-    "run_playground_history",
-    "run_playground_sweep",
     # Task snapshot splats a variant key set (result present only when finished).
     "get_task_result",
 })
@@ -1074,43 +953,10 @@ WS_COMMANDS: dict[str, dict] = {
     "pause_cycle": {"params": [_entry()]},
     "resume_cycle": {"params": [_entry()]},
     "terminate_cycle": {"params": [_entry()]},
-    "run_playground_cycle_detail": {"params": [
-        _entry(),
-        _p("cycle_id", "str"),
-        _p("settings_override", "dict", False),
-    ]},
-    "run_playground_history": {"params": [
-        _entry(),
-        _p("cycle_ids", "list[str]", False),
-        _p("settings_override", "dict", False),
-        _p("concurrency", "int", False),
-    ]},
-    "run_playground_sweep": {"params": [
-        _entry(),
-        _p("param", "str"),
-        _p("values", "list[float]"),
-        _p("objective", "str"),
-        _p("cycle_ids", "list[str]", False),
-        _p("concurrency", "int", False),
-        _p("param_y", "str", False),
-        _p("values_y", "list[float]", False),
-    ]},
-    "get_dtw_debug": {"params": [
-        _entry(),
-        _p("cycle_id", "str"),
-        _p("profile_name", "str|null", False),
-    ]},
     "get_playground_settings": {"params": [
         _entry(),
         _p("include_suggestions", "bool", False),
     ]},
-    "save_playground_preset": {"params": [
-        _entry(),
-        _p("name", "str"),
-        _p("values", "dict"),
-    ]},
-    "delete_playground_preset": {"params": [_entry(), _p("name", "str")]},
-    "list_tasks": {"params": [_p("entry_id", "str|null", False)]},
     "subscribe_tasks": {"params": [_p("entry_id", "str|null", False)]},
     "cancel_task": {"params": [_p("task_id", "str")]},
     "get_task_result": {"params": [_p("task_id", "str")]},
@@ -1124,15 +970,11 @@ WS_COMMANDS: dict[str, dict] = {
         _p("param", "str"),
         _p("values", "list[float]"),
         _p("objective", "str"),
-        _p("param_y", "str|null", False),
-        _p("values_y", "list[float]", False),
     ]},
     "start_playground_cycle_detail": {"params": [
         _entry(),
         _p("cycle_id", "str"),
         _p("settings_override", "dict", False),
-        _p("stress_tail", "bool", False),
-        _p("stress_idle_w", "float|null", False),
     ]},
     "history_import_begin": {"params": [_entry()]},
     "history_import_chunk": {"params": [
@@ -1169,12 +1011,11 @@ WS_COMMANDS: dict[str, dict] = {
     ]},
     "store_get_profiles": {"params": [_entry(), _p("device_id", "str")]},
     "store_get_cycles": {"params": [_entry(), _p("profile_id", "str")]},
-    "store_get_device_quality": {"params": [_entry(), _p("device_id", "str")]},
+    "store_confirm_device": {"params": [_entry(), _p("device_id", "str")]},
+    "store_rate_device": {"params": [_entry(), _p("device_id", "str"), _p("rating", "int")]},
     "store_get_device_profiles": {"params": [_entry(), _p("brand", "str"), _p("model", "str"), _p("appliance_type", "str")]},
     "store_get_catalog_entry": {"params": [_entry(), _p("brand", "str"), _p("model", "str"), _p("appliance_type", "str")]},
     "store_refresh_catalog": {"params": [_entry()]},
-    "store_confirm_device": {"params": [_entry(), _p("device_id", "str")]},
-    "store_rate_device": {"params": [_entry(), _p("device_id", "str"), _p("rating", "int")]},
     "store_set_online": {"params": [_entry(), _p("enabled", "bool")]},
     "store_set_prefs": {"params": [_entry(), _p("prefs", "dict")]},
     "store_import_cycle": {"params": [

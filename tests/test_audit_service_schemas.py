@@ -1,0 +1,41 @@
+"""Audit 2026-10-02 PLATFORM-10: every service has a schema and one resolver.
+
+No service passed `schema=`: `profile_name: 123` raised AttributeError, a
+non-numeric `trim_start_s` a ValueError traceback, `unlabel_cycles: "false"` was
+truthy; nine handlers raised a bare ValueError for an unknown device, and every
+one took an arbitrary entry of the device rather than ours.
+"""
+
+from __future__ import annotations
+
+import pytest
+import voluptuous as vol
+import yaml
+from pathlib import Path
+
+from custom_components.ha_washdata import _SERVICE_SCHEMAS
+
+_YAML = Path(__file__).resolve().parents[1] / "custom_components" / "ha_washdata" / "services.yaml"
+
+
+def test_every_service_in_services_yaml_has_a_schema() -> None:
+    assert set(yaml.safe_load(_YAML.read_text())) == set(_SERVICE_SCHEMAS)
+
+
+def test_values_are_typed_instead_of_crashing_the_handler() -> None:
+    out = _SERVICE_SCHEMAS["label_cycle"]({"device_id": "d", "cycle_id": "c", "profile_name": 123})
+    assert out["profile_name"] == "123"
+    assert _SERVICE_SCHEMAS["delete_profile"](
+        {"device_id": "d", "profile_name": "P", "unlabel_cycles": "false"}
+    )["unlabel_cycles"] is False
+    with pytest.raises(vol.Invalid):
+        _SERVICE_SCHEMAS["trim_cycle"]({"device_id": "d", "cycle_id": "c", "trim_start_s": "x"})
+    with pytest.raises(vol.Invalid):
+        _SERVICE_SCHEMAS["auto_label_cycles"]({"device_id": "d", "confidence_threshold": 7})
+    with pytest.raises(vol.Invalid):
+        _SERVICE_SCHEMAS["record_start"]({})
+
+
+def test_an_undeclared_key_an_automation_already_sends_is_kept() -> None:
+    out = _SERVICE_SCHEMAS["submit_cycle_feedback"]({"cycle_id": "c", "dismiss": "true"})
+    assert out["dismiss"] is True

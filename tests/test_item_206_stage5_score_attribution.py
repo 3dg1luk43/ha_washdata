@@ -414,8 +414,10 @@ async def test_learning_does_not_auto_label_a_member_on_its_siblings_score(
     hass: Any, manager: Any, mock_entry: Any
 ) -> None:
     """End to end through the real routing: the group cleared the 0.90 auto-label
-    bar, the selected member did not. The member must be queued for confirmation,
-    not recorded as fact."""
+    bar, the selected member did not. The sibling's score must never auto-label the
+    member. Since register item 433 the cycle-end gate's own label (at the member's
+    0.88, clear margin) is not queued for confirmation either: group wins that pass
+    that gate are 14/15 right leave-one-out, the same as any other label."""
     mock_entry.options = {
         "power_sensor": "sensor.test_power",
         "auto_label_confidence": 0.90,
@@ -433,14 +435,14 @@ async def test_learning_does_not_auto_label_a_member_on_its_siblings_score(
     manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=True)
     manager.learning_manager.request_cycle_verification = MagicMock()
 
-    await manager._async_process_cycle_end(_cycle_data())
+    cyc = _cycle_data()
+    await manager._async_process_cycle_end(cyc)
     await hass.async_block_till_done()
 
     manager.learning_manager.auto_label_high_confidence.assert_not_called()
-    manager.learning_manager.request_cycle_verification.assert_called_once()
-    assert manager.learning_manager.request_cycle_verification.call_args.kwargs[
-        "confidence"
-    ] == pytest.approx(0.88)
+    manager.learning_manager.request_cycle_verification.assert_not_called()
+    assert cyc.get("profile_name") == "Wolle 30"
+    assert cyc.get("label_source") == "auto_match"
 
 
 @pytest.mark.asyncio

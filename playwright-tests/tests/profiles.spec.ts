@@ -281,3 +281,27 @@ test('no quiet-tail badge when the backend measured none', async ({ page }) => {
   await expect(page.locator('.wd-profile-card').first()).toBeVisible({ timeout: 5_000 });
   await expect(page.locator('.wd-badge', { hasText: 'quiet tail' })).toHaveCount(0);
 });
+
+// ─── Coverage gaps (register item 432) ───────────────────────────────────────
+
+test('a coverage-gap cluster shows on Profiles and pre-selects its cycle', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', {
+    ...profilesData,
+    coverage_gaps: {
+      unmatched_count: 6, suggest_create: true,
+      profile_suggestions: [{ suggested_name: '~45 min program', cycle_ids: ['gap-1', 'gap-2', 'gap-3'], avg_duration_s: 2700, count: 3, similarity: 0.91 }],
+    },
+  });
+  await clickTab(page, 'profiles');
+  const banner = page.locator('.wd-sug-banner').filter({ hasText: '45 min' });
+  await expect(banner).toBeVisible({ timeout: 8_000 });
+  await expect(banner).toContainText('3');
+  await banner.locator('[data-action="coverage-create"]').click();
+  await expect(page.locator('#wd-cp-cycle')).toHaveValue('gap-1');
+});
+
+test('no coverage-gap banner when nothing is missing', async ({ page }) => {
+  await clickTab(page, 'profiles');
+  await expect(page.locator('.wd-profiles-grid').first()).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('[data-action="coverage-create"]')).toHaveCount(0);
+});

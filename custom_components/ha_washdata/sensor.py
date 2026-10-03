@@ -37,6 +37,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
+from .time_utils import utc_now
 from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -294,8 +295,10 @@ class WasherStateSensor(WasherBaseSensor):
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]
+        # No per-reading counter here (audit PLATFORM-07): `samples_recorded`
+        # changed on every power reading, so each reading wrote a new state row
+        # and a new attribute row to the recorder. The debug sensor keeps it.
         attrs: dict[str, Any] = {
-            "samples_recorded": self._manager.samples_recorded,
             "current_program_guess": self._manager.current_program,
             "sub_state": self._manager.sub_state,
         }
@@ -557,8 +560,11 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
             return 0
         start = self._manager.cycle_start_time
         if start:
-            delta = dt_util.now() - start
-            return int(delta.total_seconds())
+            # Whole minutes (audit PLATFORM-07): to the second it changed on every
+            # state write, one recorder row per power reading. UTC, like every
+            # interval (DST).
+            delta = utc_now() - dt_util.as_utc(start)
+            return int(delta.total_seconds()) // 60 * 60
         return 0
 
 

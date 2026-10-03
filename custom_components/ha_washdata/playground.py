@@ -25,10 +25,7 @@ Main entry points:
 - :func:`simulate_cycle_detail` - faithful single-cycle replay with per-step
   progress/remaining-time/phase/energy series and typed event log.
 - :func:`run_playground_history` - per-cycle rows + optional before/after diff.
-- :func:`run_playground_sweep` - objective 1D/2D grid sweep.
-- :func:`dtw_debug_payload` - the score breakdown (Stage 2 / DTW / Stage 4),
-  the two resampled traces on a shared grid, and the DTW warping path for one
-  cycle vs one profile (the DTW visualizer).
+- :func:`run_playground_sweep` - objective 1D grid sweep.
 
 All top-level entry points are defensive: they never raise, returning an
 ``{"error": ...}`` marker instead so the WS handlers can relay it.
@@ -49,7 +46,6 @@ from homeassistant.util import dt as dt_util
 from . import analysis
 from . import notification_rules as notif_rules
 from . import progress as progress_mod
-from .phase_segmenter import phase_matching_enabled
 from .signal_processing import (
     resample_adaptive,
     compact_price_timeline,
@@ -89,36 +85,12 @@ from .const import (
     CONF_WATCHDOG_INTERVAL,
     CYCLE_OVERRUN_ANOMALY_RATIO,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
-    DEFAULT_DTW_BANDWIDTH,
     DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_NOTIFY_MILESTONES,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-    MATCH_CORR_WEIGHT,
-    MATCH_DDTW_DIST_SCALE,
-    MATCH_DTW_BLEND,
-    MATCH_DTW_DIST_SCALE,
-    MATCH_DTW_ENSEMBLE_W,
-    MATCH_DTW_REFINE_TOP_N,
-    MATCH_DTW_RESAMPLE_N,
-    MATCH_DURATION_SCALE,
-    MATCH_DURATION_WEIGHT,
-    MATCH_ENERGY_SCALE,
-    MATCH_ENERGY_WEIGHT,
-    MATCH_KEEP_MIN_SCORE,
-    MATCH_MAE_PEAK_FLOOR,
-    MATCH_MAE_REF_PEAK,
-    MATCH_MAE_SCALE,
     MATCH_MIN_RESAMPLED_POINTS,
-    PLAYGROUND_STRESS_DENSE_DURATION_S,
-    PLAYGROUND_STRESS_DENSE_STEP_S,
-    PLAYGROUND_STRESS_FLOOR_PERCENTILE,
-    PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC,
-    PLAYGROUND_STRESS_MAX_IDLE_W,
-    PLAYGROUND_STRESS_MAX_SPARSE_STEPS,
-    PLAYGROUND_STRESS_SPARSE_STEP_S,
-    PLAYGROUND_STRESS_TRAILING_WINDOW_S,
     STATE_ENDING,
     STATE_FINISHED,
     STATE_IDLE,
@@ -131,6 +103,7 @@ from .const import (
     resolve_watchdog_interval_default,
 )
 from .cycle_detector import (
+    MatchContext,
     CycleDetector,
     CycleDetectorConfig,
     effective_anticrease_finalize_ratio,
@@ -213,70 +186,34 @@ _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
 }
 
 # Matching options the Playground honours, mapped to the ``match_config`` key
-# they drive. The two duration ratios are real user settings (a good value found
-# here can be applied for real). The remaining keys are the Stage 2-4 scoring
-# weights / DTW knobs: they are NOT persistent settings (they are ML-tuned
-# defaults), but they ARE exposed here as SANDBOX-ONLY overrides so power users
-# can experiment with how each stage of the matcher scores their own cycles in
-# the Playground. They never persist - a match config built from them lives only
-# for the simulation. Anything else in ``settings_override`` is ignored.
+# they drive: the two Stage-1 duration ratios, both real user settings. The Stage
+# 2-4 scoring weights and DTW knobs were sandbox-only overrides until 0.5.8; they
+# could not persist, matching is saturated on them, and tuning them on 20
+# in-sample cycles only overfit. Anything else in ``settings_override`` is ignored.
 _MATCH_OVERRIDE_KEYS: dict[str, tuple[str, Callable[[Any], Any]]] = {
-    # Stage 1 - duration gate (real settings)
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO: ("min_duration_ratio", float),
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO: ("max_duration_ratio", float),
-    # Stage 2 - core similarity (sandbox-only)
-    "corr_weight": ("corr_weight", float),
-    "keep_min_score": ("keep_min_score", float),
-    # Stage 3 - DTW refinement (sandbox-only)
-    "dtw_bandwidth": ("dtw_bandwidth", float),
-    "dtw_blend": ("dtw_blend", float),
-    "dtw_ensemble_w": ("dtw_ensemble_w", float),
-    "dtw_ddtw_scale": ("dtw_ddtw_scale", float),
-    "dtw_refine_top_n": ("dtw_refine_top_n", int),
-    # Stage 4 - duration/energy agreement (sandbox-only)
-    "duration_weight": ("duration_weight", float),
-    "energy_weight": ("energy_weight", float),
-    "duration_scale": ("duration_scale", float),
-    "energy_scale": ("energy_scale", float),
 }
 
 
 # Canonical default for every matching override key, keyed by the OPTION key the
-# Playground uses. The Stage 2-4 entries are code constants (not stored options),
-# so this table is the only place the panel can read them from; ``ws_get_constants``
-# ships it as ``pg_match_defaults`` and ``effective_settings`` falls back to it for
-# any key the live matcher config does not carry.
+# Playground uses. ``ws_get_constants`` ships it as ``pg_match_defaults`` and
+# ``effective_settings`` falls back to it for any key the live matcher config does
+# not carry.
 MATCH_DEFAULTS_BY_OPTION: dict[str, Any] = {
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO: DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO: DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-    "corr_weight": MATCH_CORR_WEIGHT,
-    "keep_min_score": MATCH_KEEP_MIN_SCORE,
-    "dtw_bandwidth": DEFAULT_DTW_BANDWIDTH,
-    "dtw_blend": MATCH_DTW_BLEND,
-    "dtw_ensemble_w": MATCH_DTW_ENSEMBLE_W,
-    "dtw_ddtw_scale": MATCH_DDTW_DIST_SCALE,
-    "dtw_refine_top_n": MATCH_DTW_REFINE_TOP_N,
-    "duration_weight": MATCH_DURATION_WEIGHT,
-    "energy_weight": MATCH_ENERGY_WEIGHT,
-    "duration_scale": MATCH_DURATION_SCALE,
-    "energy_scale": MATCH_ENERGY_SCALE,
 }
 
 # Every option key the Playground control panel may carry (detection + matching).
-# This is the allow-list for a saved Playground preset: anything else submitted by
-# a client is dropped rather than stored.
+# Anything else submitted by a client is dropped.
 SETTING_KEYS: frozenset[str] = frozenset(_OVERRIDE_FIELD_MAP) | frozenset(_MATCH_OVERRIDE_KEYS)
 
-# The subset a user may publish from the Playground back into the live config:
-# exactly the override keys that are REAL config-entry options (``CONF_*``). The
-# Stage 2-4 scoring knobs above are sandbox-only code constants - there is no
-# option behind them, so writing them into ``entry.options`` would create dead
-# keys the integration never reads. The panel gates its publish buttons on this
-# list (shipped by ``get_playground_settings``).
-PUBLISHABLE_SETTING_KEYS: frozenset[str] = frozenset(_OVERRIDE_FIELD_MAP) | {
-    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-}
+# The keys a user may publish from the Playground back into the live config. Every
+# Playground key is now a real config-entry option, so this is all of them; the
+# panel still gates its publish buttons on this list (shipped by
+# ``get_playground_settings``).
+PUBLISHABLE_SETTING_KEYS: frozenset[str] = SETTING_KEYS
 
 
 def effective_settings(
@@ -315,7 +252,7 @@ def sanitize_setting_values(values: Any) -> dict[str, Any]:
     """Filter a client-supplied settings map down to storable Playground values.
 
     Keeps only keys in :data:`SETTING_KEYS`, coerced with the same coercers the
-    simulation uses, so a preset can never carry an unknown key or a value that
+    simulation uses, so an override can never carry an unknown key or a value that
     would be silently ignored at replay time. Never raises.
     """
     if not isinstance(values, dict):
@@ -330,7 +267,7 @@ def sanitize_setting_values(values: Any) -> dict[str, Any]:
         _target, coerce = mapping
         try:
             coerced = coerce(value)
-        # OverflowError: the preset payload is JSON-decoded, so an oversized
+        # OverflowError: the override payload is JSON-decoded, so an oversized
         # integer literal arrives as an unbounded int and float() on one raises
         # rather than returning inf. Dropping the value is this function's
         # documented behaviour; escaping would fail the whole save.
@@ -630,8 +567,6 @@ def simulate_cycle_detail(
     price: float | None = None,
     compute_series: bool = True,
     prebuilt: tuple[Any, Any, Any, Any] | None = None,
-    stress_tail: bool = False,
-    stress_idle_w: float | None = None,
 ) -> dict[str, Any]:
     """Faithful single-cycle replay for the Playground "Simulate" view.
 
@@ -650,7 +585,7 @@ def simulate_cycle_detail(
     try:
         return _simulate_cycle_detail_inner(
             cycle, base_config, settings_override, store, options, price,
-            compute_series, prebuilt, stress_tail, stress_idle_w,
+            compute_series, prebuilt,
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground detail sim failed for %s: %s", cycle.get("id"), exc)
@@ -694,8 +629,6 @@ def build_cycle_detail_sim_by_id(
     settings_override: dict[str, Any] | None,
     options: dict[str, Any] | None,
     price: float | None = None,
-    stress_tail: bool = False,
-    stress_idle_w: float | None = None,
 ) -> "_DetailSim | dict[str, Any]":
     """Look up a stored cycle by id and build a resumable :class:`_DetailSim`.
 
@@ -715,10 +648,7 @@ def build_cycle_detail_sim_by_id(
     if cycle is None:
         return {"error": "not_found", "cycle_id": cycle_id}
     try:
-        return _DetailSim(
-            cycle, base_config, settings_override, store, options, price,
-            stress_tail=stress_tail, stress_idle_w=stress_idle_w,
-        )
+        return _DetailSim(cycle, base_config, settings_override, store, options, price)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground detail sim build failed for %s: %s", cycle_id, exc)
         return {"error": str(exc), "cycle_id": cycle_id}
@@ -733,8 +663,6 @@ def _simulate_cycle_detail_inner(
     price: float | None,
     compute_series: bool = True,
     prebuilt: tuple[Any, Any, Any, Any] | None = None,
-    stress_tail: bool = False,
-    stress_idle_w: float | None = None,
 ) -> dict[str, Any]:
     """One-shot faithful replay: build the resumable sim and run it to completion.
 
@@ -747,15 +675,11 @@ def _simulate_cycle_detail_inner(
     sim = _DetailSim(
         cycle, base_config, settings_override, store, options, price,
         compute_series, prebuilt,
-        stress_tail=stress_tail, stress_idle_w=stress_idle_w,
     )
     if not sim.ready:
         return sim.empty_payload()
     sim.step(0, sim.n_readings)
-    if sim.stress_tail:
-        sim.run_stress_tail()
-    else:
-        sim.run_tail()
+    sim.run_tail()
     return sim.finalize()
 
 
@@ -786,8 +710,6 @@ class _DetailSim:
         price: float | None,
         compute_series: bool = True,
         prebuilt: tuple[Any, Any, Any, Any] | None = None,
-        stress_tail: bool = False,
-        stress_idle_w: float | None = None,
     ) -> None:
         self.cycle = cycle
         self.store = store
@@ -824,11 +746,7 @@ class _DetailSim:
             "overrun_ratio": None,
             "projected_energy_wh": None,
             "projected_cost": None,
-            "stress": None,
         }
-        self.stress_tail = stress_tail
-        self.stress_idle_override = stress_idle_w
-        self._stress_outcome: dict[str, Any] | None = None
         if prebuilt is not None:
             snapshots, match_config, group_members, member_snaps = prebuilt
         else:
@@ -1215,27 +1133,23 @@ class _DetailSim:
                 )
             except Exception:  # pylint: disable=broad-exception-caught
                 pause_catalogue = None
-        return (
-            raw_name,
-            raw_conf,
-            raw_expected,
-            None,
-            False,
-            bool(is_ambiguous),
-            bool(prefix_wide),
-            bool(full_shape_hit),
-            tail_power,
-            terminal_high,
-            terminal_quiet,
-            # The FULL population, matching live: `async_match_profile` computes
-            # `MatchResult.longest_candidate_duration_s` from the candidates as
-            # they stood BEFORE the group collapse and before the [:5]
-            # truncation. An earlier version of this line used `candidates[:5]`
-            # to match what live *then* did - and live was the thing that was
-            # wrong, twice.
-            longest_candidate_duration(pre_collapse_candidates),
-            trusted_min,
-            pause_catalogue,
+        # The SAME named context live builds (audit DETECT-15). Its
+        # longest_candidate_s is the FULL population, matching live:
+        # `async_match_profile` computes it from the candidates as they stood
+        # BEFORE the group collapse and the [:5] truncation.
+        return MatchContext(
+            profile_name=raw_name,
+            confidence=raw_conf,
+            expected_duration=raw_expected,
+            is_ambiguous=bool(is_ambiguous),
+            is_prefix_ambiguous=bool(prefix_wide),
+            is_prefix_ambiguous_full_shape=bool(full_shape_hit),
+            tail_power=tail_power,
+            terminal_high=terminal_high,
+            terminal_quiet_s=terminal_quiet,
+            longest_candidate_s=longest_candidate_duration(pre_collapse_candidates),
+            trusted_min_s=trusted_min,
+            pause_catalogue=pause_catalogue,
         )
 
     def _price_at(self, offset_s: float) -> float | None:
@@ -1317,23 +1231,10 @@ class _DetailSim:
             ml_pct = progress_mod.ml_progress_percent(
                 self.store, self.options, matched_dur, trace, program, self._end_exp_fn
             )
-            # Opt-in phase-resolved ETA blend - identical gating + call as the live
-            # manager, so the Playground stays a faithful mirror of the estimator.
-            phase_remaining_s = None
-            if (
-                self.store is not None
-                and len(trace) >= 10
-                and program not in ("detecting...", "off", None)
-                and phase_matching_enabled(self.options, self.device_type)
-            ):
-                pr = self.store.phase_remaining(trace, self.device_type, program)
-                if pr is not None:
-                    phase_remaining_s = pr.get("remaining_s")
             result = progress_mod.compute_progress(
                 self.device_type, matched_dur, offset,
                 progress_mod.ema_seed(self.smoothed["v"], self.smoothed["program"], program),
                 phase_result, ml_pct,
-                phase_remaining_s=phase_remaining_s,
                 # Same time-scaled smoothing as live: the sim steps the estimator
                 # at its own throttle, so without this the replay would smooth
                 # over 30 s steps as if they were the manager's 5 s ones.
@@ -1419,34 +1320,6 @@ class _DetailSim:
             self._sample(ts)
             k += 1
 
-    def _derive_idle_level(self) -> tuple[float, float]:
-        """Derive (idle_w, fluct_w) from the standby floor of the real cycle tail.
-
-        idle_w  = p7 of readings in the last PLAYGROUND_STRESS_TRAILING_WINDOW_S;
-                  this is the between-burst standby floor, not a contaminated mean.
-        fluct_w = std-dev of the low band (readings ≤ idle_w × 1.5); falls back
-                  to ±PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC when the tail is flat.
-        """
-        if not self.readings:
-            return 3.0, 0.36
-        cutoff = self.readings[-1][0] - timedelta(seconds=PLAYGROUND_STRESS_TRAILING_WINDOW_S)
-        window = [p for ts, p in self.readings if ts >= cutoff]
-        if not window:
-            window = [self.readings[-1][1]]
-        sorted_w = sorted(window)
-        p7_idx = max(0, int(len(sorted_w) * PLAYGROUND_STRESS_FLOOR_PERCENTILE))
-        idle_w = float(sorted_w[p7_idx])
-        low_band = [p for p in window if p <= idle_w * 1.5]
-        if len(low_band) >= 2:
-            mean_lb = sum(low_band) / len(low_band)
-            variance = sum((p - mean_lb) ** 2 for p in low_band) / len(low_band)
-            fluct_w = variance ** 0.5
-            if fluct_w < 0.01:
-                fluct_w = idle_w * PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC
-        else:
-            fluct_w = idle_w * PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC
-        return max(0.0, idle_w), max(0.01, fluct_w)
-
     def run_tail(self) -> None:
         """Synthetic quiet tail so a natural end can fire."""
         if self._aborted or not self.ready:
@@ -1472,117 +1345,6 @@ class _DetailSim:
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _LOGGER.debug(
                 "Playground detail replay failed for %s: %s", self.cycle.get("id"), exc
-            )
-
-    def run_stress_tail(self) -> None:
-        """Synthetic idle continuation for the idle termination test.
-
-        Replaces the quiet tail when ``stress_tail=True``.  Never raises.
-
-        Two phases keep CPU near zero while preserving detector fidelity:
-
-        * **Dense pre-fill** (DENSE_DURATION_S at DENSE_STEP_S): populates
-          ``_power_readings`` so ``_is_standby_band_stuck`` (10-min plateau check)
-          and ``_window_has_outage_gap`` can fire correctly.
-        * **Sparse main** (SPARSE_STEP_S steps): ``_time_below_threshold += dt``
-          accumulates correctly for large dt; the 8h hard cap fires normally.
-
-        ``_sample()`` is called on every step so the series carries progress /
-        remaining_s / phase through the overrun, identical to the live estimator.
-        """
-        if self._aborted or not self.ready:
-            return
-        try:
-            idle_w, fluct_w = self._derive_idle_level()
-            override_applied = False
-            if self.stress_idle_override is not None:
-                # The schema accepts any float. Reject non-finite (nan/inf) by keeping the
-                # auto-derived floor, and clamp to [0, MAX] so a negative can't surface as a
-                # nonsensical "-Xw" draw and a huge/inf value can't corrupt the synthetic
-                # power samples (NaN/inf detector math). fluct_w stays from the call above.
-                ov = float(self.stress_idle_override)
-                if math.isfinite(ov):
-                    idle_w = max(0.0, min(ov, PLAYGROUND_STRESS_MAX_IDLE_W))
-                    override_applied = True
-
-            synthetic_from_s = self.cursor["t"]
-            stop_thresh = float(getattr(self.config, "stop_threshold_w", 2.0))
-            idle_above = idle_w >= stop_thresh
-
-            seed = sum(ord(c) for c in (self.cycle.get("id") or "pg")) & 0xFFFF
-
-            self._emit(
-                "stress_tail_start",
-                f"idle ~{idle_w:.1f}W fluct={fluct_w:.2f}W above_stop_thresh={idle_above}",
-            )
-
-            last_ts = self.readings[-1][0]
-            captured_before = len(self.captured)
-
-            n_dense = int(PLAYGROUND_STRESS_DENSE_DURATION_S / PLAYGROUND_STRESS_DENSE_STEP_S)
-            dense_end_ts = last_ts
-            for i in range(1, n_dense + 1):
-                ts = last_ts + timedelta(seconds=PLAYGROUND_STRESS_DENSE_STEP_S * i)
-                power = max(0.0, idle_w + fluct_w * math.sin(seed + i * 1.1))
-                self.cursor["t"] = (ts - self.base).total_seconds()
-                self.detector.process_reading(power, ts)
-                self._sample(ts)
-                dense_end_ts = ts
-                if len(self.captured) > captured_before:
-                    break
-
-            if len(self.captured) == captured_before:
-                for i in range(1, PLAYGROUND_STRESS_MAX_SPARSE_STEPS + 1):
-                    ts = dense_end_ts + timedelta(seconds=PLAYGROUND_STRESS_SPARSE_STEP_S * i)
-                    power = max(0.0, idle_w + fluct_w * math.sin(seed + n_dense + i * 1.1))
-                    self.cursor["t"] = (ts - self.base).total_seconds()
-                    self.detector.process_reading(power, ts)
-                    self._sample(ts)
-                    if len(self.captured) > captured_before:
-                        break
-
-            if len(self.captured) == captured_before:
-                flush_ts = dense_end_ts + timedelta(
-                    seconds=PLAYGROUND_STRESS_SPARSE_STEP_S * (PLAYGROUND_STRESS_MAX_SPARSE_STEPS + 2)
-                )
-                self.cursor["t"] = (flush_ts - self.base).total_seconds()
-                self.detector.force_end(flush_ts)
-                # Record a series sample at the forced-stop timestamp so the plotted tail
-                # reaches the reported elapsed time (otherwise the last point sits up to two
-                # sparse steps short of terminated_after_s).
-                self._sample(flush_ts)
-
-            terminated = len(self.captured) > captured_before
-            terminated_after_s: float | None = None
-            term_reason: Any = None
-            hit_cap = False
-            if terminated:
-                primary = max(
-                    self.captured[captured_before:],
-                    key=lambda c: float(c.get("duration") or 0.0),
-                )
-                term_reason = primary.get("termination_reason")
-                hit_cap = str(term_reason) == str(TerminationReason.FORCE_STOPPED)
-                terminated_after_s = self.cursor["t"] - synthetic_from_s
-
-            self._stress_outcome = {
-                "enabled": True,
-                "idle_w": round(idle_w, 2),
-                "fluct_w": round(fluct_w, 3),
-                "manual_override": override_applied,
-                "synthetic_from_s": round(synthetic_from_s, 1),
-                "stop_threshold_w": round(stop_thresh, 2),
-                "idle_above_threshold": idle_above,
-                "terminated": terminated,
-                "terminated_after_s": (
-                    round(terminated_after_s, 1) if terminated_after_s is not None else None
-                ),
-                "termination_reason": str(term_reason) if term_reason is not None else None,
-                "hit_cap": hit_cap,
-            }
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug(
-                "Playground stress tail failed for %s: %s", self.cycle.get("id"), exc
             )
 
     def finalize(self) -> dict[str, Any]:
@@ -1682,53 +1444,6 @@ class _DetailSim:
             elif ratio <= CYCLE_UNDERRUN_ANOMALY_RATIO:
                 alerts.append({"code": "underrun", "severity": "warn",
                                "detail": f"Finished at {ratio:.0%} of typical duration."})
-
-        # --- stress-tail verdict ---
-        st = self._stress_outcome
-        if st and st.get("enabled"):
-            outcome["stress"] = st
-            idle_w = st["idle_w"]
-            stop_thresh = st["stop_threshold_w"]
-            if st.get("terminated") and not st.get("hit_cap"):
-                after_s = float(st.get("terminated_after_s") or 0.0)
-                h, rem = divmod(int(after_s), 3600)
-                m = rem // 60
-                reason = st.get("termination_reason") or "?"
-                alerts.append({
-                    "code": "stress_terminated", "severity": "info",
-                    "detail_key": "msg.pg_stress_terminated_detail",
-                    "detail_params": {"idle": f"{idle_w:.1f}", "h": h, "m": m, "reason": reason},
-                    "detail": (
-                        f"Settled to ~{idle_w:.1f}W idle -- cycle ended "
-                        f"{h}h {m}m later via {reason}."
-                    ),
-                })
-            elif st.get("hit_cap"):
-                if st.get("idle_above_threshold"):
-                    alerts.append({
-                        "code": "stress_above_threshold", "severity": "warn",
-                        "detail_key": "msg.pg_stress_above_threshold_detail",
-                        "detail_params": {"idle": f"{idle_w:.1f}", "stop": f"{stop_thresh:.1f}"},
-                        "detail": (
-                            f"Idle draw ~{idle_w:.1f}W is at or above the effective stop "
-                            f"threshold ({stop_thresh:.1f}W) -- the cycle never registered "
-                            f"as quiet. Raise stop_threshold_w to fix."
-                        ),
-                    })
-                # Report the actual elapsed synthetic time (the cap is ~7h50m of synthetic
-                # tail plus the pre-tail cycle length, not a flat 8 h).
-                after_s = float(st.get("terminated_after_s") or 0.0)
-                h, rem = divmod(int(after_s), 3600)
-                m = rem // 60
-                alerts.append({
-                    "code": "stress_hit_cap", "severity": "error",
-                    "detail_key": "msg.pg_stress_hit_cap_detail",
-                    "detail_params": {"h": h, "m": m, "idle": f"{idle_w:.1f}", "stop": f"{stop_thresh:.1f}"},
-                    "detail": (
-                        f"Cycle ran {h}h {m}m without stopping -- force-stopped by the safety cap. "
-                        f"Idle draw {idle_w:.1f}W vs stop threshold {stop_thresh:.1f}W."
-                    ),
-                })
 
         series = self.series
         if len(series) > MAX_SERIES_PER_CYCLE:
@@ -1933,7 +1648,7 @@ def _diff_rows(
     }
 
 
-# ─── Parameter sweep (1D curve + 2D heatmap) ────────────────────────────────────
+# ─── Parameter sweep (1D curve) ────────────────────────────────────────────────────
 
 
 _SWEEP_OBJECTIVES = (
@@ -1975,27 +1690,6 @@ def finalize_sweep_1d(
         "current_value": current_value,
         "best_value": best["value"] if best else None,
         "best_metric": best["metric"] if best else None,
-        "lower_is_better": objective in _SWEEP_LOWER_IS_BETTER,
-    }
-
-
-def finalize_sweep_2d(
-    param_x: str, param_y: str, objective: str,
-    x_values: list[float], y_values: list[float],
-    grid: list[list[float | None]], current: dict[str, Any],
-) -> dict[str, Any]:
-    """Assemble a 2D sweep payload from grid cells collected across chunks."""
-    best: dict[str, Any] | None = None
-    for j, row in enumerate(grid):
-        for i, v in enumerate(row or []):
-            if v is None:
-                continue
-            if best is None or _sweep_is_better(v, best["metric"], objective):
-                best = {"x": x_values[i], "y": y_values[j], "metric": v}
-    return {
-        "param_x": param_x, "param_y": param_y, "objective": objective,
-        "x_values": x_values, "y_values": y_values, "grid": grid,
-        "best": best, "current": current,
         "lower_is_better": objective in _SWEEP_LOWER_IS_BETTER,
     }
 
@@ -2074,12 +1768,11 @@ def run_playground_sweep(
     options: dict[str, Any] | None,
     price: float | None,
     concurrency: int,
-    param_y: str | None = None,
-    values_y: list[float] | None = None,
     prebuilt: tuple[Any, Any, Any, Any] | None = None,
 ) -> dict[str, Any]:
-    """Sweep one param (1D curve) or two params (2D heatmap) and score each point
-    by ``objective`` computed from the per-cycle rows. Executor-safe; never raises.
+    """Sweep one param and score each value by ``objective`` computed from the
+    per-cycle rows. Executor-safe; never raises. (The 2D heatmap was removed:
+    the panel never sent a second parameter, audit PLAYGROUND.)
     """
     options = options or {}
     if objective not in _SWEEP_OBJECTIVES:
@@ -2107,32 +1800,6 @@ def run_playground_sweep(
     current_x = _sim_config_summary(base_config).get(
         _OVERRIDE_FIELD_MAP.get(param, (param,))[0]
     )
-
-    if param_y and values_y:
-        grid: list[list[float | None]] = []
-        best: dict[str, Any] | None = None
-        for vy in values_y:
-            row_metrics: list[float | None] = []
-            for vx in values:
-                override = {
-                    param: _coerce_param(base_config, param, vx),
-                    param_y: _coerce_param(base_config, param_y, vy),
-                }
-                metric, _ = _metric_for(override)
-                row_metrics.append(round(metric, 4) if metric is not None else None)
-                if metric is not None and (
-                    best is None or _sweep_is_better(metric, best["metric"], objective)
-                ):
-                    best = {"x": vx, "y": vy, "metric": round(metric, 4)}
-            grid.append(row_metrics)
-        current_y = _sim_config_summary(base_config).get(
-            _OVERRIDE_FIELD_MAP.get(param_y, (param_y,))[0]
-        )
-        return {
-            "param_x": param, "param_y": param_y, "objective": objective,
-            "x_values": values, "y_values": values_y, "grid": grid, "best": best,
-            "current": {"x": current_x, "y": current_y},
-        }
 
     points: list[dict[str, Any]] = []
     best_1d: dict[str, Any] | None = None
@@ -2165,205 +1832,3 @@ def _safe_float(value: Any) -> float | None:
         return round(float(value), 2)
     except (TypeError, ValueError):
         return None
-
-
-def _profile_trace(store: Any, profile_name: str) -> tuple[list[float], float] | None:
-    """Return (power_values, duration_s) for a profile's average envelope.
-
-    Prefers the cached envelope ``avg`` curve; falls back to the profile's
-    sample cycle trace. Returns None when nothing usable exists.
-    """
-    try:
-        env = store.get_envelope(profile_name)
-    except Exception:  # pylint: disable=broad-exception-caught
-        env = None
-    if env and env.get("avg"):
-        avg = env["avg"]
-        powers: list[float] = []
-        times: list[float] = []
-        for pt in avg:
-            if isinstance(pt, (list, tuple)) and len(pt) >= 2:
-                times.append(float(pt[0]))
-                powers.append(float(pt[1]))
-            else:
-                powers.append(float(pt))
-        if powers:
-            duration = float(env.get("target_duration") or 0.0)
-            if not duration and len(times) > 1:
-                duration = times[-1] - times[0]
-            return powers, duration
-
-    # Fallback: the profile's sample cycle.
-    try:
-        data = getattr(store, "_data", {}) or {}
-        profile = (data.get("profiles", {}) or {}).get(profile_name)
-        if not isinstance(profile, dict):
-            return None
-        # past + imported reference cycles: an import-only profile's sample lives in
-        # reference_cycles, so resolve against both (mirrors _build_match_snapshots).
-        pool = (data.get("past_cycles", []) or []) + (data.get("reference_cycles", []) or [])
-        sample = next(
-            (
-                c
-                for c in pool
-                if isinstance(c, dict) and c.get("id") == profile.get("sample_cycle_id")
-            ),
-            None,
-        )
-        if not sample:
-            return None
-        pts = decompress_power_data(sample)
-        if not pts:
-            return None
-        duration = float(
-            profile.get("avg_duration")
-            or sample.get("duration")
-            or (pts[-1][0] if pts else 0.0)
-        )
-        return [p for _, p in pts], duration
-    except Exception:  # pylint: disable=broad-exception-caught
-        return None
-
-
-def dtw_debug_payload(
-    store: Any, cycle_id: str, profile_name: str | None
-) -> dict[str, Any]:
-    """Score breakdown + resampled traces + DTW warp path for a cycle vs profile.
-
-    Returns ``{"error": <code>}`` when the cycle or profile is unavailable.
-    Executor-safe; never raises.
-    """
-    try:
-        cycle = next(
-            (c for c in store.get_past_cycles() if c.get("id") == cycle_id), None
-        )
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        return {"error": "store_error", "detail": str(exc)}
-    if cycle is None:
-        return {"error": "cycle_not_found"}
-
-    target_profile = profile_name or _cycle_label(cycle)
-    if not target_profile:
-        return {"error": "no_profile"}
-
-    cycle_pts = decompress_power_data(cycle)
-    if not cycle_pts or len(cycle_pts) < 2:
-        return {"error": "cycle_no_data", "profile_name": target_profile}
-
-    prof = _profile_trace(store, target_profile)
-    if prof is None:
-        return {"error": "profile_not_found", "profile_name": target_profile}
-    prof_powers, prof_duration = prof
-    if len(prof_powers) < 2:
-        return {"error": "profile_no_data", "profile_name": target_profile}
-
-    try:
-        return _compute_dtw_debug(
-            store, cycle, cycle_pts, target_profile, prof_powers, prof_duration
-        )
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground dtw_debug failed for %s: %s", cycle_id, exc)
-        return {
-            "error": "compute_error",
-            "detail": str(exc),
-            "profile_name": target_profile,
-        }
-
-
-def _compute_dtw_debug(
-    store: Any,
-    cycle: dict[str, Any],
-    cycle_pts: list[tuple[float, float]],
-    profile_name: str,
-    prof_powers: list[float],
-    prof_duration: float,
-) -> dict[str, Any]:
-    cfg = _matching_config(store)
-    corr_weight = float(cfg.get("corr_weight", MATCH_CORR_WEIGHT))
-    dur_weight = float(cfg.get("duration_weight", MATCH_DURATION_WEIGHT))
-    en_weight = float(cfg.get("energy_weight", MATCH_ENERGY_WEIGHT))
-    dur_scale = float(cfg.get("duration_scale", MATCH_DURATION_SCALE))
-    en_scale = float(cfg.get("energy_scale", MATCH_ENERGY_SCALE))
-    band = float(cfg.get("dtw_bandwidth", 0.2))
-    blend = float(cfg.get("dtw_blend", MATCH_DTW_BLEND))
-    l1_scale = float(cfg.get("dtw_l1_scale", MATCH_DTW_DIST_SCALE))
-    ddtw_scale = float(cfg.get("dtw_ddtw_scale", MATCH_DDTW_DIST_SCALE))
-    ensemble_w = float(cfg.get("dtw_ensemble_w", MATCH_DTW_ENSEMBLE_W))
-
-    cycle_powers = [p for _, p in cycle_pts]
-    cycle_duration = float(cycle_pts[-1][0] - cycle_pts[0][0])
-    current_peak = float(max(cycle_powers)) if cycle_powers else 0.0
-
-    # --- Stage 2: core similarity on the raw traces (matcher-faithful) ---
-    score, metrics, _offset = analysis.find_best_alignment(
-        cycle_powers, prof_powers, corr_weight=corr_weight
-    )
-    corr = float(metrics.get("corr", 0.0))
-    mae = float(metrics.get("mae", 0.0))
-    scaled_mae = mae * MATCH_MAE_REF_PEAK / max(current_peak, MATCH_MAE_PEAK_FLOOR)
-    mae_score = MATCH_MAE_SCALE / (MATCH_MAE_SCALE + scaled_mae)
-    stage2_score = float(score)
-
-    # --- DTW components on a common resampled grid ---
-    curr_arr = np.asarray(cycle_powers, dtype=float)
-    sample_arr = np.asarray(prof_powers, dtype=float)
-    l1_score = analysis._dtw_component_score(
-        curr_arr, sample_arr, current_peak, band, False, l1_scale
-    )
-    ddtw_score = analysis._dtw_component_score(
-        curr_arr, sample_arr, current_peak, band, True, ddtw_scale
-    )
-    ensemble_score = ensemble_w * l1_score + (1.0 - ensemble_w) * ddtw_score
-    blended_score = blend * stage2_score + (1.0 - blend) * ensemble_score
-
-    # --- Stage 4: duration + energy agreement over the DTW-blended score ---
-    cur_mean = float(np.mean(curr_arr)) if curr_arr.size else 0.0
-    prof_mean = float(np.mean(sample_arr)) if sample_arr.size else 0.0
-    dur_ag = analysis._agreement(cycle_duration, prof_duration, dur_scale)
-    en_ag = analysis._agreement(cur_mean, prof_mean, en_scale)
-    shape_w = 1.0 - dur_weight - en_weight
-    final_score = shape_w * blended_score + dur_weight * dur_ag + en_weight * en_ag
-
-    # --- Resampled traces on one shared grid (progress fraction 0..1) ---
-    n = MATCH_DTW_RESAMPLE_N
-    a = analysis._resample_to(curr_arr, n)
-    b = analysis._resample_to(sample_arr, n)
-    grid = np.linspace(0.0, 1.0, n)
-    cycle_trace = [[round(float(g), 4), round(float(p), 1)] for g, p in zip(grid, a)]
-    profile_trace = [[round(float(g), 4), round(float(p), 1)] for g, p in zip(grid, b)]
-
-    # --- DTW warping path on the same resampled arrays ---
-    try:
-        raw_path = analysis.compute_dtw_path(a, b, band_width_ratio=band)
-        warp_path = [[int(i), int(j)] for i, j in raw_path]
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground warp path failed: %s", exc)
-        warp_path = []
-
-    return {
-        "cycle_id": cycle.get("id"),
-        "profile_name": profile_name,
-        "grid_n": n,
-        "cycle_duration_s": round(cycle_duration, 1),
-        "profile_duration_s": round(float(prof_duration), 1),
-        "cycle_trace": cycle_trace,
-        "profile_trace": profile_trace,
-        "stage2": {
-            "correlation": round(corr, 4),
-            "mae_score": round(float(mae_score), 4),
-            "score": round(stage2_score, 4),
-        },
-        "dtw": {
-            "l1_score": round(float(l1_score), 4),
-            "ddtw_score": round(float(ddtw_score), 4),
-            "ensemble_score": round(float(ensemble_score), 4),
-            "blend_weight": round(blend, 4),
-            "blended_score": round(float(blended_score), 4),
-        },
-        "stage4": {
-            "duration_agreement": round(float(dur_ag), 4),
-            "energy_agreement": round(float(en_ag), 4),
-            "final_score": round(float(final_score), 4),
-        },
-        "warp_path": warp_path,
-    }

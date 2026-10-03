@@ -24,7 +24,7 @@ NumPy-only; no sklearn/torch/scipy are imported.
 The single runtime entry point is :func:`resolve_scorer`, which returns a scoring
 callable for a capability, preferring an on-device trained spec over the shipped
 embedded baseline. All live ML consumers go through it (the panel's ``ml_health``
-shadow comparison in ``ws_api`` and :class:`MLSuggestionEngine`), and any new
+shadow comparison in ``ws_api``), and any new
 runtime consumer should too — feature extraction lives in ``feature_extraction``
 and gating in :func:`ml_models_enabled`, so there is no separate engine object.
 
@@ -134,7 +134,7 @@ def resolve_scorer(capability: str, store: object | None):
     ``score_fn`` maps a feature mapping -> float in [0,1]; ``source`` is
     ``"on_device"`` or ``"baseline"``. Returns ``(None, None)`` when neither is
     available. This is the single bridge that lets trained models (Stage 4)
-    actually reach inference (ML Lab shadow comparison + MLSuggestionEngine)
+    actually reach inference (ML Lab shadow comparison)
     while transparently falling back to the baseline.
     """
     def _baseline():

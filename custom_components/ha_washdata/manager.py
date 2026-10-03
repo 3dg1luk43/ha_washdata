@@ -75,10 +75,8 @@ from .const import (
     CONF_NOTIFY_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_LOW_POWER_NO_UPDATE_TIMEOUT, # Import new constant
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_AUTO_MAINTENANCE,
     CONF_MAINTENANCE_REMINDER_CYCLES,
@@ -117,14 +115,12 @@ from .const import (
     DEFAULT_OFF_DELAY,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
-    DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEFAULT_PROFILE_UNMATCH_THRESHOLD,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_PROFILE_EVIDENCE_SOURCES,
     DEFAULT_LEARNING_CONFIDENCE,
-    DEFAULT_DURATION_TOLERANCE,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_AUTO_MAINTENANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
@@ -214,6 +210,8 @@ from .const import (
     MATCH_DECISIVE_MARGIN,
     MATCH_LABEL_MIN_MARGIN,
     ENABLE_ML_END_GUARD,
+    ENABLE_ML_EARLY_COMMIT,
+    ENABLE_ML_QUALITY_GATE,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_UNMATCHED_WATCHDOG_CEILING,
@@ -241,6 +239,7 @@ from .const import (
 )
 from .detector_config import apply_detector_config, build_detector_config
 from .cycle_detector import (
+    MatchContext,
     CycleDetector,
     terminal_high_for_guards,
 )
@@ -254,6 +253,8 @@ from .profile_store import (
     terminal_drop_baseline,
 )
 from .signal_processing import (
+    median_fast,
+    percentile_linear,
     integrate_wh,
     energy_gap_threshold_s,
     compact_price_timeline,
@@ -272,7 +273,6 @@ from .time_utils import power_data_to_offsets, utc_now
 from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
-from .phase_segmenter import phase_matching_enabled
 from .frontend import PANEL_URL_PATH
 
 _LOGGER = logging.getLogger(__name__)
@@ -645,7 +645,6 @@ class WashDataManager:
         # persistent-notification fallback). The clean-laundry nag uses its own tag
         # since it fires up to an hour after finish and should not clobber the thread.
         self._lifecycle_tag = f"ha_washdata_{self.entry_id}_lifecycle"
-        self._lifecycle_pn_id = self._lifecycle_tag
         self._clean_tag = f"ha_washdata_{self.entry_id}_clean"
         # #446: the live progress updates need their OWN tag, because on iOS a Live
         # Activity is a separate UI surface from the notification and is ended only
@@ -683,8 +682,6 @@ class WashDataManager:
         self._noise_max_powers: list[float] = []
         self._last_match_result = None
         self._last_phase_estimate_time = None
-        self._sample_intervals: list[float] = []
-        self._sample_interval_stats: dict[str, Any] = {}
         self._matching_task: Task[Any] | None = None
         self._cycle_end_task: Task[Any] | None = None
         self._banked_tail_repair_task: Task[Any] | None = None
@@ -1015,11 +1012,6 @@ class WashDataManager:
         # before. Kept as a separate field rather than replacing the confidence,
         # because the confidence is what the detector's end-detection gates read.
         self._last_member_confidence: float | None = None
-        # Sample interval tracking (seconds) for adaptive timing
-        # Profile matching duration tolerance (0.25 = ±25%)
-        self._profile_duration_tolerance: float = float(
-            config_entry.options.get("profile_duration_tolerance", 0.25)
-        )
 
 
         self._remove_maintenance_scheduler = None
@@ -1028,7 +1020,6 @@ class WashDataManager:
         self._ml_training_running = False  # True while a training run is in flight
         self._profile_sample_repair_stats: dict[str, int] | None = None
 
-        self._last_suggestion_update: datetime | None = None
 
         # Pump Monitor state
         self._pump_stuck_duration: int = int(
@@ -1273,7 +1264,7 @@ class WashDataManager:
                     # live_match_commit model for P(top-1 is correct).
                     try:
                         from .ml.engine import ml_models_enabled, resolve_scorer  # noqa: PLC0415
-                        if ml_models_enabled(self.config_entry.options):
+                        if ENABLE_ML_EARLY_COMMIT and ml_models_enabled(self.config_entry.options):
                             match_fn, _ = resolve_scorer("live_match", self.profile_store)
                             if match_fn is not None:
                                 ml_commit_score = float(match_fn(_live_feat))
@@ -1662,12 +1653,7 @@ class WashDataManager:
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
-            # Element 8 is the narrow #288-only prefix verdict and element 9 the
-            # matched profile's own tail power level, both for the #364 guards;
-            # element 10 is its terminal high-power block for the #399 anti-crease
-            # guard; element 11 is its measured post-activity quiet span, which
-            # bounds the tail Smart Termination may bank (register item 297). The detector
-            # tolerates shorter tuples, so other callers stay valid.
+            # Built by name (audit DETECT-15); see CycleDetector.MatchContext.
             terminal_high = self._terminal_high_for_guards(profile_name)
             # Half-interval matching until the first commit (audit LIVE-17).
             self.detector.set_match_committed(
@@ -1675,37 +1661,43 @@ class WashDataManager:
                     "detecting...", "restored...", "off", "starting", "unknown", None
                 )
             )
-            self.detector.update_match(
-                (profile_name, confidence, matched_duration, phase_name,
-                 result.is_confident_mismatch, result.is_ambiguous,
-                 result.is_prefix_ambiguous,
-                 result.is_prefix_ambiguous_full_shape,
-                 self.profile_store.profile_tail_power(profile_name) if profile_name else None,
-                 terminal_high,
-                 # Element 11 (register item 297): the matched profile's measured post-activity
-                 # quiet span, which bounds how much of Smart Termination's
-                 # confirmation delay _keep_tail_cap may store as cycle time.
-                 self.profile_store.profile_terminal_quiet_seconds(profile_name)
-                 if profile_name else None,
-                 # Element 12 (register item 330): the longest expected duration
-                 # still in play across the candidates. The ENDING fallback gate
-                 # raises its bar to this while the match is ambiguous, instead of
-                 # refusing to shorten at all.
-                 # From the FULL candidate population, carried on the result -
-                 # `result.candidates` is `candidates[:5]` and would hide the
-                 # very programme `_match_prefix_ambiguous` is warning about.
-                 float(getattr(result, "longest_candidate_duration_s", 0.0) or 0.0),
-                 # Element 13 (register item 384): the shortest length the user
-                 # has vouched for in this profile, which floors a dishwasher's
-                 # kept tail exactly as the banked-tail repair does.
-                 self.profile_store.profile_trusted_min_duration(profile_name)
-                 if profile_name else None,
-                 # Element 14 (audit DETECT-16): the matched profile's pause
-                 # catalogue, for the hazard end gate.
-                 self.profile_store.profile_pause_catalogue(
-                     profile_name, float(self.detector.config.stop_threshold_w)
-                 ) if profile_name else None)
-            )
+            self.detector.update_match(MatchContext(
+                profile_name=profile_name,
+                confidence=confidence,
+                expected_duration=matched_duration,
+                phase_name=phase_name,
+                is_confident_mismatch=result.is_confident_mismatch,
+                is_ambiguous=result.is_ambiguous,
+                is_prefix_ambiguous=result.is_prefix_ambiguous,
+                is_prefix_ambiguous_full_shape=result.is_prefix_ambiguous_full_shape,
+                tail_power=(
+                    self.profile_store.profile_tail_power(profile_name) if profile_name else None
+                ),
+                terminal_high=terminal_high,
+                # Item 297: the profile's measured post-activity quiet span, which
+                # bounds how much of Smart Termination's delay the tail may keep.
+                terminal_quiet_s=(
+                    self.profile_store.profile_terminal_quiet_seconds(profile_name)
+                    if profile_name else None
+                ),
+                # Item 330: from the FULL candidate population, carried on the
+                # result (`result.candidates` is the top 5 and would hide the very
+                # programme the prefix flag is warning about).
+                longest_candidate_s=float(
+                    getattr(result, "longest_candidate_duration_s", 0.0) or 0.0
+                ),
+                # Item 384: the shortest length the user has vouched for.
+                trusted_min_s=(
+                    self.profile_store.profile_trusted_min_duration(profile_name)
+                    if profile_name else None
+                ),
+                # Audit DETECT-16: the pause catalogue for the hazard end gate.
+                pause_catalogue=(
+                    self.profile_store.profile_pause_catalogue(
+                        profile_name, float(self.detector.config.stop_threshold_w)
+                    ) if profile_name else None
+                ),
+            ))
 
             # --- LOGGING (Unified) ---
             self._logger.info(
@@ -2071,6 +2063,23 @@ class WashDataManager:
                     self._start_event_fired = bool(
                         active_snapshot_to_restore.get("start_event_fired", False)
                     )
+                    # One-shot per-cycle state (audit MANAGER-08); junk is dropped.
+                    _fired = active_snapshot_to_restore.get("fired_cycle_timers")
+                    self._fired_cycle_timers = {
+                        int(i) for i in (_fired if isinstance(_fired, list) else [])
+                        if isinstance(i, int) and not isinstance(i, bool)
+                    }
+                    self._notified_pre_completion = bool(
+                        active_snapshot_to_restore.get("notified_pre_completion", False)
+                    )
+                    _gaps = active_snapshot_to_restore.get("restart_gaps")
+                    self._restart_gaps = [
+                        g for g in (_gaps if isinstance(_gaps, list) else [])
+                        if isinstance(g, dict)
+                    ]
+                    self._live_activity_started = bool(
+                        active_snapshot_to_restore.get("live_activity_started", False)
+                    )
 
                     # Restore user-pause state from snapshot.
                     self._is_user_paused = bool(
@@ -2250,9 +2259,6 @@ class WashDataManager:
             options.get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
             DEFAULT_LEARNING_CONFIDENCE,
         )
-        self._duration_tolerance = options.get(
-            CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE
-        )
         self._auto_label_confidence = option_float(
             options.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
             DEFAULT_AUTO_LABEL_CONFIDENCE,
@@ -2326,9 +2332,7 @@ class WashDataManager:
             }
         except Exception:  # noqa: BLE001
             pass
-        # Apply configurable duration tolerance to profile store
         try:
-            self.profile_store.set_duration_tolerance(self._profile_duration_tolerance)
             self._apply_retention_limits(self.config_entry.options)
         except Exception:
             pass
@@ -2707,11 +2711,6 @@ class WashDataManager:
             self._logger.info("Updated match interval: %ds→%ds", old_interval, new_interval)
 
         # Update other configurable options
-        self._profile_duration_tolerance = float(
-            config_entry.options.get(
-                CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE
-            )
-        )
 
 
         # Update notification settings
@@ -2838,9 +2837,6 @@ class WashDataManager:
 
         # Trigger entity updates to reflect any changes
         async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
-
-        if self.detector:
-            self.detector.config.profile_duration_tolerance = self._profile_duration_tolerance
 
         # Schedule midnight maintenance if enabled
         await self._setup_maintenance_scheduler()
@@ -3722,7 +3718,7 @@ class WashDataManager:
         promoted = list(summary.get("promoted", {}).keys())
         if promoted:
             self._ml_training_failures = 0
-            # Consumers (ML Lab, MLSuggestionEngine) read the trained specs live
+            # Consumers (ML Lab) read the trained specs live
             # from the store via ml.engine.resolve_scorer, so no refresh is needed.
             self._logger.info("On-device ML training promoted models: %s", promoted)
         else:
@@ -3826,12 +3822,10 @@ class WashDataManager:
             from .ws_api import _compute_ml_comparison  # pylint: disable=import-outside-toplevel
         except Exception:  # pylint: disable=broad-exception-caught
             return 0
-        opts = {**self.config_entry.data, **self.config_entry.options}
-        off_delay = int(opts.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY))
         try:
             result = await self.hass.async_add_executor_job(
                 functools.partial(
-                    _compute_ml_comparison, self.profile_store, off_delay, force_recompute=True
+                    _compute_ml_comparison, self.profile_store, force_recompute=True
                 )
             )
         except Exception as err:  # noqa: BLE001
@@ -5452,32 +5446,6 @@ class WashDataManager:
             self._logger,
         )
 
-    def _ml_energy_total(
-        self,
-        trace: list[tuple[datetime, float]],
-        profile_name: str,
-    ) -> float | None:
-        """Predicted total cycle energy (Wh) from the on-device ``total_energy``
-        regressor, or None.
-
-        The regressor predicts the *energy-completion fraction* (energy so far ÷
-        final energy); total = ``energy_so_far / fraction``. Because energy
-        accumulates non-linearly (heating front-loads it), this is more stable —
-        especially early — than dividing accumulated energy by *time* progress
-        (the fallback in :meth:`_update_projected_energy`). Same gating as the
-        remaining-time regressor: opt-in, inert until a model is promoted. Never
-        raises.
-        """
-        return progress_mod.ml_energy_total(
-            self.profile_store,
-            self.config_entry.options,
-            float(self._matched_profile_duration or 0.0),
-            trace,
-            profile_name,
-            self._profile_end_expectation,
-            self._logger,
-        )
-
     def _compute_cycle_quality_score(
         self,
         cycle_data: dict[str, Any],
@@ -5495,7 +5463,7 @@ class WashDataManager:
             from .ml.engine import ml_models_enabled, resolve_scorer
             from .ml.feature_extraction import quality_features
 
-            if not ml_models_enabled(self.config_entry.options):
+            if not ENABLE_ML_QUALITY_GATE or not ml_models_enabled(self.config_entry.options):
                 return
             quality_fn, _ = resolve_scorer("quality", self.profile_store)
             if quality_fn is None:
@@ -5923,6 +5891,14 @@ class WashDataManager:
         snapshot["price_timeline"] = [
             [ts, price] for ts, price in self._price_timeline
         ]
+        # One-shot per-cycle state (audit MANAGER-08): without it a restart re-fired
+        # every passed cycle timer ("Add softener" twice; an auto_pause timer paused
+        # again and, with pause_cuts_power, switched the appliance off), could send
+        # the pre-completion reminder twice, and a second restart lost the first gap.
+        snapshot["fired_cycle_timers"] = sorted(self._fired_cycle_timers)
+        snapshot["notified_pre_completion"] = bool(self._notified_pre_completion)
+        snapshot["restart_gaps"] = list(self._restart_gaps)
+        snapshot["live_activity_started"] = bool(self._live_activity_started)
         return snapshot
 
     @staticmethod
@@ -8066,6 +8042,13 @@ class WashDataManager:
                 or entry.get("event_type") in {NOTIFY_EVENT_START, "pre_complete"}
             )
         ]
+        # ...and a "minutes left" reminder parked by quiet hours (audit MANAGER-09):
+        # it was delivered at the window's end, hours after the cycle, right
+        # before "finished".
+        self._quiet_pending_notifications = [
+            entry for entry in self._quiet_pending_notifications
+            if entry.get("event_type") != "pre_complete"
+        ]
 
         # Always emit the clear when the user has any live channel configured.
         # The in-memory sent-count is unreliable after an HA restart (it resets
@@ -8463,23 +8446,6 @@ class WashDataManager:
             )
         ml_pct = self._ml_progress_percent(trace, self._current_program)
 
-        # Opt-in phase-resolved ETA (washing machine / washer-dryer only). Segment
-        # the observed-so-far trace, match against cached per-profile phase profiles,
-        # and blend the per-role budget remaining into the estimate (progress.py
-        # owns the blend). Gated + guarded: any failure leaves the proven estimate
-        # untouched (phase_remaining_s stays None -> byte-identical behaviour).
-        phase_remaining_s: float | None = None
-        if (
-            len(trace) >= 10
-            and self._current_program not in ("detecting...", "off", None)
-            and phase_matching_enabled(self.config_entry.options, self.device_type)
-        ):
-            pr = self.profile_store.phase_remaining(
-                trace, self.device_type, self._current_program
-            )
-            if pr is not None:
-                phase_remaining_s = pr.get("remaining_s")
-
         result = progress_mod.compute_progress(
             self.device_type,
             float(self._matched_profile_duration),
@@ -8490,7 +8456,6 @@ class WashDataManager:
             phase_result,
             ml_pct,
             self._logger,
-            phase_remaining_s=phase_remaining_s,
             # Real gap since the previous estimate, so the progress EMA keeps its
             # time constant instead of its step count - a plug that reports every
             # 30 s must not lag 6x further behind than one reporting every 5 s.
@@ -8871,8 +8836,16 @@ class WashDataManager:
 
     @property
     def sample_interval_stats(self):
-        """Return statistics about sampling intervals."""
-        return self._sample_interval_stats
+        """The detector's own cadence window (audit MANAGER-14: this dict was never
+        filled, so the debug sensor's `sampling_p95` and diagnostics were empty)."""
+        dts = list(getattr(self.detector, "_recent_dts", None) or [])
+        if not dts:
+            return {}
+        return {
+            "p95": round(percentile_linear(dts, 95), 2),
+            "median": round(median_fast(dts), 2),
+            "count": len(dts),
+        }
 
     @property
     def pump_stuck(self) -> bool:

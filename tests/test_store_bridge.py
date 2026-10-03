@@ -189,12 +189,6 @@ async def test_confirm_and_rate_when_connected(bridge):
 
 
 @pytest.mark.asyncio
-async def test_get_device_quality(bridge):
-    br, ps, hass = bridge
-    assert await br.get_device_quality("d1") == {"avg": 4.5, "count": 2}
-
-
-@pytest.mark.asyncio
 async def test_device_profiles_maps_type(bridge):
     br, ps, hass = bridge
     res = await br.device_profiles("Bosch", "WAT", "washing_machine")
@@ -436,3 +430,45 @@ async def test_get_profiles_browses_pending_inclusively(bridge):
     assert br._client.last_get_profiles == {
         "did": "dishwasher__ikea__tallboda", "include_pending": True,
     }
+
+
+@pytest.mark.asyncio
+async def test_a_bundle_saves_once_and_rebuilds_each_program_once(bridge):
+    """Audit STORE-10: every cycle used to rebuild its envelope and rewrite the
+    whole store (40 saves for a 40-cycle bundle)."""
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "profiles": [
+        {"id": "p1", "program": "Cotton 40", "cycles": [
+            {"id": f"c{i}", "importable": _trace(2000 + i), "createdAt": "t"} for i in range(3)
+        ]},
+        {"id": "p2", "program": "Eco 50", "cycles": [
+            {"id": "c9", "importable": _trace(1500), "createdAt": "t"},
+        ]},
+    ]}
+    ps._store.async_save.reset_mock()
+    with patch.object(ps, "async_rebuild_envelope", AsyncMock()) as rebuild:
+        seen = []
+        res = await br.download_device("d1", progress=lambda d, t: seen.append((d, t)))
+    assert res["cycles_imported"] == 4
+    assert ps._store.async_save.await_count == 1
+    assert sorted(c.args[0] for c in rebuild.await_args_list) == ["Cotton 40", "Eco 50"]
+    assert seen[0] == (0, 4) and seen[-1] == (3, 4)
+
+
+@pytest.mark.asyncio
+async def test_a_cancelled_download_keeps_what_it_imported(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "profiles": [
+        {"id": "p1", "program": "Cotton 40", "cycles": [
+            {"id": f"c{i}", "importable": _trace(2000 + i), "createdAt": "t"} for i in range(3)
+        ]},
+    ]}
+    calls = {"n": 0}
+
+    def _cancel() -> bool:
+        calls["n"] += 1
+        return calls["n"] > 2
+
+    res = await br.download_device("d1", should_cancel=_cancel)
+    assert res["cancelled"] is True and res["cycles_imported"] == 2
+    assert len(ps.get_reference_cycles()) == 2

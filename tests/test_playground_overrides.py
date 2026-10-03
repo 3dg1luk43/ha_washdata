@@ -71,42 +71,17 @@ def test_apply_match_overrides_maps_user_options_to_matcher_keys():
     assert mc == {"min_duration_ratio": 0.07, "max_duration_ratio": 1.5, "dtw_bandwidth": 0.2}
 
 
-def test_apply_match_overrides_exposes_stage_2_3_4_params_for_experiment():
-    # Stage 2-4 scoring / DTW knobs are exposed as SANDBOX-ONLY overrides so power
-    # users can experiment with the matcher in the Playground; they map straight to
-    # the config keys compute_matches_worker reads, and coerce (str->num, int).
+def test_apply_match_overrides_ignores_the_removed_stage_2_4_knobs():
+    # The Stage 2-4 scoring / DTW knobs were sandbox-only overrides until 0.5.8;
+    # an old client sending them must not change the replayed matcher.
     mc = {"corr_weight": 0.45, "duration_weight": 0.22}
     out = playground.apply_match_overrides(
-        mc,
-        {
-            "corr_weight": "0.7",       # Stage 2
-            "keep_min_score": 0.05,
-            "dtw_bandwidth": 0.0,       # Stage 3 (0 disables DTW)
-            "dtw_blend": 0.4,
-            "dtw_ensemble_w": 0.6,
-            "dtw_ddtw_scale": 25,
-            "dtw_refine_top_n": "3",    # int-coerced
-            "duration_weight": 0.3,     # Stage 4
-            "energy_weight": 0.3,
-            "duration_scale": 0.2,
-            "energy_scale": 0.25,
-            "totally_unknown_key": 9,   # ignored
-        },
+        mc, {"corr_weight": "0.7", "dtw_ensemble_w": 0.6, "dtw_refine_top_n": "3"},
     )
-    assert out["corr_weight"] == 0.7
-    assert out["keep_min_score"] == 0.05
-    assert out["dtw_bandwidth"] == 0.0
-    assert out["dtw_blend"] == 0.4
-    assert out["dtw_ensemble_w"] == 0.6
-    assert out["dtw_ddtw_scale"] == 25.0
-    assert out["dtw_refine_top_n"] == 3 and isinstance(out["dtw_refine_top_n"], int)
-    assert out["duration_weight"] == 0.3
-    assert out["energy_weight"] == 0.3
-    assert out["duration_scale"] == 0.2
-    assert out["energy_scale"] == 0.25
-    assert "totally_unknown_key" not in out
-    # base dict untouched
-    assert mc == {"corr_weight": 0.45, "duration_weight": 0.22}
+    assert out == mc
+    assert set(playground._MATCH_OVERRIDE_KEYS) == {
+        "profile_match_min_duration_ratio", "profile_match_max_duration_ratio",
+    }
 
 
 def test_apply_match_overrides_every_stage_key_maps_to_a_config_key():
@@ -220,11 +195,6 @@ def test_finalize_sweep_picks_best_by_direction():
     assert lo["best_value"] == 60 and lo["best_metric"] == 0.7    # lower is better
     assert lo["lower_is_better"] is True
 
-    grid = [[0.5, 0.8], [None, 0.6]]
-    g = playground.finalize_sweep_2d("p", "q", "match_accuracy", [10, 20], [1, 2], grid, {"x": 10, "y": 1})
-    assert g["best"] == {"x": 20, "y": 1, "metric": 0.8}
-    assert g["lower_is_better"] is False
-
 
 def test_coerce_bool_accepts_only_unambiguous_boolean_values():
     # Real booleans, the two numeric spellings of a toggle, and the usual strings.
@@ -276,10 +246,13 @@ def test_effective_settings_reads_back_what_build_sim_config_writes():
     assert eff["anti_wrinkle_enabled"] is True
     # Matching keys come off the live matcher config...
     assert eff["profile_match_min_duration_ratio"] == 0.2
-    assert eff["dtw_bandwidth"] == 0.15
+    assert eff["profile_match_max_duration_ratio"] == 1.2
     # ...and fall back to the canonical const.py defaults when it doesn't carry them.
-    assert eff["corr_weight"] == playground.MATCH_DEFAULTS_BY_OPTION["corr_weight"]
-    assert eff["duration_weight"] == playground.MATCH_DEFAULTS_BY_OPTION["duration_weight"]
+    bare = playground.effective_settings(base, {})
+    assert bare["profile_match_max_duration_ratio"] == playground.MATCH_DEFAULTS_BY_OPTION[
+        "profile_match_max_duration_ratio"
+    ]
+    assert "dtw_bandwidth" not in eff and "corr_weight" not in eff
 
     # Round-trip: applying the effective map as an override changes nothing.
     assert playground.build_sim_config(base, eff) == base
@@ -290,32 +263,24 @@ def test_effective_settings_covers_every_editable_key():
     assert set(eff) == set(playground.SETTING_KEYS)
 
 
-def test_publishable_keys_exclude_sandbox_only_matcher_knobs():
-    # Stage 1 duration ratios are real options; the Stage 2-4 scoring knobs are not
-    # (no CONF_* behind them), so publishing them would write dead option keys.
+def test_every_playground_key_is_publishable():
+    # The sandbox-only matcher knobs are gone, so every key is a real option.
     assert "profile_match_min_duration_ratio" in playground.PUBLISHABLE_SETTING_KEYS
-    assert "profile_match_max_duration_ratio" in playground.PUBLISHABLE_SETTING_KEYS
     assert "off_delay" in playground.PUBLISHABLE_SETTING_KEYS
-    for sandbox_key in (
-        "corr_weight", "keep_min_score", "dtw_bandwidth", "dtw_blend",
-        "dtw_ensemble_w", "dtw_ddtw_scale", "dtw_refine_top_n",
-        "duration_weight", "energy_weight", "duration_scale", "energy_scale",
-    ):
-        assert sandbox_key not in playground.PUBLISHABLE_SETTING_KEYS
-    assert playground.PUBLISHABLE_SETTING_KEYS <= playground.SETTING_KEYS
+    assert playground.PUBLISHABLE_SETTING_KEYS == playground.SETTING_KEYS
 
 
 def test_sanitize_setting_values_drops_unknown_and_malformed_entries():
     out = playground.sanitize_setting_values({
         "off_delay": "300",              # coerced to int
-        "corr_weight": 0.6,              # sandbox key: kept (presets may hold it)
+        "corr_weight": 0.6,              # removed matcher knob: dropped
         "anti_wrinkle_enabled": "true",  # coerced to bool
         "unknown_key": 1,                # not an editable key
         "min_off_gap": "not-a-number",   # un-coercible
         "start_threshold_w": None,       # cleared value
         "stop_threshold_w": float("inf"),  # non-finite
     })
-    assert out == {"off_delay": 300, "corr_weight": 0.6, "anti_wrinkle_enabled": True}
+    assert out == {"off_delay": 300, "anti_wrinkle_enabled": True}
     assert playground.sanitize_setting_values(None) == {}
     assert playground.sanitize_setting_values("nope") == {}
 

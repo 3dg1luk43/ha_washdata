@@ -187,7 +187,7 @@ test('"Reset to built-in models" button reverts on-device models', async ({ page
 
 // ─── Program-matching fine-tuning card ────────────────────────────────────────
 
-test('matching tuning card is present in ML tab when st.matching is provided', async ({ page }) => {
+test('the matching tuning card stays hidden while the shipped defaults are in use', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
     'ha_washdata/get_ml_training_status': {
@@ -200,9 +200,8 @@ test('matching tuning card is present in ML tab when st.matching is provided', a
     },
   });
   await openMlTab(page);
-  // "Program-matching fine-tuning" card header should appear
-  const card = page.locator('text=Program-matching').first();
-  await expect(card).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('.wd-card-title').first()).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('text=Program-matching')).toHaveCount(0);
 });
 
 test('"Reset to defaults" button calls revert_matching_config when tuned weights are active', async ({ page }) => {

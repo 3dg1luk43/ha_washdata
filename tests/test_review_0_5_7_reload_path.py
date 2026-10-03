@@ -177,8 +177,8 @@ TUNED = {
 ATTRS = (
     "_learning_confidence", "_auto_label_confidence", "_match_persistence",
     "_unmatch_threshold", "_no_update_active_timeout", "_low_power_no_update_timeout",
-    "_off_delay", "_progress_reset_delay", "_duration_tolerance",
-)
+    "_off_delay", "_progress_reset_delay",
+)  # (`_duration_tolerance` was write-only and is gone: audit MANAGER-14.)
 
 
 @pytest.mark.asyncio

@@ -46,6 +46,30 @@ def _setup(hass, bundle_settings):
     return manager, entry
 
 
+async def _run_download(hass, manager, entry, include_settings: bool) -> dict:
+    """The WS command starts a registry task (audit STORE-10); run its body and
+    return the task's result, which is what the panel reads."""
+    from custom_components.ha_washdata import task_registry
+
+    hass.data = {}
+    hass.async_create_task = MagicMock(side_effect=lambda coro: coro.close())
+    conn = _conn()
+    with patch.object(ws_api, "_store_ctx", return_value=(manager, dict(entry.options))), \
+         patch.object(ws_api, "_get_entry", return_value=entry), \
+         patch.object(ws_api, "_get_manager", return_value=manager):
+        msg = {"id": 1, "entry_id": "e", "device_id": "d1"}
+        if include_settings:
+            msg["include_settings"] = True
+        await ws_api.ws_store_download_device.__wrapped__(hass, conn, msg)
+        task_id = conn.send_result.call_args.args[1]["task_id"]
+        task = task_registry.get_registry(hass).get(task_id)
+        await ws_api._store_download_task(  # noqa: SLF001
+            hass, task, "e", manager, "d1", "washing_machine", include_settings
+        )
+    assert task.state == task_registry.STATE_DONE, task.error
+    return task.result
+
+
 @pytest.mark.asyncio
 async def test_download_applies_only_allowlisted_settings_when_opted_in():
     hass = MagicMock()
@@ -56,20 +80,13 @@ async def test_download_applies_only_allowlisted_settings_when_opted_in():
         "stop_threshold_w": 2.0, "off_delay": 200, "profile_match_max_duration_ratio": 1.5,
         "notify_title": "x", "power_sensor": "sensor.p",
     })
-    conn = _conn()
-    with patch.object(ws_api, "_store_ctx", return_value=(manager, dict(entry.options))), \
-         patch.object(ws_api, "_get_entry", return_value=entry), \
-         patch.object(ws_api, "_get_manager", return_value=manager):
-        await ws_api.ws_store_download_device.__wrapped__(
-            hass, conn, {"id": 1, "entry_id": "e", "device_id": "d1", "include_settings": True}
-        )
+    payload = await _run_download(hass, manager, entry, include_settings=True)
     hass.config_entries.async_update_entry.assert_called_once()
     applied_opts = hass.config_entries.async_update_entry.call_args.kwargs["options"]
     assert applied_opts["stop_threshold_w"] == 2.0
     assert applied_opts["profile_match_max_duration_ratio"] == 1.8
     assert applied_opts["off_delay"] == 90  # the device's own value survives
     assert "notify_title" not in applied_opts and "power_sensor" not in applied_opts
-    payload = conn.send_result.call_args.args[1]
     assert payload["settings_applied"] == 2
 
 
@@ -77,13 +94,6 @@ async def test_download_applies_only_allowlisted_settings_when_opted_in():
 async def test_download_does_not_touch_options_without_opt_in():
     hass = MagicMock()
     manager, entry = _setup(hass, {"off_delay": 200})
-    conn = _conn()
-    with patch.object(ws_api, "_store_ctx", return_value=(manager, dict(entry.options))), \
-         patch.object(ws_api, "_get_entry", return_value=entry), \
-         patch.object(ws_api, "_get_manager", return_value=manager):
-        await ws_api.ws_store_download_device.__wrapped__(
-            hass, conn, {"id": 1, "entry_id": "e", "device_id": "d1"}  # include_settings absent
-        )
+    payload = await _run_download(hass, manager, entry, include_settings=False)
     hass.config_entries.async_update_entry.assert_not_called()
-    payload = conn.send_result.call_args.args[1]
     assert payload["settings_applied"] == 0

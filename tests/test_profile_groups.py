@@ -102,24 +102,6 @@ def test_group_cohesion_single_member_is_one(store):
 # ── suggestion ───────────────────────────────────────────────────────────────
 
 
-def test_suggest_clusters_near_duplicates(store):
-    store._data["profiles"] = {
-        "Eco30": {"avg_duration": 1000.0},
-        "Eco60": {"avg_duration": 1050.0},   # same shape + duration -> cluster with Eco30
-        "Quick": {"avg_duration": 300.0},    # far shorter -> excluded
-    }
-    store._data["envelopes"] = {
-        "Eco30": {"avg": _ramp()},
-        "Eco60": {"avg": _ramp(scale=1.3)},
-        "Quick": {"avg": _ramp(n=30, scale=1.0)},
-    }
-    sug = store.suggest_profile_groups()
-    clusters = [set(s["members"]) for s in sug]
-    assert any({"Eco30", "Eco60"} <= c for c in clusters)
-    # Quick has a very different duration, so it is not grouped with the Eco pair.
-    assert not any("Quick" in c and {"Eco30", "Eco60"} <= c for c in clusters)
-
-
 def _snap(name, power, dur):
     return {"name": name, "avg_duration": float(dur), "sample_power": list(power)}
 
@@ -200,14 +182,6 @@ def test_stage5_selection_ignores_duration_prefers_energy(store):
     }
     chosen, _fit, _dur = store._stage5_pick_member(cur, 1000.0, ["RightEnergy", "RightDur"], ms)
     assert chosen == "RightEnergy"
-
-
-def test_suggest_skips_already_grouped(store):
-    store._data["profiles"] = {"E1": {"avg_duration": 1000.0}, "E2": {"avg_duration": 1010.0}}
-    store._data["envelopes"] = {"E1": {"avg": _ramp()}, "E2": {"avg": _ramp(scale=1.1)}}
-    store._data["profile_groups"] = {"Eco": {"members": ["E1", "E2"]}}
-    # Both already in a group -> nothing new to suggest.
-    assert store.suggest_profile_groups() == []
 
 
 # ── prefix-landscape guard: is_prefix_ambiguous on MatchResult ───────────────

@@ -25,6 +25,8 @@ manager / Home Assistant instance is needed.
 """
 from __future__ import annotations
 
+import pytest
+
 from datetime import timedelta
 from unittest.mock import MagicMock
 
@@ -33,6 +35,14 @@ from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.ml.training_task import train_from_cycles
+
+
+@pytest.fixture(autouse=True)
+def _consumer_unfrozen(monkeypatch):
+    """The consumer ships frozen off (audit ML-01/02/06/07); these tests cover
+    what it does when switched back on."""
+    from custom_components.ha_washdata import progress as _mod
+    monkeypatch.setattr(_mod, "ENABLE_ML_REMAINING_TIME", True)
 
 _PROFILE = "Cotton"
 _EXP = {"duration": 3600.0, "energy": 800.0, "peak": 1000.0}

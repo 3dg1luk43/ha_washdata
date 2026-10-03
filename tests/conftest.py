@@ -98,7 +98,7 @@ _ENTITY_TARGET_SCHEMA = vol.Schema(
 
 
 def _schema_for(domain: str, service: str):
-    """The real schema for a service WashData calls, or None to skip."""
+    """The real schema for a service WashData calls."""
     if domain == "notify":
         if service == "send_message":
             return _SEND_MESSAGE_SCHEMA
@@ -107,7 +107,20 @@ def _schema_for(domain: str, service: str):
         return NOTIFY_SERVICE_SCHEMA
     if domain == "switch":
         return _ENTITY_TARGET_SCHEMA
-    return None
+    if domain == "ha_washdata":
+        from custom_components.ha_washdata import _SERVICE_SCHEMAS
+
+        return _SERVICE_SCHEMAS.get(service, _FAIL_CLOSED)
+    # Fail closed (audit PLATFORM-16): a domain nobody wrote a schema for used to
+    # be skipped, so a new outbound call was never checked. Add its real schema.
+    return _FAIL_CLOSED
+
+
+def _FAIL_CLOSED(payload):  # noqa: N802 - used as a schema
+    raise vol.Invalid(
+        "no schema registered in tests/conftest.py for this outbound service; "
+        "add Home Assistant's real one to _schema_for"
+    )
 
 
 def _validate_recorded_service_calls(hass) -> None:

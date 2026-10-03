@@ -102,30 +102,6 @@ CONF_POWER_OFF_DELAY = (
     "power_off_delay"  # Seconds below the power-off threshold before Finished/Clean -> Off
 )
 CONF_EXPOSE_DEBUG_ENTITIES = "expose_debug_entities"  # Expose detailed debug sensors
-# Per-device opt-in: blend the phase-resolved (per-role budget) ETA into the
-# time-remaining estimate for phase-matching-supported device types (washing
-# machine, washer-dryer). Default off. Validated by the Phase-0 ETA gate; see
-# docs/superpowers/specs/2026-07-17-phase-segmented-matching-design.md.
-CONF_ENABLE_PHASE_MATCHING = "enable_phase_matching"
-# Phase-structure consistency advisory (Profiles tab, never a notification).
-# A single-program/temperature profile should have a fairly consistent heating
-# block; wildly varying heating time or heating present in only some cycles
-# usually means different programs/temperatures were labelled under one profile
-# (the "mixed labels" data-hygiene problem). Pure statistics from the cached
-# phase profile - no relabeling (phase matching does not label better than the
-# whole-cycle matcher; see the Phase-0 gate).
-# Minimum member cycles before a profile's cached phase profile is trusted to
-# drive the live phase-resolved ETA (mirrors the envelope's cycle_count>=2 gate);
-# below this the priors are too noisy (single-cycle -> zero variance) and the
-# estimate falls back to the classic one. Design §6 cold-start floor.
-PHASE_PROFILE_MIN_CYCLES = 2
-PHASE_CONSISTENCY_MIN_CYCLES = 4
-# Heating-time std/mean above this -> likely mixed temperatures under one label.
-# A clean single-temperature profile sits ~0.2 (load variation only); a profile
-# mixing 30/40/90C sits ~0.45-0.6, so 0.45 catches genuine mixing with margin.
-PHASE_HEAT_CV_WARN = 0.45
-PHASE_HEAT_OCC_MIXED_LO = 0.25    # heating present in only 25%-75% of cycles ->
-PHASE_HEAT_OCC_MIXED_HI = 0.75    #   mixed with a non-heating program
 CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
 )
@@ -555,8 +531,10 @@ ENERGY_ANOMALY_Z_THRESHOLD = 2.5   # |z-score| above this = energy anomaly
 # Profile warm-up mode: a newly-created profile with fewer than this many
 # labeled cycles skips auto-labeling and always requests manual confirmation.
 # Prevents the system from confidently mis-labeling cycles before it has seen
-# enough examples of the program.
-CONF_PROFILE_MIN_WARMUP_CYCLES = 5   # labeled cycles before auto-matching is enabled
+# enough examples of the program. 5 until 0.5.8 (audit UI-26): eight programs
+# meant up to 40 confirmations before the first auto-label; the label gates
+# (margin, ambiguity, label_confidence) now carry what the extra prompts guarded.
+CONF_PROFILE_MIN_WARMUP_CYCLES = 2   # labeled cycles before auto-labelling is enabled
 
 # Shape drift detection: compares the average power-curve envelope of the
 # earliest third of a profile's cycles against the most recent third.
@@ -1572,7 +1550,7 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 # v15: label provenance repair (audit MANAGER-01): cycles the user confirmed or
 # corrected in the review queue are stamped `label_source="manual"`, and an answer
 # the panel's Auto-label had replaced is put back. Pure data, idempotent.
-STORAGE_VERSION = 15
+STORAGE_VERSION = 16
 STORAGE_KEY = "ha_washdata"
 
 # ─── Config-entry schema version (NOT the storage version above) ───────────────
@@ -1603,8 +1581,6 @@ SERVICE_SUBMIT_FEEDBACK = (
 # no panel sections render and no background work runs.
 #
 #   SHOW_ML_LAB           ML Lab comparison tab in the WashData panel.
-#   ENABLE_ML_SUGGESTIONS ML-model-driven setting suggestions (Stage 3), shown
-#                         side-by-side with the classic statistical suggestions.
 #   ENABLE_ML_TRAINING    On-device model training loop (Stage 4): scheduled
 #                         retraining on the user's own labeled cycles.
 #
@@ -1612,16 +1588,18 @@ SERVICE_SUBMIT_FEEDBACK = (
 # are always on - they only improve the existing suggestion engine and add no
 # new surfaces, so they need no flag.
 SHOW_ML_LAB = True
-# Off (audit SUGGEST-18): measured over 26 devices it differed from the classic
-# engine on 7 values, 5 of them within 0.02 of it; its auto-label value fed the
-# match confidence into its own features, and the comparison it drives cost up to
-# 3.5 s per Settings/Cycles/ML-Lab load.
-ENABLE_ML_SUGGESTIONS = False
 ENABLE_ML_TRAINING = True
 # Frozen off even when a device enables ML models (audit ML-05): replayed on 292
 # real cycles the end-guard prevented no premature stop and raised the washer
 # median end lag 12.2 -> 17.5 min, every deferral the full 30 min cap.
 ENABLE_ML_END_GUARD = False
+# Also frozen off (audit ML-01/02/06/07), measured on the corpus:
+#   early commit (C2): 31% of its early commits wrong vs 8.4% for persistence;
+#   quality gate (C3): fired on 0 of the 12 auto-label-eligible real cycles;
+#   remaining-time regressor (C4): worse than the naive estimate on 7 of 8 installs.
+ENABLE_ML_EARLY_COMMIT = False
+ENABLE_ML_QUALITY_GATE = False
+ENABLE_ML_REMAINING_TIME = False
 
 # ─── Community store (online features) ────────────────────────────────────────
 # Opt-in browsing/importing/sharing of reference cycles via the WashData Store.
@@ -1790,27 +1768,6 @@ MAINTENANCE_EVENT_TYPES = (
 # the "needs maintenance" nag advisory (duration-trend / shape-drift).
 MAINTENANCE_RECENT_SUPPRESS_DAYS = 30
 
-# ─── Playground stress-tail constants (never used by the live integration) ─────
-# These govern the synthetic idle continuation in the "Test idle termination"
-# Playground toggle. All times are in seconds.
-PLAYGROUND_STRESS_TRAILING_WINDOW_S: float = 60.0    # window for idle-floor derivation
-PLAYGROUND_STRESS_FLOOR_PERCENTILE: float = 0.07     # p7 of window readings = standby floor
-PLAYGROUND_STRESS_FLUCT_FALLBACK_FRAC: float = 0.12  # ±12% fallback when window is flat
-PLAYGROUND_STRESS_DENSE_STEP_S: float = 30.0         # dense pre-fill cadence
-PLAYGROUND_STRESS_DENSE_DURATION_S: float = 1200.0   # dense pre-fill length (20 min)
-PLAYGROUND_STRESS_SPARSE_STEP_S: float = 1800.0      # sparse main step (30 min)
-PLAYGROUND_STRESS_MAX_SPARSE_STEPS: int = 15         # max sparse steps → max 7.5 h extra
-PLAYGROUND_STRESS_MAX_IDLE_W: float = 100000.0       # upper bound for a manual idle override
-                                                     # (far beyond any appliance; guards against
-                                                     # inf/absurd values corrupting synthesis)
-
-# ─── Playground setting presets (sandbox snapshots, per device) ────────────────
-# Named snapshots of the Playground control panel's values, stored under the
-# "playground_presets" store key. They never touch the live config: publishing a
-# value to entry.options is always an explicit, per-setting user action.
-PLAYGROUND_PRESET_MAX: int = 30                      # per-device cap (keeps the store small)
-PLAYGROUND_PRESET_NAME_MAX: int = 60                 # preset name length cap
-
 # ─── Which cycle categories count as evidence for a profile ────────────────────
 # A profile's envelope (its average curve + duration/energy spread) and the matching
 # template are built from stored cycles. By default all three categories count. Untick a
@@ -1890,3 +1847,59 @@ HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP: int = 30     # consecutive empty days th
                                                      # without this, a 10-year request would issue
                                                      # thousands of pointless queries.
 HISTORY_IMPORT_SOURCE: str = "history_import"        # `meta.source` marker on imported cycles
+
+
+def numeric_option_keys() -> dict[str, type]:
+    """Option keys whose compiled default is a number -> that default's type.
+
+    Derived from the ``CONF_X`` / ``DEFAULT_X`` naming pair, so a new numeric
+    setting is covered without a list to maintain (audit PLATFORM-13).
+    """
+    g = globals()
+    out: dict[str, type] = {}
+    for name, key in g.items():
+        if not name.startswith("CONF_") or not isinstance(key, str):
+            continue
+        default = g.get("DEFAULT_" + name[5:])
+        if isinstance(default, (int, float)) and not isinstance(default, bool):
+            out[key] = type(default)
+    return out
+
+
+def coerce_numeric_option(value: Any, kind: type) -> float | int | None:
+    """``value`` as a finite number of ``kind``'s type, or None if it is not one."""
+    if isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(number):
+        return None
+    if kind is int:
+        return int(number) if number.is_integer() else number
+    return number
+
+
+def drop_invalid_numeric_options(options: Any) -> tuple[dict[str, Any], list[str]]:
+    """``(options without non-numeric numeric settings, the keys dropped)``.
+
+    A non-numeric value for a numeric setting is dropped so its default applies;
+    stored, it raised in the manager's constructor and the entry never set up
+    again (audit PLATFORM-13, register item 279).
+    """
+    if not isinstance(options, dict):
+        return {}, []
+    kinds = numeric_option_keys()
+    clean = dict(options)
+    dropped: list[str] = []
+    for key, kind in kinds.items():
+        if key in clean and clean[key] is not None:
+            number = coerce_numeric_option(clean[key], kind)
+            if number is None:
+                clean.pop(key)
+                dropped.append(key)
+            else:
+                clean[key] = number
+    return clean, dropped
+

@@ -24,6 +24,7 @@ brand/model stay per-device. Nothing here runs unless online features are enable
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -242,8 +243,6 @@ class StoreBridge:
     async def get_cycles(self, profile_id: str) -> list[dict[str, Any]]:
         return await self._client.get_cycles(profile_id)
 
-    async def get_device_quality(self, device_id: str) -> dict[str, Any]:
-        return await self._client.get_device_quality(device_id)
 
     # ── community actions (authed writes) ────────────────────────────────────────
 
@@ -416,7 +415,14 @@ class StoreBridge:
                 res = {**res, "detail": self._client.last_error()}
         return res
 
-    async def download_device(self, device_id_: str, device_type: str = "") -> dict[str, Any]:
+    async def download_device(
+        self,
+        device_id_: str,
+        device_type: str = "",
+        *,
+        progress: Callable[[int, int], None] | None = None,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> dict[str, Any]:
         """Adopt a whole-device bundle: for each downloaded profile, import its
         reference cycles into ``reference_cycles`` (merge/upsert; real past_cycles are
         never touched) and, when the profile carries a phase map, replace the local
@@ -442,25 +448,43 @@ class StoreBridge:
         cycles_skipped = 0
         phases_applied = 0
         imported_store_ids: list[str] = []
-        for prof in bundle.get("profiles", []) or []:
+        # Batched (audit STORE-10): every cycle used to rebuild its envelope and
+        # rewrite the whole store - 40 saves for a 40-cycle bundle, 7 s vs 1.5 s.
+        # Now one rebuild per touched program and one save at the end.
+        touched: list[str] = []
+        profiles_list = [p for p in (bundle.get("profiles", []) or []) if isinstance(p, dict)]
+        total = sum(len(p.get("cycles") or []) for p in profiles_list)
+        seen = 0
+        cancelled = False
+        for prof in profiles_list:
+            if cancelled:
+                break
             program = str(prof.get("program") or prof.get("program_lc") or "").strip()
             if not program:
                 continue
             adopted_any = False
             for cyc in prof.get("cycles", []) or []:
+                if should_cancel is not None and should_cancel():
+                    cancelled = True
+                    break
+                if progress is not None:
+                    progress(seen, total)
+                seen += 1
                 pts = cyc.get("importable")
                 if not pts:
                     continue
                 store_cid = cyc.get("id")
                 if store_cid and f"store:{store_cid}" in already:
                     continue  # already imported on a previous download
-                local_id = await self._ps.add_reference_cycle(program, pts, {
+                local_id = self._ps._add_reference_cycle_nosave(program, pts, {  # noqa: SLF001
                     "store_cycle_id": store_cid,
                     "store_uploaded_at": cyc.get("createdAt"),
                     "sampling_interval": (cyc.get("trace") or {}).get("sampleIntervalSec"),
                     "community": True,
                 }, known_hashes=known_hashes)
                 if local_id:
+                    if program not in touched:
+                        touched.append(program)
                     cycles_imported += 1
                     adopted_any = True
                     if store_cid:
@@ -481,6 +505,10 @@ class StoreBridge:
         # community-wide "download" (adoption) for the store's usage dashboard -- the real
         # metric of how many people actually pulled this into their integration. Fired in
         # the background so store latency never delays the adopt-bundle response.
+        for program in touched:
+            await self._ps.async_rebuild_envelope(program)
+        if touched:
+            await self._ps.async_save()
         if imported_store_ids:
             self._fire_download_telemetry(imported_store_ids)
         settings = bundle.get("settings") if isinstance(bundle.get("settings"), dict) else {}
@@ -489,6 +517,7 @@ class StoreBridge:
             "cycles_imported": cycles_imported,
             # Refused by the quality bar or as a duplicate (audit STORE-03/05).
             "cycles_skipped": cycles_skipped,
+            **({"cancelled": True} if cancelled else {}),
             "phases_applied": phases_applied,
             "settings": settings,
         }
