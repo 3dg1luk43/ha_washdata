@@ -253,7 +253,8 @@
     "confirm_appliance": "Potvrdit tento spotřebič",
     "confirmed": "Potvrzeno",
     "create_profile_from_gap": "Vytvořit profil",
-    "undo_import": "Vrátit zpět poslední import"
+    "undo_import": "Vrátit zpět poslední import",
+    "pg_rerun": "Aktualizovat simulaci"
   },
   "note": {
     "off_delay": {
@@ -676,7 +677,12 @@
     "automation_off": "(vypnuto)",
     "ref_cycle_none": "Žádný",
     "share_name": "Zobrazovat mé jméno u sdíleného obsahu",
-    "cat_backfill_cycles": "Cykly nalezené v importované historii výkonu"
+    "cat_backfill_cycles": "Cykly nalezené v importované historii výkonu",
+    "pg_compare_profile": "Porovnat s profilem",
+    "pg_obj_early": "Míra předčasných konců",
+    "pg_obj_endlag": "Zpoždění konce (medián)",
+    "pg_obj_split": "Míra rozdělených cyklů",
+    "pg_sweep_cycles": "Nedávné cykly"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -705,7 +711,27 @@
     },
     "metric_auc": "AUC {auc} na validačních datech",
     "metric_mae": "chyba {model} oproti základnímu modelu {baseline}",
-    "fine_tuned_at": "doladěno {when}"
+    "fine_tuned_at": "doladěno {when}",
+    "held_out_count": "měřeno na {count} validačních cyklech",
+    "held_out_count_one": "měřeno na {count} validačním cyklu",
+    "held_out_count_few": "měřeno na {count} validačních cyklech",
+    "held_out_count_many": "měřeno na {count} validačního cyklu",
+    "held_out_count_other": "měřeno na {count} validačních cyklech",
+    "last_run_not_promoted": "Poslední kontrola ({when}): {reason}",
+    "never": "nikdy",
+    "skip_reason": {
+      "fit_failed": "Trénování selhalo: {error}",
+      "holdout_too_small": "Příliš málo cyklů na férové otestování nového modelu: k testování šlo vyčlenit {held_out}, potřeba je {min}.",
+      "insufficient_rows": "Zatím málo použitelných cyklů: dosud {count} označených a čistých cyklů.",
+      "insufficient_rows_one": "Zatím málo použitelných cyklů: dosud {count} označený a čistý cyklus.",
+      "insufficient_rows_few": "Zatím málo použitelných cyklů: dosud {count} označené a čisté cykly.",
+      "insufficient_rows_many": "Zatím málo použitelných cyklů: dosud {count} označeného a čistého cyklu.",
+      "insufficient_rows_other": "Zatím málo použitelných cyklů: dosud {count} označených a čistých cyklů.",
+      "not_better_than_incumbent": "Nový model nebyl lepší než ten používaný (chyba {model} oproti {incumbent}), proto zůstal stávající.",
+      "not_better_than_naive": "Nový model nebyl zřetelně lepší než jednoduchý odhad (chyba {model} oproti {naive}).",
+      "unknown": "Nic nového se nepodařilo naučit."
+    },
+    "trained_unknown": "v neznámou dobu"
   },
   "modal": {
     "auto_label": "Cykly automatického označování",
@@ -1034,7 +1060,25 @@
     "feedback_detected": "WashData rozpoznal: {name}",
     "import_undo_hint": "Je uchován bod obnovení z doby před posledním importem ({when}): {profiles} profilů a {cycles} cyklů.",
     "replace_undo_hint": "Nejprve se uloží bod obnovení, takže tento import můžete vrátit zpět v části Export / Import.",
-    "pg_in_sample_note": "Tyto cykly také pomohly vytvořit profily, se kterými se porovnávají, takže výsledky jsou optimistické: u nových cyklů počítejte s o něco menším počtem správných přiřazení."
+    "pg_in_sample_note": "Tyto cykly také pomohly vytvořit profily, se kterými se porovnávají, takže výsledky jsou optimistické: u nových cyklů počítejte s o něco menším počtem správných přiřazení.",
+    "hist_tail_trimmed": "Oříznuto {min} min čekání po skončení cyklu, stejně jako to dělá běžící integrace",
+    "hist_truncated": "zastaveno na limitu počtu měření ({n}), zbytek historie proto nebyl prohledán",
+    "hist_warn_kw": "Nejvyšší měření je jen {w}. Tento senzor zřejmě hlásí kilowatty; WashData čte výkon ve wattech, takže z něj nelze cykly detekovat.",
+    "hist_warn_naive_time": "{n} časových značek nemá časové pásmo a bylo načteno jako UTC. Pokud je soubor v místním čase, je každý cyklus posunut o váš posun vůči UTC a měření kolem přechodu na letní nebo zimní čas mohou být přeházena nebo vynechána.",
+    "hist_warn_naive_time_one": "{n} časová značka nemá časové pásmo a byla načtena jako UTC. Pokud je soubor v místním čase, je každý cyklus posunut o váš posun vůči UTC a měření kolem přechodu na letní nebo zimní čas mohou být přeházena nebo vynechána.",
+    "hist_warn_naive_time_few": "{n} časové značky nemají časové pásmo a byly načteny jako UTC. Pokud je soubor v místním čase, je každý cyklus posunut o váš posun vůči UTC a měření kolem přechodu na letní nebo zimní čas mohou být přeházena nebo vynechána.",
+    "hist_warn_naive_time_many": "{n} časové značky nemá časové pásmo a bylo načteno jako UTC. Pokud je soubor v místním čase, je každý cyklus posunut o váš posun vůči UTC a měření kolem přechodu na letní nebo zimní čas mohou být přeházena nebo vynechána.",
+    "hist_warn_naive_time_other": "{n} časových značek nemá časové pásmo a bylo načteno jako UTC. Pokud je soubor v místním čase, je každý cyklus posunut o váš posun vůči UTC a měření kolem přechodu na letní nebo zimní čas mohou být přeházena nebo vynechána.",
+    "pg_compare_profile_tip": "Vybírá jen profil vykreslený přes graf. Simulace vždy přiřazuje program k cyklu sama, stejně jako běžící integrace.",
+    "pg_outcome_stale": "Od spuštění této simulace se nastavení změnilo. Stále zobrazuje starý výsledek.",
+    "pg_sweep_guarded": "Ukončí více cyklů předčasně, více jich rozdělí nebo vynechá cykly, které současné nastavení zachytí, proto se nikdy nedoporučuje.",
+    "pg_sweep_keep_current": "Ponechat současnou hodnotu ({value}, {metric}): žádná hodnota nebyla lepší alespoň o jeden cyklus.",
+    "pg_sweep_n_cycles": "na {count} cyklech",
+    "pg_sweep_n_cycles_one": "na {count} cyklu",
+    "pg_sweep_n_cycles_few": "na {count} cyklech",
+    "pg_sweep_n_cycles_many": "na {count} cyklu",
+    "pg_sweep_n_cycles_other": "na {count} cyklech",
+    "pg_task_busy": "Pro toto zařízení už běží „Otestovat na historii“ nebo „Optimalizovat“. Počkejte na dokončení, nebo běh zrušte."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1193,7 +1237,7 @@
       "label": "Použít chytré modely během cyklu"
     },
     "end_energy_threshold": {
-      "doc": "Během odpočtu zpozdění vypnutí je akumulovaná energie (watty × čas) porovávána s tímto prahem. Pokud je překročena, odpočet se resetuje – zachovává otočení ochrany před mačkáním a doby sušení myčky připojené k cyklu místo jejich předčasného přerušení. Zvyšte, pokud cykly končí příliš brzy během chladnutí; snižte, pokud je detekce pomalá.",
+      "doc": "Po uplynutí zpoždění vypnutí se energie spotřebovaná během něj (watty x čas) porovná s tímto prahem. Nad ním cyklus ještě není dokončen, takže otáčení proti zmačkání a závěrečné sušení myčky zůstanou součástí cyklu a nejsou předčasně useknuty. Snižte jej, pokud cykly končí během ochlazovacího otáčení nebo závěrečného sušení; zvyšte jej, pokud dokončené cykly stále čekají.",
       "label": "Energie konce"
     },
     "energy_price_entity": {
@@ -1900,7 +1944,17 @@
     "store_download_partial": "Programy, které se nepodařilo stáhnout: {n}; zkuste to později.",
     "import_no_restore_point": "Importováno, ale bod obnovení se nepodařilo uložit, takže tento import nelze vrátit zpět",
     "import_undo_failed": "Import se nepodařilo vrátit zpět: {error}",
-    "import_undone": "Import vrácen zpět: obnoveno {profiles} profilů a {cycles} cyklů"
+    "import_undone": "Import vrácen zpět: obnoveno {profiles} profilů a {cycles} cyklů",
+    "auto_label_cancelled": "Automatické označování zrušeno po označení {count} cyklů.",
+    "auto_label_cancelled_one": "Automatické označování zrušeno po označení {count} cyklu.",
+    "auto_label_cancelled_few": "Automatické označování zrušeno po označení {count} cyklů.",
+    "auto_label_cancelled_many": "Automatické označování zrušeno po označení {count} cyklu.",
+    "auto_label_cancelled_other": "Automatické označování zrušeno po označení {count} cyklů.",
+    "auto_label_done": "Automatické označování dokončeno: označeno {count} cyklů, bez označení zůstalo: {skipped}.",
+    "auto_label_done_one": "Automatické označování dokončeno: označen {count} cyklus, bez označení zůstalo: {skipped}.",
+    "auto_label_done_few": "Automatické označování dokončeno: označeny {count} cykly, bez označení zůstalo: {skipped}.",
+    "auto_label_done_many": "Automatické označování dokončeno: označeno {count} cyklu, bez označení zůstalo: {skipped}.",
+    "auto_label_done_other": "Automatické označování dokončeno: označeno {count} cyklů, bez označení zůstalo: {skipped}."
   },
   "trend": {
     "down": "Klesající trend",

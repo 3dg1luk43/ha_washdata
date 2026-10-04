@@ -224,3 +224,100 @@ test('ML tab renders without overflow on mobile', async ({ page }) => {
   });
   expect(overflow).toBeLessThanOrEqual(1);
 });
+
+// ─── Audit ML-19 / ML-20: translated strings, why nothing was learnt ──────────
+
+test('ML-19: "never" and the unknown fine-tune time go through the translations', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_ml_training_status': {
+      ...ML_STATUS_PERSONALIZED,
+      last_trained: null,
+      on_device_models: { total_energy: { ...ML_STATUS_PERSONALIZED.on_device_models.total_energy, trained_at: null } },
+    },
+  }, {}, { translations: { en: { ml: { never: 'XX-never', trained_unknown: 'XX-unknown' } } } });
+  await openMlTab(page);
+  await expect(page.locator('p.wd-info:has-text("Last checked")').first()).toContainText('XX-never', { timeout: 8_000 });
+  const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
+  await expect(learnedCard).toContainText('fine-tuned XX-unknown');
+});
+
+test('ML-20: with nothing fine-tuned, the last run says why', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_ml_training_status': {
+      ...ML_STATUS_RESPONSE,
+      last_run: { total_energy: {
+        ts: '2026-10-04T02:00:00+00:00', promoted: false, reason_code: 'insufficient_rows',
+        reason_params: { rows: 12, min: 30, cycles: 2 }, reason: 'insufficient data (rows=12)',
+      } },
+    },
+  });
+  await openMlTab(page);
+  const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
+  const line = learnedCard.locator('.wd-ml-last-run[data-reason="insufficient_rows"]');
+  await expect(line).toContainText('Not enough usable cycles yet: 2 labelled, clean cycles so far.', { timeout: 8_000 });
+});
+
+test('ML-20: a kept model shows why the last run did not replace it', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_ml_training_status': {
+      ...ML_STATUS_PERSONALIZED,
+      last_run: { total_energy: {
+        ts: '2026-10-04T02:00:00+00:00', promoted: false, reason_code: 'not_better_than_incumbent',
+        reason_params: { model: '0.031', incumbent: '0.020' }, reason: 'kept',
+      } },
+    },
+  });
+  await openMlTab(page);
+  const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
+  await expect(learnedCard.locator('.wd-ml-last-run')).toContainText(
+    'not better than the one in use (error 0.031 vs 0.020)', { timeout: 8_000 },
+  );
+});
+
+test('ML-20: a promoting last run adds no reason line', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_ml_training_status': {
+      ...ML_STATUS_PERSONALIZED,
+      last_run: { total_energy: { ts: '2026-10-04T02:00:00+00:00', promoted: true } },
+    },
+  });
+  await openMlTab(page);
+  const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
+  await expect(learnedCard.getByText('Energy estimate')).toBeVisible({ timeout: 8_000 });
+  await expect(learnedCard.locator('.wd-ml-last-run')).toHaveCount(0);
+});
+
+test('ML-20: the fit chip says how many held-out cycles it rests on', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_ml_training_status': {
+      ...ML_STATUS_PERSONALIZED,
+      on_device_models: { total_energy: { ...ML_STATUS_PERSONALIZED.on_device_models.total_energy, held_out_cycles: 6 } },
+    },
+  });
+  await openMlTab(page);
+  const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
+  const chip = learnedCard.locator('div[title*="held-out"]').first();
+  await expect(chip).toHaveAttribute('title', /measured on 6 held-out cycles/, { timeout: 8_000 });
+});
+
+test('ML-20: "Train now" that promotes nothing says why in the toast', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_ml_training_status': ML_STATUS_RESPONSE,
+    'ha_washdata/trigger_ml_training': {
+      ok: true, promoted: [],
+      results: [{ capability: 'total_energy', promoted: false, reason_code: 'holdout_too_small',
+                  reason_params: { held_out: 2, min: 5, cycles: 9 } }],
+    },
+  });
+  await openMlTab(page);
+  await page.locator('button[data-action="ml-train-now"]').first().click();
+  await expect(page.locator('.wd-toast')).toContainText(
+    'Too few cycles to test a new model fairly: 2 could be set aside for testing, 5 are needed.', { timeout: 8_000 },
+  );
+});

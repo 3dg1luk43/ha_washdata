@@ -196,7 +196,15 @@ def begin_tick(
     profile_name = result.best_profile
     confidence = result.confidence
 
-    # Identify current program score from results
+    # Identify current program score from results. Read from the COLLAPSED top 5,
+    # so a displayed member of a cohesive Stage-5 family (whose record carries the
+    # picked member's or the `__group__` name) and a program ranked sixth read 0.0.
+    # Reading every member's own pre-collapse score instead (audit MATCH-DECIDE-03)
+    # was measured and NOT shipped: on the two corpus exports with user groups the
+    # committed program at cycle end was right 55 -> 53 of 116 (end_gate_eval --loo
+    # --all-formats: 333 -> 331 of 460, end timing identical), for 169 -> 163
+    # displayed-program changes. Both losses were 0.0 reads switching the display
+    # on real margins of 0.002-0.038 that happened to land on the label.
     current_program_score: Any = 0.0
     for c in result.candidates:
         if c.get("name") == state.current_program:
@@ -207,8 +215,8 @@ def begin_tick(
     # checkpoints, this separates right from wrong far better than the absolute
     # score does mid-cycle (AUC 0.773 vs 0.535), which is why the mid-cycle switch
     # keys on it. Register item 305. Measured against the best OTHER candidate
-    # rather than by list index: Stage-5 group collapsing rebuilds the result, so
-    # `best_profile` is not guaranteed to be `candidates[0]`.
+    # rather than by list index, so it does not depend on how the Stage-5 collapse
+    # orders the rebuilt candidate list.
     match_margin = 1.0
     runner_up = None
     for c in result.candidates:
@@ -338,12 +346,13 @@ def decide_switch(
         # and is kept because switching to something scoring below what is already
         # displayed is never right.
         # The 1.0 sentinel the margin carries when nothing else scored is
-        # LOAD-BEARING, not a gap: `devtools/decisive_margin_eval.py` measured a
-        # single surviving candidate as the correct programme 99.5% (369/371) of the
-        # time, against 92.5% (1326/1433) for the real-margin bypass, over 2645
-        # checkpoints on the shipped matcher (re-cut for audit F7; PR #448 round 6
-        # had 94.0% / 77.8% on a harness that skipped Stage-1 re-gridding). Stage 1/2
-        # rejecting every other profile is evidence.
+        # LOAD-BEARING, not a gap: `devtools/decisive_margin_eval.py --loo` measured
+        # a single surviving candidate as the correct programme 96.3% (361/375) of the
+        # time, against 87.8% (1028/1171) for the real-margin bypass, over 2636
+        # leave-one-out checkpoints on the shipped matcher (99.4% vs 90.0% where the
+        # programme keeps another cycle; in-sample flattered both to 99.5% / 92.5%;
+        # PR #448 round 6 had 94.0% / 77.8% on a harness that skipped Stage-1
+        # re-gridding). Stage 1/2 rejecting every other profile is evidence.
         if (
             tick.match_margin > MATCH_DECISIVE_MARGIN
             and confidence > current_program_score

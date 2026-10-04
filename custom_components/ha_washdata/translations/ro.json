@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Nu s-a putut conecta",
-      "invalid_auth": "Autentificare nevalidă",
       "unknown": "Eroare neașteptată",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Pragul de încredere",
-          "description": "Încrederea minimă de potrivire (0,50-0,95) pentru aplicarea etichetelor."
+          "description": "Încrederea minimă de potrivire (0,50-0,95) pentru aplicarea etichetelor. Lăsați gol pentru a folosi setarea Încredere Etichetare Automată a dispozitivului."
         }
       }
     },

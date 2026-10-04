@@ -43,6 +43,8 @@ const _HASS_REFRESH_MS = 6000;
 // Cycles-tab page size. Kept modest so the "Load more" control actually engages
 // for typical histories instead of loading everything in one page.
 const _CYCLE_PAGE_SIZE = 25;
+// playground.MAX_BATCH_CYCLES: the most cycles one Test-on-history / Optimize run replays.
+const _PG_MAX_BATCH_CYCLES = 50;
 
 // Detector states that mean "a cycle is in flight". Single source for the device
 // bar dot, the status header and the pause/resume/force-stop controls -- these
@@ -155,7 +157,7 @@ const _SETTINGS_SECTIONS = [
     ] },
     { sub: 'Cycle End', fields: [
       { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,
-        doc: 'During the off-delay countdown, accumulated energy (watts x time) is compared to this threshold. If exceeded, the countdown resets - keeping anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Raise it if cycles end too early during cool-down; lower it if detection is sluggish.' },
+        doc: 'When the off delay has run out, the energy used during it (watts x time) is compared to this threshold. Above it the cycle is not finished yet, which keeps anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Lower it if cycles end during a cool-down tumble or drying tail; raise it if finished cycles keep waiting.' },
       { key: 'smart_termination_duration_ratio', label: 'Smart Termination Ratio', type: 'number', step: 0.01, min: 0.5, max: 1.0,
         doc: 'How far into the matched program\'s expected duration a cycle must be before Smart Termination may end it early once power drops. The expected duration is the program\'s average, so on appliances whose runtime varies a lot - washers on cold winter vs warm summer inlet water, sensor-dry dryers, load-dependent programs - about half of all runs finish shorter than that average and never get the fast finish, ending only via the fallback timeout minutes late. Lower this (e.g. 0.85) on those machines so the early finish still fires; raise it toward 1.0 to be more conservative. Leave empty for the default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never fires on an ambiguous or low-confidence match.' },
     ] },
@@ -6724,7 +6726,7 @@ class HaWashdataPanel extends HTMLElement {
       ? this._t('msg.enough_data', {current: cyc, min: min}, `Enough data to learn from (${cyc}/${min} cycles).`)
       : this._t('msg.collecting_data', {need: need, current: cyc, min: min}, `Collecting data. Cycles still needed before fine-tuning can start: ${need} (${cyc}/${min}).`);
     const bar = `<div style="height:8px;border-radius:6px;background:var(--secondary-background-color);overflow:hidden;margin:8px 0"><div style="width:${pct}%;height:100%;background:${barCol}"></div></div>`;
-    const last = st.last_trained ? _fmtDate(st.last_trained) : 'never';
+    const last = st.last_trained ? _fmtDate(st.last_trained) : this._tText('ml.never', {}, 'never');
     const state = running
       ? `<span style="color:var(--info-color,#2196f3)"><span class="wd-spin"></span> ${this._t('status.fine_tuning', {}, 'fine-tuning now…')}</span>`
       : (st.enabled ? this._t('lbl.auto_fine_tune_on', {hour: String(st.hour).padStart(2, '0')}, `auto fine-tune on (around ${String(st.hour).padStart(2, '0')}:00)`) : this._t('lbl.auto_fine_tune_off', {}, 'auto fine-tune off'));
@@ -6746,17 +6748,21 @@ class HaWashdataPanel extends HTMLElement {
     const models = st.on_device_models || {};
     const keys = Object.keys(models);
     const reverting = this._busy.has('ml-revert-models');
+    const lastRuns = st.last_run || {};
     let body;
     if (!keys.length) {
-      body = `<p class="wd-info" style="margin:0">${this._t('msg.no_fine_tuned', {}, 'Nothing fine-tuned yet — WashData is using its built-in models.')}</p>`;
+      // Why nothing is fine-tuned, from the last run (audit ML-20).
+      const why = Object.keys(lastRuns).map(cap => this._mlLastRunLine(lastRuns[cap])).filter(Boolean).join('');
+      body = `<p class="wd-info" style="margin:0">${this._t('msg.no_fine_tuned', {}, 'Nothing fine-tuned yet - WashData is using its built-in models.')}</p>${why}`;
     } else {
       const rows = keys.map(cap => {
         const m = models[cap] || {};
-        const when = m.trained_at ? _fmtDate(m.trained_at) : 'unknown';
+        const when = m.trained_at ? _fmtDate(m.trained_at) : this._tText('ml.trained_unknown', {}, 'at an unknown time');
         return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--divider-color)">
           <div style="flex:1;min-width:0">
             <div style="font-weight:600">${_esc(m.label_key ? this._t(m.label_key, {}, m.label || cap) : (m.label || cap))}${this._mlTrendBadge(m.trend)}</div>
             <div class="wd-info" style="font-size:.8em;margin:0">${_esc(m.blurb_key ? this._t(m.blurb_key, {}, m.blurb || '') : (m.blurb || ''))} · ${this._t('ml.fine_tuned_at', {when}, 'fine-tuned {when}')}</div>
+            ${this._mlLastRunLine(lastRuns[cap])}
           </div>
           ${this._mlQualityChip(m)}
         </div>`;
@@ -6789,6 +6795,10 @@ class HaWashdataPanel extends HTMLElement {
     } else {
       return '';
     }
+    // How many cycles the figure rests on (audit ML-20).
+    if (Number.isInteger(m.held_out_cycles)) {
+      title += ' · ' + this._tText('ml.held_out_count', {count: m.held_out_cycles}, `measured on ${m.held_out_cycles} held-out cycles`);
+    }
     const col = pct >= 70 ? 'var(--success-color,#4caf50)' : pct >= 40 ? 'var(--warning-color,#ff9800)' : 'var(--secondary-text-color)';
     return `<div title="${_esc(title)}" style="text-align:right;flex:0 0 auto">
       <div style="font-size:.8em;font-weight:600;color:${col}">${word} ${this._t('ml.fit_word', {}, 'fit')}</div>
@@ -6808,6 +6818,32 @@ class HaWashdataPanel extends HTMLElement {
     const e = map[trend];
     if (!e) return '';
     return ` <span title="${_esc(e[2])}" style="font-size:.72em;font-weight:600;color:${e[1]};margin-left:6px">${e[0]}</span>`;
+  }
+
+  // Why a training run put no new model in use (audit ML-20), as plain text from
+  // the backend's reason code + params. `[code, text]`; an unknown code reads as
+  // 'unknown'.
+  _mlSkipReason(rec) {
+    const fallbacks = {
+      insufficient_rows: 'Not enough usable cycles yet: {count} labelled, clean cycles so far.',
+      holdout_too_small: 'Too few cycles to test a new model fairly: {held_out} could be set aside for testing, {min} are needed.',
+      not_better_than_naive: 'The new model was not clearly better than the simple estimate (error {model} vs {naive}).',
+      not_better_than_incumbent: 'The new model was not better than the one in use (error {model} vs {incumbent}), so the current one was kept.',
+      fit_failed: 'Training failed: {error}',
+      unknown: 'Nothing new was learnt.',
+    };
+    const code = Object.prototype.hasOwnProperty.call(fallbacks, rec && rec.reason_code) ? rec.reason_code : 'unknown';
+    const params = (rec && rec.reason_params) || {};
+    const vars = code === 'insufficient_rows' ? {count: Number(params.cycles) || 0} : {...params};
+    return [code, this._tText(`ml.skip_reason.${code}`, vars, fallbacks[code])];
+  }
+
+  // The last run's reason as one line; '' when it promoted or none is on record.
+  _mlLastRunLine(run) {
+    if (!run || run.promoted !== false) return '';
+    const [code, reason] = this._mlSkipReason(run);
+    const when = run.ts ? _fmtDate(run.ts) : this._tText('ml.trained_unknown', {}, 'at an unknown time');
+    return `<div class="wd-info wd-ml-last-run" data-reason="${_esc(code)}" style="font-size:.8em;margin:4px 0 0">${this._t('ml.last_run_not_promoted', {when, reason}, 'Last check ({when}): {reason}')}</div>`;
   }
 
   // ── F3: Playground tab (what-if simulator / A-B / DTW inspector) ─────────────
@@ -7187,7 +7223,7 @@ class HaWashdataPanel extends HTMLElement {
     const busy = this._pgLoading;
     const topBar = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:4px">
       <div class="wd-field" style="min-width:180px;margin:0"><label>${this._t('lbl.cycle', {}, 'Cycle')}</label><select id="wd-pg-cyc-sel" ${busy ? 'disabled' : ''}>${cycleOpts || '<option value="">—</option>'}</select></div>
-      <div class="wd-field" style="min-width:160px;margin:0"><label>${this._t('lbl.profile', {}, 'Profile')}</label><select id="wd-pg-prof-sel" ${busy ? 'disabled' : ''}>${profOpts}</select></div>
+      <div class="wd-field" style="min-width:160px;margin:0" title="${_esc(this._tText('msg.pg_compare_profile_tip', {}, 'Only picks the profile drawn over the graph. The simulation always matches the cycle on its own, as the live integration does.'))}"><label for="wd-pg-prof-sel">${this._t('lbl.pg_compare_profile', {}, 'Compare with profile')}</label><select id="wd-pg-prof-sel" ${busy ? 'disabled' : ''}>${profOpts}</select></div>
       <div style="display:flex;gap:6px;align-items:flex-end;padding-bottom:2px">
         <button class="wd-btn wd-btn-primary" data-action="pg-run" ${busy ? 'disabled' : ''} style="min-width:72px">▶ ${this._t('btn.run', {}, 'Run')}</button>
         ${busy ? `<button class="wd-btn" data-action="pg-cancel-run" style="min-width:72px">✕ ${this._t('btn.cancel', {}, 'Cancel')}</button>` : ''}
@@ -7255,8 +7291,9 @@ class HaWashdataPanel extends HTMLElement {
     </section>`;
   }
 
-  // Just the detection-parameter editor rows (Simulate mode); a change re-runs
-  // the faithful sim so the state band + estimates update.
+  // Just the detection-parameter editor rows (Simulate mode). A change redraws the
+  // thresholds at once; the outcome card then marks the simulation stale and offers
+  // to re-run it (audit PLAYGROUND-13), rather than re-running on every keystroke.
   _htmlPgParamRows() {
     const fields = this._pgOverrideFields();
     const threshFields = new Set(['start_threshold_w', 'stop_threshold_w']);
@@ -7345,8 +7382,18 @@ class HaWashdataPanel extends HTMLElement {
       : '—';
     const hasNotify = (d.events || []).some(e => String(e.type || '').startsWith('notify_'));
     const outcomeChip = (label, val) => `<div class="wd-pg-outcome-item"><div class="wd-pg-outcome-val">${_esc(val)}</div><div class="wd-pg-outcome-lbl">${_esc(label)}</div></div>`;
+    // Edits only redraw (audit PLAYGROUND-13): say this outcome predates them
+    // rather than let it read as "that setting has no effect".
+    const stale = this._pgDetailSig != null && this._pgDetailSig !== this._pgOverrideSig(this._pgCurrentOverride());
+    const staleBanner = stale
+      ? `<div class="wd-pg-stale wd-info" role="status" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 8px;color:var(--warning-color,#ff9800)">
+          <span>⚠ ${this._t('msg.pg_outcome_stale', {}, 'Settings changed since this simulation ran. It still shows the old result.')}</span>
+          <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-rerun" ${this._pgDetailBusy ? 'disabled' : ''}>▶ ${this._t('btn.pg_rerun', {}, 'Update simulation')}</button>
+        </div>`
+      : '';
     return `<div class="wd-pg-alerts-card">
       <div class="wd-subhead" style="margin:0 0 6px">${this._t('hdr.pg_outcome', {}, 'Simulation outcome')}</div>
+      ${staleBanner}
       <div class="wd-pg-outcome-grid">
         ${outcomeChip(this._t('lbl.pg_ended', {}, 'Ended'), term)}
         ${outcomeChip(this._t('lbl.duration', {}, 'Duration'), dur)}
@@ -7400,7 +7447,7 @@ class HaWashdataPanel extends HTMLElement {
       || this._pgThreshStart != null || this._pgThreshStop != null;
     const controls = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
       <span style="font-size:.85em">${this._t('lbl.last', {}, 'Last')}</span>
-      <input type="number" id="wd-pg-simn" value="${this._pgSimCycles}" min="1" max="200" style="width:56px">
+      <input type="number" id="wd-pg-simn" value="${this._pgSimCycles}" min="1" max="${_PG_MAX_BATCH_CYCLES}" style="width:56px">
       <span style="font-size:.85em">${this._t('lbl.cycles_lc', {}, 'cycles')}</span>
       <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-run-history" ${busy ? 'disabled' : ''}>▶ ${this._t('btn.run', {}, 'Run')}</button>
       ${overrideActive ? `<span style="font-size:.78em;color:var(--warning-color,#ff9800)">⚙ ${this._t('msg.pg_override_active', {}, 'Using your edited settings vs. current')}</span>` : ''}
@@ -7427,7 +7474,7 @@ class HaWashdataPanel extends HTMLElement {
     (h.baseline_rows || []).forEach(r => { baseById[r.cycle_id] = r; });
     const rows = h.rows.map(r => {
       const c = cyc(r.cycle_id);
-      const when = c && c.start_time ? _fmtDate(c.start_time) : (r.cycle_id || '').slice(0, 8);
+      const when = c && c.start_time ? _fmtDate(c.start_time) : (r.start_time ? _fmtDate(r.start_time) : (r.cycle_id || '').slice(0, 8));
       const ok = r.match_correct === true ? '✓' : (r.match_correct === false ? '✗' : '—');
       const okColor = r.match_correct === true ? 'var(--success-color,#4caf50)' : (r.match_correct === false ? 'var(--error-color,#f44336)' : 'var(--secondary-text-color)');
       const match = r.matched_profile || this._t('lbl.unlabelled', {}, 'Unlabelled');
@@ -7500,27 +7547,38 @@ class HaWashdataPanel extends HTMLElement {
   async _pgRunHistory() {
     const dev = this._devices[this._selIdx];
     if (!dev) return;
-    const ids = (this._cycles || []).slice(0, Math.max(1, this._pgSimCycles || 20)).map(c => c.id);
-    if (!ids.length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'No cycles available.'), 'error'); return; }
-    const override = { ...this._pgParamOverrides };
-    if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
-    if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
-    this._pgBatchProgress = { done: 0, total: ids.length };
+    if (!(this._cycles || []).length) { this._showToast(this._t('msg.no_cycles_selected', {}, 'No cycles available.'), 'error'); return; }
+    // The most recent N by count, not by id: the loaded page holds only 25 cycles,
+    // so "Last 40" replayed 25 (audit PLAYGROUND-18). The result reports how many ran.
+    const count = Math.max(1, Math.min(_PG_MAX_BATCH_CYCLES, this._pgSimCycles || 20));
+    const override = this._pgCurrentOverride();
+    this._pgBatchProgress = { done: 0, total: count };
     this._busy.add('pg-history');
     this._render();
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/start_playground_history`, entry_id: dev.entry_id, cycle_ids: ids, settings_override: override });
+      const r = await this._ws({ type: `${_DOMAIN}/start_playground_history`, entry_id: dev.entry_id, count, settings_override: override });
       this._pgHistoryTaskId = r && r.task_id;
       this._pgNeedsRestart = false;
       if (!this._pgHistoryTaskId) throw new Error('no task id');
-      this._addProvisionalTask(this._pgHistoryTaskId, 'pg_history', dev.entry_id, ids.length);
+      this._addProvisionalTask(this._pgHistoryTaskId, 'pg_history', dev.entry_id, count);
       if (!this._tasksSubscribed) this._pgPollTask(this._pgHistoryTaskId);
     } catch (e) {
       this._busy.delete('pg-history'); this._pgBatchProgress = null;
-      if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
-      else this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      this._pgRunFailed(e);
       this._render();
     }
+  }
+
+  // A History / Optimize start that failed: a startup race, the per-device limit of
+  // one batch run at a time (PLATFORM-04), or anything else.
+  _pgRunFailed(e) {
+    if (this._pgIsUnknownCmd(e)) { this._pgNeedsRestart = true; return; }
+    const code = (e && (e.code || (e.error && e.error.code))) || '';
+    if (code === 'task_busy') {
+      this._showToast(this._t('msg.pg_task_busy', {}, 'A Test-on-history or Optimize run is already in progress for this device. Wait for it to finish or cancel it.'), 'error');
+      return;
+    }
+    this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
   }
 
   // ── Sweep mode (objective 1D curve + 2D heatmap) ──────────────────────────
@@ -7531,6 +7589,10 @@ class HaWashdataPanel extends HTMLElement {
       ['false_end_rate', this._t('lbl.pg_obj_falseend', {}, 'False-end rate'), true],
       ['median_overrun', this._t('lbl.pg_obj_overrun', {}, 'Duration off-target'), true],
       ['ambiguity_rate', this._t('lbl.pg_obj_ambiguity', {}, 'Ambiguity rate'), true],
+      // What the end-gate settings actually move (audit PLAYGROUND-08).
+      ['end_lag', this._t('lbl.pg_obj_endlag', {}, 'End delay (median)'), true],
+      ['early_end_rate', this._t('lbl.pg_obj_early', {}, 'Early-end rate'), true],
+      ['split_rate', this._t('lbl.pg_obj_split', {}, 'Split rate'), true],
     ];
   }
 
@@ -7547,6 +7609,7 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-field" style="margin:0"><label>${this._t('lbl.from', {}, 'From')}</label><input type="number" id="wd-pg-sw-from" value="${_esc(String(this._pgSweepFrom))}" style="width:70px" step="any"></div>
       <div class="wd-field" style="margin:0"><label>${this._t('lbl.to', {}, 'To')}</label><input type="number" id="wd-pg-sw-to" value="${_esc(String(this._pgSweepTo))}" style="width:70px" step="any"></div>
       <div class="wd-field" style="margin:0"><label>${this._t('lbl.pg_steps', {}, 'Steps')}</label><input type="number" id="wd-pg-sw-steps" value="${Math.max(2, Math.min(12, this._pgSweepSteps || 5))}" min="2" max="12" style="width:52px"></div>
+      <div class="wd-field" style="margin:0"><label>${this._t('lbl.pg_sweep_cycles', {}, 'Recent cycles')}</label><input type="number" id="wd-pg-sw-n" value="${this._pgSimCycles}" min="1" max="${_PG_MAX_BATCH_CYCLES}" style="width:56px"></div>
       <button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-run2" ${busy ? 'disabled' : ''} style="margin-bottom:2px">▶ ${this._t('btn.run', {}, 'Run')}</button>
     </div>`;
     const simbar = busy ? this._htmlPgBatchBar() : '';
@@ -7558,26 +7621,47 @@ class HaWashdataPanel extends HTMLElement {
     if (!r) return '';
     if (!Array.isArray(r.points) || !r.points.length) return '';
     const obj = this._pgSweepObjectives().find(o => o[0] === r.objective);
-    const lowerBetter = obj ? obj[2] : false;
+    const lowerBetter = r.lower_is_better != null ? !!r.lower_is_better : (obj ? obj[2] : false);
     const metrics = r.points.filter(p => p.metric != null).map(p => p.metric);
     if (!metrics.length) return `<div class="wd-empty" style="padding:16px">${this._t('msg.pg_sweep_no_metric', {}, 'Not enough data to score this objective.')}</div>`;
     const mn = Math.min(...metrics), mx = Math.max(...metrics);
-    const best = lowerBetter ? Math.min(...metrics) : Math.max(...metrics);
-    const bestVal = (r.points.find(p => p.metric === best) || {}).value;
-    const fmtMetric = m => (r.objective === 'median_overrun') ? Math.round(m * 100) + '% off' : Math.round(m * 100) + '%';
+    // The backend picks the winner (audit PLAYGROUND-08): a value that ends more
+    // cycles early, splits more or detects fewer is never it, and unless one beats
+    // the current setting by a whole cycle the answer is to keep the current one.
+    // A run stored before that falls back to the plain extreme.
+    const hasPick = r.best_value !== undefined;
+    const extreme = lowerBetter ? mn : mx;
+    const bestVal = hasPick ? r.best_value : (r.points.find(p => p.metric === extreme) || {}).value;
+    const bestMetric = hasPick ? r.best_metric : extreme;
+    const keepCurrent = !!r.keep_current;
+    const sameVal = (a, b) => a != null && b != null && Math.abs(Number(a) - Number(b)) < 1e-6;
+    const fmtMetric = m => {
+      if (m == null) return '-';
+      if (r.objective === 'median_overrun') return Math.round(m * 100) + '% off';
+      if (r.objective === 'end_lag') return `${_fmtNum(m / 60, 1)} ${this._tText('lbl.timer_min', {}, 'min')}`;
+      return Math.round(m * 100) + '%';
+    };
     const bars = r.points.map(p => {
       const frac = (mx > mn && p.metric != null) ? (p.metric - mn) / (mx - mn) : (p.metric != null ? 1 : 0);
-      const isBest = p.metric === best;
-      const isCurrent = r.current_value != null && Math.abs(p.value - r.current_value) < 1e-6;
+      const isBest = !keepCurrent && sameVal(p.value, bestVal);
+      const isCurrent = sameVal(p.value, r.current_value);
       const col = isBest ? 'var(--success-color,#4caf50)' : 'var(--primary-color)';
-      return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:.82em">
-        <span style="flex:0 0 74px;text-align:right;font-variant-numeric:tabular-nums">${_esc(String(p.value))}${isCurrent ? ' ◀' : ''}</span>
+      const guard = p.guarded
+        ? ` <span class="wd-pg-sweep-guarded" title="${_esc(this._tText('msg.pg_sweep_guarded', {}, 'Ends more cycles early, splits more of them, or misses cycles the current setting catches, so it is never recommended.'))}" style="color:var(--warning-color,#ff9800)">⚠</span>`
+        : '';
+      return `<div class="wd-pg-sweep-row" data-value="${_esc(String(p.value))}" style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:.82em">
+        <span style="flex:0 0 74px;text-align:right;font-variant-numeric:tabular-nums">${_esc(String(p.value))}${isCurrent ? ' ◀' : ''}${guard}</span>
         <div style="flex:1;height:16px;border-radius:4px;background:var(--secondary-background-color);overflow:hidden"><div style="height:100%;width:${Math.round((p.metric != null ? (0.15 + 0.85 * frac) : 0) * 100)}%;background:${col};border-radius:4px"></div></div>
-        <span style="flex:0 0 46px;text-align:right;font-variant-numeric:tabular-nums">${p.metric != null ? fmtMetric(p.metric) : '—'}</span>
+        <span style="flex:0 0 46px;text-align:right;font-variant-numeric:tabular-nums">${fmtMetric(p.metric)}</span>
       </div>`;
     }).join('');
-    const applyBtn = (this._canEdit() && bestVal != null) ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-apply2" data-val="${_esc(String(bestVal))}">${this._t('btn.pg_apply_best', {}, 'Apply best')}</button>` : '';
-    return `<div style="font-size:.82em;color:var(--secondary-text-color);margin:4px 0 6px">${this._t('lbl.pg_best_value', {}, 'Best value found')}: <strong style="color:var(--primary-text-color)">${_esc(String(bestVal))}</strong> · ${fmtMetric(best)} · <span>◀ ${this._t('lbl.pg_current_value', {}, 'Current value:')}</span></div>
+    const canApply = !keepCurrent && bestVal != null && !sameVal(bestVal, r.current_value);
+    const applyBtn = (this._canEdit() && canApply) ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-apply2" data-val="${_esc(String(bestVal))}">${this._t('btn.pg_apply_best', {}, 'Apply best')}</button>` : '';
+    const nLine = r.cycles ? ` · ${this._t('msg.pg_sweep_n_cycles', {count: r.cycles}, `over ${r.cycles} cycles`)}` : '';
+    const head = keepCurrent
+      ? `<span class="wd-pg-sweep-keep">${this._t('msg.pg_sweep_keep_current', {value: String(r.current_value ?? '-'), metric: fmtMetric(bestMetric)}, `Keep the current value (${r.current_value ?? '-'}, ${fmtMetric(bestMetric)}): no value did better by at least one cycle.`)}</span>`
+      : `${this._t('lbl.pg_best_value', {}, 'Best value found')}: <strong style="color:var(--primary-text-color)">${_esc(String(bestVal))}</strong> · ${_esc(fmtMetric(bestMetric))}`;
+    return `<div class="wd-pg-sweep-head" style="font-size:.82em;color:var(--secondary-text-color);margin:4px 0 6px">${head}${nLine} · <span>◀ ${this._t('lbl.pg_current_value', {}, 'Current value:')}</span></div>
       ${bars}
       <div style="margin-top:8px">${this._htmlPgInSampleNote()}${applyBtn}</div>`;
   }
@@ -7594,8 +7678,11 @@ class HaWashdataPanel extends HTMLElement {
     const values = Array.from({length: steps}, (_, i) => +(fromN + (toN - fromN) * i / (steps - 1)).toFixed(3));
     const param = this._pgSweepParam || 'off_delay';
     const objective = this._pgSweepObjective || 'match_accuracy';
-    const msg = { type: `${_DOMAIN}/start_playground_sweep`, entry_id: dev.entry_id, param, values, objective };
-    this._pgBatchProgress = { done: 0, total: values.length };
+    // The same "Last N" as Test on history (audit PLAYGROUND-18); the backend adds
+    // one pass with the current settings, which every value has to beat.
+    const count = Math.max(1, Math.min(_PG_MAX_BATCH_CYCLES, this._pgSimCycles || 20));
+    const msg = { type: `${_DOMAIN}/start_playground_sweep`, entry_id: dev.entry_id, param, values, objective, count };
+    this._pgBatchProgress = { done: 0, total: values.length + 1 };
     this._busy.add('pg-sweep');
     this._render();
     try {
@@ -7603,12 +7690,11 @@ class HaWashdataPanel extends HTMLElement {
       this._pgSweepTaskId = r && r.task_id;
       this._pgNeedsRestart = false;
       if (!this._pgSweepTaskId) throw new Error('no task id');
-      this._addProvisionalTask(this._pgSweepTaskId, 'pg_sweep', dev.entry_id, values.length);
+      this._addProvisionalTask(this._pgSweepTaskId, 'pg_sweep', dev.entry_id, values.length + 1);
       if (!this._tasksSubscribed) this._pgPollTask(this._pgSweepTaskId);
     } catch (e) {
       this._busy.delete('pg-sweep'); this._pgBatchProgress = null;
-      if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
-      else this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      this._pgRunFailed(e);
       this._render();
     }
   }
@@ -7728,6 +7814,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!cid) return;
     this._pgCycleId = cid;
     this._pgLoading = true;
+    this._pgDetailBusy = false;
     this._pgView = null; this._pgHoverT = null;
     this._pgPowerPts = null; this._pgEnvData = null; this._pgDetail = null;
     const seq = ++this._pgLoadSeq;
@@ -7751,7 +7838,7 @@ class HaWashdataPanel extends HTMLElement {
       if (seq !== this._pgLoadSeq) return;  // cancelled or device switched mid-flight
       // Faithful backend simulation (the real detector + matcher + progress +
       // notification predicates) for this cycle under the current overrides.
-      await this._pgLoadDetail(dev.entry_id, cid);
+      await this._pgLoadDetail(dev.entry_id, cid, seq);
       // An unlabelled cycle has no profile to overlay until the replay matched one.
       const simProf = this._pgDetail && this._pgDetail.outcome && this._pgDetail.outcome.matched_profile;
       if (!profName && simProf && seq === this._pgLoadSeq) await this._pgFetchEnvelope(dev.entry_id, simProf);
@@ -7787,7 +7874,31 @@ class HaWashdataPanel extends HTMLElement {
   _pgCancelRun() {
     this._pgLoadSeq++;
     this._pgLoading = false;
+    this._pgDetailBusy = false;
+    this._pgCancelDetailTask();
     this._render();
+  }
+
+  // Stop the backend replay a dropped result belongs to (audit PLAYGROUND-12): bumping
+  // _pgLoadSeq only discards the answer, and the abandoned Simulate kept replaying to
+  // the end (2-3 s of CPU per long cycle, x5 on a Pi) with its result retained.
+  _pgCancelDetailTask() {
+    const tid = this._pgDetailTaskId;
+    this._pgDetailTaskId = null;
+    if (tid) this._ws({ type: `${_DOMAIN}/cancel_task`, task_id: tid }).catch(() => {});
+  }
+
+  // The sandbox overrides a Simulate runs with, and a stable signature of them so
+  // the outcome can say when the settings have moved on since (PLAYGROUND-13).
+  _pgCurrentOverride() {
+    const override = { ...this._pgParamOverrides };
+    if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
+    if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
+    return override;
+  }
+
+  _pgOverrideSig(override) {
+    return JSON.stringify(Object.keys(override).sort().map(k => [k, override[k]]));
   }
 
   // The single "load this cycle into the graph" path — used by the cycle dropdown
@@ -7814,12 +7925,13 @@ class HaWashdataPanel extends HTMLElement {
   // notification predicates) for one cycle under the current threshold/param
   // overrides. Result drives the Simulate state band, readout, event lane and
   // alerts rail — there is no client-side detection copy.
-  async _pgLoadDetail(entryId, cid) {
+  async _pgLoadDetail(entryId, cid, seq) {
     // Always attempt (do NOT bail on _pgNeedsRestart): a success here clears the
     // flag, so a note set by a startup race self-heals once the backend is ready.
-    const override = { ...this._pgParamOverrides };
-    if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
-    if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
+    const override = this._pgCurrentOverride();
+    const sig = this._pgOverrideSig(override);
+    // A new Simulate supersedes the one still running.
+    this._pgCancelDetailTask();
     // Run the heavy per-5s replay as a detached, chunked background task so a long
     // cycle no longer stalls Home Assistant (issue #311). We still await its
     // completion here (the caller drives the busy spinner + redraw), but the
@@ -7828,6 +7940,7 @@ class HaWashdataPanel extends HTMLElement {
       const r = await this._ws({ type: `${_DOMAIN}/start_playground_cycle_detail`, entry_id: entryId, cycle_id: cid, settings_override: override });
       const tid = r && r.task_id;
       if (!tid) throw new Error('no task id');
+      this._pgDetailTaskId = tid;
       this._addProvisionalTask(tid, 'pg_detail', entryId, 0);
       const result = await new Promise((resolve) => {
         this._taskCallbacks[tid] = async (t) => {
@@ -7845,24 +7958,32 @@ class HaWashdataPanel extends HTMLElement {
         if (known && known.state !== 'running') this._settleTaskCallback(known);
         else if (!this._tasksSubscribed) this._pollTaskGeneric(tid);
       });
+      if (this._pgDetailTaskId === tid) this._pgDetailTaskId = null;
       if (!this._isActiveEntry(entryId)) return;  // device switched mid-flight - drop stale result
+      if (seq != null && seq !== this._pgLoadSeq) return;  // cancelled or superseded
       this._pgDetail = (result && !result.error) ? result : null;
+      this._pgDetailSig = this._pgDetail ? sig : null;
       this._pgNeedsRestart = false;
     } catch (e) {
+      if (seq != null && seq !== this._pgLoadSeq) return;
       if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
       this._pgDetail = null;
+      this._pgDetailSig = null;
     }
   }
 
-  // Re-run just the detail sim (after a threshold drag / param edit), debounced,
-  // then redraw. Keeps the current cycle; no full reload.
+  // Re-run just the detail sim with the current settings (the "settings changed"
+  // banner's button), debounced, then redraw. Keeps the cycle, the zoom and the
+  // power trace; no full reload. Supersedes (and cancels) any run in flight.
   _pgRerunDetail() {
     const dev = this._devices[this._selIdx];
-    if (!dev || !this._pgCycleId) return;
+    if (!dev || !this._pgCycleId || this._pgLoading) return;
     clearTimeout(this._pgDetailDebounceTimer);
     this._pgDetailDebounceTimer = setTimeout(async () => {
+      const seq = ++this._pgLoadSeq;
       this._pgDetailBusy = true; this._render();
-      await this._pgLoadDetail(dev.entry_id, this._pgCycleId);
+      await this._pgLoadDetail(dev.entry_id, this._pgCycleId, seq);
+      if (seq !== this._pgLoadSeq) return;
       this._pgDetailBusy = false; this._render();
       requestAnimationFrame(() => this._pgDrawCanvas());
     }, 220);
@@ -9938,6 +10059,37 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Modals ────────────────────────────────────────────────────────────────
 
+  // The bulk auto-label modal opens on the device's own Auto-Label Confidence,
+  // clamped to the input's 0.5-0.95 range, not a fixed 0.75 below the 0.9 default
+  // (audit UI-10). The Cycles tab does not load options, so they are read here;
+  // `_opts` is the saved-settings baseline and is left alone (#447).
+  async _openAutoLabelModal(eid) {
+    let v = this._opts ? this._opts.auto_label_confidence : undefined;
+    if (v == null && eid) {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
+        if (!this._isActiveEntry(eid)) return;
+        v = (r && r.options || {}).auto_label_confidence;
+      } catch (_) { /* fall back to the schema default */ }
+    }
+    if (v == null) v = (_FIELD_BY_KEY.auto_label_confidence || {}).def;
+    const n = Number(v);
+    const threshold = Number.isFinite(n) ? +Math.min(0.95, Math.max(0.5, n)).toFixed(2) : 0.9;
+    this._modal = { type: 'auto-label', threshold };
+    this._render();
+  }
+
+  // The finished auto-label task as a toast with its counts (audit UI-10); the
+  // bare completion line when no result came back.
+  _autoLabelToast(snap) {
+    const r = snap && snap.result;
+    if (!r || typeof r.labeled !== 'number') return this._tText('msg.toast_auto_label_complete', {}, 'Auto-label complete');
+    if (snap.state === 'cancelled') {
+      return this._tText('toast.auto_label_cancelled', {count: r.labeled}, 'Auto-label cancelled after labelling {count} cycles.');
+    }
+    return this._tText('toast.auto_label_done', {count: r.labeled, skipped: r.skipped || 0}, 'Auto-label complete: {count} cycles labelled, {skipped} left unlabelled.');
+  }
+
   _profileOptions(selected) {
     return (this._profiles || []).map(p =>
       `<option value="${_esc(p.name)}" ${String(selected) === String(p.name) ? 'selected' : ''}>${_esc(p.name)}</option>`
@@ -10017,7 +10169,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (m.type === 'auto-label') {
       body = `<h2>${this._t('modal.auto_label', {}, 'Auto-Label Cycles')}</h2>
         <p class="wd-info" style="margin-bottom:12px">${this._t('msg.auto_label_intro', {}, 'Assign profiles to unlabelled cycles whose match confidence clears the threshold.')}</p>
-        <div class="wd-field"><label>${this._t('lbl.confidence_threshold', {}, 'Confidence threshold')}</label><input type="number" id="wd-al-thr" value="0.75" min="0.5" max="0.95" step="0.05"></div>
+        <div class="wd-field"><label>${this._t('lbl.confidence_threshold', {}, 'Confidence threshold')}</label><input type="number" id="wd-al-thr" value="${_esc(String(m.threshold != null ? m.threshold : 0.9))}" min="0.5" max="0.95" step="0.01"></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="auto-run">${this._t('btn.run_auto_label', {}, 'Run Auto-Label')}</button></div>`;
     } else if (m.type === 'merge-cycles') {
@@ -10525,6 +10677,9 @@ class HaWashdataPanel extends HTMLElement {
     if (parse.first && parse.last) facts.push(`${_fmtDate(parse.first)} – ${_fmtDate(parse.last)}`);
     if (parse.breaks) facts.push(this._tText('msg.hist_breaks', { n: parse.breaks }, `${parse.breaks} gaps where the sensor was unavailable`));
     if (parse.rows_other_entity) facts.push(this._tText('msg.hist_other_entity', { n: parse.rows_other_entity }, `${parse.rows_other_entity} readings for other entities ignored`));
+    // The 500k-row cap cut the read short (audit PLAYGROUND-11): the recorder keeps
+    // the newest rows, a file its first ones. Either way part of the history is unread.
+    if (parse.truncated) facts.push(this._tText('msg.hist_truncated', { n: parse.rows_total || 0 }, `stopped at the ${parse.rows_total || 0}-reading limit, so the rest of the history was not scanned`));
     // The file held one sensor and it was not this device's: it was read anyway, but say
     // so plainly - it is the difference between "my export" and "the wrong export".
     if (parse.entity_substituted_from) {
@@ -10534,6 +10689,13 @@ class HaWashdataPanel extends HTMLElement {
         `read ${parse.entity_id || '?'} (this device is configured for ${parse.entity_substituted_from})`,
       ));
     }
+    // What the parse found suspicious about readable data (audit PLAYGROUND-24).
+    const warnMsgs = {
+      looks_like_kw: this._tText('msg.hist_warn_kw', { w: parse.peak_w }, `The highest reading is only ${parse.peak_w}. This sensor looks like it reports kilowatts; WashData reads power in watts, so cycles cannot be detected from it.`),
+      naive_timestamps: this._tText('msg.hist_warn_naive_time', { n: parse.rows_naive_time || 0 }, `${parse.rows_naive_time || 0} timestamps have no time zone and were read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.`),
+    };
+    const warnLines = (parse.warnings || []).map(w => warnMsgs[w]).filter(Boolean)
+      .map(t => `<p class="wd-info wd-hist-warn" style="color:var(--warning-color,#ff9800)">⚠ ${_esc(t)}</p>`).join('');
     const skipped = res.skipped || [];
     const skippedByReason = {};
     skipped.forEach(sk => { skippedByReason[sk.reason] = (skippedByReason[sk.reason] || 0) + 1; });
@@ -10549,6 +10711,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!segs.length) {
       return `${title}
         <p class="wd-info">${this._t('msg.hist_none_found', {}, 'No cycles could be detected in that history.')}</p>
+        ${warnLines}
         ${facts.length ? `<p class="wd-info">${_esc(facts.join(' · '))}</p>` : ''}
         ${skipLine ? `<p class="wd-info">${this._t('msg.hist_skipped_spans', {}, 'Skipped stretches')}: ${_esc(skipLine)}</p>` : ''}
         ${settingsLine ? `<p class="wd-info">${_esc(settingsLine)}</p>` : ''}
@@ -10564,7 +10727,7 @@ class HaWashdataPanel extends HTMLElement {
       return `<tr data-hist-row="${seg.index}" style="${on ? '' : 'opacity:.55'}">
         <td><input type="checkbox" data-hist-pick="${seg.index}" ${on ? 'checked' : ''} aria-label="${_esc(this._t('lbl.hist_keep', {}, 'Keep this cycle'))}"></td>
         <td>${_esc(_fmtDate(seg.start_time))}</td>
-        <td>${_esc(_fmtDuration(seg.duration_s))}</td>
+        <td${seg.banked_tail_s ? ` title="${_esc(this._tText('msg.hist_tail_trimmed', { min: Math.round(seg.banked_tail_s / 60) }, `${Math.round(seg.banked_tail_s / 60)} min of waiting after the cycle ended were trimmed, as the live integration trims them`))}"` : ''}>${_esc(_fmtDuration(seg.duration_s))}${seg.banked_tail_s ? ' ✂' : ''}</td>
         <td>${seg.energy_wh != null ? _esc(_fmtNum(seg.energy_wh / 1000, 2)) + ' kWh' : '–'}</td>
         <td>${_esc(String(Math.round(seg.peak_w)))} W</td>
         <td><canvas class="wd-prof-spark" data-hist-spark="${seg.index}" width="64" height="20" aria-hidden="true"></canvas></td>
@@ -10575,6 +10738,7 @@ class HaWashdataPanel extends HTMLElement {
     const allOn = segs.every(seg => accept.has(seg.index));
     return `${title}
       <p class="wd-info" style="margin-bottom:8px">${this._t('msg.hist_found', { n: segs.length }, `Found ${segs.length} cycles. Untick anything that does not look like a real run - nothing is stored until you import.`)}</p>
+      ${warnLines}
       ${facts.length ? `<p class="wd-info" style="margin-bottom:4px">${_esc(facts.join(' · '))}</p>` : ''}
       ${skipLine ? `<p class="wd-info" style="margin-bottom:4px">${this._t('msg.hist_skipped_spans', {}, 'Skipped stretches')}: ${_esc(skipLine)}</p>` : ''}
       ${settingsLine ? `<p class="wd-info" style="margin-bottom:12px">${_esc(settingsLine)}</p>` : ''}
@@ -11570,8 +11734,11 @@ class HaWashdataPanel extends HTMLElement {
     });
 
     // F3: Sim cycle count
-    const pgSimN = sr.getElementById('wd-pg-simn');
-    if (pgSimN) pgSimN.addEventListener('input', () => { this._pgSimCycles = Math.max(1, Math.min(200, parseInt(pgSimN.value, 10) || 20)); });
+    // Capped at the backend's per-run limit (audit PLAYGROUND-18: 200 was offered,
+    // 50 were replayed, silently). Shared by Test on history and Optimize.
+    sr.querySelectorAll('#wd-pg-simn, #wd-pg-sw-n').forEach(inp => inp.addEventListener('input', () => {
+      this._pgSimCycles = Math.max(1, Math.min(_PG_MAX_BATCH_CYCLES, parseInt(inp.value, 10) || 20));
+    }));
 
     // F3: Sweep controls
     const pgSwParam = sr.getElementById('wd-pg-sw-param');
@@ -12839,7 +13006,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._selectMode) this._cycleSel.clear();
       this._render();
     } else if (a === 'cyc-auto-open') {
-      this._modal = { type: 'auto-label' }; this._render();
+      this._openAutoLabelModal(eid);
     } else if (a === 'cyc-merge') {
       const ids = Array.from(this._cycleSel);
       if (ids.length < 2) return;
@@ -13153,7 +13320,11 @@ class HaWashdataPanel extends HTMLElement {
       this._kickAndTrack({ type: `${_DOMAIN}/trigger_ml_training`, entry_id: eid }, 'ml-train-now:' + eid, async (r) => {
         if (r && r.ok) {
           const promoted = (r.promoted || []).length;
-          this._showToast(promoted ? this._tText('toast.ml_training_promoted', {count: promoted}, `Training complete: promoted ${promoted} model(s)`) : this._t('toast.ml_training_no_improvement', {}, 'Training complete: baseline kept (no improvement)'));
+          // Not promoted: say why (audit ML-20), not a blanket "no improvement".
+          const kept = !promoted && (r.results || []).find(x => x && x.promoted === false && x.reason_code);
+          this._showToast(promoted ? this._tText('toast.ml_training_promoted', {count: promoted}, `Training complete: promoted ${promoted} model(s)`)
+            : kept ? this._mlSkipReason(kept)[1]
+            : this._t('toast.ml_training_no_improvement', {}, 'Training complete: baseline kept (no improvement)'));
         } else {
           this._showToast(this._t('toast.ml_training_no_improvement', {}, 'Training complete: baseline kept (no improvement)'), 'info');
         }
@@ -13483,13 +13654,6 @@ class HaWashdataPanel extends HTMLElement {
           } catch (e) { this._showToast(this._tText('toast.remove_failed', {error: e.message || e}, 'Remove failed: ' + (e.message || e)), 'error'); }
         } };
       this._render();
-
-    } else if (a === 'auto-label') {
-      const thr = parseFloat(sr.getElementById('wd-auto-label-threshold')?.value || '0.75');
-      this._busyRun('auto-label', async () => {
-        try { const st = await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); if (st && st.task_id) await this._awaitTask(st.task_id); this._showToast(this._t('toast.auto_label_complete', {}, 'Auto-label complete')); await this._fetchCycles(eid); }
-        catch (e) { this._showToast(this._tText('toast.auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
-      });
     }
   }
 
@@ -13588,6 +13752,8 @@ class HaWashdataPanel extends HTMLElement {
       this._pgApplySweepValue(btn.dataset.val);
     } else if (a === 'pg-run' || a === 'pg-load') {
       this._pgLoad();
+    } else if (a === 'pg-rerun') {
+      this._pgRerunDetail();
     } else if (a === 'pg-cancel-run') {
       this._pgCancelRun();
     } else if (a === 'pg-reset-params') {
@@ -13767,10 +13933,19 @@ class HaWashdataPanel extends HTMLElement {
       catch (e) { this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'auto-run' && eid) {
-      const thr = parseFloat(sr.getElementById('wd-al-thr')?.value || '0.75');
+      // An empty or unparsable field sends no threshold, and the backend applies
+      // the device's own Auto-Label Confidence (audit UI-10).
+      const thr = parseFloat(sr.getElementById('wd-al-thr')?.value || '');
+      const req = { type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid };
+      if (Number.isFinite(thr)) req.confidence_threshold = Math.min(0.95, Math.max(0.5, thr));
       this._modal = null; this._render();
       await this._busyRun('auto-label', async () => {
-        try { const st = await this._ws({ type: `${_DOMAIN}/auto_label_cycles`, entry_id: eid, confidence_threshold: thr }); if (st && st.task_id) await this._awaitTask(st.task_id); this._showToast(this._t('msg.toast_auto_label_complete', {}, 'Auto-label complete')); await this._fetchCycles(eid); }
+        try {
+          const st = await this._ws(req);
+          const snap = st && st.task_id ? await this._awaitTask(st.task_id) : null;
+          this._showToast(this._autoLabelToast(snap));
+          await this._fetchCycles(eid);
+        }
         catch (e) { this._showToast(this._tText('msg.toast_auto_label_failed', {error: e.message || e}, 'Auto-label failed: ' + (e.message || e)), 'error'); }
       });
     } else if (action === 'merge-ok' && eid) {

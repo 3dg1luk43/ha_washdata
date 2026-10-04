@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Kunne ikke oprette forbindelse",
-      "invalid_auth": "Ugyldig godkendelse",
       "unknown": "Uventet fejl",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Tillidsgrænse",
-          "description": "Mindste matchkonfidens (0,50-0,95) for at anvende etiketter."
+          "description": "Mindste matchkonfidens (0,50-0,95) for at anvende etiketter. Lad feltet stå tomt for at bruge enhedens indstilling \"Auto-mærkning konfidens\"."
         }
       }
     },

@@ -212,6 +212,7 @@
     "unlabel_selected_tip": "Fjerner profilmerkingen fra de valgte syklusene. De blir liggende i historikken din og kan merkes på nytt senere - de påvirker bare ikke lenger denne profilen.",
     "use": "Bruk",
     "wipe_all": "Tørk alle data",
+    "pg_rerun": "Oppdater simulering",
     "delete_selected": "Slett valgte ({n})",
     "pg_apply_best": "Bruk beste",
     "pg_apply_to_settings_tip": "Kopier verdiene du redigerte her, til de aktive innstillingene for denne enheten",
@@ -664,6 +665,11 @@
     "automation_off": "(av)",
     "ref_cycle_none": "Ingen",
     "share_name": "Vis navnet mitt på det jeg deler",
+    "pg_compare_profile": "Sammenlign med profil",
+    "pg_obj_endlag": "Sluttforsinkelse (median)",
+    "pg_obj_early": "Rate for tidlig slutt",
+    "pg_obj_split": "Oppdelingsrate",
+    "pg_sweep_cycles": "Siste sykluser",
     "cat_backfill_cycles": "Sykluser funnet i importert effekthistorikk"
   },
   "log": {
@@ -693,7 +699,23 @@
     },
     "metric_auc": "AUC {auc} på valideringsdata",
     "metric_mae": "feil {model} mot baseline {baseline}",
-    "fine_tuned_at": "finjustert {when}"
+    "fine_tuned_at": "finjustert {when}",
+    "never": "aldri",
+    "trained_unknown": "på et ukjent tidspunkt",
+    "held_out_count": "målt på {count} tilbakeholdte valideringssykluser",
+    "held_out_count_one": "målt på {count} tilbakeholdt valideringssyklus",
+    "held_out_count_other": "målt på {count} tilbakeholdte valideringssykluser",
+    "last_run_not_promoted": "Siste sjekk ({when}): {reason}",
+    "skip_reason": {
+      "insufficient_rows": "Ikke nok brukbare sykluser ennå: {count} merkede, rene sykluser så langt.",
+      "insufficient_rows_one": "Ikke nok brukbare sykluser ennå: {count} merket, ren syklus så langt.",
+      "insufficient_rows_other": "Ikke nok brukbare sykluser ennå: {count} merkede, rene sykluser så langt.",
+      "fit_failed": "Treningen mislyktes: {error}",
+      "unknown": "Ingenting nytt ble lært.",
+      "holdout_too_small": "For få sykluser til å teste en ny modell rettferdig: {held_out} kunne settes av til testing, {min} trengs.",
+      "not_better_than_naive": "Den nye modellen var ikke tydelig bedre enn det enkle anslaget (feil {model} mot {naive}).",
+      "not_better_than_incumbent": "Den nye modellen var ikke bedre enn den som er i bruk (feil {model} mot {incumbent}), så den nåværende ble beholdt."
+    }
   },
   "modal": {
     "auto_label": "Automatiske etikettsykluser",
@@ -1008,6 +1030,20 @@
     "automation_desc_started": "Kjører når en {device}-syklus starter. Legg til handlingene dine (varsel, lys, ...).",
     "automation_desc_finished": "Kjører når en {device}-syklus er ferdig. Legg til handlingene dine (varsel, lys, ...).",
     "feedback_detected": "WashData oppdaget: {name}",
+    "pg_outcome_stale": "Innstillingene er endret siden denne simuleringen kjørte. Den viser fortsatt det gamle resultatet.",
+    "pg_compare_profile_tip": "Velger bare profilen som tegnes over grafen. Simuleringen gjenkjenner alltid syklusen på egen hånd, slik integrasjonen gjør under drift.",
+    "pg_task_busy": "En kjøring av Test på historikk eller Optimaliser pågår allerede for denne enheten. Vent til den er ferdig, eller avbryt den.",
+    "pg_sweep_guarded": "Avslutter flere sykluser for tidlig, deler opp flere av dem eller går glipp av sykluser som den nåværende innstillingen fanger opp, så den anbefales aldri.",
+    "pg_sweep_n_cycles": "over {count} sykluser",
+    "pg_sweep_n_cycles_one": "over {count} syklus",
+    "pg_sweep_n_cycles_other": "over {count} sykluser",
+    "pg_sweep_keep_current": "Behold den nåværende verdien ({value}, {metric}): ingen verdi gjorde det bedre med minst én syklus.",
+    "hist_truncated": "stoppet ved grensen på {n} avlesninger, så resten av historikken ble ikke gjennomgått",
+    "hist_warn_kw": "Den høyeste avlesningen er bare {w}. Denne sensoren ser ut til å rapportere kilowatt; WashData leser effekt i watt, så sykluser kan ikke oppdages fra den.",
+    "hist_warn_naive_time": "{n} tidsstempler har ingen tidssone og ble lest som UTC. Hvis filen er i lokal tid, er hver syklus forskjøvet med UTC-forskyvningen din, og avlesninger rundt et skifte til eller fra sommertid kan havne i feil rekkefølge eller gå tapt.",
+    "hist_warn_naive_time_one": "{n} tidsstempel har ingen tidssone og ble lest som UTC. Hvis filen er i lokal tid, er hver syklus forskjøvet med UTC-forskyvningen din, og avlesninger rundt et skifte til eller fra sommertid kan havne i feil rekkefølge eller gå tapt.",
+    "hist_warn_naive_time_other": "{n} tidsstempler har ingen tidssone og ble lest som UTC. Hvis filen er i lokal tid, er hver syklus forskjøvet med UTC-forskyvningen din, og avlesninger rundt et skifte til eller fra sommertid kan havne i feil rekkefølge eller gå tapt.",
+    "hist_tail_trimmed": "{min} min venting etter at syklusen var ferdig ble klippet bort, slik integrasjonen gjør under drift",
     "import_undo_hint": "Et gjenopprettingspunkt fra før siste import ({when}) er beholdt: {profiles} profil(er) og {cycles} syklus(er).",
     "replace_undo_hint": "Et gjenopprettingspunkt lagres først, så du kan angre denne importen fra Eksporter / Importer.",
     "pg_in_sample_note": "Disse syklusene var også med på å bygge profilene de matches mot, så resultatene er optimistiske: på nye sykluser kan du forvente litt færre riktige gjenkjenninger."
@@ -1193,7 +1229,7 @@
       "label": "Bruk smarte modeller under syklus"
     },
     "end_energy_threshold": {
-      "doc": "Under nedtellingen med avbruddsforsinkelse sammenlignes akkumulert energi (watt x tid) med denne terskelen. Hvis den overskrides, nullstilles nedtellingen - og holder anti-krøll-trommel og oppvaskmaskinens tørkehaler festet til syklusen i stedet for å klippe dem korte. Hev den hvis syklusene avsluttes for tidlig under nedkjøling; senke den hvis deteksjonen er treg.",
+      "doc": "Når av-forsinkelsen har løpt ut, sammenlignes energien som ble brukt i løpet av den (watt x tid), med denne terskelen. Ligger den over, er syklusen ikke ferdig ennå, slik at anti-krøll-tromling og oppvaskmaskinens ettertørking forblir en del av syklusen i stedet for å bli kuttet av. Senk den hvis sykluser avsluttes under en avkjølingstromling eller ettertørking; hev den hvis ferdige sykluser blir stående og vente.",
       "label": "Sluttenergi"
     },
     "energy_price_entity": {
@@ -1866,6 +1902,12 @@
     "analysis_failed": "Analyse mislyktes: {error}",
     "auto_detect_failed": "Automatisk gjenkjenning mislyktes: {error}",
     "auto_label_failed": "Automatisk merking mislyktes: {error}",
+    "auto_label_done": "Auto-merking fullført: {count} sykluser merket, {skipped} ikke merket.",
+    "auto_label_done_one": "Auto-merking fullført: {count} syklus merket, {skipped} ikke merket.",
+    "auto_label_done_other": "Auto-merking fullført: {count} sykluser merket, {skipped} ikke merket.",
+    "auto_label_cancelled": "Auto-merking avbrutt etter at {count} sykluser ble merket.",
+    "auto_label_cancelled_one": "Auto-merking avbrutt etter at {count} syklus ble merket.",
+    "auto_label_cancelled_other": "Auto-merking avbrutt etter at {count} sykluser ble merket.",
     "could_not_load_cycle": "Kunne ikke laste inn syklus: {error}",
     "create_failed": "Oppretting mislyktes: {error}",
     "cycles_deleted": "{count} syklus(er) slettet",

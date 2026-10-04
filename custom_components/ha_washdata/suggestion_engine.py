@@ -33,7 +33,6 @@ from .const import (
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
     resolve_off_delay_default,
     TerminationReason,
     CONF_WATCHDOG_INTERVAL,
@@ -1426,9 +1425,7 @@ class SuggestionEngine:
             # programme for the first part of every cycle (one corpus device at 0.63
             # had no candidate at all for most of a run; forcing the shipped value
             # was +3.84pp top-1 at 50% elapsed - audit MATCH-EVAL-03).
-            default_min = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
-                self.device_type or "", DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
-            )
+            default_min = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
             current_min = _num(options.get(CONF_PROFILE_MATCH_MIN_DURATION_RATIO))
             if current_min is not None and current_min > default_min:
                 suggestions[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] = {
@@ -1755,11 +1752,12 @@ class SuggestionEngine:
         Falls back to the historical inter-cycle-gap heuristic when there are too
         few traces to measure a bridge requirement.
 
-        Validated with ``devtools/min_off_gap_eval.py``: replaying all 152 clean
-        cycles across the ``cycle_data/`` corpus through a real unmatched
-        ``CycleDetector`` at the proposed value produces zero splits (the only
-        trace that splits is tron4r's known back-to-back *merged* 206-min cycle,
-        where splitting is the correct outcome).
+        Validated with ``devtools/min_off_gap_eval.py`` (production detector
+        config, unmatched replay with watchdog keepalives; item 483): on the
+        export corpus the shipped value splits 0 of 68 cycles and merges none.
+        With ``--all-formats`` it splits 6 of 151 and merges 3, all on devices
+        where every candidate value fails the same way, so ``min_off_gap`` is
+        not their cause.
         """
         # Only consider completed, labeled cycles with valid timestamps
         timed_cycles: list[tuple[float, float]] = []

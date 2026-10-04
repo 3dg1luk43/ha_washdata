@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Échec de la connexion",
-      "invalid_auth": "Authentification invalide",
       "unknown": "Erreur inattendue",
       "invalid_power": "Le seuil de puissance doit être supérieur à 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Seuil de confiance",
-          "description": "Confiance de correspondance minimale (0,50-0,95) pour appliquer les étiquettes."
+          "description": "Confiance de correspondance minimale (0,50-0,95) pour appliquer les étiquettes. Laissez vide pour utiliser le réglage Confiance d'étiquetage automatique de l'appareil."
         }
       }
     },

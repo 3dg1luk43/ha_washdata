@@ -39,7 +39,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 import voluptuous as vol
 
-from .const import PRE_IMPORT_STORE_SUFFIX, STORAGE_KEY
+from .const import NOTIFY_QUEUE_STORE_SUFFIX, PRE_IMPORT_STORE_SUFFIX, STORAGE_KEY
 from .const import (
     DEVICE_COMPLETION_THRESHOLDS,
     DOMAIN,
@@ -238,6 +238,36 @@ _DEAD_ABRUPT_KEYS = frozenset(
 )
 
 
+def _heal_seeded_cadence(options: dict[str, Any], device_type: Any) -> list[str]:
+    """Replace the seeded 30/5 cadence with the device default (#396), in place.
+
+    The pre-3.9 legacy migration seeded watchdog_interval=30 and
+    start_duration_threshold=5. On the coarse (30 s) sampling device types those
+    fall below the panel's watchdog>=2*sampling and start_duration>=sampling gates,
+    so they are replaced with the device-resolved default, but ONLY where they still
+    equal the old scalar default: a value the migration seeded, never a deliberate
+    choice. An absent key stays absent, so the runtime default applies.
+
+    One helper for the 3.9 -> 3.10 step and the one-pass legacy path (audit
+    PLATFORM-09): the bulk path copied the 3.10 -> 3.11 heal but not this one, so a
+    dryer migrating from 3.1 or 3.5 kept 30/5 while the same entry at 3.9 got 61/30.
+    A falsy device type means DEFAULT_DEVICE_TYPE, not the coarse scalar fallback.
+    """
+    dev = device_type or DEFAULT_DEVICE_TYPE
+    healed: list[str] = []
+    if options.get(CONF_WATCHDOG_INTERVAL) == 30:
+        resolved = resolve_watchdog_interval_default(dev)
+        if resolved != 30:
+            options[CONF_WATCHDOG_INTERVAL] = resolved
+            healed.append(CONF_WATCHDOG_INTERVAL)
+    if options.get(CONF_START_DURATION_THRESHOLD) == 5:
+        resolved_start = resolve_start_duration_default(dev)
+        if resolved_start != 5:
+            options[CONF_START_DURATION_THRESHOLD] = resolved_start
+            healed.append(CONF_START_DURATION_THRESHOLD)
+    return healed
+
+
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
@@ -300,36 +330,17 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _log.debug("Migrated WashData entry from 3.8 to 3.9 (no null options)")
 
     # 3.9 → 3.10: heal cadence defaults that violate the panel's own conflict rules
-    # (#396). The pre-3.9 legacy migration seeded watchdog_interval=30 and
-    # start_duration_threshold=5 into options. With sampling_interval now resolved
-    # per device type, those seeded values fall below the watchdog>=2*sampling and
-    # start_duration>=sampling gates on the coarse (30 s) sampling device types.
-    # Replace them with the device-resolved default ONLY where they still equal the
-    # old scalar default (30 / 5) - i.e. a value the migration seeded, never a
-    # deliberate user choice (both violated the rule). A never-seeded (absent) key
-    # is left absent so the runtime device-resolved default applies.
+    # (#396); see _heal_seeded_cadence, which the one-pass legacy path shares.
     if version == 3 and minor_version == 9:
         new_opts = dict(entry.options)
         # `or` (not `.get(..., default)`) so a present-but-null device type also falls
         # through to the data value / DEFAULT_DEVICE_TYPE: a null would otherwise resolve
         # to the coarse scalar defaults and wrongly heal a washing-machine-equivalent
         # entry's 30/5 up to 61/30.
-        _dt = (
-            new_opts.get(CONF_DEVICE_TYPE)
-            or entry.data.get(CONF_DEVICE_TYPE)
-            or DEFAULT_DEVICE_TYPE
+        _healed = _heal_seeded_cadence(
+            new_opts,
+            new_opts.get(CONF_DEVICE_TYPE) or entry.data.get(CONF_DEVICE_TYPE),
         )
-        _healed = []
-        if new_opts.get(CONF_WATCHDOG_INTERVAL) == 30:
-            _resolved = resolve_watchdog_interval_default(_dt)
-            if _resolved != 30:
-                new_opts[CONF_WATCHDOG_INTERVAL] = _resolved
-                _healed.append(CONF_WATCHDOG_INTERVAL)
-        if new_opts.get(CONF_START_DURATION_THRESHOLD) == 5:
-            _resolved = resolve_start_duration_default(_dt)
-            if _resolved != 5:
-                new_opts[CONF_START_DURATION_THRESHOLD] = _resolved
-                _healed.append(CONF_START_DURATION_THRESHOLD)
         # LITERAL 10, not CONFIG_ENTRY_MINOR_VERSION, like every other step. These
         # blocks form a chain - each advances minor_version to exactly N+1 so the next
         # block picks it up - so a step that wrote "whatever is current" would, after a
@@ -555,6 +566,11 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # NB: CONF_DEVICE_TYPE was already popped from ``data`` above (keys_to_remove),
         # so no stale removed value can linger there; the flow/manager read it from
         # options (options-first).
+
+    # Same heal as the 3.9 -> 3.10 step (audit PLATFORM-09), after the remap so it
+    # resolves against the device type the entry ends up on. The `setdefault` above
+    # keeps a stored 30/5, which is exactly what the chain heals.
+    _heal_seeded_cadence(options, options.get(CONF_DEVICE_TYPE))
 
     # Strip the now-retired running_dead_zone from options in the bulk path too
     # (covers entries that migrate straight from v1/v2/early-v3 in one pass).
@@ -1076,14 +1092,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         async def handle_auto_label_cycles(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
-            confidence_threshold = call.data.get("confidence_threshold", 0.75)
+            confidence_threshold = call.data.get("confidence_threshold")
 
             entry_id, _manager = _service_manager(hass, device_id)
 
             # The same registry task the panel starts (audit PLATFORM-05): under
             # the write lock, visible as a header pill, cancellable; awaited so an
             # automation step still waits for the result.
-            from .ws_api import start_auto_label_task  # noqa: PLC0415
+            from .ws_api import (  # noqa: PLC0415
+                configured_auto_label_threshold,
+                start_auto_label_task,
+            )
+
+            # Omitted: the device's own Auto-Label Confidence, as the WS command
+            # does (audit UI-10), not a hardcoded 0.75 that ignored the setting.
+            if confidence_threshold is None:
+                confidence_threshold = configured_auto_label_threshold(
+                    hass.config_entries.async_get_entry(entry_id)
+                )
 
             _task, raw = start_auto_label_task(hass, entry_id, float(confidence_threshold))
             if raw is not None:
@@ -1244,8 +1270,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # existing file even when is_allowed_path() accepts it; exclusive
             # creation ("x") makes that no-overwrite check atomic (no TOCTOU
             # window). The default generated path may be re-written freely.
+            # Serialised like the WS export (audit PERF-11): HA's orjson encoder,
+            # compact. indent=2 put every power-trace number on its own line.
+            from .ws_api import _export_json  # noqa: PLC0415
+
             def _dump_and_write():
-                text = json.dumps(payload, indent=2)
+                text = _export_json(payload)
                 try:
                     if file_path:
                         # Exclusive creation ("x") makes the no-overwrite check
@@ -1593,11 +1623,12 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 _ORPHAN_SWEEP_KEY = "ha_washdata_orphan_sweep"
 # Per-appliance store keys: the profile store, its active-cycle snapshot (0.5.8), its
-# pre-import restore point (register item 195) and the manual recorder. Global keys
+# pre-import restore point (register item 195), its held-notification queue (audit
+# MANAGER-16) and the manual recorder. Global keys
 # (``ha_washdata_panel``, ``ha_washdata_online``) use an underscore and never match.
 _ENTRY_STORE_RE = re.compile(
     r"^ha_washdata\.(?:recorder\.)?([0-9A-Za-z]{20,40})"
-    rf"(?:\.active|\.{PRE_IMPORT_STORE_SUFFIX})?$"
+    rf"(?:\.active|\.{PRE_IMPORT_STORE_SUFFIX}|\.{NOTIFY_QUEUE_STORE_SUFFIX})?$"
 )
 
 
@@ -1606,6 +1637,7 @@ def _entry_store_keys(entry_id: str) -> list[str]:
         f"{STORAGE_KEY}.{entry_id}",
         f"{STORAGE_KEY}.{entry_id}.active",
         f"{STORAGE_KEY}.{entry_id}.{PRE_IMPORT_STORE_SUFFIX}",
+        f"{STORAGE_KEY}.{entry_id}.{NOTIFY_QUEUE_STORE_SUFFIX}",
         f"{STORAGE_KEY}.recorder.{entry_id}",
     ]
 

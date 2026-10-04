@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Neizdevās izveidot savienojumu",
-      "invalid_auth": "Nederīga autentifikācija",
       "unknown": "Negaidīta kļūda",
       "invalid_power": "Jaudas slieksnim jābūt lielākam par 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Pārliecības slieksnis",
-          "description": "Minimālā atbilstības ticamība (0,50–0,95), lai lietotu etiķetes."
+          "description": "Minimālā atbilstības ticamība (0,50-0,95), lai lietotu etiķetes. Atstājiet tukšu, lai izmantotu ierīces iestatījumu Automātiskās marķēšanas pārliecība."
         }
       }
     },

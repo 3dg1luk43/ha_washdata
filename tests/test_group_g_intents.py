@@ -267,6 +267,9 @@ def test_manifest_declares_conversation_dependency():
     )
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert "conversation" in manifest["dependencies"]
+    # WashData derives everything from another entity's state events (audit
+    # PLATFORM-19), so `calculated`, not `local_polling`.
+    assert manifest["iot_class"] == "calculated"
     # Valid JSON with the expected shape.
     assert manifest["domain"] == DOMAIN
 

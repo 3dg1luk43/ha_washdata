@@ -84,9 +84,8 @@ auto_label_cycles:
           integration: ha_washdata
     confidence_threshold:
       name: Confidence Threshold
-      description: Minimum match confidence (0.50-0.95) to apply labels.
+      description: Minimum match confidence (0.50-0.95) to apply labels. Leave empty to use the device's Auto-Label Confidence setting.
       required: false
-      default: 0.75
       selector:
         number:
           min: 0.50

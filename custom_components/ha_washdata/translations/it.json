@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Connessione non riuscita",
-      "invalid_auth": "Autenticazione non valida",
       "unknown": "Errore imprevisto",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Soglia di confidenza",
-          "description": "Confidenza di corrispondenza minima (0,50-0,95) per applicare le etichette."
+          "description": "Confidenza di corrispondenza minima (0,50-0,95) per applicare le etichette. Lascia vuoto per usare l'impostazione Confidenza etichettatura automatica del dispositivo."
         }
       }
     },

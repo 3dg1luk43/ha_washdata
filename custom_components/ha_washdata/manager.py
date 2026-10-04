@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import logging
 import hashlib
+import json
 import math
 import re
 import uuid
@@ -46,7 +47,7 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.const import STATE_UNAVAILABLE, STATE_HOME
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP, STATE_UNAVAILABLE, STATE_HOME
 from homeassistant.util import dt as dt_util
 import voluptuous as vol
 
@@ -54,7 +55,10 @@ import homeassistant.helpers.event as evt
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import script as script_helper
 from homeassistant.helpers import translation
+from homeassistant.helpers.start import async_at_started
+from homeassistant.helpers.storage import Store
 
+from .const import NOTIFY_QUEUE_STORE_SUFFIX, STORAGE_KEY
 from .const import (
     resolve_off_delay_default,
     DOMAIN,
@@ -121,7 +125,6 @@ from .const import (
     DEFAULT_AUTO_MAINTENANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_NOTIFY_TITLE,
     CONF_NOTIFY_ICON,
@@ -281,6 +284,19 @@ _HEX_COLOR_RE = re.compile(r"[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8}")
 _QUIET_HOURS_EVENT_TYPES = frozenset(
     {NOTIFY_EVENT_FINISH, NOTIFY_EVENT_CLEAN, "pre_complete"}
 )
+
+# Held notifications persisted across a restart (audit MANAGER-16). Not persisted:
+# a live update (the next tick replaces it), a cycle timer (its Resume action is
+# wired for one session) and the unload nag (the Clean state it belongs to is not
+# restored, and the door may have opened meanwhile). Start and pre-complete belong
+# to the cycle under way, so they are restored only while one still is.
+_NOTIFY_QUEUE_TRANSIENT_EVENTS = frozenset(
+    {NOTIFY_EVENT_LIVE, NOTIFY_EVENT_TIMER, NOTIFY_EVENT_CLEAN}
+)
+_NOTIFY_QUEUE_CYCLE_EVENTS = frozenset({NOTIFY_EVENT_START, "pre_complete"})
+# A saved queue older than this is dropped on restore instead of delivered: a
+# "finished" from days ago is noise. Longer than any quiet window.
+_NOTIFY_QUEUE_MAX_AGE_S = 24 * 3600
 
 
 # Detector states in which the power sensor must not be swapped out. Every state
@@ -579,6 +595,9 @@ class WashDataManager:
         self.power_sensor_entity_id = config_entry.options.get(
             CONF_POWER_SENSOR, config_entry.data.get(CONF_POWER_SENSOR)
         )
+        # A sensor change saved while a cycle was under way, applied once the
+        # detector leaves _SENSOR_SWAP_BLOCKED_STATES (audit MANAGER-11).
+        self._pending_power_sensor: str | None = None
         self.device_type = config_entry.options.get(
             CONF_DEVICE_TYPE,
             config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
@@ -616,6 +635,11 @@ class WashDataManager:
         # at the end of the window by a single async_call_later timer.
         self._quiet_pending_notifications: list[dict[str, Any]] = []
         self._remove_quiet_hours_timer: Any | None = None
+        # Both queues outlive a restart through this file (audit MANAGER-16).
+        self._notify_queue_store: Store[dict[str, Any]] | None = None
+        self._notify_queue_on_disk = False
+        self._remove_ha_stop_listener: Callable[[], None] | None = None
+        self._remove_notify_queue_restore: Callable[[], None] | None = None
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
 
@@ -791,9 +815,7 @@ class WashDataManager:
             self.entry_id,
             min_duration_ratio=config_entry.options.get(
                 CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
-                    self.device_type, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
-                ),
+                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
             ),
             max_duration_ratio=config_entry.options.get(
                 CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
@@ -818,6 +840,9 @@ class WashDataManager:
         self.learning_manager = LearningManager(
             hass, self.entry_id, self.profile_store, self.device_type,
             device_name=config_entry.title,
+            # Its store saves and suggestion passes are cancelled with ours on an
+            # unload (audit MANAGER-13), not left writing the swapped-out store.
+            spawn=self._spawn_tracked,
         )
         self.recorder = CycleRecorder(hass, self.entry_id, device_name=config_entry.title)
         self._store_bridge: Any = None  # lazy community-store bridge (online features)
@@ -1048,16 +1073,9 @@ class WashDataManager:
                 resolve_sampling_interval_default(self.device_type),
             )
         )
-        self._noise_events_threshold = int(
-            config_entry.options.get(
-                CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
-                DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
-            )
-        )
         self._current_program: str = "off"
         self._time_remaining: float | None = None
         self._total_duration: float | None = None
-        self._last_total_duration_update: datetime | None = None
         self._cycle_progress: float = 0.0
         self._smoothed_progress: float = 0.0  # Smoothed progress tracking for EMA
         self._smoothed_for_program: str | None = None  # the program that EMA tracks
@@ -1991,6 +2009,15 @@ class WashDataManager:
         self._progress_reset_delay = int(
             options.get(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
         )
+        # Read here, not only in the constructor (audit MANAGER-15): the last
+        # manager tunable an options reload left stale.
+        self._noise_events_threshold = option_int(
+            options.get(
+                CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+                DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+            ),
+            DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+        )
 
     async def async_setup(self) -> None:
         """Set up the manager."""
@@ -2123,10 +2150,9 @@ class WashDataManager:
         # This is safe to run repeatedly (it skips already compressed cycles)
         await self.profile_store.async_migrate_cycles_to_compressed()
 
-        # Backfill match_confidence for labeled cycles that predate the field
-        self.hass.async_create_task(
-            self.profile_store.async_backfill_match_confidence()
-        )
+        # Backfill match_confidence for labeled cycles that predate the field.
+        # Tracked (audit MANAGER-13): it saves the store.
+        self._spawn_tracked(self.profile_store.async_backfill_match_confidence())
 
         # Subscribe to external cycle end trigger (if enabled)
         await self._setup_external_end_trigger()
@@ -2142,6 +2168,16 @@ class WashDataManager:
 
         # Subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
+
+        # HA does not unload entries on a stop, so the stop gets its own hook to keep
+        # the held notifications and a fresh snapshot (audit MANAGER-16); what it
+        # kept is re-dispatched once HA has started and notify services exist.
+        self._remove_ha_stop_listener = self.hass.bus.async_listen(
+            EVENT_HOMEASSISTANT_STOP, self._async_on_ha_stop
+        )
+        self._remove_notify_queue_restore = async_at_started(
+            self.hass, self._schedule_notify_queue_restore
+        )
 
         # Register schedulers (maintenance + ML training). These are also re-
         # registered on every config reload; calling them here ensures they
@@ -2211,51 +2247,7 @@ class WashDataManager:
         self.config_entry = config_entry
 
         # Check if power sensor changed
-        new_sensor = config_entry.options.get(
-            CONF_POWER_SENSOR, config_entry.data.get(CONF_POWER_SENSOR)
-        )
-        if new_sensor and new_sensor != self.power_sensor_entity_id:
-            # Block sensor changes when a cycle is active to prevent inconsistent state
-            d_state = self.detector.state
-            self._logger.debug(
-                "Reloading config: detector.state=%r (type=%s), RUNNING=%r",
-                d_state,
-                type(d_state),
-                STATE_RUNNING,
-            )
-            if d_state in _SENSOR_SWAP_BLOCKED_STATES:
-                # Skip the sensor change but continue with the other config
-                # updates: returning here would silently drop every setting
-                # saved alongside the sensor in the same submission.
-                self._logger.warning(
-                    "Cannot change power sensor from %s to %s while the "
-                    "detector is in state %s. Please wait for the current "
-                    "cycle to complete before changing the power sensor.",
-                    self.power_sensor_entity_id,
-                    new_sensor,
-                    d_state,
-                )
-            else:
-                self._logger.info(
-                    "Power sensor changed: %s -> %s", self.power_sensor_entity_id, new_sensor
-                )
-                self.power_sensor_entity_id = new_sensor
-                # Re-attach change + report listeners to the new sensor
-                # (helper removes the old ones first).
-                self._subscribe_power_sensor()
-                # Force update from new sensor
-                state = self.hass.states.get(self.power_sensor_entity_id)
-                if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-                    _reload_power = _finite_power(state.state)
-                    if _reload_power is not None:
-                        self.detector.process_reading(_reload_power, utc_now())
-                    else:
-                        self._logger.debug(
-                            "Initial power value for %s after config reload is not a "
-                            "finite number: %r",
-                            self.power_sensor_entity_id,
-                            state.state,
-                        )
+        self._apply_power_sensor_option()
 
         # Update device type
         self.device_type = config_entry.options.get(
@@ -2346,9 +2338,7 @@ class WashDataManager:
         new_min_ratio = float(
             config_entry.options.get(
                 CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
-                    self.device_type, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
-                ),
+                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
             )
         )
         new_max_ratio = float(
@@ -2571,6 +2561,70 @@ class WashDataManager:
 
         self._logger.info("Configuration reloaded successfully")
 
+    def _apply_power_sensor_option(self) -> None:
+        """Re-point the power listener at the configured sensor, if it changed.
+
+        Never while a cycle is under way (_SENSOR_SWAP_BLOCKED_STATES): the swap is
+        parked in ``_pending_power_sensor`` and ``_on_state_change`` applies it once
+        the detector leaves those states (audit MANAGER-11). It used to be dropped
+        until the next reload, while the panel already showed the new sensor.
+        """
+        new_sensor = self.config_entry.options.get(
+            CONF_POWER_SENSOR, self.config_entry.data.get(CONF_POWER_SENSOR)
+        )
+        if not new_sensor or new_sensor == self.power_sensor_entity_id:
+            self._pending_power_sensor = None
+            return
+        d_state = self.detector.state
+        if d_state in _SENSOR_SWAP_BLOCKED_STATES:
+            # Park the change but continue with the other config updates: returning
+            # from the reload would silently drop every setting saved alongside the
+            # sensor in the same submission.
+            self._pending_power_sensor = new_sensor
+            self._logger.warning(
+                "Power sensor change %s -> %s deferred: the detector is in state %s. "
+                "It takes effect when the current cycle ends.",
+                self.power_sensor_entity_id,
+                new_sensor,
+                d_state,
+            )
+            return
+        self._pending_power_sensor = None
+        self._logger.info(
+            "Power sensor changed: %s -> %s", self.power_sensor_entity_id, new_sensor
+        )
+        self.power_sensor_entity_id = new_sensor
+        # Re-attach change + report listeners to the new sensor
+        # (helper removes the old ones first).
+        self._subscribe_power_sensor()
+        # Force update from new sensor
+        state = self.hass.states.get(self.power_sensor_entity_id)
+        if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+            _reload_power = _finite_power(state.state)
+            if _reload_power is not None:
+                self.detector.process_reading(_reload_power, utc_now())
+            else:
+                self._logger.debug(
+                    "Initial power value for %s after config reload is not a "
+                    "finite number: %r",
+                    self.power_sensor_entity_id,
+                    state.state,
+                )
+
+    async def _async_apply_pending_power_sensor(self) -> None:
+        """Apply a parked sensor swap (see _apply_power_sensor_option).
+
+        A task, not inline in _on_state_change: that callback runs inside the
+        detector's own process_reading, and the swap feeds the new sensor's
+        reading straight back into it. HA starts tasks eagerly, so yield once
+        first or the body would still run inside that call.
+        """
+        await asyncio.sleep(0)
+        if self._is_shutdown or self._pending_power_sensor is None:
+            return
+        self._apply_power_sensor_option()
+        self._notify_update()
+
     def _spawn_tracked(self, coro: Coroutine[Any, Any, Any]) -> Task[Any]:
         """Create a detached task and track it so shutdown can cancel it.
 
@@ -2608,6 +2662,14 @@ class WashDataManager:
         # Drain cancelled tasks so they don't race the freshly-reloaded ProfileStore.
         if _to_await:
             await asyncio.gather(*_to_await, return_exceptions=True)
+        for _unsub_name in ("_remove_ha_stop_listener", "_remove_notify_queue_restore"):
+            _unsub = getattr(self, _unsub_name, None)
+            if _unsub is not None:
+                _unsub()
+                setattr(self, _unsub_name, None)
+        # Keep the held notifications for the entry's next setup (audit MANAGER-16)
+        # before the queues are cleared below.
+        await self._async_persist_notification_queues()
         if self._remove_listener:
             self._remove_listener()
         if self._remove_report_listener:
@@ -2674,9 +2736,16 @@ class WashDataManager:
         # A debounced cycle-end write still pending must land before a reload loads
         # this store again from disk (HA's own final write covers only a stop), and
         # nothing may be debounced past this point.
+        # A task cancelled above may have been on its way to a save (the learning
+        # pass's feedback request, a suggestion cleanup, audit MANAGER-13): its
+        # change is in memory but never reached disk, so write the store once now
+        # rather than lose it to the reload that reads the file next.
         try:
             self.profile_store.coalesce_saves(0)
-            await self.profile_store.async_flush_saves()
+            if _to_await:
+                await self.profile_store.async_save()
+            else:
+                await self.profile_store.async_flush_saves()
         except Exception:  # noqa: BLE001 - never block an unload on a save
             self._logger.debug("Flushing pending store writes failed", exc_info=True)
 
@@ -3762,9 +3831,8 @@ class WashDataManager:
             # Inject manual program flag into snapshot before saving
             snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
 
-            self.hass.async_create_task(
-                self.profile_store.async_save_active_cycle(snapshot)
-            )
+            # Tracked (audit MANAGER-13): an unload cancels it and writes its own.
+            self._spawn_tracked(self.profile_store.async_save_active_cycle(snapshot))
             self._last_state_save = now
 
     async def _run_final_match_from_cycle_data(
@@ -4673,6 +4741,10 @@ class WashDataManager:
                 # minutes into a two-hour wash).
                 self._smoothed_progress = 0.0
                 self._matched_profile_duration = None
+                # The ML expectation is the median of the profile's last 20 cycles;
+                # cached per profile only, it stayed frozen until another programme
+                # was matched or HA restarted (audit PROGRESS-16). Once per cycle.
+                self._ml_end_expectation_cache = None
                 self._last_estimate_time = None
                 self._score_history = {}  # Reset score history on new cycle
                 self._match_persistence_counter = {}  # Reset persistence counter
@@ -4786,6 +4858,13 @@ class WashDataManager:
         if new_state == STATE_OFF:
             self._stop_watchdog()  # Stop watchdog regardless of previous state
             self._cycle_start_time = None
+
+        # A power-sensor change saved mid-cycle lands now (audit MANAGER-11).
+        if (
+            getattr(self, "_pending_power_sensor", None) is not None
+            and new_state not in _SENSOR_SWAP_BLOCKED_STATES
+        ):
+            self._spawn_tracked(self._async_apply_pending_power_sensor())
 
         self._notify_update()
 
@@ -6317,6 +6396,140 @@ class WashDataManager:
             self._remove_quiet_hours_timer = None
 
     # ------------------------------------------------------------------
+    # Held notifications across a restart (audit MANAGER-16)
+    # ------------------------------------------------------------------
+    def _get_notify_queue_store(self) -> Store[dict[str, Any]]:
+        if getattr(self, "_notify_queue_store", None) is None:
+            self._notify_queue_store = Store(
+                self.hass, 1, f"{STORAGE_KEY}.{self.entry_id}.{NOTIFY_QUEUE_STORE_SUFFIX}"
+            )
+        return self._notify_queue_store
+
+    @staticmethod
+    def _persistable_notifications(queue: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """The queued entries worth keeping, as JSON-safe copies."""
+        out: list[dict[str, Any]] = []
+        for entry in queue:
+            if entry.get("event_type") in _NOTIFY_QUEUE_TRANSIENT_EVENTS:
+                continue
+            try:
+                json.dumps(entry)
+            except (TypeError, ValueError):
+                continue
+            out.append(dict(entry))
+        return out
+
+    async def _async_persist_notification_queues(self) -> None:
+        """Write the quiet-hours and presence queues to disk. Never raises.
+
+        Touches storage only when there is something to keep, or a file this
+        manager wrote earlier is now stale.
+        """
+        try:
+            quiet = self._persistable_notifications(
+                getattr(self, "_quiet_pending_notifications", None) or []
+            )
+            presence = self._persistable_notifications(
+                getattr(self, "_pending_notifications", None) or []
+            )
+            if quiet or presence:
+                await self._get_notify_queue_store().async_save(
+                    {
+                        "saved_at": utc_now().isoformat(),
+                        "quiet": quiet,
+                        "presence": presence,
+                    }
+                )
+                self._notify_queue_on_disk = True
+                self._logger.info(
+                    "Kept %d held notification(s) for after the restart",
+                    len(quiet) + len(presence),
+                )
+            elif getattr(self, "_notify_queue_on_disk", False):
+                await self._get_notify_queue_store().async_remove()
+                self._notify_queue_on_disk = False
+        except Exception:  # noqa: BLE001 - a stop or unload must not fail on this
+            self._logger.debug("Could not persist held notifications", exc_info=True)
+
+    async def _async_on_ha_stop(self, _event: Event) -> None:
+        """Persist what lives only in memory before Home Assistant stops.
+
+        HA does not unload config entries on a stop, so ``async_shutdown`` never runs
+        on a restart: the held notifications were lost and the active-cycle snapshot
+        was up to a minute old. Nothing is sent from here.
+        """
+        if self._is_shutdown:
+            return
+        try:
+            if self.detector.state in {
+                STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING
+            }:
+                snapshot = self._augment_active_snapshot(
+                    self.detector.get_state_snapshot()
+                )
+                await self.profile_store.async_save_active_cycle(snapshot)
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Could not save the active cycle at stop", exc_info=True)
+        await self._async_persist_notification_queues()
+
+    @callback
+    def _schedule_notify_queue_restore(self, _hass: HomeAssistant) -> None:
+        """Restore the held notifications once HA has started (notify services exist)."""
+        self._remove_notify_queue_restore = None
+        if not self._is_shutdown:
+            self._spawn_tracked(self._async_restore_notification_queues())
+
+    async def _async_restore_notification_queues(self) -> None:
+        """Re-dispatch the notifications held when HA last stopped. Never raises.
+
+        Each one goes back through the normal gates, so it is held again if quiet
+        hours are still on or nobody is home, and delivered otherwise. The file is
+        deleted on read, so a later restart cannot deliver it twice.
+        """
+        try:
+            store = self._get_notify_queue_store()
+            data = await store.async_load()
+            if data is None:
+                return
+            await store.async_remove()
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Could not restore held notifications", exc_info=True)
+            return
+        if self._is_shutdown or not isinstance(data, dict):
+            return
+        saved_at = dt_util.parse_datetime(str(data.get("saved_at") or ""))
+        if (
+            saved_at is None
+            or (utc_now() - dt_util.as_utc(saved_at)).total_seconds()
+            > _NOTIFY_QUEUE_MAX_AGE_S
+        ):
+            self._logger.info("Dropped held notifications saved at %s: too old", saved_at)
+            return
+        in_progress = self.detector.state in _CYCLE_IN_PROGRESS_STATES
+        restored = 0
+        for key in ("quiet", "presence"):
+            entries = data.get(key)
+            for entry in entries if isinstance(entries, list) else []:
+                if not isinstance(entry, dict) or not isinstance(entry.get("message"), str):
+                    continue
+                event_type = entry.get("event_type")
+                if event_type in _NOTIFY_QUEUE_TRANSIENT_EVENTS:
+                    continue
+                if event_type in _NOTIFY_QUEUE_CYCLE_EVENTS and not in_progress:
+                    continue
+                extra = entry.get("extra_vars")
+                self._dispatch_notification(
+                    entry["message"],
+                    title=entry.get("title"),
+                    icon=entry.get("icon"),
+                    event_type=event_type,
+                    extra_vars=extra if isinstance(extra, dict) else None,
+                )
+                restored += 1
+        if restored:
+            self._logger.info("Restored %d held notification(s) after restart", restored)
+
+    # ------------------------------------------------------------------
     # C2 - Milestone (cycle-count achievement) notifications
     # ------------------------------------------------------------------
     @staticmethod
@@ -7164,7 +7377,8 @@ class WashDataManager:
 
         # If noise events exceed threshold in 24h, trigger tune
         if len(self._noise_events) >= self._noise_events_threshold:
-            self.hass.async_create_task(self._tune_threshold())
+            # Tracked (audit MANAGER-13): it saves the store.
+            self._spawn_tracked(self._tune_threshold())
 
     async def _tune_threshold(self) -> None:
         """Increase the minimum power threshold."""
@@ -8082,7 +8296,6 @@ class WashDataManager:
         self._smoothed_for_program = self._current_program
         self._time_remaining = result.remaining
         self._total_duration = result.total
-        self._last_total_duration_update = now
         self._update_projected_energy()
         self._update_cycle_anomaly(duration_so_far)
 
@@ -8343,11 +8556,6 @@ class WashDataManager:
     def total_duration(self) -> float | None:
         """Return total predicted duration in seconds."""
         return self._total_duration
-
-    @property
-    def last_total_duration_update(self) -> datetime | None:
-        """Return when total duration was last refined."""
-        return self._last_total_duration_update
 
     @property
     def cycle_progress(self):
@@ -8781,7 +8989,7 @@ class WashDataManager:
         self._cancel_door_end_dwell()
 
         snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
-        self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
+        self._spawn_tracked(self.profile_store.async_save_active_cycle(snapshot))
         self._notify_update()
         return True
 
@@ -8841,7 +9049,7 @@ class WashDataManager:
         self._clear_timer_pause_notification()
 
         snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
-        self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
+        self._spawn_tracked(self.profile_store.async_save_active_cycle(snapshot))
         self._notify_update()
         return True
 
@@ -8911,15 +9119,21 @@ class WashDataManager:
             return
 
         self._manual_program_active = False
-        # If running, revert to detecting so auto-detection can resume?
-        if self.detector.state == "running":
+        # A live cycle goes back to auto-detection. PAUSED and ENDING are live too
+        # (audit MANAGER-15): comparing against "running" alone showed "off" for a
+        # cycle still under way. The refresh mirrors set_manual_program's.
+        state = self.detector.state
+        self._matched_profile_duration = None
+        if state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
             self._current_program = "detecting..."
-            self._matched_profile_duration = None
-            self._update_estimates()  # Trigger immediate re-detection attempt
+            self._last_phase_estimate_time = None
+            if state == STATE_RUNNING:
+                self._update_estimates()  # Trigger immediate re-detection attempt
+            else:
+                self._update_remaining_only()
         else:
-            # If not running, clear the forced program
+            # No cycle under way: clear the forced program
             self._current_program = "off"
-            self._matched_profile_duration = None
 
         self._notify_update()
         self._logger.info("Manual program cleared, reverting to auto-detection")

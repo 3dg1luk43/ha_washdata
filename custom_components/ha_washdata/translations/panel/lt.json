@@ -253,7 +253,8 @@
     "confirm_appliance": "Patvirtinti šį prietaisą",
     "confirmed": "Patvirtinta",
     "create_profile_from_gap": "Sukurti profilį",
-    "undo_import": "Anuliuoti paskutinį importą"
+    "undo_import": "Anuliuoti paskutinį importą",
+    "pg_rerun": "Atnaujinti simuliaciją"
   },
   "note": {
     "off_delay": {
@@ -676,7 +677,12 @@
     "automation_off": "(išjungta)",
     "ref_cycle_none": "Nėra",
     "share_name": "Rodyti mano vardą prie bendrinamo turinio",
-    "cat_backfill_cycles": "Ciklai, rasti importuotoje galios istorijoje"
+    "cat_backfill_cycles": "Ciklai, rasti importuotoje galios istorijoje",
+    "pg_compare_profile": "Palyginti su profiliu",
+    "pg_obj_early": "Ankstyvų pabaigų dalis",
+    "pg_obj_endlag": "Pabaigos vėlavimas (mediana)",
+    "pg_obj_split": "Padalinimų dalis",
+    "pg_sweep_cycles": "Naujausi ciklai"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -705,7 +711,27 @@
     },
     "metric_auc": "AUC {auc} patikros duomenimis",
     "metric_mae": "paklaida: {model} palyginti su {baseline} baze",
-    "fine_tuned_at": "tiksliai suderinta {when}"
+    "fine_tuned_at": "tiksliai suderinta {when}",
+    "last_run_not_promoted": "Paskutinis patikrinimas ({when}): {reason}",
+    "never": "niekada",
+    "skip_reason": {
+      "fit_failed": "Apmokyti nepavyko: {error}",
+      "holdout_too_small": "Per mažai ciklų, kad būtų galima teisingai išbandyti naują modelį: bandymui galima atidėti {held_out}, reikia {min}.",
+      "not_better_than_incumbent": "Naujas modelis nebuvo geresnis už naudojamą (paklaida {model}, palyginti su {incumbent}), todėl paliktas dabartinis.",
+      "not_better_than_naive": "Naujas modelis nebuvo aiškiai geresnis už paprastą įvertį (paklaida {model}, palyginti su {naive}).",
+      "unknown": "Nieko naujo neišmokta.",
+      "insufficient_rows": "Dar nepakanka tinkamų ciklų: kol kas yra {count} pažymėtų švarių ciklų.",
+      "insufficient_rows_one": "Dar nepakanka tinkamų ciklų: kol kas yra {count} pažymėtas švarus ciklas.",
+      "insufficient_rows_few": "Dar nepakanka tinkamų ciklų: kol kas yra {count} pažymėti švarūs ciklai.",
+      "insufficient_rows_many": "Dar nepakanka tinkamų ciklų: kol kas yra {count} pažymėto švaraus ciklo.",
+      "insufficient_rows_other": "Dar nepakanka tinkamų ciklų: kol kas yra {count} pažymėtų švarių ciklų."
+    },
+    "trained_unknown": "nežinomu laiku",
+    "held_out_count": "išmatuota naudojant {count} patikros ciklų",
+    "held_out_count_one": "išmatuota naudojant {count} patikros ciklą",
+    "held_out_count_few": "išmatuota naudojant {count} patikros ciklus",
+    "held_out_count_many": "išmatuota naudojant {count} patikros ciklo",
+    "held_out_count_other": "išmatuota naudojant {count} patikros ciklų"
   },
   "modal": {
     "auto_label": "Automatinio etikečių ciklai",
@@ -1034,7 +1060,25 @@
     "feedback_detected": "WashData aptiko: {name}",
     "import_undo_hint": "Saugomas atkūrimo taškas, sukurtas prieš paskutinį importą ({when}): {profiles} profilių ir {cycles} ciklų.",
     "replace_undo_hint": "Pirmiausia išsaugomas atkūrimo taškas, todėl šį importą galėsite anuliuoti skiltyje Eksportas / Importas.",
-    "pg_in_sample_note": "Šie ciklai taip pat padėjo sukurti profilius, su kuriais jie lyginami, todėl šie rezultatai yra optimistiniai: naujų ciklų atveju tikėkitės šiek tiek mažiau teisingų atitikčių."
+    "pg_in_sample_note": "Šie ciklai taip pat padėjo sukurti profilius, su kuriais jie lyginami, todėl šie rezultatai yra optimistiniai: naujų ciklų atveju tikėkitės šiek tiek mažiau teisingų atitikčių.",
+    "hist_tail_trimmed": "Nukirpta {min} min laukimo po ciklo pabaigos, kaip tai daro ir veikianti integracija",
+    "hist_truncated": "sustota ties {n} rodmenų riba, todėl likusi istorija nenuskaityta",
+    "hist_warn_kw": "Didžiausias rodmuo yra tik {w}. Panašu, kad šis sensorius praneša kilovatais; „WashData“ galią skaito vatais, todėl iš jo ciklų aptikti neįmanoma.",
+    "pg_compare_profile_tip": "Tik pasirenkamas profilis, rodomas ant grafiko. Simuliacija visada pati atpažįsta ciklo programą, kaip ir veikianti integracija.",
+    "pg_outcome_stale": "Nuo šios simuliacijos paleidimo nustatymai pasikeitė. Joje vis dar rodomas senas rezultatas.",
+    "pg_sweep_guarded": "Daugiau ciklų baigia per anksti, daugiau jų padalija arba praleidžia ciklus, kuriuos aptinka dabartinis nustatymas, todėl niekada nerekomenduojama.",
+    "pg_sweep_keep_current": "Palikite dabartinę reikšmę ({value}, {metric}): jokia reikšmė nebuvo geresnė bent vienu ciklu.",
+    "pg_task_busy": "Šiam įrenginiui jau vykdomas bandymas su istorija arba optimizavimas. Palaukite, kol jis baigsis, arba jį atšaukite.",
+    "hist_warn_naive_time": "{n} laiko žymų neturi laiko juostos, todėl jos nuskaitytos kaip UTC. Jei failas yra vietos laiku, kiekvienas ciklas paslinktas per jūsų UTC poslinkį, o rodmenys apie vasaros laiko perjungimą gali būti sukeisti vietomis arba atmesti.",
+    "hist_warn_naive_time_one": "{n} laiko žyma neturi laiko juostos, todėl ji nuskaityta kaip UTC. Jei failas yra vietos laiku, kiekvienas ciklas paslinktas per jūsų UTC poslinkį, o rodmenys apie vasaros laiko perjungimą gali būti sukeisti vietomis arba atmesti.",
+    "hist_warn_naive_time_few": "{n} laiko žymos neturi laiko juostos, todėl jos nuskaitytos kaip UTC. Jei failas yra vietos laiku, kiekvienas ciklas paslinktas per jūsų UTC poslinkį, o rodmenys apie vasaros laiko perjungimą gali būti sukeisti vietomis arba atmesti.",
+    "hist_warn_naive_time_many": "{n} laiko žymos neturi laiko juostos, todėl jos nuskaitytos kaip UTC. Jei failas yra vietos laiku, kiekvienas ciklas paslinktas per jūsų UTC poslinkį, o rodmenys apie vasaros laiko perjungimą gali būti sukeisti vietomis arba atmesti.",
+    "hist_warn_naive_time_other": "{n} laiko žymų neturi laiko juostos, todėl jos nuskaitytos kaip UTC. Jei failas yra vietos laiku, kiekvienas ciklas paslinktas per jūsų UTC poslinkį, o rodmenys apie vasaros laiko perjungimą gali būti sukeisti vietomis arba atmesti.",
+    "pg_sweep_n_cycles": "remiantis {count} ciklų",
+    "pg_sweep_n_cycles_one": "remiantis {count} ciklu",
+    "pg_sweep_n_cycles_few": "remiantis {count} ciklais",
+    "pg_sweep_n_cycles_many": "remiantis {count} ciklo",
+    "pg_sweep_n_cycles_other": "remiantis {count} ciklų"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1197,7 +1241,7 @@
       "label": "Taikyti išmaniuosius modelius ciklo metu"
     },
     "end_energy_threshold": {
-      "doc": "Išjungimo delsos atgalinio skaičiavimo metu sukaupta energija (vatai x laikas) lyginama su šia riba. Jei viršijamas, atgalinis skaičiavimas nustatomas iš naujo – prie ciklo lieka pritvirtintos nesiglamžančios būgninės ir indaplovės džiovinimo uodegėlės, o ne trumpinamos. Pakelkite, jei ciklai baigiasi per anksti vėsinimo metu; sumažinkite jį, jei aptikimas yra vangus.",
+      "doc": "Kai išjungimo delsimas baigiasi, per jį suvartota energija (vatai x laikas) lyginama su šia riba. Virš jos ciklas dar nelaikomas baigtu, todėl apsaugos nuo raukšlių būgno sukimai ir indaplovės džiovinimo pabaiga lieka prijungti prie ciklo, o ne nukerpami. Sumažinkite ją, jei ciklai baigiasi vėsinimo sukimo ar džiovinimo pabaigos metu; padidinkite, jei baigti ciklai vis dar laukia.",
       "label": "Pabaigos energija"
     },
     "energy_price_entity": {
@@ -1808,7 +1852,17 @@
     "store_download_partial": "Nepavyko atsisiųsti programų: {n}. Bandykite vėliau dar kartą.",
     "import_no_restore_point": "Importuota, bet nepavyko išsaugoti atkūrimo taško, todėl šio importo anuliuoti negalima",
     "import_undo_failed": "Nepavyko anuliuoti importo: {error}",
-    "import_undone": "Importas anuliuotas: atkurta {profiles} profilių ir {cycles} ciklų"
+    "import_undone": "Importas anuliuotas: atkurta {profiles} profilių ir {cycles} ciklų",
+    "auto_label_cancelled": "Automatinis žymėjimas atšauktas pažymėjus {count} ciklų.",
+    "auto_label_cancelled_one": "Automatinis žymėjimas atšauktas pažymėjus {count} ciklą.",
+    "auto_label_cancelled_few": "Automatinis žymėjimas atšauktas pažymėjus {count} ciklus.",
+    "auto_label_cancelled_many": "Automatinis žymėjimas atšauktas pažymėjus {count} ciklo.",
+    "auto_label_cancelled_other": "Automatinis žymėjimas atšauktas pažymėjus {count} ciklų.",
+    "auto_label_done": "Automatinis žymėjimas baigtas: pažymėta {count} ciklų, be žymos liko {skipped}.",
+    "auto_label_done_one": "Automatinis žymėjimas baigtas: pažymėtas {count} ciklas, be žymos liko {skipped}.",
+    "auto_label_done_few": "Automatinis žymėjimas baigtas: pažymėti {count} ciklai, be žymos liko {skipped}.",
+    "auto_label_done_many": "Automatinis žymėjimas baigtas: pažymėta {count} ciklo, be žymos liko {skipped}.",
+    "auto_label_done_other": "Automatinis žymėjimas baigtas: pažymėta {count} ciklų, be žymos liko {skipped}."
   },
   "suggestion": {
     "observed_label": "Pastebėta",

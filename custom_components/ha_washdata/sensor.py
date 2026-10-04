@@ -482,12 +482,11 @@ class WasherTotalDurationSensor(WasherBaseSensor):
             return int(self._manager.total_duration / 60)
         return None
 
-    @property
-    def extra_state_attributes(self):  # type: ignore[override]
-        """Return extra state attributes."""
-        return {
-            "last_updated": self._manager.last_total_duration_update,
-        }
+    # No `last_updated` attribute any more (audit PERF-13): it was stamped on every
+    # estimate, so the entity wrote a state_changed event, i.e. one recorder row,
+    # every 5 s even while the whole-minute value stood still. An unrecorded
+    # attribute would not help: the recorder writes a row for every state_changed.
+    # The entity's own `last_changed` says when the total last moved.
 
 
 class WasherProgressSensor(WasherBaseSensor):
@@ -601,9 +600,20 @@ class WasherDebugSensor(WasherBaseSensor):
         detector = self._manager.detector
         stats = self._manager.sample_interval_stats
         # pylint: disable=protected-access
+        # The confidence comes from the same result as top_candidates and
+        # last_match_details (audit MATCH-DECIDE-14), not the committed program's
+        # `_last_match_confidence`, which moves only when the switching rules commit
+        # or re-confirm the program.
+        # That one is still the Match Confidence sensor's state; it is the fallback
+        # here only while there is no result to describe.
+        last = getattr(self._manager, "_last_match_result", None)
         attrs: dict[str, Any] = {
             "sub_state": detector.sub_state,
-            "match_confidence": getattr(self._manager, "_last_match_confidence", 0.0),
+            "match_confidence": (
+                float(getattr(last, "confidence", 0.0) or 0.0)
+                if last is not None
+                else getattr(self._manager, "_last_match_confidence", 0.0)
+            ),
             "cycle_id": getattr(detector, "_current_cycle_start", None),
             "samples": detector.samples_recorded,
             "energy_accum": getattr(detector, "_energy_since_idle_wh", 0.0),

@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "接続に失敗しました",
-      "invalid_auth": "認証に失敗しました",
       "unknown": "予期しないエラーが発生しました",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "信頼度しきい値",
-          "description": "ラベルを適用する最小照合信頼度（0.50-0.95）。"
+          "description": "ラベルを適用する最小照合信頼度（0.50-0.95）。空欄にすると、デバイスの「自動ラベル信頼度」設定が使用されます。"
         }
       }
     },

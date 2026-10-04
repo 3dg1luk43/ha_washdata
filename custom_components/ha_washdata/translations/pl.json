@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Nie udało się połączyć",
-      "invalid_auth": "Nieprawidłowe uwierzytelnienie",
       "unknown": "Nieoczekiwany błąd",
       "invalid_power": "Próg mocy musi być większy niż 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Próg pewności",
-          "description": "Minimalna pewność dopasowania (0,50–0,95), aby zastosować etykiety."
+          "description": "Minimalna pewność dopasowania (0,50–0,95), aby zastosować etykiety. Pozostaw puste, aby użyć ustawienia urządzenia „Pewność Automatycznego Etykietowania”."
         }
       }
     },

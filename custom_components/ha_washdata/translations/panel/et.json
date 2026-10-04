@@ -247,7 +247,8 @@
     "confirm_appliance": "Kinnita see seade",
     "confirmed": "Kinnitatud",
     "create_profile_from_gap": "Loo profiil",
-    "undo_import": "Võta viimane import tagasi"
+    "undo_import": "Võta viimane import tagasi",
+    "pg_rerun": "Uuenda simulatsiooni"
   },
   "note": {
     "off_delay": {
@@ -664,7 +665,12 @@
     "automation_off": "(väljas)",
     "ref_cycle_none": "Puudub",
     "share_name": "Näita minu nime jagatud sisul",
-    "cat_backfill_cycles": "Imporditud võimsuse ajaloost leitud tsüklid"
+    "cat_backfill_cycles": "Imporditud võimsuse ajaloost leitud tsüklid",
+    "pg_compare_profile": "Võrdle profiiliga",
+    "pg_obj_early": "Varajase lõpu määr",
+    "pg_obj_endlag": "Lõpu viivitus (mediaan)",
+    "pg_obj_split": "Tükeldamise määr",
+    "pg_sweep_cycles": "Hiljutised tsüklid"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -693,7 +699,23 @@
     },
     "metric_auc": "AUC {auc} valideerimisandmetel",
     "metric_mae": "viga {model} vs. baasjoon {baseline}",
-    "fine_tuned_at": "peenhäälestatud {when}"
+    "fine_tuned_at": "peenhäälestatud {when}",
+    "last_run_not_promoted": "Viimane kontroll ({when}): {reason}",
+    "never": "mitte kunagi",
+    "skip_reason": {
+      "fit_failed": "Mudeli õpetamine ebaõnnestus: {error}",
+      "holdout_too_small": "Liiga vähe tsükleid, et uut mudelit õiglaselt testida: testimiseks sai kõrvale panna {held_out}, vaja on {min}.",
+      "not_better_than_incumbent": "Uus mudel ei olnud parem kui kasutusel olev (viga {model} vs. {incumbent}), seega jäi praegune alles.",
+      "not_better_than_naive": "Uus mudel ei olnud lihtsast hinnangust selgelt parem (viga {model} vs. {naive}).",
+      "unknown": "Midagi uut ei õpitud.",
+      "insufficient_rows": "Kasutatavaid tsükleid pole veel piisavalt: seni {count} märgistatud puhast tsüklit.",
+      "insufficient_rows_one": "Kasutatavaid tsükleid pole veel piisavalt: seni {count} märgistatud puhas tsükkel.",
+      "insufficient_rows_other": "Kasutatavaid tsükleid pole veel piisavalt: seni {count} märgistatud puhast tsüklit."
+    },
+    "trained_unknown": "teadmata ajal",
+    "held_out_count": "mõõdetud {count} valideerimistsüklil",
+    "held_out_count_one": "mõõdetud {count} valideerimistsüklil",
+    "held_out_count_other": "mõõdetud {count} valideerimistsüklil"
   },
   "modal": {
     "auto_label": "Automaatsed sildistamise tsüklid",
@@ -1010,7 +1032,21 @@
     "feedback_detected": "WashData tuvastas: {name}",
     "import_undo_hint": "Säilitatakse viimase impordi ({when}) eelne taastepunkt: {profiles} profiili ja {cycles} tsüklit.",
     "replace_undo_hint": "Esmalt salvestatakse taastepunkt, nii et saad selle impordi jaotises Eksport / Import tagasi võtta.",
-    "pg_in_sample_note": "Need tsüklid aitasid luua ka profiile, millega neid sobitatakse, seega on need tulemused optimistlikud: uute tsüklite puhul oodake veidi vähem õigeid sobitusi."
+    "pg_in_sample_note": "Need tsüklid aitasid luua ka profiile, millega neid sobitatakse, seega on need tulemused optimistlikud: uute tsüklite puhul oodake veidi vähem õigeid sobitusi.",
+    "hist_tail_trimmed": "Pärast tsükli lõppu kärbiti {min} min ootamist, nagu seda teeb ka aktiivne integratsioon",
+    "hist_truncated": "peatus {n} näidu piiril, seega ülejäänud ajalugu ei skannitud",
+    "hist_warn_kw": "Kõrgeim näit on vaid {w}. See andur näib edastavat kilovatte; WashData loeb võimsust vattides, seega ei saa selle põhjal tsükleid tuvastada.",
+    "pg_compare_profile_tip": "Valib ainult profiili, mis kuvatakse graafiku peal. Simulatsioon sobitab tsükli alati iseseisvalt, nagu teeb ka aktiivne integratsioon.",
+    "pg_outcome_stale": "Seaded on pärast selle simulatsiooni käivitamist muutunud. See näitab endiselt vana tulemust.",
+    "pg_sweep_guarded": "Lõpetab rohkem tsükleid liiga vara, tükeldab neid rohkem või jätab vahele tsükleid, mille praegune seade tabab, seega seda ei soovitata kunagi.",
+    "pg_sweep_keep_current": "Jäta praegune väärtus ({value}, {metric}): ükski väärtus ei olnud vähemalt ühe tsükli võrra parem.",
+    "pg_task_busy": "Selle seadme jaoks on juba käimas ajalooga testimine või optimeerimine. Oota, kuni see lõpeb, või tühista see.",
+    "hist_warn_naive_time": "{n} ajatemplil puudub ajavöönd ja need loeti UTC-ajana. Kui fail on kohalikus ajas, nihkub iga tsükkel teie UTC-nihke võrra ning suveajale ülemineku ümbruse näidud võivad sattuda vales järjekorras või kaduda.",
+    "hist_warn_naive_time_one": "{n} ajatemplil puudub ajavöönd ja see loeti UTC-ajana. Kui fail on kohalikus ajas, nihkub iga tsükkel teie UTC-nihke võrra ning suveajale ülemineku ümbruse näidud võivad sattuda vales järjekorras või kaduda.",
+    "hist_warn_naive_time_other": "{n} ajatemplil puudub ajavöönd ja need loeti UTC-ajana. Kui fail on kohalikus ajas, nihkub iga tsükkel teie UTC-nihke võrra ning suveajale ülemineku ümbruse näidud võivad sattuda vales järjekorras või kaduda.",
+    "pg_sweep_n_cycles": "{count} tsükli põhjal",
+    "pg_sweep_n_cycles_one": "{count} tsükli põhjal",
+    "pg_sweep_n_cycles_other": "{count} tsükli põhjal"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
@@ -1193,7 +1229,7 @@
       "label": "Rakenda nutikaid mudeleid tsükli ajal"
     },
     "end_energy_threshold": {
-      "doc": "Väljalülitusviivituse loenduse ajal võrreldakse kogunenud energiat (vatti x aeg) selle lävega. Ületamise korral pöördloendus lähtestub – kortsumisvastased trumlid ja nõudepesumasina kuivatussabad jäävad tsükli külge, selle asemel et neid lühikeseks lõigata. Tõstke seda, kui tsüklid lõpevad jahtumise ajal liiga vara; alandage seda, kui tuvastamine on aeglane.",
+      "doc": "Kui väljalülitumise viivitus on läbi, võrreldakse selle aja jooksul kasutatud energiat (vatid x aeg) selle lävega. Lävest kõrgemal ei ole tsükkel veel lõppenud, mis hoiab kortsudevastased trumlipöörded ja nõudepesumasina kuivatuse lõpuosa tsükli küljes, selle asemel et neid ära lõigata. Langetage seda, kui tsüklid lõpevad jahutava trumlipöörde või kuivatuse lõpuosa ajal; tõstke seda, kui lõppenud tsüklid jäävad ootama.",
       "label": "Lõpu Energia"
     },
     "energy_price_entity": {
@@ -1804,7 +1840,13 @@
     "store_download_partial": "{n} programmi ei õnnestunud alla laadida; proovi hiljem uuesti.",
     "import_no_restore_point": "Imporditud, kuid taastepunkti ei õnnestunud salvestada, seega ei saa seda importi tagasi võtta",
     "import_undo_failed": "Importi ei õnnestunud tagasi võtta: {error}",
-    "import_undone": "Import tagasi võetud: taastati {profiles} profiili ja {cycles} tsüklit"
+    "import_undone": "Import tagasi võetud: taastati {profiles} profiili ja {cycles} tsüklit",
+    "auto_label_cancelled": "Automaatne märgistamine tühistati pärast {count} tsükli märgistamist.",
+    "auto_label_cancelled_one": "Automaatne märgistamine tühistati pärast {count} tsükli märgistamist.",
+    "auto_label_cancelled_other": "Automaatne märgistamine tühistati pärast {count} tsükli märgistamist.",
+    "auto_label_done": "Automaatne märgistamine on lõpetatud: märgistati {count} tsüklit, märgistamata jäi {skipped}.",
+    "auto_label_done_one": "Automaatne märgistamine on lõpetatud: märgistati {count} tsükkel, märgistamata jäi {skipped}.",
+    "auto_label_done_other": "Automaatne märgistamine on lõpetatud: märgistati {count} tsüklit, märgistamata jäi {skipped}."
   },
   "suggestion": {
     "observed_label": "Mõõdetud",

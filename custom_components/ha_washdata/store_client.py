@@ -1196,7 +1196,7 @@ class StoreClient:
             # Defense in depth at the store boundary: keep only allow-listed, numeric
             # settings (never trust the caller to have filtered) so nothing arbitrary is
             # ever written to the shared device doc.
-            filtered = sanitize_shared_settings(settings, appliance)
+            filtered = sanitize_shared_settings(settings)
             if filtered:
                 device_fields["settings"] = filtered
         ok = ok and await self._commit_create(token, f"devices/{d_id}", device_fields)

@@ -16,8 +16,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Pure progress/remaining math (``progress`` module).
 
-The estimator + ML wiring parity is covered byte-identically by the golden
-snapshot + the manager suite; here we lock the pure smoothing/back-calc
+A whole cycle stepped through the estimator is locked by
+tests/test_audit_progress_14_golden_trace.py, and live-vs-replay parity by the
+Playground parity tests; here we lock the pure smoothing/back-calc
 (``compute_progress``), ``cycle_anomaly``, and ``current_phase`` directly.
 """
 from __future__ import annotations
@@ -128,13 +129,14 @@ def test_unknown_cadence_keeps_the_nominal_weight():
         ).smoothed == a.smoothed
 
 
-def test_backward_damping_stays_per_estimate():
-    """The anti-regression branch resists a drop on purpose, so it is NOT scaled:
-    a long gap must not let the progress bar snap backwards."""
+def test_backward_damping_without_a_cadence_is_the_plain_95_5_step():
+    """dt_seconds=None keeps the per-estimate 95/5 step. With a cadence the step is
+    a time constant like the forward EMA (audit PROGRESS-13), see
+    tests/test_audit_progress_13_backward_damping.py."""
     r = progress.compute_progress(
-        "dishwasher", 3600.0, 1800.0, 90.0, (40.0, 5.0), None, dt_seconds=600.0
+        "dishwasher", 3600.0, 1800.0, 90.0, (40.0, 5.0), None, dt_seconds=None
     )
-    assert abs(r.smoothed - (90.0 * 0.95 + 40.0 * 0.05)) < 1e-6
+    assert r.smoothed == 90.0 * 0.95 + 40.0 * 0.05
 
 
 # ── cycle_anomaly ───────────────────────────────────────────────────────────

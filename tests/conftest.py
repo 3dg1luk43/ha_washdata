@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Pytest fixtures for ha_washdata tests."""
+import asyncio
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -25,14 +27,87 @@ pytest_plugins = ["pytest_homeassistant_custom_component"]
 # Ensure mocks are loaded before anything else
 # import tests.mock_imports  # pylint: disable=unused-import
 
+# Per-test timeout for the slow tier (audit TESTING-18). pytest.ini sets 60 s for
+# everything else, so a hung async test fails in a minute instead of holding a
+# release preflight until the CI job limit. Applied by marker rather than by a
+# run_tests.sh flag so it also holds for `pytest -m slow`, release_check.sh and any
+# direct `pytest tests/test_x.py` of a slow module. The limit covers fixture setup:
+# test_suggestion_loop_fixed_point's module fixture took 687 s on an 8-core box at
+# load average ~30 (2026-10-04), so 900 s would be too tight there.
+SLOW_TEST_TIMEOUT_S = 1800
+
+
+def pytest_collection_modifyitems(config, items):
+    for item in items:
+        if item.get_closest_marker("timeout") is not None:
+            continue
+        if item.get_closest_marker("slow") or item.get_closest_marker("benchmark"):
+            item.add_marker(pytest.mark.timeout(SLOW_TEST_TIMEOUT_S))
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus, config):
+    """Say how many skips came from the private replay corpus (audit TESTING-14).
+
+    `cycle_data/` is gitignored, so off the maintainer's disk (CI, a worktree, a
+    contributor) every test that replays it skips - and a skip looks like a pass in
+    a dot summary. One line makes the lost coverage visible; release_check.sh reads
+    it. Counted per module: a skip in a module that reads cycle_data/.
+    """
+    skipped = terminalreporter.stats.get("skipped", [])
+    if not skipped:
+        return
+    root = Path(str(config.rootpath))
+    reads_corpus: dict[str, bool] = {}
+    modules: set[str] = set()
+    count = 0
+    for report in skipped:
+        rel = str(getattr(report, "location", ("",))[0] or report.nodeid.split("::")[0])
+        if rel not in reads_corpus:
+            try:
+                reads_corpus[rel] = "cycle_data" in (root / rel).read_text(encoding="utf-8")
+            except OSError:
+                reads_corpus[rel] = False
+        if reads_corpus[rel]:
+            count += 1
+            modules.add(rel)
+    if count:
+        present = "present" if (root / "cycle_data").is_dir() else "NOT present"
+        terminalreporter.write_line(
+            f"cycle_data: {count} test(s) skipped in {len(modules)} module(s) that "
+            f"replay the private corpus (cycle_data/ {present}); reasons in the SKIPPED lines",
+            yellow=True,
+        )
+
+
+def _run_scheduled(coro, *args, **kwargs):
+    """``hass.async_create_task`` for a mock hass: the coroutine RUNS (audit TESTING-07).
+
+    This used to close every scheduled coroutine unrun, so a test passed whatever
+    the background work did (cycle-end processing, learning scans, store saves).
+    On a running loop it becomes a real task: phcc's ``verify_cleanup`` fails the
+    test if it is still pending at the end. From a sync test, where nothing could
+    ever run it, it runs to completion on a throwaway loop, like HA's eager start.
+    """
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        runner = asyncio.new_event_loop()
+        try:
+            runner.run_until_complete(coro)
+            while pending := asyncio.all_tasks(runner):
+                runner.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+        finally:
+            runner.close()
+        return None
+    return loop.create_task(coro)
+
+
 @pytest.fixture
 def mock_hass(tmp_path_factory):
     """Mock Home Assistant instance."""
     hass = MagicMock()
     hass.data = {}
-    hass.async_create_task = MagicMock(
-        side_effect=lambda coro: getattr(coro, "close", lambda: None)()
-    )
+    hass.async_create_task = MagicMock(side_effect=_run_scheduled)
     async def _async_executor_mock(target, *args):
         return target(*args)
 
@@ -57,9 +132,77 @@ def mock_config_entry():
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# A REAL Home Assistant boot (audit TESTING-03).
+#
+# While WashData's manifest listed `conversation` under `dependencies`, HA set it
+# up first, its requirements (hassil, home-assistant-intents) are not installed in
+# the dev env, so `hass.config_entries.async_setup()` refused the entry ("No
+# module named 'hassil'") and every test called `async_setup_entry` by hand. A
+# MockModule satisfies it wherever the manifest lists it (WashData only registers
+# intents through `homeassistant.helpers.intent`, which needs no conversation
+# agent), so the real loader, platform forward, service bus and WebSocket
+# registry all run in-process.
+# ──────────────────────────────────────────────────────────────────────────────
+@pytest.fixture
+def mock_conversation(hass):
+    """Stand in for the `conversation` integration WashData's manifest names."""
+    from pytest_homeassistant_custom_component.common import (
+        MockModule,
+        mock_integration,
+    )
+
+    mock_integration(hass, MockModule("conversation"))
+
+
+@pytest.fixture
+async def setup_washdata_entry(hass, enable_custom_integrations, mock_conversation):
+    """Factory: boot a WashData config entry through HA's real setup path.
+
+    Returns ``async (title=..., device_type=..., options=...) -> MockConfigEntry``,
+    with the entry LOADED. Brings `http` up first, as a real HA always has it
+    (it is an ``after_dependencies`` entry, and the panel needs its routes).
+    """
+    from homeassistant.setup import async_setup_component
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+    from custom_components.ha_washdata.const import (
+        CONFIG_ENTRY_MINOR_VERSION,
+        CONFIG_ENTRY_VERSION,
+        DOMAIN,
+    )
+
+    assert await async_setup_component(hass, "http", {"http": {}})
+
+    async def _setup(
+        title: str = "Washer",
+        *,
+        device_type: str = "washing_machine",
+        power_sensor: str = "sensor.washer_power",
+        options: dict[str, Any] | None = None,
+    ):
+        hass.states.async_set(power_sensor, "0", {"unit_of_measurement": "W"})
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            title=title,
+            data={"name": title, "power_sensor": power_sensor, "device_type": device_type},
+            options=dict(options or {}),
+            unique_id=f"washdata_{title}",
+            version=CONFIG_ENTRY_VERSION,
+            minor_version=CONFIG_ENTRY_MINOR_VERSION,
+        )
+        entry.add_to_hass(hass)
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+        return entry
+
+    return _setup
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Make the fake hass stop agreeing with us.
 #
-# 93 of the test modules build their Home Assistant with `MagicMock()`, and a
+# ~120 test modules build their Home Assistant with `MagicMock()` (the per-file
+# counts are tests/fixtures/magicmock_hass_allowlist.json, which may not grow), and a
 # MagicMock accepts any service call, so a payload Home Assistant would reject
 # outright looks delivered. That is not a hypothetical: `notify`'s service
 # schema validates the optional `title` as a string, every dismiss-marker sender
@@ -167,7 +310,7 @@ def _reject_unsendable_service_payloads():
     * every manager's ``hass`` is also swept at teardown, so calls made from
       ANY other path are covered too - the switch pause/resume services, and
       whatever is added next. Hooking the constructor rather than each test's
-      fixture is what makes that automatic for the 93 modules that build their
+      fixture is what makes that automatic for the ~120 modules that build their
       hass by hand.
     """
     from custom_components.ha_washdata.manager import WashDataManager

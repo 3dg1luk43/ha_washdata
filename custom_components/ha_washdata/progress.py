@@ -34,6 +34,7 @@ import logging
 import math
 from dataclasses import dataclass
 from datetime import datetime
+from operator import le as _le
 from typing import Any, cast
 
 import numpy as np
@@ -68,6 +69,9 @@ SMOOTHING_NOMINAL_DT_S = 5.0
 # Cache type for profile_end_expectation: (profile_name, base_expectation_dict).
 EndExpCache = tuple[str, dict[str, float]] | None
 
+# How many of a profile's most recent traces its end expectation is taken from.
+_END_EXPECTATION_CYCLES = 20
+
 
 @dataclass
 class ProgressResult:
@@ -99,14 +103,24 @@ def profile_end_expectation(
     else:
         from .ml.feature_extraction import profile_expectation
 
+        # The 20 most recent non-empty traces, oldest first - walked newest-first
+        # and stopped there, so a long history is not decompressed just to be
+        # thrown away (49-248 ms on the largest corpus profiles, on the event
+        # loop, once per cycle start).
+        cycles = store.get_past_cycles() or []
+        if not isinstance(cycles, (list, tuple)):
+            cycles = list(cycles)
         points_list: list[list[tuple[float, float]]] = []
-        for cycle in store.get_past_cycles():
+        for cycle in reversed(cycles):
             if cycle.get("profile_name") != profile_name:
                 continue
             pts = decompress_power_data(cycle)
             if pts:
                 points_list.append(pts)
-        base = profile_expectation(points_list[-20:])
+                if len(points_list) >= _END_EXPECTATION_CYCLES:
+                    break
+        points_list.reverse()
+        base = profile_expectation(points_list)
         if base is None:
             return None, cache
         cache = (profile_name, dict(base))
@@ -277,6 +291,70 @@ def _parse_phase_envelope(
     return envelope_arrays, time_grid, target_duration
 
 
+def _window_values(
+    power_data: Any, window_s: float
+) -> np.ndarray[Any, np.dtype[np.float64]] | None:
+    """Powers of the trailing ``window_s`` of a ``(datetime, power)`` trace.
+
+    Exactly what ``power_data_to_offsets`` + the ``offsets >= last - window``
+    mask in :func:`estimate_phase_progress` select (same anchor, same 0.1 s
+    rounding, same skipped rows), without converting the whole trace. Only the
+    ``datetime`` format the detector hands out takes this path, and only when
+    its timestamps never go backwards: then everything before the first row
+    that falls out of the window is out of it too. Anything else returns None
+    and the caller converts the whole trace as before.
+    """
+    try:
+        if not isinstance(power_data, (list, tuple)) or not power_data:
+            return None
+        first = power_data[0]
+        if not (
+            isinstance(first, (list, tuple))
+            and len(first) >= 2
+            and isinstance(first[0], datetime)
+        ):
+            return None
+        stamps = [row[0] for row in power_data]
+        if not all(map(_le, stamps, stamps[1:])):
+            return None
+
+        def _row(row: Any) -> tuple[datetime, float] | None:
+            # The same rows `power_data_to_offsets` keeps (and the same order of
+            # checks, so the same one anchors the offsets).
+            try:
+                ts = row[0]
+                if not isinstance(ts, datetime):
+                    return None
+                return ts, float(row[1])
+            except (TypeError, ValueError, AttributeError, IndexError):
+                return None
+
+        anchor: float | None = None
+        for row in power_data:
+            kept = _row(row)
+            if kept is not None:
+                anchor = kept[0].timestamp()
+                break
+        if anchor is None:
+            return np.array([], dtype=float)
+        window_start: float | None = None
+        tail: list[float] = []
+        for row in reversed(power_data):
+            kept = _row(row)
+            if kept is None:
+                continue
+            offset = round(kept[0].timestamp() - anchor, 1)
+            if window_start is None:
+                window_start = max(0, offset - window_s)
+            if offset < window_start:
+                break
+            tail.append(kept[1])
+        tail.reverse()
+        return np.array(tail)
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
+
+
 def estimate_phase_progress(
     store: Any,
     current_power_data: list[tuple[datetime, float]] | list[tuple[str, float]],
@@ -338,23 +416,33 @@ def estimate_phase_progress(
             logger.debug("Envelope missing time grid/duration, cannot estimate phase")
             return None
 
-    # Extract power offsets from current cycle (any format -> [offset, power])
-    current_offsets_list = power_data_to_offsets(
-        cast(list[list[Any] | tuple[Any, ...]], current_power_data)
-    )
-    current_offsets = np.array([o for o, _ in current_offsets_list])
-    current_values = np.array([p for _, p in current_offsets_list])
-    if current_offsets.size == 0:
-        logger.debug("No valid current power offsets, cannot estimate phase")
-        return None
-
     # Use sliding window on TIME, not sample count
     window_duration = min(60.0, target_duration * 0.25)
-    current_time = current_offsets[-1]
-    window_start_time = max(0, current_time - window_duration)
+    # Only the last `window_duration` seconds of the trace are read, so convert
+    # only those (audit PROGRESS-17: the whole trace was converted on every 5 s
+    # estimate, on the event loop). `_window_values` returns exactly what the
+    # full conversion + time mask selects, or None to take that full path.
+    _windowed = _window_values(current_power_data, window_duration)
+    if _windowed is None:
+        # Extract power offsets from current cycle (any format -> [offset, power])
+        current_offsets_list = power_data_to_offsets(
+            cast(list[list[Any] | tuple[Any, ...]], current_power_data)
+        )
+        current_offsets = np.array([o for o, _ in current_offsets_list])
+        current_values = np.array([p for _, p in current_offsets_list])
+        if current_offsets.size == 0:
+            logger.debug("No valid current power offsets, cannot estimate phase")
+            return None
+        current_time = current_offsets[-1]
+        window_start_time = max(0, current_time - window_duration)
 
-    window_mask = current_offsets >= window_start_time
-    current_window_values = current_values[window_mask]
+        window_mask = current_offsets >= window_start_time
+        current_window_values = current_values[window_mask]
+    elif _windowed.size == 0:
+        logger.debug("No valid current power offsets, cannot estimate phase")
+        return None
+    else:
+        current_window_values = _windowed
 
     if len(current_window_values) < 3:
         logger.debug("Insufficient data in current window for phase estimation")
@@ -713,8 +801,12 @@ def _compute_progress_base(
             smoothing_threshold = DEVICE_SMOOTHING_THRESHOLDS.get(device_type, 5.0)
             if phase_progress < current_smoothed - smoothing_threshold:
                 # Backward step: damping here exists to resist regression, not to
-                # track, so it stays per-estimate (unscaled) on purpose.
-                smoothed = (current_smoothed * 0.95) + (phase_progress * 0.05)
+                # track. It is still a time constant, not a step count (audit
+                # PROGRESS-13): per estimate, the Playground's 30 s steps (and a
+                # plug reporting every 30 s live) gave way to a real drop 6x
+                # slower than a 5 s plug. dt=None keeps the plain 95/5 step.
+                beta = _dt_scaled_alpha(0.05, dt_seconds)
+                smoothed = (current_smoothed * (1.0 - beta)) + (phase_progress * beta)
                 logger.debug(
                     "Progress drop detected (%.1f%% < %.1f%% - %.1f%%), "
                     "applying heavy damping for %s",
@@ -728,6 +820,13 @@ def _compute_progress_base(
                 smoothed = (prev_smoothed * (1.0 - alpha)) + (phase_progress * alpha)
 
         smoothed = min(99.0, smoothed)
+        if duration_so_far >= matched_duration and prev_smoothed > smoothed:
+            # Past the expected end the cycle is finishing, not going backwards.
+            # In an overrun tail the phase scan declines on quiet windows, so the
+            # branches alternate: the linear one reaches 100%, then the next phase
+            # estimate's backward step (and its 99% cap) pulled the shown progress
+            # back to ~97% (audit PROGRESS-13 follow-up). Hold what was shown.
+            smoothed = prev_smoothed
         progress = smoothed
 
         remaining = matched_duration * (1.0 - (progress / 100.0))

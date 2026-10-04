@@ -11,6 +11,9 @@
 #   ./run_tests.sh <pytest-args>  Pass through any other args
 #
 # Categories live in pytest.ini under `markers` and the default `-m` filter.
+# Per-test timeouts: 60 s (pytest.ini), 1800 s for tests marked slow or benchmark
+# (tests/conftest.py), whichever mode runs them. Skips print with their reason,
+# and skips of the gitignored cycle_data/ corpus are counted on one line.
 set -e
 
 VENV_PYTHON="./.venv/bin/python"
@@ -141,7 +144,7 @@ case "$mode" in
         e2e_min_check
         ;;
     -h|--help)
-        sed -n '2,13p' "$0"
+        sed -n '2,16p' "$0"
         exit 0
         ;;
     *)

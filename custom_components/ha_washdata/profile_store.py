@@ -501,6 +501,9 @@ class MatchResult:
     # sixth-ranked longer candidate set the flag while staying invisible to the
     # bar, so the gate shortened against a programme it had been warned about.
     longest_candidate_duration_s: float = 0.0
+    # The elapsed duration this match scored (the query's), so a candidate's
+    # duration ratio can be stated against the cycle (audit MATCH-DECIDE-13).
+    query_duration_s: float = 0.0
 
     @property
     def label_confidence(self) -> float:
@@ -1267,6 +1270,54 @@ def _dismiss_unneeded_feedback(data: JSONDict) -> dict[str, int]:
     except Exception:  # noqa: BLE001 - a cleanup must never cost the user their store
         _LOGGER.warning("Review-queue cleanup failed", exc_info=True)
     return summary
+
+
+#: A cycle's ``manual_duration`` is trusted only inside this multiple of its own
+#: trace span (audit MATCH-EVAL-17).
+MANUAL_DURATION_SPAN_BOUNDS = (0.3, 3.0)
+
+
+def _sane_manual_duration(value: Any, trace_span_s: float) -> float | None:
+    """``value`` as seconds when it is plausible for a trace spanning ``trace_span_s``.
+
+    ``manual_duration`` overrides the duration a cycle shapes its profile with,
+    unchecked. One export held 385200 s and 378000 s on 107- and 105-minute traces,
+    exactly 60x (seconds stored as minutes twice), which put the profile's
+    ``avg_duration`` at 36-71 h: Stage 1 then rejected every cycle of it and its ETA
+    was useless (audit MATCH-EVAL-17). A correction is a trim or an extension of
+    the recorded run, so outside :data:`MANUAL_DURATION_SPAN_BOUNDS` of the trace it
+    is a unit slip, not a correction: None, and the caller uses the trace. With no
+    span to judge by (a trace of one instant) the value is trusted as before.
+    """
+    try:
+        dur = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(dur) or dur <= 0:
+        return None
+    lo, hi = MANUAL_DURATION_SPAN_BOUNDS
+    if trace_span_s > 0 and not lo * trace_span_s <= dur <= hi * trace_span_s:
+        return None
+    return dur
+
+
+def envelope_shape_count(envelope: Any) -> int:
+    """How many cycles shaped ``envelope`` (``shape_cycle_count``).
+
+    The envelope's ``cycle_count`` is a USAGE figure: once any reference or
+    backfill cycle exists it counts real cycles only (and counts them even when
+    the evidence choice keeps real cycles out of the curve). Gating the envelope
+    template on it made a backfill-only or store-only profile match one sample
+    cycle, never the envelope its cycles built (audit MR-11). An envelope built
+    before ``shape_cycle_count`` existed falls back to ``cycle_count``.
+    """
+    if not isinstance(envelope, dict):
+        return 0
+    raw = envelope.get("shape_cycle_count", envelope.get("cycle_count"))
+    try:
+        return int(raw or 0)
+    except (TypeError, ValueError, OverflowError):
+        return 0
 
 
 def longest_candidate_duration(candidates: Any) -> float:
@@ -2297,20 +2348,24 @@ class ProfileStore:
     def get_ml_training_history(self) -> dict[str, list[dict[str, Any]]]:
         """Per-capability held-out-score history across training runs.
 
-        ``{capability: [{"ts": iso, "score": float, "higher_better": bool}, ...]}``
-        oldest-first. Lets the panel show whether a model's fit is improving,
-        steady, or declining over time. Empty until training has run.
+        ``{capability: [{"ts": iso, "promoted": bool, "score": float,
+        "higher_better": bool, "reason_code": str, "reason_params": dict}, ...]}``
+        oldest-first, one entry per run. ``score`` is absent when the run had no
+        held-out metric, ``reason_code`` when it promoted. Entries written before
+        0.5.8 carry no ``promoted``. Empty until training has run.
         """
         raw = self._data.get("ml_training_history")
         return cast(dict[str, list[dict[str, Any]]], raw) if isinstance(raw, dict) else {}
 
     async def append_ml_training_history(self, run_iso: str, results: list[dict[str, Any]]) -> None:
-        """Append each capability's held-out score from a training run.
+        """Append one entry per capability for a training run.
 
         ``results`` is ``train_from_cycles``'s per-capability records; classifiers
         report ``new_auc`` (higher is better), regressors ``model_mae`` (lower is
-        better). Capabilities without a held-out metric this run (insufficient
-        data) are skipped. Retains at most ``ML_TRAINING_HISTORY_MAX`` runs each.
+        better). Every run is recorded, with whether it promoted and, when it did
+        not, why (audit ML-20: the panel's trend badge read every candidate,
+        promoted or not, and a run that promoted nothing left no reason to show).
+        Retains at most ``ML_TRAINING_HISTORY_MAX`` runs each.
         """
         from .const import ML_TRAINING_HISTORY_MAX  # noqa: PLC0415
 
@@ -2322,16 +2377,20 @@ class ProfileStore:
             cap = rec.get("capability")
             if not isinstance(cap, str) or not cap:
                 continue
+            entry: JSONDict = {"ts": run_iso, "promoted": bool(rec.get("promoted"))}
             if rec.get("new_auc") is not None:
-                score, higher_better = float(rec["new_auc"]), True
+                entry.update(score=round(float(rec["new_auc"]), 5), higher_better=True)
             elif rec.get("model_mae") is not None:
-                score, higher_better = float(rec["model_mae"]), False
-            else:
-                continue
+                entry.update(score=round(float(rec["model_mae"]), 5), higher_better=False)
+            if not entry["promoted"]:
+                params = rec.get("reason_params")
+                entry["reason_code"] = str(rec.get("reason_code") or "unknown")
+                entry["reason_params"] = dict(params) if isinstance(params, dict) else {}
+                entry["reason"] = str(rec.get("reason") or "")
             series = hist.setdefault(cap, [])
             if not isinstance(series, list):
                 series = hist[cap] = []
-            series.append({"ts": run_iso, "score": round(score, 5), "higher_better": higher_better})
+            series.append(entry)
             del series[:-ML_TRAINING_HISTORY_MAX]
             changed = True
         if changed:
@@ -2949,11 +3008,11 @@ class ProfileStore:
             curves = [c for c in (self._profile_curve(m) for m in members) if c is not None]
             if len(members) < 2:
                 # A genuinely single-member group is trivially cohesive (and is never
-                # collapsed anyway — nothing to aggregate).
+                # mapped as a family anyway).
                 result = 1.0
             elif len(curves) < 2:
                 # Multi-member but too few built curves -> insufficient evidence, treat as
-                # NOT cohesive so the group isn't collapsed into a blurry aggregate yet.
+                # NOT cohesive, so its members keep competing on their own for now.
                 result = 0.0
             else:
                 result = 1.0
@@ -4128,7 +4187,7 @@ class ProfileStore:
                 env_usable = False
                 if (
                     isinstance(env, dict)
-                    and int(env.get("cycle_count") or 0) >= 2
+                    and envelope_shape_count(env) >= 2
                     and isinstance(env_avg, list)
                     and len(env_avg) > 1
                     and isinstance(env_avg[0], (list, tuple))
@@ -4172,7 +4231,7 @@ class ProfileStore:
                 # admits it, so there is nothing to size a match against either way.
                 env_has_evidence = (
                     isinstance(env, dict)
-                    and int(env.get("cycle_count") or 0) >= 2
+                    and envelope_shape_count(env) >= 2
                     and isinstance(env_avg, list)
                 )
                 out[name] = (
@@ -5611,7 +5670,22 @@ class ProfileStore:
 
         return count
 
-
+    def _warn_ignored_manual_duration(
+        self, cycle: CycleDict, value: Any, trace_span_s: float
+    ) -> None:
+        """Log, once per cycle per run, a ``manual_duration`` the envelope ignored."""
+        warned: set[str] = self.__dict__.setdefault("_manual_duration_ignored", set())
+        cid = str(cycle.get("id"))
+        if cid in warned:
+            return
+        warned.add(cid)
+        self._logger.warning(
+            "Ignoring manual_duration %r on cycle %s of '%s': outside %.1f-%.1fx its "
+            "%.0f s trace (a unit slip?). Its trace length shapes the profile instead; "
+            "correct the cycle's duration to clear this.",
+            value, cid, cycle.get("profile_name"),
+            MANUAL_DURATION_SPAN_BOUNDS[0], MANUAL_DURATION_SPAN_BOUNDS[1], trace_span_s,
+        )
 
     def _rebuild_envelope_sync(
         self, labeled_cycles: list[CycleDict]
@@ -5637,7 +5711,13 @@ class ProfileStore:
             stored_dur = float(cycle.get("duration", 0.0) or 0.0)
             authoritative_dur = float(max(offsets[-1], stored_dur))
             man_dur = cycle.get("manual_duration")
-            final_dur = float(man_dur) if man_dur else authoritative_dur
+            final_dur = authoritative_dur
+            if man_dur:
+                checked = _sane_manual_duration(man_dur, offsets[-1] - offsets[0])
+                if checked is not None:
+                    final_dur = checked
+                else:
+                    self._warn_ignored_manual_duration(cycle, man_dur, offsets[-1] - offsets[0])
             peak = max(values) if values else 0.0
             parsed.append((offsets, values, final_dur, is_golden, peak))
 
@@ -6053,6 +6133,9 @@ class ProfileStore:
             "avg": to_points(avg_curve),
             "std": to_points(std_curve),
             "cycle_count": cycle_count,
+            # The cycles the curve was actually built from: what gates the envelope
+            # as a matching template (envelope_shape_count, audit MR-11).
+            "shape_cycle_count": len(durations),
             "avg_energy": avg_energy,
             "duration_std_dev": duration_std_dev,
             "updated": dt_util.now().isoformat(),
@@ -7439,7 +7522,7 @@ class ProfileStore:
 
         Mirrors the precedence in `_build_match_snapshots`: a profile with a
         pinned golden cycle keeps its own `avg_duration`, but otherwise an
-        envelope with `cycle_count >= 2` supplies `target_duration` FIRST -
+        envelope shaped by >= 2 cycles (`envelope_shape_count`) supplies `target_duration` FIRST -
         which is the duration of the cycle nearest the median
         (`compute_envelope_worker`), not the outlier-filtered mean.
 
@@ -7459,7 +7542,7 @@ class ProfileStore:
                 for c in self.iter_evidence_cycles()
             )
             envelope = (self._data.get("envelopes") or {}).get(name)
-            if not has_golden and envelope and envelope.get("cycle_count", 0) >= 2:
+            if not has_golden and envelope and envelope_shape_count(envelope) >= 2:
                 env_avg = envelope.get("avg")
                 span = 0.0
                 if env_avg and len(env_avg) > 1:
@@ -7700,10 +7783,13 @@ class ProfileStore:
                 corr = round(metrics.get("corr", 0.0), 3)
 
                 profile_duration = candidate.get("profile_duration", 0.0)
-                actual_duration = match_result.expected_duration
+                # The cycle's elapsed duration at this match. It used to be the
+                # WINNER's expected duration, so the winner always read +0.0% and
+                # the rest their ratio to it (audit MATCH-DECIDE-13).
+                actual_duration = float(getattr(match_result, "query_duration_s", 0.0) or 0.0)
                 duration_ratio = (
                     round((actual_duration / profile_duration - 1.0) * 100, 1)
-                    if profile_duration > 0
+                    if profile_duration > 0 and actual_duration > 0
                     else 0.0
                 )
 
@@ -7835,7 +7921,7 @@ class ProfileStore:
             if (
                 not has_golden
                 and envelope
-                and envelope.get("cycle_count", 0) >= 2
+                and envelope_shape_count(envelope) >= 2
                 and _env_avg
                 and isinstance(_env_avg[0], (list, tuple))
                 and len(_env_avg[0]) >= 2
@@ -8274,6 +8360,7 @@ class ProfileStore:
             is_prefix_ambiguous_full_shape=full_shape_hit,
             member_confidence=member_confidence,
             longest_candidate_duration_s=longest_candidate_s,
+            query_duration_s=float(current_duration or 0.0),
         )
 
     async def async_verify_alignment(

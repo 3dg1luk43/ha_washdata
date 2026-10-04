@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Det gick inte att ansluta",
-      "invalid_auth": "Ogiltig autentisering",
       "unknown": "Oväntat fel",
       "invalid_power": "Effekttröskeln måste vara större än 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Konfidenströskel",
-          "description": "Minsta matchningskonfidens (0,50–0,95) för att applicera etiketter."
+          "description": "Minsta matchningskonfidens (0,50–0,95) för att applicera etiketter. Lämna tomt för att använda enhetens inställning \"Automärkningskonfidens\"."
         }
       }
     },

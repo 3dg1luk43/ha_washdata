@@ -22,7 +22,7 @@ import asyncio
 import logging
 from collections import deque
 from datetime import datetime
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 from typing import Any, Optional, TYPE_CHECKING
 
 import numpy as np
@@ -136,10 +136,19 @@ class LearningManager:
         profile_store: "ProfileStore",
         device_type: str | None = None,
         device_name: str = "",
+        spawn: Callable[[Coroutine[Any, Any, Any]], Any] | None = None,
     ) -> None:
-        """Initialize the learning manager."""
+        """Initialize the learning manager.
+
+        ``spawn`` starts every background task this class creates. The manager
+        passes its ``_spawn_tracked`` (audit MANAGER-13): these tasks save the
+        ProfileStore, and an untracked one survives an entry reload and can write
+        the OLD store over the new one under the same Store key. Without it (unit
+        tests) a plain ``hass.async_create_task`` is used.
+        """
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self.hass = hass
+        self._spawn_fn = spawn
         self.entry_id = entry_id
         self.profile_store = profile_store
         self.device_type = device_type
@@ -159,6 +168,12 @@ class LearningManager:
         self._last_suggestion_update: datetime | None = None
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
         self._last_suggestions_labeled_count: int = 0  # gate model/detection passes
+
+    def _spawn(self, coro: Coroutine[Any, Any, Any]) -> Any:
+        """Start a background task through the manager's tracked spawner."""
+        if self._spawn_fn is not None:
+            return self._spawn_fn(coro)
+        return self.hass.async_create_task(coro)
 
     def _apply_suggestions_and_notify(self, suggestions: dict[str, Any]) -> None:
         """Apply suggestions that pass quality gates."""
@@ -239,7 +254,7 @@ class LearningManager:
 
         if not filtered_suggestions:
             if any_deleted:
-                self.hass.async_create_task(self.profile_store.async_save())
+                self._spawn(self.profile_store.async_save())
             return
 
         self.suggestion_engine.apply_suggestions(filtered_suggestions)
@@ -380,7 +395,7 @@ class LearningManager:
             return
 
         self._last_batch_simulation_count = current_count
-        self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles))
+        self._spawn(self._async_run_batch_simulation(labeled_cycles))
 
     async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]]) -> None:
         """Run multi-cycle batch simulation asynchronously."""
@@ -463,7 +478,7 @@ class LearningManager:
             if suggestions:
                 self._apply_suggestions_and_notify(suggestions)
             return
-        self.hass.async_create_task(self._async_scan_and_apply(generate, label))
+        self._spawn(self._async_scan_and_apply(generate, label))
 
     async def _async_scan_and_apply(
         self, generate: Callable[[], dict[str, Any]], label: str
@@ -482,7 +497,7 @@ class LearningManager:
         Offloaded to an executor because it scans power traces across up to 200
         cycles for the clean-cycle health checks.
         """
-        self.hass.async_create_task(self._async_run_detection_suggestions())
+        self._spawn(self._async_run_detection_suggestions())
 
     async def _async_run_detection_suggestions(self) -> None:
         """Run the detection-suggestion pass off the event loop."""
@@ -675,7 +690,7 @@ class LearningManager:
                 )
                 if labeled:
                     # Rebuild envelope first, then persist (issue #131)
-                    self.hass.async_create_task(
+                    self._spawn(
                         self._async_rebuild_and_save_profile(detected_profile)
                     )
                     self._logger.debug("Auto-labeled high-confidence cycle %s", cycle_id)
@@ -729,7 +744,7 @@ class LearningManager:
         # Persist pending feedback request so it survives restart.
         # The pending review is surfaced in the panel's Cycles review queue;
         # WashData intentionally does not raise a persistent notification here.
-        self.hass.async_create_task(self.profile_store.async_save())
+        self._spawn(self.profile_store.async_save())
 
     def request_cycle_verification(
         self,

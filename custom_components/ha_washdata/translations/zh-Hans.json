@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "连接失败",
-      "invalid_auth": "验证无效",
       "unknown": "意外错误",
       "invalid_power": "功率阈值必须大于 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "置信阈值",
-          "description": "应用标签的最小匹配置信度 (0.50-0.95)。"
+          "description": "应用标签的最小匹配置信度 (0.50-0.95)。留空则使用设备的“自动标记置信度”设置。"
         }
       }
     },

@@ -212,6 +212,7 @@
     "unlabel_selected_tip": "Fjarlægir prófílmerkinguna af völdum lotum. Þær verða áfram í sögunni þinni og hægt er að merkja þær aftur síðar - þær hafa bara ekki lengur áhrif á þennan prófíl.",
     "use": "Notaðu",
     "wipe_all": "Þurrkaðu öll gögn",
+    "pg_rerun": "Uppfæra hermun",
     "delete_selected": "Eyða völdum ({n})",
     "pg_apply_best": "Nota besta",
     "pg_apply_to_settings_tip": "Afrita gildin sem þú breyttir hér yfir í virkar stillingar þessa tækis",
@@ -664,6 +665,11 @@
     "automation_off": "(óvirk)",
     "ref_cycle_none": "Engin",
     "share_name": "Sýna nafnið mitt á því sem ég deili",
+    "pg_compare_profile": "Bera saman við snið",
+    "pg_obj_endlag": "Lokatöf (miðgildi)",
+    "pg_obj_early": "Hlutfall of snemmbúinna loka",
+    "pg_obj_split": "Hlutfall skiptra lota",
+    "pg_sweep_cycles": "Nýlegar lotur",
     "cat_backfill_cycles": "Lotur fundnar í innfluttri aflsögu"
   },
   "log": {
@@ -693,7 +699,23 @@
     },
     "metric_auc": "AUC {auc} á staðfestingargögnum",
     "metric_mae": "villa {model} á móti grunnlínu {baseline}",
-    "fine_tuned_at": "fínstillt {when}"
+    "fine_tuned_at": "fínstillt {when}",
+    "never": "aldrei",
+    "trained_unknown": "á óþekktum tíma",
+    "held_out_count": "mælt á {count} lotum sem haldið var utan við þjálfunina",
+    "held_out_count_one": "mælt á {count} lotu sem haldið var utan við þjálfunina",
+    "held_out_count_other": "mælt á {count} lotum sem haldið var utan við þjálfunina",
+    "last_run_not_promoted": "Síðasta athugun ({when}): {reason}",
+    "skip_reason": {
+      "insufficient_rows": "Ekki nógu margar nothæfar lotur enn: {count} merktar, hreinar lotur hingað til.",
+      "insufficient_rows_one": "Ekki nógu margar nothæfar lotur enn: {count} merkt, hrein lota hingað til.",
+      "insufficient_rows_other": "Ekki nógu margar nothæfar lotur enn: {count} merktar, hreinar lotur hingað til.",
+      "fit_failed": "Þjálfun mistókst: {error}",
+      "unknown": "Ekkert nýtt lærðist.",
+      "holdout_too_small": "Of fáar lotur til að prófa nýtt líkan á sanngjarnan hátt: hægt var að taka {held_out} frá til prófunar en {min} þarf.",
+      "not_better_than_naive": "Nýja líkanið var ekki greinilega betra en einfalda matið (villa {model} á móti {naive}).",
+      "not_better_than_incumbent": "Nýja líkanið var ekki betra en það sem er í notkun (villa {model} á móti {incumbent}), svo núverandi líkani var haldið."
+    }
   },
   "modal": {
     "auto_label": "Sjálfvirk merkingarlotur",
@@ -1008,6 +1030,20 @@
     "automation_desc_started": "Keyrir þegar lota hefst á {device}. Bættu við aðgerðum (tilkynning, ljós, ...).",
     "automation_desc_finished": "Keyrir þegar lotu lýkur á {device}. Bættu við aðgerðum (tilkynning, ljós, ...).",
     "feedback_detected": "WashData greindi: {name}",
+    "pg_outcome_stale": "Stillingum hefur verið breytt síðan þessi hermun keyrði. Hún sýnir enn gömlu niðurstöðuna.",
+    "pg_compare_profile_tip": "Velur aðeins sniðið sem er teiknað yfir ritið. Hermunin finnur alltaf samsvörun fyrir lotuna sjálf, eins og samþættingin gerir í rauntíma.",
+    "pg_task_busy": "Prófun á sögu eða bestun er þegar í gangi fyrir þetta tæki. Bíddu þar til henni lýkur eða hættu við hana.",
+    "pg_sweep_guarded": "Lýkur fleiri lotum of snemma, skiptir fleiri þeirra upp eða missir af lotum sem núverandi stilling nær, svo þetta gildi er aldrei ráðlagt.",
+    "pg_sweep_n_cycles": "yfir {count} lotur",
+    "pg_sweep_n_cycles_one": "yfir {count} lotu",
+    "pg_sweep_n_cycles_other": "yfir {count} lotur",
+    "pg_sweep_keep_current": "Halda núverandi gildi ({value}, {metric}): ekkert gildi stóð sig betur um að minnsta kosti eina lotu.",
+    "hist_truncated": "stöðvaðist við hámarkið {n} mælingar, svo afgangurinn af sögunni var ekki skoðaður",
+    "hist_warn_kw": "Hæsta mælingin er aðeins {w}. Þessi skynjari virðist skila kílóvöttum; WashData les afl í vöttum, svo ekki er hægt að greina lotur út frá honum.",
+    "hist_warn_naive_time": "{n} tímastimplar hafa ekkert tímabelti og voru lesnir sem UTC. Ef skráin er í staðartíma hliðrast hver lota um UTC-frávikið þitt, og mælingar í kringum skipti yfir í eða úr sumartíma geta lent í rangri röð eða glatast.",
+    "hist_warn_naive_time_one": "{n} tímastimpill hefur ekkert tímabelti og var lesinn sem UTC. Ef skráin er í staðartíma hliðrast hver lota um UTC-frávikið þitt, og mælingar í kringum skipti yfir í eða úr sumartíma geta lent í rangri röð eða glatast.",
+    "hist_warn_naive_time_other": "{n} tímastimplar hafa ekkert tímabelti og voru lesnir sem UTC. Ef skráin er í staðartíma hliðrast hver lota um UTC-frávikið þitt, og mælingar í kringum skipti yfir í eða úr sumartíma geta lent í rangri röð eða glatast.",
+    "hist_tail_trimmed": "{min} mín. bið eftir lok lotunnar var klippt af, eins og samþættingin gerir í rauntíma",
     "import_undo_hint": "Endurheimtarpunktur frá því fyrir síðasta innflutning ({when}) er geymdur með {profiles} prófíl(um) og {cycles} lotu(m).",
     "replace_undo_hint": "Endurheimtarpunktur er vistaður fyrst, svo þú getur afturkallað þennan innflutning undir Útflutningur / Innflutningur.",
     "pg_in_sample_note": "Þessar lotur voru líka notaðar til að byggja prófílana sem þær eru bornar saman við, svo niðurstöðurnar eru bjartsýnar: á nýjum lotum má búast við aðeins færri réttum samsvörunum."
@@ -1193,7 +1229,7 @@
       "label": "Nota greind líkön meðan á lotu stendur"
     },
     "end_energy_threshold": {
-      "doc": "Á meðan slökkvitöfin telur niður er uppsöfnuð orka (vött x tími) borin saman við þennan þröskuld. Ef farið er yfir hann byrjar niðurtalningin upp á nýtt - þannig haldast hrukkuvarnarveltur og þurrkunarhalar uppþvottavéla áfram hluti af lotunni í stað þess að lotan sé stytt. Hækkaðu gildið ef lotur enda of snemma meðan á kælingu stendur; lækkaðu það ef greiningin er of sein.",
+      "doc": "Þegar slökkvitöfin er liðin er orkan sem notuð var á meðan (vött x tími) borin saman við þennan þröskuld. Sé hún yfir honum er lotunni ekki lokið enn, sem heldur hrukkuvarnarveltum og þurrkunarhölum uppþvottavéla við lotuna í stað þess að stytta þá. Lækkaðu gildið ef lotur enda í kælingarveltu eða þurrkunarhala; hækkaðu það ef loknar lotur halda áfram að bíða.",
       "label": "Lokaorka"
     },
     "energy_price_entity": {
@@ -1866,6 +1902,12 @@
     "analysis_failed": "Greining mistókst: {error}",
     "auto_detect_failed": "Sjálfvirk skynjun mistókst: {error}",
     "auto_label_failed": "Sjálfvirk merking mistókst: {error}",
+    "auto_label_done": "Sjálfvirkri merkingu lokið: {count} lotur merktar, {skipped} án merkingar.",
+    "auto_label_done_one": "Sjálfvirkri merkingu lokið: {count} lota merkt, {skipped} án merkingar.",
+    "auto_label_done_other": "Sjálfvirkri merkingu lokið: {count} lotur merktar, {skipped} án merkingar.",
+    "auto_label_cancelled": "Hætt við sjálfvirka merkingu eftir að {count} lotur voru merktar.",
+    "auto_label_cancelled_one": "Hætt við sjálfvirka merkingu eftir að {count} lota var merkt.",
+    "auto_label_cancelled_other": "Hætt við sjálfvirka merkingu eftir að {count} lotur voru merktar.",
     "could_not_load_cycle": "Ekki tókst að hlaða lotu: {error}",
     "create_failed": "Stofnun mistókst: {error}",
     "cycles_deleted": "Lotum eytt: {count}",

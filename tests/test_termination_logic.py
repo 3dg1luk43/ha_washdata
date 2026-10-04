@@ -181,10 +181,12 @@ def test_ambiguous_match_stuck_in_ending_is_hard_finalized(base_config, mock_cal
     held open by a low standby baseline is finalized at ~2x expected instead of
     sitting in ENDING until the 8h cap (#296/#311).
 
-    A 6-tuple match with ambiguous=True blocks Smart Termination; a 3.5 W standby
-    (below stop_threshold=4.0 so ENDING is reached, but energetic enough to trip
-    the 0.05 Wh energy gate over the 60 s off_delay window) blocks the normal
-    fallback timeout. Only the backstop can end the cycle.
+    A 6-tuple match with ambiguous=True blocks Smart Termination; a 2.5-3.9 W
+    baseline (below stop_threshold=4.0 so ENDING is reached, but energetic enough
+    to trip the 0.05 Wh energy gate over the 60 s off_delay window) blocks the
+    normal fallback timeout. Only the backstop can end the cycle. The baseline
+    fluctuates on purpose: a FLAT one no longer pins the energy gate (audit
+    DETECT-08, tests/test_audit_detect_08_flat_standby_energy_gate.py).
     """
     from custom_components.ha_washdata.const import ENDING_HARD_FINALIZE_RATIO
 
@@ -206,11 +208,12 @@ def test_ambiguous_match_stuck_in_ending_is_hard_finalized(base_config, mock_cal
     assert detector.matched_profile == "Heavy"
     assert detector._match_ambiguous is True
 
-    # Run high for a while, then drop to a 3.5 W standby baseline.
+    # Run high for a while, then drop to a fluctuating sub-stop baseline.
+    baseline = (3.9, 3.9, 2.5)
     for t in range(90, 1800, 30):
         detector.process_reading(100.0, dt(t))
     for t in range(1800, 5000, 30):
-        detector.process_reading(3.5, dt(t))
+        detector.process_reading(baseline[(t // 30) % 3], dt(t))
 
     # Well past off_delay but below 2x expected (7200s): the energy gate must have
     # blocked the normal fallback, so the cycle is still open (in ENDING).
@@ -222,7 +225,7 @@ def test_ambiguous_match_stuck_in_ending_is_hard_finalized(base_config, mock_cal
 
     # Cross 2x expected (7200s) with the baseline still held: the backstop fires.
     for t in range(5000, 7400, 30):
-        detector.process_reading(3.5, dt(t))
+        detector.process_reading(baseline[(t // 30) % 3], dt(t))
 
     assert mock_callbacks["on_cycle_end"].called, (
         "Duration-anchored backstop did not finalize the stuck cycle"

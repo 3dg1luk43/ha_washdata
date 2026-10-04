@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Bağlantı başarısız oldu",
-      "invalid_auth": "Geçersiz kimlik doğrulama",
       "unknown": "Beklenmeyen hata",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Güven Eşiği",
-          "description": "Etiketleri uygulamak için minimum eşleşme güvenirliği (0,50-0,95)."
+          "description": "Etiketleri uygulamak için minimum eşleşme güvenirliği (0,50-0,95). Cihazın Otomatik Etiket Güveni ayarını kullanmak için boş bırakın."
         }
       }
     },

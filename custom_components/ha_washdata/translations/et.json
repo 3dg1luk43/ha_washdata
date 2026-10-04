@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Ühenduse loomine ebaõnnestus",
-      "invalid_auth": "Kehtetu autentimine",
       "unknown": "Ootamatu viga",
       "invalid_power": "Võimsuslävi peab olema suurem kui 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Usalduse lävi",
-          "description": "Minimaalne vaste usaldusväärsus (0,50–0,95) siltide rakendamiseks."
+          "description": "Minimaalne vaste usaldusväärsus (0,50-0,95) siltide rakendamiseks. Jätke tühjaks, et kasutada seadme sätet Automaatse Sildi Usaldus."
         }
       }
     },

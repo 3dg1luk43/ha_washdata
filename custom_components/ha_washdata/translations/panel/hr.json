@@ -250,7 +250,8 @@
     "confirm_appliance": "Potvrdi ovaj uređaj",
     "confirmed": "Potvrđeno",
     "create_profile_from_gap": "Stvori profil",
-    "undo_import": "Poništi zadnji uvoz"
+    "undo_import": "Poništi zadnji uvoz",
+    "pg_rerun": "Ažuriraj simulaciju"
   },
   "note": {
     "off_delay": {
@@ -670,7 +671,12 @@
     "automation_off": "(isključeno)",
     "ref_cycle_none": "Nijedan",
     "share_name": "Prikaži moje ime uz ono što dijelim",
-    "cat_backfill_cycles": "Ciklusi pronađeni u uvezenoj povijesti snage"
+    "cat_backfill_cycles": "Ciklusi pronađeni u uvezenoj povijesti snage",
+    "pg_compare_profile": "Usporedi s profilom",
+    "pg_obj_early": "Stopa ranih završetaka",
+    "pg_obj_endlag": "Kašnjenje završetka (medijan)",
+    "pg_obj_split": "Stopa podijeljenih ciklusa",
+    "pg_sweep_cycles": "Nedavni ciklusi"
   },
   "log": {
     "all_levels": "Sve razine",
@@ -699,7 +705,25 @@
     },
     "metric_auc": "AUC {auc} na izdvojenim podacima",
     "metric_mae": "pogreška {model} u odnosu na osnovnu vrijednost {baseline}",
-    "fine_tuned_at": "fino podešeno {when}"
+    "fine_tuned_at": "fino podešeno {when}",
+    "held_out_count": "izmjereno na {count} izdvojenih ciklusa",
+    "held_out_count_one": "izmjereno na {count} izdvojenom ciklusu",
+    "held_out_count_few": "izmjereno na {count} izdvojena ciklusa",
+    "held_out_count_other": "izmjereno na {count} izdvojenih ciklusa",
+    "last_run_not_promoted": "Zadnja provjera ({when}): {reason}",
+    "never": "nikad",
+    "skip_reason": {
+      "fit_failed": "Treniranje nije uspjelo: {error}",
+      "holdout_too_small": "Premalo ciklusa za pošteno testiranje novog modela: za testiranje se moglo izdvojiti {held_out}, a potrebno je {min}.",
+      "insufficient_rows": "Još nema dovoljno upotrebljivih ciklusa: zasad {count} označenih, čistih ciklusa.",
+      "insufficient_rows_one": "Još nema dovoljno upotrebljivih ciklusa: zasad {count} označen, čist ciklus.",
+      "insufficient_rows_few": "Još nema dovoljno upotrebljivih ciklusa: zasad {count} označena, čista ciklusa.",
+      "insufficient_rows_other": "Još nema dovoljno upotrebljivih ciklusa: zasad {count} označenih, čistih ciklusa.",
+      "not_better_than_incumbent": "Novi model nije bio bolji od onog koji se koristi (pogreška {model} u odnosu na {incumbent}), pa je zadržan trenutni.",
+      "not_better_than_naive": "Novi model nije bio jasno bolji od jednostavne procjene (pogreška {model} u odnosu na {naive}).",
+      "unknown": "Ništa novo nije naučeno."
+    },
+    "trained_unknown": "u nepoznato vrijeme"
   },
   "modal": {
     "auto_label": "Ciklusi automatskog označavanja",
@@ -1022,7 +1046,23 @@
     "feedback_detected": "WashData je prepoznao: {name}",
     "import_undo_hint": "Čuva se točka vraćanja od prije zadnjeg uvoza ({when}): {profiles} profila i {cycles} ciklusa.",
     "replace_undo_hint": "Najprije se sprema točka vraćanja, pa ovaj uvoz možete poništiti u odjeljku Izvoz / uvoz.",
-    "pg_in_sample_note": "Ovi ciklusi pomogli su i u izradi profila s kojima se uspoređuju, pa su rezultati optimistični: na novim ciklusima očekujte nešto manje točnih podudaranja."
+    "pg_in_sample_note": "Ovi ciklusi pomogli su i u izradi profila s kojima se uspoređuju, pa su rezultati optimistični: na novim ciklusima očekujte nešto manje točnih podudaranja.",
+    "hist_tail_trimmed": "Odrezano je {min} min čekanja nakon završetka ciklusa, kao što to čini integracija tijekom rada",
+    "hist_truncated": "zaustavljeno na ograničenju očitanja ({n}), pa ostatak povijesti nije pregledan",
+    "hist_warn_kw": "Najveće očitanje je samo {w}. Čini se da ovaj senzor izvještava u kilovatima; WashData čita snagu u vatima, pa se iz njega ciklusi ne mogu otkriti.",
+    "hist_warn_naive_time": "{n} vremenskih oznaka nema vremensku zonu i pročitano je kao UTC. Ako je datoteka u lokalnom vremenu, svaki je ciklus pomaknut za vaš pomak od UTC-a, a očitanja oko prelaska na ljetno ili zimsko vrijeme mogu se ispremiješati ili izgubiti.",
+    "hist_warn_naive_time_one": "{n} vremenska oznaka nema vremensku zonu i pročitana je kao UTC. Ako je datoteka u lokalnom vremenu, svaki je ciklus pomaknut za vaš pomak od UTC-a, a očitanja oko prelaska na ljetno ili zimsko vrijeme mogu se ispremiješati ili izgubiti.",
+    "hist_warn_naive_time_few": "{n} vremenske oznake nemaju vremensku zonu i pročitane su kao UTC. Ako je datoteka u lokalnom vremenu, svaki je ciklus pomaknut za vaš pomak od UTC-a, a očitanja oko prelaska na ljetno ili zimsko vrijeme mogu se ispremiješati ili izgubiti.",
+    "hist_warn_naive_time_other": "{n} vremenskih oznaka nema vremensku zonu i pročitano je kao UTC. Ako je datoteka u lokalnom vremenu, svaki je ciklus pomaknut za vaš pomak od UTC-a, a očitanja oko prelaska na ljetno ili zimsko vrijeme mogu se ispremiješati ili izgubiti.",
+    "pg_compare_profile_tip": "Odabire samo profil iscrtan preko grafikona. Simulacija uvijek sama traži odgovarajući program za ciklus, kao i integracija tijekom rada.",
+    "pg_outcome_stale": "Postavke su se promijenile nakon pokretanja ove simulacije. I dalje prikazuje stari rezultat.",
+    "pg_sweep_guarded": "Prerano završava više ciklusa, dijeli više njih ili propušta cikluse koje trenutna postavka hvata, pa se nikada ne preporučuje.",
+    "pg_sweep_keep_current": "Zadrži trenutnu vrijednost ({value}, {metric}): nijedna vrijednost nije bila bolja za barem jedan ciklus.",
+    "pg_sweep_n_cycles": "na {count} ciklusa",
+    "pg_sweep_n_cycles_one": "na {count} ciklusu",
+    "pg_sweep_n_cycles_few": "na {count} ciklusa",
+    "pg_sweep_n_cycles_other": "na {count} ciklusa",
+    "pg_task_busy": "Za ovaj uređaj već je u tijeku „Testiraj na povijesti” ili „Optimiziraj”. Pričekajte da završi ili ga otkažite."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka prevrtanja nakon završetka kako bi se smanjile bore.",
@@ -1185,7 +1225,7 @@
       "label": "Primijeni pametne modele tijekom ciklusa"
     },
     "end_energy_threshold": {
-      "doc": "Tijekom odbrojavanja odgode isključenja, akumulirana energija (vati x vrijeme) uspoređuje se s ovim pragom. Ako se prekorači, odbrojavanje se resetira - zadržavajući sustave protiv gužvanja i rubove za sušenje u perilici posuđa pričvršćene na ciklus umjesto da ih skraćuje. Povećajte ga ako ciklusi završe prerano tijekom hlađenja; smanjite ako je otkrivanje sporo.",
+      "doc": "Kad odgoda isključivanja istekne, energija potrošena tijekom nje (vati x vrijeme) uspoređuje se s ovim pragom. Iznad njega ciklus još nije završen, pa okretanja protiv gužvanja i završno sušenje perilice posuđa ostaju dio ciklusa umjesto da se prerano odsijeku. Smanjite ga ako ciklusi završavaju tijekom okretanja za hlađenje ili završnog sušenja; povećajte ga ako završeni ciklusi i dalje čekaju.",
       "label": "Energija završetka"
     },
     "energy_price_entity": {
@@ -1888,7 +1928,15 @@
     "store_download_partial": "Programi koji se nisu mogli preuzeti: {n}; pokušajte ponovno kasnije.",
     "import_no_restore_point": "Uvezeno, ali točka vraćanja nije se mogla spremiti, pa se ovaj uvoz ne može poništiti",
     "import_undo_failed": "Uvoz nije moguće poništiti: {error}",
-    "import_undone": "Uvoz poništen: vraćeno {profiles} profila i {cycles} ciklusa"
+    "import_undone": "Uvoz poništen: vraćeno {profiles} profila i {cycles} ciklusa",
+    "auto_label_cancelled": "Automatsko označavanje otkazano nakon označavanja {count} ciklusa.",
+    "auto_label_cancelled_one": "Automatsko označavanje otkazano nakon označavanja {count} ciklusa.",
+    "auto_label_cancelled_few": "Automatsko označavanje otkazano nakon označavanja {count} ciklusa.",
+    "auto_label_cancelled_other": "Automatsko označavanje otkazano nakon označavanja {count} ciklusa.",
+    "auto_label_done": "Automatsko označavanje dovršeno: označeno je {count} ciklusa, bez oznake: {skipped}.",
+    "auto_label_done_one": "Automatsko označavanje dovršeno: označen je {count} ciklus, bez oznake: {skipped}.",
+    "auto_label_done_few": "Automatsko označavanje dovršeno: označena su {count} ciklusa, bez oznake: {skipped}.",
+    "auto_label_done_other": "Automatsko označavanje dovršeno: označeno je {count} ciklusa, bez oznake: {skipped}."
   },
   "trend": {
     "down": "Trend pada",

@@ -19,8 +19,8 @@
 This module is the **single source of truth** for the shape of every
 ``ha_washdata/*`` WebSocket command: its request parameters (:data:`WS_COMMANDS`)
 and its response payload (:data:`WS_RESPONSE_TYPES`, one ``TypedDict`` per
-command). It is deliberately dependency-free — it imports nothing from Home
-Assistant and nothing from :mod:`ws_api` — so it is safe to import from tooling
+command). It is deliberately dependency-free: it imports nothing from Home
+Assistant and nothing from :mod:`ws_api`, so it is safe to import from tooling
 (``devtools/generate_ws_types.py``), from tests, and from ``ws_api`` itself
 without creating an import cycle.
 
@@ -81,7 +81,7 @@ class MatchUncertainty(TypedDict):
 
 
 class DeviceInfo(TypedDict):
-    """One entry in :class:`GetDevicesResponse` — live state for a device."""
+    """One entry in :class:`GetDevicesResponse`: live state for a device."""
 
     entry_id: str
     perm: str
@@ -463,6 +463,9 @@ class GetMlTrainingStatusResponse(TypedDict):
     interval_days: int
     hour: int
     on_device_models: dict[str, Any]
+    # capability -> {ts, promoted, reason_code, reason_params, reason} of the last
+    # training run; the reason fields only when it promoted nothing (audit ML-20).
+    last_run: dict[str, Any]
 
 
 # ─── Playground (F3) ───────────────────────────────────────────────────────────
@@ -1061,12 +1064,15 @@ WS_COMMANDS: dict[str, dict] = {
         _entry(),
         _p("cycle_ids", "list[str]", False),
         _p("settings_override", "dict", False),
+        _p("count", "int", False),
     ]},
     "start_playground_sweep": {"params": [
         _entry(),
         _p("param", "str"),
         _p("values", "list[float]"),
         _p("objective", "str"),
+        _p("cycle_ids", "list[str]", False),
+        _p("count", "int", False),
     ]},
     "start_playground_cycle_detail": {"params": [
         _entry(),

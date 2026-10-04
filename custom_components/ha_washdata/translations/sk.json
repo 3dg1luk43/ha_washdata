@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Nepodarilo sa pripojiť",
-      "invalid_auth": "Neplatné overenie",
       "unknown": "Neočakávaná chyba",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Prah spoľahlivosti",
-          "description": "Minimálna spoľahlivosť zhody (0,50–0,95) na použitie štítkov."
+          "description": "Minimálna spoľahlivosť zhody (0,50–0,95) na použitie štítkov. Ak ju necháte prázdnu, použije sa nastavenie zariadenia „Spoľahlivosť autooznačovania“."
         }
       }
     },

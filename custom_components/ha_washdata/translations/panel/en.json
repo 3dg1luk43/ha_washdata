@@ -247,7 +247,8 @@
     "unlabel_selected": "Unlabel selected ({n})",
     "unlabel_selected_tip": "Remove the profile label from the selected cycles. They stay in your history and can be labelled again later - they just stop shaping this profile.",
     "use": "Use",
-    "wipe_all": "Wipe All Data"
+    "wipe_all": "Wipe All Data",
+    "pg_rerun": "Update simulation"
   },
   "note": {
     "off_delay": {
@@ -664,7 +665,12 @@
     "energy_total": "{v} total",
     "automation_off": "(off)",
     "ref_cycle_none": "None",
-    "share_name": "Show my name on what I share"
+    "share_name": "Show my name on what I share",
+    "pg_compare_profile": "Compare with profile",
+    "pg_obj_endlag": "End delay (median)",
+    "pg_obj_early": "Early-end rate",
+    "pg_obj_split": "Split rate",
+    "pg_sweep_cycles": "Recent cycles"
   },
   "log": {
     "all_levels": "All levels",
@@ -700,7 +706,23 @@
     },
     "metric_auc": "AUC {auc} on held-out data",
     "metric_mae": "error {model} vs {baseline} baseline",
-    "fine_tuned_at": "fine-tuned {when}"
+    "fine_tuned_at": "fine-tuned {when}",
+    "never": "never",
+    "trained_unknown": "at an unknown time",
+    "held_out_count": "measured on {count} held-out cycles",
+    "held_out_count_one": "measured on {count} held-out cycle",
+    "held_out_count_other": "measured on {count} held-out cycles",
+    "last_run_not_promoted": "Last check ({when}): {reason}",
+    "skip_reason": {
+      "insufficient_rows": "Not enough usable cycles yet: {count} labelled, clean cycles so far.",
+      "insufficient_rows_one": "Not enough usable cycles yet: {count} labelled, clean cycle so far.",
+      "insufficient_rows_other": "Not enough usable cycles yet: {count} labelled, clean cycles so far.",
+      "holdout_too_small": "Too few cycles to test a new model fairly: {held_out} could be set aside for testing, {min} are needed.",
+      "not_better_than_naive": "The new model was not clearly better than the simple estimate (error {model} vs {naive}).",
+      "not_better_than_incumbent": "The new model was not better than the one in use (error {model} vs {incumbent}), so the current one was kept.",
+      "fit_failed": "Training failed: {error}",
+      "unknown": "Nothing new was learnt."
+    }
   },
   "modal": {
     "apply_suggestions_msg": "Change these {n} settings? The integration reloads after saving.",
@@ -1017,7 +1039,21 @@
     "automation_alias_finished": "{device}: cycle finished",
     "automation_desc_started": "Runs when a {device} cycle starts. Add your actions (notify, lights, ...).",
     "automation_desc_finished": "Runs when a {device} cycle finishes. Add your actions (notify, lights, ...).",
-    "feedback_detected": "WashData detected: {name}"
+    "feedback_detected": "WashData detected: {name}",
+    "pg_outcome_stale": "Settings changed since this simulation ran. It still shows the old result.",
+    "pg_compare_profile_tip": "Only picks the profile drawn over the graph. The simulation always matches the cycle on its own, as the live integration does.",
+    "pg_task_busy": "A Test-on-history or Optimize run is already in progress for this device. Wait for it to finish or cancel it.",
+    "pg_sweep_guarded": "Ends more cycles early, splits more of them, or misses cycles the current setting catches, so it is never recommended.",
+    "pg_sweep_n_cycles": "over {count} cycles",
+    "pg_sweep_n_cycles_one": "over {count} cycle",
+    "pg_sweep_n_cycles_other": "over {count} cycles",
+    "pg_sweep_keep_current": "Keep the current value ({value}, {metric}): no value did better by at least one cycle.",
+    "hist_truncated": "stopped at the {n}-reading limit, so the rest of the history was not scanned",
+    "hist_warn_kw": "The highest reading is only {w}. This sensor looks like it reports kilowatts; WashData reads power in watts, so cycles cannot be detected from it.",
+    "hist_warn_naive_time": "{n} timestamps have no time zone and were read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.",
+    "hist_warn_naive_time_one": "{n} timestamp has no time zone and was read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.",
+    "hist_warn_naive_time_other": "{n} timestamps have no time zone and were read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.",
+    "hist_tail_trimmed": "{min} min of waiting after the cycle ended were trimmed, as the live integration trims them"
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1208,7 +1244,7 @@
       "label": "Apply smart models during a cycle"
     },
     "end_energy_threshold": {
-      "doc": "During the off-delay countdown, accumulated energy (watts x time) is compared to this threshold. If exceeded, the countdown resets - keeping anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Raise it if cycles end too early during cool-down; lower it if detection is sluggish.",
+      "doc": "When the off delay has run out, the energy used during it (watts x time) is compared to this threshold. Above it the cycle is not finished yet, which keeps anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Lower it if cycles end during a cool-down tumble or drying tail; raise it if finished cycles keep waiting.",
       "label": "End Energy"
     },
     "energy_price_dynamic": {
@@ -1769,6 +1805,12 @@
     "auto_detect_failed": "Auto-detect failed: {error}",
     "auto_label_complete": "Auto-label complete",
     "auto_label_failed": "Auto-label failed: {error}",
+    "auto_label_done": "Auto-label complete: {count} cycles labelled, {skipped} left unlabelled.",
+    "auto_label_done_one": "Auto-label complete: {count} cycle labelled, {skipped} left unlabelled.",
+    "auto_label_done_other": "Auto-label complete: {count} cycles labelled, {skipped} left unlabelled.",
+    "auto_label_cancelled": "Auto-label cancelled after labelling {count} cycles.",
+    "auto_label_cancelled_one": "Auto-label cancelled after labelling {count} cycle.",
+    "auto_label_cancelled_other": "Auto-label cancelled after labelling {count} cycles.",
     "automation_deleted": "Automation deleted",
     "brand_added": "Brand added - awaiting approval",
     "catalog_refreshed": "Community catalog refreshed",

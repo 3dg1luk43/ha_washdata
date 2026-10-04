@@ -116,7 +116,7 @@ def test_adopted_settings_are_clamped_and_carry_no_plug_cadence() -> None:
         C.CONF_OFF_DELAY: 1800, C.CONF_MIN_OFF_GAP: 3600, C.CONF_PROFILE_MATCH_INTERVAL: 19,
         C.CONF_STOP_THRESHOLD_W: float("nan"), C.CONF_START_THRESHOLD_W: True,
         C.CONF_MIN_POWER: 3.0,
-    }, "washing_machine")
+    })
     assert out == {
         C.CONF_PROFILE_MATCH_MAX_DURATION_RATIO: C.DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
         C.CONF_PROFILE_MATCH_MIN_DURATION_RATIO: C.DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,

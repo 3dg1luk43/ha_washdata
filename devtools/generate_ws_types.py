@@ -21,15 +21,15 @@ Reads the single-source-of-truth contract in
 ``custom_components/ha_washdata/ws_schema.py`` (``WS_COMMANDS`` + the
 ``WS_RESPONSE_TYPES`` ``TypedDict`` registry) and emits two generated files:
 
-* ``custom_components/ha_washdata/www/ws-types.d.ts`` — TypeScript declarations:
+* ``custom_components/ha_washdata/www/ws-types.d.ts`` - TypeScript declarations:
   one ``interface`` per response ``TypedDict`` (and every nested one), a
   ``*Request`` interface per command, and ``WashDataWsRequests`` /
   ``WashDataWsResponses`` command-name -> type maps.
-* ``docs/WS_API.md`` — a human-readable reference: one section per command with
+* ``docs/WS_API.md`` - a human-readable reference: one section per command with
   its request-parameter table and response-field table.
 
 Runnable fully offline and idempotent (running it twice produces byte-identical
-output). No Home Assistant imports — ``ws_schema`` is dependency-free.
+output). No Home Assistant imports: ``ws_schema`` is dependency-free.
 
 Usage::
 
@@ -53,7 +53,7 @@ _PKG_DIR = _REPO_ROOT / "custom_components" / "ha_washdata"
 TS_OUT = _PKG_DIR / "www" / "ws-types.d.ts"
 MD_OUT = _REPO_ROOT / "docs" / "WS_API.md"
 
-_AUTOGEN = "AUTO-GENERATED — do not edit; run devtools/generate_ws_types.py"
+_AUTOGEN = "AUTO-GENERATED - do not edit; run devtools/generate_ws_types.py"
 
 
 def _load_schema() -> Any:
@@ -284,7 +284,7 @@ def _emit_md(schema: Any) -> str:
     lines.append(
         "This document is generated from "
         "`custom_components/ha_washdata/ws_schema.py`. Every command is prefixed "
-        f"with `{schema.WS_PREFIX}/` on the wire. Do not edit by hand — run "
+        f"with `{schema.WS_PREFIX}/` on the wire. Do not edit by hand - run "
         "`python3 devtools/generate_ws_types.py`."
     )
     lines.append("")
@@ -298,7 +298,7 @@ def _emit_md(schema: Any) -> str:
         params = spec.get("params", [])
         names = ", ".join(
             p["name"] if p.get("required") else f"{p['name']}?" for p in params
-        ) or "—"
+        ) or "-"
         resp = schema.WS_RESPONSE_TYPES[command].__name__
         lines.append(f"| `{command}` | {names} | `{resp}` |")
     lines.append("")

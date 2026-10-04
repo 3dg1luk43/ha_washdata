@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Yhteyden muodostaminen epäonnistui",
-      "invalid_auth": "Virheellinen todennus",
       "unknown": "Odottamaton virhe",
       "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Luottamuskynnys",
-          "description": "Vähimmäisosumavarmuus (0,50–0,95) tunnisteiden lisäämistä varten."
+          "description": "Vähimmäisosumavarmuus (0,50-0,95) tunnisteiden lisäämistä varten. Jätä tyhjäksi käyttääksesi laitteen Automaattimerkinnän varmuus -asetusta."
         }
       }
     },

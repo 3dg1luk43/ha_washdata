@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Nepavyko prisijungti",
-      "invalid_auth": "Neteisingas autentifikavimas",
       "unknown": "Netikėta klaida",
       "invalid_power": "Galios slenkstis turi būti didesnis nei 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Patikimumo slenkstis",
-          "description": "Minimalus atitikties patikimumas (0,50–0,95) etiketėms taikyti."
+          "description": "Minimalus atitikties patikimumas (0,50-0,95) etiketėms taikyti. Palikite tuščią, kad būtų naudojamas įrenginio nustatymas „Automatinio žymėjimo pasitikėjimas“."
         }
       }
     },

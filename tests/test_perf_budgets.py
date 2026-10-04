@@ -389,7 +389,7 @@ async def test_running_cycle_work(
     entry, mgr = seeded
     c = calls(ProfileStore, "async_match_profile", "async_rebuild_envelope")
     calls(WashDataManager, "_notify_update")
-    calls(progress, "_parse_phase_envelope")
+    calls(progress, "_parse_phase_envelope", "power_data_to_offsets")
     monkeypatch.setattr(cycle_detector, "np", _NumpyCounter(cycle_detector.np, c))
     store_writes.clear()
 
@@ -419,6 +419,10 @@ async def test_running_cycle_work(
         # The phase estimate parses the matched envelope once per envelope
         # revision. Measured 1; budget 1. Guards PERF-06 (a re-parse every 5 s).
         ("envelope parses", c["_parse_phase_envelope"], 1),
+        # The phase estimate converts only its 60 s window of the running trace.
+        # Measured 0; budget 0. Guards PROGRESS-17 (the whole trace converted on
+        # every 5 s estimate, 744-1593 points, on the event loop).
+        ("whole-trace conversions", c["power_data_to_offsets"], 0),
         # The detector's per-sample cadence statistics are pure Python. Measured
         # 0; budget 1. Guards PERF-07 (np.percentile / np.median on <= 20 values,
         # 40-185 us each, on every sample).

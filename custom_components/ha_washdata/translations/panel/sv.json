@@ -212,6 +212,7 @@
     "unlabel_selected_tip": "Tar bort profilmärkningen från de valda cyklerna. De ligger kvar i din historik och kan märkas igen senare - de påverkar bara inte längre den här profilen.",
     "use": "Använd",
     "wipe_all": "Rensa all data",
+    "pg_rerun": "Uppdatera simulering",
     "delete_selected": "Radera valda ({n})",
     "pg_apply_best": "Använd bästa",
     "pg_apply_to_settings_tip": "Kopiera värdena du redigerade här till den här enhetens aktiva inställningar",
@@ -664,6 +665,11 @@
     "automation_off": "(av)",
     "ref_cycle_none": "Ingen",
     "share_name": "Visa mitt namn på det jag delar",
+    "pg_compare_profile": "Jämför med profil",
+    "pg_obj_endlag": "Slutfördröjning (median)",
+    "pg_obj_early": "Andel för tidiga slut",
+    "pg_obj_split": "Uppdelningsandel",
+    "pg_sweep_cycles": "Senaste cykler",
     "cat_backfill_cycles": "Cykler hittade i importerad effekthistorik"
   },
   "log": {
@@ -693,7 +699,23 @@
     },
     "metric_auc": "AUC {auc} på valideringsdata",
     "metric_mae": "fel {model} mot baslinje {baseline}",
-    "fine_tuned_at": "finjusterad {when}"
+    "fine_tuned_at": "finjusterad {when}",
+    "never": "aldrig",
+    "trained_unknown": "vid en okänd tidpunkt",
+    "held_out_count": "mätt på {count} undanhållna valideringscykler",
+    "held_out_count_one": "mätt på {count} undanhållen valideringscykel",
+    "held_out_count_other": "mätt på {count} undanhållna valideringscykler",
+    "last_run_not_promoted": "Senaste kontroll ({when}): {reason}",
+    "skip_reason": {
+      "insufficient_rows": "Inte tillräckligt med användbara cykler än: {count} märkta, rena cykler hittills.",
+      "insufficient_rows_one": "Inte tillräckligt med användbara cykler än: {count} märkt, ren cykel hittills.",
+      "insufficient_rows_other": "Inte tillräckligt med användbara cykler än: {count} märkta, rena cykler hittills.",
+      "fit_failed": "Träningen misslyckades: {error}",
+      "unknown": "Inget nytt lärdes in.",
+      "holdout_too_small": "För få cykler för att testa en ny modell rättvist: {held_out} kunde hållas undan för test, {min} behövs.",
+      "not_better_than_naive": "Den nya modellen var inte tydligt bättre än den enkla uppskattningen (fel {model} mot {naive}).",
+      "not_better_than_incumbent": "Den nya modellen var inte bättre än den som används (fel {model} mot {incumbent}), så den nuvarande behölls."
+    }
   },
   "modal": {
     "auto_label": "Automatisk märkning av cykler",
@@ -1008,6 +1030,20 @@
     "automation_desc_started": "Körs när en {device}-cykel startar. Lägg till dina åtgärder (avisering, lampor, ...).",
     "automation_desc_finished": "Körs när en {device}-cykel är klar. Lägg till dina åtgärder (avisering, lampor, ...).",
     "feedback_detected": "WashData upptäckte: {name}",
+    "pg_outcome_stale": "Inställningarna har ändrats sedan den här simuleringen kördes. Den visar fortfarande det gamla resultatet.",
+    "pg_compare_profile_tip": "Väljer bara vilken profil som ritas över grafen. Simuleringen matchar alltid cykeln på egen hand, precis som integrationen gör under drift.",
+    "pg_task_busy": "En körning av Testa på historik eller Optimera pågår redan för den här enheten. Vänta tills den är klar eller avbryt den.",
+    "pg_sweep_guarded": "Avslutar fler cykler för tidigt, delar upp fler av dem eller missar cykler som den nuvarande inställningen fångar, så den rekommenderas aldrig.",
+    "pg_sweep_n_cycles": "över {count} cykler",
+    "pg_sweep_n_cycles_one": "över {count} cykel",
+    "pg_sweep_n_cycles_other": "över {count} cykler",
+    "pg_sweep_keep_current": "Behåll det nuvarande värdet ({value}, {metric}): inget värde var bättre med minst en cykel.",
+    "hist_truncated": "stoppade vid gränsen på {n} avläsningar, så resten av historiken genomsöktes inte",
+    "hist_warn_kw": "Den högsta avläsningen är bara {w}. Den här sensorn verkar rapportera kilowatt; WashData läser effekt i watt, så cykler kan inte upptäckas utifrån den.",
+    "hist_warn_naive_time": "{n} tidsstämplar saknar tidszon och lästes som UTC. Om filen är i lokal tid förskjuts varje cykel med din UTC-förskjutning, och avläsningar kring ett byte till eller från sommartid kan hamna i fel ordning eller försvinna.",
+    "hist_warn_naive_time_one": "{n} tidsstämpel saknar tidszon och lästes som UTC. Om filen är i lokal tid förskjuts varje cykel med din UTC-förskjutning, och avläsningar kring ett byte till eller från sommartid kan hamna i fel ordning eller försvinna.",
+    "hist_warn_naive_time_other": "{n} tidsstämplar saknar tidszon och lästes som UTC. Om filen är i lokal tid förskjuts varje cykel med din UTC-förskjutning, och avläsningar kring ett byte till eller från sommartid kan hamna i fel ordning eller försvinna.",
+    "hist_tail_trimmed": "{min} min väntan efter att cykeln avslutats klipptes bort, precis som integrationen gör under drift",
     "import_undo_hint": "En återställningspunkt från före den senaste importen ({when}) finns kvar: {profiles} profil(er) och {cycles} cykel/cykler.",
     "replace_undo_hint": "En återställningspunkt sparas först, så att du kan ångra den här importen under Exportera / Importera.",
     "pg_in_sample_note": "Dessa cykler var också med och byggde de profiler de matchas mot, så resultaten är optimistiska: på nya cykler kan du förvänta dig något färre korrekta matchningar."
@@ -1193,7 +1229,7 @@
       "label": "Tillämpa smarta modeller under en cykel"
     },
     "end_energy_threshold": {
-      "doc": "Under nedräkningen av frånslagsfördröjningen jämförs ackumulerad energi (watt x tid) med denna tröskel. Om den överskrids återställs nedräkningen - bibehåller skrynkelskydd och diskmaskinstorkande svansar på cykeln istället för att korta dem. Höj den om cyklerna slutar för tidigt under nedkylning; sänk den om detekteringen är trög.",
+      "doc": "När avfördröjningen har löpt ut jämförs energin som förbrukades under den (watt x tid) med den här tröskeln. Ligger den över är cykeln inte klar än, vilket håller skrynkelskyddstumlingar och diskmaskinens eftertorkning kvar i cykeln i stället för att korta av dem. Sänk den om cykler avslutas under en avsvalningstumling eller eftertorkning; höj den om färdiga cykler fortsätter att vänta.",
       "label": "Slutenergi"
     },
     "energy_price_entity": {
@@ -1866,6 +1902,12 @@
     "analysis_failed": "Analys misslyckades: {error}",
     "auto_detect_failed": "Autoidentifiering misslyckades: {error}",
     "auto_label_failed": "Automatisk märkning misslyckades: {error}",
+    "auto_label_done": "Automärkning klar: {count} cykler märkta, {skipped} utan märkning.",
+    "auto_label_done_one": "Automärkning klar: {count} cykel märkt, {skipped} utan märkning.",
+    "auto_label_done_other": "Automärkning klar: {count} cykler märkta, {skipped} utan märkning.",
+    "auto_label_cancelled": "Automärkning avbruten efter att {count} cykler märkts.",
+    "auto_label_cancelled_one": "Automärkning avbruten efter att {count} cykel märkts.",
+    "auto_label_cancelled_other": "Automärkning avbruten efter att {count} cykler märkts.",
     "could_not_load_cycle": "Kunde inte läsa in cykel: {error}",
     "create_failed": "Skapande misslyckades: {error}",
     "cycles_deleted": "Borttagna cykler: {count}",

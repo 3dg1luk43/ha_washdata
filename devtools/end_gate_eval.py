@@ -87,17 +87,45 @@ that finalise, whether it released on the spin (``event``) or at the
 own last reading above ``anti_wrinkle_max_power`` (an early release: the spin then
 opens a second cycle). ``--device-types`` restricts the corpus.
 
+**Committed baseline (audit TESTING-09).** ``devtools/end_gate_baseline.json``
+holds the per-device-type end-gate figures (n, median / mean / p90 lag, early
+ends > 1 / > 5 min, splits) of one ``--loo --all-formats`` run, with the replay
+flags and the tree state (HEAD, dirty files, a hash of the integration code) it
+was taken on. Regenerate it after an intended end-gate change::
+
+    python3 devtools/end_gate_eval.py --loo --all-formats \\
+        --json /tmp/rows.json --write-baseline devtools/end_gate_baseline.json
+
+and gate a change against it::
+
+    python3 devtools/end_gate_eval.py --check devtools/end_gate_baseline.json
+    python3 devtools/end_gate_eval.py --check devtools/end_gate_baseline.json --rows /tmp/rows.json
+
+``--check`` replays with the baseline's own flags (or summarises ``--rows``, the
+``--json`` output of such a run, without replaying) and exits **1** when any
+device type regresses beyond ``BASELINE_TOLERANCE``: median lag + 0.25 min, mean
+lag + 0.5 min, p90 lag + 1.0 min, and **no** new early end (> 1 or > 5 min) or
+split. Early ends and splits are counts with zero tolerance because they are the
+axes that must never move the wrong way; lag is a cost and gets a small band. It
+exits **2** when the corpus no longer matches (a device type's cycle count
+differs: ``cycle_data/`` is maintainer-local, so re-baseline rather than compare),
+and 0 otherwise. The replay is deterministic, so an unchanged tree reproduces the
+baseline exactly.
+
 Run from the repo root.
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import logging
+import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -105,19 +133,36 @@ import numpy as np
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from custom_components.ha_washdata import playground  # noqa: E402
-from custom_components.ha_washdata.const import (  # noqa: E402
-    CONF_ANTI_WRINKLE_ENABLED,
-    CONF_WATCHDOG_INTERVAL,
-    resolve_watchdog_interval_default,
-)
-from custom_components.ha_washdata.cycle_detector import (  # noqa: E402
-    CycleDetectorConfig,
-)
-from custom_components.ha_washdata.profile_store import ProfileStore  # noqa: E402
-from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
-    _cycle_readings,
-)
+if TYPE_CHECKING:
+    from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+# The integration is imported by `_integration()` (from `main` and `_production`),
+# not here: importing any of it loads Home Assistant (~3 s), and `--help` must not.
+playground: Any = None
+CONF_ANTI_WRINKLE_ENABLED = "anti_wrinkle_enabled"
+CONF_WATCHDOG_INTERVAL = "watchdog_interval"
+resolve_watchdog_interval_default: Any = None
+_cycle_readings: Any = None
+
+
+def _integration() -> None:
+    """Bind the integration names this module uses (idempotent)."""
+    global playground, CONF_ANTI_WRINKLE_ENABLED, CONF_WATCHDOG_INTERVAL  # noqa: PLW0603
+    global resolve_watchdog_interval_default, _cycle_readings  # noqa: PLW0603
+    if playground is not None:
+        return
+    from custom_components.ha_washdata import const  # noqa: PLC0415
+    from custom_components.ha_washdata import playground as _pg  # noqa: PLC0415
+    from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
+        _cycle_readings as _readings,
+    )
+
+    CONF_ANTI_WRINKLE_ENABLED = const.CONF_ANTI_WRINKLE_ENABLED
+    CONF_WATCHDOG_INTERVAL = const.CONF_WATCHDOG_INTERVAL
+    resolve_watchdog_interval_default = const.resolve_watchdog_interval_default
+    _cycle_readings = _readings
+    playground = _pg
 
 #: A cycle must carry at least this many readings to be worth replaying.
 MIN_READINGS = 10
@@ -274,6 +319,7 @@ def _production(
     options) so the Playground resolves the device type's shipped default.
     ``force_anti_wrinkle`` sets ``anti_wrinkle_enabled`` before the manager reads it.
     """
+    _integration()
     from custom_components.ha_washdata.manager import WashDataManager  # noqa: PLC0415
 
     entry_data = {"power_sensor": "sensor.end_gate_eval", "name": "eval",
@@ -747,6 +793,129 @@ def _compare(before_path: str, after_path: str) -> None:
         print(f"    ... and {len(moved) - 25} more")
 
 
+#: ``--check`` regression tolerances (audit TESTING-09): how far a metric may move
+#: the wrong way, per device type, before the check fails. Lags in minutes;
+#: early ends and splits are cycle counts.
+BASELINE_TOLERANCE: dict[str, float] = {
+    "median_lag_min": 0.25,
+    "mean_lag_min": 0.5,
+    "p90_lag_min": 1.0,
+    "early_1min_n": 0,
+    "early_5min_n": 0,
+    "split_n": 0,
+}
+#: The replay flags a baseline records and ``--check`` replays with.
+BASELINE_FLAGS = (
+    "loo", "all_formats", "shipped_watchdog", "anti_wrinkle", "tumble_tail",
+    "device_types", "no_shortening",
+)
+
+
+def _baseline_summary(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Per device type (and ``ALL``): the ``_summarise`` figures plus counts."""
+    out: dict[str, dict[str, Any]] = {}
+    for scope in [None, *sorted({r["device_type"] for r in rows})]:
+        s = _summarise(rows, scope)
+        if not s["n"]:
+            continue
+        n = s["n"]
+        out[scope or "ALL"] = {
+            "n": n,
+            "median_lag_min": s["median_lag_min"],
+            "mean_lag_min": s["mean_lag_min"],
+            "p90_lag_min": s["p90_lag_min"],
+            "early_1min_n": int(round(s["early_1min_pct"] * n / 100.0)),
+            "early_5min_n": int(round(s["early_5min_pct"] * n / 100.0)),
+            "split_n": int(round(s["split_pct"] * n / 100.0)),
+            "early_1min_pct": s["early_1min_pct"],
+            "early_5min_pct": s["early_5min_pct"],
+            "split_pct": s["split_pct"],
+        }
+    return out
+
+
+def _git(*argv: str) -> str:
+    try:
+        return subprocess.run(
+            ["git", *argv], cwd=REPO, capture_output=True, text=True, check=False
+        ).stdout.rstrip()
+    except OSError:
+        return ""
+
+
+def _tree_state() -> dict[str, Any]:
+    """HEAD, the uncommitted files, and a hash of every integration source file."""
+    digest = hashlib.sha256()
+    pkg = REPO / "custom_components" / "ha_washdata"
+    for path in sorted(pkg.rglob("*.py")):
+        digest.update(str(path.relative_to(REPO)).encode())
+        digest.update(path.read_bytes())
+    return {
+        "head": _git("rev-parse", "--short", "HEAD"),
+        "dirty": [ln for ln in _git("status", "--porcelain").splitlines() if ln.strip()],
+        "integration_py_sha256": digest.hexdigest()[:16],
+    }
+
+
+def _write_baseline(
+    path: str, rows: list[dict[str, Any]], flags: dict[str, Any], tree: dict[str, Any]
+) -> None:
+    doc = {
+        "about": (
+            "end_gate_eval baseline (audit TESTING-09). Regenerate with "
+            "--write-baseline after an intended end-gate change; gate with --check."
+        ),
+        "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "flags": flags,
+        "tree": tree,
+        "tolerance": BASELINE_TOLERANCE,
+        "summary": _baseline_summary(rows),
+    }
+    Path(path).write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+    print(f"wrote baseline ({len(doc['summary'])} scopes) to {path}")
+
+
+def _check_baseline(baseline: dict[str, Any], rows: list[dict[str, Any]]) -> int:
+    """0 within tolerance, 1 on a regression, 2 when the corpus no longer matches."""
+    tol = {**BASELINE_TOLERANCE, **(baseline.get("tolerance") or {})}
+    before = baseline.get("summary") or {}
+    after = _baseline_summary(rows)
+    regressions: list[str] = []
+    drift: list[str] = []
+    print(f"{'scope':<18}{'metric':<16}{'baseline':>10}{'now':>10}{'tol':>7}")
+    for scope in sorted(set(before) | set(after)):
+        b, a = before.get(scope), after.get(scope)
+        if b is None or a is None or b["n"] != a["n"]:
+            drift.append(
+                f"{scope}: n {b['n'] if b else 0} -> {a['n'] if a else 0}"
+            )
+            continue
+        for key, limit in tol.items():
+            if key not in b or key not in a:
+                continue
+            delta = float(a[key]) - float(b[key])
+            flag = ""
+            if delta > float(limit) + 1e-9:
+                flag = "  REGRESSION"
+                regressions.append(f"{scope} {key} {b[key]} -> {a[key]} (tol +{limit})")
+            elif abs(delta) > 1e-9:
+                flag = "  improved" if delta < 0 else "  within tol"
+            print(f"{scope:<18}{key:<16}{b[key]!s:>10}{a[key]!s:>10}{limit!s:>7}{flag}")
+    if drift:
+        print("\ncorpus differs from the baseline (re-baseline, do not compare):")
+        for line in drift:
+            print(f"    {line}")
+    if regressions:
+        print("\nREGRESSION beyond tolerance:")
+        for line in regressions:
+            print(f"    {line}")
+        return 1
+    if drift:
+        return 2
+    print("\nend gates within the baseline's tolerance")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--json", help="write per-cycle rows here for --compare")
@@ -781,12 +950,40 @@ def main() -> int:
         "--device-types", default="",
         help="comma-separated device types to replay (default: all)",
     )
+    ap.add_argument(
+        "--write-baseline", metavar="FILE",
+        help="write the per-device-type summary, flags and tree state here (TESTING-09)",
+    )
+    ap.add_argument(
+        "--check", metavar="BASELINE",
+        help="replay with BASELINE's flags and exit 1 on a regression beyond its "
+        "tolerance, 2 when the corpus differs",
+    )
+    ap.add_argument(
+        "--rows", metavar="FILE",
+        help="with --check: summarise these --json rows instead of replaying",
+    )
     args = ap.parse_args()
-    device_types = tuple(t.strip() for t in args.device_types.split(",") if t.strip())
 
     if args.compare:
         _compare(*args.compare)
         return 0
+
+    baseline: dict[str, Any] | None = None
+    if args.check:
+        baseline = json.loads(Path(args.check).read_text(encoding="utf-8"))
+        if args.rows:
+            return _check_baseline(baseline, json.loads(Path(args.rows).read_text()))
+        # Replay exactly what the baseline measured, whatever else was passed.
+        for key, value in (baseline.get("flags") or {}).items():
+            if key in BASELINE_FLAGS:
+                setattr(args, key, ",".join(value) if key == "device_types" else value)
+    elif args.rows:
+        ap.error("--rows needs --check")
+    _integration()
+    device_types = tuple(t.strip() for t in args.device_types.split(",") if t.strip())
+    # Taken before the replay: other work may change the tree while it runs.
+    tree = _tree_state() if args.write_baseline else {}
 
     if args.no_shortening:
         # Patch `const`, not `cycle_detector`. Since register item 355 the gate
@@ -825,6 +1022,13 @@ def main() -> int:
     if args.json:
         Path(args.json).write_text(json.dumps(rows, indent=1))
         print(f"\nwrote {len(rows)} rows to {args.json}")
+    if args.write_baseline:
+        flags = {key: getattr(args, key) for key in BASELINE_FLAGS}
+        flags["device_types"] = list(device_types)
+        _write_baseline(args.write_baseline, rows, flags, tree)
+    if baseline is not None:
+        print()
+        return _check_baseline(baseline, rows)
     return 0
 
 

@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Povezava ni uspela",
-      "invalid_auth": "Neveljavna avtentikacija",
       "unknown": "Nepričakovana napaka",
       "invalid_power": "Prag moči mora biti večji od 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Prag zaupanja",
-          "description": "Najmanjše zaupanje ujemanja (0,50–0,95) za uporabo oznak."
+          "description": "Najmanjše zaupanje ujemanja (0,50–0,95) za uporabo oznak. Pustite prazno, da se uporabi nastavitev naprave „Zaupanje samodejnega označevanja“."
         }
       }
     },

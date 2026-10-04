@@ -247,7 +247,8 @@
     "confirm_appliance": "Vahvista tämä laite",
     "confirmed": "Vahvistettu",
     "create_profile_from_gap": "Luo profiili",
-    "undo_import": "Kumoa viimeisin tuonti"
+    "undo_import": "Kumoa viimeisin tuonti",
+    "pg_rerun": "Päivitä simulaatio"
   },
   "note": {
     "off_delay": {
@@ -664,7 +665,12 @@
     "automation_off": "(pois)",
     "ref_cycle_none": "Ei mitään",
     "share_name": "Näytä nimeni jakamassani sisällössä",
-    "cat_backfill_cycles": "Tuodusta tehohistoriasta löydetyt jaksot"
+    "cat_backfill_cycles": "Tuodusta tehohistoriasta löydetyt jaksot",
+    "pg_compare_profile": "Vertaa profiiliin",
+    "pg_obj_early": "Ennenaikaisten päättymisten osuus",
+    "pg_obj_endlag": "Päättymisviive (mediaani)",
+    "pg_obj_split": "Jakautumisten osuus",
+    "pg_sweep_cycles": "Viimeisimmät syklit"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -693,7 +699,23 @@
     },
     "metric_auc": "AUC {auc} validointidatalla",
     "metric_mae": "virhe {model} vs. perustaso {baseline}",
-    "fine_tuned_at": "hienosäädetty {when}"
+    "fine_tuned_at": "hienosäädetty {when}",
+    "last_run_not_promoted": "Viimeisin tarkistus ({when}): {reason}",
+    "never": "ei koskaan",
+    "skip_reason": {
+      "fit_failed": "Koulutus epäonnistui: {error}",
+      "holdout_too_small": "Liian vähän syklejä uuden mallin reiluun testaamiseen: testaukseen voitiin varata {held_out}, tarvitaan {min}.",
+      "not_better_than_incumbent": "Uusi malli ei ollut parempi kuin käytössä oleva (virhe {model} vs. {incumbent}), joten nykyinen säilytettiin.",
+      "not_better_than_naive": "Uusi malli ei ollut selvästi parempi kuin yksinkertainen arvio (virhe {model} vs. {naive}).",
+      "unknown": "Mitään uutta ei opittu.",
+      "insufficient_rows": "Käyttökelpoisia syklejä ei ole vielä tarpeeksi: tähän mennessä {count} merkittyä, puhdasta sykliä.",
+      "insufficient_rows_one": "Käyttökelpoisia syklejä ei ole vielä tarpeeksi: tähän mennessä {count} merkitty, puhdas sykli.",
+      "insufficient_rows_other": "Käyttökelpoisia syklejä ei ole vielä tarpeeksi: tähän mennessä {count} merkittyä, puhdasta sykliä."
+    },
+    "trained_unknown": "tuntemattomana ajankohtana",
+    "held_out_count": "mitattu {count} validointisyklillä",
+    "held_out_count_one": "mitattu {count} validointisyklillä",
+    "held_out_count_other": "mitattu {count} validointisyklillä"
   },
   "modal": {
     "auto_label": "Automaattiset etikettisyklit",
@@ -1010,7 +1032,21 @@
     "feedback_detected": "WashData tunnisti: {name}",
     "import_undo_hint": "Viimeisintä tuontia ({when}) edeltävä palautuspiste säilytetään: {profiles} profiilia ja {cycles} jaksoa.",
     "replace_undo_hint": "Ensin tallennetaan palautuspiste, joten voit kumota tämän tuonnin kohdassa Vienti / tuonti.",
-    "pg_in_sample_note": "Nämä syklit auttoivat myös rakentamaan profiilit, joihin niitä täsmäytetään, joten nämä tulokset ovat optimistisia: uusilla sykleillä odota hieman vähemmän oikeita täsmäytyksiä."
+    "pg_in_sample_note": "Nämä syklit auttoivat myös rakentamaan profiilit, joihin niitä täsmäytetään, joten nämä tulokset ovat optimistisia: uusilla sykleillä odota hieman vähemmän oikeita täsmäytyksiä.",
+    "hist_tail_trimmed": "Syklin päättymisen jälkeistä odotusta leikattiin pois {min} min, kuten aktiivinen integraatio sen leikkaa",
+    "hist_truncated": "pysähtyi {n} lukeman rajaan, joten loppua historiasta ei käyty läpi",
+    "hist_warn_kw": "Suurin lukema on vain {w}. Tämä anturi näyttää ilmoittavan kilowatteja; WashData lukee tehon watteina, joten sen perusteella ei voi tunnistaa syklejä.",
+    "pg_compare_profile_tip": "Valitsee vain profiilin, joka piirretään kaavion päälle. Simulaatio täsmäyttää syklin aina itse, kuten aktiivinen integraatio.",
+    "pg_outcome_stale": "Asetukset ovat muuttuneet tämän simulaation ajon jälkeen. Se näyttää yhä vanhan tuloksen.",
+    "pg_sweep_guarded": "Päättää useampia syklejä liian aikaisin, jakaa useampia tai ohittaa syklejä, jotka nykyinen asetus tunnistaa, joten sitä ei koskaan suositella.",
+    "pg_sweep_keep_current": "Säilytä nykyinen arvo ({value}, {metric}): mikään arvo ei ollut parempi vähintään yhden syklin verran.",
+    "pg_task_busy": "Tälle laitteelle on jo käynnissä historiatesti tai optimointi. Odota, että se valmistuu, tai peruuta se.",
+    "hist_warn_naive_time": "{n} aikaleimalta puuttuu aikavyöhyke, ja ne luettiin UTC-aikana. Jos tiedosto on paikallisessa ajassa, jokainen sykli siirtyy UTC-erosi verran, ja kesäajan vaihdoksen ympärillä olevat lukemat voivat mennä väärään järjestykseen tai pudota pois.",
+    "hist_warn_naive_time_one": "{n} aikaleimalta puuttuu aikavyöhyke, ja se luettiin UTC-aikana. Jos tiedosto on paikallisessa ajassa, jokainen sykli siirtyy UTC-erosi verran, ja kesäajan vaihdoksen ympärillä olevat lukemat voivat mennä väärään järjestykseen tai pudota pois.",
+    "hist_warn_naive_time_other": "{n} aikaleimalta puuttuu aikavyöhyke, ja ne luettiin UTC-aikana. Jos tiedosto on paikallisessa ajassa, jokainen sykli siirtyy UTC-erosi verran, ja kesäajan vaihdoksen ympärillä olevat lukemat voivat mennä väärään järjestykseen tai pudota pois.",
+    "pg_sweep_n_cycles": "{count} syklin perusteella",
+    "pg_sweep_n_cycles_one": "{count} syklin perusteella",
+    "pg_sweep_n_cycles_other": "{count} syklin perusteella"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
@@ -1193,7 +1229,7 @@
       "label": "Käytä älykkäitä malleja syklin aikana"
     },
     "end_energy_threshold": {
-      "doc": "Off-viivelaskennan aikana kertynyttä energiaa (wattia x aika) verrataan tähän kynnykseen. Jos se ylittyy, lähtölaskenta nollautuu – rypistymisenestorummut ja astianpesukoneen kuivauspäät pysyvät kiinni syklissä sen sijaan, että niitä leikattaisiin lyhyiksi. Nosta sitä, jos jaksot päättyvät liian aikaisin jäähdytyksen aikana; alenna sitä, jos tunnistus on hidasta.",
+      "doc": "Kun sammutusviive on kulunut, sen aikana kulutettua energiaa (wattia x aika) verrataan tähän kynnykseen. Sen yläpuolella sykli ei ole vielä päättynyt, mikä pitää ryppyjeneston rumpukierrot ja astianpesukoneen kuivausvaiheen lopun kiinni syklissä sen sijaan, että ne katkaistaisiin. Laske sitä, jos syklit päättyvät jäähdytyskierron tai kuivausvaiheen lopun aikana; nosta sitä, jos valmiit syklit jäävät odottamaan.",
       "label": "Lopetuksen energiakynnys"
     },
     "energy_price_entity": {
@@ -1896,7 +1932,13 @@
     "store_download_partial": "Ohjelmia ei voitu ladata: {n}. Yritä myöhemmin uudelleen.",
     "import_no_restore_point": "Tuotu, mutta palautuspistettä ei voitu tallentaa, joten tätä tuontia ei voi kumota",
     "import_undo_failed": "Tuontia ei voitu kumota: {error}",
-    "import_undone": "Tuonti kumottu: {profiles} profiilia ja {cycles} jaksoa palautettu"
+    "import_undone": "Tuonti kumottu: {profiles} profiilia ja {cycles} jaksoa palautettu",
+    "auto_label_cancelled": "Automaattinen merkintä peruttiin, kun {count} sykliä oli merkitty.",
+    "auto_label_cancelled_one": "Automaattinen merkintä peruttiin, kun {count} sykli oli merkitty.",
+    "auto_label_cancelled_other": "Automaattinen merkintä peruttiin, kun {count} sykliä oli merkitty.",
+    "auto_label_done": "Automaattinen merkintä valmis: {count} sykliä merkitty, {skipped} jäi merkitsemättä.",
+    "auto_label_done_one": "Automaattinen merkintä valmis: {count} sykli merkitty, {skipped} jäi merkitsemättä.",
+    "auto_label_done_other": "Automaattinen merkintä valmis: {count} sykliä merkitty, {skipped} jäi merkitsemättä."
   },
   "trend": {
     "down": "Trendikäs alaspäin",

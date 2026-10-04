@@ -212,6 +212,7 @@
     "unlabel_selected_tip": "Verwijdert het profiellabel van de geselecteerde cycli. Ze blijven in je geschiedenis staan en kunnen later opnieuw worden gelabeld - ze beïnvloeden dit profiel alleen niet meer.",
     "use": "Gebruik",
     "wipe_all": "Wis alle gegevens",
+    "pg_rerun": "Simulatie bijwerken",
     "delete_selected": "Selectie verwijderen ({n})",
     "pg_apply_best": "Beste toepassen",
     "pg_apply_to_settings_tip": "De hier bewerkte waarden kopiëren naar de actieve instellingen van dit apparaat",
@@ -664,6 +665,11 @@
     "automation_off": "(uit)",
     "ref_cycle_none": "Geen",
     "share_name": "Mijn naam tonen bij wat ik deel",
+    "pg_compare_profile": "Vergelijk met profiel",
+    "pg_obj_endlag": "Eindvertraging (mediaan)",
+    "pg_obj_early": "Vroeg-einde-percentage",
+    "pg_obj_split": "Splitspercentage",
+    "pg_sweep_cycles": "Recente cycli",
     "cat_backfill_cycles": "Cycli gevonden in geïmporteerde vermogensgeschiedenis"
   },
   "log": {
@@ -693,7 +699,23 @@
     },
     "metric_auc": "AUC {auc} op validatiegegevens",
     "metric_mae": "fout {model} vs. referentie {baseline}",
-    "fine_tuned_at": "verfijnd: {when}"
+    "fine_tuned_at": "verfijnd: {when}",
+    "never": "nooit",
+    "trained_unknown": "op een onbekend tijdstip",
+    "held_out_count": "gemeten op {count} achtergehouden validatiecycli",
+    "held_out_count_one": "gemeten op {count} achtergehouden validatiecyclus",
+    "held_out_count_other": "gemeten op {count} achtergehouden validatiecycli",
+    "last_run_not_promoted": "Laatste controle ({when}): {reason}",
+    "skip_reason": {
+      "insufficient_rows": "Nog niet genoeg bruikbare cycli: tot nu toe {count} gelabelde, schone cycli.",
+      "insufficient_rows_one": "Nog niet genoeg bruikbare cycli: tot nu toe {count} gelabelde, schone cyclus.",
+      "insufficient_rows_other": "Nog niet genoeg bruikbare cycli: tot nu toe {count} gelabelde, schone cycli.",
+      "fit_failed": "Training mislukt: {error}",
+      "unknown": "Er is niets nieuws geleerd.",
+      "holdout_too_small": "Te weinig cycli om een nieuw model eerlijk te testen: {held_out} konden apart worden gehouden om te testen, {min} zijn nodig.",
+      "not_better_than_naive": "Het nieuwe model was niet duidelijk beter dan de eenvoudige schatting (fout {model} vs. {naive}).",
+      "not_better_than_incumbent": "Het nieuwe model was niet beter dan het model dat in gebruik is (fout {model} vs. {incumbent}), dus het huidige is behouden."
+    }
   },
   "modal": {
     "auto_label": "Automatische labelcycli",
@@ -1008,6 +1030,20 @@
     "automation_desc_started": "Wordt uitgevoerd wanneer een {device}-cyclus start. Voeg uw acties toe (melding, lampen, ...).",
     "automation_desc_finished": "Wordt uitgevoerd wanneer een {device}-cyclus klaar is. Voeg uw acties toe (melding, lampen, ...).",
     "feedback_detected": "Gedetecteerd door WashData: {name}",
+    "pg_outcome_stale": "De instellingen zijn gewijzigd sinds deze simulatie is uitgevoerd. Ze toont nog het oude resultaat.",
+    "pg_compare_profile_tip": "Kiest alleen het profiel dat over de grafiek wordt getekend. De simulatie herkent de cyclus altijd zelf, net als de integratie tijdens gebruik.",
+    "pg_task_busy": "Voor dit apparaat loopt al een test op geschiedenis of een optimalisatie. Wacht tot die klaar is of annuleer hem.",
+    "pg_sweep_guarded": "Beëindigt meer cycli te vroeg, splitst er meer of mist cycli die de huidige instelling wel vangt, en wordt daarom nooit aanbevolen.",
+    "pg_sweep_n_cycles": "over {count} cycli",
+    "pg_sweep_n_cycles_one": "over {count} cyclus",
+    "pg_sweep_n_cycles_other": "over {count} cycli",
+    "pg_sweep_keep_current": "Behoud de huidige waarde ({value}, {metric}): geen enkele waarde deed het minstens één cyclus beter.",
+    "hist_truncated": "gestopt bij de limiet van {n} metingen, dus de rest van de geschiedenis is niet doorzocht",
+    "hist_warn_kw": "De hoogste meting is slechts {w}. Deze sensor lijkt kilowatt te rapporteren; WashData leest vermogen in watt, dus er kunnen geen cycli mee worden gedetecteerd.",
+    "hist_warn_naive_time": "{n} tijdstempels hebben geen tijdzone en zijn als UTC gelezen. Als het bestand in lokale tijd is, is elke cyclus verschoven met je UTC-verschil, en metingen rond een overgang naar of van zomertijd kunnen in de verkeerde volgorde komen of wegvallen.",
+    "hist_warn_naive_time_one": "{n} tijdstempel heeft geen tijdzone en is als UTC gelezen. Als het bestand in lokale tijd is, is elke cyclus verschoven met je UTC-verschil, en metingen rond een overgang naar of van zomertijd kunnen in de verkeerde volgorde komen of wegvallen.",
+    "hist_warn_naive_time_other": "{n} tijdstempels hebben geen tijdzone en zijn als UTC gelezen. Als het bestand in lokale tijd is, is elke cyclus verschoven met je UTC-verschil, en metingen rond een overgang naar of van zomertijd kunnen in de verkeerde volgorde komen of wegvallen.",
+    "hist_tail_trimmed": "{min} min wachten na het einde van de cyclus is weggeknipt, zoals de integratie dat tijdens gebruik ook doet",
     "import_undo_hint": "Er wordt een herstelpunt van vóór de laatste import ({when}) bewaard: {profiles} profiel(en) en {cycles} cyclus(sen).",
     "replace_undo_hint": "Eerst wordt een herstelpunt opgeslagen, zodat deze import via Exporteren / importeren ongedaan kan worden gemaakt.",
     "pg_in_sample_note": "Deze cycli hebben ook meegeholpen de profielen op te bouwen waarmee ze worden vergeleken, dus deze resultaten zijn optimistisch: verwacht bij nieuwe cycli iets minder juiste matches."
@@ -1193,7 +1229,7 @@
       "label": "Slimme modellen gebruiken tijdens een cyclus"
     },
     "end_energy_threshold": {
-      "doc": "Tijdens het aftellen van de uitschakelvertraging wordt de verzamelde energie (watt x tijd) vergeleken met deze drempel. Bij overschrijding wordt het aftellen gereset, waardoor anti-kreukdroogtrommels en vaatwasserdroogstukken aan het programma blijven gekoppeld in plaats van ze kort te knippen. Verhoog deze als de cycli tijdens het afkoelen te vroeg eindigen; verlaag deze als de detectie traag is.",
+      "doc": "Wanneer de uitschakelvertraging is verstreken, wordt de energie die in die tijd is verbruikt (watt x tijd) vergeleken met deze drempel. Ligt die erboven, dan is de cyclus nog niet klaar, zodat anti-kreuktrommelbewegingen en de nadroogfase van een vaatwasser bij de cyclus blijven horen in plaats van te worden afgekapt. Verlaag deze als cycli eindigen tijdens een afkoeltrommeling of nadroogfase; verhoog deze als voltooide cycli blijven wachten.",
       "label": "Eindenergie"
     },
     "energy_price_entity": {
@@ -1866,6 +1902,12 @@
     "analysis_failed": "Analyse mislukt: {error}",
     "auto_detect_failed": "Automatische detectie mislukt: {error}",
     "auto_label_failed": "Automatisch labelen mislukt: {error}",
+    "auto_label_done": "Automatisch labelen voltooid: {count} cycli gelabeld, {skipped} ongelabeld gelaten.",
+    "auto_label_done_one": "Automatisch labelen voltooid: {count} cyclus gelabeld, {skipped} ongelabeld gelaten.",
+    "auto_label_done_other": "Automatisch labelen voltooid: {count} cycli gelabeld, {skipped} ongelabeld gelaten.",
+    "auto_label_cancelled": "Automatisch labelen geannuleerd nadat {count} cycli zijn gelabeld.",
+    "auto_label_cancelled_one": "Automatisch labelen geannuleerd nadat {count} cyclus is gelabeld.",
+    "auto_label_cancelled_other": "Automatisch labelen geannuleerd nadat {count} cycli zijn gelabeld.",
     "could_not_load_cycle": "Kan cyclus niet laden: {error}",
     "create_failed": "Aanmaken mislukt: {error}",
     "cycles_deleted": "Verwijderde cycli: {count}",

@@ -357,11 +357,12 @@ def test_a_decisive_margin_bypasses_persistence():
 def test_a_sole_surviving_candidate_still_bypasses_persistence():
     """Requiring a real runner-up was measured worse than the sentinel.
 
-    ``devtools/decisive_margin_eval.py`` over 1977 mid-cycle checkpoints: a
-    single surviving candidate occurs at 2.58% of them and is the correct
-    programme 94.0% (47/50) of the time, against 77.8% (669/860) for the
-    real-margin bypass it would have been held to. Stage 1/2 rejecting every
-    other profile is evidence, not the absence of it.
+    ``devtools/decisive_margin_eval.py --loo`` over 2636 leave-one-out
+    checkpoints on the shipped matcher: a single surviving candidate is the
+    correct programme 96.3% (361/375) of the time, against 87.8% (1028/1171)
+    for the real-margin bypass it would have been held to (PR #448 round 6 had
+    94.0% / 77.8% on an older harness). Stage 1/2 rejecting every other profile
+    is evidence, not the absence of it.
     """
     assert _switch_from_a_to([("B", 0.55)]) == "B"
 

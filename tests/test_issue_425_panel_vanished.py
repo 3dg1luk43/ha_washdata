@@ -57,8 +57,8 @@ import custom_components.ha_washdata as washdata
 from custom_components.ha_washdata.const import DOMAIN
 from custom_components.ha_washdata.frontend import PANEL_REGISTERED_KEY
 
-# Boots a real manager (profile store, detector, entity platforms).
-pytestmark = pytest.mark.slow
+# Boots a real manager (profile store, detector, entity platforms) in well under a
+# second per test, so it runs in the fast tier (audit TESTING-15).
 
 POWER_SENSOR = "sensor.plug_power"
 
@@ -91,9 +91,10 @@ def _make_entry(hass, title="Waschmaschine"):
     )
     entry.add_to_hass(hass)
     # async_forward_entry_setups() refuses to run unless the entry is LOADED or the
-    # setup lock is held; HA holds both for us in production, and calling
-    # async_setup_entry() directly is the only way to boot the integration here
-    # (the dev env cannot satisfy the `conversation` dependency).
+    # setup lock is held; HA holds both for us in production. These tests call
+    # async_setup_entry() directly so they can watch it raise part-way, which HA's
+    # own setup would catch and log. The real boot path, through
+    # hass.config_entries.async_setup(), is tests/test_audit_testing_03_real_setup.py.
     entry.mock_state(hass, ConfigEntryState.LOADED)
     return entry
 

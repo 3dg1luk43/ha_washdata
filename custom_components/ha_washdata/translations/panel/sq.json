@@ -247,7 +247,8 @@
         "confirm_appliance": "Konfirmo këtë pajisje",
         "confirmed": "Konfirmuar",
         "create_profile_from_gap": "Krijo profilin",
-        "undo_import": "Zhbëj importimin e fundit"
+        "undo_import": "Zhbëj importimin e fundit",
+        "pg_rerun": "Përditëso simulimin"
     },
     "conflict": {
         "anti_wrinkle_exit": {
@@ -659,7 +660,12 @@
         "automation_off": "(joaktiv)",
         "ref_cycle_none": "Asnjë",
         "share_name": "Shfaq emrin tim në atë që ndaj",
-        "cat_backfill_cycles": "Cikle të gjetura në historikun e importuar të fuqisë"
+        "cat_backfill_cycles": "Cikle të gjetura në historikun e importuar të fuqisë",
+        "pg_compare_profile": "Krahaso me profilin",
+        "pg_obj_early": "Shkalla e përfundimeve të hershme",
+        "pg_obj_endlag": "Vonesa e përfundimit (mediana)",
+        "pg_obj_split": "Shkalla e ndarjeve",
+        "pg_sweep_cycles": "Ciklet e fundit"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -688,7 +694,23 @@
         },
         "metric_auc": "AUC {auc} në të dhënat e vlerësimit",
         "metric_mae": "gabimi: {model} kundrejt bazës {baseline}",
-        "fine_tuned_at": "rregulluar mirë më {when}"
+        "fine_tuned_at": "rregulluar mirë më {when}",
+        "last_run_not_promoted": "Kontrolli i fundit ({when}): {reason}",
+        "never": "asnjëherë",
+        "skip_reason": {
+            "fit_failed": "Trajnimi dështoi: {error}",
+            "holdout_too_small": "Shumë pak cikle për të testuar drejt një model të ri: për testim mund të ndaheshin {held_out}, nevojiten {min}.",
+            "not_better_than_incumbent": "Modeli i ri nuk ishte më i mirë se ai në përdorim (gabimi {model} kundrejt {incumbent}), prandaj u mbajt modeli aktual.",
+            "not_better_than_naive": "Modeli i ri nuk ishte qartazi më i mirë se vlerësimi i thjeshtë (gabimi {model} kundrejt {naive}).",
+            "unknown": "Nuk u mësua asgjë e re.",
+            "insufficient_rows": "Ende nuk ka mjaft cikle të përdorshme: deri tani {count} cikle të etiketuara dhe të pastra.",
+            "insufficient_rows_one": "Ende nuk ka mjaft cikle të përdorshme: deri tani {count} cikël i etiketuar dhe i pastër.",
+            "insufficient_rows_other": "Ende nuk ka mjaft cikle të përdorshme: deri tani {count} cikle të etiketuara dhe të pastra."
+        },
+        "trained_unknown": "datë të panjohur",
+        "held_out_count": "matur në {count} cikle vlerësimi",
+        "held_out_count_one": "matur në {count} cikël vlerësimi",
+        "held_out_count_other": "matur në {count} cikle vlerësimi"
     },
     "modal": {
         "auto_label": "Etiketim automatik i cikleve",
@@ -1005,7 +1027,21 @@
         "feedback_detected": "WashData zbuloi: {name}",
         "import_undo_hint": "Ruhet një pikë rikthimi nga para importimit të fundit ({when}): {profiles} profil(e) dhe {cycles} cikël(cikle).",
         "replace_undo_hint": "Fillimisht ruhet një pikë rikthimi, kështu që mund ta zhbëni këtë importim nga Eksporto / Importo.",
-        "pg_in_sample_note": "Këto cikle ndihmuan gjithashtu në ndërtimin e profileve me të cilat përputhen, prandaj këto rezultate janë optimiste: në cikle të reja, prisni pak më pak përputhje të sakta."
+        "pg_in_sample_note": "Këto cikle ndihmuan gjithashtu në ndërtimin e profileve me të cilat përputhen, prandaj këto rezultate janë optimiste: në cikle të reja, prisni pak më pak përputhje të sakta.",
+        "hist_tail_trimmed": "U shkurtuan {min} min pritjeje pas përfundimit të ciklit, ashtu siç i shkurton integrimi aktiv",
+        "hist_truncated": "u ndal te kufiri prej {n} leximesh, prandaj pjesa tjetër e historisë nuk u skanua",
+        "hist_warn_kw": "Leximi më i lartë është vetëm {w}. Ky sensor duket se raporton në kilovat; WashData e lexon fuqinë në vat, prandaj ciklet nuk mund të zbulohen prej tij.",
+        "pg_compare_profile_tip": "Zgjedh vetëm profilin që vizatohet mbi grafik. Simulimi gjithmonë e përputh ciklin vetë, ashtu si integrimi aktiv.",
+        "pg_outcome_stale": "Cilësimet kanë ndryshuar që kur u ekzekutua ky simulim. Ai ende tregon rezultatin e vjetër.",
+        "pg_sweep_guarded": "Përfundon më shumë cikle herët, ndan më shumë prej tyre ose humbet cikle që cilësimi aktual i kap, prandaj nuk rekomandohet kurrë.",
+        "pg_sweep_keep_current": "Mbani vlerën aktuale ({value}, {metric}): asnjë vlerë nuk doli më mirë me të paktën një cikël.",
+        "pg_task_busy": "Për këtë pajisje është tashmë në zhvillim një testim në histori ose një optimizim. Prisni që të përfundojë ose anulojeni.",
+        "hist_warn_naive_time": "{n} vula kohore nuk kanë zonë kohore dhe u lexuan si UTC. Nëse skedari është në orën lokale, çdo cikël zhvendoset me diferencën tuaj nga UTC, dhe leximet rreth ndryshimit të orës verore mund të renditen gabim ose të hidhen poshtë.",
+        "hist_warn_naive_time_one": "{n} vulë kohore nuk ka zonë kohore dhe u lexua si UTC. Nëse skedari është në orën lokale, çdo cikël zhvendoset me diferencën tuaj nga UTC, dhe leximet rreth ndryshimit të orës verore mund të renditen gabim ose të hidhen poshtë.",
+        "hist_warn_naive_time_other": "{n} vula kohore nuk kanë zonë kohore dhe u lexuan si UTC. Nëse skedari është në orën lokale, çdo cikël zhvendoset me diferencën tuaj nga UTC, dhe leximet rreth ndryshimit të orës verore mund të renditen gabim ose të hidhen poshtë.",
+        "pg_sweep_n_cycles": "në {count} cikle",
+        "pg_sweep_n_cycles_one": "në {count} cikël",
+        "pg_sweep_n_cycles_other": "në {count} cikle"
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1164,7 +1200,7 @@
             "label": "Apliko modele inteligjente gjatë ciklit"
         },
         "end_energy_threshold": {
-            "doc": "Gjatë numërimit jashtë vonesës, energjia e akumuluar (vat x kohë) krahasohet me këtë prag. Nëse tejkalohet, numërimi mbrapsht rivendoset - duke i mbajtur bishtat kundër rrudhave dhe tharjen e lavastoviljes të lidhura me ciklin në vend që t'i shkurtoni ato. Rriteni nëse ciklet përfundojnë shumë herët gjatë ftohjes; uleni nëse zbulimi është i ngadaltë.",
+            "doc": "Kur vonesa e fikjes ka mbaruar, energjia e përdorur gjatë saj (vat x kohë) krahasohet me këtë prag. Mbi të, cikli nuk ka përfunduar ende, gjë që i mban rrotullimet kundër rrudhave dhe fundin e tharjes së lavastoviljes të lidhura me ciklin, në vend që t'i ndërpresë para kohe. Uleni nëse ciklet përfundojnë gjatë një rrotullimi ftohjeje ose gjatë fundit të tharjes; rriteni nëse ciklet e përfunduara vazhdojnë të presin.",
             "label": "Energjia e fundit"
         },
         "energy_price_entity": {
@@ -1779,7 +1815,13 @@
         "store_download_partial": "{n} program(e) nuk mund të shkarkoheshin; provoni përsëri më vonë.",
         "import_no_restore_point": "U importua, por pika e rikthimit nuk mund të ruhej, prandaj ky importim nuk mund të zhbëhet",
         "import_undo_failed": "Importimi nuk mund të zhbëhej: {error}",
-        "import_undone": "Importimi u zhbë: u rikthyen {profiles} profil(e) dhe {cycles} cikël(cikle)"
+        "import_undone": "Importimi u zhbë: u rikthyen {profiles} profil(e) dhe {cycles} cikël(cikle)",
+        "auto_label_cancelled": "Etiketimi automatik u anulua pasi u etiketuan {count} cikle.",
+        "auto_label_cancelled_one": "Etiketimi automatik u anulua pasi u etiketua {count} cikël.",
+        "auto_label_cancelled_other": "Etiketimi automatik u anulua pasi u etiketuan {count} cikle.",
+        "auto_label_done": "Etiketimi automatik përfundoi: u etiketuan {count} cikle, pa etiketë: {skipped}.",
+        "auto_label_done_one": "Etiketimi automatik përfundoi: u etiketua {count} cikël, pa etiketë: {skipped}.",
+        "auto_label_done_other": "Etiketimi automatik përfundoi: u etiketuan {count} cikle, pa etiketë: {skipped}."
     },
     "suggestion": {
         "observed_label": "I vëzhguar",

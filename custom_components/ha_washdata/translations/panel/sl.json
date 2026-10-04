@@ -253,7 +253,8 @@
     "confirm_appliance": "Potrdi to napravo",
     "confirmed": "Potrjeno",
     "create_profile_from_gap": "Ustvari profil",
-    "undo_import": "Razveljavi zadnji uvoz"
+    "undo_import": "Razveljavi zadnji uvoz",
+    "pg_rerun": "Posodobi simulacijo"
   },
   "note": {
     "off_delay": {
@@ -676,7 +677,12 @@
     "automation_off": "(izklopljeno)",
     "ref_cycle_none": "Brez",
     "share_name": "Prikaži moje ime pri vsebini, ki jo delim",
-    "cat_backfill_cycles": "Cikli, najdeni v uvoženi zgodovini moči"
+    "cat_backfill_cycles": "Cikli, najdeni v uvoženi zgodovini moči",
+    "pg_compare_profile": "Primerjaj s profilom",
+    "pg_obj_early": "Stopnja zgodnjih koncev",
+    "pg_obj_endlag": "Zamuda konca (mediana)",
+    "pg_obj_split": "Stopnja razdeljenih ciklov",
+    "pg_sweep_cycles": "Nedavni cikli"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -705,7 +711,27 @@
     },
     "metric_auc": "AUC {auc} na ločenih podatkih",
     "metric_mae": "napaka {model} v primerjavi z izhodiščem {baseline}",
-    "fine_tuned_at": "natančno prilagojeno {when}"
+    "fine_tuned_at": "natančno prilagojeno {when}",
+    "held_out_count": "izmerjeno na {count} ločenih ciklih",
+    "held_out_count_one": "izmerjeno na {count} ločenem ciklu",
+    "held_out_count_two": "izmerjeno na {count} ločenih ciklih",
+    "held_out_count_few": "izmerjeno na {count} ločenih ciklih",
+    "held_out_count_other": "izmerjeno na {count} ločenih ciklih",
+    "last_run_not_promoted": "Zadnja preveritev ({when}): {reason}",
+    "never": "nikoli",
+    "skip_reason": {
+      "fit_failed": "Učenje ni uspelo: {error}",
+      "holdout_too_small": "Premalo ciklov za pošten preizkus novega modela: za preizkus je bilo mogoče ločiti {held_out}, potrebnih je {min}.",
+      "insufficient_rows": "Še ni dovolj uporabnih ciklov: doslej {count} označenih, čistih ciklov.",
+      "insufficient_rows_one": "Še ni dovolj uporabnih ciklov: doslej {count} označen, čist cikel.",
+      "insufficient_rows_two": "Še ni dovolj uporabnih ciklov: doslej {count} označena, čista cikla.",
+      "insufficient_rows_few": "Še ni dovolj uporabnih ciklov: doslej {count} označeni, čisti cikli.",
+      "insufficient_rows_other": "Še ni dovolj uporabnih ciklov: doslej {count} označenih, čistih ciklov.",
+      "not_better_than_incumbent": "Novi model ni bil boljši od trenutno uporabljenega (napaka {model} v primerjavi z {incumbent}), zato je ostal trenutni.",
+      "not_better_than_naive": "Novi model ni bil izrazito boljši od preproste ocene (napaka {model} v primerjavi z {naive}).",
+      "unknown": "Naučeno ni bilo nič novega."
+    },
+    "trained_unknown": "ob neznanem času"
   },
   "modal": {
     "auto_label": "Samodejno označevanje ciklov",
@@ -1034,7 +1060,25 @@
     "feedback_detected": "WashData je zaznal: {name}",
     "import_undo_hint": "Shranjena je obnovitvena točka izpred zadnjega uvoza ({when}): {profiles} profilov in {cycles} ciklov.",
     "replace_undo_hint": "Najprej se shrani obnovitvena točka, zato lahko ta uvoz razveljavite v razdelku Izvoz / Uvoz.",
-    "pg_in_sample_note": "Ti cikli so pomagali zgraditi tudi profile, s katerimi se primerjajo, zato so rezultati optimistični: pri novih ciklih pričakujte nekoliko manj pravilnih ujemanj."
+    "pg_in_sample_note": "Ti cikli so pomagali zgraditi tudi profile, s katerimi se primerjajo, zato so rezultati optimistični: pri novih ciklih pričakujte nekoliko manj pravilnih ujemanj.",
+    "hist_tail_trimmed": "Čakanje po koncu cikla ({min} min) je bilo odrezano, tako kot to stori integracija med delovanjem",
+    "hist_truncated": "ustavljeno pri omejitvi odčitkov ({n}), zato preostanek zgodovine ni bil pregledan",
+    "hist_warn_kw": "Najvišji odčitek je le {w}. Ta senzor očitno poroča v kilovatih; WashData bere moč v vatih, zato iz njega ni mogoče zaznati ciklov.",
+    "hist_warn_naive_time": "{n} časovnih žigov nima časovnega pasu in je bilo prebranih kot UTC. Če je datoteka v lokalnem času, je vsak cikel zamaknjen za vaš zamik od UTC, odčitki okoli prehoda na poletni ali zimski čas pa se lahko premešajo ali izgubijo.",
+    "hist_warn_naive_time_one": "{n} časovni žig nima časovnega pasu in je bil prebran kot UTC. Če je datoteka v lokalnem času, je vsak cikel zamaknjen za vaš zamik od UTC, odčitki okoli prehoda na poletni ali zimski čas pa se lahko premešajo ali izgubijo.",
+    "hist_warn_naive_time_two": "{n} časovna žiga nimata časovnega pasu in sta bila prebrana kot UTC. Če je datoteka v lokalnem času, je vsak cikel zamaknjen za vaš zamik od UTC, odčitki okoli prehoda na poletni ali zimski čas pa se lahko premešajo ali izgubijo.",
+    "hist_warn_naive_time_few": "{n} časovni žigi nimajo časovnega pasu in so bili prebrani kot UTC. Če je datoteka v lokalnem času, je vsak cikel zamaknjen za vaš zamik od UTC, odčitki okoli prehoda na poletni ali zimski čas pa se lahko premešajo ali izgubijo.",
+    "hist_warn_naive_time_other": "{n} časovnih žigov nima časovnega pasu in je bilo prebranih kot UTC. Če je datoteka v lokalnem času, je vsak cikel zamaknjen za vaš zamik od UTC, odčitki okoli prehoda na poletni ali zimski čas pa se lahko premešajo ali izgubijo.",
+    "pg_compare_profile_tip": "Izbere le profil, narisan čez graf. Simulacija vedno sama poišče ujemajoči se program za cikel, tako kot integracija med delovanjem.",
+    "pg_outcome_stale": "Nastavitve so se spremenile, odkar je bila ta simulacija zagnana. Še vedno prikazuje star rezultat.",
+    "pg_sweep_guarded": "Prezgodaj konča več ciklov, jih več razdeli ali zgreši cikle, ki jih trenutna nastavitev zazna, zato ni nikoli priporočena.",
+    "pg_sweep_keep_current": "Ohrani trenutno vrednost ({value}, {metric}): nobena vrednost ni bila boljša vsaj za en cikel.",
+    "pg_sweep_n_cycles": "na {count} ciklih",
+    "pg_sweep_n_cycles_one": "na {count} ciklu",
+    "pg_sweep_n_cycles_two": "na {count} ciklih",
+    "pg_sweep_n_cycles_few": "na {count} ciklih",
+    "pg_sweep_n_cycles_other": "na {count} ciklih",
+    "pg_task_busy": "Za to napravo že poteka „Preizkusi na zgodovini“ ali „Optimiziraj“. Počakajte, da se konča, ali ga prekličite."
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1197,7 +1241,7 @@
       "label": "Uporabi pametne modele med ciklom"
     },
     "end_energy_threshold": {
-      "doc": "Med odštevanjem zakasnitve izklopa se akumulirana energija (vati x čas) primerja s tem pragom. Če je preseženo, se odštevanje ponastavi – sušilni stroji proti mečkanju in konci sušenja v pomivalnem stroju ostanejo pritrjeni na cikel, namesto da bi jih skrajšali. Zvišajte ga, če se cikli končajo prezgodaj med ohlajanjem; znižajte, če je zaznavanje počasno.",
+      "doc": "Ko se zamuda izklopa izteče, se energija, porabljena med njo (vati x čas), primerja s tem pragom. Nad njim cikel še ni končan, zato obračanje proti mečkanju in končno sušenje pomivalnega stroja ostaneta del cikla, namesto da bi ju prezgodaj odrezali. Znižajte ga, če se cikli končajo med ohlajevalnim obračanjem ali končnim sušenjem; zvišajte ga, če končani cikli še naprej čakajo.",
       "label": "Energija konca"
     },
     "energy_price_entity": {
@@ -1900,7 +1944,17 @@
     "store_download_partial": "Programov ni bilo mogoče prenesti: {n}; poskusite znova pozneje.",
     "import_no_restore_point": "Uvoženo, vendar obnovitvene točke ni bilo mogoče shraniti, zato tega uvoza ni mogoče razveljaviti",
     "import_undo_failed": "Uvoza ni bilo mogoče razveljaviti: {error}",
-    "import_undone": "Uvoz razveljavljen: obnovljenih {profiles} profilov in {cycles} ciklov"
+    "import_undone": "Uvoz razveljavljen: obnovljenih {profiles} profilov in {cycles} ciklov",
+    "auto_label_cancelled": "Samodejno označevanje preklicano po označitvi {count} ciklov.",
+    "auto_label_cancelled_one": "Samodejno označevanje preklicano po označitvi {count} cikla.",
+    "auto_label_cancelled_two": "Samodejno označevanje preklicano po označitvi {count} ciklov.",
+    "auto_label_cancelled_few": "Samodejno označevanje preklicano po označitvi {count} ciklov.",
+    "auto_label_cancelled_other": "Samodejno označevanje preklicano po označitvi {count} ciklov.",
+    "auto_label_done": "Samodejno označevanje dokončano: označenih je {count} ciklov, brez oznake: {skipped}.",
+    "auto_label_done_one": "Samodejno označevanje dokončano: označen je {count} cikel, brez oznake: {skipped}.",
+    "auto_label_done_two": "Samodejno označevanje dokončano: označena sta {count} cikla, brez oznake: {skipped}.",
+    "auto_label_done_few": "Samodejno označevanje dokončano: označeni so {count} cikli, brez oznake: {skipped}.",
+    "auto_label_done_other": "Samodejno označevanje dokončano: označenih je {count} ciklov, brez oznake: {skipped}."
   },
   "trend": {
     "down": "Padajoči trend",

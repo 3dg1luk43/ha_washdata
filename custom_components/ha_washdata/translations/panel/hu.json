@@ -247,7 +247,8 @@
         "confirm_appliance": "Készülék megerősítése",
         "confirmed": "Megerősítve",
         "create_profile_from_gap": "Profil létrehozása",
-        "undo_import": "Utolsó importálás visszavonása"
+        "undo_import": "Utolsó importálás visszavonása",
+        "pg_rerun": "Szimuláció frissítése"
     },
     "note": {
         "off_delay": {
@@ -664,7 +665,12 @@
         "automation_off": "(kikapcsolva)",
         "ref_cycle_none": "Nincs",
         "share_name": "A nevem megjelenítése azon, amit megosztok",
-        "cat_backfill_cycles": "Importált teljesítményelőzményekben talált ciklusok"
+        "cat_backfill_cycles": "Importált teljesítményelőzményekben talált ciklusok",
+        "pg_compare_profile": "Összehasonlítás profillal",
+        "pg_obj_early": "Korai befejezések aránya",
+        "pg_obj_endlag": "Befejezési késés (medián)",
+        "pg_obj_split": "Szétválások aránya",
+        "pg_sweep_cycles": "Legutóbbi ciklusok"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -693,7 +699,23 @@
         },
         "metric_auc": "AUC {auc} a félretett adatokon",
         "metric_mae": "hiba: {model} a(z) {baseline} referenciához képest",
-        "fine_tuned_at": "finomhangolva: {when}"
+        "fine_tuned_at": "finomhangolva: {when}",
+        "last_run_not_promoted": "Utolsó ellenőrzés ({when}): {reason}",
+        "never": "soha",
+        "skip_reason": {
+            "fit_failed": "A tanítás sikertelen: {error}",
+            "holdout_too_small": "Túl kevés ciklus egy új modell tisztességes teszteléséhez: {held_out} tehető félre tesztelésre, {min} szükséges.",
+            "not_better_than_incumbent": "Az új modell nem volt jobb a használatban lévőnél (hiba: {model} vs. {incumbent}), ezért a jelenlegi maradt.",
+            "not_better_than_naive": "Az új modell nem volt egyértelműen jobb az egyszerű becslésnél (hiba: {model} vs. {naive}).",
+            "unknown": "Semmi újat nem tanult.",
+            "insufficient_rows": "Még nincs elég használható ciklus: eddig {count} címkézett, tiszta ciklus.",
+            "insufficient_rows_one": "Még nincs elég használható ciklus: eddig {count} címkézett, tiszta ciklus.",
+            "insufficient_rows_other": "Még nincs elég használható ciklus: eddig {count} címkézett, tiszta ciklus."
+        },
+        "trained_unknown": "ismeretlen időpontban",
+        "held_out_count": "{count} félretett cikluson mérve",
+        "held_out_count_one": "{count} félretett cikluson mérve",
+        "held_out_count_other": "{count} félretett cikluson mérve"
     },
     "modal": {
         "auto_label": "Automatikus címkézési ciklusok",
@@ -1010,7 +1032,21 @@
         "feedback_detected": "A WashData ezt észlelte: {name}",
         "import_undo_hint": "Megmarad egy visszaállítási pont a legutóbbi importálás ({when}) előttről: {profiles} profil és {cycles} ciklus.",
         "replace_undo_hint": "Először egy visszaállítási pont mentődik, így ez az importálás az Exportálás / Importálás részben visszavonható.",
-        "pg_in_sample_note": "Ezek a ciklusok azoknak a profiloknak a felépítésében is részt vettek, amelyekhez illesztik őket, ezért ezek az eredmények optimisták: új ciklusoknál valamivel kevesebb helyes illesztésre számítson."
+        "pg_in_sample_note": "Ezek a ciklusok azoknak a profiloknak a felépítésében is részt vettek, amelyekhez illesztik őket, ezért ezek az eredmények optimisták: új ciklusoknál valamivel kevesebb helyes illesztésre számítson.",
+        "hist_tail_trimmed": "A ciklus vége utáni {min} perc várakozás levágva, ahogy az élő integráció is levágja",
+        "hist_truncated": "leállt a(z) {n} mérésből álló korlátnál, így az előzmények többi része nem lett átvizsgálva",
+        "hist_warn_kw": "A legmagasabb mérés csak {w}. Úgy tűnik, ez az érzékelő kilowattban jelent; a WashData wattban olvassa a teljesítményt, így ebből nem lehet ciklusokat észlelni.",
+        "pg_compare_profile_tip": "Csak azt választja ki, melyik profil jelenjen meg a grafikonon. A szimuláció mindig önállóan illeszti a ciklust, ahogy az élő integráció is.",
+        "pg_outcome_stale": "A beállítások megváltoztak a szimuláció futtatása óta. Még a régi eredményt mutatja.",
+        "pg_sweep_guarded": "Több ciklust fejez be korán, többet bont szét, vagy kihagy olyan ciklusokat, amelyeket a jelenlegi beállítás észlel, ezért soha nem ajánlott.",
+        "pg_sweep_keep_current": "Tartsa meg a jelenlegi értéket ({value}, {metric}): egyik érték sem volt jobb legalább egy ciklussal.",
+        "pg_task_busy": "Ennél az eszköznél már fut egy előzményeken végzett teszt vagy optimalizálás. Várja meg, amíg befejeződik, vagy szakítsa meg.",
+        "hist_warn_naive_time": "{n} időbélyegnek nincs időzónája, ezért UTC-ként lett beolvasva. Ha a fájl helyi időben van, minden ciklus eltolódik az Ön UTC-eltolásával, és a nyári időszámítás váltása körüli mérések sorrendje felcserélődhet, vagy kimaradhatnak.",
+        "hist_warn_naive_time_one": "{n} időbélyegnek nincs időzónája, ezért UTC-ként lett beolvasva. Ha a fájl helyi időben van, minden ciklus eltolódik az Ön UTC-eltolásával, és a nyári időszámítás váltása körüli mérések sorrendje felcserélődhet, vagy kimaradhatnak.",
+        "hist_warn_naive_time_other": "{n} időbélyegnek nincs időzónája, ezért UTC-ként lett beolvasva. Ha a fájl helyi időben van, minden ciklus eltolódik az Ön UTC-eltolásával, és a nyári időszámítás váltása körüli mérések sorrendje felcserélődhet, vagy kimaradhatnak.",
+        "pg_sweep_n_cycles": "{count} ciklus alapján",
+        "pg_sweep_n_cycles_one": "{count} ciklus alapján",
+        "pg_sweep_n_cycles_other": "{count} ciklus alapján"
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1165,7 +1201,7 @@
             "label": "Intelligens modellek alkalmazása ciklus közben"
         },
         "end_energy_threshold": {
-            "doc": "A kikapcsolási késleltetés visszaszámlálása során a felhalmozott energia (watt x idő) ehhez a küszöbértékhez kerül összehasonlításra. Ha túllépi, a visszaszámlálás újraindul – a gyűrődésgátló szárak és a mosogatógépes szárítószárak a ciklushoz rögzítve maradnak, ahelyett, hogy rövidre vágnák őket. Emelje fel, ha a ciklusok túl korán érnek véget a lehűlés során; csökkentse, ha az észlelés lassú.",
+            "doc": "Amikor a kikapcsolási késleltetés lejárt, az alatta felhasznált energiát (watt x idő) a rendszer ehhez a küszöbhöz hasonlítja. E fölött a ciklus még nem ért véget, így a ránctalanító dobforgatások és a mosogatógép száradási szakaszának vége a ciklushoz kapcsolva marad, ahelyett hogy levágnák őket. Csökkentse, ha a ciklusok egy hűtő dobforgatás vagy a száradási szakasz vége közben érnek véget; emelje meg, ha a befejezett ciklusok tovább várakoznak.",
             "label": "Záró energia"
         },
         "energy_price_entity": {
@@ -1784,7 +1820,13 @@
         "store_download_partial": "{n} programot nem sikerült letölteni; próbálja újra később.",
         "import_no_restore_point": "Importálva, de nem sikerült visszaállítási pontot menteni, ezért ez az importálás nem vonható vissza",
         "import_undo_failed": "Az importálás visszavonása sikertelen: {error}",
-        "import_undone": "Importálás visszavonva: {profiles} profil és {cycles} ciklus visszaállítva"
+        "import_undone": "Importálás visszavonva: {profiles} profil és {cycles} ciklus visszaállítva",
+        "auto_label_cancelled": "Az automatikus címkézés megszakítva {count} ciklus címkézése után.",
+        "auto_label_cancelled_one": "Az automatikus címkézés megszakítva {count} ciklus címkézése után.",
+        "auto_label_cancelled_other": "Az automatikus címkézés megszakítva {count} ciklus címkézése után.",
+        "auto_label_done": "Az automatikus címkézés kész: {count} ciklus felcímkézve, {skipped} címkézetlen maradt.",
+        "auto_label_done_one": "Az automatikus címkézés kész: {count} ciklus felcímkézve, {skipped} címkézetlen maradt.",
+        "auto_label_done_other": "Az automatikus címkézés kész: {count} ciklus felcímkézve, {skipped} címkézetlen maradt."
     },
     "suggestion": {
         "observed_label": "Megfigyelt",

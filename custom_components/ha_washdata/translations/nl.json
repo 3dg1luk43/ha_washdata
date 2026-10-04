@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Kan geen verbinding maken",
-      "invalid_auth": "Ongeldige authenticatie",
       "unknown": "Onverwachte fout",
       "invalid_power": "Vermogensdrempel moet groter zijn dan 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Betrouwbaarheidsdrempel",
-          "description": "Minimale matchbetrouwbaarheid (0,50-0,95) om labels toe te passen."
+          "description": "Minimale matchbetrouwbaarheid (0,50-0,95) om labels toe te passen. Laat leeg om de instelling \"Auto-label betrouwbaarheid\" van het apparaat te gebruiken."
         }
       }
     },

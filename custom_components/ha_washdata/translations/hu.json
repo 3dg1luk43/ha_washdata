@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Nem sikerült csatlakozni",
-      "invalid_auth": "Érvénytelen hitelesítés",
       "unknown": "Váratlan hiba",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Magabiztossági küszöb",
-          "description": "Minimális egyezési megbízhatóság (0,50–0,95) a címkék alkalmazásához."
+          "description": "Minimális egyezési megbízhatóság (0,50-0,95) a címkék alkalmazásához. Hagyja üresen az eszköz Automatikus jelölési megbízhatóság beállításának használatához."
         }
       }
     },

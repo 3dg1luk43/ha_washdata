@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import collections
+import copy
 import functools
 import json
 import logging
@@ -1264,7 +1265,7 @@ async def ws_store_upload_device(hass, connection, msg):
     settings = None
     if msg.get("include_settings"):
         # Only the allow-listed numeric thresholds; the WS layer owns entry.options.
-        settings = sanitize_shared_settings(dict(opts), appliance)
+        settings = sanitize_shared_settings(dict(opts))
     res = await manager.store_bridge.share_device(
         brand, model, appliance, msg["items"],
         include_phases=msg.get("include_phases"), settings=settings,
@@ -1320,7 +1321,7 @@ async def _store_download_task(
                 should_cancel=lambda: task.cancel_requested,
             )
             res = {**res, "settings_applied": await _apply_store_settings(
-                hass, entry_id, res, device_type, include_settings,
+                hass, entry_id, res, include_settings,
             )}
         manager.notify_update()
         reg.finish(
@@ -1334,8 +1335,7 @@ async def _store_download_task(
 
 
 async def _apply_store_settings(
-    hass: HomeAssistant, entry_id: str, res: dict[str, Any], device_type: str,
-    include_settings: bool,
+    hass: HomeAssistant, entry_id: str, res: dict[str, Any], include_settings: bool,
 ) -> int:
     """Write a bundle's opted-in settings; returns how many were applied."""
     from .const import sanitize_shared_settings  # noqa: PLC0415
@@ -1346,7 +1346,7 @@ async def _apply_store_settings(
         # Accept only allow-listed, numeric (non-bool) values - matching what the
         # upload side ever writes - so a malformed/hostile bundle can't inject a
         # string/list/bool into this device's live options.
-        filtered = sanitize_shared_settings(bundle_settings, device_type)
+        filtered = sanitize_shared_settings(bundle_settings)
         entry = _get_entry(hass, entry_id)
         if filtered and entry is not None:
             # Same critical section as ws_set_options: the changelog snapshot and
@@ -2191,7 +2191,11 @@ async def ws_get_setup_status(
         if id(rc) in evidence and rc.get("profile_name") in known_profiles
     }
 
-    coverage_gap = await hass.async_add_executor_job(store.suggest_coverage_gaps)
+    # Read from a loop-side snapshot: the executor must not iterate live store
+    # dicts (audit PERF-10).
+    coverage_gap = await hass.async_add_executor_job(
+        _store_read_snapshot(store).suggest_coverage_gaps
+    )
     # suggestions: read from the store (cheap dict lookup; heavy computation happens
     # in the SuggestionEngine background task, not here).
     _entry = _get_entry(hass, msg["entry_id"])
@@ -2230,6 +2234,35 @@ async def ws_get_setup_status(
     })
 
 
+def _store_read_snapshot(store: Any) -> Any:
+    """A copy of ``store`` an executor job can read while the loop keeps writing.
+
+    Loop-only. Shallow-copies the store object and gives it a ``_data`` whose
+    containers are copies two levels deep: every top-level list and dict, and every
+    dict inside them (each cycle, profile, envelope). The executor can then iterate
+    what it reads while the loop appends a cycle, adds a profile or sets a key on a
+    cycle (audit PERF-10, same class as register items 82 and 264). Large values
+    (power traces, envelope arrays) are shared, not copied: the loop replaces them
+    rather than mutating them in place. Cache attributes the store's methods set on
+    ``self`` land on the copy and are dropped with it. Anything without a real
+    ``_data`` dict (a test double) is returned as is.
+    """
+    data = getattr(store, "_data", None)
+    if not isinstance(data, dict):
+        return store
+
+    def _copy(value: Any) -> Any:
+        if isinstance(value, list):
+            return [dict(v) if isinstance(v, dict) else v for v in value]
+        if isinstance(value, dict):
+            return {k: (dict(v) if isinstance(v, dict) else v) for k, v in value.items()}
+        return value
+
+    snapshot = copy.copy(store)
+    snapshot._data = {key: _copy(value) for key, value in data.items()}  # pylint: disable=protected-access
+    return snapshot
+
+
 # ─── Profiles ─────────────────────────────────────────────────────────────────
 
 @websocket_api.websocket_command(
@@ -2248,22 +2281,29 @@ async def ws_get_profiles(
         _err_not_found(connection, msg["id"], entry_id)
         return
 
-    def _compute_stats() -> dict[str, Any]:
-        profiles: list[dict[str, Any]] = []
-        try:
-            profiles = manager.profile_store.list_profiles()
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Error listing profiles for %s: %s", entry_id, exc)
+    # Everything below reads the store from an executor thread while the loop keeps
+    # appending cycles and rebuilding envelopes, and each block swallows its own
+    # error - so "dictionary changed size during iteration" used to show up as a
+    # silently empty health/trends/advisories panel (audit PERF-10). The executor
+    # reads a snapshot taken here, on the loop; list_profiles is cached and stays
+    # on the loop.
+    profiles: list[dict[str, Any]] = []
+    try:
+        profiles = manager.profile_store.list_profiles()
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Error listing profiles for %s: %s", entry_id, exc)
+    store = _store_read_snapshot(manager.profile_store)
 
+    def _compute_stats() -> dict[str, Any]:
         health: dict[str, dict] = {}
         try:
-            health = manager.profile_store.compute_profile_health()
+            health = store.compute_profile_health()
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
         trends: dict[str, dict] = {}
         try:
-            trends = manager.profile_store.compute_profile_trends()
+            trends = store.compute_profile_trends()
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
@@ -2273,14 +2313,14 @@ async def ws_get_profiles(
         # stores, so the Profiles tab shows them (audit UI-13, register item 432).
         coverage_gaps: dict[str, Any] = {}
         try:
-            coverage_gaps = manager.profile_store.suggest_coverage_gaps()
+            coverage_gaps = store.suggest_coverage_gaps()
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
         advisories: list[dict] = []
         try:
             # Reuse the health/trends computed above instead of recomputing both.
-            advisories = manager.profile_store.compute_profile_advisories(health, trends)
+            advisories = store.compute_profile_advisories(health, trends)
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
@@ -2298,7 +2338,7 @@ async def ws_get_profiles(
                 _name = _profile.get("name") if isinstance(_profile, dict) else None
                 if not _name:
                     continue
-                _sig = manager.profile_store.compute_profile_terminal_signature(_name)
+                _sig = store.compute_profile_terminal_signature(_name)
                 if _sig is not None:
                     terminal[_name] = _sig
         except Exception:  # pylint: disable=broad-exception-caught
@@ -2309,7 +2349,7 @@ async def ws_get_profiles(
         # an import that never fits can be pruned. Local only, no store writes.
         matcher_counts: dict[str, int] = {}
         try:
-            matcher_counts = manager.profile_store.matcher_label_counts()
+            matcher_counts = store.matcher_label_counts()
         except Exception:  # pylint: disable=broad-exception-caught
             matcher_counts = {}
 
@@ -2990,12 +3030,39 @@ async def ws_delete_cycle(
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
+# The panel's bulk auto-label threshold range (the modal input's min/max).
+AUTO_LABEL_MIN_THRESHOLD = 0.5
+AUTO_LABEL_MAX_THRESHOLD = 0.95
+
+
+def configured_auto_label_threshold(entry: ConfigEntry | None) -> float:
+    """The device's Auto-Label Confidence, clamped to the bulk pass's range.
+
+    The bulk pass and the cycle-end label both put a guess on a cycle with no
+    confirmation, so they share the user's one bar for that. Never raises.
+    """
+    from .const import (  # pylint: disable=import-outside-toplevel
+        CONF_AUTO_LABEL_CONFIDENCE,
+        DEFAULT_AUTO_LABEL_CONFIDENCE,
+    )
+
+    merged = {**(entry.data if entry else {}), **(entry.options if entry else {})}
+    try:
+        value = float(merged.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE))
+    except (TypeError, ValueError):
+        value = DEFAULT_AUTO_LABEL_CONFIDENCE
+    if not math.isfinite(value):
+        value = DEFAULT_AUTO_LABEL_CONFIDENCE
+    return min(max(value, AUTO_LABEL_MIN_THRESHOLD), AUTO_LABEL_MAX_THRESHOLD)
+
+
 @websocket_api.websocket_command(
     {
         vol.Required("type"): "ha_washdata/auto_label_cycles",
         vol.Required("entry_id"): str,
-        vol.Optional("confidence_threshold", default=0.75): vol.All(
-            vol.Coerce(float), vol.Range(min=0.5, max=0.95)
+        vol.Optional("confidence_threshold"): vol.All(
+            vol.Coerce(float),
+            vol.Range(min=AUTO_LABEL_MIN_THRESHOLD, max=AUTO_LABEL_MAX_THRESHOLD),
         ),
     }
 )
@@ -3005,14 +3072,20 @@ async def ws_auto_label_cycles(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Auto-label all cycles with matched profiles above the confidence threshold."""
+    """Auto-label all cycles with matched profiles above the confidence threshold.
+
+    Without a threshold the device's own Auto-Label Confidence applies (audit
+    UI-10: the panel used to send a fixed 0.75, below the 0.9 default).
+    """
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
 
-    threshold: float = msg.get("confidence_threshold", 0.75)
+    threshold = msg.get("confidence_threshold")
+    if threshold is None:
+        threshold = configured_auto_label_threshold(_get_entry(hass, entry_id))
     task, _raw = start_auto_label_task(hass, entry_id, float(threshold))
     _send_result(connection, msg["id"], "auto_label_cycles", {"task_id": task.id})
 
@@ -3841,6 +3914,23 @@ async def ws_wipe_history(
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
+def _export_json(payload: dict[str, Any]) -> str:
+    """Serialise an export payload compactly, the way the store is written to disk.
+
+    ``json.dumps(indent=2)`` put every number of every power trace on its own
+    indented line, and now that no cycle is dropped (item 463) that is one
+    multi-megabyte WebSocket frame per click (audit PERF-11). Home Assistant's
+    orjson encoder is the one ``Store`` saves with, so anything persisted
+    serialises the same way, and ``import_config``'s ``json.loads`` reads it back
+    unchanged. It also runs as one C call, so the event loop cannot mutate the
+    shallow-copied store under it mid-encode the way it could between the
+    pure-Python encoder's steps.
+    """
+    from homeassistant.helpers.json import json_dumps  # pylint: disable=import-outside-toplevel
+
+    return json_dumps(payload)
+
+
 @websocket_api.websocket_command(
     {vol.Required("type"): "ha_washdata/export_config", vol.Required("entry_id"): str}
 )
@@ -3863,10 +3953,8 @@ async def ws_export_config(
             entry_data=dict(entry.data) if entry else {},
             entry_options=dict(entry.options) if entry else {},
         )
-        # Offload serialization to executor — power traces can be megabytes
-        json_str = await hass.async_add_executor_job(
-            lambda: json.dumps(payload, indent=2)
-        )
+        # Offload serialization to executor - power traces can be megabytes
+        json_str = await hass.async_add_executor_job(_export_json, payload)
         _send_result(connection, msg["id"], "export_config", {"json_data": json_str})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
@@ -4094,9 +4182,7 @@ async def ws_export_config_selective(
             entry_options=dict(entry.options) if entry else {},
             selection=selection,
         )
-        json_str = await hass.async_add_executor_job(
-            lambda: json.dumps(payload, indent=2)
-        )
+        json_str = await hass.async_add_executor_job(_export_json, payload)
         _send_result(
             connection, msg["id"], "export_config_selective", {"json_data": json_str}
         )
@@ -4184,9 +4270,7 @@ async def ws_import_config_selective(
             settings = summary.get("settings") if isinstance(summary.get("settings"), dict) else {}
             settings_applied = 0
             if entry is not None and settings:
-                filtered = sanitize_shared_settings(
-                    settings, getattr(_get_manager(hass, entry_id), "device_type", None)
-                )
+                filtered = sanitize_shared_settings(settings)
                 for key in _OPTIONS_IDENTITY_KEYS:
                     filtered.pop(key, None)
                 if filtered:
@@ -5265,11 +5349,15 @@ def ws_get_match_debug(
 
     out: dict[str, Any] = {"confidence": None, "ambiguous": False, "candidates": []}
     try:
+        # All three from the SAME result (audit MATCH-DECIDE-14). The confidence
+        # used to be `_last_match_confidence`, the committed program's (moved only
+        # when the switching rules commit or confirm it), shown beside the newest
+        # result's ambiguity flag and candidates.
         mr = getattr(manager, "_last_match_result", None)
-        conf = getattr(manager, "_last_match_confidence", None)
-        out["confidence"] = round(float(conf), 4) if conf is not None else None
-        out["ambiguous"] = bool(getattr(manager, "_last_match_ambiguous", False))
         if mr is not None:
+            conf = getattr(mr, "confidence", None)
+            out["confidence"] = round(float(conf), 4) if conf is not None else None
+            out["ambiguous"] = bool(getattr(mr, "is_ambiguous", False))
             out["candidates"] = manager.profile_store.get_match_candidates_summary(mr, 5)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error building match debug for %s: %s", entry_id, exc)
@@ -5892,20 +5980,31 @@ async def ws_get_ml_training_status(
                 "model": f"{float(v['model_mae']):.3f}",
                 "baseline": f"{float(v['naive_mae']):.3f}",
             }
+        # How many cycles the metric was measured on (audit ML-20); absent on a
+        # record promoted before the count was stored.
+        if isinstance(v.get("held_out_cycles"), int):
+            info["held_out_cycles"] = int(v["held_out_cycles"])
         models[cap] = info
 
-    # Fit trend across recent training runs (drift): compare the mean held-out
-    # score of the most-recent third of runs to the oldest third, respecting each
-    # metric's direction. Only meaningful with a few runs of history.
+    # Fit trend across the PROMOTED runs (drift): compare the mean held-out score
+    # of the most-recent third of the models that were put in use to the oldest
+    # third, respecting each metric's direction. A candidate that was rejected
+    # never served, so its score says nothing about the model in use (audit
+    # ML-20); entries from before that rule carry no `promoted` and are skipped.
+    # Only meaningful with a few promotions of history.
     history = store.get_ml_training_history()
     for cap, info in models.items():
         series = history.get(cap) if isinstance(history, dict) else None
-        if not isinstance(series, list) or len(series) < 4:
+        if not isinstance(series, list):
             continue
-        scores = [float(e["score"]) for e in series if isinstance(e, dict) and "score" in e]
+        promoted_runs = [
+            e for e in series
+            if isinstance(e, dict) and e.get("promoted") is True and "score" in e
+        ]
+        scores = [float(e["score"]) for e in promoted_runs]
         if len(scores) < 4:
             continue
-        higher_better = bool(series[-1].get("higher_better", True))
+        higher_better = bool(promoted_runs[-1].get("higher_better", True))
         third = max(1, len(scores) // 3)
         old_mean = sum(scores[:third]) / third
         new_mean = sum(scores[-third:]) / third
@@ -5915,6 +6014,22 @@ async def ws_get_ml_training_status(
         if not higher_better:
             rel = -rel  # for error metrics, a decrease is an improvement
         info["trend"] = "improving" if rel > 0.03 else "declining" if rel < -0.03 else "steady"
+
+    # The last run per capability, so the panel can say why nothing was (re)learnt
+    # (audit ML-20). Only runs recorded with `promoted` qualify.
+    last_run: dict[str, Any] = {}
+    for cap in live_caps:
+        series = history.get(cap) if isinstance(history, dict) else None
+        entry = series[-1] if isinstance(series, list) and series else None
+        if not isinstance(entry, dict) or "promoted" not in entry:
+            continue
+        run: dict[str, Any] = {"ts": entry.get("ts"), "promoted": bool(entry["promoted"])}
+        if not run["promoted"]:
+            params = entry.get("reason_params")
+            run["reason_code"] = str(entry.get("reason_code") or "unknown")
+            run["reason_params"] = dict(params) if isinstance(params, dict) else {}
+            run["reason"] = str(entry.get("reason") or "")
+        last_run[cap] = run
 
     _send_result(connection, msg["id"], "get_ml_training_status", {
             "available": ENABLE_ML_TRAINING,
@@ -5926,6 +6041,7 @@ async def ws_get_ml_training_status(
             "interval_days": int(merged.get(CONF_ML_TRAINING_INTERVAL_DAYS, DEFAULT_ML_TRAINING_INTERVAL_DAYS)),
             "hour": int(merged.get(CONF_ML_TRAINING_HOUR, DEFAULT_ML_TRAINING_HOUR)),
             "on_device_models": models,
+            "last_run": last_run,
         },
     )
 
@@ -6433,10 +6549,36 @@ def ws_get_task_result(
 
 _PG_HISTORY_CHUNK = 2
 
+# One batch replay (Test on history / Optimize) per device at a time (audit
+# PLATFORM-04): each is minutes of executor CPU on a Pi, and nothing stopped a
+# reconnecting panel or a script from stacking them. A second is refused with
+# `task_busy`; a new Simulate supersedes the previous one instead (PLAYGROUND-12).
+_PG_BATCH_KINDS = frozenset({"pg_history", "pg_sweep"})
+
+
+def _pg_running(reg: Any, entry_id: str, kinds: frozenset[str]) -> list[str]:
+    """Ids of this entry's running tasks of ``kinds``."""
+    return [
+        t["id"] for t in reg.snapshot(entry_id)
+        if t.get("state") == task_registry.STATE_RUNNING and t.get("kind") in kinds
+    ]
+
+
+def _pg_refuse_busy(hass: HomeAssistant, connection: Any, msg_id: int, entry_id: str) -> bool:
+    """Send ``task_busy`` and return True while a batch replay runs for the entry."""
+    if not _pg_running(task_registry.get_registry(hass), entry_id, _PG_BATCH_KINDS):
+        return False
+    connection.send_error(
+        msg_id, "task_busy",
+        "A Test-on-history or Optimize run is already in progress for this device",
+    )
+    return True
+
 
 async def _pg_history_task(
     hass: HomeAssistant, task: Any, entry_id: str,
     cycle_ids: list[str], override: dict[str, Any] | None,
+    count: int | None = None,
 ) -> None:
     reg = task_registry.get_registry(hass)
     ctx = _playground_context(hass, entry_id)
@@ -6445,13 +6587,10 @@ async def _pg_history_task(
         return
     _manager, store, base_config, options, price = ctx
     try:
-        past = await hass.async_add_executor_job(lambda: list(store.get_past_cycles() or []))
-        by_id = {c.get("id"): c for c in past if isinstance(c, dict)}
-        if cycle_ids:
-            ids = [c for c in cycle_ids if c in by_id]
-        else:
-            ids = [c.get("id") for c in past[-playground.DEFAULT_RECENT_CYCLES:]]
-        ids = [i for i in ids[:playground.MAX_BATCH_CYCLES] if i]
+        selected = await hass.async_add_executor_job(
+            playground._select_cycles, store, cycle_ids or None, count  # noqa: SLF001
+        )
+        ids = [c.get("id") for c in selected if c.get("id")]
         # Build match snapshots once — they are store-derived and identical for
         # every chunk; rebuilding per chunk is O(n_profiles) wasted work.
         prebuilt = await hass.async_add_executor_job(playground._build_match_snapshots, store)
@@ -6487,6 +6626,8 @@ async def _pg_history_task(
 async def _pg_sweep_task(
     hass: HomeAssistant, task: Any, entry_id: str,
     param: str, values: list[float], objective: str,
+    cycle_ids: list[str] | None = None,
+    count: int | None = None,
 ) -> None:
     reg = task_registry.get_registry(hass)
     ctx = _playground_context(hass, entry_id)
@@ -6495,13 +6636,23 @@ async def _pg_sweep_task(
         return
     _manager, store, base_config, options, price = ctx
     try:
-        past = await hass.async_add_executor_job(lambda: list(store.get_past_cycles() or []))
-        ids = [c.get("id") for c in past[-playground.DEFAULT_RECENT_CYCLES:] if isinstance(c, dict)]
-        ids = [i for i in ids[:playground.MAX_BATCH_CYCLES] if i]
+        # The cycles the panel's "Last N" picked (audit PLAYGROUND-18), else the
+        # most recent ones; the selection rule is the playground's own.
+        selected = await hass.async_add_executor_job(
+            playground._select_cycles, store, cycle_ids or None, count  # noqa: SLF001
+        )
+        ids = [c.get("id") for c in selected if c.get("id")]
         n = max(1, len(ids))
         # Build match snapshots once — identical for every sweep value/cell.
         prebuilt = await hass.async_add_executor_job(playground._build_match_snapshots, store)
-        reg.update(task, total=len(values))
+        reg.update(task, total=len(values) + 1)
+        # The current settings on the same cycles: what a value has to beat, and
+        # the early-end / split / detection floor none may lose (PLAYGROUND-08).
+        baseline = await hass.async_add_executor_job(
+            playground.sweep_baseline,
+            store, ids, base_config, objective, options, price, prebuilt,
+        )
+        reg.update(task, done=1)
         points: list[dict[str, Any]] = []
         current_value: Any = None
         for i, vx in enumerate(values):
@@ -6515,8 +6666,10 @@ async def _pg_sweep_task(
             points.extend(r.get("points") or [])
             if r.get("current_value") is not None:
                 current_value = r["current_value"]
-            reg.update(task, done=i + 1)
-        payload = playground.finalize_sweep_1d(param, objective, points, current_value)
+            reg.update(task, done=i + 2)
+        payload = playground.finalize_sweep_1d(
+            param, objective, points, current_value, baseline
+        )
         payload["partial"] = task.cancel_requested
         reg.finish(
             task,
@@ -6537,6 +6690,10 @@ async def _pg_sweep_task(
         vol.Required("entry_id"): str,
         vol.Optional("cycle_ids", default=list): [str],
         vol.Optional("settings_override", default=dict): dict,
+        # "Last N" (audit PLAYGROUND-18): the most recent N, newest first.
+        vol.Optional("count"): vol.All(
+            vol.Coerce(int), vol.Range(min=1, max=playground.MAX_BATCH_CYCLES)
+        ),
     }
 )
 @callback
@@ -6551,11 +6708,15 @@ def ws_start_playground_history(
     if _playground_context(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
+    if _pg_refuse_busy(hass, connection, msg["id"], entry_id):
+        return
     reg = task_registry.get_registry(hass)
     task = reg.create(entry_id, "pg_history", "Test on history")
     override = dict(msg.get("settings_override") or {}) or None
     cycle_ids = list(msg.get("cycle_ids") or [])
-    _raw = hass.async_create_task(_pg_history_task(hass, task, entry_id, cycle_ids, override))
+    _raw = hass.async_create_task(
+        _pg_history_task(hass, task, entry_id, cycle_ids, override, msg.get("count"))
+    )
     if _raw is not None:
         reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "start_playground_history", {"task_id": task.id})
@@ -6569,6 +6730,12 @@ def ws_start_playground_history(
         # Capped like the old one-shot command's 20x20 (audit PLAYGROUND-16).
         vol.Required("values"): vol.All([vol.Coerce(float)], vol.Length(max=20)),
         vol.Required("objective"): str,
+        # Which cycles (audit PLAYGROUND-18): the panel's "Last N" as `count`, the
+        # most recent N; explicit ids win; neither = the most recent 20.
+        vol.Optional("cycle_ids", default=list): [str],
+        vol.Optional("count"): vol.All(
+            vol.Coerce(int), vol.Range(min=1, max=playground.MAX_BATCH_CYCLES)
+        ),
     }
 )
 @callback
@@ -6582,6 +6749,8 @@ def ws_start_playground_sweep(
     if _playground_context(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
+    if _pg_refuse_busy(hass, connection, msg["id"], entry_id):
+        return
     reg = task_registry.get_registry(hass)
     task = reg.create(
         entry_id, "pg_sweep", f"Optimize: {msg['param']}",
@@ -6589,7 +6758,7 @@ def ws_start_playground_sweep(
     )
     _raw = hass.async_create_task(_pg_sweep_task(
         hass, task, entry_id, msg["param"], list(msg.get("values") or []),
-        msg["objective"],
+        msg["objective"], list(msg.get("cycle_ids") or []), msg.get("count"),
     ))
     if _raw is not None:
         reg.link_asyncio_task(task.id, _raw)
@@ -6673,6 +6842,10 @@ def ws_start_playground_cycle_detail(
         _err_not_found(connection, msg["id"], entry_id)
         return
     reg = task_registry.get_registry(hass)
+    # A new Simulate replaces the previous one: its result would be dropped by the
+    # panel anyway, and it kept replaying to the end (PLAYGROUND-12 / PLATFORM-04).
+    for stale in _pg_running(reg, entry_id, frozenset({"pg_detail"})):
+        reg.cancel(stale)
     task = reg.create(
         entry_id, "pg_detail", "Simulate cycle",
         label_key="task.pg_detail.simulate", label_params={},
@@ -6903,6 +7076,8 @@ async def ws_history_import_recorder(
         "source": "recorder",
         "rows": rows[:HISTORY_IMPORT_MAX_ROWS],
         "entity_id": entity_id,
+        # Carried into the parse report, so the review step says the read was cut.
+        "truncated": len(rows) > HISTORY_IMPORT_MAX_ROWS,
     }
     _send_result(connection, msg["id"], "history_import_recorder", {
         "token": token,
@@ -6916,24 +7091,36 @@ async def ws_history_import_recorder(
     })
 
 
-def _history_samples(slot: dict[str, Any], entity_id: str | None) -> Any:
+def _history_samples(
+    slot: dict[str, Any], entity_id: str | None, parser: Any = None
+) -> Any:
     """Turn a staging slot into samples, whichever way it was filled.
 
-    Executor-side: CSV parsing is pure Python over megabytes of text. Returns either a
-    ``(samples, report)`` pair or an ``{"error": ...}`` marker.
+    Executor-side: CSV parsing is pure Python over megabytes of text, so the scan task
+    steps a ``HistoryCsvParser`` across jobs first and hands it in (``parser``).
+    Returns either a ``(samples, report)`` pair or an ``{"error": ...}`` marker.
     """
     if slot.get("source") == "recorder":
         samples = history_import.samples_from_readings(slot.get("rows") or [])
         if len(samples) < 2:
             return {"error": "no_readings"}
-        return samples, {
-            "rows_total": len(samples),
-            "rows_parsed": len(samples),
-            "entity_id": slot.get("entity_id"),
-            "source": "recorder",
-        }
-    parsed = history_import.parse_history_csv(
-        "".join(slot.get("chunks") or []), entity_id=entity_id
+        # The same report a CSV gets, so the review step shows the span, the peak,
+        # the kW hint and the row-limit cut for a recorder read too (PLAYGROUND-11).
+        report = history_import.ParsedHistory(
+            samples=samples,
+            entity_id=slot.get("entity_id"),
+            rows_total=len(samples),
+            rows_parsed=len(samples),
+            truncated=bool(slot.get("truncated")),
+        ).report()
+        report["source"] = "recorder"
+        return samples, report
+    parsed = (
+        parser.result()
+        if parser is not None
+        else history_import.parse_history_csv(
+            "".join(slot.get("chunks") or []), entity_id=entity_id
+        )
     )
     if isinstance(parsed, dict):
         return parsed
@@ -6972,7 +7159,21 @@ async def _history_import_scan_task(
         return
     try:
         entity_id = getattr(manager, "power_sensor_entity_id", None)
-        parsed = await hass.async_add_executor_job(_history_samples, slot, entity_id)
+        parser = None
+        if slot.get("source") != "recorder":
+            # Parsed a slice per executor job, not in one (audit PLAYGROUND-11).
+            parser = await hass.async_add_executor_job(functools.partial(
+                history_import.HistoryCsvParser,
+                "".join(slot.get("chunks") or []), entity_id=entity_id,
+            ))
+            reg.update(task, total=parser.rows_estimate)
+            while not parser.finished:
+                if task.cancel_requested:
+                    reg.finish(task, state=task_registry.STATE_CANCELLED)
+                    return
+                await hass.async_add_executor_job(parser.step, history_import.PARSE_STEP_ROWS)
+                reg.update(task, done=min(parser.rows_estimate, parser.out.rows_total))
+        parsed = await hass.async_add_executor_job(_history_samples, slot, entity_id, parser)
         if isinstance(parsed, dict):
             reg.finish(task, state=task_registry.STATE_ERROR, error=str(parsed.get("error")))
             return
@@ -7008,6 +7209,13 @@ async def _history_import_scan_task(
         payload = await hass.async_add_executor_job(
             functools.partial(runner.finalize, partial=task.cancel_requested)
         )
+        # The replay is unmatched, so a dishwasher's timeout finish banked its whole
+        # end wait (audit PLAYGROUND-07): cut it by the programme it matches.
+        if not task.cancel_requested:
+            await history_import.async_import_tail_cuts(
+                manager.profile_store, base_config, payload.get("cycles") or [],
+                options, payload.get("segments") or [],
+            )
         # A candidate that overlaps a cycle WashData already holds is that cycle
         # replayed from raw history: show it, but never pre-tick it (audit
         # PLAYGROUND-05 - 81% of them slipped past the exact start/duration key, and
@@ -7138,23 +7346,28 @@ async def _history_import_apply_task(
                 if task.cancel_requested:
                     break
                 raw = cycles[index]
-                key = history_import.dedup_key(raw.get("start_time"), raw.get("duration"))
+                duration = history_import.effective_duration(raw)
+                key = history_import.dedup_key(raw.get("start_time"), duration)
                 if (key is not None and key in existing) or history_import.overlaps_stored(
-                    raw.get("start_time"), raw.get("duration"), intervals
+                    raw.get("start_time"), duration, intervals
                 ):
                     duplicates += 1
                     reg.update(task, done=done)
                     continue
                 if imported >= room:
                     break
+                stored = history_import.build_backfill_cycle(raw)
                 store._add_cycle_data(  # noqa: SLF001 - the bulk insert primitive
-                    history_import.build_backfill_cycle(raw),
+                    stored,
                     target=target,
                     id_pool=id_pool,
                 )
+                if raw.get("tail_cut_s"):
+                    # The banked-tail repair's own trim (PLAYGROUND-07).
+                    store._apply_repaired_duration(stored, float(raw["tail_cut_s"]))  # noqa: SLF001
                 if key is not None:
                     existing.add(key)
-                interval = history_import.stored_intervals([raw])
+                interval = history_import.stored_intervals([{**raw, "duration": duration}])
                 if interval:
                     intervals = sorted([*intervals, *interval])
                 imported += 1

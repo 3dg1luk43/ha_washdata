@@ -126,6 +126,31 @@ ML_END_GUARD_MAX_DEFER_SECONDS = 1800.0  # cap the extra wait the guard may add 
 # (data-clock seconds). Safe to cache: the guard only ever *defers* and terminal
 # drop only ever *shortens*, so both tolerate a value up to this window stale.
 ML_PROVIDER_THROTTLE_SECONDS = 30.0
+# ENDING energy gate vs a flat standby (audit DETECT-08, item 95 residual). The
+# gate's bar is end_energy_threshold x 3600 / off_delay as a MEAN power (1.0 W at
+# 180 s, 0.1 W at 1800 s), so a standby sitting between that bar and the stop
+# threshold pinned it forever: an unmatched cycle ran to the 8 h cap. A window is
+# a flat standby when every reading of the last max(off_delay,
+# STANDBY_BAND_WINDOW_S) seconds is above 0 W and the window spans no more than
+# max(FLOOR_W, FRAC x its highest reading). The non-zero floor is what keeps the
+# gate's one measured catch: a dishwasher's passive drying flickering 0-0.5 W
+# for 25 min before its pump-out (Hatton ECO `44d35b4ca01e`).
+#
+# Two tiers, like the standby band's. Just under stop (every reading >=
+# NEAR_STOP_FRAC x stop_threshold_w) is the item-95 shape and ends after the
+# un-shortened max(off_delay, min_off_gap). Any other flat window waits
+# LOOSE_QUIET_S: flat non-zero phases far under stop DO resume in real cycles.
+# Over every stored trace in the corpus (all formats) the resumed flat non-zero
+# sub-stop pauses longer than that device's min_off_gap are two, and both sit at
+# about half of stop: an 18.9 min washer soak at 2.7-3.0 W on a 6 W stop (it split
+# with one tier at min_off_gap, end_gate_eval --shipped-watchdog) and an 80.8 min
+# dishwasher drying phase at 0.7-0.9 W on a 1.5 W stop (it split replayed
+# unmatched). Neither reaches 0.75 x stop; 2 h is 1.5x the longer one.
+ENDING_FLAT_STANDBY_MIN_READINGS = 3
+ENDING_FLAT_STANDBY_SPREAD_FRAC = 0.25
+ENDING_FLAT_STANDBY_SPREAD_FLOOR_W = 0.2
+ENDING_FLAT_STANDBY_NEAR_STOP_FRAC = 0.75
+ENDING_FLAT_STANDBY_LOOSE_QUIET_S = 7200.0
 if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
     raise ValueError("DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)")
 from .signal_processing import (
@@ -2190,49 +2215,7 @@ class CycleDetector:
             # the plateau and finalize as a normal completion (so anti-wrinkle
             # still engages).  Cheaply gated on being well past expected before
             # the window scan runs.
-            _plateau_hi = self._standby_band_plateau(timestamp)
-            if _plateau_hi is not None:
-                start_time = self._current_cycle_start or timestamp
-                current_duration = (timestamp - start_time).total_seconds()
-                # The plateau sits ABOVE stop_threshold, so it keeps advancing
-                # _last_active_time and the default keep_tail=False trim would NOT
-                # remove it - inflating the stored duration/energy with minutes of
-                # standby. Snap the end back to the last reading above the PLATEAU
-                # and drop only the plateau run. This used to snap back to the last
-                # reading above 10% of the cycle's peak, which cut every lower-power
-                # phase after the last heating burst - 31 min of a Miele's rinse and
-                # spin in one replayed cycle.
-                trim_ceiling = _plateau_hi + max(0.5, 0.1 * _plateau_hi)
-                plateau_start_idx = None
-                for i in range(len(self._power_readings) - 1, -1, -1):
-                    if float(self._power_readings[i][1]) > trim_ceiling:
-                        plateau_start_idx = i
-                        break
-                if (
-                    plateau_start_idx is not None
-                    and plateau_start_idx < len(self._power_readings) - 1
-                ):
-                    self._power_readings = self._power_readings[: plateau_start_idx + 1]
-                    self._last_active_time = self._power_readings[-1][0]
-                    current_duration = (
-                        self._last_active_time - start_time
-                    ).total_seconds()
-                self._logger.info(
-                    "Standby-band finalize: flat plateau ~%.1fW (peak %.0fW) held "
-                    "past expected %.0fs — appliance finished but holds a standby "
-                    "draw above stop_threshold; finalizing (plateau trimmed, "
-                    "duration %.0fs).",
-                    power,
-                    self._cycle_max_power,
-                    self._expected_duration,
-                    current_duration,
-                )
-                self._finish_cycle(
-                    timestamp,
-                    status="completed",
-                    termination_reason=TerminationReason.TIMEOUT,
-                    keep_tail=False,
-                )
+            if self._maybe_finalize_standby_band(timestamp, power):
                 return
 
             # Max duration safety
@@ -2287,6 +2270,16 @@ class CycleDetector:
                 return
 
             if is_high:
+                # Standby-band finalize (#296/#445) from ENDING too (DETECT-03). A
+                # run that dipped long enough to reach ENDING and THEN settled on a
+                # flat standby above stop_threshold keeps every reading "high":
+                # after 120 s in state each one is kept below as a terminal spike
+                # and returns, resetting the quiet timer, so neither the fallback
+                # nor the RUNNING-only plateau check could ever end it - the 8 h
+                # force-stop did. Same predicate and trim as RUNNING.
+                if self._maybe_finalize_standby_band(timestamp, power):
+                    return
+
                 start_time = self._current_cycle_start or timestamp
                 current_duration = (timestamp - start_time).total_seconds()
 
@@ -2902,7 +2895,21 @@ class CycleDetector:
                     max_gap_s = energy_gap_threshold_s(recent_ts)
                     recent_e = integrate_wh(recent_ts, recent_p, max_gap_s=max_gap_s)
 
-                    if recent_e <= self.config.end_energy_threshold:
+                    energy_ok = recent_e <= self.config.end_energy_threshold
+                    if not energy_ok and self._flat_standby_tail(timestamp):
+                        # DETECT-08: the window's energy is a flat standby, not
+                        # activity. Never before the full un-shortened wait, so a
+                        # flat sub-stop phase the item-306 / hazard shortening
+                        # would otherwise cut is still bridged by min_off_gap;
+                        # far under stop, not before 2 h (see the constants).
+                        self._logger.debug(
+                            "Energy gate skipped: %.4fWh is a flat standby "
+                            "after %.0fs quiet",
+                            recent_e,
+                            self._time_below_threshold,
+                        )
+                        energy_ok = True
+                    if energy_ok:
                         start_time = self._current_cycle_start or timestamp
                         current_duration = (timestamp - start_time).total_seconds()
 
@@ -3162,6 +3169,49 @@ class CycleDetector:
         self._ml_end_cache = (now_ts, exp, start, result)
         return result
 
+    def _flat_standby_tail(self, timestamp: datetime) -> bool:
+        """Whether the ENDING quiet is a flat standby the energy gate must not pin.
+
+        DETECT-08. A sampled (no outage hole) window of the last
+        max(off_delay, STANDBY_BAND_WINDOW_S) seconds whose readings are all above
+        0 W and within max(ENDING_FLAT_STANDBY_SPREAD_FLOOR_W,
+        ENDING_FLAT_STANDBY_SPREAD_FRAC x the highest) of each other, after
+        max(off_delay, min_off_gap) of quiet when every reading is at least
+        ENDING_FLAT_STANDBY_NEAR_STOP_FRAC x stop_threshold_w, else after
+        ENDING_FLAT_STANDBY_LOOSE_QUIET_S. A window reaching back past the start
+        of the quiet holds an above-stop reading and so is not flat.
+        """
+        quiet = self._time_below_threshold
+        base_wait = float(max(self._config.off_delay, self._config.min_off_gap))
+        if quiet < base_wait:
+            return False
+        span = max(float(self._config.off_delay), STANDBY_BAND_WINDOW_S)
+        powers: list[float] = []
+        window_ts: list[datetime] = []
+        boundary: datetime | None = None
+        for ts, p in reversed(self._power_readings):
+            if (timestamp - ts).total_seconds() <= span:
+                powers.append(float(p))
+                window_ts.append(ts)
+            else:
+                boundary = ts
+                break
+        if boundary is None or len(powers) < ENDING_FLAT_STANDBY_MIN_READINGS:
+            return False
+        lo, hi = min(powers), max(powers)
+        if lo <= 0.0:
+            return False
+        if (hi - lo) > max(
+            ENDING_FLAT_STANDBY_SPREAD_FLOOR_W, ENDING_FLAT_STANDBY_SPREAD_FRAC * hi
+        ):
+            return False
+        near_stop = lo >= ENDING_FLAT_STANDBY_NEAR_STOP_FRAC * float(
+            self._config.stop_threshold_w
+        )
+        if not near_stop and quiet < max(base_wait, ENDING_FLAT_STANDBY_LOOSE_QUIET_S):
+            return False
+        return not self._window_has_outage_gap([boundary, *window_ts])
+
     def _window_has_outage_gap(self, window_ts: list[datetime]) -> bool:
         """Whether a 'sustained window' contains a data-outage-sized hole.
 
@@ -3329,6 +3379,57 @@ class CycleDetector:
         if current_duration >= self._expected_duration * STANDBY_BAND_LOOSE_MIN_RATIO:
             return hi
         return None
+
+    def _maybe_finalize_standby_band(self, timestamp: datetime, power: float) -> bool:
+        """Finish the cycle when it is stuck on a standby plateau; True if it did.
+
+        Called from RUNNING on every reading and from ENDING on every above-stop
+        reading (DETECT-03); `_standby_band_plateau` holds every gate.
+        """
+        plateau_hi = self._standby_band_plateau(timestamp)
+        if plateau_hi is None:
+            return False
+        start_time = self._current_cycle_start or timestamp
+        current_duration = (timestamp - start_time).total_seconds()
+        # The plateau sits ABOVE stop_threshold, so it keeps advancing
+        # _last_active_time and the default keep_tail=False trim would NOT
+        # remove it - inflating the stored duration/energy with minutes of
+        # standby. Snap the end back to the last reading above the PLATEAU
+        # and drop only the plateau run. This used to snap back to the last
+        # reading above 10% of the cycle's peak, which cut every lower-power
+        # phase after the last heating burst - 31 min of a Miele's rinse and
+        # spin in one replayed cycle.
+        trim_ceiling = plateau_hi + max(0.5, 0.1 * plateau_hi)
+        plateau_start_idx = None
+        for i in range(len(self._power_readings) - 1, -1, -1):
+            if float(self._power_readings[i][1]) > trim_ceiling:
+                plateau_start_idx = i
+                break
+        if (
+            plateau_start_idx is not None
+            and plateau_start_idx < len(self._power_readings) - 1
+        ):
+            self._power_readings = self._power_readings[: plateau_start_idx + 1]
+            self._last_active_time = self._power_readings[-1][0]
+            current_duration = (self._last_active_time - start_time).total_seconds()
+        self._logger.info(
+            "Standby-band finalize (%s): flat plateau ~%.1fW (peak %.0fW) held "
+            "past expected %.0fs - appliance finished but holds a standby "
+            "draw above stop_threshold; finalizing (plateau trimmed, "
+            "duration %.0fs).",
+            self._state,
+            power,
+            self._cycle_max_power,
+            self._expected_duration,
+            current_duration,
+        )
+        self._finish_cycle(
+            timestamp,
+            status="completed",
+            termination_reason=TerminationReason.TIMEOUT,
+            keep_tail=False,
+        )
+        return True
 
     def _anticrease_gate_open(self, timestamp: datetime) -> bool:
         """Core anti-crease gate (#296): everything except the current power level

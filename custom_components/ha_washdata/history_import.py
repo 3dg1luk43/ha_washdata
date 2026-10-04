@@ -58,14 +58,19 @@ import csv
 import io
 import logging
 import math
+import operator
 import statistics
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Iterable, Sequence
 
 from .const import (
+    BANKED_TAIL_REPAIR_MIN_S,
+    CONF_LEARNING_CONFIDENCE,
+    DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_SAMPLING_INTERVAL,
     DEVICE_COMPLETION_THRESHOLDS,
+    DEVICE_TYPE_DISHWASHER,
     HISTORY_IMPORT_DENSIFY_STEP_S,
     HISTORY_IMPORT_EDGE_GAP_S,
     HISTORY_IMPORT_MAX_BRIDGE_S,
@@ -78,9 +83,19 @@ from .const import (
     HISTORY_IMPORT_TAIL_STEP_S,
     STATE_FINISHED,
     STATE_OFF,
+    TERMINAL_EVENT_PEAK_FRAC,
+    TERMINAL_QUIET_CAP_S,
+    TRUSTED_LENGTH_FLOOR_FRAC,
+    TerminationReason,
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
-from .signal_processing import energy_gap_threshold_s, integrate_wh
+from .options_utils import option_float
+from .signal_processing import (
+    energy_gap_threshold_s,
+    integrate_wh,
+    terminal_event_end,
+    terminal_quiet_seen,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -119,6 +134,8 @@ class ParsedHistory:
     rows_other_entity: int = 0
     rows_unordered: int = 0
     rows_duplicate: int = 0
+    # Rows whose timestamp carried no UTC offset (read as UTC, PLAYGROUND-24).
+    rows_naive_time: int = 0
     truncated: bool = False
 
     @property
@@ -137,6 +154,7 @@ class ParsedHistory:
             "rows_other_entity": self.rows_other_entity,
             "rows_unordered": self.rows_unordered,
             "rows_duplicate": self.rows_duplicate,
+            "rows_naive_time": self.rows_naive_time,
             "truncated": self.truncated,
             "entities": list(self.entities),
             "entity_id": self.entity_id,
@@ -146,7 +164,47 @@ class ParsedHistory:
             "peak_w": round(max(powers), 1) if powers else 0.0,
             "mean_w": round(statistics.fmean(powers), 1) if powers else 0.0,
             "breaks": sum(1 for _, p in self.samples if p is None),
+            "warnings": parse_warnings(powers, self.rows_naive_time),
         }
+
+
+# Below this peak a stream that still has a shape is far more likely kilowatts than
+# an appliance: every supported type draws hundreds of watts or more at its peak.
+KW_SUSPECT_PEAK_W = 20.0
+
+
+def parse_warnings(powers: Sequence[float], naive_rows: int = 0) -> list[str]:
+    """What the review step should flag about an otherwise readable stream.
+
+    ``looks_like_kw``: the peak is under :data:`KW_SUSPECT_PEAK_W` yet the readings
+    have structure (at least three distinct non-zero values) - a kW sensor, which
+    the import (and the live integration) reads as watts, so nothing is ever
+    detected. ``naive_timestamps``: some timestamps carried no UTC offset and were
+    read as UTC (audit PLAYGROUND-24).
+    """
+    warnings: list[str] = []
+    positive = {round(p, 6) for p in powers if p > 0}
+    if positive and max(positive) < KW_SUSPECT_PEAK_W and len(positive) >= 3:
+        warnings.append("looks_like_kw")
+    if naive_rows > 0:
+        warnings.append("naive_timestamps")
+    return warnings
+
+
+def _parse_ts_naive(raw: str) -> tuple[datetime | None, bool]:
+    """:func:`_parse_ts`, plus whether the text carried no UTC offset."""
+    text = (raw or "").strip()
+    if not text:
+        return None, False
+    if text.endswith(("Z", "z")):
+        text = f"{text[:-1]}+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None, False
+    if parsed.tzinfo:
+        return parsed, False
+    return parsed.replace(tzinfo=timezone.utc), True
 
 
 def _parse_ts(raw: str) -> datetime | None:
@@ -154,17 +212,11 @@ def _parse_ts(raw: str) -> datetime | None:
 
     A naive timestamp is read as UTC: HA writes UTC in both the history download and
     the recorder, and assuming local time would move samples across a DST boundary.
+    The parse report counts them (``rows_naive_time``) so the panel can say so: a
+    file written in local time is shifted by the UTC offset, and across a DST change
+    its repeated hour reorders and drops rows (audit PLAYGROUND-24).
     """
-    text = (raw or "").strip()
-    if not text:
-        return None
-    if text.endswith(("Z", "z")):
-        text = f"{text[:-1]}+00:00"
-    try:
-        parsed = datetime.fromisoformat(text)
-    except ValueError:
-        return None
-    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+    return _parse_ts_naive(raw)[0]
 
 
 def _pick_key(fieldnames: Iterable[str], candidates: Sequence[str]) -> str | None:
@@ -173,6 +225,231 @@ def _pick_key(fieldnames: Iterable[str], candidates: Sequence[str]) -> str | Non
         if candidate in lowered:
             return lowered[candidate]
     return None
+
+
+# Rows read per executor job by :class:`HistoryCsvParser` (audit PLAYGROUND-11).
+# ~0.1 s on a desktop, so even a Pi stays well under the multi-second GIL holds
+# the one-job parse of a 500k-row file was (4.4 s CPU measured on a desktop).
+PARSE_STEP_ROWS = 10_000
+
+
+class HistoryCsvParser:
+    """:func:`parse_history_csv`, resumable: ``step`` reads a slice of rows.
+
+    The WS scan task drives it across many executor jobs (audit PLAYGROUND-11), so a
+    file at the 32 MiB / 500k-row caps no longer holds the GIL for seconds in one
+    job. :func:`parse_history_csv` drives the same object to completion, so both
+    produce the same result. Never raises; :meth:`result` returns the parsed
+    history or an ``{"error": ...}`` marker.
+    """
+
+    def __init__(
+        self,
+        text: str,
+        *,
+        entity_id: str | None = None,
+        max_rows: int = HISTORY_IMPORT_MAX_ROWS,
+    ) -> None:
+        self.entity_id = entity_id
+        self.max_rows = max_rows
+        self.error: dict[str, Any] | None = None
+        self.finished = False
+        self.out = ParsedHistory(entity_id=entity_id)
+        self._wanted = (entity_id or "").strip().casefold()
+        self._entities: dict[str, int] = {}
+        # Rows in file order, tagged True for a row this read keeps. Rows of another
+        # entity are held (tagged False) only while the file could still turn out to
+        # hold that ONE entity alone, which is read in its place (see `result`); the
+        # second distinct entity, or the configured one, drops them.
+        self._rows: list[tuple[bool, Sample]] = []
+        self._may_substitute = bool(entity_id)
+        self._other_non_numeric = 0
+        self._other_naive = 0
+        self._reader: Any = None
+        self._keys: tuple[str, str, str | None] = ("", "", None)
+        # Line count, for a progress bar (a quoted field can hold a newline, so it
+        # is an estimate).
+        self.rows_estimate = max(1, text.count("\n")) if isinstance(text, str) else 1
+        if not isinstance(text, str) or not text.strip():
+            self._fail({"error": "empty_file"})
+            return
+        try:
+            body = text.lstrip("\ufeff")
+            sample = body[:8192]
+            try:
+                dialect: Any = csv.Sniffer().sniff(sample, delimiters=",;\t")
+            except csv.Error:
+                dialect = "excel"
+            reader = csv.DictReader(io.StringIO(body), dialect=dialect)
+            if not reader.fieldnames:
+                self._fail({"error": "no_header"})
+                return
+            value_key = _pick_key(reader.fieldnames, _VALUE_KEYS)
+            time_key = _pick_key(reader.fieldnames, _TIME_KEYS)
+            entity_key = _pick_key(reader.fieldnames, _ENTITY_KEYS)
+            if value_key is None or time_key is None:
+                self._fail({"error": "missing_columns"})
+                return
+            self._reader = reader
+            self._keys = (value_key, time_key, entity_key)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("History CSV parse failed: %s", exc)
+            self._fail({"error": "parse_failed"})
+
+    def _fail(self, error: dict[str, Any]) -> None:
+        self.error = error
+        self.finished = True
+        self._reader = None
+        self._rows = []
+
+    def _parse_row(self, row: dict[str, Any]) -> tuple[Sample | None, bool]:
+        """One row's sample (None when it is not one; counted by the caller) and
+        whether its timestamp carried no offset."""
+        value_key, time_key, _entity_key = self._keys
+        timestamp, naive = _parse_ts_naive(str(row.get(time_key) or ""))
+        if timestamp is None:
+            return None, False
+        return self._parse_value(row, value_key, timestamp), naive
+
+    @staticmethod
+    def _parse_value(row: dict[str, Any], value_key: str, timestamp: datetime) -> Sample | None:
+        raw_value = str(row.get(value_key) or "").strip()
+        if raw_value.lower() in _UNKNOWN_STATES:
+            return (timestamp, None)
+        try:
+            # A locale-formatted export writes 1234,5 (comma = decimal point). But a
+            # single comma followed by exactly three digits is more likely a thousands
+            # group ("1,234" is 1234, not 1.234), which is too ambiguous to rewrite: a
+            # wrong guess stores a value 1000x off, so leave it and let float() drop it.
+            _frac = raw_value.split(",", 1)[1] if raw_value.count(",") == 1 else ""
+            _decimal_comma = raw_value.count(",") == 1 and not (
+                len(_frac) == 3 and _frac.isdigit()
+            )
+            power = float(raw_value.replace(",", ".") if _decimal_comma else raw_value)
+        except ValueError:
+            return None
+        if not math.isfinite(power):
+            return None
+        return (timestamp, max(0.0, power))
+
+    def step(self, n_rows: int = PARSE_STEP_ROWS) -> int:
+        """Read up to ``n_rows`` more rows; returns how many were read."""
+        if self.finished or self._reader is None:
+            return 0
+        out = self.out
+        _value_key, _time_key, entity_key = self._keys
+        read = 0
+        try:
+            for row in self._reader:
+                read += 1
+                out.rows_total += 1
+                if out.rows_total > self.max_rows:
+                    out.truncated = True
+                    self.finished = True
+                    break
+                row_entity = str(row.get(entity_key) or "").strip() if entity_key else ""
+                if row_entity:
+                    if row_entity not in self._entities and self._may_substitute and (
+                        self._entities or row_entity.casefold() == self._wanted
+                    ):
+                        # A second entity, or the configured one: no substitution.
+                        self._may_substitute = False
+                        self._rows = [item for item in self._rows if item[0]]
+                    self._entities[row_entity] = self._entities.get(row_entity, 0) + 1
+                # Case/whitespace-insensitive: entity ids are lowercase by convention,
+                # but an export that round-tripped through a spreadsheet can differ in
+                # case alone, which must not read as "a different appliance".
+                other = bool(
+                    self.entity_id and row_entity and row_entity.casefold() != self._wanted
+                )
+                if other:
+                    out.rows_other_entity += 1
+                    if not self._may_substitute:
+                        if read >= n_rows:
+                            break
+                        continue
+                parsed, naive = self._parse_row(row)
+                if parsed is None:
+                    if other:
+                        self._other_non_numeric += 1
+                    else:
+                        out.rows_non_numeric += 1
+                else:
+                    self._rows.append((not other, parsed))
+                    if naive:
+                        if other:
+                            self._other_naive += 1
+                        else:
+                            out.rows_naive_time += 1
+                if read >= n_rows:
+                    break
+            else:
+                self.finished = True
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("History CSV parse failed: %s", exc)
+            self._fail({"error": "parse_failed"})
+        return read
+
+    def result(self) -> ParsedHistory | dict[str, Any]:
+        """The parsed history once :attr:`finished` (sorted, de-duplicated)."""
+        if self.error is not None:
+            return self.error
+        try:
+            while not self.finished:
+                self.step(PARSE_STEP_ROWS)
+            if self.error is not None:
+                return self.error
+            out = self.out
+            entities = self._entities
+            out.entities = sorted(entities)
+            entity_id = self.entity_id
+            if (
+                entity_id
+                and entities
+                and self._wanted not in {e.casefold() for e in entities}
+            ):
+                # The configured sensor is not in the file. With exactly ONE entity in
+                # it the upload is still unambiguous - the user picked this file for
+                # this device, and a renamed entity, a template/helper sensor in front
+                # of the plug, or an export taken under the old id all land here - so
+                # honour it and record the substitution instead of dead-ending. The
+                # error is kept for a MULTI-entity file, where guessing which
+                # appliance to read would corrupt detection.
+                if len(entities) == 1:
+                    out.entity_id = next(iter(entities))
+                    out.entity_substituted_from = entity_id
+                    out.rows_other_entity = 0
+                    out.rows_non_numeric += self._other_non_numeric
+                    out.rows_naive_time += self._other_naive
+                    rows = [sample for _keep, sample in self._rows]
+                else:
+                    return {"error": "entity_not_in_file", "entities": out.entities}
+            else:
+                rows = [sample for keep, sample in self._rows if keep]
+            self._rows = []
+            if not rows:
+                return {"error": "no_readings"}
+
+            stamps = [row[0] for row in rows]
+            if all(map(operator.le, stamps, stamps[1:])):
+                # Already in order (the usual export): the stable sort is the identity.
+                ordered: Sequence[int] = range(len(rows))
+            else:
+                ordered = sorted(range(len(rows)), key=stamps.__getitem__)
+            out.rows_unordered = sum(1 for pos, i in enumerate(ordered) if pos != i)
+            last_ts: datetime | None = None
+            for i in ordered:
+                timestamp, power = rows[i]
+                if last_ts is not None and timestamp == last_ts:
+                    out.rows_duplicate += 1
+                    continue
+                out.samples.append((timestamp, power))
+                last_ts = timestamp
+            out.rows_parsed = len(out.samples)
+            return out
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("History CSV parse failed: %s", exc)
+            return {"error": "parse_failed"}
 
 
 def parse_history_csv(
@@ -189,7 +466,8 @@ def parse_history_csv(
 
     ``entity_id`` restricts the read to one entity - an export can hold several, and
     interleaving two appliances' readings would corrupt detection. When it is given but
-    absent from the file the caller gets an error rather than a silent empty result.
+    absent from the file the caller gets an error rather than a silent empty result
+    (unless the file holds exactly one other entity, which is read in its place).
 
     Rows whose state is ``unavailable``/``unknown`` are kept as stream breaks
     (power ``None``), not dropped. Out-of-order rows are sorted and exact-duplicate
@@ -197,107 +475,10 @@ def parse_history_csv(
     whose timestamp went backwards *and still advances its clock*, which would both lose
     the sample and inflate the next gap.
 
-    Never raises; returns ``{"error": ...}`` instead.
+    One call; the WS scan steps a :class:`HistoryCsvParser` across executor jobs
+    instead. Never raises; returns ``{"error": ...}`` instead.
     """
-    if not isinstance(text, str) or not text.strip():
-        return {"error": "empty_file"}
-    try:
-        body = text.lstrip("﻿")
-        sample = body[:8192]
-        try:
-            dialect: Any = csv.Sniffer().sniff(sample, delimiters=",;\t")
-        except csv.Error:
-            dialect = "excel"
-        reader = csv.DictReader(io.StringIO(body), dialect=dialect)
-        if not reader.fieldnames:
-            return {"error": "no_header"}
-        value_key = _pick_key(reader.fieldnames, _VALUE_KEYS)
-        time_key = _pick_key(reader.fieldnames, _TIME_KEYS)
-        entity_key = _pick_key(reader.fieldnames, _ENTITY_KEYS)
-        if value_key is None or time_key is None:
-            return {"error": "missing_columns"}
-
-        out = ParsedHistory(entity_id=entity_id)
-        _wanted_entity = (entity_id or "").strip().casefold()
-        entities: dict[str, int] = {}
-        rows: list[Sample] = []
-        for row in reader:
-            out.rows_total += 1
-            if out.rows_total > max_rows:
-                out.truncated = True
-                break
-            row_entity = str(row.get(entity_key) or "").strip() if entity_key else ""
-            if row_entity:
-                entities[row_entity] = entities.get(row_entity, 0) + 1
-            # Case/whitespace-insensitive: entity ids are lowercase by convention, but an
-            # export that round-tripped through a spreadsheet can differ in case alone,
-            # which must not read as "a different appliance".
-            if entity_id and row_entity and row_entity.casefold() != _wanted_entity:
-                out.rows_other_entity += 1
-                continue
-            timestamp = _parse_ts(str(row.get(time_key) or ""))
-            if timestamp is None:
-                out.rows_non_numeric += 1
-                continue
-            raw_value = str(row.get(value_key) or "").strip()
-            if raw_value.lower() in _UNKNOWN_STATES:
-                rows.append((timestamp, None))
-                continue
-            try:
-                # A locale-formatted export writes 1234,5 (comma = decimal point). But a
-                # single comma followed by exactly three digits is more likely a thousands
-                # group ("1,234" is 1234, not 1.234), which is too ambiguous to rewrite: a
-                # wrong guess stores a value 1000x off, so leave it and let float() drop it.
-                _frac = raw_value.split(",", 1)[1] if raw_value.count(",") == 1 else ""
-                _decimal_comma = raw_value.count(",") == 1 and not (
-                    len(_frac) == 3 and _frac.isdigit()
-                )
-                power = float(raw_value.replace(",", ".") if _decimal_comma else raw_value)
-            except ValueError:
-                out.rows_non_numeric += 1
-                continue
-            if not math.isfinite(power):
-                out.rows_non_numeric += 1
-                continue
-            rows.append((timestamp, max(0.0, power)))
-
-        out.entities = sorted(entities)
-        if (
-            entity_id
-            and entities
-            and _wanted_entity not in {e.casefold() for e in entities}
-        ):
-            # The configured sensor is not in the file. With exactly ONE entity in it the
-            # upload is still unambiguous - the user picked this file for this device, and
-            # a renamed entity, a template/helper sensor in front of the plug, or an export
-            # taken under the old id all land here - so honour it and record the
-            # substitution instead of dead-ending. The error is kept for a MULTI-entity
-            # file, where guessing which appliance to read would corrupt detection.
-            if len(entities) == 1:
-                only = next(iter(entities))
-                retry = parse_history_csv(text, entity_id=only, max_rows=max_rows)
-                if isinstance(retry, ParsedHistory):
-                    retry.entity_substituted_from = entity_id
-                return retry
-            return {"error": "entity_not_in_file", "entities": out.entities}
-        if not rows:
-            return {"error": "no_readings"}
-
-        ordered = sorted(range(len(rows)), key=lambda i: rows[i][0])
-        out.rows_unordered = sum(1 for pos, i in enumerate(ordered) if pos != i)
-        last_ts: datetime | None = None
-        for i in ordered:
-            timestamp, power = rows[i]
-            if last_ts is not None and timestamp == last_ts:
-                out.rows_duplicate += 1
-                continue
-            out.samples.append((timestamp, power))
-            last_ts = timestamp
-        out.rows_parsed = len(out.samples)
-        return out
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("History CSV parse failed: %s", exc)
-        return {"error": "parse_failed"}
+    return HistoryCsvParser(text, entity_id=entity_id, max_rows=max_rows).result()
 
 
 def samples_from_readings(readings: Iterable[tuple[float, float]]) -> list[Sample]:
@@ -962,6 +1143,181 @@ def mark_already_recorded(
             seg["reason"] = "already_recorded"
             marked += 1
     return marked
+
+
+def _last_active_offset(points: Sequence[tuple[float, float]], stop: float) -> float | None:
+    for offset, power in reversed(points):
+        if power > stop:
+            return offset
+    return None
+
+
+def _offset_points(cycle_data: dict[str, Any]) -> list[tuple[float, float]]:
+    points: list[tuple[float, float]] = []
+    for point in cycle_data.get("power_data") or []:
+        try:
+            points.append((float(point[0]), float(point[1])))
+        except (TypeError, ValueError, IndexError):
+            continue
+    return points
+
+
+def import_tail_probe(
+    cycle_data: dict[str, Any], config: CycleDetectorConfig
+) -> tuple[list[list[float]], float] | None:
+    """The trace to match an imported candidate on, when its tail may be cut.
+
+    Only a dishwasher's timeout finish keeps a tail (``keep_tail``); every other
+    finish of an unmatched replay already snaps back to the last activity. The probe
+    stops at the last activity: matched with the banked wait still on it, two thirds
+    of the corpus candidates found no confident programme (the wait wrecks the
+    duration terms), cut at the activity nine in ten do. Never raises.
+    """
+    try:
+        if getattr(config, "device_type", None) != DEVICE_TYPE_DISHWASHER:
+            return None
+        if cycle_data.get("termination_reason") != TerminationReason.TIMEOUT:
+            return None
+        points = _offset_points(cycle_data)
+        stop = float(getattr(config, "stop_threshold_w", 0.0) or 0.0)
+        last_active = _last_active_offset(points, stop)
+        if last_active is None or last_active <= 0:
+            return None
+        probe = [[o, p] for o, p in points if o <= last_active]
+        return (probe, last_active) if len(probe) >= 2 else None
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
+
+
+async def async_import_tail_cuts(
+    store: Any,
+    config: CycleDetectorConfig,
+    cycles: Sequence[dict[str, Any]],
+    options: dict[str, Any] | None = None,
+    segments: Sequence[dict[str, Any]] = (),
+) -> int:
+    """Stamp ``tail_cut_s`` on every candidate whose banked end wait can be cut.
+
+    Each one is matched (``ProfileStore.async_match_profile`` on its
+    :func:`import_tail_probe`) and must pass ``label_verdict`` at the device's
+    learning floor - the same bar an auto-label clears - before its programme's
+    measured drying span, trusted length and expected duration are applied by
+    :func:`import_tail_cut_s`. The match only names the programme whose
+    statistics bound the cut: the candidate itself stays unlabelled. Returns how
+    many were stamped; never raises (a failed match leaves that candidate as is).
+    """
+    from .profile_store import label_verdict  # pylint: disable=import-outside-toplevel
+
+    learning_floor = float(
+        option_float(
+            (options or {}).get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
+            DEFAULT_LEARNING_CONFIDENCE,
+        )
+        or 0.0
+    )
+    rows = {seg.get("index"): seg for seg in segments or () if isinstance(seg, dict)}
+    stamped = 0
+    stop = float(getattr(config, "stop_threshold_w", 0.0) or 0.0)
+    for position, cycle in enumerate(cycles or ()):
+        try:
+            probe = import_tail_probe(cycle, config)
+            if probe is None:
+                continue
+            result = await store.async_match_profile(
+                probe[0], probe[1], stop_threshold_w=stop
+            )
+            name, _reason = label_verdict(result, learning_floor)
+            if not name:
+                continue
+            cut = import_tail_cut_s(
+                cycle,
+                config,
+                store.profile_terminal_quiet_seconds(name),
+                store.profile_trusted_min_duration(name),
+                getattr(result, "expected_duration", None),
+            )
+            if cut is not None:
+                cycle["tail_cut_s"] = round(cut, 1)
+                stamped += 1
+                # The preview row shows what will be stored, and the overlap check
+                # (`mark_already_recorded`) reads the same span.
+                row = rows.get(position)
+                if row is not None:
+                    row["banked_tail_s"] = round(float(cycle.get("duration") or 0.0) - cut, 1)
+                    row["duration_s"] = round(cut, 1)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("History-import tail match failed: %s", exc)
+    return stamped
+
+
+def effective_duration(cycle_data: dict[str, Any]) -> Any:
+    """The duration a candidate will be stored with: its tail cut, else as detected."""
+    cut = cycle_data.get("tail_cut_s")
+    return cut if cut else cycle_data.get("duration")
+
+
+def import_tail_cut_s(
+    cycle_data: dict[str, Any],
+    config: CycleDetectorConfig,
+    quiet_s: float | None,
+    trusted_min_s: float | None = None,
+    expected_s: float | None = None,
+) -> float | None:
+    """Duration to store for an imported candidate, or None to keep it as detected.
+
+    Audit PLAYGROUND-07: the import replays unmatched, so
+    ``CycleDetector._keep_tail_cap`` has no expected duration and returns None, and a
+    dishwasher's timeout finish (``keep_tail``) banks the whole quiet wait as cycle
+    time - ~20% on the corpus, exactly ``min_off_gap`` on one Beko. The banked-tail
+    repair would undo it but skips ``backfill_cycles``. This is that rule for an
+    import: the dishwasher half of ``_keep_tail_cap`` / ``async_repair_banked_tails``
+    (the same shared ``terminal_quiet_seen`` / ``terminal_event_end`` judgement, the
+    same ``TERMINAL_QUIET_CAP_S``, ``TRUSTED_LENGTH_FLOOR_FRAC`` and
+    ``BANKED_TAIL_REPAIR_MIN_S``), fed the statistics of the programme
+    :func:`async_import_tail_cuts` matched: its measured drying span ``quiet_s``,
+    its trusted length, and - where no span was measured - its expected duration,
+    the live cap's fallback. (The live cap's end-spike shortcut needs detector state
+    the replay does not keep; the trace test covers the same pump-out.) Every other
+    device type's timeout already snaps back to its last activity, so there is
+    nothing to cut. Shorten-only; never raises.
+    """
+    try:
+        if getattr(config, "device_type", None) != DEVICE_TYPE_DISHWASHER:
+            return None
+        if cycle_data.get("termination_reason") != TerminationReason.TIMEOUT:
+            return None
+        quiet = float(quiet_s) if quiet_s is not None else 0.0
+        expected = float(expected_s) if expected_s is not None else 0.0
+        if not (math.isfinite(quiet) and quiet > 0) and not (
+            math.isfinite(expected) and expected > 0
+        ):
+            return None
+        stop = float(getattr(config, "stop_threshold_w", 0.0) or 0.0)
+        points = _offset_points(cycle_data)
+        if len(points) < 2:
+            return None
+        last_active = _last_active_offset(points, stop)
+        if last_active is None:
+            return None
+        if not (math.isfinite(quiet) and quiet > 0):
+            # No measured drying span: the live cap falls back to the programme's
+            # expected end (`_dishwasher_tail_cap`), never before the last activity.
+            new_duration = max(expected, last_active)
+        elif terminal_quiet_seen(points, last_active, stop, quiet, TERMINAL_EVENT_PEAK_FRAC):
+            # The drying already happened before the pump-out: no allowance on top.
+            new_duration = terminal_event_end(points, last_active, TERMINAL_EVENT_PEAK_FRAC)
+        else:
+            new_duration = last_active + min(quiet, TERMINAL_QUIET_CAP_S)
+        if trusted_min_s:
+            # Never below the length the user has vouched for (register item 384).
+            new_duration = max(new_duration, TRUSTED_LENGTH_FLOOR_FRAC * float(trusted_min_s))
+        old_duration = float(cycle_data.get("duration") or 0.0)
+        if old_duration - new_duration < BANKED_TAIL_REPAIR_MIN_S:
+            return None
+        return new_duration
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("History-import tail cut failed: %s", exc)
+        return None
 
 
 def build_backfill_cycle(cycle_data: dict[str, Any]) -> dict[str, Any]:

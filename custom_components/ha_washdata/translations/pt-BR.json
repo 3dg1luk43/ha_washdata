@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Falha ao conectar",
-      "invalid_auth": "Autenticação inválida",
       "unknown": "Erro inesperado",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Limite de confiança",
-          "description": "Confiança mínima de correspondência (0,50–0,95) para aplicar rótulos."
+          "description": "Confiança mínima de correspondência (0,50–0,95) para aplicar rótulos. Deixe vazio para usar a configuração Confiança de Rotulagem Automática do dispositivo."
         }
       }
     },

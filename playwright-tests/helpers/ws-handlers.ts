@@ -77,6 +77,7 @@ const EMPTY_ML_STATUS = {
   interval_days: 7,
   hour: 2,
   running: false,
+  last_run: {},
 };
 
 const EMPTY_ML_COMPARISON = {

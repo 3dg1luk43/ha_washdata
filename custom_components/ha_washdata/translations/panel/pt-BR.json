@@ -202,7 +202,8 @@
     "confirm_appliance": "Confirmar este eletrodoméstico",
     "confirmed": "Confirmado",
     "create_profile_from_gap": "Criar perfil",
-    "undo_import": "Desfazer a última importação"
+    "undo_import": "Desfazer a última importação",
+    "pg_rerun": "Atualizar simulação"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -617,7 +618,12 @@
     "automation_off": "(desativada)",
     "ref_cycle_none": "Nenhum",
     "share_name": "Mostrar meu nome no que eu compartilho",
-    "cat_backfill_cycles": "Ciclos encontrados em um histórico de potência importado"
+    "cat_backfill_cycles": "Ciclos encontrados em um histórico de potência importado",
+    "pg_compare_profile": "Comparar com perfil",
+    "pg_obj_early": "Taxa de fins antecipados",
+    "pg_obj_endlag": "Atraso do fim (mediana)",
+    "pg_obj_split": "Taxa de divisões",
+    "pg_sweep_cycles": "Ciclos recentes"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -646,7 +652,25 @@
     },
     "metric_auc": "AUC {auc} em dados de validação",
     "metric_mae": "erro {model} vs. linha de base {baseline}",
-    "fine_tuned_at": "ajustado em {when}"
+    "fine_tuned_at": "ajustado em {when}",
+    "held_out_count": "medido em {count} ciclos de validação",
+    "held_out_count_one": "medido em {count} ciclo de validação",
+    "held_out_count_many": "medido em {count} ciclos de validação",
+    "held_out_count_other": "medido em {count} ciclos de validação",
+    "last_run_not_promoted": "Última verificação ({when}): {reason}",
+    "never": "nunca",
+    "skip_reason": {
+      "fit_failed": "O treinamento falhou: {error}",
+      "holdout_too_small": "Poucos ciclos para testar um novo modelo de forma justa: {held_out} puderam ser separados para teste, são necessários {min}.",
+      "insufficient_rows": "Ainda não há ciclos utilizáveis suficientes: até agora, {count} ciclos rotulados e limpos.",
+      "insufficient_rows_one": "Ainda não há ciclos utilizáveis suficientes: até agora, {count} ciclo rotulado e limpo.",
+      "insufficient_rows_many": "Ainda não há ciclos utilizáveis suficientes: até agora, {count} ciclos rotulados e limpos.",
+      "insufficient_rows_other": "Ainda não há ciclos utilizáveis suficientes: até agora, {count} ciclos rotulados e limpos.",
+      "not_better_than_incumbent": "O novo modelo não era melhor do que o que está em uso (erro {model} vs. {incumbent}), então o atual foi mantido.",
+      "not_better_than_naive": "O novo modelo não era claramente melhor do que a estimativa simples (erro {model} vs. {naive}).",
+      "unknown": "Nada de novo foi aprendido."
+    },
+    "trained_unknown": "em um momento desconhecido"
   },
   "modal": {
     "auto_label": "Rotulagem automática de ciclos",
@@ -969,7 +993,23 @@
     "feedback_detected": "O WashData detectou: {name}",
     "import_undo_hint": "Um ponto de restauração de antes da última importação ({when}) é mantido: {profiles} perfil(is) e {cycles} ciclo(s).",
     "replace_undo_hint": "Um ponto de restauração é salvo primeiro, então você pode desfazer esta importação em Exportar / Importar.",
-    "pg_in_sample_note": "Esses ciclos também ajudaram a construir os perfis com os quais são comparados, então esses resultados são otimistas: em ciclos novos, espere um pouco menos de correspondências corretas."
+    "pg_in_sample_note": "Esses ciclos também ajudaram a construir os perfis com os quais são comparados, então esses resultados são otimistas: em ciclos novos, espere um pouco menos de correspondências corretas.",
+    "hist_tail_trimmed": "Foram cortados {min} min de espera após o fim do ciclo, como faz a integração em tempo real",
+    "hist_truncated": "parou no limite de {n} leituras, então o restante do histórico não foi analisado",
+    "hist_warn_kw": "A leitura mais alta é de apenas {w}. Este sensor parece informar quilowatts; o WashData lê a potência em watts, então não é possível detectar ciclos a partir dele.",
+    "hist_warn_naive_time": "{n} carimbos de data/hora não têm fuso horário e foram lidos como UTC. Se o arquivo estiver no horário local, cada ciclo fica deslocado pela sua diferença em relação ao UTC, e as leituras próximas a uma mudança de horário de verão podem ser reordenadas ou descartadas.",
+    "hist_warn_naive_time_one": "{n} carimbo de data/hora não tem fuso horário e foi lido como UTC. Se o arquivo estiver no horário local, cada ciclo fica deslocado pela sua diferença em relação ao UTC, e as leituras próximas a uma mudança de horário de verão podem ser reordenadas ou descartadas.",
+    "hist_warn_naive_time_many": "{n} carimbos de data/hora não têm fuso horário e foram lidos como UTC. Se o arquivo estiver no horário local, cada ciclo fica deslocado pela sua diferença em relação ao UTC, e as leituras próximas a uma mudança de horário de verão podem ser reordenadas ou descartadas.",
+    "hist_warn_naive_time_other": "{n} carimbos de data/hora não têm fuso horário e foram lidos como UTC. Se o arquivo estiver no horário local, cada ciclo fica deslocado pela sua diferença em relação ao UTC, e as leituras próximas a uma mudança de horário de verão podem ser reordenadas ou descartadas.",
+    "pg_compare_profile_tip": "Escolhe apenas o perfil desenhado sobre o gráfico. A simulação sempre busca por conta própria a correspondência do ciclo, como faz a integração em tempo real.",
+    "pg_outcome_stale": "As configurações mudaram desde que esta simulação foi executada. Ela ainda mostra o resultado antigo.",
+    "pg_sweep_guarded": "Encerra mais ciclos antes da hora, divide mais ciclos ou deixa passar ciclos que a configuração atual detecta, então este valor nunca é recomendado.",
+    "pg_sweep_keep_current": "Mantenha o valor atual ({value}, {metric}): nenhum valor foi melhor por pelo menos um ciclo.",
+    "pg_sweep_n_cycles": "em {count} ciclos",
+    "pg_sweep_n_cycles_one": "em {count} ciclo",
+    "pg_sweep_n_cycles_many": "em {count} ciclos",
+    "pg_sweep_n_cycles_other": "em {count} ciclos",
+    "pg_task_busy": "Já há uma execução de Testar no histórico ou Otimizar em andamento para este dispositivo. Aguarde até que termine ou cancele-a."
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -1132,7 +1172,7 @@
       "label": "Aplicar modelos inteligentes durante um ciclo"
     },
     "end_energy_threshold": {
-      "doc": "Durante a contagem regressiva do atraso de desligamento, a energia acumulada (watts x tempo) é comparada a esse limite. Se excedido, a contagem regressiva é reiniciada - mantendo os rolos anti-rugas e os restos de secagem da máquina de lavar louça presos ao ciclo, em vez de cortá-los. Aumente se os ciclos terminarem muito cedo durante o resfriamento; abaixe-o se a detecção for lenta.",
+      "doc": "Quando o atraso de desligamento termina, a energia consumida durante esse período (watts x tempo) é comparada a este limite. Acima dele, o ciclo ainda não terminou, o que mantém os giros antiamasso e as fases finais de secagem da lava-louças ligados ao ciclo em vez de cortá-los. Diminua-o se os ciclos terminarem durante um giro de resfriamento ou uma fase final de secagem; aumente-o se ciclos já terminados continuarem esperando.",
       "label": "Energia de Fim"
     },
     "energy_price_entity": {
@@ -1743,7 +1783,15 @@
     "store_download_partial": "Não foi possível baixar {n} programa(s); tente novamente mais tarde.",
     "import_no_restore_point": "Importado, mas não foi possível salvar um ponto de restauração, então esta importação não pode ser desfeita",
     "import_undo_failed": "Não foi possível desfazer a importação: {error}",
-    "import_undone": "Importação desfeita: {profiles} perfil(is) e {cycles} ciclo(s) restaurados"
+    "import_undone": "Importação desfeita: {profiles} perfil(is) e {cycles} ciclo(s) restaurados",
+    "auto_label_cancelled": "Rotulagem automática cancelada após rotular {count} ciclos.",
+    "auto_label_cancelled_one": "Rotulagem automática cancelada após rotular {count} ciclo.",
+    "auto_label_cancelled_many": "Rotulagem automática cancelada após rotular {count} ciclos.",
+    "auto_label_cancelled_other": "Rotulagem automática cancelada após rotular {count} ciclos.",
+    "auto_label_done": "Rotulagem automática concluída: {count} ciclos rotulados, {skipped} sem rótulo.",
+    "auto_label_done_one": "Rotulagem automática concluída: {count} ciclo rotulado, {skipped} sem rótulo.",
+    "auto_label_done_many": "Rotulagem automática concluída: {count} ciclos rotulados, {skipped} sem rótulo.",
+    "auto_label_done_other": "Rotulagem automática concluída: {count} ciclos rotulados, {skipped} sem rótulo."
   },
   "suggestion": {
     "observed_label": "Observado",

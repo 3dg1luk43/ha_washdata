@@ -403,98 +403,29 @@ def _build_match_snapshots(
     cohesive groups exist ``group_members`` and ``member_snaps`` are both empty
     dicts and behaviour is identical to before.
     """
-    snapshots: list[dict[str, Any]] = []
-    # The live builder when the store has one (item 387a), on the grid a replayed
-    # cycle starts on; `_SimStore` re-grids per match, as live does. Looked
-    # up on the TYPE so a MagicMock store (tests) keeps the legacy path below.
-    if callable(getattr(type(store), "build_match_snapshots", None)):
-        try:
-            snapshots = store.build_match_snapshots(_PLAYGROUND_START_DT)
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Playground: live snapshot builder failed: %s", exc)
-            snapshots = []
-        try:
-            grouped_snaps, group_members, member_snaps = store._grouped_snapshots(  # pylint: disable=protected-access
-                snapshots
-            )
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Playground: _grouped_snapshots failed: %s", exc)
-            grouped_snaps, group_members, member_snaps = snapshots, {}, {}
-        return grouped_snaps, _matching_config(store, in_progress=True), group_members, member_snaps
+    # in_progress: the sim replays a cycle step by step, so every match it runs is
+    # a live one - the same footing as manager._async_do_perform_matching (#400).
+    config = _matching_config(store, in_progress=True)
+    # The live builder (item 387a), on the grid a replayed cycle starts on;
+    # `_SimStore` re-grids per match, as live does. A store without it (the sim
+    # run with no store at all) has nothing to match against. The hand-rolled
+    # builder that used to serve a MagicMock store here had no production caller.
+    if not callable(getattr(type(store), "build_match_snapshots", None)):
+        return [], config, {}, {}
     try:
-        data = getattr(store, "_data", {}) or {}
-        # Snapshot the profiles dict before iterating: this runs in an executor thread
-        # (ws_api dispatches _build_match_snapshots via async_add_executor_job) while the
-        # event loop may add/remove a profile (cycle-end creation, GC, auto-label), and a
-        # live `.items()` walk would raise "dictionary changed size during iteration" -
-        # the same race get_export_inventory was moved on-loop to avoid. dict() is a cheap
-        # shallow copy of the top-level mapping (values are read-only here). iter_evidence_
-        # cycles() below returns a fresh list, so its .extend() is already snapshot-safe.
-        profiles = dict(data.get("profiles", {}) or {})
-        # Include every cycle the live matcher would consider, via the store's own
-        # evidence view: an import-only profile samples from reference_cycles or
-        # backfill_cycles, so a snapshot pool built from past_cycles alone would drop it
-        # as a candidate and the Playground's auto-detect would never match a downloaded
-        # or backfilled profile - silently reporting it as unmatched. Reading the same
-        # gated view the matcher reads also keeps the sandbox honest when the user has
-        # excluded a category from shaping profiles.
-        try:
-            pool = store.iter_evidence_cycles()
-        except Exception:  # pylint: disable=broad-exception-caught
-            # Older store without the evidence view: fall back to the raw lists. Include
-            # backfill_cycles too (the evidence view does), else a profile whose sample
-            # lives only in imported history has no snapshot and the sim reports it
-            # unmatched though live matching can use it.
-            pool = (
-                list(data.get("past_cycles", []) or [])
-                + list(data.get("reference_cycles", []) or [])
-                + list(data.get("backfill_cycles", []) or [])
-            )
-        by_id = {c.get("id"): c for c in pool if isinstance(c, dict)}
-        for name, profile in profiles.items():
-            if not isinstance(profile, dict):
-                continue
-            sample_cycle = by_id.get(profile.get("sample_cycle_id"))
-            if not sample_cycle:
-                continue
-            sample_p = decompress_power_data(sample_cycle)
-            if not sample_p:
-                continue
-            avg_dur = (
-                profile.get("avg_duration")
-                or sample_cycle.get("duration")
-                or 0.0
-            )
-            snapshots.append(
-                {
-                    "name": name,
-                    "avg_duration": float(avg_dur),
-                    "sample_power": [p for _, p in sample_p],
-                    # The trace's own time span, which is NOT avg_duration (a trimmed
-                    # mean across cycles). `analysis._prefix_point_count` converts
-                    # elapsed time to an index with it, so omitting it made the sim
-                    # truncate the prefix at a different point than production.
-                    "sample_span_s": float(sample_p[-1][0] - sample_p[0][0]),
-                }
-            )
+        snapshots = store.build_match_snapshots(_PLAYGROUND_START_DT)
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground: snapshot build failed: %s", exc)
-
+        _LOGGER.debug("Playground: live snapshot builder failed: %s", exc)
+        snapshots = []
     # Stage-5: map cohesive profile groups to their members; every member is
     # scored on its own curve and collapse_group_candidates forms the family.
-    group_members: dict[str, list[str]] = {}
-    member_snaps: dict[str, Any] = {}
     try:
         grouped_snaps, group_members, member_snaps = store._grouped_snapshots(  # pylint: disable=protected-access
             snapshots
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground: _grouped_snapshots failed: %s", exc)
-        grouped_snaps = snapshots
-
-    # in_progress: the sim replays a cycle step by step, so every match it runs is
-    # a live one - the same footing as manager._async_do_perform_matching (#400).
-    config = _matching_config(store, in_progress=True)
+        grouped_snaps, group_members, member_snaps = snapshots, {}, {}
     return grouped_snaps, config, group_members, member_snaps
 
 
@@ -849,6 +780,18 @@ class _DetailSim:
         self.label = _cycle_label(cycle)
         self.readings, _points, self.base = _readings_from_cycle(cycle)
         self.stored_duration = _safe_float(cycle.get("duration"))
+        # When the appliance actually ran, for the Optimize end-timing objectives
+        # (audit PLAYGROUND-08): first/last reading above the LIVE stop threshold,
+        # never the override's, so a swept threshold cannot move its own yardstick.
+        # Same definition as devtools/end_gate_eval.py (`_active_span`).
+        _truth_stop = float(getattr(base_config, "stop_threshold_w", 0.0) or 0.0)
+        _active = [
+            (ts - self.base).total_seconds() for ts, p in self.readings if p > _truth_stop
+        ]
+        self.active_end_s: float | None = _active[-1] if _active else None
+        self.active_span_s: float | None = (
+            _active[-1] - _active[0] if len(_active) >= 2 else None
+        )
 
         self.outcome: dict[str, Any] = {
             "detected": False,
@@ -870,6 +813,7 @@ class _DetailSim:
             "would_label": False,
             "label_profile": None,
             "label_reason": "no_cycle",
+            "end_offset_s": None,
         }
         if prebuilt is None:
             prebuilt = _build_match_snapshots(store)
@@ -988,6 +932,9 @@ class _DetailSim:
             "cycle_id": self.cycle.get("id"),
             "label": self.label,
             "duration_s": self.stored_duration,
+            "start_time": self.cycle.get("start_time"),
+            "active_end_s": _safe_float(self.active_end_s),
+            "active_span_s": _safe_float(self.active_span_s),
             "config_summary": _sim_config_summary(self.config),
             "series": [],
             "events": [],
@@ -1051,6 +998,8 @@ class _DetailSim:
             "expected": st.matched_duration if program else None,
             "ambiguous": bool(self.last_match.get("ambiguous")),
             "live_result": self._last_result,
+            # Replay offset at which WashData said "done" (end lag, PLAYGROUND-08).
+            "t": self.cursor["t"],
         })
         # ...and the terminal reset at its tail: the next cycle starts from "off"
         # with no live result, as live does once the cycle has been processed.
@@ -1486,6 +1435,7 @@ class _DetailSim:
             # a later sub-cycle left behind.
             end = self.cycle_ends[idx] if idx < len(self.cycle_ends) else None
             if end is not None:
+                outcome["end_offset_s"] = _safe_float(end.get("t"))
                 last_match.update(
                     name=end["program"],
                     conf=float(end["confidence"] or 0.0),
@@ -1598,6 +1548,9 @@ class _DetailSim:
             "cycle_id": self.cycle.get("id"),
             "label": self.label,
             "duration_s": self.stored_duration,
+            "start_time": self.cycle.get("start_time"),
+            "active_end_s": _safe_float(self.active_end_s),
+            "active_span_s": _safe_float(self.active_span_s),
             "config_summary": _sim_config_summary(self.config),
             "series": series,
             "events": self.events,
@@ -1637,9 +1590,44 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
 # ─── Test-on-history rows + before/after diff ───────────────────────────────────
 
 
+# A detected end more than this before the appliance's last activity is an early
+# end (devtools/end_gate_eval.py's `early_1min`): the cycle was cut short.
+_EARLY_END_S = 60.0
+# A run whose longest piece covers less than this share of its active span did not
+# survive as one cycle (end_gate_eval's split rule).
+_SPLIT_SPAN_FRAC = 0.9
+
+
+def _end_timing(detail: dict[str, Any]) -> tuple[float | None, bool, bool]:
+    """``(end_lag_s, early_end, split)`` of one replay (audit PLAYGROUND-08).
+
+    The lag is when WashData said "done" minus when the appliance last drew power,
+    the number ``devtools/end_gate_eval.py`` measures; the stored duration is
+    trimmed back to the last activity (item 297) and cannot show it. A run that
+    never finished counts as split: it did not survive as one cycle.
+    """
+    o = detail.get("outcome", {}) or {}
+    if not o.get("detected"):
+        return None, False, True
+    end_t = o.get("end_offset_s")
+    active_end = detail.get("active_end_s")
+    lag = (
+        round(float(end_t) - float(active_end), 1)
+        if end_t is not None and active_end is not None
+        else None
+    )
+    span = detail.get("active_span_s")
+    final = o.get("final_duration_s")
+    split = int(o.get("detected_count") or 0) > 1 or bool(
+        span and final is not None and float(final) < _SPLIT_SPAN_FRAC * float(span)
+    )
+    return lag, lag is not None and lag < -_EARLY_END_S, split
+
+
 def _detail_to_row(detail: dict[str, Any]) -> dict[str, Any]:
     """Compact per-cycle row for the Test-on-history table from a detail sim."""
     o = detail.get("outcome", {})
+    end_lag, early_end, split = _end_timing(detail)
     return {
         "cycle_id": detail.get("cycle_id"),
         "label": detail.get("label"),
@@ -1660,6 +1648,12 @@ def _detail_to_row(detail: dict[str, Any]) -> dict[str, Any]:
         "label_profile": o.get("label_profile"),
         "label_reason": o.get("label_reason"),
         "alerts": [a.get("code") for a in detail.get("alerts", [])],
+        "end_lag_s": end_lag,
+        "early_end": early_end,
+        "split": split,
+        # "Last N" can reach past the panel's loaded page of cycles, so the row
+        # carries its own date (PLAYGROUND-18).
+        "start_time": (detail.get("start_time") if isinstance(detail.get("start_time"), str) else None),
     }
 
 
@@ -1679,6 +1673,8 @@ def _rows_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "match_wrong": wrong,
         "unmatched": unmatched,
         "false_end": false_end,
+        "early_end": sum(1 for r in rows if r.get("early_end")),
+        "split": sum(1 for r in rows if r.get("split")),
     }
 
 
@@ -1708,6 +1704,26 @@ def _run_rows(
     return rows
 
 
+def _select_cycles(
+    store: Any, cycle_ids: list[str] | None, count: int | None = None
+) -> list[dict[str, Any]]:
+    """The stored cycles a History / Optimize run replays, at most
+    ``MAX_BATCH_CYCLES``: ``cycle_ids`` in order (unknown ids dropped); else the
+    ``count`` most recent, newest first - the panel's "Last N", which its loaded
+    page of 25 cycles could not supply as ids (audit PLAYGROUND-18); else the most
+    recent ``DEFAULT_RECENT_CYCLES`` in stored order."""
+    past = [c for c in (store.get_past_cycles() or []) if isinstance(c, dict)]
+    if cycle_ids:
+        by_id = {c.get("id"): c for c in past}
+        selected = [by_id[c] for c in cycle_ids if c in by_id]
+    elif count:
+        n = max(1, min(MAX_BATCH_CYCLES, int(count)))
+        selected = list(reversed(past[-n:]))
+    else:
+        selected = past[-DEFAULT_RECENT_CYCLES:]
+    return selected[:MAX_BATCH_CYCLES]
+
+
 def run_playground_history(
     store: Any,
     cycle_ids: list[str] | None,
@@ -1726,17 +1742,10 @@ def run_playground_history(
     except (TypeError, ValueError):
         concurrency = MAX_BATCH_CYCLES
     try:
-        past = list(store.get_past_cycles() or [])
+        selected = _select_cycles(store, cycle_ids)[:concurrency]
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground history: get_past_cycles failed: %s", exc)
         return {"rows": [], "summary": _rows_summary([])}
-
-    by_id = {c.get("id"): c for c in past if isinstance(c, dict)}
-    if cycle_ids:
-        selected = [by_id[c] for c in cycle_ids if c in by_id]
-    else:
-        selected = past[-DEFAULT_RECENT_CYCLES:]
-    selected = selected[:concurrency]
 
     override = settings_override or None
     rows = _run_rows(store, selected, base_config, override, options, price, prebuilt)
@@ -1801,6 +1810,12 @@ _SWEEP_OBJECTIVES = (
     "false_end_rate",
     "median_overrun",
     "ambiguity_rate",
+    # What the end-gate settings actually move (audit PLAYGROUND-08): none of the
+    # five above changed while off_delay 60 -> 1800 s moved the mean end lag
+    # 19.8 -> 25.4 min, because the stored duration is trimmed to the activity.
+    "end_lag",
+    "early_end_rate",
+    "split_rate",
 )
 # Objectives where a LOWER metric is better (best = minimum), so the sweep picks
 # the right winner and the panel colours the heatmap consistently.
@@ -1808,7 +1823,16 @@ _SWEEP_LOWER_IS_BETTER = frozenset({
     "false_end_rate",
     "median_overrun",
     "ambiguity_rate",
+    "end_lag",
+    "early_end_rate",
+    "split_rate",
 })
+# Smallest change worth recommending over the current value. A rate moves in
+# steps of one cycle (1/N, passed by the caller), so anything less is the
+# denominator moving, not a cycle getting better; the end lag is measured on a
+# replay whose tail steps are 30 s; the overrun deviation is a share of the
+# profile's length.
+_SWEEP_MIN_GAIN = {"end_lag": 60.0, "median_overrun": 0.01}
 
 
 def _sweep_is_better(candidate: float, best: float, objective: str) -> bool:
@@ -1817,23 +1841,111 @@ def _sweep_is_better(candidate: float, best: float, objective: str) -> bool:
     return candidate > best
 
 
-def finalize_sweep_1d(
-    param: str, objective: str, points: list[dict[str, Any]], current_value: Any
+def _sweep_min_gain(objective: str, n_cycles: int) -> float:
+    if objective in _SWEEP_MIN_GAIN:
+        return _SWEEP_MIN_GAIN[objective]
+    # A tiny epsilon below one cycle so 1/N itself, after rounding, still counts.
+    return (1.0 / n_cycles - 1e-6) if n_cycles > 0 else 0.0
+
+
+def _sweep_regresses(summary: Any, baseline: Any) -> bool:
+    """Does ``summary`` lose what the current setting has? The hard guard: a value
+    that ends more cycles early, splits more of them, or detects fewer can never be
+    recommended, whatever its objective says (audit PLAYGROUND-08)."""
+    if not isinstance(summary, dict) or not isinstance(baseline, dict):
+        return False
+    return (
+        int(summary.get("early_end") or 0) > int(baseline.get("early_end") or 0)
+        or int(summary.get("split") or 0) > int(baseline.get("split") or 0)
+        or int(summary.get("detected") or 0) < int(baseline.get("detected") or 0)
+    )
+
+
+def sweep_baseline(
+    store: Any,
+    cycle_ids: list[str] | None,
+    base_config: CycleDetectorConfig,
+    objective: str,
+    options: dict[str, Any] | None,
+    price: float | None,
+    prebuilt: tuple[Any, Any, Any, Any] | None = None,
 ) -> dict[str, Any]:
-    """Assemble a 1D sweep payload from per-value points collected across chunks,
-    picking the best via the same direction rule as :func:`run_playground_sweep`."""
+    """The current settings' metric and summary over the sweep's cycles: what every
+    swept value has to beat. Executor-safe; never raises."""
+    try:
+        selected = _select_cycles(store, cycle_ids)
+        rows = _run_rows(store, selected, base_config, None, options or {}, price, prebuilt)
+        metric = objective_metric(rows, objective)
+        return {
+            "metric": round(metric, 4) if metric is not None else None,
+            "summary": _rows_summary(rows),
+        }
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Playground sweep baseline failed: %s", exc)
+        return {"metric": None, "summary": None}
+
+
+def finalize_sweep_1d(
+    param: str,
+    objective: str,
+    points: list[dict[str, Any]],
+    current_value: Any,
+    baseline: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Assemble a 1D sweep payload from per-value points collected across chunks.
+
+    With a ``baseline`` (:func:`sweep_baseline`, the current settings on the same
+    cycles) the recommendation is conservative (audit PLAYGROUND-08): a value that
+    regresses early ends, splits or detection is never best; and unless the best
+    value beats the current one by at least one cycle (:func:`_sweep_min_gain`) the
+    answer is to keep the current value - a tie used to pick the first swept value,
+    so "Apply best" offered ``off_delay=60``. Without one, ties still prefer the
+    current value over the first."""
+    base_summary = (baseline or {}).get("summary")
+    base_metric = (baseline or {}).get("metric")
+    n_cycles = int((base_summary or {}).get("cycles") or 0) or max(
+        (int((p.get("summary") or {}).get("cycles") or 0) for p in points), default=0
+    )
+
+    def _is_current(value: Any) -> bool:
+        try:
+            return current_value is not None and abs(float(value) - float(current_value)) < 1e-6
+        except (TypeError, ValueError):
+            return False
+
     best: dict[str, Any] | None = None
     for p in points:
         m = p.get("metric")
-        if m is None:
+        guarded = base_summary is not None and _sweep_regresses(p.get("summary"), base_summary)
+        p["guarded"] = guarded
+        if m is None or guarded:
             continue
-        if best is None or _sweep_is_better(m, best["metric"], objective):
+        if (
+            best is None
+            or _sweep_is_better(m, best["metric"], objective)
+            or (m == best["metric"] and _is_current(p["value"]))
+        ):
             best = {"value": p["value"], "metric": m}
+    keep_current = False
+    if base_metric is not None:
+        gain = _sweep_min_gain(objective, n_cycles)
+        if best is None or not (
+            (base_metric - best["metric"] if objective in _SWEEP_LOWER_IS_BETTER
+             else best["metric"] - base_metric) >= gain
+        ):
+            best = {"value": current_value, "metric": base_metric}
+            keep_current = True
+    elif best is not None and _is_current(best["value"]):
+        keep_current = True
     return {
         "param": param, "objective": objective, "points": points,
         "current_value": current_value,
+        "current_metric": base_metric,
+        "current_summary": base_summary,
         "best_value": best["value"] if best else None,
         "best_metric": best["metric"] if best else None,
+        "keep_current": keep_current,
+        "cycles": n_cycles,
         "lower_is_better": objective in _SWEEP_LOWER_IS_BETTER,
     }
 
@@ -1874,6 +1986,19 @@ def objective_metric(rows: list[dict[str, Any]], objective: str) -> float | None
             if abs(dur - ref) <= 0.10 * ref:
                 ok += 1
         return (ok / n) if n else None
+    if objective == "end_lag":
+        # Median seconds from the appliance's last activity to WashData's "done".
+        lags = [float(r["end_lag_s"]) for r in detected if r.get("end_lag_s") is not None]
+        if not lags:
+            return None
+        lags.sort()
+        mid = len(lags) // 2
+        return lags[mid] if len(lags) % 2 else (lags[mid - 1] + lags[mid]) / 2.0
+    if objective in ("early_end_rate", "split_rate"):
+        # Over EVERY replayed cycle, not just the detected ones: a value that stops
+        # detecting a hard cycle must not shrink its own denominator and win.
+        key = "early_end" if objective == "early_end_rate" else "split"
+        return sum(1 for r in rows if r.get(key)) / len(rows)
     if objective == "median_overrun":
         # Score by the median duration's DEVIATION from the profile's expected
         # duration (|ratio - 1|), so "best" is the value that makes cycles land
@@ -1926,16 +2051,10 @@ def run_playground_sweep(
     except (TypeError, ValueError):
         concurrency = MAX_BATCH_CYCLES
     try:
-        past = list(store.get_past_cycles() or [])
+        selected = _select_cycles(store, cycle_ids)[:concurrency]
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground sweep: get_past_cycles failed: %s", exc)
         return {"error": "no cycles"}
-    by_id = {c.get("id"): c for c in past if isinstance(c, dict)}
-    if cycle_ids:
-        selected = [by_id[c] for c in cycle_ids if c in by_id]
-    else:
-        selected = past[-DEFAULT_RECENT_CYCLES:]
-    selected = selected[:concurrency]
 
     def _metric_for(override: dict[str, Any]) -> tuple[float | None, dict[str, Any]]:
         rows = _run_rows(store, selected, base_config, override, options, price, prebuilt)
@@ -1956,7 +2075,6 @@ def run_playground_sweep(
             current_x = None
 
     points: list[dict[str, Any]] = []
-    best_1d: dict[str, Any] | None = None
     for vx in values:
         override = {param: _coerce_param(base_config, param, vx)}
         metric, summary = _metric_for(override)
@@ -1964,16 +2082,9 @@ def run_playground_sweep(
             {"value": vx, "metric": round(metric, 4) if metric is not None else None,
              "summary": summary}
         )
-        if metric is not None and (
-            best_1d is None or _sweep_is_better(metric, best_1d["metric"], objective)
-        ):
-            best_1d = {"value": vx, "metric": round(metric, 4)}
-    return {
-        "param": param, "objective": objective, "points": points,
-        "current_value": current_x,
-        "best_value": best_1d["value"] if best_1d else None,
-        "best_metric": best_1d["metric"] if best_1d else None,
-    }
+    # One selection rule for the one-shot and the chunked task (which adds the
+    # current-settings baseline the guard and the keep-current rule need).
+    return finalize_sweep_1d(param, objective, points, current_x)
 
 
 # ─── DTW debug ────────────────────────────────────────────────────────────────

@@ -247,7 +247,8 @@
         "confirm_appliance": "Bu cihazı onayla",
         "confirmed": "Onaylandı",
         "create_profile_from_gap": "Profil oluştur",
-        "undo_import": "Son içe aktarmayı geri al"
+        "undo_import": "Son içe aktarmayı geri al",
+        "pg_rerun": "Simülasyonu güncelle"
     },
     "note": {
         "off_delay": {
@@ -664,7 +665,12 @@
         "automation_off": "(kapalı)",
         "ref_cycle_none": "Yok",
         "share_name": "Paylaştıklarımda adımı göster",
-        "cat_backfill_cycles": "İçe aktarılan güç geçmişinde bulunan döngüler"
+        "cat_backfill_cycles": "İçe aktarılan güç geçmişinde bulunan döngüler",
+        "pg_compare_profile": "Karşılaştırılacak profil",
+        "pg_obj_early": "Erken bitiş oranı",
+        "pg_obj_endlag": "Bitiş gecikmesi (medyan)",
+        "pg_obj_split": "Bölünme oranı",
+        "pg_sweep_cycles": "Son döngüler"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -693,7 +699,23 @@
         },
         "metric_auc": "Ayrılmış doğrulama verisinde AUC {auc}",
         "metric_mae": "hata {model} - temel model {baseline}",
-        "fine_tuned_at": "ince ayar: {when}"
+        "fine_tuned_at": "ince ayar: {when}",
+        "last_run_not_promoted": "Son kontrol ({when}): {reason}",
+        "never": "hiçbir zaman",
+        "skip_reason": {
+            "fit_failed": "Eğitim başarısız oldu: {error}",
+            "holdout_too_small": "Yeni bir modeli adil şekilde test etmek için çok az döngü var: test için {held_out} döngü ayrılabildi, {min} gerekiyor.",
+            "not_better_than_incumbent": "Yeni model kullanımdaki modelden daha iyi değildi (hata: {model}, kullanımdaki: {incumbent}), bu yüzden mevcut model korundu.",
+            "not_better_than_naive": "Yeni model basit tahminden açıkça daha iyi değildi (hata: {model}, basit tahmin: {naive}).",
+            "unknown": "Yeni bir şey öğrenilmedi.",
+            "insufficient_rows": "Henüz yeterli kullanılabilir döngü yok: şu ana kadar {count} etiketli, temiz döngü var.",
+            "insufficient_rows_one": "Henüz yeterli kullanılabilir döngü yok: şu ana kadar {count} etiketli, temiz döngü var.",
+            "insufficient_rows_other": "Henüz yeterli kullanılabilir döngü yok: şu ana kadar {count} etiketli, temiz döngü var."
+        },
+        "trained_unknown": "bilinmeyen zaman",
+        "held_out_count": "{count} ayrılmış doğrulama döngüsünde ölçüldü",
+        "held_out_count_one": "{count} ayrılmış doğrulama döngüsünde ölçüldü",
+        "held_out_count_other": "{count} ayrılmış doğrulama döngüsünde ölçüldü"
     },
     "modal": {
         "auto_label": "Döngüleri Otomatik Etiketle",
@@ -1010,7 +1032,21 @@
         "feedback_detected": "WashData algıladı: {name}",
         "import_undo_hint": "Son içe aktarmadan ({when}) önceki bir geri yükleme noktası saklanıyor: {profiles} profil ve {cycles} döngü.",
         "replace_undo_hint": "Önce bir geri yükleme noktası kaydedilir, böylece bu içe aktarmayı Dışa / İçe Aktar bölümünden geri alabilirsiniz.",
-        "pg_in_sample_note": "Bu döngüler, eşleştirildikleri profillerin oluşturulmasına da katkıda bulundu, bu yüzden bu sonuçlar iyimserdir: yeni döngülerde biraz daha az doğru eşleşme bekleyin."
+        "pg_in_sample_note": "Bu döngüler, eşleştirildikleri profillerin oluşturulmasına da katkıda bulundu, bu yüzden bu sonuçlar iyimserdir: yeni döngülerde biraz daha az doğru eşleşme bekleyin.",
+        "hist_tail_trimmed": "Döngü bittikten sonraki {min} dk bekleme, canlı entegrasyonun yaptığı gibi kırpıldı",
+        "hist_truncated": "{n} okuma sınırında durdu, bu yüzden geçmişin geri kalanı taranmadı",
+        "hist_warn_kw": "En yüksek okuma yalnızca {w}. Bu sensör kilovat cinsinden raporluyor gibi görünüyor; WashData gücü watt cinsinden okur, bu yüzden bu sensörden döngü algılanamaz.",
+        "pg_compare_profile_tip": "Yalnızca grafiğin üzerine çizilecek profili seçer. Simülasyon, canlı entegrasyonda olduğu gibi döngüyü her zaman kendisi eşleştirir.",
+        "pg_outcome_stale": "Bu simülasyon çalıştırıldıktan sonra ayarlar değişti. Hâlâ eski sonucu gösteriyor.",
+        "pg_sweep_guarded": "Daha fazla döngüyü erken bitirir, daha fazlasını böler veya mevcut ayarın yakaladığı döngüleri kaçırır, bu yüzden asla önerilmez.",
+        "pg_sweep_keep_current": "Mevcut değeri koruyun ({value}, {metric}): hiçbir değer en az bir döngü farkla daha iyi sonuç vermedi.",
+        "pg_task_busy": "Bu cihaz için zaten bir geçmişte test veya optimizasyon çalışması sürüyor. Bitmesini bekleyin veya iptal edin.",
+        "hist_warn_naive_time": "{n} zaman damgasının saat dilimi yok ve UTC olarak okundu. Dosya yerel saatteyse her döngü UTC farkınız kadar kayar ve yaz saati geçişi civarındaki okumaların sırası bozulabilir veya bu okumalar atılabilir.",
+        "hist_warn_naive_time_one": "{n} zaman damgasının saat dilimi yok ve UTC olarak okundu. Dosya yerel saatteyse her döngü UTC farkınız kadar kayar ve yaz saati geçişi civarındaki okumaların sırası bozulabilir veya bu okumalar atılabilir.",
+        "hist_warn_naive_time_other": "{n} zaman damgasının saat dilimi yok ve UTC olarak okundu. Dosya yerel saatteyse her döngü UTC farkınız kadar kayar ve yaz saati geçişi civarındaki okumaların sırası bozulabilir veya bu okumalar atılabilir.",
+        "pg_sweep_n_cycles": "{count} döngü üzerinden",
+        "pg_sweep_n_cycles_one": "{count} döngü üzerinden",
+        "pg_sweep_n_cycles_other": "{count} döngü üzerinden"
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1181,7 +1217,7 @@
             "label": "Döngü sırasında akıllı modelleri uygula"
         },
         "end_energy_threshold": {
-            "doc": "Düşmede gecikme geri sayımı sırasında biriken enerji (watt x zaman) bu eşikle karşılaştırılır. Aşılması durumunda geri sayım sıfırlanır; kırışık önleyici tamburlar ve bulaşık makinesi kurutma kuyrukları kısa kesilmek yerine döngüye bağlı kalır. Soğutma sırasında döngüler çok erken biterse yükseltin; algılama yavaşsa düşürün.",
+            "doc": "Kapatma gecikmesi dolduğunda, bu süre boyunca kullanılan enerji (watt x zaman) bu eşikle karşılaştırılır. Eşiğin üzerindeyse döngü henüz bitmemiştir; bu, kırışıklık önleme tambur dönüşlerini ve bulaşık makinesinin kurutma sonu aşamalarını kısa kesmek yerine döngüye bağlı tutar. Döngüler bir soğutma dönüşü veya kurutma sonu aşaması sırasında bitiyorsa düşürün; biten döngüler beklemeye devam ediyorsa yükseltin.",
             "label": "Bitiş Enerjisi"
         },
         "energy_price_entity": {
@@ -1804,7 +1840,13 @@
         "store_download_partial": "{n} program indirilemedi; daha sonra tekrar deneyin.",
         "import_no_restore_point": "İçe aktarıldı, ancak geri yükleme noktası kaydedilemedi, bu nedenle bu içe aktarma geri alınamaz",
         "import_undo_failed": "İçe aktarma geri alınamadı: {error}",
-        "import_undone": "İçe aktarma geri alındı: {profiles} profil ve {cycles} döngü geri yüklendi"
+        "import_undone": "İçe aktarma geri alındı: {profiles} profil ve {cycles} döngü geri yüklendi",
+        "auto_label_cancelled": "Otomatik etiketleme {count} döngü etiketlendikten sonra iptal edildi.",
+        "auto_label_cancelled_one": "Otomatik etiketleme {count} döngü etiketlendikten sonra iptal edildi.",
+        "auto_label_cancelled_other": "Otomatik etiketleme {count} döngü etiketlendikten sonra iptal edildi.",
+        "auto_label_done": "Otomatik etiketleme tamamlandı: {count} döngü etiketlendi, {skipped} döngü etiketsiz kaldı.",
+        "auto_label_done_one": "Otomatik etiketleme tamamlandı: {count} döngü etiketlendi, {skipped} döngü etiketsiz kaldı.",
+        "auto_label_done_other": "Otomatik etiketleme tamamlandı: {count} döngü etiketlendi, {skipped} döngü etiketsiz kaldı."
     },
     "suggestion": {
         "observed_label": "Gözlemlenen",

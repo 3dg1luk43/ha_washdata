@@ -1,14 +1,14 @@
 # WashData WebSocket API
 
-<!-- AUTO-GENERATED — do not edit; run devtools/generate_ws_types.py -->
+<!-- AUTO-GENERATED - do not edit; run devtools/generate_ws_types.py -->
 
-This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
+This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand - run `python3 devtools/generate_ws_types.py`.
 
 **108 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
-| `get_devices` | — | `GetDevicesResponse` |
+| `get_devices` | - | `GetDevicesResponse` |
 | `get_device_cycles` | entry_id, limit?, offset?, imported_offset? | `GetDeviceCyclesResponse` |
 | `get_options` | entry_id | `GetOptionsResponse` |
 | `set_options` | entry_id, options | `SuccessResponse` |
@@ -55,7 +55,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `export_config_selective` | entry_id, selection | `ExportConfigResponse` |
 | `import_config_selective` | entry_id, json_data, selection, mode?, conflict_resolutions?, cycle_destination?, apply_settings? | `ImportConfigSelectiveResponse` |
 | `undo_import` | entry_id | `UndoImportResponse` |
-| `get_constants` | — | `GetConstantsResponse` |
+| `get_constants` | - | `GetConstantsResponse` |
 | `get_suggestions` | entry_id | `GetSuggestionsResponse` |
 | `apply_suggestions` | entry_id, keys | `ApplySuggestionsResponse` |
 | `clear_suggestions` | entry_id | `SuccessResponse` |
@@ -68,7 +68,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `apply_merge` | entry_id, cycle_ids, target_profile?, new_profile_name? | `StartTaskResponse` |
 | `get_profile_envelope` | entry_id, profile_name | `GetProfileEnvelopeResponse` |
 | `get_profile_cycles` | entry_id, profile_name, limit? | `GetProfileCyclesResponse` |
-| `get_panel_config` | — | `GetPanelConfigResponse` |
+| `get_panel_config` | - | `GetPanelConfigResponse` |
 | `set_panel_config` | panel?, rbac? | `SuccessResponse` |
 | `set_user_prefs` | prefs | `SuccessResponse` |
 | `get_match_debug` | entry_id | `GetMatchDebugResponse` |
@@ -89,8 +89,8 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `subscribe_tasks` | entry_id? | `SubscribeTasksResponse` |
 | `cancel_task` | task_id | `CancelTaskResponse` |
 | `get_task_result` | task_id | `TaskSnapshot` |
-| `start_playground_history` | entry_id, cycle_ids?, settings_override? | `StartTaskResponse` |
-| `start_playground_sweep` | entry_id, param, values, objective | `StartTaskResponse` |
+| `start_playground_history` | entry_id, cycle_ids?, settings_override?, count? | `StartTaskResponse` |
+| `start_playground_sweep` | entry_id, param, values, objective, cycle_ids?, count? | `StartTaskResponse` |
 | `start_playground_cycle_detail` | entry_id, cycle_id, settings_override? | `StartTaskResponse` |
 | `history_import_begin` | entry_id | `HistoryImportBeginResponse` |
 | `history_import_chunk` | entry_id, token, seq, text | `HistoryImportChunkResponse` |
@@ -1261,6 +1261,7 @@ _None._
 | `interval_days` | yes | number |
 | `hour` | yes | number |
 | `on_device_models` | yes | dict[str, any] |
+| `last_run` | yes | dict[str, any] |
 
 ## `ha_washdata/trigger_ml_training`
 
@@ -1468,6 +1469,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `entry_id` | yes | str |
 | `cycle_ids` | no | list[str] |
 | `settings_override` | no | dict |
+| `count` | no | int |
 
 **Response** (`StartTaskResponse`)
 
@@ -1485,6 +1487,8 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `param` | yes | str |
 | `values` | yes | list[float] |
 | `objective` | yes | str |
+| `cycle_ids` | no | list[str] |
+| `count` | no | int |
 
 **Response** (`StartTaskResponse`)
 

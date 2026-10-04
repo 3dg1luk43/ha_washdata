@@ -11,16 +11,16 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### TL;DR
 
-- Washers and dishwashers report the end sooner; no cycle ends early in replays.
-- Labels come from a match on the whole cycle; matching is more accurate.
+- Washers and dishwashers report the end sooner, standby endings included; no cycle ends early in replays.
+- Labels come from a match on the whole cycle; matching is more accurate, store programs most of all.
 - The program shows sooner, with its odds while unsure; phases, time remaining and projected energy are realistic.
 - No splits from daylight-saving changes or a power sensor dropping out.
-- No double-counted cycles, no "finished" push for a false start; review answers stay yours.
-- Every cycle and its full power trace are kept; a replace import can be undone.
+- No double-counted cycles or false-start pushes; held notifications survive a restart; review answers stay yours.
+- Every cycle and its full power trace are kept; exports are 4-5x smaller and a replace import can be undone.
 - Far fewer store writes and much less CPU; the panel opens faster and stays smooth on phones.
 - Store downloads are quality-checked, deduplicated and cannot take over your programs.
 - Services validate their input and respect user permissions; sidebar notifications work again.
-- A simpler panel: internals hidden, one suggestion list, fewer review prompts, leaner Playground.
+- A simpler panel: internals hidden, one suggestion list, fewer review prompts; Playground Optimize weighs end delay and splits.
 - Counts, numbers and costs read right in every language.
 - Harmful suggestions, four no-op settings and the experimental ML that never helped are gone.
 
@@ -44,6 +44,8 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **The phase shows only your program's own phases**: with no phase ranges on the matched program, or between or after them, the phase sensor and `active_phase` are `unknown` instead of an English guess ("Spinning", "Drying", "Rinsing/Soaking", "Running"). The state sensor is unchanged.
 - **Dishwashers finish quickly after the plug is pulled mid-cycle**, without enabling ML models: a sudden drop to 0 W long before the program's usual quiet spells used to be held for 75 to 121 minutes by the dishwasher end waits and then stored as completed. With a program recognised (or picked by hand), it now closes about 5 minutes after the drop. Replaying 285 pulled dishwasher cycles it fired on 172; on 213 real cycles it changed no end.
 - **No "finished" notification for a false start**: an interrupted cycle (too short to count) no longer sends the finish notification or the unload reminder, and its start card is cleared. A force-stopped cycle still notifies; the new `{status}` placeholder tells the two apart.
+- **`sensor.<device>_total_duration` has no `last_updated` attribute** (it wrote a recorder row every few seconds); use the state's own last-changed time.
+- **The `auto_label_cycles` service without a threshold uses the device's Auto-label confidence**, not 0.75, like the panel's Auto-label button now does.
 - **WebSocket API**: see "For developers" below.
 
 ### Fixes
@@ -61,6 +63,24 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **The Playground replayed a different matcher**: it built its own program templates, so its pick differed from live on 26.5% of real matches, and it never ran the watchdog inside a silent stretch, so a soak long enough to split a wash replayed as one cycle. Both now match live exactly (0 of 592 picks differ). The replay showed one washer whose 28 minute soak exceeds its Minimum Off Gap and splits; that behaviour is unchanged, so raise the setting if your machine soaks that long.
 
 - **Washers with an anti-crease tumble could finish up to 40 minutes late**: with anti-wrinkle on, WashData waits for the final spin before it takes the tumbling as the end, and it looked for that spin where the program's averaged curve puts it, later than most real runs spin, so those runs waited for the safety cap instead. It now looks from the earliest spin your own runs of that program had. Replaying with anti-wrinkle on: 4 of 18 capped finishes now end at the spin, 26 to 42 minutes sooner, with no new early end or split.
+
+- **A cycle idling on a flat standby just under the Stop Threshold could run for hours**: the end-energy check kept such a cycle open until the 8-hour limit when no program was recognised (a washer on a 1.1 W standby closed 7 hours late). A flat reading now ends it after the normal wait at 75% of the Stop Threshold or more, and after 2 hours lower down; a dip before a standby plateau no longer skips that check. Replaying 472 recorded cycles: no end moved.
+
+- **Programs downloaded from the store were matched on one sample cycle** instead of their averaged curve, because the switch counted only your own cycles. Recognition on today's store packages: 71.4% to 76.6% right at cycle end, and 8.9 points better a quarter of the way in.
+
+- **A manual duration entered in the wrong unit poisoned its program**: a value 60 times the trace length set the program's typical length, so it could never be matched. Durations outside 0.3 to 3 times the recorded trace are now ignored with a log warning.
+
+- **Notifications held for quiet hours or until someone is home survived no restart**: they are now kept across a Home Assistant restart (for up to 24 hours) and sent, or held again, after it starts.
+
+- **A power sensor changed during a cycle was ignored until the next reload**; it now takes over when the cycle ends. Clearing a hand-picked program while paused or ending no longer shows the program as "off".
+
+- **The energy model could be replaced by a worse one**: a retrained projected-energy model is now kept only when it beats both the simple estimate and the model in use, on at least 5 held-out cycles (it used to promote on one). Over 25 devices the served error fell from 0.081 to 0.054; two dishwashers that were served worse than the simple estimate now are not.
+
+- **Exports are 4 to 5 times smaller** and quicker to make (9.8 MB to 2.0 MB on the largest test install), from the panel and the `export_config` service; they import as before.
+
+- **Imported dishwasher history kept the whole end wait**: cycles found in your recorder history were stored with the 20 to 30 minutes the detector waited before calling the end. A recognised imported cycle is now trimmed the way a live one is: 122 of 128 test cycles were over 5% too long, now 19.
+
+- **Progress could fall back from 100%** after a cycle ran past its program's usual length, and the backward smoothing depended on how often estimates ran. Both fixed; time remaining is unchanged within 0.2 minutes on average.
 
 - **Nightly maintenance now prunes debug traces**, as its description always said: a cycle's matcher debug data goes with its power trace, and all of it while "save debug traces" is off.
 
@@ -180,7 +200,10 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **"Uncertain: Cotton 40 or Synthetics 30, ~45% sure"**: until WashData settles on a program, the Status card names the two leading programs and how often the leader proved right with that lead in recorded cycles (26% at a near-tie, 89% at a clear lead; leave-one-out over 2,324 checkpoints from 48 households). The program sensor still reads "detecting...".
 - **Imported programs show whether they fit**: a program downloaded from the store shows how many of your cycles WashData matched to it, counted on your device.
 - **Playground History and Optimize say they are optimistic**: the replayed cycles also built the programs they are matched against.
-- **Help texts that said the wrong thing**: Match Threshold gates Smart Termination and the anti-crease finish, not which program is accepted; the duration-ratio examples used 0.9 and 1.3 against defaults of 0.10 and 1.8; ML training now retrains only the projected-energy model.
+- **The Playground's Optimize looks at what matters**: it can now optimise the end delay, early ends and split cycles, compares every value with your current one on the same cycles, never recommends a value that ends or splits more cycles, and says "keep the current value" when nothing is clearly better. Cancel stops the run on the server, a changed setting offers "Update simulation" instead of showing a stale result, History and Optimize take your newest N cycles (up to 50), and a second run on the same device is refused instead of piling up.
+- **History import warns about kilowatt sensors and timestamps without a time zone**, shows when the recorder read stopped at its limit, and reads large files in small steps so Home Assistant stays responsive.
+- **ML Training says why a model was not trained** (too few cycles, not better than the current one, ...), counts only real promotions in its trend, and translates "never" and "unknown". The Auto-label dialog starts at the device's own threshold and its result says how many cycles were labelled.
+- **Help texts that said the wrong thing**: End Energy gave the tuning direction backwards (a higher value finishes sooner); Match Threshold gates Smart Termination and the anti-crease finish, not which program is accepted; the duration-ratio examples used 0.9 and 1.3 against defaults of 0.10 and 1.8; ML training now retrains only the projected-energy model.
 - **Icelandic**: a cycle is "lota" throughout (it was partly "hringrás", a circuit), and the pump-stuck setting warnings are readable again.
 
 ### Suggestions
@@ -199,6 +222,8 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - Panel strings: `_t()` escapes substituted values; wrap deliberate markup in `_html()` and use `_tText()` for plain-text sinks. Plurals resolve `key_<category>` through `Intl.PluralRules`.
 - `match_rules.py` holds the manager's post-match rules (switching, verified pause, cycle-end label verdict) for the manager and the Playground; `devtools/playground_parity_eval.py` measures replay against the real manager. Playground detail outcomes and history rows gain `would_label`, `label_profile` and `label_reason`; events gain `verified_pause` and `match_reverted`.
 - Events and WebSocket: `ha_washdata_cycle_ended` gains `match_margin` (complete-cycle match) and `label_applied`; `get_devices` gains `match_uncertainty` and `expected_duration_s`; `get_profiles` gains `profile_matcher_counts`.
+- Harnesses measure the shipped pipeline: `prefix_guard_eval.py`, `min_off_gap_eval.py` and `decisive_margin_eval.py` (now `--loo`, `--switching`) use the production config; `end_gate_eval.py --check devtools/end_gate_baseline.json` and `eval.py baseline-status` flag regressions and a stale baseline; `analyze_diag.py` runs the real suggestion engine; `ml_energy_gate_eval.py` and `terminal_drop_plugpull_eval.py` are new.
+- Tests: a real in-process boot through `async_setup` (`setup_washdata_entry`), a WS authorization matrix, `pytest-timeout`, a progress golden trace, and a ratchet against new `MagicMock()` hass objects.
 - The engineering register moved from `INTEGRATION_REFERENCE.md` to `docs/internal/register/OPEN.md` (open items) and `ARCHIVE.md`; `docs_check.py` keeps ids unique across both.
 - Tests: tests that could not fail were replaced by mutation-checked ones; `tests/test_perf_budgets.py` counts work (no timing); `devtools/suggestion_loop_eval.py` simulates Apply all to a fixed point. The timing benchmarks are gone.
 

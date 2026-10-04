@@ -86,7 +86,6 @@ from .const import (
     DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
     DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
@@ -391,7 +390,13 @@ def effective_option_values(
         CONF_END_ENERGY_THRESHOLD: cfg.end_energy_threshold,
         CONF_POWER_OFF_THRESHOLD_W: cfg.power_off_threshold_w,
         CONF_PROFILE_MATCH_INTERVAL: cfg.match_interval,
-        CONF_PROFILE_MATCH_MIN_DURATION_RATIO: cfg.min_duration_ratio,
+        # The matcher's Stage-1 bound, resolved as the manager resolves it for the
+        # ProfileStore - NOT `cfg.min_duration_ratio`, which since DETECT-02 is the
+        # detector's finish-deferral ratio (0.8) and reported 0.8 for an unset key.
+        CONF_PROFILE_MATCH_MIN_DURATION_RATIO: opt(
+            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+            DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+        ),
         CONF_PROFILE_MATCH_MAX_DURATION_RATIO: opt(
             CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
         ),

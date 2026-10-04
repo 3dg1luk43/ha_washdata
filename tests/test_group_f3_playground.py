@@ -242,20 +242,21 @@ def test_playground_snapshots_include_every_evidence_category():
     from unittest.mock import MagicMock
 
     from custom_components.ha_washdata import playground as pg
+    from custom_components.ha_washdata.profile_store import ProfileStore
 
-    store = MagicMock()
+    # A real store: the sim builds its candidates with the live builder.
+    store = ProfileStore(MagicMock(), "t")
     backfilled = {
         "id": "b1", "profile_name": "Cotton 40", "duration": 3600,
+        "start_time": "2026-05-01T08:00:00+00:00",
         "power_data": [[float(i * 60), 1500.0] for i in range(61)],
     }
     store._data = {
         "profiles": {"Cotton 40": {"avg_duration": 3600, "sample_cycle_id": "b1"}},
         "past_cycles": [], "reference_cycles": [], "backfill_cycles": [backfilled],
+        "envelopes": {},
     }
-    store.iter_evidence_cycles = MagicMock(return_value=[backfilled])
-    store._grouped_snapshots = MagicMock(side_effect=lambda snaps: (snaps, {}, {}))
 
     snaps, _config, _members, _member_snaps = pg._build_match_snapshots(store)
 
     assert [s["name"] for s in snaps] == ["Cotton 40"]
-    store.iter_evidence_cycles.assert_called_once()

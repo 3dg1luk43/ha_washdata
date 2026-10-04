@@ -250,7 +250,8 @@
     "confirm_appliance": "Apstiprināt šo ierīci",
     "confirmed": "Apstiprināts",
     "create_profile_from_gap": "Izveidot profilu",
-    "undo_import": "Atsaukt pēdējo importēšanu"
+    "undo_import": "Atsaukt pēdējo importēšanu",
+    "pg_rerun": "Atjaunināt simulāciju"
   },
   "note": {
     "off_delay": {
@@ -670,7 +671,12 @@
     "automation_off": "(izslēgta)",
     "ref_cycle_none": "Nav",
     "share_name": "Rādīt manu vārdu pie tā, ko kopīgoju",
-    "cat_backfill_cycles": "Cikli, kas atrasti importētā jaudas vēsturē"
+    "cat_backfill_cycles": "Cikli, kas atrasti importētā jaudas vēsturē",
+    "pg_compare_profile": "Salīdzināt ar profilu",
+    "pg_obj_early": "Priekšlaicīgu beigu īpatsvars",
+    "pg_obj_endlag": "Beigu aizkave (mediāna)",
+    "pg_obj_split": "Sadalīšanu īpatsvars",
+    "pg_sweep_cycles": "Nesenie cikli"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -699,7 +705,25 @@
     },
     "metric_auc": "AUC {auc} uz validācijas datiem",
     "metric_mae": "kļūda: {model} pret {baseline} bāzlīniju",
-    "fine_tuned_at": "precizēts {when}"
+    "fine_tuned_at": "precizēts {when}",
+    "last_run_not_promoted": "Pēdējā pārbaude ({when}): {reason}",
+    "never": "nekad",
+    "skip_reason": {
+      "fit_failed": "Apmācība neizdevās: {error}",
+      "holdout_too_small": "Par maz ciklu, lai godīgi pārbaudītu jaunu modeli: pārbaudei varēja atlikt {held_out}, nepieciešami {min}.",
+      "not_better_than_incumbent": "Jaunais modelis nebija labāks par izmantoto (kļūda {model} pret {incumbent}), tāpēc tika paturēts pašreizējais.",
+      "not_better_than_naive": "Jaunais modelis nebija skaidri labāks par vienkāršo novērtējumu (kļūda {model} pret {naive}).",
+      "unknown": "Nekas jauns netika apgūts.",
+      "insufficient_rows": "Vēl nepietiek izmantojamu ciklu: līdz šim ir {count} marķēti, tīri cikli.",
+      "insufficient_rows_zero": "Vēl nepietiek izmantojamu ciklu: līdz šim ir {count} marķēti, tīri cikli.",
+      "insufficient_rows_one": "Vēl nepietiek izmantojamu ciklu: līdz šim ir {count} marķēts, tīrs cikls.",
+      "insufficient_rows_other": "Vēl nepietiek izmantojamu ciklu: līdz šim ir {count} marķēti, tīri cikli."
+    },
+    "trained_unknown": "nezināmā laikā",
+    "held_out_count": "mērīts uz {count} validācijas cikliem",
+    "held_out_count_zero": "mērīts uz {count} validācijas cikliem",
+    "held_out_count_one": "mērīts uz {count} validācijas cikla",
+    "held_out_count_other": "mērīts uz {count} validācijas cikliem"
   },
   "modal": {
     "auto_label": "Automātiskās etiķetes cikli",
@@ -1022,7 +1046,23 @@
     "feedback_detected": "WashData noteica: {name}",
     "import_undo_hint": "Tiek glabāts atjaunošanas punkts no laika pirms pēdējās importēšanas ({when}): {profiles} profili un {cycles} cikli.",
     "replace_undo_hint": "Vispirms tiek saglabāts atjaunošanas punkts, tāpēc šo importēšanu var atsaukt sadaļā Eksportēt / importēt.",
-    "pg_in_sample_note": "Šie cikli palīdzēja izveidot arī profilus, ar kuriem tie tiek saskaņoti, tāpēc šie rezultāti ir optimistiski: jauniem cikliem sagaidiet nedaudz mazāk pareizu saskaņojumu."
+    "pg_in_sample_note": "Šie cikli palīdzēja izveidot arī profilus, ar kuriem tie tiek saskaņoti, tāpēc šie rezultāti ir optimistiski: jauniem cikliem sagaidiet nedaudz mazāk pareizu saskaņojumu.",
+    "hist_tail_trimmed": "Tika apgrieztas {min} min gaidīšanas pēc cikla beigām, kā to dara arī darbojošā integrācija",
+    "hist_truncated": "apstājās pie {n} rādījumu ierobežojuma, tāpēc pārējā vēsture netika skenēta",
+    "hist_warn_kw": "Augstākais rādījums ir tikai {w}. Šķiet, ka šis sensors ziņo kilovatos; WashData nolasa jaudu vatos, tāpēc no tā nevar noteikt ciklus.",
+    "pg_compare_profile_tip": "Izvēlas tikai profilu, kas tiek attēlots virs grafika. Simulācija vienmēr pati saskaņo ciklu ar programmu, tāpat kā darbojošā integrācija.",
+    "pg_outcome_stale": "Kopš šīs simulācijas palaišanas iestatījumi ir mainījušies. Tā joprojām rāda veco rezultātu.",
+    "pg_sweep_guarded": "Priekšlaicīgi beidz vairāk ciklu, sadala vairāk ciklu vai palaiž garām ciklus, kurus pašreizējais iestatījums notver, tāpēc tas nekad netiek ieteikts.",
+    "pg_sweep_keep_current": "Paturiet pašreizējo vērtību ({value}, {metric}): neviena vērtība nebija labāka vismaz par vienu ciklu.",
+    "pg_task_busy": "Šai ierīcei jau notiek pārbaude vēsturē vai optimizēšana. Pagaidiet, līdz tā beidzas, vai atceliet to.",
+    "hist_warn_naive_time": "{n} laikspiedoliem nav laika joslas, un tie tika nolasīti kā UTC. Ja fails ir vietējā laikā, katrs cikls ir nobīdīts par jūsu UTC nobīdi, un rādījumi ap vasaras laika maiņu var tikt sajaukti vai izmesti.",
+    "hist_warn_naive_time_zero": "{n} laikspiedoliem nav laika joslas, un tie tika nolasīti kā UTC. Ja fails ir vietējā laikā, katrs cikls ir nobīdīts par jūsu UTC nobīdi, un rādījumi ap vasaras laika maiņu var tikt sajaukti vai izmesti.",
+    "hist_warn_naive_time_one": "{n} laikspiedolam nav laika joslas, un tas tika nolasīts kā UTC. Ja fails ir vietējā laikā, katrs cikls ir nobīdīts par jūsu UTC nobīdi, un rādījumi ap vasaras laika maiņu var tikt sajaukti vai izmesti.",
+    "hist_warn_naive_time_other": "{n} laikspiedoliem nav laika joslas, un tie tika nolasīti kā UTC. Ja fails ir vietējā laikā, katrs cikls ir nobīdīts par jūsu UTC nobīdi, un rādījumi ap vasaras laika maiņu var tikt sajaukti vai izmesti.",
+    "pg_sweep_n_cycles": "{count} ciklos",
+    "pg_sweep_n_cycles_zero": "{count} ciklos",
+    "pg_sweep_n_cycles_one": "{count} ciklā",
+    "pg_sweep_n_cycles_other": "{count} ciklos"
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1185,7 +1225,7 @@
       "label": "Lietot viedos modeļus cikla laikā"
     },
     "end_energy_threshold": {
-      "doc": "Izslēgšanas aizkaves atpakaļskaitīšanas laikā uzkrātā enerģija (vati x laiks) tiek salīdzināta ar šo slieksni. Ja tas tiek pārsniegts, atpakaļskaitīšanas laiks tiek atiestatīts – ciklam tiek pievienotas pretburzīšanās un trauku mazgājamās mašīnas žāvēšanas astes, nevis saīsinātas. Paceliet to, ja atdzišanas laikā cikli beidzas pārāk agri; samaziniet to, ja noteikšana ir gausa.",
+      "doc": "Kad izslēgšanas aizkave ir beigusies, tās laikā patērētā enerģija (vati x laiks) tiek salīdzināta ar šo slieksni. Ja tā ir virs sliekšņa, cikls vēl nav beidzies, tāpēc pretburzīšanās bungas griešanās un trauku mazgājamās mašīnas žāvēšanas nobeigums paliek pievienoti ciklam, nevis tiek nogriezti. Samaziniet to, ja cikli beidzas atdzišanas griešanās vai žāvēšanas nobeiguma laikā; palieliniet to, ja pabeigti cikli turpina gaidīt.",
       "label": "Beigu enerģija"
     },
     "energy_price_entity": {
@@ -1796,7 +1836,15 @@
     "store_download_partial": "Neizdevās lejupielādēt programmas: {n}. Mēģiniet vēlāk vēlreiz.",
     "import_no_restore_point": "Importēts, taču atjaunošanas punktu neizdevās saglabāt, tāpēc šo importēšanu nevar atsaukt",
     "import_undo_failed": "Neizdevās atsaukt importēšanu: {error}",
-    "import_undone": "Importēšana atsaukta: atjaunoti {profiles} profili un {cycles} cikli"
+    "import_undone": "Importēšana atsaukta: atjaunoti {profiles} profili un {cycles} cikli",
+    "auto_label_cancelled": "Automātiskā marķēšana atcelta pēc {count} ciklu marķēšanas.",
+    "auto_label_cancelled_zero": "Automātiskā marķēšana atcelta pēc {count} ciklu marķēšanas.",
+    "auto_label_cancelled_one": "Automātiskā marķēšana atcelta pēc {count} cikla marķēšanas.",
+    "auto_label_cancelled_other": "Automātiskā marķēšana atcelta pēc {count} ciklu marķēšanas.",
+    "auto_label_done": "Automātiskā marķēšana pabeigta: marķēti {count} cikli, bez marķējuma palika {skipped}.",
+    "auto_label_done_zero": "Automātiskā marķēšana pabeigta: marķēti {count} cikli, bez marķējuma palika {skipped}.",
+    "auto_label_done_one": "Automātiskā marķēšana pabeigta: marķēts {count} cikls, bez marķējuma palika {skipped}.",
+    "auto_label_done_other": "Automātiskā marķēšana pabeigta: marķēti {count} cikli, bez marķējuma palika {skipped}."
   },
   "suggestion": {
     "observed_label": "Novērotais",

@@ -86,7 +86,7 @@ def test_batched_stage3_dtw_equals_the_per_candidate_path() -> None:
             kw = dict(dtw_mode=mode, dtw_bandwidth=0.2, l1_scale=0.1, ddtw_scale=0.05,
                       ensemble_w=0.6)
             got = A._stage3_scores_batched(pairs, peak, **kw)  # noqa: SLF001
-            ref = [A._stage3_dtw_score(a, b, peak, curr_resampled=a, **kw)[0]  # noqa: SLF001
+            ref = [A._stage3_dtw_score(a, b, peak, curr_resampled=a, **kw)  # noqa: SLF001
                    for a, b in pairs]
             assert got == pytest.approx(ref, rel=1e-12, abs=1e-15)
         dists = A.dtw_lite_batch(np.vstack([a for a, _ in pairs]),

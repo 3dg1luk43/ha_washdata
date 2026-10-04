@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Povezivanje nije uspjelo",
-      "invalid_auth": "Nevažeća provjera autentičnosti",
       "unknown": "Neočekivana pogreška",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Prag povjerenja",
-          "description": "Minimalna pouzdanost podudaranja (0,50-0,95) za primjenu oznaka."
+          "description": "Minimalna pouzdanost podudaranja (0,50-0,95) za primjenu oznaka. Ostavite prazno za korištenje postavke uređaja „Pouzdanost za automatsko označavanje”."
         }
       }
     },

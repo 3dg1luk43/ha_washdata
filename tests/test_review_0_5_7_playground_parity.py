@@ -107,11 +107,11 @@ def test_the_sim_regrids_every_template_to_the_query_grid() -> None:
     assert view._grouped_snapshots(snaps)[0] is snaps
 
 
-def test_a_store_without_the_builder_keeps_the_legacy_path() -> None:
-    """Tests and older callers hand the sim a MagicMock store; that path is unchanged."""
-    store = MagicMock()
-    store._data = {"profiles": {}}
-    store.iter_evidence_cycles.return_value = []
-    store._grouped_snapshots.side_effect = lambda s: (s, {}, {})
-    snaps, _cfg, _gm, _ms = playground._build_match_snapshots(store)
-    assert snaps == []
+def test_a_store_without_the_builder_has_no_candidates() -> None:
+    """The sim run with no store (or one without the live builder) matches nothing;
+    the hand-rolled builder that served a MagicMock store had no production caller
+    and was deleted (wave 6)."""
+    for store in (None, MagicMock()):
+        snaps, cfg, gm, ms = playground._build_match_snapshots(store)
+        assert (snaps, gm, ms) == ([], {}, {})
+        assert cfg["in_progress"] is True

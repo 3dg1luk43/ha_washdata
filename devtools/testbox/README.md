@@ -30,14 +30,25 @@ when this was written), not a fixed release. Read it with
 ```bash
 cd devtools/testbox
 ./up.sh --fresh        # ~40 s: container, config, owner user, long-lived token
-./smoke.sh             # ~5 min: one full cycle end to end, then the assertions
+./smoke.sh             # ~12 min: one full cycle end to end, then the assertions
 ./down.sh              # stop (add --wipe to delete config/ too)
 ```
 
 `./smoke.sh` is the whole point in one command: it creates a device through the
 real config flow, seeds it from a real export, replays a recorded 76 min washing
-machine cycle at 60x, waits for the cycle to close, and then runs 15 checks that
-no mocked Home Assistant can make (see *What smoke.sh proves* below).
+machine cycle at 60x, waits for the cycle to close, and then runs the 22 checks
+in `assert_run.py` that no mocked Home Assistant can make (see *What smoke.sh
+proves* below). Most of the ~12 min is the wait for the cycle to close (see
+*Current known state*).
+
+**The default seed data is private.** Without `--export`, `smoke.sh` seeds from
+the maintainer's own exports under the gitignored `cycle_data/me/`
+(`washdata_export_01KXGA3C.json` for a washing machine, `washdata_export_01KDMTAA.json`
+for `--type dishwasher`), so on any other checkout it stops at
+`export not found`. Pass your own WashData export instead:
+`./smoke.sh --fresh --export /path/to/washdata_export.json [--cycle N]`. It needs
+at least one stored cycle with its power trace; `--cycle` picks which one is
+replayed (default 0), and its profiles seed the matcher.
 
 ## Paths
 
@@ -239,9 +250,10 @@ same power sensor. That cross-talk surfaces as unrelated assertion failures -
 two devices' live notifications land on two tags, so "live updates share one
 dedicated tag" fails for reasons that have nothing to do with the code.
 
-`./smoke.sh` reports **19 of 20** on a clean box at 60x for a washing machine;
-the one failure is the seeded export's own `notify.mobile_app_s24` target, which
-does not exist in the box and raises `ServiceNotFound`. `--type dishwasher`
+`./smoke.sh` reports **22 of 22** on a clean box at 60x for a washing machine.
+(It used to report 19 of 20: the seeded export's own `notify.mobile_app_s24`
+target does not exist in the box and raised `ServiceNotFound`. Step 3 now points
+every notify option at the box's own `testbox` targets.) `--type dishwasher`
 previously seeded the **washing-machine** export regardless of type - so the
 dishwasher path was being exercised against washing-machine profiles and the
 run matched programmes like "30 deg / 2:09 / 800rpm". The export now follows

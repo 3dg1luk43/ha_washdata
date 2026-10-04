@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "No se pudo conectar",
-      "invalid_auth": "Autenticación no válida",
       "unknown": "Error inesperado",
       "invalid_power": "El umbral de potencia debe ser mayor que 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Umbral de confianza",
-          "description": "Confianza mínima de coincidencia (0,50-0,95) para aplicar etiquetas."
+          "description": "Confianza mínima de coincidencia (0,50-0,95) para aplicar etiquetas. Déjelo vacío para usar el ajuste Confianza de etiquetado automático del dispositivo."
         }
       }
     },

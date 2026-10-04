@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect",
-      "invalid_auth": "Invalid authentication",
       "unknown": "Unexpected error",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Confidence Threshold",
-          "description": "Minimum match confidence (0.50-0.95) to apply labels."
+          "description": "Minimum match confidence (0.50-0.95) to apply labels. Leave empty to use the device's Auto-Label Confidence setting."
         }
       }
     },

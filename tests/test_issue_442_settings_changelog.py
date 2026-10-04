@@ -246,7 +246,7 @@ async def _drive_undo_import(hass, manager, entry):
 async def _drive_store_download(hass, manager, entry):
     with patch.object(ws_api, "_get_entry", return_value=entry):
         applied = await ws_api._apply_store_settings(
-            hass, "e1", {"settings": {"min_power": 3.5}}, "washing_machine", True
+            hass, "e1", {"settings": {"min_power": 3.5}}, True
         )
     assert applied == 1
 

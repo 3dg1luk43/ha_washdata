@@ -1,4 +1,4 @@
-// AUTO-GENERATED — do not edit; run devtools/generate_ws_types.py
+// AUTO-GENERATED - do not edit; run devtools/generate_ws_types.py
 // WashData WebSocket API type contract (Group H1).
 //
 // Response payloads for every `ha_washdata/*` WebSocket command, plus the
@@ -182,6 +182,7 @@ export interface GetMlTrainingStatusResponse {
   interval_days: number;
   hour: number;
   on_device_models: Record<string, unknown>;
+  last_run: Record<string, unknown>;
 }
 
 export interface GetOptionsResponse {
@@ -904,6 +905,7 @@ export interface StartPlaygroundHistoryRequest {
   entry_id: string;
   cycle_ids?: string[];
   settings_override?: Record<string, unknown>;
+  count?: number;
 }
 
 export interface StartPlaygroundSweepRequest {
@@ -911,6 +913,8 @@ export interface StartPlaygroundSweepRequest {
   param: string;
   values: number[];
   objective: string;
+  cycle_ids?: string[];
+  count?: number;
 }
 
 export interface StartPlaygroundCycleDetailRequest {

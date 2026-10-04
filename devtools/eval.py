@@ -7,6 +7,7 @@
     python3 devtools/eval.py run [--mode fast|full] [--cuts 1.0,0.75,0.5,0.25]
                                  [--jobs N] [--out FILE] [--config-override JSON|@FILE]
     python3 devtools/eval.py compare BASE.json NEW.json [--tol TOL.json]
+    python3 devtools/eval.py baseline-status [--baseline FILE]
 
 Every fold is the path users run. The device's store is built by a real
 ``WashDataManager`` from the export's own entry data/options (so ratios, DTW band,
@@ -41,6 +42,20 @@ over its programmes by a stable trace hash - a regression detector, not the numb
 of record. ``--mode full``: every scorable fold (the held-out cycle's programme
 keeps at least one other traced cycle). Clone files (>= 80% of their traces
 already in a larger file) are dropped.
+
+**Alias twins (audit MATCH-EVAL-08).** Inside one file the same trace can be stored
+under two programme names (a store package with "Coton 60°" and "Katoen 60°", or
+"Baumwolle" and "Baumwolle (imported)": 17 twin groups in 6 store packages). A fold
+whose label has such a twin cannot tell the two apart, so ``top1`` counts the twin
+as a matcher error. Nothing is dropped and ``top1`` is unchanged; each row carries
+``aok`` (right up to an alias: the winner shares a trace with the label) and ``tw``
+(the label has a twin), ``alias_top1`` is reported next to ``top1`` (summary and
+``compare``), and ``meta.alias_twins`` lists the labels per file. Labels are
+twinned transitively.
+
+``baseline-status`` checks ``devtools/eval_baseline.json`` against the tree (what
+``release_check.sh`` runs): stale when its ``code_sha`` (the matcher sources) no
+longer matches or its ``rev`` is not an ancestor of HEAD.
 
 ``--config-override`` takes a JSON object (or ``@file``):
 
@@ -196,6 +211,42 @@ def trace_hash(c: dict) -> str | None:
     except (TypeError, ValueError, IndexError):
         return None
     return hashlib.sha1(s.encode()).hexdigest()[:16]
+
+
+def alias_classes(dev: Device) -> dict[str, frozenset[str]]:
+    """Labels that share at least one identical trace in this file, closed transitively.
+
+    Only labels with a twin appear; each maps to its whole class (itself included).
+    """
+    by_hash: dict[str, set[str]] = defaultdict(set)
+    for (c, _), h in zip(dev.cycles, dev.hashes):
+        if h:
+            by_hash[h].add(str(c["profile_name"]))
+    parent: dict[str, str] = {}
+
+    def find(x: str) -> str:
+        while parent.setdefault(x, x) != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    for names in by_hash.values():
+        if len(names) > 1:
+            first, *rest = sorted(names)
+            for other in rest:
+                parent[find(other)] = find(first)
+    groups: dict[str, set[str]] = defaultdict(set)
+    for name in parent:
+        groups[find(name)].add(name)
+    return {n: frozenset(g) for g in groups.values() if len(g) > 1 for n in g}
+
+
+def mark_alias_twins(rows: list[dict], aliases: dict[str, dict[str, frozenset[str]]]) -> None:
+    """Set ``aok`` / ``tw`` on each row from its file's alias classes (by public key)."""
+    for r in rows:
+        cls = aliases.get(r["path"], {}).get(r["label"])
+        r["tw"] = cls is not None
+        r["aok"] = bool(r["ok"] or (cls is not None and r["top1"] in cls))
 
 
 def load_device(root: Path, rel: str) -> Device | None:
@@ -742,6 +793,9 @@ def cut_metrics(rows: list[dict]) -> dict[str, Any]:
         "top1": _pct(sum(r["ok"] for r in rows), n),
         "top3": _pct(sum(1 for r in rows if r["rank"] and r["rank"] <= 3), n),
         "group_top1": _pct(sum(r["gok"] for r in rows), n),
+        # Right up to an alias twin (audit MATCH-EVAL-08); rows from before carry no aok.
+        "alias_top1": _pct(sum(r.get("aok", r["ok"]) for r in rows), n),
+        "twin_folds": sum(1 for r in rows if r.get("tw")),
         "no_candidate": _pct(n - len(won), n),
         "label_coverage": _pct(len(lab), n),
         "label_precision": _pct(sum(r["ok"] for r in lab), len(lab)),
@@ -868,6 +922,8 @@ def _run_eval(corpus: Path, mode: str, cuts: tuple[float, ...], jobs: int, overr
     rows = [cached[d.path][str(i)][str(cut)] for d in devices for i in targets[d.path] for cut in cuts
             if cached[d.path].get(str(i), {}).get(str(cut))]
     rows.sort(key=lambda r: (r["path"], r["id"], -r["cut"]))
+    aliases = {d.key: alias_classes(d) for d in devices}
+    mark_alias_twins(rows, aliases)
     if len({d.key for d in devices}) != len(devices):
         raise SystemExit("two corpus files map to the same public key")
     if tmp_cache is not None:
@@ -882,6 +938,9 @@ def _run_eval(corpus: Path, mode: str, cuts: tuple[float, ...], jobs: int, overr
             "mode": mode, "cuts": list(cuts), "override": override or None,
             "numpy": np.__version__, "corpus_manifest": manifest, "devices": len(devices),
             "folds": len(rows), "dropped_clones": {public_key(k): public_key(v) for k, v in dropped.items()},
+            "alias_twins": {
+                k: sorted(sorted(c) for c in set(cls.values())) for k, cls in aliases.items() if cls
+            },
         },
         "tolerances": DEFAULT_TOLERANCES,
         "devices": devinfo,
@@ -919,6 +978,11 @@ def print_summary(doc: dict) -> None:
           f"{a.get(f'label_precision@{c0}')} learn-gate cov/prec {a.get(f'learn_coverage@{c0}')}/"
           f"{a.get(f'learn_precision@{c0}')} conf AUC {a.get(f'conf_auc@{c0}')} "
           f"s5 wins {a.get(f's5_wins@{c0}')} member ok {a.get(f's5_member_ok@{c0}')}")
+    twins = doc["meta"].get("alias_twins") or {}
+    if twins:
+        print(f"alias twins: {sum(len(v) for v in twins.values())} label groups in {len(twins)} files, "
+              f"{a.get(f'twin_folds@{c0}')} folds @{c0}; alias_top1 " + " ".join(
+                  f"@{c} {m['ALL'].get(f'alias_top1@{c}')}" for c in cuts) + " (top1 counts a twin as an error)")
 
 
 # --------------------------------------------------------------------------- compare
@@ -982,6 +1046,7 @@ def compare(base: dict, new: dict, tol: dict | None = None, out=print) -> int:
         cl = [k[0] for k in ks]
         ones = [1] * len(ks)
         for name, fn in (("top1", lambda r: r["ok"]), ("group_top1", lambda r: r["gok"]),
+                         ("alias_top1", lambda r: r.get("aok", r["ok"])),
                          ("top3", lambda r: bool(r["rank"] and r["rank"] <= 3)),
                          ("no_candidate", lambda r: r["top1"] is None),
                          ("label_coverage", lambda r: r["lok"]),
@@ -1027,6 +1092,50 @@ def compare(base: dict, new: dict, tol: dict | None = None, out=print) -> int:
     return 1 if failed else 0
 
 
+# ------------------------------------------------------------------- baseline status
+
+DEFAULT_BASELINE = REPO / "devtools" / "eval_baseline.json"
+
+
+def baseline_status(path: Path = DEFAULT_BASELINE, out=print) -> int:
+    """Is the committed baseline still a measurement of this tree's matcher?
+
+    0 fresh, 1 stale (the matcher sources' ``code_sha`` moved, or the baseline's
+    ``rev`` is not an ancestor of HEAD), 2 unreadable. Cheap: hashes the sources,
+    runs nothing (audit MATCH-EVAL-11).
+    """
+    try:
+        meta = json.loads(Path(path).read_text(encoding="utf-8"))["meta"]
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        out(f"cannot read {path}: {exc}")
+        return 2
+    problems: list[str] = []
+    cur = code_sha()
+    if meta.get("code_sha") != cur:
+        problems.append(f"the matcher sources changed since it was taken (code_sha {meta.get('code_sha')} -> {cur})")
+    rev = str(meta.get("rev") or "")
+    if rev and rev != "?":
+        try:
+            rc = subprocess.run(["git", "-C", str(REPO), "merge-base", "--is-ancestor", rev, "HEAD"],
+                                capture_output=True, check=False).returncode
+        except OSError:
+            rc = 0   # no git: the code_sha check stands alone
+        if rc == 1:
+            problems.append(f"its rev {rev} is not an ancestor of HEAD")
+        elif rc != 0:
+            problems.append(f"its rev {rev} is unknown to this clone")
+    try:
+        shown = Path(path).resolve().relative_to(REPO)
+    except ValueError:
+        shown = Path(path)
+    if problems:
+        out(f"stale: {'; '.join(problems)}. Regenerate: python3 devtools/eval.py run "
+            f"--mode {meta.get('mode', 'fast')} --out {shown}")
+        return 1
+    out(f"fresh (rev {rev}, code_sha {cur})")
+    return 0
+
+
 # ------------------------------------------------------------------------------- CLI
 
 def main(argv: list[str] | None = None) -> int:
@@ -1046,7 +1155,11 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("base", type=Path)
     c.add_argument("new", type=Path)
     c.add_argument("--tol", type=Path, default=None, help="JSON {metric@cut: max drop pp}")
+    b = sub.add_parser("baseline-status", help="is the committed baseline stale? (exit 1 when it is)")
+    b.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     a = ap.parse_args(argv)
+    if a.cmd == "baseline-status":
+        return baseline_status(a.baseline)
     if a.cmd == "compare":
         base = json.loads(a.base.read_text(encoding="utf-8"))
         new = json.loads(a.new.read_text(encoding="utf-8"))

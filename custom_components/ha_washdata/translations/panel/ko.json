@@ -244,7 +244,8 @@
         "confirm_appliance": "이 가전제품 확인",
         "confirmed": "확인됨",
         "create_profile_from_gap": "프로필 만들기",
-        "undo_import": "마지막 가져오기 실행 취소"
+        "undo_import": "마지막 가져오기 실행 취소",
+        "pg_rerun": "시뮬레이션 업데이트"
     },
     "note": {
         "off_delay": {
@@ -658,7 +659,12 @@
         "automation_off": "(꺼짐)",
         "ref_cycle_none": "없음",
         "share_name": "공유하는 항목에 내 이름 표시",
-        "cat_backfill_cycles": "가져온 전력 이력에서 발견된 사이클"
+        "cat_backfill_cycles": "가져온 전력 이력에서 발견된 사이클",
+        "pg_compare_profile": "비교할 프로필",
+        "pg_obj_early": "조기 종료율",
+        "pg_obj_endlag": "종료 지연(중앙값)",
+        "pg_obj_split": "분할률",
+        "pg_sweep_cycles": "최근 사이클 수"
     },
     "log": {
         "all_levels": "모든 레벨",
@@ -687,7 +693,21 @@
         },
         "metric_auc": "검증 데이터 기준 AUC {auc}",
         "metric_mae": "오차 {model} vs 기준선 {baseline}",
-        "fine_tuned_at": "{when}에 미세 조정됨"
+        "fine_tuned_at": "{when}에 미세 조정됨",
+        "last_run_not_promoted": "마지막 확인({when}): {reason}",
+        "never": "없음",
+        "skip_reason": {
+            "fit_failed": "학습 실패: {error}",
+            "holdout_too_small": "새 모델을 공정하게 테스트하기에는 사이클이 너무 적습니다. 테스트용으로 따로 둘 수 있는 사이클은 {held_out}개이며 {min}개가 필요합니다.",
+            "not_better_than_incumbent": "새 모델이 사용 중인 모델보다 낫지 않아(오차 {model} vs {incumbent}) 현재 모델을 유지했습니다.",
+            "not_better_than_naive": "새 모델이 단순 추정보다 확실히 낫지 않았습니다(오차 {model} vs {naive}).",
+            "unknown": "새로 학습한 내용이 없습니다.",
+            "insufficient_rows": "사용할 수 있는 사이클이 아직 부족합니다. 지금까지 라벨이 지정된 정상 사이클은 {count}개입니다.",
+            "insufficient_rows_other": "사용할 수 있는 사이클이 아직 부족합니다. 지금까지 라벨이 지정된 정상 사이클은 {count}개입니다."
+        },
+        "trained_unknown": "알 수 없는 시간",
+        "held_out_count": "검증용 사이클 {count}개로 측정",
+        "held_out_count_other": "검증용 사이클 {count}개로 측정"
     },
     "modal": {
         "auto_label": "자동 라벨 주기",
@@ -998,7 +1018,19 @@
         "feedback_detected": "WashData 감지 결과: {name}",
         "import_undo_hint": "마지막 가져오기({when}) 이전의 복원 지점이 보관되어 있습니다: 프로필 {profiles}개, 사이클 {cycles}개.",
         "replace_undo_hint": "먼저 복원 지점이 저장되므로 내보내기/가져오기에서 이 가져오기를 실행 취소할 수 있습니다.",
-        "pg_in_sample_note": "이 사이클들은 매칭 대상 프로필을 만드는 데에도 사용되었으므로 이 결과는 낙관적입니다. 새 사이클에서는 올바른 매칭이 약간 적을 것으로 예상하세요."
+        "pg_in_sample_note": "이 사이클들은 매칭 대상 프로필을 만드는 데에도 사용되었으므로 이 결과는 낙관적입니다. 새 사이클에서는 올바른 매칭이 약간 적을 것으로 예상하세요.",
+        "hist_tail_trimmed": "실제 통합과 마찬가지로 사이클 종료 후 대기 시간 {min}분을 잘라냈습니다",
+        "hist_truncated": "측정값 {n}개 한도에서 중지되어 나머지 기록은 검사하지 않았습니다",
+        "hist_warn_kw": "가장 높은 측정값이 {w}에 불과합니다. 이 센서는 킬로와트 단위로 보고하는 것 같습니다. WashData는 전력을 와트 단위로 읽으므로 이 센서로는 사이클을 감지할 수 없습니다.",
+        "pg_compare_profile_tip": "그래프 위에 겹쳐 표시할 프로필만 선택합니다. 시뮬레이션은 실제 통합과 마찬가지로 항상 사이클을 자체적으로 매칭합니다.",
+        "pg_outcome_stale": "이 시뮬레이션을 실행한 후 설정이 변경되었습니다. 아직 이전 결과가 표시되고 있습니다.",
+        "pg_sweep_guarded": "더 많은 사이클을 일찍 종료하거나, 더 많이 분할하거나, 현재 설정이 감지하는 사이클을 놓치므로 권장되지 않습니다.",
+        "pg_sweep_keep_current": "현재 값({value}, {metric})을 유지하세요. 최소 한 사이클 이상 더 나은 값이 없었습니다.",
+        "pg_task_busy": "이 기기에서 이미 이력 테스트 또는 최적화가 실행 중입니다. 완료될 때까지 기다리거나 취소하세요.",
+        "hist_warn_naive_time": "타임스탬프 {n}개에 시간대가 없어 UTC로 읽었습니다. 파일이 현지 시간 기준이라면 모든 사이클이 UTC 오프셋만큼 어긋나며, 서머타임 전환 전후의 측정값은 순서가 바뀌거나 누락될 수 있습니다.",
+        "hist_warn_naive_time_other": "타임스탬프 {n}개에 시간대가 없어 UTC로 읽었습니다. 파일이 현지 시간 기준이라면 모든 사이클이 UTC 오프셋만큼 어긋나며, 서머타임 전환 전후의 측정값은 순서가 바뀌거나 누락될 수 있습니다.",
+        "pg_sweep_n_cycles": "사이클 {count}개 기준",
+        "pg_sweep_n_cycles_other": "사이클 {count}개 기준"
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -1169,7 +1201,7 @@
             "label": "사이클 중 스마트 모델 적용"
         },
         "end_energy_threshold": {
-            "doc": "꺼짐 지연 카운트다운 동안 축적된 에너지(와트 x 시간)가 이 임계값과 비교됩니다. 초과하면 카운트다운이 재설정됩니다. 주름 방지 텀블러와 식기세척기 건조 테일을 짧게 자르는 대신 사이클에 부착해 두세요. 냉각 중에 사이클이 너무 일찍 끝나면 이 값을 올립니다. 감지가 느린 경우에는 낮추십시오.",
+            "doc": "오프 지연이 끝나면 그동안 사용된 에너지(와트 x 시간)를 이 임계값과 비교합니다. 이 값을 넘으면 사이클이 아직 끝나지 않은 것으로 보고, 구김 방지 텀블과 식기세척기 건조 마무리 구간을 잘라내지 않고 사이클에 포함된 상태로 유지합니다. 냉각 텀블이나 건조 마무리 중에 사이클이 끝나 버리면 값을 낮추고, 완료된 사이클이 계속 대기하면 값을 높이세요.",
             "label": "종료 에너지"
         },
         "energy_price_entity": {
@@ -1792,7 +1824,11 @@
         "store_download_partial": "프로그램 {n}개를 다운로드하지 못했습니다. 나중에 다시 시도하세요.",
         "import_no_restore_point": "가져왔지만 복원 지점을 저장할 수 없어 이 가져오기는 실행 취소할 수 없습니다",
         "import_undo_failed": "가져오기를 실행 취소하지 못했습니다: {error}",
-        "import_undone": "가져오기 실행 취소됨: 프로필 {profiles}개와 사이클 {cycles}개를 복원했습니다"
+        "import_undone": "가져오기 실행 취소됨: 프로필 {profiles}개와 사이클 {cycles}개를 복원했습니다",
+        "auto_label_cancelled": "사이클 {count}개에 라벨을 지정한 후 자동 라벨 지정이 취소되었습니다.",
+        "auto_label_cancelled_other": "사이클 {count}개에 라벨을 지정한 후 자동 라벨 지정이 취소되었습니다.",
+        "auto_label_done": "자동 라벨 지정 완료: 사이클 {count}개에 라벨을 지정했고 {skipped}개는 라벨 없이 남았습니다.",
+        "auto_label_done_other": "자동 라벨 지정 완료: 사이클 {count}개에 라벨을 지정했고 {skipped}개는 라벨 없이 남았습니다."
     },
     "suggestion": {
         "observed_label": "관측값",

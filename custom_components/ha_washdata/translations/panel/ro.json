@@ -202,7 +202,8 @@
     "confirm_appliance": "Confirmați acest aparat",
     "confirmed": "Confirmat",
     "create_profile_from_gap": "Creați profil",
-    "undo_import": "Anulați ultimul import"
+    "undo_import": "Anulați ultimul import",
+    "pg_rerun": "Actualizează simularea"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -617,7 +618,12 @@
     "automation_off": "(dezactivată)",
     "ref_cycle_none": "Niciunul",
     "share_name": "Afișați-mi numele pe ceea ce partajez",
-    "cat_backfill_cycles": "Cicluri găsite într-un istoric de putere importat"
+    "cat_backfill_cycles": "Cicluri găsite într-un istoric de putere importat",
+    "pg_compare_profile": "Compară cu profilul",
+    "pg_obj_early": "Rata de sfârșituri anticipate",
+    "pg_obj_endlag": "Întârzierea sfârșitului (mediană)",
+    "pg_obj_split": "Rata de divizare",
+    "pg_sweep_cycles": "Cicluri recente"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -646,7 +652,25 @@
     },
     "metric_auc": "AUC {auc} pe datele de validare",
     "metric_mae": "eroare: {model} față de referința {baseline}",
-    "fine_tuned_at": "ajustat pe {when}"
+    "fine_tuned_at": "ajustat pe {when}",
+    "held_out_count": "măsurat pe {count} de cicluri de validare",
+    "held_out_count_one": "măsurat pe {count} ciclu de validare",
+    "held_out_count_few": "măsurat pe {count} cicluri de validare",
+    "held_out_count_other": "măsurat pe {count} de cicluri de validare",
+    "last_run_not_promoted": "Ultima verificare ({when}): {reason}",
+    "never": "niciodată",
+    "skip_reason": {
+      "fit_failed": "Antrenarea a eșuat: {error}",
+      "holdout_too_small": "Prea puține cicluri pentru a testa corect un model nou: {held_out} au putut fi puse deoparte pentru testare, sunt necesare {min}.",
+      "insufficient_rows": "Încă nu există suficiente cicluri utilizabile: până acum, {count} de cicluri etichetate și curate.",
+      "insufficient_rows_one": "Încă nu există suficiente cicluri utilizabile: până acum, {count} ciclu etichetat și curat.",
+      "insufficient_rows_few": "Încă nu există suficiente cicluri utilizabile: până acum, {count} cicluri etichetate și curate.",
+      "insufficient_rows_other": "Încă nu există suficiente cicluri utilizabile: până acum, {count} de cicluri etichetate și curate.",
+      "not_better_than_incumbent": "Noul model nu a fost mai bun decât cel folosit (eroare {model} față de {incumbent}), așa că a fost păstrat cel actual.",
+      "not_better_than_naive": "Noul model nu a fost clar mai bun decât estimarea simplă (eroare {model} față de {naive}).",
+      "unknown": "Nu s-a învățat nimic nou."
+    },
+    "trained_unknown": "la o dată necunoscută"
   },
   "modal": {
     "auto_label": "Etichetare automată a ciclurilor",
@@ -969,7 +993,23 @@
     "feedback_detected": "WashData a detectat: {name}",
     "import_undo_hint": "Se păstrează un punct de restaurare de dinainte de ultimul import ({when}): {profiles} profil(uri) și {cycles} ciclu(ri).",
     "replace_undo_hint": "Mai întâi se salvează un punct de restaurare, astfel încât puteți anula acest import din Export / Import.",
-    "pg_in_sample_note": "Aceste cicluri au contribuit și la construirea profilurilor cu care sunt comparate, așa că aceste rezultate sunt optimiste: la ciclurile noi, așteptați-vă la ceva mai puține potriviri corecte."
+    "pg_in_sample_note": "Aceste cicluri au contribuit și la construirea profilurilor cu care sunt comparate, așa că aceste rezultate sunt optimiste: la ciclurile noi, așteptați-vă la ceva mai puține potriviri corecte.",
+    "hist_tail_trimmed": "Au fost eliminate {min} min de așteptare după sfârșitul ciclului, la fel cum face integrarea în timp real",
+    "hist_truncated": "oprit la limita de {n} citiri, așa că restul istoricului nu a fost analizat",
+    "hist_warn_kw": "Cea mai mare citire este doar {w}. Acest senzor pare să raporteze kilowați; WashData citește puterea în wați, așa că nu se pot detecta cicluri din el.",
+    "hist_warn_naive_time": "{n} de marcaje temporale nu au fus orar și au fost citite ca UTC. Dacă fișierul este în ora locală, fiecare ciclu este decalat cu diferența dvs. față de UTC, iar citirile din jurul trecerii la ora de vară sau de iarnă pot fi reordonate sau eliminate.",
+    "hist_warn_naive_time_one": "{n} marcaj temporal nu are fus orar și a fost citit ca UTC. Dacă fișierul este în ora locală, fiecare ciclu este decalat cu diferența dvs. față de UTC, iar citirile din jurul trecerii la ora de vară sau de iarnă pot fi reordonate sau eliminate.",
+    "hist_warn_naive_time_few": "{n} marcaje temporale nu au fus orar și au fost citite ca UTC. Dacă fișierul este în ora locală, fiecare ciclu este decalat cu diferența dvs. față de UTC, iar citirile din jurul trecerii la ora de vară sau de iarnă pot fi reordonate sau eliminate.",
+    "hist_warn_naive_time_other": "{n} de marcaje temporale nu au fus orar și au fost citite ca UTC. Dacă fișierul este în ora locală, fiecare ciclu este decalat cu diferența dvs. față de UTC, iar citirile din jurul trecerii la ora de vară sau de iarnă pot fi reordonate sau eliminate.",
+    "pg_compare_profile_tip": "Alege doar profilul desenat peste grafic. Simularea caută întotdeauna singură potrivirea ciclului, la fel ca integrarea în timp real.",
+    "pg_outcome_stale": "Setările s-au schimbat de la rularea acestei simulări. Încă arată rezultatul vechi.",
+    "pg_sweep_guarded": "Încheie prea devreme mai multe cicluri, divizează mai multe dintre ele sau ratează cicluri pe care setarea actuală le detectează, așa că această valoare nu este recomandată niciodată.",
+    "pg_sweep_keep_current": "Păstrați valoarea actuală ({value}, {metric}): nicio valoare nu a fost mai bună cu cel puțin un ciclu.",
+    "pg_sweep_n_cycles": "pe {count} de cicluri",
+    "pg_sweep_n_cycles_one": "pe {count} ciclu",
+    "pg_sweep_n_cycles_few": "pe {count} cicluri",
+    "pg_sweep_n_cycles_other": "pe {count} de cicluri",
+    "pg_task_busy": "O rulare Testează pe istoric sau Optimizează este deja în desfășurare pentru acest dispozitiv. Așteptați să se termine sau anulați-o."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1132,7 +1172,7 @@
       "label": "Aplicați modele inteligente în timpul unui ciclu"
     },
     "end_energy_threshold": {
-      "doc": "În timpul numărătoarei inverse pentru oprire, energia acumulată (wați x timp) este comparată cu acest prag. Dacă este depășită, numărătoarea inversă se resetează - menținând robinetele anti-șifonare și cozile de uscare a mașinii de spălat vase atașate la ciclu în loc să le tăiați scurt. Ridicați-l dacă ciclurile se termină prea devreme în timpul răcirii; coborâți-l dacă detectarea este lentă.",
+      "doc": "Când întârzierea la oprire s-a scurs, energia consumată în acest interval (wați x timp) este comparată cu acest prag. Peste prag, ciclul nu s-a terminat încă, ceea ce menține rotirile anti-șifonare și fazele finale de uscare ale mașinii de spălat vase atașate ciclului, în loc să le taie. Coborâți-l dacă ciclurile se termină în timpul unei rotiri de răcire sau al fazei finale de uscare; ridicați-l dacă ciclurile terminate continuă să aștepte.",
       "label": "Energia de Sfârșit"
     },
     "energy_price_entity": {
@@ -1743,7 +1783,15 @@
     "store_download_partial": "{n} program(e) nu au putut fi descărcate; încercați din nou mai târziu.",
     "import_no_restore_point": "Importat, dar nu s-a putut salva un punct de restaurare, așa că acest import nu poate fi anulat",
     "import_undo_failed": "Importul nu a putut fi anulat: {error}",
-    "import_undone": "Import anulat: {profiles} profil(uri) și {cycles} ciclu(ri) restaurate"
+    "import_undone": "Import anulat: {profiles} profil(uri) și {cycles} ciclu(ri) restaurate",
+    "auto_label_cancelled": "Etichetarea automată a fost anulată după ce {count} de cicluri au fost etichetate.",
+    "auto_label_cancelled_one": "Etichetarea automată a fost anulată după ce {count} ciclu a fost etichetat.",
+    "auto_label_cancelled_few": "Etichetarea automată a fost anulată după ce {count} cicluri au fost etichetate.",
+    "auto_label_cancelled_other": "Etichetarea automată a fost anulată după ce {count} de cicluri au fost etichetate.",
+    "auto_label_done": "Etichetare automată finalizată: {count} de cicluri etichetate, neetichetate: {skipped}.",
+    "auto_label_done_one": "Etichetare automată finalizată: {count} ciclu etichetat, neetichetate: {skipped}.",
+    "auto_label_done_few": "Etichetare automată finalizată: {count} cicluri etichetate, neetichetate: {skipped}.",
+    "auto_label_done_other": "Etichetare automată finalizată: {count} de cicluri etichetate, neetichetate: {skipped}."
   },
   "suggestion": {
     "observed_label": "Observat",

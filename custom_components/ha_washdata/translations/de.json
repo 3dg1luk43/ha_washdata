@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Verbindung konnte nicht hergestellt werden",
-      "invalid_auth": "Ungültige Authentifizierung",
       "unknown": "Unerwarteter Fehler",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Vertrauensschwellwert",
-          "description": "Mindestübereinstimmungskonfidenz (0,50–0,95) zum Anwenden von Zuordnungen."
+          "description": "Mindestübereinstimmungskonfidenz (0,50–0,95) zum Anwenden von Zuordnungen. Lassen Sie das Feld leer, um die Geräteeinstellung „Automatische Beschriftungskonfidenz“ zu verwenden."
         }
       }
     },

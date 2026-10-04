@@ -9,8 +9,10 @@
 #
 # pytest-homeassistant-custom-component pins a matching Home Assistant core plus
 # pytest and the plugins the suite relies on (asyncio, syrupy, xdist, socket,
-# aiohttp, freezer), so it is deliberately the single pinned entry: bumping it is
-# how this project moves to a newer Home Assistant.
+# aiohttp, freezer, timeout), so it is deliberately the single pinned entry: bumping
+# it is how this project moves to a newer Home Assistant. pytest.ini's `timeout`
+# needs pytest-timeout from it (without the plugin pytest only warns "Unknown config
+# option: timeout" and nothing is limited).
 pytest-homeassistant-custom-component==0.13.316
 
 # The one runtime dependency, needed so the numeric pipeline imports under test.

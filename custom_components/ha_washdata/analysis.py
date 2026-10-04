@@ -161,21 +161,35 @@ def find_best_alignment(
     best_mae = float("inf")
     final_offset = best_offset
 
+    # ~0.2 n^2 element work on a complete cycle (audit MATCH-CORE-11). It is
+    # byte-identical to the old ``np.mean(np.abs(c_seg - r_seg))``: the same
+    # subtract, abs and pairwise ``add.reduce`` divided by the count, written into
+    # one reused buffer. Allocating three fresh n-element arrays per offset, and
+    # np.mean's Python wrapper, cost more than the arithmetic. There is no exact
+    # shortcut for an L1 distance over shifts, and a 2-D batch over offsets was
+    # measured slower (the overlap length differs per offset). Any other dtype
+    # keeps the old expression (np.mean sums an integer array through a cast).
+    buf = (
+        np.empty(min(n_curr, n_ref))
+        if curr.dtype == np.float64 and ref.dtype == np.float64
+        else None
+    )
     for off in range(int(min_off), int(max_off) + 1):
         # intersection
         c_start = max(0, off)
         c_end = min(n_curr, n_ref + off)
-
-        r_start = max(0, -off)
-        r_end = min(n_ref, n_curr - off)
-
-        if (c_end - c_start) < 10:
+        length = c_end - c_start
+        if length < 10:
             continue
+        r_start = max(0, -off)
 
-        c_seg = curr[c_start:c_end]
-        r_seg = ref[r_start:r_end]
-
-        mae = np.mean(np.abs(c_seg - r_seg))
+        if buf is None:
+            mae = np.mean(np.abs(curr[c_start:c_end] - ref[r_start:r_start + length]))
+        else:
+            seg = buf[:length]
+            np.subtract(curr[c_start:c_end], ref[r_start:r_start + length], out=seg)
+            np.abs(seg, out=seg)
+            mae = np.add.reduce(seg) / length
         if mae < best_mae:
             best_mae = mae
             final_offset = off
@@ -256,7 +270,7 @@ def compute_dtw_lite(
     for each row are written back as a single slice assignment.  For the typical
     matching case (n=m=200, band=0.1 → w=20, ~41 cells/row) this is ~1.9× faster
     than the original element-by-element NumPy indexing loop.  The anti-diagonal
-    vectorized fill from :func:`_dtw_cost_matrix_vectorized` is NOT used here
+    vectorized fill from :func:`_dtw_cost_banded` is NOT used here
     because its per-diagonal Python setup overhead dominates for small n (it is
     2× *slower* than the scalar loop for n=200 — the opposite of its large-n
     envelope-rebuild behaviour where it wins by 1.6–8×).
@@ -449,14 +463,16 @@ def _stage3_dtw_score(
     ddtw_scale: float,
     ensemble_w: float,
     curr_resampled: np.ndarray | None = None,
-) -> tuple[float, float]:
-    """``(dtw_score, norm_dist)`` for one candidate: the four-way ``dtw_mode``
-    branch of the Stage-3 refinement.
+) -> float:
+    """The DTW score for one candidate: the four-way ``dtw_mode`` branch of the
+    Stage-3 refinement.
 
     Lifted verbatim out of ``compute_matches_worker`` so the Stage-3 loop and the
     Stage-6 prefix pass (#364) share one implementation and cannot drift apart.
     Behaviour-identical to the inlined version, including ``legacy`` mode's
-    ``dtw_dist / len(curr_arr)`` normalisation and its ``norm_dist`` bookkeeping.
+    ``dtw_dist / len(curr_arr)`` normalisation. (The normalised distance it also
+    returned until audit MR-12 went to a ``dtw_dist`` candidate field nothing
+    read, always 0.0 under the default ``ensemble``.)
     """
     if dtw_mode == "legacy":
         # Original behaviour: raw sequences, distance / len(current),
@@ -464,14 +480,13 @@ def _stage3_dtw_score(
         dtw_dist = compute_dtw_lite(curr_arr, sample_arr, band_width_ratio=dtw_bandwidth)
         n_points = len(curr_arr)
         norm_dist = (dtw_dist / n_points) if n_points > 0 else 999.0
-        return 1.0 / (1.0 + norm_dist / MATCH_DTW_DIST_SCALE), norm_dist
+        return 1.0 / (1.0 + norm_dist / MATCH_DTW_DIST_SCALE)
     if dtw_mode == "ensemble":
         # Blend the level-based (L1) and shape-based (derivative) DTW
         # scores; they are complementary signals.
         s_l1 = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, False, l1_scale, curr_resampled=curr_resampled)
         s_dd = _dtw_component_score(curr_arr, sample_arr, current_peak, dtw_bandwidth, True, ddtw_scale, curr_resampled=curr_resampled)
-        # composite; per-component distance not meaningful
-        return ensemble_w * s_l1 + (1.0 - ensemble_w) * s_dd, 0.0
+        return ensemble_w * s_l1 + (1.0 - ensemble_w) * s_dd
     # "scaled" (default) or "ddtw": resample both onto one grid so the
     # band and normalisation are consistent, then express the distance
     # relative to the current peak (behaviour-neutral at
@@ -480,7 +495,7 @@ def _stage3_dtw_score(
     scale = ddtw_scale if use_deriv else l1_scale
     return _dtw_component_score(
         curr_arr, sample_arr, current_peak, dtw_bandwidth, use_deriv, scale, curr_resampled=curr_resampled
-    ), 0.0
+    )
 
 
 def _rank_key(candidate: dict[str, Any]) -> float:
@@ -571,12 +586,14 @@ def compute_matches_worker(
             shape_pair = prefix_shape_arrays(
                 curr_arr, sample_power, current_duration, span_s
             )
+        # The alignment offset is not kept: nothing read it, and it was in different
+        # units on the two paths (shared-grid index vs native index; audit MR-12).
         if shape_pair is not None:
-            score, metrics, offset = find_best_alignment(
+            score, metrics, _offset = find_best_alignment(
                 shape_pair[0], shape_pair[1], 1.0, corr_weight=corr_weight
             )
         else:
-            score, metrics, offset = find_best_alignment(
+            score, metrics, _offset = find_best_alignment(
                 current_power, sample_power, 1.0, corr_weight=corr_weight
             )
 
@@ -595,7 +612,6 @@ def compute_matches_worker(
                 # Falls back to profile_duration so the other snapshot builders
                 # (devtools, playground) keep working unchanged.
                 "sample_span_s": float(item.get("sample_span_s") or profile_duration or 0.0),
-                "offset": offset
             })
 
     candidates.sort(key=_rank_key, reverse=True)
@@ -643,7 +659,6 @@ def compute_matches_worker(
             if batched is not None:
                 cand["original_score"] = float(cand["score"])
                 cand["score"] = float(blend * cand["score"] + (1.0 - blend) * batched[idx])
-                cand["dtw_dist"] = 0.0
                 continue
             pair = cand.get("_shape_pair")
             if pair is not None:
@@ -653,7 +668,7 @@ def compute_matches_worker(
                     curr_arr, np.array(cand["sample"]), curr_resampled
                 )
 
-            dtw_score, norm_dist = _stage3_dtw_score(
+            dtw_score = _stage3_dtw_score(
                 warp_curr,
                 sample_arr,
                 current_peak,
@@ -667,7 +682,6 @@ def compute_matches_worker(
 
             cand["original_score"] = float(cand["score"])
             cand["score"] = float(blend * cand["score"] + (1.0 - blend) * dtw_score)
-            cand["dtw_dist"] = float(norm_dist)
 
         candidates.sort(key=_rank_key, reverse=True)
 
@@ -880,7 +894,7 @@ def prefix_shape_score(
     # and the two stages would disagree about which candidates look like a prefix.
     dtw_bandwidth = float(config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH))
     if dtw_bandwidth > 0.0:
-        dtw_score, _ = _stage3_dtw_score(
+        dtw_score = _stage3_dtw_score(
             a,
             b,
             current_peak,
@@ -941,7 +955,7 @@ def _dtw_cost_matrix_scalar(
     x: np.ndarray, y: np.ndarray, n: int, m: int, w: int
 ) -> np.ndarray:
     """Reference (scalar) Sakoe-Chiba DTW cost-matrix fill. Kept verbatim as the
-    fallback for :func:`_dtw_cost_matrix_vectorized` so behavior can never regress."""
+    fallback for :func:`_dtw_cost_banded` so behavior can never regress."""
     cost_matrix = np.full((n + 1, m + 1), float("inf"))
     cost_matrix[0, 0] = 0
     for i in range(1, n + 1):
@@ -956,48 +970,106 @@ def _dtw_cost_matrix_scalar(
     return cost_matrix
 
 
-def _dtw_cost_matrix_vectorized(
+class _BandedCostMatrix:
+    """A Sakoe-Chiba DTW cost matrix that stores only its in-band cells.
+
+    Cells are kept per anti-diagonal ``d = i + j`` (the order the fill computes
+    them), each diagonal padded with one ``inf`` cell on either side. ``get``
+    returns exactly what the full ``(n+1) x (m+1)`` matrix held at ``(i, j)``:
+    the computed value in band, ``inf`` everywhere else (audit LIVE-20).
+    """
+
+    __slots__ = ("_vals", "_first", "_count", "_start")
+
+    def __init__(self, vals: np.ndarray, first: list[int], count: list[int], start: list[int]) -> None:
+        self._vals = vals
+        self._first = first
+        self._count = count
+        self._start = start
+
+    def get(self, i: int, j: int) -> float:
+        d = i + j
+        k = i - self._first[d]
+        if 0 <= k < self._count[d]:
+            # .item(): a Python float, without boxing the whole array (a .tolist()
+            # copy of a 2000-point band costs ~4x the band itself).
+            return self._vals.item(self._start[d] + 1 + k)
+        return math.inf
+
+
+def _dtw_cost_banded(
     x: np.ndarray, y: np.ndarray, n: int, m: int, w: int
-) -> np.ndarray:
-    """Bit-identical vectorized fill of the scalar cost matrix.
+) -> _BandedCostMatrix:
+    """Bit-identical vectorized fill of the scalar cost matrix, in-band cells only.
 
     The DTW recurrence is sequential, but all cells on one anti-diagonal
-    (``i + j`` constant) depend only on earlier anti-diagonals, so each diagonal
-    is one vectorized NumPy update instead of thousands of Python ``min``/``abs``
-    calls. The Sakoe-Chiba band, the per-row bounds (``int`` truncation), the
-    ``local + min(up, left, diag)`` recurrence and out-of-band ``inf`` cells all
-    match the scalar loop exactly, so the resulting matrix - and the backtracked
-    path - is identical. (#311 follow-up: this fill dominates envelope rebuilds.)
+    (``i + j`` constant) depend only on the two before it, so each diagonal is
+    one vectorized NumPy update. The Sakoe-Chiba band, the per-row bounds
+    (``int`` truncation), the ``local + min(min(up, left), diag)`` recurrence and
+    the out-of-band ``inf`` cells match the scalar loop exactly, so every cell -
+    and the backtracked path - is identical. (#311 follow-up: this fill
+    dominates envelope rebuilds.)
+
+    Until audit LIVE-20 it filled a full ``(n+1) x (m+1)`` matrix and masked all
+    of every anti-diagonal down to the band. Both band edges are non-decreasing
+    in ``i``, so the in-band cells of a diagonal are one contiguous run of rows,
+    found by a binary search; and a run moves by at most one row from one
+    diagonal to the next, so one ``inf`` pad cell per side makes every
+    predecessor lookup a slice. A 2000 x 2000 pair at the default 20% band
+    stores ~2.5x fewer cells and fills ~4-8x faster.
     """
     xf = np.asarray(x, dtype=float)
     yf = np.asarray(y, dtype=float)
-    cost_matrix = np.full((n + 1, m + 1), np.inf)
-    cost_matrix[0, 0] = 0.0
     # Per-row band bounds, identical to the scalar start_j/end_j (int truncates
     # toward zero, matching Python int()).
     i_idx = np.arange(1, n + 1)
     center = i_idx * (m / n)
     lo = np.maximum(1, (center - w).astype(np.int64))
     hi = np.minimum(m, (center + w).astype(np.int64) + 1)
+    # Rows in band on diagonal d: i + lo[i] <= d <= i + hi[i] (both sides strictly
+    # increasing in i), inside the matrix (1 <= i <= n, 1 <= d - i <= m).
+    d_all = np.arange(n + m + 1)
+    first = np.searchsorted(i_idx + hi, d_all, side="left") + 1
+    last = np.searchsorted(i_idx + lo, d_all, side="right")
+    first = np.maximum(first, np.maximum(1, d_all - m))
+    last = np.minimum(last, np.minimum(n, d_all - 1))
+    count = np.maximum(0, last - first + 1)
+    first[0], count[0] = 0, 1  # the origin (0, 0)
+    start = np.zeros(n + m + 2, dtype=np.int64)
+    np.cumsum(count + 2, out=start[1:])
+    vals = np.full(int(start[-1]), np.inf)
+    vals[1] = 0.0
+    first_l: list[int] = first.tolist()
+    count_l: list[int] = count.tolist()
+    start_l: list[int] = start.tolist()
+
+    def run(e: int, p: int, q: int) -> np.ndarray:
+        """Cells of rows ``p..q`` on diagonal ``e`` (``inf`` outside its band)."""
+        fe, ce = first_l[e], count_l[e]
+        base = start_l[e] + 1 - fe
+        if p >= fe - 1 and q <= fe + ce:
+            return vals[base + p: base + q + 1]
+        out = np.full(q - p + 1, np.inf)
+        a, b = max(p, fe), min(q, fe + ce - 1)
+        if a <= b:
+            out[a - p: b - p + 1] = vals[base + a: base + b + 1]
+        return out
+
     for d in range(2, n + m + 1):
-        i_lo = max(1, d - m)
-        i_hi = min(n, d - 1)
-        if i_lo > i_hi:
+        c = count_l[d]
+        if c <= 0:
             continue
-        ii = np.arange(i_lo, i_hi + 1)
-        jj = d - ii
-        inb = (jj >= lo[ii - 1]) & (jj <= hi[ii - 1])
-        if not inb.any():
-            continue
-        ib = ii[inb]
-        jb = jj[inb]
-        local = np.abs(xf[ib - 1] - yf[jb - 1])
+        p = first_l[d]
+        q = p + c - 1
+        # cells (i, d - i) for i = p..q: x[i - 1] against y[d - i - 1]
+        local = np.abs(xf[p - 1: q] - yf[d - q - 1: d - p][::-1])
         best = np.minimum(
-            np.minimum(cost_matrix[ib - 1, jb], cost_matrix[ib, jb - 1]),
-            cost_matrix[ib - 1, jb - 1],
+            np.minimum(run(d - 1, p - 1, q - 1), run(d - 1, p, q)),  # up, left
+            run(d - 2, p - 1, q - 1),  # diag
         )
-        cost_matrix[ib, jb] = local + best
-    return cost_matrix
+        s = start_l[d] + 1
+        np.add(local, best, out=vals[s: s + c])
+    return _BandedCostMatrix(vals, first_l, count_l, start_l)
 
 
 def compute_dtw_path(
@@ -1011,11 +1083,13 @@ def compute_dtw_path(
     if n == 0 or m == 0:
         return []
 
-    # Pre-flight memory guard: the cost matrix is (n+1)x(m+1) float64.  An
-    # uncapped call from a 1 Hz long cycle can request >1 GB here.  If the
-    # allocation would exceed ~80 MB, skip DTW and return an empty path so
+    # Pre-flight memory guard: the scalar fallback's cost matrix is (n+1)x(m+1)
+    # float64.  An uncapped call from a 1 Hz long cycle can request >1 GB there.
+    # If the allocation would exceed ~80 MB, skip DTW and return an empty path so
     # the caller falls back to linear interpolation (graceful degrade rather
-    # than OOM-killing Home Assistant — issue #388).
+    # than OOM-killing Home Assistant, issue #388). The banded fill needs far
+    # less, but the cap stays where it was so which pairs get a path is unchanged
+    # (``_closed_end_path_exists`` mirrors it).
     _DTW_CELL_BUDGET = 10_000_000  # 10 M cells x 8 B ≈ 80 MB
     if (n + 1) * (m + 1) > _DTW_CELL_BUDGET:
         _LOGGER.warning(
@@ -1027,12 +1101,13 @@ def compute_dtw_path(
 
     w = max(1, int(min(n, m) * band_width_ratio))
     try:
-        cost_matrix = _dtw_cost_matrix_vectorized(x, y, n, m, w)
+        cost = _dtw_cost_banded(x, y, n, m, w).get
     except Exception:  # pylint: disable=broad-exception-caught
-        cost_matrix = _dtw_cost_matrix_scalar(x, y, n, m, w)
+        full = _dtw_cost_matrix_scalar(x, y, n, m, w)
+        cost = lambda i, j: full[i, j]  # noqa: E731
 
     # Backtracking
-    if np.isinf(cost_matrix[n, m]):
+    if math.isinf(cost(n, m)):
         # Endpoint is unreachable (e.g. Sakoe-Chiba band excluded it); no valid path.
         return []
 
@@ -1049,9 +1124,9 @@ def compute_dtw_path(
             i -= 1
         else:
             candidates_cost = [
-                (cost_matrix[i - 1, j], 0),    # deletion (i-1)
-                (cost_matrix[i, j - 1], 1),    # insertion (j-1)
-                (cost_matrix[i - 1, j - 1], 2) # match (both)
+                (cost(i - 1, j), 0),    # deletion (i-1)
+                (cost(i, j - 1), 1),    # insertion (j-1)
+                (cost(i - 1, j - 1), 2) # match (both)
             ]
             candidates_cost.sort(key=lambda item: item[0])
             best_move = candidates_cost[0][1]
@@ -1339,7 +1414,8 @@ def align_trace_to_envelope(
 
     **Known limit, measured and accepted (register item 347).** The observed span
     here is ``t_obs[-1]``, while ``_rebuild_envelope_sync`` builds each member
-    over ``manual_duration or max(last_offset, stored_duration)``. Where the
+    over ``manual_duration`` (when plausible for its trace, audit MATCH-EVAL-17)
+    or ``max(last_offset, stored_duration)``. Where the
     stored duration runs past the last sample the build covered a slightly longer
     span than this re-derivation does, so the warp is not bit-for-bit the build's
     own. Measured over the 703 stored cycles in the maintainer's corpus it

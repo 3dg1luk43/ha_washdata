@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Lidhja dështoi",
-      "invalid_auth": "Vërtetim i pavlefshëm",
       "unknown": "Gabim i papritur",
       "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Pragu i besueshmërisë",
-          "description": "Besueshmëria minimale e përputhjes (0,50–0,95) për të aplikuar etiketat."
+          "description": "Besueshmëria minimale e përputhjes (0,50-0,95) për të aplikuar etiketat. Lëreni bosh për të përdorur cilësimin Besueshmëria e etiketimit automatik të pajisjes."
         }
       }
     },

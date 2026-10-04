@@ -212,6 +212,7 @@
     "unlabel_selected_tip": "Entfernt die Profilbeschriftung von den ausgewählten Zyklen. Sie bleiben in Ihrem Verlauf und können später erneut beschriftet werden - sie beeinflussen dieses Profil dann einfach nicht mehr.",
     "use": "Verwenden",
     "wipe_all": "Alle Daten löschen",
+    "pg_rerun": "Simulation aktualisieren",
     "delete_selected": "Auswahl löschen ({n})",
     "pg_apply_best": "Beste anwenden",
     "pg_apply_to_settings_tip": "Die hier bearbeiteten Werte in die aktiven Einstellungen dieses Geräts übernehmen",
@@ -664,6 +665,11 @@
     "automation_off": "(aus)",
     "ref_cycle_none": "Keiner",
     "share_name": "Meinen Namen bei geteilten Inhalten anzeigen",
+    "pg_compare_profile": "Mit Profil vergleichen",
+    "pg_obj_endlag": "Endverzögerung (Median)",
+    "pg_obj_early": "Anteil vorzeitiger Enden",
+    "pg_obj_split": "Aufteilungsrate",
+    "pg_sweep_cycles": "Letzte Zyklen",
     "cat_backfill_cycles": "Im importierten Leistungsverlauf gefundene Zyklen"
   },
   "log": {
@@ -693,7 +699,23 @@
     },
     "metric_auc": "AUC {auc} auf Validierungsdaten",
     "metric_mae": "Fehler {model} vs. Baseline {baseline}",
-    "fine_tuned_at": "feinabgestimmt: {when}"
+    "fine_tuned_at": "feinabgestimmt: {when}",
+    "never": "nie",
+    "trained_unknown": "zu einem unbekannten Zeitpunkt",
+    "held_out_count": "gemessen an {count} zurückgehaltenen Validierungszyklen",
+    "held_out_count_one": "gemessen an {count} zurückgehaltenen Validierungszyklus",
+    "held_out_count_other": "gemessen an {count} zurückgehaltenen Validierungszyklen",
+    "last_run_not_promoted": "Letzte Prüfung ({when}): {reason}",
+    "skip_reason": {
+      "insufficient_rows": "Noch nicht genug verwertbare Zyklen: bisher {count} beschriftete, saubere Zyklen.",
+      "insufficient_rows_one": "Noch nicht genug verwertbare Zyklen: bisher {count} beschrifteter, sauberer Zyklus.",
+      "insufficient_rows_other": "Noch nicht genug verwertbare Zyklen: bisher {count} beschriftete, saubere Zyklen.",
+      "fit_failed": "Training fehlgeschlagen: {error}",
+      "unknown": "Es wurde nichts Neues gelernt.",
+      "holdout_too_small": "Zu wenige Zyklen, um ein neues Modell fair zu testen: {held_out} konnten zum Testen zurückgehalten werden, {min} sind nötig.",
+      "not_better_than_naive": "Das neue Modell war nicht deutlich besser als die einfache Schätzung (Fehler {model} vs. {naive}).",
+      "not_better_than_incumbent": "Das neue Modell war nicht besser als das verwendete (Fehler {model} vs. {incumbent}), daher wurde das aktuelle beibehalten."
+    }
   },
   "modal": {
     "auto_label": "Auto-Label-Zyklen",
@@ -1008,6 +1030,20 @@
     "automation_desc_started": "Wird ausgeführt, wenn ein {device}-Zyklus startet. Fügen Sie Ihre Aktionen hinzu (Benachrichtigung, Licht, ...).",
     "automation_desc_finished": "Wird ausgeführt, wenn ein {device}-Zyklus endet. Fügen Sie Ihre Aktionen hinzu (Benachrichtigung, Licht, ...).",
     "feedback_detected": "Von WashData erkannt: {name}",
+    "pg_outcome_stale": "Die Einstellungen wurden geändert, seit diese Simulation lief. Sie zeigt noch das alte Ergebnis.",
+    "pg_compare_profile_tip": "Wählt nur das Profil, das über das Diagramm gelegt wird. Die Simulation ordnet den Zyklus immer selbstständig zu, so wie die Integration im laufenden Betrieb.",
+    "pg_task_busy": "Für dieses Gerät läuft bereits ein Test am Verlauf oder eine Optimierung. Warten Sie, bis der Vorgang abgeschlossen ist, oder brechen Sie ihn ab.",
+    "pg_sweep_guarded": "Beendet mehr Zyklen zu früh, teilt mehr davon auf oder verpasst Zyklen, die die aktuelle Einstellung erkennt, und wird daher nie empfohlen.",
+    "pg_sweep_n_cycles": "über {count} Zyklen",
+    "pg_sweep_n_cycles_one": "über {count} Zyklus",
+    "pg_sweep_n_cycles_other": "über {count} Zyklen",
+    "pg_sweep_keep_current": "Behalten Sie den aktuellen Wert ({value}, {metric}): Kein Wert war um mindestens einen Zyklus besser.",
+    "hist_truncated": "beim Limit von {n} Messwerten angehalten, daher wurde der restliche Verlauf nicht durchsucht",
+    "hist_warn_kw": "Der höchste Messwert beträgt nur {w}. Dieser Sensor scheint Kilowatt zu melden; WashData liest die Leistung in Watt, daher können damit keine Zyklen erkannt werden.",
+    "hist_warn_naive_time": "{n} Zeitstempel haben keine Zeitzone und wurden als UTC gelesen. Wenn die Datei in Ortszeit vorliegt, ist jeder Zyklus um Ihren UTC-Versatz verschoben, und Messwerte rund um eine Sommerzeitumstellung können vertauscht werden oder verloren gehen.",
+    "hist_warn_naive_time_one": "{n} Zeitstempel hat keine Zeitzone und wurde als UTC gelesen. Wenn die Datei in Ortszeit vorliegt, ist jeder Zyklus um Ihren UTC-Versatz verschoben, und Messwerte rund um eine Sommerzeitumstellung können vertauscht werden oder verloren gehen.",
+    "hist_warn_naive_time_other": "{n} Zeitstempel haben keine Zeitzone und wurden als UTC gelesen. Wenn die Datei in Ortszeit vorliegt, ist jeder Zyklus um Ihren UTC-Versatz verschoben, und Messwerte rund um eine Sommerzeitumstellung können vertauscht werden oder verloren gehen.",
+    "hist_tail_trimmed": "{min} Min. Wartezeit nach dem Zyklusende wurden abgeschnitten, wie es auch die Integration im laufenden Betrieb tut",
     "import_undo_hint": "Ein Wiederherstellungspunkt von vor dem letzten Import ({when}) wird aufbewahrt: {profiles} Profil(e) und {cycles} Zyklus/Zyklen.",
     "replace_undo_hint": "Zuvor wird ein Wiederherstellungspunkt gespeichert, sodass Sie diesen Import unter „Exportieren / Importieren“ rückgängig machen können.",
     "pg_in_sample_note": "Diese Zyklen haben auch die Profile mitgebildet, mit denen sie abgeglichen werden, daher sind diese Ergebnisse optimistisch: Bei neuen Zyklen ist mit etwas weniger richtigen Zuordnungen zu rechnen."
@@ -1189,7 +1225,7 @@
       "label": "Intelligente Modelle während eines Zyklus anwenden"
     },
     "end_energy_threshold": {
-      "doc": "Während des Countdowns zur Ausschaltverzögerung wird die kumulierte Energie (Watt x Zeit) mit diesem Schwellenwert verglichen. Bei Überschreitung wird der Countdown zurückgesetzt – so bleiben Knitterschutz-Wäschetrockner und Spülmaschinentrocknungsschwänze im Zyklus, anstatt sie abzubrechen. Erhöhen Sie den Wert, wenn die Zyklen während des Abkühlens zu früh enden. Verringern Sie den Wert, wenn die Erkennung langsam ist.",
+      "doc": "Wenn die Abschaltverzögerung abgelaufen ist, wird die in dieser Zeit verbrauchte Energie (Watt x Zeit) mit diesem Schwellenwert verglichen. Liegt sie darüber, ist der Zyklus noch nicht beendet. So bleiben Knitterschutz-Trommelbewegungen und die Nachtrocknung von Spülmaschinen Teil des Zyklus, statt abgeschnitten zu werden. Senken Sie den Wert, wenn Zyklen während einer Abkühl-Trommelbewegung oder der Nachtrocknung enden; erhöhen Sie ihn, wenn abgeschlossene Zyklen weiter warten.",
       "label": "Endenergie"
     },
     "energy_price_entity": {
@@ -1866,6 +1902,12 @@
     "analysis_failed": "Analyse fehlgeschlagen: {error}",
     "auto_detect_failed": "Automatische Erkennung fehlgeschlagen: {error}",
     "auto_label_failed": "Automatische Beschriftung fehlgeschlagen: {error}",
+    "auto_label_done": "Automatische Beschriftung abgeschlossen: {count} Zyklen beschriftet, {skipped} unbeschriftet gelassen.",
+    "auto_label_done_one": "Automatische Beschriftung abgeschlossen: {count} Zyklus beschriftet, {skipped} unbeschriftet gelassen.",
+    "auto_label_done_other": "Automatische Beschriftung abgeschlossen: {count} Zyklen beschriftet, {skipped} unbeschriftet gelassen.",
+    "auto_label_cancelled": "Automatische Beschriftung nach {count} beschrifteten Zyklen abgebrochen.",
+    "auto_label_cancelled_one": "Automatische Beschriftung nach {count} beschriftetem Zyklus abgebrochen.",
+    "auto_label_cancelled_other": "Automatische Beschriftung nach {count} beschrifteten Zyklen abgebrochen.",
     "could_not_load_cycle": "Zyklus konnte nicht geladen werden: {error}",
     "create_failed": "Erstellen fehlgeschlagen: {error}",
     "cycles_deleted": "Gelöschte Zyklen: {count}",

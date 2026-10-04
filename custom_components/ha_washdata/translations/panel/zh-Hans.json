@@ -244,7 +244,8 @@
         "confirm_appliance": "确认此家电",
         "confirmed": "已确认",
         "create_profile_from_gap": "创建配置文件",
-        "undo_import": "撤销上次导入"
+        "undo_import": "撤销上次导入",
+        "pg_rerun": "更新模拟"
     },
     "note": {
         "off_delay": {
@@ -658,7 +659,12 @@
         "automation_off": "（已关闭）",
         "ref_cycle_none": "无",
         "share_name": "在我分享的内容上显示我的名字",
-        "cat_backfill_cycles": "在导入的功率历史中发现的周期"
+        "cat_backfill_cycles": "在导入的功率历史中发现的周期",
+        "pg_compare_profile": "与配置文件比较",
+        "pg_obj_early": "提前结束率",
+        "pg_obj_endlag": "结束延迟（中位数）",
+        "pg_obj_split": "拆分率",
+        "pg_sweep_cycles": "最近周期数"
     },
     "log": {
         "all_levels": "所有级别",
@@ -687,7 +693,21 @@
         },
         "metric_auc": "留出验证数据上的 AUC {auc}",
         "metric_mae": "误差 {model} vs 基线 {baseline}",
-        "fine_tuned_at": "微调于 {when}"
+        "fine_tuned_at": "微调于 {when}",
+        "last_run_not_promoted": "上次检查（{when}）：{reason}",
+        "never": "从未",
+        "skip_reason": {
+            "fit_failed": "训练失败：{error}",
+            "holdout_too_small": "周期太少，无法公平地测试新模型：可留出用于测试的周期为 {held_out} 个，需要 {min} 个。",
+            "not_better_than_incumbent": "新模型并不优于当前使用的模型（误差 {model} vs {incumbent}），因此保留了当前模型。",
+            "not_better_than_naive": "新模型没有明显优于简单估算（误差 {model} vs {naive}）。",
+            "unknown": "没有学到新内容。",
+            "insufficient_rows": "可用周期尚不足：目前已标记且干净的周期为 {count} 个。",
+            "insufficient_rows_other": "可用周期尚不足：目前已标记且干净的周期为 {count} 个。"
+        },
+        "trained_unknown": "未知时间",
+        "held_out_count": "基于 {count} 个留出验证周期测得",
+        "held_out_count_other": "基于 {count} 个留出验证周期测得"
     },
     "modal": {
         "auto_label": "自动标记周期",
@@ -998,7 +1018,19 @@
         "feedback_detected": "WashData 检测到：{name}",
         "import_undo_hint": "已保留上次导入（{when}）之前的还原点：{profiles} 个配置文件和 {cycles} 个周期。",
         "replace_undo_hint": "系统会先保存一个还原点，因此您可以在“导出 / 导入”中撤销此次导入。",
-        "pg_in_sample_note": "这些周期也参与了构建与之匹配的配置文件，因此这些结果偏乐观：在新周期上，预计正确匹配会略少一些。"
+        "pg_in_sample_note": "这些周期也参与了构建与之匹配的配置文件，因此这些结果偏乐观：在新周期上，预计正确匹配会略少一些。",
+        "hist_tail_trimmed": "已裁掉周期结束后 {min} 分钟的等待时间，与实际运行的集成一致",
+        "hist_truncated": "在 {n} 条读数的上限处停止，因此其余历史未被扫描",
+        "hist_warn_kw": "最高读数仅为 {w}。该传感器似乎以千瓦为单位上报；WashData 以瓦为单位读取功率，因此无法从中检测周期。",
+        "pg_compare_profile_tip": "仅选择叠加在图表上的配置文件。模拟始终会像实际运行的集成一样，自行匹配该周期。",
+        "pg_outcome_stale": "自本次模拟运行以来设置已更改。当前显示的仍是旧结果。",
+        "pg_sweep_guarded": "会让更多周期提前结束、拆分更多周期，或漏掉当前设置能捕捉到的周期，因此绝不会被推荐。",
+        "pg_sweep_keep_current": "保持当前值（{value}，{metric}）：没有任何值能至少多改善一个周期。",
+        "pg_task_busy": "此设备已有历史测试或优化任务正在运行。请等待其完成或将其取消。",
+        "hist_warn_naive_time": "{n} 个时间戳没有时区，已按 UTC 读取。如果文件使用本地时间，每个周期都会偏移您的 UTC 时差，而夏令时切换前后的读数可能会被打乱顺序或丢弃。",
+        "hist_warn_naive_time_other": "{n} 个时间戳没有时区，已按 UTC 读取。如果文件使用本地时间，每个周期都会偏移您的 UTC 时差，而夏令时切换前后的读数可能会被打乱顺序或丢弃。",
+        "pg_sweep_n_cycles": "基于 {count} 个周期",
+        "pg_sweep_n_cycles_other": "基于 {count} 个周期"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1169,7 +1201,7 @@
             "label": "在周期中应用智能模型"
         },
         "end_energy_threshold": {
-            "doc": "在关闭延迟倒计时期间，累积能量（瓦特 x 时间）与该阈值进行比较。如果超过，倒计时会重置 - 将防皱翻滚和洗碗机干燥尾部连接到循环上，而不是缩短它们。如果冷却过程中循环结束得太早，则提高它；如果检测缓慢，则降低它。",
+            "doc": "关闭延迟结束时，会将这段时间内消耗的能量（瓦特 x 时间）与此阈值比较。高于该阈值时，周期视为尚未结束，从而将防皱翻滚和洗碗机烘干尾段保留在周期内，而不会被提前截断。如果周期在冷却翻滚或烘干尾段期间结束，请调低；如果已完成的周期一直在等待，请调高。",
             "label": "结束能耗"
         },
         "energy_price_entity": {
@@ -1792,7 +1824,11 @@
         "store_download_partial": "{n} 个程序无法下载，请稍后重试。",
         "import_no_restore_point": "已导入，但无法保存还原点，因此此次导入无法撤销",
         "import_undo_failed": "无法撤销导入：{error}",
-        "import_undone": "已撤销导入：已恢复 {profiles} 个配置文件和 {cycles} 个周期"
+        "import_undone": "已撤销导入：已恢复 {profiles} 个配置文件和 {cycles} 个周期",
+        "auto_label_cancelled": "自动标记已取消，此前已标记 {count} 个周期。",
+        "auto_label_cancelled_other": "自动标记已取消，此前已标记 {count} 个周期。",
+        "auto_label_done": "自动标记完成：已标记 {count} 个周期，{skipped} 个保持未标记。",
+        "auto_label_done_other": "自动标记完成：已标记 {count} 个周期，{skipped} 个保持未标记。"
     },
     "suggestion": {
         "observed_label": "观测值",

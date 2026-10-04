@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Kunne ikke koble til",
-      "invalid_auth": "Ugyldig autentisering",
       "unknown": "Uventet feil",
       "invalid_power": "Effektterskelen må være større enn 0"
     },
@@ -143,7 +141,7 @@
         },
         "confidence_threshold": {
           "name": "Konfidensgrense",
-          "description": "Minste matchkonfidens (0,50–0,95) for å bruke etiketter."
+          "description": "Minste matchkonfidens (0,50–0,95) for å bruke etiketter. La feltet stå tomt for å bruke enhetens innstilling \"Auto-merking konfidensgrad\"."
         }
       }
     },

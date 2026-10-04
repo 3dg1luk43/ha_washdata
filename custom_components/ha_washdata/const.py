@@ -775,6 +775,11 @@ SMART_TERM_PREFIX_MIN_COVERAGE = 0.90  # template span must cover >=90% of its d
 # programme winning at >= 0.9x its own length - occurs only 3 times in the corpus,
 # and is caught exactly as before (1 of 3).  Any stored pause of this length keeps
 # the guard; a programme with no traced evidence keeps it too.
+# Re-measured 2026-10-04 on the shipped matcher (the rewritten prefix_guard_eval,
+# real async_match_profile, leave-one-out, 71 devices; item 483): the prefix term
+# now fires on 0 of 713 genuine ends and catches 3 of 528 random-cut positives and
+# 0 of 7 quiet ones. The 186/142 figures above came from the old harness, which
+# OR-ed in the #288 full-shape term. On the shipped path the term is close to inert.
 SMART_TERM_PREFIX_MIN_PAUSE_S = 60.0
 
 # (b) Power plausibility (fixes 1, the untrained case, which no candidate-pool guard
@@ -803,6 +808,8 @@ SMART_TERM_PREFIX_MIN_PAUSE_S = 60.0
 # at 4-8x so they stay caught.  A false block only costs a later finish (the
 # power-based fallback timeout still ends the cycle); a miss costs a split cycle.
 # ~1 in 5 of the remaining false blocks had a wrong top-1 anyway, where blocking is right.
+# Re-measured 2026-10-04 on the shipped matcher (item 483, `--quiet-cuts`): at 3.5x
+# it catches 156 of 508 split positives with 0 of 675 false blocks.
 SMART_TERM_TAIL_MAX_RATIO = 3.5        # block while trailing mean > this x profile tail
 SMART_TERM_TAIL_WINDOW_S = 300.0       # upper clamp on the trailing window
 SMART_TERM_TAIL_WINDOW_MIN_S = 60.0    # lower clamp (short programmes)
@@ -1444,11 +1451,6 @@ def resolve_start_duration_default(device_type: str) -> float:
     return max(DEFAULT_START_DURATION_THRESHOLD, sampling)
 
 
-# Default profile match min duration ratio by device type
-DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE = {
-    DEVICE_TYPE_DISHWASHER: 0.10,
-}
-
 # Default Smart-Termination duration ratio by device type (#393).  Dishwashers run
 # fixed programs (measured spread +4%/+17% around the mean), so the conservative
 # 0.99 gate is defensible there; every other type keeps the scalar
@@ -1580,6 +1582,11 @@ STORAGE_KEY = "ha_washdata"
 PRE_IMPORT_STORE_SUFFIX = "pre_import"
 PRE_IMPORT_STORE_VERSION = 1
 
+# Notifications held by quiet hours / presence when Home Assistant stops or the entry
+# unloads, in `ha_washdata.<entry_id>.notify_queue` (audit MANAGER-16). Written at the
+# stop, read and deleted once HA has started again; removed with the device.
+NOTIFY_QUEUE_STORE_SUFFIX = "notify_queue"
+
 # ─── Config-entry schema version (NOT the storage version above) ───────────────
 # Single source for the config-entry schema: `ConfigFlow.VERSION`/`MINOR_VERSION`, every
 # stepwise block in `async_migrate_entry`, and the `minor_version=` the one-pass legacy
@@ -1667,9 +1674,7 @@ SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
 )
 
 
-def sanitize_shared_settings(
-    settings: Any, device_type: str | None = None
-) -> dict[str, float]:
+def sanitize_shared_settings(settings: Any) -> dict[str, float]:
     """The allow-listed, finite, numeric subset of a shared settings map.
 
     Every share/adopt/export site goes through this. The duration ratios are also
@@ -1689,9 +1694,7 @@ def sanitize_shared_settings(
         if key == CONF_PROFILE_MATCH_MAX_DURATION_RATIO:
             value = max(value, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
         elif key == CONF_PROFILE_MATCH_MIN_DURATION_RATIO:
-            value = min(value, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
-                str(device_type or ""), DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
-            ))
+            value = min(value, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
         out[str(key)] = value
     return out
 
@@ -1736,10 +1739,16 @@ ML_TRAINING_HISTORY_MAX = 30
 # Total-energy regressor (standardized_linear), the one head trained on-device.
 # It has no shipped baseline; it is only promoted when its held-out mean-absolute
 # error on the energy-fraction target beats the naive elapsed/expected
-# estimate by at least this relative margin (5% lower MAE). Trained from prefixes
-# of the device's own clean cycles.
+# estimate by at least this relative margin (5% lower MAE) AND beats the model
+# already in use, scored on the same held-out cycles (audit ML-12). Trained from
+# prefixes of the device's own clean cycles.
 ML_TRAINING_REGRESSION_MARGIN = 0.05
 ML_TRAINING_MIN_REGRESSION_ROWS = 30  # synthesized prefix rows needed to fit
+# Held-out cycles a regressor must be scored on before it can be promoted. The
+# 20% holdout rested on ONE cycle for the only real promotion on record (audit
+# PROGRESS-16); the split now holds out at least this many when the device has
+# twice as many usable cycles, and never promotes on fewer.
+ML_TRAINING_MIN_HOLDOUT_CYCLES = 5
 # How strongly a promoted remaining-time regressor influences the live progress
 # estimate. The ML completion-fraction is blended with the phase-aware estimate
 # at this weight before the existing EMA smoothing/monotonicity guards run, so a
@@ -1829,7 +1838,9 @@ DEFAULT_PROFILE_EVIDENCE_SOURCES = list(PROFILE_EVIDENCE_SOURCES)
 HISTORY_IMPORT_MAX_BYTES: int = 32 * 1024 * 1024     # staged upload cap (~32 MiB of CSV text)
 HISTORY_IMPORT_MAX_ROWS: int = 500_000               # parsed-row cap (≈ a month at 5 s)
 HISTORY_IMPORT_CHUNK_BYTES: int = 512 * 1024         # per-WS-message upload chunk (frame cap is 4 MiB)
-HISTORY_IMPORT_CHUNK_SAMPLES: int = 4000             # samples replayed per executor job
+# Samples replayed per executor job. 4000 was ~1.0 s of GIL per job on a desktop,
+# i.e. the #311 freeze pattern on a Pi (audit PLAYGROUND-11); 1000 is ~0.25 s.
+HISTORY_IMPORT_CHUNK_SAMPLES: int = 1000
 HISTORY_IMPORT_MIN_BLOCK_SAMPLES: int = 20           # floor for the per-block sample gate
 HISTORY_IMPORT_MAX_MEDIAN_INTERVAL_S: float = 120.0  # floor for the per-block cadence gate; the
                                                      # effective gate is

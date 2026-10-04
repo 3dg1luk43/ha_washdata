@@ -253,7 +253,8 @@
     "confirm_appliance": "Potwierdź to urządzenie",
     "confirmed": "Potwierdzone",
     "create_profile_from_gap": "Utwórz profil",
-    "undo_import": "Cofnij ostatni import"
+    "undo_import": "Cofnij ostatni import",
+    "pg_rerun": "Aktualizuj symulację"
   },
   "note": {
     "off_delay": {
@@ -676,7 +677,12 @@
     "automation_off": "(wyłączona)",
     "ref_cycle_none": "Brak",
     "share_name": "Pokazuj moją nazwę w udostępnianych treściach",
-    "cat_backfill_cycles": "Cykle znalezione w zaimportowanej historii mocy"
+    "cat_backfill_cycles": "Cykle znalezione w zaimportowanej historii mocy",
+    "pg_compare_profile": "Porównaj z profilem",
+    "pg_obj_early": "Wskaźnik wczesnych końców",
+    "pg_obj_endlag": "Opóźnienie końca (mediana)",
+    "pg_obj_split": "Wskaźnik podzielonych cykli",
+    "pg_sweep_cycles": "Ostatnie cykle"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -705,7 +711,27 @@
     },
     "metric_auc": "AUC {auc} na danych walidacyjnych",
     "metric_mae": "błąd {model} względem modelu bazowego {baseline}",
-    "fine_tuned_at": "dostrojono {when}"
+    "fine_tuned_at": "dostrojono {when}",
+    "held_out_count": "zmierzono na {count} cyklach walidacyjnych",
+    "held_out_count_one": "zmierzono na {count} cyklu walidacyjnym",
+    "held_out_count_few": "zmierzono na {count} cyklach walidacyjnych",
+    "held_out_count_many": "zmierzono na {count} cyklach walidacyjnych",
+    "held_out_count_other": "zmierzono na {count} cyklu walidacyjnego",
+    "last_run_not_promoted": "Ostatnie sprawdzenie ({when}): {reason}",
+    "never": "nigdy",
+    "skip_reason": {
+      "fit_failed": "Trenowanie nie powiodło się: {error}",
+      "holdout_too_small": "Za mało cykli, by rzetelnie przetestować nowy model: do testów można było odłożyć {held_out}, a potrzeba {min}.",
+      "insufficient_rows": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczonych, czystych cykli.",
+      "insufficient_rows_one": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczony, czysty cykl.",
+      "insufficient_rows_few": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczone, czyste cykle.",
+      "insufficient_rows_many": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczonych, czystych cykli.",
+      "insufficient_rows_other": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczonego, czystego cyklu.",
+      "not_better_than_incumbent": "Nowy model nie był lepszy od używanego (błąd {model} wobec {incumbent}), więc zachowano obecny.",
+      "not_better_than_naive": "Nowy model nie był wyraźnie lepszy od prostego oszacowania (błąd {model} wobec {naive}).",
+      "unknown": "Nie nauczono się niczego nowego."
+    },
+    "trained_unknown": "w nieznanym momencie"
   },
   "modal": {
     "auto_label": "Cykle automatycznego etykietowania",
@@ -1034,7 +1060,25 @@
     "feedback_detected": "WashData wykrył: {name}",
     "import_undo_hint": "Zachowano punkt przywracania sprzed ostatniego importu ({when}): {profiles} profil(e) i {cycles} cykl(e).",
     "replace_undo_hint": "Najpierw zapisywany jest punkt przywracania, więc ten import można cofnąć w sekcji Eksportuj/Importuj.",
-    "pg_in_sample_note": "Te cykle posłużyły też do zbudowania profili, z którymi są porównywane, więc wyniki są optymistyczne: przy nowych cyklach spodziewaj się nieco mniej poprawnych dopasowań."
+    "pg_in_sample_note": "Te cykle posłużyły też do zbudowania profili, z którymi są porównywane, więc wyniki są optymistyczne: przy nowych cyklach spodziewaj się nieco mniej poprawnych dopasowań.",
+    "hist_tail_trimmed": "Przycięto {min} min oczekiwania po zakończeniu cyklu, tak samo jak robi to działająca integracja",
+    "hist_truncated": "zatrzymano na limicie odczytów ({n}), więc reszta historii nie została przeskanowana",
+    "hist_warn_kw": "Najwyższy odczyt to tylko {w}. Ten czujnik wygląda, jakby podawał moc w kilowatach; WashData odczytuje moc w watach, więc nie da się na jego podstawie wykryć cykli.",
+    "hist_warn_naive_time": "{n} znaczników czasu nie ma strefy czasowej i zostało odczytanych jako UTC. Jeśli plik używa czasu lokalnego, każdy cykl jest przesunięty o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu na letni lub zimowy mogą zostać przestawione lub pominięte.",
+    "hist_warn_naive_time_one": "{n} znacznik czasu nie ma strefy czasowej i został odczytany jako UTC. Jeśli plik używa czasu lokalnego, każdy cykl jest przesunięty o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu na letni lub zimowy mogą zostać przestawione lub pominięte.",
+    "hist_warn_naive_time_few": "{n} znaczniki czasu nie mają strefy czasowej i zostały odczytane jako UTC. Jeśli plik używa czasu lokalnego, każdy cykl jest przesunięty o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu na letni lub zimowy mogą zostać przestawione lub pominięte.",
+    "hist_warn_naive_time_many": "{n} znaczników czasu nie ma strefy czasowej i zostało odczytanych jako UTC. Jeśli plik używa czasu lokalnego, każdy cykl jest przesunięty o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu na letni lub zimowy mogą zostać przestawione lub pominięte.",
+    "hist_warn_naive_time_other": "{n} znacznika czasu nie ma strefy czasowej i zostało odczytane jako UTC. Jeśli plik używa czasu lokalnego, każdy cykl jest przesunięty o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu na letni lub zimowy mogą zostać przestawione lub pominięte.",
+    "pg_compare_profile_tip": "Wybiera tylko profil nakładany na wykres. Symulacja zawsze sama dopasowuje program do cyklu, tak jak działająca integracja.",
+    "pg_outcome_stale": "Ustawienia zmieniły się od uruchomienia tej symulacji. Nadal pokazuje ona stary wynik.",
+    "pg_sweep_guarded": "Kończy więcej cykli przedwcześnie, dzieli więcej z nich lub pomija cykle wykrywane przy obecnym ustawieniu, więc nigdy nie jest zalecane.",
+    "pg_sweep_keep_current": "Zachowaj obecną wartość ({value}, {metric}): żadna wartość nie była lepsza o co najmniej jeden cykl.",
+    "pg_sweep_n_cycles": "na {count} cyklach",
+    "pg_sweep_n_cycles_one": "na {count} cyklu",
+    "pg_sweep_n_cycles_few": "na {count} cyklach",
+    "pg_sweep_n_cycles_many": "na {count} cyklach",
+    "pg_sweep_n_cycles_other": "na {count} cyklu",
+    "pg_task_busy": "Dla tego urządzenia trwa już przebieg „Testuj na historii” lub „Optymalizuj”. Poczekaj na jego zakończenie lub go anuluj."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1193,7 +1237,7 @@
       "label": "Stosuj inteligentne modele podczas cyklu"
     },
     "end_energy_threshold": {
-      "doc": "Podczas odliczania opóźnienia wyłączenia skumulowana energia (waty x czas) jest porównywana z tym progiem. Jeśli zostanie przekroczony, odliczanie zostanie zresetowane – utrzymując bębny zapobiegające zagnieceniom i końcówki suszące w zmywarce dołączone do cyklu, zamiast je skracać. Podnieś go, jeśli cykle kończą się zbyt wcześnie podczas schładzania; obniż ją, jeśli wykrywanie jest powolne.",
+      "doc": "Gdy upłynie opóźnienie wyłączenia, energia zużyta w tym czasie (waty x czas) jest porównywana z tym progiem. Powyżej progu cykl nie jest jeszcze zakończony, dzięki czemu obroty antygniotowe i końcowe suszenie zmywarki pozostają częścią cyklu, zamiast zostać ucięte. Obniż go, jeśli cykle kończą się podczas schładzających obrotów bębna lub końcowego suszenia; podnieś go, jeśli zakończone cykle wciąż czekają.",
       "label": "Energia Zakończenia"
     },
     "energy_price_entity": {
@@ -1900,7 +1944,17 @@
     "store_download_partial": "Nie udało się pobrać programów: {n}; spróbuj ponownie później.",
     "import_no_restore_point": "Zaimportowano, ale nie udało się zapisać punktu przywracania, więc tego importu nie można cofnąć",
     "import_undo_failed": "Nie udało się cofnąć importu: {error}",
-    "import_undone": "Import cofnięty: przywrócono {profiles} profil(e) i {cycles} cykl(e)"
+    "import_undone": "Import cofnięty: przywrócono {profiles} profil(e) i {cycles} cykl(e)",
+    "auto_label_cancelled": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cykli.",
+    "auto_label_cancelled_one": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cyklu.",
+    "auto_label_cancelled_few": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cykli.",
+    "auto_label_cancelled_many": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cykli.",
+    "auto_label_cancelled_other": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cyklu.",
+    "auto_label_done": "Automatyczne oznaczanie zakończone: oznaczono {count} cykli, bez etykiety pozostało: {skipped}.",
+    "auto_label_done_one": "Automatyczne oznaczanie zakończone: oznaczono {count} cykl, bez etykiety pozostało: {skipped}.",
+    "auto_label_done_few": "Automatyczne oznaczanie zakończone: oznaczono {count} cykle, bez etykiety pozostało: {skipped}.",
+    "auto_label_done_many": "Automatyczne oznaczanie zakończone: oznaczono {count} cykli, bez etykiety pozostało: {skipped}.",
+    "auto_label_done_other": "Automatyczne oznaczanie zakończone: oznaczono {count} cyklu, bez etykiety pozostało: {skipped}."
   },
   "trend": {
     "down": "Trend w dół",

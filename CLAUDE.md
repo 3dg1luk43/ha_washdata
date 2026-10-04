@@ -29,7 +29,7 @@ pip install -r requirements-dev.txt
 ## Commands
 
 ```bash
-./run_tests.sh                  # fast suite (default, ~30s - skips slow + benchmark)
+./run_tests.sh                  # fast suite (default, ~2 min - skips slow + benchmark)
 ./run_tests.sh --slow           # real-data replays, stress simulations
 ./run_tests.sh --bench          # none left: work budgets run in the fast suite (tests/test_perf_budgets.py)
 ./run_tests.sh --e2e            # Playwright E2E (chromium + mobile-chrome, ~2 min)
@@ -57,10 +57,12 @@ python3 devtools/eval.py run --mode fast     # LOO matcher accuracy on the SHIPP
 python3 devtools/eval.py compare BASE.json NEW.json   # paired deltas, McNemar, guarded metrics
 python3 devtools/end_gate_eval.py --loo      # ENDING fallback-gate lag/early-end/split (item 329); add --all-formats (diagnostics dumps + user-Contributed, item 465) and --shipped-watchdog
 python3 devtools/energy_projection_eval.py   # projected-energy accuracy, LOO (audit PROGRESS-04)
+python3 devtools/ml_energy_gate_eval.py      # on-device total_energy promotion gate vs naive and incumbent (audit ML-12)
 python3 devtools/terminal_drop_plugpull_eval.py   # dishwasher plug-pull fast finalize, LOO (audit ML-08); --rule off|ungated|guarded
 python3 devtools/margin_display_fit.py       # fits the Status card's "~N% sure" knots from an eval.py run (MATCH-DECIDE-15)
 python3 devtools/eta_eval.py --all-formats   # first-ETA timing + ETA error by elapsed fraction, LOO (item 475)
-python3 devtools/decisive_margin_eval.py     # mid-cycle switch bypass, runner-up exposure
+python3 devtools/decisive_margin_eval.py --loo   # mid-cycle switch bypass, runner-up exposure; --switching: commit/switch accuracy
+python3 devtools/end_gate_eval.py --loo --all-formats --check devtools/end_gate_baseline.json   # exit 1 on an end-gate regression
 python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
 python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)
 python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed point / ladder / oscillation / erased cycles (F10)
@@ -139,18 +141,18 @@ because the usual miss is rebuilding and then committing only the source. `--no-
 
 ### Core components
 
-- **`manager.py`** (~9.3k lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
+- **`manager.py`** (~9.2k lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
   async profile matching every 5 min, entity updates. Runs its own long jobs (ML training, health
   recompute) as plain executor/`async_create_task` jobs; the `task_registry` wiring lives in `ws_api.py`.
-- **`cycle_detector.py`** (~4.4k lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
+- **`cycle_detector.py`** (~4.7k lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
   power thresholds + energy gates, dryer anti-wrinkle, external triggers.
-- **`profile_store.py`** (~10k lines) - learned profiles + matching pipeline orchestration (numeric
+- **`profile_store.py`** (~10.9k lines) - learned profiles + matching pipeline orchestration (numeric
   Stages 1-4 run in `analysis.py::compute_matches_worker`; profile_store adds Stage-5 grouping and
   rebuilds the `MatchResult`). (The live_match ranking-snapshot history was removed in 0.5.8 with
   the ML early commit it trained.)
 - **`config_flow.py`** (~260 lines) - minimal HA flow (setup, reconfigure, small options flow). The
   ~100 tunables are edited in the **panel** and persisted via `ws_set_options`, not HA flows.
-- **`__init__.py`** (~1.6k lines) - entry point, services, config migration. Every registered service
+- **`__init__.py`** (~1.7k lines) - entry point, services, config migration. Every registered service
   needs matching entries in `services.yaml` and `strings.json`, **and a schema in `_SERVICE_SCHEMAS`**
   (enforced by `tests/test_audit_service_schemas.py`); resolve its device with `_service_manager`.
 
@@ -266,8 +268,10 @@ provenance:
   delete or re-point a profile whose `sample_cycle_id` resolves to nothing, so one forgotten list
   silently destroys an import-only profile.
 - `iter_evidence_cycles()` - **only what the user allows to shape a profile**
-  (`CONF_PROFILE_EVIDENCE_SOURCES`). Used by exactly four sites that must agree: envelope build,
-  matcher snapshot pool, `_select_reference_cycle_id`, `has_real_profiles`.
+  (`CONF_PROFILE_EVIDENCE_SOURCES`). Every reader that answers "what does this profile look like"
+  goes through it and must agree: envelope build, matcher snapshot pool (live and Playground),
+  `_select_reference_cycle_id`, `has_real_profiles`, and the per-profile statistics the detector is
+  fed (pause catalogue, terminal signature and spins, duration resolution, unmatchable checks).
 
 **Never gate GC or a lookup on the evidence view.** An excluded cycle is still a stored cycle. Usage
 statistics are likewise not evidence. An empty/unknown selection falls back to all three - a setting
@@ -295,6 +299,9 @@ tab), `ENABLE_ML_TRAINING`, and the per-device `CONF_ENABLE_ML_MODELS`
 3. **Terminal-drop fast finalize** - pure statistics, no trained model. **Asymmetric, the opposite of
    the end-guard: it can only ever shorten the wait**, and only for an anomalously-early drop on a
    *familiar* cycle (peak within the learned range, else it may be a NEW program and is deferred).
+   **Dishwashers get it without the option** (`TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES`, audit ML-08),
+   but on that path only with a committed, unambiguous match or a hand-picked program
+   (`detector_config.terminal_drop_may_fire`): ungated it split a real unmatched cycle.
 
 The `total_energy` regressor (live projected energy) is the **only head trained on-device**, and
 the one trained head with a live consumer. **Removed in 0.5.8** (maintainer decisions 2026-10-04,
@@ -550,8 +557,12 @@ keep current.
 - Use `DeviceLoggerAdapter` for all logging in `manager.py` and `profile_store.py`.
 - `scripts/` is a git submodule (`ha_integration_translator`) - `git submodule update --init`.
 - Tests reproduce specific GitHub issues (`test_issue_*.py`) - maintain this pattern for bug fixes.
-- Mark new pytest tests `slow` if they replay `cycle_data/` traces, fan out over many cycles, boot
-  full HA, or take >1.5s (`pytestmark = pytest.mark.slow` at module level).
+- Mark new pytest tests `slow` if they replay `cycle_data/` traces, fan out over many cycles, or
+  take >1.5s (`pytestmark = pytest.mark.slow` at module level). A real in-process boot through
+  `hass.config_entries.async_setup` is under 1 s: use the `setup_washdata_entry` fixture
+  (`tests/conftest.py`) rather than a MagicMock hass. `pytest-timeout` is 60 s per fast test and
+  1800 s per slow one; a new `hass = MagicMock()` site fails
+  `tests/test_audit_testing_07_no_new_magicmock_hass.py` (allow-list, `--update` to rewrite).
 - **Playwright E2E** in `playwright-tests/` covers the panel across chromium + mobile-chrome. When
   adding panel features, add or update the matching spec. Minification is a real transform, so
   `--e2e-min` (port 4568, so `reuseExistingServer` cannot hand the run a stale readable-source server)

@@ -86,6 +86,11 @@ else
   grep '^FAIL' <<<"$DOCS_OUT" | head -12 | sed 's/^/        | /'
 fi
 
+# The committed matcher baseline (audit MATCH-EVAL-11): a warning, not a failure -
+# regenerating it needs cycle_data/, which CI does not have. Hashes sources only.
+if BASE_OUT=$("$PY" devtools/eval.py baseline-status 2>&1); then pass "eval_baseline.json is current"
+else printf '  \033[33mwarn\033[0m  devtools/eval_baseline.json: %s\n' "$(tail -1 <<<"$BASE_OUT")"; fi
+
 # ── 3. version agreement ─────────────────────────────────────────────────────
 # manifest.json is what HACS and Home Assistant report; the CHANGELOG's top
 # heading is what humans read; the tag is what GitHub publishes. All three
@@ -295,6 +300,14 @@ run_suite() {
   else
     fail "$label failed" "$*"
     printf '%s\n' "$out" | tail -25 | sed 's/^/        | /'
+  fi
+  # Skips of the replay corpus look like passes in a dot summary (audit TESTING-14):
+  # cycle_data/ is gitignored, so off the maintainer's disk those tests skip.
+  # tests/conftest.py prints one line counting them; surface it as a warning.
+  local corpus
+  corpus=$(printf '%s\n' "$out" | grep -m1 '^cycle_data: ' || true)
+  if [[ -n "$corpus" ]]; then
+    printf '  \033[33mwarn\033[0m  %s: %s\n' "$label" "${corpus#cycle_data: }"
   fi
 }
 
