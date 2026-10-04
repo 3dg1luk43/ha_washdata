@@ -20,7 +20,6 @@ async def test_ml_status_lists_only_capabilities_something_still_consumes():
         for cap in ("end", "quality", "live_match", "remaining_time", "total_energy")
     })
     store.get_ml_training_history = MagicMock(return_value={})
-    store.get_matching_config = MagicMock(return_value={})
     store.get_past_cycles = MagicMock(return_value=[])
     manager = MagicMock()
     manager.profile_store = store

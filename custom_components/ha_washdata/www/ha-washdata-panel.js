@@ -55,8 +55,11 @@ const _ACTIVE_STATES = ['running', 'starting', 'paused', 'user_paused', 'ending'
 // store_account._DEFAULT_PREFS -- the generic get_prefs / store_set_prefs plumbing
 // carries it end-to-end (no per-setting wiring). All are booleans.
 const _STORE_PREFS = [
-  { key: 'show_contributor', labelKey: 'lbl.show_contributor', labelFb: 'Show contributor names',
+  { key: 'show_contributor', def: true, labelKey: 'lbl.show_contributor', labelFb: 'Show contributor names',
     docKey: 'setting.show_contributor.doc', docFb: 'Show the "by <contributor>" attribution on community appliances and reference cycles.' },
+  // Opt-in (audit STORE-14): cycles you share carry no uploader name unless this is on.
+  { key: 'share_name', def: false, labelKey: 'lbl.share_name', labelFb: 'Show my name on what I share',
+    docKey: 'setting.share_name.doc', docFb: 'Publish your connected account name as the uploader of cycles you share. Off: they are shared without a name.' },
 ];
 // Height (CSS px) of the band above the Playground plot where event pin heads
 // sit, out of the busy curve area. Shared by _pgDrawCanvas and the pointer
@@ -170,7 +173,7 @@ const _SETTINGS_SECTIONS = [
   { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', notDeviceTypes: ['other'], groups: [
     { sub: 'Match Scoring', fields: [
       { key: 'profile_match_threshold', label: 'Match Threshold', type: 'number', step: 0.01, min: 0, max: 1, def: 0.4,
-        doc: 'Minimum similarity score (0-1) required at cycle end to accept a program identification. Raise it to reduce wrong identifications; lower it if your machine\'s programs are not being matched. Default 0.4 is a conservative starting point.' },
+        doc: 'Minimum live match score (0-1) before Smart Termination and the dryer anti-crease finish may act on the matched program. Raise it if cycles end early on an uncertain match; lower it if clearly recognised cycles still wait for the full off delay. It does not change which program is shown or labelled. Default 0.4.' },
       { key: 'profile_unmatch_threshold', label: 'Unmatch Threshold', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.35,
         doc: 'If a live mid-cycle match drops below this score, the tentative identification is cleared. Keep it a little below the Match Threshold so a brief dip in similarity does not flip the display back to unmatched.' },
       { key: 'profile_match_interval', label: 'Match Interval', internal: true, unit: 's', type: 'number', min: 0,
@@ -178,9 +181,9 @@ const _SETTINGS_SECTIONS = [
     ] },
     { sub: 'Duration Gates', fields: [
       { key: 'profile_match_min_duration_ratio', label: 'Min Duration Ratio', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
-        doc: 'Minimum cycle length relative to the profile. 0.9 means a cycle must be at least 90% of the profile duration to match.' },
+        doc: 'A program is only considered once the cycle has run this fraction of its typical duration. 0.10 means a 2-hour program becomes a candidate after 12 minutes. Not applied during the first 15 minutes of a cycle.' },
       { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', internal: true, type: 'number', step: 0.01, min: 0, def: 1.8,
-        doc: 'Maximum cycle length relative to the profile. 1.3 means a cycle must be under 130% of the profile duration to match.' },
+        doc: 'A program is dropped once the cycle has run longer than this multiple of its typical duration. 1.8 means a cycle that has run 80% longer than the program no longer matches it.' },
       { key: 'duration_tolerance', label: 'Estimate Tolerance', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
         doc: 'Tolerance for time-remaining estimates (learning feedback, not matching). If the actual duration is within +/-X% of the estimate it counts as a good match.' },
     ] },
@@ -322,7 +325,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_start_message', label: 'Start Message', type: 'textarea', def: '{device} started.',
         doc: `Body sent when a cycle starts. Template variables: ${_NOTIFY_VARS}.` },
       { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration}m.', basic: true,
-        doc: `Body sent when a cycle finishes. Template variables: ${_NOTIFY_VARS}. {time_finished} and {vs_typical} are most useful here.` },
+        doc: `Body sent when a cycle finishes. Template variables: ${_NOTIFY_VARS}, {status}. {time_finished} and {vs_typical} are most useful here. {status} is completed or force_stopped: an interrupted cycle (a false start or a cancelled program) sends no finish message.` },
       { key: 'notify_pre_complete_message', label: 'Pre-Complete Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',
         doc: `Body of the pre-end / almost-done alert. Template variables: ${_NOTIFY_VARS}.` },
       { key: 'notify_reminder_message', label: 'Reminder Message', type: 'textarea', def: '',
@@ -355,9 +358,9 @@ const _SETTINGS_SECTIONS = [
   ] },
   { id: 'ml_training', label: 'ML Training', fields: [
     { key: 'enable_ml_models', label: 'Apply smart models during a cycle', type: 'checkbox', def: false,
-      doc: 'While a cycle runs, let a model fine-tuned to this machine predict its total energy and cost, and let a cycle that drops power unusually early, on a program WashData knows well, finish without waiting out the full off delay. Off = the classic power-based logic only.' },
+      doc: 'While a cycle runs, let a model fine-tuned to this machine predict its total energy and cost, and let a cycle that drops power unusually early, on a program WashData knows well, finish without waiting out the full off delay. Dishwashers get that early finish without this setting once their program is recognised. Off = the classic power-based logic only.' },
     { key: 'ml_training_enabled', label: 'Learn from this machine', type: 'checkbox', def: false,
-      doc: 'Periodically study your reviewed cycles overnight and fine-tune the models to this specific machine. A change is only kept when it genuinely scores better on held-out cycles, so this can only help or stay the same — never regress.' },
+      doc: 'Periodically retrain the projected-energy model on this machine\'s finished cycles. A retrained model is only kept when it beats the simple elapsed-versus-expected estimate on held-out cycles; otherwise the current one stays.' },
     { key: 'ml_training_hour', label: 'Learn at hour', unit: 'h', type: 'number', min: 0, max: 23, def: 2,
       doc: 'Local hour of day (0-23) to do the overnight fine-tuning. Pick a quiet hour such as 2 (02:00).' },
     { key: 'ml_training_min_cycles', label: 'Cycles needed first', type: 'number', min: 5, def: 30,
@@ -749,6 +752,18 @@ const _CSS = `
 .wd-table tr:last-child td { border-bottom: none; }
 .wd-table tbody tr:hover td { background: var(--secondary-background-color); }
 .wd-table-wrap { overflow-x: auto; }
+/* Audit UI-20: a horizontal scroller that hides content past an edge gets a shadow on
+   that edge, so on a phone the tab strip and wide tables visibly continue instead of
+   looking cut off. A shadow rather than a fade: past a table's last visible column
+   there is usually only whitespace, where a fade shows nothing. _syncScrollAffordances
+   sets the classes only while there really is more content on that side; backgrounds
+   do not affect layout, and nothing overflows at desktop widths, so the desktop view
+   is unchanged. The background of a scroll container does not scroll with it, so the
+   shadow stays on the visible edge. Mid-grey reads on light and dark themes alike. */
+.wd-ovf-l, .wd-ovf-r { background-repeat: no-repeat; background-size: 22px 100%; }
+.wd-ovf-r { background-image: linear-gradient(to left, rgba(127,127,127,.42), rgba(127,127,127,0)); background-position: right center; }
+.wd-ovf-l { background-image: linear-gradient(to right, rgba(127,127,127,.42), rgba(127,127,127,0)); background-position: left center; }
+.wd-ovf-l.wd-ovf-r { background-image: linear-gradient(to right, rgba(127,127,127,.42), rgba(127,127,127,0)), linear-gradient(to left, rgba(127,127,127,.42), rgba(127,127,127,0)); background-position: left center, right center; }
 .wd-th-sort { cursor: pointer; user-select: none; white-space: nowrap; }
 .wd-th-sort:hover { color: var(--primary-color); }
 .wd-tc-date { white-space: nowrap; color: var(--secondary-text-color); font-size: .82em; }
@@ -1327,9 +1342,11 @@ button.wd-profile-card { display: block; }
 .wd-pg-cand-track { flex: 1; height: 7px; background: var(--secondary-background-color); border-radius: var(--wd-radius-sm); overflow: hidden; }
 .wd-pg-cand-fill { height: 100%; border-radius: var(--wd-radius-sm); }
 .wd-pg-cand-pct { flex: 0 0 34px; text-align: right; color: var(--secondary-text-color); }
-/* Playground: settings control panel (live-settings source) */
+/* Playground: settings control panel (live-settings source + named presets) */
 .wd-pg-ctrl { border: 1px solid var(--divider-color, rgba(127,127,127,.25)); border-radius: var(--wd-radius-md, 10px); padding: 8px 10px; margin: 0 0 10px; background: var(--secondary-background-color); }
 .wd-pg-ctrl .wd-btn { white-space: nowrap; }
+.wd-pg-preset-sel { min-width: 150px; max-width: 220px; font-size: .82em; }
+.wd-pg-preset-name { flex: 1 1 150px; min-width: 120px; max-width: 220px; font-size: .82em; }
 /* Per-setting publish arrow. The empty slot keeps every row's value column aligned
    whether or not that row currently has a publishable change. */
 .wd-pg-pub { width: 20px; height: 20px; flex: 0 0 20px; padding: 0; border: none; border-radius: 5px; cursor: pointer; background: var(--primary-color); color: var(--text-primary-color, #fff); font-size: .8em; line-height: 1; }
@@ -1392,16 +1409,22 @@ button.wd-profile-card { display: block; }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+// The _fmt* helpers below feed HTML templates directly, often with values that
+// came from outside (a community-store document is untyped: audit STORE-19), so
+// they never echo their input: anything that is not a finite number renders '-'.
 function _fmtDuration(s) {
-  if (s == null || s < 0) return '-';
+  const n = Number(s);
+  if (s == null || !isFinite(n) || n < 0) return '-';
+  s = n;
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = Math.floor(s % 60);
   if (h > 0) return `${h}h ${m}m`;
   if (m > 0) return `${m}m ${sec}s`;
   return `${sec}s`;
 }
 function _fmtPower(w) {
-  if (w == null) return '-';
-  return w >= 100 ? `${_fmtNum(Math.round(w), 0)} W` : `${_fmtNum(w, 1)} W`;
+  const n = Number(w);
+  if (w == null || !isFinite(n)) return '-';
+  return n >= 100 ? `${_fmtNum(Math.round(n), 0)} W` : `${_fmtNum(n, 1)} W`;
 }
 // Watt label for a chart axis / grid line. #453: a fixed Math.round() prints "0W"
 // on every tick of a standby trace, so an appliance idling at 0.3 W got three
@@ -1424,7 +1447,7 @@ function _niceStep(span, divisions) {
   return (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
 }
 function _fmtEnergy(kwh) {
-  if (kwh == null) return '-';
+  if (kwh == null || !isFinite(Number(kwh))) return '-';
   return `${_fmtNum(kwh, 2)} kWh`;
 }
 // Current cycle-date display mode ('relative' | 'absolute'), synced from the
@@ -1464,11 +1487,19 @@ function _numFmt(opts) {
   return f;
 }
 // Display-only number: `dec` fraction digits (fixed, like toFixed). Never use the
-// result for a value that is sent back to the backend.
+// result for a value that is sent back to the backend. A non-number renders '-',
+// never the input itself: callers drop the result straight into innerHTML (STORE-19).
 function _fmtNum(v, dec = 0) {
   const n = Number(v);
-  if (!isFinite(n)) return String(v);
+  if (!isFinite(n)) return '-';
   return _numFmt({ minimumFractionDigits: dec, maximumFractionDigits: dec }).format(n);
+}
+// A community-store counter (downloads, favourites, ratings) as a non-negative
+// number. Store documents are untyped, so a missing, negative or non-numeric
+// counter reads as 0 rather than reaching the page as-is (audit STORE-19).
+function _storeCount(v) {
+  const n = Number(v);
+  return isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 // Money in HA's configured currency, formatted for the user's locale ("€0.21",
 // "0,21 €"). A currency that is not an ISO 4217 code keeps the old "0.21 XYZ".
@@ -1752,7 +1783,7 @@ function _field(f, value, extra) {
   const key = f.key;
   const labelText = f.unit ? `${f.label} (${f.unit})` : f.label;
   const _u = f.unit ? ` ${f.unit}` : '';
-  const tip = f.doc ? _tip(f.doc, f.diagram || _DIAGRAM_BY_KEY[key]) : '';
+  const tip = f.doc ? _tip(f.doc, f.diagram || _DIAGRAM_BY_KEY[key], extra.tText) : '';
   // D7: "changed" marker (a small dot with a tooltip) when this field has a
   // recorded change in the settings changelog.
   const chgDot = extra.changed ? `<span class="wd-chg-dot" title="${_esc(extra.changed)}" aria-label="${_esc(extra.changed)}"></span>` : '';
@@ -1880,7 +1911,7 @@ function _field(f, value, extra) {
     const tt = extra.tText || t;
     const sugReason = sug.reason_key ? tt(sug.reason_key, sug.reason_params || {}, sug.reason || '') : (sug.reason || '');
     const reason = sugReason ? _tip(sugReason) : '';
-    const nowNote = value != null && value !== '' ? ` <span style="opacity:.6;font-size:.9em">(now ${_esc(value)}${_u})</span>` : '';
+    const nowNote = value != null && value !== '' ? ` <span style="opacity:.6;font-size:.9em">${t('suggestion.now_value', {v: `${value}${_u}`}, '(now {v})')}</span>` : '';
     const impact = _sugImpact(t, key, classicVal, value);
     const useBtn = `<button type="button" class="wd-sug-use" data-sugkey="${key}" data-sugval="${_esc(classicVal)}">${extra.useBtnLabel || 'Use'}</button>`;
     // #343: a "mute" button on each suggestion card so the user can tell the
@@ -1964,9 +1995,25 @@ function _clipRectFor(el) {
   return { left, right, top, bottom };
 }
 
+// Horizontal scrollers that get an edge-shadow affordance (audit UI-20).
+const _OVF_SCROLLERS = '.wd-tabs, .wd-table-wrap';
+// Toggle .wd-ovf-l / .wd-ovf-r for the side(s) where `el` hides content. Uses the
+// distance from the START edge, so a right-to-left page (scrollLeft runs 0 to
+// negative) maps onto the right physical side. 1px of slack absorbs subpixel widths.
+function _syncOverflowEdges(el) {
+  const max = el.scrollWidth - el.clientWidth;
+  const fromStart = Math.abs(el.scrollLeft);
+  const atStart = max <= 1 || fromStart <= 1;
+  const atEnd = max <= 1 || fromStart >= max - 1;
+  const rtl = getComputedStyle(el).direction === 'rtl';
+  el.classList.toggle(rtl ? 'wd-ovf-r' : 'wd-ovf-l', !atStart);
+  el.classList.toggle(rtl ? 'wd-ovf-l' : 'wd-ovf-r', !atEnd);
+}
+
 // Tooltip popover with an optional JS-drawn SVG diagram above the text.
-function _tip(text, diagram) {
-  const dg = diagram ? _diagram(diagram) : '';
+// `tText` is the panel's plain-text translator, for the diagram's labels.
+function _tip(text, diagram, tText) {
+  const dg = diagram ? _diagram(diagram, tText) : '';
   // Focusable, with the text as its accessible name: the 100+ setting docs were
   // hover-only, unreachable by keyboard or screen reader (audit UI-05).
   return `<span class="wd-tip" tabindex="0" role="note" aria-label="${_esc(text)}">i<span class="wd-tip-pop">${dg}<span class="wd-tip-txt">${_esc(text)}</span></span></span>`;
@@ -1987,7 +2034,11 @@ function _switchRow(inner, label, tip = '', hint = '') {
 }
 
 // Small conceptual diagrams illustrating each parameter (from SETTINGS_VISUALIZED).
-function _diagram(id) {
+// Labels are translated (audit UI-07). The parameter is named like the panel method
+// so tests/test_panel_i18n_keys.py checks every literal key below against en.json;
+// without a translator (or before translations load) the English fallback shows.
+function _diagram(id, tText) {
+  const _tText = tText || ((key, vars, fallback) => fallback);
   const wrap = inner => `<svg class="wd-dg" viewBox="0 0 200 90" preserveAspectRatio="xMidYMid meet">${inner}</svg>`;
   const base = `<line class="ax" x1="8" y1="78" x2="192" y2="78"/>`;
   switch (id) {
@@ -1996,32 +2047,32 @@ function _diagram(id) {
         <rect class="fb" x="8" y="64" width="184" height="14"/>
         <line class="bad dash" x1="8" y1="64" x2="192" y2="64"/>
         <polyline class="ln" points="8,72 30,40 60,30 90,34 120,28 150,66 175,72 190,72"/>
-        <text x="150" y="60">min</text><text x="10" y="14">below = off</text>`);
+        <text x="150" y="60">${_esc(_tText('diagram.min', {}, 'min'))}</text><text x="10" y="14">${_esc(_tText('diagram.below_off', {}, 'below = off'))}</text>`);
     case 'hysteresis':
       return wrap(`${base}
         <rect class="fz" x="8" y="34" width="184" height="24"/>
         <line class="ok dash" x1="8" y1="34" x2="192" y2="34"/>
         <line class="bad dash" x1="8" y1="58" x2="192" y2="58"/>
         <polyline class="ln" points="8,72 40,72 70,24 110,24 140,72 175,72 190,72"/>
-        <text x="10" y="30">start</text><text x="10" y="70">stop</text>`);
+        <text x="10" y="30">${_esc(_tText('diagram.start', {}, 'start'))}</text><text x="10" y="70">${_esc(_tText('diagram.stop', {}, 'stop'))}</text>`);
     case 'start_energy':
       return wrap(`${base}
         <polyline class="bad" points="40,78 41,26 42,78"/>
-        <text x="14" y="20">spike ignored</text>
+        <text x="14" y="20">${_esc(_tText('diagram.spike_ignored', {}, 'spike ignored'))}</text>
         <rect class="fz" x="110" y="34" width="46" height="44"/>
         <polyline class="ln" points="110,78 110,34 156,34 156,78"/>
-        <text x="104" y="28">energy counts</text>`);
+        <text x="104" y="28">${_esc(_tText('diagram.energy_counts', {}, 'energy counts'))}</text>`);
     case 'off_delay':
       return wrap(`${base}
         <rect class="fw" x="96" y="20" width="46" height="58"/>
         <polyline class="ln" points="8,40 90,40 96,74 142,74 148,40 175,40 175,74 190,74"/>
-        <text x="98" y="16">off-delay wait</text>`);
+        <text x="98" y="16">${_esc(_tText('diagram.off_delay_wait', {}, 'off-delay wait'))}</text>`);
     case 'duration_tolerance':
       return wrap(`${base}
         <rect class="fz" x="60" y="36" width="80" height="22"/>
         <line class="ax" x1="60" y1="47" x2="140" y2="47"/>
         <line class="ln" x1="100" y1="30" x2="100" y2="64"/>
-        <text x="62" y="30">-tol</text><text x="120" y="30">+tol</text><text x="84" y="74">profile</text>`);
+        <text x="62" y="30">${_esc(_tText('diagram.minus_tol', {}, '-tol'))}</text><text x="120" y="30">${_esc(_tText('diagram.plus_tol', {}, '+tol'))}</text><text x="84" y="74">${_esc(_tText('diagram.profile', {}, 'profile'))}</text>`);
     case 'match_ratios':
       return wrap(`${base}
         <line class="ax" x1="20" y1="47" x2="180" y2="47"/>
@@ -2029,30 +2080,30 @@ function _diagram(id) {
         <line class="bad" x1="70" y1="34" x2="70" y2="60"/>
         <line class="bad" x1="130" y1="34" x2="130" y2="60"/>
         <line class="ln" x1="100" y1="30" x2="100" y2="64"/>
-        <text x="58" y="28">min</text><text x="120" y="28">max</text>`);
+        <text x="58" y="28">${_esc(_tText('diagram.min', {}, 'min'))}</text><text x="120" y="28">${_esc(_tText('diagram.max', {}, 'max'))}</text>`);
     case 'dead_zone':
       return wrap(`${base}
         <rect class="fw" x="8" y="20" width="34" height="58"/>
         <polyline class="ln" points="8,72 14,30 20,72 26,32 32,72 42,40 90,36 140,36 175,72 190,72"/>
-        <text x="10" y="16">ignored</text>`);
+        <text x="10" y="16">${_esc(_tText('diagram.ignored', {}, 'ignored'))}</text>`);
     case 'progress_reset':
       return wrap(`${base}
         <rect class="fz" x="60" y="24" width="80" height="50"/>
         <polyline class="ln" points="8,74 60,24 140,24 141,74 190,74"/>
-        <text x="72" y="20">held at 100%</text>`);
+        <text x="72" y="20">${_esc(_tText('diagram.held_at_100', {}, 'held at 100%'))}</text>`);
     case 'min_duration':
       return wrap(`${base}
         <polyline class="bad" points="30,78 34,50 38,78"/>
-        <text x="20" y="44">too short</text>
+        <text x="20" y="44">${_esc(_tText('diagram.too_short', {}, 'too short'))}</text>
         <polyline class="ln" points="90,78 100,40 150,40 160,78"/>
-        <text x="106" y="34">kept</text>`);
+        <text x="106" y="34">${_esc(_tText('diagram.kept', {}, 'kept'))}</text>`);
     case 'min_off_gap':
       // Two cycle humps separated by an orange off-gap; gap bridged into one cycle.
       return wrap(`${base}
         <rect class="fw" x="68" y="32" width="48" height="46"/>
         <polyline class="ln" points="8,78 14,78 26,44 38,32 52,44 68,78 116,78 128,32 150,32 162,44 174,78 192,78"/>
-        <text x="72" y="26">off-gap</text>
-        <text x="9" y="14">gap below min = one cycle</text>`);
+        <text x="72" y="26">${_esc(_tText('diagram.off_gap', {}, 'off-gap'))}</text>
+        <text x="9" y="14">${_esc(_tText('diagram.gap_below_min', {}, 'gap below min = one cycle'))}</text>`);
     case 'start_duration':
       // Brief spike ignored; sustained power above threshold confirms start.
       return wrap(`${base}
@@ -2060,17 +2111,17 @@ function _diagram(id) {
         <polyline class="bad" points="34,78 36,28 38,78"/>
         <polyline class="ln" points="8,78 100,78 112,50 192,50"/>
         <rect class="fw" x="112" y="50" width="44" height="28"/>
-        <text x="26" y="24">spike: ignored</text>
-        <text x="114" y="46">confirmed</text>`);
+        <text x="26" y="24">${_esc(_tText('diagram.spike_ignored_short', {}, 'spike: ignored'))}</text>
+        <text x="114" y="46">${_esc(_tText('diagram.confirmed', {}, 'confirmed'))}</text>`);
     case 'end_energy_thresh':
       // Low-power tail after main cycle; accumulated energy compared to threshold.
       return wrap(`${base}
         <polyline class="ln" points="8,78 14,78 28,28 66,28 76,60 110,60 125,78 192,78"/>
         <rect class="fz" x="76" y="60" width="49" height="18"/>
         <line class="ax" x1="8" y1="68" x2="192" y2="68"/>
-        <text x="10" y="14">tail energy above thresh: timer resets</text>
-        <text x="78" y="56">accum</text>
-        <text x="168" y="65">thr</text>`);
+        <text x="10" y="14">${_esc(_tText('diagram.tail_energy_resets', {}, 'tail energy above thresh: timer resets'))}</text>
+        <text x="78" y="56">${_esc(_tText('diagram.accum', {}, 'accum'))}</text>
+        <text x="168" y="65">${_esc(_tText('diagram.thr', {}, 'thr'))}</text>`);
     case 'confidence':
       // Horizontal 0-1 score bar: red = no match, orange = feedback zone, blue = auto-label.
       return wrap(`
@@ -2079,9 +2130,9 @@ function _diagram(id) {
         <rect class="fz" x="154" y="40" width="38" height="22"/>
         <line class="ax" x1="8" y1="40" x2="192" y2="40"/>
         <line class="ax" x1="8" y1="62" x2="192" y2="62"/>
-        <text x="14" y="36">no match</text>
-        <text x="70" y="36">feedback</text>
-        <text x="156" y="36">auto</text>
+        <text x="14" y="36">${_esc(_tText('diagram.no_match', {}, 'no match'))}</text>
+        <text x="70" y="36">${_esc(_tText('diagram.feedback', {}, 'feedback'))}</text>
+        <text x="156" y="36">${_esc(_tText('diagram.auto', {}, 'auto'))}</text>
         <text x="8" y="74">0.0</text>
         <text x="178" y="74">1.0</text>`);
     case 'watchdog_timeout':
@@ -2091,15 +2142,15 @@ function _diagram(id) {
         <rect class="fw" x="82" y="22" width="76" height="56"/>
         <line class="bad" x1="164" y1="26" x2="176" y2="38"/>
         <line class="bad" x1="176" y1="26" x2="164" y2="38"/>
-        <text x="86" y="18">no updates</text>
-        <text x="10" y="18">sensor offline: force-stop</text>`);
+        <text x="86" y="36">${_esc(_tText('diagram.no_updates', {}, 'no updates'))}</text>
+        <text x="10" y="14">${_esc(_tText('diagram.sensor_offline', {}, 'sensor offline: force-stop'))}</text>`);
     case 'anti_wrinkle':
       // Main heat cycle followed by low-power tumble pulses (anti-wrinkle zone).
       return wrap(`${base}
         <rect class="fz" x="78" y="44" width="114" height="34"/>
         <polyline class="ln" points="8,78 14,78 24,30 54,30 68,78 84,60 96,78 110,60 122,78 136,60 148,78 162,60 174,78 192,78"/>
-        <text x="10" y="14">heat phase</text>
-        <text x="82" y="40">tumble pulses kept</text>`);
+        <text x="10" y="14">${_esc(_tText('diagram.heat_phase', {}, 'heat phase'))}</text>
+        <text x="82" y="40">${_esc(_tText('diagram.tumble_kept', {}, 'tumble pulses kept'))}</text>`);
     case 'sampling':
       // Vertical tick marks at regular intervals showing sensor cadence.
       return wrap(`${base}
@@ -2109,10 +2160,10 @@ function _diagram(id) {
         <line class="ok" x1="138" y1="30" x2="138" y2="78"/>
         <line class="ok" x1="176" y1="30" x2="176" y2="78"/>
         <line class="fz" x1="8" y1="54" x2="192" y2="54"/>
-        <text x="36" y="50">SI</text>
-        <text x="74" y="50">SI</text>
-        <text x="112" y="50">SI</text>
-        <text x="10" y="14">typical reading interval</text>`);
+        <text x="36" y="50">${_esc(_tText('diagram.si', {}, 'SI'))}</text>
+        <text x="74" y="50">${_esc(_tText('diagram.si', {}, 'SI'))}</text>
+        <text x="112" y="50">${_esc(_tText('diagram.si', {}, 'SI'))}</text>
+        <text x="10" y="14">${_esc(_tText('diagram.reading_interval', {}, 'typical reading interval'))}</text>`);
     default:
       return '';
   }
@@ -2150,6 +2201,7 @@ class HaWashdataPanel extends HTMLElement {
     this._lockedSuggestions = [];   // #343: setting keys the user muted from auto-tuning
     this._feedbacks = [];
     this._diag = null;
+    this._importUndo = null;  // last replace import's restore point, from get_diagnostics (item 195)
     this._phases = [];
     this._recState = null;
     this._opts = {};
@@ -2247,10 +2299,13 @@ class HaWashdataPanel extends HTMLElement {
     // D1: matched-profile phases for the Status-tab phase timeline
     this._statusPhases = [];
     this._statusPhasesName = null;
-    // D3: cycle-list pagination
+    // D3: cycle-list pagination. Imported (reference + backfill) cycles page on
+    // their own cursor, outside the real-cycle offset/total (register item 129a).
     this._cycleOffset = 0;
     this._cyclesTotal = 0;
     this._cyclesHasMore = false;
+    this._importedOffset = 0;
+    this._importedHasMore = false;
     // D4: pending optimistic deletions keyed by an undo token
     this._undoBuffer = new Map();
     this._undoSeq = 0;
@@ -2282,6 +2337,10 @@ class HaWashdataPanel extends HTMLElement {
     // on top of it. Loaded from get_playground_settings on tab entry.
     this._pgEffective = null;       // {key: value} live baseline; null = not loaded yet
     this._pgPublishable = null;     // keys that are real config options (publish allow-list)
+    this._pgPresets = [];           // saved sandbox snapshots [{name, values, ...}]
+    this._pgPresetLimit = 0;        // server-side per-device preset cap
+    this._pgPresetSel = '';         // selected preset name in the dropdown
+    this._pgPresetName = '';        // "save as" name input buffer (survives re-render)
     this._pgSuggClassic = {};       // classic auto-tuner suggestions {key: value}
     this._pgView = null;            // {min,max} time-axis zoom window (seconds); null = full
     this._pgHoverT = null;          // hovered time (seconds) for cursor readout; null = none
@@ -2409,6 +2468,7 @@ class HaWashdataPanel extends HTMLElement {
     if (this.style.height !== px) this.style.height = px;
   }
   disconnectedCallback() {
+    if (this._ovfRO) { this._ovfRO.disconnect(); this._ovfRO = null; }
     if (this._onResize) {
       window.removeEventListener('resize', this._onResize);
       if (window.visualViewport) window.visualViewport.removeEventListener('resize', this._onResize);
@@ -3107,35 +3167,47 @@ class HaWashdataPanel extends HTMLElement {
     // case pagination degrades gracefully (no "Load more" button).
     this._cyclesError = false;
     try {
-      const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: _CYCLE_PAGE_SIZE, offset: 0 });
+      const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: _CYCLE_PAGE_SIZE, offset: 0, imported_offset: 0 });
       // The first paint no longer waits for this read (UI-19), so the device can
       // change under it: a late answer for the previous device is dropped.
       if (!this._isActiveEntry(entryId)) return;
       this._cycles = res.cycles || [];
-      // Imported store recordings and cycles recovered from raw power history are
-      // returned once (first page) and kept out of the paginated `cycles`/offset math
-      // so "Load more" stays correct. They share one panel array because they share the
-      // table; each row carries `cycle_origin` so badges and wording can differ.
+      // Imported store recordings and cycles recovered from raw power history page on
+      // their own `imported_offset` cursor, outside the real `cycles`/offset/total math
+      // (they never count in stats; register item 129a). They share one panel array
+      // because they share the table; each row carries `cycle_origin` so badges and
+      // wording can differ.
       this._refCycles = [...(res.reference_cycles || []), ...(res.backfill_cycles || [])];
       this._cycleOffset = this._cycles.length;
       this._cyclesTotal = (res.total != null) ? res.total : this._cycles.length;
       this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : false;
+      this._importedOffset = this._refCycles.length;
+      this._importedHasMore = !!res.imported_has_more;
     } catch (_) {
       if (!this._isActiveEntry(entryId)) return;
       this._cyclesError = true; this._cycles = []; this._refCycles = []; this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false;
+      this._importedOffset = 0; this._importedHasMore = false;
     }
   }
 
   // D3: fetch the next page and append (deduping by id so optimistic removals or
   // overlaps never double up). Preserves the current client-side sort/filter.
   async _loadMoreCycles(entryId) {
-    const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: _CYCLE_PAGE_SIZE, offset: this._cycleOffset });
+    // One request advances both cursors; a list with nothing left just gets an
+    // empty window back.
+    const res = await this._ws({ type: `${_DOMAIN}/get_device_cycles`, entry_id: entryId, limit: _CYCLE_PAGE_SIZE, offset: this._cycleOffset, imported_offset: this._importedOffset });
+    if (!this._isActiveEntry(entryId)) return;
     const more = res.cycles || [];
     const have = new Set(this._cycles.map(c => c.id));
     for (const c of more) if (!have.has(c.id)) this._cycles.push(c);
     this._cycleOffset += more.length;
     this._cyclesTotal = (res.total != null) ? res.total : this._cyclesTotal;
     this._cyclesHasMore = (res.has_more != null) ? !!res.has_more : (more.length >= _CYCLE_PAGE_SIZE);
+    const moreImported = [...(res.reference_cycles || []), ...(res.backfill_cycles || [])];
+    const haveImported = new Set((this._refCycles || []).map(c => c.id));
+    this._refCycles = (this._refCycles || []).concat(moreImported.filter(c => !haveImported.has(c.id)));
+    this._importedOffset += moreImported.length;
+    this._importedHasMore = !!res.imported_has_more;
   }
 
   // D1: cache the matched profile's phase ranges (start/end in seconds) for the
@@ -3265,8 +3337,15 @@ class HaWashdataPanel extends HTMLElement {
     const commit = async () => {
       const failed = [];
       for (const item of removed) {
-        try { await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: item.rec.id }); }
-        catch (_) { failed.push(item); }
+        try {
+          await this._ws({ type: `${_DOMAIN}/delete_cycle`, entry_id: eid, cycle_id: item.rec.id });
+          // A deleted row was inside the loaded window, so everything after it moved
+          // up one place server-side; step the cursor back or "Load more" skips a row.
+          if (this._isActiveEntry(eid)) {
+            if (item.ref) this._importedOffset = Math.max(0, this._importedOffset - 1);
+            else this._cycleOffset = Math.max(0, this._cycleOffset - 1);
+          }
+        } catch (_) { failed.push(item); }
       }
       // The server rebuilt affected envelopes on delete; refresh the profile list
       // so the card power-signature curve reflects the removed cycle(s).
@@ -3429,6 +3508,7 @@ class HaWashdataPanel extends HTMLElement {
       this._coverageGaps = r.coverage_gaps || {};
       this._profileAdvisories = r.profile_advisories || [];
       this._profileTerminal = r.profile_terminal || {};
+      this._profileMatcherCounts = r.profile_matcher_counts || {};
     } catch (_) { this._profilesError = true; /* keep previous data */ }
     return this._profiles;
   }
@@ -3588,11 +3668,12 @@ class HaWashdataPanel extends HTMLElement {
     this._powerHistory = []; this._powerT0 = null; this._statusEnv = null; this._statusEnvName = null;
     this._statusPhases = []; this._statusPhasesName = null;
     this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false;
+    this._importedOffset = 0; this._importedHasMore = false;
     this._settingsChangelog = null; this._settingsChangeByKey = {};
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._matchDebug = null;
-    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._profileTerminal = {}; this._opts = {}; this._optDefaults = {}; this._suggestions = []; this._lockedSuggestions = [];
-    this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._maintenance = null; this._phases = [];
+    this._profiles = []; this._profileHealth = {}; this._profileTrends = {}; this._coverageGaps = {}; this._profileAdvisories = []; this._profileTerminal = {}; this._profileMatcherCounts = {}; this._opts = {}; this._optDefaults = {}; this._suggestions = []; this._lockedSuggestions = [];
+    this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._importUndo = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
     this._deviceAutomations = [];   // per-device; re-fetched on the settings tab
@@ -3603,8 +3684,9 @@ class HaWashdataPanel extends HTMLElement {
     this._pgCycleId = ''; this._pgProfileName = '';
     this._pgPowerPts = null; this._pgEnvData = null;
     this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
-    // The live baseline is per-device; re-fetched by _fetchTabData.
+    // Live baseline + presets are per-device; re-fetched by _fetchTabData.
     this._pgEffective = null; this._pgPublishable = null;
+    this._pgPresets = []; this._pgPresetSel = ''; this._pgPresetName = ''; this._pgPresetLimit = 0;
     this._pgSuggClassic = {};
     this._pgView = null; this._pgHoverT = null; this._pgLoadSeq++;
     this._pgNeedsRestart = false; this._pgLoading = false;
@@ -3867,6 +3949,8 @@ class HaWashdataPanel extends HTMLElement {
       const r = await this._ws({ type: `${_DOMAIN}/get_diagnostics`, entry_id: eid });
       if (!this._isActiveEntry(eid)) return;  // device switched mid-flight — drop stale result
       this._diag = r.stats || {};
+      // The last replace import's restore point rides along on this fetch (item 195).
+      this._importUndo = r.import_undo || null;
     } catch (err) {
       console.warn('[WashData panel] tools fetch error -', _wsErrText(err), err);
       this._diag = { _error: String(err && err.message || err) };
@@ -4059,6 +4143,17 @@ class HaWashdataPanel extends HTMLElement {
   _stateColor(s) {
     const c = this._constants.stateColors || {};
     return c[s] || c.unknown || 'var(--disabled-color, #bdbdbd)';
+  }
+
+  // A stored cycle's status enum as the user reads it. Plain text: both callers
+  // _esc() the result. An unknown value passes through as-is (escaped there).
+  _cycleStatusLabel(st) {
+    return {
+      completed: this._tText('status.completed', {}, 'Completed'),
+      interrupted: this._tText('status.interrupted', {}, 'Interrupted'),
+      force_stopped: this._tText('status.force_stopped', {}, 'Force stopped'),
+      active: this._tText('status.active', {}, 'Active'),
+    }[st] || st;
   }
 
   _stateLabel(s) {
@@ -4436,6 +4531,7 @@ class HaWashdataPanel extends HTMLElement {
     this._drawPlaygroundCanvases(); // F3
     ['wd-status-canvas', 'wd-cyc-canvas', 'wd-compare-canvas', 'wd-env-canvas', 'wd-phase-canvas', 'wd-spag-canvas', 'wd-pgroup-canvas']
       .forEach(id => this._attachGraphGestures(id));
+    this._syncScrollAffordances();
     this._syncModalFocus(focusedBefore);
     if (focusKeyBefore && !this._modalFocusActive) {
       const again = this.shadowRoot.querySelector(focusKeyBefore);
@@ -4444,6 +4540,26 @@ class HaWashdataPanel extends HTMLElement {
       }
     }
     requestAnimationFrame(() => this._resizeLogsPage());
+  }
+
+  // Audit UI-20: mark each horizontal scroller with the side(s) it hides content on
+  // (.wd-ovf-l / .wd-ovf-r, drawn as an edge shadow). Every render replaces these
+  // elements, so the scroll listeners are re-attached here and the one
+  // ResizeObserver is pointed at the new set (it holds its targets, so it is
+  // disconnected first rather than accumulating detached nodes).
+  _syncScrollAffordances() {
+    const sr = this.shadowRoot;
+    if (!sr) return;
+    const els = sr.querySelectorAll(_OVF_SCROLLERS);
+    if (this._ovfRO) this._ovfRO.disconnect();
+    else if (typeof ResizeObserver === 'function') {
+      this._ovfRO = new ResizeObserver(entries => entries.forEach(e => _syncOverflowEdges(e.target)));
+    }
+    els.forEach(el => {
+      el.addEventListener('scroll', () => _syncOverflowEdges(el), { passive: true });
+      _syncOverflowEdges(el);
+      if (this._ovfRO) this._ovfRO.observe(el);
+    });
   }
 
   _resizeLogsPage() {
@@ -4649,6 +4765,24 @@ class HaWashdataPanel extends HTMLElement {
     }).join('')}${addBtn}</div>`;
   }
 
+  // MATCH-DECIDE-15: while the live match is undecided (nothing committed yet, or
+  // a runner-up within the ambiguity margin) say so, with the top two and a
+  // "~N% sure" read off the margin (backend match_rules.display_sure_pct). Display
+  // only: the program sensor keeps its raw `detecting...` state for automations.
+  _htmlMatchUncertainty(dev, isRunning, manual) {
+    const u = dev && dev.match_uncertainty;
+    if (!u || !isRunning || manual || !u.top) return '';
+    const what = u.runner_up
+      ? this._t('status.match_uncertain', {top: u.top, runner: u.runner_up}, 'Uncertain: {top} or {runner}')
+      : this._t('status.match_uncertain_single', {top: u.top}, 'Uncertain: maybe {top}');
+    const pct = Number(u.sure_pct);
+    const sure = (u.sure_pct != null && isFinite(pct))
+      ? ` · ${this._t('status.match_sure', {pct}, '~{pct}% sure')}` : '';
+    const tip = _tip(this._tText('status.match_uncertain_tip', {top: u.top},
+      'WashData has not settled on a program yet. The figure is how often the leading guess, {top}, turned out to be right in recorded cycles when it was this far ahead of the runner-up. It is for information only and does not change how cycles are detected or labelled.'));
+    return `<span class="wd-prog-unc" style="font-size:.82em;color:var(--warning-color,#ff9800)">${what}${sure}</span>${tip}`;
+  }
+
   _htmlStatus() {
     const dev = this._devices[this._selIdx];
     if (!dev) return `<div class="wd-empty">${this._t('msg.no_device_selected', {}, 'No device selected.')}</div>`;
@@ -4683,7 +4817,7 @@ class HaWashdataPanel extends HTMLElement {
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>${this._t('status.auto_detect', {}, 'Auto-detect')}</option>
             ${profOpts}
-          </select>${tag}</div>`;
+          </select>${tag}${this._htmlMatchUncertainty(dev, isRunning, manual)}</div>`;
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
@@ -4762,12 +4896,12 @@ class HaWashdataPanel extends HTMLElement {
       const conf = md.confidence != null ? `${(md.confidence * 100).toFixed(1)}%` : '-';
       const dRows = (md.candidates || []).map(c => `<tr><td>${_esc(c.profile_name)}</td><td>${c.confidence_pct}%</td><td>${c.mae}</td><td>${c.correlation}</td><td>${c.duration_ratio >= 0 ? '+' : ''}${c.duration_ratio}%</td></tr>`).join('');
       debugHtml = `<div class="wd-card">
-        <div class="wd-card-title">Live Match Debug ${_tip('Confidence: how closely the current power curve matches the top candidate profile (0-100%). Ambiguous: the two best candidates score within 5% of each other - the label is uncertain until the cycle finishes.')}</div>
+        <div class="wd-card-title">${this._t('hdr.live_match_debug', {}, 'Live Match Debug')} ${_tip(this._tText('msg.live_match_debug_tip', {}, 'Confidence: how closely the current power curve matches the top candidate profile (0-100%). Ambiguous: the two best candidates score within 5% of each other - the label is uncertain until the cycle finishes.'))}</div>
         <div class="wd-kv" style="margin-bottom:12px">
           <div class="wd-kv-item"><div class="wd-kv-val">${conf}</div><div class="wd-kv-lbl">${this._t('lbl.confidence', {}, 'Confidence')}</div></div>
           <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:1em;color:${md.ambiguous ? 'var(--warning-color,#ff9800)' : 'var(--success-color,#4caf50)'}">${md.ambiguous ? this._t('status.ambiguous', {}, 'Ambiguous') : this._t('status.clear', {}, 'Clear')}</div><div class="wd-kv-lbl">${this._t('lbl.label', {}, 'Match')}</div></div>
         </div>
-        ${dRows ? `<table class="wd-table"><thead><tr><th>Profile</th><th>Conf</th><th>MAE</th><th>Corr</th><th>Duration</th></tr></thead><tbody>${dRows}</tbody></table>` : `<p class="wd-info">${this._t('msg.no_match_yet', {}, 'No match attempt yet - this populates during a running cycle.')}</p>`}
+        ${dRows ? `<table class="wd-table"><thead><tr><th>${this._t('lbl.profile', {}, 'Profile')}</th><th>${this._t('col.dbg_conf', {}, 'Conf')}</th><th>${this._t('col.dbg_mae', {}, 'MAE')}</th><th>${this._t('col.dbg_corr', {}, 'Corr')}</th><th>${this._t('lbl.duration', {}, 'Duration')}</th></tr></thead><tbody>${dRows}</tbody></table>` : `<p class="wd-info">${this._t('msg.no_match_yet', {}, 'No match attempt yet - this populates during a running cycle.')}</p>`}
       </div>`;
     }
 
@@ -4945,21 +5079,28 @@ class HaWashdataPanel extends HTMLElement {
   _htmlPhaseTimeline(dev, prog, isRunning) {
     const phases = this._statusPhases || [];
     if (!isRunning || !phases.length || !dev.current_program) return '';
-    // Same scale as the live phase sensor (progress.current_phase): progress maps onto
-    // the LAST range end, not the profile's average duration. Scaling by the duration
-    // here named a different "current phase" than the sensor whenever the ranges did
-    // not end exactly at the average.
-    const total = Math.max(0, ...phases.map(p => p.end || 0));
+    // Same span as the live phase sensor (progress.phase_timeline_span): progress maps
+    // onto the matched program's expected length (expected_duration_s), or the last
+    // range end when the ranges run longer, so a range reads at its real minutes
+    // (audit PROGRESS-10). A gap, or the stretch after the last range, names no
+    // phase (progress.phase_at: [start, end), the timeline's own end included).
+    const lastEnd = Math.max(0, ...phases.map(p => p.end || 0));
+    const expected = Number(dev.expected_duration_s);
+    const total = Math.max(lastEnd, Number.isFinite(expected) ? expected : 0);
     if (total <= 0) return '';
     const curFrac = (prog != null) ? Math.min(1, Math.max(0, prog / 100)) : null;
     let curPhase = '';
+    let curFound = false;
     const segs = phases.map((ph, i) => {
       const x0 = Math.max(0, Math.min(1, (ph.start || 0) / total));
       const x1 = Math.max(0, Math.min(1, (ph.end || 0) / total));
       const width = Math.max(0, (x1 - x0) * 100);
       const col = _PALETTE[i % _PALETTE.length];
       const reached = curFrac == null ? true : (x0 <= curFrac);
-      if (curFrac != null && curFrac >= x0 && curFrac < x1) curPhase = ph.name || '';
+      if (!curFound && curFrac != null && x1 > x0 && curFrac >= x0 && (curFrac < x1 || (curFrac >= 1 && x1 >= 1))) {
+        curFound = true;
+        curPhase = ph.name || '';
+      }
       const label = (ph.name && width > 12) ? `<span class="wd-ptl-seg-lbl">${_esc(ph.name)}</span>` : '';
       return `<div class="wd-ptl-seg" style="left:${(x0 * 100).toFixed(2)}%;width:${width.toFixed(2)}%;background:${col};opacity:${reached ? 0.85 : 0.28}" title="${_esc(ph.name || '')}">${label}</div>`;
     }).join('');
@@ -4984,8 +5125,9 @@ class HaWashdataPanel extends HTMLElement {
     const dotCls = state === 'recording' ? 'wd-rec-active' : state === 'stopped' ? 'wd-rec-ready' : 'wd-rec-idle';
     const stateLabel = state === 'recording' ? this._t('status.recording', {}, 'Recording…') : state === 'stopped' ? this._t('status.ready', {}, 'Ready to process') : this._t('status.idle', {}, 'Idle');
     let detail = '';
-    if (state === 'recording') detail = rs ? `${_fmtDuration(rs.duration_s)} · ${rs.sample_count || 0} samples` : '';
-    else if (state === 'stopped') detail = `${rs.sample_count || 0} samples · ${_fmtDuration(rs.duration_s)}`;
+    const nSamples = (n) => this._t('lbl.n_samples', {n}, `${n} samples`);
+    if (state === 'recording') detail = rs ? `${_fmtDuration(rs.duration_s)} · ${nSamples(rs.sample_count || 0)}` : '';
+    else if (state === 'stopped') detail = `${nSamples(rs.sample_count || 0)} · ${_fmtDuration(rs.duration_s)}`;
     const buttons = state === 'recording'
       ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="rec-stop" title="${_esc(this._t('btn.rec_stop_tip', {}, 'Stop recording and hold the captured trace for review'))}">${this._t('btn.rec_stop', {}, 'Stop')}</button>`
       : state === 'stopped'
@@ -5144,7 +5286,7 @@ class HaWashdataPanel extends HTMLElement {
       const check = rowSel
         ? `<input type="checkbox" class="wd-csel" ${sel.has(c.id) ? 'checked' : ''} style="width:auto;margin:0">`
         : `<span class="wd-devdot" style="background:${statusDotColor(st)}" title="${_esc(st)}"></span>`;
-      const stLabel = { completed: this._t('status.completed',{},'Completed'), interrupted: this._t('status.interrupted',{},'Interrupted'), force_stopped: this._t('status.force_stopped',{},'Force stopped'), active: this._t('status.active',{},'Active') }[st] || st;
+      const stLabel = this._cycleStatusLabel(st);
       const flags = `${importedBadge(c)}${reviewBadge(c)}${overrunBadge(c)}${underrunBadge(c)}${energyAnomalyBadge(c)}${artifactBadge(c)}${restartGapBadge(c)}`.trim();
       return `<tr data-cid="${_esc(c.id)}" data-selmode="${rowSel ? 1 : 0}" tabindex="0" role="button" style="cursor:pointer">
         <td style="width:26px;padding:6px 4px 6px 8px">${check}</td>
@@ -5208,9 +5350,10 @@ class HaWashdataPanel extends HTMLElement {
       <button class="wd-btn wd-btn-danger wd-btn-sm" data-action="cyc-bulk-del" ${sel.size < 1 ? 'disabled' : ''}>${this._t('btn.delete', {}, 'Delete')}${sel.size >= 1 ? ` (${sel.size})` : ''}</button>
     </div>` : '';
 
-    // D3: "Load more" pagination — only when the backend reports more rows.
+    // D3: "Load more" pagination — only when the backend reports more rows, real or
+    // imported (each list has its own cursor).
     const loadMoreBusy = this._busy.has('cyc-load-more');
-    const loadMore = this._cyclesHasMore ? `<div style="text-align:center;margin-top:12px">
+    const loadMore = (this._cyclesHasMore || this._importedHasMore) ? `<div style="text-align:center;margin-top:12px">
       <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-load-more" ${loadMoreBusy ? 'disabled' : ''}>${loadMoreBusy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.load_more', {}, 'Load more')}</button>
     </div>` : '';
 
@@ -5250,9 +5393,9 @@ class HaWashdataPanel extends HTMLElement {
 
   _profileCardHtml(p) {
     const dur = p.avg_duration ? this._t('lbl.duration_avg', {v: Math.round(p.avg_duration / 60)}, `~${Math.round(p.avg_duration / 60)}m avg`) : this._t('lbl.no_duration', {}, 'no duration');
-    const energy = p.avg_energy != null ? ` · ${_fmtEnergy(p.avg_energy)}/cycle` : '';
+    const energy = p.avg_energy != null ? ` · ${this._t('lbl.energy_per_cycle', {v: _fmtEnergy(p.avg_energy)}, '{v}/cycle')}` : '';
     const total = (p.avg_energy != null && p.cycle_count)
-      ? ` · <strong>${_fmtEnergy(p.avg_energy * p.cycle_count)}</strong> total` : '';
+      ? ` · ${this._t('lbl.energy_total', {v: _html(`<strong>${_esc(_fmtEnergy(p.avg_energy * p.cycle_count))}</strong>`)}, '{v} total')}` : '';
     const cur = (this._hass && this._hass.config && this._hass.config.currency) || '';
     const cost = p.avg_cost != null ? ` · ${this._t('lbl.avg_cost', {}, 'Avg')} ${_fmtCost(p.avg_cost, cur)}/${this._t('lbl.per_cycle_short', {}, 'cycle')}` : '';
     const h = (this._profileHealth || {})[p.name];
@@ -5276,6 +5419,13 @@ class HaWashdataPanel extends HTMLElement {
     const importedBadge = p.is_imported
       ? `<span class="wd-badge" title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="background:var(--info-color,#2196f3);color:#fff">📥 ${this._t('status.imported', {}, 'Imported')}</span>`
       : '';
+    // STORE-21: how often the matcher labelled one of this appliance's own cycles
+    // with an imported program, so an import that never fits can be pruned.
+    // Counted locally from the stored cycles; nothing is sent to the store.
+    const usedN = p.is_imported ? Number((this._profileMatcherCounts || {})[p.name] || 0) : null;
+    const usedBadge = usedN == null ? '' : `<span class="wd-badge wd-matcher-used" data-used="${usedN}" style="color:var(--secondary-text-color,#888)" title="${_esc(this._tText('badge.matcher_used_tip', {}, "Cycles recorded on this appliance that WashData's matcher labelled with this imported program on its own. An import that is never matched may not fit your appliance and can be removed. Counted locally; nothing is sent to the store."))}">${usedN > 0
+      ? this._t('badge.matcher_used', {n: usedN}, `Matched ${usedN} of your cycles`)
+      : this._t('badge.matcher_unused', {}, 'Not matched to your cycles yet')}</span>`;
     // A program with no cycle behind it is silently absent from every match: it can
     // never win, and it cannot veto a shorter look-alike either (#400). That state used
     // to be a debug log only, so it is called out here, on the program itself.
@@ -5310,7 +5460,7 @@ class HaWashdataPanel extends HTMLElement {
       ? `<span class="wd-badge" style="color:var(--warning-color,#ff9800);background:rgba(255,152,0,.12)" title="${_esc(this._tText(durAdv.message_key, durAdv.message_params, durAdv.message))}">\u26A0 ${this._t('badge.duration_outlier', {n: (durAdv.message_params || {}).n || 1}, `${(durAdv.message_params || {}).n || 1} odd-length cycle(s)`)}</span>`
       : '';
 
-    const badges = [unmatchableBadge, durBadge, healthBadge, trendBadge, terminalBadge, warmupBadge, importedBadge].filter(Boolean).join(' ');
+    const badges = [unmatchableBadge, durBadge, healthBadge, trendBadge, terminalBadge, warmupBadge, importedBadge, usedBadge].filter(Boolean).join(' ');
     // Mini power-signature curve: the profile's real average power shape (from its
     // envelope), so the card thumbnail matches the actual cycle. Painted after
     // render by _drawProfileSparklines. Needs ≥3 envelope points.
@@ -5325,7 +5475,7 @@ class HaWashdataPanel extends HTMLElement {
             ${spark}
           </div>
           ${badges ? `<div class="wd-profile-badges">${badges}</div>` : ''}
-          <div class="wd-profile-meta">${p.cycle_count || 0} cycles · ${dur}${energy}${total}${cost}</div>
+          <div class="wd-profile-meta">${this._t('lbl.n_cycles', {n: p.cycle_count || 0}, '{n} cycles')} · ${dur}${energy}${total}${cost}</div>
         </button>
       </div>`;
   }
@@ -6237,7 +6387,7 @@ class HaWashdataPanel extends HTMLElement {
     const list = this._deviceAutomations || [];
     const pills = list.length
       ? list.map(a => `<span class="wd-auto-pill">` +
-          `<a class="wd-auto-pill-link" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top" title="${this._t('hdr.automation_open', {}, 'Open in the automation editor')}">🔗 ${_esc(a.name)}${a.enabled ? '' : ' <span style="opacity:.6">(off)</span>'}</a>` +
+          `<a class="wd-auto-pill-link" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top" title="${this._t('hdr.automation_open', {}, 'Open in the automation editor')}">🔗 ${_esc(a.name)}${a.enabled ? '' : ` <span style="opacity:.6">${this._t('lbl.automation_off', {}, '(off)')}</span>`}</a>` +
           `<button type="button" class="wd-auto-pill-x" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="${this._t('hdr.automation_delete', {}, 'Delete this automation')}">×</button>` +
         `</span>`).join('')
       : `<span class="wd-info" style="margin:0">${this._autoLoading ? this._t('msg.loading', {}, 'Loading…') : this._t('hdr.no_automations', {}, 'No automations reference this device yet.')}</span>`;
@@ -6311,10 +6461,15 @@ class HaWashdataPanel extends HTMLElement {
     if (!dev) return;
     const hass = this._hass;
     const eventType = kind === 'started' ? 'ha_washdata_cycle_started' : 'ha_washdata_cycle_ended';
-    const label = kind === 'started' ? 'started' : 'finished';
+    // Plain text (_tText): these are written into the user's automation config.
+    const device = dev.title || 'WashData';
     const config = {
-      alias: `${dev.title || 'WashData'}: cycle ${label}`,
-      description: `Runs when the WashData ${dev.title || ''} cycle ${label}. Add your actions (notify, lights, ...).`,
+      alias: kind === 'started'
+        ? this._tText('msg.automation_alias_started', {device}, '{device}: cycle started')
+        : this._tText('msg.automation_alias_finished', {device}, '{device}: cycle finished'),
+      description: kind === 'started'
+        ? this._tText('msg.automation_desc_started', {device}, 'Runs when a {device} cycle starts. Add your actions (notify, lights, ...).')
+        : this._tText('msg.automation_desc_finished', {device}, 'Runs when a {device} cycle finishes. Add your actions (notify, lights, ...).'),
       mode: 'single',
       trigger: [{ platform: 'event', event_type: eventType, event_data: { entry_id: dev.entry_id } }],
       condition: [],
@@ -6513,9 +6668,10 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // Dedicated "ML Training" tab: the single home for all ML, laid out as a plain
-  // sectioned dashboard (Status / Settings / What it's learned / Program-matching
-  // fine-tuning). Options save through the same path as Settings (_saveSettings
-  // scans every [data-opt] in the shadow root).
+  // sectioned dashboard (Status / Settings / What it's learned). Options save
+  // through the same path as Settings (_saveSettings scans every [data-opt] in
+  // the shadow root). The program-matching fine-tuning card went with the
+  // matcher weight tuner in 0.5.8.
   _htmlMlTab() {
     const o = this._opts;
     if (!Object.keys(o).length)
@@ -6543,7 +6699,6 @@ class HaWashdataPanel extends HTMLElement {
       </div>
 
       ${this._htmlMlLearnedSection(st)}
-      ${this._htmlMatchingTuningCard()}
     `;
   }
 
@@ -6655,63 +6810,6 @@ class HaWashdataPanel extends HTMLElement {
     return ` <span title="${_esc(e[2])}" style="font-size:.72em;font-weight:600;color:${e[1]};margin-left:6px">${e[0]}</span>`;
   }
 
-  // Matcher scoring-weight tuning: current defaults vs the on-device tuned
-  // override, which set is live, and a revert-to-default control.
-  _htmlMatchingTuningCard() {
-    const st = this._mlTrainingStatus;
-    const m = st && st.matching;
-    // The tuner has never promoted a config on the corpus (register item 356), so
-    // a card that always read "Using shipped defaults" was noise. Shown only while
-    // a tuned config is actually live, which is when its revert button matters.
-    if (!m || m.active !== 'tuned') return '';
-    const def = m.defaults || {};
-    const rec = m.tuned || null;
-    const cfg = (rec && rec.config) || null;
-    const tuned = m.active === 'tuned' && cfg;
-    const reverting = this._busy.has('ml-revert-match');
-    const fmt = (v) => (v == null || isNaN(v)) ? '-' : Number(v).toFixed(2);
-    const rows = [
-      ['corr_weight', 'Shape (correlation)'],
-      ['duration_weight', 'Duration agreement'],
-      ['energy_weight', 'Energy agreement'],
-      ['dtw_ensemble_w', 'DTW derivative blend (DDTW)'],
-    ].map(([k, lbl]) => {
-      const dv = def[k], iv = tuned ? cfg[k] : def[k];
-      const changed = tuned && dv != null && iv != null && Math.abs(dv - iv) > 1e-9;
-      return `<tr>
-        <td>${lbl}</td>
-        <td style="text-align:right;color:var(--secondary-text-color)">${fmt(dv)}</td>
-        <td style="text-align:right;font-weight:${changed ? '700' : '400'};color:${changed ? 'var(--primary-color)' : 'inherit'}">${fmt(iv)}</td>
-      </tr>`;
-    }).join('');
-    const badge = tuned
-      ? `<span class="wd-badge" style="color:var(--success-color,#4caf50);background:rgba(76,175,80,.14)">${this._t('badge.using_tuned', {}, 'Using tuned weights')}</span>`
-      : `<span class="wd-badge" style="color:var(--secondary-text-color);background:var(--secondary-background-color)">${this._t('badge.using_defaults', {}, 'Using shipped defaults')}</span>`;
-    let meta = '';
-    if (tuned) {
-      const when = rec.trained_at ? _fmtDate(rec.trained_at) : 'unknown';
-      const b = rec.baseline_test_top1, t = rec.tuned_test_top1;
-      const gain = (b != null && t != null)
-        ? ` · held-out top-1 ${(b * 100).toFixed(0)}% → <strong>${(t * 100).toFixed(0)}%</strong>` : '';
-      meta = `<p class="wd-info" style="margin:8px 0 0">Tuned ${_esc(when)} from ${rec.cycle_count || 0} cycles${gain}.</p>`;
-    }
-    const revertBtn = tuned
-      ? `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="ml-revert-match" ${reverting ? 'disabled' : ''}>${reverting ? ('<span class="wd-spin"></span> ' + this._t('status.reverting', {}, 'Reverting…')) : this._t('btn.reset_to_defaults', {}, 'Reset to defaults')}</button>`
-      : '';
-    return `<div class="wd-card" style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px">
-        <div class="wd-card-title" style="margin:0">${this._t('hdr.ml_matching_tuning', {}, 'Program-matching fine-tuning')}</div>${revertBtn}
-      </div>
-      <p class="wd-info" style="margin:0 0 8px">${this._t('msg.matching_tuning_intro', {}, 'When learning, WashData also adjusts how much program matching weighs shape versus duration and energy.')}</p>
-      <div style="margin-bottom:8px">${badge}</div>
-      <table class="wd-table" style="max-width:420px">
-        <thead><tr><th>${this._t('lbl.emphasis', {}, 'Emphasis')}</th><th style="text-align:right">${this._t('lbl.default', {}, 'Default')}</th><th style="text-align:right">${this._t('lbl.in_use', {}, 'In use')}</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-      ${meta}
-    </div>`;
-  }
-
   // ── F3: Playground tab (what-if simulator / A-B / DTW inspector) ─────────────
 
   // The small set of detection params the playground lets you tweak. Labels reuse
@@ -6766,10 +6864,11 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // ── Playground settings control panel ───────────────────────────────────────
-  // Load live → edit in the sandbox → publish single values back. The staged-override maps stay the single source of "what the
+  // Load live → edit in the sandbox → save/load a named preset → publish single
+  // values back. The staged-override maps stay the single source of "what the
   // user changed"; this block only decides what they are measured against.
 
-  // Fetch the device's live effective settings. Tolerant of an
+  // Fetch the device's live effective settings + its saved presets. Tolerant of an
   // older backend (command unknown): the field pre-fill silently falls back to the
   // stored-option chain in _pgFieldVal.
   async _pgFetchSettings(entryId, includeSuggestions = true) {
@@ -6781,6 +6880,9 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._isActiveEntry(entryId)) return;
       this._pgEffective = r.effective || {};
       this._pgPublishable = Array.isArray(r.publishable) ? r.publishable : null;
+      this._pgPresets = Array.isArray(r.presets) ? r.presets : [];
+      this._pgPresetLimit = r.preset_limit || 0;
+      if (this._pgPresetSel && !this._pgPresets.some(p => p.name === this._pgPresetSel)) this._pgPresetSel = '';
       if (includeSuggestions) this._pgApplySuggestions(r);
     } catch (e) {
       if (this._pgIsUnknownCmd(e)) this._pgNeedsRestart = true;
@@ -6804,6 +6906,21 @@ class HaWashdataPanel extends HTMLElement {
       this._pgApplySuggestions(r);
       if (this._tab === 'playground') this._render();
     } catch (_) { /* the buttons simply stay hidden */ }
+  }
+
+  // Every value the control panel currently shows (live baseline + staged edits).
+  // This is what a "save preset" snapshots, so a preset is a complete setup rather
+  // than a sparse diff that would mean something different on another baseline.
+  _pgCurrentValues() {
+    const out = {};
+    for (const [key] of this._pgOverrideFields()) {
+      const v = this._pgFieldVal(key, {});
+      if (v !== '' && v !== null && v !== undefined) out[key] = v;
+    }
+    if (this._pgThreshStart != null) out.start_threshold_w = this._pgThreshStart;
+    if (this._pgThreshStop != null) out.stop_threshold_w = this._pgThreshStop;
+    for (const [k, v] of Object.entries(this._pgParamOverrides || {})) out[k] = v;
+    return out;
   }
 
   // Staged value for one key, or undefined when the field is at the live baseline.
@@ -6870,6 +6987,24 @@ class HaWashdataPanel extends HTMLElement {
         ? `<span style="color:var(--warning-color,#ff9800);font-weight:600">${this._t('msg.pg_n_changed', {n: changed.length}, changed.length + ' changed vs live settings')}</span>`
         : `<span style="color:var(--success-color,#4caf50)">✓ ${this._t('msg.pg_matches_live', {}, 'Matches live settings')}</span>`);
 
+    const presets = this._pgPresets || [];
+    const presetOpts = `<option value="">${_esc(this._tText('lbl.pg_preset_none', {}, 'Select a preset…'))}</option>`
+      + presets.map(p => `<option value="${_esc(p.name)}" ${this._pgPresetSel === p.name ? 'selected' : ''}>${_esc(p.name)}</option>`).join('');
+    const hasSel = !!this._pgPresetSel;
+    const atLimit = this._pgPresetAtLimit((this._pgPresetName || '').trim());
+
+    const presetRow = `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <select id="wd-pg-preset-sel" class="wd-pg-preset-sel" aria-label="${_esc(this._tText('lbl.pg_preset', {}, 'Playground preset'))}">${presetOpts}</select>
+      <button class="wd-btn wd-btn-sm" data-action="pg-preset-load" ${hasSel ? '' : 'disabled'} title="${_esc(this._tText('btn.pg_preset_load_tip', {}, 'Replace the Playground values with this preset (live settings are untouched)'))}">${this._t('btn.pg_preset_load', {}, 'Load preset')}</button>
+      ${canEdit ? `<button class="wd-btn wd-btn-sm wd-btn-danger" data-action="pg-preset-delete" ${hasSel ? '' : 'disabled'} aria-label="${_esc(this._tText('btn.pg_preset_delete', {}, 'Delete preset'))}" title="${_esc(this._tText('btn.pg_preset_delete', {}, 'Delete preset'))}">🗑</button>` : ''}
+    </div>`;
+
+    const saveRow = canEdit ? `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <input id="wd-pg-preset-name" type="text" class="wd-pg-preset-name" maxlength="60" value="${_esc(this._pgPresetName || '')}" placeholder="${_esc(this._tText('lbl.pg_preset_name', {}, 'New preset name'))}" aria-label="${_esc(this._tText('lbl.pg_preset_name', {}, 'New preset name'))}">
+      <button class="wd-btn wd-btn-sm" data-action="pg-preset-save" ${(this._pgPresetName || '').trim() && !atLimit ? '' : 'disabled'} title="${_esc(this._tText('btn.pg_preset_save_tip', {}, 'Save every value below as a named preset for this device'))}">${this._t('btn.pg_preset_save', {}, 'Save as preset')}</button>
+      <span id="wd-pg-preset-limit-note" style="font-size:.72em;color:var(--warning-color,#ff9800)${atLimit ? '' : ';display:none'}">${this._t('msg.pg_preset_limit', {n: this._pgPresetLimit}, 'Preset limit reached ({n})')}</span>
+    </div>` : '';
+
     const publishBtn = (canEdit && publishable.length)
       ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-apply-settings" title="${_esc(this._t('btn.pg_apply_to_settings_tip', {}, 'Copy the values you edited here into this device\'s live settings'))}">${this._t('btn.pg_publish_all', {n: publishable.length}, 'Publish ' + publishable.length + ' to integration')}</button>`
       : '';
@@ -6890,7 +7025,78 @@ class HaWashdataPanel extends HTMLElement {
         ${suggClassicBtn}
         ${publishBtn}
       </div>
+      ${presetRow}
+      ${saveRow}
     </div>`;
+  }
+
+  // Saving under `name` would need a new slot and the device is at its cap (an
+  // existing name can always be overwritten).
+  _pgPresetAtLimit(name) {
+    const presets = this._pgPresets || [];
+    return this._pgPresetLimit > 0 && presets.length >= this._pgPresetLimit
+      && !presets.some(p => p.name === name);
+  }
+
+  // Replace the sandbox values with a preset: stage only what differs from the live
+  // baseline, so the graph's before/after diff keeps meaning "vs the integration".
+  _pgApplyPresetValues(values) {
+    this._pgThreshStart = null; this._pgThreshStop = null; this._pgParamOverrides = {};
+    const live = this._pgEffective || {};
+    for (const [key, val] of Object.entries(values || {})) {
+      if (val === null || val === undefined) continue;
+      const base = live[key];
+      if (base !== undefined && base !== null && this._pgSameVal(val, base)) continue;
+      this._pgSetStaged(key, val);
+    }
+  }
+
+  _pgLoadPreset() {
+    const preset = (this._pgPresets || []).find(p => p.name === this._pgPresetSel);
+    if (!preset) return;
+    this._pgApplyPresetValues(preset.values);
+    this._showToast(this._tText('toast.pg_preset_loaded', {name: preset.name}, `Preset "${preset.name}" loaded`));
+    this._render();
+    requestAnimationFrame(() => this._pgDrawCanvas());
+  }
+
+  async _pgSavePreset() {
+    const dev = this._devices[this._selIdx];
+    const name = (this._pgPresetName || '').trim();
+    if (!dev || !this._canEdit() || !name) return;
+    if ((this._pgPresets || []).some(p => p.name === name)
+      && !confirm(this._tText('msg.pg_preset_overwrite', {name}, `Overwrite the preset "${name}"?`))) return;
+    await this._busyRun('pg-preset-save', async () => {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/save_playground_preset`, entry_id: dev.entry_id, name, values: this._pgCurrentValues() });
+        if (!this._isActiveEntry(dev.entry_id)) return;
+        this._pgPresets = Array.isArray(r.presets) ? r.presets : this._pgPresets;
+        this._pgPresetSel = name;
+        this._pgPresetName = '';
+        this._showToast(this._tText('toast.pg_preset_saved', {name}, `Preset "${name}" saved`));
+      } catch (e) {
+        this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error');
+      }
+    });
+    this._render();
+  }
+
+  async _pgDeletePreset() {
+    const dev = this._devices[this._selIdx];
+    const name = this._pgPresetSel;
+    if (!dev || !this._canEdit() || !name) return;
+    if (!confirm(this._tText('msg.pg_preset_delete_confirm', {name}, `Delete the preset "${name}"?`))) return;
+    await this._busyRun('pg-preset-delete', async () => {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/delete_playground_preset`, entry_id: dev.entry_id, name });
+        if (!this._isActiveEntry(dev.entry_id)) return;
+        this._pgPresets = Array.isArray(r.presets) ? r.presets : (this._pgPresets || []).filter(p => p.name !== name);
+        this._pgPresetSel = '';
+      } catch (e) {
+        this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      }
+    });
+    this._render();
   }
 
   // Re-read the integration's settings and discard every sandbox edit.
@@ -6967,7 +7173,7 @@ class HaWashdataPanel extends HTMLElement {
     // Compact cycle dropdown
     const cycleOpts = cycles.map(c => {
       const prog = c.profile_name || c.matched_profile || this._t('lbl.unlabelled', {}, 'Unlabelled');
-      const dur = c.duration ? ` · ${Math.round(c.duration / 60)} min` : '';
+      const dur = c.duration ? ` · ${Math.round(c.duration / 60)} ${this._tText('lbl.timer_min', {}, 'min')}` : '';
       const dateStr = c.start_time ? ` · ${_fmtDate(c.start_time)}` : '';
       return `<option value="${_esc(c.id)}" ${this._pgCycleId === c.id ? 'selected' : ''}>${_esc(prog + dur + dateStr)}</option>`;
     }).join('');
@@ -7253,7 +7459,14 @@ class HaWashdataPanel extends HTMLElement {
       <th>${this._t('lbl.duration', {}, 'Duration')}</th>
       ${h.diff ? `<th>${this._t('lbl.pg_vs_current', {}, 'vs current')}</th>` : ''}
     </tr></thead><tbody>${rows}</tbody></table>`;
-    return `${intro}${controls}${this._htmlPgRecentRuns('pg_history')}${diffBanner}${summaryLine}${table}`;
+    return `${intro}${controls}${this._htmlPgRecentRuns('pg_history')}${diffBanner}${summaryLine}${this._htmlPgInSampleNote()}${table}`;
+  }
+
+  // PLAYGROUND-23: History and Optimize replay cycles against profiles that were
+  // built partly from those same cycles (no leave-one-out), so their scores run
+  // a little high. Measured on 59 cycles: correct matches 46 vs 44 held out.
+  _htmlPgInSampleNote() {
+    return `<p class="wd-pg-insample wd-info" style="font-size:.78em;margin:0 0 8px">${this._t('msg.pg_in_sample_note', {}, 'These cycles also helped build the profiles they are matched against, so these results are optimistic: on new cycles, expect slightly fewer correct matches.')}</p>`;
   }
 
   // Determinate progress bar for chunked history/sweep runs, rendered once while
@@ -7366,7 +7579,7 @@ class HaWashdataPanel extends HTMLElement {
     const applyBtn = (this._canEdit() && bestVal != null) ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="pg-sweep-apply2" data-val="${_esc(String(bestVal))}">${this._t('btn.pg_apply_best', {}, 'Apply best')}</button>` : '';
     return `<div style="font-size:.82em;color:var(--secondary-text-color);margin:4px 0 6px">${this._t('lbl.pg_best_value', {}, 'Best value found')}: <strong style="color:var(--primary-text-color)">${_esc(String(bestVal))}</strong> · ${fmtMetric(best)} · <span>◀ ${this._t('lbl.pg_current_value', {}, 'Current value:')}</span></div>
       ${bars}
-      <div style="margin-top:8px">${applyBtn}</div>`;
+      <div style="margin-top:8px">${this._htmlPgInSampleNote()}${applyBtn}</div>`;
   }
 
   // Kick off a detached, reconnect-safe Optimize sweep on the backend (1D curve),
@@ -8180,6 +8393,22 @@ class HaWashdataPanel extends HTMLElement {
       </div>`;
   }
 
+  // "Undo last import" (register item 195): shown inside the Export / Import card
+  // only while the backend holds a restore point, and only to admins (undo_import
+  // is admin-only, like the imports themselves).
+  _htmlImportUndo() {
+    const u = this._importUndo;
+    if (!u || !u.created_at || !this._isAdmin()) return '';
+    const c = u.counts || {};
+    const cycles = (c.real_cycles || 0) + (c.reference_cycles || 0) + (c.backfill_cycles || 0);
+    const busy = this._busy.has('import-undo');
+    return `<div class="wd-import-undo" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--divider-color,#e0e0e0)">
+      <p class="wd-info" style="margin:0 0 8px">${this._t('msg.import_undo_hint', { when: _fmtDate(u.created_at), profiles: c.profiles || 0, cycles },
+        'A restore point from before the last import ({when}) is kept: {profiles} profile(s) and {cycles} cycle(s).')}</p>
+      <button class="wd-btn wd-btn-secondary" data-action="import-undo" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.undo_import', {}, 'Undo last import')}</button>
+    </div>`;
+  }
+
   _htmlDiagnostics() {
     const d = this._diag;
     let statsHtml;
@@ -8220,6 +8449,7 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-primary" data-action="import-config-open">${this._t('btn.import_json', {}, 'Import from JSON')}</button>
           <button class="wd-btn wd-btn-secondary" data-action="export-config">${this._t('btn.export_all', {}, 'Quick export everything')}</button>
         </div>
+        ${this._htmlImportUndo()}
       </div>
       <div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.import_power_history', {}, 'Import power history')}</div>
@@ -8538,14 +8768,14 @@ class HaWashdataPanel extends HTMLElement {
       const yours = isMine ? `<span class="wd-tag wd-tag-approved" title="${_esc(this._t('store.your_model_tip', {}, 'This is the appliance you declared in Settings'))}">${this._t('store.your_model', {}, 'Yours')}</span>` : '';
       // Only ever claim content, never absence: these counters under-report (see
       // _storeItemHasContent), so a missing chip means "unknown", not "empty".
-      const nProg = Number(d.profileCount) || 0;
+      const nProg = _storeCount(d.profileCount);
       const progChip = nProg > 0
         ? `<span class="wd-store-chip">${this._t('store.programs_count', {n: nProg}, `Programs: ${nProg}`)}</span>`
         : '';
       return `<button class="wd-store-row" data-action="store-open-device" data-device-id="${_esc(d.id)}">
         <span class="wd-store-row-main">
           <span class="wd-store-row-title">${title}${yours}${this._statusTag(d)}</span>
-          <span class="wd-store-row-sub">${type}${progChip}<span class="wd-store-fav" title="${_esc(this._t('store.favorites', {}, 'Favourites'))}">★ ${d.favoriteCount || 0}</span></span>
+          <span class="wd-store-row-sub">${type}${progChip}<span class="wd-store-fav" title="${_esc(this._tText('store.favorites', {}, 'Favourites'))}">★ ${_fmtNum(_storeCount(d.favoriteCount), 0)}</span></span>
 
         </span>
         <span class="wd-store-row-arrow" aria-hidden="true">›</span>
@@ -8597,6 +8827,11 @@ class HaWashdataPanel extends HTMLElement {
       </div>`;
   }
 
+  // The store could not be reached (audit STORE-09): not the same as "nothing shared".
+  _htmlStoreUnreachable() {
+    return `<p class="wd-error-state" role="alert">${this._t('store.unreachable', {}, "Couldn't reach the community store. Check your connection and try again.")}</p>`;
+  }
+
   _htmlStoreDevice() {
     const items = this._storeProfiles || [];
     const rows = items.map(p => `<button class="wd-store-row" data-action="store-open-profile" data-profile-id="${_esc(p.id)}">
@@ -8604,7 +8839,7 @@ class HaWashdataPanel extends HTMLElement {
       <span class="wd-store-row-arrow" aria-hidden="true">›</span>
     </button>`).join('');
     const list = this._storeLoading ? this._htmlStoreLoading()
-      : (items.length ? `<div class="wd-store-rows">${rows}</div>` : `<p class="wd-info">${this._t('store.no_programs', {}, 'No shared programs for this appliance yet.')}</p>`);
+      : (items.length ? `<div class="wd-store-rows">${rows}</div>` : this._storeBrowseErr ? this._htmlStoreUnreachable() : `<p class="wd-info">${this._t('store.no_programs', {}, 'No shared programs for this appliance yet.')}</p>`);
     // Adopt the whole device: import every program's reference cycles into this
     // device in one action (merge/upsert; your real cycles are never touched).
     const dev = this._storeDevice;
@@ -8617,40 +8852,47 @@ class HaWashdataPanel extends HTMLElement {
     return dlHeader + list;
   }
 
+  // Every value below comes from an untyped community-store document (audit
+  // STORE-19): numbers go through the _fmt* helpers (never echo their input),
+  // strings through _esc or a _t() var, which is escaped.
   _htmlStoreProfile() {
     const items = this._storeCycles || [];
     const rows = items.map(c => {
-      const stats = c.stats || {};
+      const stats = (c.stats && typeof c.stats === 'object') ? c.stats : {};
       const spark = this._storeSparkline((c.trace && c.trace.points) || []);
-      const dur = stats.duration != null ? _fmtDuration(stats.duration) : '-';
-      const energy = stats.energy_wh != null ? _fmtEnergy(stats.energy_wh / 1000) : '-';
-      const peak = stats.peak_w != null ? _fmtPower(stats.peak_w) : '-';
-      const uploader = c.uploaderName || this._tText('store.anon', {}, 'anonymous');
+      const dur = _fmtDuration(stats.duration);
+      const energy = _fmtEnergy(stats.energy_wh != null ? Number(stats.energy_wh) / 1000 : null);
+      const peak = _fmtPower(stats.peak_w);
+      const uploader = (typeof c.uploaderName === 'string' && c.uploaderName) || this._tText('store.anon', {}, 'anonymous');
       const tag = this._statusTag(c);  // awaiting-approval / approved pill (cycles carry confirmCount)
-      const rat = c.rating || {};
-      const rating = (rat.avg != null && rat.count)
-        ? this._t('store.rating_summary', {avg: Number(rat.avg).toFixed(1), n: rat.count}, `★ ${Number(rat.avg).toFixed(1)} (${rat.count})`)
+      const rat = (c.rating && typeof c.rating === 'object') ? c.rating : {};
+      const ratAvg = Number(rat.avg), ratN = _storeCount(rat.count);
+      const rating = (rat.avg != null && isFinite(ratAvg) && ratN > 0)
+        ? this._t('store.rating_summary', {avg: _fmtNum(ratAvg, 1), n: ratN}, '★ {avg} ({n})')
         : this._t('store.no_ratings', {}, 'No ratings yet');
       return `<div class="wd-card">
         <div class="wd-store-cycle-top">
           ${spark}
           <div class="wd-store-cycle-stats">
             <div><b>${dur}</b> · ${energy} · ${peak} ${tag}</div>
-            <div class="wd-info">${this._t('store.uploaded_by', {name: uploader}, 'Shared by {name}')} · ⬇ ${c.downloads || 0} · ${rating}</div>
+            <div class="wd-info">${this._t('store.uploaded_by', {name: uploader}, 'Shared by {name}')} · ⬇ ${_fmtNum(_storeCount(c.downloads), 0)} · ${rating}</div>
           </div>
           <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-import" data-cycle-id="${_esc(c.id)}">${this._t('btn.import', {}, 'Import')}</button>
         </div>
       </div>`;
     }).join('');
     const list = this._storeLoading ? this._htmlStoreLoading()
-      : (items.length ? rows : `<p class="wd-info">${this._t('store.no_cycles', {}, 'No reference cycles shared for this program yet.')}</p>`);
+      : (items.length ? rows : this._storeBrowseErr ? this._htmlStoreUnreachable() : `<p class="wd-info">${this._t('store.no_cycles', {}, 'No reference cycles shared for this program yet.')}</p>`);
     return `<div class="wd-store-list">${list}</div>`;
   }
 
   // Minimal inline SVG sparkline from a [[t, w], ...] trace (no canvas needed for
   // a static thumbnail). Scales time to width and power to height.
   _storeSparkline(points) {
-    const pts = Array.isArray(points) ? points.filter(p => Array.isArray(p) && p.length >= 2) : [];
+    const pts = Array.isArray(points)
+      ? points.filter(p => Array.isArray(p) && p.length >= 2).map(p => [Number(p[0]), Number(p[1])])
+        .filter(p => isFinite(p[0]) && isFinite(p[1]))
+      : [];
     if (pts.length < 2) return `<svg class="wd-store-spark" viewBox="0 0 120 36" preserveAspectRatio="none" aria-hidden="true"></svg>`;
     const ts = pts.map(p => p[0]);
     const ws = pts.map(p => p[1]);
@@ -8720,7 +8962,8 @@ class HaWashdataPanel extends HTMLElement {
   _htmlStorePrefs(busy) {
     const prefs = (this._constants && this._constants.storePrefs) || {};
     const rows = _STORE_PREFS.map(p => {
-      const checked = prefs[p.key] !== false;  // defaults on; get_constants sends the full set
+      const v = prefs[p.key];
+      const checked = v === undefined ? p.def !== false : v !== false;
       return _switchRow(`data-action="store-toggle-pref" data-pref="${_esc(p.key)}" ${checked ? 'checked' : ''} ${busy ? 'disabled' : ''}`, this._t(p.labelKey, {}, p.labelFb), _tip(this._t(p.docKey, {}, p.docFb)));
     }).join('');
     // The catalog is cached for an hour because every read is charged against a quota the
@@ -8784,10 +9027,10 @@ class HaWashdataPanel extends HTMLElement {
     if (!dev || !d) return;
     const eid = dev.entry_id;
     this._storeDevice = d; this._storeProfile = null; this._storeView = 'device';
-    this._storeProfiles = []; this._storeCycles = []; this._storeLoading = true; this._render();
+    this._storeProfiles = []; this._storeCycles = []; this._storeLoading = true; this._storeBrowseErr = false; this._render();
     this._ws({ type: `${_DOMAIN}/store_get_profiles`, entry_id: eid, device_id: d.id })
-      .then(r => { if (!this._isActiveEntry(eid) || this._storeView !== 'device') return; this._storeProfiles = (r && r.items) || []; })
-      .catch(() => { if (this._isActiveEntry(eid)) this._storeProfiles = []; })
+      .then(r => { if (!this._isActiveEntry(eid) || this._storeView !== 'device') return; this._storeProfiles = (r && r.items) || []; this._storeBrowseErr = !!(r && r.error); })
+      .catch(() => { if (this._isActiveEntry(eid)) { this._storeProfiles = []; this._storeBrowseErr = true; } })
       .finally(() => { if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); } });
   }
 
@@ -9737,7 +9980,7 @@ class HaWashdataPanel extends HTMLElement {
       }
       body = `<h2>${this._t('modal.create_profile', {}, 'Create Profile')}</h2>
         <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-cp-name" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}" value="${_esc(m.prefillName || '')}"></div>
-        <div class="wd-field"><label>${this._t('lbl.ref_cycle', {}, 'Reference Cycle (optional)')}</label><select id="wd-cp-cycle"><option value="">None</option>${cycleOpts}</select></div>
+        <div class="wd-field"><label>${this._t('lbl.ref_cycle', {}, 'Reference Cycle (optional)')}</label><select id="wd-cp-cycle"><option value="">${this._t('lbl.ref_cycle_none', {}, 'None')}</option>${cycleOpts}</select></div>
         <div class="wd-field"><label>${this._t('lbl.manual_duration', {}, 'Manual Duration (min, optional)')}</label><input type="number" id="wd-cp-dur" min="0" max="600" value="0"><div class="wd-field-hint" id="wd-cp-dur-hint">${this._t('msg.manual_duration_ref_hint', {}, 'Only used when no reference cycle is selected — a reference cycle sets the duration from its own length.')}</div></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="create-profile-ok">${this._t('btn.create', {}, 'Create')}</button></div>`;
@@ -9766,7 +10009,7 @@ class HaWashdataPanel extends HTMLElement {
         <button class="wd-btn wd-btn-primary" data-maction="process-rec-ok">${this._t('btn.process_recording', {}, 'Save Recording')}</button></div>`;
     } else if (m.type === 'correct-feedback') {
       body = `<h2>${this._t('modal.correct_feedback', {}, 'Correct Feedback')}</h2>
-        <p class="wd-info">WashData detected: <strong>${_esc(m.detectedProfile)}</strong></p>
+        <p class="wd-info">${this._t('msg.feedback_detected', {name: _html(`<strong>${_esc(m.detectedProfile)}</strong>`)}, 'WashData detected: {name}')}</p>
         <div class="wd-field"><label>${this._t('lbl.correct_profile', {}, 'Correct Profile')}</label><select id="wd-fb-profile">${this._profileOptions()}</select></div>
         <div class="wd-field"><label>${this._t('lbl.correct_duration', {}, 'Correct Duration (min, optional)')}</label><input type="number" id="wd-fb-dur" min="0" value=""></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
@@ -9926,9 +10169,25 @@ class HaWashdataPanel extends HTMLElement {
   // Fixed display order for the category tree (mirrors _EXPORT_CATEGORIES on the
   // backend). Enumerable categories (profiles / cycles) come first.
   _wizCatOrder() {
-    return ['profiles', 'real_cycles', 'reference_cycles', 'custom_phases',
-      'profile_groups', 'settings', 'matching_config', 'ml_models', 'feedback',
+    return ['profiles', 'real_cycles', 'reference_cycles', 'backfill_cycles', 'custom_phases',
+      'profile_groups', 'settings', 'ml_models', 'feedback',
       'suggestions', 'maintenance_log', 'history_logs', 'lifetime_stats'];
+  }
+
+  // The three per-cycle categories and the selection set each one fills. Backfill
+  // (cycles found in imported power history, item 129e) is a peer of the other two.
+  _wizCycleCats() { return ['real_cycles', 'reference_cycles', 'backfill_cycles']; }
+
+  _wizIdSet(sel, catId) {
+    return catId === 'real_cycles' ? sel.realIds : (catId === 'backfill_cycles' ? sel.bfIds : sel.refIds);
+  }
+
+  _wizEmptySel() {
+    return { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set(), bfIds: new Set() };
+  }
+
+  _wizAnySel(sel) {
+    return !!(sel && (sel.profiles.size || sel.realIds.size || sel.refIds.size || sel.bfIds.size || sel.cats.size));
   }
 
   _wizCatLabel(catId) {
@@ -9936,10 +10195,10 @@ class HaWashdataPanel extends HTMLElement {
       profiles: this._t('lbl.cat_profiles', {}, 'Profiles (programs)'),
       real_cycles: this._t('lbl.cat_real_cycles', {}, 'Cycles (run history)'),
       reference_cycles: this._t('lbl.cat_reference_cycles', {}, 'Reference cycles (imported)'),
+      backfill_cycles: this._t('lbl.cat_backfill_cycles', {}, 'Cycles found in imported power history'),
       custom_phases: this._t('lbl.cat_custom_phases', {}, 'Custom phases'),
       profile_groups: this._t('lbl.cat_profile_groups', {}, 'Profile groups'),
       settings: this._t('lbl.cat_settings', {}, 'Detection & matching settings'),
-      matching_config: this._t('lbl.cat_matching_config', {}, 'Matcher tuning'),
       ml_models: this._t('lbl.cat_ml_models', {}, 'ML models'),
       feedback: this._t('lbl.cat_feedback', {}, 'Feedback & review labels'),
       suggestions: this._t('lbl.cat_suggestions', {}, 'Suggestions'),
@@ -9953,17 +10212,19 @@ class HaWashdataPanel extends HTMLElement {
   // Build a fresh selection model from a manifest. When importableOnly is set,
   // categories/items the backend marked not-importable are left unselected.
   _wizInitSel(manifest, importableOnly) {
-    const cats = new Set(), profiles = new Set(), realIds = new Set(), refIds = new Set();
+    const sel = this._wizEmptySel();
     const c = (manifest && manifest.categories) || {};
     const ok = (info) => !!(info && info.present && (!importableOnly || info.importable !== false));
-    if (ok(c.profiles)) (c.profiles.items || []).forEach(i => profiles.add(i.name));
-    if (ok(c.real_cycles)) (c.real_cycles.groups || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) realIds.add(String(cy.id)); }));
-    if (ok(c.reference_cycles)) (c.reference_cycles.groups || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) refIds.add(String(cy.id)); }));
-    Object.keys(c).forEach(cid => {
-      if (['profiles', 'real_cycles', 'reference_cycles'].includes(cid)) return;
-      if (ok(c[cid])) cats.add(cid);
+    if (ok(c.profiles)) (c.profiles.items || []).forEach(i => sel.profiles.add(i.name));
+    this._wizCycleCats().forEach(cid => {
+      const set = this._wizIdSet(sel, cid);
+      if (ok(c[cid])) (c[cid].groups || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) set.add(String(cy.id)); }));
     });
-    return { cats, profiles, realIds, refIds };
+    Object.keys(c).forEach(cid => {
+      if (cid === 'profiles' || this._wizCycleCats().includes(cid)) return;
+      if (ok(c[cid])) sel.cats.add(cid);
+    });
+    return sel;
   }
 
   // The selection payload sent to the backend (categories + item subsets).
@@ -9973,15 +10234,17 @@ class HaWashdataPanel extends HTMLElement {
     if (s.profiles.size) categories.push('profiles');
     if (s.realIds.size) categories.push('real_cycles');
     if (s.refIds.size) categories.push('reference_cycles');
+    if (s.bfIds.size) categories.push('backfill_cycles');
     s.cats.forEach(cid => categories.push(cid));
     const out = { categories };
     if (s.profiles.size) out.profiles = Array.from(s.profiles);
     if (s.realIds.size) out.real_cycle_ids = Array.from(s.realIds);
     if (s.refIds.size) out.reference_cycle_ids = Array.from(s.refIds);
+    if (s.bfIds.size) out.backfill_cycle_ids = Array.from(s.bfIds);
     return out;
   }
 
-  // Ids of the cycles in one manifest group (real_cycles / reference_cycles).
+  // Ids of the cycles in one manifest group (real / reference / backfill cycles).
   _wizGroupIds(manifest, catId, prof) {
     const cat = (manifest.categories || {})[catId] || {};
     const g = (cat.groups || []).find(gr => gr.profile === prof);
@@ -9998,8 +10261,8 @@ class HaWashdataPanel extends HTMLElement {
       const sel = items.filter(i => s.profiles.has(i.name)).length;
       return { sel, total, state: sel === 0 ? 'none' : (sel === total ? 'all' : 'some') };
     }
-    if (catId === 'real_cycles' || catId === 'reference_cycles') {
-      const set = catId === 'real_cycles' ? s.realIds : s.refIds;
+    if (this._wizCycleCats().includes(catId)) {
+      const set = this._wizIdSet(s, catId);
       const total = cat.count || 0;
       let sel = 0;
       (cat.groups || []).forEach(g => g.cycles.forEach(cy => { if (set.has(String(cy.id))) sel++; }));
@@ -10032,7 +10295,7 @@ class HaWashdataPanel extends HTMLElement {
       const info = cats[cid];
       const blocked = opts.importableOnly && info.importable === false;
       const st = this._wizCatState(m, cid, manifest);
-      const enumerable = ['profiles', 'real_cycles', 'reference_cycles'].includes(cid);
+      const enumerable = cid === 'profiles' || this._wizCycleCats().includes(cid);
       const countLbl = enumerable ? `${st.sel}/${info.count}` : '';
       const header = `<label class="wd-sd-prof">
         <input type="checkbox" data-maction="wiz-toggle-cat" data-cat="${cid}" ${st.state === 'all' ? 'checked' : ''} ${st.state === 'some' ? 'data-indeterminate="1"' : ''} ${blocked ? 'disabled' : ''}>
@@ -10043,10 +10306,10 @@ class HaWashdataPanel extends HTMLElement {
       if (!blocked && cid === 'profiles') {
         items = `<div class="wd-sd-cycles">${(info.items || []).map(i => `<label class="wd-sd-cyc">
           <input type="checkbox" data-maction="wiz-toggle-profile" data-name="${_esc(i.name)}" ${m.sel.profiles.has(i.name) ? 'checked' : ''}>
-          <span class="wd-sd-cyc-meta">${_esc(i.name)} · ${(i.real_cycles || 0) + (i.reference_cycles || 0)} ${this._t('lbl.cycles_short', {}, 'cycles')}${conflictNames.has(i.name) ? ` <span class="wd-tag" style="color:var(--warning-color,#e6a700)">${this._t('badge.exists', {}, 'exists')}</span>` : ''}</span>
+          <span class="wd-sd-cyc-meta">${_esc(i.name)} · ${(i.real_cycles || 0) + (i.reference_cycles || 0) + (i.backfill_cycles || 0)} ${this._t('lbl.cycles_short', {}, 'cycles')}${conflictNames.has(i.name) ? ` <span class="wd-tag" style="color:var(--warning-color,#e6a700)">${this._t('badge.exists', {}, 'exists')}</span>` : ''}</span>
         </label>`).join('')}</div>`;
-      } else if (!blocked && (cid === 'real_cycles' || cid === 'reference_cycles')) {
-        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+      } else if (!blocked && this._wizCycleCats().includes(cid)) {
+        const set = this._wizIdSet(m.sel, cid);
         items = `<div class="wd-sd-cycles">${(info.groups || []).map(g => {
           const ids = g.cycles.map(cy => String(cy.id));
           const gsel = ids.filter(id => set.has(id)).length;
@@ -10083,7 +10346,7 @@ class HaWashdataPanel extends HTMLElement {
     } else {
       body = this._htmlSelectionTree(m, { categories: m.inventory }, { importableOnly: false });
     }
-    const anything = m.sel && (m.sel.profiles.size || m.sel.realIds.size || m.sel.refIds.size || m.sel.cats.size);
+    const anything = this._wizAnySel(m.sel);
     return `<h2 id="wd-modal-title">${this._t('modal.export_select', {}, 'Export - choose data')}</h2>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.export_select_intro', {}, 'Tick exactly what to include. Selecting profiles without their cycles still exports a matchable program (its learned shape travels along).')}</p>
       ${body}
@@ -10126,7 +10389,7 @@ class HaWashdataPanel extends HTMLElement {
         <button type="button" class="wd-btn ${m.mode === 'merge' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="imp-mode-merge">${this._t('lbl.mode_merge', {}, 'Merge (keep mine)')}</button>
         <button type="button" class="wd-btn ${m.mode === 'replace' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="imp-mode-replace">${this._t('lbl.mode_replace', {}, 'Replace selected')}</button>
       </div>
-      <div class="wd-field-hint">${m.mode === 'replace' ? this._t('msg.replace_warn', {}, 'Each ticked category is wiped and replaced from the file. Unticked categories are left untouched.') : this._t('msg.merge_hint', {}, 'Imported items are added; nothing local is lost. Name clashes are resolved below.')}</div>
+      <div class="wd-field-hint">${m.mode === 'replace' ? this._t('msg.replace_warn', {}, 'Each ticked category is wiped and replaced from the file. Unticked categories are left untouched.') + ' ' + this._t('msg.replace_undo_hint', {}, 'A restore point is saved first, so you can undo this import from Export / Import.') : this._t('msg.merge_hint', {}, 'Imported items are added; nothing local is lost. Name clashes are resolved below.')}</div>
     </div>`;
     // Cycle destination toggle (only relevant when cycles are being imported).
     const realAllowed = man.real_history_allowed !== false;
@@ -10153,7 +10416,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>`).join('')}
       </div>`;
     }
-    const anything = m.sel && (m.sel.profiles.size || m.sel.realIds.size || m.sel.refIds.size || m.sel.cats.size);
+    const anything = this._wizAnySel(m.sel);
     return `${title}
       ${warnBanner}
       ${tree}
@@ -10372,7 +10635,7 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-kv-item"><div class="wd-kv-val">${_fmtDuration(cur.duration || full)}</div><div class="wd-kv-lbl">${this._t('lbl.duration', {}, 'Duration')}</div></div>
       <div class="wd-kv-item"><div class="wd-kv-val">${_fmtEnergy(kwh)}</div><div class="wd-kv-lbl">${this._t('lbl.energy', {}, 'Energy')}</div></div>
       <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.profile_name || this._t('lbl.unlabelled', {}, 'Unlabelled'))}</div><div class="wd-kv-lbl">${this._t('lbl.profile', {}, 'Profile')}</div></div>
-      <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.status || '-')}</div><div class="wd-kv-lbl">${this._t('lbl.status', {}, 'Status')}</div></div>
+      <div class="wd-kv-item"><div class="wd-kv-val" style="font-size:.95em">${_esc(cur.status ? this._cycleStatusLabel(cur.status) : '-')}</div><div class="wd-kv-lbl">${this._t('lbl.status', {}, 'Status')}</div></div>
     </div>`;
     // Does this cycle still need a review? (mirrors the Cycles-list badge, so a
     // user who saw the "needs review" dot there knows to click Review here.)
@@ -10736,7 +10999,7 @@ class HaWashdataPanel extends HTMLElement {
     const shareProfileBtn = (this._onlineEnabled() && this._storeDeviceDeclared())
       ? `<button class="wd-btn wd-btn-ghost wd-btn-sm" type="button" data-action="store-share-profile" data-prog="${_esc(m.name)}" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them'))}">⬆ ${this._t('btn.share_to_store', {}, 'Share to store')}</button>`
       : '';
-    return `<h2>Profile · ${_esc(m.name)}</h2>
+    return `<h2>${this._t('modal.profile_title', {name: m.name}, 'Profile · {name}')}</h2>
       <div class="wd-mini-tabs">${tabBar}</div>
       ${body}
       <div class="wd-modal-actions" style="margin-top:14px">
@@ -11288,6 +11551,24 @@ class HaWashdataPanel extends HTMLElement {
     const pgProfSel = sr.getElementById('wd-pg-prof-sel');
     if (pgProfSel) pgProfSel.addEventListener('change', () => { this._pgProfileName = pgProfSel.value; this._pgLoad(); });
 
+    // F3: Settings control panel - preset picker + "save as" name buffer. Both keep
+    // their value in state so a re-render (any param edit) cannot reset them.
+    const pgPresetSel = sr.getElementById('wd-pg-preset-sel');
+    if (pgPresetSel) pgPresetSel.addEventListener('change', () => { this._pgPresetSel = pgPresetSel.value; this._render(); });
+    const pgPresetName = sr.getElementById('wd-pg-preset-name');
+    if (pgPresetName) pgPresetName.addEventListener('input', () => {
+      this._pgPresetName = pgPresetName.value;
+      // Only the save button's disabled state and the preset-limit note depend on
+      // the typed name, so patch those two in place: a full _render() per keystroke
+      // would rebuild the panel DOM and repaint the Playground canvases.
+      const name = (this._pgPresetName || '').trim();
+      const atLimitNow = this._pgPresetAtLimit(name);
+      const saveBtn = sr.querySelector('[data-action="pg-preset-save"]');
+      if (saveBtn) saveBtn.disabled = !(name && !atLimitNow);
+      const limitNote = sr.getElementById('wd-pg-preset-limit-note');
+      if (limitNote) limitNote.style.display = atLimitNow ? '' : 'none';
+    });
+
     // F3: Sim cycle count
     const pgSimN = sr.getElementById('wd-pg-simn');
     if (pgSimN) pgSimN.addEventListener('input', () => { this._pgSimCycles = Math.max(1, Math.min(200, parseInt(pgSimN.value, 10) || 20)); });
@@ -11364,7 +11645,7 @@ class HaWashdataPanel extends HTMLElement {
         pill.className = 'wd-pill'; pill.dataset.val = v;
         pill.appendChild(document.createTextNode(v));
         const x = document.createElement('button');
-        x.type = 'button'; x.className = 'wd-pill-x'; x.setAttribute('aria-label', 'Remove');
+        x.type = 'button'; x.className = 'wd-pill-x'; x.setAttribute('aria-label', this._tText('btn.remove', {}, 'Remove'));
         x.textContent = '×';
         x.addEventListener('click', () => pill.remove());
         pill.appendChild(x);
@@ -11410,7 +11691,8 @@ class HaWashdataPanel extends HTMLElement {
         // brand/model catalog) appear without re-wiring the combobox.
         const entities = (this._entityListCache || {})[optKey] || [];
         const lq = (q || '').toLowerCase();
-        const hits = lq ? entities.filter(e => e.toLowerCase().includes(lq)).slice(0, 40)
+        // String(): store-catalog candidates are untyped documents (STORE-19).
+        const hits = lq ? entities.filter(e => String(e).toLowerCase().includes(lq)).slice(0, 40)
                         : entities.slice(0, 20);
         if (!hits.length) { drop.hidden = true; return; }
         drop.innerHTML = hits.map(e => `<div class="wd-combo-item" data-val="${_esc(e)}">${_esc(e)}</div>`).join('');
@@ -11430,7 +11712,7 @@ class HaWashdataPanel extends HTMLElement {
             pill.className = 'wd-pill'; pill.dataset.val = val;
             pill.appendChild(document.createTextNode(val));
             const x = document.createElement('button');
-            x.type = 'button'; x.className = 'wd-pill-x'; x.setAttribute('aria-label', 'Remove');
+            x.type = 'button'; x.className = 'wd-pill-x'; x.setAttribute('aria-label', this._tText('btn.remove', {}, 'Remove'));
             x.textContent = '×';
             x.addEventListener('click', () => pill.remove());
             pill.appendChild(x);
@@ -12506,6 +12788,28 @@ class HaWashdataPanel extends HTMLElement {
         onOk: () => this._busyRun('wipe', async () => { try { await this._ws({ type: `${_DOMAIN}/wipe_history`, entry_id: eid }); this._showToast(this._t('toast.all_wiped', {}, 'All data wiped')); this._cycles = []; this._profiles = []; await this._fetchToolsData(eid); } catch (e) { this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); } }) };
       this._render();
 
+    } else if (a === 'import-undo') {
+      // Restoring replaces the whole store again, so it is confirmed like a wipe.
+      const u = this._importUndo || {};
+      this._modal = { type: 'confirm', title: this._tText('modal.undo_import_title', {}, 'Undo last import'),
+        message: this._tText('modal.undo_import_msg', { when: _fmtDate(u.created_at) },
+          `Everything stored for this device goes back to how it was before the last import (${_fmtDate(u.created_at)}), and so do its settings. Cycles recorded and changes made since then are lost.`),
+        okLabel: this._tText('modal.undo_import_ok', {}, 'Undo import'),
+        onOk: () => this._busyRun('import-undo', async () => {
+          try {
+            const r = await this._ws({ type: `${_DOMAIN}/undo_import`, entry_id: eid });
+            const c = ((r && r.summary) || {}).counts || {};
+            const cycles = (c.real_cycles || 0) + (c.reference_cycles || 0) + (c.backfill_cycles || 0);
+            this._showToast(this._tText('toast.import_undone', { profiles: c.profiles || 0, cycles },
+              `Import undone: ${c.profiles || 0} profile(s) and ${cycles} cycle(s) restored`));
+          } catch (e) { this._showToast(this._tText('toast.import_undo_failed', { error: e.message || e }, 'Could not undo the import: ' + (e.message || e)), 'error'); }
+          // Refresh either way: a failure can mean the restore point is already gone.
+          if (!this._isActiveEntry(eid)) return;
+          await this._fetchToolsData(eid);
+          await this._fetchCycles(eid);
+          await this._fetchProfiles(eid);
+        }) };
+      this._render();
     } else if (a === 'export-config') {
       this._ws({ type: `${_DOMAIN}/export_config`, entry_id: eid }).then(r => {
         const blob = new Blob([r.json_data], { type: 'application/json' });
@@ -12517,7 +12821,7 @@ class HaWashdataPanel extends HTMLElement {
       }).catch(e => this._showToast(this._tText('toast.export_failed', {error: e.message || e}, 'Export failed: ' + (e.message || e)), 'error'));
     } else if (a === 'export-select-open') {
       // Open the export wizard: fetch this device's inventory, default everything on.
-      this._modal = { type: 'export-select', inventory: null, loading: true, sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }, expanded: new Set() };
+      this._modal = { type: 'export-select', inventory: null, loading: true, sel: this._wizEmptySel(), expanded: new Set() };
       this._render();
       (async () => {
         let inv = null;
@@ -12656,7 +12960,7 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'import-config-open') {
       // Open the import wizard at the paste/upload step.
       this._modal = { type: 'import-wizard', step: 'input', jsonText: '', manifest: null, error: null,
-        sel: { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() },
+        sel: this._wizEmptySel(),
         expanded: new Set(), mode: 'merge', cycleDest: 'reference', conflicts: {} };
       this._render();
     } else if (a === 'hist-import-open') {
@@ -12856,15 +13160,6 @@ class HaWashdataPanel extends HTMLElement {
         await this._loadMlTrainingStatus(eid);
       });
 
-    } else if (a === 'ml-revert-match') {
-      this._busyRun('ml-revert-match', async () => {
-        try {
-          await this._ws({ type: `${_DOMAIN}/revert_matching_config`, entry_id: eid });
-          this._showToast(this._t('toast.matching_reverted', {}, 'Matching weights reverted to defaults'));
-          await this._loadMlTrainingStatus(eid);
-        } catch (e) { this._showToast(this._tText('toast.revert_failed', {error: e.message || e}, 'Revert failed: ' + (e.message || e)), 'error'); }
-      });
-
     } else if (a === 'ml-revert-models') {
       this._busyRun('ml-revert-models', async () => {
         try {
@@ -13032,10 +13327,10 @@ class HaWashdataPanel extends HTMLElement {
       const p = (this._storeProfiles || []).find(x => String(x.id) === String(id));
       if (!p) return;
       this._storeProfile = p; this._storeView = 'profile';
-      this._storeCycles = []; this._storeLoading = true; this._render();
+      this._storeCycles = []; this._storeLoading = true; this._storeBrowseErr = false; this._render();
       this._ws({ type: `${_DOMAIN}/store_get_cycles`, entry_id: eid, profile_id: p.id })
-        .then(r => { if (!this._isActiveEntry(eid) || this._storeView !== 'profile') return; this._storeCycles = (r && r.items) || []; })
-        .catch(() => { if (this._isActiveEntry(eid)) this._storeCycles = []; })
+        .then(r => { if (!this._isActiveEntry(eid) || this._storeView !== 'profile') return; this._storeCycles = (r && r.items) || []; this._storeBrowseErr = !!(r && r.error); })
+        .catch(() => { if (this._isActiveEntry(eid)) { this._storeCycles = []; this._storeBrowseErr = true; } })
         .finally(() => { if (this._isActiveEntry(eid)) { this._storeLoading = false; this._render(); } });
 
     } else if (a === 'store-onboard') {
@@ -13074,7 +13369,9 @@ class HaWashdataPanel extends HTMLElement {
           if (sa) done = this._tText('toast.store_device_downloaded_settings', {p, c, ph, s: sa}, `${p} program(s), ${c} recording(s), ${ph} phase map(s), ${sa} setting(s) added`);
           else if (ph) done = this._tText('toast.store_device_downloaded_phases', {p, c, ph}, `${p} program(s), ${c} recording(s), ${ph} phase map(s) added`);
           else done = this._tText('toast.store_device_downloaded', {p, c}, `${p} program(s), ${c} recording(s) added`);
-          this._showToast(skipped ? `${done}. ${skipped}` : done);
+          const fp = (r && r.partial && r.failed_profiles) || 0;
+          const partial = fp ? this._tText('toast.store_download_partial', {n: fp}, `${fp} program(s) could not be downloaded; try again later.`) : '';
+          this._showToast([done, skipped, partial].filter(Boolean).join('. '), fp ? 'info' : undefined);
         } catch (e) { this._showToast(this._tText('toast.store_download_failed', {error: e.message || e}, 'Download failed: ' + (e.message || e)), 'error'); }
       });
 
@@ -13302,6 +13599,12 @@ class HaWashdataPanel extends HTMLElement {
       this._pgLoadLive();
     } else if (a === 'pg-load-suggested') {
       this._pgLoadSuggested();
+    } else if (a === 'pg-preset-save') {
+      this._pgSavePreset();
+    } else if (a === 'pg-preset-load') {
+      this._pgLoadPreset();
+    } else if (a === 'pg-preset-delete') {
+      this._pgDeletePreset();
     } else if (a === 'pg-publish-one') {
       this._pgPublishOne(btn.dataset.pgkey);
     }
@@ -13784,9 +14087,7 @@ class HaWashdataPanel extends HTMLElement {
           if (importableOnly && cats[cid].importable === false) return;
           if (this._wizCatState(m, cid, man).state !== 'all') allSel = false;
         });
-        m.sel = allSel
-          ? { cats: new Set(), profiles: new Set(), realIds: new Set(), refIds: new Set() }
-          : this._wizInitSel(man, importableOnly);
+        m.sel = allSel ? this._wizEmptySel() : this._wizInitSel(man, importableOnly);
         this._render();
         return;
       }
@@ -13797,10 +14098,10 @@ class HaWashdataPanel extends HTMLElement {
         if (cid === 'profiles') {
           const items = (man.categories.profiles && man.categories.profiles.items) || [];
           m.sel.profiles = new Set(turnOn ? items.map(i => i.name) : []);
-        } else if (cid === 'real_cycles' || cid === 'reference_cycles') {
-          const set = new Set();
+        } else if (this._wizCycleCats().includes(cid)) {
+          const set = this._wizIdSet(m.sel, cid);
+          set.clear();
           if (turnOn) ((man.categories[cid] && man.categories[cid].groups) || []).forEach(g => g.cycles.forEach(cy => { if (cy.id != null) set.add(String(cy.id)); }));
-          if (cid === 'real_cycles') m.sel.realIds = set; else m.sel.refIds = set;
         } else if (turnOn) { m.sel.cats.add(cid); } else { m.sel.cats.delete(cid); }
         this._render();
         return;
@@ -13813,7 +14114,7 @@ class HaWashdataPanel extends HTMLElement {
       }
       if (action === 'wiz-toggle-cycgroup') {
         const cid = btn.dataset.cat; const prof = btn.dataset.prof;
-        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+        const set = this._wizIdSet(m.sel, cid);
         const ids = this._wizGroupIds(man, cid, prof);
         const all = ids.length > 0 && ids.every(id => set.has(id));
         ids.forEach(id => { if (all) set.delete(id); else set.add(id); });
@@ -13822,7 +14123,7 @@ class HaWashdataPanel extends HTMLElement {
       }
       if (action === 'wiz-toggle-cyc') {
         const cid = btn.dataset.cat; const id = btn.dataset.cid;
-        const set = cid === 'real_cycles' ? m.sel.realIds : m.sel.refIds;
+        const set = this._wizIdSet(m.sel, cid);
         if (set.has(id)) set.delete(id); else set.add(id);
         this._render();
         return;
@@ -13881,12 +14182,21 @@ class HaWashdataPanel extends HTMLElement {
               conflict_resolutions: m.conflicts, cycle_destination: m.cycleDest, apply_settings: true });
             const s = (r && r.summary) || {};
             this._modal = null;
-            this._showToast(this._tText('toast.import_selective_done', {
-              profiles: s.profiles_imported || 0,
-              cycles: (s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0),
-            }, `Imported ${s.profiles_imported || 0} profile(s) and ${(s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0)} cycle(s)`));
+            const cycles = (s.real_cycles_imported || 0) + (s.reference_cycles_imported || 0) + (s.backfill_cycles_imported || 0);
+            // A replace (or an overwrite) saves a restore point first; say so when it
+            // could not, since the undo the hint promised will not be there.
+            const destructive = m.mode === 'replace' || Object.values(m.conflicts || {}).includes('overwrite');
+            if (destructive && s.restore_point_saved === false) {
+              this._showToast(this._tText('toast.import_no_restore_point', {}, 'Imported, but no restore point could be saved, so this import cannot be undone'), 'error');
+            } else {
+              this._showToast(this._tText('toast.import_selective_done', {
+                profiles: s.profiles_imported || 0, cycles,
+              }, `Imported ${s.profiles_imported || 0} profile(s) and ${cycles} cycle(s)`));
+            }
             await this._fetchCycles(eid);
             await this._fetchProfiles(eid);
+            // Show (or refresh) "Undo last import" in the Export / Import card.
+            if (s.restore_point_saved) await this._fetchToolsData(eid);
           } catch (e) { this._showToast(this._tText('toast.import_failed', {error: e.message || e}, 'Import failed: ' + (e.message || e)), 'error'); }
         });
         return;

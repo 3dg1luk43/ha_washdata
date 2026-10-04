@@ -39,7 +39,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 import voluptuous as vol
 
-from .const import STORAGE_KEY
+from .const import PRE_IMPORT_STORE_SUFFIX, STORAGE_KEY
 from .const import (
     DEVICE_COMPLETION_THRESHOLDS,
     DOMAIN,
@@ -630,7 +630,7 @@ async def _async_preload_ml_modules(hass: HomeAssistant) -> None:
     """Import the ML modules off the event loop (issue #328).
 
     ``ml.engine.resolve_scorer`` / ``resolve_regressor`` are called from the event
-    loop (live matching, end detection, quality gating), and Home Assistant flags
+    loop (end detection, ETA / energy projection), and Home Assistant flags
     the lazy ``importlib.import_module`` they used to do there as a blocking call.
     Warming the module cache once per setup in the import executor makes every
     later resolution a ``sys.modules`` lookup. Best effort: a failure here only
@@ -1328,7 +1328,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
 
             async with _entry_write_lock(hass, entry_id):
-                config_updates = await manager.profile_store.async_import_data(payload)
+                # This device's options ride along so "Undo last import" in the
+                # panel can put them back (register item 195).
+                config_updates = await manager.profile_store.async_import_data(
+                    payload,
+                    entry_options=dict(entry.options),
+                    source="import_config_service",
+                )
                 if config_updates:
                     await async_apply_imported_entry_options(
                         hass, entry, config_updates, "import_config_service"
@@ -1586,16 +1592,20 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 
 _ORPHAN_SWEEP_KEY = "ha_washdata_orphan_sweep"
-# Per-appliance store keys: the profile store, its active-cycle snapshot (0.5.8) and
-# the manual recorder. Global keys (``ha_washdata_panel``, ``ha_washdata_online``)
-# use an underscore and never match.
-_ENTRY_STORE_RE = re.compile(r"^ha_washdata\.(?:recorder\.)?([0-9A-Za-z]{20,40})(?:\.active)?$")
+# Per-appliance store keys: the profile store, its active-cycle snapshot (0.5.8), its
+# pre-import restore point (register item 195) and the manual recorder. Global keys
+# (``ha_washdata_panel``, ``ha_washdata_online``) use an underscore and never match.
+_ENTRY_STORE_RE = re.compile(
+    r"^ha_washdata\.(?:recorder\.)?([0-9A-Za-z]{20,40})"
+    rf"(?:\.active|\.{PRE_IMPORT_STORE_SUFFIX})?$"
+)
 
 
 def _entry_store_keys(entry_id: str) -> list[str]:
     return [
         f"{STORAGE_KEY}.{entry_id}",
         f"{STORAGE_KEY}.{entry_id}.active",
+        f"{STORAGE_KEY}.{entry_id}.{PRE_IMPORT_STORE_SUFFIX}",
         f"{STORAGE_KEY}.recorder.{entry_id}",
     ]
 

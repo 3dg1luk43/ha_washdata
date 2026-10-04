@@ -39,7 +39,6 @@ from custom_components.ha_washdata.ml import (
 
 MODEL_MODULES = [
     "hybrid_curve_quality_model",
-    "live_match_commit_model",
     "cycle_end_detector_model",
 ]
 
@@ -72,8 +71,10 @@ def test_ml_models_enabled_flag() -> None:
 def test_available_models_manifest() -> None:
     models = available_models()
     names = {model.get("name") for model in models}
-    # The three promoted models should be present with provenance.
-    assert {"hybrid_curve_quality", "live_match_commit", "cycle_end_detector"} <= names
+    # The promoted models should be present with provenance. live_match_commit
+    # went with the early match commit in 0.5.8.
+    assert {"hybrid_curve_quality", "cycle_end_detector"} <= names
+    assert "live_match_commit" not in names
     for model in models:
         assert model.get("kind") in {"standardized_logistic", "standardized_linear"}
         assert "metrics" in model

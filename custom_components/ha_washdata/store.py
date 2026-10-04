@@ -24,6 +24,7 @@ brand/model stay per-device. Nothing here runs unless online features are enable
 from __future__ import annotations
 
 import logging
+import math
 from collections.abc import Callable
 from typing import Any
 
@@ -31,7 +32,7 @@ from homeassistant.core import HomeAssistant
 
 from . import store_account
 from .const import QC_EDITED, QC_MANUAL, QC_RECORDING
-from .store_client import device_id, get_client, profile_id, trace_hash
+from .store_client import STORE_UNREACHABLE, device_id, get_client, profile_id, trace_hash
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -123,6 +124,34 @@ def _downsample(points: list[list[float]], max_n: int = 10000) -> list[list[floa
     return sampled
 
 
+# Points kept per browse-row trace: the panel's sparkline is 120 px wide.
+_BROWSE_TRACE_POINTS = 200
+
+
+def _browse_rows(cycles: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Browse copies of store cycle rows: no ``importable``, trace downsampled to
+    ``_BROWSE_TRACE_POINTS`` (see ``StoreBridge.get_cycles``). Executor-safe; never
+    raises (a non-numeric point is dropped, store data is untrusted)."""
+    out: list[dict[str, Any]] = []
+    for cyc in cycles:
+        if not isinstance(cyc, dict):
+            continue
+        row = {k: v for k, v in cyc.items() if k != "importable"}
+        trace = cyc.get("trace")
+        if isinstance(trace, dict) and isinstance(trace.get("points"), list):
+            pts: list[list[float]] = []
+            for p in trace["points"]:
+                try:
+                    o, w = float(p[0]), float(p[1])
+                except (TypeError, ValueError, IndexError, KeyError):
+                    continue
+                if math.isfinite(o) and math.isfinite(w):
+                    pts.append([o, w])
+            row["trace"] = {**trace, "points": _downsample(pts, _BROWSE_TRACE_POINTS)}
+        out.append(row)
+    return out
+
+
 def _cycle_upload_stats(cyc: dict[str, Any], pts: list[list[float]]) -> dict[str, Any]:
     """Build the community-upload stats for a cycle from its stored metadata + trace.
 
@@ -185,16 +214,35 @@ class StoreBridge:
         return {"enabled": store_account.online_enabled(self._hass), **store_account.get_identity(self._hass)}
 
     async def connect(self, refresh_token: str, uid: str, name: str | None) -> dict[str, Any]:
-        # Validate the refresh token by exchanging it once before persisting.
+        """Validate the refresh token by exchanging it once, then persist the account.
+
+        The stored uid is the one the token endpoint returned for that exchange, never
+        the caller's ``uid`` (audit STORE-18): a mismatch made every later write 403
+        under the store rules' ``uid == request.auth.uid`` checks. ``uid`` is kept in
+        the signature for the WS contract; it is only compared, for a log line.
+        """
         # ensure_id_token writes the client-wide _last_error slot on failure, so it
         # takes the same lock the upload paths use: otherwise a sign-in failing here
         # could overwrite the reason a concurrent share is about to report.
         async with self._client.write_lock:
             token = await self._client.ensure_id_token(refresh_token)
-        if not token:
+            verified = self._client.verified_uid(refresh_token) if token else None
+        if not token or not verified:
             return {"error": "token_invalid"}
-        await store_account.async_set_account(self._hass, {"refresh_token": refresh_token, "uid": uid, "name": name})
+        if uid and uid != verified:
+            _LOGGER.warning("Store connect: ignoring a uid that does not match the token's account")
+        await store_account.async_set_account(
+            self._hass, {"refresh_token": refresh_token, "uid": verified, "name": name},
+        )
         return store_account.get_identity(self._hass)
+
+    def _uploader_name(self, acct: dict[str, Any]) -> str | None:
+        """The name published on a shared cycle: the account's display name only when
+        the user opted in (``share_name``), else None (audit STORE-14)."""
+        if not store_account.get_pref(self._hass, "share_name"):
+            return None
+        name = acct.get("name")
+        return name if isinstance(name, str) and name.strip() else None
 
     async def disconnect(self) -> dict[str, Any]:
         await store_account.async_clear_account(self._hass)
@@ -229,10 +277,13 @@ class StoreBridge:
         self._client.refresh_catalog()
         return {"ok": True}
 
-    async def get_profiles(self, device_id: str, *, include_pending: bool = True) -> list[dict[str, Any]]:
+    async def get_profiles(
+        self, device_id: str, *, include_pending: bool = True,
+    ) -> list[dict[str, Any]] | None:
         """Shared programs for a catalog appliance. Pending-inclusive, like the device
         list this is opened from and like get_cycles below; passed explicitly so the
-        browse cannot silently drift back to approved-only (which showed nothing)."""
+        browse cannot silently drift back to approved-only (which showed nothing).
+        ``None`` = the store could not be reached, not "no programs" (audit STORE-09)."""
         return await self._client.get_profiles(device_id, include_pending=include_pending)
 
     async def device_profiles(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
@@ -240,8 +291,19 @@ class StoreBridge:
         dialog's profile picker). Maps the HA device type to the catalog type first."""
         return await self._client.device_profiles(brand, model, store_appliance_type(appliance_type))
 
-    async def get_cycles(self, profile_id: str) -> list[dict[str, Any]]:
-        return await self._client.get_cycles(profile_id)
+    async def get_cycles(self, profile_id: str) -> list[dict[str, Any]] | None:
+        """A program's shared cycles for the browse list; ``None`` = store unreachable.
+
+        Slimmed for the wire (audit STORE-20): the panel draws each trace as a 120 px
+        sparkline, yet every row carried the full trace twice (``trace.points`` and
+        ``importable``, up to 7k points each, 50 rows). Import re-fetches the cycle by
+        id, so the browse rows drop ``importable`` and carry a peak-preserving
+        downsample. The download path reads the client directly and keeps full traces.
+        """
+        cycles = await self._client.get_cycles(profile_id)
+        if not cycles:
+            return cycles
+        return await self._hass.async_add_executor_job(_browse_rows, cycles)
 
 
     # ── community actions (authed writes) ────────────────────────────────────────
@@ -332,7 +394,7 @@ class StoreBridge:
         # write and the read that interprets it have to be one critical section.
         async with self._client.write_lock:
             new_id = await self._client.upload_reference_cycle(
-                acct["refresh_token"], acct.get("uid", ""), acct.get("name"),
+                acct["refresh_token"], acct.get("uid", ""), self._uploader_name(acct),
                 meta, downsampled, stats, derive_qc(cyc),
             )
             if not new_id:
@@ -406,7 +468,7 @@ class StoreBridge:
             device_meta["settings"] = dict(settings)
         async with self._client.write_lock:  # see share_cycle
             res = await self._client.upload_device_bundle(
-                acct["refresh_token"], acct.get("uid", ""), acct.get("name"), device_meta, bundle_items,
+                acct["refresh_token"], acct.get("uid", ""), self._uploader_name(acct), device_meta, bundle_items,
             )
             # Return the raw bundle result ({ok, cycle_ids, errors}) so the caller can
             # tell a partial upload (some cycle_ids present) from a total failure.
@@ -434,8 +496,16 @@ class StoreBridge:
         Idempotent: a store cycle already imported locally (``meta.source ==
         "store:<id>"``) is skipped, so re-downloading the same device does not
         accumulate duplicate reference cycles.
+
+        A store that could not be read is reported as ``{"error":
+        "store_unreachable"}``, never as an empty adopt (audit STORE-09: offline used
+        to read "Nothing new - already on your device"). When only some programs'
+        cycles could not be fetched, the result carries ``partial`` +
+        ``failed_profiles``; if nothing new was imported at all it is that error.
         """
         bundle = await self._client.get_device_bundle(device_id_)
+        if bundle.get("error"):
+            return {"error": str(bundle["error"])}
         already = {
             str((c.get("meta") or {}).get("source") or "")
             for c in self._ps.get_reference_cycles()
@@ -453,6 +523,7 @@ class StoreBridge:
         # Now one rebuild per touched program and one save at the end.
         touched: list[str] = []
         profiles_list = [p for p in (bundle.get("profiles", []) or []) if isinstance(p, dict)]
+        failed_profiles = sum(1 for p in profiles_list if p.get("cycles_unavailable"))
         total = sum(len(p.get("cycles") or []) for p in profiles_list)
         seen = 0
         cancelled = False
@@ -511,6 +582,13 @@ class StoreBridge:
             await self._ps.async_save()
         if imported_store_ids:
             self._fire_download_telemetry(imported_store_ids)
+        if failed_profiles and not cycles_imported and not cancelled:
+            # Nothing new arrived and part of the setup could not be read: a failed
+            # download, not "already on your device" (audit STORE-09).
+            return {
+                "error": STORE_UNREACHABLE, "failed_profiles": failed_profiles,
+                "cycles_skipped": cycles_skipped, "phases_applied": phases_applied,
+            }
         settings = bundle.get("settings") if isinstance(bundle.get("settings"), dict) else {}
         return {
             "profiles_adopted": profiles_adopted,
@@ -518,6 +596,7 @@ class StoreBridge:
             # Refused by the quality bar or as a duplicate (audit STORE-03/05).
             "cycles_skipped": cycles_skipped,
             **({"cancelled": True} if cancelled else {}),
+            **({"partial": True, "failed_profiles": failed_profiles} if failed_profiles else {}),
             "phases_applied": phases_applied,
             "settings": settings,
         }

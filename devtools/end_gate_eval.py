@@ -63,6 +63,30 @@ stash`` in a shared working tree; check the other arm out in a worktree:
 map) out of reach to give the
 pre-306 arm, which needs no checkout.
 
+**Corpus and watchdog (register item 465).** By default only the export format
+(``device_fingerprint`` + ``data.past_cycles``) is read, which skips every
+diagnostics dump: none of ``cycle_data/user-Contributed/`` is replayed.
+``--all-formats`` reads the corpus the way ``devtools/eval.py`` does (all three
+export shapes, clone files dropped; private paths keyed by hash). The replay emits
+the live watchdog's keepalives inside silent stretches at each export's own
+``watchdog_interval``; ``--shipped-watchdog`` drops that option so every device
+runs at its type's shipped default instead. That is not cosmetic: a keepalive is
+the only reading inside a silence, so the interval decides whether an end gate is
+evaluated between the expected end and a late pump-out at all (01KGM619: 599 s in
+the export, 30 s the dishwasher default, 61 s what Apply-all suggests for it).
+
+**Anti-crease (register item 207).** ``--anti-wrinkle force`` turns anti-wrinkle
+on for every washer, dryer and washer-dryer export (``export``, the default, keeps
+each export's own setting). ``--tumble-tail`` replaces the synthetic 0 W tail of
+those devices with the #296 shape: the trace's trailing quiet is trimmed and the
+reporter's Knitterschutz tail follows (a ~3 W baseline with a sub-400 W drum burst
+every 37 s), so the ordinary end gates cannot close the cycle and the anti-crease
+finalise is the only closer. Every row records whether the #399 spin guard held
+that finalise, whether it released on the spin (``event``) or at the
+``ANTI_CREASE_SPIN_WAIT_MAX_RATIO`` cap, and whether it fired before the trace's
+own last reading above ``anti_wrinkle_max_power`` (an early release: the spin then
+opens a second cycle). ``--device-types`` restricts the corpus.
+
 Run from the repo root.
 """
 from __future__ import annotations
@@ -82,6 +106,11 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from custom_components.ha_washdata import playground  # noqa: E402
+from custom_components.ha_washdata.const import (  # noqa: E402
+    CONF_ANTI_WRINKLE_ENABLED,
+    CONF_WATCHDOG_INTERVAL,
+    resolve_watchdog_interval_default,
+)
 from custom_components.ha_washdata.cycle_detector import (  # noqa: E402
     CycleDetectorConfig,
 )
@@ -94,6 +123,105 @@ from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
 MIN_READINGS = 10
 #: Exports with fewer stored cycles than this cannot build usable profiles.
 MIN_CYCLES = 5
+#: Device types the anti-crease finalise can arm for (`_anticrease_gate_open`).
+AC_DEVICE_TYPES = ("washing_machine", "dryer", "washer_dryer")
+
+#: Anti-crease probe state for the replay in progress (one at a time).
+_AC: dict[str, Any] = {}
+
+
+def _install_anticrease_probe() -> None:
+    """Record what the #399 spin guard and the anti-crease finalise did.
+
+    Wraps three detector methods; the replay itself is unchanged. A hold is the
+    guard returning True on the finalise path (``_is_anticrease_tail``); the
+    standby-band path calls the same predicate and is recorded separately.
+    """
+    from custom_components.ha_washdata import cycle_detector as cd  # noqa: PLC0415
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        ANTI_CREASE_SPIN_WAIT_MAX_RATIO,
+        ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC,
+    )
+
+    det_cls = cd.CycleDetector
+    if getattr(det_cls, "_eval_probe", False):
+        return
+    orig_tail = det_cls._is_anticrease_tail  # noqa: SLF001
+    orig_pending = det_cls._anticrease_spin_pending  # noqa: SLF001
+    orig_final = det_cls._maybe_finalize_anticrease_tail  # noqa: SLF001
+
+    def is_tail(self: Any, ts: Any) -> bool:
+        self._eval_ac_ctx = True
+        try:
+            return orig_tail(self, ts)
+        finally:
+            self._eval_ac_ctx = False
+
+    def pending(self: Any, ts: Any) -> bool:
+        out = orig_pending(self, ts)
+        if "ac_final_ts" in _AC:
+            return out
+        if not getattr(self, "_eval_ac_ctx", False):
+            _AC["sb_held"] = _AC.get("sb_held", False) or bool(out)
+            return out
+        if out:
+            _AC["ac_held"] = True
+            return out
+        block = self._matched_terminal_high  # noqa: SLF001
+        start = self._current_cycle_start  # noqa: SLF001
+        expected = self._expected_duration  # noqa: SLF001
+        elapsed = (ts - start).total_seconds() if start is not None else 0.0
+        if block is None or block[0] < ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
+            _AC["ac_reason"] = "unarmed"
+        elif expected > 0 and elapsed >= expected * ANTI_CREASE_SPIN_WAIT_MAX_RATIO:
+            _AC["ac_reason"] = "cap"
+        else:
+            _AC["ac_reason"] = "event"
+        return out
+
+    def finalize(self: Any, ts: Any) -> bool:
+        fired = orig_final(self, ts)
+        if fired:
+            _AC.setdefault("ac_finals", []).append(ts)
+        if fired and "ac_final_ts" not in _AC:
+            _AC["ac_final_ts"] = ts
+            if _AC.get("ac_held"):
+                _AC["ac_release"] = _AC.get("ac_reason")
+        return fired
+
+    det_cls._is_anticrease_tail = is_tail  # noqa: SLF001
+    det_cls._anticrease_spin_pending = pending  # noqa: SLF001
+    det_cls._maybe_finalize_anticrease_tail = finalize  # noqa: SLF001
+    det_cls._eval_probe = True
+
+
+def _with_tumble_tail(
+    cycle: dict[str, Any], pts: list[tuple[float, float]], stop: float, level: float
+) -> dict[str, Any]:
+    """The cycle with its trailing quiet replaced by the #296 tumble tail.
+
+    The tail is the reporter's own (tron4r export, the merged back-to-back
+    cycle): a ~3.3 W baseline and a ~60 W drum burst every ~37 s, reported on
+    change. It runs for an hour or 0.6x the trace, whichever is longer, which
+    reaches past the 1.25x spin-wait cap of the trace's own programme.
+    """
+    peak = max(p for _t, p in pts)
+    floor = max(1.0, peak * 0.02)
+    end = len(pts) - 1
+    while end > 0 and pts[end][1] <= floor:
+        end -= 1
+    out = [[float(t), float(p)] for t, p in pts[: end + 1]]
+    burst = min(max(60.0, 2.0 * stop), 0.5 * level)
+    base_w = 3.3
+    t0 = out[-1][0]
+    span = max(3600.0, 0.6 * t0)
+    t = t0 + 30.0
+    while t < t0 + span:
+        out += [[t, burst], [t + 2.0, burst * 0.75], [t + 4.0, base_w], [t + 20.0, base_w]]
+        t += 37.0
+    tailed = dict(cycle)
+    tailed["power_data"] = out
+    return tailed
 
 
 class _Entry:
@@ -133,16 +261,33 @@ def _run(coro: Any) -> Any:
         loop.close()
 
 
-def _production(doc: dict[str, Any], data: dict[str, Any]) -> tuple[CycleDetectorConfig, ProfileStore, dict[str, Any]]:
-    """(detector config, ProfileStore, options) exactly as the manager builds them."""
+def _production(
+    doc: dict[str, Any],
+    data: dict[str, Any],
+    *,
+    shipped_watchdog: bool = False,
+    force_anti_wrinkle: bool = False,
+) -> tuple[CycleDetectorConfig, ProfileStore, dict[str, Any]]:
+    """(detector config, ProfileStore, options) exactly as the manager builds them.
+
+    ``shipped_watchdog`` drops the export's ``watchdog_interval`` (entry data and
+    options) so the Playground resolves the device type's shipped default.
+    ``force_anti_wrinkle`` sets ``anti_wrinkle_enabled`` before the manager reads it.
+    """
     from custom_components.ha_washdata.manager import WashDataManager  # noqa: PLC0415
 
     entry_data = {"power_sensor": "sensor.end_gate_eval", "name": "eval",
                   **{k: v for k, v in (doc.get("entry_data") or {}).items() if v is not None}}
     opts = {k: v for k, v in (doc.get("entry_options") or {}).items() if v is not None}
+    if shipped_watchdog:
+        entry_data.pop(CONF_WATCHDOG_INTERVAL, None)
+        opts.pop(CONF_WATCHDOG_INTERVAL, None)
     device_type = (doc.get("device_fingerprint") or {}).get("device_type")
     if device_type:
         opts.setdefault("device_type", device_type)
+    if force_anti_wrinkle:
+        entry_data.pop(CONF_ANTI_WRINKLE_ENABLED, None)
+        opts[CONF_ANTI_WRINKLE_ENABLED] = True
     mgr = WashDataManager(MagicMock(), _Entry(entry_data, opts, "eval"))
     store = mgr.profile_store
     store.hass = _InlineHass()
@@ -191,25 +336,89 @@ def _active_span(points: list[tuple[float, float]], stop: float) -> float:
     return (active[-1] - active[0]) if len(active) >= 2 else 0.0
 
 
-def _measure_export(path: Path, no_shortening: bool, loo: bool = False) -> list[dict[str, Any]]:
-    """Replay every usable cycle in one export; one row per cycle."""
+_EVAL_MOD: Any = None
+
+
+def _corpus_module() -> Any:
+    """``devtools/eval.py``, for its corpus loader (all export shapes, clones dropped)."""
+    global _EVAL_MOD  # noqa: PLW0603
+    if _EVAL_MOD is None:
+        import importlib.util  # noqa: PLC0415
+
+        spec = importlib.util.spec_from_file_location(
+            "wd_end_gate_eval_corpus", REPO / "devtools" / "eval.py"
+        )
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = mod  # dataclasses resolve their module through it
+        spec.loader.exec_module(mod)
+        _EVAL_MOD = mod
+    return _EVAL_MOD
+
+
+def _load_doc(path: Path, all_formats: bool) -> dict[str, Any] | None:
+    """The export, or with ``all_formats`` any corpus shape normalised to it."""
     try:
         doc = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
+        return None
+    if not all_formats or not isinstance(doc, dict):
+        return doc if isinstance(doc, dict) else None
+    unwrapped = _corpus_module()._unwrap(doc)  # noqa: SLF001
+    if unwrapped is None:
+        return None
+    data, entry_data, entry_options, _fmt = unwrapped
+    device_type = entry_options.get("device_type") or entry_data.get("device_type")
+    return {
+        "device_fingerprint": {"device_type": device_type},
+        "entry_data": entry_data,
+        "entry_options": entry_options,
+        "data": data,
+    }
+
+
+def _export_key(path: Path) -> str:
+    rel = str(path.relative_to(REPO))
+    if rel.startswith("cycle_data/"):
+        # Contributors' real names are in some file names (eval.py PRIVATE_DIRS).
+        return "cycle_data/" + _corpus_module().public_key(rel[len("cycle_data/"):])
+    return rel
+
+
+def _measure_export(
+    path: Path,
+    no_shortening: bool,
+    loo: bool = False,
+    *,
+    all_formats: bool = False,
+    shipped_watchdog: bool = False,
+    anti_wrinkle: str = "export",
+    tumble_tail: bool = False,
+    device_types: tuple[str, ...] | None = None,
+) -> list[dict[str, Any]]:
+    """Replay every usable cycle in one export; one row per cycle."""
+    doc = _load_doc(path, all_formats)
+    if doc is None:
         return []
     device_type = (doc.get("device_fingerprint") or {}).get("device_type")
     data = doc.get("data") or {}
     cycles = data.get("past_cycles") or []
     if not device_type or len(cycles) < MIN_CYCLES:
         return []
+    if device_types and device_type not in device_types:
+        return []
+    ac_device = device_type in AC_DEVICE_TYPES
+    force_aw = anti_wrinkle == "force" and ac_device
     base = dict(data)
     for key in ("past_cycles", "reference_cycles", "backfill_cycles"):
         base[key] = list(base.get(key) or [])
     base["profiles"] = {k: dict(v) if isinstance(v, dict) else v
                         for k, v in (base.get("profiles") or {}).items()}
     base["envelopes"] = dict(base.get("envelopes") or {})
-    cfg, store, opts = _production(doc, base)
+    cfg, store, opts = _production(
+        doc, base, shipped_watchdog=shipped_watchdog, force_anti_wrinkle=force_aw
+    )
     stop = float(cfg.stop_threshold_w)
+    level = float(cfg.anti_wrinkle_max_power)
     # Exports carry the envelopes the exporting version built; rebuild them with
     # the code under test, as the live store would after an upgrade.
     _rebuild_envelopes(store, list(base["profiles"]))
@@ -229,15 +438,22 @@ def _measure_export(path: Path, no_shortening: bool, loo: bool = False) -> list[
         fold_store, fold_prebuilt = store, prebuilt
         name = cyc.get("profile_name")
         if loo and name and name in base["profiles"]:
-            _cfg_f, fold_store, _o = _production(doc, _fold_data(base, cyc))
+            _cfg_f, fold_store, _o = _production(
+                doc, _fold_data(base, cyc), shipped_watchdog=shipped_watchdog,
+                force_anti_wrinkle=force_aw,
+            )
             _rebuild_envelopes(fold_store, [name])
             try:
                 fold_prebuilt = playground._build_match_snapshots(fold_store)  # noqa: SLF001
             except Exception:
                 fold_prebuilt = None
+        replayed = (
+            _with_tumble_tail(cyc, pts, stop, level) if tumble_tail and ac_device else cyc
+        )
+        _AC.clear()
         try:
             sim = playground.simulate_cycle_detail(
-                cyc, cfg, None, fold_store, opts, price=None,
+                replayed, cfg, None, fold_store, opts, price=None,
                 compute_series=False, prebuilt=fold_prebuilt,
             )
         except Exception:
@@ -246,9 +462,25 @@ def _measure_export(path: Path, no_shortening: bool, loo: bool = False) -> list[
             continue
         out = sim.get("outcome") or {}
         final = out.get("final_duration_s")
-        end_t = _end_offset(sim.get("events") or [])
+        events = sim.get("events") or []
+        end_t = _end_offset(events)
+        first_end = next(
+            (float(ev.get("t") or 0.0) for ev in events if ev.get("type") == "finished"),
+            None,
+        )
+        highs = [t for t, p in pts if p > level]
+        active = [t for t, p in pts if p > stop]
+        ac_final = _AC.get("ac_final_ts")
+        base_t = playground._cycle_base_time(replayed)  # noqa: SLF001
+        ac_final_s = (ac_final - base_t).total_seconds() if ac_final is not None else None
+        # Every anti-crease finalise, not only the first: a run that already split
+        # can release early again on a later piece.
+        ac_early_n = sum(
+            1 for ts in _AC.get("ac_finals", ())
+            if highs and (ts - base_t).total_seconds() < highs[-1]
+        )
         rows.append({
-            "export": str(path.relative_to(REPO)),
+            "export": _export_key(path),
             "device_type": device_type,
             "id": str(cyc.get("id"))[:12],
             "label": cyc.get("profile_name"),
@@ -264,6 +496,23 @@ def _measure_export(path: Path, no_shortening: bool, loo: bool = False) -> list[
             "min_off_gap": cfg.min_off_gap,
             "no_shortening": no_shortening,
             "loo": loo,
+            "watchdog_s": opts.get(
+                CONF_WATCHDOG_INTERVAL, resolve_watchdog_interval_default(device_type)
+            ),
+            # Anti-crease (register item 207). Offsets are seconds into the trace.
+            "anti_wrinkle": bool(cfg.anti_wrinkle_enabled),
+            "tumble_tail": bool(tumble_tail and ac_device),
+            "first_end_s": round(first_end, 1) if first_end is not None else None,
+            "active_end_s": round(active[-1], 1) if active else None,
+            "last_high_s": round(highs[-1], 1) if highs else None,
+            "ac_final_s": round(ac_final_s, 1) if ac_final_s is not None else None,
+            "ac_held": bool(_AC.get("ac_held")),
+            "ac_release": _AC.get("ac_release"),
+            "ac_early": bool(
+                ac_final_s is not None and highs and ac_final_s < highs[-1]
+            ),
+            "ac_early_n": ac_early_n,
+            "sb_held": bool(_AC.get("sb_held")),
         })
     return rows
 
@@ -302,6 +551,102 @@ def _summarise(rows: list[dict[str, Any]], device_type: str | None = None) -> di
     }
 
 
+def _summarise_ac(
+    rows: list[dict[str, Any]], device_type: str | None = None
+) -> dict[str, Any]:
+    """Anti-crease figures over the anti-wrinkle-enabled washer/dryer rows (item 207).
+
+    ``early`` counts anti-crease finalises (every one, on any piece of the run)
+    BEFORE the trace's last reading above ``anti_wrinkle_max_power``: the spin was
+    still ahead, so it opens another cycle. ``cut`` is the same test for the first end by ANY path. ``lag`` is the
+    first end minus the trace's last above-stop reading (with ``--tumble-tail``
+    the harness's own split/lag columns also count the tail's own detections, so
+    read these instead); ``held lag`` is the same over the finalises the #399
+    spin guard held.
+    """
+    sel = [
+        r for r in rows
+        if r.get("anti_wrinkle") and r["device_type"] in AC_DEVICE_TYPES
+        and (device_type is None or r["device_type"] == device_type)
+    ]
+    if not sel:
+        return {"n": 0}
+    fin = [r for r in sel if r.get("ac_final_s") is not None]
+    held = [r for r in fin if r.get("ac_held")]
+    lag = [
+        (r["first_end_s"] - r["active_end_s"]) / 60.0
+        for r in sel
+        if r.get("first_end_s") is not None and r.get("active_end_s") is not None
+    ]
+    held_lag = [
+        (r["ac_final_s"] - r["active_end_s"]) / 60.0
+        for r in held if r.get("active_end_s") is not None
+    ]
+    cut = sum(
+        1 for r in sel
+        if r.get("first_end_s") is not None and r.get("last_high_s") is not None
+        and r["first_end_s"] < r["last_high_s"]
+    )
+
+    def _r(vals: list[float], fn: Any) -> float | None:
+        return round(float(fn(vals)), 2) if vals else None
+
+    return {
+        "n": len(sel),
+        "finalized": len(fin),
+        "held": len(held),
+        "event": sum(1 for r in held if r.get("ac_release") == "event"),
+        "cap": sum(1 for r in held if r.get("ac_release") == "cap"),
+        "unarmed": sum(1 for r in held if r.get("ac_release") == "unarmed"),
+        "early": sum(int(r.get("ac_early_n", int(bool(r.get("ac_early"))))) for r in sel),
+        "cut": cut,
+        "med_lag_min": _r(lag, np.median),
+        "p90_lag_min": _r(lag, lambda v: np.percentile(v, 90)),
+        "max_lag_min": _r(lag, np.max),
+        "held_med_lag_min": _r(held_lag, np.median),
+        "held_max_lag_min": _r(held_lag, np.max),
+    }
+
+
+_AC_KEYS = (
+    "n", "finalized", "held", "event", "cap", "unarmed", "early", "cut",
+    "med_lag_min", "p90_lag_min", "max_lag_min", "held_med_lag_min", "held_max_lag_min",
+)
+
+
+def _print_ac_summary(rows: list[dict[str, Any]]) -> None:
+    scopes = [None, *sorted({r["device_type"] for r in rows if r["device_type"] in AC_DEVICE_TYPES})]
+    lines = [(scope or "ALL", _summarise_ac(rows, scope)) for scope in scopes]
+    lines = [(name, s) for name, s in lines if s["n"]]
+    if not lines:
+        return
+    print("\nanti-crease (anti-wrinkle on; item 207)")
+    hdr = (
+        f"{'scope':<18}{'n':>5}{'final':>7}{'held':>6}{'event':>7}{'cap':>5}"
+        f"{'unarm':>7}{'EARLY':>7}{'cut':>5}{'med lag':>9}{'p90':>8}{'max':>8}"
+        f"{'held med':>10}{'max':>8}"
+    )
+    print(hdr)
+    print("-" * len(hdr))
+
+    def _f(v: Any) -> str:
+        return "-" if v is None else f"{v:.2f}"
+
+    for name, s in lines:
+        print(
+            f"{name:<18}{s['n']:>5}{s['finalized']:>7}{s['held']:>6}{s['event']:>7}"
+            f"{s['cap']:>5}{s['unarmed']:>7}{s['early']:>7}{s['cut']:>5}"
+            f"{_f(s['med_lag_min']):>9}{_f(s['p90_lag_min']):>8}{_f(s['max_lag_min']):>8}"
+            f"{_f(s['held_med_lag_min']):>10}{_f(s['held_max_lag_min']):>8}"
+        )
+    print(
+        "final = anti-crease finalises; held = the #399 spin guard held one; "
+        "event/cap = how it released;\nEARLY = finalised before the trace's last "
+        "reading above anti_wrinkle_max_power; cut = first end (any path) before it;"
+        "\nlag = first end minus last above-stop reading, minutes."
+    )
+
+
 def _print_summary(rows: list[dict[str, Any]]) -> None:
     devices = sorted({r["device_type"] for r in rows})
     hdr = (
@@ -325,6 +670,7 @@ def _print_summary(rows: list[dict[str, Any]]) -> None:
         " in minutes."
     )
     print("weak = matched cycles whose final confidence is below 0.4 (the gate's bar).")
+    _print_ac_summary(rows)
 
 
 def _compare(before_path: str, after_path: str) -> None:
@@ -348,6 +694,40 @@ def _compare(before_path: str, after_path: str) -> None:
             ("early_1min_pct", "%"), ("early_5min_pct", "%"), ("split_pct", "%"),
         ):
             print(f"    {key:<18} {bs[key]:>8}{unit} -> {as_[key]:>8}{unit}")
+        print()
+
+    ac_scopes = [None, *sorted({
+        b_by_id[k]["device_type"] for k in common
+        if b_by_id[k]["device_type"] in AC_DEVICE_TYPES
+    })]
+    for scope in ac_scopes:
+        bs = _summarise_ac([b_by_id[k] for k in common], scope)
+        as_ = _summarise_ac([a_by_id[k] for k in common], scope)
+        if not bs["n"] or not as_["n"]:
+            continue
+        print(f"=== anti-crease {scope or 'ALL'} (n={as_['n']})")
+        for key in _AC_KEYS[1:]:
+            print(f"    {key:<18} {bs[key]!s:>8} -> {as_[key]!s:>8}")
+        print()
+    ac_moved = [
+        k for k in common
+        if b_by_id[k].get("ac_final_s") != a_by_id[k].get("ac_final_s")
+    ]
+    if ac_moved:
+        print(f"cycles whose anti-crease finalise moved: {len(ac_moved)} / {len(common)}")
+        for k in ac_moved[:40]:
+            b, a = b_by_id[k], a_by_id[k]
+
+            def _at(r: dict[str, Any]) -> str:
+                v = r.get("ac_final_s")
+                tag = r.get("ac_release") or ("free" if v is not None else "none")
+                early = " EARLY" if r.get("ac_early") else ""
+                return "-" if v is None else f"{v / 60:.1f}m {tag}{early}"
+
+            print(
+                f"    {b['device_type']:<16} {b['id']:<14} {str(b['label'])[:24]:<24} "
+                f"{_at(b):>18} -> {_at(a):<18}"
+            )
         print()
 
     moved = [
@@ -379,7 +759,30 @@ def main() -> int:
         "--loo", action="store_true",
         help="leave-one-out: match each cycle against profiles rebuilt without it",
     )
+    ap.add_argument(
+        "--all-formats", action="store_true",
+        help="read every corpus shape (diagnostics dumps too) via eval.py, clones dropped",
+    )
+    ap.add_argument(
+        "--shipped-watchdog", action="store_true",
+        help="ignore each export's watchdog_interval: replay at the device type's default",
+    )
+    ap.add_argument(
+        "--anti-wrinkle", choices=("export", "force"), default="export",
+        help="export: each export's own anti_wrinkle_enabled; force: on for every "
+        "washer/dryer/washer-dryer (item 207)",
+    )
+    ap.add_argument(
+        "--tumble-tail", action="store_true",
+        help="washers/dryers: replace the trailing quiet with the #296 anti-crease "
+        "tumble tail, so only the anti-crease finalise can close the cycle",
+    )
+    ap.add_argument(
+        "--device-types", default="",
+        help="comma-separated device types to replay (default: all)",
+    )
     args = ap.parse_args()
+    device_types = tuple(t.strip() for t in args.device_types.split(",") if t.strip())
 
     if args.compare:
         _compare(*args.compare)
@@ -398,9 +801,21 @@ def main() -> int:
         _const.END_GATE_LATE_RATIO_BY_DEVICE = {}
 
     logging.getLogger("custom_components.ha_washdata").setLevel(logging.ERROR)
+    _install_anticrease_probe()
     rows: list[dict[str, Any]] = []
-    for path in sorted((REPO / "cycle_data").rglob("*.json")):
-        rows.extend(_measure_export(path, args.no_shortening, args.loo))
+    corpus = REPO / "cycle_data"
+    if args.all_formats:
+        devices, _clones = _corpus_module().load_corpus(corpus)
+        paths = [corpus / dev.path for dev in devices]
+    else:
+        paths = sorted(corpus.rglob("*.json"))
+    for path in paths:
+        rows.extend(_measure_export(
+            path, args.no_shortening, args.loo,
+            all_formats=args.all_formats, shipped_watchdog=args.shipped_watchdog,
+            anti_wrinkle=args.anti_wrinkle, tumble_tail=args.tumble_tail,
+            device_types=device_types or None,
+        ))
 
     if not rows:
         print("no replayable cycles found - is cycle_data/ present?")

@@ -76,8 +76,6 @@
     "reviewed": "Peržiūrėta",
     "steady": "→ pastovus",
     "underrun": "Baigėsi greičiau nei įprastai",
-    "using_defaults": "Naudojami pristatyti numatytieji nustatymai",
-    "using_tuned": "Naudojant suderintus svorius",
     "overrun_ratio": "({x}x tikėtino)",
     "underrun_ratio": "({pct}% tikėtino)",
     "imported_tip": "Importuota iš bendruomenės parduotuvės. Naudojama tik atitikčiai, neįskaičiuojama į statistiką.",
@@ -89,9 +87,21 @@
     "awaiting_tip": "Laukiama bendruomenės patvirtinimo",
     "awaiting_n": "Laukiama patvirtinimo · {n} patvirtinimai",
     "awaiting": "Laukiama patvirtinimo",
-    "approved": "Patvirtinta"
+    "approved": "Patvirtinta",
+    "matcher_unused": "Dar neatitiko nė vieno jūsų ciklo",
+    "matcher_used": "Atitiko {n} jūsų ciklų",
+    "matcher_used_one": "Atitiko {n} jūsų ciklą",
+    "matcher_used_few": "Atitiko {n} jūsų ciklus",
+    "matcher_used_many": "Atitiko {n} jūsų ciklo",
+    "matcher_used_other": "Atitiko {n} jūsų ciklų",
+    "matcher_used_tip": "Šiuo prietaisu įrašyti ciklai, kuriuos WashData atitikimo modulis savarankiškai pažymėjo šia importuota programa. Importuota programa, kuri niekada neatitinka, gali netikti jūsų prietaisui, todėl ją galima pašalinti. Skaičiuojama vietoje; į parduotuvę nieko nesiunčiama."
   },
   "btn": {
+    "pg_preset_delete": "Ištrinti rinkinį",
+    "pg_preset_load": "Įkelti rinkinį",
+    "pg_preset_load_tip": "Pakeisti bandymų aikštelės reikšmes šiuo rinkiniu (aktyvūs nustatymai nekeičiami)",
+    "pg_preset_save": "Išsaugoti kaip rinkinį",
+    "pg_preset_save_tip": "Išsaugoti visas toliau esančias reikšmes kaip pavadintą šio įrenginio nustatymų rinkinį",
     "reset_zoom": "Atstatyti mastelį",
     "set_brand_model": "Nustatyti prekės ženklą ir modelį",
     "refresh_catalog": "Atnaujinti katalogą",
@@ -172,7 +182,6 @@
     "reset": "Nustatyti iš naujo",
     "reset_ml_models_tip": "Išmeskite sureguliuotus modelius ir grįžkite prie įmontuotų. „WashData“ vėliau gali juos išmokti iš naujo.",
     "reset_to_builtin": "Iš naujo nustatyti įtaisytuosius modelius",
-    "reset_to_defaults": "Atstatyti į numatytuosius nustatymus",
     "resume_cycle": "Tęsti ciklą",
     "resume_cycle_tip": "Atnaujinti pristabdytą ciklą",
     "revert_settings": "Atmesti pakeitimus",
@@ -243,7 +252,8 @@
     "retry": "Bandyti dar kartą",
     "confirm_appliance": "Patvirtinti šį prietaisą",
     "confirmed": "Patvirtinta",
-    "create_profile_from_gap": "Sukurti profilį"
+    "create_profile_from_gap": "Sukurti profilį",
+    "undo_import": "Anuliuoti paskutinį importą"
   },
   "note": {
     "off_delay": {
@@ -343,7 +353,6 @@
     "manual_recording": "Rankinis įrašymas",
     "manual_recording_tip": "Paleiskite ciklą tyčia, kol WashData įrašo galios seką. Pradėkite prieš pat prietaiso paleidimą, Sustokite, kai jis baigiasi, tada apdorokite, kad išsaugotumėte kaip pavadintą profilį.",
     "ml_learned": "Ką WashData išmoko",
-    "ml_matching_tuning": "Tikslus programos derinimas",
     "ml_settings_card": "Nustatymai",
     "ml_smart_learning": "Išmanusis mokymasis",
     "my_preferences": "Mano nuostatos",
@@ -366,7 +375,8 @@
     "online_account": "Bendruomenės parduotuvė ir interneto funkcijos",
     "import_power_history": "Galios istorijos importavimas",
     "service_status": "Aptarnavimo būsena",
-    "online_account_tab": "Internetas ir bendruomenė"
+    "online_account_tab": "Internetas ir bendruomenė",
+    "live_match_debug": "Tiesioginės atitikties derinimas"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -415,13 +425,11 @@
     "cycles_lc": "ciklai",
     "date": "Data",
     "debug_traces": "Derinimo pėdsakai",
-    "default": "Numatytoji",
     "default_access_level": "Numatytasis naudotojų lygis, nenurodytas toliau",
     "default_other": "Numatytasis (kiti įrenginiai)",
     "default_tab": "Numatytasis skirtukas atidarant skydelį",
     "description": "Aprašymas",
     "duration": "Trukmė",
-    "emphasis": "Pabrėžimas",
     "enable_access_control": "Įgalinti kiekvieno vartotojo prieigos valdymą",
     "energy": "Energija",
     "event_type": "Įvykio tipas",
@@ -433,7 +441,6 @@
     "group_name": "Grupės pavadinimas",
     "head_trim": "Apkarpymas nuo pradžios (s)",
     "hide_tabs": "Slėpti skirtukus ne administratoriams",
-    "in_use": "Naudojamas",
     "json_data": "JSON duomenys",
     "label": "Atitikta programa",
     "last": "Paskutiniai",
@@ -466,6 +473,9 @@
     "pg_group_timing": "Laiko taisyklės",
     "pg_idle": "Tuščia eiga",
     "pg_poor_match": "Prasta atitiktis",
+    "pg_preset": "Bandymų aikštelės rinkinys",
+    "pg_preset_name": "Naujo rinkinio pavadinimas",
+    "pg_preset_none": "Pasirinkite rinkinį…",
     "pg_strong_match": "Stipri atitiktis",
     "pg_weak_match": "Silpna atitiktis",
     "phase_name": "Fazės pavadinimas",
@@ -600,7 +610,6 @@
     "cat_custom_phases": "Pasirinktinės fazės",
     "cat_profile_groups": "Profilių grupės",
     "cat_settings": "Aptikimo ir atpažinimo nustatymai",
-    "cat_matching_config": "Atpažinimo derinimas",
     "cat_ml_models": "ML modeliai",
     "cat_feedback": "Atsiliepimų ir peržiūros žymos",
     "cat_suggestions": "Pasiūlymai",
@@ -651,7 +660,23 @@
     "pg_autolabel": "Automatinis žymėjimas",
     "pg_label_review": "Prašo peržiūros",
     "pg_ev_match_reverted": "Atitiktis atšaukta",
-    "pg_ev_verified_pause": "Patvirtinta pauzė"
+    "pg_ev_verified_pause": "Patvirtinta pauzė",
+    "n_samples": "{n} mėginių",
+    "n_samples_one": "{n} mėginys",
+    "n_samples_few": "{n} mėginiai",
+    "n_samples_many": "{n} mėginio",
+    "n_samples_other": "{n} mėginių",
+    "n_cycles": "{n} ciklų",
+    "n_cycles_one": "{n} ciklas",
+    "n_cycles_few": "{n} ciklai",
+    "n_cycles_many": "{n} ciklo",
+    "n_cycles_other": "{n} ciklų",
+    "energy_per_cycle": "{v}/ciklą",
+    "energy_total": "iš viso {v}",
+    "automation_off": "(išjungta)",
+    "ref_cycle_none": "Nėra",
+    "share_name": "Rodyti mano vardą prie bendrinamo turinio",
+    "cat_backfill_cycles": "Ciklai, rasti importuotoje galios istorijoje"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -673,17 +698,9 @@
     "trend_declining_tip": "Šio modelio atitiktis suprastėjo per pastarąsias patikras · daugiau peržiūrėtų ciklų gali padėti jam iš naujo mokytis.",
     "trend_steady_tip": "Šio modelio atitiktis per pastarąsias patikras išliko maždaug pastovi.",
     "cap_blurb": {
-      "end": "Nustatoma, kada ciklas iš tikrųjų baigėsi",
-      "live_match": "Greičiau atpažįstama vykdoma programa",
-      "quality": "Aptinkami klaidingai nustatyti ar sugadinti ciklai",
-      "remaining_time": "Numatoma, kiek liko laiko",
       "total_energy": "Numatoma bendra energija ir kaina"
     },
     "cap_label": {
-      "end": "Ciklo pabaigos nustatymas",
-      "live_match": "Programos atpažinimas",
-      "quality": "Ciklo kokybės patikra",
-      "remaining_time": "Likusio laiko įvertis",
       "total_energy": "Energijos įvertis"
     },
     "metric_auc": "AUC {auc} patikros duomenimis",
@@ -737,10 +754,17 @@
     "apply_suggestions_title": "Taikyti pasiūlymus",
     "apply_suggestions_msg": "Pakeisti šiuos nustatymus ({n})? Išsaugojus integracija bus įkelta iš naujo.",
     "discard_settings_title": "Išmesti neišsaugotus pakeitimus?",
-    "discard_settings_msg": "Neišsaugoti nustatymų pakeitimai: {n}. Išeiti iš Nustatymų ir juos išmesti?"
+    "discard_settings_msg": "Neišsaugoti nustatymų pakeitimai: {n}. Išeiti iš Nustatymų ir juos išmesti?",
+    "profile_title": "Profilis · {name}",
+    "undo_import_msg": "Viskas, kas saugoma šiam įrenginiui, grąžinama į būseną prieš paskutinį importą ({when}), kartu ir jo nustatymai. Nuo tada užfiksuoti ciklai ir atlikti pakeitimai prarandami.",
+    "undo_import_ok": "Anuliuoti importą",
+    "undo_import_title": "Anuliuoti paskutinį importą"
   },
   "msg": {
     "pg_canvas_empty3": "Pasirinkite ciklą aukščiau ir paspauskite Vykdyti, kad jį simuliuotumėte. Tada užveskite žymeklį, kad nuskaitytumėte reikšmes, slinkite arba priartinkite dviem pirštais ir vilkite, kad pastumtumėte.",
+    "pg_preset_delete_confirm": "Ištrinti rinkinį „{name}“?",
+    "pg_preset_limit": "Pasiekta rinkinių riba ({n})",
+    "pg_preset_overwrite": "Perrašyti rinkinį „{name}“?",
     "tail_trim_hint": "Kiek sekundžių pašalinti nuo galo",
     "store_sibling_hint": "Jūsų tiksliam modeliui nieko nebendrinta? Artimas to paties prekės ženklo modelis paprastai yra gera pradžia.",
     "store_declare_appliance": "Nurodykite WashData, kurį prietaisą turite, ir šiame skirtuke bus rodomos kitų jam bendrintos programos bei įrašai. Taip pat galite viršuje įrašyti prekės ženklą ir tiesiog pasižiūrėti.",
@@ -789,7 +813,6 @@
     "maintenance_load_error": "Nepavyko įkelti priežiūros duomenų: {error}",
     "maintenance_requires_access": "Priežiūra ir eksportas / importas reikalauja visiškos prieigos.",
     "manual_duration_hint": "Profilio vidutinė / numatoma ciklo trukmė, naudojama likusiam laikui apskaičiuoti. Redaguoti, kad jį nustatytumėte; paliekant jį nepakeistą, išlaikoma dabartinė vertė.",
-    "matching_tuning_intro": "Mokydamiesi „WashData“ taip pat koreguoja, kiek programos atitikimas sveria formą, palyginti su trukme ir energija.",
     "merge_intro": "Pasirinkti ciklai sujungiami į vieną (chronologine tvarka; tarpai užpildyti 0 W). Pasirinkite gautą profilį.",
     "ml_intro": "„WashData“ pristatomi su išmaniaisiais modeliais, kurie veikia iš karto.",
     "ml_learned_intro": "Modeliai, pritaikyti šiai mašinai.",
@@ -1002,7 +1025,16 @@
     "connect_to_confirm": "Prisijunkite nustatymų krumpliaratyje, kad galėtumėte patvirtinti ar įvertinti.",
     "coverage_gap_cluster": "Naujausi nepažymėti ciklai ({count}), trunkantys apie {min} min, atrodo kaip viena programa, kurios dar nesukūrėte.",
     "pg_label_yes": "Ciklo pabaigoje būtų pažymėtas kaip „{name}“",
-    "pg_label_no": "Būtų prašoma peržiūros: {reason}"
+    "pg_label_no": "Būtų prašoma peržiūros: {reason}",
+    "live_match_debug_tip": "Pasitikėjimas: kaip tiksliai dabartinė galios kreivė atitinka geriausią kandidatinį profilį (0-100%). Neaiški: dviejų geriausių kandidatų balai skiriasi mažiau nei 5% - žyma neaiški, kol ciklas nesibaigs.",
+    "automation_alias_started": "{device}: ciklas prasidėjo",
+    "automation_alias_finished": "{device}: ciklas baigėsi",
+    "automation_desc_started": "Vykdoma, kai prasideda {device} ciklas. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",
+    "automation_desc_finished": "Vykdoma, kai baigiasi {device} ciklas. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",
+    "feedback_detected": "WashData aptiko: {name}",
+    "import_undo_hint": "Saugomas atkūrimo taškas, sukurtas prieš paskutinį importą ({when}): {profiles} profilių ir {cycles} ciklų.",
+    "replace_undo_hint": "Pirmiausia išsaugomas atkūrimo taškas, todėl šį importą galėsite anuliuoti skiltyje Eksportas / Importas.",
+    "pg_in_sample_note": "Šie ciklai taip pat padėjo sukurti profilius, su kuriais jie lyginami, todėl šie rezultatai yra optimistiniai: naujų ciklų atveju tikėkitės šiek tiek mažiau teisingų atitikčių."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1161,7 +1193,7 @@
       "label": "Įvertinimo tolerancija"
     },
     "enable_ml_models": {
-      "doc": "Ciklo metu leiskite šiam prietaisui pritaikytam modeliui prognozuoti bendrą energiją ir kainą, o ciklui, kurio galia neįprastai anksti nukrenta vykdant programą, kurią WashData gerai žino, leiskite baigtis nelaukiant viso išjungimo delsimo. Išjungta = tik klasikinė galia pagrįsta logika.",
+      "doc": "Ciklo metu leiskite šiam prietaisui pritaikytam modeliui prognozuoti bendrą energiją ir kainą, o ciklui, kurio galia neįprastai anksti nukrenta vykdant programą, kurią WashData gerai žino, leiskite baigtis nelaukiant viso išjungimo delsimo. Indaplovės tokią ankstesnę pabaigą gauna ir be šio nustatymo, kai tik atpažįstama jų programa. Išjungta = tik klasikinė galia pagrįsta logika.",
       "label": "Taikyti išmaniuosius modelius ciklo metu"
     },
     "end_energy_threshold": {
@@ -1213,7 +1245,7 @@
       "label": "Minimali galia"
     },
     "ml_training_enabled": {
-      "doc": "Periodiškai per naktį ištirkite peržiūrėtus ciklus ir tiksliai suderinkite modelius su šia konkrečia mašina. Pokyčiai išlaikomi tik tada, kai jie iš tikrųjų pasiekia geresnių rezultatų per užlaikytus ciklus, todėl tai gali tik padėti arba išlikti nepakitusi – niekada neregresuoti.",
+      "doc": "Periodiškai iš naujo apmoko numatomos energijos modelį pagal šio aparato baigtus ciklus. Iš naujo apmokytas modelis išlaikomas tik tada, kai patikros cikluose jis pranoksta paprastą įvertį, pagrįstą praėjusio ir numatomo laiko santykiu; kitu atveju lieka dabartinis.",
       "label": "Mokytis iš šio įrenginio"
     },
     "ml_training_hour": {
@@ -1253,7 +1285,7 @@
       "label": "Android kanalas (baigimas)"
     },
     "notify_finish_message": {
-      "doc": "Tekstas, siunčiamas ciklui pasibaigus. Šablono kintamieji: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. Čia naudingiausi {time_finished} ir {vs_typical}.",
+      "doc": "Tekstas, siunčiamas ciklui pasibaigus. Šablono kintamieji: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status}. Čia naudingiausi {time_finished} ir {vs_typical}. {status} yra completed arba force_stopped: nutrauktas ciklas (klaidingas paleidimas arba atšaukta programa) pabaigos pranešimo nesiunčia.",
       "label": "Baigimo žinutė"
     },
     "notify_finish_services": {
@@ -1349,15 +1381,15 @@
       "label": "Atitikimo intervalas"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "Maksimalus ciklo ilgis, palyginti su profiliu. 1.3 reiškia, kad ciklas turi būti mažesnis nei 130 % profilio trukmės, kad atitiktų.",
+      "doc": "Programa atmetama, kai ciklas trunka ilgiau nei įprasta programos trukmė, padauginta iš šios reikšmės. 1,8 reiškia, kad ciklas, trukęs 80 % ilgiau nei programa, jos nebeatitinka.",
       "label": "Maks. trukmės santykis"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "Minimalus ciklo ilgis, palyginti su profiliu. 0,9 reiškia, kad ciklas turi sudaryti bent 90 % profilio trukmės, kad atitiktų.",
+      "doc": "Programa svarstoma tik tada, kai ciklas truko šią įprastos programos trukmės dalį. 0,10 reiškia, kad 2 valandų programa tampa kandidate po 12 minučių. Netaikoma per pirmąsias 15 ciklo minučių.",
       "label": "Min. trukmės santykis"
     },
     "profile_match_threshold": {
-      "doc": "Kad būtų priimtas programos identifikavimas, ciklo pabaigoje būtinas minimalus panašumo balas (0–1). Pakelkite jį, kad sumažintumėte klaidingų identifikacijų skaičių; sumažinkite jį, jei jūsų mašinos programos nesuderinamos. Numatytasis 0,4 yra konservatyvus atskaitos taškas.",
+      "doc": "Mažiausias tiesioginės atitikties balas (0-1), kurio reikia, kad išmanusis užbaigimas ir džiovyklės apsaugos nuo raukšlių užbaigimas galėtų veikti pagal atpažintą programą. Padidinkite, jei ciklai baigiasi per anksti dėl neaiškios atitikties; sumažinkite, jei aiškiai atpažinti ciklai vis tiek laukia viso išjungimo delsimo. Tai nekeičia, kuri programa rodoma ar priskiriama. Numatytoji reikšmė 0,4.",
       "label": "Atitikimo slenkstis"
     },
     "profile_unmatch_threshold": {
@@ -1486,6 +1518,9 @@
     "notify_icon_color": {
       "label": "Pranešimo spalva",
       "doc": "Akcentinė spalva šio prietaiso pranešimams, kad skalbimo mašiną, džiovintuvą ir indaplovę būtų galima atskirti iš pirmo žvilgsnio. iOS nuspalvina piktogramą ir Live Activity eigos juostą užrakto ekrane bei Dynamic Island. Android siunčiama ta pati spalva, tačiau ką su ja daryti, sprendžia pats telefonas: vieni nuspalvina piktogramą, o daugelis (ypač Samsung One UI) ją visiškai ignoruoja. Abi platformos supranta hex kodą (pvz., #03A9F4). Palikite tuščią, kad būtų naudojama numatytoji platformos spalva."
+    },
+    "share_name": {
+      "doc": "Skelbti prijungtos paskyros vardą kaip jūsų bendrinamų ciklų įkėlėjo. Išjungta: jie bendrinami be vardo."
     }
   },
   "setting_group": {
@@ -1589,14 +1624,17 @@
     "rebuilding": "Perkuriama…",
     "analyzing": "Analizuojama…",
     "resetting": "Atstatoma…",
-    "reverting": "Grąžinama…",
     "trimming": "Apkarpoma…",
     "splitting": "Padalijama…",
     "deleting": "Trinama…",
     "imported": "Importuota",
     "preparing": "Ruošiama…",
     "unlabelling": "Naikinamas žymėjimas…",
-    "working": "Vykdoma…"
+    "working": "Vykdoma…",
+    "match_uncertain": "Neaišku: {top} ar {runner}",
+    "match_uncertain_single": "Neaišku: galbūt {top}",
+    "match_sure": "~{pct} % tikrumas",
+    "match_uncertain_tip": "WashData dar nenusprendė, kuri tai programa. Skaičius rodo, kaip dažnai pirmaujantis spėjimas, {top}, įrašytuose cikluose pasitvirtindavo, kai jis tiek pat lenkdavo antrąjį kandidatą. Tai tik informacija; ji nekeičia to, kaip ciklai aptinkami ar žymimi."
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1652,13 +1690,14 @@
     "json_required": "Reikalingi JSON duomenys",
     "legacy_removed": "Pašalinti pasenę veiksmai",
     "logs_exported": "Žurnalai eksportuoti",
-    "matching_reverted": "Atitinkantys svoriai grąžinti į numatytuosius",
     "min_2_profiles": "Pasirinkite bent 2 grupės profilius",
     "ml_training_no_improvement": "Mokymas baigtas: pradinis lygis išlaikytas (nėra pagerėjimo)",
     "models_reverted": "Įrenginyje esantys modeliai grįžo į pradinį lygį",
     "name_required": "Reikalingas vardas",
     "no_split_found": "Nerasta tuščiosios eigos spragų, dėl kurių būtų galima suskaidyti",
     "panel_settings_saved": "Skydelio nustatymai išsaugoti",
+    "pg_preset_loaded": "Rinkinys „{name}“ įkeltas",
+    "pg_preset_saved": "Rinkinys „{name}” išsaugotas",
     "pg_sugg_loaded": "Įkelta {n} siūlomų reikšmių - paleiskite bandymų aikštelę palyginti",
     "phase_name_required": "Būtinas fazės pavadinimas",
     "phase_reset": "Atkurta įmontuota fazė „{name}“",
@@ -1755,7 +1794,6 @@
     "phase_deleted": "Fazė „{name}“ ištrinta",
     "profile_created": "Profilis „{name}“ sukurtas",
     "rename_failed": "Nepavyko pervadinti: {error}",
-    "revert_failed": "Nepavyko grąžinti: {error}",
     "save_failed": "Nepavyko išsaugoti: {error}",
     "split_complete": "Padalinta į ciklus: {count}",
     "start_failed": "Nepavyko paleisti: {error}",
@@ -1766,7 +1804,11 @@
     "store_import_duplicate": "Šis įrašas jau yra jūsų įrenginyje.",
     "device_approved": "Bendruomenė patvirtino",
     "thanks_confirming": "Ačiū už patvirtinimą",
-    "rating_saved": "Kokybės įvertinimas išsaugotas"
+    "rating_saved": "Kokybės įvertinimas išsaugotas",
+    "store_download_partial": "Nepavyko atsisiųsti programų: {n}. Bandykite vėliau dar kartą.",
+    "import_no_restore_point": "Importuota, bet nepavyko išsaugoti atkūrimo taško, todėl šio importo anuliuoti negalima",
+    "import_undo_failed": "Nepavyko anuliuoti importo: {error}",
+    "import_undone": "Importas anuliuotas: atkurta {profiles} profilių ir {cycles} ciklų"
   },
   "suggestion": {
     "observed_label": "Pastebėta",
@@ -1857,7 +1899,8 @@
         "no_power": "nėra galios",
         "no_active_power": "nėra aktyvios galios"
       }
-    }
+    },
+    "now_value": "(dabar {v})"
   },
   "trend": {
     "down": "Tendencija žemyn",
@@ -1899,7 +1942,10 @@
     "cost_tip": "Šio ciklo energijos kaina, užfiksuota jam pasibaigus. Kai įjungta „Pagal laiką svertinė kaina“, galios kreivė įkainojama pagal kiekvieną akimirką galiojusią kainą; priešingu atveju energija x viena kaina, galiojusi pabaigoje. Nustatykite kainą Nustatymuose, kad ji būtų užpildyta.",
     "confidence_tip": "Profilio atitikties pasitikėjimas (0–100 %). Kaip glaudžiai ciklo galios kreivė atitiko atpažintą programą.",
     "flags_tip": "Ciklo peržiūros, anomalijų ir šaltinio žymės. Užveskite pelę ant piktogramos, kad matytumėte detales.",
-    "cost_dynamic_tip": "Pagal laiką sverta: įkainota pagal ciklo metu galiojusią kainą (faktinė {price} {cur}/kWh)."
+    "cost_dynamic_tip": "Pagal laiką sverta: įkainota pagal ciklo metu galiojusią kainą (faktinė {price} {cur}/kWh).",
+    "dbg_conf": "Pasit.",
+    "dbg_mae": "MAE",
+    "dbg_corr": "Kor."
   },
   "stat": {
     "avg": "vid.",
@@ -1950,7 +1996,8 @@
     "website_tip": "Atidaryti bendruomenės parduotuvės svetainę",
     "favorites": "Mėgstamiausi",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Kol kas nėra įvertinimų"
+    "no_ratings": "Kol kas nėra įvertinimų",
+    "unreachable": "Nepavyko pasiekti bendruomenės parduotuvės. Patikrinkite ryšį ir bandykite dar kartą."
   },
   "settings": {
     "gear": {
@@ -2057,5 +2104,38 @@
     "margin": "Per arti antrosios vietos",
     "unknown_profile": "Programa nebeegzistuoja",
     "not_evaluated": "Neįvertinta"
+  },
+  "diagram": {
+    "accum": "sukaup.",
+    "auto": "auto",
+    "below_off": "žemiau = išj.",
+    "confirmed": "patvirtinta",
+    "energy_counts": "skaičiuojama energija",
+    "feedback": "atsiliepimas",
+    "gap_below_min": "tarpas < min = vienas ciklas",
+    "heat_phase": "šildymo fazė",
+    "held_at_100": "laikoma 100%",
+    "ignored": "ignoruojama",
+    "kept": "išlaikyta",
+    "max": "maks.",
+    "min": "min.",
+    "minus_tol": "-tol.",
+    "no_match": "nėra atitikties",
+    "no_updates": "nėra atnaujinimų",
+    "off_delay_wait": "išjungimo delsimas",
+    "off_gap": "išjungimo tarpas",
+    "plus_tol": "+tol.",
+    "profile": "profilis",
+    "reading_interval": "įprastas rodmenų intervalas",
+    "sensor_offline": "jutiklis neprisijungęs: priverstinis sustabdymas",
+    "si": "MI",
+    "spike_ignored": "smaigalys ignoruojamas",
+    "spike_ignored_short": "smaigalys: ignoruojamas",
+    "start": "paleidimas",
+    "stop": "sustabdymas",
+    "tail_energy_resets": "pabaigos energija virš slenksčio: laikmatis paleidžiamas iš naujo",
+    "thr": "slenk.",
+    "too_short": "per trumpas",
+    "tumble_kept": "būgno impulsai išlaikyti"
   }
 }

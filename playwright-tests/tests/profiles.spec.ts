@@ -300,6 +300,43 @@ test('no quiet-tail badge when the backend measured none', async ({ page }) => {
   await expect(page.locator('.wd-badge', { hasText: 'quiet tail' })).toHaveCount(0);
 });
 
+// ─── Imported programs: how often the matcher used them (STORE-21) ──────────
+//
+// Counted locally from this appliance's own cycles the matcher labelled, so an
+// import that never fits can be pruned. Only imported programs carry it.
+
+function withImports(counts: Record<string, number>) {
+  const data = JSON.parse(JSON.stringify(profilesData));
+  data.profiles[1].is_imported = true;   // Eco 60°C
+  data.profiles[2].is_imported = true;   // Quick 30°C
+  data.profile_matcher_counts = counts;
+  return data;
+}
+
+test('an imported program says how often the matcher used it', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', withImports({ 'Eco 60°C': 3, 'Cotton 40°C': 5 }));
+  await clickTab(page, 'profiles');
+  const eco = page.locator('.wd-profile-card').filter({ hasText: 'Eco 60°C' });
+  const used = eco.locator('.wd-matcher-used');
+  await expect(used).toHaveText('Matched 3 of your cycles', { timeout: 5_000 });
+  await expect(used).toHaveAttribute('title', /nothing is sent to the store/);
+});
+
+test('an imported program the matcher never used says so', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', withImports({ 'Eco 60°C': 3 }));
+  await clickTab(page, 'profiles');
+  const quick = page.locator('.wd-profile-card').filter({ hasText: 'Quick 30°C' });
+  await expect(quick.locator('.wd-matcher-used')).toHaveText('Not matched to your cycles yet', { timeout: 5_000 });
+});
+
+test('a program of your own carries no matcher-use badge', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', withImports({ 'Cotton 40°C': 5 }));
+  await clickTab(page, 'profiles');
+  const cotton = page.locator('.wd-profile-card').filter({ hasText: 'Cotton 40°C' });
+  await expect(cotton).toBeVisible({ timeout: 5_000 });
+  await expect(cotton.locator('.wd-matcher-used')).toHaveCount(0);
+});
+
 // ─── Coverage gaps (register item 432) ───────────────────────────────────────
 
 test('a coverage-gap cluster shows on Profiles and pre-selects its cycle', async ({ page }) => {

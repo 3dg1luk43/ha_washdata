@@ -10,6 +10,7 @@
       "current_program": "Cotton 40°C",
       "time_remaining_s": 1800,
       "total_duration_s": 6500,
+      "expected_duration_s": 6500,
       "current_power_w": 820.0,
       "cycle_progress_pct": 45.2,
       "suggestions_count": 2,
@@ -20,6 +21,7 @@
       "manual_program": false,
       "armed_program": null,
       "envelope_position": null,
+      "match_uncertainty": null,
       "options": {
         "name": "Test Washer",
         "device_type": "washing_machine",

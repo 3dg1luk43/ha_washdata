@@ -33,9 +33,8 @@ def test_the_manager_end_guard_provider_is_inert_with_ml_enabled() -> None:
     assert C.ENABLE_ML_END_GUARD is False
 
 
-def test_the_other_harmful_or_inert_consumers_ship_frozen() -> None:
-    """Audit ML-01/02/06/07: early commit (31% wrong), quality gate (0 fires on
-    eligible cycles) and the remaining-time regressor (worse than naive)."""
-    assert C.ENABLE_ML_EARLY_COMMIT is False
-    assert C.ENABLE_ML_QUALITY_GATE is False
+def test_the_remaining_time_regressor_ships_frozen() -> None:
+    """Audit ML-07: the remaining-time regressor is worse than naive. (The early
+    commit and the quality gate, frozen here before, were removed in 0.5.8; see
+    tests/test_audit_ml_removed_0_5_8.py.)"""
     assert C.ENABLE_ML_REMAINING_TIME is False

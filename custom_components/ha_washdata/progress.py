@@ -638,7 +638,7 @@ def _dt_scaled_alpha(alpha: float, dt_s: float | None) -> float:
         alpha_dt = 1 - (1 - alpha) ** (dt / SMOOTHING_NOMINAL_DT_S)
 
     ``dt_s`` of ``None`` (or <= 0) keeps the nominal weight, so every caller that
-    does not track its own cadence - and the golden snapshot - is unchanged.
+    does not track its own cadence (and the Playground replay) is unchanged.
     """
     if dt_s is None or not math.isfinite(dt_s) or dt_s <= 0.0:
         return alpha
@@ -797,18 +797,61 @@ def compute_progress(
     )
 
 
+def phase_timeline_span(
+    ranges: list[dict[str, Any]], expected_duration: float | None
+) -> float:
+    """Seconds the progress fraction maps onto: ``max(last range end, expected)``.
+
+    Phase ranges are minutes into the programme, so a profile that marks only
+    Wash 0-30 / Rinse 30-60 on a 100 min programme reads Rinse at minute 45 and
+    no phase at minute 80 (audit PROGRESS-10). Stretching the ranges over the
+    whole cycle (the old scale, the last range end) named Wash at 45%. Ranges
+    that run past the expected duration keep their own end. 0.0 when unusable.
+    """
+    span = max((float(r.get("end") or 0.0) for r in ranges), default=0.0)
+    try:
+        expected = float(expected_duration or 0.0)
+    except (TypeError, ValueError):
+        expected = 0.0
+    if math.isfinite(expected) and expected > span:
+        span = expected
+    return span if math.isfinite(span) and span > 0.0 else 0.0
+
+
+def phase_at(
+    ranges: list[dict[str, Any]], position_s: float, span_s: float
+) -> str | None:
+    """The range containing ``position_s``: ``[start, end)``, the timeline's own
+    end included. None in a gap or past every range - no nearest-phase guess.
+    The panel's Status timeline applies the same rule."""
+    at_end = position_s >= span_s
+    for r in sorted(ranges, key=lambda x: float(x.get("start") or 0.0)):
+        start = float(r.get("start") or 0.0)
+        end = float(r.get("end") or 0.0)
+        if end <= start:
+            continue
+        if start <= position_s < end or (at_end and end >= span_s and start <= position_s):
+            name = str(r.get("name") or "").strip()
+            return name or None
+    return None
+
+
 def current_phase(
     store: Any,
     state: str,
     current_program: str | None,
     cycle_progress: float,
+    expected_duration: float | None = None,
 ) -> str | None:
     """Live phase from the profile's configured ranges + ML-blended progress.
 
     Indexed by the smoothed progress fraction rather than raw elapsed seconds, so
-    overrun/underrun cycles still name the phase correctly. Returns ``None`` when
-    not running, no profile is matched, or the profile has no configured phase
-    ranges. Never raises.
+    overrun/underrun cycles still name the phase correctly; the fraction maps onto
+    :func:`phase_timeline_span` (the matched profile's ``expected_duration`` unless
+    the ranges run longer), so ranges are read at their real minutes. Returns
+    ``None`` when not running, no profile is matched, the profile has no phase
+    ranges, or no range covers this point (audit PROGRESS-11: no guessed phase).
+    Never raises.
     """
     try:
         if state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
@@ -819,11 +862,11 @@ def current_phase(
         ranges = store.get_profile_phase_ranges(profile)
         if not ranges:
             return None
-        nominal = max((float(r.get("end") or 0.0) for r in ranges), default=0.0)
-        if nominal <= 0.0:
+        span = phase_timeline_span(ranges, expected_duration)
+        if span <= 0.0:
             return None
         frac = max(0.0, min(1.0, float(cycle_progress) / 100.0))
-        return store.check_phase_match(profile, frac * nominal)
+        return phase_at(ranges, frac * span, span)
     except Exception:  # noqa: BLE001 - phase readout must never break
         return None
 

@@ -487,6 +487,10 @@ class CycleDetector:
         # manager injected to advance the quiet timers. Deliberately not reset per
         # cycle: it describes the sensor, not the run.
         self._last_real_reading_time: datetime | None = None
+        # When the power sensor's state became unavailable / unknown / non-numeric
+        # (register item 266): set by the manager, cleared by the next real
+        # reading. Sensor state like the field above, so not reset per cycle.
+        self._sensor_outage_since: datetime | None = None
         self._cycle_max_power: float = 0.0
 
         # Accumulators (dt-aware)
@@ -498,6 +502,10 @@ class CycleDetector:
         # dishwasher quiet-release gates so a single low sample after a telemetry
         # dropout can't satisfy them without the quiet having been observed.
         self._time_below_threshold_gapfree: float = 0.0
+        # The part of the current below-threshold run that fell inside a sensor
+        # outage and so was NOT added to `_time_below_threshold` (item 266). Only
+        # the hazard gate reads it, to place the quiet run's start honestly.
+        self._time_below_unobserved: float = 0.0
         self._last_process_time: datetime | None = None
 
         # New State Machine trackers
@@ -901,7 +909,11 @@ class CycleDetector:
         ):
             return base
         elapsed = (timestamp - self._current_cycle_start).total_seconds()
-        position = max(0.0, (elapsed - self._time_below_threshold) / self._expected_duration)
+        # Where the quiet run began. An outage inside it is still part of the run
+        # (item 266), or the outage would read as progress and drop the very pause
+        # being waited out from `later`.
+        quiet_run = self._time_below_threshold + self._time_below_unobserved
+        position = max(0.0, (elapsed - quiet_run) / self._expected_duration)
         later = [d for f, d in cat[1] if f >= position - END_GATE_HAZARD_POSITION_SLACK]
         need = END_GATE_HAZARD_MARGIN * max(later) if later else 0.0
         return max(float(self._config.off_delay), min(float(base), need))
@@ -1324,6 +1336,28 @@ class CycleDetector:
         """
         self._user_paused = bool(paused)
 
+    def mark_sensor_unavailable(self, timestamp: datetime) -> None:
+        """Start a sensor outage: the power sensor has no usable value (item 266).
+
+        Called by the manager when the sensor's state becomes unavailable, unknown
+        or non-numeric. Until the next real reading nothing is observed, so that
+        span is not credited as quiet, and a watchdog keepalive inside it takes no
+        decision (see ``process_reading``). Idempotent: an ongoing outage keeps
+        its first start.
+        """
+        if self._sensor_outage_since is None:
+            self._sensor_outage_since = dt_util.as_utc(timestamp)
+            in_cycle = self._state in (
+                STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING
+            )
+            self._logger.log(
+                logging.INFO if in_cycle else logging.DEBUG,
+                "Power sensor unavailable from %s (state %s): quiet time is not "
+                "credited until it reports again",
+                self._sensor_outage_since,
+                self._state,
+            )
+
     def reset(
         self, target_state: str = STATE_OFF, timestamp: datetime | None = None
     ) -> None:
@@ -1353,6 +1387,7 @@ class CycleDetector:
         if target_state != STATE_ANTI_WRINKLE:
             self._time_below_threshold = 0.0
             self._time_below_threshold_gapfree = 0.0
+            self._time_below_unobserved = 0.0
         self._last_match_time = None
         self._match_committed = False
         self._matched_profile = None
@@ -1537,6 +1572,16 @@ class CycleDetector:
         gap-free tally is reset like any other hole - at ANY step size, since the
         watchdog injects far more often than the outage ceiling.
 
+        A RECORDED outage (``mark_sensor_unavailable``, register item 266) goes
+        further, because only it says where the hole began: from its start until
+        the next real reading, time is not added to ``_time_below_threshold``
+        either, so an outage can no longer run out an end gate. A keepalive inside
+        one advances the clock and nothing else - no state-machine step, no
+        sample in the trace - so no decision rests on a value nobody read. The
+        manager's staleness force-stop still ends a cycle whose sensor stays dead.
+        ``observed=False`` alone (a late watchdog tick, item 391) keeps its
+        narrower meaning: it resets the gap-free tally only.
+
         (The `_keep_tail_cap` use this flag was originally added for, register
         item 238, was implemented, measured and reverted: after
         ``_last_active_time`` every reading is below the stop threshold anyway, so
@@ -1551,8 +1596,17 @@ class CycleDetector:
         # credited 3960 s of quiet and split the wash; audit DETECT-01). UTC has no
         # transitions, and mixed-zone comparisons elsewhere stay correct.
         timestamp = dt_util.as_utc(timestamp)
+        outage_since = self._sensor_outage_since
         if not synthetic:
             self._last_real_reading_time = timestamp
+            if outage_since is not None:
+                # The sensor spoke: the outage is over (item 266).
+                self._sensor_outage_since = None
+                self._logger.debug(
+                    "Power sensor reporting again after %.0fs unavailable; that "
+                    "span was not counted as quiet",
+                    (timestamp - outage_since).total_seconds(),
+                )
 
         # Calculate dt (needed by the stop lockout below and the state machine).
         dt = 0.0
@@ -1692,15 +1746,31 @@ class CycleDetector:
             (self._last_power or 0.0) * (high_dt / 3600.0) if high_dt > 0 else 0.0
         )
 
+        # The part of `dt` inside a recorded sensor outage (item 266, audit
+        # DETECT-13): from the outage start - or the previous reading, if later -
+        # up to this one. 0.0 whenever the sensor never went unavailable.
+        unobserved = 0.0
+        if outage_since is not None and dt > 0:
+            unobserved = min(dt, max(0.0, (timestamp - outage_since).total_seconds()))
+
         if is_high:
             self._time_above_threshold += high_dt
             self._time_below_threshold = 0.0
             self._time_below_threshold_gapfree = 0.0
+            self._time_below_unobserved = 0.0
             # Energy for the guarded interval, computed with high_dt above.
             self._energy_since_idle_wh += high_step_wh
             self._last_active_time = timestamp
         else:
-            self._time_below_threshold += dt
+            # Quiet nobody saw is not quiet (item 266). The watchdog keeps
+            # injecting while the sensor is unavailable, and crediting those
+            # ticks let a dropout that began on a low reading run out the
+            # fallback timeout: a washer was closed `completed` mid-wash and the
+            # rest recorded as a second cycle. Frozen, not reset, so the quiet
+            # observed on either side still counts and `is_waiting_low_power`
+            # keeps the manager's staleness force-stop armed for a dead sensor.
+            self._time_below_threshold += dt - unobserved
+            self._time_below_unobserved += unobserved
             # Gap-free tally: an outage-sized step is unobserved time, so restart
             # the observed-quiet tally from this sample instead of crediting the
             # gap. Ceiling mirrors energy_gap_threshold_s (clip(10x cadence, 60,
@@ -1733,7 +1803,11 @@ class CycleDetector:
             # ceiling - qualifying the ceiling test left the tally accumulating
             # exactly as before, which is the bug this is meant to fix.
             outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
-            if (synthetic and not observed) or (dt > outage_ceiling and not synthetic):
+            if (
+                (synthetic and not observed)
+                or unobserved > 0
+                or (dt > outage_ceiling and not synthetic)
+            ):
                 self._time_below_threshold_gapfree = 0.0
             else:
                 self._time_below_threshold_gapfree += dt
@@ -1742,6 +1816,19 @@ class CycleDetector:
         self._time_in_state += dt
 
         self._last_power = power
+
+        # A keepalive inside a recorded outage carries no observation, only the
+        # clock (item 266). Stepping the state machine on it would hand every
+        # finisher a window of the 0 W the manager injects for an unreadable
+        # sensor - the anti-crease finalize reads exactly such a window - and
+        # write that invented 0 W into the trace and the matcher's input. So it
+        # stops here; the next real reading picks up from the frozen tallies.
+        if (
+            synthetic
+            and outage_since is not None
+            and self._state in (STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+        ):
+            return
 
         anti_wrinkle_active = (
             self._config.anti_wrinkle_enabled
@@ -3840,11 +3927,30 @@ class CycleDetector:
         exists for a pump-out that already happened or never comes; a run still
         short of the quiet its programme always has before the pump-out has not
         reached that point. A run that has been through it - #424's Beko and the
-        Hatton ECO, whose terminal event sits mid-cycle - keeps the configured
-        value, so their ends do not move. Lengthen-only; the 30 min spike wait
+        Hatton ECO, whose element-11 event sits mid-cycle - keeps the configured
+        value (or the item-465 floor below). Lengthen-only; the 30 min spike wait
         still bounds the whole wait.
+
+        Also never shorter than the same margin x the longest below-stop pause
+        the profile's traced evidence ever came back from (element 14, register
+        item 465), whether or not the run has been through its terminal quiet.
+        Element 11 is a MEDIAN over the profile's last events, and a cycle closed
+        before its pump-out contributes the wrong event: on 01KGM619's Eco half
+        the stored cycles end on their last heating block (100-160 s gap), the
+        rest on a pump-out 4840-4860 s after it, so the median lands at 2500 s,
+        a quiet no cycle has. 1.1 x that released 6 of 6 pump-out cycles 6-11 min
+        before their pump-out, and each stored ~8.1k s instead of ~11.1k s, which
+        drags `avg_duration`, and with it the next release, earlier. A pause the
+        programme has resumed from says "activity can still follow a quiet this
+        long" directly. No position filter: the release is only asked past the
+        expected end, and the catalogue's fractions are of each cycle's own span,
+        which is longer than `expected` on exactly the cycles that kept their
+        pump-out. Lengthen-only, bounded by the same spike wait.
         """
-        base = float(self._config.dishwasher_end_spike_quiet_release)
+        base = max(
+            float(self._config.dishwasher_end_spike_quiet_release),
+            self._resumed_pause_release_s(),
+        )
         quiet = self._matched_terminal_quiet_s
         if not (self._matched_profile and quiet) or not self._power_readings:
             return base
@@ -3852,6 +3958,23 @@ class CycleDetector:
         if self._spike_follows_terminal_quiet(now, latest=True):
             return base
         return max(base, DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN * float(quiet))
+
+    def _resumed_pause_release_s(self) -> float:
+        """Margin x the longest pause the matched profile resumed from, else 0.
+
+        Read from the hazard gate's catalogue (element 14) with its evidence bar
+        (END_GATE_HAZARD_MIN_CYCLES traced cycles). See
+        :meth:`_dishwasher_quiet_release_s` (register item 465).
+        """
+        cat = self._matched_pause_catalogue
+        if (
+            cat is None
+            or cat[0] < END_GATE_HAZARD_MIN_CYCLES
+            or not cat[1]
+            or not self._matched_profile
+        ):
+            return 0.0
+        return DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN * max(d for _f, d in cat[1])
 
     def _spike_follows_terminal_quiet(
         self, timestamp: datetime, *, latest: bool = False
@@ -4276,6 +4399,17 @@ class CycleDetector:
             "matched_terminal_high": self._matched_terminal_high,
             "matched_terminal_quiet_s": self._matched_terminal_quiet_s,
             "matched_trusted_min_s": self._matched_trusted_min_s,
+            # Element 14. A dishwasher restored into its terminal-tail match freeze
+            # never re-matches, so without it the item-465 release floor was gone
+            # for the rest of the cycle (the hazard gate only lost a shortening).
+            "matched_pause_catalogue": (
+                [
+                    self._matched_pause_catalogue[0],
+                    [list(p) for p in self._matched_pause_catalogue[1]],
+                ]
+                if self._matched_pause_catalogue is not None
+                else None
+            ),
             "longest_candidate_duration": self._longest_candidate_duration,
             "ml_defer_start_duration": self._ml_defer_start_duration,
             # Without it a restart dropped the confidence to 0.0: Smart Termination
@@ -4314,6 +4448,8 @@ class CycleDetector:
             self._time_below_threshold_gapfree = float(
                 snapshot.get("time_below_gapfree", 0.0) or 0.0
             )
+            # Not persisted: the restart's own gap is in neither tally either.
+            self._time_below_unobserved = 0.0
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
             # Sanitize via the same helper as update_match so the class
             # invariant on _expected_duration holds across restarts and the
@@ -4359,6 +4495,9 @@ class CycleDetector:
             )
             self._matched_trusted_min_s = self._sanitize_trusted_min(
                 snapshot.get("matched_trusted_min_s")
+            )
+            self._matched_pause_catalogue = self._sanitize_pause_catalogue(
+                snapshot.get("matched_pause_catalogue")
             )
             # Unconditionally, because the hazard is the value already on the
             # object, not the one in the snapshot: this restores the ambiguity

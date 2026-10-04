@@ -64,9 +64,12 @@ class FakeClient:
         self.confirmed = None
         self.rated = None
         self.last_refresh_token = None
+        self.token_uid = "u1"  # the uid the token endpoint returns (audit STORE-18)
     async def ensure_id_token(self, rt):
         self.last_refresh_token = rt  # record so tests can assert the token is forwarded
         return self.token
+    def verified_uid(self, rt):
+        return self.token_uid if rt == self.last_refresh_token else None
     async def get_cycle(self, cid):
         return self.cycle
     async def search_devices(self, brand, appliance_type, model_query=None, include_pending=False):
@@ -77,12 +80,12 @@ class FakeClient:
         return [{"id": "bosch", "brand": "Bosch", "status": "approved"}]
     async def get_profiles(self, did, include_pending=True):
         self.last_get_profiles = {"did": did, "include_pending": include_pending}
-        return [{"id": "p1", "program": "Cotton 40"}]
+        return getattr(self, "profiles", [{"id": "p1", "program": "Cotton 40"}])
     async def device_profiles(self, brand, model, appliance_type):
         self.last_device_profiles = {"brand": brand, "model": model, "appliance_type": appliance_type}
         return {"device_id": f"{appliance_type}__{brand.lower()}__{model.lower()}", "items": [{"id": "p1", "program": "Cotton 40"}]}
     async def get_cycles(self, pid):
-        return [{"id": "c1"}]
+        return getattr(self, "cycles", [{"id": "c1"}])
     async def get_device_quality(self, did):
         return {"avg": 4.5, "count": 2}
     async def confirm_device(self, rt, uid, did):
@@ -472,3 +475,153 @@ async def test_a_cancelled_download_keeps_what_it_imported(bridge):
     res = await br.download_device("d1", should_cancel=_cancel)
     assert res["cancelled"] is True and res["cycles_imported"] == 2
     assert len(ps.get_reference_cycles()) == 2
+
+
+# ── audit STORE-18: the stored uid is the token's, never the caller's ───────────
+
+@pytest.mark.asyncio
+async def test_connect_stores_the_uid_the_token_belongs_to(bridge):
+    br, ps, hass = bridge
+    br._client.token_uid = "real-uid"
+    res = await br.connect("refresh", "someone-else", "Alice")
+    assert res["uid"] == "real-uid"
+    assert store_account.get_account(hass)["uid"] == "real-uid"
+
+
+@pytest.mark.asyncio
+async def test_connect_refuses_a_token_without_a_verified_uid(bridge):
+    br, ps, hass = bridge
+    br._client.token_uid = None
+    assert await br.connect("refresh", "u1", "Alice") == {"error": "token_invalid"}
+    assert store_account.get_account(hass) == {}
+
+
+# ── audit STORE-14: the uploader name is published only on opt-in ───────────────
+
+@pytest.mark.asyncio
+async def test_shared_cycles_carry_no_name_unless_the_user_opted_in(bridge):
+    br, ps, hass = bridge
+    await br.connect("refresh", "u1", "Alice Realname")
+    await ps.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "profile_name": "Cotton 40", "power_data": [[i * 60.0, 1000.0] for i in range(61)],
+    })
+    cid = ps.get_past_cycles()[0]["id"]
+    item = [{"local_cycle_id": cid, "program": "Cotton 40"}]
+    assert store_account.get_prefs(hass)["share_name"] is False
+    await br.share_cycle(cid, "Cotton 40", "Bosch", "WAT", "washer", sample_interval_sec=60)
+    await br.share_device("Bosch", "WAT", "washer", item)
+    assert br._client.uploaded["name"] is None
+    assert br._client.uploaded_bundle["name"] is None
+    await store_account.async_set_prefs(hass, {"share_name": True})
+    await br.share_cycle(cid, "Cotton 40", "Bosch", "WAT", "washer", sample_interval_sec=60)
+    await br.share_device("Bosch", "WAT", "washer", item)
+    assert br._client.uploaded["name"] == "Alice Realname"
+    assert br._client.uploaded_bundle["name"] == "Alice Realname"
+
+
+# ── audit STORE-09: an unreachable store is an error, not "nothing new" ─────────
+
+_OK_PROG = {"id": "p1", "program": "Cotton 40", "cycles": [
+    {"id": "c1", "importable": _trace(2000), "createdAt": "t"},
+]}
+_FAILED_PROG = {"id": "p2", "program": "Eco 50", "cycles": [], "cycles_unavailable": True}
+
+
+@pytest.mark.asyncio
+async def test_an_unreachable_store_is_an_error_not_an_empty_download(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "settings": {}, "profiles": [], "error": "store_unreachable"}
+    assert await br.download_device("d1") == {"error": "store_unreachable"}
+    assert ps.get_reference_cycles() == []
+
+
+@pytest.mark.asyncio
+async def test_an_unread_program_is_not_reported_as_already_on_the_device(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "profiles": [_OK_PROG]}
+    await br.download_device("d1")
+    # Re-download: the readable program is already here, the other one failed.
+    br._client.bundle = {"device_id": "d1", "failed_profiles": 1, "profiles": [_OK_PROG, _FAILED_PROG]}
+    res = await br.download_device("d1")
+    assert res["error"] == "store_unreachable" and res["failed_profiles"] == 1
+
+
+@pytest.mark.asyncio
+async def test_a_partly_read_bundle_imports_what_it_got_and_says_so(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "failed_profiles": 1, "profiles": [_OK_PROG, _FAILED_PROG]}
+    res = await br.download_device("d1")
+    assert res["cycles_imported"] == 1 and res["partial"] is True and res["failed_profiles"] == 1
+    assert "error" not in res
+    assert len(ps.get_reference_cycles()) == 1
+
+
+@pytest.mark.asyncio
+async def test_browse_reads_pass_an_unreachable_store_through(bridge):
+    br, ps, hass = bridge
+    br._client.profiles = None
+    br._client.cycles = None
+    assert await br.get_profiles("d") is None
+    assert await br.get_cycles("p") is None
+    br._client.profiles = []
+    br._client.cycles = []
+    assert await br.get_profiles("d") == []
+    assert await br.get_cycles("p") == []
+
+
+@pytest.mark.asyncio
+async def test_ws_browse_tells_an_unreachable_store_from_an_empty_one():
+    from custom_components.ha_washdata import ws_api
+
+    manager = MagicMock()
+    conn = MagicMock()
+    for result, expected in ((None, {"items": [], "error": "store_unreachable"}), ([], {"items": []})):
+        manager.store_bridge.get_profiles = AsyncMock(return_value=result)
+        manager.store_bridge.get_cycles = AsyncMock(return_value=result)
+        with patch.object(ws_api, "_store_ctx", return_value=(manager, {})):
+            await ws_api.ws_store_get_profiles.__wrapped__(
+                MagicMock(), conn, {"id": 1, "entry_id": "e", "device_id": "d"})
+            assert conn.send_result.call_args.args == (1, expected)
+            await ws_api.ws_store_get_cycles.__wrapped__(
+                MagicMock(), conn, {"id": 2, "entry_id": "e", "profile_id": "p"})
+            assert conn.send_result.call_args.args == (2, expected)
+
+
+# ── audit STORE-20: browse rows are slimmed for a 120 px sparkline ──────────────
+
+@pytest.mark.asyncio
+async def test_browse_cycles_drop_importable_and_downsample_the_trace(bridge):
+    br, ps, hass = bridge
+    pts = [[i * 5.0, 2000.0 if i == 1234 else 10.0] for i in range(5000)]
+    br._client.cycles = [{
+        "id": "c1", "stats": {"peak_w": 2000.0}, "uploaderName": None, "downloads": 3,
+        "trace": {"points": pts, "sampleIntervalSec": 5}, "importable": pts,
+    }]
+    hass.async_add_executor_job.reset_mock()
+    row = (await br.get_cycles("p1"))[0]
+    assert hass.async_add_executor_job.await_count == 1  # off the event loop
+    assert "importable" not in row
+    spark = row["trace"]["points"]
+    assert len(spark) == 200 and row["trace"]["sampleIntervalSec"] == 5
+    assert max(w for _o, w in spark) == 2000.0  # the peak survives (LTTB)
+    assert spark[0] == [0.0, 10.0] and spark[-1] == [pts[-1][0], 10.0]
+    assert {k: row[k] for k in ("id", "stats", "uploaderName", "downloads")} == {
+        "id": "c1", "stats": {"peak_w": 2000.0}, "uploaderName": None, "downloads": 3,
+    }
+    assert "importable" in br._client.cycles[0]  # the client's rows are not mutated
+
+
+@pytest.mark.asyncio
+async def test_browse_cycles_never_raise_on_an_untyped_trace(bridge):
+    br, ps, hass = bridge
+    br._client.cycles = [
+        {"id": "a", "trace": {"points": [[0, 1], {"o": 1, "w": 2}, ["x", 3], [5], None,
+                                         [float("nan"), 4], [60, 2]]}},
+        {"id": "b", "trace": "garbage", "importable": None},
+        {"id": "c"},
+    ]
+    rows = await br.get_cycles("p1")
+    assert rows[0]["trace"]["points"] == [[0.0, 1.0], [60.0, 2.0]]
+    assert rows[1] == {"id": "b", "trace": "garbage"}
+    assert rows[2] == {"id": "c"}

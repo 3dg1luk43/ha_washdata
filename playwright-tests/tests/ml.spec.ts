@@ -20,10 +20,11 @@ const ML_STATUS_RESPONSE = {
 
 const ML_STATUS_PERSONALIZED = {
   on_device_models: {
-    live_match: {
-      label: 'Program matching',
-      blurb: 'Identifies which program is running',
-      auc: 0.94,
+    total_energy: {
+      label: 'Energy estimate',
+      blurb: 'Predicting total energy and cost',
+      model_mae: 0.02,
+      naive_mae: 0.08,
       trained_at: '2026-07-10T14:00:00+00:00',
       trend: 'improving',
     },
@@ -151,10 +152,10 @@ test('"What WashData has learned" section shows model row when personalized', as
     'ha_washdata/get_ml_training_status': ML_STATUS_PERSONALIZED,
   });
   await openMlTab(page);
-  // Model label should appear. Scope to the "What WashData has learned" card —
-  // the Playground pane also renders a hidden "Program matching" objective label.
+  // Model label should appear. Scope to the "What WashData has learned" card so
+  // a same-named label elsewhere in a hidden pane cannot satisfy it.
   const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
-  await expect(learnedCard.getByText('Program matching')).toBeVisible({ timeout: 8_000 });
+  await expect(learnedCard.getByText('Energy estimate')).toBeVisible({ timeout: 8_000 });
 });
 
 test('personalized model row shows a quality chip', async ({ page }) => {
@@ -163,7 +164,7 @@ test('personalized model row shows a quality chip', async ({ page }) => {
     'ha_washdata/get_ml_training_status': ML_STATUS_PERSONALIZED,
   });
   await openMlTab(page);
-  // AUC 0.94 → "Strong fit" quality chip. Scope to the "What WashData has learned"
+  // Error 0.02 vs a 0.08 baseline (75% better) → "Strong fit" quality chip. Scope to the "What WashData has learned"
   // card and match the full chip text so it can't collide with substrings like the
   // Playground's "how strongly run-length agreement..." matcher-param label.
   const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
@@ -185,30 +186,14 @@ test('"Reset to built-in models" button reverts on-device models', async ({ page
   await assertWsCalled(page, 'ha_washdata/revert_ml_models');
 });
 
-// ─── Program-matching fine-tuning card ────────────────────────────────────────
+// ─── Program-matching fine-tuning card (removed in 0.5.8) ─────────────────────
 
-test('the matching tuning card stays hidden while the shipped defaults are in use', async ({ page }) => {
-  await page.goto('/');
-  await bootPanel(page, {
-    'ha_washdata/get_ml_training_status': {
-      ...ML_STATUS_RESPONSE,
-      matching: {
-        active: 'defaults',
-        defaults: { corr_weight: 0.45, duration_weight: 0.22, energy_weight: 0.22, dtw_ensemble_w: 0.7 },
-        tuned: null,
-      },
-    },
-  });
-  await openMlTab(page);
-  await expect(page.locator('.wd-card-title').first()).toBeVisible({ timeout: 8_000 });
-  await expect(page.locator('text=Program-matching')).toHaveCount(0);
-});
-
-test('"Reset to defaults" button calls revert_matching_config when tuned weights are active', async ({ page }) => {
+test('no matcher-tuning card renders, even for a status payload that still carries one', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
     'ha_washdata/get_ml_training_status': {
       ...ML_STATUS_PERSONALIZED,
+      // What a pre-0.5.8 backend sent while a tuned config was live.
       matching: {
         active: 'tuned',
         defaults: { corr_weight: 0.45, duration_weight: 0.22, energy_weight: 0.22, dtw_ensemble_w: 0.7 },
@@ -219,13 +204,11 @@ test('"Reset to defaults" button calls revert_matching_config when tuned weights
         },
       },
     },
-    'ha_washdata/revert_matching_config': { ok: true },
   });
   await openMlTab(page);
-  const revertBtn = page.locator('button[data-action="ml-revert-match"]').first();
-  await expect(revertBtn).toBeVisible({ timeout: 8_000 });
-  await revertBtn.click();
-  await assertWsCalled(page, 'ha_washdata/revert_matching_config');
+  await expect(page.locator('.wd-card', { hasText: 'What WashData has learned' })).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('text=Program-matching')).toHaveCount(0);
+  await expect(page.locator('button[data-action="ml-revert-match"]')).toHaveCount(0);
 });
 
 // ─── Mobile ─────────────────────────────────────────────────────────────────

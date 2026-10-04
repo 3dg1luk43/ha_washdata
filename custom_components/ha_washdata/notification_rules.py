@@ -35,7 +35,25 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Any
 
-from .const import CONF_NOTIFY_QUIET_END_HOUR, CONF_NOTIFY_QUIET_START_HOUR
+from .const import (
+    CONF_NOTIFY_QUIET_END_HOUR,
+    CONF_NOTIFY_QUIET_START_HOUR,
+    STATE_INTERRUPTED,
+)
+
+
+def cycle_end_is_finish(status: Any) -> bool:
+    """Whether a cycle that ended with ``status`` counts as a finished run.
+
+    Decides both the "finished" notification and entry into the Clean state (and
+    so the unload reminder) - audit MANAGER-10. An ``interrupted`` cycle is a
+    false start, a cancelled programme or a plug pulled early (the terminal-drop
+    finalize files those as interrupted too): nothing finished, nothing to unload.
+    A ``force_stopped`` cycle (watchdog or the user's Force Stop) ran a programme
+    the user may still want to hear about, so it keeps both; the finish template's
+    ``{status}`` tells it apart. A missing/unknown status keeps today's behaviour.
+    """
+    return status != STATE_INTERRUPTED
 
 
 def quiet_hours_bounds(options: Any) -> tuple[int, int] | None:

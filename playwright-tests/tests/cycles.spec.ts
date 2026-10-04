@@ -110,6 +110,43 @@ test('load more fetches next page and adds rows', async ({ page }) => {
   await expect(rows).toHaveCount(5, { timeout: 5_000 });
 });
 
+test('imported cycles page on their own cursor and load more appends them', async ({ page }) => {
+  // Register item 129a: reference + backfill cycles come `limit` at a time on
+  // `imported_offset`, outside the real offset/total; "Load more" stays while
+  // either list has more, and appends both arrays.
+  await page.evaluate(() => {
+    const w = window as any;
+    const real = (id: string, day: number) => ({ id, start_time: `2026-07-${day}T08:00:00+00:00`, duration: 3600, profile_name: 'Cotton', status: 'completed' });
+    const imp = (id: string, day: number, origin: string) => ({ id, start_time: `2026-06-${day}T08:00:00+00:00`, duration: 3600, profile_name: `Imp ${id}`, status: 'completed', cycle_origin: origin, is_reference: origin === 'reference' });
+    w.__ws_handlers['ha_washdata/get_device_cycles'] = (msg: any) => {
+      if (!msg.imported_offset) {
+        return { cycles: [real('c1', 10), real('c2', 11)], reference_cycles: [imp('r1', 20, 'reference')],
+          backfill_cycles: [imp('b1', 19, 'backfill')], total: 2, has_more: false,
+          imported_total: 4, imported_has_more: true };
+      }
+      return { cycles: [], reference_cycles: [imp('r2', 18, 'reference')], backfill_cycles: [imp('b2', 17, 'backfill')],
+        total: 2, has_more: false, imported_total: 4, imported_has_more: false };
+    };
+  });
+  await clickTab(page, 'history');
+  const rows = page.locator('tr[data-cid]');
+  await expect(rows).toHaveCount(4, { timeout: 5_000 });
+  const first = await assertWsCalled(page, 'ha_washdata/get_device_cycles');
+  expect(first[first.length - 1]).toHaveProperty('imported_offset', 0);
+
+  // Real cycles are exhausted, imported are not: the button must still be there.
+  const loadMoreBtn = page.locator('button[data-action="cyc-load-more"]').first();
+  await expect(loadMoreBtn).toBeVisible({ timeout: 3_000 });
+  await loadMoreBtn.click();
+  await expect(rows).toHaveCount(6, { timeout: 5_000 });
+  await expect(rows.filter({ hasText: 'Imp r2' })).toHaveCount(1);
+  await expect(rows.filter({ hasText: 'Imp b2' })).toHaveCount(1);
+  const calls = await assertWsCalled(page, 'ha_washdata/get_device_cycles', 2);
+  expect(calls[calls.length - 1]).toHaveProperty('imported_offset', 2);
+  expect(calls[calls.length - 1]).toHaveProperty('offset', 2);
+  await expect(page.locator('button[data-action="cyc-load-more"]')).toHaveCount(0);
+});
+
 test('sort by date descending by default', async ({ page }) => {
   await clickTab(page, 'history');
   // The first cycle should be the most recent (cyc-001, July 10)

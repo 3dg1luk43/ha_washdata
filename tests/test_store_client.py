@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Phase C: store_client - id parity, decode, token exchange, reads, upload shape."""
+import base64
 import json
 from unittest.mock import MagicMock
 
@@ -1162,3 +1163,138 @@ async def test_without_the_index_the_direct_query_still_answers():
         "brand": {"stringValue": "Bosch"}, "status": {"stringValue": "approved"}}}}]))
     items = await _client(s).search_devices(appliance_type="washer")
     assert [i["id"] for i in items] == ["d1"]
+
+
+# ── audit STORE-18: writes carry the uid the token belongs to ──────────────────
+
+def _jwt(claims: dict) -> str:
+    seg = base64.urlsafe_b64encode(json.dumps(claims).encode()).rstrip(b"=").decode()
+    return f"hdr.{seg}.sig"
+
+
+@pytest.mark.asyncio
+async def test_token_exchange_records_the_uid_it_vouches_for():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T1", "expires_in": "3600", "user_id": "real-uid"}))
+    c = _client(s)
+    assert await c.ensure_id_token("rt1") == "T1"
+    assert c.verified_uid("rt1") == "real-uid"
+    # Keyed to the refresh token that produced it, like the id_token cache.
+    assert c.verified_uid("another-account") is None
+
+
+@pytest.mark.asyncio
+async def test_token_uid_falls_back_to_the_id_token_claim():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": _jwt({"sub": "from-claim"}), "expires_in": "3600"}))
+    c = _client(s)
+    await c.ensure_id_token("rt")
+    assert c.verified_uid("rt") == "from-claim"
+    # A response carrying neither yields no verified uid (connect refuses it).
+    s.queue_post(_Resp(200, {"id_token": "not-a-jwt", "expires_in": "3600"}))
+    await c.ensure_id_token("rt2")
+    assert c.verified_uid("rt2") is None
+
+
+@pytest.mark.asyncio
+async def test_writes_stamp_the_token_uid_not_the_stored_one():
+    """A stored uid that is not the token's own made every write 403 under the
+    rules' uploaderUid / createdByUid / confirmation-id == request.auth.uid checks."""
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600", "user_id": "real"}))
+    c = _client(s)
+    cid = await c.upload_reference_cycle(
+        "rt", "stale-or-spoofed", None,
+        {"applianceType": "washer", "brand": "Bosch", "model": "WAT", "program": "Cotton 40"},
+        [[0, 2000], [60, 100], [120, 0]], {}, 3,
+    )
+    assert cid
+    creates = [w for _u, kw in s.posts if _u.endswith(":commit") for w in kw["json"]["writes"]]
+    uids = {
+        w["update"]["fields"][k]["stringValue"]
+        for w in creates for k in ("uploaderUid", "createdByUid") if k in w["update"]["fields"]
+    }
+    assert uids == {"real"}
+    # confirm_device names the confirmation doc after the uid: same rule.
+    s.queue_post(_Resp(200, {}))
+    await c.confirm_device("rt", "stale-or-spoofed", "d1")
+    conf = s.posts[-1][1]["json"]["writes"][0]["update"]
+    assert conf["name"].endswith("/confirmations/real")
+    assert conf["fields"]["uid"] == {"stringValue": "real"}
+
+
+# ── audit STORE-09: an unreachable store is not an empty one ───────────────────
+
+class _Offline(_Session):
+    """Every request fails at the transport, as when HA has no internet."""
+    def post(self, url, **kw):
+        self.posts.append((url, kw))
+        raise OSError("network unreachable")
+    def get(self, url, **kw):
+        self.gets.append((url, kw))
+        raise OSError("network unreachable")
+
+
+@pytest.mark.asyncio
+async def test_unreachable_profile_and_cycle_reads_are_none_not_empty():
+    s = _Session()
+    s.queue_post(_Resp(503, {"error": "unavailable"}))
+    s.queue_post(_Resp(200, []))
+    s.queue_post(_Resp(429, {"error": "quota"}))
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    assert await c.get_profiles("d") is None
+    assert await c.get_profiles("d") == []
+    assert await c.get_cycles("p") is None
+    assert await c.get_cycles("p") == []
+    off = _client(_Offline())
+    assert await off.get_profiles("d") is None
+    assert await off.get_cycles("p") is None
+    dp = await off.device_profiles("Bosch", "WAT", "washer")
+    assert dp == {"device_id": "washer__bosch__wat", "items": [], "error": "store_unreachable"}
+
+
+@pytest.mark.asyncio
+async def test_device_bundle_reports_an_unreachable_store():
+    bundle = await _client(_Offline()).get_device_bundle("washer__bosch__wat")
+    assert bundle["error"] == "store_unreachable" and bundle["profiles"] == []
+    # The device doc alone failing (5xx) is the same: its settings are unknown.
+    s = _Session()
+    s.queue_get(_Resp(503, {}))
+    s.queue_post(_Resp(200, []))
+    assert (await _client(s).get_device_bundle("d")).get("error") == "store_unreachable"
+    # ...but a device doc that does not exist (404) is an answer, not an outage.
+    s = _Session()
+    s.queue_get(_Resp(404, {}))
+    s.queue_post(_Resp(200, []))
+    bundle = await _client(s).get_device_bundle("d")
+    assert "error" not in bundle and bundle["profiles"] == [] and bundle["settings"] == {}
+
+
+class _CyclesFailFor(_Session):
+    """Profiles query answers two programs; the cycles query for ``bad`` fails."""
+    def __init__(self, bad: str):
+        super().__init__()
+        self._bad = bad
+    def post(self, url, **kw):
+        self.posts.append((url, kw))
+        sq = kw["json"]["structuredQuery"]
+        if sq["from"][0]["collectionId"] == "profiles":
+            return _Resp(200, [
+                {"document": {"name": f".../profiles/{pid}", "fields": {
+                    "program": {"stringValue": pid}, "status": {"stringValue": "pending"}}}}
+                for pid in ("p1", "p2")
+            ])
+        pid = next(f["fieldFilter"]["value"]["stringValue"]
+                   for f in sq["where"]["compositeFilter"]["filters"]
+                   if f["fieldFilter"]["field"]["fieldPath"] == "profileId")
+        return _Resp(503, {}) if pid == self._bad else _Resp(200, [])
+
+
+@pytest.mark.asyncio
+async def test_device_bundle_flags_a_program_whose_cycles_could_not_be_read():
+    bundle = await _client(_CyclesFailFor("p2")).get_device_bundle("d")
+    assert "error" not in bundle and bundle["failed_profiles"] == 1
+    by_id = {p["id"]: p for p in bundle["profiles"]}
+    assert by_id["p2"]["cycles_unavailable"] is True and by_id["p2"]["cycles"] == []
+    assert "cycles_unavailable" not in by_id["p1"]

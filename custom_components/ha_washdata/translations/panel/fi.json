@@ -72,8 +72,6 @@
     "reviewed": "Tarkistettu",
     "steady": "→ tasainen",
     "underrun": "Päättyi tavallista nopeammin",
-    "using_defaults": "Toimitettujen oletusarvojen käyttäminen",
-    "using_tuned": "Käyttämällä viritettyjä painoja",
     "overrun_ratio": "({x}x odotetusta)",
     "underrun_ratio": "({pct}% odotetusta)",
     "imported_tip": "Tuotu yhteisökaupasta. Käytetään vain täsmäytykseen, ei lasketa tilastoihin.",
@@ -85,9 +83,19 @@
     "awaiting_tip": "Odottaa yhteisön hyväksyntää",
     "awaiting_n": "Odottaa hyväksyntää · {n} vahvistusta",
     "awaiting": "Odottaa hyväksyntää",
-    "approved": "Hyväksytty"
+    "approved": "Hyväksytty",
+    "matcher_unused": "Ei vielä täsmäytetty yhteenkään sykliisi",
+    "matcher_used": "Täsmäytetty {n} sykliisi",
+    "matcher_used_one": "Täsmäytetty {n} sykliisi",
+    "matcher_used_other": "Täsmäytetty {n} sykliisi",
+    "matcher_used_tip": "Tällä laitteella tallennetut syklit, jotka WashDatan ohjelmantunnistin merkitsi itsenäisesti tällä tuodulla ohjelmalla. Tuonti, jota ei koskaan täsmäytetä, ei ehkä sovi laitteellesi, ja sen voi poistaa. Lasketaan paikallisesti; mitään ei lähetetä kauppaan."
   },
   "btn": {
+    "pg_preset_delete": "Poista esiasetus",
+    "pg_preset_load": "Lataa esiasetus",
+    "pg_preset_load_tip": "Korvaa testialueen arvot tällä esiasetuksella (aktiivisiin asetuksiin ei kosketa)",
+    "pg_preset_save": "Tallenna esiasetuksena",
+    "pg_preset_save_tip": "Tallenna kaikki alla olevat arvot nimettynä esiasetuksena tälle laitteelle",
     "reset_zoom": "Nollaa zoomaus",
     "set_brand_model": "Aseta merkki ja malli",
     "refresh_catalog": "Päivitä luettelo",
@@ -168,7 +176,6 @@
     "reset": "Nollaa",
     "reset_ml_models_tip": "Hävitä hienosäädetyt mallit ja palaa sisäänrakennettuun malliin. WashData voi oppia ne uudelleen myöhemmin.",
     "reset_to_builtin": "Palauta sisäänrakennetut mallit",
-    "reset_to_defaults": "Palauta oletusasetukset",
     "resume_cycle": "Jatka sykliä",
     "resume_cycle_tip": "Jatka pysäytettyä sykliä",
     "revert_settings": "Hylkää muutokset",
@@ -239,7 +246,8 @@
     "retry": "Yritä uudelleen",
     "confirm_appliance": "Vahvista tämä laite",
     "confirmed": "Vahvistettu",
-    "create_profile_from_gap": "Luo profiili"
+    "create_profile_from_gap": "Luo profiili",
+    "undo_import": "Kumoa viimeisin tuonti"
   },
   "note": {
     "off_delay": {
@@ -339,7 +347,6 @@
     "manual_recording": "Manuaalinen tallennus",
     "manual_recording_tip": "Suorita sykli tarkoituksella WashDatan tallentaessa tehojälkeä. Käynnistä juuri ennen laitteen käynnistymistä, pysäytä kun se päättyy, sitten käsittele tallentaaksesi se nimettynä profiilina.",
     "ml_learned": "Mitä WashData on oppinut",
-    "ml_matching_tuning": "Ohjelmasovitus hienosäätö",
     "ml_settings_card": "Asetukset",
     "ml_smart_learning": "Älykäs oppiminen",
     "my_preferences": "Omat asetukset",
@@ -362,7 +369,8 @@
     "online_account": "Yhteisökauppa ja verkkotoiminnot",
     "import_power_history": "Tuo tehohistoria",
     "service_status": "Huollon tila",
-    "online_account_tab": "Verkko ja yhteisö"
+    "online_account_tab": "Verkko ja yhteisö",
+    "live_match_debug": "Reaaliaikaisen täsmäytyksen virheenkorjaus"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -411,13 +419,11 @@
     "cycles_lc": "sykliä",
     "date": "Päivämäärä",
     "debug_traces": "Virheenkorjausjäljet",
-    "default": "Oletus",
     "default_access_level": "Oletustaso käyttäjille, joita ei ole lueteltu alla",
     "default_other": "Oletus (muut laitteet)",
     "default_tab": "Oletusvälilehti paneelia avattaessa",
     "description": "Kuvaus",
     "duration": "Kesto",
-    "emphasis": "Painopiste",
     "enable_access_control": "Ota käyttöön käyttäjäkohtainen pääsynhallinta",
     "energy": "Energiaa",
     "event_type": "Tapahtuman tyyppi",
@@ -429,7 +435,6 @@
     "group_name": "Ryhmän nimi",
     "head_trim": "Leikkaus alusta (s)",
     "hide_tabs": "Piilota välilehdet muille kuin järjestelmänvalvojille",
-    "in_use": "Käytössä",
     "json_data": "JSON-tiedot",
     "label": "Vastaava ohjelma",
     "last": "Viimeiset",
@@ -460,6 +465,9 @@
     "pg_group_timing": "Ajoitussäännöt",
     "pg_idle": "Vapaana",
     "pg_poor_match": "Huono osuma",
+    "pg_preset": "Testialueen esiasetus",
+    "pg_preset_name": "Uuden esiasetuksen nimi",
+    "pg_preset_none": "Valitse esiasetus…",
     "pg_strong_match": "Vahva osuma",
     "pg_weak_match": "Heikko osuma",
     "phase_name": "Vaiheen nimi",
@@ -594,7 +602,6 @@
     "cat_custom_phases": "Mukautetut vaiheet",
     "cat_profile_groups": "Profiiliryhmät",
     "cat_settings": "Havaitsemis- ja tunnistusasetukset",
-    "cat_matching_config": "Tunnistuksen hienosäätö",
     "cat_ml_models": "ML-mallit",
     "cat_feedback": "Palaute- ja tarkistusmerkinnät",
     "cat_suggestions": "Ehdotukset",
@@ -645,7 +652,19 @@
     "pg_autolabel": "Automaattimerkintä",
     "pg_label_review": "Pyytää tarkistusta",
     "pg_ev_match_reverted": "Osuma peruttu",
-    "pg_ev_verified_pause": "Vahvistettu tauko"
+    "pg_ev_verified_pause": "Vahvistettu tauko",
+    "n_samples": "{n} näytettä",
+    "n_samples_one": "{n} näyte",
+    "n_samples_other": "{n} näytettä",
+    "n_cycles": "{n} sykliä",
+    "n_cycles_one": "{n} sykli",
+    "n_cycles_other": "{n} sykliä",
+    "energy_per_cycle": "{v}/sykli",
+    "energy_total": "{v} yhteensä",
+    "automation_off": "(pois)",
+    "ref_cycle_none": "Ei mitään",
+    "share_name": "Näytä nimeni jakamassani sisällössä",
+    "cat_backfill_cycles": "Tuodusta tehohistoriasta löydetyt jaksot"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -667,17 +686,9 @@
     "trend_declining_tip": "Tämän mallin sopivuus on heikentynyt viimeisimpien tarkistusten aikana · useampien syklien tarkistaminen voi auttaa sitä oppimaan uudelleen.",
     "trend_steady_tip": "Tämän mallin sopivuus on pysynyt suunnilleen vakaana viimeisimpien tarkistusten aikana.",
     "cap_blurb": {
-      "end": "Sen tunnistaminen, milloin jakso on todella päättynyt",
-      "live_match": "Käynnissä olevan ohjelman tunnistaminen nopeammin",
-      "quality": "Väärin tunnistettujen tai vioittuneiden jaksojen havaitseminen",
-      "remaining_time": "Jäljellä olevan ajan ennustaminen",
       "total_energy": "Kokonaisenergian ja -kustannuksen ennustaminen"
     },
     "cap_label": {
-      "end": "Jakson lopun tunnistus",
-      "live_match": "Ohjelman tunnistus",
-      "quality": "Jakson laatutarkistus",
-      "remaining_time": "Jäljellä olevan ajan arvio",
       "total_energy": "Energia-arvio"
     },
     "metric_auc": "AUC {auc} validointidatalla",
@@ -731,10 +742,17 @@
     "apply_suggestions_title": "Ota ehdotukset käyttöön",
     "apply_suggestions_msg": "Muutetaanko nämä asetukset ({n})? Integraatio ladataan uudelleen tallennuksen jälkeen.",
     "discard_settings_title": "Hävitetäänkö tallentamattomat muutokset?",
-    "discard_settings_msg": "Tallentamattomat asetusmuutokset: {n}. Poistutaanko Asetuksista ja hävitetäänkö muutokset?"
+    "discard_settings_msg": "Tallentamattomat asetusmuutokset: {n}. Poistutaanko Asetuksista ja hävitetäänkö muutokset?",
+    "profile_title": "Profiili · {name}",
+    "undo_import_msg": "Kaikki tälle laitteelle tallennettu palautetaan viimeisintä tuontia ({when}) edeltävään tilaan, myös laitteen asetukset. Sen jälkeen tallennetut jaksot ja tehdyt muutokset menetetään.",
+    "undo_import_ok": "Kumoa tuonti",
+    "undo_import_title": "Kumoa viimeisin tuonti"
   },
   "msg": {
     "pg_canvas_empty3": "Valitse jakso yltä ja paina Suorita simuloidaksesi sen. Vie sitten osoitin päälle lukeaksesi arvoja, vieritä tai nipistä zoomataksesi ja vedä panoroidaksesi.",
+    "pg_preset_delete_confirm": "Poistetaanko esiasetus \"{name}\"?",
+    "pg_preset_limit": "Esiasetusten enimmäismäärä täynnä ({n})",
+    "pg_preset_overwrite": "Korvataanko esiasetus \"{name}\"?",
     "tail_trim_hint": "Kuinka monta sekuntia poistetaan lopusta",
     "store_sibling_hint": "Eikö juuri sinun mallillesi ole jaettu mitään? Saman merkin läheinen malli on yleensä hyvä lähtökohta.",
     "store_declare_appliance": "Kerro WashDatalle, mikä laite sinulla on, niin tämä välilehti näyttää muiden sille jakamat ohjelmat ja tallennukset. Voit myös kirjoittaa merkin nimen yläkenttään ja katsella ympärillesi.",
@@ -779,7 +797,6 @@
     "maintenance_load_error": "Huoltotietoja ei voitu ladata: {error}",
     "maintenance_requires_access": "Ylläpito ja vienti/tuonti vaativat täyden käyttöoikeuden.",
     "manual_duration_hint": "Profiilin keskimääräinen/odotettu syklin pituus, jota käytetään jäljellä olevan ajan arvioihin. Muokkaa asettaaksesi sen; sen jättäminen ennalleen säilyttää nykyisen arvon.",
-    "matching_tuning_intro": "Oppiessaan WashData säätää myös, kuinka paljon ohjelman yhteensovittaminen painaa muotoa kestoon ja energiaan.",
     "merge_intro": "Valitut syklit yhdistetään yhdeksi (kronologinen järjestys; välit täytetty 0 W:lla). Valitse tuloksena oleva profiili.",
     "ml_intro": "WashData toimitetaan älykkäillä malleilla, jotka toimivat heti pakkauksesta.",
     "ml_learned_intro": "Mallit hienosäädetty tälle koneelle.",
@@ -984,7 +1001,16 @@
     "connect_to_confirm": "Yhdistä asetusten rattaasta vahvistaaksesi tai arvioidaksesi.",
     "coverage_gap_cluster": "{count} viimeaikaista merkitsemätöntä, noin {min} min pituista sykliä näyttää yhdeltä ohjelmalta, jota et ole vielä luonut.",
     "pg_label_yes": "Merkittäisiin jakson lopussa nimellä \"{name}\"",
-    "pg_label_no": "Pyytäisi tarkistusta: {reason}"
+    "pg_label_no": "Pyytäisi tarkistusta: {reason}",
+    "live_match_debug_tip": "Luottamus: kuinka hyvin nykyinen tehokäyrä vastaa parasta ehdokasprofiilia (0-100 %). Epäselvä: kahden parhaan ehdokkaan pisteet ovat 5 %:n sisällä toisistaan - merkintä on epävarma, kunnes sykli päättyy.",
+    "automation_alias_started": "{device}: sykli alkoi",
+    "automation_alias_finished": "{device}: sykli päättyi",
+    "automation_desc_started": "Suoritetaan, kun laitteen {device} sykli alkaa. Lisää omat toimintosi (ilmoitus, valot, ...).",
+    "automation_desc_finished": "Suoritetaan, kun laitteen {device} sykli päättyy. Lisää omat toimintosi (ilmoitus, valot, ...).",
+    "feedback_detected": "WashData tunnisti: {name}",
+    "import_undo_hint": "Viimeisintä tuontia ({when}) edeltävä palautuspiste säilytetään: {profiles} profiilia ja {cycles} jaksoa.",
+    "replace_undo_hint": "Ensin tallennetaan palautuspiste, joten voit kumota tämän tuonnin kohdassa Vienti / tuonti.",
+    "pg_in_sample_note": "Nämä syklit auttoivat myös rakentamaan profiilit, joihin niitä täsmäytetään, joten nämä tulokset ovat optimistisia: uusilla sykleillä odota hieman vähemmän oikeita täsmäytyksiä."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
@@ -1163,7 +1189,7 @@
       "label": "Arviotoleranssi"
     },
     "enable_ml_models": {
-      "doc": "Syklin aikana tälle koneelle hienosäädetty malli ennustaa kokonaisenergian ja -kustannukset, ja sykli, jonka teho laskee epätavallisen aikaisin WashDatan hyvin tuntemassa ohjelmassa, saa päättyä odottamatta koko sammutusviivettä. Pois = vain perinteinen tehoon perustuva logiikka.",
+      "doc": "Syklin aikana tälle koneelle hienosäädetty malli ennustaa kokonaisenergian ja -kustannukset, ja sykli, jonka teho laskee epätavallisen aikaisin WashDatan hyvin tuntemassa ohjelmassa, saa päättyä odottamatta koko sammutusviivettä. Astianpesukoneet saavat tämän aikaisen lopetuksen ilman tätä asetusta, kun niiden ohjelma on tunnistettu. Pois = vain perinteinen tehoon perustuva logiikka.",
       "label": "Käytä älykkäitä malleja syklin aikana"
     },
     "end_energy_threshold": {
@@ -1215,7 +1241,7 @@
       "label": "Minimiteho"
     },
     "ml_training_enabled": {
-      "doc": "Tutki ajoittain tarkasteltuja jaksojasi yön yli ja hienosäädä mallit tälle koneelle. Muutos säilyy vain silloin, kun se todella saa paremman tuloksen pidennetyillä sykleillä, joten tämä voi vain auttaa tai pysyä samana - älä koskaan heikkene.",
+      "doc": "Kouluttaa ennustetun energian mallin ajoittain uudelleen tämän koneen valmiilla sykleillä. Uudelleenkoulutettu malli otetaan käyttöön vain, jos se päihittää validointisykleillä yksinkertaisen, kuluneen ja odotetun ajan vertailuun perustuvan arvion; muuten nykyinen malli säilyy.",
       "label": "Opi tästä koneesta"
     },
     "ml_training_hour": {
@@ -1255,7 +1281,7 @@
       "label": "Android-kanava (lopetus)"
     },
     "notify_finish_message": {
-      "doc": "Ilmoituksen runko, joka lähetetään syklin päättyessä. Mallin muuttujat: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} ja {vs_typical} ovat tässä hyödyllisimmät.",
+      "doc": "Ilmoituksen runko, joka lähetetään syklin päättyessä. Mallin muuttujat: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status}. {time_finished} ja {vs_typical} ovat tässä hyödyllisimmät. {status} on completed tai force_stopped: keskeytetty sykli (väärä käynnistys tai peruttu ohjelma) ei lähetä lopetusviestiä.",
       "label": "Lopetusviesti"
     },
     "notify_finish_services": {
@@ -1351,15 +1377,15 @@
       "label": "Täsmäytysväli"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "Jakson enimmäispituus suhteessa profiiliin. 1.3 tarkoittaa, että syklin on oltava alle 130 % profiilin kestosta, jotta se täsmää.",
+      "doc": "Ohjelma hylätään, kun sykli on kestänyt pidempään kuin ohjelman tyypillinen kesto kerrottuna tällä arvolla. 1,8 tarkoittaa, että sykli, joka on kestänyt 80 % ohjelmaa pidempään, ei enää täsmää siihen.",
       "label": "Enimmäiskestosuhde"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "Jakson vähimmäispituus suhteessa profiiliin. 0,9 tarkoittaa, että jakson on oltava vähintään 90 % profiilin kestosta, jotta se täsmää.",
+      "doc": "Ohjelma otetaan huomioon vasta, kun sykli on kestänyt tämän osuuden ohjelman tyypillisestä kestosta. 0,10 tarkoittaa, että 2 tunnin ohjelmasta tulee ehdokas 12 minuutin jälkeen. Ei käytetä syklin ensimmäisten 15 minuutin aikana.",
       "label": "Vähimmäiskestosuhde"
     },
     "profile_match_threshold": {
-      "doc": "Minimi samankaltaisuuspisteet (0-1) vaaditaan syklin lopussa ohjelman tunnisteen hyväksymiseksi. Nosta se vähentääksesi vääriä tunnistuksia; alenna sitä, jos koneesi ohjelmia ei täsmää. Oletusarvo 0,4 on konservatiivinen lähtökohta.",
+      "doc": "Pienin reaaliaikainen täsmäytyspistemäärä (0-1), ennen kuin älykäs lopetus ja kuivausrummun ryppyjeneston lopetus voivat toimia täsmäytetyn ohjelman perusteella. Nosta sitä, jos syklit päättyvät liian aikaisin epävarman täsmäytyksen vuoksi; laske sitä, jos selvästi tunnistetut syklit odottavat silti koko sammutusviiveen. Se ei muuta sitä, mikä ohjelma näytetään tai merkitään. Oletus 0,4.",
       "label": "Täsmäytyskynnys"
     },
     "profile_unmatch_threshold": {
@@ -1488,6 +1514,9 @@
     "notify_icon_color": {
       "label": "Ilmoituksen väri",
       "doc": "Korostusväri tämän laitteen ilmoituksille, jotta pesukone, kuivausrumpu ja astianpesukone erottuvat toisistaan yhdellä silmäyksellä. iOS värittää kuvakkeen ja Liveseurannan edistymispalkin lukitulla näytöllä ja Dynamic Islandissa. Androidille lähetetään sama väri, mutta puhelin päättää, mitä se sillä tekee: jotkin värittävät kuvakkeen ja monet (erityisesti Samsung One UI) jättävät sen kokonaan huomiotta. Molemmat ymmärtävät heksakoodin (esim. #03A9F4). Jätä tyhjäksi alustan oletusta varten."
+    },
+    "share_name": {
+      "doc": "Julkaise yhdistetyn tilisi nimi jakamiesi syklien lataajana. Pois: ne jaetaan ilman nimeä."
     }
   },
   "setting_group": {
@@ -1591,14 +1620,17 @@
     "rebuilding": "Rakennetaan uudelleen…",
     "analyzing": "Analysoidaan…",
     "resetting": "Nollataan…",
-    "reverting": "Palautetaan…",
     "trimming": "Leikataan…",
     "splitting": "Jaetaan…",
     "deleting": "Poistetaan…",
     "imported": "Tuotu",
     "preparing": "Valmistellaan…",
     "unlabelling": "Poistetaan merkintää…",
-    "working": "Käsitellään…"
+    "working": "Käsitellään…",
+    "match_uncertain": "Epävarma: {top} tai {runner}",
+    "match_uncertain_single": "Epävarma: ehkä {top}",
+    "match_sure": "~{pct} % varma",
+    "match_uncertain_tip": "WashData ei ole vielä päätynyt ohjelmaan. Luku kertoo, kuinka usein johtava arvaus, {top}, osoittautui oikeaksi tallennetuissa sykleissä, kun se oli näin paljon toiseksi parhaan edellä. Se on vain tiedoksi eikä muuta sitä, miten syklit tunnistetaan tai merkitään."
   },
   "suggestion": {
     "observed_label": "Havaittu",
@@ -1689,7 +1721,8 @@
         "no_power": "ilman tehoa",
         "no_active_power": "ilman aktiivista tehoa"
       }
-    }
+    },
+    "now_value": "(nyt {v})"
   },
   "tab": {
     "advanced": "Edistynyt",
@@ -1745,13 +1778,14 @@
     "json_required": "JSON-tiedot vaaditaan",
     "legacy_removed": "Vanhat toiminnot poistettu",
     "logs_exported": "Lokit viety",
-    "matching_reverted": "Vastaavat painot palautettiin oletusarvoihin",
     "min_2_profiles": "Valitse vähintään 2 profiilia ryhmälle",
     "ml_training_no_improvement": "Harjoittelu suoritettu: lähtötaso pidetty (ei parannusta)",
     "models_reverted": "Laitteessa olevat mallit palautettiin lähtötasolle",
     "name_required": "Nimi vaaditaan",
     "no_split_found": "Tyhjäkäyntiä ei löytynyt halkeamista varten",
     "panel_settings_saved": "Paneelin asetukset tallennettu",
+    "pg_preset_loaded": "Esiasetus \"{name}\" ladattu",
+    "pg_preset_saved": "Esiasetus \"{name}\" tallennettu",
     "pg_sugg_loaded": "{n} ehdotettu arvo ladattu testialueelle - aja testialue vertailua varten",
     "phase_name_required": "Vaiheen nimi vaaditaan",
     "phase_reset": "Vaihe \"{name}\" palautettu sisäänrakennettuun muotoon",
@@ -1848,7 +1882,6 @@
     "phase_deleted": "Vaihe \"{name}\" poistettu",
     "profile_created": "Profiili \"{name}\" luotu",
     "rename_failed": "Uudelleennimeäminen epäonnistui: {error}",
-    "revert_failed": "Palautus epäonnistui: {error}",
     "save_failed": "Tallennus epäonnistui: {error}",
     "split_complete": "Jaettu {count} sykliin",
     "start_failed": "Käynnistys epäonnistui: {error}",
@@ -1859,7 +1892,11 @@
     "store_import_duplicate": "Tämä tallennus on jo laitteellasi.",
     "device_approved": "Yhteisö hyväksyi",
     "thanks_confirming": "Kiitos vahvistuksesta",
-    "rating_saved": "Laatuarvio tallennettu"
+    "rating_saved": "Laatuarvio tallennettu",
+    "store_download_partial": "Ohjelmia ei voitu ladata: {n}. Yritä myöhemmin uudelleen.",
+    "import_no_restore_point": "Tuotu, mutta palautuspistettä ei voitu tallentaa, joten tätä tuontia ei voi kumota",
+    "import_undo_failed": "Tuontia ei voitu kumota: {error}",
+    "import_undone": "Tuonti kumottu: {profiles} profiilia ja {cycles} jaksoa palautettu"
   },
   "trend": {
     "down": "Trendikäs alaspäin",
@@ -1881,7 +1918,10 @@
     "cost_tip": "Tämän syklin energiakustannus, lukittu valmistuessa. Kun Aikapainotettu kustannus on käytössä, tehokäyrä veloitetaan kullakin hetkellä voimassa olleella hinnalla; muuten energia x yksi lopussa voimassa ollut hinta. Aseta hinta Asetuksista täyttääksesi sen.",
     "confidence_tip": "Profiilin osumaluottamus (0-100%). Kuinka tarkasti syklin tehokäyrä osui tunnistettuun ohjelmaan.",
     "flags_tip": "Syklin tarkistus-, poikkeama- ja lähdeliput. Siirrä hiiri kuvakkeen päälle saadaksesi lisätiedot.",
-    "cost_dynamic_tip": "Aikapainotettu: veloitettu syklin aikana voimassa olleella hinnalla (toteutunut {price} {cur}/kWh)."
+    "cost_dynamic_tip": "Aikapainotettu: veloitettu syklin aikana voimassa olleella hinnalla (toteutunut {price} {cur}/kWh).",
+    "dbg_conf": "Luott.",
+    "dbg_mae": "MAE",
+    "dbg_corr": "Korr."
   },
   "stat": {
     "avg": "ka.",
@@ -1932,7 +1972,8 @@
     "website_tip": "Avaa yhteisökaupan verkkosivusto",
     "favorites": "Suosikit",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Ei vielä arvioita"
+    "no_ratings": "Ei vielä arvioita",
+    "unreachable": "Yhteisökauppaan ei saatu yhteyttä. Tarkista yhteytesi ja yritä uudelleen."
   },
   "settings": {
     "gear": {
@@ -2039,5 +2080,38 @@
     "margin": "Liian lähellä toiseksi parasta",
     "unknown_profile": "Ohjelmaa ei ole enää olemassa",
     "not_evaluated": "Ei arvioitu"
+  },
+  "diagram": {
+    "accum": "kertynyt",
+    "auto": "auto",
+    "below_off": "alle = pois",
+    "confirmed": "vahvistettu",
+    "energy_counts": "energia ratkaisee",
+    "feedback": "palaute",
+    "gap_below_min": "tauko alle min = yksi sykli",
+    "heat_phase": "lämmitysvaihe",
+    "held_at_100": "pysyy 100 %:ssa",
+    "ignored": "ohitettu",
+    "kept": "säilytetty",
+    "max": "maks.",
+    "min": "min.",
+    "minus_tol": "-tol.",
+    "no_match": "ei osumaa",
+    "no_updates": "ei päivityksiä",
+    "off_delay_wait": "sammutusviive",
+    "off_gap": "sammutusväli",
+    "plus_tol": "+tol.",
+    "profile": "profiili",
+    "reading_interval": "tyypillinen lukemaväli",
+    "sensor_offline": "anturi offline: pakotettu pysäytys",
+    "si": "NV",
+    "spike_ignored": "piikki ohitettu",
+    "spike_ignored_short": "piikki: ohitettu",
+    "start": "käynnistys",
+    "stop": "pysäytys",
+    "tail_energy_resets": "loppuenergia yli kynnyksen: ajastin nollautuu",
+    "thr": "kynnys",
+    "too_short": "liian lyhyt",
+    "tumble_kept": "rumpupulssit säilytetty"
   }
 }

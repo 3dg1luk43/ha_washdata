@@ -81,5 +81,7 @@
   "reference_cycles": [],
   "backfill_cycles": [],
   "total": 5,
-  "has_more": false
+  "has_more": false,
+  "imported_total": 0,
+  "imported_has_more": false
 }

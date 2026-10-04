@@ -35,7 +35,9 @@ def test_docs_match_the_code() -> None:
         [*report.failures, "run: python3 devtools/docs_check.py", dc.FIX_HINT]
     )
     # The checks ran against something: an empty pass would also be "clean".
-    assert report.stats["anchors checked"] > 100
+    # Most anchors lived in the register; since the DOCS-03 split its archive is
+    # history and is not anchor-checked, so only a handful remain.
+    assert report.stats["anchors checked"] >= 1
     assert report.stats["constant claims checked"] >= 10
     assert report.stats["register ids"] > 300
     assert report.stats["deep-dive identifiers checked"] > 1000
@@ -92,22 +94,45 @@ def test_constant_check(tmp_path: Path) -> None:
 
 
 def test_register_ids_and_baseline(tmp_path: Path) -> None:
-    _write(tmp_path, dc.REFERENCE, (
-        "## 7. Register\n| # | Status | Kind | Short |\n|---|---|---|---|\n"
-        "| 5 | FIXED | CODE | a |\n| 5 | OPEN | - | b |\n| 6 | FALSE POSITIVE | DOC | c |\n"
+    _write(tmp_path, dc.REGISTER_OPEN, (
+        "# Open\n| # | Status | Kind | Owner | Summary |\n|---|---|---|---|---|\n"
+        "| 5 | OPEN | CODE | detection | b |\n"
+        "## Detail\n| 6 | FIXED | CODE | a quoted row, not the table |\n"
+    ))
+    _write(tmp_path, dc.REGISTER_ARCHIVE, (
+        "# Archive\n| # | Status | Kind | Short |\n|---|---|---|---|\n"
+        "| 5 | FIXED | CODE | a |\n| 6 | FALSE POSITIVE | DOC | c |\n"
         "| 5-6 | FIXED | CODE | summary row |\n"
-        "## 8. Index\n| 6 | FIXED | CODE | outside section 7 |\n"
+        "## Dated notes\n| 6 | FIXED | CODE | outside the table |\n"
     ))
     report = dc.Report()
     dc.check_register(tmp_path, report)
     assert report.register_counts == {"5": 2, "6": 1}
+    assert report.failures == []
 
     dc.apply_baseline(report, {})
-    assert any("register id 5 appears 2 times" in f for f in report.failures)
+    assert any("id 5 appears 2 times" in f for f in report.failures)
 
     report.failures.clear()
     dc.apply_baseline(report, dc.baseline_from(report))
     assert report.failures == []
+
+
+def test_register_open_and_archive_hold_the_right_rows(tmp_path: Path) -> None:
+    """Audit DOCS-03: OPEN.md is a short work list, ARCHIVE.md holds no open item."""
+    _write(tmp_path, dc.REGISTER_OPEN, (
+        "| # | Status | Kind | Owner | Summary |\n|---|---|---|---|---|\n"
+        f"| 7 | FIXED | CODE | x | done |\n| 8 | OPEN | CODE | x | {'y' * 301} |\n"
+        "| 9 | PARTIAL | NOTE | x | fine |\n"
+    ))
+    _write(tmp_path, dc.REGISTER_ARCHIVE, "| 10 | OPEN | CODE | still open |\n| 11 | FIXED | CODE | ok |\n")
+    report = dc.Report()
+    dc.check_register(tmp_path, report)
+    text = "\n".join(report.failures)
+    assert len(report.failures) == 3, text
+    assert "item 7 is FIXED; closed items belong in ARCHIVE.md" in text
+    assert "item 8 summary is 301 chars" in text
+    assert "item 10 is OPEN; open items belong in OPEN.md" in text
 
 
 def test_em_dash_ratchet_and_round_trip() -> None:

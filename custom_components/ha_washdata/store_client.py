@@ -26,6 +26,7 @@ Never raises into the event loop - failures return ``None``/empty and are logged
 from __future__ import annotations
 
 import asyncio
+import base64
 import hashlib
 import json
 import logging
@@ -52,6 +53,12 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 _APPLIANCE_TYPES = {"washer", "dryer", "dishwasher", "washer_dryer"}
+
+# Error marker for a read the store could not answer (network failure, timeout, 5xx,
+# rate limit). Distinct from an empty result on purpose: an offline store used to read
+# as "no shared programs" and a failed download as "already on your device" (audit
+# STORE-09).
+STORE_UNREACHABLE = "store_unreachable"
 
 # Max profiles hydrated concurrently when downloading a whole-device bundle. One query
 # each (the bundle skips the per-cycle rating fan-out), kept small to stay well under the
@@ -195,6 +202,26 @@ def _rating_from_doc(doc: dict[str, Any]) -> dict[str, Any]:
     return {"avg": total / count, "count": count}
 
 
+def _token_uid(body: dict[str, Any]) -> str | None:
+    """The Firebase uid the token endpoint vouches for, or None.
+
+    ``user_id`` of the refresh-token exchange response, else the ``user_id`` / ``sub``
+    claim of the ID token that same response carried. Both come from Google over TLS
+    in reply to our own request, so neither needs a signature check here; what must
+    NOT be trusted is the uid a caller hands to ``connect`` (audit STORE-18).
+    """
+    uid = body.get("user_id")
+    if isinstance(uid, str) and uid:
+        return uid
+    try:
+        payload = str(body.get("id_token") or "").split(".")[1]
+        claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+        uid = claims.get("user_id") or claims.get("sub")
+    except Exception:  # noqa: BLE001 - malformed token -> no verified uid
+        return None
+    return uid if isinstance(uid, str) and uid else None
+
+
 def _decode_doc(doc: dict[str, Any]) -> dict[str, Any]:
     out = {k: _decode(x) for k, x in doc.get("fields", {}).items()}
     name = doc.get("name", "")
@@ -313,6 +340,7 @@ class StoreClient:
         self._id_token: str | None = None
         self._id_token_exp: float = 0.0
         self._id_token_rt: str | None = None  # refresh token that produced the cached id_token
+        self._id_token_uid: str | None = None  # uid the token endpoint returned with it
         self._last_error: str | None = None  # short reason for the last failed write, for the UI
         self._base = f"{self._FS}/projects/{project_id}/databases/(default)/documents"
         # key -> (expiry_epoch, value). Read-only catalog/config responses; see class docstring.
@@ -431,11 +459,28 @@ class StoreClient:
             return None
         self._id_token = body.get("id_token")
         self._id_token_rt = refresh_token
+        self._id_token_uid = _token_uid(body)
         try:
             self._id_token_exp = now + float(body.get("expires_in", 3600))
         except (TypeError, ValueError):
             self._id_token_exp = now + 3600
         return self._id_token
+
+    def verified_uid(self, refresh_token: str) -> str | None:
+        """The uid the token endpoint returned for ``refresh_token``'s last exchange.
+
+        Only meaningful right after ``ensure_id_token(refresh_token)`` succeeded (same
+        cache key, so another account's uid is never returned). Every authed write
+        stamps this, not the uid stored at connect: the store rules require
+        ``uploaderUid`` / ``createdByUid`` / the confirmation doc id to equal
+        ``request.auth.uid``, so a mismatched stored uid made every write 403
+        (audit STORE-18).
+        """
+        return self._id_token_uid if self._id_token_rt == refresh_token else None
+
+    def _write_uid(self, refresh_token: str, stored_uid: str) -> str:
+        """The uid an authed write must carry (see ``verified_uid``)."""
+        return self.verified_uid(refresh_token) or stored_uid
 
     # ── reads (public, no token) ────────────────────────────────────────────────
 
@@ -789,10 +834,21 @@ class StoreClient:
         successful lookups are cached (a miss may simply mean "not contributed yet",
         which flips as soon as the user contributes it).
         """
+        return (await self._fetch_doc(path, cache_key=cache_key))[0]
+
+    async def _fetch_doc(
+        self, path: str, *, cache_key: str | None = None,
+    ) -> tuple[dict[str, Any] | None, bool]:
+        """``(doc, reached)``: ``_get_doc`` plus whether the store answered at all.
+
+        ``reached`` is False only when the store could not answer (network error,
+        timeout, 5xx, rate limit), so a caller can tell "no such document" (403/404,
+        ``(None, True)``) from "offline" (``(None, False)``).
+        """
         if cache_key is not None:
             cached = self._cache_get(cache_key)
             if cached is not None:
-                return cached
+                return cached, True
         # Capture the generation BEFORE the request: if an invalidation lands while this
         # read is in flight, caching its result would re-pin a pre-write document for the
         # full TTL. Same discipline as _fetch_and_cache.
@@ -800,17 +856,18 @@ class StoreClient:
         try:
             async with self._sess().get(f"{self._base}/{path}", timeout=15) as resp:
                 if resp.status != 200:
-                    if resp.status not in (403, 404):
-                        _LOGGER.debug("Store get %s HTTP %s", path, resp.status)
-                    return None
+                    if resp.status in (403, 404):
+                        return None, True
+                    _LOGGER.debug("Store get %s HTTP %s", path, resp.status)
+                    return None, False
                 doc = await resp.json()
         except Exception as exc:  # noqa: BLE001
             _LOGGER.debug("Store get %s error: %s", path, exc)
-            return None
+            return None, False
         out = _decode_doc(doc)
         if cache_key is not None and gen == self._cache_gen:
             self._cache_put(cache_key, out, self._CATALOG_CACHE_TTL_S)
-        return out
+        return out, True
 
     async def get_device(self, device_id: str) -> dict[str, Any] | None:
         return await self._get_doc(f"devices/{_seg(device_id)}", cache_key=f"device:{device_id}")
@@ -864,8 +921,13 @@ class StoreClient:
         self._cache_put("config:site", cfg, self._CONFIG_CACHE_TTL_S)
         return cfg
 
-    async def get_profiles(self, dev_id: str, include_pending: bool = True, page_size: int = 100) -> list[dict[str, Any]]:
+    async def get_profiles(
+        self, dev_id: str, include_pending: bool = True, page_size: int = 100,
+    ) -> list[dict[str, Any]] | None:
         """Shared programs for one catalog appliance, most-recent-first.
+
+        ``None`` when the store could not be reached, ``[]`` when the appliance really
+        has no shared programs: the two used to be the same ``[]`` (audit STORE-09).
 
         ``include_pending`` defaults to **True**, matching ``get_cycles`` and the
         device browse. It used to default to False, which made the Store tab list a
@@ -885,13 +947,16 @@ class StoreClient:
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        return await self._run_query(sq) or []
+        return await self._run_query(sq)
 
     async def device_profiles(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
         """Resolve the store deviceId from brand/model/type and return its profiles
-        (approved + the caller's own pending), for the Share dialog's profile picker."""
+        (approved + the caller's own pending), for the Share dialog's profile picker.
+        Carries ``error`` when the store could not be reached (audit STORE-09)."""
         dev_id = device_id(appliance_type, brand, model)
         items = await self.get_profiles(dev_id, include_pending=True)
+        if items is None:
+            return {"device_id": dev_id, "items": [], "error": STORE_UNREACHABLE}
         return {"device_id": dev_id, "items": items}
 
     async def get_device_bundle(self, dev_id: str, include_pending: bool = True) -> dict[str, Any]:
@@ -900,17 +965,29 @@ class StoreClient:
         ``cycles`` (hydrated by get_cycles). One device GET + one profiles query + one
         cycles query per profile. Never raises.
 
+        Failures are reported, never flattened into an empty bundle (audit STORE-09):
+        ``error`` when the device doc or the profile list could not be read (nothing is
+        known about the setup), and per profile ``cycles_unavailable`` plus a top-level
+        ``failed_profiles`` count when that program's cycle query failed.
         """
-        device = await self.get_device(dev_id) or {}
-        settings = device.get("settings") if isinstance(device.get("settings"), dict) else {}
+        unreachable = {"device_id": dev_id, "settings": {}, "profiles": [], "error": STORE_UNREACHABLE}
+        device, reached = await self._fetch_doc(
+            f"devices/{_seg(dev_id)}", cache_key=f"device:{dev_id}",
+        )
+        if not reached:
+            return unreachable
         profiles = await self.get_profiles(dev_id, include_pending=include_pending)
+        if profiles is None:
+            return unreachable
+        device = device or {}
+        settings = device.get("settings") if isinstance(device.get("settings"), dict) else {}
 
         # Bound the per-profile fan-out: an unbounded gather over a device with many
         # profiles could burst hundreds of concurrent requests and trip the store's rate
         # limiter. A shared semaphore caps how many profiles hydrate at once.
         sem = asyncio.Semaphore(_BUNDLE_HYDRATE_LIMIT)
 
-        async def _cycles_for(p: dict[str, Any]) -> list[dict[str, Any]]:
+        async def _cycles_for(p: dict[str, Any]) -> list[dict[str, Any]] | None:
             pid = p.get("id")
             if not pid:
                 return []
@@ -919,14 +996,22 @@ class StoreClient:
 
         # Fetch profiles' cycles concurrently (bounded) rather than one at a time.
         cycle_lists = await asyncio.gather(*(_cycles_for(p) for p in profiles))
+        failed = 0
         for p, cycles in zip(profiles, cycle_lists):
-            p["cycles"] = cycles
-        return {"device_id": dev_id, "settings": settings, "profiles": profiles}
+            if cycles is None:
+                failed += 1
+                p["cycles_unavailable"] = True
+            p["cycles"] = cycles or []
+        bundle: dict[str, Any] = {"device_id": dev_id, "settings": settings, "profiles": profiles}
+        if failed:
+            bundle["failed_profiles"] = failed
+        return bundle
 
     async def get_cycles(
         self, prof_id: str, include_pending: bool = True, page_size: int = 50,
-    ) -> list[dict[str, Any]]:
-        """Reference cycles for a profile, most-recent-first.
+    ) -> list[dict[str, Any]] | None:
+        """Reference cycles for a profile, most-recent-first; ``None`` when the store
+        could not be reached (``[]`` = genuinely none shared; audit STORE-09).
 
         ``include_pending`` (default True) also returns still-awaiting-approval
         recordings so they can be browsed/imported before the community votes them
@@ -945,7 +1030,10 @@ class StoreClient:
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        cycles = [self._with_decoded_trace(c) for c in (await self._run_query(sq) or [])]
+        rows = await self._run_query(sq)
+        if rows is None:
+            return None
+        cycles = [self._with_decoded_trace(c) for c in rows]
         for cyc in cycles:
             cyc["rating"] = _rating_from_doc(cyc)
         return cycles
@@ -1046,6 +1134,7 @@ class StoreClient:
         token = await self.ensure_id_token(refresh_token)
         if not token:
             return _out(None, False)
+        uid = self._write_uid(refresh_token, uid)
 
         # Preserve the documented never-raise contract: malformed metadata/points must
         # return a failure marker (with _last_error set), not propagate an exception to
@@ -1158,9 +1247,10 @@ class StoreClient:
         cyc_ok, created = await self._commit_create_ex(token, f"cycles/{cyc_id}", cycle_fields)
         if not cyc_ok:
             return _out(None, False)
-        # NB: cycle/profile counts are CALCULATED on the store (COUNT aggregation over
-        # approved+pending), not maintained as a running total here -- a best-effort
-        # increment that a rule denied is what left the browse counters stuck at 0.
+        # NB: the integration never maintains cycle/profile counts: the website
+        # increments them in the same batched write that creates the item (the store
+        # rules only allow +1 alongside a new child). A best-effort increment from
+        # here that a rule denied is what once left the browse counters stuck at 0.
         return _out(cyc_id, created)
 
     async def upload_device_bundle(
@@ -1242,6 +1332,7 @@ class StoreClient:
         token = await self.ensure_id_token(refresh_token)
         if not token:
             return None
+        uid = self._write_uid(refresh_token, uid)
         dev_path = self._doc_path(f"devices/{device_id}")
         conf_path = self._doc_path(f"devices/{device_id}/confirmations/{uid}")
         writes = [
@@ -1302,6 +1393,7 @@ class StoreClient:
         token = await self.ensure_id_token(refresh_token)
         if not token:
             return False
+        uid = self._write_uid(refresh_token, uid)
         prev_doc = await self._get_doc(f"devices/{_seg(device_id)}/ratings/{_seg(uid)}")
         prev = prev_doc.get("rating") if isinstance(prev_doc, dict) else None
         path = self._doc_path(f"devices/{device_id}/ratings/{uid}")

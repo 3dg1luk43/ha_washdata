@@ -62,6 +62,9 @@ const EMPTY_DIAGNOSTICS = {
     profile_count: 3,
     store_version: 8,
   },
+  // No restore point: "Undo last import" stays hidden until a replace import
+  // leaves one behind (register item 195).
+  import_undo: null,
 };
 
 const EMPTY_ML_STATUS = {
@@ -74,11 +77,6 @@ const EMPTY_ML_STATUS = {
   interval_days: 7,
   hour: 2,
   running: false,
-  matching: {
-    defaults: { corr_weight: 0.45, duration_weight: 0.22, energy_weight: 0.22, dtw_ensemble_w: 0.7 },
-    tuned: null,
-    active: 'default',
-  },
 };
 
 const EMPTY_ML_COMPARISON = {
@@ -117,11 +115,12 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   'ha_washdata/get_suggestions': NO_SUGGESTIONS,
   // Write commands — return success so form submissions don't throw.
   'ha_washdata/set_options': { success: true },
+  'ha_washdata/undo_import': { success: true, summary: { restored_from: '2026-10-01T10:00:00+00:00', counts: { profiles: 2, real_cycles: 5, reference_cycles: 0, backfill_cycles: 0 } } },
   'ha_washdata/set_lifetime_cycle_count': { success: true, lifetime_cycle_count: 250 },
   'ha_washdata/set_user_prefs': { success: true },
   'ha_washdata/set_panel_config': { success: true },
   // Task result (mock-hass TASK_START): manager.async_run_ml_training's summary.
-  'ha_washdata/trigger_ml_training': { ok: true, promoted: [], results: [], matching: { promoted: false } },
+  'ha_washdata/trigger_ml_training': { ok: true, promoted: [], results: [] },
   // Historical power-data import (#344). The two `__history_import_*_result` keys are
   // not real commands: they are the payloads TASK_START hands back as each detached
   // task's result, mirroring how the playground task keys work.
@@ -147,7 +146,6 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   },
   'ha_washdata/__history_import_apply_result': { imported: 1, duplicates: 0, capped: false, total_backfill: 1 },
   'ha_washdata/revert_ml_models': { success: true },
-  'ha_washdata/revert_matching_config': { success: true },
   'ha_washdata/label_cycle': { success: true },
   'ha_washdata/create_profile': { success: true, name: 'New Profile' },
   'ha_washdata/delete_profile': { success: true },
@@ -196,7 +194,8 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
     points: [{ value: 120, metric: 0.9, summary: {} }, { value: 180, metric: 0.8, summary: {} }],
   },
   // Playground settings control panel: the live effective values the sandbox opens
-  // on. `publishable` mirrors the backend allow-list (every key is a real option).
+  // on, plus this device's saved presets. `publishable` mirrors the backend
+  // allow-list (every key is a real option).
   'ha_washdata/get_playground_settings': {
     effective: {
       min_power: 2,
@@ -217,6 +216,9 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
       profile_match_min_duration_ratio: 0.1,
       profile_match_max_duration_ratio: 1.5,
     },
+    presets: [
+      { name: 'Quiet nights', values: { off_delay: 300, min_off_gap: 240 }, created_at: '2026-08-01T10:00:00+00:00', updated_at: '2026-08-01T10:00:00+00:00' },
+    ],
     publishable: [
       'min_power', 'off_delay', 'min_off_gap', 'start_threshold_w', 'stop_threshold_w',
       'completion_min_seconds', 'start_duration_threshold', 'end_repeat_count',
@@ -225,8 +227,17 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
       'dishwasher_end_spike_quiet_release',
       'profile_match_min_duration_ratio', 'profile_match_max_duration_ratio',
     ],
+    preset_limit: 30,
     classic_suggestions: { off_delay: 90, min_off_gap: 240 },
   },
+  'ha_washdata/save_playground_preset': {
+    success: true,
+    presets: [
+      { name: 'My preset', values: { off_delay: 222 }, created_at: '2026-08-16T10:00:00+00:00', updated_at: '2026-08-16T10:00:00+00:00' },
+      { name: 'Quiet nights', values: { off_delay: 300 }, created_at: '2026-08-01T10:00:00+00:00', updated_at: '2026-08-01T10:00:00+00:00' },
+    ],
+  },
+  'ha_washdata/delete_playground_preset': { success: true, presets: [] },
 };
 
 /**

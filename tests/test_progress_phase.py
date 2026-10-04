@@ -44,6 +44,9 @@ def _bound(*, state=STATE_RUNNING, program="Cotton 60", progress=0.0, ranges=Non
     mgr.detector.state = state
     mgr._current_program = program
     mgr._cycle_progress = progress
+    # The ranges cover the whole 60 min programme here, so the span is the same
+    # either way; partial ranges are covered in test_audit_progress_10_11_phase.
+    mgr._matched_profile_duration = 3600.0
     store = MagicMock()
     store.get_profile_phase_ranges.return_value = _RANGES if ranges is None else ranges
     # Use the real check_phase_match against a matching profiles dict.

@@ -230,6 +230,19 @@ async def _drive_selective_import(hass, manager, entry):
         )
 
 
+async def _drive_undo_import(hass, manager, entry):
+    """Register item 195: the undo puts the pre-import options back."""
+    manager.profile_store.async_restore_pre_import_snapshot = AsyncMock(
+        return_value={"restored_from": None, "counts": {},
+                      "entry_options": {"min_power": 3.5}}
+    )
+    with patch.object(ws_api, "_get_manager", return_value=manager), \
+            patch.object(ws_api, "_get_entry", return_value=entry):
+        await ws_api.ws_undo_import.__wrapped__(
+            hass, MagicMock(), {"id": 1, "entry_id": "e1"}
+        )
+
+
 async def _drive_store_download(hass, manager, entry):
     with patch.object(ws_api, "_get_entry", return_value=entry):
         applied = await ws_api._apply_store_settings(
@@ -245,12 +258,14 @@ async def _drive_store_download(hass, manager, entry):
         _drive_apply_suggestions,
         _drive_import,
         _drive_selective_import,
+        _drive_undo_import,
         _drive_store_download,
     ],
-    ids=["set_options", "apply_suggestions", "import", "selective_import", "store_download"],
+    ids=["set_options", "apply_suggestions", "import", "selective_import", "undo_import",
+         "store_download"],
 )
 async def test_every_option_writer_records_before_it_writes(drive) -> None:
-    """Each of the five `entry.options` writers, driven: the change is recorded
+    """Each of the six `entry.options` writers, driven: the change is recorded
     (old and new) BEFORE `async_update_entry` schedules the reload that rebuilds
     the store. Two of them (store download, selective import) had no test of it
     until this replaced a source-text count (audit TESTING-13)."""
@@ -275,20 +290,21 @@ async def test_every_option_writer_records_before_it_writes(drive) -> None:
     assert rec["min_power"]["new"] == 3.5
 
 
-async def test_no_sixth_option_writer_bypasses_the_helper() -> None:
-    """Structural lint, kept on purpose: the behaviour test above covers the five
+async def test_no_seventh_option_writer_bypasses_the_helper() -> None:
+    """Structural lint, kept on purpose: the behaviour test above covers the six
     known writers, but a NEW writer cannot be found by driving known handlers.
 
     The count is the contract, and since the PR #448 round-15 review it is a
-    clean one: ALL five writers go through `_record_option_changes`.
+    clean one: ALL six writers go through `_record_option_changes` (the sixth is
+    the import undo, register item 195).
     """
     import inspect
 
     src = inspect.getsource(ws_api)
-    assert src.count("async_update_entry(") == 5, (
+    assert src.count("async_update_entry(") == 6, (
         "a new entry.options writer appeared; wire it to _record_option_changes "
         "and add it to test_every_option_writer_records_before_it_writes"
     )
-    assert src.count("await _record_option_changes(") == 5, (
+    assert src.count("await _record_option_changes(") == 6, (
         "every option writer records through the helper; no inline copies"
     )

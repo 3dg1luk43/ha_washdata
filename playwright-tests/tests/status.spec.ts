@@ -206,14 +206,89 @@ test('a zero curve position is rendered, not swallowed as falsy', async ({ page 
   await expect(page.locator('.wd-prog-row').first()).toContainText('curve 0%', { timeout: 8_000 });
 });
 
+// ─── An undecided match is shown, not silent (MATCH-DECIDE-15) ───────────────
+
+function undecided(unc: Record<string, unknown> | null, program: string | null = null) {
+  const dev = JSON.parse(JSON.stringify(deviceRunning));
+  dev.devices[0].current_program = program;
+  dev.devices[0].match_uncertainty = unc;
+  return dev;
+}
+
+test('an undecided live match names the top two and how sure it is', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': undecided(
+    { top: 'Cotton 40°C', runner_up: 'Eco 60°C', margin: 0.04, sure_pct: 45 }) });
+  const unc = page.locator('.wd-prog-unc');
+  await expect(unc).toBeVisible({ timeout: 8_000 });
+  await expect(unc).toContainText('Uncertain: Cotton 40°C or Eco 60°C');
+  await expect(unc).toContainText('~45% sure');
+  // The dropdown still says Auto-detect: nothing was committed or relabelled.
+  await expect(page.locator('#wd-status-prog')).toHaveValue('auto_detect');
+});
+
+test('a lone candidate reads as a maybe', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': undecided(
+    { top: 'Quick 30°C', runner_up: null, margin: null, sure_pct: 60 }) });
+  const unc = page.locator('.wd-prog-unc');
+  await expect(unc).toContainText('Uncertain: maybe Quick 30°C', { timeout: 8_000 });
+  await expect(unc).toContainText('~60% sure');
+});
+
+test('a decided match shows no uncertainty line', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': deviceRunning });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  await expect(page.locator('.wd-prog-unc')).toHaveCount(0);
+});
+
+test('profile names in the uncertainty line render as text, never as markup', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': undecided(
+    { top: '<img src=x id=wd-xss>', runner_up: 'Eco', margin: 0.01, sure_pct: 25 }) });
+  await expect(page.locator('.wd-prog-unc')).toContainText('<img src=x id=wd-xss>', { timeout: 8_000 });
+  await expect(page.locator('#wd-xss')).toHaveCount(0);
+});
+
 // ─── Phase timeline uses the live phase sensor's scale ───────────────────────
 
-test('the phase timeline names the phase the live sensor names', async ({ page }) => {
-  // progress.current_phase maps progress onto the LAST range end (1000 s here), so
-  // 45.2% is 452 s = Spin. The timeline used to scale by the profile's 6500 s
-  // average instead and named no phase (or a different one) at the same moment.
+// progress.current_phase maps progress onto max(last range end, the program's
+// expected length), so partial ranges read at their real minutes (audit
+// PROGRESS-10): Wash 0-30 / Rinse 30-60 min on a 100 min program.
+const partialPhases = { phases: [
+  { name: 'Wash', start: 0, end: 1800 },
+  { name: 'Rinse', start: 1800, end: 3600 },
+] };
+
+function runningAt(progressPct: number, expectedS: number | null = 6000) {
+  const dev = JSON.parse(JSON.stringify(deviceRunning));
+  dev.devices[0].cycle_progress_pct = progressPct;
+  dev.devices[0].expected_duration_s = expectedS;
+  return dev;
+}
+
+test('the phase timeline reads partial ranges at their real minutes', async ({ page }) => {
+  // Minute 45 of 100 is Rinse. Stretching the ranges over the cycle (the old
+  // scale, the last range end) named Wash here.
   await bootPanel(page, {
-    'ha_washdata/get_devices': deviceRunning,
+    'ha_washdata/get_devices': runningAt(45),
+    'ha_washdata/get_profile_phases': partialPhases,
+  });
+  await expect(page.locator('.wd-ptl-cur')).toContainText('Rinse', { timeout: 8_000 });
+});
+
+test('the phase timeline names no phase past the last range', async ({ page }) => {
+  // Minute 80 of 100 is after Rinse ends at 60: no phase, as the sensor says.
+  await bootPanel(page, {
+    'ha_washdata/get_devices': runningAt(80),
+    'ha_washdata/get_profile_phases': partialPhases,
+  });
+  await expect(page.locator('.wd-ptl')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('.wd-ptl-cur')).toHaveCount(0);
+});
+
+test('ranges longer than the program keep their own end', async ({ page }) => {
+  // The span is the LONGER of the two: ranges to 1000 s on a 600 s program map
+  // 45.2% to 452 s, which is Spin.
+  await bootPanel(page, {
+    'ha_washdata/get_devices': runningAt(45.2, 600),
     'ha_washdata/get_profile_phases': { phases: [
       { name: 'Wash', start: 0, end: 400 },
       { name: 'Spin', start: 400, end: 1000 },

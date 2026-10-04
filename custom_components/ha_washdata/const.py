@@ -434,22 +434,6 @@ DEFAULT_DEFER_FINISH_CONFIDENCE = 0.55  # Minimum confidence to defer cycle fini
 # unchanged, dishwashers byte-identical (audit DETECT-02).
 DEFAULT_DEFER_FINISH_RATIO = 0.8
 
-# ML live-match commit gate: P(top-1 is correct) threshold to commit a match
-# before the persistence counter is satisfied.  Set high to avoid false-early
-# commits; the model's owner-holdout precision is ~0.87 at this score.
-ML_MATCH_COMMIT_THRESHOLD = 0.85
-
-# ML quality gate: P(cycle is a problem) threshold above which even a high-
-# confidence auto-label is downgraded to a feedback request.  Tuned for a
-# specificity of ~0.84 (few false positives) so users are not flooded.
-ML_QUALITY_SUSPICIOUS_THRESHOLD = 0.65
-
-# Match ranking history: maximum number of per-cycle snapshots retained on-device.
-# Each snapshot stores pre-computed live_match feature scalars (not traces) so
-# footprint is small; 500 snapshots cover ~6–12 months of typical usage and are
-# enough to build a per-device live_match training dataset.
-MATCH_RANKING_HISTORY_MAX = 500
-
 # Runtime overrun anomaly: a *soft, visible* signal (attribute + cycle metadata,
 # never a notification) flagged once a running cycle exceeds its matched
 # profile's expected duration by this ratio. Distinct from the 300% zombie-kill
@@ -540,8 +524,9 @@ SHAPE_DRIFT_RESAMPLE_N = 50           # points for envelope comparison
 CLUSTER_SHAPE_SIMILARITY_THRESHOLD = 0.75   # min correlation for shape-similar cluster
 CLUSTER_RESAMPLE_N = 50                      # points for pairwise comparison
 
-# Terminal-drop fast finalize (opt-in; gated on CONF_ENABLE_ML_MODELS via the
-# manager provider). A hard cliff-to-~0 at an elapsed offset EARLIER than this
+# Terminal-drop fast finalize (on for TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES, else
+# gated on CONF_ENABLE_ML_MODELS; detector_config.terminal_drop_enabled decides
+# for the manager and the Playground). A hard cliff-to-~0 at an elapsed offset EARLIER than this
 # device has ever legitimately gone quiet (learned from its own completed
 # cycles) is an anomaly - almost certainly a real stop (plug pulled / cancelled)
 # rather than a soak pause - so the cycle is finalized quickly instead of waiting
@@ -561,6 +546,13 @@ TERMINAL_DROP_MIN_PEAK_RATIO = 5.0      # cycle must have been clearly ON (peak 
 # treated as potentially a NEW program and DEFERRED to the proven slow path
 # rather than assumed to be a stop.
 TERMINAL_DROP_PEAK_FAMILIAR_TOL = 0.4
+# Device types that get the terminal-drop finalize whatever the "Apply smart
+# models" toggle says (audit ML-08). It is pure statistics, not a model, and only
+# dishwashers gain from it: a plug pulled mid-wash closes in 3-4.5 min instead of
+# waiting out 70-121 min (and being stored as completed); washers: 0 fires.
+# Without the toggle it fires only on a committed, unambiguous match
+# (detector_config.terminal_drop_may_fire).
+TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES = frozenset({"dishwasher"})
 
 DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Ghost cycles before threshold adjustment
 
@@ -636,19 +628,23 @@ MATCH_MIN_RESAMPLED_POINTS = 12
 # dtw_score = DIST_SCALE / (DIST_SCALE + scaled_dtw_distance).
 MATCH_DTW_BLEND = 0.5
 MATCH_DTW_DIST_SCALE = 50.0
-MATCH_DTW_REFINE_TOP_N = 5         # DTW is applied to this many top candidates
-                                   # (5 tuned via dtw_ab_eval: rescues correct
-                                   #  profiles Stage-2 ranked 4th-5th; +1.8pp)
+MATCH_DTW_REFINE_TOP_N = 5         # DTW is applied to this many top candidates.
+                                   # On the shipped path 3 ties 5 and 8 is
+                                   # identical to 5; 1 costs -0.92pp mid-cycle
+                                   # (audit MR-05).
 # Stage-3 DTW modes (config key "dtw_mode"):
 #   "legacy" - original: raw sequences, distance / len(current), fixed 50 W scale.
 #   "scaled" - both sequences resampled to MATCH_DTW_RESAMPLE_N and the distance
 #              expressed relative to the current peak (behaviour-neutral at
-#              MATCH_MAE_REF_PEAK), matching the Stage-2 MAE treatment. Default.
+#              MATCH_MAE_REF_PEAK), matching the Stage-2 MAE treatment.
 #   "ddtw"   - like "scaled" but warps on the first derivative (slope) of the
 #              curves, so alignment is driven by shape rather than absolute level.
-#   "ensemble" - blend of "scaled" and "ddtw": ENSEMBLE_W*L1 + (1-W)*DDTW.
-# Defaults tuned via devtools/dtw_ab_eval.py on cycle_data/ (leave-one-out top-1):
-# off 62.4%, legacy 66.4%, scaled 69.9%, ddtw 69.0%, ensemble(w=0.7,dd=30) 70.7%.
+#   "ensemble" - blend of "scaled" and "ddtw": ENSEMBLE_W*L1 + (1-W)*DDTW. Default.
+# Measured on the shipped path (devtools/eval.py, audit MR-05), vs ensemble: DTW off
+# -2.16pp mid-cycle top-1 (-3.78 at 25%) but +0.16 at cycle end (n.s.); scaled
+# alone -0.32, ddtw alone -0.16. Stage 3 earns its keep mid-cycle only. (The older
+# dtw_ab_eval table, off 62.4% ... ensemble 70.7%, predates item 303 and did not
+# run the shipped matcher.)
 DEFAULT_DTW_MODE = "ensemble"
 MATCH_DTW_RESAMPLE_N = 200         # common grid length for "scaled"/"ddtw" DTW
 MATCH_DDTW_DIST_SCALE = 30.0       # half-saturation for derivative-DTW distance
@@ -706,6 +702,22 @@ MATCH_LABEL_MIN_MARGIN = 0.08
 # so this is the conservative end of an accuracy/stability trade. Do not retune it
 # in isolation: any Stage-2 scoring change rescales the margin along with it.
 MATCH_DECISIVE_MARGIN = 0.12
+# DISPLAY ONLY - never a gate (audit MATCH-DECIDE-15/18). The Status card's
+# "Uncertain: X or Y, ~N% sure" figure while the live match is undecided:
+# P(the leading guess is the right programme) as a monotone piecewise-linear map
+# of the live top1-top2 margin, clamped at both ends. Being monotone, gating on it
+# equals gating on the margin, so it adds nothing as a gate and must not become one.
+# Fitted by devtools/margin_display_fit.py on devtools/eval.py --mode full, cuts
+# 0.1-0.9 (2324 live prefix folds from 48 exports, matcher-produced labels
+# excluded): 26% right at margin ~0 rising to 89% past 0.37; leave-one-source-out
+# ECE 0.059 (Brier 0.191 vs base rate 0.229). A lone candidate has no runner-up
+# (its margin is a 1.0 sentinel) and is right far less often than a real 1.0
+# margin, so it gets its own figure.
+MATCH_SURE_KNOTS: tuple[tuple[float, float], ...] = (
+    (0.007, 0.26), (0.036, 0.41), (0.064, 0.50), (0.099, 0.59),
+    (0.159, 0.73), (0.252, 0.84), (0.373, 0.89),
+)
+MATCH_SURE_SINGLE_CANDIDATE = 0.59
 # Smart Termination landscape guard: when a non-winning candidate is at least this
 # much longer than the matched profile AND has a decent shape score (before Stage-4
 # duration penalty), the current trace may be a *prefix* of that longer program
@@ -839,8 +851,11 @@ MATCH_MIN_RATIO_GRACE_S = 900.0
 END_GATE_HAZARD_MARGIN = 1.25
 END_GATE_HAZARD_MIN_CYCLES = 3
 END_GATE_HAZARD_POSITION_SLACK = 0.05
-# Despite the name, "energy" here means mean power (W), not Wh — the Stage-4
-# agreement term compares cur_energy=mean(curr_arr) vs profile_mean_power.
+# Stage-4 "energy" agreement. By default it compares mean power (W), not Wh:
+# cur_energy=mean(curr_arr) vs profile_mean_power. Washing machines and
+# washer-dryers compare integrated energy instead (analysis.stage4_energy_mode).
+# While elapsed < the template span both modes reduce to the mean ratio, so the
+# device choice only acts at cycle end or after an overrun (audit MR-09).
 MATCH_ENERGY_WEIGHT = 0.22
 MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halves
 MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
@@ -851,13 +866,15 @@ MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
 # where elapsed IS the cycle's true duration.
 #
 # Below a candidate's duration the term is deliberately UNCHANGED. Suppressing the
-# penalty there ("we simply have not got there yet") was measured and rejected: it
-# adds only +0.7pp mid-cycle top-1 over prefix energy alone, costs 3.7pp at the 90%
-# checkpoint, and - because it hands a longer sibling full duration agreement near
-# the short one's end - it puts a dishwasher's 50 deg and 65 deg programmes inside
-# MATCH_AMBIGUITY_MARGIN of each other at the end of the 50 deg, which reads as
-# ambiguous and blocks Smart Termination (measured on four real exports; #393 is
-# about finishing on time, so that is not a trade worth 0.7pp).
+# penalty there ("we simply have not got there yet") was measured and rejected. On
+# the shipped path (audit MR-02) it gains +4.65pp top-1 at 50% elapsed but costs
+# -6.58pp at 98%, which is where Smart Termination reads the live match; it also
+# raises the share of correct matches flagged ambiguous (11.2% -> 13.3%) and costs
+# washer-dryers 18.2pp. Near the short programme's end it hands a longer sibling
+# full duration agreement, so a dishwasher's 50 deg and 65 deg programmes land
+# inside MATCH_AMBIGUITY_MARGIN of each other and Smart Termination is blocked
+# (#393 is about finishing on time). The earlier "+0.7pp / -3.7pp at 90%" figures
+# came from dtw_ab_eval, which does not run the shipped matcher.
 MATCH_DURATION_SCALE_OVERRUN = 0.05
 # Issue #400, shape half: while a cycle is running, Stages 2 and 3 score it against
 # each candidate TRUNCATED to the elapsed time (reusing the #364 prefix machinery),
@@ -1212,6 +1229,9 @@ DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS = 600.0
 # a release after 600 s of quiet is premature on a programme measured to wait
 # 934-1810 s before its pump-out, and ended the corpus's "65° full" 12 min early
 # (register item 392). Lengthen-only, and bounded by the 30 min spike wait.
+# The same margin applies to the longest below-stop pause the profile's traced
+# cycles ever resumed from (match element 14, register item 465): element 11 is a
+# median that a cycle closed before its pump-out drags down.
 DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN = 1.1
 
 # Confirmation window a dishwasher must spend in ENDING before Smart Termination
@@ -1542,8 +1562,23 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 # the panel's Auto-label had replaced is put back. Pure data, idempotent.
 # v16: review-queue cleanup (register item 433): pending requests the new rule
 # would not raise are dropped, without recording an answer. Idempotent.
-STORAGE_VERSION = 16
+# v17: drops the state of the ML parts removed in 0.5.8 (the early match commit,
+# the quality gate, the matcher weight tuner, and on-device training of every head
+# but total_energy): `match_ranking_history`, `matching_config`, and the
+# `live_match` / `quality` / `end` / `remaining_time` records in
+# `ml_model_versions` / `ml_training_history`. No cycle or label is touched.
+# Idempotent.
+STORAGE_VERSION = 17
 STORAGE_KEY = "ha_washdata"
+
+# Restore point for "Undo last import" (register item 195): the store as it was before
+# the last replace import, in its own file `ha_washdata.<entry_id>.pre_import` so the
+# main store's per-save rewrite never carries a second copy. One per device: the next
+# replace import overwrites it, an undo consumes it, deleting the device removes it
+# (`async_remove_entry` + the orphan sweep in `__init__.py`). The record carries the
+# `STORAGE_VERSION` it was taken at, and a restore migrates it forward.
+PRE_IMPORT_STORE_SUFFIX = "pre_import"
+PRE_IMPORT_STORE_VERSION = 1
 
 # ─── Config-entry schema version (NOT the storage version above) ───────────────
 # Single source for the config-entry schema: `ConfigFlow.VERSION`/`MINOR_VERSION`, every
@@ -1585,12 +1620,11 @@ ENABLE_ML_TRAINING = True
 # real cycles the end-guard prevented no premature stop and raised the washer
 # median end lag 12.2 -> 17.5 min, every deferral the full 30 min cap.
 ENABLE_ML_END_GUARD = False
-# Also frozen off (audit ML-01/02/06/07), measured on the corpus:
-#   early commit (C2): 31% of its early commits wrong vs 8.4% for persistence;
-#   quality gate (C3): fired on 0 of the 12 auto-label-eligible real cycles;
-#   remaining-time regressor (C4): worse than the naive estimate on 7 of 8 installs.
-ENABLE_ML_EARLY_COMMIT = False
-ENABLE_ML_QUALITY_GATE = False
+# Also frozen off (audit ML-07): the remaining-time regressor (C4) was worse than
+# the naive estimate on 7 of 8 installs. The early match commit (C2, audit ML-02:
+# 31% of its early commits wrong vs 8.4% for persistence) and the quality gate
+# (C3, audit ML-06: fired on 0 of the 12 auto-label-eligible real cycles) were
+# frozen here too and were removed in 0.5.8 with the matcher weight tuner.
 ENABLE_ML_REMAINING_TIME = False
 
 # ─── Community store (online features) ────────────────────────────────────────
@@ -1688,16 +1722,10 @@ DEFAULT_ML_TRAINING_HOUR = 2          # 02:00 local - quiet hour
 DEFAULT_ML_TRAINING_MIN_CYCLES = 30   # need a meaningful corpus first
 DEFAULT_ML_TRAINING_INTERVAL_DAYS = 7 # retrain at most weekly
 
-# A newly trained model is only promoted over the shipped baseline when its
-# held-out AUC is at least (baseline AUC - this margin). Small negative slack is
-# allowed so personalisation can win even at a tiny AUC cost.
-ML_TRAINING_AUC_MARGIN = 0.02
-# Separate tolerance for the calibration gate: a retrained classifier must not
-# degrade balanced accuracy AT the live operating cutoff by more than this. Kept
-# distinct from ML_TRAINING_AUC_MARGIN because it bounds a different metric (decision
-# quality at a fixed threshold, not overall rank quality); same 0.02 default today.
-ML_TRAINING_BACC_MARGIN = 0.02
-ML_TRAINING_MIN_POSITIVES = 20  # need at least this many positive examples to trust a fit
+# (The classifier promotion gate - AUC margin, balanced-accuracy margin, minimum
+# positives - was removed in 0.5.8 with on-device classifier training: audit ML-11
+# measured it promoting worse models on 4-7 held-out positives. Only the
+# total_energy regressor is trained on-device now.)
 
 # Per-capability held-out-score history kept across training runs, so the panel
 # can show whether a model's fit is improving, steady, or declining over time
@@ -1705,9 +1733,9 @@ ML_TRAINING_MIN_POSITIVES = 20  # need at least this many positive examples to t
 # are retained.
 ML_TRAINING_HISTORY_MAX = 30
 
-# Remaining-time regressor (standardized_linear). Unlike the classifier heads it
-# has no shipped baseline; it is only promoted when its held-out mean-absolute
-# error on the completion-fraction target beats the naive elapsed/expected
+# Total-energy regressor (standardized_linear), the one head trained on-device.
+# It has no shipped baseline; it is only promoted when its held-out mean-absolute
+# error on the energy-fraction target beats the naive elapsed/expected
 # estimate by at least this relative margin (5% lower MAE). Trained from prefixes
 # of the device's own clean cycles.
 ML_TRAINING_REGRESSION_MARGIN = 0.05
@@ -1760,6 +1788,13 @@ MAINTENANCE_EVENT_TYPES = (
 # the "needs maintenance" nag advisory (duration-trend / shape-drift).
 MAINTENANCE_RECENT_SUPPRESS_DAYS = 30
 
+# ─── Playground setting presets (sandbox snapshots, per device) ────────────────
+# Named snapshots of the Playground control panel's values, stored under the
+# "playground_presets" store key. They never touch the live config: publishing a
+# value to entry.options is always an explicit, per-setting user action.
+PLAYGROUND_PRESET_MAX: int = 30                      # per-device cap (keeps the store small)
+PLAYGROUND_PRESET_NAME_MAX: int = 60                 # preset name length cap
+
 # ─── Which cycle categories count as evidence for a profile ────────────────────
 # A profile's envelope (its average curve + duration/energy spread) and the matching
 # template are built from stored cycles. By default all three categories count. Untick a
@@ -1776,9 +1811,8 @@ CONF_PROFILE_EVIDENCE_SOURCES = "profile_evidence_sources"
 EVIDENCE_REAL_CYCLES = "real_cycles"
 EVIDENCE_REFERENCE_CYCLES = "reference_cycles"
 EVIDENCE_BACKFILL_CYCLES = "backfill_cycles"
-# `real_cycles`/`reference_cycles` match the export taxonomy (`_EXPORT_CATEGORIES`); the
-# evidence view adds `backfill_cycles`, which the selective-export wizard does not yet
-# enumerate (whole-store export still round-trips it).
+# All three match the export taxonomy (`_EXPORT_CATEGORIES`), which the selective
+# export/import wizard enumerates per category (register item 129e).
 PROFILE_EVIDENCE_SOURCES = (
     EVIDENCE_REAL_CYCLES,
     EVIDENCE_REFERENCE_CYCLES,

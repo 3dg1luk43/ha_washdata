@@ -66,6 +66,20 @@ class OkResponse(TypedDict):
 
 # ─── Devices ────────────────────────────────────────────────────────────────────
 
+class MatchUncertainty(TypedDict):
+    """The top two of an undecided live match (MATCH-DECIDE-15). Display only.
+
+    ``runner_up`` and ``margin`` are None when only one programme scored.
+    ``sure_pct`` is ``match_rules.display_sure_pct``: how often the leading guess
+    was right at that margin on the corpus, rounded to 5. Never a gate.
+    """
+
+    top: str
+    runner_up: str | None
+    margin: float | None
+    sure_pct: int
+
+
 class DeviceInfo(TypedDict):
     """One entry in :class:`GetDevicesResponse` — live state for a device."""
 
@@ -77,9 +91,15 @@ class DeviceInfo(TypedDict):
     current_program: str | None
     time_remaining_s: float | None
     total_duration_s: float | None
+    # The matched program's expected length (s): what the phase sensor maps
+    # progress onto, so the Status phase timeline can use the same span.
+    expected_duration_s: float | None
     current_power_w: float | None
     cycle_progress_pct: float | None
     envelope_position: float | None
+    # Set while a cycle runs with no committed program, or with a runner-up within
+    # the ambiguity margin; None otherwise. The program sensor keeps `detecting...`.
+    match_uncertainty: MatchUncertainty | None
     suggestions_count: int
     suggestion_keys: list[str]
     feedback_count: int
@@ -107,8 +127,12 @@ class GetDeviceCyclesResponse(TypedDict):
     cycles: list[dict[str, Any]]
     reference_cycles: list[dict[str, Any]]
     backfill_cycles: list[dict[str, Any]]
+    # `total` / `has_more` describe the real (`cycles`) list only.
     total: int
     has_more: bool
+    # Reference + backfill, paged on their own `imported_offset` cursor (item 129a).
+    imported_total: int
+    imported_has_more: bool
 
 
 # ─── Settings ──────────────────────────────────────────────────────────────────
@@ -134,6 +158,9 @@ class GetProfilesResponse(TypedDict):
     coverage_gaps: dict[str, Any]
     profile_advisories: list[dict[str, Any]]
     profile_terminal: dict[str, Any]
+    # Profile name -> observed cycles the matcher labelled with it on its own
+    # (STORE-21); shown on imported program cards. Absent names mean 0.
+    profile_matcher_counts: dict[str, int]
 
 
 class CreateProfileResponse(TypedDict):
@@ -215,6 +242,9 @@ class DismissAllFeedbacksResponse(TypedDict):
 
 class GetDiagnosticsResponse(TypedDict):
     stats: dict[str, Any]
+    # The last replace import's restore point, ``{created_at, source, counts}``, or
+    # None when there is nothing to undo (register item 195).
+    import_undo: dict[str, Any] | None
 
 
 class ClearDebugDataResponse(TypedDict):
@@ -236,6 +266,18 @@ class AnalyzeImportResponse(TypedDict):
 
 class ImportConfigSelectiveResponse(TypedDict):
     success: bool
+    summary: dict[str, Any]
+
+
+class ImportConfigResponse(TypedDict):
+    success: bool
+    # False when the pre-import restore point could not be written (item 195).
+    restore_point_saved: bool
+
+
+class UndoImportResponse(TypedDict):
+    success: bool
+    # ``{restored_from, counts}``: when the restore point was taken, what it held.
     summary: dict[str, Any]
 
 
@@ -421,13 +463,25 @@ class GetMlTrainingStatusResponse(TypedDict):
     interval_days: int
     hour: int
     on_device_models: dict[str, Any]
-    matching: dict[str, Any]
 
 
 # ─── Playground (F3) ───────────────────────────────────────────────────────────
 
+class PlaygroundPreset(TypedDict):
+    """One saved Playground settings snapshot.
+
+    ``values`` holds only keys the Playground offers today; a stored key it no
+    longer offers is filtered out on read.
+    """
+
+    name: str
+    values: dict[str, Any]
+    created_at: Any
+    updated_at: Any
+
+
 class GetPlaygroundSettingsResponse(TypedDict):
-    """Live effective Playground settings.
+    """Live effective Playground settings + the device's saved presets.
 
     ``classic_suggestions`` is filtered to keys the Playground exposes so the
     panel can stage them directly. Every field here is required (total=True) so
@@ -435,8 +489,17 @@ class GetPlaygroundSettingsResponse(TypedDict):
     """
 
     effective: dict[str, Any]
+    presets: list[PlaygroundPreset]
     publishable: list[str]
+    preset_limit: int
     classic_suggestions: dict[str, Any]
+
+
+class PlaygroundPresetsResponse(TypedDict):
+    """Acknowledgement carrying the post-mutation preset list."""
+
+    success: bool
+    presets: list[PlaygroundPreset]
 
 
 class TaskSnapshot(TypedDict, total=False):
@@ -513,8 +576,13 @@ class StoreStatusResponse(TypedDict, total=False):
 
 
 class StoreItemsResponse(TypedDict, total=False):
-    """A list of store docs (devices / profiles / cycles)."""
+    """A list of store docs (devices / profiles / cycles).
+
+    ``error`` (``"store_unreachable"``) means the store could not be read, as opposed
+    to an empty ``items`` that really has nothing (audit STORE-09).
+    """
     items: list
+    error: str
     disabled: bool
 
 
@@ -573,6 +641,7 @@ class StoreDeviceProfilesResponse(TypedDict, total=False):
     """Resolved store deviceId + its profiles (for the Share dialog picker)."""
     device_id: str
     items: list
+    error: str
     disabled: bool
 
 
@@ -606,11 +675,18 @@ class StoreUploadDeviceResponse(TypedDict, total=False):
 
 
 class StoreDownloadDeviceResponse(TypedDict, total=False):
-    """Result of adopting a whole-device bundle into local reference cycles."""
+    """Result of adopting a whole-device bundle into local reference cycles (the
+    ``store_download`` task's result). ``partial`` + ``failed_profiles``: some
+    programs' cycles could not be fetched; ``error`` ``"store_unreachable"``: the
+    store could not be read, never reported as an empty adopt (audit STORE-09)."""
     profiles_adopted: int
     cycles_imported: int
+    cycles_skipped: int
     phases_applied: int
     settings_applied: int
+    cancelled: bool
+    partial: bool
+    failed_profiles: int
     error: str
     disabled: bool
 
@@ -679,11 +755,12 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "clear_debug_data": ClearDebugDataResponse,
     "wipe_history": SuccessResponse,
     "export_config": ExportConfigResponse,
-    "import_config": SuccessResponse,
+    "import_config": ImportConfigResponse,
     "get_export_inventory": GetExportInventoryResponse,
     "analyze_import": AnalyzeImportResponse,
     "export_config_selective": ExportConfigResponse,
     "import_config_selective": ImportConfigSelectiveResponse,
+    "undo_import": UndoImportResponse,
     "get_constants": GetConstantsResponse,
     "get_suggestions": GetSuggestionsResponse,
     "apply_suggestions": ApplySuggestionsResponse,
@@ -707,13 +784,14 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_ml_comparison": GetMlComparisonResponse,
     "get_ml_training_status": GetMlTrainingStatusResponse,
     "trigger_ml_training": StartTaskResponse,
-    "revert_matching_config": SuccessResponse,
     "revert_ml_models": SuccessResponse,
     "set_ml_review": SuccessResponse,
     "pause_cycle": OkResponse,
     "resume_cycle": OkResponse,
     "terminate_cycle": OkResponse,
     "get_playground_settings": GetPlaygroundSettingsResponse,
+    "save_playground_preset": PlaygroundPresetsResponse,
+    "delete_playground_preset": PlaygroundPresetsResponse,
     "subscribe_tasks": SubscribeTasksResponse,
     "cancel_task": CancelTaskResponse,
     "get_task_result": TaskSnapshot,
@@ -786,6 +864,7 @@ WS_COMMANDS: dict[str, dict] = {
         _entry(),
         _p("limit", "int", False),
         _p("offset", "int", False),
+        _p("imported_offset", "int", False),
     ]},
     "get_options": {"params": [_entry()]},
     "set_options": {"params": [_entry(), _p("options", "dict")]},
@@ -900,6 +979,7 @@ WS_COMMANDS: dict[str, dict] = {
         _p("cycle_destination", "str", False, enum=["reference", "real_history"]),
         _p("apply_settings", "bool", False),
     ]},
+    "undo_import": {"params": [_entry()]},
     "get_constants": {"params": []},
     "get_suggestions": {"params": [_entry()]},
     "apply_suggestions": {"params": [_entry(), _p("keys", "list[str]")]},
@@ -952,7 +1032,6 @@ WS_COMMANDS: dict[str, dict] = {
     "get_ml_comparison": {"params": [_entry()]},
     "get_ml_training_status": {"params": [_entry()]},
     "trigger_ml_training": {"params": [_entry()]},
-    "revert_matching_config": {"params": [_entry()]},
     "revert_ml_models": {"params": [_entry()]},
     "set_ml_review": {"params": [
         _entry(),
@@ -969,6 +1048,12 @@ WS_COMMANDS: dict[str, dict] = {
         _entry(),
         _p("include_suggestions", "bool", False),
     ]},
+    "save_playground_preset": {"params": [
+        _entry(),
+        _p("name", "str"),
+        _p("values", "dict"),
+    ]},
+    "delete_playground_preset": {"params": [_entry(), _p("name", "str")]},
     "subscribe_tasks": {"params": [_p("entry_id", "str|null", False)]},
     "cancel_task": {"params": [_p("task_id", "str")]},
     "get_task_result": {"params": [_p("task_id", "str")]},

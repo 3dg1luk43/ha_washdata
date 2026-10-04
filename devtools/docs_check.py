@@ -9,7 +9,8 @@ checks, all stdlib-only, deterministic and network-free (CI runs this before any
 ``pip install``):
 
 1. **Symbol anchors.** Every ``file.py:symbol`` / ``file.py::symbol`` in CLAUDE.md,
-   README.md and docs/internal/INTEGRATION_REFERENCE.md must name a file under
+   README.md, docs/internal/INTEGRATION_REFERENCE.md and register/OPEN.md must name
+   a file under
    ``custom_components/ha_washdata/``, ``devtools/`` or ``tests/`` that defines
    ``symbol`` (AST: def/class, an assignment target, a ``self.x =`` attribute;
    ``Class.member`` is looked up inside the class). ``NAME_*`` and a trailing ``_``
@@ -20,9 +21,11 @@ checks, all stdlib-only, deterministic and network-free (CI runs this before any
    must agree with ``const.py``; the storage migration range ``v1->N`` and every
    ``vA->vB`` step must top out at ``STORAGE_VERSION``; the config entry
    ``schema v1->X.Y`` must equal ``CONFIG_ENTRY_VERSION.CONFIG_ENTRY_MINOR_VERSION``.
-3. **Register ids.** Rows ``| <id> | <STATUS> | <KIND> |`` in section 7 of
-   INTEGRATION_REFERENCE.md must have unique ids. Range rows (``135-140``) are
-   summaries and are skipped.
+3. **Register ids.** Rows ``| <id> | <STATUS> | <KIND> |`` in
+   docs/internal/register/OPEN.md and ARCHIVE.md must have unique ids across both
+   files. Range rows (``135-140``) are summaries and are skipped. OPEN.md holds only
+   OPEN/PARTIAL rows with a summary of at most 300 characters; ARCHIVE.md holds none
+   (audit DOCS-03: the register had grown too big to read).
 4. **Em dash ratchet.** U+2014 per git-tracked text file must not rise (repo rule:
    no em dashes anywhere). A file not in the baseline is allowed zero.
 5. **Deep-dive identifiers.** In ``docs/internal/reference/*.md`` (outside fenced
@@ -71,7 +74,14 @@ ROOT = Path(__file__).resolve().parents[1]
 BASELINE_PATH = ROOT / "devtools" / "docs_check_baseline.json"
 COMPONENT = "custom_components/ha_washdata"
 REFERENCE = "docs/internal/INTEGRATION_REFERENCE.md"
-ANCHOR_DOCS = ("CLAUDE.md", "README.md", REFERENCE)
+REGISTER_OPEN = "docs/internal/register/OPEN.md"
+REGISTER_ARCHIVE = "docs/internal/register/ARCHIVE.md"
+REGISTER_DOCS = (REGISTER_OPEN, REGISTER_ARCHIVE)
+REGISTER_OPEN_STATUSES = frozenset({"OPEN", "PARTIAL"})
+REGISTER_OPEN_SUMMARY_MAX = 300
+# The archive is history: its FIXED rows name removed code on purpose, so it is
+# not anchor-checked. OPEN.md is a work list and must point at live code.
+ANCHOR_DOCS = ("CLAUDE.md", "README.md", REFERENCE, REGISTER_OPEN)
 CONSTANT_DOCS = ("CLAUDE.md", "README.md")
 ANCHOR_ROOTS = (COMPONENT, "devtools", "tests")
 DEEP_DIVES = "docs/internal/reference"
@@ -108,7 +118,8 @@ STORAGE_STEP_RE = re.compile(r"\bv(\d+)->v?(\d+)\b")
 CONFIG_RANGE_RE = re.compile(r"schema v1->(\d+)\.(\d+)")
 
 # | <id> | <STATUS> | <KIND> | ...   (KIND is occasionally "-")
-REGISTER_ROW_RE = re.compile(r"^\|\s*(\d+[a-z]?(?:-\d+[a-z]?)?)\s*\|\s*[A-Z][^|\n]*\|[^|\n]+\|", re.M)
+# A register row: id, status, then the rest of the line.
+REGISTER_ROW_FULL_RE = re.compile(r"^\|\s*(\d+[a-z]?(?:-\d+[a-z]?)?)\s*\|\s*([A-Z][^|\n]*)\|([^\n]*)$", re.M)
 
 # Deep-dive identifiers (check 5).
 CODE_SPAN_RE = re.compile(r"`([^`]+)`")
@@ -449,22 +460,48 @@ def _check_versions(doc: str, text: str, values: dict[str, object], report: Repo
     return checked
 
 
-def _register_section(text: str) -> str:
-    start = re.search(r"^## 7\.", text, re.M)
-    if not start:
-        return ""
-    end = re.search(r"^## (?!7\.)\d+\.", text[start.end():], re.M)
-    return text[start.start(): start.end() + end.start()] if end else text[start.start():]
+def _register_table(text: str) -> str:
+    """The register table: everything before the first ``## `` heading after it.
+
+    OPEN.md's per-item detail and ARCHIVE.md's pre-split prose follow the table
+    under their own headings and may quote rows of other tables.
+    """
+    end = re.search(r"^## ", text, re.M)
+    return text[: end.start()] if end else text
 
 
 def check_register(root: Path, report: Report) -> None:
-    path = root / REFERENCE
-    section = _register_section(path.read_text(encoding="utf-8")) if path.is_file() else ""
-    ids = [i for i in REGISTER_ROW_RE.findall(section) if "-" not in i]
+    ids: list[str] = []
+    for rel in REGISTER_DOCS:
+        path = root / rel
+        if not path.is_file():
+            report.failures.append(f"{rel}: missing (the register lives in register/OPEN.md + ARCHIVE.md)")
+            continue
+        table = _register_table(path.read_text(encoding="utf-8"))
+        rows = [m for m in REGISTER_ROW_FULL_RE.finditer(table) if "-" not in m.group(1)]
+        if not rows:
+            report.failures.append(f"{rel}: no register rows found (format changed?)")
+        ids += [m.group(1) for m in rows]
+        for m in rows:
+            status, rest = m.group(2).strip(), m.group(3)
+            line = _line_of(table, m.start())
+            if rel == REGISTER_OPEN:
+                if status not in REGISTER_OPEN_STATUSES:
+                    report.failures.append(
+                        f"{rel}:{line}: item {m.group(1)} is {status}; closed items belong in ARCHIVE.md"
+                    )
+                summary = rest.rsplit("|", 2)[-2].strip() if rest.count("|") >= 2 else rest.strip()
+                if len(summary) > REGISTER_OPEN_SUMMARY_MAX:
+                    report.failures.append(
+                        f"{rel}:{line}: item {m.group(1)} summary is {len(summary)} chars "
+                        f"(max {REGISTER_OPEN_SUMMARY_MAX}); put the detail under ## Detail"
+                    )
+            elif status in REGISTER_OPEN_STATUSES:
+                report.failures.append(
+                    f"{rel}:{line}: item {m.group(1)} is {status}; open items belong in OPEN.md"
+                )
     report.register_counts = Counter(ids)
     report.stats["register ids"] = len(ids)
-    if path.is_file() and not ids:
-        report.failures.append(f"{REFERENCE}: no section-7 register rows found (format changed?)")
 
 
 def check_em_dash(root: Path, report: Report) -> None:
@@ -649,7 +686,7 @@ def apply_baseline(report: Report, baseline: dict) -> None:
         allowed = known_dups.get(i, 1)
         if n > allowed:
             report.failures.append(
-                f"{REFERENCE}: register id {i} appears {n} times (baseline {allowed}); give the new row a fresh id"
+                f"register: id {i} appears {n} times across OPEN.md + ARCHIVE.md (baseline {allowed}); give the new row a fresh id"
             )
         elif n < allowed:
             report.notes.append(f"register id {i} now appears {n} times (baseline {allowed})")

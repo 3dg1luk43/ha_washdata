@@ -25,8 +25,6 @@
     "reviewed": "Revisionato",
     "steady": "→ stabile",
     "underrun": "Terminato prima del solito",
-    "using_defaults": "Utilizzo delle impostazioni predefinite fornite",
-    "using_tuned": "Utilizzo di pesi accordati",
     "overrun_ratio": "({x}x il previsto)",
     "underrun_ratio": "({pct}% del previsto)",
     "imported_tip": "Importato dallo store della community. Usato solo per la corrispondenza, non conteggiato nelle statistiche.",
@@ -39,9 +37,20 @@
     "awaiting_tip": "In attesa dell'approvazione della community",
     "awaiting_n": "In attesa di approvazione · {n} confermati",
     "awaiting": "In attesa di approvazione",
-    "approved": "Approvato"
+    "approved": "Approvato",
+    "matcher_unused": "Nessuna corrispondenza con i tuoi cicli finora",
+    "matcher_used": "Corrisponde a {n} dei tuoi cicli",
+    "matcher_used_one": "Corrisponde a {n} dei tuoi cicli",
+    "matcher_used_many": "Corrisponde a {n} dei tuoi cicli",
+    "matcher_used_other": "Corrisponde a {n} dei tuoi cicli",
+    "matcher_used_tip": "Cicli registrati su questo elettrodomestico che il comparatore di WashData ha etichettato autonomamente con questo programma importato. Un programma importato che non trova mai corrispondenza potrebbe non essere adatto al tuo elettrodomestico e può essere rimosso. Conteggiato localmente; nulla viene inviato allo store."
   },
   "btn": {
+    "pg_preset_delete": "Elimina preimpostazione",
+    "pg_preset_load": "Carica preimpostazione",
+    "pg_preset_load_tip": "Sostituisci i valori del Playground con questa preimpostazione (le impostazioni attive non vengono toccate)",
+    "pg_preset_save": "Salva come preimpostazione",
+    "pg_preset_save_tip": "Salva tutti i valori qui sotto come preimpostazione con nome per questo dispositivo",
     "reset_zoom": "Reimposta zoom",
     "set_brand_model": "Imposta marca e modello",
     "refresh_catalog": "Aggiorna catalogo",
@@ -122,7 +131,6 @@
     "reset": "Reset",
     "reset_ml_models_tip": "Scarta i modelli ottimizzati e torna a quelli integrati. WashData può riapprenderli in seguito.",
     "reset_to_builtin": "Ripristina i modelli integrati",
-    "reset_to_defaults": "Ripristina le impostazioni predefinite",
     "resume_cycle": "Riprendi ciclo",
     "resume_cycle_tip": "Riprendi il ciclo in pausa",
     "revert_settings": "Annulla modifiche",
@@ -193,7 +201,8 @@
     "retry": "Riprova",
     "confirm_appliance": "Conferma questo elettrodomestico",
     "confirmed": "Confermato",
-    "create_profile_from_gap": "Crea profilo"
+    "create_profile_from_gap": "Crea profilo",
+    "undo_import": "Annulla l'ultima importazione"
   },
   "conflict": {
     "anti_wrinkle_exit": {
@@ -288,7 +297,6 @@
     "manual_recording": "Registrazione manuale",
     "manual_recording_tip": "Esegui intenzionalmente un ciclo mentre WashData registra la traccia di potenza. Avvia appena prima che l'elettrodomestico parta, Ferma quando ha finito, poi Elabora per salvarlo come profilo con nome.",
     "ml_learned": "Cosa ha imparato WashData",
-    "ml_matching_tuning": "Personalizzazione della corrispondenza del programma",
     "ml_settings_card": "Impostazioni",
     "ml_smart_learning": "Apprendimento intelligente",
     "my_preferences": "Le mie preferenze",
@@ -311,7 +319,8 @@
     "online_account": "Store della community e funzionalità online",
     "import_power_history": "Importa lo storico di potenza",
     "service_status": "Stato della manutenzione",
-    "online_account_tab": "Online e community"
+    "online_account_tab": "Online e community",
+    "live_match_debug": "Debug abbinamento in tempo reale"
   },
   "health": {
     "fair": "Qualità profilo accettabile",
@@ -359,13 +368,11 @@
     "cycles_lc": "cicli",
     "date": "Data",
     "debug_traces": "Tracce di debug",
-    "default": "Predefinito",
     "default_access_level": "Livello predefinito per gli utenti non elencati di seguito",
     "default_other": "Predefinito (altri dispositivi)",
     "default_tab": "Scheda predefinita all'apertura del pannello",
     "description": "Descrizione",
     "duration": "Durata",
-    "emphasis": "Enfasi",
     "enable_access_control": "Abilita il controllo dell'accesso per utente",
     "energy": "Energia",
     "event_type": "Tipo di evento",
@@ -377,7 +384,6 @@
     "group_name": "Nome del gruppo",
     "head_trim": "Ritaglio iniziale (s)",
     "hide_tabs": "Nascondi le schede per i non amministratori",
-    "in_use": "In uso",
     "json_data": "Dati JSON",
     "label": "Programma",
     "last": "Ultimi",
@@ -410,6 +416,9 @@
     "pg_group_timing": "Regole di tempistica",
     "pg_idle": "Inattivo",
     "pg_poor_match": "Abbinamento scarso",
+    "pg_preset": "Preimpostazione del Playground",
+    "pg_preset_name": "Nome della nuova preimpostazione",
+    "pg_preset_none": "Seleziona una preimpostazione…",
     "pg_strong_match": "Abbinamento forte",
     "pg_weak_match": "Abbinamento debole",
     "phase_name": "Nome della fase",
@@ -544,7 +553,6 @@
     "cat_custom_phases": "Fasi personalizzate",
     "cat_profile_groups": "Gruppi di profili",
     "cat_settings": "Impostazioni di rilevamento e riconoscimento",
-    "cat_matching_config": "Regolazione del riconoscimento",
     "cat_ml_models": "Modelli ML",
     "cat_feedback": "Feedback ed etichette di revisione",
     "cat_suggestions": "Suggerimenti",
@@ -595,7 +603,21 @@
     "pg_autolabel": "Etichettatura automatica",
     "pg_label_review": "Richiede revisione",
     "pg_ev_match_reverted": "Abbinamento annullato",
-    "pg_ev_verified_pause": "Pausa verificata"
+    "pg_ev_verified_pause": "Pausa verificata",
+    "n_samples": "{n} campioni",
+    "n_samples_one": "{n} campione",
+    "n_samples_many": "{n} campioni",
+    "n_samples_other": "{n} campioni",
+    "n_cycles": "{n} cicli",
+    "n_cycles_one": "{n} ciclo",
+    "n_cycles_many": "{n} cicli",
+    "n_cycles_other": "{n} cicli",
+    "energy_per_cycle": "{v}/ciclo",
+    "energy_total": "{v} in totale",
+    "automation_off": "(disattivata)",
+    "ref_cycle_none": "Nessuno",
+    "share_name": "Mostra il mio nome su ciò che condivido",
+    "cat_backfill_cycles": "Cicli trovati in uno storico di potenza importato"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -617,17 +639,9 @@
     "trend_declining_tip": "L'adattamento di questo modello è peggiorato nelle ultime verifiche: rivedere più cicli può aiutarlo a riapprendere.",
     "trend_steady_tip": "L'adattamento di questo modello è rimasto pressoché stabile nelle ultime verifiche.",
     "cap_blurb": {
-      "end": "Capire quando un ciclo è davvero terminato",
-      "live_match": "Identificare prima il programma in corso",
-      "quality": "Individuare cicli rilevati male o corrotti",
-      "remaining_time": "Prevedere quanto tempo manca",
       "total_energy": "Prevedere l'energia totale e il costo"
     },
     "cap_label": {
-      "end": "Rilevamento di fine ciclo",
-      "live_match": "Riconoscimento del programma",
-      "quality": "Controllo qualità del ciclo",
-      "remaining_time": "Stima del tempo rimanente",
       "total_energy": "Stima dell'energia"
     },
     "metric_auc": "AUC {auc} sui dati di validazione",
@@ -681,10 +695,17 @@
     "apply_suggestions_title": "Applica suggerimenti",
     "apply_suggestions_msg": "Modificare queste {n} impostazioni? L'integrazione si ricarica dopo il salvataggio.",
     "discard_settings_title": "Scartare le modifiche non salvate?",
-    "discard_settings_msg": "Modifiche alle impostazioni non salvate: {n}. Uscire da Impostazioni e scartarle?"
+    "discard_settings_msg": "Modifiche alle impostazioni non salvate: {n}. Uscire da Impostazioni e scartarle?",
+    "profile_title": "Profilo · {name}",
+    "undo_import_msg": "Tutto ciò che è memorizzato per questo dispositivo torna com'era prima dell'ultima importazione ({when}), comprese le sue impostazioni. I cicli registrati e le modifiche apportate da allora vanno persi.",
+    "undo_import_ok": "Annulla importazione",
+    "undo_import_title": "Annulla l'ultima importazione"
   },
   "msg": {
     "pg_canvas_empty3": "Scegli un ciclo qui sopra e premi Esegui per simularlo. Poi passa il puntatore per leggere i valori, scorri o pizzica per ingrandire e trascina per spostarti.",
+    "pg_preset_delete_confirm": "Eliminare la preimpostazione \"{name}\"?",
+    "pg_preset_limit": "Limite di preimpostazioni raggiunto ({n})",
+    "pg_preset_overwrite": "Sovrascrivere la preimpostazione \"{name}\"?",
     "tail_trim_hint": "Numero di secondi da rimuovere dalla fine",
     "store_sibling_hint": "Non c'è nulla di condiviso per il tuo modello esatto? Un modello molto simile della stessa marca è di solito un buon punto di partenza.",
     "store_declare_appliance": "Indica a WashData quale elettrodomestico possiedi e questa scheda mostrerà le configurazioni che altre persone hanno condiviso per esso. Puoi anche digitare una marca qui sopra per dare un'occhiata.",
@@ -731,7 +752,6 @@
     "maintenance_load_error": "Impossibile caricare i dati di manutenzione: {error}",
     "maintenance_requires_access": "La manutenzione e l'esportazione/importazione richiedono l'accesso completo.",
     "manual_duration_hint": "La durata del ciclo media/prevista del profilo, utilizzata per le stime del tempo rimanente. Modifica per impostarlo; lasciandolo invariato mantiene il valore corrente.",
-    "matching_tuning_intro": "Durante l'apprendimento, WashData regola anche la misura in cui l'abbinamento del programma pesa la forma rispetto alla durata e all'energia.",
     "merge_intro": "I cicli selezionati vengono combinati in uno solo (ordine cronologico; spazi vuoti riempiti con 0 W). Scegli il profilo risultante.",
     "ml_intro": "WashData viene fornito con modelli intelligenti che funzionano immediatamente.",
     "ml_learned_intro": "Modelli ottimizzati per questa macchina.",
@@ -940,7 +960,16 @@
     "connect_to_confirm": "Connettiti nell'icona delle impostazioni per confermare o valutare.",
     "coverage_gap_cluster": "{count} cicli recenti senza etichetta di circa {min} min sembrano un programma che non hai ancora creato.",
     "pg_label_yes": "Verrebbe etichettato \"{name}\" a fine ciclo",
-    "pg_label_no": "Richiederebbe una revisione: {reason}"
+    "pg_label_no": "Richiederebbe una revisione: {reason}",
+    "live_match_debug_tip": "Fiducia: quanto la curva di potenza attuale corrisponde al profilo candidato migliore (0-100%). Ambiguo: i due candidati migliori hanno punteggi entro il 5% l'uno dall'altro; l'etichetta resta incerta finché il ciclo non termina.",
+    "automation_alias_started": "{device}: ciclo avviato",
+    "automation_alias_finished": "{device}: ciclo terminato",
+    "automation_desc_started": "Viene eseguita quando inizia un ciclo di {device}. Aggiungi le tue azioni (notifica, luci, ...).",
+    "automation_desc_finished": "Viene eseguita quando termina un ciclo di {device}. Aggiungi le tue azioni (notifica, luci, ...).",
+    "feedback_detected": "WashData ha rilevato: {name}",
+    "import_undo_hint": "Viene conservato un punto di ripristino precedente all'ultima importazione ({when}): {profiles} profilo/i e {cycles} ciclo/i.",
+    "replace_undo_hint": "Prima viene salvato un punto di ripristino, così puoi annullare questa importazione da Esporta/Importa.",
+    "pg_in_sample_note": "Questi cicli hanno anche contribuito a costruire i profili con cui vengono confrontati, quindi questi risultati sono ottimistici: sui nuovi cicli aspettati un numero leggermente inferiore di corrispondenze corrette."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
@@ -1119,7 +1148,7 @@
       "label": "Tolleranza stima"
     },
     "enable_ml_models": {
-      "doc": "Durante un ciclo, lascia che un modello ottimizzato per questa macchina preveda energia e costo totali, e lascia che un ciclo la cui potenza cala insolitamente presto, su un programma che WashData conosce bene, termini senza attendere l'intero ritardo di spegnimento. Spento = solo la classica logica basata sulla potenza.",
+      "doc": "Durante un ciclo, lascia che un modello ottimizzato per questa macchina preveda energia e costo totali, e lascia che un ciclo la cui potenza cala insolitamente presto, su un programma che WashData conosce bene, termini senza attendere l'intero ritardo di spegnimento. Le lavastoviglie ottengono questa fine anticipata anche senza questa impostazione, una volta riconosciuto il loro programma. Spento = solo la classica logica basata sulla potenza.",
       "label": "Applica modelli intelligenti durante un ciclo"
     },
     "end_energy_threshold": {
@@ -1171,7 +1200,7 @@
       "label": "Potenza minima"
     },
     "ml_training_enabled": {
-      "doc": "Studia periodicamente i cicli esaminati durante la notte e ottimizza i modelli per questa macchina specifica. Un cambiamento viene mantenuto solo quando ottiene effettivamente risultati migliori nei cicli sospesi, quindi questo può solo aiutare o rimanere lo stesso, senza mai regredire.",
+      "doc": "Riaddestra periodicamente il modello dell'energia prevista sui cicli completati di questa macchina. Un modello riaddestrato viene mantenuto solo se supera, sui cicli di validazione, la semplice stima basata sul tempo trascorso rispetto alla durata prevista; altrimenti resta quello attuale.",
       "label": "Impara da questa macchina"
     },
     "ml_training_hour": {
@@ -1211,7 +1240,7 @@
       "label": "Canale Android (fine)"
     },
     "notify_finish_message": {
-      "doc": "Corpo inviato al termine di un ciclo. Variabili modello: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} e {vs_typical} sono i più utili qui.",
+      "doc": "Corpo inviato al termine di un ciclo. Variabili modello: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status}. {time_finished} e {vs_typical} sono i più utili qui. {status} è completed o force_stopped: un ciclo interrotto (una falsa partenza o un programma annullato) non invia alcun messaggio di fine.",
       "label": "Messaggio di fine"
     },
     "notify_finish_services": {
@@ -1307,15 +1336,15 @@
       "label": "Intervallo di corrispondenza"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "Durata massima del ciclo rispetto al profilo. 1.3 significa che un ciclo deve essere inferiore al 130% della durata del profilo per corrispondere.",
+      "doc": "Un programma viene scartato quando il ciclo supera questo multiplo della durata tipica del programma. 1,8 significa che un ciclo durato l'80% in più del programma non gli corrisponde più.",
       "label": "Rapporto durata massima"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "Durata minima del ciclo rispetto al profilo. 0,9 significa che un ciclo deve corrispondere almeno al 90% della durata del profilo per corrispondere.",
+      "doc": "Un programma viene considerato solo dopo che il ciclo ha raggiunto questa frazione della durata tipica del programma. 0,10 significa che un programma di 2 ore diventa candidato dopo 12 minuti. Non applicato durante i primi 15 minuti di un ciclo.",
       "label": "Rapporto durata minima"
     },
     "profile_match_threshold": {
-      "doc": "Punteggio di somiglianza minimo (0-1) richiesto alla fine del ciclo per accettare l'identificazione del programma. Alzarlo per ridurre le identificazioni errate; abbassarlo se i programmi della macchina non corrispondono. Il valore predefinito 0,4 è un punto di partenza conservativo.",
+      "doc": "Punteggio minimo di corrispondenza in tempo reale (0-1) prima che la Terminazione intelligente e la conclusione antirughe dell'asciugatrice possano agire sul programma corrispondente. Alzalo se i cicli terminano in anticipo con una corrispondenza incerta; abbassalo se cicli chiaramente riconosciuti attendono comunque l'intero ritardo di spegnimento. Non cambia il programma mostrato né l'etichetta assegnata. Predefinito 0,4.",
       "label": "Soglia di corrispondenza"
     },
     "profile_unmatch_threshold": {
@@ -1444,6 +1473,9 @@
     "notify_icon_color": {
       "label": "Colore notifica",
       "doc": "Colore d'accento per le notifiche di questo elettrodomestico, così da distinguere a colpo d'occhio una lavatrice, un'asciugatrice e una lavastoviglie. iOS colora l'icona e la barra di avanzamento dell'Attività in tempo reale sulla schermata di blocco e nella Dynamic Island. Ad Android viene inviato lo stesso colore, ma ciò che ne fa dipende dal telefono: alcuni colorano l'icona e molti (in particolare Samsung One UI) lo ignorano del tutto. Il formato esadecimale (es. #03A9F4) è compreso da entrambi. Lascia vuoto per l'impostazione predefinita della piattaforma."
+    },
+    "share_name": {
+      "doc": "Pubblica il nome del tuo account connesso come autore dei cicli che condividi. Disattivato: vengono condivisi senza nome."
     }
   },
   "setting_group": {
@@ -1547,14 +1579,17 @@
     "rebuilding": "Ricostruzione…",
     "analyzing": "Analisi…",
     "resetting": "Reimpostazione…",
-    "reverting": "Ripristino…",
     "trimming": "Ritaglio…",
     "splitting": "Divisione…",
     "deleting": "Eliminazione…",
     "imported": "Importato",
     "preparing": "Preparazione…",
     "unlabelling": "Rimozione etichetta…",
-    "working": "Elaborazione…"
+    "working": "Elaborazione…",
+    "match_uncertain": "Incerto: {top} o {runner}",
+    "match_uncertain_single": "Incerto: forse {top}",
+    "match_sure": "~{pct}% di certezza",
+    "match_uncertain_tip": "WashData non ha ancora scelto un programma. Il valore indica quanto spesso l'ipotesi in testa, {top}, si è rivelata corretta nei cicli registrati quando aveva questo vantaggio sul secondo candidato. È solo a titolo informativo e non cambia il modo in cui i cicli vengono rilevati o etichettati."
   },
   "tab": {
     "advanced": "Avanzato",
@@ -1609,13 +1644,14 @@
     "json_required": "I dati JSON sono obbligatori",
     "legacy_removed": "Azioni legacy rimosse",
     "logs_exported": "Registri esportati",
-    "matching_reverted": "I pesi corrispondenti sono stati ripristinati ai valori predefiniti",
     "min_2_profiles": "Seleziona almeno 2 profili per un gruppo",
     "ml_training_no_improvement": "Formazione completata: linea di base mantenuta (nessun miglioramento)",
     "models_reverted": "I modelli sul dispositivo sono tornati ai valori di base",
     "name_required": "Nome richiesto",
     "no_split_found": "Non è stato trovato alcun intervallo inattivo su cui dividere",
     "panel_settings_saved": "Impostazioni del pannello salvate",
+    "pg_preset_loaded": "Preimpostazione \"{name}\" caricata",
+    "pg_preset_saved": "Preimpostazione \"{name}\" salvata",
     "pg_sugg_loaded": "{n} valore/i suggerito/i caricato/i - avvia il Playground per confrontare",
     "phase_name_required": "Il nome della fase è obbligatorio",
     "phase_reset": "Fase \"{name}\" ripristinata alla versione integrata",
@@ -1713,7 +1749,6 @@
     "phase_deleted": "Fase \"{name}\" eliminata",
     "profile_created": "Profilo \"{name}\" creato",
     "rename_failed": "Rinomina non riuscita: {error}",
-    "revert_failed": "Ripristino non riuscito: {error}",
     "save_failed": "Salvataggio non riuscito: {error}",
     "split_complete": "Diviso in {count} cicli",
     "start_failed": "Avvio non riuscito: {error}",
@@ -1724,7 +1759,11 @@
     "store_import_duplicate": "Questa registrazione è già sul tuo dispositivo.",
     "device_approved": "Approvato dalla community",
     "thanks_confirming": "Grazie per la conferma",
-    "rating_saved": "Valutazione della qualità salvata"
+    "rating_saved": "Valutazione della qualità salvata",
+    "store_download_partial": "Impossibile scaricare {n} programma/i; riprova più tardi.",
+    "import_no_restore_point": "Importato, ma non è stato possibile salvare un punto di ripristino, quindi questa importazione non può essere annullata",
+    "import_undo_failed": "Impossibile annullare l'importazione: {error}",
+    "import_undone": "Importazione annullata: ripristinati {profiles} profilo/i e {cycles} ciclo/i"
   },
   "suggestion": {
     "observed_label": "Osservato",
@@ -1815,7 +1854,8 @@
         "no_power": "senza potenza",
         "no_active_power": "senza potenza attiva"
       }
-    }
+    },
+    "now_value": "(ora {v})"
   },
   "trend": {
     "down": "Tendenza al ribasso",
@@ -1837,7 +1877,10 @@
     "cost_tip": "Costo energetico di questo ciclo, fissato al completamento. Con Costo ponderato nel tempo attivo, la curva di potenza viene addebitata al prezzo in vigore in ogni momento; altrimenti energia x l'unico prezzo in vigore alla fine. Imposta un prezzo nelle Impostazioni per popolarlo.",
     "confidence_tip": "Confidenza di corrispondenza del profilo (0-100%). Quanto la curva di potenza del ciclo corrispondeva al programma identificato.",
     "flags_tip": "Indicatori di revisione, anomalia e fonte per il ciclo. Passa il cursore su un'icona per i dettagli.",
-    "cost_dynamic_tip": "Ponderato nel tempo: addebitato al prezzo in vigore durante il ciclo (prezzo effettivo {price} {cur}/kWh)."
+    "cost_dynamic_tip": "Ponderato nel tempo: addebitato al prezzo in vigore durante il ciclo (prezzo effettivo {price} {cur}/kWh).",
+    "dbg_conf": "Conf.",
+    "dbg_mae": "MAE",
+    "dbg_corr": "Corr."
   },
   "stat": {
     "avg": "media",
@@ -1888,7 +1931,8 @@
     "website_tip": "Apri il sito dello store della community",
     "favorites": "Preferiti",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Ancora nessuna valutazione"
+    "no_ratings": "Ancora nessuna valutazione",
+    "unreachable": "Impossibile raggiungere lo store della community. Controlla la connessione e riprova."
   },
   "settings": {
     "gear": {
@@ -2048,5 +2092,38 @@
     "margin": "Troppo vicino al secondo candidato",
     "unknown_profile": "Il programma non esiste più",
     "not_evaluated": "Non valutato"
+  },
+  "diagram": {
+    "accum": "accum.",
+    "auto": "auto",
+    "below_off": "sotto = spento",
+    "confirmed": "confermato",
+    "energy_counts": "energia conteggiata",
+    "feedback": "revisione",
+    "gap_below_min": "intervallo sotto il min = un ciclo",
+    "heat_phase": "fase di riscaldamento",
+    "held_at_100": "fermo al 100%",
+    "ignored": "ignorato",
+    "kept": "mantenuto",
+    "max": "max",
+    "min": "min",
+    "minus_tol": "-tol",
+    "no_match": "non abbinato",
+    "no_updates": "nessun aggiornamento",
+    "off_delay_wait": "ritardo spegnimento",
+    "off_gap": "intervallo",
+    "plus_tol": "+tol",
+    "profile": "profilo",
+    "reading_interval": "intervallo tipico di lettura",
+    "sensor_offline": "sensore offline: arresto forzato",
+    "si": "IC",
+    "spike_ignored": "picco ignorato",
+    "spike_ignored_short": "picco: ignorato",
+    "start": "avvio",
+    "stop": "arresto",
+    "tail_energy_resets": "energia finale > soglia: timer azzerato",
+    "thr": "soglia",
+    "too_short": "troppo breve",
+    "tumble_kept": "rotazioni mantenute"
   }
 }

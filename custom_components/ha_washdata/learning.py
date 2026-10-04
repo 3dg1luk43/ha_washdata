@@ -40,7 +40,6 @@ from .const import (
     DEFAULT_LEARNING_CONFIDENCE,
     MIN_SUGGESTION_COOLDOWN_CYCLES,
     MIN_SUGGESTION_REL_DELTA,
-    ML_QUALITY_SUSPICIOUS_THRESHOLD,
     TerminationReason,
 )
 from .suggestion_engine import SuggestionEngine
@@ -624,24 +623,12 @@ class LearningManager:
                 if learning_conf + 0.001 < auto_label_conf:
                     route_conf = max(route_conf, learning_conf + 0.001)
 
-        # Auto-label if very high confidence — but skip auto-labeling when the ML
-        # quality model flagged this cycle as suspicious (P(problem) >= threshold),
-        # even if the matcher was confident.  Downgrade to a feedback request so
-        # the user can verify the match; this catches confident but wrong labels.
-        ml_quality = cycle_data.get("ml_quality_score")
-        # Use float() so numpy scalars (float32/float64) returned by resolve_scorer
-        # are accepted — isinstance(numpy_float, float) is False in NumPy ≥ 2.0.
-        # Wrap in try/except so non-numeric sentinel values are silently ignored.
-        try:
-            ml_suspicious = (
-                ml_quality is not None
-                and float(ml_quality) >= ML_QUALITY_SUSPICIOUS_THRESHOLD
-            )
-        except (TypeError, ValueError):
-            ml_suspicious = False
-        # Also downgrade when the cycle's power trace is mostly outside the
-        # profile envelope band (low conformance = the shape matched but the
-        # actual power levels are inconsistent with the profile).
+        # Auto-label if very high confidence - but not when the cycle's power trace
+        # is mostly outside the profile envelope band (low conformance = the shape
+        # matched but the actual power levels are inconsistent with the profile).
+        # (The ML quality gate that also downgraded here, C3, was removed in 0.5.8:
+        # it fired on 0 of the auto-label-eligible real cycles, audit ML-06. A
+        # legacy `ml_quality_score` on an older cycle is ignored.)
         _conformance = cycle_data.get("envelope_conformance")
         try:
             envelope_suspicious = (
@@ -670,21 +657,14 @@ class LearningManager:
                     cycle_id, detected_profile,
                 )
                 # Fall through to the feedback-request path below.
-            elif ml_suspicious or envelope_suspicious:
-                if ml_suspicious:
-                    self._logger.info(
-                        "ML quality model flagged cycle %s as suspicious (score=%.3f >= %.2f); "
-                        "downgrading auto-label to feedback request.",
-                        cycle_id, ml_quality, ML_QUALITY_SUSPICIOUS_THRESHOLD,
-                    )
-                if envelope_suspicious:
-                    # Not a review request on its own (register item 433): a cycle
-                    # the cycle-end gate already labelled returns below unasked.
-                    self._logger.info(
-                        "Envelope conformance for cycle %s is low (%.2f < 0.40); "
-                        "not auto-labelling it here.",
-                        cycle_id, _conformance,
-                    )
+            elif envelope_suspicious:
+                # Not a review request on its own (register item 433): a cycle
+                # the cycle-end gate already labelled returns below unasked.
+                self._logger.info(
+                    "Envelope conformance for cycle %s is low (%.2f < 0.40); "
+                    "not auto-labelling it here.",
+                    cycle_id, _conformance,
+                )
                 # Fall through to feedback-request path below.
             else:
                 labeled = self.auto_label_high_confidence(
@@ -715,7 +695,6 @@ class LearningManager:
         if (
             label_allowed
             and not warmup_request
-            and not ml_suspicious
             and cycle_data.get("profile_name") == detected_profile
         ):
             self._logger.debug(

@@ -64,6 +64,10 @@ else
   if node devtools/build_panel.mjs --check >/dev/null 2>&1; then pass "panel + card artifacts current"
   else fail "minified artifacts are stale or missing" "node devtools/build_panel.mjs (then commit www/*.min.js + build-manifest.json)"; fi
 fi
+# The panel method map (audit DOCS-09); build_panel.mjs regenerates it on every build.
+if [[ $FIX -eq 1 ]]; then node devtools/gen_panel_map.mjs >/dev/null && pass "PANEL_MAP regenerated"
+elif node devtools/gen_panel_map.mjs --check >/dev/null 2>&1; then pass "PANEL_MAP current"
+else fail "docs/internal/PANEL_MAP.md is stale" "node devtools/gen_panel_map.mjs (or rebuild the panel)"; fi
 
 # ── 2. generated WS contract artifacts ───────────────────────────────────────
 if [[ $FIX -eq 1 ]]; then
@@ -226,7 +230,8 @@ if [[ -z "$PH_BAD" ]]; then pass "HA-layer translation placeholders match Englis
 else fail "HA-layer translations with mismatched {placeholders}" "$PH_BAD"; fi
 
 # Panel layer: same comparison, but a mismatch there only renders a literal "{n}" or drops
-# a value rather than failing startup, and 219 predate this check. Counted, not blocking.
+# a value rather than failing startup. 219 values predated this check; the 0.5.8 translation
+# pass brought it to 0 (register item 121). Counted, not blocking.
 PH_PANEL=$(PH_LAYER=translations/panel "$PY" -c '
 import json, os, re
 from pathlib import Path
@@ -254,7 +259,7 @@ print(f"{n} {len(langs)}" if n else "")
 ')
 if [[ -z "$PH_PANEL" ]]; then pass "panel translation placeholders match English"
 else printf '  \033[33mwarn\033[0m  panel placeholder drift: %s value(s) across %s language(s)\n' $PH_PANEL
-     printf '        -> cosmetic (renders a literal {n} or drops a value); pre-existing, needs a translation pass\n'
+     printf '        -> cosmetic (renders a literal {n} or drops a value); needs a translation fix\n'
 fi
 
 # ── 5. code health ───────────────────────────────────────────────────────────

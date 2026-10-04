@@ -34,7 +34,8 @@ import numpy as np
 from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata.manager import WashDataManager
-from custom_components.ha_washdata.ml.training_task import train_from_cycles
+
+from .ml_progress_helpers import trained_remaining_time_spec
 
 
 @pytest.fixture(autouse=True)
@@ -99,8 +100,9 @@ def _trace(n: int = 60):
 def _promoted_spec() -> dict:
     rng = np.random.default_rng(7)
     cycles = [_cycle(i, float(2400 + int(rng.integers(0, 3000)))) for i in range(24)]
-    summary = train_from_cycles(cycles, "washing_machine", 2.0, "2026-07-03T02:00:00+00:00")
-    return summary["promoted"]["remaining_time"]["spec"]
+    spec = trained_remaining_time_spec(cycles)
+    assert spec, "the remaining-time regressor did not promote on data it beats naive on"
+    return spec
 
 
 # ---------------------------------------------------------------------------

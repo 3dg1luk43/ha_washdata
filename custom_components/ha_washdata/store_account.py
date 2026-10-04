@@ -46,6 +46,10 @@ _LOAD_LOCK_KEY = f"{DOMAIN}_online_load_lock"
 # plumbing carries it end-to-end with no further wiring.
 _DEFAULT_PREFS: dict[str, Any] = {
     "show_contributor": True,   # show "by <contributor>" attribution in the pickers
+    # Publish the connected GitHub display name (often a real name) as the uploader of
+    # cycles this install shares. Opt-in, like the website's showName consent; off
+    # means shared cycles carry no name (audit STORE-14).
+    "share_name": False,
 }
 
 

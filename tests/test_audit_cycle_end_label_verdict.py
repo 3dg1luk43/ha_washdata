@@ -48,7 +48,6 @@ def manager(hass: Any) -> WashDataManager:
     ps.async_clear_active_cycle = AsyncMock()
     ps.async_rebuild_envelope = AsyncMock()
     ps.async_save = AsyncMock()
-    ps.confirm_match_ranking_snapshots = MagicMock()
     mgr._run_post_cycle_processing = AsyncMock()
     mgr._learning_confidence = 0.6
     mgr._auto_label_confidence = 0.9

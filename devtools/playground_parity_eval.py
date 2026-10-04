@@ -12,8 +12,8 @@ synthetic tail. The **sim** arm is the Playground as shipped. The **live** arm
 swaps only the matcher callback: each tick runs the REAL
 ``WashDataManager._async_do_perform_matching`` (on a manager built from the
 export's own entry data/options, store executor jobs inline), so the switching
-state machine, the envelope verified pause and its releases, the confident-
-mismatch revoke and the phase heuristic are the manager's own code, not a port.
+state machine, the envelope verified pause and its releases and the confident-
+mismatch revoke are the manager's own code, not a port.
 Per device type and export it reports how many replays **end differently**
 (cycle count, termination reason, or the ENDING exit more than 60 s apart) and
 how many **report a different program** (the program displayed when the primary
@@ -33,8 +33,10 @@ Configuration: the detector config and the ProfileStore come from a real
 ``WashDataManager`` (``end_gate_eval._production``), so ``energy_mode``, the
 Stage-1 ratios, the DTW band and every detector default are what the manager
 builds. Envelopes are rebuilt once with the code under test. ML consumers are
-left at the export's setting, and both arms use the same detector (built without
-the ML providers, PLAYGROUND-20), so they cannot differ there.
+left at the export's setting, and both arms use the same detector (no ML end
+guard, PLAYGROUND-20; the terminal-drop provider wherever
+``detector_config.terminal_drop_enabled`` runs it live, audit ML-08), so they
+cannot differ there.
 
 Measured on the corpus, most recent 20 cycles per export (audit F7, 2026-10-03):
 before F7 (e0eef42) 17 of 176 replays ended differently from live (12 later,

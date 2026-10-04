@@ -8,7 +8,8 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { bootPanel, clickTab, assertWsCalled, assertWsNotCalled } from '../helpers/panel';
+import { bootPanel, clickTab, assertWsCalled, assertWsNotCalled, setHandler } from '../helpers/panel';
+import { DEFAULT_HANDLERS } from '../helpers/ws-handlers';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -126,7 +127,7 @@ test('workbench: editing a param reveals Save-to-settings and it persists', asyn
   await assertWsCalled(page, 'ha_washdata/set_options');
 });
 
-// ─── Settings control panel: live source, per-setting publish ─────────────────
+// ─── Settings control panel: live source, presets, per-setting publish ───────
 
 test('control panel: loads the integration\'s live settings on tab entry', async ({ page }) => {
   await clickTab(page, 'playground');
@@ -154,11 +155,10 @@ test('control panel: editing a value marks it changed and reveals its publish bu
 });
 
 test('removed Playground controls stay gone', async ({ page }) => {
-  // 0.5.8: matcher knobs, presets, the idle stress toggle and the DTW scorer.
+  // 0.5.8: matcher knobs, the idle stress toggle and the DTW scorer. (Presets came back.)
   await clickTab(page, 'playground');
   await expect(page.locator('.wd-pg-ctrl')).toBeVisible({ timeout: 8_000 });
   await expect(page.locator('.wd-pg-param-inp[data-pgkey="corr_weight"]')).toHaveCount(0);
-  await expect(page.locator('#wd-pg-preset-sel')).toHaveCount(0);
   await expect(page.locator('#wd-pg-stress-toggle')).toHaveCount(0);
   await assertWsNotCalled(page, 'ha_washdata/get_dtw_debug');
 });
@@ -173,6 +173,70 @@ test('control panel: Load live settings discards sandbox edits', async ({ page }
   await page.locator('button[data-action="pg-load-live"]').click();
   await expect(inp).toHaveValue('120');
   await expect(page.locator('.wd-pg-ctrl')).toContainText('Matches live settings');
+});
+
+test('control panel: save a preset, then load it back', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const inp = page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]');
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('222');
+  const save = page.locator('button[data-action="pg-preset-save"]');
+  await expect(save).toBeDisabled();             // no name typed yet
+  await page.locator('#wd-pg-preset-name').fill('My preset');
+  await expect(save).toBeEnabled();
+  await save.click();
+  const [call] = await assertWsCalled(page, 'ha_washdata/save_playground_preset');
+  // A preset is the whole control panel, not just the edited field.
+  expect(call.name).toBe('My preset');
+  expect((call.values as Record<string, unknown>).off_delay).toBe(222);
+  expect((call.values as Record<string, unknown>).min_off_gap).toBe(180);
+  await expect(page.locator('.wd-toast')).toContainText('Preset "My preset" saved');
+  // The saved preset is selected; loading it overwrites the sandbox values.
+  await expect(page.locator('#wd-pg-preset-sel')).toHaveValue('My preset');
+  await inp.fill('120');
+  await page.locator('button[data-action="pg-preset-load"]').click();
+  await expect(inp).toHaveValue('222');
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('1 changed');
+});
+
+test('control panel: load a stored preset stages only what differs from live', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const load = page.locator('button[data-action="pg-preset-load"]');
+  await expect(load).toBeDisabled({ timeout: 8_000 });   // nothing selected yet
+  await page.locator('#wd-pg-preset-sel').selectOption('Quiet nights');
+  await load.click();
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]')).toHaveValue('300');
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="min_off_gap"]')).toHaveValue('240');
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('2 changed');
+  // Loading is sandbox-only: nothing is written to the device.
+  await assertWsNotCalled(page, 'ha_washdata/set_options');
+});
+
+test('control panel: delete a preset', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await expect(page.locator('#wd-pg-preset-sel')).toBeVisible({ timeout: 8_000 });
+  await page.locator('#wd-pg-preset-sel').selectOption('Quiet nights');
+  page.once('dialog', d => d.accept());   // confirm()
+  await page.locator('button[data-action="pg-preset-delete"]').click();
+  const [call] = await assertWsCalled(page, 'ha_washdata/delete_playground_preset');
+  expect(call.name).toBe('Quiet nights');
+  await expect(page.locator('#wd-pg-preset-sel option')).toHaveCount(1);   // just the placeholder
+});
+
+test('control panel: a preset name renders as text, never as markup', async ({ page }) => {
+  const name = '<img src=x onerror="window.__pg_pwned=1">';
+  const base = DEFAULT_HANDLERS['ha_washdata/get_playground_settings'] as Record<string, unknown>;
+  await setHandler(page, 'ha_washdata/get_playground_settings', {
+    ...base, presets: [{ name, values: { off_delay: 300 }, created_at: null, updated_at: null }],
+  });
+  await clickTab(page, 'playground');
+  const sel = page.locator('#wd-pg-preset-sel');
+  await expect(sel).toBeVisible({ timeout: 8_000 });
+  await expect(sel.locator('option').nth(1)).toHaveText(name);
+  await sel.selectOption({ index: 1 });
+  await page.locator('button[data-action="pg-preset-load"]').click();
+  await expect(page.locator('.wd-toast')).toContainText(`Preset "${name}" loaded`);
+  expect(await page.evaluate(() => (window as any).__pg_pwned)).toBeUndefined();
 });
 
 test('control panel: Load suggested stages classic suggestion values', async ({ page }) => {
@@ -248,6 +312,31 @@ test('drawer/optimize: running a 1D sweep starts a sweep task', async ({ page })
   await page.locator('#wd-pg-sw-steps').fill('3');
   await page.locator('button[data-action="pg-sweep-run2"]').click();
   await assertWsCalled(page, 'ha_washdata/start_playground_sweep');
+});
+
+// PLAYGROUND-23: both replay cycles against profiles built partly from those same
+// cycles (no leave-one-out), so their results are in-sample and say so.
+test('drawer/history: the result says it is in-sample and optimistic', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await expect(page.locator('.wd-pg-insample')).toHaveCount(0);
+  await page.locator('button[data-action="pg-run-history"]').click();
+  await expect(page.locator('table.wd-pg-htable')).toBeVisible({ timeout: 8_000 });
+  const note = page.locator('.wd-pg-insample');
+  await expect(note).toHaveCount(1);
+  await expect(note).toContainText('optimistic');
+});
+
+test('drawer/optimize: the sweep result says it is in-sample and optimistic', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
+  await expect(page.locator('.wd-pg-insample')).toHaveCount(0);
+  await page.locator('#wd-pg-sw-from').fill('60');
+  await page.locator('#wd-pg-sw-to').fill('240');
+  await page.locator('#wd-pg-sw-steps').fill('3');
+  await page.locator('button[data-action="pg-sweep-run2"]').click();
+  const note = page.locator('.wd-pg-insample');
+  await expect(note).toHaveCount(1, { timeout: 8_000 });
+  await expect(note).toContainText('optimistic');
 });
 
 // ─── Mobile ──────────────────────────────────────────────────────────────────

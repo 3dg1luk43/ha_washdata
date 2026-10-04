@@ -65,7 +65,7 @@ def test_preload_puts_every_model_in_sys_modules() -> None:
     assert engine._MANIFEST_MODELS_CACHE is not None
 
 
-@pytest.mark.parametrize("capability", ["quality", "live_match", "end"])
+@pytest.mark.parametrize("capability", ["quality", "end"])
 def test_resolve_scorer_after_preload_does_not_import(
     capability: str, no_imports: None
 ) -> None:

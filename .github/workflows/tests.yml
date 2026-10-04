@@ -4,7 +4,7 @@ name: Checks
 # are deliberately NOT run here: they are a local/maintainer gate
 # (`./run_tests.sh`, `./run_tests.sh --all`, `devtools/release_check.sh --full`).
 # Runner minutes on this repo are shared with the issue/PR automation workflows,
-# which are the ones that have to stay responsive, and re-running ~1500 pytest
+# which are the ones that have to stay responsive, and re-running ~3000 pytest
 # cases plus two full browser suites on every push to every branch was consuming
 # the budget they need.
 #
@@ -54,6 +54,8 @@ jobs:
         run: npm ci --prefix devtools
       - name: Minified panel/card artifacts match their sources
         run: node devtools/build_panel.mjs --check
+      - name: Panel method map matches the panel (DOCS-09)
+        run: node devtools/gen_panel_map.mjs --check
       - name: WS type artifacts match ws_schema.py
         run: python devtools/generate_ws_types.py --check
       - name: Docs match the code (anchors, constants, register ids, em dashes)

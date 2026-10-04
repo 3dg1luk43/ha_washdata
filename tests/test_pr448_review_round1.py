@@ -26,12 +26,10 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
 
 from custom_components.ha_washdata import ws_api
 from custom_components.ha_washdata.const import DOMAIN
-from custom_components.ha_washdata.ml.matching_tuner import _series
 from custom_components.ha_washdata.suggestion_engine import detect_standby_above_stop
 
 
@@ -119,47 +117,6 @@ def test_a_cycle_the_user_stopped_at_standby_still_counts():
         [_idle_cycle(3.4, "a"), _idle_cycle(3.3, "b")], 2.56
     )
     assert res is not None and res["cycles_above"] == 2
-
-
-# --------------------------------------------------------------------------
-# matching_tuner: one half-parsed row desynchronised the two arrays
-# --------------------------------------------------------------------------
-def test_a_row_whose_power_is_unparseable_drops_the_whole_pair():
-    """``ts`` used to gain an element ``pw`` did not, so np.interp raised later."""
-    cycle = {
-        "power_data": [
-            [0.0, 10.0],
-            [10.0, "nonsense"],
-            [20.0, 30.0],
-            [30.0, 40.0],
-            [40.0, 50.0],
-        ]
-    }
-    ts, pw = _series(cycle)
-    assert ts.size == pw.size == 4
-    assert list(ts) == [0.0, 20.0, 30.0, 40.0]
-
-
-def test_an_unbounded_integer_power_drops_the_pair_rather_than_raising():
-    """`json` keeps an oversized literal as an int, and float() on one raises."""
-    cycle = {
-        "power_data": [
-            [0.0, 10.0],
-            [10.0, 10**400],
-            [20.0, 30.0],
-            [30.0, 40.0],
-            [40.0, 50.0],
-        ]
-    }
-    ts, pw = _series(cycle)
-    assert ts.size == pw.size == 4
-
-
-def test_the_arrays_stay_usable_for_interpolation():
-    """The failure mode was downstream: np.interp on unequal arrays."""
-    cycle = {"power_data": [[0.0, 1.0], [1.0, None], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0]]}
-    ts, pw = _series(cycle)
-    assert np.interp(np.linspace(0.0, 4.0, 10), ts, pw).size == 10
 
 
 # --------------------------------------------------------------------------

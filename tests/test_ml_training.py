@@ -17,7 +17,7 @@
 """Stage 4 tests: on-device NumPy-only training (trainer + training_task + engine).
 
 Covers the fit/threshold/AUC math, spec scoring parity with the embedded model
-runtime, the label-derivation + quality-gate pipeline, and the engine's
+runtime, the training pipeline (total_energy only since 0.5.8), and the engine's
 user-model-preferred / baseline-fallback behaviour.
 """
 from __future__ import annotations
@@ -137,28 +137,26 @@ def _force_stopped(i):
     }
 
 
-def test_training_promotes_both_models_with_good_data() -> None:
+def test_only_the_energy_head_is_trained() -> None:
+    """Since 0.5.8 only total_energy is trained on-device. The quality and
+    live_match heads went with their consumers (audit ML-02/06/10); end and
+    remaining_time stopped training because their consumers are frozen off and
+    the classifier gate promoted worse models (ML-11). Data that used to promote
+    an `end` model (it did, on exactly these cycles) yields no record for it."""
     cycles = [_completed(i) for i in range(30)] + [_force_stopped(i) for i in range(25)]
     summary = train_from_cycles(cycles, "washing_machine", 2.0, "2026-07-01T02:00:00+00:00")
-    promoted = summary["promoted"]
-    assert "end" in promoted and "quality" in promoted
-    for cap in ("end", "quality"):
-        spec = promoted[cap]["spec"]
-        assert spec["kind"] == "standardized_logistic"
-        assert spec["source"] == "on_device"
-        assert 0.05 <= spec["threshold"] <= 0.97
-        assert promoted[cap]["new_auc"] >= 0.5
+    assert {r["capability"] for r in summary["results"]} == {"total_energy"}
+    assert set(summary["promoted"]) <= {"total_energy"}
 
 
-def test_training_skips_when_too_few_positives() -> None:
-    # Only completed cycles -> quality has 0 positives, end may lack negatives.
-    cycles = [_completed(i) for i in range(10)]
+def test_training_skips_when_too_few_rows() -> None:
+    # Four completed cycles: too few prefix rows for the energy head.
+    cycles = [_completed(i) for i in range(4)]
     summary = train_from_cycles(cycles, "washing_machine", 2.0, "2026-07-01T02:00:00+00:00")
-    for record in summary["results"]:
-        if not record["promoted"]:
-            assert "insufficient" in record["reason"] or "below baseline" in record["reason"]
-    # quality with no problem cycles must not promote
-    assert "quality" not in summary["promoted"]
+    (record,) = summary["results"]
+    assert record["promoted"] is False
+    assert "insufficient" in record["reason"]
+    assert summary["promoted"] == {}
 
 
 def test_training_result_shape() -> None:
@@ -203,38 +201,3 @@ def test_resolve_scorer_prefers_on_device_spec() -> None:
     # No store at all -> still falls back to baseline.
     fn3, source3 = resolve_scorer("end", None)
     assert source3 == "baseline" and fn3 is not None
-
-
-# ---------------------------------------------------------------------------
-# Stage 4b: review labels feed the quality-model training
-# ---------------------------------------------------------------------------
-
-
-def test_quality_label_review_overrides_status() -> None:
-    from custom_components.ha_washdata.ml.training_task import _quality_label
-
-    # Review verdicts win over status.
-    assert _quality_label({"status": "completed", "ml_review": {"quality": "bad"}}) == 1.0
-    assert _quality_label({"status": "force_stopped", "ml_review": {"quality": "good"}}) == 0.0
-    # Golden pins clean even on a force_stopped cycle.
-    assert _quality_label({"status": "force_stopped", "ml_review": {"golden": True}}) == 0.0
-    # No review -> status-derived weak label.
-    assert _quality_label({"status": "completed"}) == 0.0
-    assert _quality_label({"status": "interrupted"}) == 1.0
-    # Unknown status, no review -> skip.
-    assert _quality_label({"status": "detecting"}) is None
-
-
-def test_review_labels_create_quality_positives() -> None:
-    # All cycles completed with clean traces, but the user flags 25 as bad ->
-    # those become quality positives, enough (with >=40 rows) to run the gate.
-    cycles = []
-    for i in range(45):
-        c = _completed(i)
-        if i < 25:
-            c["ml_review"] = {"quality": "bad", "reviewed_at": "2026-07-01T00:00:00+00:00"}
-        cycles.append(c)
-    summary = train_from_cycles(cycles, "washing_machine", 2.0, "2026-07-01T02:00:00+00:00")
-    quality_result = next(r for r in summary["results"] if r["capability"] == "quality")
-    assert quality_result["positives"] == 25
-    assert quality_result["negatives"] == 20

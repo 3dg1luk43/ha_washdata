@@ -70,8 +70,6 @@
         "reviewed": "검토됨",
         "steady": "→ 안정",
         "underrun": "평소보다 빨리 완료됨",
-        "using_defaults": "기본 제공 기본값 사용",
-        "using_tuned": "조정된 가중치 사용",
         "overrun_ratio": "(예상의 {x}배)",
         "underrun_ratio": "(예상의 {pct}%)",
         "imported_tip": "커뮤니티 스토어에서 가져왔습니다. 매칭에만 사용되며 통계에는 포함되지 않습니다.",
@@ -83,9 +81,18 @@
         "awaiting_tip": "커뮤니티 승인 대기 중",
         "awaiting_n": "승인 대기 중 · {n}개 확인됨",
         "awaiting": "승인 대기 중",
-        "approved": "승인됨"
+        "approved": "승인됨",
+        "matcher_unused": "아직 내 사이클과 매칭되지 않음",
+        "matcher_used": "내 사이클 {n}개와 매칭됨",
+        "matcher_used_other": "내 사이클 {n}개와 매칭됨",
+        "matcher_used_tip": "이 가전제품에서 기록된 사이클 중 WashData 매처가 스스로 이 가져온 프로그램으로 라벨을 지정한 사이클입니다. 한 번도 매칭되지 않는 가져온 프로그램은 가전제품에 맞지 않을 수 있으므로 삭제해도 됩니다. 로컬에서 집계되며 스토어로는 아무것도 전송되지 않습니다."
     },
     "btn": {
+        "pg_preset_delete": "프리셋 삭제",
+        "pg_preset_load": "프리셋 불러오기",
+        "pg_preset_load_tip": "플레이그라운드 값을 이 프리셋으로 바꿉니다(적용 중인 설정은 그대로 유지됩니다)",
+        "pg_preset_save": "프리셋으로 저장",
+        "pg_preset_save_tip": "아래의 모든 값을 이 기기의 이름 있는 프리셋으로 저장합니다",
         "reset_zoom": "확대/축소 초기화",
         "set_brand_model": "브랜드 및 모델 설정",
         "refresh_catalog": "카탈로그 새로 고침",
@@ -166,7 +173,6 @@
         "reset": "재설정",
         "reset_ml_models_tip": "미세 조정된 모델을 폐기하고 내장된 모델로 돌아갑니다. WashData는 나중에 다시 학습할 수 있습니다.",
         "reset_to_builtin": "내장 모델로 재설정",
-        "reset_to_defaults": "기본값으로 재설정",
         "resume_cycle": "사이클 재개",
         "resume_cycle_tip": "일시 중지된 사이클을 재개합니다",
         "revert_settings": "변경 사항 취소",
@@ -237,7 +243,8 @@
         "retry": "다시 시도",
         "confirm_appliance": "이 가전제품 확인",
         "confirmed": "확인됨",
-        "create_profile_from_gap": "프로필 만들기"
+        "create_profile_from_gap": "프로필 만들기",
+        "undo_import": "마지막 가져오기 실행 취소"
     },
     "note": {
         "off_delay": {
@@ -337,7 +344,6 @@
         "manual_recording": "수동 기록",
         "manual_recording_tip": "WashData가 전력 트레이스를 기록하는 동안 의도적으로 사이클을 실행합니다. 기기가 시작되기 직전에 시작하고, 완료되면 중지한 다음 처리하여 이름이 지정된 프로필로 저장합니다.",
         "ml_learned": "WashData가 배운 것",
-        "ml_matching_tuning": "프로그램 매칭 미세 조정",
         "ml_settings_card": "설정",
         "ml_smart_learning": "스마트러닝",
         "my_preferences": "내 환경설정",
@@ -360,7 +366,8 @@
         "online_account": "커뮤니티 스토어 및 온라인 기능",
         "import_power_history": "전력 이력 가져오기",
         "service_status": "유지보수 상태",
-        "online_account_tab": "온라인 및 커뮤니티"
+        "online_account_tab": "온라인 및 커뮤니티",
+        "live_match_debug": "실시간 매칭 디버그"
     },
     "health": {
         "fair": "프로파일 품질: 보통",
@@ -408,13 +415,11 @@
         "cycles_lc": "사이클",
         "date": "날짜",
         "debug_traces": "디버그 추적",
-        "default": "기본",
         "default_access_level": "아래에 나열되지 않은 사용자의 기본 수준",
         "default_other": "기본값(기타 장치)",
         "default_tab": "패널을 열 때 기본 탭",
         "description": "설명",
         "duration": "지속 시간",
-        "emphasis": "중요성",
         "enable_access_control": "사용자별 액세스 제어 활성화",
         "energy": "에너지",
         "event_type": "이벤트 유형",
@@ -426,7 +431,6 @@
         "group_name": "그룹 이름",
         "head_trim": "시작 부분 자르기(초)",
         "hide_tabs": "관리자가 아닌 사용자를 위한 탭 숨기기",
-        "in_use": "사용 중",
         "json_data": "JSON 데이터",
         "label": "매칭된 프로그램",
         "last": "최근",
@@ -457,6 +461,9 @@
         "pg_group_timing": "타이밍 규칙",
         "pg_idle": "대기",
         "pg_poor_match": "불량 매칭",
+        "pg_preset": "플레이그라운드 프리셋",
+        "pg_preset_name": "새 프리셋 이름",
+        "pg_preset_none": "프리셋 선택…",
         "pg_strong_match": "강한 매칭",
         "pg_weak_match": "약한 매칭",
         "phase_name": "단계 이름",
@@ -591,7 +598,6 @@
         "cat_custom_phases": "사용자 지정 단계",
         "cat_profile_groups": "프로필 그룹",
         "cat_settings": "감지 및 인식 설정",
-        "cat_matching_config": "인식기 조정",
         "cat_ml_models": "ML 모델",
         "cat_feedback": "피드백 및 검토 라벨",
         "cat_suggestions": "제안",
@@ -642,7 +648,17 @@
         "pg_autolabel": "자동 라벨",
         "pg_label_review": "검토 요청",
         "pg_ev_match_reverted": "매칭 취소",
-        "pg_ev_verified_pause": "확인된 일시 중지"
+        "pg_ev_verified_pause": "확인된 일시 중지",
+        "n_samples": "샘플 {n}개",
+        "n_samples_other": "샘플 {n}개",
+        "n_cycles": "사이클 {n}개",
+        "n_cycles_other": "사이클 {n}개",
+        "energy_per_cycle": "{v}/사이클",
+        "energy_total": "총 {v}",
+        "automation_off": "(꺼짐)",
+        "ref_cycle_none": "없음",
+        "share_name": "공유하는 항목에 내 이름 표시",
+        "cat_backfill_cycles": "가져온 전력 이력에서 발견된 사이클"
     },
     "log": {
         "all_levels": "모든 레벨",
@@ -664,17 +680,9 @@
         "trend_declining_tip": "이 모델의 적합도가 최근 재확인에서 하락했습니다 · 더 많은 사이클을 검토하면 다시 학습하는 데 도움이 될 수 있습니다.",
         "trend_steady_tip": "이 모델의 적합도가 최근 재확인에서 거의 꾸준히 유지되었습니다.",
         "cap_blurb": {
-            "end": "사이클이 실제로 완료된 시점 파악",
-            "live_match": "실행 중인 프로그램을 더 빨리 식별",
-            "quality": "잘못 감지되었거나 손상된 사이클 찾기",
-            "remaining_time": "남은 시간 예측",
             "total_energy": "총 에너지와 비용 예측"
         },
         "cap_label": {
-            "end": "사이클 종료 감지",
-            "live_match": "프로그램 매칭",
-            "quality": "사이클 품질 검사",
-            "remaining_time": "남은 시간 추정",
             "total_energy": "에너지 추정"
         },
         "metric_auc": "검증 데이터 기준 AUC {auc}",
@@ -728,10 +736,17 @@
         "apply_suggestions_title": "제안 적용",
         "apply_suggestions_msg": "이 {n}개 설정을 변경하시겠습니까? 저장 후 통합이 다시 로드됩니다.",
         "discard_settings_title": "저장하지 않은 변경 사항을 버리시겠습니까?",
-        "discard_settings_msg": "저장되지 않은 설정 변경 사항이 {n}개 있습니다. 설정을 나가고 변경 사항을 버리시겠습니까?"
+        "discard_settings_msg": "저장되지 않은 설정 변경 사항이 {n}개 있습니다. 설정을 나가고 변경 사항을 버리시겠습니까?",
+        "profile_title": "프로필 · {name}",
+        "undo_import_msg": "이 장치에 저장된 모든 데이터가 마지막 가져오기({when}) 이전 상태로 돌아가며, 설정도 마찬가지입니다. 그 이후에 기록된 사이클과 변경 사항은 사라집니다.",
+        "undo_import_ok": "가져오기 실행 취소",
+        "undo_import_title": "마지막 가져오기 실행 취소"
     },
     "msg": {
         "pg_canvas_empty3": "위에서 사이클을 선택하고 실행을 눌러 시뮬레이션하세요. 그런 다음 마우스를 올려 값을 확인하고, 스크롤 또는 두 손가락으로 확대/축소하고, 드래그하여 이동할 수 있습니다.",
+        "pg_preset_delete_confirm": "프리셋 \"{name}\"을(를) 삭제하시겠습니까?",
+        "pg_preset_limit": "프리셋 개수 제한에 도달했습니다({n})",
+        "pg_preset_overwrite": "프리셋 \"{name}\"을(를) 덮어쓰시겠습니까?",
         "tail_trim_hint": "끝부분에서 제거할 초 수",
         "store_sibling_hint": "정확히 같은 모델로 공유된 항목이 없나요? 같은 브랜드의 비슷한 모델이 보통 좋은 출발점이 됩니다.",
         "store_declare_appliance": "보유한 가전제품을 WashData에 지정하면 이 탭에 다른 사용자가 공유한 프로그램과 녹음이 표시됩니다. 위에 브랜드를 입력해 둘러볼 수도 있습니다.",
@@ -774,7 +789,6 @@
         "maintenance_load_error": "유지보수 데이터를 불러올 수 없습니다: {error}",
         "maintenance_requires_access": "유지 관리 및 내보내기/가져오기에는 전체 액세스 권한이 필요합니다.",
         "manual_duration_hint": "남은 시간 추정에 사용되는 프로필의 평균/예상 주기 길이입니다. 설정하려면 편집하세요. 변경하지 않고 그대로 두면 현재 값이 유지됩니다.",
-        "matching_tuning_intro": "학습할 때 WashData는 프로그램 일치가 모양, 지속 시간 및 에너지에 얼마나 큰 영향을 미치는지 조정합니다.",
         "merge_intro": "선택한 사이클이 하나로 결합됩니다(연대순, 간격이 0W로 채워짐). 결과 프로필을 선택합니다.",
         "ml_intro": "WashData는 즉시 사용 가능한 스마트 모델과 함께 제공됩니다.",
         "ml_learned_intro": "이 기계에 맞게 미세 조정된 모델입니다.",
@@ -975,7 +989,16 @@
         "connect_to_confirm": "확인하거나 평가하려면 설정(톱니바퀴)에서 연결하세요.",
         "coverage_gap_cluster": "약 {min}분 길이의 최근 라벨 없는 사이클 {count}개가 아직 만들지 않은 하나의 프로그램으로 보입니다.",
         "pg_label_yes": "사이클 종료 시 \"{name}\"(으)로 라벨이 지정됩니다",
-        "pg_label_no": "검토를 요청합니다: {reason}"
+        "pg_label_no": "검토를 요청합니다: {reason}",
+        "live_match_debug_tip": "신뢰도: 현재 전력 곡선이 최상위 후보 프로필과 얼마나 일치하는지 나타냅니다(0-100%). 모호함: 상위 두 후보의 점수 차이가 5% 이내입니다. 사이클이 끝날 때까지 라벨이 확정되지 않습니다.",
+        "automation_alias_started": "{device}: 사이클 시작됨",
+        "automation_alias_finished": "{device}: 사이클 완료됨",
+        "automation_desc_started": "{device} 사이클이 시작되면 실행됩니다. 원하는 동작(알림, 조명, ...)을 추가하세요.",
+        "automation_desc_finished": "{device} 사이클이 완료되면 실행됩니다. 원하는 동작(알림, 조명, ...)을 추가하세요.",
+        "feedback_detected": "WashData 감지 결과: {name}",
+        "import_undo_hint": "마지막 가져오기({when}) 이전의 복원 지점이 보관되어 있습니다: 프로필 {profiles}개, 사이클 {cycles}개.",
+        "replace_undo_hint": "먼저 복원 지점이 저장되므로 내보내기/가져오기에서 이 가져오기를 실행 취소할 수 있습니다.",
+        "pg_in_sample_note": "이 사이클들은 매칭 대상 프로필을 만드는 데에도 사용되었으므로 이 결과는 낙관적입니다. 새 사이클에서는 올바른 매칭이 약간 적을 것으로 예상하세요."
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -1142,7 +1165,7 @@
             "label": "추정 허용 오차"
         },
         "enable_ml_models": {
-            "doc": "사이클이 실행되는 동안 이 기기에 맞게 미세 조정된 모델이 총 에너지와 비용을 예측하고, WashData가 잘 아는 프로그램에서 전력이 비정상적으로 일찍 떨어진 사이클은 오프 지연을 끝까지 기다리지 않고 종료할 수 있습니다. 꺼짐 = 기존 전력 기반 논리만 사용.",
+            "doc": "사이클이 실행되는 동안 이 기기에 맞게 미세 조정된 모델이 총 에너지와 비용을 예측하고, WashData가 잘 아는 프로그램에서 전력이 비정상적으로 일찍 떨어진 사이클은 오프 지연을 끝까지 기다리지 않고 종료할 수 있습니다. 식기세척기는 프로그램이 인식되면 이 설정 없이도 이 조기 종료가 적용됩니다. 꺼짐 = 기존 전력 기반 논리만 사용.",
             "label": "사이클 중 스마트 모델 적용"
         },
         "end_energy_threshold": {
@@ -1194,7 +1217,7 @@
             "label": "최소 전력"
         },
         "ml_training_enabled": {
-            "doc": "밤새 검토한 사이클을 주기적으로 연구하고 모델을 이 특정 기계에 맞게 미세 조정하세요. 변경 사항은 보류 주기에서 실제로 더 나은 점수를 얻은 경우에만 유지되므로 이는 도움이 되거나 동일하게 유지될 수 있으며 결코 퇴보하지 않습니다.",
+            "doc": "이 기기의 완료된 사이클로 예상 에너지 모델을 주기적으로 다시 학습합니다. 다시 학습한 모델은 검증용 사이클에서 단순한 '경과 시간 대비 예상 시간' 추정보다 나을 때만 유지되며, 그렇지 않으면 현재 모델이 그대로 유지됩니다.",
             "label": "이 기기에서 학습"
         },
         "ml_training_hour": {
@@ -1234,7 +1257,7 @@
             "label": "Android 채널 (종료)"
         },
         "notify_finish_message": {
-            "doc": "사이클이 끝날 때 전송되는 본문. 템플릿 변수: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. 여기서는 {time_finished}와 {vs_typical}이 가장 유용합니다.",
+            "doc": "사이클이 끝날 때 전송되는 본문. 템플릿 변수: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status}. 여기서는 {time_finished}와 {vs_typical}이 가장 유용합니다. {status}는 completed 또는 force_stopped입니다. 중단된 사이클(잘못된 시작 또는 취소된 프로그램)은 종료 메시지를 보내지 않습니다.",
             "label": "종료 메시지"
         },
         "notify_finish_services": {
@@ -1330,15 +1353,15 @@
             "label": "매칭 간격"
         },
         "profile_match_max_duration_ratio": {
-            "doc": "프로파일에 따른 최대 사이클 길이. 1.3은 주기가 일치하려면 프로필 기간의 130% 미만이어야 함을 의미합니다.",
+            "doc": "사이클이 프로그램의 일반적인 소요 시간의 이 배수보다 오래 진행되면 해당 프로그램은 후보에서 제외됩니다. 1.8이면 프로그램보다 80% 더 오래 진행된 사이클은 더 이상 그 프로그램과 매칭되지 않습니다.",
             "label": "최대 기간 비율"
         },
         "profile_match_min_duration_ratio": {
-            "doc": "프로파일에 따른 최소 사이클 길이. 0.9는 주기가 일치하려면 프로필 기간의 90% 이상이어야 함을 의미합니다.",
+            "doc": "사이클이 프로그램의 일반적인 소요 시간 중 이 비율만큼 진행된 후에만 해당 프로그램을 후보로 고려합니다. 0.10이면 2시간짜리 프로그램은 12분 후에 후보가 됩니다. 사이클의 처음 15분 동안에는 적용되지 않습니다.",
             "label": "최소 기간 비율"
         },
         "profile_match_threshold": {
-            "doc": "프로그램 식별을 수락하려면 주기 종료 시 최소 유사성 점수(0-1)가 필요합니다. 잘못된 식별을 줄이기 위해 높이십시오. 기계의 프로그램이 일치하지 않으면 값을 낮추십시오. 기본값 0.4는 보수적인 시작점입니다.",
+            "doc": "스마트 종료와 건조기 구김 방지 확정이 매칭된 프로그램을 근거로 동작하기 전에 필요한 최소 실시간 매칭 점수(0-1)입니다. 불확실한 매칭으로 사이클이 일찍 끝나면 값을 높이고, 명확히 인식된 사이클이 여전히 오프 지연 시간을 끝까지 기다리면 값을 낮추세요. 표시되거나 라벨이 지정되는 프로그램은 바뀌지 않습니다. 기본값 0.4.",
             "label": "매칭 임계값"
         },
         "profile_unmatch_threshold": {
@@ -1479,6 +1502,9 @@
         "notify_icon_color": {
             "label": "알림 색상",
             "doc": "이 가전제품의 알림에 사용할 강조 색상으로, 세탁기와 건조기, 식기세척기를 한눈에 구분할 수 있습니다. iOS는 아이콘과 잠금 화면 및 Dynamic Island에 표시되는 실시간 현황의 진행률 표시줄에 색을 입힙니다. Android에도 같은 색상이 전달되지만 이를 어떻게 처리할지는 휴대폰에 달려 있습니다. 아이콘에 색을 입히는 기기도 있고, 아예 무시하는 기기도 많습니다(특히 Samsung One UI). 16진수(예: #03A9F4)는 양쪽 모두 인식합니다. 플랫폼 기본값을 사용하려면 비워 두세요."
+        },
+        "share_name": {
+            "doc": "공유하는 사이클의 업로더로 연결된 계정 이름을 게시합니다. 꺼짐: 이름 없이 공유됩니다."
         }
     },
     "setting_group": {
@@ -1582,14 +1608,17 @@
         "rebuilding": "재구축 중…",
         "analyzing": "분석 중…",
         "resetting": "재설정 중…",
-        "reverting": "되돌리는 중…",
         "trimming": "자르는 중…",
         "splitting": "분할 중…",
         "deleting": "삭제 중…",
         "imported": "가져옴",
         "preparing": "준비 중…",
         "unlabelling": "라벨 해제 중…",
-        "working": "처리 중…"
+        "working": "처리 중…",
+        "match_uncertain": "불확실: {top} 또는 {runner}",
+        "match_uncertain_single": "불확실: 아마도 {top}",
+        "match_sure": "약 {pct}% 확신",
+        "match_uncertain_tip": "WashData가 아직 프로그램을 확정하지 않았습니다. 이 수치는 기록된 사이클에서 선두 후보인 {top}이(가) 차순위보다 이만큼 앞서 있었을 때 실제로 맞았던 비율입니다. 참고용일 뿐이며 사이클을 감지하거나 라벨을 지정하는 방식은 바뀌지 않습니다."
     },
     "tab": {
         "advanced": "고급",
@@ -1644,13 +1673,14 @@
         "json_required": "JSON 데이터가 필요합니다",
         "legacy_removed": "기존 작업이 제거되었습니다.",
         "logs_exported": "내보낸 로그",
-        "matching_reverted": "일치하는 가중치가 기본값으로 되돌아갔습니다.",
         "min_2_profiles": "그룹당 프로필을 2개 이상 선택하세요.",
         "ml_training_no_improvement": "훈련 완료: 기준선 유지(개선 없음)",
         "models_reverted": "온디바이스 모델이 기준으로 되돌아갔습니다.",
         "name_required": "이름이 필요합니다",
         "no_split_found": "분할할 유휴 간격이 발견되지 않았습니다.",
         "panel_settings_saved": "패널 설정이 저장되었습니다.",
+        "pg_preset_loaded": "프리셋 \"{name}\"을(를) 불러왔습니다",
+        "pg_preset_saved": "프리셋 \"{name}\"을(를) 저장했습니다",
         "pg_sugg_loaded": "{n}개 제안 값을 적용했습니다 - 플레이그라운드에서 비교해 보세요",
         "phase_name_required": "단계 이름은 필수 항목입니다.",
         "phase_reset": "\"{name}\"이(가) 기본 제공 단계로 복원되었습니다",
@@ -1748,7 +1778,6 @@
         "phase_deleted": "단계 \"{name}\"이(가) 삭제되었습니다",
         "profile_created": "프로필 \"{name}\"이(가) 생성되었습니다",
         "rename_failed": "이름 변경 실패: {error}",
-        "revert_failed": "되돌리기 실패: {error}",
         "save_failed": "저장 실패: {error}",
         "split_complete": "사이클 {count}개로 분할했습니다",
         "start_failed": "시작 실패: {error}",
@@ -1759,7 +1788,11 @@
         "store_import_duplicate": "이 기록은 이미 기기에 있습니다.",
         "device_approved": "커뮤니티에서 승인되었습니다",
         "thanks_confirming": "확인해 주셔서 감사합니다",
-        "rating_saved": "품질 평가가 저장되었습니다"
+        "rating_saved": "품질 평가가 저장되었습니다",
+        "store_download_partial": "프로그램 {n}개를 다운로드하지 못했습니다. 나중에 다시 시도하세요.",
+        "import_no_restore_point": "가져왔지만 복원 지점을 저장할 수 없어 이 가져오기는 실행 취소할 수 없습니다",
+        "import_undo_failed": "가져오기를 실행 취소하지 못했습니다: {error}",
+        "import_undone": "가져오기 실행 취소됨: 프로필 {profiles}개와 사이클 {cycles}개를 복원했습니다"
     },
     "suggestion": {
         "observed_label": "관측값",
@@ -1850,7 +1883,8 @@
                 "no_power": "전력 없음",
                 "no_active_power": "활성 전력 없음"
             }
-        }
+        },
+        "now_value": "(현재 {v})"
     },
     "trend": {
         "down": "하락세",
@@ -1872,7 +1906,10 @@
         "cost_tip": "이 사이클의 에너지 비용으로, 완료 시점에 고정됩니다. 시간 가중 비용을 켜면 전력 곡선이 각 시점에 적용되던 가격으로 계산되고, 끄면 에너지 x 종료 시점의 가격 하나로 계산됩니다. 값을 채우려면 설정에서 가격을 지정하세요.",
         "confidence_tip": "프로필 매칭 신뢰도(0-100%)입니다. 사이클 전력 곡선이 식별된 프로그램과 얼마나 근접하게 일치했는지를 나타냅니다.",
         "flags_tip": "사이클의 검토, 이상, 소스 플래그. 아이콘에 마우스를 올리면 세부 정보가 표시됩니다.",
-        "cost_dynamic_tip": "시간 가중: 사이클 진행 중 적용되던 가격으로 계산됨(실효 {price} {cur}/kWh)."
+        "cost_dynamic_tip": "시간 가중: 사이클 진행 중 적용되던 가격으로 계산됨(실효 {price} {cur}/kWh).",
+        "dbg_conf": "신뢰도",
+        "dbg_mae": "MAE",
+        "dbg_corr": "상관"
     },
     "stat": {
         "avg": "평균",
@@ -1923,7 +1960,8 @@
         "website_tip": "커뮤니티 스토어 웹사이트 열기",
         "favorites": "즐겨찾기",
         "rating_summary": "★ {avg} ({n})",
-        "no_ratings": "아직 평가 없음"
+        "no_ratings": "아직 평가 없음",
+        "unreachable": "커뮤니티 스토어에 연결할 수 없습니다. 연결 상태를 확인하고 다시 시도하세요."
     },
     "settings": {
         "gear": {
@@ -2030,5 +2068,38 @@
         "margin": "차순위와의 차이가 너무 작음",
         "unknown_profile": "프로그램이 더 이상 존재하지 않음",
         "not_evaluated": "평가되지 않음"
+    },
+    "diagram": {
+        "accum": "누적",
+        "auto": "자동",
+        "below_off": "미만 = 꺼짐",
+        "confirmed": "확정",
+        "energy_counts": "에너지로 판단",
+        "feedback": "피드백",
+        "gap_below_min": "최소 미만 간격 = 한 사이클",
+        "heat_phase": "가열 단계",
+        "held_at_100": "100% 유지",
+        "ignored": "무시됨",
+        "kept": "유지됨",
+        "max": "최대",
+        "min": "최소",
+        "minus_tol": "-허용",
+        "no_match": "매칭 없음",
+        "no_updates": "업데이트 없음",
+        "off_delay_wait": "오프 지연 대기",
+        "off_gap": "오프 간격",
+        "plus_tol": "+허용",
+        "profile": "프로필",
+        "reading_interval": "일반적인 측정 간격",
+        "sensor_offline": "센서 오프라인: 강제 정지",
+        "si": "간격",
+        "spike_ignored": "스파이크 무시됨",
+        "spike_ignored_short": "스파이크: 무시",
+        "start": "시작",
+        "stop": "정지",
+        "tail_energy_resets": "후반 에너지가 임계값 초과: 타이머 재설정",
+        "thr": "임계값",
+        "too_short": "너무 짧음",
+        "tumble_kept": "텀블 펄스 유지됨"
     }
 }

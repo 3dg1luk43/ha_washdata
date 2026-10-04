@@ -201,8 +201,6 @@ from .const import (
     DEFAULT_MATCH_PERSISTENCE,
     MATCH_LABEL_MIN_MARGIN,
     ENABLE_ML_END_GUARD,
-    ENABLE_ML_EARLY_COMMIT,
-    ENABLE_ML_QUALITY_GATE,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_UNMATCHED_WATCHDOG_CEILING,
@@ -210,12 +208,6 @@ from .const import (
     DEFAULT_MAX_DEFERRAL_SECONDS,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
     ENERGY_ANOMALY_Z_THRESHOLD,
-    TERMINAL_DROP_MIN_CLEAN_CYCLES,
-    TERMINAL_DROP_MIN_QUIET_SPAN_S,
-    TERMINAL_DROP_EARLINESS_RATIO,
-    TERMINAL_DROP_MIN_PEAK_RATIO,
-    TERMINAL_DROP_PEAK_FAMILIAR_TOL,
-    ML_MATCH_COMMIT_THRESHOLD,
     STATE_RUNNING,
     STATE_OFF,
     STATE_STARTING,
@@ -227,7 +219,14 @@ from .const import (
     STATE_IDLE,
     STATE_UNKNOWN,
 )
-from .detector_config import apply_detector_config, build_detector_config
+from .detector_config import (
+    apply_detector_config,
+    build_detector_config,
+    terminal_drop_baseline_for,
+    terminal_drop_enabled,
+    terminal_drop_fires,
+    terminal_drop_may_fire,
+)
 from .cycle_detector import (
     MatchContext,
     CycleDetector,
@@ -238,8 +237,6 @@ from .profile_store import (
     MatchResult,
     ProfileStore,
     decompress_power_data,
-    is_terminal_drop,
-    terminal_drop_baseline,
 )
 from .signal_processing import (
     median_fast,
@@ -739,8 +736,10 @@ class WashDataManager:
         self._live_notification_tag = f"ha_washdata_{self.entry_id}_live"
         self._start_event_fired = False
         self._cycle_start_time: datetime | None = None
-        # Per-cycle UUID used to key ranking snapshots; prevents cross-contamination
-        # between cycles that happen to share the same second-resolution start_time.
+        # Per-cycle UUID: the identity token the live match and the cycle-end tail
+        # check so work for one cycle never lands on the next, even when both share
+        # a second-resolution start_time. (Named for the live_match ranking
+        # snapshots it first keyed; those were removed in 0.5.8.)
         self._ranking_snapshot_cycle_id: str = ""
 
         # State
@@ -1243,87 +1242,6 @@ class WashDataManager:
             matched_duration = tick.matched_duration
             phase_name = tick.phase_name
 
-            # --- Live-match features: compute always for ranking history + ML gate ---
-            # Features are cheap scalars derived from the current trace.  We compute
-            # them whenever there is a non-ambiguous candidate so they can be recorded
-            # as a training snapshot regardless of whether ML models are opted in.
-            # The opt-in ML commit check then uses the same features when enabled.
-            ml_commit_score: float | None = None
-            _live_feat: dict[str, float] | None = None
-            _top2_score: float | None = None
-            if (
-                profile_name
-                and profile_name != "detecting..."
-                and not result.is_ambiguous
-                and self._current_program in ("detecting...",)
-            ):
-                try:
-                    from .ml.feature_extraction import live_match_features  # noqa: PLC0415
-
-                    first_ts = readings[0][0]
-                    pts = [
-                        ((ts - first_ts).total_seconds(), float(pw))
-                        for ts, pw in readings
-                    ]
-                    top1_dist = max(0.0, 1.0 - confidence)
-                    top2_raw: float | None = None
-                    if len(result.candidates) > 1:
-                        s2 = result.candidates[1].get("score", 0.0) or 0.0
-                        top2_raw = max(0.0, 1.0 - float(s2))
-                        _top2_score = float(result.candidates[1].get("score", 0.0) or 0.0)
-                    n_profiles = len(self.profile_store.get_profiles())
-                    _live_feat = live_match_features(
-                        points=pts,
-                        elapsed_s=current_duration,
-                        top1_distance=top1_dist,
-                        top2_distance=top2_raw,
-                        top1_median_duration_s=float(result.expected_duration or 0),
-                        candidate_count=max(1, n_profiles),
-                    )
-                    # --- ML early-commit gate (opt-in) ---
-                    # When the user has opted into experimental ML models, query the
-                    # live_match_commit model for P(top-1 is correct).
-                    try:
-                        from .ml.engine import ml_models_enabled, resolve_scorer  # noqa: PLC0415
-                        if ENABLE_ML_EARLY_COMMIT and ml_models_enabled(self.config_entry.options):
-                            match_fn, _ = resolve_scorer("live_match", self.profile_store)
-                            if match_fn is not None:
-                                ml_commit_score = float(match_fn(_live_feat))
-                                self._logger.debug(
-                                    "Live-match ML commit score for '%s': %.3f (threshold %.2f)",
-                                    profile_name,
-                                    ml_commit_score,
-                                    ML_MATCH_COMMIT_THRESHOLD,
-                                )
-                    except Exception:  # noqa: BLE001
-                        pass
-                except Exception:  # noqa: BLE001 - ML must never break matching
-                    pass
-
-            # --- Record ranking snapshot for live_match on-device training ---
-            # Snapshot is recorded unconditionally (not gated on ML opt-in) so that
-            # training data accumulates even before the user enables ML models.
-            # Confirmed labels are back-filled at cycle end.
-            if _live_feat is not None and self._cycle_start_time:
-                try:
-                    self.profile_store.record_match_ranking_snapshot(
-                        start_time_iso=self._cycle_start_time.isoformat(),
-                        features=_live_feat,
-                        top1_profile=profile_name or "",
-                        top1_score=float(confidence),
-                        top2_score=_top2_score,
-                        candidate_count=max(1, len(self.profile_store.get_profiles())),
-                        cycle_id=self._ranking_snapshot_cycle_id,
-                    )
-                except Exception:  # noqa: BLE001 - never break matching
-                    pass
-
-            ml_early_commit = (
-                ml_commit_score is not None
-                and ml_commit_score >= ML_MATCH_COMMIT_THRESHOLD
-                and confidence >= 0.30
-            )
-
             # Step 2 (match_rules.decide_switch): Case 1 initial commit, Case 2
             # decisive-margin / trend switch, Case 3 unmatch, and the switch itself.
             switch_state = _read_switch_state(self)
@@ -1333,8 +1251,6 @@ class WashDataManager:
                 result,
                 self._match_persistence,
                 self._unmatch_threshold,
-                ml_early_commit=ml_early_commit,
-                ml_commit_score=ml_commit_score,
             )
             _write_switch_state(self, switch_state, switch_log)
 
@@ -1424,11 +1340,6 @@ class WashDataManager:
                 switch_state, tick, result, verified_pause, self.profile_store.get_profile
             )
             _write_switch_state(self, switch_state, override_log)
-
-            # --- HEURISTICS (Descriptive Phases) ---
-            phase_name = match_rules.heuristic_phase(
-                phase_name, self.device_type, current_power, self.detector.is_waiting_low_power
-            )
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
@@ -1560,23 +1471,18 @@ class WashDataManager:
         return _sanitize_ranking(raw_list)
 
     @property
-    def phase_description(self) -> str:
-        """Return a description of the current phase.
+    def phase_description(self) -> str | None:
+        """The current phase: a name from the matched profile's ranges, or None.
 
-        Prefers the *functional* progress-driven phase (the visual per-profile
-        phase configurator's ranges, indexed by the live ML-blended progress) so
-        the readout stays accurate even when a cycle runs longer/shorter than the
-        profile's nominal timeline. Falls back to the matcher's phase, then the
-        detector sub-state/state.
+        Only the *functional* progress-driven phase (the visual per-profile phase
+        configurator's ranges, indexed by the live ML-blended progress). None -
+        the sensor's ``unknown`` - when no range applies (audit PROGRESS-11): the
+        old fallbacks were the matcher's nearest-range guess, power heuristics
+        ("Spinning" over 200 W, so a 2 kW heater read Spinning) and the detector
+        sub-state, all English free text no translation could reach. The cycle
+        state itself stays on the state sensor (a translated slug).
         """
-        live = self._current_phase_from_progress()
-        if live:
-            return live
-        if self._last_match_result and self._last_match_result.matched_phase:
-            return self._last_match_result.matched_phase
-        if self.detector.sub_state:
-            return self.detector.sub_state
-        return self.detector.state
+        return self._current_phase_from_progress()
 
     def _current_phase_from_progress(self) -> str | None:
         """Live phase from the profile's configured ranges + ML-blended progress.
@@ -1584,15 +1490,18 @@ class WashDataManager:
         This is the *merge* of the visual phase configurator with the runtime
         estimator: one phase definition (the per-profile ranges the user draws),
         indexed by the smoothed progress fraction rather than raw elapsed seconds,
-        so overrun/underrun cycles still name the phase correctly. Returns None
-        (caller falls back) when not running, no profile is matched, or the
-        profile has no configured phase ranges. Never raises.
+        so overrun/underrun cycles still name the phase correctly. The fraction
+        maps onto the matched profile's expected duration (or the ranges' end if
+        they run longer), so ranges read at their real minutes (audit
+        PROGRESS-10). Returns None when not running, no profile is matched, the
+        profile has no phase ranges, or no range covers this point. Never raises.
         """
         return progress_mod.current_phase(
             self.profile_store,
             self.detector.state,
             self._current_program,
             self._cycle_progress,
+            self._matched_profile_duration,
         )
 
     @property
@@ -1609,6 +1518,26 @@ class WashDataManager:
         if result is None:
             return None
         return getattr(result, "ambiguity_margin", None)
+
+    @property
+    def match_uncertainty(self) -> dict[str, Any] | None:
+        """Top two of an undecided live match, for the panel (MATCH-DECIDE-15).
+
+        Display only (``match_rules.live_match_uncertainty``). None while idle, on
+        a hand-picked program, or once the match is decided.
+        """
+        try:
+            if self.manual_program_active:
+                return None
+            if self.detector.state not in (
+                STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING,
+            ):
+                return None
+            return match_rules.live_match_uncertainty(
+                self._last_match_result, self._current_program
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
 
     # Note: last_match_details property is defined later in the class
     # It returns MatchResult from _last_match_result
@@ -3415,8 +3344,8 @@ class WashDataManager:
             return {"ok": False, "reason": "ml_training_disabled"}
 
         opts = {**self.config_entry.data, **self.config_entry.options}
-        # Snapshot on the event loop before any executor offload (training +
-        # matcher tuning): get_past_cycles() returns the live mutable list, so a
+        # Snapshot on the event loop before any executor offload (training):
+        # get_past_cycles() returns the live mutable list, so a
         # concurrent cycle add / retention trim could otherwise change the input
         # mid-run.
         cycles = list(self.profile_store.get_past_cycles())
@@ -3479,11 +3408,6 @@ class WashDataManager:
                 self._ml_training_failures,
             )
 
-        # Stage 4/5: tune the matcher's scoring weights from this device's own
-        # cycles (same held-out promotion discipline as the models). Independent
-        # of model promotion; runs on every training pass.
-        matching = await self._tune_matching_config(cycles)
-
         # Record that training *ran* now, regardless of whether anything was
         # promoted, so "Last trained" advances on every run (a run that doesn't
         # beat the baseline previously left the timestamp stuck at the last
@@ -3505,59 +3429,16 @@ class WashDataManager:
                 "device_name": self.config_entry.title,
                 "promoted": promoted,
                 "results": summary.get("results", []),
-                "matching": matching,
             },
         )
-        # A promoted model changes the health-model signature, so recompute the
-        # persisted per-cycle health now rather than lazily on the next view.
-        if promoted:
-            try:
-                await self.async_recompute_cycle_health()
-            except Exception as err:  # noqa: BLE001
-                self._logger.debug("Post-training health recompute failed: %s", err)
+        # (No health recompute: the per-cycle health reads the quality / end
+        # models, and since 0.5.8 training promotes only total_energy.)
 
         return {
             "ok": True,
             "promoted": promoted,
             "results": summary.get("results", []),
-            "matching": matching,
         }
-
-    async def _tune_matching_config(self, cycles: list[dict[str, Any]]) -> dict[str, Any]:
-        """Tune + (if it beats the shipped defaults on a held-out split) persist
-        the matcher's scoring weights for this device. Executor-offloaded and
-        never raises. Returns the tuner status dict for logging / the UI event.
-        """
-        try:
-            from .ml.matching_tuner import tune_matching_config
-
-            result = await self.hass.async_add_executor_job(
-                tune_matching_config, cycles, self.device_type
-            )
-        except Exception as err:  # noqa: BLE001 - tuning must never break training
-            self._logger.debug("Matching-config tuning failed: %s", err)
-            return {"promoted": False, "reason": "exception", "error": str(err)}
-
-        if result.get("promoted") and result.get("config"):
-            record = {
-                "config": result["config"],
-                "trained_at": utc_now().isoformat(),
-                "cycle_count": len(cycles),
-                "baseline_test_top1": result.get("baseline_test_top1"),
-                "tuned_test_top1": result.get("tuned_test_top1"),
-            }
-            await self.profile_store.set_matching_config(record)
-            self._logger.info(
-                "On-device matcher tuning promoted (top-1 %.3f -> %.3f): %s",
-                result.get("baseline_test_top1") or 0.0,
-                result.get("tuned_test_top1") or 0.0,
-                result["config"],
-            )
-        else:
-            self._logger.debug(
-                "On-device matcher tuning not promoted: %s", result.get("reason")
-            )
-        return result
 
     async def async_recompute_cycle_health(self) -> int:
         """Recompute + persist per-cycle ML health against the current model.
@@ -3760,11 +3641,17 @@ class WashDataManager:
         """Handle power sensor state change."""
         event_data = cast(dict[str, Any], getattr(event, "data", {}))
         new_state = cast(State | None, event_data.get("new_state"))
+        # A state with no usable value is a dead sensor, not a silent one: record
+        # it, so the detector stops crediting quiet until the next real reading
+        # (register item 266, audit DETECT-13). Returning without a trace left
+        # the watchdog's keepalives to run out the end gates during a dropout.
         if new_state is None or new_state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+            self.detector.mark_sensor_unavailable(utc_now())
             return
 
         power = _finite_power(new_state.state)
         if power is None:
+            self.detector.mark_sensor_unavailable(utc_now())
             return
 
         # Capture every raw sensor reading before any throttling or processing.
@@ -4376,8 +4263,12 @@ class WashDataManager:
         # readings; it no-ops until a profile is matched. Kept ahead of the
         # keepalive/force-end branches below so even a verified-pause drying tail
         # (which skips those branches) still ticks down.
+        # The "almost done" reminder reads that same estimate, so it is checked here
+        # too: on the power path alone a silent tail delayed it to the next reading,
+        # typically the final pump-out, alongside the finish (audit PROGRESS-07).
         if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
             self._update_remaining_only()
+            self._check_pre_completion_notification()
             self._notify_update()
 
         time_since_any_update = (now - self._last_reading_time).total_seconds()
@@ -4767,7 +4658,7 @@ class WashDataManager:
                 # (most obviously one running a hand-pinned program, where
                 # _update_estimates returns early and the matcher never runs)
                 # persisted the PREVIOUS cycle's confidence as its own. That number
-                # then feeds _compute_cycle_quality_score and the learning feedback,
+                # then feeds the learning feedback,
                 # i.e. fabricated match provenance on a cycle that has none - the
                 # #400 class of bug. Zero means "no opinion" and is not stored.
                 self._last_match_confidence = 0.0
@@ -5111,25 +5002,29 @@ class WashDataManager:
         ``is_terminal_drop``) - a cycle drawing power unlike anything in its
         history is treated as a possible new program and deferred.
 
-        Returns ``False`` (keep the proven slow path) when the ML/anomaly opt-in
-        is off, there is too little history to trust the baseline, the cycle
-        looks novel, or the drop is not anomalously early.  Never raises - the
+        Returns ``False`` (keep the proven slow path) when it is off for this
+        device (``detector_config.terminal_drop_enabled``: always on for
+        dishwashers, behind the "Apply smart models" toggle otherwise - audit
+        ML-08), a default-on dishwasher has no committed unambiguous match yet
+        (``terminal_drop_may_fire``), there is too little history to trust the
+        baseline, the cycle looks novel, or the drop is not anomalously early.
+        Never raises - the
         anomaly signal must never break detection.
         """
         try:
-            from .ml.engine import ml_models_enabled
-
-            if not ml_models_enabled(self.config_entry.options):
+            options = self.config_entry.options
+            if not terminal_drop_enabled(self.device_type, options):
                 return False
-            earliest, peak_range = self._terminal_drop_baseline()
-            return is_terminal_drop(
+            # Default-on dishwashers fire only on a committed, unambiguous match.
+            if not terminal_drop_may_fire(
+                self.device_type, options, self.detector,
+                pinned=bool(self._manual_program_active),
+            ):
+                return False
+            return terminal_drop_fires(
                 points,
-                earliest,
-                peak_range,
+                self._terminal_drop_baseline(),
                 float(self.detector.config.stop_threshold_w),
-                TERMINAL_DROP_EARLINESS_RATIO,
-                TERMINAL_DROP_MIN_PEAK_RATIO,
-                TERMINAL_DROP_PEAK_FAMILIAR_TOL,
             )
         except Exception as err:  # noqa: BLE001 - anomaly signal must never break detection
             self._logger.debug("Terminal-drop detection skipped: %s", err)
@@ -5175,11 +5070,7 @@ class WashDataManager:
             cycles = list(self.profile_store.get_past_cycles())
             stop_threshold = float(self.detector.config.stop_threshold_w)
             earliest, peak_range = await self.hass.async_add_executor_job(
-                terminal_drop_baseline,
-                cycles,
-                stop_threshold,
-                TERMINAL_DROP_MIN_QUIET_SPAN_S,
-                TERMINAL_DROP_MIN_CLEAN_CYCLES,
+                terminal_drop_baseline_for, cycles, stop_threshold
             )
             self._terminal_drop_cache = (len(cycles), earliest, peak_range)
         except Exception as err:  # noqa: BLE001 - anomaly signal must never break detection
@@ -5211,91 +5102,6 @@ class WashDataManager:
             self._profile_end_expectation,
             self._logger,
         )
-
-    def _compute_cycle_quality_score(
-        self,
-        cycle_data: dict[str, Any],
-        past_cycles_snapshot: list[dict[str, Any]] | None = None,
-    ) -> None:
-        """Score a just-finished cycle with the hybrid_curve_quality model (opt-in).
-
-        When ML models are enabled for this device, computes P(cycle is a problem)
-        and stores it under ``cycle_data["ml_quality_score"]``.  A high score means
-        the cycle may be mis-detected or corrupt; the learning manager uses it to
-        downgrade auto-labeling to a feedback request so the user can confirm.
-        Never raises — scoring failure is silently ignored to keep cycle storage safe.
-        """
-        try:
-            from .ml.engine import ml_models_enabled, resolve_scorer
-            from .ml.feature_extraction import quality_features
-
-            if not ENABLE_ML_QUALITY_GATE or not ml_models_enabled(self.config_entry.options):
-                return
-            quality_fn, _ = resolve_scorer("quality", self.profile_store)
-            if quality_fn is None:
-                return
-
-            profile_name = cycle_data.get("profile_name")
-            if not profile_name:
-                return
-
-            points = decompress_power_data(cycle_data)
-            if not points or len(points) < 4:
-                return
-
-            # Build profile median stats from stored labeled cycles.
-            durations: list[float] = []
-            energies: list[float] = []
-            peaks: list[float] = []
-            # This function runs in an executor thread and the event loop may
-            # append cycles concurrently; iterating (or even copying) the live list
-            # here is a data race. Prefer the snapshot taken on the event loop at
-            # the call site; only fall back to a local copy for direct callers.
-            cycles = (
-                past_cycles_snapshot
-                if past_cycles_snapshot is not None
-                else list(self.profile_store.get_past_cycles())
-            )
-            for c in cycles:
-                if c.get("profile_name") != profile_name:
-                    continue
-                if c.get("duration") is not None:
-                    durations.append(float(c["duration"]))
-                if c.get("energy_wh") is not None:
-                    energies.append(float(c["energy_wh"]))
-                if c.get("max_power") is not None:
-                    peaks.append(float(c["max_power"]))
-
-            if not durations:
-                return
-
-            med_dur = float(np.median(durations))
-            med_energy = float(np.median(energies)) if energies else 500.0
-            med_peak = float(np.median(peaks)) if peaks else 500.0
-
-            match_conf = float(cycle_data.get("match_confidence") or 0.0)
-            conf_known = match_conf > 0
-            proxy_dist = max(0.0, 1.0 - match_conf) if conf_known else 0.25
-            proxy_margin = match_conf if conf_known else 0.30
-            proxy_fit = match_conf if conf_known else 0.75
-
-            feat = quality_features(
-                points=points,
-                profile_median_duration_s=med_dur,
-                profile_median_energy_wh=med_energy,
-                profile_median_peak_w=med_peak,
-                profile_distance=proxy_dist,
-                label_margin=proxy_margin,
-                profile_fit_score=proxy_fit,
-                flag_count=len(cycle_data.get("artifacts", [])),
-            )
-            score = round(float(quality_fn(feat)), 3)
-            cycle_data["ml_quality_score"] = score
-            self._logger.debug(
-                "ML quality score (profile=%s): %.3f", profile_name, score
-            )
-        except Exception:  # noqa: BLE001 - never break cycle storage
-            pass
 
     def _price_entity_reject_reason(self, entity_id: str) -> str | None:
         """Why ``entity_id`` cannot be a price per kWh, or None (#439).
@@ -5732,6 +5538,31 @@ class WashDataManager:
         cycle_token: str | None = None,
         price_timeline: list[tuple[float, float]] | None = None,
     ) -> None:
+        """Process cycle completion, then close it whatever failed (MANAGER-12).
+
+        An exception anywhere in the steps used to end the task before the flush
+        and the terminal reset: the UI stayed on the finished cycle with no expiry
+        timer. On shutdown the task is cancelled and ``async_shutdown`` flushes the
+        store itself; arming the expiry timer then would outlive the unload.
+        """
+        failed = False
+        try:
+            await self._async_cycle_end_steps(cycle_data, cycle_token, price_timeline)
+        except Exception:  # pylint: disable=broad-exception-caught
+            failed = True
+            self._logger.exception("Cycle-end processing failed; closing the cycle anyway")
+        finally:
+            if not self._is_shutdown:
+                await self._async_close_cycle_end(
+                    cycle_token, failed, cycle_status=cycle_data.get("status")
+                )
+
+    async def _async_cycle_end_steps(
+        self,
+        cycle_data: dict[str, Any],
+        cycle_token: str | None = None,
+        price_timeline: list[tuple[float, float]] | None = None,
+    ) -> None:
         """Process cycle completion asynchronously (heavy tasks).
 
         ``cycle_token`` is the ``_ranking_snapshot_cycle_id`` captured when this cycle
@@ -5763,7 +5594,17 @@ class WashDataManager:
         # stale, the ENDING quiet tail inside its duration), and its winner differed
         # from the complete-cycle winner on 17.5% of corpus cycles, while
         # MATCH_LABEL_MIN_MARGIN was calibrated on complete folds (item 310).
-        final_result = await self._run_final_match_from_cycle_data(cycle_data)
+        # It runs BEFORE the cycle is stored, so a raise here used to lose the
+        # cycle and strand the device on it (audit MATCH-CORE-06 / MANAGER-12). A
+        # failed match leaves an empty result: the cycle is stored unlabelled, not
+        # labelled from the live prefix match instead.
+        try:
+            final_result = await self._run_final_match_from_cycle_data(cycle_data)
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.exception(
+                "Final match failed; storing the cycle without a label"
+            )
+            final_result = MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
         same_cycle = cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token
         if program in ("detecting...", "restored...") and final_result is not None:
             # Never committed live: the complete match names the program for DISPLAY
@@ -5880,29 +5721,12 @@ class WashDataManager:
                 "ambiguous": getattr(match_result, "is_ambiguous", False),
             }
 
-        # Back-fill confirmed label on any ranking snapshots captured during this cycle
-        # so the live_match on-device trainer can use them as labelled examples.
-        _start_iso = cycle_data.get("start_time")
-        _confirmed_profile = cycle_data.get("profile_name")
-        if _start_iso and _confirmed_profile:
-            try:
-                self.profile_store.confirm_match_ranking_snapshots(
-                    _start_iso,
-                    _confirmed_profile,
-                    # Use the token captured when THIS cycle ended, not the live
-                    # field, which may already have rolled to a newly-started cycle
-                    # during the awaits above (else this cycle's snapshots go
-                    # unlabelled and a new cycle's snapshot gets mislabelled).
-                    cycle_id=cycle_token or None,
-                )
-            except Exception:  # noqa: BLE001
-                pass
-
         # Compute envelope conformance for the matched profile.
         # Stored as cycle_data["envelope_conformance"] so the panel and quality
         # gate can display/use it.  Only runs when we have a profile + power trace.
         _ep = cycle_data.get("profile_name")
         _pd = cycle_data.get("power_data")
+        _start_iso = cycle_data.get("start_time")
         if _ep and isinstance(_pd, list) and len(_pd) >= 4:
             try:
                 from .time_utils import power_data_to_offsets  # noqa: PLC0415
@@ -5968,27 +5792,6 @@ class WashDataManager:
         # otherwise the single price in effect NOW. Either way it is frozen here, so
         # later price changes never rewrite historical costs.
         await self._async_apply_cycle_cost(cycle_data, price_timeline=price_timeline)
-
-        # Score cycle quality with the ML model before persisting so the score is
-        # stored on the cycle record and available to the learning manager immediately.
-        # Must run BEFORE async_add_cycle so get_past_cycles() inside the scorer does
-        # not yet include the current cycle, keeping reference statistics uncontaminated.
-        # Only opted-in devices reach the scorer, and only then is it offloaded to the
-        # executor: on a long trace its NumPy feature extraction is O(N) and must not
-        # block the event loop (mirrors the profile matcher). Gating here avoids a
-        # pointless thread-hop for the default (ML-off) case where the scorer no-ops.
-        # The scorer mutates only cycle_data (nothing else touches it here) and never
-        # raises, so this is executor-safe.
-        from .ml.engine import ml_models_enabled  # noqa: PLC0415
-
-        if ml_models_enabled(self.config_entry.options):
-            # Snapshot past_cycles on the event loop before offloading: iterating
-            # (or copying) the live list inside the executor races the loop
-            # appending this just-finished cycle.
-            past_cycles_snapshot = list(self.profile_store.get_past_cycles())
-            await self.hass.async_add_executor_job(
-                self._compute_cycle_quality_score, cycle_data, past_cycles_snapshot
-            )
 
         # Add cycle to store immediately (still sync but offloadable parts optimized
         # internally if possible)
@@ -6114,6 +5917,18 @@ class WashDataManager:
         ):
             display_program = program
         display_program = display_program or "unknown"
+        # MATCH-DECIDE-15: how sure the complete-cycle match was, and whether the
+        # stored cycle was labelled with `program` or it is only the best guess
+        # shown for display. The margin is None with no winner (1.0 when only one
+        # programme was a candidate); `label_applied` covers a hand-picked one.
+        match_margin: float | None = None
+        if getattr(match_result, "best_profile", None):
+            try:
+                match_margin = round(
+                    float(getattr(match_result, "ambiguity_margin", 0.0) or 0.0), 3
+                )
+            except (TypeError, ValueError):
+                match_margin = None
 
         if self._notify_fire_events:
             self.hass.bus.async_fire(
@@ -6123,6 +5938,8 @@ class WashDataManager:
                     "device_name": self.config_entry.title,
                     "cycle_data": event_cycle_data,
                     "program": display_program,
+                    "match_margin": match_margin,
+                    "label_applied": bool(label_gate_ok),
                     "duration": event_cycle_data.get("duration"),
                     "start_time": event_cycle_data.get("start_time"),
                     "end_time": event_cycle_data.get("end_time") or utc_now().isoformat(),
@@ -6154,11 +5971,23 @@ class WashDataManager:
         if _same_cycle:
             self._clear_live_progress_notification(clear_services=False)
 
+        # No "finished" push for an interrupted cycle (audit MANAGER-10): a false
+        # start or a cancelled programme finished nothing. Nothing replaces the
+        # start card on the lifecycle tag then, so clear it the way the shutdown
+        # path does when no finished notification follows - unless a newer cycle
+        # already owns that tag.
+        cycle_status = cycle_data.get("status")
+        announce_finish = notif_rules.cycle_end_is_finish(cycle_status)
+        if not announce_finish and _same_cycle:
+            self._send_tag_clear(self._lifecycle_tag)
+
         # Send notification if enabled
-        if self._notify_finish_services or self._notify_actions:
+        if announce_finish and (self._notify_finish_services or self._notify_actions):
             msg_template = self.config_entry.options.get(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE)
             duration_min = int(cycle_data['duration'] / 60)
             program_name = display_program
+            # `completed` or `force_stopped` (interrupted cycles never get here).
+            status_str = str(cycle_status or "completed")
 
             energy_kwh = round(self._cycle_report_energy_wh(cycle_data) / 1000, 3)
 
@@ -6199,6 +6028,7 @@ class WashDataManager:
                 time_finished=time_finished,
                 cycle_count=finished_cycle_count,
                 vs_typical=vs_typical,
+                status=status_str,
             )
             self._dispatch_notification(
                 msg,
@@ -6212,6 +6042,7 @@ class WashDataManager:
                     "time_finished": time_finished,
                     "cycle_count": finished_cycle_count,
                     "vs_typical": vs_typical,
+                    "status": status_str,
                     # Same lifecycle tag as start/live so the finished alert replaces
                     # the live notification in place. No live_update/alert_once here,
                     # so the companion app surfaces it with sound.
@@ -6266,6 +6097,22 @@ class WashDataManager:
                 label_allowed=label_gate_ok or bool(cycle_data.get("profile_name")),
             )
 
+    async def _async_close_cycle_end(
+        self,
+        cycle_token: str | None,
+        tail_failed: bool = False,
+        cycle_status: str | None = None,
+    ) -> None:
+        """The end of the cycle-end tail, run whatever failed before it (MANAGER-12).
+
+        Flushes the coalesced cycle-end write (item 456) and resets the terminal
+        state, unless a newer cycle has started (B1). ``tail_failed`` means the
+        follow-up stopped part-way, possibly before the live notification was
+        handed over, so the live tag is cleared here instead of being left to
+        count its chronometer into negative numbers. ``cycle_status`` is the
+        ended cycle's status: an interrupted one never enters the Clean state
+        (audit MANAGER-10, ``notification_rules.cycle_end_is_finish``).
+        """
         # The one immediate write of this cycle end: the cycle, its counters, the
         # rebuilt envelopes and the feedback request the learning pass just queued.
         # No await since the lifetime-energy save that used to write first, so the
@@ -6275,6 +6122,14 @@ class WashDataManager:
             await self.profile_store.async_flush_saves()
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Failed to save the finished cycle: %s", e)
+
+        if tail_failed and (
+            cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token
+        ):
+            try:
+                self._clear_live_progress_notification()
+            except Exception:  # noqa: BLE001 - cleanup must not stop the reset
+                self._logger.debug("Clearing the live notification failed", exc_info=True)
 
         # B1: a new cycle may have started while the heavy post-processing above was
         # awaiting. If so, the manager's live-cycle fields (_current_program,
@@ -6320,7 +6175,11 @@ class WashDataManager:
         self._clean_state_start = None
         self._notified_clean_laundry = False
         self._reset_unload_nag_tracking()
-        if self._door_sensor_entity:
+        if not notif_rules.cycle_end_is_finish(cycle_status):
+            # An interrupted cycle finished nothing, so there is nothing to unload
+            # and no reminder to nag with (audit MANAGER-10).
+            self._logger.debug("Cycle ended %s: not entering Clean state", cycle_status)
+        elif self._door_sensor_entity:
             door_state = self.hass.states.get(self._door_sensor_entity)
             if door_state and door_state.state == "off":  # binary_sensor: off = closed
                 self._is_clean_state = True

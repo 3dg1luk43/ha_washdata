@@ -117,6 +117,12 @@ from .profile_store import (
     ProfileStore,
     decompress_power_data,
 )
+from .detector_config import (
+    terminal_drop_baseline_for,
+    terminal_drop_enabled,
+    terminal_drop_fires,
+    terminal_drop_may_fire,
+)
 from .time_utils import power_data_to_offsets
 
 _LOGGER = logging.getLogger(__name__)
@@ -474,7 +480,8 @@ def _build_match_snapshots(
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Playground: snapshot build failed: %s", exc)
 
-    # Stage-5: collapse cohesive profile groups into aggregate candidates.
+    # Stage-5: map cohesive profile groups to their members; every member is
+    # scored on its own curve and collapse_group_candidates forms the family.
     group_members: dict[str, list[str]] = {}
     member_snaps: dict[str, Any] = {}
     try:
@@ -492,22 +499,15 @@ def _build_match_snapshots(
 
 
 def _matching_config(store: Any, in_progress: bool = False) -> dict[str, Any]:
-    """Live matcher config from the store (defaults + tuned overrides)."""
-    config: dict[str, Any] = {
-        "min_duration_ratio": float(getattr(store, "_min_duration_ratio", 0.07)),
-        "max_duration_ratio": float(getattr(store, "_max_duration_ratio", 1.5)),
+    """Live matcher config from the store (the live matcher runs no overrides)."""
+    return {
+        "min_duration_ratio": float(getattr(store, "_min_duration_ratio", DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)),
+        "max_duration_ratio": float(getattr(store, "_max_duration_ratio", DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)),
         "dtw_bandwidth": float(getattr(store, "dtw_bandwidth", 0.2)),
         # Mirror the live Stage-4 energy discriminator so the sim is byte-identical.
         "energy_mode": str(getattr(store, "energy_mode", "mean")),
         "in_progress": bool(in_progress),
     }
-    try:
-        overrides = store._matching_overrides()  # pylint: disable=protected-access
-        if isinstance(overrides, dict):
-            config.update(overrides)
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
-    return config
 
 
 class _InlineExecutor:
@@ -664,6 +664,39 @@ def _readings_from_cycle(
 # States in which no progress estimate is shown (mirrors _update_remaining_only).
 _DEAD_STATES = (STATE_OFF, STATE_UNKNOWN, STATE_IDLE)
 _SIM_SERIES_THROTTLE_S = 30.0  # cap estimator calls; 5s matched cadence made this a no-op
+
+# Terminal-drop baselines per stored-cycle list (audit ML-08). A History/Optimize
+# batch replays many cycles against one store and the baseline decompresses every
+# completed trace, so it is built once per list. The list is held, so its id
+# cannot be recycled while cached; an append changes the length in the key.
+_TERMINAL_DROP_BASELINES: dict[tuple[int, int, float], tuple[Any, Any]] = {}
+_MAX_TERMINAL_DROP_BASELINES = 16
+
+
+def _sim_terminal_drop_baseline(
+    store: Any, stop_threshold_w: float
+) -> tuple[float | None, tuple[float, float] | None]:
+    """The live terminal-drop baseline over ``store``'s stored cycles. Never raises.
+
+    Built from every stored cycle, the replayed one included, like the rest of the
+    Playground (in-sample). That can only make a completed cycle LESS likely to
+    fire: its own first quiet span is in the baseline.
+    """
+    try:
+        cycles = store.get_past_cycles()
+        if not isinstance(cycles, list):
+            return None, None
+        key = (id(cycles), len(cycles), float(stop_threshold_w))
+        hit = _TERMINAL_DROP_BASELINES.get(key)
+        if hit is not None and hit[0] is cycles:
+            return hit[1]
+        baseline = terminal_drop_baseline_for(list(cycles), stop_threshold_w)
+        if len(_TERMINAL_DROP_BASELINES) >= _MAX_TERMINAL_DROP_BASELINES:
+            _TERMINAL_DROP_BASELINES.clear()
+        _TERMINAL_DROP_BASELINES[key] = (cycles, baseline)
+        return baseline
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None, None
 
 
 def simulate_cycle_detail(
@@ -922,7 +955,29 @@ class _DetailSim:
             self.detector = CycleDetector(
                 self.config, self._on_state_change, self._on_cycle_end,
                 profile_matcher=self._matcher, device_name="playground-detail",
+                terminal_drop_provider=self._terminal_drop_provider(
+                    {**self.options, **(settings_override or {})}
+                ),
             )
+
+    def _terminal_drop_provider(
+        self, options: dict[str, Any]
+    ) -> Callable[[list[tuple[float, float]], float], bool] | None:
+        """``manager._terminal_drop_provider`` for this replay; None where live
+        would not run it (``detector_config.terminal_drop_enabled``, audit ML-08)."""
+        if not terminal_drop_enabled(self.device_type, options):
+            return None
+        stop = float(getattr(self.config, "stop_threshold_w", 0.0) or 0.0)
+        baseline = _sim_terminal_drop_baseline(self.store, stop)
+        device_type = self.device_type
+
+        def _provider(points: list[tuple[float, float]], _expected: float) -> bool:
+            # The live gate on the sim's own detector (built after this closure).
+            if not terminal_drop_may_fire(device_type, options, self.detector):
+                return False
+            return terminal_drop_fires(points, baseline, stop)
+
+        return _provider
 
     @property
     def n_readings(self) -> int:
@@ -1035,7 +1090,7 @@ class _DetailSim:
         :class:`_SimStore`), then the manager's own rules from
         :mod:`match_rules`: switching, the envelope verified pause and its
         releases, the consistency override (which is also how a confident mismatch
-        drops the program) and the phase heuristic. Like the manager it pushes the
+        drops the program). Like the manager it pushes the
         verified pause and the commit flag to the detector, and hands it the
         tick's name - which after a divergence revert is "detecting...", as live -
         not the displayed program. Returns the match context the detector applies,
@@ -1091,13 +1146,10 @@ class _DetailSim:
         )
         verified = pause.verified_pause
         match_rules.consistency_override(st, tick, result, verified, self._get_profile)
-        phase_name = match_rules.heuristic_phase(
-            tick.phase_name, self.device_type, current_power, det.is_waiting_low_power
-        )
         det.set_verified_pause(verified)
         det.set_match_committed(match_rules.program_is_committed(st.current_program))
         self._report_tick(prev_program, bool(prev_verified), bool(verified), result)
-        return self._match_context(tick, phase_name, result)
+        return self._match_context(tick, tick.phase_name, result)
 
     def _report_tick(
         self, prev_program: Any, prev_verified: bool, verified: bool, result: Any
@@ -1304,7 +1356,7 @@ class _DetailSim:
                 pt["progress"] = round(result.progress, 1)
                 pt["remaining_s"] = round(result.remaining, 0)
                 pt["phase"] = progress_mod.current_phase(
-                    self.store, state, program, result.progress
+                    self.store, state, program, result.progress, matched_dur
                 )
                 sim_cost = self._cost_so_far(trace)
                 wh, cost = progress_mod.projected_energy(
@@ -1463,11 +1515,14 @@ class _DetailSim:
 
         # --- finish + milestone markers (reuse production predicates) ---
         if self.captured and self.finish_configured:
-            held = self._held(self.cursor["t"])
-            self._emit(
-                "notify_held" if held else "notify_finish",
-                "finish notification" + (" (held: quiet hours)" if held else ""),
-            )
+            # No finished push for an interrupted cycle (audit MANAGER-10); the
+            # milestone below does not depend on it, as live.
+            if notif_rules.cycle_end_is_finish(outcome["status"]):
+                held = self._held(self.cursor["t"])
+                self._emit(
+                    "notify_held" if held else "notify_finish",
+                    "finish notification" + (" (held: quiet hours)" if held else ""),
+                )
             try:
                 prev_life = int(self.store.get_lifetime_cycle_count())
             except Exception:  # pylint: disable=broad-exception-caught

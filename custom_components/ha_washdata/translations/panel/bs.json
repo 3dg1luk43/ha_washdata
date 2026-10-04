@@ -74,8 +74,6 @@
         "restart_gap_tip_other": "{n} HA restart praznina: trag snage ima rupe",
         "reviewed": "Recenzirano",
         "steady": "→ stabilan",
-        "using_defaults": "Korištenje isporučenih zadanih postavki",
-        "using_tuned": "Korištenje podešenih težina",
         "overrun_ratio": "({x}x očekivanog)",
         "underrun_ratio": "({pct}% očekivanog)",
         "imported_tip": "Uvezeno iz zajedničke trgovine. Koristi se samo za podudaranje, ne broji se u statistiku.",
@@ -87,9 +85,20 @@
         "awaiting_tip": "Čeka odobrenje zajednice",
         "awaiting_n": "Čeka odobrenje · potvrđeno {n}",
         "awaiting": "Čeka odobrenje",
-        "approved": "Odobreno"
+        "approved": "Odobreno",
+        "matcher_unused": "Još bez podudaranja s vašim ciklusima",
+        "matcher_used": "Podudaranje u {n} od vaših ciklusa",
+        "matcher_used_one": "Podudaranje u {n} od vaših ciklusa",
+        "matcher_used_few": "Podudaranje u {n} od vaših ciklusa",
+        "matcher_used_other": "Podudaranje u {n} od vaših ciklusa",
+        "matcher_used_tip": "Ciklusi snimljeni na ovom uređaju koje je mehanizam podudaranja WashData sam označio ovim uvezenim programom. Uvoz koji se nikada ne podudari možda ne odgovara vašem uređaju i može se ukloniti. Broji se lokalno; ništa se ne šalje u trgovinu."
     },
     "btn": {
+        "pg_preset_delete": "Izbriši konfiguraciju",
+        "pg_preset_load": "Učitaj konfiguraciju",
+        "pg_preset_load_tip": "Zamijeni vrijednosti u testnom okruženju ovom konfiguracijom (aktivne postavke ostaju netaknute)",
+        "pg_preset_save": "Sačuvaj kao konfiguraciju",
+        "pg_preset_save_tip": "Sačuvaj sve vrijednosti ispod kao imenovanu konfiguraciju za ovaj uređaj",
         "reset_zoom": "Poništi zumiranje",
         "set_brand_model": "Postavi marku i model",
         "refresh_catalog": "Osvježi katalog",
@@ -173,7 +182,6 @@
         "reset": "Vrati na zadano",
         "reset_ml_models_tip": "Odbacite fino podešene modele i vratite se na one ugrađene. WashData ih može ponovo naučiti kasnije.",
         "reset_to_builtin": "Vratite se na ugrađene modele",
-        "reset_to_defaults": "Vratite na zadane postavke",
         "resume_cycle": "Nastavi",
         "resume_cycle_tip": "Nastavite pauzirani ciklus",
         "revert_settings": "Odbaci izmjene",
@@ -241,7 +249,8 @@
         "retry": "Pokušaj ponovo",
         "confirm_appliance": "Potvrdi ovaj uređaj",
         "confirmed": "Potvrđeno",
-        "create_profile_from_gap": "Kreirajte profil"
+        "create_profile_from_gap": "Kreirajte profil",
+        "undo_import": "Poništi posljednji uvoz"
     },
     "note": {
         "off_delay": {
@@ -341,7 +350,6 @@
         "manual_recording": "Ručno snimanje",
         "manual_recording_tip": "Namjerno pokrenite ciklus dok WashData snima trag snage. Pokrenite neposredno prije nego što uređaj krene, zaustavite kada završi, zatim obradite za pohranu kao imenovani profil.",
         "ml_learned": "Šta je WashData naučio",
-        "ml_matching_tuning": "Fino podešavanje usklađenosti programa",
         "ml_settings_card": "Postavke",
         "ml_smart_learning": "Pametno učenje",
         "my_preferences": "Moje postavke",
@@ -364,7 +372,8 @@
         "online_account": "Zajednička trgovina i online funkcije",
         "import_power_history": "Uvoz historije snage",
         "service_status": "Status servisa",
-        "online_account_tab": "Online i zajednica"
+        "online_account_tab": "Online i zajednica",
+        "live_match_debug": "Dijagnostika podudaranja uživo"
     },
     "health": {
         "fair": "Prihvatljiva kvaliteta podudaranja",
@@ -412,14 +421,12 @@
         "cycles_lc": "ciklusa",
         "date": "Datum",
         "debug_traces": "Tragovi otklanjanja grešaka",
-        "default": "Zadano",
         "default_access_level": "Zadani nivo za korisnike koji nisu navedeni ispod",
         "default_other": "Zadano (ostali uređaji)",
         "default_tab": "Podrazumevana kartica prilikom otvaranja panela",
         "font_size": "Veličina fonta ploče",
         "description": "Opis",
         "duration": "Trajanje",
-        "emphasis": "Naglasak",
         "enable_access_control": "Omogućite kontrolu pristupa po korisniku",
         "energy": "Energija",
         "event_type": "Tip događaja",
@@ -431,7 +438,6 @@
         "group_name": "Naziv grupe",
         "head_trim": "Skraćivanje početka (s)",
         "hide_tabs": "Sakrij kartice za neadministratore",
-        "in_use": "U upotrebi",
         "json_data": "JSON podaci",
         "label": "Podudarajući program",
         "last": "Posljednjih",
@@ -464,6 +470,9 @@
         "pg_group_timing": "Pravila vremena",
         "pg_idle": "Neaktivan",
         "pg_poor_match": "Loše podudaranje",
+        "pg_preset": "Konfiguracija testnog okruženja",
+        "pg_preset_name": "Naziv nove konfiguracije",
+        "pg_preset_none": "Odaberite konfiguraciju…",
         "pg_strong_match": "Snažno podudaranje",
         "pg_weak_match": "Slabo podudaranje",
         "phase_name": "Ime faze",
@@ -598,7 +607,6 @@
         "cat_custom_phases": "Prilagođene faze",
         "cat_profile_groups": "Grupe profila",
         "cat_settings": "Postavke otkrivanja i prepoznavanja",
-        "cat_matching_config": "Podešavanje prepoznavanja",
         "cat_ml_models": "ML modeli",
         "cat_feedback": "Oznake povratnih informacija i pregleda",
         "cat_suggestions": "Prijedlozi",
@@ -648,7 +656,21 @@
         "pg_autolabel": "Automatsko označavanje",
         "pg_label_review": "Traži pregled",
         "pg_ev_match_reverted": "Podudaranje poništeno",
-        "pg_ev_verified_pause": "Potvrđena pauza"
+        "pg_ev_verified_pause": "Potvrđena pauza",
+        "n_samples": "{n} uzoraka",
+        "n_samples_one": "{n} uzorak",
+        "n_samples_few": "{n} uzorka",
+        "n_samples_other": "{n} uzoraka",
+        "n_cycles": "{n} ciklusa",
+        "n_cycles_one": "{n} ciklus",
+        "n_cycles_few": "{n} ciklusa",
+        "n_cycles_other": "{n} ciklusa",
+        "energy_per_cycle": "{v}/ciklus",
+        "energy_total": "ukupno {v}",
+        "automation_off": "(isključeno)",
+        "ref_cycle_none": "Nijedan",
+        "share_name": "Prikaži moje ime uz ono što dijelim",
+        "cat_backfill_cycles": "Ciklusi pronađeni u uvezenoj historiji snage"
     },
     "log": {
         "all_levels": "Svi nivoi",
@@ -670,17 +692,9 @@
         "trend_declining_tip": "Prilagodba ovog modela se pogoršala u nedavnim ponovnim provjerama, pregled više ciklusa može mu pomoći da ponovo nauči.",
         "trend_steady_tip": "Prilagodba ovog modela je ostala otprilike stabilna u nedavnim ponovnim provjerama.",
         "cap_blurb": {
-            "end": "Prepoznavanje kada je ciklus zaista završen",
-            "live_match": "Brže prepoznavanje programa koji je u toku",
-            "quality": "Uočavanje pogrešno prepoznatih ili oštećenih ciklusa",
-            "remaining_time": "Predviđanje preostalog vremena",
             "total_energy": "Predviđanje ukupne potrošnje energije i troškova"
         },
         "cap_label": {
-            "end": "Prepoznavanje kraja ciklusa",
-            "live_match": "Prepoznavanje programa",
-            "quality": "Provjera kvaliteta ciklusa",
-            "remaining_time": "Procjena preostalog vremena",
             "total_energy": "Procjena potrošnje energije"
         },
         "metric_auc": "AUC {auc} na izdvojenim podacima",
@@ -734,10 +748,17 @@
         "apply_suggestions_title": "Primijeni prijedloge",
         "apply_suggestions_msg": "Promijeniti ove postavke ({n})? Integracija se ponovo učitava nakon spremanja.",
         "discard_settings_title": "Odbaciti nesačuvane promjene?",
-        "discard_settings_msg": "Nesačuvane promjene postavki: {n}. Napustiti Postavke i odbaciti ih?"
+        "discard_settings_msg": "Nesačuvane promjene postavki: {n}. Napustiti Postavke i odbaciti ih?",
+        "profile_title": "Profil · {name}",
+        "undo_import_msg": "Sve što je pohranjeno za ovaj uređaj vraća se na stanje prije posljednjeg uvoza ({when}), uključujući i njegove postavke. Ciklusi zabilježeni od tada i promjene napravljene u međuvremenu se gube.",
+        "undo_import_ok": "Poništi uvoz",
+        "undo_import_title": "Poništi posljednji uvoz"
     },
     "msg": {
         "pg_canvas_empty3": "Odaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim pređite mišem za prikaz vrijednosti, pomjerajte točkić ili koristite dva prsta za zumiranje i povucite za pomjeranje.",
+        "pg_preset_delete_confirm": "Izbrisati konfiguraciju \"{name}\"?",
+        "pg_preset_limit": "Dostignut limit konfiguracija ({n})",
+        "pg_preset_overwrite": "Prepisati konfiguraciju \"{name}\"?",
         "tail_trim_hint": "Uklonite ovoliko sekundi sa kraja",
         "store_sibling_hint": "Nema ničega podijeljenog za vaš tačan model? Blisko srodan model iste marke obično je dobra početna tačka.",
         "store_declare_appliance": "Recite integraciji WashData koji uređaj posjedujete i ova kartica prikazat će konfiguracije koje su drugi podijelili za njega. Možete i upisati marku iznad kako biste pregledali katalog.",
@@ -784,7 +805,6 @@
         "maintenance_load_error": "Nije moguće učitati podatke o održavanju: {error}",
         "maintenance_requires_access": "Održavanje i izvoz/uvoz zahtijevaju pun pristup.",
         "manual_duration_hint": "Prosječna/očekivana dužina ciklusa profila, koja se koristi za procjene preostalog vremena. Uredite da biste ga postavili; ostavljanje nepromijenjenog zadržava trenutnu vrijednost.",
-        "matching_tuning_intro": "Prilikom učenja, WashData također prilagođava koliko usklađivanje programa teži obliku u odnosu na trajanje i energiju.",
         "merge_intro": "Odabrani ciklusi se kombinuju u jedan (hronološki red; praznine popunjene sa 0 W). Odaberite rezultirajući profil.",
         "ml_intro": "WashData se isporučuje sa pametnim modelima koji rade bez upotrebe.",
         "ml_learned_intro": "Modeli fino prilagođeni ovoj mašini.",
@@ -993,7 +1013,16 @@
         "connect_to_confirm": "Povežite se u zupčaniku postavki da biste potvrdili ili ocijenili.",
         "coverage_gap_cluster": "Nedavni neoznačeni ciklusi ({count}) od oko {min} min izgledaju kao jedan program koji još niste kreirali.",
         "pg_label_yes": "Na kraju ciklusa bio bi označen kao \"{name}\"",
-        "pg_label_no": "Bio bi poslan na pregled: {reason}"
+        "pg_label_no": "Bio bi poslan na pregled: {reason}",
+        "live_match_debug_tip": "Pouzdanost: koliko tačno trenutna kriva snage odgovara najboljem profilu kandidatu (0-100%). Dvosmisleno: rezultati dva najbolja kandidata razlikuju se za manje od 5%, pa je etiketa nesigurna dok se ciklus ne završi.",
+        "automation_alias_started": "{device}: ciklus je pokrenut",
+        "automation_alias_finished": "{device}: ciklus je završen",
+        "automation_desc_started": "Pokreće se kada započne ciklus uređaja {device}. Dodajte svoje akcije (obavještenja, svjetla, ...).",
+        "automation_desc_finished": "Pokreće se kada se završi ciklus uređaja {device}. Dodajte svoje akcije (obavještenja, svjetla, ...).",
+        "feedback_detected": "WashData je prepoznao: {name}",
+        "import_undo_hint": "Čuva se tačka vraćanja od prije posljednjeg uvoza ({when}): {profiles} profila i {cycles} ciklusa.",
+        "replace_undo_hint": "Prvo se sprema tačka vraćanja, pa ovaj uvoz možete poništiti u odjeljku Izvoz/uvoz.",
+        "pg_in_sample_note": "Ovi ciklusi su pomogli i u izradi profila s kojima se upoređuju, pa su rezultati optimistični: na novim ciklusima očekujte nešto manje tačnih podudaranja."
     },
     "phase_desc": {
         "anti_crease": "Povremena kratka spuštanja nakon završetka za smanjenje bora.",
@@ -1152,7 +1181,7 @@
             "label": "Tolerancija procjene"
         },
         "enable_ml_models": {
-            "doc": "Dok ciklus traje, neka model fino podešen za ovaj uređaj predviđa ukupnu energiju i trošak, a ciklus čija snaga neuobičajeno rano padne, na programu koji WashData dobro poznaje, neka završi bez čekanja cijelog kašnjenja isključivanja. Isključeno = samo klasična logika zasnovana na snazi.",
+            "doc": "Dok ciklus traje, neka model fino podešen za ovaj uređaj predviđa ukupnu energiju i trošak, a ciklus čija snaga neuobičajeno rano padne, na programu koji WashData dobro poznaje, neka završi bez čekanja cijelog kašnjenja isključivanja. Mašine za pranje posuđa dobijaju taj raniji završetak i bez ove postavke čim se njihov program prepozna. Isključeno = samo klasična logika zasnovana na snazi.",
             "label": "Primijeniti pametne modele tokom ciklusa"
         },
         "end_energy_threshold": {
@@ -1204,7 +1233,7 @@
             "label": "Minimalna snaga"
         },
         "ml_training_enabled": {
-            "doc": "Periodično proučavajte svoje recenzirane cikluse preko noći i fino prilagodite modele ovoj specifičnoj mašini. Promjena se zadržava samo kada zaista ima bolje rezultate u ciklusima koji se zadržavaju, tako da ovo može samo pomoći ili ostati ista - nikada ne nazadovati.",
+            "doc": "Periodično ponovo trenirajte model predviđene potrošnje energije na završenim ciklusima ove mašine. Ponovo trenirani model se zadržava samo ako na izdvojenim ciklusima nadmaši jednostavnu procjenu prema proteklom u odnosu na očekivano vrijeme; inače ostaje trenutni.",
             "label": "Učiti od ove mašine"
         },
         "ml_training_hour": {
@@ -1244,7 +1273,7 @@
             "label": "Android kanal (završetak)"
         },
         "notify_finish_message": {
-            "doc": "Tekst poslan kada se ciklus završi. Varijable predloška: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} i {vs_typical} su ovdje najkorisniji.",
+            "doc": "Tekst poslan kada se ciklus završi. Varijable predloška: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status}. {time_finished} i {vs_typical} su ovdje najkorisniji. {status} je completed ili force_stopped: prekinuti ciklus (lažni start ili otkazani program) ne šalje poruku o završetku.",
             "label": "Poruka završetka"
         },
         "notify_finish_services": {
@@ -1340,15 +1369,15 @@
             "label": "Interval podudaranja"
         },
         "profile_match_max_duration_ratio": {
-            "doc": "Maksimalna dužina ciklusa u odnosu na profil. 1.3 znači da ciklus mora biti manji od 130% trajanja profila da bi se podudarao.",
+            "doc": "Program se odbacuje kada ciklus traje duže od njegovog uobičajenog trajanja pomnoženog s ovom vrijednošću. 1,8 znači da se ciklus koji traje 80% duže od programa više ne podudara s njim.",
             "label": "Maks omjer trajanja"
         },
         "profile_match_min_duration_ratio": {
-            "doc": "Minimalna dužina ciklusa u odnosu na profil. 0,9 znači da ciklus mora biti najmanje 90% trajanja profila da bi se podudarao.",
+            "doc": "Program se uzima u obzir tek kada ciklus traje ovaj udio njegovog uobičajenog trajanja. 0,10 znači da 2-satni program postaje kandidat nakon 12 minuta. Ne primjenjuje se tokom prvih 15 minuta ciklusa.",
             "label": "Min omjer trajanja"
         },
         "profile_match_threshold": {
-            "doc": "Minimalni rezultat sličnosti (0-1) potreban na kraju ciklusa da bi se prihvatila identifikacija programa. Podignite ga da smanjite pogrešne identifikacije; snizite ga ako se programi vaše mašine ne poklapaju. Zadana vrijednost 0,4 je konzervativna polazna tačka.",
+            "doc": "Minimalni rezultat podudaranja uživo (0-1) prije nego što Pametni završetak i dovršetak anti-gužvanja kod sušilice smiju djelovati prema podudarajućem programu. Povećajte ga ako ciklusi završavaju prerano uz nesigurno podudaranje; smanjite ga ako jasno prepoznati ciklusi i dalje čekaju puno Kašnjenje isključivanja. Ne mijenja koji se program prikazuje ili dodjeljuje kao oznaka. Zadano 0,4.",
             "label": "Prag podudaranja"
         },
         "profile_unmatch_threshold": {
@@ -1477,6 +1506,9 @@
         "notify_icon_color": {
             "label": "Boja obavijesti",
             "doc": "Akcentna boja obavještenja ovog uređaja, kako bi se mašina za pranje rublja, sušilica i mašina za pranje posuđa razlikovale na prvi pogled. iOS boji ikonu i traku napretka Live Activity na zaključanom ekranu i u Dynamic Island. Android dobiva istu boju, ali šta će s njom uraditi ovisi o telefonu: neki oboje ikonu, a mnogi (posebno Samsung One UI) je potpuno zanemaruju. Obje platforme razumiju Hex (npr. #03A9F4). Ostavite prazno za zadanu boju platforme."
+        },
+        "share_name": {
+            "doc": "Objavljuje ime vašeg povezanog računa kao autora ciklusa koje dijelite. Isključeno: dijele se bez imena."
         }
     },
     "setting_group": {
@@ -1580,14 +1612,17 @@
         "rebuilding": "Ponovna izgradnja…",
         "analyzing": "Analiziranje…",
         "resetting": "Resetovanje…",
-        "reverting": "Vraćanje…",
         "trimming": "Skraćivanje…",
         "splitting": "Dijeljenje…",
         "deleting": "Brisanje…",
         "imported": "Uvezeno",
         "preparing": "Priprema…",
         "unlabelling": "Uklanjanje oznake…",
-        "working": "Obrada…"
+        "working": "Obrada…",
+        "match_uncertain": "Nesigurno: {top} ili {runner}",
+        "match_uncertain_single": "Nesigurno: možda {top}",
+        "match_sure": "~{pct}% sigurnosti",
+        "match_uncertain_tip": "WashData se još nije odlučio za program. Broj pokazuje koliko se često vodeća pretpostavka, {top}, u snimljenim ciklusima pokazala tačnom kada je imala ovoliku prednost pred drugim najboljim programom. Služi samo kao informacija i ne mijenja način na koji se ciklusi otkrivaju ili označavaju."
     },
     "suggestion": {
         "observed_label": "Izmjereno",
@@ -1678,7 +1713,8 @@
                 "no_power": "bez snage",
                 "no_active_power": "bez aktivne snage"
             }
-        }
+        },
+        "now_value": "(trenutno {v})"
     },
     "tab": {
         "advanced": "Napredno",
@@ -1733,13 +1769,14 @@
         "json_required": "Potrebni su JSON podaci",
         "legacy_removed": "Naslijeđene radnje su uklonjene",
         "logs_exported": "Dnevnici su izvezeni",
-        "matching_reverted": "Odgovarajuće težine vraćene na zadane vrijednosti",
         "min_2_profiles": "Odaberite najmanje 2 profila za grupu",
         "ml_training_no_improvement": "Obuka je završena: osnovna linija je zadržana (bez poboljšanja)",
         "models_reverted": "Modeli na uređaju vraćeni su na osnovnu liniju",
         "name_required": "Potrebno je ime",
         "no_split_found": "Nisu pronađeni praznini u praznom hodu za razdvajanje",
         "panel_settings_saved": "Postavke panela su sačuvane",
+        "pg_preset_loaded": "Konfiguracija \"{name}\" učitana",
+        "pg_preset_saved": "Konfiguracija \"{name}\" sačuvana",
         "pg_sugg_loaded": "Učitano {n} predloženih vrijednosti - pokrenite testno okruženje za usporedbu",
         "phase_name_required": "Naziv faze je obavezan",
         "phase_reset": "Faza \"{name}\" je vraćena na ugrađenu verziju",
@@ -1837,7 +1874,6 @@
         "phase_deleted": "Faza \"{name}\" je obrisana",
         "profile_created": "Profil \"{name}\" je kreiran",
         "rename_failed": "Preimenovanje nije uspjelo: {error}",
-        "revert_failed": "Vraćanje nije uspjelo: {error}",
         "save_failed": "Čuvanje nije uspjelo: {error}",
         "split_complete": "Podijeljeno na cikluse: {count}",
         "start_failed": "Pokretanje nije uspjelo: {error}",
@@ -1848,7 +1884,11 @@
         "store_import_duplicate": "Ovaj snimak je već na vašem uređaju.",
         "device_approved": "Odobreno od strane zajednice",
         "thanks_confirming": "Hvala na potvrdi",
-        "rating_saved": "Ocjena kvaliteta sačuvana"
+        "rating_saved": "Ocjena kvaliteta sačuvana",
+        "store_download_partial": "Programi koji se nisu mogli preuzeti: {n}; pokušajte ponovo kasnije.",
+        "import_no_restore_point": "Uvezeno, ali tačka vraćanja nije mogla biti spremljena, pa se ovaj uvoz ne može poništiti",
+        "import_undo_failed": "Uvoz nije moguće poništiti: {error}",
+        "import_undone": "Uvoz poništen: vraćeno {profiles} profila i {cycles} ciklusa"
     },
     "trend": {
         "down": "Opadajući trend",
@@ -1890,7 +1930,10 @@
         "cost_tip": "Trošak energije za ovaj ciklus, zamrznut po završetku. Kada je Vremenski ponderisan trošak uključen, kriva snage se naplaćuje po cijeni koja važi u svakom trenutku; u suprotnom energija x jedna cijena koja važi na kraju. Postavite cijenu u Postavkama da se popuni.",
         "confidence_tip": "Pouzdanost podudaranja profila (0-100%). Koliko se tačno kriva snage ciklusa podudarala s identificiranim programom.",
         "flags_tip": "Oznake zajednice i pokazatelji kvalitete podataka",
-        "cost_dynamic_tip": "Vremenski ponderisano: naplaćeno po cijeni koja je važila tokom ciklusa (efektivno {price} {cur}/kWh)."
+        "cost_dynamic_tip": "Vremenski ponderisano: naplaćeno po cijeni koja je važila tokom ciklusa (efektivno {price} {cur}/kWh).",
+        "dbg_conf": "Pouzd.",
+        "dbg_mae": "MAE",
+        "dbg_corr": "Kor."
     },
     "stat": {
         "avg": "pros.",
@@ -1941,7 +1984,8 @@
         "website_tip": "Otvorite web stranicu zajedničke trgovine",
         "favorites": "Favoriti",
         "rating_summary": "★ {avg} ({n})",
-        "no_ratings": "Još nema ocjena"
+        "no_ratings": "Još nema ocjena",
+        "unreachable": "Nije moguće povezati se sa zajedničkom trgovinom. Provjerite vezu i pokušajte ponovo."
     },
     "settings": {
         "gear": {
@@ -2048,5 +2092,38 @@
         "margin": "Preblizu drugom najboljem programu",
         "unknown_profile": "Program više ne postoji",
         "not_evaluated": "Nije procijenjeno"
+    },
+    "diagram": {
+        "accum": "akum.",
+        "auto": "auto",
+        "below_off": "ispod = isklj.",
+        "confirmed": "potvrđeno",
+        "energy_counts": "energija se broji",
+        "feedback": "povratna inf.",
+        "gap_below_min": "razmak ispod min. = jedan ciklus",
+        "heat_phase": "faza grijanja",
+        "held_at_100": "ostaje na 100%",
+        "ignored": "zanemareno",
+        "kept": "zadržano",
+        "max": "maks.",
+        "min": "min.",
+        "minus_tol": "-tol",
+        "no_match": "nema podudaranja",
+        "no_updates": "nema ažuriranja",
+        "off_delay_wait": "kašnjenje isključivanja",
+        "off_gap": "razmak isklj.",
+        "plus_tol": "+tol",
+        "profile": "profil",
+        "reading_interval": "tipični interval očitanja",
+        "sensor_offline": "senzor van mreže: prisilno zaustavljanje",
+        "si": "IU",
+        "spike_ignored": "skok zanemaren",
+        "spike_ignored_short": "skok: zanemaren",
+        "start": "pokretanje",
+        "stop": "zaustavljanje",
+        "tail_energy_resets": "energija kraja iznad praga: odbrojavanje se resetuje",
+        "thr": "prag",
+        "too_short": "prekratak",
+        "tumble_kept": "impulsi bubnja zadržani"
     }
 }

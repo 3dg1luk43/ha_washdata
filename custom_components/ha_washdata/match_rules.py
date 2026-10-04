@@ -27,7 +27,7 @@ Single source of truth for the rules between "the matcher returned a result" and
   release, and forced on by a user pause;
 * the consistency override, which is also how a confident mismatch (every
   candidate rejected) drops the displayed program;
-* the descriptive phase heuristic and the cycle-end label verdict.
+* the cycle-end label verdict.
 
 ``manager.WashDataManager._async_do_perform_matching`` and the Playground's
 ``playground._DetailSim._matcher`` both call these, so a replay makes the same
@@ -53,7 +53,8 @@ from .const import (
     DEFAULT_MATCH_REVERT_RATIO,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
     MATCH_DECISIVE_MARGIN,
-    ML_MATCH_COMMIT_THRESHOLD,
+    MATCH_SURE_KNOTS,
+    MATCH_SURE_SINGLE_CANDIDATE,
 )
 
 #: The manager's "no program committed yet" placeholder.
@@ -283,8 +284,6 @@ def decide_switch(
     result: Any,
     persistence: int,
     unmatch_threshold: Any,
-    ml_early_commit: bool = False,
-    ml_commit_score: float | None = None,
 ) -> list[LogLine]:
     """Cases 1-3 and the switch itself. Mutates ``state`` and ``tick``.
 
@@ -315,11 +314,6 @@ def decide_switch(
         if is_persistent:
             should_switch = True
             switch_reason = f"initial_match (persistent {state.persistence_counter[profile_name]}x)"
-        elif ml_early_commit:
-            should_switch = True
-            switch_reason = (
-                f"initial_match (ML commit score {ml_commit_score:.3f} >= {ML_MATCH_COMMIT_THRESHOLD})"
-            )
         else:
             log.append((
                 logging.DEBUG,
@@ -643,23 +637,6 @@ def consistency_override(
     return log
 
 
-def heuristic_phase(
-    phase_name: str | None,
-    device_type: str,
-    current_power: float,
-    is_waiting_low_power: Callable[[], bool],
-) -> str | None:
-    """A descriptive phase when the matcher has none (lazy ``is_waiting_low_power``)."""
-    if not phase_name:
-        if device_type == "dishwasher" and is_waiting_low_power():
-            phase_name = "Drying"
-        elif device_type == "washing_machine" and current_power > 200:
-            phase_name = "Spinning"
-        elif device_type == "washing_machine" and is_waiting_low_power():
-            phase_name = "Rinsing/Soaking"
-    return phase_name
-
-
 def final_match_input(cycle_data: dict[str, Any]) -> tuple[Any, Any] | None:
     """``(power_data, duration)`` for the complete-cycle match, or None if too short.
 
@@ -689,3 +666,73 @@ def cycle_end_label_verdict(
     if verdict and verdict not in profiles:
         verdict, reason = None, "unknown_profile"
     return verdict, reason
+
+
+def display_sure_pct(margin: float | None) -> int:
+    """The Status card's "~N% sure" for a live top1-top2 margin. DISPLAY ONLY.
+
+    ``MATCH_SURE_KNOTS`` interpolated piecewise-linearly and clamped at both ends;
+    ``None`` (no runner-up) reads ``MATCH_SURE_SINGLE_CANDIDATE``. Rounded to 5
+    so it reads as the estimate it is. Monotone in the margin, so gating on it
+    would equal gating on the margin (audit MATCH-DECIDE-18): never use it as a
+    gate.
+    """
+    if margin is None:
+        p = MATCH_SURE_SINGLE_CANDIDATE
+    else:
+        try:
+            m = float(margin)
+        except (TypeError, ValueError):
+            m = 0.0
+        if not math.isfinite(m):
+            m = 0.0
+        knots = MATCH_SURE_KNOTS
+        if m <= knots[0][0]:
+            p = knots[0][1]
+        elif m >= knots[-1][0]:
+            p = knots[-1][1]
+        else:
+            p = knots[-1][1]
+            for (x0, y0), (x1, y1) in zip(knots, knots[1:]):
+                if m <= x1:
+                    p = y0 + (y1 - y0) * (m - x0) / (x1 - x0)
+                    break
+    return int(5 * round(p * 20))
+
+
+def live_match_uncertainty(result: Any, current_program: Any) -> dict[str, Any] | None:
+    """Top two of an undecided live match, for the Status card (MATCH-DECIDE-15).
+
+    Undecided: no program committed yet, or the latest tick flags its own winner
+    as ambiguous (a runner-up within ``MATCH_AMBIGUITY_MARGIN``, or a Stage-5
+    safeguard). ``None`` when decided or there is no winner. A runner-up that is a
+    profile group is named by its best member. Display only: nothing that ends,
+    labels or switches a cycle reads this.
+    """
+    best = getattr(result, "best_profile", None) if result is not None else None
+    if not best:
+        return None
+    if program_is_committed(current_program) and getattr(result, "is_ambiguous", False) is not True:
+        return None
+    runner_up: str | None = None
+    candidates = getattr(result, "candidates", None) or []
+    for cand in list(candidates)[1:2]:
+        if not isinstance(cand, dict):
+            continue
+        name = cand.get("group_best_member") or cand.get("name")
+        if isinstance(name, str) and name.startswith("__group__"):
+            name = name[len("__group__"):]
+        if name and name != best:
+            runner_up = str(name)
+    margin: float | None = None
+    if runner_up is not None:
+        try:
+            margin = round(max(0.0, float(getattr(result, "ambiguity_margin", 0.0) or 0.0)), 3)
+        except (TypeError, ValueError):
+            margin = 0.0
+    return {
+        "top": str(best),
+        "runner_up": runner_up,
+        "margin": margin,
+        "sure_pct": display_sure_pct(margin),
+    }

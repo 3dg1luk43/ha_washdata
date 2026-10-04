@@ -112,8 +112,8 @@ def test_cadence_no_longer_changes_the_answer():
 
 
 def test_unknown_cadence_keeps_the_nominal_weight():
-    """dt_seconds=None (every caller that does not track its own cadence, and the
-    golden snapshot) must be byte-identical to before."""
+    """dt_seconds=None (every caller that does not track its own cadence) must be
+    byte-identical to before."""
     a = progress.compute_progress("dishwasher", 3600.0, 1800.0, 40.0, None, None)
     b = progress.compute_progress(
         "dishwasher", 3600.0, 1800.0, 40.0, None, None, dt_seconds=None

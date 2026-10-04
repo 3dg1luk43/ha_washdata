@@ -108,11 +108,11 @@ history.
 
 | Problem | Likely cause | Solution |
 | :--- | :--- | :--- |
-| **Starts too early** | Plug reports brief spikes during boot/standby. | Increase **Start Energy Threshold** (e.g. 2 Wh) so real energy must be consumed first. |
-| **Ends too early** | Machine soaks or has long low-power intervals. | Increase **Off Delay** (e.g. 5 min). |
-| **Ghost cycles** | High power at the very end (anti-crease, pump-out) reads as a new start. | Increase **Minimum Off Gap** (e.g. 120 s). |
-| **"Unknown" matches** | Profiles too strict, or high variance. | Increase **Duration Tolerance** (e.g. 0.25 for ±25%). |
-| **Notifications too late** | You want warning before the end. | Set **Notify Before End Minutes**. |
+| **Starts too early** | Plug reports brief spikes during boot/standby. | Increase **Start Energy** (e.g. 2 Wh) so real energy must be consumed first. |
+| **Ends too early** | Machine soaks or has long low-power intervals. | Raise **Off Delay** or **Min Off Gap**, whichever is larger: the fallback end waits for the longer of the two. Raise it above the longest quiet gap inside a cycle. |
+| **Ghost cycles** | High power at the very end (anti-crease, pump-out) reads as a new start. | Raise **Min Off Gap** above the quiet gap before that tail. Start from the value shown, never a lower one: defaults are already 8 min for a washer, 5 for a dryer and 60 for a dishwasher. |
+| **"Unknown" matches** | No profile for that program yet, or two profiles look alike. | Label a few cycles of the program in **Cycles** (each program needs its own profile); group near-identical profiles in **Profiles**. If a program regularly runs far longer than its profile, raise **Max Duration Ratio** (default 1.8). |
+| **Notifications too late** | You want warning before the end. | Set **Pre-End Alert** (minutes before the end). |
 | **Stuck in "Running"** | Locked to a long profile after a short cycle diverged. | Handled automatically: divergence detection reverts to **Detecting** once confidence drops below 60% of its peak. |
 
 **Suggested settings sensor** (`sensor.<name>_suggested_settings`): `0` means nothing to do, `> 0`
@@ -137,7 +137,7 @@ screenshot tour.
 | **Overview** | Live state, power chart, progress with a colour-coded phase timeline, time remaining, program selector, feedback attention cards, a **Setup Card** guiding your next step, and **Manual Recording**. |
 | **Cycles** | History with per-cycle cost; label, trim, split, merge or delete a cycle; multi-select for compare / merge / bulk relabel / delete with a 10 s undo; "needs review" filter. Heavy edits run as background tasks with a progress pill. |
 | **Profiles** | Create, rename, rebuild, group and clean up profiles; average cost and a duration sparkline; **Phase Catalog** sub-tab and phase-range editor. |
-| **Settings** | All tunables behind a **Basic / Advanced** toggle, each with a tooltip and inline suggestions. Includes the phase-aware ETA toggle and the **Notifications > Automations** section. |
+| **Settings** | All tunables behind a **Basic / Advanced** toggle, each with a tooltip and inline suggestions. Includes the **Notifications > Automations** section. |
 | **Playground** | What-if tools driven by the **real** detection/matching engine. **Simulate** replays a stored cycle exactly as the integration would run it, with draggable thresholds. **Test on history** replays recent cycles with a before/after diff. **Optimize** finds the best value for a setting as a 1D curve or 2D heatmap. |
 | **Store** | The **Community Store** (when online features are enabled): browse setups for your brand and appliance type, adopt one, or share your own. |
 | **Advanced** | **Maintenance** (service log and reminders), **Diagnostics** (storage stats, maintenance actions, export/import, import power history), and **ML Training**. The gear icon holds My Preferences, Panel Settings, Access Control (per-user RBAC) and the **online features** opt-in. |
@@ -161,7 +161,7 @@ screenshot tour.
 | `sensor.<name>_cycle_progress` | 0-100% |
 | `sensor.<name>_cycle_count` | Lifetime appliance runs, interrupted and force-stopped ones included - use to schedule maintenance by count |
 | `sensor.<name>_energy_total` | Lifetime kWh (`total_increasing`) - add to the HA **Energy dashboard** |
-| `sensor.<name>_current_phase` | Active phase label ("Rinsing", "Spin") |
+| `sensor.<name>_current_phase` | Active phase from the matched program's phase ranges ("Rinse", "Spin"); unknown when the program has none or no range covers this point of the cycle |
 | `sensor.<name>_pump_runs_today` | *(Pump type only)* completed pump cycles in a rolling 24 h |
 | `binary_sensor.<name>_running` | Simple on/off |
 | `button.<name>_pause_cycle` | Pause a cycle that is starting, running, finishing, or already auto-paused (converting that into a held pause). Not available during the anti-crease or rinse-hold stages. |
@@ -201,7 +201,8 @@ automations; the pack only teaches Assist which phrases route to it.
 
 WashData notifies either through ready-made pushes to **per-event targets**, or through your own
 automations triggered by the bus events it fires (`ha_washdata_cycle_started`,
-`ha_washdata_cycle_ended`, `ha_washdata_pump_stuck`). In an automation, template against the event
+`ha_washdata_cycle_ended`, `ha_washdata_pump_stuck`, and `ha_washdata_ml_training_complete` after an
+on-device ML training run). In an automation, template against the event
 data: `{{ trigger.event.data.duration }}`, `{{ trigger.event.data.program }}`,
 `{{ trigger.event.data.cycle_data.cost }}`.
 

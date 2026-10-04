@@ -94,6 +94,12 @@ from .const import (
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
     DEVICE_COMPLETION_THRESHOLDS,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
+    TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES,
+    TERMINAL_DROP_EARLINESS_RATIO,
+    TERMINAL_DROP_MIN_CLEAN_CYCLES,
+    TERMINAL_DROP_MIN_PEAK_RATIO,
+    TERMINAL_DROP_MIN_QUIET_SPAN_S,
+    TERMINAL_DROP_PEAK_FAMILIAR_TOL,
     resolve_min_off_gap_default,
     resolve_off_delay_default,
     resolve_smart_termination_duration_ratio_default,
@@ -101,6 +107,7 @@ from .const import (
     resolve_watchdog_interval_default,
 )
 from .cycle_detector import CycleDetectorConfig
+from .ml.engine import ml_models_enabled
 
 
 def _finite(value: Any, default: float) -> float:
@@ -257,6 +264,92 @@ def build_detector_config(
         # #378: without this every non-washing-machine device ran the
         # washing-machine detection path.
         device_type=device_type,
+    )
+
+
+def terminal_drop_enabled(
+    device_type: str | None, options: Mapping[str, Any] | None
+) -> bool:
+    """Whether the terminal-drop fast finalize runs for this device (audit ML-08).
+
+    Always for ``TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES`` (dishwashers): it is pure
+    statistics, not a model, so the "Apply smart models" toggle does not gate it
+    there. Every other type keeps it behind that toggle, as before. The manager's
+    provider and the Playground replay both ask here, so a replay finalizes where
+    live would.
+    """
+    if device_type in TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES:
+        return True
+    return ml_models_enabled(options)
+
+
+def terminal_drop_may_fire(
+    device_type: str | None,
+    options: Mapping[str, Any] | None,
+    detector: Any,
+    *,
+    pinned: bool = False,
+) -> bool:
+    """Whether a wired terminal-drop provider may fire at this moment.
+
+    The ML-toggle path is unchanged: it may always fire. The default-on dishwasher
+    path (toggle off) fires only while the detector holds a committed program
+    whose match is neither ambiguous nor prefix-ambiguous; ``pinned`` (a program
+    the user picked by hand, which the detector is never told is "committed")
+    counts as committed. Ungated, a new
+    programme at a familiar power with an early pause split a real cycle (one
+    "Quick wash" on 213 replayed dishwasher cycles, end_gate_eval --loo
+    --all-formats); gated, that split is gone and nothing else moved, while the
+    synthetic plug-pull keeps 172 of 187 fires (cuts at 15/30/50% of 95 cycles,
+    median close 4.5 min after the cut either way, 99.8 min without).
+    """
+    if ml_models_enabled(options):
+        return True
+    if device_type not in TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES:
+        return False
+    return bool(
+        (pinned or getattr(detector, "_match_committed", False))
+        and getattr(detector, "_matched_profile", None)
+        and not getattr(detector, "_match_ambiguous", False)
+        and not getattr(detector, "_match_prefix_ambiguous", False)
+    )
+
+
+def terminal_drop_baseline_for(
+    cycles: Any, stop_threshold_w: float
+) -> tuple[float | None, tuple[float, float] | None]:
+    """``profile_store.terminal_drop_baseline`` with the shipped constants."""
+    from .profile_store import terminal_drop_baseline  # pylint: disable=import-outside-toplevel
+
+    return terminal_drop_baseline(
+        cycles,
+        float(stop_threshold_w),
+        TERMINAL_DROP_MIN_QUIET_SPAN_S,
+        TERMINAL_DROP_MIN_CLEAN_CYCLES,
+    )
+
+
+def terminal_drop_fires(
+    points: list[tuple[float, float]],
+    baseline: tuple[float | None, tuple[float, float] | None],
+    stop_threshold_w: float,
+) -> bool:
+    """``profile_store.is_terminal_drop`` with the shipped constants.
+
+    One call for the manager's provider and the Playground's, so the two cannot
+    drift on the ratios. ``baseline`` is :func:`terminal_drop_baseline_for`'s.
+    """
+    from .profile_store import is_terminal_drop  # pylint: disable=import-outside-toplevel
+
+    earliest, peak_range = baseline
+    return is_terminal_drop(
+        points,
+        earliest,
+        peak_range,
+        float(stop_threshold_w),
+        TERMINAL_DROP_EARLINESS_RATIO,
+        TERMINAL_DROP_MIN_PEAK_RATIO,
+        TERMINAL_DROP_PEAK_FAMILIAR_TOL,
     )
 
 

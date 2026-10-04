@@ -62,6 +62,11 @@
     "golden_cycle": "Recorded reference cycle",
     "duration_outlier": "{n} odd-length cycle(s)",
     "imported_tip": "Imported from the community store. Used for matching only, not counted in stats.",
+    "matcher_unused": "Not matched to your cycles yet",
+    "matcher_used": "Matched {n} of your cycles",
+    "matcher_used_one": "Matched {n} of your cycles",
+    "matcher_used_other": "Matched {n} of your cycles",
+    "matcher_used_tip": "Cycles recorded on this appliance that WashData's matcher labelled with this imported program on its own. An import that is never matched may not fit your appliance and can be removed. Counted locally; nothing is sent to the store.",
     "unmatchable": "can't be matched",
     "quiet_tail": "~{mins}m quiet tail",
     "quiet_tail_tip": "Near the end this program goes quiet for about {mins} min, then draws about {watts} W for {secs} s before finishing. Seen in {seen} of {measured} measured cycles: the appliance does not do it every run.",
@@ -79,8 +84,6 @@
     "steady": "→ steady",
     "underrun": "Finished faster than usual",
     "underrun_ratio": "({pct}% of expected)",
-    "using_defaults": "Using shipped defaults",
-    "using_tuned": "Using tuned weights",
     "armed": "(applies to the next cycle)",
     "awaiting_tip": "Awaiting community approval",
     "awaiting_n": "Awaiting approval · {n} confirmed",
@@ -169,6 +172,11 @@
     "pg_load_live_tip": "Re-read the integration's current settings and drop every Playground edit",
     "pg_load_suggested": "Load suggested ({n})",
     "pg_load_suggested_tip": "Stage the auto-tuner's current suggestions as Playground overrides",
+    "pg_preset_delete": "Delete preset",
+    "pg_preset_load": "Load preset",
+    "pg_preset_load_tip": "Replace the Playground values with this preset (live settings are untouched)",
+    "pg_preset_save": "Save as preset",
+    "pg_preset_save_tip": "Save every value below as a named preset for this device",
     "pg_publish_all": "Publish {n} to integration",
     "pg_publish_one": "Publish {label} to the integration",
     "process": "Process",
@@ -194,7 +202,6 @@
     "reset_muted": "Reset muted",
     "reset_phase_tip": "Undo your edit and restore the built-in phase",
     "reset_to_builtin": "Reset to built-in models",
-    "reset_to_defaults": "Reset to defaults",
     "reset_zoom": "Reset zoom",
     "resume_cycle": "Resume cycle",
     "resume_cycle_tip": "Resume the paused cycle",
@@ -236,6 +243,7 @@
     "trim": "Trim",
     "trim_split": "Trim / Split",
     "undo": "Undo",
+    "undo_import": "Undo last import",
     "unlabel_selected": "Unlabel selected ({n})",
     "unlabel_selected_tip": "Remove the profile label from the selected cycles. They stay in your history and can be labelled again later - they just stop shaping this profile.",
     "use": "Use",
@@ -341,7 +349,6 @@
     "manual_recording": "Manual Recording",
     "manual_recording_tip": "Run a cycle intentionally while WashData records the power trace. Start just before the appliance starts, Stop when it finishes, then Process to save it as a named profile.",
     "ml_learned": "What WashData has learned",
-    "ml_matching_tuning": "Program-matching fine-tuning",
     "ml_settings_card": "Settings",
     "ml_smart_learning": "Smart Learning",
     "my_preferences": "My Preferences",
@@ -362,7 +369,8 @@
     "status_graph": "Status Graph",
     "storage_stats": "Storage Stats",
     "toggle_sidebar": "Toggle Home Assistant sidebar",
-    "wipe_history": "Wipe History"
+    "wipe_history": "Wipe History",
+    "live_match_debug": "Live Match Debug"
   },
   "health": {
     "fair": "Acceptable profile quality",
@@ -391,12 +399,12 @@
     "auto_fine_tune_off": "auto fine-tune off",
     "auto_fine_tune_on": "auto fine-tune on (around {hour}:00)",
     "avg_cost": "Avg cost",
+    "cat_backfill_cycles": "Cycles found in imported power history",
     "cat_custom_phases": "Custom phases",
     "cat_feedback": "Feedback & review labels",
     "cat_history_logs": "History & change logs",
     "cat_lifetime_stats": "Lifetime totals",
     "cat_maintenance_log": "Maintenance log",
-    "cat_matching_config": "Matcher tuning",
     "cat_ml_models": "ML models",
     "cat_profile_groups": "Profile groups",
     "cat_profiles": "Profiles (programs)",
@@ -430,7 +438,6 @@
     "cycles_title": "Cycles ({n})",
     "date": "Date",
     "debug_traces": "Debug Traces",
-    "default": "Default",
     "device_unresolved": "Unavailable device ({id})",
     "default_access_level": "Default level for users not listed below",
     "default_other": "Default (other devices)",
@@ -441,7 +448,6 @@
     "drag_to_resize": "Drag to resize",
     "duration": "Duration",
     "duration_avg": "~{v}m avg",
-    "emphasis": "Emphasis",
     "enable_access_control": "Enable per-user access control",
     "enable_online": "Enable online features",
     "end": "End",
@@ -477,7 +483,6 @@
     "hist_skip_short": "too few readings",
     "hist_skip_sparse": "readings too far apart",
     "import_mode": "How to combine",
-    "in_use": "In use",
     "include_phase_map": "Include phase map",
     "include_settings": "Include detection & matching settings",
     "input": "Input:",
@@ -558,6 +563,9 @@
     "pg_obj_overrun": "Duration off-target",
     "pg_objective": "Objective",
     "pg_poor_match": "Poor match",
+    "pg_preset": "Playground preset",
+    "pg_preset_name": "New preset name",
+    "pg_preset_none": "Select a preset…",
     "pg_proj_energy": "Proj. energy",
     "pg_recent_runs": "Recent runs",
     "pg_regressed": "regressed",
@@ -645,7 +653,18 @@
     "pg_autolabel": "Auto-label",
     "pg_label_review": "Asks for review",
     "pg_ev_match_reverted": "Match reverted",
-    "pg_ev_verified_pause": "Verified pause"
+    "pg_ev_verified_pause": "Verified pause",
+    "n_samples": "{n} samples",
+    "n_samples_one": "{n} sample",
+    "n_samples_other": "{n} samples",
+    "n_cycles": "{n} cycles",
+    "n_cycles_one": "{n} cycle",
+    "n_cycles_other": "{n} cycles",
+    "energy_per_cycle": "{v}/cycle",
+    "energy_total": "{v} total",
+    "automation_off": "(off)",
+    "ref_cycle_none": "None",
+    "share_name": "Show my name on what I share"
   },
   "log": {
     "all_levels": "All levels",
@@ -674,17 +693,9 @@
     "trend_declining_tip": "This model's fit has slipped across recent re-checks – reviewing more cycles may help it re-learn.",
     "trend_steady_tip": "This model's fit has held roughly steady across recent re-checks.",
     "cap_label": {
-      "end": "Cycle-end detection",
-      "quality": "Cycle quality check",
-      "live_match": "Program matching",
-      "remaining_time": "Time-remaining estimate",
       "total_energy": "Energy estimate"
     },
     "cap_blurb": {
-      "end": "Knowing when a cycle has truly finished",
-      "quality": "Spotting mis-detected or corrupted cycles",
-      "live_match": "Identifying the running program sooner",
-      "remaining_time": "Predicting how long is left",
       "total_energy": "Predicting total energy and cost"
     },
     "metric_auc": "AUC {auc} on held-out data",
@@ -736,9 +747,13 @@
     "store_import": "Import reference cycle",
     "store_share": "Share to community store",
     "store_share_device": "Share this device",
+    "undo_import_msg": "Everything stored for this device goes back to how it was before the last import ({when}), and so do its settings. Cycles recorded and changes made since then are lost.",
+    "undo_import_ok": "Undo import",
+    "undo_import_title": "Undo last import",
     "wipe_all_msg": "⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.",
     "wipe_all_ok": "Wipe Everything",
-    "wipe_all_title": "Wipe All Data"
+    "wipe_all_title": "Wipe All Data",
+    "profile_title": "Profile · {name}"
   },
   "msg": {
     "adopt_settings_hint": "Overwrite this device's detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.",
@@ -806,6 +821,7 @@
     "hist_skipped_spans": "Skipped stretches",
     "import_analyze_hint": "Load an exported file (or paste its JSON). WashData analyzes it and shows exactly what can be imported before anything changes.",
     "import_history_description": "Already had a smart plug before WashData? Upload a history export of its power sensor, or read it straight from Home Assistant, and the normal detection runs over it so past cycles turn up in your Cycles list ready to name.",
+    "import_undo_hint": "A restore point from before the last import ({when}) is kept: {profiles} profile(s) and {cycles} cycle(s).",
     "imported_history_readonly": "Detected in imported power history. It shapes program matching but is not counted in your statistics, and cannot be trimmed or split. Label it to name the program.",
     "imported_readonly": "Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.",
     "include_settings_hint": "Share this device's recognition and matching thresholds (not your notifications, entities or energy price). Adopters choose whether to apply them.",
@@ -823,7 +839,6 @@
     "maintenance_requires_access": "Maintenance and export/import require full access.",
     "manual_duration_hint": "The profile's average/expected cycle length, used for time-remaining estimates. Edit to set it; leaving it unchanged keeps the current value.",
     "manual_duration_ref_hint": "Only used when no reference cycle is selected – a reference cycle sets the duration from its own length.",
-    "matching_tuning_intro": "When learning, WashData also adjusts how much program matching weighs shape versus duration and energy.",
     "merge_hint": "Imported items are added; nothing local is lost. Name clashes are resolved below.",
     "merge_intro": "The selected cycles are combined into one (chronological order; gaps filled with 0 W). Pick the resulting profile.",
     "merge_no_imports": "Imported recordings cannot be merged into a real cycle. Deselect them to merge.",
@@ -875,12 +890,16 @@
     "pg_history_empty": "Press Run to replay your cycles.",
     "pg_history_intro2": "Replay your recent cycles through the real detector and matcher with the settings above. Click any row to load that cycle in the graph; edit a setting to see a before/after comparison.",
     "pg_history_summary": "{detected}/{total} detected · {correct} matched correctly",
+    "pg_in_sample_note": "These cycles also helped build the profiles they are matched against, so these results are optimistic: on new cycles, expect slightly fewer correct matches.",
     "pg_live_unavailable": "Live settings unavailable, showing defaults.",
     "pg_load_live_confirm": "Discard {n} Playground edit(s) and reload the integration's current settings?",
     "pg_matches_live": "Matches live settings",
     "pg_n_changed": "{n} changed vs live settings",
     "pg_no_alerts": "No issues detected in this run.",
     "pg_override_active": "Using your edited settings vs. current",
+    "pg_preset_delete_confirm": "Delete the preset \"{name}\"?",
+    "pg_preset_limit": "Preset limit reached ({n})",
+    "pg_preset_overwrite": "Overwrite the preset \"{name}\"?",
     "pg_publish_one_confirm": "Save {label} = {value} to this device's settings?",
     "pg_restart_note": "Restart Home Assistant to enable simulation tools.",
     "pg_row_load_hint": "Load this cycle in the graph above",
@@ -900,6 +919,7 @@
     "recording_in_progress": "Recording in progress",
     "refresh_catalog_hint": "The community brand and appliance lists are cached to keep the shared store within its daily budget. Refresh to pick up entries added or approved by others.",
     "reminders_intro": "Show a reminder in the panel this many cycles after the last service. Leave blank or 0 to turn a reminder off.",
+    "replace_undo_hint": "A restore point is saved first, so you can undo this import from Export / Import.",
     "replace_warn": "Each ticked category is wiped and replaced from the file. Unticked categories are left untouched.",
     "restart_gap_footer": "Highlighted on the graph. Power data is missing for these intervals; matching used only real readings.",
     "restart_gap_header": "{n} HA restart gap during this cycle",
@@ -991,7 +1011,13 @@
     "connect_to_confirm": "Connect in the settings gear to confirm or rate.",
     "coverage_gap_cluster": "{count} recent unlabelled cycles of about {min} min look like one program you have not created yet.",
     "pg_label_yes": "Would be labelled \"{name}\" at cycle end",
-    "pg_label_no": "Would ask for review: {reason}"
+    "pg_label_no": "Would ask for review: {reason}",
+    "live_match_debug_tip": "Confidence: how closely the current power curve matches the top candidate profile (0-100%). Ambiguous: the two best candidates score within 5% of each other - the label is uncertain until the cycle finishes.",
+    "automation_alias_started": "{device}: cycle started",
+    "automation_alias_finished": "{device}: cycle finished",
+    "automation_desc_started": "Runs when a {device} cycle starts. Add your actions (notify, lights, ...).",
+    "automation_desc_finished": "Runs when a {device} cycle finishes. Add your actions (notify, lights, ...).",
+    "feedback_detected": "WashData detected: {name}"
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1178,7 +1204,7 @@
       "label": "Estimate Tolerance"
     },
     "enable_ml_models": {
-      "doc": "While a cycle runs, let a model fine-tuned to this machine predict its total energy and cost, and let a cycle that drops power unusually early, on a program WashData knows well, finish without waiting out the full off delay. Off = the classic power-based logic only.",
+      "doc": "While a cycle runs, let a model fine-tuned to this machine predict its total energy and cost, and let a cycle that drops power unusually early, on a program WashData knows well, finish without waiting out the full off delay. Dishwashers get that early finish without this setting once their program is recognised. Off = the classic power-based logic only.",
       "label": "Apply smart models during a cycle"
     },
     "end_energy_threshold": {
@@ -1234,7 +1260,7 @@
       "label": "Minimum Power"
     },
     "ml_training_enabled": {
-      "doc": "Periodically study your reviewed cycles overnight and fine-tune the models to this specific machine. A change is only kept when it genuinely scores better on held-out cycles, so this can only help or stay the same - never regress.",
+      "doc": "Periodically retrain the projected-energy model on this machine's finished cycles. A retrained model is only kept when it beats the simple elapsed-versus-expected estimate on held-out cycles; otherwise the current one stays.",
       "label": "Learn from this machine"
     },
     "ml_training_hour": {
@@ -1274,7 +1300,7 @@
       "label": "Android Channel (finish)"
     },
     "notify_finish_message": {
-      "doc": "Body sent when a cycle finishes. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} and {vs_typical} are most useful here.",
+      "doc": "Body sent when a cycle finishes. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status}. {time_finished} and {vs_typical} are most useful here. {status} is completed or force_stopped: an interrupted cycle (a false start or a cancelled program) sends no finish message.",
       "label": "Finish Message"
     },
     "notify_finish_services": {
@@ -1418,15 +1444,15 @@
       "label": "Match Interval"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "Maximum cycle length relative to the profile. 1.3 means a cycle must be under 130% of the profile duration to match.",
+      "doc": "A program is dropped once the cycle has run longer than this multiple of its typical duration. 1.8 means a cycle that has run 80% longer than the program no longer matches it.",
       "label": "Max Duration Ratio"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "Minimum cycle length relative to the profile. 0.9 means a cycle must be at least 90% of the profile duration to match.",
+      "doc": "A program is only considered once the cycle has run this fraction of its typical duration. 0.10 means a 2-hour program becomes a candidate after 12 minutes. Not applied during the first 15 minutes of a cycle.",
       "label": "Min Duration Ratio"
     },
     "profile_match_threshold": {
-      "doc": "Minimum similarity score (0-1) required at cycle end to accept a program identification. Raise it to reduce wrong identifications; lower it if your machine's programs are not being matched. Default 0.4 is a conservative starting point.",
+      "doc": "Minimum live match score (0-1) before Smart Termination and the dryer anti-crease finish may act on the matched program. Raise it if cycles end early on an uncertain match; lower it if clearly recognised cycles still wait for the full off delay. It does not change which program is shown or labelled. Default 0.4.",
       "label": "Match Threshold"
     },
     "profile_unmatch_threshold": {
@@ -1495,6 +1521,9 @@
     "watchdog_interval": {
       "doc": "How often the background watchdog checks for stalled sensors and elapsed timeouts. Default 30 s.",
       "label": "Watchdog Interval"
+    },
+    "share_name": {
+      "doc": "Publish your connected account name as the uploader of cycles you share. Off: they are shared without a name."
     }
   },
   "setting_group": {
@@ -1594,12 +1623,15 @@
     "idle": "Idle",
     "imported": "Imported",
     "interrupted": "Interrupted",
+    "match_sure": "~{pct}% sure",
+    "match_uncertain": "Uncertain: {top} or {runner}",
+    "match_uncertain_single": "Uncertain: maybe {top}",
+    "match_uncertain_tip": "WashData has not settled on a program yet. The figure is how often the leading guess, {top}, turned out to be right in recorded cycles when it was this far ahead of the runner-up. It is for information only and does not change how cycles are detected or labelled.",
     "preparing": "Preparing…",
     "ready": "Ready to process",
     "rebuilding": "Rebuilding…",
     "recording": "Recording",
     "resetting": "Resetting…",
-    "reverting": "Reverting…",
     "saving": "Saving…",
     "splitting": "Splitting…",
     "training": "Training…",
@@ -1696,7 +1728,8 @@
         "no_power": "no power",
         "no_active_power": "no active power"
       }
-    }
+    },
+    "now_value": "(now {v})"
   },
   "tab": {
     "advanced": "Advanced",
@@ -1770,7 +1803,10 @@
     "group_saved": "Group saved",
     "hist_csv_required": "Load a CSV file or paste its contents first",
     "import_failed": "Import failed: {error}",
+    "import_no_restore_point": "Imported, but no restore point could be saved, so this import cannot be undone",
     "import_selective_done": "Imported {profiles} profile(s) and {cycles} cycle(s)",
+    "import_undo_failed": "Could not undo the import: {error}",
+    "import_undone": "Import undone: {profiles} profile(s) and {cycles} cycle(s) restored",
     "invalid_json": "\"{key}\" is not valid JSON - fix it or clear the field before saving.",
     "json_required": "JSON data is required",
     "label_failed": "Label failed: {error}",
@@ -1781,7 +1817,6 @@
     "maint_added": "Maintenance event added",
     "maint_delete_failed": "Could not delete event: {error}",
     "maint_deleted": "Maintenance event deleted",
-    "matching_reverted": "Matching weights reverted to defaults",
     "min_2_profiles": "Select at least 2 profiles for a group",
     "ml_training_no_improvement": "Training complete: baseline kept (no improvement)",
     "ml_training_promoted": "Training complete: promoted {count} model(s)",
@@ -1793,6 +1828,8 @@
     "panel_settings_saved": "Panel settings saved",
     "pause_failed": "Pause failed: {error}",
     "pause_no_cycle": "No active cycle to pause",
+    "pg_preset_loaded": "Preset \"{name}\" loaded",
+    "pg_preset_saved": "Preset \"{name}\" saved",
     "pg_run_gone": "That run is no longer available.",
     "pg_sugg_loaded": "Staged {n} suggested value(s) - run the Playground to compare",
     "phase_created": "Phase \"{name}\" created",
@@ -1822,7 +1859,6 @@
     "remove_failed": "Remove failed: {error}",
     "rename_failed": "Rename failed: {error}",
     "resume_no_cycle": "No paused cycle to resume",
-    "revert_failed": "Revert failed: {error}",
     "review_saved": "Review saved",
     "save_failed": "Save failed: {error}",
     "saved_except_conflicts": "Saved. Fix the highlighted conflicts to save the rest.",
@@ -1866,7 +1902,8 @@
     "thanks_confirming": "Thanks for confirming",
     "unlabel_done": "Unlabelled {count} cycle(s)",
     "unlabel_failed": "Unlabel failed: {error}",
-    "update_failed": "Update failed: {error}"
+    "update_failed": "Update failed: {error}",
+    "store_download_partial": "{n} program(s) could not be downloaded; try again later."
   },
   "trend": {
     "down": "Trending down",
@@ -1881,7 +1918,10 @@
     "cost_dynamic_tip": "Time-weighted: charged at the price in force during the cycle (effective {price} {cur}/kWh).",
     "cost_tip": "Energy cost for this cycle, frozen at completion. With Time-Weighted Cost on, the power trace is charged at the price in force at each moment; otherwise energy x the single price in effect at the end. Set a price under Settings to populate it.",
     "confidence_tip": "Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.",
-    "flags_tip": "Review, anomaly and source flags for the cycle. Hover an icon for detail."
+    "flags_tip": "Review, anomaly and source flags for the cycle. Hover an icon for detail.",
+    "dbg_conf": "Conf",
+    "dbg_mae": "MAE",
+    "dbg_corr": "Corr"
   },
   "stat": {
     "avg": "avg",
@@ -1932,7 +1972,8 @@
     "website_tip": "Open the community store website",
     "favorites": "Favourites",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "No ratings yet"
+    "no_ratings": "No ratings yet",
+    "unreachable": "Couldn't reach the community store. Check your connection and try again."
   },
   "settings": {
     "gear": {
@@ -2039,5 +2080,38 @@
     "margin": "Too close to the runner-up",
     "unknown_profile": "Program no longer exists",
     "not_evaluated": "Not evaluated"
+  },
+  "diagram": {
+    "accum": "accum",
+    "auto": "auto",
+    "below_off": "below = off",
+    "confirmed": "confirmed",
+    "energy_counts": "energy counts",
+    "feedback": "feedback",
+    "gap_below_min": "gap below min = one cycle",
+    "heat_phase": "heat phase",
+    "held_at_100": "held at 100%",
+    "ignored": "ignored",
+    "kept": "kept",
+    "max": "max",
+    "min": "min",
+    "minus_tol": "-tol",
+    "no_match": "no match",
+    "no_updates": "no updates",
+    "off_delay_wait": "off-delay wait",
+    "off_gap": "off-gap",
+    "plus_tol": "+tol",
+    "profile": "profile",
+    "reading_interval": "typical reading interval",
+    "sensor_offline": "sensor offline: force-stop",
+    "si": "SI",
+    "spike_ignored": "spike ignored",
+    "spike_ignored_short": "spike: ignored",
+    "start": "start",
+    "stop": "stop",
+    "tail_energy_resets": "tail energy above thresh: timer resets",
+    "thr": "thr",
+    "too_short": "too short",
+    "tumble_kept": "tumble pulses kept"
   }
 }

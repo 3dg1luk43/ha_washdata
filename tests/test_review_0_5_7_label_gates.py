@@ -51,7 +51,6 @@ def manager(hass: HomeAssistant) -> WashDataManager:
     mgr.profile_store.async_add_cycle = AsyncMock()
     mgr.profile_store.async_clear_active_cycle = AsyncMock()
     mgr.profile_store.async_rebuild_envelope = AsyncMock()
-    mgr.profile_store.confirm_match_ranking_snapshots = MagicMock()
     mgr._run_post_cycle_processing = AsyncMock()
     mgr._learning_confidence = 0.6
     mgr._auto_label_confidence = 0.9

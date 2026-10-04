@@ -262,15 +262,7 @@ def test_the_release_rules_order() -> None:
     assert user.verified_pause is True
 
 
-@pytest.mark.parametrize(
-    ("device", "power", "waiting", "expected"),
-    [
-        ("dishwasher", 1.0, True, "Drying"),
-        ("washing_machine", 250.0, False, "Spinning"),
-        ("washing_machine", 1.0, True, "Rinsing/Soaking"),
-        ("dryer", 1.0, True, None),
-    ],
-)
-def test_the_phase_heuristic(device: str, power: float, waiting: bool, expected: str | None) -> None:
-    assert match_rules.heuristic_phase(None, device, power, lambda: waiting) == expected
-    assert match_rules.heuristic_phase("Wash", device, power, lambda: waiting) == "Wash"
+def test_no_power_heuristic_phase_survives() -> None:
+    """Audit PROGRESS-11: the English power guesses ("Spinning" over 200 W, so a
+    2 kW heater read Spinning) are gone; no phase is better than a wrong one."""
+    assert not hasattr(match_rules, "heuristic_phase")

@@ -202,8 +202,10 @@ def find_best_alignment(
         corr = 0.0
 
     # Scale-invariant MAE: express the error relative to the current cycle's
-    # peak (common to every candidate, so ranking is unaffected) and calibrate
-    # to the legacy behaviour at MATCH_MAE_REF_PEAK. See const.py for rationale.
+    # peak and calibrate to the legacy behaviour at MATCH_MAE_REF_PEAK (see
+    # const.py). On a complete cycle the peak is common to every candidate, so
+    # ranking is unaffected; in prefix mode the compared slice, and so its peak,
+    # depends on each candidate's span (deep-dive 02, audit MR-09).
     current_peak = float(np.max(np.abs(curr))) if curr.size else 0.0
     scaled_mae = mae * MATCH_MAE_REF_PEAK / max(current_peak, MATCH_MAE_PEAK_FLOOR)
     mae_score = MATCH_MAE_SCALE / (MATCH_MAE_SCALE + scaled_mae)
@@ -591,7 +593,7 @@ def compute_matches_worker(
                 "_shape_pair": shape_pair,
                 # True wall-clock span of `sample`, for prefix truncation (#364).
                 # Falls back to profile_duration so the other snapshot builders
-                # (devtools, matching_tuner, playground) keep working unchanged.
+                # (devtools, playground) keep working unchanged.
                 "sample_span_s": float(item.get("sample_span_s") or profile_duration or 0.0),
                 "offset": offset
             })
@@ -787,7 +789,7 @@ def _prefix_point_count(
     the whole template (then it is not a prefix), or when too few points remain to
     judge. Fraction-of-array is the right operator because every snapshot flavour
     is uniform in time over its own span (envelope: np.linspace; sample cycle:
-    resample_uniform at a fixed dt; group aggregate: np.interp onto 200 points).
+    resample_uniform at a fixed dt). (The group aggregate snapshot is gone, #400.)
     """
     if n_points < SMART_TERM_PREFIX_MIN_POINTS or sample_span_s <= 0 or current_duration <= 0:
         return 0

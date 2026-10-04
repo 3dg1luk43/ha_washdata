@@ -384,7 +384,7 @@ When a new key is added to `en.json` / `strings.json`, GitLocalize automatically
 
 Maintainer steps after adding a key:
 1. Run `python3 devtools/sync_translations.py` - removes deprecated keys from all non-English HA-layer files (safe, no network).
-2. Translate the new keys into all languages via **Claude subagents with explicit domain context** - never via `translate.py` or any machine translator. See the "Translation maintenance" section of `CLAUDE.md` for the full procedure.
+2. Translate the new keys into all languages via **Claude subagents with explicit domain context** - never via `translate.py` or any machine translator. See the "UI localization" section of `CLAUDE.md` for the full procedure.
 
 ---
 

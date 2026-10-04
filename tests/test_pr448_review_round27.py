@@ -275,19 +275,6 @@ def test_the_end_gate_comment_does_not_claim_a_fixed_ratio() -> None:
     assert "resolve_end_gate_late_ratio" in src
 
 
-def test_the_tuner_docstring_describes_the_implemented_rule() -> None:
-    """Item 356 implemented the three-way template rule; the docstring still
-    called it deferred, which would tell a maintainer item 347 is open."""
-    import inspect
-
-    from custom_components.ha_washdata.ml import matching_tuner
-
-    doc = inspect.getdoc(matching_tuner._snaps) or ""
-    assert "deferred" not in doc
-    assert "duration is closest to the profile" not in doc
-    assert "three-way" in doc
-
-
 def test_the_repair_docstring_admits_it_rewrites_reference_cycles() -> None:
     """Item 353 put `reference_cycles` in scope, golden ones included. The first
     paragraph still said only `past_cycles` is touched, which is the paragraph a

@@ -157,7 +157,6 @@ def _wire_cycle_end_mocks(manager: WashDataManager) -> None:
     manager.profile_store.async_add_lifetime_energy_wh = AsyncMock()
     manager._run_post_cycle_processing = AsyncMock()
     manager._run_final_match_from_cycle_data = AsyncMock(return_value=None)
-    manager._compute_cycle_quality_score = MagicMock()
     manager._maybe_notify_milestone = MagicMock()
     manager.learning_manager = MagicMock()
 

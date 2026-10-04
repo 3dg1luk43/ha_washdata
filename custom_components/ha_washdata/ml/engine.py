@@ -48,7 +48,6 @@ CONF_ENABLE_ML_MODELS = "enable_ml_models"
 # Logical capability -> generated model module name (without the _model suffix).
 _MODEL_MODULES = {
     "quality": "hybrid_curve_quality_model",
-    "live_match": "live_match_commit_model",
     "end": "cycle_end_detector_model",
 }
 
@@ -56,8 +55,8 @@ _MODEL_MODULES = {
 _SIBLING_MODULES = ("trainer", "feature_extraction")
 
 # Imported baseline model modules, keyed by module name. Importing a module is a
-# blocking call Home Assistant forbids inside the event loop, and every
-# resolve_scorer() consumer (live matching, end detection, quality gating) runs
+# blocking call Home Assistant forbids inside the event loop, and
+# resolve_scorer() consumers (end detection, the panel's cycle health) run
 # there - so the modules are imported once from an import executor at setup
 # (:func:`preload_models`) and every later resolution is a dict lookup. A failed
 # import is cached as ``None`` so a broken install warns once instead of retrying

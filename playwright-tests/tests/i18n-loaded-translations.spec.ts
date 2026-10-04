@@ -139,3 +139,33 @@ test('UI-09: settings search finds a field by its translated label', async ({ pa
   await search.fill('off_delay');
   await expect(page.locator('.wd-field[data-field="off_delay"]')).toBeVisible();
 });
+
+// ── UI-07: strings that used to bypass _t() ────────────────────────────────────
+
+test('UI-07: profile meta, profile title and diagram labels follow the loaded language', async ({ page }) => {
+  // Marker values, so the assertion cannot be satisfied by the English fallback.
+  const xx = {
+    lbl: { n_cycles_one: 'XX {n} Zyklus', n_cycles_other: 'XX {n} Zyklen', energy_per_cycle: 'XX {v} je Zyklus' },
+    modal: { profile_title: 'XX Programm · {name}' },
+    diagram: { off_delay_wait: 'XX Ausschaltverzögerung' },
+  };
+  await page.goto('/');
+  await bootPanel(page, {}, DE, { translations: { en, de: xx } });
+
+  await clickTab(page, 'profiles');
+  const meta = page.locator('.wd-profile-meta');
+  await expect(meta.first()).toBeVisible({ timeout: 8_000 });
+  await expect(meta.filter({ hasText: 'XX 8 Zyklen' })).toHaveCount(1);
+  await expect(meta.filter({ hasText: 'XX 1 Zyklus' })).toHaveCount(1);   // plural category
+  await expect(meta.first()).toContainText('XX 0,84 kWh je Zyklus');
+
+  await page.locator('.wd-profile-card', { hasText: 'Cotton 40°C' }).click();
+  await expect(page.locator('.wd-modal h2').first()).toHaveText('XX Programm · Cotton 40°C', { timeout: 8_000 });
+  await page.locator('[data-maction="cancel"]').first().click();
+
+  await clickTab(page, 'settings');
+  await page.locator('#wd-settings-search').fill('off_delay');
+  const field = page.locator('.wd-field[data-field="off_delay"]');
+  await expect(field).toBeVisible({ timeout: 8_000 });
+  await expect(field.locator('svg.wd-dg text')).toHaveText(['XX Ausschaltverzögerung']);
+});

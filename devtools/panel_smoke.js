@@ -95,8 +95,7 @@ el._mlTrainingStatus = { available: true, enabled: true, running: false, last_tr
   on_device_models: {
     end: { trained_at: new Date().toISOString(), cycle_count: 40, kind: 'standardized_logistic', label: 'Cycle-end detection', blurb: "Knowing when a cycle has truly finished", auc: 0.91, metric: 'AUC 0.91 on held-out data', trend: 'improving' },
     remaining_time: { trained_at: new Date().toISOString(), cycle_count: 40, kind: 'standardized_linear', label: 'Time-remaining estimate', blurb: 'Predicting how long is left', model_mae: 0.02, naive_mae: 0.12, metric: 'error 0.020 vs 0.120 baseline', trend: 'declining' },
-  },
-  matching: { defaults: { corr_weight: 0.45, duration_weight: 0.22, energy_weight: 0.22, dtw_ensemble_w: 0.7 }, tuned: { config: { corr_weight: 0.5, duration_weight: 0.15, energy_weight: 0.15, dtw_ensemble_w: 0.85 }, trained_at: new Date().toISOString(), cycle_count: 40, baseline_test_top1: 0.7, tuned_test_top1: 0.8 }, active: 'tuned' } };
+  } };
 el._powerData = { live: [], raw: [], cycle_active: true };
 el._diag = { total_cycles: 10, total_profiles: 3, debug_traces_count: 0, file_size_kb: 12.3 };
 el._logs = [];
@@ -121,8 +120,6 @@ check('_htmlMlTab', () => el._htmlMlTab());
 check('_htmlMlStatusSection', () => el._htmlMlStatusSection(el._mlTrainingStatus, 'entry-1'));
 check('_htmlMlLearnedSection', () => el._htmlMlLearnedSection(el._mlTrainingStatus));
 check('_htmlMlLearnedSection (empty)', () => { const s = el._mlTrainingStatus; el._mlTrainingStatus = { ...s, on_device_models: {} }; const h = el._htmlMlLearnedSection(el._mlTrainingStatus); el._mlTrainingStatus = s; return h; });
-check('_htmlMatchingTuningCard', () => el._htmlMatchingTuningCard());
-check('_htmlMatchingTuningCard (default)', () => { const s = el._mlTrainingStatus; el._mlTrainingStatus = { ...s, matching: { ...s.matching, tuned: null, active: 'default' } }; const h = el._htmlMatchingTuningCard(); el._mlTrainingStatus = s; return h; });
 // Playground (unified workbench + drawer, with and without backend data)
 check('_htmlPlayground (workbench, empty)', () => { el._pgAnalysisTab = 'history'; return el._htmlPlayground(); });
 check('_htmlPlayground (workbench, with detail)', () => {

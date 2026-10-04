@@ -158,10 +158,9 @@ def test_playground_tab_whitelisted():
 
 
 def test_the_removed_playground_commands_are_gone():
-    # 0.5.8 UI removals: the DTW visualizer and the settings presets.
-    for cmd in ("get_dtw_debug", "save_playground_preset", "delete_playground_preset"):
-        assert not hasattr(ws_api, f"ws_{cmd}")
-        assert cmd not in ws_api._READ_WRITE_COMMANDS
+    # 0.5.8 UI removals: the DTW visualizer. (The settings presets came back.)
+    assert not hasattr(ws_api, "ws_get_dtw_debug")
+    assert "get_dtw_debug" not in ws_api._READ_WRITE_COMMANDS
 
 
 def test_the_one_shot_playground_commands_are_gone():
@@ -225,7 +224,7 @@ async def test_playground_settings_can_skip_suggestion_computation():
     assert lean["classic_suggestions"] == {}
     assert store.get_suggestions.call_count == 0
     # The values the fields actually need are still there.
-    assert "effective" in lean and "presets" not in lean
+    assert "effective" in lean and "presets" in lean
 
     # Opted in (the default for every other caller): suggestions are read.
     full = await _call(True)

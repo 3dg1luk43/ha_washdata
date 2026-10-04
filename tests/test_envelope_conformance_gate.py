@@ -19,7 +19,7 @@
 When a completed cycle's power trace lies mostly outside the matched profile's
 min/max envelope band (``envelope_conformance`` < 0.40), even a high-confidence
 match that would normally be auto-labeled is downgraded to a feedback request.
-This is a complementary signal to the ML quality gate: match confidence measures
+It complements match confidence: confidence measures
 *shape* correlation, whereas envelope conformance measures absolute power *level*
 consistency.  This covers the wiring in
 ``LearningManager._maybe_request_feedback``.
@@ -33,7 +33,6 @@ from custom_components.ha_washdata.const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
-    ML_QUALITY_SUSPICIOUS_THRESHOLD,
 )
 
 _PROFILE = "Cotton 60°"
@@ -104,7 +103,7 @@ def _learning_manager(*, auto_label_conf: float = 0.9) -> tuple[LearningManager,
     return lm, store
 
 
-def _cycle_data(*, envelope_conformance=None, ml_quality_score=None):
+def _cycle_data(*, envelope_conformance=None):
     cd = {
         "id": _CYCLE_ID,
         "duration": 3600,
@@ -113,8 +112,6 @@ def _cycle_data(*, envelope_conformance=None, ml_quality_score=None):
     }
     if envelope_conformance is not None:
         cd["envelope_conformance"] = envelope_conformance
-    if ml_quality_score is not None:
-        cd["ml_quality_score"] = ml_quality_score
     return cd
 
 
@@ -226,48 +223,3 @@ def test_non_float_conformance_ignored():
     )
 
     assert cd.get("auto_labeled") is True
-
-
-# ---------------------------------------------------------------------------
-# Interaction with the ML quality gate (both signals independent)
-# ---------------------------------------------------------------------------
-
-
-def test_conformance_downgrade_with_clean_quality():
-    """Envelope gate fires even when the ML quality score is clean."""
-    lm, store = _learning_manager()
-    cd = _cycle_data(
-        envelope_conformance=0.10,
-        ml_quality_score=0.0,  # quality model says fine
-    )
-    store.past_cycles.append(cd)
-
-    lm._maybe_request_feedback(
-        cycle_data=cd,
-        detected_profile=_PROFILE,
-        confidence=0.99,
-        predicted_duration=3600.0,
-    )
-
-    assert _CYCLE_ID in store.pending
-    assert cd.get("auto_labeled") is not True
-
-
-def test_both_gates_suspicious_still_downgrades():
-    """Both quality-suspicious AND low-conformance → single feedback request."""
-    lm, store = _learning_manager()
-    cd = _cycle_data(
-        envelope_conformance=0.15,
-        ml_quality_score=ML_QUALITY_SUSPICIOUS_THRESHOLD + 0.1,
-    )
-    store.past_cycles.append(cd)
-
-    lm._maybe_request_feedback(
-        cycle_data=cd,
-        detected_profile=_PROFILE,
-        confidence=0.99,
-        predicted_duration=3600.0,
-    )
-
-    assert _CYCLE_ID in store.pending
-    assert cd.get("auto_labeled") is not True

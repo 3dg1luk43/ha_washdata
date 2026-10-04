@@ -19,13 +19,15 @@
 Covers the pieces that make on-device remaining-time prediction work:
   * ``trainer.fit_ridge`` / ``regression_metrics`` / ``predict_*`` / ``build_regression_spec``
   * ``feature_extraction.progress_features`` (columns, monotonicity, edge cases)
-  * ``training_task._progress_dataset`` (prefix synthesis + fraction labels)
-  * ``training_task._train_regression_capability`` (naive-baseline promotion gate)
-  * ``train_from_cycles`` wiring of the regression capability
+  * the prefix rows (``tests/ml_progress_helpers``; on-device training of this head
+    was removed in 0.5.8, audit ML-11, so the dataset lives with the tests now)
+  * ``training_task._train_regression_capability`` (naive-baseline promotion gate,
+    shared with the ``total_energy`` head)
+  * ``train_from_cycles`` no longer training this head
   * ``engine.resolve_regressor`` (on-device spec preference, no baseline fallback)
 
-There is no shipped baseline for this head: it activates only once on-device
-training promotes one over the naive elapsed/expected estimate.
+There is no shipped baseline for this head and its consumer is frozen off; a spec
+can only come from a pre-0.5.8 store, which storage v17 drops.
 """
 from __future__ import annotations
 
@@ -41,12 +43,12 @@ from custom_components.ha_washdata.ml.feature_extraction import (
     progress_features,
 )
 from custom_components.ha_washdata.ml.training_task import (
-    _holdout_split,
-    _progress_dataset,
     _regression_split,
     _train_regression_capability,
     train_from_cycles,
 )
+
+from .ml_progress_helpers import remaining_time_rows, trained_remaining_time_spec
 
 
 # ---------------------------------------------------------------------------
@@ -159,7 +161,7 @@ def test_progress_features_tail_slope_negative_on_decay() -> None:
 
 
 # ---------------------------------------------------------------------------
-# training_task._progress_dataset
+# Prefix rows (tests/ml_progress_helpers)
 # ---------------------------------------------------------------------------
 
 
@@ -194,7 +196,7 @@ def _cycle(i: int, total: float) -> dict:
 def test_progress_dataset_synthesizes_labelled_prefixes() -> None:
     cycles = [_cycle(i, 3600.0) for i in range(6)]
     expectations = {"Cotton": _EXP}
-    X, y, columns, _g = _progress_dataset(cycles, expectations)
+    X, y, columns, _g = remaining_time_rows(cycles, expectations)
     assert columns == list(PROGRESS_FEATURE_COLUMNS)
     assert X.shape[0] == y.shape[0]
     assert X.shape[0] >= 6 * 5  # ~6 cut fractions per cycle
@@ -208,7 +210,7 @@ def test_progress_dataset_synthesizes_labelled_prefixes() -> None:
 def test_progress_dataset_returns_per_cycle_groups() -> None:
     """B5: each cycle's prefix rows share one group id (so a group == a source cycle)."""
     cycles = [_cycle(i, 3600.0) for i in range(6)]
-    X, _y, _columns, groups = _progress_dataset(cycles, {"Cotton": _EXP})
+    X, _y, _columns, groups = remaining_time_rows(cycles, {"Cotton": _EXP})
     assert groups.shape[0] == X.shape[0]
     # 6 cycles all produced rows -> 6 distinct groups, each with multiple prefix rows.
     assert len(np.unique(groups)) == 6
@@ -250,13 +252,13 @@ def test_regression_split_respects_groups() -> None:
 
 def test_progress_dataset_skips_profiles_without_expectation() -> None:
     cycles = [_cycle(i, 3600.0) for i in range(6)]
-    X, y, _, _g = _progress_dataset(cycles, {})  # no expectations at all
+    X, y, _, _g = remaining_time_rows(cycles, {})  # no expectations at all
     assert X.shape[0] == 0
 
 
 def test_progress_dataset_skips_short_cycles() -> None:
     tiny = {**_cycle(0, 30.0), "power_data": [[0.0, 500.0], [30.0, 0.0]]}
-    X, _y, _, _g = _progress_dataset([tiny], {"Cotton": _EXP})
+    X, _y, _, _g = remaining_time_rows([tiny], {"Cotton": _EXP})
     assert X.shape[0] == 0
 
 
@@ -313,18 +315,15 @@ def test_regression_not_promoted_when_too_few_rows() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_train_from_cycles_includes_remaining_time_record() -> None:
-    # Variable-duration cycles so the naive elapsed/expected estimate is wrong
-    # for the long/short ones while the shape features stay progress-informative.
+def test_train_from_cycles_no_longer_trains_remaining_time() -> None:
+    """Removed in 0.5.8 (audit ML-11): its consumer is frozen off, so a trained
+    spec changed nothing. The same data still promotes a spec through the shared
+    regression gate (see test_end_to_end_prediction_rises_with_prefix)."""
     rng = np.random.default_rng(7)
     cycles = [_cycle(i, float(2400 + int(rng.integers(0, 3000)))) for i in range(24)]
     summary = train_from_cycles(cycles, "washing_machine", 2.0, "2026-07-03T02:00:00+00:00")
-    caps = {r["capability"] for r in summary["results"]}
-    assert "remaining_time" in caps
-    rt = next(r for r in summary["results"] if r["capability"] == "remaining_time")
-    assert "model_mae" in rt and "naive_mae" in rt
-    if rt["promoted"]:
-        assert summary["promoted"]["remaining_time"]["spec"]["kind"] == "standardized_linear"
+    assert "remaining_time" not in {r["capability"] for r in summary["results"]}
+    assert "remaining_time" not in summary["promoted"]
 
 
 # ---------------------------------------------------------------------------
@@ -389,14 +388,11 @@ def test_resolve_regressor_survives_bad_store() -> None:
 def test_end_to_end_prediction_rises_with_prefix() -> None:
     rng = np.random.default_rng(11)
     cycles = [_cycle(i, float(2400 + int(rng.integers(0, 3000)))) for i in range(24)]
-    summary = train_from_cycles(cycles, "washing_machine", 2.0, "2026-07-03T02:00:00+00:00")
+    spec = trained_remaining_time_spec(cycles)
     # Seeded data and seeded splits: this promotes deterministically, so a failure
     # to promote is the regression this test guards, not a reason to skip it
     # (audit TESTING-13).
-    assert summary["promoted"].get("remaining_time"), (
-        "the remaining-time regressor did not promote on data it beats naive on"
-    )
-    spec = summary["promoted"]["remaining_time"]["spec"]
+    assert spec, "the remaining-time regressor did not promote on data it beats naive on"
 
     store = MagicMock()
     store.get_ml_model_versions.return_value = {"remaining_time": {"spec": spec}}

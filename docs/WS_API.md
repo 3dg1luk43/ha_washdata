@@ -4,12 +4,12 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand — run `python3 devtools/generate_ws_types.py`.
 
-**106 commands.**
+**108 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
 | `get_devices` | — | `GetDevicesResponse` |
-| `get_device_cycles` | entry_id, limit?, offset? | `GetDeviceCyclesResponse` |
+| `get_device_cycles` | entry_id, limit?, offset?, imported_offset? | `GetDeviceCyclesResponse` |
 | `get_options` | entry_id | `GetOptionsResponse` |
 | `set_options` | entry_id, options | `SuccessResponse` |
 | `get_settings_changelog` | entry_id | `GetSettingsChangelogResponse` |
@@ -49,11 +49,12 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `clear_debug_data` | entry_id | `ClearDebugDataResponse` |
 | `wipe_history` | entry_id | `SuccessResponse` |
 | `export_config` | entry_id | `ExportConfigResponse` |
-| `import_config` | entry_id, json_data | `SuccessResponse` |
+| `import_config` | entry_id, json_data | `ImportConfigResponse` |
 | `get_export_inventory` | entry_id | `GetExportInventoryResponse` |
 | `analyze_import` | entry_id, json_data | `AnalyzeImportResponse` |
 | `export_config_selective` | entry_id, selection | `ExportConfigResponse` |
 | `import_config_selective` | entry_id, json_data, selection, mode?, conflict_resolutions?, cycle_destination?, apply_settings? | `ImportConfigSelectiveResponse` |
+| `undo_import` | entry_id | `UndoImportResponse` |
 | `get_constants` | — | `GetConstantsResponse` |
 | `get_suggestions` | entry_id | `GetSuggestionsResponse` |
 | `apply_suggestions` | entry_id, keys | `ApplySuggestionsResponse` |
@@ -77,13 +78,14 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_ml_comparison` | entry_id | `GetMlComparisonResponse` |
 | `get_ml_training_status` | entry_id | `GetMlTrainingStatusResponse` |
 | `trigger_ml_training` | entry_id | `StartTaskResponse` |
-| `revert_matching_config` | entry_id | `SuccessResponse` |
 | `revert_ml_models` | entry_id | `SuccessResponse` |
 | `set_ml_review` | entry_id, cycle_id, quality?, golden?, tags?, notes? | `SuccessResponse` |
 | `pause_cycle` | entry_id | `OkResponse` |
 | `resume_cycle` | entry_id | `OkResponse` |
 | `terminate_cycle` | entry_id | `OkResponse` |
 | `get_playground_settings` | entry_id, include_suggestions? | `GetPlaygroundSettingsResponse` |
+| `save_playground_preset` | entry_id, name, values | `PlaygroundPresetsResponse` |
+| `delete_playground_preset` | entry_id, name | `PlaygroundPresetsResponse` |
 | `subscribe_tasks` | entry_id? | `SubscribeTasksResponse` |
 | `cancel_task` | task_id | `CancelTaskResponse` |
 | `get_task_result` | task_id | `TaskSnapshot` |
@@ -136,6 +138,7 @@ _None._
 | `entry_id` | yes | str |
 | `limit` | no | int |
 | `offset` | no | int |
+| `imported_offset` | no | int |
 
 **Response** (`GetDeviceCyclesResponse`)
 
@@ -147,6 +150,8 @@ _None._
 | `backfill_cycles` | yes | list[dict[str, any]] |
 | `total` | yes | number |
 | `has_more` | yes | bool |
+| `imported_total` | yes | number |
+| `imported_has_more` | yes | bool |
 
 ## `ha_washdata/get_options`
 
@@ -233,6 +238,7 @@ _None._
 | `coverage_gaps` | yes | dict[str, any] |
 | `profile_advisories` | yes | list[dict[str, any]] |
 | `profile_terminal` | yes | dict[str, any] |
+| `profile_matcher_counts` | yes | dict[str, number] |
 
 ## `ha_washdata/create_profile`
 
@@ -710,6 +716,7 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `stats` | yes | dict[str, any] |
+| `import_undo` | yes | dict[str, any] \| null |
 
 ## `ha_washdata/reprocess_history`
 
@@ -777,11 +784,12 @@ _None._
 | `entry_id` | yes | str |
 | `json_data` | yes | str |
 
-**Response** (`SuccessResponse`)
+**Response** (`ImportConfigResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
 | `success` | yes | bool |
+| `restore_point_saved` | yes | bool |
 
 ## `ha_washdata/get_export_inventory`
 
@@ -842,6 +850,21 @@ _None._
 | `apply_settings` | no | bool |
 
 **Response** (`ImportConfigSelectiveResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `summary` | yes | dict[str, any] |
+
+## `ha_washdata/undo_import`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+
+**Response** (`UndoImportResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
@@ -1238,7 +1261,6 @@ _None._
 | `interval_days` | yes | number |
 | `hour` | yes | number |
 | `on_device_models` | yes | dict[str, any] |
-| `matching` | yes | dict[str, any] |
 
 ## `ha_washdata/trigger_ml_training`
 
@@ -1253,20 +1275,6 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `task_id` | yes | str |
-
-## `ha_washdata/revert_matching_config`
-
-**Request parameters**
-
-| Param | Required | Type |
-| --- | --- | --- |
-| `entry_id` | yes | str |
-
-**Response** (`SuccessResponse`)
-
-| Field | Always present | Type |
-| --- | --- | --- |
-| `success` | yes | bool |
 
 ## `ha_washdata/revert_ml_models`
 
@@ -1357,8 +1365,43 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `effective` | yes | dict[str, any] |
+| `presets` | yes | list[PlaygroundPreset] |
 | `publishable` | yes | list[str] |
+| `preset_limit` | yes | number |
 | `classic_suggestions` | yes | dict[str, any] |
+
+## `ha_washdata/save_playground_preset`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `name` | yes | str |
+| `values` | yes | dict |
+
+**Response** (`PlaygroundPresetsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `presets` | yes | list[PlaygroundPreset] |
+
+## `ha_washdata/delete_playground_preset`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `name` | yes | str |
+
+**Response** (`PlaygroundPresetsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `presets` | yes | list[PlaygroundPreset] |
 
 ## `ha_washdata/subscribe_tasks`
 
@@ -1631,6 +1674,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `items` | no | list |
+| `error` | no | str |
 | `disabled` | no | bool |
 
 ## `ha_washdata/store_list_brands`
@@ -1648,6 +1692,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `items` | no | list |
+| `error` | no | str |
 | `disabled` | no | bool |
 
 ## `ha_washdata/store_get_profiles`
@@ -1664,6 +1709,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `items` | no | list |
+| `error` | no | str |
 | `disabled` | no | bool |
 
 ## `ha_washdata/store_get_cycles`
@@ -1680,6 +1726,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `items` | no | list |
+| `error` | no | str |
 | `disabled` | no | bool |
 
 ## `ha_washdata/store_confirm_device`
@@ -1737,6 +1784,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | --- | --- | --- |
 | `device_id` | no | str |
 | `items` | no | list |
+| `error` | no | str |
 | `disabled` | no | bool |
 
 ## `ha_washdata/store_get_catalog_entry`

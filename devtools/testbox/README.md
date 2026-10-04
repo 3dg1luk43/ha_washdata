@@ -16,9 +16,14 @@ bug** (importing a configuration silently rebound the device to the exporter's
 power sensor - register item 317).
 
 It is a complement, not a replacement. Detection maths, matching accuracy and
-progress estimation belong in `run_tests.sh`, where time can be frozen and 606
-recorded cycles can be replayed in 30 seconds. What belongs here is everything
-that crosses the boundary into Home Assistant.
+progress estimation belong in `run_tests.sh` (time frozen; `--slow` replays the
+recorded `cycle_data/` corpus) and the `devtools/*_eval.py` harnesses. What
+belongs here is everything that crosses the boundary into Home Assistant.
+
+**The Home Assistant version floats.** `docker-compose.yml` pins
+`home-assistant:stable`, so the box runs whatever stable was last pulled (2026.9.3
+when this was written), not a fixed release. Read it with
+`./hactl.py ws get_config | grep '"version"'` and quote it when citing a box run.
 
 ## Quick start
 
@@ -180,6 +185,19 @@ Two consequences worth knowing:
 - `notify_live_interval_seconds` is floored at 30 in the manager, so at 60x one
   live update covers ~30 min of appliance time.
 
+Three more wall-clock quantities do not scale and change behaviour, so a box run
+cannot judge them (measured in the 0.5.7 review campaign, register item 389):
+
+- **The start-energy gate** is in Wh, so at 60x it takes 60x more appliance time
+  to fill. A cycle with a low-power prelude is recorded starting ~8 min late
+  (start offset +9 min against +1 min typical); its end is unaffected.
+- **`STANDBY_BAND_WINDOW_S`** (600 s) is 10 h of appliance time at 60x, so the
+  standby-band finalize can never fire in a compressed run. Reproduce that path
+  at 2x.
+- **Back-to-back washes merge.** A 7 min gap between two washes becomes 7 s,
+  shorter than any scaled `min_off_gap`, so the box keeps as one cycle what a
+  real-time replay splits in two.
+
 After the trace ends the replay pushes 0 W once and stops. Home Assistant drops
 unchanged states, so repeated 0 W produces no further events - which is exactly
 the report-on-change plug behaviour behind #424/#427, and means the **watchdog is
@@ -245,9 +263,9 @@ there. Register item 320.
 
 - **Timing is compressed**, so it cannot judge cycle-end accuracy or ETA
   convergence in minutes. Those live in `run_tests.sh --slow` and
-  `devtools/dtw_ab_eval.py`.
+  `devtools/end_gate_eval.py --loo`.
 - **One appliance, one trace per run.** Matching accuracy over the corpus stays
-  in the benchmark suite.
+  in `devtools/eval.py`, which drives the shipped matcher.
 - **The companion app is not here.** The box proves Home Assistant accepted and
   delivered the payload; whether iOS then renders a Live Activity from it is
   still only verifiable on a phone.

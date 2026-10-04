@@ -72,8 +72,6 @@
     "reviewed": "Gjennomgått",
     "steady": "→ stødig",
     "underrun": "Ble ferdig raskere enn vanlig",
-    "using_defaults": "Bruker standardverdier for levering",
-    "using_tuned": "Bruker avstemte vekter",
     "overrun_ratio": "({x}x forventet)",
     "underrun_ratio": "({pct}% av forventet)",
     "imported_tip": "Importert fra fellesskapsbutikken. Brukes kun til matching, telles ikke med i statistikken.",
@@ -85,9 +83,19 @@
     "awaiting_tip": "Venter på godkjenning fra fellesskapet",
     "awaiting_n": "Venter på godkjenning · {n} bekreftet",
     "awaiting": "Venter på godkjenning",
-    "approved": "Godkjent"
+    "approved": "Godkjent",
+    "matcher_unused": "Ennå ikke gjenkjent i syklusene dine",
+    "matcher_used": "Gjenkjent i {n} av syklusene dine",
+    "matcher_used_one": "Gjenkjent i {n} av syklusene dine",
+    "matcher_used_other": "Gjenkjent i {n} av syklusene dine",
+    "matcher_used_tip": "Sykluser registrert på dette apparatet som WashDatas programgjenkjenning selv har merket med dette importerte programmet. En import som aldri blir gjenkjent, passer kanskje ikke til apparatet ditt og kan fjernes. Telles lokalt; ingenting sendes til fellesskapsbutikken."
   },
   "btn": {
+    "pg_preset_delete": "Slett forhåndsinnstilling",
+    "pg_preset_load": "Last inn forhåndsinnstilling",
+    "pg_preset_load_tip": "Erstatt verdiene i sandkassen med denne forhåndsinnstillingen (de aktive innstillingene berøres ikke)",
+    "pg_preset_save": "Lagre som forhåndsinnstilling",
+    "pg_preset_save_tip": "Lagre alle verdiene nedenfor som en navngitt forhåndsinnstilling for denne enheten",
     "reset_zoom": "Tilbakestill zoom",
     "set_brand_model": "Angi merke og modell",
     "refresh_catalog": "Oppdater katalog",
@@ -168,7 +176,6 @@
     "reset": "Tilbakestill",
     "reset_ml_models_tip": "Kast de finjusterte modellene og gå tilbake til de innebygde. WashData kan lære dem på nytt senere.",
     "reset_to_builtin": "Tilbakestill til innebygde modeller",
-    "reset_to_defaults": "Tilbakestill til standardinnstillinger",
     "resume_cycle": "Gjenoppta",
     "resume_cycle_tip": "Fortsett den pausede syklusen",
     "revert_settings": "Forkast endringer",
@@ -239,7 +246,8 @@
     "retry": "Prøv igjen",
     "confirm_appliance": "Bekreft dette apparatet",
     "confirmed": "Bekreftet",
-    "create_profile_from_gap": "Opprett profil"
+    "create_profile_from_gap": "Opprett profil",
+    "undo_import": "Angre siste import"
   },
   "note": {
     "off_delay": {
@@ -339,7 +347,6 @@
     "manual_recording": "Manuelt opptak",
     "manual_recording_tip": "Kjør en syklus med vilje mens WashData spiller inn effektsporet. Klikk Start opptak rett før apparatet starter, Stopp når det er ferdig, og deretter Behandl for å lagre det som en navngitt profil.",
     "ml_learned": "Hva WashData har lært",
-    "ml_matching_tuning": "Programtilpasset finjustering",
     "ml_settings_card": "Innstillinger",
     "ml_smart_learning": "Smart læring",
     "my_preferences": "Mine preferanser",
@@ -362,7 +369,8 @@
     "online_account": "Fellesskapsbutikk og nettfunksjoner",
     "import_power_history": "Importer effekthistorikk",
     "service_status": "Servicestatus",
-    "online_account_tab": "Nett & fellesskap"
+    "online_account_tab": "Nett & fellesskap",
+    "live_match_debug": "Feilsøking av direkte match"
   },
   "health": {
     "fair": "Akseptabel profilkvalitet",
@@ -410,13 +418,11 @@
     "cycles_lc": "sykluser",
     "date": "Dato",
     "debug_traces": "Feilsøk spor",
-    "default": "Misligholde",
     "default_access_level": "Standardnivå for brukere som ikke er oppført nedenfor",
     "default_other": "Standard (andre enheter)",
     "default_tab": "Standardfane når panelet åpnes",
     "description": "Beskrivelse",
     "duration": "Varighet",
-    "emphasis": "Vektlegging",
     "enable_access_control": "Aktiver tilgangskontroll per bruker",
     "energy": "Energi",
     "event_type": "Hendelsestype",
@@ -428,7 +434,6 @@
     "group_name": "Gruppenavn",
     "head_trim": "Beskjær start (s)",
     "hide_tabs": "Skjul faner for ikke-administratorer",
-    "in_use": "I bruk",
     "json_data": "JSON-data",
     "label": "Matchet program",
     "last": "Siste",
@@ -459,6 +464,9 @@
     "pg_group_timing": "Tidsregler",
     "pg_idle": "Inaktiv",
     "pg_poor_match": "Dårlig treff",
+    "pg_preset": "Forhåndsinnstilling for sandkassen",
+    "pg_preset_name": "Navn på ny forhåndsinnstilling",
+    "pg_preset_none": "Velg en forhåndsinnstilling…",
     "pg_strong_match": "Sterkt treff",
     "pg_weak_match": "Svakt treff",
     "phase_name": "Fasenavn",
@@ -593,7 +601,6 @@
     "cat_custom_phases": "Egendefinerte faser",
     "cat_profile_groups": "Profilgrupper",
     "cat_settings": "Deteksjons- & gjenkjenningsinnstillinger",
-    "cat_matching_config": "Finjustering av gjenkjenning",
     "cat_ml_models": "ML-modeller",
     "cat_feedback": "Tilbakemelding & vurderingsmerker",
     "cat_suggestions": "Forslag",
@@ -645,7 +652,19 @@
     "pg_autolabel": "Auto-merking",
     "pg_label_review": "Ber om gjennomgang",
     "pg_ev_match_reverted": "Treff tilbakestilt",
-    "pg_ev_verified_pause": "Bekreftet pause"
+    "pg_ev_verified_pause": "Bekreftet pause",
+    "n_samples": "{n} målinger",
+    "n_samples_one": "{n} måling",
+    "n_samples_other": "{n} målinger",
+    "n_cycles": "{n} sykluser",
+    "n_cycles_one": "{n} syklus",
+    "n_cycles_other": "{n} sykluser",
+    "energy_per_cycle": "{v}/syklus",
+    "energy_total": "{v} totalt",
+    "automation_off": "(av)",
+    "ref_cycle_none": "Ingen",
+    "share_name": "Vis navnet mitt på det jeg deler",
+    "cat_backfill_cycles": "Sykluser funnet i importert effekthistorikk"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -667,17 +686,9 @@
     "trend_declining_tip": "Denne modellens tilpasning har blitt dårligere ved de siste ny-sjekkene. Å gjennomgå flere sykluser kan hjelpe den å lære på nytt.",
     "trend_steady_tip": "Denne modellens tilpasning har holdt seg omtrent stabil ved de siste ny-sjekkene.",
     "cap_blurb": {
-      "end": "Å vite når en syklus faktisk er ferdig",
-      "live_match": "Å identifisere det pågående programmet raskere",
-      "quality": "Å oppdage feildetekterte eller ødelagte sykluser",
-      "remaining_time": "Å forutsi hvor lang tid som er igjen",
       "total_energy": "Å forutsi total energi og kostnad"
     },
     "cap_label": {
-      "end": "Deteksjon av syklusslutt",
-      "live_match": "Programgjenkjenning",
-      "quality": "Kvalitetssjekk av syklus",
-      "remaining_time": "Estimat av gjenstående tid",
       "total_energy": "Energiestimat"
     },
     "metric_auc": "AUC {auc} på valideringsdata",
@@ -731,10 +742,17 @@
     "apply_suggestions_title": "Bruk forslag",
     "apply_suggestions_msg": "Endre disse {n} innstillingene? Integrasjonen lastes inn på nytt etter lagring.",
     "discard_settings_title": "Forkaste ulagrede endringer?",
-    "discard_settings_msg": "Ulagrede innstillingsendringer: {n}. Forlate Innstillinger og forkaste dem?"
+    "discard_settings_msg": "Ulagrede innstillingsendringer: {n}. Forlate Innstillinger og forkaste dem?",
+    "profile_title": "Profil · {name}",
+    "undo_import_msg": "Alt som er lagret for denne enheten, går tilbake til slik det var før siste import ({when}), og det samme gjør innstillingene. Sykluser registrert og endringer gjort siden da går tapt.",
+    "undo_import_ok": "Angre import",
+    "undo_import_title": "Angre siste import"
   },
   "msg": {
     "pg_canvas_empty3": "Velg en syklus ovenfor og trykk på Kjør for å simulere den. Hold deretter pekeren over for å lese av verdier, rull eller knip for å zoome, og dra for å panorere.",
+    "pg_preset_delete_confirm": "Slette forhåndsinnstillingen \"{name}\"?",
+    "pg_preset_limit": "Grensen for forhåndsinnstillinger er nådd ({n})",
+    "pg_preset_overwrite": "Overskrive forhåndsinnstillingen \"{name}\"?",
     "tail_trim_hint": "Fjern så mange sekunder fra slutten",
     "store_sibling_hint": "Er ingenting delt for nøyaktig din modell? En nært beslektet modell fra samme merke er vanligvis et godt utgangspunkt.",
     "store_declare_appliance": "Fortell WashData hvilket apparat du har, så viser denne fanen oppsettene andre har delt for det. Du kan også skrive et merke ovenfor for å se deg rundt.",
@@ -779,7 +797,6 @@
     "maintenance_load_error": "Kunne ikke laste vedlikeholdsdata: {error}",
     "maintenance_requires_access": "Vedlikehold og eksport/import krever full tilgang.",
     "manual_duration_hint": "Profilens gjennomsnittlige/forventede sykluslengde, brukt for gjenværende tidsanslag. Rediger for å angi det; ved å forlate den uendret beholder den gjeldende verdien.",
-    "matching_tuning_intro": "Ved læring justerer WashData også hvor mye programtilpasning veier form kontra varighet og energi.",
     "merge_intro": "De valgte syklusene er kombinert til én (kronologisk rekkefølge; hull fylt med 0 W). Velg den resulterende profilen.",
     "ml_intro": "WashData leveres med smarte modeller som fungerer ut av esken.",
     "ml_learned_intro": "Modeller finjustert til denne maskinen.",
@@ -984,7 +1001,16 @@
     "connect_to_confirm": "Koble til i innstillingstannhjulet for å bekrefte eller vurdere.",
     "coverage_gap_cluster": "{count} nylige umerkede sykluser på omtrent {min} min ser ut som ett program du ikke har opprettet ennå.",
     "pg_label_yes": "Ville blitt merket \"{name}\" ved syklusens slutt",
-    "pg_label_no": "Ville bedt om gjennomgang: {reason}"
+    "pg_label_no": "Ville bedt om gjennomgang: {reason}",
+    "live_match_debug_tip": "Konfidens: hvor godt den nåværende effektkurven samsvarer med den beste kandidatprofilen (0-100%). Tvetydig: de to beste kandidatene scorer innenfor 5% av hverandre - merket er usikkert til syklusen er ferdig.",
+    "automation_alias_started": "{device}: syklus startet",
+    "automation_alias_finished": "{device}: syklus ferdig",
+    "automation_desc_started": "Kjører når en {device}-syklus starter. Legg til handlingene dine (varsel, lys, ...).",
+    "automation_desc_finished": "Kjører når en {device}-syklus er ferdig. Legg til handlingene dine (varsel, lys, ...).",
+    "feedback_detected": "WashData oppdaget: {name}",
+    "import_undo_hint": "Et gjenopprettingspunkt fra før siste import ({when}) er beholdt: {profiles} profil(er) og {cycles} syklus(er).",
+    "replace_undo_hint": "Et gjenopprettingspunkt lagres først, så du kan angre denne importen fra Eksporter / Importer.",
+    "pg_in_sample_note": "Disse syklusene var også med på å bygge profilene de matches mot, så resultatene er optimistiske: på nye sykluser kan du forvente litt færre riktige gjenkjenninger."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",
@@ -1163,7 +1189,7 @@
       "label": "Estimattoleranse"
     },
     "enable_ml_models": {
-      "doc": "Mens en syklus kjører, la en modell finjustert for denne maskinen forutsi totalt energiforbruk og kostnad, og la en syklus der effekten faller uvanlig tidlig, på et program WashData kjenner godt, avslutte uten å vente ut hele av-forsinkelsen. Av = kun den klassiske effektbaserte logikken.",
+      "doc": "Mens en syklus kjører, la en modell finjustert for denne maskinen forutsi totalt energiforbruk og kostnad, og la en syklus der effekten faller uvanlig tidlig, på et program WashData kjenner godt, avslutte uten å vente ut hele av-forsinkelsen. Oppvaskmaskiner får denne tidlige avslutningen uten denne innstillingen så snart programmet deres er gjenkjent. Av = kun den klassiske effektbaserte logikken.",
       "label": "Bruk smarte modeller under syklus"
     },
     "end_energy_threshold": {
@@ -1215,7 +1241,7 @@
       "label": "Minimum effekt"
     },
     "ml_training_enabled": {
-      "doc": "Studer regelmessig de gjennomgåtte syklusene dine over natten og finjuster modellene til denne spesifikke maskinen. En endring beholdes bare når den virkelig scorer bedre på utholdte sykluser, så dette kan bare hjelpe eller forbli det samme - aldri gå tilbake.",
+      "doc": "Tren modellen for forventet energi på nytt med jevne mellomrom på denne maskinens fullførte sykluser. En ny modell beholdes bare hvis den på tilbakeholdte valideringssykluser slår det enkle anslaget basert på forløpt mot forventet tid; ellers beholdes den nåværende.",
       "label": "Lær fra denne maskinen"
     },
     "ml_training_hour": {
@@ -1255,7 +1281,7 @@
       "label": "Android-kanal (slutt)"
     },
     "notify_finish_message": {
-      "doc": "Meldingstekst som sendes når en syklus er ferdig. Malvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} og {vs_typical} er mest nyttige her.",
+      "doc": "Meldingstekst som sendes når en syklus er ferdig. Malvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status}. {time_finished} og {vs_typical} er mest nyttige her. {status} er completed eller force_stopped: en avbrutt syklus (en falsk start eller et kansellert program) sender ingen sluttmelding.",
       "label": "Sluttmelding"
     },
     "notify_finish_services": {
@@ -1351,15 +1377,15 @@
       "label": "Samsvarsintervall"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "Maksimal sykluslengde i forhold til profilen. 1.3 betyr at en syklus må være under 130 % av profilvarigheten for å matche.",
+      "doc": "Et program forkastes når syklusen har gått lenger enn denne faktoren ganger programmets typiske varighet. 1,8 betyr at en syklus som har gått 80 % lenger enn programmet, ikke lenger matcher det.",
       "label": "Maks. varighetsforhold"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "Minimum sykluslengde i forhold til profilen. 0,9 betyr at en syklus må være minst 90 % av profilvarigheten for å matche.",
+      "doc": "Et program vurderes først når syklusen har gått denne andelen av programmets typiske varighet. 0,10 betyr at et program på 2 timer blir en kandidat etter 12 minutter. Brukes ikke i de første 15 minuttene av en syklus.",
       "label": "Min. varighetsforhold"
     },
     "profile_match_threshold": {
-      "doc": "Minimum likhetspoeng (0-1) kreves ved syklusslutt for å godta en programidentifikasjon. Hev den for å redusere feil identifikasjon; senk den hvis maskinens programmer ikke blir matchet. Standard 0,4 er et konservativt utgangspunkt.",
+      "doc": "Minste live-matchpoeng (0-1) før smart avslutning og tørketrommelens anti-rynke-avslutning kan handle ut fra det gjenkjente programmet. Hev den hvis sykluser avsluttes for tidlig ved en usikker gjenkjenning; senk den hvis tydelig gjenkjente sykluser fortsatt venter hele av-forsinkelsen. Den endrer ikke hvilket program som vises eller merkes. Standard 0,4.",
       "label": "Samsvarsterskel"
     },
     "profile_unmatch_threshold": {
@@ -1488,6 +1514,9 @@
     "notify_icon_color": {
       "label": "Varselfarge",
       "doc": "Aksentfarge for varslene fra dette apparatet, slik at en vaskemaskin, en tørketrommel og en oppvaskmaskin er lette å skille fra hverandre. iOS farger ikonet og fremdriftslinjen i Liveaktiviteten på låst skjerm og i Dynamic Island. Android får den samme fargen, men hva den gjør med den, er opp til telefonen: noen farger ikonet, og mange (særlig Samsung One UI) ignorerer den helt. Begge forstår hex-verdier (f.eks. #03A9F4). La stå tomt for plattformens standard."
+    },
+    "share_name": {
+      "doc": "Publiser navnet på den tilkoblede kontoen din som opplaster av sykluser du deler. Av: de deles uten navn."
     }
   },
   "setting_group": {
@@ -1591,14 +1620,17 @@
     "rebuilding": "Bygger opp igjen…",
     "analyzing": "Analyserer…",
     "resetting": "Tilbakestiller…",
-    "reverting": "Tilbakefører…",
     "trimming": "Beskjærer…",
     "splitting": "Deler opp…",
     "deleting": "Sletter…",
     "imported": "Importert",
     "preparing": "Forbereder…",
     "unlabelling": "Fjerner merking…",
-    "working": "Arbeider…"
+    "working": "Arbeider…",
+    "match_uncertain": "Usikker: {top} eller {runner}",
+    "match_uncertain_single": "Usikker: kanskje {top}",
+    "match_sure": "~{pct}% sikker",
+    "match_uncertain_tip": "WashData har ennå ikke bestemt seg for et program. Tallet viser hvor ofte den ledende gjetningen, {top}, viste seg å være riktig i registrerte sykluser når den lå så langt foran nummer to. Det er kun til informasjon og endrer ikke hvordan sykluser oppdages eller merkes."
   },
   "suggestion": {
     "observed_label": "Observert",
@@ -1689,7 +1721,8 @@
         "no_power": "ingen effekt",
         "no_active_power": "ingen aktiv effekt"
       }
-    }
+    },
+    "now_value": "(nå {v})"
   },
   "tab": {
     "advanced": "Avansert",
@@ -1744,13 +1777,14 @@
     "json_required": "JSON-data kreves",
     "legacy_removed": "Eldre handlinger er fjernet",
     "logs_exported": "Logger eksportert",
-    "matching_reverted": "Matchende vekter er tilbakestilt til standardverdier",
     "min_2_profiles": "Velg minst 2 profiler for en gruppe",
     "ml_training_no_improvement": "Trening fullført: grunnlinje beholdt (ingen forbedring)",
     "models_reverted": "Modeller på enheten har gått tilbake til grunnlinjen",
     "name_required": "Navn kreves",
     "no_split_found": "Ingen ledige mellomrom funnet å dele seg på",
     "panel_settings_saved": "Panelinnstillinger lagret",
+    "pg_preset_loaded": "Forhåndsinnstillingen \"{name}\" er lastet inn",
+    "pg_preset_saved": "Forhåndsinnstillingen \"{name}\" er lagret",
     "pg_sugg_loaded": "{n} foreslåtte verdi(er) lest inn - kjør sandkassen for å sammenligne",
     "phase_name_required": "Fasenavn er påkrevd",
     "phase_reset": "\"{name}\" tilbakestilt til den innebygde fasen",
@@ -1848,7 +1882,6 @@
     "phase_deleted": "Fase \"{name}\" slettet",
     "profile_created": "Profil \"{name}\" opprettet",
     "rename_failed": "Omdøping mislyktes: {error}",
-    "revert_failed": "Tilbakestilling mislyktes: {error}",
     "save_failed": "Lagring mislyktes: {error}",
     "split_complete": "Delt i {count} sykluser",
     "start_failed": "Start mislyktes: {error}",
@@ -1859,7 +1892,11 @@
     "store_import_duplicate": "Dette opptaket er allerede på apparatet ditt.",
     "device_approved": "Godkjent av fellesskapet",
     "thanks_confirming": "Takk for bekreftelsen",
-    "rating_saved": "Kvalitetsvurdering lagret"
+    "rating_saved": "Kvalitetsvurdering lagret",
+    "store_download_partial": "{n} program(mer) kunne ikke lastes ned; prøv igjen senere.",
+    "import_no_restore_point": "Importert, men det kunne ikke lagres et gjenopprettingspunkt, så denne importen kan ikke angres",
+    "import_undo_failed": "Kunne ikke angre importen: {error}",
+    "import_undone": "Import angret: {profiles} profil(er) og {cycles} syklus(er) gjenopprettet"
   },
   "trend": {
     "down": "Trender nedover",
@@ -1881,7 +1918,10 @@
     "cost_tip": "Energikostnad for denne syklusen, frosset ved fullføring. Med Tidsvektet kostnad på beregnes effektkurven til prisen som gjaldt i hvert øyeblikk, ellers energi x den ene prisen som gjaldt til slutt. Angi en pris under Innstillinger for å fylle den ut.",
     "confidence_tip": "Profilmatchkonfidens (0-100 %). Hvor tett syklusens effektkurve matchet det identifiserte programmet.",
     "flags_tip": "Gjennomgangs-, anomali- og kildeflagg for syklusen. Hold musepekeren over et ikon for detaljer.",
-    "cost_dynamic_tip": "Tidsvektet: beregnet til prisen som gjaldt under syklusen (effektivt {price} {cur}/kWh)."
+    "cost_dynamic_tip": "Tidsvektet: beregnet til prisen som gjaldt under syklusen (effektivt {price} {cur}/kWh).",
+    "dbg_conf": "Konf.",
+    "dbg_mae": "MAE",
+    "dbg_corr": "Korr."
   },
   "stat": {
     "avg": "gj.sn.",
@@ -1932,7 +1972,8 @@
     "website_tip": "Åpne fellesskapsbutikkens nettsted",
     "favorites": "Favoritter",
     "rating_summary": "★ {avg} ({n})",
-    "no_ratings": "Ingen vurderinger ennå"
+    "no_ratings": "Ingen vurderinger ennå",
+    "unreachable": "Kunne ikke nå fellesskapsbutikken. Sjekk tilkoblingen og prøv igjen."
   },
   "settings": {
     "gear": {
@@ -2039,5 +2080,38 @@
     "margin": "For nær nummer to",
     "unknown_profile": "Programmet finnes ikke lenger",
     "not_evaluated": "Ikke vurdert"
+  },
+  "diagram": {
+    "accum": "akkumulert",
+    "auto": "auto",
+    "below_off": "under = av",
+    "confirmed": "bekreftet",
+    "energy_counts": "energi teller",
+    "feedback": "tilbakemelding",
+    "gap_below_min": "gap under min = én syklus",
+    "heat_phase": "varmefase",
+    "held_at_100": "holdt på 100%",
+    "ignored": "ignorert",
+    "kept": "beholdt",
+    "max": "maks",
+    "min": "min",
+    "minus_tol": "-tol",
+    "no_match": "ingen treff",
+    "no_updates": "ingen oppdateringer",
+    "off_delay_wait": "av-forsinkelse",
+    "off_gap": "av-gap",
+    "plus_tol": "+tol",
+    "profile": "profil",
+    "reading_interval": "typisk måleintervall",
+    "sensor_offline": "sensor frakoblet: tvangsstopp",
+    "si": "SI",
+    "spike_ignored": "topp ignorert",
+    "spike_ignored_short": "topp: ignorert",
+    "start": "start",
+    "stop": "stopp",
+    "tail_energy_resets": "restenergi > terskel: timer nullstilles",
+    "thr": "tersk.",
+    "too_short": "for kort",
+    "tumble_kept": "tumlepulser beholdt"
   }
 }
