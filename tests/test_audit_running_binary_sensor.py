@@ -19,7 +19,6 @@ from custom_components.ha_washdata.const import (
     STATE_IDLE,
     STATE_OFF,
     STATE_PAUSED,
-    STATE_RINSE,
     STATE_RUNNING,
     STATE_STARTING,
     STATE_USER_PAUSED,
@@ -36,7 +35,7 @@ def _sensor(state: str) -> WasherRunningBinarySensor:
 
 
 @pytest.mark.parametrize(
-    "state", [STATE_RUNNING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_RINSE]
+    "state", [STATE_RUNNING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING]
 )
 def test_on_while_a_cycle_is_in_progress(state: str) -> None:
     assert _sensor(state).is_on is True

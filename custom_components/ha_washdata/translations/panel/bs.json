@@ -3,6 +3,7 @@
         "min": "min",
         "entity_not_found": "Entitet nije pronađen",
         "running_long": "Traje predugo",
+        "stalled": "Zaglavljeno",
         "remaining": "preostalo",
         "progress": "napredak",
         "show_time_remaining": "Prikaži preostalo vrijeme",
@@ -245,6 +246,8 @@
         "save_total_cycles": "Sačuvaj ukupan broj",
         "clear": "Očisti",
         "add_brand": "Dodaj marku",
+        "log_done_task": "Označi kao obavljeno: {task}",
+        "add_task": "Dodaj zadatak",
         "add_appliance": "Dodaj uređaj",
         "retry": "Pokušaj ponovo",
         "confirm_appliance": "Potvrdi ovaj uređaj",
@@ -332,6 +335,8 @@
         }
     },
     "hdr": {
+        "custom_tasks": "Vlastiti zadaci",
+        "maintenance_supporter": "Trebate više?",
         "access_control": "Kontrola pristupa",
         "add_maintenance": "Dodaj događaj održavanja",
         "automation_delete": "Izbrišite ovu automatizaciju",
@@ -387,6 +392,11 @@
         "aria_playground_chart3": "Interaktivni grafikon snage ciklusa: pređite mišem za prikaz vremena/snage, pomjerajte točkić ili koristite dva prsta za zumiranje, povucite za pomjeranje",
         "device_unresolved": "Nedostupan uređaj ({id})",
         "drag_to_resize": "Prevucite za promjenu veličine",
+        "task_name": "Zadatak",
+        "every_cycles": "Interval (ciklusi)",
+        "every_days": "Interval (dani)",
+        "new_task_name": "Novi zadatak",
+        "days_since_service": "{since} / {total} dana",
         "actions": "Akcije",
         "activity": "Aktivnost",
         "administrators": "Administratori",
@@ -432,6 +442,8 @@
         "energy": "Energija",
         "event_type": "Tip događaja",
         "expected": "Očekivano",
+        "suspected_profile": "{name} (pretpostavka)",
+        "runner_up_profile": "{name} (drugi najbolji)",
         "expected_duration": "Očekivano trajanje (min)",
         "file_kb": "Fajl (kB)",
         "from": "Od",
@@ -770,6 +782,8 @@
         "import_wizard": "Uvoz - odaberi podatke",
         "history_import": "Uvoz historije snage",
         "apply_suggestions_title": "Primijeni prijedloge",
+        "remove_task_title": "Ukloni zadatak",
+        "remove_task_msg": "Ukloniti podsjetnik \"{task}\"? Njegovi unosi u dnevniku održavanja ostaju sačuvani.",
         "apply_suggestions_msg": "Promijeniti ove postavke ({n})? Integracija se ponovo učitava nakon spremanja.",
         "discard_settings_title": "Odbaciti nesačuvane promjene?",
         "discard_settings_msg": "Nesačuvane promjene postavki: {n}. Napustiti Postavke i odbaciti ih?",
@@ -982,6 +996,10 @@
         "online_unavailable": "Online funkcije nisu dostupne na ovom serveru.",
         "store_picker_offline": "Omogućite online funkcije u zupčaniku postavki da biste birali iz kataloga zajednice.",
         "pick_brand_first": "Prvo odaberite marku uređaja.",
+        "custom_task_limit": "Dostigli ste najveći broj zadataka ({max}).",
+        "custom_tasks_intro": "Dodajte sve ostalo na šta želite biti podsjećeni. Zadatak dospijeva kada se dostigne bilo koji od intervala; ostavite jedan prazan ili 0 da se koristi samo drugi.",
+        "maintenance_due_sensor_hint": "Binarni senzor Dospjelo održavanje uključuje se dok god je neki zadatak dospio, pa možete napraviti vlastitu automatizaciju obavještenja.",
+        "maintenance_supporter_intro": "Maintenance Supporter je zasebna integracija koja može mnogo više: bilo koji uređaj ili zadatak, rasporedi prema vremenu, korištenju ili senzoru, obavještenja i historija. Može koristiti brojač ciklusa WashData.",
         "adopt_settings_hint": "Primijeni postavke otkrivanja i uspoređivanja dijeljenog uređaja na ovaj uređaj",
         "include_settings_hint": "Uključi pragove otkrivanja, težine uspoređivanja i ostale parametre u dijeljeni paket",
         "onboard_download": "Preuzmi gotove postavke iz prodavnice zajednice",
@@ -1085,6 +1103,7 @@
         "wash_dw": "Glavni deterdžent za pranje sa grijanjem."
     },
     "placeholder": {
+        "custom_task": "npr. Očisti brtvu vrata",
         "add": "dodaj…",
         "group_name": "npr. Pamuk 2:47",
         "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1654,6 +1673,7 @@
         "resetting": "Resetovanje…",
         "trimming": "Skraćivanje…",
         "splitting": "Dijeljenje…",
+        "stalled": "Zaglavljeno",
         "deleting": "Brisanje…",
         "imported": "Uvezeno",
         "preparing": "Priprema…",
@@ -1785,6 +1805,11 @@
     },
     "toast": {
         "catalog_refreshed": "Katalog zajednice je osvježen",
+        "task_name_required": "Dajte zadatku naziv",
+        "task_added": "Zadatak dodan",
+        "task_save_failed": "Nije moguće sačuvati zadatak: {error}",
+        "task_removed": "Zadatak uklonjen",
+        "maint_logged": "Označeno kao obavljeno: {task}",
         "access_saved": "Kontrola pristupa je sačuvana",
         "all_wiped": "Svi podaci su izbrisani",
         "analysis_complete_none": "Analiza završena: nema novih prijedloga",
@@ -1944,6 +1969,10 @@
     },
     "maint": {
         "bearing_service": "Servis ležajeva",
+        "salt": "Dopuni so",
+        "rinse_aid": "Dopuni sredstvo za ispiranje",
+        "lint_filter": "Očisti filter za dlačice",
+        "condenser_clean": "Očisti kondenzator",
         "descale": "Uklanjanje kamenca",
         "drum_clean": "Očisti bubanj",
         "filter_clean": "Očisti filter",
@@ -2007,7 +2036,8 @@
         "notify_held": "Obavijest je zadržana zbog tihih sati.",
         "finished": "Ciklus je dostigao završno stanje i završio.",
         "match_reverted": "Program se vratio na otkrivanje: njegov rezultat je pao znatno ispod vlastitog vrha.",
-        "verified_pause": "Poravnanje uživo je potvrdilo (ili ukinulo) pauzu unutar programa. Dok pauza traje, ciklus se ne završava."
+        "verified_pause": "Poravnanje uživo je potvrdilo (ili ukinulo) pauzu unutar programa. Dok pauza traje, ciklus se ne završava.",
+        "stalled": "Ciklus se zadržao na potrošnji u stanju pripravnosti duže nego što ovaj program ikada tu pauzira, a posao još nije završen. Prikazano kao Pauzirano (Zaglavljeno); ciklus ostaje otvoren."
     },
     "store": {
         "search_ph2": "Pretraži po marki ili modelu…",
@@ -2041,6 +2071,7 @@
         }
     },
     "link": {
+        "maintenance_supporter": "Maintenance Supporter na GitHubu ↗",
         "manual": "Priručnik ↗"
     },
     "tip": {

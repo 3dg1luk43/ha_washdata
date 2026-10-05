@@ -24,7 +24,7 @@ boundary behaviour by ``devtools/testbox``.
 
 Usage, from the repo root (needs ``paho-mqtt``; the web UI also ``nicegui``)::
 
-    python3 devtools/mqtt_mock_socket.py                     # web UI on :8080
+    python3 devtools/mqtt_mock_socket.py                     # web UI on :8081
     python3 devtools/mqtt_mock_socket.py --list --source cycle_data/me/<export>.json
     python3 devtools/mqtt_mock_socket.py --dry-run --source <export> --scenario soak --mode silent
     python3 devtools/mqtt_mock_socket.py --headless --source <export> --play random \\
@@ -99,7 +99,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--ledger", type=Path, default=LEDGER_FILE,
                     help=f"where finished runs are appended (default {LEDGER_FILE.name})")
     ap.add_argument("--web-host", default="0.0.0.0", help="web UI bind address (default 0.0.0.0)")
-    ap.add_argument("--web-port", type=int, default=8080, help="web UI port (default 8080)")
+    ap.add_argument("--web-port", type=int, default=8081, help="web UI port (default 8081)")
     ap.add_argument("--headless", action="store_true", help="no web UI")
     ap.add_argument("--list", action="store_true", help="list scenarios, plug modes and programmes")
     ap.add_argument("--dry-run", action="store_true",

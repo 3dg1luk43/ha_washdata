@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Неоднозначность сопоставления"
+      },
+      "maintenance_due": {
+        "name": "Требуется обслуживание",
+        "state": {
+          "on": "Требуется",
+          "off": "Не требуется"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID задач к выполнению"
+          },
+          "due_tasks": {
+            "name": "Задачи к выполнению",
+            "state": {
+              "descale": "Удаление накипи",
+              "filter_clean": "Очистка фильтра",
+              "drum_clean": "Очистка барабана",
+              "bearing_service": "Обслуживание подшипников",
+              "other": "Другое",
+              "salt": "Пополнение соли",
+              "rinse_aid": "Пополнение ополаскивателя",
+              "lint_filter": "Очистка фильтра ворса",
+              "condenser_clean": "Очистка конденсатора"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Защита от морщин",
           "interrupted": "Прервано",
           "force_stopped": "Принудительная остановка",
-          "rinse": "Полоскание",
           "unknown": "Неизвестно",
           "clean": "Чистый",
           "delay_wait": "Ожидание начала"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Аномалия цикла",
+            "state": {
+              "overrun": "Работает долго",
+              "stalled": "Завис"
+            }
+          }
         }
       },
       "washer_program": {

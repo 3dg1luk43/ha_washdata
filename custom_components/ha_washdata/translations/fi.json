@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Vastaavuuden epäselvyys"
+      },
+      "maintenance_due": {
+        "name": "Huolto tarpeen",
+        "state": {
+          "on": "Tarpeen",
+          "off": "Ei tarpeen"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Ajankohtaisten tehtävien tunnukset"
+          },
+          "due_tasks": {
+            "name": "Ajankohtaiset tehtävät",
+            "state": {
+              "descale": "Kalkinpoisto",
+              "filter_clean": "Puhdista suodatin",
+              "drum_clean": "Puhdista rumpu",
+              "bearing_service": "Laakerihuolto",
+              "other": "Muu",
+              "salt": "Lisää suolaa",
+              "rinse_aid": "Lisää huuhtelukirkastetta",
+              "lint_filter": "Puhdista nukkasihti",
+              "condenser_clean": "Puhdista lauhdutin"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Ryppyjenesto",
           "interrupted": "Keskeytynyt",
           "force_stopped": "Pakotettu pysäytys",
-          "rinse": "Huuhtelu",
           "unknown": "Tuntematon",
           "clean": "Puhdas",
           "delay_wait": "Odotetaan aloitusta"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Syklin poikkeama",
+            "state": {
+              "overrun": "Käy pitkään",
+              "stalled": "Jumissa"
+            }
+          }
         }
       },
       "washer_program": {

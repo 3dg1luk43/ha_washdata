@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Неяснота на съвпадението"
+      },
+      "maintenance_due": {
+        "name": "Предстои поддръжка",
+        "state": {
+          "on": "Предстои",
+          "off": "Не предстои"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID на предстоящи задачи"
+          },
+          "due_tasks": {
+            "name": "Предстоящи задачи",
+            "state": {
+              "descale": "Премахване на котлен камък",
+              "filter_clean": "Почистване на филтъра",
+              "drum_clean": "Почистване на барабана",
+              "bearing_service": "Сервиз на лагерите",
+              "other": "Друго",
+              "salt": "Допълване на сол",
+              "rinse_aid": "Допълване на препарат за изплакване",
+              "lint_filter": "Почистване на филтъра за мъх",
+              "condenser_clean": "Почистване на кондензатора"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Против бръчки",
           "interrupted": "Прекъснат",
           "force_stopped": "Принудително спряно",
-          "rinse": "Изплакване",
           "unknown": "Неизвестен",
           "clean": "Чисто",
           "delay_wait": "Изчакване за стартиране"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Аномалия на цикъла",
+            "state": {
+              "overrun": "Работи дълго",
+              "stalled": "Заседнал"
+            }
+          }
         }
       },
       "washer_program": {

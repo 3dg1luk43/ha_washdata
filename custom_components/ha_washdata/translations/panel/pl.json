@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Nie znaleziono encji",
     "running_long": "Działa długo",
+    "stalled": "Utknął",
     "remaining": "pozostało",
     "progress": "postęp",
     "show_time_remaining": "Pokaż pozostały czas",
@@ -248,6 +249,8 @@
     "save_total_cycles": "Zapisz łączną liczbę",
     "clear": "Wyczyść",
     "add_brand": "Dodaj markę",
+    "log_done_task": "Oznacz jako wykonane: {task}",
+    "add_task": "Dodaj zadanie",
     "add_appliance": "Dodaj urządzenie",
     "retry": "Ponów",
     "confirm_appliance": "Potwierdź to urządzenie",
@@ -335,6 +338,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Własne zadania",
+    "maintenance_supporter": "Potrzebujesz więcej?",
     "access_control": "Kontrola dostępu",
     "add_maintenance": "Dodaj zdarzenie konserwacji",
     "automation_delete": "Usuń tę automatyzację",
@@ -390,6 +395,11 @@
     "aria_playground_chart3": "Interaktywny wykres mocy cyklu: najedź, aby odczytać czas/moc, przewiń lub użyj dwóch palców, aby powiększyć, przeciągnij, aby przesunąć",
     "device_unresolved": "Niedostępne urządzenie ({id})",
     "drag_to_resize": "Przeciągnij, aby zmienić rozmiar",
+    "task_name": "Zadanie",
+    "every_cycles": "Co ile cykli",
+    "every_days": "Co ile dni",
+    "new_task_name": "Nowe zadanie",
+    "days_since_service": "{since} / {total} dni",
     "actions": "Działania",
     "activity": "Działalność",
     "administrators": "Administratorzy",
@@ -435,6 +445,8 @@
     "energy": "Energia",
     "event_type": "Typ zdarzenia",
     "expected": "Oczekiwane",
+    "suspected_profile": "{name} (przypuszczalny)",
+    "runner_up_profile": "{name} (drugi najlepszy)",
     "expected_duration": "Oczekiwany czas trwania (min)",
     "file_kb": "Plik (kB)",
     "from": "Od",
@@ -778,6 +790,8 @@
     "import_wizard": "Import - wybierz dane",
     "history_import": "Import historii mocy",
     "apply_suggestions_title": "Zastosuj sugestie",
+    "remove_task_title": "Usuń zadanie",
+    "remove_task_msg": "Usunąć przypomnienie \"{task}\"? Jego wpisy w dzienniku konserwacji zostaną zachowane.",
     "apply_suggestions_msg": "Zmienić te ustawienia ({n})? Integracja zostanie przeładowana po zapisaniu.",
     "discard_settings_title": "Odrzucić niezapisane zmiany?",
     "discard_settings_msg": "Niezapisane zmiany ustawień: {n}. Opuścić Ustawienia i je odrzucić?",
@@ -996,6 +1010,10 @@
     "online_unavailable": "Funkcje online nie są dostępne na tym serwerze.",
     "store_picker_offline": "Włącz funkcje online w kółku zębatym ustawień, aby wybierać z katalogu społeczności.",
     "pick_brand_first": "Najpierw wybierz markę urządzenia.",
+    "custom_task_limit": "Osiągnięto limit zadań ({max}).",
+    "custom_tasks_intro": "Dodaj wszystko inne, o czym chcesz otrzymywać przypomnienia. Zadanie staje się wymagane, gdy upłynie którykolwiek z interwałów; pozostaw jeden pusty lub 0, aby używać tylko drugiego.",
+    "maintenance_due_sensor_hint": "Czujnik binarny Wymagana konserwacja włącza się, gdy którekolwiek zadanie jest wymagane, więc możesz zbudować własną automatyzację powiadomień.",
+    "maintenance_supporter_intro": "Maintenance Supporter to osobna integracja, która potrafi znacznie więcej: dowolne urządzenie lub zadanie, harmonogramy według czasu, użycia lub czujnika, powiadomienia i historia. Może korzystać z licznika cykli WashData.",
     "adopt_settings_hint": "Zastosuj ustawienia wykrywania i dopasowywania udostępnionego urządzenia do tego urządzenia",
     "include_settings_hint": "Dołącz progi wykrywania, wagi dopasowywania i inne parametry do udostępnianego pakietu",
     "onboard_download": "Pobierz gotową konfigurację ze sklepu społeczności",
@@ -1101,6 +1119,7 @@
     "wash_dw": "Pranie w detergencie głównym z ogrzewaniem."
   },
   "placeholder": {
+    "custom_task": "np. Wyczyść uszczelkę drzwi",
     "add": "dodaj…",
     "group_name": "np. Bawełna 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1670,6 +1689,7 @@
     "resetting": "Resetowanie…",
     "trimming": "Przycinanie…",
     "splitting": "Dzielenie…",
+    "stalled": "Utknął",
     "deleting": "Usuwanie…",
     "imported": "Zaimportowano",
     "preparing": "Przygotowywanie…",
@@ -1801,6 +1821,11 @@
   },
   "toast": {
     "catalog_refreshed": "Katalog społeczności odświeżony",
+    "task_name_required": "Nadaj zadaniu nazwę",
+    "task_added": "Dodano zadanie",
+    "task_save_failed": "Nie można zapisać zadania: {error}",
+    "task_removed": "Usunięto zadanie",
+    "maint_logged": "Oznaczono jako wykonane: {task}",
     "access_saved": "Kontrola dostępu zapisana",
     "all_wiped": "Wszystkie dane zostały usunięte",
     "analysis_complete_none": "Analiza ukończona: brak nowych sugestii",
@@ -1962,6 +1987,10 @@
   },
   "maint": {
     "bearing_service": "Serwis łożysk",
+    "salt": "Uzupełnij sól",
+    "rinse_aid": "Uzupełnij nabłyszczacz",
+    "lint_filter": "Wyczyść filtr kłaczków",
+    "condenser_clean": "Wyczyść skraplacz",
     "descale": "Odkamienianie",
     "drum_clean": "Wyczyść bęben",
     "filter_clean": "Wyczyść filtr",
@@ -2025,7 +2054,8 @@
     "notify_held": "Powiadomienie zostało wstrzymane z powodu godzin ciszy.",
     "finished": "Cykl osiągnął stan końcowy i zakończył się.",
     "match_reverted": "Program wrócił do wykrywania: jego wynik spadł znacznie poniżej własnego szczytu.",
-    "verified_pause": "Wyrównanie na żywo potwierdziło (lub zniosło) pauzę wewnątrz programu. Dopóki pauza trwa, cykl nie zostanie zakończony."
+    "verified_pause": "Wyrównanie na żywo potwierdziło (lub zniosło) pauzę wewnątrz programu. Dopóki pauza trwa, cykl nie zostanie zakończony.",
+    "stalled": "Cykl pozostawał na poborze mocy w trybie czuwania dłużej, niż ten program kiedykolwiek pauzuje w tym miejscu, choć praca nie została dokończona. Pokazany jako Wstrzymany (Utknął); cykl pozostaje otwarty."
   },
   "store": {
     "search_ph2": "Szukaj według marki lub modelu…",
@@ -2059,6 +2089,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter na GitHubie ↗",
     "manual": "Instrukcja ↗"
   },
   "tip": {

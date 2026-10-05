@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entiteettiä ei löytynyt",
     "running_long": "Käy pitkään",
+    "stalled": "Jumissa",
     "remaining": "jäljellä",
     "progress": "edistyminen",
     "show_time_remaining": "Näytä jäljellä oleva aika",
@@ -242,6 +243,8 @@
     "save_total_cycles": "Tallenna kokonaismäärä",
     "clear": "Tyhjennä",
     "add_brand": "Lisää merkki",
+    "log_done_task": "Kirjaa tehdyksi: {task}",
+    "add_task": "Lisää tehtävä",
     "add_appliance": "Lisää laite",
     "retry": "Yritä uudelleen",
     "confirm_appliance": "Vahvista tämä laite",
@@ -329,6 +332,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Omat tehtävät",
+    "maintenance_supporter": "Tarvitsetko enemmän?",
     "access_control": "Kulunvalvonta",
     "add_maintenance": "Lisää huoltotapahtuma",
     "automation_delete": "Poista tämä automaatio",
@@ -385,6 +390,11 @@
     "device_unresolved": "Laite ei saatavilla ({id})",
     "drag_to_resize": "Vedä muuttaaksesi kokoa",
     "pg_anti_wrinkle": "Ryppyjenesto",
+    "task_name": "Tehtävä",
+    "every_cycles": "Väli (sykleinä)",
+    "every_days": "Väli (päivinä)",
+    "new_task_name": "Uusi tehtävä",
+    "days_since_service": "{since} / {total} päivää",
     "actions": "Toiminnot",
     "activity": "Toiminta",
     "administrators": "Järjestelmänvalvojat",
@@ -429,6 +439,8 @@
     "energy": "Energiaa",
     "event_type": "Tapahtuman tyyppi",
     "expected": "Odotettu",
+    "suspected_profile": "{name} (oletettu)",
+    "runner_up_profile": "{name} (toiseksi paras)",
     "expected_duration": "Odotettu kesto (min)",
     "file_kb": "Tiedosto (kB)",
     "from": "Mistä",
@@ -762,6 +774,8 @@
     "import_wizard": "Tuonti - valitse tiedot",
     "history_import": "Tuo tehohistoria",
     "apply_suggestions_title": "Ota ehdotukset käyttöön",
+    "remove_task_title": "Poista tehtävä",
+    "remove_task_msg": "Poistetaanko muistutus \"{task}\"? Sen merkinnät huoltolokissa säilytetään.",
     "apply_suggestions_msg": "Muutetaanko nämä asetukset ({n})? Integraatio ladataan uudelleen tallennuksen jälkeen.",
     "discard_settings_title": "Hävitetäänkö tallentamattomat muutokset?",
     "discard_settings_msg": "Tallentamattomat asetusmuutokset: {n}. Poistutaanko Asetuksista ja hävitetäänkö muutokset?",
@@ -961,6 +975,10 @@
     "online_unavailable": "Verkkotoiminnot eivät ole käytettävissä tällä palvelimella.",
     "store_picker_offline": "Ota verkkotoiminnot käyttöön asetusten rattaasta valitaksesi yhteisön luettelosta.",
     "pick_brand_first": "Valitse ensin laitteen merkki.",
+    "custom_task_limit": "Olet saavuttanut {max} tehtävän rajan.",
+    "custom_tasks_intro": "Lisää mitä tahansa muuta, mistä haluat muistutuksen. Tehtävä on ajankohtainen, kun jompikumpi väli täyttyy; jätä toinen tyhjäksi tai 0:ksi, jos haluat käyttää vain toista.",
+    "maintenance_due_sensor_hint": "Binäärianturi \"Huolto tarpeen\" kytkeytyy päälle aina, kun jokin tehtävä on ajankohtainen, joten voit tehdä oman ilmoitusautomaation.",
+    "maintenance_supporter_intro": "Maintenance Supporter on erillinen integraatio, joka tekee paljon enemmän: mikä tahansa laite tai tehtävä, aikataulut ajan, käytön tai anturin perusteella, ilmoitukset ja historia. Se voi käyttää WashDatan syklilaskuria.",
     "adopt_settings_hint": "Korvaa tämän laitteen tunnistus- ja täsmäytyskynnykset jaetuilla. Ilmoituksiasi, entiteettejäsi tai energiahintaasi ei koskaan muuteta.",
     "include_settings_hint": "Jaa tämän laitteen tunnistus- ja täsmäytyskynnykset (ei ilmoituksiasi, entiteettejäsi tai energiahintaasi). Käyttöönottajat päättävät, otetaanko ne käyttöön.",
     "onboard_download": "Uusi laite? Ota käyttöön valmis asetus (ohjelmat, viitesyklit ja vaiheet) toiselta WashData-käyttäjältä, jolla on sama laite.",
@@ -1089,6 +1107,7 @@
     "wash_dw": "Pääpesuaine pesu lämmityksellä."
   },
   "placeholder": {
+    "custom_task": "esim. Puhdista luukun tiiviste",
     "add": "lisää…",
     "group_name": "esim. Puuvilla 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1658,6 +1677,7 @@
     "resetting": "Nollataan…",
     "trimming": "Leikataan…",
     "splitting": "Jaetaan…",
+    "stalled": "Jumissa",
     "deleting": "Poistetaan…",
     "imported": "Tuotu",
     "preparing": "Valmistellaan…",
@@ -1790,6 +1810,11 @@
   "toast": {
     "catalog_refreshed": "Yhteisön luettelo päivitetty",
     "contrib_device_changed": "Lisätty yhteisökauppaan, mutta valittu laite vaihtui lomakkeen ollessa auki. Valitse se asetuksista.",
+    "task_name_required": "Anna tehtävälle nimi",
+    "task_added": "Tehtävä lisätty",
+    "task_save_failed": "Tehtävää ei voitu tallentaa: {error}",
+    "task_removed": "Tehtävä poistettu",
+    "maint_logged": "Kirjattu tehdyksi: {task}",
     "access_saved": "Kulunvalvonta tallennettu",
     "all_wiped": "Kaikki tiedot pyyhitty",
     "analysis_complete_none": "Analyysi valmis: ei uusia ehdotuksia",
@@ -1946,6 +1971,10 @@
   },
   "maint": {
     "bearing_service": "Laakerihuolto",
+    "salt": "Lisää suolaa",
+    "rinse_aid": "Lisää huuhtelukirkastetta",
+    "lint_filter": "Puhdista nukkasihti",
+    "condenser_clean": "Puhdista lauhdutin",
     "descale": "Kalkinpoisto",
     "drum_clean": "Puhdista rumpu",
     "filter_clean": "Puhdista suodatin",
@@ -1989,7 +2018,8 @@
     "notify_held": "Ilmoitus pidätettiin hiljaisten tuntien vuoksi.",
     "finished": "Jakso saavutti lopputilan ja päättyi.",
     "match_reverted": "Ohjelma palasi havaitsemistilaan: sen pisteet putosivat selvästi oman huippunsa alapuolelle.",
-    "verified_pause": "Reaaliaikainen kohdistus vahvisti (tai vapautti) tauon ohjelman sisällä. Niin kauan kuin se on voimassa, jaksoa ei päätetä."
+    "verified_pause": "Reaaliaikainen kohdistus vahvisti (tai vapautti) tauon ohjelman sisällä. Niin kauan kuin se on voimassa, jaksoa ei päätetä.",
+    "stalled": "Sykli pysyi valmiustilan kulutuksessa pidempään kuin tämä ohjelma koskaan pitää siinä taukoa, vaikka työtä oli vielä jäljellä. Näytetään tilana Keskeytetty (Jumissa); sykli pysyy avoimena."
   },
   "store": {
     "search_ph2": "Hae merkin tai mallin mukaan…",
@@ -2023,6 +2053,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter GitHubissa ↗",
     "manual": "Käyttöohje ↗"
   },
   "tip": {

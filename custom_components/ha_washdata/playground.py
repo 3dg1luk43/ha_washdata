@@ -111,6 +111,7 @@ from .cycle_detector import (
     CycleDetectorConfig,
     effective_anticrease_finalize_ratio,
     effective_curve_preroll_seconds,
+    standby_near_stop_ceiling,
     terminal_high_for_guards,
 )
 from .profile_store import (
@@ -1193,6 +1194,13 @@ class _DetailSim:
             pause_catalogue=(
                 _ask(lambda: store.profile_pause_catalogue(name, stop_w)) if name else None
             ),
+            # #452, as the manager supplies it (the stall display and its
+            # standby-band hold).
+            stall_catalogue=(
+                (lambda: _ask(lambda: store.profile_pause_catalogue(
+                    name, standby_near_stop_ceiling(stop_w)
+                ))) if name else None
+            ),
         )
 
     def _label_decision(self, cycle_data: dict[str, Any], live_result: Any) -> tuple[str | None, str]:
@@ -1283,6 +1291,8 @@ class _DetailSim:
             "confidence": round(self.last_match["conf"], 3) if self.last_match["name"] else None,
             "matched_profile": self.last_match["name"],
         }
+        if getattr(self.detector, "stalled", False) is True:
+            pt["stalled"] = True  # #452: shown as paused / Stalled live
         matched_dur = float(self.last_match["expected"] or 0.0)
         program = self.last_match["name"]
         if state not in _DEAD_STATES and program and matched_dur > 0:
@@ -1348,6 +1358,7 @@ class _DetailSim:
                 self._watchdog_keepalives(ts)
                 self.cursor["t"] = (ts - self.base).total_seconds()
                 self.detector.process_reading(power, ts)
+                self._note_stall()
                 self._last_real = (ts, power)
                 self._sample(ts)
         except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1355,6 +1366,20 @@ class _DetailSim:
             _LOGGER.debug(
                 "Playground detail replay failed for %s: %s", self.cycle.get("id"), exc
             )
+
+    def _note_stall(self) -> None:
+        """A ``stalled`` event when the detector starts showing a stall (#452).
+
+        The same display rule live shows (``CycleDetector.stalled``) and the
+        moment the manager fires ``ha_washdata_cycle_stalled``: real readings only.
+        """
+        stalled = getattr(self.detector, "stalled", False) is True
+        if stalled == getattr(self, "_stall_shown", False):
+            return
+        self._stall_shown = stalled
+        if stalled:
+            info = self.detector.stall_info() or {}
+            self._emit("stalled", f"stalled at {info.get('plateau_w')} W (display only)", "warn")
 
     def _watchdog_keepalives(self, until: datetime) -> None:
         """Inject the keepalives live would have injected before ``until`` (item 390).

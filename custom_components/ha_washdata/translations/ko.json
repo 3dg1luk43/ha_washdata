@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "일치 모호도"
+      },
+      "maintenance_due": {
+        "name": "유지보수 예정",
+        "state": {
+          "on": "예정",
+          "off": "예정 없음"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "예정 작업 ID"
+          },
+          "due_tasks": {
+            "name": "예정 작업",
+            "state": {
+              "descale": "석회질 제거",
+              "filter_clean": "필터 청소",
+              "drum_clean": "드럼 청소",
+              "bearing_service": "베어링 정비",
+              "other": "기타",
+              "salt": "소금 보충",
+              "rinse_aid": "린스 보충",
+              "lint_filter": "보풀 필터 청소",
+              "condenser_clean": "콘덴서 청소"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "주름 방지",
           "interrupted": "중단됨",
           "force_stopped": "강제 정지됨",
-          "rinse": "헹굼",
           "unknown": "알 수 없음",
           "clean": "깨끗한",
           "delay_wait": "시작을 기다리는 중"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "사이클 이상",
+            "state": {
+              "overrun": "지연 중",
+              "stalled": "멈춤"
+            }
+          }
         }
       },
       "washer_program": {

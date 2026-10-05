@@ -3,6 +3,7 @@
         "min": "dk",
         "entity_not_found": "Varlık bulunamadı",
         "running_long": "Uzun sürüyor",
+        "stalled": "Takıldı",
         "remaining": "kalan",
         "progress": "ilerleme",
         "show_time_remaining": "Kalan süreyi göster",
@@ -242,6 +243,8 @@
         "save_total_cycles": "Toplamı Kaydet",
         "clear": "Temizle",
         "add_brand": "Marka ekle",
+        "log_done_task": "Yapıldı olarak kaydet: {task}",
+        "add_task": "Görev ekle",
         "add_appliance": "Cihaz ekle",
         "retry": "Yeniden dene",
         "confirm_appliance": "Bu cihazı onayla",
@@ -329,6 +332,8 @@
         }
     },
     "hdr": {
+        "custom_tasks": "Kendi görevleriniz",
+        "maintenance_supporter": "Daha fazlası mı gerekiyor?",
         "access_control": "Erişim Denetimi",
         "add_maintenance": "Bakım Kaydı Ekle",
         "automation_delete": "Bu otomasyonu sil",
@@ -384,6 +389,11 @@
         "aria_playground_chart3": "Etkileşimli döngü güç grafiği: zamanı/gücü okumak için üzerine gelin, yakınlaştırmak için kaydırın veya iki parmak kullanın, kaydırmak için sürükleyin",
         "device_unresolved": "Kullanılamayan cihaz ({id})",
         "drag_to_resize": "Yeniden boyutlandırmak için sürükleyin",
+        "task_name": "Görev",
+        "every_cycles": "Sıklık (döngü)",
+        "every_days": "Sıklık (gün)",
+        "new_task_name": "Yeni görev",
+        "days_since_service": "{since} / {total} gün",
         "actions": "Eylemler",
         "activity": "Aktivite",
         "administrators": "Yöneticiler",
@@ -428,6 +438,8 @@
         "energy": "Enerji",
         "event_type": "Olay türü",
         "expected": "Beklenen",
+        "suspected_profile": "{name} (tahmini)",
+        "runner_up_profile": "{name} (ikinci aday)",
         "expected_duration": "Beklenen Süre (dk)",
         "file_kb": "Dosya (kB)",
         "from": "Başlangıç",
@@ -762,6 +774,8 @@
         "import_wizard": "İçe aktarma - veri seçin",
         "history_import": "Güç geçmişini içe aktar",
         "apply_suggestions_title": "Önerileri uygula",
+        "remove_task_title": "Görevi Kaldır",
+        "remove_task_msg": "\"{task}\" hatırlatıcısı kaldırılsın mı? Bakım günlüğündeki kayıtları korunur.",
         "apply_suggestions_msg": "Bu {n} ayar değiştirilsin mi? Entegrasyon kaydettikten sonra yeniden yüklenir.",
         "discard_settings_title": "Kaydedilmemiş değişiklikler atılsın mı?",
         "discard_settings_msg": "Kaydedilmemiş {n} ayar değişikliği var. Ayarlar'dan çıkılıp bu değişiklikler atılsın mı?",
@@ -961,6 +975,10 @@
         "online_unavailable": "Çevrimiçi özellikler bu sunucuda kullanılamıyor.",
         "store_picker_offline": "Topluluk kataloğundan seçim yapmak için ayarlar dişlisinde çevrimiçi özellikleri etkinleştirin.",
         "pick_brand_first": "Önce bir cihaz markası seçin.",
+        "custom_task_limit": "{max} görev sınırına ulaştınız.",
+        "custom_tasks_intro": "Hatırlatılmasını istediğiniz başka her şeyi ekleyin. Aralıklardan herhangi birine ulaşıldığında görevin zamanı gelir; yalnızca diğerini kullanmak için birini boş bırakın veya 0 girin.",
+        "maintenance_due_sensor_hint": "\"Bakım zamanı\" ikili sensörü herhangi bir görevin zamanı geldiğinde açılır, böylece kendi bildirim otomasyonunuzu oluşturabilirsiniz.",
+        "maintenance_supporter_intro": "Maintenance Supporter çok daha fazlasını yapan ayrı bir entegrasyondur: her türlü cihaz veya görev, zamana, kullanıma ya da bir sensöre göre planlama, bildirimler ve geçmiş. WashData döngü sayacını kullanabilir.",
         "adopt_settings_hint": "Bu cihazın algılama ve eşleştirme eşiklerini paylaşılanlarla üzerine yaz. Bildirimleriniz, varlıklarınız ve enerji fiyatınız hiçbir zaman değiştirilmez.",
         "include_settings_hint": "Bu cihazın tanıma ve eşleştirme eşiklerini paylaşın (bildirimlerinizi, varlıklarınızı veya enerji fiyatınızı değil). Benimseyenler bunların uygulanıp uygulanmayacağını seçer.",
         "onboard_download": "Yeni cihaz mı? Aynı cihaza sahip başka bir WashData kullanıcısından hazır bir kurulum (programlar, referans döngüleri ve fazlar) benimseyin.",
@@ -1089,6 +1107,7 @@
         "wash_dw": "Ana deterjanla ısıtma ile yıkama."
     },
     "placeholder": {
+        "custom_task": "örn. Kapı contasını temizle",
         "add": "ekle…",
         "group_name": "örn. Pamuk 2:47",
         "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1658,6 +1677,7 @@
         "resetting": "Sıfırlanıyor…",
         "trimming": "Kırpılıyor…",
         "splitting": "Bölünüyor…",
+        "stalled": "Takıldı",
         "deleting": "Siliniyor…",
         "imported": "İçe aktarıldı",
         "preparing": "Hazırlanıyor…",
@@ -1698,6 +1718,11 @@
     "toast": {
         "catalog_refreshed": "Topluluk kataloğu yenilendi",
         "contrib_device_changed": "Topluluk mağazasına eklendi, ancak form açıkken seçili cihaz değişti. Bunu Ayarlar'dan seçin.",
+        "task_name_required": "Göreve bir ad verin",
+        "task_added": "Görev eklendi",
+        "task_save_failed": "Görev kaydedilemedi: {error}",
+        "task_removed": "Görev kaldırıldı",
+        "maint_logged": "Yapıldı olarak kaydedildi: {task}",
         "access_saved": "Erişim denetimi kaydedildi",
         "all_wiped": "Tüm veriler silindi",
         "analysis_complete_none": "Analiz tamamlandı: yeni öneri yok",
@@ -1946,6 +1971,10 @@
     },
     "maint": {
         "bearing_service": "Rulman servisi",
+        "salt": "Tuz ekle",
+        "rinse_aid": "Parlatıcı ekle",
+        "lint_filter": "Tüy filtresini temizle",
+        "condenser_clean": "Kondenseri temizle",
         "descale": "Kireç çözme",
         "drum_clean": "Tamburu temizle",
         "filter_clean": "Filtreyi temizle",
@@ -1989,7 +2018,8 @@
         "notify_held": "Bir bildirim, sessiz saatler nedeniyle bekletildi.",
         "finished": "Döngü, son duruma ulaştı ve sona erdi.",
         "match_reverted": "Program algılama durumuna geri döndü: puanı kendi zirvesinin oldukça altına düştü.",
-        "verified_pause": "Canlı hizalama, program içindeki bir duraklamayı doğruladı (veya kaldırdı). Bu durum sürdükçe döngü sonlandırılmaz."
+        "verified_pause": "Canlı hizalama, program içindeki bir duraklamayı doğruladı (veya kaldırdı). Bu durum sürdükçe döngü sonlandırılmaz.",
+        "stalled": "Döngü, yapılacak iş hâlâ varken, bu programın orada şimdiye kadarki en uzun duraklamasından daha uzun süre bekleme gücünde kaldı. Duraklatıldı (Takıldı) olarak gösterilir; döngü açık kalır."
     },
     "store": {
         "search_ph2": "Marka veya modele göre ara…",
@@ -2023,6 +2053,7 @@
         }
     },
     "link": {
+        "maintenance_supporter": "GitHub'da Maintenance Supporter ↗",
         "manual": "Kılavuz ↗"
     },
     "tip": {

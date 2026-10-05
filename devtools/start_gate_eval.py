@@ -142,6 +142,17 @@ start on, #35's wait drops 34 -> 1 (15.75 -> 0.46 per idle day), idle probes
 only source that enters DELAY_WAIT. The largest aborted probe on #35 stays at 0.53 of
 the energy gate; holding the wait with the old DELAY_WAIT seed (first reading's
 power for the whole window) took it to 0.78 and showed 17 flickers.
+
+**Discussion #452** (2026-10-05, the idle display and the hidden terminal-state probe):
+``idle_flips`` counts off <-> idle changes of the shown state outside every reference
+cycle; ``--standby-level W`` replays as if that standby level had been learned. No
+manifest source learns one (every idle floor is ~0 W, and #35's standby has no off
+level), so the shipped run shows 0 changes in 32.5 idle days; at a forced 2 W level
+still 0 (none is ever seen switched off below it, which a learned level requires);
+with ``power_off_threshold_w=0.5`` one, on #35 (into idle, never back). A standby-band
+probe out of Finished is hidden like a re-probe: flickers 8 -> 3 (#35 6 -> 3, #214
+and the maintainer's washer 1 -> 0). Every detection metric and every per-reference
+row of every source identical (shipped gates and users' own, delayed start on and off).
 """
 from __future__ import annotations
 
@@ -180,6 +191,7 @@ from custom_components.ha_washdata.const import (  # noqa: E402
     STATE_ENDING,
     STATE_FINISHED,
     STATE_FORCE_STOPPED,
+    STATE_IDLE,
     STATE_INTERRUPTED,
     STATE_OFF,
     STATE_PAUSED,
@@ -191,6 +203,7 @@ from custom_components.ha_washdata.const import (  # noqa: E402
 from custom_components.ha_washdata.cycle_detector import (  # noqa: E402
     CycleDetector,
     CycleDetectorConfig,
+    learned_standby_level_w,
 )
 from custom_components.ha_washdata.detector_config import (  # noqa: E402
     build_detector_config,
@@ -427,6 +440,11 @@ def shipped_defaults(device: Device) -> Device:
     return Device(device.device_type, data, opts, list(device.stored))
 
 
+#: ``--standby-level``: replay every source as if this standby level had been
+#: learned (#452 idle display what-if); None keeps each device's own.
+STANDBY_LEVEL_OVERRIDE: float | None = None
+
+
 def detector_setup(device: Device, overrides: dict[str, Any]) -> tuple[CycleDetectorConfig, dict[str, Any]]:
     """The detector config and the manager-side timings, as the manager builds them."""
     opts = {**device.options, **overrides}
@@ -449,6 +467,14 @@ def detector_setup(device: Device, overrides: dict[str, Any]) -> tuple[CycleDete
             _num(CONF_WATCHDOG_INTERVAL, resolve_watchdog_interval_default(device.device_type)),
         ),
         "progress_reset_delay": _num(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY),
+        # The idle display's standby level, as the manager learns it (#452), or
+        # the --standby-level what-if.
+        "standby_level_w": (
+            STANDBY_LEVEL_OVERRIDE if STANDBY_LEVEL_OVERRIDE is not None
+            else learned_standby_level_w(
+                device.stored, config.stop_threshold_w, config.start_threshold_w
+            )
+        ),
     }
     return config, manager
 
@@ -477,6 +503,8 @@ class Replay:
     flickers: list[tuple[datetime, datetime]] = field(default_factory=list)
     # (shown as delay_wait, back to off) on the entities (item 504)
     wait_drops: list[tuple[datetime, datetime]] = field(default_factory=list)
+    # (moment, shown state) of every off <-> idle change on the entities (#452)
+    idle_flips: list[tuple[datetime, str]] = field(default_factory=list)
 
 
 def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[str, Any]) -> Replay:
@@ -486,6 +514,7 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
     probes: list[tuple[datetime, datetime]] = []
     flickers: list[tuple[datetime, datetime]] = []
     wait_drops: list[tuple[datetime, datetime]] = []
+    idle_flips: list[tuple[datetime, str]] = []
     starting_since: dict[str, datetime | None] = {"t": None}
     # What the entities show (manager.check_state reads ``exposed_state``), sampled
     # where the manager writes them: on every transition and after every reading.
@@ -502,13 +531,16 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
             shown["since"] = ts
         elif state == STATE_DELAY_WAIT and prev != STATE_STARTING:
             shown["wait_since"] = ts
-        if prev == STATE_STARTING and state in (STATE_OFF, STATE_DELAY_WAIT):
+        if prev == STATE_STARTING and state in (STATE_OFF, STATE_IDLE, STATE_DELAY_WAIT):
             # Item 504: a false start out of DELAY_WAIT returns there, not to OFF.
+            # #452: off shows as idle on a two-level appliance at its standby level.
             flickers.append((shown["since"] or ts, ts))
-        elif prev == STATE_DELAY_WAIT and state == STATE_OFF:
+        elif prev == STATE_DELAY_WAIT and state in (STATE_OFF, STATE_IDLE):
             wait_drops.append((shown["wait_since"] or ts, ts))
         elif state == STATE_RUNNING and runs and runs[-1].commit == ts:
             runs[-1].shown_starting = prev == STATE_STARTING
+        if {prev, state} == {STATE_OFF, STATE_IDLE}:
+            idle_flips.append((ts, state))
         shown["state"] = state
 
     def _on_state(old: str, new: str) -> None:
@@ -531,6 +563,7 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
             runs[-1].status = cycle.get("status")
 
     det = CycleDetector(config, _on_state, _on_end, None, device_name="start_gate_eval")
+    det.set_standby_level(manager.get("standby_level_w"))
 
     sampling = float(manager["sampling_interval"])
     watchdog = float(manager["watchdog_s"])
@@ -592,7 +625,7 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
         processed += 1
         _feed(ts, power)
         last_real = (ts, power)
-    return Replay(runs, probes, len(readings), processed, flickers, wait_drops)
+    return Replay(runs, probes, len(readings), processed, flickers, wait_drops, idle_flips)
 
 
 # ─── Truth ────────────────────────────────────────────────────────────────────
@@ -787,6 +820,7 @@ def score(
     cycle_probes = len(result.probes) - len(idle_probes)
     flickers = [f for f in result.flickers if not _inside_any(f[0], f[1])]
     wait_drops = [w for w in result.wait_drops if not _inside_any(w[0], w[1])]
+    idle_flips = [f for f in result.idle_flips if not _inside_any(f[0], f[0])]
 
     lo, hi = window
     busy = 0.0
@@ -825,6 +859,11 @@ def score(
         "flickers_per_idle_day": _rate(len(flickers)),
         "wait_drops": len(wait_drops),
         "wait_drops_per_idle_day": _rate(len(wait_drops)),
+        # #452: off <-> idle changes of the shown state outside every reference
+        # cycle (each is a recorder row), and the learned level that drives them.
+        "idle_flips": len(idle_flips),
+        "idle_flips_per_idle_day": _rate(len(idle_flips)),
+        "idle_shown": sum(1 for _t, st in idle_flips if st == STATE_IDLE),
         "starting_unshown": sum(
             1 for r in hits if not r.get("merged_into") and not r["shown_starting"]
         ),
@@ -923,6 +962,7 @@ def evaluate(
                 "start_energy_threshold": config.start_energy_threshold,
                 "curve_preroll_seconds": config.curve_preroll_seconds,
                 "sampling_interval": manager["sampling_interval"],
+                "standby_level_w": manager.get("standby_level_w"),
             },
             **scored,
         }
@@ -1036,7 +1076,7 @@ def aggregate(results: list[dict[str, Any]]) -> dict[str, dict[str, dict[str, An
     """
     acc: dict[str, dict[str, dict[str, Any]]] = {}
     keys = ("references", "missed", "merged", "split", "phantoms", "idle_probes", "cycle_probes",
-            "flickers", "wait_drops", "starting_unshown")
+            "flickers", "wait_drops", "starting_unshown", "idle_flips")
     for res in results:
         if "error" in res or not res.get("aggregate", True):
             continue
@@ -1067,6 +1107,7 @@ def aggregate(results: list[dict[str, Any]]) -> dict[str, dict[str, dict[str, An
                 "idle_probes_per_idle_day": round(s["idle_probes"] / days, 2) if days > 0 else None,
                 "flickers_per_idle_day": round(s["flickers"] / days, 2) if days > 0 else None,
                 "wait_drops_per_idle_day": round(s["wait_drops"] / days, 2) if days > 0 else None,
+                "idle_flips_per_idle_day": round(s["idle_flips"] / days, 2) if days > 0 else None,
                 "late_start_s": {"median": _q(s["late"], 0.5), "p90": _q(s["late"], 0.9),
                                  "max": _q(s["late"], 1.0)},
                 "late_over_30s": sum(1 for x in s["late"] if x > 30.0),
@@ -1079,7 +1120,7 @@ def _print_aggregate(agg: dict[str, dict[str, dict[str, Any]]]) -> None:
     print(f"\n{'variant':<40} {'group':<16} {'src':>3} {'refs':>4} {'miss':>4} {'merge':>5} "
           f"{'split':>5} {'late med/p90/max s':>20} {'>30s':>4} {'commit med/p90':>15} "
           f"{'phantom (/idle d)':>18} {'probes':>6} {'flick':>5} {'waits':>5} {'unshown':>7} "
-          f"{'idle d':>7}")
+          f"{'idle d':>7} {'idle<>off':>9}")
     for name, groups in agg.items():
         for group in sorted(groups, key=lambda g: (g == "ALL", g)):
             s = groups[group]
@@ -1091,7 +1132,7 @@ def _print_aggregate(agg: dict[str, dict[str, dict[str, Any]]]) -> None:
                   f"{str(s['phantoms']) + ' (' + str(s['phantoms_per_idle_day']) + ')':>18} "
                   f"{s['idle_probes']:>6} {s['flickers']:>5} {s['wait_drops']:>5} "
                   f"{s['starting_unshown']:>7} "
-                  f"{s['idle_days']:>7}")
+                  f"{s['idle_days']:>7} {s['idle_flips']:>9}")
 
 
 def _print(result: dict[str, Any], label: str) -> None:
@@ -1124,6 +1165,9 @@ def _print(result: dict[str, Any], label: str) -> None:
     first = next(iter(result["variants"].values()))
     print(f"idle days: {first['summary']['idle_days']}, readings in/processed (baseline): "
           f"{first['summary']['readings']['in']}/{first['summary']['readings']['processed']}")
+    print(f"idle display (#452): standby level {first['gates'].get('standby_level_w')} W, "
+          f"off<->idle changes {first['summary']['idle_flips']} "
+          f"({first['summary']['idle_flips_per_idle_day']} per idle day)")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1154,10 +1198,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--truth", choices=("auto", "stored", "blocks", "union"), default="auto")
     ap.add_argument("--exclude", action="append", default=[],
                     help="stored cycle id or block ident that is not a cycle")
+    ap.add_argument("--standby-level", type=float, default=None, metavar="W",
+                    help="#452 what-if: replay as if this standby level had been learned "
+                         "(the idle display; detection never reads it)")
     ap.add_argument("--json", help="write the full result here")
     args = ap.parse_args(argv)
     if not args.history and not args.manifest:
         ap.error("--history or --manifest is required")
+    global STANDBY_LEVEL_OVERRIDE  # noqa: PLW0603
+    STANDBY_LEVEL_OVERRIDE = args.standby_level
 
     root = Path(args.root)
     if args.manifest:

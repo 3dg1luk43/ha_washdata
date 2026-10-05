@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Ambigüedad de coincidencia"
+      },
+      "maintenance_due": {
+        "name": "Mantenimiento pendiente",
+        "state": {
+          "on": "Pendiente",
+          "off": "No pendiente"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID de tareas pendientes"
+          },
+          "due_tasks": {
+            "name": "Tareas pendientes",
+            "state": {
+              "descale": "Descalcificar",
+              "filter_clean": "Limpiar filtro",
+              "drum_clean": "Limpiar tambor",
+              "bearing_service": "Servicio de rodamientos",
+              "other": "Otro",
+              "salt": "Rellenar sal",
+              "rinse_aid": "Rellenar abrillantador",
+              "lint_filter": "Limpiar filtro de pelusa",
+              "condenser_clean": "Limpiar condensador"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Antiarrugas",
           "interrupted": "Interrumpido",
           "force_stopped": "Parada forzada",
-          "rinse": "Aclarado",
           "unknown": "Desconocido",
           "clean": "Limpio",
           "delay_wait": "Esperando para comenzar"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalía del ciclo",
+            "state": {
+              "overrun": "Con retraso",
+              "stalled": "Atascado"
+            }
+          }
         }
       },
       "washer_program": {

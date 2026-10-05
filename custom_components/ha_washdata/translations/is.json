@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Samsvörun tvíræðni"
+      },
+      "maintenance_due": {
+        "name": "Viðhald tímabært",
+        "state": {
+          "on": "Tímabært",
+          "off": "Ekki tímabært"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Auðkenni tímabærra verka"
+          },
+          "due_tasks": {
+            "name": "Tímabær verk",
+            "state": {
+              "descale": "Afkalka",
+              "filter_clean": "Hreinsa síu",
+              "drum_clean": "Hreinsa tromlu",
+              "bearing_service": "Þjónusta á legum",
+              "other": "Annað",
+              "salt": "Fylla á salt",
+              "rinse_aid": "Fylla á gljáa",
+              "lint_filter": "Hreinsa lósíu",
+              "condenser_clean": "Hreinsa eimsvala"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Anti-hrukku",
           "interrupted": "Truflað",
           "force_stopped": "Þvingun stöðvuð",
-          "rinse": "Skolaðu",
           "unknown": "Óþekkt",
           "clean": "Hreint",
           "delay_wait": "Bíður eftir að byrja"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Frávik í lotu",
+            "state": {
+              "overrun": "Keyrir lengur",
+              "stalled": "Stöðvuð"
+            }
+          }
         }
       },
       "washer_program": {

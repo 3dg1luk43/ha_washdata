@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Match-dubbelzinnigheid"
+      },
+      "maintenance_due": {
+        "name": "Onderhoud nodig",
+        "state": {
+          "on": "Nodig",
+          "off": "Niet nodig"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID's van openstaande taken"
+          },
+          "due_tasks": {
+            "name": "Openstaande taken",
+            "state": {
+              "descale": "Ontkalken",
+              "filter_clean": "Filter reinigen",
+              "drum_clean": "Trommel reinigen",
+              "bearing_service": "Lageronderhoud",
+              "other": "Overig",
+              "salt": "Zout bijvullen",
+              "rinse_aid": "Glansmiddel bijvullen",
+              "lint_filter": "Pluizenfilter reinigen",
+              "condenser_clean": "Condensor reinigen"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Anti-kreuk",
           "interrupted": "Onderbroken",
           "force_stopped": "Geforceerd gestopt",
-          "rinse": "Spoelen",
           "unknown": "Onbekend",
           "clean": "Schoon",
           "delay_wait": "Wachten om te beginnen"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Cyclusafwijking",
+            "state": {
+              "overrun": "Loopt langer",
+              "stalled": "Vastgelopen"
+            }
+          }
         }
       },
       "washer_program": {

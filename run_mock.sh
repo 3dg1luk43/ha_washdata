@@ -1,13 +1,13 @@
 #!/bin/bash
 # The mock MQTT plug (devtools/mqtt_mock_socket.py) as a systemd service.
 #
-#   ./run_mock.sh on       install, enable at boot and start (web UI on :8080)
+#   ./run_mock.sh on       install, enable at boot and start (web UI on :8081)
 #   ./run_mock.sh off      stop and disable
 #   ./run_mock.sh status   service status
 #   ./run_mock.sh logs     follow the log
 #
 # MOCK_WEB_HOST / MOCK_WEB_PORT change the web UI bind address (default 0.0.0.0, every
-# interface) and port (default 8080), e.g. MOCK_WEB_HOST=127.0.0.1 ./run_mock.sh on.
+# interface) and port (default 8081), e.g. MOCK_WEB_HOST=127.0.0.1 ./run_mock.sh on.
 # `on` also stops an instance left by the old nohup start (devtools/.mock_socket.pid),
 # which would otherwise fight the service over the same MQTT discovery topics.
 set -euo pipefail
@@ -16,7 +16,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UNIT="washdata-mock-socket"
 UNIT_FILE="/etc/systemd/system/${UNIT}.service"
 HOST="${MOCK_WEB_HOST:-0.0.0.0}"
-PORT="${MOCK_WEB_PORT:-8080}"
+PORT="${MOCK_WEB_PORT:-8081}"
 LEGACY_PID="${REPO}/devtools/.mock_socket.pid"
 
 stop_legacy() {

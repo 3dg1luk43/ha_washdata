@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entiteit niet gevonden",
     "running_long": "Loopt langer",
+    "stalled": "Vastgelopen",
     "remaining": "resterend",
     "progress": "voortgang",
     "show_time_remaining": "Resterende tijd tonen",
@@ -91,6 +92,8 @@
     "matcher_used_tip": "Cycli die op dit apparaat zijn opgenomen en die de matcher van WashData zelf met dit geïmporteerde programma heeft gelabeld. Een import die nooit wordt herkend, past misschien niet bij je apparaat en kan worden verwijderd. Lokaal geteld; er wordt niets naar de communitystore verzonden."
   },
   "btn": {
+    "log_done_task": "Als gedaan registreren: {task}",
+    "add_task": "Taak toevoegen",
     "pg_preset_delete": "Voorinstelling verwijderen",
     "pg_preset_load": "Voorinstelling laden",
     "pg_preset_load_tip": "De waarden in de speeltuin vervangen door deze voorinstelling (de actieve instellingen blijven ongewijzigd)",
@@ -329,6 +332,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Je eigen taken",
+    "maintenance_supporter": "Meer nodig?",
     "access_control": "Toegangscontrole",
     "add_maintenance": "Onderhoudsgebeurtenis toevoegen",
     "automation_delete": "Verwijder deze automatisering",
@@ -379,6 +384,11 @@
     "poor": "⚠ Slechte profielkwaliteit"
   },
   "lbl": {
+    "task_name": "Taak",
+    "every_cycles": "Om de (cycli)",
+    "every_days": "Om de (dagen)",
+    "new_task_name": "Nieuwe taak",
+    "days_since_service": "{since} / {total} dagen",
     "envelope_position_tip": "Positie op de eigen opgenomen curve van het overeenkomende programma, {pct}%. Bepaald door deze cyclus uit te lijnen op het profiel in plaats van tijd te tellen, dus hij blijft kloppen als een draaibeurt langer of korter duurt dan gebruikelijk. Hij wordt ververst terwijl het apparaat stil is en kan daardoor achterlopen tijdens een actieve fase.",
     "envelope_position": "curve {pct}%",
     "aria_playground_chart3": "Interactieve vermogensgrafiek van de cyclus: beweeg de muis eroverheen om tijd/vermogen af te lezen, scroll of knijp om te zoomen, sleep om te verschuiven",
@@ -428,6 +438,8 @@
     "energy": "Energie",
     "event_type": "Gebeurtenistype",
     "expected": "Verwacht",
+    "suspected_profile": "{name} (vermoedelijk)",
+    "runner_up_profile": "{name} (nummer twee)",
     "expected_duration": "Verwachte duur (min)",
     "file_kb": "Bestand (kB)",
     "from": "Van",
@@ -718,6 +730,8 @@
     }
   },
   "modal": {
+    "remove_task_title": "Taak verwijderen",
+    "remove_task_msg": "De herinnering \"{task}\" verwijderen? De bijbehorende items in het onderhoudslogboek blijven bewaard.",
     "auto_label": "Automatische labelcycli",
     "correct_feedback": "Correcte feedback",
     "create_profile": "Profiel aanmaken",
@@ -771,6 +785,10 @@
     "undo_import_title": "Laatste import ongedaan maken"
   },
   "msg": {
+    "custom_task_limit": "Je hebt de limiet van {max} taken bereikt.",
+    "custom_tasks_intro": "Voeg alles toe waaraan je nog herinnerd wilt worden. Een taak is aan de beurt zodra een van beide intervallen is bereikt; laat er een leeg of op 0 om alleen de andere te gebruiken.",
+    "maintenance_due_sensor_hint": "De binaire sensor Onderhoud nodig gaat aan zolang er een taak aan de beurt is, zodat je je eigen meldingsautomatisering kunt bouwen.",
+    "maintenance_supporter_intro": "Maintenance Supporter is een aparte integratie die veel meer kan: elk apparaat of elke taak, intervallen op basis van tijd, gebruik of een sensor, meldingen en een geschiedenis. Het kan de cyclusteller van WashData gebruiken.",
     "pg_canvas_empty3": "Kies hierboven een cyclus en druk op Uitvoeren om deze te simuleren. Beweeg vervolgens de muis erover om waarden af te lezen, scroll of knijp om te zoomen en sleep om te verschuiven.",
     "pg_preset_delete_confirm": "De voorinstelling \"{name}\" verwijderen?",
     "pg_preset_limit": "Maximum aantal voorinstellingen bereikt ({n})",
@@ -1089,6 +1107,7 @@
     "wash_dw": "Hoofdwasmiddel met verwarming."
   },
   "placeholder": {
+    "custom_task": "bijv. deurrubber reinigen",
     "add": "toevoegen…",
     "group_name": "bijv. Katoen 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1658,6 +1677,7 @@
     "resetting": "Resetten…",
     "trimming": "Bijsnijden…",
     "splitting": "Splitsen…",
+    "stalled": "Vastgelopen",
     "deleting": "Verwijderen…",
     "imported": "Geïmporteerd",
     "preparing": "Voorbereiden…",
@@ -1788,6 +1808,11 @@
     "wrong_profile": "Verkeerd profiel"
   },
   "toast": {
+    "task_name_required": "Geef de taak een naam",
+    "task_added": "Taak toegevoegd",
+    "task_save_failed": "Kan taak niet opslaan: {error}",
+    "task_removed": "Taak verwijderd",
+    "maint_logged": "Geregistreerd als gedaan: {task}",
     "catalog_refreshed": "Communitycatalogus vernieuwd",
     "access_saved": "Toegangscontrole opgeslagen",
     "all_wiped": "Alle gegevens gewist",
@@ -1945,6 +1970,10 @@
     "up": "Trend omhoog"
   },
   "maint": {
+    "salt": "Zout bijvullen",
+    "rinse_aid": "Glansmiddel bijvullen",
+    "lint_filter": "Pluizenfilter reinigen",
+    "condenser_clean": "Condensor reinigen",
     "bearing_service": "Lageronderhoud",
     "descale": "Ontkalken",
     "drum_clean": "Trommel reinigen",
@@ -1989,7 +2018,8 @@
     "notify_held": "Een melding werd vastgehouden vanwege de stille uren.",
     "finished": "De cyclus bereikte een eindtoestand en stopte.",
     "match_reverted": "Het programma viel terug naar detecteren: zijn score zakte ruim onder zijn eigen piek.",
-    "verified_pause": "De live uitlijning bevestigde een pauze binnen het programma (of hief die op). Zolang die geldt, wordt de cyclus niet beëindigd."
+    "verified_pause": "De live uitlijning bevestigde een pauze binnen het programma (of hief die op). Zolang die geldt, wordt de cyclus niet beëindigd.",
+    "stalled": "De cyclus bleef langer op zijn stand-byverbruik staan dan welke pauze van dit programma op dat punt ook, terwijl er nog werk te doen was. Getoond als Gepauzeerd (Vastgelopen); de cyclus blijft open."
   },
   "store": {
     "search_ph2": "Zoeken op merk of model…",
@@ -2023,6 +2053,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter op GitHub ↗",
     "manual": "Handleiding ↗"
   },
   "tip": {

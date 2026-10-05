@@ -53,7 +53,7 @@ const BUTTON_ICONS = {
 };
 const BUTTON_ORDER = ["pause", "resume", "terminate", "record_start", "record_stop", "program", "open_panel"];
 
-const ACTIVE_STATES = ["running", "paused", "user_paused", "ending", "starting", "anti_wrinkle", "rinse"];
+const ACTIVE_STATES = ["running", "paused", "user_paused", "ending", "starting", "anti_wrinkle"];
 // States where button.py's PauseCycleButton is available, so the card must not
 // grey out Pause where the backend would accept it. An auto-detected "paused"
 // is pausable: async_pause_cycle turns it into a user pause that survives the
@@ -850,7 +850,12 @@ class WashDataCard extends HTMLElement {
       else if (vm.timeText) parts.push(vm.timeText);
       else if (vm.pct !== null) parts.push(vm.pct + "%");
     }
-    if (flags.showAnomaly && vm.anomaly) parts.push(this._t("card.running_long", null, "running long"));
+    if (flags.showAnomaly && vm.anomaly) {
+      // #452: a stalled cycle (halted on its standby draw) is not one running long.
+      parts.push(vm.anomaly.kind === "stalled"
+        ? this._t("card.stalled", null, "Stalled")
+        : this._t("card.running_long", null, "running long"));
+    }
     stateEl.textContent = parts.join(" • ");
   }
 
@@ -910,7 +915,9 @@ class WashDataCard extends HTMLElement {
       // and a zero; above it the decimal is noise.
       if (vm.isRunning && vm.powerW !== null)
         addChip((vm.powerW >= 100 ? Math.round(vm.powerW) : vm.powerW.toFixed(1)) + " W");
-      if (flags.showAnomaly && vm.anomaly) {
+      if (flags.showAnomaly && vm.anomaly && vm.anomaly.kind === "stalled") {
+        addChip(this._t("card.stalled", null, "Stalled"), true);  // #452
+      } else if (flags.showAnomaly && vm.anomaly) {
         const ratio = vm.anomaly.ratio ? " (" + Math.round((vm.anomaly.ratio - 1) * 100) + "%)" : "";
         addChip(this._t("card.running_long", null, "Running long") + ratio, true);
       }

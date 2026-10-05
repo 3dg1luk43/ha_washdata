@@ -27,18 +27,33 @@ threshold under a dishwasher's 0.8 W drying phase (10 Eco cycles stranded, force
 stopped under ``--idle-hold``) and the start under a washer's 3.3 W post-end draw (2
 labelled cycles split). Both are failures now, and pinned below.
 
-Runtime: ~7 min on 8 cores (the corpus run), ~2 min for the revert and idle checks.
+Runtime (2026-10-05, 4 cores): serially one pooled corpus run, ~3.5 min, and ~1 min
+for the revert and idle checks; under xdist ~1000 core-s in per-device units, the
+longest ~130 s.
+
+**Under pytest-xdist** the corpus run is one unit per device instead of one pooled
+run: each device's four tests share an ``xdist_group``, so ``--dist loadgroup``
+hands each device to one worker, which runs it on its own (``jobs=1``: no process
+pool inside a worker, and the revert checks likewise) while the others take the
+next device. A device's result is the same either way: measured 2026-10-05,
+the 21 per-device runs equal the pooled run's 21 results (CPU 666 s per device vs
+752 s pooled: each device keeps its matcher memo in one process).
 """
 from __future__ import annotations
 
+import functools
 import importlib.util
 import os
+import pickle
 import sys
 from pathlib import Path
 
 import pytest
+from filelock import FileLock
 
-pytestmark = pytest.mark.slow
+# heavy: under pytest-xdist these go out first (tests/conftest.py), so no worker
+# starts a minutes-long device run last.
+pytestmark = [pytest.mark.slow, pytest.mark.heavy]
 
 _REPO = Path(__file__).resolve().parents[1]
 _CORPUS = _REPO / "cycle_data"
@@ -59,37 +74,125 @@ _RATCHET_DEVICE = "01KGM619"
 
 needs_corpus = pytest.mark.skipif(not _CORPUS.is_dir(), reason="cycle_data/ corpus not present")
 
+_XDIST = bool(os.environ.get("PYTEST_XDIST_WORKER"))
 
-@pytest.fixture(scope="module")
-def results() -> list[dict]:
-    return loop.run(_CORPUS, rounds=ROUNDS, jobs=min(8, os.cpu_count() or 1))
+
+def _jobs() -> int:
+    """A process pool when this is the only process; one process per xdist worker."""
+    return 1 if _XDIST else min(8, os.cpu_count() or 1)
+
+
+@functools.cache
+def _devices() -> tuple[str, ...]:
+    """The corpus devices the loop runs, biggest file first (``loop.run``'s order)."""
+    paths = loop.device_paths(_CORPUS)
+    return tuple(sorted(paths, key=lambda p: (-(_CORPUS / p).stat().st_size, p)))
+
+
+def _group(device: str) -> str:
+    return f"suggestion-loop-{_devices().index(device)}"
+
+
+def _slow_selected(config: pytest.Config) -> bool:
+    """Would ``-m`` keep slow tests? (Scanning the corpus costs ~2 s per process.)"""
+    expr = (config.getoption("markexpr") or "").strip()
+    if not expr:
+        return True
+    try:
+        from _pytest.mark.expression import Expression  # noqa: PLC0415
+
+        return Expression.compile(expr).evaluate(lambda name, **_kw: name == "slow")
+    except Exception:  # noqa: BLE001 - unknown pytest internals: scan, to be safe
+        return True
+
+
+def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
+    """One test per corpus device, grouped per device for ``--dist loadgroup``."""
+    if "device" not in metafunc.fixturenames:
+        return
+    if not _CORPUS.is_dir() or not _slow_selected(metafunc.config):
+        # Skipped (no corpus) or deselected (-m "not slow"): one placeholder.
+        metafunc.parametrize("device", ["corpus"])
+        return
+    metafunc.parametrize("device", [
+        pytest.param(d, id=loop.ev.public_key(d), marks=pytest.mark.xdist_group(_group(d)))
+        for d in _devices()
+    ])
+
+
+@functools.cache
+def _pooled() -> dict[str, dict]:
+    return {r["device"]: r for r in loop.run(_CORPUS, rounds=ROUNDS, jobs=_jobs())}
+
+
+_DONE: dict[str, dict] = {}
+
+
+def _result(device: str, shared: Path) -> dict:
+    """The loop's result for one device, computed once per session.
+
+    Serial: one pooled corpus run. Under xdist: this device alone, in this worker,
+    under a lock in the session's shared temp dir, so a test of the same device on
+    another worker (any ``--dist`` but loadgroup) loads it instead of repeating it.
+    """
+    key = loop.ev.public_key(device)
+    if not _XDIST:
+        return _pooled()[key]
+    if key not in _DONE:
+        out = shared / f"suggestion_loop_{_devices().index(device)}.pickle"
+        with FileLock(f"{out}.lock"):
+            if out.is_file():
+                _DONE[key] = pickle.loads(out.read_bytes())
+            else:
+                res = loop.run(_CORPUS, rounds=ROUNDS, jobs=1, only=[device])
+                # ``only`` matches substrings: exactly this device, or the split is wrong.
+                assert [r["device"] for r in res] == [key], [r["device"] for r in res]
+                out.write_bytes(pickle.dumps(res[0]))
+                _DONE[key] = res[0]
+    return _DONE[key]
+
+
+@pytest.fixture
+def result(device, tmp_path_factory) -> dict:
+    return _result(device, tmp_path_factory.getbasetemp().parent)
 
 
 @needs_corpus
-def test_every_shipped_suggestion_reaches_a_fixed_point(results):
+def test_the_loop_covers_the_whole_traced_corpus(tmp_path_factory):
     # The whole traced corpus, not a sample: 20+ devices carry enough history.
-    assert len(results) >= 20, [r["device"] for r in results]
-    assert loop.failures(results) == []
-    # Each device stopped because Apply all had nothing left to change, not
-    # because it ran out of rounds.
-    assert all(r["fixed_point"] for r in results), [
-        r["device"] for r in results if not r["fixed_point"]
-    ]
+    devices = _devices()
+    assert len(devices) >= 20, devices
+    # The muted-setting check below is not vacuous: some device's Apply all moved.
+    shared = tmp_path_factory.getbasetemp().parent
+    assert any(_result(d, shared)["lock_probe"] for d in devices)
 
 
 @needs_corpus
-def test_the_cooldown_expires_and_never_leaks(results):
-    for r in results:
-        assert not r["cooldown_leaks"], (r["device"], r["cooldown_leaks"])
-        assert not any(row["cooldown_active_after_expiry"] for row in r["rounds"]), r["device"]
+def test_every_shipped_suggestion_reaches_a_fixed_point(result):
+    assert loop.failures([result]) == []
+    # The device stopped because Apply all had nothing left to change, not because
+    # it ran out of rounds.
+    assert result["fixed_point"], result["device"]
 
 
 @needs_corpus
-def test_a_muted_setting_is_never_applied(results):
-    probed = [r for r in results if r["lock_probe"]]
-    assert probed
-    for r in probed:
-        assert r["lock_probe"]["applied"] == [], (r["device"], r["lock_probe"])
+def test_the_cooldown_expires_and_never_leaks(result):
+    assert not result["cooldown_leaks"], (result["device"], result["cooldown_leaks"])
+    assert not any(row["cooldown_active_after_expiry"] for row in result["rounds"]), result["device"]
+
+
+@needs_corpus
+def test_a_muted_setting_is_never_applied(result):
+    if result["lock_probe"]:
+        assert result["lock_probe"]["applied"] == [], (result["device"], result["lock_probe"])
+
+
+@needs_corpus
+def test_issue_455_apply_all_never_splits_or_strands_a_labelled_cycle(result):
+    """(b) a start under the post-end draw splits; (a) a stop under it strands."""
+    assert not result["fragmented"], (result["device"], result["fragmented"], result["keys"])
+    idle = [row["replay"]["idle_above_stop"] for row in result["rounds"]]
+    assert idle[-1] <= idle[0], (result["device"], idle, result["keys"])
 
 
 @needs_corpus
@@ -97,7 +200,7 @@ def test_a_muted_setting_is_never_applied(results):
 def test_revert_check_the_removed_sampling_interval_suggestion_is_a_ladder():
     # Three applies plus the evaluation after them is enough to see it still climbing.
     res = loop.run(
-        _CORPUS, rounds=3, jobs=min(8, os.cpu_count() or 1), only=[_LADDER_DEVICE],
+        _CORPUS, rounds=3, jobs=_jobs(), only=[_LADDER_DEVICE],
         legacy=("sampling_interval",), lock_probe=False,
     )
     assert len(res) == 1
@@ -116,7 +219,7 @@ def test_revert_check_the_removed_completion_minimum_erases_its_own_evidence():
     there, so it is not a ladder; it is caught as erased evidence.
     """
     res = loop.run(
-        _CORPUS, rounds=ROUNDS, jobs=min(8, os.cpu_count() or 1), only=[_RATCHET_DEVICE],
+        _CORPUS, rounds=ROUNDS, jobs=_jobs(), only=[_RATCHET_DEVICE],
         legacy=("completion_min",), lock_probe=False,
     )
     if not res:
@@ -128,15 +231,6 @@ def test_revert_check_the_removed_completion_minimum_erases_its_own_evidence():
 
 
 @needs_corpus
-def test_issue_455_apply_all_never_splits_or_strands_a_labelled_cycle(results):
-    """(b) a start under the post-end draw splits; (a) a stop under it strands."""
-    for r in results:
-        assert not r["fragmented"], (r["device"], r["fragmented"], r["keys"])
-        idle = [row["replay"]["idle_above_stop"] for row in r["rounds"]]
-        assert idle[-1] <= idle[0], (r["device"], idle, r["keys"])
-
-
-@needs_corpus
 def test_issue_455a_the_drying_phase_still_ends_cycles_when_it_is_standby():
     """``--idle-hold``: read every kept tail at or above the new stop as standby.
 
@@ -145,7 +239,7 @@ def test_issue_455a_the_drying_phase_still_ends_cycles_when_it_is_standby():
     there. Its stop threshold now stays put, so nothing is erased.
     """
     res = loop.run(
-        _CORPUS, rounds=ROUNDS, jobs=min(8, os.cpu_count() or 1), only=[_RATCHET_DEVICE],
+        _CORPUS, rounds=ROUNDS, jobs=_jobs(), only=[_RATCHET_DEVICE],
         lock_probe=False, idle_hold=True,
     )
     if not res:

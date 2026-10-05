@@ -3,17 +3,17 @@
   "assets": {
     "ha-washdata-panel.js": {
       "artifact": "ha-washdata-panel.min.js",
-      "source_sha256": "9629334d1afebf47e5ff27e70f168c787150c3721e4f2778333590035d9b3e5e",
-      "artifact_sha256": "207fa6a3908a2cd07e281508293b9357822f9985d824f1b6b121bccab99b1f26",
-      "source_bytes": 969970,
-      "artifact_bytes": 613915
+      "source_sha256": "a34daec00cd664066ae11d83073067b60c5559c284d3074dcd6be4d4a565649b",
+      "artifact_sha256": "9a84b57ebdc808bebc2c5fbf0b46b4fb4a045f321c933cc7f328868fb1a5dcfe",
+      "source_bytes": 987057,
+      "artifact_bytes": 624804
     },
     "ha-washdata-card.js": {
       "artifact": "ha-washdata-card.min.js",
-      "source_sha256": "8b01dc9ea37dc20cf982c9c4408b0ed492c68b1090393cdce5a0e55e985325f9",
-      "artifact_sha256": "e30ccd85fed3433abbc85b29e0df1fb40c0cff8ad47ed2398222bc84814e814a",
-      "source_bytes": 58143,
-      "artifact_bytes": 31177
+      "source_sha256": "e2c3087d6ebf1a5f384db26eda753e85a36894014d83e12cf539b25fcf7ee54d",
+      "artifact_sha256": "0c06dfd8ac4d3946f2b11e7f4478a9397c8ffedeff527cddcd519f5b4759494f",
+      "source_bytes": 58483,
+      "artifact_bytes": 31341
     }
   }
 }

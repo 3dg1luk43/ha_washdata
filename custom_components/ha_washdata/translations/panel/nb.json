@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entitet ikke funnet",
     "running_long": "Kjører lenger",
+    "stalled": "Stoppet opp",
     "remaining": "gjenstår",
     "progress": "fremdrift",
     "show_time_remaining": "Vis gjenstående tid",
@@ -91,6 +92,8 @@
     "matcher_used_tip": "Sykluser registrert på dette apparatet som WashDatas programgjenkjenning selv har merket med dette importerte programmet. En import som aldri blir gjenkjent, passer kanskje ikke til apparatet ditt og kan fjernes. Telles lokalt; ingenting sendes til fellesskapsbutikken."
   },
   "btn": {
+    "log_done_task": "Loggfør som utført: {task}",
+    "add_task": "Legg til oppgave",
     "pg_preset_delete": "Slett forhåndsinnstilling",
     "pg_preset_load": "Last inn forhåndsinnstilling",
     "pg_preset_load_tip": "Erstatt verdiene i sandkassen med denne forhåndsinnstillingen (de aktive innstillingene berøres ikke)",
@@ -329,6 +332,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Dine egne oppgaver",
+    "maintenance_supporter": "Trenger du mer?",
     "access_control": "Tilgangskontroll",
     "add_maintenance": "Legg til vedlikeholdshendelse",
     "automation_delete": "Slett denne automatiseringen",
@@ -379,6 +384,11 @@
     "poor": "⚠ Dårlig profilkvalitet"
   },
   "lbl": {
+    "task_name": "Oppgave",
+    "every_cycles": "Hver (sykluser)",
+    "every_days": "Hver (dager)",
+    "new_task_name": "Ny oppgave",
+    "days_since_service": "{since} / {total} dager",
     "envelope_position_tip": "Posisjon på det matchede programmets egen registrerte kurve, {pct} %. Måles ved å justere denne syklusen mot profilen i stedet for å telle tid, så den stemmer også når en kjøring er lengre eller kortere enn vanlig. Den oppdateres mens apparatet er stille, og kan derfor henge etter i en aktiv fase.",
     "envelope_position": "kurve {pct} %",
     "aria_playground_chart3": "Interaktiv effektgraf for syklusen: hold pekeren over for å lese av tid/effekt, rull eller knip for å zoome, dra for å panorere",
@@ -428,6 +438,8 @@
     "energy": "Energi",
     "event_type": "Hendelsestype",
     "expected": "Forventet",
+    "suspected_profile": "{name} (antatt)",
+    "runner_up_profile": "{name} (nummer to)",
     "expected_duration": "Forventet varighet (min)",
     "file_kb": "Fil (kB)",
     "from": "Fra",
@@ -718,6 +730,8 @@
     }
   },
   "modal": {
+    "remove_task_title": "Fjern oppgave",
+    "remove_task_msg": "Fjerne påminnelsen \"{task}\"? Oppføringene i vedlikeholdsloggen beholdes.",
     "auto_label": "Automatiske etikettsykluser",
     "correct_feedback": "Korriger tilbakemelding",
     "create_profile": "Opprett profil",
@@ -771,6 +785,10 @@
     "undo_import_title": "Angre siste import"
   },
   "msg": {
+    "custom_task_limit": "Du har nådd grensen på {max} oppgaver.",
+    "custom_tasks_intro": "Legg til alt annet du vil bli påminnet om. En oppgave forfaller når et av intervallene er nådd; la det ene stå tomt eller på 0 for å bare bruke det andre.",
+    "maintenance_due_sensor_hint": "Den binære sensoren Vedlikehold forfaller slås på så lenge en oppgave forfaller, slik at du kan lage din egen varslingsautomasjon.",
+    "maintenance_supporter_intro": "Maintenance Supporter er en egen integrasjon som gjør mye mer: hvilket som helst apparat eller oppgave, intervaller etter tid, bruk eller en sensor, varsler og historikk. Den kan bruke syklustelleren i WashData.",
     "pg_canvas_empty3": "Velg en syklus ovenfor og trykk på Kjør for å simulere den. Hold deretter pekeren over for å lese av verdier, rull eller knip for å zoome, og dra for å panorere.",
     "pg_preset_delete_confirm": "Slette forhåndsinnstillingen \"{name}\"?",
     "pg_preset_limit": "Grensen for forhåndsinnstillinger er nådd ({n})",
@@ -1089,6 +1107,7 @@
     "wash_dw": "Hovedvaskemiddel med oppvarming."
   },
   "placeholder": {
+    "custom_task": "f.eks. rengjør dørpakning",
     "add": "legg til…",
     "group_name": "f.eks. Bomull 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1658,6 +1677,7 @@
     "resetting": "Tilbakestiller…",
     "trimming": "Beskjærer…",
     "splitting": "Deler opp…",
+    "stalled": "Stoppet opp",
     "deleting": "Sletter…",
     "imported": "Importert",
     "preparing": "Forbereder…",
@@ -1788,6 +1808,11 @@
     "wrong_profile": "Feil profil"
   },
   "toast": {
+    "task_name_required": "Gi oppgaven et navn",
+    "task_added": "Oppgave lagt til",
+    "task_save_failed": "Kunne ikke lagre oppgaven: {error}",
+    "task_removed": "Oppgave fjernet",
+    "maint_logged": "Loggført som utført: {task}",
     "catalog_refreshed": "Fellesskapskatalogen er oppdatert",
     "access_saved": "Tilgangskontroll lagret",
     "all_wiped": "Alle data slettet",
@@ -1945,6 +1970,10 @@
     "up": "Trender opp"
   },
   "maint": {
+    "salt": "Fyll på salt",
+    "rinse_aid": "Fyll på glansemiddel",
+    "lint_filter": "Rengjør lofilter",
+    "condenser_clean": "Rengjør kondensator",
     "bearing_service": "Lagerservice",
     "descale": "Avkalking",
     "drum_clean": "Rengjør trommel",
@@ -1989,7 +2018,8 @@
     "notify_held": "Et varsel ble holdt tilbake på grunn av stilletimer.",
     "finished": "Syklusen nådde en sluttilstand og stoppet.",
     "match_reverted": "Programmet falt tilbake til oppdaging: poengsummen falt langt under sin egen topp.",
-    "verified_pause": "Den direkte justeringen bekreftet (eller opphevet) en pause inne i programmet. Så lenge den gjelder, avsluttes ikke syklusen."
+    "verified_pause": "Den direkte justeringen bekreftet (eller opphevet) en pause inne i programmet. Så lenge den gjelder, avsluttes ikke syklusen.",
+    "stalled": "Syklusen lå på standbyforbruket sitt lenger enn noen pause i dette programmet på det stedet, mens det fortsatt gjensto arbeid. Vises som Pause (Stoppet opp); syklusen forblir åpen."
   },
   "store": {
     "search_ph2": "Søk etter merke eller modell…",
@@ -2023,6 +2053,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter på GitHub ↗",
     "manual": "Håndbok ↗"
   },
   "tip": {

@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Ambiguitate la potrivire"
+      },
+      "maintenance_due": {
+        "name": "Întreținere scadentă",
+        "state": {
+          "on": "Scadentă",
+          "off": "Nu este scadentă"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID-uri sarcini scadente"
+          },
+          "due_tasks": {
+            "name": "Sarcini scadente",
+            "state": {
+              "descale": "Detartrare",
+              "filter_clean": "Curățare filtru",
+              "drum_clean": "Curățare tambur",
+              "bearing_service": "Service rulmenți",
+              "other": "Altele",
+              "salt": "Reumplere sare",
+              "rinse_aid": "Reumplere agent de clătire",
+              "lint_filter": "Curățare filtru de scame",
+              "condenser_clean": "Curățare condensator"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Antirid",
           "interrupted": "Întrerupt",
           "force_stopped": "Oprit forțat",
-          "rinse": "Clătire",
           "unknown": "Necunoscut",
           "clean": "Curat",
           "delay_wait": "Așteaptă să Înceapă"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalie ciclu",
+            "state": {
+              "overrun": "Întârziere",
+              "stalled": "Blocat"
+            }
+          }
         }
       },
       "washer_program": {

@@ -88,6 +88,33 @@ own last reading above ``anti_wrinkle_max_power`` (an early release: the spin th
 opens a second cycle). ``--device-types`` restricts the corpus, ``--export SUBSTR``
 to the exports whose path contains it.
 
+**Synthetic halt (discussion #452).** ``--halt-at F --halt-min M`` inserts a flat
+standby plateau into every replayed cycle: at fraction ``F`` of its active span
+(``F >= 1``: right after its last above-stop reading, the display left on after
+the programme ended) for ``M`` minutes (``Mx``: M times the active span), every
+later reading shifted by that much. The level alternates +-0.4 W around
+``--halt-level`` (default ``auto``: 4.5 W clamped into ``[stop + 0.5, near-stop
+ceiling - 0.5]``, so it is the #452 shape on every device). Rows record whether
+and when the stall display flagged (``stall_*``), whether it flagged outside the
+plateau (a false flag; on an unmodified run every flag is one), when the
+standby-band finalize fired, and whether the cycle closed inside the plateau.
+``--no-stall-guard`` patches ``STALL_HOLDS_STANDBY_BAND`` off for the before arm.
+For a mid-cycle halt the yardstick span includes the plateau; for ``F >= 1`` it
+does not (the programme had ended). ``auto`` can sit at or above a device's start
+threshold, so with ``F >= 1`` the plateau may also open phantom cycles there: read
+the split column of such a run as the harness's, and compare arms row by row.
+
+Measured 2026-10-05, ``--loo --all-formats`` over the 258 washer, washer-dryer and
+dryer cycles: unmodified, no stall is ever flagged (0 of 472 rows, every device
+type) and the standby-band finalize never fires. A 45 min halt at 50% of the
+active span shows as stalled in 196 (76%), median 10.6 min in; the hold keeps 28 of
+the 106 the finalize used to close inside the halt (splits 117 -> 89). At 90% (the
+final spin): 118 (46%), 39 of 180 kept. 20 min at 30%: 109 (42%). With the display
+left on for 45 min after a real end, 46 (18%) show as stalled for a while (the
+match still says the programme owes work: it ends early on it) and the hold delays
+6 (2.3%) of the 204 closes the finalize makes inside that time. Early ends unchanged
+in every run.
+
 **Option overrides (register item 469).** ``--set KEY=VALUE`` layers an option onto
 every replayed export as Apply all would save it (the active-span yardstick keeps
 the export's own stop threshold), e.g. ``--set profile_match_interval=45`` for the
@@ -118,6 +145,17 @@ differs: ``cycle_data/`` is maintainer-local, so re-baseline rather than compare
 and 0 otherwise. The replay is deterministic, so an unchanged tree reproduces the
 baseline exactly.
 
+**Parallel replay.** ``--jobs N`` (default ``cpu_count - 1``, at most 8) replays
+in N worker processes, one cycle per unit, longest export first and its longest
+cycles first (the previous run's per-cycle times in ``--timings``, else trace
+length), handed out one at a time as workers free up; a worker keeps its last two
+exports' setup. ``--jobs-file F`` re-reads the worker count from F after every
+cycle, so a scheduler (``devtools/verify.sh``) can add cores mid-run. Rows are put
+back in the serial order, so the ``--json`` rows, the summary and ``--check`` are
+identical to ``--jobs 1``, the serial loop. Progress goes to stderr. Measured
+2026-10-05 on the 472-row ``--loo --all-formats`` corpus: 278 s serial, 82 s at
+``--jobs 4`` (4 cores), rows and ``--check`` byte-identical.
+
 Run from the repo root.
 """
 from __future__ import annotations
@@ -127,8 +165,12 @@ import asyncio
 import hashlib
 import json
 import logging
+import multiprocessing
+import os
 import subprocess
 import sys
+import time
+from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -244,6 +286,101 @@ def _install_anticrease_probe() -> None:
     det_cls._anticrease_spin_pending = pending  # noqa: SLF001
     det_cls._maybe_finalize_anticrease_tail = finalize  # noqa: SLF001
     det_cls._eval_probe = True
+
+
+def _install_stall_probe() -> None:
+    """Record the stall display's flips and the standby-band finalize (#452)."""
+    from custom_components.ha_washdata import cycle_detector as cd  # noqa: PLC0415
+
+    det_cls = cd.CycleDetector
+    if getattr(det_cls, "_eval_stall_probe", False):
+        return
+    orig_set = det_cls._set_stalled  # noqa: SLF001
+    orig_sb = det_cls._maybe_finalize_standby_band  # noqa: SLF001
+
+    def set_stalled(self: Any, stalled: bool, ts: Any) -> None:
+        before = self._stall_active  # noqa: SLF001
+        orig_set(self, stalled, ts)
+        if self._stall_active != before:  # noqa: SLF001
+            _AC.setdefault("stall", []).append((bool(stalled), ts))
+            if stalled and "stall_why" not in _AC:
+                # The evidence the first flag stood on: the run's position on the
+                # match it began under, and whether that match ends on a block.
+                name, expected, block, _cat = self._stall_match or (None, 0.0, None, None)  # noqa: SLF001
+                start, run = self._current_cycle_start, self._stall_run_start  # noqa: SLF001
+                _AC["stall_why"] = {
+                    "position": round((run - start).total_seconds() / expected, 3)
+                    if name and expected > 0 and start and run else None,
+                    "armed": bool(block is not None and block[0] >= 0.9),
+                    "eval": self._stall_eval,  # noqa: SLF001
+                }
+
+    def finalize_sb(self: Any, ts: Any, power: float) -> bool:
+        start = self._current_cycle_start  # noqa: SLF001
+        expected = float(self._expected_duration)  # noqa: SLF001
+        why = {
+            "ratio": round((ts - start).total_seconds() / expected, 3)
+            if start is not None and expected > 0 else None,
+            "stalled": bool(self._stall_active),  # noqa: SLF001
+            "eval": self._stall_eval,  # noqa: SLF001
+            "run_s": round((ts - self._stall_run_start).total_seconds())  # noqa: SLF001
+            if self._stall_run_start is not None else None,  # noqa: SLF001
+        }
+        fired = orig_sb(self, ts, power)
+        if fired:
+            _AC.setdefault("sb_finals", []).append(ts)
+            _AC.setdefault("sb_why", []).append(why)
+        return fired
+
+    det_cls._set_stalled = set_stalled  # noqa: SLF001
+    det_cls._maybe_finalize_standby_band = finalize_sb  # noqa: SLF001
+    det_cls._eval_stall_probe = True
+
+
+def _halt_level(stop: float, level: str) -> float:
+    from custom_components.ha_washdata.cycle_detector import (  # noqa: PLC0415
+        standby_near_stop_ceiling,
+    )
+
+    if level != "auto":
+        return float(level)
+    return min(max(4.5, stop + 0.5), standby_near_stop_ceiling(stop) - 0.5)
+
+
+def _with_halt(
+    cycle: dict[str, Any], pts: list[tuple[float, float]], stop: float,
+    at: float, length: str, level: float,
+) -> tuple[dict[str, Any], float, float, float]:
+    """The cycle with a flat standby plateau inserted (#452).
+
+    Returns ``(cycle, halt_start_s, halt_end_s, yardstick_span_s)``.
+    """
+    active = [t for t, p in pts if p > stop]
+    span = active[-1] - active[0]
+    length_s = (
+        float(length[:-1]) * span if length.endswith("x") else float(length) * 60.0
+    )
+    gaps = [b - a for (a, _p), (b, _q) in zip(pts, pts[1:]) if b > a]
+    step = min(60.0, max(10.0, float(np.median(gaps)) if gaps else 30.0))
+    if at >= 1.0:
+        t0 = active[-1] + step
+        head = [[float(t), float(p)] for t, p in pts if t <= active[-1]]
+        tail = [[t0 + length_s, 0.0], [t0 + length_s + 600.0, 0.0]]
+        yard = span
+    else:
+        t0 = active[0] + at * span
+        head = [[float(t), float(p)] for t, p in pts if t < t0]
+        tail = [[float(t) + length_s, float(p)] for t, p in pts if t >= t0]
+        yard = span + length_s
+    plateau = []
+    t, k = t0, 0
+    while t < t0 + length_s:
+        plateau.append([t, round(level + (0.4 if k % 2 else -0.4), 2)])
+        t += step
+        k += 1
+    out = dict(cycle)
+    out["power_data"] = head + plateau + tail
+    return out, t0, t0 + length_s, yard
 
 
 def _with_tumble_tail(
@@ -404,7 +541,7 @@ def _corpus_module() -> Any:
         import importlib.util  # noqa: PLC0415
 
         spec = importlib.util.spec_from_file_location(
-            "wd_end_gate_eval_corpus", REPO / "devtools" / "eval.py"
+            "wd_end_gate_eval_corpus", Path(__file__).resolve().parent / "eval.py"
         )
         mod = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = mod  # dataclasses resolve their module through it
@@ -443,28 +580,44 @@ def _export_key(path: Path) -> str:
 
 
 def _measure_export(
-    path: Path,
-    no_shortening: bool,
-    loo: bool = False,
-    *,
-    all_formats: bool = False,
-    shipped_watchdog: bool = False,
-    anti_wrinkle: str = "export",
-    tumble_tail: bool = False,
-    device_types: tuple[str, ...] | None = None,
-    overrides: dict[str, Any] | None = None,
+    path: Path, no_shortening: bool, loo: bool = False, **kw: Any,
 ) -> list[dict[str, Any]]:
     """Replay every usable cycle in one export; one row per cycle."""
+    return [row for _ci, row in _replay_export(path, no_shortening, loo, **kw)]
+
+
+def _export_doc(
+    path: Path, all_formats: bool, device_types: tuple[str, ...] | None,
+) -> tuple[dict[str, Any], str, list[dict[str, Any]]] | None:
+    """``(doc, device type, past cycles)``, or None for an export that is not replayed."""
     doc = _load_doc(path, all_formats)
     if doc is None:
-        return []
+        return None
     device_type = (doc.get("device_fingerprint") or {}).get("device_type")
     data = doc.get("data") or {}
     cycles = data.get("past_cycles") or []
     if not device_type or len(cycles) < MIN_CYCLES:
-        return []
+        return None
     if device_types and device_type not in device_types:
-        return []
+        return None
+    return doc, device_type, cycles
+
+
+def _export_setup(
+    path: Path,
+    *,
+    all_formats: bool = False,
+    shipped_watchdog: bool = False,
+    anti_wrinkle: str = "export",
+    device_types: tuple[str, ...] | None = None,
+    overrides: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    """Everything the per-cycle loop shares: the production store, rebuilt envelopes."""
+    found = _export_doc(path, all_formats, device_types)
+    if found is None:
+        return None
+    doc, device_type, _cycles = found
+    data = doc.get("data") or {}
     ac_device = device_type in AC_DEVICE_TYPES
     force_aw = anti_wrinkle == "force" and ac_device
     base = dict(data)
@@ -495,9 +648,63 @@ def _measure_export(
         prebuilt = playground._build_match_snapshots(store)  # noqa: SLF001
     except Exception:
         prebuilt = None
+    return {
+        "doc": doc, "device_type": device_type, "ac_device": ac_device,
+        "force_aw": force_aw, "base": base, "cfg": cfg, "store": store,
+        "opts": opts, "stop": stop, "level": level, "prebuilt": prebuilt,
+    }
+
+
+#: Per worker process: the setups of the exports it replayed last (``--jobs``).
+_SETUP_MEMO: dict[str, dict[str, Any] | None] = {}
+SETUP_MEMO_SIZE = 2
+
+
+def _replay_export(
+    path: Path,
+    no_shortening: bool,
+    loo: bool = False,
+    *,
+    all_formats: bool = False,
+    shipped_watchdog: bool = False,
+    anti_wrinkle: str = "export",
+    tumble_tail: bool = False,
+    device_types: tuple[str, ...] | None = None,
+    overrides: dict[str, Any] | None = None,
+    halt: tuple[float, str, str] | None = None,
+    only: frozenset[int] | None = None,
+    memo: bool = False,
+) -> list[tuple[int, dict[str, Any]]]:
+    """``(cycle index, row)`` per replayed cycle of one export.
+
+    ``only`` replays just the cycles at those indexes of ``past_cycles`` (one
+    ``--jobs`` unit). The setup does not depend on it, and with ``memo`` a worker
+    keeps the setups of its last ``SETUP_MEMO_SIZE`` exports for the next unit.
+    """
+    setup_kw = {
+        "all_formats": all_formats, "shipped_watchdog": shipped_watchdog,
+        "anti_wrinkle": anti_wrinkle, "device_types": device_types,
+        "overrides": overrides,
+    }
+    if memo:
+        key = json.dumps([str(path), setup_kw], sort_keys=True, default=str)
+        if key not in _SETUP_MEMO:
+            while len(_SETUP_MEMO) >= SETUP_MEMO_SIZE:
+                _SETUP_MEMO.pop(next(iter(_SETUP_MEMO)))
+            _SETUP_MEMO[key] = _export_setup(path, **setup_kw)
+        ctx = _SETUP_MEMO[key]
+    else:
+        ctx = _export_setup(path, **setup_kw)
+    if ctx is None:
+        return []
+    device_type, ac_device, force_aw = ctx["device_type"], ctx["ac_device"], ctx["force_aw"]
+    doc, base, cfg, store, opts = ctx["doc"], ctx["base"], ctx["cfg"], ctx["store"], ctx["opts"]
+    stop, level, prebuilt = ctx["stop"], ctx["level"], ctx["prebuilt"]
     cycles = base["past_cycles"]
-    rows: list[dict[str, Any]] = []
-    for cyc in cycles:
+    rows: list[tuple[int, dict[str, Any]]] = []
+    for ci, cyc in enumerate(cycles):
+        if only is not None and ci not in only:
+            continue
         pts = _cycle_readings(cyc)
         if len(pts) < MIN_READINGS:
             continue
@@ -519,6 +726,13 @@ def _measure_export(
         replayed = (
             _with_tumble_tail(cyc, pts, stop, level) if tumble_tail and ac_device else cyc
         )
+        halt_s: tuple[float, float] | None = None
+        if halt is not None:
+            replayed, h0, h1, span = _with_halt(
+                replayed, _cycle_readings(replayed), stop, halt[0], halt[1],
+                _halt_level(stop, halt[2]),
+            )
+            halt_s = (h0, h1)
         _AC.clear()
         try:
             sim = playground.simulate_cycle_detail(
@@ -548,7 +762,33 @@ def _measure_export(
             1 for ts in _AC.get("ac_finals", ())
             if highs and (ts - base_t).total_seconds() < highs[-1]
         )
-        rows.append({
+        # #452 stall display: flips as (on, offset) and the standby-band finalizes.
+        flips = [(on, (ts - base_t).total_seconds()) for on, ts in _AC.get("stall", ())]
+        ons = [t for on, t in flips if on]
+        sb_finals = [(ts - base_t).total_seconds() for ts in _AC.get("sb_finals", ())]
+        finishes = [
+            float(ev.get("t") or 0.0) for ev in events if ev.get("type") == "finished"
+        ]
+        in_halt = (lambda t: halt_s is not None and halt_s[0] <= t <= halt_s[1] + 60.0)
+        stall_fields = {
+            "halt_start_s": round(halt_s[0], 1) if halt_s else None,
+            "halt_end_s": round(halt_s[1], 1) if halt_s else None,
+            "stall_on_s": round(ons[0], 1) if ons else None,
+            "stall_n": len(ons),
+            "stall_in_halt": any(in_halt(t) for t in ons),
+            "stall_outside_halt": any(not in_halt(t) for t in ons),
+            "stall_latency_s": (
+                round(min(t for t in ons if in_halt(t)) - halt_s[0], 1)
+                if halt_s and any(in_halt(t) for t in ons) else None
+            ),
+            "sb_final_s": round(sb_finals[0], 1) if sb_finals else None,
+            "sb_why": (_AC.get("sb_why") or [None])[0],
+            "stall_why": _AC.get("stall_why"),
+            "closed_in_halt": any(
+                halt_s is not None and halt_s[0] <= t < halt_s[1] for t in finishes
+            ),
+        }
+        rows.append((ci, {
             "export": _export_key(path),
             "device_type": device_type,
             "id": str(cyc.get("id"))[:12],
@@ -582,7 +822,8 @@ def _measure_export(
             ),
             "ac_early_n": ac_early_n,
             "sb_held": bool(_AC.get("sb_held")),
-        })
+            **stall_fields,
+        }))
     return rows
 
 
@@ -716,6 +957,63 @@ def _print_ac_summary(rows: list[dict[str, Any]]) -> None:
     )
 
 
+def _summarise_stall(
+    rows: list[dict[str, Any]], device_type: str | None = None
+) -> dict[str, Any]:
+    """Stall display figures (#452) over the rows of one scope.
+
+    ``detected``: a stall flagged inside the inserted plateau; ``false``: a row
+    flagged outside it (on an unmodified run, any flag); ``closed in halt``: the
+    cycle was closed while the plateau was still running (it then splits on resume).
+    """
+    sel = [r for r in rows if device_type is None or r["device_type"] == device_type]
+    halted = [r for r in sel if r.get("halt_start_s") is not None]
+    det = [r for r in halted if r.get("stall_in_halt")]
+    lat = [r["stall_latency_s"] / 60.0 for r in det if r.get("stall_latency_s") is not None]
+    return {
+        "n": len(sel),
+        "halted": len(halted),
+        "detected": len(det),
+        "detected_pct": round(100.0 * len(det) / len(halted), 1) if halted else None,
+        "med_latency_min": round(float(np.median(lat)), 1) if lat else None,
+        "false": sum(1 for r in sel if r.get("stall_outside_halt")),
+        "closed_in_halt": sum(1 for r in halted if r.get("closed_in_halt")),
+        "sb_fired": sum(1 for r in sel if r.get("sb_final_s") is not None),
+    }
+
+
+_STALL_KEYS = (
+    "n", "halted", "detected", "detected_pct", "med_latency_min", "false",
+    "closed_in_halt", "sb_fired",
+)
+
+
+def _print_stall_summary(rows: list[dict[str, Any]]) -> None:
+    if not any(r.get("halt_start_s") is not None or r.get("stall_n") for r in rows):
+        return
+    print("\nstall display (#452)")
+    hdr = (
+        f"{'scope':<18}{'n':>5}{'halted':>8}{'detect':>8}{'%':>7}{'lat min':>9}"
+        f"{'false':>7}{'closed':>8}{'sb fin':>8}"
+    )
+    print(hdr)
+    print("-" * len(hdr))
+    for scope in [None, *sorted({r["device_type"] for r in rows})]:
+        st = _summarise_stall(rows, scope)
+        if not st["n"]:
+            continue
+        print(
+            f"{scope or 'ALL':<18}{st['n']:>5}{st['halted']:>8}{st['detected']:>8}"
+            f"{st['detected_pct']!s:>7}{st['med_latency_min']!s:>9}{st['false']:>7}"
+            f"{st['closed_in_halt']:>8}{st['sb_fired']:>8}"
+        )
+    print(
+        "detect = flagged inside the inserted plateau; false = flagged outside it; "
+        "closed = the cycle\nwas closed while the plateau ran; sb fin = standby-band "
+        "finalizes."
+    )
+
+
 def _print_summary(rows: list[dict[str, Any]]) -> None:
     devices = sorted({r["device_type"] for r in rows})
     hdr = (
@@ -740,6 +1038,7 @@ def _print_summary(rows: list[dict[str, Any]]) -> None:
     )
     print("weak = matched cycles whose final confidence is below 0.4 (the gate's bar).")
     _print_ac_summary(rows)
+    _print_stall_summary(rows)
 
 
 def _compare(before_path: str, after_path: str) -> None:
@@ -797,6 +1096,16 @@ def _compare(before_path: str, after_path: str) -> None:
                 f"    {b['device_type']:<16} {b['id']:<14} {str(b['label'])[:24]:<24} "
                 f"{_at(b):>18} -> {_at(a):<18}"
             )
+        print()
+
+    for scope in [None, *devices]:
+        bs = _summarise_stall([b_by_id[k] for k in common], scope)
+        as_ = _summarise_stall([a_by_id[k] for k in common], scope)
+        if not (bs["halted"] or as_["halted"] or bs["false"] or as_["false"]):
+            continue
+        print(f"=== stall {scope or 'ALL'} (n={as_['n']})")
+        for key in _STALL_KEYS[1:]:
+            print(f"    {key:<18} {bs[key]!s:>8} -> {as_[key]!s:>8}")
         print()
 
     moved = [
@@ -939,9 +1248,201 @@ def _check_baseline(baseline: dict[str, Any], rows: list[dict[str, Any]]) -> int
     return 0
 
 
-def main() -> int:
+#: ``--jobs`` unit timings of the previous run (longest-first ordering only).
+TIMINGS_FILE = (
+    Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache")
+    / "ha_washdata_end_gate" / "timings.json"
+)
+
+
+#: ``--jobs`` / ``--jobs-file`` ceiling.
+MAX_JOBS = 8
+
+
+def default_jobs() -> int:
+    """One core left for the rest of the machine, at most ``MAX_JOBS``."""
+    return max(1, min((os.cpu_count() or 2) - 1, MAX_JOBS))
+
+
+def _setup_replay(no_shortening: bool, no_stall_guard: bool, repo: str | None = None) -> None:
+    """Patches and probes every replay needs; idempotent (also the pool initializer)."""
+    global REPO  # noqa: PLW0603
+    if repo is not None:
+        REPO = Path(repo)  # a worker re-imports this module: keep the caller's root
+    _integration()
+    if no_shortening:
+        # Patch `const`, not `cycle_detector`. Since register item 355 the gate
+        # calls `resolve_end_gate_late_ratio(device_type)`, which reads these two
+        # names out of `const` at call time - rebinding the detector module's
+        # imported copy no longer reaches it, and this arm would silently stop
+        # disabling the shortening while still reporting itself as the pre-306
+        # baseline. Both names, because the per-device map wins for washers.
+        from custom_components.ha_washdata import const as _const  # noqa: PLC0415
+
+        _const.END_GATE_LATE_RATIO = 1e9
+        _const.END_GATE_LATE_RATIO_BY_DEVICE = {}
+
+    if no_stall_guard:
+        from custom_components.ha_washdata import cycle_detector as _cd  # noqa: PLC0415
+
+        _cd.STALL_HOLDS_STANDBY_BAND = False
+
+    logging.getLogger("custom_components.ha_washdata").setLevel(logging.ERROR)
+    _install_anticrease_probe()
+    _install_stall_probe()
+
+
+def _unit_key(path: Path, ci: int, cyc: dict[str, Any]) -> str:
+    return f"{_export_key(path)}#{ci}#{str(cyc.get('id'))[:12]}"
+
+
+def _plan_units(
+    paths: list[Path], all_formats: bool, device_types: tuple[str, ...] | None,
+    timings: dict[str, float],
+) -> list[tuple[float, int, int, str]]:
+    """``(estimated s, export index, cycle index, key)`` per cycle, in submit order.
+
+    One unit per stored cycle, so the slowest export spreads over every worker.
+    The estimate is the unit's time in the previous run (``timings``), else its
+    trace length scaled by the seconds per reading those timings show.
+    """
+    raw: list[tuple[int, int, str, int]] = []
+    for i, path in enumerate(paths):
+        found = _export_doc(path, all_formats, device_types)
+        if found is None:
+            continue
+        for ci, cyc in enumerate(found[2]):
+            cyc = cyc if isinstance(cyc, dict) else {}
+            raw.append((i, ci, _unit_key(path, ci, cyc), len(cyc.get("power_data") or [])))
+    known = [(timings[k], n) for _i, _c, k, n in raw if k in timings]
+    per_reading = (sum(t for t, _n in known) / max(1, sum(n for _t, n in known))) if known else 1e-3
+    units = [(timings.get(k, n * per_reading), i, ci, k) for i, ci, k, n in raw]
+    # Longest export first, and its longest cycles first. Export-major because a
+    # worker that moves to another export repeats that export's setup: cycle-major
+    # order cost 271 setups (79 core-s) on the corpus at --jobs 4, this ~100.
+    total: dict[int, float] = {}
+    for est, i, _ci, _k in units:
+        total[i] = total.get(i, 0.0) + est
+    return sorted(units, key=lambda u: (-total[u[1]], u[1], -u[0], u[2]))
+
+
+def _replay_unit(
+    unit: tuple[int, int, Path, bool, bool, dict[str, Any]],
+) -> tuple[int, int, list[tuple[int, dict[str, Any]]], float]:
+    idx, ci, path, no_shortening, loo, kw = unit
+    t0 = time.monotonic()
+    rows = _replay_export(path, no_shortening, loo, only=frozenset((ci,)), memo=True, **kw)
+    return idx, ci, rows, time.monotonic() - t0
+
+
+def _load_timings(path: Path | None) -> dict[str, float]:
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8")) if path else {}
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(doc, dict):
+        return {}
+    return {k: float(v) for k, v in doc.items() if isinstance(v, (int, float))}
+
+
+def _save_timings(path: Path | None, timings: dict[str, float]) -> None:
+    if not path:
+        return
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+        tmp.write_text(json.dumps(timings, sort_keys=True), encoding="utf-8")
+        os.replace(tmp, path)
+    except OSError:
+        pass  # an ordering hint only
+
+
+def _granted(jobs: int, jobs_file: Path | None) -> int:
+    """Workers allowed right now: ``--jobs``, or the count in ``--jobs-file``."""
+    if jobs_file is None:
+        return jobs
+    try:
+        return max(1, min(MAX_JOBS, int(jobs_file.read_text(encoding="utf-8").strip())))
+    except (OSError, ValueError):
+        return jobs
+
+
+def _replay_parallel(
+    paths: list[Path], jobs: int, no_shortening: bool, no_stall_guard: bool,
+    loo: bool, kw: dict[str, Any], timings_path: Path | None = None,
+    jobs_file: Path | None = None,
+) -> list[dict[str, Any]]:
+    """The serial loop's rows, in its order, from ``jobs`` worker processes.
+
+    Units are single cycles (``_plan_units`` order), handed out one at a time
+    as workers free up, so no worker is left holding a long tail. With
+    ``jobs_file`` the number of units in flight is re-read after every unit, so
+    a scheduler (``devtools/verify.py``) can hand the run more cores mid-way;
+    spawned workers start on demand. Rows are put back in (export, cycle index)
+    order, so the output is identical to ``--jobs 1``; progress goes to stderr.
+    """
+    timings = _load_timings(timings_path)
+    units = _plan_units(paths, kw["all_formats"], kw["device_types"], timings)
+    todo = iter(units)
+    got: list[tuple[int, int, dict[str, Any]]] = []
+    t0 = time.monotonic()
+    step = max(1, len(units) // 20)
+    finished = 0
+    # spawn, not fork: the caller may have threads (pytest does), and a fork copies
+    # their held locks. Each worker imports the integration once (~3 s).
+    with ProcessPoolExecutor(
+        max(jobs, MAX_JOBS) if jobs_file else jobs,
+        mp_context=multiprocessing.get_context("spawn"),
+        initializer=_setup_replay, initargs=(no_shortening, no_stall_guard, str(REPO)),
+    ) as ex:
+        inflight: dict[Any, str] = {}
+
+        def top_up() -> None:
+            limit = _granted(jobs, jobs_file)
+            while len(inflight) < limit:
+                unit = next(todo, None)
+                if unit is None:
+                    return
+                _est, i, ci, key = unit
+                inflight[ex.submit(_replay_unit, (i, ci, paths[i], no_shortening, loo, kw))] = key
+
+        top_up()
+        while inflight:
+            done, _pending = wait(inflight, return_when=FIRST_COMPLETED)
+            for fut in done:
+                idx, ci, rows, took = fut.result()
+                timings[inflight.pop(fut)] = round(took, 3)
+                got.extend((idx, ci, row) for _c, row in rows)
+                finished += 1
+                if finished % step == 0 or finished == len(units):
+                    print(
+                        f"end_gate_eval: {finished}/{len(units)} cycles, "
+                        f"{time.monotonic() - t0:.0f}s, {_granted(jobs, jobs_file)} workers",
+                        file=sys.stderr, flush=True,
+                    )
+            top_up()
+    _save_timings(timings_path, timings)
+    return [row for _i, _c, row in sorted(got, key=lambda r: (r[0], r[1]))]
+
+
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--json", help="write per-cycle rows here for --compare")
+    ap.add_argument(
+        "--jobs", type=int, default=default_jobs(), metavar="N",
+        help="worker processes (default: cpu_count - 1, at most 8; 1 = serial). "
+        "Rows and summary are identical for every N",
+    )
+    ap.add_argument(
+        "--jobs-file", metavar="FILE",
+        help="re-read the worker count from FILE after every cycle (a scheduler such as "
+        "devtools/verify.sh grows it mid-run); --jobs is the start value",
+    )
+    ap.add_argument(
+        "--timings", default=str(TIMINGS_FILE), metavar="FILE",
+        help="--jobs: per-cycle timings of the previous run, read to hand out the "
+        "longest cycles first and rewritten after the run ('' = none)",
+    )
     ap.add_argument("--compare", nargs=2, metavar=("BEFORE", "AFTER"))
     ap.add_argument(
         "--no-shortening", action="store_true",
@@ -996,7 +1497,25 @@ def main() -> int:
         help="replay only exports whose corpus path contains SUBSTR (repeatable). "
         "Not with --check",
     )
-    args = ap.parse_args()
+    ap.add_argument(
+        "--halt-at", type=float, default=None, metavar="F",
+        help="insert a flat standby plateau at fraction F of each cycle's active span "
+        "(F >= 1: after its last activity) (#452)",
+    )
+    ap.add_argument(
+        "--halt-min", default="30", metavar="M",
+        help="with --halt-at: plateau length in minutes, or 'Nx' for N x the active span",
+    )
+    ap.add_argument(
+        "--halt-level", default="auto", metavar="W",
+        help="with --halt-at: plateau level in W (+-0.4), or 'auto' (see the docstring)",
+    )
+    ap.add_argument(
+        "--no-stall-guard", action="store_true",
+        help="before arm: the stall display does not hold the standby-band finalize",
+    )
+
+    args = ap.parse_args(argv)
     overrides: dict[str, Any] = {}
     for item in args.set:
         key, sep, raw = item.partition("=")
@@ -1029,20 +1548,13 @@ def main() -> int:
     # Taken before the replay: other work may change the tree while it runs.
     tree = _tree_state() if args.write_baseline else {}
 
-    if args.no_shortening:
-        # Patch `const`, not `cycle_detector`. Since register item 355 the gate
-        # calls `resolve_end_gate_late_ratio(device_type)`, which reads these two
-        # names out of `const` at call time - rebinding the detector module's
-        # imported copy no longer reaches it, and this arm would silently stop
-        # disabling the shortening while still reporting itself as the pre-306
-        # baseline. Both names, because the per-device map wins for washers.
-        from custom_components.ha_washdata import const as _const
-
-        _const.END_GATE_LATE_RATIO = 1e9
-        _const.END_GATE_LATE_RATIO_BY_DEVICE = {}
-
-    logging.getLogger("custom_components.ha_washdata").setLevel(logging.ERROR)
-    _install_anticrease_probe()
+    _setup_replay(args.no_shortening, args.no_stall_guard)
+    halt = (
+        (float(args.halt_at), str(args.halt_min), str(args.halt_level))
+        if args.halt_at is not None else None
+    )
+    if args.check and halt is not None:
+        ap.error("--check replays the baseline's corpus unmodified: drop --halt-at")
     rows: list[dict[str, Any]] = []
     corpus = REPO / "cycle_data"
     if args.all_formats:
@@ -1052,13 +1564,21 @@ def main() -> int:
         paths = sorted(corpus.rglob("*.json"))
     if args.export:
         paths = [p for p in paths if any(sub in str(p) for sub in args.export)]
-    for path in paths:
-        rows.extend(_measure_export(
-            path, args.no_shortening, args.loo,
-            all_formats=args.all_formats, shipped_watchdog=args.shipped_watchdog,
-            anti_wrinkle=args.anti_wrinkle, tumble_tail=args.tumble_tail,
-            device_types=device_types or None, overrides=overrides or None,
-        ))
+    kw = {
+        "all_formats": args.all_formats, "shipped_watchdog": args.shipped_watchdog,
+        "anti_wrinkle": args.anti_wrinkle, "tumble_tail": args.tumble_tail,
+        "device_types": device_types or None, "overrides": overrides or None,
+        "halt": halt,
+    }
+    if (args.jobs > 1 or args.jobs_file) and paths:
+        rows = _replay_parallel(
+            paths, args.jobs, args.no_shortening, args.no_stall_guard, args.loo, kw,
+            Path(args.timings) if args.timings else None,
+            Path(args.jobs_file) if args.jobs_file else None,
+        )
+    else:
+        for path in paths:
+            rows.extend(_measure_export(path, args.no_shortening, args.loo, **kw))
 
     if not rows:
         print("no replayable cycles found - is cycle_data/ present?")

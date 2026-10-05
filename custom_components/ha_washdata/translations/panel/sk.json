@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entita sa nenašla",
     "running_long": "Beží dlho",
+    "stalled": "Zaseknuté",
     "remaining": "zostáva",
     "progress": "postup",
     "show_time_remaining": "Zobraziť zostávajúci čas",
@@ -248,6 +249,8 @@
     "save_total_cycles": "Uložiť celkový počet",
     "clear": "Vymazať",
     "add_brand": "Pridať značku",
+    "log_done_task": "Zapísať ako hotové: {task}",
+    "add_task": "Pridať úlohu",
     "add_appliance": "Pridať spotrebič",
     "retry": "Skúsiť znova",
     "confirm_appliance": "Potvrdiť tento spotrebič",
@@ -335,6 +338,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Vlastné úlohy",
+    "maintenance_supporter": "Potrebujete viac?",
     "access_control": "Kontrola prístupu",
     "add_maintenance": "Pridať udalosť údržby",
     "automation_delete": "Odstrániť túto automatizáciu",
@@ -390,6 +395,11 @@
     "aria_playground_chart3": "Interaktívny graf výkonu cyklu: prejdením myšou zobrazíte čas/výkon, kolieskom alebo dvoma prstami priblížite, ťahaním posuniete",
     "device_unresolved": "Nedostupné zariadenie ({id})",
     "drag_to_resize": "Potiahnutím zmeníte veľkosť",
+    "task_name": "Úloha",
+    "every_cycles": "Interval (cykly)",
+    "every_days": "Interval (dni)",
+    "new_task_name": "Nová úloha",
+    "days_since_service": "{since} / {total} dní",
     "actions": "Akcie",
     "activity": "Aktivita",
     "administrators": "Administrátori",
@@ -435,6 +445,8 @@
     "energy": "Energia",
     "event_type": "Typ udalosti",
     "expected": "Očakávané",
+    "suspected_profile": "{name} (odhad)",
+    "runner_up_profile": "{name} (druhý najlepší)",
     "expected_duration": "Očakávané trvanie (min)",
     "file_kb": "Súbor (kB)",
     "from": "Od",
@@ -778,6 +790,8 @@
     "import_wizard": "Import - vybrať údaje",
     "history_import": "Import histórie výkonu",
     "apply_suggestions_title": "Použiť návrhy",
+    "remove_task_title": "Odstrániť úlohu",
+    "remove_task_msg": "Odstrániť pripomienku \"{task}\"? Jej záznamy v denníku údržby zostanú zachované.",
     "apply_suggestions_msg": "Zmeniť tieto nastavenia ({n})? Integrácia sa po uložení znovu načíta.",
     "discard_settings_title": "Zahodiť neuložené zmeny?",
     "discard_settings_msg": "Neuložené zmeny nastavení: {n}. Opustiť Nastavenia a zmeny zahodiť?",
@@ -996,6 +1010,10 @@
     "online_unavailable": "Online funkcie nie sú na tomto serveri dostupné.",
     "store_picker_offline": "Povoľte online funkcie v ozubenom koliesku nastavení, aby ste mohli vyberať z katalógu komunity.",
     "pick_brand_first": "Najprv vyberte značku spotrebiča.",
+    "custom_task_limit": "Dosiahli ste maximálny počet úloh ({max}).",
+    "custom_tasks_intro": "Pridajte čokoľvek ďalšie, na čo chcete dostať pripomienku. Úloha je na rade, keď uplynie ktorýkoľvek z intervalov; jeden nechajte prázdny alebo 0, aby platil len ten druhý.",
+    "maintenance_due_sensor_hint": "Binárny senzor Údržba na rade sa zapne, keď je ktorákoľvek úloha na rade, takže si môžete vytvoriť vlastnú automatizáciu upozornení.",
+    "maintenance_supporter_intro": "Maintenance Supporter je samostatná integrácia, ktorá dokáže oveľa viac: ľubovoľný spotrebič alebo úloha, plánovanie podľa času, používania alebo senzora, upozornenia a história. Dokáže využívať počítadlo cyklov WashData.",
     "adopt_settings_hint": "Použiť nastavenia detekcie a porovnávania zdieľaného zariadenia na toto zariadenie",
     "include_settings_hint": "Zahrnúť prahy detekcie, váhy porovnávania a ďalšie parametre do zdieľaného balíčka",
     "onboard_download": "Stiahnuť hotové nastavenie z obchodu komunity",
@@ -1101,6 +1119,7 @@
     "wash_dw": "Hlavné pranie čistiaceho prostriedku s ohrevom."
   },
   "placeholder": {
+    "custom_task": "napr. Vyčistiť tesnenie dvierok",
     "add": "pridať…",
     "group_name": "napr. Bavlna 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1670,6 +1689,7 @@
     "resetting": "Resetovanie…",
     "trimming": "Orezávanie…",
     "splitting": "Rozdeľovanie…",
+    "stalled": "Zaseknuté",
     "deleting": "Odstraňovanie…",
     "imported": "Importované",
     "preparing": "Príprava…",
@@ -1801,6 +1821,11 @@
   },
   "toast": {
     "catalog_refreshed": "Katalóg komunity obnovený",
+    "task_name_required": "Zadajte názov úlohy",
+    "task_added": "Úloha pridaná",
+    "task_save_failed": "Úlohu sa nepodarilo uložiť: {error}",
+    "task_removed": "Úloha odstránená",
+    "maint_logged": "Zapísané ako hotové: {task}",
     "access_saved": "Kontrola prístupu uložená",
     "all_wiped": "Všetky dáta vymazané",
     "analysis_complete_none": "Analýza dokončená: žiadne nové návrhy",
@@ -1962,6 +1987,10 @@
   },
   "maint": {
     "bearing_service": "Servis ložísk",
+    "salt": "Doplniť soľ",
+    "rinse_aid": "Doplniť leštidlo",
+    "lint_filter": "Vyčistiť filter na vlákna",
+    "condenser_clean": "Vyčistiť kondenzátor",
     "descale": "Odstránenie vodného kameňa",
     "drum_clean": "Vyčistiť bubon",
     "filter_clean": "Vyčistiť filter",
@@ -2025,7 +2054,8 @@
     "notify_held": "Oznámenie bolo pozdržané pre tiché hodiny.",
     "finished": "Cyklus dosiahol koncový stav a skončil.",
     "match_reverted": "Program sa vrátil do rozpoznávania: jeho skóre kleslo výrazne pod jeho vlastnú špičku.",
-    "verified_pause": "Živé zarovnanie potvrdilo (alebo uvoľnilo) pozastavenie v rámci programu. Kým pozastavenie trvá, cyklus sa neukončí."
+    "verified_pause": "Živé zarovnanie potvrdilo (alebo uvoľnilo) pozastavenie v rámci programu. Kým pozastavenie trvá, cyklus sa neukončí.",
+    "stalled": "Cyklus zotrval na kľudovom príkone dlhšie, než u tohto programu kedy trvá pauza, a práca ešte zostáva. Zobrazené ako Pozastavené (Zaseknuté); cyklus zostáva otvorený."
   },
   "store": {
     "search_ph2": "Hľadať podľa značky alebo modelu…",
@@ -2059,6 +2089,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter na GitHube ↗",
     "manual": "Príručka ↗"
   },
   "tip": {

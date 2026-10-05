@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entītija nav atrasta",
     "running_long": "Darbojas ilgi",
+    "stalled": "Iestrēdzis",
     "remaining": "atlicis",
     "progress": "progress",
     "show_time_remaining": "Rādīt atlikušo laiku",
@@ -245,6 +246,8 @@
     "save_total_cycles": "Saglabāt kopējo skaitu",
     "clear": "Notīrīt",
     "add_brand": "Pievienot zīmolu",
+    "log_done_task": "Atzīmēt kā izpildītu: {task}",
+    "add_task": "Pievienot uzdevumu",
     "add_appliance": "Pievienot ierīci",
     "retry": "Mēģināt vēlreiz",
     "confirm_appliance": "Apstiprināt šo ierīci",
@@ -332,6 +335,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Jūsu uzdevumi",
+    "maintenance_supporter": "Vajag vairāk?",
     "access_control": "Piekļuves kontrole",
     "add_maintenance": "Pievienot apkopes notikumu",
     "automation_delete": "Dzēst šo automatizāciju",
@@ -388,6 +393,11 @@
     "device_unresolved": "Nepieejama ierīce ({id})",
     "drag_to_resize": "Velciet, lai mainītu izmēru",
     "pg_anti_wrinkle": "Pretgrumbu režīms",
+    "task_name": "Uzdevums",
+    "every_cycles": "Intervāls (cikli)",
+    "every_days": "Intervāls (dienas)",
+    "new_task_name": "Jauns uzdevums",
+    "days_since_service": "{since} / {total} dienas",
     "actions": "Darbības",
     "activity": "Aktivitāte",
     "administrators": "Administratori",
@@ -432,6 +442,8 @@
     "energy": "Enerģija",
     "event_type": "Notikuma veids",
     "expected": "Gaidāmais",
+    "suspected_profile": "{name} (iespējamā)",
+    "runner_up_profile": "{name} (otrais kandidāts)",
     "expected_duration": "Paredzamais ilgums (min)",
     "file_kb": "Fails (kB)",
     "from": "No",
@@ -770,6 +782,8 @@
     "import_wizard": "Imports - izvēlēties datus",
     "history_import": "Jaudas vēstures importēšana",
     "apply_suggestions_title": "Lietot ieteikumus",
+    "remove_task_title": "Noņemt uzdevumu",
+    "remove_task_msg": "Noņemt atgādinājumu \"{task}\"? Tā ieraksti apkopes žurnālā tiek saglabāti.",
     "apply_suggestions_msg": "Mainīt šos iestatījumus ({n})? Pēc saglabāšanas integrācija tiks ielādēta no jauna.",
     "discard_settings_title": "Izmest nesaglabātās izmaiņas?",
     "discard_settings_msg": "Nesaglabātas iestatījumu izmaiņas: {n}. Pamest Iestatījumus un izmest tās?",
@@ -974,6 +988,10 @@
     "online_unavailable": "Tiešsaistes funkcijas šajā serverī nav pieejamas.",
     "store_picker_offline": "Iespējojiet tiešsaistes funkcijas iestatījumu zobratā, lai izvēlētos no kopienas kataloga.",
     "pick_brand_first": "Vispirms izvēlieties ierīces zīmolu.",
+    "custom_task_limit": "Sasniegts maksimālais uzdevumu skaits ({max}).",
+    "custom_tasks_intro": "Pievienojiet jebko citu, par ko vēlaties saņemt atgādinājumu. Uzdevums jāveic, kad sasniegts jebkurš no intervāliem; vienu atstājiet tukšu vai 0, lai izmantotu tikai otru.",
+    "maintenance_due_sensor_hint": "Binārais sensors \"Jāveic apkope\" ieslēdzas, kamēr kāds uzdevums ir jāveic, tāpēc varat izveidot savu paziņojumu automatizāciju.",
+    "maintenance_supporter_intro": "Maintenance Supporter ir atsevišķa integrācija, kas spēj daudz vairāk: jebkura ierīce vai uzdevums, grafiki pēc laika, lietojuma vai sensora, paziņojumi un vēsture. Tā var izmantot WashData ciklu skaitītāju.",
     "adopt_settings_hint": "Pārrakstīt šīs ierīces noteikšanas un saskaņošanas sliekšņus ar kopīgotajiem. Jūsu paziņojumi, entītijas un enerģijas cena netiek mainīti.",
     "include_settings_hint": "Kopīgot šīs ierīces atpazīšanas un saskaņošanas sliekšņus (ne jūsu paziņojumus, entītijas vai enerģijas cenu). Pieņēmēji izvēlas, vai piemērot tos.",
     "onboard_download": "Jauna ierīce? Pieņemiet gatavu iestatījumu (programmas, atskaites ciklus un fāzes) no cita WashData lietotāja ar to pašu ierīci.",
@@ -1085,6 +1103,7 @@
     "wash_dw": "Galvenā mazgāšanas līdzekļa mazgāšana ar sildīšanu."
   },
   "placeholder": {
+    "custom_task": "piem., Tīrīt durvju blīvējumu",
     "add": "pievienot…",
     "group_name": "piem. Kokvilna 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1654,6 +1673,7 @@
     "resetting": "Atiestata…",
     "trimming": "Apgriež…",
     "splitting": "Sadala…",
+    "stalled": "Iestrēdzis",
     "deleting": "Dzēš…",
     "imported": "Importēts",
     "preparing": "Sagatavo…",
@@ -1694,6 +1714,11 @@
   "toast": {
     "catalog_refreshed": "Kopienas katalogs atsvaidzināts",
     "contrib_device_changed": "Pievienots kopienas veikalā, bet, kamēr veidlapa bija atvērta, mainījās atlasītā ierīce. Atlasiet to sadaļā Iestatījumi.",
+    "task_name_required": "Piešķiriet uzdevumam nosaukumu",
+    "task_added": "Uzdevums pievienots",
+    "task_save_failed": "Neizdevās saglabāt uzdevumu: {error}",
+    "task_removed": "Uzdevums noņemts",
+    "maint_logged": "Atzīmēts kā izpildīts: {task}",
     "access_saved": "Piekļuves kontrole saglabāta",
     "all_wiped": "Visi dati ir izdzēsti",
     "analysis_complete_none": "Analīze pabeigta: nav jaunu ieteikumu",
@@ -1944,6 +1969,10 @@
   },
   "maint": {
     "bearing_service": "Gultņu apkope",
+    "salt": "Papildināt sāli",
+    "rinse_aid": "Papildināt skalošanas līdzekli",
+    "lint_filter": "Tīrīt plūksnu filtru",
+    "condenser_clean": "Tīrīt kondensatoru",
     "descale": "Atkaļķošana",
     "drum_clean": "Tīrīt tromeli",
     "filter_clean": "Tīrīt filtru",
@@ -2007,7 +2036,8 @@
     "notify_held": "Paziņojums tika aizturēts klusuma stundu dēļ.",
     "finished": "Cikls sasniedza gala stāvokli un beidzās.",
     "match_reverted": "Programma atgriezās noteikšanas stāvoklī: tās rezultāts nokritās krietni zem sava maksimuma.",
-    "verified_pause": "Reāllaika salāgošana apstiprināja (vai atcēla) pauzi programmas vidū. Kamēr tā ir spēkā, cikls netiek pabeigts."
+    "verified_pause": "Reāllaika salāgošana apstiprināja (vai atcēla) pauzi programmas vidū. Kamēr tā ir spēkā, cikls netiek pabeigts.",
+    "stalled": "Cikls palika uz gaidīšanas jaudas ilgāk, nekā šī programma tur jebkad pauzē, lai gan darbs vēl nav pabeigts. Rādīts kā Pauzēts (Iestrēdzis); cikls paliek atvērts."
   },
   "store": {
     "search_ph2": "Meklēt pēc zīmola vai modeļa…",
@@ -2041,6 +2071,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter vietnē GitHub ↗",
     "manual": "Rokasgrāmata ↗"
   },
   "tip": {

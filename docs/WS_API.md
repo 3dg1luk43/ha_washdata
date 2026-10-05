@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand - run `python3 devtools/generate_ws_types.py`.
 
-**108 commands.**
+**111 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -28,6 +28,9 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `get_maintenance_log` | entry_id | `GetMaintenanceLogResponse` |
 | `add_maintenance_event` | entry_id, event_type, date?, notes? | `AddMaintenanceEventResponse` |
 | `delete_maintenance_event` | entry_id, event_id | `SuccessResponse` |
+| `add_maintenance_task` | entry_id, name, cycles?, days? | `MaintenanceTaskResponse` |
+| `update_maintenance_task` | entry_id, task_id, name?, cycles?, days? | `MaintenanceTaskResponse` |
+| `delete_maintenance_task` | entry_id, task_id | `SuccessResponse` |
 | `set_lifetime_cycle_count` | entry_id, count | `SetLifetimeCycleCountResponse` |
 | `label_cycle` | entry_id, cycle_id, profile_name?, new_profile_name? | `SuccessResponse` |
 | `delete_cycle` | entry_id, cycle_id | `SuccessResponse` |
@@ -411,11 +414,14 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `log` | yes | list[dict[str, any]] |
-| `due` | yes | any |
+| `due` | yes | list[str] |
 | `event_types` | yes | list[str] |
-| `reminders` | yes | dict[str, any] |
+| `reminders` | yes | dict[str, number] |
 | `cycles_since` | yes | dict[str, number] |
+| `custom_tasks` | yes | list[MaintenanceTask] |
+| `status` | yes | list[MaintenanceStatusRow] |
 | `lifetime_cycle_count` | yes | number |
+| `limits` | yes | MaintenanceLimits |
 
 ## `ha_washdata/add_maintenance_event`
 
@@ -443,6 +449,58 @@ _None._
 | --- | --- | --- |
 | `entry_id` | yes | str |
 | `event_id` | yes | str |
+
+**Response** (`SuccessResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+
+## `ha_washdata/add_maintenance_task`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `name` | yes | str |
+| `cycles` | no | int |
+| `days` | no | int |
+
+**Response** (`MaintenanceTaskResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `task` | yes | MaintenanceTask |
+
+## `ha_washdata/update_maintenance_task`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `task_id` | yes | str |
+| `name` | no | str |
+| `cycles` | no | int |
+| `days` | no | int |
+
+**Response** (`MaintenanceTaskResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `task` | yes | MaintenanceTask |
+
+## `ha_washdata/delete_maintenance_task`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `task_id` | yes | str |
 
 **Response** (`SuccessResponse`)
 

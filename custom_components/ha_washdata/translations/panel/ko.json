@@ -3,6 +3,7 @@
         "min": "분",
         "entity_not_found": "엔티티를 찾을 수 없음",
         "running_long": "지연 중",
+        "stalled": "멈춤",
         "remaining": "남음",
         "progress": "진행률",
         "show_time_remaining": "남은 시간 표시",
@@ -239,6 +240,8 @@
         "save_total_cycles": "누적 값 저장",
         "clear": "지우기",
         "add_brand": "브랜드 추가",
+        "log_done_task": "완료 기록: {task}",
+        "add_task": "작업 추가",
         "add_appliance": "가전제품 추가",
         "retry": "다시 시도",
         "confirm_appliance": "이 가전제품 확인",
@@ -326,6 +329,8 @@
         }
     },
     "hdr": {
+        "custom_tasks": "직접 추가한 작업",
+        "maintenance_supporter": "더 필요하신가요?",
         "access_control": "접근 제어",
         "add_maintenance": "유지보수 이벤트 추가",
         "automation_delete": "이 자동화 삭제",
@@ -381,6 +386,11 @@
         "aria_playground_chart3": "대화형 사이클 전력 그래프: 마우스를 올리면 시간/전력 표시, 스크롤 또는 두 손가락으로 확대/축소, 드래그하여 이동",
         "device_unresolved": "사용할 수 없는 기기 ({id})",
         "drag_to_resize": "드래그하여 크기 조정",
+        "task_name": "작업",
+        "every_cycles": "주기 (사이클)",
+        "every_days": "주기 (일)",
+        "new_task_name": "새 작업",
+        "days_since_service": "{since} / {total}일",
         "actions": "작업",
         "activity": "활동",
         "administrators": "관리자",
@@ -425,6 +435,8 @@
         "energy": "에너지",
         "event_type": "이벤트 유형",
         "expected": "예상",
+        "suspected_profile": "{name} (추정)",
+        "runner_up_profile": "{name} (차순위)",
         "expected_duration": "예상 기간(분)",
         "file_kb": "파일(KB)",
         "from": "시작",
@@ -754,6 +766,8 @@
         "import_wizard": "가져오기 - 데이터 선택",
         "history_import": "전력 이력 가져오기",
         "apply_suggestions_title": "제안 적용",
+        "remove_task_title": "작업 제거",
+        "remove_task_msg": "알림 \"{task}\"을(를) 제거하시겠습니까? 유지보수 기록의 항목은 유지됩니다.",
         "apply_suggestions_msg": "이 {n}개 설정을 변경하시겠습니까? 저장 후 통합이 다시 로드됩니다.",
         "discard_settings_title": "저장하지 않은 변경 사항을 버리시겠습니까?",
         "discard_settings_msg": "저장되지 않은 설정 변경 사항이 {n}개 있습니다. 설정을 나가고 변경 사항을 버리시겠습니까?",
@@ -948,6 +962,10 @@
         "online_unavailable": "이 서버에서는 온라인 기능을 사용할 수 없습니다.",
         "store_picker_offline": "설정(톱니바퀴)에서 온라인 기능을 활성화하면 커뮤니티 카탈로그에서 선택할 수 있습니다.",
         "pick_brand_first": "먼저 가전제품 브랜드를 선택하세요.",
+        "custom_task_limit": "작업 한도 {max}개에 도달했습니다.",
+        "custom_tasks_intro": "알림을 받고 싶은 다른 항목을 추가하세요. 두 간격 중 하나에 도달하면 작업이 예정 상태가 됩니다. 하나만 사용하려면 다른 하나를 비워 두거나 0으로 설정하세요.",
+        "maintenance_due_sensor_hint": "\"유지보수 예정\" 바이너리 센서는 예정된 작업이 있는 동안 켜지므로 직접 알림 자동화를 만들 수 있습니다.",
+        "maintenance_supporter_intro": "Maintenance Supporter는 훨씬 더 많은 기능을 제공하는 별도의 통합입니다. 모든 가전이나 작업, 시간·사용량·센서 기반 일정, 알림, 기록을 지원합니다. WashData 사이클 카운터를 사용할 수 있습니다.",
         "adopt_settings_hint": "이 기기의 감지 및 매칭 임계값을 공유된 것으로 덮어씁니다. 알림, 엔티티, 에너지 가격은 변경되지 않습니다.",
         "include_settings_hint": "이 기기의 인식 및 매칭 임계값을 공유합니다(알림, 엔티티 또는 에너지 가격 제외). 채택자가 적용 여부를 선택합니다.",
         "onboard_download": "새 기기인가요? 같은 가전제품을 가진 다른 WashData 사용자의 완성된 설정(프로그램, 참조 사이클, 페이즈)을 채택하세요.",
@@ -1073,6 +1091,7 @@
         "wash_dw": "주요세제를 가열하여 세탁합니다."
     },
     "placeholder": {
+        "custom_task": "예: 도어 씰 청소",
         "add": "추가…",
         "group_name": "예：면 2:47",
         "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1642,6 +1661,7 @@
         "resetting": "재설정 중…",
         "trimming": "자르는 중…",
         "splitting": "분할 중…",
+        "stalled": "멈춤",
         "deleting": "삭제 중…",
         "imported": "가져옴",
         "preparing": "준비 중…",
@@ -1681,6 +1701,11 @@
     },
     "toast": {
         "catalog_refreshed": "커뮤니티 카탈로그를 새로 고쳤습니다",
+        "task_name_required": "작업 이름을 입력하세요",
+        "task_added": "작업이 추가되었습니다",
+        "task_save_failed": "작업을 저장할 수 없습니다: {error}",
+        "task_removed": "작업이 제거되었습니다",
+        "maint_logged": "완료로 기록됨: {task}",
         "access_saved": "액세스 제어가 저장되었습니다.",
         "all_wiped": "모든 데이터가 지워졌습니다.",
         "analysis_complete_none": "분석 완료: 새로운 제안 없음",
@@ -1928,6 +1953,10 @@
     },
     "maint": {
         "bearing_service": "베어링 정비",
+        "salt": "소금 보충",
+        "rinse_aid": "린스 보충",
+        "lint_filter": "보풀 필터 청소",
+        "condenser_clean": "콘덴서 청소",
         "descale": "석회질 제거",
         "drum_clean": "드럼 청소",
         "filter_clean": "필터 청소",
@@ -1971,7 +2000,8 @@
         "notify_held": "방해 금지 시간대라서 알림이 보류되었습니다.",
         "finished": "사이클이 종료 상태에 도달하여 끝났습니다.",
         "match_reverted": "프로그램이 감지 중 상태로 되돌아갔습니다. 점수가 자체 최고치보다 크게 떨어졌습니다.",
-        "verified_pause": "실시간 정렬이 프로그램 내부의 일시 중지를 확인(또는 해제)했습니다. 이 상태가 유지되는 동안에는 사이클이 종료되지 않습니다."
+        "verified_pause": "실시간 정렬이 프로그램 내부의 일시 중지를 확인(또는 해제)했습니다. 이 상태가 유지되는 동안에는 사이클이 종료되지 않습니다.",
+        "stalled": "남은 작업이 있는데도 사이클이 이 프로그램이 그 지점에서 일시 정지하는 어떤 시간보다 오래 대기 전력 상태에 머물렀습니다. 일시 정지됨 (멈춤)으로 표시되며 사이클은 계속 열린 상태로 유지됩니다."
     },
     "store": {
         "search_ph2": "제조사 또는 모델명 검색…",
@@ -2005,6 +2035,7 @@
         }
     },
     "link": {
+        "maintenance_supporter": "GitHub의 Maintenance Supporter ↗",
         "manual": "설명서 ↗"
     },
     "tip": {

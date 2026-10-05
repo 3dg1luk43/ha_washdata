@@ -90,7 +90,6 @@ from .const import (
     STATE_ENDING,
     STATE_FINISHED,
     STATE_PAUSED,
-    STATE_RINSE,
     STATE_RUNNING,
     STATE_STARTING,
     STATE_USER_PAUSED,
@@ -109,7 +108,6 @@ _ACTIVE_STATES = frozenset(
         STATE_ENDING,
         STATE_PAUSED,
         STATE_USER_PAUSED,
-        STATE_RINSE,
         STATE_ANTI_WRINKLE,
     }
 )

@@ -3,6 +3,7 @@
     "min": "mín.",
     "entity_not_found": "Eining fannst ekki",
     "running_long": "Keyrir lengur",
+    "stalled": "Stöðvuð",
     "remaining": "eftir",
     "progress": "framvinda",
     "show_time_remaining": "Sýna tíma sem eftir er",
@@ -91,6 +92,8 @@
     "matcher_used_tip": "Lotur skráðar á þessu tæki sem samsvörun WashData merkti sjálf með þessu innflutta kerfi. Innflutt kerfi sem aldrei fær samsvörun passar hugsanlega ekki við tækið þitt og má fjarlægja það. Talið staðbundið; ekkert er sent í samfélagsverslunina."
   },
   "btn": {
+    "log_done_task": "Skrá sem lokið: {task}",
+    "add_task": "Bæta við verki",
     "pg_preset_delete": "Eyða forstillingu",
     "pg_preset_load": "Hlaða forstillingu",
     "pg_preset_load_tip": "Skipta gildunum á tilraunasvæðinu út fyrir þessa forstillingu (virku stillingarnar haldast óbreyttar)",
@@ -329,6 +332,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Þín eigin verk",
+    "maintenance_supporter": "Þarftu meira?",
     "access_control": "Aðgangsstýring",
     "add_maintenance": "Bæta við viðhaldsatburði",
     "automation_delete": "Eyða þessari sjálfvirkni",
@@ -379,6 +384,11 @@
     "poor": "⚠ Léleg samsvörun"
   },
   "lbl": {
+    "task_name": "Verk",
+    "every_cycles": "Millibil (lotur)",
+    "every_days": "Millibil (dagar)",
+    "new_task_name": "Nýtt verk",
+    "days_since_service": "{since} / {total} dagar",
     "envelope_position_tip": "Staðsetning á skráðum ferli kerfisins sem samsvarar, {pct}%. Mælt með því að stilla þessa lotu saman við prófílinn í stað þess að telja tíma, þannig að hún helst rétt þegar keyrsla er lengri eða styttri en venjulega. Hún uppfærist á meðan tækið er kyrrt og getur því dregist aftur úr í virkum áfanga.",
     "envelope_position": "ferill {pct}%",
     "aria_playground_chart3": "Gagnvirkt aflrit fyrir lotuna: haltu bendlinum yfir til að lesa tíma/afl, skrunaðu eða þysjaðu með tveimur fingrum, dragðu til að hliðra",
@@ -428,6 +438,8 @@
     "energy": "Orka",
     "event_type": "Tegund atburðar",
     "expected": "Vænt",
+    "suspected_profile": "{name} (líklegt)",
+    "runner_up_profile": "{name} (næstbest)",
     "expected_duration": "Áætluð lengd (mín.)",
     "file_kb": "Skrá (kB)",
     "from": "Frá",
@@ -718,6 +730,8 @@
     }
   },
   "modal": {
+    "remove_task_title": "Fjarlægja verk",
+    "remove_task_msg": "Fjarlægja áminninguna \"{task}\"? Færslur hennar í viðhaldsskránni eru varðveittar.",
     "auto_label": "Sjálfvirk merkingarlotur",
     "correct_feedback": "Leiðrétta endurgjöf",
     "create_profile": "Búðu til prófíl",
@@ -771,6 +785,10 @@
     "undo_import_title": "Afturkalla síðasta innflutning"
   },
   "msg": {
+    "custom_task_limit": "Þú hefur náð hámarki upp á {max} verk.",
+    "custom_tasks_intro": "Bættu við öllu öðru sem þú vilt fá áminningu um. Verk er tímabært þegar annað hvort millibilið næst; hafðu annað autt eða 0 til að nota aðeins hitt.",
+    "maintenance_due_sensor_hint": "Tvíundarskynjarinn Viðhald tímabært kveikir á sér á meðan eitthvert verk er tímabært, svo þú getur búið til þína eigin sjálfvirkni fyrir tilkynningar.",
+    "maintenance_supporter_intro": "Maintenance Supporter er sérstök samþætting sem gerir miklu meira: hvaða tæki eða verk sem er, áætlanir eftir tíma, notkun eða skynjara, tilkynningar og feril. Hún getur notað lotuteljara WashData.",
     "pg_canvas_empty3": "Veldu lotu að ofan og ýttu á Keyra til að herma hana. Haltu svo bendlinum yfir til að lesa gildi, skrunaðu eða þysjaðu með tveimur fingrum og dragðu til að hliðra.",
     "pg_preset_delete_confirm": "Eyða forstillingunni \"{name}\"?",
     "pg_preset_limit": "Hámarksfjölda forstillinga náð ({n})",
@@ -1089,6 +1107,7 @@
     "wash_dw": "Aðalþvottaefnisþvottur með hita."
   },
   "placeholder": {
+    "custom_task": "t.d. hreinsa hurðarþéttingu",
     "add": "bæta við…",
     "group_name": "t.d. Bómull 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1658,6 +1677,7 @@
     "resetting": "Endurstilli…",
     "trimming": "Klippi til…",
     "splitting": "Skipti…",
+    "stalled": "Stöðvuð",
     "deleting": "Eyði…",
     "imported": "Flutt inn",
     "preparing": "Undirbý…",
@@ -1788,6 +1808,11 @@
     "wrong_profile": "Rangt snið"
   },
   "toast": {
+    "task_name_required": "Gefðu verkinu nafn",
+    "task_added": "Verki bætt við",
+    "task_save_failed": "Ekki tókst að vista verkið: {error}",
+    "task_removed": "Verk fjarlægt",
+    "maint_logged": "Skráð sem lokið: {task}",
     "catalog_refreshed": "Samfélagsskráin endurnýjuð",
     "access_saved": "Aðgangsstýring vistuð",
     "all_wiped": "Öll gögn þurrkuð út",
@@ -1945,6 +1970,10 @@
     "up": "Stefna upp"
   },
   "maint": {
+    "salt": "Fylla á salt",
+    "rinse_aid": "Fylla á gljáa",
+    "lint_filter": "Hreinsa lósíu",
+    "condenser_clean": "Hreinsa eimsvala",
     "bearing_service": "Þjónusta á legum",
     "descale": "Afkalka",
     "drum_clean": "Hreinsa tromlu",
@@ -1989,7 +2018,8 @@
     "notify_held": "Tilkynningu var haldið eftir vegna hljóðlátra stunda.",
     "finished": "Lotan náði lokastöðu og endaði.",
     "match_reverted": "Kerfið féll aftur í greiningu: skor þess fór langt niður fyrir eigið hámark.",
-    "verified_pause": "Samstillingin í rauntíma staðfesti hlé innan kerfisins (eða aflétti því). Á meðan það varir er lotunni ekki lokið."
+    "verified_pause": "Samstillingin í rauntíma staðfesti hlé innan kerfisins (eða aflétti því). Á meðan það varir er lotunni ekki lokið.",
+    "stalled": "Lotan sat á biðstöðunotkun sinni lengur en nokkurt hlé þessa kerfis á þeim stað, þótt kerfinu væri ekki lokið. Sýnt sem Gert hlé (Stöðvuð); lotan helst opin."
   },
   "store": {
     "search_ph2": "Leita eftir vörumerki eða gerð…",
@@ -2023,6 +2053,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter á GitHub ↗",
     "manual": "Handbók ↗"
   },
   "tip": {

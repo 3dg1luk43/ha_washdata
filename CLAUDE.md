@@ -29,12 +29,17 @@ pip install -r requirements-dev.txt
 ## Commands
 
 ```bash
-./run_tests.sh                  # fast suite (default, ~2 min - skips slow + benchmark)
-./run_tests.sh --slow           # real-data replays, stress simulations
+./run_tests.sh                  # fast suite (default; pytest-xdist, one worker per core up to 8: ~30 s on 4 cores; --serial = one process)
+./run_tests.sh --slow           # slow tier on pytest-xdist --dist loadgroup (one group per suggestion-loop device; ~4.5 min on 4 cores)
 ./run_tests.sh --bench          # none left: work budgets run in the fast suite (tests/test_perf_budgets.py)
 ./run_tests.sh --e2e            # Playwright E2E (chromium + mobile-chrome, ~2 min)
 ./run_tests.sh --e2e-min        # same E2E against the minified build (the bytes users download)
 ./run_tests.sh --all            # everything (~13 min)
+devtools/verify.sh              # quick: generated files, docs_check, fast suite, E2E readable (~3 min on 4 cores)
+devtools/verify.sh full         # pre-push: + slow suite, E2E min, release_check --skip-tests, end_gate --check, eval.py gate on one dynamically shared core budget; ~10 min cold on this 4C/8T box, ~6.7 min after a Python-only change (E2E/end-gate reported `cached` when their inputs are unchanged since a pass)
+devtools/verify.sh full --box   # + the real-HA test box (never by default; the summary names changed files that need it)
+devtools/verify.sh full --no-cache   # run every stage regardless of the result cache (use before a release)
+devtools/release_check.sh --skip-tests   # every release check except the test suites
 
 pytest tests/test_cycle_detector.py -v
 pytest tests/test_cycle_detector.py::test_function_name -v
@@ -55,7 +60,7 @@ python3 devtools/docs_check.py          # doc anchors/constants/register ids/dee
 
 python3 devtools/eval.py run --mode fast     # LOO matcher accuracy on the SHIPPED path (audit F1)
 python3 devtools/eval.py compare BASE.json NEW.json   # paired deltas, McNemar, guarded metrics
-python3 devtools/end_gate_eval.py --loo      # ENDING fallback-gate lag/early-end/split (item 329); add --all-formats (diagnostics dumps + user-Contributed, item 465) and --shipped-watchdog
+python3 devtools/end_gate_eval.py --loo      # ENDING fallback-gate lag/early-end/split (item 329); add --all-formats (diagnostics dumps + user-Contributed, item 465) and --shipped-watchdog; --jobs N (default cpu-1, max 8; rows identical to --jobs 1)
 python3 devtools/energy_projection_eval.py   # projected-energy accuracy, LOO (audit PROGRESS-04)
 python3 devtools/ml_energy_gate_eval.py      # on-device total_energy promotion gate vs naive and incumbent (audit ML-12)
 python3 devtools/terminal_drop_plugpull_eval.py   # dishwasher plug-pull fast finalize, LOO (audit ML-08); --rule off|ungated|guarded
@@ -68,7 +73,7 @@ python3 devtools/start_gate_eval.py <diag.json|history.csv|sqlite:db>   # start 
 python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)
 python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed point / ladder / oscillation / erased cycles (F10)
 
-python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug into a real HA (web UI :8080)
+python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug into a real HA (web UI :8081)
 python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent
 
 cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its README.md)
@@ -80,7 +85,7 @@ cd devtools/testbox && ./hactl.py ws ha_washdata/get_profiles entry_id=<id>   # 
 
 ### Two tiers of test, and what each can prove
 
-`run_tests.sh` is the fast, deterministic tier: frozen time, the recorded `cycle_data/` corpus, pure
+`devtools/verify.sh full` is the pre-push run (add `--box` when the change needs a real HA, see below). `run_tests.sh` is the fast, deterministic tier: frozen time, the recorded `cycle_data/` corpus, pure
 detection/matching/progress maths. It is where accuracy lives. But **about a third of its modules build
 Home Assistant with `MagicMock()`**, and a MagicMock accepts any service call - so code Home
 Assistant rejects outright used to pass every test (register item 316: `title: None` killed every

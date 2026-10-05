@@ -2,6 +2,51 @@
 
 Documentation has moved to the [Developer Tools wiki page](https://github.com/3dg1luk43/ha_washdata/wiki/Developer-Tools).
 
+## `verify.sh` - the whole verification, one core budget
+
+```bash
+devtools/verify.sh                 # quick: generated files, docs_check, fast suite, E2E (readable)
+devtools/verify.sh full            # + slow suite, E2E (minified), release_check --skip-tests,
+                                   #   end_gate_eval --check, eval.py baseline-status + run/compare
+devtools/verify.sh full --box      # + the real-HA test box (never by default)
+devtools/verify.sh full --cores 4  # share 4 cores (default: every usable core)
+devtools/verify.sh full --dry-run  # stages, work estimates, first allocation; runs nothing
+devtools/verify.sh full --no-cache # also re-run stages whose inputs are unchanged since a pass
+```
+
+- **Scheduling.** Each stage's work estimate is the core-seconds it held last run (cached
+  in `~/.cache/ha_washdata_verify/timings.json`; defaults until then). Tiny stages start at
+  once beside the rest; the long fixed-width stages (slow, both E2E runs, fast) start
+  longest first, each extra core going to the one that would finish last; one process over
+  the budget runs the next waiting fixed stage in the background so it never starts last.
+  Then the elastic `end-gate` takes that slot and, once nothing is queued, grows into every
+  freed core (`end_gate_eval.py --jobs-file`). Other stages keep the worker count they
+  started with (pytest `-n`, Playwright `--workers`, `--jobs`), which inner pools see as
+  `PYTHON_CPU_COUNT`; under xdist the slow tier runs no process pool inside a worker.
+- **Output.** One table: stage, result, cores, start, end, wall, core-seconds held, CPU,
+  log; then total wall, budget use, the tail (first to last non-tiny stage finishing) and
+  the under-used tail (time at the end with fewer cores held than the budget). Logs per
+  stage in a temp dir printed first. Exit 1 on any failure; a stale `eval_baseline.json`
+  is a warning.
+- **Measured 2026-10-05** (i5-1145G7: 4 cores / 8 threads; with both threads of a core
+  busy each runs at ~60%, so 8 threads give ~1.2x the work of 4): `full` on 8 threads
+  10m05s when every stage runs, 6m41s when a Python-only change leaves both E2E runs
+  cached, 5m26s when only tests changed; `quick` 2m51s on 4 cores.
+- **Result cache.** Both E2E runs and `end-gate` declare their inputs; when a sha256 over
+  them equals the one recorded at the stage's last pass (`~/.cache/ha_washdata_verify/passed.json`)
+  the stage is reported `cached` instead of run, so a Python-only change skips both
+  browser suites and a panel-only change skips the replay. `--no-cache` runs everything.
+  The test suites and the box are never cached.
+- **Box hint.** Without `--box`, the summary names changed files that only a real Home
+  Assistant can judge (setup, services, entities, WS API, notifications).
+- The two Playwright runs (ports 4567 / 4568) run concurrently with separate `--output`
+  dirs. `run_tests.sh` itself runs both pytest tiers on pytest-xdist (`--serial` opts out):
+  the fast tier `--dist load`, the slow tier `--dist loadgroup`, where the suggestion-loop
+  corpus run is one group per device and `heavy` tests go out first.
+- `end_gate_eval.py --jobs N` replays one cycle per unit, longest export first (per-cycle
+  timings of the last run in `~/.cache/ha_washdata_end_gate/timings.json`); rows and
+  `--check` are identical to `--jobs 1`.
+
 ## `eval.py` - matching accuracy gate
 
 Leave-one-cycle-out over `cycle_data/` (gitignored: symlink it or pass `--corpus`) on the
@@ -80,7 +125,7 @@ harness (`testbox/`). Needs `paho-mqtt`, and `nicegui` for the web UI; the broke
 `priv_secrets.py`.
 
 ```bash
-python3 devtools/mqtt_mock_socket.py                                  # web UI on :8080
+python3 devtools/mqtt_mock_socket.py                                  # web UI on :8081
 ./run_mock.sh on | off                                                # same, as a systemd service enabled at boot
 python3 devtools/mqtt_mock_socket.py --list --source <export.json>    # scenarios, modes, programmes
 python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent

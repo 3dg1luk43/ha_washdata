@@ -209,8 +209,9 @@ class WashDataRecordStartButton(ButtonEntity):
         return (
             not self._manager.recorder.is_recording
             # The state entities show, so a hidden standby re-probe (item 501)
-            # does not toggle availability on every reading.
-            and self._manager.detector.exposed_state == "off"
+            # does not toggle availability on every reading. Idle (#452) is a
+            # switched-on appliance between cycles: recording starts from there too.
+            and self._manager.detector.exposed_state in ("off", "idle")
         )
 
     async def async_press(self) -> None:

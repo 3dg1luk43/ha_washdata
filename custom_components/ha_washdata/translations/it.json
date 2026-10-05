@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Ambiguità corrispondenza"
+      },
+      "maintenance_due": {
+        "name": "Manutenzione in scadenza",
+        "state": {
+          "on": "In scadenza",
+          "off": "Non in scadenza"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID attività in scadenza"
+          },
+          "due_tasks": {
+            "name": "Attività in scadenza",
+            "state": {
+              "descale": "Decalcifica",
+              "filter_clean": "Pulisci filtro",
+              "drum_clean": "Pulisci cestello",
+              "bearing_service": "Manutenzione cuscinetti",
+              "other": "Altro",
+              "salt": "Ricarica sale",
+              "rinse_aid": "Ricarica brillantante",
+              "lint_filter": "Pulisci filtro lanugine",
+              "condenser_clean": "Pulisci condensatore"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Antirughe",
           "interrupted": "Interrotto",
           "force_stopped": "Fermato forzatamente",
-          "rinse": "Risciacquo",
           "unknown": "Sconosciuto",
           "clean": "Pulito",
           "delay_wait": "In attesa di iniziare"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalia del ciclo",
+            "state": {
+              "overrun": "In ritardo",
+              "stalled": "Bloccato"
+            }
+          }
         }
       },
       "washer_program": {

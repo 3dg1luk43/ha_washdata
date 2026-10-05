@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Неоднозначність відповідності"
+      },
+      "maintenance_due": {
+        "name": "Потрібне обслуговування",
+        "state": {
+          "on": "Потрібно",
+          "off": "Не потрібно"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID потрібних завдань"
+          },
+          "due_tasks": {
+            "name": "Потрібні завдання",
+            "state": {
+              "descale": "Видалення накипу",
+              "filter_clean": "Очистити фільтр",
+              "drum_clean": "Очистити барабан",
+              "bearing_service": "Обслуговування підшипників",
+              "other": "Інше",
+              "salt": "Додати сіль",
+              "rinse_aid": "Додати ополіскувач",
+              "lint_filter": "Очистити фільтр ворсу",
+              "condenser_clean": "Очистити конденсатор"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Проти зморшок",
           "interrupted": "Перерваний",
           "force_stopped": "Примусово зупинено",
-          "rinse": "Полоскання",
           "unknown": "Невідомо",
           "clean": "Чистий",
           "delay_wait": "Очікування початку"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Аномалія циклу",
+            "state": {
+              "overrun": "Працює довго",
+              "stalled": "Застряг"
+            }
+          }
         }
       },
       "washer_program": {

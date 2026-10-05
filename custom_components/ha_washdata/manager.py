@@ -28,6 +28,7 @@ import re
 import traceback
 import uuid
 import asyncio
+import functools
 from asyncio import Task
 from collections.abc import Callable, Coroutine, Mapping
 from datetime import datetime, timedelta
@@ -84,7 +85,6 @@ from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_AUTO_MAINTENANCE,
     CONF_MAINTENANCE_REMINDER_CYCLES,
-    DEFAULT_MAINTENANCE_REMINDER_CYCLES,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
@@ -112,6 +112,8 @@ from .const import (
     NOTIFY_EVENT_TIMER,
     EVENT_CYCLE_STARTED,
     EVENT_CYCLE_ENDED,
+    EVENT_CYCLE_STALLED,
+    CYCLE_ANOMALY_STALLED,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -234,6 +236,9 @@ from .detector_config import (
 from .cycle_detector import (
     MatchContext,
     CycleDetector,
+    STANDBY_LEVEL_RECENT_CYCLES,
+    learned_standby_level_w,
+    standby_near_stop_ceiling,
     terminal_high_for_guards,
 )
 from .learning import LearningManager
@@ -264,6 +269,7 @@ from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
 from . import match_rules
+from .maintenance import effective_reminders
 from .frontend import PANEL_URL_PATH
 
 _LOGGER = logging.getLogger(__name__)
@@ -1441,6 +1447,15 @@ class WashDataManager:
                         profile_name, float(self.detector.config.stop_threshold_w)
                     ) if profile_name else None
                 ),
+                # #452: the same below the near-stop ceiling, for the stall display.
+                # Lazy: read only when a flat run is long enough to be judged.
+                stall_catalogue=(
+                    functools.partial(
+                        self.profile_store.profile_pause_catalogue,
+                        profile_name,
+                        standby_near_stop_ceiling(self.detector.config.stop_threshold_w),
+                    ) if profile_name else None
+                ),
             ))
 
             # --- LOGGING (Unified) ---
@@ -2207,6 +2222,9 @@ class WashDataManager:
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.exception("Failed re-scoping custom phases for %s", self.entry_id)
 
+        # Preset maintenance reminders count from when they first apply (#461).
+        self._sync_maintenance_baselines()
+
         # Repair broken sample_cycle_id references (can happen after aggressive retention)
         try:
             stats = await self.profile_store.async_repair_profile_samples()
@@ -2224,6 +2242,9 @@ class WashDataManager:
             self._logger.exception(
                 "Failed repairing profile sample references for %s", self.entry_id
             )
+
+        # The idle display's standby level, from the stored cycles (#452).
+        await self._async_refresh_standby_level()
 
         # Subscribe to power sensor updates (state changes AND unchanged re-reports)
         self._subscribe_power_sensor()
@@ -2375,6 +2396,9 @@ class WashDataManager:
         # Propagate to learning pipeline (captured at construction time)
         self.learning_manager.device_type = self.device_type
         self.learning_manager.suggestion_engine.device_type = self.device_type
+        # A saved reminder change (or an import) may switch a preset maintenance
+        # reminder on or off: re-stamp its counting origin (#461).
+        self._sync_maintenance_baselines()
         # Recompute the device-scaled unmatched-guard ceiling (#404): it tracks
         # device_type, which the reconfigure flow can change.
         self._unmatched_watchdog_ceiling = float(
@@ -2676,6 +2700,8 @@ class WashDataManager:
             "the snapshot",
             self.detector.state,
         )
+        # The idle display's standby level depends on the stop/start thresholds.
+        await self._async_refresh_standby_level()
 
         self._logger.info("Configuration reloaded successfully")
 
@@ -3931,6 +3957,7 @@ class WashDataManager:
         self._in_power_event = True
         try:
             self.detector.process_reading(power, now)
+            self._check_stall_event()  # #452: only a real reading can start a stall
 
             if self._cycle_start_time is None and self.detector.current_cycle_start is not None:
                 self._cycle_start_time = self.detector.current_cycle_start
@@ -3950,6 +3977,55 @@ class WashDataManager:
             self._in_power_event = False
 
         self._notify_update()
+
+    def _check_stall_event(self) -> None:
+        """Fire EVENT_CYCLE_STALLED once per stall (discussion #452).
+
+        Display and automation only, never a notification. The payload is the
+        detector's small ``stall_info`` (no trace), far under the 32 KB limit.
+        """
+        if getattr(self.detector, "stalled", False) is not True:
+            return
+        info = self.detector.stall_info()
+        if not isinstance(info, dict):
+            return
+        key = info.get("stalled_since")
+        if key == getattr(self, "_stall_event_key", None):
+            return
+        self._stall_event_key = key
+        if not self._notify_fire_events:
+            return
+        self.hass.bus.async_fire(
+            EVENT_CYCLE_STALLED,
+            {
+                "entry_id": self.entry_id,
+                "device_name": self.config_entry.title,
+                "device_type": self.device_type,
+                "program": self._current_program,
+                **info,
+            },
+        )
+
+    async def _async_refresh_standby_level(self) -> None:
+        """Re-learn the standby level the idle display reads (#452). Never raises."""
+        try:
+            cfg = self.detector.config
+            cycles = [
+                dict(c) for c in list(self.profile_store.get_past_cycles() or [])[
+                    -STANDBY_LEVEL_RECENT_CYCLES:
+                ]
+                if isinstance(c, dict)
+            ]
+            level = await self.hass.async_add_executor_job(
+                learned_standby_level_w,
+                cycles,
+                float(cfg.stop_threshold_w),
+                float(cfg.start_threshold_w),
+            )
+            self.detector.set_standby_level(level)
+            self._logger.debug("Idle display standby level: %s W", level)
+        except Exception:  # noqa: BLE001 - a display statistic must never break setup
+            self._logger.debug("Could not learn the standby level", exc_info=True)
 
     def _check_state_save(self, now: datetime) -> None:
         """Periodically save active state."""
@@ -6437,6 +6513,8 @@ class WashDataManager:
             await self.profile_store.async_flush_saves()
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Failed to save the finished cycle: %s", e)
+        # The idle display's standby level now includes this cycle (#452).
+        await self._async_refresh_standby_level()
 
         if tail_failed and (
             cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token
@@ -8746,13 +8824,18 @@ class WashDataManager:
         if self.recorder.is_recording:
             return STATE_RUNNING
         state = self.detector.state
-        if state == STATE_STARTING:
-            # A standby re-probe reads as off until it has evidence (item 501).
-            state = self.detector.exposed_state
+        # The detector's display layer: a standby re-probe reads as off until it
+        # has evidence (item 501), a stalled cycle as paused and a two-level
+        # appliance at its standby level as idle (#452). A stand-in detector
+        # without one shows its raw state.
+        exposed = getattr(self.detector, "exposed_state", None)
+        if isinstance(exposed, str):
+            state = exposed
         # A completed cycle ends in STATE_FINISHED, not STATE_OFF; accept both
         # or the door-sensor Clean state (#153) is never surfaced (#282).
         if self._is_clean_state and state in (
             STATE_OFF,
+            STATE_IDLE,
             STATE_FINISHED,
         ):
             return STATE_CLEAN
@@ -8780,8 +8863,10 @@ class WashDataManager:
         """Return more granular state info (e.g. current phase)."""
         if self.recorder.is_recording:
             return "Recording"
-        if self.detector.state == STATE_STARTING:
-            return self.detector.exposed_sub_state  # item 501, as in check_state
+        # Item 501 / #452, as in check_state.
+        exposed = getattr(self.detector, "exposed_sub_state", NotImplemented)
+        if exposed is None or isinstance(exposed, str):
+            return exposed
         return self.detector.sub_state
 
     @property
@@ -8816,7 +8901,13 @@ class WashDataManager:
 
     @property
     def cycle_anomaly(self) -> str:
-        """Runtime anomaly state for the current cycle ("none" | "overrun")."""
+        """Runtime anomaly state for the current cycle ("none" | "overrun" | "stalled").
+
+        ``stalled`` (#452) wins while the detector shows the cycle stalled; like
+        ``overrun`` it is visible only and never a notification.
+        """
+        if getattr(self.detector, "stalled", False) is True:
+            return CYCLE_ANOMALY_STALLED
         return self._cycle_anomaly
 
     @property
@@ -8853,18 +8944,55 @@ class WashDataManager:
 
     @property
     def maintenance_due(self) -> list[str]:
-        """Maintenance event types whose reminder threshold has been reached (E2).
+        """Ids of the maintenance tasks that are due (E2, #461): built-in types, then
+        custom tasks.
 
-        Surfaced as a state-sensor attribute + read by the panel banner. Never a
-        notification. Returns an empty list on any error.
+        Surfaced as a state-sensor attribute, the Maintenance-due binary sensor and
+        the panel banner. Never a notification. Returns an empty list on any error.
         """
         try:
-            cfg = self.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
-            if not isinstance(cfg, dict) or not cfg:
-                cfg = DEFAULT_MAINTENANCE_REMINDER_CYCLES
-            return self.profile_store.get_maintenance_due(cfg)
+            return self.profile_store.get_maintenance_due(
+                effective_reminders(
+                    self.device_type,
+                    self.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES),
+                )
+            )
         except Exception:  # noqa: BLE001
             return []
+
+    @property
+    def maintenance_status(self) -> list[dict[str, Any]]:
+        """Every active maintenance reminder with its progress (#461). Never raises.
+
+        Rows from ``ProfileStore.get_maintenance_status`` against the device-type
+        aware reminder config (``maintenance.effective_reminders``).
+        """
+        try:
+            return self.profile_store.get_maintenance_status(
+                effective_reminders(
+                    self.device_type,
+                    self.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES),
+                )
+            )
+        except Exception:  # noqa: BLE001
+            return []
+
+    def _sync_maintenance_baselines(self) -> None:
+        """Stamp/clear the preset reminder types' counting origin (#461). Never raises.
+
+        Run on every setup and config reload, after the store is loaded, so a
+        preset reminder that starts applying (an upgrade, or the user switching it
+        on) counts from now rather than opening as due.
+        """
+        try:
+            self.profile_store.sync_maintenance_baselines(
+                effective_reminders(
+                    self.device_type,
+                    self.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES),
+                )
+            )
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Maintenance baseline sync failed", exc_info=True)
 
     @property
     def current_power(self):

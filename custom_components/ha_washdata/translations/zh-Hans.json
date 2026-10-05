@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "匹配歧义"
+      },
+      "maintenance_due": {
+        "name": "需要维护",
+        "state": {
+          "on": "到期",
+          "off": "未到期"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "到期任务 ID"
+          },
+          "due_tasks": {
+            "name": "到期任务",
+            "state": {
+              "descale": "除垢",
+              "filter_clean": "清洁过滤器",
+              "drum_clean": "清洁滚筒",
+              "bearing_service": "轴承保养",
+              "other": "其他",
+              "salt": "补充软水盐",
+              "rinse_aid": "补充光亮剂",
+              "lint_filter": "清洁绒毛过滤器",
+              "condenser_clean": "清洁冷凝器"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "抗皱",
           "interrupted": "被打断",
           "force_stopped": "强制停止",
-          "rinse": "冲洗",
           "unknown": "未知",
           "clean": "干净的",
           "delay_wait": "等待开始"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "周期异常",
+            "state": {
+              "overrun": "运行超时",
+              "stalled": "停滞"
+            }
+          }
         }
       },
       "washer_program": {

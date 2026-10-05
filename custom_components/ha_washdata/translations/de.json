@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Übereinstimmungsmehrdeutigkeit"
+      },
+      "maintenance_due": {
+        "name": "Wartung fällig",
+        "state": {
+          "on": "Fällig",
+          "off": "Nicht fällig"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "IDs fälliger Aufgaben"
+          },
+          "due_tasks": {
+            "name": "Fällige Aufgaben",
+            "state": {
+              "descale": "Entkalken",
+              "filter_clean": "Filter reinigen",
+              "drum_clean": "Trommel reinigen",
+              "bearing_service": "Lagerwartung",
+              "other": "Sonstiges",
+              "salt": "Salz nachfüllen",
+              "rinse_aid": "Klarspüler nachfüllen",
+              "lint_filter": "Flusensieb reinigen",
+              "condenser_clean": "Kondensator reinigen"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Knitterschutz",
           "interrupted": "Unterbrochen",
           "force_stopped": "Erzwungen beendet",
-          "rinse": "Spülen",
           "unknown": "Unbekannt",
           "clean": "Sauber",
           "delay_wait": "Warten auf den Start"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Zyklusanomalie",
+            "state": {
+              "overrun": "Läuft länger",
+              "stalled": "Stillstand"
+            }
+          }
         }
       },
       "washer_program": {

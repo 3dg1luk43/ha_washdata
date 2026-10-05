@@ -45,12 +45,15 @@ const _HASS_REFRESH_MS = 6000;
 const _CYCLE_PAGE_SIZE = 25;
 // playground.MAX_BATCH_CYCLES: the most cycles one Test-on-history / Optimize run replays.
 const _PG_MAX_BATCH_CYCLES = 50;
+// The external integration the Maintenance section points to (#461). It reads the
+// cycle-count sensor (translation_key "cycle_count", unit "cycles"), a public contract.
+const _MAINTENANCE_SUPPORTER_URL = 'https://github.com/iluebbe/maintenance_supporter';
 
 // Detector states that mean "a cycle is in flight". Single source for the device
 // bar dot, the status header and the pause/resume/force-stop controls -- these
 // used to be three hand-copied lists and the controls one had drifted (it was
 // missing 'paused', so an auto-paused cycle showed no buttons at all).
-const _ACTIVE_STATES = ['running', 'starting', 'paused', 'user_paused', 'ending', 'anti_wrinkle', 'rinse'];
+const _ACTIVE_STATES = ['running', 'starting', 'paused', 'user_paused', 'ending', 'anti_wrinkle'];
 
 // Declarative community-store preference toggles, rendered in the gear's Online &
 // Community pane. To ship a new online setting: add one row here AND one default in
@@ -1056,6 +1059,10 @@ button.wd-profile-card { display: block; }
 .wd-star-btn:hover { transform: scale(1.15); }
 /* Share-device selection tree (profile -> its reference cycles). */
 .wd-sd-tree { display: flex; flex-direction: column; gap: 8px; max-height: 44vh; overflow-y: auto; margin-bottom: 16px; }
+/* #460: a group's overflow:hidden drops its automatic min-height to 0, so past the
+   max-height above the groups shrank and clipped their own rows instead of the tree
+   scrolling (a phone hits the cap at once). Rows keep their height; the tree scrolls. */
+.wd-sd-tree > * { flex-shrink: 0; }
 .wd-sd-group { border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--secondary-background-color); overflow: hidden; }
 .wd-sd-prof { display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; font-weight: 600; }
 .wd-sd-prof-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1268,6 +1275,7 @@ button.wd-profile-card { display: block; }
   .wd-tab { padding: 9px 13px; }
   .wd-modal { padding: 16px; width: calc(100% - 18px); }
   .wd-modal-lg { max-width: 100%; }
+  .wd-sd-prof-name { white-space: normal; overflow-wrap: anywhere; }  /* #460: wrap, never ellipsise a choice */
   .wd-canvas-wrap canvas { height: 200px; }
   .wd-zoom-reset { width: 36px; height: 36px; top: 8px; right: 8px; font-size: 17px; }
   .wd-gtip { white-space: normal; max-width: calc(100vw - 24px); }
@@ -3467,21 +3475,50 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { /* leave prior status */ }
   }
 
-  // Fetch the matched profile's envelope so the cycle modal can overlay the
-  // expected curve. Attaches to the currently-open cycle modal and re-renders.
-  async _fetchCycleProfileEnv(entryId, profileName) {
+  // Which profile curves the cycle dialog overlays (#462). A labelled cycle overlays
+  // its label. An unlabelled one with pending detection feedback overlays the
+  // profile the matcher suspected (since 0.5.7's label margin such cycles stay
+  // unlabelled) plus the feedback's runner-up, since the margin to it is why the
+  // cycle was not labelled. Null when there is nothing to overlay.
+  _cycleOverlayPlan(cycleId, curve) {
+    const label = curve && curve.profile_name;
+    if (label) return { name: label, suspected: false, runnerUp: null };
+    const fb = (this._feedbacks || []).find(f => f.cycle_id === cycleId);
+    const name = fb && typeof fb.detected_profile === 'string' ? fb.detected_profile : '';
+    if (!name) return null;
+    const ru = (Array.isArray(fb.ranking) ? fb.ranking : []).find(c => c && typeof c.name === 'string' && c.name && c.name !== name);
+    return { name, suspected: true, runnerUp: ru ? ru.name : null };
+  }
+
+  // Resolve the overlay plan for a freshly loaded cycle and fetch its envelopes.
+  _loadCycleOverlays(entryId, cycleId, curve) {
+    const m = this._modal;
+    if (!m || m.type !== 'cycle-detail' || m.cycleId !== cycleId) return;
+    m.overlayPlan = this._cycleOverlayPlan(cycleId, curve);
+    if (!m.overlayPlan) return;
+    this._fetchCycleProfileEnv(entryId, m.overlayPlan.name);
+    if (m.overlayPlan.runnerUp) this._fetchCycleProfileEnv(entryId, m.overlayPlan.runnerUp, 'runnerUpEnv');
+  }
+
+  // Fetch a profile's envelope so the cycle modal can overlay it (into
+  // `m[slot]`). Attaches to the currently-open cycle modal and re-renders.
+  async _fetchCycleProfileEnv(entryId, profileName, slot = 'profileEnv') {
     if (!profileName) return;
+    // The requested name is stored on the modal and the response is matched
+    // against it: the overlaid profile is not always the cycle's label (#462),
+    // and Review mode rewrites curve.profile_name from its unsaved select.
+    const m0 = this._modal;
+    if (m0 && m0.type === 'cycle-detail') (m0.envFor = m0.envFor || {})[slot] = profileName;
     try {
       const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: entryId, profile_name: profileName });
       // Ignore stale responses: while this request was in flight the modal may
-      // have been closed, switched to a different cycle/device, or the cycle
-      // relabelled. Only apply the envelope when the open cycle-detail modal
-      // still represents this exact device + profile.
+      // have been closed or switched to a different cycle/device. Only apply the
+      // envelope when the open cycle-detail modal still asked for this profile.
       const m = this._modal;
       if (m && m.type === 'cycle-detail'
           && m.entryId === entryId
-          && m.curve && (m.curve.profile_name || '') === profileName) {
-        m.profileEnv = r.envelope || null;
+          && m.envFor && m.envFor[slot] === profileName) {
+        m[slot] = r.envelope || null;
         this._render();
       }
     } catch (_) { /* overlay is optional */ }
@@ -4930,7 +4967,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>
         <div class="wd-badge ${isRunning ? 'wd-running' : ''}" style="color:${color};background:color-mix(in srgb, ${color} 13%, transparent);">
           <span class="wd-dot"></span>${_esc(label)}
-          ${!rec && dev.sub_state && dev.sub_state.toLowerCase() !== state ? `<span style="opacity:.7;font-size:.85em">(${_esc(dev.sub_state)})</span>` : ''}
+          ${!rec && dev.sub_state && dev.sub_state.toLowerCase() !== state ? `<span style="opacity:.7;font-size:.85em">(${_esc(dev.sub_state === 'Stalled' ? this._tText('status.stalled', {}, 'Stalled') : dev.sub_state)})</span>` : ''}
         </div>
         ${programCtl}
         <div class="wd-stats">
@@ -7990,7 +8027,8 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // Backend detector state -> one of the four state-band categories.
-  _pgMapState(st) {
+  _pgMapState(st, stalled) {
+    if (stalled) return 'stalled';  // #452: shown as Paused / Stalled live
     if (st === 'running' || st === 'paused') return 'running';
     if (st === 'ending') return 'ending';
     if (st === 'starting') return 'detecting';
@@ -8014,7 +8052,7 @@ class HaWashdataPanel extends HTMLElement {
     const segs = [];
     let cur = null;
     for (const p of s) {
-      const st = this._pgMapState(p.state);
+      const st = this._pgMapState(p.state, p.stalled);
       if (!cur || cur.state !== st) { cur = { start: p.t, end: p.t, state: st }; segs.push(cur); }
       else cur.end = p.t;
     }
@@ -8158,8 +8196,8 @@ class HaWashdataPanel extends HTMLElement {
     drawThrLine(+threshStop, '#e34948', this._t('btn.stop', {}, 'Stop'));
 
     // State band
-    const stateColors = { idle: bgCol, detecting: '#42a5f566', running: '#66bb6a66', ending: '#ef535066', anti_wrinkle: '#ab47bc66' };
-    const stateLabels = { idle: this._t('lbl.pg_idle', {}, 'Idle'), detecting: this._t('lbl.pg_detecting', {}, 'Detecting'), running: this._t('lbl.pg_ev_running', {}, 'Running'), ending: this._t('lbl.pg_ev_ending', {}, 'Ending'), anti_wrinkle: this._t('lbl.pg_anti_wrinkle', {}, 'Anti-wrinkle') };
+    const stateColors = { idle: bgCol, detecting: '#42a5f566', running: '#66bb6a66', ending: '#ef535066', anti_wrinkle: '#ab47bc66', stalled: '#eda10066' };
+    const stateLabels = { idle: this._t('lbl.pg_idle', {}, 'Idle'), detecting: this._t('lbl.pg_detecting', {}, 'Detecting'), running: this._t('lbl.pg_ev_running', {}, 'Running'), ending: this._t('lbl.pg_ev_ending', {}, 'Ending'), anti_wrinkle: this._t('lbl.pg_anti_wrinkle', {}, 'Anti-wrinkle'), stalled: this._t('status.stalled', {}, 'Stalled') };
     const stateY = ch - stateBandH - phaseBandH;
     ctx.fillStyle = bgCol; ctx.fillRect(padL, stateY, cw - padL - padR, stateBandH);
     // Real detector state band from the backend simulation (no client-side copy).
@@ -8360,6 +8398,7 @@ class HaWashdataPanel extends HTMLElement {
       notify_milestone: ['🏆', '#2a78d6', this._t('lbl.pg_ev_notify_milestone', {}, 'Milestone notification')],
       notify_held:   ['🌙', '#7e57c2', this._t('lbl.pg_ev_notify_held', {}, 'Notification held (quiet hours)')],
       finished:      ['✓', '#4caf50', this._t('lbl.pg_ev_finished', {}, 'Finished')],
+      stalled:       ['⏸', '#eda100', this._t('status.stalled', {}, 'Stalled')],
     };
     const m = M[type] || ['•', 'var(--secondary-text-color)', type];
     return { glyph: m[0], color: m[1], label: m[2] };
@@ -8381,6 +8420,7 @@ class HaWashdataPanel extends HTMLElement {
       notify_milestone: this._t('pg_evd.notify_milestone', {}, 'A milestone notification would be sent.'),
       notify_held: this._t('pg_evd.notify_held', {}, 'A notification was held back for quiet hours.'),
       finished: this._t('pg_evd.finished', {}, 'The cycle reached a terminal state and ended.'),
+      stalled: this._t('pg_evd.stalled', {}, 'The cycle sat on its standby draw for longer than this program ever pauses there, with work still to do. Shown as Paused (Stalled); the cycle stays open.'),
     };
     return D[type] || '';
   }
@@ -8408,13 +8448,14 @@ class HaWashdataPanel extends HTMLElement {
     const elapsed = hoverT != null ? hoverT : totalDur;
     const power = this._pgInterpPower(pts, elapsed);
     const sp = this._pgSeriesAt(elapsed);
-    const stateKey = sp ? this._pgMapState(sp.state) : 'idle';
+    const stateKey = sp ? this._pgMapState(sp.state, sp.stalled) : 'idle';
     const stripStateMap = {
       idle: [this._t('lbl.pg_idle', {}, 'Idle'), 'var(--secondary-background-color)'],
       detecting: [this._t('lbl.pg_detecting', {}, 'Detecting'), '#42a5f5'],
       running: [this._t('lbl.pg_ev_running', {}, 'Running'), '#66bb6a'],
       ending: [this._t('lbl.pg_ev_ending', {}, 'Ending'), '#ef5350'],
       anti_wrinkle: [this._t('lbl.pg_anti_wrinkle', {}, 'Anti-wrinkle'), '#ab47bc'],
+      stalled: [this._t('status.stalled', {}, 'Stalled'), '#eda100'],
     };
     const [stateText, stateColor] = stripStateMap[stateKey] || stripStateMap.idle;
     const pct = sp && sp.progress != null ? Math.round(sp.progress) : null;
@@ -8583,16 +8624,40 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Maintenance (Advanced → Maintenance): service log + reminders ────────────
 
-  // Localized label for a maintenance event type (falls back to the raw key).
-  _maintLabel(type) {
+  // Label for a maintenance task: a built-in type is translated; a custom task
+  // (#461) shows the user's own name, never translated. `fallback` is the name a
+  // log entry recorded, so a renamed or removed task's history still reads.
+  _maintLabel(type, fallback) {
     const map = {
       descale: this._t('maint.descale', {}, 'Descale'),
       filter_clean: this._t('maint.filter_clean', {}, 'Clean filter'),
       drum_clean: this._t('maint.drum_clean', {}, 'Clean drum'),
       bearing_service: this._t('maint.bearing_service', {}, 'Bearing service'),
       other: this._t('maint.other', {}, 'Other'),
+      salt: this._t('maint.salt', {}, 'Refill salt'),
+      rinse_aid: this._t('maint.rinse_aid', {}, 'Refill rinse aid'),
+      lint_filter: this._t('maint.lint_filter', {}, 'Clean lint filter'),
+      condenser_clean: this._t('maint.condenser_clean', {}, 'Clean condenser'),
     };
-    return map[type] || type;
+    if (map[type]) return map[type];
+    const tasks = (this._maintenance && this._maintenance.custom_tasks) || [];
+    const task = tasks.find(t => t && t.id === type);
+    if (task && task.name) return task.name;
+    return fallback || type;
+  }
+
+  // Progress rows for the Service Status card. `status` (#461) covers built-in
+  // and custom tasks with cycle and day intervals; a payload without it (an older
+  // backend) falls back to the built-in cycle reminders.
+  _maintStatusRows(mt, eventTypes) {
+    if (Array.isArray(mt.status)) return mt.status;
+    const reminders = mt.reminders || {};
+    const cyclesSince = mt.cycles_since || {};
+    return eventTypes.map(t => {
+      const thr = parseInt(reminders[t], 10) || 0;
+      const since = Math.max(0, parseInt(cyclesSince[t], 10) || 0);
+      return { id: t, custom: false, cycles_interval: thr, days_interval: 0, cycles_since: since, days_since: null, due: thr > 0 && since >= thr };
+    }).filter(r => r.cycles_interval > 0);
   }
 
   _htmlMaintenance() {
@@ -8608,21 +8673,28 @@ class HaWashdataPanel extends HTMLElement {
     const due = mt.due || [];
     const log = mt.log || [];
     const reminders = mt.reminders || {};
-    const cyclesSince = mt.cycles_since || {};
+    const customTasks = Array.isArray(mt.custom_tasks) ? mt.custom_tasks : [];
+    const limits = mt.limits || {};
+    const nameMax = parseInt(limits.name_max, 10) || 60;
+    const tasksMax = parseInt(limits.tasks_max, 10) || 20;
     const odometer = Math.max(0, parseInt(mt.lifetime_cycle_count, 10) || 0);
     const canFull = this._canFull();
 
-    // Reminder-due banner (advisory style; never a notification).
+    // Reminder-due banner (advisory style; never a notification), with a one-click
+    // "Log done" per due task (#461): it logs that task, which restarts its count.
     const dueBanner = due.length ? (() => {
       const items = due.map(t => this._maintLabel(t)).join(', ');
-      return `<div style="margin-bottom:14px;padding:10px 12px;border-radius:6px;background:rgba(255,152,0,.10);border-left:3px solid var(--warning-color,#ff9800)">
+      const doneBtns = canEdit ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${due.map(t => `<button class="wd-btn wd-btn-sm" data-action="maint-log-done" data-mtype="${_esc(t)}">${this._t('btn.log_done_task', { task: this._maintLabel(t) }, 'Log done: {task}')}</button>`).join('')}</div>` : '';
+      return `<div class="wd-maint-due" style="margin-bottom:14px;padding:10px 12px;border-radius:6px;background:rgba(255,152,0,.10);border-left:3px solid var(--warning-color,#ff9800)">
         <span style="font-weight:600;color:var(--warning-color,#ff9800)">${this._t('msg.maintenance_due', { items }, 'Maintenance due: {items}')}</span>
+        ${doneBtns}
       </div>`;
     })() : '';
 
-    // Add-event form (edit access only).
+    // Add-event form (edit access only): built-in types, then the custom tasks.
     const today = new Date().toISOString().slice(0, 10);
-    const typeOpts = eventTypes.map(t => `<option value="${_esc(t)}">${_esc(this._maintLabel(t))}</option>`).join('');
+    const typeOpts = eventTypes.map(t => `<option value="${_esc(t)}">${_esc(this._maintLabel(t))}</option>`).join('')
+      + customTasks.map(t => `<option value="${_esc(t.id)}">${_esc(t.name || t.id)}</option>`).join('');
     const addForm = canEdit ? `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.add_maintenance', {}, 'Add Maintenance Event')}</div>
       <div class="wd-form-grid">
@@ -8640,7 +8712,7 @@ class HaWashdataPanel extends HTMLElement {
       return `<div class="wd-card" style="background:var(--secondary-background-color);padding:10px 12px">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
           <div>
-            <div style="font-weight:600">${_esc(this._maintLabel(e.event_type))}</div>
+            <div style="font-weight:600">${_esc(this._maintLabel(e.event_type, e.task_name))}</div>
             <div class="wd-info" style="margin-top:2px">${_fmtDate(e.date)}</div>
             ${notes}
           </div>
@@ -8649,30 +8721,59 @@ class HaWashdataPanel extends HTMLElement {
       </div>`;
     }).join('') : `<p class="wd-info">${this._t('msg.no_maintenance', {}, 'No maintenance recorded yet.')}</p>`;
 
-    // Reminder thresholds editor (edit access only).
+    // Reminder editor (edit access only): the built-in rows for this device type,
+    // then the user's own tasks (#461), saved together by "Save reminders".
+    const intervalInput = (attr, id, value, max) => `<input type="number" min="0" max="${max}" step="1" ${attr}="${_esc(id)}" value="${value ? _esc(value) : ''}" placeholder="0">`;
+    const taskRows = customTasks.map(t => `<div class="wd-form-grid wd-maint-task" data-mtask-row="${_esc(t.id)}" style="align-items:end;margin-top:8px;padding-top:8px;border-top:1px solid var(--divider-color)">
+        <div class="wd-field"><label>${this._t('lbl.task_name', {}, 'Task')}</label><input type="text" maxlength="${nameMax}" data-mtask-name="${_esc(t.id)}" value="${_esc(t.name || '')}"></div>
+        <div class="wd-field"><label>${this._t('lbl.every_cycles', {}, 'Every (cycles)')}</label>${intervalInput('data-mtask-cycles', t.id, t.cycles, limits.cycles_max || 100000)}</div>
+        <div class="wd-field"><label>${this._t('lbl.every_days', {}, 'Every (days)')}</label>${intervalInput('data-mtask-days', t.id, t.days, limits.days_max || 3650)}</div>
+        <div class="wd-field"><button class="wd-btn wd-btn-danger wd-btn-sm" data-action="maint-task-remove" data-mtask="${_esc(t.id)}">${this._t('btn.remove', {}, 'Remove')}</button></div>
+      </div>`).join('');
+    const newTaskRow = customTasks.length < tasksMax ? `<div class="wd-form-grid" style="align-items:end;margin-top:12px">
+        <div class="wd-field"><label>${this._t('lbl.new_task_name', {}, 'New task')}</label><input type="text" id="wd-mtask-new-name" maxlength="${nameMax}" placeholder="${_esc(this._t('placeholder.custom_task', {}, 'e.g. Clean door seal'))}"></div>
+        <div class="wd-field"><label>${this._t('lbl.every_cycles', {}, 'Every (cycles)')}</label><input type="number" min="0" step="1" id="wd-mtask-new-cycles" placeholder="0"></div>
+        <div class="wd-field"><label>${this._t('lbl.every_days', {}, 'Every (days)')}</label><input type="number" min="0" step="1" id="wd-mtask-new-days" placeholder="0"></div>
+        <div class="wd-field"><button class="wd-btn wd-btn-sm" data-action="maint-task-add">${this._t('btn.add_task', {}, 'Add task')}</button></div>
+      </div>` : `<p class="wd-info" style="margin-top:8px">${this._t('msg.custom_task_limit', { max: tasksMax }, 'You have reached the limit of {max} tasks.')}</p>`;
     const remEditor = canEdit ? `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.maintenance_reminders', {}, 'Service Reminders')}</div>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.reminders_intro', {}, 'Show a reminder in the panel this many cycles after the last service. Leave blank or 0 to turn a reminder off.')}</p>
       <div class="wd-form-grid">
         ${eventTypes.map(t => `<div class="wd-field"><label>${_esc(this._maintLabel(t))}</label><input type="number" min="0" step="1" data-maint-rem="${_esc(t)}" value="${reminders[t] != null ? _esc(reminders[t]) : ''}" placeholder="${_esc(this._t('lbl.reminder_every', {}, 'Remind every (cycles)'))}"></div>`).join('')}
       </div>
+      <div class="wd-subhead" style="margin-top:16px">${this._t('hdr.custom_tasks', {}, 'Your own tasks')}</div>
+      <p class="wd-info">${this._t('msg.custom_tasks_intro', {}, 'Add anything else you want to be reminded of. A task is due when either interval is reached; leave one blank or 0 to use only the other.')}</p>
+      ${taskRows}
+      ${newTaskRow}
+      <p class="wd-info" style="margin-top:12px">${this._t('msg.maintenance_due_sensor_hint', {}, 'The Maintenance due binary sensor turns on while any task is due, so you can build your own notification automation.')}</p>
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="maint-save-reminders">${this._t('btn.save_reminders', {}, 'Save reminders')}</button></div>
     </div>` : '';
 
     // Service status: the odometer every reminder is measured against, plus how
-    // close each task is. The backend computed "cycles since" all along and only
-    // ever sent the yes/no "due" list, so the panel could not show progress.
-    const progressRows = eventTypes.map(t => {
-      const thr = parseInt(reminders[t], 10) || 0;
-      if (thr <= 0) return '';
-      const since = Math.max(0, parseInt(cyclesSince[t], 10) || 0);
-      const pct = Math.max(0, Math.min(100, Math.round((since / thr) * 100)));
-      const isDue = since >= thr;
-      const barColor = isDue ? 'var(--warning-color,#ff9800)' : 'var(--primary-color)';
-      return `<div style="margin-top:10px">
+    // close each task is, by cycles and/or by days.
+    const progressRows = this._maintStatusRows(mt, eventTypes).map(r => {
+      const thrC = parseInt(r.cycles_interval, 10) || 0;
+      const thrD = parseInt(r.days_interval, 10) || 0;
+      const sinceC = Math.max(0, parseInt(r.cycles_since, 10) || 0);
+      const sinceD = r.days_since == null ? null : Math.max(0, parseInt(r.days_since, 10) || 0);
+      const parts = [];
+      let frac = 0;
+      if (thrC > 0) {
+        parts.push(this._t('lbl.cycles_since_service', { since: sinceC, total: thrC }, sinceC + ' / ' + thrC + ' cycles'));
+        frac = Math.max(frac, sinceC / thrC);
+      }
+      if (thrD > 0) {
+        const d = sinceD == null ? 0 : sinceD;
+        parts.push(this._t('lbl.days_since_service', { since: d, total: thrD }, d + ' / ' + thrD + ' days'));
+        frac = Math.max(frac, d / thrD);
+      }
+      const pct = Math.max(0, Math.min(100, Math.round(frac * 100)));
+      const barColor = r.due ? 'var(--warning-color,#ff9800)' : 'var(--primary-color)';
+      return `<div style="margin-top:10px" data-mstatus="${_esc(r.id)}">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
-          <span style="font-weight:600">${_esc(this._maintLabel(t))}</span>
-          <span class="wd-info">${this._t('lbl.cycles_since_service', { since: since, total: thr }, since + ' / ' + thr + ' cycles')}</span>
+          <span style="font-weight:600">${_esc(r.custom ? (r.name || r.id) : this._maintLabel(r.id))}</span>
+          <span class="wd-info">${parts.join(' · ')}</span>
         </div>
         <div style="height:6px;margin-top:4px;border-radius:3px;background:var(--divider-color);overflow:hidden">
           <div style="height:100%;border-radius:3px;width:${pct}%;background:${barColor}"></div>
@@ -8700,6 +8801,14 @@ class HaWashdataPanel extends HTMLElement {
       ${odometerEditor}
     </div>`;
 
+    // Pointer to the external Maintenance Supporter integration (#461): it does
+    // far more than these reminders and can read WashData's cycle counter.
+    const supporterCard = `<div class="wd-card wd-maint-supporter">
+      <div class="wd-card-title">${this._t('hdr.maintenance_supporter', {}, 'Need more?')}</div>
+      <p class="wd-info">${this._t('msg.maintenance_supporter_intro', {}, 'Maintenance Supporter is a separate integration that does much more: any appliance or task, schedules by time, usage or a sensor, notifications and a history. It can use the WashData cycle counter.')}</p>
+      <p style="margin-top:8px"><a href="${_MAINTENANCE_SUPPORTER_URL}" target="_blank" rel="noopener noreferrer" style="color:var(--primary-color);text-decoration:none;font-weight:500">${this._t('link.maintenance_supporter', {}, 'Maintenance Supporter on GitHub ↗')}</a></p>
+    </div>`;
+
     return `${dueBanner}
       ${statusCard}
       ${addForm}
@@ -8708,7 +8817,8 @@ class HaWashdataPanel extends HTMLElement {
         <p class="wd-info" style="margin-bottom:12px">${this._t('msg.maintenance_intro', {}, 'Log servicing you perform on this appliance and get reminded when each task is due again.')}</p>
         <div style="display:flex;flex-direction:column;gap:8px">${rows}</div>
       </div>
-      ${remEditor}`;
+      ${remEditor}
+      ${supporterCard}`;
   }
 
   // ── Panel tab (preferences + admin settings + RBAC) ─────────────────────────
@@ -10997,9 +11107,20 @@ class HaWashdataPanel extends HTMLElement {
       const totalN = cur.sample_count || shownN;
       decNote = `<div class="wd-info" style="margin:4px 0 0;font-size:.72em;color:var(--secondary-text-color)">${this._t('msg.samples_decimated', {shown: shownN, total: totalN}, `Showing ${shownN} of ${totalN} samples (thinned for display; peaks kept). A wide gap here is thinning, not missing data.`)}</div>`;
     }
+    // Legend for the profile curves behind the trace, so a suspected program
+    // (#462) is never read as the cycle's label. Same list the chart draws.
+    const overlays = this._cycleProfileOverlays(m);
+    const legSw = s => s.dash
+      ? `background:repeating-linear-gradient(90deg,${s.stroke} 0 5px,transparent 5px 8px)`
+      : `background:${s.stroke}`;
+    const overlayLeg = overlays.length ? `<div class="wd-leg" data-cyc-legend style="margin:8px 0 12px">
+        <span class="wd-leg-i"><span class="wd-leg-sw" style="background:var(--primary-color)"></span> ${this._t('lbl.power', {}, 'Power')}</span>
+        ${overlays.map(s => `<span class="wd-leg-i" data-leg="${s.kind}"><span class="wd-leg-sw" style="${legSw(s)};opacity:.8"></span> ${_esc(s.name)}</span>`).join('')}
+      </div>` : '';
     return `<h2>${this._t('lbl.cycle', {}, 'Cycle')} · ${_esc(_fmtDate(cur.start_time))}</h2>
       ${meta}${modeBar}
       <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_cycle_chart', {}, 'Cycle power trace'))}"></canvas></div>
+      ${overlayLeg}
       ${decNote}
       ${artifactBox}
       ${restartGapBox}
@@ -11172,6 +11293,41 @@ class HaWashdataPanel extends HTMLElement {
       </div>`;
   }
 
+  // The profile curves drawn behind a cycle's trace in Inspect/Review (hidden while
+  // trimming/splitting): the labelled profile's expected curve, or for an unlabelled
+  // cycle with pending feedback the SUSPECTED profile and its runner-up (#462), each
+  // dashed and named as such so neither reads as a confirmed label. The chart and
+  // its legend both read this list, so they agree. Names are plain text.
+  _cycleProfileOverlays(m) {
+    const out = [];
+    if (!m || (m.mode !== 'view' && m.mode !== 'review')) return out;
+    const cur = m.curve || {};
+    const plan = m.overlayPlan || null;
+    const suspected = !!(plan && plan.suspected);
+    const name = (plan && plan.name) || cur.profile_name || 'profile';
+    const label = suspected
+      ? this._tText('lbl.suspected_profile', { name }, '{name} (suspected)')
+      : `${this._tText('lbl.expected', {}, 'Expected')} (${name})`;
+    const pe = m.profileEnv;
+    const envEnd = env => env.target_duration || env.avg[env.avg.length - 1][0] || 0;
+    if (!suspected && (cur.expected || []).length > 1) {
+      // Server-projected onto this cycle's own time axis via the same alignment
+      // the artifact shading was computed with, so the overlay, the trace and the
+      // shading agree. Do NOT extend the x axis - it is already in cycle time.
+      out.push({ kind: 'expected', points: cur.expected, stroke: '#ff9800', width: 2, alpha: 0.45, name: label });
+    } else if (pe && (pe.avg || []).length) {
+      // The envelope on its own absolute grid, which slides by (duration -
+      // target_duration): no stored projection, or the profile is only suspected.
+      out.push({ kind: suspected ? 'suspected' : 'expected', points: pe.avg, stroke: '#ff9800', width: 2, alpha: 0.45, dash: suspected, name: label, xEnd: envEnd(pe) });
+    }
+    const ru = suspected && plan.runnerUp ? m.runnerUpEnv : null;
+    if (ru && (ru.avg || []).length) {
+      out.push({ kind: 'runner_up', points: ru.avg, stroke: '#9c27b0', width: 1.6, alpha: 0.55, dash: true, xEnd: envEnd(ru),
+        name: this._tText('lbl.runner_up_profile', { name: plan.runnerUp }, '{name} (runner-up)') });
+    }
+    return out;
+  }
+
   _drawCycleEditor() {
     const m = this._modal;
     if (!m || m.type !== 'cycle-detail' || !m.loaded) return;
@@ -11180,21 +11336,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!samples.length) return;
     let full = cur.full_duration_s || samples[samples.length - 1][0] || 1;
     const series = [];
-    // Matched-profile expected curve overlaid in Inspect/Review so the user can
-    // compare the actual trace against what the labelled profile looks like
-    // (faint orange, behind the live trace). Hidden during Trim/Split editing.
-    const pe = m.profileEnv;
-    if ((m.mode === 'view' || m.mode === 'review') && (cur.expected || []).length > 1) {
-      // Server-projected onto this cycle's own time axis via the same alignment
-      // the artifact shading was computed with, so the overlay, the trace and the
-      // shading agree. Do NOT extend `full` - it is already in cycle time.
-      series.push({ points: cur.expected, stroke: '#ff9800', width: 2, alpha: 0.45, name: `${this._t('lbl.expected', {}, 'Expected')} (${cur.profile_name || 'profile'})` });
-    } else if ((m.mode === 'view' || m.mode === 'review') && pe && (pe.avg || []).length) {
-      // Fallback (no stored envelope / projection failed): the envelope on its
-      // own absolute grid, which slides by (duration - target_duration).
-      series.push({ points: pe.avg, stroke: '#ff9800', width: 2, alpha: 0.45, name: `${this._t('lbl.expected', {}, 'Expected')} (${cur.profile_name || 'profile'})` });
-      full = Math.max(full, pe.target_duration || pe.avg[pe.avg.length - 1][0] || 0);
-    }
+    this._cycleProfileOverlays(m).forEach(s => { series.push(s); full = Math.max(full, s.xEnd || 0); });
     // User-selected comparison overlays (Review mode): draw each ticked profile's
     // envelope so the user can eyeball which profile best fits the cycle.
     if (m.mode === 'review' && (m.overlays || []).length) {
@@ -12775,7 +12917,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._profiles.length) this._fetchProfiles(eid);
       this._render();
       this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
-        .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._render(); if (r.profile_name) this._fetchCycleProfileEnv(eid, r.profile_name); } })
+        .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._loadCycleOverlays(eid, cid, r); this._render(); } })
         .catch(e => this._showToast(this._tText('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
 
     } else if (a === 'cleanup-edit-cycle') {
@@ -12785,7 +12927,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._profiles.length) this._fetchProfiles(eid);
       this._render();
       this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
-        .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._render(); if (r.profile_name) this._fetchCycleProfileEnv(eid, r.profile_name); } })
+        .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._loadCycleOverlays(eid, cid, r); this._render(); } })
         .catch(e => this._showToast(this._tText('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
 
     } else if (a === 'open-profile') {
@@ -12902,7 +13044,17 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
 
     } else if (a === 'fb-confirm') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
+      const fbCid = btn.dataset.cid;
+      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => {
+        // Confirming labels the cycle with the detected profile, so an open dialog
+        // stops calling its overlay "suspected" (#462).
+        const m = this._modal;
+        if (m && m.type === 'cycle-detail' && m.cycleId === fbCid && m.overlayPlan && m.overlayPlan.suspected) {
+          if (m.curve) m.curve.profile_name = m.overlayPlan.name;
+          m.overlayPlan = { name: m.overlayPlan.name, suspected: false, runnerUp: null };
+        }
+        this._render();
+      }).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
     } else if (a === 'fb-ignore') {
       this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
     } else if (a === 'fb-correct') {
@@ -13698,21 +13850,119 @@ class HaWashdataPanel extends HTMLElement {
         } catch (e) { this._showToast(this._tText('toast.odometer_save_failed', { error: e.message || e }, 'Could not save total: ' + (e.message || e)), 'error'); }
       });
     } else if (a === 'maint-save-reminders') {
+      const mt = this._maintenance || {};
+      const saved = mt.reminders || {};
       const dict = {};
       sr.querySelectorAll('[data-maint-rem]').forEach(el => {
         const t = el.dataset.maintRem;
         const n = parseInt(el.value, 10);
         dict[t] = (!isNaN(n) && n > 0) ? n : 0;
       });
+      // Only a real change goes through set_options (it reloads the entry).
+      const builtinChanged = Object.keys(dict).some(t => dict[t] !== (parseInt(saved[t], 10) || 0));
+      // Custom tasks (#461): rename / interval edits made in place, plus a new task
+      // typed into the "New task" row and saved without pressing "Add task".
+      const updates = [];
+      for (const t of (Array.isArray(mt.custom_tasks) ? mt.custom_tasks : [])) {
+        const nameEl = sr.querySelector(`[data-mtask-name="${CSS.escape(t.id)}"]`);
+        if (!nameEl) continue;
+        const name = nameEl.value.trim();
+        if (!name) { this._showToast(this._tText('toast.task_name_required', {}, 'Give the task a name'), 'error'); return; }
+        const cycles = this._maintInterval(sr.querySelector(`[data-mtask-cycles="${CSS.escape(t.id)}"]`));
+        const days = this._maintInterval(sr.querySelector(`[data-mtask-days="${CSS.escape(t.id)}"]`));
+        const patch = {};
+        if (name !== t.name) patch.name = name;
+        if (cycles !== (t.cycles || 0)) patch.cycles = cycles;
+        if (days !== (t.days || 0)) patch.days = days;
+        if (Object.keys(patch).length) updates.push({ task_id: t.id, ...patch });
+      }
+      // Read before _busyRun: its first render rebuilds the inputs.
+      const newTask = this._maintNewTaskInput(sr);
       this._busyRun('maint-save-reminders', async () => {
         try {
-          await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { maintenance_reminder_cycles: dict } });
+          if (builtinChanged) {
+            await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: eid, options: { maintenance_reminder_cycles: dict } });
+          }
+          for (const u of updates) {
+            await this._ws({ type: `${_DOMAIN}/update_maintenance_task`, entry_id: eid, ...u });
+          }
+          if (newTask.name) await this._maintAddTask(eid, newTask);
           await this._fetchMaintenance(eid);
           this._showToast(this._t('toast.reminders_saved', {}, 'Service reminders saved'));
           this._render();
-        } catch (e) { this._showToast(this._tText('toast.reminders_save_failed', { error: e.message || e }, 'Could not save reminders: ' + (e.message || e)), 'error'); }
+        } catch (e) {
+          // A partial save (one task refused) still refreshes what did land.
+          await this._fetchMaintenance(eid).catch(() => {});
+          this._render();
+          this._showToast(this._tText('toast.reminders_save_failed', { error: e.message || e }, 'Could not save reminders: ' + (e.message || e)), 'error');
+        }
+      });
+    } else if (a === 'maint-task-add') {
+      const newTask = this._maintNewTaskInput(sr);
+      if (!newTask.name) { this._showToast(this._tText('toast.task_name_required', {}, 'Give the task a name'), 'error'); return; }
+      this._busyRun('maint-task-add', async () => {
+        try {
+          await this._maintAddTask(eid, newTask);
+          await this._fetchMaintenance(eid);
+          this._showToast(this._t('toast.task_added', {}, 'Task added'));
+          this._render();
+        } catch (e) { this._showToast(this._tText('toast.task_save_failed', { error: e.message || e }, 'Could not save task: ' + (e.message || e)), 'error'); }
+      });
+    } else if (a === 'maint-task-remove') {
+      const tid = btn.dataset.mtask;
+      const task = ((this._maintenance && this._maintenance.custom_tasks) || []).find(t => t.id === tid);
+      const name = task ? task.name : tid;
+      this._modal = { type: 'confirm', title: this._t('modal.remove_task_title', {}, 'Remove Task'),
+        message: this._tText('modal.remove_task_msg', { task: name }, 'Remove the reminder "{task}"? Its entries in the maintenance log are kept.'),
+        okLabel: this._t('btn.remove', {}, 'Remove'),
+        onOk: () => this._busyRun('maint-task-remove', async () => {
+          try {
+            await this._ws({ type: `${_DOMAIN}/delete_maintenance_task`, entry_id: eid, task_id: tid });
+            await this._fetchMaintenance(eid);
+            this._showToast(this._t('toast.task_removed', {}, 'Task removed'));
+          } catch (e) { this._showToast(this._tText('toast.task_save_failed', { error: e.message || e }, 'Could not save task: ' + (e.message || e)), 'error'); }
+        }) };
+      this._render();
+    } else if (a === 'maint-log-done') {
+      // One click per due task (#461): logs it as done now, which restarts its count.
+      const eventType = btn.dataset.mtype;
+      if (!eventType) return;
+      const label = this._maintLabel(eventType);
+      this._busyRun('maint-log-done', async () => {
+        try {
+          await this._ws({ type: `${_DOMAIN}/add_maintenance_event`, entry_id: eid, event_type: eventType });
+          await this._fetchMaintenance(eid);
+          this._showToast(this._tText('toast.maint_logged', { task: label }, 'Logged as done: {task}'));
+          this._render();
+        } catch (e) { this._showToast(this._tText('toast.maint_add_failed', { error: e.message || e }, 'Could not add event: ' + (e.message || e)), 'error'); }
       });
     }
+  }
+
+  // A custom-task interval input's value: blank is 0 (off); anything else is sent
+  // as typed so the backend's single validation rule decides (and names the error).
+  _maintInterval(el) {
+    const raw = String((el && el.value) || '').trim();
+    if (!raw) return 0;
+    const n = Number(raw);
+    return isNaN(n) ? raw : n;
+  }
+
+  // What the "New task" row holds (#461).
+  _maintNewTaskInput(sr) {
+    return {
+      name: (sr.getElementById('wd-mtask-new-name')?.value || '').trim(),
+      cycles: this._maintInterval(sr.getElementById('wd-mtask-new-cycles')),
+      days: this._maintInterval(sr.getElementById('wd-mtask-new-days')),
+    };
+  }
+
+  // Create a custom task from `_maintNewTaskInput` values.
+  async _maintAddTask(eid, task) {
+    const payload = { type: `${_DOMAIN}/add_maintenance_task`, entry_id: eid, name: task.name };
+    if (task.cycles) payload.cycles = task.cycles;
+    if (task.days) payload.days = task.days;
+    return this._ws(payload);
   }
 
   _onActPlayground(a, btn, dev, eid) {

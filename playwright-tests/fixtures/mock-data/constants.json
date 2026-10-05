@@ -25,7 +25,6 @@
     "anti_wrinkle":   "var(--info-color, #2196f3)",
     "interrupted":    "var(--error-color, #f44336)",
     "force_stopped":  "var(--error-color, #f44336)",
-    "rinse":          "var(--info-color, #2196f3)",
     "clean":          "var(--teal-color, #009688)",
     "unknown":        "var(--disabled-color, #bdbdbd)",
     "recording":      "var(--error-color, #f44336)"

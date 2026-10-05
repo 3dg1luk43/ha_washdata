@@ -57,7 +57,12 @@ from .const import (
     TERMINAL_QUIET_CAP_S,
     TERMINAL_QUIET_MIN_CONSISTENCY,
     TERMINAL_QUIET_MIN_OBSERVATIONS,
+    MAINTENANCE_COUNT_FROM_ENABLE_TYPES,
+    MAINTENANCE_CUSTOM_TASK_MAX,
+    MAINTENANCE_CUSTOM_TASK_PREFIX,
     MAINTENANCE_EVENT_TYPES,
+    MAINTENANCE_INTERVAL_CYCLES_MAX,
+    MAINTENANCE_INTERVAL_DAYS_MAX,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
     MATCH_MIN_RESAMPLED_POINTS,
@@ -106,7 +111,9 @@ from . import analysis
 from .time_utils import (
     migrate_power_data_to_offsets,
     power_data_to_offsets,
+    utc_now,
 )
+from .maintenance import clean_task_name, coerce_interval, is_due
 from .phase_catalog import (
     DEFAULT_PHASES_BY_DEVICE,
     _builtin_phase_id,
@@ -1517,7 +1524,10 @@ _EXPORT_CATEGORIES: dict[str, dict[str, Any]] = {
     # the tuner was removed in 0.5.8; an older export's copy is no longer offered.)
     "suggestions":      {"keys": ["suggestions", "suggestion_apply_cycle_count"], "kind": "mixed"},
     "feedback":         {"keys": ["feedback_history", "pending_feedback"], "kind": "dict"},
-    "maintenance_log":  {"keys": ["maintenance_log"], "kind": "list"},
+    # The custom task definitions travel with the log entries that reference them
+    # (#461). The preset types' counting baselines do not: they are re-stamped on
+    # the target at its next config load.
+    "maintenance_log":  {"keys": ["maintenance_log", "maintenance_tasks"], "kind": "list"},
     "ml_models":        {"keys": ["ml_model_versions", "ml_training_history", "ml_last_training_run"],
                          "kind": "mixed", "device_specific": True},
     "history_logs":     {"keys": ["auto_adjustments", "settings_changelog"], "kind": "list"},
@@ -3373,11 +3383,14 @@ class ProfileStore:
     ) -> dict[str, Any]:
         """Append a maintenance event and persist. Returns the created entry.
 
-        ``event_type`` must be one of :data:`MAINTENANCE_EVENT_TYPES` (else raises
-        ``ValueError``). ``date`` defaults to the current timestamp; a short unique
-        id is generated for the entry.
+        ``event_type`` must be one of :data:`MAINTENANCE_EVENT_TYPES` or the id of
+        one of this device's custom tasks (else raises ``ValueError``). ``date``
+        defaults to the current timestamp; a short unique id is generated for the
+        entry. A custom task's entry also records its name at the time, so the log
+        still reads after the task is renamed or removed (#461).
         """
-        if event_type not in MAINTENANCE_EVENT_TYPES:
+        custom = self._find_maintenance_task(event_type)
+        if event_type not in MAINTENANCE_EVENT_TYPES and custom is None:
             raise ValueError(f"Unknown maintenance event_type: {event_type!r}")
         when = date if isinstance(date, str) and date else dt_util.now().isoformat()
         # Reject a date the log cannot read back, for the same reason event_type is
@@ -3405,6 +3418,8 @@ class ProfileStore:
             # cycles run since that date instead of collapsing to zero.
             "cycle_count_at_log": self._odometer_at(parsed_when),
         }
+        if custom is not None:
+            entry["task_name"] = str(custom.get("name") or "")
         log = self._data.setdefault("maintenance_log", [])
         if not isinstance(log, list):
             log = []
@@ -3580,67 +3595,362 @@ class ProfileStore:
         except Exception:  # noqa: BLE001
             return 0
 
-    def cycles_since_maintenance(self, event_type: str) -> int:
-        """Cycles this appliance has run since it was last serviced for *event_type*.
+    def _latest_maintenance_by_type(self) -> dict[str, tuple[datetime, dict[str, Any]]]:
+        """The most recent log entry per event type, as ``(date, entry)``. One pass.
+
+        Entries whose date does not parse are skipped, as they always were when
+        picking the latest event for a type. Never raises.
+        """
+        latest: dict[str, tuple[datetime, dict[str, Any]]] = {}
+        try:
+            for e in self._data.get("maintenance_log", []) or []:
+                if not isinstance(e, dict):
+                    continue
+                event_type = e.get("event_type")
+                if not isinstance(event_type, str):
+                    continue
+                dt = _parse_maintenance_dt(e.get("date"))
+                if dt is None:
+                    continue
+                current = latest.get(event_type)
+                if current is None or dt > current[0]:
+                    latest[event_type] = (dt, e)
+        except Exception:  # noqa: BLE001
+            return {}
+        return latest
+
+    def _maintenance_origin(self, task_id: str) -> tuple[int, datetime | None] | None:
+        """Where a never-logged task starts counting: ``(odometer, date)``, or None.
+
+        A custom task counts from when it was created or last switched on, a preset
+        type from the baseline :meth:`sync_maintenance_baselines` stamped when its
+        reminder first applied. The original five types have no origin: never
+        logged, they count the whole odometer, as before #461. Never raises.
+        """
+        try:
+            if task_id.startswith(MAINTENANCE_CUSTOM_TASK_PREFIX):
+                record = self._find_maintenance_task(task_id)
+                count, when = (
+                    (record.get("since_cycle_count"), record.get("since"))
+                    if record is not None else (None, None)
+                )
+            elif task_id in MAINTENANCE_COUNT_FROM_ENABLE_TYPES:
+                baselines = self._data.get("maintenance_baselines")
+                stamp = baselines.get(task_id) if isinstance(baselines, dict) else None
+                count, when = (
+                    (stamp.get("cycle_count"), stamp.get("date"))
+                    if isinstance(stamp, dict) else (None, None)
+                )
+            else:
+                return None
+            if not isinstance(count, (int, float)) or isinstance(count, bool):
+                return None
+            return int(count), _parse_maintenance_dt(when)
+        except Exception:  # noqa: BLE001
+            return None
+
+    @staticmethod
+    def _days_since(when: datetime | None) -> float | None:
+        """Days elapsed since *when* (never negative), or None without a date.
+
+        An interval, so it is taken on UTC: two aware local stamps subtract on
+        wall-clock fields and are an hour off across a DST change (DETECT-01).
+        """
+        if when is None:
+            return None
+        try:
+            return max(0.0, (utc_now() - dt_util.as_utc(when)).total_seconds() / 86400.0)
+        except (TypeError, ValueError, OverflowError):
+            return None
+
+    def _maintenance_since(
+        self,
+        task_id: str,
+        latest: dict[str, tuple[datetime, dict[str, Any]]],
+    ) -> tuple[int, float | None]:
+        """``(cycles, days)`` since a task was last done (or started counting).
 
         Measured against the monotonic lifetime odometer
         (:meth:`get_lifetime_cycle_count`): the reading now minus the reading stamped
         on the most recent matching event. That is retention-proof and
         deletion-proof, which the previous ``past_cycles`` scan was not - past the
         old 200-cycle cap it stopped rising and every deleted record set the
-        reminder back (#414).
+        reminder back (#414). Events logged before the stamp existed have no
+        reading to subtract, so they fall back to the old date-based scan.
 
-        Events logged before the stamp existed have no reading to subtract, so they
-        fall back to the old date-based scan. When the task was never logged at all
-        (the common case), the answer is the whole odometer.
+        Never logged: from the task's origin (:meth:`_maintenance_origin`) when it
+        has one; a preset type or custom task without one has not started counting
+        yet (0, the next config load stamps it); one of the original five counts the
+        whole odometer. ``days`` is None when there is no date to count from.
+        """
+        odometer = self.get_lifetime_cycle_count()
+        hit = latest.get(task_id)
+        if hit is not None:
+            when, entry = hit
+            stamp = entry.get("cycle_count_at_log")
+            if isinstance(stamp, (int, float)) and not isinstance(stamp, bool):
+                cycles = max(0, odometer - int(stamp))
+            else:
+                cycles = self._cycles_after(when)
+            return cycles, self._days_since(when)
+        origin = self._maintenance_origin(task_id)
+        if origin is not None:
+            count, when = origin
+            return max(0, odometer - count), self._days_since(when)
+        if (
+            task_id in MAINTENANCE_COUNT_FROM_ENABLE_TYPES
+            or task_id.startswith(MAINTENANCE_CUSTOM_TASK_PREFIX)
+        ):
+            return 0, None
+        return odometer, None
 
-        Note the odometer counts every persisted cycle, including ones recorded as
-        interrupted or force-stopped, where the old scan counted only completed
-        ones: a filter still gets dirty on a run the watchdog had to close.
-        Never raises.
+    def cycles_since_maintenance(self, event_type: str) -> int:
+        """Cycles this appliance has run since it was last serviced for *event_type*.
+
+        See :meth:`_maintenance_since`. Note the odometer counts every persisted
+        cycle, including ones recorded as interrupted or force-stopped, where the
+        old scan counted only completed ones: a filter still gets dirty on a run the
+        watchdog had to close. Never raises.
         """
         try:
-            latest: dict[str, Any] | None = None
-            latest_dt: datetime | None = None
-            for e in self._data.get("maintenance_log", []) or []:
-                if not isinstance(e, dict) or e.get("event_type") != event_type:
-                    continue
-                dt = _parse_maintenance_dt(e.get("date"))
-                if dt is not None and (latest_dt is None or dt > latest_dt):
-                    latest_dt = dt
-                    latest = e
-            if latest is None:
-                return self.get_lifetime_cycle_count()
-            stamp = latest.get("cycle_count_at_log")
-            if isinstance(stamp, (int, float)) and not isinstance(stamp, bool):
-                return max(0, self.get_lifetime_cycle_count() - int(stamp))
-            return self._cycles_after(latest_dt)
+            return self._maintenance_since(
+                str(event_type), self._latest_maintenance_by_type()
+            )[0]
         except Exception:  # noqa: BLE001
             return 0
 
+    def get_maintenance_status(self, reminder_cfg: dict[str, Any] | None) -> list[dict[str, Any]]:
+        """Every active reminder with how far along it is (#461). Never raises.
+
+        Built-in types with a positive interval in ``reminder_cfg`` (in its order),
+        then this device's custom tasks with any interval set. Each row is
+        ``{"id", "custom", "name", "cycles_interval", "days_interval",
+        "cycles_since", "days_since", "due"}``; ``name`` is the user's text for a
+        custom task and None for a built-in type (callers translate those);
+        ``days_since`` is whole days, or None when there is no date to count from.
+        A task is due when either of its intervals is reached.
+        """
+        rows: list[dict[str, Any]] = []
+        try:
+            latest = self._latest_maintenance_by_type()
+
+            def _row(task_id: str, name: str | None, cycles: int, days: int) -> None:
+                since_cycles, since_days = self._maintenance_since(task_id, latest)
+                rows.append({
+                    "id": task_id,
+                    "custom": name is not None,
+                    "name": name,
+                    "cycles_interval": cycles,
+                    "days_interval": days,
+                    "cycles_since": since_cycles,
+                    "days_since": None if since_days is None else int(since_days),
+                    "due": is_due(since_cycles, cycles, since_days, days),
+                })
+
+            if isinstance(reminder_cfg, dict):
+                for event_type, threshold in reminder_cfg.items():
+                    try:
+                        thr = int(threshold)
+                    except (TypeError, ValueError):
+                        continue
+                    if thr > 0:
+                        _row(str(event_type), None, thr, 0)
+            for task in self.get_maintenance_tasks():
+                cycles = int(task.get("cycles") or 0)
+                days = int(task.get("days") or 0)
+                if cycles > 0 or days > 0:
+                    _row(task["id"], str(task.get("name") or task["id"]), cycles, days)
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Maintenance status failed", exc_info=True)
+        return rows
+
     def get_maintenance_due(self, reminder_cfg: dict[str, Any] | None) -> list[str]:
-        """Return event types whose cycles-since threshold has been reached.
+        """Ids of the tasks that are due: built-in types, then custom tasks.
 
         For each event type with a positive integer threshold in ``reminder_cfg``,
-        includes it when ``cycles_since_maintenance(event_type) >= threshold``.
-        Never raises.
+        includes it when ``cycles_since_maintenance(event_type) >= threshold``; a
+        custom task is due when its cycle or day interval is reached. Never raises.
+        """
+        return [row["id"] for row in self.get_maintenance_status(reminder_cfg) if row["due"]]
+
+    def sync_maintenance_baselines(self, reminder_cfg: dict[str, Any] | None) -> bool:
+        """Stamp or clear the counting origin of the preset types (#461).
+
+        A preset type (salt, rinse aid, lint filter, condenser) counts from the
+        moment its reminder applies, not from odometer 0, so neither an upgrade nor
+        switching the reminder on opens with "due". Called on every config load:
+        a type that is on and has no baseline gets one at the current odometer; a
+        type that is off loses its baseline, so switching it on again later counts
+        from then. A logged event still takes precedence over the baseline.
+
+        Cheap and idempotent; returns whether anything changed and, if so,
+        schedules a debounced write rather than awaiting one (this runs inside
+        ``async_setup``, whose awaits are billed to startup time, #408). Never raises.
         """
         try:
-            if not isinstance(reminder_cfg, dict):
-                return []
-            due: list[str] = []
-            for event_type, threshold in reminder_cfg.items():
+            raw = self._data.get("maintenance_baselines")
+            baselines = dict(raw) if isinstance(raw, dict) else {}
+            changed = not isinstance(raw, dict) and raw is not None
+            cfg = reminder_cfg if isinstance(reminder_cfg, dict) else {}
+            for event_type in sorted(MAINTENANCE_COUNT_FROM_ENABLE_TYPES):
                 try:
-                    thr = int(threshold)
+                    enabled = int(cfg.get(event_type) or 0) > 0
                 except (TypeError, ValueError):
-                    continue
-                if thr <= 0:
-                    continue
-                if self.cycles_since_maintenance(str(event_type)) >= thr:
-                    due.append(str(event_type))
-            return due
+                    enabled = False
+                if enabled and not isinstance(baselines.get(event_type), dict):
+                    baselines[event_type] = {
+                        "cycle_count": self.get_lifetime_cycle_count(),
+                        "date": dt_util.now().isoformat(),
+                    }
+                    changed = True
+                elif not enabled and event_type in baselines:
+                    del baselines[event_type]
+                    changed = True
+            if not changed:
+                return False
+            self._data["maintenance_baselines"] = baselines
+            self._delayed_save_pending = True
+            self._store.async_delay_save(self._data_for_delayed_write, _BURST_SAVE_DELAY_S)
+            return True
         except Exception:  # noqa: BLE001
+            self._logger.debug("Maintenance baseline sync failed", exc_info=True)
+            return False
+
+    # ── Custom maintenance tasks (#461) ──────────────────────────────────────
+
+    def _maintenance_task_list(self) -> list[dict[str, Any]]:
+        """The live custom-task list, self-healed to a list. Never raises."""
+        raw = self._data.get("maintenance_tasks")
+        if not isinstance(raw, list):
+            raw = []
+            self._data["maintenance_tasks"] = raw
+        return raw
+
+    def _find_maintenance_task(self, task_id: Any) -> dict[str, Any] | None:
+        """The stored record of a custom task by id, or None. Never raises."""
+        if not isinstance(task_id, str) or not task_id.startswith(MAINTENANCE_CUSTOM_TASK_PREFIX):
+            return None
+        raw = self._data.get("maintenance_tasks")
+        if not isinstance(raw, list):
+            return None
+        for task in raw:
+            if isinstance(task, dict) and task.get("id") == task_id:
+                return task
+        return None
+
+    def get_maintenance_tasks(self) -> list[dict[str, Any]]:
+        """This device's custom maintenance tasks, oldest first (copies). Never raises.
+
+        Each is ``{"id", "name", "cycles", "days", "since", "since_cycle_count"}``:
+        intervals of 0 are off; ``since`` / ``since_cycle_count`` are the date and
+        odometer it counts from until it is first logged.
+        """
+        raw = self._data.get("maintenance_tasks")
+        if not isinstance(raw, list):
             return []
+        return [
+            dict(t) for t in raw
+            if isinstance(t, dict)
+            and isinstance(t.get("id"), str)
+            and t["id"].startswith(MAINTENANCE_CUSTOM_TASK_PREFIX)
+        ]
+
+    def _maintenance_name_taken(self, name: str, exclude_id: str | None = None) -> bool:
+        folded = name.casefold()
+        return any(
+            str(t.get("name") or "").casefold() == folded
+            for t in self.get_maintenance_tasks()
+            if t.get("id") != exclude_id
+        )
+
+    async def async_add_maintenance_task(
+        self, name: Any, cycles: Any = 0, days: Any = 0
+    ) -> dict[str, Any]:
+        """Create a custom maintenance task and persist it. Returns the record.
+
+        Raises ``ValueError`` for an empty or duplicate name, an invalid interval,
+        or when the per-device task limit is reached. It counts from now: a task
+        just defined is not due until its interval has passed.
+        """
+        clean = clean_task_name(name)
+        if not clean:
+            raise ValueError("A task needs a name")
+        cycles_i = coerce_interval(cycles, MAINTENANCE_INTERVAL_CYCLES_MAX)
+        days_i = coerce_interval(days, MAINTENANCE_INTERVAL_DAYS_MAX)
+        tasks = self._maintenance_task_list()
+        if len(self.get_maintenance_tasks()) >= MAINTENANCE_CUSTOM_TASK_MAX:
+            raise ValueError(
+                f"Task limit reached ({MAINTENANCE_CUSTOM_TASK_MAX}); remove one first"
+            )
+        if self._maintenance_name_taken(clean):
+            raise ValueError(f"A task named {clean!r} already exists")
+        task: dict[str, Any] = {
+            "id": f"{MAINTENANCE_CUSTOM_TASK_PREFIX}{uuid.uuid4().hex[:10]}",
+            "name": clean,
+            "cycles": cycles_i,
+            "days": days_i,
+            "since": dt_util.now().isoformat(),
+            "since_cycle_count": self.get_lifetime_cycle_count(),
+        }
+        tasks.append(task)
+        await self.async_save()
+        return dict(task)
+
+    async def async_update_maintenance_task(
+        self,
+        task_id: str,
+        *,
+        name: Any = None,
+        cycles: Any = None,
+        days: Any = None,
+    ) -> dict[str, Any]:
+        """Rename a custom task or change its intervals; persist. Returns the record.
+
+        ``None`` leaves a field as it is. Raises ``ValueError`` for an unknown
+        task, an empty or duplicate name or an invalid interval. A task switched
+        back on after being off (both intervals 0) counts from now, so it does not
+        reopen as due for the time it spent switched off. Log entries keep the name
+        they were written with.
+        """
+        task = self._find_maintenance_task(task_id)
+        if task is None:
+            raise ValueError(f"Unknown maintenance task: {task_id!r}")
+        updates: dict[str, Any] = {}
+        if name is not None:
+            clean = clean_task_name(name)
+            if not clean:
+                raise ValueError("A task needs a name")
+            if self._maintenance_name_taken(clean, exclude_id=task_id):
+                raise ValueError(f"A task named {clean!r} already exists")
+            updates["name"] = clean
+        if cycles is not None:
+            updates["cycles"] = coerce_interval(cycles, MAINTENANCE_INTERVAL_CYCLES_MAX)
+        if days is not None:
+            updates["days"] = coerce_interval(days, MAINTENANCE_INTERVAL_DAYS_MAX)
+        was_off = int(task.get("cycles") or 0) <= 0 and int(task.get("days") or 0) <= 0
+        task.update(updates)
+        now_on = int(task.get("cycles") or 0) > 0 or int(task.get("days") or 0) > 0
+        if was_off and now_on:
+            task["since"] = dt_util.now().isoformat()
+            task["since_cycle_count"] = self.get_lifetime_cycle_count()
+        await self.async_save()
+        return dict(task)
+
+    async def async_delete_maintenance_task(self, task_id: str) -> bool:
+        """Remove a custom task; report whether one was removed.
+
+        Its log entries stay (they carry the task's name), so the history of what
+        was done is not lost with the reminder.
+        """
+        raw = self._data.get("maintenance_tasks")
+        if not isinstance(raw, list):
+            return False
+        remaining = [t for t in raw if not (isinstance(t, dict) and t.get("id") == task_id)]
+        if len(remaining) == len(raw):
+            return False
+        self._data["maintenance_tasks"] = remaining
+        await self.async_save()
+        return True
 
     def has_recent_maintenance(
         self, event_type: str, days: int = MAINTENANCE_RECENT_SUPPRESS_DAYS

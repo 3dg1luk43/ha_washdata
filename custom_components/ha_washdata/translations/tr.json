@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Eşleşme Belirsizliği"
+      },
+      "maintenance_due": {
+        "name": "Bakım zamanı",
+        "state": {
+          "on": "Zamanı geldi",
+          "off": "Zamanı gelmedi"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Zamanı gelen görev kimlikleri"
+          },
+          "due_tasks": {
+            "name": "Zamanı gelen görevler",
+            "state": {
+              "descale": "Kireç çözme",
+              "filter_clean": "Filtreyi temizle",
+              "drum_clean": "Tamburu temizle",
+              "bearing_service": "Rulman servisi",
+              "other": "Diğer",
+              "salt": "Tuz ekle",
+              "rinse_aid": "Parlatıcı ekle",
+              "lint_filter": "Tüy filtresini temizle",
+              "condenser_clean": "Kondenseri temizle"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Kırışıklık Karşıtı",
           "interrupted": "Kesintiye uğradı",
           "force_stopped": "Zorla Durduruldu",
-          "rinse": "Durulmak",
           "unknown": "Bilinmiyor",
           "clean": "Temiz",
           "delay_wait": "Başlamak için Bekleniyor"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Döngü anomalisi",
+            "state": {
+              "overrun": "Uzun sürüyor",
+              "stalled": "Takıldı"
+            }
+          }
         }
       },
       "washer_program": {

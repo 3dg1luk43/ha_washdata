@@ -117,7 +117,7 @@ pytest tests/ -v
 ### 6. Testing with Mock Socket
 
 To play stored cycles from your own export into Home Assistant through a mock MQTT plug
-(web UI on :8080; `--list` shows the scenarios and plug reporting modes):
+(web UI on :8081; `--list` shows the scenarios and plug reporting modes):
 
 ```bash
 python3 devtools/mqtt_mock_socket.py --source path/to/washdata_export.json

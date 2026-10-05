@@ -3,6 +3,7 @@
         "min": "perc",
         "entity_not_found": "Entitás nem található",
         "running_long": "Sokáig fut",
+        "stalled": "Elakadt",
         "remaining": "hátralévő",
         "progress": "haladás",
         "show_time_remaining": "Hátralévő idő megjelenítése",
@@ -242,6 +243,8 @@
         "save_total_cycles": "Összesítés mentése",
         "clear": "Törlés",
         "add_brand": "Márka hozzáadása",
+        "log_done_task": "Elvégzés rögzítése: {task}",
+        "add_task": "Feladat hozzáadása",
         "add_appliance": "Készülék hozzáadása",
         "retry": "Újrapróbálás",
         "confirm_appliance": "Készülék megerősítése",
@@ -329,6 +332,8 @@
         }
     },
     "hdr": {
+        "custom_tasks": "Saját feladatok",
+        "maintenance_supporter": "Többre van szüksége?",
         "access_control": "Hozzáférés-vezérlés",
         "add_maintenance": "Karbantartási esemény hozzáadása",
         "automation_delete": "Törölje ezt az automatizálást",
@@ -385,6 +390,11 @@
         "device_unresolved": "Nem elérhető eszköz ({id})",
         "drag_to_resize": "Húzza az átméretezéshez",
         "pg_anti_wrinkle": "Ránctalanítás",
+        "task_name": "Feladat",
+        "every_cycles": "Gyakoriság (ciklus)",
+        "every_days": "Gyakoriság (nap)",
+        "new_task_name": "Új feladat",
+        "days_since_service": "{since} / {total} nap",
         "actions": "Akciók",
         "activity": "Tevékenység",
         "administrators": "Rendszergazdák",
@@ -429,6 +439,8 @@
         "energy": "Energia",
         "event_type": "Eseménytípus",
         "expected": "Várt",
+        "suspected_profile": "{name} (feltételezett)",
+        "runner_up_profile": "{name} (második helyezett)",
         "expected_duration": "Várható időtartam (perc)",
         "file_kb": "Fájl (kB)",
         "from": "Ettől",
@@ -762,6 +774,8 @@
         "import_wizard": "Importálás - adatok kiválasztása",
         "history_import": "Teljesítményelőzmények importálása",
         "apply_suggestions_title": "Javaslatok alkalmazása",
+        "remove_task_title": "Feladat eltávolítása",
+        "remove_task_msg": "Eltávolítja a(z) \"{task}\" emlékeztetőt? A karbantartási naplóban lévő bejegyzései megmaradnak.",
         "apply_suggestions_msg": "Módosítja ezt a(z) {n} beállítást? Az integráció mentés után újratöltődik.",
         "discard_settings_title": "Eldobja a nem mentett módosításokat?",
         "discard_settings_msg": "Nem mentett beállításmódosítások: {n}. Kilép a Beállításokból, és eldobja őket?",
@@ -961,6 +975,10 @@
         "online_unavailable": "Az online funkciók nem érhetők el ezen a szerveren.",
         "store_picker_offline": "A közösségi katalógusból való választáshoz engedélyezze az online funkciókat a beállítások fogaskerekénél.",
         "pick_brand_first": "Először válasszon készülékmárkát.",
+        "custom_task_limit": "Elérte a feladatok {max} darabos korlátját.",
+        "custom_tasks_intro": "Adjon hozzá bármi mást, amire emlékeztetőt szeretne. Egy feladat akkor esedékes, ha bármelyik időköz letelik; hagyja az egyiket üresen vagy 0-n, ha csak a másikat szeretné használni.",
+        "maintenance_due_sensor_hint": "Az \"Esedékes karbantartás\" bináris érzékelő bekapcsol, amíg bármelyik feladat esedékes, így saját értesítési automatizálást készíthet.",
+        "maintenance_supporter_intro": "A Maintenance Supporter egy különálló integráció, amely sokkal többet tud: bármilyen készülék vagy feladat, ütemezés idő, használat vagy érzékelő alapján, értesítések és előzmények. Használhatja a WashData ciklusszámlálóját.",
         "adopt_settings_hint": "Felülírja az eszköz érzékelési és párosítási küszöbeit a megosztottakkal. Az értesítések, entitások és energiaár soha nem változnak.",
         "include_settings_hint": "Ossza meg az eszköz felismerési és párosítási küszöbeit (nem az értesítéseit, entitásait vagy energiaárát). Az átvevők döntik el, hogy alkalmazzák-e.",
         "onboard_download": "Új eszköz? Vegyen át egy kész beállítást (programok, referenciaciklusok és fázisok) egy másik WashData-felhasználótól, akinek ugyanolyan készüléke van.",
@@ -1069,6 +1087,7 @@
         "wash_dw": "Főmosószeres mosás melegítéssel."
     },
     "placeholder": {
+        "custom_task": "pl. Ajtótömítés tisztítása",
         "add": "hozzáadás…",
         "group_name": "pl. Pamut 2:47",
         "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1638,6 +1657,7 @@
         "resetting": "Visszaállítás…",
         "trimming": "Vágás…",
         "splitting": "Felosztás…",
+        "stalled": "Elakadt",
         "deleting": "Törlés…",
         "imported": "Importált",
         "preparing": "Előkészítés…",
@@ -1678,6 +1698,11 @@
     "toast": {
         "catalog_refreshed": "A közösségi katalógus frissítve",
         "contrib_device_changed": "Hozzáadva a közösségi boltba, de a kiválasztott készülék megváltozott, amíg az űrlap nyitva volt. Válassza ki a Beállításokban.",
+        "task_name_required": "Adjon nevet a feladatnak",
+        "task_added": "Feladat hozzáadva",
+        "task_save_failed": "Nem sikerült menteni a feladatot: {error}",
+        "task_removed": "Feladat eltávolítva",
+        "maint_logged": "Elvégzettként rögzítve: {task}",
         "access_saved": "A hozzáférés-szabályozás mentve",
         "all_wiped": "Minden adat törölve",
         "analysis_complete_none": "Az elemzés kész: nincs új javaslat",
@@ -1926,6 +1951,10 @@
     },
     "maint": {
         "bearing_service": "Csapágy szerviz",
+        "salt": "Só utántöltése",
+        "rinse_aid": "Öblítőszer utántöltése",
+        "lint_filter": "Szöszszűrő tisztítása",
+        "condenser_clean": "Kondenzátor tisztítása",
         "descale": "Vízkőmentesítés",
         "drum_clean": "Dob tisztítása",
         "filter_clean": "Szűrő tisztítása",
@@ -1989,7 +2018,8 @@
         "notify_held": "Egy értesítés visszatartásra került a csendes órák miatt.",
         "finished": "A ciklus elérte a végállapotot és befejeződött.",
         "match_reverted": "A program visszakerült az észlelés állapotba: pontszáma jóval a saját csúcsértéke alá esett.",
-        "verified_pause": "Az élő igazítás megerősített (vagy feloldott) egy szünetet a programon belül. Amíg ez érvényben van, a ciklus nem ér véget."
+        "verified_pause": "Az élő igazítás megerősített (vagy feloldott) egy szünetet a programon belül. Amíg ez érvényben van, a ciklus nem ér véget.",
+        "stalled": "A ciklus hosszabb ideig maradt a készenléti fogyasztásán, mint ameddig ez a program ott valaha szünetel, pedig még volt hátra munka. Szüneteltetve (Elakadt) állapotként jelenik meg; a ciklus nyitva marad."
     },
     "store": {
         "search_ph2": "Keresés márka vagy típus szerint…",
@@ -2023,6 +2053,7 @@
         }
     },
     "link": {
+        "maintenance_supporter": "Maintenance Supporter a GitHubon ↗",
         "manual": "Kézikönyv ↗"
     },
     "tip": {

@@ -149,11 +149,14 @@ export interface GetLogsResponse {
 
 export interface GetMaintenanceLogResponse {
   log: Record<string, unknown>[];
-  due: unknown;
+  due: string[];
   event_types: string[];
-  reminders: Record<string, unknown>;
+  reminders: Record<string, number>;
   cycles_since: Record<string, number>;
+  custom_tasks: MaintenanceTask[];
+  status: MaintenanceStatusRow[];
   lifetime_cycle_count: number;
+  limits: MaintenanceLimits;
 }
 
 export interface GetMatchDebugResponse {
@@ -312,6 +315,38 @@ export interface ImportConfigResponse {
 export interface ImportConfigSelectiveResponse {
   success: boolean;
   summary: Record<string, unknown>;
+}
+
+export interface MaintenanceLimits {
+  tasks_max: number;
+  name_max: number;
+  cycles_max: number;
+  days_max: number;
+}
+
+export interface MaintenanceStatusRow {
+  id: string;
+  custom: boolean;
+  name: string | null;
+  cycles_interval: number;
+  days_interval: number;
+  cycles_since: number;
+  days_since: number | null;
+  due: boolean;
+}
+
+export interface MaintenanceTask {
+  id: string;
+  name: string;
+  cycles: number;
+  days: number;
+  since: string;
+  since_cycle_count: number;
+}
+
+export interface MaintenanceTaskResponse {
+  success: boolean;
+  task: MaintenanceTask;
 }
 
 export interface MatchUncertainty {
@@ -595,6 +630,26 @@ export interface AddMaintenanceEventRequest {
 export interface DeleteMaintenanceEventRequest {
   entry_id: string;
   event_id: string;
+}
+
+export interface AddMaintenanceTaskRequest {
+  entry_id: string;
+  name: string;
+  cycles?: number;
+  days?: number;
+}
+
+export interface UpdateMaintenanceTaskRequest {
+  entry_id: string;
+  task_id: string;
+  name?: string;
+  cycles?: number;
+  days?: number;
+}
+
+export interface DeleteMaintenanceTaskRequest {
+  entry_id: string;
+  task_id: string;
 }
 
 export interface SetLifetimeCycleCountRequest {
@@ -1083,6 +1138,9 @@ export interface WashDataWsRequests {
   "ha_washdata/get_maintenance_log": GetMaintenanceLogRequest;
   "ha_washdata/add_maintenance_event": AddMaintenanceEventRequest;
   "ha_washdata/delete_maintenance_event": DeleteMaintenanceEventRequest;
+  "ha_washdata/add_maintenance_task": AddMaintenanceTaskRequest;
+  "ha_washdata/update_maintenance_task": UpdateMaintenanceTaskRequest;
+  "ha_washdata/delete_maintenance_task": DeleteMaintenanceTaskRequest;
   "ha_washdata/set_lifetime_cycle_count": SetLifetimeCycleCountRequest;
   "ha_washdata/label_cycle": LabelCycleRequest;
   "ha_washdata/delete_cycle": DeleteCycleRequest;
@@ -1194,6 +1252,9 @@ export interface WashDataWsResponses {
   "ha_washdata/get_maintenance_log": GetMaintenanceLogResponse;
   "ha_washdata/add_maintenance_event": AddMaintenanceEventResponse;
   "ha_washdata/delete_maintenance_event": SuccessResponse;
+  "ha_washdata/add_maintenance_task": MaintenanceTaskResponse;
+  "ha_washdata/update_maintenance_task": MaintenanceTaskResponse;
+  "ha_washdata/delete_maintenance_task": SuccessResponse;
   "ha_washdata/set_lifetime_cycle_count": SetLifetimeCycleCountResponse;
   "ha_washdata/label_cycle": SuccessResponse;
   "ha_washdata/delete_cycle": SuccessResponse;

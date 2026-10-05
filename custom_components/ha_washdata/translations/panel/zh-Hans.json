@@ -3,6 +3,7 @@
         "min": "分钟",
         "entity_not_found": "未找到实体",
         "running_long": "运行超时",
+        "stalled": "停滞",
         "remaining": "剩余",
         "progress": "进度",
         "show_time_remaining": "显示剩余时间",
@@ -239,6 +240,8 @@
         "save_total_cycles": "保存累计值",
         "clear": "清除",
         "add_brand": "添加品牌",
+        "log_done_task": "记录完成：{task}",
+        "add_task": "添加任务",
         "add_appliance": "添加家电",
         "retry": "重试",
         "confirm_appliance": "确认此家电",
@@ -326,6 +329,8 @@
         }
     },
     "hdr": {
+        "custom_tasks": "自定义任务",
+        "maintenance_supporter": "需要更多功能？",
         "access_control": "访问控制",
         "add_maintenance": "添加维护事件",
         "automation_delete": "删除此自动化",
@@ -381,6 +386,11 @@
         "aria_playground_chart3": "交互式周期功率图：悬停查看时间/功率，滚动或双指缩放，拖动平移",
         "device_unresolved": "不可用的设备 ({id})",
         "drag_to_resize": "拖动以调整大小",
+        "task_name": "任务",
+        "every_cycles": "间隔（周期）",
+        "every_days": "间隔（天）",
+        "new_task_name": "新任务",
+        "days_since_service": "{since} / {total} 天",
         "actions": "操作",
         "activity": "活动",
         "administrators": "管理员",
@@ -425,6 +435,8 @@
         "energy": "能耗",
         "event_type": "事件类型",
         "expected": "预期",
+        "suspected_profile": "{name}（推测）",
+        "runner_up_profile": "{name}（第二名）",
         "expected_duration": "预期时长（分钟）",
         "file_kb": "文件（kB）",
         "from": "起始",
@@ -754,6 +766,8 @@
         "import_wizard": "导入 - 选择数据",
         "history_import": "导入功率历史",
         "apply_suggestions_title": "应用建议",
+        "remove_task_title": "移除任务",
+        "remove_task_msg": "移除提醒“{task}”吗？它在维护日志中的记录会保留。",
         "apply_suggestions_msg": "要更改这 {n} 项设置吗？保存后集成将重新加载。",
         "discard_settings_title": "丢弃未保存的更改？",
         "discard_settings_msg": "有 {n} 项设置更改尚未保存。要离开设置并丢弃这些更改吗？",
@@ -948,6 +962,10 @@
         "online_unavailable": "此服务器不支持在线功能。",
         "store_picker_offline": "在设置齿轮中启用在线功能，即可从社区目录中选择。",
         "pick_brand_first": "请先选择家电品牌。",
+        "custom_task_limit": "已达到 {max} 个任务的上限。",
+        "custom_tasks_intro": "添加任何其他想要提醒的事项。任一间隔达到时任务即到期；将其中一个留空或填 0，即只使用另一个。",
+        "maintenance_due_sensor_hint": "只要有任何任务到期，“需要维护”二元传感器就会开启，因此您可以创建自己的通知自动化。",
+        "maintenance_supporter_intro": "Maintenance Supporter 是一个独立的集成，功能更多：支持任何设备或任务，可按时间、使用量或传感器安排计划，提供通知和历史记录。它可以使用 WashData 的周期计数器。",
         "adopt_settings_hint": "用共享的设置覆盖此设备的检测和匹配阈值。您的通知、实体和电价永远不会更改。",
         "include_settings_hint": "分享此设备的识别和匹配阈值（不含通知、实体或电价）。采用者自行选择是否应用。",
         "onboard_download": "新设备？从拥有相同设备的其他 WashData 用户处采用现成配置（程序、参考周期和阶段）。",
@@ -1073,6 +1091,7 @@
         "wash_dw": "主要洗涤剂加热洗涤。"
     },
     "placeholder": {
+        "custom_task": "例如：清洁门封",
         "add": "添加…",
         "group_name": "例如 棉布 2:47",
         "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1642,6 +1661,7 @@
         "resetting": "重置中…",
         "trimming": "裁剪中…",
         "splitting": "拆分中…",
+        "stalled": "停滞",
         "deleting": "删除中…",
         "imported": "已导入",
         "preparing": "正在准备…",
@@ -1681,6 +1701,11 @@
     },
     "toast": {
         "catalog_refreshed": "社区目录已刷新",
+        "task_name_required": "请为任务命名",
+        "task_added": "已添加任务",
+        "task_save_failed": "无法保存任务：{error}",
+        "task_removed": "已移除任务",
+        "maint_logged": "已记录为完成：{task}",
         "access_saved": "已保存访问控制",
         "all_wiped": "所有数据已清除",
         "analysis_complete_none": "分析完成：没有新建议",
@@ -1928,6 +1953,10 @@
     },
     "maint": {
         "bearing_service": "轴承保养",
+        "salt": "补充软水盐",
+        "rinse_aid": "补充光亮剂",
+        "lint_filter": "清洁绒毛过滤器",
+        "condenser_clean": "清洁冷凝器",
         "descale": "除垢",
         "drum_clean": "清洁滚筒",
         "filter_clean": "清洁过滤器",
@@ -1971,7 +2000,8 @@
         "notify_held": "由于处于免打扰时段，通知已被暂缓。",
         "finished": "循环到达终止状态并已结束。",
         "match_reverted": "程序退回到检测中：其得分已远低于自身峰值。",
-        "verified_pause": "实时对齐确认（或解除）了程序内的一次暂停。暂停保持期间，循环不会结束。"
+        "verified_pause": "实时对齐确认（或解除）了程序内的一次暂停。暂停保持期间，循环不会结束。",
+        "stalled": "在仍有工作未完成的情况下，循环停留在待机功耗上的时间超过了该程序在此处的任何一次暂停。显示为“已暂停（停滞）”；循环保持未结束状态。"
     },
     "store": {
         "search_ph2": "按品牌或型号搜索…",
@@ -2005,6 +2035,7 @@
         }
     },
     "link": {
+        "maintenance_supporter": "GitHub 上的 Maintenance Supporter ↗",
         "manual": "手册 ↗"
     },
     "tip": {

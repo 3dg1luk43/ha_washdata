@@ -186,13 +186,61 @@ class GetProfilePhasesResponse(TypedDict):
 
 # ─── Maintenance log ───────────────────────────────────────────────────────────
 
+class MaintenanceTask(TypedDict):
+    """A user-defined maintenance task (#461). Intervals of 0 are off.
+
+    ``since`` / ``since_cycle_count``: the date and odometer it counts from until
+    it is first logged (creation, or when it was last switched back on).
+    """
+
+    id: str
+    name: str
+    cycles: int
+    days: int
+    since: str
+    since_cycle_count: int
+
+
+class MaintenanceStatusRow(TypedDict):
+    """One active reminder and how far along it is (#461).
+
+    ``name`` is the user's text for a custom task and None for a built-in type
+    (the panel translates those). ``days_since`` is None without a date to count
+    from. Due when either interval (0 = off) is reached.
+    """
+
+    id: str
+    custom: bool
+    name: str | None
+    cycles_interval: int
+    days_interval: int
+    cycles_since: int
+    days_since: int | None
+    due: bool
+
+
+class MaintenanceLimits(TypedDict):
+    tasks_max: int
+    name_max: int
+    cycles_max: int
+    days_max: int
+
+
 class GetMaintenanceLogResponse(TypedDict):
     log: list[dict[str, Any]]
-    due: Any
+    due: list[str]
     event_types: list[str]
-    reminders: dict[str, Any]
+    reminders: dict[str, int]
     cycles_since: dict[str, int]
+    custom_tasks: list[MaintenanceTask]
+    status: list[MaintenanceStatusRow]
     lifetime_cycle_count: int
+    limits: MaintenanceLimits
+
+
+class MaintenanceTaskResponse(TypedDict):
+    success: bool
+    task: MaintenanceTask
 
 
 class SetLifetimeCycleCountResponse(TypedDict):
@@ -737,6 +785,9 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_maintenance_log": GetMaintenanceLogResponse,
     "add_maintenance_event": AddMaintenanceEventResponse,
     "delete_maintenance_event": SuccessResponse,
+    "add_maintenance_task": MaintenanceTaskResponse,
+    "update_maintenance_task": MaintenanceTaskResponse,
+    "delete_maintenance_task": SuccessResponse,
     "set_lifetime_cycle_count": SetLifetimeCycleCountResponse,
     "label_cycle": SuccessResponse,
     "delete_cycle": SuccessResponse,
@@ -918,6 +969,20 @@ WS_COMMANDS: dict[str, dict] = {
         _p("notes", "str", False),
     ]},
     "delete_maintenance_event": {"params": [_entry(), _p("event_id", "str")]},
+    "add_maintenance_task": {"params": [
+        _entry(),
+        _p("name", "str"),
+        _p("cycles", "int", False),
+        _p("days", "int", False),
+    ]},
+    "update_maintenance_task": {"params": [
+        _entry(),
+        _p("task_id", "str"),
+        _p("name", "str", False),
+        _p("cycles", "int", False),
+        _p("days", "int", False),
+    ]},
+    "delete_maintenance_task": {"params": [_entry(), _p("task_id", "str")]},
     "set_lifetime_cycle_count": {"params": [_entry(), _p("count", "int")]},
     "label_cycle": {"params": [
         _entry(),

@@ -71,6 +71,11 @@ def test_maintenance_event_types_contract():
         "drum_clean",
         "bearing_service",
         "other",
+        # Device-type presets (discussion #461).
+        "salt",
+        "rinse_aid",
+        "lint_filter",
+        "condenser_clean",
     )
 
 

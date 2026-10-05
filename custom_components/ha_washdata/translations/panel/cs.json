@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entita nenalezena",
     "running_long": "Běží dlouho",
+    "stalled": "Zaseknuto",
     "remaining": "zbývá",
     "progress": "postup",
     "show_time_remaining": "Zobrazit zbývající čas",
@@ -248,6 +249,8 @@
     "save_total_cycles": "Uložit celkový počet",
     "clear": "Vymazat",
     "add_brand": "Přidat značku",
+    "log_done_task": "Zapsat jako hotové: {task}",
+    "add_task": "Přidat úkol",
     "add_appliance": "Přidat spotřebič",
     "retry": "Zkusit znovu",
     "confirm_appliance": "Potvrdit tento spotřebič",
@@ -335,6 +338,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Vlastní úkoly",
+    "maintenance_supporter": "Potřebujete víc?",
     "access_control": "Řízení přístupu",
     "add_maintenance": "Přidat údržbovou událost",
     "automation_delete": "Smazat tuto automatizaci",
@@ -390,6 +395,11 @@
     "aria_playground_chart3": "Interaktivní graf výkonu cyklu: najetím zobrazíte čas/výkon, kolečkem nebo dvěma prsty přiblížíte, tažením posunete",
     "device_unresolved": "Nedostupné zařízení ({id})",
     "drag_to_resize": "Přetažením změníte velikost",
+    "task_name": "Úkol",
+    "every_cycles": "Interval (cykly)",
+    "every_days": "Interval (dny)",
+    "new_task_name": "Nový úkol",
+    "days_since_service": "{since} / {total} dní",
     "actions": "Akce",
     "activity": "Aktivita",
     "administrators": "Správci",
@@ -435,6 +445,8 @@
     "energy": "Energie",
     "event_type": "Typ události",
     "expected": "Očekávaný",
+    "suspected_profile": "{name} (odhad)",
+    "runner_up_profile": "{name} (druhý nejlepší)",
     "expected_duration": "Očekávaná doba trvání (min)",
     "file_kb": "Soubor (kB)",
     "from": "Od",
@@ -778,6 +790,8 @@
     "import_wizard": "Import - vybrat data",
     "history_import": "Import historie výkonu",
     "apply_suggestions_title": "Použít návrhy",
+    "remove_task_title": "Odebrat úkol",
+    "remove_task_msg": "Odebrat připomínku \"{task}\"? Její záznamy v protokolu údržby zůstanou zachovány.",
     "apply_suggestions_msg": "Změnit tato nastavení ({n})? Integrace se po uložení znovu načte.",
     "discard_settings_title": "Zahodit neuložené změny?",
     "discard_settings_msg": "Neuložené změny nastavení: {n}. Opustit Nastavení a změny zahodit?",
@@ -996,6 +1010,10 @@
     "online_unavailable": "Online funkce nejsou na tomto serveru dostupné.",
     "store_picker_offline": "Povolte online funkce v ozubeném kolečku nastavení, abyste mohli vybírat z katalogu komunity.",
     "pick_brand_first": "Nejprve vyberte značku spotřebiče.",
+    "custom_task_limit": "Dosáhli jste maximálního počtu úkolů ({max}).",
+    "custom_tasks_intro": "Přidejte cokoli dalšího, na co chcete být upozorňováni. Úkol je na řadě, jakmile uplyne kterýkoli z intervalů; jeden nechte prázdný nebo 0, aby platil jen ten druhý.",
+    "maintenance_due_sensor_hint": "Binární senzor Údržba na řadě se zapne, kdykoli je některý úkol na řadě, takže si můžete vytvořit vlastní automatizaci oznámení.",
+    "maintenance_supporter_intro": "Maintenance Supporter je samostatná integrace, která umí mnohem víc: libovolný spotřebič nebo úkol, plánování podle času, používání nebo senzoru, oznámení a historii. Může využívat počítadlo cyklů WashData.",
     "adopt_settings_hint": "Použít nastavení detekce a porovnávání sdíleného zařízení na toto zařízení",
     "include_settings_hint": "Zahrnout prahy detekce, váhy porovnávání a další parametry do sdíleného balíčku",
     "onboard_download": "Stáhnout hotové nastavení z komunitního obchodu",
@@ -1101,6 +1119,7 @@
     "wash_dw": "Hlavní mycí prostředek s ohřevem."
   },
   "placeholder": {
+    "custom_task": "např. Vyčistit těsnění dvířek",
     "add": "přidat…",
     "group_name": "např. Bavlna 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Popisek\"}]",
@@ -1670,6 +1689,7 @@
     "resetting": "Resetování…",
     "trimming": "Ořezávání…",
     "splitting": "Rozdělování…",
+    "stalled": "Zaseknuto",
     "deleting": "Mazání…",
     "imported": "Importováno",
     "preparing": "Příprava…",
@@ -1801,6 +1821,11 @@
   },
   "toast": {
     "catalog_refreshed": "Katalog komunity obnoven",
+    "task_name_required": "Zadejte název úkolu",
+    "task_added": "Úkol přidán",
+    "task_save_failed": "Úkol se nepodařilo uložit: {error}",
+    "task_removed": "Úkol odebrán",
+    "maint_logged": "Zapsáno jako hotové: {task}",
     "access_saved": "Řízení přístupu bylo uloženo",
     "all_wiped": "Všechna data vymazána",
     "analysis_complete_none": "Analýza dokončena: žádné nové návrhy",
@@ -1962,6 +1987,10 @@
   },
   "maint": {
     "bearing_service": "Servis ložisek",
+    "salt": "Doplnit sůl",
+    "rinse_aid": "Doplnit leštidlo",
+    "lint_filter": "Vyčistit filtr na vlákna",
+    "condenser_clean": "Vyčistit kondenzátor",
     "descale": "Odvápnění",
     "drum_clean": "Vyčistit buben",
     "filter_clean": "Vyčistit filtr",
@@ -2025,7 +2054,8 @@
     "notify_held": "Oznámení bylo zadrženo kvůli tichým hodinám.",
     "finished": "Cyklus dosáhl koncového stavu a skončil.",
     "match_reverted": "Program se vrátil do rozpoznávání: jeho skóre kleslo výrazně pod jeho vlastní špičku.",
-    "verified_pause": "Živé zarovnání potvrdilo (nebo uvolnilo) pauzu uvnitř programu. Dokud pauza trvá, cyklus se neukončí."
+    "verified_pause": "Živé zarovnání potvrdilo (nebo uvolnilo) pauzu uvnitř programu. Dokud pauza trvá, cyklus se neukončí.",
+    "stalled": "Cyklus setrval na klidovém příkonu déle, než u tohoto programu kdy trvá pauza, a práce ještě zbývá. Zobrazeno jako Pozastaveno (Zaseknuto); cyklus zůstává otevřený."
   },
   "store": {
     "search_ph2": "Hledat podle značky nebo modelu…",
@@ -2059,6 +2089,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter na GitHubu ↗",
     "manual": "Příručka ↗"
   },
   "tip": {

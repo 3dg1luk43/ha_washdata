@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Αμφισημία αντιστοίχισης"
+      },
+      "maintenance_due": {
+        "name": "Οφειλόμενη συντήρηση",
+        "state": {
+          "on": "Οφείλεται",
+          "off": "Δεν οφείλεται"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Αναγνωριστικά οφειλόμενων εργασιών"
+          },
+          "due_tasks": {
+            "name": "Οφειλόμενες εργασίες",
+            "state": {
+              "descale": "Αφαλάτωση",
+              "filter_clean": "Καθαρισμός φίλτρου",
+              "drum_clean": "Καθαρισμός κάδου",
+              "bearing_service": "Σέρβις ρουλεμάν",
+              "other": "Άλλο",
+              "salt": "Αναπλήρωση αλατιού",
+              "rinse_aid": "Αναπλήρωση λαμπρυντικού",
+              "lint_filter": "Καθαρισμός φίλτρου χνουδιού",
+              "condenser_clean": "Καθαρισμός συμπυκνωτή"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Κατά ρυτίδων",
           "interrupted": "Διακόπηκε",
           "force_stopped": "Αναγκαστική διακοπή",
-          "rinse": "Ξέπλυμα",
           "unknown": "Άγνωστο",
           "clean": "Καθαρός",
           "delay_wait": "Αναμονή για την έναρξη"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Ανωμαλία κύκλου",
+            "state": {
+              "overrun": "Καθυστερεί",
+              "stalled": "Κόλλησε"
+            }
+          }
         }
       },
       "washer_program": {

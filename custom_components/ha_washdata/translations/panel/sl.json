@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entiteta ni najdena",
     "running_long": "Traja predolgo",
+    "stalled": "V zastoju",
     "remaining": "preostalo",
     "progress": "napredek",
     "show_time_remaining": "Pokaži preostali čas",
@@ -248,6 +249,8 @@
     "save_total_cycles": "Shrani skupno število",
     "clear": "Počisti",
     "add_brand": "Dodaj znamko",
+    "log_done_task": "Označi kot opravljeno: {task}",
+    "add_task": "Dodaj nalogo",
     "add_appliance": "Dodaj napravo",
     "retry": "Poskusi znova",
     "confirm_appliance": "Potrdi to napravo",
@@ -335,6 +338,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Lastne naloge",
+    "maintenance_supporter": "Potrebujete več?",
     "access_control": "Nadzor dostopa",
     "add_maintenance": "Dodaj dogodek vzdrževanja",
     "automation_delete": "Izbriši to avtomatizacijo",
@@ -390,6 +395,11 @@
     "aria_playground_chart3": "Interaktivni graf moči cikla: pomaknite kazalec za prikaz časa/moči, drsajte ali uporabite dva prsta za povečavo, povlecite za premikanje",
     "device_unresolved": "Nedostopna naprava ({id})",
     "drag_to_resize": "Povlecite za spremembo velikosti",
+    "task_name": "Naloga",
+    "every_cycles": "Interval (cikli)",
+    "every_days": "Interval (dnevi)",
+    "new_task_name": "Nova naloga",
+    "days_since_service": "{since} / {total} dni",
     "actions": "Dejanja",
     "activity": "Aktivnost",
     "administrators": "Skrbniki",
@@ -435,6 +445,8 @@
     "energy": "Energija",
     "event_type": "Vrsta dogodka",
     "expected": "Pričakovano",
+    "suspected_profile": "{name} (domnevno)",
+    "runner_up_profile": "{name} (drugi najboljši)",
     "expected_duration": "Pričakovano trajanje (min)",
     "file_kb": "Datoteka (kB)",
     "from": "Od",
@@ -778,6 +790,8 @@
     "import_wizard": "Uvoz - izberi podatke",
     "history_import": "Uvoz zgodovine moči",
     "apply_suggestions_title": "Uporabi predloge",
+    "remove_task_title": "Odstrani nalogo",
+    "remove_task_msg": "Odstranim opomnik \"{task}\"? Njegovi vnosi v dnevniku vzdrževanja ostanejo ohranjeni.",
     "apply_suggestions_msg": "Želite spremeniti te nastavitve ({n})? Integracija se po shranjevanju znova naloži.",
     "discard_settings_title": "Zavržem neshranjene spremembe?",
     "discard_settings_msg": "Neshranjene spremembe nastavitev: {n}. Zapustim Nastavitve in jih zavržem?",
@@ -996,6 +1010,10 @@
     "online_unavailable": "Spletne funkcije na tem strežniku niso na voljo.",
     "store_picker_offline": "Omogočite spletne funkcije v zobniku nastavitev, da boste lahko izbirali iz kataloga skupnosti.",
     "pick_brand_first": "Najprej izberite znamko naprave.",
+    "custom_task_limit": "Dosegli ste največje število nalog ({max}).",
+    "custom_tasks_intro": "Dodajte karkoli drugega, na kar želite biti opomnjeni. Naloga je na vrsti, ko je dosežen kateri koli od intervalov; enega pustite praznega ali 0, da se uporablja samo drugi.",
+    "maintenance_due_sensor_hint": "Binarni senzor Vzdrževanje na vrsti se vklopi, ko je katera koli naloga na vrsti, zato lahko ustvarite lastno avtomatizacijo obvestil.",
+    "maintenance_supporter_intro": "Maintenance Supporter je ločena integracija, ki zmore veliko več: katero koli napravo ali nalogo, urnike po času, uporabi ali senzorju, obvestila in zgodovino. Uporablja lahko števec ciklov WashData.",
     "adopt_settings_hint": "Uporabi nastavitve zaznavanja in ujemanja deljene naprave za to napravo",
     "include_settings_hint": "Vključi pragove zaznavanja, uteži ujemanja in druge parametre v deljeni paket",
     "onboard_download": "Prenesi vnaprej pripravljene nastavitve iz skupnostne trgovine",
@@ -1101,6 +1119,7 @@
     "wash_dw": "Glavno pranje z detergentom z ogrevanjem."
   },
   "placeholder": {
+    "custom_task": "npr. Očisti tesnilo vrat",
     "add": "dodaj…",
     "group_name": "npr. Bombaž 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1670,6 +1689,7 @@
     "resetting": "Ponastavljanje…",
     "trimming": "Obrezovanje…",
     "splitting": "Deljenje…",
+    "stalled": "V zastoju",
     "deleting": "Brisanje…",
     "imported": "Uvoženo",
     "preparing": "Pripravljanje…",
@@ -1801,6 +1821,11 @@
   },
   "toast": {
     "catalog_refreshed": "Katalog skupnosti je osvežen",
+    "task_name_required": "Poimenujte nalogo",
+    "task_added": "Naloga dodana",
+    "task_save_failed": "Naloge ni bilo mogoče shraniti: {error}",
+    "task_removed": "Naloga odstranjena",
+    "maint_logged": "Označeno kot opravljeno: {task}",
     "access_saved": "Nadzor dostopa shranjen",
     "all_wiped": "Vsi podatki izbrisani",
     "analysis_complete_none": "Analiza zaključena: ni novih predlogov",
@@ -1962,6 +1987,10 @@
   },
   "maint": {
     "bearing_service": "Servis ležajev",
+    "salt": "Dopolni sol",
+    "rinse_aid": "Dopolni sredstvo za izpiranje",
+    "lint_filter": "Očisti filter za vlakna",
+    "condenser_clean": "Očisti kondenzator",
     "descale": "Odstranjevanje vodnega kamna",
     "drum_clean": "Očisti boben",
     "filter_clean": "Očisti filter",
@@ -2025,7 +2054,8 @@
     "notify_held": "Obvestilo je bilo zadržano zaradi tihih ur.",
     "finished": "Cikel je dosegel končno stanje in se je končal.",
     "match_reverted": "Program se je vrnil v zaznavanje: njegov rezultat je padel precej pod njegov lastni vrh.",
-    "verified_pause": "Sprotna poravnava je potrdila (ali sprostila) premor znotraj programa. Dokler premor velja, se cikel ne konča."
+    "verified_pause": "Sprotna poravnava je potrdila (ali sprostila) premor znotraj programa. Dokler premor velja, se cikel ne konča.",
+    "stalled": "Cikel je ostal na porabi v stanju pripravljenosti dlje, kot se ta program tam kdaj ustavi, delo pa še ni opravljeno. Prikazano kot Zaustavljeno (V zastoju); cikel ostane odprt."
   },
   "store": {
     "search_ph2": "Iskanje po znamki ali modelu…",
@@ -2059,6 +2089,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter na GitHubu ↗",
     "manual": "Priročnik ↗"
   },
   "tip": {

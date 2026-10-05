@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Nejednoznačnost shody"
+      },
+      "maintenance_due": {
+        "name": "Údržba na řadě",
+        "state": {
+          "on": "Na řadě",
+          "off": "Není na řadě"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID úkolů na řadě"
+          },
+          "due_tasks": {
+            "name": "Úkoly na řadě",
+            "state": {
+              "descale": "Odvápnění",
+              "filter_clean": "Vyčistit filtr",
+              "drum_clean": "Vyčistit buben",
+              "bearing_service": "Servis ložisek",
+              "other": "Jiné",
+              "salt": "Doplnit sůl",
+              "rinse_aid": "Doplnit leštidlo",
+              "lint_filter": "Vyčistit filtr na vlákna",
+              "condenser_clean": "Vyčistit kondenzátor"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Proti pomačkání",
           "interrupted": "Přerušeno",
           "force_stopped": "Nuceně zastaveno",
-          "rinse": "Máchání",
           "unknown": "Neznámý",
           "clean": "Čistý",
           "delay_wait": "Čekání na spuštění"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomálie cyklu",
+            "state": {
+              "overrun": "Běží dlouho",
+              "stalled": "Zaseknuto"
+            }
+          }
         }
       },
       "washer_program": {

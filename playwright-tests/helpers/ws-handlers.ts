@@ -44,7 +44,13 @@ const EMPTY_MAINTENANCE = {
   reminders: { descale: 30 },
   // #414: cycles run since each task, and the odometer they are measured against.
   cycles_since: { descale: 12, filter_clean: 12, drum_clean: 12, bearing_service: 12, other: 12 },
+  // #461: custom tasks, every active reminder with its progress, and the limits.
+  custom_tasks: [],
+  status: [
+    { id: 'descale', custom: false, name: null, cycles_interval: 30, days_interval: 0, cycles_since: 12, days_since: null, due: false },
+  ],
   lifetime_cycle_count: 212,
+  limits: { tasks_max: 20, name_max: 60, cycles_max: 100000, days_max: 3650 },
 };
 
 const EMPTY_CHANGELOG = { changelog: [] };
@@ -155,6 +161,15 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
     event: { id: 'maint-001', date: '2026-07-20T09:00:00+00:00', event_type: 'descale', notes: '', cycle_count_at_log: 212 },
   },
   'ha_washdata/delete_maintenance_event': { success: true },
+  'ha_washdata/add_maintenance_task': {
+    success: true,
+    task: { id: 'custom_0123456789', name: 'Door seal', cycles: 0, days: 30, since: '2026-07-20T09:00:00+00:00', since_cycle_count: 212 },
+  },
+  'ha_washdata/update_maintenance_task': {
+    success: true,
+    task: { id: 'custom_0123456789', name: 'Door gasket', cycles: 0, days: 30, since: '2026-07-20T09:00:00+00:00', since_cycle_count: 212 },
+  },
+  'ha_washdata/delete_maintenance_task': { success: true },
   // Split/trim run as background tasks; these are the payloads get_task_result returns.
   'ha_washdata/apply_split': { success: true, new_ids: ['cyc-split-a', 'cyc-split-b'] },
   'ha_washdata/trim_cycle': { success: true },

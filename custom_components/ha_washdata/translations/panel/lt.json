@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Objektas nerastas",
     "running_long": "Veikia ilgai",
+    "stalled": "Užstrigo",
     "remaining": "liko",
     "progress": "eiga",
     "show_time_remaining": "Rodyti likusį laiką",
@@ -248,6 +249,8 @@
     "save_total_cycles": "Išsaugoti bendrą skaičių",
     "clear": "Išvalyti",
     "add_brand": "Pridėti prekės ženklą",
+    "log_done_task": "Pažymėti kaip atliktą: {task}",
+    "add_task": "Pridėti užduotį",
     "add_appliance": "Pridėti prietaisą",
     "retry": "Bandyti dar kartą",
     "confirm_appliance": "Patvirtinti šį prietaisą",
@@ -335,6 +338,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Jūsų užduotys",
+    "maintenance_supporter": "Reikia daugiau?",
     "access_control": "Prieigos kontrolė",
     "add_maintenance": "Pridėti priežiūros įvykį",
     "automation_delete": "Ištrinkite šią automatiką",
@@ -391,6 +396,11 @@
     "device_unresolved": "Nepasiekiamas įrenginys ({id})",
     "drag_to_resize": "Vilkite, kad pakeistumėte dydį",
     "pg_anti_wrinkle": "Apsauga nuo raukšlių",
+    "task_name": "Užduotis",
+    "every_cycles": "Intervalas (ciklai)",
+    "every_days": "Intervalas (dienos)",
+    "new_task_name": "Nauja užduotis",
+    "days_since_service": "{since} / {total} dienų",
     "actions": "Veiksmai",
     "activity": "Veikla",
     "administrators": "Administratoriai",
@@ -435,6 +445,8 @@
     "energy": "Energija",
     "event_type": "Įvykio tipas",
     "expected": "Numatoma",
+    "suspected_profile": "{name} (spėjama)",
+    "runner_up_profile": "{name} (antrasis kandidatas)",
     "expected_duration": "Numatoma trukmė (min.)",
     "file_kb": "Failas (kB)",
     "from": "Nuo",
@@ -778,6 +790,8 @@
     "import_wizard": "Importas - pasirinkti duomenis",
     "history_import": "Galios istorijos importavimas",
     "apply_suggestions_title": "Taikyti pasiūlymus",
+    "remove_task_title": "Pašalinti užduotį",
+    "remove_task_msg": "Pašalinti priminimą „{task}“? Jo įrašai priežiūros žurnale išsaugomi.",
     "apply_suggestions_msg": "Pakeisti šiuos nustatymus ({n})? Išsaugojus integracija bus įkelta iš naujo.",
     "discard_settings_title": "Išmesti neišsaugotus pakeitimus?",
     "discard_settings_msg": "Neišsaugoti nustatymų pakeitimai: {n}. Išeiti iš Nustatymų ir juos išmesti?",
@@ -987,6 +1001,10 @@
     "online_unavailable": "Interneto funkcijos šiame serveryje nepasiekiamos.",
     "store_picker_offline": "Įjunkite interneto funkcijas nustatymų krumpliaratyje, kad galėtumėte rinktis iš bendruomenės katalogo.",
     "pick_brand_first": "Pirmiausia pasirinkite prietaiso prekės ženklą.",
+    "custom_task_limit": "Pasiekėte didžiausią užduočių skaičių ({max}).",
+    "custom_tasks_intro": "Pridėkite bet ką kita, apie ką norite gauti priminimą. Užduotį laikas atlikti, kai pasiekiamas bet kuris iš intervalų; vieną palikite tuščią arba 0, kad būtų naudojamas tik kitas.",
+    "maintenance_due_sensor_hint": "Dvejetainis jutiklis „Reikia priežiūros“ įsijungia, kai ateina laikas atlikti bet kurią užduotį, todėl galite susikurti savo pranešimų automatizavimą.",
+    "maintenance_supporter_intro": "Maintenance Supporter yra atskira integracija, kuri gali daug daugiau: bet kokie prietaisai ar užduotys, tvarkaraščiai pagal laiką, naudojimą ar jutiklį, pranešimai ir istorija. Ji gali naudoti WashData ciklų skaitiklį.",
     "adopt_settings_hint": "Perrašykite šio įrenginio aptikimo ir atitikties slenksčius bendrais. Jūsų pranešimai, esybės ir energijos kaina niekada nekeičiami.",
     "include_settings_hint": "Bendrinkite šio įrenginio atpažinimo ir atitikties slenksčius (ne jūsų pranešimus, esybes ar energijos kainą). Perėmėjai pasirenka, ar juos taikyti.",
     "onboard_download": "Naujas įrenginys? Perimkite paruoštą konfigūraciją (programas, etalonius ciklus ir fazes) iš kito WashData naudotojo, turinčio tą patį prietaisą.",
@@ -1101,6 +1119,7 @@
     "wash_dw": "Pagrindinis ploviklis, skalbimas su šildymu."
   },
   "placeholder": {
+    "custom_task": "pvz., Valyti durelių sandariklį",
     "add": "pridėti…",
     "group_name": "pvz. Medvilnė 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1670,6 +1689,7 @@
     "resetting": "Atstatoma…",
     "trimming": "Apkarpoma…",
     "splitting": "Padalijama…",
+    "stalled": "Užstrigo",
     "deleting": "Trinama…",
     "imported": "Importuota",
     "preparing": "Ruošiama…",
@@ -1710,6 +1730,11 @@
   "toast": {
     "catalog_refreshed": "Bendruomenės katalogas atnaujintas",
     "contrib_device_changed": "Pridėta į bendruomenės parduotuvę, bet, kol forma buvo atidaryta, pasikeitė pasirinktas prietaisas. Pasirinkite jį nustatymuose.",
+    "task_name_required": "Suteikite užduočiai pavadinimą",
+    "task_added": "Užduotis pridėta",
+    "task_save_failed": "Nepavyko išsaugoti užduoties: {error}",
+    "task_removed": "Užduotis pašalinta",
+    "maint_logged": "Pažymėta kaip atlikta: {task}",
     "access_saved": "Prieigos valdymas išsaugotas",
     "all_wiped": "Visi duomenys ištrinti",
     "analysis_complete_none": "Analizė baigta: jokių naujų pasiūlymų",
@@ -1962,6 +1987,10 @@
   },
   "maint": {
     "bearing_service": "Guolių aptarnavimas",
+    "salt": "Papildyti druskos",
+    "rinse_aid": "Papildyti skalavimo priemonės",
+    "lint_filter": "Valyti pūkų filtrą",
+    "condenser_clean": "Valyti kondensatorių",
     "descale": "Kalkių šalinimas",
     "drum_clean": "Valyti būgną",
     "filter_clean": "Valyti filtrą",
@@ -2025,7 +2054,8 @@
     "notify_held": "Pranešimas buvo sulaikytas dėl tylos valandų.",
     "finished": "Ciklas pasiekė galutinę būseną ir baigėsi.",
     "match_reverted": "Programa grįžo į aptikimo būseną: jos rezultatas nukrito gerokai žemiau savo didžiausios reikšmės.",
-    "verified_pause": "Tiesioginis sulygiavimas patvirtino (arba panaikino) pauzę programos viduje. Kol ji galioja, ciklas nebaigiamas."
+    "verified_pause": "Tiesioginis sulygiavimas patvirtino (arba panaikino) pauzę programos viduje. Kol ji galioja, ciklas nebaigiamas.",
+    "stalled": "Ciklas išbuvo ties budėjimo galia ilgiau, nei ši programa kada nors ten daro pauzę, nors darbas dar nebaigtas. Rodoma kaip Pristabdyta (Užstrigo); ciklas lieka atviras."
   },
   "store": {
     "search_ph2": "Ieškoti pagal prekės ženklą ar modelį…",
@@ -2059,6 +2089,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter GitHub svetainėje ↗",
     "manual": "Vadovas ↗"
   },
   "tip": {

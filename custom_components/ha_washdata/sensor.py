@@ -76,7 +76,6 @@ from .const import (
     STATE_DELAY_WAIT,
     STATE_INTERRUPTED,
     STATE_FORCE_STOPPED,
-    STATE_RINSE,
     STATE_UNKNOWN,
     STATE_CLEAN,
 )
@@ -278,7 +277,6 @@ class WasherStateSensor(WasherBaseSensor):
                 STATE_DELAY_WAIT,
                 STATE_INTERRUPTED,
                 STATE_FORCE_STOPPED,
-                STATE_RINSE,
                 STATE_UNKNOWN,
                 STATE_CLEAN,
             ],
@@ -451,7 +449,9 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE, STATE_DELAY_WAIT):
+        if self._manager.check_state() in (
+            STATE_OFF, STATE_IDLE, STATE_ANTI_WRINKLE, STATE_DELAY_WAIT
+        ):
             return None
         if self._manager.time_remaining is not None:
             return int(self._manager.time_remaining / 60)
@@ -477,7 +477,7 @@ class WasherTotalDurationSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state() == STATE_OFF:
+        if self._manager.check_state() in (STATE_OFF, STATE_IDLE):  # idle: #452
             return None
         if self._manager.total_duration:
             return int(self._manager.total_duration / 60)
@@ -594,7 +594,7 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state() == STATE_OFF:
+        if self._manager.check_state() in (STATE_OFF, STATE_IDLE):  # idle: #452
             return 0
         start = self._manager.cycle_start_time
         if start:

@@ -3,6 +3,7 @@
         "min": "min",
         "entity_not_found": "Entiteti nuk u gjet",
         "running_long": "Po zgjat",
+        "stalled": "I ngecur",
         "remaining": "mbetur",
         "progress": "përparimi",
         "show_time_remaining": "Shfaq kohën e mbetur",
@@ -242,6 +243,8 @@
         "save_total_cycles": "Ruaj totalin",
         "clear": "Pastro",
         "add_brand": "Shto markë",
+        "log_done_task": "Shëno si të kryer: {task}",
+        "add_task": "Shto detyrë",
         "add_appliance": "Shto pajisje",
         "retry": "Riprovo",
         "confirm_appliance": "Konfirmo këtë pajisje",
@@ -324,6 +327,8 @@
         }
     },
     "hdr": {
+        "custom_tasks": "Detyrat tuaja",
+        "maintenance_supporter": "Ju duhet më shumë?",
         "access_control": "Kontrolli i aksesit",
         "add_maintenance": "Shto ngjarje mirëmbajtjeje",
         "automation_delete": "Fshi këtë automatizim",
@@ -379,6 +384,11 @@
         "aria_playground_chart3": "Grafik interaktiv i fuqisë së ciklit: kaloni kursorin për të lexuar kohën/fuqinë, rrëshqitni ose zmadhoni me dy gishta, tërhiqni për të lëvizur",
         "device_unresolved": "Pajisje e padisponueshme ({id})",
         "drag_to_resize": "Tërhiqni për të ndryshuar madhësinë",
+        "task_name": "Detyra",
+        "every_cycles": "Çdo (cikle)",
+        "every_days": "Çdo (ditë)",
+        "new_task_name": "Detyrë e re",
+        "days_since_service": "{since} / {total} ditë",
         "actions": "Veprime",
         "activity": "Aktivitet",
         "administrators": "Administratorë",
@@ -423,6 +433,8 @@
         "energy": "Energjia",
         "event_type": "Lloji i ngjarjes",
         "expected": "I pritshëm",
+        "suspected_profile": "{name} (i supozuar)",
+        "runner_up_profile": "{name} (vendi i dytë)",
         "expected_duration": "Kohëzgjatja e pritshme (min)",
         "file_kb": "Skedari (kB)",
         "from": "Nga",
@@ -757,6 +769,8 @@
         "import_wizard": "Importo - zgjidh të dhënat",
         "history_import": "Importo historikun e fuqisë",
         "apply_suggestions_title": "Apliko sugjerimet",
+        "remove_task_title": "Hiq detyrën",
+        "remove_task_msg": "Të hiqet kujtesa \"{task}\"? Regjistrimet e saj në regjistrin e mirëmbajtjes ruhen.",
         "apply_suggestions_msg": "Të ndryshohen këto {n} cilësime? Integrimi ringarkohet pas ruajtjes.",
         "discard_settings_title": "Të hidhen poshtë ndryshimet e paruajtura?",
         "discard_settings_msg": "Ndryshime të paruajtura të cilësimeve: {n}. Të dilet nga Cilësimet dhe të hidhen poshtë?",
@@ -953,6 +967,10 @@
         "online_unavailable": "Veçoritë online nuk janë të disponueshme në këtë server.",
         "store_picker_offline": "Aktivizoni veçoritë online te ingranazhi i cilësimeve për të zgjedhur nga katalogu i komunitetit.",
         "pick_brand_first": "Zgjidhni së pari një markë pajisjeje.",
+        "custom_task_limit": "Keni arritur kufirin prej {max} detyrash.",
+        "custom_tasks_intro": "Shtoni çdo gjë tjetër për të cilën doni të merrni kujtesë. Një detyrë bëhet e nevojshme kur arrihet njëri nga intervalet; lëreni njërin bosh ose 0 për të përdorur vetëm tjetrin.",
+        "maintenance_due_sensor_hint": "Sensori binar \"Mirëmbajtje e nevojshme\" ndizet sa kohë që ndonjë detyrë është e nevojshme, kështu që mund të krijoni automatizimin tuaj të njoftimeve.",
+        "maintenance_supporter_intro": "Maintenance Supporter është një integrim më vete që bën shumë më tepër: çdo pajisje ose detyrë, planifikime sipas kohës, përdorimit ose një sensori, njoftime dhe historik. Mund të përdorë numëruesin e cikleve të WashData.",
         "adopt_settings_hint": "Mbishkruan pragun e zbulimit dhe përputhjes të kësaj pajisje me të ndarët. Njoftimet, entitetet dhe çmimi i energjisë nuk ndryshohen kurrë.",
         "include_settings_hint": "Ndani pragjet e njohjes dhe përputhjes të kësaj pajisje (jo njoftimet, entitetet ose çmimin e energjisë). Adoptuesit zgjedhin nëse do t'i aplikojnë.",
         "onboard_download": "Pajisje e re? Adoptoni një konfigurim të gatshëm (programe, cikle referimi dhe faza) nga një tjetër përdorues WashData me të njëjtën pajisje.",
@@ -1064,6 +1082,7 @@
         "wash_dw": "Larja kryesore me detergjent me ngrohje."
     },
     "placeholder": {
+        "custom_task": "p.sh. Pastro guarnicionin e derës",
         "add": "shto…",
         "group_name": "p.sh. Pambuk 2:47",
         "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1633,6 +1652,7 @@
         "resetting": "Po rivendoset…",
         "trimming": "Duke prerë…",
         "splitting": "Po ndahet…",
+        "stalled": "I ngecur",
         "deleting": "Po fshihet…",
         "imported": "Importuar",
         "preparing": "Po përgatitet…",
@@ -1673,6 +1693,11 @@
     "toast": {
         "catalog_refreshed": "Katalogu i komunitetit u rifreskua",
         "contrib_device_changed": "U shtua në dyqanin e komunitetit, por pajisja e zgjedhur ndryshoi ndërsa formulari ishte i hapur. Zgjidheni te Cilësimet.",
+        "task_name_required": "Jepini detyrës një emër",
+        "task_added": "Detyra u shtua",
+        "task_save_failed": "Nuk u ruajt dot detyra: {error}",
+        "task_removed": "Detyra u hoq",
+        "maint_logged": "U shënua si e kryer: {task}",
         "access_saved": "Kontrolli i aksesit u ruajt",
         "all_wiped": "Të gjitha të dhënat u fshien",
         "analysis_complete_none": "Analiza e plotë: asnjë sugjerim i ri",
@@ -1921,6 +1946,10 @@
     },
     "maint": {
         "bearing_service": "Servisi i kushinetave",
+        "salt": "Rimbush kripën",
+        "rinse_aid": "Rimbush lëngun shpëlarës",
+        "lint_filter": "Pastro filtrin e pushit",
+        "condenser_clean": "Pastro kondensatorin",
         "descale": "Heqja e gurëve",
         "drum_clean": "Pastro tamburin",
         "filter_clean": "Pastro filtrin",
@@ -1984,7 +2013,8 @@
         "notify_held": "Një njoftim u mbajt për shkak të orëve të qeta.",
         "finished": "Cikli arriti gjendjen përfundimtare dhe përfundoi.",
         "match_reverted": "Programi u kthye te zbulimi: rezultati i tij ra shumë nën kulmin e vet.",
-        "verified_pause": "Përafrimi në kohë reale konfirmoi (ose liroi) një pauzë brenda programit. Për sa kohë mbetet në fuqi, cikli nuk përfundohet."
+        "verified_pause": "Përafrimi në kohë reale konfirmoi (ose liroi) një pauzë brenda programit. Për sa kohë mbetet në fuqi, cikli nuk përfundohet.",
+        "stalled": "Cikli qëndroi në konsumin e pritjes më gjatë se sa ky program bën ndonjëherë pauzë atje, ndërkohë që kishte ende punë për të bërë. Shfaqet si Në pauzë (I ngecur); cikli mbetet i hapur."
     },
     "store": {
         "search_ph2": "Kërko sipas markës ose modelit…",
@@ -2018,6 +2048,7 @@
         }
     },
     "link": {
+        "maintenance_supporter": "Maintenance Supporter në GitHub ↗",
         "manual": "Manuali ↗"
     },
     "tip": {

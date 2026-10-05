@@ -584,6 +584,11 @@ DEFAULT_DELAY_TIMEOUT_HOURS = 8.0  # h - give up waiting after this long
 CONF_PUMP_STUCK_DURATION = "pump_stuck_duration"  # Seconds before a running pump is flagged as stuck
 DEFAULT_PUMP_STUCK_DURATION = 1800  # 30 min - typical sump pump runs <60 s; 30 min implies motor is jammed
 EVENT_PUMP_STUCK = "ha_washdata_pump_stuck"  # Fired when stuck-pump threshold is exceeded
+# Discussion #452: a cycle halted on a flat standby-level plateau (an unbalanced
+# load, a door warning). Once per stall, display/automation only, never a
+# notification (CycleDetector.stalled).
+EVENT_CYCLE_STALLED = "ha_washdata_cycle_stalled"
+CYCLE_ANOMALY_STALLED = "stalled"  # the state sensor's cycle_anomaly while stalled
 
 # Profile Matching Thresholds
 CONF_PROFILE_MATCH_THRESHOLD = "profile_match_threshold"
@@ -920,7 +925,6 @@ STATE_FINISHED = "finished"
 STATE_ANTI_WRINKLE = "anti_wrinkle"
 STATE_INTERRUPTED = "interrupted"
 STATE_FORCE_STOPPED = "force_stopped"
-STATE_RINSE = "rinse"
 
 # States in which a cycle is in progress: what `binary_sensor.*_running` reports.
 # Only `running` used to count, so the sensor turned off during every soak, pause
@@ -928,7 +932,7 @@ STATE_RINSE = "rinse"
 # (audit PLATFORM-06). STARTING is excluded (not yet a confirmed cycle), as is
 # ANTI_WRINKLE (the cycle has finished; the drum only tumbles the load).
 CYCLE_IN_PROGRESS_STATES = frozenset(
-    {STATE_RUNNING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_RINSE}
+    {STATE_RUNNING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING}
 )
 
 STATE_UNKNOWN = "unknown"
@@ -952,7 +956,6 @@ STATE_COLORS = {
     STATE_ANTI_WRINKLE: "var(--info-color, #2196f3)",
     STATE_INTERRUPTED: "var(--error-color, #f44336)",
     STATE_FORCE_STOPPED: "var(--error-color, #f44336)",
-    STATE_RINSE: "var(--info-color, #2196f3)",
     STATE_CLEAN: "var(--teal-color, #009688)",
     STATE_UNKNOWN: "var(--disabled-color, #bdbdbd)",
     "recording": "var(--error-color, #f44336)",
@@ -1821,15 +1824,64 @@ DEFAULT_MAINTENANCE_REMINDER_CYCLES = {
     "filter_clean": 50,
     "drum_clean": 100,
 }
-# Recognised maintenance event types. bearing_service / other default off (absent
-# from the default reminder dict) and are opt-in.
+# Recognised built-in maintenance event types. bearing_service / other default off
+# (absent from the default reminder dict) and are opt-in. The last four are the
+# device-type presets of discussion #461 (see MAINTENANCE_PRESETS_BY_DEVICE_TYPE).
 MAINTENANCE_EVENT_TYPES = (
     "descale",
     "filter_clean",
     "drum_clean",
     "bearing_service",
     "other",
+    "salt",
+    "rinse_aid",
+    "lint_filter",
+    "condenser_clean",
 )
+# Preset defaults per device type (cycles), replacing DEFAULT_MAINTENANCE_REMINDER_CYCLES
+# for that type while its reminder config was never saved. None of these can be
+# measured from power: they are manufacturer ballparks set on the early side, so the
+# reminder comes with headroom. Every type not listed keeps the washer default.
+MAINTENANCE_PRESETS_BY_DEVICE_TYPE: dict[str, dict[str, int]] = {
+    DEVICE_TYPE_DISHWASHER: {
+        # A 1-2 kg softener reservoir lasts ~30-60 cycles at medium-hard water.
+        "salt": 30,
+        # A ~110-150 ml rinse-aid reservoir at ~3 ml per cycle lasts ~40-50 cycles.
+        "rinse_aid": 40,
+        # Same 50 as the washer default, so an existing dishwasher's reminder stays put.
+        "filter_clean": 50,
+    },
+    DEVICE_TYPE_DRYER: {
+        # Manufacturers say every load; 10 is a backstop for a forgotten filter.
+        "lint_filter": 10,
+        # Condenser / heat-pump filters: manufacturers suggest every ~20-50 loads.
+        "condenser_clean": 30,
+    },
+}
+# Built-in types the reminder editor offers per device type (in this order). Types
+# not listed get the original five. A type with a saved positive threshold is shown
+# whatever its device type, so no saved reminder ever disappears from the editor.
+MAINTENANCE_TYPES_BY_DEVICE_TYPE: dict[str, tuple[str, ...]] = {
+    DEVICE_TYPE_DISHWASHER: ("salt", "rinse_aid", "filter_clean", "descale", "other"),
+    DEVICE_TYPE_DRYER: ("lint_filter", "condenser_clean", "other"),
+}
+# The preset types count "since last done" from the moment their reminder is first
+# active (a baseline stamped in the store), not from odometer 0: an upgraded
+# dishwasher with 300 cycles must not open with "salt due" (#461). The original five
+# keep counting from the whole odometer when never logged, exactly as before.
+MAINTENANCE_COUNT_FROM_ENABLE_TYPES = frozenset(
+    {"salt", "rinse_aid", "lint_filter", "condenser_clean"}
+)
+# User-defined maintenance tasks (#461), stored per device in the profile store
+# ("maintenance_tasks") next to the log entries that reference them. Each has a
+# free-text name and an interval in cycles and/or days (0 = off for that axis);
+# it is due when either is reached. Ids carry this prefix so they can never collide
+# with a built-in type.
+MAINTENANCE_CUSTOM_TASK_PREFIX = "custom_"
+MAINTENANCE_CUSTOM_TASK_MAX = 20
+MAINTENANCE_TASK_NAME_MAX = 60
+MAINTENANCE_INTERVAL_CYCLES_MAX = 100000
+MAINTENANCE_INTERVAL_DAYS_MAX = 3650
 # A logged maintenance event of a matching type within this many days suppresses
 # the "needs maintenance" nag advisory (duration-trend / shape-drift).
 MAINTENANCE_RECENT_SUPPRESS_DAYS = 30

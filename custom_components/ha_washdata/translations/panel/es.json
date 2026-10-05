@@ -46,6 +46,8 @@
     "matcher_used_tip": "Ciclos registrados en este aparato que el comparador de WashData etiquetó por sí solo con este programa importado. Un programa importado que nunca coincide puede no ajustarse a su aparato y se puede eliminar. Se cuenta localmente; no se envía nada a la tienda."
   },
   "btn": {
+    "log_done_task": "Registrar como hecho: {task}",
+    "add_task": "Agregar tarea",
     "pg_preset_delete": "Eliminar preajuste",
     "pg_preset_load": "Cargar preajuste",
     "pg_preset_load_tip": "Sustituir los valores de la Zona de pruebas por este preajuste (los ajustes activos no se modifican)",
@@ -279,6 +281,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Sus propias tareas",
+    "maintenance_supporter": "¿Necesita más?",
     "access_control": "Control de acceso",
     "add_maintenance": "Agregar evento de mantenimiento",
     "automation_delete": "Eliminar esta automatización",
@@ -329,6 +333,11 @@
     "poor": "⚠ Calidad de perfil deficiente"
   },
   "lbl": {
+    "task_name": "Tarea",
+    "every_cycles": "Cada (ciclos)",
+    "every_days": "Cada (días)",
+    "new_task_name": "Nueva tarea",
+    "days_since_service": "{since} / {total} días",
     "envelope_position_tip": "Posición en la curva grabada del propio programa coincidente, {pct}%. Se mide alineando este ciclo con el perfil en lugar de contar el tiempo, así que sigue siendo correcta cuando un ciclo dura más o menos de lo habitual. Se actualiza mientras el electrodoméstico está en silencio, por lo que puede retrasarse durante una fase activa.",
     "envelope_position": "curva {pct}%",
     "aria_playground_chart3": "Gráfico interactivo de potencia del ciclo: pasa el cursor para leer el tiempo/la potencia, desplázate o pellizca para hacer zoom, arrastra para desplazarte",
@@ -378,6 +387,8 @@
     "energy": "Energía",
     "event_type": "Tipo de evento",
     "expected": "Esperado",
+    "suspected_profile": "{name} (probable)",
+    "runner_up_profile": "{name} (segundo candidato)",
     "expected_duration": "Duración esperada (min)",
     "file_kb": "Archivo (KB)",
     "from": "Desde",
@@ -673,6 +684,8 @@
     "trained_unknown": "en un momento desconocido"
   },
   "modal": {
+    "remove_task_title": "Eliminar tarea",
+    "remove_task_msg": "¿Eliminar el recordatorio \"{task}\"? Sus entradas en el registro de mantenimiento se conservan.",
     "auto_label": "Ciclos de etiquetado automático",
     "correct_feedback": "Comentarios correctos",
     "create_profile": "Crear perfil",
@@ -726,6 +739,10 @@
     "undo_import_title": "Deshacer la última importación"
   },
   "msg": {
+    "custom_task_limit": "Ha alcanzado el límite de {max} tareas.",
+    "custom_tasks_intro": "Agregue cualquier otra cosa que quiera que se le recuerde. Una tarea queda pendiente cuando se alcanza cualquiera de los dos intervalos; deje uno vacío o en 0 para usar solo el otro.",
+    "maintenance_due_sensor_hint": "El sensor binario Mantenimiento pendiente se activa mientras haya alguna tarea pendiente, para que pueda crear su propia automatización de notificaciones.",
+    "maintenance_supporter_intro": "Maintenance Supporter es una integración independiente que hace mucho más: cualquier electrodoméstico o tarea, plazos por tiempo, uso o un sensor, notificaciones e historial. Puede usar el contador de ciclos de WashData.",
     "pg_canvas_empty3": "Elige un ciclo de arriba y pulsa Ejecutar para simularlo. Después, pasa el cursor para leer los valores, desplázate o pellizca para hacer zoom y arrastra para desplazarte.",
     "pg_preset_delete_confirm": "¿Eliminar el preajuste \"{name}\"?",
     "pg_preset_limit": "Límite de preajustes alcanzado ({n})",
@@ -1052,6 +1069,7 @@
     "wash_dw": "Lavado con detergente principal con calefacción."
   },
   "placeholder": {
+    "custom_task": "p. ej., limpiar la junta de la puerta",
     "add": "añadir…",
     "group_name": "ej. Algodón 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1621,6 +1639,7 @@
     "resetting": "Reiniciando…",
     "trimming": "Recortando…",
     "splitting": "Dividiendo…",
+    "stalled": "Atascado",
     "deleting": "Eliminando…",
     "imported": "Importado",
     "preparing": "Preparando…",
@@ -1659,6 +1678,11 @@
     "wrong_profile": "perfil equivocado"
   },
   "toast": {
+    "task_name_required": "Asigne un nombre a la tarea",
+    "task_added": "Tarea agregada",
+    "task_save_failed": "No se pudo guardar la tarea: {error}",
+    "task_removed": "Tarea eliminada",
+    "maint_logged": "Registrado como hecho: {task}",
     "catalog_refreshed": "Catálogo de la comunidad actualizado",
     "access_saved": "Control de acceso guardado",
     "all_wiped": "Todos los datos borrados",
@@ -1910,6 +1934,10 @@
     "up": "Tendencia ascendente"
   },
   "maint": {
+    "salt": "Rellenar sal",
+    "rinse_aid": "Rellenar abrillantador",
+    "lint_filter": "Limpiar filtro de pelusa",
+    "condenser_clean": "Limpiar condensador",
     "bearing_service": "Servicio de rodamientos",
     "descale": "Descalcificar",
     "drum_clean": "Limpiar tambor",
@@ -1954,7 +1982,8 @@
     "notify_held": "Se retuvo una notificación por las horas de silencio.",
     "finished": "El ciclo alcanzó un estado final y terminó.",
     "match_reverted": "El programa volvió a la detección: su puntuación cayó muy por debajo de su propio máximo.",
-    "verified_pause": "La alineación en vivo confirmó (o liberó) una pausa dentro del programa. Mientras se mantiene, el ciclo no se da por terminado."
+    "verified_pause": "La alineación en vivo confirmó (o liberó) una pausa dentro del programa. Mientras se mantiene, el ciclo no se da por terminado.",
+    "stalled": "El ciclo permaneció en su consumo en espera más tiempo que cualquier pausa de este programa en ese punto, con trabajo aún pendiente. Se muestra como En pausa (Atascado); el ciclo sigue abierto."
   },
   "store": {
     "search_ph2": "Buscar por marca o modelo…",
@@ -1988,6 +2017,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter en GitHub ↗",
     "manual": "Manual ↗"
   },
   "tip": {
@@ -2077,6 +2107,7 @@
     "min": "min",
     "entity_not_found": "Entidad no encontrada",
     "running_long": "Con retraso",
+    "stalled": "Atascado",
     "remaining": "restante",
     "progress": "progreso",
     "show_time_remaining": "Mostrar tiempo restante",

@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entitet hittades inte",
     "running_long": "Kör längre",
+    "stalled": "Avstannad",
     "remaining": "återstår",
     "progress": "förlopp",
     "show_time_remaining": "Visa återstående tid",
@@ -91,6 +92,8 @@
     "matcher_used_tip": "Cykler inspelade på den här apparaten som WashDatas matchning på egen hand har märkt med det här importerade programmet. En import som aldrig matchas kanske inte passar din apparat och kan tas bort. Räknas lokalt; inget skickas till gemenskapsbutiken."
   },
   "btn": {
+    "log_done_task": "Logga som klar: {task}",
+    "add_task": "Lägg till uppgift",
     "pg_preset_delete": "Ta bort förinställning",
     "pg_preset_load": "Ladda förinställning",
     "pg_preset_load_tip": "Ersätt värdena i testytan med den här förinställningen (de aktiva inställningarna påverkas inte)",
@@ -329,6 +332,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Dina egna uppgifter",
+    "maintenance_supporter": "Behöver du mer?",
     "access_control": "Åtkomstkontroll",
     "add_maintenance": "Lägg till underhållshändelse",
     "automation_delete": "Ta bort denna automatisering",
@@ -379,6 +384,11 @@
     "poor": "⚠ Dålig profilkvalitet"
   },
   "lbl": {
+    "task_name": "Uppgift",
+    "every_cycles": "Intervall (cykler)",
+    "every_days": "Intervall (dagar)",
+    "new_task_name": "Ny uppgift",
+    "days_since_service": "{since} / {total} dagar",
     "envelope_position_tip": "Position på det matchade programmets egen registrerade kurva, {pct} %. Mäts genom att den här cykeln passas in mot profilen i stället för att tiden räknas, så den stämmer även när en körning är längre eller kortare än vanligt. Den uppdateras medan apparaten är tyst och kan därför släpa efter under en aktiv fas.",
     "envelope_position": "kurva {pct} %",
     "aria_playground_chart3": "Interaktiv effektgraf för cykeln: hovra för att avläsa tid/effekt, skrolla eller nyp för att zooma, dra för att panorera",
@@ -428,6 +438,8 @@
     "energy": "Energi",
     "event_type": "Händelsetyp",
     "expected": "Förväntad",
+    "suspected_profile": "{name} (förmodat)",
+    "runner_up_profile": "{name} (tvåan)",
     "expected_duration": "Förväntad varaktighet (min)",
     "file_kb": "Fil (kB)",
     "from": "Från",
@@ -718,6 +730,8 @@
     }
   },
   "modal": {
+    "remove_task_title": "Ta bort uppgift",
+    "remove_task_msg": "Ta bort påminnelsen \"{task}\"? Dess poster i underhållsloggen behålls.",
     "auto_label": "Automatisk märkning av cykler",
     "correct_feedback": "Korrigera feedback",
     "create_profile": "Skapa profil",
@@ -771,6 +785,10 @@
     "undo_import_title": "Ångra senaste import"
   },
   "msg": {
+    "custom_task_limit": "Du har nått gränsen på {max} uppgifter.",
+    "custom_tasks_intro": "Lägg till allt annat du vill bli påmind om. En uppgift behöver göras när något av intervallen nås; lämna det ena tomt eller 0 för att bara använda det andra.",
+    "maintenance_due_sensor_hint": "Den binära sensorn Dags för underhåll slås på så länge någon uppgift behöver göras, så att du kan bygga en egen automation för meddelanden.",
+    "maintenance_supporter_intro": "Maintenance Supporter är en separat integration som kan mycket mer: valfri apparat eller uppgift, intervall efter tid, användning eller en sensor, meddelanden och en historik. Den kan använda WashDatas cykelräknare.",
     "pg_canvas_empty3": "Välj en cykel ovan och tryck på Kör för att simulera den. Hovra sedan för att avläsa värden, skrolla eller nyp för att zooma och dra för att panorera.",
     "pg_preset_delete_confirm": "Ta bort förinställningen \"{name}\"?",
     "pg_preset_limit": "Gränsen för förinställningar är nådd ({n})",
@@ -1089,6 +1107,7 @@
     "wash_dw": "Huvudtvättmedelstvätt med värme."
   },
   "placeholder": {
+    "custom_task": "t.ex. rengör dörrtätning",
     "add": "lägg till…",
     "group_name": "t.ex. Bomull 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1658,6 +1677,7 @@
     "resetting": "Återställer…",
     "trimming": "Beskär…",
     "splitting": "Delar upp…",
+    "stalled": "Avstannad",
     "deleting": "Raderar…",
     "imported": "Importerad",
     "preparing": "Förbereder…",
@@ -1788,6 +1808,11 @@
     "wrong_profile": "Fel profil"
   },
   "toast": {
+    "task_name_required": "Ge uppgiften ett namn",
+    "task_added": "Uppgift tillagd",
+    "task_save_failed": "Kunde inte spara uppgiften: {error}",
+    "task_removed": "Uppgift borttagen",
+    "maint_logged": "Loggad som klar: {task}",
     "catalog_refreshed": "Gemenskapskatalogen har uppdaterats",
     "access_saved": "Åtkomstkontroll sparad",
     "all_wiped": "All data rensad",
@@ -1945,6 +1970,10 @@
     "up": "Uppåtgående trend"
   },
   "maint": {
+    "salt": "Fyll på salt",
+    "rinse_aid": "Fyll på spolglans",
+    "lint_filter": "Rengör luddfilter",
+    "condenser_clean": "Rengör kondensor",
     "bearing_service": "Lagerservice",
     "descale": "Avkalka",
     "drum_clean": "Rengör trumma",
@@ -1989,7 +2018,8 @@
     "notify_held": "En avisering hölls tillbaka på grund av tysta timmar.",
     "finished": "Cykeln nådde ett sluttillstånd och avslutades.",
     "match_reverted": "Programmet föll tillbaka till detektering: dess poäng sjönk långt under sin egen topp.",
-    "verified_pause": "Den pågående justeringen bekräftade (eller släppte) en paus inne i programmet. Så länge den gäller avslutas inte cykeln."
+    "verified_pause": "Den pågående justeringen bekräftade (eller släppte) en paus inne i programmet. Så länge den gäller avslutas inte cykeln.",
+    "stalled": "Cykeln låg kvar på sin standbyförbrukning längre än någon paus i det här programmet på det stället, med arbete kvar att göra. Visas som Pausad (Avstannad); cykeln förblir öppen."
   },
   "store": {
     "search_ph2": "Sök efter märke eller modell…",
@@ -2023,6 +2053,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter på GitHub ↗",
     "manual": "Manual ↗"
   },
   "tip": {

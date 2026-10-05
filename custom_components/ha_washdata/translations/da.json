@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Matchtvetydighed"
+      },
+      "maintenance_due": {
+        "name": "Vedligeholdelse forfalder",
+        "state": {
+          "on": "Forfalden",
+          "off": "Ikke forfalden"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Id'er for forfaldne opgaver"
+          },
+          "due_tasks": {
+            "name": "Forfaldne opgaver",
+            "state": {
+              "descale": "Afkalk",
+              "filter_clean": "Rengør filter",
+              "drum_clean": "Rengør tromle",
+              "bearing_service": "Lejeservice",
+              "other": "Andet",
+              "salt": "Påfyld salt",
+              "rinse_aid": "Påfyld afspændingsmiddel",
+              "lint_filter": "Rengør fnugfilter",
+              "condenser_clean": "Rengør kondensator"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Anti-Rynke",
           "interrupted": "Afbrudt",
           "force_stopped": "Tving stoppet",
-          "rinse": "Skylle",
           "unknown": "Ukendt",
           "clean": "Ren",
           "delay_wait": "Venter på at starte"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Cyklusanomali",
+            "state": {
+              "overrun": "Kører længere",
+              "stalled": "Gået i stå"
+            }
+          }
         }
       },
       "washer_program": {

@@ -46,6 +46,8 @@
     "matcher_used_tip": "Cicluri înregistrate pe acest aparat pe care motorul de potrivire WashData le-a etichetat singur cu acest program importat. Un program importat care nu se potrivește niciodată poate să nu corespundă aparatului dvs. și poate fi eliminat. Numărat local; nimic nu este trimis către magazin."
   },
   "btn": {
+    "log_done_task": "Marcați ca efectuat: {task}",
+    "add_task": "Adăugați sarcină",
     "pg_preset_delete": "Șterge presetarea",
     "pg_preset_load": "Încarcă presetarea",
     "pg_preset_load_tip": "Înlocuiește valorile din Zona de test cu această presetare (setările active rămân neatinse)",
@@ -279,6 +281,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Sarcinile dumneavoastră",
+    "maintenance_supporter": "Aveți nevoie de mai mult?",
     "access_control": "Control acces",
     "add_maintenance": "Adăugați eveniment de întreținere",
     "automation_delete": "Ștergeți această automatizare",
@@ -329,6 +333,11 @@
     "poor": "⚠ Calitate slabă a profilului"
   },
   "lbl": {
+    "task_name": "Sarcină",
+    "every_cycles": "La fiecare (cicluri)",
+    "every_days": "La fiecare (zile)",
+    "new_task_name": "Sarcină nouă",
+    "days_since_service": "{since} / {total} zile",
     "envelope_position_tip": "Poziția pe curba înregistrată a programului potrivit, {pct}%. Este măsurată prin alinierea acestui ciclu la profil în loc de numărarea timpului, așa că rămâne corectă atunci când un ciclu durează mai mult sau mai puțin decât de obicei. Se actualizează cât timp aparatul este în liniște, deci poate rămâne în urmă în timpul unei faze active.",
     "envelope_position": "curbă {pct}%",
     "aria_playground_chart3": "Grafic interactiv al puterii ciclului: treci cu cursorul pentru a citi timpul/puterea, derulează sau folosește două degete pentru a mări, trage pentru a te deplasa",
@@ -378,6 +387,8 @@
     "energy": "Energie",
     "event_type": "Tip eveniment",
     "expected": "Așteptat",
+    "suspected_profile": "{name} (probabil)",
+    "runner_up_profile": "{name} (al doilea candidat)",
     "expected_duration": "Durată așteptată (min)",
     "file_kb": "Fișier (kB)",
     "from": "De la",
@@ -673,6 +684,8 @@
     "trained_unknown": "la o dată necunoscută"
   },
   "modal": {
+    "remove_task_title": "Eliminați sarcina",
+    "remove_task_msg": "Eliminați mementoul \"{task}\"? Înregistrările sale din jurnalul de întreținere se păstrează.",
     "auto_label": "Etichetare automată a ciclurilor",
     "correct_feedback": "Corectați feedback-ul",
     "create_profile": "Creați profil",
@@ -726,6 +739,10 @@
     "undo_import_title": "Anulați ultimul import"
   },
   "msg": {
+    "custom_task_limit": "Ați atins limita de {max} sarcini.",
+    "custom_tasks_intro": "Adăugați orice altceva doriți să vi se amintească. O sarcină devine scadentă când este atins oricare dintre intervale; lăsați unul gol sau 0 pentru a-l folosi doar pe celălalt.",
+    "maintenance_due_sensor_hint": "Senzorul binar Întreținere scadentă se activează cât timp există o sarcină scadentă, astfel încât vă puteți crea propria automatizare de notificare.",
+    "maintenance_supporter_intro": "Maintenance Supporter este o integrare separată care face mult mai mult: orice aparat sau sarcină, termene după timp, utilizare sau un senzor, notificări și un istoric. Poate folosi contorul de cicluri WashData.",
     "pg_canvas_empty3": "Alege un ciclu de mai sus și apasă Rulează pentru a-l simula. Apoi treci cu cursorul pentru a citi valorile, derulează sau folosește două degete pentru a mări și trage pentru a te deplasa.",
     "pg_preset_delete_confirm": "Ștergi presetarea \"{name}\"?",
     "pg_preset_limit": "Limita de presetări a fost atinsă ({n})",
@@ -1032,6 +1049,7 @@
     "wash_dw": "Spălare principală cu detergent și încălzire."
   },
   "placeholder": {
+    "custom_task": "de exemplu, curățare garnitura ușii",
     "add": "adaugă…",
     "group_name": "ex. Bumbac 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1601,6 +1619,7 @@
     "resetting": "Se resetează…",
     "trimming": "Se taie…",
     "splitting": "Se divide…",
+    "stalled": "Blocat",
     "deleting": "Se șterge…",
     "imported": "Importat",
     "preparing": "Se pregătește…",
@@ -1639,6 +1658,11 @@
     "wrong_profile": "Profil greșit"
   },
   "toast": {
+    "task_name_required": "Dați un nume sarcinii",
+    "task_added": "Sarcină adăugată",
+    "task_save_failed": "Sarcina nu a putut fi salvată: {error}",
+    "task_removed": "Sarcină eliminată",
+    "maint_logged": "Marcat ca efectuat: {task}",
     "catalog_refreshed": "Catalogul comunității a fost actualizat",
     "access_saved": "Controlul accesului a fost salvat",
     "all_wiped": "Toate datele au fost șterse",
@@ -1890,6 +1914,10 @@
     "up": "Tendință ascendentă"
   },
   "maint": {
+    "salt": "Reumplere sare",
+    "rinse_aid": "Reumplere agent de clătire",
+    "lint_filter": "Curățare filtru de scame",
+    "condenser_clean": "Curățare condensator",
     "bearing_service": "Service rulmenți",
     "descale": "Detartrare",
     "drum_clean": "Curățare tambur",
@@ -1954,7 +1982,8 @@
     "notify_held": "O notificare a fost reținută pentru orele de liniște.",
     "finished": "Ciclul a ajuns într-o stare finală și s-a încheiat.",
     "match_reverted": "Programul a revenit la detectare: scorul său a scăzut mult sub propriul vârf.",
-    "verified_pause": "Alinierea în timp real a confirmat (sau a eliberat) o pauză în cadrul programului. Cât timp aceasta se menține, ciclul nu este încheiat."
+    "verified_pause": "Alinierea în timp real a confirmat (sau a eliberat) o pauză în cadrul programului. Cât timp aceasta se menține, ciclul nu este încheiat.",
+    "stalled": "Ciclul a rămas la consumul de standby mai mult decât orice pauză a acestui program în acel punct, deși mai avea de lucru. Afișat ca Pauză (Blocat); ciclul rămâne deschis."
   },
   "store": {
     "search_ph2": "Căutați după marcă sau model…",
@@ -1988,6 +2017,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter pe GitHub ↗",
     "manual": "Manual ↗"
   },
   "tip": {
@@ -2077,6 +2107,7 @@
     "min": "min",
     "entity_not_found": "Entitate negăsită",
     "running_long": "Întârziere",
+    "stalled": "Blocat",
     "remaining": "rămas",
     "progress": "progres",
     "show_time_remaining": "Afișează timpul rămas",

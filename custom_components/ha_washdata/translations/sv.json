@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Matchningstvetydighet"
+      },
+      "maintenance_due": {
+        "name": "Dags för underhåll",
+        "state": {
+          "on": "Dags",
+          "off": "Inte dags"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID för uppgifter att göra"
+          },
+          "due_tasks": {
+            "name": "Uppgifter att göra",
+            "state": {
+              "descale": "Avkalka",
+              "filter_clean": "Rengör filter",
+              "drum_clean": "Rengör trumma",
+              "bearing_service": "Lagerservice",
+              "other": "Övrigt",
+              "salt": "Fyll på salt",
+              "rinse_aid": "Fyll på spolglans",
+              "lint_filter": "Rengör luddfilter",
+              "condenser_clean": "Rengör kondensor"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -315,9 +341,17 @@
           "delay_wait": "Väntar på att starta",
           "interrupted": "Avbruten",
           "force_stopped": "Tvångsstoppad",
-          "rinse": "Sköljning",
           "unknown": "Okänd",
           "clean": "Rena"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Cykelavvikelse",
+            "state": {
+              "overrun": "Kör längre",
+              "stalled": "Avstannad"
+            }
+          }
         }
       },
       "washer_program": {

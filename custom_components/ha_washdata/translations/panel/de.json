@@ -3,6 +3,7 @@
     "min": "Min.",
     "entity_not_found": "Entität nicht gefunden",
     "running_long": "Läuft länger",
+    "stalled": "Stillstand",
     "remaining": "verbleibend",
     "progress": "Fortschritt",
     "show_time_remaining": "Verbleibende Zeit anzeigen",
@@ -91,6 +92,8 @@
     "matcher_used_tip": "Auf diesem Gerät aufgezeichnete Zyklen, die die Programmerkennung von WashData selbstständig mit diesem importierten Programm beschriftet hat. Ein Import, der nie zugeordnet wird, passt möglicherweise nicht zu Ihrem Gerät und kann entfernt werden. Wird lokal gezählt; nichts wird an den Community-Store gesendet."
   },
   "btn": {
+    "log_done_task": "Als erledigt protokollieren: {task}",
+    "add_task": "Aufgabe hinzufügen",
     "pg_preset_delete": "Voreinstellung löschen",
     "pg_preset_load": "Voreinstellung laden",
     "pg_preset_load_tip": "Die Werte im Testbereich durch diese Voreinstellung ersetzen (die aktiven Einstellungen bleiben unverändert)",
@@ -329,6 +332,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Ihre eigenen Aufgaben",
+    "maintenance_supporter": "Benötigen Sie mehr?",
     "access_control": "Zugangskontrolle",
     "add_maintenance": "Wartungsereignis hinzufügen",
     "automation_delete": "Löschen Sie diese Automatisierung",
@@ -379,6 +384,11 @@
     "poor": "⚠ Schlechte Übereinstimmungsqualität"
   },
   "lbl": {
+    "task_name": "Aufgabe",
+    "every_cycles": "Alle (Zyklen)",
+    "every_days": "Alle (Tage)",
+    "new_task_name": "Neue Aufgabe",
+    "days_since_service": "{since} / {total} Tage",
     "envelope_position_tip": "Position auf der aufgezeichneten Kurve des zugeordneten Programms, {pct} %. Ermittelt durch den Abgleich dieses Zyklus mit dem Profil statt durch Zählen der Zeit, daher stimmt sie auch, wenn ein Durchlauf länger oder kürzer als üblich ist. Sie wird aktualisiert, während das Gerät still ist, und kann deshalb in einer aktiven Phase hinterherhinken.",
     "envelope_position": "Kurve {pct} %",
     "aria_playground_chart3": "Interaktives Leistungsdiagramm des Zyklus: zum Ablesen von Zeit/Leistung mit dem Zeiger darüberfahren, scrollen oder mit zwei Fingern zoomen, zum Verschieben ziehen",
@@ -428,6 +438,8 @@
     "energy": "Energie",
     "event_type": "Ereignistyp",
     "expected": "Erwartet",
+    "suspected_profile": "{name} (vermutet)",
+    "runner_up_profile": "{name} (Zweitplatzierter)",
     "expected_duration": "Erwartete Dauer (Min.)",
     "file_kb": "Datei (kB)",
     "from": "Von",
@@ -718,6 +730,8 @@
     }
   },
   "modal": {
+    "remove_task_title": "Aufgabe entfernen",
+    "remove_task_msg": "Die Erinnerung \"{task}\" entfernen? Die zugehörigen Einträge im Wartungsprotokoll bleiben erhalten.",
     "auto_label": "Auto-Label-Zyklen",
     "correct_feedback": "Feedback korrigieren",
     "create_profile": "Profil erstellen",
@@ -771,6 +785,10 @@
     "undo_import_title": "Letzten Import rückgängig machen"
   },
   "msg": {
+    "custom_task_limit": "Sie haben das Limit von {max} Aufgaben erreicht.",
+    "custom_tasks_intro": "Fügen Sie alles hinzu, woran Sie sonst noch erinnert werden möchten. Eine Aufgabe ist fällig, sobald eines der beiden Intervalle erreicht ist; lassen Sie eines leer oder auf 0, um nur das andere zu verwenden.",
+    "maintenance_due_sensor_hint": "Der binäre Sensor Wartung fällig schaltet sich ein, solange eine Aufgabe fällig ist, sodass Sie Ihre eigene Benachrichtigungsautomatisierung erstellen können.",
+    "maintenance_supporter_intro": "Maintenance Supporter ist eine separate Integration, die viel mehr kann: beliebige Geräte oder Aufgaben, Intervalle nach Zeit, Nutzung oder einem Sensor, Benachrichtigungen und einen Verlauf. Sie kann den Zykluszähler von WashData nutzen.",
     "pg_canvas_empty3": "Wähle oben einen Zyklus und drücke auf Ausführen, um ihn zu simulieren. Fahre dann mit dem Zeiger darüber, um Werte abzulesen, scrolle oder zoome mit zwei Fingern und ziehe zum Verschieben.",
     "pg_preset_delete_confirm": "Die Voreinstellung \"{name}\" löschen?",
     "pg_preset_limit": "Maximale Anzahl an Voreinstellungen erreicht ({n})",
@@ -1089,6 +1107,7 @@
     "wash_dw": "Hauptwaschmittelwäsche mit Erhitzen."
   },
   "placeholder": {
+    "custom_task": "z. B. Türdichtung reinigen",
     "add": "hinzufügen…",
     "group_name": "z. B. Baumwolle 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1658,6 +1677,7 @@
     "resetting": "Wird zurückgesetzt…",
     "trimming": "Wird zugeschnitten…",
     "splitting": "Wird geteilt…",
+    "stalled": "Stillstand",
     "deleting": "Wird gelöscht…",
     "imported": "Importiert",
     "preparing": "Wird vorbereitet…",
@@ -1788,6 +1808,11 @@
     "wrong_profile": "Falsches Profil"
   },
   "toast": {
+    "task_name_required": "Geben Sie der Aufgabe einen Namen",
+    "task_added": "Aufgabe hinzugefügt",
+    "task_save_failed": "Aufgabe konnte nicht gespeichert werden: {error}",
+    "task_removed": "Aufgabe entfernt",
+    "maint_logged": "Als erledigt protokolliert: {task}",
     "catalog_refreshed": "Community-Katalog aktualisiert",
     "access_saved": "Zugangskontrolle gespeichert",
     "all_wiped": "Alle Daten gelöscht",
@@ -1945,6 +1970,10 @@
     "up": "Aufwärtstrend"
   },
   "maint": {
+    "salt": "Salz nachfüllen",
+    "rinse_aid": "Klarspüler nachfüllen",
+    "lint_filter": "Flusensieb reinigen",
+    "condenser_clean": "Kondensator reinigen",
     "bearing_service": "Lagerwartung",
     "descale": "Entkalken",
     "drum_clean": "Trommel reinigen",
@@ -1989,7 +2018,8 @@
     "notify_held": "Eine Benachrichtigung wurde wegen der Ruhezeiten zurückgehalten.",
     "finished": "Der Zyklus hat einen Endzustand erreicht und wurde beendet.",
     "match_reverted": "Das Programm ist auf die Erkennung zurückgefallen: Sein Wert ist deutlich unter seinen eigenen Höchstwert gesunken.",
-    "verified_pause": "Die laufende Ausrichtung hat eine Pause innerhalb des Programms bestätigt (oder aufgehoben). Solange sie gilt, wird der Zyklus nicht beendet."
+    "verified_pause": "Die laufende Ausrichtung hat eine Pause innerhalb des Programms bestätigt (oder aufgehoben). Solange sie gilt, wird der Zyklus nicht beendet.",
+    "stalled": "Der Zyklus verharrte länger auf seiner Standby-Leistung als jede Pause dieses Programms an dieser Stelle, obwohl noch Arbeit ausstand. Angezeigt als Angehalten (Stillstand); der Zyklus bleibt offen."
   },
   "store": {
     "search_ph2": "Nach Marke oder Modell suchen…",
@@ -2023,6 +2053,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter auf GitHub ↗",
     "manual": "Handbuch ↗"
   },
   "tip": {

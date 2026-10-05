@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Találat kétértelműsége"
+      },
+      "maintenance_due": {
+        "name": "Esedékes karbantartás",
+        "state": {
+          "on": "Esedékes",
+          "off": "Nem esedékes"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Esedékes feladatok azonosítói"
+          },
+          "due_tasks": {
+            "name": "Esedékes feladatok",
+            "state": {
+              "descale": "Vízkőmentesítés",
+              "filter_clean": "Szűrő tisztítása",
+              "drum_clean": "Dob tisztítása",
+              "bearing_service": "Csapágy szerviz",
+              "other": "Egyéb",
+              "salt": "Só utántöltése",
+              "rinse_aid": "Öblítőszer utántöltése",
+              "lint_filter": "Szöszszűrő tisztítása",
+              "condenser_clean": "Kondenzátor tisztítása"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Ránctalanító",
           "interrupted": "Megszakított",
           "force_stopped": "Kényszer leállított",
-          "rinse": "Öblítés",
           "unknown": "Ismeretlen",
           "clean": "Tiszta",
           "delay_wait": "Várakozás a kezdésre"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Ciklusrendellenesség",
+            "state": {
+              "overrun": "Sokáig fut",
+              "stalled": "Elakadt"
+            }
+          }
         }
       },
       "washer_program": {

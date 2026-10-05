@@ -46,6 +46,8 @@
     "matcher_used_tip": "Cycles enregistrés sur cet appareil que le moteur de correspondance de WashData a étiquetés de lui-même avec ce programme importé. Un import qui ne correspond jamais peut ne pas convenir à votre appareil et peut être supprimé. Compté localement ; rien n'est envoyé à la boutique."
   },
   "btn": {
+    "log_done_task": "Marquer comme fait : {task}",
+    "add_task": "Ajouter une tâche",
     "pg_preset_delete": "Supprimer le préréglage",
     "pg_preset_load": "Charger le préréglage",
     "pg_preset_load_tip": "Remplacer les valeurs du Bac à sable par ce préréglage (les réglages actifs ne sont pas modifiés)",
@@ -279,6 +281,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Vos propres tâches",
+    "maintenance_supporter": "Besoin de plus ?",
     "access_control": "Contrôle d'accès",
     "add_maintenance": "Ajouter un événement d'entretien",
     "automation_delete": "Supprimer cette automatisation",
@@ -329,6 +333,11 @@
     "poor": "⚠ Qualité de profil médiocre"
   },
   "lbl": {
+    "task_name": "Tâche",
+    "every_cycles": "Tous les (cycles)",
+    "every_days": "Tous les (jours)",
+    "new_task_name": "Nouvelle tâche",
+    "days_since_service": "{since} / {total} jours",
     "envelope_position_tip": "Position sur la courbe enregistrée du programme correspondant, {pct} %. Elle est mesurée en alignant ce cycle sur le profil plutôt qu'en comptant le temps, elle reste donc juste lorsqu'un cycle est plus long ou plus court que d'habitude. Elle est actualisée lorsque l'appareil est silencieux et peut donc être en retard pendant une phase active.",
     "envelope_position": "courbe {pct} %",
     "aria_playground_chart3": "Graphique interactif de puissance du cycle : survolez pour lire le temps/la puissance, faites défiler ou pincez pour zoomer, faites glisser pour vous déplacer",
@@ -378,6 +387,8 @@
     "energy": "Énergie",
     "event_type": "Type d'événement",
     "expected": "Attendu",
+    "suspected_profile": "{name} (probable)",
+    "runner_up_profile": "{name} (deuxième candidat)",
     "expected_duration": "Durée prévue (min)",
     "file_kb": "Fichier (ko)",
     "from": "De",
@@ -673,6 +684,8 @@
     "trained_unknown": "à une date inconnue"
   },
   "modal": {
+    "remove_task_title": "Retirer la tâche",
+    "remove_task_msg": "Retirer le rappel « {task} » ? Ses entrées dans le journal d'entretien sont conservées.",
     "auto_label": "Cycles d'étiquetage automatique",
     "correct_feedback": "Commentaires corrects",
     "create_profile": "Créer un profil",
@@ -726,6 +739,10 @@
     "undo_import_title": "Annuler la dernière importation"
   },
   "msg": {
+    "custom_task_limit": "Vous avez atteint la limite de {max} tâches.",
+    "custom_tasks_intro": "Ajoutez tout ce dont vous souhaitez qu'on vous rappelle. Une tâche est à effectuer dès que l'un des deux intervalles est atteint ; laissez-en un vide ou à 0 pour n'utiliser que l'autre.",
+    "maintenance_due_sensor_hint": "Le capteur binaire Entretien à effectuer s'active tant qu'une tâche est à effectuer, ce qui vous permet de créer votre propre automatisation de notification.",
+    "maintenance_supporter_intro": "Maintenance Supporter est une intégration distincte qui en fait bien plus : n'importe quel appareil ou tâche, des échéances selon le temps, l'utilisation ou un capteur, des notifications et un historique. Elle peut utiliser le compteur de cycles de WashData.",
     "pg_canvas_empty3": "Choisissez un cycle ci-dessus et appuyez sur Exécuter pour le simuler. Survolez ensuite pour lire les valeurs, faites défiler ou pincez pour zoomer et faites glisser pour vous déplacer.",
     "pg_preset_delete_confirm": "Supprimer le préréglage « {name} » ?",
     "pg_preset_limit": "Limite de préréglages atteinte ({n})",
@@ -1052,6 +1069,7 @@
     "wash_dw": "Lavage avec détergent principal avec chauffage."
   },
   "placeholder": {
+    "custom_task": "p. ex. nettoyer le joint de porte",
     "add": "ajouter…",
     "group_name": "ex. Coton 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1621,6 +1639,7 @@
     "resetting": "Réinitialisation…",
     "trimming": "Rognage…",
     "splitting": "Fractionnement…",
+    "stalled": "Bloqué",
     "deleting": "Suppression…",
     "imported": "Importé",
     "preparing": "Préparation…",
@@ -1659,6 +1678,11 @@
     "wrong_profile": "Mauvais profil"
   },
   "toast": {
+    "task_name_required": "Donnez un nom à la tâche",
+    "task_added": "Tâche ajoutée",
+    "task_save_failed": "Impossible d'enregistrer la tâche : {error}",
+    "task_removed": "Tâche retirée",
+    "maint_logged": "Marqué comme fait : {task}",
     "catalog_refreshed": "Catalogue de la communauté rafraîchi",
     "access_saved": "Contrôle d'accès enregistré",
     "all_wiped": "Toutes les données effacées",
@@ -1910,6 +1934,10 @@
     "up": "Tendance à la hausse"
   },
   "maint": {
+    "salt": "Recharger le sel",
+    "rinse_aid": "Recharger le liquide de rinçage",
+    "lint_filter": "Nettoyer le filtre à peluches",
+    "condenser_clean": "Nettoyer le condenseur",
     "bearing_service": "Entretien des roulements",
     "descale": "Détartrer",
     "drum_clean": "Nettoyer le tambour",
@@ -1954,7 +1982,8 @@
     "notify_held": "Une notification a été différée pour les heures silencieuses.",
     "finished": "Le cycle a atteint son état final et s'est terminé.",
     "match_reverted": "Le programme est revenu en détection : son score est tombé bien en dessous de son propre pic.",
-    "verified_pause": "L'alignement en direct a confirmé (ou levé) une pause au sein du programme. Tant qu'elle est maintenue, le cycle n'est pas terminé."
+    "verified_pause": "L'alignement en direct a confirmé (ou levé) une pause au sein du programme. Tant qu'elle est maintenue, le cycle n'est pas terminé.",
+    "stalled": "Le cycle est resté à sa consommation de veille plus longtemps que n'importe quelle pause de ce programme à cet endroit, alors qu'il restait du travail. Affiché comme En pause (Bloqué) ; le cycle reste ouvert."
   },
   "store": {
     "search_ph2": "Rechercher par marque ou modèle…",
@@ -1988,6 +2017,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter sur GitHub ↗",
     "manual": "Manuel ↗"
   },
   "tip": {
@@ -2077,6 +2107,7 @@
     "min": "min",
     "entity_not_found": "Entité introuvable",
     "running_long": "Dépassement",
+    "stalled": "Bloqué",
     "remaining": "restant",
     "progress": "progression",
     "show_time_remaining": "Afficher le temps restant",

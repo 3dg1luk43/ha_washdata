@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entitet ikke fundet",
     "running_long": "Kører længere",
+    "stalled": "Gået i stå",
     "remaining": "tilbage",
     "progress": "fremgang",
     "show_time_remaining": "Vis resterende tid",
@@ -91,6 +92,8 @@
     "matcher_used_tip": "Cyklusser optaget på dette apparat, som WashDatas programgenkendelse selv har mærket med dette importerede program. En import, der aldrig bliver genkendt, passer måske ikke til dit apparat og kan fjernes. Tælles lokalt; intet sendes til fællesskabsbutikken."
   },
   "btn": {
+    "log_done_task": "Log som udført: {task}",
+    "add_task": "Tilføj opgave",
     "pg_preset_delete": "Slet forudindstilling",
     "pg_preset_load": "Indlæs forudindstilling",
     "pg_preset_load_tip": "Erstat værdierne i legepladsen med denne forudindstilling (de aktive indstillinger røres ikke)",
@@ -329,6 +332,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Dine egne opgaver",
+    "maintenance_supporter": "Brug for mere?",
     "access_control": "Adgangskontrol",
     "add_maintenance": "Tilføj vedligeholdelseshændelse",
     "automation_delete": "Slet denne automatisering",
@@ -379,6 +384,11 @@
     "poor": "⚠ Dårlig matchkvalitet"
   },
   "lbl": {
+    "task_name": "Opgave",
+    "every_cycles": "Hver (cyklusser)",
+    "every_days": "Hver (dage)",
+    "new_task_name": "Ny opgave",
+    "days_since_service": "{since} / {total} dage",
     "envelope_position_tip": "Position på det matchede programs egen registrerede kurve, {pct} %. Måles ved at justere denne cyklus ind efter profilen i stedet for at tælle tid, så den holder stik, når en kørsel er længere eller kortere end normalt. Den opdateres, mens apparatet er stille, så den kan halte bagefter under en aktiv fase.",
     "envelope_position": "kurve {pct} %",
     "aria_playground_chart3": "Interaktiv effektgraf for cyklussen: hold markøren over for at aflæse tid/effekt, rul eller knib for at zoome, træk for at panorere",
@@ -428,6 +438,8 @@
     "energy": "Energi",
     "event_type": "Hændelsestype",
     "expected": "Forventet",
+    "suspected_profile": "{name} (formodet)",
+    "runner_up_profile": "{name} (nummer to)",
     "expected_duration": "Forventet varighed (min)",
     "file_kb": "Fil (kB)",
     "from": "Fra",
@@ -718,6 +730,8 @@
     }
   },
   "modal": {
+    "remove_task_title": "Fjern opgave",
+    "remove_task_msg": "Fjern påmindelsen \"{task}\"? Dens poster i vedligeholdelsesloggen bevares.",
     "auto_label": "Auto-label cyklusser",
     "correct_feedback": "Korriger feedback",
     "create_profile": "Opret profil",
@@ -771,6 +785,10 @@
     "undo_import_title": "Fortryd seneste import"
   },
   "msg": {
+    "custom_task_limit": "Du har nået grænsen på {max} opgaver.",
+    "custom_tasks_intro": "Tilføj alt andet, du vil mindes om. En opgave forfalder, når et af intervallerne er nået; lad det ene være tomt eller 0 for kun at bruge det andet.",
+    "maintenance_due_sensor_hint": "Den binære sensor Vedligeholdelse forfalder tændes, så længe en opgave er forfalden, så du kan bygge din egen automatisering til notifikationer.",
+    "maintenance_supporter_intro": "Maintenance Supporter er en separat integration, der kan meget mere: ethvert apparat eller enhver opgave, intervaller efter tid, brug eller en sensor, notifikationer og en historik. Den kan bruge WashDatas cyklustæller.",
     "pg_canvas_empty3": "Vælg en cyklus ovenfor, og tryk på Kør for at simulere den. Hold derefter markøren over for at aflæse værdier, rul eller knib for at zoome, og træk for at panorere.",
     "pg_preset_delete_confirm": "Slet forudindstillingen \"{name}\"?",
     "pg_preset_limit": "Grænsen for forudindstillinger er nået ({n})",
@@ -1089,6 +1107,7 @@
     "wash_dw": "Hovedvaskemiddel med varme."
   },
   "placeholder": {
+    "custom_task": "f.eks. rengør dørpakning",
     "add": "tilføj…",
     "group_name": "f.eks. Bomuld 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1658,6 +1677,7 @@
     "resetting": "Nulstiller…",
     "trimming": "Beskærer…",
     "splitting": "Opdeler…",
+    "stalled": "Gået i stå",
     "deleting": "Sletter…",
     "imported": "Importeret",
     "preparing": "Forbereder…",
@@ -1788,6 +1808,11 @@
     "wrong_profile": "Forkert profil"
   },
   "toast": {
+    "task_name_required": "Giv opgaven et navn",
+    "task_added": "Opgave tilføjet",
+    "task_save_failed": "Kunne ikke gemme opgaven: {error}",
+    "task_removed": "Opgave fjernet",
+    "maint_logged": "Logget som udført: {task}",
     "catalog_refreshed": "Fællesskabskataloget er opdateret",
     "access_saved": "Adgangskontrol gemt",
     "all_wiped": "Alle data slettet",
@@ -1945,6 +1970,10 @@
     "up": "Opadgående tendens"
   },
   "maint": {
+    "salt": "Påfyld salt",
+    "rinse_aid": "Påfyld afspændingsmiddel",
+    "lint_filter": "Rengør fnugfilter",
+    "condenser_clean": "Rengør kondensator",
     "bearing_service": "Lejeservice",
     "descale": "Afkalk",
     "drum_clean": "Rengør tromle",
@@ -1989,7 +2018,8 @@
     "notify_held": "En notifikation blev holdt tilbage på grund af stilletimer.",
     "finished": "Cyklussen nåede en sluttilstand og stoppede.",
     "match_reverted": "Programmet faldt tilbage til registrering: dets score faldt et godt stykke under sit eget højdepunkt.",
-    "verified_pause": "Live-justeringen bekræftede (eller frigav) en pause inde i programmet. Så længe den gælder, afsluttes cyklussen ikke."
+    "verified_pause": "Live-justeringen bekræftede (eller frigav) en pause inde i programmet. Så længe den gælder, afsluttes cyklussen ikke.",
+    "stalled": "Cyklussen lå på sit standbyforbrug længere end nogen pause i dette program på det sted, mens der stadig var arbejde tilbage. Vises som Pause (Gået i stå); cyklussen forbliver åben."
   },
   "store": {
     "search_ph2": "Søg efter mærke eller model…",
@@ -2023,6 +2053,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter på GitHub ↗",
     "manual": "Manual ↗"
   },
   "tip": {

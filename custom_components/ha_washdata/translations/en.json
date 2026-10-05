@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Match Ambiguity"
+      },
+      "maintenance_due": {
+        "name": "Maintenance due",
+        "state": {
+          "on": "Due",
+          "off": "Not due"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Due task IDs"
+          },
+          "due_tasks": {
+            "name": "Due tasks",
+            "state": {
+              "descale": "Descale",
+              "filter_clean": "Clean filter",
+              "drum_clean": "Clean drum",
+              "bearing_service": "Bearing service",
+              "other": "Other",
+              "salt": "Refill salt",
+              "rinse_aid": "Refill rinse aid",
+              "lint_filter": "Clean lint filter",
+              "condenser_clean": "Clean condenser"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Anti-Wrinkle",
           "interrupted": "Interrupted",
           "force_stopped": "Force Stopped",
-          "rinse": "Rinse",
           "unknown": "Unknown",
           "clean": "Clean",
           "delay_wait": "Delay Start"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Cycle anomaly",
+            "state": {
+              "overrun": "Running long",
+              "stalled": "Stalled"
+            }
+          }
         }
       },
       "washer_program": {

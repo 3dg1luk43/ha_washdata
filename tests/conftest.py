@@ -43,6 +43,11 @@ def pytest_collection_modifyitems(config, items):
             continue
         if item.get_closest_marker("slow") or item.get_closest_marker("benchmark"):
             item.add_marker(pytest.mark.timeout(SLOW_TEST_TIMEOUT_S))
+    # Under pytest-xdist, tests marked `heavy` (minutes of work) go out first, so no
+    # worker picks one up last and leaves the run waiting on it. Workers only (the
+    # order must be the same on every worker; a serial run keeps file order). Stable.
+    if hasattr(config, "workerinput"):
+        items.sort(key=lambda item: item.get_closest_marker("heavy") is None)
 
 
 def pytest_terminal_summary(terminalreporter, exitstatus, config):

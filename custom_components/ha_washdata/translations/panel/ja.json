@@ -3,6 +3,7 @@
         "min": "分",
         "entity_not_found": "エンティティが見つかりません",
         "running_long": "超過中",
+        "stalled": "停滞中",
         "remaining": "残り",
         "progress": "進捗",
         "show_time_remaining": "残り時間を表示",
@@ -239,6 +240,8 @@
         "save_total_cycles": "累計を保存",
         "clear": "クリア",
         "add_brand": "ブランドを追加",
+        "log_done_task": "完了を記録: {task}",
+        "add_task": "タスクを追加",
         "add_appliance": "家電を追加",
         "retry": "再試行",
         "confirm_appliance": "この家電を確認",
@@ -326,6 +329,8 @@
         }
     },
     "hdr": {
+        "custom_tasks": "独自のタスク",
+        "maintenance_supporter": "もっと機能が必要ですか？",
         "access_control": "アクセス制御",
         "add_maintenance": "メンテナンスイベントの追加",
         "automation_delete": "このオートメーションを削除します",
@@ -381,6 +386,11 @@
         "aria_playground_chart3": "インタラクティブなサイクル電力グラフ: ホバーで時刻/電力を表示、スクロールまたはピンチでズーム、ドラッグで移動",
         "device_unresolved": "利用不可のデバイス ({id})",
         "drag_to_resize": "ドラッグしてサイズ変更",
+        "task_name": "タスク",
+        "every_cycles": "間隔 (サイクル)",
+        "every_days": "間隔 (日)",
+        "new_task_name": "新しいタスク",
+        "days_since_service": "{since} / {total} 日",
         "actions": "アクション",
         "activity": "活動",
         "administrators": "管理者",
@@ -425,6 +435,8 @@
         "energy": "エネルギー",
         "event_type": "イベントの種類",
         "expected": "予想",
+        "suspected_profile": "{name} (推定)",
+        "runner_up_profile": "{name} (次点)",
         "expected_duration": "予想される所要時間 (分)",
         "file_kb": "ファイル (kB)",
         "from": "開始",
@@ -754,6 +766,8 @@
         "import_wizard": "インポート - データを選択",
         "history_import": "電力履歴のインポート",
         "apply_suggestions_title": "提案を適用",
+        "remove_task_title": "タスクを削除",
+        "remove_task_msg": "リマインダー「{task}」を削除しますか？メンテナンス履歴の記録は保持されます。",
         "apply_suggestions_msg": "これら {n} 件の設定を変更しますか？保存後に統合がリロードされます。",
         "discard_settings_title": "未保存の変更を破棄しますか？",
         "discard_settings_msg": "未保存の設定変更が {n} 件あります。設定を離れて変更を破棄しますか？",
@@ -948,6 +962,10 @@
         "online_unavailable": "このサーバーではオンライン機能を利用できません。",
         "store_picker_offline": "設定（歯車アイコン）でオンライン機能を有効にすると、コミュニティカタログから選択できます。",
         "pick_brand_first": "先に家電ブランドを選択してください。",
+        "custom_task_limit": "タスクの上限 ({max} 件) に達しました。",
+        "custom_tasks_intro": "リマインドしてほしいその他の作業を追加します。どちらかの間隔に達するとタスクは要対応になります。片方だけを使う場合は、もう片方を空欄または 0 にします。",
+        "maintenance_due_sensor_hint": "「メンテナンス時期」バイナリセンサーは、いずれかのタスクが要対応の間オンになるため、独自の通知オートメーションを作成できます。",
+        "maintenance_supporter_intro": "Maintenance Supporter は、さらに多くのことができる別の統合です。あらゆる家電やタスク、時間・使用量・センサーによるスケジュール、通知、履歴に対応します。WashData のサイクルカウンターを利用できます。",
         "adopt_settings_hint": "このデバイスの検出・マッチングしきい値を共有されたものに上書きします。通知、エンティティ、電力料金は変更されません。",
         "include_settings_hint": "このデバイスの認識・マッチングしきい値を共有します（通知、エンティティ、電力料金は除く）。引き継ぐかどうかは引継ぎ側が選択します。",
         "onboard_download": "新しいデバイスですか？同じ機器を持つ他のWashDataユーザーの既成セットアップ（プログラム、リファレンスサイクル、フェーズ）を引き継ぎましょう。",
@@ -1073,6 +1091,7 @@
         "wash_dw": "主な洗剤は加熱しながら洗浄します。"
     },
     "placeholder": {
+        "custom_task": "例: ドアパッキンの清掃",
         "add": "追加…",
         "group_name": "例：綿 2:47",
         "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1642,6 +1661,7 @@
         "resetting": "リセット中…",
         "trimming": "トリム中…",
         "splitting": "分割中…",
+        "stalled": "停滞中",
         "deleting": "削除中…",
         "imported": "インポート済み",
         "preparing": "準備中…",
@@ -1681,6 +1701,11 @@
     },
     "toast": {
         "catalog_refreshed": "コミュニティカタログを更新しました",
+        "task_name_required": "タスクに名前を付けてください",
+        "task_added": "タスクを追加しました",
+        "task_save_failed": "タスクを保存できませんでした: {error}",
+        "task_removed": "タスクを削除しました",
+        "maint_logged": "完了として記録しました: {task}",
         "access_saved": "アクセス制御が保存されました",
         "all_wiped": "すべてのデータが消去されました",
         "analysis_complete_none": "分析が完了しました: 新しい提案はありません",
@@ -1928,6 +1953,10 @@
     },
     "maint": {
         "bearing_service": "ベアリングの整備",
+        "salt": "塩の補充",
+        "rinse_aid": "リンス剤の補充",
+        "lint_filter": "糸くずフィルターの清掃",
+        "condenser_clean": "コンデンサーの清掃",
         "descale": "スケール除去",
         "drum_clean": "ドラムの清掃",
         "filter_clean": "フィルターの清掃",
@@ -1971,7 +2000,8 @@
         "notify_held": "サイレント時間帯のため、通知が保留されました。",
         "finished": "サイクルが終了状態に達して終了しました。",
         "match_reverted": "プログラムが検出中の状態に戻りました。スコアが自身のピークを大きく下回ったためです。",
-        "verified_pause": "リアルタイムの位置合わせにより、プログラム内の一時停止が確認（または解除）されました。一時停止が有効な間、サイクルは終了しません。"
+        "verified_pause": "リアルタイムの位置合わせにより、プログラム内の一時停止が確認（または解除）されました。一時停止が有効な間、サイクルは終了しません。",
+        "stalled": "作業がまだ残っているのに、このプログラムがそこで一時停止するどの時間よりも長く、サイクルが待機電力のまま留まりました。一時停止中 (停滞中) と表示され、サイクルは継続中のままです。"
     },
     "store": {
         "search_ph2": "メーカーまたは型番で検索…",
@@ -2005,6 +2035,7 @@
         }
     },
     "link": {
+        "maintenance_supporter": "GitHub の Maintenance Supporter ↗",
         "manual": "マニュアル ↗"
     },
     "tip": {

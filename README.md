@@ -154,7 +154,7 @@ screenshot tour.
 
 | Entity | What it reports |
 | :--- | :--- |
-| `sensor.<name>_state` | `idle`, `starting`, `running`, `paused`, `user_paused`, `ending`, `finished`, `anti_wrinkle`, `interrupted`, `force_stopped`, `rinse`, `clean`, `delay_wait`, `unknown` |
+| `sensor.<name>_state` | `off`, `idle`, `starting`, `running`, `paused`, `user_paused`, `ending`, `finished`, `anti_wrinkle`, `interrupted`, `force_stopped`, `clean`, `delay_wait`, `unknown` |
 | `sensor.<name>_program` | Best-matched profile. Carries a `reference_profile` attribute (the program's expected power curve) for energy-management automations. |
 | `sensor.<name>_time_remaining` | Smart countdown (locks during high-variance phases) |
 | `sensor.<name>_total_duration` | Elapsed + remaining. Ideal for `timer-bar-card`. |

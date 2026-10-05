@@ -48,6 +48,7 @@ from .const import (
     STATE_INTERRUPTED,
     STATE_FORCE_STOPPED,
     STATE_UNKNOWN,
+    STATE_IDLE,
     DEVICE_TYPE_WASHING_MACHINE,
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_WASHER_DRYER,
@@ -180,6 +181,53 @@ STOP_LOCKOUT_RELEASE_SECONDS = 180.0
 # reads it. Measured by devtools/start_gate_eval.py (flickers per idle day).
 STANDBY_REPROBE_SHOW_ENERGY_FRACTION = 0.5
 
+# Discussion #452: two more display-only states, read by `exposed_state` and never
+# by detection.
+#
+# STALLED. A washer that halts mid-cycle (an unbalanced load, a door warning)
+# sits at its standby draw, just ABOVE stop_threshold_w, so the cycle never even
+# pauses. A stall is a flat run of readings in the standby band's near-stop shape
+# (`standby_near_stop_ceiling`, at most STANDBY_BAND_MAX_FRACTION of the cycle's
+# peak, spread within the band's flatness limit) that has lasted longer than any
+# low stretch the matched programme recorded from that position on
+# (END_GATE_HAZARD_MARGIN x the longest in its near-stop pause catalogue, element
+# 15; at least STALL_MIN_S) while the programme still owes work: its terminal
+# high-power block not yet seen (#399's evidence), or, for a programme without
+# one, the run began before STALL_OWES_MAX_POSITION of its expected duration.
+# The evidence is the match the run began under (a plateau soon reads to the
+# matcher as a finished SHORTER programme) AND the current match (the last tick
+# before a real end can be a prefix match of a LONGER one); with no current match
+# the first stands. Unmatched (or matched with fewer than
+# END_GATE_HAZARD_MIN_CYCLES traced cycles): STALL_UNMATCHED_MIN_S. Shown as
+# `paused` with sub-state STALL_SUB_STATE, cleared by the first reading out of
+# the band. The one place it reaches detection is the standby-band finalize:
+# during a run whose two matches both still owe their terminal high-power block,
+# the near-stop tier is held, so the plateau waits for the loose tier
+# (STANDBY_BAND_LOOSE_MIN_RATIO x expected) instead of closing a halted wash as
+# finished at 1.0x (STALL_HOLDS_STANDBY_BAND, the A/B switch for
+# devtools/end_gate_eval.py).
+STALL_DEVICE_TYPES = STANDBY_BAND_FINALIZE_DEVICE_TYPES
+STALL_MIN_S = 600.0
+STALL_UNMATCHED_MIN_S = 1800.0
+STALL_OWES_MAX_POSITION = 0.75
+STALL_SUB_STATE = "Stalled"
+STALL_HOLDS_STANDBY_BAND = True
+#
+# IDLE. Outside a cycle a two-level appliance (display on vs switched off) shows
+# `idle` at its standby level and `off` below it. The level is the user's
+# power-off threshold (#284) when one is set: idle at or above it, off below it,
+# debounced by power_off_delay like the #284 reset itself. Otherwise the learned
+# standby level (`learned_standby_level_w`, set by the manager): idle from
+# IDLE_OFF_FRACTION of it, off below IDLE_EXIT_FRACTION of that (hysteresis), each
+# held IDLE_DEBOUNCE_S, and only once the appliance has been seen below that off
+# level outside a cycle since start-up. A level under IDLE_MIN_STANDBY_W, or at
+# or above the start threshold, is not clearly separated from off or from a
+# start: no idle at all, exactly as before.
+IDLE_MIN_STANDBY_W = 2.0
+IDLE_OFF_FRACTION = 0.5
+IDLE_EXIT_FRACTION = 0.75
+IDLE_DEBOUNCE_S = 60.0
+
 
 def effective_anticrease_finalize_ratio(value: Any) -> float:
     """The ratio the anti-crease gate will actually use for a stored value.
@@ -248,12 +296,17 @@ class MatchContext:
     longest_candidate_s: float = 0.0  # 12 (item 330 fallback bar)
     trusted_min_s: Any = None         # 13 (item 384 trusted-length floor)
     pause_catalogue: Any = None       # 14 (DETECT-16 hazard gate)
+    # 15 (#452 stall display): the same catalogue below `standby_near_stop_ceiling`,
+    # or a zero-argument callable returning it: read only when a flat run lasts
+    # long enough to be judged, so the profile's traces are not walked for it on
+    # every cycle (`test_perf_budgets`).
+    stall_catalogue: Any = None
 
     def __getitem__(self, index: Any) -> Any:
         return self.as_sequence()[index]
 
     def __len__(self) -> int:
-        return 14
+        return 15
 
     def as_sequence(self) -> tuple[Any, ...]:
         return (
@@ -261,7 +314,7 @@ class MatchContext:
             self.is_confident_mismatch, self.is_ambiguous, False,
             self.is_prefix_ambiguous_full_shape, self.tail_power, self.terminal_high,
             self.terminal_quiet_s, self.longest_candidate_s, self.trusted_min_s,
-            self.pause_catalogue,
+            self.pause_catalogue, self.stall_catalogue,
         )
 
 
@@ -388,6 +441,65 @@ def trim_zero_readings(
 
     # Return trimmed slice (inclusive of end)
     return readings[start_idx : end_idx + 1]
+
+
+def standby_near_stop_ceiling(stop_threshold_w: float) -> float:
+    """Top of the standby band's near-stop shape (#445 / register item 383).
+
+    A plateau at or above the stop threshold and at most this high is an
+    appliance sitting at its standby draw, not one doing work. Shared by the
+    standby-band finalize, the stall display (#452) and its pause catalogue.
+    """
+    stop = float(stop_threshold_w)
+    return max(STANDBY_BAND_NEAR_STOP_FACTOR * stop, stop + STANDBY_BAND_NEAR_STOP_W)
+
+
+#: How many of the most recent stored cycles `learned_standby_level_w` reads.
+STANDBY_LEVEL_RECENT_CYCLES = 30
+
+
+def learned_standby_level_w(
+    cycles: Any, stop_threshold_w: float, start_threshold_w: float
+) -> float | None:
+    """Discussion #452: the standby/display level of a two-level appliance, or None.
+
+    Two measurements the suggestion engine already makes, in order: the level
+    every recent cycle was still drawing when it ended (``detect_standby_above_stop``,
+    #445), else the resting draw of the clean cycles (``resting_level_w``, item
+    455), timed below the near-stop ceiling instead of below stop so that a draw
+    just above stop (#452: 4-5 W on a 2.8 W stop) is seen too. None unless the
+    level is at least IDLE_MIN_STANDBY_W and below the start threshold, i.e.
+    clearly separated from both "off" and a start. Reads the last
+    STANDBY_LEVEL_RECENT_CYCLES cycles. Pure, executor-safe, never raises.
+    """
+    try:
+        # Lazy: suggestion_engine imports Home Assistant helpers this module does not need.
+        from .suggestion_engine import (  # noqa: PLC0415
+            _cycle_readings,
+            detect_standby_above_stop,
+            resting_level_w,
+            select_clean_cycles,
+        )
+
+        stop = float(stop_threshold_w)
+        start = float(start_threshold_w)
+        if not (math.isfinite(stop) and math.isfinite(start)) or stop <= 0:
+            return None
+        recent = [c for c in list(cycles or [])[-STANDBY_LEVEL_RECENT_CYCLES:] if isinstance(c, dict)]
+        adv = detect_standby_above_stop(recent, stop)
+        if adv is not None:
+            level: float | None = float(adv["idle_w"])
+        else:
+            clean, _excluded = select_clean_cycles(recent, stop_threshold_w=stop)
+            points = [p for p in (_cycle_readings(c) for c in clean) if len(p) >= 5]
+            level = resting_level_w(points, standby_near_stop_ceiling(stop))
+        if level is None or not math.isfinite(level):
+            return None
+        if level < IDLE_MIN_STANDBY_W or level >= start:
+            return None
+        return float(level)
+    except Exception:  # noqa: BLE001 - a display statistic must never break setup
+        return None
 
 
 def terminal_high_for_guards(
@@ -689,26 +801,384 @@ class CycleDetector:
         self._probe_hidden: bool = False
         self._probe_hidden_state: str = STATE_OFF
         self._probe_hidden_sub_state: str | None = None
+        # Discussion #452, display only (see the STALL_* / IDLE_* constants).
+        # Element 15: the matched profile's low stretches below the near-stop
+        # ceiling, as element 14's (traced, ((fraction, seconds), ...)).
+        self._matched_stall_catalogue: tuple[int, tuple[tuple[float, float], ...]] | None = None
+        # The current flat near-stop run: its first reading and its spread.
+        self._stall_run_start: datetime | None = None
+        self._stall_run_lo: float = 0.0
+        self._stall_run_hi: float = 0.0
+        self._stall_active: bool = False
+        self._stall_since: datetime | None = None
+        # The match as it stood when the current run began (`_begin_stall_run`):
+        # a plateau soon looks like a finished SHORTER programme to the matcher,
+        # so the evidence is the pre-plateau match's. And (required seconds,
+        # owes work, owes its terminal high-power block), computed from it once.
+        self._stall_match: tuple[Any, ...] | None = None
+        self._stall_eval: tuple[float, bool, bool] | None = None
+        # ...and whether the CURRENT match agrees, re-read after every match.
+        self._stall_now: tuple[bool, bool] | None = None
+        # The learned standby level (`learned_standby_level_w`, set by the
+        # manager) and the debounced idle/off class it drives.
+        self._standby_level_w: float | None = None
+        self._idle_shown: bool = False
+        self._idle_candidate_since: datetime | None = None
+        # A LEARNED level shows idle only once the appliance has been seen at its
+        # off level outside a cycle (held IDLE_DEBOUNCE_S) since start-up: an
+        # appliance whose switched-off draw reaches the level would otherwise read
+        # idle for ever, and an automation waiting for `off` would never fire.
+        self._idle_off_seen: bool = False
+        self._idle_off_since: datetime | None = None
 
     @property
     def exposed_state(self) -> str:
-        """The state entities show: ``state``, except during a hidden probe (item 501).
+        """The state entities show. Detection never reads this.
 
-        Detection never reads this. A standby that keeps crossing the start
-        threshold otherwise wrote ~500 off/starting rows a day to the recorder and
-        fired every automation keyed on ``starting``; the probes themselves (and
-        so every start, commit and phantom) are unchanged.
+        ``state``, except: during a hidden probe the state it began in (item 501:
+        a standby that keeps crossing the start threshold otherwise wrote ~500
+        off/starting rows a day and fired every automation keyed on
+        ``starting``); ``paused`` while the open cycle is stalled (#452); and
+        ``idle`` instead of ``off`` while a two-level appliance sits at its
+        standby level (#452).
         """
-        if self._probe_hidden and self._state == STATE_STARTING:
-            return self._probe_hidden_state
-        return self._state
+        state = self._state
+        if self._probe_hidden and state == STATE_STARTING:
+            state = self._probe_hidden_state
+        if state == STATE_OFF and self._idle_shown and self._idle_bounds() is not None:
+            return STATE_IDLE
+        if self._stall_active and state in (STATE_RUNNING, STATE_ENDING):
+            return STATE_PAUSED
+        return state
 
     @property
     def exposed_sub_state(self) -> str | None:
-        """``sub_state`` to show, held at the pre-probe value while a probe is hidden."""
+        """``sub_state`` to show, matching :attr:`exposed_state`."""
+        exposed = self.exposed_state
+        if exposed == STATE_IDLE:
+            return STATE_IDLE.capitalize()
+        if self._stall_active and exposed == STATE_PAUSED:
+            return STALL_SUB_STATE
         if self._probe_hidden and self._state == STATE_STARTING:
             return self._probe_hidden_sub_state
         return self._sub_state
+
+    @property
+    def stalled(self) -> bool:
+        """Whether the open cycle is stalled (#452). Display only."""
+        return self._stall_active
+
+    def stall_info(self) -> dict[str, Any] | None:
+        """Small, event-safe description of the current stall, or None."""
+        if not self._stall_active or self._stall_run_start is None:
+            return None
+        start = self._current_cycle_start
+        last = self._last_process_time or self._stall_run_start
+        return {
+            "stalled_since": self._stall_run_start.isoformat(),
+            "stalled_for_s": round(max(0.0, (last - self._stall_run_start).total_seconds())),
+            "elapsed_at_stall_s": (
+                round((self._stall_run_start - start).total_seconds()) if start else None
+            ),
+            "plateau_w": round((self._stall_run_lo + self._stall_run_hi) / 2.0, 2),
+            # The match the halt began under when the halt has since cost it.
+            "matched_profile": self._matched_profile or (
+                self._stall_match[0] if self._stall_match else None
+            ),
+        }
+
+    def set_standby_level(self, level_w: float | None) -> None:
+        """The learned standby level for the idle display (#452); None: none."""
+        try:
+            level = float(level_w) if level_w is not None else None
+        except (TypeError, ValueError):
+            level = None
+        self._standby_level_w = level if level is not None and math.isfinite(level) else None
+
+    def _idle_bounds(self) -> tuple[float, float, float, bool] | None:
+        """``(enter_w, exit_w, debounce_s, off level confirmed)`` of the idle
+        display, or None (#452)."""
+        cfg = self._config
+        start = float(cfg.start_threshold_w)
+        pot = cfg.power_off_threshold_w
+        if isinstance(pot, (int, float)) and 0.0 < float(pot) < float(cfg.stop_threshold_w):
+            # The user's own off level (#284): the same boundary and debounce the
+            # power-based Off uses, so a reset to off never shows idle first.
+            return (float(pot), float(pot), max(0.0, float(cfg.power_off_delay)), True)
+        level = self._standby_level_w
+        if level is None or level < IDLE_MIN_STANDBY_W or level >= start:
+            return None
+        enter = IDLE_OFF_FRACTION * level
+        return (enter, IDLE_EXIT_FRACTION * enter, IDLE_DEBOUNCE_S, False)
+
+    def _update_idle(self, timestamp: datetime, power: float) -> None:
+        """Debounced idle/off class of the latest real reading (#452). O(1).
+
+        A reading at or above the enter level votes idle, one below the exit
+        level votes off, one in between keeps the current class. The class
+        changes only once the other vote has held for the debounce, timed from
+        its first reading, so an excursion shorter than that never shows.
+        """
+        bounds = self._idle_bounds()
+        if bounds is None:
+            self._idle_shown = False
+            self._idle_candidate_since = None
+            return
+        enter, exit_w, debounce, confirmed = bounds
+        if power >= enter:
+            vote = True
+        elif power < exit_w:
+            vote = False
+        else:
+            vote = self._idle_shown
+        if power < exit_w and self._state in (
+            STATE_OFF, STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED
+        ):
+            if self._idle_off_since is None:
+                self._idle_off_since = timestamp
+            if (timestamp - self._idle_off_since).total_seconds() >= debounce:
+                self._idle_off_seen = True
+        else:
+            self._idle_off_since = None
+        if vote and not (confirmed or self._idle_off_seen):
+            vote = False  # never seen switched off: not yet known to be two-level
+        if vote == self._idle_shown:
+            self._idle_candidate_since = None
+            return
+        if self._idle_candidate_since is None:
+            self._idle_candidate_since = timestamp
+        if (timestamp - self._idle_candidate_since).total_seconds() >= debounce:
+            self._idle_shown = vote
+            self._idle_candidate_since = None
+
+    @classmethod
+    def _sanitize_stall_catalogue(cls, raw: Any) -> Any:
+        """Element 15, keeping only the stretches that can set a stall's wait.
+
+        The near-stop catalogue holds every gap between two drum tumbles; a
+        stretch under STALL_MIN_S / END_GATE_HAZARD_MARGIN can never raise the
+        wait above STALL_MIN_S, so it is dropped. A callable (the producers' lazy
+        form) is kept as is and resolved by :meth:`_resolve_stall_catalogue`.
+        """
+        if callable(raw):
+            return raw
+        cat = cls._sanitize_pause_catalogue(raw)
+        if cat is None:
+            return None
+        floor = STALL_MIN_S / END_GATE_HAZARD_MARGIN
+        return (cat[0], tuple(p for p in cat[1] if p[1] >= floor))
+
+    @classmethod
+    def _resolve_stall_catalogue(
+        cls, raw: Any
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """Element 15 as data: a lazy producer is called here, once per run."""
+        if callable(raw):
+            try:
+                raw = raw()
+            except Exception:  # noqa: BLE001 - missing evidence, not an error
+                return None
+        return cls._sanitize_stall_catalogue(raw) if raw is not None else None
+
+    def _seed_stall_run(self) -> None:
+        """Re-derive the flat near-stop run in progress from the trace (#452)."""
+        self._clear_stall()
+        if self._state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            return
+        band = self._stall_band()
+        if band is None:
+            return
+        lo = hi = None
+        start = None
+        for ts, p in reversed(self._power_readings):
+            p = float(p)
+            if not band[0] <= p <= band[1]:
+                break
+            nlo = p if lo is None else min(lo, p)
+            nhi = p if hi is None else max(hi, p)
+            if nhi - nlo > band[2]:
+                break
+            lo, hi, start = nlo, nhi, ts
+        if start is not None and lo is not None and hi is not None:
+            # The restored match stands in for the one the run began under.
+            self._begin_stall_run(start, lo)
+            self._stall_run_hi = hi
+
+    def _clear_stall(self) -> None:
+        self._stall_run_start = None
+        self._stall_run_lo = self._stall_run_hi = 0.0
+        self._stall_active = False
+        self._stall_since = None
+        self._stall_match = None
+        self._stall_eval = None
+        self._stall_now = None
+
+    def _begin_stall_run(self, timestamp: datetime, power: float) -> None:
+        """A new flat near-stop run starts at this reading: snapshot the match."""
+        self._stall_run_start = timestamp
+        self._stall_run_lo = self._stall_run_hi = power
+        self._stall_eval = None
+        self._stall_now = None
+        self._stall_match = (
+            self._matched_profile if self._expected_duration > 0 else None,
+            float(self._expected_duration),
+            self._matched_terminal_high,
+            self._matched_stall_catalogue,
+        )
+
+    def _stall_evidence(self) -> tuple[float, bool, bool] | None:
+        """``(required s, owes work, owes its spin)`` of the current run, or None."""
+        if self._stall_run_start is None:
+            return None
+        if self._stall_eval is None:
+            self._stall_eval = self._stall_evaluate()
+        return self._stall_eval
+
+    def _stall_holds_standby_band(self) -> bool:
+        """Whether the current flat run says the programme is not done (#452).
+
+        Only the strongest evidence holds a finalize: the match the run began
+        under ends on a terminal high-power block (#399) this cycle has not
+        produced yet. A matcher that re-reads the halt as a finished SHORTER
+        programme cannot release it, and the plain position test the display also
+        accepts holds nothing (a programme matched to a longer one ends "early"
+        every time). Independent of the display's wait: the finalize's own 10 min
+        window and expected-duration gate already say "long enough".
+        """
+        if not STALL_HOLDS_STANDBY_BAND or self._stall_band() is None:
+            return False
+        evidence = self._stall_evidence()
+        return bool(evidence and evidence[2] and self._stall_now_evidence()[1])
+
+    def _stall_now_evidence(self) -> tuple[bool, bool]:
+        """``(owes work, owes its spin)`` by the CURRENT match, for the current run.
+
+        Both matches must agree before anything shows or holds: the one the run
+        began under can be a prefix match of a longer programme (the last live
+        tick before a real end differs from the complete match on 17.5% of
+        cycles, audit MATCH-DECIDE-02), and the current one can be the halt read
+        as a finished shorter programme. Measured with ``end_gate_eval.py
+        --halt-at``: requiring both cut real ends held under a 45 min display-on
+        tail 15 -> 6 of 258 and kept 28 of the 48 halts the pre-plateau match
+        alone kept open. With no current match the pre-plateau verdict stands.
+        """
+        if self._stall_now is not None:
+            return self._stall_now
+        start, run_start = self._current_cycle_start, self._stall_run_start
+        expected = float(self._expected_duration)
+        block = self._matched_terminal_high
+        if not (self._matched_profile and expected > 0 and start and run_start):
+            evidence = self._stall_evidence()
+            now = (bool(evidence and evidence[1]), bool(evidence and evidence[2]))
+        elif block is not None and block[0] >= ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
+            needed = float(block[1]) * ANTI_CREASE_TERMINAL_MATCH_FRAC
+            offset_s = float(block[2]) if len(block) >= 3 else float(block[0]) * expected
+            ceiling_w = float(block[3]) if len(block) >= 4 else None
+            spin = needed > 0 and self._high_power_seconds_since(
+                offset_s, ceiling_w=ceiling_w
+            ) < needed
+            now = (spin, spin)
+        else:
+            position = (run_start - start).total_seconds() / expected
+            now = (position < STALL_OWES_MAX_POSITION, False)
+        self._stall_now = now
+        return now
+
+    def _set_stalled(self, stalled: bool, timestamp: datetime) -> None:
+        """Flip the stall flag (one place, so the eval harness can observe it)."""
+        if stalled == self._stall_active:
+            return
+        self._stall_active = stalled
+        self._stall_since = timestamp if stalled else None
+        if stalled:
+            self._logger.info(
+                "Cycle stalled: flat %.1f-%.1f W (stop %.2f W) for %.0fs, matched %s; "
+                "shown as paused (display only, the cycle stays open)",
+                self._stall_run_lo,
+                self._stall_run_hi,
+                self._config.stop_threshold_w,
+                (timestamp - (self._stall_run_start or timestamp)).total_seconds(),
+                self._matched_profile,
+            )
+        else:
+            self._logger.debug("Cycle no longer stalled at %s", timestamp)
+
+    def _stall_band(self) -> tuple[float, float, float] | None:
+        """``(low_w, high_w, flatness_w)`` a stall plateau must sit in, or None."""
+        if self._config.device_type not in STALL_DEVICE_TYPES:
+            return None
+        stop = float(self._config.stop_threshold_w)
+        peak = float(self._cycle_max_power)
+        if stop <= 0 or peak <= 0:
+            return None
+        high = min(standby_near_stop_ceiling(stop), peak * STANDBY_BAND_MAX_FRACTION)
+        if high < stop:
+            return None
+        flat = max(STANDBY_BAND_FLATNESS_FLOOR_W, peak * STANDBY_BAND_FLATNESS_FRACTION)
+        return (stop, high, flat)
+
+    def _stall_evaluate(self) -> tuple[float, bool, bool]:
+        """``(required seconds, owes work, owes its spin)`` for the current run,
+        from the match it began under."""
+        start = self._current_cycle_start
+        run_start = self._stall_run_start
+        name, expected, block, cat = self._stall_match or (None, 0.0, None, None)
+        if not (name and expected > 0 and start and run_start):
+            return (STALL_UNMATCHED_MIN_S, True, False)
+        cat = self._resolve_stall_catalogue(cat)
+        position = max(0.0, (run_start - start).total_seconds() / expected)
+        # Owes work: the terminal high-power block (#399) not yet produced, or,
+        # for a programme without one, a run that began well before its end.
+        owes_spin = False
+        if block is not None and block[0] >= ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
+            needed = float(block[1]) * ANTI_CREASE_TERMINAL_MATCH_FRAC
+            offset_s = float(block[2]) if len(block) >= 3 else float(block[0]) * expected
+            ceiling_w = float(block[3]) if len(block) >= 4 else None
+            owes_spin = needed > 0 and self._high_power_seconds_since(
+                offset_s, ceiling_w=ceiling_w
+            ) < needed
+            owes = owes_spin
+        else:
+            owes = position < STALL_OWES_MAX_POSITION
+        # Ambiguity is not a reason to refuse here: the display only waits, it
+        # never shortens anything (unlike the hazard gate this mirrors).
+        if cat is None or cat[0] < END_GATE_HAZARD_MIN_CYCLES:
+            return (STALL_UNMATCHED_MIN_S, owes, owes_spin)
+        later = [d for f, d in cat[1] if f >= position - END_GATE_HAZARD_POSITION_SLACK]
+        need = max(STALL_MIN_S, END_GATE_HAZARD_MARGIN * max(later, default=0.0))
+        return (need, owes, owes_spin)
+
+    def _update_stall(self, timestamp: datetime, power: float) -> None:
+        """Track the flat near-stop run of an open cycle and flag a stall (#452).
+
+        O(1) per reading; the evidence is computed once per run and match.
+        """
+        band = self._stall_band()
+        if band is None or not (band[0] <= power <= band[1]):
+            if self._stall_run_start is not None or self._stall_active:
+                self._set_stalled(False, timestamp)
+                self._clear_stall()
+            return
+        if self._stall_run_start is None:
+            self._begin_stall_run(timestamp, power)
+        else:
+            lo = min(self._stall_run_lo, power)
+            hi = max(self._stall_run_hi, power)
+            if hi - lo > band[2] and not self._stall_active:
+                # Not flat: a new run starts here. A stall already shown stays
+                # shown while readings stay in the band.
+                self._begin_stall_run(timestamp, power)
+            else:
+                self._stall_run_lo, self._stall_run_hi = lo, hi
+        run_s = (timestamp - self._stall_run_start).total_seconds()
+        if self._stall_eval is None and run_s < min(STALL_MIN_S, STALL_UNMATCHED_MIN_S):
+            return
+        evidence = self._stall_evidence()
+        if evidence is not None:
+            self._set_stalled(
+                run_s >= evidence[0] and evidence[1] and self._stall_now_evidence()[0],
+                timestamp,
+            )
 
     def _hide_probe(self, hidden: bool) -> None:
         """Item 501: whether the probe about to begin is hidden. Called BEFORE the
@@ -1405,6 +1875,12 @@ class CycleDetector:
             self._matched_pause_catalogue = self._sanitize_pause_catalogue(
                 result_seq[13] if len(result_seq) >= 14 else None
             )
+            # Element 15 (#452): likewise. A run already in progress keeps the
+            # match it began under (`_stall_match`).
+            self._matched_stall_catalogue = self._sanitize_stall_catalogue(
+                result_seq[14] if len(result_seq) >= 15 else None
+            )
+            self._stall_now = None  # the current match is re-read for a run in progress
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -1426,6 +1902,7 @@ class CycleDetector:
             self._matched_terminal_quiet_s = None
             self._matched_trusted_min_s = None
             self._matched_pause_catalogue = None
+            self._matched_stall_catalogue = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -1579,6 +2056,7 @@ class CycleDetector:
         self._matched_terminal_quiet_s = None
         self._matched_trusted_min_s = None
         self._matched_pause_catalogue = None
+        self._matched_stall_catalogue = None
         self._orphaned_pause_evidence_s = 0.0
         # Element 12 belongs with them: its own comment claims a stale value can
         # never license a shortening for a different match, and that was only
@@ -2017,6 +2495,9 @@ class CycleDetector:
         if power < self._config.stop_threshold_w:
             # Back on the idle floor: the next probe is a fresh one (item 501).
             self._standby_reprobe = False
+        if not synthetic:
+            # #452 idle display: real readings only (a keepalive is not a level).
+            self._update_idle(timestamp, power)
 
         # A keepalive inside a recorded outage carries no observation, only the
         # clock (item 266). Stepping the state machine on it would hand every
@@ -2229,7 +2710,17 @@ class CycleDetector:
             if is_high and not started_from_anti_wrinkle:
                 # Transition to STARTING
                 self._preserve_delay_band_on_off = self._delay_band_start is not None
-                self._hide_probe(self._standby_reprobe and self._state == STATE_OFF)
+                self._hide_probe(
+                    (self._standby_reprobe and self._state == STATE_OFF)
+                    # #452: right after a cycle the terminal states probe from
+                    # stop_threshold_w, so a display left on above it probes on its
+                    # first reading. Under start_threshold_w that probe cannot
+                    # commit; like a standby re-probe (item 501) it is not shown.
+                    or (
+                        self._state in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED)
+                        and power < self._config.start_threshold_w
+                    )
+                )
                 self._transition_to(STATE_STARTING, timestamp)
                 self._current_cycle_start = timestamp
                 self._power_readings = [(timestamp, power)]
@@ -2444,6 +2935,7 @@ class CycleDetector:
         elif self._state == STATE_RUNNING:
             self._power_readings.append((timestamp, power))
             self._cycle_max_power = max(self._cycle_max_power, power)
+            self._update_stall(timestamp, power)  # #452, display + standby-band hold
 
             # Anti-crease finalize (#296): a matched cycle past its expected
             # duration that has settled into the low-power tumble tail is done -
@@ -2483,6 +2975,7 @@ class CycleDetector:
 
         elif self._state == STATE_PAUSED:
             self._power_readings.append((timestamp, power))
+            self._update_stall(timestamp, power)  # #452
 
             # Anti-crease finalize (#296) - see the RUNNING branch.
             if self._maybe_finalize_anticrease_tail(timestamp):
@@ -2501,6 +2994,7 @@ class CycleDetector:
 
         elif self._state == STATE_ENDING:
             self._power_readings.append((timestamp, power))
+            self._update_stall(timestamp, power)  # #452
 
             # Hard cap: ENDING must not run longer than RUNNING's 8 h safety limit.
             # Without this a standby baseline can hold the state open indefinitely.
@@ -3326,6 +3820,8 @@ class CycleDetector:
             self._probe_wait_since = None  # item 504: per probe, like the hiding
         if new_state not in (STATE_OFF, STATE_STARTING):
             self._standby_reprobe = False
+        if new_state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            self._clear_stall()  # #452: a stall belongs to one open cycle
 
         # Reset energy accumulator on transition to OFF
         if new_state == STATE_OFF:
@@ -3620,10 +4116,17 @@ class CycleDetector:
         # soak, a 60 W rinse; flat and under 10% of a heater peak) waits for twice
         # the expected duration, as it did before 0.5.7. See the constants.
         stop = float(self._config.stop_threshold_w)
-        near_stop_ceiling = max(
-            STANDBY_BAND_NEAR_STOP_FACTOR * stop, stop + STANDBY_BAND_NEAR_STOP_W
-        )
-        if stop > 0 and float(np.median(window)) >= stop and hi <= near_stop_ceiling:
+        near_stop_ceiling = standby_near_stop_ceiling(stop)
+        if (
+            stop > 0
+            and float(np.median(window)) >= stop
+            and hi <= near_stop_ceiling
+            # #452: a halt says the programme is not done (it stopped on its
+            # standby draw before its end), so the near-stop tier waits; the
+            # loose tier below still bounds it at STANDBY_BAND_LOOSE_MIN_RATIO x
+            # expected.
+            and not self._stall_holds_standby_band()
+        ):
             return hi
         if current_duration >= self._expected_duration * STANDBY_BAND_LOOSE_MIN_RATIO:
             return hi
@@ -5102,6 +5605,9 @@ class CycleDetector:
                 self._last_active_time = dt_util.as_utc(dt_last) if dt_last else None
             else:
                 self._last_active_time = self._current_cycle_start
+            # #452: a stall survives a restart from the restored trace (element
+            # 15 is not persisted: the next match tick supplies it again).
+            self._seed_stall_run()
 
         except Exception:  # pylint: disable=broad-exception-caught
             self.restore_error = traceback.format_exc()

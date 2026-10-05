@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entity not found",
     "running_long": "Running long",
+    "stalled": "Stalled",
     "remaining": "remaining",
     "progress": "progress",
     "show_time_remaining": "Show time remaining",
@@ -91,6 +92,8 @@
     "approved": "Approved"
   },
   "btn": {
+    "log_done_task": "Log done: {task}",
+    "add_task": "Add task",
     "add_appliance": "Add appliance",
     "add_brand": "Add brand",
     "add_device": "+ Add device",
@@ -329,6 +332,8 @@
     }
   },
   "hdr": {
+    "custom_tasks": "Your own tasks",
+    "maintenance_supporter": "Need more?",
     "access_control": "Access Control",
     "add_maintenance": "Add Maintenance Event",
     "automation_delete": "Delete this automation",
@@ -379,6 +384,11 @@
     "poor": "⚠ Poor profile quality"
   },
   "lbl": {
+    "task_name": "Task",
+    "every_cycles": "Every (cycles)",
+    "every_days": "Every (days)",
+    "new_task_name": "New task",
+    "days_since_service": "{since} / {total} days",
     "actions": "Actions",
     "activity": "Activity",
     "administrators": "Administrators",
@@ -461,6 +471,8 @@
     "evidence_real_cycles": "Cycles this machine ran",
     "evidence_reference_cycles": "Downloaded from the community store",
     "expected": "Expected",
+    "suspected_profile": "{name} (suspected)",
+    "runner_up_profile": "{name} (runner-up)",
     "expected_duration": "Expected Duration (min)",
     "file_kb": "File (kB)",
     "flags": "Flags",
@@ -679,6 +691,10 @@
     "search_ph": "Search logs…"
   },
   "maint": {
+    "salt": "Refill salt",
+    "rinse_aid": "Refill rinse aid",
+    "lint_filter": "Clean lint filter",
+    "condenser_clean": "Clean condenser",
     "descale": "Descale",
     "filter_clean": "Clean filter",
     "drum_clean": "Clean drum",
@@ -725,6 +741,8 @@
     }
   },
   "modal": {
+    "remove_task_title": "Remove Task",
+    "remove_task_msg": "Remove the reminder \"{task}\"? Its entries in the maintenance log are kept.",
     "apply_suggestions_msg": "Change these {n} settings? The integration reloads after saving.",
     "apply_suggestions_title": "Apply suggestions",
     "auto_label": "Auto-Label Cycles",
@@ -778,6 +796,10 @@
     "profile_title": "Profile · {name}"
   },
   "msg": {
+    "custom_task_limit": "You have reached the limit of {max} tasks.",
+    "custom_tasks_intro": "Add anything else you want to be reminded of. A task is due when either interval is reached; leave one blank or 0 to use only the other.",
+    "maintenance_due_sensor_hint": "The Maintenance due binary sensor turns on while any task is due, so you can build your own notification automation.",
+    "maintenance_supporter_intro": "Maintenance Supporter is a separate integration that does much more: any appliance or task, schedules by time, usage or a sensor, notifications and a history. It can use the WashData cycle counter.",
     "adopt_settings_hint": "Overwrite this device's detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.",
     "advisory_duration_trend_up": "'{name}' cycles are running progressively longer (about +{pct}% per cycle). If the appliance's behaviour changed, re-record or rebuild this profile.",
     "advisory_energy_trend_up": "'{name}' is drawing progressively more energy (about +{pct}% per cycle) - worth checking the appliance if that is unexpected.",
@@ -1096,6 +1118,7 @@
     "wash_dw": "Main detergent wash with heating."
   },
   "placeholder": {
+    "custom_task": "e.g. Clean door seal",
     "add": "add…",
     "group_name": "e.g. Cotton 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1670,6 +1693,7 @@
     "resetting": "Resetting…",
     "saving": "Saving…",
     "splitting": "Splitting…",
+    "stalled": "Stalled",
     "training": "Training…",
     "trimming": "Trimming…",
     "unlabelling": "Unlabelling…",
@@ -1795,6 +1819,11 @@
     "wrong_profile": "Wrong profile"
   },
   "toast": {
+    "task_name_required": "Give the task a name",
+    "task_added": "Task added",
+    "task_save_failed": "Could not save task: {error}",
+    "task_removed": "Task removed",
+    "maint_logged": "Logged as done: {task}",
     "access_saved": "Access control saved",
     "all_wiped": "All data wiped",
     "analysis_complete": "Analysis complete: {count} suggestion(s)",
@@ -1989,7 +2018,8 @@
     "notify_held": "A notification was held back for quiet hours.",
     "finished": "The cycle reached a terminal state and ended.",
     "match_reverted": "The program fell back to detecting: its score dropped well below its own peak.",
-    "verified_pause": "The live alignment confirmed (or released) a pause inside the program. While it holds, the cycle is not ended."
+    "verified_pause": "The live alignment confirmed (or released) a pause inside the program. While it holds, the cycle is not ended.",
+    "stalled": "The cycle sat on its standby draw for longer than this program ever pauses there, with work still to do. Shown as Paused (Stalled); the cycle stays open."
   },
   "store": {
     "browse": "Browse",
@@ -2023,6 +2053,7 @@
     }
   },
   "link": {
+    "maintenance_supporter": "Maintenance Supporter on GitHub ↗",
     "manual": "Manual ↗"
   },
   "tip": {

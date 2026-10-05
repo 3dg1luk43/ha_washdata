@@ -22,6 +22,8 @@
 #   devtools/release_check.sh --fix           regenerate artifacts instead of failing
 #   devtools/release_check.sh --tag v0.5.5    also require the tag to match the version
 #   devtools/release_check.sh --full          add the slow suite and the E2E suite
+#   devtools/release_check.sh --skip-tests    every check but the test suites (devtools/verify.sh
+#                                             runs those itself; CI never passes it)
 #
 # Exit code is the number of failed checks, so `if release_check.sh; then tag; fi`
 # works. Every failure prints the exact command that fixes it.
@@ -31,15 +33,17 @@ cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 FIX=0
 FULL=0
+SKIP_TESTS=0
 WANT_TAG=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --fix)  FIX=1; shift ;;
     --full) FULL=1; shift ;;
+    --skip-tests) SKIP_TESTS=1; shift ;;
     --tag)
       if [[ $# -lt 2 ]]; then echo "--tag needs a value (e.g. --tag v0.5.5)" >&2; exit 2; fi
       WANT_TAG="$2"; shift 2 ;;
-    -h|--help) sed -n '6,30p' "$0"; exit 0 ;;
+    -h|--help) sed -n '6,29p' "$0"; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
@@ -312,9 +316,15 @@ run_suite() {
 }
 
 head_ "Tests"
-run_suite "fast suite" "$PY" -m pytest tests/ -q
+if [[ $SKIP_TESTS -eq 1 ]]; then
+  skip "test suites (--skip-tests: the caller runs them)"
+else
+  run_suite "fast suite" "$PY" -m pytest tests/ -q
+fi
 
-if [[ $FULL -eq 1 ]]; then
+if [[ $SKIP_TESTS -eq 1 ]]; then
+  :
+elif [[ $FULL -eq 1 ]]; then
   run_suite "slow suite" "$PY" -m pytest tests/ -q -m slow
   if command -v npx >/dev/null 2>&1; then
     if (cd playwright-tests && npx playwright test --reporter=dot >/dev/null 2>&1); then pass "E2E suite"

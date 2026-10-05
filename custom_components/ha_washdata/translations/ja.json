@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "照合の曖昧さ"
+      },
+      "maintenance_due": {
+        "name": "メンテナンス時期",
+        "state": {
+          "on": "要対応",
+          "off": "対応不要"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "要対応タスク ID"
+          },
+          "due_tasks": {
+            "name": "要対応タスク",
+            "state": {
+              "descale": "スケール除去",
+              "filter_clean": "フィルターの清掃",
+              "drum_clean": "ドラムの清掃",
+              "bearing_service": "ベアリングの整備",
+              "other": "その他",
+              "salt": "塩の補充",
+              "rinse_aid": "リンス剤の補充",
+              "lint_filter": "糸くずフィルターの清掃",
+              "condenser_clean": "コンデンサーの清掃"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "しわ防止",
           "interrupted": "中断",
           "force_stopped": "強制停止",
-          "rinse": "すすぎ",
           "unknown": "不明",
           "clean": "クリーン",
           "delay_wait": "開始を待っています"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "サイクル異常",
+            "state": {
+              "overrun": "超過中",
+              "stalled": "停滞中"
+            }
+          }
         }
       },
       "washer_program": {

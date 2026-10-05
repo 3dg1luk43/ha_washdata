@@ -297,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Dvosmislenost podudaranja"
+      },
+      "maintenance_due": {
+        "name": "Dospjelo održavanje",
+        "state": {
+          "on": "Dospjelo",
+          "off": "Nije dospjelo"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID-ovi dospjelih zadataka"
+          },
+          "due_tasks": {
+            "name": "Dospjeli zadaci",
+            "state": {
+              "descale": "Uklanjanje kamenca",
+              "filter_clean": "Očisti filter",
+              "drum_clean": "Očisti bubanj",
+              "bearing_service": "Servis ležajeva",
+              "other": "Ostalo",
+              "salt": "Dopuni so",
+              "rinse_aid": "Dopuni sredstvo za ispiranje",
+              "lint_filter": "Očisti filter za dlačice",
+              "condenser_clean": "Očisti kondenzator"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -314,10 +340,18 @@
           "anti_wrinkle": "Anti-gužvanje",
           "interrupted": "Prekinut",
           "force_stopped": "Prisilno zaustavljeno",
-          "rinse": "Isperite",
           "unknown": "Nepoznato",
           "clean": "Čisto",
           "delay_wait": "Čeka se početak"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalija ciklusa",
+            "state": {
+              "overrun": "Traje predugo",
+              "stalled": "Zaglavljeno"
+            }
+          }
         }
       },
       "washer_program": {

@@ -88,7 +88,10 @@ from .const import (
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
     resolve_smart_termination_duration_ratio_default,
-    DEFAULT_MAINTENANCE_REMINDER_CYCLES,
+    MAINTENANCE_CUSTOM_TASK_MAX,
+    MAINTENANCE_INTERVAL_CYCLES_MAX,
+    MAINTENANCE_INTERVAL_DAYS_MAX,
+    MAINTENANCE_TASK_NAME_MAX,
     resolve_min_off_gap_default,
     resolve_off_delay_default,
     DEVICE_TYPE_PUMP,
@@ -116,6 +119,7 @@ from .cycle_detector import (
     CycleDetectorConfig,
 )
 from .detector_config import build_detector_config, effective_option_values
+from .maintenance import editor_types, effective_reminders
 from .options_utils import strip_null_options
 from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
@@ -1405,6 +1409,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         # Maintenance log (Group E)
         ws_get_maintenance_log, ws_add_maintenance_event, ws_delete_maintenance_event,
         ws_set_lifetime_cycle_count,
+        ws_add_maintenance_task, ws_update_maintenance_task, ws_delete_maintenance_task,
         # Cycles
         ws_label_cycle, ws_delete_cycle, ws_auto_label_cycles,
         # Phase catalog
@@ -1553,7 +1558,8 @@ def ws_get_devices(
                     # What the entities show (item 501): a hidden standby re-probe
                     # stays "off" here too instead of flickering the Status card.
                     info["detector_state"] = getattr(detector, "exposed_state", detector.state)
-                    info["sub_state"] = detector.sub_state
+                    # Matching it (#452: "Stalled" while a stalled cycle shows paused).
+                    info["sub_state"] = getattr(detector, "exposed_sub_state", detector.sub_state)
 
                 program: str | None = getattr(manager, "_current_program", None)
                 if program in (None, "off", "unknown", "detecting...", "restored..."):
@@ -2763,15 +2769,21 @@ async def ws_get_maintenance_log(
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
-    reminders = dict(DEFAULT_MAINTENANCE_REMINDER_CYCLES)
-    cfg = manager.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
-    if isinstance(cfg, dict):
-        reminders.update(cfg)
+    device_type = manager.device_type
+    # The reminders that actually apply (#461): the device type's preset until the
+    # config is saved, the saved config after. Until #461 this merged the washer
+    # defaults over the saved config, so a partial config showed rows the manager
+    # never evaluated.
+    reminders = effective_reminders(
+        device_type, manager.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
+    )
     store = manager.profile_store
+    status = store.get_maintenance_status(reminders)
     _send_result(connection, msg["id"], "get_maintenance_log", {
         "log": store.get_maintenance_log(),
-        "due": manager.maintenance_due,
-        "event_types": list(MAINTENANCE_EVENT_TYPES),
+        "due": [row["id"] for row in status if row["due"]],
+        # The built-in types this device's editor offers (device-type aware).
+        "event_types": editor_types(device_type, reminders),
         "reminders": reminders,
         # Cycles run since each task was last done, and the odometer they are
         # measured against (#414). Computed backend-side before this and never
@@ -2779,7 +2791,16 @@ async def ws_get_maintenance_log(
         "cycles_since": {
             evt: store.cycles_since_maintenance(evt) for evt in MAINTENANCE_EVENT_TYPES
         },
+        "custom_tasks": store.get_maintenance_tasks(),
+        # Every active reminder (built-in and custom) with its progress.
+        "status": status,
         "lifetime_cycle_count": manager.lifetime_cycle_count,
+        "limits": {
+            "tasks_max": MAINTENANCE_CUSTOM_TASK_MAX,
+            "name_max": MAINTENANCE_TASK_NAME_MAX,
+            "cycles_max": MAINTENANCE_INTERVAL_CYCLES_MAX,
+            "days_max": MAINTENANCE_INTERVAL_DAYS_MAX,
+        },
     })
 
 
@@ -2944,6 +2965,121 @@ async def ws_delete_maintenance_event(
         if removed:
             manager.notify_update()
         _send_result(connection, msg["id"], "delete_maintenance_event", {"success": removed})
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+# Custom maintenance tasks (#461). Edit level, like the maintenance log: a task is
+# a reminder the user defines, never a change to detection or stored cycles.
+# Intervals are validated by the store (whole numbers, bounded) so the WS layer,
+# the panel and any future service share one rule; a refusal is invalid_format.
+_TASK_INTERVAL = vol.Any(None, int, float, str)
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/add_maintenance_task",
+        vol.Required("entry_id"): str,
+        vol.Required("name"): str,
+        vol.Optional("cycles"): _TASK_INTERVAL,
+        vol.Optional("days"): _TASK_INTERVAL,
+    }
+)
+@websocket_api.async_response
+async def ws_add_maintenance_task(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Create a custom maintenance task (free-text name, cycles and/or days)."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        task = await manager.profile_store.async_add_maintenance_task(
+            msg["name"], msg.get("cycles"), msg.get("days")
+        )
+        manager.notify_update()
+        _send_result(connection, msg["id"], "add_maintenance_task", {"success": True, "task": task})
+    except ValueError as exc:
+        connection.send_error(msg["id"], "invalid_format", str(exc))
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/update_maintenance_task",
+        vol.Required("entry_id"): str,
+        vol.Required("task_id"): str,
+        vol.Optional("name"): str,
+        vol.Optional("cycles"): _TASK_INTERVAL,
+        vol.Optional("days"): _TASK_INTERVAL,
+    }
+)
+@websocket_api.async_response
+async def ws_update_maintenance_task(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Rename a custom maintenance task or change its intervals.
+
+    An omitted field is left as it is; an explicit ``null`` interval switches
+    that axis off, the same as 0.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    def _interval(key: str) -> Any:
+        # The store reads None as "leave it"; on the wire null means "off".
+        if key not in msg:
+            return None
+        return 0 if msg[key] is None else msg[key]
+
+    try:
+        task = await manager.profile_store.async_update_maintenance_task(
+            msg["task_id"],
+            name=msg.get("name"),
+            cycles=_interval("cycles"),
+            days=_interval("days"),
+        )
+        manager.notify_update()
+        _send_result(connection, msg["id"], "update_maintenance_task", {"success": True, "task": task})
+    except ValueError as exc:
+        connection.send_error(msg["id"], "invalid_format", str(exc))
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/delete_maintenance_task",
+        vol.Required("entry_id"): str,
+        vol.Required("task_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_delete_maintenance_task(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Remove a custom maintenance task. Its log entries stay, with their name."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        removed = await manager.profile_store.async_delete_maintenance_task(msg["task_id"])
+        if removed:
+            manager.notify_update()
+        _send_result(connection, msg["id"], "delete_maintenance_task", {"success": removed})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 

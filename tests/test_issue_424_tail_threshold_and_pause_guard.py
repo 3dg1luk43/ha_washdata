@@ -298,6 +298,7 @@ _TRON = _REPO / "cycle_data" / "tron4r" / "dishwasher" / "dishwasher_export_2026
 
 
 @pytest.mark.slow
+@pytest.mark.heavy  # ~30 s: handed out first under pytest-xdist
 @pytest.mark.skipif(not _TRON.exists(), reason="reporter export not in cycle_data/")
 def test_the_second_reporters_dishwasher_reaches_smart_termination() -> None:
     import sys
