@@ -116,10 +116,11 @@ pytest tests/ -v
 
 ### 6. Testing with Mock Socket
 
-To simulate a washing machine with power readings:
+To play stored cycles from your own export into Home Assistant through a mock MQTT plug
+(web UI on :8080; `--list` shows the scenarios and plug reporting modes):
 
 ```bash
-python3 devtools/mqtt_mock_socket.py --default LONG --variability 0.15
+python3 devtools/mqtt_mock_socket.py --source path/to/washdata_export.json
 ```
 
 For the full testing guide, see the [Testing wiki page](https://github.com/3dg1luk43/ha_washdata/wiki/Testing).

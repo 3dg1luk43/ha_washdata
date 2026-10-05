@@ -1788,6 +1788,9 @@ class WashDataManager:
                 # no other timer sees a synthetic anchor.
                 if self.detector.state == STATE_ANTI_WRINKLE and last_save:
                     self._last_real_reading_time = snap_last_real or last_save
+                    # The cycle end started the expiry timer that runs that
+                    # keepalive; a restart into the tail must start it too.
+                    self._start_state_expiry_timer()
 
                 # Restore if in any active state (Running, Paused, Ending)
                 if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
@@ -2844,7 +2847,10 @@ class WashDataManager:
             self._logger.debug("Failed to clear live notification on shutdown", exc_info=True)
 
         # Save active state before shutdown
-        if self.detector.state in {STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING}:
+        if (
+            self.detector.state in {STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING}
+            or self._in_anticrease_tail()
+        ):
             snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
             await self.profile_store.async_save_active_cycle(snapshot)
 
@@ -4898,8 +4904,14 @@ class WashDataManager:
         # the expiry timer cannot race the new cycle and reset us to OFF (#267).
         # A start from idle owns no update intervals yet: drop anything a false
         # start (STARTING -> OFF, which ends no cycle) left pending, so it is not
-        # committed with this cycle (#458).
-        if new_state == STATE_STARTING and old_state in (STATE_OFF, STATE_UNKNOWN):
+        # committed with this cycle (#458). DELAY_WAIT is idle too, and since item
+        # 504 its false starts return there, so hours of standby probes would
+        # otherwise reach the next completed cycle.
+        if new_state == STATE_STARTING and old_state in (
+            STATE_OFF,
+            STATE_UNKNOWN,
+            STATE_DELAY_WAIT,
+        ):
             self.learning_manager.discard_cycle_cadence()
         if new_state == STATE_STARTING and self._cycle_completed_time is not None:
             self._cycle_completed_time = None
@@ -5135,7 +5147,7 @@ class WashDataManager:
                     ts = np.array([v[0] for v in valid])
                     ps = np.array([v[1] for v in valid])
                     # Shared trapezoidal integrator with a data-driven outage gap
-                    # (single source with ProfileStore.add_cycle).
+                    # (single source with ProfileStore.async_add_cycle).
                     cycle_energy_wh = integrate_wh(
                         ts, ps, max_gap_s=energy_gap_threshold_s(ts)
                     )
@@ -5715,6 +5727,19 @@ class WashDataManager:
         except (ValueError, TypeError):
             return 0.0
 
+    def _in_anticrease_tail(self) -> bool:
+        """The detector sits in a #296 anti-crease tail (register item 393a).
+
+        Saved at stop and unload like an active cycle: a restart that starts from
+        OFF reads the tail's next drum bursts as a new cycle (one ~20 min cycle on
+        the item-393 shape). The cycle end has already cleared the active slot, and
+        the restore consumes it again, so a stale tail cannot come back later.
+        """
+        return (
+            self.detector.state == STATE_ANTI_WRINKLE
+            and getattr(self.detector, "in_anticrease_tail", False) is True
+        )
+
     def _augment_active_snapshot(self, snapshot: dict[str, Any]) -> dict[str, Any]:
         """Add manager-owned fields to a detector snapshot before persisting.
 
@@ -6111,9 +6136,7 @@ class WashDataManager:
         # maintenance still rebuilds them all).
         touched_profiles: list[str] = []
         try:
-            retained = await self.profile_store.async_add_cycle(
-                cycle_data, defer_rebuilds=True
-            )
+            retained = await self.profile_store.async_add_cycle(cycle_data)
             cycle_persisted = True
             # The cycle (with its restart_gaps) is now durably stored, so it is safe
             # to drop the live buffer. Doing this only after a confirmed persist means
@@ -6676,7 +6699,7 @@ class WashDataManager:
         try:
             if self.detector.state in {
                 STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING
-            }:
+            } or self._in_anticrease_tail():
                 snapshot = self._augment_active_snapshot(
                     self.detector.get_state_snapshot()
                 )
@@ -8719,19 +8742,23 @@ class WashDataManager:
         return max(0.0, raw - paused)
 
     def check_state(self):
-        """Return current detector state."""
+        """Return the state entities show (the detector's exposed state)."""
         if self.recorder.is_recording:
             return STATE_RUNNING
+        state = self.detector.state
+        if state == STATE_STARTING:
+            # A standby re-probe reads as off until it has evidence (item 501).
+            state = self.detector.exposed_state
         # A completed cycle ends in STATE_FINISHED, not STATE_OFF; accept both
         # or the door-sensor Clean state (#153) is never surfaced (#282).
-        if self._is_clean_state and self.detector.state in (
+        if self._is_clean_state and state in (
             STATE_OFF,
             STATE_FINISHED,
         ):
             return STATE_CLEAN
         if self._is_user_paused:
             return STATE_USER_PAUSED
-        return self.detector.state
+        return state
 
     def list_phase_catalog(self, device_type: str) -> list[dict[str, Any]]:
         """Return the merged phase catalog for a device type."""
@@ -8753,6 +8780,8 @@ class WashDataManager:
         """Return more granular state info (e.g. current phase)."""
         if self.recorder.is_recording:
             return "Recording"
+        if self.detector.state == STATE_STARTING:
+            return self.detector.exposed_sub_state  # item 501, as in check_state
         return self.detector.sub_state
 
     @property

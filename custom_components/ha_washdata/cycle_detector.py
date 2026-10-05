@@ -174,6 +174,12 @@ _LOGGER = logging.getLogger(__name__)
 # window expires (issue #267).
 STOP_LOCKOUT_RELEASE_SECONDS = 180.0
 
+# Register item 501: how much of start_energy_threshold a standby RE-probe (one
+# that began with no reading below stop_threshold_w since the last false start)
+# must fill before entities show it as `starting`. Display only: detection never
+# reads it. Measured by devtools/start_gate_eval.py (flickers per idle day).
+STANDBY_REPROBE_SHOW_ENERGY_FRACTION = 0.5
+
 
 def effective_anticrease_finalize_ratio(value: Any) -> float:
     """The ratio the anti-crease gate will actually use for a stored value.
@@ -609,6 +615,10 @@ class CycleDetector:
         # (traced cycles, ((start_fraction, seconds), ...)), for the hazard end
         # gate. None: no catalogue, the fallback waits as before.
         self._matched_pause_catalogue: tuple[int, tuple[tuple[float, float], ...]] | None = None
+        # Register item 498: the longest pause in the catalogue of every match
+        # revoked this cycle, which bounds a verified pause the revoke orphaned
+        # (`_release_orphaned_pause`). 0.0: no evidence, the floor applies.
+        self._orphaned_pause_evidence_s: float = 0.0
         self._terminal_quiet_memo: tuple[Any, bool] | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
@@ -659,6 +669,60 @@ class CycleDetector:
         # that drops back into the standby band without the machine truly
         # turning off.
         self._preserve_delay_band_on_off: bool = False
+        # Register item 504: when the current STARTING probe came out of DELAY_WAIT,
+        # the moment DELAY_WAIT was entered (its timeout anchor). A false start that
+        # falls back into the standby band returns to DELAY_WAIT with this anchor
+        # instead of to OFF, so a standby that straddles start_threshold_w keeps
+        # waiting until a real start, a true off, or the band's own timeout.
+        # None for every other probe. In memory only: a probe restored after a
+        # restart falls back to OFF as before.
+        self._probe_wait_since: datetime | None = None
+        # Register item 501: a standby that straddles start_threshold_w (#35: 2-22 W
+        # around a 4.24 W threshold) re-probes on almost every reading.
+        # `_standby_reprobe` is set when a false start falls back into the band
+        # (>= stop_threshold_w), and cleared by any reading below it and by every
+        # state other than OFF/STARTING. A probe that begins while it is set, or out
+        # of DELAY_WAIT (a standby by definition), is HIDDEN: it runs exactly as any
+        # other, but `exposed_state` keeps showing the state it began in until it
+        # has filled STANDBY_REPROBE_SHOW_ENERGY_FRACTION of the energy gate.
+        self._standby_reprobe: bool = False
+        self._probe_hidden: bool = False
+        self._probe_hidden_state: str = STATE_OFF
+        self._probe_hidden_sub_state: str | None = None
+
+    @property
+    def exposed_state(self) -> str:
+        """The state entities show: ``state``, except during a hidden probe (item 501).
+
+        Detection never reads this. A standby that keeps crossing the start
+        threshold otherwise wrote ~500 off/starting rows a day to the recorder and
+        fired every automation keyed on ``starting``; the probes themselves (and
+        so every start, commit and phantom) are unchanged.
+        """
+        if self._probe_hidden and self._state == STATE_STARTING:
+            return self._probe_hidden_state
+        return self._state
+
+    @property
+    def exposed_sub_state(self) -> str | None:
+        """``sub_state`` to show, held at the pre-probe value while a probe is hidden."""
+        if self._probe_hidden and self._state == STATE_STARTING:
+            return self._probe_hidden_sub_state
+        return self._sub_state
+
+    def _hide_probe(self, hidden: bool) -> None:
+        """Item 501: whether the probe about to begin is hidden. Called BEFORE the
+        transition to STARTING, whose callback already refreshes the entities."""
+        self._probe_hidden = hidden
+        self._probe_hidden_state = self._state
+        self._probe_hidden_sub_state = self._sub_state
+
+    def _show_probe_with_evidence(self) -> None:
+        """Item 501: a hidden probe is shown once it has filled part of the energy gate."""
+        if self._probe_hidden and self._energy_since_idle_wh >= (
+            STANDBY_REPROBE_SHOW_ENERGY_FRACTION * self._config.start_energy_threshold
+        ):
+            self._probe_hidden = False
 
     @property
     def _gate_cadence(self) -> float:
@@ -888,6 +952,17 @@ class CycleDetector:
         if not math.isfinite(value) or value < 0:
             return None
         return min(value, TERMINAL_QUIET_CAP_S)
+
+    @staticmethod
+    def _sanitize_positive(raw: Any) -> float | None:
+        """A finite positive float from a snapshot, else None."""
+        if raw is None or isinstance(raw, bool):
+            return None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        return value if math.isfinite(value) and value > 0.0 else None
 
     @staticmethod
     def _sanitize_trusted_min(raw: Any) -> float | None:
@@ -1212,6 +1287,11 @@ class CycleDetector:
         # wrapper returns (name, confidence, duration, phase, is_mismatch)
         # Or MatchResult object if refactored, but currently wrapper returns tuple.
 
+        # Register item 498: what a revoke below discards, kept as the evidence
+        # that bounds a verified pause it leaves behind.
+        revoked_from = self._matched_profile
+        revoked_catalogue = self._matched_pause_catalogue
+
         is_match_mismatch = False
         match_name: str | None = None
         phase_name: str | None = None
@@ -1369,6 +1449,44 @@ class CycleDetector:
                 # Wrapper provides it
                 self._expected_duration = expected_duration
 
+        if revoked_from and not self._matched_profile and revoked_catalogue is not None:
+            # Either path above that drops the match (a revoke, or a named match
+            # with an unusable duration). Max over the cycle's revokes.
+            self._orphaned_pause_evidence_s = max(
+                self._orphaned_pause_evidence_s,
+                max((d for _f, d in revoked_catalogue[1]), default=0.0),
+            )
+
+    def _release_orphaned_pause(self) -> None:
+        """Release a verified pause a revoked match left behind (register item 498).
+
+        After a revoke nothing could clear an automatic verified pause but high
+        power: the 95%-of-span release needs the match, the #375 release its
+        expected duration. So it held every ENDING finisher until the 8 h force stop
+        (a plug reporting 0 W) or the watchdog's 4.5 h silence limit (a silent plug).
+        The bounded wait is :func:`match_rules.orphaned_pause_wait_s`; a user pause
+        is never released. Called on every ENDING reading (watchdog keepalives and
+        the Playground's replay included), after this reading's match tick.
+        """
+        if not self._verified_pause or self._user_paused or self._matched_profile:
+            return
+        longest = self._orphaned_pause_evidence_s
+        pause = match_rules.decide_orphaned_pause_release(
+            verified_pause=True,
+            user_paused=False,
+            current_matched=None,
+            time_below=self._time_below_threshold_gapfree,
+            wait_s=match_rules.orphaned_pause_wait_s(
+                off_delay=self._config.off_delay,
+                min_off_gap=self._config.min_off_gap,
+                longest_pause_s=longest,
+            ),
+            longest_pause_s=longest,
+        )
+        for level, msg, args in pause.log:
+            self._logger.log(level, msg, *args)
+        self._verified_pause = pause.verified_pause
+
     def set_verified_pause(self, verified: bool) -> None:
         """Set or clear the verified pause flag."""
         self._verified_pause = verified
@@ -1461,6 +1579,7 @@ class CycleDetector:
         self._matched_terminal_quiet_s = None
         self._matched_trusted_min_s = None
         self._matched_pause_catalogue = None
+        self._orphaned_pause_evidence_s = 0.0
         # Element 12 belongs with them: its own comment claims a stale value can
         # never license a shortening for a different match, and that was only
         # true of the tuple path. Left here across a reset, a small positive
@@ -1493,6 +1612,10 @@ class CycleDetector:
         self._delay_wait_true_off_seconds = 0.0
         self._starting_paused_off_since = None
         self._delay_wait_high_start = None
+        # Item 501: a forced state is a fresh start, never a standby re-probe.
+        self._standby_reprobe = False
+        self._probe_hidden = False
+        self._probe_wait_since = None
 
     @property
     def state(self) -> str:
@@ -1821,8 +1944,9 @@ class CycleDetector:
         # interval and satisfy start_energy_threshold on its own. Computed here, not
         # at the three use sites, because `self._last_power` is overwritten a few
         # lines below - before the two STARTING seeds further down would read it.
-        # The sibling paths already do this: the DELAY_WAIT seed credits at
-        # `start_power` and the anti-wrinkle window uses the trapezoid average.
+        # The sibling paths already do this: the DELAY_WAIT seed is this same
+        # accumulator over its high streak (item 504) and the anti-wrinkle window
+        # uses the trapezoid average.
         high_step_wh = (
             (self._last_power or 0.0) * (high_dt / 3600.0) if high_dt > 0 else 0.0
         )
@@ -1890,6 +2014,9 @@ class CycleDetector:
         self._time_in_state += dt
 
         self._last_power = power
+        if power < self._config.stop_threshold_w:
+            # Back on the idle floor: the next probe is a fresh one (item 501).
+            self._standby_reprobe = False
 
         # A keepalive inside a recorded outage carries no observation, only the
         # clock (item 266). Stepping the state machine on it would hand every
@@ -2102,6 +2229,7 @@ class CycleDetector:
             if is_high and not started_from_anti_wrinkle:
                 # Transition to STARTING
                 self._preserve_delay_band_on_off = self._delay_band_start is not None
+                self._hide_probe(self._standby_reprobe and self._state == STATE_OFF)
                 self._transition_to(STATE_STARTING, timestamp)
                 self._current_cycle_start = timestamp
                 self._power_readings = [(timestamp, power)]
@@ -2113,6 +2241,7 @@ class CycleDetector:
                 self._energy_since_idle_wh = high_step_wh
                 self._cycle_max_power = power
                 self._apply_curve_preroll(timestamp, power)
+                self._show_probe_with_evidence()
             # NOTE: terminal-state expiry (Finished/Interrupted/Force-Stopped -> Off)
             # is owned solely by the manager (WashDataManager._handle_state_expiry),
             # which has a wall-clock timer that also fires when a change-only power
@@ -2137,28 +2266,39 @@ class CycleDetector:
                 if self._delay_wait_high_start is None:
                     self._delay_wait_high_start = timestamp
                     self._delay_wait_high_power = power
+                    # Item 504: the streak's energy from here, credited per guarded
+                    # interval by the accumulator above (#403), seeds the probe.
+                    # The previous reading was not high, so nothing before the
+                    # anchor is lost.
+                    self._energy_since_idle_wh = 0.0
                 else:
                     elapsed_high = (
                         timestamp - self._delay_wait_high_start
                     ).total_seconds()
                     if elapsed_high >= self._config.start_duration_threshold:
-                        self._logger.info(
-                            "Delayed start: cycle starting (power %.1fW sustained ≥ %.1fW for %.0fs)",
+                        # Debug, like any other probe: since item 504 a straddling
+                        # standby probes from here hundreds of times a day.
+                        self._logger.debug(
+                            "Delayed start: probing (power %.1fW sustained ≥ %.1fW for %.0fs)",
                             power,
                             self._config.start_threshold_w,
                             elapsed_high,
                         )
+                        self._hide_probe(True)  # out of a standby (item 501)
+                        wait_since = self._state_enter_time or timestamp
                         self._transition_to(STATE_STARTING, timestamp)
+                        self._probe_wait_since = wait_since  # item 504
                         start_timestamp = self._delay_wait_high_start or timestamp
                         start_power = self._delay_wait_high_power or power
                         self._current_cycle_start = start_timestamp
                         self._power_readings = [(start_timestamp, start_power)]
-                        elapsed_from_anchor = (timestamp - start_timestamp).total_seconds()
-                        self._energy_since_idle_wh = (
-                            start_power * (elapsed_from_anchor / 3600.0)
-                            if elapsed_from_anchor > 0
-                            else 0.0
-                        )
+                        # `_energy_since_idle_wh` already holds the streak's energy
+                        # (item 504). It was `start_power * elapsed`, which credited
+                        # the first high reading's level for the whole window: a
+                        # 22 W blip then 5 W for 20 s banked 0.15 of a 0.2 Wh gate,
+                        # and once false starts return here every standby probe
+                        # started that way (max aborted probe 0.53 -> 0.78 of the
+                        # gate on #35).
                         if timestamp != start_timestamp:
                             self._power_readings.append((timestamp, power))
                         self._cycle_max_power = max(start_power, power)
@@ -2169,6 +2309,7 @@ class CycleDetector:
                         # anchor forward (see _apply_curve_preroll), and is a no-op
                         # while the option is off, which is the default.
                         self._apply_curve_preroll(timestamp, power)
+                        self._show_probe_with_evidence()
             else:
                 # Power dropped back below start threshold - clear the
                 # high-power streak anchor so the next high reading
@@ -2209,6 +2350,8 @@ class CycleDetector:
             if is_high:
                 # Power back up - clear any accumulated "true off" hold time.
                 self._starting_paused_off_since = None
+
+            self._show_probe_with_evidence()  # item 501
 
             if self._time_above_threshold >= self._config.start_duration_threshold:
                 if self._energy_since_idle_wh >= self._config.start_energy_threshold:
@@ -2265,7 +2408,38 @@ class CycleDetector:
                     # preserve the band via _preserve_delay_band_on_off if it was set
                     # at STARTING entry (line 838), so a brief high-power peak (menu
                     # navigation) doesn't restart the delayed-start accumulation from zero.
-                    self._transition_to(STATE_OFF, timestamp)
+                    # Item 501: back in the band, not on the idle floor, so the next
+                    # probe is a standby re-probe and is not shown until it has evidence.
+                    self._standby_reprobe = power >= self._config.stop_threshold_w
+                    wait_since = self._probe_wait_since
+                    waited_s = (
+                        (timestamp - wait_since).total_seconds()
+                        if wait_since is not None
+                        else 0.0
+                    )
+                    if (
+                        wait_since is not None
+                        and self._standby_reprobe
+                        and waited_s < self._config.delay_timeout_seconds
+                    ):
+                        # Item 504: a probe out of DELAY_WAIT that falls back into the
+                        # band goes back to waiting, keeping DELAY_WAIT's timeout
+                        # anchor. Back to OFF lost it, and on a standby straddling
+                        # start_threshold_w the band (OFF only) re-armed DELAY_WAIT a
+                        # minute later: off <-> waiting ~16 times per idle day on
+                        # #35. A drop below stop_threshold_w still ends the wait,
+                        # and so does the timeout, checked here because on such a
+                        # standby this abort may be the only in-band reading.
+                        self._transition_to(STATE_DELAY_WAIT, timestamp)
+                        self._state_enter_time = wait_since
+                        self._time_in_state = max(0.0, waited_s)
+                    else:
+                        if wait_since is not None and self._standby_reprobe:
+                            self._logger.info(
+                                "Delayed start timeout after %.0fh → OFF",
+                                self._config.delay_timeout_seconds / 3600.0,
+                            )
+                        self._transition_to(STATE_OFF, timestamp)
 
         elif self._state == STATE_RUNNING:
             self._power_readings.append((timestamp, power))
@@ -2449,6 +2623,9 @@ class CycleDetector:
             else:
                 # Periodic profile matching during ending
                 self._try_profile_match(timestamp)
+                # A verified pause a revoke orphaned is released after a bounded
+                # quiet, so the fallback below can end the cycle (item 498).
+                self._release_orphaned_pause()
 
                 # --- SMART TERMINATION CHECK ---
                 # If we have a confident profile match and duration meets expectations,
@@ -3142,6 +3319,14 @@ class CycleDetector:
         if new_state != STATE_ENDING:
             self._ml_defer_start_duration = None
 
+        # Item 501: hiding is per probe, and a re-probe only follows a false start
+        # straight back in OFF (any other state means the standby run is over).
+        if new_state != STATE_STARTING:
+            self._probe_hidden = False
+            self._probe_wait_since = None  # item 504: per probe, like the hiding
+        if new_state not in (STATE_OFF, STATE_STARTING):
+            self._standby_reprobe = False
+
         # Reset energy accumulator on transition to OFF
         if new_state == STATE_OFF:
             self._energy_since_idle_wh = 0.0
@@ -3175,6 +3360,8 @@ class CycleDetector:
             self._delay_wait_high_power = None
             self._sub_state = "Waiting to Start"
             self._preserve_delay_band_on_off = False
+            # Like OFF: a false start returning here (item 504) leaves no energy.
+            self._energy_since_idle_wh = 0.0
         elif new_state == STATE_ANTI_WRINKLE:
             self._anti_wrinkle_candidate_start = None
             self._anti_wrinkle_candidate_peak = 0.0
@@ -4710,7 +4897,20 @@ class CycleDetector:
             # was then blocked as low_confidence, and a dishwasher restored into
             # its terminal-tail match freeze could never re-match (DETECT-09).
             "last_match_confidence": self._last_match_confidence,
+            # Register item 393a: the #296 tail's baseline and the idle clock of
+            # the anti-wrinkle state. Without the floor a restart mid-tail fell
+            # back to the configured burst length, which splits the tail again.
+            "anticrease_tail_floor_w": self._anticrease_tail_floor_w,
+            "anti_wrinkle_idle_time": self._anti_wrinkle_idle_time,
         }
+
+    @property
+    def in_anticrease_tail(self) -> bool:
+        """STATE_ANTI_WRINKLE entered by the #296 anti-crease finalise (item 393a)."""
+        return (
+            self._state == STATE_ANTI_WRINKLE
+            and self._anticrease_tail_floor_w is not None
+        )
 
     def get_elapsed_seconds(self) -> float:
         """Return seconds elapsed in current cycle."""
@@ -4736,6 +4936,9 @@ class CycleDetector:
         try:
             self._state = snapshot.get("state", STATE_OFF)
             self._sub_state = snapshot.get("sub_state")
+            # Not persisted (item 501): a restored probe is shown.
+            self._standby_reprobe = False
+            self._probe_hidden = False
             self._energy_since_idle_wh = snapshot.get("accumulated_energy_wh", 0.0)
             self._time_above_threshold = snapshot.get("time_above", 0.0)
             self._time_below_threshold = snapshot.get("time_below", 0.0)
@@ -4816,6 +5019,21 @@ class CycleDetector:
                 )
             except (TypeError, ValueError):
                 self._last_match_confidence = 0.0
+            # Item 393a. Meaningful only in the tail; an older snapshot (or any
+            # other state) yields None / 0.0, i.e. the configured burst length.
+            # The burst candidate is not restored: the restart broke the run.
+            in_tail = self._state == STATE_ANTI_WRINKLE
+            self._anticrease_tail_floor_w = (
+                self._sanitize_positive(snapshot.get("anticrease_tail_floor_w"))
+                if in_tail else None
+            )
+            self._anti_wrinkle_idle_time = (
+                self._sanitize_positive(snapshot.get("anti_wrinkle_idle_time")) or 0.0
+                if in_tail else 0.0
+            )
+            self._anti_wrinkle_candidate_start = None
+            self._anti_wrinkle_candidate_peak = 0.0
+            self._anti_wrinkle_candidate_start_power = 0.0
 
             # Restore state enter time and recompute time_in_state from it
             enter_time = snapshot.get("state_enter_time")

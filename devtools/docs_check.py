@@ -479,7 +479,8 @@ def check_register(root: Path, report: Report) -> None:
             continue
         table = _register_table(path.read_text(encoding="utf-8"))
         rows = [m for m in REGISTER_ROW_FULL_RE.finditer(table) if "-" not in m.group(1)]
-        if not rows:
+        # An empty work list is a legitimate state; a missing table header is not.
+        if not rows and (rel != REGISTER_OPEN or "| # | Status |" not in table):
             report.failures.append(f"{rel}: no register rows found (format changed?)")
         ids += [m.group(1) for m in rows]
         for m in rows:

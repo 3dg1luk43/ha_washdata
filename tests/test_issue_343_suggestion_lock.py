@@ -127,7 +127,12 @@ def test_all_locked_triggers_save(mock_hass):
     mgr.suggestion_engine.apply_suggestions = MagicMock()
 
     created_tasks = []
-    mock_hass.async_create_task = MagicMock(side_effect=lambda coro, *a: created_tasks.append(coro))
+
+    def _record(coro, *_a):
+        created_tasks.append(coro)
+        coro.close()  # recorded, never run: close it so it is not left unawaited
+
+    mock_hass.async_create_task = MagicMock(side_effect=_record)
 
     mgr._apply_suggestions_and_notify({
         "start_threshold_w": {"value": 3.6},

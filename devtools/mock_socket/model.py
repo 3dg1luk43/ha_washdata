@@ -540,8 +540,8 @@ class Event:
     """Something the plug tells Home Assistant (or the ledger), at appliance time ``t``."""
 
     t: float
-    kind: str  # "power" | "online" | "offline" | "run_end"
-    power: float | None = None
+    kind: str  # "power" | "draw" | "online" | "offline" | "run_end"
+    power: float | None = None  # "power": what was reported; "draw": what the appliance drew
     energy_kwh: float | None = None
     run: Run | None = None
 
@@ -662,11 +662,18 @@ class PlugSim:
 
     def advance(self, t: float) -> list[Event]:
         events: list[Event] = []
+        last: float | None = None
         while True:
             due = self.next_due()
             if due is None or due > t + EPS:
                 break
-            self._step(due if self.now is None else max(due, self.now), events)
+            if last is not None and due <= last + EPS:
+                # A step resolves everything due by its time, so the same instant coming
+                # back means next_due and _report disagree; in the live mock that would
+                # spin the event loop forever.
+                raise RuntimeError(f"plug scheduler stalled at t={due}")
+            last = due if self.now is None else max(due, self.now)
+            self._step(last, events)
         self._accrue(t)
         return events
 
@@ -692,7 +699,10 @@ class PlugSim:
                 self._out_i = 0
                 events.append(Event(t, "run_end", run=run))
                 changed = True
-        self._value = self._draw(t)
+        value = self._draw(t)
+        if value != self._value:
+            events.append(Event(t, "draw", power=value))
+        self._value = value
         online = self.plugged and not self._in_outage()
         if online != self._online:
             self._online = online
@@ -730,7 +740,7 @@ class PlugSim:
 
     def boot(self, t: float) -> list[Event]:
         """The plug powers up and reports."""
-        events: list[Event] = []
+        events: list[Event] = [Event(t, "draw", power=self._value)]
         self.now = t
         self._step(t, events, changed=True)
         return events
@@ -769,6 +779,13 @@ class PlugSim:
             at = run.program_time(t)
             run.frozen.append((at, t - run.frozen_since))
             run.frozen_since = None
+        self._step(t, events, changed=True)
+        return events
+
+    def set_idle_w(self, watts: float, t: float) -> list[Event]:
+        """The draw between runs (a display, a standby board)."""
+        events = self.advance(t)
+        self.idle_w = max(0.0, float(watts))
         self._step(t, events, changed=True)
         return events
 

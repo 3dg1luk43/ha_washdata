@@ -68,7 +68,8 @@ python3 devtools/start_gate_eval.py <diag.json|history.csv|sqlite:db>   # start 
 python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)
 python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed point / ladder / oscillation / erased cycles (F10)
 
-python3 devtools/mqtt_mock_socket.py --cycle-source <cycles.json>    # mock appliance over MQTT
+python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug into a real HA (web UI :8080)
+python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent
 
 cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its README.md)
 cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 20 checks (~12 min)

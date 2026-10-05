@@ -104,7 +104,7 @@ async def test_process_cycle_end_triggers_processing(manager):
     # Minimal setup to make _process_cycle_end run without errors
     cycle_data = {"start_time": "2023-01-01T12:00:00", "duration": 1000}
     manager.detector.get_current_cycle_data = MagicMock(return_value=cycle_data)
-    manager.profile_store.add_cycle = MagicMock()
+    manager.profile_store.async_add_cycle = AsyncMock(return_value=set())
     
     manager._on_cycle_end(cycle_data)
     

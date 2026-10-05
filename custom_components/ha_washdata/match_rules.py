@@ -26,7 +26,8 @@ Single source of truth for the rules between "the matcher returned a result" and
   score history;
 * the envelope verified pause - set on a confirmed expected low-power region,
   released at 95% of the envelope span, on high power, by the #375 sustained-quiet
-  release, and forced on by a user pause;
+  release, after a bounded quiet once a revoke has orphaned it (item 498), and
+  forced on by a user pause;
 * the consistency override, which is also how a confident mismatch (every
   candidate rejected) drops the displayed program;
 * the cycle-end label verdict.
@@ -53,11 +54,13 @@ from typing import Any
 
 from .const import (
     DEFAULT_MATCH_REVERT_RATIO,
+    END_GATE_HAZARD_MARGIN,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
     MATCH_AMBIGUOUS_COMMIT_FACTOR,
     MATCH_DECISIVE_MARGIN,
     MATCH_SURE_KNOTS,
     MATCH_SURE_SINGLE_CANDIDATE,
+    ORPHANED_PAUSE_MAX_WAIT_S,
 )
 
 #: The manager's "no program committed yet" placeholder.
@@ -624,6 +627,85 @@ def decide_pause_release(
         verified_pause = True
 
     return PauseDecision(verified_pause=verified_pause, log=log)
+
+
+#: Register item 498: release a verified pause a revoke has orphaned, after
+#: :func:`orphaned_pause_wait_s`. A module flag so the A/B and the revert check can
+#: turn it off; always on in production.
+RELEASE_ORPHANED_PAUSE = True
+
+
+def orphaned_pause_wait_s(*, off_delay: Any, min_off_gap: Any, longest_pause_s: Any) -> float:
+    """How much gap-free quiet an orphaned verified pause may hold the end for.
+
+    A revoke (divergence revert, or every candidate rejected) drops the match and
+    its expected duration but leaves the envelope's verified pause, which neither
+    the 95%-of-span release (it needs the match) nor the #375 release (it needs the
+    expected duration) can then clear, so it held the cycle until the force stop.
+
+    ``longest_pause_s`` is the longest below-stop pause the revoked programme's
+    traced cycles ever resumed from (its pause catalogue, the hazard gate's evidence,
+    position-free because the expected duration that placed it is gone). The wait is
+    ``END_GATE_HAZARD_MARGIN`` x that, so a soak the device has recorded is still
+    bridged, held to ``[floor, ORPHANED_PAUSE_MAX_WAIT_S]``. The floor is
+    ``max(off_delay, min_off_gap, ENDING_HARD_FINALIZE_MIN_QUIET_S)``: what the
+    unmatched fallback waits anyway, and the #375 release's quiet floor, so a release
+    can never end a cycle sooner than if no pause had engaged. The floor wins over
+    the cap. Never raises.
+    """
+    try:
+        floor = max(
+            float(off_delay or 0.0), float(min_off_gap or 0.0), ENDING_HARD_FINALIZE_MIN_QUIET_S
+        )
+    except (TypeError, ValueError, OverflowError):
+        floor = ENDING_HARD_FINALIZE_MIN_QUIET_S
+    if not math.isfinite(floor):
+        floor = ENDING_HARD_FINALIZE_MIN_QUIET_S
+    try:
+        evidence = END_GATE_HAZARD_MARGIN * max(0.0, float(longest_pause_s or 0.0))
+    except (TypeError, ValueError, OverflowError):
+        evidence = 0.0
+    if not math.isfinite(evidence):
+        evidence = 0.0
+    return max(floor, min(ORPHANED_PAUSE_MAX_WAIT_S, evidence))
+
+
+def decide_orphaned_pause_release(
+    *,
+    verified_pause: Any,
+    user_paused: bool,
+    current_matched: Any,
+    time_below: float,
+    wait_s: float,
+    longest_pause_s: float,
+) -> PauseDecision:
+    """Release a verified pause no match stands behind any more (register item 498).
+
+    Only an AUTOMATIC pause (a user pause is authoritative, issue #306) with no
+    matched programme, once the GAP-FREE quiet tally reaches ``wait_s``
+    (:func:`orphaned_pause_wait_s`): a telemetry outage is unobserved time, as for
+    the #375 release. A new match ends the orphan state and the normal releases
+    apply again. Run by the detector on every ENDING reading, which the manager's
+    readings and watchdog keepalives and the Playground's replay all reach.
+    """
+    if (
+        RELEASE_ORPHANED_PAUSE
+        and verified_pause
+        and not user_paused
+        and not current_matched
+        and time_below >= wait_s
+    ):
+        return PauseDecision(
+            verified_pause=False,
+            log=[(
+                logging.INFO,
+                "Releasing auto-detected pause left by a revoked match: quiet %.0fs >= "
+                "%.0fs (longest recorded pause of the revoked programme %.0fs) - "
+                "allowing normal cycle finish (item 498).",
+                (time_below, wait_s, longest_pause_s),
+            )],
+        )
+    return PauseDecision(verified_pause=verified_pause)
 
 
 #: Register item 469(b): an AMBIGUOUS tick in ENDING cannot defer the end (here

@@ -1550,7 +1550,9 @@ def ws_get_devices(
             try:
                 detector = getattr(manager, "detector", None)
                 if detector is not None:
-                    info["detector_state"] = detector.state
+                    # What the entities show (item 501): a hidden standby re-probe
+                    # stays "off" here too instead of flickering the Status card.
+                    info["detector_state"] = getattr(detector, "exposed_state", detector.state)
                     info["sub_state"] = detector.sub_state
 
                 program: str | None = getattr(manager, "_current_program", None)
@@ -7101,7 +7103,12 @@ def _history_samples(
     Returns either a ``(samples, report)`` pair or an ``{"error": ...}`` marker.
     """
     if slot.get("source") == "recorder":
-        samples = history_import.samples_from_readings(slot.get("rows") or [])
+        # `parser` is then a stepped RecorderReadings (audit PLAYGROUND-11).
+        samples = (
+            parser.result()
+            if parser is not None
+            else history_import.samples_from_readings(slot.get("rows") or [])
+        )
         if len(samples) < 2:
             return {"error": "no_readings"}
         # The same report a CSV gets, so the review step shows the span, the peak,
@@ -7173,21 +7180,35 @@ async def _history_import_scan_task(
                     return
                 await hass.async_add_executor_job(parser.step, history_import.PARSE_STEP_ROWS)
                 reg.update(task, done=min(parser.rows_estimate, parser.out.rows_total))
+        else:
+            # The recorder rows are converted a slice per job too.
+            parser = history_import.RecorderReadings(slot.get("rows") or [])
+            reg.update(task, total=parser.rows_estimate)
+            while not parser.finished:
+                if task.cancel_requested:
+                    reg.finish(task, state=task_registry.STATE_CANCELLED)
+                    return
+                await hass.async_add_executor_job(parser.step, history_import.PARSE_STEP_ROWS)
+                reg.update(task, done=parser.done)
         parsed = await hass.async_add_executor_job(_history_samples, slot, entity_id, parser)
         if isinstance(parsed, dict):
             reg.finish(task, state=task_registry.STATE_ERROR, error=str(parsed.get("error")))
             return
         samples, report = parsed
         sampling_interval = options.get(CONF_SAMPLING_INTERVAL)
-        runner = await hass.async_add_executor_job(
-            functools.partial(
-                history_import.build_scan,
-                samples,
-                base_config,
-                sampling_interval_s=sampling_interval,
-                parse_report=report,
-            )
+        # Blocks, gates and densification, a slice per job (audit PLAYGROUND-11).
+        builder = history_import.ScanBuilder(
+            samples, base_config,
+            sampling_interval_s=sampling_interval, parse_report=report,
         )
+        while not builder.finished:
+            if task.cancel_requested:
+                reg.finish(task, state=task_registry.STATE_CANCELLED)
+                return
+            await hass.async_add_executor_job(
+                builder.step, history_import.SCAN_BUILD_STEP_SAMPLES
+            )
+        runner = builder.result()
         if isinstance(runner, dict):
             # A stream with nothing usable in it is a *result*, not a failure: the panel
             # explains which spans were skipped and why (six months of hourly averages

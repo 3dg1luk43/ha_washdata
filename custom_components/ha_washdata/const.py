@@ -851,6 +851,16 @@ MATCH_MIN_RATIO_GRACE_S = 900.0
 END_GATE_HAZARD_MARGIN = 1.25
 END_GATE_HAZARD_MIN_CYCLES = 3
 END_GATE_HAZARD_POSITION_SLACK = 0.05
+# Register item 498: a revoked match (divergence revert, or every candidate
+# rejected) leaves an envelope-verified pause with no expected duration, which only
+# high power cleared, so a finished cycle sat until the force stop. Released once the
+# gap-free quiet reaches END_GATE_HAZARD_MARGIN x the longest below-stop pause the
+# revoked programme's traced cycles ever resumed from, never before max(off_delay,
+# min_off_gap, ENDING_HARD_FINALIZE_MIN_QUIET_S) (what the unmatched fallback waits
+# anyway) and, above that floor, never after this cap: past the corpus's longest
+# resumed pause x margin (a 6838 s dishwasher drying phase before its pump-out ->
+# 8548 s) and 1.5 h inside the watchdog's 4.5 h silence limit under a verified pause.
+ORPHANED_PAUSE_MAX_WAIT_S = 10800.0
 # Stage-4 "energy" agreement. By default it compares mean power (W), not Wh:
 # cur_energy=mean(curr_arr) vs profile_mean_power. Washing machines and
 # washer-dryers compare integrated energy instead (analysis.stage4_energy_mode).

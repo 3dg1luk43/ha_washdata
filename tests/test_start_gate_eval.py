@@ -206,3 +206,126 @@ def test_cli_runs_on_a_dump(tmp_path, capsys):
     assert "baseline" in printed and "start_energy_threshold=0.5" in printed
     result = json.loads(out_json.read_text(encoding="utf-8"))
     assert result["variants"]["baseline"]["summary"]["references"] == 1
+
+
+def test_gz_recording_csv_merge_and_clip(tmp_path):
+    """The issue-download shapes: gzipped files, #43's recording CSV, two downloads of one plug."""
+    import gzip
+
+    rec = "minutes_from_start,watts,timestamp_utc\n0.0,0.0,2026-03-18T10:00:00\n0.3,12.5,2026-03-18T10:00:20\n"
+    path = tmp_path / "dishwasher_power.csv.gz"
+    path.write_bytes(gzip.compress(rec.encode()))
+    readings, doc = sge.load_history(str(path), None)
+    stamp = datetime(2026, 3, 18, 10, 0, tzinfo=timezone.utc)
+    assert doc is None
+    assert readings == [(stamp, 0.0), (stamp + timedelta(seconds=20), 12.5)]
+
+    dump = {"data": {"live_diagnostics": {"power_trace": [[_at(0).isoformat(), 1.0]]}}}
+    gz = tmp_path / "config_entry.json.gz"
+    gz.write_bytes(gzip.compress(json.dumps(dump).encode()))
+    assert sge.load_history(str(gz), None)[0] == [(_at(0), 1.0)]
+    assert sge.load_config(gz) == dump
+
+    first = [(_at(0), 0.0), (_at(10), 5.0)]
+    second = [(_at(10), 5.0), (_at(20), 0.0)]
+    merged = sge.merge([first, second])
+    assert merged == [(_at(0), 0.0), (_at(10), 5.0), (_at(20), 0.0)]
+    assert sge.clip(merged, _at(5), _at(15)) == [(_at(10), 5.0)]
+
+
+def test_union_truth_extra_and_exclude():
+    """A wiped history (#101): stored misses a real run, union adds it from the blocks."""
+    readings, end = _day()
+    # A second wash later the same day that no stored cycle covers.
+    second = end + 7200
+    rows = []
+    t = second
+    for watts, span in ((200.0, 60), (2000.0, 600), (400.0, 1200)):
+        stop = t + span
+        while t < stop:
+            rows.append((_at(t), watts))
+            t += 5
+    tail = [(_at(t + 30 * k), 0.3) for k in range(240)]
+    readings = readings + rows + tail
+    device = _device(end)
+
+    stored = sge.evaluate(readings, device, truth="stored")["variants"]["baseline"]["summary"]
+    assert stored["references"] == 1 and stored["phantoms"] == 1
+
+    union = sge.evaluate(readings, device, truth="union")
+    s = union["variants"]["baseline"]["summary"]
+    assert union["truth"] == "union" and s["references"] == 2 and s["phantoms"] == 0
+
+    # exclude drops the stored record; a hand-labelled window replaces what it overlaps.
+    out = sge.evaluate(readings, device, truth="stored", exclude=["wash"],
+                       extra=[(_at(WASH - 120), _at(end))])
+    assert out["truth"] == "stored+manual"
+    rows_out = out["variants"]["baseline"]["rows"]
+    assert [r["ref"].split("@")[0] for r in rows_out] == ["manual"]
+
+
+def test_shipped_defaults_drops_only_the_start_gates():
+    device = sge.load_device({"data": {"past_cycles": []}, "entry_data": {},
+                              "entry_options": {**OPTIONS, "curve_preroll_seconds": 300}}, None)
+    shipped = sge.shipped_defaults(device)
+    assert not set(sge.START_GATE_KEYS) & set(shipped.options)
+    assert shipped.options["min_power"] == 2.0 and shipped.options["stop_threshold_w"] == 2.0
+    config, manager = sge.detector_setup(shipped, {})
+    assert config.start_threshold_w == pytest.approx(3.0)  # min_power + 1
+    assert config.curve_preroll_seconds == 0.0
+    assert manager["sampling_interval"] == 2.0  # the washer's device default
+
+
+def test_manifest_aggregates_per_device_type(tmp_path, capsys):
+    import gzip
+
+    readings, end = _day()
+    dump = {
+        "data": {
+            "entry": {"data": {"device_type": "washing_machine"}, "options": dict(OPTIONS)},
+            "store_export": {"data": {"past_cycles": [{
+                "id": "wash", "start_time": _at(WASH).isoformat(),
+                "end_time": _at(end).isoformat(), "duration": end - WASH}]}},
+            "live_diagnostics": {"power_trace": [[t.isoformat(), p] for t, p in readings]},
+        }
+    }
+    sub = tmp_path / "issue1"
+    sub.mkdir()
+    (sub / "config_entry-ha_washdata-ABC.json.gz").write_bytes(gzip.compress(json.dumps(dump).encode()))
+    manifest = tmp_path / "sources.jsonl"
+    manifest.write_text("\n".join([
+        "# comment lines and blank lines are skipped",
+        "",
+        json.dumps({"label": "a", "history": "issue1/*ABC.json.gz"}),
+        json.dumps({"label": "b", "history": str(sub / "config_entry-ha_washdata-ABC.json.gz"),
+                    "aggregate": False}),
+    ]), encoding="utf-8")
+    sources = sge.read_manifest(manifest)
+    assert [s.label for s in sources] == ["a", "b"] and sources[1].aggregate is False
+    results = [sge.evaluate_source(s, root=tmp_path, sweeps=["start_energy_threshold=1000"])
+               for s in sources]
+    agg = sge.aggregate(results)
+    base = agg["baseline"]["washing_machine"]
+    assert base["sources"] == 1 and base["references"] == 1 and base["missed"] == 0
+    assert agg["baseline"]["ALL"]["references"] == 1
+    assert agg["start_energy_threshold=1000"]["ALL"]["missed"] == 1
+
+    out_json = tmp_path / "out.json"
+    assert sge.main(["--manifest", str(manifest), "--root", str(tmp_path), "--shipped-defaults",
+                     "--source", "a", "--json", str(out_json)]) == 0
+    printed = capsys.readouterr().out
+    assert "washing_machine" in printed and "ALL" in printed and "not aggregated" not in printed
+    written = json.loads(out_json.read_text(encoding="utf-8"))
+    assert [r["label"] for r in written["sources"]] == ["a"]
+    assert written["aggregate"]["baseline"]["ALL"]["references"] == 1
+
+
+def test_manifest_glob_must_match_one_file(tmp_path):
+    with pytest.raises(SystemExit):
+        sge._resolve("nothing/*.json", tmp_path)
+    (tmp_path / "x-1.json").write_text("{}")
+    (tmp_path / "x-2.json").write_text("{}")
+    with pytest.raises(SystemExit):
+        sge._resolve("x-*.json", tmp_path)
+    assert sge._resolve("x-1*.json", tmp_path) == str(tmp_path / "x-1.json")
+    assert sge._resolve("sqlite:db/home.db", tmp_path) == "sqlite:" + str(tmp_path / "db/home.db")

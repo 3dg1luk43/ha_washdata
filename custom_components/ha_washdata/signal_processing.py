@@ -55,7 +55,7 @@ def energy_gap_threshold_s(timestamps: np.ndarray) -> float:
     Ten times the median sample interval, clamped to ``[60, 3600]``. Segments
     longer than this are treated as sensor outages and excluded from the energy
     sum, without masking valid slow-sampling configurations. Single source for
-    both persistence paths (``manager._on_cycle_end`` / ``ProfileStore.add_cycle``).
+    both persistence paths (``manager._on_cycle_end`` / ``ProfileStore.async_add_cycle``).
     """
     ts = np.asarray(timestamps, dtype=float)
     if ts.size < 2:

@@ -50,7 +50,7 @@ def load_json_data(file_path):
     with open(file_path, "r") as f:
         return json.load(f)
 
-# --- CycleSynthesizer Logic (Copied/Adapted from mqtt_mock_socket.py) ---
+# --- CycleSynthesizer Logic (the pre-0.5.8 mock socket's; that mock was rebuilt) ---
 class CycleSynthesizer:
     def __init__(self, jitter_w: float = 0.0, variability: float = 0.0):
         self.jitter_w = jitter_w

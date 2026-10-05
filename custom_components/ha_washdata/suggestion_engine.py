@@ -23,7 +23,7 @@ import logging
 import math
 from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 from datetime import datetime
-from typing import Any, TYPE_CHECKING, cast
+from typing import Any, Callable, Coroutine, TYPE_CHECKING, cast
 
 import numpy as np
 from homeassistant.core import HomeAssistant, callback
@@ -1088,12 +1088,20 @@ class SuggestionEngine:
         entry_id: str,
         profile_store: "ProfileStore",
         device_type: str | None = None,
+        spawn: Callable[[Coroutine[Any, Any, Any]], Any] | None = None,
     ) -> None:
-        """Initialize the suggestion engine."""
+        """Initialize the suggestion engine.
+
+        ``spawn`` starts the store save :meth:`apply_suggestions` schedules. The
+        learning manager passes the manager's ``_spawn_tracked`` so an unload can
+        cancel it (audit MANAGER-13); without it a plain ``hass.async_create_task``
+        is used.
+        """
         self.hass = hass
         self.entry_id = entry_id
         self.profile_store = profile_store
         self.device_type = device_type
+        self._spawn_fn = spawn
         # Loop-affine config snapshot, set by for_job() on a per-job copy
         # before an executor dispatch. See _entry_options().
         self._options_snapshot: dict[str, Any] | None = None
@@ -2200,7 +2208,11 @@ class SuggestionEngine:
         self._reconcile_stored_suggestions()
 
         if self.hass and suggestions:
-            self.hass.async_create_task(self.profile_store.async_save())
+            save = self.profile_store.async_save()
+            if self._spawn_fn is not None:
+                self._spawn_fn(save)
+            else:
+                self.hass.async_create_task(save)
 
     def _reconcile_stored_suggestions(self) -> None:
         """Reconcile the accumulated stored suggestions against current options."""

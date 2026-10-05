@@ -28,6 +28,12 @@ def mock_hass():
     async def mock_executor_job(func, *args, **kwargs):
         return func(*args, **kwargs)
     hass.async_add_executor_job = AsyncMock(side_effect=mock_executor_job)
+    # The manager test offloads matching; nothing here awaits it, so close the
+    # coroutine instead of leaving it unawaited (the warning surfaced in
+    # test_issue_122, whichever test's teardown collected it).
+    hass.async_create_task = MagicMock(
+        side_effect=lambda coro, *a, **k: getattr(coro, "close", lambda: None)()
+    )
     return hass
 
 @pytest.fixture

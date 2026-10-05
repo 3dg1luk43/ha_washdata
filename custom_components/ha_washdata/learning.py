@@ -153,7 +153,7 @@ class LearningManager:
         self.profile_store = profile_store
         self.device_type = device_type
         self.suggestion_engine = SuggestionEngine(
-            hass, entry_id, profile_store, device_type
+            hass, entry_id, profile_store, device_type, spawn=spawn
         )
 
         # Operational Stats
@@ -874,9 +874,11 @@ class LearningManager:
         elif user_confirmed:
             profile_name = pending.get("detected_profile")
             if isinstance(profile_name, str) and profile_name:
-                self._auto_label_cycle(
+                left = self._auto_label_cycle(
                     cycle_id, profile_name, duration_sec, source="manual"
                 )
+                if left:
+                    profiles_to_rebuild.add(left)
                 if duration_sec is not None:
                     cycles = self.profile_store.get_past_cycles()
                     confirmed_cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
@@ -890,10 +892,12 @@ class LearningManager:
             detected_profile_name = pending.get("detected_profile")
 
             if isinstance(target_profile, str) and target_profile:
-                self._apply_correction_learning(
+                left = self._apply_correction_learning(
                     cycle_id, target_profile, duration_sec
                 )
                 profiles_to_rebuild.add(target_profile)
+                if left:
+                    profiles_to_rebuild.add(left)
                 if (
                     isinstance(detected_profile_name, str)
                     and detected_profile_name
@@ -1062,17 +1066,22 @@ class LearningManager:
         manual_duration: float | None = None,
         *,
         source: str = "auto_match",
-    ) -> None:
-        """Write a label and its provenance.
+    ) -> str | None:
+        """Write a label and its provenance; returns the profile the cycle left.
 
         ``source`` is ``"manual"`` when the user answered a review request (confirm
         or correct) and ``"auto_match"`` when the matcher's guess is recorded.
         These paths used to set only ``profile_name``, so a user's correction still
         read as a matcher guess and the panel's Auto-label reverted it - storing the
         user's answer as ``original_auto_label`` (audit MANAGER-01).
+
+        The returned name (None when the label did not move) is the profile whose
+        envelope lost a member: it is the cycle's real old label, which need not
+        be the profile the review request detected (register item 493).
         """
         cycles = self.profile_store.get_past_cycles()
         cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
+        left: str | None = None
         if cycle:
             old = cycle.get("profile_name")
             if (
@@ -1091,20 +1100,24 @@ class LearningManager:
             if old and old != profile_name:
                 # The profile the cycle left must not keep it as its sample.
                 self.profile_store.heal_profile_sample(old)
+                if isinstance(old, str):
+                    left = old
+        return left
 
     def _apply_correction_learning(
         self,
         cycle_id: str,
         corrected_profile: str,
         corrected_duration: Optional[float] = None,
-    ) -> None:
+    ) -> str | None:
         """Apply user correction to a cycle (fix for issue #131).
 
         Note: We do not update avg_duration here with EMA. Instead, the envelope
         rebuild in async_submit_cycle_feedback() will recalculate all statistics
-        (min/max/avg) from labeled cycles, ensuring accuracy.
+        (min/max/avg) from labeled cycles, ensuring accuracy. Returns the profile
+        the cycle left (see :meth:`_auto_label_cycle`).
         """
-        self._auto_label_cycle(
+        left = self._auto_label_cycle(
             cycle_id, corrected_profile, corrected_duration, source="manual"
         )
         if corrected_duration is not None:
@@ -1113,6 +1126,7 @@ class LearningManager:
             if cycle:
                 cycle["duration"] = corrected_duration
         # Profile stats will be recalculated when envelope is rebuilt
+        return left
 
     async def _async_rebuild_profile_envelope(self, profile_name: str) -> None:
         """Async helper to rebuild a profile's envelope (issue #131 fix).

@@ -62,7 +62,9 @@ from mock_socket.model import (  # noqa: E402
     load_appliance,
 )
 from mock_socket.runner import (  # noqa: E402
+    HISTORY_DIR,
     LEDGER_FILE,
+    STATE_FILE,
     MockHub,
     MqttSettings,
     PlugSettings,
@@ -92,8 +94,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--seed", type=int, help="dry run: random seed")
     ap.add_argument("--mqtt-host", help="broker host (default from priv_secrets.py)")
     ap.add_argument("--mqtt-port", type=int, help="broker port")
+    ap.add_argument("--config", type=Path, default=STATE_FILE,
+                    help=f"plug settings file (default {STATE_FILE.name})")
     ap.add_argument("--ledger", type=Path, default=LEDGER_FILE,
                     help=f"where finished runs are appended (default {LEDGER_FILE.name})")
+    ap.add_argument("--web-host", default="0.0.0.0", help="web UI bind address (default 0.0.0.0)")
     ap.add_argument("--web-port", type=int, default=8080, help="web UI port (default 8080)")
     ap.add_argument("--headless", action="store_true", help="no web UI")
     ap.add_argument("--list", action="store_true", help="list scenarios, plug modes and programmes")
@@ -158,7 +163,8 @@ def cmd_dry_run(args: argparse.Namespace, plug: PlugSettings) -> int:
           f"{lead / 60:.0f} min before and {tail / 3600:.0f} h after")
     if args.events:
         for e in events:
-            value = f"{e.power:9.1f} W  {e.energy_kwh:.4f} kWh" if e.kind == "power" else ""
+            value = (f"{e.power:9.1f} W  {e.energy_kwh:.4f} kWh" if e.kind == "power"
+                     else f"{e.power:9.1f} W" if e.kind == "draw" else "")
             print(f"  {_hms(e.t - lead):>9s}  {e.kind:8s} {value}")
     return 0
 
@@ -206,7 +212,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.list:
         return cmd_list(args)
 
-    speedup, plugs = load_state()
+    speedup, plugs = load_state(args.config)
     plug = next((p for p in plugs if p.id == args.plug), None) if args.plug else plugs[0]
     if plug is None:
         sys.exit(f"no plug {args.plug!r}; configured: {', '.join(p.id for p in plugs)}")
@@ -236,14 +242,16 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.headless:
         # A scripted session must not rewrite the UI's saved settings; the ledger still counts.
-        hub = MockHub(mqtt, speedup=speedup, plugs=plugs, state_path=None, ledger_path=args.ledger)
+        hub = MockHub(mqtt, speedup=speedup, plugs=plugs, state_path=None, ledger_path=args.ledger,
+                      history_dir=args.config.parent / HISTORY_DIR.name)
         return asyncio.run(run_headless(args, hub, plug.id))
 
     from nicegui import app, ui  # noqa: PLC0415 - only the web UI needs it
 
     from mock_socket.ui import mount  # noqa: PLC0415
 
-    hub = MockHub(mqtt, speedup=speedup, plugs=plugs, ledger_path=args.ledger)
+    hub = MockHub(mqtt, speedup=speedup, plugs=plugs, state_path=args.config,
+                  ledger_path=args.ledger, history_dir=args.config.parent / HISTORY_DIR.name)
     hub.save()
     mount(hub)
 
@@ -256,7 +264,8 @@ def main(argv: list[str] | None = None) -> int:
 
     app.on_startup(startup)
     app.on_shutdown(hub.shutdown)
-    ui.run(title="WashData mock plugs", port=args.web_port, show=False, reload=False)
+    ui.run(title="WashData mock plugs", host=args.web_host, port=args.web_port, show=False,
+           reload=False)
     return 0
 
 

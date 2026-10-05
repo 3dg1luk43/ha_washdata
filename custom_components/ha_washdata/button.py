@@ -208,7 +208,9 @@ class WashDataRecordStartButton(ButtonEntity):
         """Only available when not already recording and no active cycle is running."""
         return (
             not self._manager.recorder.is_recording
-            and self._manager.detector.state == "off"
+            # The state entities show, so a hidden standby re-probe (item 501)
+            # does not toggle availability on every reading.
+            and self._manager.detector.exposed_state == "off"
         )
 
     async def async_press(self) -> None:

@@ -183,9 +183,12 @@ def parse_warnings(powers: Sequence[float], naive_rows: int = 0) -> list[str]:
     read as UTC (audit PLAYGROUND-24).
     """
     warnings: list[str] = []
-    positive = {round(p, 6) for p in powers if p > 0}
-    if positive and max(positive) < KW_SUSPECT_PEAK_W and len(positive) >= 3:
-        warnings.append("looks_like_kw")
+    # The distinct-value set only when the peak qualifies: building it rounded every
+    # reading of a watt-scale stream (~0.15 s of the 0.34 s report at the row cap).
+    if powers and max(powers) < KW_SUSPECT_PEAK_W:
+        positive = {round(p, 6) for p in powers if p > 0}
+        if positive and max(positive) < KW_SUSPECT_PEAK_W and len(positive) >= 3:
+            warnings.append("looks_like_kw")
     if naive_rows > 0:
         warnings.append("naive_timestamps")
     return warnings
@@ -481,19 +484,54 @@ def parse_history_csv(
     return HistoryCsvParser(text, entity_id=entity_id, max_rows=max_rows).result()
 
 
+class RecorderReadings:
+    """:func:`samples_from_readings`, resumable: ``step`` converts a slice of rows.
+
+    The WS scan task drives it across executor jobs like :class:`HistoryCsvParser`
+    (audit PLAYGROUND-11): 500k recorder rows were one ~0.7 s job.
+    :func:`samples_from_readings` drives the same object to completion, so both give
+    the same samples.
+    """
+
+    def __init__(self, readings: Iterable[tuple[float, float]] | None) -> None:
+        self._rows: Sequence[tuple[float, float]] = (
+            readings if isinstance(readings, (list, tuple)) else list(readings or [])
+        )
+        self.rows_estimate = max(1, len(self._rows))
+        self.done = 0
+        self._out: list[Sample] = []
+
+    @property
+    def finished(self) -> bool:
+        return self.done >= len(self._rows)
+
+    def step(self, n_rows: int = PARSE_STEP_ROWS) -> int:
+        """Convert up to ``n_rows`` more rows; returns how many were read."""
+        start = self.done
+        end = min(len(self._rows), start + max(1, int(n_rows)))
+        out = self._out
+        for raw_ts, raw_power in self._rows[start:end]:
+            try:
+                timestamp = datetime.fromtimestamp(float(raw_ts), tz=timezone.utc)
+                power = float(raw_power)
+            except (TypeError, ValueError, OSError, OverflowError):
+                continue
+            if math.isfinite(power):
+                out.append((timestamp, max(0.0, power)))
+        self.done = end
+        return end - start
+
+    def result(self) -> list[Sample]:
+        """The samples, sorted by time (stable, as the one-shot sort was)."""
+        while not self.finished:
+            self.step(PARSE_STEP_ROWS)
+        self._out.sort(key=lambda item: item[0])
+        return self._out
+
+
 def samples_from_readings(readings: Iterable[tuple[float, float]]) -> list[Sample]:
     """Convert ``(unix_ts, watts)`` pairs - the recorder read shape - into samples."""
-    out: list[Sample] = []
-    for raw_ts, raw_power in readings or []:
-        try:
-            timestamp = datetime.fromtimestamp(float(raw_ts), tz=timezone.utc)
-            power = float(raw_power)
-        except (TypeError, ValueError, OSError, OverflowError):
-            continue
-        if math.isfinite(power):
-            out.append((timestamp, max(0.0, power)))
-    out.sort(key=lambda item: item[0])
-    return out
+    return RecorderReadings(readings).result()
 
 
 # ─── Block segmentation ───────────────────────────────────────────────────────
@@ -595,60 +633,105 @@ def find_activity_blocks(
     Blocks that never reach the start threshold are dead air and are returned as skipped
     spans instead, so the UI can account for every row.
     """
-    quiet_w = _quiet_threshold(config)
-    active_w = _active_threshold(config)
-    limit = float(cut_after_s if cut_after_s is not None else cut_threshold_s(config))
+    finder = _BlockFinder(samples, config, cut_after_s=cut_after_s)
+    finder.step(len(samples))
+    return finder.finish()
 
-    blocks: list[Block] = []
-    skipped: list[dict[str, Any]] = []
-    current: list[tuple[datetime, float]] = []
-    quiet_s = 0.0
-    idle_s = 0.0
 
-    def _close() -> None:
-        nonlocal current
+class _BlockFinder:
+    """:func:`find_activity_blocks`, resumable: ``step`` walks a slice of samples.
+
+    :class:`ScanBuilder` drives it across executor jobs (audit PLAYGROUND-11); the
+    function drives it in one call, so both cut the stream identically.
+    """
+
+    def __init__(
+        self,
+        samples: Sequence[Sample],
+        config: CycleDetectorConfig,
+        *,
+        cut_after_s: float | None = None,
+    ) -> None:
+        self.samples = samples
+        self.quiet_w = _quiet_threshold(config)
+        self.active_w = _active_threshold(config)
+        self.limit = float(
+            cut_after_s if cut_after_s is not None else cut_threshold_s(config)
+        )
+        self.blocks: list[Block] = []
+        self.skipped: list[dict[str, Any]] = []
+        self.readings = 0  # samples with a power value (build_scan's first gate)
+        self.pos = 0
+        self._current: list[tuple[datetime, float]] = []
+        self._quiet_s = 0.0
+        self._idle_s = 0.0
+        self._in_break = False
+
+    @property
+    def finished(self) -> bool:
+        return self.pos >= len(self.samples)
+
+    def _close(self) -> None:
+        current = self._current
         if not current:
             return
         block = Block(current)
-        if block.peak_w >= active_w and len(current) >= 2:
-            blocks.append(block)
+        if block.peak_w >= self.active_w and len(current) >= 2:
+            self.blocks.append(block)
         else:
-            skipped.append(block.summary(reason="idle"))
-        current = []
+            self.skipped.append(block.summary(reason="idle"))
+        self._current = []
 
-    in_break = False
-    for timestamp, power in samples:
-        if power is None:
-            # Do not cut yet: a 2 s Wi-Fi blip or an HA restart writes the same
-            # `unavailable` row, and cutting there split one wash into two
-            # "completed" candidates, both pre-ticked (audit PLAYGROUND-06). The
-            # next real sample decides: a short hole is bridged as a plain gap
-            # (the detector's own outage logic judges it), a long one cuts.
-            in_break = True
-            continue
-        if in_break:
-            in_break = False
-            hole = (
-                (timestamp - current[-1][0]).total_seconds() if current else float("inf")
-            )
-            if hole > min(limit, HISTORY_IMPORT_MAX_BRIDGE_S):
-                _close()
-                quiet_s = idle_s = 0.0
-        if current:
-            gap = (timestamp - current[-1][0]).total_seconds()
-            carried = current[-1][1]
-            quiet_s = quiet_s + gap if carried < quiet_w else 0.0
-            idle_s += gap
-            if quiet_s > limit or idle_s > limit:
-                _close()
-                quiet_s = idle_s = 0.0
-        current.append((timestamp, power))
-        if power >= active_w:
-            idle_s = 0.0
-        if power >= quiet_w:
-            quiet_s = 0.0
-    _close()
-    return blocks, skipped
+    def step(self, n: int) -> int:
+        """Walk up to ``n`` more samples; returns how many."""
+        start = self.pos
+        end = min(len(self.samples), start + max(1, int(n)))
+        quiet_w, active_w, limit = self.quiet_w, self.active_w, self.limit
+        quiet_s, idle_s, in_break = self._quiet_s, self._idle_s, self._in_break
+        readings = self.readings
+        for timestamp, power in self.samples[start:end]:
+            if power is None:
+                # Do not cut yet: a 2 s Wi-Fi blip or an HA restart writes the same
+                # `unavailable` row, and cutting there split one wash into two
+                # "completed" candidates, both pre-ticked (audit PLAYGROUND-06). The
+                # next real sample decides: a short hole is bridged as a plain gap
+                # (the detector's own outage logic judges it), a long one cuts.
+                in_break = True
+                continue
+            readings += 1
+            current = self._current
+            if in_break:
+                in_break = False
+                hole = (
+                    (timestamp - current[-1][0]).total_seconds() if current else float("inf")
+                )
+                if hole > min(limit, HISTORY_IMPORT_MAX_BRIDGE_S):
+                    self._close()
+                    current = self._current
+                    quiet_s = idle_s = 0.0
+            if current:
+                gap = (timestamp - current[-1][0]).total_seconds()
+                carried = current[-1][1]
+                quiet_s = quiet_s + gap if carried < quiet_w else 0.0
+                idle_s += gap
+                if quiet_s > limit or idle_s > limit:
+                    self._close()
+                    current = self._current
+                    quiet_s = idle_s = 0.0
+            current.append((timestamp, power))
+            if power >= active_w:
+                idle_s = 0.0
+            if power >= quiet_w:
+                quiet_s = 0.0
+        self._quiet_s, self._idle_s, self._in_break = quiet_s, idle_s, in_break
+        self.readings = readings
+        self.pos = end
+        return end - start
+
+    def finish(self) -> tuple[list[Block], list[dict[str, Any]]]:
+        """Close the last block; ``(blocks, skipped)`` as the function returns them."""
+        self._close()
+        return self.blocks, self.skipped
 
 
 def trim_leading_debris(
@@ -710,18 +793,30 @@ def classify_blocks(
     usable: list[Block] = []
     skipped: list[dict[str, Any]] = []
     for raw in blocks:
-        block = trim_leading_debris(raw)
-        if len(block.samples) < min_samples:
-            skipped.append(block.summary(reason="too_few_samples"))
-            continue
-        if block.median_dt_s > max_dt:
-            skipped.append(block.summary(reason="sparse"))
-            continue
-        if block.span_s > max_span_s:
-            skipped.append(block.summary(reason="too_long"))
-            continue
-        usable.append(block)
+        _classify_block(raw, min_samples, max_dt, max_span_s, usable, skipped)
     return usable, skipped
+
+
+def _classify_block(
+    raw: Block,
+    min_samples: int,
+    max_dt: float,
+    max_span_s: float,
+    usable: list[Block],
+    skipped: list[dict[str, Any]],
+) -> None:
+    """One block of :func:`classify_blocks` (shared with :class:`ScanBuilder`)."""
+    block = trim_leading_debris(raw)
+    if len(block.samples) < min_samples:
+        skipped.append(block.summary(reason="too_few_samples"))
+        return
+    if block.median_dt_s > max_dt:
+        skipped.append(block.summary(reason="sparse"))
+        return
+    if block.span_s > max_span_s:
+        skipped.append(block.summary(reason="too_long"))
+        return
+    usable.append(block)
 
 
 def densify_quiet_gaps(
@@ -918,14 +1013,19 @@ class ScanRunner:
         skipped: Sequence[dict[str, Any]] = (),
         parse_report: dict[str, Any] | None = None,
         max_segments: int = HISTORY_IMPORT_MAX_SEGMENTS,
+        streams: Sequence[list[tuple[datetime, float]]] | None = None,
     ) -> None:
         self.config = config
         self.skipped = [dict(item) for item in skipped]
         self.parse_report = dict(parse_report or {})
         self.max_segments = max(1, int(max_segments))
-        self._streams = [
-            densify_quiet_gaps(block, config) for block in blocks
-        ]
+        # ``streams``: the blocks already densified (``ScanBuilder`` does it a slice
+        # per executor job); otherwise densified here.
+        self._streams = (
+            list(streams)
+            if streams is not None
+            else [densify_quiet_gaps(block, config) for block in blocks]
+        )
         self.total = sum(len(stream) for stream in self._streams)
         self.done = 0
         self._block = 0
@@ -986,6 +1086,127 @@ class ScanRunner:
         }
 
 
+# Samples of block work per executor job when :class:`ScanBuilder` is stepped
+# (audit PLAYGROUND-11): ~50 ms on a desktop, against ~0.7-1.7 s for the one job
+# ``build_scan`` was at the 500k-row cap.
+SCAN_BUILD_STEP_SAMPLES = 50_000
+
+
+class ScanBuilder:
+    """:func:`build_scan`, resumable: ``step`` does a slice of its work.
+
+    Three passes, each cut by a sample budget: the block finder over the stream, the
+    gates per block, the quiet-gap densification per usable block. The WS scan task
+    drives it across executor jobs; :func:`build_scan` drives it to completion, so both
+    return the same runner or the same error. Never raises.
+    """
+
+    def __init__(
+        self,
+        samples: Sequence[Sample],
+        config: CycleDetectorConfig,
+        *,
+        sampling_interval_s: float | None = None,
+        parse_report: dict[str, Any] | None = None,
+    ) -> None:
+        self.config = config
+        self._parse_report = parse_report
+        self._result: ScanRunner | dict[str, Any] | None = None
+        self._finder: _BlockFinder | None = None
+        self._phase = "find"
+        self._blocks: list[Block] = []
+        self._idle: list[dict[str, Any]] = []
+        self._usable: list[Block] = []
+        self._gated: list[dict[str, Any]] = []
+        self._streams: list[list[tuple[datetime, float]]] = []
+        self._index = 0
+        try:
+            self._finder = _BlockFinder(samples, config)
+            self._min_samples = min_block_samples(config)
+            self._max_dt = max_median_interval_s(sampling_interval_s)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            self._fail(exc)
+
+    @property
+    def finished(self) -> bool:
+        return self._result is not None
+
+    def _fail(self, exc: Exception) -> None:
+        _LOGGER.debug("History-import scan build failed: %s", exc)
+        self._result = {"error": "scan_failed"}
+
+    def step(self, n: int = SCAN_BUILD_STEP_SAMPLES) -> int:
+        """Do up to ``n`` samples of work; returns how many. Never raises."""
+        budget = max(1, int(n))
+        spent = 0
+        try:
+            while spent < budget and self._result is None:
+                spent += self._advance(budget - spent)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            self._fail(exc)
+        return spent
+
+    def _advance(self, budget: int) -> int:
+        """One bounded unit of the current pass; returns the samples it cost."""
+        if self._phase == "find":
+            finder = self._finder
+            if finder is None:
+                raise RuntimeError("scan builder lost its block finder")
+            spent = finder.step(budget) if not finder.finished else 0
+            if finder.finished:
+                if finder.readings < 2:
+                    self._result = {"error": "no_readings"}
+                    return max(1, spent)
+                self._blocks, self._idle = finder.finish()
+                self._finder = None
+                self._phase = "classify"
+                self._index = 0
+            return max(1, spent)
+        if self._phase == "classify":
+            spent = 0
+            while self._index < len(self._blocks) and spent < budget:
+                block = self._blocks[self._index]
+                _classify_block(
+                    block, self._min_samples, self._max_dt,
+                    HISTORY_IMPORT_MAX_BLOCK_SPAN_S, self._usable, self._gated,
+                )
+                spent += max(1, len(block.samples))
+                self._index += 1
+            if self._index >= len(self._blocks):
+                self._blocks = []
+                if not self._usable:
+                    self._result = {
+                        "error": "no_usable_blocks",
+                        "skipped": self._idle + self._gated,
+                        "parse": dict(self._parse_report or {}),
+                    }
+                self._phase = "densify"
+                self._index = 0
+            return max(1, spent)
+        # densify
+        spent = 0
+        while self._index < len(self._usable) and spent < budget:
+            block = self._usable[self._index]
+            self._streams.append(densify_quiet_gaps(block, self.config))
+            spent += max(1, len(block.samples))
+            self._index += 1
+        if self._index >= len(self._usable):
+            self._result = ScanRunner(
+                self._usable,
+                self.config,
+                skipped=self._idle + self._gated,
+                parse_report=self._parse_report,
+                streams=self._streams,
+            )
+        return max(1, spent)
+
+    def result(self) -> ScanRunner | dict[str, Any]:
+        """The ready runner, or the error marker :func:`build_scan` returns."""
+        while self._result is None:
+            self.step(SCAN_BUILD_STEP_SAMPLES)
+        return self._result
+
+
 def build_scan(
     samples: Sequence[Sample],
     config: CycleDetectorConfig,
@@ -993,27 +1214,18 @@ def build_scan(
     sampling_interval_s: float | None = None,
     parse_report: dict[str, Any] | None = None,
 ) -> ScanRunner | dict[str, Any]:
-    """Blocks + gates + a ready-to-drive :class:`ScanRunner`. Never raises."""
+    """Blocks + gates + a ready-to-drive :class:`ScanRunner`. Never raises.
+
+    One call; the WS scan steps a :class:`ScanBuilder` across executor jobs instead.
+    """
     try:
-        readings = [(t, p) for t, p in samples if p is not None]
-        if len(readings) < 2:
-            return {"error": "no_readings"}
-        blocks, idle = find_activity_blocks(samples, config)
-        usable, gated = classify_blocks(
-            blocks, config, sampling_interval_s=sampling_interval_s
-        )
-        if not usable:
-            return {
-                "error": "no_usable_blocks",
-                "skipped": idle + gated,
-                "parse": dict(parse_report or {}),
-            }
-        return ScanRunner(
-            usable,
-            config,
-            skipped=idle + gated,
+        builder = ScanBuilder(
+            samples, config,
+            sampling_interval_s=sampling_interval_s,
             parse_report=parse_report,
         )
+        builder.step(max(1, len(samples)) * 3)
+        return builder.result()
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("History-import scan build failed: %s", exc)
         return {"error": "scan_failed"}

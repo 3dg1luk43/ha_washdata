@@ -89,7 +89,8 @@ STATE_VERSION = 2
 #: The pre-rebuild plug. Two WashData entries point at the power sensor it created.
 DEFAULT_PLUG_ID = "mock_washer_power"
 DEFAULT_PLUG_NAME = "Mock Washer Socket"
-HISTORY_POINTS = 4000
+HISTORY_DIR = DEVTOOLS / "mock_socket_history"
+HISTORY_KEEP_S = 48 * 3600
 
 
 # --------------------------------------------------------------------------- settings
@@ -200,6 +201,13 @@ class Clock:
     def utc(self, t: float) -> datetime:
         return datetime.fromtimestamp(self._wall + t / self.speedup, tz=timezone.utc)
 
+    def ms(self, t: float) -> float:
+        """Epoch milliseconds of appliance time ``t``."""
+        return (self._wall + t / self.speedup) * 1000.0
+
+    def from_ms(self, ms: float) -> float:
+        return (ms / 1000.0 - self._wall) * self.speedup
+
 
 def run_record(plug: PlugSettings, run: Run, clock: Clock) -> dict[str, Any]:
     """The ledger line for one finished run."""
@@ -225,6 +233,97 @@ def run_record(plug: PlugSettings, run: Run, clock: Clock) -> dict[str, Any]:
             for cyc, start, end in run.truth()
         ],
     }
+
+
+# --------------------------------------------------------------------------- plot history
+
+
+class History:
+    """What the plot shows, in epoch ms: the reports Home Assistant got (``None`` = the plug
+    went offline), the true draw, and offline / relay-off spans.
+
+    Appended to ``mock_socket_history/<plug>.csv`` and reloaded (last 48 h) on start, so a
+    restart keeps the picture; the time the mock itself was down shows as a gap. Clients
+    fetch deltas with ``since(cursor)``; pruning bumps ``epoch`` so they reload in full.
+    """
+
+    def __init__(self, path: Path | None, keep_s: float = HISTORY_KEEP_S) -> None:
+        self.path = path
+        self.keep_ms = keep_s * 1000.0
+        self.reported: list[tuple[float, float | None]] = []
+        self.draw: list[tuple[float, float | None]] = []
+        self.spans: list[list[Any]] = []  # [kind, start_ms, end_ms | None]
+        self.epoch = 0
+        self._fh = None
+        if path is not None:
+            self._load()
+
+    def _load(self) -> None:
+        cutoff = time.time() * 1000.0 - self.keep_ms
+        kept: list[str] = []
+        if self.path.exists():
+            for line in self.path.read_text(encoding="utf-8").splitlines():
+                parts = line.split(",", 2)
+                if len(parts) != 3:
+                    continue
+                try:
+                    ms = float(parts[0])
+                except ValueError:
+                    continue
+                if ms < cutoff:
+                    continue
+                kept.append(line)
+                self._apply(ms, parts[1], parts[2])
+        last = max((p[0] for p in (self.reported[-1:] + self.draw[-1:])), default=None)
+        if last is not None:
+            # The mock was down from here: no reading, and every open span ends.
+            if self.reported and self.reported[-1][1] is not None:
+                self.reported.append((last + 1.0, None))
+            for span in self.spans:
+                if span[2] is None:
+                    span[2] = last
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.write_text("".join(f"{line}\n" for line in kept), encoding="utf-8")
+        self._fh = self.path.open("a", encoding="utf-8", buffering=1)
+
+    def _apply(self, ms: float, kind: str, value: str) -> None:
+        if kind in ("r", "d"):
+            target = self.reported if kind == "r" else self.draw
+            target.append((ms, float(value) if value else None))
+        elif kind == "s":
+            self.spans.append([value, ms, None])
+        elif kind == "e":
+            for span in reversed(self.spans):
+                if span[0] == value and span[2] is None:
+                    span[2] = ms
+                    break
+
+    def add(self, ms: float, kind: str, value: str = "") -> None:
+        self._apply(ms, kind, value)
+        if self._fh is not None:
+            self._fh.write(f"{ms:.0f},{kind},{value}\n")
+        if self.reported and self.reported[0][0] < ms - self.keep_ms - 3.6e6:
+            self._prune(ms - self.keep_ms)
+
+    def _prune(self, cutoff: float) -> None:
+        self.reported = [p for p in self.reported if p[0] >= cutoff]
+        self.draw = [p for p in self.draw if p[0] >= cutoff]
+        self.spans = [s for s in self.spans if s[2] is None or s[2] >= cutoff]
+        self.epoch += 1
+
+    def cursor(self) -> tuple[int, int, int]:
+        return self.epoch, len(self.reported), len(self.draw)
+
+    def since(self, cursor: tuple[int, int, int] | None) -> tuple[bool, list, list]:
+        """(full, reported, draw): everything if ``cursor`` is stale, else what is new."""
+        if cursor is None or cursor[0] != self.epoch:
+            return True, list(self.reported), list(self.draw)
+        return False, self.reported[cursor[1]:], self.draw[cursor[2]:]
+
+    def close(self) -> None:
+        if self._fh is not None:
+            self._fh.close()
+            self._fh = None
 
 
 # --------------------------------------------------------------------------- MQTT
@@ -308,11 +407,12 @@ class PlugRuntime:
         self.load_error = ""
         self.sim = PlugSim(PLUG_MODES[settings.mode], idle_w=settings.idle_w,
                            energy_kwh=settings.energy_kwh)
-        self.history: deque[tuple[float, float | None]] = deque(maxlen=HISTORY_POINTS)
-        self.ledger: deque[dict[str, Any]] = deque(maxlen=20)
+        self.history = History(
+            hub.history_dir / f"{settings.id}.csv" if hub.history_dir is not None else None
+        )
+        self.ledger: deque[dict[str, Any]] = deque(maxlen=200)
         self.repeat_at: float | None = None
         self.runs_left: int | None = None  # a CLI --runs budget; None follows s.repeat
-        self.reports = 0
         self._wake = asyncio.Event()
         self._task: asyncio.Task | None = None
         if settings.source:
@@ -367,10 +467,22 @@ class PlugRuntime:
             self._handle(self.sim.advance(now))
             if self.repeat_at is not None and now >= self.repeat_at - EPS and self.sim.run is None:
                 self.repeat_at = None
-                self.start()
+                error = self.start()
+                if error:
+                    _LOGGER.warning("[%s] repeat not started: %s", self.s.id, error)
 
     def _poke(self) -> None:
         self._wake.set()
+
+    def planned_truth_ms(self) -> list[tuple[str, float, float]]:
+        """The playing run's real cycles, (programme, start ms, end ms); the future part is
+        the plan, shifted by every relay-off pause so far."""
+        run = self.sim.run
+        if run is None:
+            return []
+        clock = self.hub.clock
+        return [(c.program, clock.ms(run.appliance_time(c.start)), clock.ms(run.appliance_time(c.end)))
+                for c in run.program.truth]
 
     # ----------------------------------------------------------------- controls
 
@@ -399,6 +511,9 @@ class PlugRuntime:
         self._poke()
 
     def set_relay(self, on: bool) -> None:
+        if on != self.sim.relay_on:
+            now = self.hub.clock.now()
+            self.history.add(self.hub.clock.ms(now), "e" if on else "s", "relay")
         self._handle(self.sim.set_relay(on, self.hub.clock.now()))
         self._publish(self.topics.relay, "ON" if on else "OFF", retain=True)
         self._poke()
@@ -410,7 +525,9 @@ class PlugRuntime:
 
     def set_option(self, key: str, value: Any) -> None:
         """A persisted setting, from the UI or a select entity in Home Assistant."""
-        if key == "mode" and value in PLUG_MODES:
+        if key == "mode":
+            if value not in PLUG_MODES:
+                return
             self._handle(self.sim.advance(self.hub.clock.now()))
             self.sim.mode = PLUG_MODES[value]
         elif key == "scenario" and value not in SCENARIOS:
@@ -420,7 +537,8 @@ class PlugRuntime:
         ):
             return
         elif key == "idle_w":
-            self.sim.idle_w = float(value)
+            value = max(0.0, float(value))
+            self._handle(self.sim.set_idle_w(value, self.hub.clock.now()))
         elif key == "repeat" and not value:
             self.repeat_at = None
         setattr(self.s, key, value)
@@ -460,16 +578,21 @@ class PlugRuntime:
 
     def _handle(self, events: list[Event]) -> None:
         for event in events:
+            ms = self.hub.clock.ms(event.t)
             if event.kind == "power":
                 self._publish(self.topics.power, f"{event.power:.1f}")
                 self._publish(self.topics.energy, f"{event.energy_kwh:.4f}")
-                self.history.append((self.hub.clock.utc(event.t).timestamp(), event.power))
-                self.reports += 1
+                self.history.add(ms, "r", f"{event.power:g}")
+            elif event.kind == "draw":
+                self.history.add(ms, "d", f"{event.power:g}")
             elif event.kind in ("online", "offline"):
                 self._publish(self.topics.availability,
                               ONLINE if event.kind == "online" else OFFLINE, retain=True)
                 if event.kind == "offline":
-                    self.history.append((self.hub.clock.utc(event.t).timestamp(), None))
+                    self.history.add(ms, "r")
+                    self.history.add(ms, "s", "offline")
+                else:
+                    self.history.add(ms, "e", "offline")
                 _LOGGER.info("[%s] plug %s", self.s.id, event.kind)
             elif event.kind == "run_end" and event.run is not None:
                 self._finish(event.run)
@@ -498,9 +621,11 @@ class MockHub:
     def __init__(self, mqtt: MqttSettings | None, *, speedup: float = 1.0,
                  plugs: list[PlugSettings] | None = None,
                  state_path: Path | None = STATE_FILE,
-                 ledger_path: Path | None = LEDGER_FILE) -> None:
-        """``state_path`` / ``ledger_path`` None: keep settings / the ledger in memory."""
+                 ledger_path: Path | None = LEDGER_FILE,
+                 history_dir: Path | None = HISTORY_DIR) -> None:
+        """``state_path`` / ``ledger_path`` / ``history_dir`` None: keep it in memory."""
         self.mqtt_settings = mqtt
+        self.history_dir = history_dir
         self.clock = Clock(speedup)
         self.state_path = state_path
         self.ledger_path = ledger_path
@@ -537,6 +662,7 @@ class MockHub:
             plug.sim.advance(self.clock.now())
             plug.s.energy_kwh = round(plug.sim.energy_kwh, 4)
             await plug.end()
+            plug.history.close()
         self.save()
         if self.link is not None:
             self.link.stop()
@@ -563,6 +689,7 @@ class MockHub:
     async def remove_plug(self, plug_id: str) -> None:
         plug = self.plugs.pop(plug_id)
         await plug.end()
+        plug.history.close()
         if self.link is not None and self.link.connected:
             for topic, _payload in discovery(plug_id, plug.s.name, programs=[], scenarios=[],
                                              modes=[], prefix=self.link.settings.prefix):

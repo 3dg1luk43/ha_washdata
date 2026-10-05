@@ -46,6 +46,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **No "finished" notification for a false start**: an interrupted cycle (too short to count) no longer sends the finish notification or the unload reminder, and its start card is cleared. A force-stopped cycle still notifies; the new `{status}` placeholder tells the two apart.
 - **`sensor.<device>_total_duration` has no `last_updated` attribute** (it wrote a recorder row every few seconds); use the state's own last-changed time.
 - **The `auto_label_cycles` service without a threshold uses the device's Auto-label confidence**, not 0.75, like the panel's Auto-label button now does.
+- **The progress sensor reports a whole percent**, and its projected energy and cost attributes update when the percent changes: it wrote a recorder row on every estimate.
 - **WebSocket API**: see "For developers" below.
 
 ### Fixes
@@ -95,6 +96,14 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **Cycles ended later when the matcher wavered during the end wait**: an uncertain match could start a pause or stretch the wait at the last moment. Replaying 472 cycles, 19 now end earlier and none later (median delay 7.5 to 6.7 minutes). Dishwasher Eco runs without a final pump-out keep their full length instead of being cut to about 2 hours.
 
 - **Washers are recognised more often at cycle end**: the energy WashData expected from each program came from its averaged curve, which could be 20% or more off what the program's own runs use (2.5 times on one). It now uses the typical energy of the program's own cycles. Replaying 543 cycles: 77.2% right (was 76.2%), on the worst test washer 66.7% (was 55.6%); end timing unchanged.
+
+- **A pause left behind by a dropped program match could hold a finished cycle until the force stop**: when the live match confirmed a quiet phase and the program was then dropped, nothing could release that pause. It now releases after the longest quiet that program's own runs ever resumed from (at least the normal end wait, at most 3 hours). No recorded cycle reaches this, so nothing else moves.
+
+- **A restart during a washer's anti-crease tumbling started a phantom cycle**: the tumbling state was never saved, so after a restart the next drum turns counted as a new cycle. It is now saved and restored as part of the finished cycle.
+
+- **Auto-label and review answers update program curves at once**, not at the nightly maintenance.
+
+- **A standby that hovers around the Start Threshold no longer flips the state to "starting" all day**: a plug whose idle draw kept crossing the threshold showed "starting" and "off" on almost every reading (about 500 times a day, each a recorder row and a trigger for automations keyed on "starting"). Such a probe now shows "starting" only once it has used half the start energy; real starts still show it before "running". With delayed-start detection on, such a standby now stays in Waiting to Start until the wash really starts, the plug drops to off or the delay times out, instead of falling back to Off after every false start (34 flips in 2.2 days down to 1). On the reporting user's history: 1127 flips in 2.2 days down to 6, with every detected start unchanged ([#35](https://github.com/3dg1luk43/ha_washdata/issues/35)).
 
 - **Nightly maintenance now prunes debug traces**, as its description always said: a cycle's matcher debug data goes with its power trace, and all of it while "save debug traces" is off.
 
@@ -239,6 +248,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - Harnesses measure the shipped pipeline: `prefix_guard_eval.py`, `min_off_gap_eval.py` and `decisive_margin_eval.py` (now `--loo`, `--switching`) use the production config; `end_gate_eval.py --check devtools/end_gate_baseline.json` and `eval.py baseline-status` flag regressions and a stale baseline; `analyze_diag.py` runs the real suggestion engine; `ml_energy_gate_eval.py` and `terminal_drop_plugpull_eval.py` are new.
 - Tests: a real in-process boot through `async_setup` (`setup_washdata_entry`), a WS authorization matrix, `pytest-timeout`, a progress golden trace, and a ratchet against new `MagicMock()` hass objects.
 - The engineering register moved from `INTEGRATION_REFERENCE.md` to `docs/internal/register/OPEN.md` (open items) and `ARCHIVE.md`; `docs_check.py` keeps ids unique across both.
+- `devtools/mqtt_mock_socket.py` rebuilt: real time by default, scenarios taken from the register (soak, dropout, standby above stop, anti-crease, back-to-back, plug-pull, delayed start, idle blips), plug reporting modes (`recorded`, `on-change`, `silent`, `poll-30s`), a ledger of the cycles each run really played, and a web UI with a tab per plug and a plot to measure on. `./run_mock.sh on|off` runs it as a service. Existing mock entities keep their ids.
 - Tests: tests that could not fail were replaced by mutation-checked ones; `tests/test_perf_budgets.py` counts work (no timing); `devtools/suggestion_loop_eval.py` simulates Apply all to a fixed point. The timing benchmarks are gone.
 
 ## 0.5.7 - Unreleased

@@ -21,6 +21,7 @@ from __future__ import annotations
 from asyncio import Task
 import hashlib
 import logging
+import math
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -489,8 +490,26 @@ class WasherTotalDurationSensor(WasherBaseSensor):
     # The entity's own `last_changed` says when the total last moved.
 
 
+def _whole_percent(value: Any) -> int | None:
+    """Progress rounded half-up to a whole percent (the card's Math.round)."""
+    if value is None:
+        return None
+    try:
+        pct = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(pct):
+        return None
+    return int(math.floor(pct + 0.5))
+
+
 class WasherProgressSensor(WasherBaseSensor):
-    """Sensor for cycle progress percentage."""
+    """Sensor for cycle progress percentage.
+
+    The state is a whole percent (audit PERF-13): as a raw float it changed on
+    every estimate, and every state_changed event is a recorder row. The panel
+    reads the unrounded figure over the WS API, not from this entity.
+    """
 
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the progress sensor."""
@@ -498,14 +517,17 @@ class WasherProgressSensor(WasherBaseSensor):
             key="cycle_progress",
             translation_key="cycle_progress",
             native_unit_of_measurement="%",
-            suggested_display_precision=1,
+            suggested_display_precision=0,
             icon="mdi:progress-clock",
         )
         super().__init__(manager, entry)
+        # The projection attributes, refreshed when the shown percent moves.
+        self._attrs_key: tuple[Any, ...] | None = None
+        self._attrs: dict[str, float] | None = None
 
     @property
     def native_value(self):  # type: ignore[override]
-        return self._manager.cycle_progress
+        return _whole_percent(self._manager.cycle_progress)
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]
@@ -514,15 +536,23 @@ class WasherProgressSensor(WasherBaseSensor):
         Derived from accumulated energy and the (ML-blended) progress estimate.
         Keys are present only while a projection is available, so the attributes
         stay clean when idle or early in a cycle.
+
+        Refreshed when the shown percent changes or a projection appears or goes,
+        not on every estimate: the projection moves with each reading, so it would
+        otherwise write the state_changed row the whole-percent state saves.
         """
-        attrs: dict[str, float] = {}
         projected_wh = self._manager.projected_energy_wh
-        if projected_wh is not None:
-            attrs["projected_energy_kwh"] = round(float(projected_wh) / 1000.0, 3)
         projected_cost = self._manager.projected_cost
-        if projected_cost is not None:
-            attrs["projected_cost"] = round(float(projected_cost), 2)
-        return attrs or None
+        key = (self.native_value, projected_wh is None, projected_cost is None)
+        if key != self._attrs_key:
+            attrs: dict[str, float] = {}
+            if projected_wh is not None:
+                attrs["projected_energy_kwh"] = round(float(projected_wh) / 1000.0, 3)
+            if projected_cost is not None:
+                attrs["projected_cost"] = round(float(projected_cost), 2)
+            self._attrs_key = key
+            self._attrs = attrs or None
+        return self._attrs
 
 
 class WasherPowerSensor(WasherBaseSensor):

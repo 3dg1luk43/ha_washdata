@@ -269,6 +269,10 @@ def test_recorded_mode_reports_at_the_trace_times(app):
     events = sim.boot(0.0) + sim.start(program, 100.0) + sim.advance(100.0 + program.end)
     in_run = [e.t - 100.0 for e in _power(events) if e.t >= 100.0]
     assert in_run == pytest.approx([t for t, _ in program.knots])
+    # The idle heartbeat never fires inside a run: a recorded silence stays silent.
+    sim = PlugSim(PLUG_MODES["recorded"])
+    events = sim.boot(0.0) + sim.start(_steady(80.0, 60), 100.0) + sim.advance(3700.0)
+    assert [e.t for e in _power(events) if e.t >= 100.0] == [100.0, 3700.0]
 
 
 def test_silent_mode_says_nothing_at_a_steady_draw():
@@ -292,6 +296,28 @@ def test_on_change_heartbeat_and_rate_limit():
     # 100 W at 10 s; 200 W and 300 W arrive inside the 5 s limit, so only the
     # latest value goes out when it lifts; the run end (0 W) is reported at 70 s.
     assert reported == [(0.0, 0.0), (10.0, 100.0), (15.0, 300.0), (70.0, 0.0)]
+
+
+def test_on_change_always_reports_off():
+    """0.6 W -> 0 W is inside the 1 W deadband, but a plug always reports off."""
+    sim = PlugSim(PLUG_MODES["silent"])
+    events = sim.boot(0.0) + sim.start(_steady(0.6, 10), 100.0) + sim.advance(1000.0)
+    assert [(e.t, e.power) for e in _power(events)] == [(0.0, 0.0), (100.0, 0.6), (700.0, 0.0)]
+
+
+def test_idle_draw_change_is_reported_at_once():
+    sim = PlugSim(PLUG_MODES["silent"])
+    sim.boot(0.0)
+    events = sim.set_idle_w(3.2, 50.0)
+    assert [(e.t, e.power) for e in _power(events)] == [(50.0, 3.2)]
+
+
+def test_a_scheduler_that_cannot_progress_fails_instead_of_hanging(monkeypatch):
+    sim = PlugSim(PLUG_MODES["recorded"])
+    sim.boot(0.0)
+    monkeypatch.setattr(sim, "_report", lambda *_args: None)  # never moves the heartbeat
+    with pytest.raises(RuntimeError, match="stalled"):
+        sim.advance(600.0)
 
 
 def test_poll_mode_resends_unchanged_values():
@@ -378,3 +404,88 @@ def test_discovery_keeps_the_entities_existing_entries_point_at():
 ])
 def test_parse_command(topic, payload, expected):
     assert parse_command(topic, payload) == expected
+
+
+# --------------------------------------------------------------------------- runner
+
+
+async def test_hub_plays_repeated_runs_into_the_ledger(tmp_path, export_path):
+    """No broker needed: the hub's clock, repeat budget and ledger, at 20000x."""
+    import asyncio
+
+    from devtools.mock_socket.runner import MockHub, PlugSettings
+
+    ledger = tmp_path / "ledger.jsonl"
+    settings = PlugSettings("p1", "P1", source=str(export_path), stretch=0.0, scale=0.0, gap_min=1.0)
+    hub = MockHub(None, speedup=20000, plugs=[settings], state_path=None, ledger_path=ledger,
+                  history_dir=tmp_path / "history")
+    await hub.start()
+    plug = hub.plugs["p1"]
+    plug.runs_left = 2
+    assert plug.start() is None
+    for _ in range(500):
+        await asyncio.sleep(0.01)
+        if plug.runs_left == 0:
+            break
+    await hub.shutdown()
+
+    first, second = (json.loads(line) for line in ledger.read_text().splitlines())
+    for rec in (first, second):
+        assert (rec["status"], rec["scenario"], rec["plug_mode"]) == ("completed", "clean", "recorded")
+        (truth,) = rec["truth"]
+        assert truth["program"] == "Cotton 40" and 44 <= truth["minutes"] <= 47
+    # Stamps are wall clock (what Home Assistant records), so at 20000x only the order shows.
+    assert datetime.fromisoformat(second["started"]) >= datetime.fromisoformat(first["ended"])
+
+
+# --------------------------------------------------------------------------- plot data
+
+
+def test_measure_integrates_both_step_traces():
+    from devtools.mock_socket.measure import measure
+
+    reported = [(0.0, 100.0), (10_000.0, 200.0), (20_000.0, None), (30_000.0, 50.0)]
+    draw = [(0.0, 100.0), (15_000.0, 300.0)]
+    m = measure(reported, draw, 40_000.0, 0.0)  # either drag direction
+    assert m.duration_s == 40.0
+    assert m.energy_reported_wh == pytest.approx(3500 / 3600)  # 100 W x 10 s + 200 x 10 + 50 x 10
+    assert m.energy_true_wh == pytest.approx(9000 / 3600)
+    assert m.error_pct == pytest.approx(100 * (3500 - 9000) / 9000)
+    assert m.offline_s == 10.0
+    assert (m.reports, m.median_interval_s, m.longest_silence_s) == (3, 20.0, 20.0)
+    assert m.mean_w == pytest.approx(3500 / 30)
+    assert (m.min_w, m.max_w, m.true_peak_w) == (50.0, 200.0, 300.0)
+    assert "energy from reports: 0.97 Wh" in m.as_text()
+
+
+def test_measure_counts_the_reading_held_from_before_the_window():
+    from devtools.mock_socket.measure import measure
+
+    m = measure([(0.0, 360.0)], [], 10_000.0, 20_000.0)
+    assert m.reports == 0 and m.longest_silence_s == 10.0
+    assert m.energy_reported_wh == pytest.approx(1.0)  # 360 W for 10 s
+    assert m.energy_true_wh is None and m.offline_s == 0.0
+
+
+def test_history_survives_a_restart_with_a_gap(tmp_path):
+    from devtools.mock_socket.runner import History
+
+    path = tmp_path / "p.csv"
+    now = float(int(datetime.now(timezone.utc).timestamp() * 1000))  # the file keeps whole ms
+    h = History(path)
+    h.add(now - 5 * 86400e3, "r", "1")  # older than 48 h: dropped on reload
+    h.add(now, "r", "100")
+    h.add(now, "d", "100")
+    h.add(now + 1000, "s", "relay")
+    cursor = h.cursor()
+    h.add(now + 2000, "r", "0")
+    full, rep, draw = h.since(cursor)
+    assert not full and rep == [(now + 2000, 0.0)] and draw == []
+    h.close()
+
+    h2 = History(path)
+    assert h2.reported == [(now, 100.0), (now + 2000, 0.0), (now + 2001, None)]  # mock was down
+    assert h2.spans == [["relay", now + 1000, now + 2000]]  # closed where the record stops
+    assert h2.since(None)[0] is True
+    h2.close()
+    assert len(path.read_text().splitlines()) == 4  # the pruned line is gone from disk too

@@ -135,6 +135,18 @@ def test_register_open_and_archive_hold_the_right_rows(tmp_path: Path) -> None:
     assert "item 10 is OPEN; open items belong in OPEN.md" in text
 
 
+def test_an_empty_open_list_is_fine_but_a_missing_table_is_not(tmp_path: Path) -> None:
+    _write(tmp_path, dc.REGISTER_ARCHIVE, "| 1 | FIXED | CODE | done |\n")
+    _write(tmp_path, dc.REGISTER_OPEN, "| # | Status | Kind | Owner | Summary |\n|---|---|---|---|---|\n\n## Detail\n")
+    report = dc.Report()
+    dc.check_register(tmp_path, report)
+    assert report.failures == []
+    _write(tmp_path, dc.REGISTER_OPEN, "# Open\nnothing here\n")
+    report = dc.Report()
+    dc.check_register(tmp_path, report)
+    assert any("OPEN.md: no register rows found" in f for f in report.failures)
+
+
 def test_em_dash_ratchet_and_round_trip() -> None:
     dash = "\N{EM DASH}"
     assert dash.encode() == dc.EM_DASH

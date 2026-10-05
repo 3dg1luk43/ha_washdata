@@ -5074,22 +5074,16 @@ class ProfileStore:
             self._active_data = {}
             await self._async_write_active()
 
-    def add_cycle(self, cycle_data: CycleDict) -> None:
-        """Add a completed cycle to history (sync wrapper, schedules async tasks)."""
-        self._add_cycle_data(cycle_data)
-        self.hass.async_create_task(self.async_enforce_retention())
-
-    async def async_add_cycle(
-        self, cycle_data: CycleDict, *, defer_rebuilds: bool = False
-    ) -> set[str]:
+    async def async_add_cycle(self, cycle_data: CycleDict) -> set[str]:
         """Add a completed cycle to history asynchronously.
 
-        Returns the profiles retention changed. Since 0.5.8 retention keeps every
-        cycle and trace (register item 463), so this is empty; ``defer_rebuilds``
-        still lets the cycle end rebuild before it saves if that ever changes.
+        Returns the profiles retention changed, which the caller rebuilds. Since
+        0.5.8 retention keeps every cycle and trace (register item 463), so this is
+        empty. (The sync ``add_cycle`` wrapper, which scheduled retention as an
+        untracked task, had no caller left and is gone.)
         """
         self._add_cycle_data(cycle_data)
-        return await self.async_enforce_retention(defer_rebuilds=defer_rebuilds)
+        return await self.async_enforce_retention()
 
     def _add_cycle_data(
         self,
@@ -5235,18 +5229,16 @@ class ProfileStore:
         # Apply retention after adding
 
 
-    async def async_enforce_retention(self, *, defer_rebuilds: bool = False) -> set[str]:
-        """Apply retention policy; returns the profiles it changed (see async_add_cycle)."""
-        affected = self._enforce_retention_data()
-        if defer_rebuilds:
-            return affected
-        for p in affected:
-            try:
-                # Use async rebuild task
-                self.hass.async_create_task(self.async_rebuild_envelope(p))
-            except Exception as e: # pylint: disable=broad-exception-caught
-                self._logger.warning("Failed to schedule envelope rebuild for %s: %s", p, e)
-        return affected
+    async def async_enforce_retention(self) -> set[str]:
+        """Apply retention policy; returns the profiles it changed (see async_add_cycle).
+
+        Only the debug-trace rule is left (item 380), which changes no profile, so
+        nothing is rebuilt here. The per-profile rebuild it used to schedule was an
+        untracked task an unload could not cancel (audit MANAGER-13), unreachable
+        since item 463; a rule that changes profiles again must have its callers
+        rebuild what this returns, the way the cycle end does.
+        """
+        return self._enforce_retention_data()
 
     def _enforce_retention_data(self) -> set[str]:
         """Retention, data operations only. Returns the profiles it changed.
@@ -9312,8 +9304,14 @@ class ProfileStore:
                     else:
                         leaving = target.get("profile_name")
                         target["profile_name"] = match.best_profile
+                        # Both envelopes changed: the gaining one has a new member,
+                        # the leaving one lost one (register item 493). Rebuilt once
+                        # each at the end, like the backfill moves.
+                        if match.best_profile:
+                            touched.add(match.best_profile)
                         if leaving and leaving != match.best_profile:
                             self.heal_profile_sample(leaving)
+                            touched.add(leaving)
                     target["match_confidence"] = float(match.label_confidence)
                     target["label_source"] = source
                     if ranking:
@@ -9349,10 +9347,10 @@ class ProfileStore:
                 stats["skipped"] += 1
 
         if stats["labeled"] > 0 or stats["relabeled"] > 0:
-            # A labelled backfill cycle exists only to shape its profile's envelope, so
-            # rebuild what changed before saving - otherwise the import accomplishes
-            # nothing until some unrelated later trigger.
-            for name in touched:
+            # A labelled cycle shapes its profile's envelope (a backfill one exists
+            # only for that), so rebuild what changed before saving - otherwise the
+            # pass changes nothing the matcher sees until the nightly maintenance.
+            for name in sorted(touched):
                 await self.async_rebuild_envelope(name)
             await self.async_save()
             # Trigger smart processing after bulk labeling

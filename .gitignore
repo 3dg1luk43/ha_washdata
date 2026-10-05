@@ -15,6 +15,9 @@ devtools/priv_secrets.py
 devtools/mock_socket.db
 server.log
 devtools/mock_socket_config.json
+devtools/mock_socket_config.tmp
+devtools/mock_socket_ledger.jsonl
+devtools/mock_socket_history/
 devtools/uploaded_cycles
 devtools/generate_docs_graphs.py
 .gemini/
@@ -76,3 +79,4 @@ devtools/testbox/__pycache__
 devtools/testbox/support/**/__pycache__/
 docs/internal/plans
 MagicMock
+devtools/mock_socket/__pycache__

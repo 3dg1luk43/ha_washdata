@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Unified energy integration: `integrate_wh` (+ optional outage gap masking) and
 `energy_gap_threshold_s`. Both persistence paths (manager._on_cycle_end and
-ProfileStore.add_cycle) now share this single implementation.
+ProfileStore.async_add_cycle) now share this single implementation.
 """
 from __future__ import annotations
 
