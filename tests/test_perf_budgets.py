@@ -97,9 +97,6 @@ async def seed_store(ps: ProfileStore) -> None:
 
 
 async def forward_platforms(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    # The dev env cannot import `conversation` (no hassil); mark it loaded so the
-    # manifest dependency resolves, as it is in a real install.
-    hass.config.components.add("conversation")
     entry.mock_state(hass, ConfigEntryState.LOADED)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await hass.async_block_till_done()

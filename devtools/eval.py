@@ -6,6 +6,7 @@
 
     python3 devtools/eval.py run [--mode fast|full] [--cuts 1.0,0.75,0.5,0.25]
                                  [--jobs N] [--out FILE] [--config-override JSON|@FILE]
+                                 [--include-twins]
     python3 devtools/eval.py compare BASE.json NEW.json [--tol TOL.json]
     python3 devtools/eval.py baseline-status [--baseline FILE]
 
@@ -52,6 +53,15 @@ as a matcher error. Nothing is dropped and ``top1`` is unchanged; each row carri
 (the label has a twin), ``alias_top1`` is reported next to ``top1`` (summary and
 ``compare``), and ``meta.alias_twins`` lists the labels per file. Labels are
 twinned transitively.
+
+**Twin entries.** Two config entries on one plug record the same runs under two
+label sets (the maintainer's washer is exported as both ``01KBWSV8`` and
+``01KXGA3C``: 47 of 50 runs start within 2 min of each other), so pooling both
+counts each run twice. Entries are twins when >= ``TWIN_MIN_RUNS`` and >=
+``TWIN_MIN_FRACTION`` of the smaller entry's observed runs start within
+``TWIN_WINDOW_S`` of a run of the other. By default only the entry with the most
+labelled traced cycles is scored (``meta.twin_entries`` names both);
+``--include-twins`` scores both.
 
 ``baseline-status`` checks ``devtools/eval_baseline.json`` against the tree (what
 ``release_check.sh`` runs): stale when its ``code_sha`` (the matcher sources) no
@@ -291,6 +301,86 @@ def load_corpus(root: Path) -> tuple[list[Device], dict[str, str]]:
     return sorted(kept, key=lambda d: d.path), dropped
 
 
+#: Twin entries: two config entries on ONE plug record the same runs, so their folds
+#: are not independent evidence. A pair is twins when at least TWIN_MIN_RUNS runs and
+#: TWIN_MIN_FRACTION of the smaller entry's runs start within TWIN_WINDOW_S of a run
+#: of the other.
+TWIN_WINDOW_S = 120.0
+TWIN_MIN_FRACTION = 0.5
+TWIN_MIN_RUNS = 5
+
+
+def run_starts(dev: Device) -> np.ndarray:
+    """Sorted start times (epoch s) of the entry's observed runs (``past_cycles``)."""
+    from datetime import datetime  # noqa: PLC0415
+    out: list[float] = []
+    for c in dev.data.get("past_cycles") or []:
+        raw = c.get("start_time") if isinstance(c, dict) else None
+        if not isinstance(raw, str) or not raw:
+            continue
+        try:
+            dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if dt.tzinfo is None:
+            continue   # a naive stamp has no absolute time to compare across entries
+        out.append(dt.timestamp())
+    return np.unique(np.asarray(out, dtype=float))
+
+
+def _near_count(small: np.ndarray, big: np.ndarray, window: float) -> int:
+    """Runs of ``small`` with a run of ``big`` within ``window`` seconds."""
+    if not small.size or not big.size:
+        return 0
+    idx = np.searchsorted(big, small)
+    lo = np.abs(small - big[np.clip(idx - 1, 0, big.size - 1)])
+    hi = np.abs(big[np.clip(idx, 0, big.size - 1)] - small)
+    return int(np.count_nonzero(np.minimum(lo, hi) <= window))
+
+
+def twin_entries(devices: list[Device]) -> dict[str, dict[str, Any]]:
+    """{dropped path: {kept, overlap, runs}} for same-plug duplicate entries.
+
+    Per twin class (pairs closed transitively) the entry with the most labelled
+    traced cycles is kept (ties: path order), so the pooled figures count each
+    physical run once.
+    """
+    starts = {d.path: run_starts(d) for d in devices}
+    parent: dict[str, str] = {}
+    evidence: dict[frozenset[str], tuple[int, int]] = {}
+
+    def find(x: str) -> str:
+        while parent.setdefault(x, x) != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    for i, a in enumerate(devices):
+        for b in devices[i + 1:]:
+            sa, sb = starts[a.path], starts[b.path]
+            small, big = (sa, sb) if sa.size <= sb.size else (sb, sa)
+            if small.size < TWIN_MIN_RUNS:
+                continue
+            near = _near_count(small, big, TWIN_WINDOW_S)
+            if near >= TWIN_MIN_RUNS and near >= TWIN_MIN_FRACTION * small.size:
+                evidence[frozenset((a.path, b.path))] = (near, int(small.size))
+                parent[find(b.path)] = find(a.path)
+    classes: dict[str, list[Device]] = defaultdict(list)
+    for d in devices:
+        if d.path in parent:
+            classes[find(d.path)].append(d)
+    out: dict[str, dict[str, Any]] = {}
+    for members in classes.values():
+        keep = sorted(members, key=lambda d: (-len(d.cycles), d.path))[0]
+        for d in members:
+            if d is keep:
+                continue
+            pair = evidence.get(frozenset((d.path, keep.path))) or max(
+                (v for k, v in evidence.items() if d.path in k), default=(0, 0))
+            out[d.path] = {"kept": keep.path, "overlap": pair[0], "runs": pair[1]}
+    return out
+
+
 def provenance(c: dict, evidence: str, auto_sources: tuple[str, ...]) -> str:
     """reference (store) / manual (user-set or golden) / auto (matcher's guess) / unknown."""
     if evidence == "reference":
@@ -502,9 +592,16 @@ def base_data(dev: Device) -> dict:
 
 
 async def rebuild_base(dev: Device, override: dict) -> dict:
-    """Every envelope rebuilt with the current code (exports carry stale ones)."""
+    """Every envelope rebuilt with the current code (exports carry stale ones).
+
+    The setup sample repair runs first, as ``WashDataManager`` setup runs it before
+    any match: an export can carry a sample pointer the current code repairs on load
+    (e.g. a profile sampling another programme's run), and matching against the
+    unrepaired pointer measures a store no user has.
+    """
     data = base_data(dev)
     st, _ = fresh_store(dev, data, override)
+    await st.async_repair_profile_samples()
     for name in list(data["profiles"]):
         await st.async_rebuild_envelope(name)
     return {"profiles": data["profiles"], "envelopes": data["envelopes"]}
@@ -848,19 +945,22 @@ def _parse_cuts(text: str) -> tuple[float, ...]:
 
 def run_eval(corpus: Path, mode: str = "fast", cuts: tuple[float, ...] = DEFAULT_CUTS,
              jobs: int = 1, override: dict | None = None, cache_dir: Path | None = None,
-             use_cache: bool = True, only: str | None = None, log=print) -> dict:
+             use_cache: bool = True, only: str | None = None, log=print,
+             include_twins: bool = False) -> dict:
     """Run the LOO evaluation and return the result document (see module docstring)."""
     levels = {n: logging.getLogger(n).level for n in (PKG_NAME, "homeassistant")}
     _quiet_logs()
     try:
-        return _run_eval(Path(corpus), mode, cuts, jobs, override or {}, cache_dir, use_cache, only, log)
+        return _run_eval(Path(corpus), mode, cuts, jobs, override or {}, cache_dir, use_cache, only, log,
+                         include_twins)
     finally:
         for n, lv in levels.items():
             logging.getLogger(n).setLevel(lv)
 
 
 def _run_eval(corpus: Path, mode: str, cuts: tuple[float, ...], jobs: int, override: dict,
-              cache_dir: Path | None, use_cache: bool, only: str | None, log) -> dict:
+              cache_dir: Path | None, use_cache: bool, only: str | None, log,
+              include_twins: bool = False) -> dict:
     cuts = tuple(sorted({float(c) for c in cuts}, reverse=True))
     from custom_components.ha_washdata import profile_store as ps  # noqa: PLC0415
     if PKG_DIR.resolve() not in Path(ps.__file__).resolve().parents:
@@ -868,6 +968,13 @@ def _run_eval(corpus: Path, mode: str, cuts: tuple[float, ...], jobs: int, overr
     t0 = time.time()
     devices, dropped = load_corpus(corpus)
     devices = [d for d in devices if len(d.labels) >= 2 and (not only or only in d.path)]
+    twins = twin_entries(devices)
+    for path, tw in sorted(twins.items()):
+        log(f"[eval] twin entries: {path} and {tw['kept']} ({tw['overlap']} of {tw['runs']} runs start "
+            f"within {TWIN_WINDOW_S:.0f} s); {'both scored' if include_twins else 'scoring only ' + tw['kept']}",
+            file=sys.stderr)
+    if not include_twins:
+        devices = [d for d in devices if d.path not in twins]
     if not devices:
         raise SystemExit(f"no device with >= 2 labelled programmes under {corpus}")
     csha = code_sha()
@@ -938,6 +1045,13 @@ def _run_eval(corpus: Path, mode: str, cuts: tuple[float, ...], jobs: int, overr
             "mode": mode, "cuts": list(cuts), "override": override or None,
             "numpy": np.__version__, "corpus_manifest": manifest, "devices": len(devices),
             "folds": len(rows), "dropped_clones": {public_key(k): public_key(v) for k, v in dropped.items()},
+            # Same-plug duplicate entries: {twin: {kept, overlap, runs, scored}}. Unless
+            # --include-twins, only the kept one is scored, so a run counts once.
+            "twin_entries": {
+                public_key(k): {"kept": public_key(v["kept"]), "overlap": v["overlap"], "runs": v["runs"],
+                                "scored": bool(include_twins)}
+                for k, v in sorted(twins.items())
+            },
             "alias_twins": {
                 k: sorted(sorted(c) for c in set(cls.values())) for k, cls in aliases.items() if cls
             },
@@ -1151,6 +1265,8 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE)
     r.add_argument("--no-cache", action="store_true", help="ignore and do not write the row cache")
     r.add_argument("--only", default=None, help="restrict to devices whose path contains this")
+    r.add_argument("--include-twins", action="store_true",
+                   help="also score the dropped entry of a same-plug twin pair (see module docstring)")
     c = sub.add_parser("compare", help="paired comparison of two run results")
     c.add_argument("base", type=Path)
     c.add_argument("new", type=Path)
@@ -1170,7 +1286,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         doc = run_eval(a.corpus, a.mode, _parse_cuts(a.cuts), max(1, a.jobs),
-                       parse_override(a.config_override), a.cache_dir, not a.no_cache, a.only)
+                       parse_override(a.config_override), a.cache_dir, not a.no_cache, a.only,
+                       include_twins=a.include_twins)
     except SystemExit as exc:
         print(f"eval: {exc}", file=sys.stderr)
         return 2

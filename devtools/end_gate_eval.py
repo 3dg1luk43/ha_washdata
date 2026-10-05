@@ -85,7 +85,13 @@ finalise is the only closer. Every row records whether the #399 spin guard held
 that finalise, whether it released on the spin (``event``) or at the
 ``ANTI_CREASE_SPIN_WAIT_MAX_RATIO`` cap, and whether it fired before the trace's
 own last reading above ``anti_wrinkle_max_power`` (an early release: the spin then
-opens a second cycle). ``--device-types`` restricts the corpus.
+opens a second cycle). ``--device-types`` restricts the corpus, ``--export SUBSTR``
+to the exports whose path contains it.
+
+**Option overrides (register item 469).** ``--set KEY=VALUE`` layers an option onto
+every replayed export as Apply all would save it (the active-span yardstick keeps
+the export's own stop threshold), e.g. ``--set profile_match_interval=45`` for the
+shorter match interval Apply all suggests.
 
 **Committed baseline (audit TESTING-09).** ``devtools/end_gate_baseline.json``
 holds the per-device-type end-gate figures (n, median / mean / p90 lag, early
@@ -312,12 +318,15 @@ def _production(
     *,
     shipped_watchdog: bool = False,
     force_anti_wrinkle: bool = False,
+    overrides: dict[str, Any] | None = None,
 ) -> tuple[CycleDetectorConfig, ProfileStore, dict[str, Any]]:
     """(detector config, ProfileStore, options) exactly as the manager builds them.
 
     ``shipped_watchdog`` drops the export's ``watchdog_interval`` (entry data and
     options) so the Playground resolves the device type's shipped default.
     ``force_anti_wrinkle`` sets ``anti_wrinkle_enabled`` before the manager reads it.
+    ``overrides`` (``--set``) are layered onto the options last, as Apply all would
+    save them, and dropped from the entry data so the option wins.
     """
     _integration()
     from custom_components.ha_washdata.manager import WashDataManager  # noqa: PLC0415
@@ -334,6 +343,9 @@ def _production(
     if force_anti_wrinkle:
         entry_data.pop(CONF_ANTI_WRINKLE_ENABLED, None)
         opts[CONF_ANTI_WRINKLE_ENABLED] = True
+    for key, value in (overrides or {}).items():
+        entry_data.pop(key, None)
+        opts[key] = value
     mgr = WashDataManager(MagicMock(), _Entry(entry_data, opts, "eval"))
     store = mgr.profile_store
     store.hass = _InlineHass()
@@ -440,6 +452,7 @@ def _measure_export(
     anti_wrinkle: str = "export",
     tumble_tail: bool = False,
     device_types: tuple[str, ...] | None = None,
+    overrides: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Replay every usable cycle in one export; one row per cycle."""
     doc = _load_doc(path, all_formats)
@@ -461,10 +474,20 @@ def _measure_export(
                         for k, v in (base.get("profiles") or {}).items()}
     base["envelopes"] = dict(base.get("envelopes") or {})
     cfg, store, opts = _production(
-        doc, base, shipped_watchdog=shipped_watchdog, force_anti_wrinkle=force_aw
+        doc, base, shipped_watchdog=shipped_watchdog, force_anti_wrinkle=force_aw,
+        overrides=overrides,
     )
-    stop = float(cfg.stop_threshold_w)
+    # The yardstick (active span) stays at the export's own stop threshold, so an
+    # overridden one cannot move what it is measured against.
+    stop = float(
+        _production(doc, base, shipped_watchdog=shipped_watchdog)[0].stop_threshold_w
+        if overrides else cfg.stop_threshold_w
+    )
     level = float(cfg.anti_wrinkle_max_power)
+    # Setup runs the sample repair before any match (e.g. it drops a profile's
+    # pointer at another programme's run), and mutates base["profiles"] in place,
+    # so the LOO fold stores inherit it.
+    _run(store.async_repair_profile_samples())
     # Exports carry the envelopes the exporting version built; rebuild them with
     # the code under test, as the live store would after an upgrade.
     _rebuild_envelopes(store, list(base["profiles"]))
@@ -486,7 +509,7 @@ def _measure_export(
         if loo and name and name in base["profiles"]:
             _cfg_f, fold_store, _o = _production(
                 doc, _fold_data(base, cyc), shipped_watchdog=shipped_watchdog,
-                force_anti_wrinkle=force_aw,
+                force_anti_wrinkle=force_aw, overrides=overrides,
             )
             _rebuild_envelopes(fold_store, [name])
             try:
@@ -963,7 +986,28 @@ def main() -> int:
         "--rows", metavar="FILE",
         help="with --check: summarise these --json rows instead of replaying",
     )
+    ap.add_argument(
+        "--set", action="append", default=[], metavar="KEY=VALUE",
+        help="override one option on every replayed export, as Apply all saves it "
+        "(repeatable; VALUE is parsed as JSON, else kept as a string). Not with --check",
+    )
+    ap.add_argument(
+        "--export", action="append", default=[], metavar="SUBSTR",
+        help="replay only exports whose corpus path contains SUBSTR (repeatable). "
+        "Not with --check",
+    )
     args = ap.parse_args()
+    overrides: dict[str, Any] = {}
+    for item in args.set:
+        key, sep, raw = item.partition("=")
+        if not sep or not key.strip():
+            ap.error(f"--set needs KEY=VALUE, got {item!r}")
+        try:
+            overrides[key.strip()] = json.loads(raw)
+        except ValueError:
+            overrides[key.strip()] = raw
+    if args.check and (overrides or args.export):
+        ap.error("--check replays the baseline's corpus and options: drop --set/--export")
 
     if args.compare:
         _compare(*args.compare)
@@ -1006,12 +1050,14 @@ def main() -> int:
         paths = [corpus / dev.path for dev in devices]
     else:
         paths = sorted(corpus.rglob("*.json"))
+    if args.export:
+        paths = [p for p in paths if any(sub in str(p) for sub in args.export)]
     for path in paths:
         rows.extend(_measure_export(
             path, args.no_shortening, args.loo,
             all_formats=args.all_formats, shipped_watchdog=args.shipped_watchdog,
             anti_wrinkle=args.anti_wrinkle, tumble_tail=args.tumble_tail,
-            device_types=device_types or None,
+            device_types=device_types or None, overrides=overrides or None,
         ))
 
     if not rows:

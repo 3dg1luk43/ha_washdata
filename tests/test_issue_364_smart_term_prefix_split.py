@@ -104,8 +104,8 @@ def _match_tuple(tail_power: float | None) -> tuple:
         None,
         False,  # is_confident_mismatch
         False,  # is_ambiguous
-        False,  # is_prefix_ambiguous (widened) - the guard the report shows failing
-        False,  # is_prefix_ambiguous_full_shape (legacy)
+        False,  # element 7, retired (the #364 prefix-fit flag, removed in 0.5.8)
+        False,  # is_prefix_ambiguous_full_shape (#288)
         tail_power,
     )
 
@@ -234,13 +234,11 @@ def test_short_tuples_leave_new_fields_at_safe_defaults() -> None:
 
     detector.update_match(("P", 0.7, 3600.0, None, False, True, True))
     assert detector._matched_tail_power is None
-    # No element 8: the narrow flag mirrors the widened one, so the anti-crease
-    # gate is exactly as conservative as it was before #364.
-    assert detector._match_prefix_ambiguous is True
+    # No element 8: the #288 flag is read from element 7, where pre-#364 callers
+    # put it, so the anti-crease gate is exactly as conservative as before #364.
     assert detector._match_prefix_ambiguous_full_shape is True
 
     detector.update_match(("P", 0.7, 3600.0, None, False, False))
-    assert detector._match_prefix_ambiguous is False
     assert detector._match_prefix_ambiguous_full_shape is False
 
 
@@ -313,19 +311,19 @@ def test_block_reason_reports_still_active() -> None:
     """The #346 diagnostic must name the new blocker, so a late finish caused by
     this guard is traceable in the log."""
     reason = CycleDetector._smart_term_block_reason(
-        4700.0, SHORT_EXPECTED, 0.98, True, False, False, False
+        4700.0, SHORT_EXPECTED, 0.98, True, False, False
     )
     assert reason == "still_active"
     # Order: the pre-existing reasons still win, so existing logs are unchanged.
     assert (
         CycleDetector._smart_term_block_reason(
-            4700.0, SHORT_EXPECTED, 0.98, True, True, False, False
+            4700.0, SHORT_EXPECTED, 0.98, True, True, False
         )
         == "match_ambiguous"
     )
     assert (
         CycleDetector._smart_term_block_reason(
-            4700.0, SHORT_EXPECTED, 0.98, True, False, False, True
+            4700.0, SHORT_EXPECTED, 0.98, True, False, True
         )
         is None
     )
@@ -345,20 +343,23 @@ def test_tail_power_survives_snapshot_roundtrip() -> None:
     snap = detector.get_state_snapshot()
     assert snap["matched_tail_power"] == PROFILE_TAIL_W
     assert snap["match_prefix_ambiguous_full_shape"] is False
+    # The retired #364 prefix-fit flag is no longer written (removed in 0.5.8).
+    assert "match_prefix_ambiguous" not in snap
 
     restored = _make_detector([])
     restored.restore_state_snapshot(snap)
     assert restored._matched_tail_power == PROFILE_TAIL_W
     assert restored._match_prefix_ambiguous_full_shape is False
 
-    # Pre-#364 snapshot: no narrow flag, so it must fall back to the widened one
-    # rather than defaulting to False (which would LOOSEN the anti-crease gate).
+    # Pre-#364 snapshot: no narrow flag, only the old single one, so it must fall
+    # back to that rather than defaulting to False (which would LOOSEN the
+    # anti-crease gate).
     legacy = dict(snap)
     legacy.pop("match_prefix_ambiguous_full_shape")
     legacy.pop("matched_tail_power")
+    legacy["match_prefix_ambiguous"] = True
     older = _make_detector([])
     older.restore_state_snapshot(legacy)
-    assert older._match_prefix_ambiguous is True
     assert older._match_prefix_ambiguous_full_shape is True
     assert older._matched_tail_power is None
 

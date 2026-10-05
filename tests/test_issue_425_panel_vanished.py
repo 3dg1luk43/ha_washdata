@@ -67,10 +67,10 @@ POWER_SENSOR = "sensor.plug_power"
 async def http_up_fixture(hass):
     """Serve the panel's static routes.
 
-    ``http`` is an ``after_dependencies`` entry, so a real HA always has it up
-    before our entry is set up; the bare test hass does not, and without it
-    ``hass.http`` has no ``async_register_static_paths``. Opted into per test:
-    test_panel_registers_when_http_comes_up_late needs the opposite.
+    ``http`` is a hard dependency, so Home Assistant sets it up before our entry
+    (test_the_manifest_brings_up_what_the_panel_needs proves that path). These
+    tests call ``async_setup_entry`` directly, which skips dependency processing,
+    so they bring it up themselves.
     """
     assert await async_setup_component(hass, "http", {"http": {}})
 
@@ -379,22 +379,60 @@ async def test_a_cancelled_card_registration_clears_the_in_progress_flag(
     )
 
 
-async def test_panel_registers_when_http_comes_up_late(hass, enable_custom_integrations):
-    """Hoisting the registration must not lose the panel on a late frontend stack.
+async def test_the_manifest_brings_up_what_the_panel_needs(
+    hass, enable_custom_integrations, broken_link
+):
+    """The hoisted registration needs ``http`` up BEFORE setup: the manifest owns that.
 
-    ``http`` is only an ``after_dependencies`` entry, so nothing in the
-    integration itself guarantees it is up when setup starts - and without it
-    the panel's static routes cannot be registered. This test deliberately skips
-    the ``http_up`` fixture, leaving the frontend stack to arrive with the entity
-    platforms, exactly where the registration used to sit.
+    Item 487. ``http`` used to reach this setup only as a side effect of the hard
+    ``conversation`` dependency (whose own setup cannot even import in the dev
+    env), so moving ``conversation`` to ``after_dependencies`` left nothing
+    bringing the panel's routes up. ``http`` (static routes) and
+    ``websocket_api`` (the panel's commands) are now hard dependencies.
+
+    Real config-entry setup, so Home Assistant resolves the manifest; ``http`` is
+    not preloaded and ``conversation`` is not mocked. The entry fails part-way
+    (``broken_link``, after the platform forward), so the late registration retry
+    in ``async_setup_entry`` never runs: the panel can only come from the early
+    call, which therefore found ``http`` already up. The intent handler registers
+    without ``conversation`` loaded: ``helpers.intent`` keeps it in ``hass.data``
+    and the agent looks it up when a sentence matches.
     """
-    hass.states.async_set(POWER_SENSOR, "0", {"unit_of_measurement": "W"})
-    entry = _make_entry(hass)
+    from homeassistant.helpers import intent as ha_intent
 
-    assert await washdata.async_setup_entry(hass, entry) is True
+    from custom_components.ha_washdata.const import (
+        CONFIG_ENTRY_MINOR_VERSION,
+        CONFIG_ENTRY_VERSION,
+    )
+    from custom_components.ha_washdata.intents import INTENT_STATUS
+
+    hass.states.async_set(POWER_SENSOR, "0", {"unit_of_measurement": "W"})
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="Waschmaschine",
+        data={
+            "name": "Waschmaschine",
+            "power_sensor": POWER_SENSOR,
+            "device_type": "washing_machine",
+        },
+        unique_id="washdata_Waschmaschine",
+        version=CONFIG_ENTRY_VERSION,
+        minor_version=CONFIG_ENTRY_MINOR_VERSION,
+    )
+    entry.add_to_hass(hass)
+
+    assert await hass.config_entries.async_setup(entry.entry_id) is False
     await hass.async_block_till_done()
 
-    assert hass.data.get(PANEL_REGISTERED_KEY) is True
+    assert entry.state is ConfigEntryState.SETUP_ERROR
+    assert {"http", "websocket_api"} <= hass.config.components
+    assert hass.data.get(PANEL_REGISTERED_KEY) is True, (
+        "the early (#425) panel registration ran without http: the manifest no "
+        "longer guarantees the panel's routes are up before setup (item 487)."
+    )
+    assert hass.data.get("ha_washdata_ws_registered") is True
+    assert "conversation" not in hass.config.components
+    assert INTENT_STATUS in hass.data.get(ha_intent.DATA_KEY, {})
 
 
 async def test_second_appliance_does_not_disturb_the_first(

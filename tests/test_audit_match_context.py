@@ -16,15 +16,14 @@ def test_every_named_field_reaches_its_detector_state() -> None:
     det = CycleDetector(build_detector_config({}, {}, "washing_machine"), MagicMock(), MagicMock())
     det.update_match(MatchContext(
         profile_name="Cotton", confidence=0.7, expected_duration=3600.0,
-        is_ambiguous=True, is_prefix_ambiguous=True, is_prefix_ambiguous_full_shape=False,
+        is_ambiguous=True, is_prefix_ambiguous_full_shape=True,
         tail_power=1.5, terminal_quiet_s=300.0, longest_candidate_s=5400.0,
         trusted_min_s=3000.0, pause_catalogue=(3, ((0.5, 120.0),)),
     ))
     assert det._matched_profile == "Cotton"  # noqa: SLF001
     assert det._expected_duration == 3600.0  # noqa: SLF001
     assert det._match_ambiguous is True  # noqa: SLF001
-    assert det._match_prefix_ambiguous is True  # noqa: SLF001
-    assert det._match_prefix_ambiguous_full_shape is False  # noqa: SLF001
+    assert det._match_prefix_ambiguous_full_shape is True  # noqa: SLF001
     assert det._matched_tail_power == 1.5  # noqa: SLF001
     assert det._matched_terminal_quiet_s == 300.0  # noqa: SLF001
     assert det._longest_candidate_duration == 5400.0  # noqa: SLF001
@@ -38,3 +37,16 @@ def test_the_context_is_the_legacy_sequence() -> None:
     assert tuple(ctx.as_sequence()) == (
         "A", 0.5, 60.0, None, False, False, False, False, None, None, None, 0.0, None, None,
     )
+
+
+def test_element_7_is_retired_and_only_seeds_a_legacy_full_shape_flag() -> None:
+    """Element 7 carried the #364 prefix-fit flag (removed in 0.5.8). The context
+    no longer has the field and always sends False there; a legacy 7-element tuple
+    still seeds the #288 full-shape flag from it, as before #364 split it out."""
+    assert not hasattr(MatchContext("A", 0.5, 60.0), "is_prefix_ambiguous")
+    det = CycleDetector(build_detector_config({}, {}, "washing_machine"), MagicMock(), MagicMock())
+    det.update_match(("Cotton", 0.7, 3600.0, None, False, False, True))
+    assert det._match_prefix_ambiguous_full_shape is True  # noqa: SLF001
+    assert not hasattr(det, "_match_prefix_ambiguous")
+    det.update_match(MatchContext("Cotton", 0.7, 3600.0, is_prefix_ambiguous_full_shape=False))
+    assert det._match_prefix_ambiguous_full_shape is False  # noqa: SLF001

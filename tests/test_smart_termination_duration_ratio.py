@@ -142,13 +142,13 @@ def test_default_ratio_blocks_a_short_cycle_that_a_lower_ratio_passes():
     # Default 0.98: the fast path is unreachable for this run.
     assert CycleDetector._smart_term_block_reason(
         current_duration=current, expected=expected, smart_ratio=0.98,
-        is_confident=True, ambiguous=False, prefix_ambiguous=False,
+        is_confident=True, ambiguous=False,
     ) == "duration_not_reached"
 
     # Tuned down to 0.85: the same run now clears the gate.
     assert CycleDetector._smart_term_block_reason(
         current_duration=current, expected=expected, smart_ratio=0.85,
-        is_confident=True, ambiguous=False, prefix_ambiguous=False,
+        is_confident=True, ambiguous=False,
     ) is None
 
 

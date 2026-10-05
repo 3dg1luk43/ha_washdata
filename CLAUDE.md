@@ -64,6 +64,7 @@ python3 devtools/eta_eval.py --all-formats   # first-ETA timing + ETA error by e
 python3 devtools/decisive_margin_eval.py --loo   # mid-cycle switch bypass, runner-up exposure; --switching: commit/switch accuracy
 python3 devtools/end_gate_eval.py --loo --all-formats --check devtools/end_gate_baseline.json   # exit 1 on an end-gate regression
 python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
+python3 devtools/start_gate_eval.py <diag.json|history.csv|sqlite:db>   # start gates on a raw idle+cycle history (missed/late/phantom)
 python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)
 python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed point / ladder / oscillation / erased cycles (F10)
 
@@ -182,7 +183,9 @@ measures absolute *level/spread*.
 - **`notification_rules.py`** - pure notification *decision* predicates shared by `manager.py` and the
   Playground sim. **Delivery stays in the manager**; only thresholds/gating live here.
 - **`match_rules.py`** (audit F7) - the manager's post-match rules as pure functions: program
-  switching (initial commit, decisive-margin and trend switches, divergence/unmatch reverts), the
+  switching (initial commit, which an ambiguous winner earns only after `MATCH_AMBIGUOUS_COMMIT_FACTOR`
+  x persistence wins; decisive-margin switches; persistent switches by a clear or rising challenger;
+  divergence/unmatch reverts), the
   envelope verified pause and its releases, the consistency override, the cycle-end label verdict.
   `manager._async_do_perform_matching` and the Playground replay both call them (the alignment await
   stays in the manager), and the detector's dishwasher match freeze calls the pause release too.
@@ -470,7 +473,10 @@ Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for
   the observed duration is a prefix, and the sharp kernel costs -6.4pp at 60% elapsed. Weight and scale move
   **together** (a sharper scale with higher weight separates near-duplicates; raising weight alone was
   net-negative). `energy_agreement` uses mean power by default, **integrated energy** for
-  `washing_machine`/`washer_dryer` via `energy_mode`.
+  `washing_machine`/`washer_dryer` via `energy_mode`. On a **completed** integrated-mode match the
+  candidate's expected energy is the median of its own cycles (`envelope["energy_ref"]`, item 497,
+  `MATCH_ENERGY_REF_MIN_CYCLES`), not the warped envelope's mean x duration; mid-cycle keeps the
+  template value (the prefix variant was measured and caused early washer ends).
 - **Stage 5 - profile groups (shipped, hierarchical):** the user groups near-duplicate profiles.
   `_grouped_snapshots` returns the snapshots **unchanged** and only maps each **cohesive** group
   (pairwise envelope correlation >= `GROUP_MIN_COHESION`) to its members; loose groups are not mapped
@@ -521,10 +527,13 @@ runs **one complete-cycle match** and labels from it (audit MATCH-DECIDE-02); th
 a prefix match whose winner differed from the complete one on 17.5% of cycles. The live `program`
 is display only. Do not reintroduce a second cycle-end label path.
 
-**Prefix guard flags (audit LIVE-18):** `is_prefix_ambiguous` (Smart Termination, the fallback bar,
-the dishwasher floor, the hazard gate) is the #364 prefix-fit term only; the #288 full-shape term
-survives only as `is_prefix_ambiguous_full_shape` for the anti-crease finalize. Both are composed by
-`profile_store.match_prefix_flags`, which the Playground calls too - compose them nowhere else.
+**Prefix guard (item 491):** the #364 prefix-fit term (`is_prefix_ambiguous`, Stage 6) was removed in
+0.5.8: since #400 the matcher already scores a running cycle on each candidate's truncated curve, so
+the term never fired at a split moment (0/713 genuine ends, 0/7 quiet positives) and cost half the
+matcher's CPU per live match. The only prefix flag left is `is_prefix_ambiguous_full_shape` (#288,
+anti-crease finalize only), composed only by `profile_store._match_prefix_ambiguity`; MatchContext
+element 7 is a retired always-False slot. Do not re-add a prefix guard without
+`devtools/prefix_guard_eval.py --quiet-cuts --sweep` showing catches where splits happen.
 
 ## Known Technical Debt
 

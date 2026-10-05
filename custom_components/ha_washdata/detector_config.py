@@ -293,7 +293,8 @@ def terminal_drop_may_fire(
 
     The ML-toggle path is unchanged: it may always fire. The default-on dishwasher
     path (toggle off) fires only while the detector holds a committed program
-    whose match is neither ambiguous nor prefix-ambiguous; ``pinned`` (a program
+    whose match is not ambiguous (it also refused a #364 prefix-ambiguous one
+    until that flag was removed in 0.5.8); ``pinned`` (a program
     the user picked by hand, which the detector is never told is "committed")
     counts as committed. Ungated, a new
     programme at a familiar power with an early pause split a real cycle (one
@@ -310,7 +311,6 @@ def terminal_drop_may_fire(
         (pinned or getattr(detector, "_match_committed", False))
         and getattr(detector, "_matched_profile", None)
         and not getattr(detector, "_match_ambiguous", False)
-        and not getattr(detector, "_match_prefix_ambiguous", False)
     )
 
 

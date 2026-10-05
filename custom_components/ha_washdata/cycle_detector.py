@@ -21,6 +21,7 @@ from __future__ import annotations
 import itertools
 import logging
 import math
+import traceback
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Callable, cast
@@ -231,8 +232,8 @@ class MatchContext:
     phase_name: str | None = None
     is_confident_mismatch: bool = False
     is_ambiguous: bool = False
-    # Element 7: the #364 prefix-fit term (Smart Termination, fallback bar, floors).
-    is_prefix_ambiguous: bool = False
+    # Element 7 is retired: it carried the #364 prefix-fit flag, removed in 0.5.8
+    # (see const.py). The slot stays (always False) so 8-14 keep their positions.
     # Element 8: the #288 full-shape term (anti-crease finalize only).
     is_prefix_ambiguous_full_shape: bool = False
     tail_power: Any = None            # 9 (#364 power guard)
@@ -251,7 +252,7 @@ class MatchContext:
     def as_sequence(self) -> tuple[Any, ...]:
         return (
             self.profile_name, self.confidence, self.expected_duration, self.phase_name,
-            self.is_confident_mismatch, self.is_ambiguous, self.is_prefix_ambiguous,
+            self.is_confident_mismatch, self.is_ambiguous, False,
             self.is_prefix_ambiguous_full_shape, self.tail_power, self.terminal_high,
             self.terminal_quiet_s, self.longest_candidate_s, self.trusted_min_s,
             self.pause_catalogue,
@@ -516,6 +517,8 @@ class CycleDetector:
         # (register item 266): set by the manager, cleared by the next real
         # reading. Sensor state like the field above, so not reset per cycle.
         self._sensor_outage_since: datetime | None = None
+        # Traceback of the last restore_state_snapshot that failed, else None.
+        self.restore_error: str | None = None
         self._cycle_max_power: float = 0.0
 
         # Accumulators (dt-aware)
@@ -561,20 +564,19 @@ class CycleDetector:
         self._expected_duration: float = 0.0
         self._last_match_confidence: float = 0.0
         # Element 12: the longest expected duration among the candidates the
-        # matcher still considers plausible. `_match_prefix_ambiguous` means one
-        # of them is materially longer than the winner, so "past the expected
-        # end" might be "mid-soak in that longer programme" - but only up to
-        # THIS duration. Past it there is no longer programme left to be mid-soak
-        # in, and the guard's own rationale is spent.
+        # matcher still considers plausible. An ambiguous match may mean one of
+        # them is materially longer than the winner, so "past the expected end"
+        # might be "mid-soak in that longer programme" - but only up to THIS
+        # duration. Past it there is no longer programme left to be mid-soak in,
+        # and the guard's own rationale is spent.
         self._longest_candidate_duration: float = 0.0
         self._end_spike_seen: bool = False
         self._end_spike_duration: float = 0.0  # cycle duration (s) when _end_spike_seen was last set
         self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
-        self._match_prefix_ambiguous: bool = False  # longer candidate with good shape exists (prefix guard)
-        # The narrower #288-only half of the flag above. #364 widened
-        # _match_prefix_ambiguous with prefix scoring, which is safe for the ENDING
-        # Smart-Termination gate but must NOT reach the anti-crease finalize (see
-        # _anticrease_gate_open) where blocking can re-hang a cycle (#296).
+        # The #288 prefix-landscape term (element 8): a much longer candidate with
+        # a good full-envelope shape exists. Read only by the anti-crease finalize
+        # (see _anticrease_gate_open). The ENDING gates' own prefix flag (#364
+        # prefix fit, element 7) was removed in 0.5.8.
         self._match_prefix_ambiguous_full_shape: bool = False
         # Mean power the matched profile draws over the last few % of its own run
         # (profile_store.profile_tail_power). None = no opinion, guard stays inert.
@@ -611,6 +613,10 @@ class CycleDetector:
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
+        # Register item 393a: set while STATE_ANTI_WRINKLE was entered by the #296
+        # anti-crease finalise - the level at or under which a reading is that
+        # tail's own baseline rather than a burst. None for every other entry.
+        self._anticrease_tail_floor_w: float | None = None
         self._last_smart_term_block_reason: str | None = None  # #346 diagnostic throttle
 
         # Anti-wrinkle tracking (dryers only)
@@ -922,15 +928,22 @@ class CycleDetector:
         traced cycles; otherwise ``base``. Measured (prototype, 292 cycles): washer
         median lag 16.17 -> 12.50 min, early ends 0 -> 0, splits unchanged.
         """
-        cat = self._matched_pause_catalogue
+        return self._hazard_wait_for(
+            timestamp, base, self._matched_pause_catalogue,
+            self._expected_duration, self._match_ambiguous,
+        )
+
+    def _hazard_wait_for(
+        self, timestamp: datetime, base: float, cat: Any, expected: float, ambiguous: bool
+    ) -> float:
+        """:meth:`_hazard_wait` for a match with these values (register item 469b)."""
         if (
             cat is None
             or cat[0] < END_GATE_HAZARD_MIN_CYCLES
             or not self._matched_profile
-            or self._expected_duration <= 0
+            or expected <= 0
             or self._current_cycle_start is None
-            or self._match_ambiguous
-            or self._match_prefix_ambiguous
+            or ambiguous
         ):
             return base
         elapsed = (timestamp - self._current_cycle_start).total_seconds()
@@ -938,7 +951,7 @@ class CycleDetector:
         # (item 266), or the outage would read as progress and drop the very pause
         # being waited out from `later`.
         quiet_run = self._time_below_threshold + self._time_below_unobserved
-        position = max(0.0, (elapsed - quiet_run) / self._expected_duration)
+        position = max(0.0, (elapsed - quiet_run) / expected)
         later = [d for f, d in cat[1] if f >= position - END_GATE_HAZARD_POSITION_SLACK]
         need = END_GATE_HAZARD_MARGIN * max(later) if later else 0.0
         return max(float(self._config.off_delay), min(float(base), need))
@@ -1175,6 +1188,26 @@ class CycleDetector:
             return
         if isinstance(result, MatchContext):
             result = result.as_sequence()
+        # Register item 469(b): an ambiguous match in ENDING may not make the end
+        # later (see `ambiguous_ending_match_defers`). Like the freezes above, the
+        # detector keeps the match it has; a revoke still applies.
+        if (
+            match_rules.HOLD_AMBIGUOUS_IN_ENDING
+            and isinstance(result, (list, tuple))
+            and len(result) >= 6
+            and result[0] is not None
+            and bool(result[5])
+            and not bool(result[4])
+            and self.ambiguous_ending_match_defers(
+                result[2], result[1], result[11] if len(result) >= 12 else 0.0,
+                result[13] if len(result) >= 14 else None,
+            )
+        ):
+            self._logger.debug(
+                "ENDING: ambiguous match %s not applied, %s kept (item 469)",
+                result[0], self._matched_profile,
+            )
+            return
         # Unpack 5 elements (or 4 for backward compatibility if needed, but wrapper is updated)
         # wrapper returns (name, confidence, duration, phase, is_mismatch)
         # Or MatchResult object if refactored, but currently wrapper returns tuple.
@@ -1244,12 +1277,13 @@ class CycleDetector:
             # Store confidence + ambiguity for Smart Termination checks
             self._last_match_confidence = confidence or 0.0
             self._match_ambiguous = ambiguous
-            self._match_prefix_ambiguous = bool(result_seq[6]) if len(result_seq) >= 7 else False
-            # Element 8 (#364): the narrower legacy verdict. A shorter tuple
-            # (Playground, older callers, most tests) falls back to the widened
-            # value, which reproduces pre-#364 behaviour exactly.
+            # Element 8: the #288 full-shape term. Element 7 (the removed #364
+            # prefix-fit flag) is read only as its fallback for a 7-element legacy
+            # tuple, which carried the #288 verdict there before #364 split it out.
             self._match_prefix_ambiguous_full_shape = (
-                bool(result_seq[7]) if len(result_seq) >= 8 else self._match_prefix_ambiguous
+                bool(result_seq[7]) if len(result_seq) >= 8
+                else bool(result_seq[6]) if len(result_seq) >= 7
+                else False
             )
             # Element 9 (#364): the matched profile's own tail power level. Absent
             # or non-finite leaves the power-plausibility guard inert - so a shorter
@@ -1306,7 +1340,6 @@ class CycleDetector:
             self._matched_profile = None
             self._expected_duration = 0.0
             self._match_ambiguous = False
-            self._match_prefix_ambiguous = False
             self._match_prefix_ambiguous_full_shape = False
             self._matched_tail_power = None
             self._matched_terminal_high = None
@@ -1422,7 +1455,6 @@ class CycleDetector:
         self._expected_duration = 0.0
         self._last_match_confidence = 0.0
         self._match_ambiguous = False
-        self._match_prefix_ambiguous = False
         self._match_prefix_ambiguous_full_shape = False
         self._matched_tail_power = None
         self._matched_terminal_high = None
@@ -1452,6 +1484,7 @@ class CycleDetector:
         self._anti_wrinkle_candidate_start = None
         self._anti_wrinkle_candidate_peak = 0.0
         self._anti_wrinkle_candidate_start_power = 0.0
+        self._anticrease_tail_floor_w = None
         # Reset idle time tracker for anti-wrinkle
         self._anti_wrinkle_idle_time = 0.0
         # Reset delayed-start tracking
@@ -1503,7 +1536,6 @@ class CycleDetector:
         smart_ratio: float,
         is_confident: bool,
         ambiguous: bool,
-        prefix_ambiguous: bool,
         power_plausible: bool = True,
     ) -> str | None:
         """Why the Smart-Termination fast end-path did NOT fire, for diagnostics.
@@ -1522,8 +1554,6 @@ class CycleDetector:
             return "low_confidence"
         if ambiguous:
             return "match_ambiguous"
-        if prefix_ambiguous:
-            return "prefix_ambiguous"
         if not power_plausible:
             return "still_active"
         return None
@@ -1700,6 +1730,9 @@ class CycleDetector:
         # is supposed to catch it (a 120 s gap after a 10 s cadence lifts p95 to
         # ~15.5 s -> ceiling 155 s -> the gap counts as observed quiet).
         self._prior_p95_dt = self._p95_dt
+        # Below five intervals `_p95_dt` is just the last interval (or the 1 s
+        # default), not a cadence, so nothing can be called outage-sized yet.
+        prior_cadence_known = len(self._recent_dts) >= 5
         # Only the SENSOR trains the cadence estimator (#424). The watchdog's 0 W
         # keepalives exist because the plug fell silent, so once it does every
         # interval left in `_recent_dts` is one we manufactured: p95 AND the
@@ -1757,7 +1790,30 @@ class CycleDetector:
         # waiting machine idles. The cost is one extra report before
         # confirmation on a band-crossing ramp; no start is lost.
         prev_high = self._last_power is not None and self._last_power >= threshold
-        high_dt = dt if prev_high else 0.0
+
+        # The part of `dt` inside a recorded sensor outage (item 266, audit
+        # DETECT-13): from the outage start - or the previous reading, if later -
+        # up to this one. 0.0 whenever the sensor never went unavailable.
+        unobserved = 0.0
+        if outage_since is not None and dt > 0:
+            unobserved = min(dt, max(0.0, (timestamp - outage_since).total_seconds()))
+        # Outage-sized interval: clip(10x cadence, 60, 3600) like
+        # energy_gap_threshold_s, from the maintained p95 (O(1) in this hot path)
+        # as it stood BEFORE this reading, so a gap cannot widen its own ceiling.
+        outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
+
+        # Carrying the previous level forward assumes somebody was looking (item
+        # 266). Time inside a recorded outage, and a sensor interval the cadence
+        # calls an outage, is not high-power evidence either: crediting it let a
+        # plug that dropped out mid-heat confirm a start and bank its last power
+        # for the whole hole, which the stored energy (`integrate_wh` drops
+        # outage-sized segments) never counted. Synthetic keepalives are exempt
+        # from the size test for the reason given in the low branch below.
+        high_dt = 0.0
+        if prev_high:
+            high_dt = dt - unobserved
+            if not synthetic and prior_cadence_known and dt > outage_ceiling:
+                high_dt = 0.0
         # ...and the ENERGY for that interval at the level the appliance actually sat
         # at, which is the same argument applied to the second start gate. Crediting
         # it at the NEW reading's power let a sample barely above the threshold,
@@ -1770,13 +1826,6 @@ class CycleDetector:
         high_step_wh = (
             (self._last_power or 0.0) * (high_dt / 3600.0) if high_dt > 0 else 0.0
         )
-
-        # The part of `dt` inside a recorded sensor outage (item 266, audit
-        # DETECT-13): from the outage start - or the previous reading, if later -
-        # up to this one. 0.0 whenever the sensor never went unavailable.
-        unobserved = 0.0
-        if outage_since is not None and dt > 0:
-            unobserved = min(dt, max(0.0, (timestamp - outage_since).total_seconds()))
 
         if is_high:
             self._time_above_threshold += high_dt
@@ -1827,7 +1876,7 @@ class CycleDetector:
             # so during a real outage every individual `dt` sits under the
             # ceiling - qualifying the ceiling test left the tally accumulating
             # exactly as before, which is the bug this is meant to fix.
-            outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
+            # (`outage_ceiling` is computed once, above the high-power credit.)
             if (
                 (synthetic and not observed)
                 or unobserved > 0
@@ -1874,7 +1923,25 @@ class CycleDetector:
             STATE_ANTI_WRINKLE,
         ):
             started_from_anti_wrinkle = False
-            if anti_wrinkle_active and self._state == STATE_ANTI_WRINKLE and is_high:
+            tail_floor = (
+                self._anticrease_tail_floor_w
+                if self._state == STATE_ANTI_WRINKLE
+                else None
+            )
+            if (
+                anti_wrinkle_active
+                and tail_floor is not None
+                and is_high
+                and power <= tail_floor
+            ):
+                # Register item 393a: the #296 tail's own baseline between bursts.
+                # It can sit above stop_threshold (the 3.3 W Knitterschutz draw
+                # against a ~1.5 W threshold), where it never reset the candidate,
+                # so every tail left anti-wrinkle after anti_wrinkle_max_duration.
+                self._anti_wrinkle_candidate_start = None
+                self._anti_wrinkle_candidate_peak = 0.0
+                self._anti_wrinkle_candidate_start_power = 0.0
+            elif anti_wrinkle_active and self._state == STATE_ANTI_WRINKLE and is_high:
                 if self._anti_wrinkle_candidate_start is None:
                     self._anti_wrinkle_candidate_start = timestamp
                     self._anti_wrinkle_candidate_peak = power
@@ -1887,11 +1954,22 @@ class CycleDetector:
                 candidate_duration = (
                     timestamp - self._anti_wrinkle_candidate_start
                 ).total_seconds()
+                # Register item 393a: after the #296 finalise the tail is a train of
+                # sub-max-power drum bursts, and a send-on-change plug can skip the
+                # baseline between two of them (the reporter's 20 Knitterschutz
+                # tails all hold 60-111 s without a reading under stop_threshold),
+                # so the configured burst length opened a second cycle on the tail
+                # itself. The finalise accepted ANTI_CREASE_CONFIRM_WINDOW_S of such
+                # readings as tail; leaving it on duration takes a burst longer than
+                # that. A next wash's heating still leaves at once on the power test.
+                burst_limit = float(self._config.anti_wrinkle_max_duration)
+                if tail_floor is not None:
+                    burst_limit = max(burst_limit, ANTI_CREASE_CONFIRM_WINDOW_S)
                 exceeds = (
                     self._anti_wrinkle_candidate_peak
                     > self._config.anti_wrinkle_max_power
                     or power > self._config.anti_wrinkle_max_power
-                    or candidate_duration > self._config.anti_wrinkle_max_duration
+                    or candidate_duration > burst_limit
                 )
 
                 if exceeds:
@@ -2407,17 +2485,12 @@ class CycleDetector:
 
                     # Gate the predictive end on match certainty.
                     # _match_ambiguous: top-1 vs top-2 score gap is too small to
-                    # trust the matched profile's expected duration — fall through
-                    # to the power-based fallback timeout instead.
-                    # _match_prefix_ambiguous: a longer candidate with a similar
-                    # shape score exists in the pool. The current trace may be a
-                    # prefix of that longer program (e.g. Quick 46 min matched
-                    # while the machine is actually running Normal 88 min and
-                    # happens to be in a mid-cycle soak dip at the 46-min mark).
-                    # Blocking Smart Termination here means a true Quick cycle
-                    # waits for the fallback timeout instead of getting an early
-                    # close — an acceptable trade-off against the alternative of
-                    # splitting a Normal wash into two separate cycle records.
+                    # trust the matched profile's expected duration - fall through
+                    # to the power-based fallback timeout instead. (The #364
+                    # prefix-fit flag that also blocked here - "a longer candidate
+                    # explains this trace better" - was removed in 0.5.8: since
+                    # #400 the live matcher scores that prefix itself, and the flag
+                    # never fired at a split moment on the corpus. See const.py.)
                     # Surface why the fast end-path is (not) firing, throttled to
                     # reason changes so a stuck cycle's cause is visible in the log
                     # without spamming every reading. Pure diagnostic (#346).
@@ -2427,7 +2500,6 @@ class CycleDetector:
                         smart_ratio,
                         is_confident_match,
                         self._match_ambiguous,
-                        self._match_prefix_ambiguous,
                         _power_plausible,
                     )
                     if _block_reason != self._last_smart_term_block_reason:
@@ -2435,13 +2507,12 @@ class CycleDetector:
                         if _block_reason is not None:
                             self._logger.debug(
                                 "Smart Termination not applied (%s): dur=%.0fs/%.0fs conf=%.2f "
-                                "ambiguous=%s prefix_ambiguous=%s trailing_power=%s profile_tail=%s",
+                                "ambiguous=%s trailing_power=%s profile_tail=%s",
                                 _block_reason,
                                 current_duration,
                                 self._expected_duration * smart_ratio,
                                 getattr(self, "_last_match_confidence", 0.0),
                                 self._match_ambiguous,
-                                self._match_prefix_ambiguous,
                                 self._trailing_mean_power(timestamp, self._tail_window_s()),
                                 self._matched_tail_power,
                             )
@@ -2450,7 +2521,6 @@ class CycleDetector:
                         current_duration >= (self._expected_duration * smart_ratio)
                         and is_confident_match
                         and not self._match_ambiguous
-                        and not self._match_prefix_ambiguous
                         # A user pause is authoritative: every other finisher honours
                         # it, and the paused time itself pushes elapsed past the
                         # ratio, so a washer paused near its end was finished by
@@ -2621,14 +2691,13 @@ class CycleDetector:
                     ):
                         self._logger.info(
                             "Duration-anchored finalize: cycle in ENDING at %.0fs "
-                            "(%.1fx expected %.0fs), quiet %.0fs — Smart Termination "
-                            "was blocked (ambiguous=%s prefix=%s); finalizing.",
+                            "(%.1fx expected %.0fs), quiet %.0fs - Smart Termination "
+                            "was blocked (ambiguous=%s); finalizing.",
                             current_duration,
                             current_duration / self._expected_duration,
                             self._expected_duration,
                             self._time_below_threshold,
                             self._match_ambiguous,
-                            self._match_prefix_ambiguous,
                         )
                         self._finish_cycle(
                             timestamp,
@@ -2689,19 +2758,19 @@ class CycleDetector:
                 # reach for the device type that needed it most. Early ends stayed
                 # at 0.00% for washers at every ratio measured; the dishwashers,
                 # which do produce early ends below 1.0, keep 1.05.
-                # Gated on the SAME guards Smart Termination respects. The rule
+                # Gated on the SAME guard Smart Termination respects. The rule
                 # keys on `_expected_duration`, so it must not fire while the
-                # matcher says that duration is in doubt: `_match_prefix_ambiguous`
-                # means a much longer look-alike is still plausible, and then "past
+                # matcher says that duration is in doubt: an ambiguous match may
+                # mean a much longer look-alike is still plausible, and then "past
                 # the expected end" may really be "mid-soak in a longer programme".
-                # Without this the fallback timeout walks straight through the
-                # prefix-landscape guard and re-opens the #288 split-cycle bug -
-                # caught by test_smart_termination_blocked_by_prefix_ambiguous,
-                # where a 450 s soak dip sits right at the short profile's end.
+                # Without this the fallback timeout walks straight through and
+                # re-opens the #288 split-cycle bug - caught by
+                # test_smart_termination_blocked_by_ambiguous_match, where a 450 s
+                # soak dip sits right at the short profile's end.
                 # NOT also gated on `_last_match_confidence >=
                 # match_confidence_threshold`, and that is deliberate, not an
-                # oversight - the paragraph above says "the SAME guards Smart
-                # Termination respects" and means the two ambiguity flags.
+                # oversight - the paragraph above says "the SAME guard Smart
+                # Termination respects" and means the ambiguity flag.
                 # Smart Termination does check confidence, because it ENDS a cycle
                 # early on a prediction; this rule only shortens a wait that is
                 # already past the programme's own expected end, so the asymmetry
@@ -2730,7 +2799,7 @@ class CycleDetector:
                     # a materially LONGER programme is plausible, that longer one's
                     # end instead (register item 330).
                     #
-                    # Blocking outright on the two ambiguity flags - which is what
+                    # Blocking outright on the ambiguity flags - which is what
                     # this did until item 330 - was costing almost every cycle the
                     # shortening. Measured on `devtools/end_gate_eval.py`: of the
                     # 94 cycles that ever pass 1.05x their own expected duration,
@@ -2739,12 +2808,14 @@ class CycleDetector:
                     # pre-reporter-export corpus) and the median cycle still
                     # waited out the full `min_off_gap`.
                     #
-                    # The flags are not wrong, they are too coarse. Both exist to
+                    # The flags were not wrong, they were too coarse. They exist to
                     # protect `_expected_duration` against "this is really a prefix
                     # of something longer" (#288 / #364) - a statement about
-                    # DURATION, not about which label wins. Two programmes that
-                    # score within the ambiguity margin and run the same length
-                    # leave "past the expected end" true either way. So instead of
+                    # DURATION, not about which label wins. (Only `_match_ambiguous`
+                    # is left: the #364 prefix-fit flag was removed in 0.5.8.)
+                    # Two programmes that score within the ambiguity margin and
+                    # run the same length leave "past the expected end" true
+                    # either way. So instead of
                     # refusing, raise the bar to the longest duration still in
                     # play: past THAT, no candidate is left for this to be a
                     # mid-soak of, which is exactly the condition the guard was
@@ -2756,26 +2827,22 @@ class CycleDetector:
                     # and an ambiguous match with no candidate durations to
                     # compare must block exactly as it did before - otherwise the
                     # #288 split-cycle reproduction
-                    # `test_smart_termination_blocked_by_prefix_ambiguous` walks
+                    # `test_smart_termination_blocked_by_ambiguous_match` walks
                     # straight through, which is how the first draft of this was
                     # caught.
-                    _bar = self._expected_duration
-                    _blocked = False
-                    _bar_raised = False
-                    if self._match_prefix_ambiguous or self._match_ambiguous:
-                        if self._longest_candidate_duration > _bar:
-                            _bar = self._longest_candidate_duration
-                            _bar_raised = True
-                        elif self._longest_candidate_duration <= 0.0:
-                            # No information: a caller that does not send element
-                            # 12 keeps the old refusal (see below). The bound
-                            # itself is now derived from the FULL candidate
-                            # population, the same one `_match_prefix_ambiguity`
-                            # judges, so a longer candidate ranked sixth or lower
-                            # can no longer set the flag while hiding from the
-                            # bar - which it could when this read
-                            # `MatchResult.candidates`, i.e. `candidates[:5]`.
-                            _blocked = True
+                    #
+                    # The bar is `_fallback_shortening_bar` (one implementation
+                    # with the item-469b ENDING hold): None, i.e. blocked, for an
+                    # ambiguous match with no candidate durations. The bound
+                    # itself is derived from the FULL pre-collapse candidate
+                    # population, so a longer candidate ranked sixth or lower
+                    # cannot hide from the bar - which it could when this read
+                    # `MatchResult.candidates`, i.e. `candidates[:5]`.
+                    _bar_s = self._fallback_shortening_bar(
+                        self._expected_duration,
+                        self._match_ambiguous,
+                        self._longest_candidate_duration,
+                    )
                     # Device-resolved (register item 355): 1.05 is out of reach
                     # for a load-adaptive washer, which reaches a median 0.83 of
                     # its EXPECTED duration before it stops.
@@ -2793,12 +2860,7 @@ class CycleDetector:
                     # rest as a second cycle, which is #288. The item-355 measurement
                     # was taken against the expected duration and says nothing about
                     # this case, so a raised bar keeps the original 1.05.
-                    _late_ratio = (
-                        END_GATE_LATE_RATIO
-                        if _bar_raised
-                        else resolve_end_gate_late_ratio(self._config.device_type)
-                    )
-                    if not _blocked and _elapsed >= _late_ratio * _bar:
+                    if _bar_s is not None and _elapsed >= _bar_s:
                         effective_off_delay = max(
                             self._config.off_delay,
                             min(self._config.min_off_gap, END_GATE_LATE_SECONDS),
@@ -3468,8 +3530,9 @@ class CycleDetector:
             return False
         if self._last_match_confidence < self._config.match_confidence_threshold:
             return False
-        # Deliberately the NARROW #288-only verdict, not the #364-widened flag: a
-        # false block here disables the finalise AND the match freeze, and because
+        # The #288 full-shape verdict only (the wider #364 prefix-fit flag never
+        # reached this gate, and was removed in 0.5.8): a false block here
+        # disables the finalise AND the match freeze, and because
         # the tumble bursts recur faster than off_delay neither the fallback timeout
         # nor ENDING_HARD_FINALIZE can close the cycle - that is the #296 hang.
         if self._match_ambiguous or self._match_prefix_ambiguous_full_shape:
@@ -3748,6 +3811,21 @@ class CycleDetector:
             return False
         start_time = self._current_cycle_start or timestamp
         current_duration = (timestamp - start_time).total_seconds()
+        # Register item 393a: the tail's baseline, from the window that was just
+        # accepted as tail (read before _finish_cycle clears the readings). Twice
+        # its lowest reading, never under the anti-wrinkle exit level.
+        tail_floor = max(
+            float(self._config.anti_wrinkle_exit_power),
+            float(self._config.stop_threshold_w),
+            2.0 * min(
+                (
+                    float(p)
+                    for ts, p in self._power_readings
+                    if (timestamp - ts).total_seconds() <= ANTI_CREASE_CONFIRM_WINDOW_S
+                ),
+                default=0.0,
+            ),
+        )
         self._logger.info(
             "Anti-crease finalize: matched '%s' past expected %.0fs (elapsed %.0fs), "
             "settled into the low-power tumble tail — finalizing into anti-wrinkle.",
@@ -3785,6 +3863,9 @@ class CycleDetector:
             # expected_end" no longer does, and this paragraph used to claim it.
             tail_cap=self._keep_tail_cap(start_time),
         )
+        # After _finish_cycle, whose reset() clears it (register item 393a).
+        if self._state == STATE_ANTI_WRINKLE:
+            self._anticrease_tail_floor_w = tail_floor
         return True
 
     def _is_terminal_drop(self) -> bool:
@@ -3851,18 +3932,15 @@ class CycleDetector:
         # early-wash dip and records the rest of the programme as a second
         # cycle, which is the expensive failure. A low-confidence match to a
         # short look-alike is exactly how that happens, so it does not get to
-        # lower the bar. Uses the WIDER `_match_prefix_ambiguous`, not the
-        # narrow full-shape flag Smart Termination takes: a false block here
-        # only keeps the 30 min floor, where for the anti-crease finalize it can
-        # re-hang the cycle (#296). No-op on the whole corpus either way - every
-        # corpus dishwasher profile is over 90 minutes.
+        # lower the bar; nor does an ambiguous one. (It also honoured the #364
+        # prefix-fit flag until that was removed in 0.5.8.) No-op on the whole
+        # corpus either way - every corpus dishwasher profile is over 90 minutes.
         _dw_floor = DISHWASHER_MIN_CYCLE_DURATION_S
         if (
             self._matched_profile
             and self._expected_duration > 0
             and self._last_match_confidence >= self._config.match_confidence_threshold
             and not self._match_ambiguous
-            and not self._match_prefix_ambiguous
         ):
             _dw_floor = min(_dw_floor, float(self._expected_duration))
         if self._config.device_type == "dishwasher" and duration < _dw_floor:
@@ -4018,6 +4096,122 @@ class CycleDetector:
         # (A "ratio to 1 + profile_duration_tolerance" window used to follow, but both
         # of its branches returned False - the tolerance changed nothing here.)
         return False
+
+    def _fallback_shortening_bar(
+        self, expected: float, ambiguous: bool, longest: float
+    ) -> float | None:
+        """Elapsed seconds from which the ENDING fallback shortens, None when blocked.
+
+        The item 306/330/355 bar for a match with these values: ``expected`` at the
+        device's late ratio, or, while the match is ambiguous, the longest candidate
+        at the plain ``END_GATE_LATE_RATIO`` when that is longer, and blocked when
+        there are no candidate durations to compare (see the gate in
+        ``process_reading``). Shared by that gate and
+        :meth:`ambiguous_ending_match_defers`, so the two cannot disagree.
+        """
+        bar = float(expected)
+        raised = False
+        if ambiguous:
+            if longest > bar:
+                bar = float(longest)
+                raised = True
+            elif longest <= 0.0:
+                return None
+        ratio = (
+            END_GATE_LATE_RATIO
+            if raised
+            else resolve_end_gate_late_ratio(self._config.device_type)
+        )
+        return ratio * bar
+
+    def _ending_wait_left_s(
+        self, expected: float, ambiguous: bool, longest: float, confidence: float, cat: Any
+    ) -> float:
+        """Seconds until the ENDING fallback would finish under continued quiet, for
+        a match with these values (register item 469b).
+
+        The fallback gate in ``process_reading``, run forward: the hazard wait
+        before the shortening bar, the shortened wait after it (the gate swaps one
+        for the other, so the shortening can also lengthen), then
+        ``_should_defer_finish``'s duration floor, which needs the confidence. The
+        energy gate and Smart Termination are left out: neither depends on which
+        programme is matched in a way an ambiguous tick changes, except that the
+        ambiguity blocks Smart Termination (see the caller).
+        """
+        now = self._power_readings[-1][0]
+        elapsed = (now - self._current_cycle_start).total_seconds()
+        quiet = float(self._time_below_threshold)
+        hazard = self._hazard_wait_for(
+            now, max(self._config.off_delay, self._config.min_off_gap), cat, expected, ambiguous
+        )
+        left = max(0.0, hazard - quiet)
+        bar = self._fallback_shortening_bar(expected, ambiguous, longest)
+        if bar is not None and elapsed + left >= bar:
+            short = max(
+                self._config.off_delay,
+                min(self._config.min_off_gap, END_GATE_LATE_SECONDS),
+            )
+            left = max(0.0, short - quiet, bar - elapsed)
+        if confidence >= DEFAULT_DEFER_FINISH_CONFIDENCE:
+            left = max(left, expected * float(self._config.min_duration_ratio) - elapsed)
+        return left
+
+    def ambiguous_ending_match_defers(
+        self, expected: Any, confidence: Any, longest: Any, catalogue: Any = None
+    ) -> bool:
+        """Would an AMBIGUOUS match with these values make this ENDING wait longer?
+
+        Register item 469(b). A tick in ENDING matches a trace that ends in its idle
+        tail, which reads as the prefix of a longer programme pausing, so its top-1
+        drifts longer and ties with its runner-up. Applied as is, a shorter match
+        interval (what "Apply all" suggests) let such a tick defer the end: 01KXGA3C
+        62f39dfc34f4, a 29 min wool wash, waited 23.2 min instead of 6.7 min at an
+        87 s interval. ``update_match`` refuses such a match when this says the
+        fallback would finish later with it (:meth:`_ending_wait_left_s` for both),
+        or as late when the current match is clear (only the ambiguous one blocks
+        Smart Termination). Not "a longer programme": the shortening bar is not
+        monotone in the expected duration. A match to the LONGEST candidate does
+        not raise it, so it can end sooner than a shorter ambiguous one whose bar
+        the longest raised (01KBWSV8 1dbc19ccba79 / daea1437efcc: 6.7 min applied,
+        23-25 min held), and a shorter one can raise it (01KXGA3C 9c2624675652).
+        A dishwasher's drying and pump-out waits follow the expected duration
+        alone, so there a longer one is refused outright.
+
+        False outside ENDING or without a matched programme: nothing to keep.
+        """
+        if (
+            self._state != STATE_ENDING
+            or not self._matched_profile
+            or self._expected_duration <= 0
+            or self._current_cycle_start is None
+            or not self._power_readings
+        ):
+            return False
+        try:
+            new_expected = float(expected)
+            new_confidence = float(confidence or 0.0)
+            new_longest = float(longest or 0.0)
+        except (TypeError, ValueError):
+            return True
+        if not (math.isfinite(new_expected) and new_expected > 0):
+            return True  # would unmatch the cycle: the unshortened fallback
+        if (
+            self._config.device_type == DEVICE_TYPE_DISHWASHER
+            and new_expected > self._expected_duration
+        ):
+            return True
+        new_left = self._ending_wait_left_s(
+            new_expected, True, new_longest, new_confidence,
+            self._sanitize_pause_catalogue(catalogue),
+        )
+        old_left = self._ending_wait_left_s(
+            self._expected_duration, self._match_ambiguous,
+            self._longest_candidate_duration, self._last_match_confidence,
+            self._matched_pause_catalogue,
+        )
+        if new_left > old_left + 1.0:
+            return True
+        return not self._match_ambiguous and new_left >= old_left - 1.0
 
     def _dishwasher_quiet_release_s(self) -> float:
         """Sustained quiet past expected that releases the pump-out wait (#379).
@@ -4494,7 +4688,6 @@ class CycleDetector:
             "end_spike_seen": self._end_spike_seen,
             "end_spike_duration": self._end_spike_duration,
             "match_ambiguous": self._match_ambiguous,
-            "match_prefix_ambiguous": self._match_prefix_ambiguous,
             "match_prefix_ambiguous_full_shape": self._match_prefix_ambiguous_full_shape,
             "matched_tail_power": self._matched_tail_power,
             "matched_terminal_high": self._matched_terminal_high,
@@ -4532,8 +4725,14 @@ class CycleDetector:
             and self._time_below_threshold > 0
         )
 
-    def restore_state_snapshot(self, snapshot: dict[str, Any]) -> None:
-        """Restore state from snapshot."""
+    def restore_state_snapshot(self, snapshot: dict[str, Any]) -> bool:
+        """Restore state from snapshot; False when it could not be restored.
+
+        A snapshot that raises leaves the detector OFF (never half-restored) and is
+        logged with its traceback. The caller keeps the snapshot for diagnostics
+        instead of deleting it (register item 266 follow-up): until then a restore
+        that raised lost the running cycle with one ERROR line and no record.
+        """
         try:
             self._state = snapshot.get("state", STATE_OFF)
             self._sub_state = snapshot.get("sub_state")
@@ -4579,11 +4778,13 @@ class CycleDetector:
             self._end_spike_seen = snapshot.get("end_spike_seen", False)
             self._end_spike_duration = float(snapshot.get("end_spike_duration", 0.0))
             self._match_ambiguous = snapshot.get("match_ambiguous", False)
-            self._match_prefix_ambiguous = snapshot.get("match_prefix_ambiguous", False)
-            # A pre-#364 snapshot has no narrow flag: fall back to the widened
-            # value so a restart cannot loosen the anti-crease gate.
+            # A pre-#364 snapshot has no narrow flag: fall back to the old single
+            # `match_prefix_ambiguous` (the #364 prefix-fit flag, removed in 0.5.8,
+            # and before #364 the #288 verdict itself) so a restart cannot loosen
+            # the anti-crease gate. Newer snapshots no longer write that key.
             self._match_prefix_ambiguous_full_shape = snapshot.get(
-                "match_prefix_ambiguous_full_shape", self._match_prefix_ambiguous
+                "match_prefix_ambiguous_full_shape",
+                snapshot.get("match_prefix_ambiguous", False),
             )
             self._matched_tail_power = self._sanitize_tail_power(
                 snapshot.get("matched_tail_power")
@@ -4684,6 +4885,16 @@ class CycleDetector:
             else:
                 self._last_active_time = self._current_cycle_start
 
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            self._logger.error("Failed restore: %s", e)
+        except Exception:  # pylint: disable=broad-exception-caught
+            self.restore_error = traceback.format_exc()
+            self._logger.warning(
+                "Could not restore the active-cycle snapshot (state %r, cycle start "
+                "%r); starting from OFF",
+                snapshot.get("state") if isinstance(snapshot, dict) else None,
+                snapshot.get("current_cycle_start") if isinstance(snapshot, dict) else None,
+                exc_info=True,
+            )
             self.reset()
+            return False
+        self.restore_error = None
+        return True

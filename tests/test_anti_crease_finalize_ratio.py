@@ -180,21 +180,24 @@ def test_tuned_ratio_recognises_the_tail_the_default_sits_through() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_short_max_duration_fragments_the_tail_after_an_early_finalize() -> None:
-    """A continuous tumble longer than ``anti_wrinkle_max_duration`` reopens a cycle.
+def test_a_continuous_tumble_stays_absorbed_after_an_early_finalize() -> None:
+    """A continuous tumble longer than ``anti_wrinkle_max_duration`` no longer
+    reopens a cycle once the #296 finalise recognised it (register item 393a).
 
     With the ratio at its default the finalise never fires, so the 60 s default
     is never reached during a tail and nobody notices. Lowering the ratio makes
     the tail arrive while the machine is still tumbling, and a dryer that tumbles
-    for minutes in one stretch then trips the pulse-length limit and opens a
-    fragment - the reporter saw exactly this twice (32 Wh and 13 Wh).
+    for minutes in one stretch tripped the pulse-length limit and opened a
+    fragment - the reporter saw exactly this twice (32 Wh and 13 Wh). The tail's
+    own level is now its baseline, so the same tumble stays attached at the
+    shipped 60 s limit.
     """
     det, on_end = _run_dryer_with_tumble_tail(
         0.75, tail_end=8000, anti_wrinkle_max_duration=60.0
     )
     assert on_end.call_count == 1, "the finalise itself still fired"
-    assert det.state != STATE_ANTI_WRINKLE, (
-        "a 600 s continuous tumble against a 60 s pulse limit leaves anti-wrinkle"
+    assert det.state == STATE_ANTI_WRINKLE, (
+        "a 600 s continuous tumble at the tail's own level stays in anti-wrinkle"
     )
 
 

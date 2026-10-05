@@ -197,17 +197,38 @@ Two consequences worth knowing:
   live update covers ~30 min of appliance time.
 
 Three more wall-clock quantities do not scale and change behaviour, so a box run
-cannot judge them (measured in the 0.5.7 review campaign, register item 389):
+cannot judge them (measured in the 0.5.7 review campaign, register item 389).
+None is a bug; each has a way to test it that does not compress time:
 
 - **The start-energy gate** is in Wh, so at 60x it takes 60x more appliance time
   to fill. A cycle with a low-power prelude is recorded starting ~8 min late
   (start offset +9 min against +1 min typical); its end is unaffected.
-- **`STANDBY_BAND_WINDOW_S`** (600 s) is 10 h of appliance time at 60x, so the
-  standby-band finalize can never fire in a compressed run. Reproduce that path
-  at 2x.
+  *Test it* by replay: `devtools/start_gate_eval.py` feeds a raw history (a
+  diagnostics dump's 24 h `power_trace`, a History CSV download, or a recorder
+  database) through the real detector in real time and reports missed, late and
+  phantom starts per gate value. In the box, `set-options
+  start_energy_threshold=<default / speedup>` removes the artefact, since the
+  energy a compressed prelude delivers shrinks by the same factor.
+- **`STANDBY_BAND_WINDOW_S`** (600 s) is a constant, not an option, so it cannot
+  be scaled: at 60x it is 10 h of appliance time and the standby-band finalize can
+  never fire. *Test it* at 2x (20 min of appliance time): `./smoke.sh` writes
+  60x timings in step 3, so after it run `./hactl.py set-options <id>` with the
+  shipped `off_delay`, `min_off_gap`, `sampling_interval`, `watchdog_interval`,
+  `profile_match_interval`, `completion_min_seconds` and `interrupted_min_seconds`
+  halved, then `./hactl.py replay <export> --cycle N --speedup 2` on a cycle whose
+  tail holds a flat standby above `stop_threshold_w`
+  (`tests/test_issue_445_standby_above_stop.py` has the shape). By replay, a
+  stored trace that ends in such a standby goes through the finalize in real time
+  in `devtools/end_gate_eval.py --loo --all-formats`.
 - **Back-to-back washes merge.** A 7 min gap between two washes becomes 7 s,
-  shorter than any scaled `min_off_gap`, so the box keeps as one cycle what a
-  real-time replay splits in two.
+  shorter than the 10 s `min_off_gap` step 3 writes, so the box keeps as one cycle
+  what a real-time replay splits in two. *Test it* by replay:
+  `devtools/min_off_gap_eval.py` replays every trace at each candidate
+  `min_off_gap` and runs a merge probe (one cycle replayed twice, the user's
+  shortest real gap between loads apart), and
+  `devtools/start_gate_eval.py` reports `merged` against the stored records of a
+  raw history. In the box, 2x with the halved options above keeps every gap and
+  every option in proportion.
 
 After the trace ends the replay pushes 0 W once and stops. Home Assistant drops
 unchanged states, so repeated 0 W produces no further events - which is exactly

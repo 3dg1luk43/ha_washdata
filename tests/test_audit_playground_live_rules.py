@@ -36,6 +36,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from custom_components.ha_washdata import analysis, match_rules, playground
+from custom_components.ha_washdata.const import MATCH_AMBIGUOUS_COMMIT_FACTOR
 from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
 from custom_components.ha_washdata.profile_store import MatchResult, ProfileStore
 
@@ -164,13 +165,17 @@ def test_an_ambiguous_but_persistent_top1_is_committed() -> None:
 
     The sim's own rule never committed an ambiguous one, so a cycle the live
     integration names showed as "unmatched" in the Playground (audit: 3 of 20 on
-    one grouped washer).
+    one grouped washer). An ambiguous top-1 waits MATCH_AMBIGUOUS_COMMIT_FACTOR x
+    the persistence (match_rules.decide_switch), in the sim as live.
     """
     sim = _sim(_store("A", "B"), {"match_persistence": 3})
     with patch.object(
         analysis, "compute_matches_worker", return_value=_cands(("A", 0.70), ("B", 0.68))
     ):
         for i in range(3):
+            _tick(sim, _readings(40 + i))
+        assert sim.last_match["name"] is None
+        for i in range(3, 3 * MATCH_AMBIGUOUS_COMMIT_FACTOR):
             _tick(sim, _readings(40 + i))
     assert sim.last_match["name"] == "A"
 

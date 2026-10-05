@@ -243,8 +243,9 @@ def test_safe_offset_survives_an_unbounded_integer():
     assert _safe_offset(12.5) == pytest.approx(12.5)
 
 
-def test_prefix_scoring_and_stage3_share_one_bandwidth_default():
-    """Both read the same unmutated config in one match (register item 309)."""
+def test_stage3_reads_the_option_bandwidth_default():
+    """Stage 3 reads the same unmutated config default as production (register
+    item 309). The #364 prefix pass that shared it was removed in 0.5.8."""
     from pathlib import Path
 
     src = (
@@ -254,7 +255,7 @@ def test_prefix_scoring_and_stage3_share_one_bandwidth_default():
         / "analysis.py"
     ).read_text()
     assert 'config.get("dtw_bandwidth", 0.1)' not in src
-    assert src.count('config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH)') == 2
+    assert src.count('config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH)') == 1
 
 
 # --------------------------------------------------------------------------
@@ -309,10 +310,10 @@ def test_the_end_gate_is_deliberately_not_gated_on_confidence():
         "the confidence check was measured as pure cost (2 cycles delayed, no "
         "split or early end prevented) - see devtools/end_gate_eval.py"
     )
-    # The ambiguity guards are still consulted - since item 330 they raise the
-    # bar to the longest plausible candidate rather than refusing outright, and
-    # they still refuse when there is no candidate duration to compare.
-    assert "_match_prefix_ambiguous" in code
+    # The ambiguity guard is still consulted - since item 330 it raises the bar
+    # to the longest plausible candidate rather than refusing outright, and it
+    # still refuses when there is no candidate duration to compare. (The #364
+    # prefix-fit flag it also read was removed in 0.5.8.)
     assert "_match_ambiguous" in code
     assert "_longest_candidate_duration" in code
 
@@ -384,7 +385,6 @@ def _dishwasher_defers(
     expected: float = 0.0,
     conf: float = 0.9,
     ambiguous: bool = False,
-    prefix_ambiguous: bool = False,
 ) -> bool:
     """The REAL ``CycleDetector._should_defer_finish`` on a dishwasher.
 
@@ -405,7 +405,6 @@ def _dishwasher_defers(
     det._expected_duration = expected  # noqa: SLF001
     det._last_match_confidence = conf  # noqa: SLF001
     det._match_ambiguous = ambiguous  # noqa: SLF001
-    det._match_prefix_ambiguous = prefix_ambiguous  # noqa: SLF001
     det._end_spike_seen = True  # noqa: SLF001
     return det._should_defer_finish(duration)  # noqa: SLF001
 
@@ -430,7 +429,6 @@ def test_a_matched_dishwasher_profile_lowers_the_minimum_duration_floor():
     # and a weak match to a short look-alike is how a fill dip ends the cycle.
     assert _dishwasher_defers(400.0, "Delay- prewash", 360.0, conf=0.2) is True
     assert _dishwasher_defers(400.0, "Delay- prewash", 360.0, ambiguous=True) is True
-    assert _dishwasher_defers(400.0, "Delay- prewash", 360.0, prefix_ambiguous=True) is True
     # A programme just over the floor cannot RAISE it above the constant.
     assert _dishwasher_defers(1900.0, "Rapido", 2000.0) is False
 

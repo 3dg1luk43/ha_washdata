@@ -19,9 +19,10 @@
 Until this module no test went through ``hass.config_entries.async_setup``: the
 one boot test called ``async_setup_entry`` by hand because the `conversation`
 dependency "could not be satisfied", so ``async_setup_entry`` was 0% covered by
-the fast suite. The ``setup_washdata_entry`` fixture (tests/conftest.py) mocks
-`conversation` and lets the real loader, platform forward, service bus and
-WebSocket registry run. Boots in well under a second, so it stays in the fast tier.
+the fast suite. The ``setup_washdata_entry`` fixture (tests/conftest.py) lets the
+real loader resolve the manifest (item 487 made `conversation` an after-dependency)
+and runs the platform forward, service bus and WebSocket registry. Boots in well
+under a second, so it stays in the fast tier.
 """
 from __future__ import annotations
 

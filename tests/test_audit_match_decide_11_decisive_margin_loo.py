@@ -111,8 +111,10 @@ def test_switching_rows_read_the_displayed_programme(tmp_path: Path, capsys) -> 
     assert len(rows) == 7
     for r in rows:
         assert set(r) >= {"committed", "first_right", "final_right", "switches",
-                          "reverts", "wrong_to_right", "right_to_wrong", "scorable"}
+                          "reverts", "wrong_to_right", "right_to_wrong", "scorable",
+                          "notify_right", "commit_s"}
         assert r["first_right"] <= r["committed"]
+        assert (r["commit_s"] is not None) == r["committed"]
     assert sum(r["scorable"] for r in rows) == 6
     dme._print_switching(rows, True)  # noqa: SLF001
     assert "live switching replay (LOO)" in capsys.readouterr().out

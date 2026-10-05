@@ -97,16 +97,23 @@ def test_dtw_ab_eval_uses_the_shipped_stage_1_4_config(tmp_path: Path, device_ty
 def test_prefix_guard_folds_come_from_the_shipped_matcher(tmp_path: Path) -> None:
     path = tmp_path / "export.json"
     _export(path, "washing_machine")
+    from custom_components.ha_washdata import analysis  # noqa: PLC0415
     from custom_components.ha_washdata import profile_store as ps  # noqa: PLC0415
 
-    orig = ps.match_prefix_flags
+    orig, orig_worker = ps._match_prefix_ambiguity, analysis.compute_matches_worker  # noqa: SLF001
     out = prefix_guard_eval._collect_device((str(path), True))  # noqa: SLF001
-    assert ps.match_prefix_flags is orig  # the recorder is removed again
+    # The recorders are removed again.
+    assert ps._match_prefix_ambiguity is orig  # noqa: SLF001
+    assert analysis.compute_matches_worker is orig_worker
     assert len(out["neg"]) == 6
     for row in out["neg"]:
         assert row["cands"], row
         assert isinstance(row["landscape_paused"], bool)
-        # The sweep's rule at the shipped margin is the production flag (no pauses).
+        # The sweep's rule at the shipped margin is the row's flag (no pauses).
         assert prefix_guard_eval._prefix_fires(  # noqa: SLF001
-            row["cands"], row["best_dur"], ps.SMART_TERM_PREFIX_MARGIN
+            row["cands"], row["best_dur"], prefix_guard_eval.SHIPPED_PREFIX[0]
         ) == row["landscape"]
+    # The harness scored the removed rule's prefix itself: Quick folds see the
+    # longer Cotton programme with a harness prefix score.
+    assert any(c.get("ps_wide") is not None for r in out["pos"] + out["neg"]
+               for c in r["cands"][1:])

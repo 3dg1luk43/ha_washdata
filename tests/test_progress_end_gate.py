@@ -124,24 +124,25 @@ def test_unmatched_cycle_is_untouched(callbacks):
     callbacks["on_cycle_end"].assert_not_called()
 
 
-def test_prefix_ambiguous_match_does_not_shorten(callbacks):
-    """The #288 split-cycle guard must hold (the regression this nearly shipped).
-
-    With a much longer look-alike still plausible, "past the expected end" may
-    really be "mid-soak in a longer programme", so the rule must not fire - the
-    fallback timeout must not walk through the guard Smart Termination respects.
-    """
+def test_the_retired_prefix_fit_element_does_not_hold_the_shortening(callbacks):
+    """Element 7 carried the #364 prefix-fit flag, removed in 0.5.8 (it never
+    fired at a split moment on the shipped matcher). A legacy tuple that still
+    sets it shortens like any confident, unambiguous match."""
     det = _detector(callbacks)
     _run_active(det, 3000)
     det.update_match(("Quick 40C", 0.7, 2760.0, None, False, False, True))
-    assert det._match_prefix_ambiguous is True
     _quiet(det, 3030, 400)
-    assert det.state in (STATE_ENDING, STATE_PAUSED)
-    callbacks["on_cycle_end"].assert_not_called()
+    assert det.state == STATE_FINISHED
+    callbacks["on_cycle_end"].assert_called_once()
 
 
 def test_ambiguous_match_does_not_shorten(callbacks):
-    """Same reasoning for plain ambiguity: the expected length is in doubt."""
+    """The #288 split-cycle guard must hold (the regression this nearly shipped).
+
+    With the expected length in doubt - a longer look-alike scoring within the
+    ambiguity margin - "past the expected end" may really be "mid-soak in a
+    longer programme", so the rule must not fire: the fallback timeout must not
+    walk through the guard Smart Termination respects."""
     det = _detector(callbacks)
     _run_active(det, 3000)
     det.update_match(("Quick 40C", 0.7, 2760.0, None, False, True, False))

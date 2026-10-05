@@ -84,11 +84,10 @@ def _history_cycle(i: int) -> dict[str, Any]:
 class _Det:
     """The detector match state the gate reads."""
 
-    def __init__(self, committed=True, matched="Eco", ambiguous=False, prefix=False):
+    def __init__(self, committed=True, matched="Eco", ambiguous=False):
         self._match_committed = committed
         self._matched_profile = matched
         self._match_ambiguous = ambiguous
-        self._match_prefix_ambiguous = prefix
 
 
 @pytest.mark.parametrize(
@@ -98,7 +97,6 @@ class _Det:
         ("dishwasher", False, _Det(committed=False), False, False),
         ("dishwasher", False, _Det(matched=None), False, False),
         ("dishwasher", False, _Det(ambiguous=True), False, False),
-        ("dishwasher", False, _Det(prefix=True), False, False),
         ("dishwasher", False, _Det(committed=False), True, True),   # a manual pin
         ("dishwasher", True, _Det(committed=False, matched=None), False, True),  # toggle path ungated
         ("washing_machine", True, _Det(committed=False, matched=None), False, True),

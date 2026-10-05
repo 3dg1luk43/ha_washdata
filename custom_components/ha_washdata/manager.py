@@ -25,6 +25,7 @@ import hashlib
 import json
 import math
 import re
+import traceback
 import uuid
 import asyncio
 from asyncio import Task
@@ -365,6 +366,25 @@ def _finite_power(raw: Any) -> float | None:
     if not math.isfinite(power):
         return None
     return power
+
+
+def _snapshot_time(raw: Any) -> datetime | None:
+    """A timestamp from the active-cycle snapshot as aware UTC, else None.
+
+    A naive value is a legacy local stamp, read in HA's zone like every other
+    snapshot field. Never raises: a junk value restores as "unknown".
+    """
+    if not isinstance(raw, str) or not raw:
+        return None
+    try:
+        parsed = dt_util.parse_datetime(raw)
+    except (TypeError, ValueError):
+        return None
+    if parsed is None:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt_util.now().tzinfo)
+    return dt_util.as_utc(parsed)
 
 
 def _coerce_price_timeline(raw: Any) -> list[tuple[float, float]]:
@@ -779,6 +799,12 @@ class WashDataManager:
         self._remove_power_off_timer: Any | None = None
         self._last_reading_time: datetime | None = None
         self._last_real_reading_time: datetime | None = None # Track last real sensor update
+        # Register item 266, restart hazard. The silence clock and sensor value a
+        # restored cycle's snapshot carried, consumed once by the setup read; and
+        # the report that read took, which the resync must not mistake for a
+        # missed one (it would hand the restart's own write back as fresh).
+        self._restored_sensor_clock: tuple[datetime, float | None] | None = None
+        self._setup_report_ts: datetime | None = None
         self._noise_events: list[datetime] = []
         self._noise_max_powers: list[float] = []
         self._last_match_result = None
@@ -1228,8 +1254,8 @@ class WashDataManager:
                  readings,
                  current_duration,
                  in_progress=True,
-                 # Lets the prefix guard ignore longer programmes that never pause
-                 # below this threshold, so cannot explain an ENDING quiet (#424).
+                 # Lets the #288 prefix term ignore longer programmes that never
+                 # pause below this threshold, so cannot explain a quiet (#424).
                  stop_threshold_w=float(self.detector.config.stop_threshold_w),
             )
 
@@ -1359,8 +1385,19 @@ class WashDataManager:
             )
             _write_switch_state(self, switch_state, override_log)
 
+            # Register item 469(b): an ambiguous tick in ENDING engages no new
+            # verified pause (the detector refuses its match if it would defer).
+            pause = match_rules.hold_in_ending(
+                ending=self.detector.state == STATE_ENDING,
+                is_ambiguous=bool(result.is_ambiguous),
+                current_matched=current_matched,
+                prev_verified=getattr(self.detector, "_verified_pause", False),
+                verified_pause=verified_pause,
+                user_paused=self._is_user_paused,
+            )
+            _emit_rule_log(self._logger, pause.log)
             # Push updates to detector
-            self.detector.set_verified_pause(verified_pause)
+            self.detector.set_verified_pause(pause.verified_pause)
             # A divergence revert revokes the detector's match (no name, revoke flag).
             profile_name, revoke = match_rules.detector_match(tick, result)
             # Built by name (audit DETECT-15); see CycleDetector.MatchContext.
@@ -1376,7 +1413,6 @@ class WashDataManager:
                 phase_name=phase_name,
                 is_confident_mismatch=revoke,
                 is_ambiguous=result.is_ambiguous,
-                is_prefix_ambiguous=result.is_prefix_ambiguous,
                 is_prefix_ambiguous_full_shape=result.is_prefix_ambiguous_full_shape,
                 tail_power=(
                     self.profile_store.profile_tail_power(profile_name) if profile_name else None
@@ -1390,7 +1426,7 @@ class WashDataManager:
                 ),
                 # Item 330: from the FULL candidate population, carried on the
                 # result (`result.candidates` is the top 5 and would hide the very
-                # programme the prefix flag is warning about).
+                # programme an ambiguous match may be warning about).
                 longest_candidate_s=float(
                     getattr(result, "longest_candidate_duration_s", 0.0) or 0.0
                 ),
@@ -1589,6 +1625,51 @@ class WashDataManager:
             active_snapshot if isinstance(active_snapshot, dict) else None
         )
 
+        snap = active_snapshot_to_restore or {}
+        snap_last_real = _snapshot_time(snap.get("last_real_reading_time"))
+
+        def is_live_silent_tail(now: datetime) -> bool:
+            """A cycle waiting out a silent low-power tail (register item 266).
+
+            The windows in ``is_viable_restore`` age the snapshot, but a silent
+            tail is not stale: the watchdog keeps such a cycle for as long as its
+            staleness budget allows silence (1 h, a dishwasher 4 h, the profile's
+            remaining time, a verified pause), and saves came only with real
+            readings, so a drying dishwasher's snapshot aged past 30 min while
+            Home Assistant was watching it. Restore what the watchdog would hold:
+            same budget, judged on the sensor's real silence, and only while the
+            sensor still reads low. Past that budget the watchdog would have
+            force-ended it, so it is genuinely stale and is still dropped.
+            """
+            if snap_last_real is None or not power_is_valid:
+                return False
+            if current_power >= self._config.min_power:
+                return False
+            if snap.get("state") not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+                return False
+            try:
+                waiting = float(snap.get("time_below") or 0.0) > 0.0
+                expected = float(snap.get("expected_duration") or 0.0)
+            except (TypeError, ValueError):
+                return False
+            if not waiting:
+                return False
+            start = _snapshot_time(snap.get("current_cycle_start"))
+            elapsed = (now - start).total_seconds() if start is not None else 0.0
+            budget = self._low_power_silence_budget_s(
+                elapsed, expected, bool(snap.get("is_user_paused"))
+            )
+            silence = (now - snap_last_real).total_seconds()
+            if silence > budget:
+                return False
+            self._logger.info(
+                "Restoring a cycle in a silent low-power tail: sensor silent "
+                "%.0fs, within the watchdog's %.0fs budget",
+                silence,
+                budget,
+            )
+            return True
+
         # Helper to check if a snapshot is viable
         def is_viable_restore(last_save_time: datetime) -> bool:
             now = utc_now()
@@ -1609,7 +1690,7 @@ class WashDataManager:
                 and current_power >= self._config.min_power
             ):
                 return True
-            return False
+            return is_live_silent_tail(now)
 
         last_save = self.profile_store.get_last_active_save()
         if last_save and last_save.tzinfo is None:
@@ -1687,7 +1768,15 @@ class WashDataManager:
                         "state": STATE_PAUSED,
                     }
 
-                self.detector.restore_state_snapshot(active_snapshot_to_restore)
+                if self.detector.restore_state_snapshot(active_snapshot_to_restore) is False:
+                    # The detector already logged the traceback.
+                    await self._async_keep_failed_restore(
+                        active_snapshot_to_restore,
+                        last_save,
+                        self.detector.restore_error or "restore_state_snapshot failed",
+                        traceback_logged=True,
+                    )
+                    return
 
                 # Anti-wrinkle keepalive anchor (#339). The keepalive in
                 # _handle_state_expiry needs a "sensor last spoke" timestamp, but
@@ -1698,10 +1787,20 @@ class WashDataManager:
                 # last_save is the best available proxy. Scoped to ANTI_WRINKLE so
                 # no other timer sees a synthetic anchor.
                 if self.detector.state == STATE_ANTI_WRINKLE and last_save:
-                    self._last_real_reading_time = last_save
+                    self._last_real_reading_time = snap_last_real or last_save
 
                 # Restore if in any active state (Running, Paused, Ending)
                 if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+                    # The sensor's pre-restart silence clock (register item 266).
+                    # The setup read then decides whether the entity's startup
+                    # write is a new report or just the old value written again.
+                    if snap_last_real is not None:
+                        self._last_real_reading_time = snap_last_real
+                        self._restored_sensor_clock = (
+                            snap_last_real,
+                            _finite_power(snap.get("last_sensor_power")),
+                        )
+
                     # Restore manual program flag if present
                     self._manual_program_active = active_snapshot_to_restore.get(
                         "manual_program", False
@@ -1864,14 +1963,56 @@ class WashDataManager:
                     self._start_watchdog()
                 else:
                     await self.profile_store.async_clear_active_cycle()
-            except Exception as err:
-                self._logger.warning("Failed to restore active cycle: %s, clearing", err)
-                await self.profile_store.async_clear_active_cycle()
+            except Exception:  # noqa: BLE001
+                await self._async_keep_failed_restore(
+                    active_snapshot_to_restore, last_save, traceback.format_exc()
+                )
         else:
             if last_save:
                 age = (utc_now() - last_save).total_seconds()
                 self._logger.info("Active cycle too stale (age=%.0fs), clearing", age)
             await self.profile_store.async_clear_active_cycle()
+
+    async def _async_keep_failed_restore(
+        self,
+        snapshot: dict[str, Any],
+        last_save: datetime | None,
+        error: str,
+        *,
+        traceback_logged: bool = False,
+    ) -> None:
+        """A snapshot that could not be restored: say so, keep it, start from OFF.
+
+        It used to be deleted after one log line, so the running cycle vanished
+        without a trace (register item 266 follow-up). It is kept, the last one per
+        device, for the diagnostics download; the active slot is cleared so the
+        next restart does not trip over it again, and the detector starts OFF so
+        the appliance's next cycle is detected normally. Never raises.
+        """
+        now = utc_now()
+        age = (now - last_save).total_seconds() if last_save is not None else None
+        self._logger.warning(
+            "Could not restore the active cycle (state %r, snapshot age %s); kept it "
+            "for diagnostics and starting from OFF%s",
+            snapshot.get("state"),
+            f"{age:.0f}s" if age is not None else "unknown",
+            "" if traceback_logged else f":\n{error}",
+        )
+        try:
+            self.detector.reset()
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Detector reset after a failed restore raised", exc_info=True)
+        await self.profile_store.async_keep_failed_restore({
+            "failed_at": now.isoformat(),
+            "last_active_save": last_save.isoformat() if last_save is not None else None,
+            "age_s": round(age, 1) if age is not None else None,
+            "error": error,
+            "snapshot": snapshot,
+        })
+        try:
+            await self.profile_store.async_clear_active_cycle()
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Clearing a failed snapshot raised", exc_info=True)
 
     async def _async_repair_banked_tails(self) -> None:
         """One-time repair of cycles that banked the end-of-cycle confirmation
@@ -2118,33 +2259,7 @@ class WashDataManager:
             self._armed_program = None
 
         # Force initial update from current state (in case it's already stable)
-        state = self.hass.states.get(self.power_sensor_entity_id)
-        if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-            # A non-finite reading is skipped entirely, which leaves the cache
-            # unset, i.e. the pre-#409 behaviour. Seeding it with a nan instead
-            # would be PERMANENT: _resync_power_from_state returns early precisely
-            # when the sensor is non-finite, so the healing path could never
-            # overwrite it, and every later watchdog comparison would be False.
-            power = _finite_power(state.state)
-            if power is not None:
-                try:
-                    now = utc_now()
-                    self.detector.process_reading(power, now)
-                    # Seed the reading cache from the sensor itself (#409). The
-                    # reading was already fed to the detector; leaving the manager's
-                    # own cache unset meant every reload started with
-                    # _current_power = 0 and _last_reading_time = None, so (a) the
-                    # power tile/entity reported a value the sensor never had until
-                    # the next event and (b) the watchdog - which returns early while
-                    # _last_reading_time is None - could neither keepalive nor close a
-                    # restored cycle whose plug went silent across the reload.
-                    self._current_power = power
-                    self._last_reading_time = now
-                    self._last_real_reading_time = (
-                        getattr(state, "last_reported", None) or state.last_updated
-                    )
-                except (ValueError, TypeError):
-                    pass
+        self._read_power_state_at_setup()
 
         # Trigger migration/compression of old cycle format
         # This is safe to run repeatedly (it skips already compressed cycles)
@@ -3794,7 +3909,14 @@ class WashDataManager:
                 power, now, self._last_reading_time
             )
         self._last_reading_time = now
-        self._last_real_reading_time = now # Track real update
+        if self._restored_sensor_clock is not None:
+            # The entity appeared only after setup, so this is its startup write
+            # (register item 266): same rule as the setup read.
+            self._seed_real_reading_clock(
+                power, report_ts if isinstance(report_ts, datetime) else now
+            )
+        else:
+            self._last_real_reading_time = now # Track real update
         self._current_power = power
         # One entity refresh per reading, the one at the end (register item 456):
         # _update_estimates and a match that completes inside process_reading (a
@@ -3834,6 +3956,25 @@ class WashDataManager:
             # Tracked (audit MANAGER-13): an unload cancels it and writes its own.
             self._spawn_tracked(self.profile_store.async_save_active_cycle(snapshot))
             self._last_state_save = now
+
+    def _save_snapshot_while_silent(self, now: datetime) -> None:
+        """Keep the active snapshot current through a silence (register item 266).
+
+        Saves were driven by real readings only, so a cycle waiting out a silent
+        tail kept the snapshot of its last report: a crash then restored that
+        moment's quiet tally, recorded the watched silence as a restart gap, and
+        aged the snapshot by time Home Assistant had in fact been watching - past
+        the restore window on a long drying tail. Same 60 s throttle. Never
+        raises: a lost save only costs a restore, the watchdog tick must finish.
+        """
+        if self.detector.state not in (
+            STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING
+        ):
+            return
+        try:
+            self._check_state_save(now)
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Could not save the active cycle in a silence", exc_info=True)
 
     async def _run_final_match_from_cycle_data(
         self, cycle_data: dict[str, Any]
@@ -4258,6 +4399,70 @@ class WashDataManager:
             return None
         return power, report_ts
 
+    def _read_power_state_at_setup(self) -> None:
+        """Feed the power entity's current state once at setup and seed the caches."""
+        state = self.hass.states.get(self.power_sensor_entity_id)
+        if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+            # A non-finite reading is skipped entirely, which leaves the cache
+            # unset, i.e. the pre-#409 behaviour. Seeding it with a nan instead
+            # would be PERMANENT: _resync_power_from_state returns early precisely
+            # when the sensor is non-finite, so the healing path could never
+            # overwrite it, and every later watchdog comparison would be False.
+            power = _finite_power(state.state)
+            if power is not None:
+                try:
+                    now = utc_now()
+                    self.detector.process_reading(power, now)
+                    # Seed the reading cache from the sensor itself (#409). The
+                    # reading was already fed to the detector; leaving the manager's
+                    # own cache unset meant every reload started with
+                    # _current_power = 0 and _last_reading_time = None, so (a) the
+                    # power tile/entity reported a value the sensor never had until
+                    # the next event and (b) the watchdog - which returns early while
+                    # _last_reading_time is None - could neither keepalive nor close a
+                    # restored cycle whose plug went silent across the reload.
+                    self._current_power = power
+                    self._last_reading_time = now
+                    self._seed_real_reading_clock(
+                        power,
+                        getattr(state, "last_reported", None) or state.last_updated,
+                    )
+                except (ValueError, TypeError):
+                    pass
+
+    def _seed_real_reading_clock(self, power: float, report_ts: datetime) -> None:
+        """Set the silence clock from the power entity's first state after a
+        restart (register item 266): the setup read, or the first event when the
+        entity only appears after setup.
+
+        After a restart every entity is written afresh, so the entity's timestamp
+        says "the sensor just spoke" even when the plug has been silent for an
+        hour. For a restored cycle whose sensor still holds the value it held
+        before the restart, that write carries nothing new: keep the restored
+        clock, so the watchdog's keepalive, ghost and staleness rules go on
+        measuring the real silence. A different value is a genuine report and
+        takes the entity's time, as does every setup with nothing restored. The
+        report is remembered so the watchdog's resync does not hand it back as
+        a missed one and reseed the clock a tick later.
+        """
+        restored, self._restored_sensor_clock = self._restored_sensor_clock, None
+        if (
+            restored is not None
+            and restored[1] is not None
+            and math.isclose(power, restored[1], rel_tol=0.0, abs_tol=1e-6)
+            and self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+        ):
+            self._last_real_reading_time = restored[0]
+            self._setup_report_ts = report_ts
+            self._logger.info(
+                "Power sensor still reads %.2fW, as before the restart: keeping its "
+                "last report at %s as the silence clock",
+                power,
+                restored[0],
+            )
+            return
+        self._last_real_reading_time = report_ts
+
     def _resync_power_from_state(self, now: datetime, feed_detector: bool) -> None:
         """Re-anchor the cached power on the sensor's live state (#409).
 
@@ -4283,7 +4488,7 @@ class WashDataManager:
         missed = (
             self._last_real_reading_time is None
             or report_ts > self._last_real_reading_time
-        )
+        ) and report_ts != self._setup_report_ts  # setup already took it (item 266)
         if feed_detector and missed:
             self._logger.debug(
                 "Resync: sensor reported %.2fW at %s but the last processed reading "
@@ -4297,6 +4502,34 @@ class WashDataManager:
             self._last_reading_time = now
             self._last_real_reading_time = report_ts
         self._current_power = power
+
+    def _low_power_silence_budget_s(
+        self, elapsed: float, expected: float, verified_pause: bool
+    ) -> float:
+        """How long a low-power wait may go without a real reading before the
+        watchdog force-ends it as stale. The restart path asks the same question
+        of a snapshot (register item 266), so the two cannot drift apart.
+        """
+        # Dishwashers can have very long silent drying phases (up to 2h)
+        # We use the device-specific timeout as the floor for this effective timeout.
+        # The floor is applied unconditionally - dishwashers have passive drying phases
+        # even when no profile has been matched yet.  The original restriction to matched
+        # cycles caused premature kills: with the default 3600s timeout, an unmatched
+        # dishwasher cycle was killed ~1h after the last sensor update, while the
+        # physical drying phase could still have 1-2h of silent runtime remaining.
+        budget = max(
+            float(DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(self.device_type, 0)),
+            float(self._low_power_no_update_timeout),
+        )
+        # Profile-Aware Extension: with a matched profile, never kill during the
+        # expected duration - remaining + 1800 s (30 min buffer for drying/pause).
+        if expected > 0 and elapsed < expected:
+            budget = max(budget, expected - elapsed + 1800)
+        # Verified Pause Extension: a confirmed legitimate pause (e.g. drying) gets
+        # up to the global deferral limit + the same buffer.
+        if verified_pause:
+            budget = max(budget, DEFAULT_MAX_DEFERRAL_SECONDS + 1800)
+        return budget
 
     async def _watchdog_check_stuck_cycle(self, now: datetime) -> None:
         """Watchdog: check if cycle is stuck (no updates for too long)."""
@@ -4485,43 +4718,9 @@ class WashDataManager:
         # If we are in a low power state (waiting for off_delay or drying profile),
         # we treat silence leniently. We inject keepalives until the stricter
         # low_power_no_update_timeout is reached.
-
-        # Dishwashers can have very long silent drying phases (up to 2h)
-        # We use the device-specific timeout as the floor for this effective timeout.
-        # The floor is applied unconditionally - dishwashers have passive drying phases
-        # even when no profile has been matched yet.  The original restriction to matched
-        # cycles caused premature kills: with the default 3600s timeout, an unmatched
-        # dishwasher cycle was killed ~1h after the last sensor update, while the
-        # physical drying phase could still have 1-2h of silent runtime remaining.
-        low_power_floor = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(
-            self.device_type, 0
+        effective_low_power_timeout = self._low_power_silence_budget_s(
+            elapsed, expected, bool(getattr(self.detector, "_verified_pause", False))
         )
-        effective_low_power_timeout = max(
-            low_power_floor, self._low_power_no_update_timeout
-        )
-
-        # Profile-Aware Extension:
-        # If we have a matched profile, ensure we don't kill during the expected duration.
-        if expected > 0 and elapsed < expected:
-            # Extend timeout to cover the remaining expected duration + buffer
-            remaining = expected - elapsed
-            # Allow silence up to remaining + 1800s (30m buffer for drying/pause)
-            extended_timeout = remaining + 1800
-            if extended_timeout > effective_low_power_timeout:
-                effective_low_power_timeout = extended_timeout
-
-        # Verified Pause Extension:
-        # If the manager/store has confirmed this is a legitimate pause (e.g. Drying),
-        # allow even more leniency up to the global deferral limit.
-        if getattr(self.detector, "_verified_pause", False):
-            # Allow silence up to DEFAULT_MAX_DEFERRAL_SECONDS (default 2h) + buffer
-            pause_limit = DEFAULT_MAX_DEFERRAL_SECONDS + 1800
-            if pause_limit > effective_low_power_timeout:
-                effective_low_power_timeout = pause_limit
-                self._logger.debug(
-                    "Watchdog: Extending timeout to %.0fs due to verified pause",
-                    effective_low_power_timeout
-                )
 
         if self.detector.is_waiting_low_power():
 
@@ -4599,6 +4798,7 @@ class WashDataManager:
                 )
                 self._last_reading_time = now
                 self._current_power = _ka_w
+                self._save_snapshot_while_silent(now)
                 self._notify_update()
                 return
 
@@ -4623,6 +4823,7 @@ class WashDataManager:
             )
             self._last_reading_time = now
             self._current_power = _ka_w
+            self._save_snapshot_while_silent(now)
             self._notify_update()
             return
 
@@ -4669,6 +4870,7 @@ class WashDataManager:
                         limit,
                     )
                     self._last_reading_time = now
+                    self._save_snapshot_while_silent(now)
                     self._notify_update()
                     return
 
@@ -5550,6 +5752,17 @@ class WashDataManager:
         snapshot["notified_pre_completion"] = bool(self._notified_pre_completion)
         snapshot["restart_gaps"] = list(self._restart_gaps)
         snapshot["live_activity_started"] = bool(self._live_activity_started)
+        # When the power sensor last really reported, and the value the manager
+        # held for it (register item 266). Without them a restart took the
+        # entity's own startup write for a report, so the watchdog's silence
+        # clock restarted at zero and a cycle in a long silent tail looked as if
+        # its plug had just spoken.
+        snapshot["last_real_reading_time"] = (
+            self._last_real_reading_time.isoformat()
+            if self._last_real_reading_time is not None
+            else None
+        )
+        snapshot["last_sensor_power"] = self._current_power
         return snapshot
 
     @staticmethod

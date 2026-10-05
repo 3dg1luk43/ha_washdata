@@ -224,6 +224,9 @@ def _prepare(path: Path, flags: dict[str, bool]) -> dict[str, Any] | None:
     stop = float(cfg.stop_threshold_w)
     if flags["repair"]:
         EG._run(store.async_repair_banked_tails(stop, device_type))  # noqa: SLF001
+    # Setup's sample repair before any match, as eval.py / end_gate_eval.py; it
+    # mutates base["profiles"] in place, so the LOO fold stores inherit it.
+    EG._run(store.async_repair_profile_samples())  # noqa: SLF001
     EG._rebuild_envelopes(store, list(base["profiles"]))  # noqa: SLF001
     try:
         prebuilt = playground._build_match_snapshots(store)  # noqa: SLF001

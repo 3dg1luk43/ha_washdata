@@ -1,4 +1,4 @@
-"""Audit 2026-10-02 DETECT-16: the hazard end gate, and LIVE-18's prefix flag.
+"""Audit 2026-10-02 DETECT-16: the hazard end gate, and LIVE-18's prefix flags.
 
 The ENDING fallback waited max(off_delay, min_off_gap) - a blind per-device
 prior for a soak - until 0.90-1.05x expected. It now waits 1.25x the longest
@@ -13,7 +13,7 @@ from unittest.mock import MagicMock
 
 from custom_components.ha_washdata.cycle_detector import CycleDetector
 from custom_components.ha_washdata.detector_config import build_detector_config
-from custom_components.ha_washdata.profile_store import match_prefix_flags
+from custom_components.ha_washdata.profile_store import MatchResult, _match_prefix_ambiguity
 from custom_components.ha_washdata.signal_processing import resumed_pauses
 
 T0 = datetime(2026, 5, 1, 8, 0, tzinfo=timezone.utc)
@@ -53,7 +53,12 @@ def test_it_does_nothing_without_evidence_or_with_an_ambiguous_match() -> None:
     assert _wait(_det(None), 0.95 * 7200) == 2400.0
     assert _wait(_det((2, ((0.92, 120.0),) * 2)), 0.95 * 7200) == 2400.0
     assert _wait(_det(ambiguous=True), 0.95 * 7200) == 2400.0
-    assert _wait(_det(prefix=True), 0.95 * 7200) == 2400.0
+
+
+def test_the_retired_prefix_fit_element_no_longer_holds_the_hazard_gate() -> None:
+    """Element 7 (the #364 prefix-fit flag) was removed in 0.5.8; a legacy tuple
+    still setting it gets the hazard wait like any unambiguous match."""
+    assert _wait(_det(prefix=True), 0.95 * 7200) == 150.0
 
 
 def test_a_shorter_tuple_and_a_reset_clear_the_catalogue() -> None:
@@ -70,8 +75,14 @@ def test_resumed_pauses_skip_the_leading_standby_and_the_open_end() -> None:
     assert resumed_pauses(pts, 2.0) == [(120 / 900, 180.0)]
 
 
-def test_the_wide_prefix_flag_is_the_prefix_fit_term_alone() -> None:
+def test_only_the_full_shape_flag_is_left_and_a_prefix_score_cannot_set_it() -> None:
+    """LIVE-18 took the #288 term off the ENDING gates; 0.5.8 removed the #364
+    prefix-fit flag those gates read instead. What is left is the #288 term, for
+    the anti-crease finalize, and a `prefix_score` no longer reaches it."""
     win = {"name": "Quick", "profile_duration": 2760.0, "shape_score": 0.70, "score": 0.61}
     longer = {"name": "Normal", "profile_duration": 5280.0, "shape_score": 0.70, "score": 0.44}
-    assert match_prefix_flags([win, longer], 2760.0) == (False, True)
-    assert match_prefix_flags([win, dict(longer, prefix_score=0.9)], 2760.0) == (True, True)
+    assert _match_prefix_ambiguity([win, longer], 2760.0) is True
+    poor = dict(longer, shape_score=0.20, prefix_score=0.95)
+    assert _match_prefix_ambiguity([win, poor], 2760.0) is False
+    assert "is_prefix_ambiguous" not in MatchResult.__dataclass_fields__
+    assert "is_prefix_ambiguous_full_shape" in MatchResult.__dataclass_fields__

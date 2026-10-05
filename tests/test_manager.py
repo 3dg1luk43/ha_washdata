@@ -29,7 +29,7 @@ from custom_components.ha_washdata.const import (
     CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_START,
     STATE_STARTING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_ANTI_WRINKLE,
     CONF_NOTIFY_ACTIONS, CONF_NOTIFY_PEOPLE, CONF_NOTIFY_ONLY_WHEN_HOME, CONF_NOTIFY_FIRE_EVENTS,
-    CONF_WATCHDOG_INTERVAL,
+    CONF_WATCHDOG_INTERVAL, MATCH_AMBIGUOUS_COMMIT_FACTOR,
 )
 
 @pytest.fixture
@@ -693,10 +693,11 @@ async def test_start_notification_fires_immediately_in_fallback(manager: WashDat
     assert manager._notified_start is True
     assert manager._current_program == "detecting..."  # Program not yet resolved
 
-    # 2nd and 3rd Intervals - no additional start notifications, program resolves on 3rd
+    # Later intervals - no additional start notifications. The result is ambiguous,
+    # so it resolves after MATCH_AMBIGUOUS_COMMIT_FACTOR x persistence intervals.
     mock_hass.services.async_call.reset_mock()
-    await manager._async_do_perform_matching(readings)
-    await manager._async_do_perform_matching(readings)
+    for _ in range(3 * MATCH_AMBIGUOUS_COMMIT_FACTOR - 1):
+        await manager._async_do_perform_matching(readings)
 
     # Notification fired only once; program now resolved via persistence
     assert mock_hass.services.async_call.call_count == 0  # No extra start notification

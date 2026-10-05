@@ -62,7 +62,7 @@ def _manager(mock_hass: Any) -> WashDataManager:
     result = MagicMock(
         best_profile="Cotton", confidence=0.9, expected_duration=3600.0,
         matched_phase=None, candidates=[{"name": "Cotton", "score": 0.9}],
-        is_ambiguous=False, is_prefix_ambiguous=False,
+        is_ambiguous=False,
         is_prefix_ambiguous_full_shape=False, is_confident_mismatch=False,
         member_confidence=None, longest_candidate_duration_s=3600.0,
     )

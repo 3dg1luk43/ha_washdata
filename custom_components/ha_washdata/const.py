@@ -702,6 +702,18 @@ MATCH_LABEL_MIN_MARGIN = 0.08
 # so this is the conservative end of an accuracy/stability trade. Do not retune it
 # in isolation: any Stage-2 scoring change rescales the margin along with it.
 MATCH_DECISIVE_MARGIN = 0.12
+# The first commit of a live programme (match_rules.decide_switch, Case 1). A winner
+# that is AMBIGUOUS on the tick (inside MATCH_AMBIGUITY_MARGIN of the runner-up, or
+# flagged by a Stage-5 safeguard) commits only once it has led for this many times
+# match_persistence consecutive matches; a clear winner still commits at
+# match_persistence. Until 0.5.8 an ambiguous winner committed at match_persistence
+# too. Measured alone (devtools/decisive_margin_eval.py --switching --loo, 291
+# labelled cycles): first programme shown right on washers 29.8 -> 34.2%,
+# dishwashers 90.8 -> 93.1%, washer switches per cycle 1.32 -> 1.12, for a median
+# first commit 17.8 -> 19.5 min on washers (dishwashers unchanged at 11.1 min).
+# Not "never": a stable winner of an always-close pair must still get a programme
+# and an ETA (offline, waiting for a clear tick left 4 washer cycles uncommitted).
+MATCH_AMBIGUOUS_COMMIT_FACTOR = 2
 # DISPLAY ONLY - never a gate (audit MATCH-DECIDE-15/18). The Status card's
 # "Uncertain: X or Y, ~N% sure" figure while the live match is undecided:
 # P(the leading guess is the right programme) as a monotone piecewise-linear map
@@ -718,13 +730,15 @@ MATCH_SURE_KNOTS: tuple[tuple[float, float], ...] = (
     (0.159, 0.73), (0.252, 0.84), (0.373, 0.89),
 )
 MATCH_SURE_SINGLE_CANDIDATE = 0.59
-# Smart Termination landscape guard: when a non-winning candidate is at least this
+# Prefix-landscape guard (#288): when a non-winning candidate is at least this
 # much longer than the matched profile AND has a decent shape score (before Stage-4
 # duration penalty), the current trace may be a *prefix* of that longer program
-# rather than a completed short one. Smart Termination is blocked; the power-based
-# fallback timeout decides instead. Ratio chosen so that programmes within ~50% of
+# rather than a completed short one. Ratio chosen so that programmes within ~50% of
 # each other (e.g. Quick 46 min vs Eco 60 min, ratio 1.30) do not trigger the guard
 # but genuine prefix pairs like Quick 46 vs Normal 88 min (ratio 1.91) always do.
+# Since audit LIVE-18 it guards only the dryer anti-crease finalize
+# (`MatchResult.is_prefix_ambiguous_full_shape`): at the ENDING gates it was every
+# false block at a genuine end.
 SMART_TERM_LANDSCAPE_RATIO = 1.5       # candidate must be >= 1.5× the matched duration
 SMART_TERM_LANDSCAPE_MIN_SHAPE = 0.40  # minimum shape score (pre-Stage-4) to qualify
 
@@ -738,48 +752,27 @@ SMART_TERM_LANDSCAPE_MIN_SHAPE = 0.40  # minimum shape score (pre-Stage-4) to qu
 #   (3) the 1.5 ratio is knife-edge - on a real 13-programme washer the observed
 #       neighbour ratios are 1.12-1.48, so the guard never fires at all.
 #
-# Two independent additions, both shorten-only (they can only ever BLOCK an early
-# finish, never end a cycle sooner).
+# (a) Prefix scoring (for 2 + 3) was REMOVED in 0.5.8. It re-scored a longer
+# candidate against its own curve truncated to the elapsed time and blocked the
+# ENDING gates when that beat the winner's shape score by 0.15 (floor 0.40, ratio
+# > 1.10, at most 3 scorings per match). #400 took its premise away: Stages 2/3
+# now score a running cycle against every candidate's truncated curve, so a longer
+# programme whose start explains the trace better mostly wins the match itself.
+# Measured on the shipped matcher (devtools/prefix_guard_eval.py --quiet-cuts
+# --sweep, leave-one-out, 71 devices): 0 of 713 genuine ends and 0 of the 7 quiet
+# split positives (ENDING quiet inside a pause power later resumed from, the only
+# moment Smart Termination can split a cycle) at every point of a margin 0-0.15 x
+# floor 0-0.60 x ratio 1.0-1.5 grid - their best prefix margin was -0.024. What it
+# caught were mid-activity cuts that never reach ENDING, which (b) blocks.
 #
-# (a) Prefix scoring (fixes 2 + 3).  A longer candidate is re-scored against its own
-# curve TRUNCATED to the elapsed duration, which is an apples-to-apples comparison
-# and lands on the same 0-1 scale as `shape_score` (same find_best_alignment, same
-# DTW blend).  Because it compares equal-length series over the whole overlap it
-# reads systematically higher than the full-envelope score, so it gets its OWN
-# threshold rather than reusing SMART_TERM_LANDSCAPE_MIN_SHAPE.  The load-bearing
-# term is the MARGIN over the winner ("the longer programme explains this trace at
-# least this much better than the short one does"), which is scale-free; the floor
-# only rejects candidates that fit nothing.  Measured on 20 real cycles + 7
-# envelopes (37 prefix-cut positives vs 17 genuine-cycle negatives): margin 0.15
-# catches 26/37 splits for 1/17 false blocks, while simply lowering the ratio to
-# 1.35/1.15 costs 2/17 and 4/17 false blocks for no measured gain.
-SMART_TERM_PREFIX_MARGIN = 0.15        # prefix score must beat the winner by this
-SMART_TERM_PREFIX_MIN_SHAPE = 0.40     # absolute floor on the prefix score
-SMART_TERM_PREFIX_MIN_RATIO = 1.10     # noise guard: ignore near-equal durations
-SMART_TERM_PREFIX_MAX_CANDIDATES = 3   # cap prefix scorings per match (cost control)
-SMART_TERM_PREFIX_MIN_POINTS = 12      # mirrors the matcher's >=12-sample floor
-SMART_TERM_PREFIX_MIN_COVERAGE = 0.90  # template span must cover >=90% of its duration
-
-# (c) Pause evidence (#424).  Both terms above ask whether the trace LOOKS like the
-# start of a longer programme; neither asks whether that programme could be quiet
-# right now.  Smart Termination only runs in ENDING, i.e. after the power has sat
-# below `stop_threshold_w`, so a longer candidate can only explain the moment if it
-# is a programme that pauses below that threshold mid-cycle.  A candidate whose
-# stored cycles never once did is not a prefix explanation, and it no longer blocks.
-# Measured with `devtools/prefix_guard_eval.py --quiet-cuts` (leave-one-out, on the
-# item-303 grid, every genuine end judged after 300 s of ENDING quiet): the two
-# terms fired on 186 of 689 genuine cycle ends (27.0%), each one pushed onto the
-# fallback timeout - for a dishwasher on defaults, an hour.  With this, 142
-# (20.6%).  The population a split can actually come from - a below-threshold
-# mid-cycle pause of >= 300 s that power later resumed from, with a shorter
-# programme winning at >= 0.9x its own length - occurs only 3 times in the corpus,
-# and is caught exactly as before (1 of 3).  Any stored pause of this length keeps
-# the guard; a programme with no traced evidence keeps it too.
-# Re-measured 2026-10-04 on the shipped matcher (the rewritten prefix_guard_eval,
-# real async_match_profile, leave-one-out, 71 devices; item 483): the prefix term
-# now fires on 0 of 713 genuine ends and catches 3 of 528 random-cut positives and
-# 0 of 7 quiet ones. The 186/142 figures above came from the old harness, which
-# OR-ed in the #288 full-shape term. On the shipped path the term is close to inert.
+# (c) Pause evidence (#424), on the #288 term. It asks whether the trace LOOKS like
+# the start of a longer programme, not whether that programme could be quiet right
+# now. A longer candidate can only explain a below-`stop_threshold_w` moment if it
+# is a programme that pauses below that threshold mid-cycle, so a candidate whose
+# stored cycles never once did no longer counts. Any stored pause of this length
+# keeps the guard; a programme with no traced evidence keeps it too. (Measured when
+# it also fed the ENDING gates: genuine-end fires 186/689 -> 142/689 on the old
+# harness, which OR-ed both terms.)
 SMART_TERM_PREFIX_MIN_PAUSE_S = 60.0
 
 # (b) Power plausibility (fixes 1, the untrained case, which no candidate-pool guard
@@ -866,6 +859,11 @@ END_GATE_HAZARD_POSITION_SLACK = 0.05
 MATCH_ENERGY_WEIGHT = 0.22
 MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halves
 MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
+# At cycle end Stage 4 takes a washer's expected energy from the median of the
+# profile's own cycles (analysis.member_energy_reference) once it has this many;
+# below it, and mid-cycle, the template's mean power x duration as before. 3 was
+# measured slightly worse than 2 (eval.py full, cut 1.0: +3/-4 folds).
+MATCH_ENERGY_REF_MIN_CYCLES = 2
 # Issue #400: once a RUNNING cycle has outlasted a candidate, that is hard
 # evidence against it, and the penalty uses this sharper scale instead of
 # MATCH_DURATION_SCALE. Only reached when the caller opts in via
@@ -892,6 +890,11 @@ MATCH_DURATION_SCALE_OVERRUN = 0.05
 # 71.0% at 0.7; at 0.8 the 90% checkpoint drops and a real dishwasher export loses
 # Smart Termination, the same cliff the rejected duration credit fell off.
 MATCH_PREFIX_SHAPE_MAX_RATIO = 0.7
+# The fewest template samples a truncated prefix may keep and still be correlated
+# and warped (analysis._prefix_point_count / prefix_shape_arrays), mirroring the
+# matcher's >= 12-sample floor. Named SMART_TERM_PREFIX_MIN_POINTS while the
+# removed #364 prefix guard shared it.
+MATCH_PREFIX_MIN_POINTS = 12
 
 
 # States
@@ -1040,9 +1043,12 @@ STANDBY_BAND_LOOSE_MIN_RATIO = 2.0
 # (register item 297). `profile_terminal_quiet_seconds` is a median over that profile's own
 # cycles, so it is already self-limiting; this is the guard against a corrupted
 # or hand-edited value licensing an unbounded tail - the one thing the field
-# exists to prevent. 30 min comfortably covers a dishwasher's passive drying
-# phase, measured at a median 11% of the cycle and reaching 43%.
-TERMINAL_QUIET_CAP_S = 1800.0
+# exists to prevent. Not a measurement of drying: 30 min did not cover it
+# (register item 469). 01KGM619's Eco dries 4840-4860 s before its pump-out, so
+# a run closed without one stored last activity + 1800 s (~8.0k s of an ~11.1k s
+# programme). At 2 h: 12 such replays store 10.0-11.3k s, end lag unchanged on
+# dishwashers but one cycle (+3 min) and no early end or split moved.
+TERMINAL_QUIET_CAP_S = 7200.0
 # A measured quiet span is only trusted as a tail allowance when the profile has
 # actually shown it repeatedly (register item 297). Measured over 20 real profiles: the two
 # dishwashers, which genuinely end in a passive drying phase, scored 20/20 and
@@ -1166,6 +1172,14 @@ ANTI_CREASE_TERMINAL_MATCH_FRAC = 0.5       # live high-power seconds after that
                                             # profile's own block, that count as
                                             # "this run has had its spin"
 ANTI_CREASE_SPIN_WAIT_MAX_RATIO = 1.25      # never block past this x expected
+# Register item 480: the envelope's max band arms the guard when ANY member's last
+# block above the level is terminal, and washer spins straddle 400 W (held runs
+# peak at 331-394 W, the members that "spin" at 404-437 W). Once the band arms,
+# the guard stays armed only when at least this share of the profile's completed
+# traced members end with their own terminal block; with fewer members than the
+# floor the band (or sample) decides alone, as before.
+ANTI_CREASE_SPIN_ARM_MIN_SHARE = 0.5
+ANTI_CREASE_SPIN_ARM_MIN_MEMBERS = 2
 
 # Device Type Defaults
 # Device Type Defaults (Maps)
@@ -1528,6 +1542,13 @@ GROUP_MIN_COHESION = 0.80
 # gap inside the wash; 120 s is well under the measured p10 of 624 s.
 TERMINAL_EVENT_PEAK_FRAC = 0.004
 TERMINAL_QUIET_MIN_S = 120.0
+# ...but a gap of 120 s also sits between a dishwasher's own heating blocks
+# (120-160 s on 01KGM619), so a cycle closed before its pump-out offered its LAST
+# HEATING BLOCK as the terminal event (register item 469). A terminal event is a
+# low-power one: over every corpus dishwasher the candidates peak at <= 9.1% of
+# their cycle's peak (median 1.3%) or at >= 90% (main activity), nothing between.
+# Above this fraction the last run is main activity and the trace has no event.
+TERMINAL_EVENT_MAX_PEAK_FRAC = 0.25
 # Below this many evidence cycles the medians describe noise, not the programme.
 TERMINAL_SIGNATURE_MIN_CYCLES = 3
 # Cycles a profile needs before one of them can be called a duration outlier
@@ -1586,6 +1607,12 @@ PRE_IMPORT_STORE_VERSION = 1
 # unloads, in `ha_washdata.<entry_id>.notify_queue` (audit MANAGER-16). Written at the
 # stop, read and deleted once HA has started again; removed with the device.
 NOTIFY_QUEUE_STORE_SUFFIX = "notify_queue"
+
+# The last active-cycle snapshot that failed to restore, in
+# `ha_washdata.<entry_id>.failed_restore` (register item 266 follow-up): kept for the
+# diagnostics download instead of being deleted with the cycle it held. Written only
+# on a failure, one per device (the next failure overwrites it), removed with the device.
+FAILED_RESTORE_STORE_SUFFIX = "failed_restore"
 
 # ─── Config-entry schema version (NOT the storage version above) ───────────────
 # Single source for the config-entry schema: `ConfigFlow.VERSION`/`MINOR_VERSION`, every

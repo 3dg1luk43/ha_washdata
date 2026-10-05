@@ -56,6 +56,8 @@ _SENSITIVE_KEYS = {
     "switch_entity",
     "energy_price_entity",
     "energy_sensor",
+    # The active-cycle snapshot's meter entity (kept in `failed_restore`).
+    "energy_meter_source",
 }
 
 
@@ -79,6 +81,14 @@ def _redact(obj: Any) -> Any:
     if isinstance(obj, list):
         return [_redact(v) for v in obj]
     return obj
+
+
+async def _failed_restore(manager: WashDataManager) -> Any:
+    """The kept failed-restore record, redacted; None on any problem reading it."""
+    try:
+        return _redact(await manager.profile_store.async_get_failed_restore())
+    except Exception:  # noqa: BLE001 - the download must never fail on this
+        return None
 
 
 async def async_get_config_entry_diagnostics(
@@ -153,4 +163,8 @@ async def async_get_config_entry_diagnostics(
         # state_history: [{ts, from, to, program}, ...] - detector state changes
         # logs:          [{ts, lvl}, ...] - log timestamps and levels (msg removed)
         "live_diagnostics": manager.diag_buffer.redacted_snapshot(),
+        # The last active-cycle snapshot that failed to restore, with the error and
+        # its age (register item 266 follow-up); None when none ever has. A download,
+        # not a bus event, so the 32 KB event-data limit does not apply.
+        "failed_restore": await _failed_restore(manager),
     }

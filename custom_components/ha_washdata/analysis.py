@@ -38,21 +38,19 @@ from .const import (
     MATCH_DTW_RESAMPLE_N,
     MATCH_DURATION_SCALE,
     MATCH_DURATION_SCALE_OVERRUN,
+    MATCH_PREFIX_MIN_POINTS,
     MATCH_PREFIX_SHAPE_MAX_RATIO,
     MATCH_DURATION_WEIGHT,
     MATCH_DURATION_WEIGHT_IN_PROGRESS,
     MATCH_MIN_RATIO_GRACE_S,
     MATCH_ENERGY_SCALE,
+    MATCH_ENERGY_REF_MIN_CYCLES,
     MATCH_ENERGY_WEIGHT,
     MATCH_KEEP_MIN_SCORE,
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
     MAX_ALIGN_GRID_POINTS,
-    SMART_TERM_PREFIX_MAX_CANDIDATES,
-    SMART_TERM_PREFIX_MIN_COVERAGE,
-    SMART_TERM_PREFIX_MIN_POINTS,
-    SMART_TERM_PREFIX_MIN_RATIO,
     STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES,
 )
 
@@ -467,9 +465,8 @@ def _stage3_dtw_score(
     """The DTW score for one candidate: the four-way ``dtw_mode`` branch of the
     Stage-3 refinement.
 
-    Lifted verbatim out of ``compute_matches_worker`` so the Stage-3 loop and the
-    Stage-6 prefix pass (#364) share one implementation and cannot drift apart.
-    Behaviour-identical to the inlined version, including ``legacy`` mode's
+    Lifted verbatim out of ``compute_matches_worker`` (for the #364 Stage-6 prefix
+    pass, removed in 0.5.8). Behaviour-identical to the inlined version, including ``legacy`` mode's
     ``dtw_dist / len(curr_arr)`` normalisation. (The normalised distance it also
     returned until audit MR-12 went to a ``dtw_dist`` candidate field nothing
     read, always 0.0 under the default ``ensemble``.)
@@ -711,6 +708,10 @@ def compute_matches_worker(
         # "integrated" compares true integrated energy (mean x duration). Opt-in so
         # the historical default is byte-for-byte preserved. See register item 99.
         integrated = config.get("energy_mode", "mean") == "integrated"
+        own_energy = (
+            {str(s.get("name")): s.get("energy_ref") for s in snapshots}
+            if integrated and not in_progress else {}
+        )
         cur_mean = float(np.mean(curr_arr))
         cur_energy = cur_mean * current_duration if integrated else cur_mean
         for cand in candidates:
@@ -743,6 +744,17 @@ def compute_matches_worker(
             # time as cur_energy does, so a prefix mean is scaled by the elapsed
             # duration and a whole-template mean by the candidate's own duration.
             cand_energy = cand_mean * cand_span if integrated else cand_mean
+            if integrated and not in_progress:
+                # A COMPLETED cycle is graded against the median energy of the
+                # profile's own cycles, not mean(template) x duration: on a warped
+                # envelope that inherits the reference cycle's heating length (w7g).
+                # Not while running: rescaling the prefix by median/template gained
+                # 0.8-1.6pp top-1 at 25-75% elapsed, but the live matches it moved
+                # are the ones the end gates read (end_gate_eval --loo: 2 new ends
+                # > 5 min early, washer-dryer median lag +0.7 min).
+                own = own_energy_ws(own_energy.get(str(cand["name"])))
+                if own is not None:
+                    cand_energy = own
             en_ag = _agreement(cur_energy, cand_energy, en_scale)
             cand["shape_score"] = float(cand["score"])
             cand["score"] = float(
@@ -757,12 +769,10 @@ def compute_matches_worker(
     # MATCH-CORE-05). It carries no evidence: drop it.
     candidates[:] = [c for c in candidates if math.isfinite(float(c.get("score", 0.0)))]
 
-    # Stage 6 (#364): prefix scores for the few candidates materially LONGER than
-    # the winner. Purely additive - it writes `prefix_score` and never touches
-    # `score`, so ranking is provably unchanged. Must run after the Stage-4
-    # re-sort because the anchor is the winner's duration.
-    annotate_prefix_scores(candidates, curr_arr, current_duration, config)
-
+    # (Stage 6, the #364 prefix scores for the Smart-Termination guard, was removed
+    # in 0.5.8: Stages 2/3 already score a running cycle on each candidate's
+    # truncated curve, so the guard fired on 0 of 713 genuine ends and 0 of 7
+    # quiet split positives on the shipped matcher - devtools/prefix_guard_eval.py.)
     return candidates
 
 def prefix_mean(
@@ -781,7 +791,7 @@ def prefix_mean(
     Falls back to the whole template (and the candidate's own duration) when the
     cycle has already outlasted it: that candidate has finished, so its total is
     the honest comparison. Deliberately NOT ``_prefix_point_count``: that helper's
-    12-sample floor exists because Stage 6 *correlates* the prefix, while a mean
+    12-sample floor exists because Stages 2/3 *correlate* the prefix, while a mean
     over a handful of leading samples is perfectly well defined - applying the
     floor here would silently restore whole-template energy for the first few
     percent of every cycle, which is exactly the window #400 is about.
@@ -792,6 +802,69 @@ def prefix_mean(
         k = max(1, int(round(len(sample) * (current_duration / sample_span_s))))
         return float(np.mean(sample[:k])), current_duration
     return float(np.mean(sample)), profile_duration
+
+
+def member_energy_reference(
+    members: list[tuple[list[float], list[float], float]],
+) -> dict[str, Any] | None:
+    """A profile's energy taken from its OWN cycles, for Stage 4.
+
+    ``members`` are the ``(offsets, watts, duration)`` triples the envelope is built
+    from. Each member's energy is measured the way Stage 4 measures the cycle being
+    matched - mean of the linearly interpolated trace x duration - so both sides of
+    the agreement are the same quantity. ``{"n": members used, "median_wh": median
+    whole-cycle Wh}``, or None without a usable member.
+
+    Why (w7g): Stage 4 took a profile's energy as ``mean(template) x avg_duration``.
+    On a DTW-warped envelope that inherits the heating length of the cycle the
+    members were warped onto: > 20% off its own members' median on 17 of 85 washer
+    profiles in the corpus, 2.5x on one.
+    """
+    totals: list[float] = []
+    for offsets, watts, duration in members:
+        t = np.asarray(offsets, dtype=float)
+        p = np.asarray(watts, dtype=float)
+        if t.size != p.size or t.size < 2:
+            continue
+        ok = np.isfinite(t) & np.isfinite(p)
+        t, p = t[ok], p[ok]
+        if t.size < 2:
+            continue
+        order = np.argsort(t, kind="mergesort")
+        t, p = t[order], p[order]
+        span = float(t[-1] - t[0])
+        if span <= 0:
+            continue
+        try:
+            dur = float(duration)
+        except (TypeError, ValueError):
+            dur = 0.0
+        if not math.isfinite(dur) or dur <= 0:
+            dur = span
+        energy_ws = float(np.sum(0.5 * (p[1:] + p[:-1]) * np.diff(t))) / span * dur
+        if math.isfinite(energy_ws) and energy_ws > 0:
+            totals.append(energy_ws)
+    if not totals:
+        return None
+    return {"n": len(totals), "median_wh": round(float(np.median(totals)) / 3600.0, 3)}
+
+
+def own_energy_ws(ref: dict[str, Any] | None) -> float | None:
+    """The whole-cycle energy (W*s) Stage 4 expects from a profile's own cycles.
+
+    The median of a :func:`member_energy_reference`, or None (keep the template's
+    ``mean x duration``) without one of at least ``MATCH_ENERGY_REF_MIN_CYCLES``
+    cycles or with a malformed one.
+    """
+    if not isinstance(ref, dict):
+        return None
+    try:
+        if int(ref.get("n") or 0) < MATCH_ENERGY_REF_MIN_CYCLES:
+            return None
+        own_ws = float(ref["median_wh"]) * 3600.0
+    except (TypeError, ValueError, KeyError):
+        return None
+    return own_ws if math.isfinite(own_ws) and own_ws > 0 else None
 
 
 def _prefix_point_count(
@@ -805,10 +878,10 @@ def _prefix_point_count(
     is uniform in time over its own span (envelope: np.linspace; sample cycle:
     resample_uniform at a fixed dt). (The group aggregate snapshot is gone, #400.)
     """
-    if n_points < SMART_TERM_PREFIX_MIN_POINTS or sample_span_s <= 0 or current_duration <= 0:
+    if n_points < MATCH_PREFIX_MIN_POINTS or sample_span_s <= 0 or current_duration <= 0:
         return 0
     k = int(round(n_points * (current_duration / sample_span_s)))
-    if k < SMART_TERM_PREFIX_MIN_POINTS or k >= n_points:
+    if k < MATCH_PREFIX_MIN_POINTS or k >= n_points:
         return 0
     return k
 
@@ -822,133 +895,31 @@ def prefix_shape_arrays(
     """``(current, template)`` on one grid, with the template TRUNCATED to the
     elapsed time - or None when it cannot be truncated meaningfully.
 
-    One definition of "the same stretch of both curves", shared by the two callers
-    that need it: the live Stage-2/3 shape scoring (#400) and the Stage-6 prefix
-    guard (#364). Both series go onto a shared grid so an index offset equals a time
-    offset regardless of the template's native cadence; the grid also honours the
-    #388 OOM cap. The 12-sample floor is real here (unlike in ``prefix_mean``):
-    these arrays get correlated and warped, not averaged.
+    One definition of "the same stretch of both curves" for the live Stage-2/3
+    shape scoring (#400). (It also fed the #364 Stage-6 prefix guard, removed in
+    0.5.8; ``devtools/prefix_guard_eval.py`` keeps a copy of that rule.) Both
+    series go onto a shared grid so an index offset equals a time offset
+    regardless of the template's native cadence; the grid also honours the #388
+    OOM cap. The 12-sample floor is real here (unlike in ``prefix_mean``): these
+    arrays get correlated and warped, not averaged.
 
     The grid is shared **between the two series**, not across candidates: ``k``
     is the candidate's own truncated point count, so a longer template can be
-    scored on a finer grid than a shorter one. That asymmetry is deliberate and
-    measured. Capping the grid at ``k`` is what stops ``arr[:k]`` being upsampled
-    past the points it actually has, which would invent template detail the
-    recording never contained. Dropping the ``k`` term to make the grid purely
-    candidate-independent (``min(curr_arr.size, MAX_ALIGN_GRID_POINTS)``) was
-    tried and measured on ``devtools/prefix_guard_eval.py``: at the shipped
-    constants it takes the #364 split guard from **59/114 caught (52%) to 52/114
-    (46%)** while removing only 2 of 13 false blocks. A miss there is a SPLIT
-    CYCLE and a false block is merely a later finish, so that trade is
-    net-negative. ``devtools/dtw_ab_eval.py`` is byte-identical either way
-    (it scores only complete cycles, which never take the prefix path), so it
-    cannot be used to judge this function - use ``prefix_guard_eval.py``.
+    scored on a finer grid than a shorter one. Capping the grid at ``k`` is what
+    stops ``arr[:k]`` being upsampled past the points it actually has, which
+    would invent template detail the recording never contained. (The one A/B of
+    dropping the ``k`` term was measured on the removed guard, not on matching.)
+    ``devtools/dtw_ab_eval.py`` scores only complete cycles, which never take
+    the prefix path, so it cannot judge this function - use ``devtools/eval.py``.
     """
     arr = np.asarray(sample, dtype=float)
     k = _prefix_point_count(arr.size, current_duration, sample_span_s)
     if k == 0:
         return None
     grid = int(min(curr_arr.size, k, MAX_ALIGN_GRID_POINTS))
-    if grid < SMART_TERM_PREFIX_MIN_POINTS:
+    if grid < MATCH_PREFIX_MIN_POINTS:
         return None
     return _resample_to(curr_arr, grid), _resample_to(arr[:k], grid)
-
-
-def prefix_shape_score(
-    curr_arr: np.ndarray,
-    sample: list[float] | np.ndarray,
-    current_duration: float,
-    sample_span_s: float,
-    current_peak: float,
-    config: dict[str, Any],
-) -> float | None:
-    """Score the live trace against ``sample`` TRUNCATED to ``current_duration``.
-
-    The #288 landscape guard asks whether a longer candidate has a decent shape
-    score against its **whole** curve - which a part-way-through trace cannot
-    have. This asks the question that actually matters: does the trace look like
-    the *beginning* of that longer programme? (#364)
-
-    Same scale as ``shape_score`` by construction: identical Stage-2 formula
-    (``find_best_alignment``) and identical Stage-3 DTW blend, only the reference
-    array differs. Returns None when the template cannot be truncated meaningfully.
-
-    NB prefix scoring normalizes on the shared resample ``grid`` (both series are
-    resampled to it), so it does not support the non-default ``dtw_mode="legacy"``
-    absolute-watt/length normalization - under which cross-candidate prefix scores of
-    differing native length would not be comparable. This is inert in production: the
-    default is ``"ensemble"`` and the live ProfileStore path never sets ``dtw_mode``;
-    ``"legacy"`` exists only for the devtools re-sweep harness.
-    """
-    pair = prefix_shape_arrays(curr_arr, sample, current_duration, sample_span_s)
-    if pair is None:
-        return None
-    a, b = pair
-
-    corr_weight = float(config.get("corr_weight", MATCH_CORR_WEIGHT))
-    score, _metrics, _offset = find_best_alignment(a, b, 1.0, corr_weight=corr_weight)
-
-    # The SAME default as `compute_matches_worker` (register item 309). Both read
-    # the same unmutated `config` in one match, so a caller that omits the key
-    # would otherwise get DEFAULT_DTW_BANDWIDTH for Stage 3 and the old 0.1 here,
-    # and the two stages would disagree about which candidates look like a prefix.
-    dtw_bandwidth = float(config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH))
-    if dtw_bandwidth > 0.0:
-        dtw_score = _stage3_dtw_score(
-            a,
-            b,
-            current_peak,
-            dtw_mode=str(config.get("dtw_mode", DEFAULT_DTW_MODE)),
-            dtw_bandwidth=dtw_bandwidth,
-            l1_scale=float(config.get("dtw_l1_scale", MATCH_DTW_DIST_SCALE)),
-            ddtw_scale=float(config.get("dtw_ddtw_scale", MATCH_DDTW_DIST_SCALE)),
-            ensemble_w=float(config.get("dtw_ensemble_w", MATCH_DTW_ENSEMBLE_W)),
-        )
-        blend = float(config.get("dtw_blend", MATCH_DTW_BLEND))
-        return float(blend * score + (1.0 - blend) * dtw_score)
-    return float(score)
-
-
-def annotate_prefix_scores(
-    candidates: list[dict[str, Any]],
-    curr_arr: np.ndarray,
-    current_duration: float,
-    config: dict[str, Any],
-) -> None:
-    """Stage 6 (#364): write ``prefix_score`` on the few non-winning candidates
-    that are materially longer than the winner.
-
-    Mutates in place and never touches ``score``/``shape_score``, so candidate
-    ranking is unaffected - this only feeds the Smart-Termination prefix guard.
-    Every test before the first array touch is a scalar compare, so the common
-    case (no candidate is materially longer) costs nothing.
-    """
-    if current_duration <= 0 or len(candidates) < 2 or curr_arr.size == 0:
-        return
-    best_dur = float(candidates[0].get("profile_duration") or 0.0)
-    if best_dur <= 0:
-        return
-    min_dur = best_dur * SMART_TERM_PREFIX_MIN_RATIO
-    current_peak = float(np.max(curr_arr))
-    scored = 0
-    for cand in candidates[1:]:
-        prof_dur = float(cand.get("profile_duration") or 0.0)
-        if prof_dur <= min_dur:
-            continue  # not a longer look-alike
-        if prof_dur <= current_duration:
-            continue  # we already outlasted it, so we are not inside its prefix
-        span = float(cand.get("sample_span_s") or prof_dur)
-        if span < prof_dur * SMART_TERM_PREFIX_MIN_COVERAGE:
-            continue  # gap-truncated template: may not start at the programme's start
-        score = prefix_shape_score(
-            curr_arr, cand.get("sample") or [], current_duration, span, current_peak, config
-        )
-        if score is None:
-            continue
-        cand["prefix_score"] = float(score)
-        scored += 1
-        if scored >= SMART_TERM_PREFIX_MAX_CANDIDATES:
-            break
 
 
 def _dtw_cost_matrix_scalar(

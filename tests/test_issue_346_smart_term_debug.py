@@ -29,46 +29,39 @@ from custom_components.ha_washdata.cycle_detector import CycleDetector
 
 
 def test_gate_passes_returns_none():
-    # duration reached, confident, not ambiguous, not prefix-ambiguous
+    # duration reached, confident, not ambiguous
     assert CycleDetector._smart_term_block_reason(
         current_duration=1000.0, expected=1000.0, smart_ratio=0.98,
-        is_confident=True, ambiguous=False, prefix_ambiguous=False,
+        is_confident=True, ambiguous=False,
     ) is None
 
 
 def test_no_expected_duration_is_suppressed():
     assert CycleDetector._smart_term_block_reason(
         current_duration=500.0, expected=0.0, smart_ratio=0.98,
-        is_confident=True, ambiguous=False, prefix_ambiguous=False,
+        is_confident=True, ambiguous=False,
     ) is None
 
 
 def test_duration_not_reached():
     assert CycleDetector._smart_term_block_reason(
         current_duration=100.0, expected=1000.0, smart_ratio=0.98,
-        is_confident=True, ambiguous=False, prefix_ambiguous=False,
+        is_confident=True, ambiguous=False,
     ) == "duration_not_reached"
 
 
 def test_low_confidence():
     assert CycleDetector._smart_term_block_reason(
         current_duration=1000.0, expected=1000.0, smart_ratio=0.98,
-        is_confident=False, ambiguous=False, prefix_ambiguous=False,
+        is_confident=False, ambiguous=False,
     ) == "low_confidence"
 
 
-def test_match_ambiguous_takes_priority_over_prefix():
+def test_match_ambiguous_takes_priority_over_still_active():
     assert CycleDetector._smart_term_block_reason(
         current_duration=1000.0, expected=1000.0, smart_ratio=0.98,
-        is_confident=True, ambiguous=True, prefix_ambiguous=True,
+        is_confident=True, ambiguous=True, power_plausible=False,
     ) == "match_ambiguous"
-
-
-def test_prefix_ambiguous():
-    assert CycleDetector._smart_term_block_reason(
-        current_duration=1000.0, expected=1000.0, smart_ratio=0.98,
-        is_confident=True, ambiguous=False, prefix_ambiguous=True,
-    ) == "prefix_ambiguous"
 
 
 def test_reset_clears_the_block_reason_throttle():
@@ -112,15 +105,16 @@ def test_anti_wrinkle_reset_also_clears_the_block_reason_throttle():
 
 
 @pytest.mark.parametrize(
-    ("conf", "ambiguous", "prefix", "reason"),
+    ("conf", "ambiguous", "retired7", "reason"),
     [
         (0.9, False, False, None),
         (0.1, False, False, "low_confidence"),
         (0.9, True, False, "match_ambiguous"),
-        (0.9, False, True, "prefix_ambiguous"),
+        # Element 7 (the #364 prefix-fit flag, removed in 0.5.8) no longer blocks.
+        (0.9, False, True, None),
     ],
 )
-def test_the_logged_reason_agrees_with_the_real_gate(conf, ambiguous, prefix, reason):
+def test_the_logged_reason_agrees_with_the_real_gate(conf, ambiguous, retired7, reason):
     """The tests above exercise the diagnostic helper only, a copy of the gate
     that feeds a debug line. Drive the real detector and check the reason it
     logged matches what the real gate then did: no reason <=> Smart Termination
@@ -138,7 +132,7 @@ def test_the_logged_reason_agrees_with_the_real_gate(conf, ambiguous, prefix, re
         completion_min_seconds=600, start_duration_threshold=0.0,
         start_energy_threshold=0.0, start_threshold_w=6.0, stop_threshold_w=4.0,
     )
-    match = ("Cotton", conf, 1200.0, "W", False, ambiguous, prefix)
+    match = ("Cotton", conf, 1200.0, "W", False, ambiguous, retired7)
     on_end = Mock()
     det = CycleDetector(cfg, Mock(), on_end, profile_matcher=lambda r: match)
     for t in range(0, 1170, 10):

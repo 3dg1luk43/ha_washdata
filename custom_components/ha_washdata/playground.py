@@ -95,6 +95,7 @@ from .const import (
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_PROFILE_UNMATCH_THRESHOLD,
+    STATE_ENDING,
     STATE_FINISHED,
     STATE_IDLE,
     STATE_OFF,
@@ -1095,6 +1096,15 @@ class _DetailSim:
         )
         verified = pause.verified_pause
         match_rules.consistency_override(st, tick, result, verified, self._get_profile)
+        # The manager's ENDING pause hold (register item 469b).
+        verified = match_rules.hold_in_ending(
+            ending=det.state == STATE_ENDING,
+            is_ambiguous=bool(result.is_ambiguous),
+            current_matched=current_matched,
+            prev_verified=prev_verified,
+            verified_pause=verified,
+            user_paused=False,
+        ).verified_pause
         det.set_verified_pause(verified)
         det.set_match_committed(match_rules.program_is_committed(st.current_program))
         self._report_tick(prev_program, bool(prev_verified), bool(verified), result)
@@ -1167,7 +1177,6 @@ class _DetailSim:
             phase_name=phase_name,
             is_confident_mismatch=revoke,
             is_ambiguous=result.is_ambiguous,
-            is_prefix_ambiguous=result.is_prefix_ambiguous,
             is_prefix_ambiguous_full_shape=result.is_prefix_ambiguous_full_shape,
             tail_power=_ask(lambda: store.profile_tail_power(name)) if name else None,
             # One implementation with the manager's `_terminal_high_for_guards`.

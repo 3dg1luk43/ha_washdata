@@ -1088,6 +1088,9 @@ class LearningManager:
             cycle["label_source"] = source
             if manual_duration:
                 cycle["manual_duration"] = manual_duration
+            if old and old != profile_name:
+                # The profile the cycle left must not keep it as its sample.
+                self.profile_store.heal_profile_sample(old)
 
     def _apply_correction_learning(
         self,

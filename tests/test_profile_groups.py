@@ -184,12 +184,12 @@ def test_stage5_selection_ignores_duration_prefers_energy(store):
     assert chosen == "RightEnergy"
 
 
-# ── prefix-landscape guard: is_prefix_ambiguous on MatchResult ───────────────
+# ── prefix-landscape guard: is_prefix_ambiguous_full_shape on MatchResult ─────
 #
-# async_match_profile sets MatchResult.is_prefix_ambiguous=True when any
-# non-winning candidate has a duration >= 1.5x the winner's AND a shape_score
-# >= 0.40 (SMART_TERM_LANDSCAPE_RATIO / SMART_TERM_LANDSCAPE_MIN_SHAPE).
-# The flag is consumed by cycle_detector to block Smart Termination.
+# async_match_profile sets MatchResult.is_prefix_ambiguous_full_shape=True when
+# any non-winning candidate has a duration >= 1.5x the winner's AND a shape_score
+# >= 0.40 (SMART_TERM_LANDSCAPE_RATIO / SMART_TERM_LANDSCAPE_MIN_SHAPE). Since
+# audit LIVE-18 only the anti-crease finalize reads it.
 
 
 def _cand(name, dur, shape, final=None):
@@ -208,15 +208,14 @@ def _cand(name, dur, shape, final=None):
 # These used to re-implement the formula inline, which meant they kept passing while
 # production diverged - the #364 leaks were invisible to them. They now call the
 # real predicate, so they are genuine #288 regression tests. `_match_prefix_ambiguity`
-# returns (full_shape_hit, prefix_fit_hit); these cases exercise the full-envelope
-# term (#288), so they assert element 0. The prefix term (#364) needs a
-# `prefix_score` key and is covered in tests/test_issue_364_prefix_scoring.py.
+# is the full-envelope term (#288); the #364 prefix-fit term it used to return
+# beside it was removed in 0.5.8 (tests/test_issue_364_prefix_scoring.py).
 
 from custom_components.ha_washdata.profile_store import _match_prefix_ambiguity
 
 
 def _is_prefix_ambiguous(candidates, best_dur):
-    return _match_prefix_ambiguity(candidates, best_dur)[0]
+    return _match_prefix_ambiguity(candidates, best_dur)
 
 
 def test_prefix_ambiguous_true_when_longer_look_alike_exists():
@@ -235,14 +234,14 @@ def test_prefix_ambiguous_false_when_runner_up_shape_too_low():
     Note this is a statement about that term only, not about prefix risk in general:
     a trace part-way through a longer programme scores badly against that
     programme's whole curve precisely when it IS a prefix of it. That blind spot is
-    #364, and it is covered by the prefix-score term (element 1), which needs a
-    `prefix_score` on the candidate.
+    #364; since #400 the live matcher scores a running cycle on each candidate's
+    truncated curve, so that programme wins the match itself.
     """
     candidates = [
         _cand("Quick", 2760, 0.70, 0.61),
         _cand("Wool", 5400, 0.15, 0.12),   # different shape -> shape_score below threshold
     ]
-    assert _match_prefix_ambiguity(candidates, 2760.0) == (False, False)
+    assert _match_prefix_ambiguity(candidates, 2760.0) is False
 
 
 def test_prefix_ambiguous_false_when_runner_up_not_much_longer():
@@ -271,9 +270,9 @@ def test_prefix_ambiguous_true_exact_ratio_boundary():
 
 @pytest.mark.parametrize("prefix_score", [None, 0.90])
 async def test_async_match_profile_sets_is_prefix_ambiguous(prefix_score):
-    """End-to-end: a qualifying longer runner-up sets the narrow #288 flag (the
-    anti-crease guard); the wide ENDING flag needs the #364 prefix fit as well
-    (audit LIVE-18: the #288 term alone was every false block at a genuine end)."""
+    """End-to-end: a qualifying longer runner-up sets the #288 flag (the
+    anti-crease guard), whatever a stray `prefix_score` says: the #364 ENDING flag
+    that read it was removed in 0.5.8."""
     from unittest.mock import AsyncMock
     from custom_components.ha_washdata.profile_store import ProfileStore
 
@@ -301,12 +300,12 @@ async def test_async_match_profile_sets_is_prefix_ambiguous(prefix_score):
         result = await ps.async_match_profile(power_data, 2760.0)
 
     assert result.is_prefix_ambiguous_full_shape is True
-    assert result.is_prefix_ambiguous is (prefix_score is not None)
+    assert not hasattr(result, "is_prefix_ambiguous")
 
 
 async def test_async_match_profile_no_prefix_ambiguous_when_only_short_runner_up():
-    """async_match_profile returns is_prefix_ambiguous=False when the runner-up
-    is not long enough, even with a good shape score."""
+    """async_match_profile returns is_prefix_ambiguous_full_shape=False when the
+    runner-up is not long enough, even with a good shape score."""
     from unittest.mock import AsyncMock
     from custom_components.ha_washdata.profile_store import ProfileStore
 
@@ -332,4 +331,4 @@ async def test_async_match_profile_no_prefix_ambiguous_when_only_short_runner_up
         power_data = [(float(i * 2), 80.0) for i in range(300)]
         result = await ps.async_match_profile(power_data, 2760.0)
 
-    assert result.is_prefix_ambiguous is False
+    assert result.is_prefix_ambiguous_full_shape is False

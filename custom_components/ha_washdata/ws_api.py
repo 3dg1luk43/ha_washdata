@@ -202,10 +202,10 @@ _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_OFF_DELAY,
     CONF_WATCHDOG_INTERVAL,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    # CONF_PROFILE_MATCH_INTERVAL is held back (maintainer decision 2026-10-04,
-    # audit SUGGEST-21): a shorter interval lets a match tick land inside the end
-    # wait and delays the end (register item 469(b): 6.7 -> 20.2 min on one cycle).
-    # The engine still computes it; re-list it once 469(b) is fixed.
+    # Held back from 2026-10-04 (audit SUGGEST-21) until register item 469(b): a
+    # shorter interval let an ambiguous tick land in the end wait and delay the end
+    # (6.7 -> 23.2 min on one cycle). `match_rules.hold_in_ending` closes that.
+    CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_MIN_OFF_GAP,

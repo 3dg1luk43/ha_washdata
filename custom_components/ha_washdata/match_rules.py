@@ -20,8 +20,10 @@ Single source of truth for the rules between "the matcher returned a result" and
 "the detector receives it" (audit PLAYGROUND-01/02/03):
 
 * the program switching state machine - divergence revert, temporal persistence,
-  the initial commit (0.15 / unmatch-threshold floor, ambiguous-but-persistent),
-  the decisive-margin and trend switches, the unmatch revert, the score history;
+  the initial commit (0.15 / unmatch-threshold floor; an ambiguous winner waits
+  ``MATCH_AMBIGUOUS_COMMIT_FACTOR`` x persistence), the decisive-margin switch and
+  the persistent switch (clear lead or rising trend), the unmatch revert, the
+  score history;
 * the envelope verified pause - set on a confirmed expected low-power region,
   released at 95% of the envelope span, on high power, by the #375 sustained-quiet
   release, and forced on by a user pause;
@@ -52,6 +54,7 @@ from typing import Any
 from .const import (
     DEFAULT_MATCH_REVERT_RATIO,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
+    MATCH_AMBIGUOUS_COMMIT_FACTOR,
     MATCH_DECISIVE_MARGIN,
     MATCH_SURE_KNOTS,
     MATCH_SURE_SINGLE_CANDIDATE,
@@ -313,20 +316,28 @@ def decide_switch(
     # counter to re-commit it at once) made a stable low-confidence top-1 flip
     # program <-> "detecting..." every few ticks, dropping the ETA each time
     # (audit MATCH-DECIDE-05; 38 of 580 cycles).
+    # An AMBIGUOUS winner waits MATCH_AMBIGUOUS_COMMIT_FACTOR x as many wins. A
+    # near-tie early in a wash is mostly a prefix of one programme resembling
+    # another, so committing it at plain persistence showed the wrong programme
+    # (and its ETA) first on most washer cycles; the Status card says "Uncertain:
+    # X or Y" meanwhile. Not "never": a stable winner of an always-close pair must
+    # still get a programme and an ETA. Measured in const.py.
     if (
         profile_name
         and confidence >= max(0.15, float(unmatch_threshold or 0.0))
         and (not result.is_ambiguous or is_persistent)
         and (not state.matched_duration or state.current_program == DETECTING)
     ):
-        if is_persistent:
+        wins = state.persistence_counter.get(profile_name, 0)
+        needed = persistence * (MATCH_AMBIGUOUS_COMMIT_FACTOR if result.is_ambiguous else 1)
+        if is_persistent and wins >= needed:
             should_switch = True
-            switch_reason = f"initial_match (persistent {state.persistence_counter[profile_name]}x)"
+            switch_reason = f"initial_match (persistent {wins}x)"
         else:
             log.append((
                 logging.DEBUG,
-                "Match persistence: %s at %d/%d matches. Stay at detecting...",
-                (profile_name, state.persistence_counter.get(profile_name, 0), persistence),
+                "Match persistence: %s at %d/%d matches%s. Stay at detecting...",
+                (profile_name, wins, needed, " (ambiguous)" if result.is_ambiguous else ""),
             ))
 
     # Case 2: Mid-cycle override (different profile)
@@ -363,15 +374,27 @@ def decide_switch(
                 f"{MATCH_DECISIVE_MARGIN}, {confidence:.3f} vs {current_program_score:.3f})"
             )
 
-        # Normal Switch: Requires persistence AND either better score + trend
+        # Normal Switch: a persistent challenger that beats the displayed programme
+        # by more than 0.05 (against flapping) and either leads its runner-up
+        # clearly (not ambiguous) or has a rising score. Until 0.5.8 only the
+        # rising score qualified, so a challenger that led clearly tick after tick
+        # but held a flat score was never adopted. Measured alone
+        # (decisive_margin_eval.py --switching --loo, 291 cycles): programme shown
+        # at cycle end right on washers 50.9 -> 55.3%, dishwashers unchanged
+        # (96.9%), washer switches per cycle 1.32 -> 1.47; with the commit rule
+        # above 1.25, and end timing unchanged (end_gate_eval --loo --all-formats:
+        # 1 of 472 ends moved, 3.5 min earlier).
         elif is_persistent:
-            if confidence > current_program_score and analyze_trend(
-                state.score_history.get(profile_name, [])
+            if confidence > current_program_score and (
+                not result.is_ambiguous
+                or analyze_trend(state.score_history.get(profile_name, []))
             ):
-                # Add a minimum score gap for mid-cycle switching (0.05) to prevent flapping
                 if (confidence - current_program_score) > 0.05:
                     should_switch = True
-                    switch_reason = f"positive_trend_persistent ({confidence:.3f} > {current_program_score:.3f})"
+                    switch_reason = (
+                        f"{'clear_lead' if not result.is_ambiguous else 'positive_trend'}"
+                        f"_persistent ({confidence:.3f} > {current_program_score:.3f})"
+                    )
 
     # Case 3: Unmatching (confidence drop)
     elif (
@@ -601,6 +624,58 @@ def decide_pause_release(
         verified_pause = True
 
     return PauseDecision(verified_pause=verified_pause, log=log)
+
+
+#: Register item 469(b): an AMBIGUOUS tick in ENDING cannot defer the end (here
+#: for the verified pause, ``CycleDetector.ambiguous_ending_match_defers`` for the
+#: match). A module flag so the A/B and the revert check can turn both off; always
+#: on in production.
+HOLD_AMBIGUOUS_IN_ENDING = True
+
+
+def hold_in_ending(
+    *,
+    ending: bool,
+    is_ambiguous: bool,
+    current_matched: Any,
+    prev_verified: Any,
+    verified_pause: Any,
+    user_paused: bool,
+) -> PauseDecision:
+    """An ambiguous tick in ENDING engages no verified pause (register item 469b).
+
+    Once the detector is in ENDING the run has gone quiet and the end gates are
+    counting. A tick there matches a trace that ends in that idle tail, and when its
+    top-1 is within ``MATCH_AMBIGUITY_MARGIN`` of its runner-up it is not evidence of
+    anything (it licenses no switch and no label). Its envelope alignment could still
+    engage a verified pause, which blocks every ENDING finalize: on the AK Willows
+    washer-dryer db46776df845 it engaged on the reading the timeout would have fired
+    on once "Apply all" set a 45 s match interval (lag 7.0 -> 17.0 min).
+
+    So a pause that was not already on stays off. A release still applies, an
+    engaged pause stays, and a user pause is authoritative. The same tick's match
+    reaches the detector, which refuses it only if it would wait longer
+    (``CycleDetector.ambiguous_ending_match_defers``). Shared by the manager and the
+    Playground replay.
+    """
+    if (
+        HOLD_AMBIGUOUS_IN_ENDING
+        and ending
+        and is_ambiguous
+        and current_matched
+        and verified_pause
+        and not prev_verified
+        and not user_paused
+    ):
+        return PauseDecision(
+            verified_pause=False,
+            log=[(
+                logging.DEBUG,
+                "ENDING: ambiguous match engages no verified pause for %s (item 469)",
+                (current_matched,),
+            )],
+        )
+    return PauseDecision(verified_pause=verified_pause)
 
 
 def consistency_override(

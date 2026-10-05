@@ -238,7 +238,7 @@ def _replay_export(args: tuple[Any, ...]) -> dict[str, Any]:
     """
     rel, per_export, verbose = args[:3]
     only = tuple(args[3]) if len(args) > 3 and args[3] else ()
-    from end_gate_eval import _production, _rebuild_envelopes  # noqa: PLC0415
+    from end_gate_eval import _production, _rebuild_envelopes, _run  # noqa: PLC0415
 
     from custom_components.ha_washdata import const, playground  # noqa: PLC0415
     from custom_components.ha_washdata.suggestion_engine import _cycle_readings  # noqa: PLC0415
@@ -249,6 +249,9 @@ def _replay_export(args: tuple[Any, ...]) -> dict[str, Any]:
     doc, device_type, data = loaded
     base = _base_data(data)
     cfg, sim_store, opts = _production(doc, base)
+    # Setup's sample repair before any match (as eval.py / end_gate_eval.py); the
+    # live arm's deep copy below inherits it.
+    _run(sim_store.async_repair_profile_samples())
     _rebuild_envelopes(sim_store, list(base["profiles"]))
     live_data = copy.deepcopy(sim_store._data)  # noqa: SLF001
     _cfg2, live_store, _o2 = _production(doc, live_data)
@@ -325,7 +328,7 @@ def _replay_export(args: tuple[Any, ...]) -> dict[str, Any]:
 
 def _match_export(args: tuple[str, int, bool]) -> dict[str, Any]:
     rel, per_export, verbose = args
-    from end_gate_eval import _production, _rebuild_envelopes  # noqa: PLC0415
+    from end_gate_eval import _production, _rebuild_envelopes, _run  # noqa: PLC0415
 
     from custom_components.ha_washdata import playground  # noqa: PLC0415
     from custom_components.ha_washdata.suggestion_engine import _cycle_readings  # noqa: PLC0415
@@ -336,6 +339,7 @@ def _match_export(args: tuple[str, int, bool]) -> dict[str, Any]:
     doc, device_type, data = loaded
     base = _base_data(data)
     cfg, store, opts = _production(doc, base)
+    _run(store.async_repair_profile_samples())  # setup's repair, as eval.py
     _rebuild_envelopes(store, list(base["profiles"]))
     prebuilt = playground._build_match_snapshots(store)  # noqa: SLF001
     stop = float(cfg.stop_threshold_w)
@@ -366,7 +370,8 @@ def _match_export(args: tuple[str, int, bool]) -> dict[str, Any]:
             live = (
                 res.best_profile, round(float(res.confidence), 6),
                 round(float(res.expected_duration or 0), 3), bool(res.is_ambiguous),
-                bool(res.is_prefix_ambiguous), bool(res.is_prefix_ambiguous_full_shape),
+                bool(getattr(res, "is_prefix_ambiguous", False)),  # removed in 0.5.8
+                bool(res.is_prefix_ambiguous_full_shape),
                 round(float(res.longest_candidate_duration_s or 0), 3),
             )
             extra_live = extra_sim = None
@@ -376,7 +381,8 @@ def _match_export(args: tuple[str, int, bool]) -> dict[str, Any]:
                 mine = (
                     got.best_profile, round(float(got.confidence), 6),
                     round(float(got.expected_duration or 0), 3), bool(got.is_ambiguous),
-                    bool(got.is_prefix_ambiguous), bool(got.is_prefix_ambiguous_full_shape),
+                    bool(getattr(got, "is_prefix_ambiguous", False)),  # removed in 0.5.8
+                    bool(got.is_prefix_ambiguous_full_shape),
                     round(float(got.longest_candidate_duration_s or 0), 3),
                 )
                 extra_live = (res.member_confidence, res.is_confident_mismatch, res.matched_phase)

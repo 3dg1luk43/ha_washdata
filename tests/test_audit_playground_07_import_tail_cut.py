@@ -51,7 +51,10 @@ def test_the_cut_keeps_the_programmes_measured_drying_and_no_more():
     cand = _cand(_RUN + _TAIL, 5400.0 + 3600.0)
     assert hi.import_tail_cut_s(cand, DISHWASHER, 900.0) == 5400.0 + 900.0
     # The allowance is capped exactly as live caps it.
-    assert hi.import_tail_cut_s(cand, DISHWASHER, 9000.0) == 5400.0 + TERMINAL_QUIET_CAP_S
+    long_wait = _cand(
+        _RUN + [[5400.0 + 30 * k, 0.4] for k in range(1, 400)], 5400.0 + 12000.0
+    )
+    assert hi.import_tail_cut_s(long_wait, DISHWASHER, 99999.0) == 5400.0 + TERMINAL_QUIET_CAP_S
 
 
 def test_a_run_that_already_dried_before_its_pump_out_keeps_no_allowance():

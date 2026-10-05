@@ -12,9 +12,9 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 ### TL;DR
 
 - Washers and dishwashers report the end sooner, standby endings included; no cycle ends early in replays.
-- Labels come from a match on the whole cycle; matching is more accurate, store programs most of all.
-- The program shows sooner, with its odds while unsure; phases, time remaining and projected energy are realistic.
-- No splits from daylight-saving changes or a power sensor dropping out.
+- Labels come from a match on the whole cycle; matching is more accurate (washers and store programs most) at half the CPU.
+- The right program shows more often, with its odds while unsure; phases, time remaining and projected energy are realistic.
+- No splits or lost cycles from daylight-saving changes, sensor dropouts or restarts; no dishwasher stuck in Drying.
 - No double-counted cycles or false-start pushes; held notifications survive a restart; review answers stay yours.
 - Every cycle and its full power trace are kept; exports are 4-5x smaller and a replace import can be undone.
 - Far fewer store writes and much less CPU; the panel opens faster and stays smooth on phones.
@@ -81,6 +81,20 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **Imported dishwasher history kept the whole end wait**: cycles found in your recorder history were stored with the 20 to 30 minutes the detector waited before calling the end. A recognised imported cycle is now trimmed the way a live one is: 122 of 128 test cycles were over 5% too long, now 19.
 
 - **Progress could fall back from 100%** after a cycle ran past its program's usual length, and the backward smoothing depended on how often estimates ran. Both fixed; time remaining is unchanged within 0.2 minutes on average.
+
+- **Matching costs half the CPU while a cycle runs**: a Smart Termination guard added for #364 re-scored every longer program on the running prefix, which the matcher has done itself since #400; replayed on 472 cycles it never fired where a split happens and changed no end, so it is removed (35 ms to 17 ms per live match).
+
+- **A restart during a quiet spell could lose or shorten the running cycle**: after Home Assistant restarted, WashData treated the plug's first state as fresh news and forgot how long the appliance had already been quiet, and a long silent tail could be dropped on restore. The quiet time now survives the restart (the state is also saved during silence), so the cycle continues and ends once. Power during a sensor outage no longer counts toward starting a cycle or toward its live energy. If a saved cycle cannot be restored at all, WashData now logs why, keeps the snapshot for the diagnostics download and carries on, instead of dropping it silently.
+
+- **Washers showed the wrong program more often than the right one**: an early lead was committed at once even when two programs were neck and neck, and a better-fitting program could only take over while its score was still rising. A close call now has to hold twice as long before it is shown, and a clearly better program can take over. Replaying 291 cycles, washers show the right program at the end 56.5% of the time (was 52.2%) and first 34.2% (was 29.8%); dishwashers unchanged. A washer's first time-remaining estimate now appears about 2 minutes later in the median, and is right more often when it does.
+
+- **Anti-crease washers: fewer waits for the safety cap, and the crease guard no longer becomes a second cycle**: one run whose spin crossed 400 W made WashData wait for a spin on every run of that program, although most spun at 330-390 W; it now waits only when at least half the program's runs had that spin (six test runs finish 3 to 34 minutes sooner). After the anti-crease finish, a plug that reports only on change could skip the dips between tumbles and leave the tumbling to start a new cycle; it now stays part of the finished one (Miele crease guard, 20 of 20 records).
+
+- **A relabelled cycle kept speaking for the program it was taken from**: moving a cycle to another program left it as the old program's template, so a program with no cycles of its own kept being matched using someone else's run. Every relabel, merge, split and review answer now gives the old program a template of its own (or none), and existing data is repaired at startup. On the affected test washer the right program at cycle end went from 38.9% to 50.0%. A program imported without cycles is no longer deleted by the next maintenance run.
+
+- **Cycles ended later when the matcher wavered during the end wait**: an uncertain match could start a pause or stretch the wait at the last moment. Replaying 472 cycles, 19 now end earlier and none later (median delay 7.5 to 6.7 minutes). Dishwasher Eco runs without a final pump-out keep their full length instead of being cut to about 2 hours.
+
+- **Washers are recognised more often at cycle end**: the energy WashData expected from each program came from its averaged curve, which could be 20% or more off what the program's own runs use (2.5 times on one). It now uses the typical energy of the program's own cycles. Replaying 543 cycles: 77.2% right (was 76.2%), on the worst test washer 66.7% (was 55.6%); end timing unchanged.
 
 - **Nightly maintenance now prunes debug traces**, as its description always said: a cycle's matcher debug data goes with its power trace, and all of it while "save debug traces" is off.
 
@@ -158,7 +172,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - **An error while matching a finished cycle could lose the cycle**: the final match runs before the cycle is saved, and nothing caught a failure there. The cycle is now saved unlabelled, and the end-of-cycle cleanup (saving, returning to idle) always runs. The almost-done reminder also reaches plugs that stay silent near the end, and deleting a program no longer leaves its curve behind.
 
-- **A dishwasher could stay running for hours after it finished**: when the live alignment had confirmed a pause shortly before the end, the release that ends it only ran on a match, and a dishwasher stops matching once it has been quiet for 5 minutes. The cycle then waited for the force stop, about 8 hours on a plug that keeps reporting 0 W. The release now runs there too; in replays one such cycle ends 224 minutes sooner and nothing else moves.
+- **A dishwasher could stay in Ending / Drying for hours after it finished** ([#375](https://github.com/3dg1luk43/ha_washdata/issues/375), reported again on 0.5.7): when the live alignment had confirmed a drying pause shortly before the end, the release that ends it only ran on a match, and a dishwasher stops matching once it has been quiet for 5 minutes. If Smart Termination was also held back (an uncertain or low-confidence match), the cycle waited for the force stop: about 8 hours on a plug that keeps reporting 0 W, 4.5 hours on one that goes silent, stored as force-stopped. The release now runs there too, so the reported case ends at the program's expected length with either kind of plug; in replays one such cycle ends 224 minutes sooner and nothing else moves. Thanks to @michir16 for the report and the analysis.
 
 - **A program dropped mid-cycle could still end the cycle**: when a match faded and the display went back to detecting, the end detection kept that program's expected length and Smart Termination. It now forgets the match, as it does when nothing matches. A non-numeric unmatch threshold (from an imported config) no longer stops matching.
 
@@ -210,7 +224,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - **Suggestions that made devices worse are gone**: the confidence thresholds (each apply lowered them), Sampling Interval (each apply raised it), smoothing, start duration, end repeat count, the two duration tolerances, the per-cycle stop/start simulation and the ML-driven suggestions. Completion minimum no longer creeps up until short programs count as interrupted; suggestions no longer stop for good at 200 stored cycles; a muted setting is never applied by Apply all; a setting you never changed is no longer suggested at the value it already has; the maximum duration ratio is never suggested below 1.8; dishwasher Off Delay uses your measured cycles; the end-energy threshold is only raised when it makes an end impossible.
 
-- **The match interval is no longer suggested** for now: a shorter interval let a match run land inside the end wait and delayed some cycle ends by up to 14 minutes. A value you already applied stays.
+- **The match interval is suggested again, and a shorter one no longer delays cycle ends**: a match run inside the end wait could switch to a longer, uncertain program or start a pause just as the cycle was about to end, delaying some ends by up to 16 minutes. Uncertain matches can no longer push the end out during that wait, so Apply all may lower the interval safely (replayed on 21 devices: 14 ends earlier, 1 later).
 
 - **Settings removed from the panel**: End Repeat Count, Smoothing Window and Profile Duration Tolerance did nothing measurable, and "Phase-aware time remaining" never ran (its data was never built); the feature behind it is removed.
 

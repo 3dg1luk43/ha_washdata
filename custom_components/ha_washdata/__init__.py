@@ -39,7 +39,12 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 import voluptuous as vol
 
-from .const import NOTIFY_QUEUE_STORE_SUFFIX, PRE_IMPORT_STORE_SUFFIX, STORAGE_KEY
+from .const import (
+    FAILED_RESTORE_STORE_SUFFIX,
+    NOTIFY_QUEUE_STORE_SUFFIX,
+    PRE_IMPORT_STORE_SUFFIX,
+    STORAGE_KEY,
+)
 from .const import (
     DEVICE_COMPLETION_THRESHOLDS,
     DOMAIN,
@@ -1167,11 +1172,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
 
     # Belt and braces for the hoist above: the panel's static routes need
-    # hass.http, which is an after_dependencies entry rather than a hard one, so
-    # it is guaranteed up before setup in a real HA but not in every harness.
-    # By here the entity platforms have pulled the whole frontend stack in, which
-    # is where this block used to live.  Every step guards on its own "already
-    # done" flag, so this is a no-op whenever the early call did its job.
+    # hass.http. It is a hard manifest dependency (item 487), so HA sets it up
+    # before this entry; a caller that invokes async_setup_entry directly skips
+    # that, and there the platform forward is what processes the manifest.
+    # Every step guards on its own "already done" flag, so this is a no-op
+    # whenever the early call did its job.
     await _async_setup_shared(hass, _log)
 
     # Register feedback service
@@ -1624,11 +1629,12 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 _ORPHAN_SWEEP_KEY = "ha_washdata_orphan_sweep"
 # Per-appliance store keys: the profile store, its active-cycle snapshot (0.5.8), its
 # pre-import restore point (register item 195), its held-notification queue (audit
-# MANAGER-16) and the manual recorder. Global keys
+# MANAGER-16), its last failed snapshot restore (item 266) and the manual recorder. Global keys
 # (``ha_washdata_panel``, ``ha_washdata_online``) use an underscore and never match.
 _ENTRY_STORE_RE = re.compile(
     r"^ha_washdata\.(?:recorder\.)?([0-9A-Za-z]{20,40})"
-    rf"(?:\.active|\.{PRE_IMPORT_STORE_SUFFIX}|\.{NOTIFY_QUEUE_STORE_SUFFIX})?$"
+    rf"(?:\.active|\.{PRE_IMPORT_STORE_SUFFIX}|\.{NOTIFY_QUEUE_STORE_SUFFIX}"
+    rf"|\.{FAILED_RESTORE_STORE_SUFFIX})?$"
 )
 
 
@@ -1638,6 +1644,7 @@ def _entry_store_keys(entry_id: str) -> list[str]:
         f"{STORAGE_KEY}.{entry_id}.active",
         f"{STORAGE_KEY}.{entry_id}.{PRE_IMPORT_STORE_SUFFIX}",
         f"{STORAGE_KEY}.{entry_id}.{NOTIFY_QUEUE_STORE_SUFFIX}",
+        f"{STORAGE_KEY}.{entry_id}.{FAILED_RESTORE_STORE_SUFFIX}",
         f"{STORAGE_KEY}.recorder.{entry_id}",
     ]
 

@@ -136,33 +136,21 @@ def mock_config_entry():
 #
 # While WashData's manifest listed `conversation` under `dependencies`, HA set it
 # up first, its requirements (hassil, home-assistant-intents) are not installed in
-# the dev env, so `hass.config_entries.async_setup()` refused the entry ("No
-# module named 'hassil'") and every test called `async_setup_entry` by hand. A
-# MockModule satisfies it wherever the manifest lists it (WashData only registers
-# intents through `homeassistant.helpers.intent`, which needs no conversation
-# agent), so the real loader, platform forward, service bus and WebSocket
-# registry all run in-process.
+# the dev env, and every test called `async_setup_entry` by hand. Since item 487
+# `conversation` is only an after-dependency (intents register through
+# `homeassistant.helpers.intent`, which needs no conversation agent) and the hard
+# dependencies are `http` + `websocket_api`: the real loader resolves the
+# manifest as it is, and the platform forward, service bus and WebSocket registry
+# all run in-process. Nothing is preloaded: a manifest that stops bringing the
+# panel's routes up fails here.
 # ──────────────────────────────────────────────────────────────────────────────
 @pytest.fixture
-def mock_conversation(hass):
-    """Stand in for the `conversation` integration WashData's manifest names."""
-    from pytest_homeassistant_custom_component.common import (
-        MockModule,
-        mock_integration,
-    )
-
-    mock_integration(hass, MockModule("conversation"))
-
-
-@pytest.fixture
-async def setup_washdata_entry(hass, enable_custom_integrations, mock_conversation):
+async def setup_washdata_entry(hass, enable_custom_integrations):
     """Factory: boot a WashData config entry through HA's real setup path.
 
     Returns ``async (title=..., device_type=..., options=...) -> MockConfigEntry``,
-    with the entry LOADED. Brings `http` up first, as a real HA always has it
-    (it is an ``after_dependencies`` entry, and the panel needs its routes).
+    with the entry LOADED.
     """
-    from homeassistant.setup import async_setup_component
     from pytest_homeassistant_custom_component.common import MockConfigEntry
 
     from custom_components.ha_washdata.const import (
@@ -170,8 +158,6 @@ async def setup_washdata_entry(hass, enable_custom_integrations, mock_conversati
         CONFIG_ENTRY_VERSION,
         DOMAIN,
     )
-
-    assert await async_setup_component(hass, "http", {"http": {}})
 
     async def _setup(
         title: str = "Washer",

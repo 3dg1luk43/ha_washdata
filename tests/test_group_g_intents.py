@@ -266,7 +266,13 @@ def test_manifest_declares_conversation_dependency():
         / "manifest.json"
     )
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    assert "conversation" in manifest["dependencies"]
+    # Item 487: the intent handler lives in helpers.intent (no conversation agent
+    # needed to register it), so conversation only orders setup when present; a
+    # hard dependency made a broken or absent Assist stack block the whole
+    # integration. The panel's routes and commands are the real hard needs.
+    assert "conversation" in manifest["after_dependencies"]
+    assert "conversation" not in manifest["dependencies"]
+    assert {"http", "websocket_api"} <= set(manifest["dependencies"])
     # WashData derives everything from another entity's state events (audit
     # PLATFORM-19), so `calculated`, not `local_polling`.
     assert manifest["iot_class"] == "calculated"

@@ -273,20 +273,20 @@ def _cands() -> list[dict]:
 
 def test_a_longer_programme_that_never_pauses_cannot_block() -> None:
     """The second reporter's case, with their numbers: Chef 70 at 1.62x and 0.477."""
-    assert _match_prefix_ambiguity(_cands(), 6818.0) == (True, False)
-    assert _match_prefix_ambiguity(_cands(), 6818.0, lambda n: False) == (False, False)
+    assert _match_prefix_ambiguity(_cands(), 6818.0) is True
+    assert _match_prefix_ambiguity(_cands(), 6818.0, lambda n: False) is False
 
 
 @pytest.mark.parametrize("answer", [True, None])
 def test_evidence_of_a_pause_or_no_evidence_keeps_the_guard(answer) -> None:
-    assert _match_prefix_ambiguity(_cands(), 6818.0, lambda n: answer) == (True, False)
+    assert _match_prefix_ambiguity(_cands(), 6818.0, lambda n: answer) is True
 
 
 def test_a_failing_lookup_keeps_the_guard() -> None:
     def boom(_name):
         raise RuntimeError("boom")
 
-    assert _match_prefix_ambiguity(_cands(), 6818.0, boom) == (True, False)
+    assert _match_prefix_ambiguity(_cands(), 6818.0, boom) is True
 
 
 # ---------------------------------------------------------------------------

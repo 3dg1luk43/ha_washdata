@@ -32,6 +32,10 @@ python3 devtools/eval.py run --config-override '{"const": {"MATCH_DURATION_WEIGH
 - `--mode fast` (8 cycles per device) is a regression detector; `--mode full` is the number of
   record. Runs are deterministic; results are cached in `~/.cache/ha_washdata_eval`, keyed by a
   hash of the matcher sources, so a code change invalidates them.
+- **Twin entries** (two config entries on one plug, e.g. a test clone: >= 5 runs and 50% of the
+  smaller entry's runs start within 120 s of the other's) are scored once by default, keeping the
+  entry with the most labelled traced cycles; `--include-twins` scores both; `meta.twin_entries` lists
+  them. Every replay harness runs `async_repair_profile_samples` first, as setup does.
 - `const` overrides rebind module-level names only; a value captured at import time (default
   argument, derived dict) is not affected.
 - After a matcher change that is meant to move accuracy, re-cut the baseline:
@@ -48,6 +52,7 @@ All replay the shipped code; run with `--help` for options.
 | `decisive_margin_eval.py --loo` | the mid-cycle switch bypass; `--switching` adds commit and switch accuracy |
 | `prefix_guard_eval.py` | the prefix-ambiguity guard on genuine ends and random cuts |
 | `min_off_gap_eval.py` | `min_off_gap` split/merge bounds (replays unmatched) |
+| `start_gate_eval.py` | start gates on a raw continuous history: missed, late, phantom starts per idle day |
 | `eta_eval.py --all-formats` | first-ETA timing and ETA error by elapsed fraction |
 | `energy_projection_eval.py` | projected-energy accuracy |
 | `ml_energy_gate_eval.py` | the on-device `total_energy` promotion gate |

@@ -487,20 +487,30 @@ def test_smart_termination_fires_on_a_trusted_match(base_config):
 
 @pytest.mark.parametrize(
     "case",
-    ["below_confidence", "ambiguous", "prefix_ambiguous"],
+    ["below_confidence", "ambiguous"],
 )
 def test_smart_termination_is_blocked_by_each_gate_condition(base_config, case):
     """Each blocked case is closed by the power fallback instead, later."""
     conf = 0.9
-    ambiguous = prefix = False
+    ambiguous = False
     if case == "below_confidence":
         conf = base_config.match_confidence_threshold - 0.01
-    elif case == "ambiguous":
-        ambiguous = True
     else:
-        prefix = True
+        ambiguous = True
     ended_at, cycle = _run_gate_case(
-        base_config, ("Cotton", conf, _GATE_EXPECTED, "W", False, ambiguous, prefix)
+        base_config, ("Cotton", conf, _GATE_EXPECTED, "W", False, ambiguous, False)
     )
     assert cycle["termination_reason"] != "smart", case
     assert ended_at >= _DROP_AT + 900, (case, ended_at)
+
+
+def test_the_retired_prefix_fit_element_no_longer_blocks(base_config):
+    """Element 7 carried the #364 prefix-fit flag, removed in 0.5.8: on the shipped
+    matcher it never fired at a split moment (devtools/prefix_guard_eval.py
+    --quiet-cuts --sweep). A legacy tuple that still sets it ends on Smart
+    Termination like any trusted, unambiguous match."""
+    ended_at, cycle = _run_gate_case(
+        base_config, ("Cotton", 0.9, _GATE_EXPECTED, "W", False, False, True)
+    )
+    assert cycle["termination_reason"] == "smart"
+    assert ended_at < _DROP_AT + 900, ended_at

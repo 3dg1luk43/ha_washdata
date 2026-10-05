@@ -56,9 +56,11 @@ replays each cycle through the live state machine (``playground
 .simulate_cycle_detail``: real ``CycleDetector``, real matcher, the manager's own
 ``match_rules`` switching / persistence / verified pause / consistency override)
 and summarises per device type: the first committed programme right, the
-programme displayed at cycle end right, displayed switches and reverts per
-cycle, and switches that went wrong -> right versus right -> wrong. With
-``--loo`` each replay runs against a store without the cycle.
+programme displayed at cycle end right, the programme the finish notification
+names right (the cycle-end label verdict, else the displayed one, else the
+complete-cycle winner), displayed switches and reverts per cycle, switches that
+went wrong -> right versus right -> wrong, and the median time to the first
+commit. With ``--loo`` each replay runs against a store without the cycle.
 
 ``--all-formats`` reads every corpus shape (diagnostics dumps too) the way
 ``devtools/eval.py`` does, clone files dropped. Exit codes: 0 ok, 2 no corpus.
@@ -153,6 +155,10 @@ def _device(
     base["envelopes"] = dict(base.get("envelopes") or {})
     try:
         cfg, store, opts = eg._production(doc, base)  # noqa: SLF001
+        # Setup runs the sample repair before any match and mutates
+        # base["profiles"] in place, so the LOO fold stores inherit it (as in
+        # eval.py and end_gate_eval.py).
+        eg._run(store.async_repair_profile_samples())  # noqa: SLF001
         eg._rebuild_envelopes(store, list(base["profiles"]))  # noqa: SLF001
     except Exception:  # noqa: BLE001
         return None
@@ -291,6 +297,23 @@ def _switching_rows(job: tuple[str, bool, bool]) -> list[dict[str, Any]]:
             elif etype == "finished":
                 break
         right = [s == label for s in shown]
+        # What the finish notification names (manager._async_cycle_end_steps): the
+        # cycle-end label verdict when it passes, else the programme displayed at
+        # the end, else (never committed live) the complete-cycle winner at the
+        # 0.15 display floor. The sim exposes that winner only as a verdict, so the
+        # last fallback re-runs the complete match on the stored trace.
+        outcome = sim.get("outcome") or {}
+        notified = outcome.get("label_profile") if outcome.get("would_label") else None
+        if notified is None and shown and shown[-1]:
+            notified = shown[-1]
+        if notified is None:
+            pts = eg._cycle_readings(cyc)  # noqa: SLF001
+            try:
+                final = eg._run(fold.async_match_profile(pts, pts[-1][0] - pts[0][0]))  # noqa: SLF001
+            except Exception:  # noqa: BLE001
+                final = None
+            if final is not None and final.best_profile and float(final.confidence or 0.0) >= 0.15:
+                notified = final.best_profile
         rows.append({
             "device_type": device_type,
             "scorable": _scorable(base, cyc),
@@ -311,6 +334,9 @@ def _switching_rows(job: tuple[str, bool, bool]) -> list[dict[str, Any]]:
                 commit_t / max(1.0, float(sim.get("duration_s") or 0.0))
                 if commit_t is not None else None
             ),
+            "commit_s": commit_t,
+            "notify_right": notified == label,
+            "label_reason": outcome.get("label_reason"),
         })
     return rows
 
@@ -381,7 +407,8 @@ def _print_switching(rows: list[dict[str, Any]], loo: bool) -> None:
     print(f"live switching replay ({'LOO' if loo else 'IN-SAMPLE (flattering)'}),"
           " labelled cycles")
     hdr = (f"{'scope':<18}{'n':>5}{'commit':>8}{'1st right':>11}{'end right':>11}"
-           f"{'sw/cyc':>8}{'rev/cyc':>9}{'w->r':>6}{'r->w':>6}{'commit@':>9}")
+           f"{'notify':>8}{'sw/cyc':>8}{'rev/cyc':>9}{'w->r':>6}{'r->w':>6}{'commit@':>9}"
+           f"{'min':>6}")
     for only_scorable in (False, True):
         sel = [r for r in rows if r["scorable"] or not only_scorable]
         print(f"\n{'scorable cycles only' if only_scorable else 'every labelled cycle'}")
@@ -394,22 +421,29 @@ def _print_switching(rows: list[dict[str, Any]], loo: bool) -> None:
                 continue
             fracs = sorted(r["commit_frac"] for r in s if r["commit_frac"] is not None)
             med = fracs[len(fracs) // 2] if fracs else None
+            secs = sorted(r["commit_s"] for r in s if r.get("commit_s") is not None)
+            med_min = secs[len(secs) // 2] / 60.0 if secs else None
             print(
                 f"{scope or 'ALL':<18}{n:>5}"
                 f"{100.0 * sum(r['committed'] for r in s) / n:>7.1f}%"
                 f"{100.0 * sum(r['first_right'] for r in s) / n:>10.1f}%"
                 f"{100.0 * sum(r['final_right'] for r in s) / n:>10.1f}%"
+                f"{100.0 * sum(bool(r.get('notify_right')) for r in s) / n:>7.1f}%"
                 f"{sum(r['switches'] for r in s) / n:>8.2f}"
                 f"{sum(r['reverts'] for r in s) / n:>9.2f}"
                 f"{sum(r['wrong_to_right'] for r in s):>6}"
                 f"{sum(r['right_to_wrong'] for r in s):>6}"
                 f"{'-' if med is None else f'{100.0 * med:.0f}%':>9}"
+                f"{'-' if med_min is None else f'{med_min:.1f}':>6}"
             )
     print(
         "\ncommit = a programme was ever displayed; 1st/end right = the first / last"
         " displayed programme is the label;\nsw = displayed programme changed,"
         " rev = reverted to detecting; w->r / r->w = switches that fixed / broke it;"
-        "\ncommit@ = median first-commit time as a fraction of the replay."
+        "\nnotify = the finish notification names the label (the cycle-end label"
+        " verdict, else the programme displayed at the end,\nelse the complete-cycle"
+        " winner);"
+        " commit@ / min = median first-commit time as a fraction of the replay / in minutes."
     )
 
 
