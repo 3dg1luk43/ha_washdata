@@ -27,7 +27,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### Breaking changes
 
-- **`binary_sensor.<device>_running` stays on for the whole cycle**, through soaks, pauses and the end wait. It used to turn off in each of them; automations that treat "off" as finished now fire only when the cycle is over.
+- **`binary_sensor.<device>_running` stays on for the whole cycle** ([#464](https://github.com/3dg1luk43/ha_washdata/issues/464)), through soaks, pauses and the end wait. It used to turn off in each of them; automations that treat "off" as finished now fire only when the cycle is over.
 - **The state sensor no longer has a `samples_recorded` attribute** (it changed on every reading; the debug sensor still has `samples`). **Elapsed time** updates in whole minutes.
 - **Services validate their input**: a value of the wrong type is now a validation error instead of being guessed or crashing, and `export_config`, `import_config` and `trigger_ml_training` are administrator-only.
 - **Store**: publishing, rating and confirming are administrator-only, and adopting a shared setup no longer copies Off Delay, Minimum Off Gap, the power-off settings or the match interval (they depend on the sharer's plug).

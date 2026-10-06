@@ -154,7 +154,11 @@ for (const m of oversized) {
 out.push(``);
 
 const rendered = out.join('\n');
-if (process.argv.includes('--check')) {
+if (!fs.existsSync(path.dirname(OUT))) {
+  // docs/internal is local-only (gitignored since 0.5.8): nothing to check or write
+  // in a CI checkout or a fresh clone.
+  console.log('docs/internal not present (local-only): PANEL_MAP skipped.');
+} else if (process.argv.includes('--check')) {
   const current = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : '';
   if (current !== rendered) {
     console.error('docs/internal/PANEL_MAP.md is stale. Run: node devtools/gen_panel_map.mjs');

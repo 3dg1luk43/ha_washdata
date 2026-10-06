@@ -39,8 +39,10 @@ def test_docs_match_the_code() -> None:
     # history and is not anchor-checked, so only a handful remain.
     assert report.stats["anchors checked"] >= 1
     assert report.stats["constant claims checked"] >= 10
-    assert report.stats["register ids"] > 300
-    assert report.stats["deep-dive identifiers checked"] > 1000
+    # docs/internal (register, deep-dives) is local-only and absent from a CI checkout.
+    if (dc.ROOT / "docs/internal").is_dir():
+        assert report.stats["register ids"] > 300
+        assert report.stats["deep-dive identifiers checked"] > 1000
 
 
 def test_anchor_check(tmp_path: Path) -> None:

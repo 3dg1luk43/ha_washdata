@@ -2,8 +2,9 @@
 
 Guidance for Claude Code when working in this repository.
 
-**Detail lives elsewhere on purpose.** `docs/internal/INTEGRATION_REFERENCE.md` (+ 14 deep-dives
-under `docs/internal/reference/`) is the canonical engineering reference: module maps, subsystem
+**Detail lives elsewhere on purpose.** `docs/internal/` is **local-only** (gitignored since 0.5.8; a fresh
+clone or CI checkout does not have it, and the checks that read it skip themselves). In it,
+`INTEGRATION_REFERENCE.md` (+ 14 deep-dives under `docs/internal/reference/`) is the canonical engineering reference: module maps, subsystem
 walkthroughs, tuning provenance; the discrepancy/tech-debt register is `docs/internal/register/`. This file holds only the
 rules and traps; when you need the "why" or the measured numbers, read the reference.
 

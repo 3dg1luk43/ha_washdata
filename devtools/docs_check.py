@@ -472,6 +472,12 @@ def _register_table(text: str) -> str:
 
 def check_register(root: Path, report: Report) -> None:
     ids: list[str] = []
+    if not (root / "docs/internal").is_dir():
+        # docs/internal is local-only (gitignored since 0.5.8): a CI checkout or a
+        # fresh clone has no register to check.
+        report.notes.append("docs/internal not present (local-only): register checks skipped")
+        report.stats["register ids"] = 0
+        return
     for rel in REGISTER_DOCS:
         path = root / rel
         if not path.is_file():
