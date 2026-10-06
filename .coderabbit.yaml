@@ -1,0 +1,285 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# CodeRabbit config for WashData. Project rules live in CLAUDE.md and CONTRIBUTING.md
+# (read as code guidelines below); this file adds the review settings and the traps
+# reviewers have tripped on before, so they are not re-flagged every round.
+
+language: en-GB
+tone_instructions: >-
+  Be brief and concrete: lead with the failing input or state and what goes wrong.
+  No praise, no restating the diff, no style nits. Plain English, no em dashes.
+  If you are not sure a finding is real, say so.
+early_access: false
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  high_level_summary_instructions: >-
+    A few bullets: what changes for users, then what changes for developers.
+    No file-by-file list.
+  poem: false
+  in_progress_fortune: false
+  review_status: true
+  collapse_walkthrough: true
+  changed_files_summary: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false
+  assess_linked_issues: true
+  related_issues: true
+  related_prs: true
+  suggested_labels: false
+  auto_apply_labels: false
+  suggested_reviewers: false
+  auto_assign_reviewers: false
+  # The maintainer fixes findings with an agent loop that reads these blocks.
+  enable_prompt_for_ai_agents: true
+  abort_on_close: true
+  slop_detection:
+    enabled: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+    # PRs go to main, or to a release branch such as 0.5.8.
+    base_branches:
+      - "^\\d+\\.\\d+\\.\\d+(\\.\\d+)?$"
+    ignore_title_keywords:
+      - "WIP"
+      - "[skip review]"
+
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+    simplify:
+      enabled: false
+    autofix:
+      enabled: false
+    fix_ci:
+      enabled: false
+    resolve_merge_conflict:
+      enabled: false
+
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    title:
+      mode: "off"
+    description:
+      mode: warning
+    issue_assessment:
+      mode: warning
+    custom_checks:
+      - name: Generated files rebuilt
+        mode: error
+        instructions: >-
+          If custom_components/ha_washdata/www/ha-washdata-panel.js or
+          ha-washdata-card.js changed, the matching .min.js and www/build-manifest.json
+          must change in the same PR (node devtools/build_panel.mjs). If ws_api.py or
+          ws_schema.py changed a WebSocket command, www/ws-types.d.ts and docs/WS_API.md
+          must be regenerated too (python3 devtools/generate_ws_types.py). Fail when a
+          source changed and its generated file did not.
+      - name: Changelog entry
+        mode: warning
+        instructions: >-
+          A user-visible fix or feature needs an entry in CHANGELOG.md under the
+          unreleased version: symptom, cause, fix, with the issue link and a
+          "Thanks to @user" credit where a user reported it. The release's TL;DR must
+          still describe the release. Pure test, devtools or CI changes need none.
+      - name: Tuning backed by a measurement
+        mode: warning
+        instructions: >-
+          If the PR changes the value of a matching, end-detection or start-gate
+          constant (MATCH_*, end gates, thresholds, defaults in const.py), the
+          description must quote a before/after from a committed harness
+          (devtools/eval.py compare, end_gate_eval.py --loo, decisive_margin_eval.py,
+          prefix_guard_eval.py, start_gate_eval.py). Reasoning alone is not enough.
+      - name: No em dash
+        mode: warning
+        instructions: >-
+          No added line may contain the em dash character (U+2014), in code, docs,
+          translations or commit-facing text. "->" and "→" are fine.
+
+  path_filters:
+    # Generated: review the generator, not the output.
+    - "!custom_components/ha_washdata/www/*.min.js"
+    - "!custom_components/ha_washdata/www/build-manifest.json"
+    - "!custom_components/ha_washdata/www/ws-types.d.ts"
+    - "!docs/WS_API.md"
+    - "!**/package-lock.json"
+    # Measured baselines and parity fixtures, rewritten by their harnesses.
+    - "!devtools/*_baseline.json"
+    - "!custom_components/ha_washdata/ml/*_parity.json"
+    # Non-English translations: produced by translators with domain context and
+    # checked by the i18n tests. English (en.json, strings.json) stays in review.
+    - "!custom_components/ha_washdata/translations/**/[a-df-z]*.json"
+    - "!custom_components/ha_washdata/translations/**/e[lst].json"
+
+  path_instructions:
+    - path: "custom_components/ha_washdata/**/*.py"
+      instructions: |
+        Home Assistant custom integration. Runtime rules:
+        - NumPy is the only third-party dependency, ml/ included. Flag any new import of scipy, sklearn, pandas or torch.
+        - All HA code is async. CPU-heavy NumPy work runs in the executor; long jobs go through task_registry.py, never tied only to a WebSocket request.
+        - Timestamps: dt_util.now(), never datetime.now(). Intervals (elapsed, dt, durations): time_utils.utc_now() and dt_util.as_utc(); local-time subtraction is an hour off across DST.
+        - Energy: signal_processing.integrate_wh() + energy_gap_threshold_s(). Flag a new inline trapezoid.
+        - No user-facing English in Python: HA labels go in strings.json and translations/en.json. Exception: ws_api send_error() diagnostics are inline by design (the panel wraps them in its own translated toast).
+        - Tunables live in entry.options, identity keys in entry.data. Device type, brand and model are in entry.options; reading them from entry.data breaks detection.
+        - HA event data has a 32 KB limit: never put power_data, debug_data or power_trace in an event.
+        - manager.py and profile_store.py log through DeviceLoggerAdapter.
+        - Every registered service needs services.yaml, strings.json and a schema in __init__._SERVICE_SCHEMAS.
+        - json-facing float()/int() conversions must also catch OverflowError (an oversized integer literal raises). Accept these findings.
+        - Modules documented as "never raises" (playground.py, history_import.py, the profile heuristics) return an error dict on purpose; a broad except there is intended.
+        Review limits:
+        - Do not propose a new notification type; new signals go in sensor attributes, cycle metadata or the panel.
+        - Do not suggest a new helper next to an existing implementation; extend the existing one.
+        - Changing a tuned constant, removing a shipped feature or redesigning cycle termination is the maintainer's call: say so instead of asking for it.
+        - There is no Ruff config in this repo. Do not cite rules outside Ruff's defaults (for example FBT003).
+
+    - path: "custom_components/ha_washdata/{profile_store,analysis,match_rules,progress,cycle_detector,playground,learning}.py"
+      instructions: |
+        Matching and detection core. Accuracy is measured, not argued: ask for a harness result (devtools/eval.py for the matcher, end_gate_eval.py --loo for end gates) rather than proposing a scoring change. devtools/dtw_ab_eval.py does not run the shipped matcher and scores complete cycles only.
+        - progress.py is the single source for progress, remaining time, phase and projected energy. match_rules.py holds the post-match rules. The manager and the Playground both call them; flag any re-implementation in either caller.
+        - The Playground replay must stay byte-identical to the live path. A suggestion that makes the sim behave differently from manager.py is wrong even if it looks cleaner.
+        - Every auto-label goes through profile_store.label_verdict(). Labelling or persisting uses MatchResult.label_confidence, not confidence (they differ on a Stage-5 group win).
+        - New gates should use the top1-top2 margin, not the absolute confidence. MATCH_AMBIGUITY_MARGIN stays 0.05 because it also gates Smart Termination.
+        - Cycle lookups go through iter_stored_cycles()/find_stored_cycle(); only the profile-shaping readers use iter_evidence_cycles(). Profile GC or a lookup gated on the evidence view deletes import-only profiles.
+        - Rejected designs, do not re-add: the Stage-5 aggregate group snapshot, the additive _stage5_rerank tie-break, the #364 prefix-fit guard, a global phase_match fill role.
+        - prefix_shape_arrays caps the grid at the candidate's k on purpose (a candidate-independent grid measured worse on the split guard).
+        - Detector config is clamped where it is read, not in a constructor: an options reload assigns detector.config fields directly.
+        - In the start energy evidence, a long gap between two high readings is a running appliance on a send-on-delta plug. Do not zero high_dt above an outage ceiling (measured: a cold detector then never starts a cycle).
+
+    - path: "custom_components/ha_washdata/{__init__,profile_store}.py"
+      instructions: |
+        Migrations: config entry migration is async_migrate_entry (__init__.py), storage migration is WashDataStore._async_migrate_func (profile_store.py). Both must be deterministic and idempotent and must never drop cycles, labels or corrections. A version bump is the constant in const.py plus one new step, with an old-schema fixture test.
+        async_unload_entry must not await the per-entry WebSocket lock (HA unloads on every reload and shutdown); handlers re-validate the manager after an awaited write instead. A failed stale-platform unload during setup must not abort the setup retry (#425).
+
+    - path: "custom_components/ha_washdata/manager.py"
+      instructions: |
+        Notifications: mobile-only keys (tag, clickAction, url, notification_icon, colours, live-update keys) go only to notify.mobile_app_* targets; strict platforms such as Signal reject unknown keys. title must never be passed as None (HA's schema rejects it and the call is silently dropped). tests/conftest.py replays every recorded service call through HA's real schemas; payload changes must keep that guard passing.
+        _armed_program is the authoritative session state; do not roll it back when its store write fails.
+        Recomputes mutate cycles and then save without rollback; that is the established pattern, and the mutated values are the correct ones.
+
+    - path: "custom_components/ha_washdata/ml/**"
+      instructions: |
+        Experimental ML, NumPy only. Inference goes through engine.resolve_scorer() / resolve_regressor(). Each model's FEATURE_COLUMNS and the scoring math are duplicated byte-for-byte in the offline lab: flag any change that is not mirrored there, and do not refactor for style. ENABLE_ML_END_GUARD is frozen off by measurement; do not suggest enabling it. feature_extraction.cumulative_energy_wh returns a per-reading array and is not a duplicate of integrate_wh (a scalar).
+
+    - path: "custom_components/ha_washdata/store*.py"
+      instructions: |
+        The community store is a sanctioned, opt-in online feature (Firestore and Auth over REST). Network calls here are intended. Flag missing auth checks, unvalidated downloads and unbounded fan-out, not the fact that it talks to a server.
+
+    - path: "custom_components/ha_washdata/www/ha-washdata-*.js"
+      instructions: |
+        Readable panel and card source; the .min.js is generated from it and must be rebuilt in the same PR.
+        - Every user-visible string goes through this._t(key, vars, fallback), including title=, placeholder=, aria-label= and tooltips. The English fallback must match translations/panel/en.json. Only 'WashData' may be hardcoded.
+        - _t() HTML-escapes its vars. Markup on purpose is wrapped in _html(...); sinks that escape themselves or are plain text (toast, confirm, textContent, title through _esc) use _tText(...). Flag double escaping and raw user text in HTML.
+        - CSS and HTML live in JS template literals: a backtick inside them breaks the build. Single-quoted fallbacks need escaped apostrophes.
+        - _opts is the saved-options baseline; an unsaved edit written into it makes the save skip the key (#447).
+        - Every [data-tab] element is bound to the main tab router; a new data-tab attribute elsewhere hijacks navigation.
+
+    - path: "custom_components/ha_washdata/{strings.json,translations/en.json,translations/panel/en.json}"
+      instructions: |
+        Canonical English. strings.json and translations/en.json must stay identical. Texts must be short and plain: a setting's help is one or two sentences, a tooltip one. Flag padding ("in order to", restating the label, listing every edge case). Keep every {placeholder}. Plurals use key_one/key_other with the plain key as fallback. No leading or trailing whitespace (HA rejects it). Other languages are translated separately; never suggest machine translation.
+
+    - path: "tests/**"
+      instructions: |
+        - A bug fix comes with tests/test_issue_<number>_*.py reproducing it.
+        - Tests that replay cycle_data/, fan out over many cycles or take over 1.5 s are marked slow (module-level pytestmark).
+        - Prefer the setup_washdata_entry fixture to a MagicMock hass. A new hass = MagicMock() site fails test_audit_testing_07 unless added to the allow-list on purpose.
+        - A MagicMock hass used as a Store path writes files into the repo; give it a real config dir (tmp_path).
+        - Use async def tests; asyncio.run() inside a sync test breaks every later HA fixture.
+        - Do not weaken or remove the autouse service-schema guard in tests/conftest.py.
+        - A test must be able to fail: flag assertions that only check a mock was called, or that pass when the code under test returns early.
+
+    - path: "devtools/**"
+      instructions: |
+        Measurement harnesses and dev tools, not shipped. A harness a tuning claim rests on must drive the shipped code path (ProfileStore.async_match_profile with the config a real manager builds), not a partial copy. devtools/ is "type": "module", so CommonJS files must be .cjs. Never print or commit secrets; devtools/secrets.py is gitignored and secrets.py.template holds placeholders only.
+
+    - path: ".github/workflows/**"
+      instructions: |
+        Actions are pinned to a commit SHA, permissions are minimal, and no workflow merges anything. Workflows on issue_comment or pull_request_target must never check out or run PR code. Bot messages in github-script are JS template literals: backticks inside them must be escaped. Keep bot texts short and friendly.
+
+    - path: "CHANGELOG.md"
+      instructions: |
+        Each release opens with a short TL;DR that is rewritten as a whole when entries change. Entries are direct: symptom, cause, fix, measured numbers, issue link, "Thanks to @user". No narration or case history. No em dashes.
+
+    - path: "{README.md,CONTRIBUTING.md,SECURITY.md,docs/**/*.md}"
+      instructions: |
+        User-facing docs: short, plain sentences, the thing the reader does first. Flag padding and claims that no longer match the code. No em dashes.
+
+    - path: "playwright-tests/**"
+      instructions: |
+        Panel E2E across chromium and mobile-chrome, run against both the readable and the minified build. New panel features need a matching spec. Prefer role and test-id locators over CSS paths, and wait on state, not on timeouts.
+
+  tools:
+    ruff:
+      enabled: true
+    shellcheck:
+      enabled: true
+    actionlint:
+      enabled: true
+    zizmor:
+      enabled: true
+    gitleaks:
+      enabled: true
+    osvScanner:
+      enabled: true
+    github-checks:
+      enabled: true
+    # Off: no project config, so their defaults only add noise here.
+    markdownlint:
+      enabled: false
+    yamllint:
+      enabled: false
+    languagetool:
+      enabled: false
+    biome:
+      enabled: false
+    eslint:
+      enabled: false
+    oxc:
+      enabled: false
+    pylint:
+      enabled: false
+    flake8:
+      enabled: false
+    htmlhint:
+      enabled: false
+    stylelint:
+      enabled: false
+    presidio:
+      enabled: false
+    trufflehog:
+      enabled: false
+
+chat:
+  art: false
+  auto_reply: true
+  allow_non_org_members: false
+
+knowledge_base:
+  opt_out: false
+  web_search:
+    enabled: true
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "CLAUDE.md"
+      - "CONTRIBUTING.md"
+  learnings:
+    scope: local
+  issues:
+    scope: local
+  pull_requests:
+    scope: local
+
+issue_enrichment:
+  auto_enrich:
+    enabled: false
+  planning:
+    enabled: true
+    auto_planning:
+      enabled: false
