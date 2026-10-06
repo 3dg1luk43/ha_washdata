@@ -7976,7 +7976,9 @@ class ProfileStore:
                     or span
                     or 0.0
                 )
-            return float(profile.get("avg_duration") or 0.0)
+            # The sample-cycle path: avg_duration, then the sample's own duration
+            # and trace span, as the snapshot builder takes them.
+            return float(self.resolve_profile_duration(name) or 0.0)
         except Exception:  # pylint: disable=broad-exception-caught
             return float(profile.get("avg_duration") or 0.0)
 

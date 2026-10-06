@@ -201,3 +201,21 @@ def test_a_resume_keeps_the_cycles_expectation(manager: WashDataManager) -> None
     manager._ml_end_expectation_cache = cached
     manager._on_state_change(STATE_PAUSED, STATE_RUNNING)
     assert manager._ml_end_expectation_cache == cached
+
+
+def test_a_legacy_profile_without_avg_duration_uses_its_sample_cycle(mock_hass) -> None:
+    """The matcher sizes a profile with no ``avg_duration`` and no envelope by its
+    sample cycle's ``duration``; ``_stage1_duration_for`` returned 0.0 there, so
+    training fell back to the trace median while serving used the matched one."""
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+    with patch("custom_components.ha_washdata.profile_store.WashDataStore"):
+        store = ProfileStore(mock_hass, "e", min_duration_ratio=0.1, max_duration_ratio=1.8)
+    store._data["profiles"]["Legacy"] = {"sample_cycle_id": "c0"}  # noqa: SLF001
+    store._data["past_cycles"] = [{  # noqa: SLF001
+        "id": "c0", "profile_name": "Legacy", "status": "completed", "duration": 5400.0,
+        "start_time": "2026-01-01T08:00:00+00:00",
+        "power_data": [[0.0, 0.0], [60.0, 500.0], [5400.0, 0.0]],
+    }]
+    assert store._stage1_duration_for("Legacy", store._data["profiles"]["Legacy"]) == 5400.0  # noqa: SLF001
+    assert training_task._expected_durations(store) == {"Legacy": 5400.0}
