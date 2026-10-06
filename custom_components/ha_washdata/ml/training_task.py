@@ -477,26 +477,32 @@ def _expected_durations(store: Any) -> dict[str, float]:
     return out
 
 
+def training_stop_threshold(merged: dict[str, Any]) -> float:
+    """The stop threshold training cleans cycles with: the entry's Stop Threshold,
+    else its min_power, else 2.0 W. ``merged`` is entry data overlaid by options."""
+    from ..const import CONF_MIN_POWER, CONF_STOP_THRESHOLD_W
+
+    for key in (CONF_STOP_THRESHOLD_W, CONF_MIN_POWER):
+        try:
+            v = float(merged.get(key))
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if v > 0:
+            return v
+    return 2.0
+
+
 async def async_run_training(hass: Any, manager: Any) -> dict[str, Any]:
     """Public entry point: train on this device's cycles and persist winners.
 
     Offloads the CPU work to an executor thread and persists any promoted model
     specs into the profile store. Returns a summary for logging / the event.
     """
-    from ..const import CONF_MIN_POWER, CONF_STOP_THRESHOLD_W
-
     store = manager.profile_store
     entry = hass.config_entries.async_get_entry(manager.entry_id)
-    merged = {**(entry.data if entry else {}), **(entry.options if entry else {})}
-    stop_thr = 2.0
-    for key in (CONF_STOP_THRESHOLD_W, CONF_MIN_POWER):
-        try:
-            v = float(merged.get(key))
-        except (TypeError, ValueError):
-            continue
-        if v > 0:
-            stop_thr = v
-            break
+    stop_thr = training_stop_threshold(
+        {**(entry.data if entry else {}), **(entry.options if entry else {})}
+    )
 
     from homeassistant.util import dt as dt_util
 

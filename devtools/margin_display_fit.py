@@ -99,6 +99,8 @@ def fit(folds: list[dict[str, Any]]) -> tuple[list[tuple[float, float]], float |
 def predict(knots: list[tuple[float, float]], single: float | None, fold: dict[str, Any]) -> float:
     if int(fold.get("nc", 0)) < 2:
         return single if single is not None else (knots[-1][1] if knots else 0.5)
+    if not knots:  # no margin bin reached 5 folds (a small result file)
+        return single if single is not None else 0.5
     x = [k[0] for k in knots]
     y = [k[1] for k in knots]
     return float(np.interp(float(fold["mg"]), x, y))

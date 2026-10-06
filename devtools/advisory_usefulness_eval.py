@@ -474,7 +474,9 @@ def _report_gaps(devs: list[dict]) -> dict:
     why = Counter()
     for d, h in misses:
         r = h["oracle/recent"]
-        why["< 5 unmatched (function returns {})" if r["unmatched"] < 5 else
+        # unmatched_count is only reported when the function returns a result, so 0
+        # means it returned {} (below min_unmatched, whatever --gap-kwargs set).
+        why["too few unmatched (function returns {})" if not r["unmatched"] else
             "clusters but none P-pure" if r["clusters"] else "no shape-similar duration bucket"] += 1
     print(f"oracle/recent misses by reason: {dict(why)}")
     diag = Counter(h["miss_diag"]["reason"] for _, h in misses if "miss_diag" in h)

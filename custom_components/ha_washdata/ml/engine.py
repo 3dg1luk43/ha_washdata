@@ -25,7 +25,7 @@ The runtime entry points are :func:`resolve_scorer`, which returns the shipped
 embedded baseline's scoring callable for a classifier capability, and
 :func:`resolve_regressor`, which returns an on-device trained regressor. All live
 ML consumers go through them (the panel's ``ml_health`` shadow comparison in
-``ws_api``), and any new runtime consumer should too — feature extraction lives in ``feature_extraction``
+``ws_api``), and any new runtime consumer should too - feature extraction lives in ``feature_extraction``
 and gating in :func:`ml_models_enabled`, so there is no separate engine object.
 
 Each model consumes a feature mapping whose keys are the model's

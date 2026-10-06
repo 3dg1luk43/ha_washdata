@@ -219,3 +219,19 @@ def test_end_energy_is_raised_only_when_it_forbids_an_end() -> None:
     opts[CONF_END_ENERGY_THRESHOLD] = 0.5
     out = _engine(cycles, options=opts).run_batch_simulation(cycles)
     assert CONF_END_ENERGY_THRESHOLD not in out
+
+
+def test_an_oversized_json_integer_does_not_abort_the_batch_pass() -> None:
+    """`float(10**400)` raises OverflowError; the end-energy block caught only
+    TypeError/ValueError, so one oversized stored option aborted every suggestion."""
+    from custom_components.ha_washdata.const import (
+        CONF_END_ENERGY_THRESHOLD,
+        CONF_STOP_THRESHOLD_W,
+    )
+
+    cycles = [_cycle(i) for i in range(12)]
+    for key in (CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY):
+        opts = {CONF_STOP_THRESHOLD_W: 2.0, CONF_OFF_DELAY: 600, CONF_END_ENERGY_THRESHOLD: 0.01}
+        opts[key] = 10**400
+        out = _engine(cycles, options=opts).run_batch_simulation(cycles)
+        assert CONF_END_ENERGY_THRESHOLD not in out

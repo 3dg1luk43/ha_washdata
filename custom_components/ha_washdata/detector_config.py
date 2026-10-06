@@ -111,7 +111,7 @@ def _finite(value: Any, default: float) -> float:
     """``value`` as a finite float, else ``default``."""
     try:
         number = float(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return default
     return number if math.isfinite(number) else default
 
@@ -155,7 +155,7 @@ def build_detector_config(
         if isinstance(default, (int, float)):
             try:
                 number = float(value)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 return default
             return number if math.isfinite(number) else default
         return value

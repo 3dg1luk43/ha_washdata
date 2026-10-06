@@ -53,6 +53,7 @@ from .const import (
     MAX_ALIGN_GRID_POINTS,
     STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES,
 )
+from .signal_processing import integrate_wh
 
 
 def stage4_energy_mode(device_type: str | None) -> str:
@@ -841,7 +842,7 @@ def member_energy_reference(
             dur = 0.0
         if not math.isfinite(dur) or dur <= 0:
             dur = span
-        energy_ws = float(np.sum(0.5 * (p[1:] + p[:-1]) * np.diff(t))) / span * dur
+        energy_ws = integrate_wh(t, p) * 3600.0 / span * dur
         if math.isfinite(energy_ws) and energy_ws > 0:
             totals.append(energy_ws)
     if not totals:

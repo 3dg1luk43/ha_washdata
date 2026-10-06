@@ -98,7 +98,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                     help=f"plug settings file (default {STATE_FILE.name})")
     ap.add_argument("--ledger", type=Path, default=LEDGER_FILE,
                     help=f"where finished runs are appended (default {LEDGER_FILE.name})")
-    ap.add_argument("--web-host", default="0.0.0.0", help="web UI bind address (default 0.0.0.0)")
+    ap.add_argument("--web-host", default="127.0.0.1",
+                    help="web UI bind address (default 127.0.0.1; the UI has no login, so 0.0.0.0 opens it to the LAN)")
     ap.add_argument("--web-port", type=int, default=8081, help="web UI port (default 8081)")
     ap.add_argument("--headless", action="store_true", help="no web UI")
     ap.add_argument("--list", action="store_true", help="list scenarios, plug modes and programmes")

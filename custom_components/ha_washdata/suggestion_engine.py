@@ -319,7 +319,7 @@ def _cycle_readings(cycle: dict[str, Any]) -> list[tuple[float, float]]:
             cast(list[list[float] | tuple[Any, float]], raw), start_iso
         )
         return [(float(o), float(p)) for o, p in pairs]
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return []
 
 
@@ -463,7 +463,7 @@ def select_clean_cycles(
 
         try:
             duration = float(c.get("duration") or 0.0)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             duration = 0.0
 
         readings = _cycle_readings(c)
@@ -875,7 +875,7 @@ def reconcile_suggestions(
     in ``out`` (live-vs-live conflicts are the frontend's responsibility).
     """
     out: dict[str, Any] = {k: dict(v) if isinstance(v, dict) else v for k, v in suggestions.items()}
-    # Track which keys the engine originally proposed — used for direction logic.
+    # Track which keys the engine originally proposed - used for direction logic.
     original_keys: frozenset[str] = frozenset(
         k for k, v in out.items() if isinstance(v, dict) and v.get("value") is not None
     )
@@ -923,7 +923,7 @@ def reconcile_suggestions(
             base = entry.get("reason", "")
             entry["reason"] = f"{base} Adjusted to {rounded} for consistency with {why}.".strip()
             # The composed English reason now differs from the base suggestion's
-            # localization key, so drop the sidecars — the panel falls back to the
+            # localization key, so drop the sidecars - the panel falls back to the
             # (updated) English ``reason``. Reconcile-composed reasons embed both a
             # nested base reason and a "why" fragment, which the flat single-key
             # _t() mechanism cannot recompose; leaving English here is correct.
@@ -1387,7 +1387,7 @@ class SuggestionEngine:
             try:
                 avg = float(prof.get("avg_duration") or 0.0)
                 dur = float(c.get("duration") or 0.0)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 continue
             if avg > 60 and dur > 60:
                 r = dur / avg
@@ -1487,7 +1487,7 @@ class SuggestionEngine:
             raw = options.get(key)
             try:
                 val = float(raw)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 continue
             if val > 0:
                 return val
@@ -1961,7 +1961,7 @@ class SuggestionEngine:
             return readings
         try:
             max_power = float(opts.get(CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             max_power = DEFAULT_ANTI_WRINKLE_MAX_POWER
         if max_power <= 0:
             return readings
@@ -2158,7 +2158,7 @@ class SuggestionEngine:
                 or resolve_off_delay_default(self.device_type or "")
             )
             cur_end = _num(_batch_opts.get(CONF_END_ENERGY_THRESHOLD))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             cur_end = None
         if cur_end is not None and cur_off_delay > 0:
             floor_wh = math.ceil(cur_stop * cur_off_delay / 36.0) / 100.0

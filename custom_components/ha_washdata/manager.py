@@ -63,6 +63,7 @@ from homeassistant.helpers.storage import Store
 from .const import NOTIFY_QUEUE_STORE_SUFFIX, STORAGE_KEY
 from .const import (
     resolve_off_delay_default,
+    CADENCE_RESET_FROM_STATES,
     DOMAIN,
     CONF_POWER_SENSOR,
     CONF_PROFILE_EVIDENCE_SOURCES,
@@ -4964,14 +4965,7 @@ class WashDataManager:
         # 504 its false starts return there, so hours of standby probes would
         # otherwise reach the next completed cycle; since item 515 so do the
         # terminal states' (the cycle end already closed the previous cycle's).
-        if new_state == STATE_STARTING and old_state in (
-            STATE_OFF,
-            STATE_UNKNOWN,
-            STATE_DELAY_WAIT,
-            STATE_FINISHED,
-            STATE_INTERRUPTED,
-            STATE_FORCE_STOPPED,
-        ):
+        if new_state == STATE_STARTING and old_state in CADENCE_RESET_FROM_STATES:
             self.learning_manager.discard_cycle_cadence()
         # The completed/Clean overlay (the cycle end, Clean, the unload nag, the
         # 100 % progress) is cleared when a new cycle COMMITS, in the RUNNING

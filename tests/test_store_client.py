@@ -1298,3 +1298,20 @@ async def test_device_bundle_flags_a_program_whose_cycles_could_not_be_read():
     by_id = {p["id"]: p for p in bundle["profiles"]}
     assert by_id["p2"]["cycles_unavailable"] is True and by_id["p2"]["cycles"] == []
     assert "cycles_unavailable" not in by_id["p1"]
+
+
+@pytest.mark.asyncio
+async def test_catalog_invalidation_drops_the_index_delta_cache_too():
+    # Search reads the static index plus a `delta:` query for entries created after
+    # it. A stale delta hides a device the user has just contributed for up to the
+    # 1 h TTL, and the panel's refresh action could not clear it.
+    s = _Session()
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    await c._index_delta("devices", "2026-01-01T00:00:00Z", ("brand",))
+    await c._index_delta("devices", "2026-01-01T00:00:00Z", ("brand",))
+    assert len(s.posts) == 1
+    c.refresh_catalog()
+    s.queue_post(_Resp(200, []))
+    await c._index_delta("devices", "2026-01-01T00:00:00Z", ("brand",))
+    assert len(s.posts) == 2

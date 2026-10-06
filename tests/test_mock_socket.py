@@ -23,13 +23,19 @@ whose "expect" line the shipped detector contradicts is a broken scenario.
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import random
 from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from custom_components.ha_washdata.const import STANDBY_BAND_WINDOW_S
+from custom_components.ha_washdata.const import (
+    CONF_START_DURATION_THRESHOLD,
+    CONF_START_ENERGY_THRESHOLD,
+    CONF_START_THRESHOLD_W,
+    STANDBY_BAND_WINDOW_S,
+)
 from custom_components.ha_washdata.cycle_detector import CycleDetector
 from devtools.mock_socket.model import (
     PLUG_MODES,
@@ -213,7 +219,15 @@ def test_scenarios_are_sized_from_the_device_config(app):
     assert pulled.truth[0].end == pytest.approx(0.9 * clean_end, abs=1.0)
 
 
-def test_idle_blips_stay_under_both_start_gates(app):
+@pytest.mark.parametrize("tight", [False, True])
+def test_idle_blips_stay_under_both_start_gates(app, tight):
+    if tight:
+        # A small start energy: the power floor (start threshold + 5 W) used to
+        # override the energy cap, so a 3 s blip at 8 W carried 0.0067 Wh > 0.005.
+        app = dataclasses.replace(app, entry_options={
+            **app.entry_options, CONF_START_ENERGY_THRESHOLD: 0.005,
+            CONF_START_THRESHOLD_W: 3.0, CONF_START_DURATION_THRESHOLD: 4.0,
+        })
     cfg = app.config
     for seed in range(20):
         program = build_program("idle-blips", app, None, NO_VARIATION, random.Random(seed))
@@ -221,7 +235,7 @@ def test_idle_blips_stay_under_both_start_gates(app):
             if w > 0:
                 assert w > cfg.start_threshold_w  # it does cross the power threshold...
                 assert t_next - t < cfg.start_duration_threshold  # ...but not for long
-                assert w * (t_next - t) / 3600.0 < cfg.start_energy_threshold
+                assert w * (t_next - t) / 3600.0 < 0.5 * cfg.start_energy_threshold
 
 
 def longest_run(program: Program, pred) -> float:

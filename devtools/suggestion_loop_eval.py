@@ -147,6 +147,7 @@ from custom_components.ha_washdata import analysis as analysis_mod  # noqa: E402
 from custom_components.ha_washdata import playground, ws_api  # noqa: E402
 from custom_components.ha_washdata.const import (  # noqa: E402
     CONF_AUTO_LABEL_CONFIDENCE,
+    CADENCE_RESET_FROM_STATES,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_LEARNING_CONFIDENCE,
     CONF_PROFILE_MATCH_THRESHOLD,
@@ -160,7 +161,6 @@ from custom_components.ha_washdata.const import (  # noqa: E402
     STATE_PAUSED,
     STATE_RUNNING,
     STATE_STARTING,
-    STATE_UNKNOWN,
     TerminationReason,
     resolve_sampling_interval_default,
 )
@@ -491,7 +491,7 @@ class _ManagerTap:
     * The cadence model: every reading the manager processes while the detector is
       active is timed against the previous processed reading (a watchdog keepalive
       counts as processed but is never itself timed), held per cycle, dropped on a
-      start from idle, and committed at the cycle's end only when it ended on its
+      start from idle or a finished state (``CADENCE_RESET_FROM_STATES``), and committed at the cycle's end only when it ended on its
       own (``process_power_reading`` / ``discard_cycle_cadence`` /
       ``close_cycle_cadence``). Readings past the end of the recorded trace (the
       replay's synthetic quiet tail) are not timed: their spacing is invented.
@@ -523,7 +523,7 @@ class _ManagerTap:
             orig_pr(power, timestamp, synthetic, observed)
 
         def on_state_change(old: str, new: str) -> None:
-            if new == STATE_STARTING and old in (STATE_OFF, STATE_UNKNOWN):
+            if new == STATE_STARTING and old in CADENCE_RESET_FROM_STATES:
                 self.pending.clear()
             orig_state(old, new)
 
@@ -778,8 +778,14 @@ def run_passes(mgr: Any, cad: tuple[float, float] | None) -> dict[str, Any]:
     return passed
 
 
-def apply_all(mgr: Any, merged: dict, device_type: str) -> dict[str, Any]:
-    """``ws_apply_suggestions`` for every visible key: the option updates."""
+def apply_all(
+    mgr: Any, merged: dict, device_type: str
+) -> tuple[dict[str, Any], tuple[float, float] | None]:
+    """``ws_apply_suggestions`` for every visible key: ``(updates, refused)``.
+
+    ``refused`` is the (start, stop) pair when the handler refuses the apply (item
+    515), with ``updates`` then empty: the user is stuck, which is not a fixed point.
+    """
     updates: dict[str, Any] = {}
     for key, item, _s, _c in ws_api._visible_suggestions(  # noqa: SLF001
         mgr.profile_store, merged, device_type
@@ -791,8 +797,8 @@ def apply_all(mgr: Any, merged: dict, device_type: str) -> dict[str, Any]:
     if pair is not None:
         print(f"apply_all refused (item 515): start {pair[0]:g} W, stop {pair[1]:g} W, "
               f"updates {sorted(updates)}", file=sys.stderr)
-        return {}
-    return updates
+        return {}, (float(pair[0]), float(pair[1]))
+    return updates, None
 
 
 # ----------------------------------------------------------------- classification
@@ -878,7 +884,7 @@ def _lock_probe(mgr: Any, cad: Any, merged: dict, device_type: str, locked: list
     try:
         run_passes(mgr, cad)
         stored = sorted(k for k in st.get_suggestions() if k in locked)
-        applied = sorted(k for k in apply_all(mgr, merged, device_type) if k in locked)
+        applied = sorted(k for k in apply_all(mgr, merged, device_type)[0] if k in locked)
     finally:
         st._data["suggestions"], st._data["locked_suggestions"] = saved  # noqa: SLF001
     return {"locked": sorted(locked), "stored_by_cascade": stored, "applied": applied}
@@ -1028,13 +1034,14 @@ class DeviceLoop:
             < MIN_SUGGESTION_COOLDOWN_CYCLES
         )
         run_passes(mgr, cad)
-        updates = apply_all(mgr, merged, self.device_type)
+        updates, refused = apply_all(mgr, merged, self.device_type)
         if self.lock_probe and rnd == 0 and updates:
             self.lock_result = _lock_probe(mgr, cad, merged, self.device_type, list(updates))
         cpu += time.process_time() - t0
         self.cpu += cpu
         self.history.append({
             "round": rnd, "applied": {k: [options.get(k), v] for k, v in updates.items()},
+            "refused": list(refused) if refused else None,
             "cooldown_active_after_expiry": cooldown_active, "cadence": cad,
             "replay": m, "cpu_s": round(cpu, 1), "memo_hit": memo_hit, "memo_miss": memo_miss,
         })
@@ -1104,7 +1111,9 @@ class DeviceLoop:
         return {
             "device": self.title, "device_type": self.device_type, "cycles": len(self.past),
             "replayable": sum(1 for c in self.past if _replayable(c)),
-            "rounds": self.history, "keys": keys, "fixed_point": not final_updates,
+            "rounds": self.history, "keys": keys,
+            "fixed_point": not final_updates and not (self.history and self.history[-1].get("refused")),
+            "refused": [row["round"] for row in self.history if row.get("refused")],
             "erased": erased, "fragmented": fragmented, "delayed": delayed,
             "lag_median_s": [
                 round(float(np.median([lag0[i] for i in both]))) if both else None,
@@ -1235,6 +1244,8 @@ def failures(results: list[dict]) -> list[str]:
             out.append(f"{r['device']}: non-corrective {leak} stored during the cooldown")
         if any(row["cooldown_active_after_expiry"] for row in r["rounds"]):
             out.append(f"{r['device']}: cooldown never expired")
+        if r.get("refused"):
+            out.append(f"{r['device']}: Apply all refused (stop >= start, item 515) in round(s) {r['refused']}")
         lp = r.get("lock_probe") or {}
         if lp.get("applied"):
             out.append(f"{r['device']}: Apply all changed muted {lp['applied']}")

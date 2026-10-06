@@ -193,3 +193,16 @@ def test_a_run_leaves_the_process_as_it_found_it(synth_results):
     # tests that follow (test_ws_contract reads a debug log through caplog).
     assert logging.getLogger("custom_components.ha_washdata").level != logging.CRITICAL
     assert not getattr(analysis.compute_matches_worker, "_loop_eval_memo", False)
+
+
+def test_a_refused_apply_all_is_a_failure_not_a_fixed_point(tmp_path, monkeypatch):
+    # Item 515: the handler refuses an apply that leaves stop >= start and applies
+    # nothing. Reading that empty apply as "nothing left to apply" reported a user
+    # stuck on the same refusal every time as converged.
+    (tmp_path / "synth").mkdir()
+    (tmp_path / "synth" / "export.json").write_text(json.dumps(_export()))
+    monkeypatch.setattr(loop.ws_api, "inverted_threshold_pair", lambda *_a: (5.0, 6.0))
+    res = loop.run(tmp_path, rounds=1, jobs=1)[0]
+    assert res["refused"] == [0]
+    assert res["fixed_point"] is False
+    assert any("refused" in line for line in loop.failures([res]))

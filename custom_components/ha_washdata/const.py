@@ -936,6 +936,13 @@ CYCLE_IN_PROGRESS_STATES = frozenset(
 STATE_UNKNOWN = "unknown"
 STATE_CLEAN = "clean"  # Cycle ended but door not yet opened (laundry still inside)
 
+# A cycle start from one of these owns no update intervals yet, so the manager drops
+# the cadence intervals earlier false starts left pending (#458, items 504 and 515).
+CADENCE_RESET_FROM_STATES = frozenset({
+    STATE_OFF, STATE_UNKNOWN, STATE_DELAY_WAIT,
+    STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED,
+})
+
 # Authoritative state -> display color map. Single source of truth for the
 # full-screen panel (and any other frontend), surfaced over the WebSocket
 # get_constants command so colors are defined in exactly one place. Values are

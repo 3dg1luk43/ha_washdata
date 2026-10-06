@@ -410,15 +410,16 @@ class StoreClient:
         """Drop cached brand/device catalog reads (call after a create/upload/promote write so
         a just-contributed or newly-approved entry appears immediately, not after the TTL).
 
-        Covers both the list queries (``brands:``/``devices:``) and the single-document
+        Covers the list queries (``brands:``/``devices:``), the single-document
         lookups behind the identity badges (``brand:``/``device:``) -- a create writes the
         very document those resolve, so a stale hit there would show "not in the catalog"
-        for an entry the user just added.
+        for an entry the user just added -- and the search index's ``delta:`` query,
+        which is where a just-created entry appears while the index predates it.
         """
         self._cache_gen += 1
         for key in [
             k for k in self._read_cache
-            if k.startswith(("brands:", "devices:", "brand:", "device:"))
+            if k.startswith(("brands:", "devices:", "brand:", "device:", "delta:"))
         ]:
             self._read_cache.pop(key, None)
 

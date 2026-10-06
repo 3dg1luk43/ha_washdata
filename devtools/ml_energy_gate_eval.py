@@ -121,7 +121,9 @@ def main() -> int:
             continue
         n_dev += 1
         st, mgr = E.fresh_store(dev, data, {})
-        clean, _ = select_clean_cycles(past, stop_threshold_w=2.0)
+        # The threshold async_run_training cleans with, not a flat 2 W.
+        ed, eo = E.entry_dicts(dev, {})
+        clean, _ = select_clean_cycles(past, stop_threshold_w=TT.training_stop_threshold({**ed, **eo}))
         live = TT.live_expectations(
             past, {c.get("profile_name") for c in clean}, TT._expected_durations(st),  # noqa: SLF001
         )

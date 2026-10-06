@@ -441,9 +441,12 @@ def _idle_blips(app: Appliance, _cycles: list[SourceCycle], rng: random.Random) 
     span, knots = 1800.0, []
     length_cap = max(1.0, 0.8 * cfg.start_duration_threshold)
     for at in sorted(rng.uniform(60.0, span - 60.0) for _ in range(6)):
+        power = round(min(200.0, max(cfg.start_threshold_w + 5.0, rng.uniform(10.0, 200.0))), 1)
+        # Size the length from the chosen power: the power floor above can exceed what
+        # a fixed length allows under half the start energy.
         length = rng.uniform(1.0, length_cap)
-        energy_cap_w = 0.5 * cfg.start_energy_threshold * 3600.0 / length
-        power = round(min(200.0, max(cfg.start_threshold_w + 5.0, rng.uniform(10.0, energy_cap_w))), 1)
+        if cfg.start_energy_threshold > 0:
+            length = min(length, 0.45 * cfg.start_energy_threshold * 3600.0 / power)
         if knots and at <= knots[-1][0]:
             continue
         knots += [(round(at, 3), power), (round(at + length, 3), 0.0)]

@@ -189,6 +189,6 @@ if (checkOnly) {
   // the script skips itself when the folder is absent).
   if (wwwFlag === -1) {
     const { execFileSync } = await import('node:child_process');
-    execFileSync(process.execPath, [path.join(path.dirname(fileURLToPath(import.meta.url)), 'gen_panel_map.mjs')], { stdio: 'ignore' });
+    execFileSync(process.execPath, [path.join(path.dirname(fileURLToPath(import.meta.url)), 'gen_panel_map.mjs')], { stdio: ['ignore', 'ignore', 'inherit'] });
   }
 }

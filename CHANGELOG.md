@@ -41,11 +41,11 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### Features
 
-- **Your own maintenance reminders** (discussion #461): any task every N cycles and/or N days, done in one click, and a "Maintenance due" binary sensor for your own notification. New default tasks start counting from the upgrade. Thanks to @dafunkydan
-- **Stalled cycles** (discussion #452): a cycle halted on standby draw (an unbalanced load stopping a washer at 4-5 W) shows `paused` with sub-state Stalled and fires `ha_washdata_cycle_stalled`; it continues when the machine resumes. Thanks to @gouthamravee
+- **Your own maintenance reminders** ([discussion #461](https://github.com/3dg1luk43/ha_washdata/discussions/461)): any task every N cycles and/or N days, done in one click, and a "Maintenance due" binary sensor for your own notification. New default tasks start counting from the upgrade. Thanks to @dafunkydan
+- **Stalled cycles** ([discussion #452](https://github.com/3dg1luk43/ha_washdata/discussions/452)): a cycle halted on standby draw (an unbalanced load stopping a washer at 4-5 W) shows `paused` with sub-state Stalled and fires `ha_washdata_cycle_stalled`; it continues when the machine resumes. Thanks to @gouthamravee
 - **Idle between cycles**: an appliance with its display on shows `idle`, and `off` only when really off.
 - **"Uncertain: Cotton 40 or Synthetics 30, ~45% sure"**: until WashData settles on a program, Overview names the two leading programs and how often that lead proved right.
-- **The cycle chart shows the recorder history around a cycle** (discussion #463), 10 minutes by default, display only. Thanks to @bartbutenaers
+- **The cycle chart shows the recorder history around a cycle** ([discussion #463](https://github.com/3dg1luk43/ha_washdata/discussions/463)), 10 minutes by default, display only. Thanks to @bartbutenaers
 - **The cycle dialog shows the suspected program and the runner-up** for a cycle waiting for your confirmation ([#462](https://github.com/3dg1luk43/ha_washdata/issues/462)). Thanks to @TRON4R
 - **Undo last import**: Export / Import keeps a restore point from before the last import that replaced data (administrators). Imported power history is its own export category.
 

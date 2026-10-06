@@ -103,3 +103,19 @@ def test_a_junk_option_falls_back_to_its_default_instead_of_raising() -> None:
     assert bad.stop_threshold_w == good.stop_threshold_w
     assert bad.min_power == good.min_power
     assert bad.match_interval == 300
+
+
+def test_an_oversized_json_integer_falls_back_instead_of_raising() -> None:
+    """`json` keeps `10**400` as an unbounded int and `float()` on it raises
+    OverflowError, which the junk-value guard did not catch. `1e400` is a float
+    literal that parses to inf and never raises, so both are asserted."""
+    good = build_detector_config({}, {}, "washing_machine")
+    for huge in (10**400, 1e400):
+        bad = build_detector_config(
+            {C.CONF_OFF_DELAY: huge, C.CONF_STOP_THRESHOLD_W: huge},
+            {C.CONF_MIN_POWER: huge},
+            "washing_machine",
+        )
+        assert bad.off_delay == good.off_delay
+        assert bad.stop_threshold_w == good.stop_threshold_w
+        assert bad.min_power == good.min_power
