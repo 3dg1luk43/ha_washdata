@@ -682,7 +682,13 @@
         "pg_obj_early": "Erken bitiş oranı",
         "pg_obj_endlag": "Bitiş gecikmesi (medyan)",
         "pg_obj_split": "Bölünme oranı",
-        "pg_sweep_cycles": "Son döngüler"
+        "pg_sweep_cycles": "Son döngüler",
+        "cycle_context": "Döngü çevresindeki kaydedici geçmişi",
+        "cycle_context_off": "Kapalı",
+        "cycle_context_minutes": "{min} dk",
+        "cycle_context_series": "Kaydedici geçmişi",
+        "before_start": "Başlangıçtan önce",
+        "after_end": "Bitişten sonra"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -1064,7 +1070,12 @@
         "hist_warn_naive_time_other": "{n} zaman damgasının saat dilimi yok ve UTC olarak okundu. Dosya yerel saatteyse her döngü UTC farkınız kadar kayar ve yaz saati geçişi civarındaki okumaların sırası bozulabilir veya bu okumalar atılabilir.",
         "pg_sweep_n_cycles": "{count} döngü üzerinden",
         "pg_sweep_n_cycles_one": "{count} döngü üzerinden",
-        "pg_sweep_n_cycles_other": "{count} döngü üzerinden"
+        "pg_sweep_n_cycles_other": "{count} döngü üzerinden",
+        "cycle_context_loading": "Kaydedici geçmişi yükleniyor…",
+        "cycle_context_note": "Gri: güç sensörünün bu döngüden önceki ve sonraki kaydedici geçmişi. Döngünün parçası değildir: süre, enerji ve eşleştirme yalnızca döngünün kendi güç izini kullanır.",
+        "cycle_context_none": "Kaydedicide bu döngünün çevresine ait okuma yok (Home Assistant varsayılan olarak 10 günlük geçmiş tutar).",
+        "cycle_context_tip": "Yalnızca görüntüleme içindir: döngüde hiçbir şeyi değiştirmez. Bir döngü, başlangıç eşiğinin üzerindeki ilk okumayla başlar; bu yüzden grafiği o okumadan açılır. Bu seçenek, kaydedicinin hâlâ tuttuğu döngüler için güç sensörünün kendi kaydedici geçmişini döngünün iki yanına çizer. Bunun yerine iptal edilen başlatma denemelerinin okumalarını gelecekteki döngülere taşımak için Eğri Ön Kaydı ayarını kullanın (Ayarlar > Algılama > Döngü Başlangıcı): kaydedilen başlangıcı öne çeker; bu da kaydedilmiş süreleri ve dolayısıyla bu ayar olmadan öğrenilmiş profillerle eşleştirmeyi değiştirir.",
+        "invalid_threshold_pair": "Durdurma Eşiği ({stop} W), Başlangıç Eşiği değerinden ({start} W) düşük olmalıdır: durdurma eşiğinin altında döngü biter, başlangıç eşiğinin üzerinde döngü başlar. Hiçbir şey kaydedilmedi; ikisini birlikte değiştirin."
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1556,7 +1567,7 @@
         },
         "curve_preroll_seconds": {
             "label": "Eğri Ön Kaydı",
-            "doc": "WashData'nın, iptal edilen başlatma denemelerinden gelen kaç saniyelik okumayı bir döngünün eğrisinin başına taşıyabileceği. Bir döngünün eğrisi normalde sonunda başarılı olan başlatma denemesiyle başlar; bu nedenle yerleşmeden önce birkaç kez yoklayan makinelerde (program seçimi, kapak kilidi, ilk su alma) gerçek etkinliğin ilk dakikaları her eğride eksik kalır. Bu değeri, makinenizdeki en uzun hazırlık aşamasının biraz üzerine ayarlayın (çoğu makine için 300 sn fazlasıyla yeter). 0 kapatır. Açmanın kaydedilen başlangıcı öne çektiğini unutmayın: değişiklikten önce ve sonra kaydedilen döngüler aynı program için farklı süreler taşır ve eski döngüler elenene kadar öğrenilen ortalamalar kayar."
+            "doc": "WashData'nın, iptal edilen başlatma denemelerinden gelen kaç saniyelik okumayı bir döngünün eğrisinin başına taşıyabileceği. Bir döngünün eğrisi normalde sonunda başarılı olan başlatma denemesiyle başlar; bu nedenle yerleşmeden önce birkaç kez yoklayan makinelerde (program seçimi, kapak kilidi, ilk su alma) gerçek etkinliğin ilk dakikaları her eğride eksik kalır. Bu değeri, makinenizdeki en uzun hazırlık aşamasının biraz üzerine ayarlayın (çoğu makine için 300 sn fazlasıyla yeter). 0 kapatır. Açmanın kaydedilen başlangıcı öne çektiğini unutmayın: değişiklikten önce ve sonra kaydedilen döngüler aynı program için farklı süreler taşır ve eski döngüler elenene kadar öğrenilen ortalamalar kayar. Hiçbir şeyi değiştirmeden yalnızca bir döngüden önce ne olduğunu görmek için bunun yerine döngü grafiğindeki kaydedici geçmişini kullanın."
         },
         "unload_confirm_entity": {
             "label": "Boşaltma Onay Varlığı",

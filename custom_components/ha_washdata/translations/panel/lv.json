@@ -688,7 +688,13 @@
     "pg_obj_early": "Priekšlaicīgu beigu īpatsvars",
     "pg_obj_endlag": "Beigu aizkave (mediāna)",
     "pg_obj_split": "Sadalīšanu īpatsvars",
-    "pg_sweep_cycles": "Nesenie cikli"
+    "pg_sweep_cycles": "Nesenie cikli",
+    "cycle_context": "Recorder vēsture pirms un pēc cikla",
+    "cycle_context_off": "Izslēgts",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Recorder vēsture",
+    "before_start": "Pirms sākuma",
+    "after_end": "Pēc beigām"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -1080,7 +1086,12 @@
     "pg_sweep_n_cycles": "{count} ciklos",
     "pg_sweep_n_cycles_zero": "{count} ciklos",
     "pg_sweep_n_cycles_one": "{count} ciklā",
-    "pg_sweep_n_cycles_other": "{count} ciklos"
+    "pg_sweep_n_cycles_other": "{count} ciklos",
+    "cycle_context_loading": "Ielādē recorder vēsturi…",
+    "cycle_context_note": "Pelēkā krāsā: jaudas sensora recorder vēsture pirms un pēc šī cikla. Tā nav cikla daļa: ilgums, enerģija un saskaņošana izmanto tikai paša cikla ierakstu.",
+    "cycle_context_none": "Recorder nesatur nolasījumus pirms un pēc šī cikla (Home Assistant pēc noklusējuma glabā vēsturi 10 dienas).",
+    "cycle_context_tip": "Tikai attēlošanai: ciklā neko nemaina. Cikls sākas ar pirmo nolasījumu virs starta sliekšņa, tāpēc tā grafiks sākas ar šo nolasījumu. Šeit tiek attēlota paša jaudas sensora recorder vēsture abpus ciklam, tiem cikliem, kurus recorder vēl glabā. Ja tā vietā vēlaties pārnest pārtraukto palaišanas mēģinājumu nolasījumus uz turpmākajiem cikliem, izmantojiet Līknes ievadsekundes (Iestatījumi > Noteikšana > Cikla sākums): tas pārceļ reģistrēto sākumu agrāk, kas maina saglabātos ilgumus un līdz ar to saskaņošanu ar profiliem, kas apgūti bez tā.",
+    "invalid_threshold_pair": "Apstāšanās slieksnim ({stop} W) jābūt zemākam par starta slieksni ({start} W): zem apstāšanās sliekšņa cikls beidzas, virs starta sliekšņa tas sākas. Nekas netika saglabāts; mainiet abas vērtības kopā."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1212,7 +1223,7 @@
       "label": "Min. cikla ilgums"
     },
     "curve_preroll_seconds": {
-      "doc": "Cik sekundes nolasījumu no pārtrauktiem palaišanas mēģinājumiem WashData drīkst pārnest uz cikla līknes sākumu. Cikla līkne parasti sākas ar to palaišanas mēģinājumu, kurš beidzot izdodas, tāpēc mašīnā, kas pirms iestāšanās ritmā pamēģina vairākas reizes - programmas izvēle, durvju bloķēšana, pirmā ūdens uzpilde - katrā līknē trūkst pirmo īstās darbības minūšu. Iestatiet šo vērtību nedaudz virs garākā šāda jūsu mašīnas iesildīšanās posma (300 s vairumam ir ar uzviju). 0 to izslēdz. Ņemiet vērā, ka ieslēgšana pārceļ reģistrēto sākumu agrāk, tāpēc cikli, kas reģistrēti pirms un pēc izmaiņas, vienai un tai pašai programmai uzrāda atšķirīgu ilgumu; apgūtie vidējie rādītāji mainīsies, līdz vecākie cikli izkritīs no uzskaites.",
+      "doc": "Cik sekundes nolasījumu no pārtrauktiem palaišanas mēģinājumiem WashData drīkst pārnest uz cikla līknes sākumu. Cikla līkne parasti sākas ar to palaišanas mēģinājumu, kurš beidzot izdodas, tāpēc mašīnā, kas pirms iestāšanās ritmā pamēģina vairākas reizes - programmas izvēle, durvju bloķēšana, pirmā ūdens uzpilde - katrā līknē trūkst pirmo īstās darbības minūšu. Iestatiet šo vērtību nedaudz virs garākā šāda jūsu mašīnas iesildīšanās posma (300 s vairumam ir ar uzviju). 0 to izslēdz. Ņemiet vērā, ka ieslēgšana pārceļ reģistrēto sākumu agrāk, tāpēc cikli, kas reģistrēti pirms un pēc izmaiņas, vienai un tai pašai programmai uzrāda atšķirīgu ilgumu; apgūtie vidējie rādītāji mainīsies, līdz vecākie cikli izkritīs no uzskaites. Ja vēlaties tikai redzēt, kas notika pirms cikla, neko nemainot, tā vietā izmantojiet recorder vēsturi cikla grafikā.",
       "label": "Līknes ievadsekundes"
     },
     "delay_confirm_seconds": {

@@ -425,6 +425,12 @@
     "current_phase": "Núverandi fasi",
     "cycle": "Lota",
     "cycle_date_display": "Sýning á dagsetningu lotu",
+    "cycle_context": "Recorder-saga í kringum lotuna",
+    "cycle_context_off": "Af",
+    "cycle_context_minutes": "{min} mín.",
+    "cycle_context_series": "Recorder-saga",
+    "before_start": "Fyrir upphaf",
+    "after_end": "Eftir lok",
     "cycles_count": "Lotur",
     "cycles_lc": "lotur",
     "date": "Dagsetning",
@@ -815,6 +821,10 @@
     "compare_profiles_tip": "Leggðu önnur prófílumslög yfir á töfluna hér að ofan til að sjá hver þeirra passar best við þessa lotu.",
     "compare_selected_cycles": "Valdar lotur (fastar) – sýna / fela",
     "cycles_deleted": "{count} lotu(m) eytt",
+    "cycle_context_loading": "Hleð recorder-sögu…",
+    "cycle_context_note": "Grátt: recorder-saga aflskynjarans fyrir og eftir þessa lotu. Hún er ekki hluti af lotunni: lengd, orka og samsvörun nota aðeins eigið spor lotunnar.",
+    "cycle_context_none": "Recorder geymir engar mælingar í kringum þessa lotu (Home Assistant geymir sjálfgefið 10 daga af sögu).",
+    "cycle_context_tip": "Aðeins til sýnis: breytir engu um lotuna. Lota hefst við fyrstu mælingu yfir ræsingarþröskuldinum, svo línurit hennar opnast við þá mælingu. Þetta teiknar recorder-sögu aflskynjarans sjálfs beggja vegna hennar, fyrir lotur sem recorder geymir enn. Til að taka frekar mælingar úr misheppnuðum ræsitilraunum með í framtíðarlotur skaltu nota Aðdragandi ferils (Stillingar > Greining > Upphaf lotu): það færir skráð upphaf framar, sem breytir vistuðum lengdum og þar með samsvörun við snið sem lærð voru án þess.",
     "enough_data": "Nóg gögn til að læra af ({current}/{min} lotur).",
     "export_description": "Veldu nákvæmlega hvaða prófíla, lotur, stillingar og fleira á að flytja út í JSON, eða greindu skrá og fluttu aðeins inn þá hluta sem þú vilt.",
     "feedback_cycles_pending": "Til yfirferðar: {n}",
@@ -1062,6 +1072,7 @@
     "hist_warn_naive_time_one": "{n} tímastimpill hefur ekkert tímabelti og var lesinn sem UTC. Ef skráin er í staðartíma hliðrast hver lota um UTC-frávikið þitt, og mælingar í kringum skipti yfir í eða úr sumartíma geta lent í rangri röð eða glatast.",
     "hist_warn_naive_time_other": "{n} tímastimplar hafa ekkert tímabelti og voru lesnir sem UTC. Ef skráin er í staðartíma hliðrast hver lota um UTC-frávikið þitt, og mælingar í kringum skipti yfir í eða úr sumartíma geta lent í rangri röð eða glatast.",
     "hist_tail_trimmed": "{min} mín. bið eftir lok lotunnar var klippt af, eins og samþættingin gerir í rauntíma",
+    "invalid_threshold_pair": "Stöðvunarþröskuldur ({stop} W) verður að vera undir Ræsingarþröskuldi ({start} W): undir stöðvunarþröskuldinum lýkur lotu, yfir ræsingarþröskuldinum hefst lota. Ekkert var vistað; breyttu báðum saman.",
     "import_undo_hint": "Endurheimtarpunktur frá því fyrir síðasta innflutning ({when}) er geymdur með {profiles} prófíl(um) og {cycles} lotu(m).",
     "replace_undo_hint": "Endurheimtarpunktur er vistaður fyrst, svo þú getur afturkallað þennan innflutning undir Útflutningur / Innflutningur.",
     "pg_in_sample_note": "Þessar lotur voru líka notaðar til að byggja prófílana sem þær eru bornar saman við, svo niðurstöðurnar eru bjartsýnar: á nýjum lotum má búast við aðeins færri réttum samsvörunum."
@@ -1217,7 +1228,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Aðdragandi ferils",
-      "doc": "Hversu margar sekúndur af mælingum úr misheppnuðum ræsitilraunum WashData má taka með fremst í ferli lotu. Ferill lotu byrjar venjulega á þeirri ræsitilraun sem loks tekst, þannig að í vél sem þreifar sig áfram nokkrum sinnum áður en hún fer almennilega í gang - kerfisval, hurðarlæsing, fyrsta vatnsinntak - vantar fyrstu mínúturnar af raunverulegri virkni í hvern feril. Stilltu þetta aðeins hærra en lengsti slíkur aðdragandi vélarinnar þinnar (300 s duga flestum). 0 slekkur á þessu. Athugaðu að þegar kveikt er á því færist skráð upphaf framar, þannig að lotur fyrir og eftir breytinguna bera ólíka lengd fyrir sama kerfi; lærðu meðaltölin skekkjast þar til eldri loturnar detta út."
+      "doc": "Hversu margar sekúndur af mælingum úr misheppnuðum ræsitilraunum WashData má taka með fremst í ferli lotu. Ferill lotu byrjar venjulega á þeirri ræsitilraun sem loks tekst, þannig að í vél sem þreifar sig áfram nokkrum sinnum áður en hún fer almennilega í gang - kerfisval, hurðarlæsing, fyrsta vatnsinntak - vantar fyrstu mínúturnar af raunverulegri virkni í hvern feril. Stilltu þetta aðeins hærra en lengsti slíkur aðdragandi vélarinnar þinnar (300 s duga flestum). 0 slekkur á þessu. Athugaðu að þegar kveikt er á því færist skráð upphaf framar, þannig að lotur fyrir og eftir breytinguna bera ólíka lengd fyrir sama kerfi; lærðu meðaltölin skekkjast þar til eldri loturnar detta út. Til að sjá aðeins það sem kom á undan lotu, án þess að breyta neinu, skaltu frekar nota recorder-söguna í línuriti lotunnar."
     },
     "delay_confirm_seconds": {
       "doc": "Aflið verður að haldast á biðstöðubilinu svona lengi áður en litið er svo á að tækið bíði eftir ræsingu frekar en að það sé í gangi.",

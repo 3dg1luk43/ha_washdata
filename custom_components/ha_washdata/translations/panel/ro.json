@@ -374,6 +374,12 @@
     "current_phase": "Faza curentă",
     "cycle": "Ciclu",
     "cycle_date_display": "Afișarea datei ciclului",
+    "cycle_context": "Istoricul recorder-ului în jurul ciclului",
+    "cycle_context_off": "Oprit",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Istoricul recorder-ului",
+    "before_start": "Înainte de pornire",
+    "after_end": "După sfârșit",
     "cycles_count": "Cicluri",
     "cycles_lc": "cicluri",
     "date": "Dată",
@@ -770,6 +776,10 @@
     "compare_profiles_tip": "Suprapuneți alte plicuri de profil pe graficul de mai sus pentru a vedea care dintre ele se potrivește cel mai bine acestui ciclu.",
     "compare_selected_cycles": "Cicluri selectate (solid) – afișați / ascundeți",
     "cycles_deleted": "{count} ciclu(ri) șterse",
+    "cycle_context_loading": "Se încarcă istoricul recorder-ului…",
+    "cycle_context_note": "Gri: istoricul recorder-ului pentru senzorul de putere înainte și după acest ciclu. Nu face parte din ciclu: durata, energia și potrivirea folosesc doar traseul propriu al ciclului.",
+    "cycle_context_none": "Recorder-ul nu conține citiri în jurul acestui ciclu (Home Assistant păstrează implicit 10 zile de istoric).",
+    "cycle_context_tip": "Doar afișare: nu schimbă nimic la ciclu. Un ciclu începe la prima citire peste pragul de pornire, așa că graficul lui se deschide la acea citire. Aceasta desenează istoricul recorder-ului pentru senzorul de putere însuși, de o parte și de alta, pentru ciclurile pe care recorder-ul le mai păstrează. Pentru a include în schimb citirile încercărilor de pornire întrerupte în ciclurile viitoare, folosiți Preambulul curbei (Setări > Detectare > Pornire Ciclu): acesta mută mai devreme startul înregistrat, ceea ce schimbă duratele stocate și deci potrivirea cu profilurile învățate fără el.",
     "enough_data": "Date suficiente pentru a învăța ({current}/{min} cicluri).",
     "export_description": "Alege exact ce profiluri, cicluri, setări și altele să exporți în JSON, sau analizează un fișier și importă doar părțile dorite.",
     "feedback_cycles_pending": "De revizuit: {n}",
@@ -1012,6 +1022,7 @@
     "replace_undo_hint": "Mai întâi se salvează un punct de restaurare, astfel încât puteți anula acest import din Export / Import.",
     "pg_in_sample_note": "Aceste cicluri au contribuit și la construirea profilurilor cu care sunt comparate, așa că aceste rezultate sunt optimiste: la ciclurile noi, așteptați-vă la ceva mai puține potriviri corecte.",
     "hist_tail_trimmed": "Au fost eliminate {min} min de așteptare după sfârșitul ciclului, la fel cum face integrarea în timp real",
+    "invalid_threshold_pair": "Pragul de Oprire ({stop} W) trebuie să fie sub Pragul de Pornire ({start} W): sub pragul de oprire un ciclu se încheie, peste pragul de pornire începe unul. Nu s-a salvat nimic; modificați-le pe amândouă împreună.",
     "hist_truncated": "oprit la limita de {n} citiri, așa că restul istoricului nu a fost analizat",
     "hist_warn_kw": "Cea mai mare citire este doar {w}. Acest senzor pare să raporteze kilowați; WashData citește puterea în wați, așa că nu se pot detecta cicluri din el.",
     "hist_warn_naive_time": "{n} de marcaje temporale nu au fus orar și au fost citite ca UTC. Dacă fișierul este în ora locală, fiecare ciclu este decalat cu diferența dvs. față de UTC, iar citirile din jurul trecerii la ora de vară sau de iarnă pot fi reordonate sau eliminate.",
@@ -1159,7 +1170,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Preambulul curbei",
-      "doc": "Câte secunde de citiri provenite din încercări de pornire întrerupte poate include WashData la începutul curbei unui ciclu. Curba unui ciclu începe în mod normal la încercarea de pornire care reușește în cele din urmă, așa că la o mașină care încearcă de câteva ori înainte de a porni efectiv (selectarea programului, blocarea ușii, prima umplere) primele minute de activitate reală lipsesc din fiecare curbă. Setați această valoare puțin peste cea mai lungă astfel de pornire pregătitoare a mașinii dumneavoastră (300 s sunt mai mult decât suficiente în majoritatea cazurilor). 0 dezactivează funcția. Rețineți că activarea ei mută mai devreme startul înregistrat, astfel încât ciclurile înregistrate înainte și după modificare vor avea durate diferite pentru același program; mediile învățate vor devia până când ciclurile mai vechi ies din istoric."
+      "doc": "Câte secunde de citiri provenite din încercări de pornire întrerupte poate include WashData la începutul curbei unui ciclu. Curba unui ciclu începe în mod normal la încercarea de pornire care reușește în cele din urmă, așa că la o mașină care încearcă de câteva ori înainte de a porni efectiv (selectarea programului, blocarea ușii, prima umplere) primele minute de activitate reală lipsesc din fiecare curbă. Setați această valoare puțin peste cea mai lungă astfel de pornire pregătitoare a mașinii dumneavoastră (300 s sunt mai mult decât suficiente în majoritatea cazurilor). 0 dezactivează funcția. Rețineți că activarea ei mută mai devreme startul înregistrat, astfel încât ciclurile înregistrate înainte și după modificare vor avea durate diferite pentru același program; mediile învățate vor devia până când ciclurile mai vechi ies din istoric. Pentru a vedea doar ce a precedat un ciclu, fără a schimba nimic, folosiți în schimb istoricul recorder-ului din graficul ciclului."
     },
     "delay_confirm_seconds": {
       "doc": "Puterea trebuie să rămână în banda de așteptare mult timp înainte ca aparatul să fie tratat ca așteptând să pornească și nu ca fiind în funcțiune.",

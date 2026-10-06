@@ -374,6 +374,12 @@
     "current_phase": "Phase actuelle",
     "cycle": "Cycle",
     "cycle_date_display": "Affichage de la date du cycle",
+    "cycle_context": "Historique du recorder autour du cycle",
+    "cycle_context_off": "Désactivé",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Historique du recorder",
+    "before_start": "Avant le début",
+    "after_end": "Après la fin",
     "cycles_count": "Cycles",
     "cycles_lc": "cycles",
     "date": "Date",
@@ -770,6 +776,10 @@
     "compare_profiles_tip": "Superposez d'autres enveloppes de profil sur le graphique ci-dessus pour voir laquelle correspond le mieux à ce cycle.",
     "compare_selected_cycles": "Cycles sélectionnés (solides) – afficher/masquer",
     "cycles_deleted": "{count} cycle(s) supprimé(s)",
+    "cycle_context_loading": "Chargement de l'historique du recorder…",
+    "cycle_context_note": "Gris : l'historique du recorder du capteur de puissance avant et après ce cycle. Il ne fait pas partie du cycle : la durée, l'énergie et la correspondance n'utilisent que la courbe propre au cycle.",
+    "cycle_context_none": "Le recorder ne contient aucun relevé autour de ce cycle (Home Assistant conserve 10 jours d'historique par défaut).",
+    "cycle_context_tip": "Affichage uniquement : ne modifie rien au cycle. Un cycle commence au premier relevé au-dessus du seuil de démarrage, donc son graphique s'ouvre sur ce relevé. Ceci trace l'historique du recorder du capteur de puissance lui-même de part et d'autre, pour les cycles que le recorder conserve encore. Pour reporter plutôt les relevés des tentatives de démarrage avortées dans les cycles futurs, utilisez Amorce de courbe (Paramètres > Détection > Début de cycle) : elle avance le début enregistré, ce qui modifie les durées stockées et donc la correspondance avec les profils appris sans elle.",
     "enough_data": "Suffisamment de données pour apprendre ({current}/{min} cycles).",
     "export_description": "Choisissez précisément quels profils, cycles, réglages et autres exporter vers un JSON, ou analysez un fichier pour n'importer que les éléments souhaités.",
     "feedback_cycles_pending": "À réviser : {n}",
@@ -1012,6 +1022,7 @@
     "replace_undo_hint": "Un point de restauration est d'abord enregistré, vous pouvez donc annuler cette importation depuis Exporter/Importer.",
     "pg_in_sample_note": "Ces cycles ont aussi servi à construire les profils auxquels ils sont comparés, ces résultats sont donc optimistes : sur de nouveaux cycles, attendez-vous à un peu moins de correspondances correctes.",
     "hist_tail_trimmed": "{min} min d'attente après la fin du cycle ont été supprimées, comme le fait l'intégration en direct",
+    "invalid_threshold_pair": "Le Seuil d'arrêt ({stop} W) doit être inférieur au Seuil de démarrage ({start} W) : sous le seuil d'arrêt un cycle se termine, au-dessus du seuil de démarrage un cycle commence. Rien n'a été enregistré ; modifiez les deux ensemble.",
     "hist_truncated": "arrêté à la limite de {n} mesures, le reste de l'historique n'a donc pas été analysé",
     "hist_warn_kw": "La mesure la plus élevée n'est que de {w}. Ce capteur semble indiquer des kilowatts ; WashData lit la puissance en watts, les cycles ne peuvent donc pas être détectés à partir de lui.",
     "hist_warn_naive_time": "{n} horodatages n'ont pas de fuseau horaire et ont été lus en UTC. Si le fichier est en heure locale, chaque cycle est décalé de votre écart avec UTC, et les mesures autour d'un changement d'heure peuvent être réordonnées ou supprimées.",
@@ -1179,7 +1190,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Amorce de courbe",
-      "doc": "Combien de secondes de relevés issus de tentatives de démarrage avortées WashData peut reporter au début de la courbe d'un cycle. La courbe d'un cycle commence normalement à la tentative de démarrage qui finit par aboutir : sur une machine qui tâtonne plusieurs fois avant de se lancer (sélection du programme, verrouillage de la porte, premier remplissage), les premières minutes d'activité réelle manquent dans chaque courbe. Réglez cette valeur un peu au-dessus de la plus longue mise en route de ce type sur votre machine (300 s suffisent largement dans la plupart des cas). 0 désactive la fonction. Attention : l'activer avance le début enregistré, de sorte que les cycles enregistrés avant et après la modification portent des durées différentes pour un même programme ; les moyennes apprises vont dériver jusqu'à ce que les anciens cycles disparaissent de l'historique."
+      "doc": "Combien de secondes de relevés issus de tentatives de démarrage avortées WashData peut reporter au début de la courbe d'un cycle. La courbe d'un cycle commence normalement à la tentative de démarrage qui finit par aboutir : sur une machine qui tâtonne plusieurs fois avant de se lancer (sélection du programme, verrouillage de la porte, premier remplissage), les premières minutes d'activité réelle manquent dans chaque courbe. Réglez cette valeur un peu au-dessus de la plus longue mise en route de ce type sur votre machine (300 s suffisent largement dans la plupart des cas). 0 désactive la fonction. Attention : l'activer avance le début enregistré, de sorte que les cycles enregistrés avant et après la modification portent des durées différentes pour un même programme ; les moyennes apprises vont dériver jusqu'à ce que les anciens cycles disparaissent de l'historique. Pour voir seulement ce qui a précédé un cycle, sans rien modifier, utilisez plutôt l'historique du recorder dans le graphique du cycle."
     },
     "delay_confirm_seconds": {
       "doc": "L'alimentation doit rester dans la bande de veille pendant ce temps avant que l'appareil ne soit traité comme en attente de démarrage plutôt que comme étant en fonctionnement.",

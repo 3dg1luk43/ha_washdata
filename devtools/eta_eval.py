@@ -48,6 +48,24 @@ every 30 s of replay time (``_SIM_SERIES_THROTTLE_S``) and only at readings, so 
 can trail the commit by up to 30 s, or more on a plug that is silent at steady
 power; ``first_commit_s`` (the commit event itself) is in the JSON beside it.
 
+**Synthetic halt (register item 514).** ``--halt-at F --halt-min M`` inserts the
+#452 standby plateau of ``end_gate_eval --halt-at`` (same helper, same level) at
+fraction ``F`` (0 < F < 1) of each cycle's active span, for ``M`` minutes, every
+later reading shifted by it. The truth is then the halted trace's own last
+reading above stop, so the plateau counts as time the cycle took. Each row adds
+``halt_*``: the remaining time shown when the plateau began (``rem_h0_s``), when
+the stall display first flagged (``rem_stall_s``) and when the plateau ended
+(``rem_h1_s``), so ``rem_h0_s - rem_h1_s`` is how far the ETA counted down
+through a halt (the plateau's own length when it ignores it), and the error of the
+ETA shown ``HALT_AFTER_S`` after the wash resumed. ``--device-types`` restricts
+the corpus (the stall display runs on washers, washer-dryers and dryers only).
+Measured 2026-10-06, ``--all-formats``, 45 min at 50% over the 246 washer and
+washer-dryer targets (189 shown as stalled): counting stalled time, the ETA fell a
+median 40.9 min through the halt and read 41.8 / 36.4 / 21.6 min wrong (median
+|error|) 1 / 10 / 30 min after the resume; leaving finished stalls out, 40.6 min
+and 25.0 / 16.7 / 13.7; leaving the stall shown now out too (shipped), 0.5 min and
+13.2 / 16.7 / 13.7. The real corpus is unchanged (0 of 450 rows).
+
 Usage, from the repo root (``--all-formats`` is ~450 cycles, ~13 min at ``--jobs 3``;
 a worker holds ~200 MB)::
 
@@ -114,6 +132,8 @@ MIN_TRUTH_S = 600.0
 STATUSES = ("completed", "force_stopped")
 #: Cycles per parallel job (an export's cycles are spread over its jobs).
 CHUNK = 12
+#: ``--halt-at``: seconds after the plateau ended at which the ETA error is read.
+HALT_AFTER_S = (60.0, 600.0, 1800.0)
 
 
 def _fkey(f: float) -> str:
@@ -195,6 +215,46 @@ def cycle_metrics(series: list[dict[str, Any]], truth_s: float, label: str | Non
     return out
 
 
+def halt_metrics(
+    series: list[dict[str, Any]], truth_s: float, h0: float, h1: float
+) -> dict[str, Any]:
+    """What the ETA did through an inserted halt (``--halt-at``), from a replay series.
+
+    ``rem_*_s`` is the remaining time of the latest estimate at or before that
+    moment (None without one); ``after`` maps each ``HALT_AFTER_S`` offset past the
+    plateau's end to the error of the ETA shown then, as in :func:`cycle_metrics`.
+    """
+    def shown_at(t: float) -> dict[str, Any] | None:
+        shown = None
+        for p in series:
+            if float(p["t"]) > t:
+                break
+            shown = p
+        return shown
+
+    def rem(t: float | None) -> float | None:
+        p = shown_at(t) if t is not None else None
+        return float(p["remaining_s"]) if p and p.get("remaining_s") is not None else None
+
+    stall_on = next(
+        (float(p["t"]) for p in series if p.get("stalled") and h0 <= float(p["t"]) <= h1), None
+    )
+    after: dict[str, Any] = {}
+    for d in HALT_AFTER_S:
+        p = shown_at(h1 + d)
+        if p is None or p.get("remaining_s") is None or float(p["t"]) < h1 or truth_s <= h1 + d:
+            after[str(int(d))] = None
+            continue
+        true_rem = truth_s - float(p["t"])
+        after[str(int(d))] = round(float(p["remaining_s"]) - true_rem, 1)
+    return {
+        "halt_start_s": round(h0, 1), "halt_end_s": round(h1, 1),
+        "halt_stall_on_s": round(stall_on, 1) if stall_on is not None else None,
+        "rem_h0_s": rem(h0), "rem_stall_s": rem(stall_on), "rem_h1_s": rem(h1),
+        "halt_after_err_s": after,
+    }
+
+
 def _first_event(events: list[dict[str, Any]], etype: str) -> float | None:
     for ev in events:
         if ev.get("type") == etype:
@@ -212,6 +272,8 @@ def _prepare(path: Path, flags: dict[str, bool]) -> dict[str, Any] | None:
     device_type = (doc.get("device_fingerprint") or {}).get("device_type")
     data = doc.get("data") or {}
     if not device_type or len(data.get("past_cycles") or []) < EG.MIN_CYCLES:
+        return None
+    if flags.get("device_types") and device_type not in flags["device_types"]:
         return None
     base = dict(data)
     for key in ("past_cycles", "reference_cycles", "backfill_cycles"):
@@ -260,14 +322,22 @@ def _replay_one(ctx: dict[str, Any], cyc: dict[str, Any], key: str,
             prebuilt = playground._build_match_snapshots(store)  # noqa: SLF001
         except Exception:  # noqa: BLE001
             prebuilt = None
+    replayed, halt_s = cyc, None
+    if flags.get("halt"):
+        at, length, level = flags["halt"]
+        replayed, h0, h1, _span = EG._with_halt(  # noqa: SLF001
+            cyc, decompress_power_data(cyc), stop, float(at), str(length),
+            EG._halt_level(stop, str(level)),  # noqa: SLF001
+        )
+        halt_s = (h0, h1)
     with _full_series():
         sim = playground.simulate_cycle_detail(
-            cyc, cfg, None, store, opts, price=None, compute_series=True, prebuilt=prebuilt,
+            replayed, cfg, None, store, opts, price=None, compute_series=True, prebuilt=prebuilt,
         )
     if "error" in sim:
         print(f"replay failed: {key} {str(cyc.get('id'))[:12]}: {sim['error']}", file=sys.stderr)
         return None
-    pts = decompress_power_data(cyc)
+    pts = decompress_power_data(replayed)
     truth_s = truth_end(pts, stop)
     out = sim.get("outcome") or {}
     n_other = sum(
@@ -292,6 +362,7 @@ def _replay_one(ctx: dict[str, Any], cyc: dict[str, Any], key: str,
         "expected_s": out.get("expected_s"),
         "first_commit_s": _first_event(sim.get("events") or [], "match_commit"),
         **cycle_metrics(sim.get("series") or [], truth_s, name),
+        **(halt_metrics(sim.get("series") or [], truth_s, *halt_s) if halt_s else {}),
         "loo": flags["loo"],
         "repair": flags["repair"],
         "pre_404": flags.get("pre_404", False),
@@ -361,10 +432,18 @@ def run(
     jobs: int = 1,
     only: str | None = None,
     log: Any = None,
+    halt: tuple[float, str, str] | None = None,
+    device_types: tuple[str, ...] | None = None,
 ) -> list[dict[str, Any]]:
     """Replay the corpus; one row per target cycle, sorted by (export, id)."""
-    flags = {"loo": loo, "all_formats": all_formats,
-             "shipped_watchdog": shipped_watchdog, "repair": repair, "pre_404": pre_404}
+    flags: dict[str, Any] = {
+        "loo": loo, "all_formats": all_formats,
+        "shipped_watchdog": shipped_watchdog, "repair": repair, "pre_404": pre_404,
+    }
+    if halt is not None:
+        flags["halt"] = list(halt)
+    if device_types:
+        flags["device_types"] = sorted(device_types)
     pkg_log = logging.getLogger("custom_components.ha_washdata")
     saved_level = pkg_log.level
     pkg_log.setLevel(logging.ERROR)
@@ -479,6 +558,64 @@ def print_summary(rows: list[dict[str, Any]]) -> None:
           " Truth = last reading above stop_threshold_w.")
 
 
+def summarise_halt(rows: list[dict[str, Any]], device_type: str | None = None) -> dict[str, Any]:
+    """``--halt-at`` figures: how far the ETA counted down through the plateau, and
+    how wrong it was after the wash resumed (minutes; medians of absolute values)."""
+    sel = [r for r in rows if r.get("halt_start_s") is not None
+           and (device_type is None or r["device_type"] == device_type)]
+    if not sel:
+        return {"n": 0}
+
+    def med(vals: list[float]) -> float | None:
+        return round(float(np.median(vals)) / 60.0, 1) if vals else None
+
+    down = [r["rem_h0_s"] - r["rem_h1_s"] for r in sel
+            if r.get("rem_h0_s") is not None and r.get("rem_h1_s") is not None]
+    stalled = [r for r in sel if r.get("halt_stall_on_s") is not None]
+    down_st = [r["rem_stall_s"] - r["rem_h1_s"] for r in stalled
+               if r.get("rem_stall_s") is not None and r.get("rem_h1_s") is not None]
+    out: dict[str, Any] = {
+        "n": len(sel), "stalled": len(stalled),
+        "halt_min": med([r["halt_end_s"] - r["halt_start_s"] for r in sel]),
+        "countdown_med_min": med(down),
+        "countdown_stalled_med_min": med(down_st),
+        "after": {},
+    }
+    for d in HALT_AFTER_S:
+        errs = [r["halt_after_err_s"][str(int(d))] for r in sel
+                if (r.get("halt_after_err_s") or {}).get(str(int(d))) is not None]
+        out["after"][str(int(d))] = {
+            "n": len(errs),
+            "medae_min": med([abs(e) for e in errs]),
+            "bias_min": round(float(np.mean(errs)) / 60.0, 1) if errs else None,
+        }
+    return out
+
+
+def print_halt_summary(rows: list[dict[str, Any]]) -> None:
+    if not any(r.get("halt_start_s") is not None for r in rows):
+        return
+    print("\nsynthetic halt (--halt-at)")
+    hdr = (f"{'scope':<16}{'n':>5}{'stalled':>9}{'halt':>6}{'down':>7}{'down st':>9}"
+           + "".join(f"{f'+{int(d) // 60}m |e|':>10}{'bias':>6}" for d in HALT_AFTER_S))
+    print(hdr)
+    print("-" * len(hdr))
+    for scope in [None, *sorted({r["device_type"] for r in rows})]:
+        h = summarise_halt(rows, scope)
+        if not h["n"]:
+            continue
+        line = (f"{scope or 'ALL':<16}{h['n']:>5}{h['stalled']:>9}{_f(h['halt_min'], 6)}"
+                f"{_f(h['countdown_med_min'], 7)}{_f(h['countdown_stalled_med_min'], 9)}")
+        for d in HALT_AFTER_S:
+            a = h["after"][str(int(d))]
+            line += f"{_f(a['medae_min'], 10)}{_f(a['bias_min'], 6)}"
+        print(line)
+    print("down = median minutes the remaining time fell from the plateau's start to its end"
+          " (its length when\nthe ETA ignores the halt); down st = from the stall flag to the"
+          " end; +Nm |e| / bias = ETA error N min\nafter the wash resumed (median |error|, mean"
+          " signed error; + = more time left than there was).")
+
+
 def compare(before_path: str, after_path: str) -> None:
     before = json.loads(Path(before_path).read_text())
     after = json.loads(Path(after_path).read_text())
@@ -493,6 +630,15 @@ def compare(before_path: str, after_path: str) -> None:
         if not bs["n"]:
             continue
         print(f"=== {scope or 'ALL'} (n={as_['n']})")
+        bh, ah = summarise_halt(bs_rows, scope), summarise_halt(as_rows, scope)
+        if bh["n"] or ah["n"]:
+            for key in ("stalled", "countdown_med_min", "countdown_stalled_med_min"):
+                print(f"    halt {key:<27}{_f(bh.get(key), 8)} -> {_f(ah.get(key), 8)}")
+            for d in HALT_AFTER_S:
+                b, a = bh["after"][str(int(d))], ah["after"][str(int(d))]
+                print(f"    halt +{int(d) // 60:>2}m  |e| {_f(b['medae_min'], 5)} -> "
+                      f"{_f(a['medae_min'], 5)}   bias {_f(b['bias_min'], 5)} -> "
+                      f"{_f(a['bias_min'], 5)}")
         for key in ("never", "first_median_min", "first_p75_min", "first_right_pct"):
             print(f"    {key:<22}{_f(bs[key], 8)} -> {_f(as_[key], 8)}")
         for f in FRACS:
@@ -537,22 +683,40 @@ def main(argv: list[str] | None = None) -> int:
                     help="item 404 off: match at the full interval before the first commit too")
     ap.add_argument("--jobs", type=int, default=1, help="parallel worker processes")
     ap.add_argument("--only", help="replay only exports whose path contains this")
+    ap.add_argument("--halt-at", type=float, default=None, metavar="F",
+                    help="insert a #452 standby plateau at fraction F (0-1) of each cycle's "
+                    "active span (see the docstring)")
+    ap.add_argument("--halt-min", default="45", metavar="M",
+                    help="with --halt-at: plateau length in minutes, or 'Nx' for N x the active span")
+    ap.add_argument("--halt-level", default="auto", metavar="W",
+                    help="with --halt-at: plateau level in W (+-0.4), or 'auto' (end_gate_eval's)")
+    ap.add_argument("--device-types", default="",
+                    help="comma-separated device types to replay (default: all)")
     ap.add_argument("--corpus", default=str(REPO / "cycle_data"))
     args = ap.parse_args(argv)
 
     if args.compare:
         compare(*args.compare)
         return 0
+    if args.halt_at is not None and not 0.0 < args.halt_at < 1.0:
+        ap.error("--halt-at must be a fraction of the active span in (0, 1)")
+    halt = (
+        (float(args.halt_at), str(args.halt_min), str(args.halt_level))
+        if args.halt_at is not None else None
+    )
     t0 = time.monotonic()
     rows = run(
         Path(args.corpus), loo=not args.in_sample, all_formats=args.all_formats,
         shipped_watchdog=args.shipped_watchdog, repair=not args.no_repair,
         pre_404=args.pre_404, jobs=args.jobs, only=args.only, log=lambda m: print(m, file=sys.stderr, flush=True),
+        halt=halt,
+        device_types=tuple(t for t in args.device_types.split(",") if t) or None,
     )
     if not rows:
         print("no replayable cycles found - is cycle_data/ present?")
         return 1
     print_summary(rows)
+    print_halt_summary(rows)
     print(f"\n{'in-sample' if args.in_sample else 'leave-one-out'}, "
           f"{'no repair' if args.no_repair else 'banked tails repaired'}, "
           f"{'shipped' if args.shipped_watchdog else 'export'} watchdog"

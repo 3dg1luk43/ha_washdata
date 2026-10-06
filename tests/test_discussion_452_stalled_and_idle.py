@@ -189,9 +189,11 @@ def test_a_later_match_to_a_longer_programme_does_not_turn_a_real_end_into_a_sta
 
 def test_a_current_match_that_says_done_vetoes_the_stall() -> None:
     """The other half of the agreement: re-matched during the plateau to a shorter
-    programme whose final block this run already produced, nothing shows."""
+    programme whose final block this run already produced, nothing shows. (The
+    plateau follows a wind-down: straight out of activity the match it began under
+    decides alone, register item 514.)"""
     det = _det()
-    _feed(det, 0, 1800, _wash)
+    _feed(det, 0, 1800, lambda t: 20.0 if t >= 1740 else _wash(t))
     _match(det, 3600.0, terminal=(0.92, 300.0, 3312.0, 200.0))
     _feed(det, 1800, 1900, _halt)
     # Its final block (from 1380 s) is already in this run's tumbles above 200 W.
@@ -319,12 +321,14 @@ def test_finished_cycle_moves_to_idle_while_the_display_stays_on() -> None:
     _feed(det, 600, 2400, _wash)
     _feed(det, 2400, 2700, 0.0)  # the end gates close the cycle at 0 W
     assert det.state == STATE_FINISHED
-    # The display is switched on (4.5 W, above stop): the terminal state probes on
-    # that first reading. The probe is not shown, and the state then reads idle.
+    # The display is switched on (4.5 W, above stop, below start): no probe out of
+    # Finished at all (item 510), so Finished holds until the manager's expiry
+    # resets the detector, and off then reads idle.
     shown = _shown(det, 2700, 3000, 4.5)
-    assert STATE_STARTING not in shown
-    assert shown[-1] == STATE_IDLE
-    assert _shown(det, 3000, 3200, 0.0)[-1] == STATE_OFF  # switched off
+    assert shown == [STATE_FINISHED]
+    det.reset(STATE_OFF, _at(3000))
+    assert _shown(det, 3000, 3100, 4.5)[-1] == STATE_IDLE
+    assert _shown(det, 3100, 3300, 0.0)[-1] == STATE_OFF  # switched off
 
 
 def test_a_learned_level_needs_the_off_level_seen_once() -> None:

@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand - run `python3 devtools/generate_ws_types.py`.
 
-**111 commands.**
+**112 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -65,6 +65,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `set_suggestion_lock` | entry_id, key, locked | `SetSuggestionLockResponse` |
 | `run_suggestion_analysis` | entry_id | `RunSuggestionAnalysisResponse` |
 | `get_cycle_power_data` | entry_id, cycle_id | `GetCyclePowerDataResponse` |
+| `get_cycle_context` | entry_id, cycle_id, before_s?, after_s? | `GetCycleContextResponse` |
 | `trim_cycle` | entry_id, cycle_id, start_s, end_s | `StartTaskResponse` |
 | `analyze_split` | entry_id, cycle_id, gap_seconds? | `AnalyzeSplitResponse` |
 | `apply_split` | entry_id, cycle_id, split_offsets, segment_profiles? | `StartTaskResponse` |
@@ -1062,6 +1063,32 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `editable` | no | bool |
 | `cycle_origin` | no | str |
 | `expected` | no | list[list[number]] \| null |
+
+## `ha_washdata/get_cycle_context`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `cycle_id` | yes | str |
+| `before_s` | no | float |
+| `after_s` | no | float |
+
+**Response** (`GetCycleContextResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `cycle_id` | yes | str |
+| `available` | yes | bool |
+| `reason` | yes | str \| null |
+| `entity_id` | yes | str \| null |
+| `before_s` | yes | number |
+| `after_s` | yes | number |
+| `trace_end_s` | yes | number |
+| `after_end_s` | yes | number |
+| `before` | yes | list[list[number \| null]] |
+| `after` | yes | list[list[number \| null]] |
 
 ## `ha_washdata/trim_cycle`
 

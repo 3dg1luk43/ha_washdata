@@ -682,7 +682,13 @@
     "pg_obj_early": "Varajase lõpu määr",
     "pg_obj_endlag": "Lõpu viivitus (mediaan)",
     "pg_obj_split": "Tükeldamise määr",
-    "pg_sweep_cycles": "Hiljutised tsüklid"
+    "pg_sweep_cycles": "Hiljutised tsüklid",
+    "cycle_context": "Salvesti ajalugu tsükli ümber",
+    "cycle_context_off": "Väljas",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Salvesti ajalugu",
+    "before_start": "Enne algust",
+    "after_end": "Pärast lõppu"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -1064,7 +1070,12 @@
     "hist_warn_naive_time_other": "{n} ajatemplil puudub ajavöönd ja need loeti UTC-ajana. Kui fail on kohalikus ajas, nihkub iga tsükkel teie UTC-nihke võrra ning suveajale ülemineku ümbruse näidud võivad sattuda vales järjekorras või kaduda.",
     "pg_sweep_n_cycles": "{count} tsükli põhjal",
     "pg_sweep_n_cycles_one": "{count} tsükli põhjal",
-    "pg_sweep_n_cycles_other": "{count} tsükli põhjal"
+    "pg_sweep_n_cycles_other": "{count} tsükli põhjal",
+    "cycle_context_loading": "Salvesti ajaloo laadimine…",
+    "cycle_context_note": "Hall: võimsusanduri salvesti ajalugu enne ja pärast seda tsüklit. See ei ole tsükli osa: kestus, energia ja sobitamine kasutavad ainult tsükli enda võimsusjälge.",
+    "cycle_context_none": "Salvestis pole selle tsükli ümber ühtegi näitu (Home Assistant hoiab vaikimisi 10 päeva ajalugu).",
+    "cycle_context_tip": "Ainult kuvamiseks: ei muuda tsüklis midagi. Tsükkel algab esimesest näidust üle käivitumise läve, seega selle graafik algab sellest näidust. See joonistab võimsusanduri enda salvesti ajaloo tsükli mõlemale poole nende tsüklite puhul, mida salvesti veel hoiab. Kui soovite selle asemel kanda katkenud käivituskatsete näidud tulevastesse tsüklitesse, kasutage sätet Kõvera eeljooks (Seaded > Tuvastamine > Tsükli Algus): see nihutab salvestatud alguse varasemaks, mis muudab salvestatud kestusi ja seega ka sobitamist profiilidega, mis on õpitud ilma selleta.",
+    "invalid_threshold_pair": "Peatumise Lävi ({stop} W) peab olema väiksem kui Käivitumise Lävi ({start} W): allpool peatumise läve tsükkel lõpeb, üle käivitumise läve tsükkel algab. Midagi ei salvestatud; muutke mõlemat korraga."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
@@ -1217,7 +1228,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Kõvera eeljooks",
-      "doc": "Mitu sekundit katkenud käivituskatsete näite tohib WashData kanda tsükli kõvera algusse. Tsükli kõver algab tavaliselt sellest käivituskatsest, mis lõpuks õnnestub, seega masinal, mis kobab paar korda enne tegelikku käivitumist - programmi valik, ukselukk, esimene veevõtt - puuduvad igalt kõveralt tegeliku tegevuse esimesed minutid. Seadke see veidi suuremaks kui teie masina pikim selline eeljooks (300 s on enamikule küllaga). 0 lülitab selle välja. Pange tähele, et sisselülitamine nihutab salvestatud alguse varasemaks, nii et enne ja pärast muudatust salvestatud tsüklid kannavad sama programmi kohta erinevat kestust; õpitud keskmised triivivad, kuni vanemad tsüklid välja langevad."
+      "doc": "Mitu sekundit katkenud käivituskatsete näite tohib WashData kanda tsükli kõvera algusse. Tsükli kõver algab tavaliselt sellest käivituskatsest, mis lõpuks õnnestub, seega masinal, mis kobab paar korda enne tegelikku käivitumist - programmi valik, ukselukk, esimene veevõtt - puuduvad igalt kõveralt tegeliku tegevuse esimesed minutid. Seadke see veidi suuremaks kui teie masina pikim selline eeljooks (300 s on enamikule küllaga). 0 lülitab selle välja. Pange tähele, et sisselülitamine nihutab salvestatud alguse varasemaks, nii et enne ja pärast muudatust salvestatud tsüklid kannavad sama programmi kohta erinevat kestust; õpitud keskmised triivivad, kuni vanemad tsüklid välja langevad. Kui soovite ainult näha, mis toimus enne tsüklit, midagi muutmata, kasutage selle asemel tsükli graafikus salvesti ajalugu."
     },
     "delay_confirm_seconds": {
       "doc": "Toide peab jääma ooterežiimi sagedusalasse nii kauaks, enne kui seadet käsitletakse kui käivitust ootavat, mitte töötavat.",

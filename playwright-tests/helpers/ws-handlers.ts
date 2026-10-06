@@ -176,6 +176,12 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   'ha_washdata/apply_merge': { success: true, new_id: 'cyc-merged' },
   'ha_washdata/rebuild_envelopes': { success: true, rebuilt: 3 },
   'ha_washdata/analyze_split': { segments: [[0, 600], [900, 1740]], split_offsets: [600], samples: [], sample_count: 0, decimated: false, full_duration_s: 1740 },
+  // Recorder history around a cycle (item 513): nothing recorded by default, so a
+  // spec that does not ask for it draws no context.
+  'ha_washdata/get_cycle_context': {
+    cycle_id: 'cyc-001', available: false, reason: 'no_history', entity_id: 'sensor.washer_power',
+    before_s: 600, after_s: 600, trace_end_s: 1740, after_end_s: 0, before: [], after: [],
+  },
   'ha_washdata/get_cycle_power_data': {
     cycle_id: 'cyc-001',
     samples: Array.from({ length: 30 }, (_, i) => [i * 60, i < 2 || i > 27 ? 3 : 900]),

@@ -410,3 +410,31 @@ def effective_option_values(
             ),
         ),
     }
+
+
+def inverted_threshold_pair(
+    before: Mapping[str, Any] | None,
+    after: Mapping[str, Any] | None,
+    device_type: str,
+) -> tuple[float, float] | None:
+    """``(start, stop)`` when a write leaves ``stop_threshold_w`` at or above
+    ``start_threshold_w``, else None (register item 515).
+
+    ``before`` and ``after`` are the merged data + options around the write, read
+    the way the detector reads them (an unset threshold follows ``min_power``).
+    Only a write that CHANGES the effective pair is held to it: a config that
+    already runs inverted (a contributed washer export: stop 6.0 W above start
+    2.3 W) keeps working as today until the pair itself is edited.
+    """
+    after_values = effective_option_values(after, device_type)
+    start = float(after_values[CONF_START_THRESHOLD_W])
+    stop = float(after_values[CONF_STOP_THRESHOLD_W])
+    if stop < start:
+        return None
+    before_values = effective_option_values(before, device_type)
+    if (
+        float(before_values[CONF_START_THRESHOLD_W]),
+        float(before_values[CONF_STOP_THRESHOLD_W]),
+    ) == (start, stop):
+        return None
+    return start, stop

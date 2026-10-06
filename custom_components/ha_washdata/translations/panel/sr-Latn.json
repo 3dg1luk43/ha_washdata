@@ -688,7 +688,13 @@
     "pg_obj_early": "Stopa ranih završetaka",
     "pg_obj_endlag": "Kašnjenje završetka (medijana)",
     "pg_obj_split": "Stopa podeljenih ciklusa",
-    "pg_sweep_cycles": "Nedavni ciklusi"
+    "pg_sweep_cycles": "Nedavni ciklusi",
+    "cycle_context": "Istorija recordera oko ciklusa",
+    "cycle_context_off": "Isključeno",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Istorija recordera",
+    "before_start": "Pre početka",
+    "after_end": "Posle kraja"
   },
   "log": {
     "all_levels": "Svi nivoi",
@@ -1080,7 +1086,12 @@
     "pg_sweep_n_cycles_one": "na {count} ciklusu",
     "pg_sweep_n_cycles_few": "na {count} ciklusa",
     "pg_sweep_n_cycles_other": "na {count} ciklusa",
-    "pg_task_busy": "Za ovaj uređaj već je u toku „Test na istoriji“ ili „Optimizuj“. Sačekajte da se završi ili ga otkažite."
+    "pg_task_busy": "Za ovaj uređaj već je u toku „Test na istoriji“ ili „Optimizuj“. Sačekajte da se završi ili ga otkažite.",
+    "cycle_context_loading": "Učitavanje istorije recordera…",
+    "cycle_context_note": "Sivo: istorija senzora snage iz recordera pre i posle ovog ciklusa. Nije deo ciklusa: trajanje, energija i podudaranje koriste samo sopstveni zapis ciklusa.",
+    "cycle_context_none": "Recorder nema očitavanja oko ovog ciklusa (Home Assistant podrazumevano čuva istoriju 10 dana).",
+    "cycle_context_tip": "Samo za prikaz: ništa ne menja na ciklusu. Ciklus počinje prvim očitavanjem iznad praga pokretanja, pa njegov grafikon počinje tim očitavanjem. Ovde se iscrtava sopstvena istorija senzora snage iz recordera sa obe strane ciklusa, za cikluse koje recorder još čuva. Ako umesto toga želite da očitavanja iz prekinutih pokušaja pokretanja prenesete u buduće cikluse, koristite Uvodne sekunde krive (Podešavanja > Detekcija > Start ciklusa): to pomera zabeleženi početak ranije, što menja sačuvana trajanja, a time i podudaranje sa profilima naučenim bez toga.",
+    "invalid_threshold_pair": "Prag zaustavljanja ({stop} W) mora biti ispod praga pokretanja ({start} W): ispod praga zaustavljanja ciklus se završava, iznad praga pokretanja počinje. Ništa nije sačuvano; promenite obe vrednosti zajedno."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka okretanja nakon završetka radi smanjenja gužvanja.",
@@ -1212,7 +1223,7 @@
       "label": "Min. trajanje ciklusa"
     },
     "curve_preroll_seconds": {
-      "doc": "Koliko sekundi očitavanja iz prekinutih pokušaja pokretanja WashData sme da prenese na početak krive ciklusa. Kriva ciklusa obično počinje od pokušaja pokretanja koji konačno uspe, pa kod mašine koja nekoliko puta proba da krene pre nego što se ustali - izbor programa, zaključavanje vrata, prvo punjenje vodom - prvi minuti stvarne aktivnosti nedostaju na svakoj krivoj. Podesite ovu vrednost malo iznad najdužeg takvog zaleta koji vaša mašina ima (300 s je za većinu više nego dovoljno). 0 isključuje ovu funkciju. Imajte u vidu da uključivanje pomera zabeleženi početak ranije, pa ciklusi zabeleženi pre i posle promene nose različita trajanja za isti program; naučeni proseci će odstupati dok stariji ciklusi ne isteknu.",
+      "doc": "Koliko sekundi očitavanja iz prekinutih pokušaja pokretanja WashData sme da prenese na početak krive ciklusa. Kriva ciklusa obično počinje od pokušaja pokretanja koji konačno uspe, pa kod mašine koja nekoliko puta proba da krene pre nego što se ustali - izbor programa, zaključavanje vrata, prvo punjenje vodom - prvi minuti stvarne aktivnosti nedostaju na svakoj krivoj. Podesite ovu vrednost malo iznad najdužeg takvog zaleta koji vaša mašina ima (300 s je za većinu više nego dovoljno). 0 isključuje ovu funkciju. Imajte u vidu da uključivanje pomera zabeleženi početak ranije, pa ciklusi zabeleženi pre i posle promene nose različita trajanja za isti program; naučeni proseci će odstupati dok stariji ciklusi ne isteknu. Ako samo želite da vidite šta je prethodilo ciklusu, bez ikakvih promena, umesto toga koristite istoriju recordera u grafikonu ciklusa.",
       "label": "Uvodne sekunde krive"
     },
     "delay_confirm_seconds": {

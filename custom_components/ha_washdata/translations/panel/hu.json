@@ -682,7 +682,13 @@
         "pg_obj_early": "Korai befejezések aránya",
         "pg_obj_endlag": "Befejezési késés (medián)",
         "pg_obj_split": "Szétválások aránya",
-        "pg_sweep_cycles": "Legutóbbi ciklusok"
+        "pg_sweep_cycles": "Legutóbbi ciklusok",
+        "cycle_context": "Rögzítő-előzmények a ciklus körül",
+        "cycle_context_off": "Ki",
+        "cycle_context_minutes": "{min} perc",
+        "cycle_context_series": "Rögzítő-előzmények",
+        "before_start": "Kezdés előtt",
+        "after_end": "Befejezés után"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -1064,7 +1070,12 @@
         "hist_warn_naive_time_other": "{n} időbélyegnek nincs időzónája, ezért UTC-ként lett beolvasva. Ha a fájl helyi időben van, minden ciklus eltolódik az Ön UTC-eltolásával, és a nyári időszámítás váltása körüli mérések sorrendje felcserélődhet, vagy kimaradhatnak.",
         "pg_sweep_n_cycles": "{count} ciklus alapján",
         "pg_sweep_n_cycles_one": "{count} ciklus alapján",
-        "pg_sweep_n_cycles_other": "{count} ciklus alapján"
+        "pg_sweep_n_cycles_other": "{count} ciklus alapján",
+        "cycle_context_loading": "Rögzítő-előzmények betöltése…",
+        "cycle_context_note": "Szürke: a teljesítményérzékelő rögzítő-előzményei a ciklus előtt és után. Ez nem része a ciklusnak: az időtartam, az energia és az egyeztetés csak a ciklus saját görbéjét használja.",
+        "cycle_context_none": "A rögzítő nem tárol leolvasásokat a ciklus körül (a Home Assistant alapértelmezés szerint 10 napnyi előzményt őriz meg).",
+        "cycle_context_tip": "Csak megjelenítés: a ciklusban semmit sem változtat. A ciklus az indítási küszöb feletti első leolvasásnál kezdődik, ezért a diagramja ennél a leolvasásnál kezdődik. Ez a teljesítményérzékelő saját rögzítő-előzményeit rajzolja meg a ciklus két oldalán, azoknál a ciklusoknál, amelyeket a rögzítő még tárol. Ha ehelyett a megszakadt indítási kísérletek leolvasásait szeretné a jövőbeli ciklusokba átvinni, használja a Görbe előfutama beállítást (Beállítások > Érzékelés > Ciklus indítása): ez korábbra helyezi a rögzített kezdést, ami megváltoztatja a tárolt időtartamokat, és így a nélküle megtanult profilokkal való egyeztetést is.",
+        "invalid_threshold_pair": "A Leállítási küszöbnek ({stop} W) kisebbnek kell lennie az Indítási küszöbnél ({start} W): a leállítási küszöb alatt a ciklus véget ér, az indítási küszöb felett elindul. Semmi sem lett mentve; a kettőt együtt módosítsa."
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1536,7 +1547,7 @@
         },
         "curve_preroll_seconds": {
             "label": "Görbe előfutama",
-            "doc": "Hány másodpercnyi leolvasás kerülhet a megszakadt indítási kísérletekből a ciklus görbéjének elejére. A ciklus görbéje általában azzal az indítási kísérlettel kezdődik, amelyik végül sikerül, ezért egy olyan gépnél, amely néhányszor próbálkozik, mielőtt beállna (programválasztás, ajtózár, első vízbeeresztés), minden görbéből hiányzik a tényleges működés első néhány perce. Állítsa ezt az értéket kicsivel a gépénél előforduló leghosszabb ilyen nekifutás fölé (300 mp a legtöbb géphez bőven elég). A 0 kikapcsolja. Vegye figyelembe, hogy bekapcsolva a rögzített kezdés korábbra kerül, így a változtatás előtt és után rögzített ciklusok ugyanahhoz a programhoz eltérő időtartamot hordoznak; a megtanult átlagok addig csúsznak el, amíg a régebbi ciklusok ki nem esnek."
+            "doc": "Hány másodpercnyi leolvasás kerülhet a megszakadt indítási kísérletekből a ciklus görbéjének elejére. A ciklus görbéje általában azzal az indítási kísérlettel kezdődik, amelyik végül sikerül, ezért egy olyan gépnél, amely néhányszor próbálkozik, mielőtt beállna (programválasztás, ajtózár, első vízbeeresztés), minden görbéből hiányzik a tényleges működés első néhány perce. Állítsa ezt az értéket kicsivel a gépénél előforduló leghosszabb ilyen nekifutás fölé (300 mp a legtöbb géphez bőven elég). A 0 kikapcsolja. Vegye figyelembe, hogy bekapcsolva a rögzített kezdés korábbra kerül, így a változtatás előtt és után rögzített ciklusok ugyanahhoz a programhoz eltérő időtartamot hordoznak; a megtanult átlagok addig csúsznak el, amíg a régebbi ciklusok ki nem esnek. Ha csak azt szeretné látni, mi történt a ciklus előtt, anélkül hogy bármit módosítana, használja helyette a ciklusdiagram rögzítő-előzményeit."
         },
         "unload_confirm_entity": {
             "label": "Kirakodást megerősítő entitás",

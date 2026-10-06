@@ -425,6 +425,12 @@
     "current_phase": "Aktuelle Phase",
     "cycle": "Zyklus",
     "cycle_date_display": "Anzeige des Zyklusdatums",
+    "cycle_context": "Recorder-Verlauf rund um den Zyklus",
+    "cycle_context_off": "Aus",
+    "cycle_context_minutes": "{min} Min.",
+    "cycle_context_series": "Recorder-Verlauf",
+    "before_start": "Vor dem Start",
+    "after_end": "Nach dem Ende",
     "cycles_count": "Zyklen",
     "cycles_lc": "Zyklen",
     "date": "Datum",
@@ -815,6 +821,10 @@
     "compare_profiles_tip": "Überlagern Sie andere Profilumschläge in der Tabelle oben, um zu sehen, welcher am besten zu diesem Zyklus passt.",
     "compare_selected_cycles": "Ausgewählte Zyklen (durchgehend) – ein-/ausblenden",
     "cycles_deleted": "{count} Zyklen gelöscht",
+    "cycle_context_loading": "Recorder-Verlauf wird geladen…",
+    "cycle_context_note": "Grau: der Recorder-Verlauf des Leistungssensors vor und nach diesem Zyklus. Er gehört nicht zum Zyklus: Dauer, Energie und Zuordnung verwenden nur die eigene Aufzeichnung des Zyklus.",
+    "cycle_context_none": "Der Recorder enthält keine Messwerte rund um diesen Zyklus (Home Assistant speichert standardmäßig 10 Tage Verlauf).",
+    "cycle_context_tip": "Nur Anzeige: ändert nichts am Zyklus. Ein Zyklus beginnt beim ersten Messwert über dem Startschwellenwert, daher setzt sein Diagramm bei diesem Messwert ein. Hier wird der Recorder-Verlauf des Leistungssensors selbst zu beiden Seiten davon gezeichnet, für Zyklen, die der Recorder noch vorhält. Um stattdessen die Messwerte abgebrochener Startversuche in künftige Zyklen zu übernehmen, verwenden Sie Kurven-Vorlauf (Einstellungen > Erkennung > Zyklusstart): Damit verschiebt sich der aufgezeichnete Start nach vorn, was die gespeicherten Dauern und damit die Zuordnung zu ohne ihn gelernten Profilen verändert.",
     "enough_data": "Genügend Daten zum Lernen ({current}/{min} Zyklen).",
     "export_description": "Wählen Sie genau aus, welche Profile, Zyklen, Einstellungen und mehr nach JSON exportiert werden sollen, oder analysieren Sie eine Datei und importieren Sie nur die gewünschten Teile.",
     "feedback_cycles_pending": "Zu überprüfen: {n}",
@@ -1062,6 +1072,7 @@
     "hist_warn_naive_time_one": "{n} Zeitstempel hat keine Zeitzone und wurde als UTC gelesen. Wenn die Datei in Ortszeit vorliegt, ist jeder Zyklus um Ihren UTC-Versatz verschoben, und Messwerte rund um eine Sommerzeitumstellung können vertauscht werden oder verloren gehen.",
     "hist_warn_naive_time_other": "{n} Zeitstempel haben keine Zeitzone und wurden als UTC gelesen. Wenn die Datei in Ortszeit vorliegt, ist jeder Zyklus um Ihren UTC-Versatz verschoben, und Messwerte rund um eine Sommerzeitumstellung können vertauscht werden oder verloren gehen.",
     "hist_tail_trimmed": "{min} Min. Wartezeit nach dem Zyklusende wurden abgeschnitten, wie es auch die Integration im laufenden Betrieb tut",
+    "invalid_threshold_pair": "Der Stoppschwellenwert ({stop} W) muss unter dem Startschwellenwert ({start} W) liegen: Unterhalb des Stoppschwellenwerts endet ein Zyklus, oberhalb des Startschwellenwerts beginnt einer. Es wurde nichts gespeichert; ändern Sie beide Werte gemeinsam.",
     "import_undo_hint": "Ein Wiederherstellungspunkt von vor dem letzten Import ({when}) wird aufbewahrt: {profiles} Profil(e) und {cycles} Zyklus/Zyklen.",
     "replace_undo_hint": "Zuvor wird ein Wiederherstellungspunkt gespeichert, sodass Sie diesen Import unter „Exportieren / Importieren“ rückgängig machen können.",
     "pg_in_sample_note": "Diese Zyklen haben auch die Profile mitgebildet, mit denen sie abgeglichen werden, daher sind diese Ergebnisse optimistisch: Bei neuen Zyklen ist mit etwas weniger richtigen Zuordnungen zu rechnen."
@@ -1213,7 +1224,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Kurven-Vorlauf",
-      "doc": "Wie viele Sekunden an Messwerten aus abgebrochenen Startversuchen WashData an den Anfang der Kurve eines Zyklus übernehmen darf. Die Kurve eines Zyklus beginnt normalerweise bei dem Startversuch, der schließlich erfolgreich ist; bei einem Gerät, das mehrmals antastet, bevor es richtig losläuft - Programmwahl, Türverriegelung, erstes Befüllen -, fehlen daher die ersten Minuten echter Aktivität in jeder Kurve. Stellen Sie diesen Wert etwas höher ein als den längsten solchen Anlauf Ihres Geräts (300 s reichen für die meisten aus). 0 schaltet die Funktion ab. Beachten Sie: Wird sie eingeschaltet, verschiebt sich der aufgezeichnete Start nach vorn, sodass Zyklen von vor und nach der Änderung für dasselbe Programm unterschiedliche Dauern tragen; die gelernten Durchschnittswerte driften, bis die älteren Zyklen herausgefallen sind."
+      "doc": "Wie viele Sekunden an Messwerten aus abgebrochenen Startversuchen WashData an den Anfang der Kurve eines Zyklus übernehmen darf. Die Kurve eines Zyklus beginnt normalerweise bei dem Startversuch, der schließlich erfolgreich ist; bei einem Gerät, das mehrmals antastet, bevor es richtig losläuft - Programmwahl, Türverriegelung, erstes Befüllen -, fehlen daher die ersten Minuten echter Aktivität in jeder Kurve. Stellen Sie diesen Wert etwas höher ein als den längsten solchen Anlauf Ihres Geräts (300 s reichen für die meisten aus). 0 schaltet die Funktion ab. Beachten Sie: Wird sie eingeschaltet, verschiebt sich der aufgezeichnete Start nach vorn, sodass Zyklen von vor und nach der Änderung für dasselbe Programm unterschiedliche Dauern tragen; die gelernten Durchschnittswerte driften, bis die älteren Zyklen herausgefallen sind. Wenn Sie nur sehen möchten, was vor einem Zyklus geschah, ohne etwas zu ändern, verwenden Sie stattdessen den Recorder-Verlauf im Zyklusdiagramm."
     },
     "delay_confirm_seconds": {
       "doc": "Der Strom muss so lange im Standby-Bereich bleiben, bevor das Gerät als „auf den Start wartend“ und nicht als „in Betrieb“ behandelt wird.",

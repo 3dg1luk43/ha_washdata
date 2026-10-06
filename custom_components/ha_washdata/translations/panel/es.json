@@ -374,6 +374,12 @@
     "current_phase": "Fase actual",
     "cycle": "Ciclo",
     "cycle_date_display": "Visualización de la fecha del ciclo",
+    "cycle_context": "Historial del recorder en torno al ciclo",
+    "cycle_context_off": "Desactivado",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Historial del recorder",
+    "before_start": "Antes del inicio",
+    "after_end": "Después del final",
     "cycles_count": "Ciclos",
     "cycles_lc": "ciclos",
     "date": "Fecha",
@@ -770,6 +776,10 @@
     "compare_profiles_tip": "Superponga otros sobres de perfil en el cuadro anterior para ver cuál se adapta mejor a este ciclo.",
     "compare_selected_cycles": "Ciclos seleccionados (sólidos): mostrar/ocultar",
     "cycles_deleted": "{count} ciclo(s) eliminado(s)",
+    "cycle_context_loading": "Cargando historial del recorder…",
+    "cycle_context_note": "Gris: el historial del recorder del sensor de potencia antes y después de este ciclo. No forma parte del ciclo: la duración, la energía y la coincidencia usan solo el trazado propio del ciclo.",
+    "cycle_context_none": "El recorder no conserva lecturas en torno a este ciclo (Home Assistant guarda 10 días de historial de forma predeterminada).",
+    "cycle_context_tip": "Solo de visualización: no cambia nada del ciclo. Un ciclo empieza en la primera lectura que supera el umbral de inicio, así que su gráfico se abre en esa lectura. Esto dibuja el historial del recorder del propio sensor de potencia a ambos lados, para los ciclos que el recorder aún conserva. Para incorporar en cambio las lecturas de los intentos de arranque interrumpidos a los ciclos futuros, use Preinicio de la curva (Ajustes > Detección > Inicio del ciclo): adelanta el inicio registrado, lo que cambia las duraciones guardadas y, por tanto, la coincidencia con perfiles aprendidos sin él.",
     "enough_data": "Suficientes datos para aprender ({current}/{min} ciclos).",
     "export_description": "Elige exactamente qué perfiles, ciclos, ajustes y más exportar a JSON, o analiza un archivo e importa solo las partes que quieras.",
     "feedback_cycles_pending": "Para revisar: {n}",
@@ -1012,6 +1022,7 @@
     "replace_undo_hint": "Primero se guarda un punto de restauración, así que puedes deshacer esta importación desde Exportar / Importar.",
     "pg_in_sample_note": "Estos ciclos también ayudaron a construir los perfiles con los que se comparan, por lo que estos resultados son optimistas: en ciclos nuevos, espere algo menos de coincidencias correctas.",
     "hist_tail_trimmed": "Se recortaron {min} min de espera tras el fin del ciclo, como hace la integración en vivo",
+    "invalid_threshold_pair": "El Umbral de parada ({stop} W) debe ser inferior al Umbral de inicio ({start} W): por debajo del umbral de parada un ciclo termina, por encima del umbral de inicio empieza uno. No se ha guardado nada; cambie los dos a la vez.",
     "hist_truncated": "se detuvo en el límite de {n} lecturas, así que el resto del historial no se analizó",
     "hist_warn_kw": "La lectura más alta es solo {w}. Parece que este sensor informa en kilovatios; WashData lee la potencia en vatios, así que no se pueden detectar ciclos a partir de él.",
     "hist_warn_naive_time": "{n} marcas de tiempo no tienen zona horaria y se leyeron como UTC. Si el archivo está en hora local, cada ciclo queda desplazado según su diferencia con UTC, y las lecturas en torno a un cambio de horario de verano pueden reordenarse o descartarse.",
@@ -1179,7 +1190,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Preinicio de la curva",
-      "doc": "Cuántos segundos de lecturas procedentes de intentos de arranque interrumpidos puede incorporar WashData al principio de la curva de un ciclo. La curva de un ciclo empieza normalmente en el intento de arranque que por fin tiene éxito, así que en una máquina que tantea varias veces antes de arrancar de verdad (selección del programa, bloqueo de la puerta, primer llenado) faltan los primeros minutos de actividad real en todas las curvas. Ajuste este valor un poco por encima del arranque previo más largo de su máquina (300 s sobran en la mayoría de los casos). 0 lo desactiva. Tenga en cuenta que activarlo adelanta el inicio registrado, de modo que los ciclos registrados antes y después del cambio tienen duraciones distintas para el mismo programa; las medias aprendidas se desviarán hasta que los ciclos antiguos salgan del historial."
+      "doc": "Cuántos segundos de lecturas procedentes de intentos de arranque interrumpidos puede incorporar WashData al principio de la curva de un ciclo. La curva de un ciclo empieza normalmente en el intento de arranque que por fin tiene éxito, así que en una máquina que tantea varias veces antes de arrancar de verdad (selección del programa, bloqueo de la puerta, primer llenado) faltan los primeros minutos de actividad real en todas las curvas. Ajuste este valor un poco por encima del arranque previo más largo de su máquina (300 s sobran en la mayoría de los casos). 0 lo desactiva. Tenga en cuenta que activarlo adelanta el inicio registrado, de modo que los ciclos registrados antes y después del cambio tienen duraciones distintas para el mismo programa; las medias aprendidas se desviarán hasta que los ciclos antiguos salgan del historial. Para ver solo lo que ocurrió antes de un ciclo, sin cambiar nada, use en su lugar el historial del recorder en el gráfico del ciclo."
     },
     "delay_confirm_seconds": {
       "doc": "La energía debe permanecer en la banda de espera durante este tiempo antes de que el electrodoméstico sea considerado como esperando para iniciarse en lugar de funcionando.",

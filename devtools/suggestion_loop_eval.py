@@ -786,6 +786,12 @@ def apply_all(mgr: Any, merged: dict, device_type: str) -> dict[str, Any]:
     ):
         val = item["value"]
         updates[key] = int(float(val)) if key in ws_api._SUGGESTION_INT_KEYS else float(val)  # noqa: SLF001
+    # Item 515: the handler refuses an apply that would leave stop >= start.
+    pair = ws_api.inverted_threshold_pair(merged, {**merged, **updates}, device_type)
+    if pair is not None:
+        print(f"apply_all refused (item 515): start {pair[0]:g} W, stop {pair[1]:g} W, "
+              f"updates {sorted(updates)}", file=sys.stderr)
+        return {}
     return updates
 
 

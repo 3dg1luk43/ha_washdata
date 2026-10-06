@@ -677,7 +677,13 @@
         "pg_obj_early": "Shkalla e përfundimeve të hershme",
         "pg_obj_endlag": "Vonesa e përfundimit (mediana)",
         "pg_obj_split": "Shkalla e ndarjeve",
-        "pg_sweep_cycles": "Ciklet e fundit"
+        "pg_sweep_cycles": "Ciklet e fundit",
+        "cycle_context": "Historiku i regjistruesit rreth ciklit",
+        "cycle_context_off": "Joaktiv",
+        "cycle_context_minutes": "{min} min",
+        "cycle_context_series": "Historiku i regjistruesit",
+        "before_start": "Para fillimit",
+        "after_end": "Pas përfundimit"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -1059,7 +1065,12 @@
         "hist_warn_naive_time_other": "{n} vula kohore nuk kanë zonë kohore dhe u lexuan si UTC. Nëse skedari është në orën lokale, çdo cikël zhvendoset me diferencën tuaj nga UTC, dhe leximet rreth ndryshimit të orës verore mund të renditen gabim ose të hidhen poshtë.",
         "pg_sweep_n_cycles": "në {count} cikle",
         "pg_sweep_n_cycles_one": "në {count} cikël",
-        "pg_sweep_n_cycles_other": "në {count} cikle"
+        "pg_sweep_n_cycles_other": "në {count} cikle",
+        "cycle_context_loading": "Duke ngarkuar historikun e regjistruesit…",
+        "cycle_context_note": "Gri: historiku i regjistruesit për sensorin e fuqisë para dhe pas këtij cikli. Nuk është pjesë e ciklit: kohëzgjatja, energjia dhe përputhja përdorin vetëm gjurmën e vetë ciklit.",
+        "cycle_context_none": "Regjistruesi nuk ka lexime rreth këtij cikli (si parazgjedhje Home Assistant ruan historikun e 10 ditëve).",
+        "cycle_context_tip": "Vetëm për shfaqje: nuk ndryshon asgjë te cikli. Një cikël fillon me leximin e parë mbi pragun e nisjes, prandaj grafiku i tij hapet te ai lexim. Kjo vizaton historikun e regjistruesit të vetë sensorit të fuqisë në të dyja anët e ciklit, për ciklet që regjistruesi i mban ende. Për të bartur në vend të kësaj leximet e përpjekjeve të ndërprera për nisje në ciklet e ardhshme, përdorni cilësimin Sekondat hyrëse të kurbës (Cilësimet > Zbulim > Fillimi i ciklit): ai e zhvendos më herët fillimin e regjistruar, gjë që ndryshon kohëzgjatjet e ruajtura dhe rrjedhimisht përputhjen me profilet e mësuara pa të.",
+        "invalid_threshold_pair": "Pragu i ndalimit ({stop} W) duhet të jetë nën Pragun e nisjes ({start} W): nën pragun e ndalimit një cikël përfundon, mbi pragun e nisjes një cikël fillon. Nuk u ruajt asgjë; ndryshojini të dy pragjet bashkë."
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1187,7 +1198,7 @@
             "label": "Kohëzgjatja min. e ciklit"
         },
         "curve_preroll_seconds": {
-            "doc": "Sa sekonda leximesh nga përpjekjet e ndërprera për nisje mund të bartë WashData në fillim të kurbës së një cikli. Kurba e një cikli normalisht fillon nga përpjekja e nisjes që më në fund ia del, prandaj te një makinë që provon disa herë përpara se të vendoset - zgjedhja e programit, bllokimi i derës, mbushja e parë me ujë - minutat e para të aktivitetit të vërtetë mungojnë në çdo kurbë. Vendoseni këtë vlerë pak mbi nisjen më të gjatë të tillë që ka makina juaj (300 s është më se e mjaftueshme për shumicën). 0 e çaktivizon. Kini parasysh se aktivizimi e zhvendos më herët fillimin e regjistruar, prandaj ciklet e regjistruara para dhe pas ndryshimit mbajnë kohëzgjatje të ndryshme për të njëjtin program; mesataret e mësuara do të zhvendosen derisa ciklet më të vjetra të dalin nga përdorimi.",
+            "doc": "Sa sekonda leximesh nga përpjekjet e ndërprera për nisje mund të bartë WashData në fillim të kurbës së një cikli. Kurba e një cikli normalisht fillon nga përpjekja e nisjes që më në fund ia del, prandaj te një makinë që provon disa herë përpara se të vendoset - zgjedhja e programit, bllokimi i derës, mbushja e parë me ujë - minutat e para të aktivitetit të vërtetë mungojnë në çdo kurbë. Vendoseni këtë vlerë pak mbi nisjen më të gjatë të tillë që ka makina juaj (300 s është më se e mjaftueshme për shumicën). 0 e çaktivizon. Kini parasysh se aktivizimi e zhvendos më herët fillimin e regjistruar, prandaj ciklet e regjistruara para dhe pas ndryshimit mbajnë kohëzgjatje të ndryshme për të njëjtin program; mesataret e mësuara do të zhvendosen derisa ciklet më të vjetra të dalin nga përdorimi. Për të parë vetëm çfarë ndodhi para një cikli, pa ndryshuar asgjë, përdorni në vend të kësaj historikun e regjistruesit në grafikun e ciklit.",
             "label": "Sekondat hyrëse të kurbës"
         },
         "delay_confirm_seconds": {

@@ -237,6 +237,7 @@ from .cycle_detector import (
     MatchContext,
     CycleDetector,
     STANDBY_LEVEL_RECENT_CYCLES,
+    TERMINAL_PROBE_RETURNS,
     learned_standby_level_w,
     standby_near_stop_ceiling,
     terminal_high_for_guards,
@@ -4181,6 +4182,10 @@ class WashDataManager:
             not self._cycle_completed_time
             or self.detector.state == STATE_RUNNING
             or self.detector.state == STATE_DELAY_WAIT
+            # A probe out of a terminal state (item 515): the overlay waits for its
+            # outcome. Resetting the detector here would kill a real start (#267),
+            # and a nag must not fire into a new load; an abort resumes the timers.
+            or self.detector.state == STATE_STARTING
         ):
             # Cycle is running or not completed, don't reset
             return
@@ -4973,23 +4978,32 @@ class WashDataManager:
         self.diag_buffer.record_state(
             old_state, new_state, self._current_program, utc_now()
         )
-        # A new cycle starting while we are still showing the completed/Clean
-        # overlay (the progress-reset window) must clear that overlay and cancel
-        # the expiry timer right away, so the UI leaves "Finished" and the unload
-        # nag stops immediately instead of waiting for the reset window - and so
-        # the expiry timer cannot race the new cycle and reset us to OFF (#267).
         # A start from idle owns no update intervals yet: drop anything a false
         # start (STARTING -> OFF, which ends no cycle) left pending, so it is not
         # committed with this cycle (#458). DELAY_WAIT is idle too, and since item
         # 504 its false starts return there, so hours of standby probes would
-        # otherwise reach the next completed cycle.
+        # otherwise reach the next completed cycle; since item 515 so do the
+        # terminal states' (the cycle end already closed the previous cycle's).
         if new_state == STATE_STARTING and old_state in (
             STATE_OFF,
             STATE_UNKNOWN,
             STATE_DELAY_WAIT,
+            STATE_FINISHED,
+            STATE_INTERRUPTED,
+            STATE_FORCE_STOPPED,
         ):
             self.learning_manager.discard_cycle_cadence()
-        if new_state == STATE_STARTING and self._cycle_completed_time is not None:
+        # The completed/Clean overlay (the cycle end, Clean, the unload nag, the
+        # 100 % progress) is cleared when a new cycle COMMITS, in the RUNNING
+        # branch below, not when a probe begins (register item 515): most probes
+        # out of Finished abort, the detector returns to the terminal state, and
+        # clearing here lost Clean and the nag to a blip. The expiry timer keeps
+        # running through the probe and skips STARTING (#267, _handle_state_expiry).
+        if (
+            new_state == STATE_STARTING
+            and not TERMINAL_PROBE_RETURNS
+            and self._cycle_completed_time is not None
+        ):
             self._cycle_completed_time = None
             self._is_clean_state = False
             self._clean_state_start = None
@@ -4999,13 +5013,22 @@ class WashDataManager:
             self._power_off_below_since = None
             self._cancel_power_off_timer()
             self._stop_state_expiry_timer()
+        if old_state == STATE_STARTING and new_state in (
+            STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED
+        ):
+            # Item 515: a false start back in its terminal state ended no cycle.
+            self._cycle_start_time = None
         if new_state == STATE_RUNNING:
             new_cycle_detected = old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN)
             # Only reset estimates if we are truly starting a NEW cycle (from off or starting)
             # If we transition from PAUSED or ENDING, it's a resume - keep estimates!
             if new_cycle_detected:
+                # The previous cycle's completed/Clean overlay ends here (item 515;
+                # Clean and the nag tracking are reset further down).
                 self._cycle_completed_time = None
                 self._stop_state_expiry_timer()
+                self._power_off_below_since = None
+                self._cancel_power_off_timer()
 
                 self._current_program = "detecting..."
                 self._manual_program_active = False
@@ -7746,7 +7769,13 @@ class WashDataManager:
             self._current_program = "off"
             self._time_remaining = None
             self._total_duration = None
-            self._cycle_progress = 0.0
+            # A probe out of a completed cycle keeps its 100 % (item 515): most
+            # abort back to Finished; RUNNING zeroes it when one commits.
+            if not (
+                self.detector.state == STATE_STARTING
+                and self._cycle_completed_time is not None
+            ):
+                self._cycle_progress = 0.0
             self._projected_energy_wh = None
             self._projected_cost = None
             self._cycle_anomaly = "none"
@@ -8559,6 +8588,15 @@ class WashDataManager:
         if duration_so_far <= 0.0:
             return
 
+        # Item 514: a halt is not progress either. The detector's programme view
+        # leaves its stalls out of the elapsed time and the trace, like the
+        # Playground replay (`progress_elapsed_s` / `progress_trace`); the cycle
+        # timers above and the projected energy below keep the real figures.
+        prog_elapsed = getattr(self.detector, "progress_elapsed_s", None)
+        prog_elapsed = prog_elapsed(duration_so_far, now) if callable(prog_elapsed) else None
+        if isinstance(prog_elapsed, (int, float)):
+            duration_so_far = float(prog_elapsed)
+
         if not (self._matched_profile_duration and self._matched_profile_duration > 0):
             # No profile matched - don't provide misleading time estimates.
             self._time_remaining = None
@@ -8580,6 +8618,10 @@ class WashDataManager:
         # shared pure smoothing/back-calc in :mod:`progress` - the identical math
         # the Playground simulation runs.
         trace = self.detector.get_power_trace()
+        prog_trace = getattr(self.detector, "progress_trace", None)
+        prog_trace = prog_trace(now) if callable(prog_trace) else None
+        if isinstance(prog_trace, list):
+            trace = prog_trace  # item 514, see above
         phase_result = None
         if len(trace) >= 10 and self._current_program != "detecting...":
             phase_result = self._estimate_phase_progress(

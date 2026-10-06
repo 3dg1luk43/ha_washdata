@@ -408,6 +408,27 @@ class GetCyclePowerDataResponse(_GetCyclePowerDataBase, total=False):
     expected: list[list[float]] | None
 
 
+class GetCycleContextResponse(TypedDict):
+    """The power sensor's recorder history around a stored cycle (item 513).
+
+    ``before`` / ``after`` are ``[offset_s, watts | null]`` from the cycle's stored
+    start (``before`` offsets are negative; ``after`` starts at ``trace_end_s``);
+    a null watt marks an unavailable row. ``reason`` is null when ``available``,
+    else one of ``not_found`` / ``not_live`` / ``no_sensor`` / ``no_start`` /
+    ``no_history``. Display only: nothing here is part of the cycle."""
+
+    cycle_id: str
+    available: bool
+    reason: str | None
+    entity_id: str | None
+    before_s: float
+    after_s: float
+    trace_end_s: float
+    after_end_s: float
+    before: list[list[float | None]]
+    after: list[list[float | None]]
+
+
 class AnalyzeSplitResponse(TypedDict):
     segments: list[list[float]]
     split_offsets: list[float]
@@ -822,6 +843,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "set_suggestion_lock": SetSuggestionLockResponse,
     "run_suggestion_analysis": RunSuggestionAnalysisResponse,
     "get_cycle_power_data": GetCyclePowerDataResponse,
+    "get_cycle_context": GetCycleContextResponse,
     "trim_cycle": StartTaskResponse,
     "analyze_split": AnalyzeSplitResponse,
     "apply_split": StartTaskResponse,
@@ -1055,6 +1077,12 @@ WS_COMMANDS: dict[str, dict] = {
     "set_suggestion_lock": {"params": [_entry(), _p("key", "str"), _p("locked", "bool")]},
     "run_suggestion_analysis": {"params": [_entry()]},
     "get_cycle_power_data": {"params": [_entry(), _p("cycle_id", "str")]},
+    "get_cycle_context": {"params": [
+        _entry(),
+        _p("cycle_id", "str"),
+        _p("before_s", "float", False),
+        _p("after_s", "float", False),
+    ]},
     "trim_cycle": {"params": [
         _entry(),
         _p("cycle_id", "str"),

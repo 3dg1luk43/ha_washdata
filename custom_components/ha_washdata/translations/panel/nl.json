@@ -425,6 +425,12 @@
     "current_phase": "Huidige fase",
     "cycle": "Cyclus",
     "cycle_date_display": "Weergave cyclusdatum",
+    "cycle_context": "Recordergeschiedenis rond de cyclus",
+    "cycle_context_off": "Uit",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Recordergeschiedenis",
+    "before_start": "Vóór start",
+    "after_end": "Na einde",
     "cycles_count": "Cycli",
     "cycles_lc": "cycli",
     "date": "Datum",
@@ -815,6 +821,10 @@
     "compare_profiles_tip": "Leg andere profielenveloppen op het schema hierboven om te zien welke het beste bij deze cyclus past.",
     "compare_selected_cycles": "Geselecteerde cycli (vast) – tonen/verbergen",
     "cycles_deleted": "{count} cyclus(sen) verwijderd",
+    "cycle_context_loading": "Recordergeschiedenis laden…",
+    "cycle_context_note": "Grijs: de recordergeschiedenis van de vermogenssensor vóór en na deze cyclus. Die hoort niet bij de cyclus: duur, energie en matchen gebruiken alleen het eigen spoor van de cyclus.",
+    "cycle_context_none": "De recorder bevat geen metingen rond deze cyclus (Home Assistant bewaart standaard 10 dagen geschiedenis).",
+    "cycle_context_tip": "Alleen weergave: verandert niets aan de cyclus. Een cyclus begint bij de eerste meting boven de startdrempel, dus de grafiek opent bij die meting. Dit tekent de eigen recordergeschiedenis van de vermogenssensor aan weerszijden ervan, voor cycli die de recorder nog bewaart. Om in plaats daarvan de metingen van afgebroken startpogingen mee te nemen in toekomstige cycli, gebruikt u Curve-aanloop (Instellingen > Detectie > Cyclusstart): die verschuift het geregistreerde begin naar voren, wat de opgeslagen duren verandert en daarmee het matchen met profielen die zonder deze instelling zijn geleerd.",
     "enough_data": "Voldoende gegevens om van te leren ({current}/{min} cycli).",
     "export_description": "Kies precies welke profielen, cycli, instellingen en meer u naar JSON wilt exporteren, of analyseer een bestand en importeer alleen de onderdelen die u wilt.",
     "feedback_cycles_pending": "Te beoordelen: {n}",
@@ -1062,6 +1072,7 @@
     "hist_warn_naive_time_one": "{n} tijdstempel heeft geen tijdzone en is als UTC gelezen. Als het bestand in lokale tijd is, is elke cyclus verschoven met je UTC-verschil, en metingen rond een overgang naar of van zomertijd kunnen in de verkeerde volgorde komen of wegvallen.",
     "hist_warn_naive_time_other": "{n} tijdstempels hebben geen tijdzone en zijn als UTC gelezen. Als het bestand in lokale tijd is, is elke cyclus verschoven met je UTC-verschil, en metingen rond een overgang naar of van zomertijd kunnen in de verkeerde volgorde komen of wegvallen.",
     "hist_tail_trimmed": "{min} min wachten na het einde van de cyclus is weggeknipt, zoals de integratie dat tijdens gebruik ook doet",
+    "invalid_threshold_pair": "Stopdrempel ({stop} W) moet lager zijn dan Startdrempel ({start} W): onder de stopdrempel eindigt een cyclus, boven de startdrempel begint er een. Er is niets opgeslagen; wijzig beide samen.",
     "import_undo_hint": "Er wordt een herstelpunt van vóór de laatste import ({when}) bewaard: {profiles} profiel(en) en {cycles} cyclus(sen).",
     "replace_undo_hint": "Eerst wordt een herstelpunt opgeslagen, zodat deze import via Exporteren / importeren ongedaan kan worden gemaakt.",
     "pg_in_sample_note": "Deze cycli hebben ook meegeholpen de profielen op te bouwen waarmee ze worden vergeleken, dus deze resultaten zijn optimistisch: verwacht bij nieuwe cycli iets minder juiste matches."
@@ -1217,7 +1228,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Curve-aanloop",
-      "doc": "Hoeveel seconden aan metingen uit afgebroken startpogingen WashData vooraan in de curve van een cyclus mag opnemen. De curve van een cyclus begint normaal bij de startpoging die uiteindelijk slaagt, dus bij een machine die een paar keer aftast voordat ze echt begint - programmakeuze, deurvergrendeling, eerste vulling - ontbreken de eerste minuten echte activiteit in elke curve. Stel dit iets hoger in dan de langste aanloop die uw machine heeft (300 s is voor de meeste ruim voldoende). 0 schakelt het uit. Houd er rekening mee dat inschakelen het geregistreerde begin naar voren verschuift, zodat cycli van voor en na de wijziging verschillende duren dragen voor hetzelfde programma; de geleerde gemiddelden verschuiven tot de oudere cycli zijn afgevallen."
+      "doc": "Hoeveel seconden aan metingen uit afgebroken startpogingen WashData vooraan in de curve van een cyclus mag opnemen. De curve van een cyclus begint normaal bij de startpoging die uiteindelijk slaagt, dus bij een machine die een paar keer aftast voordat ze echt begint - programmakeuze, deurvergrendeling, eerste vulling - ontbreken de eerste minuten echte activiteit in elke curve. Stel dit iets hoger in dan de langste aanloop die uw machine heeft (300 s is voor de meeste ruim voldoende). 0 schakelt het uit. Houd er rekening mee dat inschakelen het geregistreerde begin naar voren verschuift, zodat cycli van voor en na de wijziging verschillende duren dragen voor hetzelfde programma; de geleerde gemiddelden verschuiven tot de oudere cycli zijn afgevallen. Wilt u alleen zien wat er vóór een cyclus gebeurde, zonder iets te veranderen, gebruik dan de recordergeschiedenis in de cyclusgrafiek."
     },
     "delay_confirm_seconds": {
       "doc": "De stroom moet zo lang in de standby-band blijven voordat het apparaat wordt behandeld als wachtend om te starten in plaats van als actief.",

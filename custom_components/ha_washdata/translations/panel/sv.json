@@ -425,6 +425,12 @@
     "current_phase": "Aktuell fas",
     "cycle": "Cykel",
     "cycle_date_display": "Visning av cykelns datum",
+    "cycle_context": "Recorder-historik runt cykeln",
+    "cycle_context_off": "Av",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Recorder-historik",
+    "before_start": "Före start",
+    "after_end": "Efter slut",
     "cycles_count": "Cykler",
     "cycles_lc": "cykler",
     "date": "Datum",
@@ -815,6 +821,10 @@
     "compare_profiles_tip": "Lägg över andra profilkuvert på diagrammet ovan för att se vilket som passar bäst för denna cykel.",
     "compare_selected_cycles": "Valda cykler (solid) – visa / dölj",
     "cycles_deleted": "{count} cykler borttagna",
+    "cycle_context_loading": "Läser in recorder-historik…",
+    "cycle_context_note": "Grått: effektsensorns recorder-historik före och efter den här cykeln. Den är inte en del av cykeln: varaktighet, energi och matchning använder bara cykelns eget spår.",
+    "cycle_context_none": "Recordern har inga mätvärden runt den här cykeln (Home Assistant sparar 10 dagars historik som standard).",
+    "cycle_context_tip": "Endast visning: ändrar ingenting i cykeln. En cykel startar vid det första mätvärdet över starttröskeln, så dess diagram börjar vid det mätvärdet. Det här ritar effektsensorns egen recorder-historik på båda sidor om den, för cykler som recordern fortfarande har kvar. Vill du i stället ta med mätvärdena från avbrutna startförsök i framtida cykler, använd Kurvupptakt (Inställningar > Detektering > Cykelstart): den flyttar den registrerade starten tidigare, vilket ändrar sparade varaktigheter och därmed matchningen mot profiler som lärts in utan den.",
     "enough_data": "Tillräckligt med data för att lära sig av ({current}/{min} cykler).",
     "export_description": "Välj exakt vilka profiler, cykler, inställningar och mer som ska exporteras till JSON, eller analysera en fil och importera bara de delar du vill ha.",
     "feedback_cycles_pending": "Att granska: {n}",
@@ -1062,6 +1072,7 @@
     "hist_warn_naive_time_one": "{n} tidsstämpel saknar tidszon och lästes som UTC. Om filen är i lokal tid förskjuts varje cykel med din UTC-förskjutning, och avläsningar kring ett byte till eller från sommartid kan hamna i fel ordning eller försvinna.",
     "hist_warn_naive_time_other": "{n} tidsstämplar saknar tidszon och lästes som UTC. Om filen är i lokal tid förskjuts varje cykel med din UTC-förskjutning, och avläsningar kring ett byte till eller från sommartid kan hamna i fel ordning eller försvinna.",
     "hist_tail_trimmed": "{min} min väntan efter att cykeln avslutats klipptes bort, precis som integrationen gör under drift",
+    "invalid_threshold_pair": "Stopptröskel ({stop} W) måste vara under Starttröskel ({start} W): under stopptröskeln slutar en cykel, över starttröskeln börjar en. Inget sparades; ändra båda tillsammans.",
     "import_undo_hint": "En återställningspunkt från före den senaste importen ({when}) finns kvar: {profiles} profil(er) och {cycles} cykel/cykler.",
     "replace_undo_hint": "En återställningspunkt sparas först, så att du kan ångra den här importen under Exportera / Importera.",
     "pg_in_sample_note": "Dessa cykler var också med och byggde de profiler de matchas mot, så resultaten är optimistiska: på nya cykler kan du förvänta dig något färre korrekta matchningar."
@@ -1217,7 +1228,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Kurvupptakt",
-      "doc": "Hur många sekunders mätvärden från avbrutna startförsök WashData får ta med främst i en cykels kurva. En cykels kurva börjar normalt vid det startförsök som till slut lyckas, så på en maskin som trevar ett par gånger innan den kommer i gång på riktigt - programval, dörrlås, första vattenintag - saknas de första minuterna av verklig aktivitet i varje kurva. Ställ in det här lite högre än den längsta sådana upptakt din maskin har (300 s räcker gott för de flesta). 0 stänger av det. Tänk på att när det slås på flyttas den registrerade starten tidigare, så cykler från före och efter ändringen bär olika varaktigheter för samma program; de inlärda medelvärdena kommer att glida tills de äldre cyklerna fallit ur."
+      "doc": "Hur många sekunders mätvärden från avbrutna startförsök WashData får ta med främst i en cykels kurva. En cykels kurva börjar normalt vid det startförsök som till slut lyckas, så på en maskin som trevar ett par gånger innan den kommer i gång på riktigt - programval, dörrlås, första vattenintag - saknas de första minuterna av verklig aktivitet i varje kurva. Ställ in det här lite högre än den längsta sådana upptakt din maskin har (300 s räcker gott för de flesta). 0 stänger av det. Tänk på att när det slås på flyttas den registrerade starten tidigare, så cykler från före och efter ändringen bär olika varaktigheter för samma program; de inlärda medelvärdena kommer att glida tills de äldre cyklerna fallit ur. Vill du bara se vad som kom före en cykel, utan att ändra något, använd i stället recorder-historiken i cykeldiagrammet."
     },
     "delay_confirm_seconds": {
       "doc": "Strömmen måste stanna i standby-bandet så länge innan apparaten behandlas som att den väntar på att starta snarare än att den är igång.",

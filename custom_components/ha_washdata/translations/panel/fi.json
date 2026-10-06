@@ -682,7 +682,13 @@
     "pg_obj_early": "Ennenaikaisten päättymisten osuus",
     "pg_obj_endlag": "Päättymisviive (mediaani)",
     "pg_obj_split": "Jakautumisten osuus",
-    "pg_sweep_cycles": "Viimeisimmät syklit"
+    "pg_sweep_cycles": "Viimeisimmät syklit",
+    "cycle_context": "Tallentimen historia syklin ympäriltä",
+    "cycle_context_off": "Pois",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Tallentimen historia",
+    "before_start": "Ennen alkua",
+    "after_end": "Lopun jälkeen"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -1064,7 +1070,12 @@
     "hist_warn_naive_time_other": "{n} aikaleimalta puuttuu aikavyöhyke, ja ne luettiin UTC-aikana. Jos tiedosto on paikallisessa ajassa, jokainen sykli siirtyy UTC-erosi verran, ja kesäajan vaihdoksen ympärillä olevat lukemat voivat mennä väärään järjestykseen tai pudota pois.",
     "pg_sweep_n_cycles": "{count} syklin perusteella",
     "pg_sweep_n_cycles_one": "{count} syklin perusteella",
-    "pg_sweep_n_cycles_other": "{count} syklin perusteella"
+    "pg_sweep_n_cycles_other": "{count} syklin perusteella",
+    "cycle_context_loading": "Ladataan tallentimen historiaa…",
+    "cycle_context_note": "Harmaa: tehoanturin tallentimen historia ennen tätä sykliä ja sen jälkeen. Se ei ole osa sykliä: kesto, energia ja täsmäytys käyttävät vain syklin omia lukemia.",
+    "cycle_context_none": "Tallentimessa ei ole lukemia tämän syklin ympäriltä (Home Assistant säilyttää oletuksena 10 päivän historian).",
+    "cycle_context_tip": "Vain näyttöä varten: ei muuta syklissä mitään. Sykli alkaa ensimmäisestä käynnistyskynnyksen ylittävästä lukemasta, joten sen kaavio alkaa siitä lukemasta. Tämä piirtää tehoanturin oman tallentimen historian syklin molemmin puolin niille sykleille, jotka tallennin vielä säilyttää. Jos haluat sen sijaan liittää keskeytyneiden käynnistysyritysten lukemat tuleviin sykleihin, käytä asetusta Käyrän esijakso (Asetukset > Tunnistus > Syklin alku): se siirtää tallennettua alkuhetkeä aikaisemmaksi, mikä muuttaa tallennettuja kestoja ja siten täsmäytystä profiileihin, jotka on opittu ilman sitä.",
+    "invalid_threshold_pair": "Pysäytyskynnyksen ({stop} W) on oltava pienempi kuin Käynnistyskynnys ({start} W): pysäytyskynnyksen alapuolella sykli päättyy, käynnistyskynnyksen yläpuolella sykli alkaa. Mitään ei tallennettu; muuta molempia yhdessä."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
@@ -1217,7 +1228,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Käyrän esijakso",
-      "doc": "Kuinka monta sekuntia keskeytyneiden käynnistysyritysten lukemia WashData saa liittää syklin käyrän alkuun. Syklin käyrä alkaa normaalisti siitä käynnistysyrityksestä, joka lopulta onnistuu, joten koneessa, joka kokeilee muutaman kerran ennen kuin se todella lähtee käyntiin - ohjelman valinta, luukun lukitus, ensimmäinen vedenotto - jokaisesta käyrästä puuttuvat todellisen toiminnan ensimmäiset minuutit. Aseta tämä hieman suuremmaksi kuin koneesi pisin tällainen alkuvaihe (300 s riittää useimmille). 0 poistaa toiminnon käytöstä. Huomaa, että käyttöönotto siirtää tallennettua alkuhetkeä aikaisemmaksi, joten ennen muutosta ja sen jälkeen tallennetuilla sykleillä on saman ohjelman kohdalla eri kestot; opitut keskiarvot ajautuvat, kunnes vanhemmat syklit poistuvat."
+      "doc": "Kuinka monta sekuntia keskeytyneiden käynnistysyritysten lukemia WashData saa liittää syklin käyrän alkuun. Syklin käyrä alkaa normaalisti siitä käynnistysyrityksestä, joka lopulta onnistuu, joten koneessa, joka kokeilee muutaman kerran ennen kuin se todella lähtee käyntiin - ohjelman valinta, luukun lukitus, ensimmäinen vedenotto - jokaisesta käyrästä puuttuvat todellisen toiminnan ensimmäiset minuutit. Aseta tämä hieman suuremmaksi kuin koneesi pisin tällainen alkuvaihe (300 s riittää useimmille). 0 poistaa toiminnon käytöstä. Huomaa, että käyttöönotto siirtää tallennettua alkuhetkeä aikaisemmaksi, joten ennen muutosta ja sen jälkeen tallennetuilla sykleillä on saman ohjelman kohdalla eri kestot; opitut keskiarvot ajautuvat, kunnes vanhemmat syklit poistuvat. Jos haluat vain nähdä, mitä ennen sykliä tapahtui, muuttamatta mitään, käytä sen sijaan syklin kaavion tallentimen historiaa."
     },
     "delay_confirm_seconds": {
       "doc": "Virran on pysyttävä valmiustilassa niin kauan, ennen kuin laitetta käsitellään käynnistystä odottavana eikä käynnissä.",

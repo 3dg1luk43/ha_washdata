@@ -442,6 +442,12 @@
     "current_phase": "Current phase",
     "cycle": "Cycle",
     "cycle_date_display": "Cycle date display",
+    "cycle_context": "Recorder history around the cycle",
+    "cycle_context_off": "Off",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Recorder history",
+    "before_start": "Before start",
+    "after_end": "After end",
     "cycle_destination": "Where should imported cycles go?",
     "cycles_count": "Cycles",
     "cycles_lc": "cycles",
@@ -827,6 +833,10 @@
     "compare_profiles_tip": "Overlay other profile envelopes on the chart above to see which one best fits this cycle.",
     "compare_selected_cycles": "Selected cycles (solid) – show / hide",
     "cycles_deleted": "{count} cycle(s) deleted",
+    "cycle_context_loading": "Loading recorder history…",
+    "cycle_context_note": "Grey: the power sensor's recorder history before and after this cycle. It is not part of the cycle: duration, energy and matching use only the cycle's own trace.",
+    "cycle_context_none": "The recorder holds no readings around this cycle (Home Assistant keeps 10 days of history by default).",
+    "cycle_context_tip": "Display only: changes nothing about the cycle. A cycle starts at the first reading over the start threshold, so its chart opens at that reading. This draws the power sensor's own recorder history either side of it, for cycles the recorder still holds. To carry the readings of aborted start attempts into future cycles instead, use Curve Pre-roll (Settings > Detection > Cycle Start): it moves the recorded start earlier, which changes stored durations and so matching against profiles learned without it.",
     "dest_real_history_hint": "Imported cycles count as this device's own history and feed energy/usage stats. Use for moving one appliance to a new install.",
     "dest_reference_hint": "Imported cycles only improve program matching and never affect usage/energy statistics.",
     "device_type_mismatch_warn": "This export is from a different appliance type ({src} vs {local}). Programs and cycles can still be imported as reference data, but device-specific settings and real-history import are disabled.",
@@ -1075,7 +1085,8 @@
     "hist_warn_naive_time": "{n} timestamps have no time zone and were read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.",
     "hist_warn_naive_time_one": "{n} timestamp has no time zone and was read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.",
     "hist_warn_naive_time_other": "{n} timestamps have no time zone and were read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.",
-    "hist_tail_trimmed": "{min} min of waiting after the cycle ended were trimmed, as the live integration trims them"
+    "hist_tail_trimmed": "{min} min of waiting after the cycle ended were trimmed, as the live integration trims them",
+    "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W): below the stop threshold a cycle ends, above the start threshold one begins. Nothing was saved; change the two together."
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1223,7 +1234,7 @@
       "label": "Min Cycle Duration"
     },
     "curve_preroll_seconds": {
-      "doc": "How many seconds of readings from aborted start attempts WashData may carry into the front of a cycle's curve. A cycle's curve normally begins at the start attempt that finally succeeds, so on a machine that probes a few times before settling - programme selection, door lock, first fill - the first minutes of real activity are missing from every curve. Set this a little above the longest such run-up your machine has (300 s is plenty for most). 0 turns it off. Be aware that turning it on moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program; the learned averages will drift until the older cycles age out.",
+      "doc": "How many seconds of readings from aborted start attempts WashData may carry into the front of a cycle's curve. A cycle's curve normally begins at the start attempt that finally succeeds, so on a machine that probes a few times before settling - programme selection, door lock, first fill - the first minutes of real activity are missing from every curve. Set this a little above the longest such run-up your machine has (300 s is plenty for most). 0 turns it off. Be aware that turning it on moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program; the learned averages will drift until the older cycles age out. To only see what came before a cycle, without changing anything, use the recorder history in the cycle chart instead.",
       "label": "Curve Pre-roll"
     },
     "delay_confirm_seconds": {

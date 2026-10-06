@@ -425,6 +425,12 @@
     "current_phase": "Gjeldende fase",
     "cycle": "Syklus",
     "cycle_date_display": "Visning av syklusdato",
+    "cycle_context": "Recorder-historikk rundt syklusen",
+    "cycle_context_off": "Av",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Recorder-historikk",
+    "before_start": "Før start",
+    "after_end": "Etter slutt",
     "cycles_count": "Sykluser",
     "cycles_lc": "sykluser",
     "date": "Dato",
@@ -815,6 +821,10 @@
     "compare_profiles_tip": "Legg over andre profilkonvolutter på diagrammet ovenfor for å se hvilken som passer best til denne syklusen.",
     "compare_selected_cycles": "Valgte sykluser (fast) – vis / skjul",
     "cycles_deleted": "{count} syklus(er) slettet",
+    "cycle_context_loading": "Laster inn recorder-historikk…",
+    "cycle_context_note": "Grå: strømsensorens recorder-historikk før og etter denne syklusen. Den er ikke en del av syklusen: varighet, energi og matching bruker bare syklusens eget spor.",
+    "cycle_context_none": "Recorderen har ingen målinger rundt denne syklusen (Home Assistant beholder 10 dager med historikk som standard).",
+    "cycle_context_tip": "Bare visning: endrer ingenting ved syklusen. En syklus starter ved den første målingen over startterskelen, så diagrammet åpner ved den målingen. Dette tegner strømsensorens egen recorder-historikk på begge sider av den, for sykluser som recorderen fortsatt har. Vil du i stedet ta med målingene fra avbrutte startforsøk i fremtidige sykluser, bruk Kurveopptakt (Innstillinger > Deteksjon > Syklusstart): den flytter det registrerte starttidspunktet tidligere, noe som endrer lagrede varigheter og dermed matching mot profiler som er innlært uten den.",
     "enough_data": "Nok data til å lære av ({current}/{min} sykluser).",
     "export_description": "Velg nøyaktig hvilke profiler, sykluser, innstillinger og mer som skal eksporteres til JSON, eller analyser en fil og importer bare delene du vil ha.",
     "feedback_cycles_pending": "Til gjennomgang: {n}",
@@ -1062,6 +1072,7 @@
     "hist_warn_naive_time_one": "{n} tidsstempel har ingen tidssone og ble lest som UTC. Hvis filen er i lokal tid, er hver syklus forskjøvet med UTC-forskyvningen din, og avlesninger rundt et skifte til eller fra sommertid kan havne i feil rekkefølge eller gå tapt.",
     "hist_warn_naive_time_other": "{n} tidsstempler har ingen tidssone og ble lest som UTC. Hvis filen er i lokal tid, er hver syklus forskjøvet med UTC-forskyvningen din, og avlesninger rundt et skifte til eller fra sommertid kan havne i feil rekkefølge eller gå tapt.",
     "hist_tail_trimmed": "{min} min venting etter at syklusen var ferdig ble klippet bort, slik integrasjonen gjør under drift",
+    "invalid_threshold_pair": "Stoppterskel ({stop} W) må være under Startterskel ({start} W): under stoppterskelen slutter en syklus, over startterskelen begynner en. Ingenting ble lagret; endre begge samtidig.",
     "import_undo_hint": "Et gjenopprettingspunkt fra før siste import ({when}) er beholdt: {profiles} profil(er) og {cycles} syklus(er).",
     "replace_undo_hint": "Et gjenopprettingspunkt lagres først, så du kan angre denne importen fra Eksporter / Importer.",
     "pg_in_sample_note": "Disse syklusene var også med på å bygge profilene de matches mot, så resultatene er optimistiske: på nye sykluser kan du forvente litt færre riktige gjenkjenninger."
@@ -1217,7 +1228,7 @@
     },
     "curve_preroll_seconds": {
       "label": "Kurveopptakt",
-      "doc": "Hvor mange sekunder med målinger fra avbrutte startforsøk WashData kan ta med fremst i kurven til en syklus. Kurven til en syklus begynner normalt ved startforsøket som til slutt lykkes, så på en maskin som prøver seg noen ganger før den kommer ordentlig i gang - programvalg, dørlås, første vanninntak - mangler de første minuttene med reell aktivitet i hver kurve. Sett dette litt høyere enn den lengste slike opptakten maskinen din har (300 s er rikelig for de fleste). 0 slår det av. Vær oppmerksom på at når det slås på, flyttes det registrerte starttidspunktet tidligere, slik at sykluser fra før og etter endringen bærer ulike varigheter for det samme programmet; de innlærte gjennomsnittene vil drive til de eldre syklusene har falt ut."
+      "doc": "Hvor mange sekunder med målinger fra avbrutte startforsøk WashData kan ta med fremst i kurven til en syklus. Kurven til en syklus begynner normalt ved startforsøket som til slutt lykkes, så på en maskin som prøver seg noen ganger før den kommer ordentlig i gang - programvalg, dørlås, første vanninntak - mangler de første minuttene med reell aktivitet i hver kurve. Sett dette litt høyere enn den lengste slike opptakten maskinen din har (300 s er rikelig for de fleste). 0 slår det av. Vær oppmerksom på at når det slås på, flyttes det registrerte starttidspunktet tidligere, slik at sykluser fra før og etter endringen bærer ulike varigheter for det samme programmet; de innlærte gjennomsnittene vil drive til de eldre syklusene har falt ut. Vil du bare se hva som kom før en syklus, uten å endre noe, bruk i stedet recorder-historikken i syklusdiagrammet."
     },
     "delay_confirm_seconds": {
       "doc": "Strømmen må forbli i standby-båndet så lenge før apparatet blir behandlet som venter på å starte i stedet for å kjøre.",

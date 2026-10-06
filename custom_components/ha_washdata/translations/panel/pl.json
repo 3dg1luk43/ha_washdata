@@ -694,7 +694,13 @@
     "pg_obj_early": "Wskaźnik wczesnych końców",
     "pg_obj_endlag": "Opóźnienie końca (mediana)",
     "pg_obj_split": "Wskaźnik podzielonych cykli",
-    "pg_sweep_cycles": "Ostatnie cykle"
+    "pg_sweep_cycles": "Ostatnie cykle",
+    "cycle_context": "Historia z recordera wokół cyklu",
+    "cycle_context_off": "Wyłączone",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Historia z recordera",
+    "before_start": "Przed startem",
+    "after_end": "Po zakończeniu"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -1096,7 +1102,12 @@
     "pg_sweep_n_cycles_few": "na {count} cyklach",
     "pg_sweep_n_cycles_many": "na {count} cyklach",
     "pg_sweep_n_cycles_other": "na {count} cyklu",
-    "pg_task_busy": "Dla tego urządzenia trwa już przebieg „Testuj na historii” lub „Optymalizuj”. Poczekaj na jego zakończenie lub go anuluj."
+    "pg_task_busy": "Dla tego urządzenia trwa już przebieg „Testuj na historii” lub „Optymalizuj”. Poczekaj na jego zakończenie lub go anuluj.",
+    "cycle_context_loading": "Wczytywanie historii z recordera…",
+    "cycle_context_note": "Szary: historia czujnika mocy z recordera przed tym cyklem i po nim. Nie jest częścią cyklu: czas trwania, energia i dopasowanie korzystają wyłącznie z własnego przebiegu cyklu.",
+    "cycle_context_none": "Recorder nie przechowuje żadnych odczytów z okresu wokół tego cyklu (Home Assistant domyślnie przechowuje historię przez 10 dni).",
+    "cycle_context_tip": "Tylko do podglądu: niczego w cyklu nie zmienia. Cykl zaczyna się od pierwszego odczytu powyżej progu startu, więc jego wykres otwiera się na tym odczycie. Tutaj rysowana jest własna historia czujnika mocy z recordera po obu stronach cyklu, dla cykli, które recorder nadal przechowuje. Aby zamiast tego dołączać odczyty z przerwanych prób startu do przyszłych cykli, użyj ustawienia Wstępny zapis krzywej (Ustawienia > Wykrywanie > Start Cyklu): przesuwa ono zapisany początek wcześniej, co zmienia zapisane czasy trwania, a przez to także dopasowanie do profili wyuczonych bez niego.",
+    "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W): poniżej progu zatrzymania cykl się kończy, powyżej progu startu się zaczyna. Nic nie zostało zapisane; zmień obie wartości razem."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1567,7 +1578,7 @@
       "doc": "Nalicza każdy cykl według ceny obowiązującej w każdej chwili jego trwania, zamiast według jednej ceny z momentu zakończenia. Działa tylko z encją ceny (cena statyczna nie może się zmieniać). Nie wymaga dodatkowej konfiguracji: cena jest śledzona na bieżąco w trakcie cyklu, a Przetwarzanie historii w Diagnostyce przelicza koszty starszych cykli z recordera. Wyłączone = klasyczne działanie, jedna cena zamrożona na koniec."
     },
     "curve_preroll_seconds": {
-      "doc": "Ile sekund odczytów z przerwanych prób startu WashData może dołączyć na początku krzywej cyklu. Krzywa cyklu zwykle zaczyna się od tej próby startu, która ostatecznie się powiodła, więc w maszynie, która próbuje kilka razy, zanim się rozkręci - wybór programu, blokada drzwi, pierwsze napełnianie - w każdej krzywej brakuje pierwszych minut rzeczywistej pracy. Ustaw tę wartość nieco powyżej najdłuższego takiego rozbiegu Twojej maszyny (300 s w zupełności wystarczy w większości przypadków). 0 wyłącza tę funkcję. Pamiętaj, że jej włączenie przesuwa zapisany początek wcześniej, więc cykle zapisane przed zmianą i po niej mają różne czasy trwania dla tego samego programu; wyuczone średnie będą się przesuwać, dopóki starsze cykle nie wypadną z historii.",
+      "doc": "Ile sekund odczytów z przerwanych prób startu WashData może dołączyć na początku krzywej cyklu. Krzywa cyklu zwykle zaczyna się od tej próby startu, która ostatecznie się powiodła, więc w maszynie, która próbuje kilka razy, zanim się rozkręci - wybór programu, blokada drzwi, pierwsze napełnianie - w każdej krzywej brakuje pierwszych minut rzeczywistej pracy. Ustaw tę wartość nieco powyżej najdłuższego takiego rozbiegu Twojej maszyny (300 s w zupełności wystarczy w większości przypadków). 0 wyłącza tę funkcję. Pamiętaj, że jej włączenie przesuwa zapisany początek wcześniej, więc cykle zapisane przed zmianą i po niej mają różne czasy trwania dla tego samego programu; wyuczone średnie będą się przesuwać, dopóki starsze cykle nie wypadną z historii. Jeśli chcesz tylko zobaczyć, co działo się przed cyklem, niczego nie zmieniając, użyj zamiast tego historii z recordera na wykresie cyklu.",
       "label": "Wstępny zapis krzywej"
     },
     "unload_confirm_entity": {

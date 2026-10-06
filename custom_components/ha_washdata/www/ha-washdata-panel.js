@@ -86,6 +86,10 @@ const _CANVAS_MIN_VIEW_S = 5;
 // Grab radius (CSS px) of the axis-pointer handle. 22 is a touch target, not a
 // pixel-hunt: HA draws its handle at size 20.
 const _AXIS_HANDLE_GRAB = 22;
+// Minutes of recorder history the cycle dialog can draw either side of a cycle
+// (item 513, discussion #463). Same list ws_set_user_prefs accepts; 0 = off.
+const _CYCLE_CONTEXT_CHOICES = [0, 5, 10, 30, 60];
+const _CYCLE_CONTEXT_DEFAULT_MIN = 10;
 
 // Floor for the measured panel height (_syncPanelHeight), so a bad measurement in a
 // hidden/zero-height container cannot collapse the UI to nothing.
@@ -156,7 +160,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600,
         doc: 'Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).' },
       { key: 'curve_preroll_seconds', label: 'Curve Pre-roll', unit: 's', type: 'number', step: 10, min: 0, max: 600, def: 0,
-        doc: 'Seconds of readings from aborted start attempts that may be carried into the front of a cycle\'s curve. Machines that probe before settling (programme selection, door lock, first fill) can drop the first minutes of real activity from every curve. 0 turns this off. Note that enabling it moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program until the older ones age out - expect the learned averages to drift for a while.' },
+        doc: 'Seconds of readings from aborted start attempts that may be carried into the front of a cycle\'s curve. Machines that probe before settling (programme selection, door lock, first fill) can drop the first minutes of real activity from every curve. 0 turns this off. Note that enabling it moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program until the older ones age out - expect the learned averages to drift for a while. To only see what came before a cycle, without changing anything, use the recorder history in the cycle chart instead.' },
     ] },
     { sub: 'Cycle End', fields: [
       { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,
@@ -1762,6 +1766,25 @@ function _parseIntList(s) {
 }
 
 // Linear-interpolated y at offset x for a sorted [[x,y],...] series.
+// Like _valueAt, but null where the series has no reading: before its first point,
+// after its last, and inside a gap (a null-power point breaks the run). The cycle
+// chart's series are read this way while recorder context is drawn around them
+// (item 513), so the lead-in does not show the trace's first reading as "Power".
+function _valueInRun(pts, x) {
+  if (!pts || !pts.length) return null;
+  for (let i = 0; i < pts.length; i++) {
+    const b = pts[i];
+    if (b[0] < x) continue;
+    if (b[0] === x) return b[1] == null ? null : b[1];
+    if (i === 0) return null;
+    const a = pts[i - 1];
+    if (a[1] == null || b[1] == null) return null;
+    const span = (b[0] - a[0]) || 1;
+    return a[1] + (b[1] - a[1]) * ((x - a[0]) / span);
+  }
+  return null;
+}
+
 function _valueAt(pts, x) {
   if (!pts || !pts.length) return null;
   if (x <= pts[0][0]) return pts[0][1];
@@ -3001,7 +3024,20 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Data fetching ─────────────────────────────────────────────────────────
 
-  async _ws(msg) { return this._hass.connection.sendMessagePromise(msg); }
+  async _ws(msg) {
+    try {
+      return await this._hass.connection.sendMessagePromise(msg);
+    } catch (e) {
+      // The backend refuses an inverted Stop/Start pair with an English message
+      // (item 515); every save path shows e.message, so localise it here once.
+      if (e && e.code === 'invalid_threshold_pair') {
+        const m = /\(([-\d.]+) W\)[^(]*\(([-\d.]+) W\)/.exec(String(e.message || ''));
+        e.message = this._tText('msg.invalid_threshold_pair',
+          { stop: m ? m[1] : '?', start: m ? m[2] : '?' }, e.message);
+      }
+      throw e;
+    }
+  }
 
   async _fetchAll() {
     if (!this._hass) return;
@@ -9507,9 +9543,12 @@ class HaWashdataPanel extends HTMLElement {
     let xMax = opts.xMax || 0;
     if (!xMax) { series.forEach(s => (s.points || []).forEach(p => { if (p[0] > xMax) xMax = p[0]; })); if (opts.band) (opts.band.max || []).forEach(p => { if (p[0] > xMax) xMax = p[0]; }); }
     xMax = xMax || 1;
-    // Zoom viewport (absent key = full view).
+    // Zoom viewport (absent key = full view). `opts.xStart` is the data's left edge
+    // when it is not 0: the cycle chart draws the recorder's history before the
+    // cycle at negative offsets (item 513). Every other chart starts at 0.
+    const xStart = Math.min(0, Number(opts.xStart) || 0);
     const zoom = this._canvasZoom && this._canvasZoom[canvasId];
-    const xMin = zoom ? zoom.xMin : 0;
+    const xMin = zoom ? zoom.xMin : xStart;
     const xViewMax = zoom ? zoom.xMax : xMax;
 
     // Scale y to the VISIBLE window, not the whole trace - this is HA's
@@ -9566,7 +9605,14 @@ class HaWashdataPanel extends HTMLElement {
         ctx.lineTo(X(pts[pts.length - 1][0]), Y(0)); ctx.lineTo(X(pts[0][0]), Y(0)); ctx.closePath();
         const g = ctx.createLinearGradient(0, padT, 0, ch - padB); g.addColorStop(0, _withAlpha(col, 0.33)); g.addColorStop(1, _withAlpha(col, 0.03)); ctx.fillStyle = g; ctx.fill();
       }
-      ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])));
+      // A null power breaks the line instead of bridging it (the cycle context's
+      // unavailable rows, item 513); a series without one draws exactly as before.
+      ctx.beginPath();
+      let pen = false;
+      pts.forEach(p => {
+        if (p[1] == null) { pen = false; return; }
+        if (pen) ctx.lineTo(X(p[0]), Y(p[1])); else { ctx.moveTo(X(p[0]), Y(p[1])); pen = true; }
+      });
       ctx.strokeStyle = col; ctx.lineWidth = (s.width || 1.5) * dpr; ctx.lineJoin = 'round';
       if (s.dash) ctx.setLineDash([6 * dpr, 4 * dpr]);
       ctx.globalAlpha = s.alpha != null ? s.alpha : 1; ctx.stroke(); ctx.globalAlpha = 1;
@@ -9583,22 +9629,25 @@ class HaWashdataPanel extends HTMLElement {
 
     // Axis time labels. When zoomed: show viewport start on the left edge too.
     ctx.fillStyle = txt; ctx.font = `${11 * dpr}px sans-serif`; ctx.textBaseline = 'bottom';
-    if (zoom) {
+    if (zoom || xStart < 0) {
       ctx.textAlign = 'left';
-      ctx.fillText((xMin / 60).toFixed(1) + ' min', padL, ch - 2 * dpr);
+      ctx.fillText((xMin / 60).toFixed(zoom ? 1 : 0) + ' min', padL, ch - 2 * dpr);
     }
     ctx.textAlign = 'right';
     ctx.fillText((xViewMax / 60).toFixed(0) + ' min', cw - padR, ch - 2 * dpr);
 
     canvas._wd = {
-      xMax, xMin, xViewMax, yMax, dpr, padT, padB, padL, ch, primary,
+      xMax, xMin, xViewMax, yMax, dpr, padT, padB, padL, ch, primary, xStart,
+      // [start, end] of the cycle on this axis when context is drawn around it, so
+      // the readout can say "before start" / "after end" there (item 513).
+      cycleSpan: opts.cycleSpan || null,
       // CSS-px width of the plot area; the pinch/pan math needs it to turn a
       // finger travel distance into seconds at the current scale.
       plotWcss: plotW / dpr,
       Xpx: X, Ypx: Y,
       xToCss: x => X(x) / dpr,
       cssToX: px => Math.max(xMin, Math.min(xViewMax, xMin + ((px * dpr - padL) / plotW) * (xViewMax - xMin))),
-      series: (opts.series || []).map(s => ({ points: s.points, stroke: s.stroke, name: s.name, cid: s.cid })),
+      series: (opts.series || []).map(s => ({ points: s.points, stroke: s.stroke, name: s.name, cid: s.cid, bounded: s.bounded, aside: s.aside, kind: s.kind })),
       band: opts.band || null,
       artifacts: opts.artifacts || null,
       _opts: opts,
@@ -9843,7 +9892,7 @@ class HaWashdataPanel extends HTMLElement {
     // in the wrong direction).
     const pend = this._gPinchPending && this._gPinchPending.id === id ? this._gPinchPending : null;
     const cur = pend ? { xMin: pend.lo, xMax: pend.hi } : this._canvasZoom[id];
-    const lo = cur ? cur.xMin : 0;
+    const lo = cur ? cur.xMin : (wd.xStart || 0);
     const range = (cur ? cur.xMax : (wd.xMax || 1)) - lo;
     const plotW = Math.max(1, wd.plotWcss);
     const frac = Math.max(0, Math.min(1, centerCss / plotW));
@@ -9871,11 +9920,14 @@ class HaWashdataPanel extends HTMLElement {
     const canvas = this.shadowRoot && this.shadowRoot.getElementById(id);
     const wd = canvas && canvas._wd;
     if (!wd) return;
-    const full = wd.xMax || 1;
+    // The data's left edge is 0 except where a chart draws before it (xStart < 0,
+    // the cycle chart's recorder lead-in, item 513); `full` is the whole span.
+    const x0 = wd.xStart || 0;
+    const full = (wd.xMax || 1) - x0;
     const minRange = Math.min(full, Math.max(full / _CANVAS_MAX_ZOOM, _CANVAS_MIN_VIEW_S));
     const range = Math.min(full, Math.max(minRange, xMax - xMin));
     if (range >= full * 0.99) { this._resetCanvasZoom(id); return; }
-    const lo = Math.max(0, Math.min(full - range, xMin));
+    const lo = Math.max(x0, Math.min(x0 + full - range, xMin));
     const prev = this._canvasZoom[id];
     if (prev && Math.abs(prev.xMin - lo) < 1e-6 && Math.abs(prev.xMax - lo - range) < 1e-6) return;
     this._canvasZoom[id] = { xMin: lo, xMax: lo + range };
@@ -9890,7 +9942,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!wd) return;
     const full = wd.xMax || 1;
     const cur = this._canvasZoom[id];
-    const lo = cur ? cur.xMin : 0;
+    const lo = cur ? cur.xMin : (wd.xStart || 0);
     const range = Math.max(1e-6, (cur ? cur.xMax : full) - lo);
     const frac = Math.max(0, Math.min(1, (focusXt - lo) / range));
     const newRange = range * factor;
@@ -9967,14 +10019,25 @@ class HaWashdataPanel extends HTMLElement {
     ctx.setLineDash([]);
     const colOf = s => (s.stroke === 'primary' ? wd.primary : s.stroke);
     const dot = (v, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(xp, wd.Ypx(v), 3.4 * wd.dpr, 0, 6.2832); ctx.fill(); };
-    const lines = [`${this._t('lbl.from_start', {}, 'From start')}: <b>${_fmtClock(x)}</b>`, `${this._t('lbl.to_end', {}, 'To end')}: <b>${_fmtClock(Math.max(0, wd.xMax - x))}</b>`];
+    // Outside the cycle (the recorder context around it, item 513) the readout
+    // says how far before the start / after the end the cursor is instead.
+    const span = wd.cycleSpan;
+    const lines = span && x < span[0]
+      ? [`${this._t('lbl.before_start', {}, 'Before start')}: <b>${_fmtClock(span[0] - x)}</b>`]
+      : span && x > span[1]
+        ? [`${this._t('lbl.after_end', {}, 'After end')}: <b>${_fmtClock(x - span[1])}</b>`]
+        : [`${this._t('lbl.from_start', {}, 'From start')}: <b>${_fmtClock(x)}</b>`, `${this._t('lbl.to_end', {}, 'To end')}: <b>${_fmtClock(Math.max(0, (span ? span[1] : wd.xMax) - x))}</b>`];
     const series = wd.series || [];
+    // A bounded series has no value outside its own points (or in a gap), rather
+    // than the clamped first/last one.
+    const valOf = s => (s.bounded ? _valueInRun(s.points, x) : _valueAt(s.points, x));
     this._hoverNearest = null;
-    if (series.length > 4) {
+    // `aside` series (the cycle context) do not count towards the many-curves mode.
+    if (series.filter(s => !s.aside).length > 4) {
       // Many curves (cleanup): highlight only the one under the cursor so the
       // user can identify exactly which cycle to act on.
       let best = null, bestD = Infinity;
-      series.forEach(s => { const v = _valueAt(s.points, x); if (v == null) return; const d = Math.abs(wd.Ypx(v) - cursorYdev); if (d < bestD) { bestD = d; best = { s, v }; } });
+      series.forEach(s => { const v = valOf(s); if (v == null) return; const d = Math.abs(wd.Ypx(v) - cursorYdev); if (d < bestD) { bestD = d; best = { s, v }; } });
       if (best) {
         const col = colOf(best.s);
         ctx.strokeStyle = col; ctx.lineWidth = 3 * wd.dpr; ctx.beginPath();
@@ -9984,7 +10047,7 @@ class HaWashdataPanel extends HTMLElement {
         if (best.s.cid) { lines.push(`<span style="opacity:.7">${this._t('lbl.click_to_select', {}, 'click to select')}</span>`); this._hoverNearest = { id, cid: best.s.cid }; }
       }
     } else {
-      series.forEach(s => { const v = _valueAt(s.points, x); if (v == null) return; dot(v, colOf(s)); lines.push(`${_esc(s.name || this._t('lbl.power', {}, 'Power'))}: <b>${_fmtNum(v, v < 100 ? 1 : 0)} W</b>`); });
+      series.forEach(s => { const v = valOf(s); if (v == null) return; dot(v, colOf(s)); lines.push(`${_esc(s.name || this._t('lbl.power', {}, 'Power'))}: <b>${_fmtNum(v, v < 100 ? 1 : 0)} W</b>`); });
     }
     if (wd.band) {
       const lo = _valueAt(wd.band.min, x), hi = _valueAt(wd.band.max, x);
@@ -11113,18 +11176,52 @@ class HaWashdataPanel extends HTMLElement {
     const legSw = s => s.dash
       ? `background:repeating-linear-gradient(90deg,${s.stroke} 0 5px,transparent 5px 8px)`
       : `background:${s.stroke}`;
-    const overlayLeg = overlays.length ? `<div class="wd-leg" data-cyc-legend style="margin:8px 0 12px">
+    // The recorder context (item 513) is a legend entry too, so the grey line is
+    // never read as part of the cycle.
+    const context = this._cycleContextSeries(m);
+    const legItems = context ? [...overlays, context.series] : overlays;
+    const overlayLeg = legItems.length ? `<div class="wd-leg" data-cyc-legend style="margin:8px 0 12px">
         <span class="wd-leg-i"><span class="wd-leg-sw" style="background:var(--primary-color)"></span> ${this._t('lbl.power', {}, 'Power')}</span>
-        ${overlays.map(s => `<span class="wd-leg-i" data-leg="${s.kind}"><span class="wd-leg-sw" style="${legSw(s)};opacity:.8"></span> ${_esc(s.name)}</span>`).join('')}
+        ${legItems.map(s => `<span class="wd-leg-i" data-leg="${s.kind}"><span class="wd-leg-sw" style="${legSw(s)};opacity:.8"></span> ${_esc(s.name)}</span>`).join('')}
       </div>` : '';
     return `<h2>${this._t('lbl.cycle', {}, 'Cycle')} · ${_esc(_fmtDate(cur.start_time))}</h2>
       ${meta}${modeBar}
       <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_cycle_chart', {}, 'Cycle power trace'))}"></canvas></div>
+      ${this._htmlCycleContextBar(m, cur)}
       ${overlayLeg}
       ${decNote}
       ${artifactBox}
       ${restartGapBox}
       ${controls}`;
+  }
+
+  // The cycle chart's recorder-history control (item 513, discussion #463): the
+  // length, and one line saying what the grey context is or why there is none.
+  // Inspect/Review only, and never for an imported cycle (this plug's recorder did
+  // not measure it). The tip says where the setting that DOES change the cycle is.
+  _htmlCycleContextBar(m, cur) {
+    if ((m.mode !== 'view' && m.mode !== 'review') || cur.is_reference || !(cur.samples || []).length) return '';
+    const st = m.ctx || { minutes: this._cycleContextMinutes(m.entryId), loading: false, data: null };
+    const opts = _CYCLE_CONTEXT_CHOICES.map(v => `<option value="${v}" ${v === st.minutes ? 'selected' : ''}>${v
+      ? this._t('lbl.cycle_context_minutes', { min: v }, `${v} min`)
+      : this._t('lbl.cycle_context_off', {}, 'Off')}</option>`).join('');
+    let state = '', note = '';
+    if (st.minutes && st.loading) {
+      state = 'loading';
+      note = this._t('msg.cycle_context_loading', {}, 'Loading recorder history…');
+    } else if (st.minutes && st.data && this._cycleContextSeries(m)) {
+      state = 'shown';
+      note = this._t('msg.cycle_context_note', {}, 'Grey: the power sensor\'s recorder history before and after this cycle. It is not part of the cycle: duration, energy and matching use only the cycle\'s own trace.');
+    } else if (st.minutes && st.data) {
+      state = 'none';
+      note = this._t('msg.cycle_context_none', {}, 'The recorder holds no readings around this cycle (Home Assistant keeps 10 days of history by default).');
+    }
+    const tip = _tip(this._tText('msg.cycle_context_tip', {}, 'Display only: changes nothing about the cycle. A cycle starts at the first reading over the start threshold, so its chart opens at that reading. This draws the power sensor\'s own recorder history either side of it, for cycles the recorder still holds. To carry the readings of aborted start attempts into future cycles instead, use Curve Pre-roll (Settings > Detection > Cycle Start): it moves the recorded start earlier, which changes stored durations and so matching against profiles learned without it.'));
+    return `<div class="wd-cyc-ctx" data-cyc-ctx style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 0;font-size:.8em;color:var(--secondary-text-color)">
+        <label style="display:inline-flex;align-items:center;gap:6px;margin:0;text-transform:none;letter-spacing:0">${this._t('lbl.cycle_context', {}, 'Recorder history around the cycle')}
+          <select id="wd-cyc-ctx" class="wd-filter-select" data-maction="cyc-ctx">${opts}</select></label>${tip}
+        ${note ? `<span data-cyc-ctx-note="${state}">${note}</span>` : ''}
+      </div>`;
   }
 
   // Per-profile control panel: stats, phases, cleanup, danger.
@@ -11350,8 +11447,22 @@ class HaWashdataPanel extends HTMLElement {
         full = Math.max(full, env.target_duration || (last ? last[0] : 0));
       });
     }
-    series.push({ points: samples, stroke: 'primary', fill: true, width: 2, name: this._t('lbl.power', {}, 'Power') });
+    // The recorder's history either side of the trace (item 513): drawn grey behind
+    // the trace on a shaded background, read as "before start" / "after end", and
+    // every series reads as absent outside its own points while it is shown.
+    const context = this._cycleContextSeries(m);
+    if (context) {
+      series.forEach(s => { s.bounded = true; });
+      series.push(context.series);
+      full = Math.max(full, context.xEnd);
+    }
+    series.push({ points: samples, stroke: 'primary', fill: true, width: 2, name: this._t('lbl.power', {}, 'Power'), bounded: !!context });
     const bands = [], vlines = [];
+    if (context) {
+      const shade = 'rgba(127,127,127,.10)';
+      if (context.xStart < context.traceStart) bands.push({ x0: context.xStart, x1: context.traceStart, fill: shade });
+      if (context.xEnd > context.traceEnd) bands.push({ x0: context.traceEnd, x1: context.xEnd, fill: shade });
+    }
     let artifacts = [];
     if (m.mode === 'trim') {
       const a = m.trim.start, b = m.trim.end;
@@ -11377,7 +11488,86 @@ class HaWashdataPanel extends HTMLElement {
         bands.push({ x0, x1, fill: 'rgba(96,125,139,.20)', label: '↻' });
       });
     }
-    this._drawCurves('wd-cyc-canvas', { series, xMax: full, bands, vlines, artifacts });
+    this._drawCurves('wd-cyc-canvas', {
+      series, xMax: full, bands, vlines, artifacts,
+      ...(context ? { xStart: context.xStart, cycleSpan: [context.traceStart, context.traceEnd] } : {}),
+    });
+  }
+
+  // How many minutes of recorder history the cycle dialog draws around a cycle on
+  // this device (item 513): a per-user, per-device pref, 10 by default, 0 = off.
+  _cycleContextMinutes(entryId) {
+    const map = this._pref('cycle_context_min', null);
+    const v = map && typeof map === 'object' ? map[entryId] : undefined;
+    return _CYCLE_CONTEXT_CHOICES.includes(v) ? v : _CYCLE_CONTEXT_DEFAULT_MIN;
+  }
+
+  // Fetch the recorder's history around the open cycle into `m.ctx` (item 513).
+  // Display only: get_cycle_context reads the recorder and nothing else. Skipped
+  // for imported cycles, which this plug never measured, and while switched off.
+  async _loadCycleContext(entryId, cycleId, curve) {
+    const m = this._modal;
+    if (!m || m.type !== 'cycle-detail' || m.cycleId !== cycleId) return;
+    const minutes = this._cycleContextMinutes(entryId);
+    if (!minutes || !curve || curve.is_reference || !(curve.samples || []).length) {
+      m.ctx = { minutes, loading: false, data: null };
+      return;
+    }
+    m.ctx = { minutes, loading: true, data: null };
+    let data = null;
+    try {
+      data = await this._ws({ type: `${_DOMAIN}/get_cycle_context`, entry_id: entryId, cycle_id: cycleId, before_s: minutes * 60, after_s: minutes * 60 });
+    } catch (_) { data = { available: false, reason: 'no_history' }; }
+    const cur = this._modal;
+    // Stale reply: the dialog closed, moved to another cycle, or the length changed.
+    if (!cur || cur.type !== 'cycle-detail' || cur.cycleId !== cycleId || cur.entryId !== entryId
+        || !cur.ctx || cur.ctx.minutes !== minutes) return;
+    cur.ctx = { minutes, loading: false, data };
+    this._render();
+  }
+
+  // The context as one drawable series plus its extent, or null when none is
+  // shown (off, loading, nothing recorded, or Trim/Split, which edit the trace and
+  // must not suggest they can reach outside it). A change-only sensor holds its
+  // value until the next row, so it is drawn as steps: a straight line from the
+  // last idle row to the first cycle reading would invent a slow rise that never
+  // happened. A null power (an unavailable row) breaks the line.
+  _cycleContextSeries(m) {
+    if (!m || (m.mode !== 'view' && m.mode !== 'review')) return null;
+    const d = m.ctx && m.ctx.data;
+    const samples = (m.curve && m.curve.samples) || [];
+    if (!d || !d.available || !samples.length) return null;
+    const first = samples[0], last = samples[samples.length - 1];
+    const pts = [];
+    let hold = null;
+    const add = (t, w) => {
+      if (hold != null) pts.push([t, hold]);
+      if (w == null) { pts.push([t, null]); hold = null; return; }
+      pts.push([t, w]);
+      hold = w;
+    };
+    const rows = (list, keep) => (Array.isArray(list) ? list : []).filter(p => Array.isArray(p) && Number.isFinite(p[0]) && keep(p[0]));
+    const before = rows(d.before, t => t < first[0]);
+    const after = rows(d.after, t => t >= last[0]);
+    before.forEach(([t, w]) => add(t, w));
+    // Hold the last reading up to the start, then rise into the trace's first one.
+    if (hold != null) { pts.push([first[0], hold]); pts.push([first[0], first[1]]); }
+    if (after.length) {
+      if (pts.length) pts.push([last[0], null]);  // no line across the cycle itself
+      hold = null;
+      add(last[0], last[1]);
+      after.forEach(([t, w]) => add(t, w));
+      const endX = Number(d.after_end_s) || 0;
+      if (hold != null && endX > pts[pts.length - 1][0]) pts.push([endX, hold]);
+    }
+    if (!pts.some(p => p[1] != null)) return null;
+    const xStart = before.length ? Math.min(before[0][0], -(Number(d.before_s) || 0)) : first[0];
+    const xEnd = after.length ? Math.max(pts[pts.length - 1][0], Number(d.after_end_s) || 0) : last[0];
+    return {
+      series: { kind: 'context', points: pts, stroke: '#9e9e9e', width: 2, alpha: 1, bounded: true, aside: true,
+        name: this._tText('lbl.cycle_context_series', {}, 'Recorder history') },
+      xStart: Math.min(0, xStart), xEnd, traceStart: first[0], traceEnd: last[0],
+    };
   }
 
   // Multi-cycle comparison modal (opened from the Cycles select-mode "Compare"
@@ -12917,7 +13107,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._profiles.length) this._fetchProfiles(eid);
       this._render();
       this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
-        .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._loadCycleOverlays(eid, cid, r); this._render(); } })
+        .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._loadCycleOverlays(eid, cid, r); this._loadCycleContext(eid, cid, r); this._render(); } })
         .catch(e => this._showToast(this._tText('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
 
     } else if (a === 'cleanup-edit-cycle') {
@@ -12927,7 +13117,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!this._profiles.length) this._fetchProfiles(eid);
       this._render();
       this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid })
-        .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._loadCycleOverlays(eid, cid, r); this._render(); } })
+        .then(r => { if (this._modal && this._modal.cycleId === cid) { this._modal.curve = r; this._modal.loaded = true; this._modal.trim = { start: 0, end: r.full_duration_s || 0 }; this._loadCycleOverlays(eid, cid, r); this._loadCycleContext(eid, cid, r); this._render(); } })
         .catch(e => this._showToast(this._tText('toast.could_not_load_cycle', {error: e.message || e}, 'Could not load cycle: ' + (e.message || e)), 'error'));
 
     } else if (a === 'open-profile') {
@@ -14708,6 +14898,19 @@ class HaWashdataPanel extends HTMLElement {
       if (action === 'cyc-trim') { m.mode = 'trim'; if (!m.trim || m.trim.end <= 0) m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
       if (action === 'cyc-split') { m.mode = 'split'; this._render(); return; }
       if (action === 'cyc-review') { m.mode = 'review'; this._render(); return; }
+      if (action === 'cyc-ctx') {
+        // Recorder-history length (item 513). The select fires on click too, so an
+        // unchanged value is a no-op; a new one is remembered for this device.
+        const v = Number(sr.getElementById('wd-cyc-ctx')?.value);
+        const ceid = m.entryId || eid;
+        if (!_CYCLE_CONTEXT_CHOICES.includes(v) || (m.ctx && m.ctx.minutes === v)) return;
+        const map = this._pref('cycle_context_min', null);
+        this._setPref('cycle_context_min', { ...(map && typeof map === 'object' ? map : {}), [ceid]: v });
+        delete this._canvasZoom['wd-cyc-canvas'];  // a viewport inside the old lead-in
+        this._loadCycleContext(ceid, m.cycleId, m.curve);
+        this._render();
+        return;
+      }
       if (action === 'cyc-review-save') {
         const cid = m.cycleId;
         const quality = sr.getElementById('wd-cyc-rev-quality')?.value || '';

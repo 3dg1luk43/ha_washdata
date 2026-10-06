@@ -803,16 +803,84 @@ def consistency_override(
     return log
 
 
+# Register item 514: the complete-cycle match at cycle end reads the stored trace
+# with each finished stall and user pause (``cycle_data["halt_spans"]``, the
+# detector's) cut out and the stored duration less them, as the live matcher reads
+# the trace (``CycleDetector._match_readings``): a halt is not part of the
+# programme. The stored cycle keeps every reading. The A/B switch.
+STALL_CUT_FROM_FINAL_MATCH = True
+
+
+def sanitize_stall_spans(raw: Any) -> list[tuple[float, float]]:
+    """Finished stalls as ``(seconds from the cycle start, length)`` pairs (item 511):
+    finite, non-negative, in order and not overlapping; anything else is dropped."""
+    spans: list[tuple[float, float]] = []
+    if not isinstance(raw, (list, tuple)):
+        return spans
+    for item in raw:
+        try:
+            at, length = float(item[0]), float(item[1])
+        except (TypeError, ValueError, IndexError, KeyError, OverflowError):
+            continue
+        if (
+            math.isfinite(at) and math.isfinite(length) and at >= 0.0 and length > 0.0
+            and (not spans or at >= spans[-1][0] + spans[-1][1])
+        ):
+            spans.append((at, length))
+    return spans
+
+
+def stall_cut_plan(
+    offsets: list[float], spans: list[tuple[float, float]]
+) -> list[tuple[int, float]]:
+    """Which readings stay once each span is cut out, and how far each moves back.
+
+    ``offsets`` are the readings' seconds from the cycle start, in order; ``spans``
+    ``(at, length)`` pairs in order (an infinite length cuts to the end). Returns
+    ``(index, shift_s)`` per kept reading: one inside ``[at, at + length)`` is
+    dropped and every later one moves back by the spans before it. One
+    implementation for the live matcher, progress and the cycle-end match.
+    """
+    cuts = [(at, at + length, length) for at, length in spans]
+    out: list[tuple[int, float]] = []
+    i, shift = 0, 0.0
+    for idx, offset in enumerate(offsets):
+        while i < len(cuts) and offset >= cuts[i][1]:
+            shift += cuts[i][2]
+            i += 1
+        if i < len(cuts) and offset >= cuts[i][0]:
+            continue  # inside a stall
+        out.append((idx, shift))
+    return out
+
+
 def final_match_input(cycle_data: dict[str, Any]) -> tuple[Any, Any] | None:
     """``(power_data, duration)`` for the complete-cycle match, or None if too short.
 
     The detector stores ``power_data`` as ``[[offset_seconds, power], ...]``,
     offsets relative to the cycle start. Fewer than 10 readings: no final match.
+    Finished stalls and user pauses are cut out (item 514,
+    ``STALL_CUT_FROM_FINAL_MATCH``) unless that would leave fewer than 10.
     """
     power_data = cycle_data.get("power_data", [])
     duration = cycle_data.get("duration", 0)
     if not power_data or len(power_data) < 10:
         return None
+    spans = (
+        sanitize_stall_spans(cycle_data.get("halt_spans"))
+        if STALL_CUT_FROM_FINAL_MATCH else []
+    )
+    if spans:
+        try:
+            offsets = [float(p[0]) for p in power_data]
+            stored = float(duration or 0.0)
+        except (TypeError, ValueError, IndexError, KeyError):
+            return power_data, duration
+        plan = stall_cut_plan(offsets, spans)
+        if len(plan) >= 10:
+            cut = [[round(offsets[i] - shift, 1), power_data[i][1]] for i, shift in plan]
+            excluded = sum(length for at, length in spans if at < stored)
+            return cut, max(0.0, stored - excluded)
     return power_data, duration
 
 

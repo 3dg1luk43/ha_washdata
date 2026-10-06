@@ -115,6 +115,22 @@ match still says the programme owes work: it ends early on it) and the hold dela
 6 (2.3%) of the 204 closes the finalize makes inside that time. Early ends unchanged
 in every run.
 
+**User pause (register item 514).** ``--user-pause`` (with ``--halt-at``) makes the
+plateau a user pause instead of a halt: the detector is told what the manager's
+``async_pause_cycle`` tells it (user-paused, verified pause) at the plateau's first
+reading and what ``async_resume_cycle`` tells it at the first reading after it.
+``--halt-level 0.4`` is a pause that cuts the plug's power (0.0 / 0.8 W). Every row
+also records the cycle-end label verdict (``label_profile`` / ``label_reason``, the
+Playground's ``would_label``) for the label check of a halted cycle. Measured
+2026-10-06 over the 258 cycles, 45 min pauses: before item 514 the gates read the
+raw clock after a resume, and a power-cutting pause at 50% / 30% / 90% split 48 /
+50 / 40 cycles (early ends > 1 min 6 / 5 / 18); a resumed pause now leaves the gate
+clock: 12 / 22 / 33 split, early ends 5 / 7 / 8, each new one either the unpaused
+cycle's own Smart Termination end (one washer; unpaused it ends from RUNNING, which
+``end_offset_s`` does not see) or a former split. Paused on the display level (shown
+as stalled, so item 511 already banked most of it): 9 -> 6 split at 50%, 14 -> 9 at
+90%, early ends 1 -> 0.
+
 **Option overrides (register item 469).** ``--set KEY=VALUE`` layers an option onto
 every replayed export as Apply all would save it (the active-span yardstick keeps
 the export's own stop threshold), e.g. ``--set profile_match_interval=45`` for the
@@ -171,7 +187,7 @@ import subprocess
 import sys
 import time
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
@@ -335,6 +351,39 @@ def _install_stall_probe() -> None:
     det_cls._set_stalled = set_stalled  # noqa: SLF001
     det_cls._maybe_finalize_standby_band = finalize_sb  # noqa: SLF001
     det_cls._eval_stall_probe = True
+
+
+def _install_user_pause_probe() -> None:
+    """``--user-pause``: pause and resume the detector around the plateau (item 514).
+
+    Inert unless the replay in progress set ``_AC["user_pause"]`` to its window.
+    """
+    from custom_components.ha_washdata import cycle_detector as cd  # noqa: PLC0415
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        STATE_ENDING, STATE_PAUSED, STATE_RUNNING, STATE_STARTING,
+    )
+
+    det_cls = cd.CycleDetector
+    if getattr(det_cls, "_eval_user_pause_probe", False):
+        return
+    orig = det_cls.process_reading
+    open_states = (STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+
+    def process_reading(self: Any, power: float, timestamp: Any, *a: Any, **k: Any) -> Any:
+        window = _AC.get("user_pause")
+        if window is not None:
+            paused = bool(self._user_paused)  # noqa: SLF001
+            if not paused and window[0] <= timestamp < window[1] and self.state in open_states:
+                self.set_user_paused(True, timestamp)  # async_pause_cycle
+                self.set_verified_pause(True)
+                _AC["user_paused_at"] = timestamp
+            elif paused and timestamp >= window[1]:
+                self.set_user_paused(False, timestamp)  # async_resume_cycle
+                self.set_verified_pause(False)
+        return orig(self, power, timestamp, *a, **k)
+
+    det_cls.process_reading = process_reading
+    det_cls._eval_user_pause_probe = True  # noqa: SLF001
 
 
 def _halt_level(stop: float, level: str) -> float:
@@ -672,6 +721,7 @@ def _replay_export(
     device_types: tuple[str, ...] | None = None,
     overrides: dict[str, Any] | None = None,
     halt: tuple[float, str, str] | None = None,
+    user_pause: bool = False,
     only: frozenset[int] | None = None,
     memo: bool = False,
 ) -> list[tuple[int, dict[str, Any]]]:
@@ -734,6 +784,9 @@ def _replay_export(
             )
             halt_s = (h0, h1)
         _AC.clear()
+        if user_pause and halt_s is not None:
+            _b = playground._cycle_base_time(replayed)  # noqa: SLF001
+            _AC["user_pause"] = (_b + timedelta(seconds=halt_s[0]), _b + timedelta(seconds=halt_s[1]))
         try:
             sim = playground.simulate_cycle_detail(
                 replayed, cfg, None, fold_store, opts, price=None,
@@ -822,6 +875,10 @@ def _replay_export(
             ),
             "ac_early_n": ac_early_n,
             "sb_held": bool(_AC.get("sb_held")),
+            "user_pause": bool(user_pause and halt_s is not None),
+            # The cycle-end label verdict of the longest detected piece (item 514).
+            "label_profile": out.get("label_profile"),
+            "label_reason": out.get("label_reason"),
             **stall_fields,
         }))
     return rows
@@ -1290,6 +1347,7 @@ def _setup_replay(no_shortening: bool, no_stall_guard: bool, repo: str | None = 
     logging.getLogger("custom_components.ha_washdata").setLevel(logging.ERROR)
     _install_anticrease_probe()
     _install_stall_probe()
+    _install_user_pause_probe()
 
 
 def _unit_key(path: Path, ci: int, cyc: dict[str, Any]) -> str:
@@ -1511,6 +1569,11 @@ def main(argv: list[str] | None = None) -> int:
         help="with --halt-at: plateau level in W (+-0.4), or 'auto' (see the docstring)",
     )
     ap.add_argument(
+        "--user-pause", action="store_true",
+        help="with --halt-at: the plateau is a user pause (paused at its first reading, "
+        "resumed after it), not a halt",
+    )
+    ap.add_argument(
         "--no-stall-guard", action="store_true",
         help="before arm: the stall display does not hold the standby-band finalize",
     )
@@ -1548,6 +1611,8 @@ def main(argv: list[str] | None = None) -> int:
     # Taken before the replay: other work may change the tree while it runs.
     tree = _tree_state() if args.write_baseline else {}
 
+    if args.user_pause and args.halt_at is None:
+        ap.error("--user-pause needs --halt-at (the plateau it pauses over)")
     _setup_replay(args.no_shortening, args.no_stall_guard)
     halt = (
         (float(args.halt_at), str(args.halt_min), str(args.halt_level))
@@ -1569,6 +1634,7 @@ def main(argv: list[str] | None = None) -> int:
         "anti_wrinkle": args.anti_wrinkle, "tumble_tail": args.tumble_tail,
         "device_types": device_types or None, "overrides": overrides or None,
         "halt": halt,
+        "user_pause": bool(args.user_pause),
     }
     if (args.jobs > 1 or args.jobs_file) and paths:
         rows = _replay_parallel(

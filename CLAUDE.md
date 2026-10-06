@@ -70,6 +70,7 @@ python3 devtools/decisive_margin_eval.py --loo   # mid-cycle switch bypass, runn
 python3 devtools/end_gate_eval.py --loo --all-formats --check devtools/end_gate_baseline.json   # exit 1 on an end-gate regression
 python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
 python3 devtools/start_gate_eval.py <diag.json|history.csv|sqlite:db>   # start gates on a raw idle+cycle history (missed/late/phantom)
+python3 devtools/lead_in_eval.py               # stored cycle start vs raw onset on the start-gate manifest (#463)
 python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)
 python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed point / ladder / oscillation / erased cycles (F10)
 

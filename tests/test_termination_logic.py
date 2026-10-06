@@ -301,9 +301,11 @@ def test_standby_band_stuck_running_is_finalized(base_config, mock_callbacks):
         profile_matcher=mock_matcher,
     )
 
-    # Establish RUNNING + match with real activity (peak 100 W).
+    # Establish RUNNING + match with real activity (peak 100 W), winding down at
+    # the end as a programme does (a plateau straight out of activity under a
+    # match that still owes work reads as a halt, which waits: register item 514).
     for t in range(0, 300, 30):
-        detector.process_reading(100.0, dt(t))
+        detector.process_reading(12.0 if t == 270 else 100.0, dt(t))
     assert detector.matched_profile == "Cotton"
     assert detector.state == STATE_RUNNING
 

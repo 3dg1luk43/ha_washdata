@@ -1073,8 +1073,11 @@ class _DetailSim:
         current_matched = det.matched_profile
         prev_verified = getattr(det, "_verified_pause", False)
         current_power = det_readings[-1][1]
+        # The detector mirrors the manager's user pause (`set_user_paused`); a replay
+        # never pauses, but a harness can (`end_gate_eval --user-pause`, item 514).
+        user_paused = getattr(det, "_user_paused", False) is True
         alignment: tuple[bool, float] | None = None
-        if match_rules.needs_alignment_check(current_matched, current_power, stop_w, False):
+        if match_rules.needs_alignment_check(current_matched, current_power, stop_w, user_paused):
             alignment = self._verify_alignment(current_matched, det_readings)
         pause = match_rules.decide_alignment_pause(
             verified_pause=prev_verified,
@@ -1087,7 +1090,7 @@ class _DetailSim:
             current_matched=current_matched,
             current_power=current_power,
             stop_threshold_w=getattr(det.config, "stop_threshold_w", 5.0),
-            user_paused=False,
+            user_paused=user_paused,
             expected_duration=det.expected_duration_seconds,
             current_duration=current_duration,
             time_below=getattr(
@@ -1104,7 +1107,7 @@ class _DetailSim:
             current_matched=current_matched,
             prev_verified=prev_verified,
             verified_pause=verified,
-            user_paused=False,
+            user_paused=user_paused,
         ).verified_pause
         det.set_verified_pause(verified)
         det.set_match_committed(match_rules.program_is_committed(st.current_program))
@@ -1296,19 +1299,23 @@ class _DetailSim:
         matched_dur = float(self.last_match["expected"] or 0.0)
         program = self.last_match["name"]
         if state not in _DEAD_STATES and program and matched_dur > 0:
+            # Item 514, as live: progress reads programme time (a halt is not
+            # progress); the energy and the cost below read the whole trace.
+            prog_trace = self.detector.progress_trace(ts)
+            prog_t = self.detector.progress_elapsed_s(offset, ts)
             phase_result = None
-            if len(trace) >= 10 and program != "detecting...":
+            if len(prog_trace) >= 10 and program != "detecting...":
                 phase_result = progress_mod.estimate_phase_progress(
-                    self.store, trace, offset, program,
+                    self.store, prog_trace, prog_t, program,
                     quiet_threshold_w=float(
                         getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0
                     ),
                 )
             ml_pct = progress_mod.ml_progress_percent(
-                self.store, self.options, matched_dur, trace, program, self._end_exp_fn
+                self.store, self.options, matched_dur, prog_trace, program, self._end_exp_fn
             )
             result = progress_mod.compute_progress(
-                self.device_type, matched_dur, offset,
+                self.device_type, matched_dur, prog_t,
                 progress_mod.ema_seed(self.smoothed["v"], self.smoothed["program"], program),
                 phase_result, ml_pct,
                 # Same time-scaled smoothing as live: the sim steps the estimator

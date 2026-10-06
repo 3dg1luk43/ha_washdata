@@ -694,7 +694,13 @@
     "pg_obj_early": "Míra předčasných konců",
     "pg_obj_endlag": "Zpoždění konce (medián)",
     "pg_obj_split": "Míra rozdělených cyklů",
-    "pg_sweep_cycles": "Nedávné cykly"
+    "pg_sweep_cycles": "Nedávné cykly",
+    "cycle_context": "Historie z recorderu kolem cyklu",
+    "cycle_context_off": "Vypnuto",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Historie z recorderu",
+    "before_start": "Před začátkem",
+    "after_end": "Po konci"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -1096,7 +1102,12 @@
     "pg_sweep_n_cycles_few": "na {count} cyklech",
     "pg_sweep_n_cycles_many": "na {count} cyklu",
     "pg_sweep_n_cycles_other": "na {count} cyklech",
-    "pg_task_busy": "Pro toto zařízení už běží „Otestovat na historii“ nebo „Optimalizovat“. Počkejte na dokončení, nebo běh zrušte."
+    "pg_task_busy": "Pro toto zařízení už běží „Otestovat na historii“ nebo „Optimalizovat“. Počkejte na dokončení, nebo běh zrušte.",
+    "cycle_context_loading": "Načítání historie z recorderu…",
+    "cycle_context_note": "Šedě: historie snímače výkonu z recorderu před tímto cyklem a po něm. Není součástí cyklu: trvání, energie a párování používají pouze vlastní záznam cyklu.",
+    "cycle_context_none": "Recorder kolem tohoto cyklu neuchovává žádné odečty (Home Assistant ve výchozím nastavení uchovává historii 10 dní).",
+    "cycle_context_tip": "Pouze pro zobrazení: na cyklu nic nemění. Cyklus začíná prvním odečtem nad prahem spuštění, takže jeho graf začíná tímto odečtem. Zde se vykresluje vlastní historie snímače výkonu z recorderu po obou stranách cyklu, u cyklů, které recorder ještě uchovává. Pokud chcete místo toho přenášet odečty z neúspěšných pokusů o spuštění do budoucích cyklů, použijte Náběh křivky (Nastavení > Detekce > Start cyklu): posune zaznamenaný začátek dříve, což mění uložené doby trvání, a tím i párování s profily naučenými bez něj.",
+    "invalid_threshold_pair": "Práh zastavení ({stop} W) musí být nižší než práh spuštění ({start} W): pod prahem zastavení cyklus končí, nad prahem spuštění začíná. Nic nebylo uloženo; změňte obě hodnoty společně."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1567,7 +1578,7 @@
       "doc": "Účtuje každý cyklus cenou platnou v každém okamžiku jeho běhu místo jediné ceny platné v okamžiku jeho dokončení. Týká se pouze entity ceny (statická cena se měnit nemůže). Nevyžaduje žádné další nastavení: cena se sleduje živě po celou dobu cyklu a Zpracování historie v Diagnostice přepočítá náklady starších cyklů z recorderu. Vypnuto = klasické chování, jedna cena zafixovaná na konci."
     },
     "curve_preroll_seconds": {
-      "doc": "Kolik sekund odečtů z neúspěšných pokusů o spuštění může WashData přenést na začátek křivky cyklu. Křivka cyklu obvykle začíná u pokusu o spuštění, který nakonec uspěl, takže u stroje, který to před rozběhnutím několikrát zkusí - volba programu, zámek dveří, první napouštění - chybí v každé křivce první minuty skutečné činnosti. Nastavte tuto hodnotu o něco výše, než je nejdelší takový rozběh vašeho stroje (300 s většině bohatě stačí). 0 funkci vypne. Mějte na paměti, že zapnutí posune zaznamenaný začátek dříve, takže cykly zaznamenané před změnou a po ní nesou pro stejný program různé doby trvání; naučené průměry se budou posouvat, dokud starší cykly nevypadnou z historie.",
+      "doc": "Kolik sekund odečtů z neúspěšných pokusů o spuštění může WashData přenést na začátek křivky cyklu. Křivka cyklu obvykle začíná u pokusu o spuštění, který nakonec uspěl, takže u stroje, který to před rozběhnutím několikrát zkusí - volba programu, zámek dveří, první napouštění - chybí v každé křivce první minuty skutečné činnosti. Nastavte tuto hodnotu o něco výše, než je nejdelší takový rozběh vašeho stroje (300 s většině bohatě stačí). 0 funkci vypne. Mějte na paměti, že zapnutí posune zaznamenaný začátek dříve, takže cykly zaznamenané před změnou a po ní nesou pro stejný program různé doby trvání; naučené průměry se budou posouvat, dokud starší cykly nevypadnou z historie. Pokud chcete jen vidět, co cyklu předcházelo, aniž byste cokoli měnili, použijte místo toho historii z recorderu v grafu cyklu.",
       "label": "Náběh křivky"
     },
     "unload_confirm_entity": {

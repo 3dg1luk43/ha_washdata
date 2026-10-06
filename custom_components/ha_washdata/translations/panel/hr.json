@@ -688,7 +688,13 @@
     "pg_obj_early": "Stopa ranih završetaka",
     "pg_obj_endlag": "Kašnjenje završetka (medijan)",
     "pg_obj_split": "Stopa podijeljenih ciklusa",
-    "pg_sweep_cycles": "Nedavni ciklusi"
+    "pg_sweep_cycles": "Nedavni ciklusi",
+    "cycle_context": "Povijest recordera oko ciklusa",
+    "cycle_context_off": "Isključeno",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Povijest recordera",
+    "before_start": "Prije početka",
+    "after_end": "Nakon završetka"
   },
   "log": {
     "all_levels": "Sve razine",
@@ -1080,7 +1086,12 @@
     "pg_sweep_n_cycles_one": "na {count} ciklusu",
     "pg_sweep_n_cycles_few": "na {count} ciklusa",
     "pg_sweep_n_cycles_other": "na {count} ciklusa",
-    "pg_task_busy": "Za ovaj uređaj već je u tijeku „Testiraj na povijesti” ili „Optimiziraj”. Pričekajte da završi ili ga otkažite."
+    "pg_task_busy": "Za ovaj uređaj već je u tijeku „Testiraj na povijesti” ili „Optimiziraj”. Pričekajte da završi ili ga otkažite.",
+    "cycle_context_loading": "Učitavanje povijesti recordera…",
+    "cycle_context_note": "Sivo: povijest senzora snage iz recordera prije i nakon ovog ciklusa. Nije dio ciklusa: trajanje, energija i podudaranje koriste samo vlastiti zapis ciklusa.",
+    "cycle_context_none": "Recorder nema očitanja oko ovog ciklusa (Home Assistant standardno čuva povijest 10 dana).",
+    "cycle_context_tip": "Samo za prikaz: ništa ne mijenja na ciklusu. Ciklus počinje prvim očitanjem iznad praga pokretanja, pa njegov grafikon počinje tim očitanjem. Ovdje se iscrtava vlastita povijest senzora snage iz recordera s obje strane ciklusa, za cikluse koje recorder još čuva. Ako umjesto toga želite očitanja iz prekinutih pokušaja pokretanja prenijeti u buduće cikluse, upotrijebite Uvodne sekunde krivulje (Postavke > Otkrivanje > Početak ciklusa): to pomiče zabilježeni početak ranije, što mijenja spremljena trajanja, a time i podudaranje s profilima naučenima bez toga.",
+    "invalid_threshold_pair": "Prag zaustavljanja ({stop} W) mora biti ispod praga pokretanja ({start} W): ispod praga zaustavljanja ciklus završava, iznad praga pokretanja počinje. Ništa nije spremljeno; promijenite obje vrijednosti zajedno."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka prevrtanja nakon završetka kako bi se smanjile bore.",
@@ -1212,7 +1223,7 @@
       "label": "Min. trajanje ciklusa"
     },
     "curve_preroll_seconds": {
-      "doc": "Koliko sekundi očitanja iz prekinutih pokušaja pokretanja WashData smije prenijeti na početak krivulje ciklusa. Krivulja ciklusa inače počinje pokušajem pokretanja koji konačno uspije, pa kod stroja koji nekoliko puta pokuša krenuti prije nego što se smiri - odabir programa, zaključavanje vrata, prvo punjenje vodom - prve minute stvarne aktivnosti nedostaju u svakoj krivulji. Postavite ovu vrijednost malo iznad najduljeg takvog zaleta koji vaš stroj ima (300 s je za većinu više nego dovoljno). 0 isključuje ovu značajku. Imajte na umu da uključivanje pomiče zabilježeni početak ranije, pa ciklusi zabilježeni prije i poslije promjene nose različita trajanja za isti program; naučeni prosjeci će odstupati dok stariji ciklusi ne isteknu.",
+      "doc": "Koliko sekundi očitanja iz prekinutih pokušaja pokretanja WashData smije prenijeti na početak krivulje ciklusa. Krivulja ciklusa inače počinje pokušajem pokretanja koji konačno uspije, pa kod stroja koji nekoliko puta pokuša krenuti prije nego što se smiri - odabir programa, zaključavanje vrata, prvo punjenje vodom - prve minute stvarne aktivnosti nedostaju u svakoj krivulji. Postavite ovu vrijednost malo iznad najduljeg takvog zaleta koji vaš stroj ima (300 s je za većinu više nego dovoljno). 0 isključuje ovu značajku. Imajte na umu da uključivanje pomiče zabilježeni početak ranije, pa ciklusi zabilježeni prije i poslije promjene nose različita trajanja za isti program; naučeni prosjeci će odstupati dok stariji ciklusi ne isteknu. Ako samo želite vidjeti što je prethodilo ciklusu, bez ikakvih promjena, umjesto toga upotrijebite povijest recordera u grafikonu ciklusa.",
       "label": "Uvodne sekunde krivulje"
     },
     "delay_confirm_seconds": {

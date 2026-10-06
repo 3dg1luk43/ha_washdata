@@ -694,7 +694,13 @@
     "pg_obj_early": "Miera predčasných ukončení",
     "pg_obj_endlag": "Oneskorenie konca (medián)",
     "pg_obj_split": "Miera rozdelených cyklov",
-    "pg_sweep_cycles": "Nedávne cykly"
+    "pg_sweep_cycles": "Nedávne cykly",
+    "cycle_context": "História z recordera okolo cyklu",
+    "cycle_context_off": "Vypnuté",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "História z recordera",
+    "before_start": "Pred začiatkom",
+    "after_end": "Po skončení"
   },
   "log": {
     "all_levels": "Všetky úrovne",
@@ -1096,7 +1102,12 @@
     "pg_sweep_n_cycles_few": "na {count} cykloch",
     "pg_sweep_n_cycles_many": "na {count} cyklu",
     "pg_sweep_n_cycles_other": "na {count} cykloch",
-    "pg_task_busy": "Pre toto zariadenie už beží „Otestovať na histórii“ alebo „Optimalizovať“. Počkajte na dokončenie alebo beh zrušte."
+    "pg_task_busy": "Pre toto zariadenie už beží „Otestovať na histórii“ alebo „Optimalizovať“. Počkajte na dokončenie alebo beh zrušte.",
+    "cycle_context_loading": "Načítava sa história z recordera…",
+    "cycle_context_note": "Sivou farbou: história senzora výkonu z recordera pred týmto cyklom a po ňom. Nie je súčasťou cyklu: trvanie, energia a porovnávanie používajú iba vlastný záznam cyklu.",
+    "cycle_context_none": "Recorder okolo tohto cyklu neuchováva žiadne merania (Home Assistant štandardne uchováva históriu 10 dní).",
+    "cycle_context_tip": "Iba na zobrazenie: na cykle nič nemení. Cyklus začína prvým meraním nad prahom spustenia, takže jeho graf začína týmto meraním. Tu sa vykresľuje vlastná história senzora výkonu z recordera na oboch stranách cyklu, pri cykloch, ktoré recorder ešte uchováva. Ak chcete namiesto toho prenášať merania z neúspešných pokusov o spustenie do budúcich cyklov, použite Nábeh krivky (Nastavenia > Detekcia > Začiatok cyklu): posunie zaznamenaný začiatok skôr, čo mení uložené doby trvania, a tým aj porovnávanie s profilmi naučenými bez neho.",
+    "invalid_threshold_pair": "Prah zastavenia ({stop} W) musí byť nižší ako prah spustenia ({start} W): pod prahom zastavenia sa cyklus končí, nad prahom spustenia sa začína. Nič sa neuložilo; zmeňte obe hodnoty spolu."
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1567,7 +1578,7 @@
       "doc": "Účtuje každý cyklus cenou platnou v každom okamihu jeho behu namiesto jedinej ceny platnej pri jeho dokončení. Týka sa len entity ceny (statická cena sa meniť nemôže). Nevyžaduje žiadne ďalšie nastavenie: cena sa počas cyklu sleduje naživo a Spracovanie histórie v Diagnostike prepočíta náklady starších cyklov z recordera. Vypnuté = klasické správanie, jedna cena zafixovaná na konci."
     },
     "curve_preroll_seconds": {
-      "doc": "Koľko sekúnd meraní z neúspešných pokusov o spustenie môže WashData preniesť na začiatok krivky cyklu. Krivka cyklu obvykle začína pri pokuse o spustenie, ktorý nakoniec uspel, takže pri stroji, ktorý to pred rozbehnutím niekoľkokrát skúsi - voľba programu, zámok dverí, prvé napúšťanie - chýbajú v každej krivke prvé minúty skutočnej činnosti. Nastavte túto hodnotu o niečo vyššie, než je najdlhší takýto rozbeh vášho stroja (300 s väčšine bohato stačí). 0 funkciu vypne. Majte na pamäti, že zapnutie posunie zaznamenaný začiatok skôr, takže cykly zaznamenané pred zmenou a po nej nesú pre ten istý program rozdielne doby trvania; naučené priemery sa budú posúvať, kým staršie cykly nevypadnú z histórie.",
+      "doc": "Koľko sekúnd meraní z neúspešných pokusov o spustenie môže WashData preniesť na začiatok krivky cyklu. Krivka cyklu obvykle začína pri pokuse o spustenie, ktorý nakoniec uspel, takže pri stroji, ktorý to pred rozbehnutím niekoľkokrát skúsi - voľba programu, zámok dverí, prvé napúšťanie - chýbajú v každej krivke prvé minúty skutočnej činnosti. Nastavte túto hodnotu o niečo vyššie, než je najdlhší takýto rozbeh vášho stroja (300 s väčšine bohato stačí). 0 funkciu vypne. Majte na pamäti, že zapnutie posunie zaznamenaný začiatok skôr, takže cykly zaznamenané pred zmenou a po nej nesú pre ten istý program rozdielne doby trvania; naučené priemery sa budú posúvať, kým staršie cykly nevypadnú z histórie. Ak chcete len vidieť, čo cyklu predchádzalo, bez akejkoľvek zmeny, použite namiesto toho históriu z recordera v grafe cyklu.",
       "label": "Nábeh krivky"
     },
     "unload_confirm_entity": {

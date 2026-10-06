@@ -952,7 +952,12 @@ def reconcile_suggestions(
         stop = eff(CONF_STOP_THRESHOLD_W)
         if start is not None and stop is not None and start <= stop and in_out(CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W):
             if is_original(CONF_START_THRESHOLD_W):
-                adjust(CONF_STOP_THRESHOLD_W, round(start * 0.8, 1), "the start threshold")
+                if round(start * 0.8, 1) < start:
+                    adjust(CONF_STOP_THRESHOLD_W, round(start * 0.8, 1), "the start threshold")
+                else:
+                    # Item 515: at start <= 0.2 W the 0.1 W rounding lands back on
+                    # start, which left the pair inverted; floor at 0.01 W instead.
+                    adjust(CONF_STOP_THRESHOLD_W, start * 0.8, "the start threshold", round_dir="down")
             else:
                 adjust(CONF_START_THRESHOLD_W, round(max(stop + 0.5, stop * 1.25), 1), "the stop threshold")
             stop = eff(CONF_STOP_THRESHOLD_W)

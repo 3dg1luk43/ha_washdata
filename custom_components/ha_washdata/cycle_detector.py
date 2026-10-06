@@ -181,6 +181,15 @@ STOP_LOCKOUT_RELEASE_SECONDS = 180.0
 # reads it. Measured by devtools/start_gate_eval.py (flickers per idle day).
 STANDBY_REPROBE_SHOW_ENERGY_FRACTION = 0.5
 
+# Register item 515: a false start out of Finished / Interrupted / Force-Stopped
+# returns to that state with its original entry time (as item 504 returns one
+# out of DELAY_WAIT), instead of falling to OFF. With it the manager clears the
+# cycle end, Clean and the unload nag only when a probe commits (RUNNING), not
+# when it begins: a probe that aborted used to lose all three, and a straddling
+# standby (#35) probes on almost every reading. The A/B switch for the revert
+# checks and `devtools/start_gate_eval.py` (`terminal_lost`).
+TERMINAL_PROBE_RETURNS = True
+
 # Discussion #452: two more display-only states, read by `exposed_state` and never
 # by detection.
 #
@@ -200,7 +209,8 @@ STANDBY_REPROBE_SHOW_ENERGY_FRACTION = 0.5
 # the first stands. Unmatched (or matched with fewer than
 # END_GATE_HAZARD_MIN_CYCLES traced cycles): STALL_UNMATCHED_MIN_S. Shown as
 # `paused` with sub-state STALL_SUB_STATE, cleared by the first reading out of
-# the band. The one place it reaches detection is the standby-band finalize:
+# the band. While shown it reaches detection twice: the anti-crease finalize
+# waits (item 511, below), and in the standby-band finalize,
 # during a run whose two matches both still owe their terminal high-power block,
 # the near-stop tier is held, so the plateau waits for the loose tier
 # (STANDBY_BAND_LOOSE_MIN_RATIO x expected) instead of closing a halted wash as
@@ -212,6 +222,68 @@ STALL_UNMATCHED_MIN_S = 1800.0
 STALL_OWES_MAX_POSITION = 0.75
 STALL_SUB_STATE = "Stalled"
 STALL_HOLDS_STANDBY_BAND = True
+# Register item 511: a halted programme does not advance. Once a stall is over
+# (the wash resumed, or the plug dropped below stop), every duration-based end
+# gate (Smart Termination, the hard finalize, the item-306 shortening, the hazard
+# gate, the minimum-duration deferral, both standby-band tiers, the anti-crease
+# gate and its #399 spin wait) reads the elapsed time LESS that run, from its
+# first reading (`_gate_elapsed_s`); the live matcher reads the trace with it cut
+# out (`_match_readings`) and the #399 scan offset moves past it. Without that the
+# halt carried the clock past each gate's ratio and the resumed wash ended at its
+# next quiet. A stall still shown counts as before, so the standby band closes
+# a display left on after a real end exactly as the #452 hold above allows (the
+# loose tier bounds it), and the anti-crease finalize waits while one is shown. The
+# stored duration, the displayed elapsed and the 8 h cap keep the wall clock.
+# Excluding the stall in progress as well (the near-stop tier then waited out
+# every shown stall) kept 26 more synthetic 45 min halts whole, but held 10 real
+# ends with the display left on for 45 min until it went off (up to 57 min late)
+# and one left on for twice the programme up to 6 h. The A/B switch for the
+# revert checks.
+STALL_EXCLUDED_FROM_GATES = True
+# Register item 514: progress reads programme time too. Every finished stall
+# leaves the elapsed time and the trace the progress estimate reads
+# (`progress_elapsed_s` / `progress_trace`, the one input of the manager and the
+# Playground replay), as the user pause leaves the elapsed time
+# (`manager.net_elapsed_seconds`), and the finished stalls ride in the cycle data
+# (`stall_spans`) so the cycle-end label match reads the trace without them
+# (`match_rules.final_match_input`). The stall shown now as well
+# (STALL_CURRENT_EXCLUDED_FROM_PROGRESS): from the moment it shows, the remaining
+# time stops counting down. Measured (`eta_eval --halt-at 0.5 --halt-min 45`, 246
+# washer targets): through the halt the ETA fell a median 40.9 min before, 0.5 now;
+# its median error 1 / 10 / 30 min after the resume 41.8 / 36.4 / 21.6 -> 13.2 /
+# 16.7 / 13.7 min (finished stalls only: 25.0 / 16.7 / 13.7); real corpus 0 of 450
+# rows changed. A/B switches for the revert checks.
+STALL_EXCLUDED_FROM_PROGRESS = True
+STALL_CURRENT_EXCLUDED_FROM_PROGRESS = True
+# ...and a finished user pause is programme time stood still too (item 514): the
+# gate clock, the #399 scan offset and the live matcher's trace leave it out like
+# a finished stall (the union of the two, `_gate_spans`), and it rides in the
+# cycle data with them (`halt_spans`). The user pause blocked every finisher
+# while it lasted (the verified pause) but the gates read the raw clock after
+# the resume, so a pause that cuts the plug's power ended the resumed wash at
+# its next quiet. Progress already leaves it out (`manager.net_elapsed_seconds`).
+# Measured (`end_gate_eval --halt-at F --halt-min 45 --user-pause`, 258 cycles):
+# power cut at 50% / 30% / 90%, splits 48 / 50 / 40 -> 12 / 22 / 33, early ends
+# 6 / 5 / 18 -> 5 / 7 / 8 (each new one the unpaused cycle's own end, or a former
+# split); paused on the display level, 9 -> 6 and 14 -> 9 (50% / 90%).
+USER_PAUSE_EXCLUDED_FROM_GATES = True
+# Register item 514: a halt is abrupt. A programme winds down to its end (the last
+# spin's ramp, then quiet), so the reading before a display left on is low; a halt
+# stops the machine where it is. A flat run whose previous reading was at least
+# STALL_ABRUPT_PEAK_FRACTION of the cycle's peak (and twice the band's ceiling)
+# began straight out of activity (`_stall_run_abrupt`), and when the MATCHED
+# programme it began under still owes work, the current match need not agree: the
+# plateau soon reads to the matcher as a finished shorter programme, which vetoed
+# the display and the near-stop hold above and closed the halted wash 10 min in.
+# Unmatched runs are left to the current match (a short programme's real end looks
+# the same). Measured (`end_gate_eval --halt-at/--halt-min`, 258 washer,
+# washer-dryer and dryer cycles): at 0.10, 45 min halts at 50% shown 196 -> 198,
+# closed inside the halt 75 -> 67, splits 79 -> 71 (30%: 76 -> 61; 90%: 130 -> 118),
+# early ends unchanged; a display left on after a real end (100%, 45 min and 2x):
+# no new stall flag, 2 closes later, both in runs the old gates had split. At 0.05:
+# 50% splits 79 -> 54 and 9 more shown, but one more display-on flag and one more
+# real end held (+36 min). 0 disables (the A/B switch).
+STALL_ABRUPT_PEAK_FRACTION = 0.10
 #
 # IDLE. Outside a cycle a two-level appliance (display on vs switched off) shows
 # `idle` at its standby level and `off` below it. The level is the user's
@@ -557,6 +629,19 @@ def terminal_high_for_guards(
         return None
 
 
+def _merge_spans(spans: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """``(at, length)`` spans sorted and merged where they overlap (item 514: a
+    stall shown during a user pause is banked by both)."""
+    merged: list[tuple[float, float]] = []
+    for at, length in sorted(spans):
+        if merged and at <= merged[-1][0] + merged[-1][1]:
+            a0, n0 = merged[-1]
+            merged[-1] = (a0, max(a0 + n0, at + length) - a0)
+        else:
+            merged.append((at, length))
+    return merged
+
+
 class CycleDetector:
     """Detects washing machine cycles based on power usage.
 
@@ -659,6 +744,10 @@ class CycleDetector:
         self._matched_profile: str | None = None
         self._verified_pause: bool = False
         self._user_paused: bool = False
+        # Item 514: when the current user pause began, and the pauses this cycle
+        # already resumed from as (seconds from the cycle start, length).
+        self._user_pause_since: datetime | None = None
+        self._user_pause_spans: list[tuple[float, float]] = []
 
         self._last_power: float | None = None
         self._time_in_state: float = 0.0
@@ -789,11 +878,16 @@ class CycleDetector:
         # None for every other probe. In memory only: a probe restored after a
         # restart falls back to OFF as before.
         self._probe_wait_since: datetime | None = None
+        # Item 515: when the current probe came out of a terminal state, that state,
+        # its entry time and its sub-state, for the false start to return to. None
+        # for every other probe; in memory only (a restored probe falls to OFF).
+        self._probe_terminal_from: tuple[str, datetime | None, str | None] | None = None
         # Register item 501: a standby that straddles start_threshold_w (#35: 2-22 W
         # around a 4.24 W threshold) re-probes on almost every reading.
         # `_standby_reprobe` is set when a false start falls back into the band
-        # (>= stop_threshold_w), and cleared by any reading below it and by every
-        # state other than OFF/STARTING. A probe that begins while it is set, or out
+        # (>= stop_threshold_w) or a terminal state reads the band (item 510), and
+        # cleared by any reading below it and by entering any state other than
+        # OFF/STARTING. A probe that begins while it is set, or out
         # of DELAY_WAIT (a standby by definition), is HIDDEN: it runs exactly as any
         # other, but `exposed_state` keeps showing the state it began in until it
         # has filled STANDBY_REPROBE_SHOW_ENERGY_FRACTION of the energy gate.
@@ -819,6 +913,11 @@ class CycleDetector:
         self._stall_eval: tuple[float, bool, bool] | None = None
         # ...and whether the CURRENT match agrees, re-read after every match.
         self._stall_now: tuple[bool, bool] | None = None
+        # Item 514: the current run began straight out of activity.
+        self._stall_run_abrupt: bool = False
+        # Item 511: the runs this cycle ended while shown as stalled, as (elapsed
+        # seconds at the run's first reading, run seconds), in order.
+        self._stall_spans: list[tuple[float, float]] = []
         # The learned standby level (`learned_standby_level_w`, set by the
         # manager) and the debounced idle/off class it drives.
         self._standby_level_w: float | None = None
@@ -968,6 +1067,12 @@ class CycleDetector:
         floor = STALL_MIN_S / END_GATE_HAZARD_MARGIN
         return (cat[0], tuple(p for p in cat[1] if p[1] >= floor))
 
+    @staticmethod
+    def _sanitize_stall_spans(raw: Any) -> list[tuple[float, float]]:
+        """Item 511's finished stalls from a snapshot: finite, non-negative pairs
+        in order; anything else is dropped (an old snapshot has none)."""
+        return match_rules.sanitize_stall_spans(raw)
+
     @classmethod
     def _resolve_stall_catalogue(
         cls, raw: Any
@@ -1004,6 +1109,116 @@ class CycleDetector:
             self._begin_stall_run(start, lo)
             self._stall_run_hi = hi
 
+    def _gate_spans(self) -> list[tuple[float, float]]:
+        """The spans the gates' programme time leaves out, in order and merged:
+        every finished stall (item 511) and every finished user pause (item 514)."""
+        stalls = self._stall_spans if STALL_EXCLUDED_FROM_GATES else []
+        pauses = self._user_pause_spans if USER_PAUSE_EXCLUDED_FROM_GATES else []
+        if not pauses:
+            return stalls
+        if not stalls:
+            return pauses
+        return _merge_spans([*stalls, *pauses])
+
+    def _gate_elapsed_s(self, timestamp: datetime) -> float:
+        """Elapsed seconds the duration-based end gates read (item 511): the
+        cycle's wall clock less every finished stall and user pause (item 514).
+        0.0 with no cycle open."""
+        start = self._current_cycle_start
+        if start is None:
+            return 0.0
+        elapsed = (timestamp - start).total_seconds()
+        spans = self._gate_spans()
+        if spans:
+            elapsed = max(0.0, elapsed - sum(length for _at, length in spans))
+        return elapsed
+
+    def _wall_offset_s(self, offset_s: float) -> float:
+        """A programme-time offset from the cycle start as wall-clock seconds
+        (item 511): each left-out span that began before it moves it later."""
+        shift = 0.0
+        for at, length in self._gate_spans():
+            if offset_s < at - shift:
+                break
+            shift += length
+        return offset_s + shift
+
+    def _match_readings(self) -> list[tuple[datetime, float]]:
+        """The trace the live matcher reads (item 511): each finished stall cut
+        out and every later reading moved back by it, so the duration, the
+        Stage-1 ratio and the in-progress Stage-4 stretch are programme time and
+        the shape has no plateau the programme never made. A stall still shown
+        stays in, as before: its evidence includes the current match's reading
+        of it. The stored trace keeps every reading."""
+        return self._cut_readings(self._gate_spans())
+
+    def _cut_readings(
+        self, spans: list[tuple[float, float]]
+    ) -> list[tuple[datetime, float]]:
+        """The trace with ``spans`` cut out, every later reading moved back by them
+        (`match_rules.stall_cut_plan`). The trace itself when there is none."""
+        start = self._current_cycle_start
+        if not spans or start is None:
+            return self._power_readings
+        readings = self._power_readings
+        plan = match_rules.stall_cut_plan(
+            [(ts - start).total_seconds() for ts, _p in readings], spans
+        )
+        return [
+            (readings[i][0] - timedelta(seconds=shift), readings[i][1]) if shift
+            else readings[i]
+            for i, shift in plan
+        ]
+
+    def _progress_spans(
+        self, timestamp: datetime | None
+    ) -> tuple[list[tuple[float, float]], tuple[float, float] | None]:
+        """``(finished stalls, the stall shown now as (at, seconds so far) or None)``
+        that progress leaves out (item 514)."""
+        if not STALL_EXCLUDED_FROM_PROGRESS:
+            return [], None
+        start, run = self._current_cycle_start, self._stall_run_start
+        current = None
+        if (
+            STALL_CURRENT_EXCLUDED_FROM_PROGRESS and self._stall_active
+            and start is not None and run is not None and timestamp is not None
+        ):
+            current = (
+                max(0.0, (run - start).total_seconds()),
+                max(0.0, (dt_util.as_utc(timestamp) - run).total_seconds()),
+            )
+        return list(self._stall_spans), current
+
+    def progress_elapsed_s(self, elapsed_s: float, timestamp: datetime | None) -> float:
+        """``elapsed_s`` less the stalled time progress leaves out (item 514).
+
+        ``elapsed_s`` is the caller's own clock: the manager's net of the user
+        pause, the Playground's replay offset. ``timestamp`` is now (the stall
+        shown at this moment counts up to it)."""
+        finished, current = self._progress_spans(timestamp)
+        stalled = sum(length for _at, length in finished)
+        if current is not None:
+            stalled += current[1]
+        return max(0.0, float(elapsed_s) - stalled)
+
+    def progress_trace(self, timestamp: datetime | None) -> list[tuple[datetime, float]]:
+        """The trace progress reads (item 514): the live matcher's, and with a
+        stall shown now everything from its first reading on is left out too.
+        A copy, like :meth:`get_power_trace`."""
+        finished, current = self._progress_spans(timestamp)
+        if current is not None:
+            finished = [*finished, (current[0], math.inf)]
+        return list(self._cut_readings(finished))
+
+    def _bank_stall(self, timestamp: datetime) -> None:
+        """Keep the run that ends at ``timestamp`` if it is shown as stalled."""
+        start, run_start = self._current_cycle_start, self._stall_run_start
+        if self._stall_active and start is not None and run_start is not None:
+            self._stall_spans.append((
+                max(0.0, (run_start - start).total_seconds()),
+                max(0.0, (timestamp - run_start).total_seconds()),
+            ))
+
     def _clear_stall(self) -> None:
         self._stall_run_start = None
         self._stall_run_lo = self._stall_run_hi = 0.0
@@ -1012,6 +1227,7 @@ class CycleDetector:
         self._stall_match = None
         self._stall_eval = None
         self._stall_now = None
+        self._stall_run_abrupt = False
 
     def _begin_stall_run(self, timestamp: datetime, power: float) -> None:
         """A new flat near-stop run starts at this reading: snapshot the match."""
@@ -1019,6 +1235,17 @@ class CycleDetector:
         self._stall_run_lo = self._stall_run_hi = power
         self._stall_eval = None
         self._stall_now = None
+        # Item 514: straight out of activity, judged on the reading before this
+        # one (a restart re-derives it from the restored trace).
+        self._stall_run_abrupt = False
+        band = self._stall_band() if STALL_ABRUPT_PEAK_FRACTION > 0 else None
+        if band is not None:
+            prev = next(
+                (float(p) for ts, p in reversed(self._power_readings) if ts < timestamp), None
+            )
+            self._stall_run_abrupt = prev is not None and prev >= max(
+                STALL_ABRUPT_PEAK_FRACTION * float(self._cycle_max_power), 2.0 * band[1]
+            )
         self._stall_match = (
             self._matched_profile if self._expected_duration > 0 else None,
             float(self._expected_duration),
@@ -1048,7 +1275,18 @@ class CycleDetector:
         if not STALL_HOLDS_STANDBY_BAND or self._stall_band() is None:
             return False
         evidence = self._stall_evidence()
+        if self._stall_abrupt_owes():
+            return True  # item 514: an abrupt halt under a match that owes work
         return bool(evidence and evidence[2] and self._stall_now_evidence()[1])
+
+    def _stall_abrupt_owes(self) -> bool:
+        """Item 514: the run began straight out of activity under a MATCHED
+        programme that still owes work, so the current match's verdict (the
+        plateau read as a finished shorter programme) is not needed."""
+        if not (self._stall_run_abrupt and self._stall_match and self._stall_match[0]):
+            return False
+        evidence = self._stall_evidence()
+        return bool(evidence and evidence[1])
 
     def _stall_now_evidence(self) -> tuple[bool, bool]:
         """``(owes work, owes its spin)`` by the CURRENT match, for the current run.
@@ -1079,7 +1317,8 @@ class CycleDetector:
             ) < needed
             now = (spin, spin)
         else:
-            position = (run_start - start).total_seconds() / expected
+            # Programme time (item 511): an earlier stall is not progress.
+            position = self._gate_elapsed_s(run_start) / expected
             now = (position < STALL_OWES_MAX_POSITION, False)
         self._stall_now = now
         return now
@@ -1126,7 +1365,7 @@ class CycleDetector:
         if not (name and expected > 0 and start and run_start):
             return (STALL_UNMATCHED_MIN_S, True, False)
         cat = self._resolve_stall_catalogue(cat)
-        position = max(0.0, (run_start - start).total_seconds() / expected)
+        position = max(0.0, self._gate_elapsed_s(run_start) / expected)  # item 511
         # Owes work: the terminal high-power block (#399) not yet produced, or,
         # for a programme without one, a run that began well before its end.
         owes_spin = False
@@ -1156,6 +1395,7 @@ class CycleDetector:
         band = self._stall_band()
         if band is None or not (band[0] <= power <= band[1]):
             if self._stall_run_start is not None or self._stall_active:
+                self._bank_stall(timestamp)  # item 511
                 self._set_stalled(False, timestamp)
                 self._clear_stall()
             return
@@ -1176,7 +1416,8 @@ class CycleDetector:
         evidence = self._stall_evidence()
         if evidence is not None:
             self._set_stalled(
-                run_s >= evidence[0] and evidence[1] and self._stall_now_evidence()[0],
+                run_s >= evidence[0] and evidence[1]
+                and (self._stall_now_evidence()[0] or self._stall_abrupt_owes()),
                 timestamp,
             )
 
@@ -1186,6 +1427,31 @@ class CycleDetector:
         self._probe_hidden = hidden
         self._probe_hidden_state = self._state
         self._probe_hidden_sub_state = self._sub_state
+
+    def _return_probe_to_terminal(self, timestamp: datetime, power: float) -> None:
+        """Item 515: a false start goes back to the terminal state it began in.
+
+        With that state's entry time and sub-state, and without the probe's
+        readings, as ``reset()`` leaves a terminal state: no cycle is open, so a
+        later force-stop or "Done now" there records nothing. A reading still in
+        the band marks the next probe as a standby re-probe (items 501, 510).
+        """
+        back = self._probe_terminal_from
+        if back is None:
+            return
+        state, entered, sub_state = back
+        self._transition_to(state, timestamp)
+        if entered is not None:
+            self._state_enter_time = entered
+            self._time_in_state = max(0.0, (timestamp - entered).total_seconds())
+        self._sub_state = sub_state
+        self._power_readings = []
+        self._current_cycle_start = None
+        self._last_active_time = None
+        self._cycle_max_power = 0.0
+        self._energy_since_idle_wh = 0.0
+        self._time_above_threshold = 0.0
+        self._standby_reprobe = power >= self._config.stop_threshold_w
 
     def _show_probe_with_evidence(self) -> None:
         """Item 501: a hidden probe is shown once it has filled part of the energy gate."""
@@ -1339,7 +1605,7 @@ class CycleDetector:
 
         # Call the matcher
         try:
-            result = self._profile_matcher(self._power_readings)
+            result = self._profile_matcher(self._match_readings())
             # If synchronous result returned, process it.
             # If None returned (async offload), the matcher is responsible for
             # calling update_match later.
@@ -1491,7 +1757,7 @@ class CycleDetector:
             or ambiguous
         ):
             return base
-        elapsed = (timestamp - self._current_cycle_start).total_seconds()
+        elapsed = self._gate_elapsed_s(timestamp)  # programme time (item 511)
         # Where the quiet run began. An outage inside it is still part of the run
         # (item 266), or the outage would read as progress and drop the very pause
         # being waited out from `later`.
@@ -1980,14 +2246,34 @@ class CycleDetector:
         """
         self._match_committed = bool(committed)
 
-    def set_user_paused(self, paused: bool) -> None:
+    def set_user_paused(self, paused: bool, timestamp: datetime | None = None) -> None:
         """Mirror the user's Pause Cycle state (set by the manager).
 
         Kept apart from ``_verified_pause`` on purpose: the envelope auto-pause
         writes that one too, and freezing Smart Termination on it would re-open
         the #375 hang class. Only a USER pause blocks Smart Termination.
+
+        Item 514: a resume banks the pause (from ``timestamp``, now by default)
+        as a span the gates' programme time leaves out. A pause start restored
+        from a snapshot is kept when the manager re-asserts the pause.
         """
-        self._user_paused = bool(paused)
+        paused = bool(paused)
+        now = dt_util.as_utc(timestamp) if timestamp is not None else utc_now()
+        if paused and not self._user_paused:
+            if self._user_pause_since is None:
+                self._user_pause_since = now
+        elif not paused:
+            since, start = self._user_pause_since, self._current_cycle_start
+            self._user_pause_since = None
+            if self._user_paused and since is not None and start is not None:
+                begin = max(since, start)
+                length = (now - begin).total_seconds()
+                if length > 0:
+                    self._user_pause_spans = _merge_spans([
+                        *self._user_pause_spans,
+                        ((begin - start).total_seconds(), length),
+                    ])
+        self._user_paused = paused
 
     def mark_sensor_unavailable(self, timestamp: datetime) -> None:
         """Start a sensor outage: the power sensor has no usable value (item 266).
@@ -2021,6 +2307,17 @@ class CycleDetector:
         replay with historical timestamps must pass it: stamping the host clock
         left a replayed dryer in ANTI_WRINKLE forever (audit DETECT-10).
         """
+        # Item 515: the manager's Off expiry of a terminal state is a display change,
+        # not a fresh start. Since false starts return to the terminal state, the
+        # standby's re-probe flag (item 501) and the probes' pre-roll readings live
+        # there now, as they did in OFF, and carry into it (the cycle end emptied
+        # the buffer, so it holds nothing of that cycle).
+        idle_carry = (
+            TERMINAL_PROBE_RETURNS
+            and target_state == STATE_OFF
+            and self._state in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED)
+        )
+        carried = (self._standby_reprobe, self._preroll_buffer) if idle_carry else None
         self._transition_to(
             target_state,
             dt_util.as_utc(timestamp) if timestamp is not None else utc_now(),
@@ -2094,6 +2391,9 @@ class CycleDetector:
         self._standby_reprobe = False
         self._probe_hidden = False
         self._probe_wait_since = None
+        self._probe_terminal_from = None
+        if carried is not None:
+            self._standby_reprobe, self._preroll_buffer = carried
 
     @property
     def state(self) -> str:
@@ -2358,6 +2658,16 @@ class CycleDetector:
         # Hysteresis Logic
         if self._state in (STATE_OFF, STATE_DELAY_WAIT, STATE_STARTING, STATE_UNKNOWN):
             threshold = self._config.start_threshold_w
+        elif self._state in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED):
+            # No cycle is open here either, so a terminal state starts on
+            # start_threshold_w like OFF (register item 510). It fell to the stop
+            # threshold by omission when these states were added: a display left
+            # on above stop probed STARTING on its first reading, a probe that
+            # cannot commit (STARTING measures against start_threshold_w), and the
+            # manager cleared Finished, Clean and the unload nag on it. The higher
+            # of the two, so an inverted pair (stop above start, seen in a
+            # contributed export) is not made easier to leave than before.
+            threshold = max(self._config.start_threshold_w, self._config.stop_threshold_w)
         else:
             threshold = self._config.stop_threshold_w
 
@@ -2707,21 +3017,28 @@ class CycleDetector:
                 # excursion - most users' "menu navigation" peaks last
                 # less than a sample interval anyway).
 
+            terminal = self._state in (
+                STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED
+            )
+            if terminal and not is_high and power >= self._config.stop_threshold_w:
+                # Item 510: a terminal state holds through the standby band instead
+                # of probing on it, so the band reading marks the next probe as a
+                # standby re-probe (item 501), as the band probe's abort used to.
+                self._standby_reprobe = True
+
             if is_high and not started_from_anti_wrinkle:
                 # Transition to STARTING
                 self._preserve_delay_band_on_off = self._delay_band_start is not None
                 self._hide_probe(
-                    (self._standby_reprobe and self._state == STATE_OFF)
-                    # #452: right after a cycle the terminal states probe from
-                    # stop_threshold_w, so a display left on above it probes on its
-                    # first reading. Under start_threshold_w that probe cannot
-                    # commit; like a standby re-probe (item 501) it is not shown.
-                    or (
-                        self._state in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED)
-                        and power < self._config.start_threshold_w
-                    )
+                    self._standby_reprobe and (self._state == STATE_OFF or terminal)
+                )
+                back = (
+                    (self._state, self._state_enter_time, self._sub_state)
+                    if terminal and TERMINAL_PROBE_RETURNS
+                    else None
                 )
                 self._transition_to(STATE_STARTING, timestamp)
+                self._probe_terminal_from = back  # item 515
                 self._current_cycle_start = timestamp
                 self._power_readings = [(timestamp, power)]
                 # Seed from the guarded interval (#403), not raw dt: this seed
@@ -2908,7 +3225,12 @@ class CycleDetector:
                         if wait_since is not None
                         else 0.0
                     )
-                    if (
+                    if self._probe_terminal_from is not None:
+                        # Item 515: out of Finished / Interrupted / Force-Stopped, back
+                        # there whatever the power: a probe that never committed ends
+                        # nothing, and the manager's expiry still owns the way to OFF.
+                        self._return_probe_to_terminal(timestamp, power)
+                    elif (
                         wait_since is not None
                         and self._standby_reprobe
                         and waited_s < self._config.delay_timeout_seconds
@@ -3026,8 +3348,8 @@ class CycleDetector:
                 if self._maybe_finalize_standby_band(timestamp, power):
                     return
 
-                start_time = self._current_cycle_start or timestamp
-                current_duration = (timestamp - start_time).total_seconds()
+                # Programme time: a stall is not progress (item 511).
+                current_duration = self._gate_elapsed_s(timestamp)
 
                 is_dishwasher = self._config.device_type == "dishwasher"
 
@@ -3126,7 +3448,9 @@ class CycleDetector:
                 # we terminate early (after appropriate debounce), ignoring long arbitrary timeouts.
                 if self._matched_profile:
                     start_time = self._current_cycle_start or timestamp
-                    current_duration = (timestamp - start_time).total_seconds()
+                    # Programme time (item 511): the halt itself carried the clock
+                    # past the ratio, so the resumed wash ended at its next quiet.
+                    current_duration = self._gate_elapsed_s(timestamp)
 
                     # --- ROBUSTNESS UPGRADE ---
                     # 1. Require higher duration ratio for Smart path
@@ -3464,7 +3788,7 @@ class CycleDetector:
                     and self._expected_duration > 0
                     and self._current_cycle_start is not None
                 ):
-                    _elapsed = (timestamp - self._current_cycle_start).total_seconds()
+                    _elapsed = self._gate_elapsed_s(timestamp)  # item 511
                     # The bar this run has to clear. Normally the matched
                     # programme's own expected end; while the matcher still thinks
                     # a materially LONGER programme is plausible, that longer one's
@@ -3603,7 +3927,7 @@ class CycleDetector:
                     if not recent_window:
                         # Check deferred finish for matched profiles
                         start_time = self._current_cycle_start or timestamp
-                        current_duration = (timestamp - start_time).total_seconds()
+                        current_duration = self._gate_elapsed_s(timestamp)  # item 511
 
                         if self._should_defer_finish(current_duration):
                             return
@@ -3644,7 +3968,7 @@ class CycleDetector:
                         energy_ok = True
                     if energy_ok:
                         start_time = self._current_cycle_start or timestamp
-                        current_duration = (timestamp - start_time).total_seconds()
+                        current_duration = self._gate_elapsed_s(timestamp)  # item 511
 
                         if self._should_defer_finish(current_duration):
                             return
@@ -3689,6 +4013,12 @@ class CycleDetector:
             STATE_STARTING,
             STATE_DELAY_WAIT,
             STATE_UNKNOWN,
+        ) and not (
+            # Item 515: a false start out of a terminal state returns there, not to
+            # OFF; it keeps recording as OFF did, so the next probe can still chain
+            # it. The buffer is empty there until a probe (the cycle end reset it).
+            self._preroll_buffer
+            and self._state in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED)
         ):
             return
         self._preroll_buffer.append((timestamp, float(power)))
@@ -3818,10 +4148,14 @@ class CycleDetector:
         if new_state != STATE_STARTING:
             self._probe_hidden = False
             self._probe_wait_since = None  # item 504: per probe, like the hiding
+            self._probe_terminal_from = None  # item 515, likewise
         if new_state not in (STATE_OFF, STATE_STARTING):
             self._standby_reprobe = False
         if new_state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
             self._clear_stall()  # #452: a stall belongs to one open cycle
+            self._stall_spans = []  # item 511
+            self._user_pause_spans = []  # item 514
+            self._user_pause_since = None
 
         # Reset energy accumulator on transition to OFF
         if new_state == STATE_OFF:
@@ -4016,7 +4350,7 @@ class CycleDetector:
         start = self._current_cycle_start
         if start is None:
             return None
-        current_duration = (timestamp - start).total_seconds()
+        current_duration = self._gate_elapsed_s(timestamp)  # item 511
         if current_duration < self._expected_duration * STANDBY_BAND_MIN_RATIO:
             return None
         # #399 interaction, load-bearing since the gate above dropped from 2.0x to
@@ -4234,7 +4568,7 @@ class CycleDetector:
         start = self._current_cycle_start
         if start is None:
             return False
-        current_duration = (timestamp - start).total_seconds()
+        current_duration = self._gate_elapsed_s(timestamp)  # programme time, item 511
         # Held to the documented 0.50-1.00 range on READ, not at construction: the
         # manager assigns this field directly on an options reload, and the value can
         # arrive from an import or the Playground, neither of which range-checks it.
@@ -4295,6 +4629,11 @@ class CycleDetector:
         cheap gate passes, so normal cycles never pay for it.
         """
         if not self._anticrease_gate_open(timestamp):
+            return False
+        # Item 511: a stalled wash is halted, not in its tumble tail (the #296
+        # bursts leave the stall band, so a real tail never shows as stalled). The
+        # standby band's loose tier still bounds the plateau.
+        if STALL_EXCLUDED_FROM_GATES and self._stall_active:
             return False
         # #399: only the finalise, never _anticrease_gate_open. A false block in the
         # shared gate would also kill the match freeze, and because the tumble bursts
@@ -4365,7 +4704,8 @@ class CycleDetector:
 
         Delay-only and bounded: never blocks past
         ``ANTI_CREASE_SPIN_WAIT_MAX_RATIO`` x expected, and fails open on any
-        missing input, so it cannot reproduce the #296 hang.
+        missing input, so it cannot reproduce the #296 hang. The cap reads the
+        gates' programme time (item 511).
         """
         block = self._matched_terminal_high
         if block is None:
@@ -4377,7 +4717,7 @@ class CycleDetector:
         start = self._current_cycle_start
         if expected <= 0 or start is None:
             return False
-        current_duration = (timestamp - start).total_seconds()
+        current_duration = self._gate_elapsed_s(timestamp)
         if current_duration >= expected * ANTI_CREASE_SPIN_WAIT_MAX_RATIO:
             return False  # cap: waited long enough, let the finalise through
         needed = block_seconds * ANTI_CREASE_TERMINAL_MATCH_FRAC
@@ -4461,6 +4801,9 @@ class CycleDetector:
         start = self._current_cycle_start
         if start is None or not self._power_readings:
             return 0.0
+        if self._stall_spans or self._user_pause_spans:
+            # The offset is on the profile's grid: programme time (items 511, 514).
+            offset_s = self._wall_offset_s(offset_s)
         ceiling = (
             float(self._config.anti_wrinkle_max_power)
             if ceiling_w is None
@@ -4829,7 +5172,7 @@ class CycleDetector:
         ambiguity blocks Smart Termination (see the caller).
         """
         now = self._power_readings[-1][0]
-        elapsed = (now - self._current_cycle_start).total_seconds()
+        elapsed = self._gate_elapsed_s(now)  # the gate's own clock (item 511)
         quiet = float(self._time_below_threshold)
         hazard = self._hazard_wait_for(
             now, max(self._config.off_delay, self._config.min_off_gap), cat, expected, ambiguous
@@ -5278,6 +5621,15 @@ class CycleDetector:
             "termination_reason": termination_reason,
             "power_data": [[round(t.timestamp() - start_ts, 1), p] for t, p in final_readings],
         }
+        spans = [
+            [round(at, 1), round(n, 1)]
+            for at, n in _merge_spans([*self._stall_spans, *self._user_pause_spans])
+            if at < duration
+        ]
+        if spans:
+            # Item 514: the finished stalls and user pauses, so the cycle-end label
+            # match reads the trace in programme time (`match_rules.final_match_input`).
+            cycle_data["halt_spans"] = spans
 
         self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)
@@ -5405,6 +5757,14 @@ class CycleDetector:
             # back to the configured burst length, which splits the tail again.
             "anticrease_tail_floor_w": self._anticrease_tail_floor_w,
             "anti_wrinkle_idle_time": self._anti_wrinkle_idle_time,
+            # Item 511: the stalls already over, which the end gates' clock
+            # excludes (the one in progress is re-derived from the trace).
+            "stall_spans": [[at, length] for at, length in self._stall_spans],
+            # Item 514: the user pauses already resumed from, and the current one.
+            "user_pause_spans": [[at, length] for at, length in self._user_pause_spans],
+            "user_pause_since": (
+                self._user_pause_since.isoformat() if self._user_pause_since else None
+            ),
         }
 
     @property
@@ -5607,6 +5967,13 @@ class CycleDetector:
                 self._last_active_time = self._current_cycle_start
             # #452: a stall survives a restart from the restored trace (element
             # 15 is not persisted: the next match tick supplies it again).
+            self._stall_spans = self._sanitize_stall_spans(snapshot.get("stall_spans"))
+            self._user_pause_spans = self._sanitize_stall_spans(
+                snapshot.get("user_pause_spans")
+            )
+            _since = snapshot.get("user_pause_since")
+            _since_dt = dt_util.parse_datetime(_since) if isinstance(_since, str) else None
+            self._user_pause_since = dt_util.as_utc(_since_dt) if _since_dt else None
             self._seed_stall_run()
 
         except Exception:  # pylint: disable=broad-exception-caught

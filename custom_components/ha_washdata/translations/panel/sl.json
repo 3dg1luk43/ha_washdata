@@ -694,7 +694,13 @@
     "pg_obj_early": "Stopnja zgodnjih koncev",
     "pg_obj_endlag": "Zamuda konca (mediana)",
     "pg_obj_split": "Stopnja razdeljenih ciklov",
-    "pg_sweep_cycles": "Nedavni cikli"
+    "pg_sweep_cycles": "Nedavni cikli",
+    "cycle_context": "Zgodovina iz recorderja okoli cikla",
+    "cycle_context_off": "Izklopljeno",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Zgodovina iz recorderja",
+    "before_start": "Pred začetkom",
+    "after_end": "Po koncu"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -1096,7 +1102,12 @@
     "pg_sweep_n_cycles_two": "na {count} ciklih",
     "pg_sweep_n_cycles_few": "na {count} ciklih",
     "pg_sweep_n_cycles_other": "na {count} ciklih",
-    "pg_task_busy": "Za to napravo že poteka „Preizkusi na zgodovini“ ali „Optimiziraj“. Počakajte, da se konča, ali ga prekličite."
+    "pg_task_busy": "Za to napravo že poteka „Preizkusi na zgodovini“ ali „Optimiziraj“. Počakajte, da se konča, ali ga prekličite.",
+    "cycle_context_loading": "Nalaganje zgodovine iz recorderja…",
+    "cycle_context_note": "Sivo: zgodovina senzorja moči iz recorderja pred tem ciklom in po njem. Ni del cikla: trajanje, energija in ujemanje uporabljajo samo lastni zapis cikla.",
+    "cycle_context_none": "Recorder okoli tega cikla ne hrani nobenih odčitkov (Home Assistant privzeto hrani zgodovino 10 dni).",
+    "cycle_context_tip": "Samo za prikaz: na ciklu ne spremeni ničesar. Cikel se začne pri prvem odčitku nad pragom zagona, zato se njegov graf odpre pri tem odčitku. Tu se izriše lastna zgodovina senzorja moči iz recorderja na obeh straneh cikla, za cikle, ki jih recorder še hrani. Če želite namesto tega odčitke iz prekinjenih poskusov zagona prenesti v prihodnje cikle, uporabite Uvodne sekunde krivulje (Nastavitve > Zaznavanje > Začetek cikla): to premakne zabeleženi začetek nazaj, kar spremeni shranjena trajanja in s tem ujemanje s profili, naučenimi brez tega.",
+    "invalid_threshold_pair": "Prag zaustavitve ({stop} W) mora biti pod pragom zagona ({start} W): pod pragom zaustavitve se cikel konča, nad pragom zagona se začne. Nič ni bilo shranjeno; spremenite obe vrednosti skupaj."
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1228,7 +1239,7 @@
       "label": "Min. trajanje cikla"
     },
     "curve_preroll_seconds": {
-      "doc": "Koliko sekund odčitkov iz prekinjenih poskusov zagona sme WashData prenesti na začetek krivulje cikla. Krivulja cikla se običajno začne pri poskusu zagona, ki končno uspe, zato pri stroju, ki pred umiritvijo večkrat poskusi - izbira programa, zaklep vrat, prvo polnjenje z vodo - v vsaki krivulji manjkajo prve minute resnične dejavnosti. To vrednost nastavite nekoliko nad najdaljši tak zalet, ki ga ima vaš stroj (300 s je za večino več kot dovolj). 0 funkcijo izklopi. Upoštevajte, da vklop premakne zabeleženi začetek nazaj, zato cikli, zabeleženi pred spremembo in po njej, za isti program nosijo različna trajanja; naučena povprečja bodo odstopala, dokler starejši cikli ne izpadejo.",
+      "doc": "Koliko sekund odčitkov iz prekinjenih poskusov zagona sme WashData prenesti na začetek krivulje cikla. Krivulja cikla se običajno začne pri poskusu zagona, ki končno uspe, zato pri stroju, ki pred umiritvijo večkrat poskusi - izbira programa, zaklep vrat, prvo polnjenje z vodo - v vsaki krivulji manjkajo prve minute resnične dejavnosti. To vrednost nastavite nekoliko nad najdaljši tak zalet, ki ga ima vaš stroj (300 s je za večino več kot dovolj). 0 funkcijo izklopi. Upoštevajte, da vklop premakne zabeleženi začetek nazaj, zato cikli, zabeleženi pred spremembo in po njej, za isti program nosijo različna trajanja; naučena povprečja bodo odstopala, dokler starejši cikli ne izpadejo. Če želite samo videti, kaj je bilo pred ciklom, ne da bi karkoli spremenili, raje uporabite zgodovino iz recorderja v grafu cikla.",
       "label": "Uvodne sekunde krivulje"
     },
     "delay_confirm_seconds": {

@@ -131,11 +131,19 @@ def _real_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(dt_util, "now", _REAL_DT_NOW)
 
 
+# A fixed midday instant. The test HA runs in US/Pacific and the replays advance the
+# clock by up to an hour from "now", so a run started near local midnight there
+# (about 09:00 in Central Europe) crossed the daily maintenance and counted its
+# envelope rebuilds and store writes as live-path work.
+PINNED_START = "2026-01-14 20:00:00+00:00"  # 12:00 PST
+
+
 @pytest.fixture
 async def seeded(
-    hass: HomeAssistant, enable_custom_integrations: None
+    hass: HomeAssistant, enable_custom_integrations: None, freezer: Any
 ) -> AsyncIterator[tuple[ConfigEntry, WashDataManager]]:
     """Real manager on the seeded store; no entities (replays count manager work)."""
+    freezer.move_to(PINNED_START)
     entry = make_entry(hass, QUIET)
     mgr = await boot(hass, entry)
     await seed_store(mgr.profile_store)

@@ -118,7 +118,11 @@ from . import task_registry
 from .cycle_detector import (
     CycleDetectorConfig,
 )
-from .detector_config import build_detector_config, effective_option_values
+from .detector_config import (
+    build_detector_config,
+    effective_option_values,
+    inverted_threshold_pair,
+)
 from .maintenance import editor_types, effective_reminders
 from .options_utils import strip_null_options
 from .setup_advisor import compute_setup_phase
@@ -300,6 +304,43 @@ def _visible_suggestions(
     return out
 
 
+def _threshold_pair_message(start: float, stop: float) -> str:
+    """The error a write that would invert the threshold pair is refused with (item 515)."""
+    return (
+        f"Stop Threshold ({stop:g} W) must be below Start Threshold ({start:g} W): "
+        "below the stop threshold a cycle ends, above the start threshold one "
+        "begins. Nothing was saved; change the two together."
+    )
+
+
+def _without_inverted_threshold_pair(
+    entry: ConfigEntry, updates: dict[str, Any], source: str
+) -> dict[str, Any]:
+    """An import's settings, less its threshold pair when that would invert this
+    device's (item 515): the device keeps its own pair, the rest still applies.
+
+    An import is someone else's tuning (an export, a store bundle), so a refused
+    pair is logged rather than failing the import that carries profiles and cycles.
+    """
+    merged = {**entry.data, **entry.options}
+    device_type = merged.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+    pair = inverted_threshold_pair(merged, {**merged, **updates}, device_type)
+    if pair is None:
+        return updates
+    kept = {
+        k: v for k, v in updates.items()
+        if k not in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
+    }
+    if inverted_threshold_pair(merged, {**merged, **kept}, device_type) is not None:
+        kept.pop(CONF_MIN_POWER, None)  # it sets an unset threshold's default
+    _LOGGER.warning(
+        "%s for %s: not applying its thresholds (start %g W, stop %g W): the stop "
+        "threshold must be below the start threshold; the device keeps its own",
+        source, entry.title, pair[0], pair[1],
+    )
+    return kept
+
+
 def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
     """Reduce a [(offset_s, watts), ...] series to ~max_points, preserving extrema.
 
@@ -353,12 +394,18 @@ async def _recorder_power(
     start_dt: Any,
     *,
     end_dt: Any = None,
-) -> list[tuple[float, float]]:
+    keep_unavailable: bool = False,
+) -> list[tuple[float, float | None]]:
     """Raw (unix_ts, watts) readings for entity_id over a window, via the recorder.
 
     ``end_dt`` defaults to now (the live chart overlay's use). Passing it lets a caller
     read the history in bounded windows instead of one unbounded query - a month of
     5-second data is millions of rows in a single recorder-executor job.
+
+    A row that is not a number (``unavailable``/``unknown``) is skipped, unless
+    ``keep_unavailable`` asks for it as ``(ts, None)``: the cycle-context view
+    (register item 513) breaks its line there instead of holding the last reading
+    across an outage. Watts are never None without it.
     """
     try:
         from homeassistant.components.recorder import (  # pylint: disable=import-outside-toplevel
@@ -370,11 +417,11 @@ async def _recorder_power(
     # tz-aware; use dt_util.now() per the datetime convention
     window_end = end_dt if end_dt is not None else dt_util.now()
 
-    def _query() -> list[tuple[float, float]]:
+    def _query() -> list[tuple[float, float | None]]:
         res = history.state_changes_during_period(
             hass, start_dt, window_end, entity_id, include_start_time_state=True
         )
-        rows: list[tuple[float, float]] = []
+        rows: list[tuple[float, float | None]] = []
         start_ts = start_dt.timestamp() if hasattr(start_dt, "timestamp") else None
         for s in res.get(entity_id, []) or []:
             try:
@@ -387,6 +434,14 @@ async def _recorder_power(
                     ts = start_ts
                 rows.append((ts, round(float(s.state), 1)))
             except (ValueError, TypeError):
+                if keep_unavailable:
+                    try:
+                        gap_ts = s.last_changed.timestamp()
+                    except (AttributeError, TypeError, ValueError):
+                        continue
+                    if start_ts is not None and gap_ts < start_ts:
+                        gap_ts = start_ts
+                    rows.append((gap_ts, None))
                 continue
         return rows
 
@@ -643,6 +698,9 @@ _PREF_DATE_FORMATS = ("relative", "absolute")
 # than coupling the WS handler to the translations/panel/ language file list —
 # the panel already falls back to system language for any tag it can't load.
 _PREF_LANG_TAG_RE = re.compile(r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$")
+# cycle_context_min: the cycle chart's recorder-history length per device, in
+# minutes (register item 513). The panel offers exactly these; 0 = off.
+_PREF_CYCLE_CONTEXT_MINUTES = (0, 5, 10, 30, 60)
 
 # Commands that require 'full' (destructive or full-data export/import).
 _FULL_COMMANDS = frozenset({
@@ -1358,6 +1416,9 @@ async def _apply_store_settings(
             # writer records the same "old" value and one of the two updates is
             # silently lost (#442 follow-up).
             async with _entry_options_lock(hass, entry_id):
+                filtered = _without_inverted_threshold_pair(
+                    entry, filtered, "store_download"
+                )  # item 515
                 await _record_option_changes(hass, entry, filtered, "store_download")
                 hass.config_entries.async_update_entry(
                     entry, options={**entry.options, **filtered}
@@ -1434,6 +1495,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_set_suggestion_lock,
         # Cycle curve / interactive editing
         ws_get_cycle_power_data, ws_trim_cycle, ws_analyze_split, ws_apply_split, ws_apply_merge,
+        # Recorder history around a stored cycle, display only (item 513)
+        ws_get_cycle_context,
         # Profile envelope / member cycles
         ws_get_profile_envelope, ws_get_profile_cycles,
         # Panel config + RBAC
@@ -2068,6 +2131,22 @@ async def ws_set_options(
         # that CONF_NAME is absent from options).
         for key in _OPTIONS_IDENTITY_KEYS:
             new_options.pop(key, None)
+
+        # Register item 515: a save must not leave the stop threshold at or above
+        # the start threshold. The panel's own conflict check holds such an edit
+        # back, but the Playground publish/sweep, the per-setting Revert and any
+        # other client wrote it straight through. An entry already running an
+        # inverted pair keeps saving every other setting (see the helper).
+        _inverted = inverted_threshold_pair(
+            {**entry.data, **entry.options},
+            {**entry.data, **new_options},
+            effective_device_type,
+        )
+        if _inverted is not None:
+            connection.send_error(
+                msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
+            )
+            return
 
         update_kwargs: dict[str, Any] = {"options": new_options}
         if isinstance(submitted_name, str) and submitted_name.strip():
@@ -4128,6 +4207,9 @@ async def async_apply_imported_entry_options(
         # would silently revert a ws_set_options that committed while we waited.
         # A persisted null survives options.get(key, DEFAULT) and breaks setup
         # (#389), so the same write-boundary strip as ws_set_options applies.
+        entry_options_updates = _without_inverted_threshold_pair(
+            entry, entry_options_updates, source
+        )
         new_options = strip_null_options({**entry.options, **entry_options_updates})
         # ...and a non-numeric numeric setting is dropped, same reason (PLATFORM-13).
         new_options, _ = drop_invalid_numeric_options(new_options)
@@ -4415,6 +4497,9 @@ async def ws_import_config_selective(
                     # Nested inside the write lock this handler already holds;
                     # order is always write -> options, so no deadlock.
                     async with _entry_options_lock(hass, entry_id):
+                        filtered = _without_inverted_threshold_pair(
+                            entry, filtered, "store_device_package"
+                        )  # item 515
                         await _record_option_changes(
                             hass, entry, filtered, "store_device_package"
                         )
@@ -4673,6 +4758,20 @@ async def ws_apply_suggestions(
                 int(float(val)) if key in _SUGGESTION_INT_KEYS else float(val)
             )
 
+        # Item 515: the reconciler keeps a stored start/stop pair ordered, but
+        # applying one of the two alone (a subset, a muted cascade, or a pair
+        # reconciled against options that changed since) could still invert it.
+        _inverted = inverted_threshold_pair(
+            merged,
+            {**merged, **updates},
+            getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+        )
+        if _inverted is not None:
+            connection.send_error(
+                msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
+            )
+            return
+
         if updates:
             # Clear before updating the entry: async_update_entry schedules a
             # reload that rebuilds the store, so persist the cleared state first.
@@ -4872,6 +4971,166 @@ async def ws_get_cycle_power_data(
             **meta,
         },
     )
+
+
+# Cycle context (register item 513, discussion #463): the power sensor's recorder
+# history just before and just after a stored cycle, for the cycle chart to draw
+# greyed either side of the stored trace. The cap bounds the two recorder queries.
+_CYCLE_CONTEXT_MAX_S = 3600.0
+_CYCLE_CONTEXT_MAX_POINTS = 300
+
+
+def _cycle_context_points(
+    rows: list[tuple[float, float | None]],
+    origin_ts: float,
+    lo_ts: float,
+    hi_ts: float,
+    *,
+    hi_inclusive: bool,
+    max_points: int = _CYCLE_CONTEXT_MAX_POINTS,
+) -> list[list[float | None]]:
+    """Recorder rows inside a window as ``[offset_s, watts]`` from ``origin_ts``.
+
+    ``watts`` is None at an unavailable (or non-finite) row, so the panel breaks the
+    line there rather than holding the last reading across an outage. Each run
+    between two such rows is thinned on its own (``_downsample`` keeps a run's
+    extrema), so thinning never bridges a gap.
+    """
+    inside = [
+        (ts, w) for ts, w in rows
+        if lo_ts <= ts and (ts <= hi_ts if hi_inclusive else ts < hi_ts)
+    ]
+    total = sum(1 for _ts, w in inside if w is not None) or 1
+    out: list[list[float | None]] = []
+    run: list[tuple[float, float]] = []
+
+    def _flush() -> None:
+        if run:
+            budget = max(4, round(max_points * len(run) / total))
+            out.extend(_downsample([(ts - origin_ts, w) for ts, w in run], budget))
+            run.clear()
+
+    for ts, w in inside:
+        if w is None or not math.isfinite(float(w)):
+            _flush()
+            if not out or out[-1][1] is not None:
+                out.append([round(ts - origin_ts, 2), None])
+            continue
+        run.append((ts, float(w)))
+    _flush()
+    return out
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_cycle_context",
+        vol.Required("entry_id"): str,
+        vol.Required("cycle_id"): str,
+        vol.Optional("before_s", default=600.0): vol.Coerce(float),
+        vol.Optional("after_s", default=600.0): vol.Coerce(float),
+    }
+)
+@websocket_api.async_response
+async def ws_get_cycle_context(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """The power sensor's recorder history around one stored cycle (item 513).
+
+    ``before`` covers ``[start - before_s, start)`` and ``after`` covers
+    ``[trace end, trace end + after_s]`` (clamped to now), both as
+    ``[offset_s, watts]`` from the cycle's stored start: the axis the cycle chart
+    already plots, so the panel draws them either side of the stored trace.
+    Display only: it reads the recorder and the cycle's start and trace end, writes
+    nothing, and nothing it returns reaches duration, energy, matching or envelopes.
+
+    Only for a cycle this device observed live (``past``): a community-store
+    reference was recorded on someone else's machine and a backfill came from an
+    imported history, so this plug's recorder at that time says nothing about
+    either. ``available`` is False while the recorder holds no reading for either
+    window (it keeps 10 days by default; an excluded entity has none), and
+    ``reason`` says why.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+
+    def _window(key: str) -> float:
+        value = float(msg.get(key) or 0.0)
+        if not math.isfinite(value):
+            return 0.0
+        return max(0.0, min(_CYCLE_CONTEXT_MAX_S, value))
+
+    cycle_id: str = msg["cycle_id"]
+    before_s, after_s = _window("before_s"), _window("after_s")
+    out: dict[str, Any] = {
+        "cycle_id": cycle_id,
+        "available": False,
+        "reason": None,
+        "entity_id": None,
+        "before_s": before_s,
+        "after_s": after_s,
+        "trace_end_s": 0.0,
+        "after_end_s": 0.0,
+        "before": [],
+        "after": [],
+    }
+    try:
+        store = manager.profile_store
+        cycle, origin = store.find_stored_cycle(cycle_id)
+        entity_id = getattr(manager, "power_sensor_entity_id", None)
+        start_raw = cycle.get("start_time") if cycle else None
+        start_dt = dt_util.parse_datetime(str(start_raw)) if start_raw else None
+        if cycle is None:
+            out["reason"] = "not_found"
+        elif origin != "past":
+            out["reason"] = "not_live"
+        elif not entity_id:
+            out["reason"] = "no_sensor"
+        elif start_dt is None:
+            out["reason"] = "no_start"
+        else:
+            out["entity_id"] = entity_id
+            start_dt = dt_util.as_utc(start_dt)
+            start_ts = start_dt.timestamp()
+            samples = store.get_cycle_power_data(cycle_id)
+            try:
+                trace_end = float(samples[-1][0]) if samples else float(cycle.get("duration") or 0.0)
+            except (TypeError, ValueError):
+                trace_end = 0.0
+            trace_end = max(0.0, trace_end) if math.isfinite(trace_end) else 0.0
+            out["trace_end_s"] = round(trace_end, 2)
+            if before_s > 0:
+                lo = start_ts - before_s
+                rows = await _recorder_power(
+                    hass, entity_id, start_dt - timedelta(seconds=before_s),
+                    end_dt=start_dt, keep_unavailable=True,
+                )
+                out["before"] = _cycle_context_points(
+                    rows, start_ts, lo, start_ts, hi_inclusive=False
+                )
+            end_dt = start_dt + timedelta(seconds=trace_end)
+            after_end_dt = min(end_dt + timedelta(seconds=after_s), dt_util.utcnow())
+            if after_s > 0 and after_end_dt > end_dt:
+                rows = await _recorder_power(
+                    hass, entity_id, end_dt, end_dt=after_end_dt, keep_unavailable=True,
+                )
+                out["after"] = _cycle_context_points(
+                    rows, start_ts, end_dt.timestamp(), after_end_dt.timestamp(),
+                    hi_inclusive=True,
+                )
+                out["after_end_s"] = round(after_end_dt.timestamp() - start_ts, 2)
+            out["available"] = any(p[1] is not None for p in out["before"] + out["after"])
+            if not out["available"]:
+                out["reason"] = "no_history"
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Error building cycle context for %s: %s", cycle_id, exc)
+        out.update(available=False, reason="no_history", before=[], after=[])
+
+    _send_result(connection, msg["id"], "get_cycle_context", out)
 
 
 @websocket_api.websocket_command(
@@ -5450,6 +5709,19 @@ async def ws_set_user_prefs(
             cur.pop("lang_override", None)  # empty clears -> system default
         elif isinstance(lang, str) and _PREF_LANG_TAG_RE.match(lang):
             cur["lang_override"] = lang
+    # Cycle chart context length per device (item 513): {entry_id: minutes}. Merged
+    # into the stored map, so a panel only has to send the device it changed.
+    ctx = p.get("cycle_context_min")
+    if isinstance(ctx, dict):
+        ctx_map = dict(cur.get("cycle_context_min") or {})
+        for eid, minutes in ctx.items():
+            if not isinstance(eid, str) or not eid or len(eid) > 64:
+                continue
+            if isinstance(minutes, bool) or minutes not in _PREF_CYCLE_CONTEXT_MINUTES:
+                continue
+            ctx_map[eid] = int(minutes)
+        # Bounded: one key per config entry, never more than any real install has.
+        cur["cycle_context_min"] = dict(list(ctx_map.items())[-64:])
     # Allow setup guidance skip keys: setup_skip_<step_key> -> "never" | ISO timestamp
     for k, v in p.items():
         if isinstance(k, str) and k.startswith("setup_skip_"):

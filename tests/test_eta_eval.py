@@ -204,3 +204,56 @@ def test_compare_pairs_runs_and_lists_moved_first_etas(run_out, tmp_path, capsys
     assert f"paired cycles: {len(rows)}" in out
     assert "moved by >= 1 min: 2 / 6" in out
     assert "never" in out and rows[0]["id"] in out
+
+
+# ------------------------------------------------------- synthetic halt (item 514)
+
+
+def test_halt_metrics_read_the_countdown_through_the_plateau():
+    # A 45 min plateau from 1000 s: the ETA counts down until the stall flag at
+    # 1600 s, then holds; the wash resumes at 3700 s and ends at 5000 s.
+    series = [
+        _pt(900, 2100, "Long"), _pt(1000, 2000, "Long"), _pt(1600, 1400, "Long"),
+        {"t": 1630, "remaining_s": 1400, "matched_profile": "Long", "stalled": True},
+        {"t": 3690, "remaining_s": 1400, "matched_profile": "Long", "stalled": True},
+        _pt(3760, 1350, "Long"), _pt(4300, 700, "Long"), _pt(4990, 10, "Long"),
+    ]
+    h = eta.halt_metrics(series, 5000.0, 1000.0, 3700.0)
+    assert (h["halt_start_s"], h["halt_end_s"], h["halt_stall_on_s"]) == (1000.0, 3700.0, 1630.0)
+    assert (h["rem_h0_s"], h["rem_stall_s"], h["rem_h1_s"]) == (2000.0, 1400.0, 1400.0)
+    # +1 min: the 3760 s estimate, 1350 s left of the true 1240 s.
+    assert h["halt_after_err_s"]["60"] == pytest.approx(1350 - (5000 - 3760))
+    assert h["halt_after_err_s"]["600"] == pytest.approx(700 - (5000 - 4300))
+    assert h["halt_after_err_s"]["1800"] is None  # past the end of the cycle
+    rows = [{"export": "x", "id": "a", "device_type": "washing_machine", **h}]
+    s = eta.summarise_halt(rows)
+    assert s["n"] == 1 and s["stalled"] == 1
+    assert s["countdown_med_min"] == pytest.approx(10.0)
+    assert s["countdown_stalled_med_min"] == pytest.approx(0.0)
+
+
+def test_a_halt_run_replays_the_plateau_and_reports_it(corpus, tmp_path, capsys):
+    out = tmp_path / "halt.json"
+    assert eta.main([
+        "--corpus", str(corpus), "--json", str(out),
+        "--halt-at", "0.5", "--halt-min", "40", "--device-types", "washing_machine",
+    ]) == 0
+    rows = json.loads(out.read_text())
+    assert len(rows) == 6
+    for r in rows:
+        # The truth is the halted trace's: the plateau sits above stop.
+        assert r["halt_end_s"] - r["halt_start_s"] == pytest.approx(2400.0, abs=60.0)
+        assert r["truth_s"] > r["halt_end_s"]
+        assert r["rem_h0_s"] is not None
+    # Where the stall showed, the remaining time froze from the flag on (item 514):
+    # it no longer runs out while the machine stands still.
+    shown = [r for r in rows if r["halt_stall_on_s"] is not None]
+    assert shown
+    for r in shown:
+        assert 0.0 < r["rem_h1_s"] <= r["rem_stall_s"] < r["rem_h0_s"], r
+    assert "synthetic halt (--halt-at)" in capsys.readouterr().out
+
+
+def test_halt_at_must_be_a_fraction():
+    with pytest.raises(SystemExit):
+        eta.main(["--halt-at", "1.0"])

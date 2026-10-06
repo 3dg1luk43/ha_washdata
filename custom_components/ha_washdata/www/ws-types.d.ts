@@ -94,6 +94,19 @@ export interface GetConstantsResponse {
   pg_match_defaults: Record<string, unknown>;
 }
 
+export interface GetCycleContextResponse {
+  cycle_id: string;
+  available: boolean;
+  reason: string | null;
+  entity_id: string | null;
+  before_s: number;
+  after_s: number;
+  trace_end_s: number;
+  after_end_s: number;
+  before: ((number | null)[])[];
+  after: ((number | null)[])[];
+}
+
 export interface GetCyclePowerDataResponse {
   cycle_id: string;
   samples: number[][];
@@ -822,6 +835,13 @@ export interface GetCyclePowerDataRequest {
   cycle_id: string;
 }
 
+export interface GetCycleContextRequest {
+  entry_id: string;
+  cycle_id: string;
+  before_s?: number;
+  after_s?: number;
+}
+
 export interface TrimCycleRequest {
   entry_id: string;
   cycle_id: string;
@@ -1175,6 +1195,7 @@ export interface WashDataWsRequests {
   "ha_washdata/set_suggestion_lock": SetSuggestionLockRequest;
   "ha_washdata/run_suggestion_analysis": RunSuggestionAnalysisRequest;
   "ha_washdata/get_cycle_power_data": GetCyclePowerDataRequest;
+  "ha_washdata/get_cycle_context": GetCycleContextRequest;
   "ha_washdata/trim_cycle": TrimCycleRequest;
   "ha_washdata/analyze_split": AnalyzeSplitRequest;
   "ha_washdata/apply_split": ApplySplitRequest;
@@ -1289,6 +1310,7 @@ export interface WashDataWsResponses {
   "ha_washdata/set_suggestion_lock": SetSuggestionLockResponse;
   "ha_washdata/run_suggestion_analysis": RunSuggestionAnalysisResponse;
   "ha_washdata/get_cycle_power_data": GetCyclePowerDataResponse;
+  "ha_washdata/get_cycle_context": GetCycleContextResponse;
   "ha_washdata/trim_cycle": StartTaskResponse;
   "ha_washdata/analyze_split": AnalyzeSplitResponse;
   "ha_washdata/apply_split": StartTaskResponse;

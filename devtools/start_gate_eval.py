@@ -149,10 +149,23 @@ cycle; ``--standby-level W`` replays as if that standby level had been learned. 
 manifest source learns one (every idle floor is ~0 W, and #35's standby has no off
 level), so the shipped run shows 0 changes in 32.5 idle days; at a forced 2 W level
 still 0 (none is ever seen switched off below it, which a learned level requires);
-with ``power_off_threshold_w=0.5`` one, on #35 (into idle, never back). A standby-band
-probe out of Finished is hidden like a re-probe: flickers 8 -> 3 (#35 6 -> 3, #214
-and the maintainer's washer 1 -> 0). Every detection metric and every per-reference
+with ``power_off_threshold_w=0.5`` one, on #35 (into idle, never back). Item 452 hid a
+standby-band probe out of Finished (flickers 8 -> 3); since item 510 a terminal
+state starts a probe only at the start threshold, so those band probes no longer
+happen at all (terminal-state probes 14 -> 10, all removed ones had aborted; #35
+stays at 3 flickers). Every detection metric and every per-reference
 row of every source identical (shipped gates and users' own, delayed start on and off).
+
+**Item 515** (2026-10-06, a false start out of a terminal state returns there): the
+replay keeps the manager's completed/Clean overlay (set by a cycle end, gone with the
+Off expiry or a commit; ``--terminal-to-off`` replays the rule before it, where a probe
+cleared the overlay as it began and its false start fell to OFF). ``terminal_probes``
+counts the idle probes that began while a cycle end was shown, ``terminal_lost`` those
+that cleared it without committing (column ``end lost``). Over the manifest, users'
+gates and shipped defaults, delayed start on and off: lost 1 -> 0 (#35; the next three
+probes there now also come out of the shown end, terminal probes 1 -> 4, all abort
+back to it); every other field of every source and per-reference row identical,
+flickers included.
 """
 from __future__ import annotations
 
@@ -175,6 +188,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 # pylint: disable=wrong-import-position
+from custom_components.ha_washdata import cycle_detector as _cycle_detector  # noqa: E402
 from custom_components.ha_washdata import history_import  # noqa: E402
 from custom_components.ha_washdata.const import (  # noqa: E402
     CONF_CURVE_PREROLL_SECONDS,
@@ -505,6 +519,11 @@ class Replay:
     wait_drops: list[tuple[datetime, datetime]] = field(default_factory=list)
     # (moment, shown state) of every off <-> idle change on the entities (#452)
     idle_flips: list[tuple[datetime, str]] = field(default_factory=list)
+    # Item 515: probes that began while a cycle end was shown (the manager's
+    # completed/Clean overlay), and those whose overlay a probe that never
+    # committed cleared (the manager cleared it on STARTING before item 515).
+    terminal_probes: list[tuple[datetime, datetime]] = field(default_factory=list)
+    terminal_lost: list[tuple[datetime, datetime]] = field(default_factory=list)
 
 
 def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[str, Any]) -> Replay:
@@ -520,6 +539,14 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
     # where the manager writes them: on every transition and after every reading.
     shown: dict[str, Any] = {"state": STATE_OFF, "since": None, "wait_since": None}
     completed_at: dict[str, datetime | None] = {"t": None}
+    # Item 515, the manager's completed/Clean overlay (`_cycle_completed_time`):
+    # set by a cycle end, gone with the Off expiry or a commit. Before item 515
+    # (TERMINAL_PROBE_RETURNS off) a probe cleared it as it began, and a false
+    # start then fell to OFF.
+    returns = bool(getattr(_cycle_detector, "TERMINAL_PROBE_RETURNS", False))
+    probe_overlay: dict[str, Any] = {"shown": False, "cleared": False}
+    terminal_probes: list[tuple[datetime, datetime]] = []
+    terminal_lost: list[tuple[datetime, datetime]] = []
 
     det: CycleDetector
 
@@ -531,9 +558,10 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
             shown["since"] = ts
         elif state == STATE_DELAY_WAIT and prev != STATE_STARTING:
             shown["wait_since"] = ts
-        if prev == STATE_STARTING and state in (STATE_OFF, STATE_IDLE, STATE_DELAY_WAIT):
+        if prev == STATE_STARTING and state in (STATE_OFF, STATE_IDLE, STATE_DELAY_WAIT, *_TERMINAL):
             # Item 504: a false start out of DELAY_WAIT returns there, not to OFF.
             # #452: off shows as idle on a two-level appliance at its standby level.
+            # Item 515: out of a terminal state, back to it.
             flickers.append((shown["since"] or ts, ts))
         elif prev == STATE_DELAY_WAIT and state in (STATE_OFF, STATE_IDLE):
             wait_drops.append((shown["wait_since"] or ts, ts))
@@ -549,11 +577,20 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
             return
         if new == STATE_STARTING:
             starting_since["t"] = ts
+            probe_overlay["shown"] = completed_at["t"] is not None
+            probe_overlay["cleared"] = probe_overlay["shown"] and not returns
+            if probe_overlay["cleared"]:
+                completed_at["t"] = None
         elif old == STATE_STARTING and new == STATE_RUNNING:
             start = det.current_cycle_start or starting_since["t"] or ts
             runs.append(Run(start=start, commit=ts))
-        elif old == STATE_STARTING and new in (STATE_OFF, STATE_DELAY_WAIT):
+            completed_at["t"] = None
+        elif old == STATE_STARTING and new in (STATE_OFF, STATE_DELAY_WAIT, *_TERMINAL):
             probes.append((starting_since["t"] or ts, ts))
+            if probe_overlay["shown"]:
+                terminal_probes.append((starting_since["t"] or ts, ts))
+            if probe_overlay["cleared"]:
+                terminal_lost.append((starting_since["t"] or ts, ts))
         _expose()
 
     def _on_end(cycle: dict[str, Any]) -> None:
@@ -588,7 +625,10 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
             and det.state in _TERMINAL
             and (ts - completed_at["t"]).total_seconds() > reset_after
         ):
-            now["t"] = completed_at["t"] + timedelta(seconds=reset_after)
+            # Not before the last reading: since item 515 a probe out of the terminal
+            # state can straddle the moment (the manager's expiry skips STARTING).
+            due = completed_at["t"] + timedelta(seconds=reset_after)
+            now["t"] = max(due, now["t"]) if now["t"] is not None else due
             det.reset(STATE_OFF, now["t"])
             completed_at["t"] = None
         if power is None:
@@ -625,7 +665,8 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
         processed += 1
         _feed(ts, power)
         last_real = (ts, power)
-    return Replay(runs, probes, len(readings), processed, flickers, wait_drops, idle_flips)
+    return Replay(runs, probes, len(readings), processed, flickers, wait_drops, idle_flips,
+                  terminal_probes, terminal_lost)
 
 
 # ─── Truth ────────────────────────────────────────────────────────────────────
@@ -821,6 +862,8 @@ def score(
     flickers = [f for f in result.flickers if not _inside_any(f[0], f[1])]
     wait_drops = [w for w in result.wait_drops if not _inside_any(w[0], w[1])]
     idle_flips = [f for f in result.idle_flips if not _inside_any(f[0], f[0])]
+    terminal_probes = [p for p in result.terminal_probes if not _inside_any(p[0], p[1])]
+    terminal_lost = [p for p in result.terminal_lost if not _inside_any(p[0], p[1])]
 
     lo, hi = window
     busy = 0.0
@@ -864,6 +907,10 @@ def score(
         "idle_flips": len(idle_flips),
         "idle_flips_per_idle_day": _rate(len(idle_flips)),
         "idle_shown": sum(1 for _t, st in idle_flips if st == STATE_IDLE),
+        # Item 515: idle probes that began while a cycle end (Finished / Clean) was
+        # shown, and those that cleared it without committing a cycle.
+        "terminal_probes": len(terminal_probes),
+        "terminal_lost": len(terminal_lost),
         "starting_unshown": sum(
             1 for r in hits if not r.get("merged_into") and not r["shown_starting"]
         ),
@@ -1076,7 +1123,8 @@ def aggregate(results: list[dict[str, Any]]) -> dict[str, dict[str, dict[str, An
     """
     acc: dict[str, dict[str, dict[str, Any]]] = {}
     keys = ("references", "missed", "merged", "split", "phantoms", "idle_probes", "cycle_probes",
-            "flickers", "wait_drops", "starting_unshown", "idle_flips")
+            "flickers", "wait_drops", "starting_unshown", "idle_flips", "terminal_probes",
+            "terminal_lost")
     for res in results:
         if "error" in res or not res.get("aggregate", True):
             continue
@@ -1120,7 +1168,7 @@ def _print_aggregate(agg: dict[str, dict[str, dict[str, Any]]]) -> None:
     print(f"\n{'variant':<40} {'group':<16} {'src':>3} {'refs':>4} {'miss':>4} {'merge':>5} "
           f"{'split':>5} {'late med/p90/max s':>20} {'>30s':>4} {'commit med/p90':>15} "
           f"{'phantom (/idle d)':>18} {'probes':>6} {'flick':>5} {'waits':>5} {'unshown':>7} "
-          f"{'idle d':>7} {'idle<>off':>9}")
+          f"{'idle d':>7} {'idle<>off':>9} {'end lost':>8}")
     for name, groups in agg.items():
         for group in sorted(groups, key=lambda g: (g == "ALL", g)):
             s = groups[group]
@@ -1132,7 +1180,8 @@ def _print_aggregate(agg: dict[str, dict[str, dict[str, Any]]]) -> None:
                   f"{str(s['phantoms']) + ' (' + str(s['phantoms_per_idle_day']) + ')':>18} "
                   f"{s['idle_probes']:>6} {s['flickers']:>5} {s['wait_drops']:>5} "
                   f"{s['starting_unshown']:>7} "
-                  f"{s['idle_days']:>7} {s['idle_flips']:>9}")
+                  f"{s['idle_days']:>7} {s['idle_flips']:>9} "
+                  f"{str(s['terminal_lost']) + '/' + str(s['terminal_probes']):>8}")
 
 
 def _print(result: dict[str, Any], label: str) -> None:
@@ -1168,6 +1217,9 @@ def _print(result: dict[str, Any], label: str) -> None:
     print(f"idle display (#452): standby level {first['gates'].get('standby_level_w')} W, "
           f"off<->idle changes {first['summary']['idle_flips']} "
           f"({first['summary']['idle_flips_per_idle_day']} per idle day)")
+    print("cycle end shown (item 515): " + ", ".join(
+        f"{name}: {v['summary']['terminal_lost']} of {v['summary']['terminal_probes']} "
+        f"probes out of it lost it" for name, v in result["variants"].items()))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1201,12 +1253,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--standby-level", type=float, default=None, metavar="W",
                     help="#452 what-if: replay as if this standby level had been learned "
                          "(the idle display; detection never reads it)")
+    ap.add_argument("--terminal-to-off", action="store_true",
+                    help="item 515 A/B: replay as before it (a false start out of a "
+                         "terminal state falls to OFF and the overlay clears on STARTING)")
     ap.add_argument("--json", help="write the full result here")
     args = ap.parse_args(argv)
     if not args.history and not args.manifest:
         ap.error("--history or --manifest is required")
     global STANDBY_LEVEL_OVERRIDE  # noqa: PLW0603
     STANDBY_LEVEL_OVERRIDE = args.standby_level
+    if args.terminal_to_off:
+        _cycle_detector.TERMINAL_PROBE_RETURNS = False
 
     root = Path(args.root)
     if args.manifest:

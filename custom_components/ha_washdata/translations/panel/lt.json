@@ -694,7 +694,13 @@
     "pg_obj_early": "Ankstyvų pabaigų dalis",
     "pg_obj_endlag": "Pabaigos vėlavimas (mediana)",
     "pg_obj_split": "Padalinimų dalis",
-    "pg_sweep_cycles": "Naujausi ciklai"
+    "pg_sweep_cycles": "Naujausi ciklai",
+    "cycle_context": "Recorder istorija prieš ciklą ir po jo",
+    "cycle_context_off": "Išjungta",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Recorder istorija",
+    "before_start": "Prieš pradžią",
+    "after_end": "Po pabaigos"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -1096,7 +1102,12 @@
     "pg_sweep_n_cycles_one": "remiantis {count} ciklu",
     "pg_sweep_n_cycles_few": "remiantis {count} ciklais",
     "pg_sweep_n_cycles_many": "remiantis {count} ciklo",
-    "pg_sweep_n_cycles_other": "remiantis {count} ciklų"
+    "pg_sweep_n_cycles_other": "remiantis {count} ciklų",
+    "cycle_context_loading": "Įkeliama recorder istorija…",
+    "cycle_context_note": "Pilka: galios jutiklio recorder istorija prieš šį ciklą ir po jo. Ji nėra ciklo dalis: trukmė, energija ir atitikimas naudoja tik paties ciklo įrašą.",
+    "cycle_context_none": "Recorder neturi rodmenų prieš šį ciklą ir po jo (Home Assistant pagal numatytuosius nustatymus saugo 10 dienų istoriją).",
+    "cycle_context_tip": "Tik rodymui: cikle nieko nekeičia. Ciklas prasideda nuo pirmojo rodmens virš paleidimo slenksčio, todėl jo grafikas prasideda nuo to rodmens. Čia nubraižoma paties galios jutiklio recorder istorija abipus ciklo, tiems ciklams, kuriuos recorder dar saugo. Jei vietoj to norite nutrauktų paleidimo bandymų rodmenis perkelti į būsimus ciklus, naudokite nustatymą „Kreivės įžanginės sekundės“ (Nustatymai > Aptikimas > Ciklo pradžia): jis paankstina įrašytą pradžią, todėl pasikeičia išsaugotos trukmės, o kartu ir atitikimas profiliams, išmoktiems be šio nustatymo.",
+    "invalid_threshold_pair": "Sustabdymo slenkstis ({stop} W) turi būti mažesnis už paleidimo slenkstį ({start} W): žemiau sustabdymo slenksčio ciklas baigiasi, virš paleidimo slenksčio prasideda. Niekas neišsaugota; keiskite abi vertes kartu."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1228,7 +1239,7 @@
       "label": "Min. ciklo trukmė"
     },
     "curve_preroll_seconds": {
-      "doc": "Kiek sekundžių rodmenų iš nutrauktų paleidimo bandymų WashData gali perkelti į ciklo kreivės pradžią. Ciklo kreivė paprastai prasideda nuo to paleidimo bandymo, kuris galiausiai pavyksta, todėl mašinoje, kuri prieš įsibėgėdama kelis kartus pabando - programos pasirinkimas, durelių užraktas, pirmasis vandens pripildymas - kiekvienoje kreivėje trūksta pirmųjų tikros veiklos minučių. Nustatykite šią vertę šiek tiek didesnę už ilgiausią tokią jūsų mašinos įsibėgėjimo trukmę (300 s daugumai yra su kaupu). 0 išjungia šią funkciją. Atminkite, kad ją įjungus įrašyta pradžia paankstinama, todėl ciklai, įrašyti prieš pakeitimą ir po jo, tai pačiai programai turi skirtingas trukmes; išmokti vidurkiai svyruos, kol senesni ciklai bus išstumti.",
+      "doc": "Kiek sekundžių rodmenų iš nutrauktų paleidimo bandymų WashData gali perkelti į ciklo kreivės pradžią. Ciklo kreivė paprastai prasideda nuo to paleidimo bandymo, kuris galiausiai pavyksta, todėl mašinoje, kuri prieš įsibėgėdama kelis kartus pabando - programos pasirinkimas, durelių užraktas, pirmasis vandens pripildymas - kiekvienoje kreivėje trūksta pirmųjų tikros veiklos minučių. Nustatykite šią vertę šiek tiek didesnę už ilgiausią tokią jūsų mašinos įsibėgėjimo trukmę (300 s daugumai yra su kaupu). 0 išjungia šią funkciją. Atminkite, kad ją įjungus įrašyta pradžia paankstinama, todėl ciklai, įrašyti prieš pakeitimą ir po jo, tai pačiai programai turi skirtingas trukmes; išmokti vidurkiai svyruos, kol senesni ciklai bus išstumti. Jei norite tik pamatyti, kas vyko prieš ciklą, nieko nekeisdami, vietoj to naudokite recorder istoriją ciklo grafike.",
       "label": "Kreivės įžanginės sekundės"
     },
     "delay_confirm_seconds": {
