@@ -49,3 +49,19 @@ def test_auto_label_accepts_an_empty_threshold() -> None:
     assert _SERVICE_SCHEMAS["auto_label_cycles"](
         {"device_id": "d", "confidence_threshold": "0.8"}
     )["confidence_threshold"] == 0.8
+
+
+@pytest.mark.parametrize(
+    ("service", "data"),
+    [
+        ("auto_label_cycles", {"confidence_threshold": 10**400}),
+        ("trim_cycle", {"cycle_id": "c", "trim_start_s": 10**400}),
+        ("trim_cycle", {"cycle_id": "c", "trim_end_s": 10**400}),
+        ("submit_cycle_feedback", {"cycle_id": "c", "corrected_duration": 10**400}),
+    ],
+)
+def test_an_oversized_integer_is_a_validation_error(service, data) -> None:
+    # vol.Coerce(float) lets OverflowError escape (voluptuous catches only
+    # ValueError/TypeError), so the call failed with a traceback, not Invalid.
+    with pytest.raises(vol.Invalid):
+        _SERVICE_SCHEMAS[service]({"device_id": "d", **data})

@@ -171,8 +171,17 @@ def _svc(fields: dict[Any, Any]) -> vol.Schema:
 # One schema per service, mirroring services.yaml (audit PLATFORM-10): none had
 # one, so `profile_name: 123` raised AttributeError, a non-numeric trim_start_s a
 # ValueError traceback, and `unlabel_cycles: "false"` read as true.
+def _float(value: Any) -> float:
+    """``vol.Coerce(float)`` that also rejects an oversized JSON integer: voluptuous
+    catches only ValueError/TypeError, so ``float(10**400)`` escaped as OverflowError."""
+    try:
+        return float(value)
+    except (TypeError, ValueError, OverflowError) as err:
+        raise vol.Invalid("expected a number") from err
+
+
 _OPT_STR = vol.Any(None, cv.string)
-_OPT_NUM = vol.Any(None, vol.Coerce(float))
+_OPT_NUM = vol.Any(None, _float)
 _SERVICE_SCHEMAS: dict[str, vol.Schema] = {
     "label_cycle": _svc({vol.Required("cycle_id"): cv.string,
                          vol.Optional("profile_name"): _OPT_STR}),
@@ -181,7 +190,7 @@ _SERVICE_SCHEMAS: dict[str, vol.Schema] = {
     "delete_profile": _svc({vol.Required("profile_name"): cv.string,
                             vol.Optional("unlabel_cycles"): cv.boolean}),
     "auto_label_cycles": _svc({vol.Optional("confidence_threshold"): vol.Any(None, vol.All(
-        vol.Coerce(float), vol.Range(min=0.0, max=1.0)))}),
+        _float, vol.Range(min=0.0, max=1.0)))}),
     "export_config": _svc({vol.Optional("path"): _OPT_STR}),
     "import_config": _svc({vol.Required("path"): cv.string}),
     "submit_cycle_feedback": vol.Schema({
@@ -197,7 +206,7 @@ _SERVICE_SCHEMAS: dict[str, vol.Schema] = {
     "record_start": _svc({}),
     "record_stop": _svc({}),
     "trim_cycle": _svc({vol.Required("cycle_id"): cv.string,
-                        vol.Optional("trim_start_s"): vol.Coerce(float),
+                        vol.Optional("trim_start_s"): _float,
                         vol.Optional("trim_end_s"): _OPT_NUM}),
     "pause_cycle": _svc({}),
     "resume_cycle": _svc({}),
