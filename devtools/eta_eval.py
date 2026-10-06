@@ -142,25 +142,43 @@ def _fkey(f: float) -> str:
 
 @contextlib.contextmanager
 def _pre_404_cadence(enabled: bool) -> Iterator[None]:
-    """``--pre-404``: the detector always reads itself as committed.
+    """``--pre-404``: the match rate limit always reads the detector as committed.
 
     Register item 404 halves ``match_interval`` until the first commit, gated on
-    ``CycleDetector._match_committed`` (read only by that rate limit). Pinning it True
-    gives the pre-404 cadence on the code under test, like ``end_gate_eval
-    --no-shortening`` gives the pre-306 gate.
+    ``CycleDetector._match_committed``. Pinning it True gives the pre-404 cadence on
+    the code under test, like ``end_gate_eval --no-shortening`` gives the pre-306
+    gate. The dishwasher terminal-drop gate reads the same flag, so it is handed the
+    real commit state (kept by the setter): the pin must not let it fire before the
+    first commit, which would change how cycles end, not only the match cadence.
     """
     if not enabled:
         yield
         return
     from custom_components.ha_washdata.cycle_detector import CycleDetector  # noqa: PLC0415
+    from custom_components.ha_washdata.ml.engine import ml_models_enabled  # noqa: PLC0415
+
+    def _store(self: Any, value: Any) -> None:
+        self.__dict__["_pre404_committed"] = bool(value)
+
+    orig_gate = playground.terminal_drop_may_fire
+
+    def _gate(device_type: Any, options: Any, detector: Any, *, pinned: bool = False) -> bool:
+        if not orig_gate(device_type, options, detector, pinned=pinned):
+            return False
+        return bool(
+            ml_models_enabled(options) or pinned
+            or detector.__dict__.get("_pre404_committed", False)
+        )
 
     CycleDetector._match_committed = property(  # type: ignore[assignment]  # noqa: SLF001
-        lambda _self: True, lambda _self, _value: None
+        lambda _self: True, _store
     )
+    playground.terminal_drop_may_fire = _gate
     try:
         yield
     finally:
         del CycleDetector._match_committed  # noqa: SLF001
+        playground.terminal_drop_may_fire = orig_gate
 
 
 @contextlib.contextmanager

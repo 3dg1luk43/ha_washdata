@@ -186,6 +186,23 @@ def test_pre_404_arm_pins_the_commit_flag_and_restores_it():
     assert det._match_committed is False  # noqa: SLF001
 
 
+def test_pre_404_arm_keeps_the_terminal_drop_gate_on_the_real_commit():
+    # The pinned flag is for the match rate limit only: the dishwasher
+    # terminal-drop gate must still wait for the first real commit.
+    from custom_components.ha_washdata.cycle_detector import CycleDetector
+
+    det = CycleDetector.__new__(CycleDetector)
+    det._matched_profile, det._match_ambiguous = "Eco", False  # noqa: SLF001
+    with eta._pre_404_cadence(True):  # noqa: SLF001
+        det.set_match_committed(False)
+        assert playground.terminal_drop_may_fire("dishwasher", {}, det) is False
+        assert playground.terminal_drop_may_fire("dishwasher", {}, det, pinned=True) is True
+        det.set_match_committed(True)
+        assert playground.terminal_drop_may_fire("dishwasher", {}, det) is True
+    det.set_match_committed(False)
+    assert playground.terminal_drop_may_fire("dishwasher", {}, det) is False
+
+
 def test_the_playground_display_caps_are_restored(run_out):
     assert playground.MAX_SERIES_PER_CYCLE == 600
     assert playground.MAX_EVENTS_PER_CYCLE == 300

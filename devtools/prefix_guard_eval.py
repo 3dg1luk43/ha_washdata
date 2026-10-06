@@ -358,7 +358,8 @@ def _with_quiet(points: list[tuple[float, float]], until: float) -> list[tuple[f
     while t < until:
         out.append((t, 0.0))
         t += QUIET_STEP_S
-    out.append((until, 0.0))
+    if until > out[-1][0]:  # never a reading back in time, nor a duplicate
+        out.append((until, 0.0))
     return out
 
 

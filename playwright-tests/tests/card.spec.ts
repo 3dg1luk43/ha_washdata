@@ -263,3 +263,15 @@ test('tile: tap_action none leaves the card out of the tab order', async ({ page
   const n = await page.evaluate(() => (window as any).__card.shadowRoot.querySelectorAll('[role="button"]').length);
   expect(n).toBe(0);
 });
+
+test('tile: an editor tap_action change rebuilds the keyboard binding', async ({ page }) => {
+  // _attachGestures binds focus only at build time; setConfig must rebuild when
+  // the tap action is switched on or off, or the card keeps the old behaviour.
+  await mount(page, { entity: 'sensor.wm_state', layout: 'tile', tap_action: { action: 'none' } }, RUN);
+  const count = () => page.evaluate(() => (window as any).__card.shadowRoot.querySelectorAll('[role="button"]').length);
+  expect(await count()).toBe(0);
+  await page.evaluate(() => (window as any).__card.setConfig({ entity: 'sensor.wm_state', layout: 'tile', tap_action: { action: 'more-info' } }));
+  expect(await count()).toBe(1);
+  await page.evaluate(() => (window as any).__card.setConfig({ entity: 'sensor.wm_state', layout: 'tile', tap_action: { action: 'none' } }));
+  expect(await count()).toBe(0);
+});

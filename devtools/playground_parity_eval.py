@@ -417,7 +417,7 @@ def _match_export(args: tuple[str, int, bool]) -> dict[str, Any]:
     return {"export": rel, "tally": dict(tally), "diffs": diffs}
 
 
-def _run(fn: Any, exports: list[Path], per_export: int, jobs: int, verbose: bool) -> list[Any]:
+def _dispatch(fn: Any, exports: list[Path], per_export: int, jobs: int, verbose: bool) -> list[Any]:
     tasks = [(str(p.relative_to(REPO)), per_export, verbose) for p in exports]
     tasks = [t for t in tasks if _load(REPO / t[0]) is not None]
     if jobs <= 1:
@@ -498,10 +498,10 @@ def main() -> int:
     exports = _exports(filters)
     t0 = time.time()
     if args.mode == "replay":
-        results = _run(_replay_export, exports, args.per_export, args.jobs, args.verbose)
+        results = _dispatch(_replay_export, exports, args.per_export, args.jobs, args.verbose)
         doc = _print_replay(results)
     else:
-        results = _run(_match_export, exports, args.per_export, args.jobs, args.verbose)
+        results = _dispatch(_match_export, exports, args.per_export, args.jobs, args.verbose)
         doc = _print_match(results)
     print(f"\n{time.time() - t0:.0f}s")
     if args.json:

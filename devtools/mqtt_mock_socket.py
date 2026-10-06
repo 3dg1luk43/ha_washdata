@@ -259,7 +259,9 @@ def main(argv: list[str] | None = None) -> int:
     async def startup() -> None:
         await hub.start()
         if args.play:
-            error = hub.plugs[plug.id].start()
+            # Explicitly: loading a source without that programme resets the saved
+            # one to "random", which would start a random cycle instead of failing.
+            error = hub.plugs[plug.id].start(program=args.play)
             if error:
                 _LOGGER.error("cannot start: %s", error)
 

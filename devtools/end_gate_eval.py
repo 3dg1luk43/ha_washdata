@@ -804,8 +804,15 @@ def _replay_export(
             (float(ev.get("t") or 0.0) for ev in events if ev.get("type") == "finished"),
             None,
         )
-        highs = [t for t, p in pts if p > level]
-        active = [t for t, p in pts if p > stop]
+        # The yardstick readings on the replay's clock: a mid-cycle halt (F < 1)
+        # moved every reading from its start on by the plateau length. Taken from
+        # the source, not the replay, so the plateau never counts as work.
+        work = pts
+        if halt_s is not None and halt is not None and halt[0] < 1.0:
+            shift = halt_s[1] - halt_s[0]
+            work = [(t + shift if t >= halt_s[0] else t, p) for t, p in pts]
+        highs = [t for t, p in work if p > level]
+        active = [t for t, p in work if p > stop]
         ac_final = _AC.get("ac_final_ts")
         base_t = playground._cycle_base_time(replayed)  # noqa: SLF001
         ac_final_s = (ac_final - base_t).total_seconds() if ac_final is not None else None

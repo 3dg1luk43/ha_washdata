@@ -39,3 +39,13 @@ def test_values_are_typed_instead_of_crashing_the_handler() -> None:
 def test_an_undeclared_key_an_automation_already_sends_is_kept() -> None:
     out = _SERVICE_SCHEMAS["submit_cycle_feedback"]({"cycle_id": "c", "dismiss": "true"})
     assert out["dismiss"] is True
+
+
+def test_auto_label_accepts_an_empty_threshold() -> None:
+    # services.yaml says "Leave empty to use the device's Auto-Label Confidence";
+    # an automation passing null must reach the handler's None fallback.
+    out = _SERVICE_SCHEMAS["auto_label_cycles"]({"device_id": "d", "confidence_threshold": None})
+    assert out["confidence_threshold"] is None
+    assert _SERVICE_SCHEMAS["auto_label_cycles"](
+        {"device_id": "d", "confidence_threshold": "0.8"}
+    )["confidence_threshold"] == 0.8

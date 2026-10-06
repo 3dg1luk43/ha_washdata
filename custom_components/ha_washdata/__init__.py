@@ -180,8 +180,8 @@ _SERVICE_SCHEMAS: dict[str, vol.Schema] = {
                             vol.Optional("reference_cycle_id"): _OPT_STR}),
     "delete_profile": _svc({vol.Required("profile_name"): cv.string,
                             vol.Optional("unlabel_cycles"): cv.boolean}),
-    "auto_label_cycles": _svc({vol.Optional("confidence_threshold"): vol.All(
-        vol.Coerce(float), vol.Range(min=0.0, max=1.0))}),
+    "auto_label_cycles": _svc({vol.Optional("confidence_threshold"): vol.Any(None, vol.All(
+        vol.Coerce(float), vol.Range(min=0.0, max=1.0)))}),
     "export_config": _svc({vol.Optional("path"): _OPT_STR}),
     "import_config": _svc({vol.Required("path"): cv.string}),
     "submit_cycle_feedback": vol.Schema({

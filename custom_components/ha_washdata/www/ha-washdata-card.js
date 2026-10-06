@@ -199,6 +199,8 @@ class WashDataCard extends HTMLElement {
       f.showSparkline ? "spark" : "",
       f.buttons.join("+"),
       layout === "glance" ? String(this._glanceEntities().length) : "",
+      // _attachGestures makes the card focusable only when it has a tap action.
+      c.tap_action && c.tap_action.action === "none" ? "notap" : "",
     ].join("|");
   }
 
