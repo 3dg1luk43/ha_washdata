@@ -844,21 +844,31 @@ _SERVICE_LEVEL_ORDER = {"none": 0, "read": 1, "edit": 2, "full": 3}
 _ADMIN_SERVICES = frozenset({"export_config", "import_config", "trigger_ml_training"})
 
 
-def _service_entry_id(hass: HomeAssistant, call: ServiceCall) -> str | None:
-    """The config entry a device-scoped service call addresses, if any."""
+def _service_entry_ids(hass: HomeAssistant, call: ServiceCall) -> list[str | None]:
+    """Every config entry a service call names: its ``entry_id`` and its device's.
+
+    Both are returned, and the caller authorizes each, because handlers differ in
+    which one they act on (``submit_cycle_feedback`` prefers ``entry_id``, every
+    other handler resolves ``device_id``, and the schemas allow extra keys). Checking
+    only ``entry_id`` let a user with edit access to entry B pass B's id beside
+    entry A's device and change A. ``[None]`` when the call names no entry.
+    """
+    ids: list[str | None] = []
     entry_id = call.data.get("entry_id")
     if isinstance(entry_id, str) and entry_id:
-        return entry_id
+        ids.append(entry_id)
     device_id = call.data.get("device_id")
     if isinstance(device_id, str) and device_id:
         device = dr.async_get(hass).async_get(device_id)
         if device is not None:
             loaded = hass.data.get(DOMAIN, {})
-            return next(
+            dev_entry = next(
                 (e for e in device.config_entries if e in loaded),
                 next(iter(device.config_entries), None),
             )
-    return None
+            if dev_entry is not None and dev_entry not in ids:
+                ids.append(dev_entry)
+    return ids or [None]
 
 
 async def _async_check_service_access(
@@ -885,9 +895,10 @@ async def _async_check_service_access(
         raise Unauthorized(context=call.context)
     from .ws_api import _effective_level  # pylint: disable=import-outside-toplevel
 
-    granted = _effective_level(hass, user, _service_entry_id(hass, call))
-    if _SERVICE_LEVEL_ORDER.get(granted, 0) < _SERVICE_LEVEL_ORDER.get(level, 2):
-        raise Unauthorized(context=call.context)
+    for entry_id in _service_entry_ids(hass, call):
+        granted = _effective_level(hass, user, entry_id)
+        if _SERVICE_LEVEL_ORDER.get(granted, 0) < _SERVICE_LEVEL_ORDER.get(level, 2):
+            raise Unauthorized(context=call.context)
 
 
 def _guarded_service(hass: HomeAssistant, name: str, handler: Any) -> Any:

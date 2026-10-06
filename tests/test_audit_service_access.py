@@ -138,3 +138,25 @@ async def test_automations_without_a_user_are_still_allowed(
     )
     assert out.exists()
     await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_a_second_id_in_the_call_cannot_borrow_another_entrys_access(
+    hass, hass_read_only_user, enable_custom_integrations
+):
+    # The guard read `entry_id` first, the handlers resolve `device_id`: a user
+    # with edit on entry B passed B's entry_id beside entry A's device_id and
+    # changed A. Every entry the call names must be authorized.
+    entry, dev = await _setup(hass)
+    from custom_components.ha_washdata import ws_api
+
+    ws_api._panel_data(hass)["rbac"] = {
+        "enabled": True,
+        "users": {hass_read_only_user.id: {"default": "read", "devices": {"entry_b": "edit"}}},
+    }
+    with pytest.raises(Unauthorized):
+        await hass.services.async_call(
+            DOMAIN, "delete_profile",
+            {"device_id": dev.id, "entry_id": "entry_b", "profile_name": "Cotton"},
+            blocking=True, context=Context(user_id=hass_read_only_user.id),
+        )
+    await hass.config_entries.async_unload(entry.entry_id)
