@@ -1714,14 +1714,26 @@ SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
 )
 
 
+# Shared settings the panel bounds to 0-1 (scores and a fraction). Every shareable
+# setting is also >= 0 there.
+_SHARED_UNIT_INTERVAL_KEYS = frozenset({
+    CONF_PROFILE_MATCH_THRESHOLD,
+    CONF_PROFILE_UNMATCH_THRESHOLD,
+    CONF_DURATION_TOLERANCE,
+    CONF_AUTO_LABEL_CONFIDENCE,
+    CONF_LEARNING_CONFIDENCE,
+})
+
+
 def sanitize_shared_settings(settings: Any) -> dict[str, float]:
     """The allow-listed, finite, numeric subset of a shared settings map.
 
-    Every share/adopt/export site goes through this. The duration ratios are also
-    held to the shipped bounds (audit STORE-06): 25/25 store bundles carried a max
-    ratio below 1.8 (12 at the 1.5 measured to delete the true candidate on 2.3% of
-    folds, register item 311), and min ratios up to 0.81 forbid any match before
-    81% of a programme.
+    Every share/adopt/export site goes through this. A value outside the panel's
+    own range is dropped (a match threshold of 5 can never be met by a 0-1 score).
+    The duration ratios are also held to the shipped bounds (audit STORE-06):
+    25/25 store bundles carried a max ratio below 1.8 (12 at the 1.5 measured to
+    delete the true candidate on 2.3% of folds, register item 311), and min ratios
+    up to 0.81 forbid any match before 81% of a programme.
     """
     if not isinstance(settings, dict):
         return {}
@@ -1729,7 +1741,15 @@ def sanitize_shared_settings(settings: Any) -> dict[str, float]:
     for key, value in settings.items():
         if key not in SHAREABLE_SETTING_KEYS or isinstance(value, bool):
             continue
-        if not isinstance(value, (int, float)) or not math.isfinite(value):
+        if not isinstance(value, (int, float)):
+            continue
+        try:
+            number = float(value)  # an oversized JSON integer raises here
+        except OverflowError:
+            continue
+        if not math.isfinite(number):
+            continue
+        if number < 0 or (key in _SHARED_UNIT_INTERVAL_KEYS and number > 1):
             continue
         if key == CONF_PROFILE_MATCH_MAX_DURATION_RATIO:
             value = max(value, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)

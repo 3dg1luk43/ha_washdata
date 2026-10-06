@@ -123,7 +123,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 #### Services, store and import
 
 - **Services ignored user permissions**: a read-only user could export or import the whole configuration, and import replaced the device's sensors. Services now apply the panel's checks.
-- **Store downloads are checked**: a recording needs 30 readings, no gap over 15 minutes and a plausible length; copies are skipped; a download never becomes the template of a program that has your own cycles.
+- **Store downloads are checked**: a recording needs 30 readings, no gap over 15 minutes and a plausible length; copies are skipped; a download never becomes the template of a program that has your own cycles. An adopted setup's settings outside the ranges the panel allows (a match threshold above 1, a negative power) are skipped.
 - **Ratings given from Home Assistant now count in the store**, and Store search finds every model of an appliance type at almost no store cost.
 - **History import offered cycles you already had** and split a wash on one "unavailable" reading: known cycles are recognised by overlap and short dropouts are bridged. It warns about kilowatt sensors and timestamps without a time zone.
 - **Anti-Wrinkle Exit Power was pushed below the Stop Threshold** by the settings check and the suggestions, where it does nothing ([#285](https://github.com/3dg1luk43/ha_washdata/issues/285), [#296](https://github.com/3dg1luk43/ha_washdata/issues/296), [#325](https://github.com/3dg1luk43/ha_washdata/issues/325)): both are gone and the help says it only matters above the Stop Threshold.

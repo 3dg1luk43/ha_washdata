@@ -557,8 +557,8 @@ class PlugView:
         if on != self.plug.sim.plugged:
             self.plug.set_connected(on)
 
-    def _load(self, path: str | None) -> None:
-        if not path or path == self.plug.s.source:
+    def _load(self, path: str | None, force: bool = False) -> None:
+        if not path or (path == self.plug.s.source and not force):
             return
         error = self.plug.load_source(path)
         if error:
@@ -572,9 +572,14 @@ class PlugView:
     async def _upload(self, e: events.UploadEventArguments) -> None:
         UPLOAD_DIR.mkdir(exist_ok=True)
         dest = UPLOAD_DIR / Path(e.file.name).name
+        replaced = str(dest) == self.plug.s.source
         dest.write_bytes(await e.file.read())
         self._uploader.reset()
         self.sel_source.set_options(_source_options(str(dest)), value=str(dest))
+        if replaced:
+            # Same name as the loaded source: the select value does not change and
+            # _load skips the current source, so the plug kept the old cycles.
+            self._load(str(dest), force=True)
 
     async def _remove(self) -> None:
         s = self.plug.s

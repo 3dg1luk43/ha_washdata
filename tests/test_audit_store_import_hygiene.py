@@ -122,3 +122,20 @@ def test_adopted_settings_are_clamped_and_carry_no_plug_cadence() -> None:
         C.CONF_PROFILE_MATCH_MIN_DURATION_RATIO: C.DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
         C.CONF_MIN_POWER: 3.0,
     }
+
+
+def test_adopted_settings_outside_the_panels_ranges_are_dropped() -> None:
+    # A bundle's profile_match_threshold of 5 can never be met by a 0-1 score, so
+    # Smart Termination's confidence gate never opens for whoever adopts it. The
+    # panel bounds these five to 0-1 and every shared setting to >= 0.
+    out = C.sanitize_shared_settings({
+        C.CONF_PROFILE_MATCH_THRESHOLD: 5, C.CONF_PROFILE_UNMATCH_THRESHOLD: -0.1,
+        C.CONF_DURATION_TOLERANCE: 1.5, C.CONF_AUTO_LABEL_CONFIDENCE: 0.8,
+        C.CONF_LEARNING_CONFIDENCE: 1.0, C.CONF_STOP_THRESHOLD_W: -2.0,
+        C.CONF_START_THRESHOLD_W: 8.0, C.CONF_MIN_POWER: 10**400,
+        C.CONF_END_ENERGY_THRESHOLD: 1e400,
+    })
+    assert out == {
+        C.CONF_AUTO_LABEL_CONFIDENCE: 0.8, C.CONF_LEARNING_CONFIDENCE: 1.0,
+        C.CONF_START_THRESHOLD_W: 8.0,
+    }
