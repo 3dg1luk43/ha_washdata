@@ -28,6 +28,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -50,9 +51,11 @@ _T0 = datetime(2026, 3, 1, 8, 0, tzinfo=timezone.utc)
 _NOW = datetime(2026, 7, 17, 12, 0, tzinfo=timezone.utc)
 
 
-def _hass():
+def _hass(config_dir: Path | None = None):
     hass = MagicMock()
     hass.data = {}
+    if config_dir is not None:  # an import writes its undo snapshot through HA's Store
+        hass.config.path = lambda *a: str(config_dir.joinpath(*a))
 
     async def _exec(func, *args, **kwargs):
         if inspect.iscoroutinefunction(func):
@@ -306,11 +309,11 @@ def test_selective_export_carries_chosen_backfill_cycles():
 
 
 @pytest.mark.asyncio
-async def test_backfill_only_device_round_trips_through_selective_import():
+async def test_backfill_only_device_round_trips_through_selective_import(tmp_path):
     src = _backfill_device()
     payload = _export(src, {"categories": ["profiles", "backfill_cycles"]})
 
-    dst = _store()
+    dst = _store(_hass(tmp_path))
     summary = await dst.async_import_data_selective(
         payload, selection={"categories": ["profiles", "backfill_cycles"]},
         local_device_type="washing_machine",
@@ -336,9 +339,9 @@ async def test_backfill_only_device_round_trips_through_selective_import():
 
 
 @pytest.mark.asyncio
-async def test_backfill_import_skips_cycles_already_on_record():
+async def test_backfill_import_skips_cycles_already_on_record(tmp_path):
     payload = _export(_backfill_device(), {"categories": ["backfill_cycles"]})
-    dst = _store()
+    dst = _store(_hass(tmp_path))
     # The same run recorded live, ending a few seconds apart: an overlap, not a new cycle.
     live = _cycle("live", 1, "Cotton")
     live["duration"] = 3590
@@ -353,10 +356,10 @@ async def test_backfill_import_skips_cycles_already_on_record():
 
 
 @pytest.mark.asyncio
-async def test_replace_mode_never_wipes_local_backfill():
+async def test_replace_mode_never_wipes_local_backfill(tmp_path):
     payload = _export(_backfill_device(), {"categories": ["backfill_cycles"],
                                            "backfill_cycle_ids": ["b2"]})
-    dst = _store()
+    dst = _store(_hass(tmp_path))
     mine = _cycle("mine", 40, None, source="history_import")
     dst._data["backfill_cycles"] = [mine]
     await dst.async_import_data_selective(
@@ -368,12 +371,12 @@ async def test_replace_mode_never_wipes_local_backfill():
 
 
 @pytest.mark.asyncio
-async def test_backfill_is_device_specific():
+async def test_backfill_is_device_specific(tmp_path):
     payload = _export(_backfill_device(), {"categories": ["profiles", "backfill_cycles"]})
     manifest = build_import_manifest(payload, local_device_type="dishwasher",
                                      local_profile_names=[])
     assert manifest["categories"]["backfill_cycles"]["importable"] is False
-    dst = _store()
+    dst = _store(_hass(tmp_path))
     summary = await dst.async_import_data_selective(
         payload, selection={"categories": ["profiles", "backfill_cycles"]},
         local_device_type="dishwasher",
@@ -383,11 +386,11 @@ async def test_backfill_is_device_specific():
 
 
 @pytest.mark.asyncio
-async def test_backfill_import_never_golden_and_capped():
+async def test_backfill_import_never_golden_and_capped(tmp_path):
     src = _backfill_device()
     src._data["backfill_cycles"][0]["ml_review"] = {"golden": True, "label": "good"}
     payload = _export(src, {"categories": ["backfill_cycles"]})
-    dst = _store()
+    dst = _store(_hass(tmp_path))
     with patch("custom_components.ha_washdata.const.HISTORY_IMPORT_MAX_TOTAL_CYCLES", 2):
         summary = await dst.async_import_data_selective(
             payload, selection={"categories": ["backfill_cycles"]},

@@ -221,39 +221,6 @@ def power_data_to_offsets(
     return []
 
 
-def power_data_offsets_to_datetimes(
-    power_data: PowerData,
-    start_time_iso: str,
-) -> list[tuple[datetime, float]]:
-    """Convert stored ``[[offset_sec, power], ...]`` to ``[(datetime, power), ...]``.
-
-    Args:
-        power_data: Offset-format power data.
-        start_time_iso: ISO-8601 cycle start time.
-
-    Returns:
-        List of ``(datetime, power)`` tuples. Empty list on failure.
-    """
-    try:
-        start_dt = dt_util.parse_datetime(start_time_iso)
-        if start_dt is None:
-            return []
-        start_ts = start_dt.timestamp()
-    except Exception:  # pylint: disable=broad-exception-caught
-        return []
-
-    result: list[tuple[datetime, float]] = []
-    for item in power_data:
-        try:
-            offset = float(item[0])
-            p = float(item[1])
-            ts = datetime.fromtimestamp(start_ts + offset, tz=start_dt.tzinfo)
-            result.append((ts, p))
-        except (TypeError, ValueError, IndexError):
-            continue
-    return result
-
-
 def migrate_power_data_to_offsets(cycle: dict[str, Any]) -> bool:
     """Migrate a single cycle's power_data to offset format in-place.
 

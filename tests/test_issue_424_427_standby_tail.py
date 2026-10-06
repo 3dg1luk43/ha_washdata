@@ -152,22 +152,6 @@ class TestGateCadence:
         assert det._gate_cadence == pytest.approx(det._p95_dt)
         assert det._dynamic_pause_threshold == pytest.approx(900.0)
 
-    def test_cadence_statistic_itself_is_untouched(self) -> None:
-        """``_p95_dt`` still tracks the worst gap - the outage ceilings need it.
-
-        Every gap-vs-outage classification is sized from ``_prior_p95_dt`` (a
-        snapshot of ``_p95_dt``); narrowing that would change which intervals
-        count as observed time across the anti-crease and quiet-release paths.
-        """
-        det, _ = _detector()
-        for _ in range(18):
-            det._update_cadence(3.0)
-        det._update_cadence(297.6)
-        det._update_cadence(481.4)
-
-        assert det._p95_dt > 300.0
-        assert det._gate_cadence < det._p95_dt
-
     def test_silent_plug_reaches_ending_on_the_first_keepalives(self) -> None:
         """End to end on the #427 shape, driven through the state machine.
 

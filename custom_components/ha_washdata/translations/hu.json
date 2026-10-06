@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData beállítása",
-        "description": "Állítsa be a mosógépet vagy más készüléket.\n\nTeljesítményérzékelő szükséges.\n\nA beállítás után nyissa meg a WashData panelt az oldalsávból (vagy lépjen ide: [/ha-washdata](/ha-washdata)), ahol megtekintheti a ciklusokat, finomhangolhatja a felismerést és kezelheti a profilokat.",
+        "description": "Állítson be egy mosógépet vagy más készüléket. Teljesítményérzékelő szükséges.\n\nA beállítás után nyissa meg a WashData panelt az oldalsávból ([/ha-washdata](/ha-washdata)) a ciklusok, profilok és az összes beállítás megtekintéséhez.",
         "data": {
           "name": "Eszköz neve",
           "device_type": "Eszköz típusa",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Barátságos név ennek az eszköznek (pl. „Mosógép”, „Mosogatógép”).",
-          "device_type": "Milyen típusú készülék ez? Segít személyre szabni az észlelést és a címkézést.",
-          "power_sensor": "Az érzékelő entitás, amely valós idejű energiafogyasztást jelent (wattban) az okosdugóról.",
-          "min_power": "Az e küszöbérték feletti teljesítményértékek (wattban) azt jelzik, hogy a készülék működik. Kezdje 2 W-tal a legtöbb eszköz esetében."
+          "device_type": "Beállítja az észlelési alapértékeket ehhez a készüléktípushoz.",
+          "power_sensor": "Az okoskonnektor érzékelője, amely az élő teljesítményt jelenti wattban.",
+          "min_power": "Az e feletti leolvasások (wattban) azt jelentik, hogy a készülék működik. A legtöbb eszközhöz 2 W megfelelő."
         }
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Frissítse az eszköz nevét, a készülék típusát vagy a teljesítményérzékelőt.\n\nA WashData panel (oldalsáv vagy [/ha-washdata](/ha-washdata)) a felismerés, ciklusok, profilok és értesítések kezelésére szolgál.",
+        "description": "Módosítsa az eszköz nevét, a készülék típusát vagy a teljesítményérzékelőt.\n\nMinden más a WashData panelen található (oldalsáv vagy [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -41,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "Nevezze át az eszközt, vagy módosítsa az alap hardverbeállításait. Az összes felismerési, egyeztetési és értesítési beállítás a [WashData panelen](/ha-washdata) található (az oldalsávból is elérhető).",
+        "description": "Nevezze át az eszközt, vagy módosítsa az alapbeállításait. Minden más az oldalsáv [WashData paneljén](/ha-washdata) található.",
         "data": {
           "name": "Eszköz neve",
           "device_type": "Device Type",
@@ -91,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profil neve",
-          "description": "Egy meglévő profil neve (profilok létrehozása a Profilok kezelése menüben). Hagyja üresen a címke eltávolításához."
+          "description": "Egy meglévő profil neve (profilokat a WashData panelen hozhat létre). Hagyja üresen a címke eltávolításához."
         }
       }
     },
@@ -147,7 +147,7 @@
     },
     "export_config": {
       "name": "Konfiguráció exportálása",
-      "description": "Exportálja az eszköz profiljait, ciklusait és beállításait JSON-fájlba (eszközönként).",
+      "description": "Az eszköz profiljainak, ciklusainak és beállításainak exportálása JSON-fájlba.",
       "fields": {
         "device_id": {
           "name": "Eszköz",
@@ -175,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Ciklus visszajelzés küldése",
-      "description": "Erősítse meg vagy javítsa ki az automatikusan észlelt programot a ciklus befejezése után. Adja meg az „entry_id” (speciális) vagy az „device_id” (ajánlott) értéket.",
+      "description": "Egy befejezett ciklus észlelt programjának megerősítése vagy javítása. Adja meg a `device_id` (ajánlott) vagy az `entry_id` értéket.",
       "fields": {
         "device_id": {
           "name": "Eszköz",
@@ -281,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Megjelölés kirakodottként",
-      "description": "Annak megerősítése, hogy a kész adagot kivették a WashData eszközből, ami törli a „Tiszta” állapotot és a kirakodási emlékeztetőt.",
+      "description": "Megerősíti, hogy a kész adagot kivették. Törli a „Tiszta” állapotot és a kirakodási emlékeztetőt.",
       "fields": {
         "device_id": {
           "name": "Eszköz",

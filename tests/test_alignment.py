@@ -104,6 +104,4 @@ async def test_match_profile_integration_shifted(store):
 
     result = await store.async_match_profile(input_readings, 45.0)
 
-    # Match might not be perfect due to test setup, but should find profile
-    if result.best_profile:
-        assert result.best_profile == "TestProfile"
+    assert result.best_profile == "TestProfile"

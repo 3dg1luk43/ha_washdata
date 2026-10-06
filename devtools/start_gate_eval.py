@@ -177,7 +177,6 @@ import io
 import json
 import math
 import sqlite3
-import statistics
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone

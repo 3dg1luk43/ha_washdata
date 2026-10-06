@@ -443,6 +443,19 @@ export interface StoreDeviceProfilesResponse {
   disabled?: boolean;
 }
 
+export interface StoreDownloadDeviceResponse {
+  profiles_adopted?: number;
+  cycles_imported?: number;
+  cycles_skipped?: number;
+  phases_applied?: number;
+  settings?: Record<string, unknown>;
+  settings_applied?: number;
+  cancelled?: boolean;
+  partial?: boolean;
+  failed_profiles?: number;
+  error?: string;
+}
+
 export interface StoreImportResponse {
   profile?: string;
   cycle_id?: string;
@@ -1365,4 +1378,8 @@ export interface WashDataWsResponses {
   "ha_washdata/store_upload_device": StoreUploadDeviceResponse;
   "ha_washdata/store_download_device": StartTaskResponse;
   "ha_washdata/get_shareable_cycles": GetShareableCyclesResponse;
+}
+
+export interface WashDataTaskResults {
+  "store_download": StoreDownloadDeviceResponse;
 }

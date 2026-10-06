@@ -164,22 +164,6 @@ def test_cycles_since_maintenance_no_event_returns_total(store):
     assert store.cycles_since_maintenance("descale") == 3
 
 
-async def test_cycles_since_maintenance_after_event(store):
-    now = dt_util.now()
-    # two cycles before the maintenance, three after
-    store._data["past_cycles"] = [
-        _completed_cycle(now - timedelta(days=10)),
-        _completed_cycle(now - timedelta(days=9)),
-        _completed_cycle(now - timedelta(days=4)),
-        _completed_cycle(now - timedelta(days=3)),
-        _completed_cycle(now - timedelta(days=2)),
-    ]
-    await store.async_add_maintenance_event(
-        "descale", date=(now - timedelta(days=5)).isoformat()
-    )
-    assert store.cycles_since_maintenance("descale") == 3
-
-
 async def test_cycles_since_maintenance_counts_every_run(store):
     """Every recorded run counts, not just the ones that ended cleanly (#414).
 

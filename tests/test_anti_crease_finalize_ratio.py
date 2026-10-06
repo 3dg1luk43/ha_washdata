@@ -43,7 +43,6 @@ import pytest
 
 from custom_components.ha_washdata import playground, ws_api
 from custom_components.ha_washdata.const import (
-    ANTI_CREASE_FINALIZE_RATIO,
     CONF_ANTI_CREASE_FINALIZE_RATIO,
     CONF_CURVE_PREROLL_SECONDS,
     CONF_DEVICE_TYPE,
@@ -71,11 +70,6 @@ def test_default_is_unchanged_at_098() -> None:
     assert DEFAULT_ANTI_CREASE_FINALIZE_RATIO == 0.98
     cfg = CycleDetectorConfig(min_power=5.0, off_delay=60)
     assert cfg.anti_crease_finalize_ratio == DEFAULT_ANTI_CREASE_FINALIZE_RATIO
-
-
-def test_legacy_constant_alias_still_resolves() -> None:
-    """The pre-#429 module constant is kept so older imports do not break."""
-    assert ANTI_CREASE_FINALIZE_RATIO == DEFAULT_ANTI_CREASE_FINALIZE_RATIO
 
 
 def test_it_is_not_the_smart_termination_ratio() -> None:

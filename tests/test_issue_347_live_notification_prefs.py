@@ -32,9 +32,9 @@ from unittest.mock import MagicMock, AsyncMock, patch
 
 import pytest
 
-from custom_components.ha_washdata.manager import WashDataManager, _MOBILE_ONLY_EXTRA_KEYS
+from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
-    CONF_MIN_POWER, CONF_NOTIFY_LIVE_STICKY, CONF_NOTIFY_LIVE_CLICK_ACTION,
+    CONF_MIN_POWER, CONF_NOTIFY_LIVE_STICKY,
 )
 
 
@@ -59,10 +59,6 @@ def _make_manager(mock_hass, options) -> WashDataManager:
         return WashDataManager(mock_hass, entry)
 
 
-def test_clickaction_is_a_mobile_only_key():
-    assert "clickAction" in _MOBILE_ONLY_EXTRA_KEYS
-
-
 def test_defaults_add_nothing(mock_hass):
     mgr = _make_manager(mock_hass, {})
     ev: dict[str, Any] = {}
@@ -79,7 +75,3 @@ def test_sticky_enabled_sets_sticky_true(mock_hass):
     assert ev["sticky"] == "true"
 
 
-def test_click_action_is_still_honoured(mock_hass):
-    """The user's explicit target still wins over the #438 per-device default."""
-    mgr = _make_manager(mock_hass, {CONF_NOTIFY_LIVE_CLICK_ACTION: "/lovelace/laundry"})
-    assert mgr._notification_tap_target() == "/lovelace/laundry"

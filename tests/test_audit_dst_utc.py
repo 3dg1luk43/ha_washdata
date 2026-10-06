@@ -49,7 +49,6 @@ def _cfg(device_type: str = "washing_machine", min_power: float = 2.0, **over):
         ),
         start_duration_threshold=C.resolve_start_duration_default(device_type),
         min_off_gap=C.resolve_min_off_gap_default(device_type),
-        profile_duration_tolerance=C.DEFAULT_PROFILE_DURATION_TOLERANCE,
         start_energy_threshold=C.DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(
             device_type, 0.2
         ),

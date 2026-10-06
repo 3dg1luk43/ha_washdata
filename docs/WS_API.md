@@ -2039,3 +2039,22 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `items` | no | list |
 | `phase_programs` | no | list |
 | `all_programs` | no | list |
+
+# Task results
+
+A command answering `StartTaskResponse` runs as a background task; its outcome arrives as `TaskSnapshot.result` (via `get_task_result` or `subscribe_tasks`). Task kinds with a typed result:
+
+## `store_download` (`StoreDownloadDeviceResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `profiles_adopted` | no | number |
+| `cycles_imported` | no | number |
+| `cycles_skipped` | no | number |
+| `phases_applied` | no | number |
+| `settings` | no | dict |
+| `settings_applied` | no | number |
+| `cancelled` | no | bool |
+| `partial` | no | bool |
+| `failed_profiles` | no | number |
+| `error` | no | str |

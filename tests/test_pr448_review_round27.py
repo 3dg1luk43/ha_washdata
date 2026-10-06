@@ -31,8 +31,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from custom_components.ha_washdata.const import BANKED_TAIL_REPAIR_KEY
-
 
 class _Mgr:
     """The scheduler in isolation: it touches only the store and _spawn_tracked."""
@@ -199,19 +197,6 @@ async def test_the_import_config_service_schedules_the_repair(
     await hass.config_entries.async_unload(entry.entry_id)
 
 
-def test_an_old_selective_import_arms_the_marker() -> None:
-    """The half this test file exists to connect to: the store really does set
-    the marker on an old payload, so the scheduling above is not hypothetical."""
-    from custom_components.ha_washdata.profile_store import (
-        _export_predates_banked_tail_repair,
-    )
-
-    assert _export_predates_banked_tail_repair({"version": 12}) is True
-    # v13 re-arms as well since the #424 re-run (STORAGE_VERSION 14).
-    assert _export_predates_banked_tail_repair({"version": 13}) is True
-    assert _export_predates_banked_tail_repair({"version": 14}) is False
-
-
 # --------------------------------------------------------------------------
 # round 28: the second per-entry WS lock was never released on unload
 # --------------------------------------------------------------------------
@@ -257,36 +242,6 @@ def test_the_two_lock_keys_are_distinct() -> None:
     )
 
     assert _WS_OPTIONS_LOCKS_KEY != _WS_WRITE_LOCKS_KEY
-
-
-# --------------------------------------------------------------------------
-# round 28: three docs describing pre-item-355/356/353 behaviour
-# --------------------------------------------------------------------------
-def test_the_end_gate_comment_does_not_claim_a_fixed_ratio() -> None:
-    """Item 355 made the bar device-resolved (0.90 for washers), so "never fires
-    before 1.05x expected" became false for exactly the device type the change
-    was made for."""
-    import inspect
-
-    from custom_components.ha_washdata import cycle_detector
-
-    src = inspect.getsource(cycle_detector)
-    assert "never fires before 1.05x expected" not in src
-    assert "resolve_end_gate_late_ratio" in src
-
-
-def test_the_repair_docstring_admits_it_rewrites_reference_cycles() -> None:
-    """Item 353 put `reference_cycles` in scope, golden ones included. The first
-    paragraph still said only `past_cycles` is touched, which is the paragraph a
-    maintainer reads first."""
-    import inspect
-
-    from custom_components.ha_washdata.profile_store import ProfileStore
-
-    doc = inspect.getdoc(ProfileStore.async_repair_banked_tails) or ""
-    assert "Only ``past_cycles`` is touched" not in doc
-    assert "reference_cycles" in doc
-    assert "golden" in doc
 
 
 # --------------------------------------------------------------------------
@@ -666,17 +621,6 @@ def test_an_already_started_activity_does_not_hand_over_again() -> None:
     assert [e for e in m.log if e[0] == "clear"] == []
 
 
-def test_the_shutdown_docstring_no_longer_claims_both_tags_are_cleared() -> None:
-    """Round 25 gated the lifecycle clear on `_CYCLE_IN_PROGRESS_STATES` because it
-    carries the FINISHED alert. The docstring still said both tags go outright,
-    which is the sentence a maintainer would trust when undoing the gate."""
-    import inspect
-
-    from custom_components.ha_washdata.manager import WashDataManager
-
-    doc = inspect.getdoc(WashDataManager._clear_live_progress_notification) or ""
-    assert "so both tags are cleared outright" not in doc
-    assert "_CYCLE_IN_PROGRESS_STATES" in doc
 
 
 # --------------------------------------------------------------------------

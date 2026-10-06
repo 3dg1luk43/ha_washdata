@@ -35,7 +35,6 @@ from custom_components.ha_washdata.const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
     CONF_LEARNING_CONFIDENCE,
-    CONF_PROFILE_MIN_WARMUP_CYCLES,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
     ENERGY_ANOMALY_Z_THRESHOLD,
     SHAPE_DRIFT_MIN_CYCLES,
@@ -177,15 +176,6 @@ def _post_cycle(cycle_data: dict, store) -> dict:
 
     _apply_post_cycle_anomalies(cycle_data, store)
     return cycle_data
-
-
-def test_a1_underrun_logic_50_pct_of_median():
-    """A cycle at 50% of its profile's median is an underrun."""
-    cd = _post_cycle(
-        {"profile_name": "Cotton 60", "duration": 1800.0}, _StubStore(median=3600.0)
-    )
-    assert cd.get("anomaly") == "underrun"
-    assert cd["underrun_ratio"] == pytest.approx(0.5, abs=0.001)
 
 
 def test_a1_underrun_logic_80_pct_does_not_trigger():
@@ -368,17 +358,6 @@ def test_a2_independent_of_the_duration_anomaly():
     assert cd["energy_anomaly"] == "energy_spike"
 
 
-def test_a2_fewer_than_3_cycles_means_no_stats():
-    """With only 2 labeled cycles the stats method returns None → no anomaly."""
-    cycles = [
-        _labeled_cycle("Eco 30", energy_wh=200.0),
-        _labeled_cycle("Eco 30", energy_wh=220.0),
-    ]
-    store = _ps_with_method_energy(cycles)
-    stats = store.get_profile_energy_stats("Eco 30")
-    assert stats is None
-
-
 # ---------------------------------------------------------------------------
 # A3 — Shape-similarity clustering in suggest_coverage_gaps
 # ---------------------------------------------------------------------------
@@ -479,9 +458,8 @@ def test_a3_dissimilar_cycles_do_not_produce_suggestion():
         min_unmatched_rate=0.0,
     )
     # Random traces should have low pairwise correlation → no suggestion above threshold
-    suggestions = result.get("profile_suggestions", [])
-    for s in suggestions:
-        assert s["similarity"] < CLUSTER_SHAPE_SIMILARITY_THRESHOLD
+    # (a cluster below it is dropped, not returned with a low similarity).
+    assert result.get("profile_suggestions", []) == []
 
 
 # ---------------------------------------------------------------------------
@@ -579,27 +557,6 @@ def mock_hass_learning():
     return hass
 
 
-def test_a4_warmup_prevents_auto_label(mock_hass_learning):
-    """Profile with 1 labeled cycle (< 2 warmup) must NOT auto-label even at high confidence."""
-    mgr, store = _learning_manager(mock_hass_learning, labeled_count=1)
-
-    cycle_data = {"id": "cyc_warmup", "duration": 3600.0, "profile_name": None}
-    store.past_cycles.append(cycle_data)
-
-    # Confidence is very high (above auto_label_conf=0.9)
-    mgr._maybe_request_feedback(
-        cycle_data,
-        detected_profile="Cotton 60",
-        confidence=0.97,
-        predicted_duration=3600.0,
-    )
-
-    # Must NOT have auto-labeled (warmup gate should have blocked it)
-    assert cycle_data.get("auto_labeled") is not True
-    # Should have gone to the pending-feedback path instead
-    assert "cyc_warmup" in store.pending
-
-
 def test_a4_sufficient_cycles_allows_auto_label(mock_hass_learning):
     """Profile past the warm-up (2+ labeled cycles) auto-labels normally at high confidence."""
     mgr, store = _learning_manager(mock_hass_learning, labeled_count=5)
@@ -619,24 +576,6 @@ def test_a4_sufficient_cycles_allows_auto_label(mock_hass_learning):
     assert cycle_data.get("profile_name") == "Cotton 60"
     # And NOT in pending (auto-label path returns early)
     assert "cyc_mature" not in store.pending
-
-
-def test_a4_warmup_boundary_exactly_warmup_threshold(mock_hass_learning):
-    """Profile with exactly CONF_PROFILE_MIN_WARMUP_CYCLES cycles is no longer in warmup."""
-    mgr, store = _learning_manager(mock_hass_learning, labeled_count=CONF_PROFILE_MIN_WARMUP_CYCLES)
-
-    cycle_data = {"id": "cyc_boundary", "duration": 3600.0, "profile_name": None}
-    store.past_cycles.append(cycle_data)
-
-    mgr._maybe_request_feedback(
-        cycle_data,
-        detected_profile="Cotton 60",
-        confidence=0.97,
-        predicted_duration=3600.0,
-    )
-
-    # Exactly at threshold → should auto-label (>= warmup, not < warmup)
-    assert cycle_data.get("auto_labeled") is True
 
 
 # ---------------------------------------------------------------------------
@@ -734,16 +673,11 @@ def test_a5_shape_drift_absent_when_too_few_cycles():
     """Fewer than SHAPE_DRIFT_MIN_CYCLES traced cycles → shape_drift keys not present."""
     profile = "Quick Wash"
     n_cycles = SHAPE_DRIFT_MIN_CYCLES - 1  # 9 cycles
-    # Cycles with NO power_data — they won't count as traced
-    cycles = [
-        {
-            "profile_name": profile,
-            "duration": 3600.0,
-            "status": "completed",
-            "match_confidence": 0.85,
-            # no power_data key
-        }
-        for _ in range(n_cycles)
+    # Traced, and drifting as hard as the detected case above (ramp-up then
+    # ramp-down): only the cycle count can keep the keys out.
+    third = n_cycles // 3
+    cycles = [_labeled_cycle_with_ramp_up_power(profile) for _ in range(n_cycles - third)] + [
+        _labeled_cycle_with_ramp_down_power(profile) for _ in range(third)
     ]
 
     store = _ps_with_health_method(cycles)

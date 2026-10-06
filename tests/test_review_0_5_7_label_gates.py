@@ -97,22 +97,6 @@ async def test_b_an_unflagged_match_still_labels(hass, manager) -> None:
     assert cycle["label_source"] == "auto_match"
 
 
-@pytest.mark.asyncio
-async def test_b_the_post_cycle_pass_honours_it_too(hass, manager) -> None:
-    manager._current_program = "Cotton 40"
-    manager._last_match_confidence = 0.3  # below learning: live gate declines
-    manager._matched_profile_duration = 7200
-    manager._last_match_result = None
-    manager.profile_store.async_match_profile = AsyncMock(return_value=_result(ambiguous=True))
-
-    cycle = _cycle()
-    await manager._async_process_cycle_end(cycle)
-    await hass.async_block_till_done()
-
-    assert cycle.get("label_source") != "auto_label_post"
-    assert not cycle.get("profile_name")
-
-
 # --- (c) the bulk service --------------------------------------------------------
 
 

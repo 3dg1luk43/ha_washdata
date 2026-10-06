@@ -64,7 +64,7 @@ const _STORE_PREFS = [
     docKey: 'setting.show_contributor.doc', docFb: 'Show the "by <contributor>" attribution on community appliances and reference cycles.' },
   // Opt-in (audit STORE-14): cycles you share carry no uploader name unless this is on.
   { key: 'share_name', def: false, labelKey: 'lbl.share_name', labelFb: 'Show my name on what I share',
-    docKey: 'setting.share_name.doc', docFb: 'Publish your connected account name as the uploader of cycles you share. Off: they are shared without a name.' },
+    docKey: 'setting.share_name.doc', docFb: 'Show your account name as the uploader of cycles you share. Off: shared without a name.' },
 ];
 // Height (CSS px) of the band above the Playground plot where event pin heads
 // sit, out of the busy curve area. Shared by _pgDrawCanvas and the pointer
@@ -112,199 +112,199 @@ const _SETTINGS_SECTIONS = [
   { id: 'basic', label: 'Basic', intro: 'Core identity and the essentials most setups need.', groups: [
     { sub: 'Device info', fields: [
       { key: 'name', label: 'Device Name', basic: true, type: 'text',
-        doc: 'Display name shown in the HA integrations list and device registry.' },
+        doc: 'Name shown in Home Assistant for this device.' },
       { key: 'device_type', label: 'Device Type', basic: true, type: 'devicetype',
-        doc: 'Appliance class. Sets sensible detection defaults (thresholds, off-delay, end handling) tuned for that appliance type; change it only if the device was originally set up as the wrong type.' },
+        doc: 'Sets detection defaults (thresholds, off delay, end handling) for this kind of appliance. Change it only if the device was set up as the wrong type.' },
       { key: 'store_brand', label: 'Appliance Brand', type: 'storebrand', optional: true, basic: true,
-        doc: 'Optional. The appliance brand, picked from the community catalog. Used to find and share matching reference recordings. Leave blank if you are not using online features.' },
+        doc: 'Optional. Your appliance brand from the community catalog, used to find and share reference recordings. Leave blank if you do not use online features.' },
       { key: 'store_model', label: 'Appliance Model', type: 'storemodel', optional: true, basic: true,
-        doc: 'Optional. The appliance model, picked from the community catalog once a brand is set. If your model is not listed you can add it to the catalog.' },
+        doc: 'Optional. Your appliance model from the community catalog (pick a brand first). If it is not listed, you can add it.' },
     ] },
     { sub: 'Basic configuration', fields: [
       { key: 'power_sensor', label: 'Power Sensor', basic: true, type: 'entity', domain: 'sensor',
-        doc: 'The sensor entity reporting live power in watts for this appliance (e.g. sensor.washer_power). All cycle detection is based on this signal.' },
+        doc: 'The sensor that reports this appliance\'s live power in watts (e.g. sensor.washer_power). All detection is based on it.' },
       { key: 'min_power', label: 'Minimum Power', unit: 'W', type: 'number', step: 0.1, min: 0, def: 2.0, basic: true,
-        doc: 'Absolute minimum power considered active. Readings below this are treated as 0 W (standby), filtering out the phantom load of smart plugs and standby LEDs.' },
+        doc: 'Readings below this count as 0 W (standby). Filters out the idle draw of smart plugs and standby LEDs.' },
       { key: 'off_delay', label: 'Off Delay', unit: 's', type: 'number', min: 0, def: 180, basic: true,
-        doc: 'Time to wait after power drops before declaring the cycle finished. If power resumes within this window the cycle continues seamlessly - this bridges pauses between wash stages. Dishwashers have long drying phases (power off for 20-60 min) so the off-delay must exceed that to keep the whole wash+dry as one cycle.' },
+        doc: 'How long power must stay low before the cycle is finished. Power coming back within this time continues the cycle. Dishwashers can be idle 20-60 min while drying, so set it longer than that.' },
       { key: 'linked_device', label: 'Group Under Device', type: 'device',
-        doc: 'Optionally nest this WashData device under another device (e.g. the smart plug) in the HA device registry, shown as "Connected via ...".' },
+        doc: 'Optional. Show this WashData device under another device (e.g. the smart plug) in Home Assistant, as "Connected via ...".' },
     ] },
     // Energy and cost moved here from Notifications (audit UI-25): the price drives
     // every cost figure, not just the peak-rate tip that stays with the messages.
     { sub: 'Energy', fields: [
       { key: 'energy_sensor', label: 'Energy Meter Entity', type: 'entity', domain: 'sensor', optional: true,
-        doc: 'Optional cumulative energy counter (total_increasing kWh/Wh, e.g. the plug\'s own lifetime meter). When set, each cycle\'s reported energy is taken from this counter\'s start-to-end delta, which avoids the under-counting you get from integrating a slow-reporting power sensor. Falls back to the integrated value if the reading is missing, its unit is unknown, or the delta is not positive. Leave blank to keep integrating the power sensor.' },
+        doc: 'Optional kWh or Wh counter (total_increasing, e.g. the plug\'s own meter). Cycle energy is then read from it, which is more accurate than computing it from a slow power sensor. If its reading is unusable, the computed value is used.' },
       { key: 'energy_price_entity', label: 'Energy Price Entity', type: 'entity', domain: 'sensor', basic: true, notPrice: true,
-        doc: 'Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Must be a price, not the plug\'s own power or energy entity: it takes precedence over the static price below, so a kWh counter here costs every cycle at the meter reading instead of your tariff. With Time-Weighted Cost on, each cycle is charged at the price in force at every moment it ran; otherwise the price in effect when it finished is frozen onto it.' },
+        doc: 'Sensor with the current price per kWh (e.g. a dynamic tariff). It overrides the static price below, so it must be a price, not the plug\'s power or energy sensor.' },
       { key: 'energy_price_static', label: 'Static Energy Price (per kWh)', type: 'number', step: 0.001, min: 0, basic: true,
-        doc: 'Fixed price per kWh used for cost figures when no live price entity is set above.' },
+        doc: 'Fixed price per kWh, used when no price entity is set.' },
       { key: 'energy_price_dynamic', label: 'Time-Weighted Cost', type: 'checkbox', def: true, basic: true,
-        doc: 'Charge each cycle at the price in force at every moment it ran, instead of the single price current when it finished. Only applies to a price entity (a static price cannot move). Needs no extra setup: the price is tracked live while the cycle runs, and Process History under Diagnostics recosts older cycles from the recorder. Off = the classic behaviour, one price frozen at the end.' },
+        doc: 'Charge each cycle at the price at each moment it ran, instead of the price when it finished. Needs a price entity. Process History (Diagnostics) recosts older cycles.' },
     ] },
   ] },
   { id: 'detection', label: 'Detection', intro: 'How a cycle is detected as starting, running and finishing.', groups: [
     { sub: 'Thresholds & Gap', fields: [
       { key: 'start_threshold_w', label: 'Start Threshold', unit: 'W', type: 'number', step: 1, min: 0,
-        doc: 'Power must rise above this level to confirm a cycle has started. Setting it too low causes false starts from standby power; too high and slow-starting programs (cold fill) are missed. The suggestion engine sets this just above the machine\'s observed lowest active power.' },
+        doc: 'Power must rise above this to start a cycle. Too low: standby power causes false starts. Too high: slow-starting programs (cold fill) are missed.' },
       { key: 'stop_threshold_w', label: 'Stop Threshold', unit: 'W', type: 'number', step: 0.1, min: 0,
-        doc: 'Power must fall below this level before the off-delay countdown begins. Set it below the Start Threshold - the gap between them is the hysteresis band that prevents flicker. If set too high, low-power phases (rinse holds, anti-crease) falsely trigger the end sequence.' },
+        doc: 'Power must fall below this before the off delay starts counting. Keep it below the Start Threshold. Too high, and low-power phases (rinse holds, anti-crease) start the end countdown by mistake.' },
       { key: 'min_off_gap', label: 'Min Off Gap', unit: 's', type: 'number', min: 0,
-        doc: 'If the machine powers off for less than this time, the on/off/on sequence is treated as one continuous cycle. Prevents soak programs (machine powers off for several minutes mid-wash) from being split into two separate cycles. Set it shorter than the gap between your back-to-back loads if you want those counted as separate cycles. Device-type defaults protect the typical intra-cycle pause for each appliance.' },
+        doc: 'An off period shorter than this does not split a cycle, so soak pauses stay in one wash. Keep it shorter than the gap between back-to-back loads, or those merge into one cycle.' },
     ] },
     { sub: 'Cycle Start', fields: [
       { key: 'start_duration_threshold', label: 'Start Duration', internal: true, unit: 's', type: 'number', min: 0, def: 5,
-        doc: 'Power must stay above the start threshold this long to confirm a real start, preventing split-second on/off toggles from starting a cycle.' },
+        doc: 'Power must stay above the Start Threshold this long before a cycle starts, so brief on/off blips are ignored.' },
       { key: 'start_energy_threshold', label: 'Start Energy', internal: true, unit: 'Wh', type: 'number', step: 0.01, min: 0, def: 0.2,
-        doc: 'Energy (power x time) the appliance must consume before RUNNING. A brief high-power spike has very low energy and is ignored, preventing false starts.' },
+        doc: 'Energy the appliance must use before the cycle counts as running. A short power spike uses little energy, so it does not start a cycle.' },
       { key: 'completion_min_seconds', label: 'Min Cycle Duration', unit: 's', type: 'number', min: 0, def: 600,
-        doc: 'Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).' },
+        doc: 'Cycles shorter than this (test runs, opening the door to add a sock) are saved as Interrupted and get no finish notification.' },
       { key: 'curve_preroll_seconds', label: 'Curve Pre-roll', unit: 's', type: 'number', step: 10, min: 0, max: 600, def: 0,
-        doc: 'Seconds of readings from aborted start attempts that may be carried into the front of a cycle\'s curve. Machines that probe before settling (programme selection, door lock, first fill) can drop the first minutes of real activity from every curve. 0 turns this off. Note that enabling it moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program until the older ones age out - expect the learned averages to drift for a while. To only see what came before a cycle, without changing anything, use the recorder history in the cycle chart instead.' },
+        doc: 'Adds readings from failed start attempts to the front of a cycle, for machines that probe before starting (door lock, first fill). 300 s covers most; 0 = off. Recorded starts move earlier, so learned durations drift for a while.' },
     ] },
     { sub: 'Cycle End', fields: [
       { key: 'end_energy_threshold', label: 'End Energy', unit: 'Wh', type: 'number', step: 0.001, min: 0, def: 0.05,
-        doc: 'When the off delay has run out, the energy used during it (watts x time) is compared to this threshold. Above it the cycle is not finished yet, which keeps anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Lower it if cycles end during a cool-down tumble or drying tail; raise it if finished cycles keep waiting.' },
+        doc: 'Energy allowed during the off delay. More than this and the cycle keeps going, so tumbles and drying tails stay attached. Lower it if cycles end during a tail; raise it if finished cycles keep waiting.' },
       { key: 'smart_termination_duration_ratio', label: 'Smart Termination Ratio', type: 'number', step: 0.01, min: 0.5, max: 1.0,
-        doc: 'How far into the matched program\'s expected duration a cycle must be before Smart Termination may end it early once power drops. The expected duration is the program\'s average, so on appliances whose runtime varies a lot - washers on cold winter vs warm summer inlet water, sensor-dry dryers, load-dependent programs - about half of all runs finish shorter than that average and never get the fast finish, ending only via the fallback timeout minutes late. Lower this (e.g. 0.85) on those machines so the early finish still fires; raise it toward 1.0 to be more conservative. Leave empty for the default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never fires on an ambiguous or low-confidence match.' },
+        doc: 'Fraction of the program\'s average duration a cycle must reach before Smart Termination may end it early. If run times vary (water temperature, sensor-dry, load size), lower it (e.g. 0.85). Leave empty for 0.98 (0.99 on dishwashers).' },
     ] },
     { sub: 'Power Off', fields: [
       { key: 'power_off_threshold_w', label: 'Power Off Threshold', unit: 'W', type: 'number', step: 0.1, min: 0, def: 0,
-        doc: 'Optional power-based Off detection. When above 0, once a cycle has finished and power stays below this level for the Power Off Delay, the machine is treated as switched off and the state returns to Off. Leave at 0 to disable (the default). Set it above the true switched-off floor and below the Stop Threshold and your machine\'s finished-but-on standby draw; if it is not below the Stop Threshold it is ignored. When enabled it replaces the Progress Reset Delay for returning to Off, so a finished machine stays in Finished/Clean until it is actually powered off.' },
+        doc: 'After a cycle, power below this for the Power Off Delay sets the state to Off, instead of the Progress Reset Delay doing it. Set it above the switched-off draw, below standby and the Stop Threshold. 0 disables it (default).' },
       { key: 'power_off_delay', label: 'Power Off Delay', unit: 's', type: 'number', min: 0, def: 30,
-        doc: 'How long power must stay below the Power Off Threshold after a cycle finishes before the state returns to Off. Only used when the Power Off Threshold is above 0. Checked on the background cadence, so the effective delay rounds up to the next state-expiry tick.' },
+        doc: 'How long power must stay below the Power Off Threshold after a cycle before the state returns to Off. Only used when that threshold is above 0. Checked periodically, so the real wait can be slightly longer.' },
     ] },
     { sub: 'Signal Processing', fields: [
       { key: 'sampling_interval', label: 'Sampling Interval', internal: true, unit: 's', type: 'number', min: 1, def: 30,
-        doc: 'Minimum time between processed readings. A reading that arrives sooner than this after the last one is skipped (low readings during a cycle are always kept), so set it to your plug\'s real reporting interval or lower: a higher value only throws readings away. WashData does not suggest this value, because what it can measure is the interval left after this setting has already dropped readings.' },
+        doc: 'Minimum time between processed readings. Readings that arrive sooner are skipped (low readings during a cycle are always kept). Set it to your plug\'s reporting interval or lower; a higher value only throws readings away.' },
     ] },
   ] },
   { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', notDeviceTypes: ['other'], groups: [
     { sub: 'Match Scoring', fields: [
       { key: 'profile_match_threshold', label: 'Match Threshold', type: 'number', step: 0.01, min: 0, max: 1, def: 0.4,
-        doc: 'Minimum live match score (0-1) before Smart Termination and the dryer anti-crease finish may act on the matched program. Raise it if cycles end early on an uncertain match; lower it if clearly recognised cycles still wait for the full off delay. It does not change which program is shown or labelled. Default 0.4.' },
+        doc: 'Live match score a cycle needs before Smart Termination or the anti-crease finish may end it early. It does not change the shown program. Raise it if weak matches end cycles early; lower it if clear matches wait the off delay.' },
       { key: 'profile_unmatch_threshold', label: 'Unmatch Threshold', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.35,
-        doc: 'If a live mid-cycle match drops below this score, the tentative identification is cleared. Keep it a little below the Match Threshold so a brief dip in similarity does not flip the display back to unmatched.' },
+        doc: 'If the live match score drops below this, the current program guess is cleared. Keep it a little below the Match Threshold so a brief dip does not reset it.' },
       { key: 'profile_match_interval', label: 'Match Interval', internal: true, unit: 's', type: 'number', min: 0,
-        doc: 'How often to attempt profile matching during a running cycle. Default 300 s (5 minutes) balances detection speed and CPU.' },
+        doc: 'How often to match a running cycle against profiles. Default 300 s (5 min).' },
     ] },
     { sub: 'Duration Gates', fields: [
       { key: 'profile_match_min_duration_ratio', label: 'Min Duration Ratio', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
-        doc: 'A program is only considered once the cycle has run this fraction of its typical duration. 0.10 means a 2-hour program becomes a candidate after 12 minutes. Not applied during the first 15 minutes of a cycle.' },
+        doc: 'A program is only considered after the cycle has run this fraction of its typical duration. 0.10: a 2-hour program becomes a candidate after 12 minutes. Not applied in a cycle\'s first 15 minutes.' },
       { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', internal: true, type: 'number', step: 0.01, min: 0, def: 1.8,
-        doc: 'A program is dropped once the cycle has run longer than this multiple of its typical duration. 1.8 means a cycle that has run 80% longer than the program no longer matches it.' },
+        doc: 'A program is dropped once the cycle has run longer than this multiple of its typical duration. 1.8: a cycle 80% longer than the program no longer matches it.' },
       { key: 'duration_tolerance', label: 'Estimate Tolerance', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
-        doc: 'Tolerance for time-remaining estimates (learning feedback, not matching). If the actual duration is within +/-X% of the estimate it counts as a good match.' },
+        doc: 'Learning feedback only: a cycle within +/-X% of its estimated duration counts as a good estimate. Does not affect matching.' },
     ] },
     { sub: 'Profile Evidence', fields: [
       { key: 'profile_evidence_sources', label: 'Cycles that shape a program', type: 'checkboxlist', def: ['real_cycles', 'reference_cycles', 'backfill_cycles'],
         choices: [['real_cycles', 'Cycles this machine ran'], ['reference_cycles', 'Downloaded from the community store'], ['backfill_cycles', 'Found in imported power history']],
-        doc: 'Which cycles are used to build each program\'s power curve, and to match a finished cycle against it. Unticking a kind stops it shaping your programs without deleting anything - the cycles stay in your Cycles list and can still be labelled or removed. Useful if you do not trust imported data. Statistics are unaffected: they always count only the cycles this machine actually ran. Unticking everything is ignored, since a program with no cycles behind it could never match.' },
+        doc: 'Which kinds of cycles shape each program\'s curve and matching. Unticking a kind deletes nothing; useful if you do not trust imported data. Statistics always count only this machine\'s cycles. Unticking all is ignored.' },
     ] },
     { sub: 'Auto-Labeling', fields: [
       { key: 'auto_label_confidence', label: 'Auto-Label Confidence', type: 'number', step: 0.01, min: 0, max: 1, def: 0.9,
-        doc: 'If the match score at cycle end is at or above this, the program is labeled automatically without any confirmation prompt. Raise it to require higher certainty before auto-labeling; lower it to automate more. Works in conjunction with Learning Confidence below it.' },
+        doc: 'Match score at cycle end at or above which the program is labelled without asking. Raise it for more certainty; lower it to label more cycles automatically. Keep it above Learning Confidence.' },
       { key: 'learning_confidence', label: 'Learning Confidence', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.6,
-        doc: 'If the match score falls between this and Auto-Label Confidence, WashData flags the finished cycle for review in the Cycles queue so you can verify the identified program. Below this score the match is too uncertain to surface. Must be kept below Auto-Label Confidence.' },
+        doc: 'Lowest match score for labelling a finished cycle. A clear winner is labelled; a close call goes to the review queue in Cycles. Below this, nothing is labelled or asked. Keep it below Auto-Label Confidence.' },
     ] },
   ] },
   { id: 'timing', label: 'Timing & Watchdog', intro: 'Background cadence, the offline watchdog and housekeeping.', groups: [
     { sub: 'Watchdog', fields: [
       { key: 'watchdog_interval', label: 'Watchdog Interval', internal: true, unit: 's', type: 'number', min: 1, def: 30,
-        doc: 'How often the background watchdog checks for stalled sensors and elapsed timeouts. Default 30 s.' },
+        doc: 'How often the background check looks for stalled sensors and timeouts. Default 30 s.' },
       { key: 'no_update_active_timeout', label: 'No-Update Timeout', internal: true, unit: 's', type: 'number', min: 0, def: 600,
-        doc: 'If no power updates arrive for this long while running, assume the plug dropped offline and force-stop to avoid a zombie cycle. Default 600 s allows for cloud or mesh lag.' },
+        doc: 'If no power update arrives for this long during a cycle, assume the plug went offline and force-stop the cycle. The default 600 s allows for cloud or mesh delays.' },
     ] },
     { sub: 'Housekeeping', fields: [
       { key: 'progress_reset_delay', label: 'Progress Reset Delay', unit: 's', type: 'number', min: 0, def: 1800,
-        doc: 'After finishing, hold progress at 100% for this long so Completed is visible on dashboards before resetting to Idle.' },
+        doc: 'After a cycle, keep progress at 100% this long before resetting to Idle.' },
       { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', type: 'checkbox', def: true,
-        doc: 'Run nightly housekeeping: label older unlabelled cycles that now clearly match a program, rebuild program curves, refresh anomaly marks, recompute cycle health and remove debug traces while Save Debug Traces is off. Every cycle and its full power trace is kept.' },
+        doc: 'Nightly cleanup: label old cycles that now clearly match a program, rebuild program curves, refresh anomaly marks and cycle health, and remove debug traces if Save Debug Traces is off. Cycles and their power traces are always kept.' },
       { key: 'power_profile_interval_min', label: 'Power Profile Interval', unit: 'min', type: 'number', min: 1, def: 15,
-        doc: 'Bucket size for the per-profile power_profile sensor attribute (the flat per-slot average-watts array consumed by external planners such as EMHASS and tibber_prices). Smaller buckets keep short power spikes sharp; larger buckets smooth the shape. Default 15 min. Read-time only; does not affect detection.' },
+        doc: 'Bucket size of the power_profile attribute (average watts per slot) used by planners such as EMHASS and tibber_prices. Smaller keeps short spikes; larger smooths the curve. Default 15 min. Does not affect detection.' },
     ] },
     { sub: 'Debug', fields: [
       { key: 'expose_debug_entities', label: 'Expose Debug Entities', internal: true, type: 'checkbox',
-        doc: 'Publish extra diagnostic HA entities (match confidence, ambiguity, state internals). Off keeps the entity list clean for normal use.' },
+        doc: 'Add diagnostic entities (match confidence, ambiguity, internal state). Off keeps the entity list clean.' },
       { key: 'save_debug_traces', label: 'Save Debug Traces', type: 'checkbox',
-        doc: 'Also store the matcher\'s debug data (every candidate\'s scores) with each cycle. Useful for troubleshooting; it adds about 20 KB per cycle, kept for as long as the cycle is.' },
+        doc: 'Also store the matcher\'s debug data (every candidate\'s scores) with each cycle, for troubleshooting. Adds about 20 KB per cycle.' },
     ] },
   ] },
-  { id: 'anti_wrinkle', label: 'Anti-Wrinkle', intro: 'Anti-wrinkle / anti-crease mode detects low-power tumble pulses after the main phase and keeps them attached to the finished cycle instead of reading them as new cycles.', onlyDeviceTypes: ['washing_machine', 'dryer', 'washer_dryer'], fields: [
+  { id: 'anti_wrinkle', label: 'Anti-Wrinkle', intro: 'Keeps a dryer\'s low-power tumble pulses after the main phase attached to the finished cycle.', onlyDeviceTypes: ['washing_machine', 'dryer', 'washer_dryer'], fields: [
     { key: 'anti_wrinkle_enabled', label: 'Enable Anti-Wrinkle Detection', basic: true, type: 'checkbox',
-      doc: 'Recognise the short low-power tumble pulses a dryer emits after the main heat phase and keep them attached to the finished cycle instead of reading them as new cycles.' },
+      doc: 'Keep a dryer\'s short low-power tumble pulses after the main heat phase with the finished cycle, instead of reading them as new cycles.' },
     { key: 'anti_wrinkle_max_power', label: 'Max Anti-Wrinkle Power', unit: 'W', type: 'number', step: 10, min: 0, def: 400,
-      doc: 'A pulse above this power is treated as a real new cycle, not an anti-wrinkle tumble. Set just above the tumble-pulse power.' },
+      doc: 'A pulse above this power counts as a real new cycle, not a tumble. Set it just above your tumble-pulse power.' },
     { key: 'anti_wrinkle_max_duration', label: 'Max Duration', unit: 's', type: 'number', min: 0, def: 60,
-      doc: 'Pulses longer than this are treated as a real cycle rather than an anti-wrinkle tumble.' },
+      doc: 'A pulse longer than this counts as a real cycle, not an anti-wrinkle tumble.' },
     { key: 'anti_wrinkle_exit_power', label: 'Exit Power Threshold', internal: true, unit: 'W', type: 'number', step: 0.1, min: 0, def: 0.8,
-      doc: 'Power must fall below this between pulses for anti-wrinkle mode to stay active.' },
+      doc: 'In anti-wrinkle mode, power below this counts as quiet between tumble pulses, and quiet for longer than the Max Pulse Gap ends the mode. The Stop Threshold is used when it is higher, so this only changes anything when set above the Stop Threshold.' },
     { key: 'anti_wrinkle_idle_timeout', label: 'Max Pulse Gap', unit: 's', type: 'number', step: 30, min: 0, def: 120,
-      doc: 'How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start.' },
+      doc: 'How long the dryer may stay quiet between tumble pulses before anti-wrinkle mode ends. Set it above your dryer\'s longest gap, or later pulses are read as false starts.' },
     { key: 'anti_crease_finalize_ratio', label: 'Anti-Crease Finalize Ratio', type: 'number', step: 0.01, min: 0.5, max: 1.0, def: 0.98,
-      doc: 'Fraction of the matched program\'s expected duration a cycle must reach before the anti-crease tumble tail may be finalised. Lower it on a dryer whose sensor-dry runtime follows the load, so its tail is recognised instead of sitting until the fallback timeout. Leave washing machines at the default: there this fraction is what keeps a quiet mid-wash phase from being mistaken for the tail. Separate from the Smart Termination Ratio, which gates a different check.' },
+      doc: 'Fraction of the program\'s average duration a cycle must reach before its low-power tumbling counts as the anti-crease tail. Lower it (e.g. 0.75) on load-sensing dryers. Keep washers at the default (0.98), or a wash can end halfway.' },
   ] },
-  { id: 'dishwasher', label: 'Dishwasher', intro: 'End-of-cycle handling for dishwashers, which typically finish with a long near-silent drying phase before a short final drain.', onlyDeviceTypes: ['dishwasher'], fields: [
+  { id: 'dishwasher', label: 'Dishwasher', intro: 'End handling for dishwashers, which often dry quietly for a long time before a short final drain.', onlyDeviceTypes: ['dishwasher'], fields: [
     { key: 'dishwasher_end_spike_quiet_release', label: 'Passive-Dry Quiet Release', unit: 's', type: 'number', step: 60, min: 0, def: 600,
-      doc: 'Once the cycle passes its expected duration, how long the dishwasher must stay quiet (below the Stop Threshold) before WashData stops waiting for a final drain and ends the cycle. Raise it if your machine has a long silent drying phase before a late final drain that is being missed - a wider window lets the learned duration follow seasonal drift (colder inlet water = longer cycles) instead of locking to the old average. It only ever shortens the wait relative to the internal 30-minute end-spike cap, never extends it.' },
+      doc: 'After the expected duration, how long the dishwasher must stay below the Stop Threshold before WashData stops waiting for the final drain. Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.' },
   ] },
-  { id: 'delay', label: 'Delay Start', intro: 'Delayed-start detection identifies when an appliance is powered but has not yet begun its cycle.', fields: [
+  { id: 'delay', label: 'Delay Start', intro: 'Detects an appliance that is on and waiting for a delayed start.', fields: [
     { key: 'delay_start_detect_enabled', label: 'Enable Delay-Start Detection', type: 'checkbox',
-      doc: 'Detect when the appliance is powered on and waiting (delayed start / standby) but has not begun its cycle, so standby draw is not mistaken for a running cycle.' },
+      doc: 'Detect an appliance that is on and waiting for a delayed start, so its standby draw is not taken for a running cycle.' },
     { key: 'delay_confirm_seconds', label: 'Confirm Seconds', unit: 's', type: 'number', min: 0, def: 60,
-      doc: 'Power must stay in the standby band for this long before the appliance is treated as waiting-to-start rather than running.' },
+      doc: 'Power must stay in the standby band this long before the appliance counts as waiting to start.' },
     { key: 'delay_timeout_hours', label: 'Timeout Hours', unit: 'h', type: 'number', step: 0.5, min: 0, def: 8.0,
-      doc: 'Stop waiting in delayed-start mode after this many hours and return to idle, so a machine left powered but never started does not wait forever.' },
+      doc: 'Give up waiting for a delayed start after this many hours and return to idle.' },
   ] },
-  { id: 'triggers', label: 'Triggers & Door', intro: 'Optional external signals: an end trigger, a door sensor, a pause switch, and the unload reminder.', groups: [
+  { id: 'triggers', label: 'Triggers & Door', intro: 'Optional extras: end trigger, door sensor, pause switch and unload reminder.', groups: [
     { sub: 'External End Trigger', fields: [
       { key: 'external_end_trigger_enabled', label: 'Enable External End Trigger', type: 'checkbox',
-        doc: 'Let an external binary sensor signal the end of a cycle, in addition to the built-in power-based detection.' },
+        doc: 'Let a binary sensor signal the end of a cycle, in addition to power-based detection.' },
       { key: 'external_end_trigger', label: 'External Trigger Entity', type: 'entity', domain: 'binary_sensor',
-        doc: 'Binary sensor whose state change marks the cycle end (e.g. an appliance "finished" contact or a companion integration).' },
+        doc: 'Binary sensor whose change marks the cycle end (e.g. a "finished" contact or another integration).' },
       { key: 'external_end_trigger_inverted', label: 'Invert External Trigger (trigger on OFF)', type: 'checkbox',
-        doc: 'Treat the trigger sensor turning OFF (rather than ON) as the end-of-cycle signal.' },
+        doc: 'Treat the sensor turning OFF (not ON) as the end signal.' },
     ] },
     { sub: 'Door & Pause', fields: [
       { key: 'door_sensor_entity', label: 'Door Sensor Entity', basic: true, type: 'entity', domain: 'binary_sensor',
-        doc: 'Optional door binary sensor. Used to detect when the appliance has been opened/unloaded after a cycle.' },
+        doc: 'Optional door sensor. Shows when the appliance was opened to unload after a cycle.' },
       { key: 'door_opens_at_end', label: 'Door Opens Automatically At End', type: 'checkbox',
-        doc: 'For dishwashers that pop the door open at the end of the cycle to dry (AirDry and similar). With this on, a door-open on a running cycle no longer pauses it forever; instead, if the door stays open for the dwell below, WashData treats the cycle as finished. A brief open (adding an item) is ignored. Requires a Door Sensor Entity.' },
+        doc: 'For dishwashers that open the door at the end to dry (e.g. AirDry). A door left open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. Needs a Door Sensor Entity.' },
       { key: 'door_end_dwell_seconds', label: 'Door-Open End Dwell', unit: 's', type: 'number', min: 1, def: 60,
-        doc: 'How long the door must stay open before WashData ends the cycle, when "Door Opens Automatically At End" is on. Long enough to ignore quickly adding a dish (default 60 s), short enough to end promptly once the machine pops the door.' },
+        doc: 'With "Door Opens Automatically At End" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s).' },
       { key: 'pause_cuts_power', label: 'Pause Also Cuts Power (via switch)', type: 'checkbox',
-        doc: 'When a cycle is paused, also switch off the Switch Entity below. Only for appliances whose plug can safely be cut mid-cycle.' },
+        doc: 'When a cycle is paused, also switch off the Switch Entity below. Only for appliances that can safely lose power mid-cycle.' },
       { key: 'switch_entity', label: 'Switch Entity', type: 'entity', domain: 'switch',
-        doc: 'Optional switch toggled off on pause and back on when resuming, used together with "Pause also cuts power".' },
+        doc: 'Optional switch turned off on pause and back on when resuming, with "Pause Also Cuts Power".' },
     ] },
     { sub: 'Unload Reminder', fields: [
       { key: 'notify_unload_delay_minutes', label: 'Unload Nag Delay', unit: 'min', type: 'number', min: 0, def: 60, basic: true,
-        doc: 'Minutes after a cycle ends before sending the still-waiting "unload the machine" reminder. Set 0 to disable the reminder.' },
+        doc: 'Minutes after a cycle ends before the "unload the machine" reminder. 0 disables it.' },
       { key: 'notify_unload_repeat', label: 'Repeat Until Unloaded', type: 'checkbox',
-        doc: 'Keep re-sending the unload reminder every "Unload Nag Delay" minutes until the unload is confirmed or you tap "Stop reminding" on the notification. Needs a way to confirm the unload: a Door Sensor Entity, an Unload Confirmation Entity, or the "Confirm Unload Manually" option below. The dismiss button works on Home Assistant companion-app (mobile) notifications.' },
+        doc: 'Resend the unload reminder every "Unload Nag Delay" minutes until the unload is confirmed or you tap "Stop reminding" (mobile app). Needs a Door Sensor Entity, an Unload Confirmation Entity, or "Confirm Unload Manually".' },
       { key: 'unload_confirm_entity', label: 'Unload Confirmation Entity', type: 'entity',
         domains: ['event', 'button', 'input_button', 'binary_sensor', 'sensor', 'input_boolean', 'switch', 'scene', 'tag'],
-        doc: 'Optional entity whose activation means the load has been taken out, for machines that cannot have a door sensor. Any kind works: a Zigbee or NFC button, an input_button helper, a motion sensor in front of the machine, a scene. Every state change counts as a confirmation except switching off and going unavailable. Setting this also enables the unload reminder on a device with no Door Sensor Entity.' },
+        doc: 'Optional. Any entity that confirms the load was taken out, for machines without a door sensor (a button, input_button, motion sensor, scene). Every state change counts except turning off or unavailable. Also enables the unload reminder.' },
       { key: 'unload_track_without_door', label: 'Confirm Unload Manually', type: 'checkbox',
-        doc: 'Run the unload reminder on a device with no Door Sensor Entity and no Unload Confirmation Entity, and confirm the unload from your own automation instead: press the "Mark Unloaded" button entity, or call the ha_washdata.mark_unloaded service. Ignored when a Door Sensor Entity is set, which already provides the signal.' },
+        doc: 'Run the unload reminder without a door sensor or confirmation entity. Confirm the unload from your own automation with the "Mark Unloaded" button or the ha_washdata.mark_unloaded service. Ignored when a Door Sensor Entity is set.' },
       { key: 'pump_stuck_duration', label: 'Pump Stuck Duration', unit: 's', type: 'number', min: 0, def: 1800,
-        onlyDeviceType: 'pump', doc: 'Seconds a pump may run continuously before it is flagged as possibly stuck (fires the stuck-pump event).' },
+        onlyDeviceType: 'pump', doc: 'How long a pump may run nonstop before the stuck-pump event fires.' },
     ] },
   ] },
   { id: 'notifications', label: 'Notifications', groups: [
     { sub: 'Services', fields: [
       { key: 'notify_start_services', label: 'Start Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…', basic: true,
-        doc: 'notify.* services called when a cycle starts. Add one per target (phone, dashboard, etc.); leave empty for no start notification.' },
+        doc: 'notify.* services to call when a cycle starts (phone, dashboard, ...). Leave empty for none.' },
       { key: 'notify_finish_services', label: 'Finish Services', type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…', basic: true,
-        doc: 'notify.* services called when a cycle finishes. Add one per target; leave empty for no finish notification.' },
+        doc: 'notify.* services to call when a cycle finishes. Leave empty for none.' },
       { key: 'notify_live_services', label: 'Live Progress Services', basic: true, type: 'entitylist', domain: 'notify', placeholder: 'add a notify service…',
-        doc: 'notify.* services called for live progress updates while a cycle runs. Leave empty to disable live-progress notifications.' },
+        doc: 'notify.* services for live progress updates while a cycle runs. Leave empty to turn them off.' },
       { key: 'notify_people', label: 'People (for Only When Home)', type: 'entitylist', domain: 'person', placeholder: 'add a person…',
-        doc: 'person.* entities used by "Notify Only When Home" to decide whether anyone is home.' },
+        doc: 'person.* entities that "Notify Only When Home" checks.' },
       { key: 'notify_only_when_home', label: 'Notify Only When Home', type: 'checkbox',
-        doc: 'Only send notifications when at least one of the linked people (above) is home.' },
+        doc: 'Only notify when at least one of the people above is home.' },
       { key: 'notify_fire_events', label: 'Fire HA Events for Notifications', type: 'checkbox', def: true,
-        doc: 'Also fire ha_washdata_* events on cycle start/finish so you can build your own automations.' },
+        doc: 'Also fire ha_washdata_* events on cycle start and finish for your own automations.' },
     ] },
     { sub: 'Timing', fields: [
       { key: 'notify_before_end_minutes', label: 'Pre-End Alert', unit: 'min', type: 'number', min: 0, def: 0,
@@ -312,70 +312,70 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_live_interval_seconds', label: 'Live Update Interval', unit: 's', type: 'number', min: 30, def: 300,
         doc: 'How often live-progress notifications are refreshed while a cycle runs.' },
       { key: 'notify_live_overrun_percent', label: 'Live Overrun % Before Alert', unit: '%', type: 'number', min: 0, def: 20,
-        doc: 'If a cycle runs past its estimate by more than this percentage, send an overrun alert.' },
+        doc: 'Live updates stop once a cycle runs this percent past its expected duration (20 = up to 1.2x the expected time).' },
       { key: 'notify_live_chronometer', label: 'Use Live Chronometer', type: 'checkbox',
-        doc: 'Show a live-updating countdown timer in the notification (on platforms that support it) instead of a static estimate.' },
+        doc: 'Show a live countdown timer in the notification (where supported) instead of a fixed estimate.' },
       { key: 'notify_live_silent', label: 'Silent Live Updates', type: 'checkbox', def: true,
-        doc: 'iOS only. Refresh the live progress quietly: each update arrives without a sound or vibration, at a lower, battery-saving priority that iOS may briefly batch. The first update of a cycle (the one that starts the Live Activity) and the start/finish notifications still alert as usual. Turn this off to be alerted on every update.' },
+        doc: 'iOS only. Update live progress silently, at a battery-saving priority that iOS may batch. The first update and the start/finish notifications still alert. Off: every update alerts.' },
       { key: 'notify_live_sticky', label: 'Keep Live Notification On Tap', type: 'checkbox',
-        doc: 'Android only. Make the live-progress notification persistent (sticky) so tapping it does not dismiss the ongoing thread. Off keeps the default behaviour where a tap dismisses it.' },
+        doc: 'Android only. Keep the live progress notification when tapped. Off: a tap dismisses it.' },
       { key: 'notify_live_click_action', label: 'Notification Tap Target', type: 'text', optional: true,
-        doc: 'Where a tap on a notification from this appliance opens, on Android and iOS. Blank opens the WashData panel on this appliance. Enter a dashboard path (e.g. /lovelace/laundry) or a full URL to send it somewhere else, or "none" for no tap target at all.' },
+        doc: 'What a tap on this appliance\'s notification opens. Blank: the WashData panel on this appliance. Enter a dashboard path (e.g. /lovelace/laundry) or URL, or "none" for no tap action.' },
       { key: 'notify_timeout_seconds', label: 'Auto-Dismiss After', unit: 's', type: 'number', min: 0, def: 0,
-        doc: 'Automatically dismiss the notification after this many seconds (on platforms that support it). 0 keeps it until dismissed manually.' },
+        doc: 'Dismiss the notification after this many seconds (where supported). 0 keeps it until you dismiss it.' },
     ] },
     { sub: 'Messages', fields: [
       { key: 'notify_title', label: 'Notification Title', type: 'text', def: 'WashData: {device}',
-        doc: `Notification title. Template variables: ${_NOTIFY_VARS}.` },
+        doc: 'Notification title. Only {device} is substituted; any other variable falls back to the default title.' },
       { key: 'notify_icon', label: 'Notification Icon', type: 'text', def: '',
-        doc: 'The small icon shown on the notification (e.g. mdi:washing-machine). Android draws it in the status bar; iOS shows it in place of the app icon, and needs the companion app 2026.8 or newer. Leave blank for the platform default.' },
+        doc: 'Small icon on the notification (e.g. mdi:washing-machine). Sent only to mobile_app targets, not notify groups. On iOS it replaces the app icon and needs companion app 2026.8 or newer. Blank: platform default.' },
       { key: 'notify_icon_color', label: 'Notification Colour', type: 'color', def: '', placeholder: '#03A9F4',
-        doc: 'Accent colour for this appliance\'s notifications, so a washer, a dryer and a dishwasher are tellable apart at a glance. iOS tints the icon and the Live Activity progress bar on the Lock Screen and in the Dynamic Island. Android is sent the same colour, but what it does with it is up to the phone: some tint the icon, and many (Samsung One UI especially) ignore it entirely. Hex (e.g. #03A9F4) is understood by both. Leave blank for the platform default.' },
+        doc: 'Accent colour for this appliance\'s notifications, so washer, dryer and dishwasher are easy to tell apart. On iOS it fills the circle behind the icon and colours the Live Activity bar. Many Android phones (Samsung especially) ignore it. Use hex, e.g. #03A9F4. Blank: platform default.' },
       { key: 'notify_start_message', label: 'Start Message', type: 'textarea', def: '{device} started.',
-        doc: `Body sent when a cycle starts. Template variables: ${_NOTIFY_VARS}.` },
-      { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration}m.', basic: true,
-        doc: `Body sent when a cycle finishes. Template variables: ${_NOTIFY_VARS}, {status}. {time_finished} and {vs_typical} are most useful here. {status} is completed or force_stopped: an interrupted cycle (a false start or a cancelled program) sends no finish message.` },
+        doc: 'Body sent when a cycle starts. Template variables: {device}, {program}. Any other variable falls back to the default text.' },
+      { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration} min.', basic: true,
+        doc: 'Body sent when a cycle finishes. Variables: {device}, {program}, {duration} (minutes), {duration_hm} (1 h 05 min), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed or force_stopped; interrupted cycles send nothing). Any other variable falls back to the default text.' },
       { key: 'notify_pre_complete_message', label: 'Pre-Complete Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',
-        doc: `Body of the pre-end / almost-done alert. Template variables: ${_NOTIFY_VARS}.` },
+        doc: 'Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left). Any other variable falls back to the default text.' },
       { key: 'notify_reminder_message', label: 'Reminder Message', type: 'textarea', def: '',
-        doc: `Body of the still-waiting unload reminder. Blank uses the built-in default. Template variables: ${_NOTIFY_VARS}.` },
+        doc: 'Text of the one-time Pre-End Alert. Template variables: {device}, {program}, {minutes} (the Pre-End Alert setting). Any other variable falls back to the default text.' },
       { key: 'notify_channel', label: 'Android Channel (start/live)', type: 'text', def: '',
         placeholder: 'e.g. WashData', suggestions: ['WashData', 'WashData Status', 'Appliance Status'],
-        doc: 'Android notification channel name for start/live messages (controls per-channel sound and priority on the mobile app). Blank uses the companion app default.' },
+        doc: 'Android channel for start and live messages; the channel sets sound and priority. Blank: app default.' },
       { key: 'notify_finish_channel', label: 'Android Channel (finish)', type: 'text', def: '',
         placeholder: 'e.g. WashData Finished', suggestions: ['WashData Finished', 'WashData Alerts', 'Appliance Finished'],
-        doc: 'Android notification channel name for the finish message. Blank reuses the start/live channel.' },
+        doc: 'Android channel for the finish message. Blank reuses the start/live channel.' },
       { key: 'peak_rate_threshold', label: 'Peak-Rate Threshold (per kWh)', type: 'number', step: 0.001, min: 0, def: 0, clearable: true,
-        doc: 'When a cycle starts and the current price per kWh is at or above this value, append a peak-rate tip to the start notification. 0 or blank disables the tip.' },
+        doc: 'If the price per kWh is at or above this when a cycle starts, add a peak-rate tip to the start notification. 0 or blank disables it.' },
       { key: 'peak_rate_message', label: 'Peak-Rate Message', type: 'text', def: '', placeholder: 'Running at peak rate ({price}/kWh).',
-        doc: 'Optional custom text for the peak-rate tip appended to the start notification. Template variables: {device}, {price}. Blank uses the built-in default.' },
+        doc: 'Custom text for the peak-rate tip. Template variables: {device}, {price}. Blank uses the default.' },
     ] },
     { sub: 'Cycle Timers', fields: [
       { key: 'notify_cycle_timers', label: 'Cycle Timers', type: 'timerlist',
-        doc: 'Notifications at specific minutes into a cycle (e.g. to add softener). Message supports {device}, {program}, {minutes}. Enable Auto-pause to pause at that point and receive an interactive notification with a Resume button; resume via the panel, the pause/resume service, or the notification action.' },
+        doc: 'Notifications at set minutes into a cycle (e.g. to add softener). Message supports {device}, {program}, {minutes}. With Auto-pause, the cycle also pauses there and the notification gets a Resume button.' },
     ] },
     { sub: 'Quiet Hours & Milestones', fields: [
       { key: 'notify_quiet_start_hour', label: 'Quiet Hours Start', basic: true, unit: 'h', type: 'number', min: 0, max: 23, clearable: true,
-        doc: 'Start of a do-not-disturb window (0-23). Finish, reminder and clean-laundry notifications that would fire during quiet hours are held and delivered when the window ends. Leave blank to disable. Supports windows that cross midnight (e.g. start 22, end 7).' },
+        doc: 'Start of a do-not-disturb window (0-23). Finish, reminder and clean-laundry notifications in this window are held until it ends. Can cross midnight (e.g. 22 to 7). Blank disables it.' },
       { key: 'notify_quiet_end_hour', label: 'Quiet Hours End', basic: true, unit: 'h', type: 'number', min: 0, max: 23, clearable: true,
-        doc: 'End of the do-not-disturb window (0-23). Held notifications are delivered at this hour. Leave blank to disable.' },
+        doc: 'End of the do-not-disturb window (0-23); held notifications are sent then. Blank disables it.' },
       { key: 'notify_milestones', label: 'Cycle Milestones', type: 'intlist', def: '50, 100, 500, 1000', placeholder: '50, 100, 500, 1000',
-        doc: 'Comma-separated cycle counts that trigger a one-off celebration notification when reached (e.g. 50, 100, 500, 1000). Blank disables milestone notifications.' },
+        doc: 'Cycle counts that trigger a one-off celebration notification, comma-separated (e.g. 50, 100, 500, 1000). Blank disables them.' },
       { key: 'notify_milestone_message', label: 'Milestone Message', type: 'textarea', def: '{device} has completed {cycle_count} cycles!',
         doc: 'Message for the milestone notification. Template variables: {device}, {cycle_count}.' },
     ] },
   ] },
   { id: 'ml_training', label: 'ML Training', fields: [
     { key: 'enable_ml_models', label: 'Apply smart models during a cycle', type: 'checkbox', def: false,
-      doc: 'While a cycle runs, let a model fine-tuned to this machine predict its total energy and cost, and let a cycle that drops power unusually early, on a program WashData knows well, finish without waiting out the full off delay. Dishwashers get that early finish without this setting once their program is recognised. Off = the classic power-based logic only.' },
+      doc: 'Use a model trained on this machine to predict a running cycle\'s energy and cost, and let a well-known program that stops unusually early finish without the full off delay. Off: power-based logic only.' },
     { key: 'ml_training_enabled', label: 'Learn from this machine', type: 'checkbox', def: false,
-      doc: 'Periodically retrain the projected-energy model on this machine\'s finished cycles. A retrained model is only kept when it beats the simple elapsed-versus-expected estimate on held-out cycles; otherwise the current one stays.' },
+      doc: 'Retrain the energy model on this machine\'s finished cycles from time to time. A new model is kept only if it beats the simple estimate on test cycles.' },
     { key: 'ml_training_hour', label: 'Learn at hour', unit: 'h', type: 'number', min: 0, max: 23, def: 2,
-      doc: 'Local hour of day (0-23) to do the overnight fine-tuning. Pick a quiet hour such as 2 (02:00).' },
+      doc: 'Hour of day (0-23) for overnight training. Pick a quiet hour, e.g. 2.' },
     { key: 'ml_training_min_cycles', label: 'Cycles needed first', type: 'number', min: 5, def: 30,
-      doc: 'Wait until at least this many cycles have been recorded before fine-tuning, so there is enough to learn from.' },
+      doc: 'Wait for at least this many recorded cycles before training.' },
     { key: 'ml_training_interval_days', label: 'Check at most every', unit: 'days', type: 'number', min: 1, def: 7,
-      doc: 'Re-check for improvements at most once per this many days.' },
+      doc: 'Retrain at most once every this many days.' },
   ] },
 ];
 
@@ -436,11 +436,11 @@ function _nonPriceReason(id, vals, ctx) {
   if (!id) return null;
   if (id === vals.power_sensor) {
     return { msgKey: 'conflict.price_entity.power_sensor', msgVars: {},
-      msgFb: 'This is the device\'s Power Sensor, not a price. A price entity overrides the static price below, so cycles would be costed at watts per kWh - clear this field.' };
+      msgFb: 'This is the device\'s Power Sensor, not a price. Cycles would be costed in watts per kWh; clear this field.' };
   }
   if (id === vals.energy_sensor) {
     return { msgKey: 'conflict.price_entity.energy_sensor', msgVars: {},
-      msgFb: 'This is the device\'s Energy Meter, not a price. A price entity overrides the static price below, so cycles would be costed at the meter reading per kWh - clear this field.' };
+      msgFb: 'This is the device\'s Energy Meter, not a price. Cycles would be costed at the meter reading per kWh; clear this field.' };
   }
   const st = (ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
   if (!st) return null;
@@ -448,12 +448,12 @@ function _nonPriceReason(id, vals, ctx) {
   const dc = String(attrs.device_class == null ? '' : attrs.device_class).trim().toLowerCase();
   if (_NON_PRICE_DEVICE_CLASSES.has(dc)) {
     return { msgKey: 'conflict.price_entity.device_class', msgVars: {dc},
-      msgFb: `This sensor measures ${dc}, not a price per kWh. A price entity overrides the static price below - clear this field or point it at a tariff sensor.` };
+      msgFb: `This sensor measures ${dc}, not a price per kWh. Clear this field or pick a tariff sensor.` };
   }
   const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
   if (_NON_PRICE_UNITS.has(unit.toLowerCase())) {
     return { msgKey: 'conflict.price_entity.unit', msgVars: {unit},
-      msgFb: `This sensor reads in ${unit}, which is not a price per kWh. A price entity overrides the static price below - clear this field or point it at a tariff sensor.` };
+      msgFb: `This sensor reads in ${unit}, not a price per kWh. Clear this field or pick a tariff sensor.` };
   }
   return null;
 }
@@ -561,15 +561,9 @@ const _SETTING_CONFLICTS = [
       profile_match_threshold:   { msgKey: 'conflict.unmatch.match',   msgVars: {un: v.profile_unmatch_threshold},   msgFb: `Must be above Unmatch Threshold (${v.profile_unmatch_threshold})`, fixVal: +(v.profile_unmatch_threshold + 0.05).toFixed(2) },
     }),
   },
-  {
-    // anti_wrinkle_exit_power < stop_threshold_w — only for devices that support anti-wrinkle
-    keys: ['anti_wrinkle_exit_power', 'stop_threshold_w'],
-    check: v => ['washing_machine','dryer','washer_dryer'].includes(v.device_type) && v.anti_wrinkle_exit_power != null && v.stop_threshold_w != null && v.anti_wrinkle_exit_power >= v.stop_threshold_w,
-    fieldErrors: v => ({
-      anti_wrinkle_exit_power: { msgKey: 'conflict.anti_wrinkle_exit.exit', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be below Stop Threshold (${v.stop_threshold_w} W); otherwise the anti-wrinkle exit power is ignored`, fixVal: +(v.stop_threshold_w * 0.4).toFixed(1) },
-      stop_threshold_w:        { msgKey: 'conflict.anti_wrinkle_exit.stop', msgVars: {exit: v.anti_wrinkle_exit_power}, msgFb: `Must be above Anti-Wrinkle Exit Power (${v.anti_wrinkle_exit_power} W)`, fixVal: +(v.anti_wrinkle_exit_power * 2.5).toFixed(1) },
-    }),
-  },
+  // (No anti_wrinkle_exit_power vs stop_threshold_w rule: the detector counts quiet
+  // below the higher of the two, so any pair is valid and the old "must be below
+  // stop" fix moved the exit power to where it does nothing; #285 #296 #325.)
   {
     // anti_wrinkle_max_power > start_threshold_w — only for devices that support anti-wrinkle
     keys: ['anti_wrinkle_max_power', 'start_threshold_w'],
@@ -584,8 +578,8 @@ const _SETTING_CONFLICTS = [
     keys: ['pump_stuck_duration', 'no_update_active_timeout'],
     check: v => v.device_type === 'pump' && v.pump_stuck_duration != null && v.no_update_active_timeout != null && v.no_update_active_timeout <= v.pump_stuck_duration,
     fieldErrors: v => ({
-      pump_stuck_duration:      { msgKey: 'conflict.pump_stuck.duration', msgVars: {to: v.no_update_active_timeout}, msgFb: `Must be less than No-Update Timeout (${v.no_update_active_timeout} s) so the stuck alarm fires before the watchdog kills the cycle`, fixVal: v.no_update_active_timeout - 60 },
-      no_update_active_timeout: { msgKey: 'conflict.pump_stuck.timeout',  msgVars: {ps: v.pump_stuck_duration}, msgFb: `Must exceed Pump Stuck Duration (${v.pump_stuck_duration} s) so the stuck alarm fires before the cycle is force-stopped`, fixVal: v.pump_stuck_duration + 60 },
+      pump_stuck_duration:      { msgKey: 'conflict.pump_stuck.duration', msgVars: {to: v.no_update_active_timeout}, msgFb: `Must be below No-Update Timeout (${v.no_update_active_timeout} s) so the stuck alarm can fire first`, fixVal: v.no_update_active_timeout - 60 },
+      no_update_active_timeout: { msgKey: 'conflict.pump_stuck.timeout',  msgVars: {ps: v.pump_stuck_duration}, msgFb: `Must exceed Pump Stuck Duration (${v.pump_stuck_duration} s) so the stuck alarm can fire first`, fixVal: v.pump_stuck_duration + 60 },
     }),
   },
   {
@@ -4854,7 +4848,7 @@ class HaWashdataPanel extends HTMLElement {
     const sure = (u.sure_pct != null && isFinite(pct))
       ? ` · ${this._t('status.match_sure', {pct}, '~{pct}% sure')}` : '';
     const tip = _tip(this._tText('status.match_uncertain_tip', {top: u.top},
-      'WashData has not settled on a program yet. The figure is how often the leading guess, {top}, turned out to be right in recorded cycles when it was this far ahead of the runner-up. It is for information only and does not change how cycles are detected or labelled.'));
+      'WashData has not settled on a program yet. The figure is how often the leading guess, {top}, was right in past cycles when it led by this much. Information only.'));
     return `<span class="wd-prog-unc" style="font-size:.82em;color:var(--warning-color,#ff9800)">${what}${sure}</span>${tip}`;
   }
 
@@ -4888,7 +4882,7 @@ class HaWashdataPanel extends HTMLElement {
     const tag = suffix ? `<span class="wd-prog-tag ${tagKind}">${suffix}</span>` : '';
     // Program selection is allowed for any user who can see the device (read+):
     // a deliberate exception to the edit level, kept by the maintainer.
-    const programCtl = `<div class="wd-prog-ctl"><label>${this._t('lbl.program', {}, 'Program')}</label>${_tip(this._t('lbl.program_tip', {}, 'Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running. Pick one before starting the appliance and it is applied as soon as the next cycle begins.'))}
+    const programCtl = `<div class="wd-prog-ctl"><label>${this._t('lbl.program', {}, 'Program')}</label>${_tip(this._t('lbl.program_tip', {}, 'Choose which program the current cycle is matched to. Auto-detect picks the best match. Pin a program when auto-detect is wrong; pick one before starting and it applies to the next cycle.'))}
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>${this._t('status.auto_detect', {}, 'Auto-detect')}</option>
             ${profOpts}
@@ -4926,10 +4920,9 @@ class HaWashdataPanel extends HTMLElement {
     const envPct = envPos != null ? Math.round(envPos * 100) : null;
     const envPosHtml = envPct != null
       ? ` <span style="opacity:.75" title="${_esc(this._tText('lbl.envelope_position_tip', {pct: envPct},
-          `Position on the matched program's own recorded curve, ${envPct}%. Measured by aligning `
-          + `this cycle against the profile instead of counting time, so it stays right when a run `
-          + `is longer or shorter than usual. It refreshes while the appliance is quiet, so it can `
-          + `lag behind during an active phase.`))}">${this._t('lbl.envelope_position', {pct: envPct},
+          `Position on the matched program's recorded curve: ${envPct}%. Found by aligning the cycle `
+          + `to the profile, so it stays right when a run is longer or shorter. Updates while the `
+          + `appliance is quiet, so it can lag.`))}">${this._t('lbl.envelope_position', {pct: envPct},
           `curve ${envPct}%`)}</span>`
       : '';
     const progressHtml = (isRunning && prog != null) ? `
@@ -4989,7 +4982,7 @@ class HaWashdataPanel extends HTMLElement {
       if (!showPause && !showResume && !showStop) return '';
       return `<div class="wd-cycle-ctrl" style="margin-top:0">
         ${showResume ? `<button class="wd-btn wd-btn-sm wd-btn-primary" data-action="resume-cycle" title="${_esc(this._t('btn.resume_cycle_tip', {}, 'Resume the paused cycle'))}">${this._t('btn.resume_cycle', {}, 'Resume')}</button>` : ''}
-        ${showPause ? `<button class="wd-btn wd-btn-sm" data-action="pause-cycle" title="${_esc(this._t('btn.pause_cycle_tip', {}, 'Pause the running cycle — the appliance will resume where it left off'))}">${this._t('btn.pause_cycle', {}, 'Pause')}</button>` : ''}
+        ${showPause ? `<button class="wd-btn wd-btn-sm" data-action="pause-cycle" title="${_esc(this._t('btn.pause_cycle_tip', {}, 'Pause the running cycle – the appliance will resume where it left off'))}">${this._t('btn.pause_cycle', {}, 'Pause')}</button>` : ''}
         ${showStop ? `<button class="wd-btn wd-btn-sm wd-btn-danger" data-action="terminate-cycle" title="${_esc(this._t('btn.force_stop_tip', {}, 'Immediately end the current cycle and mark it as force-stopped'))}">${this._t('btn.force_stop', {}, 'Force Stop')}</button>` : ''}
       </div>`;
     })();
@@ -5208,12 +5201,12 @@ class HaWashdataPanel extends HTMLElement {
       : state === 'stopped'
         ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="rec-process-open" title="${_esc(this._t('btn.process_tip', {}, 'Save the recorded trace as a new or existing profile'))}">${this._t('btn.process', {}, 'Process')}</button>
            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-discard" title="${_esc(this._t('btn.discard_tip', {}, 'Discard the recorded trace without saving'))}">${this._t('btn.discard', {}, 'Discard')}</button>`
-        : `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-start" title="${_esc(this._t('btn.rec_start_tip', {}, 'Begin recording the appliance\'s power trace — start just before running a cycle'))}">${this._t('btn.record', {}, 'Start Recording')}</button>`;
+        : `<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="rec-start" title="${_esc(this._t('btn.rec_start_tip', {}, 'Begin recording the appliance\'s power trace – start just before running a cycle'))}">${this._t('btn.record', {}, 'Start Recording')}</button>`;
     return `<div class="wd-card" style="margin-top:0">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:8px">
           <div class="wd-rec-dot ${dotCls}"></div>
-          <div><strong>${this._t('hdr.manual_recording', {}, 'Manual Recording')}</strong>${_tip(this._t('hdr.manual_recording_tip', {}, 'Run a cycle intentionally while WashData records the power trace. Start just before the appliance starts, Stop when it finishes, then Process to save it as a named profile.'))}${detail ? `<span class="wd-field-hint" style="margin-left:8px">${detail}</span>` : ''}</div>
+          <div><strong>${this._t('hdr.manual_recording', {}, 'Manual Recording')}</strong>${_tip(this._t('hdr.manual_recording_tip', {}, 'Record a cycle on purpose: press Start just before the appliance starts and Stop when it finishes, then Process to save it as a profile.'))}${detail ? `<span class="wd-field-hint" style="margin-left:8px">${detail}</span>` : ''}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">${buttons}</div>
       </div>
@@ -5383,8 +5376,8 @@ class HaWashdataPanel extends HTMLElement {
       ${_th(this._t('lbl.status', {}, 'Status'), 'status', col === 'status', dir, 'cycsort', '', this._t('col.status_tip', {}, 'Cycle outcome: Completed (natural end), Interrupted (abrupt power drop), Force Stopped (manual), or Needs Review (feedback pending).'))}
       ${_th(this._t('lbl.date', {}, 'Date'), 'date', col === 'date', dir, 'cycsort', '', this._t('col.date_tip', {}, 'Date and time the cycle started.'))}
       ${_th(this._t('lbl.duration', {}, 'Duration'), 'duration', col === 'duration', dir, 'cycsort', 'right', this._t('col.duration_tip', {}, 'Total cycle run time from start to end.'))}
-      ${_th(this._t('lbl.energy', {}, 'Energy'), 'energy', col === 'energy', dir, 'cycsort', 'right', this._t('col.energy_tip', {}, 'Total energy consumed (kWh). Computed by integrating power over time.'))}
-      ${_th(this._t('lbl.cost', {}, 'Cost'), 'cost', col === 'cost', dir, 'cycsort', 'right', this._t('col.cost_tip', {}, 'Energy cost for this cycle, frozen at completion. With Time-Weighted Cost on, the power trace is charged at the price in force at each moment; otherwise energy x the single price in effect at the end. Set a price under Settings to populate it.'))}
+      ${_th(this._t('lbl.energy', {}, 'Energy'), 'energy', col === 'energy', dir, 'cycsort', 'right', this._t('col.energy_tip', {}, 'Total energy used (kWh), computed from power over time.'))}
+      ${_th(this._t('lbl.cost', {}, 'Cost'), 'cost', col === 'cost', dir, 'cycsort', 'right', this._t('col.cost_tip', {}, 'Energy cost of this cycle, fixed when it finished. With Time-Weighted Cost on, each moment is charged at its own price; otherwise at the price at the end. Set a price in Settings to fill this in.'))}
       ${_th(this._t('lbl.confidence', {}, 'Confidence'), 'confidence', col === 'confidence', dir, 'cycsort', 'right', this._t('col.confidence_tip', {}, 'Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.'))}
     </tr></thead>`;
 
@@ -5408,7 +5401,7 @@ class HaWashdataPanel extends HTMLElement {
     const title = this._t('lbl.cycles_title', {n: `${realCycles.length}${impNote}${shown}`}, `Cycles (${realCycles.length}${impNote}${shown})`);
 
     const toolbar = canEdit ? `<div class="wd-card-actions" style="margin:0 0 4px;justify-content:flex-end">
-      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-auto-open" title="${_esc(this._t('btn.auto_label_cycles_tip', {}, 'Automatically assign profile names to unlabelled cycles whose match confidence clears the threshold'))}">${this._t('btn.auto_label_cycles', {}, 'Auto-label cycles')}</button>
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="cyc-auto-open" title="${_esc(this._t('btn.auto_label_cycles_tip', {}, 'Name unlabelled cycles whose match confidence clears the threshold.'))}">${this._t('btn.auto_label_cycles', {}, 'Auto-label cycles')}</button>
       <button class="wd-btn ${selMode ? 'wd-btn-primary' : 'wd-btn-secondary'} wd-btn-sm" data-action="cyc-select-toggle">${selMode ? this._t('btn.done', {}, 'Done') : this._t('btn.select', {}, 'Select')}</button>
     </div>` : '';
 
@@ -5489,7 +5482,7 @@ class HaWashdataPanel extends HTMLElement {
     // match immediately), shown with an "Imported" badge instead of "Still learning".
     const isWarmup = cycleCount < warmupThreshold && !p.is_imported;
     const warmupBadge = isWarmup
-      ? `<span class="wd-badge" title="${_esc(this._tText('msg.warmup_detail', {needed: warmupThreshold}, `Matching already runs. WashData asks you to confirm the first ${warmupThreshold} cycles of this profile before it labels them on its own.`))}" style="background:var(--info-color,#2196f3);color:#fff">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
+      ? `<span class="wd-badge" title="${_esc(this._tText('msg.warmup_detail', {needed: warmupThreshold}, `Matching already works. WashData asks you to confirm the first ${warmupThreshold} cycles of this profile before labelling on its own.`))}" style="background:var(--info-color,#2196f3);color:#fff">${this._t('msg.warmup_badge', {done: cycleCount, needed: warmupThreshold}, `Still learning (${cycleCount}/${warmupThreshold} cycles)`)}</span>`
       : '';
     const importedBadge = p.is_imported
       ? `<span class="wd-badge" title="${_esc(this._t('badge.imported_tip', {}, 'Imported from the community store. Used for matching only, not counted in stats.'))}" style="background:var(--info-color,#2196f3);color:#fff">📥 ${this._t('status.imported', {}, 'Imported')}</span>`
@@ -5498,7 +5491,7 @@ class HaWashdataPanel extends HTMLElement {
     // with an imported program, so an import that never fits can be pruned.
     // Counted locally from the stored cycles; nothing is sent to the store.
     const usedN = p.is_imported ? Number((this._profileMatcherCounts || {})[p.name] || 0) : null;
-    const usedBadge = usedN == null ? '' : `<span class="wd-badge wd-matcher-used" data-used="${usedN}" style="color:var(--secondary-text-color,#888)" title="${_esc(this._tText('badge.matcher_used_tip', {}, "Cycles recorded on this appliance that WashData's matcher labelled with this imported program on its own. An import that is never matched may not fit your appliance and can be removed. Counted locally; nothing is sent to the store."))}">${usedN > 0
+    const usedBadge = usedN == null ? '' : `<span class="wd-badge wd-matcher-used" data-used="${usedN}" style="color:var(--secondary-text-color,#888)" title="${_esc(this._tText('badge.matcher_used_tip', {}, "Cycles on this appliance that WashData matched to this imported program on its own. An import that never matches may not fit your appliance; you can remove it. Counted locally; nothing is sent to the store."))}">${usedN > 0
       ? this._t('badge.matcher_used', {n: usedN}, `Matched ${usedN} of your cycles`)
       : this._t('badge.matcher_unused', {}, 'Not matched to your cycles yet')}</span>`;
     // A program with no cycle behind it is silently absent from every match: it can
@@ -5522,8 +5515,7 @@ class HaWashdataPanel extends HTMLElement {
       const tTip = this._tText('badge.quiet_tail_tip',
         {mins, secs, watts, seen: term.seen_in, measured: term.measured},
         `Near the end this program goes quiet for about ${mins} min, then draws about `
-        + `${watts} W for ${secs} s before finishing. Seen in ${term.seen_in} of `
-        + `${term.measured} measured cycles: the appliance does not do it every run.`);
+        + `${watts} W for ${secs} s. Seen in ${term.seen_in} of ${term.measured} measured cycles.`);
       terminalBadge = `<span class="wd-badge" style="color:var(--secondary-text-color,#888)"`
         + ` title="${_esc(tTip)}">${this._t('badge.quiet_tail', {mins}, `~${mins}m quiet tail`)}</span>`;
     }
@@ -5654,8 +5646,8 @@ class HaWashdataPanel extends HTMLElement {
         <p class="wd-info">${this._t('msg.profiles_intro', {}, 'Click a profile for stats, phases and cleanup. Group near-identical programs (same shape/duration, different temperature or spin) so matching reliably picks between them.')}</p>
         ${canEdit ? `<div class="wd-card-actions">
           <button class="wd-btn wd-btn-primary" data-action="create-profile" title="${_esc(this._t('btn.new_profile_tip', {}, 'Create a new program profile from an existing labelled cycle or recording'))}">${this._t('btn.new_profile', {}, '+ New Profile')}</button>
-          <button class="wd-btn wd-btn-secondary" data-action="pg-new" title="${_esc(this._t('btn.new_group_tip', {}, 'Group near-identical profiles (same shape/duration, different temperature or spin) so the matcher reliably picks between them'))}">${this._t('btn.new_group', {}, '+ New Group')}</button>
-          <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''} title="${_esc(this._t('btn.rebuild_tip', {}, 'Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles — run after labelling new cycles or correcting old ones'))}">${rebuildBusy ? ('<span class="wd-spin"></span> ' + this._t('status.rebuilding', {}, 'Rebuilding…')) : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="pg-new" title="${_esc(this._t('btn.new_group_tip', {}, 'Group near-identical profiles (same shape, different temperature or spin) so matching can tell them apart.'))}">${this._t('btn.new_group', {}, '+ New Group')}</button>
+          <button class="wd-btn wd-btn-secondary" data-action="rebuild-envelopes" ${rebuildBusy ? 'disabled' : ''} title="${_esc(this._t('btn.rebuild_tip', {}, 'Rebuild every profile\'s expected power band from its labelled cycles. Run after labelling or correcting cycles.'))}">${rebuildBusy ? ('<span class="wd-spin"></span> ' + this._t('status.rebuilding', {}, 'Rebuilding…')) : this._t('btn.rebuild', {}, 'Rebuild Envelopes')}</button>
         </div>` : ''}
       </div>
       ${groupSections}
@@ -5708,7 +5700,7 @@ class HaWashdataPanel extends HTMLElement {
       ${canvas}
       <div class="wd-rev-sub">${this._t('lbl.members', {}, 'Members')}${members.length ? ` (${members.length})` : ''}</div>
       <div class="wd-rev-tags">${checks || `<span class="wd-info">${this._t('msg.no_profiles_yet_short', {}, 'No profiles yet.')}</span>`}</div>
-      <p class="wd-info" style="margin-top:10px">${this._t('msg.group_modal_help', {}, 'Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.')}</p>
+      <p class="wd-info" style="margin-top:10px">${this._t('msg.group_modal_help', {}, 'Group programs with the same shape that differ in temperature or spin. Matching scores the group as one, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.')}</p>
       <div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         ${m.orig ? `<button class="wd-btn wd-btn-danger" data-maction="pg-delete" title="${_esc(this._t('btn.delete_group_tip', {}, 'Delete this group only - the member profiles are kept'))}">${this._t('btn.delete_group', {}, 'Delete Group')}</button>` : ''}
@@ -5829,7 +5821,7 @@ class HaWashdataPanel extends HTMLElement {
       ? `<p class="wd-info" style="margin:0 0 10px;font-size:.82em">${this._t('msg.settings_basic_note', {}, 'Showing essential settings. Switch to Advanced for the full list.')}</p>`
       : '';
     // Advanced only: reveal the internal tuning fields (search always finds them).
-    const internalToggle = basicMode ? '' : `<label class="wd-check-inline" style="font-size:.82em;display:inline-flex;align-items:center;gap:6px" title="${_esc(this._t('lbl.show_internal_tip', {}, 'Tuning the integration sets for you (sampling, watchdog, match cadence, thresholds). Shown automatically when this device has its own value, a conflict or a suggestion.'))}">
+    const internalToggle = basicMode ? '' : `<label class="wd-check-inline" style="font-size:.82em;display:inline-flex;align-items:center;gap:6px" title="${_esc(this._t('lbl.show_internal_tip', {}, 'Settings WashData tunes for you (sampling, watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.'))}">
       <input type="checkbox" id="wd-settings-internal-chk" data-action="set-settings-internal" ${this._pref('show_internal', false) ? 'checked' : ''}>
       ${this._t('lbl.show_internal', {}, 'Show internal settings')}</label>`;
 
@@ -5895,7 +5887,7 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-secondary" id="wd-settings-revert" ${this._prevOpts ? '' : 'disabled'} title="${this._prevOpts ? this._t('btn.revert_settings_tip', {}, 'Restore settings from before your last save') : this._t('btn.revert_settings_tip_none', {}, 'Save first to enable undo')}">${this._t('btn.revert_settings', {}, 'Revert changes')}</button>
           <button class="wd-btn wd-btn-secondary" id="wd-settings-reload" title="${_esc(this._t('btn.refresh_settings_tip', {}, 'Reload settings from the server'))}">${this._t('btn.refresh', {}, 'Refresh')}</button>
         </div>
-        <p class="wd-info" style="margin-top:12px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload. HA entities may briefly show as unavailable.')}</p>
+        <p class="wd-info" style="margin-top:12px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving reloads the integration. Entities may briefly show as unavailable.')}</p>
       </div>
       ${this._htmlSettingsHistory()}
     `;
@@ -6102,8 +6094,8 @@ class HaWashdataPanel extends HTMLElement {
     // The + button already covers "not in the catalog", and the approved-only
     // toggle is intentionally gone: pending entries are shown with a tag.
     const storeActions = (this._onlineEnabled() && this._storeDeviceDeclared()) ? `<div class="wd-store-actions">
-      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-share-device" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them'))}">${this._t('btn.share_device', {}, '⬆ Share this device')}</button>
-      <button class="wd-btn wd-btn-ghost wd-btn-sm" data-action="store-download-device" ${match ? `data-device-id="${_esc(match.id)}"` : ''} title="${_esc(this._t('msg.store_download_device_intro', {}, 'Adopt every shared program and its reference cycles onto your device.'))}">${this._t('btn.download_device', {}, 'Download this setup')}</button>
+      <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-share-device" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its reference cycles to the community store so owners of the same machine can adopt them.'))}">${this._t('btn.share_device', {}, '⬆ Share this device')}</button>
+      <button class="wd-btn wd-btn-ghost wd-btn-sm" data-action="store-download-device" ${match ? `data-device-id="${_esc(match.id)}"` : ''} title="${_esc(this._t('msg.store_download_device_intro', {}, 'Add every shared program and its reference cycles to your device. Your own cycles and stats are not affected.'))}">${this._t('btn.download_device', {}, 'Download this setup')}</button>
     </div>` : '';
     return `<div class="wd-field"><label>${_esc(label)} ${doc ? _tip(doc) : ''}${tag}${loading}</label>
       <div class="wd-combo-row">
@@ -6770,7 +6762,7 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-card-actions" style="margin-top:12px">
           <button class="wd-btn wd-btn-primary" id="wd-ml-save" ${saveBusy ? 'disabled' : ''}>${saveBusy ? ('<span class="wd-spin"></span> ' + this._t('status.saving', {}, 'Saving…')) : this._t('btn.save', {}, 'Save')}</button>
         </div>
-        <p class="wd-info" style="margin-top:10px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving triggers an integration reload.')}</p>
+        <p class="wd-info" style="margin-top:10px;font-size:.78em">${this._t('msg.saving_triggers_reload', {}, 'Saving reloads the integration. Entities may briefly show as unavailable.')}</p>
       </div>
 
       ${this._htmlMlLearnedSection(st)}
@@ -6853,14 +6845,11 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // Humanized "fit" indicator for a fine-tuned model: a coloured word + bar, with
-  // the exact metric on hover. Classifiers use held-out AUC; regressors use how
-  // much they beat the baseline estimate.
+  // the exact metric on hover: how much the regressor beats the baseline estimate
+  // (every fine-tuned model is a regressor since 0.5.8).
   _mlQualityChip(m) {
     let pct = 0, word = '', title = m.metric_key ? this._tText(m.metric_key, m.metric_params || {}, m.metric || '') : (m.metric || '');
-    if (m.auc != null) {
-      pct = Math.max(0, Math.min(1, (m.auc - 0.5) / 0.5)) * 100;
-      word = m.auc >= 0.85 ? this._t('ml.fit_strong',{},'Strong') : m.auc >= 0.75 ? this._t('ml.fit_good',{},'Good') : m.auc >= 0.65 ? this._t('ml.fit_fair',{},'Fair') : this._t('ml.fit_weak',{},'Weak');
-    } else if (m.model_mae != null && m.naive_mae != null && m.naive_mae > 0) {
+    if (m.model_mae != null && m.naive_mae != null && m.naive_mae > 0) {
       const impr = Math.max(0, (m.naive_mae - m.model_mae) / m.naive_mae);
       pct = Math.min(1, impr) * 100;
       word = impr >= 0.5 ? this._t('ml.fit_strong',{},'Strong') : impr >= 0.2 ? this._t('ml.fit_good',{},'Good') : this._t('ml.fit_slight',{},'Slight');
@@ -6885,7 +6874,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!trend) return '';
     const map = {
       improving: [this._t('badge.improving',{},'↗ improving'), 'var(--success-color,#4caf50)', this._t('ml.trend_improving_tip', {}, "This model's fit has improved across recent re-checks.")],
-      declining: [this._t('badge.declining',{},'↘ declining'), 'var(--warning-color,#ff9800)', this._t('ml.trend_declining_tip', {}, "This model's fit has slipped across recent re-checks — reviewing more cycles may help it re-learn.")],
+      declining: [this._t('badge.declining',{},'↘ declining'), 'var(--warning-color,#ff9800)', this._t('ml.trend_declining_tip', {}, "This model's fit has slipped across recent re-checks – reviewing more cycles may help it re-learn.")],
       steady: [this._t('badge.steady',{},'→ steady'), 'var(--secondary-text-color)', this._t('ml.trend_steady_tip', {}, "This model's fit has held roughly steady across recent re-checks.")],
     };
     const e = map[trend];
@@ -6935,14 +6924,14 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_enabled',    'Enable Anti-Wrinkle Detection', '', 'Absorb the tumble pulses after the main phase instead of reading them as new cycles', 'advanced', 'bool'],
       ['anti_wrinkle_max_power',  'Max Anti-Wrinkle Power','W', 'A pulse above this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_max_duration','Max Anti-Wrinkle Duration','s', 'A pulse longer than this ends anti-wrinkle and opens a new cycle', 'advanced'],
-      ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Power must fall below this between pulses for anti-wrinkle to stay active', 'advanced'],
+      ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Quiet level between tumble pulses; only takes effect above the Stop Threshold', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
       ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
-      ['smart_termination_duration_ratio', 'Smart Termination Ratio', '', 'Fraction of the matched program\'s expected duration a cycle must reach before Smart Termination may end it early; lower it for load- or temperature-dependent machines', 'advanced'],
-      ['anti_crease_finalize_ratio', 'Anti-Crease Finalize Ratio', '', 'Fraction of the matched program\'s expected duration a cycle must reach before the anti-crease tumble tail may be finalised. Lower it on a dryer whose sensor-dry runtime follows the load, so its tail is recognised instead of sitting until the fallback timeout. Leave washing machines at the default: there this fraction is what keeps a quiet mid-wash phase from being mistaken for the tail. Separate from the Smart Termination Ratio, which gates a different check.', 'advanced'],
-      ['curve_preroll_seconds', 'Curve Pre-roll', 's', 'Seconds of readings from aborted start attempts that may be carried into the front of a cycle\'s curve. Machines that probe before settling (programme selection, door lock, first fill) can drop the first minutes of real activity from every curve. 0 turns this off. Note that enabling it moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program until the older ones age out - expect the learned averages to drift for a while.', 'timing'],
-      ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Stage 1: shortest run (vs the profile) still allowed to match', 'matching'],
-      ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Stage 1: longest run (vs the profile) still allowed to match', 'matching'],
+      ['smart_termination_duration_ratio', 'Smart Termination Ratio', '', 'Fraction of the program\'s average duration a cycle must reach before Smart Termination may end it early; lower it if run times vary', 'advanced'],
+      ['anti_crease_finalize_ratio', 'Anti-Crease Finalize Ratio', '', 'Fraction of the program\'s average duration a cycle must reach before the anti-crease tail may finish it; lower it on dryers, keep washers at the default', 'advanced'],
+      ['curve_preroll_seconds', 'Curve Pre-roll', 's', 'Seconds of readings from aborted start attempts carried into the front of a cycle\'s curve; 0 = off', 'timing'],
+      ['profile_match_min_duration_ratio', 'Min Duration Ratio', '', 'Minimum cycle length as a fraction of the profile\'s duration; default 0.1 (10%)', 'matching'],
+      ['profile_match_max_duration_ratio', 'Max Duration Ratio', '', 'Maximum cycle length as a fraction of the profile\'s duration; default 1.8 (180%)', 'matching'],
     ];
   }
 
@@ -7091,7 +7080,7 @@ class HaWashdataPanel extends HTMLElement {
     const publishable = changed.filter(k => this._pgIsPublishable(k));
 
     const status = !loaded
-      ? `<span style="color:var(--secondary-text-color)">${this._t('msg.pg_live_unavailable', {}, 'Live settings unavailable — showing defaults.')}</span>`
+      ? `<span style="color:var(--secondary-text-color)">${this._t('msg.pg_live_unavailable', {}, 'Live settings unavailable, showing defaults.')}</span>`
       : (changed.length
         ? `<span style="color:var(--warning-color,#ff9800);font-weight:600">${this._t('msg.pg_n_changed', {n: changed.length}, changed.length + ' changed vs live settings')}</span>`
         : `<span style="color:var(--success-color,#4caf50)">✓ ${this._t('msg.pg_matches_live', {}, 'Matches live settings')}</span>`);
@@ -7334,7 +7323,7 @@ class HaWashdataPanel extends HTMLElement {
 
     return `<div class="wd-card">
       <div class="wd-card-title" style="margin:0 0 10px">${this._t('hdr.playground', {}, 'Playground')}</div>
-      <p class="wd-sec-intro" style="margin:0 0 10px">${this._t('msg.playground_intro', {}, 'Explore how settings affect detection on your real cycle data. Nothing here changes live configuration until you explicitly apply it.')}</p>
+      <p class="wd-sec-intro" style="margin:0 0 10px">${this._t('msg.playground_intro', {}, 'Try settings on your real cycle data. Nothing here changes your live settings until you apply it.')}</p>
       ${restartNote}
       ${workbench}
       ${this._htmlPgDrawer()}
@@ -7474,7 +7463,7 @@ class HaWashdataPanel extends HTMLElement {
         ${o.label_reason ? outcomeChip(this._t('lbl.pg_autolabel', {}, 'Auto-label'), this._pgLabelVerdict(o).short) : ''}
       </div>
       <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">${alertRows}</div>
-      ${hasNotify ? `<p class="wd-info" style="margin:8px 0 0;font-size:.72em">🔔 ${this._t('msg.pg_notify_partial', {}, 'Notification markers cover start, almost-done, finish, milestones and quiet hours only. Live progress updates, unload reminders and overrun alerts are not simulated.')}</p>` : ''}
+      ${hasNotify ? `<p class="wd-info" style="margin:8px 0 0;font-size:.72em">🔔 ${this._t('msg.pg_notify_partial', {}, 'Markers show start, almost-done, finish, milestone and quiet-hours notifications only. Live updates, unload reminders and overrun alerts are not simulated.')}</p>` : ''}
     </div>`;
   }
 
@@ -7526,7 +7515,7 @@ class HaWashdataPanel extends HTMLElement {
       ${overrideActive ? `<span style="font-size:.78em;color:var(--warning-color,#ff9800)">⚙ ${this._t('msg.pg_override_active', {}, 'Using your edited settings vs. current')}</span>` : ''}
     </div>`;
     const simbar = busy ? this._htmlPgBatchBar() : '';
-    const intro = `<p class="wd-sec-intro" style="margin:0 0 8px">${this._t('msg.pg_history_intro2', {}, 'Replay your recent cycles through the real detector and matcher with the settings above. Click any row to load that cycle in the graph; edit a setting to see a before/after comparison.')}</p>`;
+    const intro = `<p class="wd-sec-intro" style="margin:0 0 8px">${this._t('msg.pg_history_intro2', {}, 'Replay recent cycles through the real detector and matcher with the settings above. Click a row to load it in the graph; change a setting to compare before and after.')}</p>`;
     if (!h || !Array.isArray(h.rows)) {
       return `${intro}${controls}${this._htmlPgRecentRuns('pg_history')}${simbar}${busy ? '' : `<div class="wd-empty" style="padding:24px">${this._t('msg.pg_history_empty', {}, 'Press Run to replay your cycles.')}</div>`}`;
     }
@@ -7586,7 +7575,7 @@ class HaWashdataPanel extends HTMLElement {
   // built partly from those same cycles (no leave-one-out), so their scores run
   // a little high. Measured on 59 cycles: correct matches 46 vs 44 held out.
   _htmlPgInSampleNote() {
-    return `<p class="wd-pg-insample wd-info" style="font-size:.78em;margin:0 0 8px">${this._t('msg.pg_in_sample_note', {}, 'These cycles also helped build the profiles they are matched against, so these results are optimistic: on new cycles, expect slightly fewer correct matches.')}</p>`;
+    return `<p class="wd-pg-insample wd-info" style="font-size:.78em;margin:0 0 8px">${this._t('msg.pg_in_sample_note', {}, 'These cycles helped build the profiles they are matched against, so results are optimistic: expect slightly fewer correct matches on new cycles.')}</p>`;
   }
 
   // Determinate progress bar for chunked history/sweep runs, rendered once while
@@ -7648,7 +7637,7 @@ class HaWashdataPanel extends HTMLElement {
     if (this._pgIsUnknownCmd(e)) { this._pgNeedsRestart = true; return; }
     const code = (e && (e.code || (e.error && e.error.code))) || '';
     if (code === 'task_busy') {
-      this._showToast(this._t('msg.pg_task_busy', {}, 'A Test-on-history or Optimize run is already in progress for this device. Wait for it to finish or cancel it.'), 'error');
+      this._showToast(this._t('msg.pg_task_busy', {}, 'A Test-on-history or Optimize run is already in progress for this device. Wait for it or cancel it.'), 'error');
       return;
     }
     this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
@@ -7838,7 +7827,7 @@ class HaWashdataPanel extends HTMLElement {
         <span class="wd-pg-strip-track"><span class="wd-pg-strip-fill" id="wd-pg-pbar" style="width:0%"></span></span>
         <span id="wd-pg-pct">—%</span>
       </span>
-      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase" title="${_esc(this._t('lbl.pg_time_left_model_tip', {}, 'Model-estimated time remaining (phase estimator + ML blend), not a static countdown'))}">${this._t('lbl.pg_time_left_model', {}, 'Time left (model)')} <span id="wd-pg-rem" style="color:var(--primary-text-color,inherit)">—</span></span>
+      <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase" title="${_esc(this._t('lbl.pg_time_left_model_tip', {}, 'Estimated from the program\'s phases, not a fixed countdown'))}">${this._t('lbl.pg_time_left_model', {}, 'Time left (model)')} <span id="wd-pg-rem" style="color:var(--primary-text-color,inherit)">—</span></span>
       <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.energy', {}, 'Energy')} <span id="wd-pg-energy" style="color:var(--primary-text-color,inherit)">—</span></span>
       <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.match', {}, 'Match')} <span id="wd-pg-conf" style="color:var(--primary-text-color,inherit)">—</span></span>
       <span style="font-size:.75em;color:var(--secondary-text-color);text-transform:uppercase">${this._t('lbl.phase', {}, 'Phase')} <span id="wd-pg-phase" style="color:var(--primary-text-color,inherit)">—</span></span>
@@ -8456,7 +8445,7 @@ class HaWashdataPanel extends HTMLElement {
       notify_milestone: this._t('pg_evd.notify_milestone', {}, 'A milestone notification would be sent.'),
       notify_held: this._t('pg_evd.notify_held', {}, 'A notification was held back for quiet hours.'),
       finished: this._t('pg_evd.finished', {}, 'The cycle reached a terminal state and ended.'),
-      stalled: this._t('pg_evd.stalled', {}, 'The cycle sat on its standby draw for longer than this program ever pauses there, with work still to do. Shown as Paused (Stalled); the cycle stays open.'),
+      stalled: this._t('pg_evd.stalled', {}, 'The cycle sat at standby draw longer than this program ever pauses there, with work left. Shown as Paused (Stalled); the cycle stays open.'),
     };
     return D[type] || '';
   }
@@ -8631,7 +8620,7 @@ class HaWashdataPanel extends HTMLElement {
       ${this._canFull() ? `<div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.maintenance', {}, 'Maintenance Actions')}</div>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <div><strong>${this._t('hdr.process_history', {}, 'Process History')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.process_history_hint', {}, 'Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), recost cycles against your recorded energy prices, and recompute cycle health. Run this after a batch of reviews.')}</p>
+          <div><strong>${this._t('hdr.process_history', {}, 'Process History')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.process_history_hint', {}, 'Re-run matching on all stored cycles, refresh suggestions, retrain ML models (if enabled), recost cycles from recorded prices and recompute cycle health. Run it after a batch of reviews.')}</p>
             <button class="wd-btn wd-btn-secondary" data-action="reprocess-history">${this._t('btn.process_history', {}, 'Process Now')}</button></div>
           <div><strong>${this._t('hdr.clear_debug', {}, 'Clear Debug Traces')}</strong><p class="wd-info" style="margin:4px 0">${this._t('msg.clear_debug_hint', {}, 'Remove stored debug data to free space.')}</p>
             <button class="wd-btn wd-btn-secondary" data-action="clear-debug">${this._t('btn.clear_debug', {}, 'Clear Debug Data')}</button></div>
@@ -8651,7 +8640,7 @@ class HaWashdataPanel extends HTMLElement {
       </div>
       <div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.import_power_history', {}, 'Import power history')}</div>
-        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.import_history_description', {}, 'Already had a smart plug before WashData? Upload a history export of its power sensor, or read it straight from Home Assistant, and the normal detection runs over it so past cycles turn up in your Cycles list ready to name.')}</p>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.import_history_description', {}, 'Had a smart plug before WashData? Upload its power history or read it from Home Assistant. Detection runs over it, and past cycles appear in your Cycles list ready to name.')}</p>
         <div class="wd-card-actions">
           <button class="wd-btn wd-btn-primary" data-action="hist-import-open">${this._t('btn.import_power_history', {}, 'Import power history')}</button>
         </div>
@@ -8782,7 +8771,7 @@ class HaWashdataPanel extends HTMLElement {
       <p class="wd-info">${this._t('msg.custom_tasks_intro', {}, 'Add anything else you want to be reminded of. A task is due when either interval is reached; leave one blank or 0 to use only the other.')}</p>
       ${taskRows}
       ${newTaskRow}
-      <p class="wd-info" style="margin-top:12px">${this._t('msg.maintenance_due_sensor_hint', {}, 'The Maintenance due binary sensor turns on while any task is due, so you can build your own notification automation.')}</p>
+      <p class="wd-info" style="margin-top:12px">${this._t('msg.maintenance_due_sensor_hint', {}, 'The Maintenance due binary sensor is on while any task is due, for your own notification automations.')}</p>
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="maint-save-reminders">${this._t('btn.save_reminders', {}, 'Save reminders')}</button></div>
     </div>` : '';
 
@@ -8822,7 +8811,7 @@ class HaWashdataPanel extends HTMLElement {
         <label>${this._t('lbl.correct_total_cycles', {}, 'Correct the total')}</label>
         <input type="number" min="0" step="1" id="wd-maint-odometer" value="${odometer}">
       </div>
-      <p class="wd-info" style="margin-top:6px">${this._t('msg.odometer_correct_hint', {}, 'Set this if WashData recorded a run that never happened, or if the appliance had already run cycles before WashData was installed.')}</p>
+      <p class="wd-info" style="margin-top:6px">${this._t('msg.odometer_correct_hint', {}, 'Set this if WashData counted a run that never happened, or the appliance ran cycles before WashData was installed.')}</p>
       <div class="wd-card-actions"><button class="wd-btn" data-action="maint-save-odometer">${this._t('btn.save_total_cycles', {}, 'Save total')}</button></div>
     </div>` : '';
 
@@ -8832,7 +8821,7 @@ class HaWashdataPanel extends HTMLElement {
         <span style="font-size:26px;font-weight:700">${odometer}</span>
         <span class="wd-info">${this._t('lbl.total_cycles_run', {}, 'cycles run in total')}</span>
       </div>
-      <p class="wd-info" style="margin-top:6px">${this._t('msg.odometer_intro', {}, 'This total only ever rises. Deleting a cycle record does not change it, and it keeps counting past the stored-history limit, so service reminders stay correct.')}</p>
+      <p class="wd-info" style="margin-top:6px">${this._t('msg.odometer_intro', {}, 'This total only goes up. Deleting a cycle does not lower it, so service reminders stay correct.')}</p>
       ${progressRows || `<p class="wd-info" style="margin-top:10px">${this._t('msg.no_reminders_set', {}, 'No service reminders are set yet.')}</p>`}
       ${odometerEditor}
     </div>`;
@@ -8850,7 +8839,7 @@ class HaWashdataPanel extends HTMLElement {
       ${addForm}
       <div class="wd-card">
         <div class="wd-card-title">${this._t('hdr.maintenance_log', {}, 'Maintenance Log')}</div>
-        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.maintenance_intro', {}, 'Log servicing you perform on this appliance and get reminded when each task is due again.')}</p>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.maintenance_intro', {}, 'Log servicing on this appliance and get reminded when each task is due again.')}</p>
         <div style="display:flex;flex-direction:column;gap:8px">${rows}</div>
       </div>
       ${remEditor}
@@ -8968,7 +8957,7 @@ class HaWashdataPanel extends HTMLElement {
     const adminNote = users.filter(u => u.is_admin).map(u => `<span class="wd-pill">${_esc(u.name)} - full (admin)</span>`).join(' ');
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.access_control', {}, 'Access Control')}</div>
-      ${_switchRow(`id="wd-rbac-enabled" ${rbac.enabled ? 'checked' : ''}`, this._t('lbl.enable_access_control', {}, 'Enable per-user access control'), '', this._t('msg.rbac_hint', {}, 'When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.'))}
+      ${_switchRow(`id="wd-rbac-enabled" ${rbac.enabled ? 'checked' : ''}`, this._t('lbl.enable_access_control', {}, 'Enable per-user access control'), '', this._t('msg.rbac_hint', {}, 'Off: every Home Assistant user has full access (default). Administrators always have full access and can manage everyone.'))}
       <div class="wd-field"><label>${this._t('lbl.default_access_level', {}, 'Default level for users not listed below')}</label>${this._levelSelect('id="wd-rbac-default"', rbac.default_level || 'none', false)}</div>
       ${adminNote ? `<div class="wd-field"><label>${this._t('lbl.administrators', {}, 'Administrators')}</label><div>${adminNote}</div></div>` : ''}
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="save-rbac">${this._t('btn.save_access_control', {}, 'Save Access Control')}</button></div>
@@ -8991,7 +8980,7 @@ class HaWashdataPanel extends HTMLElement {
     const storeHeader = `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div class="wd-card-title" style="margin:0">${this._t('hdr.community_store', {}, 'Community Store')}</div>${storeLink}</div>`;
     if (!this._onlineEnabled() || (st && st.enabled === false)) {
       return `<div class="wd-card">${storeHeader}
-        <p class="wd-info">${this._t('msg.store_enable_hint', {}, 'Enable online features in Settings to browse and import community reference cycles.')}</p></div>`;
+        <p class="wd-info">${this._t('msg.store_enable_hint', {}, 'Turn on online features in Preferences > Online & Community to browse and import community reference cycles.')}</p></div>`;
     }
     let body;
     if (this._storeView === 'device') body = this._htmlStoreDevice();
@@ -9055,7 +9044,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!this._storeBrandScope()) {
       return `
         ${this._storeSearchHtml()}
-        <p class="wd-info" style="margin-bottom:10px">${this._t('msg.store_declare_appliance', {}, 'Tell WashData which appliance you own and this tab shows the setups other people have shared for it. You can also type a brand above to look around.')}</p>
+        <p class="wd-info" style="margin-bottom:10px">${this._t('msg.store_declare_appliance', {}, 'Tell WashData which appliance you own to see setups others shared for it. Or type a brand above to look around.')}</p>
         <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-goto-identity">${this._t('btn.set_brand_model', {}, 'Set brand & model')}</button>`;
     }
 
@@ -9065,7 +9054,7 @@ class HaWashdataPanel extends HTMLElement {
     // The exact model is empty far more often than not, so say plainly that the other
     // rows are worth a look rather than letting the user conclude the store is empty.
     const siblingHint = (!this._storeLoading && items.length > 1)
-      ? `<p class="wd-info" style="margin-bottom:8px">${this._t('msg.store_sibling_hint', {}, 'Nothing shared for your exact model? A closely-related model from the same brand is usually a good starting point.')}</p>`
+      ? `<p class="wd-info" style="margin-bottom:8px">${this._t('msg.store_sibling_hint', {}, 'Nothing shared for your model? A related model from the same brand is usually a good start.')}</p>`
       : '';
     return `
       ${this._storeSearchHtml()}
@@ -9112,7 +9101,7 @@ class HaWashdataPanel extends HTMLElement {
     const dev = this._storeDevice;
     const dlBusy = this._busy.has('store-download-device');
     const dlHeader = (this._canEdit() && dev && items.length) ? `<div class="wd-card" style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <span class="wd-info" style="flex:1;min-width:180px">${this._t('msg.store_download_device_intro', {}, 'Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.')}</span>
+      <span class="wd-info" style="flex:1;min-width:180px">${this._t('msg.store_download_device_intro', {}, 'Add every shared program and its reference cycles to your device. Your own cycles and stats are not affected.')}</span>
       ${_switchInline(`data-action="store-toggle-dl-settings" ${this._dlSettings ? 'checked' : ''} ${dlBusy ? 'disabled' : ''}`, this._t('lbl.adopt_settings', {}, 'Also adopt settings'), _tip(this._t('msg.adopt_settings_hint', {}, 'Overwrite this device\'s detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.')))}
       <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-download-device" data-device-id="${_esc(dev.id)}" ${dlBusy ? 'disabled' : ''}>${dlBusy ? '<span class="wd-spin"></span> ' : '⬇ '}${this._t('btn.download_device', {}, 'Download this setup')}</button>
     </div>` : '';
@@ -9217,7 +9206,7 @@ class HaWashdataPanel extends HTMLElement {
         </div>`);
     return `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.online_account', {}, 'Community Store & online features')}</div>
-      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.online_intro_global', {}, 'Browse and share reference recordings with other WashData users, and confirm appliance entries. One connection applies to your whole WashData integration; appliance brand and model are set per device under Basic. All online features are opt-in and off by default.')}</p>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.online_intro_global', {}, 'Browse and share reference recordings with other WashData users. One connection covers all your WashData devices; brand and model are set per device under Basic. Online features are off until you turn them on.')}</p>
       ${_switchRow(`data-action="store-toggle-online" ${on ? 'checked' : ''} ${busy ? 'disabled' : ''}`, this._t('lbl.enable_online', {}, 'Enable online features'))}
       ${on ? this._htmlStorePrefs(busy) : ''}
       ${on ? connBlock : ''}
@@ -9240,7 +9229,7 @@ class HaWashdataPanel extends HTMLElement {
     return rows + `
       <div class="wd-field" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px">
         <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="store-refresh-catalog" ${refreshing || busy ? 'disabled' : ''}>${refreshing ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.refresh_catalog', {}, 'Refresh catalog')}</button>
-        <span class="wd-info" style="margin:0;flex:1;min-width:180px">${this._t('msg.refresh_catalog_hint', {}, 'The community brand and appliance lists are cached to keep the shared store within its daily budget. Refresh to pick up entries added or approved by others.')}</span>
+        <span class="wd-info" style="margin:0;flex:1;min-width:180px">${this._t('msg.refresh_catalog_hint', {}, 'Community brand and appliance lists are cached to save the store\'s daily budget. Refresh to see entries others added or approved.')}</span>
       </div>`;
   }
 
@@ -10306,7 +10295,7 @@ class HaWashdataPanel extends HTMLElement {
       body = `<h2>${this._t('modal.create_profile', {}, 'Create Profile')}</h2>
         <div class="wd-field"><label>${this._t('lbl.profile_name', {}, 'Profile Name')}</label><input type="text" id="wd-cp-name" placeholder="${_esc(this._t('placeholder.profile_name', {}, 'e.g. Cotton 40°C'))}" value="${_esc(m.prefillName || '')}"></div>
         <div class="wd-field"><label>${this._t('lbl.ref_cycle', {}, 'Reference Cycle (optional)')}</label><select id="wd-cp-cycle"><option value="">${this._t('lbl.ref_cycle_none', {}, 'None')}</option>${cycleOpts}</select></div>
-        <div class="wd-field"><label>${this._t('lbl.manual_duration', {}, 'Manual Duration (min, optional)')}</label><input type="number" id="wd-cp-dur" min="0" max="600" value="0"><div class="wd-field-hint" id="wd-cp-dur-hint">${this._t('msg.manual_duration_ref_hint', {}, 'Only used when no reference cycle is selected — a reference cycle sets the duration from its own length.')}</div></div>
+        <div class="wd-field"><label>${this._t('lbl.manual_duration', {}, 'Manual Duration (min, optional)')}</label><input type="number" id="wd-cp-dur" min="0" max="600" value="0"><div class="wd-field-hint" id="wd-cp-dur-hint">${this._t('msg.manual_duration_ref_hint', {}, 'Only used without a reference cycle; a reference cycle sets the duration from its own length.')}</div></div>
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="create-profile-ok">${this._t('btn.create', {}, 'Create')}</button></div>`;
     } else if (m.type === 'create-phase') {
@@ -10316,7 +10305,7 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-modal-actions"><button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
         <button class="wd-btn wd-btn-primary" data-maction="create-phase-ok">${this._t('btn.create', {}, 'Create')}</button></div>`;
     } else if (m.type === 'edit-phase') {
-      const builtinNote = m.isDefault ? `<p class="wd-info" style="margin:0 0 12px">${this._t('msg.edit_builtin_phase', {}, 'This is a built-in phase. Saving creates a custom override; the original is preserved and can be restored by deleting the override.')}</p>` : '';
+      const builtinNote = m.isDefault ? `<p class="wd-info" style="margin:0 0 12px">${this._t('msg.edit_builtin_phase', {}, 'This is a built-in phase. Saving creates a custom copy; delete the copy to restore the original.')}</p>` : '';
       body = `<h2>${this._t('modal.edit_phase', {}, 'Edit Phase')} ${m.isDefault ? `<span class="wd-tag">${this._t('badge.built_in_tag', {}, 'built-in')}</span>` : ''}</h2>
         ${builtinNote}
         <div class="wd-field"><label>${this._t('lbl.phase_name', {}, 'Phase Name')}</label><input type="text" id="wd-eph-name" value="${_esc(m.phaseName)}"></div>
@@ -10426,7 +10415,7 @@ class HaWashdataPanel extends HTMLElement {
           return `<div class="wd-sd-group wd-sd-group-nocyc">
             <div class="wd-sd-prof wd-sd-prof-disabled">
               <span class="wd-sd-prof-name">${_esc(g.program)}</span>
-              <span class="wd-sd-nocyc-note">${this._t('msg.share_profile_no_cycles', {}, 'No reference cycles — mark a cycle as ⭐ in the Cycles tab to include this profile')}</span>
+              <span class="wd-sd-nocyc-note">${this._t('msg.share_profile_no_cycles', {}, 'No reference cycles – mark a cycle as ⭐ in the Cycles tab to include this profile')}</span>
             </div>
           </div>`;
         }
@@ -10464,13 +10453,13 @@ class HaWashdataPanel extends HTMLElement {
     const settingsRow = `<label class="wd-sd-settings">
         <input type="checkbox" data-maction="sd-toggle-settings" ${m.includeSettings ? 'checked' : ''} ${busy ? 'disabled' : ''}>
         <span>${this._t('lbl.include_settings', {}, 'Include detection & matching settings')}</span>
-        ${_tip(this._t('msg.include_settings_hint', {}, 'Share this device\'s recognition and matching thresholds (not your notifications, entities or energy price). Adopters choose whether to apply them.'))}
+        ${_tip(this._t('msg.include_settings_hint', {}, 'Share this device\'s detection and matching thresholds (not notifications, entities or energy price). Others choose whether to apply them.'))}
       </label>`;
     const guideBlock = `<details class="wd-share-guide" ${m.guideOpen ? 'open' : ''}>
       <summary data-maction="sd-toggle-guide">${this._t('msg.share_guidelines_title', {}, 'Before you share')}</summary>
       <ul class="wd-share-guide-list">
         <li>${this._t('msg.share_guideline_naming', {}, "Name each profile exactly as shown on the appliance dial or display (e.g. 'Cotton 40', 'Eco 60').")}</li>
-        <li>${this._t('msg.share_guideline_quality', {}, 'Only share cycles that completed normally -- no mid-cycle interruptions, door-open events, or power blips.')}</li>
+        <li>${this._t('msg.share_guideline_quality', {}, 'Only share cycles that finished normally: no interruptions, door openings or power blips.')}</li>
         <li>${this._t('msg.share_guideline_review', {}, 'Your upload starts as pending and appears publicly once enough community members confirm it.')}</li>
       </ul>
     </details>`;
@@ -10673,7 +10662,7 @@ class HaWashdataPanel extends HTMLElement {
     }
     const anything = this._wizAnySel(m.sel);
     return `<h2 id="wd-modal-title">${this._t('modal.export_select', {}, 'Export - choose data')}</h2>
-      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.export_select_intro', {}, 'Tick exactly what to include. Selecting profiles without their cycles still exports a matchable program (its learned shape travels along).')}</p>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.export_select_intro', {}, 'Tick what to include. Profiles without their cycles still export a matchable program.')}</p>
       ${body}
       <div class="wd-modal-actions">
         <button class="wd-btn wd-btn-secondary" data-maction="cancel" ${busy ? 'disabled' : ''}>${this._t('btn.cancel', {}, 'Cancel')}</button>
@@ -10687,7 +10676,7 @@ class HaWashdataPanel extends HTMLElement {
     if (m.step === 'input' || m.step === 'analyze') {
       const analyzing = m.step === 'analyze';
       return `${title}
-        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.import_analyze_hint', {}, 'Load an exported file (or paste its JSON). WashData analyzes it and shows exactly what can be imported before anything changes.')}</p>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.import_analyze_hint', {}, 'Load an exported file (or paste its JSON). WashData shows what can be imported before anything changes.')}</p>
         <div class="wd-field"><label>${this._t('lbl.load_from_file', {}, 'Load from file')}</label><input type="file" id="wd-import-file" accept=".json,application/json" ${analyzing ? 'disabled' : ''}></div>
         <div class="wd-field"><label>${this._t('lbl.json_data', {}, 'JSON Data')}</label><textarea id="wd-import-json" style="min-height:120px;font-family:monospace;font-size:.78em" ${analyzing ? 'disabled' : ''}>${_esc(m.jsonText || '')}</textarea></div>
         ${m.error ? `<p class="wd-info" style="color:var(--error-color)">${_esc(m.error)}</p>` : ''}
@@ -10705,7 +10694,7 @@ class HaWashdataPanel extends HTMLElement {
     const srcDt = man.source_device_type || '?';
     const localDt = man.local_device_type || '?';
     const warnBanner = mismatch ? `<div class="wd-banner wd-banner-warn" style="margin-bottom:12px;padding:8px 12px;border-radius:8px;background:var(--warning-color,#e6a700);color:#111">
-      ${this._t('msg.device_type_mismatch_warn', { src: srcDt, local: localDt }, 'This export is from a different appliance type ({src} vs {local}). Programs and cycles can still be imported as reference data, but device-specific settings and real-history import are disabled.')}
+      ${this._t('msg.device_type_mismatch_warn', { src: srcDt, local: localDt }, 'This export is from a different appliance type ({src} vs {local}). Programs and cycles can still be imported as reference data, but not device settings or real history.')}
     </div>` : '';
     const tree = this._htmlSelectionTree(m, man, { importableOnly: true, conflicts: true });
     // Merge / replace mode toggle.
@@ -10723,7 +10712,7 @@ class HaWashdataPanel extends HTMLElement {
         <button type="button" class="wd-btn ${m.cycleDest === 'reference' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="imp-dest-reference">${this._t('lbl.dest_reference', {}, 'Reference (shape only)')}</button>
         <button type="button" class="wd-btn ${m.cycleDest === 'real_history' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="imp-dest-real" ${realAllowed ? '' : 'disabled'}>${this._t('lbl.dest_real_history', {}, 'Real history (counts in stats)')}</button>
       </div>
-      <div class="wd-field-hint">${m.cycleDest === 'real_history' ? this._t('msg.dest_real_history_hint', {}, 'Imported cycles count as this device\'s own history and feed energy/usage stats. Use for moving one appliance to a new install.') : this._t('msg.dest_reference_hint', {}, 'Imported cycles only improve program matching and never affect usage/energy statistics.')}</div>
+      <div class="wd-field-hint">${m.cycleDest === 'real_history' ? this._t('msg.dest_real_history_hint', {}, 'Imported cycles count as this device\'s own history and statistics. Use this to move an appliance to a new install.') : this._t('msg.dest_reference_hint', {}, 'Imported cycles only improve program matching and never affect usage/energy statistics.')}</div>
     </div>`;
     // Per-conflict resolution (merge mode, selected conflicting profiles).
     let conflictBar = '';
@@ -10788,7 +10777,7 @@ class HaWashdataPanel extends HTMLElement {
       const busy = this._busy.has('hist-import');
       const dis = busy ? 'disabled' : '';
       return `${title}
-        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.hist_input_hint', {}, 'Upload a CSV downloaded from the History panel (entity, state, last changed), or let WashData read the sensor\'s history directly. Detection then runs over it exactly as it does live, and you choose which of the cycles it finds to keep.')}</p>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.hist_input_hint', {}, 'Upload a CSV from the History panel (entity, state, last changed), or let WashData read the sensor\'s history directly. Live detection runs over it and you choose which cycles to keep.')}</p>
         <div class="wd-field"><label>${this._t('lbl.load_from_file', {}, 'Load from file')}</label><input type="file" id="wd-hist-file" accept=".csv,text/csv,text/plain" ${dis}></div>
         <div class="wd-field"><label>${this._t('lbl.hist_csv_data', {}, 'CSV data')}</label><textarea id="wd-hist-csv" style="min-height:96px;font-family:monospace;font-size:.78em" placeholder="entity_id,state,last_changed" ${dis}>${_esc(m.csvText || '')}</textarea></div>
         <div class="wd-field">
@@ -10798,7 +10787,7 @@ class HaWashdataPanel extends HTMLElement {
             <input type="date" id="wd-hist-since" value="${_esc(m.since || _histDefaultSince())}" min="${_esc(_histMinSince())}" max="${_esc(_histToday())}" ${dis}>
             <button class="wd-btn wd-btn-secondary" data-maction="hist-recorder" ${dis}>${this._t('btn.hist_read_recorder', {}, 'Read from Home Assistant')}</button>
           </div>
-          <div class="wd-field-hint">${this._t('msg.hist_recorder_hint', {}, 'Reads from the date you pick up to now. Home Assistant keeps detailed history for 10 days by default and only hourly averages after that, which are too coarse to detect cycles from - pick a date further back only if your recorder is set to keep more.')}</div>
+          <div class="wd-field-hint">${this._t('msg.hist_recorder_hint', {}, 'Reads from the date you pick until now. Home Assistant keeps detailed history for 10 days by default; older hourly averages are too coarse for cycle detection.')}</div>
         </div>
         ${err}
         <div class="wd-modal-actions">
@@ -10811,7 +10800,7 @@ class HaWashdataPanel extends HTMLElement {
       const t = m.scanTaskId ? (this._tasks || {})[m.scanTaskId] : null;
       const pct = (t && t.total > 0) ? Math.round((t.done / t.total) * 100) : null;
       return `${title}
-        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.hist_scanning', {}, 'Replaying your history through the detector. This runs in the background - you can close this dialog and come back to it.')}</p>
+        <p class="wd-info" style="margin-bottom:12px">${this._t('msg.hist_scanning', {}, 'Running your history through the detector in the background. You can close this dialog and come back.')}</p>
         <div class="wd-prog-bg" style="margin-bottom:8px"><div class="wd-prog-fill" style="width:${pct == null ? 0 : pct}%"></div></div>
         <p class="wd-info">${pct == null ? this._t('status.preparing', {}, 'Preparing…') : `${pct}%`}</p>
         ${err}
@@ -10829,7 +10818,7 @@ class HaWashdataPanel extends HTMLElement {
       ].filter(Boolean);
       return `${title}
         ${lines.map(l => `<p class="wd-info">${_esc(l)}</p>`).join('')}
-        <p class="wd-info">${this._t('msg.hist_next_step', {}, 'They are in your Cycles list, tagged as imported history. Open one and use Label to name the program it belongs to.')}</p>
+        <p class="wd-info">${this._t('msg.hist_next_step', {}, 'They are in your Cycles list, tagged as imported history. Open one and use Label to name its program.')}</p>
         <div class="wd-modal-actions">
           <button class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
           <button class="wd-btn wd-btn-primary" data-maction="hist-goto-cycles">${this._t('btn.hist_goto_cycles', {}, 'Show me the cycles')}</button>
@@ -10864,8 +10853,8 @@ class HaWashdataPanel extends HTMLElement {
     }
     // What the parse found suspicious about readable data (audit PLAYGROUND-24).
     const warnMsgs = {
-      looks_like_kw: this._tText('msg.hist_warn_kw', { w: parse.peak_w }, `The highest reading is only ${parse.peak_w}. This sensor looks like it reports kilowatts; WashData reads power in watts, so cycles cannot be detected from it.`),
-      naive_timestamps: this._tText('msg.hist_warn_naive_time', { n: parse.rows_naive_time || 0 }, `${parse.rows_naive_time || 0} timestamps have no time zone and were read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.`),
+      looks_like_kw: this._tText('msg.hist_warn_kw', { w: parse.peak_w }, `The highest reading is only ${parse.peak_w}. This sensor seems to report kilowatts; WashData needs watts, so no cycles can be detected.`),
+      naive_timestamps: this._tText('msg.hist_warn_naive_time', { n: parse.rows_naive_time || 0 }, `${parse.rows_naive_time || 0} timestamps have no time zone and were read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.`),
     };
     const warnLines = (parse.warnings || []).map(w => warnMsgs[w]).filter(Boolean)
       .map(t => `<p class="wd-info wd-hist-warn" style="color:var(--warning-color,#ff9800)">⚠ ${_esc(t)}</p>`).join('');
@@ -10991,8 +10980,8 @@ class HaWashdataPanel extends HTMLElement {
       <button class="wd-btn wd-btn-sm ${m.mode === 'split' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-split">${this._t('btn.split', {}, 'Split')}</button>
       <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>
     </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${fromHistory
-      ? this._t('msg.imported_history_readonly', {}, 'Detected in imported power history. It shapes program matching but is not counted in your statistics, and cannot be trimmed or split. Label it to name the program.')
-      : this._t('msg.imported_readonly', {}, 'Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.')}</div>` : '');
+      ? this._t('msg.imported_history_readonly', {}, 'Found in imported power history. It helps matching but is not counted in your statistics and cannot be trimmed or split. Label it to name the program.')
+      : this._t('msg.imported_readonly', {}, 'Imported from the community store. Used for reference and matching, not counted in your stats, and cannot be edited.')}</div>` : '');
 
     // Pending-detection-feedback banner (Confirm / Correct… / Ignore). Built once
     // and shown in BOTH Inspect and Review modes, so a cycle in the "needs review"
@@ -11065,7 +11054,7 @@ class HaWashdataPanel extends HTMLElement {
           <span style="min-width:120px">${_fmtDuration(s)} – ${_fmtDuration(e)}</span>
           <select data-segidx="${i}"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option>${this._profileOptions(m.split.profiles[i])}</select></div>`;
       }).join('');
-      controls = `<p class="wd-info" style="margin:4px 0 8px">${this._t('msg.split_intro', {}, 'Click the graph to add or remove a split point, or auto-detect by idle gaps. Each resulting segment can get its own profile.')}</p>
+      controls = `<p class="wd-info" style="margin:4px 0 8px">${this._t('msg.split_intro', {}, 'Click the graph to add or remove a split point, or auto-detect by idle gaps. Each part can get its own profile.')}</p>
         <div class="wd-mode-bar">
           <div class="wd-field" style="margin:0;display:flex;align-items:center;gap:6px"><label style="margin:0;text-transform:none;letter-spacing:0">${this._t('lbl.gap_s', {}, 'Gap (s)')}</label><input type="number" id="wd-split-gap" value="900" min="30" step="30" style="width:80px"></div>
           <button class="wd-btn wd-btn-sm wd-btn-secondary" data-maction="cyc-auto-split">${this._t('btn.auto_detect_split', {}, 'Auto-detect')}</button>
@@ -11093,15 +11082,15 @@ class HaWashdataPanel extends HTMLElement {
       const reviewedBadge = rv.reviewed_at ? `<span style="font-size:.75em;color:var(--secondary-text-color)">${this._t('lbl.reviewed_on', {date: _fmtDay(rv.reviewed_at)}, 'reviewed {date}')}</span>` : '';
       // Pending-feedback banner (Confirm/Correct/Ignore) is built in the shared
       // scope above and rendered here as well as in Inspect mode (#331).
-      const tProfile = _tip(this._t('msg.review_profile_tip', {}, 'The program this cycle is labelled as. If the auto-detected program was wrong, correct it here - labelling teaches matching for future cycles.'));
-      const tQuality = _tip(this._t('msg.review_quality_tip', {}, 'How clean this cycle is. Good = a textbook example of this program; Bad = detected but noisy or atypical; Unusable = mis-detected (merged, truncated or spurious). Drives the health score and which cycles are allowed to train the model.'));
-      const tRecorded = _tip(this._t('msg.review_recorded_tip', {}, 'Mark this as a hand-picked reference cycle for its program - the same role as a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never dropped by cleanup. (This is the "golden"/recorded flag; both are the same thing.)'));
-      const tTags = _tip(this._t('msg.review_tags_tip', {}, 'Optional flags describing what went wrong with this cycle, so training and cleanup can account for it.'));
+      const tProfile = _tip(this._t('msg.review_profile_tip', {}, 'The program this cycle is labelled as. If it is wrong, correct it here; labels teach matching.'));
+      const tQuality = _tip(this._t('msg.review_quality_tip', {}, 'How clean this cycle is. Good: a textbook run of this program. Bad: detected, but noisy or unusual. Unusable: mis-detected (merged, cut short or spurious). Affects the health score and which cycles train the model.'));
+      const tRecorded = _tip(this._t('msg.review_recorded_tip', {}, 'Mark this as a hand-picked reference cycle for its program, like a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never removed by cleanup.'));
+      const tTags = _tip(this._t('msg.review_tags_tip', {}, 'Optional flags for what went wrong, so training and cleanup can allow for it.'));
       const tNotes = _tip(this._t('msg.review_notes_tip', {}, 'Free-text notes for your own reference. Not used by matching or training.'));
       controls = `
         ${fbBanner}
         <p style="font-size:.82em;color:var(--secondary-text-color);margin:8px 0 12px">
-          ${this._t('msg.review_confirm_help', {}, 'Confirm whether this cycle was detected correctly. Your reviews train the model on your machine - the more cycles you confirm, the better matching and health scoring get. A quick Good/Bad is enough.')}
+          ${this._t('msg.review_confirm_help', {}, 'Was this cycle detected correctly? Confirming cycles improves matching for your machine. A quick Good/Bad is enough.')}
         </p>
         <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:6px 0">
           <label style="display:inline-flex;align-items:center;gap:6px">${this._t('lbl.profile', {}, 'Profile')}${tProfile}
@@ -11113,7 +11102,7 @@ class HaWashdataPanel extends HTMLElement {
           <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="wd-cyc-rev-golden" ${rv.golden ? 'checked' : ''}> ${this._t('badge.golden_cycle', {}, 'Recorded reference cycle')}${tRecorded}</label>
           ${reviewedBadge}
         </div>
-        <div class="wd-rev-sub">${this._t('lbl.compare_profiles', {}, 'Compare with profiles')}${_tip(this._t('msg.compare_profiles_tip', {}, 'Overlay other profile envelopes on the chart above to see which one best fits this cycle.'))}</div>
+        <div class="wd-rev-sub">${this._t('lbl.compare_profiles', {}, 'Compare with profiles')}${_tip(this._t('msg.compare_profiles_tip', {}, 'Overlay other profiles on the chart to see which fits this cycle best.'))}</div>
         <div class="wd-rev-tags">${(this._profiles || []).map(p => {
           const on = (m.overlays || []).includes(p.name);
           const sw = on ? `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${_PALETTE[Math.max(0, this._profiles.findIndex(x => x.name === p.name)) % _PALETTE.length]};margin:0 2px"></span>` : '';
@@ -11158,7 +11147,7 @@ class HaWashdataPanel extends HTMLElement {
       restartGapBox = `<div class="wd-card" style="margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--info-color,#2196f3)">
         <div style="font-weight:600;font-size:.9em">↻ ${this._t('msg.restart_gap_header', {n: gaps.length}, `${gaps.length} HA restart gap${gaps.length > 1 ? 's' : ''} during this cycle`)}</div>
         <ul class="wd-info" style="margin:4px 0 0;padding-left:18px;font-size:.82em">${items}</ul>
-        <div class="wd-info" style="margin:6px 0 0;font-size:.75em">${this._t('msg.restart_gap_footer', {}, 'Highlighted on the graph. Power data is missing for these intervals — matching used only real readings.')}</div>
+        <div class="wd-info" style="margin:6px 0 0;font-size:.75em">${this._t('msg.restart_gap_footer', {}, 'Highlighted on the graph. Power data is missing for these intervals; matching used only real readings.')}</div>
       </div>`;
     }
     // Thinning caption (#395): the graph draws a decimated copy of the stored
@@ -11211,12 +11200,12 @@ class HaWashdataPanel extends HTMLElement {
       note = this._t('msg.cycle_context_loading', {}, 'Loading recorder history…');
     } else if (st.minutes && st.data && this._cycleContextSeries(m)) {
       state = 'shown';
-      note = this._t('msg.cycle_context_note', {}, 'Grey: the power sensor\'s recorder history before and after this cycle. It is not part of the cycle: duration, energy and matching use only the cycle\'s own trace.');
+      note = this._t('msg.cycle_context_note', {}, 'Grey: the power sensor\'s recorder history around this cycle. It is not part of the cycle and does not affect duration, energy or matching.');
     } else if (st.minutes && st.data) {
       state = 'none';
       note = this._t('msg.cycle_context_none', {}, 'The recorder holds no readings around this cycle (Home Assistant keeps 10 days of history by default).');
     }
-    const tip = _tip(this._tText('msg.cycle_context_tip', {}, 'Display only: changes nothing about the cycle. A cycle starts at the first reading over the start threshold, so its chart opens at that reading. This draws the power sensor\'s own recorder history either side of it, for cycles the recorder still holds. To carry the readings of aborted start attempts into future cycles instead, use Curve Pre-roll (Settings > Detection > Cycle Start): it moves the recorded start earlier, which changes stored durations and so matching against profiles learned without it.'));
+    const tip = _tip(this._tText('msg.cycle_context_tip', {}, 'Display only: shows the power sensor\'s recorder history around this cycle, if still kept. To add failed start attempts to future cycles, use Curve Pre-roll (Settings > Detection > Cycle Start), which changes stored durations.'));
     return `<div class="wd-cyc-ctx" data-cyc-ctx style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 0;font-size:.8em;color:var(--secondary-text-color)">
         <label style="display:inline-flex;align-items:center;gap:6px;margin:0;text-transform:none;letter-spacing:0">${this._t('lbl.cycle_context', {}, 'Recorder history around the cycle')}
           <select id="wd-cyc-ctx" class="wd-filter-select" data-maction="cyc-ctx">${opts}</select></label>${tip}
@@ -11358,19 +11347,25 @@ class HaWashdataPanel extends HTMLElement {
       // running locks the other out - an unlabel racing a delete would re-label
       // cycles that are already gone and rebuild the envelope from a stale set.
       const clBusy = busyDel || busyUnl;
-      body = `<p class="wd-info" style="margin-bottom:10px">${this._t('msg.cleanup_intro', {}, 'Every labelled cycle overlaid. Tick outliers, then unlabel them (kept in history, but no longer shaping this profile) or delete them outright.')}</p>
+      body = `<p class="wd-info" style="margin-bottom:10px">${this._t('msg.cleanup_intro', {}, 'All labelled cycles overlaid. Tick outliers, then unlabel them (kept in history, no longer shaping this profile) or delete them.')}</p>
         ${allCyc.length ? `<div class="wd-canvas-wrap"><canvas id="wd-spag-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_spaghetti_chart', {}, 'Overlaid cycle power traces'))}"></canvas></div>` : `<p class="wd-info">${this._t('msg.no_cycles_profile', {}, 'No cycles for this profile.')}</p>`}
         ${allCyc.length ? `<div class="wd-table-wrap" style="max-height:420px;overflow:auto;margin:10px 0"><table class="wd-table">${thead}<tbody>${rows}</tbody></table></div>` : ''}
         ${canEdit ? `<div class="wd-modal-actions">
-          <button class="wd-btn wd-btn-secondary" data-maction="pp-cleanup-unlabel" ${clBusy || sel.size === 0 ? 'disabled' : ''} title="${_esc(this._t('btn.unlabel_selected_tip', {}, 'Remove the profile label from the selected cycles. They stay in your history and can be labelled again later - they just stop shaping this profile.'))}">${busyUnl ? ('<span class="wd-spin"></span> ' + this._t('status.unlabelling', {}, 'Unlabelling…')) : this._t('btn.unlabel_selected', {n: sel.size}, `Unlabel selected (${sel.size})`)}</button>
+          <button class="wd-btn wd-btn-secondary" data-maction="pp-cleanup-unlabel" ${clBusy || sel.size === 0 ? 'disabled' : ''} title="${_esc(this._t('btn.unlabel_selected_tip', {}, 'Remove the label from the selected cycles. They stay in your history but stop shaping this profile.'))}">${busyUnl ? ('<span class="wd-spin"></span> ' + this._t('status.unlabelling', {}, 'Unlabelling…')) : this._t('btn.unlabel_selected', {n: sel.size}, `Unlabel selected (${sel.size})`)}</button>
           <button class="wd-btn wd-btn-danger" data-maction="pp-cleanup-del" ${clBusy || sel.size === 0 ? 'disabled' : ''}>${busyDel ? ('<span class="wd-spin"></span> ' + this._t('status.deleting', {}, 'Deleting…')) : this._t('btn.delete_selected', {n: sel.size}, `Delete selected (${sel.size})`)}</button>
         </div>` : ''}`;
     } else if (m.tab === 'danger') {
       const busyR = this._busy.has('pp-rebuild');
       const curDurMin = (m.stats && m.stats.avg_duration) ? Math.round(m.stats.avg_duration / 60) : 0;
+      // #158: with cycles the duration is recomputed on every envelope rebuild, so
+      // an edit could not stick; show it read-only and say where it comes from.
+      const durLearned = !!(m.stats && m.stats.duration_learned);
+      const durHint = durLearned
+        ? this._t('msg.duration_learned_hint', {}, "Worked out from this program's cycles (outliers left out) and updated after each new one. To change it, trim or remove the cycles that are off.")
+        : this._t('msg.manual_duration_hint', {}, "The profile's expected cycle length, used for time-remaining estimates. Leave it unchanged to keep the current value.");
       body = `<div class="wd-field"><label>${this._t('lbl.rename_profile', {}, 'Rename Profile')}</label><input type="text" id="wd-pp-rename" value="${_esc(m.name)}"></div>
-        <div class="wd-field"><label>${this._t('lbl.expected_duration', {}, 'Expected Duration (min)')}</label><input type="number" id="wd-pp-dur" min="0" max="600" value="${curDurMin}">
-          <div class="wd-field-hint">${this._t('msg.manual_duration_hint', {}, "The profile's average/expected cycle length, used for time-remaining estimates. Edit to set it; leaving it unchanged keeps the current value.")}</div></div>
+        <div class="wd-field"><label>${this._t('lbl.expected_duration', {}, 'Expected Duration (min)')}</label><input type="number" id="wd-pp-dur" min="0" max="600" value="${curDurMin}" data-orig="${curDurMin}" ${durLearned ? 'disabled' : ''}>
+          <div class="wd-field-hint">${durHint}</div></div>
         <div class="wd-card-actions">
           <button class="wd-btn wd-btn-primary" data-maction="pp-rename">${this._t('btn.save', {}, 'Save')}</button>
           <button class="wd-btn wd-btn-secondary" data-maction="pp-rebuild" ${busyR ? 'disabled' : ''}>${busyR ? ('<span class="wd-spin"></span> ' + this._t('status.rebuilding', {}, 'Rebuilding…')) : this._t('btn.rebuild_envelope', {}, 'Rebuild Envelope')}</button>
@@ -11379,7 +11374,7 @@ class HaWashdataPanel extends HTMLElement {
     }
 
     const shareProfileBtn = (this._onlineEnabled() && this._storeDeviceDeclared())
-      ? `<button class="wd-btn wd-btn-ghost wd-btn-sm" type="button" data-action="store-share-profile" data-prog="${_esc(m.name)}" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them'))}">⬆ ${this._t('btn.share_to_store', {}, 'Share to store')}</button>`
+      ? `<button class="wd-btn wd-btn-ghost wd-btn-sm" type="button" data-action="store-share-profile" data-prog="${_esc(m.name)}" title="${_esc(this._t('btn.share_device_tip', {}, 'Share this appliance and its reference cycles to the community store so owners of the same machine can adopt them.'))}">⬆ ${this._t('btn.share_to_store', {}, 'Share to store')}</button>`
       : '';
     return `<h2>${this._t('modal.profile_title', {name: m.name}, 'Profile · {name}')}</h2>
       <div class="wd-mini-tabs">${tabBar}</div>
@@ -11598,7 +11593,7 @@ class HaWashdataPanel extends HTMLElement {
     return `<h2>${this._t('msg.compare_cycles_title', { count: ids.length }, `Compare ${ids.length} cycles`)}</h2>
       ${m.loaded ? '' : `<div class="wd-info" style="margin-bottom:6px">${this._t('msg.loading', {}, 'Loading…')}</div>`}
       <div class="wd-canvas-wrap"><canvas id="wd-compare-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_compare_chart', {}, 'Cycle comparison chart'))}"></canvas></div>
-      <div class="wd-rev-sub" style="margin-top:10px">${this._t('msg.compare_selected_cycles', {}, 'Selected cycles (solid) — show / hide')}</div>
+      <div class="wd-rev-sub" style="margin-top:10px">${this._t('msg.compare_selected_cycles', {}, 'Selected cycles (solid) – show / hide')}</div>
       <div class="wd-rev-tags">${cycRows}</div>
       <div class="wd-rev-sub">${this._t('msg.compare_overlay_profiles', {}, 'Overlay profiles (faint)')}${_tip(this._t('msg.compare_overlay_tip', {}, 'Overlay learned profile envelopes to see which program each cycle resembles.'))}</div>
       <div class="wd-rev-tags">${profRows}</div>
@@ -13302,7 +13297,7 @@ class HaWashdataPanel extends HTMLElement {
       const u = this._importUndo || {};
       this._modal = { type: 'confirm', title: this._tText('modal.undo_import_title', {}, 'Undo last import'),
         message: this._tText('modal.undo_import_msg', { when: _fmtDate(u.created_at) },
-          `Everything stored for this device goes back to how it was before the last import (${_fmtDate(u.created_at)}), and so do its settings. Cycles recorded and changes made since then are lost.`),
+          `This device's data and settings go back to how they were before the last import (${_fmtDate(u.created_at)}). Cycles recorded and changes made since then are lost.`),
         okLabel: this._tText('modal.undo_import_ok', {}, 'Undo import'),
         onOk: () => this._busyRun('import-undo', async () => {
           try {
@@ -14517,7 +14512,7 @@ class HaWashdataPanel extends HTMLElement {
     if (task.id === m.applyTaskId) {
       if (task.state === 'error') {
         m.error = task.error === 'scan_expired'
-          ? this._t('msg.hist_scan_expired', {}, 'That scan is no longer available. Please scan again.')
+          ? this._t('msg.hist_scan_expired', {}, 'That scan is no longer available. Scan again.')
           : (task.error || this._t('msg.hist_import_failed', {}, 'Import failed.'));
         m.step = 'review';
         this._render();
@@ -15052,10 +15047,14 @@ class HaWashdataPanel extends HTMLElement {
       }
       if (action === 'pp-rename') {
         const nn = sr.getElementById('wd-pp-rename')?.value?.trim();
-        const dur = parseFloat(sr.getElementById('wd-pp-dur')?.value || '0');
+        const durEl = sr.getElementById('wd-pp-dur');
+        const dur = parseFloat(durEl?.value || '0');
+        // Only an edited value is sent (#158): resending the rounded minutes on a
+        // plain rename overwrote the stored duration, and a computed one is read-only.
+        const durEdited = !!durEl && !durEl.disabled && dur > 0 && dur !== parseFloat(durEl.dataset.orig || '0');
         if (!nn) { this._showToast(this._t('msg.toast_name_required', {}, 'Name required'), 'error'); return; }
         try {
-          await this._ws({ type: `${_DOMAIN}/rename_profile`, entry_id: eid, profile_name: m.name, new_name: nn, manual_duration_min: dur > 0 ? dur : null });
+          await this._ws({ type: `${_DOMAIN}/rename_profile`, entry_id: eid, profile_name: m.name, new_name: nn, manual_duration_min: durEdited ? dur : null });
           this._showToast(this._t('toast.profile_renamed', {}, 'Profile renamed')); m.name = nn;
           // rename_profile also rewrites the member name inside any profile group
           // (profile_store.update_profile step 4); re-fetch groups too or the stale

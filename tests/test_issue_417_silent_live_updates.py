@@ -31,10 +31,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 
 import pytest
 
-from custom_components.ha_washdata.manager import (
-    WashDataManager,
-    _MOBILE_ONLY_EXTRA_KEYS,
-)
+from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER,
     CONF_NOTIFY_LIVE_SILENT,
@@ -65,12 +62,6 @@ def _make_manager(mock_hass, options) -> WashDataManager:
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
          patch("custom_components.ha_washdata.manager.CycleDetector"):
         return WashDataManager(mock_hass, entry)
-
-
-def test_silent_keys_are_mobile_only():
-    """Strict-schema platforms (Signal) reject unknown keys, so these stay mobile."""
-    assert "silent" in _MOBILE_ONLY_EXTRA_KEYS
-    assert "push" in _MOBILE_ONLY_EXTRA_KEYS
 
 
 def test_refresh_is_silent_by_default(mock_hass):

@@ -29,9 +29,10 @@ was promoted. Nothing here runs unless the training loop (behind the feature fla
 
 Removed in 0.5.8: the ``quality`` and ``live_match`` heads with their consumers
 (the quality gate and the early match commit; audit ML-02/06/10), and on-device
-training of the ``end`` classifier and the ``remaining_time`` regressor, whose
-consumers are frozen off (audit ML-05/07/11: promotion on 4-7 held-out positives
-admitted worse models). Those consumers run their shipped baseline, or nothing.
+training of the ``end`` classifier, whose consumer is frozen off (audit
+ML-05/11: promotion on 4-7 held-out positives admitted worse models) and runs its
+shipped baseline, and the ``remaining_time`` regressor with its consumer (audit
+ML-07).
 """
 from __future__ import annotations
 
@@ -216,10 +217,12 @@ def _regression_holdout(
     X: np.ndarray, y: np.ndarray, groups: np.ndarray | None = None,
     *, frac: float = 0.2, seed: int = 0, min_test_groups: int = 0,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, int]:
-    """:func:`_regression_split` plus how many units were held out.
+    """Seeded train/test split for regression, plus how many units were held out.
 
-    The unit is a source cycle (group) when ``groups`` is given, else a row. An
-    in-sample fallback (``X_tr is X and X_te is X``) reports 0.
+    When ``groups`` is given, splits by group so correlated same-cycle rows never
+    span train and test. The unit is a source cycle (group) when ``groups`` is
+    given, else a row. An in-sample fallback (``X_tr is X and X_te is X``)
+    reports 0.
     """
     n = X.shape[0]
     if groups is not None and getattr(groups, "size", 0) == n:
@@ -236,19 +239,6 @@ def _regression_holdout(
         return X, y, X, y, 0
     test_idx, train_idx = idx[:n_test], idx[n_test:]
     return X[train_idx], y[train_idx], X[test_idx], y[test_idx], int(n_test)
-
-
-def _regression_split(
-    X: np.ndarray, y: np.ndarray, groups: np.ndarray | None = None,
-    *, frac: float = 0.2, seed: int = 0
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Seeded train/test split for regression (no class balancing).
-
-    When ``groups`` is given, splits by group so correlated same-cycle rows never
-    span train and test; falls back to in-sample eval if it cannot.
-    """
-    X_tr, y_tr, X_te, y_te, _held = _regression_holdout(X, y, groups, frac=frac, seed=seed)
-    return X_tr, y_tr, X_te, y_te
 
 
 def _incumbent_mae(

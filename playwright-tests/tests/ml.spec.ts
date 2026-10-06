@@ -172,6 +172,23 @@ test('personalized model row shows a quality chip', async ({ page }) => {
   await expect(chip).toBeVisible({ timeout: 8_000 });
 });
 
+test('a model row carrying only a classifier AUC shows no quality chip (removed in 0.5.8)', async ({ page }) => {
+  // Every fine-tuned model is a regressor since 0.5.8; the AUC chip went with the
+  // on-device classifiers, so a stale `auc` figure renders no fit word at all.
+  const { model_mae: _m, naive_mae: _n, ...rest } = ML_STATUS_PERSONALIZED.on_device_models.total_energy;
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_ml_training_status': {
+      ...ML_STATUS_PERSONALIZED,
+      on_device_models: { total_energy: { ...rest, auc: 0.91 } },
+    },
+  });
+  await openMlTab(page);
+  const learnedCard = page.locator('.wd-card', { hasText: 'What WashData has learned' });
+  await expect(learnedCard.getByText('Energy estimate')).toBeVisible({ timeout: 8_000 });
+  await expect(learnedCard.getByText(/\bfit\b/)).toHaveCount(0);
+});
+
 test('"Reset to built-in models" button reverts on-device models', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {

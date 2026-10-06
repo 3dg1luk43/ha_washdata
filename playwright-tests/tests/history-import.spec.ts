@@ -163,5 +163,5 @@ test('an expired scan asks for a rescan instead of failing silently', async ({ p
       finished_at: Date.now() / 1000, has_result: false,
     });
   });
-  await expect(page.locator('.wd-modal')).toContainText('scan again', { timeout: 8_000 });
+  await expect(page.locator('.wd-modal')).toContainText('Scan again', { timeout: 8_000 });
 });

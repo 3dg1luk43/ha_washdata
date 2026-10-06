@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData Setup",
-        "description": "Konfigurera din tvättmaskin eller annan apparat.\n\nEffektsensor krävs.\n\nEfter installationen öppnar du WashData-panelen från sidofältet (eller gå till [/ha-washdata](/ha-washdata)) för att visa cykler, finjustera identifiering och hantera profiler.",
+        "description": "Konfigurera en tvättmaskin eller annan apparat. En effektsensor krävs.\n\nÖppna efter konfigurationen WashData-panelen från sidofältet ([/ha-washdata](/ha-washdata)) för att se cykler, profiler och alla inställningar.",
         "data": {
           "name": "Enhetens namn",
           "device_type": "Enhetstyp",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Ett vänligt namn för den här enheten (t.ex. \"Tvättmaskin\", \"Diskmaskin\").",
-          "device_type": "Vilken typ av apparat är detta? Hjälper till att skräddarsy detektering och märkning.",
-          "power_sensor": "Sensorenheten som rapporterar strömförbrukning i realtid (i watt) från din smarta kontakt.",
-          "min_power": "Effektavläsningar över detta tröskelvärde (i watt) indikerar att apparaten är igång. Börja med 2W för de flesta enheter."
+          "device_type": "Ställer in standardvärden för detektering för den här typen av apparat.",
+          "power_sensor": "Den smarta kontaktens sensor som rapporterar aktuell effekt i watt.",
+          "min_power": "Mätvärden över detta (i watt) betyder att apparaten är igång. 2 W passar de flesta enheter."
         }
       },
       "reconfigure": {
         "title": "Konfigurera om WashData",
-        "description": "Uppdatera enhetsnamnet, apparattypen eller effektsensorn.\n\nWashData-panelen (sidofältet eller [/ha-washdata](/ha-washdata)) är där identifiering, cykler, profiler och notiser hanteras.",
+        "description": "Ändra enhetsnamn, apparattyp eller effektsensor.\n\nAllt annat finns i WashData-panelen (sidofältet eller [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Enhetens namn",
           "device_type": "Enhetstyp",
@@ -47,7 +47,7 @@
           "min_power": "Minsta effekttröskel (W)"
         },
         "title": "WashData-inställningar",
-        "description": "Byt namn på enheten eller ändra dess grundläggande hårdvaruinställningar. Alla inställningar för identifiering, matchning och notiser finns i [WashData-panelen](/ha-washdata) (även nåbar från sidofältet)."
+        "description": "Byt namn på enheten eller ändra dess grundinställningar. Allt annat finns i [WashData-panelen](/ha-washdata) i sidofältet."
       }
     },
     "error": {
@@ -91,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profilnamn",
-          "description": "Namnet på en befintlig profil (skapa profiler i menyn Hantera profiler). Lämna tomt för att ta bort etiketten."
+          "description": "Namnet på en befintlig profil (skapa profiler i WashData-panelen). Lämna tomt för att ta bort märkningen."
         }
       }
     },
@@ -147,7 +147,7 @@
     },
     "export_config": {
       "name": "Exportera konfiguration",
-      "description": "Exportera enhetens profiler, cykler och inställningar till en JSON-fil (per enhet).",
+      "description": "Exportera enhetens profiler, cykler och inställningar till en JSON-fil.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -175,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Skicka cykelfeedback",
-      "description": "Bekräfta eller korrigera ett automatiskt identifierat program efter en avslutad cykel. Ange antingen `entry_id` (avancerat) eller `device_id` (rekommenderas).",
+      "description": "Bekräfta eller korrigera det identifierade programmet för en avslutad cykel. Ange `device_id` (rekommenderas) eller `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -281,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Markera som lossad",
-      "description": "Bekräfta att den färdiga tvätten har tagits ut ur en WashData-enhet, vilket rensar tillståndet \"Rena\" och en eventuell lossningspåminnelse.",
+      "description": "Bekräfta att den färdiga tvätten har tagits ut. Rensar tillståndet \"Ren\" och en eventuell lossningspåminnelse.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -342,7 +342,7 @@
           "interrupted": "Avbruten",
           "force_stopped": "Tvångsstoppad",
           "unknown": "Okänd",
-          "clean": "Rena"
+          "clean": "Ren"
         },
         "state_attributes": {
           "cycle_anomaly": {

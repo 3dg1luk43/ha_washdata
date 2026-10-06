@@ -12,21 +12,8 @@ test.beforeEach(async ({ page }) => {
   await clickTab(page, 'settings');
 });
 
-test('settings tab renders the device name field', async ({ page }) => {
-  const nameInput = page.locator('input[data-opt="name"], input[data-opt="name"]').first();
-  await expect(nameInput).toBeVisible({ timeout: 8_000 });
-  await expect(nameInput).toHaveValue('Test Washer');
-});
-
 test('settings tab fetches options on navigation', async ({ page }) => {
   await assertWsCalled(page, 'ha_washdata/get_options');
-});
-
-test('settings tab shows Basic/Advanced toggle', async ({ page }) => {
-  // The Basic/Advanced buttons were replaced by a slide toggle (a checkbox
-  // wrapped in a .wd-mode-switch label).
-  const toggle = page.locator('.wd-mode-switch').first();
-  await expect(toggle).toBeVisible({ timeout: 5_000 });
 });
 
 test('Basic, the production default, shows the device identity and power sensor (UI-22)', async ({ page }) => {

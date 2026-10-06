@@ -103,7 +103,7 @@ def _replay() -> list[tuple[int, str, float, float]]:
                 store, trace, float(t), PROFILE, quiet_threshold_w=QUIET_W
             )
         res = progress.compute_progress(
-            "washing_machine", PROFILE_S, float(t), smoothed, phase, None,
+            "washing_machine", PROFILE_S, float(t), smoothed, phase,
             dt_seconds=None if prev_at is None else float(t - prev_at),
         )
         assert res is not None

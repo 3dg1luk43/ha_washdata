@@ -186,7 +186,7 @@ test('the matched-curve position renders beside the time-based progress', async 
   // along the matched curve, is the overrun the profile alignment can see.
   await expect(row).toContainText('curve 87%');
   await expect(row.locator('span[title]', { hasText: 'curve 87%' }))
-    .toHaveAttribute('title', /refreshes while the appliance is quiet/);
+    .toHaveAttribute('title', /while the appliance is quiet/);
 });
 
 test('no curve position is shown before an alignment has run', async ({ page }) => {

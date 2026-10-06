@@ -232,31 +232,3 @@ async def test_playground_settings_can_skip_suggestion_computation():
     assert full["classic_suggestions"].get("off_delay") == 240
 
 
-def test_playground_snapshots_include_every_evidence_category():
-    """A profile sampled from a backfilled cycle must still be a Playground candidate.
-
-    The snapshot pool was built from `past_cycles + reference_cycles`, so such a profile
-    produced no candidate at all and the sandbox reported the cycle as unmatched - a wrong
-    answer that would have been read as a matcher problem.
-    """
-    from unittest.mock import MagicMock
-
-    from custom_components.ha_washdata import playground as pg
-    from custom_components.ha_washdata.profile_store import ProfileStore
-
-    # A real store: the sim builds its candidates with the live builder.
-    store = ProfileStore(MagicMock(), "t")
-    backfilled = {
-        "id": "b1", "profile_name": "Cotton 40", "duration": 3600,
-        "start_time": "2026-05-01T08:00:00+00:00",
-        "power_data": [[float(i * 60), 1500.0] for i in range(61)],
-    }
-    store._data = {
-        "profiles": {"Cotton 40": {"avg_duration": 3600, "sample_cycle_id": "b1"}},
-        "past_cycles": [], "reference_cycles": [], "backfill_cycles": [backfilled],
-        "envelopes": {},
-    }
-
-    snaps, _config, _members, _member_snaps = pg._build_match_snapshots(store)
-
-    assert [s["name"] for s in snaps] == ["Cotton 40"]

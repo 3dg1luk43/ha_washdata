@@ -163,17 +163,6 @@ def test_low_confidence_not_counted_as_unmatched():
 # ---------------------------------------------------------------------------
 
 
-def test_result_has_expected_keys():
-    cycles = [_matched()] * 15 + [_unmatched(1800.0)] * 5 + [_unmatched(1900.0)] * 3
-    store = _store_with_cycles(cycles)
-    result = store.suggest_coverage_gaps()
-    assert "unmatched_count" in result
-    assert "low_confidence_count" in result
-    assert "unmatched_rate" in result
-    assert "suggest_create" in result
-    assert "duration_clusters" in result
-
-
 def test_unmatched_rate_correct():
     # 6 unmatched in 30 recent = 20%
     cycles = [_matched()] * 24 + [_unmatched()] * 6

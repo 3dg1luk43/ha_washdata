@@ -93,8 +93,7 @@ el._mlSettings = { off_delay: { ml_value: 130, ml_reason: 'ml' } };
 el._mlById = {};
 el._mlTrainingStatus = { available: true, enabled: true, running: false, last_trained: new Date().toISOString(), cycle_count: 35, min_cycles: 30, hour: 2,
   on_device_models: {
-    end: { trained_at: new Date().toISOString(), cycle_count: 40, kind: 'standardized_logistic', label: 'Cycle-end detection', blurb: "Knowing when a cycle has truly finished", auc: 0.91, metric: 'AUC 0.91 on held-out data', trend: 'improving' },
-    remaining_time: { trained_at: new Date().toISOString(), cycle_count: 40, kind: 'standardized_linear', label: 'Time-remaining estimate', blurb: 'Predicting how long is left', model_mae: 0.02, naive_mae: 0.12, metric: 'error 0.020 vs 0.120 baseline', trend: 'declining' },
+    total_energy: { trained_at: new Date().toISOString(), cycle_count: 40, kind: 'standardized_linear', label: 'Energy estimate', blurb: 'Predicting total energy and cost', model_mae: 0.02, naive_mae: 0.12, metric: 'error 0.020 vs 0.120 baseline', trend: 'declining' },
   } };
 el._powerData = { live: [], raw: [], cycle_active: true };
 el._diag = { total_cycles: 10, total_profiles: 3, debug_traces_count: 0, file_size_kb: 12.3 };

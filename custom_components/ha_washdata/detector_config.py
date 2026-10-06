@@ -54,7 +54,6 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_POWER_OFF_DELAY,
     CONF_POWER_OFF_THRESHOLD_W,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_THRESHOLD,
@@ -83,7 +82,6 @@ from .const import (
     DEFAULT_POWER_OFF_DELAY,
     DEFAULT_POWER_OFF_THRESHOLD_W,
     DEFAULT_DEFER_FINISH_RATIO,
-    DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_THRESHOLD,
@@ -199,9 +197,6 @@ def build_detector_config(
             opt(CONF_START_DURATION_THRESHOLD, resolve_start_duration_default(device_type))
         ),
         min_off_gap=int(opt(CONF_MIN_OFF_GAP, resolve_min_off_gap_default(device_type))),
-        profile_duration_tolerance=float(
-            opt(CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE)
-        ),
         start_energy_threshold=float(
             opt(
                 CONF_START_ENERGY_THRESHOLD,

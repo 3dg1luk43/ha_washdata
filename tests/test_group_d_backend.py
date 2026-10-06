@@ -402,16 +402,3 @@ async def test_d7_get_settings_changelog_missing_manager():
     connection.send_result.assert_not_called()
 
 
-def test_d7_command_registered():
-    """The new command must be wired into the registration block.
-
-    Runs the real registration rather than searching its source text for the
-    handler's name (audit TESTING-13).
-    """
-    from homeassistant.components import websocket_api
-
-    hass = MagicMock()
-    hass.data = {}
-    ws_api.async_register_commands(hass)
-    handler, _schema = hass.data[websocket_api.DOMAIN]["ha_washdata/get_settings_changelog"]
-    assert handler.__wrapped__ is ws_api.ws_get_settings_changelog

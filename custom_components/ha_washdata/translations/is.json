@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData uppsetning",
-        "description": "Stilltu þvottavélina þína eða annað tæki.\n\nKraftskynjari er nauðsynlegur.\n\nEftir uppsetningu skaltu opna WashData-spjaldið frá hliðarstikunni (eða fara á [/ha-washdata](/ha-washdata)) til að skoða lotur, stilla skynjun og stjórna sniðum.",
+        "description": "Settu upp þvottavél eða annað tæki. Aflskynjari er nauðsynlegur.\n\nEftir uppsetningu skaltu opna WashData-spjaldið frá hliðarstikunni ([/ha-washdata](/ha-washdata)) til að sjá lotur, snið og allar stillingar.",
         "data": {
           "name": "Nafn tækis",
           "device_type": "Tegund tækis",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Vingjarnlegt nafn fyrir þetta tæki (t.d. „Þvottavél“, „Uppþvottavél“).",
-          "device_type": "Hvers konar tæki er þetta? Hjálpar til við að sérsníða greiningu og merkingu.",
-          "power_sensor": "Skynjareiningin sem tilkynnir um orkunotkun í rauntíma (í vöttum) frá snjalltenginu þínu.",
-          "min_power": "Aflmælingar yfir þessum viðmiðunarmörkum (í vöttum) gefa til kynna að heimilistækið sé í gangi. Byrjaðu með 2W fyrir flest tæki."
+          "device_type": "Stillir sjálfgefin greiningargildi fyrir þessa tegund tækis.",
+          "power_sensor": "Skynjari snjalltengilsins sem gefur upp núverandi afl í vöttum.",
+          "min_power": "Mælingar yfir þessu (í vöttum) þýða að tækið er í gangi. 2 W hentar flestum tækjum."
         }
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Uppfærðu heiti tækisins, tegund tækis eða kraftskynjara.\n\nÍ WashData-spjaldinu (hliðarstikan eða [/ha-washdata](/ha-washdata)) er skynjun, lotum, sniðum og tilkynningum stjórnað.",
+        "description": "Breyttu heiti tækisins, tegund tækis eða aflskynjara.\n\nAllt annað er í WashData-spjaldinu (hliðarstikan eða [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -41,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "Endurnefndu tækið eða breyttu grunnstillingum vélbúnaðar. Allar stillingar fyrir skynjun, samsvörun og tilkynningar eru í [WashData-spjaldinu](/ha-washdata) (einnig aðgengilegt frá hliðarstikunni).",
+        "description": "Endurnefndu tækið eða breyttu grunnstillingum þess. Allt annað er í [WashData-spjaldinu](/ha-washdata) á hliðarstikunni.",
         "data": {
           "name": "Nafn tækis",
           "device_type": "Device Type",
@@ -91,7 +91,7 @@
         },
         "profile_name": {
           "name": "Nafn prófíls",
-          "description": "Heiti sniðs sem fyrir er (búið til snið í valmyndinni Stjórna sniðum). Skildu eftir autt til að fjarlægja merkimiðann."
+          "description": "Heiti sniðs sem er til (búðu til snið í WashData-spjaldinu). Skildu eftir autt til að fjarlægja merkinguna."
         }
       }
     },
@@ -147,7 +147,7 @@
     },
     "export_config": {
       "name": "Flytja út stillingar",
-      "description": "Flyttu út prófíla, lotur og stillingar þessa tækis í JSON skrá (á hvert tæki).",
+      "description": "Flyttu snið, lotur og stillingar þessa tækis út í JSON-skrá.",
       "fields": {
         "device_id": {
           "name": "Tæki",
@@ -175,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Senda endurgjöf um lotu",
-      "description": "Staðfestu eða leiðréttu sjálfvirkt greint kerfi eftir að lotu er lokið. Gefðu upp annað hvort `entry_id` (ítarlegt) eða `device_id` (ráðlagt).",
+      "description": "Staðfestu eða leiðréttu greint kerfi lotu sem er lokið. Gefðu upp `device_id` (ráðlagt) eða `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Tæki",
@@ -281,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Merkja sem losað",
-      "description": "Staðfestu að búið sé að taka fullunna þvottinn úr WashData tæki, sem hreinsar stöðuna \"Hreint\" og hvers kyns losunaráminningu.",
+      "description": "Staðfestu að þvotturinn hafi verið tekinn út. Hreinsar stöðuna \"Hreint\" og hvers kyns losunaráminningu.",
       "fields": {
         "device_id": {
           "name": "Tæki",

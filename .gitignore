@@ -23,6 +23,8 @@ bin/
 test-results/
 playwright-tests/test-results/
 playwright-tests/playwright-report/
+# A MagicMock hass used as a Store path writes here; tests/conftest.py fails the run if it does.
+/MagicMock/
 
 # --- Private data: cycle corpora, exports, dumps, secrets ----------------------
 # The maintainer's and users' recorded cycles (gitignored corpus the slow tests

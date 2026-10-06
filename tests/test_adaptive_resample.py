@@ -73,11 +73,3 @@ def test_adaptive_resample_irregular():
     segments, used_dt = resample_adaptive(ts, p, min_dt=5.0)
     assert used_dt == 10.0
     
-def test_resample_adaptive_logic_check():
-    # Case: Median 60s, min=5, max=30.
-    # Goal: Do NOT upsample to 30. Use 60.
-    ts = np.arange(0, 300, 60.0)
-    p = np.full_like(ts, 100.0)
-    
-    segments, used_dt = resample_adaptive(ts, p, min_dt=5.0)
-    assert used_dt >= 60.0 # Should not be 30

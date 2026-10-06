@@ -232,11 +232,6 @@ def test_a_pause_counts_only_once_power_resumes() -> None:
     assert not has_resumed_pause([(0, 100.0), (10, 0.0), (900, 0.0)], 1.44, 60.0)
 
 
-def test_a_change_only_plug_counts_its_silence() -> None:
-    """One 0 W row and then nothing until the next activity is still a pause."""
-    assert has_resumed_pause([(0, 50.0), (100, 0.0), (400, 50.0)], 1.44, 60.0)
-
-
 def _profile_cycle(name: str, points: list[tuple[float, float]]) -> dict:
     return {"id": f"{name}-{len(points)}", "profile_name": name, "duration": points[-1][0],
             "power_data": [[t, p] for t, p in points]}

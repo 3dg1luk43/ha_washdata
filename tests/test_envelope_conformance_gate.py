@@ -191,23 +191,6 @@ def test_conformance_at_threshold_auto_labels():
     assert cd.get("auto_labeled") is True
 
 
-def test_no_conformance_key_auto_labels_normally():
-    """When envelope_conformance is absent the gate is inactive."""
-    lm, store = _learning_manager()
-    cd = _cycle_data()  # no envelope_conformance key
-    store.past_cycles.append(cd)
-
-    lm._maybe_request_feedback(
-        cycle_data=cd,
-        detected_profile=_PROFILE,
-        confidence=0.95,
-        predicted_duration=3600.0,
-    )
-
-    assert cd.get("auto_labeled") is True
-    assert _CYCLE_ID not in store.pending
-
-
 def test_non_float_conformance_ignored():
     """Non-numeric envelope_conformance must not trigger the gate."""
     lm, store = _learning_manager()

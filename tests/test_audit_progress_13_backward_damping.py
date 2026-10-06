@@ -16,7 +16,7 @@ _ARGS = ("dishwasher", 3600.0, 1800.0)
 
 
 def _step(prev: float, dt: float | None) -> float:
-    r = progress.compute_progress(*_ARGS, prev, (40.0, 5.0), None, dt_seconds=dt)
+    r = progress.compute_progress(*_ARGS, prev, (40.0, 5.0), dt_seconds=dt)
     assert r is not None
     return r.smoothed
 
@@ -46,7 +46,7 @@ def test_past_the_expected_end_the_shown_progress_never_falls_back():
     on quiet windows), the linear one reaches 100% and the next phase estimate's
     time-scaled backward step pulled it back to ~97%. Past the expected end the
     shown progress is held instead."""
-    over = progress.compute_progress("dishwasher", 3600.0, 3840.0, 100.0, (80.0, 5.0), None, dt_seconds=60.0)
+    over = progress.compute_progress("dishwasher", 3600.0, 3840.0, 100.0, (80.0, 5.0), dt_seconds=60.0)
     assert over.progress == 100.0 and over.remaining == 0.0
-    before_end = progress.compute_progress("dishwasher", 3600.0, 3000.0, 90.0, (40.0, 5.0), None, dt_seconds=60.0)
+    before_end = progress.compute_progress("dishwasher", 3600.0, 3000.0, 90.0, (40.0, 5.0), dt_seconds=60.0)
     assert before_end.progress < 90.0

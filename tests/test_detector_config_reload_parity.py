@@ -68,7 +68,6 @@ from custom_components.ha_washdata.const import (
     CONF_POWER_OFF_DELAY,
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_POWER_SENSOR,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_THRESHOLD,
@@ -100,7 +99,6 @@ OPTIONS_B: dict[str, Any] = {
     CONF_POWER_OFF_DELAY: 77.0,
     CONF_PROFILE_MATCH_INTERVAL: 600,
     CONF_PROFILE_MATCH_THRESHOLD: 0.55,
-    CONF_PROFILE_DURATION_TOLERANCE: 0.42,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO: 0.15,
     CONF_ANTI_WRINKLE_ENABLED: True,
     CONF_ANTI_WRINKLE_MAX_POWER: 321.0,
@@ -220,17 +218,3 @@ async def test_c_min_off_gap_reaches_the_detector_on_a_reload(mock_hass) -> None
     await _reload(mgr, _entry({CONF_MIN_OFF_GAP: 10}))
 
     assert mgr.detector.config.min_off_gap == 10
-
-
-@pytest.mark.asyncio
-async def test_d_duration_tolerance_reaches_the_detector_at_construction(
-    mock_hass,
-) -> None:
-    """The other half: a restart must not reset the tolerance to 0.25.
-
-    ``_should_defer_finish`` reads it live for the deferral ceiling, so a device
-    tuned to 0.42 ran at 0.25 after every restart until the next settings save.
-    """
-    mgr = _build(mock_hass, _entry({CONF_PROFILE_DURATION_TOLERANCE: 0.42}))
-
-    assert mgr.detector.config.profile_duration_tolerance == pytest.approx(0.42)

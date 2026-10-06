@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configuração WashData",
-        "description": "Configure sua máquina de lavar ou outro eletrodoméstico.\n\nSensor de potência é necessário.\n\nApós a configuração, abra o painel WashData pela barra lateral (ou acesse [/ha-washdata](/ha-washdata)) para visualizar ciclos, ajustar a detecção e gerenciar perfis.",
+        "description": "Configure uma máquina de lavar ou outro eletrodoméstico. É necessário um sensor de potência.\n\nApós a configuração, abra o painel WashData pela barra lateral ([/ha-washdata](/ha-washdata)) para ver ciclos, perfis e todas as configurações.",
         "data": {
           "name": "Nome do dispositivo",
           "device_type": "Tipo de dispositivo",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Um nome amigável para este dispositivo (por exemplo, 'Máquina de lavar', 'Lava-louças').",
-          "device_type": "Que tipo de aparelho é esse? Ajuda a personalizar a detecção e a rotulagem.",
-          "power_sensor": "A entidade do sensor que informa o consumo de energia em tempo real (em watts) do seu plugue inteligente.",
-          "min_power": "As leituras de potência acima deste limite (em watts) indicam que o aparelho está funcionando. Comece com 2W para a maioria dos dispositivos."
+          "device_type": "Define os padrões de detecção para este tipo de eletrodoméstico.",
+          "power_sensor": "O sensor do plugue inteligente que informa a potência atual em watts.",
+          "min_power": "Leituras acima deste valor (em watts) indicam que o aparelho está funcionando. 2 W serve para a maioria dos dispositivos."
         }
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Atualize o nome do dispositivo, o tipo de eletrodoméstico ou o sensor de potência.\n\nO painel WashData (barra lateral ou [/ha-washdata](/ha-washdata)) é onde detecção, ciclos, perfis e notificações são gerenciados.",
+        "description": "Altere o nome do dispositivo, o tipo de eletrodoméstico ou o sensor de potência.\n\nTodo o resto fica no painel WashData (barra lateral, ou [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -41,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "Renomeie o dispositivo ou altere suas configurações principais de hardware. Todas as configurações de detecção, correspondência e notificação estão no [painel WashData](/ha-washdata) (também acessível pela barra lateral).",
+        "description": "Renomeie o dispositivo ou altere suas configurações principais. Todo o resto fica no [painel WashData](/ha-washdata) na barra lateral.",
         "data": {
           "name": "Nome do dispositivo",
           "device_type": "Device Type",
@@ -91,7 +91,7 @@
         },
         "profile_name": {
           "name": "Nome do perfil",
-          "description": "O nome de um perfil existente (crie perfis no menu Gerenciar Perfis). Deixe em branco para remover o rótulo."
+          "description": "Nome de um perfil existente (crie perfis no painel WashData). Deixe em branco para remover o rótulo."
         }
       }
     },
@@ -147,7 +147,7 @@
     },
     "export_config": {
       "name": "Exportar configuração",
-      "description": "Exporte os perfis, ciclos e configurações deste dispositivo para um arquivo JSON (por dispositivo).",
+      "description": "Exporte os perfis, ciclos e configurações deste dispositivo para um arquivo JSON.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -175,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Enviar feedback do ciclo",
-      "description": "Confirme ou corrija um programa detectado automaticamente após um ciclo concluído. Forneça `entry_id` (avançado) ou `device_id` (recomendado).",
+      "description": "Confirme ou corrija o programa detectado de um ciclo concluído. Informe `device_id` (recomendado) ou `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -281,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Marcar como descarregado",
-      "description": "Confirme que a carga finalizada foi retirada de um dispositivo WashData, limpando o estado Limpo e qualquer lembrete de descarga.",
+      "description": "Confirme que a carga finalizada foi retirada. Limpa o estado Limpo e qualquer lembrete de descarga.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -341,7 +341,7 @@
           "interrupted": "Interrompido",
           "force_stopped": "Parada forçada",
           "unknown": "Desconhecido",
-          "clean": "Limpar",
+          "clean": "Limpo",
           "delay_wait": "Esperando para começar"
         },
         "state_attributes": {

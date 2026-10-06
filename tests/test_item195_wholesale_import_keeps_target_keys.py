@@ -26,6 +26,8 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import tempfile
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -36,8 +38,9 @@ from custom_components.ha_washdata.profile_store import (
 )
 
 
-def _hass():
+def _hass(config_dir: Path):
     hass = MagicMock()
+    hass.config.path = lambda *a: str(config_dir.joinpath(*a))  # HA's Store writes here
 
     async def _exec(func, *args, **kwargs):
         if inspect.iscoroutinefunction(func):
@@ -61,9 +64,9 @@ def _cycle(cid: str, profile: str | None, day: int = 1) -> dict:
     }
 
 
-def _target() -> ProfileStore:
+def _target(tmp_path: Path) -> ProfileStore:
     with patch("custom_components.ha_washdata.profile_store.WashDataStore"):
-        ps = ProfileStore(_hass(), "e", min_duration_ratio=0.0, max_duration_ratio=3.0)
+        ps = ProfileStore(_hass(Path(tempfile.mkdtemp(dir=tmp_path))), "e", min_duration_ratio=0.0, max_duration_ratio=3.0)
         ps._store.async_load = AsyncMock(return_value=None)
         ps._store.async_save = AsyncMock()
     ps._data.update({
@@ -95,8 +98,8 @@ def _payload(**data) -> dict:
 
 
 @pytest.mark.asyncio
-async def test_keys_the_payload_lacks_are_kept():
-    store = _target()
+async def test_keys_the_payload_lacks_are_kept(tmp_path):
+    store = _target(tmp_path)
     await store.async_import_data(_payload())
     d = store._data
     assert d["maintenance_log"] == [{"id": "m1", "type": "descale"}]
@@ -110,8 +113,8 @@ async def test_keys_the_payload_lacks_are_kept():
 
 
 @pytest.mark.asyncio
-async def test_keys_the_payload_carries_still_replace():
-    store = _target()
+async def test_keys_the_payload_carries_still_replace(tmp_path):
+    store = _target(tmp_path)
     await store.async_import_data(_payload(maintenance_log=[{"id": "m2", "type": "filter"}],
                                            lifetime_cycle_count=5))
     d = store._data
@@ -123,16 +126,16 @@ async def test_keys_the_payload_carries_still_replace():
 
 
 @pytest.mark.asyncio
-async def test_null_in_payload_carries_nothing():
-    store = _target()
+async def test_null_in_payload_carries_nothing(tmp_path):
+    store = _target(tmp_path)
     await store.async_import_data(_payload(maintenance_log=None, backfill_cycles=None))
     assert store._data["maintenance_log"] == [{"id": "m1", "type": "descale"}]
     assert [c["id"] for c in store._data["backfill_cycles"]] == ["bf"]
 
 
 @pytest.mark.asyncio
-async def test_payload_owned_keys_are_never_kept():
-    store = _target()
+async def test_payload_owned_keys_are_never_kept(tmp_path):
+    store = _target(tmp_path)
     payload = _payload()
     del payload["data"]["envelopes"]
     await store.async_import_data(payload)
@@ -143,8 +146,8 @@ async def test_payload_owned_keys_are_never_kept():
 
 
 @pytest.mark.asyncio
-async def test_kept_cycles_rebuild_the_envelopes_they_label():
-    store = _target()
+async def test_kept_cycles_rebuild_the_envelopes_they_label(tmp_path):
+    store = _target(tmp_path)
     rebuilt: list[str] = []
 
     async def _rebuild(name):
@@ -157,7 +160,7 @@ async def test_kept_cycles_rebuild_the_envelopes_they_label():
     assert rebuilt == ["Cotton"]
 
     # A full, current export carries every list: nothing kept, nothing rebuilt.
-    store = _target()
+    store = _target(tmp_path)
     rebuilt.clear()
     with patch.object(store, "async_rebuild_envelope", side_effect=_rebuild):
         await store.async_import_data(_payload(reference_cycles=[], backfill_cycles=[]))

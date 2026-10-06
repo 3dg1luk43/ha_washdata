@@ -1,0 +1,43 @@
+name: Reopen Own Issue
+
+# GitHub lets an author reopen only an issue they closed themselves, so an issue
+# closed by the maintainer or a bot (done, missing info) could not be reopened by
+# the person who reported it (#465). Commenting `/reopen` on your own closed issue
+# reopens it and puts it back in front of the maintainer.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+
+jobs:
+  reopen:
+    runs-on: ubuntu-latest
+    if: >
+      !github.event.issue.pull_request &&
+      github.event.issue.state == 'closed' &&
+      github.event.comment.user.login == github.event.issue.user.login &&
+      startsWith(github.event.comment.body, '/reopen')
+    steps:
+      - name: Reopen the issue for its author
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.0.1
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.issue.number;
+
+            await github.rest.issues.update({ owner, repo, issue_number, state: 'open' });
+
+            // `done` would let close_done_issues.yml close it again after the next
+            // release comment; the review label puts it back in the maintainer's queue.
+            await github.rest.issues.removeLabel({ owner, repo, issue_number, name: 'done' })
+              .catch(() => {});
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number, labels: ['awaiting maintainer review'],
+            });
+
+            await github.rest.reactions.createForIssueComment({
+              owner, repo, comment_id: context.payload.comment.id, content: 'rocket',
+            });

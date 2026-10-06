@@ -32,8 +32,9 @@ BASE = datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
 
 
 @pytest.fixture
-def mock_hass():
+def mock_hass(tmp_path):
     hass = MagicMock()
+    hass.config.path = lambda *a: str(tmp_path.joinpath(*a))  # HA's Store writes here
 
     async def _exec(func, *args, **kwargs):
         if inspect.iscoroutinefunction(func):

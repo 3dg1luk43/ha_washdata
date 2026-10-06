@@ -35,6 +35,36 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import eval as E  # noqa: E402
 
 
+def profile_expectations(cycles: list[dict]) -> dict[str, dict[str, float]]:
+    """The pre-PROGRESS-16 training expectation, kept here as the "old" arm.
+
+    Median of the stored ``duration`` / ``energy_wh`` / ``max_power`` fields per
+    profile (missing energy/peak default to 500). Training used this until it was
+    replaced by ``training_task.live_expectations``; it moved out of the
+    integration in 0.5.8 because nothing there calls it any more.
+    """
+    stats: dict[str, dict[str, list[float]]] = {}
+    for c in cycles:
+        name = c.get("profile_name")
+        if not isinstance(name, str) or not name:
+            continue
+        s = stats.setdefault(name, {"d": [], "e": [], "p": []})
+        for key, field in (("d", "duration"), ("e", "energy_wh"), ("p", "max_power")):
+            v = c.get(field)
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                s[key].append(float(v))
+    out: dict[str, dict[str, float]] = {}
+    for name, s in stats.items():
+        if not s["d"]:
+            continue
+        out[name] = {
+            "duration": float(np.median(s["d"])),
+            "energy": float(np.median(s["e"])) if s["e"] else 500.0,
+            "peak": float(np.median(s["p"])) if s["p"] else 500.0,
+        }
+    return out
+
+
 def _spec(fit: dict) -> dict:
     return {"center": fit["center"], "scale": fit["scale"], "coef": fit["coef"],
             "bias": fit["bias"], "output_center": fit["y_center"], "output_scale": fit["y_scale"]}
@@ -76,9 +106,6 @@ def main() -> int:
 
     from custom_components.ha_washdata.ml import trainer as T  # noqa: PLC0415
     from custom_components.ha_washdata.ml import training_task as TT  # noqa: PLC0415
-    from custom_components.ha_washdata.ml.feature_extraction import (  # noqa: PLC0415
-        profile_expectations,
-    )
     from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
         select_clean_cycles,
     )

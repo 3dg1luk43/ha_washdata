@@ -81,7 +81,7 @@ def test_available_models_manifest() -> None:
 
 
 def test_unknown_capability_returns_none() -> None:
-    score_fn, source = resolve_scorer("does_not_exist", None)
+    score_fn, source = resolve_scorer("does_not_exist")
     assert score_fn is None and source is None
 
 

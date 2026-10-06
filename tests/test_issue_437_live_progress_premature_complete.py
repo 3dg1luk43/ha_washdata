@@ -126,7 +126,6 @@ def test_first_estimate_after_a_match_bypasses_the_5s_throttle(
     manager._time_remaining = None
     manager._last_phase_estimate_time = now - timedelta(seconds=1)  # throttled
     manager.detector.get_power_trace = MagicMock(return_value=[])
-    manager._ml_progress_percent = MagicMock(return_value=None)
     result = progress_mod.ProgressResult(20.5, 20.5, 12060.0, 15060.0, None, "linear")
 
     with patch(

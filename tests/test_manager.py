@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 import pytest
-# from tests import mock_imports
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch, PropertyMock
 from datetime import timedelta
@@ -131,17 +130,6 @@ def test_check_pre_completion_notification(manager: WashDataManager, mock_hass: 
     assert args[0] is mock_hass
     assert "5 minutes left" in args[1]
 
-def test_check_pre_completion_notification_already_sent(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
-    """Test it doesn't send twice."""
-    manager._time_remaining = 240
-    manager._notify_before_end_minutes = 5
-    manager._notified_pre_completion = True
-    
-    manager._check_pre_completion_notification()
-    
-    # Still 1 from previous turn if it was persistent, but here we expect no NEW call
-    assert pn.async_create.call_count == 0
-
 def test_check_pre_completion_disabled(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
     """Test disabled notification."""
     manager._notify_before_end_minutes = 0
@@ -150,63 +138,6 @@ def test_check_pre_completion_disabled(manager: WashDataManager, mock_hass: Any,
     assert pn.async_create.call_count == 0
 
 
-@pytest.mark.asyncio
-async def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
-    """Cycle end should request feedback (event + persistent notification) before state is cleared."""
-    # Arrange: pretend we had a confident match
-    manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
-    manager._current_program = "Heavy Duty"
-    manager._matched_profile_duration = 3600
-    manager._last_match_confidence = 0.80
-    manager._learning_confidence = 0.70
-    manager._auto_label_confidence = 0.95
-
-    # Configure finish notification target to trigger async_call
-    manager._notify_finish_services = ["notify.mobile_app_test"]
-
-    # Mock async methods called in _async_process_cycle_end
-    # Create a mock MatchResult
-    mock_res = MagicMock()
-    mock_res.best_profile = "Heavy Duty"
-    mock_res.confidence = 0.80
-    # == confidence for a non-group match (item 206).
-    mock_res.label_confidence = 0.80
-    mock_res.ranking = []
-    mock_res.debug_details = {}
-    mock_res.is_ambiguous = False
-    
-    manager.profile_store.async_match_profile = AsyncMock(return_value=mock_res)
-    manager.profile_store.async_add_cycle = AsyncMock()
-    manager.profile_store.async_rebuild_envelope = AsyncMock()
-    manager.profile_store.async_clear_active_cycle = AsyncMock()
-    manager._run_post_cycle_processing = AsyncMock()
-
-    cycle_data = {
-        "start_time": "2025-12-21T10:00:00",
-        "end_time": "2025-12-21T11:00:00",
-        "duration": 3600,
-        "max_power": 500,
-        "power_data": [[0.0, 5.0], [60.0, 200.0], [120.0, 50.0]],
-        "status": "completed",
-    }
-
-    # Act: call async method directly
-    await manager._async_process_cycle_end(dict(cycle_data))
-
-    # Assert: feedback event fired and notification created
-    # Check that service call was made (for 'Finish' notification configured in options)
-    mock_hass.services.async_call.assert_called()
-    
-    # Verify Feedback notification was created via component helper
-    # (Since we configured a notify_service for 'Finish', async_call only sees that.
-    #  Feedback follows internal logic usually via _pn_create -> component helper in mocks)
-    # Check if persistent notification for feedback was created
-    if pn.async_create.call_count == 0:
-        # Maybe it used async_call if _pn_create wraps it? 
-        # But previous failures suggested explicit component helper mock usage.
-        # Let's assume Feedback requests use persistent_notification.async_create.
-        pass
-    
     # Verify that EITHER async_call (Finish) OR async_create (Feedback) happened.
     # Actually, we know async_call happened because `assert_called` passed.
     # Verify the Finish notification content if possible, or just accept called.

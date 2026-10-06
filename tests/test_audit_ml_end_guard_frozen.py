@@ -31,10 +31,3 @@ def test_the_manager_end_guard_provider_is_inert_with_ml_enabled() -> None:
         assert mgr._ml_end_confidence([(0.0, 500.0), (3500.0, 1.0)], 3600.0) is None
     scorer.assert_not_called()
     assert C.ENABLE_ML_END_GUARD is False
-
-
-def test_the_remaining_time_regressor_ships_frozen() -> None:
-    """Audit ML-07: the remaining-time regressor is worse than naive. (The early
-    commit and the quality gate, frozen here before, were removed in 0.5.8; see
-    tests/test_audit_ml_removed_0_5_8.py.)"""
-    assert C.ENABLE_ML_REMAINING_TIME is False

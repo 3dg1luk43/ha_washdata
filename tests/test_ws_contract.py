@@ -143,6 +143,14 @@ def test_every_response_type_is_a_typeddict():
         assert hasattr(td, "__annotations__"), f"{command}: not a TypedDict"
 
 
+def test_task_result_types_name_real_task_kinds():
+    """Each typed task result is a TypedDict keyed by a kind ws_api really creates."""
+    source = inspect.getsource(ws_api)
+    for kind, td in ws_schema.WS_TASK_RESULT_TYPES.items():
+        assert hasattr(td, "__required_keys__"), f"{kind}: not a TypedDict"
+        assert f'"{kind}"' in source, f"no task of kind {kind!r} in ws_api.py"
+
+
 def test_command_params_have_valid_shape():
     valid_types = {
         "str", "int", "float", "bool", "dict", "list",

@@ -111,14 +111,6 @@ def test_a_cycle_stopped_at_working_power_is_not_standby_evidence():
     assert detect_standby_above_stop([mid_wash, dict(mid_wash, id="u2")], 2.56) is None
 
 
-def test_a_cycle_the_user_stopped_at_standby_still_counts():
-    """#445's reporter force-stopped four cycles; those ARE the evidence."""
-    res = detect_standby_above_stop(
-        [_idle_cycle(3.4, "a"), _idle_cycle(3.3, "b")], 2.56
-    )
-    assert res is not None and res["cycles_above"] == 2
-
-
 # --------------------------------------------------------------------------
 # manager: the banked-tail repair was spawned untracked
 # --------------------------------------------------------------------------
@@ -368,17 +360,6 @@ def test_a_sole_surviving_candidate_still_bypasses_persistence():
     assert _switch_from_a_to([("B", 0.55)]) == "B"
 
 
-def test_both_measurement_harnesses_are_checked_in():
-    """The whole reason these two were unmeasurable is that item 306's harness
-    was never committed. Do not let that happen again."""
-    from pathlib import Path
-
-    devtools = Path(__file__).resolve().parents[1] / "devtools"
-    assert (devtools / "end_gate_eval.py").is_file()
-    assert (devtools / "decisive_margin_eval.py").is_file()
-    assert (devtools / "playground_parity_eval.py").is_file()
-
-
 def _dishwasher_defers(
     duration: float,
     matched: str | None = None,
@@ -573,25 +554,6 @@ def test_an_unobserved_keepalive_still_resets_the_gapfree_tally():
             0.0, t + timedelta(seconds=dt_s), synthetic=True, observed=False
         )
         assert det._time_below_threshold_gapfree == 0.0, dt_s
-
-
-def test_a_real_reading_after_an_outage_still_resets_regardless_of_observed():
-    """`observed` only ever qualifies the synthetic exemption; a genuine
-    sensor reading across a hole resets as it always did."""
-    from datetime import datetime, timedelta, timezone
-
-    from custom_components.ha_washdata.cycle_detector import (
-        CycleDetector,
-        CycleDetectorConfig,
-    )
-
-    cfg = CycleDetectorConfig(min_power=2.0, off_delay=60, stop_threshold_w=2.0)
-    det = CycleDetector(cfg, lambda a, b: None, lambda c: None)
-    base = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
-    for i in range(30):
-        det.process_reading(0.0, base + timedelta(seconds=i * 2))
-    det.process_reading(0.0, base + timedelta(seconds=660))  # real, big hole
-    assert det._time_below_threshold_gapfree == 0.0
 
 
 # --------------------------------------------------------------------------

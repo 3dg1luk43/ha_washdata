@@ -118,19 +118,6 @@ def test_no_clear_when_no_live_target_is_configured(
     mock_hass.services.async_call.assert_not_called()
 
 
-def test_first_live_tick_hands_the_lifecycle_card_over(
-    manager: WashDataManager, mock_hass: Any
-) -> None:
-    """Live updates no longer replace the start alert by sharing its tag, so the
-    handover is explicit - otherwise the mobile app would show two entries.
-
-    This also heals an upgrade: a Live Activity left running under the old shared
-    tag by a pre-0.5.7 build is ended by exactly this clear.
-    """
-    manager._hand_over_lifecycle_to_live_activity()
-    assert _clears(mock_hass) == [manager._lifecycle_tag]
-
-
 def test_the_handover_fires_once_per_cycle(
     manager: WashDataManager, mock_hass: Any
 ) -> None:

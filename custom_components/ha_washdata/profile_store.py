@@ -1535,8 +1535,6 @@ _EXPORT_CATEGORIES: dict[str, dict[str, Any]] = {
     "settings":         {"keys": [], "kind": "options", "device_specific": True},
 }
 
-# Categories whose payload rides at the envelope level (entry_options), not inside "data".
-_ENVELOPE_LEVEL_CATEGORIES = frozenset({"settings"})
 # Enumerable/structural categories handled explicitly (not as plain leaf keys).
 _STRUCTURAL_CATEGORIES = frozenset(
     {"profiles", "real_cycles", "reference_cycles", "backfill_cycles", "settings"}
@@ -2071,7 +2069,6 @@ class ProfileStore:
         min_duration_ratio: float = 0.50,
         max_duration_ratio: float = 1.50,
         save_debug_traces: bool = False,
-        match_threshold: float = 0.4,
         unmatch_threshold: float = 0.35,
         device_name: str = "",
     ) -> None:
@@ -2081,7 +2078,6 @@ class ProfileStore:
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self._min_duration_ratio = min_duration_ratio
         self._max_duration_ratio = max_duration_ratio
-        self._match_threshold = match_threshold
         self._unmatch_threshold = unmatch_threshold
         self.dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
         # Stage-4 energy-agreement mode ("mean"|"integrated"); the manager sets it
@@ -2560,29 +2556,15 @@ class ProfileStore:
             return cast(list[CycleDict], raw)
         return []
 
-    # ── Community-store account (connect handoff) ─────────────────────────────
+    # ── Legacy per-device community-store account ─────────────────────────────
     def get_store_account(self) -> dict[str, Any]:
-        """Full persisted store account incl. the refresh token (credential)."""
+        """The pre-global per-device store account incl. the refresh token.
+
+        Read once by ``_migrate_online_to_global``, which hoists it into
+        ``store_account.py`` and then clears it; nothing writes it any more.
+        """
         raw = self._data.get("store_account")
         return dict(raw) if isinstance(raw, dict) else {}
-
-    def get_store_identity(self) -> dict[str, Any]:
-        """Safe account view for status/UI - never includes the refresh token."""
-        a = self.get_store_account()
-        return {
-            "connected": bool(a.get("refresh_token")),
-            "uid": a.get("uid"),
-            "name": a.get("name"),
-            "brand": a.get("brand"),
-            "model": a.get("model"),
-        }
-
-    async def set_store_account(self, account: dict[str, Any]) -> None:
-        """Persist/merge the store account (refresh_token, uid, name, brand, model)."""
-        cur = self.get_store_account()
-        cur.update({k: v for k, v in account.items() if v is not None})
-        self._data["store_account"] = cur
-        await self.async_save()
 
     async def clear_store_account(self) -> None:
         self._data.pop("store_account", None)
@@ -4576,18 +4558,14 @@ class ProfileStore:
                 # problem they do not have.
                 if reason == "no usable duration":
                     message = (
-                        f"'{name}' can never be matched: it has a cycle with power "
-                        "data but no usable duration, so WashData has no length to "
-                        "size a match against. Re-record this program, or set its "
-                        "expected duration, to bring it back into matching."
+                        f"'{name}' can never match: its cycle has no usable duration. "
+                        "Re-record this program or set its expected duration."
                     )
                     message_key = "msg.advisory_unmatchable_no_duration"
                 else:
                     message = (
-                        f"'{name}' can never be matched: it has no cycle with power "
-                        "data behind it, so WashData has nothing to compare a running "
-                        "cycle against. Label a cycle of this program (or record one) "
-                        "to bring it back into matching."
+                        f"'{name}' can never match: no cycle with power data is "
+                        "behind it. Label or record a cycle of this program to fix it."
                     )
                     message_key = "msg.advisory_unmatchable"
                 advisories.append({
@@ -4629,17 +4607,17 @@ class ProfileStore:
                     "severity": "warning",
                     "code": "duration_outlier",
                     "message": (
-                        f"{len(offenders)} cycle(s) labelled '{name}' are too far "
-                        f"from its usual length to ever match it (worst: "
+                        f"{len(offenders)} cycle(s) labelled ‘{name}’ are too far "
+                        f"from its usual length to ever match (worst: "
                         # Two decimals, not one: the values that reach this
                         # advisory are by definition the ones far from 1.0, and
                         # `.1f` collapsed the informative end of that range - a
                         # cycle at 0.04x its profile rendered as "0.0x", which
                         # states the cycle had no length and reads like a bug.
                         # Real corpus cycles run as short as 0.148x (item 311).
-                        f"{worst['ratio']:.2f}x). They are probably mislabelled, or "
-                        "one recording captured two runs. Re-label or split them so "
-                        "they stop skewing this program's time estimate."
+                        f"{worst['ratio']:.2f}x). They are probably mislabelled or hold "
+                        "two runs. Relabel or split them so they stop skewing its time "
+                        "estimate."
                     ),
                     "message_key": "msg.advisory_duration_outlier",
                     "message_params": {
@@ -4657,9 +4635,9 @@ class ProfileStore:
                     advisories.append({
                         "profile": name, "severity": "warning", "code": "poor_health",
                         "message": (
-                            f"'{name}' has a low fit score - its recent cycles vary "
-                            "a lot or match weakly. Review its cycles or re-record "
-                            "the profile so matching and time estimates stay accurate."
+                            f"'{name}' fits poorly: its recent cycles vary a lot or "
+                            "match weakly. Review its cycles or re-record it to keep "
+                            "matching and estimates accurate."
                         ),
                         # Localization: panel renders _t(message_key, message_params,
                         # message). The English `message` above is the fallback.
@@ -4672,10 +4650,9 @@ class ProfileStore:
                     advisories.append({
                         "profile": name, "severity": "info", "code": "shape_drift",
                         "message": (
-                            f"'{name}' has drifted significantly from its original "
-                            f"power shape{corr_str}. The appliance may have changed "
-                            "behaviour over time (e.g. limescale, wear). Consider "
-                            "re-recording this profile with recent cycles."
+                            f"'{name}' has drifted from its original power "
+                            f"shape{corr_str}, perhaps from limescale or wear. "
+                            "Consider re-recording it with recent cycles."
                         ),
                         "message_key": (
                             "msg.advisory_shape_drift_corr"
@@ -4700,9 +4677,9 @@ class ProfileStore:
                     advisories.append({
                         "profile": name, "severity": "info", "code": "duration_trend_up",
                         "message": (
-                            f"'{name}' cycles are running progressively longer "
-                            f"(about +{pct:.0f}% per cycle). If the appliance's "
-                            "behaviour changed, re-record or rebuild this profile."
+                            f"'{name}' cycles keep getting longer "
+                            f"(about +{pct:.0f}% per cycle). If the appliance "
+                            "changed, re-record or rebuild this profile."
                         ),
                         "message_key": "msg.advisory_duration_trend_up",
                         "message_params": {"name": name, "pct": f"{pct:.0f}"},
@@ -4713,9 +4690,9 @@ class ProfileStore:
                     advisories.append({
                         "profile": name, "severity": "info", "code": "energy_trend_up",
                         "message": (
-                            f"'{name}' is drawing progressively more energy "
-                            f"(about +{pct:.0f}% per cycle) - worth checking the "
-                            "appliance if that is unexpected."
+                            f"'{name}' uses more energy each cycle "
+                            f"(about +{pct:.0f}% per cycle). Check the appliance "
+                            "if that is unexpected."
                         ),
                         "message_key": "msg.advisory_energy_trend_up",
                         "message_params": {"name": name, "pct": f"{pct:.0f}"},
@@ -8177,8 +8154,8 @@ class ProfileStore:
                 resumes = (j + 1 < n) and float(np.max(p_obs[j + 1:])) > active_thr
                 if dur >= min_dur[s] and (s != "pause" or resumes):
                     if s == "pause":
-                        detail = (f"Power dropped to near zero for ~{int(dur)}s then resumed — "
-                                  "likely the door was opened mid-cycle or the cycle was paused.")
+                        detail = (f"Power dropped to near zero for ~{int(dur)}s, then resumed. "
+                                  "The door was probably opened or the cycle paused.")
                         detail_key = "msg.artifact_pause_detail"
                     elif s == "dip":
                         detail = f"Drew below the usual power band for ~{int(dur)}s."
@@ -9211,6 +9188,27 @@ class ProfileStore:
         await self.async_save()
         self._logger.info("Created standalone profile '%s'", name)
 
+    def learned_duration_profiles(self) -> set[str]:
+        """Profiles whose ``avg_duration`` the envelope rebuild computes (#158).
+
+        The rebuild's own test: an evidence cycle labelled with the profile that
+        completed (or was force-stopped) and ran for over a minute. For these the
+        stored duration is derived from the cycles; a hand edit cannot stick.
+        """
+        out: set[str] = set()
+        for cycle in self.iter_evidence_cycles():
+            if not isinstance(cycle, dict):
+                continue
+            name = cycle.get("profile_name")
+            if not name or cycle.get("status") not in ("completed", "force_stopped"):
+                continue
+            try:
+                if float(cycle.get("duration") or 0.0) > 60:
+                    out.add(str(name))
+            except (TypeError, ValueError):
+                continue
+        return out
+
     async def update_profile(
         self, old_name: str, new_name: str, avg_duration: float | None = None
     ) -> int:
@@ -9239,13 +9237,19 @@ class ProfileStore:
 
         target_name = new_name if renamed else old_name
 
-        # Handle Duration Update
-        if avg_duration is not None and avg_duration > 0:
+        # Handle Duration Update. A profile with cycles has its duration computed
+        # by every envelope rebuild, so a hand-set value lasted only until the next
+        # cycle (#158); the panel shows that duration read-only and this refuses it.
+        learned = self.learned_duration_profiles()
+        if avg_duration is not None and avg_duration > 0 and (
+            old_name in learned or target_name in learned
+        ):
+            self._logger.info(
+                "Ignored a manual duration for '%s': it is computed from its cycles",
+                target_name,
+            )
+        elif avg_duration is not None and avg_duration > 0:
             profiles[target_name]["avg_duration"] = float(avg_duration)
-            # If there's an envelope, we ideally update its target_duration too,
-            # but envelope is usually rebuilt from data.
-            # However, for manual profiles, envelope might be empty or theoretical.
-            # Let's log it.
             self._logger.info(
                 "Updated baseline duration for '%s' to %ss",
                 target_name,

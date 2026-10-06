@@ -1,27 +1,10 @@
 name: Checks
 
-# Cheap, fast-failing checks only. The Python suite and the Playwright E2E suite
-# are deliberately NOT run here: they are a local/maintainer gate
-# (`./run_tests.sh`, `./run_tests.sh --all`, `devtools/release_check.sh --full`).
-# Runner minutes on this repo are shared with the issue/PR automation workflows,
-# which are the ones that have to stay responsive, and re-running ~3000 pytest
-# cases plus two full browser suites on every push to every branch was consuming
-# the budget they need.
-#
-# What is kept is the set of checks that are (a) seconds rather than minutes and
-# (b) catch a class of breakage no human reliably catches by eye -- a *generated*
-# file that no longer matches its source. The panel ships as a generated
-# artifact: `www/ha-washdata-panel.js` is the source of truth and
-# `devtools/build_panel.mjs` produces the `*.min.js` that is actually served.
-# `frontend.py` only serves an artifact whose recorded source hash still matches
-# disk, so a forgotten rebuild fails safe (users get the larger readable file)
-# rather than shipping stale code -- but a release that quietly loses
-# minification for everyone is still a bug. Same for the WS type artifacts.
-#
-# The panel parse/smoke step is here for the same reason: a stray backtick in the
-# panel's CSS-in-template-literal blanks the whole panel at runtime, and it costs
-# a second to rule out. `devtools/docs_check.py` likewise: stdlib-only, under a
-# second, and it catches hand-written docs drifting from the code they name.
+# Fast checks on every push: generated files match their sources (panel build,
+# WS types), the panel parses and renders, and docs_check (docs vs code). On pull
+# requests the fast pytest suite runs too. The slow suite, the Playwright E2E
+# suites and the test box stay local (`devtools/verify.sh full [--box]`): runner
+# minutes are shared with the issue/PR automation.
 
 on:
   push:

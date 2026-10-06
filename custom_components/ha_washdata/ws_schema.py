@@ -750,17 +750,19 @@ class StoreDownloadDeviceResponse(TypedDict, total=False):
     """Result of adopting a whole-device bundle into local reference cycles (the
     ``store_download`` task's result). ``partial`` + ``failed_profiles``: some
     programs' cycles could not be fetched; ``error`` ``"store_unreachable"``: the
-    store could not be read, never reported as an empty adopt (audit STORE-09)."""
+    store could not be read, never reported as an empty adopt (audit STORE-09).
+    ``settings`` is the bundle's shared settings, ``settings_applied`` how many
+    of them were written (only with ``include_settings``)."""
     profiles_adopted: int
     cycles_imported: int
     cycles_skipped: int
     phases_applied: int
+    settings: dict
     settings_applied: int
     cancelled: bool
     partial: bool
     failed_profiles: int
     error: str
-    disabled: bool
 
 
 class GetShareableCyclesResponse(TypedDict, total=False):
@@ -898,6 +900,13 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_upload_device": StoreUploadDeviceResponse,
     "store_download_device": StartTaskResponse,
     "get_shareable_cycles": GetShareableCyclesResponse,
+}
+
+#: Map a task-registry ``kind`` -> the TypedDict of its finished ``result``
+#: (``TaskSnapshot.result`` from ``get_task_result`` / ``subscribe_tasks``). Only
+#: kinds whose result the panel reads by key are listed; the rest stay ``Any``.
+WS_TASK_RESULT_TYPES: dict[str, type] = {
+    "store_download": StoreDownloadDeviceResponse,
 }
 
 #: Commands whose response splats an upstream summary dict and therefore has an
@@ -1239,6 +1248,7 @@ def full_command_name(command: str) -> str:
 __all__ = [
     "WS_COMMANDS",
     "WS_RESPONSE_TYPES",
+    "WS_TASK_RESULT_TYPES",
     "WS_OPEN_RESPONSES",
     "WS_PREFIX",
     "full_command_name",

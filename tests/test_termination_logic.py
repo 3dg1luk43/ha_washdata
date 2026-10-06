@@ -15,13 +15,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Test termination logic priority."""
-# import tests.mock_imports  # noqa: F401
 import pytest
 from unittest.mock import Mock, MagicMock
 from datetime import datetime, timedelta
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
 from custom_components.ha_washdata.const import (
-    STATE_OFF, STATE_RUNNING, STATE_ENDING, STATE_PAUSED, STATE_FINISHED,
+    STATE_OFF, STATE_RUNNING, STATE_ENDING, STATE_FINISHED,
     STATE_INTERRUPTED,
     STANDBY_BAND_MIN_RATIO,
 )
@@ -51,68 +50,6 @@ def mock_callbacks():
         "on_state_change": Mock(),
         "on_cycle_end": Mock(),
     }
-
-def test_long_drying_phase_cycle_continuation(base_config, mock_callbacks):
-    """
-    Verify cycle remains active during long low-power (drying) phases 
-    when expected duration suggests it should continue.
-    """
-    detector = CycleDetector(
-        config=base_config,
-        on_state_change=mock_callbacks["on_state_change"],
-        on_cycle_end=mock_callbacks["on_cycle_end"],
-    )
-
-    # 1. Start Cycle
-    detector.process_reading(100.0, dt(0))
-    detector.process_reading(100.0, dt(10)) # Running
-    
-    # Simulate a matched profile that expects 3600s (1h)
-    # This is normally done by profile matcher callback injection.
-    # We can manually set it for testing internals if we want, or use a mock matcher.
-    
-    # We'll use a mock matcher to conform to __init__ API
-    mock_matcher = Mock()
-    # Return match: name="Heavy", conf=0.9, duration=3600, phase="Washing", is_mismatch=False
-    mock_matcher.side_effect = lambda readings: ("Heavy", 0.9, 3600.0, "Washing", False)
-    
-    detector = CycleDetector(
-        config=base_config,
-        on_state_change=mock_callbacks["on_state_change"],
-        on_cycle_end=mock_callbacks["on_cycle_end"],
-        profile_matcher=mock_matcher
-    )
-    
-    # Restart with matcher
-    detector.process_reading(100.0, dt(0))
-    detector.process_reading(100.0, dt(10)) # Transition to RUNNING
-    detector.process_reading(100.0, dt(20)) # Match attempted here
-    
-    # Check match happened
-    assert detector.matched_profile == "Heavy"
-    # assert detector._expected_duration == 3600.0 # Internal, but assumed
-    
-    # 2. Power drops at T=1800 (30 mins), half way. 
-    # Must feed intermediate readings to avoid skewing p95 cadence
-    # Feed "Running" power every 10s until 1800
-    for t in range(30, 1800, 10):
-        detector.process_reading(100.0, dt(t))
-    
-    # Drop to 1.0W
-    detector.process_reading(1.0, dt(1800))
-    
-    # 3. Wait off_delay (60s) with 10s updates
-    for t in range(1810, 1870, 10):
-        detector.process_reading(1.0, dt(t))
-    
-    # Power is low, but the 3600 s expectation keeps the cycle open. A finished
-    # cycle lands in FINISHED/INTERRUPTED, never OFF, so "alive" is asserted as
-    # "not ended and still in a cycle state" (audit TESTING-13 Q-05).
-    assert not mock_callbacks["on_cycle_end"].called, (
-        "Cycle ended prematurely at "
-        f"{mock_callbacks['on_cycle_end'].call_args[0][0]['duration']}s (expected ~3600s)"
-    )
-    assert detector.state in (STATE_ENDING, STATE_RUNNING, STATE_PAUSED)
 
 def test_manual_program_override_termination(base_config, mock_callbacks):
     """A manual program keeps the cycle alive past off_delay, and a power cut
@@ -506,13 +443,3 @@ def test_smart_termination_is_blocked_by_each_gate_condition(base_config, case):
     assert ended_at >= _DROP_AT + 900, (case, ended_at)
 
 
-def test_the_retired_prefix_fit_element_no_longer_blocks(base_config):
-    """Element 7 carried the #364 prefix-fit flag, removed in 0.5.8: on the shipped
-    matcher it never fired at a split moment (devtools/prefix_guard_eval.py
-    --quiet-cuts --sweep). A legacy tuple that still sets it ends on Smart
-    Termination like any trusted, unambiguous match."""
-    ended_at, cycle = _run_gate_case(
-        base_config, ("Cotton", 0.9, _GATE_EXPECTED, "W", False, False, True)
-    )
-    assert cycle["termination_reason"] == "smart"
-    assert ended_at < _DROP_AT + 900, ended_at

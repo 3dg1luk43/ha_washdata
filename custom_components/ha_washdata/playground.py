@@ -1311,13 +1311,10 @@ class _DetailSim:
                         getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0
                     ),
                 )
-            ml_pct = progress_mod.ml_progress_percent(
-                self.store, self.options, matched_dur, prog_trace, program, self._end_exp_fn
-            )
             result = progress_mod.compute_progress(
                 self.device_type, matched_dur, prog_t,
                 progress_mod.ema_seed(self.smoothed["v"], self.smoothed["program"], program),
-                phase_result, ml_pct,
+                phase_result,
                 # Same time-scaled smoothing as live: the sim steps the estimator
                 # at its own throttle, so without this the replay would smooth
                 # over 30 s steps as if they were the manager's 5 s ones.

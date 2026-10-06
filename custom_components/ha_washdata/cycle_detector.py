@@ -422,7 +422,6 @@ class CycleDetectorConfig:
     power_off_threshold_w: float = 0.0
     power_off_delay: float = 30.0
     match_interval: int = 300  # Default profile match interval
-    profile_duration_tolerance: float = 0.25  # Default tolerance (±25%)
     anti_wrinkle_enabled: bool = False
     anti_wrinkle_max_power: float = 400.0
     anti_wrinkle_max_duration: float = 60.0
@@ -904,7 +903,6 @@ class CycleDetector:
         self._stall_run_lo: float = 0.0
         self._stall_run_hi: float = 0.0
         self._stall_active: bool = False
-        self._stall_since: datetime | None = None
         # The match as it stood when the current run began (`_begin_stall_run`):
         # a plateau soon looks like a finished SHORTER programme to the matcher,
         # so the evidence is the pre-plateau match's. And (required seconds,
@@ -1223,7 +1221,6 @@ class CycleDetector:
         self._stall_run_start = None
         self._stall_run_lo = self._stall_run_hi = 0.0
         self._stall_active = False
-        self._stall_since = None
         self._stall_match = None
         self._stall_eval = None
         self._stall_now = None
@@ -1328,7 +1325,6 @@ class CycleDetector:
         if stalled == self._stall_active:
             return
         self._stall_active = stalled
-        self._stall_since = timestamp if stalled else None
         if stalled:
             self._logger.info(
                 "Cycle stalled: flat %.1f-%.1f W (stop %.2f W) for %.0fs, matched %s; "
@@ -2921,7 +2917,13 @@ class CycleDetector:
                 self._anti_wrinkle_candidate_start_power = 0.0
 
             if self._state == STATE_ANTI_WRINKLE:
-                # Track time in idle (below exit_power threshold)
+                # Track time in idle. Quiet is below the exit power OR the stop
+                # threshold, whichever is higher, so the exit power only matters when
+                # set above stop. Not a "true off" level below stop (#285 #296 #325):
+                # after 33 of 139 corpus washer/dryer cycles the appliance idled
+                # between the 0.8 W default and its stop threshold, which would hold
+                # anti-wrinkle (and with it Clean and the unload reminder) for the
+                # 2 h cap. The #296 tail's baseline above stop is the tail floor's job.
                 effective_exit = max(self._config.anti_wrinkle_exit_power, self._config.stop_threshold_w)
                 if power < effective_exit:
                     # Low-power gap invalidates any burst candidate collected while in anti-wrinkle.

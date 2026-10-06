@@ -74,21 +74,15 @@ def test_inconsistent_profile_is_poor():
     assert h["health_score"] < 0.40
 
 
-def test_moderate_profile_is_fair():
-    """Moderate CV and confidence → fair."""
+def test_middling_profile_is_fair():
+    """CV 0.136 (consistency 0.728) + confidence 0.30 -> score 0.514, mid-band."""
     cycles = [
-        {"profile_name": "Eco 40°", "duration": 2400.0, "match_confidence": 0.55},
-        {"profile_name": "Eco 40°", "duration": 2800.0, "match_confidence": 0.60},
-        {"profile_name": "Eco 40°", "duration": 2200.0, "match_confidence": 0.58},
-        {"profile_name": "Eco 40°", "duration": 2600.0, "match_confidence": 0.52},
+        {"profile_name": "Mixed", "duration": d, "match_confidence": 0.30}
+        for d in (3000.0, 3600.0, 4200.0)
     ]
-    store = _store_with_cycles(cycles)
-    health = store.compute_profile_health()
-
-    h = health["Eco 40°"]
-    assert h["health_status"] in ("fair", "healthy", "poor")  # heuristic range
-    assert "cycle_count" in h
-    assert h["cycle_count"] == 4
+    h = _store_with_cycles(cycles).compute_profile_health()["Mixed"]
+    assert h["health_status"] == "fair"
+    assert h["health_score"] == pytest.approx(0.514, abs=0.001)
 
 
 # ---------------------------------------------------------------------------

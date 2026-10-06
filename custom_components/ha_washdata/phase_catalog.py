@@ -23,8 +23,11 @@ from copy import deepcopy
 from typing import Any
 
 from .const import (
+    DEVICE_TYPE_AIR_FRYER,
+    DEVICE_TYPE_BREAD_MAKER,
     DEVICE_TYPE_DISHWASHER,
     DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_PUMP,
     DEVICE_TYPE_WASHER_DRYER,
     DEVICE_TYPE_WASHING_MACHINE,
 )
@@ -202,6 +205,75 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
             "is_default": True,
         },
     ],
+    # #190: these two lists went with the removed device types in 0.5.0 (4fde004)
+    # although both types stayed, so a bread maker was offered Pre-Wash and Spin.
+    DEVICE_TYPE_BREAD_MAKER: [
+        {
+            "name": "Kneading",
+            "description": "Motor-driven dough mixing and development. High power draw.",
+            "translation_key": "phase_desc.kneading",
+            "is_default": True,
+        },
+        {
+            "name": "Resting",
+            "description": "Short low-power pause between kneading stages for gluten relaxation.",
+            "translation_key": "phase_desc.resting",
+            "is_default": True,
+        },
+        {
+            "name": "Proving",
+            "description": "Low-heat rising period to allow yeast fermentation and dough expansion.",
+            "translation_key": "phase_desc.proving",
+            "is_default": True,
+        },
+        {
+            "name": "Baking",
+            "description": "High-temperature heating element active for crust and crumb formation.",
+            "translation_key": "phase_desc.baking",
+            "is_default": True,
+        },
+        {
+            "name": "Keep Warm",
+            "description": "Low-heat holding stage to keep the loaf warm after baking.",
+            "translation_key": "phase_desc.keep_warm_bm",
+            "is_default": True,
+        },
+    ],
+    DEVICE_TYPE_AIR_FRYER: [
+        {
+            "name": "Pre-Heat",
+            "description": "Initial chamber heating before full cooking.",
+            "translation_key": "phase_desc.pre_heat",
+            "is_default": True,
+        },
+        {
+            "name": "Cooking",
+            "description": "Main cooking phase with active heater and fan.",
+            "translation_key": "phase_desc.cooking",
+            "is_default": True,
+        },
+        {
+            "name": "Pause",
+            "description": "Short pause for shaking or inspection.",
+            "translation_key": "phase_desc.pause_af",
+            "is_default": True,
+        },
+        {
+            "name": "Cool Down",
+            "description": "Fan-only cool-down stage after heating.",
+            "translation_key": "phase_desc.cool_down_af",
+            "is_default": True,
+        },
+        {
+            "name": "Keep Warm",
+            "description": "Low-heat holding stage to keep food warm.",
+            "translation_key": "phase_desc.keep_warm",
+            "is_default": True,
+        },
+    ],
+    # A pump run is one phase; without an entry it fell back to the union of every
+    # list above (washing phases included).
+    DEVICE_TYPE_PUMP: [],
 }
 
 

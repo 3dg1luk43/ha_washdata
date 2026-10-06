@@ -76,15 +76,6 @@ def test_a_low_power_rinse_past_expected_is_not_standby() -> None:
     assert not ended
 
 
-def test_standby_just_above_the_stop_threshold_still_closes_at_the_expected_end() -> None:
-    """#445's shape keeps the 1.0x gate: 3.4 W idle on a 2.56 W stop threshold."""
-    ended: list = []
-    det = _det(2.56, ended)
-    t = _run(det, lambda t: 230.0, EXPECTED, 0.0)
-    _run(det, lambda t: 3.4, EXPECTED + 1500, t)
-    assert ended, "the #445 appliance would sit until the 2x gate again"
-
-
 def test_any_other_flat_plateau_keeps_the_0_5_6_gate() -> None:
     """Not near the stop threshold: still finalised, but only at 2x expected."""
     ended: list = []

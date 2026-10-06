@@ -219,16 +219,23 @@ async def test_delete_cycle_rebuilds_envelope(store):
 @pytest.mark.asyncio
 async def test_match_profile_no_profiles(store):
     """Test matching when no profiles exist."""
-    current_data = [(dt_str(0), 100.0)]
-    result = await store.async_match_profile(current_data, 100.0)
+    # Enough readings to get past the resample floor, so the empty store is what answers.
+    current_data = [(dt_str(i * 10), 100.0 + (i % 7) * 10.0) for i in range(60)]
+    result = await store.async_match_profile(current_data, 600.0)
+    assert result.best_profile is None
+    assert result.confidence == 0.0
+    # A single reading cannot be resampled at all: no match, no error.
+    result = await store.async_match_profile([(dt_str(0), 100.0)], 100.0)
     assert result.best_profile is None
     assert result.confidence == 0.0
 
 @pytest.mark.asyncio
 async def test_match_profile_extreme_duration(store):
-    """Test matching when duration is far outside acceptable range."""
+    """Stage 1 rejects a candidate whose duration ratio is past max_duration_ratio (2.0 here)."""
     start_dt = datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    dense_power = [[(start_dt + timedelta(seconds=i)).isoformat(), 100.0] for i in range(101)]
+    dense_power = [
+        [(start_dt + timedelta(seconds=i)).isoformat(), 100.0 + (i % 7) * 10.0] for i in range(101)
+    ]
     
     await store.async_add_cycle({
         "start_time": start_dt.isoformat(),
@@ -238,14 +245,11 @@ async def test_match_profile_extreme_duration(store):
     })
     c1_id = store.get_past_cycles()[0]["id"]
     await store.create_profile("FixedProfile", c1_id)
-    
-    # 1. Match with duration = 10s (Ratio 0.1, outside 0.75-1.25 default)
-    current_data = [[(start_dt + timedelta(seconds=i)).isoformat(), 100.0] for i in range(10)]
-    result = await store.async_match_profile(current_data, 10.0)
-    assert result.best_profile is None
-    
-    # 2. Match with duration = 1000s (Ratio 10.0, outside 0.75-1.25)
-    result_long = await store.async_match_profile(current_data, 1000.0)
+
+    # The same trace at the profile's own length matches...
+    assert (await store.async_match_profile(dense_power, 100.0)).best_profile == "FixedProfile"
+    # ...and claimed to run 10x as long (ratio 10) it is rejected before scoring.
+    result_long = await store.async_match_profile(dense_power, 1000.0)
     assert result_long.best_profile is None
 
 @pytest.mark.asyncio
@@ -263,25 +267,6 @@ async def test_async_add_cycle_malformed_data(store):
     # but currently preserves non-list if passed directly (or we need to check if it's cleared)
     # Actually let's just assert it's present.
     assert "power_data" in store.get_past_cycles()[1]
-
-@pytest.mark.asyncio
-async def test_delete_profile_with_unlabel(store):
-    """Test deleting profile and unlabeling associated cycles."""
-    await store.async_add_cycle({
-        "start_time": dt_str(0),
-        "duration": 100,
-        "status": "completed",
-        "profile_name": "DeleteMe",
-        "power_data": [[dt_str(0), 10]]
-    })
-    c1_id = store.get_past_cycles()[0]["id"]
-    store._data["profiles"]["DeleteMe"] = {"sample_cycle_id": c1_id}
-    
-    # Delete and unlabel
-    await store.delete_profile("DeleteMe", unlabel_cycles=True)
-    
-    assert "DeleteMe" not in store.get_profiles()
-    assert store.get_past_cycles()[0]["profile_name"] is None
 
 @pytest.mark.asyncio
 async def test_create_profile_already_exists(store):

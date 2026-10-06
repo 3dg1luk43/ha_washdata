@@ -41,9 +41,7 @@ import numpy as np
 
 from .const import (
     CYCLE_OVERRUN_ANOMALY_RATIO,
-    ENABLE_ML_REMAINING_TIME,
     DEVICE_SMOOTHING_THRESHOLDS,
-    ML_PROGRESS_BLEND_WEIGHT,
     STATE_ENDING,
     STATE_PAUSED,
     STATE_RUNNING,
@@ -133,61 +131,6 @@ def profile_end_expectation(
 EndExpFn = Any  # Callable[[str, float], dict[str, float] | None]
 
 
-def ml_progress_percent(
-    store: Any,
-    options: Any,
-    matched_duration: float,
-    trace: list[tuple[datetime, float]],
-    profile_name: str,
-    end_expectation_fn: EndExpFn,
-    logger: logging.Logger | None = None,
-) -> float | None:
-    """ML completion-fraction estimate (0-100) for the running cycle, or None.
-
-    Uses the on-device ``remaining_time`` regressor; gated on the ML opt-in and
-    inert until training promotes a regressor. ``end_expectation_fn(name, dur)``
-    supplies the profile expectation (the manager passes its cached
-    ``_profile_end_expectation``; the Playground wraps :func:`profile_end_expectation`)
-    so history is only decompressed after the cheap gates pass. Never raises.
-    """
-    logger = logger or _LOGGER
-    try:
-        from .ml.engine import ml_models_enabled, resolve_regressor
-
-        if not ENABLE_ML_REMAINING_TIME or not ml_models_enabled(options):
-            return None
-        if (
-            not profile_name
-            or profile_name in ("off", "detecting...", "restored...")
-            or profile_name not in store.get_profiles()
-        ):
-            return None
-        predict_fn, _src = resolve_regressor("remaining_time", store)
-        if predict_fn is None:
-            return None
-        if not trace or len(trace) < 4:
-            return None
-        expectation = end_expectation_fn(
-            profile_name, float(matched_duration or 0.0)
-        )
-        if expectation is None:
-            return None
-        t0 = trace[0][0]
-        pts = [(float((t - t0).total_seconds()), float(p)) for t, p in trace]
-        from .ml.feature_extraction import progress_features
-
-        feat = progress_features(pts, expectation)
-        if feat is None:
-            return None
-        frac = float(predict_fn(feat))
-        if not math.isfinite(frac):
-            return None
-        return float(min(max(frac, 0.0), 0.99)) * 100.0
-    except Exception as err:  # noqa: BLE001 - ML must never break estimates
-        logger.debug("ML progress estimate skipped: %s", err)
-        return None
-
-
 def ml_energy_total(
     store: Any,
     options: Any,
@@ -198,8 +141,12 @@ def ml_energy_total(
     logger: logging.Logger | None = None,
 ) -> float | None:
     """Predicted total cycle energy (Wh) from the on-device ``total_energy``
-    regressor, or None. ``end_expectation_fn`` as in :func:`ml_progress_percent`.
-    Never raises.
+    regressor, or None. Never raises.
+
+    ``end_expectation_fn(name, dur)`` supplies the profile expectation (the
+    manager passes its cached ``_profile_end_expectation``; the Playground wraps
+    :func:`profile_end_expectation`) so history is only decompressed after the
+    cheap gates pass.
     """
     logger = logger or _LOGGER
     try:
@@ -757,17 +704,15 @@ def _compute_progress_base(
     duration_so_far: float,
     prev_smoothed: float,
     phase_result: tuple[float, float] | None,
-    ml_pct: float | None,
     logger: logging.Logger | None = None,
     dt_seconds: float | None = None,
 ) -> ProgressResult | None:
-    """The blend + EMA + monotonicity + back-calculation body of the estimate loop.
+    """The EMA + monotonicity + back-calculation body of the estimate loop.
 
     Pure arithmetic: the caller supplies ``phase_result`` (from
-    :func:`estimate_phase_progress`, or ``None`` to force the linear fallback) and
-    ``ml_pct`` (from :func:`ml_progress_percent`, or ``None``); both the live
-    manager and the Playground compute those via the same functions, so this is
-    the single implementation of the smoothing/back-calc. Returns ``None`` when no
+    :func:`estimate_phase_progress`, or ``None`` to force the linear fallback);
+    the live manager and the Playground compute it via the same function, so this
+    is the single implementation of the smoothing/back-calc. Returns ``None`` when no
     profile duration is known (caller clears the estimate). Behavior-identical to
     the matched-duration branch of ``manager._update_remaining_only``.
     """
@@ -778,10 +723,6 @@ def _compute_progress_base(
     # --- PHASE-AWARE ESTIMATION ---
     if phase_result is not None:
         phase_progress, phase_variance = phase_result
-
-        if ml_pct is not None:
-            w = ML_PROGRESS_BLEND_WEIGHT
-            phase_progress = (1.0 - w) * phase_progress + w * ml_pct
 
         if prev_smoothed == 0.0:
             smoothed = phase_progress
@@ -851,11 +792,6 @@ def _compute_progress_base(
     remaining = max(matched_dur - duration_so_far, 0.0)
     progress = (duration_so_far / matched_dur) * 100.0
 
-    if ml_pct is not None:
-        w = ML_PROGRESS_BLEND_WEIGHT
-        progress = (1.0 - w) * progress + w * ml_pct
-        remaining = max(matched_dur * (1.0 - progress / 100.0), 0.0)
-
     if prev_smoothed > 0:
         lin_alpha = _dt_scaled_alpha(0.1, dt_seconds)
         smoothed = (prev_smoothed * (1.0 - lin_alpha)) + (progress * lin_alpha)
@@ -882,7 +818,6 @@ def compute_progress(
     duration_so_far: float,
     prev_smoothed: float,
     phase_result: tuple[float, float] | None,
-    ml_pct: float | None,
     logger: logging.Logger | None = None,
     dt_seconds: float | None = None,
 ) -> ProgressResult | None:
@@ -892,7 +827,7 @@ def compute_progress(
     10% worse at 25% on washers)."""
     return _compute_progress_base(
         device_type, matched_duration, duration_so_far, prev_smoothed,
-        phase_result, ml_pct, logger, dt_seconds,
+        phase_result, logger, dt_seconds,
     )
 
 
@@ -942,7 +877,7 @@ def current_phase(
     cycle_progress: float,
     expected_duration: float | None = None,
 ) -> str | None:
-    """Live phase from the profile's configured ranges + ML-blended progress.
+    """Live phase from the profile's configured ranges + the smoothed progress.
 
     Indexed by the smoothed progress fraction rather than raw elapsed seconds, so
     overrun/underrun cycles still name the phase correctly; the fraction maps onto

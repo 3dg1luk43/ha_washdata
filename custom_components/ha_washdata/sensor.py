@@ -587,6 +587,12 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
             translation_key="elapsed_time",
             native_unit_of_measurement="s",
             device_class=SensorDeviceClass.DURATION,
+            # Shown in minutes like time remaining / total duration (#232). The
+            # native unit stays seconds: HA applies a suggested unit only when the
+            # entity is first registered, so an existing entity keeps the unit its
+            # history and automations use (no state_class, so no statistics) until
+            # its owner picks another one in the entity settings, which HA converts.
+            suggested_unit_of_measurement="min",
             suggested_display_precision=0,
             icon="mdi:timer-outline",
         )
@@ -889,7 +895,6 @@ class WasherProfileSensorManager:
         self._entry = entry
         self._async_add_entities = async_add_entities
         self._sensors: dict[str, WasherProfileCountSensor] = {}
-        self._diagnostics_cleanup_done: bool = False
 
         # Determine the signal string. It must match SIGNAL_WASHER_UPDATE from const.py
         # which is "washdata_update_{}"
@@ -917,7 +922,6 @@ class WasherProfileSensorManager:
         cleanup_orphaned_diagnostic_entities(
             self._manager.hass, self._manager, self._entry
         )
-        self._diagnostics_cleanup_done = True
 
     def unsubscribe(self) -> None:
         """Remove the dispatcher subscription."""

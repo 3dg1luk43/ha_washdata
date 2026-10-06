@@ -109,38 +109,6 @@ def profile_expectation(cycles_points: Sequence[Sequence[Point]]) -> dict[str, f
     }
 
 
-def profile_expectations(cycles: list[dict]) -> dict[str, dict[str, float]]:
-    """Median duration/energy/peak per profile from stored cycle dicts.
-
-    The dict-based counterpart of :func:`profile_expectation` (which works from
-    decompressed traces): reads the ``duration``/``energy_wh``/``max_power``
-    scalar fields already stored on each cycle. Shared by on-device training
-    (``training_task``) and the ML suggestion engine so the "profile expectation"
-    definition lives in one place. Profiles with no usable duration are skipped;
-    missing energy/peak default to 500.
-    """
-    stats: dict[str, dict[str, list[float]]] = {}
-    for c in cycles:
-        name = c.get("profile_name")
-        if not isinstance(name, str) or not name:
-            continue
-        s = stats.setdefault(name, {"d": [], "e": [], "p": []})
-        for key, field in (("d", "duration"), ("e", "energy_wh"), ("p", "max_power")):
-            v = c.get(field)
-            if isinstance(v, (int, float)) and not isinstance(v, bool):
-                s[key].append(float(v))
-    out: dict[str, dict[str, float]] = {}
-    for name, s in stats.items():
-        if not s["d"]:
-            continue
-        out[name] = {
-            "duration": float(np.median(s["d"])),
-            "energy": float(np.median(s["e"])) if s["e"] else 500.0,
-            "peak": float(np.median(s["p"])) if s["p"] else 500.0,
-        }
-    return out
-
-
 def latest_end_event_features(
     points: Sequence[Point],
     expectation: dict[str, float],

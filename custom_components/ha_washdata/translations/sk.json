@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Nastavenie WashData",
-        "description": "Nakonfigurujte si práčku alebo iný spotrebič.\n\nSnímač výkonu je povinný.\n\nPo nastavení otvorte panel WashData z bočného panelu (alebo prejdite na [/ha-washdata](/ha-washdata)) na zobrazenie cyklov, ladenie detekcie a správu profilov.",
+        "description": "Nastavte práčku alebo iný spotrebič. Je potrebný snímač výkonu.\n\nPo nastavení otvorte panel WashData z bočného panela ([/ha-washdata](/ha-washdata)), kde nájdete cykly, profily a všetky nastavenia.",
         "data": {
           "name": "Názov zariadenia",
           "device_type": "Typ zariadenia",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Priateľský názov pre toto zariadenie (napr. „Práčka“, „Umývačka riadu“).",
-          "device_type": "O aký typ spotrebiča ide? Pomáha prispôsobiť detekciu a označovanie.",
-          "power_sensor": "Entita senzora, ktorá hlási spotrebu energie v reálnom čase (vo wattoch) z vašej inteligentnej zásuvky.",
-          "min_power": "Údaje o príkone nad touto hranicou (vo wattoch) indikujú, že spotrebič beží. Začnite s 2 W pre väčšinu zariadení."
+          "device_type": "Nastaví predvolené hodnoty detekcie pre tento druh spotrebiča.",
+          "power_sensor": "Senzor inteligentnej zásuvky, ktorý hlási aktuálny výkon vo wattoch.",
+          "min_power": "Hodnoty nad touto hranicou (vo wattoch) znamenajú, že spotrebič beží. Pre väčšinu zariadení stačia 2 W."
         }
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Aktualizujte názov zariadenia, typ spotrebiča alebo snímač výkonu.\n\nPanel WashData (bočný panel alebo [/ha-washdata](/ha-washdata)) slúži na správu detekcie, cyklov, profilov a oznámení.",
+        "description": "Zmeňte názov zariadenia, typ spotrebiča alebo snímač výkonu.\n\nVšetko ostatné je v paneli WashData (bočný panel alebo [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -41,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "Premenujte zariadenie alebo zmeňte jeho základné hardvérové nastavenia. Všetky nastavenia detekcie, párovania a oznámení sú na [paneli WashData](/ha-washdata) (dostupný aj z bočného panelu).",
+        "description": "Premenujte zariadenie alebo zmeňte jeho základné nastavenia. Všetko ostatné je v [paneli WashData](/ha-washdata) v bočnom paneli.",
         "data": {
           "name": "Názov zariadenia",
           "device_type": "Device Type",
@@ -91,7 +91,7 @@
         },
         "profile_name": {
           "name": "Názov profilu",
-          "description": "Názov existujúceho profilu (vytvorte profily v ponuke Spravovať profily). Ak chcete štítok odstrániť, nechajte pole prázdne."
+          "description": "Názov existujúceho profilu (profily vytvoríte v paneli WashData). Ponechajte prázdne na odstránenie štítka."
         }
       }
     },
@@ -147,7 +147,7 @@
     },
     "export_config": {
       "name": "Exportovať konfiguráciu",
-      "description": "Exportujte profily, cykly a nastavenia tohto zariadenia do súboru JSON (na server).",
+      "description": "Exportuje profily, cykly a nastavenia tohto zariadenia do súboru JSON.",
       "fields": {
         "device_id": {
           "name": "Zariadenie",
@@ -175,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Odoslať spätnú väzbu cyklu",
-      "description": "Po dokončení cyklu potvrďte alebo opravte automaticky rozpoznaný program. Zadajte buď `entry_id` (rozšírené) alebo `device_id` (odporúčané).",
+      "description": "Potvrďte alebo opravte rozpoznaný program dokončeného cyklu. Zadajte `device_id` (odporúčané) alebo `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Zariadenie",
@@ -281,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Označiť ako vyložené",
-      "description": "Potvrďte, že dokončená náplň bola vybratá zo zariadenia WashData, čím sa zruší stav „Čistý“ aj prípadná pripomienka vyloženia.",
+      "description": "Potvrďte, že dokončená náplň bola vybratá. Zruší stav „Čistý“ aj pripomienku vyloženia.",
       "fields": {
         "device_id": {
           "name": "Zariadenie",

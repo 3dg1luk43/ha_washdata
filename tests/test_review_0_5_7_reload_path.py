@@ -45,12 +45,10 @@ from custom_components.ha_washdata.const import (
     CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PROGRESS_RESET_DELAY,
     DEFAULT_OFF_DELAY,
-    DEVICE_TYPE_DISHWASHER,
     DEVICE_TYPE_WASHING_MACHINE,
     STATE_OFF,
     STATE_RUNNING,
     STATE_STARTING,
-    resolve_off_delay_default,
 )
 from custom_components.ha_washdata.manager import WashDataManager
 
@@ -127,11 +125,6 @@ async def test_a_an_unset_stop_threshold_is_the_same_after_restart_and_after_sav
     stop_at_setup = mgr.detector.config.stop_threshold_w
     await _reload(mgr, _entry({CONF_MIN_POWER: 2.0, "notify_live_interval_seconds": 60}))
     assert mgr.detector.config.stop_threshold_w == pytest.approx(stop_at_setup)
-
-
-def test_a_the_displayed_off_delay_default_is_the_one_in_force() -> None:
-    """The panel showed an unset dishwasher Off Delay as 1800 s; it ran on 180."""
-    assert resolve_off_delay_default(DEVICE_TYPE_DISHWASHER) == DEFAULT_OFF_DELAY
 
 
 # --- (b) ---------------------------------------------------------------------

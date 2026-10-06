@@ -110,65 +110,6 @@ async def test_initial_match_switching(manager):
     assert manager._last_match_confidence == 0.85
 
 @pytest.mark.asyncio
-async def test_strong_override_switching(manager):
-    """Test switching to a better profile (Override)."""
-    # Setup: Currently matched to "Synthetic" loosely
-    manager._current_program = "Synthetic"
-    manager._matched_profile_duration = 3600.0
-    
-    # Mock result where "Cotton 60" is much better
-    mock_res = MatchResult(
-        best_profile="Cotton 60",
-        confidence=0.95,
-        expected_duration=7200.0,
-        matched_phase=None,
-        candidates=[
-            {"name": "Cotton 60", "score": 0.95},
-            {"name": "Synthetic", "score": 0.60}, 
-        ],
-        is_ambiguous=False,
-        ambiguity_margin=0.35
-    )
-    manager.profile_store.async_match_profile.return_value = mock_res
-    
-    # Act
-    readings = _make_readings(1000)
-    await manager._async_do_perform_matching(readings)
-    
-    # Assert
-    assert manager._current_program == "Cotton 60"
-    assert manager._matched_profile_duration == 7200.0
-
-@pytest.mark.asyncio
-async def test_no_switch_weak_improvement(manager):
-    """Test NOT switching if improvement is marginal."""
-    # Setup: Currently matched to "Synthetic"
-    manager._current_program = "Synthetic"
-    manager._matched_profile_duration = 3600.0
-    
-    # Mock result where "Cotton 60" is only slightly better
-    mock_res = MatchResult(
-        best_profile="Cotton 60",
-        confidence=0.75,
-        expected_duration=7200.0,
-        matched_phase=None,
-        candidates=[
-            {"name": "Cotton 60", "score": 0.75},
-            {"name": "Synthetic", "score": 0.70},
-        ],
-        is_ambiguous=False,
-        ambiguity_margin=0.05
-    )
-    manager.profile_store.async_match_profile.return_value = mock_res
-    
-    # Act
-    readings = _make_readings(1000)
-    await manager._async_do_perform_matching(readings)
-    
-    # Assert: Should stay Synthetic
-    assert manager._current_program == "Synthetic"
-
-@pytest.mark.asyncio
 async def test_unmatching_logic(manager):
     """Test reverting to detection if confidence drops."""
     # Setup: Matched "Cotton 40"

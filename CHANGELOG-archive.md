@@ -320,7 +320,7 @@ WashData releases 0.5.4 and earlier, moved out of [CHANGELOG.md](CHANGELOG.md) a
 
 * @kdjkdjkdj made their first contribution in https://github.com/3dg1luk43/ha_washdata/issues/316
 
-## 0.5.0 - "Goodbye OptionsFlow, Hello Panel (Oh, and hi WashData Community Store)" - 2026-07-16
+## 0.5.0 - "Goodbye OptionsFlow, Hello Panel (Oh, and hi WashData Community Store)" - 2026-07-17
 
 The biggest release in WashData's history. It retires the 180-plus-tunable options dialog in favour of a full-screen management panel, overhauls matching accuracy, rebuilds actions on native Home Assistant automations, and adds an experimental, fully-gated, NumPy-only ML subsystem that runs *alongside* the proven detection/matching engine. On top of that panel it also sharpens what WashData notices and how it talks to you: detection flags cycles that finish suspiciously early or draw unusual energy, energy tracking grows into a full Home Assistant Energy dashboard sensor with per-profile cost, notifications gain quiet hours and celebration milestones, the panel picks up a phase timeline and a genuine power-user **Playground**, and you can now simply ask your voice assistant whether the washer is done. It also opens WashData up to the community for the first time with the optional, off-by-default **WashData Store**: adopt program profiles and reference cycles that other owners of your exact appliance have already recorded, and share your own back, so you no longer have to teach every program from scratch.
 
@@ -598,7 +598,7 @@ The biggest release in WashData's history. It retires the 180-plus-tunable optio
 
 - **Stale-PR Closer Generalised and Anchored to Label Time**: The scheduled `Close Incomplete PRs` workflow was renamed `Close Stale PRs` and now closes both `needs description` (5-day grace) and `needs accepted issue` (3-day grace) PRs from a single rule list. Each grace period is measured from when its label was actually applied (read from the PR's label events) rather than from PR creation, so a PR labelled long after it was opened gets the full grace the warning promises instead of being closed early. The workflow was also granted the `issues: write` permission it needs to comment, alongside its existing `pull-requests: write`. New repository labels `needs accepted issue` and `awaiting maintainer` back this flow.
 
-## 0.4.5 - 2026-06-02
+## 0.4.5 - 2026-06-03
 
 ### ✨ Features
 
@@ -696,7 +696,7 @@ The biggest release in WashData's history. It retires the 180-plus-tunable optio
 - **Release-Reference Bot Auto-Notifies and Closes Resolved Issues**: A new workflow (`.github/workflows/release_references.yml`) runs on every published GitHub release and scans the release notes for issue references (`#<number>` or full issue URLs to this repo). For each referenced open issue created before the release was published, the bot posts a comment linking to the release page, adds the `done` label, and inserts a hidden marker (`<!-- release-reference-bot -->`) into the comment body. `close_done_issues.yml` was extended to recognise that marker as an "owner-equivalent" last comment, so the existing 5-day inactivity rule auto-closes the issue without the maintainer having to comment manually. Reporter replies after the bot's comment still block the auto-close (the last-comment check fails), giving anyone whose problem is *not* actually fixed by the release a clean way to push back. The workflow also exposes a `workflow_dispatch` input to re-scan a specific tag, and de-duplicates against its own previous comments (matching the `tag:<release.tag_name>` line) so re-runs are idempotent.
 - **Test Suite Split into Fast / Slow / Benchmark Categories**: The dev test loop previously took ~12 minutes because two stress-simulation tests in `tests/repro/test_comprehensive_stress_suite.py` alone consumed ~11 minutes, and a further dozen real-data replay tests added another ~40 seconds. For small changes (UI tweaks, config-flow edits, translation updates) this discouraged running the suite at all. Tests are now tagged with pytest markers: `slow` (real-data replays from `cycle_data/`, stress simulations, full HA integration flow - 8 files / 144 tests) and `benchmark` (pure performance characterization - 2 tests). `pytest.ini` skips both categories by default, so `./run_tests.sh` (and raw `pytest tests/`) now run only the 271-test **fast** suite in about 30 seconds (a 23× speedup). The runner also accepts `--slow`, `--bench`, and `--all` to opt in. No tests were deleted - the full suite still runs via `./run_tests.sh --all` for releases and CI. See `TESTING.md` → *Test Categories* for the marker conventions when adding new tests.
 
-## 0.4.4.1 - 2026-04-29
+## 0.4.4.1 - 2026-05-05
 
 ### ✨ Features
 - **New Device Type: Oven** (#137): Added support for electric ovens with defaults tuned for the heating profile of a thermostat-regulated cavity (4-hour active timeout to cover slow roasts and pyrolytic self-clean, 10-minute off-delay and 15-minute min-off-gap to bridge thermostat-driven silences without splitting one bake into multiple cycles, 0.5 Wh start-energy gate to filter incidental fan/light draws, 5.0 % progress-smoothing tolerance for the bistable on/off swings during temperature regulation, 10-minute completion threshold). Includes five built-in phases: **Pre-Heat**, **Heating**, **Maintaining Temp**, **Cool Down**, and **Pyrolytic Clean**. Selectable in the device-type dropdown with a `mdi:stove` icon. Issue and feature-request templates updated to list the new option.
@@ -777,7 +777,7 @@ The biggest release in WashData's history. It retires the 180-plus-tunable optio
 
 <br>
 
-## 0.4.3.1 - 2026-03-16
+## 0.4.3.1 - 2026-03-17
 
 ### ✨ Features
 - **Trim Cycle Service**: Added a new `trim_cycle` HA service call that trims a cycle's stored power trace to a user-specified `[trim_start_s, trim_end_s]` window. Offsets are renormalized to start at zero, and all cycle metadata - `start_time`, `end_time`, `duration`, `signature`, `sampling_interval` - is recomputed and persisted atomically. Useful for removing noisy preamble or lingering standby readings from a recorded cycle.
@@ -999,7 +999,7 @@ The biggest release in WashData's history. It retires the 180-plus-tunable optio
 - **State Logic**: Fixed assertions and logic validation for terminal states.
 - **Notification Tests**: Fixed test environment formatting for notification services.
 
-## 0.4.0 - 2026-01-12
+## 0.4.0 - 2026-02-01
 
 **Major Architectural Rewrite ("vNext")**
 
@@ -1113,7 +1113,7 @@ Thank you to everyone who has been patient during development and to all contrib
 - **Bug**: Ensure stats are immediately rebuilt after merging cycles.
 - **Translation Keys**: Corrected missing labels for "Smart Extension Threshold" and other advanced settings.
 
-## 0.3.1 - 2024-12-31
+## 0.3.1 - 2025-12-31
 
 ### Added
 - **Manual Duration for Profiles**: Users can now specify a manual "Baseline Duration" when creating profiles, useful for setting up profiles without historical data (e.g., "Eco Mode - 180 mins").
@@ -1126,7 +1126,7 @@ Thank you to everyone who has been patient during development and to all contrib
 - **Mocking Issues**: Improved test verification process for Config Flow.
 - **Manual Override**: Fixed issue where unselecting a manual profile while idle would not clear the program sensor.
 
-## 0.3.0 - 2024-12-31
+## 0.3.0 - 2025-12-31
 
 This release marks a significant milestone for WashData, introducing intelligent profile-based cycle detection, a dedicated dashboard card, a completely rewritten configuration experience, and major improvements to cycle detection and time estimation.
 

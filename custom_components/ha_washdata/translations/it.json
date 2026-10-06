@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configurazione WashData",
-        "description": "Configura la tua lavatrice o altro elettrodomestico.\n\nÈ richiesto il sensore di potenza.\n\nDopo la configurazione, apri il pannello WashData dalla barra laterale (o vai su [/ha-washdata](/ha-washdata)) per visualizzare i cicli, regolare il rilevamento e gestire i profili.",
+        "description": "Configura una lavatrice o un altro elettrodomestico. È richiesto un sensore di potenza.\n\nDopo la configurazione, apri il pannello WashData dalla barra laterale ([/ha-washdata](/ha-washdata)) per vedere cicli, profili e tutte le impostazioni.",
         "data": {
           "name": "Nome dispositivo",
           "device_type": "Tipo di dispositivo",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Un nome descrittivo per questo dispositivo (ad esempio \"Lavatrice\", \"Lavastoviglie\").",
-          "device_type": "Che tipo di elettrodomestico è questo? Aiuta a personalizzare il rilevamento e l'etichettatura.",
-          "power_sensor": "L'entità sensore che segnala il consumo energetico in tempo reale (in watt) dalla tua presa intelligente.",
-          "min_power": "Le letture di potenza superiori a questa soglia (in watt) indicano che l'elettrodomestico è in funzione. Inizia con 2 W per la maggior parte dei dispositivi."
+          "device_type": "Imposta i valori di rilevamento predefiniti per questo tipo di elettrodomestico.",
+          "power_sensor": "Il sensore della presa intelligente che riporta la potenza attuale in watt.",
+          "min_power": "Letture sopra questo valore (in watt) indicano che l'elettrodomestico è in funzione. 2 W va bene per la maggior parte dei dispositivi."
         }
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Aggiorna il nome del dispositivo, il tipo di elettrodomestico o il sensore di potenza.\n\nIl pannello WashData (barra laterale, o [/ha-washdata](/ha-washdata)) è dove vengono gestiti rilevamento, cicli, profili e notifiche.",
+        "description": "Cambia il nome del dispositivo, il tipo di elettrodomestico o il sensore di potenza.\n\nTutto il resto è nel pannello WashData (barra laterale, o [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -41,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "Rinomina il dispositivo o modifica le sue impostazioni hardware principali. Tutte le impostazioni di rilevamento, corrispondenza e notifica si trovano nel [pannello WashData](/ha-washdata) (accessibile anche dalla barra laterale).",
+        "description": "Rinomina il dispositivo o modifica le sue impostazioni principali. Tutto il resto è nel [pannello WashData](/ha-washdata) nella barra laterale.",
         "data": {
           "name": "Nome del dispositivo",
           "device_type": "Device Type",
@@ -91,7 +91,7 @@
         },
         "profile_name": {
           "name": "Nome profilo",
-          "description": "Il nome di un profilo esistente (crea profili nel menu Gestisci profili). Lascia vuoto per rimuovere l'etichetta."
+          "description": "Nome di un profilo esistente (crea i profili nel pannello WashData). Lascia vuoto per rimuovere l'etichetta."
         }
       }
     },
@@ -147,7 +147,7 @@
     },
     "export_config": {
       "name": "Esporta configurazione",
-      "description": "Esporta profili, cicli e impostazioni di questo dispositivo in un file JSON (per dispositivo).",
+      "description": "Esporta profili, cicli e impostazioni di questo dispositivo in un file JSON.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -175,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Invia feedback sul ciclo",
-      "description": "Conferma o correggi un programma rilevato automaticamente dopo un ciclo completato. Fornisci `entry_id` (avanzato) o `device_id` (consigliato).",
+      "description": "Conferma o correggi il programma rilevato di un ciclo terminato. Indica `device_id` (consigliato) o `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -281,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Segna come scaricato",
-      "description": "Confermare che il carico terminato è stato tolto da un dispositivo WashData, azzerando lo stato Pulito e ogni promemoria di scarico.",
+      "description": "Conferma che il carico terminato è stato tolto. Azzera lo stato Pulito e ogni promemoria di scarico.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",

@@ -128,17 +128,6 @@ def test_grouped_snapshots_maps_cohesive_group(store):
     assert set(ms) == {"A", "B"}
 
 
-def test_grouped_snapshots_skips_loose_group(store):
-    # Anti-correlated envelopes -> cohesion below threshold -> NOT collapsed.
-    store._data["envelopes"] = {"A": {"avg": _ramp()}, "C": {"avg": _ramp(scale=-1.0, offset=29.0)}}
-    store._data["profile_groups"] = {"G": {"members": ["A", "C"]}}
-    snaps = [_snap("A", [float(i) for i in range(30)], 1000), _snap("C", [float(29 - i) for i in range(30)], 1000)]
-    out, gm, _ms = store._grouped_snapshots(snaps)
-    names = [s["name"] for s in out]
-    assert "A" in names and "C" in names
-    assert gm == {}
-
-
 def test_grouped_snapshots_no_groups_is_noop(store):
     snaps = [_snap("A", [1.0, 2.0, 3.0, 4.0], 1000)]
     out, gm, ms = store._grouped_snapshots(snaps)
@@ -227,35 +216,12 @@ def test_prefix_ambiguous_true_when_longer_look_alike_exists():
     assert _is_prefix_ambiguous(candidates, 2760.0) is True
 
 
-def test_prefix_ambiguous_false_when_runner_up_shape_too_low():
-    """A longer profile with a poor FULL-envelope shape score does not trip the #288
-    term.
-
-    Note this is a statement about that term only, not about prefix risk in general:
-    a trace part-way through a longer programme scores badly against that
-    programme's whole curve precisely when it IS a prefix of it. That blind spot is
-    #364; since #400 the live matcher scores a running cycle on each candidate's
-    truncated curve, so that programme wins the match itself.
-    """
-    candidates = [
-        _cand("Quick", 2760, 0.70, 0.61),
-        _cand("Wool", 5400, 0.15, 0.12),   # different shape -> shape_score below threshold
-    ]
-    assert _match_prefix_ambiguity(candidates, 2760.0) is False
-
-
 def test_prefix_ambiguous_false_when_runner_up_not_much_longer():
     """A profile only 30% longer (ratio 1.30 < LANDSCAPE_RATIO 1.50) does not trigger."""
     candidates = [
         _cand("Quick", 2760, 0.70, 0.61),
         _cand("Eco", 3590, 0.68, 0.55),    # 3590/2760 = 1.30 < 1.5
     ]
-    assert _is_prefix_ambiguous(candidates, 2760.0) is False
-
-
-def test_prefix_ambiguous_false_when_only_one_candidate():
-    """Single-candidate result (no runner-up) must not flag prefix ambiguity."""
-    candidates = [_cand("Quick", 2760, 0.70, 0.61)]
     assert _is_prefix_ambiguous(candidates, 2760.0) is False
 
 

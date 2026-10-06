@@ -109,7 +109,7 @@ CONF_EXTERNAL_END_TRIGGER_INVERTED = "external_end_trigger_inverted"  # Invert e
 CONF_ANTI_WRINKLE_ENABLED = "anti_wrinkle_enabled"  # Dryer anti-wrinkle shielding
 CONF_ANTI_WRINKLE_MAX_POWER = "anti_wrinkle_max_power"  # W threshold for anti-wrinkle spikes
 CONF_ANTI_WRINKLE_MAX_DURATION = "anti_wrinkle_max_duration"  # Seconds to treat as anti-wrinkle
-CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true-off exit
+CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W: quiet level in anti-wrinkle, floored at stop_threshold_w
 CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below exit power before anti-wrinkle ends
 CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE = "dishwasher_end_spike_quiet_release"  # Dishwasher: sustained-quiet seconds after expected duration that release the end-of-cycle drain wait early (#379)
 CONF_SMART_TERMINATION_DURATION_RATIO = "smart_termination_duration_ratio"  # Fraction of the matched profile's expected (mean) duration that Smart Termination requires before it may fire (#393)
@@ -266,7 +266,9 @@ CONF_LINKED_DEVICE = "linked_device"
 
 DEFAULT_NOTIFY_TITLE = "WashData: {device}"
 DEFAULT_NOTIFY_START_MESSAGE = "{device} started."
-DEFAULT_NOTIFY_FINISH_MESSAGE = "{device} finished. Duration: {duration}m."
+# "{duration} min", not "{duration}m": a voice assistant read "m" as metres (#93, #117).
+# A template the user saved keeps its own text.
+DEFAULT_NOTIFY_FINISH_MESSAGE = "{device} finished. Duration: {duration} min."
 DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes remaining."
 DEFAULT_NOTIFY_REMINDER_MESSAGE = "{device}: about {minutes} minutes left."
 DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE = "{device}: No profile matched yet."
@@ -285,7 +287,7 @@ DEFAULT_NOTIFY_TIMEOUT_SECONDS = 0  # 0 = notifications never auto-dismiss
 DEFAULT_NOTIFY_CHANNEL = ""  # Empty = omit channel (companion app default)
 DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
 DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
-DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago - laundry is still inside."
+DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration} min ago - laundry is still inside."
 DEFAULT_NOTIFY_UNLOAD_REPEAT = False  # opt-in: re-send the unload reminder until dismissed (#374)
 # Safety bound on repeat mode (#374). The reminder is meant to run "until the door
 # opens", and the in-notification "Stop reminding" button is mobile_app-only - so a
@@ -296,10 +298,6 @@ DEFAULT_NOTIFY_UNLOAD_REPEAT = False  # opt-in: re-send the unload reminder unti
 # past any legitimate reminder window, so normal use never reaches it.
 NOTIFY_UNLOAD_REPEAT_MAX_REMINDERS = 48
 DEFAULT_PEAK_RATE_MESSAGE = "Running at peak rate ({price}/kWh)."
-
-# Quiet hours default: feature off (both hours unset). See CONF_NOTIFY_QUIET_*.
-DEFAULT_NOTIFY_QUIET_START_HOUR = None
-DEFAULT_NOTIFY_QUIET_END_HOUR = None
 
 # Milestone notification defaults.
 DEFAULT_NOTIFY_MILESTONES = [50, 100, 500, 1000]
@@ -1157,10 +1155,6 @@ DEFAULT_ANTI_CREASE_FINALIZE_RATIO = 0.98  # elapsed must reach 98% of expected 
 # remove the discriminator this gate rests on for washing machines (see above).
 ANTI_CREASE_FINALIZE_RATIO_MIN = 0.5
 ANTI_CREASE_FINALIZE_RATIO_MAX = 1.0
-# Backwards-compatible alias: the pre-#429 module-level constant. Kept so older
-# imports (and anything pinned in the lab) still resolve; the detector reads the
-# per-device config field, never this.
-ANTI_CREASE_FINALIZE_RATIO = DEFAULT_ANTI_CREASE_FINALIZE_RATIO
 ANTI_CREASE_CONFIRM_WINDOW_S = 180.0   # recent window that must hold no reading > max_power
 
 # Issue #399: both conditions above look BACKWARDS, so a wash whose final spin
@@ -1667,12 +1661,11 @@ ENABLE_ML_TRAINING = True
 # real cycles the end-guard prevented no premature stop and raised the washer
 # median end lag 12.2 -> 17.5 min, every deferral the full 30 min cap.
 ENABLE_ML_END_GUARD = False
-# Also frozen off (audit ML-07): the remaining-time regressor (C4) was worse than
-# the naive estimate on 7 of 8 installs. The early match commit (C2, audit ML-02:
-# 31% of its early commits wrong vs 8.4% for persistence) and the quality gate
-# (C3, audit ML-06: fired on 0 of the 12 auto-label-eligible real cycles) were
-# frozen here too and were removed in 0.5.8 with the matcher weight tuner.
-ENABLE_ML_REMAINING_TIME = False
+# Removed in 0.5.8, after being frozen here: the remaining-time regressor (C4,
+# audit ML-07: worse than the naive estimate on 7 of 8 installs), the early match
+# commit (C2, audit ML-02: 31% of its early commits wrong vs 8.4% for
+# persistence) and the quality gate (C3, audit ML-06: fired on 0 of the 12
+# auto-label-eligible real cycles), with the matcher weight tuner.
 
 # ─── Community store (online features) ────────────────────────────────────────
 # Opt-in browsing/importing/sharing of reference cycles via the WashData Store.
@@ -1789,11 +1782,6 @@ ML_TRAINING_MIN_REGRESSION_ROWS = 30  # synthesized prefix rows needed to fit
 # PROGRESS-16); the split now holds out at least this many when the device has
 # twice as many usable cycles, and never promotes on fewer.
 ML_TRAINING_MIN_HOLDOUT_CYCLES = 5
-# How strongly a promoted remaining-time regressor influences the live progress
-# estimate. The ML completion-fraction is blended with the phase-aware estimate
-# at this weight before the existing EMA smoothing/monotonicity guards run, so a
-# bad model can never wholly override the proven phase estimator.
-ML_PROGRESS_BLEND_WEIGHT = 0.5
 
 # Service + event names for the training loop.
 SERVICE_TRIGGER_ML_TRAINING = "trigger_ml_training"

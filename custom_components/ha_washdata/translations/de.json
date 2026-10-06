@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData-Setup",
-        "description": "Konfigurieren Sie Ihre Waschmaschine oder ein anderes Gerät.\n\nLeistungssensor ist erforderlich.\n\nNach der Einrichtung öffnen Sie das WashData-Panel über die Seitenleiste (oder gehen Sie zu [/ha-washdata](/ha-washdata)), um Zyklen anzuzeigen, die Erkennung anzupassen und Profile zu verwalten.",
+        "description": "Richten Sie eine Waschmaschine oder ein anderes Gerät ein. Ein Leistungssensor ist erforderlich.\n\nÖffnen Sie nach der Einrichtung das WashData-Panel über die Seitenleiste ([/ha-washdata](/ha-washdata)), um Zyklen, Profile und alle Einstellungen zu sehen.",
         "data": {
           "name": "Gerätename",
           "device_type": "Gerätetyp",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Ein benutzerfreundlicher Name für dieses Gerät (z. B. „Waschmaschine“, „Geschirrspüler“).",
-          "device_type": "Um welche Art von Gerät handelt es sich? Dies hilft bei der individuellen Erkennung und Zuordnung.",
-          "power_sensor": "Die Sensoreinheit, die den Stromverbrauch (in Watt) Ihres Smart Plugs in Echtzeit meldet.",
-          "min_power": "Leistungswerte über diesem Schwellwert (in Watt) zeigen an, dass das Gerät läuft. Für die meisten Geräte ist 2W ein guter Anfang."
+          "device_type": "Legt die Erkennungsstandards für diese Geräteart fest.",
+          "power_sensor": "Der Smart-Plug-Sensor, der die aktuelle Leistung in Watt meldet.",
+          "min_power": "Werte über diesem Wert (in Watt) bedeuten, dass das Gerät läuft. 2 W passen für die meisten Geräte."
         }
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Aktualisieren Sie den Gerätenamen, den Gerätetyp oder den Leistungssensor.\n\nDas WashData-Panel (Seitenleiste oder [/ha-washdata](/ha-washdata)) ist der Ort, an dem Erkennung, Zyklen, Profile und Benachrichtigungen verwaltet werden.",
+        "description": "Ändern Sie den Gerätenamen, den Gerätetyp oder den Leistungssensor.\n\nAlles andere finden Sie im WashData-Panel (Seitenleiste oder [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -41,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "Benennen Sie das Gerät um oder ändern Sie seine grundlegenden Hardware-Einstellungen. Alle Erkennungs-, Abgleich- und Benachrichtigungseinstellungen befinden sich im [WashData-Panel](/ha-washdata) (auch über die Seitenleiste erreichbar).",
+        "description": "Benennen Sie das Gerät um oder ändern Sie seine Grundeinstellungen. Alles andere finden Sie im [WashData-Panel](/ha-washdata) in der Seitenleiste.",
         "data": {
           "name": "Name des Geräts",
           "device_type": "Device Type",
@@ -91,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profilname",
-          "description": "Der Name eines vorhandenen Profils (Profile erstellen im Menü „Profile verwalten“). Feld leer lassen, um die Zuordnung zu entfernen."
+          "description": "Name eines vorhandenen Profils (Profile erstellen Sie im WashData-Panel). Leer lassen, um die Beschriftung zu entfernen."
         }
       }
     },
@@ -147,7 +147,7 @@
     },
     "export_config": {
       "name": "Konfiguration exportieren",
-      "description": "Profile, Zyklen und Einstellungen dieses Geräts in eine JSON-Datei exportieren (pro Gerät).",
+      "description": "Profile, Zyklen und Einstellungen dieses Geräts in eine JSON-Datei exportieren.",
       "fields": {
         "device_id": {
           "name": "Gerät",
@@ -175,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Zyklus-Feedback bestätigen",
-      "description": "Ein automatisch erkanntes Programm nach einem abgeschlossenen Zyklus bestätigen oder korrigieren. Geben Sie entweder „entry_id“ (erweitert) oder „device_id“ (empfohlen) an.",
+      "description": "Das erkannte Programm eines abgeschlossenen Zyklus bestätigen oder korrigieren. Geben Sie `device_id` (empfohlen) oder `entry_id` an.",
       "fields": {
         "device_id": {
           "name": "Gerät",
@@ -281,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Als entladen markieren",
-      "description": "Bestätigen Sie, dass die fertige Ladung aus einem WashData-Gerät entnommen wurde. Damit werden der Zustand \"Sauber\" und eine eventuelle Entladeerinnerung zurückgesetzt.",
+      "description": "Bestätigen, dass die fertige Ladung entnommen wurde. Setzt den Zustand „Sauber“ und eine eventuelle Entladeerinnerung zurück.",
       "fields": {
         "device_id": {
           "name": "Gerät",

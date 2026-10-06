@@ -20,9 +20,10 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from custom_components.ha_washdata.profile_store import ProfileStore
 
 @pytest.fixture
-def mock_hass():
+def mock_hass(tmp_path):
     hass = MagicMock()
     hass.data = {}
+    hass.config.path = lambda *a: str(tmp_path.joinpath(*a))  # HA's Store writes here
     async def mock_executor_job(func, *args, **kwargs):
         return func(*args, **kwargs)
     hass.async_add_executor_job = AsyncMock(side_effect=mock_executor_job)

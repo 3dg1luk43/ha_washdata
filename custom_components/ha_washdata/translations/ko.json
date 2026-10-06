@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData 설정",
-        "description": "세탁기 또는 기타 가전제품을 구성하세요.\n\n전력 센서가 필요합니다.\n\n설정 후, 사이드바에서 WashData 패널을 열거나 [/ha-washdata](/ha-washdata)로 이동하여 사이클 확인, 검출 조정 및 프로파일 관리를 하세요.",
+        "description": "세탁기 또는 기타 가전제품을 설정합니다. 전력 센서가 필요합니다.\n\n설정 후 사이드바에서 WashData 패널([/ha-washdata](/ha-washdata))을 열면 사이클, 프로필, 모든 설정을 볼 수 있습니다.",
         "data": {
           "name": "장치 이름",
           "device_type": "장치 유형",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "이 장치의 이름입니다(예: '세탁기', '식기세척기').",
-          "device_type": "이 가전제품의 종류는 무엇입니까? 감지 및 라벨링 맞춤에 도움이 됩니다.",
-          "power_sensor": "스마트 플러그에서 실시간 전력 소비(와트)를 보고하는 센서 엔터티입니다.",
-          "min_power": "이 임계값(와트)보다 높은 전력 수치는 가전제품이 작동 중임을 나타냅니다. 대부분의 장치에서는 2W로 시작하세요."
+          "device_type": "이 종류의 가전제품에 맞는 감지 기본값을 설정합니다.",
+          "power_sensor": "실시간 전력을 와트 단위로 보고하는 스마트 플러그 센서입니다.",
+          "min_power": "이 값(와트)보다 높은 측정값은 가전제품이 작동 중임을 뜻합니다. 대부분의 장치에는 2 W가 적합합니다."
         }
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "장치 이름, 가전 유형 또는 전력 센서를 업데이트합니다.\n\nWashData 패널(사이드바 또는 [/ha-washdata](/ha-washdata))에서 검출, 사이클, 프로파일 및 알림을 관리합니다.",
+        "description": "장치 이름, 가전 유형 또는 전력 센서를 변경합니다.\n\n그 밖의 모든 설정은 WashData 패널(사이드바 또는 [/ha-washdata](/ha-washdata))에 있습니다.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -41,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "장치 이름을 변경하거나 핵심 하드웨어 설정을 변경합니다. 모든 검출, 매칭 및 알림 설정은 [WashData 패널](/ha-washdata)에서 확인할 수 있습니다(사이드바에서도 접근 가능).",
+        "description": "장치 이름이나 핵심 설정을 변경합니다. 그 밖의 모든 설정은 사이드바의 [WashData 패널](/ha-washdata)에 있습니다.",
         "data": {
           "name": "장치 이름",
           "device_type": "Device Type",
@@ -91,7 +91,7 @@
         },
         "profile_name": {
           "name": "프로필 이름",
-          "description": "기존 프로필의 이름입니다(프로필 관리 메뉴에서 프로필 생성). 라벨을 제거하려면 비워두세요."
+          "description": "기존 프로필 이름입니다(프로필은 WashData 패널에서 생성). 비워 두면 라벨이 제거됩니다."
         }
       }
     },
@@ -147,7 +147,7 @@
     },
     "export_config": {
       "name": "구성 내보내기",
-      "description": "이 장치의 프로필, 사이클 및 설정을 JSON 파일로 내보냅니다(장치별).",
+      "description": "이 장치의 프로필, 사이클 및 설정을 JSON 파일로 내보냅니다.",
       "fields": {
         "device_id": {
           "name": "장치",
@@ -175,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "사이클 피드백 제출",
-      "description": "사이클이 완료된 후 자동 감지된 프로그램을 확인하거나 수정합니다. `entry_id`(고급) 또는 `device_id`(권장)를 제공하세요.",
+      "description": "완료된 사이클에서 감지된 프로그램을 확인하거나 수정합니다. `device_id`(권장) 또는 `entry_id`를 지정하세요.",
       "fields": {
         "device_id": {
           "name": "장치",
@@ -281,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "꺼냄으로 표시",
-      "description": "WashData 장치에서 완료된 내용물을 꺼냈음을 확인하여 깨끗한 상태와 모든 꺼내기 알림을 해제합니다.",
+      "description": "완료된 내용물을 꺼냈음을 확인합니다. 깨끗한 상태와 모든 꺼내기 알림을 해제합니다.",
       "fields": {
         "device_id": {
           "name": "장치",

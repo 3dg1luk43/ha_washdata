@@ -49,7 +49,6 @@ from .const import (
     CONF_MIN_POWER,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_ANTI_WRINKLE_MAX_POWER,
-    CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_ENABLED,
     DEFAULT_ANTI_WRINKLE_ENABLED,
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
@@ -1001,15 +1000,14 @@ def reconcile_suggestions(
         if pot is not None and pot > 0.0 and stop_eff is not None and pot >= stop_eff and in_out(CONF_POWER_OFF_THRESHOLD_W, CONF_STOP_THRESHOLD_W):
             adjust(CONF_POWER_OFF_THRESHOLD_W, round(stop_eff * 0.6, 1), "the stop threshold")
 
-        # ── Rule 8: anti_wrinkle_exit_power < stop_threshold_w ────────────────
+        # (Rule 8, anti_wrinkle_exit_power < stop_threshold_w, is gone: the detector
+        # counts quiet below max(exit power, stop threshold), so the rule moved the
+        # exit power to exactly where it has no effect and erased a deliberate raise.
+        # Never fired on the corpus, suggestion_loop_eval.py; #285 #296 #325.)
         # Anti-wrinkle only applies to washing machines, dryers, and washer-dryer
-        # combos; skip the constraint for all other device types.
+        # combos; skip its constraints for all other device types.
         _dt = current.get(CONF_DEVICE_TYPE)
         _aw_eligible = _dt is None or _dt in {DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER}
-        if _aw_eligible:
-            aw_exit = eff(CONF_ANTI_WRINKLE_EXIT_POWER)
-            if stop_eff is not None and aw_exit is not None and aw_exit >= stop_eff and in_out(CONF_ANTI_WRINKLE_EXIT_POWER, CONF_STOP_THRESHOLD_W):
-                adjust(CONF_ANTI_WRINKLE_EXIT_POWER, round(stop_eff * 0.4, 1), "the stop threshold")
 
         # ── Rule 9: anti_wrinkle_max_power > start_threshold_w ────────────────
         if _aw_eligible:
@@ -1289,12 +1287,12 @@ class SuggestionEngine:
                     # shown to the user beside the value they are asked to accept.
                     budget = MATCH_INTERVAL_SUGGESTION_MIN_S * persistence
                     reason_match = (
-                        f"The shortest program ({shortest_profile_s:.0f}s) alone would cap "
+                        f"The shortest program ({shortest_profile_s:.0f}s) would cap "
                         f"this at {cap:.0f}s, below the {MATCH_INTERVAL_SUGGESTION_MIN_S}s "
-                        f"minimum, so it is held there: {persistence} consecutive matches "
-                        f"take {budget}s, which is more than {pct:.0f}% of that program. "
+                        f"minimum, so the minimum is used: {persistence} consecutive matches "
+                        f"take {budget}s, over {pct:.0f}% of that program. "
                         f"Matching only runs when a reading arrives (median="
-                        f"{median_dt:.1f}s), so the minimum costs nothing."
+                        f"{median_dt:.1f}s), so this costs nothing."
                     )
                     reason_match_key = "suggestion.reason.match_interval_floored"
                     reason_match_params = {
@@ -2049,8 +2047,6 @@ class SuggestionEngine:
             main_cycles.append(main_readings)
             powers = np.array([p for _, p in main_readings])
             active = powers[powers > 0.5]
-            peak = float(np.max(powers)) if powers.size else 0.0
-            active_thr = max(stop_thr, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
             if active.size > 0:
                 lowest_active.append(float(np.min(active)))
 
@@ -2131,9 +2127,9 @@ class SuggestionEngine:
                 )
             else:
                 reason_thr = (
-                    f"Kept just above the p05 lowest active power across {n} cycles "
-                    f"({p05_min:.1f}W) so a start is caught as early as possible and the "
-                    f"stop threshold stays below the machine's lowest running power."
+                    f"Just above the lowest active power (p05) across {n} cycles "
+                    f"({p05_min:.1f}W), so starts are caught early and the stop "
+                    f"threshold stays below the lowest running power."
                 )
                 reason_thr_params = {"cycles": n, "p05": f"{p05_min:.1f}"}
                 suggestions[CONF_STOP_THRESHOLD_W] = {

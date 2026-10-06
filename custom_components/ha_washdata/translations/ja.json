@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData セットアップ",
-        "description": "洗濯機またはその他の家電製品を設定します。\n\n電力センサーが必要です。\n\nセットアップ後、サイドバーの WashData パネルを開くか（または [/ha-washdata](/ha-washdata) にアクセスして）、サイクルの確認、検出の調整、プロファイルの管理を行ってください。",
+        "description": "洗濯機などの家電を設定します。電力センサーが必要です。\n\nセットアップ後、サイドバーから WashData パネル（[/ha-washdata](/ha-washdata)）を開くと、サイクル、プロファイル、すべての設定を確認できます。",
         "data": {
           "name": "デバイス名",
           "device_type": "デバイスの種類",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "このデバイスのわかりやすい名前（例：「洗濯機」、「食器洗い機」）。",
-          "device_type": "家電製品の種類を選択します。検出とラベル付けの精度向上に役立ちます。",
-          "power_sensor": "スマートプラグからリアルタイムの消費電力（ワット）を報告するセンサーエンティティ。",
-          "min_power": "このしきい値（ワット）を超える電力値は、家電製品が動作中であることを示します。ほとんどのデバイスでは 2W から始めてください。"
+          "device_type": "この種類の家電向けの検出のデフォルトを設定します。",
+          "power_sensor": "リアルタイムの電力をワット単位で報告するスマートプラグのセンサー。",
+          "min_power": "この値（ワット）を超える測定値は、家電が動作中であることを示します。ほとんどのデバイスには 2 W が適しています。"
         }
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "デバイス名、家電の種類、または電力センサーを更新します。\n\nWashData パネル（サイドバー、または [/ha-washdata](/ha-washdata)）で、検出、サイクル、プロファイル、通知を管理できます。",
+        "description": "デバイス名、家電の種類、電力センサーを変更します。\n\nその他の設定はすべて WashData パネル（サイドバー、または [/ha-washdata](/ha-washdata)）にあります。",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -41,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "デバイス名を変更するか、主要なハードウェア設定を変更します。すべての検出・照合・通知の設定は [WashData パネル](/ha-washdata) で確認できます（サイドバーからもアクセス可能）。",
+        "description": "デバイス名や主要な設定を変更します。その他の設定はすべて、サイドバーの [WashData パネル](/ha-washdata) にあります。",
         "data": {
           "name": "デバイス名",
           "device_type": "Device Type",
@@ -91,7 +91,7 @@
         },
         "profile_name": {
           "name": "プロファイル名",
-          "description": "既存のプロファイル名（プロファイル管理メニューでプロファイルを作成）。ラベルを削除するには空白にします。"
+          "description": "既存のプロファイル名（プロファイルは WashData パネルで作成）。空欄にするとラベルを削除します。"
         }
       }
     },
@@ -147,7 +147,7 @@
     },
     "export_config": {
       "name": "設定をエクスポート",
-      "description": "このデバイスのプロファイル、サイクル、設定を JSON ファイルにエクスポートします（デバイスごと）。",
+      "description": "このデバイスのプロファイル、サイクル、設定を JSON ファイルにエクスポートします。",
       "fields": {
         "device_id": {
           "name": "デバイス",
@@ -175,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "サイクルフィードバックを送信",
-      "description": "完了したサイクルの自動検出されたプログラムを確認または修正します。`entry_id`（上級者向け）または `device_id`（推奨）のいずれかを指定します。",
+      "description": "完了したサイクルで検出されたプログラムを確認または修正します。`device_id`（推奨）または `entry_id` を指定します。",
       "fields": {
         "device_id": {
           "name": "デバイス",
@@ -281,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "取り出し済みとしてマーク",
-      "description": "WashData デバイスから終了した中身を取り出したことを確認し、クリーン状態と取り出しリマインダーを解除します。",
+      "description": "終了した中身を取り出したことを確認します。クリーン状態と取り出しリマインダーを解除します。",
       "fields": {
         "device_id": {
           "name": "デバイス",

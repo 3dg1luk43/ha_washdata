@@ -307,9 +307,8 @@ def _visible_suggestions(
 def _threshold_pair_message(start: float, stop: float) -> str:
     """The error a write that would invert the threshold pair is refused with (item 515)."""
     return (
-        f"Stop Threshold ({stop:g} W) must be below Start Threshold ({start:g} W): "
-        "below the stop threshold a cycle ends, above the start threshold one "
-        "begins. Nothing was saved; change the two together."
+        f"Stop Threshold ({stop:g} W) must be below Start Threshold ({start:g} W). "
+        "Nothing was saved; change both together."
     )
 
 
@@ -2377,6 +2376,10 @@ async def ws_get_profiles(
     profiles: list[dict[str, Any]] = []
     try:
         profiles = manager.profile_store.list_profiles()
+        # #158: the panel shows a computed duration read-only (rows are copies).
+        learned = manager.profile_store.learned_duration_profiles()
+        for row in profiles:
+            row["duration_learned"] = row.get("name") in learned
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error listing profiles for %s: %s", entry_id, exc)
     store = _store_read_snapshot(manager.profile_store)
@@ -5991,17 +5994,11 @@ def _compute_cycle_events(
     return events[:max_events]
 
 
-def _health_model_sig(store: Any) -> str:
-    """Signature of the active health/end models, so persisted per-cycle health
-    can be invalidated (recomputed) whenever the model changes or is retrained.
-    """
-    versions = store.get_ml_model_versions() or {}
-    parts = []
-    for cap in ("quality", "end"):
-        v = versions.get(cap)
-        ts = v.get("trained_at") if isinstance(v, dict) else None
-        parts.append(f"{cap}:{ts or 'base'}")
-    return "|".join(parts)
+# Signature persisted with each cycle's ``ml_health``: the shipped quality/end
+# baselines. It used to carry an on-device model's ``trained_at`` so a retrain
+# invalidated the cache; no on-device classifier exists since 0.5.8, and the
+# value is unchanged so health already persisted stays valid.
+_HEALTH_MODEL_SIG = "quality:base|end:base"
 
 
 def _compute_ml_comparison(
@@ -6029,13 +6026,13 @@ def _compute_ml_comparison(
     except Exception:  # pylint: disable=broad-exception-caught
         return {"enabled": False, "error": "ML models not available", "cycles": []}
 
-    # Prefer on-device trained models when present, else the embedded baseline.
-    quality_score_fn, quality_source = resolve_scorer("quality", store)
-    end_score_fn, end_source = resolve_scorer("end", store)
+    # The shipped embedded baselines (no on-device classifier exists since 0.5.8).
+    quality_score_fn, quality_source = resolve_scorer("quality")
+    end_score_fn, end_source = resolve_scorer("end")
     if quality_score_fn is None and end_score_fn is None:
         return {"enabled": False, "error": "ML models not available", "cycles": []}
 
-    model_sig = _health_model_sig(store)
+    model_sig = _HEALTH_MODEL_SIG
     health_dirty = False
     health_updates: dict[str, Any] = {}
     cycles: list[Any] = store.get_past_cycles()
@@ -6350,9 +6347,9 @@ async def ws_get_ml_training_status(
         "total_energy": ("Energy estimate", "Predicting total energy and cost"),
     }
     # Only what is trained on-device AND consumed is listed, which since 0.5.8 is
-    # `total_energy` alone. `end` / `remaining_time` are no longer trained (their
-    # consumers are frozen off, audit ML-05/07/11) and `live_match` / `quality`
-    # lost consumer and training; storage v17 drops all four records, so an older
+    # `total_energy` alone. `end` is no longer trained (its consumer is frozen
+    # off, audit ML-05/11) and `remaining_time` / `live_match` / `quality` lost
+    # consumer and training; storage v17 drops all four records, so an older
     # import is the only way one can still be here.
     live_caps = set(_cap_labels)
     models: dict[str, Any] = {}
@@ -6374,14 +6371,9 @@ async def ws_get_ml_training_status(
             "blurb_key": f"ml.cap_blurb.{cap}" if cap in _cap_labels else None,
         }
         # Raw metric numbers so the panel can render a humanized quality indicator
-        # (a bar + word) with the exact figure on hover: held-out AUC for
-        # classifiers, MAE-vs-naive for regressors.
-        if v.get("new_auc") is not None:
-            info["auc"] = round(float(v["new_auc"]), 4)
-            info["metric"] = f"AUC {float(v['new_auc']):.2f} on held-out data"
-            info["metric_key"] = "ml.metric_auc"
-            info["metric_params"] = {"auc": f"{float(v['new_auc']):.2f}"}
-        elif v.get("model_mae") is not None and v.get("naive_mae") is not None:
+        # (a bar + word) with the exact figure on hover: MAE vs the naive estimate
+        # (every listed capability is a regressor since 0.5.8).
+        if v.get("model_mae") is not None and v.get("naive_mae") is not None:
             info["model_mae"] = round(float(v["model_mae"]), 5)
             info["naive_mae"] = round(float(v["naive_mae"]), 5)
             info["metric"] = f"error {float(v['model_mae']):.3f} vs {float(v['naive_mae']):.3f} baseline"
@@ -6534,9 +6526,8 @@ async def ws_revert_ml_models(
 ) -> None:
     """Revert all on-device trained models to the shipped embedded baselines.
 
-    Drops every promoted spec in ``ml_model_versions`` so ``resolve_scorer`` /
-    ``resolve_regressor`` fall back to the baseline (or, for the baseline-less
-    remaining-time regressor, become inert). The next training pass may
+    Drops every promoted spec in ``ml_model_versions`` so ``resolve_regressor``
+    becomes inert for the baseline-less ``total_energy`` regressor. The next training pass may
     re-promote models if they beat the baseline again.
     """
     entry_id: str = msg["entry_id"]
@@ -6655,15 +6646,6 @@ async def ws_terminate_cycle(
 
 
 # ─── Playground (F3): headless what-if replay + DTW visualizer ──────────────────
-
-
-def _safe_float_finite(value: Any, default: float) -> float:
-    """Convert ``value`` to a finite float, falling back to ``default`` on failure."""
-    try:
-        v = float(value)
-        return v if math.isfinite(v) else default
-    except (TypeError, ValueError):
-        return default
 
 
 def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:

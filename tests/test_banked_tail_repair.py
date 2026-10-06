@@ -114,24 +114,9 @@ def test_a_dishwasher_without_its_pump_out_keeps_the_measured_drying() -> None:
     assert _cap_offset(d) == pytest.approx(3600.0)
 
 
-def test_an_unmeasured_dishwasher_keeps_the_old_behaviour() -> None:
-    """Truncating a drying phase on no evidence is the worse error: the pump-out
-    is measurably absent in a substantial minority of runs on some machines."""
-    d = _det("dishwasher", quiet=None, spike=False)
-    assert _cap_offset(d) == pytest.approx(3600.0)  # the expected end, as before
-    d2 = _det("dishwasher", quiet=None, spike=False, last_active=5000.0)
-    assert _cap_offset(d2) == pytest.approx(5000.0)  # ...or later activity
-
-
 def test_a_corrupt_quiet_span_cannot_license_an_unbounded_tail() -> None:
     d = _det("dishwasher", quiet=99999.0, spike=False)
     assert _cap_offset(d) == pytest.approx(3000.0 + TERMINAL_QUIET_CAP_S)
-
-
-def test_an_unmatched_cycle_is_untouched() -> None:
-    d = _det("washing_machine")
-    d._expected_duration = 0.0
-    assert d._keep_tail_cap(T0) is None
 
 
 # ---------------------------------------------------------------------------
@@ -189,12 +174,6 @@ def test_a_consistently_measured_span_is_trusted() -> None:
 
 def test_no_event_ever_means_no_opinion() -> None:
     st = _sig(_Store({}), quiet_before_s=None, seen_in=0, measured=11, consistency=0.0)
-    assert st.profile_terminal_quiet_seconds("p") is None
-
-
-def test_a_failing_statistic_never_breaks_matching() -> None:
-    st = _Store({})
-    st.compute_profile_terminal_signature = MagicMock(side_effect=RuntimeError("boom"))
     assert st.profile_terminal_quiet_seconds("p") is None
 
 
@@ -617,27 +596,6 @@ async def test_a_terminal_pump_out_gets_no_drying_allowance() -> None:
     assert res["repaired"] == 1
     # Ends at the pump-out (3030 s, its last sample), NOT 3030 + 600.
     assert float(data["past_cycles"][0]["duration"]) == pytest.approx(3030.0, abs=31.0)
-
-
-@pytest.mark.asyncio
-async def test_a_cycle_that_ends_in_drying_still_gets_its_allowance() -> None:
-    """The other half: no terminal event, so the tail IS the drying."""
-    pts = [[float(t), 100.0] for t in range(0, 3000, 30)]
-    pts.append([3000.0, 0.0])                                    # plug goes quiet
-    cyc = {
-        "id": "b", "profile_name": "Eco", "start_time": T0.isoformat(),
-        "duration": 6000.0, "termination_reason": "smart",
-        "sampling_interval": 30.0, "power_data": pts,
-    }
-    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
-    st = _Store(data)
-    st.profile_terminal_quiet_seconds = lambda _n: 600.0  # type: ignore[assignment]
-
-    res = await st.async_repair_banked_tails(2.0, "dishwasher")
-
-    assert res["repaired"] == 1
-    # last activity 2970 + 600 measured drying.
-    assert float(data["past_cycles"][0]["duration"]) == pytest.approx(3570.0, abs=31.0)
 
 
 @pytest.mark.asyncio

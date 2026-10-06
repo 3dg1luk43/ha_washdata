@@ -67,10 +67,10 @@
     "matcher_used": "Matched {n} of your cycles",
     "matcher_used_one": "Matched {n} of your cycles",
     "matcher_used_other": "Matched {n} of your cycles",
-    "matcher_used_tip": "Cycles recorded on this appliance that WashData's matcher labelled with this imported program on its own. An import that is never matched may not fit your appliance and can be removed. Counted locally; nothing is sent to the store.",
+    "matcher_used_tip": "Cycles on this appliance that WashData matched to this imported program on its own. An import that never matches may not fit your appliance; you can remove it. Counted locally; nothing is sent to the store.",
     "unmatchable": "can't be matched",
     "quiet_tail": "~{mins}m quiet tail",
-    "quiet_tail_tip": "Near the end this program goes quiet for about {mins} min, then draws about {watts} W for {secs} s before finishing. Seen in {seen} of {measured} measured cycles: the appliance does not do it every run.",
+    "quiet_tail_tip": "Near the end this program goes quiet for about {mins} min, then draws about {watts} W for {secs} s. Seen in {seen} of {measured} measured cycles.",
     "improving": "↗ improving",
     "manual": "(manually selected)",
     "needs_review": "Needs review",
@@ -108,7 +108,7 @@
     "apply_trim": "Apply Trim",
     "auto_detect_split": "Auto-detect",
     "auto_label_cycles": "Auto-label cycles",
-    "auto_label_cycles_tip": "Automatically assign profile names to unlabelled cycles whose match confidence clears the threshold",
+    "auto_label_cycles_tip": "Name unlabelled cycles whose match confidence clears the threshold.",
     "back": "Back",
     "browse_community_setups": "Browse community setups",
     "cancel": "Cancel",
@@ -161,7 +161,7 @@
     "mute_suggestion": "Stop suggesting this setting",
     "new_automation": "＋ New Automation",
     "new_group": "+ New Group",
-    "new_group_tip": "Group near-identical profiles (same shape/duration, different temperature or spin) so the matcher reliably picks between them",
+    "new_group_tip": "Group near-identical profiles (same shape, different temperature or spin) so matching can tell them apart.",
     "new_phase": "+ New Phase",
     "new_profile": "+ New Profile",
     "new_profile_tip": "Create a new program profile from an existing labelled cycle or recording",
@@ -188,7 +188,7 @@
     "process_tip": "Save the recorded trace as a new or existing profile",
     "rebuild": "Rebuild Envelopes",
     "rebuild_envelope": "Rebuild Envelope",
-    "rebuild_tip": "Recompute the expected power envelope (min/max band) for all profiles from their labelled cycles – run after labelling new cycles or correcting old ones",
+    "rebuild_tip": "Rebuild every profile's expected power band from its labelled cycles. Run after labelling or correcting cycles.",
     "rec_start_tip": "Begin recording the appliance's power trace – start just before running a cycle",
     "rec_stop": "Stop",
     "rec_stop_tip": "Stop recording and hold the captured trace for review",
@@ -235,7 +235,7 @@
     "set_brand_model": "Set brand & model",
     "share": "Share",
     "share_device": "⬆ Share this device",
-    "share_device_tip": "Share this appliance and its recorded reference cycles to the community store so others with the same machine can adopt them",
+    "share_device_tip": "Share this appliance and its reference cycles to the community store so owners of the same machine can adopt them.",
     "share_n": "Share {n} cycle(s)",
     "share_to_store": "Share to store",
     "show_only": "Show only",
@@ -248,7 +248,7 @@
     "undo": "Undo",
     "undo_import": "Undo last import",
     "unlabel_selected": "Unlabel selected ({n})",
-    "unlabel_selected_tip": "Remove the profile label from the selected cycles. They stay in your history and can be labelled again later - they just stop shaping this profile.",
+    "unlabel_selected_tip": "Remove the label from the selected cycles. They stay in your history but stop shaping this profile.",
     "use": "Use",
     "wipe_all": "Wipe All Data",
     "pg_rerun": "Update simulation"
@@ -259,10 +259,6 @@
     }
   },
   "conflict": {
-    "anti_wrinkle_exit": {
-      "exit": "Must be below Stop Threshold ({stop} W); otherwise the anti-wrinkle exit power is ignored",
-      "stop": "Must be above Anti-Wrinkle Exit Power ({exit} W)"
-    },
     "anti_wrinkle_max": {
       "max": "Must be above Start Threshold ({start} W); otherwise anti-wrinkle duration limit is bypassed",
       "start": "Must be below Anti-Wrinkle Max Power ({max} W)"
@@ -270,10 +266,10 @@
     "attn_sub": "Fix conflicts before saving",
     "attn_title": "Setting conflicts: {n}",
     "price_entity": {
-      "power_sensor": "This is the device's Power Sensor, not a price. A price entity overrides the static price below, so cycles would be costed at watts per kWh - clear this field.",
-      "energy_sensor": "This is the device's Energy Meter, not a price. A price entity overrides the static price below, so cycles would be costed at the meter reading per kWh - clear this field.",
-      "device_class": "This sensor measures {dc}, not a price per kWh. A price entity overrides the static price below - clear this field or point it at a tariff sensor.",
-      "unit": "This sensor reads in {unit}, which is not a price per kWh. A price entity overrides the static price below - clear this field or point it at a tariff sensor."
+      "power_sensor": "This is the device's Power Sensor, not a price. Cycles would be costed in watts per kWh; clear this field.",
+      "energy_sensor": "This is the device's Energy Meter, not a price. Cycles would be costed at the meter reading per kWh; clear this field.",
+      "device_class": "This sensor measures {dc}, not a price per kWh. Clear this field or pick a tariff sensor.",
+      "unit": "This sensor reads in {unit}, not a price per kWh. Clear this field or pick a tariff sensor."
     },
     "settings_banner": "Setting conflicts: {n}. Check the highlighted sections and fix them before saving.",
     "settings_banner_btn": "Go to first",
@@ -308,8 +304,8 @@
       "threshold": "Must be below Stop Threshold ({stop} W) to take effect"
     },
     "pump_stuck": {
-      "duration": "Must be less than No-Update Timeout ({to} s) so the stuck alarm fires before the watchdog kills the cycle",
-      "timeout": "Must exceed Pump Stuck Duration ({ps} s) so the stuck alarm fires before the cycle is force-stopped"
+      "duration": "Must be below No-Update Timeout ({to} s) so the stuck alarm can fire first",
+      "timeout": "Must exceed Pump Stuck Duration ({ps} s) so the stuck alarm can fire first"
     },
     "start_dur": {
       "sampling": "Sampling Interval exceeds Start Duration ({sdt} s); single-sample spikes can open a cycle",
@@ -353,7 +349,7 @@
     "maintenance_log": "Maintenance Log",
     "maintenance_reminders": "Service Reminders",
     "manual_recording": "Manual Recording",
-    "manual_recording_tip": "Run a cycle intentionally while WashData records the power trace. Start just before the appliance starts, Stop when it finishes, then Process to save it as a named profile.",
+    "manual_recording_tip": "Record a cycle on purpose: press Start just before the appliance starts and Stop when it finishes, then Process to save it as a profile.",
     "ml_learned": "What WashData has learned",
     "ml_settings_card": "Settings",
     "ml_smart_learning": "Smart Learning",
@@ -592,7 +588,7 @@
     "pg_strong_match": "Strong match",
     "pg_sweep_param": "Parameter",
     "pg_time_left_model": "Time left (model)",
-    "pg_time_left_model_tip": "Model-estimated time remaining (phase estimator + ML blend), not a static countdown",
+    "pg_time_left_model_tip": "Estimated from the program's phases, not a fixed countdown",
     "pg_vs_current": "vs current",
     "pg_weak_match": "Weak match",
     "pg_zoom_hint": "double-click to reset zoom",
@@ -604,10 +600,10 @@
     "profile": "Profile",
     "profile_name": "Profile Name",
     "program": "Program",
-    "program_tip": "Override which profile is matched to the current cycle. Auto-detect lets the integration pick the best match automatically. Pin a specific program to force-match it when auto-detect is wrong or you know what is running. Pick one before starting the appliance and it is applied as soon as the next cycle begins.",
+    "program_tip": "Choose which program the current cycle is matched to. Auto-detect picks the best match. Pin a program when auto-detect is wrong; pick one before starting and it applies to the next cycle.",
     "progress": "Progress",
     "envelope_position": "curve {pct}%",
-    "envelope_position_tip": "Position on the matched program's own recorded curve, {pct}%. Measured by aligning this cycle against the profile instead of counting time, so it stays right when a run is longer or shorter than usual. It refreshes while the appliance is quiet, so it can lag behind during an active phase.",
+    "envelope_position_tip": "Position on the matched program's recorded curve: {pct}%. Found by aligning the cycle to the profile, so it stays right when a run is longer or shorter. Updates while the appliance is quiet, so it can lag.",
     "quality": "Quality",
     "raw_socket": "Raw socket",
     "ref_cycle": "Reference Cycle (optional)",
@@ -666,7 +662,7 @@
     "hist_reason_already_recorded": "overlaps a cycle WashData already recorded",
     "share_consent": "I confirm these cycles ran to normal completion without interruption",
     "show_internal": "Show internal settings",
-    "show_internal_tip": "Tuning the integration sets for you (sampling, watchdog, match cadence, thresholds). Shown automatically when this device has its own value, a conflict or a suggestion.",
+    "show_internal_tip": "Settings WashData tunes for you (sampling, watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.",
     "rate_n": "{n} stars",
     "rate_quality": "Rate quality",
     "pg_autolabel": "Auto-label",
@@ -709,11 +705,9 @@
   },
   "ml": {
     "builtin_models": "● Using built-in models",
-    "fit_fair": "Fair",
     "fit_good": "Good",
     "fit_slight": "Slight",
     "fit_strong": "Strong",
-    "fit_weak": "Weak",
     "fit_word": "fit",
     "personalized": "● Personalized to this machine",
     "better_than_baseline": "{pct}% better than the baseline estimate ({metric})",
@@ -726,7 +720,6 @@
     "cap_blurb": {
       "total_energy": "Predicting total energy and cost"
     },
-    "metric_auc": "AUC {auc} on held-out data",
     "metric_mae": "error {model} vs {baseline} baseline",
     "fine_tuned_at": "fine-tuned {when}",
     "never": "never",
@@ -793,7 +786,7 @@
     "store_import": "Import reference cycle",
     "store_share": "Share to community store",
     "store_share_device": "Share this device",
-    "undo_import_msg": "Everything stored for this device goes back to how it was before the last import ({when}), and so do its settings. Cycles recorded and changes made since then are lost.",
+    "undo_import_msg": "This device's data and settings go back to how they were before the last import ({when}). Cycles recorded and changes made since then are lost.",
     "undo_import_ok": "Undo import",
     "undo_import_title": "Undo last import",
     "wipe_all_msg": "⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.",
@@ -804,16 +797,16 @@
   "msg": {
     "custom_task_limit": "You have reached the limit of {max} tasks.",
     "custom_tasks_intro": "Add anything else you want to be reminded of. A task is due when either interval is reached; leave one blank or 0 to use only the other.",
-    "maintenance_due_sensor_hint": "The Maintenance due binary sensor turns on while any task is due, so you can build your own notification automation.",
+    "maintenance_due_sensor_hint": "The Maintenance due binary sensor is on while any task is due, for your own notification automations.",
     "maintenance_supporter_intro": "Maintenance Supporter is a separate integration that does much more: any appliance or task, schedules by time, usage or a sensor, notifications and a history. It can use the WashData cycle counter.",
     "adopt_settings_hint": "Overwrite this device's detection & matching thresholds with the shared ones. Your notifications, entities and energy price are never changed.",
-    "advisory_duration_trend_up": "'{name}' cycles are running progressively longer (about +{pct}% per cycle). If the appliance's behaviour changed, re-record or rebuild this profile.",
-    "advisory_energy_trend_up": "'{name}' is drawing progressively more energy (about +{pct}% per cycle) - worth checking the appliance if that is unexpected.",
-    "advisory_poor_health": "'{name}' has a low fit score - its recent cycles vary a lot or match weakly. Review its cycles or re-record the profile so matching and time estimates stay accurate.",
-    "advisory_shape_drift": "'{name}' has drifted significantly from its original power shape. The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
-    "advisory_shape_drift_corr": "'{name}' has drifted significantly from its original power shape (correlation {corr}). The appliance may have changed behaviour over time (e.g. limescale, wear). Consider re-recording this profile with recent cycles.",
-    "advisory_unmatchable": "'{name}' can never be matched: it has no cycle with power data behind it, so WashData has nothing to compare a running cycle against. Label a cycle of this program (or record one) to bring it back into matching.",
-    "advisory_unmatchable_no_duration": "'{name}' can never be matched: it has a cycle with power data but no usable duration, so WashData has no length to size a match against. Re-record this program, or set its expected duration, to bring it back into matching.",
+    "advisory_duration_trend_up": "'{name}' cycles keep getting longer (about +{pct}% per cycle). If the appliance changed, re-record or rebuild this profile.",
+    "advisory_energy_trend_up": "'{name}' uses more energy each cycle (about +{pct}% per cycle). Check the appliance if that is unexpected.",
+    "advisory_poor_health": "'{name}' fits poorly: its recent cycles vary a lot or match weakly. Review its cycles or re-record it to keep matching and estimates accurate.",
+    "advisory_shape_drift": "'{name}' has drifted from its original power shape, perhaps from limescale or wear. Consider re-recording it with recent cycles.",
+    "advisory_shape_drift_corr": "'{name}' has drifted from its original power shape (correlation {corr}), perhaps from limescale or wear. Consider re-recording it with recent cycles.",
+    "advisory_unmatchable": "'{name}' can never match: no cycle with power data is behind it. Label or record a cycle of this program to fix it.",
+    "advisory_unmatchable_no_duration": "'{name}' can never match: its cycle has no usable duration. Re-record this program or set its expected duration.",
     "analyzing": "Analyzing…",
     "appliance_monitor": "Appliance monitor",
     "artifact_dip_detail": "Dropped below the usual power band for ~{n}s.",
@@ -821,35 +814,35 @@
     "artifact_header": "{n} anomalies detected during this cycle",
     "artifact_header_one": "{n} anomaly detected during this cycle",
     "artifact_header_other": "{n} anomalies detected during this cycle",
-    "artifact_pause_detail": "Power dropped to near zero for ~{n}s then resumed – likely the door was opened mid-cycle or the cycle was paused.",
+    "artifact_pause_detail": "Power dropped to near zero for ~{n}s, then resumed. The door was probably opened or the cycle paused.",
     "artifact_spike_detail": "Drew above the usual power band for ~{n}s.",
     "auto_label_intro": "Assign profiles to unlabelled cycles whose match confidence clears the threshold.",
     "automations_intro": "WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.",
-    "cleanup_intro": "Every labelled cycle overlaid. Tick outliers, then unlabel them (kept in history, but no longer shaping this profile) or delete them outright.",
+    "cleanup_intro": "All labelled cycles overlaid. Tick outliers, then unlabel them (kept in history, no longer shaping this profile) or delete them.",
     "clear_debug_hint": "Remove stored debug data to free space.",
     "collecting_data": "Collecting data. Cycles still needed before fine-tuning can start: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlay profiles (faint)",
     "compare_overlay_tip": "Overlay learned profile envelopes to see which program each cycle resembles.",
-    "compare_profiles_tip": "Overlay other profile envelopes on the chart above to see which one best fits this cycle.",
+    "compare_profiles_tip": "Overlay other profiles on the chart to see which fits this cycle best.",
     "compare_selected_cycles": "Selected cycles (solid) – show / hide",
     "cycles_deleted": "{count} cycle(s) deleted",
     "cycle_context_loading": "Loading recorder history…",
-    "cycle_context_note": "Grey: the power sensor's recorder history before and after this cycle. It is not part of the cycle: duration, energy and matching use only the cycle's own trace.",
+    "cycle_context_note": "Grey: the power sensor's recorder history around this cycle. It is not part of the cycle and does not affect duration, energy or matching.",
     "cycle_context_none": "The recorder holds no readings around this cycle (Home Assistant keeps 10 days of history by default).",
-    "cycle_context_tip": "Display only: changes nothing about the cycle. A cycle starts at the first reading over the start threshold, so its chart opens at that reading. This draws the power sensor's own recorder history either side of it, for cycles the recorder still holds. To carry the readings of aborted start attempts into future cycles instead, use Curve Pre-roll (Settings > Detection > Cycle Start): it moves the recorded start earlier, which changes stored durations and so matching against profiles learned without it.",
-    "dest_real_history_hint": "Imported cycles count as this device's own history and feed energy/usage stats. Use for moving one appliance to a new install.",
+    "cycle_context_tip": "Display only: shows the power sensor's recorder history around this cycle, if still kept. To add failed start attempts to future cycles, use Curve Pre-roll (Settings > Detection > Cycle Start), which changes stored durations.",
+    "dest_real_history_hint": "Imported cycles count as this device's own history and statistics. Use this to move an appliance to a new install.",
     "dest_reference_hint": "Imported cycles only improve program matching and never affect usage/energy statistics.",
-    "device_type_mismatch_warn": "This export is from a different appliance type ({src} vs {local}). Programs and cycles can still be imported as reference data, but device-specific settings and real-history import are disabled.",
+    "device_type_mismatch_warn": "This export is from a different appliance type ({src} vs {local}). Programs and cycles can still be imported as reference data, but not device settings or real history.",
     "diagnostics_load_failed": "Could not load diagnostics: {error}",
     "enough_data": "Enough data to learn from ({current}/{min} cycles).",
     "export_description": "Choose exactly which profiles, cycles, settings and more to export to JSON, or analyze a file and import only the parts you want.",
-    "export_select_intro": "Tick exactly what to include. Selecting profiles without their cycles still exports a matchable program (its learned shape travels along).",
+    "export_select_intro": "Tick what to include. Profiles without their cycles still export a matchable program.",
     "feedback_cycles_pending": "To review: {n}",
     "feedback_prompt": "Confirm it was right, correct the program, or ignore.",
     "feedback_relabel_hint": "Re-labelling this cycle resolves it too.",
     "filter_by_profile": "Filter by profile…",
     "font_size_hint": "Make everything in this panel larger or smaller. Applies to your account on this device.",
-    "group_modal_help": "Group programs with the same shape that differ in temperature/spin (durations may vary). Matching scores the group as one candidate, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.",
+    "group_modal_help": "Group programs with the same shape that differ in temperature or spin. Matching scores the group as one, then picks the best-fitting member. Pick at least 2; the overlay shows how alike they are.",
     "group_not_cohesive": "These profiles aren't similar enough to group reliably, so matching treats them individually until you remove the outlier or split the group.",
     "group_preview_hint": "Tick 2+ members to preview and compare their power curves.",
     "head_trim_hint": "Remove this many seconds from the start",
@@ -860,25 +853,25 @@
     "hist_found": "Found {n} cycles. Untick anything that does not look like a real run - nothing is stored until you import.",
     "hist_import_failed": "Import failed.",
     "hist_imported_count": "{n} cycles imported.",
-    "hist_input_hint": "Upload a CSV downloaded from the History panel (entity, state, last changed), or let WashData read the sensor's history directly. Detection then runs over it exactly as it does live, and you choose which of the cycles it finds to keep.",
-    "hist_next_step": "They are in your Cycles list, tagged as imported history. Open one and use Label to name the program it belongs to.",
+    "hist_input_hint": "Upload a CSV from the History panel (entity, state, last changed), or let WashData read the sensor's history directly. Live detection runs over it and you choose which cycles to keep.",
+    "hist_next_step": "They are in your Cycles list, tagged as imported history. Open one and use Label to name its program.",
     "hist_none_found": "No cycles could be detected in that history.",
     "hist_other_entity": "{n} readings for other entities ignored",
     "hist_recorder_empty": "Home Assistant has no detailed history for this sensor in that window.",
-    "hist_recorder_hint": "Reads from the date you pick up to now. Home Assistant keeps detailed history for 10 days by default and only hourly averages after that, which are too coarse to detect cycles from - pick a date further back only if your recorder is set to keep more.",
+    "hist_recorder_hint": "Reads from the date you pick until now. Home Assistant keeps detailed history for 10 days by default; older hourly averages are too coarse for cycle detection.",
     "hist_rows_read": "{n} readings read",
     "hist_scan_capped": "Only the first candidates are shown ({n} were found).",
-    "hist_scan_expired": "That scan is no longer available. Please scan again.",
+    "hist_scan_expired": "That scan is no longer available. Scan again.",
     "hist_scan_failed": "Scanning failed.",
-    "hist_scanning": "Replaying your history through the detector. This runs in the background - you can close this dialog and come back to it.",
+    "hist_scanning": "Running your history through the detector in the background. You can close this dialog and come back.",
     "hist_settings_used": "Detected using this device's current settings (minimum power {w} W, off delay {s} s).",
     "hist_skipped_spans": "Skipped stretches",
-    "import_analyze_hint": "Load an exported file (or paste its JSON). WashData analyzes it and shows exactly what can be imported before anything changes.",
-    "import_history_description": "Already had a smart plug before WashData? Upload a history export of its power sensor, or read it straight from Home Assistant, and the normal detection runs over it so past cycles turn up in your Cycles list ready to name.",
+    "import_analyze_hint": "Load an exported file (or paste its JSON). WashData shows what can be imported before anything changes.",
+    "import_history_description": "Had a smart plug before WashData? Upload its power history or read it from Home Assistant. Detection runs over it, and past cycles appear in your Cycles list ready to name.",
     "import_undo_hint": "A restore point from before the last import ({when}) is kept: {profiles} profile(s) and {cycles} cycle(s).",
-    "imported_history_readonly": "Detected in imported power history. It shapes program matching but is not counted in your statistics, and cannot be trimmed or split. Label it to name the program.",
-    "imported_readonly": "Imported from the community store. Shown for reference and matching. It is not counted in your stats and cannot be edited.",
-    "include_settings_hint": "Share this device's recognition and matching thresholds (not your notifications, entities or energy price). Adopters choose whether to apply them.",
+    "imported_history_readonly": "Found in imported power history. It helps matching but is not counted in your statistics and cannot be trimmed or split. Label it to name the program.",
+    "imported_readonly": "Imported from the community store. Used for reference and matching, not counted in your stats, and cannot be edited.",
+    "include_settings_hint": "Share this device's detection and matching thresholds (not notifications, entities or energy price). Others choose whether to apply them.",
     "legacy_actions_title": "{count} legacy custom action still running",
     "legacy_actions_title_one": "{count} legacy custom action still running",
     "legacy_actions_title_other": "{count} legacy custom actions still running",
@@ -888,11 +881,12 @@
     "loading_settings": "Loading settings…",
     "log_buffer_hint": "Newest first · buffers the last 500 ha_washdata records since restart · drag the bottom edge to resize.",
     "maintenance_due": "Maintenance due: {items}",
-    "maintenance_intro": "Log servicing you perform on this appliance and get reminded when each task is due again.",
+    "maintenance_intro": "Log servicing on this appliance and get reminded when each task is due again.",
     "maintenance_load_error": "Could not load maintenance data: {error}",
     "maintenance_requires_access": "Maintenance and export/import require full access.",
-    "manual_duration_hint": "The profile's average/expected cycle length, used for time-remaining estimates. Edit to set it; leaving it unchanged keeps the current value.",
-    "manual_duration_ref_hint": "Only used when no reference cycle is selected – a reference cycle sets the duration from its own length.",
+    "manual_duration_hint": "The profile's expected cycle length, used for time-remaining estimates. Leave it unchanged to keep the current value.",
+    "manual_duration_ref_hint": "Only used without a reference cycle; a reference cycle sets the duration from its own length.",
+    "duration_learned_hint": "Worked out from this program's cycles (outliers left out) and updated after each new one. To change it, trim or remove the cycles that are off.",
     "merge_hint": "Imported items are added; nothing local is lost. Name clashes are resolved below.",
     "merge_intro": "The selected cycles are combined into one (chronological order; gaps filled with 0 W). Pick the resulting profile.",
     "merge_no_imports": "Imported recordings cannot be merged into a real cycle. Deselect them to merge.",
@@ -928,11 +922,11 @@
     "no_split_points": "No split points yet.",
     "no_suggestions": "No active suggestions.",
     "notify_services_hint": "Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.",
-    "odometer_correct_hint": "Set this if WashData recorded a run that never happened, or if the appliance had already run cycles before WashData was installed.",
-    "odometer_intro": "This total only ever rises. Deleting a cycle record does not change it, and it keeps counting past the stored-history limit, so service reminders stay correct.",
+    "odometer_correct_hint": "Set this if WashData counted a run that never happened, or the appliance ran cycles before WashData was installed.",
+    "odometer_intro": "This total only goes up. Deleting a cycle does not lower it, so service reminders stay correct.",
     "old_actions_warning": "Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.",
     "onboard_download": "New device? Adopt a ready-made setup (programs, reference cycles and phases) from another WashData user with the same appliance.",
-    "online_intro_global": "Browse and share reference recordings with other WashData users, and confirm appliance entries. One connection applies to your whole WashData integration; appliance brand and model are set per device under Basic. All online features are opt-in and off by default.",
+    "online_intro_global": "Browse and share reference recordings with other WashData users. One connection covers all your WashData devices; brand and model are set per device under Basic. Online features are off until you turn them on.",
     "online_unavailable": "Online features are not available on this server.",
     "pending_feedback": "Pending detection feedback",
     "performance_trend": "Performance trend ({n} cycles)",
@@ -942,9 +936,9 @@
     "pg_canvas_empty3": "Pick a cycle above and press Run to simulate it. Then hover to read values, scroll or pinch to zoom, and drag to pan.",
     "pg_ctrl_intro": "Values start from this device's live integration settings. Edits stay in the Playground until you publish them.",
     "pg_history_empty": "Press Run to replay your cycles.",
-    "pg_history_intro2": "Replay your recent cycles through the real detector and matcher with the settings above. Click any row to load that cycle in the graph; edit a setting to see a before/after comparison.",
+    "pg_history_intro2": "Replay recent cycles through the real detector and matcher with the settings above. Click a row to load it in the graph; change a setting to compare before and after.",
     "pg_history_summary": "{detected}/{total} detected · {correct} matched correctly",
-    "pg_in_sample_note": "These cycles also helped build the profiles they are matched against, so these results are optimistic: on new cycles, expect slightly fewer correct matches.",
+    "pg_in_sample_note": "These cycles helped build the profiles they are matched against, so results are optimistic: expect slightly fewer correct matches on new cycles.",
     "pg_live_unavailable": "Live settings unavailable, showing defaults.",
     "pg_load_live_confirm": "Discard {n} Playground edit(s) and reload the integration's current settings?",
     "pg_matches_live": "Matches live settings",
@@ -964,14 +958,14 @@
     "phase_catalog_intro": "Named segments of a cycle (Pre-wash, Heating, Spin…). Assign them to a profile from its control panel.",
     "phase_ranges_intro": "Phase ranges (minutes from cycle start) overlaid on the average curve. Edit values to preview live.",
     "pick_brand_first": "Pick an appliance brand first.",
-    "playground_intro": "Explore how settings affect detection on your real cycle data. Nothing here changes live configuration until you explicitly apply it.",
+    "playground_intro": "Try settings on your real cycle data. Nothing here changes your live settings until you apply it.",
     "prefs_personal": "These apply to your Home Assistant account only.",
-    "process_history_hint": "Re-run matching on all stored cycles, refresh tuning suggestions, retrain the ML models (if enabled), recost cycles against your recorded energy prices, and recompute cycle health. Run this after a batch of reviews.",
+    "process_history_hint": "Re-run matching on all stored cycles, refresh suggestions, retrain ML models (if enabled), recost cycles from recorded prices and recompute cycle health. Run it after a batch of reviews.",
     "profile_deleted": "Profile deleted",
     "profiles_intro": "Click a profile for stats, phases and cleanup. Group near-identical programs (same shape/duration, different temperature or spin) so matching reliably picks between them.",
-    "rbac_hint": "When off, every Home Assistant user has full access (the default). Administrators always have full access and can manage everyone.",
+    "rbac_hint": "Off: every Home Assistant user has full access (default). Administrators always have full access and can manage everyone.",
     "recording_in_progress": "Recording in progress",
-    "refresh_catalog_hint": "The community brand and appliance lists are cached to keep the shared store within its daily budget. Refresh to pick up entries added or approved by others.",
+    "refresh_catalog_hint": "Community brand and appliance lists are cached to save the store's daily budget. Refresh to see entries others added or approved.",
     "reminders_intro": "Show a reminder in the panel this many cycles after the last service. Leave blank or 0 to turn a reminder off.",
     "replace_undo_hint": "A restore point is saved first, so you can undo this import from Export / Import.",
     "replace_warn": "Each ticked category is wiped and replaced from the file. Unticked categories are left untouched.",
@@ -980,24 +974,24 @@
     "restart_gap_header_one": "{n} HA restart gap during this cycle",
     "restart_gap_header_other": "{n} HA restart gaps during this cycle",
     "restart_gap_item": "{dur} gap",
-    "review_confirm_help": "Confirm whether this cycle was detected correctly. Your reviews train the model on your machine - the more cycles you confirm, the better matching and health scoring get. A quick Good/Bad is enough.",
+    "review_confirm_help": "Was this cycle detected correctly? Confirming cycles improves matching for your machine. A quick Good/Bad is enough.",
     "review_in_settings": "Review in Settings",
     "review_notes_placeholder": "Notes (optional)",
     "review_notes_tip": "Free-text notes for your own reference. Not used by matching or training.",
-    "review_profile_tip": "The program this cycle is labelled as. If the auto-detected program was wrong, correct it here - labelling teaches matching for future cycles.",
-    "review_quality_tip": "How clean this cycle is. Good = a textbook example of this program; Bad = detected but noisy or atypical; Unusable = mis-detected (merged, truncated or spurious). Drives the health score and which cycles are allowed to train the model.",
-    "review_recorded_tip": "Mark this as a hand-picked reference cycle for its program - the same role as a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never dropped by cleanup. (This is the \"golden\"/recorded flag; both are the same thing.)",
-    "review_tags_tip": "Optional flags describing what went wrong with this cycle, so training and cleanup can account for it.",
+    "review_profile_tip": "The program this cycle is labelled as. If it is wrong, correct it here; labels teach matching.",
+    "review_quality_tip": "How clean this cycle is. Good: a textbook run of this program. Bad: detected, but noisy or unusual. Unusable: mis-detected (merged, cut short or spurious). Affects the health score and which cycles train the model.",
+    "review_recorded_tip": "Mark this as a hand-picked reference cycle for its program, like a manually recorded cycle. Reference cycles are always kept, seed the matching template, and are never removed by cleanup.",
+    "review_tags_tip": "Optional flags for what went wrong, so training and cleanup can allow for it.",
     "review_to_cycles": "Open the Cycles review queue",
     "samples_decimated": "Showing {shown} of {total} samples (thinned for display; peaks kept). A wide gap here is thinning, not missing data.",
-    "saving_triggers_reload": "Saving triggers an integration reload. HA entities may briefly show as unavailable.",
+    "saving_triggers_reload": "Saving reloads the integration. Entities may briefly show as unavailable.",
     "search_placeholder": "Search settings…",
     "see_recorder": "See recorder widget below",
     "setting_changed": "Changed from {old} to {new} on {date}",
     "settings_basic_note": "Showing essential settings. Switch to Advanced for the full list.",
     "share_device_none": "No shareable cycles yet. Mark a recorded or hand-picked cycle as a reference cycle (⭐) in the Cycles tab first.",
     "share_guideline_naming": "Name each profile exactly as shown on the appliance dial or display (e.g. 'Cotton 40', 'Eco 60').",
-    "share_guideline_quality": "Only share cycles that completed normally -- no mid-cycle interruptions, door-open events, or power blips.",
+    "share_guideline_quality": "Only share cycles that finished normally: no interruptions, door openings or power blips.",
     "share_guideline_review": "Your upload starts as pending and appears publicly once enough community members confirm it.",
     "share_guidelines_title": "Before you share",
     "share_profile_no_cycles": "No reference cycles – mark a cycle as ⭐ in the Cycles tab to include this profile",
@@ -1005,17 +999,17 @@
     "showing_suggestions": "Showing {count} setting with suggestions.",
     "showing_suggestions_one": "Showing {count} setting with suggestions.",
     "showing_suggestions_other": "Showing {count} settings with suggestions.",
-    "split_intro": "Click the graph to add or remove a split point, or auto-detect by idle gaps. Each resulting segment can get its own profile.",
-    "store_declare_appliance": "Tell WashData which appliance you own and this tab shows the setups other people have shared for it. You can also type a brand above to look around.",
-    "store_download_device_intro": "Adopt every shared program and its reference cycles onto your device. Your own recorded cycles and stats are not affected.",
-    "store_enable_hint": "Enable online features in Settings to browse and import community reference cycles.",
-    "advisory_duration_outlier": "{n} cycle(s) labelled ‘{name}’ are too far from its usual length to ever match it (worst: {ratio}x). They are probably mislabelled, or one recording captured two runs. Re-label or split them so they stop skewing this program’s time estimate.",
+    "split_intro": "Click the graph to add or remove a split point, or auto-detect by idle gaps. Each part can get its own profile.",
+    "store_declare_appliance": "Tell WashData which appliance you own to see setups others shared for it. Or type a brand above to look around.",
+    "store_download_device_intro": "Add every shared program and its reference cycles to your device. Your own cycles and stats are not affected.",
+    "store_enable_hint": "Turn on online features in Preferences > Online & Community to browse and import community reference cycles.",
+    "advisory_duration_outlier": "{n} cycle(s) labelled ‘{name}’ are too far from its usual length to ever match (worst: {ratio}x). They are probably mislabelled or hold two runs. Relabel or split them so they stop skewing its time estimate.",
     "standby_above_stop_title": "Still drawing {idle} W when the cycle ended",
     "standby_above_stop_sub": "{n} of the last {total} cycles. The off delay only starts once power is below the Stop Threshold ({stop} W), so cycles finish late or need stopping by hand.",
     "store_picker_offline": "Enable online features in the settings gear to pick from the community catalog.",
     "store_share_device_intro": "Upload {brand} {model} with the reference cycles you select. Others with the same appliance can adopt your programs. Entries are reviewed before appearing publicly.",
     "store_share_intro": "Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.",
-    "store_sibling_hint": "Nothing shared for your exact model? A closely-related model from the same brand is usually a good starting point.",
+    "store_sibling_hint": "Nothing shared for your model? A related model from the same brand is usually a good start.",
     "sug_mute_failed": "Could not mute suggestion",
     "sug_muted": "Won't suggest this setting again",
     "sug_staged": "Set {key} = {val}. Save to apply.",
@@ -1055,13 +1049,13 @@
     "tuning_suggestions_available_other": "{count} tuning suggestions available from observed cycles. They appear beside the relevant fields.",
     "unsure_detected_prefix": "WashData is unsure it detected",
     "warmup_badge": "Still learning ({done}/{needed} cycles)",
-    "warmup_detail": "Matching already runs. WashData asks you to confirm the first {needed} cycles of this profile before it labels them on its own.",
+    "warmup_detail": "Matching already works. WashData asks you to confirm the first {needed} cycles of this profile before labelling on its own.",
     "wipe_history_warning": "Permanently delete all cycles and profiles. Cannot be undone.",
     "compare_cycles_title": "Compare {count} cycles",
-    "edit_builtin_phase": "This is a built-in phase. Saving creates a custom override; the original is preserved and can be restored by deleting the override.",
+    "edit_builtin_phase": "This is a built-in phase. Saving creates a custom copy; delete the copy to restore the original.",
     "fetch_error": "Failed to load data.",
     "connection_lost": "Connection lost - showing data from {time}.",
-    "pg_notify_partial": "Notification markers cover start, almost-done, finish, milestones and quiet hours only. Live progress updates, unload reminders and overrun alerts are not simulated.",
+    "pg_notify_partial": "Markers show start, almost-done, finish, milestone and quiet-hours notifications only. Live updates, unload reminders and overrun alerts are not simulated.",
     "connect_to_confirm": "Connect in the settings gear to confirm or rate.",
     "coverage_gap_cluster": "{count} recent unlabelled cycles of about {min} min look like one program you have not created yet.",
     "pg_label_yes": "Would be labelled \"{name}\" at cycle end",
@@ -1074,19 +1068,19 @@
     "feedback_detected": "WashData detected: {name}",
     "pg_outcome_stale": "Settings changed since this simulation ran. It still shows the old result.",
     "pg_compare_profile_tip": "Only picks the profile drawn over the graph. The simulation always matches the cycle on its own, as the live integration does.",
-    "pg_task_busy": "A Test-on-history or Optimize run is already in progress for this device. Wait for it to finish or cancel it.",
+    "pg_task_busy": "A Test-on-history or Optimize run is already in progress for this device. Wait for it or cancel it.",
     "pg_sweep_guarded": "Ends more cycles early, splits more of them, or misses cycles the current setting catches, so it is never recommended.",
     "pg_sweep_n_cycles": "over {count} cycles",
     "pg_sweep_n_cycles_one": "over {count} cycle",
     "pg_sweep_n_cycles_other": "over {count} cycles",
     "pg_sweep_keep_current": "Keep the current value ({value}, {metric}): no value did better by at least one cycle.",
     "hist_truncated": "stopped at the {n}-reading limit, so the rest of the history was not scanned",
-    "hist_warn_kw": "The highest reading is only {w}. This sensor looks like it reports kilowatts; WashData reads power in watts, so cycles cannot be detected from it.",
-    "hist_warn_naive_time": "{n} timestamps have no time zone and were read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.",
-    "hist_warn_naive_time_one": "{n} timestamp has no time zone and was read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.",
-    "hist_warn_naive_time_other": "{n} timestamps have no time zone and were read as UTC. If the file is in local time, every cycle is shifted by your UTC offset, and readings around a daylight-saving change can be reordered or dropped.",
+    "hist_warn_kw": "The highest reading is only {w}. This sensor seems to report kilowatts; WashData needs watts, so no cycles can be detected.",
+    "hist_warn_naive_time": "{n} timestamps have no time zone and were read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.",
+    "hist_warn_naive_time_one": "{n} timestamp has no time zone and was read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.",
+    "hist_warn_naive_time_other": "{n} timestamps have no time zone and were read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.",
     "hist_tail_trimmed": "{min} min of waiting after the cycle ended were trimmed, as the live integration trims them",
-    "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W): below the stop threshold a cycle ends, above the start threshold one begins. Nothing was saved; change the two together."
+    "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W). Nothing was saved; change both together."
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1096,27 +1090,37 @@
     "start_duration_threshold": "Seconds above threshold to confirm start",
     "start_threshold_w": "Minimum watts to count as started",
     "stop_threshold_w": "Below this, machine counts as off",
-    "profile_match_min_duration_ratio": "Stage 1: minimum cycle length as a fraction of profile duration; default 0.1 (10%)",
-    "profile_match_max_duration_ratio": "Stage 1: maximum cycle length as a fraction of profile duration; default 1.8 (180%)",
+    "profile_match_min_duration_ratio": "Minimum cycle length as a fraction of the profile's duration; default 0.1 (10%)",
+    "profile_match_max_duration_ratio": "Maximum cycle length as a fraction of the profile's duration; default 1.8 (180%)",
     "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
     "dishwasher_end_spike_quiet_release": "Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released",
-    "smart_termination_duration_ratio": "Fraction of the matched program's expected duration a cycle must reach before Smart Termination may end it early; lower it for load- or temperature-dependent machines",
-    "anti_crease_finalize_ratio": "Fraction of the matched program's expected duration a cycle must reach before the anti-crease tumble tail may be finalised; lower it on dryers with a long tumble tail, leave washing machines at the default",
+    "smart_termination_duration_ratio": "Fraction of the program's average duration a cycle must reach before Smart Termination may end it early; lower it if run times vary",
+    "anti_crease_finalize_ratio": "Fraction of the program's average duration a cycle must reach before the anti-crease tail may finish it; lower it on dryers, keep washers at the default",
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
     "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
     "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
-    "anti_wrinkle_exit_power": "Power must fall below this between pulses for anti-wrinkle to stay active",
+    "anti_wrinkle_exit_power": "Quiet level between tumble pulses; only takes effect above the Stop Threshold",
     "curve_preroll_seconds": "Seconds of readings from aborted start attempts carried into the front of a cycle's curve; 0 = off"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
     "anti_wrinkle": "Periodic post-cycle tumbling to reduce wrinkles.",
+    "baking": "High-temperature heating element active for crust and crumb formation.",
+    "cooking": "Main cooking phase with active heater and fan.",
     "cool_down": "Tumbling without heat near cycle end.",
+    "cool_down_af": "Fan-only cool-down stage after heating.",
     "drain_and_switch": "Transition period from washing to drying mode.",
     "dry": "Drying stage using heater and/or residual heat.",
     "drying": "Main heated tumbling period.",
     "heat_up": "Initial heater warm-up before full drying begins.",
+    "keep_warm": "Low-heat holding stage to keep food warm.",
+    "keep_warm_bm": "Low-heat holding stage to keep the loaf warm after baking.",
+    "kneading": "Motor-driven dough mixing and development. High power draw.",
+    "pause_af": "Short pause for shaking or inspection.",
+    "pre_heat": "Initial chamber heating before full cooking.",
     "pre_rinse": "Initial spray-down before detergent wash.",
+    "proving": "Low-heat rising period to allow yeast fermentation and dough expansion.",
+    "resting": "Short low-power pause between kneading stages for gluten relaxation.",
     "pre_wash": "Initial soak or pre-treatment before the main wash.",
     "rinse": "Clean-water rinse stage. This phase may repeat multiple times.",
     "sanitize": "High-temperature cleaning stage for sanitization programs.",
@@ -1156,7 +1160,7 @@
   },
   "section": {
     "anti_wrinkle": {
-      "intro": "Anti-wrinkle / anti-crease mode detects low-power tumble pulses after the main phase and keeps them attached to the finished cycle.",
+      "intro": "Keeps a dryer's low-power tumble pulses after the main phase attached to the finished cycle.",
       "label": "Anti-Wrinkle"
     },
     "basic": {
@@ -1164,7 +1168,7 @@
       "label": "Basic"
     },
     "delay": {
-      "intro": "Delayed-start detection identifies when an appliance is powered but has not yet begun its cycle.",
+      "intro": "Detects an appliance that is on and waiting for a delayed start.",
       "label": "Delayed Start"
     },
     "detection": {
@@ -1172,7 +1176,7 @@
       "label": "Detection"
     },
     "dishwasher": {
-      "intro": "End-of-cycle handling for dishwashers, which typically finish with a long near-silent drying phase before a short final drain.",
+      "intro": "End handling for dishwashers, which often dry quietly for a long time before a short final drain.",
       "label": "Dishwasher"
     },
     "matching": {
@@ -1192,165 +1196,165 @@
       "label": "Timing & Watchdog"
     },
     "triggers": {
-      "intro": "Optional external signals: an end trigger, a door sensor, a pause switch, and the unload reminder.",
+      "intro": "Optional extras: end trigger, door sensor, pause switch and unload reminder.",
       "label": "Triggers & Doors"
     }
   },
   "setting": {
     "anti_crease_finalize_ratio": {
-      "doc": "How far into the matched program's expected duration a cycle must be before WashData may decide the low-power tumbling it is seeing is the anti-crease tail and finish the cycle there. The expected duration is the program's average, so on a dryer whose sensor-dry runtime follows the load, most runs never reach 98% of it and the tail sits until the fallback timeout instead - often 15 to 40 minutes after the machine actually stopped. Lower this (e.g. 0.75) on such a dryer. Leave washing machines at the default: a washer spends most of its cycle below the Max Anti-Wrinkle Power, so this fraction is the only thing separating a quiet mid-wash phase from the tail, and lowering it can cut a wash in half. Leave empty for the default (0.98). This is a different setting from the Smart Termination Ratio, which gates a separate early-finish check.",
+      "doc": "Fraction of the program's average duration a cycle must reach before its low-power tumbling counts as the anti-crease tail. Lower it (e.g. 0.75) on load-sensing dryers. Keep washers at the default (0.98), or a wash can end halfway.",
       "label": "Anti-Crease Finalize Ratio"
     },
     "anti_wrinkle_enabled": {
-      "doc": "Recognise the short low-power tumble pulses a dryer emits after the main heat phase and keep them attached to the finished cycle instead of reading them as new cycles.",
+      "doc": "Keep a dryer's short low-power tumble pulses after the main heat phase with the finished cycle, instead of reading them as new cycles.",
       "label": "Enable Anti-Wrinkle Detection"
     },
     "anti_wrinkle_exit_power": {
-      "doc": "Power must fall below this between pulses for anti-wrinkle mode to stay active.",
+      "doc": "In anti-wrinkle mode, power below this counts as quiet between tumble pulses, and quiet for longer than the Max Pulse Gap ends the mode. The Stop Threshold is used when it is higher, so this only changes anything when set above the Stop Threshold.",
       "label": "Exit Power Threshold"
     },
     "anti_wrinkle_idle_timeout": {
       "label": "Max Pulse Gap",
-      "doc": "How long the machine may stay quiet between two tumble pulses before anti-wrinkle mode ends. Set it above the longest gap your dryer leaves between pulses, otherwise every later pulse is read as a false start."
+      "doc": "How long the dryer may stay quiet between tumble pulses before anti-wrinkle mode ends. Set it above your dryer's longest gap, or later pulses are read as false starts."
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Pulses longer than this are treated as a real cycle rather than an anti-wrinkle tumble.",
+      "doc": "A pulse longer than this counts as a real cycle, not an anti-wrinkle tumble.",
       "label": "Max Duration"
     },
     "anti_wrinkle_max_power": {
-      "doc": "A pulse above this power is treated as a real new cycle, not an anti-wrinkle tumble. Set just above the tumble-pulse power.",
+      "doc": "A pulse above this power counts as a real new cycle, not a tumble. Set it just above your tumble-pulse power.",
       "label": "Max Anti-Wrinkle Power"
     },
     "auto_label_confidence": {
-      "doc": "If the match score at cycle end is at or above this, the program is labeled automatically without any confirmation prompt. Raise it to require higher certainty before auto-labeling; lower it to automate more. Works in conjunction with Learning Confidence below it.",
+      "doc": "Match score at cycle end at or above which the program is labelled without asking. Raise it for more certainty; lower it to label more cycles automatically. Keep it above Learning Confidence.",
       "label": "Auto-Label Confidence"
     },
     "auto_maintenance": {
-      "doc": "Run nightly housekeeping: label older unlabelled cycles that now clearly match a program, rebuild program curves, refresh anomaly marks, recompute cycle health and remove debug traces while Save Debug Traces is off. Every cycle and its full power trace is kept.",
+      "doc": "Nightly cleanup: label old cycles that now clearly match a program, rebuild program curves, refresh anomaly marks and cycle health, and remove debug traces if Save Debug Traces is off. Cycles and their power traces are always kept.",
       "label": "Auto Maintenance (nightly cleanup)"
     },
     "completion_min_seconds": {
-      "doc": "Cycles shorter than this are discarded as ghost cycles (test runs, opening the door to add a sock).",
+      "doc": "Cycles shorter than this (test runs, opening the door to add a sock) are saved as Interrupted and get no finish notification.",
       "label": "Min Cycle Duration"
     },
     "curve_preroll_seconds": {
-      "doc": "How many seconds of readings from aborted start attempts WashData may carry into the front of a cycle's curve. A cycle's curve normally begins at the start attempt that finally succeeds, so on a machine that probes a few times before settling - programme selection, door lock, first fill - the first minutes of real activity are missing from every curve. Set this a little above the longest such run-up your machine has (300 s is plenty for most). 0 turns it off. Be aware that turning it on moves the recorded start earlier, so cycles recorded before and after the change carry different durations for the same program; the learned averages will drift until the older cycles age out. To only see what came before a cycle, without changing anything, use the recorder history in the cycle chart instead.",
+      "doc": "Adds readings from failed start attempts to the front of a cycle, for machines that probe before starting (door lock, first fill). 300 s covers most; 0 = off. Recorded starts move earlier, so learned durations drift for a while.",
       "label": "Curve Pre-roll"
     },
     "delay_confirm_seconds": {
-      "doc": "Power must stay in the standby band for this long before the appliance is treated as waiting-to-start rather than running.",
+      "doc": "Power must stay in the standby band this long before the appliance counts as waiting to start.",
       "label": "Confirm Seconds"
     },
     "delay_start_detect_enabled": {
-      "doc": "Detect when the appliance is powered on and waiting (delayed start / standby) but has not begun its cycle, so standby draw is not mistaken for a running cycle.",
+      "doc": "Detect an appliance that is on and waiting for a delayed start, so its standby draw is not taken for a running cycle.",
       "label": "Enable Delay-Start Detection"
     },
     "delay_timeout_hours": {
-      "doc": "Stop waiting in delayed-start mode after this many hours and return to idle, so a machine left powered but never started does not wait forever.",
+      "doc": "Give up waiting for a delayed start after this many hours and return to idle.",
       "label": "Timeout Hours"
     },
     "device_type": {
-      "doc": "Appliance class. Sets sensible detection defaults (thresholds, off-delay, end handling) tuned for that appliance type; change it only if the device was originally set up as the wrong type.",
+      "doc": "Sets detection defaults (thresholds, off delay, end handling) for this kind of appliance. Change it only if the device was set up as the wrong type.",
       "label": "Device Type"
     },
     "dishwasher_end_spike_quiet_release": {
-      "doc": "Once the cycle passes its expected duration, how long the dishwasher must stay quiet (below the Stop Threshold) before WashData stops waiting for a final drain and ends the cycle. Raise it if your machine has a long silent drying phase before a late final drain that is being missed - a wider window lets the learned duration follow seasonal drift (colder inlet water = longer cycles) instead of locking to the old average. It only ever shortens the wait relative to the internal 30-minute end-spike cap, never extends it.",
+      "doc": "After the expected duration, how long the dishwasher must stay below the Stop Threshold before WashData stops waiting for the final drain. Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.",
       "label": "Passive-Dry Quiet Release"
     },
     "door_end_dwell_seconds": {
       "label": "Door-Open End Dwell",
-      "doc": "How long the door must stay open before WashData ends the cycle, when \"Door Opens Automatically At End\" is on. Long enough to ignore quickly adding a dish (default 60 s), short enough to end promptly once the machine pops the door."
+      "doc": "With \"Door Opens Automatically At End\" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s)."
     },
     "door_opens_at_end": {
       "label": "Door Opens Automatically At End",
-      "doc": "For dishwashers that pop the door open at the end of the cycle to dry (AirDry and similar). With this on, a door-open on a running cycle no longer pauses it forever; instead, if the door stays open for the dwell below, WashData treats the cycle as finished. A brief open (adding an item) is ignored. Requires a Door Sensor Entity."
+      "doc": "For dishwashers that open the door at the end to dry (e.g. AirDry). A door left open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. Needs a Door Sensor Entity."
     },
     "door_sensor_entity": {
-      "doc": "Optional door binary sensor. Used to detect when the appliance has been opened/unloaded after a cycle.",
+      "doc": "Optional door sensor. Shows when the appliance was opened to unload after a cycle.",
       "label": "Door Sensor Entity"
     },
     "duration_tolerance": {
-      "doc": "Tolerance for time-remaining estimates (learning feedback, not matching). If the actual duration is within +/-X% of the estimate it counts as a good match.",
+      "doc": "Learning feedback only: a cycle within +/-X% of its estimated duration counts as a good estimate. Does not affect matching.",
       "label": "Estimate Tolerance"
     },
     "enable_ml_models": {
-      "doc": "While a cycle runs, let a model fine-tuned to this machine predict its total energy and cost, and let a cycle that drops power unusually early, on a program WashData knows well, finish without waiting out the full off delay. Dishwashers get that early finish without this setting once their program is recognised. Off = the classic power-based logic only.",
+      "doc": "Use a model trained on this machine to predict a running cycle's energy and cost, and let a well-known program that stops unusually early finish without the full off delay. Off: power-based logic only.",
       "label": "Apply smart models during a cycle"
     },
     "end_energy_threshold": {
-      "doc": "When the off delay has run out, the energy used during it (watts x time) is compared to this threshold. Above it the cycle is not finished yet, which keeps anti-crease tumbles and dishwasher drying tails attached to the cycle instead of cutting them short. Lower it if cycles end during a cool-down tumble or drying tail; raise it if finished cycles keep waiting.",
+      "doc": "Energy allowed during the off delay. More than this and the cycle keeps going, so tumbles and drying tails stay attached. Lower it if cycles end during a tail; raise it if finished cycles keep waiting.",
       "label": "End Energy"
     },
     "energy_price_dynamic": {
-      "doc": "Charge each cycle at the price in force at every moment it ran, instead of the single price current when it finished. Only applies to a price entity (a static price cannot move). Needs no extra setup: the price is tracked live while the cycle runs, and Process History under Diagnostics recosts older cycles from the recorder. Off = the classic behaviour, one price frozen at the end.",
+      "doc": "Charge each cycle at the price at each moment it ran, instead of the price when it finished. Needs a price entity. Process History (Diagnostics) recosts older cycles.",
       "label": "Time-Weighted Cost"
     },
     "energy_price_entity": {
-      "doc": "Sensor with the current electricity price per kWh (e.g. a dynamic tariff). Must be a price, not the plug's own power or energy entity: it takes precedence over the static price below, so a kWh counter here costs every cycle at the meter reading instead of your tariff. With Time-Weighted Cost on, each cycle is charged at the price in force at every moment it ran; otherwise the price in effect when it finished is frozen onto it.",
+      "doc": "Sensor with the current price per kWh (e.g. a dynamic tariff). It overrides the static price below, so it must be a price, not the plug's power or energy sensor.",
       "label": "Energy Price Entity"
     },
     "energy_price_static": {
-      "doc": "Fixed price per kWh used for cost figures when no live price entity is set above.",
+      "doc": "Fixed price per kWh, used when no price entity is set.",
       "label": "Static Energy Price (per kWh)"
     },
     "energy_sensor": {
-      "doc": "Optional cumulative energy counter (total_increasing kWh/Wh, e.g. the plug's own lifetime meter). When set, each cycle's reported energy is taken from this counter's start-to-end delta, which avoids the under-counting you get from integrating a slow-reporting power sensor. Falls back to the integrated value if the reading is missing, its unit is unknown, or the delta is not positive. Leave blank to keep integrating the power sensor.",
+      "doc": "Optional kWh or Wh counter (total_increasing, e.g. the plug's own meter). Cycle energy is then read from it, which is more accurate than computing it from a slow power sensor. If its reading is unusable, the computed value is used.",
       "label": "Energy Meter Entity"
     },
     "expose_debug_entities": {
-      "doc": "Publish extra diagnostic HA entities (match confidence, ambiguity, state internals). Off keeps the entity list clean for normal use.",
+      "doc": "Add diagnostic entities (match confidence, ambiguity, internal state). Off keeps the entity list clean.",
       "label": "Expose Debug Entities"
     },
     "external_end_trigger": {
-      "doc": "Binary sensor whose state change marks the cycle end (e.g. an appliance \"finished\" contact or a companion integration).",
+      "doc": "Binary sensor whose change marks the cycle end (e.g. a \"finished\" contact or another integration).",
       "label": "External Trigger Entity"
     },
     "external_end_trigger_enabled": {
-      "doc": "Let an external binary sensor signal the end of a cycle, in addition to the built-in power-based detection.",
+      "doc": "Let a binary sensor signal the end of a cycle, in addition to power-based detection.",
       "label": "Enable External End Trigger"
     },
     "external_end_trigger_inverted": {
-      "doc": "Treat the trigger sensor turning OFF (rather than ON) as the end-of-cycle signal.",
+      "doc": "Treat the sensor turning OFF (not ON) as the end signal.",
       "label": "Invert External Trigger (trigger on OFF)"
     },
     "learning_confidence": {
-      "doc": "If the match score falls between this and Auto-Label Confidence, a feedback notification asks you to verify the identified program. Below this score the match is too uncertain to surface. Must be kept below Auto-Label Confidence.",
+      "doc": "Lowest match score for labelling a finished cycle. A clear winner is labelled; a close call goes to the review queue in Cycles. Below this, nothing is labelled or asked. Keep it below Auto-Label Confidence.",
       "label": "Learning Confidence"
     },
     "linked_device": {
-      "doc": "Optionally nest this WashData device under another device (e.g. the smart plug) in the HA device registry, shown as \"Connected via ...\".",
+      "doc": "Optional. Show this WashData device under another device (e.g. the smart plug) in Home Assistant, as \"Connected via ...\".",
       "label": "Group Under Device"
     },
     "min_off_gap": {
-      "doc": "If the machine powers off for less than this time, the on/off/on sequence is treated as one continuous cycle. Prevents soak programs (machine powers off for several minutes mid-wash) from being split into two separate cycles. Set it shorter than the gap between your back-to-back loads if you want those counted as separate cycles. Device-type defaults protect the typical intra-cycle pause for each appliance.",
+      "doc": "An off period shorter than this does not split a cycle, so soak pauses stay in one wash. Keep it shorter than the gap between back-to-back loads, or those merge into one cycle.",
       "label": "Min Off Gap"
     },
     "min_power": {
-      "doc": "Absolute minimum power considered active. Readings below this are treated as 0 W (standby), filtering out the phantom load of smart plugs and standby LEDs.",
+      "doc": "Readings below this count as 0 W (standby). Filters out the idle draw of smart plugs and standby LEDs.",
       "label": "Minimum Power"
     },
     "ml_training_enabled": {
-      "doc": "Periodically retrain the projected-energy model on this machine's finished cycles. A retrained model is only kept when it beats the simple elapsed-versus-expected estimate on held-out cycles; otherwise the current one stays.",
+      "doc": "Retrain the energy model on this machine's finished cycles from time to time. A new model is kept only if it beats the simple estimate on test cycles.",
       "label": "Learn from this machine"
     },
     "ml_training_hour": {
-      "doc": "Local hour of day (0-23) to do the overnight fine-tuning. Pick a quiet hour such as 2 (02:00).",
+      "doc": "Hour of day (0-23) for overnight training. Pick a quiet hour, e.g. 2.",
       "label": "Learn at hour"
     },
     "ml_training_interval_days": {
-      "doc": "Re-check for improvements at most once per this many days.",
+      "doc": "Retrain at most once every this many days.",
       "label": "Check at most every"
     },
     "ml_training_min_cycles": {
-      "doc": "Wait until at least this many cycles have been recorded before fine-tuning, so there is enough to learn from.",
+      "doc": "Wait for at least this many recorded cycles before training.",
       "label": "Cycles needed first"
     },
     "name": {
-      "doc": "Display name shown in the HA integrations list and device registry.",
+      "doc": "Name shown in Home Assistant for this device.",
       "label": "Device Name"
     },
     "no_update_active_timeout": {
-      "doc": "If no power updates arrive for this long while running, assume the plug dropped offline and force-stop to avoid a zombie cycle. Default 600 s allows for cloud or mesh lag.",
+      "doc": "If no power update arrives for this long during a cycle, assume the plug went offline and force-stop the cycle. The default 600 s allows for cloud or mesh delays.",
       "label": "No-Update Timeout"
     },
     "notify_before_end_minutes": {
@@ -1358,242 +1362,242 @@
       "label": "Pre-End Alert"
     },
     "notify_channel": {
-      "doc": "Android notification channel name for start/live messages (controls per-channel sound and priority on the mobile app). Blank uses the companion app default.",
+      "doc": "Android channel for start and live messages; the channel sets sound and priority. Blank: app default.",
       "label": "Android Channel (start/live)"
     },
     "notify_cycle_timers": {
-      "doc": "Notifications at specific minutes into a cycle (e.g. to add softener). Message supports {device}, {program}, {minutes}. Enable Auto-pause to pause at that point and receive an interactive notification with a Resume button; resume via the panel, the pause/resume service, or the notification action.",
+      "doc": "Notifications at set minutes into a cycle (e.g. to add softener). Message supports {device}, {program}, {minutes}. With Auto-pause, the cycle also pauses there and the notification gets a Resume button.",
       "label": "Cycle Timers"
     },
     "notify_finish_channel": {
-      "doc": "Android notification channel name for the finish message. Blank reuses the start/live channel.",
+      "doc": "Android channel for the finish message. Blank reuses the start/live channel.",
       "label": "Android Channel (finish)"
     },
     "notify_finish_message": {
-      "doc": "Body sent when a cycle finishes. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status}. {time_finished} and {vs_typical} are most useful here. {status} is completed or force_stopped: an interrupted cycle (a false start or a cancelled program) sends no finish message.",
+      "doc": "Body sent when a cycle finishes. Variables: {device}, {program}, {duration} (minutes), {duration_hm} (1 h 05 min), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed or force_stopped; interrupted cycles send nothing). Any other variable falls back to the default text.",
       "label": "Finish Message"
     },
     "notify_finish_services": {
-      "doc": "notify.* services called when a cycle finishes. Add one per target; leave empty for no finish notification.",
+      "doc": "notify.* services to call when a cycle finishes. Leave empty for none.",
       "label": "Finish Services"
     },
     "notify_fire_events": {
-      "doc": "Also fire ha_washdata_* events on cycle start/finish so you can build your own automations.",
+      "doc": "Also fire ha_washdata_* events on cycle start and finish for your own automations.",
       "label": "Fire HA Events for Notifications"
     },
     "notify_icon": {
-      "doc": "The small icon shown on the notification (e.g. mdi:washing-machine). Android draws it in the status bar; iOS shows it in place of the app icon, and needs the companion app 2026.8 or newer. Leave blank for the platform default.",
+      "doc": "Small icon on the notification (e.g. mdi:washing-machine). Sent only to mobile_app targets, not notify groups. On iOS it replaces the app icon and needs companion app 2026.8 or newer. Blank: platform default.",
       "label": "Notification Icon"
     },
     "notify_icon_color": {
-      "doc": "Accent colour for this appliance's notifications, so a washer, a dryer and a dishwasher are tellable apart at a glance. iOS tints the icon and the Live Activity progress bar on the Lock Screen and in the Dynamic Island. Android is sent the same colour, but what it does with it is up to the phone: some tint the icon, and many (Samsung One UI especially) ignore it entirely. Hex (e.g. #03A9F4) is understood by both. Leave blank for the platform default.",
+      "doc": "Accent colour for this appliance's notifications, so washer, dryer and dishwasher are easy to tell apart. On iOS it fills the circle behind the icon and colours the Live Activity bar. Many Android phones (Samsung especially) ignore it. Use hex, e.g. #03A9F4. Blank: platform default.",
       "label": "Notification Colour"
     },
     "notify_live_chronometer": {
-      "doc": "Show a live-updating countdown timer in the notification (on platforms that support it) instead of a static estimate.",
+      "doc": "Show a live countdown timer in the notification (where supported) instead of a fixed estimate.",
       "label": "Use Live Chronometer"
     },
     "notify_live_click_action": {
       "label": "Notification Tap Target",
-      "doc": "Where a tap on a notification from this appliance opens, on Android and iOS. Blank opens the WashData panel on this appliance. Enter a dashboard path (e.g. /lovelace/laundry) or a full URL to send it somewhere else, or \"none\" for no tap target at all."
+      "doc": "What a tap on this appliance's notification opens. Blank: the WashData panel on this appliance. Enter a dashboard path (e.g. /lovelace/laundry) or URL, or \"none\" for no tap action."
     },
     "notify_live_interval_seconds": {
       "doc": "How often live-progress notifications are refreshed while a cycle runs.",
       "label": "Live Update Interval"
     },
     "notify_live_overrun_percent": {
-      "doc": "If a cycle runs past its estimate by more than this percentage, send an overrun alert.",
+      "doc": "Live updates stop once a cycle runs this percent past its expected duration (20 = up to 1.2x the expected time).",
       "label": "Live Overrun % Before Alert"
     },
     "notify_live_services": {
-      "doc": "notify.* services called for live progress updates while a cycle runs. Leave empty to disable live-progress notifications.",
+      "doc": "notify.* services for live progress updates while a cycle runs. Leave empty to turn them off.",
       "label": "Live Progress Services"
     },
     "notify_live_silent": {
       "label": "Silent Live Updates",
-      "doc": "iOS only. Refresh the live progress quietly: each update arrives without a sound or vibration, at a lower, battery-saving priority that iOS may briefly batch. The first update of a cycle (the one that starts the Live Activity) and the start/finish notifications still alert as usual. Turn this off to be alerted on every update."
+      "doc": "iOS only. Update live progress silently, at a battery-saving priority that iOS may batch. The first update and the start/finish notifications still alert. Off: every update alerts."
     },
     "notify_live_sticky": {
       "label": "Keep Live Notification On Tap",
-      "doc": "Android only. Make the live-progress notification persistent (sticky) so tapping it does not dismiss the ongoing thread. Off keeps the default behaviour where a tap dismisses it."
+      "doc": "Android only. Keep the live progress notification when tapped. Off: a tap dismisses it."
     },
     "notify_milestone_message": {
       "doc": "Message for the milestone notification. Template variables: {device}, {cycle_count}.",
       "label": "Milestone Message"
     },
     "notify_milestones": {
-      "doc": "Comma-separated cycle counts that trigger a one-off celebration notification when reached (e.g. 50, 100, 500, 1000). Blank disables milestone notifications.",
+      "doc": "Cycle counts that trigger a one-off celebration notification, comma-separated (e.g. 50, 100, 500, 1000). Blank disables them.",
       "label": "Cycle Milestones"
     },
     "notify_only_when_home": {
-      "doc": "Only send notifications when at least one of the linked people (above) is home.",
+      "doc": "Only notify when at least one of the people above is home.",
       "label": "Notify Only When Home"
     },
     "notify_people": {
-      "doc": "person.* entities used by \"Notify Only When Home\" to decide whether anyone is home.",
+      "doc": "person.* entities that \"Notify Only When Home\" checks.",
       "label": "People (for Only When Home)"
     },
     "notify_pre_complete_message": {
-      "doc": "Body of the pre-end / almost-done alert. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "doc": "Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left). Any other variable falls back to the default text.",
       "label": "Pre-Complete Message"
     },
     "notify_quiet_end_hour": {
-      "doc": "End of the do-not-disturb window (0-23). Held notifications are delivered at this hour. Leave blank to disable.",
+      "doc": "End of the do-not-disturb window (0-23); held notifications are sent then. Blank disables it.",
       "label": "Quiet Hours End"
     },
     "notify_quiet_start_hour": {
-      "doc": "Start of a do-not-disturb window (0-23). Finish, reminder and clean-laundry notifications that would fire during quiet hours are held and delivered when the window ends. Leave blank to disable. Supports windows that cross midnight (e.g. start 22, end 7).",
+      "doc": "Start of a do-not-disturb window (0-23). Finish, reminder and clean-laundry notifications in this window are held until it ends. Can cross midnight (e.g. 22 to 7). Blank disables it.",
       "label": "Quiet Hours Start"
     },
     "notify_reminder_message": {
-      "doc": "Body of the still-waiting unload reminder. Blank uses the built-in default. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "doc": "Text of the one-time Pre-End Alert. Template variables: {device}, {program}, {minutes} (the Pre-End Alert setting). Any other variable falls back to the default text.",
       "label": "Reminder Message"
     },
     "notify_start_message": {
-      "doc": "Body sent when a cycle starts. Template variables: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "doc": "Body sent when a cycle starts. Template variables: {device}, {program}. Any other variable falls back to the default text.",
       "label": "Start Message"
     },
     "notify_start_services": {
-      "doc": "notify.* services called when a cycle starts. Add one per target (phone, dashboard, etc.); leave empty for no start notification.",
+      "doc": "notify.* services to call when a cycle starts (phone, dashboard, ...). Leave empty for none.",
       "label": "Start Services"
     },
     "notify_timeout_seconds": {
-      "doc": "Automatically dismiss the notification after this many seconds (on platforms that support it). 0 keeps it until dismissed manually.",
+      "doc": "Dismiss the notification after this many seconds (where supported). 0 keeps it until you dismiss it.",
       "label": "Auto-Dismiss After"
     },
     "notify_title": {
-      "doc": "Notification title. Template variables: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Notification title. Only {device} is substituted; any other variable falls back to the default title.",
       "label": "Notification Title"
     },
     "notify_unload_delay_minutes": {
-      "doc": "Minutes after a cycle ends before sending the still-waiting \"unload the machine\" reminder. Set 0 to disable the reminder.",
+      "doc": "Minutes after a cycle ends before the \"unload the machine\" reminder. 0 disables it.",
       "label": "Unload Nag Delay"
     },
     "notify_unload_repeat": {
-      "doc": "Keep re-sending the unload reminder every \"Unload Nag Delay\" minutes until the unload is confirmed or you tap \"Stop reminding\" on the notification. Needs a way to confirm the unload: a Door Sensor Entity, an Unload Confirmation Entity, or the \"Confirm Unload Manually\" option below. The dismiss button works on Home Assistant companion-app (mobile) notifications.",
+      "doc": "Resend the unload reminder every \"Unload Nag Delay\" minutes until the unload is confirmed or you tap \"Stop reminding\" (mobile app). Needs a Door Sensor Entity, an Unload Confirmation Entity, or \"Confirm Unload Manually\".",
       "label": "Repeat Until Unloaded"
     },
     "off_delay": {
-      "doc": "Time to wait after power drops before declaring the cycle finished. If power resumes within this window the cycle continues seamlessly - this bridges pauses between wash stages. Dishwashers have long drying phases (power off for 20-60 min) so the off-delay must exceed that to keep the whole wash+dry as one cycle.",
+      "doc": "How long power must stay low before the cycle is finished. Power coming back within this time continues the cycle. Dishwashers can be idle 20-60 min while drying, so set it longer than that.",
       "label": "Off Delay"
     },
     "pause_cuts_power": {
-      "doc": "When a cycle is paused, also switch off the Switch Entity below. Only for appliances whose plug can safely be cut mid-cycle.",
+      "doc": "When a cycle is paused, also switch off the Switch Entity below. Only for appliances that can safely lose power mid-cycle.",
       "label": "Pause Also Cuts Power (via switch)"
     },
     "peak_rate_message": {
-      "doc": "Optional custom text for the peak-rate tip appended to the start notification. Template variables: {device}, {price}. Blank uses the built-in default.",
+      "doc": "Custom text for the peak-rate tip. Template variables: {device}, {price}. Blank uses the default.",
       "label": "Peak-Rate Message"
     },
     "peak_rate_threshold": {
-      "doc": "When a cycle starts and the current price per kWh is at or above this value, append a peak-rate tip to the start notification. 0 or blank disables the tip.",
+      "doc": "If the price per kWh is at or above this when a cycle starts, add a peak-rate tip to the start notification. 0 or blank disables it.",
       "label": "Peak-Rate Threshold (per kWh)"
     },
     "power_off_delay": {
-      "doc": "How long power must stay below the Power Off Threshold after a cycle finishes before the state returns to Off. Only used when the Power Off Threshold is above 0. Checked on the background cadence, so the effective delay rounds up to the next state-expiry tick.",
+      "doc": "How long power must stay below the Power Off Threshold after a cycle before the state returns to Off. Only used when that threshold is above 0. Checked periodically, so the real wait can be slightly longer.",
       "label": "Power Off Delay"
     },
     "power_off_threshold_w": {
-      "doc": "Optional power-based Off detection. When above 0, once a cycle has finished and power stays below this level for the Power Off Delay, the machine is treated as switched off and the state returns to Off. Leave at 0 to disable (the default). Set it above the true switched-off floor and below the Stop Threshold and your machine's finished-but-on standby draw; if it is not below the Stop Threshold it is ignored. When enabled it replaces the Progress Reset Delay for returning to Off, so a finished machine stays in Finished/Clean until it is actually powered off.",
+      "doc": "After a cycle, power below this for the Power Off Delay sets the state to Off, instead of the Progress Reset Delay doing it. Set it above the switched-off draw, below standby and the Stop Threshold. 0 disables it (default).",
       "label": "Power Off Threshold"
     },
     "power_profile_interval_min": {
       "label": "Power Profile Interval",
-      "doc": "Bucket size for the per-profile power_profile sensor attribute (the flat per-slot average-watts array consumed by external planners such as EMHASS and tibber_prices). Smaller buckets keep short power spikes sharp; larger buckets smooth the shape. Default 15 min. Read-time only; does not affect detection."
+      "doc": "Bucket size of the power_profile attribute (average watts per slot) used by planners such as EMHASS and tibber_prices. Smaller keeps short spikes; larger smooths the curve. Default 15 min. Does not affect detection."
     },
     "power_sensor": {
-      "doc": "The sensor entity reporting live power in watts for this appliance (e.g. sensor.washer_power). All cycle detection is based on this signal.",
+      "doc": "The sensor that reports this appliance's live power in watts (e.g. sensor.washer_power). All detection is based on it.",
       "label": "Power Sensor"
     },
     "profile_evidence_sources": {
       "label": "Cycles that shape a program",
-      "doc": "Which cycles are used to build each program's power curve, and to match a finished cycle against it. Unticking a kind stops it shaping your programs without deleting anything - the cycles stay in your Cycles list and can still be labelled or removed. Useful if you do not trust imported data. Statistics are unaffected: they always count only the cycles this machine actually ran. Unticking everything is ignored, since a program with no cycles behind it could never match."
+      "doc": "Which kinds of cycles shape each program's curve and matching. Unticking a kind deletes nothing; useful if you do not trust imported data. Statistics always count only this machine's cycles. Unticking all is ignored."
     },
     "profile_match_interval": {
-      "doc": "How often to attempt profile matching during a running cycle. Default 300 s (5 minutes) balances detection speed and CPU.",
+      "doc": "How often to match a running cycle against profiles. Default 300 s (5 min).",
       "label": "Match Interval"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "A program is dropped once the cycle has run longer than this multiple of its typical duration. 1.8 means a cycle that has run 80% longer than the program no longer matches it.",
+      "doc": "A program is dropped once the cycle has run longer than this multiple of its typical duration. 1.8: a cycle 80% longer than the program no longer matches it.",
       "label": "Max Duration Ratio"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "A program is only considered once the cycle has run this fraction of its typical duration. 0.10 means a 2-hour program becomes a candidate after 12 minutes. Not applied during the first 15 minutes of a cycle.",
+      "doc": "A program is only considered after the cycle has run this fraction of its typical duration. 0.10: a 2-hour program becomes a candidate after 12 minutes. Not applied in a cycle's first 15 minutes.",
       "label": "Min Duration Ratio"
     },
     "profile_match_threshold": {
-      "doc": "Minimum live match score (0-1) before Smart Termination and the dryer anti-crease finish may act on the matched program. Raise it if cycles end early on an uncertain match; lower it if clearly recognised cycles still wait for the full off delay. It does not change which program is shown or labelled. Default 0.4.",
+      "doc": "Live match score a cycle needs before Smart Termination or the anti-crease finish may end it early. It does not change the shown program. Raise it if weak matches end cycles early; lower it if clear matches wait the off delay.",
       "label": "Match Threshold"
     },
     "profile_unmatch_threshold": {
-      "doc": "If a live mid-cycle match drops below this score, the tentative identification is cleared. Keep it a little below the Match Threshold so a brief dip in similarity does not flip the display back to unmatched.",
+      "doc": "If the live match score drops below this, the current program guess is cleared. Keep it a little below the Match Threshold so a brief dip does not reset it.",
       "label": "Unmatch Threshold"
     },
     "progress_reset_delay": {
-      "doc": "After finishing, hold progress at 100% for this long so Completed is visible on dashboards before resetting to Idle.",
+      "doc": "After a cycle, keep progress at 100% this long before resetting to Idle.",
       "label": "Progress Reset Delay"
     },
     "pump_stuck_duration": {
-      "doc": "Seconds a pump may run continuously before it is flagged as possibly stuck (fires the stuck-pump event).",
+      "doc": "How long a pump may run nonstop before the stuck-pump event fires.",
       "label": "Pump Stuck Duration"
     },
     "sampling_interval": {
-      "doc": "Minimum time between processed readings. A reading that arrives sooner than this after the last one is skipped (low readings during a cycle are always kept), so set it to your plug's real reporting interval or lower: a higher value only throws readings away. WashData does not suggest this value, because what it can measure is the interval left after this setting has already dropped readings.",
+      "doc": "Minimum time between processed readings. Readings that arrive sooner are skipped (low readings during a cycle are always kept). Set it to your plug's reporting interval or lower; a higher value only throws readings away.",
       "label": "Sampling Interval"
     },
     "save_debug_traces": {
-      "doc": "Also store the matcher's debug data (every candidate's scores) with each cycle. Useful for troubleshooting; it adds about 20 KB per cycle, kept for as long as the cycle is.",
+      "doc": "Also store the matcher's debug data (every candidate's scores) with each cycle, for troubleshooting. Adds about 20 KB per cycle.",
       "label": "Save Debug Traces"
     },
     "show_contributor": {
       "doc": "Show the \"by <contributor>\" attribution on community appliances and reference cycles."
     },
     "smart_termination_duration_ratio": {
-      "doc": "How far into the matched program's expected duration a cycle must be before Smart Termination may end it early once power drops. The expected duration is the program's average, so on appliances whose runtime varies a lot - washers on cold winter vs warm summer inlet water, sensor-dry dryers, load-dependent programs - about half of all runs finish shorter than that average and never get the fast finish, ending only via the fallback timeout minutes late. Lower this (e.g. 0.85) on those machines so the early finish still fires; raise it toward 1.0 to be more conservative. Leave empty for the default (0.98, or 0.99 for dishwashers). It can only ever end a cycle earlier, never later, and never fires on an ambiguous or low-confidence match.",
+      "doc": "Fraction of the program's average duration a cycle must reach before Smart Termination may end it early. If run times vary (water temperature, sensor-dry, load size), lower it (e.g. 0.85). Leave empty for 0.98 (0.99 on dishwashers).",
       "label": "Smart Termination Ratio"
     },
     "start_duration_threshold": {
-      "doc": "Power must stay above the start threshold this long to confirm a real start, preventing split-second on/off toggles from starting a cycle.",
+      "doc": "Power must stay above the Start Threshold this long before a cycle starts, so brief on/off blips are ignored.",
       "label": "Start Duration"
     },
     "start_energy_threshold": {
-      "doc": "Energy (power x time) the appliance must consume before RUNNING. A brief high-power spike has very low energy and is ignored, preventing false starts.",
+      "doc": "Energy the appliance must use before the cycle counts as running. A short power spike uses little energy, so it does not start a cycle.",
       "label": "Start Energy"
     },
     "start_threshold_w": {
-      "doc": "Power must rise above this level to confirm a cycle has started. Setting it too low causes false starts from standby power; too high and slow-starting programs (cold fill) are missed. The suggestion engine sets this just above the machine's observed lowest active power.",
+      "doc": "Power must rise above this to start a cycle. Too low: standby power causes false starts. Too high: slow-starting programs (cold fill) are missed.",
       "label": "Start Threshold"
     },
     "stop_threshold_w": {
-      "doc": "Power must fall below this level before the off-delay countdown begins. Set it below the Start Threshold - the gap between them is the hysteresis band that prevents flicker. If set too high, low-power phases (rinse holds, anti-crease) falsely trigger the end sequence.",
+      "doc": "Power must fall below this before the off delay starts counting. Keep it below the Start Threshold. Too high, and low-power phases (rinse holds, anti-crease) start the end countdown by mistake.",
       "label": "Stop Threshold"
     },
     "store_brand": {
       "label": "Appliance Brand",
-      "doc": "Optional. The appliance brand, picked from the community catalog. Used to find and share matching reference recordings. Leave blank if you are not using online features."
+      "doc": "Optional. Your appliance brand from the community catalog, used to find and share reference recordings. Leave blank if you do not use online features."
     },
     "store_model": {
       "label": "Appliance Model",
-      "doc": "Optional. The appliance model, picked from the community catalog once a brand is set. If your model is not listed you can add it to the catalog."
+      "doc": "Optional. Your appliance model from the community catalog (pick a brand first). If it is not listed, you can add it."
     },
     "switch_entity": {
-      "doc": "Optional switch toggled off on pause and back on when resuming, used together with \"Pause also cuts power\".",
+      "doc": "Optional switch turned off on pause and back on when resuming, with \"Pause Also Cuts Power\".",
       "label": "Switch Entity"
     },
     "unload_confirm_entity": {
-      "doc": "Optional entity whose activation means the load has been taken out, for machines that cannot have a door sensor. Any kind works: a Zigbee or NFC button, an input_button helper, a motion sensor in front of the machine, a scene. Every state change counts as a confirmation except switching off and going unavailable. Setting this also enables the unload reminder on a device with no Door Sensor Entity.",
+      "doc": "Optional. Any entity that confirms the load was taken out, for machines without a door sensor (a button, input_button, motion sensor, scene). Every state change counts except turning off or unavailable. Also enables the unload reminder.",
       "label": "Unload Confirmation Entity"
     },
     "unload_track_without_door": {
-      "doc": "Run the unload reminder on a device with no Door Sensor Entity and no Unload Confirmation Entity, and confirm the unload from your own automation instead: press the \"Mark Unloaded\" button entity, or call the ha_washdata.mark_unloaded service. Ignored when a Door Sensor Entity is set, which already provides the signal.",
+      "doc": "Run the unload reminder without a door sensor or confirmation entity. Confirm the unload from your own automation with the \"Mark Unloaded\" button or the ha_washdata.mark_unloaded service. Ignored when a Door Sensor Entity is set.",
       "label": "Confirm Unload Manually"
     },
     "watchdog_interval": {
-      "doc": "How often the background watchdog checks for stalled sensors and elapsed timeouts. Default 30 s.",
+      "doc": "How often the background check looks for stalled sensors and timeouts. Default 30 s.",
       "label": "Watchdog Interval"
     },
     "share_name": {
-      "doc": "Publish your connected account name as the uploader of cycles you share. Off: they are shared without a name."
+      "doc": "Show your account name as the uploader of cycles you share. Off: shared without a name."
     }
   },
   "setting_group": {
@@ -1696,7 +1700,7 @@
     "match_sure": "~{pct}% sure",
     "match_uncertain": "Uncertain: {top} or {runner}",
     "match_uncertain_single": "Uncertain: maybe {top}",
-    "match_uncertain_tip": "WashData has not settled on a program yet. The figure is how often the leading guess, {top}, turned out to be right in recorded cycles when it was this far ahead of the runner-up. It is for information only and does not change how cycles are detected or labelled.",
+    "match_uncertain_tip": "WashData has not settled on a program yet. The figure is how often the leading guess, {top}, was right in past cycles when it led by this much. Information only.",
     "preparing": "Preparing…",
     "ready": "Ready to process",
     "rebuilding": "Rebuilding…",
@@ -1771,14 +1775,14 @@
       "off_delay_pauses": "Sized to outlast real pauses: p95 intra-cycle pause {p95}s + 60s buffer, from {pauses} pauses across {cycles} clean cycles (floor {floor}s).",
       "match_interval": "Based on observed update cadence (median={median}s) * 10.",
       "match_interval_capped": "Capped so {persistence} consecutive matches fit in {pct}% of the shortest program ({shortest}s); the update cadence (median={median}s) alone would have suggested a longer interval.",
-      "match_interval_floored": "The shortest program ({shortest}s) alone would cap this at {cap}s, below the {minimum}s minimum, so it is held there: {persistence} consecutive matches take {budget}s, which is more than {pct}% of that program. Matching only runs when a reading arrives (median={median}s), so the minimum costs nothing.",
+      "match_interval_floored": "The shortest program ({shortest}s) would cap this at {cap}s, below the {minimum}s minimum, so the minimum is used: {persistence} consecutive matches take {budget}s, over {pct}% of that program. Matching only runs when a reading arrives (median={median}s), so this costs nothing.",
       "max_duration_ratio": "Based on labeled cycle durations (p95={p95}).",
       "min_power": "40% of the p05 lowest active power ({p05}W) across {cycles} clean cycles, keeping the off-gate below real draw.{excl}",
       "completion_min_seconds": "Half the p05 clean-cycle duration ({minutes} min) across {cycles} cycles; filters ghost cycles.{excl}",
       "min_off_gap": "Based on {gaps} observed inter-cycle gaps (p05={p05}s). Device floor: {floor}s.",
       "min_off_gap_bridge": "Sized to bridge the longest quiet stretch inside a cycle: {span}s + 60s buffer, from {spans} bridged gaps across {cycles} clean cycles (stays under your {ceiling}s back-to-back headroom).",
       "standby_floor": "Every recent cycle was still drawing {idle}W when it ended, so a threshold below that can never see the appliance switch off. Kept above it; the {cycles} clean cycles on record never paused under it for more than {pause}s.",
-      "thr_batch": "Kept just above the p05 lowest active power across {cycles} cycles ({p05}W) so a start is caught as early as possible and the stop threshold stays below the machine's lowest running power.",
+      "thr_batch": "Just above the lowest active power (p05) across {cycles} cycles ({p05}W), so starts are caught early and the stop threshold stays below the lowest running power.",
       "max_duration_ratio_default": "Back to the default: a lower ceiling rejects the right programme whenever a run is longer than usual.",
       "min_duration_ratio_default": "Back to the default: a higher floor stops a running cycle from being recognised until it is well under way.",
       "end_energy_floor": "Raised to the floor the stop threshold ({stop} W) over the off delay ({off_delay} s) implies; below it the cycle can only end through a fallback path."
@@ -1996,9 +2000,9 @@
     "status_tip": "Cycle outcome: Completed (natural end), Interrupted (abrupt power drop), Force Stopped (manual), or Needs Review (feedback pending).",
     "date_tip": "Date and time the cycle started.",
     "duration_tip": "Total cycle run time from start to end.",
-    "energy_tip": "Total energy consumed (kWh). Computed by integrating power over time.",
+    "energy_tip": "Total energy used (kWh), computed from power over time.",
     "cost_dynamic_tip": "Time-weighted: charged at the price in force during the cycle (effective {price} {cur}/kWh).",
-    "cost_tip": "Energy cost for this cycle, frozen at completion. With Time-Weighted Cost on, the power trace is charged at the price in force at each moment; otherwise energy x the single price in effect at the end. Set a price under Settings to populate it.",
+    "cost_tip": "Energy cost of this cycle, fixed when it finished. With Time-Weighted Cost on, each moment is charged at its own price; otherwise at the price at the end. Set a price in Settings to fill this in.",
     "confidence_tip": "Profile match confidence (0-100%). How closely the cycle power curve matched the identified program.",
     "flags_tip": "Review, anomaly and source flags for the cycle. Hover an icon for detail.",
     "dbg_conf": "Conf",
@@ -2030,7 +2034,7 @@
     "finished": "The cycle reached a terminal state and ended.",
     "match_reverted": "The program fell back to detecting: its score dropped well below its own peak.",
     "verified_pause": "The live alignment confirmed (or released) a pause inside the program. While it holds, the cycle is not ended.",
-    "stalled": "The cycle sat on its standby draw for longer than this program ever pauses there, with work still to do. Shown as Paused (Stalled); the cycle stays open."
+    "stalled": "The cycle sat at standby draw longer than this program ever pauses there, with work left. Shown as Paused (Stalled); the cycle stays open."
   },
   "store": {
     "browse": "Browse",
@@ -2114,24 +2118,24 @@
     },
     "phase0": {
       "washer": "WashData is already detecting your cycles. Record your first cycle to enable program names and time estimates.",
-      "dishwasher": "WashData is watching. Dishwashers have complex cycles – recording your first cycle is strongly recommended. If a detected cycle runs too long, use the cycle editor to trim it before saving as a profile.",
+      "dishwasher": "WashData is watching. Dishwasher cycles are complex, so record your first cycle. If a detected cycle runs too long, trim it in the cycle editor before saving it as a profile.",
       "generic": "WashData is watching. Record or label a detected cycle to start building profiles."
     },
     "phase1a": {
-      "labelled": "Good start – your first program is saved. For the cleanest data, consider recording your next cycle with the recorder widget."
+      "labelled": "Good start: your first program is saved. For the cleanest data, record your next cycle with the recorder."
     },
     "phase1b": {
-      "recorded": "Your recording was saved as {profile_name}. Now record or label your other common programs to build coverage."
+      "recorded": "Your recording was saved as {profile_name}. Now record or label your other common programs."
     },
     "phase1c": {
-      "verify": "You have {count} programs from the community. Run a cycle to verify WashData recognises it correctly – matching will improve as your device builds its own history."
+      "verify": "You have {count} programs from the community. Run a cycle to check WashData recognises it; matching improves as your device builds its own history."
     },
     "phase2": {
-      "cluster": "WashData has seen {count} cycles that don't match any saved program – they look similar to each other. Want to create a new profile for them?",
+      "cluster": "WashData has seen {count} similar cycles that match no saved program. Create a new profile for them?",
       "unmatched": "Your last cycle didn't match any saved program. Is it a new program?"
     },
     "phase3": {
-      "suggestions": "WashData has settings recommendations based on your cycle history – review them to improve detection accuracy."
+      "suggestions": "WashData has setting suggestions from your cycle history. Review them to improve detection."
     },
     "phase4": {
       "healthy": "This device is fully set up ({profile_count} profiles)."

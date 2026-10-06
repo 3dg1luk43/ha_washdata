@@ -16,6 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Pytest fixtures for ha_washdata tests."""
 import asyncio
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -23,9 +24,6 @@ import pytest
 from unittest.mock import MagicMock
 
 pytest_plugins = ["pytest_homeassistant_custom_component"]
-
-# Ensure mocks are loaded before anything else
-# import tests.mock_imports  # pylint: disable=unused-import
 
 # Per-test timeout for the slow tier (audit TESTING-18). pytest.ini sets 60 s for
 # everything else, so a hung async test fails in a minute instead of holding a
@@ -330,3 +328,85 @@ def _reject_unsendable_service_payloads():
         WashDataManager.__init__ = original_init
         for hass in built:
             _validate_recorded_service_calls(hass)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# A MagicMock hass has no config dir.
+#
+# `hass.config.path()` on a MagicMock returns another MagicMock, and HA's `Store`
+# writes to its `__fspath__`: `MagicMock/mock.config.path()/<id>` under the cwd,
+# i.e. the repo root. The stores ProfileStore builds beside the one most tests
+# patch (`.active`, the `.pre_import` undo snapshot) wrote 1936 such files in a
+# day, and a later MagicMock that got a recycled id could read one back. Give the
+# mock a real directory, as `mock_hass` above does
+# (`hass.config.path = lambda *a: str(tmp_path.joinpath(*a))`), or patch the Store.
+# ──────────────────────────────────────────────────────────────────────────────
+@pytest.fixture(autouse=True)
+def _no_store_write_through_a_mock_config_path():
+    """Fail the test whose Store write would land at a MagicMock path (nothing is written)."""
+    from homeassistant.helpers.storage import Store
+
+    original = Store._write_prepared_data
+    stray: list[str] = []
+
+    def _guarded(self, mode, json_data):
+        if not isinstance(self.path, str):
+            stray.append(self.key)
+            return
+        original(self, mode, json_data)
+
+    Store._write_prepared_data = _guarded
+    try:
+        yield
+    finally:
+        Store._write_prepared_data = original
+    if stray:
+        pytest.fail(
+            f"Store write(s) for {sorted(set(stray))} through a MagicMock "
+            "hass.config.path(); see the note above this fixture in tests/conftest.py",
+            pytrace=False,
+        )
+
+
+def _stray_mock_files(config) -> int:
+    root = Path(str(config.rootpath)) / "MagicMock"
+    return sum(1 for p in root.rglob("*") if p.is_file()) if root.is_dir() else 0
+
+
+def pytest_sessionstart(session):
+    session.config._washdata_stray_mock_files = _stray_mock_files(session.config)
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Backstop for writers other than Store (an export to `hass.config.path(...)`)."""
+    if hasattr(session.config, "workerinput"):
+        return
+    before = getattr(session.config, "_washdata_stray_mock_files", 0)
+    after = _stray_mock_files(session.config)
+    if after > before:
+        reporter = session.config.pluginmanager.get_plugin("terminalreporter")
+        if reporter is not None:
+            reporter.write_line(
+                f"\n{after - before} new file(s) under {session.config.rootpath}/MagicMock: "
+                "a test wrote through a MagicMock hass.config.path() (tests/conftest.py)",
+                red=True,
+            )
+        session.exitstatus = 1
+
+
+@pytest.fixture(autouse=True)
+def _logging_state_restored():
+    """Undo what an in-process devtools harness does to logging for its own process.
+
+    ``end_gate_eval.main`` sets the package logger to ERROR and a replay job calls
+    ``logging.disable``; neither is restored, so every ``caplog`` test that ran
+    after one on the same worker captured nothing (test_issue_439's "logged once"
+    and test_ws_contract's debug line failed whenever both tiers ran together).
+    """
+    loggers = [logging.getLogger(name) for name in ("custom_components.ha_washdata", "homeassistant")]
+    disabled = logging.root.manager.disable
+    levels = [lg.level for lg in loggers]
+    yield
+    logging.disable(disabled)
+    for lg, level in zip(loggers, levels):
+        lg.setLevel(level)

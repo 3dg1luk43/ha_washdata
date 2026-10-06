@@ -11,262 +11,169 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### TL;DR
 
-- Washers and dishwashers report the end sooner, standby endings included; no cycle ends early in replays.
-- Labels come from a match on the whole cycle; matching is more accurate (washers and store programs most) at half the CPU.
-- The right program shows more often, with its odds while unsure; phases, time remaining and projected energy are realistic.
-- No splits or lost cycles from daylight-saving changes, sensor dropouts or restarts; no dishwasher stuck in Drying.
-- No double-counted cycles or false-start pushes; held notifications survive a restart; review answers stay yours.
-- Every cycle and its full power trace are kept; exports are 4-5x smaller and a replace import can be undone.
-- Far fewer store writes and much less CPU; the panel opens faster and stays smooth on phones.
-- Store downloads are quality-checked, deduplicated and cannot take over your programs.
-- Services validate their input and respect user permissions; sidebar notifications work again.
-- A simpler panel: internals hidden, one suggestion list, fewer review prompts; Playground Optimize weighs end delay and splits.
-- New: your own maintenance reminders, a Stalled state for halted cycles, and Idle between cycles.
-- Counts, numbers and costs read right in every language.
-- Harmful suggestions, four no-op settings and the experimental ML that never helped are gone.
+- Cycles end sooner, washers and dishwashers most; no early ends in replays.
+- Better program recognition; labels come from the whole cycle; far fewer review prompts.
+- No lost or split cycles from restarts, sensor dropouts or daylight saving.
+- New Stalled and Idle states; the running sensor stays on for the whole cycle.
+- Your own maintenance reminders.
+- Every cycle and trace kept; exports 4-5x smaller; imports can be undone.
+- Much less CPU, disk and recorder load; a faster, simpler panel.
+- Safer store downloads and permission-checked services.
+- Harmful suggestions, no-op settings and unused ML removed.
 
 ### Breaking changes
 
-- **`binary_sensor.<device>_running` stays on for the whole cycle** ([#464](https://github.com/3dg1luk43/ha_washdata/issues/464)), through soaks, pauses and the end wait. It used to turn off in each of them; automations that treat "off" as finished now fire only when the cycle is over.
-- **The state sensor no longer has a `samples_recorded` attribute** (it changed on every reading; the debug sensor still has `samples`). **Elapsed time** updates in whole minutes.
-- **Services validate their input**: a value of the wrong type is now a validation error instead of being guessed or crashing, and `export_config`, `import_config` and `trigger_ml_training` are administrator-only.
-- **Store**: publishing, rating and confirming are administrator-only, and adopting a shared setup no longer copies Off Delay, Minimum Off Gap, the power-off settings or the match interval (they depend on the sharer's plug).
-- **Store: your name is no longer published with what you share** unless you turn on "Show my name on what I share" (Preferences > Online). Names on cycles already shared stay until you remove them on the website.
+- **`binary_sensor.<device>_running` stays on for the whole cycle** ([#464](https://github.com/3dg1luk43/ha_washdata/issues/464)), through soaks, pauses and the end wait. Automations that treat "off" as finished now fire only at the real end.
+- **The state sensor can read `idle`** (display on between cycles) where it read `off`, **and `paused` while a cycle is stalled.** Automations waiting for `off` should accept `idle` too, or use the running sensor.
+- **Fewer recorder writes**: the state sensor drops `samples_recorded` (the debug sensor keeps `samples`), the total duration sensor drops `last_updated`, elapsed time moves in whole minutes and progress in whole percent.
+- **Services validate their input and check permissions**: a wrong type is a validation error, and `export_config`, `import_config` and `trigger_ml_training` are administrator-only. `auto_label_cycles` without a threshold uses the device's Auto-label confidence (was 0.75).
+- **Store**: publishing, rating and confirming are administrator-only; adopting a setup no longer copies Off Delay, Min Off Gap, the power-off settings or the match interval; your name is published only with "Show my name on what I share" (Preferences > Online & Community).
 - **Removed settings**: End Repeat Count, Smoothing Window, Profile Duration Tolerance and Phase-aware time remaining. Stored values are ignored.
-- **Every cycle and its full power trace are kept**: the 200-cycle limit and the "Power Traces Kept" settings are gone, so your history and its charts keep growing (about 1 MB per appliance per year, about 3 MB with Save Debug Traces on). Cycles whose trace an earlier version already dropped stay without one. Program curves draw on the whole history once a program has more than about 20 recorded cycles.
-- **Older unlabelled cycles are labelled by the nightly maintenance**, not at every cycle end, when a new program makes them a clear match.
-- **Removed suggestions**: the confidence thresholds, Sampling Interval, smoothing, start duration, end repeat count and the duration tolerances are no longer suggested.
-- **Experimental ML**: the early program commit (31% of its early picks wrong), the quality gate (never fired where it could act) and the matching-weights tuner (never improved a real install) are removed; the end guard (no early end prevented, washer ends 5 minutes later) and the time-remaining model (worse than the standard estimate on 7 of 8 installs) stay off even with ML models enabled, and on-device training now trains only the energy model. The "Calibrated" suggestions and the per-cycle "Cycle health" chip are gone.
-- **Review queue**: WashData asks you to confirm a cycle only when it could not label it with a clear margin over the next-best program, or for a program's first 2 cycles (was 5). A labelled cycle between 0.6 and 0.9 confidence used to be queued too. "Needs review" lists the cycles waiting for your answer, the same number as the Overview card; interrupted and force-stopped cycles keep their own filters.
-- **Panel moves**: Maintenance is under Cycles, energy price and cost under Settings > Basic, the gear dialog is called Preferences, and low-level tuning (sampling, watchdog, match cadence, start thresholds) is behind "Show internal settings" unless the device has its own value.
-- **Panel removals**: the Playground's matcher weights, idle-termination test and DTW / Envelope-fit view; the Overview "Tools & Data" card; the raw "replace all from JSON" import (the selective import and the `import_config` service remain). Playground presets stay; a preset saved with matcher weights loads without them.
-- **Labels** come from a match on the whole finished cycle, so a cycle can be labelled with a different program than the one shown while it ran.
-- **Projected energy** appears from 10% progress (was 3%).
-- **The phase shows only your program's own phases**: with no phase ranges on the matched program, or between or after them, the phase sensor and `active_phase` are `unknown` instead of an English guess ("Spinning", "Drying", "Rinsing/Soaking", "Running"). The state sensor is unchanged.
-- **Dishwashers finish quickly after the plug is pulled mid-cycle**, without enabling ML models: a sudden drop to 0 W long before the program's usual quiet spells used to be held for 75 to 121 minutes by the dishwasher end waits and then stored as completed. With a program recognised (or picked by hand), it now closes about 5 minutes after the drop. Replaying 285 pulled dishwasher cycles it fired on 172; on 213 real cycles it changed no end.
-- **No "finished" notification for a false start**: an interrupted cycle (too short to count) no longer sends the finish notification or the unload reminder, and its start card is cleared. A force-stopped cycle still notifies; the new `{status}` placeholder tells the two apart.
-- **`sensor.<device>_total_duration` has no `last_updated` attribute** (it wrote a recorder row every few seconds); use the state's own last-changed time.
-- **The `auto_label_cycles` service without a threshold uses the device's Auto-label confidence**, not 0.75, like the panel's Auto-label button now does.
-- **The progress sensor reports a whole percent**, and its projected energy and cost attributes update when the percent changes: it wrote a recorder row on every estimate.
-- **Dishwasher and dryer service reminders follow the device**: a device that never saved its reminders gets salt / rinse aid / filter (dishwasher) or lint filter / condenser (dryer) instead of the washer's descale and drum-clean defaults.
-- **The state sensor can read `idle` where it read `off`** (display left on after or before a cycle) **and `paused` while a cycle is stalled.** Automations waiting for `off` after a cycle should accept `idle` too, or use `binary_sensor.<device>_running` turning off.
-- **WebSocket API**: see "For developers" below.
+- **Every cycle and its full power trace are kept** ([#459](https://github.com/3dg1luk43/ha_washdata/issues/459)): the 200-cycle limit and "Power Traces Kept" are gone (about 1 MB per appliance per year, 3 MB with Save Debug Traces on).
+- **Labels come from a match on the whole finished cycle**, so a label can differ from the program shown while it ran. Older unlabelled cycles are labelled by the nightly maintenance.
+- **Review queue**: WashData asks only when a label's lead over the next program is small, or for a program's first 2 cycles (was 5, plus every match between 0.6 and 0.9 confidence).
+- **The phase sensor shows only your program's own phases**, `unknown` elsewhere instead of an English guess. Projected energy appears from 10% progress (was 3%).
+- **No "finished" notification for a false start**: an interrupted cycle sends no finish notification or unload reminder. Force-stopped cycles still notify; the new `{status}` placeholder tells them apart.
+- **Dishwashers and dryers get their own default service reminders** (salt, rinse aid, filter; lint filter, condenser) instead of the washer's.
+- **Experimental ML**: the early program commit, the quality gate and the matching-weights tuner are removed; the end guard and the time-remaining model stay off even with ML enabled; on-device training trains only the energy model. The "Calibrated" suggestions and the "Cycle health" chip are gone.
+- **Panel**: Maintenance moved under Cycles, energy price under Settings > Basic, the gear dialog is now Preferences, and low-level tuning is behind "Show internal settings". Removed: the Playground matcher weights, idle-termination test and DTW view, the Overview "Tools & Data" card, and the raw "replace all from JSON" import.
+- **WebSocket API**: see "For developers".
+
+### Features
+
+- **Your own maintenance reminders** (discussion #461): any task every N cycles and/or N days, done in one click, and a "Maintenance due" binary sensor for your own notification. New default tasks start counting from the upgrade. Thanks to @dafunkydan
+- **Stalled cycles** (discussion #452): a cycle halted on standby draw (an unbalanced load stopping a washer at 4-5 W) shows `paused` with sub-state Stalled and fires `ha_washdata_cycle_stalled`; it continues when the machine resumes. Thanks to @gouthamravee
+- **Idle between cycles**: an appliance with its display on shows `idle`, and `off` only when really off.
+- **"Uncertain: Cotton 40 or Synthetics 30, ~45% sure"**: until WashData settles on a program, Overview names the two leading programs and how often that lead proved right.
+- **The cycle chart shows the recorder history around a cycle** (discussion #463), 10 minutes by default, display only. Thanks to @bartbutenaers
+- **The cycle dialog shows the suspected program and the runner-up** for a cycle waiting for your confirmation ([#462](https://github.com/3dg1luk43/ha_washdata/issues/462)). Thanks to @TRON4R
+- **Undo last import**: Export / Import keeps a restore point from before the last import that replaced data (administrators). Imported power history is its own export category.
 
 ### Fixes
 
-- **A washer could be ended mid-wash, or lose its last half hour** (0.5.7 regression): the "appliance finished but idles above its Stop Threshold" close fired at the matched program's expected end on any flat stretch under 10% of the heater's peak - a soak at 0 W, a 60 W rinse - so a wash matched to a shorter program was closed early, and the stored end was cut back to the last heating burst. Replaying 263 cycles: it fired on 8 washer cycles (none in 0.5.6), splitting 2 and cutting 6 by 6 to 31 minutes. It now closes at the expected end only on a plateau at or just above the Stop Threshold, keeps the old twice-expected wait for anything else, and trims only the plateau. All 8 are stored as in 0.5.6 again, with 0.5.7's quicker finishes kept.
-
-- **A dishwasher's silent drying phase could be cut, live and by the history correction** (0.5.7): on a machine that dries silently after its last activity, the measured drying allowance read the pause before it, so the one-time correction trimmed ~235 min ECO cycles to ~121 min (deleting the trace past the cut) and live finishes stored them at ~120 min too. Neither now stores a dishwasher below 90% of the shortest length you have confirmed for that program (a corrected duration, a recording or a golden cycle), once the run has lasted that long. The correction also leaves cycles you trimmed by hand alone, keeps a pump-out that sits below the Stop Threshold, skips a cycle with a broken start time instead of stopping halfway, and an import of your own history keeps your corrected durations.
-
-- **A dishwasher could end about 12 minutes before its final pump-out**: a fan blip a few minutes after the last heating was taken for the pump-out once the run was past 85% of its expected time. A blip now counts only after the quiet spell that program is measured to have before its pump-out, and the early release after the expected time waits for that spell too. Replaying 116 dishwasher cycles: early ends 4 to 0, mean finish delay +0.4 min, only one machine's cycles moved.
-
-- **Saving any setting reset a new device's Min Power and Off Delay**: a device keeps those two in its setup data until the first save, and applying a save read only the saved settings, so the first unrelated change fell back to the defaults (a 10 W device started cycles on a 5 W load; reproduced on a real Home Assistant). Saving now applies exactly what a restart does. A save during a cycle no longer rewinds it to the last snapshot, nine settings that needed a restart now apply at once, a new cycle no longer starts from the last one's progress, and the settings page shows an unset dishwasher Off Delay as the 180 s in force, not 1800 s.
-
-- **Uncertain matches were auto-labelled**: when the program family matched but the chosen member did not fit, or the run was already longer than that member, the match was flagged uncertain but the cycle-end labelling ignored the flag; 7 of the 12 cycles labelled that way got the wrong program. Those cycles now ask for confirmation, and the bulk auto-label service applies the same checks.
-
-- **The Playground replayed a different matcher**: it built its own program templates, so its pick differed from live on 26.5% of real matches, and it never ran the watchdog inside a silent stretch, so a soak long enough to split a wash replayed as one cycle. Both now match live exactly (0 of 592 picks differ). The replay showed one washer whose 28 minute soak exceeds its Minimum Off Gap and splits; that behaviour is unchanged, so raise the setting if your machine soaks that long.
-
-- **Washers with an anti-crease tumble could finish up to 40 minutes late**: with anti-wrinkle on, WashData waits for the final spin before it takes the tumbling as the end, and it looked for that spin where the program's averaged curve puts it, later than most real runs spin, so those runs waited for the safety cap instead. It now looks from the earliest spin your own runs of that program had. Replaying with anti-wrinkle on: 4 of 18 capped finishes now end at the spin, 26 to 42 minutes sooner, with no new early end or split.
-
-- **A cycle idling on a flat standby just under the Stop Threshold could run for hours**: the end-energy check kept such a cycle open until the 8-hour limit when no program was recognised (a washer on a 1.1 W standby closed 7 hours late). A flat reading now ends it after the normal wait at 75% of the Stop Threshold or more, and after 2 hours lower down; a dip before a standby plateau no longer skips that check. Replaying 472 recorded cycles: no end moved.
-
-- **Programs downloaded from the store were matched on one sample cycle** instead of their averaged curve, because the switch counted only your own cycles. Recognition on today's store packages: 71.4% to 76.6% right at cycle end, and 8.9 points better a quarter of the way in.
-
-- **A manual duration entered in the wrong unit poisoned its program**: a value 60 times the trace length set the program's typical length, so it could never be matched. Durations outside 0.3 to 3 times the recorded trace are now ignored with a log warning.
-
-- **Notifications held for quiet hours or until someone is home survived no restart**: they are now kept across a Home Assistant restart (for up to 24 hours) and sent, or held again, after it starts.
-
-- **A power sensor changed during a cycle was ignored until the next reload**; it now takes over when the cycle ends. Clearing a hand-picked program while paused or ending no longer shows the program as "off".
-
-- **The energy model could be replaced by a worse one**: a retrained projected-energy model is now kept only when it beats both the simple estimate and the model in use, on at least 5 held-out cycles (it used to promote on one). Over 25 devices the served error fell from 0.081 to 0.054; two dishwashers that were served worse than the simple estimate now are not.
-
-- **Exports are 4 to 5 times smaller** and quicker to make (9.8 MB to 2.0 MB on the largest test install), from the panel and the `export_config` service; they import as before.
-
-- **Imported dishwasher history kept the whole end wait**: cycles found in your recorder history were stored with the 20 to 30 minutes the detector waited before calling the end. A recognised imported cycle is now trimmed the way a live one is: 122 of 128 test cycles were over 5% too long, now 19.
-
-- **Progress could fall back from 100%** after a cycle ran past its program's usual length, and the backward smoothing depended on how often estimates ran. Both fixed; time remaining is unchanged within 0.2 minutes on average.
-
-- **Matching costs half the CPU while a cycle runs**: a Smart Termination guard added for #364 re-scored every longer program on the running prefix, which the matcher has done itself since #400; replayed on 472 cycles it never fired where a split happens and changed no end, so it is removed (35 ms to 17 ms per live match).
-
-- **A restart during a quiet spell could lose or shorten the running cycle**: after Home Assistant restarted, WashData treated the plug's first state as fresh news and forgot how long the appliance had already been quiet, and a long silent tail could be dropped on restore. The quiet time now survives the restart (the state is also saved during silence), so the cycle continues and ends once. Power during a sensor outage no longer counts toward starting a cycle or toward its live energy. If a saved cycle cannot be restored at all, WashData now logs why, keeps the snapshot for the diagnostics download and carries on, instead of dropping it silently.
-
-- **Washers showed the wrong program more often than the right one**: an early lead was committed at once even when two programs were neck and neck, and a better-fitting program could only take over while its score was still rising. A close call now has to hold twice as long before it is shown, and a clearly better program can take over. Replaying 291 cycles, washers show the right program at the end 56.5% of the time (was 52.2%) and first 34.2% (was 29.8%); dishwashers unchanged. A washer's first time-remaining estimate now appears about 2 minutes later in the median, and is right more often when it does.
-
-- **Anti-crease washers: fewer waits for the safety cap, and the crease guard no longer becomes a second cycle**: one run whose spin crossed 400 W made WashData wait for a spin on every run of that program, although most spun at 330-390 W; it now waits only when at least half the program's runs had that spin (six test runs finish 3 to 34 minutes sooner). After the anti-crease finish, a plug that reports only on change could skip the dips between tumbles and leave the tumbling to start a new cycle; it now stays part of the finished one (Miele crease guard, 20 of 20 records).
-
-- **A relabelled cycle kept speaking for the program it was taken from**: moving a cycle to another program left it as the old program's template, so a program with no cycles of its own kept being matched using someone else's run. Every relabel, merge, split and review answer now gives the old program a template of its own (or none), and existing data is repaired at startup. On the affected test washer the right program at cycle end went from 38.9% to 50.0%. A program imported without cycles is no longer deleted by the next maintenance run.
-
-- **Cycles ended later when the matcher wavered during the end wait**: an uncertain match could start a pause or stretch the wait at the last moment. Replaying 472 cycles, 19 now end earlier and none later (median delay 7.5 to 6.7 minutes). Dishwasher Eco runs without a final pump-out keep their full length instead of being cut to about 2 hours.
-
-- **Washers are recognised more often at cycle end**: the energy WashData expected from each program came from its averaged curve, which could be 20% or more off what the program's own runs use (2.5 times on one). It now uses the typical energy of the program's own cycles. Replaying 543 cycles: 77.2% right (was 76.2%), on the worst test washer 66.7% (was 55.6%); end timing unchanged.
-
-- **A pause left behind by a dropped program match could hold a finished cycle until the force stop**: when the live match confirmed a quiet phase and the program was then dropped, nothing could release that pause. It now releases after the longest quiet that program's own runs ever resumed from (at least the normal end wait, at most 3 hours). No recorded cycle reaches this, so nothing else moves.
-
-- **A restart during a washer's anti-crease tumbling started a phantom cycle**: the tumbling state was never saved, so after a restart the next drum turns counted as a new cycle. It is now saved and restored as part of the finished cycle.
-
-- **Auto-label and review answers update program curves at once**, not at the nightly maintenance.
-
-- **A standby that hovers around the Start Threshold no longer flips the state to "starting" all day**: a plug whose idle draw kept crossing the threshold showed "starting" and "off" on almost every reading (about 500 times a day, each a recorder row and a trigger for automations keyed on "starting"). Such a probe now shows "starting" only once it has used half the start energy; real starts still show it before "running". With delayed-start detection on, such a standby now stays in Waiting to Start until the wash really starts, the plug drops to off or the delay times out, instead of falling back to Off after every false start (34 flips in 2.2 days down to 1). On the reporting user's history: 1127 flips in 2.2 days down to 6, with every detected start unchanged ([#35](https://github.com/3dg1luk43/ha_washdata/issues/35)).
-
-- **Nightly maintenance now prunes debug traces**, as its description always said: a cycle's matcher debug data goes with its power trace, and all of it while "save debug traces" is off.
-
-- **A dishwasher stored about ten minutes of standby in every cycle** ([#424](https://github.com/3dg1luk43/ha_washdata/issues/424)): the check for "this run already dried" ran at the Stop Threshold, while the drying allowance it guards is measured at 0.4% of the cycle's peak. On a Beko that ends drain, 1.3 W, 0.3 W, the check found no quiet and every cycle kept the full 611 s allowance (249 min stored for a 239 min wash). Both now use the same level; the one-time history correction runs again on upgrade and now also covers dishwasher timeout finishes. Replaying the reporter's 26 cycles: stored tail 10.0 to 0.0 min, nothing else moved. Thanks to @KoLSMS.
-
-- **A dishwasher that never pauses mid-programme reached Smart Termination never** ([#424](https://github.com/3dg1luk43/ha_washdata/issues/424)): the guard against ending one program early because it looks like the start of a longer one blocked every cycle, because a three-hour program shares the first hour of the two-hour one. Each cycle then waited out the fallback, an hour on dishwasher defaults. A longer program now only blocks when its own recorded cycles have paused below the Stop Threshold; this one never drops below 1.44 W until the machine switches off. Over 689 replayed cycle ends the guard's false blocks fall from 27.0% to 20.6% with the same split protection, and on 255 full replays no cycle ends earlier or splits. Thanks to @TRON4R for the exports and the analysis.
-
-- **A Stop Threshold below standby now corrects itself** ([#458](https://github.com/3dg1luk43/ha_washdata/issues/458)): the suggested Stop Threshold is 0.8 x the lowest power seen in a cycle, and a standby reading inside the trace made that 0.8 x standby (1.76 W on a 2.2 W idle), so no cycle could end and each ran to the 6 hour limit. When every recent cycle ends at standby, WashData now suggests a threshold 25% above it, only if your clean cycles never paused under that for half the Off Delay, and never one at or below standby. Thanks to @protik77.
-
-- **Force-stopped cycles stopped producing suggestions** ([#458](https://github.com/3dg1luk43/ha_washdata/issues/458)): hours of a stuck cycle's standby readings filled the update-interval statistics behind the Watchdog Interval and No-Update Timeout suggestions. Intervals now count only once a cycle ends on its own, and force- or user-stopped cycles no longer trigger the suggestion passes.
-
-- **A cycle whose trace was pruned kept getting flagged for review** ([#459](https://github.com/3dg1luk43/ha_washdata/issues/459)): the nightly health check scored cycles without their trace, which the model reads as ~99% suspect, so each new cycle past the trace limit put one old cycle in the review queue at 1% health. A cycle without a trace keeps its last real score, or shows none, and no longer counts towards the queue; its stale anomaly markers go with the trace. Thanks to @TRON4R.
-
-- **Power traces kept per program is now a setting** ([#459](https://github.com/3dg1luk43/ha_washdata/issues/459)): Settings, Timing & Watchdog, Housekeeping. Default 20, minimum 1; a change applies without a restart.
-
-- **Across a daylight-saving change a wash could split in two or be stored an hour short**: elapsed time was computed on local clock time, so a soak over the spring-forward hour counted an hour too much quiet and a fall-back cycle stored 31 minutes for a 91 minute run. Quiet hours were released an hour off on those nights, on fall-back inside the quiet window. All interval arithmetic now runs in UTC.
-
-- **Sidebar notifications never appeared**: the fallback for devices without a notify target and the auto-pause timer card went through an API Home Assistant has removed, so they failed silently. They now reach Home Assistant.
-
-- **A finished cycle could be reopened and counted twice**: within 20 minutes of an interrupted or force-stopped cycle, any restart or settings save reopened it, so its energy was added to the lifetime total twice and a second "finished" notification went out. A save during the end of a cycle could also restore its snapshot. Both are gone.
-
-- **A match from the previous cycle could carry into the next one**: a match started on the reading that ended a cycle finished after it, so the next cycle began already matched. Such results are now dropped.
-
-- **Your answers in the review queue could be overwritten**: confirming or correcting a cycle kept the matcher's label source, so Auto-label replaced your answer. Answers are now stored as yours, and existing ones are repaired on upgrade. A cycle the label gate refused is no longer auto-labelled by the learning step instead.
-
-- **Labels now come from the finished cycle**: the label was decided on the last mid-cycle match, whose winner differed from a match on the whole cycle in 17.5% of cycles. Every cycle end now runs one match on the complete trace and labels from it, with the same margin and uncertainty checks everywhere.
-
-- **The displayed program flickered**: a weak match was shown and dropped again on every check (38 of 580 cycles), and during a pause two close programs could alternate. Both now need the usual agreement before they show.
-
-- **Matching is more accurate, measured on real cycles**: program templates now sit on the same time grid as the cycle being matched, the shortest-duration check waits 15 minutes, and mid-cycle the duration counts less than at the end. Leave-one-out over 2478 cycle cuts, correct program: complete cycle 75.1% to 76.4%, at 75% elapsed 66.2% to 68.1%, at 25% 55.6% to 57.3%.
-
-- **The program shows sooner**: until the first program is committed, WashData matches every 150 s instead of 300 s, because on a plug reporting every 30 s the 300 s try had too few points. The right program is shown for 61% of the cycle instead of 56%.
-
-- **Washers end sooner after their last pause**: once a program is matched with confidence, the wait for the end is sized from the longest pause that program's own recorded cycles ever made from that point on, instead of the device's Minimum Off Gap. Replaying 293 cycles: washer median finish delay 10.6 to 10.0 minutes, dishwashers 5.0 to 4.5, no early ends or splits added.
-
-- **Smart Termination is blocked less often by a longer look-alike program**: a longer program whose overall shape resembled the run blocked the quick finish even when the run did not fit its start, which cost washers a median 3.9 minutes per cycle. Only a longer program that fits the run so far blocks it now. Across this release, replaying 293 cycles: washer median finish delay 15.8 to 10.0 minutes, no cycle ends early any more (one ended two hours early before), and splits are unchanged.
-
-- **Time remaining could stay at 36 s through a long overrun, and jumped wrongly after a program switch**: it now reaches 0 once the program's time is up, and starts fresh for the new program after a switch or a manual pick.
-
-- **Projected energy was up to 2.5x too high early in a cycle**: it assumed energy is used evenly over time, but heating comes first. It now follows the matched program's own energy curve and appears from 10% progress. Average error at 25% progress: 112% to 20%; at 50%: 45% to 10%.
-
-- **A resumed wash could end at the next pause, and Stop stored the time after the wash**: the final spin could become a second cycle; Smart Termination ignored a user pause; pressing Stop 30 minutes after a wash ended stored those 30 minutes; and after a restart Smart Termination waited for the timeout.
-
-- **Ratings given from Home Assistant now count in the store**: rating an appliance wrote only your rating, never the totals the store and website show, so it was invisible there. Both now go in one write, as on the website. Opening a shared program's cycles also costs one store read instead of one per cycle: ratings come from the totals on each cycle.
-
-- **Store downloads are checked before they shape your programs**: a shared recording now needs at least 30 readings, no gap over 15 minutes and a plausible length, and a recording you already have under any name is skipped (14% of the community recordings are copies). A downloaded recording no longer becomes the template of a program that has your own cycles; one could cost up to half of a program's correct matches. Adopted settings no longer include another plug's timing (Off Delay, Minimum Off Gap, power-off and match interval), and duration ratios stay within the shipped bounds.
-
-- **Services ignored user permissions**: a read-only user could import or export the whole configuration, including to a public web folder, and the import service replaced this device's power and door sensors with the exporter's. Services now apply the same admin and access checks as the panel.
-
-- **History import offered cycles you already had**, and one "unavailable" reading split a wash in two. Recorded cycles are now recognised by overlap, and short dropouts are bridged.
-
-- **The running sensor turned off during soaks and pauses**, so automations treating "off" as done fired mid-cycle. It now stays on for the whole cycle.
-
-- **Smaller fixes**: the cycle counter counted two per cycle on new installs and milestones fired one early; an unlabelled cycle announced "finished None"; a broken imported template could win a match; diagnostics did not redact changelog rows for sensitive settings; 40 panel texts had no translation; every entity was rewritten every 30 seconds and each power reading rebuilt every program's statistics about 40 times.
-
-- **Every minute of every cycle rewrote the whole WashData store**: the in-flight snapshot lived in the main file, 6.7 MB per save and over 1 GB across a 4 hour cycle on a large install, freezing Home Assistant briefly each time and wearing SD cards. It now has its own small file.
-
-- **The panel rebuilt every tab on every refresh**, up to a quarter second with many cycles loaded and over a second on a phone. Only the open tab is built now. A failed load shows an error with Retry instead of "No devices configured yet" or an endless "Loading settings", and a lost connection shows a "Connection lost" note instead of a frozen "Running".
-
-- **Auto-label and "Download this setup" run in the background**, with progress in the header and a cancel button, instead of holding the panel for up to a minute. A download now saves once instead of once per recording.
-
-- **A restart re-sent cycle reminders**: "Add softener" arrived twice, and an auto-pause timer could pause the cycle (and cut its power) again. A reminder held by quiet hours is no longer delivered after the cycle finished.
-
-- **The Store search reads the published catalog**, so it costs the free store budget almost nothing, and every model of an appliance type is found. On the store website, brands after the 60th (Miele, Siemens, Samsung, Whirlpool...) appear again with "Load more".
-
-- **A non-numeric value in a numeric setting stopped the device from loading** at the next restart. Saves and imports now drop such values, and a device that already has one loads again with the default.
-
-- **Services check their input**: a wrong type now gives a clear validation error instead of a crash, and a service always acts on this integration's own entry of the device. Read-only users can no longer cancel an administrator's import, and only administrators can publish to the store.
-
-- **Reconfiguring a device restarted it twice**, interrupting a running cycle. It now applies in place.
-
-- **A dishwasher that dries silently for over an hour could be ended before its final pump-out**: the quiet wait was sized from cycles that had been closed before their pump-out, so it fired 6 to 11 minutes early and the pump-out could even be recorded as a separate short cycle. The wait is now at least as long as the longest pause that program has ever resumed from. Replaying 213 dishwasher cycles: ends more than 5 minutes early 8 to 0, median delay unchanged.
-
-- **A power sensor dropping out mid-cycle could end the cycle or split it in two**: while the plug was unavailable, WashData counted the silence as the appliance being quiet. An outage is now neither quiet nor activity; the cycle waits for the plug to report again, and a sensor that stays dead is still force-stopped as before. Replaying cycles with an injected 15-minute outage: splits 10.5% to 2.1%, early ends 2.1% to 0.
-
-- **An error while matching a finished cycle could lose the cycle**: the final match runs before the cycle is saved, and nothing caught a failure there. The cycle is now saved unlabelled, and the end-of-cycle cleanup (saving, returning to idle) always runs. The almost-done reminder also reaches plugs that stay silent near the end, and deleting a program no longer leaves its curve behind.
-
-- **A dishwasher could stay in Ending / Drying for hours after it finished** ([#375](https://github.com/3dg1luk43/ha_washdata/issues/375), reported again on 0.5.7): when the live alignment had confirmed a drying pause shortly before the end, the release that ends it only ran on a match, and a dishwasher stops matching once it has been quiet for 5 minutes. If Smart Termination was also held back (an uncertain or low-confidence match), the cycle waited for the force stop: about 8 hours on a plug that keeps reporting 0 W, 4.5 hours on one that goes silent, stored as force-stopped. The release now runs there too, so the reported case ends at the program's expected length with either kind of plug; in replays one such cycle ends 224 minutes sooner and nothing else moves. Thanks to @michir16 for the report and the analysis.
-
-- **A program dropped mid-cycle could still end the cycle**: when a match faded and the display went back to detecting, the end detection kept that program's expected length and Smart Termination. It now forgets the match, as it does when nothing matches. A non-numeric unmatch threshold (from an imported config) no longer stops matching.
-
-- **A program you picked by hand is never queued for review**: during a program's first cycles, or when the match was too close to call, WashData still asked you to confirm its own guess over your choice.
-
-- **Less work on every Home Assistant start and cycle end**: each start re-ran the matcher on every labelled cycle it disagreed with (typically ones you relabelled), for good; it now tries each once. A cycle end now writes the store once instead of six times (each write is the whole file), rebuilds only the program that got the cycle and reads a quarter of the stored traces; between cycles a power reading refreshes the entities once.
-
-- **Apply all no longer sets the stop or start threshold at the appliance's resting draw**: on a dishwasher that dries at 0.8 W or a washer that idles at 3.3 W between tumbles, the suggested thresholds landed at or below that level, so cycles ended up to 30 minutes late, were force-stopped or split in two. Those suggestions are now withheld; on the other 18 test devices nothing changes.
-
-- **Less recorder churn**: the state sensor no longer carries `samples_recorded` (it changed on every reading; the debug sensor still has it), and elapsed time moves in whole minutes. The manual recorder saves every 5 minutes instead of every minute.
+#### Cycle ends: washers
+
+- **A washer could be ended mid-wash or lose its last half hour** (0.5.7 regression): the "idles above the Stop Threshold" close fired on any flat stretch, such as a soak. It now needs a plateau at or just above the Stop Threshold.
+- **Washers finish sooner**: the end wait follows the longest pause the program's own runs made, only a longer program that fits the run so far blocks Smart Termination, and a wavering match no longer stretches the wait. Replaying 293 cycles: median finish delay 15.8 to 10.0 minutes, no early ends.
+- **Anti-crease washers waited up to 40 minutes for the safety cap**: the final spin is now looked for where your own runs had it. The crease tumbling no longer becomes a second cycle on report-on-change plugs or after a restart.
+
+#### Cycle ends: dishwashers
+
+- **A dishwasher could end before its final pump-out**, on a fan blip or during a long silent drying: the wait now covers the quiet that program has before its pump-out. Early ends in replays: 8 to 0.
+- **A dishwasher's silent drying could be cut** (0.5.7), live and by the history correction: a dishwasher is never stored below 90% of the shortest length you confirmed for that program.
+- **A dishwasher could stay in Ending / Drying for hours** ([#375](https://github.com/3dg1luk43/ha_washdata/issues/375)): a confirmed drying pause is now released even after matching has stopped. Thanks to @michir16 for the report and the analysis.
+- **A dishwasher stored about ten minutes of standby in every cycle** ([#424](https://github.com/3dg1luk43/ha_washdata/issues/424)): the "already dried" check now uses the right power level, and history is corrected once on upgrade. Thanks to @KoLSMS.
+- **A dishwasher that never pauses mid-program never reached Smart Termination** ([#424](https://github.com/3dg1luk43/ha_washdata/issues/424)) and waited out the hour-long fallback: a longer program now blocks it only if that program's own runs pause. Thanks to @TRON4R for the exports and the analysis.
+- **A dishwasher unplugged mid-cycle was held for 75 to 121 minutes**: with a recognised program it now closes about 5 minutes after the drop.
+- **Imported dishwasher history kept the 20-30 minute end wait**: recognised imported cycles are now trimmed like live ones.
+
+#### Standby and thresholds
+
+- **A cycle on a flat standby just under the Stop Threshold could run for hours**: it now ends after the normal wait (2 hours when the standby is far below the threshold).
+- **A Stop Threshold below standby now corrects itself** ([#458](https://github.com/3dg1luk43/ha_washdata/issues/458)): the suggestion no longer lands under the standby draw, which kept every cycle open to the 6-hour limit. Thanks to @protik77.
+- **A standby hovering at the Start Threshold flipped to "starting" all day** ([#35](https://github.com/3dg1luk43/ha_washdata/issues/35)): "starting" now needs half the start energy, and delayed start stays in Waiting to Start. 1127 flips in 2.2 days down to 6, every real start unchanged.
+- **A display left on, or a short blip, cleared Clean and the unload reminder**: after a cycle only the Start Threshold opens a new one, and a false start returns to the previous state.
+
+#### Restarts, dropouts and clock changes
+
+- **A restart during a quiet spell could lose or shorten the cycle**: the quiet time now survives the restart. A cycle that cannot be restored is logged and kept for the diagnostics download.
+- **A power sensor dropout could end or split a cycle**: an outage now counts as neither quiet nor activity. With a 15-minute outage, splits 10.5% to 2.1%.
+- **Across a daylight-saving change a wash could split or be stored an hour short**, and quiet hours ended an hour off: time maths now runs in UTC.
+- **A finished cycle could be reopened and counted twice** by a restart or save within 20 minutes; a match could carry into the next cycle; an error in the final match could lose the cycle. All fixed.
+- **Saving any setting reset a new device's Min Power and Off Delay**: a save now applies exactly what a restart does, no longer rewinds a running cycle, and nine settings that needed a restart apply at once.
+- **Reconfiguring a device restarted it twice**, a power sensor changed mid-cycle was ignored until reload, and a non-numeric setting stopped the device from loading. Fixed.
+
+#### Program recognition and labels
+
+- **Uncertain matches were auto-labelled** (7 of 12 such labels wrong), and labels came from the last mid-cycle match, which differed from the complete one in 17.5% of cycles. One match on the finished cycle now decides, with the same checks everywhere.
+- **Matching is more accurate**: programs are compared on the cycle's time grid, with their typical energy, and store programs on their averaged curve; a relabelled cycle no longer stands in for its old program. Right program at cycle end: 75.1% to 76.4% from the time grid alone, store programs 71.4% to 76.6%.
+- **Washers showed the wrong program more often than the right one**: a close call must hold longer before it shows, a clearly better program can take over, and weak matches no longer flicker. Right at the end 52.2% to 56.5%.
+- **The program shows sooner**: until the first program is shown, matching runs every 150 s instead of 300 s.
+- **A program dropped mid-cycle could still end the cycle or hold it in a pause**: a dropped match is now forgotten and its pause released.
+- **Your review answers could be overwritten by Auto-label**: they are stored as yours (existing ones repaired). A program you picked by hand is never queued for review, and answers update program curves at once.
+- **A manual duration in the wrong unit poisoned its program**: durations outside 0.3 to 3 times the trace are ignored.
+- **A cycle without a trace kept getting flagged for review** ([#459](https://github.com/3dg1luk43/ha_washdata/issues/459)): it keeps its last health score and no longer counts toward the queue. Thanks to @TRON4R.
+
+#### Progress, time remaining and energy
+
+- **Projected energy was up to 2.5x too high early on**: it now follows the program's own energy curve. Error at 25% progress: 112% to 20%.
+- **Time remaining stayed at 36 s through an overrun** and jumped after a program switch, and progress could fall back from 100%. Fixed.
+- **A retrained energy model could be worse than the one in use**: it is now kept only if it beats both it and the simple estimate on at least 5 held-out cycles.
+
+#### Pauses and halts
+
+- **A resumed wash could end at its next pause**, Smart Termination ignored a user pause, and Stop stored the time after the wash. Fixed; a pause that cut the plug's power no longer splits the wash.
+- **A long halt threw off the end, time remaining, the program and the label**: a halt no longer counts as program time. With 45-minute halts, the estimate after resuming is 13 minutes off instead of 42.
+
+#### Notifications
+
+- **Notifications held for quiet hours or until someone is home were lost on restart**: they are kept (up to 24 hours) and sent after it.
+- **A restart re-sent reminders** ("Add softener" twice) and could re-run an auto-pause; a reminder held by quiet hours is no longer sent after the cycle finished.
+- **Sidebar notifications never appeared** (fallback without a notify target, auto-pause timer card): they work again.
+- **Voice assistants read the default finish text's "m" as metres** ([#93](https://github.com/3dg1luk43/ha_washdata/issues/93), [#117](https://github.com/3dg1luk43/ha_washdata/issues/117)): the default finish and unload texts say "min", and the new `{duration_hm}` reads "1 h 05 min". Saved texts are unchanged.
+- **iOS: a notification colour hid the notification icon** ([#465](https://github.com/3dg1luk43/ha_washdata/issues/465)): the icon and the circle behind it got the same colour. Only Live Activities tint the icon now. The icon needs companion app 2026.8 or newer and a `mobile_app` target (not a notify group). Thanks to @dimitarraychev.
+
+#### Performance
+
+- **Every minute of a cycle rewrote the whole store** (6.7 MB per save on a large install): the in-flight snapshot has its own small file.
+- **Less CPU and disk**: live matching costs half the CPU, a cycle end writes the store once instead of six times, entities are no longer rewritten every 30 seconds, and the manual recorder saves every 5 minutes.
+- **Exports are 4 to 5 times smaller** (9.8 MB to 2.0 MB on the largest test install).
+- **Deleting an appliance deletes its stored data**; files left by earlier deletions are removed once at startup. Nightly maintenance prunes debug traces.
+
+#### Services, store and import
+
+- **Services ignored user permissions**: a read-only user could export or import the whole configuration, and import replaced the device's sensors. Services now apply the panel's checks.
+- **Store downloads are checked**: a recording needs 30 readings, no gap over 15 minutes and a plausible length; copies are skipped; a download never becomes the template of a program that has your own cycles.
+- **Ratings given from Home Assistant now count in the store**, and Store search finds every model of an appliance type at almost no store cost.
+- **History import offered cycles you already had** and split a wash on one "unavailable" reading: known cycles are recognised by overlap and short dropouts are bridged. It warns about kilowatt sensors and timestamps without a time zone.
+- **Anti-Wrinkle Exit Power was pushed below the Stop Threshold** by the settings check and the suggestions, where it does nothing ([#285](https://github.com/3dg1luk43/ha_washdata/issues/285), [#296](https://github.com/3dg1luk43/ha_washdata/issues/296), [#325](https://github.com/3dg1luk43/ha_washdata/issues/325)): both are gone and the help says it only matters above the Stop Threshold.
+- **An edited Expected Duration was overwritten after the next cycle** ([#158](https://github.com/3dg1luk43/ha_washdata/issues/158)): on a program with cycles it is computed and shown read-only.
+- **Bread maker and air fryer have their own phases again** (lost in 0.5.0, [#190](https://github.com/3dg1luk43/ha_washdata/issues/190)); a pump is no longer offered washing phases.
+- **Force End also stops a forgotten manual recording**, which kept the device running at 0 W ([#376](https://github.com/3dg1luk43/ha_washdata/issues/376), [#383](https://github.com/3dg1luk43/ha_washdata/issues/383)).
+- **Elapsed Time shows minutes on new devices** like the other durations ([#232](https://github.com/3dg1luk43/ha_washdata/issues/232)); existing ones keep their unit.
+- **Smaller fixes**: the cycle counter counted two per cycle on new installs and milestones fired one early; an unlabelled cycle announced "finished None"; a broken imported template could win a match; diagnostics did not redact changelog rows for sensitive settings.
 
 ### Panel
 
-- **Settings show what you set up, internals on request**: Basic lists name, type, power sensor, Min Power, Off Delay, notifications and quiet hours; Advanced hides 13 internal fields behind "Show internal settings", and shows any of them that has its own value, a conflict or a suggestion. Search always finds them.
-- **One place for suggestions**: the field pill (now with a line on what the change does) and the Settings banner. Apply all opens a preview of every change, old to new, before saving. The tab bulb and device badges are gone; the Overview card shows one count.
-- **Profile warnings follow your maintenance log**: poor fit, trending longer or more energy, and shape drift render only from the advisories, so logging a descale clears them.
-- **Profiles shows programs you have not created yet**: when recent unlabelled cycles look like one program, a banner offers "Create profile" with one of them preselected. The setup card's "create from cluster" now lands on it. The finder also catches far more: it needs 3 such cycles instead of 5, no longer splits one program's runs at a 15-minute boundary, tolerates one odd cycle in a group, and ignores a cycle that matched a known program well but was only refused for a close runner-up. Measured on 44 hidden programmes with the real label gate: 23% -> 39% caught (55% when the hidden program's own cycles are the only unlabelled ones), 82% of hints correct, and none on a store with nothing missing.
-- **Group suggestions are gone**: computed on every Profiles visit but never shown, and measured: 29% of the suggested groups were real near-duplicates, and accepting them lowered the right-program rate from 76.4% to 74.6% (p=0.019).
-- **ML Training lists only models something uses**: fine-tuned models whose consumer is off are not shown as learned.
-- **The Playground shows one match score**, the replay's own confidence, and notes that its notification markers skip live updates, reminders and overrun alerts.
-- **Far fewer review requests, and the ones left matter**: every cycle matched at 0.6 to 0.9 confidence was queued for review, 81% of cycles on the test corpus, although most were already labelled correctly at cycle end. What predicts a wrong label is a small margin over the next-best program, not a modest confidence: leave-one-out over 604 cycle ends, a clear margin at 0.7-0.9 is 93-96% right, a small one 33-54%. Only those and a new program's first cycles are queued now, about 19% of cycles. A trace that sits outside its program's usual power band no longer asks on its own: such labels are still 86% right. Requests already waiting that the new rule would not raise are cleared once on upgrade (a cycle carrying the detected program with a clear margin, past its program's warm-up), without being recorded as your answer; near-ties and cycles relabelled differently stay.
-- **A replace import can be undone**: WashData keeps a restore point from just before the last import that overwrote your data, and Export / Import shows "Undo last import" (administrators) to put programs, cycles and settings back. Imported power history is now an export/import category of its own, and long cycle lists page through imported cycles too.
-- **Deleting an appliance deletes its stored data**: there was no clean-up step, so every deleted appliance left its programs, cycles and power traces in Home Assistant's `.storage` for good (6.9 MB from 15 deleted devices on one install). Files left by appliances deleted earlier are removed once at startup.
-- **Leaving Settings with unsaved changes asks first**: switching to another tab or device, following a link out of WashData (the sidebar, the automation editor) or reloading the page dropped them without a word.
-- **The Playground replays what the integration does**: it ran its own copy of the matching and program-switching rules, which had drifted (188 of 1180 matches differed) and never held a confirmed pause, so 17 of 176 replayed cycles ended at a different time and 15 showed a different program than the live integration would. It now runs the integration's own code for both: 0 of 176 differ. Each replay also says whether the cycle would be auto-labelled and why not, and marks confirmed pauses and dropped matches on the graph. A dishwasher what-if with a low Off Delay no longer stops the replay before its last pump-out could arrive, and Optimize marks today's value for every setting it can sweep.
-- **The Playground phase bar draws again**: it looked for phases the panel was never sent, so it stayed empty. It now shows the phase the live readout would have named at each point of the replay.
-- **The dashboard card works by keyboard and picks up new translations after an upgrade**: it can be focused and opened with Enter or Space like Home Assistant's own tile card, and its translation files are no longer cached for a month past an update. It also stops re-scanning every entity in Home Assistant on each state change.
-- **"Reset muted" works for settings that are no longer suggested**: muting one of the suggestions removed in this release (Estimate Tolerance, the confidence thresholds, ...) made Reset fail with "1 suggestion(s) failed to unlock".
-- **Appliance brand and model are in Basic settings**, so a second device can declare the same appliance without switching to Advanced.
-- **Saving no longer rewrites switches you never touched**: a default-on switch such as Time-Weighted Cost was saved on every save once its section was on screen.
-- **Text typed into settings search can no longer inject markup** once a translation is loaded: translated messages inserted values without escaping them.
-- **Store data can no longer inject markup into the panel**: a few numbers from the community store (peak power, download and rating counts) were inserted unchecked. When the store cannot be reached the Store tab now says so, instead of "No shared programs yet" or "already on your device".
-- **Wide tables and the tab strip show a shadow at the edge** when there is more to scroll to on a phone, and about 60 more labels (debug table, profile cards, chart diagrams, automation names) follow your language.
-- **Counts read correctly in every language** ("1 tuning suggestion", "2 tuning suggestions", and the forms Polish, Russian, Lithuanian and others need), and numbers, costs and dates follow your Home Assistant number, time and language settings: a cost shows as "€0.21", as on the card, instead of "0.21 EUR".
-- **Settings search finds the words you see** in your language, not only the English names.
-- **The panel opens faster**: it asks for its data in parallel and shows the Status tab before the rest arrives, and translation files are sent compressed (about 70% smaller).
-- **An edited built-in phase can be reset**: its Delete button failed every time. It is now a Reset button that restores the built-in phase, and programs keep their ranges.
-- **Phases sit at the minutes you set**: phase ranges were stretched over the program's length, so on a 100-minute program with Rinse at 30-60 min the readout said Rinse until the end, and the Status timeline and the phase sensor could disagree. Both, and the Playground, now read a phase at its own minutes and show none in a gap or after the last one.
-- **"Uncertain: Cotton 40 or Synthetics 30, ~45% sure"**: until WashData settles on a program, the Status card names the two leading programs and how often the leader proved right with that lead in recorded cycles (26% at a near-tie, 89% at a clear lead; leave-one-out over 2,324 checkpoints from 48 households). The program sensor still reads "detecting...".
-- **Imported programs show whether they fit**: a program downloaded from the store shows how many of your cycles WashData matched to it, counted on your device.
-- **Playground History and Optimize say they are optimistic**: the replayed cycles also built the programs they are matched against.
-- **The Playground's Optimize looks at what matters**: it can now optimise the end delay, early ends and split cycles, compares every value with your current one on the same cycles, never recommends a value that ends or splits more cycles, and says "keep the current value" when nothing is clearly better. Cancel stops the run on the server, a changed setting offers "Update simulation" instead of showing a stale result, History and Optimize take your newest N cycles (up to 50), and a second run on the same device is refused instead of piling up.
-- **History import warns about kilowatt sensors and timestamps without a time zone**, shows when the recorder read stopped at its limit, and reads large files in small steps so Home Assistant stays responsive.
-- **Export / Import (choose data) works on phones** ([#460](https://github.com/3dg1luk43/ha_washdata/issues/460)): a size cap on the selection list made its groups shrink and clip, hiding options and individual cycles; the list now scrolls and long option names wrap. Thanks to @Aaroneisele55
-- **The cycle dialog shows the suspected program's curve** ([#462](https://github.com/3dg1luk43/ha_washdata/issues/462)): a cycle WashData was unsure about stays unlabelled since 0.5.7, so its dialog drew no program curve exactly when you are asked to confirm it. It now overlays the suspected program and the runner-up, marked as such, in Inspect and Review. Thanks to @TRON4R
-- **Your own maintenance reminders** (discussion #461): add any task (every N cycles and/or every N days), log a due task done in one click, and use the new "Maintenance due" binary sensor to build your own notification. Dishwashers now get salt, rinse aid and filter reminders and dryers lint filter and condenser reminders by default; the new ones start counting from the upgrade, so nothing comes due on day one. The Maintenance section also points to the Maintenance Supporter integration, which handles any appliance or task and can use WashData's cycle counter. Thanks to @dafunkydan
-- **A cycle halted on its standby draw shows as Paused (Stalled)** (discussion #452): an unbalanced load stops a washer at 4-5 W, above its Stop Threshold, so the cycle looked like it was still running. A flat standby-level stretch longer than any the program has recorded there (30 minutes when no program is recognised) now shows `paused` with sub-state Stalled and `cycle_anomaly: stalled`, and fires a `ha_washdata_cycle_stalled` event for your automations. The cycle stays open and continues when the machine resumes, and it is no longer closed as finished during the halt as often. Thanks to @gouthamravee
-- **A wash that resumed after a long halt could end at its next pause**: the halt counted as program time, so WashData saw the resumed wash as already past its usual end, and the program shown drifted to a longer one. A finished stall is now left out of the end checks and of the live matching, and the anti-crease finish waits while a cycle is stalled. With 45-minute halts injected into 258 recorded washes: 79 split instead of 89, and the halt changed the program shown on 17 cycles instead of 59.
-- **A display left on no longer ends Finished or Clean**: a standby draw above the Stop Threshold after a cycle (a display at 4-5 W on a 2.8 W stop) started a new-cycle check on its first reading, which cleared the Clean state and the unload reminder. Finished, Interrupted and Force-stopped now start a new cycle only at the Start Threshold, like Off.
-- **Halts and pauses no longer throw off time remaining, labels or the end**: time remaining stops counting down while a cycle is stalled and a finished stall no longer counts as program time (45-minute halts: the estimate 1 minute after resuming is off by 13 minutes instead of 42); a washer that halts straight out of activity is kept open even when the matcher reads the halt as a finished shorter program; the program label at cycle end ignores halts and pauses (right labels 43 to 80 of 246 halted test cycles); and resuming your own pause no longer leaves the paused time counting toward the end, which split a resumed wash after a pause that cut the plug's power (48 to 12 splits).
-- **A blip during Finished or Clean no longer clears Clean or the unload reminder**: a short spike over the Start Threshold (a door light, a display) started a new-cycle check that cleared them even when it came to nothing. The false start now returns to the state it came from, and Clean ends only when a new cycle really starts.
-- **The Stop Threshold can no longer be set at or above the Start Threshold**: saving such a pair (from Settings, the Playground, Apply all) is refused with a message, and imports keep the device's own pair. Devices already configured that way keep working.
-- **Idle between cycles**: an appliance that keeps its display on (standby draw) shows `idle` and only `off` when it is really switched off. The standby level is learned from its own cycles, or taken from the Power-Off Threshold when set.
-- **The cycle chart shows what happened around a cycle** (discussion #463): the power sensor's recorder history before and after the cycle is drawn in grey (10 minutes by default, adjustable per device, or off), so a cycle no longer looks cut off at the start. Measured on recorded histories, stored cycles begin within 20 seconds of the real start; the cut-off look was the missing idle baseline. Display only: duration, energy and matching are unchanged, and it works for any cycle the recorder still holds (10 days by default). Thanks to @bartbutenaers
-- **ML Training says why a model was not trained** (too few cycles, not better than the current one, ...), counts only real promotions in its trend, and translates "never" and "unknown". The Auto-label dialog starts at the device's own threshold and its result says how many cycles were labelled.
-- **Help texts that said the wrong thing**: End Energy gave the tuning direction backwards (a higher value finishes sooner); Match Threshold gates Smart Termination and the anti-crease finish, not which program is accepted; the duration-ratio examples used 0.9 and 1.3 against defaults of 0.10 and 1.8; ML training now retrains only the projected-energy model.
-- **Icelandic**: a cycle is "lota" throughout (it was partly "hringrás", a circuit), and the pump-stuck setting warnings are readable again.
+- **Simpler settings**: Basic holds name, type, power sensor, Min Power, Off Delay, brand and model, energy price, notifications and quiet hours; Advanced hides 13 internal fields unless one has its own value, a conflict or a suggestion.
+- **One place for suggestions**: the field pill and the Settings banner. Apply all previews every change first.
+- **Leaving Settings with unsaved changes asks first**; saving no longer rewrites switches you never touched; a Stop Threshold at or above the Start Threshold is refused.
+- **Profile warnings follow your maintenance log**: logging a descale clears the poor-fit, trend and drift warnings.
+- **Profiles finds programs you have not created yet** more often (39% of hidden programs, was 23%; 82% of hints right) and preselects a cycle for "Create profile". Group suggestions are removed: accepting them lowered the right-program rate.
+- **Imported programs show how many of your cycles matched them.**
+- **Phases sit at the minutes you set** instead of being stretched over the program, and an edited built-in phase can be reset.
+- **The panel opens faster and stays smooth on phones**: only the open tab is rebuilt and data loads in parallel. A failed load offers Retry; a lost connection says so.
+- **Auto-label and "Download this setup" run in the background**, with progress and Cancel.
+- **The Playground replays exactly what the integration does** (0 of 176 replays differ, was 17) and says whether a cycle would be auto-labelled. Its phase bar draws again.
+- **Playground Optimize weighs end delay, early ends and splits**, compares each value with your current one, never recommends one that ends or splits more cycles, and says "keep the current value" when nothing is better.
+- **Export / Import (choose data) works on phones** ([#460](https://github.com/3dg1luk43/ha_washdata/issues/460)). Thanks to @Aaroneisele55
+- **ML Training lists only models something uses** and says why a model was not trained.
+- **Every language**: counts, numbers, costs and dates follow your language and Home Assistant settings ("€0.21"), about 100 more labels are translated, and settings search finds translated words. Icelandic now calls a cycle "lota" throughout.
+- **Settings search text and store data can no longer inject markup** into the panel. When the store cannot be reached, the Store tab says so.
+- **The dashboard card works by keyboard** and picks up new translations after an upgrade.
+- **Help texts corrected**: End Energy (a higher value finishes sooner), Match Threshold (gates Smart Termination, not which program is accepted) and the duration-ratio examples.
 
 ### Suggestions
 
-- **Suggestions that made devices worse are gone**: the confidence thresholds (each apply lowered them), Sampling Interval (each apply raised it), smoothing, start duration, end repeat count, the two duration tolerances, the per-cycle stop/start simulation and the ML-driven suggestions. Completion minimum no longer creeps up until short programs count as interrupted; suggestions no longer stop for good at 200 stored cycles; a muted setting is never applied by Apply all; a setting you never changed is no longer suggested at the value it already has; the maximum duration ratio is never suggested below 1.8; dishwasher Off Delay uses your measured cycles; the end-energy threshold is only raised when it makes an end impossible.
-
-- **The match interval is suggested again, and a shorter one no longer delays cycle ends**: a match run inside the end wait could switch to a longer, uncertain program or start a pause just as the cycle was about to end, delaying some ends by up to 16 minutes. Uncertain matches can no longer push the end out during that wait, so Apply all may lower the interval safely (replayed on 21 devices: 14 ends earlier, 1 later).
-
-- **Settings removed from the panel**: End Repeat Count, Smoothing Window and Profile Duration Tolerance did nothing measurable, and "Phase-aware time remaining" never ran (its data was never built); the feature behind it is removed.
+- **Suggestions that made devices worse are removed**: the confidence thresholds, Sampling Interval, smoothing, start duration, end repeat count, the duration tolerances and the ML-driven ones.
+- **Apply all no longer sets the stop or start threshold at the appliance's resting draw** (cycles ended up to 30 minutes late or split), never applies a muted setting, and no longer suggests a value you already have.
+- **Force-stopped cycles no longer skew the Watchdog and No-Update Timeout suggestions** ([#458](https://github.com/3dg1luk43/ha_washdata/issues/458)).
+- **The match interval is suggested again**: a shorter one no longer delays cycle ends.
+- Completion minimum no longer creeps up until short programs count as interrupted, suggestions no longer stop at 200 cycles, and the maximum duration ratio is never suggested below 1.8.
 
 ### For developers
 
-- WebSocket: `auto_label_cycles` and `store_download_device` now return `{task_id}` (the result is the task's); `list_tasks`, `store_get_device_quality`, the three one-shot `run_playground_*` commands and the Playground sweep's second parameter (`param_y`/`values_y`) are removed; `start_playground_sweep` takes at most 20 values. See `docs/WS_API.md`.
-- WebSocket, panel removals: `get_dtw_debug` is removed, as are `start_playground_cycle_detail`'s `stress_tail`/`stress_idle_w`. Responses drop `get_profile_groups.suggestions`, `get_playground_settings.ml_suggestions`/`ml_suggestions_enabled`, `get_constants.ml_suggestions_enabled` and `get_ml_comparison.settings_comparison`/`ml_suggestions_enabled`. `store_get_cycles` ratings come from each cycle's stored totals. `get_ml_training_status.on_device_models` lists only capabilities with a live consumer. Playground overrides accept only real options (the Stage 2-4 matcher weights are ignored).
-- `devtools/docs_check.py` (CI and `release_check.sh`) checks doc anchors, constants, register ids and the deep-dives' identifiers against the code; `tests/test_e2e_mock_contract.py` holds the Playwright mocks to the WebSocket contract, which now requires the keys `get_panel_config`, `get_power_history`, `get_cycle_power_data` and `get_recording_state` always send.
-- Panel strings: `_t()` escapes substituted values; wrap deliberate markup in `_html()` and use `_tText()` for plain-text sinks. Plurals resolve `key_<category>` through `Intl.PluralRules`.
-- `match_rules.py` holds the manager's post-match rules (switching, verified pause, cycle-end label verdict) for the manager and the Playground; `devtools/playground_parity_eval.py` measures replay against the real manager. Playground detail outcomes and history rows gain `would_label`, `label_profile` and `label_reason`; events gain `verified_pause` and `match_reverted`.
-- Events and WebSocket: `ha_washdata_cycle_ended` gains `match_margin` (complete-cycle match) and `label_applied`; `get_devices` gains `match_uncertainty` and `expected_duration_s`; `get_profiles` gains `profile_matcher_counts`.
-- Harnesses measure the shipped pipeline: `prefix_guard_eval.py`, `min_off_gap_eval.py` and `decisive_margin_eval.py` (now `--loo`, `--switching`) use the production config; `end_gate_eval.py --check devtools/end_gate_baseline.json` and `eval.py baseline-status` flag regressions and a stale baseline; `analyze_diag.py` runs the real suggestion engine; `ml_energy_gate_eval.py` and `terminal_drop_plugpull_eval.py` are new.
-- Tests: a real in-process boot through `async_setup` (`setup_washdata_entry`), a WS authorization matrix, `pytest-timeout`, a progress golden trace, and a ratchet against new `MagicMock()` hass objects.
-- The state sensor's never-used `rinse` option is removed (a rinse is a phase of a running cycle, not a state; nothing ever reported it).
-- The engineering register moved from `INTEGRATION_REFERENCE.md` to `docs/internal/register/OPEN.md` (open items) and `ARCHIVE.md`; `docs_check.py` keeps ids unique across both.
-- `devtools/mqtt_mock_socket.py` rebuilt: real time by default, scenarios taken from the register (soak, dropout, standby above stop, anti-crease, back-to-back, plug-pull, delayed start, idle blips), plug reporting modes (`recorded`, `on-change`, `silent`, `poll-30s`), a ledger of the cycles each run really played, and a web UI with a tab per plug and a plot to measure on. `./run_mock.sh on|off` runs it as a service. Existing mock entities keep their ids.
-- Tests: tests that could not fail were replaced by mutation-checked ones; `tests/test_perf_budgets.py` counts work (no timing); `devtools/suggestion_loop_eval.py` simulates Apply all to a fixed point. The timing benchmarks are gone.
+- WebSocket: `auto_label_cycles` and `store_download_device` return `{task_id}`; removed `list_tasks`, `store_get_device_quality`, `get_dtw_debug`, the three one-shot `run_playground_*` commands, the sweep's `param_y`/`values_y` and `start_playground_cycle_detail`'s `stress_*`; `start_playground_sweep` takes at most 20 values. See `docs/WS_API.md`.
+- WebSocket responses drop `get_profile_groups.suggestions` and every `ml_suggestions*` / `settings_comparison` field; `get_devices` gains `match_uncertainty` and `expected_duration_s`, `get_profiles` gains `profile_matcher_counts`; Playground overrides accept only real options.
+- `ha_washdata_cycle_ended` gains `match_margin` and `label_applied`; new event `ha_washdata_cycle_stalled`. The state sensor's never-used `rinse` option is removed.
+- `match_rules.py` holds the post-match rules shared by the manager and the Playground; `devtools/playground_parity_eval.py` measures replay against the real manager. Playground outcomes gain `would_label`, `label_profile`, `label_reason`.
+- Panel strings: `_t()` escapes substituted values (`_html()` for deliberate markup, `_tText()` for plain-text sinks); plurals resolve `key_<category>` through `Intl.PluralRules`.
+- Harnesses use the production config; `end_gate_eval.py --check` and `eval.py baseline-status` flag regressions; `analyze_diag.py` runs the real suggestion engine; new `ml_energy_gate_eval.py`, `terminal_drop_plugpull_eval.py`, `suggestion_loop_eval.py`.
+- `devtools/mqtt_mock_socket.py` rebuilt: real time by default, scenarios, plug reporting modes (`recorded`, `on-change`, `silent`, `poll-30s`), a ledger and a web UI; `./run_mock.sh on|off` runs it as a service.
+- Tests: a real in-process boot through `async_setup`, a WS authorization matrix, `pytest-timeout`, mutation-checked replacements for tests that could not fail, work-count budgets in `tests/test_perf_budgets.py` (timing benchmarks removed), and a ratchet against new `MagicMock()` hass objects.
+- `devtools/docs_check.py` (CI and `release_check.sh`) checks doc anchors and constants against the code; `tests/test_e2e_mock_contract.py` holds the Playwright mocks to the WebSocket contract.
 
-## 0.5.7 - Unreleased
+## 0.5.7 - 2026-09-26
 
 ### TL;DR
 
@@ -356,7 +263,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - **The unload reminder no longer needs a door sensor** ([#451](https://github.com/3dg1luk43/ha_washdata/issues/451)): the "laundry is still inside" reminder and the Clean state behind it could only be driven by a contact sensor on the door. Two ways in, both off by default. **Unload Confirmation Entity** treats any entity's activation as "unloaded" (a Zigbee or NFC button, an input_button, a motion sensor, a scene), ignoring the first value after it starts watching, since some buttons re-send their last press on reconnect. **Confirm Unload Manually** needs no entity: press the new **Mark Unloaded** button or call `ha_washdata.mark_unloaded`. Either also enables the Clean state without a door sensor. Thanks to @aharrison7 for the request.
 
-## 0.5.6 - Live on Matrix/Element - 2026-08-22
+## 0.5.6 - Live on Matrix/Element - 2026-09-17
 
 ### TL;DR
 
@@ -488,7 +395,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - **Export and import are documented properly**: The README still described only the whole-store backup, so the selective wizard added in 0.5.3 was effectively undiscoverable. It now covers what can be picked (down to a single program or cycle), merge versus replace, where imported cycles land, and the fact that an HA diagnostics download can be imported directly, with its redacted entity ids and notify targets needing to be re-pointed by hand.
 
-## 0.5.5 - 2026-08-19
+## 0.5.5 - 2026-08-22
 
 ### Features
 

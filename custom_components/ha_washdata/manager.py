@@ -30,7 +30,7 @@ import uuid
 import asyncio
 import functools
 from asyncio import Task
-from collections.abc import Callable, Coroutine, Mapping
+from collections.abc import Callable, Coroutine
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
 import numpy as np
@@ -91,7 +91,6 @@ from .const import (
     CONF_WATCHDOG_INTERVAL,
     CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     CONF_NOTIFY_BEFORE_END_MINUTES,
-    CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_DEVICE_TYPE,
     CONF_SAMPLING_INTERVAL,
@@ -119,7 +118,6 @@ from .const import (
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
-    DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEFAULT_PROFILE_UNMATCH_THRESHOLD,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_PROFILE_EVIDENCE_SOURCES,
@@ -587,18 +585,6 @@ def _option_then_data(config_entry: Any, key: str, default: Any) -> Any:
     return config_entry.options.get(key, config_entry.data.get(key, default))
 
 
-def _default_start_threshold_w(min_power: float) -> float:
-    return float(min_power) + max(1.0, 0.1 * float(min_power))
-
-
-def _default_stop_threshold_w(min_power: float) -> float:
-    """One formula for both writers (item 388a): reload used
-    ``min_power - max(0.5, 0.1*min_power)`` and setup ``0.6*min_power``, so an
-    unset stop threshold moved 1.2 -> 1.5 W (6 -> 9 W at 10 W) on every save
-    and back on every restart."""
-    return float(min_power) * 0.6 if float(min_power) > 0 else 2.0
-
-
 class WashDataManager:
     """Manages a single washing machine instance."""
 
@@ -832,9 +818,6 @@ class WashDataManager:
         self._remove_state_expiry_timer = None
 
         # Components
-        match_threshold = config_entry.options.get(
-            CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
-        )
         # Coerced (audit F7 finding): a non-numeric stored value raised inside every
         # match tick (`float()` in the initial commit, `<` in the unmatch check).
         unmatch_threshold = option_float(
@@ -855,7 +838,6 @@ class WashDataManager:
                 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
             ),
             save_debug_traces=config_entry.options.get(CONF_SAVE_DEBUG_TRACES, False),
-            match_threshold=match_threshold,
             unmatch_threshold=unmatch_threshold,
             device_name=config_entry.title,
         )
@@ -2163,9 +2145,6 @@ class WashDataManager:
         store = getattr(self, "profile_store", None)
         if store is not None and hasattr(store, "_unmatch_threshold"):
             store._unmatch_threshold = self._unmatch_threshold  # pylint: disable=protected-access
-            store._match_threshold = options.get(  # pylint: disable=protected-access
-                CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
-            )
         self._progress_reset_delay = int(
             options.get(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
         )
@@ -3615,8 +3594,8 @@ class WashDataManager:
         promoted = list(summary.get("promoted", {}).keys())
         if promoted:
             self._ml_training_failures = 0
-            # Consumers (ML Lab) read the trained specs live
-            # from the store via ml.engine.resolve_scorer, so no refresh is needed.
+            # Consumers read the trained specs live from the store via
+            # ml.engine.resolve_regressor, so no refresh is needed.
             self._logger.info("On-device ML training promoted models: %s", promoted)
         else:
             self._ml_training_failures += 1
@@ -4232,6 +4211,7 @@ class WashDataManager:
                         fallback_template=DEFAULT_NOTIFY_UNLOAD_MESSAGE,
                         device=self.config_entry.title,
                         duration=duration_min,
+                        duration_hm=self._format_duration_hm(duration_min),
                         delay=self._notify_unload_delay_minutes,
                     )
                     extra_vars: dict[str, Any] = {"tag": self._clean_tag}
@@ -5343,7 +5323,7 @@ class WashDataManager:
                 or profile_name not in self.profile_store.get_profiles()
             ):
                 return None
-            end_fn, _ = resolve_scorer("end", self.profile_store)
+            end_fn, _ = resolve_scorer("end")
             if end_fn is None:
                 return None
             expectation = self._profile_end_expectation(profile_name, expected_duration)
@@ -5470,30 +5450,6 @@ class WashDataManager:
             # Allow a later reading to retry the refresh for this count.
             if self._terminal_drop_refresh_n == n:
                 self._terminal_drop_refresh_n = None
-
-    def _ml_progress_percent(
-        self,
-        trace: list[tuple[datetime, float]],
-        profile_name: str,
-    ) -> float | None:
-        """ML completion-fraction estimate (0-100) for the running cycle, or None.
-
-        Uses the on-device ``remaining_time`` regressor (a ``standardized_linear``
-        head with no shipped baseline) to predict how far through the cycle we
-        are, learning this device's own progress curve rather than assuming the
-        matched profile's median duration. Gated on the ML opt-in and only active
-        once training has promoted a regressor; otherwise returns ``None`` so the
-        caller keeps the proven phase-aware estimate untouched. Never raises.
-        """
-        return progress_mod.ml_progress_percent(
-            self.profile_store,
-            self.config_entry.options,
-            float(self._matched_profile_duration or 0.0),
-            trace,
-            profile_name,
-            self._profile_end_expectation,
-            self._logger,
-        )
 
     def _price_entity_reject_reason(self, entity_id: str) -> str | None:
         """Why ``entity_id`` cannot be a price per kWh, or None (#439).
@@ -5888,6 +5844,20 @@ class WashDataManager:
         )
         snapshot["last_sensor_power"] = self._current_power
         return snapshot
+
+    @staticmethod
+    def _format_duration_hm(minutes: Any) -> str:
+        """The ``{duration_hm}`` template variable: ``"1 h 05 min"``, ``"45 min"``.
+
+        Unit symbols a voice assistant reads correctly (#93, #117: it read
+        ``{duration}m`` as metres). Whole minutes in; never raises.
+        """
+        try:
+            total = max(0, int(minutes))
+        except (TypeError, ValueError, OverflowError):
+            return ""
+        hours, mins = divmod(total, 60)
+        return f"{hours} h {mins:02d} min" if hours else f"{mins} min"
 
     @staticmethod
     def _format_vs_typical(
@@ -6436,6 +6406,7 @@ class WashDataManager:
                 fallback_template=DEFAULT_NOTIFY_FINISH_MESSAGE,
                 device=self.config_entry.title,
                 duration=duration_min,
+                duration_hm=self._format_duration_hm(duration_min),
                 program=program_name,
                 energy_kwh=f"{energy_kwh:.3f}",
                 cost=cost_str,
@@ -7379,9 +7350,17 @@ class WashDataManager:
             # changes that, which is why the setting's help text says so (item 372).
             # Note the app reads the iOS-named key FIRST - harmless only because
             # both carry one value here, so do not let them diverge.
+            #
+            # #465: on an ordinary iOS notification the two keys mean different
+            # things: `color` is the avatar disc and `notification_icon_color` the
+            # glyph on it (white by default), so sending one value to both drew the
+            # icon in the disc's own colour and it vanished. Only a Live Activity
+            # reads `notification_icon_color` as the icon tint, so only the live
+            # update carries it; Android falls back to `color` either way.
             if icon_color and self._is_mobile_notify_service(notify_service):
                 svc_data["color"] = icon_color
-                svc_data["notification_icon_color"] = icon_color
+                if event_type == NOTIFY_EVENT_LIVE:
+                    svc_data["notification_icon_color"] = icon_color
                 svc_data["progress_bar_color"] = icon_color
 
             state = (
@@ -7817,17 +7796,6 @@ class WashDataManager:
         self._check_pre_completion_notification()
         self._check_live_progress_notification()
         self._notify_update_deferrable()
-
-    # _async_run_matching removed in favor of _async_perform_combined_matching
-
-    def _analyze_trend(self, profile_name: str) -> bool:
-        """Analyze score history to detect positive trend.
-
-        Returns True if score has increased in at least 7 of the last 10 intervals.
-        Requires at least 5 samples history to make a determination. The rule is
-        ``match_rules.analyze_trend``, shared with the Playground replay.
-        """
-        return match_rules.analyze_trend(self._score_history.get(profile_name, []))
 
     def _reset_live_notification_state(
         self, *, keep_activity_started: bool = False
@@ -8613,10 +8581,10 @@ class WashDataManager:
             )
             return
 
-        # Compute the phase-aware and ML progress inputs via the manager's own
-        # wrappers (so per-call caching + test mocks apply), then hand them to the
-        # shared pure smoothing/back-calc in :mod:`progress` - the identical math
-        # the Playground simulation runs.
+        # Compute the phase-aware progress input via the manager's own wrapper
+        # (so per-call caching + test mocks apply), then hand it to the shared
+        # pure smoothing/back-calc in :mod:`progress` - the identical math the
+        # Playground simulation runs.
         trace = self.detector.get_power_trace()
         prog_trace = getattr(self.detector, "progress_trace", None)
         prog_trace = prog_trace(now) if callable(prog_trace) else None
@@ -8627,7 +8595,6 @@ class WashDataManager:
             phase_result = self._estimate_phase_progress(
                 trace, duration_so_far, self._current_program
             )
-        ml_pct = self._ml_progress_percent(trace, self._current_program)
 
         result = progress_mod.compute_progress(
             self.device_type,
@@ -8637,7 +8604,6 @@ class WashDataManager:
                 self._smoothed_progress, self._smoothed_for_program, self._current_program
             ),
             phase_result,
-            ml_pct,
             self._logger,
             # Real gap since the previous estimate, so the progress EMA keeps its
             # time constant instead of its step count - a plug that reports every
@@ -9468,6 +9434,14 @@ class WashDataManager:
     async def async_terminate_cycle(self) -> None:
         """Force terminate the current cycle via user request."""
         self._logger.warning("Force terminating cycle by user request")
+
+        # A manual recording pins the shown state at running (check_state) while the
+        # detector is fed nothing, so user_stop() alone was a no-op and a forgotten
+        # recording kept the device "running" through restarts (#376, #383). Stop it
+        # as the Stop Recording button does: the run is kept for processing.
+        if self.recorder.is_recording:
+            self._logger.info("Force terminate: stopping the active manual recording")
+            await self.recorder.stop_recording()
 
         # Trigger natural cycle end via detector
         # This will call _on_cycle_end callback, which handles:

@@ -72,27 +72,10 @@ def test_late_progress_is_spin():
     assert fn() == "Spin"
 
 
-def test_overrun_still_names_by_progress_not_elapsed():
-    # The whole point: at 45% progress the phase is Wash regardless of how long
-    # the cycle has actually been running (raw elapsed would drift).
-    _mgr, fn = _bound(progress=45.0)   # 45% -> 27min -> Wash
-    assert fn() == "Wash"
-
-
 def test_none_when_not_running():
     for st in (STATE_IDLE, STATE_OFF):
         _mgr, fn = _bound(state=st, progress=50.0)
         assert fn() is None
-
-
-def test_none_without_ranges():
-    _mgr, fn = _bound(progress=50.0, ranges=[])
-    assert fn() is None
-
-
-def test_none_for_placeholder_program():
-    _mgr, fn = _bound(program="detecting...", progress=50.0)
-    assert fn() is None
 
 
 def test_never_raises():

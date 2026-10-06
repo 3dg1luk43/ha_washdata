@@ -203,7 +203,7 @@ measures absolute *level/spread*.
   `auto_label_backfill`): anything in that tuple means "the matcher guessed this", which the
   `original_auto_label` preservation checks consult before overwriting.
 - **`phase_catalog.py`** - phase labels mapped to time ranges. Live phase is indexed by the
-  **ML-blended progress fraction** (not raw elapsed), so the readout survives overrun/underrun.
+  **smoothed progress fraction** (not raw elapsed), so the readout survives overrun/underrun.
   Separate from phase-*segmented matching* below.
 - The 0.5.1 phase-resolved ETA stack (`phase_segmenter.py`, `phase_match.py`, `enable_phase_matching`)
   was **removed** in 0.5.8 (audit PROGRESS-01/02): it never ran (no profile carried `device_type`), and
@@ -299,15 +299,13 @@ the baseline files**. Full detail in reference 07.
 tab), `ENABLE_ML_TRAINING`, and the per-device `CONF_ENABLE_ML_MODELS`
 (`ml_models_enabled(options)`, default off) which gates feeding ML into live decisions.
 
-**Three gated runtime consumers** of `CONF_ENABLE_ML_MODELS`, plus the energy projection:
+**Two gated runtime consumers** of `CONF_ENABLE_ML_MODELS`, plus the energy projection:
 
 1. **ML end-detection guard** - asymmetric anti-premature-stop: can only **defer, never end early**.
    **Frozen off by `ENABLE_ML_END_GUARD = False`** whatever the device option (audit ML-05: 0
-   premature ends prevented on 292 replayed cycles, washer median lag +5.3 min).
-2. **ML remaining-time regressor** - blends a completion fraction into the phase-aware progress
-   *before* EMA smoothing. **Frozen off** (`ENABLE_ML_REMAINING_TIME`, audit ML-07: worse than naive
-   on 7 of 8 installs). The code stays; each consumer's tests patch its flag on.
-3. **Terminal-drop fast finalize** - pure statistics, no trained model. **Asymmetric, the opposite of
+   premature ends prevented on 292 replayed cycles, washer median lag +5.3 min). The code stays;
+   its tests patch the flag on.
+2. **Terminal-drop fast finalize** - pure statistics, no trained model. **Asymmetric, the opposite of
    the end-guard: it can only ever shorten the wait**, and only for an anomalously-early drop on a
    *familiar* cycle (peak within the learned range, else it may be a NEW program and is deferred).
    **Dishwashers get it without the option** (`TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES`, audit ML-08),
@@ -319,8 +317,9 @@ the one trained head with a live consumer. **Removed in 0.5.8** (maintainer deci
 register item 210 moot): the ML early match commit (audit ML-01/02: 31% of its commits wrong) with
 its `live_match` model, training head and ranking snapshots; the ML quality gate (ML-06: 0 fires on
 eligible cycles) and the quality head's training (ML-10: untrainable on any real install); on-device
-training of the `end` and `remaining_time` heads, whose consumers stay frozen (ML-11: the classifier
-gate promoted worse models on 4-7 held-out positives); the matcher weight tuner (MR-10: never
+training of the `end` head, whose consumer stays frozen (ML-11: the classifier gate promoted worse
+models on 4-7 held-out positives); the `remaining_time` regressor with its progress blend and
+`ENABLE_ML_REMAINING_TIME` (ML-07: worse than naive on 7 of 8 installs); the matcher weight tuner (MR-10: never
 promoted on a real export) with `revert_matching_config` and `matching_config`. Storage v17 drops
 their stored state. Do not re-add any of them without a replay that beats what they replaced.
 
@@ -329,10 +328,10 @@ Panel `ml_health` goes through `resolve_scorer` directly and is **not** gated on
 the per-cycle score is still computed, by the shipped quality baseline). The ML Training tab lists
 only capabilities with a live consumer.
 
-**Modules:** `engine.py` exposes `resolve_scorer(capability, store)` (classifiers) and
-`resolve_regressor` (regressors). **All ML inference must go through them** so trained models are
-actually used. `trainer.py` (logistic scoring + ridge fit), `training_task.py` (prefix dataset +
-promotion of `total_energy`), `feature_extraction.py`.
+**Modules:** `engine.py` exposes `resolve_scorer(capability)` (the shipped classifier baselines) and
+`resolve_regressor(capability, store)` (on-device regressors). **All ML inference must go through
+them** so trained models are actually used. `trainer.py` (ridge fit + spec scoring), `training_task.py`
+(prefix dataset + promotion of `total_energy`), `feature_extraction.py`.
 
 **Promotion discipline:** the regressor promotes only when held-out MAE beats the naive
 elapsed/expected baseline by `ML_TRAINING_REGRESSION_MARGIN`. (The classifier AUC/balanced-accuracy
