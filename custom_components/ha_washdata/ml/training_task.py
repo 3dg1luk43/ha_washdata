@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import functools
 import logging
+import math
 from typing import Any
 
 import numpy as np
@@ -479,7 +480,8 @@ def _expected_durations(store: Any) -> dict[str, float]:
 
 def training_stop_threshold(merged: dict[str, Any]) -> float:
     """The stop threshold training cleans cycles with: the entry's Stop Threshold,
-    else its min_power, else 2.0 W. ``merged`` is entry data overlaid by options."""
+    else its min_power, else 2.0 W, skipping a value that is not positive and finite
+    (under +inf no reading is active). ``merged`` is entry data overlaid by options."""
     from ..const import CONF_MIN_POWER, CONF_STOP_THRESHOLD_W
 
     for key in (CONF_STOP_THRESHOLD_W, CONF_MIN_POWER):
@@ -487,7 +489,7 @@ def training_stop_threshold(merged: dict[str, Any]) -> float:
             v = float(merged.get(key))
         except (TypeError, ValueError, OverflowError):
             continue
-        if v > 0:
+        if v > 0 and math.isfinite(v):
             return v
     return 2.0
 
