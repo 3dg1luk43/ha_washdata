@@ -83,3 +83,25 @@ def test_every_restored_description_key_has_an_english_value() -> None:
         for phase in DEFAULT_PHASES_BY_DEVICE[device_type]:
             section, key = phase["translation_key"].split(".")
             assert en[section][key] == phase["description"], phase["name"]
+
+
+def test_a_universal_custom_phase_named_like_a_new_built_in_stays_visible() -> None:
+    # The air fryer and bread maker lists added built-in names ("Pause",
+    # "Kneading") to the guard against legacy built-in overrides leaking into other
+    # catalogues, which hid a user's own universal phase of that name on a washer.
+    custom = [{"id": "3f0c9b8e-1d2a-4c5b-9e7f-0a1b2c3d4e5f", "name": "Pause", "device_type": ""}]
+    assert "Pause" in [p["name"] for p in merge_phase_catalog("washing_machine", custom)]
+    # Where it IS a built-in it still merges into it instead of duplicating.
+    assert [p["name"] for p in merge_phase_catalog(DEVICE_TYPE_AIR_FRYER, custom)].count("Pause") == 1
+
+
+def test_a_legacy_built_in_override_still_does_not_leak() -> None:
+    # No id (pre-id data) or another device's built-in id: an override of THAT
+    # device's built-in, not a phase of its own.
+    from custom_components.ha_washdata.phase_catalog import _builtin_phase_id
+
+    for item in (
+        {"name": "Spin", "device_type": "", "description": "edited"},
+        {"id": _builtin_phase_id("washing_machine", "Spin"), "name": "Spin", "device_type": ""},
+    ):
+        assert "Spin" not in [p["name"] for p in merge_phase_catalog(DEVICE_TYPE_BREAD_MAKER, [item])]

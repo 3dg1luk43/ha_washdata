@@ -417,6 +417,9 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
         # New phase: guard against universal overrides leaking into unrelated catalogs.
         # For legacy items with no device_type, first try matching against the active
         # catalog device_type before discarding, so legacy overrides are preserved.
+        # Only an override is guarded (no id, or a built-in's id): a phase the user
+        # created has its own id and stays, even when a built-in list added later
+        # shares its name (the air fryer's "Pause", 0.5.8).
         if not item_device_type and normalized_name.casefold() in all_builtin_names:
             active_dt_key = (str(device_type or "").strip().casefold(), normalized_name.casefold())
             if active_dt_key in builtin_by_name:
@@ -425,7 +428,9 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
                 if new_desc:
                     merged[idx]["description"] = new_desc
                 merged[idx]["is_default"] = False
-            continue
+                continue
+            if not phase_id or get_builtin_phase_by_id(phase_id) is not None:
+                continue
 
         # Deduplicate before appending.
         if phase_id and phase_id in seen_ids:
