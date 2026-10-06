@@ -117,6 +117,10 @@ reviews:
     # checked by the i18n tests. English (en.json, strings.json) stays in review.
     - "!custom_components/ha_washdata/translations/**/[a-df-z]*.json"
     - "!custom_components/ha_washdata/translations/**/e[lst].json"
+    # Tests are not reviewed: CodeRabbit caps a review at 150 files and a release PR
+    # carries hundreds of test files.
+    - "!tests/**"
+    - "!playwright-tests/**"
 
   path_instructions:
     - path: "custom_components/ha_washdata/**/*.py"
@@ -184,16 +188,6 @@ reviews:
       instructions: |
         Canonical English. strings.json and translations/en.json must stay identical. Texts must be short and plain: a setting's help is one or two sentences, a tooltip one. Flag padding ("in order to", restating the label, listing every edge case). Keep every {placeholder}. Plurals use key_one/key_other with the plain key as fallback. No leading or trailing whitespace (HA rejects it). Other languages are translated separately; never suggest machine translation.
 
-    - path: "tests/**"
-      instructions: |
-        - A bug fix comes with tests/test_issue_<number>_*.py reproducing it.
-        - Tests that replay cycle_data/, fan out over many cycles or take over 1.5 s are marked slow (module-level pytestmark).
-        - Prefer the setup_washdata_entry fixture to a MagicMock hass. A new hass = MagicMock() site fails test_audit_testing_07 unless added to the allow-list on purpose.
-        - A MagicMock hass used as a Store path writes files into the repo; give it a real config dir (tmp_path).
-        - Use async def tests; asyncio.run() inside a sync test breaks every later HA fixture.
-        - Do not weaken or remove the autouse service-schema guard in tests/conftest.py.
-        - A test must be able to fail: flag assertions that only check a mock was called, or that pass when the code under test returns early.
-
     - path: "devtools/**"
       instructions: |
         Measurement harnesses and dev tools, not shipped. A harness a tuning claim rests on must drive the shipped code path (ProfileStore.async_match_profile with the config a real manager builds), not a partial copy. devtools/ is "type": "module", so CommonJS files must be .cjs. Never print or commit secrets; devtools/secrets.py is gitignored and secrets.py.template holds placeholders only.
@@ -209,10 +203,6 @@ reviews:
     - path: "{README.md,CONTRIBUTING.md,SECURITY.md,docs/**/*.md}"
       instructions: |
         User-facing docs: short, plain sentences, the thing the reader does first. Flag padding and claims that no longer match the code. No em dashes.
-
-    - path: "playwright-tests/**"
-      instructions: |
-        Panel E2E across chromium and mobile-chrome, run against both the readable and the minified build. New panel features need a matching spec. Prefer role and test-id locators over CSS paths, and wait on state, not on timeouts.
 
   tools:
     ruff:
