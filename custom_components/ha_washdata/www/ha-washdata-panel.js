@@ -875,6 +875,9 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-pillbox .wd-pill { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 4px 2px 9px;
   font-size: .82em; line-height: 1.4; border-radius: var(--wd-radius-lg); background: var(--primary-color); color: var(--wd-white);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* The label shrinks and ellipsizes; the remove button never does (#467: a long
+   notify service pushed it out of the clipped pill). */
+.wd-pill-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wd-pill-x { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; padding: 0;
   border: 0; border-radius: 50%; background: rgba(255,255,255,.25); color: var(--wd-white); font-size: 13px; line-height: 1;
   cursor: pointer; flex: none; }
@@ -1857,7 +1860,7 @@ function _field(f, value, extra) {
     // Chip/pill multi-picker: existing values as removable pills + a combobox
     // add-input. Managed by DOM (no re-render) and collected on save.
     const vals = Array.isArray(value) ? value : (value ? [value] : []);
-    const pills = vals.map(x => `<span class="wd-pill" data-val="${_esc(x)}">${_esc(x)}<button type="button" class="wd-pill-x" aria-label="${_esc(extra.t ? extra.t('btn.remove', {}, 'Remove') : 'Remove')}">×</button></span>`).join('');
+    const pills = vals.map(x => `<span class="wd-pill" data-val="${_esc(x)}" title="${_esc(x)}"><span class="wd-pill-txt">${_esc(x)}</span><button type="button" class="wd-pill-x" aria-label="${_esc(extra.t ? extra.t('btn.remove', {}, 'Remove') : 'Remove')}">×</button></span>`).join('');
     input = `<div class="wd-pillbox" data-opt="${key}" data-ftype="entitylist">${pills}` +
       `<div class="wd-combo wd-combo-pill">` +
       `<input type="text" class="wd-pill-add" autocomplete="off" spellcheck="false" placeholder="${_esc(extra.t('placeholder.' + (f.domain || 'add'), {}, f.placeholder || 'add…'))}">` +
@@ -12132,19 +12135,22 @@ class HaWashdataPanel extends HTMLElement {
 
     // Entity-pill multi-pickers: add/remove chips via direct DOM mutation only
     // (never _render) so other unsaved settings-form edits are preserved.
+    // One builder for a pill added by typing and by picking, matching the template.
+    const mkPill = (v) => {
+      const pill = document.createElement('span');
+      pill.className = 'wd-pill'; pill.dataset.val = v; pill.title = v;
+      const txt = document.createElement('span');
+      txt.className = 'wd-pill-txt'; txt.textContent = v;
+      pill.appendChild(txt);
+      const x = document.createElement('button');
+      x.type = 'button'; x.className = 'wd-pill-x'; x.setAttribute('aria-label', this._tText('btn.remove', {}, 'Remove'));
+      x.textContent = '×';
+      x.addEventListener('click', () => pill.remove());
+      pill.appendChild(x);
+      return pill;
+    };
     sr.querySelectorAll('.wd-pillbox').forEach(box => {
       const addInput = box.querySelector('.wd-pill-add');
-      const mkPill = (v) => {
-        const pill = document.createElement('span');
-        pill.className = 'wd-pill'; pill.dataset.val = v;
-        pill.appendChild(document.createTextNode(v));
-        const x = document.createElement('button');
-        x.type = 'button'; x.className = 'wd-pill-x'; x.setAttribute('aria-label', this._tText('btn.remove', {}, 'Remove'));
-        x.textContent = '×';
-        x.addEventListener('click', () => pill.remove());
-        pill.appendChild(x);
-        return pill;
-      };
       const addVal = (raw) => {
         const v = String(raw || '').trim();
         if (!v) return;
@@ -12202,15 +12208,7 @@ class HaWashdataPanel extends HTMLElement {
         if (isPill) {
           const box = combo.closest('.wd-pillbox');
           if (box && !Array.from(box.querySelectorAll('.wd-pill')).some(p => p.dataset.val === val)) {
-            const pill = document.createElement('span');
-            pill.className = 'wd-pill'; pill.dataset.val = val;
-            pill.appendChild(document.createTextNode(val));
-            const x = document.createElement('button');
-            x.type = 'button'; x.className = 'wd-pill-x'; x.setAttribute('aria-label', this._tText('btn.remove', {}, 'Remove'));
-            x.textContent = '×';
-            x.addEventListener('click', () => pill.remove());
-            pill.appendChild(x);
-            box.insertBefore(pill, combo);
+            box.insertBefore(mkPill(val), combo);
           }
           inp.value = '';
         } else {

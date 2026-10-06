@@ -147,6 +147,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **The Playground replays exactly what the integration does** (0 of 176 replays differ, was 17) and says whether a cycle would be auto-labelled. Its phase bar draws again.
 - **Playground Optimize weighs end delay, early ends and splits**, compares each value with your current one, never recommends one that ends or splits more cycles, and says "keep the current value" when nothing is better.
 - **Export / Import (choose data) works on phones** ([#460](https://github.com/3dg1luk43/ha_washdata/issues/460)). Thanks to @Aaroneisele55
+- **A long notify service can be removed again** ([#467](https://github.com/3dg1luk43/ha_washdata/issues/467)): its pill now cuts the text short instead of pushing the remove button out of view; hover shows the full value. Thanks to @wilpatat
 - **ML Training lists only models something uses** and says why a model was not trained.
 - **Every language**: counts, numbers, costs and dates follow your language and Home Assistant settings ("€0.21"), about 100 more labels are translated, and settings search finds translated words. Icelandic now calls a cycle "lota" throughout.
 - **Settings search text and store data can no longer inject markup** into the panel. When the store cannot be reached, the Store tab says so.
