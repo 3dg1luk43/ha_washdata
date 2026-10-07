@@ -873,9 +873,12 @@ def score(
 
     judged = [r for r in rows if not r["partial"]]
     hits = [r for r in judged if not r["missed"]]
-    late = sorted(r["late_start_s"] for r in hits)
-    lag = sorted(r["commit_lag_s"] for r in hits)
-    fid = sorted(abs(r["vs_stored_s"]) for r in hits)
+    # A reference merged into an earlier run is timed against THAT run's start, so
+    # it is left out of the timings, as aggregate() does.
+    timed = [r for r in hits if not r.get("merged_into")]
+    late = sorted(r["late_start_s"] for r in timed)
+    lag = sorted(r["commit_lag_s"] for r in timed)
+    fid = sorted(abs(r["vs_stored_s"]) for r in timed)
 
     def _q(xs: list[float], q: float) -> float | None:
         if not xs:
@@ -918,7 +921,7 @@ def score(
         # A replay that disagrees with live by more than a minute is not measuring the
         # gate: a restart that lost the cycle's head, older code, a deleted record.
         "fidelity_outliers": {
-            r["ref"]: r["vs_stored_s"] for r in hits if abs(r["vs_stored_s"]) > FIDELITY_OUTLIER_S
+            r["ref"]: r["vs_stored_s"] for r in timed if abs(r["vs_stored_s"]) > FIDELITY_OUTLIER_S
         },
         "readings": {"in": result.readings_in, "processed": result.readings_processed},
         "phantom_starts": [p.start.isoformat() for p in phantoms],

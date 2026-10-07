@@ -228,7 +228,10 @@ def corpus_jobs(
 
 
 def summarise(rows: list[dict[str, Any]], cuts: tuple[float, ...]) -> list[dict[str, Any]]:
-    """Per cut: n, fires, median / p90 close (min), never closed, splits."""
+    """Per cut: n, fires, median / p90 close (min), never closed, splits, errors.
+
+    A replay that returned an error is not "never closed": it is counted on its own,
+    and main() exits non-zero, so a broken call path cannot pass as a slow rule."""
     table = []
     for frac in cuts:
         rs = [r for r in rows if r["frac"] == frac]
@@ -239,8 +242,9 @@ def summarise(rows: list[dict[str, Any]], cuts: tuple[float, ...]) -> list[dict[
             "fires": sum(r["fired"] for r in rs),
             "median_close_min": round(statistics.median(closes), 1) if closes else None,
             "p90_close_min": round(closes[int(0.9 * (len(closes) - 1))], 1) if closes else None,
-            "never_closed": sum(r["close_min"] is None for r in rs),
+            "never_closed": sum(r["close_min"] is None and not r.get("error") for r in rs),
             "splits": sum(r["n_finished"] > 1 for r in rs),
+            "errors": sum(bool(r.get("error")) for r in rs),
         })
     return table
 
@@ -275,16 +279,16 @@ def main(argv: list[str] | None = None) -> int:
     n_used = len({r["export"] for r in rows})
     print(f"rule={args.rule}  exports={len(jobs)} ({n_used} with a usable cycle)  "
           f"cycles={n_cycles}  rows={len(rows)}")
-    print(f"{'cut':>5} {'n':>4} {'fires':>6} {'median close':>13} {'p90':>7} {'never':>6} {'splits':>7}")
+    print(f"{'cut':>5} {'n':>4} {'fires':>6} {'median close':>13} {'p90':>7} {'never':>6} {'splits':>7} {'errors':>7}")
     for t in table:
         med = "-" if t["median_close_min"] is None else f"{t['median_close_min']:.1f} min"
         p90 = "-" if t["p90_close_min"] is None else f"{t['p90_close_min']:.1f}"
         print(f"{t['cut'] * 100:>4.0f}% {t['n']:>4} {t['fires']:>6} {med:>13} {p90:>7} "
-              f"{t['never_closed']:>6} {t['splits']:>7}")
+              f"{t['never_closed']:>6} {t['splits']:>7} {t['errors']:>7}")
     if args.json:
         Path(args.json).write_text(json.dumps({"rule": args.rule, "summary": table, "rows": rows}, indent=1))
         print(f"wrote {len(rows)} rows to {args.json}")
-    return 0
+    return 1 if any(t["errors"] for t in table) else 0
 
 
 if __name__ == "__main__":

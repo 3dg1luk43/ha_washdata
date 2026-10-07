@@ -90,3 +90,12 @@ def test_summarise_counts_fires_and_closes() -> None:
     (t,) = pp.summarise(rows, (0.15,))
     assert (t["n"], t["fires"], t["never_closed"], t["splits"]) == (3, 1, 1, 0)
     assert t["median_close_min"] == 47.0
+
+
+def test_a_failed_replay_is_an_error_not_a_never_closed_cycle() -> None:
+    rows = [
+        {"frac": 0.15, "fired": False, "close_min": None, "n_finished": 0},
+        {"frac": 0.15, "fired": False, "close_min": None, "n_finished": 0, "error": "boom"},
+    ]
+    (t,) = pp.summarise(rows, (0.15,))
+    assert (t["never_closed"], t["errors"]) == (1, 1)

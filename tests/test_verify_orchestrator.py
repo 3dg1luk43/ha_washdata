@@ -345,3 +345,37 @@ def test_underused_tail_is_the_time_at_the_end_below_the_budget():
     assert verify.underused_tail([(0, 8), (100, 4), (120, 0)], 8, 130) == 30
     assert verify.underused_tail([(0, 9), (50, 8)], 8, 60) == 0      # slot: over the budget
     assert verify.underused_tail([(0, 2)], 8, 40) == 40
+
+
+def test_an_interrupted_run_keeps_the_finished_stages_timings(tmp_path):
+    """Ctrl-C / SIGTERM returned 130 before save_timings ran, so the next run had
+    no timing for (and no cached pass of) the stages that had already finished."""
+    import json  # noqa: PLC0415
+    import signal  # noqa: PLC0415
+    import time  # noqa: PLC0415
+
+    marker = tmp_path / "pid"
+    timings = tmp_path / "timings.json"
+    child = (f"import os, pathlib, time; pathlib.Path({str(marker)!r}).write_text(str(os.getpid()));"
+             " time.sleep(120)")
+    code = (
+        f"import sys; sys.path.insert(0, {str(REPO / 'devtools')!r})\n"
+        "import verify\n"
+        "quick = verify.Stage('quick', ('quick',), lambda c, logs: [verify.Command("
+        "[sys.executable, '-c', 'pass'])], 1)\n"
+        f"hang = verify.Stage('hang', ('quick',), lambda c, logs: [verify.Command("
+        f"[sys.executable, '-c', {child!r}])], 50)\n"
+        "verify._stages = lambda: [quick, hang]\n"
+        "verify.changed_files = lambda: []\n"
+        f"raise SystemExit(verify.main(['--timings', {str(timings)!r}, '--passed', "
+        f"{str(tmp_path / 'passed.json')!r}, '--logs', {str(tmp_path / 'logs')!r}]))\n"
+    )
+    proc = subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.DEVNULL)
+    deadline = time.monotonic() + 30
+    while not marker.is_file() and time.monotonic() < deadline:
+        time.sleep(0.05)
+    assert marker.is_file(), "the stage never started"
+    time.sleep(0.8)  # the quick stage (a bare `python -c pass`) has finished by now
+    proc.send_signal(signal.SIGTERM)
+    assert proc.wait(timeout=30) == 130
+    assert "quick" in json.loads(timings.read_text())

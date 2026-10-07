@@ -206,7 +206,7 @@ None is a bug; each has a way to test it that does not compress time:
   *Test it* by replay: `devtools/start_gate_eval.py` feeds a raw history (a
   diagnostics dump's 24 h `power_trace`, a History CSV download, or a recorder
   database) through the real detector in real time and reports missed, late and
-  phantom starts per gate value. In the box, `set-options
+  phantom starts per gate value. In the box, `./hactl.py set-options <id>
   start_energy_threshold=<default / speedup>` removes the artefact, since the
   energy a compressed prelude delivers shrinks by the same factor.
 - **`STANDBY_BAND_WINDOW_S`** (600 s) is a constant, not an option, so it cannot

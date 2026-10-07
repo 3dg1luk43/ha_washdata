@@ -684,6 +684,9 @@ def run(
             except OSError:
                 pass
         out("interrupted")
+        # Keep what the finished stages earned: their timings and reusable passes.
+        save_timings(timings_path, timings)
+        save_timings(passed_path, passed)
         return 130
     finally:
         if in_main:
