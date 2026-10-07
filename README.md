@@ -70,8 +70,8 @@ WashData ships no programs, because every machine is different. Teach it your 2-
 - **Or label afterwards:** just use the machine. Each run is stored as an unlabelled cycle; open it
   in **Cycles** and assign it to a new profile.
 
-After that, matching is automatic. When WashData is not sure, it asks you to confirm the cycle on
-the Overview tab.
+After that, matching is automatic. When WashData is not sure, it puts the cycle in the review queue
+in **Cycles** (Overview links to it), where you confirm or correct it.
 
 **How many profiles?** One per program you can tell apart by length or power curve (Quick vs Cotton,
 wash only vs wash + dry). Programs that differ only in temperature or spin look alike; WashData may

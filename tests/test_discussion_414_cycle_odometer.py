@@ -697,3 +697,32 @@ async def test_an_unparseable_start_time_only_drops_its_own_record(store):
 
     # The junk record is skipped; the other 3 in the window still count.
     assert entry["cycle_count_at_log"] == 7
+
+
+def test_legacy_date_scan_is_cached_until_the_history_changes(store):
+    """The maintenance sensor asks on every power reading; an unstamped entry's
+    date scan reads every stored record, so it is cached on (log time, odometer,
+    record count) and redone only when one of them moves."""
+    now = dt_util.now()
+    store._data["past_cycles"] = [
+        {"id": f"c{i}", "start_time": (now - timedelta(days=10 - i)).isoformat(),
+         "status": "completed", "duration": 3600.0}
+        for i in range(10)
+    ]
+    store._data["lifetime_cycle_count"] = 10
+    store._data["maintenance_log"] = [{
+        "id": "old", "date": (now - timedelta(days=4, hours=1)).isoformat(),
+        "event_type": "drum_clean", "notes": "",
+    }]
+    with patch.object(store, "_cycles_after", wraps=store._cycles_after) as scan:
+        assert store.cycles_since_maintenance("drum_clean") == 4
+        assert store.cycles_since_maintenance("drum_clean") == 4
+        assert scan.call_count == 1
+        store._data["past_cycles"].append(
+            {"id": "c10", "start_time": now.isoformat(), "status": "completed", "duration": 3600.0}
+        )
+        store._data["lifetime_cycle_count"] = 11
+        assert store.cycles_since_maintenance("drum_clean") == 5
+        del store._data["past_cycles"][-2]  # a deleted record
+        assert store.cycles_since_maintenance("drum_clean") == 4
+        assert scan.call_count == 3

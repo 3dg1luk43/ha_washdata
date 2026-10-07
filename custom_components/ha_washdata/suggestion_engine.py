@@ -2160,7 +2160,10 @@ class SuggestionEngine:
             cur_end = _num(_batch_opts.get(CONF_END_ENERGY_THRESHOLD))
         except (TypeError, ValueError, OverflowError):
             cur_end = None
-        if cur_end is not None and cur_off_delay > 0:
+        if (
+            cur_end is not None and cur_off_delay > 0
+            and math.isfinite(cur_stop) and math.isfinite(cur_off_delay)
+        ):
             floor_wh = math.ceil(cur_stop * cur_off_delay / 36.0) / 100.0
             if cur_end < floor_wh:
                 suggestions[CONF_END_ENERGY_THRESHOLD] = {

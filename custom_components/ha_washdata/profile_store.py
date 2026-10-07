@@ -2097,6 +2097,9 @@ class ProfileStore:
         self._cached_sample_segments: dict[tuple[str, float], Segment] = {}
         self._sample_segment_lock = threading.Lock()
         self._terminal_quiet_cache: dict[str, tuple[tuple[int, str, int], float | None]] = {}
+        # Legacy (unstamped) maintenance entries: task id -> ((log time, odometer,
+        # record count), cycles since). See _maintenance_since.
+        self._legacy_maintenance_cache: dict[str, tuple[tuple[str, int, int], int]] = {}
         # Cache for group cohesion scores to avoid re-running DTW on the event loop
         # every 5 minutes.  Keyed by sorted-members tuple; invalidated when profile_groups
         # content changes (tracked by a simple generation counter).
@@ -3673,7 +3676,16 @@ class ProfileStore:
             if isinstance(stamp, (int, float)) and not isinstance(stamp, bool):
                 cycles = max(0, odometer - int(stamp))
             else:
-                cycles = self._cycles_after(when)
+                # The date scan reads every stored record, and the maintenance sensor
+                # asks on every power reading, so it is cached until a cycle is added
+                # (odometer), deleted (record count) or the task is logged again.
+                key = (when.isoformat(), odometer, len(self.get_past_cycles()))
+                cached = self._legacy_maintenance_cache.get(task_id)
+                if cached is not None and cached[0] == key:
+                    cycles = cached[1]
+                else:
+                    cycles = self._cycles_after(when)
+                    self._legacy_maintenance_cache[task_id] = (key, cycles)
             return cycles, self._days_since(when)
         origin = self._maintenance_origin(task_id)
         if origin is not None:

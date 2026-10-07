@@ -235,3 +235,19 @@ def test_an_oversized_json_integer_does_not_abort_the_batch_pass() -> None:
         opts[key] = 10**400
         out = _engine(cycles, options=opts).run_batch_simulation(cycles)
         assert CONF_END_ENERGY_THRESHOLD not in out
+
+
+def test_a_non_finite_stop_or_off_delay_does_not_abort_the_batch_pass() -> None:
+    """float("Infinity") passes the > 0 check and math.ceil(inf) then raised
+    OverflowError outside the try, losing every batch suggestion for the device."""
+    from custom_components.ha_washdata.const import (
+        CONF_END_ENERGY_THRESHOLD,
+        CONF_STOP_THRESHOLD_W,
+    )
+
+    cycles = [_cycle(i) for i in range(12)]
+    for key in (CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY):
+        opts = {CONF_STOP_THRESHOLD_W: 2.0, CONF_OFF_DELAY: 600, CONF_END_ENERGY_THRESHOLD: 0.01}
+        opts[key] = "Infinity"
+        out = _engine(cycles, options=opts).run_batch_simulation(cycles)
+        assert CONF_END_ENERGY_THRESHOLD not in out

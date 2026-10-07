@@ -184,7 +184,9 @@ def replay_export(
                 e.get("type") in ("match_commit", "match_changed") and float(e.get("t") or 0) <= cut_s
                 for e in events
             )
-            first = finished[0] if finished else None
+            # The close the cut caused: a finish BEFORE it is a split (counted by
+            # n_finished), and scoring it gave a negative close and a phantom fire.
+            first = next((e for e in finished if float(e.get("t") or 0) >= cut_s), None)
             rows.append({
                 "export": key,
                 "id": str(cyc.get("id"))[:12],
