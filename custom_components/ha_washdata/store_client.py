@@ -30,6 +30,7 @@ import base64
 import hashlib
 import json
 import logging
+import math
 import re
 import time
 import unicodedata
@@ -195,11 +196,13 @@ def _rating_from_doc(doc: dict[str, Any]) -> dict[str, Any]:
     try:
         count = int(doc.get("ratingCount") or 0)
         total = float(doc.get("ratingSum") or 0)
-    except (TypeError, ValueError, AttributeError):
+        avg = total / count if count > 0 else None
+    except (TypeError, ValueError, AttributeError, OverflowError):
+        # OverflowError: an integerValue decodes to an unbounded int.
         return {"avg": None, "count": 0}
-    if count <= 0:
+    if avg is None or not math.isfinite(avg):
         return {"avg": None, "count": 0}
-    return {"avg": total / count, "count": count}
+    return {"avg": avg, "count": count}
 
 
 def _token_uid(body: dict[str, Any]) -> str | None:
@@ -470,7 +473,7 @@ class StoreClient:
         self._id_token_uid = _token_uid(body)
         try:
             self._id_token_exp = now + float(body.get("expires_in", 3600))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             self._id_token_exp = now + 3600
         return self._id_token
 
@@ -1165,7 +1168,7 @@ class StoreClient:
         program = required["program"]
         try:
             interval = float(meta.get("sampleIntervalSec") or 0)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             interval = 0.0
         if appliance not in _APPLIANCE_TYPES:
             _LOGGER.warning("Store upload: invalid applianceType %r", appliance)
@@ -1178,7 +1181,7 @@ class StoreClient:
         qc_code = qc if qc in (1, 2, 3) else 3
         try:
             pts = [[float(p[0]), float(p[1])] for p in (points or [])[:10000] if len(p) >= 2]
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             self._last_error = "malformed trace points"
             return _out(None, False)
         if len(pts) < 2:
@@ -1372,7 +1375,7 @@ class StoreClient:
         status = dev.get("status")
         try:
             threshold = int((await self.get_config()).get("confirmThreshold") or 5)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             threshold = 5
         if status == "pending" and count >= threshold:
             promote = [{

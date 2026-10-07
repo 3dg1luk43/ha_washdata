@@ -1333,3 +1333,16 @@ async def test_catalog_invalidation_drops_the_index_delta_cache_too():
     s.queue_post(_Resp(200, []))
     await c._index_delta("devices", "2026-01-01T00:00:00Z", ("brand",))
     assert len(s.posts) == 2
+
+
+def test_an_oversized_rating_reads_as_no_ratings():
+    # Firestore integerValue decodes to an unbounded int and float() on it raises
+    # OverflowError, which escaped and failed get_cycles. 1e400 parses to inf
+    # instead and never raises, so both are asserted.
+    from custom_components.ha_washdata.store_client import _rating_from_doc
+
+    none = {"avg": None, "count": 0}
+    assert _rating_from_doc({"ratingCount": 2, "ratingSum": 10**400}) == none
+    assert _rating_from_doc({"ratingCount": 10**400, "ratingSum": 5}) == none
+    assert _rating_from_doc({"ratingCount": 2, "ratingSum": 1e400}) == none
+    assert _rating_from_doc({"ratingCount": 2, "ratingSum": 9}) == {"avg": 4.5, "count": 2}
