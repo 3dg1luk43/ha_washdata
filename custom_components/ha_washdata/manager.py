@@ -1837,11 +1837,34 @@ class WashDataManager:
                             self._config.min_power,
                         )
 
-                    if self.detector.matched_profile:
-                        self._current_program = self.detector.matched_profile
+                    # The committed program and its expected duration. Until the
+                    # snapshot carried them, the detector's match was all there was:
+                    # the last tick's raw winner, not necessarily the displayed
+                    # program, and no `_matched_profile_duration`, so the ETA was blank
+                    # and the first tick another candidate led reverted the program to
+                    # "detecting..." (decide_switch's no-duration branch).
+                    if "committed_program" in active_snapshot_to_restore:
+                        committed = active_snapshot_to_restore.get("committed_program")
+                        committed_duration = active_snapshot_to_restore.get(
+                            "committed_program_duration"
+                        )
+                    else:  # snapshot from an older version
+                        committed = self.detector.matched_profile
+                        committed_duration = self.detector.expected_duration_seconds
+                    committed_profile = (
+                        self.profile_store.get_profile(committed)
+                        if isinstance(committed, str) and committed
+                        else None
+                    )
+                    if committed_profile is not None:
+                        self._current_program = committed
+                        self._matched_profile_duration = self._profile_duration(
+                            committed_duration
+                        ) or self._profile_duration(committed_profile.get("avg_duration"))
                         self._logger.info(
-                            "Restored/Resurrected washer cycle with profile: %s",
+                            "Restored washer cycle with profile: %s (duration=%.0fs)",
                             self._current_program,
+                            self._matched_profile_duration or 0.0,
                         )
                     else:
                         self._current_program = "detecting..."
@@ -5803,6 +5826,15 @@ class WashDataManager:
         # carried explicitly to re-pin the override.
         snapshot["manual_program_name"] = (
             self._current_program if self._manual_program_active else None
+        )
+        # The auto-detected program on display and its expected duration, for the
+        # same reason: the detector holds only the last tick's raw winner.
+        committed = not self._manual_program_active and match_rules.program_is_committed(
+            self._current_program
+        )
+        snapshot["committed_program"] = self._current_program if committed else None
+        snapshot["committed_program_duration"] = (
+            self._matched_profile_duration if committed else None
         )
         snapshot["notified_start"] = self._notified_start
         snapshot["start_event_fired"] = self._start_event_fired

@@ -77,6 +77,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 #### Restarts, dropouts and clock changes
 
 - **A restart during a quiet spell could lose or shorten the cycle**: the quiet time now survives the restart. A cycle that cannot be restored is logged and kept for the diagnostics download.
+- **After a restart, a recognised program lost its time remaining and fell back to "detecting..."**: the restore brought back the last match's raw winner without its expected duration, so the first time another program led, the program was dropped. The program on display and its duration now survive the restart.
 - **A power sensor dropout could end or split a cycle**: an outage now counts as neither quiet nor activity. With a 15-minute outage, splits 10.5% to 2.1%.
 - **Across a daylight-saving change a wash could split or be stored an hour short**, and quiet hours ended an hour off: time maths now runs in UTC.
 - **A finished cycle could be reopened and counted twice** by a restart or save within 20 minutes; a match could carry into the next cycle; an error in the final match could lose the cycle. All fixed.
