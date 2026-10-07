@@ -5421,7 +5421,7 @@ class HaWashdataPanel extends HTMLElement {
       <button class="wd-btn wd-btn-danger wd-btn-sm" data-action="cyc-bulk-del" ${sel.size < 1 ? 'disabled' : ''}>${this._t('btn.delete', {}, 'Delete')}${sel.size >= 1 ? ` (${sel.size})` : ''}</button>
     </div>` : '';
 
-    // D3: "Load more" pagination — only when the backend reports more rows, real or
+    // D3: "Load more" pagination - only when the backend reports more rows, real or
     // imported (each list has its own cursor).
     const loadMoreBusy = this._busy.has('cyc-load-more');
     const loadMore = (this._cyclesHasMore || this._importedHasMore) ? `<div style="text-align:center;margin-top:12px">
@@ -6443,6 +6443,8 @@ class HaWashdataPanel extends HTMLElement {
       if (this._modal !== m) return;
       m.profiles = (r && r.items) || [];
       m.deviceId = (r && r.device_id) || null;
+      // An outage is not "no profiles yet" (audit STORE-09).
+      m.storeUnreachable = !!(r && r.error === 'store_unreachable');
     } catch (_) { if (this._modal === m) m.profiles = []; }
     if (this._modal === m) this._render();
   }
@@ -10379,9 +10381,11 @@ class HaWashdataPanel extends HTMLElement {
       const loading = m.profiles == null ? ` <span class="wd-info" style="font-size:.85em">${this._t('msg.loading', {}, 'Loading…')}</span>` : '';
       const opts = names.length
         ? names.map(n => `<option value="${_esc(n)}" ${n === m.program ? 'selected' : ''}>${_esc(n)}</option>`).join('')
-        : `<option value="">${this._t('msg.no_profiles_option', {}, '(no profiles yet - add one)')}</option>`;
+        : (m.storeUnreachable ? '<option value=""></option>'
+          : `<option value="">${this._t('msg.no_profiles_option', {}, '(no profiles yet - add one)')}</option>`);
       body = `<h2>${this._t('modal.store_share', {}, 'Share to community store')}</h2>
         <p class="wd-info" style="margin-bottom:12px">${this._t('msg.store_share_intro', {}, 'Upload this reference cycle so others with the same appliance can use it. It is reviewed before appearing publicly.')}</p>
+        ${m.storeUnreachable ? this._htmlStoreUnreachable() : ''}
         <div class="wd-field"><label>${this._t('lbl.profile', {}, 'Profile')}${loading}</label>
           <div class="wd-combo-row">
             <select id="wd-store-share-prog">${opts}</select>

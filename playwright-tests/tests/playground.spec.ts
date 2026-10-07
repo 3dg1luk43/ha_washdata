@@ -252,7 +252,7 @@ test('control panel: Load suggested stages classic suggestion values', async ({ 
 });
 
 test('control panel: the suggestion button shows the suggestion count in its label', async ({ page }) => {
-  // Mock returns 2 classic suggestions — the count must appear in the label.
+  // Mock returns 2 classic suggestions - the count must appear in the label.
   await clickTab(page, 'playground');
   const classic = page.locator('button[data-action="pg-load-suggested"]');
   await expect(classic).toBeVisible({ timeout: 8_000 });
