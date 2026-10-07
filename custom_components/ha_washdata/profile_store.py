@@ -177,7 +177,7 @@ def label_verdict(result: Any, floor: float) -> tuple[str | None, str]:
         return None, "no_winner"
     try:
         conf = float(getattr(result, "label_confidence", 0.0) or 0.0)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         conf = 0.0
     if conf < float(floor or 0.0):
         return None, "below_floor"
@@ -404,7 +404,7 @@ def _value_to_timestamp(value: Any) -> float | None:
             return parsed.timestamp()
         try:
             return float(value)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return None
     return None
 
@@ -617,7 +617,7 @@ def _envelope_y(raw: list[Any] | None) -> np.ndarray:
         return np.asarray(
             [p[1] if isinstance(p, (list, tuple)) else p for p in raw], dtype=float
         )
-    except (TypeError, ValueError, IndexError):
+    except (TypeError, ValueError, IndexError, OverflowError):
         return np.array([], dtype=float)
 
 
@@ -847,7 +847,7 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
                         last_saved_p = p_val
                         last_saved_t = offset
 
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, OverflowError):
                     continue
         return compressed
     except Exception:
@@ -1862,7 +1862,7 @@ def _usable_reference_pairs(points: Any) -> list[list[float]] | None:
             continue
         try:
             x, y = float(p[0]), float(p[1])
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
         if np.isfinite(x) and np.isfinite(y):
             pairs.append([x, y])
@@ -1954,7 +1954,7 @@ def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
     for x in base:
         try:
             seen_sigs.add(json.dumps(x, sort_keys=True, default=str))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             pass
     for item in incoming:
         if isinstance(item, dict) and item.get("id") is not None:
@@ -1966,7 +1966,7 @@ def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
             continue
         try:
             sig = json.dumps(item, sort_keys=True, default=str)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             sig = None
         if sig is not None:
             if sig in seen_sigs:
@@ -3206,7 +3206,7 @@ class ProfileStore:
         """
         try:
             add = max(0.0, float(wh))
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, OverflowError):
             return
         base = self.get_lifetime_energy_wh()
         self._data["lifetime_energy_wh"] = round(base + add, 3)
@@ -3252,7 +3252,7 @@ class ProfileStore:
         """
         try:
             value = int(count)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return
         if value < 0:
             return
@@ -3733,7 +3733,7 @@ class ProfileStore:
                 for event_type, threshold in reminder_cfg.items():
                     try:
                         thr = int(threshold)
-                    except (TypeError, ValueError):
+                    except (TypeError, ValueError, OverflowError):
                         continue
                     if thr > 0:
                         _row(str(event_type), None, thr, 0)
@@ -3777,7 +3777,7 @@ class ProfileStore:
             for event_type in sorted(MAINTENANCE_COUNT_FROM_ENABLE_TYPES):
                 try:
                     enabled = int(cfg.get(event_type) or 0) > 0
-                except (TypeError, ValueError):
+                except (TypeError, ValueError, OverflowError):
                     enabled = False
                 if enabled and not isinstance(baselines.get(event_type), dict):
                     baselines[event_type] = {
@@ -4479,7 +4479,7 @@ class ProfileStore:
                 ):
                     try:
                         span = float(env_avg[-1][0]) - float(env_avg[0][0])
-                    except (TypeError, ValueError, IndexError):
+                    except (TypeError, ValueError, IndexError, OverflowError):
                         span = 0.0
                     env_usable = bool(
                         env.get("target_duration") or profile.get("avg_duration") or span
@@ -5002,7 +5002,7 @@ class ProfileStore:
             try:
                 start = float(phase.get("start", 0.0))
                 end = float(phase.get("end", 0.0))
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 continue
             if end <= start:
                 continue
@@ -5053,7 +5053,7 @@ class ProfileStore:
             try:
                 start = float(item.get("start", 0.0))
                 end = float(item.get("end", 0.0))
-            except (TypeError, ValueError) as e:
+            except (TypeError, ValueError, OverflowError) as e:
                 raise ValueError("invalid_phase_range") from e
             if end <= start:
                 raise ValueError("invalid_phase_range")
@@ -5078,7 +5078,7 @@ class ProfileStore:
         try:
             self._min_duration_ratio = float(min_ratio)
             self._max_duration_ratio = float(max_ratio)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             pass
 
     def _migrate_phase_ids(self) -> bool:
@@ -5428,7 +5428,7 @@ class ProfileStore:
                     try:
                         ts = float(start_time_raw)
                         start_time_iso = dt_util.utc_from_timestamp(ts).isoformat()
-                    except (ValueError, OSError):
+                    except (ValueError, OSError, OverflowError):
                         self._logger.debug(
                             "add_cycle: unparseable string start_time %r, falling back",
                             start_time_raw,
@@ -5438,7 +5438,7 @@ class ProfileStore:
             elif isinstance(start_time_raw, (int, float)):
                 try:
                     start_time_iso = dt_util.utc_from_timestamp(float(start_time_raw)).isoformat()
-                except (ValueError, OSError):
+                except (ValueError, OSError, OverflowError):
                     pass
             if start_time_iso is not None:
                 cycle_data["start_time"] = start_time_iso
@@ -5810,7 +5810,7 @@ class ProfileStore:
                                     shifted_data.append([round(row[0] - first_offset, 1), row[1]])
                                 cycle["power_data"] = shifted_data
                                 processed_count += 1
-                            except (ValueError, TypeError) as e:
+                            except (ValueError, TypeError, OverflowError) as e:
                                 self._logger.warning("Failed to shift start_time for trimmed cycle: %s", e)
                         else:
                             # Only trailing trimmed or no shift needed
@@ -6138,7 +6138,7 @@ class ProfileStore:
         if isinstance(profile, dict):
             try:
                 target = float(profile.get("avg_duration") or 0.0) or None
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 target = None
         chosen = self._select_reference_cycle_id(profile_name, target)
         if chosen:
@@ -6228,7 +6228,7 @@ class ProfileStore:
                     continue
                 try:
                     repaired_rows.append([round(float(pt[0]) + start_ts, 1), round(float(pt[1]), 1)])
-                except (TypeError, ValueError):
+                except (TypeError, ValueError, OverflowError):
                     continue
             if not repaired_rows:
                 continue  # all rows malformed - leave original trace untouched
@@ -6569,7 +6569,7 @@ class ProfileStore:
             # Inside the try: a stored time_grid with non-numeric entries must
             # yield the safe None fallback, not propagate to async_verify_alignment.
             return [float(t) for t in env_time], env_power
-        except (TypeError, ValueError, IndexError):
+        except (TypeError, ValueError, IndexError, OverflowError):
             return None
 
     @staticmethod
@@ -6870,7 +6870,7 @@ class ProfileStore:
                         new_duration = max(new_duration, TRUSTED_LENGTH_FLOOR_FRAC * _floor)
                 try:
                     old_duration = float(cycle.get("duration") or 0.0)
-                except (TypeError, ValueError):
+                except (TypeError, ValueError, OverflowError):
                     continue
                 if old_duration - new_duration < BANKED_TAIL_REPAIR_MIN_S:
                     continue
@@ -7968,7 +7968,7 @@ class ProfileStore:
                 if env_avg and len(env_avg) > 1:
                     try:
                         span = float(env_avg[-1][0]) - float(env_avg[0][0])
-                    except (TypeError, ValueError, IndexError):
+                    except (TypeError, ValueError, IndexError, OverflowError):
                         span = 0.0
                 return float(
                     envelope.get("target_duration")
@@ -8019,7 +8019,7 @@ class ProfileStore:
                     continue
                 try:
                     dur = float(cycle.get("duration") or 0.0)
-                except (TypeError, ValueError):
+                except (TypeError, ValueError, OverflowError):
                     continue
                 if dur > 60:
                     by_profile.setdefault(str(name), []).append(cycle)
@@ -8224,7 +8224,7 @@ class ProfileStore:
                     "correlation": corr,
                     "duration_ratio": duration_ratio,  # ±% from expected
                 })
-            except (TypeError, ValueError, KeyError):
+            except (TypeError, ValueError, KeyError, OverflowError):
                 continue
 
         return candidates
@@ -8692,7 +8692,7 @@ class ProfileStore:
             if _chosen_cand is not None:
                 try:
                     member_confidence = float(_chosen_cand["score"])
-                except (TypeError, ValueError, KeyError):
+                except (TypeError, ValueError, KeyError, OverflowError):
                     member_confidence = None
             # Safeguard #2: the group won but if the chosen member
             # does not individually fit reasonably (vs the group score), the real
@@ -8823,7 +8823,7 @@ class ProfileStore:
         try:
             offsets = [float(x[0]) for x in current_power_data]
             powers = [float(x[1]) for x in current_power_data]
-        except (TypeError, ValueError, IndexError):
+        except (TypeError, ValueError, IndexError, OverflowError):
             # A legacy ISO-timestamped trace (x[0] is a string) lands here. The
             # signature admits ``list[tuple[Any, ...]]``, so normalize through the
             # shared helper instead of bailing out: returning early skipped
@@ -8838,7 +8838,7 @@ class ProfileStore:
             try:
                 offsets = [float(x[0]) for x in normalized]
                 powers = [float(x[1]) for x in normalized]
-            except (TypeError, ValueError, IndexError):
+            except (TypeError, ValueError, IndexError, OverflowError):
                 return False, 0.0, 9999.0
         current_power_list = self._resample_trace_to_grid(offsets, powers, env_time)
 
@@ -9209,7 +9209,7 @@ class ProfileStore:
             try:
                 if float(cycle.get("duration") or 0.0) > 60:
                     out.add(str(name))
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 continue
         return out
 
@@ -11082,7 +11082,7 @@ class ProfileStore:
                 if seg_e <= seg_s:
                     return []
                 materialized_segs.append((seg_s, seg_e, seg_p))
-        except (TypeError, ValueError, KeyError, IndexError):
+        except (TypeError, ValueError, KeyError, IndexError, OverflowError):
             return []
         # A split into fewer than two pieces is not a real split; guard here so
         # an empty or single-element segments list can't pop the source cycle and

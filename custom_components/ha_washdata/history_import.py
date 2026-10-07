@@ -1282,7 +1282,7 @@ def dedup_key(start_time: Any, duration: Any) -> tuple[int, int] | None:
         return None
     try:
         return (int(parsed.timestamp()), int(round(float(duration or 0.0))))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
 
 
@@ -1305,7 +1305,7 @@ def stored_intervals(cycles: Iterable[dict[str, Any]]) -> list[tuple[float, floa
             continue
         try:
             duration = max(0.0, float(cycle.get("duration") or 0.0))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
         t0 = start.timestamp()
         out.append((t0, t0 + duration))
@@ -1330,7 +1330,7 @@ def overlaps_stored(
     try:
         t0 = start.timestamp()
         t1 = t0 + max(0.0, float(duration or 0.0))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return False
     for s0, s1 in intervals:
         if s0 >= t1:
@@ -1369,7 +1369,7 @@ def _offset_points(cycle_data: dict[str, Any]) -> list[tuple[float, float]]:
     for point in cycle_data.get("power_data") or []:
         try:
             points.append((float(point[0]), float(point[1])))
-        except (TypeError, ValueError, IndexError):
+        except (TypeError, ValueError, IndexError, OverflowError):
             continue
     return points
 

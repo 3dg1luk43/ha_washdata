@@ -236,7 +236,7 @@ def _is_step_suppressed(step_key: str, skipped_steps: dict, now: datetime) -> bo
         if until.tzinfo is None:
             until = until.replace(tzinfo=timezone.utc)
         return now < until
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, OverflowError):
         return False
 
 

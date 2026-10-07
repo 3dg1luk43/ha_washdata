@@ -517,7 +517,7 @@ def _whole_percent(value: Any) -> int | None:
         return None
     try:
         pct = float(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if not math.isfinite(pct):
         return None

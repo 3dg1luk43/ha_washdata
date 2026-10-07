@@ -1227,7 +1227,7 @@ class StoreClient:
                 # 0.0 (which would ship a bogus zero-length phase to the catalog).
                 try:
                     return {"name": str(p.get("name", "")), "start": float(p["start"]), "end": float(p["end"])}
-                except (KeyError, TypeError, ValueError):
+                except (KeyError, TypeError, ValueError, OverflowError):
                     return None
             valid_phases = [
                 vp for vp in (_valid_phase(p) for p in phases if isinstance(p, dict)) if vp is not None

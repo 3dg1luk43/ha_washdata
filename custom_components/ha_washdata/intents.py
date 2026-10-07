@@ -139,7 +139,7 @@ def _minutes_from_seconds(seconds: Any) -> int | None:
     """Return whole minutes (>=1) from a seconds value, or None when unusable."""
     try:
         value = float(seconds)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if value <= 0:
         return None
@@ -152,7 +152,7 @@ def _minutes_since(end: Any, now: datetime) -> int | None:
         return None
     try:
         delta = (now - end).total_seconds()
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if delta < 0:
         return 0
@@ -309,7 +309,7 @@ async def _localized_templates(
             continue
         try:
             loaded = await hass.async_add_executor_job(_load_intent_file, lg)
-        except (AttributeError, TypeError):
+        except (AttributeError, TypeError, OverflowError):
             # Only a hass without a usable executor (the minimal test stand-in)
             # reads on the loop. A broad except here would also catch a real
             # executor failure - e.g. "cannot schedule new futures after

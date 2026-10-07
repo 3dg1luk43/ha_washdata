@@ -1619,7 +1619,7 @@ def _apply_device_link(hass: HomeAssistant, entry: ConfigEntry) -> None:
             registry.async_update_device(
                 washdata_device.id, via_device_id=linked_device_id
             )
-        except (HomeAssistantError, ValueError) as err:
+        except (HomeAssistantError, ValueError, OverflowError) as err:
             # The via_device link is cosmetic (it only nests the device in the HA
             # registry UI). A registry rule we do not know about yet must never be
             # able to take the whole entry down with it, as the self-link did in

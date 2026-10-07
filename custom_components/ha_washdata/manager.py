@@ -384,7 +384,7 @@ def _snapshot_time(raw: Any) -> datetime | None:
         return None
     try:
         parsed = dt_util.parse_datetime(raw)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if parsed is None:
         return None
@@ -408,7 +408,7 @@ def _coerce_price_timeline(raw: Any) -> list[tuple[float, float]]:
             continue
         try:
             result.append((float(entry[0]), float(entry[1])))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
     result.sort(key=lambda item: item[0])
     return result
@@ -1652,7 +1652,7 @@ class WashDataManager:
             try:
                 waiting = float(snap.get("time_below") or 0.0) > 0.0
                 expected = float(snap.get("expected_duration") or 0.0)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 return False
             if not waiting:
                 return False
@@ -3033,7 +3033,7 @@ class WashDataManager:
             return
         try:
             price = float(new_state.state)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, OverflowError):
             # unknown/unavailable/non-numeric: carry the last known price forward
             # rather than charging the cycle at zero for the outage.
             return
@@ -3057,7 +3057,7 @@ class WashDataManager:
             return
         try:
             value = round(float(price), PRICE_TIMELINE_PRICE_DECIMALS)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, OverflowError):
             return
         if not math.isfinite(value):
             # Same rule as _finite_power: "nan"/"inf" parse cleanly and would ride
@@ -3354,7 +3354,7 @@ class WashDataManager:
             stop_thr = 0.0
             try:
                 stop_thr = float(getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 stop_thr = 0.0
             if stop_thr > 0.0 and self._current_power >= stop_thr:
                 self._logger.debug(
@@ -3536,7 +3536,7 @@ class WashDataManager:
 
         try:
             hour = int(opts.get(CONF_ML_TRAINING_HOUR, DEFAULT_ML_TRAINING_HOUR))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             hour = DEFAULT_ML_TRAINING_HOUR
         hour = max(0, min(23, hour))
 
@@ -3826,7 +3826,7 @@ class WashDataManager:
                 continue
             try:
                 parsed = dt_util.parse_datetime(ts)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, OverflowError):
                 parsed = None
             if parsed is not None and (latest is None or parsed > latest):
                 latest = parsed
@@ -4521,7 +4521,7 @@ class WashDataManager:
                         power,
                         getattr(state, "last_reported", None) or state.last_updated,
                     )
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, OverflowError):
                     pass
 
     def _seed_real_reading_clock(self, power: float, report_ts: datetime) -> None:
@@ -5238,7 +5238,7 @@ class WashDataManager:
             for p in power_data:
                 try:
                     valid.append((float(p[0]), float(p[1])))
-                except (TypeError, ValueError, IndexError):
+                except (TypeError, ValueError, IndexError, OverflowError):
                     pass
             if len(valid) >= 2:
                 try:
@@ -5535,7 +5535,7 @@ class WashDataManager:
             if state is not None:
                 try:
                     value = float(state.state)
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, OverflowError):
                     pass
                 else:
                     # A non-finite reading is treated as no reading, exactly like an
@@ -5547,7 +5547,7 @@ class WashDataManager:
         if static is not None:
             try:
                 value = float(static)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, OverflowError):
                 pass
             else:
                 if math.isfinite(value):
@@ -5586,7 +5586,7 @@ class WashDataManager:
             for state in res.get(entity_id, []) or []:
                 try:
                     price = float(state.state)
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, OverflowError):
                     # unknown/unavailable: the previous price stays in force.
                     continue
                 ts = state.last_changed.timestamp()
@@ -5741,7 +5741,7 @@ class WashDataManager:
             return None
         try:
             value = float(state.state)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, OverflowError):
             return None
         unit = str(state.attributes.get("unit_of_measurement") or "").strip().lower()
         # Normalize to Wh. An unrecognised unit is treated as unusable so a
@@ -5795,11 +5795,11 @@ class WashDataManager:
         if meter is not None:
             try:
                 return float(meter)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, OverflowError):
                 pass
         try:
             return float(cycle_data.get("energy_wh", 0.0))
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, OverflowError):
             return 0.0
 
     def _in_anticrease_tail(self) -> bool:
@@ -5908,14 +5908,14 @@ class WashDataManager:
             if not median or float(median) <= 0:
                 return ""
             pct = round((float(duration) - float(median)) / float(median) * 100)
-        except (ValueError, TypeError, ZeroDivisionError):
+        except (ValueError, TypeError, ZeroDivisionError, OverflowError):
             return ""
         try:
             if pct >= 1:
                 return longer_template.format(pct=pct)
             if pct <= -1:
                 return shorter_template.format(pct=abs(pct))
-        except (KeyError, IndexError, ValueError):
+        except (KeyError, IndexError, ValueError, OverflowError):
             # Malformed translation template; fall back to the English default.
             if pct >= 1:
                 return f"{pct}% longer than usual"
@@ -5944,7 +5944,7 @@ class WashDataManager:
                 device=self.config_entry.title,
                 price=f"{float(price):.3f}",
             )
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, OverflowError):
             return ""
 
     async def _async_process_cycle_end(
@@ -6048,7 +6048,7 @@ class WashDataManager:
         # score (item 206), not a Stage-5 group's, which is its best SIBLING's.
         try:
             label_confidence = float(getattr(match_result, "label_confidence", 0.0) or 0.0)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             label_confidence = 0.0
         if label_confidence > 0 and (
             not manual_program or getattr(match_result, "best_profile", None) == program
@@ -6340,7 +6340,7 @@ class WashDataManager:
                 match_margin = round(
                     float(getattr(match_result, "ambiguity_margin", 0.0) or 0.0), 3
                 )
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 match_margin = None
 
         if self._notify_fire_events:
@@ -6751,7 +6751,7 @@ class WashDataManager:
                 continue
             try:
                 json.dumps(entry)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 continue
             out.append(dict(entry))
         return out
@@ -6973,7 +6973,7 @@ class WashDataManager:
         """
         try:
             pct = int(round(float(progress_pct)))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             pct = 0
         pct = max(0, min(100, pct))
         extras: dict[str, Any] = {
@@ -7516,7 +7516,7 @@ class WashDataManager:
                     err,
                 )
                 return False
-            except (ValueError, TypeError, HomeAssistantError) as err:
+            except (ValueError, TypeError, HomeAssistantError, OverflowError) as err:
                 self._logger.error(
                     "Invalid notification action configuration for %s: %s",
                     self.config_entry.title,
@@ -9111,7 +9111,7 @@ class WashDataManager:
                     ts = float(start_raw)
                 if ts >= cutoff:
                     count += 1
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 continue
         return count
 

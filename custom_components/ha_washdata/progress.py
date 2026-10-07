@@ -230,7 +230,7 @@ def _parse_phase_envelope(
             envelope.get("time_grid", []), dtype=float
         )
         target_duration = float(envelope.get("target_duration", 0.0) or 0.0)
-    except (KeyError, ValueError, TypeError, IndexError) as e:
+    except (KeyError, ValueError, TypeError, IndexError, OverflowError) as e:
         logger.warning("Invalid envelope format for %s: %s", profile_name, e)
         return None
     for _arr in (*envelope_arrays.values(), time_grid):
@@ -273,7 +273,7 @@ def _window_values(
                 if not isinstance(ts, datetime):
                     return None
                 return ts, float(row[1])
-            except (TypeError, ValueError, AttributeError, IndexError):
+            except (TypeError, ValueError, AttributeError, IndexError, OverflowError):
                 return None
 
         anchor: float | None = None
@@ -845,7 +845,7 @@ def phase_timeline_span(
     span = max((float(r.get("end") or 0.0) for r in ranges), default=0.0)
     try:
         expected = float(expected_duration or 0.0)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         expected = 0.0
     if math.isfinite(expected) and expected > span:
         span = expected
@@ -941,7 +941,7 @@ def envelope_energy_fraction(
                 )
                 if cum[-1] > 0 and tg[-1] > tg[0]:
                     curve = (tg, cum / cum[-1])
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             curve = None
         # The envelope itself is held, so its id cannot be recycled while cached.
         _ENERGY_CURVES[key] = (env, curve)
@@ -1009,7 +1009,7 @@ def projected_energy(
         # absent or non-numeric price is "unknown".
         try:
             price_val = float(price)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             price_val = None
         if price_val is None:
             cost = None
@@ -1020,7 +1020,7 @@ def projected_energy(
             if cost_so_far_wh is not None:
                 try:
                     charged_wh = float(cost_so_far_wh)
-                except (TypeError, ValueError):
+                except (TypeError, ValueError, OverflowError):
                     charged_wh = energy_so_far
             remaining_wh = max(0.0, projected_wh - charged_wh)
             cost = float(cost_so_far) + (remaining_wh / 1000.0) * price_val

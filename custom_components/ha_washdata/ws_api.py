@@ -252,7 +252,7 @@ def _coerce_suggested(key: str, val: Any) -> Any:
     """
     try:
         return int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return val
 
 
@@ -267,7 +267,7 @@ def _suggestion_equivalent(suggested: Any, current: Any) -> bool:
         return False
     try:
         return abs(float(suggested) - float(current)) < 1e-6
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return str(suggested) == str(current)
 
 
@@ -432,11 +432,11 @@ async def _recorder_power(
                 if start_ts is not None and ts < start_ts:
                     ts = start_ts
                 rows.append((ts, round(float(s.state), 1)))
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, OverflowError):
                 if keep_unavailable:
                     try:
                         gap_ts = s.last_changed.timestamp()
-                    except (AttributeError, TypeError, ValueError):
+                    except (AttributeError, TypeError, ValueError, OverflowError):
                         continue
                     if start_ts is not None and gap_ts < start_ts:
                         gap_ts = start_ts
@@ -463,7 +463,7 @@ def _cycle_kwh(c: dict[str, Any]) -> float | None:
     if wh is not None:
         try:
             return round(float(wh) / 1000.0, 4)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             pass
     return c.get("energy_kwh")
 
@@ -611,7 +611,7 @@ def _json_safe(value: Any) -> Any:
     try:
         json.dumps(value)
         return value
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return str(value)
 
 
@@ -986,7 +986,7 @@ def _sanitize_panel(p: dict[str, Any], current: dict[str, Any]) -> dict[str, Any
     if "poll_interval_s" in p:
         try:
             out["poll_interval_s"] = max(2, min(60, int(p["poll_interval_s"])))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             pass
     if p.get("default_tab") in _PANEL_TABS:
         out["default_tab"] = p["default_tab"]
@@ -3269,7 +3269,7 @@ def configured_auto_label_threshold(entry: ConfigEntry | None) -> float:
     merged = {**(entry.data if entry else {}), **(entry.options if entry else {})}
     try:
         value = float(merged.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         value = DEFAULT_AUTO_LABEL_CONFIDENCE
     if not math.isfinite(value):
         value = DEFAULT_AUTO_LABEL_CONFIDENCE
@@ -5102,7 +5102,7 @@ async def ws_get_cycle_context(
             samples = store.get_cycle_power_data(cycle_id)
             try:
                 trace_end = float(samples[-1][0]) if samples else float(cycle.get("duration") or 0.0)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 trace_end = 0.0
             trace_end = max(0.0, trace_end) if math.isfinite(trace_end) else 0.0
             out["trace_end_s"] = round(trace_end, 2)
@@ -5700,7 +5700,7 @@ async def ws_set_user_prefs(
     if "font_scale" in p:
         try:
             cur["font_scale"] = max(0.7, min(2.0, float(p["font_scale"])))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             cur.pop("font_scale", None)
     # Display prefs: cycle date format + panel language override (paired with the
     # panel's save-prefs payload; without these they would be silently dropped).
@@ -6771,7 +6771,7 @@ async def ws_get_playground_settings(
             val = item["value"]
             try:
                 classic_sugg[key] = int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 pass
 
     _send_result(connection, msg["id"], "get_playground_settings", {
@@ -7840,7 +7840,7 @@ def ws_apply_history_import(
     for item in msg["accept"][:HISTORY_IMPORT_MAX_SEGMENTS]:
         try:
             accept.append(int(item))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
     reg = task_registry.get_registry(hass)
     task = reg.create(

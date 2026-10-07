@@ -143,7 +143,7 @@ def _browse_rows(cycles: list[dict[str, Any]]) -> list[dict[str, Any]]:
             for p in trace["points"]:
                 try:
                     o, w = float(p[0]), float(p[1])
-                except (TypeError, ValueError, IndexError, KeyError):
+                except (TypeError, ValueError, IndexError, KeyError, OverflowError):
                     continue
                 if math.isfinite(o) and math.isfinite(w):
                     pts.append([o, w])
@@ -170,7 +170,7 @@ def _cycle_upload_stats(cyc: dict[str, Any], pts: list[list[float]]) -> dict[str
     }
     try:
         energy = float(cyc.get("energy_wh"))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         energy = 0.0
     if energy > 0:
         stats["energy_wh"] = energy
@@ -616,7 +616,7 @@ class StoreBridge:
             name = str(p.get("name", "")).strip()
             try:
                 start, end = float(p.get("start", 0)), float(p.get("end", 0))
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 continue
             if name and end > start:
                 ranges.append({"name": name, "start": start, "end": end})

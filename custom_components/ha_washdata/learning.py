@@ -248,7 +248,7 @@ class LearningManager:
                         if cooldown_active and not data.get("corrective"):
                             continue
 
-                    except (TypeError, ValueError):
+                    except (TypeError, ValueError, OverflowError):
                         pass
             filtered_suggestions[key] = data
 
@@ -650,7 +650,7 @@ class LearningManager:
                 _conformance is not None
                 and float(_conformance) < 0.40
             )
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             envelope_suspicious = False
         # The cycle-end pass already labelled this cycle with a DIFFERENT programme
         # (the post-cycle match on the complete trace): re-labelling here would
@@ -776,7 +776,7 @@ class LearningManager:
                         "metrics": cand.get("metrics", {}),
                         "profile_duration": float(cand.get("profile_duration", 0.0)),
                     })
-                except (TypeError, ValueError, KeyError, AttributeError):
+                except (TypeError, ValueError, KeyError, AttributeError, OverflowError):
                     continue
 
         feedback_req: dict[str, Any] = {
@@ -847,7 +847,7 @@ class LearningManager:
         if corrected_duration is not None:
             try:
                 duration_sec = float(corrected_duration)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 self._logger.warning(
                     "Invalid corrected_duration %r for cycle %s, ignoring",
                     corrected_duration,

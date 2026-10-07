@@ -243,7 +243,7 @@ def effective_settings(
             continue
         try:
             out[opt_key] = coerce(value)
-        except (TypeError, ValueError):  # pragma: no cover - defensive
+        except (TypeError, ValueError, OverflowError):  # pragma: no cover - defensive
             continue
     cfg = match_config or {}
     for opt_key, (cfg_key, coerce) in _MATCH_OVERRIDE_KEYS.items():
@@ -252,7 +252,7 @@ def effective_settings(
             continue
         try:
             out[opt_key] = coerce(value)
-        except (TypeError, ValueError):  # pragma: no cover - defensive
+        except (TypeError, ValueError, OverflowError):  # pragma: no cover - defensive
             continue
     return out
 
@@ -314,7 +314,7 @@ def apply_match_overrides(
             continue
         try:
             out[cfg_key] = coerce(val)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             pass
     return out
 
@@ -338,13 +338,13 @@ def build_sim_config(
         field, coerce = mapping
         try:
             changes[field] = coerce(value)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
     if not changes:
         return base
     try:
         return replace(base, **changes)
-    except (TypeError, ValueError):  # pragma: no cover - defensive
+    except (TypeError, ValueError, OverflowError):  # pragma: no cover - defensive
         return base
 
 
@@ -892,7 +892,7 @@ class _DetailSim:
                     resolve_watchdog_interval_default(self.device_type),
                 )
             )
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             _wd = float(resolve_watchdog_interval_default(self.device_type))
         self.watchdog_s = _wd if math.isfinite(_wd) and _wd > 0 else 0.0
         self._last_real: tuple[datetime, float] | None = None
@@ -1777,7 +1777,7 @@ def run_playground_history(
     options = options or {}
     try:
         concurrency = max(1, min(MAX_BATCH_CYCLES, int(concurrency)))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         concurrency = MAX_BATCH_CYCLES
     try:
         selected = _select_cycles(store, cycle_ids)[:concurrency]
@@ -1948,7 +1948,7 @@ def finalize_sweep_1d(
     def _is_current(value: Any) -> bool:
         try:
             return current_value is not None and abs(float(value) - float(current_value)) < 1e-6
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return False
 
     best: dict[str, Any] | None = None
@@ -2061,7 +2061,7 @@ def _coerce_param(base_config: CycleDetectorConfig, param: str, value: float) ->
     _field, coerce = mapping
     try:
         return coerce(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return value
 
 
@@ -2086,7 +2086,7 @@ def run_playground_sweep(
         objective = "match_accuracy"
     try:
         concurrency = max(1, min(MAX_BATCH_CYCLES, int(concurrency)))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         concurrency = MAX_BATCH_CYCLES
     try:
         selected = _select_cycles(store, cycle_ids)[:concurrency]
@@ -2133,5 +2133,5 @@ def _safe_float(value: Any) -> float | None:
         if value is None:
             return None
         return round(float(value), 2)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None

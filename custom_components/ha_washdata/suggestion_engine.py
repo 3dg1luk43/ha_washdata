@@ -1790,7 +1790,7 @@ class SuggestionEngine:
                 if start is None or end is None or end <= start:
                     continue
                 timed_cycles.append((start, end))
-            except (TypeError, ValueError, KeyError):
+            except (TypeError, ValueError, KeyError, OverflowError):
                 continue
 
         if len(timed_cycles) < 3:

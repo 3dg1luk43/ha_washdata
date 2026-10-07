@@ -988,7 +988,7 @@ class CycleDetector:
         """The learned standby level for the idle display (#452); None: none."""
         try:
             level = float(level_w) if level_w is not None else None
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             level = None
         self._standby_level_w = level if level is not None and math.isfinite(level) else None
 
@@ -1636,7 +1636,7 @@ class CycleDetector:
         """
         try:
             value = float(raw)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             self._logger.debug(
                 "%s: invalid raw_expected_duration %r, defaulting to 0.0",
                 source, raw,
@@ -2052,7 +2052,7 @@ class CycleDetector:
                     if not math.isfinite(confidence):
                         confidence = 0.0
                         self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
-                except (TypeError, ValueError):
+                except (TypeError, ValueError, OverflowError):
                     confidence = 0.0
                     self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                 expected_duration = self._sanitize_expected_duration(
@@ -2075,7 +2075,7 @@ class CycleDetector:
                         if not math.isfinite(confidence):
                             confidence = 0.0
                             self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
-                    except (TypeError, ValueError):
+                    except (TypeError, ValueError, OverflowError):
                         confidence = 0.0
                         self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                     expected_duration = self._sanitize_expected_duration(
@@ -5226,7 +5226,7 @@ class CycleDetector:
             new_expected = float(expected)
             new_confidence = float(confidence or 0.0)
             new_longest = float(longest or 0.0)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return True
         if not (math.isfinite(new_expected) and new_expected > 0):
             return True  # would unmatch the cycle: the unshortened fallback
@@ -5882,7 +5882,7 @@ class CycleDetector:
                 self._last_match_confidence = float(
                     snapshot.get("last_match_confidence") or 0.0
                 )
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 self._last_match_confidence = 0.0
             # Item 393a. Meaningful only in the tail; an older snapshot (or any
             # other state) yields None / 0.0, i.e. the configured burst length.
@@ -5949,7 +5949,7 @@ class CycleDetector:
                             value = float(reading[1])
                             if math.isfinite(value):
                                 self._power_readings.append((dt_util.as_utc(t), value))
-                    except (TypeError, ValueError) as exc:
+                    except (TypeError, ValueError, OverflowError) as exc:
                         self._logger.debug("Skipping malformed power reading %s: %s", r, exc)
 
             if has_naive_readings:

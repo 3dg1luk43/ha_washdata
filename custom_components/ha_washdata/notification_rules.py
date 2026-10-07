@@ -72,7 +72,7 @@ def quiet_hours_bounds(options: Any) -> tuple[int, int] | None:
         end = int(raw_end)
         if start != raw_start or end != raw_end:
             return None
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if not (0 <= start <= 23) or not (0 <= end <= 23):
         return None
@@ -146,7 +146,7 @@ def milestone_crossed(prev_count: int, cur_count: int, milestones: Any) -> int |
             continue
         try:
             m = int(raw)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
         if m != raw or m <= 0:
             continue

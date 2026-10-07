@@ -230,7 +230,7 @@ def begin_tick(
             continue
         try:
             cs = float(c.get("score", 0.0) or 0.0)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
         if runner_up is None or cs > runner_up:
             runner_up = cs
@@ -874,7 +874,7 @@ def final_match_input(cycle_data: dict[str, Any]) -> tuple[Any, Any] | None:
         try:
             offsets = [float(p[0]) for p in power_data]
             stored = float(duration or 0.0)
-        except (TypeError, ValueError, IndexError, KeyError):
+        except (TypeError, ValueError, IndexError, KeyError, OverflowError):
             return power_data, duration
         plan = stall_cut_plan(offsets, spans)
         if len(plan) >= 10:
@@ -916,7 +916,7 @@ def display_sure_pct(margin: float | None) -> int:
     else:
         try:
             m = float(margin)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             m = 0.0
         if not math.isfinite(m):
             m = 0.0
@@ -962,7 +962,7 @@ def live_match_uncertainty(result: Any, current_program: Any) -> dict[str, Any] 
     if runner_up is not None:
         try:
             margin = round(max(0.0, float(getattr(result, "ambiguity_margin", 0.0) or 0.0)), 3)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             margin = 0.0
     return {
         "top": str(best),

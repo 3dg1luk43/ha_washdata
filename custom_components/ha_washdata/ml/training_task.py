@@ -110,7 +110,7 @@ def live_expectations(
             continue
         try:
             duration = float(durations.get(name) or 0.0)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             duration = 0.0
         try:
             expectation, _cache = profile_end_expectation(view, name, duration, None)

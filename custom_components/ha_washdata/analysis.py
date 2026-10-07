@@ -500,7 +500,7 @@ def _rank_key(candidate: dict[str, Any]) -> float:
     """Sort key for candidate ranking: a non-finite score ranks last, never first."""
     try:
         score = float(candidate.get("score", 0.0))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return float("-inf")
     return score if math.isfinite(score) else float("-inf")
 
@@ -838,7 +838,7 @@ def member_energy_reference(
             continue
         try:
             dur = float(duration)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             dur = 0.0
         if not math.isfinite(dur) or dur <= 0:
             dur = span
@@ -863,7 +863,7 @@ def own_energy_ws(ref: dict[str, Any] | None) -> float | None:
         if int(ref.get("n") or 0) < MATCH_ENERGY_REF_MIN_CYCLES:
             return None
         own_ws = float(ref["median_wh"]) * 3600.0
-    except (TypeError, ValueError, KeyError):
+    except (TypeError, ValueError, KeyError, OverflowError):
         return None
     return own_ws if math.isfinite(own_ws) and own_ws > 0 else None
 
@@ -1151,7 +1151,7 @@ def compute_envelope_worker(
         try:
             offsets_list, values_list, *rest = curve
             curve_duration = rest[0] if rest else None
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, OverflowError):
             continue
 
         if not offsets_list or not values_list:
@@ -1170,7 +1170,7 @@ def compute_envelope_worker(
         try:
             offsets = np.asarray(offsets_list, dtype=float)
             values = np.asarray(values_list, dtype=float)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
 
         # Drop paired entries where either coordinate is non-finite.
