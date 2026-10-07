@@ -152,6 +152,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **Every language**: counts, numbers, costs and dates follow your language and Home Assistant settings ("€0.21"), about 100 more labels are translated, and settings search finds translated words. Icelandic now calls a cycle "lota" throughout.
 - **Settings search text and store data can no longer inject markup** into the panel. When the store cannot be reached, the Store tab says so.
 - **The dashboard card works by keyboard** and picks up new translations after an upgrade.
+- **The card's program dropdown can be used again** ([#468](https://github.com/3dg1luk43/ha_washdata/issues/468)): a tap on it no longer reaches the card and opens the more-info dialog, which closed the list before a program could be picked. Thanks to @Stefinet21
 - **Help texts corrected**: End Energy (a higher value finishes sooner), Match Threshold (gates Smart Termination, not which program is accepted) and the duration-ratio examples.
 
 ### Suggestions

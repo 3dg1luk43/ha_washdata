@@ -163,6 +163,24 @@ test('detail: pressing Pause calls button.press on the discovered pause entity',
   ).toBeTruthy();
 });
 
+test('detail: tapping the program select does not run the card tap_action (#468)', async ({ page }) => {
+  // The select stopped pointerdown and click but not pointerup, which reached the
+  // card and ran more-info: the dialog closed the dropdown before a pick.
+  await mount(page, { entity: 'sensor.wm_state', layout: 'detail', buttons: ['program'] }, RUN);
+  const fired = await page.evaluate(() => {
+    const card = (window as any).__card;
+    const sel = card.shadowRoot.getElementById('prog-select');
+    let n = 0;
+    card.addEventListener('hass-more-info', () => { n += 1; });
+    const opts = { bubbles: true, composed: true, clientX: 10, clientY: 10, pointerId: 1 };
+    sel.dispatchEvent(new PointerEvent('pointerdown', opts));
+    sel.dispatchEvent(new PointerEvent('pointerup', opts));
+    sel.dispatchEvent(new MouseEvent('click', opts));
+    return n;
+  });
+  expect(fired).toBe(0);
+});
+
 test('glance: renders one row per device with state dot and time', async ({ page }) => {
   await mount(page, { entity: 'sensor.wm_state', entities: ['sensor.wm_state'], layout: 'glance' }, RUN);
   const rows = await page.evaluate(() => {

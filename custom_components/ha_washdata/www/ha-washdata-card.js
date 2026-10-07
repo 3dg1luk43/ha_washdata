@@ -722,6 +722,9 @@ class WashDataCard extends HTMLElement {
         sel.id = "prog-select";
         sel.addEventListener("click", (ev) => ev.stopPropagation());
         sel.addEventListener("pointerdown", (ev) => ev.stopPropagation());
+        // As the buttons below: a pointerup reaching the card ran tap_action, whose
+        // more-info dialog closed the dropdown before a program could be picked (#468).
+        sel.addEventListener("pointerup", (ev) => ev.stopPropagation());
         sel.addEventListener("change", (ev) => {
           ev.stopPropagation();
           this._onProgramChange(ev.target.value);

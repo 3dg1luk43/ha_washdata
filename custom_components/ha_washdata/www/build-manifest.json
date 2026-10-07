@@ -10,10 +10,10 @@
     },
     "ha-washdata-card.js": {
       "artifact": "ha-washdata-card.min.js",
-      "source_sha256": "a144862b8f330f578c9d7fc8647303425bc5116bb9cffcbc04875bb90aa312f3",
-      "artifact_sha256": "fc6fd3c12680404eb96ff66d75af2e10c7fafaf1b27dd0ca4b180f52738855df",
-      "source_bytes": 58633,
-      "artifact_bytes": 31395
+      "source_sha256": "c1a72cac2958efe7421b5d54ff09723966ef4a87f15ec26f3dc9a4edee8fb38b",
+      "artifact_sha256": "d25b9eafc0d50d34021ea0e4a392b6135dd2d61231269bc43237f00b23ca4157",
+      "source_bytes": 58880,
+      "artifact_bytes": 31450
     }
   }
 }
