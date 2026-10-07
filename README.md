@@ -166,5 +166,5 @@ Translations are community-maintained on [GitLocalize](https://gitlocalize.com/r
 
 ## License
 
-[AGPL-3.0-or-later](LICENSE). Free to use, study, modify and share; a modified version you run as
-a network service must be published under the same licence.
+[AGPL-3.0-or-later](LICENSE). Free to use, study, modify and share; if others use a modified version
+over a network, you must offer them its source under the same licence.

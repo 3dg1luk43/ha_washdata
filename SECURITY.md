@@ -33,7 +33,8 @@ the fix is released.
 - **Stored data** (programs, cycles, power traces, exports) lives in your Home Assistant config
   folder, unencrypted, protected by the file system.
 - **Notifications** go wherever your chosen notify service sends them (for example a phone push
-  through a cloud service). Without notify targets or automations, nothing leaves Home Assistant.
+  through a cloud service). Without notify targets, automations or the Community Store's online
+  features, nothing leaves Home Assistant.
 - **Community Store** (off by default): when you enable online features, browsing fetches shared
   setups, and only what you choose to share is uploaded (program curves, reference traces, appliance
   brand, model and type). Your name is shown only if you turn that on. Turning online features off

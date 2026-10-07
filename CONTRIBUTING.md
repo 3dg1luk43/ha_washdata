@@ -35,7 +35,7 @@ Home Assistant log (a few full lines are enough). A diagnostics download from th
 
 ## Development setup
 
-Python 3.13.
+Python 3.13. Fork [the repository](https://github.com/3dg1luk43/ha_washdata) on GitHub first, then clone your fork:
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/ha_washdata.git

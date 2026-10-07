@@ -156,6 +156,9 @@ def replay_export(
     # the exporting version built); each fold shares them and rebuilds only the
     # left-out cycle's own programme.
     _cfg, store, _opts = EG._production(doc, base)  # noqa: SLF001
+    # Setup's sample repair, as end_gate_eval, eta_eval and decisive_margin_eval run
+    # it: it fixes base["profiles"] in place, and the folds inherit the repair.
+    EG._run(store.async_repair_profile_samples())  # noqa: SLF001
     EG._rebuild_envelopes(store, list(base["profiles"]))  # noqa: SLF001
     rows: list[dict[str, Any]] = []
     done = 0
