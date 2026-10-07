@@ -2028,6 +2028,9 @@ class SuggestionEngine:
 
         _batch_opts = self._entry_options()
         stop_thr = self._current_stop_threshold(_batch_opts)
+        # What the detector really ends cycles at (0.6 x min_power when the Stop
+        # Threshold is unset, #450). stop_thr stays the clean-cycle check's level.
+        eff_stop = float(self._effective_thresholds(_batch_opts)[CONF_STOP_THRESHOLD_W])
         # Keep the unfiltered list: the min_off_gap merge ceiling must see the
         # user's real turnaround, which dropping a cycle would fuse away.
         raw_cycles = list(cycles)
@@ -2143,7 +2146,7 @@ class SuggestionEngine:
             # lowest RUNNING power, so it proposes nothing: the thresholds in force
             # demonstrably end cycles at that level. Same margin as the standby
             # floor (#458), so plug jitter at the resting level stays quiet.
-            resting = resting_level_w(main_cycles, stop_thr)
+            resting = resting_level_w(main_cycles, eff_stop)
             resting_floor = (
                 max(resting * STANDBY_FLOOR_RATIO, resting + STANDBY_FLOOR_MIN_MARGIN_W)
                 if resting is not None and resting > 0
@@ -2182,7 +2185,7 @@ class SuggestionEngine:
         # median 1759% for no effect. A value BELOW that floor forbids what the
         # power gate allows (#376), so that one is corrected.
         try:
-            cur_stop = float(_batch_opts.get(CONF_STOP_THRESHOLD_W) or stop_thr)
+            cur_stop = eff_stop
             cur_off_delay = float(
                 _batch_opts.get(CONF_OFF_DELAY)
                 or resolve_off_delay_default(self.device_type or "")

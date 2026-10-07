@@ -211,10 +211,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
                 # already reloads in place (sensor swap included, item 61);
                 # async_update_reload_and_abort ALSO scheduled a full unload/setup,
                 # which interrupted a running cycle and raced the in-place reload.
-                self.hass.config_entries.async_update_entry(
-                    entry, title=user_input[CONF_NAME], options=new_options
+                if entry.state is config_entries.ConfigEntryState.LOADED:
+                    self.hass.config_entries.async_update_entry(
+                        entry, title=user_input[CONF_NAME], options=new_options
+                    )
+                    return self.async_abort(reason="reconfigure_successful")
+                # Not loaded (a failed setup, often what the reconfigure is fixing):
+                # the update listener is registered only by a successful setup, so
+                # nothing would apply the options until a restart. Reload instead.
+                return self.async_update_reload_and_abort(
+                    entry, title=user_input[CONF_NAME], options=new_options,
+                    reason="reconfigure_successful",
                 )
-                return self.async_abort(reason="reconfigure_successful")
 
         schema = _structural_schema(entry)
 

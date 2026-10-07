@@ -238,11 +238,15 @@ def test_an_oversized_json_integer_does_not_abort_the_batch_pass() -> None:
     )
 
     cycles = [_cycle(i) for i in range(12)]
-    for key in (CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY):
-        opts = {CONF_STOP_THRESHOLD_W: 2.0, CONF_OFF_DELAY: 600, CONF_END_ENERGY_THRESHOLD: 0.01}
-        opts[key] = 10**400
-        out = _engine(cycles, options=opts).run_batch_simulation(cycles)
-        assert CONF_END_ENERGY_THRESHOLD not in out
+    opts = {CONF_STOP_THRESHOLD_W: 2.0, CONF_OFF_DELAY: 10**400, CONF_END_ENERGY_THRESHOLD: 0.01}
+    out = _engine(cycles, options=opts).run_batch_simulation(cycles)
+    assert CONF_END_ENERGY_THRESHOLD not in out  # no usable off delay, no floor
+    # An unusable stored Stop Threshold runs at the detector's default, so the
+    # end-energy floor is judged against that (the pass completes, and 0.01 Wh is
+    # below what the default stop over 600 s implies).
+    opts = {CONF_STOP_THRESHOLD_W: 10**400, CONF_OFF_DELAY: 600, CONF_END_ENERGY_THRESHOLD: 0.01}
+    out = _engine(cycles, options=opts).run_batch_simulation(cycles)
+    assert out[CONF_END_ENERGY_THRESHOLD]["corrective"] is True
 
 
 def test_a_non_finite_stop_or_off_delay_does_not_abort_the_batch_pass() -> None:
@@ -267,3 +271,16 @@ def test_an_oversized_stored_duration_does_not_abort_detection_suggestions() -> 
     cycles = [_cycle(i) for i in range(12)]
     cycles[3]["duration"] = 10**400
     _engine(cycles).generate_detection_suggestions()
+
+
+def test_an_unset_stop_threshold_sets_the_end_energy_floor_at_what_the_detector_runs() -> None:
+    """A fresh entry has no Stop Threshold (#450): the detector ends cycles at
+    0.6 x min_power (1.2 W here), so the floor over 600 s is 0.20 Wh. Reading
+    min_power itself (2 W -> 0.34 Wh) raised a 'corrective' change to 0.25 Wh,
+    a value that already works."""
+    from custom_components.ha_washdata.const import CONF_END_ENERGY_THRESHOLD, CONF_MIN_POWER
+
+    cycles = [_cycle(i) for i in range(12)]
+    opts = {CONF_MIN_POWER: 2.0, CONF_OFF_DELAY: 600, CONF_END_ENERGY_THRESHOLD: 0.25}
+    out = _engine(cycles, options=opts).run_batch_simulation(cycles)
+    assert CONF_END_ENERGY_THRESHOLD not in out

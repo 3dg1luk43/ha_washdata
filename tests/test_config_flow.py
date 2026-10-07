@@ -25,6 +25,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from homeassistant.config_entries import ConfigEntryState
 
 from custom_components.ha_washdata.config_flow import (
     ConfigFlow,
@@ -224,6 +225,7 @@ def _make_reconfigure_entry(**kwargs):
         CONF_MIN_POWER: kwargs.get("min_power", 5.0),
     }
     entry.options = {}
+    entry.state = kwargs.get("state", ConfigEntryState.LOADED)
     return entry
 
 
@@ -272,6 +274,25 @@ async def test_reconfigure_saves_and_aborts_on_valid_input():
     assert new_options[CONF_DEVICE_TYPE] == "dryer"
     assert new_options[CONF_POWER_SENSOR] == "sensor.dryer_power"
     assert new_options[CONF_MIN_POWER] == 3.0
+
+
+@pytest.mark.asyncio
+async def test_reconfigure_of_an_entry_that_failed_setup_reloads_it():
+    """A failed setup registers no update listener, so the in-place update applied
+    nothing: the corrected sensor sat unused until a restart."""
+    flow = _make_config_flow()
+    entry = _make_reconfigure_entry(state=ConfigEntryState.SETUP_ERROR)
+    flow._get_reconfigure_entry = MagicMock(return_value=entry)
+    flow.async_update_reload_and_abort = MagicMock(return_value={"type": "abort"})
+    user_input = {
+        CONF_NAME: "My Washer", CONF_DEVICE_TYPE: "washing_machine",
+        CONF_POWER_SENSOR: "sensor.fixed_power", CONF_MIN_POWER: 5.0,
+    }
+    await flow.async_step_reconfigure(user_input)
+    assert not flow.hass.config_entries.async_update_entry.called
+    _args, kwargs = flow.async_update_reload_and_abort.call_args
+    assert kwargs["options"][CONF_POWER_SENSOR] == "sensor.fixed_power"
+    assert kwargs["reason"] == "reconfigure_successful"
 
 
 @pytest.mark.asyncio

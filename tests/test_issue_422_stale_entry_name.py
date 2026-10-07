@@ -49,6 +49,7 @@ from custom_components.ha_washdata.const import (
     CONF_OFF_DELAY,
     CONF_POWER_SENSOR,
 )
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_NAME
 
 
@@ -57,6 +58,7 @@ def _make_entry(*, title: str, data_name: str, options: dict | None = None):
     entry = MagicMock()
     entry.entry_id = "entry_1"
     entry.title = title
+    entry.state = ConfigEntryState.LOADED  # a reconfigure of an unloaded entry reloads it
     entry.data = {
         CONF_NAME: data_name,
         CONF_POWER_SENSOR: "sensor.39c0_power",
