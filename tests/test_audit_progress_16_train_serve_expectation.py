@@ -219,3 +219,14 @@ def test_a_legacy_profile_without_avg_duration_uses_its_sample_cycle(mock_hass) 
     }]
     assert store._stage1_duration_for("Legacy", store._data["profiles"]["Legacy"]) == 5400.0  # noqa: SLF001
     assert training_task._expected_durations(store) == {"Legacy": 5400.0}
+
+
+def test_one_oversized_duration_skips_only_that_profile() -> None:
+    # float(10**400) raises OverflowError, which the per-profile except missed: it
+    # reached the outer catch-all and dropped EVERY profile's expectation.
+    from types import SimpleNamespace
+
+    store = SimpleNamespace(get_profiles=lambda: {
+        "Bad": {"avg_duration": 10**400}, "Good": {"avg_duration": 3600.0},
+    })
+    assert training_task._expected_durations(store) == {"Good": 3600.0}

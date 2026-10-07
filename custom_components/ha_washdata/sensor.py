@@ -210,6 +210,7 @@ async def async_setup_entry(
         )
 
     async_add_entities(entities)
+    manager.sensor_add_entities = async_add_entities
 
     # Reconcile diagnostics at startup so stale unavailable entries are auto-removed.
     cleanup_orphaned_diagnostic_entities(hass, manager, entry)
@@ -218,6 +219,26 @@ async def async_setup_entry(
     profile_sensor_manager = WasherProfileSensorManager(manager, entry, async_add_entities)
     await profile_sensor_manager.async_update()
     entry.async_on_unload(profile_sensor_manager.unsubscribe)
+
+
+@callback
+def async_reconcile_device_type_sensors(
+    hass: HomeAssistant, manager: WashDataManager, entry: ConfigEntry
+) -> None:
+    """Add or drop the pump-only sensor after an in-place device type change.
+
+    Options apply through the update listener without re-running platform setup
+    (audit PLATFORM-15), so a washer turned pump never got PumpRunsTodaySensor
+    and a pump turned washer kept it until a restart. Removing the registry entry
+    also removes the live entity.
+    """
+    if manager.device_type == DEVICE_TYPE_PUMP and manager.sensor_add_entities is not None:
+        entity_id = entity_registry.async_get(hass).async_get_entity_id(
+            "sensor", DOMAIN, f"{entry.entry_id}_pump_runs_today"
+        )
+        if entity_id is None or hass.states.get(entity_id) is None:
+            manager.sensor_add_entities([PumpRunsTodaySensor(manager, entry)])
+    cleanup_orphaned_diagnostic_entities(hass, manager, entry)
 
 
 class WasherBaseSensor(SensorEntity):

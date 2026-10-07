@@ -14,9 +14,10 @@ Device** (on/off detection only).
 
 > [!CAUTION]
 > **Electrical safety.** A plug on a washer, dryer or dishwasher carries the full heating load for
-> hours. It must be rated for the appliance's peak power (often over 2500 W; a 16 A plug or a
-> hardwired module, not a 10 A one). Cheap or under-rated plugs can overheat and catch fire. Use at
-> your own risk and check the plug regularly. More in [Smart plugs](https://github.com/3dg1luk43/ha_washdata/wiki/Smart-Plugs).
+> hours. It must be rated in watts at your mains voltage for the appliance's peak power, often over
+> 2500 W (16 A is 3680 W at 230 V, but 15 A at 120 V is only 1800 W), or use a hardwired module.
+> Cheap or under-rated plugs can overheat and catch fire. Use at your own risk and check the plug
+> regularly. More in [Smart plugs](https://github.com/3dg1luk43/ha_washdata/wiki/Smart-Plugs).
 
 ## What you get
 

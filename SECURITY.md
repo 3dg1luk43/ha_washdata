@@ -49,8 +49,8 @@ checks.
 - Administrator-only, even with access control off: export and import (panel and services),
   wiping history, reprocessing history, clearing debug data, the ML training service, panel configuration, and
   every Community Store account, sharing, rating and publishing action.
-- Background tasks check access to the device they belong to. Export and import paths must stay
-  inside the Home Assistant config folder.
+- Background tasks check access to the device they belong to. A path given to the export or import
+  service must be in Home Assistant's `allowlist_external_dirs`; an export there never overwrites a file.
 
 ## Dependencies
 
@@ -60,6 +60,7 @@ well.
 ## Electrical safety
 
 Not a software issue, but the real risk: a smart plug on a washer, dryer or dishwasher carries the
-heating load for hours. Use a plug rated for the appliance's peak power (16 A or a hardwired module,
-not 10 A) and check it regularly. See
+heating load for hours. Use a plug rated in watts at your mains voltage for the appliance's peak
+power (16 A is 3680 W at 230 V, but 15 A at 120 V is only 1800 W) or a hardwired module, and check
+it regularly. See
 [Smart plugs](https://github.com/3dg1luk43/ha_washdata/wiki/Smart-Plugs).

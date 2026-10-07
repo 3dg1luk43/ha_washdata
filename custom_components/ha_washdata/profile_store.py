@@ -7980,7 +7980,9 @@ class ProfileStore:
             # and trace span, as the snapshot builder takes them.
             return float(self.resolve_profile_duration(name) or 0.0)
         except Exception:  # pylint: disable=broad-exception-caught
-            return float(profile.get("avg_duration") or 0.0)
+            # The envelope path's float() can be what raised (an oversized
+            # target_duration); the fallback must not raise again.
+            return float(self.resolve_profile_duration(name) or 0.0)
 
     def _self_unmatchable_cycles(self) -> dict[str, list[dict[str, Any]]]:
         """Labelled cycles that fall outside the duration gate for their OWN profile.

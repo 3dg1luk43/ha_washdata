@@ -1165,6 +1165,24 @@ async def test_without_the_index_the_direct_query_still_answers():
     assert [i["id"] for i in items] == ["d1"]
 
 
+def test_a_malformed_index_is_rejected_or_cleaned_at_the_boundary():
+    from custom_components.ha_washdata.store_client import _shape_index
+
+    # No id column: every consumer keys rows by id, so the whole index is unusable
+    # and the search must fall back to the direct queries.
+    no_id = json.loads(json.dumps(_INDEX))
+    no_id["fields"]["devices"] = ["brand", "model", "applianceType", "favoriteCount", "status"]
+    no_id["devices"] = [row[1:] for row in no_id["devices"]]
+    assert _shape_index(no_id) is None
+    # A row without a usable id is dropped; a non-numeric count sorts as 0.
+    bad = json.loads(json.dumps(_INDEX))
+    bad["devices"][0][0] = None
+    bad["devices"][1][4] = "many"
+    shaped = _shape_index(bad)
+    assert [d["id"] for d in shaped["devices"]][0] == "washer__bosch__wat"
+    assert shaped["devices"][0]["favoriteCount"] == 0
+
+
 # ── audit STORE-18: writes carry the uid the token belongs to ──────────────────
 
 def _jwt(claims: dict) -> str:

@@ -1638,8 +1638,12 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
         # Update configuration without interrupting detector
         await manager.async_reload_config(entry)
         # Options changes (e.g. linked device) reload in place without
-        # recreating entities, so apply the device link explicitly here.
+        # recreating entities, so apply the device link explicitly here, and add or
+        # drop the pump-only sensor if the device type changed.
         _apply_device_link(hass, entry)
+        from .sensor import async_reconcile_device_type_sensors  # pylint: disable=import-outside-toplevel
+
+        async_reconcile_device_type_sensors(hass, manager, entry)
     else:
         # Full reload if manager not found
         await async_unload_entry(hass, entry)

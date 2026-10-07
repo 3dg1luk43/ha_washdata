@@ -469,8 +469,8 @@ def _expected_durations(store: Any) -> dict[str, float]:
                     float(resolve(name, profile)) if callable(resolve)
                     else float(profile.get("avg_duration") or 0.0)
                 )
-            except (TypeError, ValueError):
-                continue
+            except (TypeError, ValueError, OverflowError):
+                continue  # one bad profile must not drop every expectation
             if duration > 0 and np.isfinite(duration):
                 out[name] = duration
     except Exception:  # noqa: BLE001 - fall back to the trace medians

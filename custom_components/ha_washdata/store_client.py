@@ -238,8 +238,10 @@ def _shape_index(raw: Any) -> dict[str, Any] | None:
     if not isinstance(raw, dict) or raw.get("schema") != 1 or not raw.get("generatedAt"):
         return None
     fields = raw.get("fields")
+    # Remote data, validated here so a bad index falls back to the direct queries
+    # instead of raising in a consumer: every one keys rows by ``id``.
     if not isinstance(fields, dict) or not all(
-        isinstance(fields.get(k), list) for k in ("brands", "devices")
+        isinstance(fields.get(k), list) and "id" in fields[k] for k in ("brands", "devices")
     ):
         return None
 
@@ -248,7 +250,9 @@ def _shape_index(raw: Any) -> dict[str, Any] | None:
         out = []
         for row in raw.get(name) or []:
             if isinstance(row, list) and len(row) == len(names):
-                out.append(dict(zip(names, row)))
+                item = dict(zip(names, row))
+                if isinstance(item.get("id"), str) and item["id"]:
+                    out.append(item)
         return out
 
     brands = _rows("brands")
@@ -256,6 +260,9 @@ def _shape_index(raw: Any) -> dict[str, Any] | None:
         b["brand_lc"] = str(b.get("id") or "").lower()
     devices = _rows("devices")
     for d in devices:
+        fav = d.get("favoriteCount")
+        if isinstance(fav, bool) or not isinstance(fav, (int, float)) or fav != fav:
+            d["favoriteCount"] = 0  # the browse sorts by it
         # As the device documents store it (lowercased display name), NOT the id's
         # normalised token ("aeg lavamat" vs "aeg-lavamat"): brand filters compare it.
         d["brand_lc"] = str(d.get("brand") or "").lower()

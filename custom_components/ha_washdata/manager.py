@@ -616,6 +616,9 @@ class WashDataManager:
             CONF_DEVICE_TYPE,
             config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
         )
+        # The sensor platform's add callback, kept so an in-place device type change
+        # can add the pump-only sensor (sensor.async_reconcile_device_type_sensors).
+        self.sensor_add_entities: Any = None
 
         # Initialize attributes to satisfy pylint
         self._off_delay = float(DEFAULT_OFF_DELAY)
