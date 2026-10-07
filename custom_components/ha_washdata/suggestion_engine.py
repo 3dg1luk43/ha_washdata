@@ -1171,11 +1171,26 @@ class SuggestionEngine:
             )
         )
         suggested_timeout = int(max(60, timeout_floor, p95_dt * 20))
+        reason_to = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 20 (min 60s)."
+        reason_to_key = "suggestion.reason.no_update_timeout"
+        reason_to_params: dict[str, Any] = {"p95": f"{p95_dt:.1f}"}
+        if suggested_timeout == timeout_floor and timeout_floor > max(60, p95_dt * 20):
+            # The device default won: say so, as the off-delay floor branch does.
+            if self.device_type and self.device_type in DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE:
+                reason_to = (
+                    f"Used device-specific safe minimum for {self.device_type} ({timeout_floor}s)."
+                )
+                reason_to_key = "suggestion.reason.off_delay_device_floor"
+                reason_to_params = {"device": self.device_type, "floor": timeout_floor}
+            else:
+                reason_to = f"Used generic safe minimum ({timeout_floor}s)."
+                reason_to_key = "suggestion.reason.off_delay_generic_floor"
+                reason_to_params = {"floor": timeout_floor}
         suggestions[CONF_NO_UPDATE_ACTIVE_TIMEOUT] = {
             "value": suggested_timeout,
-            "reason": f"Based on observed update cadence (p95={p95_dt:.1f}s) * 20 (min 60s).",
-            "reason_key": "suggestion.reason.no_update_timeout",
-            "reason_params": {"p95": f"{p95_dt:.1f}"},
+            "reason": reason_to,
+            "reason_key": reason_to_key,
+            "reason_params": reason_to_params,
         }
 
         # 3. Off Delay
@@ -1592,20 +1607,22 @@ class SuggestionEngine:
         # own evidence and the next suggestion rose again - a ratchet that turned a
         # 48 min "Quick wash" interrupted (audit SUGGEST-03). And it never exceeds
         # half the shortest learned programme.
+        # _num, not float(): an oversized stored integer (10**400) raised
+        # OverflowError out of this comprehension and lost the whole pass.
         durations = [
-            float(c["duration"])
-            for c in [
-                *clean,
-                *(
-                    c for c in all_cycles
-                    if isinstance(c, dict)
-                    and c.get("status") == "interrupted"
-                    and c.get("profile_name")
-                ),
-            ]
-            if isinstance(c.get("duration"), (int, float))
-            and not isinstance(c.get("duration"), bool)
-            and float(c["duration"]) > 0
+            d for d in (
+                _num(c.get("duration")) if isinstance(c.get("duration"), (int, float)) else None
+                for c in [
+                    *clean,
+                    *(
+                        c for c in all_cycles
+                        if isinstance(c, dict)
+                        and c.get("status") == "interrupted"
+                        and c.get("profile_name")
+                    ),
+                ]
+            )
+            if d is not None and d > 0
         ]
         if len(durations) >= 10:
             p05d = float(np.percentile(durations, 5))

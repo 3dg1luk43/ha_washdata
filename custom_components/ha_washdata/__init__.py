@@ -199,7 +199,11 @@ _SERVICE_SCHEMAS: dict[str, vol.Schema] = {
         vol.Required("cycle_id"): cv.string,
         vol.Optional("user_confirmed"): cv.boolean,
         vol.Optional("corrected_profile"): _OPT_STR,
-        vol.Optional("corrected_duration"): _OPT_NUM,
+        # As services.yaml's selector: YAML automations bypass it, and NaN, inf or a
+        # negative value reached the stored cycle's duration.
+        vol.Optional("corrected_duration"): vol.Any(
+            None, vol.All(_float, vol.Range(min=0, max=86400))
+        ),
         vol.Optional("notes"): _OPT_STR,
         vol.Optional("dismiss"): cv.boolean,
     }, extra=vol.ALLOW_EXTRA),

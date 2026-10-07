@@ -35,6 +35,7 @@ backups/
 *.dump
 devtools/secrets.py
 devtools/priv_secrets.py
+devtools/mqtt_secrets.py
 gha-creds-*.json
 .env
 .mcp.json

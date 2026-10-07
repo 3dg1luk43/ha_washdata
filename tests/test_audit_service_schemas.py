@@ -65,3 +65,13 @@ def test_an_oversized_integer_is_a_validation_error(service, data) -> None:
     # ValueError/TypeError), so the call failed with a traceback, not Invalid.
     with pytest.raises(vol.Invalid):
         _SERVICE_SCHEMAS[service]({"device_id": "d", **data})
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), -60, 90000])
+def test_corrected_duration_is_held_to_the_selector_range(bad) -> None:
+    # YAML automations bypass services.yaml's 0-86400 selector, and NaN, inf or a
+    # negative value reached the stored cycle's duration.
+    with pytest.raises(vol.Invalid):
+        _SERVICE_SCHEMAS["submit_cycle_feedback"]({"cycle_id": "c", "corrected_duration": bad})
+    out = _SERVICE_SCHEMAS["submit_cycle_feedback"]({"cycle_id": "c", "corrected_duration": "3600"})
+    assert out["corrected_duration"] == 3600.0

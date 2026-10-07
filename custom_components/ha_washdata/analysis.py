@@ -768,7 +768,7 @@ def compute_matches_worker(
     # A non-finite score (a NaN in an imported template, a NaN avg_duration) used to
     # sort to rank 1 with a NaN margin that was never "ambiguous" (audit
     # MATCH-CORE-05). It carries no evidence: drop it.
-    candidates[:] = [c for c in candidates if math.isfinite(float(c.get("score", 0.0)))]
+    candidates[:] = [c for c in candidates if math.isfinite(_rank_key(c))]
 
     # (Stage 6, the #364 prefix scores for the Smart-Termination guard, was removed
     # in 0.5.8: Stages 2/3 already score a running cycle on each candidate's

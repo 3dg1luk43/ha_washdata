@@ -355,6 +355,9 @@ class StoreClient:
         self._base = f"{self._FS}/projects/{project_id}/databases/(default)/documents"
         # key -> (expiry_epoch, value). Read-only catalog/config responses; see class docstring.
         self._read_cache: dict[str, tuple[float, Any]] = {}
+        # Status changes this client made (device id -> (status, UTC stamp)): the daily
+        # search index only learns of them at its next build. See _devices_from_index.
+        self._status_overrides: dict[str, tuple[str, str]] = {}
         # Bumped on every catalog invalidation; a read captures it before its query and only
         # caches the result if it is unchanged afterwards, so an in-flight read that spans an
         # invalidation cannot re-cache a pre-write snapshot.
@@ -684,6 +687,11 @@ class StoreClient:
             r.setdefault("brand_lc", str(r.get("brand") or "").lower())
             r.setdefault("model_lc", str(r.get("model") or "").lower())
             rows[r["id"]] = r
+        # The delta only carries entries CREATED after the build, so a device this
+        # client just promoted (confirm_device) still reads "pending" from the index.
+        for did, (status, at) in self._status_overrides.items():
+            if did in rows and at > index["generatedAt"]:
+                rows[did] = {**rows[did], "status": status}
         bl = (brand or "").lower()
         out = [
             r for r in rows.values()
@@ -1385,6 +1393,9 @@ class StoreClient:
             }]
             if (await self._commit(token, promote))[0]:
                 status = "approved"
+                self._status_overrides[device_id] = (
+                    status, time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + "Z"
+                )
                 # Promotion changes catalog visibility (pending -> approved); drop cached
                 # listings so the newly-approved device shows in approved-only searches now.
                 self._invalidate_catalog_cache()

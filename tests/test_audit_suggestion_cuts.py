@@ -136,6 +136,14 @@ def test_dishwasher_timeout_and_off_delay_keep_their_floors() -> None:
         DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE["dishwasher"]
     )
     assert out[CONF_OFF_DELAY]["value"] < 1800
+    # The device default won here (30 s x 20 = 600 s < 4 h), so the reason must
+    # name it, not the cadence formula the value did not come from.
+    timeout = out[CONF_NO_UPDATE_ACTIVE_TIMEOUT]
+    assert timeout["reason_key"] == "suggestion.reason.off_delay_device_floor"
+    assert timeout["reason_params"]["floor"] == timeout["value"]
+    # A cadence-driven value keeps the cadence reason.
+    slow = _engine(cycles, device_type="washing_machine").generate_operational_suggestions(600.0, 300.0)
+    assert slow[CONF_NO_UPDATE_ACTIVE_TIMEOUT]["reason_key"] == "suggestion.reason.no_update_timeout"
 
 
 def _learning(store: MagicMock, options: dict) -> LearningManager:
@@ -251,3 +259,11 @@ def test_a_non_finite_stop_or_off_delay_does_not_abort_the_batch_pass() -> None:
         opts[key] = "Infinity"
         out = _engine(cycles, options=opts).run_batch_simulation(cycles)
         assert CONF_END_ENERGY_THRESHOLD not in out
+
+
+def test_an_oversized_stored_duration_does_not_abort_detection_suggestions() -> None:
+    # The isinstance guard accepted 10**400 and float() of it raised OverflowError
+    # inside the comprehension, losing min_power and completion_min_seconds.
+    cycles = [_cycle(i) for i in range(12)]
+    cycles[3]["duration"] = 10**400
+    _engine(cycles).generate_detection_suggestions()

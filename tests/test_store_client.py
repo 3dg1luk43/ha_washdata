@@ -1165,6 +1165,29 @@ async def test_without_the_index_the_direct_query_still_answers():
     assert [i["id"] for i in items] == ["d1"]
 
 
+@pytest.mark.asyncio
+async def test_a_device_this_client_promoted_shows_in_approved_only_search():
+    # The daily index still says "pending" and the delta only carries new entries,
+    # so a confirm that promoted the device left it out of approved-only search.
+    s = _Session()
+    s.queue_get(_Resp(200, _INDEX))
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    before = await c.search_devices(appliance_type="washer")
+    assert "washer__aeg-lavamat__x1" not in [i["id"] for i in before]
+    c._status_overrides["washer__aeg-lavamat__x1"] = ("approved", "2026-10-03T08:00:00Z")
+    c._invalidate_catalog_cache()
+    s.queue_post(_Resp(200, []))
+    after = await c.search_devices(appliance_type="washer")
+    assert "washer__aeg-lavamat__x1" in [i["id"] for i in after]
+    # An index built after the change wins: the override is not applied over it.
+    c._status_overrides["washer__aeg-lavamat__x1"] = ("approved", "2026-10-01T00:00:00Z")
+    c._invalidate_catalog_cache()
+    s.queue_post(_Resp(200, []))
+    stale = await c.search_devices(appliance_type="washer")
+    assert "washer__aeg-lavamat__x1" not in [i["id"] for i in stale]
+
+
 def test_a_malformed_index_is_rejected_or_cleaned_at_the_boundary():
     from custom_components.ha_washdata.store_client import _shape_index
 
