@@ -1188,6 +1188,20 @@ async def test_a_device_this_client_promoted_shows_in_approved_only_search():
     assert "washer__aeg-lavamat__x1" not in [i["id"] for i in stale]
 
 
+@pytest.mark.asyncio
+async def test_a_delta_row_with_a_string_favorite_count_still_sorts():
+    # Index rows are cleaned in _shape_index; delta rows came straight from
+    # Firestore, and -("3") raised TypeError out of search_devices.
+    s = _Session()
+    s.queue_get(_Resp(200, _INDEX))
+    s.queue_post(_Resp(200, [{"document": {"name": ".../devices/washer__miele__w1", "fields": {
+        "brand": {"stringValue": "Miele"}, "model": {"stringValue": "W1"},
+        "applianceType": {"stringValue": "washer"}, "status": {"stringValue": "approved"},
+        "favoriteCount": {"stringValue": "3"}}}}]))
+    items = await _client(s).search_devices(appliance_type="washer")
+    assert "washer__miele__w1" in [i["id"] for i in items]
+
+
 def test_a_malformed_index_is_rejected_or_cleaned_at_the_boundary():
     from custom_components.ha_washdata.store_client import _shape_index
 

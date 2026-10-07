@@ -1508,11 +1508,23 @@ class SuggestionEngine:
                 return val
         return 2.0
 
+    def _effective_thresholds(self, options: dict[str, Any]) -> dict[str, Any]:
+        """Stop, start and off delay as the detector runs them, set or not.
+
+        An unset Stop Threshold runs at 0.6 x min_power (#450 fresh entries), not at
+        min_power, which ``_current_stop_threshold`` falls back to for clean-cycle
+        checks: the standby check must compare against what really ends a cycle.
+        """
+        from .detector_config import effective_option_values  # noqa: PLC0415
+
+        return effective_option_values(options, self.device_type or "")
+
     def _standby_floor(self, options: dict[str, Any]) -> dict[str, Any] | None:
         """``standby_stop_floor`` over this device's recent history (#458)."""
-        stop = self._current_stop_threshold(options)
-        off_delay = _num(options.get(CONF_OFF_DELAY))
-        if off_delay is None or off_delay <= 0:
+        eff = self._effective_thresholds(options)
+        stop = float(eff[CONF_STOP_THRESHOLD_W])
+        off_delay = float(eff[CONF_OFF_DELAY])
+        if off_delay <= 0:
             off_delay = float(resolve_off_delay_default(self.device_type or ""))
         cycles = self.profile_store.get_past_cycles()[-200:]
         return standby_stop_floor(list(cycles), stop, off_delay)
@@ -1531,11 +1543,12 @@ class SuggestionEngine:
         if not floor or not floor.get("safe"):
             return {}
         floor_w = float(floor["floor_w"])
-        if self._current_stop_threshold(options) >= floor_w:
+        eff = self._effective_thresholds(options)
+        if float(eff[CONF_STOP_THRESHOLD_W]) >= floor_w:
             return {}
         out: dict[str, Any] = {CONF_STOP_THRESHOLD_W: _standby_floor_entry(floor_w, floor)}
         start_min = round(floor_w * STANDBY_FLOOR_RATIO, 2)
-        start = _num(options.get(CONF_START_THRESHOLD_W))
+        start = _num(eff[CONF_START_THRESHOLD_W])
         if start is None or start < start_min:
             out[CONF_START_THRESHOLD_W] = _standby_floor_entry(start_min, floor)
         return out

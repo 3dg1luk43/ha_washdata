@@ -121,8 +121,16 @@ def _shipped_cfg_cached(source: str, device_type: str) -> tuple:
     doc = None
     if source.endswith(".json"):
         doc = end_gate_eval._load_doc(Path(source), True)  # noqa: SLF001
-    if not doc or not (doc.get("device_fingerprint") or {}).get("device_type"):
+    if not doc:
         doc = {"device_fingerprint": {"device_type": device_type}}
+    elif not any(
+        (doc.get(k) or {}).get("device_type")
+        for k in ("device_fingerprint", "entry_options", "entry_data")
+    ):
+        # Add the fallback type only: replacing the document dropped the export's
+        # options, and the tables then ran on default duration/DTW/energy settings.
+        doc = {**doc, "device_fingerprint": {
+            **(doc.get("device_fingerprint") or {}), "device_type": device_type}}
     _cfg, store, _opts = end_gate_eval._production(doc, {})  # noqa: SLF001
     cfg = {
         "min_duration_ratio": store._min_duration_ratio,  # noqa: SLF001

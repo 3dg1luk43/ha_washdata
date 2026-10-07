@@ -232,6 +232,14 @@ def _decode_doc(doc: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _favorite_count(value: Any) -> int | float:
+    """A row's ``favoriteCount`` as a number the browse can sort by: 0 when it is
+    missing, a bool, a string or NaN (index rows and delta rows are both remote)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value != value:
+        return 0
+    return value
+
+
 def _shape_index(raw: Any) -> dict[str, Any] | None:
     """The published ``search-index.json`` (schema 1) as dict rows, or None.
 
@@ -263,9 +271,7 @@ def _shape_index(raw: Any) -> dict[str, Any] | None:
         b["brand_lc"] = str(b.get("id") or "").lower()
     devices = _rows("devices")
     for d in devices:
-        fav = d.get("favoriteCount")
-        if isinstance(fav, bool) or not isinstance(fav, (int, float)) or fav != fav:
-            d["favoriteCount"] = 0  # the browse sorts by it
+        d["favoriteCount"] = _favorite_count(d.get("favoriteCount"))  # the browse sorts by it
         # As the device documents store it (lowercased display name), NOT the id's
         # normalised token ("aeg lavamat" vs "aeg-lavamat"): brand filters compare it.
         d["brand_lc"] = str(d.get("brand") or "").lower()
@@ -700,7 +706,8 @@ class StoreClient:
             and (not appliance_type or r.get("applianceType") == appliance_type)
             and (not bl or r.get("brand_lc") == bl)
         ]
-        out.sort(key=lambda r: (-(r.get("favoriteCount") or 0), str(r.get("id"))))
+        # Delta rows come straight from Firestore, uncleaned: sort through the same guard.
+        out.sort(key=lambda r: (-_favorite_count(r.get("favoriteCount")), str(r.get("id"))))
         return out[:page_size]
 
     async def search_devices(

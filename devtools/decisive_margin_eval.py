@@ -70,6 +70,7 @@ Run from the repo root.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import asyncio
 import json
 import logging
@@ -342,11 +343,17 @@ def _switching_rows(job: tuple[str, bool, bool]) -> list[dict[str, Any]]:
 
 
 def _key(path: Path) -> str:
-    """The corpus key results are filed under (contributors' names hashed)."""
+    """The corpus key results are filed under (contributors' names hashed).
+
+    Not resolved: ``cycle_data/`` is often a symlink, and resolving it led outside
+    the repo, where the fallback printed the raw file name, a contributor's real
+    name under ``user-Contributed/``. A path really outside the repo is hashed too.
+    """
+    p = path if path.is_absolute() else REPO / path
     try:
-        return _eg()._export_key(path.resolve())  # noqa: SLF001
+        return _eg()._export_key(p)  # noqa: SLF001
     except ValueError:  # outside the repo
-        return path.name
+        return "external/" + hashlib.sha1(str(path).encode()).hexdigest()[:12]
 
 
 def _paths(all_formats: bool) -> list[str]:

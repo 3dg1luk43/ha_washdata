@@ -36,6 +36,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from custom_components.ha_washdata.const import (
+    CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
@@ -116,6 +117,16 @@ def test_the_pass_raises_the_stop_threshold_and_the_start_with_it() -> None:
     assert out[CONF_START_THRESHOLD_W]["value"] == pytest.approx(3.44)
     assert out[CONF_STOP_THRESHOLD_W]["corrective"] is True
     assert out[CONF_STOP_THRESHOLD_W]["reason_key"] == "suggestion.reason.standby_floor"
+
+
+def test_an_unset_stop_threshold_is_judged_at_what_the_detector_runs() -> None:
+    """A fresh entry has no Stop Threshold option (#450): the detector runs at
+    0.6 x min_power (1.8 W here, under the 2.2 W standby), while the check read
+    min_power itself (3 W, above the 2.75 W floor) and proposed nothing."""
+    out = _engine(
+        _history([_clean(f"c{i}") for i in range(6)]), {CONF_MIN_POWER: 3.0, CONF_OFF_DELAY: 180}
+    ).generate_standby_floor_suggestions()
+    assert out[CONF_STOP_THRESHOLD_W]["value"] == pytest.approx(2.75)
 
 
 def test_the_raised_pair_survives_reconciliation() -> None:

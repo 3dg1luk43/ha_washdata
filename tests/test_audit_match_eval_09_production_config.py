@@ -93,6 +93,33 @@ def test_dtw_ab_eval_uses_the_shipped_stage_1_4_config(tmp_path: Path, device_ty
     assert cfg["dtw_bandwidth"] > 0
 
 
+def test_dtw_ab_eval_keeps_the_export_options_without_a_device_type(tmp_path: Path) -> None:
+    # No device type anywhere: the fallback replaced the whole document, so the
+    # export's own options were dropped and the defaults ran instead.
+    path = tmp_path / "export.json"
+    _export(path, "washing_machine")
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    doc["device_fingerprint"] = {}
+    doc["entry_options"] = {"profile_match_max_duration_ratio": 2.4}
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    dtw_ab_eval._shipped_cfg_cached.cache_clear()  # noqa: SLF001
+    assert dtw_ab_eval._shipped_cfg(str(path))["max_duration_ratio"] == 2.4  # noqa: SLF001
+
+
+def test_decisive_margin_key_hashes_names_through_a_symlinked_corpus(tmp_path: Path) -> None:
+    # cycle_data/ is often a symlink: resolving it left the repo and the fallback
+    # printed the raw file name, a contributor's real name under user-Contributed/.
+    import decisive_margin_eval as dm  # noqa: PLC0415
+
+    real = tmp_path / "corpus" / "user-Contributed"
+    real.mkdir(parents=True)
+    (real / "Jane Doe washer.json").write_text("{}", encoding="utf-8")
+    link = dm.REPO / "cycle_data" / "user-Contributed" / "Jane Doe washer.json"
+    key = dm._key(link)  # noqa: SLF001
+    assert "Jane" not in key and key.startswith("cycle_data/user-Contributed/")
+    assert "Jane" not in dm._key(real / "Jane Doe washer.json")  # noqa: SLF001
+
+
 @pytest.mark.slow
 def test_prefix_guard_folds_come_from_the_shipped_matcher(tmp_path: Path) -> None:
     path = tmp_path / "export.json"
