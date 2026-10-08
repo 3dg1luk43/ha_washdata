@@ -333,9 +333,11 @@ only capabilities with a live consumer.
 them** so trained models are actually used. `trainer.py` (ridge fit + spec scoring), `training_task.py`
 (prefix dataset + promotion of `total_energy`), `feature_extraction.py`.
 
-**Promotion discipline:** the regressor promotes only when held-out MAE beats the naive
-elapsed/expected baseline by `ML_TRAINING_REGRESSION_MARGIN`. (The classifier AUC/balanced-accuracy
-gate went with classifier training in 0.5.8.) Revert via `revert_ml_models`.
+**Promotion discipline:** the regressor promotes only when all three hold, on the same held-out
+rows: its MAE beats the naive elapsed/expected baseline by `ML_TRAINING_REGRESSION_MARGIN`, it is
+strictly below the incumbent model's MAE (audit ML-12), and there are at least
+`ML_TRAINING_MIN_HOLDOUT_CYCLES` held-out cycles (PROGRESS-16). Keep all three. (The classifier
+AUC/balanced-accuracy gate went with classifier training in 0.5.8.) Revert via `revert_ml_models`.
 
 **Coupling contract with the lab:** each model's `FEATURE_COLUMNS` and the standardized-logistic
 scoring math are duplicated in `wash_ml/*` and **must stay byte-identical**.
