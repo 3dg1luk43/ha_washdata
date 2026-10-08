@@ -213,10 +213,14 @@ def _stages() -> list[Stage]:
     py = _py()
     return [
         Stage("generated", ("quick", "full"), lambda c, logs: [
+            # build_panel imports esbuild: install it first, as run_tests.sh does,
+            # or a fresh checkout reports a module error instead of a check.
+            *([Command(["npm", "ci", "--prefix", "devtools", "--silent"])]
+              if not (REPO / "devtools" / "node_modules").is_dir() else []),
             Command(["node", "devtools/build_panel.mjs", "--check"]),
             Command(["node", "devtools/gen_panel_map.mjs", "--check"]),
             Command([py, "devtools/generate_ws_types.py", "--check"]),
-        ], 1, unavailable=_need("node")),
+        ], 1, unavailable=_need("node", "npm")),
         Stage("docs", ("quick", "full"), lambda c, logs: [
             Command([py, "devtools/docs_check.py"]),
         ], 1),

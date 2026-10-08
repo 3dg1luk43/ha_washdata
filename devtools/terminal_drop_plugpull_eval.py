@@ -30,11 +30,12 @@ Playground's terminal-drop rule for an A/B on the same code:
 harness measures the benefit, that one the cost (early ends, splits).
 
 Measured 2026-10-04, 95 cycles from 15 dishwasher exports (all corpus formats),
-fires / 95 and median close after the cut:
+fires / 95 and median close after the cut; ungated and guarded re-run 2026-10-07
+(guarded 30%: 65 -> 66 fires on the code since, every other cell unchanged):
 
     cut    off              ungated          guarded (shipped)
     15%    0,  121.0 min    68, 4.2 min      58, 4.5 min
-    30%    0,   99.2 min    69, 4.5 min      65, 4.5 min
+    30%    0,   99.2 min    69, 4.5 min      66, 4.5 min
     50%    0,   75.0 min    50, 5.0 min      49, 5.0 min
 
 ``end_gate_eval`` on the same day: ungated split one real cycle ("Quick wash", a

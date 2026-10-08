@@ -315,7 +315,9 @@ class WashDataCard extends HTMLElement {
     }
     if (c.map.has(key)) return c.map.get(key);
     const roles = this._computeRoles(primaryEntity);
-    if (reg && roles._deviceId) c.map.set(key, roles);
+    // A role the suffix fallback had to look for in live states may appear later
+    // without a registry change, so such a result is recomputed, never cached.
+    if (reg && roles._deviceId && !roles._fromStates) c.map.set(key, roles);
     return roles;
   }
 
@@ -360,9 +362,11 @@ class WashDataCard extends HTMLElement {
 
     // Suffix fallback for the common case where the primary is the state sensor
     // but the registry lookup came up empty (e.g. template entity, no device).
+    let fromStates = false;
     if (!roles.time || !roles.progress || !roles.program) {
       const m = /^sensor\.(.+)_state$/.exec(primary);
       if (m) {
+        fromStates = true;
         const base = "sensor." + m[1] + "_";
         const st = hass && hass.states;
         const guess = (suffix) => (st && st[base + suffix] ? base + suffix : null);
@@ -375,6 +379,7 @@ class WashDataCard extends HTMLElement {
     roles._buttons = buttons;
     roles._select = selectEntity;
     roles._deviceId = deviceId;
+    roles._fromStates = fromStates;
     return roles;
   }
 
@@ -639,15 +644,17 @@ class WashDataCard extends HTMLElement {
     return this._buildTile();
   }
 
-  _attachGestures(cardEl) {
+  _attachGestures(cardEl, keyEl = cardEl) {
     // Keyboard: focusable with Enter / Space running the tap action, as HA's own
-    // tile card does (audit UI-17: pointer-only until 0.5.8).
+    // tile card does (audit UI-17: pointer-only until 0.5.8). `keyEl` carries the
+    // button role: a card holding its own buttons or program selector passes a
+    // part without them, since a role="button" may not contain interactive controls.
     const tapCfg = (this._cfg && this._cfg.tap_action) || { action: "more-info" };
     if (tapCfg.action !== "none") {
-      cardEl.tabIndex = 0;
-      cardEl.setAttribute("role", "button");
-      cardEl.addEventListener("keydown", (ev) => {
-        if (ev.target !== cardEl || (ev.key !== "Enter" && ev.key !== " ")) return;
+      keyEl.tabIndex = 0;
+      keyEl.setAttribute("role", "button");
+      keyEl.addEventListener("keydown", (ev) => {
+        if (ev.target !== keyEl || (ev.key !== "Enter" && ev.key !== " ")) return;
         ev.preventDefault();
         this._executeAction((this._cfg && this._cfg.tap_action) || { action: "more-info" });
       });
@@ -708,7 +715,8 @@ class WashDataCard extends HTMLElement {
       (flags.showSparkline ? '<canvas id="spark"></canvas>' : "") +
       (flags.buttons.length ? '<div class="acts" id="acts"></div>' : "") +
       "</div></ha-card>";
-    this._attachGestures(this.shadowRoot.getElementById("card"));
+    const card = this.shadowRoot.getElementById("card");
+    this._attachGestures(card, flags.buttons.length ? card.querySelector(".top") : card);
     if (flags.buttons.length) this._buildButtons(this.shadowRoot.getElementById("acts"), flags.buttons);
   }
 

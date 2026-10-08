@@ -1240,17 +1240,21 @@ class SuggestionEngine:
             reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
             reason_off_key: str = "suggestion.reason.off_delay_cadence"
             reason_off_params: dict[str, Any] = {"p95": f"{p95_dt:.1f}"}
-            if suggested_off_delay == fallback_floor == device_floor:
-                if self.device_type and self.device_type in DEFAULT_OFF_DELAY_BY_DEVICE:
+            if suggested_off_delay == fallback_floor:
+                # A floor set the value, not the cadence: name the floor that did.
+                if (
+                    fallback_floor == device_floor
+                    and self.device_type and self.device_type in DEFAULT_OFF_DELAY_BY_DEVICE
+                ):
                     reason_off = (
                         f"Used device-specific safe minimum for {self.device_type} ({device_floor}s)."
                     )
                     reason_off_key = "suggestion.reason.off_delay_device_floor"
                     reason_off_params = {"device": self.device_type, "floor": device_floor}
                 else:
-                    reason_off = f"Used generic safe minimum ({DEFAULT_OFF_DELAY}s)."
+                    reason_off = f"Used generic safe minimum ({fallback_floor}s)."
                     reason_off_key = "suggestion.reason.off_delay_generic_floor"
-                    reason_off_params = {"floor": DEFAULT_OFF_DELAY}
+                    reason_off_params = {"floor": fallback_floor}
             suggestions[CONF_OFF_DELAY] = {
                 "value": suggested_off_delay,
                 "reason": reason_off,

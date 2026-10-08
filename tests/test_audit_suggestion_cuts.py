@@ -136,6 +136,11 @@ def test_dishwasher_timeout_and_off_delay_keep_their_floors() -> None:
         DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE["dishwasher"]
     )
     assert out[CONF_OFF_DELAY]["value"] < 1800
+    # With 8 traced cycles the measured floor, not the 1800 s prior and not the
+    # cadence (30 s x 5 = 150 s), set the off delay: the reason must say so.
+    off = out[CONF_OFF_DELAY]
+    assert off["reason_key"] == "suggestion.reason.off_delay_generic_floor"
+    assert off["reason_params"]["floor"] == off["value"]
     # The device default won here (30 s x 20 = 600 s < 4 h), so the reason must
     # name it, not the cadence formula the value did not come from.
     timeout = out[CONF_NO_UPDATE_ACTIVE_TIMEOUT]

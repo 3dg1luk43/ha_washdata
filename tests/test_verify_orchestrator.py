@@ -379,3 +379,14 @@ def test_an_interrupted_run_keeps_the_finished_stages_timings(tmp_path):
     proc.send_signal(signal.SIGTERM)
     assert proc.wait(timeout=30) == 130
     assert "quick" in json.loads(timings.read_text())
+
+
+def test_generated_installs_the_panel_build_deps_on_a_fresh_checkout(tmp_path, monkeypatch):
+    # build_panel.mjs imports esbuild from devtools/node_modules; without it the
+    # stage reported a module error instead of checking the generated files.
+    stage = next(s for s in verify._stages() if s.name == "generated")
+    monkeypatch.setattr(verify, "REPO", tmp_path)
+    fresh = stage.build(1, tmp_path)
+    assert fresh[0].argv[:2] == ["npm", "ci"]
+    (tmp_path / "devtools" / "node_modules").mkdir(parents=True)
+    assert stage.build(1, tmp_path)[0].argv[:2] == ["node", "devtools/build_panel.mjs"]

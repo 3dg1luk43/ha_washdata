@@ -108,7 +108,7 @@ test('unlabelled cycle with pending feedback overlays the suspected profile and 
 
 test('the suspected overlay lands in Review mode too, even when the reply arrives after the switch', async ({ page }) => {
   // Hold both envelopes so the replies arrive after Review re-rendered the form
-  // (which rewrites curve.profile_name from the unlabelled select).
+  // and snapshotted its unsaved choice (#469 keeps that apart from the label).
   await bootWith(page, FEEDBACK, ['Eco 60°C', 'Quick 30°C']);
   await openCycle(page, 'cyc-003');
   await page.locator('button[data-maction="cyc-review"]').click();

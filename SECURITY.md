@@ -30,8 +30,9 @@ the fix is released.
 
 - **Local by default.** Detection, matching, learning and the optional ML models run inside Home
   Assistant. No telemetry, no downloads of models or firmware.
-- **Stored data** (programs, cycles, power traces, exports) lives in your Home Assistant config
-  folder, unencrypted, protected by the file system.
+- **Stored data** (programs, cycles, power traces) lives in your Home Assistant config folder,
+  unencrypted, protected by the file system. An export goes there too, unless an administrator
+  writes it to another allowed directory.
 - **Notifications** go wherever your chosen notify service sends them (for example a phone push
   through a cloud service). Without notify targets, automations or the Community Store's online
   features, nothing leaves Home Assistant.

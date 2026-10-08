@@ -295,7 +295,7 @@ def terminal_drop_may_fire(
     programme at a familiar power with an early pause split a real cycle (one
     "Quick wash" on 213 replayed dishwasher cycles, end_gate_eval --loo
     --all-formats); gated, that split is gone and nothing else moved, while the
-    synthetic plug-pull keeps 172 of 187 fires (cuts at 15/30/50% of 95 cycles,
+    synthetic plug-pull keeps 173 of 187 fires (cuts at 15/30/50% of 95 cycles,
     median close 4.5 min after the cut either way, 99.8 min without).
     """
     if ml_models_enabled(options):

@@ -181,6 +181,44 @@ test('detail: tapping the program select does not run the card tap_action (#468)
   expect(fired).toBe(0);
 });
 
+test('detail with controls: the button role sits on a part without them', async ({ page }) => {
+  // A role="button" may not contain interactive controls: with action buttons or
+  // the program selector the keyboard target is the top row, not the whole card.
+  await mount(page, { entity: 'sensor.wm_state', layout: 'detail', buttons: ['pause', 'program'] }, RUN);
+  const got = await page.evaluate(() => {
+    const card = (window as any).__card;
+    const els = card.shadowRoot.querySelectorAll('[role="button"]');
+    const el = els[0];
+    let fired: string | null = null;
+    card.addEventListener('hass-more-info', (ev: any) => { fired = ev.detail && ev.detail.entityId; });
+    el.focus();
+    el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    return { n: els.length, nested: !!el.querySelector('button, select'), fired };
+  });
+  expect(got.n).toBe(1);
+  expect(got.nested).toBe(false);
+  expect(got.fired).toBe('sensor.wm_state');
+});
+
+test('a role found in live states is not cached before its sensor appears', async ({ page }) => {
+  // The registry lacks the time sensor, so the suffix fallback looks in live
+  // states; caching that miss left the card without a time once it appeared.
+  const data = JSON.parse(JSON.stringify(RUN));
+  delete data.entities['sensor.wm_time_remaining'];
+  const time = data.states['sensor.wm_time_remaining'];
+  delete data.states['sensor.wm_time_remaining'];
+  await mount(page, { entity: 'sensor.wm_state', layout: 'tile' }, data);
+  const before = await page.evaluate(() => (window as any).__card.shadowRoot.getElementById('state').textContent);
+  expect(before).not.toContain('16 min');
+  const after = await page.evaluate((t: any) => {
+    const card = (window as any).__card;
+    const h = card._hass;
+    card.hass = { ...h, states: { ...h.states, 'sensor.wm_time_remaining': t } };
+    return card.shadowRoot.getElementById('state').textContent;
+  }, time);
+  expect(after).toContain('16 min');
+});
+
 test('glance: renders one row per device with state dot and time', async ({ page }) => {
   await mount(page, { entity: 'sensor.wm_state', entities: ['sensor.wm_state'], layout: 'glance' }, RUN);
   const rows = await page.evaluate(() => {

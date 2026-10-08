@@ -3538,8 +3538,7 @@ class HaWashdataPanel extends HTMLElement {
   async _fetchCycleProfileEnv(entryId, profileName, slot = 'profileEnv') {
     if (!profileName) return;
     // The requested name is stored on the modal and the response is matched
-    // against it: the overlaid profile is not always the cycle's label (#462),
-    // and Review mode rewrites curve.profile_name from its unsaved select.
+    // against it: the overlaid profile is not always the cycle's label (#462).
     const m0 = this._modal;
     if (m0 && m0.type === 'cycle-detail') (m0.envFor = m0.envFor || {})[slot] = profileName;
     try {
@@ -4708,7 +4707,9 @@ class HaWashdataPanel extends HTMLElement {
     if (gEl) rv.golden = !!gEl.checked;
     if (nEl) rv.notes = nEl.value || '';
     rv.tags = Array.from(sr.querySelectorAll('.wd-cyc-rev-tag')).filter(cb => cb.checked).map(cb => cb.value);
-    if (lEl && m.curve) m.curve.profile_name = lEl.value || '';
+    // The unsaved choice lives apart from curve.profile_name (#469): that field is
+    // the label on record, which the save compares against and the tile shows.
+    if (lEl) m.reviewLabel = lEl.value || '';
   }
 
   _buildHtml() {
@@ -11101,7 +11102,7 @@ class HaWashdataPanel extends HTMLElement {
         </p>
         <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:6px 0">
           <label style="display:inline-flex;align-items:center;gap:6px">${this._t('lbl.profile', {}, 'Profile')}${tProfile}
-            <select id="wd-cyc-rev-label" class="wd-filter-select"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option>${this._profileOptions(cur.profile_name)}</select>
+            <select id="wd-cyc-rev-label" class="wd-filter-select"><option value="">${this._t('lbl.unlabelled_paren', {}, '(unlabelled)')}</option>${this._profileOptions(m.reviewLabel !== undefined ? m.reviewLabel : cur.profile_name)}</select>
           </label>
           <label style="display:inline-flex;align-items:center;gap:6px">${this._t('lbl.quality', {}, 'Quality')}${tQuality}
             <select id="wd-cyc-rev-quality" class="wd-filter-select">${qOpt('', '-')}${qOpt('good', this._t('quality.good', {}, 'Good'))}${qOpt('bad', this._t('quality.bad', {}, 'Bad'))}${qOpt('unusable', this._t('quality.unusable', {}, 'Unusable'))}</select>
@@ -14928,7 +14929,19 @@ class HaWashdataPanel extends HTMLElement {
             // (#331), so refresh the queue rather than leaving a stale entry.
             if (newLabel !== curLabel) await this._fetchFeedbacks(eid);
             await this._loadMlIndex(eid);
-            if (this._modal && this._modal.cycleId === cid) this._modal.ml = (this._mlById || {})[cid] || this._modal.ml;
+            const open = this._modal;
+            if (open && open.type === 'cycle-detail' && open.cycleId === cid) {
+              open.ml = (this._mlById || {})[cid] || open.ml;
+              // The open dialog showed the label it was opened with, so a relabel
+              // looked unsaved and saving back to that label was skipped (#469).
+              delete open.reviewLabel;
+              if (newLabel !== curLabel && open.curve) {
+                open.curve.profile_name = newLabel || null;
+                open.profileEnv = null;
+                open.runnerUpEnv = null;
+                this._loadCycleOverlays(eid, cid, open.curve);
+              }
+            }
           } catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
         });
         return;
