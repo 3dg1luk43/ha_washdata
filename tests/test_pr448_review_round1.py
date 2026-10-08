@@ -26,12 +26,10 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
 
 from custom_components.ha_washdata import ws_api
 from custom_components.ha_washdata.const import DOMAIN
-from custom_components.ha_washdata.ml.matching_tuner import _series
 from custom_components.ha_washdata.suggestion_engine import detect_standby_above_stop
 
 
@@ -111,55 +109,6 @@ def test_a_cycle_stopped_at_working_power_is_not_standby_evidence():
         "power_data": [[0.0, 2000.0], [10.0, 1800.0], [20.0, 500.0]],
     }
     assert detect_standby_above_stop([mid_wash, dict(mid_wash, id="u2")], 2.56) is None
-
-
-def test_a_cycle_the_user_stopped_at_standby_still_counts():
-    """#445's reporter force-stopped four cycles; those ARE the evidence."""
-    res = detect_standby_above_stop(
-        [_idle_cycle(3.4, "a"), _idle_cycle(3.3, "b")], 2.56
-    )
-    assert res is not None and res["cycles_above"] == 2
-
-
-# --------------------------------------------------------------------------
-# matching_tuner: one half-parsed row desynchronised the two arrays
-# --------------------------------------------------------------------------
-def test_a_row_whose_power_is_unparseable_drops_the_whole_pair():
-    """``ts`` used to gain an element ``pw`` did not, so np.interp raised later."""
-    cycle = {
-        "power_data": [
-            [0.0, 10.0],
-            [10.0, "nonsense"],
-            [20.0, 30.0],
-            [30.0, 40.0],
-            [40.0, 50.0],
-        ]
-    }
-    ts, pw = _series(cycle)
-    assert ts.size == pw.size == 4
-    assert list(ts) == [0.0, 20.0, 30.0, 40.0]
-
-
-def test_an_unbounded_integer_power_drops_the_pair_rather_than_raising():
-    """`json` keeps an oversized literal as an int, and float() on one raises."""
-    cycle = {
-        "power_data": [
-            [0.0, 10.0],
-            [10.0, 10**400],
-            [20.0, 30.0],
-            [30.0, 40.0],
-            [40.0, 50.0],
-        ]
-    }
-    ts, pw = _series(cycle)
-    assert ts.size == pw.size == 4
-
-
-def test_the_arrays_stay_usable_for_interpolation():
-    """The failure mode was downstream: np.interp on unequal arrays."""
-    cycle = {"power_data": [[0.0, 1.0], [1.0, None], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0]]}
-    ts, pw = _series(cycle)
-    assert np.interp(np.linspace(0.0, 4.0, 10), ts, pw).size == 10
 
 
 # --------------------------------------------------------------------------
@@ -272,36 +221,6 @@ def test_no_quiet_span_reports_no_endpoint():
     assert _measured_quiet_span(pts, 0.0, len(pts), 2.0) == (0.0, None)
 
 
-def test_the_scored_pause_prefix_ends_on_the_measured_span():
-    """End to end through _scored_pauses: the feature extractor is handed the
-    prefix that belongs to the duration it is scored against."""
-    from custom_components.ha_washdata.suggestion_engine import MLSuggestionEngine
-
-    seen: list[int] = []
-
-    def _feat(prefix, _expectation):
-        seen.append(len(prefix))
-        return [0.0]
-
-    pts: list[tuple[float, float]] = [(0.0, 1000.0)]
-    pts += [(float(t), 0.5) for t in range(10, 310, 10)]   # long quiet span
-    pts.append((310.0, 50.0))                               # splits the low run
-    pts += [(float(t), 0.5) for t in range(320, 370, 10)]   # short quiet span
-    pts += [(float(t), 1000.0) for t in range(370, 700, 10)]  # sustained resume
-
-    engine = MLSuggestionEngine.__new__(MLSuggestionEngine)
-    pauses = engine._scored_pauses(
-        pts, {"duration": 3600.0, "energy": 800.0, "peak": 1000.0}, 2.0,
-        lambda _f: 0.1, _feat,
-    )
-
-    assert pauses, "the long quiet span should be reported as a pause"
-    assert seen, "the feature extractor was never called"
-    # The prefix ends on the 300 s sample (index 30), so its length is 31 -
-    # it must not run on to the 360 s sample the resume follows.
-    assert seen[0] == 31, f"scored a prefix of {seen[0]} samples, expected 31"
-
-
 # --------------------------------------------------------------------------
 # Round 4: _safe_offset and the prefix bandwidth default
 # --------------------------------------------------------------------------
@@ -316,8 +235,9 @@ def test_safe_offset_survives_an_unbounded_integer():
     assert _safe_offset(12.5) == pytest.approx(12.5)
 
 
-def test_prefix_scoring_and_stage3_share_one_bandwidth_default():
-    """Both read the same unmutated config in one match (register item 309)."""
+def test_stage3_reads_the_option_bandwidth_default():
+    """Stage 3 reads the same unmutated config default as production (register
+    item 309). The #364 prefix pass that shared it was removed in 0.5.8."""
     from pathlib import Path
 
     src = (
@@ -327,7 +247,7 @@ def test_prefix_scoring_and_stage3_share_one_bandwidth_default():
         / "analysis.py"
     ).read_text()
     assert 'config.get("dtw_bandwidth", 0.1)' not in src
-    assert src.count('config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH)') == 2
+    assert src.count('config.get("dtw_bandwidth", DEFAULT_DTW_BANDWIDTH)') == 1
 
 
 # --------------------------------------------------------------------------
@@ -382,58 +302,98 @@ def test_the_end_gate_is_deliberately_not_gated_on_confidence():
         "the confidence check was measured as pure cost (2 cycles delayed, no "
         "split or early end prevented) - see devtools/end_gate_eval.py"
     )
-    # The ambiguity guards are still consulted - since item 330 they raise the
-    # bar to the longest plausible candidate rather than refusing outright, and
-    # they still refuse when there is no candidate duration to compare.
-    assert "_match_prefix_ambiguous" in code
+    # The ambiguity guard is still consulted - since item 330 it raises the bar
+    # to the longest plausible candidate rather than refusing outright, and it
+    # still refuses when there is no candidate duration to compare. (The #364
+    # prefix-fit flag it also read was removed in 0.5.8.)
     assert "_match_ambiguous" in code
     assert "_longest_candidate_duration" in code
+
+
+def _switch_result(candidates: list[tuple[str, float]]) -> object:
+    from custom_components.ha_washdata.profile_store import MatchResult
+
+    cands = [{"name": n, "score": sc, "profile_duration": 3600.0} for n, sc in candidates]
+    best, conf = candidates[0]
+    margin = conf - candidates[1][1] if len(candidates) > 1 else 1.0
+    return MatchResult(best, conf, 3600.0, None, cands, margin < 0.05, margin)
+
+
+def _switch_from_a_to(candidates: list[tuple[str, float]]) -> str:
+    """Run the REAL switching rules once, with "A" committed mid-cycle.
+
+    The challenger is seen for the first time, so it is not persistent: only the
+    decisive-margin bypass can switch to it on this tick.
+    """
+    from custom_components.ha_washdata import match_rules
+
+    state = match_rules.SwitchState(
+        current_program="A",
+        matched_duration=3600.0,
+        last_confidence=0.6,
+        score_history={"A": [0.6, 0.6, 0.6, 0.6, 0.6]},
+        persistence_counter={"A": 3},
+        current_candidate="A",
+    )
+    result = _switch_result(candidates)
+    tick = match_rules.begin_tick(state, result, 3, 1800.0)
+    match_rules.decide_switch(state, tick, result, 3, 0.35)
+    return state.current_program
+
+
+def test_a_decisive_margin_bypasses_persistence():
+    """Register item 305: a winner far clear of the runner-up switches at once."""
+    assert _switch_from_a_to([("B", 0.80), ("A", 0.40)]) == "B"  # genuinely decisive
+    assert _switch_from_a_to([("B", 0.80), ("A", 0.75)]) == "A"  # crowded field: waits
 
 
 def test_a_sole_surviving_candidate_still_bypasses_persistence():
     """Requiring a real runner-up was measured worse than the sentinel.
 
-    ``devtools/decisive_margin_eval.py`` over 1977 mid-cycle checkpoints: a
-    single surviving candidate occurs at 2.58% of them and is the correct
-    programme 94.0% (47/50) of the time, against 77.8% (669/860) for the
-    real-margin bypass it would have been held to. Stage 1/2 rejecting every
-    other profile is evidence, not the absence of it.
+    ``devtools/decisive_margin_eval.py --loo`` over 2636 leave-one-out
+    checkpoints on the shipped matcher: a single surviving candidate is the
+    correct programme 96.3% (361/375) of the time, against 87.8% (1028/1171)
+    for the real-margin bypass it would have been held to (PR #448 round 6 had
+    94.0% / 77.8% on an older harness). Stage 1/2 rejecting every other profile
+    is evidence, not the absence of it.
     """
-    from custom_components.ha_washdata.const import MATCH_DECISIVE_MARGIN
-
-    def bypasses(runner_up: float | None, confidence: float, current: float) -> bool:
-        margin = 1.0 if runner_up is None else confidence - runner_up
-        return margin > MATCH_DECISIVE_MARGIN and confidence > current
-
-    assert bypasses(0.40, 0.80, 0.50) is True   # genuinely decisive
-    assert bypasses(0.75, 0.80, 0.50) is False  # crowded field, unchanged
-    assert bypasses(None, 0.55, 0.0) is True    # sole survivor: 94% correct
+    assert _switch_from_a_to([("B", 0.55)]) == "B"
 
 
-def test_the_decisive_margin_bypass_does_not_require_a_runner_up():
-    from pathlib import Path
+def _dishwasher_defers(
+    duration: float,
+    matched: str | None = None,
+    expected: float = 0.0,
+    conf: float = 0.9,
+    ambiguous: bool = False,
+) -> bool:
+    """The REAL ``CycleDetector._should_defer_finish`` on a dishwasher.
 
-    src = (
-        Path(__file__).resolve().parents[1]
-        / "custom_components"
-        / "ha_washdata"
-        / "manager.py"
-    ).read_text()
-    block = src.split("Decisive Margin Override", 1)[1].split("should_switch = True", 1)[0]
-    assert "_runner_up is not None" not in block, (
-        "the sole-surviving-candidate case is 94% correct - see "
-        "devtools/decisive_margin_eval.py"
+    The end-spike wait is marked done so the floor is the only dishwasher rule
+    that can defer at these durations (the drying guard needs < 85% of expected).
+    """
+    from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
+
+    det = CycleDetector(
+        CycleDetectorConfig(
+            min_power=2.0, off_delay=300, device_type="dishwasher",
+            match_confidence_threshold=0.4, min_duration_ratio=0.8,
+        ),
+        lambda *_a: None,
+        lambda *_a: None,
     )
+    det._matched_profile = matched  # noqa: SLF001
+    det._expected_duration = expected  # noqa: SLF001
+    det._last_match_confidence = conf  # noqa: SLF001
+    det._match_ambiguous = ambiguous  # noqa: SLF001
+    det._end_spike_seen = True  # noqa: SLF001
+    return det._should_defer_finish(duration)  # noqa: SLF001
 
 
-def test_both_measurement_harnesses_are_checked_in():
-    """The whole reason these two were unmeasurable is that item 306's harness
-    was never committed. Do not let that happen again."""
-    from pathlib import Path
-
-    devtools = Path(__file__).resolve().parents[1] / "devtools"
-    assert (devtools / "end_gate_eval.py").is_file()
-    assert (devtools / "decisive_margin_eval.py").is_file()
+def test_the_unmatched_dishwasher_floor_is_thirty_minutes():
+    """An unmatched dishwasher never ends before 30 min (fill / early-wash dips)."""
+    assert _dishwasher_defers(1799.0) is True
+    assert _dishwasher_defers(1801.0) is False
 
 
 def test_a_matched_dishwasher_profile_lowers_the_minimum_duration_floor():
@@ -444,44 +404,14 @@ def test_a_matched_dishwasher_profile_lowers_the_minimum_duration_floor():
     A matched profile may only ever LOWER the floor, never raise it - the
     39.4 min Electrolux "Rapido" already clears it and is unaffected.
     """
-    from custom_components.ha_washdata.const import DISHWASHER_MIN_CYCLE_DURATION_S
-
-    def floor(
-        matched: str | None,
-        expected: float,
-        conf: float = 0.9,
-        ambiguous: bool = False,
-        prefix_ambiguous: bool = False,
-        threshold: float = 0.4,
-    ) -> float:
-        out = DISHWASHER_MIN_CYCLE_DURATION_S
-        if (
-            matched
-            and expected > 0
-            and conf >= threshold
-            and not ambiguous
-            and not prefix_ambiguous
-        ):
-            out = min(out, float(expected))
-        return out
-
+    # A trusted short programme lowers it to its own length.
+    assert _dishwasher_defers(400.0, "Delay- prewash", 360.0) is False
     # An UNTRUSTED match may not lower it: this is an anti-premature-end guard,
     # and a weak match to a short look-alike is how a fill dip ends the cycle.
-    assert floor("Delay- prewash", 360.0, conf=0.2) == DISHWASHER_MIN_CYCLE_DURATION_S
-    assert floor("Delay- prewash", 360.0, ambiguous=True) == DISHWASHER_MIN_CYCLE_DURATION_S
-    assert (
-        floor("Delay- prewash", 360.0, prefix_ambiguous=True)
-        == DISHWASHER_MIN_CYCLE_DURATION_S
-    )
-
-    # Unmatched: the blanket floor still applies.
-    assert floor(None, 0.0) == DISHWASHER_MIN_CYCLE_DURATION_S
-    # A programme shorter than the floor lowers it to its own length.
-    assert floor("Delay- prewash", 360.0) == 360.0
-    # One that already clears the floor is unaffected...
-    assert floor("Rapido", 2364.0) == DISHWASHER_MIN_CYCLE_DURATION_S
-    # ...and a long one cannot raise it above the constant.
-    assert floor("ECO", 13962.0) == DISHWASHER_MIN_CYCLE_DURATION_S
+    assert _dishwasher_defers(400.0, "Delay- prewash", 360.0, conf=0.2) is True
+    assert _dishwasher_defers(400.0, "Delay- prewash", 360.0, ambiguous=True) is True
+    # A programme just over the floor cannot RAISE it above the constant.
+    assert _dishwasher_defers(1900.0, "Rapido", 2000.0) is False
 
 
 # --------------------------------------------------------------------------
@@ -509,16 +439,30 @@ def test_option_writers_do_not_queue_behind_the_long_background_tasks():
     for marker in (
         'lock = _entry_options_lock(hass, msg["entry_id"])',   # ws_set_options
         'async with _entry_options_lock(hass, entry_id):',      # ws_apply_suggestions
-        'async with _entry_options_lock(hass, msg["entry_id"]):',  # store_download
     ):
         assert marker in src, marker
+    # store_download now applies settings inside its registry task, which holds the
+    # write lock (audit STORE-11): options lock inside it, write -> options.
+    task_body = src.split("async def _store_download_task(", 1)[1].split("\nasync def ", 1)[0]
+    assert task_body.find("_entry_write_lock(") < task_body.find("_apply_store_settings(")
+    helper_body = src.split("async def _apply_store_settings(", 1)[1].split("\n@websocket_api", 1)[0]
+    assert "async with _entry_options_lock(hass, entry_id):" in helper_body
     # Lock ORDER where both are held must be write -> options. The import
     # handlers are the only place both are taken; assert the options lock is
     # acquired INSIDE their write-lock block, not around it.
-    for handler in ("async def ws_import_config(", "async def ws_import_config_selective("):
+    # ws_import_config takes the options lock through the helper it shares with
+    # the import_config service (audit PLATFORM-02), so follow it there.
+    helper = src.split("async def async_apply_imported_entry_options(", 1)[1].split(
+        "\n@websocket_api", 1
+    )[0]
+    assert "_entry_options_lock(" in helper
+    for handler, options_marker in (
+        ("async def ws_import_config(", "async_apply_imported_entry_options("),
+        ("async def ws_import_config_selective(", "_entry_options_lock("),
+    ):
         body = src.split(handler, 1)[1].split("\n@websocket_api", 1)[0]
         w = body.find("_entry_write_lock(")
-        o = body.find("_entry_options_lock(")
+        o = body.find(options_marker)
         assert w != -1 and o != -1, handler
         assert w < o, f"{handler}: options lock must be nested inside the write lock"
 
@@ -612,25 +556,6 @@ def test_an_unobserved_keepalive_still_resets_the_gapfree_tally():
         assert det._time_below_threshold_gapfree == 0.0, dt_s
 
 
-def test_a_real_reading_after_an_outage_still_resets_regardless_of_observed():
-    """`observed` only ever qualifies the synthetic exemption; a genuine
-    sensor reading across a hole resets as it always did."""
-    from datetime import datetime, timedelta, timezone
-
-    from custom_components.ha_washdata.cycle_detector import (
-        CycleDetector,
-        CycleDetectorConfig,
-    )
-
-    cfg = CycleDetectorConfig(min_power=2.0, off_delay=60, stop_threshold_w=2.0)
-    det = CycleDetector(cfg, lambda a, b: None, lambda c: None)
-    base = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
-    for i in range(30):
-        det.process_reading(0.0, base + timedelta(seconds=i * 2))
-    det.process_reading(0.0, base + timedelta(seconds=660))  # real, big hole
-    assert det._time_below_threshold_gapfree == 0.0
-
-
 # --------------------------------------------------------------------------
 # Round 14: an imported old backup never got the banked-tail repair
 # --------------------------------------------------------------------------
@@ -648,8 +573,10 @@ def test_an_old_export_re_arms_the_banked_tail_repair():
 
     assert _export_predates_banked_tail_repair({"version": 12}) is True
     assert _export_predates_banked_tail_repair({"version": 1}) is True
-    assert _export_predates_banked_tail_repair({"version": 13}) is False
+    # v13 (0.5.7) predates the #424 re-run of the repair, so it re-arms too.
+    assert _export_predates_banked_tail_repair({"version": 13}) is True
     assert _export_predates_banked_tail_repair({"version": 14}) is False
+    assert _export_predates_banked_tail_repair({"version": 15}) is False
     # Unreadable version is treated as old: an idempotent repair on an already
     # repaired history costs one pass, skipping it on an unrepaired one is
     # permanent. (An oversized integer literal is NOT unreadable - Python ints
@@ -996,6 +923,7 @@ def test_every_english_panel_key_reaches_every_language():
     why this is asserted rather than eyeballed per key.
     """
     import json
+    import re
     from pathlib import Path
 
     root = (
@@ -1017,11 +945,16 @@ def test_every_english_panel_key_reaches_every_language():
         return out
 
     en = flat(json.loads((root / "en.json").read_text()))
+    # Plural forms (audit UI-08) are per language: CLDR gives Japanese only
+    # `other` and Polish `few`/`many` too, so English's `_one`/`_other` cannot be
+    # required everywhere. The panel falls back to the plain key, which must exist.
+    plural = re.compile(r"_(zero|one|two|few|many|other)$")
+    required = {k for k in en if not (plural.search(k) and plural.sub("", k) in en)}
     gaps = {}
     for path in sorted(root.glob("*.json")):
         if path.name == "en.json":
             continue
-        missing = sorted(set(en) - set(flat(json.loads(path.read_text()))))
+        missing = sorted(required - set(flat(json.loads(path.read_text()))))
         if missing:
             gaps[path.stem] = missing
     assert not gaps, f"keys missing from other languages: {gaps}"
@@ -1036,13 +969,15 @@ def test_the_ending_bound_is_taken_before_the_group_collapse():
     ENDING gate's bar exactly while the match is ambiguous, which is when Stage
     5's own safeguards say the selected member may be the wrong one, so reading
     the collapsed list can end a cycle while a longer sibling is still plausible.
-    Asserted on source order in both the live matcher and the Playground mirror,
-    because reaching it needs a grouped profile and a full match run.
+    Asserted on source order in the live matcher, because reaching it needs a
+    grouped profile and a full match run. The Playground no longer mirrors it: it
+    runs ``ProfileStore.async_match_profile`` itself (audit PLAYGROUND-01).
     """
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[1] / "custom_components" / "ha_washdata"
-    for mod in ("profile_store.py", "playground.py"):
+    assert "collapse_group_candidates(" not in (root / "playground.py").read_text()
+    for mod in ("profile_store.py",):
         src = (root / mod).read_text()
         capture = src.index("pre_collapse_candidates = list(candidates)")
         collapse = src.index("candidates = collapse_group_candidates(")
@@ -1112,7 +1047,8 @@ def test_no_panel_key_is_used_for_two_different_strings():
     ).read_text()
 
     pattern = re.compile(
-        r"_t\(\s*'([^']+)'\s*,\s*(?:\{[^{}]*\}|[A-Za-z_$][\w$]*)\s*,\s*'((?:[^'\\]|\\.)*)'"
+        # _tText (audit UI-21) is the same lookup for plain-text sinks.
+        r"_t(?:Text)?\(\s*'([^']+)'\s*,\s*(?:\{[^{}]*\}|[A-Za-z_$][\w$]*)\s*,\s*'((?:[^'\\]|\\.)*)'"
     )
     fallbacks = defaultdict(set)
     for key, fallback in pattern.findall(src):

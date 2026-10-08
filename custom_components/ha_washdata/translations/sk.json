@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Nastavenie WashData",
-        "description": "Nakonfigurujte si práčku alebo iný spotrebič.\n\nSnímač výkonu je povinný.\n\nPo nastavení otvorte panel WashData z bočného panelu (alebo prejdite na [/ha-washdata](/ha-washdata)) na zobrazenie cyklov, ladenie detekcie a správu profilov.",
+        "description": "Nastavte práčku alebo iný spotrebič. Je potrebný snímač výkonu.\n\nPo nastavení otvorte panel WashData z bočného panela ([/ha-washdata](/ha-washdata)), kde nájdete cykly, profily a všetky nastavenia.",
         "data": {
           "name": "Názov zariadenia",
           "device_type": "Typ zariadenia",
@@ -12,43 +12,41 @@
         },
         "data_description": {
           "name": "Priateľský názov pre toto zariadenie (napr. „Práčka“, „Umývačka riadu“).",
-          "device_type": "O aký typ spotrebiča ide? Pomáha prispôsobiť detekciu a označovanie.",
-          "power_sensor": "Entita senzora, ktorá hlási spotrebu energie v reálnom čase (vo wattoch) z vašej inteligentnej zásuvky.",
-          "min_power": "Údaje o príkone nad touto hranicou (vo wattoch) indikujú, že spotrebič beží. Začnite s 2 W pre väčšinu zariadení."
+          "device_type": "Nastaví predvolené hodnoty detekcie pre tento druh spotrebiča.",
+          "power_sensor": "Senzor inteligentnej zásuvky, ktorý hlási aktuálny výkon vo wattoch.",
+          "min_power": "Hodnoty nad touto hranicou (vo wattoch) znamenajú, že spotrebič beží. Pre väčšinu zariadení stačia 2 W."
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Aktualizujte názov zariadenia, typ spotrebiča alebo snímač výkonu.\n\nPanel WashData (bočný panel alebo [/ha-washdata](/ha-washdata)) slúži na správu detekcie, cyklov, profilov a oznámení.",
+        "title": "Opätovná konfigurácia WashData",
+        "description": "Zmeňte názov zariadenia, typ spotrebiča alebo snímač výkonu.\n\nVšetko ostatné je v paneli WashData (bočný panel alebo [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Názov zariadenia",
+          "device_type": "Typ zariadenia",
+          "power_sensor": "Snímač výkonu",
+          "min_power": "Minimálny prah výkonu (W)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Nepodarilo sa pripojiť",
-      "invalid_auth": "Neplatné overenie",
       "unknown": "Neočakávaná chyba",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Prah výkonu musí byť väčší ako 0"
     },
     "abort": {
       "already_configured": "Zariadenie je už nakonfigurované",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Opätovná konfigurácia bola úspešná"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
-        "description": "Premenujte zariadenie alebo zmeňte jeho základné hardvérové nastavenia. Všetky nastavenia detekcie, párovania a oznámení sú na [paneli WashData](/ha-washdata) (dostupný aj z bočného panelu).",
+        "title": "Nastavenia WashData",
+        "description": "Premenujte zariadenie alebo zmeňte jeho základné nastavenia. Všetko ostatné je v [paneli WashData](/ha-washdata) v bočnom paneli.",
         "data": {
           "name": "Názov zariadenia",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Typ zariadenia",
+          "power_sensor": "Snímač výkonu",
+          "min_power": "Minimálny prah výkonu (W)"
         }
       }
     },
@@ -60,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Zatiaľ nebol rozpoznaný žiadny profil.",
       "vs_typical_longer": "o {pct}% dlhšie než zvyčajne",
       "vs_typical_shorter": "o {pct}% kratšie než zvyčajne",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Prah výkonu musí byť väčší ako 0"
     }
   },
   "selector": {
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Názov profilu",
-          "description": "Názov existujúceho profilu (vytvorte profily v ponuke Spravovať profily). Ak chcete štítok odstrániť, nechajte pole prázdne."
+          "description": "Názov existujúceho profilu (profily vytvoríte v paneli WashData). Ponechajte prázdne na odstránenie štítka."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Prah spoľahlivosti",
-          "description": "Minimálna spoľahlivosť zhody (0,50–0,95) na použitie štítkov."
+          "description": "Minimálna spoľahlivosť zhody (0,50–0,95) na použitie štítkov. Ak ju necháte prázdnu, použije sa nastavenie zariadenia „Spoľahlivosť autooznačovania“."
         }
       }
     },
     "export_config": {
       "name": "Exportovať konfiguráciu",
-      "description": "Exportujte profily, cykly a nastavenia tohto zariadenia do súboru JSON (na server).",
+      "description": "Exportuje profily, cykly a nastavenia tohto zariadenia do súboru JSON.",
       "fields": {
         "device_id": {
           "name": "Zariadenie",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Odoslať spätnú väzbu cyklu",
-      "description": "Po dokončení cyklu potvrďte alebo opravte automaticky rozpoznaný program. Zadajte buď `entry_id` (rozšírené) alebo `device_id` (odporúčané).",
+      "description": "Potvrďte alebo opravte rozpoznaný program dokončeného cyklu. Zadajte `device_id` (odporúčané) alebo `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Zariadenie",
@@ -272,18 +270,18 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "Spustiť ML tréning",
+      "description": "Ručne pretrénujte ML modely v zariadení z vlastných označených cyklov tohto zariadenia (experimentálne).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Zariadenie",
+          "description": "Zariadenie WashData, ktorého modely sa majú pretrénovať."
         }
       }
     },
     "mark_unloaded": {
       "name": "Označiť ako vyložené",
-      "description": "Potvrďte, že dokončená náplň bola vybratá zo zariadenia WashData, čím sa zruší stav „Čistý“ aj prípadná pripomienka vyloženia.",
+      "description": "Potvrďte, že dokončená náplň bola vybratá. Zruší stav „Čistý“ aj pripomienku vyloženia.",
       "fields": {
         "device_id": {
           "name": "Zariadenie",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Nejednoznačnosť porovnania"
+      },
+      "maintenance_due": {
+        "name": "Údržba na rade",
+        "state": {
+          "on": "Na rade",
+          "off": "Nie je na rade"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID úloh na rade"
+          },
+          "due_tasks": {
+            "name": "Úlohy na rade",
+            "state": {
+              "descale": "Odstránenie vodného kameňa",
+              "filter_clean": "Vyčistiť filter",
+              "drum_clean": "Vyčistiť bubon",
+              "bearing_service": "Servis ložísk",
+              "other": "Iné",
+              "salt": "Doplniť soľ",
+              "rinse_aid": "Doplniť leštidlo",
+              "lint_filter": "Vyčistiť filter na vlákna",
+              "condenser_clean": "Vyčistiť kondenzátor"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Ochrana proti vráskam",
           "interrupted": "Prerušený",
           "force_stopped": "Nútene zastavené",
-          "rinse": "Oplachovanie",
           "unknown": "Neznámy",
           "clean": "Čistý",
           "delay_wait": "Čaká sa na spustenie"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomália cyklu",
+            "state": {
+              "overrun": "Beží dlho",
+              "stalled": "Zaseknuté"
+            }
+          }
         }
       },
       "washer_program": {

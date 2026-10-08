@@ -92,7 +92,10 @@ async def test_envelope_alignment_with_user_data(store, data_file):
     
     # Identify a profile and associated cycles
     profiles = wash_data.get("profiles", {})
-    past_cycles = wash_data.get("past_cycles", [])
+    # A community-store export keeps its cycles in reference_cycles, not
+    # past_cycles; reading only past_cycles skipped the whole public corpus
+    # (audit TESTING-17: 66 passed / 228 skipped).
+    past_cycles = wash_data.get("past_cycles") or wash_data.get("reference_cycles") or []
     
     if not profiles or not past_cycles:
         pytest.skip(f"Insufficient data in {data_file}")

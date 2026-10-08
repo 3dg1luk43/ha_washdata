@@ -12,21 +12,17 @@ test.beforeEach(async ({ page }) => {
   await clickTab(page, 'settings');
 });
 
-test('settings tab renders the device name field', async ({ page }) => {
-  const nameInput = page.locator('input[data-opt="name"], input[data-opt="name"]').first();
-  await expect(nameInput).toBeVisible({ timeout: 8_000 });
-  await expect(nameInput).toHaveValue('Test Washer');
-});
-
 test('settings tab fetches options on navigation', async ({ page }) => {
   await assertWsCalled(page, 'ha_washdata/get_options');
 });
 
-test('settings tab shows Basic/Advanced toggle', async ({ page }) => {
-  // The Basic/Advanced buttons were replaced by a slide toggle (a checkbox
-  // wrapped in a .wd-mode-switch label).
-  const toggle = page.locator('.wd-mode-switch').first();
-  await expect(toggle).toBeVisible({ timeout: 5_000 });
+test('Basic, the production default, shows the device identity and power sensor (UI-22)', async ({ page }) => {
+  // The fixture now boots in Basic, as a fresh install does (audit UI-22); this
+  // is the screen most users see, and it once hid name and sensor (UI-02).
+  await expect(page.locator('#wd-settings-level-chk')).not.toBeChecked({ timeout: 5_000 });
+  await expect(page.locator('input[data-opt="name"]')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('input[data-opt="power_sensor"]')).toBeVisible();
+  await expect(page.locator('input[data-opt="name"]')).toHaveValue('Test Washer');
 });
 
 test('advanced mode shows more fields than basic mode', async ({ page }) => {
@@ -92,30 +88,6 @@ test('suggestion banner appears when device has suggestions', async ({ page }) =
   await expect(banner).toBeVisible({ timeout: 5_000 });
 });
 
-test('Calibrated (ML-only) suggestion surfaces the tuning banner', async ({ page }) => {
-  // Regression: a device with only a Calibrated (ML) recommendation and no classic
-  // suggestion must still surface "tuning suggestions available" when Settings opens.
-  await page.goto('/');
-  await bootPanel(page, {
-    'ha_washdata/get_suggestions': { suggestions: [] },
-    // off_delay default is 120 in options.json; 371 differs -> a live ML suggestion.
-    'ha_washdata/get_ml_comparison': {
-      settings_comparison: { off_delay: { ml_value: 371, ml_reason: 'ML reason' } },
-    },
-  });
-  await clickTab(page, 'settings');
-  // Banner visible even though there are zero classic suggestions.
-  const banner = page.locator('.wd-sug-banner').first();
-  await expect(banner).toBeVisible({ timeout: 8_000 });
-  await expect(banner).toContainText(/tuning suggestion/i);
-  // Apply-all / Dismiss act on the classic engine only -> hidden when ML-only.
-  await expect(page.locator('.wd-sug-banner [data-action="sug-apply-all"]')).toHaveCount(0);
-  await expect(page.locator('.wd-sug-banner [data-action="sug-dismiss"]')).toHaveCount(0);
-  // The Calibrated pill still renders beside the off_delay field.
-  const calPill = page.locator('.wd-field[data-field="off_delay"] .wd-sug-chip-cal').first();
-  await expect(calPill).toBeVisible({ timeout: 5_000 });
-});
-
 test('mute button renders inside the suggestion card', async ({ page }) => {
   // The mute button (#343) is injected into the suggestion markup by a trailing
   // `</div>` regex in _htmlSugWidget, which implicitly assumes every branch
@@ -136,29 +108,6 @@ test('mute button renders inside the suggestion card', async ({ page }) => {
   // Nested inside the suggestion card, not a sibling that escaped the replace().
   const mute = field.locator('.wd-sug [data-suglock="off_delay"]').first();
   await expect(mute).toBeVisible({ timeout: 3_000 });
-});
-
-test('a muted key hides its Calibrated (ML) recommendation too', async ({ page }) => {
-  // Regression: the mute is per-setting, not per-engine. A key returned in
-  // locked_suggestions must not surface an ML recommendation card either, and
-  // must not count toward the tuning banner.
-  await page.goto('/');
-  await bootPanel(page, {
-    'ha_washdata/get_suggestions': { suggestions: [], locked_suggestions: ['off_delay'] },
-    'ha_washdata/get_ml_comparison': {
-      settings_comparison: { off_delay: { ml_value: 371, ml_reason: 'ML reason' } },
-    },
-  });
-  await clickTab(page, 'settings');
-  const field = page.locator('.wd-field[data-field="off_delay"]').first();
-  await expect(field).toBeVisible({ timeout: 8_000 });
-  // No Calibrated pill for a muted key ...
-  await expect(field.locator('.wd-sug-chip-cal')).toHaveCount(0);
-  // ... and no "N tuning suggestions available" banner, since the only ML key is
-  // muted. The separate "N muted - Reset muted" banner is expected and shares the
-  // .wd-sug-banner class, so assert on the tuning wording rather than the count.
-  await expect(page.locator('.wd-sug-banner')).not.toContainText(/tuning suggestion/i);
-  await expect(page.locator('.wd-sug-banner [data-action="sug-unmute-all"]')).toBeVisible();
 });
 
 test('suggestion widget appears beside the relevant field', async ({ page }) => {
@@ -197,6 +146,60 @@ test('Use button in suggestion applies the value', async ({ page }) => {
   await expect(offDelayInput).toHaveValue('371', { timeout: 3_000 });
 });
 
+test('a muted key hides its suggestion and its banner count', async ({ page }) => {
+  // The mute (#343) is per-setting: a locked key must not render a pill or count.
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_suggestions': { suggestions: [], locked_suggestions: ['off_delay'] },
+  });
+  await clickTab(page, 'settings');
+  const field = page.locator('.wd-field[data-field="off_delay"]').first();
+  await expect(field).toBeVisible({ timeout: 8_000 });
+  await expect(field.locator('.wd-sug')).toHaveCount(0);
+  await expect(page.locator('.wd-sug-banner')).not.toContainText(/tuning suggestion/i);
+  await expect(page.locator('.wd-sug-banner [data-action="sug-unmute-all"]')).toBeVisible();
+});
+
+test('the suggestion pill says what the change does', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_suggestions': {
+      suggestions: [{ key: 'off_delay', suggested: 371, current: 120, reason: 'Test reason' }],
+    },
+  });
+  // The harness serves empty translations and impact lines have no JS fallback,
+  // so seed the one key this asserts on (en.json carries it in production).
+  await page.evaluate(() => {
+    const el: any = document.querySelector('ha-washdata-panel');
+    el._panelTrans = { en: { suggestion: { impact: { off_delay: { higher: 'More time for appliance pauses' } } } } };
+  });
+  await clickTab(page, 'settings');
+  const field = page.locator('.wd-field[data-field="off_delay"]').first();
+  await expect(field.locator('.wd-sug .wd-sug-impact-line')).toContainText(/pauses/i, { timeout: 8_000 });
+});
+
+test('Apply all previews every change before saving', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_suggestions': {
+      suggestions: [
+        { key: 'off_delay', suggested: 371, current: 120, reason: 'a' },
+        { key: 'min_power', suggested: 3, current: 2, reason: 'b' },
+      ],
+    },
+  });
+  await clickTab(page, 'settings');
+  await page.locator('.wd-sug-banner [data-action="sug-apply-all"]').first().click();
+  const list = page.locator('.wd-confirm-list li');
+  await expect(list).toHaveCount(2, { timeout: 5_000 });
+  await expect(list.first()).toContainText('120');
+  await expect(list.first()).toContainText('371');
+  // Nothing is sent until the preview is confirmed.
+  await assertWsNotCalled(page, 'ha_washdata/apply_suggestions');
+  await page.locator('[data-maction="ok"]').click();
+  await assertWsCalled(page, 'ha_washdata/apply_suggestions');
+});
+
 test('settings changelog dot appears for changed settings', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
@@ -211,28 +214,6 @@ test('settings changelog dot appears for changed settings', async ({ page }) => 
   await expect(dot).toBeVisible({ timeout: 5_000 });
 });
 
-test('split suggestion widget (Observed vs Calibrated) shows two option rows', async ({ page }) => {
-  await page.goto('/');
-  await bootPanel(page, {
-    'ha_washdata/get_suggestions': {
-      suggestions: [
-        // suggested must differ from current off_delay (120 in options.json)
-        { key: 'off_delay', suggested: 180, current: 120, reason: 'Classic reason' },
-      ],
-    },
-    // Panel reads d.settings_comparison (keyed by field key), not d.comparisons
-    'ha_washdata/get_ml_comparison': {
-      settings_comparison: {
-        off_delay: { ml_value: 371, ml_reason: 'ML reason' },
-      },
-    },
-  });
-  await clickTab(page, 'settings');
-  // The split case: both classic+ML diverge → two wd-sug-opt divs
-  const opts = page.locator('.wd-sug-split .wd-sug-opt');
-  await expect(opts).toHaveCount(2, { timeout: 8_000 });
-});
-
 test('settings tab renders without overflow on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   // Settings should stack to single column
@@ -245,7 +226,15 @@ test('settings tab renders without overflow on mobile', async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(1);
 });
 
+// The fixture boots Basic, the production default (audit UI-22). Tests of
+// Advanced-only fields re-boot in Advanced explicitly.
+async function rebootAdvanced(page) {
+  await bootPanel(page, {}, {}, { settingsLevel: 'advanced' });
+  await clickTab(page, 'settings');
+}
+
 test('notification fields are present in settings', async ({ page }) => {
+  await rebootAdvanced(page);
   // Navigate to the Notifications section (separate from the default basic section)
   const notifSec = page.locator('button[data-sec="notifications"]').first();
   await expect(notifSec).toBeVisible({ timeout: 8_000 });
@@ -270,6 +259,7 @@ test('revert button appears when changes have been staged', async ({ page }) => 
 // see a single field - if that ever regresses, three bogus option keys get persisted.
 
 async function openProfileEvidence(page) {
+  await rebootAdvanced(page);
   const sec = page.locator('button[data-sec="matching"]').first();
   await expect(sec).toBeVisible({ timeout: 8_000 });
   await sec.click();
@@ -319,4 +309,30 @@ test('unticking every evidence category saves the full default set, not an empty
   expect(options.profile_evidence_sources).toEqual(
     ['real_cycles', 'reference_cycles', 'backfill_cycles'],
   );
+});
+
+test('leaving Settings with an unsaved edit asks before discarding it (audit UI-15)', async ({ page }) => {
+  await clickTab(page, 'settings');
+  const inp = page.locator('input[data-opt="min_power"]').first();
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('3.5');
+  await inp.dispatchEvent('change');
+  await page.locator('button.wd-tab[data-tab="history"]').click();
+  // Still on Settings, with a confirm.
+  await expect(page.locator('.wd-modal h2')).toContainText(/unsaved/i);
+  await page.locator('[data-maction="cancel"]').click();
+  await expect(page.locator('button.wd-tab[data-tab="settings"].active')).toBeVisible();
+  await expect(page.locator('input[data-opt="min_power"]').first()).toHaveValue('3.5');
+  // Confirming discards and leaves.
+  await page.locator('button.wd-tab[data-tab="history"]').click();
+  await page.locator('[data-maction="ok"]').click();
+  await expect(page.locator('button.wd-tab[data-tab="history"].active')).toBeVisible();
+});
+
+test('leaving Settings without edits does not ask', async ({ page }) => {
+  await clickTab(page, 'settings');
+  await expect(page.locator('input[data-opt="min_power"]').first()).toBeVisible({ timeout: 8_000 });
+  await page.locator('button.wd-tab[data-tab="history"]').click();
+  await expect(page.locator('button.wd-tab[data-tab="history"].active')).toBeVisible();
+  await expect(page.locator('.wd-modal')).toHaveCount(0);
 });

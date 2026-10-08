@@ -16,8 +16,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Pure progress/remaining math (``progress`` module).
 
-The estimator + ML wiring parity is covered byte-identically by the golden
-snapshot + the manager suite; here we lock the pure smoothing/back-calc
+A whole cycle stepped through the estimator is locked by
+tests/test_audit_progress_14_golden_trace.py, and live-vs-replay parity by the
+Playground parity tests; here we lock the pure smoothing/back-calc
 (``compute_progress``), ``cycle_anomaly``, and ``current_phase`` directly.
 """
 from __future__ import annotations
@@ -31,29 +32,29 @@ from custom_components.ha_washdata.profile_store import ProfileStore
 
 # ── compute_progress ────────────────────────────────────────────────────────
 def test_compute_progress_none_without_duration():
-    assert progress.compute_progress("dishwasher", 0.0, 100.0, 0.0, (50.0, 5.0), None) is None
+    assert progress.compute_progress("dishwasher", 0.0, 100.0, 0.0, (50.0, 5.0)) is None
 
 
 def test_compute_progress_phase_variance_locking():
     # high variance (>100) -> alpha 0.05 heavy damping: 50*0.95 + 80*0.05 = 51.5
-    r = progress.compute_progress("dishwasher", 3600.0, 1800.0, 50.0, (80.0, 200.0), None)
+    r = progress.compute_progress("dishwasher", 3600.0, 1800.0, 50.0, (80.0, 200.0))
     assert r is not None and r.source == "phase"
     assert 51.0 < r.progress < 52.0
 
 
 def test_compute_progress_phase_normal_alpha():
     # low variance -> alpha 0.2: 50*0.8 + 55*0.2 = 51.0
-    r = progress.compute_progress("dishwasher", 3600.0, 1800.0, 50.0, (55.0, 5.0), None)
+    r = progress.compute_progress("dishwasher", 3600.0, 1800.0, 50.0, (55.0, 5.0))
     assert 50.9 < r.progress < 51.1
 
 
 def test_compute_progress_first_estimate_snaps():
-    r = progress.compute_progress("dishwasher", 3600.0, 1800.0, 0.0, (40.0, 5.0), None)
+    r = progress.compute_progress("dishwasher", 3600.0, 1800.0, 0.0, (40.0, 5.0))
     assert abs(r.progress - 40.0) < 1e-6
 
 
 def test_compute_progress_remaining_back_calculated():
-    r = progress.compute_progress("dishwasher", 3600.0, 1800.0, 0.0, (50.0, 5.0), None)
+    r = progress.compute_progress("dishwasher", 3600.0, 1800.0, 0.0, (50.0, 5.0))
     # remaining = 3600 * (1 - 0.50) = 1800
     assert abs(r.remaining - 1800.0) < 1.0
     assert abs(r.total - (1800.0 + r.remaining)) < 1.0
@@ -61,27 +62,21 @@ def test_compute_progress_remaining_back_calculated():
 
 def test_compute_progress_linear_fallback():
     # no phase_result -> linear: progress = elapsed/expected*100 = 25%
-    r = progress.compute_progress("dishwasher", 3600.0, 900.0, 0.0, None, None)
+    r = progress.compute_progress("dishwasher", 3600.0, 900.0, 0.0, None)
     assert r.source == "linear"
     assert 24.0 < r.progress < 26.0
 
 
-def test_compute_progress_ml_blend():
-    # phase 40, ml 80, weight 0.5 -> 60 blended (then snaps since prev_smoothed 0)
-    r = progress.compute_progress("dishwasher", 3600.0, 1800.0, 0.0, (40.0, 5.0), 80.0)
-    assert abs(r.progress - 60.0) < 1e-6
-
-
 # ── estimate cadence (dt-scaled smoothing) ──────────────────────────
 def _ramp_to_end(dt_s, *, scaled, matched=8824.0):
-    """Replay a completed cycle at a fixed estimate cadence, no phase/ML input."""
+    """Replay a completed cycle at a fixed estimate cadence, no phase input."""
     smoothed = 0.0
     elapsed = 0.0
     result = None
     while elapsed < matched:
         elapsed += dt_s
         result = progress.compute_progress(
-            "dishwasher", matched, elapsed, smoothed, None, None,
+            "dishwasher", matched, elapsed, smoothed, None,
             dt_seconds=dt_s if scaled else None,
         )
         smoothed = result.smoothed
@@ -112,29 +107,30 @@ def test_cadence_no_longer_changes_the_answer():
 
 
 def test_unknown_cadence_keeps_the_nominal_weight():
-    """dt_seconds=None (every caller that does not track its own cadence, and the
-    golden snapshot) must be byte-identical to before."""
-    a = progress.compute_progress("dishwasher", 3600.0, 1800.0, 40.0, None, None)
+    """dt_seconds=None (every caller that does not track its own cadence) must be
+    byte-identical to before."""
+    a = progress.compute_progress("dishwasher", 3600.0, 1800.0, 40.0, None)
     b = progress.compute_progress(
-        "dishwasher", 3600.0, 1800.0, 40.0, None, None, dt_seconds=None
+        "dishwasher", 3600.0, 1800.0, 40.0, None, dt_seconds=None
     )
     c = progress.compute_progress(
-        "dishwasher", 3600.0, 1800.0, 40.0, None, None, dt_seconds=5.0
+        "dishwasher", 3600.0, 1800.0, 40.0, None, dt_seconds=5.0
     )
     assert a.smoothed == b.smoothed == c.smoothed
     for bad in (0.0, -30.0, float("nan")):
         assert progress.compute_progress(
-            "dishwasher", 3600.0, 1800.0, 40.0, None, None, dt_seconds=bad
+            "dishwasher", 3600.0, 1800.0, 40.0, None, dt_seconds=bad
         ).smoothed == a.smoothed
 
 
-def test_backward_damping_stays_per_estimate():
-    """The anti-regression branch resists a drop on purpose, so it is NOT scaled:
-    a long gap must not let the progress bar snap backwards."""
+def test_backward_damping_without_a_cadence_is_the_plain_95_5_step():
+    """dt_seconds=None keeps the per-estimate 95/5 step. With a cadence the step is
+    a time constant like the forward EMA (audit PROGRESS-13), see
+    tests/test_audit_progress_13_backward_damping.py."""
     r = progress.compute_progress(
-        "dishwasher", 3600.0, 1800.0, 90.0, (40.0, 5.0), None, dt_seconds=600.0
+        "dishwasher", 3600.0, 1800.0, 90.0, (40.0, 5.0), dt_seconds=None
     )
-    assert abs(r.smoothed - (90.0 * 0.95 + 40.0 * 0.05)) < 1e-6
+    assert r.smoothed == 90.0 * 0.95 + 40.0 * 0.05
 
 
 # ── cycle_anomaly ───────────────────────────────────────────────────────────

@@ -56,13 +56,26 @@ _SENSITIVE_KEYS = {
     "switch_entity",
     "energy_price_entity",
     "energy_sensor",
+    # The active-cycle snapshot's meter entity (kept in `failed_restore`).
+    "energy_meter_source",
 }
+
+
+# A record that names a setting in a field instead of using it as the dict key -
+# a settings-changelog row is `{"key": "power_sensor", "old": ..., "new": ...}` -
+# carries the sensitive value under these generic names, which slipped past the
+# key-based redaction: entity ids, person.* and notify targets (audit PLATFORM-08).
+_VALUE_FIELDS = ("old", "new", "value")
 
 
 def _redact(obj: Any) -> Any:
     if isinstance(obj, dict):
+        named = obj.get("key")
+        names_sensitive = isinstance(named, str) and named in _SENSITIVE_KEYS
         return {
-            k: "**REDACTED**" if k in _SENSITIVE_KEYS else _redact(v)
+            k: "**REDACTED**"
+            if k in _SENSITIVE_KEYS or (names_sensitive and k in _VALUE_FIELDS)
+            else _redact(v)
             for k, v in obj.items()
         }
     if isinstance(obj, list):
@@ -70,11 +83,23 @@ def _redact(obj: Any) -> Any:
     return obj
 
 
+async def _failed_restore(manager: WashDataManager) -> Any:
+    """The kept failed-restore record, redacted; None on any problem reading it."""
+    try:
+        return _redact(await manager.profile_store.async_get_failed_restore())
+    except Exception:  # noqa: BLE001 - the download must never fail on this
+        return None
+
+
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
-    manager: WashDataManager = hass.data[DOMAIN][entry.entry_id]
+    manager: WashDataManager | None = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if manager is None:
+        # Setup failed or the entry is unloaded: the download must still work - it
+        # is how such a failure gets reported (audit PLATFORM-14).
+        return {"entry": _redact(entry.as_dict()), "manager_state": None}
 
     # Full store export - same payload as the export_config service, but the
     # entry_data / entry_options pass through the redactor to strip personal keys.
@@ -138,4 +163,8 @@ async def async_get_config_entry_diagnostics(
         # state_history: [{ts, from, to, program}, ...] - detector state changes
         # logs:          [{ts, lvl}, ...] - log timestamps and levels (msg removed)
         "live_diagnostics": manager.diag_buffer.redacted_snapshot(),
+        # The last active-cycle snapshot that failed to restore, with the error and
+        # its age (register item 266 follow-up); None when none ever has. A download,
+        # not a bus event, so the 32 KB event-data limit does not apply.
+        "failed_restore": await _failed_restore(manager),
     }

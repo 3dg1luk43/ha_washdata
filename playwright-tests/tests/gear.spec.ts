@@ -51,7 +51,12 @@ test('gear closes via the close button', async ({ page }) => {
 });
 
 test('Online & Community tab appears only when online is available', async ({ page }) => {
-  // Default boot: online not advertised -> no Online tab.
+  // Online not advertised -> no Online tab. ws_get_constants always sends
+  // store_online_available: true, so the default fixture does too; the panel's
+  // "not available" branch is pinned with an explicit override.
+  await bootPanel(page, {
+    'ha_washdata/get_constants': { ...constants, store_online_available: false },
+  });
   await openGear(page);
   await expect(page.locator('.wd-modal [data-gtab="online"]')).toHaveCount(0);
 });

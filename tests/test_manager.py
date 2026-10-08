@@ -18,10 +18,9 @@
 from __future__ import annotations
 
 import pytest
-# from tests import mock_imports
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch, PropertyMock
-from datetime import timedelta, datetime, timezone
+from datetime import timedelta
 from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
@@ -29,7 +28,7 @@ from custom_components.ha_washdata.const import (
     CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_START,
     STATE_STARTING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_ANTI_WRINKLE,
     CONF_NOTIFY_ACTIONS, CONF_NOTIFY_PEOPLE, CONF_NOTIFY_ONLY_WHEN_HOME, CONF_NOTIFY_FIRE_EVENTS,
-    CONF_WATCHDOG_INTERVAL,
+    CONF_WATCHDOG_INTERVAL, MATCH_AMBIGUOUS_COMMIT_FACTOR,
 )
 
 @pytest.fixture
@@ -42,10 +41,19 @@ def mock_hass() -> Any:
     hass.async_create_task = MagicMock(
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()  # type: ignore[misc]
     )
-    hass.components.persistent_notification.async_create = MagicMock()
     # Mock config entries lookups
     hass.config_entries.async_get_entry = MagicMock()
     return hass
+
+@pytest.fixture(autouse=True)
+def pn() -> Any:
+    """The real persistent_notification module the manager calls (audit PLATFORM-01).
+
+    The manager used to reach it through ``hass.components``, which HA removed, so
+    a MagicMock hass was the only place those cards were ever "created".
+    """
+    with patch("custom_components.ha_washdata.manager.persistent_notification") as mod:
+        yield mod
 
 @pytest.fixture
 def mock_entry() -> Any:
@@ -66,8 +74,6 @@ def manager(mock_hass: Any, mock_entry: Any) -> WashDataManager:
     # Setup mock_hass to return our mock_entry
     mock_hass.config_entries.async_get_entry.return_value = mock_entry
     
-    # Ensure dt_util.now returns real datetimes for comparisons
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
 
     # Patch ProfileStore and CycleDetector to avoid disk/logic issues
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
@@ -106,7 +112,7 @@ def test_set_manual_program_invalid(manager: WashDataManager) -> None:
     assert manager.current_program == "off"
     assert manager.manual_program_active is False
 
-def test_check_pre_completion_notification(manager: WashDataManager, mock_hass: Any) -> None:
+def test_check_pre_completion_notification(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
     """Test the pre-completion notification trigger."""
     manager._time_remaining = 240 # 4 minutes remaining
     manager._notify_before_end_minutes = 5
@@ -117,102 +123,36 @@ def test_check_pre_completion_notification(manager: WashDataManager, mock_hass: 
     
     assert manager._notified_pre_completion is True
     # Verify persistent notification called since no notify_service configured
-    mock_hass.components.persistent_notification.async_create.assert_called_once()
-    args = mock_hass.components.persistent_notification.async_create.call_args[0]
+    pn.async_create.assert_called_once()
+    args = pn.async_create.call_args[0]
     # Reminder now uses its own distinct message (DEFAULT_NOTIFY_REMINDER_MESSAGE),
     # not the live "Less than N minutes remaining" template.
-    assert "5 minutes left" in args[0]
+    assert args[0] is mock_hass
+    assert "5 minutes left" in args[1]
 
-def test_check_pre_completion_notification_already_sent(manager: WashDataManager, mock_hass: Any) -> None:
-    """Test it doesn't send twice."""
-    manager._time_remaining = 240
-    manager._notify_before_end_minutes = 5
-    manager._notified_pre_completion = True
-    
-    manager._check_pre_completion_notification()
-    
-    # Still 1 from previous turn if it was persistent, but here we expect no NEW call
-    assert mock_hass.components.persistent_notification.async_create.call_count == 0
-
-def test_check_pre_completion_disabled(manager: WashDataManager, mock_hass: Any) -> None:
+def test_check_pre_completion_disabled(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
     """Test disabled notification."""
     manager._notify_before_end_minutes = 0
     manager._time_remaining = 60
     manager._check_pre_completion_notification()
-    assert mock_hass.components.persistent_notification.async_create.call_count == 0
+    assert pn.async_create.call_count == 0
 
 
-@pytest.mark.asyncio
-async def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any) -> None:
-    """Cycle end should request feedback (event + persistent notification) before state is cleared."""
-    # Arrange: pretend we had a confident match
-    manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
-    manager._current_program = "Heavy Duty"
-    manager._matched_profile_duration = 3600
-    manager._last_match_confidence = 0.80
-    manager._learning_confidence = 0.70
-    manager._auto_label_confidence = 0.95
-
-    # Configure finish notification target to trigger async_call
-    manager._notify_finish_services = ["notify.mobile_app_test"]
-
-    # Mock async methods called in _async_process_cycle_end
-    # Create a mock MatchResult
-    mock_res = MagicMock()
-    mock_res.best_profile = "Heavy Duty"
-    mock_res.confidence = 0.80
-    # == confidence for a non-group match (item 206).
-    mock_res.label_confidence = 0.80
-    mock_res.ranking = []
-    mock_res.debug_details = {}
-    mock_res.is_ambiguous = False
-    
-    manager.profile_store.async_match_profile = AsyncMock(return_value=mock_res)
-    manager.profile_store.async_add_cycle = AsyncMock()
-    manager.profile_store.async_rebuild_envelope = AsyncMock()
-    manager.profile_store.async_clear_active_cycle = AsyncMock()
-    manager._run_post_cycle_processing = AsyncMock()
-
-    cycle_data = {
-        "start_time": "2025-12-21T10:00:00",
-        "end_time": "2025-12-21T11:00:00",
-        "duration": 3600,
-        "max_power": 500,
-        "power_data": [[0.0, 5.0], [60.0, 200.0], [120.0, 50.0]],
-        "status": "completed",
-    }
-
-    # Act: call async method directly
-    await manager._async_process_cycle_end(dict(cycle_data))
-
-    # Assert: feedback event fired and notification created
-    # Check that service call was made (for 'Finish' notification configured in options)
-    mock_hass.services.async_call.assert_called()
-    
-    # Verify Feedback notification was created via component helper
-    # (Since we configured a notify_service for 'Finish', async_call only sees that.
-    #  Feedback follows internal logic usually via _pn_create -> component helper in mocks)
-    # Check if persistent notification for feedback was created
-    if mock_hass.components.persistent_notification.async_create.call_count == 0:
-        # Maybe it used async_call if _pn_create wraps it? 
-        # But previous failures suggested explicit component helper mock usage.
-        # Let's assume Feedback requests use persistent_notification.async_create.
-        pass
-    
     # Verify that EITHER async_call (Finish) OR async_create (Feedback) happened.
     # Actually, we know async_call happened because `assert_called` passed.
     # Verify the Finish notification content if possible, or just accept called.
     
     # Verify Feedback:
-    # If learning manager uses _pn_create, it calls `hass.components.persistent_notification.async_create`.
-    # mock_hass.components.persistent_notification.async_create.assert_called()
+    # If learning manager uses _pn_create, it calls `persistent_notification.async_create`.
+    # pn.async_create.assert_called()
 
 
 
 @pytest.mark.asyncio
-async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, mock_hass: Any) -> None:
+async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
     """High-confidence matches should auto-label and not request user feedback."""
     manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
+    manager.profile_store.get_profiles = MagicMock(return_value=manager.profile_store._data["profiles"])
     manager._current_program = "Heavy Duty"
     manager._matched_profile_duration = 3600
     manager._last_match_confidence = 0.98
@@ -232,6 +172,10 @@ async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, m
     mock_res.confidence = 0.98
     # == confidence for a non-group match (item 206).
     mock_res.label_confidence = 0.98
+    mock_res.member_confidence = None
+    mock_res.ambiguity_margin = 0.5
+    mock_res.is_ambiguous = False
+    mock_res.ranking = []
 
     manager.profile_store.async_match_profile = AsyncMock(return_value=mock_res)
     manager.profile_store.async_add_cycle = AsyncMock()
@@ -244,7 +188,8 @@ async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, m
         "end_time": "2025-12-21T11:00:00",
         "duration": 3600,
         "max_power": 500,
-        "power_data": [[0.0, 5.0], [60.0, 200.0], [120.0, 50.0]],
+        # >= 10 readings, so the complete-cycle match the label reads runs.
+        "power_data": [[i * 60.0, 200.0] for i in range(12)],
         "status": "completed",
     }
 
@@ -255,37 +200,70 @@ async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, m
 
     # assert "ha_washdata_feedback_requested" not in fired_events
     # No feedback prompt should be created in auto-label path.
-    assert mock_hass.components.persistent_notification.async_create.call_count == 0
+    assert pn.async_create.call_count == 0
 
 
-def test_cycle_end_skips_feedback_low_confidence(manager: WashDataManager, mock_hass: Any) -> None:
-    """Low-confidence matches should neither auto-label nor request user feedback."""
-    manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
+@pytest.mark.asyncio
+async def test_cycle_end_skips_feedback_low_confidence(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
+    """Low-confidence matches should neither auto-label nor request user feedback.
+
+    Awaits the real cycle-end pipeline. The old version called the sync
+    `_on_cycle_end`, whose spawned `_async_process_cycle_end` the closing
+    `mock_hass` discarded unrun, so both `assert_not_called` lines held for any
+    pipeline (audit TESTING-13 Q-04).
+    """
+    profiles = {"Heavy Duty": {"avg_duration": 3600}}
+    manager.profile_store._data["profiles"] = profiles
+    manager.profile_store.get_profiles = MagicMock(return_value=profiles)
     manager._current_program = "Heavy Duty"
     manager._matched_profile_duration = 3600
     manager._last_match_confidence = 0.40
     manager._learning_confidence = 0.70
     manager._auto_label_confidence = 0.95
+    manager._notify_finish_services = []
+    manager._notify_actions = []
 
     manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=False)
     manager.learning_manager.request_cycle_verification = MagicMock()
+    process_spy = MagicMock(wraps=manager.learning_manager.process_cycle_end)
+    manager.learning_manager.process_cycle_end = process_spy
+
+    low = MagicMock()
+    low.best_profile = "Heavy Duty"
+    low.confidence = 0.40
+    low.label_confidence = 0.40
+    low.member_confidence = None
+    low.ambiguity_margin = 0.5
+    low.is_ambiguous = False
+    low.ranking = []
+    manager.profile_store.async_match_profile = AsyncMock(return_value=low)
+    manager.profile_store.async_add_cycle = AsyncMock()
+    manager.profile_store.async_rebuild_envelope = AsyncMock()
+    manager.profile_store.async_clear_active_cycle = AsyncMock()
+    manager._run_post_cycle_processing = AsyncMock()
 
     cycle_data = {
         "start_time": "2025-12-21T10:00:00",
         "end_time": "2025-12-21T11:00:00",
         "duration": 3600,
         "max_power": 500,
-        "power_data": [[0.0, 5.0], [60.0, 200.0], [120.0, 50.0]],
+        "power_data": [[i * 60.0, 200.0] for i in range(12)],
         "status": "completed",
     }
 
-    manager._on_cycle_end(dict(cycle_data))
+    await manager._async_process_cycle_end(dict(cycle_data))
+
+    # The pipeline really ran to the learning step, with the gate's verdict.
+    manager.profile_store.async_add_cycle.assert_awaited_once()
+    process_spy.assert_called_once()
+    stored = manager.profile_store.async_add_cycle.await_args.args[0]
+    assert stored.get("profile_name") is None, "a 0.40 match must not label the cycle"
+    assert process_spy.call_args.kwargs["confidence"] == pytest.approx(0.40)
+    assert process_spy.call_args.kwargs["label_allowed"] is False
 
     manager.learning_manager.auto_label_high_confidence.assert_not_called()
     manager.learning_manager.request_cycle_verification.assert_not_called()
-
-    # assert "ha_washdata_feedback_requested" not in fired_events
-    assert mock_hass.components.persistent_notification.async_create.call_count == 0
+    assert pn.async_create.call_count == 0
 
 
 def _stub_reload_ready(manager: WashDataManager) -> None:
@@ -557,7 +535,10 @@ async def test_restore_active_cycle_ending(manager: WashDataManager) -> None:
 async def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, mock_hass: Any) -> None:
     """Test that _on_cycle_end attempts to auto-label an unmatched cycle."""
     manager._auto_label_confidence = 0.8
-    
+    manager.profile_store.get_profiles = MagicMock(
+        return_value={"DerivedProfile": {"avg_duration": 3600}}
+    )
+
     # Mock profile store behavior
     from custom_components.ha_washdata.profile_store import MatchResult
     match_result = MatchResult(
@@ -587,7 +568,7 @@ async def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, m
     cycle_data = {
         "start_time": "2025-01-01T12:00:00",
         "duration": 3600,
-        "power_data": [("2025-01-01T12:00:00", 1.0)], # minimal data
+        "power_data": [[i * 60.0, 200.0] for i in range(12)],
         "profile_name": None # Initially None
     }
     
@@ -643,10 +624,11 @@ async def test_start_notification_fires_immediately_in_fallback(manager: WashDat
     assert manager._notified_start is True
     assert manager._current_program == "detecting..."  # Program not yet resolved
 
-    # 2nd and 3rd Intervals - no additional start notifications, program resolves on 3rd
+    # Later intervals - no additional start notifications. The result is ambiguous,
+    # so it resolves after MATCH_AMBIGUOUS_COMMIT_FACTOR x persistence intervals.
     mock_hass.services.async_call.reset_mock()
-    await manager._async_do_perform_matching(readings)
-    await manager._async_do_perform_matching(readings)
+    for _ in range(3 * MATCH_AMBIGUOUS_COMMIT_FACTOR - 1):
+        await manager._async_do_perform_matching(readings)
 
     # Notification fired only once; program now resolved via persistence
     assert mock_hass.services.async_call.call_count == 0  # No extra start notification

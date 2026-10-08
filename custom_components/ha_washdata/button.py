@@ -52,6 +52,8 @@ async def async_setup_entry(
 class WashDataTerminateButton(ButtonEntity):
     """Button to force terminate the current cycle."""
 
+    _attr_should_poll = False  # state is pushed; nothing to poll (PERF-02)
+
     _attr_has_entity_name = True
     _attr_translation_key = "force_end_cycle"
     _attr_icon = "mdi:stop-circle-outline"
@@ -78,6 +80,8 @@ class WashDataTerminateButton(ButtonEntity):
 
 class WashDataPauseCycleButton(ButtonEntity):
     """Button to pause the current cycle (user-triggered)."""
+
+    _attr_should_poll = False  # state is pushed; nothing to poll (PERF-02)
 
     _attr_has_entity_name = True
     _attr_translation_key = "pause_cycle"
@@ -124,6 +128,8 @@ class WashDataPauseCycleButton(ButtonEntity):
 class WashDataResumeCycleButton(ButtonEntity):
     """Button to resume a user-paused cycle."""
 
+    _attr_should_poll = False  # state is pushed; nothing to poll (PERF-02)
+
     _attr_has_entity_name = True
     _attr_translation_key = "resume_cycle"
     _attr_icon = "mdi:play-circle-outline"
@@ -166,6 +172,8 @@ class WashDataResumeCycleButton(ButtonEntity):
 class WashDataRecordStartButton(ButtonEntity):
     """Button to start manually recording a clean cycle."""
 
+    _attr_should_poll = False  # state is pushed; nothing to poll (PERF-02)
+
     _attr_has_entity_name = True
     _attr_translation_key = "record_start"
     _attr_icon = "mdi:record-circle-outline"
@@ -200,7 +208,10 @@ class WashDataRecordStartButton(ButtonEntity):
         """Only available when not already recording and no active cycle is running."""
         return (
             not self._manager.recorder.is_recording
-            and self._manager.detector.state == "off"
+            # The state entities show, so a hidden standby re-probe (item 501)
+            # does not toggle availability on every reading. Idle (#452) is a
+            # switched-on appliance between cycles: recording starts from there too.
+            and self._manager.detector.exposed_state in ("off", "idle")
         )
 
     async def async_press(self) -> None:
@@ -210,6 +221,8 @@ class WashDataRecordStartButton(ButtonEntity):
 
 class WashDataRecordStopButton(ButtonEntity):
     """Button to stop manual recording."""
+
+    _attr_should_poll = False  # state is pushed; nothing to poll (PERF-02)
 
     _attr_has_entity_name = True
     _attr_translation_key = "record_stop"
@@ -259,6 +272,7 @@ class WashDataMarkUnloadedButton(ButtonEntity):
     and Home Assistant skips an unavailable entity in a service call, so an
     automation that presses it unconditionally is a harmless no-op.
     """
+    _attr_should_poll = False  # state is pushed; nothing to poll (PERF-02)
 
     _attr_has_entity_name = True
     _attr_translation_key = "mark_unloaded"

@@ -140,14 +140,3 @@ def option_int(value: Any, default: int, minimum: int | None = None) -> int:
     if minimum is not None and result < minimum:
         return minimum
     return result
-
-
-def has_null_options(options: Mapping[str, Any]) -> bool:
-    """True when ``options`` holds at least one unset-meaning ``None``.
-
-    Lets a caller skip the rewrite (and the entry reload it schedules) when there is
-    nothing to clean.
-    """
-    return any(
-        v is None and k not in NULL_MEANINGFUL_OPTION_KEYS for k, v in options.items()
-    )

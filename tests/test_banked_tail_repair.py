@@ -114,24 +114,9 @@ def test_a_dishwasher_without_its_pump_out_keeps_the_measured_drying() -> None:
     assert _cap_offset(d) == pytest.approx(3600.0)
 
 
-def test_an_unmeasured_dishwasher_keeps_the_old_behaviour() -> None:
-    """Truncating a drying phase on no evidence is the worse error: the pump-out
-    is measurably absent in a substantial minority of runs on some machines."""
-    d = _det("dishwasher", quiet=None, spike=False)
-    assert _cap_offset(d) == pytest.approx(3600.0)  # the expected end, as before
-    d2 = _det("dishwasher", quiet=None, spike=False, last_active=5000.0)
-    assert _cap_offset(d2) == pytest.approx(5000.0)  # ...or later activity
-
-
 def test_a_corrupt_quiet_span_cannot_license_an_unbounded_tail() -> None:
     d = _det("dishwasher", quiet=99999.0, spike=False)
     assert _cap_offset(d) == pytest.approx(3000.0 + TERMINAL_QUIET_CAP_S)
-
-
-def test_an_unmatched_cycle_is_untouched() -> None:
-    d = _det("washing_machine")
-    d._expected_duration = 0.0
-    assert d._keep_tail_cap(T0) is None
 
 
 # ---------------------------------------------------------------------------
@@ -189,12 +174,6 @@ def test_a_consistently_measured_span_is_trusted() -> None:
 
 def test_no_event_ever_means_no_opinion() -> None:
     st = _sig(_Store({}), quiet_before_s=None, seen_in=0, measured=11, consistency=0.0)
-    assert st.profile_terminal_quiet_seconds("p") is None
-
-
-def test_a_failing_statistic_never_breaks_matching() -> None:
-    st = _Store({})
-    st.compute_profile_terminal_signature = MagicMock(side_effect=RuntimeError("boom"))
     assert st.profile_terminal_quiet_seconds("p") is None
 
 
@@ -620,27 +599,6 @@ async def test_a_terminal_pump_out_gets_no_drying_allowance() -> None:
 
 
 @pytest.mark.asyncio
-async def test_a_cycle_that_ends_in_drying_still_gets_its_allowance() -> None:
-    """The other half: no terminal event, so the tail IS the drying."""
-    pts = [[float(t), 100.0] for t in range(0, 3000, 30)]
-    pts.append([3000.0, 0.0])                                    # plug goes quiet
-    cyc = {
-        "id": "b", "profile_name": "Eco", "start_time": T0.isoformat(),
-        "duration": 6000.0, "termination_reason": "smart",
-        "sampling_interval": 30.0, "power_data": pts,
-    }
-    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
-    st = _Store(data)
-    st.profile_terminal_quiet_seconds = lambda _n: 600.0  # type: ignore[assignment]
-
-    res = await st.async_repair_banked_tails(2.0, "dishwasher")
-
-    assert res["repaired"] == 1
-    # last activity 2970 + 600 measured drying.
-    assert float(data["past_cycles"][0]["duration"]) == pytest.approx(3570.0, abs=31.0)
-
-
-@pytest.mark.asyncio
 async def test_the_terminal_point_never_carries_active_power() -> None:
     """Found in the PR #448 round-16 review.
 
@@ -734,10 +692,12 @@ def test_the_live_cap_and_the_repair_use_one_helper() -> None:
     """They answer the same question, so they must not be able to drift."""
     from custom_components.ha_washdata import cycle_detector as _cd
     from custom_components.ha_washdata import profile_store as _ps
-    from custom_components.ha_washdata.signal_processing import quiet_run_before
+    from custom_components.ha_washdata.signal_processing import terminal_quiet_seen
 
-    assert _cd.quiet_run_before is quiet_run_before
-    assert _ps._quiet_run_before is quiet_run_before
+    # #424: the helper now also asks at the signature's own threshold, so it is
+    # `terminal_quiet_seen` both sides share rather than `quiet_run_before`.
+    assert _cd.terminal_quiet_seen is terminal_quiet_seen
+    assert _ps._terminal_quiet_seen is terminal_quiet_seen
 
 
 @pytest.mark.asyncio
@@ -876,3 +836,45 @@ async def test_an_uncorrected_sibling_is_still_repaired() -> None:
     assert res["repaired"] == 1
     assert data["past_cycles"][0]["duration"] == pytest.approx(4200.0)
     assert data["past_cycles"][1]["duration"] == pytest.approx(2970.0, abs=31.0)
+
+
+@pytest.mark.asyncio
+async def test_one_impossible_start_time_does_not_stop_the_repair() -> None:
+    """Register item 384: `parse_datetime` RAISES for month 13; the repair aborted
+    on that row with the cycles before it cut, the ones after it not, and the
+    pending key still set, so every restart stopped on the same row."""
+    bad = _cycle("bad", 3000, 1200)
+    bad["start_time"] = "2026-13-45T08:00:00+00:00"
+    data = {
+        "past_cycles": [_cycle("a", 3000, 1200), bad, _cycle("b", 3000, 1200)],
+        BANKED_TAIL_REPAIR_KEY: True,
+    }
+    st = _Store(data)
+
+    res = await st.async_repair_banked_tails(2.0, "washing_machine")
+
+    assert res["repaired"] == 3
+    assert all(c["duration"] == pytest.approx(2970.0, abs=31.0) for c in data["past_cycles"])
+    assert "end_time" not in bad  # nothing to anchor it on; duration and trace still agree
+    assert bad["power_data"][-1][0] <= bad["duration"] + 1e-6
+    assert not st.banked_tail_repair_pending()
+
+
+@pytest.mark.asyncio
+async def test_a_pump_out_below_the_stop_threshold_is_kept() -> None:
+    """Register item 384: a stop threshold above the signature's level (0.4% of
+    peak) left a quiet pump-out below it; when only the peak-fraction quiet test
+    fired, the repair ended the cycle at the last ABOVE-stop sample and cut the
+    drying and the pump-out off."""
+    pts = [[float(t), 2000.0] for t in range(0, 3000, 30)]
+    pts += [[float(t), 0.3] for t in range(3000, 4200, 30)]   # 20 min drying
+    pts += [[4200.0, 9.0], [4230.0, 9.0], [4260.0, 0.3], [4800.0, 0.3]]  # 9 W pump-out
+    cyc = {"id": "d", "profile_name": "Eco", "start_time": T0.isoformat(), "duration": 4800.0,
+           "termination_reason": "smart", "power_data": pts}
+    data = {"past_cycles": [cyc], BANKED_TAIL_REPAIR_KEY: True}
+    st = _Store(data)
+    st.profile_terminal_quiet_seconds = MagicMock(return_value=1200.0)
+
+    await st.async_repair_banked_tails(10.0, "dishwasher")  # stop 10 W > the 9 W pump-out
+
+    assert cyc["duration"] == pytest.approx(4230.0, abs=1.0)

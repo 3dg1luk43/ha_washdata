@@ -21,11 +21,11 @@ This package holds compact, NumPy-only models trained offline in the
 ``promoted_manifest.json`` for provenance). The integration runtime stays
 NumPy-only; no sklearn/torch/scipy are imported.
 
-The single runtime entry point is :func:`resolve_scorer`, which returns a scoring
-callable for a capability, preferring an on-device trained spec over the shipped
-embedded baseline. All live ML consumers go through it (the panel's ``ml_health``
-shadow comparison in ``ws_api`` and :class:`MLSuggestionEngine`), and any new
-runtime consumer should too — feature extraction lives in ``feature_extraction``
+The runtime entry points are :func:`resolve_scorer`, which returns the shipped
+embedded baseline's scoring callable for a classifier capability, and
+:func:`resolve_regressor`, which returns an on-device trained regressor. All live
+ML consumers go through them (the panel's ``ml_health`` shadow comparison in
+``ws_api``), and any new runtime consumer should too - feature extraction lives in ``feature_extraction``
 and gating in :func:`ml_models_enabled`, so there is no separate engine object.
 
 Each model consumes a feature mapping whose keys are the model's
@@ -48,7 +48,6 @@ CONF_ENABLE_ML_MODELS = "enable_ml_models"
 # Logical capability -> generated model module name (without the _model suffix).
 _MODEL_MODULES = {
     "quality": "hybrid_curve_quality_model",
-    "live_match": "live_match_commit_model",
     "end": "cycle_end_detector_model",
 }
 
@@ -56,8 +55,8 @@ _MODEL_MODULES = {
 _SIBLING_MODULES = ("trainer", "feature_extraction")
 
 # Imported baseline model modules, keyed by module name. Importing a module is a
-# blocking call Home Assistant forbids inside the event loop, and every
-# resolve_scorer() consumer (live matching, end detection, quality gating) runs
+# blocking call Home Assistant forbids inside the event loop, and
+# resolve_scorer() consumers (end detection, the panel's cycle health) run
 # there - so the modules are imported once from an import executor at setup
 # (:func:`preload_models`) and every later resolution is a dict lookup. A failed
 # import is cached as ``None`` so a broken install warns once instead of retrying
@@ -127,123 +126,49 @@ def ml_models_enabled(options: Mapping[str, object] | None) -> bool:
     return bool(options.get(CONF_ENABLE_ML_MODELS, False))
 
 
-def resolve_scorer(capability: str, store: object | None):
-    """Return ``(score_fn, source)`` for a capability, preferring an on-device
-    trained spec over the shipped embedded baseline.
+def resolve_scorer(capability: str):
+    """Return ``(score_fn, source)`` for a classifier capability's shipped baseline.
 
     ``score_fn`` maps a feature mapping -> float in [0,1]; ``source`` is
-    ``"on_device"`` or ``"baseline"``. Returns ``(None, None)`` when neither is
-    available. This is the single bridge that lets trained models (Stage 4)
-    actually reach inference (ML Lab shadow comparison + MLSuggestionEngine)
-    while transparently falling back to the baseline.
+    ``"baseline"``. Returns ``(None, None)`` when the capability has no embedded
+    model or it failed to import. The lookup hits the module cache warmed by
+    :func:`preload_models`, so no import happens in the event loop. (The
+    on-device classifier specs this used to prefer can no longer exist: their
+    training was removed in 0.5.8 and storage v17 drops their records.)
     """
-    def _baseline():
-        """Resolve the shipped embedded baseline scorer for this capability.
+    module_name = _MODEL_MODULES.get(capability)
+    if module_name is None:
+        return (None, None)
+    module = _load_model_module(module_name)
+    if module is None:
+        return (None, None)
 
-        Kept as a lazily-invoked helper so the baseline module is only looked up
-        when the on-device spec is absent *or* fails at call time. The lookup hits
-        the module cache warmed by :func:`preload_models`, so no import happens in
-        the event loop.
-        """
-        module_name = _MODEL_MODULES.get(capability)
-        if module_name is None:
-            return (None, None)
-        module = _load_model_module(module_name)
-        if module is None:
-            return (None, None)
-
-        def _baseline_score(feats, _m=module):
-            # The embedded baseline must never raise into live inference either
-            # (mirrors _on_device_score's call-time guard): on any scoring error
-            # log and return a neutral 0.0 so a gate treats the signal as absent
-            # rather than letting the exception reach live detection/matching.
-            try:
-                return float(_m.score(feats))
-            except Exception as exc:  # noqa: BLE001 - never raise into live inference
-                _LOGGER.warning(
-                    "Embedded baseline scorer for capability %r failed at call "
-                    "time, returning neutral 0.0: %s", capability, exc,
-                )
-                return 0.0
-
-        return (_baseline_score, "baseline")
-
-    # 1) On-device trained spec from the store.
-    if store is not None:
+    def _baseline_score(feats, _m=module):
+        # The embedded baseline must never raise into live inference: on any
+        # scoring error log and return a neutral 0.0 so a gate treats the signal
+        # as absent rather than letting the exception reach detection/matching.
         try:
-            versions = store.get_ml_model_versions() or {}  # type: ignore[attr-defined]
-            record = versions.get(capability)
-            spec = record.get("spec") if isinstance(record, dict) else None
-            # Only treat a spec as a classifier here. A regression spec
-            # (standardized_linear) must never be sigmoid-squashed by score_spec;
-            # classifier and regression capability keys are disjoint today, but this
-            # guard keeps it safe if a key were ever reused.
-            if isinstance(spec, dict) and spec.get("kind") != "standardized_linear":
-                # Feature-column schema guard: a spec promoted under an older
-                # FEATURE_COLUMNS must be dropped rather than silently scoring on a
-                # stale/neutral-filled schema. The call-time guard already catches
-                # shape mismatches, but this catches them at load time and logs
-                # clearly, so users see a single warm-up warning instead of a
-                # per-inference warning storm.
-                module_name = _MODEL_MODULES.get(capability)
-                if module_name is not None:
-                    try:
-                        _bm = _load_model_module(module_name)
-                        _expected = list(getattr(_bm, "FEATURE_COLUMNS", []))
-                        _stored = list(spec.get("feature_columns") or [])
-                        if _expected and _stored and _stored != _expected:
-                            _LOGGER.warning(
-                                "Promoted spec for %r has stale feature schema "
-                                "(%d cols vs current %d); reverting to baseline.",
-                                capability, len(_stored), len(_expected),
-                            )
-                            return _baseline()
-                    except Exception:  # noqa: BLE001 - schema check must not break inference
-                        pass
-
-                score_spec = _sibling_attr("trainer", "score_spec")
-                if score_spec is None:
-                    return _baseline()
-
-                def _on_device_score(feats, _s=spec):
-                    # A malformed / dimensionally-incompatible promoted spec must
-                    # never raise into live detection/matching: on any call-time
-                    # error fall back to the embedded baseline (or a neutral 0.0).
-                    try:
-                        return float(score_spec(_s, feats))
-                    except Exception as exc:  # noqa: BLE001 - never raise into live inference
-                        _LOGGER.warning(
-                            "Trained scorer for capability %r failed at call time, "
-                            "falling back to baseline: %s", capability, exc,
-                        )
-                        fn, _src = _baseline()
-                        if fn is not None:
-                            try:
-                                return fn(feats)
-                            except Exception:  # noqa: BLE001 - baseline must not raise either
-                                pass
-                        return 0.0
-
-                return (_on_device_score, "on_device")
-        except Exception as exc:  # noqa: BLE001 - never let a bad store break inference
+            return float(_m.score(feats))
+        except Exception as exc:  # noqa: BLE001 - never raise into live inference
             _LOGGER.warning(
-                "Failed to load trained spec for capability %r, falling back to baseline: %s",
-                capability, exc,
+                "Embedded baseline scorer for capability %r failed at call "
+                "time, returning neutral 0.0: %s", capability, exc,
             )
-    # 2) Shipped embedded baseline module.
-    return _baseline()
+            return 0.0
+
+    return (_baseline_score, "baseline")
 
 
 def resolve_regressor(capability: str, store: object | None):
     """Return ``(predict_fn, source)`` for a regression capability.
 
-    Regression models (``"remaining_time"`` and ``"total_energy"``) have **no**
+    Regression models (since 0.5.8 only ``"total_energy"``) have **no**
     shipped embedded baseline - they are trained purely on-device (Stage 4) and
     stored as ``standardized_linear`` specs. This returns ``(None, None)`` until
     on-device training promotes one, so live behaviour is unchanged until then.
 
     ``predict_fn`` maps a feature mapping -> float in the model's target units
-    (a completion fraction in ~[0, 1] for both regression capabilities).
+    (for ``total_energy``, the energy fraction so far in ~[0, 1]).
     """
     if store is None:
         return (None, None)

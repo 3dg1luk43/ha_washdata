@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "WashData Setup",
-        "description": "Konfigurera din tvättmaskin eller annan apparat.\n\nEffektsensor krävs.\n\nEfter installationen öppnar du WashData-panelen från sidofältet (eller gå till [/ha-washdata](/ha-washdata)) för att visa cykler, finjustera identifiering och hantera profiler.",
+        "title": "Konfigurera WashData",
+        "description": "Konfigurera en tvättmaskin eller annan apparat. En effektsensor krävs.\n\nÖppna efter konfigurationen WashData-panelen från sidofältet ([/ha-washdata](/ha-washdata)) för att se cykler, profiler och alla inställningar.",
         "data": {
           "name": "Enhetens namn",
           "device_type": "Enhetstyp",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Ett vänligt namn för den här enheten (t.ex. \"Tvättmaskin\", \"Diskmaskin\").",
-          "device_type": "Vilken typ av apparat är detta? Hjälper till att skräddarsy detektering och märkning.",
-          "power_sensor": "Sensorenheten som rapporterar strömförbrukning i realtid (i watt) från din smarta kontakt.",
-          "min_power": "Effektavläsningar över detta tröskelvärde (i watt) indikerar att apparaten är igång. Börja med 2W för de flesta enheter."
+          "device_type": "Ställer in standardvärden för detektering för den här typen av apparat.",
+          "power_sensor": "Den smarta kontaktens sensor som rapporterar aktuell effekt i watt.",
+          "min_power": "Mätvärden över detta (i watt) betyder att apparaten är igång. 2 W passar de flesta enheter."
         }
       },
       "reconfigure": {
         "title": "Konfigurera om WashData",
-        "description": "Uppdatera enhetsnamnet, apparattypen eller effektsensorn.\n\nWashData-panelen (sidofältet eller [/ha-washdata](/ha-washdata)) är där identifiering, cykler, profiler och notiser hanteras.",
+        "description": "Ändra enhetsnamn, apparattyp eller effektsensor.\n\nAllt annat finns i WashData-panelen (sidofältet eller [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Enhetens namn",
           "device_type": "Enhetstyp",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Det gick inte att ansluta",
-      "invalid_auth": "Ogiltig autentisering",
       "unknown": "Oväntat fel",
       "invalid_power": "Effekttröskeln måste vara större än 0"
     },
@@ -49,7 +47,7 @@
           "min_power": "Minsta effekttröskel (W)"
         },
         "title": "WashData-inställningar",
-        "description": "Byt namn på enheten eller ändra dess grundläggande hårdvaruinställningar. Alla inställningar för identifiering, matchning och notiser finns i [WashData-panelen](/ha-washdata) (även nåbar från sidofältet)."
+        "description": "Byt namn på enheten eller ändra dess grundinställningar. Allt annat finns i [WashData-panelen](/ha-washdata) i sidofältet."
       }
     },
     "error": {
@@ -70,9 +68,9 @@
         "dryer": "Torktumlare",
         "washer_dryer": "Kombination av tvättmaskin och torktumlare",
         "dishwasher": "Diskmaskin",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Airfryer",
         "bread_maker": "Brödmaskin",
-        "pump": "Pump / Sump Pump",
+        "pump": "Pump / Dräneringspump",
         "generic": "Annat (avancerat)",
         "other": "Tröskelenhet"
       }
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profilnamn",
-          "description": "Namnet på en befintlig profil (skapa profiler i menyn Hantera profiler). Lämna tomt för att ta bort etiketten."
+          "description": "Namnet på en befintlig profil (skapa profiler i WashData-panelen). Lämna tomt för att ta bort märkningen."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Konfidenströskel",
-          "description": "Minsta matchningskonfidens (0,50–0,95) för att applicera etiketter."
+          "description": "Minsta matchningskonfidens (0,50–0,95) för att applicera etiketter. Lämna tomt för att använda enhetens inställning \"Automärkningskonfidens\"."
         }
       }
     },
     "export_config": {
       "name": "Exportera konfiguration",
-      "description": "Exportera enhetens profiler, cykler och inställningar till en JSON-fil (per enhet).",
+      "description": "Exportera enhetens profiler, cykler och inställningar till en JSON-fil.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Skicka cykelfeedback",
-      "description": "Bekräfta eller korrigera ett automatiskt identifierat program efter en avslutad cykel. Ange antingen `entry_id` (avancerat) eller `device_id` (rekommenderas).",
+      "description": "Bekräfta eller korrigera det identifierade programmet för en avslutad cykel. Ange `device_id` (rekommenderas) eller `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -272,7 +270,7 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
+      "name": "Starta ML-träning",
       "description": "Träna om ML-modellerna på enheten manuellt från enhetens egna märkta cykler (experimentell).",
       "fields": {
         "device_id": {
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Markera som lossad",
-      "description": "Bekräfta att den färdiga tvätten har tagits ut ur en WashData-enhet, vilket rensar tillståndet \"Rena\" och en eventuell lossningspåminnelse.",
+      "description": "Bekräfta att den färdiga tvätten har tagits ut. Rensar tillståndet \"Ren\" och en eventuell lossningspåminnelse.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Matchningstvetydighet"
+      },
+      "maintenance_due": {
+        "name": "Dags för underhåll",
+        "state": {
+          "on": "Dags",
+          "off": "Inte dags"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID för uppgifter att göra"
+          },
+          "due_tasks": {
+            "name": "Uppgifter att göra",
+            "state": {
+              "descale": "Avkalka",
+              "filter_clean": "Rengör filter",
+              "drum_clean": "Rengör trumma",
+              "bearing_service": "Lagerservice",
+              "other": "Övrigt",
+              "salt": "Fyll på salt",
+              "rinse_aid": "Fyll på spolglans",
+              "lint_filter": "Rengör luddfilter",
+              "condenser_clean": "Rengör kondensor"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -317,9 +341,17 @@
           "delay_wait": "Väntar på att starta",
           "interrupted": "Avbruten",
           "force_stopped": "Tvångsstoppad",
-          "rinse": "Sköljning",
           "unknown": "Okänd",
-          "clean": "Rena"
+          "clean": "Ren"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Cykelavvikelse",
+            "state": {
+              "overrun": "Kör längre",
+              "stalled": "Avstannad"
+            }
+          }
         }
       },
       "washer_program": {

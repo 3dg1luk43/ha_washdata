@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData häälestus",
-        "description": "Seadistage oma pesumasin või muu seade.\n\nVajalik on võimsusandur.\n\nPärast seadistamist avage WashData paneel külgribalt (või minge [/ha-washdata](/ha-washdata)), et vaadata tsükleid, häälestada tuvastust ja hallata profiile.",
+        "description": "Seadistage pesumasin või muu seade. Vajalik on võimsusandur.\n\nPärast seadistamist avage külgribalt WashData paneel ([/ha-washdata](/ha-washdata)), et näha tsükleid, profiile ja kõiki seadeid.",
         "data": {
           "name": "Seadme nimi",
           "device_type": "Seadme tüüp",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Selle seadme sõbralik nimi (nt 'pesumasin', 'nõudepesumasin').",
-          "device_type": "Mis tüüpi seade see on? Aitab kohandada tuvastamist ja märgistamist.",
-          "power_sensor": "Anduri olem, mis teatab teie nutika pistiku reaalajas energiatarbimisest (vattides).",
-          "min_power": "Sellest läviväärtusest kõrgemad võimsusnäidud (vattides) näitavad, et seade töötab. Enamiku seadmete puhul alustage 2W-st."
+          "device_type": "Määrab seda tüüpi seadme tuvastamise vaikesätted.",
+          "power_sensor": "Nutipistiku andur, mis teatab reaalajas võimsust vattides.",
+          "min_power": "Sellest suuremad näidud (vattides) tähendavad, et seade töötab. Enamikule seadmetele sobib 2 W."
         }
       },
       "reconfigure": {
         "title": "WashData uuesti seadistamine",
-        "description": "Uuendage seadme nime, seadmetüüpi või võimsusandurit.\n\nWashData paneelis (külgriba või [/ha-washdata](/ha-washdata)) hallatakse tuvastust, tsükleid, profiile ja teavitusi.",
+        "description": "Muutke seadme nime, seadmetüüpi või võimsusandurit.\n\nKõik muu on WashData paneelis (külgriba või [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Seadme nimi",
           "device_type": "Seadme tüüp",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Ühenduse loomine ebaõnnestus",
-      "invalid_auth": "Kehtetu autentimine",
       "unknown": "Ootamatu viga",
       "invalid_power": "Võimsuslävi peab olema suurem kui 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData seadistused",
-        "description": "Nimetage seade ümber või muutke selle põhilisi riistvara seadeid. Kõik tuvastus-, sobitamis- ja teavitusseaded asuvad [WashData paneelil](/ha-washdata) (ligipääsetav ka külgribalt).",
+        "description": "Nimetage seade ümber või muutke selle põhiseadeid. Kõik muu on külgribal olevas [WashData paneelis](/ha-washdata).",
         "data": {
           "name": "Seadme nimi",
           "device_type": "Seadme tüüp",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profiili nimi",
-          "description": "Olemasoleva profiili nimi (profiilide loomine menüüs Profiilide haldamine). Sildi eemaldamiseks jätke tühjaks."
+          "description": "Olemasoleva profiili nimi (profiile saab luua WashData paneelis). Sildi eemaldamiseks jätke tühjaks."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Usalduse lävi",
-          "description": "Minimaalne vaste usaldusväärsus (0,50–0,95) siltide rakendamiseks."
+          "description": "Minimaalne vaste usaldusväärsus (0,50-0,95) siltide rakendamiseks. Jätke tühjaks, et kasutada seadme sätet Automaatse Sildi Usaldus."
         }
       }
     },
     "export_config": {
       "name": "Ekspordi konfiguratsioon",
-      "description": "Eksportige selle seadme profiilid, tsüklid ja seaded JSON-faili (seadme kohta).",
+      "description": "Eksportige selle seadme profiilid, tsüklid ja seaded JSON-faili.",
       "fields": {
         "device_id": {
           "name": "Seade",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Esitage tsükli tagasiside",
-      "description": "Pärast tsükli lõppemist kinnitage või parandage automaatselt tuvastatud programm. Sisestage kas „entry_id” (täpsem) või „device_id” (soovitatav).",
+      "description": "Kinnitage või parandage lõppenud tsükli tuvastatud programm. Sisestage `device_id` (soovitatav) või `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Seade",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Märgi mahalaadituks",
-      "description": "Kinnitage, et lõpetatud tsükli sisu on WashData seadmest välja võetud: olek „Puhas“ ja mahalaadimise meeldetuletus lähtestatakse.",
+      "description": "Kinnitage, et lõppenud tsükli sisu on välja võetud. Lähtestab oleku „Puhas“ ja kõik mahalaadimise meeldetuletused.",
       "fields": {
         "device_id": {
           "name": "Seade",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Vaste ebamäärasus"
+      },
+      "maintenance_due": {
+        "name": "Hooldus vajalik",
+        "state": {
+          "on": "Vajalik",
+          "off": "Pole vajalik"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Vajalike ülesannete ID-d"
+          },
+          "due_tasks": {
+            "name": "Vajalikud ülesanded",
+            "state": {
+              "descale": "Katlakivi eemaldamine",
+              "filter_clean": "Puhasta filter",
+              "drum_clean": "Puhasta trummel",
+              "bearing_service": "Laagrite hooldus",
+              "other": "Muu",
+              "salt": "Lisa soola",
+              "rinse_aid": "Lisa loputusvahendit",
+              "lint_filter": "Puhasta ebemefilter",
+              "condenser_clean": "Puhasta kondensaator"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Kortsudevastane",
           "interrupted": "Katkestatud",
           "force_stopped": "Sundpeatatud",
-          "rinse": "Loputamine",
           "unknown": "Tundmatu",
           "clean": "Puhas",
           "delay_wait": "Ootab algust"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Tsükli anomaalia",
+            "state": {
+              "overrun": "Töötab kaua",
+              "stalled": "Seiskunud"
+            }
+          }
         }
       },
       "washer_program": {

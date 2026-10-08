@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Phase C: store_client - id parity, decode, token exchange, reads, upload shape."""
+import base64
 import json
 from unittest.mock import MagicMock
 
@@ -34,7 +35,7 @@ class _Resp:
         return self
     async def __aexit__(self, *a):
         return False
-    async def json(self):
+    async def json(self, **kw):
         return self._body
     async def text(self):
         return json.dumps(self._body) if not isinstance(self._body, str) else self._body
@@ -189,16 +190,6 @@ async def test_device_profiles_resolves_id_and_includes_pending():
 
 
 @pytest.mark.asyncio
-async def test_get_device_quality_decodes_aggregation():
-    s = _Session()
-    s.queue_post(_Resp(200, [{"result": {"aggregateFields": {
-        "cnt": {"integerValue": "3"}, "avg": {"doubleValue": 4.25}}}}]))
-    c = _client(s)
-    q = await c.get_device_quality("washer__bosch__wat")
-    assert q == {"avg": 4.25, "count": 3}
-
-
-@pytest.mark.asyncio
 async def test_get_cycles_includes_pending_and_attaches_rating():
     s = _Session()
     # 1: the cycles list query (one v1 cycle so it hydrates an importable trace).
@@ -207,6 +198,8 @@ async def test_get_cycles_includes_pending_and_attaches_rating():
             "status": {"stringValue": "pending"},
             "downloads": {"integerValue": "4"},
             "confirmCount": {"integerValue": "1"},
+            "ratingSum": {"integerValue": "9"},
+            "ratingCount": {"integerValue": "2"},
             "cycleSchemaVersion": {"integerValue": "1"},
             "trace": {"mapValue": {"fields": {"points": {"arrayValue": {"values": [
                 {"mapValue": {"fields": {"o": {"integerValue": "0"}, "w": {"doubleValue": 5.0}}}},
@@ -214,9 +207,6 @@ async def test_get_cycles_includes_pending_and_attaches_rating():
             ]}}}}},
         }}},
     ]))
-    # 2: the per-cycle rating aggregation.
-    s.queue_post(_Resp(200, [{"result": {"aggregateFields": {
-        "cnt": {"integerValue": "2"}, "avg": {"doubleValue": 4.5}}}}]))
     c = _client(s)
     items = await c.get_cycles("washer__bosch__wat__cotton-40")
     assert len(items) == 1
@@ -224,8 +214,9 @@ async def test_get_cycles_includes_pending_and_attaches_rating():
     clauses = s.posts[0][1]["json"]["structuredQuery"]["where"]["compositeFilter"]["filters"]
     status = next(f for f in clauses if f["fieldFilter"]["field"]["fieldPath"] == "status")
     assert status["fieldFilter"]["op"] == "IN"
-    # rating summary attached + map points hydrated to [[o, w]] pairs
-    assert items[0]["rating"] == {"avg": 4.5, "count": 2}
+    # Rating read from the doc's denormalized totals - no per-cycle aggregation
+    # request (audit STORE-15) - and map points hydrated to [[o, w]] pairs
+    assert items[0]["rating"] == {"avg": 4.5, "count": 2} and len(s.posts) == 1
     assert items[0]["importable"] == [[0, 5.0], [60, 0.0]]
 
 
@@ -265,24 +256,56 @@ async def test_confirm_device_promotes_at_threshold():
 
 
 @pytest.mark.asyncio
-async def test_rate_device_shape():
-    s = _Session()
-    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))  # token
-    s.queue_post(_Resp(200, {}))                                        # commit
-    c = _client(s)
-    ok = await c.rate_device("refresh", "u1", "d1", 4)
-    assert ok is True
-    write = s.posts[-1][1]["json"]["writes"][0]
-    assert write["update"]["fields"]["rating"] == {"integerValue": "4"}
-    assert {"fieldPath": "updatedAt", "setToServerValue": "REQUEST_TIME"} in write["updateTransforms"]
-
-
-@pytest.mark.asyncio
 async def test_rate_device_rejects_out_of_range():
     s = _Session()
     c = _client(s)
     assert await c.rate_device("refresh", "u1", "d1", 9) is False
     assert len(s.posts) == 0  # no network for an invalid rating
+
+
+@pytest.mark.asyncio
+async def test_rate_device_first_rating_bumps_the_device_totals():
+    # Audit STORE-15: the integration wrote only the rating doc, so its ratings never
+    # reached the ratingSum / ratingCount the store shows. Same batch as the website.
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))  # token
+    s.queue_get(_Resp(404, {}))                                         # no prior rating
+    s.queue_post(_Resp(200, {}))                                        # commit
+    c = _client(s)
+    assert await c.rate_device("refresh", "u1", "d1", 4) is True
+    writes = s.posts[-1][1]["json"]["writes"]
+    assert writes[0]["update"]["fields"]["rating"] == {"integerValue": "4"}
+    assert {"fieldPath": "updatedAt", "setToServerValue": "REQUEST_TIME"} in writes[0]["updateTransforms"]
+    assert writes[1]["transform"]["document"].endswith("/documents/devices/d1")
+    assert writes[1]["transform"]["fieldTransforms"] == [
+        {"fieldPath": "ratingCount", "increment": {"integerValue": "1"}},
+        {"fieldPath": "ratingSum", "increment": {"integerValue": "4"}},
+    ]
+
+
+@pytest.mark.asyncio
+async def test_rate_device_edit_shifts_the_sum_only():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))
+    s.queue_get(_Resp(200, {"name": ".../devices/d1/ratings/u1", "fields": {"rating": {"integerValue": "2"}}}))
+    s.queue_post(_Resp(200, {}))
+    c = _client(s)
+    assert await c.rate_device("refresh", "u1", "d1", 5) is True
+    writes = s.posts[-1][1]["json"]["writes"]
+    assert writes[1]["transform"]["fieldTransforms"] == [
+        {"fieldPath": "ratingSum", "increment": {"integerValue": "3"}},
+    ]
+
+
+@pytest.mark.asyncio
+async def test_rate_device_same_rating_leaves_the_totals_alone():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600"}))
+    s.queue_get(_Resp(200, {"name": ".../devices/d1/ratings/u1", "fields": {"rating": {"integerValue": "4"}}}))
+    s.queue_post(_Resp(200, {}))
+    c = _client(s)
+    assert await c.rate_device("refresh", "u1", "d1", 4) is True
+    assert len(s.posts[-1][1]["json"]["writes"]) == 1
 
 
 @pytest.mark.asyncio
@@ -670,7 +693,9 @@ async def test_upload_reference_cycle_attaches_settings():
                for w in kw["json"]["writes"] if "/devices/" in w.get("update", {}).get("name", ""))
     setmap = dev["update"]["fields"]["settings"]["mapValue"]["fields"]
     assert setmap["start_threshold_w"] == {"doubleValue": 12.0}
-    assert setmap["off_delay"] == {"integerValue": "180"}
+    # off_delay is the sharer's plug cadence, not the model's: never uploaded
+    # (audit STORE-06).
+    assert "off_delay" not in setmap
 
 
 @pytest.mark.asyncio
@@ -899,9 +924,9 @@ async def test_list_queries_project_only_the_fields_the_ui_reads():
 
 
 @pytest.mark.asyncio
-async def test_bundle_skips_the_per_cycle_rating_fanout():
-    # Ratings are browse-only decoration the adopt path never reads, but they cost one
-    # aggregation request per cycle.
+async def test_no_per_cycle_rating_fanout():
+    # Ratings used to cost one aggregation request per cycle (audit STORE-15); they
+    # are now read from the totals the cycle doc already carries.
     s = _Session()
     s.queue_get(_Resp(200, {"name": ".../devices/d1", "fields": {}}))          # get_device
     s.queue_post(_Resp(200, [                                                  # get_profiles
@@ -915,12 +940,11 @@ async def test_bundle_skips_the_per_cycle_rating_fanout():
     bundle = await c.get_device_bundle("d1")
     assert [cyc["id"] for cyc in bundle["profiles"][0]["cycles"]] == ["c1", "c2"]
     assert not [u for u, _ in s.posts if "runAggregationQuery" in u]
-    # ...while the browse path still attaches them.
+    # ...and neither does the browse path: a doc without totals has no ratings.
     s.queue_post(_Resp(200, [{"document": {"name": ".../cycles/c1", "fields": {}}}]))
-    s.queue_post(_Resp(200, [{"result": {"aggregateFields": {
-        "cnt": {"integerValue": "2"}, "avg": {"doubleValue": 4.5}}}}]))
     cycles = await c.get_cycles("p1")
-    assert cycles[0]["rating"] == {"avg": 4.5, "count": 2}
+    assert cycles[0]["rating"] == {"avg": None, "count": 0}
+    assert not [u for u, _ in s.posts if "runAggregationQuery" in u]
 
 
 def test_shared_client_is_one_per_install():
@@ -959,6 +983,7 @@ async def test_confirm_device_does_not_read_its_own_write_from_cache():
     res = await c.confirm_device("refresh", "u1", "d1")
     assert res["confirmCount"] == 5
     assert res["status"] == "approved"
+
 
 
 @pytest.mark.asyncio
@@ -1083,3 +1108,278 @@ async def test_get_profiles_is_pending_inclusive_by_default():
     status = next(f for f in clauses if f["fieldFilter"]["field"]["fieldPath"] == "status")
     assert status["fieldFilter"]["op"] == "EQUAL"
     assert status["fieldFilter"]["value"]["stringValue"] == "approved"
+
+
+# ── published catalog index (audit STORE-07) ───────────────────────────────────
+
+_INDEX = {
+    "schema": 1, "generatedAt": "2026-10-02T19:16:54.111Z",
+    "fields": {
+        "brands": ["id", "brand", "deviceCount", "status"],
+        "devices": ["id", "brand", "model", "applianceType", "favoriteCount", "status"],
+        "profiles": ["id", "program", "deviceId", "status"],
+    },
+    "brands": [["aeg-lavamat", "AEG Lavamat", 2, "pending"], ["bosch", "Bosch", 1, "approved"]],
+    "devices": [
+        ["washer__aeg-lavamat__x1", "AEG Lavamat", "X1", "washer", 1, "pending"],
+        ["washer__bosch__wat", "Bosch", "WAT", "washer", 5, "approved"],
+        ["dishwasher__bosch__smv", "Bosch", "SMV", "dishwasher", 9, "approved"],
+        ["washer__bosch__old", "Bosch", "OLD", "washer", 0, "rejected"],
+    ],
+    "profiles": [],
+}
+
+
+async def test_type_wide_search_is_served_from_the_published_index():
+    s = _Session()
+    s.queue_get(_Resp(200, _INDEX))
+    # The delta: one entry created after the index was built.
+    s.queue_post(_Resp(200, [{"document": {"name": ".../devices/washer__miele__w1", "fields": {
+        "brand": {"stringValue": "Miele"}, "brand_lc": {"stringValue": "miele"},
+        "model": {"stringValue": "W1"}, "model_lc": {"stringValue": "w1"},
+        "applianceType": {"stringValue": "washer"}, "status": {"stringValue": "pending"},
+        "favoriteCount": {"integerValue": "0"}}}}]))
+    c = _client(s)
+    items = await c.search_devices(appliance_type="washer", include_pending=True)
+    assert [i["id"] for i in items] == [
+        "washer__bosch__wat", "washer__aeg-lavamat__x1", "washer__miele__w1",
+    ]
+    assert len(s.posts) == 1  # the delta only, never the whole type
+    assert "createdAt" in json.dumps(s.posts[0][1]["json"])
+    # Brand filters compare the stored lowercased name, not the id token.
+    lav = await c.search_devices(brand="AEG Lavamat", appliance_type="washer", include_pending=True)
+    assert [i["id"] for i in lav] == ["washer__aeg-lavamat__x1"]
+    approved = await c.search_devices(appliance_type="washer")
+    assert [i["id"] for i in approved] == ["washer__bosch__wat"]
+    brands = await c.list_brands(q="b")
+    assert [b["brand_lc"] for b in brands] == ["bosch"]
+    assert len(s.gets) == 1 and len(s.posts) == 2  # index cached; one brand delta
+
+
+async def test_without_the_index_the_direct_query_still_answers():
+    s = _Session()
+    s.queue_get(_Resp(404, {}))
+    s.queue_post(_Resp(200, [{"document": {"name": ".../devices/d1", "fields": {
+        "brand": {"stringValue": "Bosch"}, "status": {"stringValue": "approved"}}}}]))
+    items = await _client(s).search_devices(appliance_type="washer")
+    assert [i["id"] for i in items] == ["d1"]
+
+
+@pytest.mark.asyncio
+async def test_a_device_this_client_promoted_shows_in_approved_only_search():
+    # The daily index still says "pending" and the delta only carries new entries,
+    # so a confirm that promoted the device left it out of approved-only search.
+    s = _Session()
+    s.queue_get(_Resp(200, _INDEX))
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    before = await c.search_devices(appliance_type="washer")
+    assert "washer__aeg-lavamat__x1" not in [i["id"] for i in before]
+    c._status_overrides["washer__aeg-lavamat__x1"] = ("approved", "2026-10-03T08:00:00Z")
+    c._invalidate_catalog_cache()
+    s.queue_post(_Resp(200, []))
+    after = await c.search_devices(appliance_type="washer")
+    assert "washer__aeg-lavamat__x1" in [i["id"] for i in after]
+    # An index built after the change wins: the override is not applied over it.
+    c._status_overrides["washer__aeg-lavamat__x1"] = ("approved", "2026-10-01T00:00:00Z")
+    c._invalidate_catalog_cache()
+    s.queue_post(_Resp(200, []))
+    stale = await c.search_devices(appliance_type="washer")
+    assert "washer__aeg-lavamat__x1" not in [i["id"] for i in stale]
+
+
+@pytest.mark.asyncio
+async def test_a_delta_row_with_a_string_favorite_count_still_sorts():
+    # Index rows are cleaned in _shape_index; delta rows came straight from
+    # Firestore, and -("3") raised TypeError out of search_devices.
+    s = _Session()
+    s.queue_get(_Resp(200, _INDEX))
+    s.queue_post(_Resp(200, [{"document": {"name": ".../devices/washer__miele__w1", "fields": {
+        "brand": {"stringValue": "Miele"}, "model": {"stringValue": "W1"},
+        "applianceType": {"stringValue": "washer"}, "status": {"stringValue": "approved"},
+        "favoriteCount": {"stringValue": "3"}}}}]))
+    items = await _client(s).search_devices(appliance_type="washer")
+    assert "washer__miele__w1" in [i["id"] for i in items]
+
+
+def test_a_malformed_index_is_rejected_or_cleaned_at_the_boundary():
+    from custom_components.ha_washdata.store_client import _shape_index
+
+    # No id column: every consumer keys rows by id, so the whole index is unusable
+    # and the search must fall back to the direct queries.
+    no_id = json.loads(json.dumps(_INDEX))
+    no_id["fields"]["devices"] = ["brand", "model", "applianceType", "favoriteCount", "status"]
+    no_id["devices"] = [row[1:] for row in no_id["devices"]]
+    assert _shape_index(no_id) is None
+    # A row without a usable id is dropped; a non-numeric count sorts as 0.
+    bad = json.loads(json.dumps(_INDEX))
+    bad["devices"][0][0] = None
+    bad["devices"][1][4] = "many"
+    shaped = _shape_index(bad)
+    assert [d["id"] for d in shaped["devices"]][0] == "washer__bosch__wat"
+    assert shaped["devices"][0]["favoriteCount"] == 0
+
+
+# ── audit STORE-18: writes carry the uid the token belongs to ──────────────────
+
+def _jwt(claims: dict) -> str:
+    seg = base64.urlsafe_b64encode(json.dumps(claims).encode()).rstrip(b"=").decode()
+    return f"hdr.{seg}.sig"
+
+
+@pytest.mark.asyncio
+async def test_token_exchange_records_the_uid_it_vouches_for():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T1", "expires_in": "3600", "user_id": "real-uid"}))
+    c = _client(s)
+    assert await c.ensure_id_token("rt1") == "T1"
+    assert c.verified_uid("rt1") == "real-uid"
+    # Keyed to the refresh token that produced it, like the id_token cache.
+    assert c.verified_uid("another-account") is None
+
+
+@pytest.mark.asyncio
+async def test_token_uid_falls_back_to_the_id_token_claim():
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": _jwt({"sub": "from-claim"}), "expires_in": "3600"}))
+    c = _client(s)
+    await c.ensure_id_token("rt")
+    assert c.verified_uid("rt") == "from-claim"
+    # A response carrying neither yields no verified uid (connect refuses it).
+    s.queue_post(_Resp(200, {"id_token": "not-a-jwt", "expires_in": "3600"}))
+    await c.ensure_id_token("rt2")
+    assert c.verified_uid("rt2") is None
+
+
+@pytest.mark.asyncio
+async def test_writes_stamp_the_token_uid_not_the_stored_one():
+    """A stored uid that is not the token's own made every write 403 under the
+    rules' uploaderUid / createdByUid / confirmation-id == request.auth.uid checks."""
+    s = _Session()
+    s.queue_post(_Resp(200, {"id_token": "T", "expires_in": "3600", "user_id": "real"}))
+    c = _client(s)
+    cid = await c.upload_reference_cycle(
+        "rt", "stale-or-spoofed", None,
+        {"applianceType": "washer", "brand": "Bosch", "model": "WAT", "program": "Cotton 40"},
+        [[0, 2000], [60, 100], [120, 0]], {}, 3,
+    )
+    assert cid
+    creates = [w for _u, kw in s.posts if _u.endswith(":commit") for w in kw["json"]["writes"]]
+    uids = {
+        w["update"]["fields"][k]["stringValue"]
+        for w in creates for k in ("uploaderUid", "createdByUid") if k in w["update"]["fields"]
+    }
+    assert uids == {"real"}
+    # confirm_device names the confirmation doc after the uid: same rule.
+    s.queue_post(_Resp(200, {}))
+    await c.confirm_device("rt", "stale-or-spoofed", "d1")
+    conf = s.posts[-1][1]["json"]["writes"][0]["update"]
+    assert conf["name"].endswith("/confirmations/real")
+    assert conf["fields"]["uid"] == {"stringValue": "real"}
+
+
+# ── audit STORE-09: an unreachable store is not an empty one ───────────────────
+
+class _Offline(_Session):
+    """Every request fails at the transport, as when HA has no internet."""
+    def post(self, url, **kw):
+        self.posts.append((url, kw))
+        raise OSError("network unreachable")
+    def get(self, url, **kw):
+        self.gets.append((url, kw))
+        raise OSError("network unreachable")
+
+
+@pytest.mark.asyncio
+async def test_unreachable_profile_and_cycle_reads_are_none_not_empty():
+    s = _Session()
+    s.queue_post(_Resp(503, {"error": "unavailable"}))
+    s.queue_post(_Resp(200, []))
+    s.queue_post(_Resp(429, {"error": "quota"}))
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    assert await c.get_profiles("d") is None
+    assert await c.get_profiles("d") == []
+    assert await c.get_cycles("p") is None
+    assert await c.get_cycles("p") == []
+    off = _client(_Offline())
+    assert await off.get_profiles("d") is None
+    assert await off.get_cycles("p") is None
+    dp = await off.device_profiles("Bosch", "WAT", "washer")
+    assert dp == {"device_id": "washer__bosch__wat", "items": [], "error": "store_unreachable"}
+
+
+@pytest.mark.asyncio
+async def test_device_bundle_reports_an_unreachable_store():
+    bundle = await _client(_Offline()).get_device_bundle("washer__bosch__wat")
+    assert bundle["error"] == "store_unreachable" and bundle["profiles"] == []
+    # The device doc alone failing (5xx) is the same: its settings are unknown.
+    s = _Session()
+    s.queue_get(_Resp(503, {}))
+    s.queue_post(_Resp(200, []))
+    assert (await _client(s).get_device_bundle("d")).get("error") == "store_unreachable"
+    # ...but a device doc that does not exist (404) is an answer, not an outage.
+    s = _Session()
+    s.queue_get(_Resp(404, {}))
+    s.queue_post(_Resp(200, []))
+    bundle = await _client(s).get_device_bundle("d")
+    assert "error" not in bundle and bundle["profiles"] == [] and bundle["settings"] == {}
+
+
+class _CyclesFailFor(_Session):
+    """Profiles query answers two programs; the cycles query for ``bad`` fails."""
+    def __init__(self, bad: str):
+        super().__init__()
+        self._bad = bad
+    def post(self, url, **kw):
+        self.posts.append((url, kw))
+        sq = kw["json"]["structuredQuery"]
+        if sq["from"][0]["collectionId"] == "profiles":
+            return _Resp(200, [
+                {"document": {"name": f".../profiles/{pid}", "fields": {
+                    "program": {"stringValue": pid}, "status": {"stringValue": "pending"}}}}
+                for pid in ("p1", "p2")
+            ])
+        pid = next(f["fieldFilter"]["value"]["stringValue"]
+                   for f in sq["where"]["compositeFilter"]["filters"]
+                   if f["fieldFilter"]["field"]["fieldPath"] == "profileId")
+        return _Resp(503, {}) if pid == self._bad else _Resp(200, [])
+
+
+@pytest.mark.asyncio
+async def test_device_bundle_flags_a_program_whose_cycles_could_not_be_read():
+    bundle = await _client(_CyclesFailFor("p2")).get_device_bundle("d")
+    assert "error" not in bundle and bundle["failed_profiles"] == 1
+    by_id = {p["id"]: p for p in bundle["profiles"]}
+    assert by_id["p2"]["cycles_unavailable"] is True and by_id["p2"]["cycles"] == []
+    assert "cycles_unavailable" not in by_id["p1"]
+
+
+@pytest.mark.asyncio
+async def test_catalog_invalidation_drops_the_index_delta_cache_too():
+    # Search reads the static index plus a `delta:` query for entries created after
+    # it. A stale delta hides a device the user has just contributed for up to the
+    # 1 h TTL, and the panel's refresh action could not clear it.
+    s = _Session()
+    s.queue_post(_Resp(200, []))
+    c = _client(s)
+    await c._index_delta("devices", "2026-01-01T00:00:00Z", ("brand",))
+    await c._index_delta("devices", "2026-01-01T00:00:00Z", ("brand",))
+    assert len(s.posts) == 1
+    c.refresh_catalog()
+    s.queue_post(_Resp(200, []))
+    await c._index_delta("devices", "2026-01-01T00:00:00Z", ("brand",))
+    assert len(s.posts) == 2
+
+
+def test_an_oversized_rating_reads_as_no_ratings():
+    # Firestore integerValue decodes to an unbounded int and float() on it raises
+    # OverflowError, which escaped and failed get_cycles. 1e400 parses to inf
+    # instead and never raises, so both are asserted.
+    from custom_components.ha_washdata.store_client import _rating_from_doc
+
+    none = {"avg": None, "count": 0}
+    assert _rating_from_doc({"ratingCount": 2, "ratingSum": 10**400}) == none
+    assert _rating_from_doc({"ratingCount": 10**400, "ratingSum": 5}) == none
+    assert _rating_from_doc({"ratingCount": 2, "ratingSum": 1e400}) == none
+    assert _rating_from_doc({"ratingCount": 2, "ratingSum": 9}) == {"avg": 4.5, "count": 2}

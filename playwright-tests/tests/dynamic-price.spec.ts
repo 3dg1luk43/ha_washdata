@@ -31,7 +31,7 @@ const PRICE_STATES = {
 
 async function openEnergySection(page) {
   await clickTab(page, 'settings');
-  const sec = page.locator('button[data-sec="notifications"]').first();
+  const sec = page.locator('button[data-sec="basic"]').first();
   await expect(sec).toBeVisible({ timeout: 8_000 });
   await sec.click();
 }
@@ -77,9 +77,9 @@ test('a real tariff sensor in the price field raises nothing', async ({ page }) 
   await expect(page.locator('[data-cerr="energy_price_entity"]')).toBeHidden();
 });
 
-test('the time-weighted cost toggle renders under Notifications -> Energy', async ({ page }) => {
+test('the time-weighted cost toggle renders under Basic -> Energy', async ({ page }) => {
   await clickTab(page, 'settings');
-  const sec = page.locator('button[data-sec="notifications"]').first();
+  const sec = page.locator('button[data-sec="basic"]').first();
   await expect(sec).toBeVisible({ timeout: 8_000 });
   await sec.click();
   const toggle = page.locator('input[data-opt="energy_price_dynamic"]').first();
@@ -90,7 +90,7 @@ test('the time-weighted cost toggle renders under Notifications -> Energy', asyn
 
 test('turning the toggle off saves it as false', async ({ page }) => {
   await clickTab(page, 'settings');
-  await page.locator('button[data-sec="notifications"]').first().click();
+  await page.locator('button[data-sec="basic"]').first().click();
   const field = page.locator('.wd-field-switch:has(input[data-opt="energy_price_dynamic"])').first();
   await expect(field).toBeVisible({ timeout: 8_000 });
   await field.locator('label').first().click();
@@ -109,11 +109,12 @@ test('a time-weighted cycle shows its effective price, a fixed-price one does no
 
   const marked = dynamicRow.locator('td.wd-tc-num span[title*="Time-weighted"]');
   await expect(marked).toHaveCount(1);
-  await expect(marked).toHaveText('0.21 EUR');
+  // Currency formatted for the HA user's locale (audit UI-08), as the card does.
+  await expect(marked).toHaveText('€0.21');
   await expect(marked).toHaveAttribute('title', /0\.2471/);
 
   // The frozen-price cycle shows the same kind of number with no such claim on it.
   const fixedRow = page.locator('tr[data-cid="cyc-002"]');
   await expect(fixedRow.locator('td.wd-tc-num span[title*="Time-weighted"]')).toHaveCount(0);
-  await expect(fixedRow.locator('td.wd-tc-num').nth(2)).toHaveText('0.34 EUR');
+  await expect(fixedRow.locator('td.wd-tc-num').nth(2)).toHaveText('€0.34');
 });

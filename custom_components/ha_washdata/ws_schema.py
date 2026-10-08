@@ -19,8 +19,8 @@
 This module is the **single source of truth** for the shape of every
 ``ha_washdata/*`` WebSocket command: its request parameters (:data:`WS_COMMANDS`)
 and its response payload (:data:`WS_RESPONSE_TYPES`, one ``TypedDict`` per
-command). It is deliberately dependency-free — it imports nothing from Home
-Assistant and nothing from :mod:`ws_api` — so it is safe to import from tooling
+command). It is deliberately dependency-free: it imports nothing from Home
+Assistant and nothing from :mod:`ws_api`, so it is safe to import from tooling
 (``devtools/generate_ws_types.py``), from tests, and from ``ws_api`` itself
 without creating an import cycle.
 
@@ -66,8 +66,22 @@ class OkResponse(TypedDict):
 
 # ─── Devices ────────────────────────────────────────────────────────────────────
 
+class MatchUncertainty(TypedDict):
+    """The top two of an undecided live match (MATCH-DECIDE-15). Display only.
+
+    ``runner_up`` and ``margin`` are None when only one programme scored.
+    ``sure_pct`` is ``match_rules.display_sure_pct``: how often the leading guess
+    was right at that margin on the corpus, rounded to 5. Never a gate.
+    """
+
+    top: str
+    runner_up: str | None
+    margin: float | None
+    sure_pct: int
+
+
 class DeviceInfo(TypedDict):
-    """One entry in :class:`GetDevicesResponse` — live state for a device."""
+    """One entry in :class:`GetDevicesResponse`: live state for a device."""
 
     entry_id: str
     perm: str
@@ -77,9 +91,15 @@ class DeviceInfo(TypedDict):
     current_program: str | None
     time_remaining_s: float | None
     total_duration_s: float | None
+    # The matched program's expected length (s): what the phase sensor maps
+    # progress onto, so the Status phase timeline can use the same span.
+    expected_duration_s: float | None
     current_power_w: float | None
     cycle_progress_pct: float | None
     envelope_position: float | None
+    # Set while a cycle runs with no committed program, or with a runner-up within
+    # the ambiguity margin; None otherwise. The program sensor keeps `detecting...`.
+    match_uncertainty: MatchUncertainty | None
     suggestions_count: int
     suggestion_keys: list[str]
     feedback_count: int
@@ -107,8 +127,12 @@ class GetDeviceCyclesResponse(TypedDict):
     cycles: list[dict[str, Any]]
     reference_cycles: list[dict[str, Any]]
     backfill_cycles: list[dict[str, Any]]
+    # `total` / `has_more` describe the real (`cycles`) list only.
     total: int
     has_more: bool
+    # Reference + backfill, paged on their own `imported_offset` cursor (item 129a).
+    imported_total: int
+    imported_has_more: bool
 
 
 # ─── Settings ──────────────────────────────────────────────────────────────────
@@ -134,6 +158,9 @@ class GetProfilesResponse(TypedDict):
     coverage_gaps: dict[str, Any]
     profile_advisories: list[dict[str, Any]]
     profile_terminal: dict[str, Any]
+    # Profile name -> observed cycles the matcher labelled with it on its own
+    # (STORE-21); shown on imported program cards. Absent names mean 0.
+    profile_matcher_counts: dict[str, int]
 
 
 class CreateProfileResponse(TypedDict):
@@ -151,7 +178,6 @@ class ProfileGroupInfo(TypedDict):
 class GetProfileGroupsResponse(TypedDict):
     groups: list[ProfileGroupInfo]
     min_cohesion: float
-    suggestions: list[dict[str, Any]]
 
 
 class GetProfilePhasesResponse(TypedDict):
@@ -160,13 +186,61 @@ class GetProfilePhasesResponse(TypedDict):
 
 # ─── Maintenance log ───────────────────────────────────────────────────────────
 
+class MaintenanceTask(TypedDict):
+    """A user-defined maintenance task (#461). Intervals of 0 are off.
+
+    ``since`` / ``since_cycle_count``: the date and odometer it counts from until
+    it is first logged (creation, or when it was last switched back on).
+    """
+
+    id: str
+    name: str
+    cycles: int
+    days: int
+    since: str
+    since_cycle_count: int
+
+
+class MaintenanceStatusRow(TypedDict):
+    """One active reminder and how far along it is (#461).
+
+    ``name`` is the user's text for a custom task and None for a built-in type
+    (the panel translates those). ``days_since`` is None without a date to count
+    from. Due when either interval (0 = off) is reached.
+    """
+
+    id: str
+    custom: bool
+    name: str | None
+    cycles_interval: int
+    days_interval: int
+    cycles_since: int
+    days_since: int | None
+    due: bool
+
+
+class MaintenanceLimits(TypedDict):
+    tasks_max: int
+    name_max: int
+    cycles_max: int
+    days_max: int
+
+
 class GetMaintenanceLogResponse(TypedDict):
     log: list[dict[str, Any]]
-    due: Any
+    due: list[str]
     event_types: list[str]
-    reminders: dict[str, Any]
+    reminders: dict[str, int]
     cycles_since: dict[str, int]
+    custom_tasks: list[MaintenanceTask]
+    status: list[MaintenanceStatusRow]
     lifetime_cycle_count: int
+    limits: MaintenanceLimits
+
+
+class MaintenanceTaskResponse(TypedDict):
+    success: bool
+    task: MaintenanceTask
 
 
 class SetLifetimeCycleCountResponse(TypedDict):
@@ -188,10 +262,13 @@ class GetPhaseCatalogResponse(TypedDict):
 
 # ─── Recording ─────────────────────────────────────────────────────────────────
 
-class GetRecordingStateResponse(TypedDict, total=False):
+class _GetRecordingStateBase(TypedDict):
+    state: str
+
+
+class GetRecordingStateResponse(_GetRecordingStateBase, total=False):
     """``state`` is always present; the remaining keys depend on the state."""
 
-    state: str
     duration_s: int
     sample_count: int
     start_time: str | None
@@ -213,6 +290,9 @@ class DismissAllFeedbacksResponse(TypedDict):
 
 class GetDiagnosticsResponse(TypedDict):
     stats: dict[str, Any]
+    # The last replace import's restore point, ``{created_at, source, counts}``, or
+    # None when there is nothing to undo (register item 195).
+    import_undo: dict[str, Any] | None
 
 
 class ClearDebugDataResponse(TypedDict):
@@ -237,6 +317,18 @@ class ImportConfigSelectiveResponse(TypedDict):
     summary: dict[str, Any]
 
 
+class ImportConfigResponse(TypedDict):
+    success: bool
+    # False when the pre-import restore point could not be written (item 195).
+    restore_point_saved: bool
+
+
+class UndoImportResponse(TypedDict):
+    success: bool
+    # ``{restored_from, counts}``: when the restore point was taken, what it held.
+    summary: dict[str, Any]
+
+
 # ─── Shared constants ──────────────────────────────────────────────────────────
 
 class GetConstantsResponse(TypedDict):
@@ -245,7 +337,6 @@ class GetConstantsResponse(TypedDict):
     device_types: list[dict[str, Any]]
     state_colors: dict[str, Any]
     ml_lab_enabled: bool
-    ml_suggestions_enabled: bool
     ml_training_available: bool
     PROFILE_MIN_WARMUP_CYCLES: Any
     store_online_available: bool
@@ -281,17 +372,20 @@ class RunSuggestionAnalysisResponse(TypedDict, total=False):
 
 # ─── Cycle curve / interactive editing ─────────────────────────────────────────
 
-class GetCyclePowerDataResponse(TypedDict, total=False):
-    """``cycle_id`` / ``samples`` / ``sample_count`` / ``decimated`` /
-    ``full_duration_s`` are always present; the metadata keys are present only
-    when the cycle is found. ``sample_count`` is the stored point count and
-    ``decimated`` is True when ``samples`` was thinned below it (#395)."""
-
+class _GetCyclePowerDataBase(TypedDict):
     cycle_id: str
     samples: list[list[float]]
     sample_count: int
     decimated: bool
     full_duration_s: float
+
+
+class GetCyclePowerDataResponse(_GetCyclePowerDataBase, total=False):
+    """``cycle_id`` / ``samples`` / ``sample_count`` / ``decimated`` /
+    ``full_duration_s`` are always present (the required base); the metadata keys
+    are present only when the cycle is found. ``sample_count`` is the stored point
+    count and ``decimated`` is True when ``samples`` was thinned below it (#395)."""
+
     start_time: str | None
     end_time: str | None
     duration: float | None
@@ -312,6 +406,27 @@ class GetCyclePowerDataResponse(TypedDict, total=False):
     # `expected_curve_for_cycle` succeeds, so it is optional rather than absent:
     # the panel draws the expected curve from it.
     expected: list[list[float]] | None
+
+
+class GetCycleContextResponse(TypedDict):
+    """The power sensor's recorder history around a stored cycle (item 513).
+
+    ``before`` / ``after`` are ``[offset_s, watts | null]`` from the cycle's stored
+    start (``before`` offsets are negative; ``after`` starts at ``trace_end_s``);
+    a null watt marks an unavailable row. ``reason`` is null when ``available``,
+    else one of ``not_found`` / ``not_live`` / ``no_sensor`` / ``no_start`` /
+    ``no_history``. Display only: nothing here is part of the cycle."""
+
+    cycle_id: str
+    available: bool
+    reason: str | None
+    entity_id: str | None
+    before_s: float
+    after_s: float
+    trace_end_s: float
+    after_end_s: float
+    before: list[list[float | None]]
+    after: list[list[float | None]]
 
 
 class AnalyzeSplitResponse(TypedDict):
@@ -345,14 +460,17 @@ class GetProfileCyclesResponse(TypedDict):
 
 # ─── Panel config + RBAC ───────────────────────────────────────────────────────
 
-class GetPanelConfigResponse(TypedDict, total=False):
-    """``panel`` / ``is_admin`` / ``user`` / ``prefs`` are always present;
-    ``rbac`` and ``users`` are added for admins only."""
-
+class _GetPanelConfigBase(TypedDict):
     panel: dict[str, Any]
     is_admin: bool
     user: dict[str, Any]
     prefs: dict[str, Any]
+
+
+class GetPanelConfigResponse(_GetPanelConfigBase, total=False):
+    """``panel`` / ``is_admin`` / ``user`` / ``prefs`` are always present (the
+    required base); ``rbac`` and ``users`` are added for admins only."""
+
     rbac: dict[str, Any]
     users: list[dict[str, Any]]
 
@@ -367,14 +485,17 @@ class GetMatchDebugResponse(TypedDict):
 
 # ─── Live power history ────────────────────────────────────────────────────────
 
-class GetPowerHistoryResponse(TypedDict, total=False):
-    """Base keys are always present; ``cycle_start_iso`` only while a cycle runs."""
-
+class _GetPowerHistoryBase(TypedDict):
     cycle_active: bool
     cycle_elapsed_s: float
     live: list[list[float]]
     raw: list[list[float]]
     restart_gaps: list[Any]
+
+
+class GetPowerHistoryResponse(_GetPowerHistoryBase, total=False):
+    """Base keys are always present; ``cycle_start_iso`` only while a cycle runs."""
+
     cycle_start_iso: str
 
 
@@ -388,17 +509,15 @@ class GetLogsResponse(TypedDict):
 
 class GetMlComparisonResponse(TypedDict, total=False):
     """Two shapes: a disabled report (``enabled=False`` + ``error``) and an
-    enabled report; both carry ``cycles`` + ``settings_comparison``."""
+    enabled report; both carry ``cycles``."""
 
     enabled: bool
     error: str
     cycles: list[dict[str, Any]]
-    settings_comparison: dict[str, Any]
     cycle_count: int
     evaluated_count: int
     model_source: dict[str, Any]
     profile_stats: dict[str, Any]
-    ml_suggestions_enabled: bool
 
 
 # ─── On-device ML training ─────────────────────────────────────────────────────
@@ -413,84 +532,19 @@ class GetMlTrainingStatusResponse(TypedDict):
     interval_days: int
     hour: int
     on_device_models: dict[str, Any]
-    matching: dict[str, Any]
+    # capability -> {ts, promoted, reason_code, reason_params, reason} of the last
+    # training run; the reason fields only when it promoted nothing (audit ML-20).
+    last_run: dict[str, Any]
 
 
 # ─── Playground (F3) ───────────────────────────────────────────────────────────
 
-class RunPlaygroundCycleDetailResponse(TypedDict, total=False):
-    cycle_id: Any
-    label: str | None
-    duration_s: float | None
-    config_summary: dict[str, Any]
-    series: list[dict[str, Any]]
-    events: list[dict[str, Any]]
-    alerts: list[dict[str, Any]]
-    outcome: dict[str, Any]
-    error: str
-
-
-class RunPlaygroundHistoryResponse(TypedDict, total=False):
-    rows: list[dict[str, Any]]
-    summary: dict[str, Any]
-    baseline_rows: list[dict[str, Any]]
-    baseline_summary: dict[str, Any]
-    diff: dict[str, list[str]]
-
-
-class RunPlaygroundSweepResponse(TypedDict, total=False):
-    param: str
-    objective: str
-    points: list[dict[str, Any]]
-    current_value: Any
-    best_value: Any
-    best_metric: float | None
-    param_x: str
-    param_y: str
-    x_values: list[float]
-    y_values: list[float]
-    grid: list[list[Any]]
-    best: dict[str, Any]
-    current: dict[str, Any]
-    error: str
-
-
-class DtwStage2Scores(TypedDict):
-    correlation: float
-    mae_score: float
-    score: float
-
-
-class DtwScores(TypedDict):
-    l1_score: float
-    ddtw_score: float
-    ensemble_score: float
-    blend_weight: float
-    blended_score: float
-
-
-class DtwStage4Scores(TypedDict):
-    duration_agreement: float
-    energy_agreement: float
-    final_score: float
-
-
-class GetDtwDebugResponse(TypedDict):
-    cycle_id: Any
-    profile_name: str
-    grid_n: int
-    cycle_duration_s: float
-    profile_duration_s: float
-    cycle_trace: list[list[float]]
-    profile_trace: list[list[float]]
-    stage2: DtwStage2Scores
-    dtw: DtwScores
-    stage4: DtwStage4Scores
-    warp_path: list[list[int]]
-
-
 class PlaygroundPreset(TypedDict):
-    """One saved Playground settings snapshot."""
+    """One saved Playground settings snapshot.
+
+    ``values`` holds only keys the Playground offers today; a stored key it no
+    longer offers is filtered out on read.
+    """
 
     name: str
     values: dict[str, Any]
@@ -501,10 +555,8 @@ class PlaygroundPreset(TypedDict):
 class GetPlaygroundSettingsResponse(TypedDict):
     """Live effective Playground settings + the device's saved presets.
 
-    ``classic_suggestions`` and ``ml_suggestions`` are filtered to keys the
-    Playground exposes so the panel can stage them directly.  ``ml_suggestions``
-    is ``None`` when ``ENABLE_ML_SUGGESTIONS`` is off - the key is still always
-    present, so every field here is required (total=True) and
+    ``classic_suggestions`` is filtered to keys the Playground exposes so the
+    panel can stage them directly. Every field here is required (total=True) so
     ``_validate_ws_contract()`` can catch a handler that drops one.
     """
 
@@ -513,8 +565,6 @@ class GetPlaygroundSettingsResponse(TypedDict):
     publishable: list[str]
     preset_limit: int
     classic_suggestions: dict[str, Any]
-    ml_suggestions: dict[str, Any] | None
-    ml_suggestions_enabled: bool
 
 
 class PlaygroundPresetsResponse(TypedDict):
@@ -540,10 +590,6 @@ class TaskSnapshot(TypedDict, total=False):
     error: str | None
     has_result: bool
     result: Any
-
-
-class ListTasksResponse(TypedDict):
-    tasks: list[TaskSnapshot]
 
 
 class CancelTaskResponse(TypedDict):
@@ -602,8 +648,13 @@ class StoreStatusResponse(TypedDict, total=False):
 
 
 class StoreItemsResponse(TypedDict, total=False):
-    """A list of store docs (devices / profiles / cycles)."""
+    """A list of store docs (devices / profiles / cycles).
+
+    ``error`` (``"store_unreachable"``) means the store could not be read, as opposed
+    to an empty ``items`` that really has nothing (audit STORE-09).
+    """
     items: list
+    error: str
     disabled: bool
 
 
@@ -631,13 +682,6 @@ class StoreSimpleResponse(TypedDict, total=False):
     brand: str | None
     model: str | None
     error: str
-    disabled: bool
-
-
-class StoreQualityResponse(TypedDict, total=False):
-    """Device 5-star quality summary (count + average)."""
-    avg: float | None
-    count: int
     disabled: bool
 
 
@@ -669,6 +713,7 @@ class StoreDeviceProfilesResponse(TypedDict, total=False):
     """Resolved store deviceId + its profiles (for the Share dialog picker)."""
     device_id: str
     items: list
+    error: str
     disabled: bool
 
 
@@ -702,13 +747,22 @@ class StoreUploadDeviceResponse(TypedDict, total=False):
 
 
 class StoreDownloadDeviceResponse(TypedDict, total=False):
-    """Result of adopting a whole-device bundle into local reference cycles."""
+    """Result of adopting a whole-device bundle into local reference cycles (the
+    ``store_download`` task's result). ``partial`` + ``failed_profiles``: some
+    programs' cycles could not be fetched; ``error`` ``"store_unreachable"``: the
+    store could not be read, never reported as an empty adopt (audit STORE-09).
+    ``settings`` is the bundle's shared settings, ``settings_applied`` how many
+    of them were written (only with ``include_settings``)."""
     profiles_adopted: int
     cycles_imported: int
+    cycles_skipped: int
     phases_applied: int
+    settings: dict
     settings_applied: int
+    cancelled: bool
+    partial: bool
+    failed_profiles: int
     error: str
-    disabled: bool
 
 
 class GetShareableCyclesResponse(TypedDict, total=False):
@@ -754,10 +808,13 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_maintenance_log": GetMaintenanceLogResponse,
     "add_maintenance_event": AddMaintenanceEventResponse,
     "delete_maintenance_event": SuccessResponse,
+    "add_maintenance_task": MaintenanceTaskResponse,
+    "update_maintenance_task": MaintenanceTaskResponse,
+    "delete_maintenance_task": SuccessResponse,
     "set_lifetime_cycle_count": SetLifetimeCycleCountResponse,
     "label_cycle": SuccessResponse,
     "delete_cycle": SuccessResponse,
-    "auto_label_cycles": SuccessResponse,
+    "auto_label_cycles": StartTaskResponse,
     "get_phase_catalog": GetPhaseCatalogResponse,
     "create_phase": SuccessResponse,
     "update_phase": SuccessResponse,
@@ -775,11 +832,12 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "clear_debug_data": ClearDebugDataResponse,
     "wipe_history": SuccessResponse,
     "export_config": ExportConfigResponse,
-    "import_config": SuccessResponse,
+    "import_config": ImportConfigResponse,
     "get_export_inventory": GetExportInventoryResponse,
     "analyze_import": AnalyzeImportResponse,
     "export_config_selective": ExportConfigResponse,
     "import_config_selective": ImportConfigSelectiveResponse,
+    "undo_import": UndoImportResponse,
     "get_constants": GetConstantsResponse,
     "get_suggestions": GetSuggestionsResponse,
     "apply_suggestions": ApplySuggestionsResponse,
@@ -787,6 +845,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "set_suggestion_lock": SetSuggestionLockResponse,
     "run_suggestion_analysis": RunSuggestionAnalysisResponse,
     "get_cycle_power_data": GetCyclePowerDataResponse,
+    "get_cycle_context": GetCycleContextResponse,
     "trim_cycle": StartTaskResponse,
     "analyze_split": AnalyzeSplitResponse,
     "apply_split": StartTaskResponse,
@@ -803,20 +862,14 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "get_ml_comparison": GetMlComparisonResponse,
     "get_ml_training_status": GetMlTrainingStatusResponse,
     "trigger_ml_training": StartTaskResponse,
-    "revert_matching_config": SuccessResponse,
     "revert_ml_models": SuccessResponse,
     "set_ml_review": SuccessResponse,
     "pause_cycle": OkResponse,
     "resume_cycle": OkResponse,
     "terminate_cycle": OkResponse,
-    "run_playground_cycle_detail": RunPlaygroundCycleDetailResponse,
-    "run_playground_history": RunPlaygroundHistoryResponse,
-    "run_playground_sweep": RunPlaygroundSweepResponse,
-    "get_dtw_debug": GetDtwDebugResponse,
     "get_playground_settings": GetPlaygroundSettingsResponse,
     "save_playground_preset": PlaygroundPresetsResponse,
     "delete_playground_preset": PlaygroundPresetsResponse,
-    "list_tasks": ListTasksResponse,
     "subscribe_tasks": SubscribeTasksResponse,
     "cancel_task": CancelTaskResponse,
     "get_task_result": TaskSnapshot,
@@ -834,20 +887,26 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_search_devices": StoreItemsResponse,
     "store_get_profiles": StoreItemsResponse,
     "store_get_cycles": StoreItemsResponse,
+    "store_confirm_device": StoreConfirmResponse,
+    "store_rate_device": StoreOnlineResponse,
     "store_import_cycle": StoreImportResponse,
     "store_upload_cycle": StoreUploadResponse,
     "store_list_brands": StoreItemsResponse,
-    "store_get_device_quality": StoreQualityResponse,
-    "store_confirm_device": StoreConfirmResponse,
-    "store_rate_device": StoreOnlineResponse,
     "store_set_online": StoreOnlineResponse,
     "store_set_prefs": StorePrefsResponse,
     "store_get_device_profiles": StoreDeviceProfilesResponse,
     "store_get_catalog_entry": StoreCatalogEntryResponse,
     "store_refresh_catalog": StoreRefreshCatalogResponse,
     "store_upload_device": StoreUploadDeviceResponse,
-    "store_download_device": StoreDownloadDeviceResponse,
+    "store_download_device": StartTaskResponse,
     "get_shareable_cycles": GetShareableCyclesResponse,
+}
+
+#: Map a task-registry ``kind`` -> the TypedDict of its finished ``result``
+#: (``TaskSnapshot.result`` from ``get_task_result`` / ``subscribe_tasks``). Only
+#: kinds whose result the panel reads by key are listed; the rest stay ``Any``.
+WS_TASK_RESULT_TYPES: dict[str, type] = {
+    "store_download": StoreDownloadDeviceResponse,
 }
 
 #: Commands whose response splats an upstream summary dict and therefore has an
@@ -855,11 +914,6 @@ WS_RESPONSE_TYPES: dict[str, type] = {
 #: for these but does not flag extra keys.
 WS_OPEN_RESPONSES: frozenset[str] = frozenset({
     "run_suggestion_analysis",
-    # Playground what-if responses carry nested/variant shapes (incl. an error
-    # variant); skip strict extra-key validation.
-    "run_playground_cycle_detail",
-    "run_playground_history",
-    "run_playground_sweep",
     # Task snapshot splats a variant key set (result present only when finished).
     "get_task_result",
 })
@@ -895,6 +949,7 @@ WS_COMMANDS: dict[str, dict] = {
         _entry(),
         _p("limit", "int", False),
         _p("offset", "int", False),
+        _p("imported_offset", "int", False),
     ]},
     "get_options": {"params": [_entry()]},
     "set_options": {"params": [_entry(), _p("options", "dict")]},
@@ -945,6 +1000,20 @@ WS_COMMANDS: dict[str, dict] = {
         _p("notes", "str", False),
     ]},
     "delete_maintenance_event": {"params": [_entry(), _p("event_id", "str")]},
+    "add_maintenance_task": {"params": [
+        _entry(),
+        _p("name", "str"),
+        _p("cycles", "int", False),
+        _p("days", "int", False),
+    ]},
+    "update_maintenance_task": {"params": [
+        _entry(),
+        _p("task_id", "str"),
+        _p("name", "str", False),
+        _p("cycles", "int", False),
+        _p("days", "int", False),
+    ]},
+    "delete_maintenance_task": {"params": [_entry(), _p("task_id", "str")]},
     "set_lifetime_cycle_count": {"params": [_entry(), _p("count", "int")]},
     "label_cycle": {"params": [
         _entry(),
@@ -1009,6 +1078,7 @@ WS_COMMANDS: dict[str, dict] = {
         _p("cycle_destination", "str", False, enum=["reference", "real_history"]),
         _p("apply_settings", "bool", False),
     ]},
+    "undo_import": {"params": [_entry()]},
     "get_constants": {"params": []},
     "get_suggestions": {"params": [_entry()]},
     "apply_suggestions": {"params": [_entry(), _p("keys", "list[str]")]},
@@ -1016,6 +1086,12 @@ WS_COMMANDS: dict[str, dict] = {
     "set_suggestion_lock": {"params": [_entry(), _p("key", "str"), _p("locked", "bool")]},
     "run_suggestion_analysis": {"params": [_entry()]},
     "get_cycle_power_data": {"params": [_entry(), _p("cycle_id", "str")]},
+    "get_cycle_context": {"params": [
+        _entry(),
+        _p("cycle_id", "str"),
+        _p("before_s", "float", False),
+        _p("after_s", "float", False),
+    ]},
     "trim_cycle": {"params": [
         _entry(),
         _p("cycle_id", "str"),
@@ -1061,7 +1137,6 @@ WS_COMMANDS: dict[str, dict] = {
     "get_ml_comparison": {"params": [_entry()]},
     "get_ml_training_status": {"params": [_entry()]},
     "trigger_ml_training": {"params": [_entry()]},
-    "revert_matching_config": {"params": [_entry()]},
     "revert_ml_models": {"params": [_entry()]},
     "set_ml_review": {"params": [
         _entry(),
@@ -1074,32 +1149,6 @@ WS_COMMANDS: dict[str, dict] = {
     "pause_cycle": {"params": [_entry()]},
     "resume_cycle": {"params": [_entry()]},
     "terminate_cycle": {"params": [_entry()]},
-    "run_playground_cycle_detail": {"params": [
-        _entry(),
-        _p("cycle_id", "str"),
-        _p("settings_override", "dict", False),
-    ]},
-    "run_playground_history": {"params": [
-        _entry(),
-        _p("cycle_ids", "list[str]", False),
-        _p("settings_override", "dict", False),
-        _p("concurrency", "int", False),
-    ]},
-    "run_playground_sweep": {"params": [
-        _entry(),
-        _p("param", "str"),
-        _p("values", "list[float]"),
-        _p("objective", "str"),
-        _p("cycle_ids", "list[str]", False),
-        _p("concurrency", "int", False),
-        _p("param_y", "str", False),
-        _p("values_y", "list[float]", False),
-    ]},
-    "get_dtw_debug": {"params": [
-        _entry(),
-        _p("cycle_id", "str"),
-        _p("profile_name", "str|null", False),
-    ]},
     "get_playground_settings": {"params": [
         _entry(),
         _p("include_suggestions", "bool", False),
@@ -1110,7 +1159,6 @@ WS_COMMANDS: dict[str, dict] = {
         _p("values", "dict"),
     ]},
     "delete_playground_preset": {"params": [_entry(), _p("name", "str")]},
-    "list_tasks": {"params": [_p("entry_id", "str|null", False)]},
     "subscribe_tasks": {"params": [_p("entry_id", "str|null", False)]},
     "cancel_task": {"params": [_p("task_id", "str")]},
     "get_task_result": {"params": [_p("task_id", "str")]},
@@ -1118,21 +1166,20 @@ WS_COMMANDS: dict[str, dict] = {
         _entry(),
         _p("cycle_ids", "list[str]", False),
         _p("settings_override", "dict", False),
+        _p("count", "int", False),
     ]},
     "start_playground_sweep": {"params": [
         _entry(),
         _p("param", "str"),
         _p("values", "list[float]"),
         _p("objective", "str"),
-        _p("param_y", "str|null", False),
-        _p("values_y", "list[float]", False),
+        _p("cycle_ids", "list[str]", False),
+        _p("count", "int", False),
     ]},
     "start_playground_cycle_detail": {"params": [
         _entry(),
         _p("cycle_id", "str"),
         _p("settings_override", "dict", False),
-        _p("stress_tail", "bool", False),
-        _p("stress_idle_w", "float|null", False),
     ]},
     "history_import_begin": {"params": [_entry()]},
     "history_import_chunk": {"params": [
@@ -1169,12 +1216,11 @@ WS_COMMANDS: dict[str, dict] = {
     ]},
     "store_get_profiles": {"params": [_entry(), _p("device_id", "str")]},
     "store_get_cycles": {"params": [_entry(), _p("profile_id", "str")]},
-    "store_get_device_quality": {"params": [_entry(), _p("device_id", "str")]},
+    "store_confirm_device": {"params": [_entry(), _p("device_id", "str")]},
+    "store_rate_device": {"params": [_entry(), _p("device_id", "str"), _p("rating", "int")]},
     "store_get_device_profiles": {"params": [_entry(), _p("brand", "str"), _p("model", "str"), _p("appliance_type", "str")]},
     "store_get_catalog_entry": {"params": [_entry(), _p("brand", "str"), _p("model", "str"), _p("appliance_type", "str")]},
     "store_refresh_catalog": {"params": [_entry()]},
-    "store_confirm_device": {"params": [_entry(), _p("device_id", "str")]},
-    "store_rate_device": {"params": [_entry(), _p("device_id", "str"), _p("rating", "int")]},
     "store_set_online": {"params": [_entry(), _p("enabled", "bool")]},
     "store_set_prefs": {"params": [_entry(), _p("prefs", "dict")]},
     "store_import_cycle": {"params": [
@@ -1202,6 +1248,7 @@ def full_command_name(command: str) -> str:
 __all__ = [
     "WS_COMMANDS",
     "WS_RESPONSE_TYPES",
+    "WS_TASK_RESULT_TYPES",
     "WS_OPEN_RESPONSES",
     "WS_PREFIX",
     "full_command_name",

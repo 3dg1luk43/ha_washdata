@@ -74,8 +74,13 @@ async def test_repro_avg_duration_skew(hass):
     assert ema_avg == new_avg
 
 @pytest.mark.asyncio
-async def test_auto_label_no_rebuild_repro(hass):
-    """Confirm that auto_label_cycles doesn't rebuild envelopes."""
+async def test_auto_label_rebuilds_the_envelope(hass):
+    """auto_label_cycles rebuilds the envelope of a profile a real cycle joined.
+
+    This used to pin the opposite ("current bug"): only backfill moves were
+    rebuilt, so the label changed nothing the matcher saw until the nightly
+    maintenance (register item 493 note).
+    """
     store = ProfileStore(hass, "test_entry")
     profile_name = "Cotton 60"
     store._data["profiles"][profile_name] = {
@@ -113,7 +118,5 @@ async def test_auto_label_no_rebuild_repro(hass):
     
     assert store._data["past_cycles"][1]["profile_name"] == profile_name
     
-    # Check if envelope was updated
-    # In current implementation, it's NOT updated.
     final_updated = store._data["envelopes"][profile_name]["updated"]
-    assert initial_updated == final_updated, "Envelope should NOT have been updated (current bug)"
+    assert initial_updated != final_updated, "the envelope was not rebuilt"

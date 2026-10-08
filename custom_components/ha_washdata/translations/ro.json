@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configurare WashData",
-        "description": "Configurați mașina de spălat sau alt aparat.\n\nEste necesar un senzor de putere.\n\nDupă configurare, deschideți panoul WashData din bara laterală (sau accesați [/ha-washdata](/ha-washdata)) pentru a vizualiza ciclurile, a ajusta detectarea și a gestiona profilurile.",
+        "description": "Configurați o mașină de spălat sau alt aparat. Este necesar un senzor de putere.\n\nDupă configurare, deschideți panoul WashData din bara laterală ([/ha-washdata](/ha-washdata)) pentru a vedea ciclurile, profilurile și toate setările.",
         "data": {
           "name": "Numele dispozitivului",
           "device_type": "Tip de dispozitiv",
@@ -12,43 +12,41 @@
         },
         "data_description": {
           "name": "Un nume prietenos pentru acest dispozitiv (de exemplu, „Mașină de spălat”, „Mașină de spălat vase”).",
-          "device_type": "Ce tip de aparat este acesta? Ajută la personalizarea detectării și etichetării.",
-          "power_sensor": "Entitatea senzor care raportează consumul de energie în timp real (în wați) de la priza inteligentă.",
-          "min_power": "Citirile de putere peste acest prag (în wați) indică faptul că aparatul funcționează. Începeți cu 2W pentru majoritatea dispozitivelor."
+          "device_type": "Stabilește valorile implicite de detectare pentru acest tip de aparat.",
+          "power_sensor": "Senzorul prizei inteligente care raportează puterea curentă în wați.",
+          "min_power": "Citirile peste această valoare (în wați) înseamnă că aparatul funcționează. 2 W se potrivește pentru majoritatea dispozitivelor."
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Actualizați numele dispozitivului, tipul aparatului sau senzorul de putere.\n\nPanoul WashData (bara laterală sau [/ha-washdata](/ha-washdata)) este locul unde se gestionează detectarea, ciclurile, profilurile și notificările.",
+        "title": "Reconfigurare WashData",
+        "description": "Schimbați numele dispozitivului, tipul aparatului sau senzorul de putere.\n\nTot restul se află în panoul WashData (bara laterală sau [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Numele dispozitivului",
+          "device_type": "Tip de dispozitiv",
+          "power_sensor": "Senzor de putere",
+          "min_power": "Pragul minim de putere (W)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Nu s-a putut conecta",
-      "invalid_auth": "Autentificare nevalidă",
       "unknown": "Eroare neașteptată",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0"
     },
     "abort": {
       "already_configured": "Dispozitivul este deja configurat",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Reconfigurarea s-a realizat cu succes"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
-        "description": "Redenumiți dispozitivul sau modificați setările hardware de bază. Toate setările de detectare, potrivire și notificare se află în [panoul WashData](/ha-washdata) (accesibil și din bara laterală).",
+        "title": "Setări WashData",
+        "description": "Redenumiți dispozitivul sau modificați setările sale de bază. Tot restul se află în [panoul WashData](/ha-washdata) din bara laterală.",
         "data": {
           "name": "Numele dispozitivului",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Tip de dispozitiv",
+          "power_sensor": "Senzor de putere",
+          "min_power": "Pragul minim de putere (W)"
         }
       }
     },
@@ -60,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Niciun profil nu a fost recunoscut încă.",
       "vs_typical_longer": "cu {pct}% mai mult decât de obicei",
       "vs_typical_shorter": "cu {pct}% mai puțin decât de obicei",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0"
     }
   },
   "selector": {
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Nume profil",
-          "description": "Numele unui profil existent (creați profiluri în meniul Gestionare profiluri). Lăsați necompletat pentru a elimina eticheta."
+          "description": "Numele unui profil existent (creați profiluri în panoul WashData). Lăsați gol pentru a elimina eticheta."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Pragul de încredere",
-          "description": "Încrederea minimă de potrivire (0,50-0,95) pentru aplicarea etichetelor."
+          "description": "Încrederea minimă de potrivire (0,50-0,95) pentru aplicarea etichetelor. Lăsați gol pentru a folosi setarea Încredere Etichetare Automată a dispozitivului."
         }
       }
     },
     "export_config": {
       "name": "Exportați configurația",
-      "description": "Exportați profilurile, ciclurile și setările acestui dispozitiv într-un fișier JSON (per dispozitiv).",
+      "description": "Exportați profilurile, ciclurile și setările acestui dispozitiv într-un fișier JSON.",
       "fields": {
         "device_id": {
           "name": "Dispozitiv",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Trimiteți feedback pentru ciclu",
-      "description": "Confirmați sau corectați un program detectat automat după un ciclu finalizat. Furnizați fie „entry_id” (avansat), fie „device_id” (recomandat).",
+      "description": "Confirmați sau corectați programul detectat al unui ciclu încheiat. Indicați `device_id` (recomandat) sau `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Dispozitiv",
@@ -272,18 +270,18 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "Porniți antrenarea ML",
+      "description": "Reantrenați manual modelele ML de pe dispozitiv pe baza ciclurilor etichetate ale acestui dispozitiv (experimental).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Dispozitiv",
+          "description": "Dispozitivul WashData pentru care se reantrenează modelele."
         }
       }
     },
     "mark_unloaded": {
       "name": "Marcați ca descărcat",
-      "description": "Confirmați că încărcătura terminată a fost scoasă dintr-un dispozitiv WashData, ștergând starea Curat și orice memento de descărcare.",
+      "description": "Confirmați că încărcătura terminată a fost scoasă. Șterge starea Curat și orice memento de descărcare.",
       "fields": {
         "device_id": {
           "name": "Dispozitiv",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Ambiguitate la potrivire"
+      },
+      "maintenance_due": {
+        "name": "Întreținere scadentă",
+        "state": {
+          "on": "Scadentă",
+          "off": "Nu este scadentă"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID-uri sarcini scadente"
+          },
+          "due_tasks": {
+            "name": "Sarcini scadente",
+            "state": {
+              "descale": "Detartrare",
+              "filter_clean": "Curățare filtru",
+              "drum_clean": "Curățare tambur",
+              "bearing_service": "Service rulmenți",
+              "other": "Altele",
+              "salt": "Reumplere sare",
+              "rinse_aid": "Reumplere agent de clătire",
+              "lint_filter": "Curățare filtru de scame",
+              "condenser_clean": "Curățare condensator"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Antirid",
           "interrupted": "Întrerupt",
           "force_stopped": "Oprit forțat",
-          "rinse": "Clătire",
           "unknown": "Necunoscut",
           "clean": "Curat",
           "delay_wait": "Așteaptă să Înceapă"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalie ciclu",
+            "state": {
+              "overrun": "Întârziere",
+              "stalled": "Blocat"
+            }
+          }
         }
       },
       "washer_program": {

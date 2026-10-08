@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import collections
+import copy
 import functools
 import json
 import logging
@@ -32,12 +33,15 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant.components import websocket_api
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
-    CONF_AUTO_LABEL_CONFIDENCE,
+    coerce_numeric_option,
+    drop_invalid_numeric_options,
+    numeric_option_keys,
     CONF_NAME,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
@@ -51,32 +55,25 @@ from .const import (
     CONF_UNLOAD_CONFIRM_ENTITY,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
-    CONF_DURATION_TOLERANCE,
     CONF_END_ENERGY_THRESHOLD,
-    CONF_END_REPEAT_COUNT,
     CONF_ENERGY_SENSOR,
     CONF_EXTERNAL_END_TRIGGER,
-    CONF_LEARNING_CONFIDENCE,
     CONF_LINKED_DEVICE,
     CONF_MAINTENANCE_REMINDER_CYCLES,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_OFF_DELAY,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_MIN_WARMUP_CYCLES,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PUMP_STUCK_DURATION,
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_POWER_SENSOR,
     CONF_ENERGY_PRICE_ENTITY,
     CONF_NOTIFY_PEOPLE,
     CONF_SAMPLING_INTERVAL,
-    CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
@@ -84,28 +81,25 @@ from .const import (
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_DEVICE_TYPE,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
-    DEFAULT_SMART_TERMINATION_DURATION_RATIO,
-    DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE,
     DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-    DEFAULT_CURVE_PREROLL_SECONDS,
     CURVE_PREROLL_MAX_SECONDS,
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
     resolve_smart_termination_duration_ratio_default,
-    DEFAULT_MAINTENANCE_REMINDER_CYCLES,
-    DEFAULT_MIN_POWER,
-    DEFAULT_OFF_DELAY,
-    DEFAULT_OFF_DELAY_BY_DEVICE,
+    MAINTENANCE_CUSTOM_TASK_MAX,
+    MAINTENANCE_INTERVAL_CYCLES_MAX,
+    MAINTENANCE_INTERVAL_DAYS_MAX,
+    MAINTENANCE_TASK_NAME_MAX,
     resolve_min_off_gap_default,
     resolve_off_delay_default,
-    DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEVICE_TYPE_PUMP,
     MAINTENANCE_EVENT_TYPES,
+    PLAYGROUND_PRESET_MAX,
+    ML_HEALTH_MIN_TRACE_POINTS,
     DEVICE_TYPES,
     DOMAIN,
-    ENABLE_ML_SUGGESTIONS,
     ENABLE_ML_TRAINING,
     HISTORY_IMPORT_CHUNK_BYTES,
     HISTORY_IMPORT_CHUNK_SAMPLES,
@@ -115,7 +109,6 @@ from .const import (
     HISTORY_IMPORT_MAX_TOTAL_CYCLES,
     HISTORY_IMPORT_RECORDER_EMPTY_DAY_STOP,
     HISTORY_IMPORT_RECORDER_MAX_DAYS,
-    PLAYGROUND_PRESET_MAX,
     SHOW_ML_LAB,
     STATE_COLORS,
 )
@@ -124,9 +117,13 @@ from . import playground
 from . import task_registry
 from .cycle_detector import (
     CycleDetectorConfig,
-    effective_anticrease_finalize_ratio,
-    effective_curve_preroll_seconds,
 )
+from .detector_config import (
+    build_detector_config,
+    effective_option_values,
+    inverted_threshold_pair,
+)
+from .maintenance import editor_types, effective_reminders
 from .options_utils import strip_null_options
 from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
@@ -204,31 +201,27 @@ _CYCLE_STRIP_KEYS = frozenset({"power_data", "power_trace", "debug_data", "sampl
 
 # Settings keys that can be staged from suggestions. Mirrors the OptionsFlow's
 # _suggestion_keys_to_apply so the panel and the flow agree on what is tunable.
+# The keys the suggestion engine can still produce. A stored suggestion for any
+# other key - one written by an older version for a setting no longer suggested
+# (sampling_interval, smoothing_window, start debounce, the confidence ladder, the
+# tolerances, end_repeat_count; audit SUGGEST-01/04/12) - is never shown or applied.
 _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_WATCHDOG_INTERVAL,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_SAMPLING_INTERVAL,
+    # Held back from 2026-10-04 (audit SUGGEST-21) until register item 469(b): a
+    # shorter interval let an ambiguous tick land in the end wait and delay the end
+    # (6.7 -> 23.2 min on one cycle). `match_rules.hold_in_ending` closes that.
     CONF_PROFILE_MATCH_INTERVAL,
-    CONF_AUTO_LABEL_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_MIN_OFF_GAP,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_END_ENERGY_THRESHOLD,
-    # Stage 1 detection suggestions
-    CONF_SMOOTHING_WINDOW,
-    CONF_START_DURATION_THRESHOLD,
     CONF_COMPLETION_MIN_SECONDS,
-    CONF_LEARNING_CONFIDENCE,
-    CONF_PROFILE_MATCH_THRESHOLD,
-    CONF_END_REPEAT_COUNT,
     # Device-class-specific suggestions from reconcile_suggestions
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
@@ -242,9 +235,7 @@ _SUGGESTION_INT_KEYS: frozenset[str] = frozenset({
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_MIN_OFF_GAP,
-    CONF_SMOOTHING_WINDOW,
     CONF_COMPLETION_MIN_SECONDS,
-    CONF_END_REPEAT_COUNT,
     CONF_PUMP_STUCK_DURATION,
 })
 
@@ -261,7 +252,7 @@ def _coerce_suggested(key: str, val: Any) -> Any:
     """
     try:
         return int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return val
 
 
@@ -276,22 +267,77 @@ def _suggestion_equivalent(suggested: Any, current: Any) -> bool:
         return False
     try:
         return abs(float(suggested) - float(current)) < 1e-6
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return str(suggested) == str(current)
 
-# Settings surfaced in the ML Lab side-by-side comparison: key -> (label, unit).
-# Order defines display order. Only keys either engine produces are shown.
-_ML_COMPARE_SETTINGS: tuple[tuple[str, str, str], ...] = (
-    (CONF_OFF_DELAY, "Off Delay", "s"),
-    (CONF_END_REPEAT_COUNT, "End Repeat Count", "x"),
-    (CONF_AUTO_LABEL_CONFIDENCE, "Auto-label Confidence", ""),
-    (CONF_STOP_THRESHOLD_W, "Stop Threshold", "W"),
-    (CONF_START_THRESHOLD_W, "Start Threshold", "W"),
-    (CONF_END_ENERGY_THRESHOLD, "End Energy Threshold", "Wh"),
-    (CONF_MIN_POWER, "Min Power", "W"),
-    (CONF_MIN_OFF_GAP, "Min Off Gap", "s"),
-    (CONF_DURATION_TOLERANCE, "Duration Tolerance", ""),
-)
+
+def _visible_suggestions(
+    store: Any, merged: dict[str, Any], device_type: str
+) -> list[tuple[str, dict[str, Any], Any, Any]]:
+    """``(key, stored item, suggested, current)`` for every suggestion worth showing.
+
+    The ONE filter behind the Settings list, the Overview card, Apply-all and
+    the setup advisor, which had drifted (audit SUGGEST-11/17): a muted key could
+    be re-created by the reconcile cascade and applied by Apply-all, and the setup
+    card counted stale keys nothing would show. Drops keys the engine no longer
+    produces, muted keys, and values equal to what the key already RUNS with - the
+    effective default when it is unset, not ``None`` (SUGGEST-10).
+    """
+    raw = store.get_suggestions() or {}
+    try:
+        muted = set(store.get_locked_suggestions() or [])
+    except Exception:  # pylint: disable=broad-exception-caught
+        muted = set()
+    effective = effective_option_values(merged, device_type)
+    out: list[tuple[str, dict[str, Any], Any, Any]] = []
+    for key in _SUGGESTION_KEYS:
+        item = raw.get(key)
+        if key in muted or not isinstance(item, dict) or item.get("value") is None:
+            continue
+        suggested = _coerce_suggested(key, item["value"])
+        current = merged.get(key)
+        if current is None:
+            current = effective.get(key)
+        if _suggestion_equivalent(suggested, current):
+            continue
+        out.append((key, item, suggested, current))
+    return out
+
+
+def _threshold_pair_message(start: float, stop: float) -> str:
+    """The error a write that would invert the threshold pair is refused with (item 515)."""
+    return (
+        f"Stop Threshold ({stop:g} W) must be below Start Threshold ({start:g} W). "
+        "Nothing was saved; change both together."
+    )
+
+
+def _without_inverted_threshold_pair(
+    entry: ConfigEntry, updates: dict[str, Any], source: str
+) -> dict[str, Any]:
+    """An import's settings, less its threshold pair when that would invert this
+    device's (item 515): the device keeps its own pair, the rest still applies.
+
+    An import is someone else's tuning (an export, a store bundle), so a refused
+    pair is logged rather than failing the import that carries profiles and cycles.
+    """
+    merged = {**entry.data, **entry.options}
+    device_type = merged.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+    pair = inverted_threshold_pair(merged, {**merged, **updates}, device_type)
+    if pair is None:
+        return updates
+    kept = {
+        k: v for k, v in updates.items()
+        if k not in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
+    }
+    if inverted_threshold_pair(merged, {**merged, **kept}, device_type) is not None:
+        kept.pop(CONF_MIN_POWER, None)  # it sets an unset threshold's default
+    _LOGGER.warning(
+        "%s for %s: not applying its thresholds (start %g W, stop %g W): the stop "
+        "threshold must be below the start threshold; the device keeps its own",
+        source, entry.title, pair[0], pair[1],
+    )
+    return kept
 
 
 def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
@@ -347,12 +393,18 @@ async def _recorder_power(
     start_dt: Any,
     *,
     end_dt: Any = None,
-) -> list[tuple[float, float]]:
+    keep_unavailable: bool = False,
+) -> list[tuple[float, float | None]]:
     """Raw (unix_ts, watts) readings for entity_id over a window, via the recorder.
 
     ``end_dt`` defaults to now (the live chart overlay's use). Passing it lets a caller
     read the history in bounded windows instead of one unbounded query - a month of
     5-second data is millions of rows in a single recorder-executor job.
+
+    A row that is not a number (``unavailable``/``unknown``) is skipped, unless
+    ``keep_unavailable`` asks for it as ``(ts, None)``: the cycle-context view
+    (register item 513) breaks its line there instead of holding the last reading
+    across an outage. Watts are never None without it.
     """
     try:
         from homeassistant.components.recorder import (  # pylint: disable=import-outside-toplevel
@@ -364,11 +416,11 @@ async def _recorder_power(
     # tz-aware; use dt_util.now() per the datetime convention
     window_end = end_dt if end_dt is not None else dt_util.now()
 
-    def _query() -> list[tuple[float, float]]:
+    def _query() -> list[tuple[float, float | None]]:
         res = history.state_changes_during_period(
             hass, start_dt, window_end, entity_id, include_start_time_state=True
         )
-        rows: list[tuple[float, float]] = []
+        rows: list[tuple[float, float | None]] = []
         start_ts = start_dt.timestamp() if hasattr(start_dt, "timestamp") else None
         for s in res.get(entity_id, []) or []:
             try:
@@ -380,7 +432,15 @@ async def _recorder_power(
                 if start_ts is not None and ts < start_ts:
                     ts = start_ts
                 rows.append((ts, round(float(s.state), 1)))
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, OverflowError):
+                if keep_unavailable:
+                    try:
+                        gap_ts = s.last_changed.timestamp()
+                    except (AttributeError, TypeError, ValueError, OverflowError):
+                        continue
+                    if start_ts is not None and gap_ts < start_ts:
+                        gap_ts = start_ts
+                    rows.append((gap_ts, None))
                 continue
         return rows
 
@@ -403,7 +463,7 @@ def _cycle_kwh(c: dict[str, Any]) -> float | None:
     if wh is not None:
         try:
             return round(float(wh) / 1000.0, 4)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             pass
     return c.get("energy_kwh")
 
@@ -551,7 +611,7 @@ def _json_safe(value: Any) -> Any:
     try:
         json.dumps(value)
         return value
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return str(value)
 
 
@@ -637,6 +697,9 @@ _PREF_DATE_FORMATS = ("relative", "absolute")
 # than coupling the WS handler to the translations/panel/ language file list —
 # the panel already falls back to system language for any tag it can't load.
 _PREF_LANG_TAG_RE = re.compile(r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$")
+# cycle_context_min: the cycle chart's recorder-history length per device, in
+# minutes (register item 513). The panel offers exactly these; 0 = off.
+_PREF_CYCLE_CONTEXT_MINUTES = (0, 5, 10, 30, 60)
 
 # Commands that require 'full' (destructive or full-data export/import).
 _FULL_COMMANDS = frozenset({
@@ -644,8 +707,10 @@ _FULL_COMMANDS = frozenset({
     "trigger_ml_training",
     # Selective export/import wizard (same full-data reach as the wholesale variants).
     "get_export_inventory", "analyze_import", "export_config_selective", "import_config_selective",
-    # Reverting on-device models / matcher tuning discards learned state -> full access.
-    "revert_matching_config", "revert_ml_models",
+    # Undo of a replace import: a whole-store replace like the import itself.
+    "undo_import",
+    # Reverting on-device models discards learned state -> full access.
+    "revert_ml_models",
     # Rewrites the appliance's lifetime odometer, which drives maintenance schedules.
     "set_lifetime_cycle_count",
     # Historical power-data import: ingests a whole power history and writes cycles.
@@ -671,6 +736,7 @@ _ADMIN_COMMANDS = frozenset({
     "analyze_import",
     "export_config_selective",
     "import_config_selective",
+    "undo_import",
     "reprocess_history",
     "clear_debug_data",
     # Global community-store mutations: these change the ONE integration-wide GitHub
@@ -680,6 +746,12 @@ _ADMIN_COMMANDS = frozenset({
     "store_disconnect",
     "store_set_online",
     "store_set_prefs",
+    # They publish under that same install-wide account (audit PLATFORM-11): with
+    # RBAC off, any non-admin could otherwise post under the admin's identity.
+    "store_upload_cycle",
+    "store_upload_device",
+    "store_rate_device",
+    "store_confirm_device",
     # Historical power-data import: reads a whole recorder history (or an uploaded
     # export of one) and writes cycles into the store, so it is admin-only even with
     # RBAC disabled, exactly like the selective import wizard.
@@ -695,13 +767,12 @@ _ADMIN_COMMANDS = frozenset({
 # read-only what-if replay (it never persists anything) whose name does not start
 # with get_, so it is whitelisted here to gate at the 'read' level.
 _READ_WRITE_COMMANDS = frozenset({
+    # Picking the live program stays a read-level exception by design, although
+    # the pick is stored as the cycle's label at cycle end (audit PLATFORM-11
+    # proposed edit; the maintainer kept it open to every user of the device).
     "set_program",
-    "run_playground_cycle_detail",
-    "run_playground_history",
-    "run_playground_sweep",
     # Background-task registry: read-level runtime actions (watch progress, fetch
     # a what-if/maintenance result, or stop a task). None mutate stored data.
-    "list_tasks",
     "subscribe_tasks",
     "cancel_task",
     "get_task_result",
@@ -714,7 +785,6 @@ _READ_WRITE_COMMANDS = frozenset({
     "store_list_brands",
     "store_get_profiles",
     "store_get_cycles",
-    "store_get_device_quality",
     "store_get_device_profiles",
     "store_get_catalog_entry",
     # NB: store_refresh_catalog is deliberately NOT here. It drops the install-wide
@@ -820,7 +890,12 @@ def _effective_level(hass: HomeAssistant, user: Any, entry_id: str | None) -> st
 
 
 # Background-task commands that may reference a task by id with no device context.
-_TASK_COMMANDS = frozenset({"list_tasks", "subscribe_tasks", "cancel_task", "get_task_result"})
+_TASK_COMMANDS = frozenset({"subscribe_tasks", "cancel_task", "get_task_result"})
+# Cancelling a task needs the level its START needed (audit PLATFORM-11): a read
+# user could stop an admin's history import or reprocess. Read-level kinds are the
+# what-if Playground runs; admin kinds are started by admin-only commands.
+_READ_TASK_KINDS = frozenset({"pg_history", "pg_sweep", "pg_detail"})
+_ADMIN_TASK_KINDS = frozenset({"reprocess", "history_import", "history_import_apply"})
 
 
 def _rbac_ok(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> bool:
@@ -853,10 +928,27 @@ def _rbac_ok(hass: HomeAssistant, connection: websocket_api.ActiveConnection, ms
                 connection.send_error(msg["id"], "forbidden", "Task not found or not authorized")
                 return False
         else:
-            # list_tasks / subscribe_tasks with no device context: require a device so
+            # subscribe_tasks with no device context: require a device so
             # the result set can be authorized (the panel passes entry_id per device).
             connection.send_error(msg["id"], "forbidden", "You need to specify a device")
             return False
+    if cmd == "cancel_task" and msg.get("task_id"):
+        from . import task_registry  # pylint: disable=import-outside-toplevel
+
+        task = task_registry.get_registry(hass).get(msg["task_id"])
+        kind = getattr(task, "kind", None)
+        if kind in _ADMIN_TASK_KINDS:
+            connection.send_error(msg["id"], "forbidden", "Administrator access required")
+            return False
+        if kind not in _READ_TASK_KINDS:
+            entry_id = entry_id or getattr(task, "entry_id", None)
+            if entry_id and _LEVEL_RANK.get(
+                _effective_level(hass, user, entry_id), 0
+            ) < _LEVEL_RANK["edit"]:
+                connection.send_error(
+                    msg["id"], "forbidden", "You need edit access to this device"
+                )
+                return False
     if not entry_id:
         return True  # no device context and not admin/open: harmless read-style command
     if cmd in _READ_WRITE_COMMANDS:
@@ -894,7 +986,7 @@ def _sanitize_panel(p: dict[str, Any], current: dict[str, Any]) -> dict[str, Any
     if "poll_interval_s" in p:
         try:
             out["poll_interval_s"] = max(2, min(60, int(p["poll_interval_s"])))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             pass
     if p.get("default_tab") in _PANEL_TABS:
         out["default_tab"] = p["default_tab"]
@@ -922,7 +1014,6 @@ def _sanitize_rbac(r: dict[str, Any]) -> dict[str, Any]:
 
 # ─── Registration ─────────────────────────────────────────────────────────────
 
-@callback
 # ─── Community store (online features) ─────────────────────────────────────────
 
 def _store_ctx(hass: HomeAssistant, entry_id: str) -> tuple[Any, dict[str, Any]] | None:
@@ -1009,20 +1100,6 @@ async def ws_store_list_brands(hass, connection, msg):
     manager, _ = ctx
     items = await manager.store_bridge.list_brands(msg.get("query"), include_pending=bool(msg.get("include_pending", True)))
     _send_result(connection, msg["id"], "store_list_brands", {"items": items})
-
-
-@websocket_api.websocket_command({
-    vol.Required("type"): "ha_washdata/store_get_device_quality", vol.Required("entry_id"): str,
-    vol.Required("device_id"): str,
-})
-@websocket_api.async_response
-async def ws_store_get_device_quality(hass, connection, msg):
-    ctx = _store_ctx(hass, msg["entry_id"])
-    if ctx is None:
-        _send_result(connection, msg["id"], "store_get_device_quality", {"disabled": True})
-        return
-    manager, _ = ctx
-    _send_result(connection, msg["id"], "store_get_device_quality", await manager.store_bridge.get_device_quality(msg["device_id"]))
 
 
 @websocket_api.websocket_command({
@@ -1151,7 +1228,9 @@ async def ws_store_get_profiles(hass, connection, msg):
         return
     manager, _ = ctx
     items = await manager.store_bridge.get_profiles(msg["device_id"])
-    _send_result(connection, msg["id"], "store_get_profiles", {"items": items})
+    # None = the store could not be reached, not "no shared programs" (audit STORE-09).
+    _send_result(connection, msg["id"], "store_get_profiles",
+                 {"items": items} if items is not None else {"items": [], "error": "store_unreachable"})
 
 
 @websocket_api.websocket_command({
@@ -1166,7 +1245,8 @@ async def ws_store_get_cycles(hass, connection, msg):
         return
     manager, _ = ctx
     items = await manager.store_bridge.get_cycles(msg["profile_id"])
-    _send_result(connection, msg["id"], "store_get_cycles", {"items": items})
+    _send_result(connection, msg["id"], "store_get_cycles",
+                 {"items": items} if items is not None else {"items": [], "error": "store_unreachable"})
 
 
 @websocket_api.websocket_command({
@@ -1181,9 +1261,12 @@ async def ws_store_import_cycle(hass, connection, msg):
         _send_result(connection, msg["id"], "store_import_cycle", {"disabled": True})
         return
     manager, _ = ctx
-    res = await manager.store_bridge.import_cycle(
-        msg["cycle_id"], msg.get("target_profile"), msg.get("new_profile_name")
-    )
+    # Under the write lock imports, reprocess and merges hold (audit STORE-11): a
+    # replace-mode selective import resets reference_cycles mid-download otherwise.
+    async with _entry_write_lock(hass, msg["entry_id"]):
+        res = await manager.store_bridge.import_cycle(
+            msg["cycle_id"], msg.get("target_profile"), msg.get("new_profile_name")
+        )
     manager.notify_update()
     _send_result(connection, msg["id"], "store_import_cycle", res)
 
@@ -1227,7 +1310,7 @@ async def ws_store_upload_device(hass, connection, msg):
     ``include_settings`` bundles the allow-listed recognition/matching settings."""
     from .const import (
         CONF_STORE_BRAND, CONF_STORE_MODEL, CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE,
-        SHAREABLE_SETTING_KEYS,
+        sanitize_shared_settings,
     )
     ctx = _store_ctx(hass, msg["entry_id"])
     if ctx is None:
@@ -1243,7 +1326,7 @@ async def ws_store_upload_device(hass, connection, msg):
     settings = None
     if msg.get("include_settings"):
         # Only the allow-listed numeric thresholds; the WS layer owns entry.options.
-        settings = {k: opts[k] for k in SHAREABLE_SETTING_KEYS if k in opts}
+        settings = sanitize_shared_settings(dict(opts))
     res = await manager.store_bridge.share_device(
         brand, model, appliance, msg["items"],
         include_phases=msg.get("include_phases"), settings=settings,
@@ -1260,40 +1343,87 @@ async def ws_store_download_device(hass, connection, msg):
     """Adopt a whole-device bundle into this device's reference cycles (merge/upsert).
     When ``include_settings`` is set, also apply the bundle's allow-listed
     recognition/matching settings onto this device's options (overwrites live tuning)."""
-    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE, SHAREABLE_SETTING_KEYS
+    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE
     ctx = _store_ctx(hass, msg["entry_id"])
     if ctx is None:
         _send_result(connection, msg["id"], "store_download_device", {"disabled": True})
         return
     manager, opts = ctx
     device_type = opts.get(CONF_DEVICE_TYPE, manager.config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
-    res = await manager.store_bridge.download_device(msg["device_id"], device_type)
+    # A registry task under the write lock (audit STORE-10/11): a bundle import ran
+    # 7-61 s inside this request, unlocked against reprocess and imports.
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        msg["entry_id"], "store_download", "Downloading from the store",
+        label_key="task.store_download.running",
+    )
+    raw = hass.async_create_task(_store_download_task(
+        hass, task, msg["entry_id"], manager, msg["device_id"], device_type,
+        bool(msg.get("include_settings")),
+    ))
+    if raw is not None:
+        reg.link_asyncio_task(task.id, raw)
+    _send_result(connection, msg["id"], "store_download_device", {"task_id": task.id})
+
+
+async def _store_download_task(
+    hass: HomeAssistant, task: Any, entry_id: str, manager: Any, device_id: str,
+    device_type: str, include_settings: bool,
+) -> None:
+    reg = task_registry.get_registry(hass)
+    try:
+        async with _entry_write_lock(hass, entry_id):
+            if _get_manager(hass, entry_id) is not manager:
+                reg.finish(task, state=task_registry.STATE_ERROR, error="device reloaded")
+                return
+            res = await manager.store_bridge.download_device(
+                device_id, device_type,
+                progress=lambda done, total: reg.update(task, done=done, total=total),
+                should_cancel=lambda: task.cancel_requested,
+            )
+            res = {**res, "settings_applied": await _apply_store_settings(
+                hass, entry_id, res, include_settings,
+            )}
+        manager.notify_update()
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if res.get("cancelled")
+            else task_registry.STATE_DONE,
+            result=res,
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
+
+
+async def _apply_store_settings(
+    hass: HomeAssistant, entry_id: str, res: dict[str, Any], include_settings: bool,
+) -> int:
+    """Write a bundle's opted-in settings; returns how many were applied."""
+    from .const import sanitize_shared_settings  # noqa: PLC0415
+
     settings_applied = 0
-    if msg.get("include_settings"):
+    if include_settings:
         bundle_settings = res.get("settings") if isinstance(res.get("settings"), dict) else {}
         # Accept only allow-listed, numeric (non-bool) values - matching what the
         # upload side ever writes - so a malformed/hostile bundle can't inject a
         # string/list/bool into this device's live options.
-        filtered = {
-            k: v for k, v in bundle_settings.items()
-            if k in SHAREABLE_SETTING_KEYS
-            and isinstance(v, (int, float)) and not isinstance(v, bool)
-        }
-        entry = _get_entry(hass, msg["entry_id"])
+        filtered = sanitize_shared_settings(bundle_settings)
+        entry = _get_entry(hass, entry_id)
         if filtered and entry is not None:
             # Same critical section as ws_set_options: the changelog snapshot and
             # the options write have to be atomic per entry, or a concurrent
             # writer records the same "old" value and one of the two updates is
             # silently lost (#442 follow-up).
-            async with _entry_options_lock(hass, msg["entry_id"]):
+            async with _entry_options_lock(hass, entry_id):
+                filtered = _without_inverted_threshold_pair(
+                    entry, filtered, "store_download"
+                )  # item 515
                 await _record_option_changes(hass, entry, filtered, "store_download")
                 hass.config_entries.async_update_entry(
                     entry, options={**entry.options, **filtered}
                 )
             settings_applied = len(filtered)
-    res = {**res, "settings_applied": settings_applied}
-    manager.notify_update()
-    _send_result(connection, msg["id"], "store_download_device", res)
+    return settings_applied
 
 
 @websocket_api.websocket_command({
@@ -1339,6 +1469,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         # Maintenance log (Group E)
         ws_get_maintenance_log, ws_add_maintenance_event, ws_delete_maintenance_event,
         ws_set_lifetime_cycle_count,
+        ws_add_maintenance_task, ws_update_maintenance_task, ws_delete_maintenance_task,
         # Cycles
         ws_label_cycle, ws_delete_cycle, ws_auto_label_cycles,
         # Phase catalog
@@ -1354,6 +1485,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         # Selective export/import wizard (inventory + analyze + selective export/import)
         ws_get_export_inventory, ws_analyze_import,
         ws_export_config_selective, ws_import_config_selective,
+        # "Undo last import" (register item 195)
+        ws_undo_import,
         # Shared constants
         ws_get_constants,
         # Suggestions
@@ -1361,6 +1494,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_set_suggestion_lock,
         # Cycle curve / interactive editing
         ws_get_cycle_power_data, ws_trim_cycle, ws_analyze_split, ws_apply_split, ws_apply_merge,
+        # Recorder history around a stored cycle, display only (item 513)
+        ws_get_cycle_context,
         # Profile envelope / member cycles
         ws_get_profile_envelope, ws_get_profile_cycles,
         # Panel config + RBAC
@@ -1377,20 +1512,14 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_ml_comparison,
         # ML Lab review write-back (Stage 4b)
         ws_set_ml_review,
-        # On-device ML training (status + manual trigger + matcher-tuning revert + models revert)
-        ws_get_ml_training_status, ws_trigger_ml_training, ws_revert_matching_config,
-        ws_revert_ml_models,
+        # On-device ML training (status + manual trigger + models revert)
+        ws_get_ml_training_status, ws_trigger_ml_training, ws_revert_ml_models,
         # Cycle controls (pause / resume / force-stop)
         ws_pause_cycle, ws_resume_cycle, ws_terminate_cycle,
-        # Playground (F3): DTW visualizer
-        ws_get_dtw_debug,
         # Playground settings control panel: live values + named presets
         ws_get_playground_settings, ws_save_playground_preset, ws_delete_playground_preset,
-        # Playground redesign: faithful single-cycle sim + history table + sweep
-        ws_run_playground_cycle_detail, ws_run_playground_history,
-        ws_run_playground_sweep,
         # Background-task registry (progress / cancel / reconnect-safe results)
-        ws_list_tasks, ws_subscribe_tasks, ws_cancel_task, ws_get_task_result,
+        ws_subscribe_tasks, ws_cancel_task, ws_get_task_result,
         # Playground batch/sweep as detached registry-tracked tasks
         ws_start_playground_history, ws_start_playground_sweep,
         ws_start_playground_cycle_detail,
@@ -1403,7 +1532,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         # Local reference cycles eligible to share (share-device tree source)
         ws_get_shareable_cycles,
         # Community catalog: brand list, device quality, confirm/rate, global online toggle
-        ws_store_list_brands, ws_store_get_device_quality, ws_store_get_device_profiles,
+        ws_store_list_brands, ws_store_get_device_profiles,
         ws_store_confirm_device, ws_store_rate_device, ws_store_set_online,
         ws_store_set_prefs,
         # Catalog identity badges (point reads) + manual cache refresh
@@ -1450,6 +1579,7 @@ def ws_get_devices(
             "current_program": None,
             "time_remaining_s": None,
             "total_duration_s": None,
+            "expected_duration_s": None,
             "current_power_w": None,
             "cycle_progress_pct": None,
             "suggestions_count": 0,
@@ -1467,6 +1597,8 @@ def ws_get_devices(
             # and the branch is skipped for a manager-less entry (mid-setup, stale,
             # or a setup that failed) as well as short-circuited by its own except.
             "envelope_position": None,
+            # Top two of an undecided live match (MATCH-DECIDE-15): display only.
+            "match_uncertainty": None,
             # Merged data+options, matching ``ws_get_options`` and the
             # options-first resolution in WashDataManager (#450). An entry added
             # after its last schema migration carries the structural keys in
@@ -1485,8 +1617,11 @@ def ws_get_devices(
             try:
                 detector = getattr(manager, "detector", None)
                 if detector is not None:
-                    info["detector_state"] = detector.state
-                    info["sub_state"] = detector.sub_state
+                    # What the entities show (item 501): a hidden standby re-probe
+                    # stays "off" here too instead of flickering the Status card.
+                    info["detector_state"] = getattr(detector, "exposed_state", detector.state)
+                    # Matching it (#452: "Stalled" while a stalled cycle shows paused).
+                    info["sub_state"] = getattr(detector, "exposed_sub_state", detector.sub_state)
 
                 program: str | None = getattr(manager, "_current_program", None)
                 if program in (None, "off", "unknown", "detecting...", "restored..."):
@@ -1499,6 +1634,12 @@ def ws_get_devices(
 
                 info["time_remaining_s"] = getattr(manager, "_time_remaining", None)
                 info["total_duration_s"] = getattr(manager, "_total_duration", None)
+                # The matched program's expected length: the span the phase sensor
+                # maps progress onto, so the Status timeline names the same phase
+                # (audit PROGRESS-10).
+                info["expected_duration_s"] = getattr(
+                    manager, "_matched_profile_duration", None
+                )
 
                 # Read through the property, not the raw cache (#409): it falls back
                 # to the sensor's live state so the panel can never show a power the
@@ -1516,6 +1657,12 @@ def ws_get_devices(
                 # the panel's tooltip says.
                 info["envelope_position"] = getattr(manager, "envelope_position", None)
 
+                # "Uncertain: X or Y, ~N% sure" on the Status card while the live
+                # match is undecided (MATCH-DECIDE-15). The sensor state keeps its
+                # raw `detecting...` value, which automations compare against.
+                _unc = getattr(manager, "match_uncertainty", None)
+                info["match_uncertainty"] = _unc if isinstance(_unc, dict) else None
+
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
                     # Assigned per entry and OUTSIDE both probes. It used to be
@@ -1526,23 +1673,12 @@ def ws_get_devices(
                     # entry, raised NameError into a debug-level log.
                     merged = {**entry.data, **entry.options}
                     try:
-                        # Same filters as ws_get_suggestions (muted keys and
-                        # no-op values dropped) so the device-pill badge can
-                        # never disagree with the Settings tab banner.
-                        raw = store.get_suggestions() or {}
-                        try:
-                            muted = set(store.get_locked_suggestions() or [])
-                        except Exception:  # pylint: disable=broad-exception-caught
-                            muted = set()
+                        # The same filter as the Settings list, so the Overview
+                        # card can never disagree with the Settings tab banner.
                         keys = [
-                            k for k in _SUGGESTION_KEYS
-                            if k not in muted
-                            and isinstance(raw.get(k), dict)
-                            and raw[k].get("value") is not None
-                            # Coerce first, exactly like ws_get_suggestions, so the pill
-                            # and the Settings list agree on int-key rounding.
-                            and not _suggestion_equivalent(
-                                _coerce_suggested(k, raw[k]["value"]), merged.get(k)
+                            k for k, _i, _s, _c in _visible_suggestions(
+                                store, merged,
+                                getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
                             )
                         ]
                         info["suggestion_keys"] = keys
@@ -1611,6 +1747,7 @@ def ws_get_devices(
         vol.Required("entry_id"): str,
         vol.Optional("limit", default=50): vol.All(int, vol.Range(min=1, max=200)),
         vol.Optional("offset", default=0): vol.All(int, vol.Range(min=0)),
+        vol.Optional("imported_offset"): vol.All(int, vol.Range(min=0)),
     }
 )
 @callback
@@ -1621,13 +1758,22 @@ def ws_get_device_cycles(
 ) -> None:
     """Return a page of recent cycles for a device, stripping large binary fields.
 
-    Cycles are returned most-recent-first and sliced ``[offset : offset+limit]``
-    so the panel can page. ``total`` is the device's full cycle count and
-    ``has_more`` is True when cycles remain beyond the returned window.
+    Real cycles are returned most-recent-first and sliced ``[offset : offset+limit]``
+    so the panel can page. ``total`` is the device's real cycle count and
+    ``has_more`` is True when real cycles remain beyond the returned window.
+
+    Imported cycles (``reference_cycles`` + ``backfill_cycles``) page on their own
+    cursor, ``imported_offset``, over one newest-start-first list of both, with the
+    same ``limit``; ``imported_total`` / ``imported_has_more`` describe it. They keep
+    their own cursor because they stay out of ``total`` (they never enter usage
+    stats), so folding them into ``offset`` would change what ``total`` counts.
+    A client that omits ``imported_offset`` gets the pre-paging behaviour: every
+    imported cycle on ``offset == 0`` and none after (register item 129a).
     """
     entry_id: str = msg["entry_id"]
     limit: int = msg.get("limit", 50)
     offset: int = msg.get("offset", 0)
+    imported_offset: int | None = msg.get("imported_offset")
 
     manager = _get_manager(hass, entry_id)
     if manager is None:
@@ -1638,6 +1784,8 @@ def ws_get_device_cycles(
     reference_cycles: list[dict[str, Any]] = []
     backfill_cycles: list[dict[str, Any]] = []
     total = 0
+    imported_total = 0
+    imported_end = 0
     try:
         store = getattr(manager, "profile_store", None)
         if store is not None:
@@ -1650,22 +1798,27 @@ def ws_get_device_cycles(
             window = ordered[offset:offset + limit]
             for c in window:
                 cycles.append(_strip_cycle(c))
-            # Imported store recordings and cycles recovered from raw history are
-            # bounded sets kept out of the paginated `cycles`/`total` (they never enter
-            # usage stats). Return them once, on the first page, tagged so the panel can
-            # badge them and route edits/deletes correctly. They travel in separate
-            # arrays because they are separate categories: a curated community template
-            # and an auto-detected segment from the user's own past are not the same
-            # claim about a cycle.
-            if offset == 0:
-                for c in reversed(store.get_reference_cycles()):
-                    ref = _strip_cycle(c)
-                    ref.update(_cycle_capabilities(c, "reference"))
-                    reference_cycles.append(ref)
-                for c in reversed(store.get_backfill_cycles()):
-                    item = _strip_cycle(c)
-                    item.update(_cycle_capabilities(c, "backfill"))
-                    backfill_cycles.append(item)
+            # Imported store recordings and cycles recovered from raw history are kept
+            # out of `cycles`/`total` (they never enter usage stats), tagged so the
+            # panel can badge them and route edits/deletes correctly. They travel in
+            # separate arrays because they are separate categories: a curated community
+            # template and an auto-detected segment from the user's own past are not
+            # the same claim about a cycle.
+            imported = _imported_cycles_newest_first(store)
+            imported_total = len(imported)
+            if imported_offset is not None:
+                imported_window = imported[imported_offset:imported_offset + limit]
+                imported_end = imported_offset + len(imported_window)
+            elif offset == 0:
+                imported_window = imported
+                imported_end = imported_total
+            else:
+                imported_window = []
+                imported_end = imported_total
+            for c, origin in imported_window:
+                item = _strip_cycle(c)
+                item.update(_cycle_capabilities(c, origin))
+                (reference_cycles if origin == "reference" else backfill_cycles).append(item)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error fetching cycles for entry %s: %s", entry_id, exc)
 
@@ -1677,8 +1830,45 @@ def ws_get_device_cycles(
             "backfill_cycles": backfill_cycles,
             "total": total,
             "has_more": has_more,
+            "imported_total": imported_total,
+            "imported_has_more": imported_end < imported_total,
         },
     )
+
+
+def _imported_cycles_newest_first(store: Any) -> list[tuple[dict[str, Any], str]]:
+    """Reference + backfill cycles as ``(cycle, origin)``, newest start first.
+
+    One ordering for both lists so a page holds the most recent imports whatever their
+    category. Storage order (reversed, newest-added first) breaks ties and places
+    cycles whose ``start_time`` does not parse last, so the order is total and stable
+    across requests, which paging needs.
+    """
+    rows: list[tuple[dict[str, Any], str]] = []
+    for origin, getter in (
+        ("reference", "get_reference_cycles"),
+        ("backfill", "get_backfill_cycles"),
+    ):
+        seq = getattr(store, getter)()
+        if not isinstance(seq, list):
+            continue
+        rows.extend((c, origin) for c in reversed(seq) if isinstance(c, dict))
+
+    def _start_ts(row: tuple[dict[str, Any], str]) -> float:
+        value = row[0].get("start_time")
+        try:
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                return float(value)  # legacy numeric unix timestamp
+            parsed = dt_util.parse_datetime(str(value or ""))
+            # Aware stamps only: a naive one would compare in local time.
+            if parsed is not None and parsed.tzinfo is not None:
+                return parsed.timestamp()
+        except (TypeError, ValueError, OverflowError, OSError):
+            pass
+        return float("-inf")
+
+    # sorted() is stable, so equal starts keep the newest-added-first order above.
+    return sorted(rows, key=_start_ts, reverse=True)
 
 
 # ─── Settings ─────────────────────────────────────────────────────────────────
@@ -1801,6 +1991,20 @@ async def ws_set_options(
         # power_sensor / min_power, which live in options post-3.6) are preserved
         # from entry.options and overridden by the submission.
         new_options = {**entry.options, **msg["options"]}
+
+        # A numeric setting must be a finite number (audit PLATFORM-13): stored,
+        # "abc" raised in the manager's constructor and the entry never set up
+        # again. A bad value drops the key so its default applies - the contract
+        # the per-key blocks below already follow; None / "" reach their reset path.
+        _numeric = numeric_option_keys()
+        for _key, _val in msg["options"].items():
+            if _key not in _numeric or _val is None or _val == "":
+                continue
+            _num = coerce_numeric_option(_val, _numeric[_key])
+            if _num is None:
+                new_options.pop(_key, None)
+            else:
+                new_options[_key] = _num
 
         # Capture the submitted display name for the entry title before it is
         # stripped out of options below.
@@ -1927,6 +2131,22 @@ async def ws_set_options(
         for key in _OPTIONS_IDENTITY_KEYS:
             new_options.pop(key, None)
 
+        # Register item 515: a save must not leave the stop threshold at or above
+        # the start threshold. The panel's own conflict check holds such an edit
+        # back, but the Playground publish/sweep, the per-setting Revert and any
+        # other client wrote it straight through. An entry already running an
+        # inverted pair keeps saving every other setting (see the helper).
+        _inverted = inverted_threshold_pair(
+            {**entry.data, **entry.options},
+            {**entry.data, **new_options},
+            effective_device_type,
+        )
+        if _inverted is not None:
+            connection.send_error(
+                msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
+            )
+            return
+
         update_kwargs: dict[str, Any] = {"options": new_options}
         if isinstance(submitted_name, str) and submitted_name.strip():
             update_kwargs["title"] = submitted_name.strip()
@@ -2042,18 +2262,35 @@ async def ws_get_setup_status(
     # Gather store data (executor-safe reads)
     store = manager.profile_store
     profile_names = list(store._data.get("profiles", {}).keys())
-    past_cycles = store._data.get("past_cycles", [])
-    ref_names: set[str] = set()
-    for rc in store._data.get("reference_cycles", []):
-        if rc.get("profile_name"):
-            ref_names.add(rc["profile_name"])
+    # The evidence view, split back into its three lists: every advisor check asks
+    # "can this profile be matched", which is what has_real_profiles answers with the
+    # same view, so the card's phase0 coincides with the manager skipping matching.
+    # Backfilled history is this machine's own (item 129d); before, only past_cycles
+    # were read and an import-only device was told to start recording.
+    evidence = {id(c) for c in store.iter_evidence_cycles()}
+    past_cycles = [c for c in store.get_past_cycles() if id(c) in evidence]
+    backfill_cycles = [c for c in store.get_backfill_cycles() if id(c) in evidence]
+    known_profiles = set(profile_names)
+    ref_names: set[str] = {
+        rc["profile_name"]
+        for rc in store.get_reference_cycles()
+        if id(rc) in evidence and rc.get("profile_name") in known_profiles
+    }
 
-    coverage_gap = await hass.async_add_executor_job(store.suggest_coverage_gaps)
+    # Read from a loop-side snapshot: the executor must not iterate live store
+    # dicts (audit PERF-10).
+    coverage_gap = await hass.async_add_executor_job(
+        _store_read_snapshot(store).suggest_coverage_gaps
+    )
     # suggestions: read from the store (cheap dict lookup; heavy computation happens
     # in the SuggestionEngine background task, not here).
-    suggestions = list((store.get_suggestions() or {}).values())
-    pg_data = store._data.get("profile_groups", {})
-    pending_groups = (pg_data.get("suggestions") or []) if isinstance(pg_data, dict) else []
+    _entry = _get_entry(hass, msg["entry_id"])
+    _merged = {**_entry.data, **_entry.options} if _entry is not None else {}
+    suggestions = [
+        item for _k, item, _s, _c in _visible_suggestions(
+            store, _merged, getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE
+        )
+    ]
 
     device_type = manager.device_type
 
@@ -2064,9 +2301,9 @@ async def ws_get_setup_status(
         ref_profile_names=ref_names,
         coverage_gap=coverage_gap,
         suggestions=suggestions,
-        profile_groups=pending_groups,
         skipped_steps=skipped_steps,
         now=dt_util.now(),
+        backfill_cycles=backfill_cycles,
     )
 
     _send_result(connection, msg["id"], "get_setup_status", {
@@ -2081,6 +2318,35 @@ async def ws_get_setup_status(
         "dismissible": result.dismissible,
         "step_key": result.step_key,
     })
+
+
+def _store_read_snapshot(store: Any) -> Any:
+    """A copy of ``store`` an executor job can read while the loop keeps writing.
+
+    Loop-only. Shallow-copies the store object and gives it a ``_data`` whose
+    containers are copies two levels deep: every top-level list and dict, and every
+    dict inside them (each cycle, profile, envelope). The executor can then iterate
+    what it reads while the loop appends a cycle, adds a profile or sets a key on a
+    cycle (audit PERF-10, same class as register items 82 and 264). Large values
+    (power traces, envelope arrays) are shared, not copied: the loop replaces them
+    rather than mutating them in place. Cache attributes the store's methods set on
+    ``self`` land on the copy and are dropped with it. Anything without a real
+    ``_data`` dict (a test double) is returned as is.
+    """
+    data = getattr(store, "_data", None)
+    if not isinstance(data, dict):
+        return store
+
+    def _copy(value: Any) -> Any:
+        if isinstance(value, list):
+            return [dict(v) if isinstance(v, dict) else v for v in value]
+        if isinstance(value, dict):
+            return {k: (dict(v) if isinstance(v, dict) else v) for k, v in value.items()}
+        return value
+
+    snapshot = copy.copy(store)
+    snapshot._data = {key: _copy(value) for key, value in data.items()}  # pylint: disable=protected-access
+    return snapshot
 
 
 # ─── Profiles ─────────────────────────────────────────────────────────────────
@@ -2101,34 +2367,50 @@ async def ws_get_profiles(
         _err_not_found(connection, msg["id"], entry_id)
         return
 
-    def _compute_stats() -> dict[str, Any]:
-        profiles: list[dict[str, Any]] = []
-        try:
-            profiles = manager.profile_store.list_profiles()
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Error listing profiles for %s: %s", entry_id, exc)
+    # Everything below reads the store from an executor thread while the loop keeps
+    # appending cycles and rebuilding envelopes, and each block swallows its own
+    # error - so "dictionary changed size during iteration" used to show up as a
+    # silently empty health/trends/advisories panel (audit PERF-10). The executor
+    # reads a snapshot taken here, on the loop; list_profiles is cached and stays
+    # on the loop.
+    profiles: list[dict[str, Any]] = []
+    try:
+        profiles = manager.profile_store.list_profiles()
+        # #158: the panel shows a computed duration read-only (rows are copies).
+        learned = manager.profile_store.learned_duration_profiles()
+        for row in profiles:
+            row["duration_learned"] = row.get("name") in learned
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Error listing profiles for %s: %s", entry_id, exc)
+    store = _store_read_snapshot(manager.profile_store)
 
+    def _compute_stats() -> dict[str, Any]:
         health: dict[str, dict] = {}
         try:
-            health = manager.profile_store.compute_profile_health()
+            health = store.compute_profile_health()
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
         trends: dict[str, dict] = {}
         try:
-            trends = manager.profile_store.compute_profile_trends()
+            trends = store.compute_profile_trends()
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
+        # Coverage gaps: unlabelled recent cycles that look like one program the user
+        # has not created. Measured by devtools/advisory_usefulness_eval.py: 92-95%
+        # of its clusters are the missing program, and it stays silent on intact
+        # stores, so the Profiles tab shows them (audit UI-13, register item 432).
         coverage_gaps: dict[str, Any] = {}
         try:
-            coverage_gaps = manager.profile_store.suggest_coverage_gaps()
+            coverage_gaps = store.suggest_coverage_gaps()
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
         advisories: list[dict] = []
         try:
-            advisories = manager.profile_store.compute_profile_advisories()
+            # Reuse the health/trends computed above instead of recomputing both.
+            advisories = store.compute_profile_advisories(health, trends)
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
@@ -2146,11 +2428,20 @@ async def ws_get_profiles(
                 _name = _profile.get("name") if isinstance(_profile, dict) else None
                 if not _name:
                     continue
-                _sig = manager.profile_store.compute_profile_terminal_signature(_name)
+                _sig = store.compute_profile_terminal_signature(_name)
                 if _sig is not None:
                     terminal[_name] = _sig
         except Exception:  # pylint: disable=broad-exception-caught
             terminal = {}
+
+        # How often the matcher labelled one of this appliance's own cycles with
+        # each program (STORE-21): the panel shows it on imported program cards so
+        # an import that never fits can be pruned. Local only, no store writes.
+        matcher_counts: dict[str, int] = {}
+        try:
+            matcher_counts = store.matcher_label_counts()
+        except Exception:  # pylint: disable=broad-exception-caught
+            matcher_counts = {}
 
         return {
             "profiles": profiles,
@@ -2159,6 +2450,7 @@ async def ws_get_profiles(
             "coverage_gaps": coverage_gaps,
             "profile_advisories": advisories,
             "profile_terminal": terminal,
+            "profile_matcher_counts": matcher_counts,
         }
 
     stats = await hass.async_add_executor_job(_compute_stats)
@@ -2294,8 +2586,8 @@ async def ws_get_profile_groups(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Return profile groups with member lists, cohesion, and near-duplicate
-    suggestions the user can act on."""
+    """Return profile groups with member lists and cohesion. (Near-duplicate group
+    suggestions were deleted in 0.5.8, register item 432.)"""
     from .const import GROUP_MIN_COHESION  # pylint: disable=import-outside-toplevel
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
@@ -2316,11 +2608,11 @@ async def ws_get_profile_groups(
             "cohesion": round(coh, 3),
             "cohesive": coh >= GROUP_MIN_COHESION,  # False => not aggregated by matcher; UI warns
         })
-    suggestions = await hass.async_add_executor_job(store.suggest_profile_groups)
+    # Group suggestions were computed on every Profiles visit and rendered nowhere
+    # (audit UI-13), so they are no longer sent.
     _send_result(connection, msg["id"], "get_profile_groups", {
         "groups": groups,
         "min_cohesion": GROUP_MIN_COHESION,
-        "suggestions": suggestions,
     })
 
 
@@ -2559,15 +2851,21 @@ async def ws_get_maintenance_log(
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
-    reminders = dict(DEFAULT_MAINTENANCE_REMINDER_CYCLES)
-    cfg = manager.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
-    if isinstance(cfg, dict):
-        reminders.update(cfg)
+    device_type = manager.device_type
+    # The reminders that actually apply (#461): the device type's preset until the
+    # config is saved, the saved config after. Until #461 this merged the washer
+    # defaults over the saved config, so a partial config showed rows the manager
+    # never evaluated.
+    reminders = effective_reminders(
+        device_type, manager.config_entry.options.get(CONF_MAINTENANCE_REMINDER_CYCLES)
+    )
     store = manager.profile_store
+    status = store.get_maintenance_status(reminders)
     _send_result(connection, msg["id"], "get_maintenance_log", {
         "log": store.get_maintenance_log(),
-        "due": manager.maintenance_due,
-        "event_types": list(MAINTENANCE_EVENT_TYPES),
+        "due": [row["id"] for row in status if row["due"]],
+        # The built-in types this device's editor offers (device-type aware).
+        "event_types": editor_types(device_type, reminders),
         "reminders": reminders,
         # Cycles run since each task was last done, and the odometer they are
         # measured against (#414). Computed backend-side before this and never
@@ -2575,7 +2873,16 @@ async def ws_get_maintenance_log(
         "cycles_since": {
             evt: store.cycles_since_maintenance(evt) for evt in MAINTENANCE_EVENT_TYPES
         },
+        "custom_tasks": store.get_maintenance_tasks(),
+        # Every active reminder (built-in and custom) with its progress.
+        "status": status,
         "lifetime_cycle_count": manager.lifetime_cycle_count,
+        "limits": {
+            "tasks_max": MAINTENANCE_CUSTOM_TASK_MAX,
+            "name_max": MAINTENANCE_TASK_NAME_MAX,
+            "cycles_max": MAINTENANCE_INTERVAL_CYCLES_MAX,
+            "days_max": MAINTENANCE_INTERVAL_DAYS_MAX,
+        },
     })
 
 
@@ -2744,6 +3051,121 @@ async def ws_delete_maintenance_event(
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
+# Custom maintenance tasks (#461). Edit level, like the maintenance log: a task is
+# a reminder the user defines, never a change to detection or stored cycles.
+# Intervals are validated by the store (whole numbers, bounded) so the WS layer,
+# the panel and any future service share one rule; a refusal is invalid_format.
+_TASK_INTERVAL = vol.Any(None, int, float, str)
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/add_maintenance_task",
+        vol.Required("entry_id"): str,
+        vol.Required("name"): str,
+        vol.Optional("cycles"): _TASK_INTERVAL,
+        vol.Optional("days"): _TASK_INTERVAL,
+    }
+)
+@websocket_api.async_response
+async def ws_add_maintenance_task(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Create a custom maintenance task (free-text name, cycles and/or days)."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        task = await manager.profile_store.async_add_maintenance_task(
+            msg["name"], msg.get("cycles"), msg.get("days")
+        )
+        manager.notify_update()
+        _send_result(connection, msg["id"], "add_maintenance_task", {"success": True, "task": task})
+    except ValueError as exc:
+        connection.send_error(msg["id"], "invalid_format", str(exc))
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/update_maintenance_task",
+        vol.Required("entry_id"): str,
+        vol.Required("task_id"): str,
+        vol.Optional("name"): str,
+        vol.Optional("cycles"): _TASK_INTERVAL,
+        vol.Optional("days"): _TASK_INTERVAL,
+    }
+)
+@websocket_api.async_response
+async def ws_update_maintenance_task(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Rename a custom maintenance task or change its intervals.
+
+    An omitted field is left as it is; an explicit ``null`` interval switches
+    that axis off, the same as 0.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    def _interval(key: str) -> Any:
+        # The store reads None as "leave it"; on the wire null means "off".
+        if key not in msg:
+            return None
+        return 0 if msg[key] is None else msg[key]
+
+    try:
+        task = await manager.profile_store.async_update_maintenance_task(
+            msg["task_id"],
+            name=msg.get("name"),
+            cycles=_interval("cycles"),
+            days=_interval("days"),
+        )
+        manager.notify_update()
+        _send_result(connection, msg["id"], "update_maintenance_task", {"success": True, "task": task})
+    except ValueError as exc:
+        connection.send_error(msg["id"], "invalid_format", str(exc))
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/delete_maintenance_task",
+        vol.Required("entry_id"): str,
+        vol.Required("task_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_delete_maintenance_task(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Remove a custom maintenance task. Its log entries stay, with their name."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        removed = await manager.profile_store.async_delete_maintenance_task(msg["task_id"])
+        if removed:
+            manager.notify_update()
+        _send_result(connection, msg["id"], "delete_maintenance_task", {"success": removed})
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
 # ─── Cycles ───────────────────────────────────────────────────────────────────
 
 @websocket_api.websocket_command(
@@ -2828,12 +3250,39 @@ async def ws_delete_cycle(
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
+# The panel's bulk auto-label threshold range (the modal input's min/max).
+AUTO_LABEL_MIN_THRESHOLD = 0.5
+AUTO_LABEL_MAX_THRESHOLD = 0.95
+
+
+def configured_auto_label_threshold(entry: ConfigEntry | None) -> float:
+    """The device's Auto-Label Confidence, clamped to the bulk pass's range.
+
+    The bulk pass and the cycle-end label both put a guess on a cycle with no
+    confirmation, so they share the user's one bar for that. Never raises.
+    """
+    from .const import (  # pylint: disable=import-outside-toplevel
+        CONF_AUTO_LABEL_CONFIDENCE,
+        DEFAULT_AUTO_LABEL_CONFIDENCE,
+    )
+
+    merged = {**(entry.data if entry else {}), **(entry.options if entry else {})}
+    try:
+        value = float(merged.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE))
+    except (TypeError, ValueError, OverflowError):
+        value = DEFAULT_AUTO_LABEL_CONFIDENCE
+    if not math.isfinite(value):
+        value = DEFAULT_AUTO_LABEL_CONFIDENCE
+    return min(max(value, AUTO_LABEL_MIN_THRESHOLD), AUTO_LABEL_MAX_THRESHOLD)
+
+
 @websocket_api.websocket_command(
     {
         vol.Required("type"): "ha_washdata/auto_label_cycles",
         vol.Required("entry_id"): str,
-        vol.Optional("confidence_threshold", default=0.75): vol.All(
-            vol.Coerce(float), vol.Range(min=0.5, max=0.95)
+        vol.Optional("confidence_threshold"): vol.All(
+            vol.Coerce(float),
+            vol.Range(min=AUTO_LABEL_MIN_THRESHOLD, max=AUTO_LABEL_MAX_THRESHOLD),
         ),
     }
 )
@@ -2843,20 +3292,72 @@ async def ws_auto_label_cycles(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Auto-label all cycles with matched profiles above the confidence threshold."""
+    """Auto-label all cycles with matched profiles above the confidence threshold.
+
+    Without a threshold the device's own Auto-Label Confidence applies (audit
+    UI-10: the panel used to send a fixed 0.75, below the 0.9 default).
+    """
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
 
-    threshold: float = msg.get("confidence_threshold", 0.75)
+    threshold = msg.get("confidence_threshold")
+    if threshold is None:
+        threshold = configured_auto_label_threshold(_get_entry(hass, entry_id))
+    task, _raw = start_auto_label_task(hass, entry_id, float(threshold))
+    _send_result(connection, msg["id"], "auto_label_cycles", {"task_id": task.id})
+
+
+def start_auto_label_task(
+    hass: HomeAssistant, entry_id: str, threshold: float
+) -> tuple[Any, asyncio.Task[Any] | None]:
+    """Start the one auto-label runner (panel and service) as a registry task.
+
+    It re-matches every unlabelled stored cycle - 56 s for 201 cycles - so it runs
+    detached with progress and cancel, under the per-entry write lock that
+    reprocess, merge and imports hold (audit PLATFORM-05). Never overwrites (audit
+    MANAGER-01 / UI-10).
+    """
+    reg = task_registry.get_registry(hass)
+    task = reg.create(
+        entry_id, "auto_label", "Auto-labelling cycles", label_key="task.auto_label.running",
+    )
+    raw = hass.async_create_task(_auto_label_task(hass, task, entry_id, threshold))
+    if raw is not None:
+        reg.link_asyncio_task(task.id, raw)
+    return task, raw
+
+
+async def _auto_label_task(
+    hass: HomeAssistant, task: Any, entry_id: str, threshold: float
+) -> None:
+    reg = task_registry.get_registry(hass)
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+        return
     try:
-        await manager.profile_store.auto_label_cycles(threshold, overwrite=True)
+        async with _entry_write_lock(hass, entry_id):
+            if _get_manager(hass, entry_id) is not manager:
+                reg.finish(task, state=task_registry.STATE_ERROR, error="device reloaded")
+                return
+            stats = await manager.profile_store.auto_label_cycles(
+                threshold,
+                overwrite=False,
+                progress=lambda done, total: reg.update(task, done=done, total=total),
+                should_cancel=lambda: task.cancel_requested,
+            )
         manager.notify_update()
-        _send_result(connection, msg["id"], "auto_label_cycles", {"success": True})
+        reg.finish(
+            task,
+            state=task_registry.STATE_CANCELLED if stats.get("cancelled")
+            else task_registry.STATE_DONE,
+            result=stats,
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        connection.send_error(msg["id"], "unknown_error", str(exc))
+        reg.finish(task, state=task_registry.STATE_ERROR, error=str(exc))
 
 
 # ─── Phase catalog ────────────────────────────────────────────────────────────
@@ -3434,7 +3935,12 @@ async def ws_get_diagnostics(
 
     try:
         stats = await manager.profile_store.get_storage_stats()
-        _send_result(connection, msg["id"], "get_diagnostics", {"stats": stats})
+        # The restore point of the last replace import rides along on the fetch that
+        # already fills the Export / Import card, so the panel needs no second call.
+        undo = await manager.profile_store.async_get_pre_import_snapshot()
+        _send_result(
+            connection, msg["id"], "get_diagnostics", {"stats": stats, "import_undo": undo}
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -3628,6 +4134,23 @@ async def ws_wipe_history(
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
+def _export_json(payload: dict[str, Any]) -> str:
+    """Serialise an export payload compactly, the way the store is written to disk.
+
+    ``json.dumps(indent=2)`` put every number of every power trace on its own
+    indented line, and now that no cycle is dropped (item 463) that is one
+    multi-megabyte WebSocket frame per click (audit PERF-11). Home Assistant's
+    orjson encoder is the one ``Store`` saves with, so anything persisted
+    serialises the same way, and ``import_config``'s ``json.loads`` reads it back
+    unchanged. It also runs as one C call, so the event loop cannot mutate the
+    shallow-copied store under it mid-encode the way it could between the
+    pure-Python encoder's steps.
+    """
+    from homeassistant.helpers.json import json_dumps  # pylint: disable=import-outside-toplevel
+
+    return json_dumps(payload)
+
+
 @websocket_api.websocket_command(
     {vol.Required("type"): "ha_washdata/export_config", vol.Required("entry_id"): str}
 )
@@ -3650,13 +4173,51 @@ async def ws_export_config(
             entry_data=dict(entry.data) if entry else {},
             entry_options=dict(entry.options) if entry else {},
         )
-        # Offload serialization to executor — power traces can be megabytes
-        json_str = await hass.async_add_executor_job(
-            lambda: json.dumps(payload, indent=2)
-        )
+        # Offload serialization to executor - power traces can be megabytes
+        json_str = await hass.async_add_executor_job(_export_json, payload)
         _send_result(connection, msg["id"], "export_config", {"json_data": json_str})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+async def async_apply_imported_entry_options(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    config_updates: dict[str, Any],
+    source: str,
+) -> None:
+    """Apply an import payload's tunables to ``entry.options``, the one safe way.
+
+    Shared by the ``import_config`` WS command and the ``import_config`` service,
+    which had drifted: the service still rebound the device to the EXPORTER's
+    power and door sensors (the item-317 "integration silently goes dead"
+    failure), skipped the options lock and wrote no settings changelog
+    (audit PLATFORM-02).
+
+    Identity never lands in options and local entity/device bindings are dropped:
+    an import carries the exporter's ids. ``config_updates["entry_data"]`` is
+    deliberately NOT written to ``entry.data`` - it is the source device's raw,
+    un-redacted identity; identity changes go through the reconfigure flow.
+    The caller holds the per-entry write lock; order is always write -> options.
+    """
+    entry_options_updates = dict(config_updates.get("entry_options", {}) or {})
+    for key in _IMPORT_LOCAL_BINDING_KEYS:
+        entry_options_updates.pop(key, None)
+    if not entry_options_updates:
+        return
+    async with _entry_options_lock(hass, entry.entry_id):
+        # Read INSIDE the lock: a snapshot taken before the `async with` suspended
+        # would silently revert a ws_set_options that committed while we waited.
+        # A persisted null survives options.get(key, DEFAULT) and breaks setup
+        # (#389), so the same write-boundary strip as ws_set_options applies.
+        entry_options_updates = _without_inverted_threshold_pair(
+            entry, entry_options_updates, source
+        )
+        new_options = strip_null_options({**entry.options, **entry_options_updates})
+        # ...and a non-numeric numeric setting is dropped, same reason (PLATFORM-13).
+        new_options, _ = drop_invalid_numeric_options(new_options)
+        await _record_option_changes(hass, entry, entry_options_updates, source)
+        hass.config_entries.async_update_entry(entry, options=new_options)
 
 
 @websocket_api.websocket_command(
@@ -3685,7 +4246,16 @@ async def ws_import_config(
     async with _entry_write_lock(hass, entry_id):
         try:
             payload = await hass.async_add_executor_job(json.loads, msg["json_data"])
-            config_updates = await manager.profile_store.async_import_data(payload)
+            pre_entry = _get_entry(hass, entry_id)
+            config_updates = await manager.profile_store.async_import_data(
+                payload,
+                # Kept with the restore point so an undo puts them back (item 195).
+                entry_options=dict(pre_entry.options) if pre_entry else None,
+            )
+            result = {
+                "success": True,
+                "restore_point_saved": bool(config_updates.get("restore_point_saved")),
+            }
 
             # Re-validate after the awaits — the entry may have been reloaded
             # (a new manager + store) during the import. Persisting through the
@@ -3696,52 +4266,14 @@ async def ws_import_config(
                 _LOGGER.warning(
                     "Manager replaced during import for %s; aborting notify", entry_id
                 )
-                _send_result(connection, msg["id"], "import_config", {"success": True})
+                _send_result(connection, msg["id"], "import_config", result)
                 return
 
             entry = _get_entry(hass, entry_id)
             if entry and config_updates:
-                entry_options_updates = dict(config_updates.get("entry_options", {}))
-                # Identity must never be persisted into options; the display name
-                # rides the entry title. Local entity/device bindings are dropped
-                # too: they are tunables when the panel writes them, but an
-                # import carries the exporter's ids and would repoint this device
-                # at entities that do not exist here (item 317). device_type and
-                # min_power are genuinely portable and stay.
-                for key in _IMPORT_LOCAL_BINDING_KEYS:
-                    entry_options_updates.pop(key, None)
-                if entry_options_updates:
-                    # Apply the imported tunables on top of the current options;
-                    # never spread entry.data into options. An import payload can
-                    # carry a null (an export taken from an entry that still held
-                    # one), and a persisted null survives options.get(key, DEFAULT)
-                    # and breaks setup (#389), so the same write-boundary strip as
-                    # ws_set_options applies here.
-                    # Nested inside the write lock this handler already holds;
-                    # order is always write -> options, so no deadlock.
-                    async with _entry_options_lock(hass, entry_id):
-                        # Read INSIDE the lock. Built before it, `new_options`
-                        # is a snapshot of `entry.options` from before the
-                        # `async with` suspended - so a `ws_set_options` that
-                        # committed while we waited would be silently reverted
-                        # by this write, and the changelog would record the
-                        # post-save value as `old`. The other four option
-                        # writers already read inside their lock; this was the
-                        # one that did not.
-                        new_options = strip_null_options(
-                            {**entry.options, **entry_options_updates}
-                        )
-                        await _record_option_changes(
-                            hass, entry, entry_options_updates, "import_config"
-                        )
-                        hass.config_entries.async_update_entry(
-                            entry, options=new_options
-                        )
-                # NB: config_updates["entry_data"] is intentionally NOT written to
-                # entry.data. export_data ships the raw, un-redacted entry.data of
-                # the *source* device (its power_sensor and other identity), so
-                # blindly applying it would hijack this device's sensor binding.
-                # Identity changes must go through the reconfigure flow.
+                await async_apply_imported_entry_options(
+                    hass, entry, config_updates, "import_config"
+                )
 
             # An old payload re-arms the one-time banked-tail repair, and the
             # options write above is the only thing here that could reload the
@@ -3749,7 +4281,7 @@ async def ws_import_config(
             # the imported tails inflating avg_duration until the next restart.
             manager.async_schedule_banked_tail_repair()
             manager.notify_update()
-            _send_result(connection, msg["id"], "import_config", {"success": True})
+            _send_result(connection, msg["id"], "import_config", result)
         except json.JSONDecodeError as exc:
             connection.send_error(msg["id"], "invalid_json", str(exc))
         except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -3873,9 +4405,7 @@ async def ws_export_config_selective(
             entry_options=dict(entry.options) if entry else {},
             selection=selection,
         )
-        json_str = await hass.async_add_executor_job(
-            lambda: json.dumps(payload, indent=2)
-        )
+        json_str = await hass.async_add_executor_job(_export_json, payload)
         _send_result(
             connection, msg["id"], "export_config_selective", {"json_data": json_str}
         )
@@ -3904,7 +4434,7 @@ async def ws_import_config_selective(
     msg: dict[str, Any],
 ) -> None:
     """Selectively import chosen categories/items, merging into existing data."""
-    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE, SHAREABLE_SETTING_KEYS
+    from .const import CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE, sanitize_shared_settings
 
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
@@ -3935,6 +4465,9 @@ async def ws_import_config_selective(
                 cycle_destination=msg["cycle_destination"],
                 apply_settings=msg["apply_settings"],
                 local_device_type=device_type,
+                # Kept with the restore point of a destructive import so an undo puts
+                # them back (item 195); never applied to the entry from here.
+                entry_options=dict(entry.options) if entry is not None else None,
             )
 
             # Re-validate after the awaits — the entry may have been reloaded (a new
@@ -3960,17 +4493,16 @@ async def ws_import_config_selective(
             settings = summary.get("settings") if isinstance(summary.get("settings"), dict) else {}
             settings_applied = 0
             if entry is not None and settings:
-                filtered = {
-                    k: v for k, v in settings.items()
-                    if k in SHAREABLE_SETTING_KEYS
-                    and isinstance(v, (int, float)) and not isinstance(v, bool)
-                }
+                filtered = sanitize_shared_settings(settings)
                 for key in _OPTIONS_IDENTITY_KEYS:
                     filtered.pop(key, None)
                 if filtered:
                     # Nested inside the write lock this handler already holds;
                     # order is always write -> options, so no deadlock.
                     async with _entry_options_lock(hass, entry_id):
+                        filtered = _without_inverted_threshold_pair(
+                            entry, filtered, "store_device_package"
+                        )  # item 515
                         await _record_option_changes(
                             hass, entry, filtered, "store_device_package"
                         )
@@ -3994,6 +4526,87 @@ async def ws_import_config_selective(
             connection.send_error(msg["id"], "invalid_json", str(exc))
         except ValueError as exc:
             connection.send_error(msg["id"], "invalid_format", str(exc))
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+async def _async_restore_entry_options(
+    hass: HomeAssistant, entry: ConfigEntry, snapshot_options: dict[str, Any]
+) -> None:
+    """Put ``entry.options`` back to what they were before the undone import.
+
+    Exactly the snapshot's options, so a key the import added goes away again, with
+    one exception: this device's own entity/device bindings keep their CURRENT
+    values. The import never wrote them (``_IMPORT_LOCAL_BINDING_KEYS``), so any
+    change to them since was the user's own, and reverting it could re-point the
+    device at a sensor it no longer uses. Same write-boundary hygiene as the import.
+    """
+    async with _entry_options_lock(hass, entry.entry_id):
+        current = dict(entry.options)
+        restored = {
+            k: v for k, v in snapshot_options.items() if k not in _IMPORT_LOCAL_BINDING_KEYS
+        }
+        restored.update({k: current[k] for k in _IMPORT_LOCAL_BINDING_KEYS if k in current})
+        restored = strip_null_options(restored)
+        restored, _ = drop_invalid_numeric_options(restored)
+        if restored == current:
+            return
+        await _record_option_changes(
+            hass, entry, {k: v for k, v in restored.items() if current.get(k) != v},
+            "undo_import",
+        )
+        hass.config_entries.async_update_entry(entry, options=restored)
+
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "ha_washdata/undo_import", vol.Required("entry_id"): str}
+)
+@websocket_api.async_response
+async def ws_undo_import(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Undo the last replace import: restore the store and options saved before it.
+
+    The restore point is consumed, so the panel's undo affordance disappears once
+    this succeeds. No restore point is a clean ``not_found`` error (register item 195).
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+
+    # A restore rewrites the whole store, so it takes the same per-entry write lock
+    # as the imports and cannot interleave with a reprocess / recording persist.
+    async with _entry_write_lock(hass, entry_id):
+        try:
+            restored = await manager.profile_store.async_restore_pre_import_snapshot()
+            result = {
+                "success": True,
+                "summary": {
+                    "restored_from": restored.get("restored_from"),
+                    "counts": restored.get("counts") or {},
+                },
+            }
+            # Re-validate after the awaits, as the imports do: the entry may have
+            # been reloaded and the options belong to the live one.
+            if _get_manager(hass, entry_id) is not manager:
+                _LOGGER.warning(
+                    "Manager replaced during import undo for %s; aborting notify", entry_id
+                )
+                _send_result(connection, msg["id"], "undo_import", result)
+                return
+            entry = _get_entry(hass, entry_id)
+            snapshot_options = restored.get("entry_options")
+            if entry is not None and isinstance(snapshot_options, dict):
+                await _async_restore_entry_options(hass, entry, snapshot_options)
+            manager.async_schedule_banked_tail_repair()
+            manager.notify_update()
+            _send_result(connection, msg["id"], "undo_import", result)
+        except ValueError as exc:
+            connection.send_error(msg["id"], "not_found", str(exc))
         except Exception as exc:  # pylint: disable=broad-exception-caught
             connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -4026,7 +4639,6 @@ def ws_get_constants(
             "device_types": device_types,
             "state_colors": dict(STATE_COLORS),
             "ml_lab_enabled": SHOW_ML_LAB,
-            "ml_suggestions_enabled": ENABLE_ML_SUGGESTIONS,
             "ml_training_available": ENABLE_ML_TRAINING,
             "PROFILE_MIN_WARMUP_CYCLES": CONF_PROFILE_MIN_WARMUP_CYCLES,
             # Canonical matcher defaults for the Playground's matcher-param fields, so
@@ -4070,17 +4682,10 @@ def ws_get_suggestions(
 
     out: list[dict[str, Any]] = []
     try:
-        raw: dict[str, Any] = manager.profile_store.get_suggestions() or {}
-        for key in _SUGGESTION_KEYS:
-            item = raw.get(key)
-            if not isinstance(item, dict) or item.get("value") is None:
-                continue
-            val = item["value"]
-            suggested = _coerce_suggested(key, val)
-            current = merged.get(key)
-            # Hide suggestions that would not change the current value.
-            if _suggestion_equivalent(suggested, current):
-                continue
+        for key, item, suggested, current in _visible_suggestions(
+            manager.profile_store, merged,
+            getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+        ):
             out.append(
                 {
                     "key": key,
@@ -4136,12 +4741,19 @@ async def ws_apply_suggestions(
         return
 
     try:
-        raw: dict[str, Any] = manager.profile_store.get_suggestions() or {}
+        merged = {**entry.data, **entry.options}
+        # Only what the Settings list would show: a muted key re-created by the
+        # reconcile cascade used to be applied here (audit SUGGEST-11).
+        visible = {
+            key: item
+            for key, item, _s, _c in _visible_suggestions(
+                manager.profile_store, merged,
+                getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+            )
+        }
         updates: dict[str, Any] = {}
         for key in msg["keys"]:
-            if key not in _SUGGESTION_KEYS:
-                continue
-            item = raw.get(key)
+            item = visible.get(key)
             if not isinstance(item, dict) or item.get("value") is None:
                 continue
             val = item["value"]
@@ -4149,10 +4761,26 @@ async def ws_apply_suggestions(
                 int(float(val)) if key in _SUGGESTION_INT_KEYS else float(val)
             )
 
+        # Item 515: the reconciler keeps a stored start/stop pair ordered, but
+        # applying one of the two alone (a subset, a muted cascade, or a pair
+        # reconciled against options that changed since) could still invert it.
+        _inverted = inverted_threshold_pair(
+            merged,
+            {**merged, **updates},
+            getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+        )
+        if _inverted is not None:
+            connection.send_error(
+                msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
+            )
+            return
+
         if updates:
             # Clear before updating the entry: async_update_entry schedules a
             # reload that rebuilds the store, so persist the cleared state first.
-            cycle_count = len(manager.profile_store.get_past_cycles())
+            # The odometer, like the cooldown check (audit SUGGEST-05): at the
+            # retention cap len(past_cycles) never grows past the stamp again.
+            cycle_count = manager.profile_store.get_lifetime_cycle_count()
             manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
             # Same critical section as ws_set_options (#442 follow-up): the
             # changelog snapshot and the options write must be atomic per entry.
@@ -4215,7 +4843,11 @@ async def ws_set_suggestion_lock(
     proposing it (#343)."""
     entry_id: str = msg["entry_id"]
     key: str = msg["key"]
-    if key not in _SUGGESTION_KEYS:
+    # Only LOCKING needs a key the engine can suggest. Unlocking must accept any
+    # stored key: a mute on a setting that 0.5.8 stopped suggesting (the confidence
+    # thresholds, sampling interval, ...) could otherwise never be cleared, and
+    # "Reset muted" failed on it forever.
+    if msg["locked"] and key not in _SUGGESTION_KEYS:
         connection.send_error(msg["id"], "invalid_key", f"Unknown suggestion key: {key!r}")
         return
     manager = _get_manager(hass, entry_id)
@@ -4308,7 +4940,8 @@ async def ws_get_cycle_power_data(
                 artifacts = await hass.async_add_executor_job(
                     store.detect_cycle_artifacts, cycle["profile_name"], samples
                 )
-            meta["artifacts"] = artifacts or []
+            # Only with a trace to draw them on (#459).
+            meta["artifacts"] = (artifacts or []) if samples else []
             # HA restart gaps recorded during this cycle (for panel shading).
             meta["restart_gaps"] = cycle.get("restart_gaps") or []
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -4341,6 +4974,166 @@ async def ws_get_cycle_power_data(
             **meta,
         },
     )
+
+
+# Cycle context (register item 513, discussion #463): the power sensor's recorder
+# history just before and just after a stored cycle, for the cycle chart to draw
+# greyed either side of the stored trace. The cap bounds the two recorder queries.
+_CYCLE_CONTEXT_MAX_S = 3600.0
+_CYCLE_CONTEXT_MAX_POINTS = 300
+
+
+def _cycle_context_points(
+    rows: list[tuple[float, float | None]],
+    origin_ts: float,
+    lo_ts: float,
+    hi_ts: float,
+    *,
+    hi_inclusive: bool,
+    max_points: int = _CYCLE_CONTEXT_MAX_POINTS,
+) -> list[list[float | None]]:
+    """Recorder rows inside a window as ``[offset_s, watts]`` from ``origin_ts``.
+
+    ``watts`` is None at an unavailable (or non-finite) row, so the panel breaks the
+    line there rather than holding the last reading across an outage. Each run
+    between two such rows is thinned on its own (``_downsample`` keeps a run's
+    extrema), so thinning never bridges a gap.
+    """
+    inside = [
+        (ts, w) for ts, w in rows
+        if lo_ts <= ts and (ts <= hi_ts if hi_inclusive else ts < hi_ts)
+    ]
+    total = sum(1 for _ts, w in inside if w is not None) or 1
+    out: list[list[float | None]] = []
+    run: list[tuple[float, float]] = []
+
+    def _flush() -> None:
+        if run:
+            budget = max(4, round(max_points * len(run) / total))
+            out.extend(_downsample([(ts - origin_ts, w) for ts, w in run], budget))
+            run.clear()
+
+    for ts, w in inside:
+        if w is None or not math.isfinite(float(w)):
+            _flush()
+            if not out or out[-1][1] is not None:
+                out.append([round(ts - origin_ts, 2), None])
+            continue
+        run.append((ts, float(w)))
+    _flush()
+    return out
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_cycle_context",
+        vol.Required("entry_id"): str,
+        vol.Required("cycle_id"): str,
+        vol.Optional("before_s", default=600.0): vol.Coerce(float),
+        vol.Optional("after_s", default=600.0): vol.Coerce(float),
+    }
+)
+@websocket_api.async_response
+async def ws_get_cycle_context(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """The power sensor's recorder history around one stored cycle (item 513).
+
+    ``before`` covers ``[start - before_s, start)`` and ``after`` covers
+    ``[trace end, trace end + after_s]`` (clamped to now), both as
+    ``[offset_s, watts]`` from the cycle's stored start: the axis the cycle chart
+    already plots, so the panel draws them either side of the stored trace.
+    Display only: it reads the recorder and the cycle's start and trace end, writes
+    nothing, and nothing it returns reaches duration, energy, matching or envelopes.
+
+    Only for a cycle this device observed live (``past``): a community-store
+    reference was recorded on someone else's machine and a backfill came from an
+    imported history, so this plug's recorder at that time says nothing about
+    either. ``available`` is False while the recorder holds no reading for either
+    window (it keeps 10 days by default; an excluded entity has none), and
+    ``reason`` says why.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+
+    def _window(key: str) -> float:
+        value = float(msg.get(key) or 0.0)
+        if not math.isfinite(value):
+            return 0.0
+        return max(0.0, min(_CYCLE_CONTEXT_MAX_S, value))
+
+    cycle_id: str = msg["cycle_id"]
+    before_s, after_s = _window("before_s"), _window("after_s")
+    out: dict[str, Any] = {
+        "cycle_id": cycle_id,
+        "available": False,
+        "reason": None,
+        "entity_id": None,
+        "before_s": before_s,
+        "after_s": after_s,
+        "trace_end_s": 0.0,
+        "after_end_s": 0.0,
+        "before": [],
+        "after": [],
+    }
+    try:
+        store = manager.profile_store
+        cycle, origin = store.find_stored_cycle(cycle_id)
+        entity_id = getattr(manager, "power_sensor_entity_id", None)
+        start_raw = cycle.get("start_time") if cycle else None
+        start_dt = dt_util.parse_datetime(str(start_raw)) if start_raw else None
+        if cycle is None:
+            out["reason"] = "not_found"
+        elif origin != "past":
+            out["reason"] = "not_live"
+        elif not entity_id:
+            out["reason"] = "no_sensor"
+        elif start_dt is None:
+            out["reason"] = "no_start"
+        else:
+            out["entity_id"] = entity_id
+            start_dt = dt_util.as_utc(start_dt)
+            start_ts = start_dt.timestamp()
+            samples = store.get_cycle_power_data(cycle_id)
+            try:
+                trace_end = float(samples[-1][0]) if samples else float(cycle.get("duration") or 0.0)
+            except (TypeError, ValueError, OverflowError):
+                trace_end = 0.0
+            trace_end = max(0.0, trace_end) if math.isfinite(trace_end) else 0.0
+            out["trace_end_s"] = round(trace_end, 2)
+            if before_s > 0:
+                lo = start_ts - before_s
+                rows = await _recorder_power(
+                    hass, entity_id, start_dt - timedelta(seconds=before_s),
+                    end_dt=start_dt, keep_unavailable=True,
+                )
+                out["before"] = _cycle_context_points(
+                    rows, start_ts, lo, start_ts, hi_inclusive=False
+                )
+            end_dt = start_dt + timedelta(seconds=trace_end)
+            after_end_dt = min(end_dt + timedelta(seconds=after_s), dt_util.utcnow())
+            if after_s > 0 and after_end_dt > end_dt:
+                rows = await _recorder_power(
+                    hass, entity_id, end_dt, end_dt=after_end_dt, keep_unavailable=True,
+                )
+                out["after"] = _cycle_context_points(
+                    rows, start_ts, end_dt.timestamp(), after_end_dt.timestamp(),
+                    hi_inclusive=True,
+                )
+                out["after_end_s"] = round(after_end_dt.timestamp() - start_ts, 2)
+            out["available"] = any(p[1] is not None for p in out["before"] + out["after"])
+            if not out["available"]:
+                out["reason"] = "no_history"
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Error building cycle context for %s: %s", cycle_id, exc)
+        out.update(available=False, reason="no_history", before=[], after=[])
+
+    _send_result(connection, msg["id"], "get_cycle_context", out)
 
 
 @websocket_api.websocket_command(
@@ -4893,7 +5686,9 @@ async def ws_set_user_prefs(
     p = msg["prefs"]
     if p.get("default_tab") in _PANEL_TABS:
         cur["default_tab"] = p["default_tab"]
-    for k in ("show_expected", "show_raw", "show_raw_active", "show_debug", "onboarding_dismissed"):
+    for k in ("show_expected", "show_raw", "show_raw_active", "show_debug", "onboarding_dismissed",
+              # Settings: reveal the internal tuning fields (audit UI-02).
+              "show_internal"):
         if k in p:
             cur[k] = bool(p[k])
     # F2: per-user Basic/Advanced settings disclosure level.
@@ -4905,7 +5700,7 @@ async def ws_set_user_prefs(
     if "font_scale" in p:
         try:
             cur["font_scale"] = max(0.7, min(2.0, float(p["font_scale"])))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             cur.pop("font_scale", None)
     # Display prefs: cycle date format + panel language override (paired with the
     # panel's save-prefs payload; without these they would be silently dropped).
@@ -4917,6 +5712,19 @@ async def ws_set_user_prefs(
             cur.pop("lang_override", None)  # empty clears -> system default
         elif isinstance(lang, str) and _PREF_LANG_TAG_RE.match(lang):
             cur["lang_override"] = lang
+    # Cycle chart context length per device (item 513): {entry_id: minutes}. Merged
+    # into the stored map, so a panel only has to send the device it changed.
+    ctx = p.get("cycle_context_min")
+    if isinstance(ctx, dict):
+        ctx_map = dict(cur.get("cycle_context_min") or {})
+        for eid, minutes in ctx.items():
+            if not isinstance(eid, str) or not eid or len(eid) > 64:
+                continue
+            if isinstance(minutes, bool) or minutes not in _PREF_CYCLE_CONTEXT_MINUTES:
+                continue
+            ctx_map[eid] = int(minutes)
+        # Bounded: one key per config entry, never more than any real install has.
+        cur["cycle_context_min"] = dict(list(ctx_map.items())[-64:])
     # Allow setup guidance skip keys: setup_skip_<step_key> -> "never" | ISO timestamp
     for k, v in p.items():
         if isinstance(k, str) and k.startswith("setup_skip_"):
@@ -4954,11 +5762,15 @@ def ws_get_match_debug(
 
     out: dict[str, Any] = {"confidence": None, "ambiguous": False, "candidates": []}
     try:
+        # All three from the SAME result (audit MATCH-DECIDE-14). The confidence
+        # used to be `_last_match_confidence`, the committed program's (moved only
+        # when the switching rules commit or confirm it), shown beside the newest
+        # result's ambiguity flag and candidates.
         mr = getattr(manager, "_last_match_result", None)
-        conf = getattr(manager, "_last_match_confidence", None)
-        out["confidence"] = round(float(conf), 4) if conf is not None else None
-        out["ambiguous"] = bool(getattr(manager, "_last_match_ambiguous", False))
         if mr is not None:
+            conf = getattr(mr, "confidence", None)
+            out["confidence"] = round(float(conf), 4) if conf is not None else None
+            out["ambiguous"] = bool(getattr(mr, "is_ambiguous", False))
             out["candidates"] = manager.profile_store.get_match_candidates_summary(mr, 5)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error building match debug for %s: %s", entry_id, exc)
@@ -5182,21 +5994,15 @@ def _compute_cycle_events(
     return events[:max_events]
 
 
-def _health_model_sig(store: Any) -> str:
-    """Signature of the active health/end models, so persisted per-cycle health
-    can be invalidated (recomputed) whenever the model changes or is retrained.
-    """
-    versions = store.get_ml_model_versions() or {}
-    parts = []
-    for cap in ("quality", "end"):
-        v = versions.get(cap)
-        ts = v.get("trained_at") if isinstance(v, dict) else None
-        parts.append(f"{cap}:{ts or 'base'}")
-    return "|".join(parts)
+# Signature persisted with each cycle's ``ml_health``: the shipped quality/end
+# baselines. It used to carry an on-device model's ``trained_at`` so a retrain
+# invalidated the cache; no on-device classifier exists since 0.5.8, and the
+# value is unchanged so health already persisted stays valid.
+_HEALTH_MODEL_SIG = "quality:base|end:base"
 
 
 def _compute_ml_comparison(
-    store: Any, current_off_delay: int, *, force_recompute: bool = False
+    store: Any, *, force_recompute: bool = False
 ) -> dict[str, Any]:
     """Build the ML shadow-mode comparison report (CPU-intensive; runs in executor).
 
@@ -5218,15 +6024,15 @@ def _compute_ml_comparison(
         from .ml.feature_extraction import latest_end_event_features, quality_features
         from .profile_store import decompress_power_data
     except Exception:  # pylint: disable=broad-exception-caught
-        return {"enabled": False, "error": "ML models not available", "cycles": [], "settings_comparison": {}}
+        return {"enabled": False, "error": "ML models not available", "cycles": []}
 
-    # Prefer on-device trained models when present, else the embedded baseline.
-    quality_score_fn, quality_source = resolve_scorer("quality", store)
-    end_score_fn, end_source = resolve_scorer("end", store)
+    # The shipped embedded baselines (no on-device classifier exists since 0.5.8).
+    quality_score_fn, quality_source = resolve_scorer("quality")
+    end_score_fn, end_source = resolve_scorer("end")
     if quality_score_fn is None and end_score_fn is None:
-        return {"enabled": False, "error": "ML models not available", "cycles": [], "settings_comparison": {}}
+        return {"enabled": False, "error": "ML models not available", "cycles": []}
 
-    model_sig = _health_model_sig(store)
+    model_sig = _HEALTH_MODEL_SIG
     health_dirty = False
     health_updates: dict[str, Any] = {}
     cycles: list[Any] = store.get_past_cycles()
@@ -5257,11 +6063,9 @@ def _compute_ml_comparison(
             "count": len(s["durations"]),
         }
 
-    # --- Evaluate cycles (newest 200 for scoring/display; all for pause analysis) ---
+    # --- Evaluate the newest 200 cycles ---
     # `cycles` is oldest-first (new cycles are appended at the end), so the newest
-    # 200 are the tail. Score / persist health for only that window; the pause
-    # scan below still runs over every cycle.
-    intra_pauses: list[float] = []
+    # 200 are the tail; older ones are skipped before their trace is decompressed.
     evaluated: list[dict[str, Any]] = []
     recent_start_idx = max(0, len(cycles) - 200)
 
@@ -5289,35 +6093,56 @@ def _compute_ml_comparison(
         else:
             proxy_dist, proxy_margin, proxy_fit = 0.25, 0.30, 0.75
 
-        points = decompress_power_data(cycle)
-
-        # Collect intra-cycle pauses for off_delay recommendation (all cycles).
-        if points and len(points) >= 4 and status == "completed":
-            powers = [p for _, p in points]
-            peak = max(powers) if powers else 0.0
-            low_thresh = max(1.0, 0.05 * peak)
-            in_pause = False
-            pause_start_s = 0.0
-            for offset_s, pwr in points:
-                if not in_pause and pwr < low_thresh:
-                    in_pause = True
-                    pause_start_s = offset_s
-                elif in_pause and pwr >= low_thresh:
-                    pause_dur = offset_s - pause_start_s
-                    if 5.0 <= pause_dur <= 1800.0:
-                        intra_pauses.append(pause_dur)
-                    in_pause = False
-
-        # Only score and display the newest 200 cycles (the tail of the
-        # oldest-first list); older cycles still contributed pauses above.
         if idx < recent_start_idx:
             continue
+
+        points = decompress_power_data(cycle)
 
         # Reuse persisted per-cycle health when it was computed against the
         # current model (unless a recompute is forced). This is what keeps the
         # panel from re-scoring every cycle on every load.
         cached = cycle.get("ml_health")
-        if (
+        has_trace = len(points) >= ML_HEALTH_MIN_TRACE_POINTS
+        if not has_trace:
+            # #459: a cycle whose trace was pruned by retention cannot be scored.
+            # `quality_features` falls back to a `has_trace = 0` row that no model
+            # was trained on (the baseline sits ~38 sigma away from it), so every
+            # pruned cycle came back as ~0.99 / "review" at the next forced
+            # recompute and joined the review queue. Keep the last assessment that
+            # was made WITH a trace; anything else (never scored, or scored after
+            # the trace was gone, which is what the nightly run did until now) is
+            # "no data". Checked before the cache so polluted entries heal on the
+            # next panel load rather than at the next maintenance run.
+            if isinstance(cached, dict) and cached.get("has_trace"):
+                ml_quality = cached.get("score")
+                quality_label = cached.get("label", "no_data")
+                ml_end_conf = cached.get("end_score")
+                end_label = cached.get("end_label", "no_event")
+                events = cached.get("events") or []
+            else:
+                ml_quality = None
+                quality_label = "no_data"
+                ml_end_conf = None
+                end_label = "no_event"
+                events = []
+                cycle_id_key = cycle.get("id", "")
+                if cycle_id_key and not (
+                    isinstance(cached, dict)
+                    and cached.get("label") == "no_data"
+                    and cached.get("score") is None
+                ):
+                    health_updates[cycle_id_key] = {
+                        "score": None,
+                        "label": "no_data",
+                        "end_score": None,
+                        "end_label": "no_event",
+                        "events": [],
+                        "model_sig": model_sig,
+                        "has_trace": False,
+                        "at": dt_util.now().isoformat(),
+                    }
+                    health_dirty = True
+        elif (
             not force_recompute
             and isinstance(cached, dict)
             and cached.get("model_sig") == model_sig
@@ -5395,6 +6220,9 @@ def _compute_ml_comparison(
                     "end_label": end_label,
                     "events": events,
                     "model_sig": model_sig,
+                    # #459: marks a score as trace-backed, so it survives the
+                    # trace being pruned later instead of being re-scored blind.
+                    "has_trace": True,
                     "at": dt_util.now().isoformat(),
                 }
             health_dirty = True
@@ -5413,7 +6241,7 @@ def _compute_ml_comparison(
             "ml_quality_label": quality_label,
             "ml_end_confidence": round(ml_end_conf, 3) if ml_end_conf is not None else None,
             "ml_end_label": end_label,
-            "has_power_data": len(points) > 0,
+            "has_power_data": has_trace,
             "events": events,
             "ml_review": cycle.get("ml_review") or {},
         })
@@ -5421,40 +6249,11 @@ def _compute_ml_comparison(
     # Panel expects most-recent-first ordering; the loop appended oldest-first.
     evaluated.reverse()
 
-    # --- Settings comparison: off_delay ---
-    settings_comparison: dict[str, Any] = {}
-    ml_off_delay: int | None = None
-    pause_p95: float | None = None
-    if intra_pauses:
-        intra_pauses.sort()
-        p95_idx = min(int(len(intra_pauses) * 0.95), len(intra_pauses) - 1)
-        pause_p95 = intra_pauses[p95_idx]
-        ml_off_delay = max(60, int(pause_p95) + 60)
-
-    original_suggestions = store.get_suggestions() or {}
-    orig_off = original_suggestions.get(CONF_OFF_DELAY)
-    settings_comparison["off_delay"] = {
-        "key": CONF_OFF_DELAY,
-        "label": "Off Delay",
-        "unit": "s",
-        "current_value": current_off_delay,
-        "original_suggestion": orig_off.get("value") if isinstance(orig_off, dict) else None,
-        "original_reason": orig_off.get("reason") if isinstance(orig_off, dict) else None,
-        "ml_recommendation": ml_off_delay,
-        "ml_reasoning": (
-            f"p95 intra-cycle pause: {int(pause_p95)}s + 60s buffer = {ml_off_delay}s "
-            f"(from {len(intra_pauses)} observed pauses)"
-            if ml_off_delay is not None else "Not enough pause data to recommend"
-        ),
-        "pause_count": len(intra_pauses),
-    }
-
     return {
         "enabled": True,
         "cycle_count": len(cycles),
         "evaluated_count": sum(1 for e in evaluated if e["ml_quality_score"] is not None),
         "cycles": evaluated,
-        "settings_comparison": settings_comparison,
         "model_source": {"quality": quality_source, "end": end_source},
         "_health_dirty": health_dirty,
         "_health_updates": health_updates,
@@ -5463,122 +6262,6 @@ def _compute_ml_comparison(
             for name, m in profile_medians.items()
         },
     }
-
-
-def _build_settings_comparison(
-    manager: Any, merged: dict[str, Any], engine: Any = None
-) -> dict[str, Any]:
-    """Build the enriched Classic-vs-ML settings comparison (executor-safe).
-
-    Runs both the classic :class:`SuggestionEngine` and the
-    :class:`MLSuggestionEngine` against clean cycle history and merges their
-    recommendations with the current option values. Gated by the caller behind
-    ``ENABLE_ML_SUGGESTIONS``.
-    """
-    try:
-        from .suggestion_engine import (  # pylint: disable=import-outside-toplevel
-            MLSuggestionEngine,
-            select_clean_cycles,
-        )
-    except Exception:  # pylint: disable=broad-exception-caught
-        return {}
-
-    # `engine` is a for_job() copy prepared on the event loop with the config
-    # snapshot already bound; fall back to the shared engine only for callers that
-    # did not supply one (its _entry_options() then does a live read).
-    classic = engine
-    if classic is None:
-        learning = getattr(manager, "learning_manager", None)
-        classic = getattr(learning, "suggestion_engine", None)
-    if classic is None:
-        return {}
-
-    stop_thr = classic._current_stop_threshold(merged)  # pylint: disable=protected-access
-    raw_cycles = classic.profile_store.get_past_cycles()
-
-    # Classic recommendations pooled from every classic pass.
-    classic_vals: dict[str, Any] = {}
-    for producer in (
-        classic.generate_detection_suggestions,
-        classic.generate_model_suggestions,
-    ):
-        try:
-            classic_vals.update(producer() or {})
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
-    try:
-        classic_vals.update(classic.run_batch_simulation(raw_cycles) or {})
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
-    # Classic off_delay via the (Stage 2) pause analysis.
-    try:
-        clean, _excl = select_clean_cycles(raw_cycles[-200:], stop_threshold_w=stop_thr)
-        device_floor = DEFAULT_OFF_DELAY_BY_DEVICE.get(
-            classic.device_type, DEFAULT_OFF_DELAY
-        ) if classic.device_type else DEFAULT_OFF_DELAY
-        od = classic._suggest_off_delay_from_pauses(clean, stop_thr, device_floor)  # pylint: disable=protected-access
-        if od is not None:
-            classic_vals[CONF_OFF_DELAY] = {
-                "value": od[0],
-                "reason": od[1],
-                "reason_key": od[2],
-                "reason_params": od[3],
-            }
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
-
-    # ML recommendations.
-    ml_vals: dict[str, Any] = {}
-    try:
-        ml_vals = MLSuggestionEngine(classic).generate_ml_suggestions() or {}
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
-
-    def _val(entry: Any) -> Any:
-        return entry.get("value") if isinstance(entry, dict) else None
-
-    def _reason(entry: Any) -> str:
-        return entry.get("reason", "") if isinstance(entry, dict) else ""
-
-    def _reason_key(entry: Any) -> str | None:
-        return entry.get("reason_key") if isinstance(entry, dict) else None
-
-    def _reason_params(entry: Any) -> dict[str, Any] | None:
-        return entry.get("reason_params") if isinstance(entry, dict) else None
-
-    comparison: dict[str, Any] = {}
-    for key, label, unit in _ML_COMPARE_SETTINGS:
-        cv, mv = classic_vals.get(key), ml_vals.get(key)
-        if cv is None and mv is None:
-            continue
-        current = merged.get(key)
-        classic_value = _val(cv)
-        ml_value = _val(mv)
-        # Hide a recommendation that would not change the current value.
-        if classic_value is not None and _suggestion_equivalent(classic_value, current):
-            classic_value = None
-        if ml_value is not None and _suggestion_equivalent(ml_value, current):
-            ml_value = None
-        if classic_value is None and ml_value is None:
-            continue
-        comparison[key] = {
-            "key": key,
-            # ``label`` is the English fallback; the panel renders the field's own
-            # localized setting label (setting.<key>.label) so this is not shown
-            # directly. Reasons carry _key/_params sidecars for _t() rendering.
-            "label": label,
-            "unit": unit,
-            "current_value": current,
-            "classic_value": classic_value,
-            "classic_reason": _reason(cv) if classic_value is not None else "",
-            "classic_reason_key": _reason_key(cv) if classic_value is not None else None,
-            "classic_reason_params": _reason_params(cv) if classic_value is not None else None,
-            "ml_value": ml_value,
-            "ml_reason": _reason(mv) if ml_value is not None else "",
-            "ml_reason_key": _reason_key(mv) if ml_value is not None else None,
-            "ml_reason_params": _reason_params(mv) if ml_value is not None else None,
-        }
-    return comparison
 
 
 @websocket_api.websocket_command(
@@ -5607,13 +6290,7 @@ async def ws_get_ml_comparison(
 
     try:
         store = manager.profile_store
-        entry = _get_entry(hass, entry_id)
-        merged: dict[str, Any] = {**(entry.data if entry else {}), **(entry.options if entry else {})}
-        current_off_delay = int(merged.get(CONF_OFF_DELAY, 120))
-
-        result = await hass.async_add_executor_job(
-            _compute_ml_comparison, store, current_off_delay
-        )
+        result = await hass.async_add_executor_job(_compute_ml_comparison, store)
         # Apply any freshly-computed per-cycle health updates on the event loop
         # (the executor must not mutate live store dicts directly), then persist.
         health_updates = result.pop("_health_updates", {})
@@ -5624,25 +6301,6 @@ async def ws_get_ml_comparison(
                 if cid and cid in health_updates:
                     cycle["ml_health"] = health_updates[cid]
             await store.async_save()
-        result["ml_suggestions_enabled"] = ENABLE_ML_SUGGESTIONS
-
-        # Stage 3: replace the basic off_delay-only comparison with the full
-        # Classic-vs-ML settings table when ML suggestions are unlocked.
-        if ENABLE_ML_SUGGESTIONS:
-            # Bind this handler's already-merged view to a throwaway engine copy
-            # before the executor hop: reading the config entry is loop-affine, so
-            # the generators must not re-read it from the worker thread, and a
-            # copy keeps concurrent jobs from clobbering each other's snapshot.
-            shared = getattr(
-                getattr(manager, "learning_manager", None), "suggestion_engine", None
-            )
-            job_engine = shared.for_job(merged) if shared is not None else None
-            enriched = await hass.async_add_executor_job(
-                _build_settings_comparison, manager, merged, job_engine
-            )
-            if enriched:
-                result["settings_comparison"] = enriched
-
         _send_result(connection, msg["id"], "get_ml_comparison", result)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("ML comparison failed for %s: %s", entry_id, exc)
@@ -5671,10 +6329,6 @@ async def ws_get_ml_training_status(
         DEFAULT_ML_TRAINING_HOUR,
         DEFAULT_ML_TRAINING_INTERVAL_DAYS,
         DEFAULT_ML_TRAINING_MIN_CYCLES,
-        MATCH_CORR_WEIGHT,
-        MATCH_DTW_ENSEMBLE_W,
-        MATCH_DURATION_WEIGHT,
-        MATCH_ENERGY_WEIGHT,
     )
 
     entry_id: str = msg["entry_id"]
@@ -5690,15 +6344,17 @@ async def ws_get_ml_training_status(
     # Plain-language names + a one-line "what it does" for each capability, so the
     # panel never has to show raw internal keys to non-ML users.
     _cap_labels = {
-        "end": ("Cycle-end detection", "Knowing when a cycle has truly finished"),
-        "quality": ("Cycle quality check", "Spotting mis-detected or corrupted cycles"),
-        "live_match": ("Program matching", "Identifying the running program sooner"),
-        "remaining_time": ("Time-remaining estimate", "Predicting how long is left"),
         "total_energy": ("Energy estimate", "Predicting total energy and cost"),
     }
+    # Only what is trained on-device AND consumed is listed, which since 0.5.8 is
+    # `total_energy` alone. `end` is no longer trained (its consumer is frozen
+    # off, audit ML-05/11) and `remaining_time` / `live_match` / `quality` lost
+    # consumer and training; storage v17 drops all four records, so an older
+    # import is the only way one can still be here.
+    live_caps = set(_cap_labels)
     models: dict[str, Any] = {}
     for cap, v in versions.items():
-        if not isinstance(v, dict):
+        if not isinstance(v, dict) or cap not in live_caps:
             continue
         spec = v.get("spec") if isinstance(v.get("spec"), dict) else {}
         label, blurb = _cap_labels.get(cap, (cap, ""))
@@ -5715,14 +6371,9 @@ async def ws_get_ml_training_status(
             "blurb_key": f"ml.cap_blurb.{cap}" if cap in _cap_labels else None,
         }
         # Raw metric numbers so the panel can render a humanized quality indicator
-        # (a bar + word) with the exact figure on hover: held-out AUC for
-        # classifiers, MAE-vs-naive for regressors.
-        if v.get("new_auc") is not None:
-            info["auc"] = round(float(v["new_auc"]), 4)
-            info["metric"] = f"AUC {float(v['new_auc']):.2f} on held-out data"
-            info["metric_key"] = "ml.metric_auc"
-            info["metric_params"] = {"auc": f"{float(v['new_auc']):.2f}"}
-        elif v.get("model_mae") is not None and v.get("naive_mae") is not None:
+        # (a bar + word) with the exact figure on hover: MAE vs the naive estimate
+        # (every listed capability is a regressor since 0.5.8).
+        if v.get("model_mae") is not None and v.get("naive_mae") is not None:
             info["model_mae"] = round(float(v["model_mae"]), 5)
             info["naive_mae"] = round(float(v["naive_mae"]), 5)
             info["metric"] = f"error {float(v['model_mae']):.3f} vs {float(v['naive_mae']):.3f} baseline"
@@ -5731,20 +6382,31 @@ async def ws_get_ml_training_status(
                 "model": f"{float(v['model_mae']):.3f}",
                 "baseline": f"{float(v['naive_mae']):.3f}",
             }
+        # How many cycles the metric was measured on (audit ML-20); absent on a
+        # record promoted before the count was stored.
+        if isinstance(v.get("held_out_cycles"), int):
+            info["held_out_cycles"] = int(v["held_out_cycles"])
         models[cap] = info
 
-    # Fit trend across recent training runs (drift): compare the mean held-out
-    # score of the most-recent third of runs to the oldest third, respecting each
-    # metric's direction. Only meaningful with a few runs of history.
+    # Fit trend across the PROMOTED runs (drift): compare the mean held-out score
+    # of the most-recent third of the models that were put in use to the oldest
+    # third, respecting each metric's direction. A candidate that was rejected
+    # never served, so its score says nothing about the model in use (audit
+    # ML-20); entries from before that rule carry no `promoted` and are skipped.
+    # Only meaningful with a few promotions of history.
     history = store.get_ml_training_history()
     for cap, info in models.items():
         series = history.get(cap) if isinstance(history, dict) else None
-        if not isinstance(series, list) or len(series) < 4:
+        if not isinstance(series, list):
             continue
-        scores = [float(e["score"]) for e in series if isinstance(e, dict) and "score" in e]
+        promoted_runs = [
+            e for e in series
+            if isinstance(e, dict) and e.get("promoted") is True and "score" in e
+        ]
+        scores = [float(e["score"]) for e in promoted_runs]
         if len(scores) < 4:
             continue
-        higher_better = bool(series[-1].get("higher_better", True))
+        higher_better = bool(promoted_runs[-1].get("higher_better", True))
         third = max(1, len(scores) // 3)
         old_mean = sum(scores[:third]) / third
         new_mean = sum(scores[-third:]) / third
@@ -5755,20 +6417,22 @@ async def ws_get_ml_training_status(
             rel = -rel  # for error metrics, a decrease is an improvement
         info["trend"] = "improving" if rel > 0.03 else "declining" if rel < -0.03 else "steady"
 
-    # Matcher scoring-weight tuning (Stage 4/5): current shipped defaults, the
-    # on-device tuned record (if promoted), and which set is actually in use.
-    tuned_rec = store.get_matching_config()
-    tuned_cfg = tuned_rec.get("config") if isinstance(tuned_rec, dict) else None
-    matching = {
-        "defaults": {
-            "corr_weight": MATCH_CORR_WEIGHT,
-            "duration_weight": MATCH_DURATION_WEIGHT,
-            "energy_weight": MATCH_ENERGY_WEIGHT,
-            "dtw_ensemble_w": MATCH_DTW_ENSEMBLE_W,
-        },
-        "tuned": tuned_rec or None,
-        "active": "tuned" if tuned_cfg else "default",
-    }
+    # The last run per capability, so the panel can say why nothing was (re)learnt
+    # (audit ML-20). Only runs recorded with `promoted` qualify.
+    last_run: dict[str, Any] = {}
+    for cap in live_caps:
+        series = history.get(cap) if isinstance(history, dict) else None
+        entry = series[-1] if isinstance(series, list) and series else None
+        if not isinstance(entry, dict) or "promoted" not in entry:
+            continue
+        run: dict[str, Any] = {"ts": entry.get("ts"), "promoted": bool(entry["promoted"])}
+        if not run["promoted"]:
+            params = entry.get("reason_params")
+            run["reason_code"] = str(entry.get("reason_code") or "unknown")
+            run["reason_params"] = dict(params) if isinstance(params, dict) else {}
+            run["reason"] = str(entry.get("reason") or "")
+        last_run[cap] = run
+
     _send_result(connection, msg["id"], "get_ml_training_status", {
             "available": ENABLE_ML_TRAINING,
             "enabled": bool(merged.get(CONF_ML_TRAINING_ENABLED, DEFAULT_ML_TRAINING_ENABLED)),
@@ -5779,7 +6443,7 @@ async def ws_get_ml_training_status(
             "interval_days": int(merged.get(CONF_ML_TRAINING_INTERVAL_DAYS, DEFAULT_ML_TRAINING_INTERVAL_DAYS)),
             "hour": int(merged.get(CONF_ML_TRAINING_HOUR, DEFAULT_ML_TRAINING_HOUR)),
             "on_device_models": models,
-            "matching": matching,
+            "last_run": last_run,
         },
     )
 
@@ -5850,33 +6514,6 @@ def ws_trigger_ml_training(
 
 @websocket_api.websocket_command(
     {
-        vol.Required("type"): "ha_washdata/revert_matching_config",
-        vol.Required("entry_id"): str,
-    }
-)
-@websocket_api.async_response
-async def ws_revert_matching_config(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Revert the matcher's scoring weights to the shipped defaults.
-
-    Drops the on-device tuned override so matching falls back to the const
-    defaults. The next training pass may re-promote a new one if it wins.
-    """
-    entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
-        _err_not_found(connection, msg["id"], entry_id)
-        return
-    await manager.profile_store.clear_matching_config()
-    manager.notify_update()
-    _send_result(connection, msg["id"], "revert_matching_config", {"success": True})
-
-
-@websocket_api.websocket_command(
-    {
         vol.Required("type"): "ha_washdata/revert_ml_models",
         vol.Required("entry_id"): str,
     }
@@ -5889,11 +6526,9 @@ async def ws_revert_ml_models(
 ) -> None:
     """Revert all on-device trained models to the shipped embedded baselines.
 
-    Drops every promoted spec in ``ml_model_versions`` so ``resolve_scorer`` /
-    ``resolve_regressor`` fall back to the baseline (or, for the baseline-less
-    remaining-time regressor, become inert). The next training pass may
-    re-promote models if they beat the baseline again. Mirrors
-    ``revert_matching_config`` for the matcher weights.
+    Drops every promoted spec in ``ml_model_versions`` so ``resolve_regressor``
+    becomes inert for the baseline-less ``total_energy`` regressor. The next training pass may
+    re-promote models if they beat the baseline again.
     """
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
@@ -5927,8 +6562,8 @@ async def ws_set_ml_review(
 ) -> None:
     """Attach an ML-Lab review (quality / golden / tags / notes) to a cycle.
 
-    This is the write-back that turns the read-only shadow view into a feedback
-    loop: reviews become strong training labels for the on-device quality model.
+    The write-back from the read-only shadow view. (Until 0.5.8 a review also
+    labelled the on-device quality model, whose training was removed.)
     """
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
@@ -6013,15 +6648,6 @@ async def ws_terminate_cycle(
 # ─── Playground (F3): headless what-if replay + DTW visualizer ──────────────────
 
 
-def _safe_float_finite(value: Any, default: float) -> float:
-    """Convert ``value`` to a finite float, falling back to ``default`` on failure."""
-    try:
-        v = float(value)
-        return v if math.isfinite(v) else default
-    except (TypeError, ValueError):
-        return default
-
-
 def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
     """Resolve the device's live CycleDetectorConfig as the simulation base.
 
@@ -6033,47 +6659,15 @@ def _playground_base_config(manager: Any, entry: Any) -> CycleDetectorConfig:
     cfg = getattr(detector, "config", None)
     if isinstance(cfg, CycleDetectorConfig):
         return cfg
-    opts: dict[str, Any] = {}
-    if entry is not None:
-        opts = {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
-    min_power = float(opts.get(CONF_MIN_POWER, DEFAULT_MIN_POWER) or DEFAULT_MIN_POWER)
-    return CycleDetectorConfig(
-        min_power=min_power,
-        off_delay=int(opts.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY)),
-        device_type=str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)),
-        completion_min_seconds=int(opts.get(CONF_COMPLETION_MIN_SECONDS, 600)),
-        end_repeat_count=int(opts.get(CONF_END_REPEAT_COUNT, 1)),
-        min_off_gap=int(opts.get(CONF_MIN_OFF_GAP, 60)),
-        start_threshold_w=float(opts.get(CONF_START_THRESHOLD_W, min_power)),
-        stop_threshold_w=float(
-            opts.get(CONF_STOP_THRESHOLD_W, min_power * 0.6 if min_power else 2.0)
-        ),
-        dishwasher_end_spike_quiet_release=_safe_float_finite(
-            opts.get(CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE),
-            DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
-        ),
-        smart_termination_duration_ratio=_safe_float_finite(
-            opts.get(CONF_SMART_TERMINATION_DURATION_RATIO),
-            resolve_smart_termination_duration_ratio_default(
-                str(opts.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
-            ),
-        ),
-        # The same helpers the detector reads these through, not a bare float:
-        # this branch builds the sim config when the live detector is unavailable,
-        # and an imported or stale option would otherwise give the Playground a
-        # value production would have clamped (register items 244, 249).
-        anti_crease_finalize_ratio=effective_anticrease_finalize_ratio(
-            opts.get(CONF_ANTI_CREASE_FINALIZE_RATIO, DEFAULT_ANTI_CREASE_FINALIZE_RATIO)
-        ),
-        curve_preroll_seconds=effective_curve_preroll_seconds(
-            opts.get(CONF_CURVE_PREROLL_SECONDS, DEFAULT_CURVE_PREROLL_SECONDS)
-        ),
-        # Match the live detector's tuned gate, not the dataclass 0.4, so the sim's
-        # Smart-Termination / anti-crease confidence checks reproduce production.
-        match_confidence_threshold=_safe_float_finite(
-            opts.get(CONF_PROFILE_MATCH_THRESHOLD), DEFAULT_PROFILE_MATCH_THRESHOLD
-        ),
+    # The same builder the manager uses (audit F2): this fallback had its own
+    # defaults (min_off_gap 60 s for every device, scalar completion floor) and
+    # gave a not-yet-initialised device a configuration no detector runs.
+    options = dict(getattr(entry, "options", {}) or {}) if entry is not None else {}
+    data = dict(getattr(entry, "data", {}) or {}) if entry is not None else {}
+    device_type = str(
+        options.get(CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
     )
+    return build_detector_config(options, data, device_type)
 
 
 def _playground_context(hass: HomeAssistant, entry_id: str):
@@ -6097,199 +6691,17 @@ def _playground_context(hass: HomeAssistant, entry_id: str):
     return manager, store, base_config, options, price
 
 
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): "ha_washdata/run_playground_cycle_detail",
-        vol.Required("entry_id"): str,
-        vol.Required("cycle_id"): str,
-        vol.Optional("settings_override", default=dict): dict,
-    }
-)
-@websocket_api.async_response
-async def ws_run_playground_cycle_detail(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Faithful single-cycle simulation timeline (series + events + alerts +
-    outcome) for the Playground "Simulate" view. Read-only what-if."""
-    entry_id: str = msg["entry_id"]
-    ctx = _playground_context(hass, entry_id)
-    if ctx is None:
-        _err_not_found(connection, msg["id"], entry_id)
-        return
-    _manager, store, base_config, options, price = ctx
-    try:
-        cycle_id = msg["cycle_id"]
-        override = dict(msg.get("settings_override") or {})
-        # The store lookup + replay run together in the executor so no store
-        # access happens on the event loop.
-        payload = await hass.async_add_executor_job(
-            playground.simulate_cycle_detail_by_id,
-            store, cycle_id, base_config, override, options, price,
-        )
-        if isinstance(payload, dict) and payload.get("error") == "not_found":
-            connection.send_error(msg["id"], "not_found", "Cycle not found")
-            return
-        _send_result(connection, msg["id"], "run_playground_cycle_detail", payload)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground cycle detail failed for %s: %s", entry_id, exc)
-        connection.send_error(msg["id"], "unknown_error", str(exc))
-
-
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): "ha_washdata/run_playground_history",
-        vol.Required("entry_id"): str,
-        vol.Optional("cycle_ids", default=list): [str],
-        vol.Optional("settings_override", default=dict): dict,
-        vol.Optional("concurrency", default=25): vol.Coerce(int),
-    }
-)
-@websocket_api.async_response
-async def ws_run_playground_history(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Per-cycle results table (+ before/after diff when settings_override is set)
-    for the Playground "Test on history" view. Read-only what-if."""
-    entry_id: str = msg["entry_id"]
-    ctx = _playground_context(hass, entry_id)
-    if ctx is None:
-        _err_not_found(connection, msg["id"], entry_id)
-        return
-    _manager, store, base_config, options, price = ctx
-    try:
-        cycle_ids = list(msg.get("cycle_ids") or [])
-        override = dict(msg.get("settings_override") or {})
-        # Bound the batch size to the same safe cap as the backend (and sweep),
-        # so an oversized caller value can't request unbounded replay work.
-        concurrency = max(1, min(playground.MAX_BATCH_CYCLES, int(msg.get("concurrency", 25))))
-        payload = await hass.async_add_executor_job(
-            playground.run_playground_history,
-            store, cycle_ids, base_config, override, options, price, concurrency,
-        )
-        _send_result(connection, msg["id"], "run_playground_history", payload)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground history failed for %s: %s", entry_id, exc)
-        connection.send_error(msg["id"], "unknown_error", str(exc))
-
-
-#: Max sweep points per axis - caps the grid so a caller can't request an
-#: unbounded number of full-history replays (values x values_y x cycles).
-_MAX_SWEEP_VALUES = 20
-
-
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): "ha_washdata/run_playground_sweep",
-        vol.Required("entry_id"): str,
-        vol.Required("param"): str,
-        vol.Required("values"): vol.All([vol.Coerce(float)], vol.Length(min=1, max=_MAX_SWEEP_VALUES)),
-        vol.Required("objective"): str,
-        vol.Optional("cycle_ids", default=list): [str],
-        vol.Optional("concurrency", default=15): vol.Coerce(int),
-        vol.Optional("param_y"): str,
-        vol.Optional("values_y"): vol.All([vol.Coerce(float)], vol.Length(max=_MAX_SWEEP_VALUES)),
-    }
-)
-@websocket_api.async_response
-async def ws_run_playground_sweep(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Objective-driven parameter sweep (1D curve or 2D heatmap) for the
-    Playground "Sweep" view. Read-only what-if."""
-    entry_id: str = msg["entry_id"]
-    ctx = _playground_context(hass, entry_id)
-    if ctx is None:
-        _err_not_found(connection, msg["id"], entry_id)
-        return
-    _manager, store, base_config, options, price = ctx
-    param_y = msg.get("param_y")
-    values_y = list(msg["values_y"]) if msg.get("values_y") else None
-    # A 2D sweep needs BOTH the second parameter and its values, or neither.
-    if bool(param_y) != bool(values_y):
-        connection.send_error(
-            msg["id"], "invalid_format",
-            "param_y and values_y must both be provided for a 2D sweep, or both omitted",
-        )
-        return
-    try:
-        cycle_ids = list(msg.get("cycle_ids") or [])
-        concurrency = max(1, min(playground.MAX_BATCH_CYCLES, int(msg.get("concurrency", 15))))
-        payload = await hass.async_add_executor_job(
-            playground.run_playground_sweep,
-            store,
-            cycle_ids,
-            base_config,
-            msg["param"],
-            list(msg.get("values") or []),
-            msg["objective"],
-            options,
-            price,
-            concurrency,
-            param_y,
-            values_y,
-        )
-        _send_result(connection, msg["id"], "run_playground_sweep", payload)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Playground sweep failed for %s: %s", entry_id, exc)
-        connection.send_error(msg["id"], "unknown_error", str(exc))
-
-
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): "ha_washdata/get_dtw_debug",
-        vol.Required("entry_id"): str,
-        vol.Required("cycle_id"): str,
-        vol.Optional("profile_name"): vol.Any(str, None),
-    }
-)
-@websocket_api.async_response
-async def ws_get_dtw_debug(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Return the Stage 2 / DTW / Stage 4 score breakdown + resampled traces +
-    DTW warp path for one cycle vs one profile (defaults to the cycle's label)."""
-    entry_id: str = msg["entry_id"]
-    manager = _get_manager(hass, entry_id)
-    if manager is None:
-        _err_not_found(connection, msg["id"], entry_id)
-        return
-
-    store = getattr(manager, "profile_store", None)
-    if store is None:
-        connection.send_error(msg["id"], "unavailable", "Profile store unavailable")
-        return
-
-    try:
-        payload = await hass.async_add_executor_job(
-            playground.dtw_debug_payload,
-            store,
-            msg["cycle_id"],
-            msg.get("profile_name"),
-        )
-        if isinstance(payload, dict) and payload.get("error"):
-            connection.send_error(
-                msg["id"], payload["error"], payload.get("detail", payload["error"])
-            )
-            return
-        _send_result(connection, msg["id"], "get_dtw_debug", payload)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("DTW debug failed for %s: %s", entry_id, exc)
-        connection.send_error(msg["id"], "unknown_error", str(exc))
-
-
 # ─── Playground settings control panel (live values + presets) ─────────────────
 
 
 def _playground_preset_list(store: Any) -> list[dict[str, Any]]:
-    """Presets as a name-sorted list for the panel dropdown."""
+    """Presets as a name-sorted list for the panel dropdown.
+
+    Each stored record's values are passed through the same allow-list a save
+    uses, so a preset written before 0.5.8 still loads: keys the Playground no
+    longer offers (the Stage 2-4 matcher weights) are dropped from the view while
+    the stored record stays untouched.
+    """
     presets = store.get_playground_presets()
     out: list[dict[str, Any]] = []
     for name, record in presets.items():
@@ -6297,7 +6709,7 @@ def _playground_preset_list(store: Any) -> list[dict[str, Any]]:
             continue
         out.append({
             "name": name,
-            "values": dict(record.get("values") or {}),
+            "values": playground.sanitize_setting_values(record.get("values")),
             "created_at": record.get("created_at"),
             "updated_at": record.get("updated_at"),
         })
@@ -6325,12 +6737,9 @@ async def ws_get_playground_settings(
     really running - never on a stale schema default. ``publishable`` lists the
     keys the panel may write back to the config entry.
 
-    ``include_suggestions=False`` skips the auto-tuner/ML suggestion blocks. They exist
-    only to label the two "Load suggested" buttons, and the ML one runs statistics across
-    every clean cycle - real work, on the critical path of opening the tab. The panel
-    therefore opens without them and fetches them in the background; the buttons already
-    render only once their count is non-zero, so they simply appear when the data lands.
-    Defaults to True so every other caller is unaffected.
+    ``include_suggestions=False`` skips the auto-tuner suggestions. They exist only to
+    label the "Load suggested" button, so the panel opens without them and fetches them
+    in the background. Defaults to True so every other caller is unaffected.
     """
     entry_id: str = msg["entry_id"]
     ctx = _playground_context(hass, entry_id)
@@ -6362,41 +6771,8 @@ async def ws_get_playground_settings(
             val = item["value"]
             try:
                 classic_sugg[key] = int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 pass
-
-    # ML suggestions — computed on-demand; executor-offloaded because it runs
-    # statistics across all clean cycles. None when the feature is disabled.
-    ml_sugg: dict[str, Any] | None = None
-    if ENABLE_ML_SUGGESTIONS and include_suggestions:
-        ml_sugg = {}
-        try:
-            learning = getattr(_manager, "learning_manager", None)
-            classic_engine = getattr(learning, "suggestion_engine", None)
-            if classic_engine is not None:
-                _pg_setting_keys = playground.SETTING_KEYS
-                _pg_int_keys = _SUGGESTION_INT_KEYS
-                job_engine = classic_engine.for_job(options)
-
-                def _run_ml_sugg() -> dict[str, Any]:
-                    from .suggestion_engine import MLSuggestionEngine as _ML  # pylint: disable=import-outside-toplevel
-                    raw = _ML(job_engine).generate_ml_suggestions() or {}
-                    out: dict[str, Any] = {}
-                    for k in _pg_setting_keys:
-                        entry = raw.get(k)
-                        if isinstance(entry, dict) and entry.get("value") is not None:
-                            v = entry["value"]
-                            try:
-                                out[k] = int(float(v)) if k in _pg_int_keys else round(float(v), 4)
-                            except (TypeError, ValueError):
-                                pass
-                    return out
-
-                ml_sugg = await hass.async_add_executor_job(_run_ml_sugg)
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug(
-                "Could not generate Playground ML suggestions for %s: %s", entry_id, exc
-            )
 
     _send_result(connection, msg["id"], "get_playground_settings", {
         "effective": playground.effective_settings(base_config, match_config),
@@ -6404,8 +6780,6 @@ async def ws_get_playground_settings(
         "publishable": sorted(playground.PUBLISHABLE_SETTING_KEYS),
         "preset_limit": PLAYGROUND_PRESET_MAX,
         "classic_suggestions": classic_sugg,
-        "ml_suggestions": ml_sugg,
-        "ml_suggestions_enabled": ENABLE_ML_SUGGESTIONS,
     })
 
 
@@ -6482,24 +6856,6 @@ async def ws_delete_playground_preset(
 
 
 # ─── Background-task registry (progress / cancel / reconnect-safe results) ──────
-
-
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): "ha_washdata/list_tasks",
-        vol.Optional("entry_id"): vol.Any(str, None),
-    }
-)
-@callback
-def ws_list_tasks(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Snapshot of active + recently-finished background tasks (for reconnect
-    rehydration / a one-shot refresh). Optionally filtered to one device."""
-    reg = task_registry.get_registry(hass)
-    _send_result(connection, msg["id"], "list_tasks", {"tasks": reg.snapshot(msg.get("entry_id"))})
 
 
 @websocket_api.websocket_command(
@@ -6585,10 +6941,36 @@ def ws_get_task_result(
 
 _PG_HISTORY_CHUNK = 2
 
+# One batch replay (Test on history / Optimize) per device at a time (audit
+# PLATFORM-04): each is minutes of executor CPU on a Pi, and nothing stopped a
+# reconnecting panel or a script from stacking them. A second is refused with
+# `task_busy`; a new Simulate supersedes the previous one instead (PLAYGROUND-12).
+_PG_BATCH_KINDS = frozenset({"pg_history", "pg_sweep"})
+
+
+def _pg_running(reg: Any, entry_id: str, kinds: frozenset[str]) -> list[str]:
+    """Ids of this entry's running tasks of ``kinds``."""
+    return [
+        t["id"] for t in reg.snapshot(entry_id)
+        if t.get("state") == task_registry.STATE_RUNNING and t.get("kind") in kinds
+    ]
+
+
+def _pg_refuse_busy(hass: HomeAssistant, connection: Any, msg_id: int, entry_id: str) -> bool:
+    """Send ``task_busy`` and return True while a batch replay runs for the entry."""
+    if not _pg_running(task_registry.get_registry(hass), entry_id, _PG_BATCH_KINDS):
+        return False
+    connection.send_error(
+        msg_id, "task_busy",
+        "A Test-on-history or Optimize run is already in progress for this device",
+    )
+    return True
+
 
 async def _pg_history_task(
     hass: HomeAssistant, task: Any, entry_id: str,
     cycle_ids: list[str], override: dict[str, Any] | None,
+    count: int | None = None,
 ) -> None:
     reg = task_registry.get_registry(hass)
     ctx = _playground_context(hass, entry_id)
@@ -6597,13 +6979,10 @@ async def _pg_history_task(
         return
     _manager, store, base_config, options, price = ctx
     try:
-        past = await hass.async_add_executor_job(lambda: list(store.get_past_cycles() or []))
-        by_id = {c.get("id"): c for c in past if isinstance(c, dict)}
-        if cycle_ids:
-            ids = [c for c in cycle_ids if c in by_id]
-        else:
-            ids = [c.get("id") for c in past[-playground.DEFAULT_RECENT_CYCLES:]]
-        ids = [i for i in ids[:playground.MAX_BATCH_CYCLES] if i]
+        selected = await hass.async_add_executor_job(
+            playground._select_cycles, store, cycle_ids or None, count  # noqa: SLF001
+        )
+        ids = [c.get("id") for c in selected if c.get("id")]
         # Build match snapshots once — they are store-derived and identical for
         # every chunk; rebuilding per chunk is O(n_profiles) wasted work.
         prebuilt = await hass.async_add_executor_job(playground._build_match_snapshots, store)
@@ -6639,7 +7018,8 @@ async def _pg_history_task(
 async def _pg_sweep_task(
     hass: HomeAssistant, task: Any, entry_id: str,
     param: str, values: list[float], objective: str,
-    param_y: str | None, values_y: list[float] | None,
+    cycle_ids: list[str] | None = None,
+    count: int | None = None,
 ) -> None:
     reg = task_registry.get_registry(hass)
     ctx = _playground_context(hass, entry_id)
@@ -6648,54 +7028,40 @@ async def _pg_sweep_task(
         return
     _manager, store, base_config, options, price = ctx
     try:
-        past = await hass.async_add_executor_job(lambda: list(store.get_past_cycles() or []))
-        ids = [c.get("id") for c in past[-playground.DEFAULT_RECENT_CYCLES:] if isinstance(c, dict)]
-        ids = [i for i in ids[:playground.MAX_BATCH_CYCLES] if i]
+        # The cycles the panel's "Last N" picked (audit PLAYGROUND-18), else the
+        # most recent ones; the selection rule is the playground's own.
+        selected = await hass.async_add_executor_job(
+            playground._select_cycles, store, cycle_ids or None, count  # noqa: SLF001
+        )
+        ids = [c.get("id") for c in selected if c.get("id")]
         n = max(1, len(ids))
         # Build match snapshots once — identical for every sweep value/cell.
         prebuilt = await hass.async_add_executor_job(playground._build_match_snapshots, store)
-        if param_y and values_y:
-            reg.update(task, total=len(values) * len(values_y))
-            grid: list[list[float | None]] = [[None] * len(values) for _ in values_y]
-            current: dict[str, Any] = {}
-            done = 0
-            cancelled = False
-            for j, vy in enumerate(values_y):
-                for i, vx in enumerate(values):
-                    if task.cancel_requested:
-                        cancelled = True
-                        break
-                    r = await hass.async_add_executor_job(
-                        playground.run_playground_sweep,
-                        store, ids, base_config, param, [vx], objective,
-                        options, price, n, param_y, [vy], prebuilt,
-                    )
-                    cell = (r.get("grid") or [[None]])[0]
-                    grid[j][i] = cell[0] if cell else None
-                    if r.get("current"):
-                        current = r["current"]
-                    done += 1
-                    reg.update(task, done=done)
-                if cancelled:
-                    break
-            payload = playground.finalize_sweep_2d(param, param_y, objective, values, values_y, grid, current)
-        else:
-            reg.update(task, total=len(values))
-            points: list[dict[str, Any]] = []
-            current_value: Any = None
-            for i, vx in enumerate(values):
-                if task.cancel_requested:
-                    break
-                r = await hass.async_add_executor_job(
-                    playground.run_playground_sweep,
-                    store, ids, base_config, param, [vx], objective, options, price, n,
-                    None, None, prebuilt,
-                )
-                points.extend(r.get("points") or [])
-                if r.get("current_value") is not None:
-                    current_value = r["current_value"]
-                reg.update(task, done=i + 1)
-            payload = playground.finalize_sweep_1d(param, objective, points, current_value)
+        reg.update(task, total=len(values) + 1)
+        # The current settings on the same cycles: what a value has to beat, and
+        # the early-end / split / detection floor none may lose (PLAYGROUND-08).
+        baseline = await hass.async_add_executor_job(
+            playground.sweep_baseline,
+            store, ids, base_config, objective, options, price, prebuilt,
+        )
+        reg.update(task, done=1)
+        points: list[dict[str, Any]] = []
+        current_value: Any = None
+        for i, vx in enumerate(values):
+            if task.cancel_requested:
+                break
+            r = await hass.async_add_executor_job(
+                playground.run_playground_sweep,
+                store, ids, base_config, param, [vx], objective, options, price, n,
+                prebuilt,
+            )
+            points.extend(r.get("points") or [])
+            if r.get("current_value") is not None:
+                current_value = r["current_value"]
+            reg.update(task, done=i + 2)
+        payload = playground.finalize_sweep_1d(
+            param, objective, points, current_value, baseline
+        )
         payload["partial"] = task.cancel_requested
         reg.finish(
             task,
@@ -6716,6 +7082,10 @@ async def _pg_sweep_task(
         vol.Required("entry_id"): str,
         vol.Optional("cycle_ids", default=list): [str],
         vol.Optional("settings_override", default=dict): dict,
+        # "Last N" (audit PLAYGROUND-18): the most recent N, newest first.
+        vol.Optional("count"): vol.All(
+            vol.Coerce(int), vol.Range(min=1, max=playground.MAX_BATCH_CYCLES)
+        ),
     }
 )
 @callback
@@ -6730,11 +7100,15 @@ def ws_start_playground_history(
     if _playground_context(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
+    if _pg_refuse_busy(hass, connection, msg["id"], entry_id):
+        return
     reg = task_registry.get_registry(hass)
     task = reg.create(entry_id, "pg_history", "Test on history")
     override = dict(msg.get("settings_override") or {}) or None
     cycle_ids = list(msg.get("cycle_ids") or [])
-    _raw = hass.async_create_task(_pg_history_task(hass, task, entry_id, cycle_ids, override))
+    _raw = hass.async_create_task(
+        _pg_history_task(hass, task, entry_id, cycle_ids, override, msg.get("count"))
+    )
     if _raw is not None:
         reg.link_asyncio_task(task.id, _raw)
     _send_result(connection, msg["id"], "start_playground_history", {"task_id": task.id})
@@ -6745,10 +7119,15 @@ def ws_start_playground_history(
         vol.Required("type"): "ha_washdata/start_playground_sweep",
         vol.Required("entry_id"): str,
         vol.Required("param"): str,
-        vol.Required("values"): [vol.Coerce(float)],
+        # Capped like the old one-shot command's 20x20 (audit PLAYGROUND-16).
+        vol.Required("values"): vol.All([vol.Coerce(float)], vol.Length(max=20)),
         vol.Required("objective"): str,
-        vol.Optional("param_y"): vol.Any(str, None),
-        vol.Optional("values_y"): vol.Any([vol.Coerce(float)], None),
+        # Which cycles (audit PLAYGROUND-18): the panel's "Last N" as `count`, the
+        # most recent N; explicit ids win; neither = the most recent 20.
+        vol.Optional("cycle_ids", default=list): [str],
+        vol.Optional("count"): vol.All(
+            vol.Coerce(int), vol.Range(min=1, max=playground.MAX_BATCH_CYCLES)
+        ),
     }
 )
 @callback
@@ -6762,10 +7141,7 @@ def ws_start_playground_sweep(
     if _playground_context(hass, entry_id) is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
-    param_y = msg.get("param_y")
-    values_y = msg.get("values_y")
-    if bool(param_y) != bool(values_y):
-        connection.send_error(msg["id"], "invalid_format", "param_y and values_y must be set together")
+    if _pg_refuse_busy(hass, connection, msg["id"], entry_id):
         return
     reg = task_registry.get_registry(hass)
     task = reg.create(
@@ -6774,7 +7150,7 @@ def ws_start_playground_sweep(
     )
     _raw = hass.async_create_task(_pg_sweep_task(
         hass, task, entry_id, msg["param"], list(msg.get("values") or []),
-        msg["objective"], param_y, list(values_y) if values_y else None,
+        msg["objective"], list(msg.get("cycle_ids") or []), msg.get("count"),
     ))
     if _raw is not None:
         reg.link_asyncio_task(task.id, _raw)
@@ -6790,8 +7166,6 @@ _PG_DETAIL_CHUNK = 250
 async def _pg_detail_task(
     hass: HomeAssistant, task: Any, entry_id: str,
     cycle_id: str, override: dict[str, Any] | None,
-    stress_tail: bool = False,
-    stress_idle_w: float | None = None,
 ) -> None:
     reg = task_registry.get_registry(hass)
     ctx = _playground_context(hass, entry_id)
@@ -6803,7 +7177,6 @@ async def _pg_detail_task(
         sim = await hass.async_add_executor_job(
             playground.build_cycle_detail_sim_by_id,
             store, cycle_id, base_config, override, options, price,
-            stress_tail, stress_idle_w,
         )
         if isinstance(sim, dict):  # {"error": ...} marker (not_found / build failure)
             if sim.get("error") == "not_found":
@@ -6822,10 +7195,7 @@ async def _pg_detail_task(
             await hass.async_add_executor_job(sim.step, i, i + _PG_DETAIL_CHUNK)
             reg.update(task, done=min(total, i + _PG_DETAIL_CHUNK))
         if not task.cancel_requested:
-            if sim.stress_tail:
-                await hass.async_add_executor_job(sim.run_stress_tail)
-            else:
-                await hass.async_add_executor_job(sim.run_tail)
+            await hass.async_add_executor_job(sim.run_tail)
         payload = await hass.async_add_executor_job(sim.finalize)
         payload["partial"] = task.cancel_requested
         reg.finish(
@@ -6847,8 +7217,6 @@ async def _pg_detail_task(
         vol.Required("entry_id"): str,
         vol.Required("cycle_id"): str,
         vol.Optional("settings_override", default=dict): dict,
-        vol.Optional("stress_tail", default=False): bool,
-        vol.Optional("stress_idle_w", default=None): vol.Any(vol.Coerce(float), None),
     }
 )
 @callback
@@ -6866,15 +7234,17 @@ def ws_start_playground_cycle_detail(
         _err_not_found(connection, msg["id"], entry_id)
         return
     reg = task_registry.get_registry(hass)
+    # A new Simulate replaces the previous one: its result would be dropped by the
+    # panel anyway, and it kept replaying to the end (PLAYGROUND-12 / PLATFORM-04).
+    for stale in _pg_running(reg, entry_id, frozenset({"pg_detail"})):
+        reg.cancel(stale)
     task = reg.create(
         entry_id, "pg_detail", "Simulate cycle",
         label_key="task.pg_detail.simulate", label_params={},
     )
     override = dict(msg.get("settings_override") or {})
-    stress_tail = bool(msg.get("stress_tail", False))
-    stress_idle_w = msg.get("stress_idle_w")
     _raw = hass.async_create_task(
-        _pg_detail_task(hass, task, entry_id, msg["cycle_id"], override, stress_tail, stress_idle_w)
+        _pg_detail_task(hass, task, entry_id, msg["cycle_id"], override)
     )
     if _raw is not None:
         reg.link_asyncio_task(task.id, _raw)
@@ -7098,6 +7468,8 @@ async def ws_history_import_recorder(
         "source": "recorder",
         "rows": rows[:HISTORY_IMPORT_MAX_ROWS],
         "entity_id": entity_id,
+        # Carried into the parse report, so the review step says the read was cut.
+        "truncated": len(rows) > HISTORY_IMPORT_MAX_ROWS,
     }
     _send_result(connection, msg["id"], "history_import_recorder", {
         "token": token,
@@ -7111,24 +7483,41 @@ async def ws_history_import_recorder(
     })
 
 
-def _history_samples(slot: dict[str, Any], entity_id: str | None) -> Any:
+def _history_samples(
+    slot: dict[str, Any], entity_id: str | None, parser: Any = None
+) -> Any:
     """Turn a staging slot into samples, whichever way it was filled.
 
-    Executor-side: CSV parsing is pure Python over megabytes of text. Returns either a
-    ``(samples, report)`` pair or an ``{"error": ...}`` marker.
+    Executor-side: CSV parsing is pure Python over megabytes of text, so the scan task
+    steps a ``HistoryCsvParser`` across jobs first and hands it in (``parser``).
+    Returns either a ``(samples, report)`` pair or an ``{"error": ...}`` marker.
     """
     if slot.get("source") == "recorder":
-        samples = history_import.samples_from_readings(slot.get("rows") or [])
+        # `parser` is then a stepped RecorderReadings (audit PLAYGROUND-11).
+        samples = (
+            parser.result()
+            if parser is not None
+            else history_import.samples_from_readings(slot.get("rows") or [])
+        )
         if len(samples) < 2:
             return {"error": "no_readings"}
-        return samples, {
-            "rows_total": len(samples),
-            "rows_parsed": len(samples),
-            "entity_id": slot.get("entity_id"),
-            "source": "recorder",
-        }
-    parsed = history_import.parse_history_csv(
-        "".join(slot.get("chunks") or []), entity_id=entity_id
+        # The same report a CSV gets, so the review step shows the span, the peak,
+        # the kW hint and the row-limit cut for a recorder read too (PLAYGROUND-11).
+        report = history_import.ParsedHistory(
+            samples=samples,
+            entity_id=slot.get("entity_id"),
+            rows_total=len(samples),
+            rows_parsed=len(samples),
+            truncated=bool(slot.get("truncated")),
+        ).report()
+        report["source"] = "recorder"
+        return samples, report
+    parsed = (
+        parser.result()
+        if parser is not None
+        else history_import.parse_history_csv(
+            "".join(slot.get("chunks") or []), entity_id=entity_id
+        )
     )
     if isinstance(parsed, dict):
         return parsed
@@ -7167,21 +7556,49 @@ async def _history_import_scan_task(
         return
     try:
         entity_id = getattr(manager, "power_sensor_entity_id", None)
-        parsed = await hass.async_add_executor_job(_history_samples, slot, entity_id)
+        parser = None
+        if slot.get("source") != "recorder":
+            # Parsed a slice per executor job, not in one (audit PLAYGROUND-11).
+            parser = await hass.async_add_executor_job(functools.partial(
+                history_import.HistoryCsvParser,
+                "".join(slot.get("chunks") or []), entity_id=entity_id,
+            ))
+            reg.update(task, total=parser.rows_estimate)
+            while not parser.finished:
+                if task.cancel_requested:
+                    reg.finish(task, state=task_registry.STATE_CANCELLED)
+                    return
+                await hass.async_add_executor_job(parser.step, history_import.PARSE_STEP_ROWS)
+                reg.update(task, done=min(parser.rows_estimate, parser.out.rows_total))
+        else:
+            # The recorder rows are converted a slice per job too.
+            parser = history_import.RecorderReadings(slot.get("rows") or [])
+            reg.update(task, total=parser.rows_estimate)
+            while not parser.finished:
+                if task.cancel_requested:
+                    reg.finish(task, state=task_registry.STATE_CANCELLED)
+                    return
+                await hass.async_add_executor_job(parser.step, history_import.PARSE_STEP_ROWS)
+                reg.update(task, done=parser.done)
+        parsed = await hass.async_add_executor_job(_history_samples, slot, entity_id, parser)
         if isinstance(parsed, dict):
             reg.finish(task, state=task_registry.STATE_ERROR, error=str(parsed.get("error")))
             return
         samples, report = parsed
         sampling_interval = options.get(CONF_SAMPLING_INTERVAL)
-        runner = await hass.async_add_executor_job(
-            functools.partial(
-                history_import.build_scan,
-                samples,
-                base_config,
-                sampling_interval_s=sampling_interval,
-                parse_report=report,
-            )
+        # Blocks, gates and densification, a slice per job (audit PLAYGROUND-11).
+        builder = history_import.ScanBuilder(
+            samples, base_config,
+            sampling_interval_s=sampling_interval, parse_report=report,
         )
+        while not builder.finished:
+            if task.cancel_requested:
+                reg.finish(task, state=task_registry.STATE_CANCELLED)
+                return
+            await hass.async_add_executor_job(
+                builder.step, history_import.SCAN_BUILD_STEP_SAMPLES
+            )
+        runner = builder.result()
         if isinstance(runner, dict):
             # A stream with nothing usable in it is a *result*, not a failure: the panel
             # explains which spans were skipped and why (six months of hourly averages
@@ -7202,6 +7619,21 @@ async def _history_import_scan_task(
             reg.update(task, done=min(runner.total, runner.done))
         payload = await hass.async_add_executor_job(
             functools.partial(runner.finalize, partial=task.cancel_requested)
+        )
+        # The replay is unmatched, so a dishwasher's timeout finish banked its whole
+        # end wait (audit PLAYGROUND-07): cut it by the programme it matches.
+        if not task.cancel_requested:
+            await history_import.async_import_tail_cuts(
+                manager.profile_store, base_config, payload.get("cycles") or [],
+                options, payload.get("segments") or [],
+            )
+        # A candidate that overlaps a cycle WashData already holds is that cycle
+        # replayed from raw history: show it, but never pre-tick it (audit
+        # PLAYGROUND-05 - 81% of them slipped past the exact start/duration key, and
+        # a labelled copy double-weights the real cycle in its envelope).
+        history_import.mark_already_recorded(
+            payload.get("segments") or [],
+            history_import.stored_intervals(manager.profile_store.iter_stored_cycles()),
         )
         # Split the payload: traces stay server-side, keyed by this task so a reconnect
         # can still apply them; only the preview rows travel.
@@ -7314,6 +7746,9 @@ async def _history_import_apply_task(
             target = store.get_backfill_cycles()
             room = max(0, HISTORY_IMPORT_MAX_TOTAL_CYCLES - len(target))
             existing = history_import.existing_dedup_keys(store.iter_stored_cycles())
+            # Time overlap, not just the exact key: the same run recorded live and
+            # replayed from history rarely agrees to the second (PLAYGROUND-05).
+            intervals = history_import.stored_intervals(store.iter_stored_cycles())
             id_pool = {c.get("id") for c in target if isinstance(c, dict)}
             imported = 0
             duplicates = 0
@@ -7322,20 +7757,30 @@ async def _history_import_apply_task(
                 if task.cancel_requested:
                     break
                 raw = cycles[index]
-                key = history_import.dedup_key(raw.get("start_time"), raw.get("duration"))
-                if key is not None and key in existing:
+                duration = history_import.effective_duration(raw)
+                key = history_import.dedup_key(raw.get("start_time"), duration)
+                if (key is not None and key in existing) or history_import.overlaps_stored(
+                    raw.get("start_time"), duration, intervals
+                ):
                     duplicates += 1
                     reg.update(task, done=done)
                     continue
                 if imported >= room:
                     break
+                stored = history_import.build_backfill_cycle(raw)
                 store._add_cycle_data(  # noqa: SLF001 - the bulk insert primitive
-                    history_import.build_backfill_cycle(raw),
+                    stored,
                     target=target,
                     id_pool=id_pool,
                 )
+                if raw.get("tail_cut_s"):
+                    # The banked-tail repair's own trim (PLAYGROUND-07).
+                    store._apply_repaired_duration(stored, float(raw["tail_cut_s"]))  # noqa: SLF001
                 if key is not None:
                     existing.add(key)
+                interval = history_import.stored_intervals([{**raw, "duration": duration}])
+                if interval:
+                    intervals = sorted([*intervals, *interval])
                 imported += 1
                 reg.update(task, done=done)
             if imported:
@@ -7395,7 +7840,7 @@ def ws_apply_history_import(
     for item in msg["accept"][:HISTORY_IMPORT_MAX_SEGMENTS]:
         try:
             accept.append(int(item))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
     reg = task_registry.get_registry(hass)
     task = reg.create(

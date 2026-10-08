@@ -29,7 +29,6 @@ from unittest.mock import MagicMock
 import numpy as np
 from homeassistant.util import dt as dt_util
 
-from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.ml import trainer as T
 from custom_components.ha_washdata.ml.training_task import _energy_dataset, train_from_cycles
 from custom_components.ha_washdata.ml.feature_extraction import PROGRESS_FEATURE_COLUMNS
@@ -96,7 +95,7 @@ def test_train_from_cycles_includes_total_energy():
 
 
 # ---------------------------------------------------------------------------
-# manager._ml_energy_total gate
+# progress.ml_energy_total gate
 # ---------------------------------------------------------------------------
 
 
@@ -108,14 +107,16 @@ def _spec_from_cycles() -> dict:
 
 
 def _bound(*, enabled: bool, versions: dict):
-    mgr = MagicMock()
-    mgr.config_entry.options = {"enable_ml_models": True} if enabled else {}
-    mgr.profile_store.get_profiles.return_value = {_PROFILE: {}}
-    mgr.profile_store.get_ml_model_versions.return_value = versions
-    mgr._matched_profile_duration = 3600.0
-    mgr._profile_end_expectation = lambda name, dur: dict(_EXP)
-    mgr._logger = MagicMock()
-    return WashDataManager._ml_energy_total.__get__(mgr, WashDataManager)
+    """The gate the live projection calls (`progress.ml_energy_total`)."""
+    from custom_components.ha_washdata import progress as progress_mod
+
+    store = MagicMock()
+    store.get_profiles.return_value = {_PROFILE: {}}
+    store.get_ml_model_versions.return_value = versions
+    options = {"enable_ml_models": True} if enabled else {}
+    return lambda trace, profile: progress_mod.ml_energy_total(
+        store, options, 3600.0, trace, profile, lambda name, dur: dict(_EXP), MagicMock(),
+    )
 
 
 def _trace(n: int = 60):

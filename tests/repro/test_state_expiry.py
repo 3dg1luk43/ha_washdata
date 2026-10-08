@@ -25,7 +25,7 @@ from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS,
-    STATE_FINISHED, STATE_OFF, CONF_PROGRESS_RESET_DELAY,
+    STATE_OFF, CONF_PROGRESS_RESET_DELAY,
     STATE_RUNNING
 )
 
@@ -50,34 +50,6 @@ def mock_entry():
         CONF_PROGRESS_RESET_DELAY: 150,
     }
     return entry
-
-async def test_finished_state_expiry(mock_hass, mock_entry):
-    """Test that Finished state expires even without new readings."""
-    # Ensure dt_util.now() returns a consistent time
-    now = datetime(2026, 2, 9, 12, 0, 0, tzinfo=timezone.utc)
-    
-    with patch("homeassistant.util.dt.now", return_value=now), \
-         patch("custom_components.ha_washdata.manager.ProfileStore"), \
-         patch("custom_components.ha_washdata.manager.CycleDetector") as mock_detector_class:
-        
-        mock_detector = mock_detector_class.return_value
-        # Initially in FINISHED state
-        mock_detector.state = STATE_FINISHED
-        
-        manager = WashDataManager(mock_hass, mock_entry)
-        
-        # Simulate cycle completed 31 minutes ago
-        manager._cycle_completed_time = now - timedelta(minutes=31)
-        manager._cycle_progress = 100.0
-        
-        # Manually trigger the check (simulating async_track_time_interval callback)
-        await manager._handle_state_expiry(now)
-        
-        # Check if progress was reset (YES)
-        assert manager._cycle_progress == 0.0
-        
-        # Check if detector.reset(STATE_OFF) was called
-        mock_detector.reset.assert_called_once_with(STATE_OFF)
 
 async def test_expiry_timer_cancelled_on_new_cycle(mock_hass, mock_entry):
     """Test that starting a new cycle cancels the expiry timer."""

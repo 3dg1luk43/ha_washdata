@@ -46,15 +46,33 @@ test('clicking a profile card opens the profile detail modal', async ({ page }) 
 });
 
 test('health badge shows on profile card based on health status', async ({ page }) => {
+  // The card's health badge is driven by the backend's `poor_health` advisory
+  // (profile_store.compute_profile_advisories), not by profile_health directly.
+  // This used to pass only because the fixture lacked profile_health, so every
+  // card carried a bogus "Still learning (0/5)" badge that the locator matched.
+  await setHandler(page, 'ha_washdata/get_profiles', {
+    ...profilesData,
+    profile_advisories: [{
+      profile: 'Eco 60°C',
+      severity: 'warning',
+      code: 'poor_health',
+      message: "'Eco 60°C' has a low fit score - its recent cycles vary a lot or match weakly.",
+      message_key: 'msg.advisory_poor_health',
+      message_params: { name: 'Eco 60°C' },
+    }],
+  });
   await clickTab(page, 'profiles');
-  // Cotton 40°C has health_status: "healthy" — should show a health badge
+  const ecoCard = page.locator('.wd-profile-card').filter({ hasText: 'Eco 60°C' });
+  await expect(ecoCard.locator('.wd-badge', { hasText: 'poor fit' })).toBeVisible({ timeout: 5_000 });
+  // Cotton 40°C is healthy: no health badge, and no warm-up badge either (8 cycles).
   const cottonCard = page.locator('.wd-profile-card').filter({ hasText: 'Cotton 40°C' });
-  await expect(cottonCard.locator('.wd-badge, [class*="health"]').first()).toBeVisible({ timeout: 5_000 });
+  await expect(cottonCard.locator('.wd-badge', { hasText: 'poor fit' })).toHaveCount(0);
+  await expect(cottonCard.locator('.wd-badge', { hasText: 'Still learning' })).toHaveCount(0);
 });
 
 test('warmup badge shows on profiles with few labeled cycles', async ({ page }) => {
   await clickTab(page, 'profiles');
-  // Quick 30°C has labeled_count: 1 (below warmup threshold of 5)
+  // Quick 30°C has profile_health.cycle_count 1 (below PROFILE_MIN_WARMUP_CYCLES = 2)
   const quickCard = page.locator('.wd-profile-card').filter({ hasText: 'Quick 30°C' });
   await expect(quickCard).toBeVisible({ timeout: 5_000 });
   // Warmup badge renders as .wd-badge with text "Still learning (n/N cycles)"
@@ -64,8 +82,8 @@ test('warmup badge shows on profiles with few labeled cycles', async ({ page }) 
 
 test('empty profiles state shows create profile button', async ({ page }) => {
   await bootPanel(page, {
-    'ha_washdata/get_profiles': { profiles: [], advisories: [], coverage_gaps: null },
-    'ha_washdata/get_profile_groups': { groups: [], suggestions: [], min_cohesion: 0.85 },
+    'ha_washdata/get_profiles': { profiles: [], profile_health: {}, profile_trends: {}, coverage_gaps: {}, profile_advisories: [], profile_terminal: {} },
+    'ha_washdata/get_profile_groups': { groups: [], min_cohesion: 0.85 },
   });
   await clickTab(page, 'profiles');
   const createBtn = page.locator('button[data-action="create-profile"]').first();
@@ -280,4 +298,65 @@ test('no quiet-tail badge when the backend measured none', async ({ page }) => {
   await clickTab(page, 'profiles');
   await expect(page.locator('.wd-profile-card').first()).toBeVisible({ timeout: 5_000 });
   await expect(page.locator('.wd-badge', { hasText: 'quiet tail' })).toHaveCount(0);
+});
+
+// ─── Imported programs: how often the matcher used them (STORE-21) ──────────
+//
+// Counted locally from this appliance's own cycles the matcher labelled, so an
+// import that never fits can be pruned. Only imported programs carry it.
+
+function withImports(counts: Record<string, number>) {
+  const data = JSON.parse(JSON.stringify(profilesData));
+  data.profiles[1].is_imported = true;   // Eco 60°C
+  data.profiles[2].is_imported = true;   // Quick 30°C
+  data.profile_matcher_counts = counts;
+  return data;
+}
+
+test('an imported program says how often the matcher used it', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', withImports({ 'Eco 60°C': 3, 'Cotton 40°C': 5 }));
+  await clickTab(page, 'profiles');
+  const eco = page.locator('.wd-profile-card').filter({ hasText: 'Eco 60°C' });
+  const used = eco.locator('.wd-matcher-used');
+  await expect(used).toHaveText('Matched 3 of your cycles', { timeout: 5_000 });
+  await expect(used).toHaveAttribute('title', /nothing is sent to the store/);
+});
+
+test('an imported program the matcher never used says so', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', withImports({ 'Eco 60°C': 3 }));
+  await clickTab(page, 'profiles');
+  const quick = page.locator('.wd-profile-card').filter({ hasText: 'Quick 30°C' });
+  await expect(quick.locator('.wd-matcher-used')).toHaveText('Not matched to your cycles yet', { timeout: 5_000 });
+});
+
+test('a program of your own carries no matcher-use badge', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', withImports({ 'Cotton 40°C': 5 }));
+  await clickTab(page, 'profiles');
+  const cotton = page.locator('.wd-profile-card').filter({ hasText: 'Cotton 40°C' });
+  await expect(cotton).toBeVisible({ timeout: 5_000 });
+  await expect(cotton.locator('.wd-matcher-used')).toHaveCount(0);
+});
+
+// ─── Coverage gaps (register item 432) ───────────────────────────────────────
+
+test('a coverage-gap cluster shows on Profiles and pre-selects its cycle', async ({ page }) => {
+  await setHandler(page, 'ha_washdata/get_profiles', {
+    ...profilesData,
+    coverage_gaps: {
+      unmatched_count: 6, suggest_create: true,
+      profile_suggestions: [{ suggested_name: '~45 min program', cycle_ids: ['gap-1', 'gap-2', 'gap-3'], avg_duration_s: 2700, count: 3, similarity: 0.91 }],
+    },
+  });
+  await clickTab(page, 'profiles');
+  const banner = page.locator('.wd-sug-banner').filter({ hasText: '45 min' });
+  await expect(banner).toBeVisible({ timeout: 8_000 });
+  await expect(banner).toContainText('3');
+  await banner.locator('[data-action="coverage-create"]').click();
+  await expect(page.locator('#wd-cp-cycle')).toHaveValue('gap-1');
+});
+
+test('no coverage-gap banner when nothing is missing', async ({ page }) => {
+  await clickTab(page, 'profiles');
+  await expect(page.locator('.wd-profiles-grid').first()).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('[data-action="coverage-create"]')).toHaveCount(0);
 });

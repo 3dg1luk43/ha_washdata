@@ -45,7 +45,6 @@ def mock_hass() -> Any:
     hass.async_create_task = MagicMock(
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()
     )
-    hass.components.persistent_notification.async_create = MagicMock()
     hass.config_entries.async_get_entry = MagicMock()
     hass.states.get = MagicMock(return_value=MagicMock(state="home"))
     return hass
@@ -119,19 +118,6 @@ def test_no_clear_when_no_live_target_is_configured(
     mock_hass.services.async_call.assert_not_called()
 
 
-def test_first_live_tick_hands_the_lifecycle_card_over(
-    manager: WashDataManager, mock_hass: Any
-) -> None:
-    """Live updates no longer replace the start alert by sharing its tag, so the
-    handover is explicit - otherwise the mobile app would show two entries.
-
-    This also heals an upgrade: a Live Activity left running under the old shared
-    tag by a pre-0.5.7 build is ended by exactly this clear.
-    """
-    manager._hand_over_lifecycle_to_live_activity()
-    assert _clears(mock_hass) == [manager._lifecycle_tag]
-
-
 def test_the_handover_fires_once_per_cycle(
     manager: WashDataManager, mock_hass: Any
 ) -> None:
@@ -159,81 +145,10 @@ def test_the_handover_fires_once_per_cycle(
     )
 
 
-def test_activity_is_ended_after_the_finished_alert_not_before(
-    manager: WashDataManager, mock_hass: Any
-) -> None:
-    """Ordering matters: clearing first would leave the lock screen empty until
-    the finished notification arrived."""
-    order: list[str] = []
-    manager._notify_finish_services = ["notify.mobile_app_iphone"]
-
-    def _record(message, event_type=None, extra_vars=None, **kw):  # noqa: ANN001
-        order.append(f"send:{event_type}")
-        return True
-
-    manager._dispatch_notification = MagicMock(side_effect=_record)
-    manager._send_tag_clear = MagicMock(
-        side_effect=lambda tag: order.append(f"clear:{tag}")
-    )
-
-    manager._live_activity_started = True
-    live_running = manager._live_activity_started
-    manager._clear_live_progress_notification(clear_services=False)
-    manager._dispatch_notification("done", event_type="finish", extra_vars={})
-    if live_running:
-        manager._end_live_activity()
-
-    assert order == ["send:finish", f"clear:{manager._live_notification_tag}"], order
-
-
-def test_cycle_end_orders_finish_before_the_activity_clear_in_source() -> None:
-    """Pin the ordering in the real cycle-end path.
-
-    The two tests around this one drive the sequence by hand, which proves the
-    pieces but not that _async_process_cycle_end wires them in that order. Read
-    it out of the source so a later edit that moves the clear above the finished
-    notification - re-opening #446's "lock screen momentarily empty" - fails here.
-
-    Reading source text is a poor substitute for observing delivery order, and it
-    is only here because a mocked service bus has no delivery order to observe.
-    The real check now lives in `devtools/testbox/assert_run.py`, against two
-    timestamped records in the box's notification capture; this stays as the cheap
-    canary that runs in 30 s without Docker.
-    """
-    import inspect
-
-    from custom_components.ha_washdata import manager as mgr_mod
-
-    src = inspect.getsource(mgr_mod.WashDataManager._async_process_cycle_end)
-    i_capture = src.index("live_activity_running = _same_cycle and self._live_activity_started")
-    i_purge = src.index("_clear_live_progress_notification(clear_services=False)")
-    i_finish = src.index('event_type=NOTIFY_EVENT_FINISH')
-    i_end = src.index("self._end_live_activity()")
-
-    # The flag must be read before the purge resets it...
-    assert i_capture < i_purge, "the purge resets _live_activity_started"
-    # ...and the activity must be ended only after the finished alert is dispatched.
-    assert i_finish < i_end, "clearing before the finish empties the lock screen"
-    assert "if live_activity_running:" in src
-    # Both the flag read and the purge are gated on the cycle token: this tail
-    # runs after several awaits, and a NEW cycle starting during them would
-    # otherwise have its live counters purged and its activity ended, since the
-    # live tag is per device rather than per cycle.
-    assert "_same_cycle = (" in src
-    assert "if _same_cycle:" in src
-
-
-def test_no_stray_clear_when_no_activity_ever_started(
-    manager: WashDataManager, mock_hass: Any
-) -> None:
-    """A device with live targets configured but no activity this cycle must not
-    receive an end call for something that never began."""
-    manager._live_activity_started = False
-    live_running = manager._live_activity_started
-    manager._clear_live_progress_notification(clear_services=False)
-    if live_running:
-        manager._end_live_activity()
-    assert _clears(mock_hass) == []
+# The cycle-end ordering (finished card, then the activity clear), the "no stray
+# clear" case and the cycle-token gate are driven through a real manager in
+# test_issue_446_cycle_token_gate.py. The copies that re-enacted the tail by hand
+# or read its source text here could not fail (audit TESTING-13 Q-01).
 
 
 def test_shutdown_mid_cycle_clears_both_surfaces(
@@ -467,34 +382,3 @@ def test_the_setup_time_presence_flush_also_records_the_activity(
     assert manager._live_activity_started is True
     assert manager._pending_notifications == []
     assert manager._live_notification_sent_count == 1
-
-
-def test_a_new_cycle_keeps_its_live_activity_when_the_old_tail_lands_late(
-    manager: WashDataManager, mock_hass: Any
-) -> None:
-    """Found in the PR #448 round-13 review.
-
-    The cycle-end tail runs after the persistence / envelope / cost / lifetime
-    awaits. A new cycle starting during them resets the live state and its first
-    tick sets `_live_activity_started` again - so an ungated tail read the NEW
-    cycle's flag, purged its counters, and cleared `_live_notification_tag`,
-    which is per DEVICE. The new cycle's activity vanished and its start card
-    was cleared a second time.
-    """
-    # Cycle A finished; by the time its tail runs, cycle B owns the tokens.
-    manager._ranking_snapshot_cycle_id = "cycle-B"
-    manager._live_activity_started = True
-    manager._live_notification_sent_count = 3
-
-    same_cycle = (
-        "cycle-A" is None or manager._ranking_snapshot_cycle_id == "cycle-A"
-    )
-    assert same_cycle is False
-    live_activity_running = same_cycle and manager._live_activity_started
-    assert live_activity_running is False, (
-        "cycle A's tail must not end the activity cycle B is running"
-    )
-
-    # And with no token (legacy callers) the old unconditional behaviour holds.
-    same_cycle_legacy = True  # cycle_token is None
-    assert (same_cycle_legacy and manager._live_activity_started) is True

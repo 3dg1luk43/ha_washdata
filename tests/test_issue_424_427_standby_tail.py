@@ -87,13 +87,11 @@ def _detector(**overrides) -> tuple[CycleDetector, list[dict]]:
         min_power=0.1,
         off_delay=480,
         device_type=DEVICE_TYPE_WASHING_MACHINE,
-        smoothing_window=1,
         interrupted_min_seconds=150,
         completion_min_seconds=600,
         start_duration_threshold=7,
         start_energy_threshold=0.2,
         end_energy_threshold=0.2365,
-        end_repeat_count=3,
         min_off_gap=480,
         start_threshold_w=1.08,
         stop_threshold_w=0.6,
@@ -153,22 +151,6 @@ class TestGateCadence:
 
         assert det._gate_cadence == pytest.approx(det._p95_dt)
         assert det._dynamic_pause_threshold == pytest.approx(900.0)
-
-    def test_cadence_statistic_itself_is_untouched(self) -> None:
-        """``_p95_dt`` still tracks the worst gap - the outage ceilings need it.
-
-        Every gap-vs-outage classification is sized from ``_prior_p95_dt`` (a
-        snapshot of ``_p95_dt``); narrowing that would change which intervals
-        count as observed time across the anti-crease and quiet-release paths.
-        """
-        det, _ = _detector()
-        for _ in range(18):
-            det._update_cadence(3.0)
-        det._update_cadence(297.6)
-        det._update_cadence(481.4)
-
-        assert det._p95_dt > 300.0
-        assert det._gate_cadence < det._p95_dt
 
     def test_silent_plug_reaches_ending_on_the_first_keepalives(self) -> None:
         """End to end on the #427 shape, driven through the state machine.

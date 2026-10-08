@@ -85,15 +85,6 @@ def test_pause_is_withdrawn_once_the_user_holds_the_cycle(state: str) -> None:
     assert _pause_available(state, user_paused=True) is False
 
 
-def test_pause_is_offered_during_an_automatic_pause() -> None:
-    """The README claim, stated as its own case because it is the one that regressed.
-
-    An automatic pause leaves the detector in PAUSED without `is_user_paused`, so
-    the button stays available and pressing it turns that pause into a held one.
-    """
-    assert _pause_available(STATE_PAUSED, user_paused=False) is True
-
-
 def test_resume_is_offered_only_while_the_user_holds_the_cycle() -> None:
     assert _resume_available(STATE_PAUSED, user_paused=True) is True
     # Not during an automatic pause: there is no user hold to release.

@@ -34,7 +34,6 @@ from custom_components.ha_washdata.const import (
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_DEVICE_TYPE,
     CONF_PUMP_STUCK_DURATION,
-    MATCH_AMBIGUITY_MARGIN,
     MATCH_MAE_REF_PEAK,
     TerminationReason,
     CONF_AUTO_LABEL_CONFIDENCE,
@@ -91,16 +90,6 @@ def test_confidence_behaviour_neutral_at_reference_peak() -> None:
     # Build an offset copy so the aligned MAE is ~100 W and correlation ~1.
     _, metrics, _ = analysis.find_best_alignment(curve, curve + 100.0)
     assert metrics["mae"] == pytest.approx(100.0, abs=1.0)
-
-
-# ---------------------------------------------------------------------------
-# 5b: centralized ambiguity threshold
-# ---------------------------------------------------------------------------
-
-
-def test_ambiguity_margin_constant_is_shared() -> None:
-    # Both match paths import the single constant; sanity-check it exists + range.
-    assert 0.0 < MATCH_AMBIGUITY_MARGIN < 0.5
 
 
 # ---------------------------------------------------------------------------
@@ -201,31 +190,12 @@ def test_reconcile_end_energy_consistent_pair_unchanged() -> None:
 def test_reconcile_watchdog_and_timeout() -> None:
     s = {CONF_WATCHDOG_INTERVAL: _sug(20.0), CONF_NO_UPDATE_ACTIVE_TIMEOUT: _sug(25.0)}
     out, changed = reconcile_suggestions(s, {CONF_SAMPLING_INTERVAL: 30})
-    assert out[CONF_WATCHDOG_INTERVAL]["value"] >= 2 * 30
+    # Rule 3a (watchdog >= 2 x sampling) is gone with the sampling suggestion
+    # (audit SUGGEST-04); Rule 3b still keeps the timeout above the watchdog.
+    assert out[CONF_WATCHDOG_INTERVAL]["value"] == 20.0
     assert out[CONF_NO_UPDATE_ACTIVE_TIMEOUT]["value"] > out[CONF_WATCHDOG_INTERVAL]["value"]
 
 
-def test_reconcile_start_duration_vs_sampling() -> None:
-    s = {CONF_START_DURATION_THRESHOLD: _sug(5.0)}
-    out, changed = reconcile_suggestions(s, {CONF_SAMPLING_INTERVAL: 30})
-    assert out[CONF_START_DURATION_THRESHOLD]["value"] >= 30
-
-
-def test_reconcile_confidence_ordering() -> None:
-    s = {
-        CONF_LEARNING_CONFIDENCE: _sug(0.8),
-        CONF_PROFILE_MATCH_THRESHOLD: _sug(0.6),
-        CONF_AUTO_LABEL_CONFIDENCE: _sug(0.5),
-    }
-    out, changed = reconcile_suggestions(s, {})
-    lc = out[CONF_LEARNING_CONFIDENCE]["value"]
-    mt = out[CONF_PROFILE_MATCH_THRESHOLD]["value"]
-    al = out[CONF_AUTO_LABEL_CONFIDENCE]["value"]
-    # #396: the confidence ladder is unmatch < match < learning < auto_label, so
-    # the enforced invariants are match <= learning and match <= auto_label
-    # (the old rule flagged learning ABOVE match, which was backwards).
-    assert mt <= lc
-    assert mt <= al
 
 
 def test_reconcile_coherent_set_unchanged() -> None:
@@ -288,12 +258,13 @@ def test_reconcile_anti_wrinkle_skipped_for_dishwasher() -> None:
 
 
 def test_reconcile_anti_wrinkle_fires_for_dryer() -> None:
-    # Anti-wrinkle rule must fire when the device is a dryer.
-    s = {CONF_STOP_THRESHOLD_W: _sug(0.72), CONF_ANTI_WRINKLE_EXIT_POWER: _sug(0.8)}
-    current = {CONF_DEVICE_TYPE: "dryer"}
+    # Anti-wrinkle rules must fire when the device is a dryer (Rule 9: max power
+    # above the start threshold). Rule 8 (exit power below stop) is gone, #285.
+    s = {CONF_START_THRESHOLD_W: _sug(450.0)}
+    current = {CONF_DEVICE_TYPE: "dryer", CONF_ANTI_WRINKLE_MAX_POWER: 400.0}
     out, changed = reconcile_suggestions(s, current)
-    assert CONF_ANTI_WRINKLE_EXIT_POWER in changed
-    assert out[CONF_ANTI_WRINKLE_EXIT_POWER]["value"] < out[CONF_STOP_THRESHOLD_W]["value"]
+    assert CONF_ANTI_WRINKLE_MAX_POWER in changed
+    assert out[CONF_ANTI_WRINKLE_MAX_POWER]["value"] > out[CONF_START_THRESHOLD_W]["value"]
 
 
 def test_reconcile_pump_stuck_skipped_for_dishwasher() -> None:

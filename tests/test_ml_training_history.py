@@ -51,14 +51,20 @@ async def test_appends_classifier_auc_and_regressor_mae(store):
     assert hist["remaining_time"][0]["higher_better"] is False
 
 
-async def test_skips_results_without_metric(store):
+async def test_records_runs_without_metric_with_their_reason(store):
+    """Audit ML-20: a run that promoted nothing is recorded with why, so the panel
+    can show it; it carries no score, so it never feeds the trend badge."""
     await store.append_ml_training_history("2026-07-03T02:00:00+00:00", [
-        {"capability": "quality", "promoted": False, "reason": "insufficient data"},
+        {"capability": "total_energy", "promoted": False, "reason": "insufficient data (rows=12)",
+         "reason_code": "insufficient_rows", "reason_params": {"rows": 12, "min": 30, "cycles": 2}},
         {"capability": "end", "new_auc": 0.9, "promoted": True},
     ])
     hist = store.get_ml_training_history()
-    assert "quality" not in hist
-    assert "end" in hist
+    (entry,) = hist["total_energy"]
+    assert entry["promoted"] is False and "score" not in entry
+    assert entry["reason_code"] == "insufficient_rows"
+    assert entry["reason_params"] == {"rows": 12, "min": 30, "cycles": 2}
+    assert hist["end"][0]["promoted"] is True and "reason_code" not in hist["end"][0]
 
 
 async def test_accumulates_across_runs(store):

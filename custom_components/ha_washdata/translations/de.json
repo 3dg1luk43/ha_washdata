@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData-Setup",
-        "description": "Konfigurieren Sie Ihre Waschmaschine oder ein anderes Gerät.\n\nLeistungssensor ist erforderlich.\n\nNach der Einrichtung öffnen Sie das WashData-Panel über die Seitenleiste (oder gehen Sie zu [/ha-washdata](/ha-washdata)), um Zyklen anzuzeigen, die Erkennung anzupassen und Profile zu verwalten.",
+        "description": "Richten Sie eine Waschmaschine oder ein anderes Gerät ein. Ein Leistungssensor ist erforderlich.\n\nÖffnen Sie nach der Einrichtung das WashData-Panel über die Seitenleiste ([/ha-washdata](/ha-washdata)), um Zyklen, Profile und alle Einstellungen zu sehen.",
         "data": {
           "name": "Gerätename",
           "device_type": "Gerätetyp",
@@ -12,43 +12,41 @@
         },
         "data_description": {
           "name": "Ein benutzerfreundlicher Name für dieses Gerät (z. B. „Waschmaschine“, „Geschirrspüler“).",
-          "device_type": "Um welche Art von Gerät handelt es sich? Dies hilft bei der individuellen Erkennung und Zuordnung.",
-          "power_sensor": "Die Sensoreinheit, die den Stromverbrauch (in Watt) Ihres Smart Plugs in Echtzeit meldet.",
-          "min_power": "Leistungswerte über diesem Schwellwert (in Watt) zeigen an, dass das Gerät läuft. Für die meisten Geräte ist 2W ein guter Anfang."
+          "device_type": "Legt die Erkennungsstandards für diese Geräteart fest.",
+          "power_sensor": "Der Smart-Plug-Sensor, der die aktuelle Leistung in Watt meldet.",
+          "min_power": "Werte über diesem Wert (in Watt) bedeuten, dass das Gerät läuft. 2 W passen für die meisten Geräte."
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Aktualisieren Sie den Gerätenamen, den Gerätetyp oder den Leistungssensor.\n\nDas WashData-Panel (Seitenleiste oder [/ha-washdata](/ha-washdata)) ist der Ort, an dem Erkennung, Zyklen, Profile und Benachrichtigungen verwaltet werden.",
+        "title": "WashData neu konfigurieren",
+        "description": "Ändern Sie den Gerätenamen, den Gerätetyp oder den Leistungssensor.\n\nAlles andere finden Sie im WashData-Panel (Seitenleiste oder [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Gerätename",
+          "device_type": "Gerätetyp",
+          "power_sensor": "Leistungssensor",
+          "min_power": "Mindestleistungsschwelle (W)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Verbindung konnte nicht hergestellt werden",
-      "invalid_auth": "Ungültige Authentifizierung",
       "unknown": "Unerwarteter Fehler",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein"
     },
     "abort": {
       "already_configured": "Gerät ist bereits konfiguriert",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Die Neukonfiguration war erfolgreich"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
-        "description": "Benennen Sie das Gerät um oder ändern Sie seine grundlegenden Hardware-Einstellungen. Alle Erkennungs-, Abgleich- und Benachrichtigungseinstellungen befinden sich im [WashData-Panel](/ha-washdata) (auch über die Seitenleiste erreichbar).",
+        "title": "WashData-Einstellungen",
+        "description": "Benennen Sie das Gerät um oder ändern Sie seine Grundeinstellungen. Alles andere finden Sie im [WashData-Panel](/ha-washdata) in der Seitenleiste.",
         "data": {
           "name": "Name des Geräts",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Gerätetyp",
+          "power_sensor": "Leistungssensor",
+          "min_power": "Mindestleistungsschwelle (W)"
         }
       }
     },
@@ -60,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Noch kein Profil erkannt.",
       "vs_typical_longer": "{pct}% länger als üblich",
       "vs_typical_shorter": "{pct}% kürzer als üblich",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein"
     }
   },
   "selector": {
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profilname",
-          "description": "Der Name eines vorhandenen Profils (Profile erstellen im Menü „Profile verwalten“). Feld leer lassen, um die Zuordnung zu entfernen."
+          "description": "Name eines vorhandenen Profils (Profile erstellen Sie im WashData-Panel). Leer lassen, um die Beschriftung zu entfernen."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Vertrauensschwellwert",
-          "description": "Mindestübereinstimmungskonfidenz (0,50–0,95) zum Anwenden von Zuordnungen."
+          "description": "Mindestübereinstimmungskonfidenz (0,50–0,95) zum Anwenden von Zuordnungen. Lassen Sie das Feld leer, um die Geräteeinstellung „Automatische Beschriftungskonfidenz“ zu verwenden."
         }
       }
     },
     "export_config": {
       "name": "Konfiguration exportieren",
-      "description": "Profile, Zyklen und Einstellungen dieses Geräts in eine JSON-Datei exportieren (pro Gerät).",
+      "description": "Profile, Zyklen und Einstellungen dieses Geräts in eine JSON-Datei exportieren.",
       "fields": {
         "device_id": {
           "name": "Gerät",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Zyklus-Feedback bestätigen",
-      "description": "Ein automatisch erkanntes Programm nach einem abgeschlossenen Zyklus bestätigen oder korrigieren. Geben Sie entweder „entry_id“ (erweitert) oder „device_id“ (empfohlen) an.",
+      "description": "Das erkannte Programm eines abgeschlossenen Zyklus bestätigen oder korrigieren. Geben Sie `device_id` (empfohlen) oder `entry_id` an.",
       "fields": {
         "device_id": {
           "name": "Gerät",
@@ -272,18 +270,18 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "ML-Training starten",
+      "description": "Die ML-Modelle auf dem Gerät manuell aus den eigenen zugeordneten Zyklen dieses Geräts neu trainieren (experimentell).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Gerät",
+          "description": "Das WashData-Gerät, dessen Modelle neu trainiert werden sollen."
         }
       }
     },
     "mark_unloaded": {
       "name": "Als entladen markieren",
-      "description": "Bestätigen Sie, dass die fertige Ladung aus einem WashData-Gerät entnommen wurde. Damit werden der Zustand \"Sauber\" und eine eventuelle Entladeerinnerung zurückgesetzt.",
+      "description": "Bestätigen, dass die fertige Ladung entnommen wurde. Setzt den Zustand „Sauber“ und eine eventuelle Entladeerinnerung zurück.",
       "fields": {
         "device_id": {
           "name": "Gerät",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Übereinstimmungsmehrdeutigkeit"
+      },
+      "maintenance_due": {
+        "name": "Wartung fällig",
+        "state": {
+          "on": "Fällig",
+          "off": "Nicht fällig"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "IDs fälliger Aufgaben"
+          },
+          "due_tasks": {
+            "name": "Fällige Aufgaben",
+            "state": {
+              "descale": "Entkalken",
+              "filter_clean": "Filter reinigen",
+              "drum_clean": "Trommel reinigen",
+              "bearing_service": "Lagerwartung",
+              "other": "Sonstiges",
+              "salt": "Salz nachfüllen",
+              "rinse_aid": "Klarspüler nachfüllen",
+              "lint_filter": "Flusensieb reinigen",
+              "condenser_clean": "Kondensator reinigen"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Knitterschutz",
           "interrupted": "Unterbrochen",
           "force_stopped": "Erzwungen beendet",
-          "rinse": "Spülen",
           "unknown": "Unbekannt",
           "clean": "Sauber",
           "delay_wait": "Warten auf den Start"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Zyklusanomalie",
+            "state": {
+              "overrun": "Läuft länger",
+              "stalled": "Stillstand"
+            }
+          }
         }
       },
       "washer_program": {

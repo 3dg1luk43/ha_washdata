@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData iestatīšana",
-        "description": "Konfigurējiet veļas mašīnu vai citu ierīci.\n\nNepieciešams jaudas sensors.\n\nPēc iestatīšanas atveriet WashData paneli no sānjoslas (vai dodieties uz [/ha-washdata](/ha-washdata)), lai skatītu ciklus, pielāgotu noteikšanu un pārvaldītu profilus.",
+        "description": "Iestatiet veļas mašīnu vai citu ierīci. Nepieciešams jaudas sensors.\n\nPēc iestatīšanas atveriet WashData paneli no sānjoslas ([/ha-washdata](/ha-washdata)), lai redzētu ciklus, profilus un visus iestatījumus.",
         "data": {
           "name": "Ierīces nosaukums",
           "device_type": "Ierīces veids",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Šīs ierīces draudzīgs nosaukums (piemēram, “Veļas mašīna”, “Trauku mazgājamā mašīna”).",
-          "device_type": "Kāda veida ierīce šī ir? Palīdz pielāgot noteikšanu un marķēšanu.",
-          "power_sensor": "Sensora entītija, kas ziņo reāllaika enerģijas patēriņu (vatos) no jūsu viedā spraudņa.",
-          "min_power": "Jaudas rādījumi, kas pārsniedz šo slieksni (vatos), norāda, ka ierīce darbojas. Lielākajai daļai ierīču sāciet ar 2 W."
+          "device_type": "Iestata šāda veida ierīcei piemērotus noteikšanas noklusējumus.",
+          "power_sensor": "Viedā spraudņa sensors, kas ziņo pašreizējo jaudu vatos.",
+          "min_power": "Rādījumi virs šīs vērtības (vatos) nozīmē, ka ierīce darbojas. Lielākajai daļai ierīču der 2 W."
         }
       },
       "reconfigure": {
         "title": "WashData pārkonfigurēšana",
-        "description": "Atjauniniet ierīces nosaukumu, ierīces veidu vai jaudas sensoru.\n\nWashData panelī (sānjosla vai [/ha-washdata](/ha-washdata)) tiek pārvaldīta noteikšana, cikli, profili un paziņojumi.",
+        "description": "Mainiet ierīces nosaukumu, ierīces veidu vai jaudas sensoru.\n\nViss pārējais ir WashData panelī (sānjosla vai [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Ierīces nosaukums",
           "device_type": "Ierīces veids",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Neizdevās izveidot savienojumu",
-      "invalid_auth": "Nederīga autentifikācija",
       "unknown": "Negaidīta kļūda",
       "invalid_power": "Jaudas slieksnim jābūt lielākam par 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData iestatījumi",
-        "description": "Pārdēvējiet ierīci vai mainiet tās galvenos aparatūras iestatījumus. Visi noteikšanas, saskaņošanas un paziņojumu iestatījumi atrodas [WashData panelī](/ha-washdata) (pieejams arī no sānjoslas).",
+        "description": "Pārdēvējiet ierīci vai mainiet tās galvenos iestatījumus. Viss pārējais ir [WashData panelī](/ha-washdata) sānjoslā.",
         "data": {
           "name": "Ierīces nosaukums",
           "device_type": "Ierīces veids",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profila nosaukums",
-          "description": "Esoša profila nosaukums (izveidojiet profilus izvēlnē Pārvaldīt profilus). Atstājiet tukšu, lai noņemtu etiķeti."
+          "description": "Esoša profila nosaukums (profilus izveido WashData panelī). Atstājiet tukšu, lai noņemtu etiķeti."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Pārliecības slieksnis",
-          "description": "Minimālā atbilstības ticamība (0,50–0,95), lai lietotu etiķetes."
+          "description": "Minimālā atbilstības ticamība (0,50-0,95), lai lietotu etiķetes. Atstājiet tukšu, lai izmantotu ierīces iestatījumu Automātiskās marķēšanas pārliecība."
         }
       }
     },
     "export_config": {
       "name": "Eksportēt konfigurāciju",
-      "description": "Eksportējiet šīs ierīces profilus, ciklus un iestatījumus JSON failā (katrai ierīcei).",
+      "description": "Eksportējiet šīs ierīces profilus, ciklus un iestatījumus JSON failā.",
       "fields": {
         "device_id": {
           "name": "Ierīce",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Iesniedziet cikla atsauksmes",
-      "description": "Pēc cikla pabeigšanas apstipriniet vai labojiet automātiski noteikto programmu. Norādiet vai nu “entry_id” (papildu) vai “device_id” (ieteicams).",
+      "description": "Apstipriniet vai labojiet pabeigta cikla noteikto programmu. Norādiet `device_id` (ieteicams) vai `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Ierīce",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Atzīmēt kā izkrautu",
-      "description": "Apstipriniet, ka pabeigtā cikla saturs ir izņemts no WashData ierīces: stāvoklis „Tīrs“ un izkraušanas atgādinājums tiks notīrīti.",
+      "description": "Apstipriniet, ka pabeigtā cikla saturs ir izņemts. Notīra stāvokli „Tīrs“ un izkraušanas atgādinājumu.",
       "fields": {
         "device_id": {
           "name": "Ierīce",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Atbilstības neskaidrība"
+      },
+      "maintenance_due": {
+        "name": "Jāveic apkope",
+        "state": {
+          "on": "Jāveic",
+          "off": "Nav jāveic"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Jāveicamo uzdevumu ID"
+          },
+          "due_tasks": {
+            "name": "Jāveicamie uzdevumi",
+            "state": {
+              "descale": "Atkaļķošana",
+              "filter_clean": "Tīrīt filtru",
+              "drum_clean": "Tīrīt tromeli",
+              "bearing_service": "Gultņu apkope",
+              "other": "Cits",
+              "salt": "Papildināt sāli",
+              "rinse_aid": "Papildināt skalošanas līdzekli",
+              "lint_filter": "Tīrīt plūksnu filtru",
+              "condenser_clean": "Tīrīt kondensatoru"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Pretgrumbu",
           "interrupted": "Pārtrauca",
           "force_stopped": "Piespiedu kārtā apturēta",
-          "rinse": "Noskalo",
           "unknown": "Nezināms",
           "clean": "Tīrs",
           "delay_wait": "Gaida sākumu"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Cikla anomālija",
+            "state": {
+              "overrun": "Darbojas ilgi",
+              "stalled": "Iestrēdzis"
+            }
+          }
         }
       },
       "washer_program": {

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData opsætning",
-        "description": "Konfigurer din vaskemaskine eller andet apparat.\n\nStrømsensor er påkrævet.\n\nEfter opsætning skal du åbne WashData-panelet fra sidebjælken (eller gå til [/ha-washdata](/ha-washdata)) for at se cyklusser, justere registrering og administrere profiler.",
+        "description": "Opsæt en vaskemaskine eller et andet apparat. En effektsensor er påkrævet.\n\nÅbn efter opsætningen WashData-panelet fra sidebjælken ([/ha-washdata](/ha-washdata)) for at se cyklusser, profiler og alle indstillinger.",
         "data": {
           "name": "Enhedens navn",
           "device_type": "Enhedstype",
@@ -12,55 +12,53 @@
         },
         "data_description": {
           "name": "Et venligt navn for denne enhed (f.eks. \"Vaskemaskine\", \"Opvaskemaskine\").",
-          "device_type": "Hvilken type apparat er dette? Hjælper med at skræddersy detektering og mærkning.",
-          "power_sensor": "Sensorenheden, der rapporterer strømforbrug i realtid (i watt) fra dit smartstik.",
-          "min_power": "Effektaflæsninger over denne tærskel (i watt) indikerer, at apparatet kører. Start med 2W for de fleste enheder."
+          "device_type": "Indstiller registreringsstandarder for denne type apparat.",
+          "power_sensor": "Smartstikkets sensor, der rapporterer aktuel effekt i watt.",
+          "min_power": "Målinger over denne værdi (i watt) betyder, at apparatet kører. 2 W passer til de fleste enheder."
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Opdater enhedsnavnet, apparattypen eller strømsensoren.\n\nWashData-panelet (sidebjælken eller [/ha-washdata](/ha-washdata)) er, hvor registrering, cyklusser, profiler og notifikationer administreres.",
+        "title": "Genkonfigurer WashData",
+        "description": "Skift enhedsnavn, apparattype eller effektsensor.\n\nAlt andet findes i WashData-panelet (sidebjælken eller [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Enhedens navn",
+          "device_type": "Enhedstype",
+          "power_sensor": "Strømsensor",
+          "min_power": "Minimum effekttærskel (W)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Kunne ikke oprette forbindelse",
-      "invalid_auth": "Ugyldig godkendelse",
       "unknown": "Uventet fejl",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Effekttærsklen skal være større end 0"
     },
     "abort": {
       "already_configured": "Enheden er allerede konfigureret",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Genkonfigurationen lykkedes"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
-        "description": "Omdøb enheden eller skift dens grundlæggende hardwareindstillinger. Alle indstillinger for registrering, matching og notifikationer findes i [WashData-panelet](/ha-washdata) (også tilgængeligt fra sidebjælken).",
+        "title": "WashData-indstillinger",
+        "description": "Omdøb enheden eller skift dens grundindstillinger. Alt andet findes i [WashData-panelet](/ha-washdata) i sidebjælken.",
         "data": {
           "name": "Enhedsnavn",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Enhedstype",
+          "power_sensor": "Strømsensor",
+          "min_power": "Minimum effekttærskel (W)"
         }
       }
     },
     "error": {
-      "timer_default_message": "{device}: {minutes} min timer",
+      "timer_default_message": "{device}: timer på {minutes} min",
       "timer_pause_action_title": "Genoptag cyklus",
       "timer_pause_body_suffix": "Cyklussen er sat på pause. Åbn WashData-panelet for at genoptage.",
       "unload_dismiss_action_title": "Stop påmindelser",
       "notify_live_waiting_message": "{device}: Ingen profil genkendt endnu.",
       "vs_typical_longer": "{pct}% længere end normalt",
       "vs_typical_shorter": "{pct}% kortere end normalt",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Effekttærsklen skal være større end 0"
     }
   },
   "selector": {
@@ -70,7 +68,7 @@
         "dryer": "Tørretumbler",
         "washer_dryer": "Vaske-tørretumbler kombi",
         "dishwasher": "Opvaskemaskine",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Airfryer",
         "bread_maker": "Brødmaskine",
         "pump": "Pumpe / Sump Pumpe",
         "generic": "Andet (avanceret)",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profilnavn",
-          "description": "Navnet på en eksisterende profil (opret profiler i menuen Administrer profiler). Lad være tomt for at fjerne etiketten."
+          "description": "Navnet på en eksisterende profil (opret profiler i WashData-panelet). Lad være tomt for at fjerne mærkningen."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Tillidsgrænse",
-          "description": "Mindste matchkonfidens (0,50-0,95) for at anvende etiketter."
+          "description": "Mindste matchkonfidens (0,50-0,95) for at anvende etiketter. Lad feltet stå tomt for at bruge enhedens indstilling \"Auto-mærkning konfidens\"."
         }
       }
     },
     "export_config": {
       "name": "Eksporter Konfig",
-      "description": "Eksporter denne enheds profiler, cyklusser og indstillinger til en JSON-fil (pr. enhed).",
+      "description": "Eksporter denne enheds profiler, cyklusser og indstillinger til en JSON-fil.",
       "fields": {
         "device_id": {
           "name": "Enhed",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Indsend cyklusfeedback",
-      "description": "Bekræft eller ret et auto-detekteret program efter en afsluttet cyklus. Angiv enten \"entry_id\" (avanceret) eller \"device_id\" (anbefales).",
+      "description": "Bekræft eller ret det registrerede program for en afsluttet cyklus. Angiv `device_id` (anbefales) eller `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Enhed",
@@ -272,18 +270,18 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "Start ML-træning",
+      "description": "Gentræn ML-modellerne på enheden manuelt ud fra enhedens egne mærkede cyklusser (eksperimentel).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Enhed",
+          "description": "WashData-enheden, hvis modeller skal gentrænes."
         }
       }
     },
     "mark_unloaded": {
       "name": "Markér som aflæsset",
-      "description": "Bekræft, at den færdige vask er taget ud af en WashData-enhed, hvilket rydder tilstanden \"Ren\" og en eventuel aflæsningspåmindelse.",
+      "description": "Bekræft, at den færdige vask er taget ud. Rydder tilstanden \"Ren\" og en eventuel aflæsningspåmindelse.",
       "fields": {
         "device_id": {
           "name": "Enhed",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Matchtvetydighed"
+      },
+      "maintenance_due": {
+        "name": "Vedligeholdelse forfalder",
+        "state": {
+          "on": "Forfalden",
+          "off": "Ikke forfalden"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Id'er for forfaldne opgaver"
+          },
+          "due_tasks": {
+            "name": "Forfaldne opgaver",
+            "state": {
+              "descale": "Afkalk",
+              "filter_clean": "Rengør filter",
+              "drum_clean": "Rengør tromle",
+              "bearing_service": "Lejeservice",
+              "other": "Andet",
+              "salt": "Påfyld salt",
+              "rinse_aid": "Påfyld afspændingsmiddel",
+              "lint_filter": "Rengør fnugfilter",
+              "condenser_clean": "Rengør kondensator"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Anti-Rynke",
           "interrupted": "Afbrudt",
           "force_stopped": "Tving stoppet",
-          "rinse": "Skylle",
           "unknown": "Ukendt",
           "clean": "Ren",
           "delay_wait": "Venter på at starte"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Cyklusanomali",
+            "state": {
+              "overrun": "Kører længere",
+              "stalled": "Gået i stå"
+            }
+          }
         }
       },
       "washer_program": {

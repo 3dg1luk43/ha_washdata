@@ -246,27 +246,3 @@ class TestOffDelayPauseBasedStrips:
         # With stripped readings the main phase is smooth, no resumed pauses
         assert result is None
 
-
-# ─── Gap D: run_simulation() no longer suggests a hardcoded end_energy ───────
-
-class TestRunSimulationEndEnergy:
-    """run_simulation must not suggest a context-free end_energy_threshold (#343 gap D)."""
-
-    _CYCLE = {
-        "power_data": [[float(i * 5), p] for i, p in enumerate(_MAIN_POWERS + _TAIL_POWERS)],
-        "start_time": None,
-    }
-
-    def test_end_energy_not_in_single_cycle_suggestion(self):
-        """Hardcoded 0.05 is removed; batch path handles it when data is sufficient."""
-        eng = _engine()
-        result = eng.run_simulation(self._CYCLE)
-        assert CONF_END_ENERGY_THRESHOLD not in result, (
-            f"run_simulation should not suggest end_energy; got {result.get(CONF_END_ENERGY_THRESHOLD)}"
-        )
-
-    def test_stop_start_still_present(self):
-        """The stop/start suggestions from the original fix remain intact."""
-        eng = _engine()
-        result = eng.run_simulation(self._CYCLE)
-        assert CONF_STOP_THRESHOLD_W in result

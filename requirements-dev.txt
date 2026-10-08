@@ -9,9 +9,20 @@
 #
 # pytest-homeassistant-custom-component pins a matching Home Assistant core plus
 # pytest and the plugins the suite relies on (asyncio, syrupy, xdist, socket,
-# aiohttp, freezer), so it is deliberately the single pinned entry: bumping it is
-# how this project moves to a newer Home Assistant.
+# aiohttp, freezer, timeout), so it is deliberately the single pinned entry: bumping
+# it is how this project moves to a newer Home Assistant. pytest.ini's `timeout`
+# needs pytest-timeout from it (without the plugin pytest only warns "Unknown config
+# option: timeout" and nothing is limited).
 pytest-homeassistant-custom-component==0.13.316
 
 # The one runtime dependency, needed so the numeric pipeline imports under test.
 numpy>=1.24
+
+# Property-based tests (tests/test_detector_properties.py: DST, time-shift and
+# reporting-cadence invariance of the cycle detector). Test-time only.
+hypothesis>=6.100
+
+# Cross-worker cache lock in tests/test_suggestion_loop_fixed_point.py. Imported at
+# module level, so the fast job collects it too; locally it came in only through an
+# unrelated package, which is why CI alone failed. Test-time only.
+filelock>=3.12

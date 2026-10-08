@@ -23,7 +23,6 @@ B4 — Peak-rate awareness tip at cycle start
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
 import pytest
@@ -60,7 +59,13 @@ def _list_profiles_store(profiles: dict, past_cycles: list[dict]) -> ProfileStor
     store = MagicMock(spec=ProfileStore)
     store._data = {"profiles": profiles, "past_cycles": past_cycles}
     store.get_envelope = MagicMock(return_value=None)
-    store.list_profiles = ProfileStore.list_profiles.__get__(store, ProfileStore)
+    # Bind every real collaborator list_profiles reaches (a spec mock would hand
+    # back a MagicMock for an unbound one and the test would measure nothing).
+    for name in (
+        "list_profiles", "_profile_summaries", "_profiles_fingerprint",
+        "_build_profile_summaries", "get_reference_cycles", "get_backfill_cycles",
+    ):
+        setattr(store, name, getattr(ProfileStore, name).__get__(store, ProfileStore))
     return store
 
 
@@ -249,16 +254,6 @@ def test_b3_cycle_count_reflects_store():
     m = MagicMock()
     m.profile_store.get_past_cycles.return_value = [1, 2, 3, 4]
     assert WashDataManager.cycle_count.fget(m) == 4
-
-
-def test_b3_time_finished_format(monkeypatch):
-    from custom_components.ha_washdata import manager as mgr_mod
-
-    fixed = datetime(2026, 7, 10, 9, 5, tzinfo=timezone.utc)
-    monkeypatch.setattr(mgr_mod.dt_util, "now", lambda: fixed)
-    # Mirrors the exact expression used in the finish-notification block:
-    # zero-padded local wall-clock "HH:MM".
-    assert mgr_mod.dt_util.now().strftime("%H:%M") == "09:05"
 
 
 # ---------------------------------------------------------------------------

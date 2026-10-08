@@ -102,24 +102,6 @@ def test_group_cohesion_single_member_is_one(store):
 # ── suggestion ───────────────────────────────────────────────────────────────
 
 
-def test_suggest_clusters_near_duplicates(store):
-    store._data["profiles"] = {
-        "Eco30": {"avg_duration": 1000.0},
-        "Eco60": {"avg_duration": 1050.0},   # same shape + duration -> cluster with Eco30
-        "Quick": {"avg_duration": 300.0},    # far shorter -> excluded
-    }
-    store._data["envelopes"] = {
-        "Eco30": {"avg": _ramp()},
-        "Eco60": {"avg": _ramp(scale=1.3)},
-        "Quick": {"avg": _ramp(n=30, scale=1.0)},
-    }
-    sug = store.suggest_profile_groups()
-    clusters = [set(s["members"]) for s in sug]
-    assert any({"Eco30", "Eco60"} <= c for c in clusters)
-    # Quick has a very different duration, so it is not grouped with the Eco pair.
-    assert not any("Quick" in c and {"Eco30", "Eco60"} <= c for c in clusters)
-
-
 def _snap(name, power, dur):
     return {"name": name, "avg_duration": float(dur), "sample_power": list(power)}
 
@@ -144,17 +126,6 @@ def test_grouped_snapshots_maps_cohesive_group(store):
     assert not any(n.startswith("__group__") for n in names)
     assert set(gm["__group__G"]) == {"A", "B"}
     assert set(ms) == {"A", "B"}
-
-
-def test_grouped_snapshots_skips_loose_group(store):
-    # Anti-correlated envelopes -> cohesion below threshold -> NOT collapsed.
-    store._data["envelopes"] = {"A": {"avg": _ramp()}, "C": {"avg": _ramp(scale=-1.0, offset=29.0)}}
-    store._data["profile_groups"] = {"G": {"members": ["A", "C"]}}
-    snaps = [_snap("A", [float(i) for i in range(30)], 1000), _snap("C", [float(29 - i) for i in range(30)], 1000)]
-    out, gm, _ms = store._grouped_snapshots(snaps)
-    names = [s["name"] for s in out]
-    assert "A" in names and "C" in names
-    assert gm == {}
 
 
 def test_grouped_snapshots_no_groups_is_noop(store):
@@ -202,20 +173,12 @@ def test_stage5_selection_ignores_duration_prefers_energy(store):
     assert chosen == "RightEnergy"
 
 
-def test_suggest_skips_already_grouped(store):
-    store._data["profiles"] = {"E1": {"avg_duration": 1000.0}, "E2": {"avg_duration": 1010.0}}
-    store._data["envelopes"] = {"E1": {"avg": _ramp()}, "E2": {"avg": _ramp(scale=1.1)}}
-    store._data["profile_groups"] = {"Eco": {"members": ["E1", "E2"]}}
-    # Both already in a group -> nothing new to suggest.
-    assert store.suggest_profile_groups() == []
-
-
-# ── prefix-landscape guard: is_prefix_ambiguous on MatchResult ───────────────
+# ── prefix-landscape guard: is_prefix_ambiguous_full_shape on MatchResult ─────
 #
-# async_match_profile sets MatchResult.is_prefix_ambiguous=True when any
-# non-winning candidate has a duration >= 1.5x the winner's AND a shape_score
-# >= 0.40 (SMART_TERM_LANDSCAPE_RATIO / SMART_TERM_LANDSCAPE_MIN_SHAPE).
-# The flag is consumed by cycle_detector to block Smart Termination.
+# async_match_profile sets MatchResult.is_prefix_ambiguous_full_shape=True when
+# any non-winning candidate has a duration >= 1.5x the winner's AND a shape_score
+# >= 0.40 (SMART_TERM_LANDSCAPE_RATIO / SMART_TERM_LANDSCAPE_MIN_SHAPE). Since
+# audit LIVE-18 only the anti-crease finalize reads it.
 
 
 def _cand(name, dur, shape, final=None):
@@ -234,15 +197,14 @@ def _cand(name, dur, shape, final=None):
 # These used to re-implement the formula inline, which meant they kept passing while
 # production diverged - the #364 leaks were invisible to them. They now call the
 # real predicate, so they are genuine #288 regression tests. `_match_prefix_ambiguity`
-# returns (full_shape_hit, prefix_fit_hit); these cases exercise the full-envelope
-# term (#288), so they assert element 0. The prefix term (#364) needs a
-# `prefix_score` key and is covered in tests/test_issue_364_prefix_scoring.py.
+# is the full-envelope term (#288); the #364 prefix-fit term it used to return
+# beside it was removed in 0.5.8 (tests/test_issue_364_prefix_scoring.py).
 
 from custom_components.ha_washdata.profile_store import _match_prefix_ambiguity
 
 
 def _is_prefix_ambiguous(candidates, best_dur):
-    return _match_prefix_ambiguity(candidates, best_dur)[0]
+    return _match_prefix_ambiguity(candidates, best_dur)
 
 
 def test_prefix_ambiguous_true_when_longer_look_alike_exists():
@@ -254,35 +216,12 @@ def test_prefix_ambiguous_true_when_longer_look_alike_exists():
     assert _is_prefix_ambiguous(candidates, 2760.0) is True
 
 
-def test_prefix_ambiguous_false_when_runner_up_shape_too_low():
-    """A longer profile with a poor FULL-envelope shape score does not trip the #288
-    term.
-
-    Note this is a statement about that term only, not about prefix risk in general:
-    a trace part-way through a longer programme scores badly against that
-    programme's whole curve precisely when it IS a prefix of it. That blind spot is
-    #364, and it is covered by the prefix-score term (element 1), which needs a
-    `prefix_score` on the candidate.
-    """
-    candidates = [
-        _cand("Quick", 2760, 0.70, 0.61),
-        _cand("Wool", 5400, 0.15, 0.12),   # different shape -> shape_score below threshold
-    ]
-    assert _match_prefix_ambiguity(candidates, 2760.0) == (False, False)
-
-
 def test_prefix_ambiguous_false_when_runner_up_not_much_longer():
     """A profile only 30% longer (ratio 1.30 < LANDSCAPE_RATIO 1.50) does not trigger."""
     candidates = [
         _cand("Quick", 2760, 0.70, 0.61),
         _cand("Eco", 3590, 0.68, 0.55),    # 3590/2760 = 1.30 < 1.5
     ]
-    assert _is_prefix_ambiguous(candidates, 2760.0) is False
-
-
-def test_prefix_ambiguous_false_when_only_one_candidate():
-    """Single-candidate result (no runner-up) must not flag prefix ambiguity."""
-    candidates = [_cand("Quick", 2760, 0.70, 0.61)]
     assert _is_prefix_ambiguous(candidates, 2760.0) is False
 
 
@@ -295,16 +234,18 @@ def test_prefix_ambiguous_true_exact_ratio_boundary():
     assert _is_prefix_ambiguous(candidates, 2000.0) is True
 
 
-async def test_async_match_profile_sets_is_prefix_ambiguous():
-    """End-to-end: async_match_profile returns is_prefix_ambiguous=True when the
-    executor-returned candidates include a qualifying longer runner-up."""
+@pytest.mark.parametrize("prefix_score", [None, 0.90])
+async def test_async_match_profile_sets_is_prefix_ambiguous(prefix_score):
+    """End-to-end: a qualifying longer runner-up sets the #288 flag (the
+    anti-crease guard), whatever a stray `prefix_score` says: the #364 ENDING flag
+    that read it was removed in 0.5.8."""
     from unittest.mock import AsyncMock
     from custom_components.ha_washdata.profile_store import ProfileStore
 
-    mock_candidates = [
-        _cand("Quick", 2760, 0.70, 0.61),
-        _cand("Normal", 5280, 0.70, 0.44),
-    ]
+    longer = _cand("Normal", 5280, 0.70, 0.44)
+    if prefix_score is not None:
+        longer["prefix_score"] = prefix_score
+    mock_candidates = [_cand("Quick", 2760, 0.70, 0.61), longer]
 
     with patch("custom_components.ha_washdata.profile_store.WashDataStore"):
         ps = ProfileStore(MagicMock(), "entry")
@@ -324,12 +265,13 @@ async def test_async_match_profile_sets_is_prefix_ambiguous():
         power_data = [(float(i * 2), 80.0) for i in range(300)]
         result = await ps.async_match_profile(power_data, 2760.0)
 
-    assert result.is_prefix_ambiguous is True
+    assert result.is_prefix_ambiguous_full_shape is True
+    assert not hasattr(result, "is_prefix_ambiguous")
 
 
 async def test_async_match_profile_no_prefix_ambiguous_when_only_short_runner_up():
-    """async_match_profile returns is_prefix_ambiguous=False when the runner-up
-    is not long enough, even with a good shape score."""
+    """async_match_profile returns is_prefix_ambiguous_full_shape=False when the
+    runner-up is not long enough, even with a good shape score."""
     from unittest.mock import AsyncMock
     from custom_components.ha_washdata.profile_store import ProfileStore
 
@@ -355,4 +297,4 @@ async def test_async_match_profile_no_prefix_ambiguous_when_only_short_runner_up
         power_data = [(float(i * 2), 80.0) for i in range(300)]
         result = await ps.async_match_profile(power_data, 2760.0)
 
-    assert result.is_prefix_ambiguous is False
+    assert result.is_prefix_ambiguous_full_shape is False

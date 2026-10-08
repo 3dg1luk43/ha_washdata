@@ -186,7 +186,6 @@ def test_accumulator_reaches_off_delay_without_the_sensor_speaking() -> None:
         off_delay=480,
         min_off_gap=480,
         device_type="washing_machine",
-        smoothing_window=1,
         completion_min_seconds=600,
         start_threshold_w=1.08,
         stop_threshold_w=0.6,

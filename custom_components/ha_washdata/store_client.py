@@ -26,9 +26,11 @@ Never raises into the event loop - failures return ``None``/empty and are logged
 from __future__ import annotations
 
 import asyncio
+import base64
 import hashlib
 import json
 import logging
+import math
 import re
 import time
 import unicodedata
@@ -42,9 +44,10 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     DOMAIN,
-    SHAREABLE_SETTING_KEYS,
+    sanitize_shared_settings,
     STORE_API_KEY,
     STORE_PROJECT_ID,
+    STORE_WEB_ORIGIN,
     SUPPORTED_CYCLE_SCHEMA_VERSIONS,
 )
 
@@ -52,8 +55,11 @@ _LOGGER = logging.getLogger(__name__)
 
 _APPLIANCE_TYPES = {"washer", "dryer", "dishwasher", "washer_dryer"}
 
-# Max concurrent per-cycle rating aggregations when listing a profile's cycles.
-_RATING_FANOUT_LIMIT = 8
+# Error marker for a read the store could not answer (network failure, timeout, 5xx,
+# rate limit). Distinct from an empty result on purpose: an offline store used to read
+# as "no shared programs" and a failed download as "already on your device" (audit
+# STORE-09).
+STORE_UNREACHABLE = "store_unreachable"
 
 # Max profiles hydrated concurrently when downloading a whole-device bundle. One query
 # each (the bundle skips the per-cycle rating fan-out), kept small to stay well under the
@@ -183,11 +189,94 @@ def _decode(v: dict[str, Any]) -> Any:
     return None
 
 
+def _rating_from_doc(doc: dict[str, Any]) -> dict[str, Any]:
+    """``{"avg", "count"}`` from a doc's denormalized ``ratingSum`` / ``ratingCount``.
+
+    Never raises; missing or malformed fields read as no ratings."""
+    try:
+        count = int(doc.get("ratingCount") or 0)
+        total = float(doc.get("ratingSum") or 0)
+        avg = total / count if count > 0 else None
+    except (TypeError, ValueError, AttributeError, OverflowError):
+        # OverflowError: an integerValue decodes to an unbounded int.
+        return {"avg": None, "count": 0}
+    if avg is None or not math.isfinite(avg):
+        return {"avg": None, "count": 0}
+    return {"avg": avg, "count": count}
+
+
+def _token_uid(body: dict[str, Any]) -> str | None:
+    """The Firebase uid the token endpoint vouches for, or None.
+
+    ``user_id`` of the refresh-token exchange response, else the ``user_id`` / ``sub``
+    claim of the ID token that same response carried. Both come from Google over TLS
+    in reply to our own request, so neither needs a signature check here; what must
+    NOT be trusted is the uid a caller hands to ``connect`` (audit STORE-18).
+    """
+    uid = body.get("user_id")
+    if isinstance(uid, str) and uid:
+        return uid
+    try:
+        payload = str(body.get("id_token") or "").split(".")[1]
+        claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+        uid = claims.get("user_id") or claims.get("sub")
+    except Exception:  # noqa: BLE001 - malformed token -> no verified uid
+        return None
+    return uid if isinstance(uid, str) and uid else None
+
+
 def _decode_doc(doc: dict[str, Any]) -> dict[str, Any]:
     out = {k: _decode(x) for k, x in doc.get("fields", {}).items()}
     name = doc.get("name", "")
     out["id"] = name.rsplit("/", 1)[-1] if "/" in name else name
     return out
+
+
+def _favorite_count(value: Any) -> int | float:
+    """A row's ``favoriteCount`` as a number the browse can sort by: 0 when it is
+    missing, a bool, a string or NaN (index rows and delta rows are both remote)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value != value:
+        return 0
+    return value
+
+
+def _shape_index(raw: Any) -> dict[str, Any] | None:
+    """The published ``search-index.json`` (schema 1) as dict rows, or None.
+
+    Rows are positional arrays under ``fields``; a brand's id IS its ``brand_lc``,
+    a device's ``brand_lc`` / ``model_lc`` are its lowercased names, as stored.
+    """
+    if not isinstance(raw, dict) or raw.get("schema") != 1 or not raw.get("generatedAt"):
+        return None
+    fields = raw.get("fields")
+    # Remote data, validated here so a bad index falls back to the direct queries
+    # instead of raising in a consumer: every one keys rows by ``id``.
+    if not isinstance(fields, dict) or not all(
+        isinstance(fields.get(k), list) and "id" in fields[k] for k in ("brands", "devices")
+    ):
+        return None
+
+    def _rows(name: str) -> list[dict[str, Any]]:
+        names = fields[name]
+        out = []
+        for row in raw.get(name) or []:
+            if isinstance(row, list) and len(row) == len(names):
+                item = dict(zip(names, row))
+                if isinstance(item.get("id"), str) and item["id"]:
+                    out.append(item)
+        return out
+
+    brands = _rows("brands")
+    for b in brands:
+        b["brand_lc"] = str(b.get("id") or "").lower()
+    devices = _rows("devices")
+    for d in devices:
+        d["favoriteCount"] = _favorite_count(d.get("favoriteCount"))  # the browse sorts by it
+        # As the device documents store it (lowercased display name), NOT the id's
+        # normalised token ("aeg lavamat" vs "aeg-lavamat"): brand filters compare it.
+        d["brand_lc"] = str(d.get("brand") or "").lower()
+        d["model_lc"] = str(d.get("model") or "").lower()
+    return {"generatedAt": str(raw["generatedAt"]), "brands": brands, "devices": devices}
 
 
 # Firestore forbids directly-nested arrays, so a trace can't be stored as
@@ -267,10 +356,14 @@ class StoreClient:
         self._id_token: str | None = None
         self._id_token_exp: float = 0.0
         self._id_token_rt: str | None = None  # refresh token that produced the cached id_token
+        self._id_token_uid: str | None = None  # uid the token endpoint returned with it
         self._last_error: str | None = None  # short reason for the last failed write, for the UI
         self._base = f"{self._FS}/projects/{project_id}/databases/(default)/documents"
         # key -> (expiry_epoch, value). Read-only catalog/config responses; see class docstring.
         self._read_cache: dict[str, tuple[float, Any]] = {}
+        # Status changes this client made (device id -> (status, UTC stamp)): the daily
+        # search index only learns of them at its next build. See _devices_from_index.
+        self._status_overrides: dict[str, tuple[str, str]] = {}
         # Bumped on every catalog invalidation; a read captures it before its query and only
         # caches the result if it is unchanged afterwards, so an in-flight read that spans an
         # invalidation cannot re-cache a pre-write snapshot.
@@ -336,15 +429,16 @@ class StoreClient:
         """Drop cached brand/device catalog reads (call after a create/upload/promote write so
         a just-contributed or newly-approved entry appears immediately, not after the TTL).
 
-        Covers both the list queries (``brands:``/``devices:``) and the single-document
+        Covers the list queries (``brands:``/``devices:``), the single-document
         lookups behind the identity badges (``brand:``/``device:``) -- a create writes the
         very document those resolve, so a stale hit there would show "not in the catalog"
-        for an entry the user just added.
+        for an entry the user just added -- and the search index's ``delta:`` query,
+        which is where a just-created entry appears while the index predates it.
         """
         self._cache_gen += 1
         for key in [
             k for k in self._read_cache
-            if k.startswith(("brands:", "devices:", "brand:", "device:"))
+            if k.startswith(("brands:", "devices:", "brand:", "device:", "delta:"))
         ]:
             self._read_cache.pop(key, None)
 
@@ -385,11 +479,28 @@ class StoreClient:
             return None
         self._id_token = body.get("id_token")
         self._id_token_rt = refresh_token
+        self._id_token_uid = _token_uid(body)
         try:
             self._id_token_exp = now + float(body.get("expires_in", 3600))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             self._id_token_exp = now + 3600
         return self._id_token
+
+    def verified_uid(self, refresh_token: str) -> str | None:
+        """The uid the token endpoint returned for ``refresh_token``'s last exchange.
+
+        Only meaningful right after ``ensure_id_token(refresh_token)`` succeeded (same
+        cache key, so another account's uid is never returned). Every authed write
+        stamps this, not the uid stored at connect: the store rules require
+        ``uploaderUid`` / ``createdByUid`` / the confirmation doc id to equal
+        ``request.auth.uid``, so a mismatched stored uid made every write 403
+        (audit STORE-18).
+        """
+        return self._id_token_uid if self._id_token_rt == refresh_token else None
+
+    def _write_uid(self, refresh_token: str, stored_uid: str) -> str:
+        """The uid an authed write must carry (see ``verified_uid``)."""
+        return self.verified_uid(refresh_token) or stored_uid
 
     # ── reads (public, no token) ────────────────────────────────────────────────
 
@@ -519,6 +630,86 @@ class StoreClient:
             return cached if include_pending else self._approved_only(cached)
         return None
 
+    # ── published catalog index (audit STORE-07) ─────────────────────────────────
+    #
+    # The store's deploy builds `search-index.json` daily (brands, devices,
+    # profiles, as row arrays under a `fields` header). Type-wide device lists and the
+    # brand list come from it, plus the entries created since it was built (one
+    # small `createdAt` query, the same delta the website runs), so a Store search
+    # costs ~0 Firestore reads instead of every device of the type (473 per install
+    # per cache hour, silently truncated at 500). Any failure falls back to the
+    # direct queries below.
+
+    _INDEX_TTL_S = 3600.0
+    _INDEX_MISS_TTL_S = 300.0
+    _INDEX_DELTA_LIMIT = 50
+
+    async def _catalog_index(self) -> dict[str, Any] | None:
+        hit = self._cache_get("catalog_index")
+        if hit is not None:
+            return hit or None
+        gen = self._cache_gen
+        index: dict[str, Any] | None = None
+        try:
+            async with self._sess().get(f"{STORE_WEB_ORIGIN}/search-index.json", timeout=15) as resp:
+                if resp.status == 200:
+                    index = _shape_index(await resp.json(content_type=None))
+        except Exception as exc:  # noqa: BLE001 - fall back to the direct queries
+            _LOGGER.debug("Store search index unavailable: %s", exc)
+        if gen == self._cache_gen:
+            self._cache_put(
+                "catalog_index", index or {},
+                self._INDEX_TTL_S if index else self._INDEX_MISS_TTL_S,
+            )
+        return index
+
+    async def _index_delta(
+        self, collection: str, generated_at: str, fields: tuple[str, ...]
+    ) -> list[dict[str, Any]]:
+        """Entries of ``collection`` created after the index was built (any status
+        the browse shows); filtered in memory by the caller."""
+        key = f"delta:{collection}:{generated_at}"
+        return await self._cached_catalog_query(key, lambda: {
+            "from": [{"collectionId": collection}],
+            "select": {"fields": [{"fieldPath": f} for f in (*fields, "createdAt")]},
+            "where": self._where([
+                self._status_filter(True),
+                {"fieldFilter": {"field": {"fieldPath": "createdAt"}, "op": "GREATER_THAN",
+                                 "value": {"timestampValue": generated_at}}},
+            ]),
+            "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
+            "limit": self._INDEX_DELTA_LIMIT,
+        })
+
+    async def _devices_from_index(
+        self, brand: str | None, appliance_type: str | None, include_pending: bool,
+        page_size: int,
+    ) -> list[dict[str, Any]] | None:
+        index = await self._catalog_index()
+        if index is None:
+            return None
+        rows = {r["id"]: r for r in index["devices"]}
+        for r in await self._index_delta("devices", index["generatedAt"], _DEVICE_LIST_FIELDS):
+            r.setdefault("brand_lc", str(r.get("brand") or "").lower())
+            r.setdefault("model_lc", str(r.get("model") or "").lower())
+            rows[r["id"]] = r
+        # The delta only carries entries CREATED after the build, so a device this
+        # client just promoted (confirm_device) still reads "pending" from the index.
+        for did, (status, at) in self._status_overrides.items():
+            if did in rows and at > index["generatedAt"]:
+                rows[did] = {**rows[did], "status": status}
+        bl = (brand or "").lower()
+        out = [
+            r for r in rows.values()
+            if (include_pending or r.get("status") == "approved")
+            and r.get("status") in ("approved", "pending")
+            and (not appliance_type or r.get("applianceType") == appliance_type)
+            and (not bl or r.get("brand_lc") == bl)
+        ]
+        # Delta rows come straight from Firestore, uncleaned: sort through the same guard.
+        out.sort(key=lambda r: (-_favorite_count(r.get("favoriteCount")), str(r.get("id"))))
+        return out[:page_size]
+
     async def search_devices(
         self, brand: str | None = None, appliance_type: str | None = None,
         model_query: str | None = None, *, include_pending: bool = False, page_size: int = 500,
@@ -537,6 +728,10 @@ class StoreClient:
                 p = model_query.lower()
                 rows = [r for r in rows if str(r.get("model_lc", "")).startswith(p)]
             return rows
+
+        from_index = await self._devices_from_index(brand, appliance_type, include_pending, page_size)
+        if from_index is not None:
+            return _finish(from_index)
 
         shared = self._serve_from_superset(f"{base}:1:{page_size}", include_pending, page_size)
         if shared is not None:
@@ -608,6 +803,20 @@ class StoreClient:
         dropdown" case, and truncating it would make brands past the cap unfindable.
         """
         prefix = (q or "").strip().lower()
+        index = await self._catalog_index()
+        if index is not None:
+            rows = {r["id"]: r for r in index["brands"]}
+            for r in await self._index_delta("brands", index["generatedAt"], _BRAND_LIST_FIELDS):
+                r.setdefault("brand_lc", str(r.get("id") or "").lower())
+                rows[r["id"]] = r
+            out = [
+                r for r in rows.values()
+                if (include_pending or r.get("status") == "approved")
+                and r.get("status") in ("approved", "pending")
+                and str(r.get("brand_lc", "")).startswith(prefix)
+            ]
+            out.sort(key=lambda r: str(r.get("brand_lc", "")))
+            return out[:page_size]
         select = {"fields": [{"fieldPath": f} for f in _BRAND_LIST_FIELDS]}
         order = [{"field": {"fieldPath": "brand_lc"}, "direction": "ASCENDING"}]
 
@@ -651,10 +860,21 @@ class StoreClient:
         successful lookups are cached (a miss may simply mean "not contributed yet",
         which flips as soon as the user contributes it).
         """
+        return (await self._fetch_doc(path, cache_key=cache_key))[0]
+
+    async def _fetch_doc(
+        self, path: str, *, cache_key: str | None = None,
+    ) -> tuple[dict[str, Any] | None, bool]:
+        """``(doc, reached)``: ``_get_doc`` plus whether the store answered at all.
+
+        ``reached`` is False only when the store could not answer (network error,
+        timeout, 5xx, rate limit), so a caller can tell "no such document" (403/404,
+        ``(None, True)``) from "offline" (``(None, False)``).
+        """
         if cache_key is not None:
             cached = self._cache_get(cache_key)
             if cached is not None:
-                return cached
+                return cached, True
         # Capture the generation BEFORE the request: if an invalidation lands while this
         # read is in flight, caching its result would re-pin a pre-write document for the
         # full TTL. Same discipline as _fetch_and_cache.
@@ -662,17 +882,18 @@ class StoreClient:
         try:
             async with self._sess().get(f"{self._base}/{path}", timeout=15) as resp:
                 if resp.status != 200:
-                    if resp.status not in (403, 404):
-                        _LOGGER.debug("Store get %s HTTP %s", path, resp.status)
-                    return None
+                    if resp.status in (403, 404):
+                        return None, True
+                    _LOGGER.debug("Store get %s HTTP %s", path, resp.status)
+                    return None, False
                 doc = await resp.json()
         except Exception as exc:  # noqa: BLE001
             _LOGGER.debug("Store get %s error: %s", path, exc)
-            return None
+            return None, False
         out = _decode_doc(doc)
         if cache_key is not None and gen == self._cache_gen:
             self._cache_put(cache_key, out, self._CATALOG_CACHE_TTL_S)
-        return out
+        return out, True
 
     async def get_device(self, device_id: str) -> dict[str, Any] | None:
         return await self._get_doc(f"devices/{_seg(device_id)}", cache_key=f"device:{device_id}")
@@ -726,49 +947,13 @@ class StoreClient:
         self._cache_put("config:site", cfg, self._CONFIG_CACHE_TTL_S)
         return cfg
 
-    async def _rating_agg(self, parent_path: str) -> dict[str, Any]:
-        """count + average over the `ratings` subcollection under ``parent_path``.
-
-        Public (unauthenticated) aggregation -- ratings are world-readable. Returns
-        ``{"avg": float|None, "count": int}`` and never raises.
-        """
-        body = {"structuredAggregationQuery": {
-            "structuredQuery": {"from": [{"collectionId": "ratings"}]},
-            "aggregations": [
-                {"alias": "cnt", "count": {}},
-                # NB: the Firestore aggregation operator is `avg`, NOT `average` --
-                # the wrong name 400s the whole query and silently zeroes ratings.
-                {"alias": "avg", "avg": {"field": {"fieldPath": "rating"}}},
-            ],
-        }}
-        try:
-            async with self._sess().post(
-                f"{self._base}/{parent_path}:runAggregationQuery",
-                json=body, timeout=15,
-            ) as resp:
-                if resp.status != 200:
-                    return {"avg": None, "count": 0}
-                rows = await resp.json()
-        except Exception as exc:  # noqa: BLE001
-            _LOGGER.debug("Store rating aggregation error (%s): %s", parent_path, exc)
-            return {"avg": None, "count": 0}
-        agg = next((r["result"]["aggregateFields"] for r in rows if isinstance(r, dict) and "result" in r), None)
-        if not agg:
-            return {"avg": None, "count": 0}
-        cnt = _decode(agg["cnt"]) if "cnt" in agg else 0
-        avg = _decode(agg["avg"]) if ("avg" in agg and "nullValue" not in agg["avg"]) else None
-        return {"avg": avg if (cnt and avg is not None) else None, "count": cnt or 0}
-
-    async def get_device_quality(self, device_id: str) -> dict[str, Any]:
-        """count + average of the device's 5-star quality ratings (info only)."""
-        return await self._rating_agg(f"devices/{_seg(device_id)}")
-
-    async def cycle_rating(self, cycle_id: str) -> dict[str, Any]:
-        """count + average of a reference cycle's 5-star ratings (info only)."""
-        return await self._rating_agg(f"cycles/{_seg(cycle_id)}")
-
-    async def get_profiles(self, dev_id: str, include_pending: bool = True, page_size: int = 100) -> list[dict[str, Any]]:
+    async def get_profiles(
+        self, dev_id: str, include_pending: bool = True, page_size: int = 100,
+    ) -> list[dict[str, Any]] | None:
         """Shared programs for one catalog appliance, most-recent-first.
+
+        ``None`` when the store could not be reached, ``[]`` when the appliance really
+        has no shared programs: the two used to be the same ``[]`` (audit STORE-09).
 
         ``include_pending`` defaults to **True**, matching ``get_cycles`` and the
         device browse. It used to default to False, which made the Store tab list a
@@ -788,13 +973,16 @@ class StoreClient:
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        return await self._run_query(sq) or []
+        return await self._run_query(sq)
 
     async def device_profiles(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
         """Resolve the store deviceId from brand/model/type and return its profiles
-        (approved + the caller's own pending), for the Share dialog's profile picker."""
+        (approved + the caller's own pending), for the Share dialog's profile picker.
+        Carries ``error`` when the store could not be reached (audit STORE-09)."""
         dev_id = device_id(appliance_type, brand, model)
         items = await self.get_profiles(dev_id, include_pending=True)
+        if items is None:
+            return {"device_id": dev_id, "items": [], "error": STORE_UNREACHABLE}
         return {"device_id": dev_id, "items": items}
 
     async def get_device_bundle(self, dev_id: str, include_pending: bool = True) -> dict[str, Any]:
@@ -803,45 +991,61 @@ class StoreClient:
         ``cycles`` (hydrated by get_cycles). One device GET + one profiles query + one
         cycles query per profile. Never raises.
 
-        Star ratings are deliberately skipped here. They are browse-only decoration and
-        the adopt path (``StoreBridge.download_device``) never reads them, but they cost
-        one aggregation request *per cycle*: a 15-profile device turned a ~17-request
-        download into ~60, all on the user's critical path.
+        Failures are reported, never flattened into an empty bundle (audit STORE-09):
+        ``error`` when the device doc or the profile list could not be read (nothing is
+        known about the setup), and per profile ``cycles_unavailable`` plus a top-level
+        ``failed_profiles`` count when that program's cycle query failed.
         """
-        device = await self.get_device(dev_id) or {}
-        settings = device.get("settings") if isinstance(device.get("settings"), dict) else {}
+        unreachable = {"device_id": dev_id, "settings": {}, "profiles": [], "error": STORE_UNREACHABLE}
+        device, reached = await self._fetch_doc(
+            f"devices/{_seg(dev_id)}", cache_key=f"device:{dev_id}",
+        )
+        if not reached:
+            return unreachable
         profiles = await self.get_profiles(dev_id, include_pending=include_pending)
+        if profiles is None:
+            return unreachable
+        device = device or {}
+        settings = device.get("settings") if isinstance(device.get("settings"), dict) else {}
 
         # Bound the per-profile fan-out: an unbounded gather over a device with many
         # profiles could burst hundreds of concurrent requests and trip the store's rate
         # limiter. A shared semaphore caps how many profiles hydrate at once.
         sem = asyncio.Semaphore(_BUNDLE_HYDRATE_LIMIT)
 
-        async def _cycles_for(p: dict[str, Any]) -> list[dict[str, Any]]:
+        async def _cycles_for(p: dict[str, Any]) -> list[dict[str, Any]] | None:
             pid = p.get("id")
             if not pid:
                 return []
             async with sem:
-                return await self.get_cycles(pid, include_pending=include_pending, include_ratings=False)
+                return await self.get_cycles(pid, include_pending=include_pending)
 
         # Fetch profiles' cycles concurrently (bounded) rather than one at a time.
         cycle_lists = await asyncio.gather(*(_cycles_for(p) for p in profiles))
+        failed = 0
         for p, cycles in zip(profiles, cycle_lists):
-            p["cycles"] = cycles
-        return {"device_id": dev_id, "settings": settings, "profiles": profiles}
+            if cycles is None:
+                failed += 1
+                p["cycles_unavailable"] = True
+            p["cycles"] = cycles or []
+        bundle: dict[str, Any] = {"device_id": dev_id, "settings": settings, "profiles": profiles}
+        if failed:
+            bundle["failed_profiles"] = failed
+        return bundle
 
     async def get_cycles(
         self, prof_id: str, include_pending: bool = True, page_size: int = 50,
-        *, include_ratings: bool = True,
-    ) -> list[dict[str, Any]]:
-        """Reference cycles for a profile, most-recent-first.
+    ) -> list[dict[str, Any]] | None:
+        """Reference cycles for a profile, most-recent-first; ``None`` when the store
+        could not be reached (``[]`` = genuinely none shared; audit STORE-09).
 
         ``include_pending`` (default True) also returns still-awaiting-approval
         recordings so they can be browsed/imported before the community votes them
         in (they are publicly readable, shown with an "awaiting approval" tag).
-        Each cycle gets a ``rating`` = ``{"avg", "count"}`` summary attached, unless
-        ``include_ratings`` is False -- one extra aggregation request per cycle that
-        only the browse UI displays (see get_device_bundle).
+        Each cycle carries a ``rating`` = ``{"avg", "count"}`` summary read from the
+        denormalized ``ratingSum`` / ``ratingCount`` the store keeps on the cycle doc,
+        so it costs no extra request. Until 0.5.8 it was one aggregation query per
+        listed cycle (audit STORE-15); a cycle without the fields has no ratings.
         """
         sq = {
             "from": [{"collectionId": "cycles"}],
@@ -852,23 +1056,12 @@ class StoreClient:
             "orderBy": [{"field": {"fieldPath": "createdAt"}, "direction": "DESCENDING"}],
             "limit": page_size,
         }
-        cycles = [self._with_decoded_trace(c) for c in (await self._run_query(sq) or [])]
-        if not include_ratings:
-            return cycles
-        # Attach each cycle's 5-star rating summary (info-only; the aggregation lives
-        # in a subcollection so it can't ride the list query). Bound concurrency with
-        # a semaphore so a large page can't fan out into dozens of simultaneous
-        # aggregation requests.
-        sem = asyncio.Semaphore(_RATING_FANOUT_LIMIT)
-        async def _rate(cyc: dict[str, Any]) -> dict[str, Any]:
-            cid = cyc.get("id")
-            if not cid:
-                return {"avg": None, "count": 0}
-            async with sem:
-                return await self.cycle_rating(cid)
-        summaries = await asyncio.gather(*(_rate(c) for c in cycles), return_exceptions=True)
-        for cyc, summary in zip(cycles, summaries):
-            cyc["rating"] = summary if isinstance(summary, dict) else {"avg": None, "count": 0}
+        rows = await self._run_query(sq)
+        if rows is None:
+            return None
+        cycles = [self._with_decoded_trace(c) for c in rows]
+        for cyc in cycles:
+            cyc["rating"] = _rating_from_doc(cyc)
         return cycles
 
     async def get_cycle(self, cycle_id: str) -> dict[str, Any] | None:
@@ -967,6 +1160,7 @@ class StoreClient:
         token = await self.ensure_id_token(refresh_token)
         if not token:
             return _out(None, False)
+        uid = self._write_uid(refresh_token, uid)
 
         # Preserve the documented never-raise contract: malformed metadata/points must
         # return a failure marker (with _last_error set), not propagate an exception to
@@ -989,7 +1183,7 @@ class StoreClient:
         program = required["program"]
         try:
             interval = float(meta.get("sampleIntervalSec") or 0)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             interval = 0.0
         if appliance not in _APPLIANCE_TYPES:
             _LOGGER.warning("Store upload: invalid applianceType %r", appliance)
@@ -1002,7 +1196,7 @@ class StoreClient:
         qc_code = qc if qc in (1, 2, 3) else 3
         try:
             pts = [[float(p[0]), float(p[1])] for p in (points or [])[:10000] if len(p) >= 2]
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             self._last_error = "malformed trace points"
             return _out(None, False)
         if len(pts) < 2:
@@ -1028,11 +1222,7 @@ class StoreClient:
             # Defense in depth at the store boundary: keep only allow-listed, numeric
             # settings (never trust the caller to have filtered) so nothing arbitrary is
             # ever written to the shared device doc.
-            filtered = {
-                str(k): v for k, v in settings.items()
-                if k in SHAREABLE_SETTING_KEYS
-                and isinstance(v, (int, float)) and not isinstance(v, bool)
-            }
+            filtered = sanitize_shared_settings(settings)
             if filtered:
                 device_fields["settings"] = filtered
         ok = ok and await self._commit_create(token, f"devices/{d_id}", device_fields)
@@ -1052,7 +1242,7 @@ class StoreClient:
                 # 0.0 (which would ship a bogus zero-length phase to the catalog).
                 try:
                     return {"name": str(p.get("name", "")), "start": float(p["start"]), "end": float(p["end"])}
-                except (KeyError, TypeError, ValueError):
+                except (KeyError, TypeError, ValueError, OverflowError):
                     return None
             valid_phases = [
                 vp for vp in (_valid_phase(p) for p in phases if isinstance(p, dict)) if vp is not None
@@ -1083,9 +1273,10 @@ class StoreClient:
         cyc_ok, created = await self._commit_create_ex(token, f"cycles/{cyc_id}", cycle_fields)
         if not cyc_ok:
             return _out(None, False)
-        # NB: cycle/profile counts are CALCULATED on the store (COUNT aggregation over
-        # approved+pending), not maintained as a running total here -- a best-effort
-        # increment that a rule denied is what left the browse counters stuck at 0.
+        # NB: the integration never maintains cycle/profile counts: the website
+        # increments them in the same batched write that creates the item (the store
+        # rules only allow +1 alongside a new child). A best-effort increment from
+        # here that a rule denied is what once left the browse counters stuck at 0.
         return _out(cyc_id, created)
 
     async def upload_device_bundle(
@@ -1167,6 +1358,7 @@ class StoreClient:
         token = await self.ensure_id_token(refresh_token)
         if not token:
             return None
+        uid = self._write_uid(refresh_token, uid)
         dev_path = self._doc_path(f"devices/{device_id}")
         conf_path = self._doc_path(f"devices/{device_id}/confirmations/{uid}")
         writes = [
@@ -1198,7 +1390,7 @@ class StoreClient:
         status = dev.get("status")
         try:
             threshold = int((await self.get_config()).get("confirmThreshold") or 5)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             threshold = 5
         if status == "pending" and count >= threshold:
             promote = [{
@@ -1208,26 +1400,52 @@ class StoreClient:
             }]
             if (await self._commit(token, promote))[0]:
                 status = "approved"
+                self._status_overrides[device_id] = (
+                    status, time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + "Z"
+                )
                 # Promotion changes catalog visibility (pending -> approved); drop cached
                 # listings so the newly-approved device shows in approved-only searches now.
                 self._invalidate_catalog_cache()
         return {"confirmed": True, "confirmCount": count, "status": status}
 
     async def rate_device(self, refresh_token: str, uid: str, device_id: str, rating: int) -> bool:
-        """Set this user's 5-star quality rating for a device (info only)."""
+        """Set this user's 5-star quality rating for a device (info only).
+
+        The device's denormalized ``ratingSum`` / ``ratingCount`` move in the SAME
+        batch, as the website's ``rateDevice`` does (the store rules tie the two with
+        ``existsAfter`` / ``getAfter``). Writing only the rating doc, as this did until
+        0.5.8, left every integration rating out of the totals the store shows (audit
+        STORE-15). The prior rating is read uncached so an edit shifts the sum by the
+        difference instead of counting a second rating."""
         if rating not in (1, 2, 3, 4, 5):
             return False
         token = await self.ensure_id_token(refresh_token)
         if not token:
             return False
+        uid = self._write_uid(refresh_token, uid)
+        prev_doc = await self._get_doc(f"devices/{_seg(device_id)}/ratings/{_seg(uid)}")
+        prev = prev_doc.get("rating") if isinstance(prev_doc, dict) else None
         path = self._doc_path(f"devices/{device_id}/ratings/{uid}")
-        writes = [{
+        dev_path = self._doc_path(f"devices/{device_id}")
+        writes: list[dict[str, Any]] = [{
             "update": {"name": path, "fields": {"uid": _encode(uid), "rating": _encode(rating)}},
             "updateTransforms": [{"fieldPath": "updatedAt", "setToServerValue": "REQUEST_TIME"}],
         }]
+        if prev not in (1, 2, 3, 4, 5):
+            writes.append({"transform": {"document": dev_path, "fieldTransforms": [
+                {"fieldPath": "ratingCount", "increment": _encode(1)},
+                {"fieldPath": "ratingSum", "increment": _encode(rating)},
+            ]}})
+        elif prev != rating:
+            writes.append({"transform": {"document": dev_path, "fieldTransforms": [
+                {"fieldPath": "ratingSum", "increment": _encode(rating - prev)},
+            ]}})
         ok, body = await self._commit(token, writes)
         if not ok:
             _LOGGER.warning("Store rate_device failed: %s", body[:200])
+        else:
+            # The device doc's totals just changed; drop the cached point read.
+            self._invalidate_catalog_cache()
         return ok
 
     async def bump_downloads(self, cycle_ids: list[str]) -> None:

@@ -22,6 +22,8 @@
 #   devtools/release_check.sh --fix           regenerate artifacts instead of failing
 #   devtools/release_check.sh --tag v0.5.5    also require the tag to match the version
 #   devtools/release_check.sh --full          add the slow suite and the E2E suite
+#   devtools/release_check.sh --skip-tests    every check but the test suites (devtools/verify.sh
+#                                             runs those itself; CI never passes it)
 #
 # Exit code is the number of failed checks, so `if release_check.sh; then tag; fi`
 # works. Every failure prints the exact command that fixes it.
@@ -31,15 +33,17 @@ cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 FIX=0
 FULL=0
+SKIP_TESTS=0
 WANT_TAG=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --fix)  FIX=1; shift ;;
     --full) FULL=1; shift ;;
+    --skip-tests) SKIP_TESTS=1; shift ;;
     --tag)
       if [[ $# -lt 2 ]]; then echo "--tag needs a value (e.g. --tag v0.5.5)" >&2; exit 2; fi
       WANT_TAG="$2"; shift 2 ;;
-    -h|--help) sed -n '6,30p' "$0"; exit 0 ;;
+    -h|--help) sed -n '6,29p' "$0"; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
@@ -64,6 +68,10 @@ else
   if node devtools/build_panel.mjs --check >/dev/null 2>&1; then pass "panel + card artifacts current"
   else fail "minified artifacts are stale or missing" "node devtools/build_panel.mjs (then commit www/*.min.js + build-manifest.json)"; fi
 fi
+# The panel method map (audit DOCS-09); build_panel.mjs regenerates it on every build.
+if [[ $FIX -eq 1 ]]; then node devtools/gen_panel_map.mjs >/dev/null && pass "PANEL_MAP regenerated"
+elif node devtools/gen_panel_map.mjs --check >/dev/null 2>&1; then pass "PANEL_MAP current"
+else fail "docs/internal/PANEL_MAP.md is stale" "node devtools/gen_panel_map.mjs (or rebuild the panel)"; fi
 
 # ── 2. generated WS contract artifacts ───────────────────────────────────────
 if [[ $FIX -eq 1 ]]; then
@@ -73,6 +81,19 @@ else
   if "$PY" devtools/generate_ws_types.py --check >/dev/null 2>&1; then pass "ws-types.d.ts + docs/WS_API.md current"
   else fail "WS type artifacts are out of date" "$PY devtools/generate_ws_types.py"; fi
 fi
+
+# Hand-written docs cannot be regenerated, so --fix does not apply: symbol anchors,
+# the constants CLAUDE.md quotes, register id uniqueness, the em dash ratchet (audit F9).
+if DOCS_OUT=$("$PY" devtools/docs_check.py 2>&1); then pass "docs match the code (anchors, constants, register ids, em dashes)"
+else
+  fail "docs drifted from the code" "$PY devtools/docs_check.py"
+  grep '^FAIL' <<<"$DOCS_OUT" | head -12 | sed 's/^/        | /'
+fi
+
+# The committed matcher baseline (audit MATCH-EVAL-11): a warning, not a failure -
+# regenerating it needs cycle_data/, which CI does not have. Hashes sources only.
+if BASE_OUT=$("$PY" devtools/eval.py baseline-status 2>&1); then pass "eval_baseline.json is current"
+else printf '  \033[33mwarn\033[0m  devtools/eval_baseline.json: %s\n' "$(tail -1 <<<"$BASE_OUT")"; fi
 
 # ── 3. version agreement ─────────────────────────────────────────────────────
 # manifest.json is what HACS and Home Assistant report; the CHANGELOG's top
@@ -218,7 +239,8 @@ if [[ -z "$PH_BAD" ]]; then pass "HA-layer translation placeholders match Englis
 else fail "HA-layer translations with mismatched {placeholders}" "$PH_BAD"; fi
 
 # Panel layer: same comparison, but a mismatch there only renders a literal "{n}" or drops
-# a value rather than failing startup, and 219 predate this check. Counted, not blocking.
+# a value rather than failing startup. 219 values predated this check; the 0.5.8 translation
+# pass brought it to 0 (register item 121). Counted, not blocking.
 PH_PANEL=$(PH_LAYER=translations/panel "$PY" -c '
 import json, os, re
 from pathlib import Path
@@ -246,7 +268,7 @@ print(f"{n} {len(langs)}" if n else "")
 ')
 if [[ -z "$PH_PANEL" ]]; then pass "panel translation placeholders match English"
 else printf '  \033[33mwarn\033[0m  panel placeholder drift: %s value(s) across %s language(s)\n' $PH_PANEL
-     printf '        -> cosmetic (renders a literal {n} or drops a value); pre-existing, needs a translation pass\n'
+     printf '        -> cosmetic (renders a literal {n} or drops a value); needs a translation fix\n'
 fi
 
 # ── 5. code health ───────────────────────────────────────────────────────────
@@ -283,12 +305,26 @@ run_suite() {
     fail "$label failed" "$*"
     printf '%s\n' "$out" | tail -25 | sed 's/^/        | /'
   fi
+  # Skips of the replay corpus look like passes in a dot summary (audit TESTING-14):
+  # cycle_data/ is gitignored, so off the maintainer's disk those tests skip.
+  # tests/conftest.py prints one line counting them; surface it as a warning.
+  local corpus
+  corpus=$(printf '%s\n' "$out" | grep -m1 '^cycle_data: ' || true)
+  if [[ -n "$corpus" ]]; then
+    printf '  \033[33mwarn\033[0m  %s: %s\n' "$label" "${corpus#cycle_data: }"
+  fi
 }
 
 head_ "Tests"
-run_suite "fast suite" "$PY" -m pytest tests/ -q
+if [[ $SKIP_TESTS -eq 1 ]]; then
+  skip "test suites (--skip-tests: the caller runs them)"
+else
+  run_suite "fast suite" "$PY" -m pytest tests/ -q
+fi
 
-if [[ $FULL -eq 1 ]]; then
+if [[ $SKIP_TESTS -eq 1 ]]; then
+  :
+elif [[ $FULL -eq 1 ]]; then
   run_suite "slow suite" "$PY" -m pytest tests/ -q -m slow
   if command -v npx >/dev/null 2>&1; then
     if (cd playwright-tests && npx playwright test --reporter=dot >/dev/null 2>&1); then pass "E2E suite"

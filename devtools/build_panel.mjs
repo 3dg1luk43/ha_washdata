@@ -184,4 +184,11 @@ if (checkOnly) {
     process.exit(1);
   }
   console.log('Build verified.');
+  // Keep docs/internal/PANEL_MAP.md in step with the panel it maps (audit DOCS-09):
+  // it is gated by `gen_panel_map.mjs --check` locally (docs/internal is not in git;
+  // the script skips itself when the folder is absent).
+  if (wwwFlag === -1) {
+    const { execFileSync } = await import('node:child_process');
+    execFileSync(process.execPath, [path.join(path.dirname(fileURLToPath(import.meta.url)), 'gen_panel_map.mjs')], { stdio: ['ignore', 'ignore', 'inherit'] });
+  }
 }

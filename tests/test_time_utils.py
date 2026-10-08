@@ -25,7 +25,6 @@ import pytest
 from custom_components.ha_washdata.time_utils import (
     detect_power_data_format,
     migrate_power_data_to_offsets,
-    power_data_offsets_to_datetimes,
     power_data_to_offsets,
 )
 
@@ -154,30 +153,6 @@ def test_empty_returns_empty():
 def test_single_point_offset():
     result = power_data_to_offsets([[42.0, 999.0]])
     assert result == [[42.0, 999.0]]
-
-
-# ---------------------------------------------------------------------------
-# power_data_offsets_to_datetimes
-# ---------------------------------------------------------------------------
-
-
-def test_offsets_to_datetimes_roundtrip():
-    data = [[0.0, 100.0], [60.0, 80.0], [120.0, 50.0]]
-    datetimes = power_data_offsets_to_datetimes(data, START_ISO)
-    assert len(datetimes) == 3
-    ts0, p0 = datetimes[0]
-    ts1, p1 = datetimes[1]
-    assert isinstance(ts0, datetime)
-    assert ts0.tzinfo is not None
-    assert p0 == pytest.approx(100.0)
-    delta = (ts1 - ts0).total_seconds()
-    assert delta == pytest.approx(60.0, abs=0.5)
-
-
-def test_offsets_to_datetimes_bad_start_time():
-    data = [[0.0, 100.0]]
-    result = power_data_offsets_to_datetimes(data, "not-a-datetime")
-    assert result == []
 
 
 # ---------------------------------------------------------------------------

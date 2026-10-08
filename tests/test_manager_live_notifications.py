@@ -36,7 +36,6 @@ def mock_hass() -> Any:
     hass.async_create_task = MagicMock(
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()
     )
-    hass.components.persistent_notification.async_create = MagicMock()
     hass.config_entries.async_get_entry = MagicMock()
     hass.states.get = MagicMock(return_value=MagicMock(state="home"))
     return hass
@@ -192,25 +191,6 @@ def test_clear_live_notification_sends_clear_message(
         assert payload["message"] == "clear_notification"
         tags.append(payload["data"]["tag"])
     assert tags == [manager._live_notification_tag, manager._lifecycle_tag]
-
-
-def test_clear_after_a_finished_cycle_spares_the_lifecycle_card(
-    manager: WashDataManager, mock_hass: Any
-) -> None:
-    """Found in the PR #448 round-25 review. The finished alert uses the
-    lifecycle tag, so a restart or unload after the cycle ended would dismiss the
-    card the user still wants. The live tag still goes: its Live Activity
-    chronometer counts into negative numbers once nothing updates it."""
-    from custom_components.ha_washdata.const import STATE_OFF
-
-    manager._notify_live_services = ["notify.mobile_app_pixel"]
-    manager._live_notification_sent_count = 1
-    manager.detector.state = STATE_OFF
-
-    manager._clear_live_progress_notification()
-
-    tags = [c[0][2]["data"]["tag"] for c in mock_hass.services.async_call.call_args_list]
-    assert tags == [manager._live_notification_tag]
 
 
 def test_finish_path_clear_skips_service_clear(

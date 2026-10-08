@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData 设置",
-        "description": "配置您的洗衣机或其他家电设备。\n\n需要功率传感器。\n\n设置完成后，请从侧边栏打开 WashData 面板（或访问 [/ha-washdata](/ha-washdata)）来查看周期、调整检测参数和管理配置文件。",
+        "description": "设置洗衣机或其他家电。需要功率传感器。\n\n设置完成后，从侧边栏打开 WashData 面板（[/ha-washdata](/ha-washdata)），即可查看周期、配置文件和所有设置。",
         "data": {
           "name": "设备名称",
           "device_type": "设备类型",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "该设备的友好名称（例如“洗衣机”、“洗碗机”）。",
-          "device_type": "这是什么类型的设备？帮助定制检测和标记。",
-          "power_sensor": "报告智能插头实时功耗（以瓦为单位）的传感器实体。",
-          "min_power": "功率读数高于此阈值（以瓦为单位）表明设备正在运行。大多数设备从 2W 开始。"
+          "device_type": "为此类家电设置检测默认值。",
+          "power_sensor": "以瓦为单位报告实时功率的智能插头传感器。",
+          "min_power": "高于此值（瓦）的读数表示设备正在运行。大多数设备适合 2 W。"
         }
       },
       "reconfigure": {
         "title": "重新配置 WashData",
-        "description": "更新设备名称、家电类型或功率传感器。\n\nWashData 面板（侧边栏或 [/ha-washdata](/ha-washdata)）用于管理检测、周期、配置文件和通知。",
+        "description": "更改设备名称、家电类型或功率传感器。\n\n其他所有设置都在 WashData 面板中（侧边栏或 [/ha-washdata](/ha-washdata)）。",
         "data": {
           "name": "设备名称",
           "device_type": "设备类型",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "连接失败",
-      "invalid_auth": "验证无效",
       "unknown": "意外错误",
       "invalid_power": "功率阈值必须大于 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData 设置",
-        "description": "重命名设备或更改其核心硬件设置。所有检测、匹配和通知设置均在 [WashData 面板](/ha-washdata) 中（也可从侧边栏访问）。",
+        "description": "重命名设备或更改其核心设置。其他所有设置都在侧边栏的 [WashData 面板](/ha-washdata) 中。",
         "data": {
           "name": "设备名称",
           "device_type": "设备类型",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "个人资料名称",
-          "description": "现有配置文件的名称（在“管理配置文件”菜单中创建配置文件）。留空以删除标签。"
+          "description": "现有配置文件的名称（在 WashData 面板中创建配置文件）。留空则删除标签。"
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "置信阈值",
-          "description": "应用标签的最小匹配置信度 (0.50-0.95)。"
+          "description": "应用标签的最小匹配置信度 (0.50-0.95)。留空则使用设备的“自动标记置信度”设置。"
         }
       }
     },
     "export_config": {
       "name": "导出配置",
-      "description": "将此设备的配置文件、周期和设置导出到 JSON 文件（每个设备）。",
+      "description": "将此设备的配置文件、周期和设置导出到 JSON 文件。",
       "fields": {
         "device_id": {
           "name": "设备",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "提交周期反馈",
-      "description": "完成循环后确认或更正自动检测的程序。提供“entry_id”（高级）或“device_id”（推荐）。",
+      "description": "确认或更正已完成周期检测到的程序。请提供 `device_id`（推荐）或 `entry_id`。",
       "fields": {
         "device_id": {
           "name": "设备",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "标记为已卸载",
-      "description": "确认已从 WashData 设备中取出完成的物品，清除干净状态和所有卸载提醒。",
+      "description": "确认已取出完成的物品。清除干净状态和所有卸载提醒。",
       "fields": {
         "device_id": {
           "name": "设备",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "匹配歧义"
+      },
+      "maintenance_due": {
+        "name": "需要维护",
+        "state": {
+          "on": "到期",
+          "off": "未到期"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "到期任务 ID"
+          },
+          "due_tasks": {
+            "name": "到期任务",
+            "state": {
+              "descale": "除垢",
+              "filter_clean": "清洁过滤器",
+              "drum_clean": "清洁滚筒",
+              "bearing_service": "轴承保养",
+              "other": "其他",
+              "salt": "补充软水盐",
+              "rinse_aid": "补充光亮剂",
+              "lint_filter": "清洁绒毛过滤器",
+              "condenser_clean": "清洁冷凝器"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "抗皱",
           "interrupted": "被打断",
           "force_stopped": "强制停止",
-          "rinse": "冲洗",
           "unknown": "未知",
           "clean": "干净的",
           "delay_wait": "等待开始"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "周期异常",
+            "state": {
+              "overrun": "运行超时",
+              "stalled": "停滞"
+            }
+          }
         }
       },
       "washer_program": {

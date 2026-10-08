@@ -53,7 +53,7 @@ const BUTTON_ICONS = {
 };
 const BUTTON_ORDER = ["pause", "resume", "terminate", "record_start", "record_stop", "program", "open_panel"];
 
-const ACTIVE_STATES = ["running", "paused", "user_paused", "ending", "starting", "anti_wrinkle", "rinse"];
+const ACTIVE_STATES = ["running", "paused", "user_paused", "ending", "starting", "anti_wrinkle"];
 // States where button.py's PauseCycleButton is available, so the card must not
 // grey out Pause where the backend would accept it. An auto-detected "paused"
 // is pausable: async_pause_cycle turns it into a user pause that survives the
@@ -82,8 +82,16 @@ function loadConstants(hass) {
 
 const _panelTrans = {}; // lang -> dict
 const _panelTransPending = {}; // lang -> Promise
+// The card is loaded as ha-washdata-card.js?v=<cache buster>; reuse it for the
+// translation files, as the panel does. Without it HA serves them with a 31-day
+// cache, so an upgraded card kept last release's strings (audit UI-17).
+const _CARD_VERSION = (() => {
+  try { return new URL(import.meta.url).searchParams.get("v") || ""; }
+  catch (_) { return ""; }
+})();
 function _panelTransUrl(lang) {
-  return "/" + DOMAIN + "/panel-translations/" + encodeURIComponent(lang) + ".json";
+  const base = "/" + DOMAIN + "/panel-translations/" + encodeURIComponent(lang) + ".json";
+  return _CARD_VERSION ? base + "?v=" + encodeURIComponent(_CARD_VERSION) : base;
 }
 async function _fetchPanelLang(lang) {
   if (!lang) return null;
@@ -191,6 +199,8 @@ class WashDataCard extends HTMLElement {
       f.showSparkline ? "spark" : "",
       f.buttons.join("+"),
       layout === "glance" ? String(this._glanceEntities().length) : "",
+      // _attachGestures makes the card focusable only when it has a tap action.
+      c.tap_action && c.tap_action.action === "none" ? "notap" : "",
     ].join("|");
   }
 
@@ -292,7 +302,26 @@ class WashDataCard extends HTMLElement {
   }
 
   // ── Entity discovery ──────────────────────────────────────────────────────
+  // Memoised per registry object: HA replaces `hass.entities` only when the entity
+  // registry changes, but calls `set hass` on every state change in the house, and
+  // each call walked the whole registry once per card (audit UI-16). Results from
+  // the suffix fallback read live states, so only registry-resolved roles are kept.
   _resolveRoles(primaryEntity) {
+    const reg = (this._hass && this._hass.entities) || null;
+    const key = primaryEntity || (this._cfg && this._cfg.entity) || "";
+    let c = this._rolesCache;
+    if (!c || c.reg !== reg || c.cfg !== this._cfg) {
+      c = this._rolesCache = { reg, cfg: this._cfg, map: new Map() };
+    }
+    if (c.map.has(key)) return c.map.get(key);
+    const roles = this._computeRoles(primaryEntity);
+    // A role the suffix fallback had to look for in live states may appear later
+    // without a registry change, so such a result is recomputed, never cached.
+    if (reg && roles._deviceId && !roles._fromStates) c.map.set(key, roles);
+    return roles;
+  }
+
+  _computeRoles(primaryEntity) {
     const hass = this._hass;
     const cfg = this._cfg || {};
     const reg = (hass && hass.entities) || {};
@@ -333,9 +362,11 @@ class WashDataCard extends HTMLElement {
 
     // Suffix fallback for the common case where the primary is the state sensor
     // but the registry lookup came up empty (e.g. template entity, no device).
+    let fromStates = false;
     if (!roles.time || !roles.progress || !roles.program) {
       const m = /^sensor\.(.+)_state$/.exec(primary);
       if (m) {
+        fromStates = true;
         const base = "sensor." + m[1] + "_";
         const st = hass && hass.states;
         const guess = (suffix) => (st && st[base + suffix] ? base + suffix : null);
@@ -348,6 +379,7 @@ class WashDataCard extends HTMLElement {
     roles._buttons = buttons;
     roles._select = selectEntity;
     roles._deviceId = deviceId;
+    roles._fromStates = fromStates;
     return roles;
   }
 
@@ -580,6 +612,7 @@ class WashDataCard extends HTMLElement {
   _baseStyle() {
     return (
       ":host{display:block;height:100%}" +
+      "[role=button]:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}" +
       "ha-card{padding:0;background:var(--ha-card-background,var(--card-background-color,white));" +
       "border-radius:var(--ha-card-border-radius,12px);box-shadow:var(--ha-card-box-shadow,none);" +
       "overflow:hidden;cursor:pointer;height:100%;box-sizing:border-box;" +
@@ -611,7 +644,21 @@ class WashDataCard extends HTMLElement {
     return this._buildTile();
   }
 
-  _attachGestures(cardEl) {
+  _attachGestures(cardEl, keyEl = cardEl) {
+    // Keyboard: focusable with Enter / Space running the tap action, as HA's own
+    // tile card does (audit UI-17: pointer-only until 0.5.8). `keyEl` carries the
+    // button role: a card holding its own buttons or program selector passes a
+    // part without them, since a role="button" may not contain interactive controls.
+    const tapCfg = (this._cfg && this._cfg.tap_action) || { action: "more-info" };
+    if (tapCfg.action !== "none") {
+      keyEl.tabIndex = 0;
+      keyEl.setAttribute("role", "button");
+      keyEl.addEventListener("keydown", (ev) => {
+        if (ev.target !== keyEl || (ev.key !== "Enter" && ev.key !== " ")) return;
+        ev.preventDefault();
+        this._executeAction((this._cfg && this._cfg.tap_action) || { action: "more-info" });
+      });
+    }
     cardEl.addEventListener("pointerdown", this._onPointerDown);
     cardEl.addEventListener("pointermove", this._onPointerMove);
     cardEl.addEventListener("pointerup", this._onPointerUp);
@@ -668,7 +715,8 @@ class WashDataCard extends HTMLElement {
       (flags.showSparkline ? '<canvas id="spark"></canvas>' : "") +
       (flags.buttons.length ? '<div class="acts" id="acts"></div>' : "") +
       "</div></ha-card>";
-    this._attachGestures(this.shadowRoot.getElementById("card"));
+    const card = this.shadowRoot.getElementById("card");
+    this._attachGestures(card, flags.buttons.length ? card.querySelector(".top") : card);
     if (flags.buttons.length) this._buildButtons(this.shadowRoot.getElementById("acts"), flags.buttons);
   }
 
@@ -682,6 +730,9 @@ class WashDataCard extends HTMLElement {
         sel.id = "prog-select";
         sel.addEventListener("click", (ev) => ev.stopPropagation());
         sel.addEventListener("pointerdown", (ev) => ev.stopPropagation());
+        // As the buttons below: a pointerup reaching the card ran tap_action, whose
+        // more-info dialog closed the dropdown before a program could be picked (#468).
+        sel.addEventListener("pointerup", (ev) => ev.stopPropagation());
         sel.addEventListener("change", (ev) => {
           ev.stopPropagation();
           this._onProgramChange(ev.target.value);
@@ -812,7 +863,12 @@ class WashDataCard extends HTMLElement {
       else if (vm.timeText) parts.push(vm.timeText);
       else if (vm.pct !== null) parts.push(vm.pct + "%");
     }
-    if (flags.showAnomaly && vm.anomaly) parts.push(this._t("card.running_long", null, "running long"));
+    if (flags.showAnomaly && vm.anomaly) {
+      // #452: a stalled cycle (halted on its standby draw) is not one running long.
+      parts.push(vm.anomaly.kind === "stalled"
+        ? this._t("card.stalled", null, "Stalled")
+        : this._t("card.running_long", null, "running long"));
+    }
     stateEl.textContent = parts.join(" • ");
   }
 
@@ -872,7 +928,9 @@ class WashDataCard extends HTMLElement {
       // and a zero; above it the decimal is noise.
       if (vm.isRunning && vm.powerW !== null)
         addChip((vm.powerW >= 100 ? Math.round(vm.powerW) : vm.powerW.toFixed(1)) + " W");
-      if (flags.showAnomaly && vm.anomaly) {
+      if (flags.showAnomaly && vm.anomaly && vm.anomaly.kind === "stalled") {
+        addChip(this._t("card.stalled", null, "Stalled"), true);  // #452
+      } else if (flags.showAnomaly && vm.anomaly) {
         const ratio = vm.anomaly.ratio ? " (" + Math.round((vm.anomaly.ratio - 1) * 100) + "%)" : "";
         addChip(this._t("card.running_long", null, "Running long") + ratio, true);
       }

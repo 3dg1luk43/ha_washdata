@@ -23,6 +23,8 @@ Constraint: Resampling must be segment-based (no interpolation across gaps).
 
 from __future__ import annotations
 
+import math
+
 from dataclasses import dataclass
 from collections.abc import Sequence
 from typing import List, Tuple
@@ -53,7 +55,7 @@ def energy_gap_threshold_s(timestamps: np.ndarray) -> float:
     Ten times the median sample interval, clamped to ``[60, 3600]``. Segments
     longer than this are treated as sensor outages and excluded from the energy
     sum, without masking valid slow-sampling configurations. Single source for
-    both persistence paths (``manager._on_cycle_end`` / ``ProfileStore.add_cycle``).
+    both persistence paths (``manager._on_cycle_end`` / ``ProfileStore.async_add_cycle``).
     """
     ts = np.asarray(timestamps, dtype=float)
     if ts.size < 2:
@@ -475,3 +477,179 @@ def quiet_run_before(
     if prev_active is None:
         return 0.0
     return max(0.0, run_start - prev_active)
+
+
+def terminal_quiet_seen(
+    points: list[tuple[float, float]],
+    last_active: float,
+    stop_threshold_w: float,
+    quiet_s: float,
+    peak_frac: float,
+) -> bool:
+    """Has this trace ALREADY been through the quiet phase its profile ends with?
+
+    ``quiet_s`` is ``compute_profile_terminal_signature``'s ``quiet_before_s``: the
+    quiet measured before the LAST run above ``peak * peak_frac`` of each cycle.
+    A kept tail may add up to that much past the last activity, on the reasoning
+    that a run which has not yet dried is still drying - so the allowance must be
+    withheld when this run already did.
+
+    Asked two ways, and either one answers yes (shorten-only):
+
+    * at ``stop_threshold_w``, from ``last_active`` - the original test (register
+      item 347);
+    * at the SIGNATURE'S OWN threshold, from the last sample above it (#424). The
+      statistic and the test of whether it has happened must use the same level.
+      On #424's Beko the quiet is measured at 7.9 W (0.4% of a 1.97 kW peak) while
+      its stop threshold is 0.96 W; its run ends 15-20 W drain -> 1.3 W -> 0.3 W,
+      so at the stop threshold the last activity is the 1.3 W wind-down sample,
+      preceded by the drain, and the test found no quiet at all. Every cycle then
+      banked the full 611 s allowance as cycle time. At 7.9 W the same traces show
+      605-630 s of quiet, i.e. the phase had happened.
+
+    Shared by ``CycleDetector._keep_tail_cap`` and the banked-tail repair so a
+    cycle is judged the same way live and in history. Pure; never raises.
+    """
+    try:
+        if quiet_s <= 0 or not points:
+            return False
+        need = 0.5 * float(quiet_s)
+        if quiet_run_before(points, last_active, stop_threshold_w) >= need:
+            return True
+        peak = max(p for _o, p in points)
+        if peak <= 0:
+            return False
+        thr = peak * peak_frac
+        last_event: float | None = None
+        for offset, power in reversed(points):
+            if power > thr:
+                last_event = offset
+                break
+        if last_event is None:
+            return False
+        return quiet_run_before(points, last_event, thr) >= need
+    except Exception:  # noqa: BLE001 - a statistic must never break a finish
+        return False
+
+
+def terminal_event_end(
+    points: Sequence[tuple[float, float]], last_active: float, peak_frac: float
+) -> float:
+    """Where a run that has been through its terminal quiet actually ends.
+
+    ``last_active`` (the last sample above the stop threshold), or the last sample
+    above ``peak * peak_frac`` when that is later: a stop threshold above the
+    signature's level leaves a quiet pump-out BELOW it, and when only
+    :func:`terminal_quiet_seen`'s peak-fraction test fires, ending at
+    ``last_active`` cut that pump-out off (register item 384). Shared by the live
+    cap and the banked-tail repair, like ``terminal_quiet_seen``. Never raises.
+    """
+    try:
+        peak = max((p for _o, p in points), default=0.0)
+        if peak <= 0:
+            return last_active
+        thr = peak * peak_frac
+        for offset, power in reversed(points):
+            if power > thr:
+                return max(float(last_active), float(offset))
+        return last_active
+    except Exception:  # noqa: BLE001
+        return last_active
+
+
+def has_resumed_pause(
+    points: Sequence[tuple[float, float]], threshold_w: float, min_pause_s: float
+) -> bool:
+    """Does this trace hold a pause below ``threshold_w`` of ``min_pause_s`` or more
+    that power later came back from? (#424)
+
+    Timed on the wall clock from the first below-threshold sample to the next one at
+    or above it, so a change-only plug that reports one 0 W row and then nothing
+    still counts its silence. A run still open at the end of the trace never
+    resumed: that is the cycle's own end, not a pause. A run that starts on the
+    first sample is the standby before the cycle (a curve pre-roll), not a pause
+    either. Pure; never raises.
+    """
+    return longest_resumed_pause_s(points, threshold_w, skip_leading=True) >= min_pause_s
+
+
+def longest_resumed_pause_s(
+    points: Sequence[tuple[float, float]], threshold_w: float, *, skip_leading: bool = True
+) -> float:
+    """Longest pause below ``threshold_w`` that power later came back from (#458).
+
+    Timed like :func:`has_resumed_pause`. With ``skip_leading`` a run that starts on
+    the trace's first sample is ignored: that is standby before the cycle began (a
+    curve pre-roll), which the end gates never see. A run still open at the end of
+    the trace is the cycle's own end and is ignored too. Pure; never raises.
+    """
+    return max(
+        (d for _f, d in resumed_pauses(points, threshold_w, skip_leading=skip_leading)),
+        default=0.0,
+    )
+
+
+def resumed_pauses(
+    points: Sequence[tuple[float, float]], threshold_w: float, *, skip_leading: bool = True
+) -> list[tuple[float, float]]:
+    """``(start_fraction, seconds)`` of every pause below ``threshold_w`` that power
+    later came back from, timed like :func:`has_resumed_pause`.
+
+    ``start_fraction`` is where the pause began as a share of the trace's span: the
+    hazard end gate's per-profile pause catalogue (audit DETECT-16). Pure; never
+    raises.
+    """
+    try:
+        out: list[tuple[float, float]] = []
+        if not points:
+            return out
+        t0 = float(points[0][0])
+        span = float(points[-1][0]) - t0
+        first_below: float | None = None
+        leading = True
+        for offset, power in points:
+            if power < threshold_w:
+                if first_below is None:
+                    first_below = offset
+            else:
+                if first_below is not None and not (skip_leading and leading):
+                    out.append((
+                        (first_below - t0) / span if span > 0 else 0.0,
+                        offset - first_below,
+                    ))
+                first_below = None
+                leading = False
+        return out
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def percentile_linear(values: Sequence[float], q: float) -> float:
+    """``np.percentile(values, q)`` (linear method) without NumPy, bit for bit.
+
+    For the detector's 20-interval cadence window, where NumPy's per-call
+    overhead (40-185 us) dwarfed the arithmetic (audit PERF-07). Same virtual
+    index ``(n - 1) * q`` and the same two-sided lerp NumPy uses. ``values``
+    must be non-empty.
+    """
+    a = sorted(float(v) for v in values)
+    n = len(a)
+    virtual = (n - 1) * (q / 100.0)
+    lo = math.floor(virtual)
+    hi = min(lo + 1, n - 1)
+    lo = min(max(lo, 0), n - 1)
+    t = virtual - lo
+    x, y = a[lo], a[hi]
+    diff = y - x
+    return y - diff * (1.0 - t) if t >= 0.5 else x + diff * t
+
+
+def median_fast(values: Sequence[float]) -> float:
+    """``np.median(values)`` without NumPy, bit for bit; ``values`` non-empty."""
+    a = sorted(float(v) for v in values)
+    n = len(a)
+    mid = n // 2
+    if n % 2:
+        return a[mid]
+    return (a[mid - 1] + a[mid]) / 2.0
+

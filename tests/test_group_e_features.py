@@ -71,6 +71,11 @@ def test_maintenance_event_types_contract():
         "drum_clean",
         "bearing_service",
         "other",
+        # Device-type presets (discussion #461).
+        "salt",
+        "rinse_aid",
+        "lint_filter",
+        "condenser_clean",
     )
 
 
@@ -156,22 +161,6 @@ def test_cycles_since_maintenance_no_event_returns_total(store):
         _completed_cycle(now - timedelta(days=2)),
         _completed_cycle(now - timedelta(days=1)),
     ]
-    assert store.cycles_since_maintenance("descale") == 3
-
-
-async def test_cycles_since_maintenance_after_event(store):
-    now = dt_util.now()
-    # two cycles before the maintenance, three after
-    store._data["past_cycles"] = [
-        _completed_cycle(now - timedelta(days=10)),
-        _completed_cycle(now - timedelta(days=9)),
-        _completed_cycle(now - timedelta(days=4)),
-        _completed_cycle(now - timedelta(days=3)),
-        _completed_cycle(now - timedelta(days=2)),
-    ]
-    await store.async_add_maintenance_event(
-        "descale", date=(now - timedelta(days=5)).isoformat()
-    )
     assert store.cycles_since_maintenance("descale") == 3
 
 

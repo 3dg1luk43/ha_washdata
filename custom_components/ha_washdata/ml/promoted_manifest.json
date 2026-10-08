@@ -65,31 +65,6 @@
       "name": "hybrid_curve_quality",
       "target": "problem_cycle",
       "target_units": ""
-    },
-    {
-      "created_at": "2026-06-29T20:49:05+00:00",
-      "git_commit": "605a862",
-      "kind": "standardized_logistic",
-      "metrics": {
-        "owner_holdout": {
-          "accuracy": 0.771789,
-          "balanced_accuracy": 0.741539,
-          "f1": 0.836751,
-          "fn": 120,
-          "fp": 79,
-          "positive_rate": 0.675459,
-          "precision": 0.865874,
-          "problem_recall": 0.809524,
-          "rows": 872,
-          "specificity": 0.673554,
-          "tn": 163,
-          "tp": 510
-        }
-      },
-      "module": "live_match_commit_model.py",
-      "name": "live_match_commit",
-      "target": "match_top1_correct",
-      "target_units": ""
     }
   ],
   "source": "ml_washdata/output/promoted"

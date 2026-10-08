@@ -43,7 +43,6 @@ from custom_components.ha_washdata.const import (
     DOMAIN,
 )
 from custom_components.ha_washdata.options_utils import (
-    has_null_options,
     option_float,
     option_int,
     strip_null_options,
@@ -51,7 +50,7 @@ from custom_components.ha_washdata.options_utils import (
 
 
 # ---------------------------------------------------------------------------
-# strip_null_options / has_null_options
+# strip_null_options
 # ---------------------------------------------------------------------------
 
 def test_strip_drops_unset_numeric_nulls():
@@ -78,7 +77,6 @@ def test_strip_drops_a_null_power_sensor_too():
     """
     options = {CONF_POWER_SENSOR: None}
     assert strip_null_options(options) == {}
-    assert has_null_options(options) is True
 
 
 def test_strip_drops_nulls_readers_treat_as_absent_anyway():
@@ -96,10 +94,6 @@ def test_strip_does_not_mutate_the_input():
     strip_null_options(options)
     assert options == {CONF_POWER_OFF_THRESHOLD_W: None}
 
-
-def test_has_null_options_detects_only_unset_meaning_nulls():
-    assert has_null_options({CONF_POWER_OFF_DELAY: None}) is True
-    assert has_null_options({CONF_MIN_POWER: 5.0}) is False
 
 
 def test_stripped_key_restores_the_compiled_default():

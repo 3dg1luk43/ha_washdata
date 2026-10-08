@@ -138,12 +138,17 @@ test.describe('touch', () => {
     // genuinely taller than the viewport. Before the fix this swipe moved
     // nothing at all, because touch-action: none handed every touch that began
     // on a chart to the canvas and the scroller never saw it.
+    // Centring the chart can leave the scroller at its bottom (the Overview lost
+    // a card in 0.5.8), so swipe toward whichever side still has room.
     const cdp = await page.context().newCDPSession(page);
     const box = await canvasBox(page, 'wd-status-canvas');
     const before = await scrollTop(page);
-    await swipe(cdp, Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2), 0, -170);
+    const back = before > 0;
+    await swipe(cdp, Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2), 0, back ? 170 : -170);
     await page.waitForTimeout(400);
-    expect(await scrollTop(page)).toBeGreaterThan(before);
+    const after = await scrollTop(page);
+    if (back) expect(after).toBeLessThan(before);
+    else expect(after).toBeGreaterThan(before);
   });
 
   test('the same swipe cancels the chart pointer instead of scrubbing', async ({ page }) => {

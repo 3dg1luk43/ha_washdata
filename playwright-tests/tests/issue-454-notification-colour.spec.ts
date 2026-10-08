@@ -21,9 +21,10 @@ async function openNotificationColour(page: Page) {
   return field;
 }
 
+// The colour field is an Advanced setting; the fixture boots Basic (audit UI-22).
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await bootPanel(page);
+  await bootPanel(page, {}, {}, { settingsLevel: 'advanced' });
   await clickTab(page, 'settings');
 });
 
@@ -83,7 +84,7 @@ test('clear puts a configured colour back to the platform default', async ({ pag
   await page.goto('/');
   await bootPanel(page, {
     'ha_washdata/get_options': { options: { ...optionsData, notify_icon_color: '#FF9800' } },
-  });
+  }, {}, { settingsLevel: 'advanced' });
   await clickTab(page, 'settings');
 
   const field = await openNotificationColour(page);

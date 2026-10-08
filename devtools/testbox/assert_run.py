@@ -181,26 +181,34 @@ async def main() -> int:
                 f"tags seen: {tags}",
             )
 
-        # #454: one configured colour, three companion-app keys, mobile only.
+        # #454: one configured colour, companion-app keys, mobile only.
         # A MagicMock accepts any payload, so the unit suite can prove the keys
         # are BUILT but never that they survive a real notify service call; and
         # `color` in particular is a documented Android key, so a schema that
-        # rejected it would only show up here.
+        # rejected it would only show up here. #465: iOS draws the icon glyph in
+        # `notification_icon_color` on a `color` disc, so one value for both hid
+        # the icon: ordinary notifications carry `color` + `progress_bar_color`
+        # only, and `notification_icon_color` goes on live updates alone.
         colour_keys = ("color", "notification_icon_color", "progress_bar_color")
         mobile = [r for r in titled if r["service"].startswith("mobile_app_")]
         plain = [r for r in titled if not r["service"].startswith("mobile_app_")]
+        live_ids = {id(r) for r in live}
+
+        def _colour_ok(r: dict) -> bool:
+            data = r.get("data") or {}
+            if data.get("color") != "#4CAF50" or data.get("progress_bar_color") != "#4CAF50":
+                return False
+            icon = data.get("notification_icon_color")
+            return icon == "#4CAF50" if id(r) in live_ids else icon is None
+
         checks.check(
-            bool(mobile)
-            and all(
-                all((r.get("data") or {}).get(k) == "#4CAF50" for k in colour_keys)
-                for r in mobile
-            ),
+            bool(mobile) and all(_colour_ok(r) for r in mobile),
             f"the notification colour reached every mobile payload ({len(mobile)})",
             "missing/wrong: "
             + str([
-                {k: (r.get("data") or {}).get(k) for k in colour_keys}
+                {"live": id(r) in live_ids, **{k: (r.get("data") or {}).get(k) for k in colour_keys}}
                 for r in mobile
-                if any((r.get("data") or {}).get(k) != "#4CAF50" for k in colour_keys)
+                if not _colour_ok(r)
             ][:3]),
         )
         checks.check(

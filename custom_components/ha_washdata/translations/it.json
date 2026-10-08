@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configurazione WashData",
-        "description": "Configura la tua lavatrice o altro elettrodomestico.\n\nÈ richiesto il sensore di potenza.\n\nDopo la configurazione, apri il pannello WashData dalla barra laterale (o vai su [/ha-washdata](/ha-washdata)) per visualizzare i cicli, regolare il rilevamento e gestire i profili.",
+        "description": "Configura una lavatrice o un altro elettrodomestico. È richiesto un sensore di potenza.\n\nDopo la configurazione, apri il pannello WashData dalla barra laterale ([/ha-washdata](/ha-washdata)) per vedere cicli, profili e tutte le impostazioni.",
         "data": {
           "name": "Nome dispositivo",
           "device_type": "Tipo di dispositivo",
@@ -12,43 +12,41 @@
         },
         "data_description": {
           "name": "Un nome descrittivo per questo dispositivo (ad esempio \"Lavatrice\", \"Lavastoviglie\").",
-          "device_type": "Che tipo di elettrodomestico è questo? Aiuta a personalizzare il rilevamento e l'etichettatura.",
-          "power_sensor": "L'entità sensore che segnala il consumo energetico in tempo reale (in watt) dalla tua presa intelligente.",
-          "min_power": "Le letture di potenza superiori a questa soglia (in watt) indicano che l'elettrodomestico è in funzione. Inizia con 2 W per la maggior parte dei dispositivi."
+          "device_type": "Imposta i valori di rilevamento predefiniti per questo tipo di elettrodomestico.",
+          "power_sensor": "Il sensore della presa intelligente che riporta la potenza attuale in watt.",
+          "min_power": "Letture sopra questo valore (in watt) indicano che l'elettrodomestico è in funzione. 2 W va bene per la maggior parte dei dispositivi."
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Aggiorna il nome del dispositivo, il tipo di elettrodomestico o il sensore di potenza.\n\nIl pannello WashData (barra laterale, o [/ha-washdata](/ha-washdata)) è dove vengono gestiti rilevamento, cicli, profili e notifiche.",
+        "title": "Riconfigura WashData",
+        "description": "Cambia il nome del dispositivo, il tipo di elettrodomestico o il sensore di potenza.\n\nTutto il resto è nel pannello WashData (barra laterale, o [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Nome dispositivo",
+          "device_type": "Tipo di dispositivo",
+          "power_sensor": "Sensore di potenza",
+          "min_power": "Soglia di potenza minima (W)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Connessione non riuscita",
-      "invalid_auth": "Autenticazione non valida",
       "unknown": "Errore imprevisto",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "La soglia di potenza deve essere maggiore di 0"
     },
     "abort": {
       "already_configured": "Il dispositivo è già configurato",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "La riconfigurazione è avvenuta con successo"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
-        "description": "Rinomina il dispositivo o modifica le sue impostazioni hardware principali. Tutte le impostazioni di rilevamento, corrispondenza e notifica si trovano nel [pannello WashData](/ha-washdata) (accessibile anche dalla barra laterale).",
+        "title": "Impostazioni WashData",
+        "description": "Rinomina il dispositivo o modifica le sue impostazioni principali. Tutto il resto è nel [pannello WashData](/ha-washdata) nella barra laterale.",
         "data": {
           "name": "Nome del dispositivo",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Tipo di dispositivo",
+          "power_sensor": "Sensore di potenza",
+          "min_power": "Soglia di potenza minima (W)"
         }
       }
     },
@@ -60,7 +58,7 @@
       "notify_live_waiting_message": "{device}: nessun profilo ancora riconosciuto.",
       "vs_typical_longer": "{pct}% più lungo del solito",
       "vs_typical_shorter": "{pct}% più corto del solito",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "La soglia di potenza deve essere maggiore di 0"
     }
   },
   "selector": {
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Nome profilo",
-          "description": "Il nome di un profilo esistente (crea profili nel menu Gestisci profili). Lascia vuoto per rimuovere l'etichetta."
+          "description": "Nome di un profilo esistente (crea i profili nel pannello WashData). Lascia vuoto per rimuovere l'etichetta."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Soglia di confidenza",
-          "description": "Confidenza di corrispondenza minima (0,50-0,95) per applicare le etichette."
+          "description": "Confidenza di corrispondenza minima (0,50-0,95) per applicare le etichette. Lascia vuoto per usare l'impostazione Confidenza etichettatura automatica del dispositivo."
         }
       }
     },
     "export_config": {
       "name": "Esporta configurazione",
-      "description": "Esporta profili, cicli e impostazioni di questo dispositivo in un file JSON (per dispositivo).",
+      "description": "Esporta profili, cicli e impostazioni di questo dispositivo in un file JSON.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Invia feedback sul ciclo",
-      "description": "Conferma o correggi un programma rilevato automaticamente dopo un ciclo completato. Fornisci `entry_id` (avanzato) o `device_id` (consigliato).",
+      "description": "Conferma o correggi il programma rilevato di un ciclo terminato. Indica `device_id` (consigliato) o `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Segna come scaricato",
-      "description": "Confermare che il carico terminato è stato tolto da un dispositivo WashData, azzerando lo stato Pulito e ogni promemoria di scarico.",
+      "description": "Conferma che il carico terminato è stato tolto. Azzera lo stato Pulito e ogni promemoria di scarico.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Ambiguità corrispondenza"
+      },
+      "maintenance_due": {
+        "name": "Manutenzione in scadenza",
+        "state": {
+          "on": "In scadenza",
+          "off": "Non in scadenza"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID attività in scadenza"
+          },
+          "due_tasks": {
+            "name": "Attività in scadenza",
+            "state": {
+              "descale": "Decalcifica",
+              "filter_clean": "Pulisci filtro",
+              "drum_clean": "Pulisci cestello",
+              "bearing_service": "Manutenzione cuscinetti",
+              "other": "Altro",
+              "salt": "Ricarica sale",
+              "rinse_aid": "Ricarica brillantante",
+              "lint_filter": "Pulisci filtro lanugine",
+              "condenser_clean": "Pulisci condensatore"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Antirughe",
           "interrupted": "Interrotto",
           "force_stopped": "Fermato forzatamente",
-          "rinse": "Risciacquo",
           "unknown": "Sconosciuto",
           "clean": "Pulito",
           "delay_wait": "In attesa di iniziare"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalia del ciclo",
+            "state": {
+              "overrun": "In ritardo",
+              "stalled": "Bloccato"
+            }
+          }
         }
       },
       "washer_program": {

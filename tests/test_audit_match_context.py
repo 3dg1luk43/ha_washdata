@@ -1,0 +1,56 @@
+"""Audit 2026-10-02 DETECT-15: the match handed to the detector is built by name.
+
+It was a 13-, then 14-element positional tuple built in two places (manager and
+Playground); items 351/384/387a were each "forgot element N in one producer".
+"""
+
+from __future__ import annotations
+
+from unittest.mock import MagicMock
+
+from custom_components.ha_washdata.cycle_detector import CycleDetector, MatchContext
+from custom_components.ha_washdata.detector_config import build_detector_config
+
+
+def test_every_named_field_reaches_its_detector_state() -> None:
+    det = CycleDetector(build_detector_config({}, {}, "washing_machine"), MagicMock(), MagicMock())
+    det.update_match(MatchContext(
+        profile_name="Cotton", confidence=0.7, expected_duration=3600.0,
+        is_ambiguous=True, is_prefix_ambiguous_full_shape=True,
+        tail_power=1.5, terminal_quiet_s=300.0, longest_candidate_s=5400.0,
+        trusted_min_s=3000.0, pause_catalogue=(3, ((0.5, 120.0),)),
+        stall_catalogue=(3, ((0.4, 900.0), (0.6, 60.0))),
+    ))
+    assert det._matched_profile == "Cotton"  # noqa: SLF001
+    assert det._expected_duration == 3600.0  # noqa: SLF001
+    assert det._match_ambiguous is True  # noqa: SLF001
+    assert det._match_prefix_ambiguous_full_shape is True  # noqa: SLF001
+    assert det._matched_tail_power == 1.5  # noqa: SLF001
+    assert det._matched_terminal_quiet_s == 300.0  # noqa: SLF001
+    assert det._longest_candidate_duration == 5400.0  # noqa: SLF001
+    assert det._matched_trusted_min_s == 3000.0  # noqa: SLF001
+    assert det._matched_pause_catalogue == (3, ((0.5, 120.0),))  # noqa: SLF001
+    # Element 15 (#452) keeps only the stretches that can set a stall's wait.
+    assert det._matched_stall_catalogue == (3, ((0.4, 900.0),))  # noqa: SLF001
+
+
+def test_the_context_is_the_legacy_sequence() -> None:
+    ctx = MatchContext("A", 0.5, 60.0)
+    assert len(ctx) == 15 and ctx[0] == "A" and ctx[11] == 0.0 and ctx[13] is None
+    assert tuple(ctx.as_sequence()) == (
+        "A", 0.5, 60.0, None, False, False, False, False, None, None, None, 0.0, None, None,
+        None,
+    )
+
+
+def test_element_7_is_retired_and_only_seeds_a_legacy_full_shape_flag() -> None:
+    """Element 7 carried the #364 prefix-fit flag (removed in 0.5.8). The context
+    no longer has the field and always sends False there; a legacy 7-element tuple
+    still seeds the #288 full-shape flag from it, as before #364 split it out."""
+    assert not hasattr(MatchContext("A", 0.5, 60.0), "is_prefix_ambiguous")
+    det = CycleDetector(build_detector_config({}, {}, "washing_machine"), MagicMock(), MagicMock())
+    det.update_match(("Cotton", 0.7, 3600.0, None, False, False, True))
+    assert det._match_prefix_ambiguous_full_shape is True  # noqa: SLF001
+    assert not hasattr(det, "_match_prefix_ambiguous")
+    det.update_match(MatchContext("Cotton", 0.7, 3600.0, is_prefix_ambiguous_full_shape=False))
+    assert det._match_prefix_ambiguous_full_shape is False  # noqa: SLF001

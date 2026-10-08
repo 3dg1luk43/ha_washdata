@@ -73,8 +73,12 @@ def test_the_gate_resolves_per_device_not_from_the_module_constant() -> None:
         / "ha_washdata"
         / "cycle_detector.py"
     ).read_text()
-    gate = src[src.index("if not _blocked and _elapsed >="):][:120]
-    assert "_late_ratio" in gate
+    # The gate reads its bar from `_fallback_shortening_bar` (shared with the
+    # item-469b ENDING hold), which resolves the ratio per device.
+    assert "if _bar_s is not None and _elapsed >= _bar_s:" in src
+    bar = src[src.index("def _fallback_shortening_bar("):]
+    bar = bar[: bar.index("def ambiguous_ending_match_defers(")]
+    assert "resolve_end_gate_late_ratio(self._config.device_type)" in bar
     assert "END_GATE_LATE_RATIO * _bar" not in src
 
 
@@ -106,26 +110,29 @@ def test_the_device_ratio_never_discounts_a_raised_ambiguity_bar() -> None:
 
     Item 355's measurement was taken against the expected duration and says
     nothing about the raised case, so a raised bar keeps the original 1.05.
-    Asserted on source because reaching this branch needs a full detector in
-    ENDING with an ambiguous match and a populated element 12.
+    Asserted on `CycleDetector._fallback_shortening_bar`, the gate's bar since
+    register item 469 (it used to be read off the source).
     """
-    from pathlib import Path
+    from custom_components.ha_washdata.const import END_GATE_LATE_RATIO
+    from custom_components.ha_washdata.cycle_detector import (
+        CycleDetector,
+        CycleDetectorConfig,
+    )
 
-    src = (
-        Path(__file__).resolve().parents[1]
-        / "custom_components"
-        / "ha_washdata"
-        / "cycle_detector.py"
-    ).read_text()
-
-    # The raise and the ratio choice must be linked by the same flag.
-    assert "_bar_raised = True" in src
-    block = src[src.index("_late_ratio = ("):][:400]
-    assert "END_GATE_LATE_RATIO" in block
-    assert "_bar_raised" in block
-    assert "resolve_end_gate_late_ratio" in block
-
-    # The flag must be set where the bar is raised, not anywhere else.
-    raise_at = src.index("_bar = self._longest_candidate_duration")
-    flag_at = src.index("_bar_raised = True")
-    assert 0 < flag_at - raise_at < 120, "the flag must sit with the raise it describes"
+    det = CycleDetector(
+        CycleDetectorConfig(min_power=2.0, off_delay=180, device_type="washing_machine"),
+        lambda a, b: None,
+        lambda c: None,
+    )
+    washer = resolve_end_gate_late_ratio("washing_machine")
+    assert washer < END_GATE_LATE_RATIO
+    # Clear match: the device's discounted ratio on the expected duration.
+    assert det._fallback_shortening_bar(5000.0, False, 9000.0) == pytest.approx(washer * 5000.0)
+    # Ambiguous with a longer look-alike: raised to it, at the undiscounted 1.05.
+    assert det._fallback_shortening_bar(5000.0, True, 9000.0) == pytest.approx(
+        END_GATE_LATE_RATIO * 9000.0
+    )
+    # Ambiguous, nothing longer: not raised, the device ratio applies.
+    assert det._fallback_shortening_bar(5000.0, True, 4000.0) == pytest.approx(washer * 5000.0)
+    # Ambiguous with no candidate durations at all: blocked.
+    assert det._fallback_shortening_bar(5000.0, True, 0.0) is None

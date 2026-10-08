@@ -35,7 +35,7 @@ def _data_blob():
             {"id": "r1", "profile_name": "Wool 20", "duration": 1800, "start_time": "2023-01-03T10:00:00+00:00"},
         ],
         "custom_phases": [{"id": "cp1", "name": "Soak"}],
-        "matching_config": {"Cotton 40": {"corr_weight": 0.5}},
+        "ml_model_versions": {"total_energy": {"trained_at": "2023-01-04T02:00:00+00:00"}},
     }
 
 
@@ -139,7 +139,7 @@ def test_manifest_device_type_match():
     assert m["device_type_match"] is True
     assert m["real_history_allowed"] is True
     assert m["warnings"] == []
-    assert m["categories"]["matching_config"]["importable"] is True
+    assert m["categories"]["ml_models"]["importable"] is True
 
 
 def test_manifest_device_type_mismatch_blocks_device_specific():
@@ -151,7 +151,7 @@ def test_manifest_device_type_mismatch_blocks_device_specific():
     assert m["real_history_allowed"] is False
     assert "device_type_mismatch" in m["warnings"]
     # device-specific categories are not importable across device types...
-    assert m["categories"]["matching_config"]["importable"] is False
+    assert m["categories"]["ml_models"]["importable"] is False
     # ...but shape categories still are.
     assert m["categories"]["profiles"]["importable"] is True
     assert m["categories"]["real_cycles"]["importable"] is True

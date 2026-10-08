@@ -38,6 +38,21 @@ import homeassistant.util.dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 
+
+def utc_now() -> datetime:
+    """Return the current time as an aware UTC datetime, for interval arithmetic.
+
+    Two aware datetimes that share one tzinfo instance are subtracted on their
+    wall-clock fields, and every ``dt_util.now()`` stamp shares HA's ZoneInfo, so
+    ``now() - earlier_now()`` is an hour wrong across a DST change (audit
+    DETECT-01). Use this for anything that is subtracted, compared or stored to
+    be subtracted later; keep ``dt_util.now()`` only where the LOCAL clock is the
+    point (quiet hours, "finished at 14:05"). It reads ``dt_util.now()`` rather
+    than ``dt_util.utcnow()`` so tests that freeze ``dt_util.now`` keep
+    controlling the clock.
+    """
+    return dt_util.as_utc(dt_util.now())
+
 # Type aliases
 PowerPoint = list[Any] | tuple[Any, ...]
 PowerData = list[PowerPoint]
@@ -103,7 +118,7 @@ def power_data_to_offsets(
                 parsed_start = dt_util.parse_datetime(start_time_iso)
                 if parsed_start is not None:
                     base_ts = parsed_start.timestamp()
-            except (ValueError, OSError) as e:
+            except (ValueError, OSError, OverflowError) as e:
                 _LOGGER.debug("Failed to parse start_time_iso %s: %s", start_time_iso, e)
         result: list[list[float]] = []
         for item in power_data:
@@ -114,7 +129,7 @@ def power_data_to_offsets(
                     base_ts = ts_abs  # use first reading as anchor
                 offset = round(ts_abs - base_ts, 1)
                 result.append([max(0.0, offset), p])
-            except (TypeError, ValueError, IndexError):
+            except (TypeError, ValueError, IndexError, OverflowError):
                 continue
         return result
 
@@ -124,7 +139,7 @@ def power_data_to_offsets(
         for item in power_data:
             try:
                 result.append([float(item[0]), float(item[1])])
-            except (TypeError, ValueError, IndexError):
+            except (TypeError, ValueError, IndexError, OverflowError):
                 continue
         return result
 
@@ -135,7 +150,7 @@ def power_data_to_offsets(
                 parsed_start = dt_util.parse_datetime(start_time_iso)
                 if parsed_start is not None:
                     start_ts = parsed_start.timestamp()
-            except (ValueError, OSError) as e:
+            except (ValueError, OSError, OverflowError) as e:
                 _LOGGER.debug("Failed to parse datetime %s: %s", start_time_iso, e)
         result: list[list[float]] = []
         for item in power_data:
@@ -148,7 +163,7 @@ def power_data_to_offsets(
                 if start_ts is None:
                     start_ts = ts.timestamp()
                 result.append([round(ts.timestamp() - start_ts, 1), p])
-            except (TypeError, ValueError, AttributeError, IndexError):
+            except (TypeError, ValueError, AttributeError, IndexError, OverflowError):
                 continue
         return result
 
@@ -161,7 +176,7 @@ def power_data_to_offsets(
                 if parsed is None:
                     return []
                 base_ts = parsed.timestamp()
-            except (ValueError, OSError) as e:
+            except (ValueError, OSError, OverflowError) as e:
                 _LOGGER.debug("Failed to parse datetime %s: %s", start_time_iso, e)
                 return []
 
@@ -198,45 +213,12 @@ def power_data_to_offsets(
                         offset, p, len(result),
                     )
                 result.append([max(0.0, offset), p])
-            except (TypeError, ValueError, AttributeError, IndexError):
+            except (TypeError, ValueError, AttributeError, IndexError, OverflowError):
                 continue
         return result
 
     _LOGGER.debug("power_data_to_offsets: unrecognised format, returning empty")
     return []
-
-
-def power_data_offsets_to_datetimes(
-    power_data: PowerData,
-    start_time_iso: str,
-) -> list[tuple[datetime, float]]:
-    """Convert stored ``[[offset_sec, power], ...]`` to ``[(datetime, power), ...]``.
-
-    Args:
-        power_data: Offset-format power data.
-        start_time_iso: ISO-8601 cycle start time.
-
-    Returns:
-        List of ``(datetime, power)`` tuples. Empty list on failure.
-    """
-    try:
-        start_dt = dt_util.parse_datetime(start_time_iso)
-        if start_dt is None:
-            return []
-        start_ts = start_dt.timestamp()
-    except Exception:  # pylint: disable=broad-exception-caught
-        return []
-
-    result: list[tuple[datetime, float]] = []
-    for item in power_data:
-        try:
-            offset = float(item[0])
-            p = float(item[1])
-            ts = datetime.fromtimestamp(start_ts + offset, tz=start_dt.tzinfo)
-            result.append((ts, p))
-        except (TypeError, ValueError, IndexError):
-            continue
-    return result
 
 
 def migrate_power_data_to_offsets(cycle: dict[str, Any]) -> bool:

@@ -163,12 +163,22 @@ async def test_confidence_still_equals_the_best_siblings_own_score(store: Any) -
     """The guarantee that keeps this change out of end detection: `confidence` is
     byte-identical to the pre-fix value, i.e. the top sibling's blended score."""
     _wire_group(store)
-    result = await store.async_match_profile(_live_trace(), LIVE_DUR)
+    # Score the siblings on the templates the store actually scores - re-gridded
+    # onto the query step (audit MATCH-CORE-01). Hand-built raw-index templates
+    # would compare different moments of the cycle wherever the grids differ.
+    seen: list[tuple[Any, ...]] = []
+    real_worker = analysis.compute_matches_worker
 
-    snaps = [_snap("A", CURVE_A, A_DUR), _snap("B", CURVE_B, B_DUR)]
+    def _spy(*args: Any, **kwargs: Any) -> Any:
+        seen.append(args)
+        return real_worker(*args, **kwargs)
+
+    with patch.object(analysis, "compute_matches_worker", side_effect=_spy):
+        result = await store.async_match_profile(_live_trace(), LIVE_DUR)
+
+    current, duration, snaps, config = seen[0][:4]
     expected = max(
-        c["score"]
-        for c in analysis.compute_matches_worker(LIVE, LIVE_DUR, snaps, _cfg())
+        c["score"] for c in real_worker(current, duration, snaps, config)
     )
     assert result.confidence == pytest.approx(expected, abs=0.02)
 
@@ -241,7 +251,6 @@ def manager(hass: Any, mock_entry: Any) -> Any:
         mgr.profile_store.async_clear_active_cycle = AsyncMock()
         mgr.profile_store.async_rebuild_envelope = AsyncMock()
         mgr.profile_store.async_save = AsyncMock()
-        mgr.profile_store.confirm_match_ranking_snapshots = MagicMock()
         mgr._run_post_cycle_processing = AsyncMock()
         mgr._learning_confidence = 0.6
         mgr._auto_label_confidence = 0.9
@@ -254,8 +263,20 @@ def _cycle_data() -> dict[str, Any]:
         "start_time": "2026-05-01T08:00:00+00:00",
         "duration": 4100.0,
         "status": "completed",
-        "power_data": [[0.0, 50.0], [60.0, 200.0]],
+        # >= 10 readings, so the complete-cycle match runs (audit MATCH-DECIDE-02).
+        "power_data": [[i * 60.0, 200.0] for i in range(12)],
     }
+
+
+def _complete(profile: str | None, group: float, member: float | None) -> Any:
+    """The complete-cycle match every cycle-end label decision reads: on a group
+    win `confidence` is the group's (best sibling's) score, `member_confidence`
+    the selected member's, and `label_confidence` the smaller of the two."""
+    return MagicMock(
+        best_profile=profile, confidence=group, member_confidence=member,
+        label_confidence=group if member is None else min(group, member),
+        ambiguity_margin=0.40, is_ambiguous=False, ranking=[],
+    )
 
 
 @pytest.mark.asyncio
@@ -271,8 +292,7 @@ async def test_cycle_end_does_not_label_a_member_on_its_siblings_score(
     manager._last_member_confidence = 0.569
     manager._matched_profile_duration = 4080
     manager.profile_store.async_match_profile = AsyncMock(
-        return_value=MagicMock(best_profile=None, confidence=0.0,
-                               label_confidence=0.0, ranking=[])
+        return_value=_complete("Wolle 30", 0.608, 0.569)
     )
 
     cycle_data = _cycle_data()
@@ -297,8 +317,7 @@ async def test_cycle_end_still_labels_when_the_member_earned_it(
     manager._last_member_confidence = 0.605
     manager._matched_profile_duration = 4080
     manager.profile_store.async_match_profile = AsyncMock(
-        return_value=MagicMock(best_profile=None, confidence=0.0,
-                               label_confidence=0.0, ranking=[])
+        return_value=_complete("Wolle 30", 0.608, 0.605)
     )
 
     cycle_data = _cycle_data()
@@ -321,8 +340,7 @@ async def test_cycle_end_is_unchanged_for_a_non_group_match(
     manager._last_member_confidence = None
     manager._matched_profile_duration = 4080
     manager.profile_store.async_match_profile = AsyncMock(
-        return_value=MagicMock(best_profile=None, confidence=0.0,
-                               label_confidence=0.0, ranking=[])
+        return_value=_complete("Wolle 30", 0.62, None)
     )
 
     cycle_data = _cycle_data()
@@ -334,22 +352,16 @@ async def test_cycle_end_is_unchanged_for_a_non_group_match(
 
 
 @pytest.mark.asyncio
-async def test_post_cycle_auto_label_gates_on_the_members_own_score(
+async def test_a_never_committed_cycle_is_named_but_not_labelled_on_a_siblings_score(
     hass: Any, manager: Any
 ) -> None:
-    """The 0.9 auto-label path labels without ever asking the user, so it is the
-    highest-stakes reader of the number."""
+    """A cycle that never committed live adopts the complete match for DISPLAY, but
+    the label still needs the member's own score to clear the learning floor."""
     manager._current_program = "detecting..."
     manager._last_match_confidence = 0.0
     manager._last_member_confidence = None
-    manager._run_final_match_from_cycle_data = AsyncMock()
     manager.profile_store.async_match_profile = AsyncMock(
-        return_value=MagicMock(
-            best_profile="Wolle 30",
-            confidence=0.93,        # the group's (sibling's) score
-            label_confidence=0.88,  # what Wolle itself earned
-            ranking=[],
-        )
+        return_value=_complete("Wolle 30", 0.93, 0.58)
     )
 
     cycle_data = _cycle_data()
@@ -357,7 +369,8 @@ async def test_post_cycle_auto_label_gates_on_the_members_own_score(
     await hass.async_block_till_done()
 
     assert not cycle_data.get("profile_name")
-    assert cycle_data.get("label_source") != "auto_label_post"
+    assert not cycle_data.get("label_source")
+    assert cycle_data["match_confidence"] == pytest.approx(0.58)
 
 
 # ── the learning handoff reads the same number ──────────────────────────────
@@ -382,8 +395,7 @@ async def test_learning_handoff_carries_the_members_own_score(
     manager._last_member_confidence = 0.88
     manager._matched_profile_duration = 4080
     manager.profile_store.async_match_profile = AsyncMock(
-        return_value=MagicMock(best_profile=None, confidence=0.0,
-                               label_confidence=0.0, ranking=[])
+        return_value=_complete("Wolle 30", 0.93, 0.88)
     )
     manager.learning_manager.process_cycle_end = MagicMock()
 
@@ -401,8 +413,10 @@ async def test_learning_does_not_auto_label_a_member_on_its_siblings_score(
     hass: Any, manager: Any, mock_entry: Any
 ) -> None:
     """End to end through the real routing: the group cleared the 0.90 auto-label
-    bar, the selected member did not. The member must be queued for confirmation,
-    not recorded as fact."""
+    bar, the selected member did not. The sibling's score must never auto-label the
+    member. Since register item 433 the cycle-end gate's own label (at the member's
+    0.88, clear margin) is not queued for confirmation either: group wins that pass
+    that gate are 14/15 right leave-one-out, the same as any other label."""
     mock_entry.options = {
         "power_sensor": "sensor.test_power",
         "auto_label_confidence": 0.90,
@@ -413,22 +427,21 @@ async def test_learning_does_not_auto_label_a_member_on_its_siblings_score(
     manager._last_member_confidence = 0.88  # what Wolle itself earned
     manager._matched_profile_duration = 4080
     manager.profile_store.async_match_profile = AsyncMock(
-        return_value=MagicMock(best_profile=None, confidence=0.0,
-                               label_confidence=0.0, ranking=[])
+        return_value=_complete("Wolle 30", 0.93, 0.88)
     )
     manager.profile_store.get_past_cycles = MagicMock(return_value=[])
     manager.learning_manager._async_run_simulation = AsyncMock()
     manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=True)
     manager.learning_manager.request_cycle_verification = MagicMock()
 
-    await manager._async_process_cycle_end(_cycle_data())
+    cyc = _cycle_data()
+    await manager._async_process_cycle_end(cyc)
     await hass.async_block_till_done()
 
     manager.learning_manager.auto_label_high_confidence.assert_not_called()
-    manager.learning_manager.request_cycle_verification.assert_called_once()
-    assert manager.learning_manager.request_cycle_verification.call_args.kwargs[
-        "confidence"
-    ] == pytest.approx(0.88)
+    manager.learning_manager.request_cycle_verification.assert_not_called()
+    assert cyc.get("profile_name") == "Wolle 30"
+    assert cyc.get("label_source") == "auto_match"
 
 
 @pytest.mark.asyncio
@@ -447,8 +460,7 @@ async def test_learning_handoff_is_unchanged_for_a_non_group_match(
     manager._last_member_confidence = None
     manager._matched_profile_duration = 4080
     manager.profile_store.async_match_profile = AsyncMock(
-        return_value=MagicMock(best_profile=None, confidence=0.0,
-                               label_confidence=0.0, ranking=[])
+        return_value=_complete("Wolle 30", 0.93, None)
     )
     manager.profile_store.get_past_cycles = MagicMock(return_value=[])
     manager.learning_manager._async_run_simulation = AsyncMock()

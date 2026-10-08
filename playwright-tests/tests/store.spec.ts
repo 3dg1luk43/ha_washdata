@@ -864,3 +864,93 @@ test('a failing brand search backs off instead of retrying in a loop', async ({ 
   await page.waitForTimeout(1500);   // 6x the 250 ms debounce
   expect((await brandCalls(page)).length).toBeLessThanOrEqual(2);
 });
+
+// Audit STORE-19: store documents are untyped (the rules let a numeric field hold a
+// string), so a legacy or hostile document can put markup where the panel expects a
+// number. Each of these values used to reach innerHTML as-is (`_fmtNum` echoed a
+// non-number, and `downloads` / `favoriteCount` / the rating fallback were
+// interpolated raw). None of them may create an element.
+const XSS = '<img src=x onerror="window.__wdxss=1" data-xss="1">';
+
+async function expectNoInjectedMarkup(page: import('@playwright/test').Page) {
+  await expect(page.locator('[data-xss]')).toHaveCount(0);
+  expect(await page.evaluate(() => (window as any).__wdxss)).toBeUndefined();
+}
+
+test('store browse rows never render markup from an untyped store document', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers({
+    'ha_washdata/store_search_devices': {
+      items: [{
+        id: 'dev-x', brand: `Bosch${XSS}`, model: `WAT${XSS}`, applianceType: XSS,
+        profileCount: XSS, favoriteCount: XSS, status: 'pending', confirmCount: XSS,
+      }],
+    },
+    'ha_washdata/store_get_profiles': { items: [{ id: 'sp-x', program: `Cotton${XSS}`, cycleCount: XSS, status: 'pending' }] },
+  }));
+  await clickTab(page, 'store');
+  const row = page.locator('[data-action="store-open-device"]').first();
+  await expect(row).toBeVisible({ timeout: 8_000 });
+  await expectNoInjectedMarkup(page);
+  await expect(row.locator('.wd-store-fav')).toHaveText('★ 0');
+  await row.click();
+  await expect(page.locator('[data-action="store-open-profile"]').first()).toBeVisible({ timeout: 8_000 });
+  await expectNoInjectedMarkup(page);
+});
+
+test('a reference-cycle card never renders markup from untyped store numbers', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers({
+    'ha_washdata/store_get_cycles': {
+      items: [{
+        id: 'sc-x',
+        stats: { duration: XSS, energy_wh: XSS, peak_w: XSS },
+        trace: { points: [[0, XSS], [XSS, 900], [600, 1200], [1200, 3]] },
+        uploaderName: XSS,
+        downloads: XSS,
+        status: 'pending',
+        confirmCount: XSS,
+        rating: { avg: 4.5, count: XSS },
+      }, {
+        // A rating whose average itself is markup, next to a numeric count.
+        id: 'sc-y',
+        stats: { duration: 3600, energy_wh: 850, peak_w: `2100${XSS}` },
+        downloads: 3,
+        rating: { avg: XSS, count: 2 },
+      }],
+    },
+  }));
+  await clickTab(page, 'store');
+  await page.locator('[data-action="store-open-device"]').first().click();
+  await page.locator('[data-action="store-open-profile"]').first().click();
+  const stats = page.locator('.wd-store-cycle-stats');
+  await expect(stats).toHaveCount(2, { timeout: 8_000 });
+  await expectNoInjectedMarkup(page);
+  // A non-number renders as a placeholder, never as the document's own text. (The
+  // first card's uploader is a string, so it is shown escaped, as text.)
+  await expect(stats.nth(1)).not.toContainText('onerror');
+  await expect(stats.nth(1)).toContainText('1h 0m');
+});
+
+test('an unreachable store says so instead of "nothing shared" (audit STORE-09)', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, storeHandlers({ 'ha_washdata/store_get_profiles': { items: [], error: 'store_unreachable' } }));
+  await clickTab(page, 'store');
+  await page.locator('[data-action="store-open-device"]').first().click();
+  await expect(page.locator('.wd-error-state')).toContainText(/reach/i, { timeout: 8_000 });
+  await expect(page.getByText('No shared programs')).toHaveCount(0);
+});
+
+test('"Show my name on what I share" is off unless chosen (audit STORE-14)', async ({ page }) => {
+  await page.goto('/');
+  // An older backend that does not send the key yet must not render it as on.
+  await bootPanel(page, {
+    ...storeHandlers(),
+    'ha_washdata/get_constants': { ...STORE_CONSTANTS, store_prefs: { show_contributor: true } },
+  });
+  await page.locator('#wd-settings-btn').click();
+  await page.locator('[data-gtab="online"]').click();
+  const input = page.locator('input[data-action="store-toggle-pref"][data-pref="share_name"]');
+  await expect(input).toBeAttached({ timeout: 8_000 });
+  await expect(input).not.toBeChecked();
+});

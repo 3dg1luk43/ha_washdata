@@ -60,6 +60,14 @@ BASE = datetime(2026, 5, 1, 8, 0, tzinfo=timezone.utc)
 # ─── Manager: the cycle-end label ─────────────────────────────────────────────
 
 
+def _complete(profile: str | None, conf: float, margin: float | None = 0.40) -> Any:
+    """The complete-cycle match the cycle-end verdict reads (audit MATCH-DECIDE-02)."""
+    return MagicMock(
+        best_profile=profile, confidence=conf, label_confidence=conf,
+        member_confidence=None, ambiguity_margin=margin, is_ambiguous=False, ranking=[],
+    )
+
+
 @pytest.fixture
 def mock_entry() -> Any:
     entry = MagicMock()
@@ -79,12 +87,15 @@ def manager(hass: HomeAssistant, mock_entry: Any) -> WashDataManager:
         mgr = WashDataManager(hass, mock_entry)
         mgr.profile_store.get_suggestions = MagicMock(return_value={})
         mgr.profile_store.get_profiles = MagicMock(
-            return_value={"Sportswear 30C": {"avg_duration": 4080}}
+            return_value={"Sportswear 30C": {"avg_duration": 4080},
+                          "Delicate 30C": {"avg_duration": 3000}}
+        )
+        mgr.profile_store.async_match_profile = AsyncMock(
+            return_value=_complete(None, 0.0, None)
         )
         mgr.profile_store.async_add_cycle = AsyncMock()
         mgr.profile_store.async_clear_active_cycle = AsyncMock()
         mgr.profile_store.async_rebuild_envelope = AsyncMock()
-        mgr.profile_store.confirm_match_ranking_snapshots = MagicMock()
         mgr._run_post_cycle_processing = AsyncMock()
         mgr._learning_confidence = 0.6
         mgr._auto_label_confidence = 0.9
@@ -97,8 +108,10 @@ def _cycle_data() -> dict[str, Any]:
         "start_time": "2026-05-01T08:00:00+00:00",
         "duration": 13680.0,
         "status": "completed",
-        "power_data": [[0.0, 50.0], [60.0, 200.0]],
+        # >= 10 readings, so the complete-cycle match runs (audit MATCH-DECIDE-02).
+        "power_data": [[i * 60.0, 200.0] for i in range(12)],
     }
+
 
 
 @pytest.mark.asyncio
@@ -114,7 +127,7 @@ async def test_a_weak_live_match_is_not_recorded_as_the_cycles_programme(
     manager._last_match_confidence = 0.52
     manager._matched_profile_duration = 4080
     manager.profile_store.async_match_profile = AsyncMock(
-        return_value=MagicMock(best_profile=None, confidence=0.0, ranking=[])
+        return_value=_complete("Sportswear 30C", 0.52)
     )
 
     cycle_data = _cycle_data()
@@ -181,6 +194,9 @@ async def test_a_confident_live_match_still_labels_the_cycle(
     manager._current_program = "Sportswear 30C"
     manager._last_match_confidence = 0.72
     manager._matched_profile_duration = 4080
+    manager.profile_store.async_match_profile = AsyncMock(
+        return_value=_complete("Sportswear 30C", 0.72)
+    )
 
     cycle_data = _cycle_data()
     await manager._async_process_cycle_end(cycle_data)
@@ -214,11 +230,11 @@ async def test_a_hand_picked_programme_is_recorded_whatever_the_score(
 
 
 @pytest.mark.asyncio
-async def test_a_weak_match_falls_through_to_the_post_cycle_auto_label(
+async def test_the_complete_cycle_winner_is_labelled_over_the_live_program(
     hass: HomeAssistant, manager: WashDataManager
 ) -> None:
-    """The 0.9-gated post-cycle path re-matches on the COMPLETE trace, so it is the
-    better judge - but a weak live label used to pre-empt it entirely."""
+    """The label comes from the match on the COMPLETE trace (audit MATCH-DECIDE-02);
+    the live tick's program, a prefix match, only names what was shown."""
     manager._current_program = "Sportswear 30C"
     manager._last_match_confidence = 0.52
     manager._matched_profile_duration = 4080
@@ -240,12 +256,12 @@ async def test_a_weak_match_falls_through_to_the_post_cycle_auto_label(
     await hass.async_block_till_done()
 
     assert cycle_data["profile_name"] == "Delicate 30C"
-    assert cycle_data["label_source"] == "auto_label_post"
+    assert cycle_data["label_source"] == "auto_match"
 
 
 
 @pytest.mark.asyncio
-async def test_the_post_cycle_auto_label_also_needs_a_decisive_margin(
+async def test_the_cycle_end_label_also_needs_a_decisive_margin(
     hass: HomeAssistant, manager: WashDataManager
 ) -> None:
     """Found in the PR #448 review: item 310's gate reached only one of two paths.
@@ -276,11 +292,11 @@ async def test_the_post_cycle_auto_label_also_needs_a_decisive_margin(
     assert "profile_name" not in cycle_data or not cycle_data["profile_name"], (
         "a crowded field must leave the cycle unlabelled for the user to confirm"
     )
-    assert cycle_data.get("label_source") != "auto_label_post"
+    assert not cycle_data.get("label_source")
 
 
 @pytest.mark.asyncio
-async def test_a_single_candidate_still_gets_its_post_cycle_label(
+async def test_a_single_candidate_still_gets_its_label(
     hass: HomeAssistant, manager: WashDataManager
 ) -> None:
     """An undefined margin (one candidate) must not block labelling - item 310."""
@@ -302,7 +318,7 @@ async def test_a_single_candidate_still_gets_its_post_cycle_label(
     await hass.async_block_till_done()
 
     assert cycle_data["profile_name"] == "Delicate 30C"
-    assert cycle_data["label_source"] == "auto_label_post"
+    assert cycle_data["label_source"] == "auto_match"
 
 
 @pytest.mark.asyncio
@@ -329,7 +345,7 @@ async def test_a_margin_exactly_at_the_bar_is_labelled(
     await manager._async_process_cycle_end(cycle_data)
     await hass.async_block_till_done()
 
-    assert cycle_data["label_source"] == "auto_label_post"
+    assert cycle_data["label_source"] == "auto_match"
 
 
 # ─── Profile store: sample repair and the unmatchable state ───────────────────

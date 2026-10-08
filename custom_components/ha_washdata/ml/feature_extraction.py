@@ -24,11 +24,12 @@ Three feature extractors are implemented:
 
 - **Cycle-end detector** (``END_FEATURE_COLUMNS``): self-contained from a live
   power series + profile expectation; call ``latest_end_event_features``.
-- **Live-match commit confidence** (``LIVE_MATCH_FEATURE_COLUMNS``): requires the
-  match ranking from ``ProfileStore`` plus the observed prefix; call
-  ``live_match_features``.
+- **Remaining-time / energy regressors** (``PROGRESS_FEATURE_COLUMNS``): a
+  running-cycle prefix + profile expectation; call ``progress_features``.
 - **Hybrid cycle quality** (``QUALITY_FEATURE_COLUMNS``): requires the complete
   cycle power trace plus profile/match context; call ``quality_features``.
+
+(The live-match commit features went with the early match commit in 0.5.8.)
 
 All inputs are plain Python/NumPy (offset-seconds, watts), so this module has no
 Home Assistant dependency and is unit-tested directly. It is only invoked when
@@ -108,38 +109,6 @@ def profile_expectation(cycles_points: Sequence[Sequence[Point]]) -> dict[str, f
     }
 
 
-def profile_expectations(cycles: list[dict]) -> dict[str, dict[str, float]]:
-    """Median duration/energy/peak per profile from stored cycle dicts.
-
-    The dict-based counterpart of :func:`profile_expectation` (which works from
-    decompressed traces): reads the ``duration``/``energy_wh``/``max_power``
-    scalar fields already stored on each cycle. Shared by on-device training
-    (``training_task``) and the ML suggestion engine so the "profile expectation"
-    definition lives in one place. Profiles with no usable duration are skipped;
-    missing energy/peak default to 500.
-    """
-    stats: dict[str, dict[str, list[float]]] = {}
-    for c in cycles:
-        name = c.get("profile_name")
-        if not isinstance(name, str) or not name:
-            continue
-        s = stats.setdefault(name, {"d": [], "e": [], "p": []})
-        for key, field in (("d", "duration"), ("e", "energy_wh"), ("p", "max_power")):
-            v = c.get(field)
-            if isinstance(v, (int, float)) and not isinstance(v, bool):
-                s[key].append(float(v))
-    out: dict[str, dict[str, float]] = {}
-    for name, s in stats.items():
-        if not s["d"]:
-            continue
-        out[name] = {
-            "duration": float(np.median(s["d"])),
-            "energy": float(np.median(s["e"])) if s["e"] else 500.0,
-            "peak": float(np.median(s["p"])) if s["p"] else 500.0,
-        }
-    return out
-
-
 def latest_end_event_features(
     points: Sequence[Point],
     expectation: dict[str, float],
@@ -196,82 +165,10 @@ def latest_end_event_features(
 
 
 # ---------------------------------------------------------------------------
-# Live-match commit confidence
-# ---------------------------------------------------------------------------
-
-# Mirrors ml_washdata/wash_ml/live_matching.py COMMIT_FEATURE_COLUMNS.
-# The test suite asserts this equals the embedded model's FEATURE_COLUMNS.
-LIVE_MATCH_FEATURE_COLUMNS = [
-    "match_progress_top1",
-    "top1_distance",
-    "margin",
-    "distance_ratio",
-    "candidate_count_log",
-    "prefix_active_fraction",
-    "duration_ratio_top1",
-    "elapsed_log",
-]
-
-
-def live_match_features(
-    points: Sequence[Point],
-    elapsed_s: float,
-    top1_distance: float,
-    top2_distance: float | None,
-    top1_median_duration_s: float,
-    candidate_count: int,
-) -> dict[str, float]:
-    """Features for the live-match commit-confidence model.
-
-    Args:
-        points: Observed power readings (offset_s, watts) for the current prefix.
-        elapsed_s: Seconds elapsed since cycle start.
-        top1_distance: Blended RMSE+DTW shape distance to the top-1 candidate
-            prefix (as returned by the profile matcher).
-        top2_distance: Distance to the top-2 candidate; pass ``None`` or ``0.0``
-            when only one candidate is available (margin defaults to 1.0).
-        top1_median_duration_s: Expected (median) duration of the top-1 candidate
-            profile in seconds.
-        candidate_count: Number of candidate profiles on this device.
-
-    Returns a dict with exactly ``LIVE_MATCH_FEATURE_COLUMNS`` keys.
-    """
-    elapsed = max(0.0, float(elapsed_s))
-    top1 = max(0.0, float(top1_distance))
-    top2_raw = float(top2_distance) if top2_distance is not None else 0.0
-    top2 = top2_raw if top2_raw > 1e-9 else top1 + 1.0
-    margin = max(0.0, top2 - top1)
-    dur = float(top1_median_duration_s)
-    progress = (elapsed / dur) if dur > 0 else 1.0
-
-    # prefix_active_fraction: fraction of prefix readings clearly above idle.
-    # Lab uses > 0.05 on a peak-normalised trace; equivalent here is > 5% of
-    # peak, with a 1 W floor so a cold trace never divides by near-zero.
-    if points:
-        powers = np.asarray([max(0.0, float(p)) for _, p in points], dtype=float)
-        peak = float(np.max(powers)) if powers.size else 0.0
-        active_thr = max(1.0, 0.05 * peak)
-        prefix_active_fraction = float(np.mean(powers > active_thr)) if powers.size else 0.0
-    else:
-        prefix_active_fraction = 0.0
-
-    return {
-        "match_progress_top1": float(min(progress, 2.0)),
-        "top1_distance": float(top1),
-        "margin": float(margin),
-        "distance_ratio": float(top1 / top2) if top2 > 1e-9 else 1.0,
-        "candidate_count_log": float(math.log1p(max(0, int(candidate_count)))),
-        "prefix_active_fraction": float(prefix_active_fraction),
-        "duration_ratio_top1": float(min(progress, 2.0)),
-        "elapsed_log": float(math.log1p(elapsed)),
-    }
-
-
-# ---------------------------------------------------------------------------
 # Remaining-time / progress regressor
 # ---------------------------------------------------------------------------
 
-# Feature columns for the on-device remaining-time regressor. Unlike the three
+# Feature columns for the on-device remaining-time regressor. Unlike the
 # classifier heads this model is a ``standardized_linear`` regressor whose target
 # is the cycle completion fraction (elapsed / total_actual). There is no shipped
 # baseline: the model exists only once on-device training promotes one over the

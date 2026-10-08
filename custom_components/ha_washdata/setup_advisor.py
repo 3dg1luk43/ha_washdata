@@ -29,30 +29,57 @@ def compute_setup_phase(
     ref_profile_names: set[str],
     coverage_gap: dict | None,
     suggestions: list[dict],
-    profile_groups: list[dict],
     skipped_steps: dict[str, str | None],
     now: datetime,
+    backfill_cycles: list[dict] | None = None,
 ) -> SetupPhaseResult:
     """Compute the current adoption phase for a device.
+
+    Every cycle argument is the **evidence** view (``iter_evidence_cycles``), not the
+    stored one: each check here asks whether a profile can be matched, and a profile
+    whose only cycles the user excluded cannot. That keeps phase0 equal to
+    ``ProfileStore.has_real_profiles`` being False, which is when the manager skips
+    matching and leaves this card to explain why (register item 129d).
 
     Args:
         device_type: HA device type string (washing_machine, dishwasher, ...).
         profile_names: All profile names stored for this device.
-        past_cycles: All past cycles (each may have profile_name and meta.source).
-        ref_profile_names: Profile names that have reference cycles (store-adopted).
+        past_cycles: Live cycles that count as evidence (each may have profile_name
+            and meta.source).
+        ref_profile_names: Profile names backed by evidence reference cycles
+            (store-adopted).
         coverage_gap: Result of profile_store.suggest_coverage_gaps(), or None.
         suggestions: Actionable suggestions from SuggestionEngine (empty list = none).
-        profile_groups: Profile groups list from store (empty list = none pending).
         skipped_steps: Dict of step_key -> "never" | ISO timestamp | None.
         now: Current aware datetime for snooze comparisons.
+        backfill_cycles: Evidence cycles recovered from this machine's raw power
+            history (#344). They are its own history, so a profile they back is a
+            self-built profile, never a community one; they are never recordings.
     """
-    real = _real_profile_names(profile_names, past_cycles)
+    backfill = list(backfill_cycles or [])
+    own_cycles = [*past_cycles, *backfill]
+    real = _real_profile_names(profile_names, own_cycles)
     has_real = bool(real)
+    # Only the recorder writes meta.source == "recorder", and it writes past_cycles.
     has_recorded = _has_recorded_cycles(past_cycles, real)
     has_store = bool(ref_profile_names)
-    has_self_cycles = bool(real)  # any cycle assigned to a real profile
+    has_self_cycles = bool(real)  # any own cycle assigned to a real profile
 
     # ── Phase 0 ──────────────────────────────────────────────────────────────
+    if not has_real and not has_store and any(not c.get("profile_name") for c in backfill):
+        # Imported history is waiting to be named: labelling it is the next step,
+        # recording is the alternative. "Start recording" first told a user who had
+        # just imported weeks of cycles that the device had nothing (item 129d).
+        return SetupPhaseResult(
+            phase="phase0",
+            message_key="setup.phase0.generic",
+            cta_label_key="setup.cta.label_detected_cycle",
+            cta_action="open_cycles_unlabeled",
+            secondary_label_key="setup.cta.start_recording",
+            secondary_action="open_recorder",
+            skippable=False,
+            dismissible=False,
+        )
     if not has_real and not has_store:
         msg_key = {
             "washing_machine": "setup.phase0.washer",
@@ -114,7 +141,7 @@ def compute_setup_phase(
         )
 
     # ── Phase 3 — tuning items ────────────────────────────────────────────────
-    item = _phase3_pending_item(suggestions, profile_groups, skipped_steps, now)
+    item = _phase3_pending_item(suggestions, skipped_steps, now)
     if item:
         return item
 
@@ -131,7 +158,7 @@ def compute_setup_phase(
     # ≥5 cycles assigned to real profiles.  At that point the "record your first
     # cycle" nudge is stale and misleading regardless of whether the user ever
     # clicked Skip.
-    _established = len(real) >= 2 or _real_cycle_count(past_cycles, real) >= 5
+    _established = len(real) >= 2 or _real_cycle_count(own_cycles, real) >= 5
     _coverage_gap_actionable = bool(coverage_gap and coverage_gap.get("suggest_create"))
     _phase1_suppressed = _is_step_suppressed("setup_skip_phase1", skipped_steps, now)
     if has_real and not _established and not _coverage_gap_actionable and not _phase1_suppressed:
@@ -209,7 +236,7 @@ def _is_step_suppressed(step_key: str, skipped_steps: dict, now: datetime) -> bo
         if until.tzinfo is None:
             until = until.replace(tzinfo=timezone.utc)
         return now < until
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, OverflowError):
         return False
 
 
@@ -221,7 +248,6 @@ def _phase2_active(coverage_gap: dict | None, skipped_steps: dict, now: datetime
 
 def _phase3_pending_item(
     suggestions: list[dict],
-    profile_groups: list[dict],
     skipped_steps: dict,
     now: datetime,
 ) -> SetupPhaseResult | None:
@@ -234,15 +260,5 @@ def _phase3_pending_item(
             skippable=True,
             dismissible=True,
             step_key="setup_skip_phase3_suggestions",
-        )
-    if profile_groups and not _is_step_suppressed("setup_skip_phase3_groups", skipped_steps, now):
-        return SetupPhaseResult(
-            phase="phase3",
-            message_key="setup.phase3.groups",
-            cta_label_key="setup.cta.organise_profiles",
-            cta_action="open_profiles_groups",
-            skippable=True,
-            dismissible=True,
-            step_key="setup_skip_phase3_groups",
         )
     return None

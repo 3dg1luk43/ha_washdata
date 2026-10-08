@@ -24,13 +24,15 @@ brand/model stay per-device. Nothing here runs unless online features are enable
 from __future__ import annotations
 
 import logging
+import math
+from collections.abc import Callable
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 
 from . import store_account
 from .const import QC_EDITED, QC_MANUAL, QC_RECORDING
-from .store_client import device_id, get_client, profile_id, trace_hash
+from .store_client import STORE_UNREACHABLE, device_id, get_client, profile_id, trace_hash
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -122,6 +124,34 @@ def _downsample(points: list[list[float]], max_n: int = 10000) -> list[list[floa
     return sampled
 
 
+# Points kept per browse-row trace: the panel's sparkline is 120 px wide.
+_BROWSE_TRACE_POINTS = 200
+
+
+def _browse_rows(cycles: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Browse copies of store cycle rows: no ``importable``, trace downsampled to
+    ``_BROWSE_TRACE_POINTS`` (see ``StoreBridge.get_cycles``). Executor-safe; never
+    raises (a non-numeric point is dropped, store data is untrusted)."""
+    out: list[dict[str, Any]] = []
+    for cyc in cycles:
+        if not isinstance(cyc, dict):
+            continue
+        row = {k: v for k, v in cyc.items() if k != "importable"}
+        trace = cyc.get("trace")
+        if isinstance(trace, dict) and isinstance(trace.get("points"), list):
+            pts: list[list[float]] = []
+            for p in trace["points"]:
+                try:
+                    o, w = float(p[0]), float(p[1])
+                except (TypeError, ValueError, IndexError, KeyError, OverflowError):
+                    continue
+                if math.isfinite(o) and math.isfinite(w):
+                    pts.append([o, w])
+            row["trace"] = {**trace, "points": _downsample(pts, _BROWSE_TRACE_POINTS)}
+        out.append(row)
+    return out
+
+
 def _cycle_upload_stats(cyc: dict[str, Any], pts: list[list[float]]) -> dict[str, Any]:
     """Build the community-upload stats for a cycle from its stored metadata + trace.
 
@@ -140,7 +170,7 @@ def _cycle_upload_stats(cyc: dict[str, Any], pts: list[list[float]]) -> dict[str
     }
     try:
         energy = float(cyc.get("energy_wh"))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         energy = 0.0
     if energy > 0:
         stats["energy_wh"] = energy
@@ -184,16 +214,35 @@ class StoreBridge:
         return {"enabled": store_account.online_enabled(self._hass), **store_account.get_identity(self._hass)}
 
     async def connect(self, refresh_token: str, uid: str, name: str | None) -> dict[str, Any]:
-        # Validate the refresh token by exchanging it once before persisting.
+        """Validate the refresh token by exchanging it once, then persist the account.
+
+        The stored uid is the one the token endpoint returned for that exchange, never
+        the caller's ``uid`` (audit STORE-18): a mismatch made every later write 403
+        under the store rules' ``uid == request.auth.uid`` checks. ``uid`` is kept in
+        the signature for the WS contract; it is only compared, for a log line.
+        """
         # ensure_id_token writes the client-wide _last_error slot on failure, so it
         # takes the same lock the upload paths use: otherwise a sign-in failing here
         # could overwrite the reason a concurrent share is about to report.
         async with self._client.write_lock:
             token = await self._client.ensure_id_token(refresh_token)
-        if not token:
+            verified = self._client.verified_uid(refresh_token) if token else None
+        if not token or not verified:
             return {"error": "token_invalid"}
-        await store_account.async_set_account(self._hass, {"refresh_token": refresh_token, "uid": uid, "name": name})
+        if uid and uid != verified:
+            _LOGGER.warning("Store connect: ignoring a uid that does not match the token's account")
+        await store_account.async_set_account(
+            self._hass, {"refresh_token": refresh_token, "uid": verified, "name": name},
+        )
         return store_account.get_identity(self._hass)
+
+    def _uploader_name(self, acct: dict[str, Any]) -> str | None:
+        """The name published on a shared cycle: the account's display name only when
+        the user opted in (``share_name``), else None (audit STORE-14)."""
+        if not store_account.get_pref(self._hass, "share_name"):
+            return None
+        name = acct.get("name")
+        return name if isinstance(name, str) and name.strip() else None
 
     async def disconnect(self) -> dict[str, Any]:
         await store_account.async_clear_account(self._hass)
@@ -228,10 +277,13 @@ class StoreBridge:
         self._client.refresh_catalog()
         return {"ok": True}
 
-    async def get_profiles(self, device_id: str, *, include_pending: bool = True) -> list[dict[str, Any]]:
+    async def get_profiles(
+        self, device_id: str, *, include_pending: bool = True,
+    ) -> list[dict[str, Any]] | None:
         """Shared programs for a catalog appliance. Pending-inclusive, like the device
         list this is opened from and like get_cycles below; passed explicitly so the
-        browse cannot silently drift back to approved-only (which showed nothing)."""
+        browse cannot silently drift back to approved-only (which showed nothing).
+        ``None`` = the store could not be reached, not "no programs" (audit STORE-09)."""
         return await self._client.get_profiles(device_id, include_pending=include_pending)
 
     async def device_profiles(self, brand: str, model: str, appliance_type: str) -> dict[str, Any]:
@@ -239,11 +291,20 @@ class StoreBridge:
         dialog's profile picker). Maps the HA device type to the catalog type first."""
         return await self._client.device_profiles(brand, model, store_appliance_type(appliance_type))
 
-    async def get_cycles(self, profile_id: str) -> list[dict[str, Any]]:
-        return await self._client.get_cycles(profile_id)
+    async def get_cycles(self, profile_id: str) -> list[dict[str, Any]] | None:
+        """A program's shared cycles for the browse list; ``None`` = store unreachable.
 
-    async def get_device_quality(self, device_id: str) -> dict[str, Any]:
-        return await self._client.get_device_quality(device_id)
+        Slimmed for the wire (audit STORE-20): the panel draws each trace as a 120 px
+        sparkline, yet every row carried the full trace twice (``trace.points`` and
+        ``importable``, up to 7k points each, 50 rows). Import re-fetches the cycle by
+        id, so the browse rows drop ``importable`` and carry a peak-preserving
+        downsample. The download path reads the client directly and keeps full traces.
+        """
+        cycles = await self._client.get_cycles(profile_id)
+        if not cycles:
+            return cycles
+        return await self._hass.async_add_executor_job(_browse_rows, cycles)
+
 
     # ── community actions (authed writes) ────────────────────────────────────────
 
@@ -280,11 +341,18 @@ class StoreBridge:
         profile = raw_profile.strip() if isinstance(raw_profile, str) else ""
         if not profile:
             return {"error": "profile_name_required"}
-        local_id = await self._ps.add_reference_cycle(profile, pts, {
+        meta = {
             "store_cycle_id": cyc.get("id"),
             "store_uploaded_at": cyc.get("createdAt"),
             "sampling_interval": (cyc.get("trace") or {}).get("sampleIntervalSec"),
-        })
+            "community": True,
+        }
+        # Too short / gappy / implausible, or a copy of a trace already stored
+        # under any name (audit STORE-03/05): refused before it shapes a profile.
+        verdict = self._ps.reference_import_verdict(pts, meta)
+        if verdict != "ok":
+            return {"error": "invalid_trace" if verdict == "invalid" else verdict}
+        local_id = await self._ps.add_reference_cycle(profile, pts, meta)
         if not local_id:  # trace failed validation in add_reference_cycle
             return {"error": "invalid_trace"}
         # Credit the download on the source store cycle + record one community-wide
@@ -326,7 +394,7 @@ class StoreBridge:
         # write and the read that interprets it have to be one critical section.
         async with self._client.write_lock:
             new_id = await self._client.upload_reference_cycle(
-                acct["refresh_token"], acct.get("uid", ""), acct.get("name"),
+                acct["refresh_token"], acct.get("uid", ""), self._uploader_name(acct),
                 meta, downsampled, stats, derive_qc(cyc),
             )
             if not new_id:
@@ -400,7 +468,7 @@ class StoreBridge:
             device_meta["settings"] = dict(settings)
         async with self._client.write_lock:  # see share_cycle
             res = await self._client.upload_device_bundle(
-                acct["refresh_token"], acct.get("uid", ""), acct.get("name"), device_meta, bundle_items,
+                acct["refresh_token"], acct.get("uid", ""), self._uploader_name(acct), device_meta, bundle_items,
             )
             # Return the raw bundle result ({ok, cycle_ids, errors}) so the caller can
             # tell a partial upload (some cycle_ids present) from a total failure.
@@ -409,7 +477,14 @@ class StoreBridge:
                 res = {**res, "detail": self._client.last_error()}
         return res
 
-    async def download_device(self, device_id_: str, device_type: str = "") -> dict[str, Any]:
+    async def download_device(
+        self,
+        device_id_: str,
+        device_type: str = "",
+        *,
+        progress: Callable[[int, int], None] | None = None,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> dict[str, Any]:
         """Adopt a whole-device bundle: for each downloaded profile, import its
         reference cycles into ``reference_cycles`` (merge/upsert; real past_cycles are
         never touched) and, when the profile carries a phase map, replace the local
@@ -421,38 +496,72 @@ class StoreBridge:
         Idempotent: a store cycle already imported locally (``meta.source ==
         "store:<id>"``) is skipped, so re-downloading the same device does not
         accumulate duplicate reference cycles.
+
+        A store that could not be read is reported as ``{"error":
+        "store_unreachable"}``, never as an empty adopt (audit STORE-09: offline used
+        to read "Nothing new - already on your device"). When only some programs'
+        cycles could not be fetched, the result carries ``partial`` +
+        ``failed_profiles``; if nothing new was imported at all it is that error.
         """
         bundle = await self._client.get_device_bundle(device_id_)
+        if bundle.get("error"):
+            return {"error": str(bundle["error"])}
         already = {
             str((c.get("meta") or {}).get("source") or "")
             for c in self._ps.get_reference_cycles()
         }
+        # Hashed once for the whole bundle; each import adds its own, so two
+        # programs carrying the same recording keep only the first (STORE-05).
+        known_hashes = self._ps.stored_trace_hashes()
         profiles_adopted = 0
         cycles_imported = 0
+        cycles_skipped = 0
         phases_applied = 0
         imported_store_ids: list[str] = []
-        for prof in bundle.get("profiles", []) or []:
+        # Batched (audit STORE-10): every cycle used to rebuild its envelope and
+        # rewrite the whole store - 40 saves for a 40-cycle bundle, 7 s vs 1.5 s.
+        # Now one rebuild per touched program and one save at the end.
+        touched: list[str] = []
+        profiles_list = [p for p in (bundle.get("profiles", []) or []) if isinstance(p, dict)]
+        failed_profiles = sum(1 for p in profiles_list if p.get("cycles_unavailable"))
+        total = sum(len(p.get("cycles") or []) for p in profiles_list)
+        seen = 0
+        cancelled = False
+        for prof in profiles_list:
+            if cancelled:
+                break
             program = str(prof.get("program") or prof.get("program_lc") or "").strip()
             if not program:
                 continue
             adopted_any = False
             for cyc in prof.get("cycles", []) or []:
+                if should_cancel is not None and should_cancel():
+                    cancelled = True
+                    break
+                if progress is not None:
+                    progress(seen, total)
+                seen += 1
                 pts = cyc.get("importable")
                 if not pts:
                     continue
                 store_cid = cyc.get("id")
                 if store_cid and f"store:{store_cid}" in already:
                     continue  # already imported on a previous download
-                local_id = await self._ps.add_reference_cycle(program, pts, {
+                local_id = self._ps._add_reference_cycle_nosave(program, pts, {  # noqa: SLF001
                     "store_cycle_id": store_cid,
                     "store_uploaded_at": cyc.get("createdAt"),
                     "sampling_interval": (cyc.get("trace") or {}).get("sampleIntervalSec"),
-                })
+                    "community": True,
+                }, known_hashes=known_hashes)
                 if local_id:
+                    if program not in touched:
+                        touched.append(program)
                     cycles_imported += 1
                     adopted_any = True
                     if store_cid:
                         imported_store_ids.append(store_cid)
+                else:
+                    cycles_skipped += 1
             if adopted_any:
                 profiles_adopted += 1
             # Stage 2: apply the bundled phase map (replace) + reconcile labels. Never
@@ -467,12 +576,27 @@ class StoreBridge:
         # community-wide "download" (adoption) for the store's usage dashboard -- the real
         # metric of how many people actually pulled this into their integration. Fired in
         # the background so store latency never delays the adopt-bundle response.
+        for program in touched:
+            await self._ps.async_rebuild_envelope(program)
+        if touched:
+            await self._ps.async_save()
         if imported_store_ids:
             self._fire_download_telemetry(imported_store_ids)
+        if failed_profiles and not cycles_imported and not cancelled:
+            # Nothing new arrived and part of the setup could not be read: a failed
+            # download, not "already on your device" (audit STORE-09).
+            return {
+                "error": STORE_UNREACHABLE, "failed_profiles": failed_profiles,
+                "cycles_skipped": cycles_skipped, "phases_applied": phases_applied,
+            }
         settings = bundle.get("settings") if isinstance(bundle.get("settings"), dict) else {}
         return {
             "profiles_adopted": profiles_adopted,
             "cycles_imported": cycles_imported,
+            # Refused by the quality bar or as a duplicate (audit STORE-03/05).
+            "cycles_skipped": cycles_skipped,
+            **({"cancelled": True} if cancelled else {}),
+            **({"partial": True, "failed_profiles": failed_profiles} if failed_profiles else {}),
             "phases_applied": phases_applied,
             "settings": settings,
         }
@@ -492,7 +616,7 @@ class StoreBridge:
             name = str(p.get("name", "")).strip()
             try:
                 start, end = float(p.get("start", 0)), float(p.get("end", 0))
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 continue
             if name and end > start:
                 ranges.append({"name": name, "start": start, "end": end})

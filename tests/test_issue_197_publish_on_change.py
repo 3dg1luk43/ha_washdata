@@ -237,6 +237,10 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
     # `_resync_power_from_state` would feed it instead of the keepalive firing.
     manager._live_power_state = MagicMock(return_value=(1.0, last_real))
     manager._low_power_no_update_timeout = 3600.0   # Default - should NOT be what closes the cycle
+    # A 120 s tick: 200 s of silence is then the first, on-time keepalive. On the
+    # 61 s washer default it would be a late tick, which closes an UNOBSERVED
+    # interval (register item 391, covered below).
+    manager._watchdog_interval = 120
 
     # Wire detector mock: cycle is in RUNNING state, waiting in low-power.
     detector = manager.detector
@@ -388,3 +392,43 @@ async def test_watchdog_skips_injection_during_verified_pause(
             f"the watchdog may only inject SYNTHETIC readings, got {c}"
         )
     assert manager._last_real_reading_time == last_real
+
+
+@pytest.mark.asyncio
+async def test_a_late_watchdog_tick_closes_an_unobserved_interval(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """Register item 391: a tick that arrives long after the last reading (host
+    suspend, event-loop stall) must not let the gap-free tally bank that time."""
+    now = datetime(2026, 3, 28, 12, 0, 0, tzinfo=timezone.utc)
+    last = now - timedelta(seconds=1800)
+    manager._watchdog_interval = 61
+    manager._last_reading_time = last
+    manager._last_real_reading_time = last
+    manager._current_power = 1.0
+    manager._current_program = "Tumble Cottons"
+    manager._live_power_state = MagicMock(return_value=(1.0, last))
+    manager._low_power_no_update_timeout = 3600.0
+    detector = manager.detector
+    detector.state = "running"
+    detector.is_waiting_low_power = MagicMock(return_value=True)
+    detector._verified_pause = False
+    detector.process_reading = MagicMock()
+    detector.force_end = MagicMock()
+    detector.get_elapsed_seconds = MagicMock(return_value=3600.0)
+    detector.expected_duration_seconds = 9000.0
+    detector.current_cycle_start = now - timedelta(hours=1)
+    detector.config = MagicMock()
+    detector.config.stop_threshold_w = 2.0
+    detector.config.min_power = 10.0
+    detector.config.off_delay = 120
+
+    await manager._watchdog_check_stuck_cycle(now)
+
+    detector.process_reading.assert_called_once_with(1.0, now, synthetic=True, observed=False)
+
+    # The next, on-time tick is observed again.
+    detector.process_reading.reset_mock()
+    later = now + timedelta(seconds=61)
+    await manager._watchdog_check_stuck_cycle(later)
+    detector.process_reading.assert_called_once_with(1.0, later, synthetic=True, observed=True)

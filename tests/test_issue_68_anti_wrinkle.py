@@ -194,6 +194,7 @@ def test_anti_wrinkle_shields_low_power_spike(
 def test_anti_wrinkle_exit_via_user_stop(
     dryer_config_with_anti_wrinkle: CycleDetectorConfig,
     mock_callbacks: dict[str, Mock],
+    freezer,
 ) -> None:
     """Test that ANTI_WRINKLE can be exited via user_stop."""
     detector = CycleDetector(
@@ -218,7 +219,8 @@ def test_anti_wrinkle_exit_via_user_stop(
     mock_callbacks["on_state_change"].reset_mock()
     mock_callbacks["on_cycle_end"].reset_mock()
     
-    # Simulate user stop
+    # Simulate user stop (clock frozen just after the last reading, not 2026)
+    freezer.move_to(dt(1580))
     detector.user_stop()
     
     # Should exit to OFF via user stop
@@ -293,25 +295,34 @@ def test_anti_wrinkle_enabled_washer_dryer(mock_callbacks: dict[str, Mock]) -> N
 def test_anti_wrinkle_interrupted_cycle_no_transition(
     dryer_config_with_anti_wrinkle: CycleDetectorConfig,
     mock_callbacks: dict[str, Mock],
+    freezer,
 ) -> None:
-    """Test that user-stopped cycles bypass anti-wrinkle (manual completion)."""
+    """Test that user-stopped cycles bypass anti-wrinkle (manual completion).
+
+    The clock is frozen at the stop instant: `user_stop()` reads the wall clock,
+    and against these 2023 readings an unfrozen one stored a 118 M s cycle - the
+    only reason the old version reached `completed` (audit TESTING-13).
+    """
     detector = CycleDetector(
         config=dryer_config_with_anti_wrinkle,
         on_state_change=mock_callbacks["on_state_change"],
         on_cycle_end=mock_callbacks["on_cycle_end"],
     )
 
-    # Start cycle
+    # A full-length run (past completion_min_seconds), still drawing power.
     detector.process_reading(500.0, dt(0))
-    detector.process_reading(500.0, dt(10))
-    for t in range(10, 400, 10):
+    for t in range(10, 900, 10):
         detector.process_reading(500.0, dt(t))
 
-    # User stop (manual/external completion bypasses anti-wrinkle)
+    freezer.move_to(dt(900))
     detector.user_stop()
 
-    # Should end in FINISHED (not ANTI_WRINKLE) when user-stopped
+    # A completed dryer cycle would enter ANTI_WRINKLE; a user stop must not.
     assert detector.state == STATE_FINISHED
+    cycle = mock_callbacks["on_cycle_end"].call_args[0][0]
+    assert cycle["status"] == "completed"
+    assert cycle["termination_reason"] == "user"
+    assert cycle["duration"] == pytest.approx(900.0, abs=15.0)
 
 @pytest.fixture
 def dryer_config_long_pulse_gap() -> CycleDetectorConfig:

@@ -72,13 +72,11 @@ def _config_from_options(opts: dict) -> CycleDetectorConfig:
         min_power=opts["min_power"],
         off_delay=opts["off_delay"],
         device_type=opts["device_type"],
-        smoothing_window=opts["smoothing_window"],
         interrupted_min_seconds=opts["interrupted_min_seconds"],
         completion_min_seconds=opts["completion_min_seconds"],
         start_duration_threshold=opts["start_duration_threshold"],
         start_energy_threshold=opts["start_energy_threshold"],
         end_energy_threshold=opts["end_energy_threshold"],
-        end_repeat_count=opts["end_repeat_count"],
         min_off_gap=opts["min_off_gap"],
         start_threshold_w=opts["start_threshold_w"],
         stop_threshold_w=opts["stop_threshold_w"],
@@ -259,7 +257,6 @@ def test_update_match_freeze_preserves_good_match_in_tail() -> None:
     det._expected_duration = 600.0
     det._last_match_confidence = 0.7
     det._match_ambiguous = False
-    det._match_prefix_ambiguous = False
     det._cycle_max_power = 2000.0
     det._current_cycle_start = base
     det._power_readings = [
@@ -309,7 +306,6 @@ def test_dishwasher_is_excluded_from_anticrease_finalize() -> None:
     det._expected_duration = 600.0
     det._last_match_confidence = 0.7
     det._match_ambiguous = False
-    det._match_prefix_ambiguous = False
     det._cycle_max_power = 2000.0
     det._current_cycle_start = base
     det._power_readings = [

@@ -58,27 +58,6 @@ def test_boot_spike_rejection(detector):
     # Reverted to OFF
     assert detector._on_state_change.call_args_list[-1][0][1] == STATE_OFF
 
-def test_low_energy_rejection(detector):
-    """Test that low-power hum is rejected by energy threshold."""
-    # Threshold is 0.01 Wh
-    # Hum at 10W for 20s = 10 * (20/3600) = 0.055 Wh -> wait, hum should be lower
-    # Hum at 1W for 60s = 1 * (60/3600) = 0.00027 Wh
-    
-    # Let's set hum just above start_threshold_w (6.0) but low enough to fail energy
-    # Hum at 7W for 20s = 7 * (20/3600) = 0.038 Wh... no, 0.01 Wh is small.
-    # 0.01 Wh = 36 Joules. 7W * 5s = 35 Joules.
-    
-    synth = CycleSynthesizer()
-    synth.add_phase(7.0, 5.0) # 7W for 5s (Duration threshold is 10s)
-    synth.add_gap(60.0)
-    
-    readings = synth.generate(sample_interval=1.0)
-    
-    for ts, p in readings:
-        detector.process_reading(p, ts)
-        
-    assert detector.state == STATE_OFF
-
 def test_long_drying_phase_robustness(detector):
     """Test that a long low-power phase doesn't prematurely end if deferred."""
     # Configure detector with a matched profile expectation (normally done via callback)

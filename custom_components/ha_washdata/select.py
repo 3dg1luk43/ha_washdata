@@ -49,6 +49,8 @@ async def async_setup_entry(
 class WashDataProgramSelect(SelectEntity):
     """Select entity to manually choose the running program."""
 
+    _attr_should_poll = False  # pushed by the manager's update signal (PERF-02)
+
     _attr_has_entity_name = True
 
     _attr_translation_key = "program_select"

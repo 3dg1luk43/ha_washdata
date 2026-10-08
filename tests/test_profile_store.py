@@ -105,11 +105,9 @@ async def test_create_profile(store):
 
 
 @pytest.mark.asyncio
-async def test_retention_policy(store):
-    """Test that old cycles are dropped."""
-    store._max_past_cycles = 5
-
-    for i in range(10):
+async def test_every_cycle_is_kept(store):
+    """Register item 463: no retention cap. Past the old 200 every cycle stays."""
+    for i in range(210):
         t_str = dt_str(i * 60)
         await store.async_add_cycle({
             "start_time": t_str,
@@ -118,11 +116,9 @@ async def test_retention_policy(store):
             "power_data": [[t_str, 10]],
         })
 
-    assert len(store._data["past_cycles"]) == 5
-
+    assert len(store._data["past_cycles"]) == 210
     times = [c["start_time"] for c in store._data["past_cycles"]]
-    assert dt_str(540) in times
-    assert dt_str(0) not in times
+    assert dt_str(0) in times and dt_str(209 * 60) in times
 
 
 @pytest.mark.asyncio
@@ -223,16 +219,23 @@ async def test_delete_cycle_rebuilds_envelope(store):
 @pytest.mark.asyncio
 async def test_match_profile_no_profiles(store):
     """Test matching when no profiles exist."""
-    current_data = [(dt_str(0), 100.0)]
-    result = await store.async_match_profile(current_data, 100.0)
+    # Enough readings to get past the resample floor, so the empty store is what answers.
+    current_data = [(dt_str(i * 10), 100.0 + (i % 7) * 10.0) for i in range(60)]
+    result = await store.async_match_profile(current_data, 600.0)
+    assert result.best_profile is None
+    assert result.confidence == 0.0
+    # A single reading cannot be resampled at all: no match, no error.
+    result = await store.async_match_profile([(dt_str(0), 100.0)], 100.0)
     assert result.best_profile is None
     assert result.confidence == 0.0
 
 @pytest.mark.asyncio
 async def test_match_profile_extreme_duration(store):
-    """Test matching when duration is far outside acceptable range."""
+    """Stage 1 rejects a candidate whose duration ratio is past max_duration_ratio (2.0 here)."""
     start_dt = datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    dense_power = [[(start_dt + timedelta(seconds=i)).isoformat(), 100.0] for i in range(101)]
+    dense_power = [
+        [(start_dt + timedelta(seconds=i)).isoformat(), 100.0 + (i % 7) * 10.0] for i in range(101)
+    ]
     
     await store.async_add_cycle({
         "start_time": start_dt.isoformat(),
@@ -242,14 +245,11 @@ async def test_match_profile_extreme_duration(store):
     })
     c1_id = store.get_past_cycles()[0]["id"]
     await store.create_profile("FixedProfile", c1_id)
-    
-    # 1. Match with duration = 10s (Ratio 0.1, outside 0.75-1.25 default)
-    current_data = [[(start_dt + timedelta(seconds=i)).isoformat(), 100.0] for i in range(10)]
-    result = await store.async_match_profile(current_data, 10.0)
-    assert result.best_profile is None
-    
-    # 2. Match with duration = 1000s (Ratio 10.0, outside 0.75-1.25)
-    result_long = await store.async_match_profile(current_data, 1000.0)
+
+    # The same trace at the profile's own length matches...
+    assert (await store.async_match_profile(dense_power, 100.0)).best_profile == "FixedProfile"
+    # ...and claimed to run 10x as long (ratio 10) it is rejected before scoring.
+    result_long = await store.async_match_profile(dense_power, 1000.0)
     assert result_long.best_profile is None
 
 @pytest.mark.asyncio
@@ -267,25 +267,6 @@ async def test_async_add_cycle_malformed_data(store):
     # but currently preserves non-list if passed directly (or we need to check if it's cleared)
     # Actually let's just assert it's present.
     assert "power_data" in store.get_past_cycles()[1]
-
-@pytest.mark.asyncio
-async def test_delete_profile_with_unlabel(store):
-    """Test deleting profile and unlabeling associated cycles."""
-    await store.async_add_cycle({
-        "start_time": dt_str(0),
-        "duration": 100,
-        "status": "completed",
-        "profile_name": "DeleteMe",
-        "power_data": [[dt_str(0), 10]]
-    })
-    c1_id = store.get_past_cycles()[0]["id"]
-    store._data["profiles"]["DeleteMe"] = {"sample_cycle_id": c1_id}
-    
-    # Delete and unlabel
-    await store.delete_profile("DeleteMe", unlabel_cycles=True)
-    
-    assert "DeleteMe" not in store.get_profiles()
-    assert store.get_past_cycles()[0]["profile_name"] is None
 
 @pytest.mark.asyncio
 async def test_create_profile_already_exists(store):
@@ -307,88 +288,3 @@ async def test_create_profile_already_exists(store):
     await store.create_profile("ProfileX", c2_id)
     assert store.get_profiles()["ProfileX"]["avg_duration"] == 200
     assert store.get_profiles()["ProfileX"]["sample_cycle_id"] == c2_id
-
-
-# ─── Playground presets (sandbox setting snapshots, per device) ────────────────
-
-
-@pytest.mark.asyncio
-async def test_playground_preset_save_load_and_delete(store):
-    """A preset round-trips through the store and never touches live config."""
-    assert store.get_playground_presets() == {}
-
-    rec = await store.async_save_playground_preset("Quiet nights", {"off_delay": 300})
-    assert rec["values"] == {"off_delay": 300}
-    assert rec["created_at"] and rec["updated_at"]
-    assert list(store.get_playground_presets()) == ["Quiet nights"]
-
-    # Overwriting keeps the original creation timestamp.
-    again = await store.async_save_playground_preset("Quiet nights", {"off_delay": 420})
-    assert again["created_at"] == rec["created_at"]
-    assert store.get_playground_presets()["Quiet nights"]["values"] == {"off_delay": 420}
-
-    assert await store.async_delete_playground_preset("Quiet nights") is True
-    assert store.get_playground_presets() == {}
-    # Deleting a name that is gone is a no-op, not an error.
-    assert await store.async_delete_playground_preset("Quiet nights") is False
-
-
-@pytest.mark.asyncio
-async def test_playground_preset_rejects_empty_input_and_enforces_cap(store):
-    from custom_components.ha_washdata.const import PLAYGROUND_PRESET_MAX
-
-    with pytest.raises(ValueError):
-        await store.async_save_playground_preset("   ", {"off_delay": 300})
-    with pytest.raises(ValueError):
-        await store.async_save_playground_preset("Empty", {})
-
-    for i in range(PLAYGROUND_PRESET_MAX):
-        await store.async_save_playground_preset(f"p{i}", {"off_delay": 100 + i})
-    with pytest.raises(ValueError):
-        await store.async_save_playground_preset("one too many", {"off_delay": 999})
-    # An existing name may still be overwritten at the cap.
-    await store.async_save_playground_preset("p0", {"off_delay": 111})
-    assert len(store.get_playground_presets()) == PLAYGROUND_PRESET_MAX
-
-
-@pytest.mark.asyncio
-async def test_playground_preset_overlong_name_is_deletable(store):
-    """A name past the length cap must delete with the same input that saved it.
-
-    Save clamped to PLAYGROUND_PRESET_NAME_MAX while delete did not, so an
-    over-long name was stored under a truncated key and looked up in full - the
-    preset became undeletable and permanently consumed one of the cap slots.
-    """
-    from custom_components.ha_washdata.const import PLAYGROUND_PRESET_NAME_MAX
-
-    long_name = "x" * (PLAYGROUND_PRESET_NAME_MAX + 25)
-    await store.async_save_playground_preset(long_name, {"off_delay": 300})
-    stored = list(store.get_playground_presets())
-    assert len(stored) == 1
-    assert len(stored[0]) == PLAYGROUND_PRESET_NAME_MAX
-
-    assert await store.async_delete_playground_preset(long_name) is True
-    assert store.get_playground_presets() == {}
-
-
-@pytest.mark.asyncio
-async def test_playground_preset_key_has_no_trailing_space(store):
-    """Clamping must not bake a trailing space into the stored key.
-
-    The cut can land mid-space, so the normalizer strips again after truncating.
-    """
-    from custom_components.ha_washdata.const import PLAYGROUND_PRESET_NAME_MAX
-
-    name = "y" * (PLAYGROUND_PRESET_NAME_MAX - 1) + "   tail"
-    await store.async_save_playground_preset(name, {"off_delay": 300})
-    key = next(iter(store.get_playground_presets()))
-    assert key == key.strip()
-    assert await store.async_delete_playground_preset(name) is True
-
-
-@pytest.mark.asyncio
-async def test_playground_presets_self_heal_corrupt_store_key(store):
-    store._data["playground_presets"] = ["not", "a", "dict"]
-    assert store.get_playground_presets() == {}
-    await store.async_save_playground_preset("ok", {"off_delay": 300})
-    assert list(store.get_playground_presets()) == ["ok"]

@@ -1,75 +1,94 @@
-deploy_to_ha.sh
-backups
-devtools/__pycache__
-mock_data
-custom_components/ha_washdata/__pycache__
-tests/__pycache__
-ha_washdata.code-workspace
-devtools/secrets.py
-.gitignore
-custom_components/ha_washdata/test_data
-tests/repro/__pycache__
-simulator.log
-.dev_notes
-devtools/priv_secrets.py
-devtools/mock_socket.db
-server.log
-devtools/mock_socket_config.json
-devtools/uploaded_cycles
-devtools/generate_docs_graphs.py
-.gemini/
-gha-creds-*.json
-.agent/
-conductor/
-cycle_data/
-.github/commands/
-.issues/
-tests/utils/__pycache__/
-tests/repro/data_files.txt
-tests/benchmarks/__pycache__/
+# WashData .gitignore. What is committed: the integration, its tests, the dev tools
+# and the public docs. Everything below is local, generated or private.
+
+# --- Python / Node / editors -------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+.venv_*/
 .coverage
-.venv_translation/
+.coverage.*
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+node_modules/
+.vscode/
+*.code-workspace
+.DS_Store
+*.log
+bin/
+
+# --- Test and E2E output -----------------------------------------------------
+test-results/
+playwright-tests/test-results/
+playwright-tests/playwright-report/
+# A MagicMock hass used as a Store path writes here; tests/conftest.py fails the run if it does.
+/MagicMock/
+
+# --- Private data: cycle corpora, exports, dumps, secrets ----------------------
+# The maintainer's and users' recorded cycles (gitignored corpus the slow tests
+# and devtools harnesses read when present).
+cycle_data/
+mock_data/
+backups/
+*.dump
+devtools/secrets.py
+devtools/priv_secrets.py
+devtools/mqtt_secrets.py
+gha-creds-*.json
+.env
+.mcp.json
+
+# --- Internal documentation and agent working files (local only) --------------
+# The engineering reference, the tech-debt register, plans and reply drafts live
+# under docs/internal/ on the maintainer's machine only.
+docs/internal/
+docs/plans/
+docs/superpowers/
+docs/STORE.md
+.dev_notes/
+.claude/
+.agent/
+.gemini/
+.issues/
+conductor/
+IMPROVEMENT_PLAN.md
+ROADMAP.md
+coderabbit_unfixed_findings.md
+reddit_post_draft.md
+*_reply_draft.md
+*_REPLY.md
+UI_TEST_GUIDE_*.md
 .github/agents
+.github/commands/
 .github/rules
 .github/scripts
 .github/skills
 .github/ui-ux-pro-max
 .github/workflows copy
 .github/ARCHITECTURE.md
+
+# --- Dev tool state ------------------------------------------------------------
+deploy_to_ha.sh
+devtools/mock_socket.db
+devtools/mock_socket_config.json
+devtools/mock_socket_config.tmp
+devtools/mock_socket_ledger.jsonl
+devtools/mock_socket_history/
+devtools/uploaded_cycles
 devtools/.mock_socket.pid
-bin
-.vscode/settings.json
-.claude
-custom_components/ha_washdata/ml/__pycache__
-ROADMAP.md
-playwright-tests/test-results
-playwright-tests/playwright-report
-playwright-tests/node_modules
-devtools/node_modules
-IMPROVEMENT_PLAN.md
-docs/superpowers
+devtools/generate_docs_graphs.py
+custom_components/ha_washdata/test_data
+tests/repro/data_files.txt
 re/SETUP.md
-reddit_post_draft.md
-docs/plans
-docs/STORE.md
-coderabbit_unfixed_findings.md
-issue_*_reply_draft.md
-discussion_*_reply_draft.md
-DISCUSSION_*_REPLY.md
-UI_TEST_GUIDE_*.md
-# Developer-specific MCP server config (local endpoints); not part of the release.
-.mcp.json
-docs/internal/DESIGN_353_program_entity.md
-docs/internal/ISSUE_REPLIES_0.5.4.md
-docs/internal/ISSUE_TRIAGE.md
-# Pre-compressed static assets are generated at integration setup from whatever
-# file is actually being served (see frontend._ensure_gzip), never committed: a
-# checked-in .gz could out-live its source and be served as if it were current.
-custom_components/ha_washdata/www/*.gz
-# The test box's generated Home Assistant config dir: .storage, the recorder DB,
-# logs, the access token and the captured notifications. The scripts that build
-# the box ARE committed (see devtools/testbox/README.md); only its state is not.
+
+# The test box's generated Home Assistant config dir (.storage, recorder DB, logs,
+# token, captured notifications). The scripts that build the box are committed.
 devtools/testbox/config/
-devtools/testbox/__pycache__
-# The notify platform under support/ IS committed - ignore only its bytecode.
-devtools/testbox/support/**/__pycache__/
+
+# --- Generated at runtime, never committed --------------------------------------
+# Pre-compressed static assets are built at integration setup from the file being
+# served (frontend._ensure_gzip): a checked-in .gz could out-live its source.
+custom_components/ha_washdata/www/*.gz
+custom_components/ha_washdata/translations/panel/*.gz

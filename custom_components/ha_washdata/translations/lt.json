@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData sąranka",
-        "description": "Sukonfigūruokite skalbimo mašiną ar kitą prietaisą.\n\nReikalingas galios jutiklis.\n\nBaigę sąranką, atidarykite WashData skydelį iš šoninės juostos (arba eikite į [/ha-washdata](/ha-washdata)), kad peržiūrėtumėte ciklus, sureguliuotumėte aptikimą ir tvarkytumėte profilius.",
+        "description": "Sukonfigūruokite skalbimo mašiną ar kitą prietaisą. Reikalingas galios jutiklis.\n\nBaigę sąranką, atidarykite WashData skydelį šoninėje juostoje ([/ha-washdata](/ha-washdata)), kad matytumėte ciklus, profilius ir visus nustatymus.",
         "data": {
           "name": "Įrenginio pavadinimas",
           "device_type": "Įrenginio tipas",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Patogus šio įrenginio pavadinimas (pvz., 'Skalbimo mašina', 'Indaplovė').",
-          "device_type": "Kokio tipo tai prietaisas? Padeda pritaikyti aptikimą ir ženklinimą.",
-          "power_sensor": "Jutiklio objektas, kuris realiuoju laiku praneša energijos suvartojimą (vatais) iš jūsų išmaniojo kištuko.",
-          "min_power": "Galios rodmenys, viršijantys šią ribą (vatais), rodo, kad prietaisas veikia. Pradėkite nuo 2 W daugeliui įrenginių."
+          "device_type": "Nustato šio prietaiso tipo numatytuosius aptikimo nustatymus.",
+          "power_sensor": "Išmaniojo kištuko jutiklis, pranešantis esamą galią vatais.",
+          "min_power": "Rodmenys virš šios ribos (vatais) reiškia, kad prietaisas veikia. Daugeliui įrenginių tinka 2 W."
         }
       },
       "reconfigure": {
         "title": "WashData rekonfigūracija",
-        "description": "Atnaujinkite įrenginio pavadinimą, prietaiso tipą arba galios jutiklį.\n\nWashData skydelyje (šoninė juosta arba [/ha-washdata](/ha-washdata)) tvarkomas aptikimas, ciklai, profiliai ir pranešimai.",
+        "description": "Pakeiskite įrenginio pavadinimą, prietaiso tipą arba galios jutiklį.\n\nVisa kita yra WashData skydelyje (šoninė juosta arba [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Įrenginio pavadinimas",
           "device_type": "Įrenginio tipas",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Nepavyko prisijungti",
-      "invalid_auth": "Neteisingas autentifikavimas",
       "unknown": "Netikėta klaida",
       "invalid_power": "Galios slenkstis turi būti didesnis nei 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData nustatymai",
-        "description": "Pervadinkite įrenginį arba pakeiskite pagrindinius aparatinės įrangos nustatymus. Visi aptikimo, atitikimo ir pranešimų nustatymai yra [WashData skydelyje](/ha-washdata) (taip pat pasiekiami iš šoninės juostos).",
+        "description": "Pervadinkite įrenginį arba pakeiskite pagrindinius nustatymus. Visa kita yra [WashData skydelyje](/ha-washdata) šoninėje juostoje.",
         "data": {
           "name": "Įrenginio pavadinimas",
           "device_type": "Įrenginio tipas",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profilio pavadinimas",
-          "description": "Esamo profilio pavadinimas (sukurkite profilius meniu Tvarkyti profilius). Palikite tuščią, kad pašalintumėte etiketę."
+          "description": "Esamo profilio pavadinimas (profiliai kuriami WashData skydelyje). Palikite tuščią, kad pašalintumėte žymę."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Patikimumo slenkstis",
-          "description": "Minimalus atitikties patikimumas (0,50–0,95) etiketėms taikyti."
+          "description": "Minimalus atitikties patikimumas (0,50-0,95) etiketėms taikyti. Palikite tuščią, kad būtų naudojamas įrenginio nustatymas „Automatinio žymėjimo pasitikėjimas“."
         }
       }
     },
     "export_config": {
       "name": "Eksportuoti konfigūraciją",
-      "description": "Eksportuoti šio įrenginio profilius, ciklus ir nustatymus į JSON failą (kiekvienam įrenginiui).",
+      "description": "Eksportuoti šio įrenginio profilius, ciklus ir nustatymus į JSON failą.",
       "fields": {
         "device_id": {
           "name": "Įrenginys",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Pateikti ciklo atsiliepimą",
-      "description": "Patvirtinti arba pataisyti automatiškai aptiktą programą po baigto ciklo. Pateikite `entry_id` (išplėstinis) arba `device_id` (rekomenduojama).",
+      "description": "Patvirtinti arba pataisyti baigto ciklo aptiktą programą. Nurodykite `device_id` (rekomenduojama) arba `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Įrenginys",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Pažymėti kaip iškrautą",
-      "description": "Patvirtinkite, kad baigto ciklo turinys išimtas iš „WashData“ įrenginio: būsena „Švarus“ ir iškrovimo priminimas bus panaikinti.",
+      "description": "Patvirtinti, kad baigto ciklo turinys išimtas. Išvalo būseną „Švarus“ ir iškrovimo priminimą.",
       "fields": {
         "device_id": {
           "name": "Įrenginys",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Atitikties dviprasmiškumas"
+      },
+      "maintenance_due": {
+        "name": "Reikia priežiūros",
+        "state": {
+          "on": "Reikia",
+          "off": "Nereikia"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Reikalingų užduočių ID"
+          },
+          "due_tasks": {
+            "name": "Reikalingos užduotys",
+            "state": {
+              "descale": "Kalkių šalinimas",
+              "filter_clean": "Valyti filtrą",
+              "drum_clean": "Valyti būgną",
+              "bearing_service": "Guolių aptarnavimas",
+              "other": "Kita",
+              "salt": "Papildyti druskos",
+              "rinse_aid": "Papildyti skalavimo priemonės",
+              "lint_filter": "Valyti pūkų filtrą",
+              "condenser_clean": "Valyti kondensatorių"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Apsauga nuo raukšlių",
           "interrupted": "Nutraukta",
           "force_stopped": "Priverstinai sustabdyta",
-          "rinse": "Skalavimas",
           "unknown": "Nežinoma",
           "clean": "Švarus",
           "delay_wait": "Laukiama pradžios"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Ciklo anomalija",
+            "state": {
+              "overrun": "Veikia ilgai",
+              "stalled": "Užstrigo"
+            }
+          }
         }
       },
       "washer_program": {

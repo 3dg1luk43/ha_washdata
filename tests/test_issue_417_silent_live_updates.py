@@ -26,17 +26,12 @@ stays audible - the same behaviour Uber/Maps-style live activities have.
 This is an option on the EXISTING live notification, not a new notification type.
 """
 
-from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch
 
 import pytest
 
-from homeassistant.util import dt as dt_util
-from custom_components.ha_washdata.manager import (
-    WashDataManager,
-    _MOBILE_ONLY_EXTRA_KEYS,
-)
+from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER,
     CONF_NOTIFY_LIVE_SILENT,
@@ -64,16 +59,9 @@ def _make_manager(mock_hass, options) -> WashDataManager:
     entry.title = "Test Washer"
     entry.options = {CONF_MIN_POWER: 2.0, "power_sensor": "sensor.p", **options}
     mock_hass.config_entries.async_get_entry.return_value = entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
          patch("custom_components.ha_washdata.manager.CycleDetector"):
         return WashDataManager(mock_hass, entry)
-
-
-def test_silent_keys_are_mobile_only():
-    """Strict-schema platforms (Signal) reject unknown keys, so these stay mobile."""
-    assert "silent" in _MOBILE_ONLY_EXTRA_KEYS
-    assert "push" in _MOBILE_ONLY_EXTRA_KEYS
 
 
 def test_refresh_is_silent_by_default(mock_hass):

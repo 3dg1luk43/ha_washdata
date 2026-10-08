@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Golden tests for the NumPy-only runtime feature extraction.
 
-These verify all three feature extractors reproduce the lab's feature definitions
+These verify the classifier feature extractors reproduce the lab's feature definitions
 on hand-constructed cycles and that each column list cannot drift from the
 embedded model it feeds.
 """
@@ -29,15 +29,12 @@ import pytest
 from custom_components.ha_washdata.ml import (
     cycle_end_detector_model,
     hybrid_curve_quality_model,
-    live_match_commit_model,
 )
 from custom_components.ha_washdata.ml.feature_extraction import (
     END_FEATURE_COLUMNS,
-    LIVE_MATCH_FEATURE_COLUMNS,
     QUALITY_FEATURE_COLUMNS,
     cumulative_energy_wh,
     latest_end_event_features,
-    live_match_features,
     profile_expectation,
     quality_features,
 )
@@ -129,92 +126,6 @@ def test_short_dip_is_not_an_event() -> None:
     points = [(float(t), 1000.0) for t in range(0, 901, 100)]
     points += [(920.0, 0.0)]
     assert latest_end_event_features(points, {"duration": 1000.0, "energy": 300.0, "peak": 2000.0}) is None
-
-
-# ---------------------------------------------------------------------------
-# Live-match commit confidence
-# ---------------------------------------------------------------------------
-
-
-def test_live_match_columns_match_embedded_model() -> None:
-    """The extractor and the embedded model must agree on feature order exactly."""
-    assert LIVE_MATCH_FEATURE_COLUMNS == list(live_match_commit_model.FEATURE_COLUMNS)
-
-
-def test_live_match_features_keys_and_finite() -> None:
-    points = [(float(t), 800.0) for t in range(0, 600, 30)]
-    features = live_match_features(
-        points=points,
-        elapsed_s=300.0,
-        top1_distance=0.15,
-        top2_distance=0.45,
-        top1_median_duration_s=600.0,
-        candidate_count=3,
-    )
-    assert set(features) == set(LIVE_MATCH_FEATURE_COLUMNS)
-    assert all(math.isfinite(v) for v in features.values())
-
-
-def test_live_match_features_geometry() -> None:
-    """Verify each feature is computed correctly from known inputs."""
-    elapsed = 300.0
-    top1_dur = 600.0
-    top1_dist = 0.12
-    top2_dist = 0.48
-    n_candidates = 4
-
-    # Active prefix: all readings at 800 W, so prefix_active_fraction = 1.0
-    points = [(float(t), 800.0) for t in range(0, 300, 30)]
-
-    features = live_match_features(
-        points=points,
-        elapsed_s=elapsed,
-        top1_distance=top1_dist,
-        top2_distance=top2_dist,
-        top1_median_duration_s=top1_dur,
-        candidate_count=n_candidates,
-    )
-    progress = elapsed / top1_dur  # 0.5
-    assert features["match_progress_top1"] == pytest.approx(progress)
-    assert features["duration_ratio_top1"] == pytest.approx(progress)
-    assert features["top1_distance"] == pytest.approx(top1_dist)
-    assert features["margin"] == pytest.approx(top2_dist - top1_dist)
-    assert features["distance_ratio"] == pytest.approx(top1_dist / top2_dist)
-    assert features["candidate_count_log"] == pytest.approx(math.log1p(n_candidates))
-    assert features["elapsed_log"] == pytest.approx(math.log1p(elapsed))
-    # All readings >> active threshold -> fraction = 1.0
-    assert features["prefix_active_fraction"] == pytest.approx(1.0)
-
-
-def test_live_match_features_idle_prefix() -> None:
-    """An all-zero prefix should produce prefix_active_fraction = 0.0."""
-    points = [(float(t), 0.0) for t in range(0, 120, 10)]
-    features = live_match_features(
-        points=points,
-        elapsed_s=120.0,
-        top1_distance=0.3,
-        top2_distance=None,
-        top1_median_duration_s=600.0,
-        candidate_count=2,
-    )
-    assert features["prefix_active_fraction"] == pytest.approx(0.0)
-    # Only one candidate -> top2 defaults to top1 + 1, margin = 1.0
-    assert features["margin"] == pytest.approx(1.0)
-
-
-def test_live_match_feeds_embedded_model() -> None:
-    """live_match_features output must be scoreable by the embedded model."""
-    points = [(float(t), 600.0) for t in range(0, 600, 30)]
-    features = live_match_features(
-        points=points,
-        elapsed_s=300.0,
-        top1_distance=0.1,
-        top2_distance=0.5,
-        top1_median_duration_s=600.0,
-        candidate_count=3,
-    )
-    score = live_match_commit_model.score(features)
-    assert 0.0 <= score <= 1.0
 
 
 # ---------------------------------------------------------------------------

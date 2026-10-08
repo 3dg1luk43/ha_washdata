@@ -17,7 +17,7 @@ label_cycle:
         text:
     profile_name:
       name: Profile Name
-      description: The name of an existing profile (create profiles in Manage Profiles menu). Leave blank to remove label.
+      description: An existing profile name (create profiles in the WashData panel). Leave blank to remove the label.
       required: false
       selector:
         text:
@@ -84,9 +84,8 @@ auto_label_cycles:
           integration: ha_washdata
     confidence_threshold:
       name: Confidence Threshold
-      description: Minimum match confidence (0.50-0.95) to apply labels.
+      description: Minimum match confidence (0.50-0.95) to apply labels. Leave empty to use the device's Auto-Label Confidence setting.
       required: false
-      default: 0.75
       selector:
         number:
           min: 0.50
@@ -95,7 +94,7 @@ auto_label_cycles:
 
 export_config:
   name: Export Config
-  description: Export this washer's profiles and cycles to a JSON file (per device).
+  description: Export this device's profiles, cycles and settings to a JSON file.
   fields:
     device_id:
       name: Device
@@ -132,8 +131,8 @@ import_config:
 submit_cycle_feedback:
   name: Submit Cycle Feedback
   description: >
-    Confirm or correct an auto-detected program after a completed cycle.
-    Provide either `entry_id` (advanced) or `device_id` (recommended).
+    Confirm or correct the detected program of a finished cycle.
+    Give `device_id` (recommended) or `entry_id`.
   fields:
     device_id:
       name: Device
@@ -274,7 +273,7 @@ resume_cycle:
 
 mark_unloaded:
   name: Mark Unloaded
-  description: Confirm the finished load has been taken out, clearing the Clean state and any unload reminder. Does nothing when no load is waiting.
+  description: Confirm the finished load was taken out. Clears the Clean state and any unload reminder.
   fields:
     device_id:
       name: Device

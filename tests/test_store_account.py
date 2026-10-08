@@ -171,23 +171,12 @@ def store():
 
 @pytest.mark.asyncio
 async def test_store_account_round_trip(store):
-    await store.set_store_account({"uid": "u1", "name": "Alice", "refresh_token": "SECRET", "brand": "Bosch", "model": "WAT"})
+    """The legacy per-device account the global hoist reads, then clears."""
+    store._data["store_account"] = {"uid": "u1", "name": "Alice", "refresh_token": "SECRET"}
     acct = store.get_store_account()
     assert acct["refresh_token"] == "SECRET" and acct["uid"] == "u1"
-    ident = store.get_store_identity()
-    assert ident == {"connected": True, "uid": "u1", "name": "Alice", "brand": "Bosch", "model": "WAT"}
-    assert "refresh_token" not in ident
     await store.clear_store_account()
     assert store.get_store_account() == {}
-    assert store.get_store_identity()["connected"] is False
-
-
-@pytest.mark.asyncio
-async def test_set_store_account_merges(store):
-    await store.set_store_account({"uid": "u1", "refresh_token": "R", "brand": "Bosch"})
-    await store.set_store_account({"model": "WAT28"})  # merge, keep refresh_token/brand
-    acct = store.get_store_account()
-    assert acct["refresh_token"] == "R" and acct["brand"] == "Bosch" and acct["model"] == "WAT28"
 
 
 def test_diagnostics_redacts_store_credentials():

@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Nie znaleziono encji",
     "running_long": "Działa długo",
+    "stalled": "Utknął",
     "remaining": "pozostało",
     "progress": "postęp",
     "show_time_remaining": "Pokaż pozostały czas",
@@ -48,16 +49,18 @@
     }
   },
   "badge": {
-    "quiet_tail_tip": "Pod koniec ten program cichnie na około {mins} min, a następnie tuż przed zakończeniem pobiera około {watts} W przez {secs} s. Zaobserwowano w {seen} z {measured} zmierzonych cykli: urządzenie nie robi tego przy każdym uruchomieniu.",
+    "quiet_tail_tip": "Pod koniec ten program cichnie na około {mins} min, a potem pobiera około {watts} W przez {secs} s. Widoczne w {seen} z {measured} zmierzonych cykli.",
     "quiet_tail": "cicha końcówka ~{mins} min",
     "artifact_tip": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) – otwórz, aby zobaczyć je na wykresie",
+    "artifact_tip_one": "Wykryto {n} anomalię (np. drzwi otwarte w połowie cyklu) – otwórz, aby zobaczyć ją na wykresie",
+    "artifact_tip_few": "Wykryto {n} anomalie (np. drzwi otwarte w połowie cyklu) – otwórz, aby zobaczyć je na wykresie",
+    "artifact_tip_many": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) – otwórz, aby zobaczyć je na wykresie",
+    "artifact_tip_other": "Wykryto {n} anomalii (np. drzwi otwarte w połowie cyklu) – otwórz, aby zobaczyć je na wykresie",
     "auto": "(automatycznie wykryty)",
     "built_in_tag": "wbudowany",
     "declining": "↘ maleje",
     "energy_low": "Niższe zużycie energii niż zwykle",
     "energy_spike": "Wyższe zużycie energii niż zwykle",
-    "fair_fit": "akceptowalne dopasowanie",
-    "fair_fit_tip": "Umiarkowana spójność dopasowania – niektóre cykle przypisane do tego profilu mają niższy poziom pewności. Oznacz więcej cykli lub ponownie zapisz profil, aby poprawić dokładność.",
     "feedback_requested": "Poproszono o opinię",
     "golden_cycle": "Zarejestrowany cykl referencyjny",
     "duration_outlier": "Cykle o nietypowej długości: {n}",
@@ -66,27 +69,40 @@
     "needs_review": "Wymaga recenzji",
     "overrun": "Trwało dłużej niż zwykle",
     "poor_fit": "słabe dopasowanie",
-    "poor_fit_tip": "Niespójna historia dopasowań - rozważ przebudowę tego profilu",
-    "restart_gap_tip": "{n} przerwa restartu HA: przebieg mocy ma lukę",
+    "restart_gap_tip": "{n} przerwy restartu HA: przebieg mocy ma luki",
+    "restart_gap_tip_one": "{n} przerwa restartu HA: przebieg mocy ma lukę",
+    "restart_gap_tip_few": "{n} przerwy restartu HA: przebieg mocy ma luki",
+    "restart_gap_tip_many": "{n} przerw restartu HA: przebieg mocy ma luki",
+    "restart_gap_tip_other": "{n} przerwy restartu HA: przebieg mocy ma luki",
     "reviewed": "Zrecenzowano",
     "steady": "→ stały",
     "underrun": "Zakończono szybciej niż zwykle",
-    "using_defaults": "Używanie dostarczonych ustawień domyślnych",
-    "using_tuned": "Używanie dostrojonych wag",
     "overrun_ratio": "({x}x oczekiwanego)",
     "underrun_ratio": "({pct}% oczekiwanego)",
-    "awaiting_tip": "Oczekuje na zatwierdzenie przez społeczność",
-    "awaiting_n": "Oczekuje na zatwierdzenie · potwierdzono {n}",
-    "approved": "Zatwierdzone",
-    "awaiting": "Oczekuje na zatwierdzenie",
     "imported_tip": "Zaimportowano ze sklepu społecznościowego. Używane tylko do dopasowywania, nie liczy się do statystyk.",
     "unmatchable": "nie można dopasować",
     "not_importable": "niedostępne",
     "exists": "istnieje",
     "backfilled_tip": "Wykryty w zaimportowanej historii mocy. Wpływa tylko na dopasowywanie programów, nie liczy się do statystyk.",
-    "armed": "(dotyczy następnego cyklu)"
+    "armed": "(dotyczy następnego cyklu)",
+    "awaiting_tip": "Oczekuje na zatwierdzenie przez społeczność",
+    "awaiting_n": "Oczekuje na zatwierdzenie · potwierdzono {n}",
+    "awaiting": "Oczekuje na zatwierdzenie",
+    "approved": "Zatwierdzone",
+    "matcher_unused": "Jeszcze nie dopasowano do Twoich cykli",
+    "matcher_used": "Dopasowano do {n} Twoich cykli",
+    "matcher_used_one": "Dopasowano do {n} Twojego cyklu",
+    "matcher_used_few": "Dopasowano do {n} Twoich cykli",
+    "matcher_used_many": "Dopasowano do {n} Twoich cykli",
+    "matcher_used_other": "Dopasowano do {n} cyklu",
+    "matcher_used_tip": "Cykle na tym urządzeniu, które WashData samodzielnie dopasował do tego zaimportowanego programu. Import, który nigdy nie zostaje dopasowany, może nie pasować do Twojego urządzenia; możesz go usunąć. Liczone lokalnie; nic nie jest wysyłane do sklepu."
   },
   "btn": {
+    "pg_preset_delete": "Usuń preset",
+    "pg_preset_load": "Wczytaj preset",
+    "pg_preset_load_tip": "Zastąp wartości w piaskownicy tym presetem (aktywne ustawienia pozostają nietknięte)",
+    "pg_preset_save": "Zapisz jako preset",
+    "pg_preset_save_tip": "Zapisz wszystkie poniższe wartości jako nazwany preset dla tego urządzenia",
     "reset_zoom": "Resetuj powiększenie",
     "set_brand_model": "Ustaw markę i model",
     "refresh_catalog": "Odśwież katalog",
@@ -97,12 +113,11 @@
     "add_timer": "+ Dodaj timer",
     "apply_all": "Zastosuj wszystko",
     "apply_label": "Zastosuj etykietę",
-    "apply_set_b": "Zastosuj zestaw B",
     "apply_split": "Zastosuj podział",
     "apply_trim": "Zastosuj przycięcie",
     "auto_detect_split": "Automatyczne wykrywanie",
     "auto_label_cycles": "Cykle automatycznego etykietowania",
-    "auto_label_cycles_tip": "Automatycznie przypisz nazwy profili do nieoznakowanych cykli, których pewność dopasowania przekracza próg",
+    "auto_label_cycles_tip": "Nadaj nazwy nieoznaczonym cyklom, których pewność dopasowania przekracza próg.",
     "cancel": "Anuluj",
     "clear_debug": "Wyczyść dane debugowania",
     "clear_splits": "Wyczyść",
@@ -112,8 +127,6 @@
     "convert_to_automation": "Przekształć w automatyzację",
     "correct": "Popraw…",
     "create": "Utwórz",
-    "create_from_cluster": "Utwórz profil z {count} cykli",
-    "create_profile": "+ Utwórz profil",
     "delete": "Usuń",
     "delete_group": "Usuń grupę",
     "delete_group_tip": "Usuń tylko tę grupę – profile członków zostaną zachowane",
@@ -122,39 +135,30 @@
     "discard_tip": "Odrzuć nagranie bez zapisywania",
     "dismiss": "Odrzuć",
     "mute_suggestion": "Przestań sugerować to ustawienie",
-    "pg_load_calibrated": "Wczytaj skalibrowane (ML) ({n})",
-    "pg_load_calibrated_tip": "Załaduj ustawienia skalibrowane przez ML jako nadpisania w piaskownicy",
     "pg_load_live": "Wczytaj aktywne ustawienia",
     "pg_load_live_tip": "Wczytaj ponownie bieżące ustawienia integracji i odrzuć wszystkie zmiany z piaskownicy",
     "pg_load_suggested": "Wczytaj sugerowane ({n})",
     "pg_load_suggested_tip": "Załaduj bieżące sugestie automatycznego dostrajania jako nadpisania w piaskownicy",
-    "pg_preset_delete": "Usuń preset",
-    "pg_preset_load": "Wczytaj preset",
-    "pg_preset_load_tip": "Zastąp wartości w piaskownicy tym presetem (aktywne ustawienia pozostają nietknięte)",
-    "pg_preset_save": "Zapisz jako preset",
-    "pg_preset_save_tip": "Zapisz wszystkie poniższe wartości jako nazwany preset dla tego urządzenia",
     "pg_publish_all": "Zapisz w integracji ({n})",
     "pg_publish_one": "Zapisz {label} w integracji",
     "reset_muted": "Zresetuj wyciszone",
+    "reset_phase_tip": "Cofnij swoją edycję i przywróć wbudowaną fazę",
     "done": "Zrobione",
     "edit": "Edytuj",
     "export": "Eksportuj",
-    "export_json": "Eksportuj do JSON",
     "force_stop": "Wymuś zatrzymanie",
     "force_stop_tip": "Natychmiast zakończ bieżący cykl i oznacz go jako wymuszony do zatrzymania",
     "from_template": "Z szablonu ▾",
     "ignore": "Ignoruj",
     "import_json": "Importuj z JSON",
-    "import_overwrite": "Importuj (nadpisuje dane)",
     "inspect": "Zbadaj",
     "label": "Oznacz",
-    "load": "Wczytaj",
     "load_more": "Wczytaj więcej",
     "manage": "Zarządzaj",
     "merge": "Scal",
     "new_automation": "+ Nowa automatyzacja",
     "new_group": "+ Nowa grupa",
-    "new_group_tip": "Grupuj niemal identyczne profile (ten sam kształt/czas trwania, różna temperatura lub wirowanie), aby dopasowanie niezawodnie wybierało między nimi",
+    "new_group_tip": "Grupuj niemal identyczne profile (ten sam kształt, inna temperatura lub wirowanie), aby dopasowanie umiało je rozróżnić.",
     "new_phase": "+ Nowa faza",
     "new_profile": "+ Nowy profil",
     "new_profile_tip": "Utwórz nowy profil programu z istniejącego oznakowanego cyklu lub nagrania",
@@ -162,23 +166,19 @@
     "on_cycle_started": "Po rozpoczęciu cyklu",
     "pause_cycle": "Pauza",
     "pause_cycle_tip": "Wstrzymaj bieżący cykl – urządzenie wznowi pracę od miejsca, w którym zostało zatrzymane",
-    "pg_apply_device": "Zastosuj do urządzenia",
-    "pg_autofill": "Wypełnij automatycznie",
-    "play": "Odtwórz",
     "process": "Przetwórz",
     "process_history": "Przetwarzaj teraz",
     "process_recording": "Zapisz nagranie",
     "process_tip": "Zapisz zarejestrowany przebieg jako nowy lub istniejący profil",
     "rebuild": "Odbuduj koperty",
     "rebuild_envelope": "Odbuduj kopertę",
-    "rebuild_tip": "Przelicz oczekiwaną obwiednię mocy (pasmo min/maks) dla wszystkich profili z ich oznakowanych cykli – uruchom po oznaczeniu nowych cykli lub korekcie starych",
+    "rebuild_tip": "Odbuduj oczekiwane pasmo mocy każdego profilu z jego oznaczonych cykli. Uruchom po oznaczeniu lub poprawieniu cykli.",
     "rec_start_tip": "Rozpocznij rejestrowanie przebiegu mocy urządzenia – uruchom tuż przed rozpoczęciem cyklu",
     "rec_stop": "Zatrzymaj",
     "rec_stop_tip": "Zatrzymaj nagrywanie i zachowaj zarejestrowany przebieg do przeglądu",
     "record": "Rozpocznij nagrywanie",
     "refresh": "Odśwież",
     "refresh_diag_tip": "Przeładuj statystyki przechowywania",
-    "refresh_logs_tip": "Przeładuj najnowsze rekordy dziennika",
     "refresh_settings_tip": "Przeładuj ustawienia z serwera",
     "relabel": "Zmień etykietę ({count})",
     "remove": "Usuń",
@@ -186,7 +186,6 @@
     "reset": "Resetuj",
     "reset_ml_models_tip": "Odrzuć modele dopracowane i wróć do wbudowanych. WashData może później nauczyć się ich ponownie.",
     "reset_to_builtin": "Zresetuj do modeli wbudowanych",
-    "reset_to_defaults": "Przywróć ustawienia domyślne",
     "resume_cycle": "Wznów cykl",
     "resume_cycle_tip": "Wznów wstrzymany cykl",
     "revert_settings": "Odrzuć zmiany",
@@ -199,8 +198,6 @@
     "run_analysis": "🔍 Przeprowadź analizę sugestii",
     "run_analysis_tip": "Przeanalizuj już teraz swoje zarejestrowane cykle i odśwież sugestie dotyczące tuningu",
     "run_auto_label": "Uruchom automatyczne etykietowanie",
-    "run_both": "Uruchom A vs B",
-    "run_simulation": "Uruchom symulację",
     "save": "Zapisz",
     "save_access_control": "Zapisz kontrolę dostępu",
     "save_group": "Zapisz grupę",
@@ -212,10 +209,8 @@
     "save_settings": "Zapisz ustawienia",
     "select": "Wybierz",
     "select_all": "Zaznacz wszystko",
-    "select_last20": "Ostatnie 20",
     "select_none": "Wyczyść",
     "show_only": "Pokaż tylko",
-    "skip_setup": "Pomiń konfigurację",
     "split": "Podziel",
     "stop": "Zatrzymaj",
     "submit_correction": "Prześlij poprawkę",
@@ -224,30 +219,24 @@
     "trim_split": "Przytnij / Podziel",
     "undo": "Cofnij",
     "unlabel_selected": "Usuń etykietę z zaznaczonych ({n})",
-    "unlabel_selected_tip": "Usuwa etykietę profilu z zaznaczonych cykli. Pozostaną w Twojej historii i można je później oznaczyć ponownie - przestaną tylko kształtować ten profil.",
+    "unlabel_selected_tip": "Usuń etykietę z zaznaczonych cykli. Zostaną w historii, ale przestaną kształtować ten profil.",
     "use": "Użyj",
     "wipe_all": "Wyczyść wszystkie dane",
     "delete_selected": "Usuń zaznaczone ({n})",
-    "group_suggest": "Grupa {n}: {members}",
     "pg_apply_best": "Zastosuj najlepsze",
-    "pg_apply_to_settings": "Zapisz w ustawieniach",
     "pg_apply_to_settings_tip": "Skopiuj wartości edytowane tutaj do aktywnych ustawień tego urządzenia",
     "import": "Importuj",
     "disconnect": "Rozłącz",
     "connect_github": "Połącz z GitHub",
-    "save_appliance": "Zapisz urządzenie",
     "share_to_store": "Udostępnij w sklepie",
     "share": "Udostępnij",
-    "confirm_appliance": "Potwierdź to urządzenie",
-    "confirmed": "Potwierdzone",
     "browse_community_setups": "Przeglądaj konfiguracje społeczności",
     "download_device": "Pobierz konfigurację urządzenia",
     "share_device": "Udostępnij konfigurację urządzenia",
-    "share_device_tip": "Udostępnij programy i ustawienia tego urządzenia społeczności",
+    "share_device_tip": "Udostępnij to urządzenie i jego cykle referencyjne w sklepie społeczności, aby właściciele tej samej maszyny mogli z nich skorzystać.",
     "share_n": "Udostępnij cykle: {n}",
     "export_selected": "Eksport (wybierz dane)",
     "export_all": "Szybki eksport wszystkiego",
-    "import_raw": "Zaawansowane: zastąp wszystko z pliku JSON",
     "download_export": "Pobierz eksport",
     "analyze_import": "Analizuj plik",
     "import_selected": "Importuj wybrane",
@@ -260,7 +249,15 @@
     "save_total_cycles": "Zapisz łączną liczbę",
     "clear": "Wyczyść",
     "add_brand": "Dodaj markę",
-    "add_appliance": "Dodaj urządzenie"
+    "log_done_task": "Oznacz jako wykonane: {task}",
+    "add_task": "Dodaj zadanie",
+    "add_appliance": "Dodaj urządzenie",
+    "retry": "Ponów",
+    "confirm_appliance": "Potwierdź to urządzenie",
+    "confirmed": "Potwierdzone",
+    "create_profile_from_gap": "Utwórz profil",
+    "undo_import": "Cofnij ostatni import",
+    "pg_rerun": "Aktualizuj symulację"
   },
   "note": {
     "off_delay": {
@@ -268,10 +265,6 @@
     }
   },
   "conflict": {
-    "anti_wrinkle_exit": {
-      "exit": "Musi być poniżej Progu Zatrzymania ({stop} W); w przeciwnym razie moc wyjścia antygniotowego jest ignorowana",
-      "stop": "Musi być powyżej Progu Wyjścia Mocy antygniotowej ({exit} W)"
-    },
     "anti_wrinkle_max": {
       "max": "Musi być powyżej Progu Startu ({start} W); w przeciwnym razie limit czasu trwania ochrony antygniotowej jest pomijany",
       "start": "Musi być poniżej Maks. Mocy Antygniotowej ({max} W)"
@@ -309,14 +302,14 @@
       "threshold": "Musi być poniżej Progu Zatrzymania ({stop} W), aby zadziałać"
     },
     "price_entity": {
-      "power_sensor": "To jest Czujnik Mocy urządzenia, a nie cena. Encja ceny ma pierwszeństwo przed statyczną ceną poniżej, więc cykle byłyby wyceniane po watach za kWh - wyczyść to pole.",
-      "energy_sensor": "To jest Licznik Energii urządzenia, a nie cena. Encja ceny ma pierwszeństwo przed statyczną ceną poniżej, więc cykle byłyby wyceniane po wskazaniu licznika za kWh - wyczyść to pole.",
-      "device_class": "Klasa tego czujnika to {dc}, a nie cena za kWh. Encja ceny ma pierwszeństwo przed statyczną ceną poniżej - wyczyść to pole lub wskaż czujnik taryfy.",
-      "unit": "Ten czujnik podaje wartości w {unit}, co nie jest ceną za kWh. Encja ceny ma pierwszeństwo przed statyczną ceną poniżej - wyczyść to pole lub wskaż czujnik taryfy."
+      "power_sensor": "To jest Czujnik Mocy urządzenia, a nie cena. Cykle byłyby wyceniane w watach za kWh; wyczyść to pole.",
+      "energy_sensor": "To jest Licznik Energii urządzenia, a nie cena. Cykle byłyby wyceniane według wskazania licznika za kWh; wyczyść to pole.",
+      "device_class": "Ten czujnik mierzy {dc}, a nie cenę za kWh. Wyczyść to pole lub wybierz czujnik taryfy.",
+      "unit": "Ten czujnik podaje wartości w {unit}, a nie cenę za kWh. Wyczyść to pole lub wybierz czujnik taryfy."
     },
     "pump_stuck": {
-      "duration": "Musi być mniejszy niż Limit Czasu Braku Aktualizacji ({to} s), aby alarm zacięcia zadziałał przed wyłączeniem cyklu przez watchdoga",
-      "timeout": "Musi przekraczać Czas Zacięcia Pompy ({ps} s), aby alarm zadziałał przed wymuszonym zatrzymaniem cyklu"
+      "duration": "Musi być mniejszy niż Limit Czasu Braku Aktualizacji ({to} s), aby alarm zacięcia zadziałał pierwszy",
+      "timeout": "Musi przekraczać Czas Zacięcia Pompy ({ps} s), aby alarm zacięcia zadziałał pierwszy"
     },
     "start_dur": {
       "sampling": "Interwał Próbkowania przekracza Czas Trwania Startu ({sdt} s); pojedynczy impuls może otworzyć cykl",
@@ -334,10 +327,15 @@
       "sampling": "Interwał Próbkowania powinien wynosić co najwyżej połowę Interwału Watchdog ({wi} s)"
     },
     "settings_banner": "Konflikty ustawień: {n}. Sprawdź podświetlone sekcje i popraw je przed zapisaniem.",
-    "settings_banner_btn": "Przejdź do pierwszego"
+    "settings_banner_btn": "Przejdź do pierwszego",
+    "end_energy": {
+      "energy": "Zbyt restrykcyjne dla Progu Zatrzymania ({w} W) w czasie Opóźnienia Wyłączenia ({d} s); cykl może się zakończyć tylko ścieżką awaryjną",
+      "stop": "Energia Zakończenia ({e} Wh w ciągu {d} s) dopuszcza tylko {p} W"
+    }
   },
   "hdr": {
-    "ab_comparison": "Porównanie ustawień A/B",
+    "custom_tasks": "Własne zadania",
+    "maintenance_supporter": "Potrzebujesz więcej?",
     "access_control": "Kontrola dostępu",
     "add_maintenance": "Dodaj zdarzenie konserwacji",
     "automation_delete": "Usuń tę automatyzację",
@@ -346,28 +344,22 @@
     "automation_review_this_cycle": "Przejrzyj ten cykl",
     "automations": "Automatyka",
     "clear_debug": "Wyczyść ślady debugowania",
-    "cycle_simulator": "Symulator cykli",
     "diagnostics_pref": "Diagnostyka",
     "display": "Wyświetlacz",
-    "dtw_inspector": "Inspektor DTW",
     "export_import": "Eksportuj/Importuj",
-    "getting_started": "Pierwsze kroki",
     "live_power": "Moc na żywo",
     "logs": "Dzienniki",
-    "logs_diagnostics": "Diagnostyka",
     "maintenance": "Działania konserwacyjne",
     "maintenance_log": "Dziennik konserwacji",
     "maintenance_reminders": "Przypomnienia serwisowe",
     "manual_recording": "Nagrywanie ręczne",
-    "manual_recording_tip": "Uruchom cykl celowo, gdy WashData rejestruje przebieg mocy. Naciśnij Start tuż przed uruchomieniem urządzenia, Stop po zakończeniu, a następnie Przetwórz, aby zapisać jako nazwany profil.",
+    "manual_recording_tip": "Nagraj cykl celowo: naciśnij Rozpocznij nagrywanie tuż przed uruchomieniem urządzenia i Zatrzymaj po zakończeniu, a potem Przetwórz, aby zapisać go jako profil.",
     "ml_learned": "Czego nauczył się WashData",
-    "ml_matching_tuning": "Dostrajanie dopasowania programu",
     "ml_settings_card": "Ustawienia",
     "ml_smart_learning": "Inteligentne uczenie się",
     "my_preferences": "Moje preferencje",
     "no_automations": "Żadna automatyzacja nie odwołuje się jeszcze do tego urządzenia.",
     "panel_settings": "Ustawienia panelu",
-    "param_sweep": "Przemiatanie parametru",
     "pg_settings_source": "Źródło ustawień",
     "phase_catalog": "Katalog faz",
     "playground": "Piaskownica",
@@ -376,11 +368,8 @@
     "status": "Status",
     "status_graph": "Wykres stanu",
     "storage_stats": "Statystyki przechowywania",
-    "test_history": "Testuj na historii",
     "toggle_sidebar": "Przełącz pasek boczny Asystenta Home",
-    "tools_and_data": "Narzędzia i dane",
     "wipe_history": "Wyczyść historię",
-    "recommendations": "Zalecenia ({n})",
     "pg_detection_params": "Ustawienia wykrywania",
     "pg_outcome": "Wynik symulacji",
     "pg_across_cycles": "We wszystkich Twoich cyklach",
@@ -388,7 +377,8 @@
     "online_account": "Sklep społecznościowy i funkcje online",
     "import_power_history": "Import historii mocy",
     "service_status": "Status serwisu",
-    "online_account_tab": "Online i społeczność"
+    "online_account_tab": "Online i społeczność",
+    "live_match_debug": "Debugowanie dopasowania na żywo"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -396,11 +386,16 @@
     "poor": "⚠ Słaba jakość profilu"
   },
   "lbl": {
-    "envelope_position_tip": "Pozycja na własnej zarejestrowanej krzywej dopasowanego programu, {pct}%. Wyznaczana przez dopasowanie kształtu tego cyklu do profilu, a nie przez odliczanie czasu, więc pozostaje poprawna, gdy przebieg jest dłuższy lub krótszy niż zwykle. Odświeża się, gdy urządzenie jest ciche, więc podczas aktywnej fazy może być opóźniona.",
+    "envelope_position_tip": "Pozycja na zarejestrowanej krzywej dopasowanego programu: {pct}%. Wyznaczana przez dopasowanie cyklu do profilu, więc pozostaje poprawna, gdy przebieg jest dłuższy lub krótszy. Odświeża się, gdy urządzenie jest ciche, więc może się opóźniać.",
     "envelope_position": "krzywa {pct}%",
     "aria_playground_chart3": "Interaktywny wykres mocy cyklu: najedź, aby odczytać czas/moc, przewiń lub użyj dwóch palców, aby powiększyć, przeciągnij, aby przesunąć",
     "device_unresolved": "Niedostępne urządzenie ({id})",
     "drag_to_resize": "Przeciągnij, aby zmienić rozmiar",
+    "task_name": "Zadanie",
+    "every_cycles": "Co ile cykli",
+    "every_days": "Co ile dni",
+    "new_task_name": "Nowe zadanie",
+    "days_since_service": "{since} / {total} dni",
     "actions": "Działania",
     "activity": "Działalność",
     "administrators": "Administratorzy",
@@ -408,10 +403,8 @@
     "aria_cycle_chart": "Krzywa mocy cyklu",
     "aria_envelope_chart": "Obwiednia mocy profilu",
     "aria_phase_chart": "Wykres edytora faz",
-    "aria_playground_chart": "Krzywa mocy cyklu z przeciąganymi progami wykrywania",
     "aria_power_chart": "Wykres mocy",
     "aria_spaghetti_chart": "Nałożone krzywe mocy cykli",
-    "aria_sweep_chart": "Wykres wyników przemiatania parametru",
     "artifact_anomaly": "Anomalia",
     "artifact_high_power": "Wysoka moc",
     "artifact_interruption": "Przerwanie",
@@ -425,151 +418,103 @@
     "cohesion_good": "spójność {pct}%",
     "cohesion_low": "⚠ niska spójność {pct}%",
     "compare_profiles": "Porównaj z profilami",
-    "concurrency": "Współbieżność",
     "confidence": "Zaufanie",
     "confidence_threshold": "Próg ufności",
     "correct_duration": "Prawidłowy czas trwania (min, opcjonalnie)",
     "correct_profile": "Prawidłowy profil",
-    "correlation": "Korelacja",
     "cost": "Koszt",
     "create_new_profile": "+ Utwórz nowy profil…",
     "current_phase": "Bieżąca faza",
-    "curves": "Krzywe",
     "cycle": "Cykl",
     "cycle_date_display": "Wyświetlanie daty cyklu",
-    "cycle_health": "Zdrowie na rowerze",
-    "cycle_index": "indeks cyklu →",
-    "cycles": "Cykle",
     "cycles_count": "Cykle",
     "cycles_lc": "cykli",
-    "dashed": "przerywana",
     "date": "Data",
     "debug_traces": "Debuguj ślady",
-    "default": "Domyślny",
     "default_access_level": "Domyślny poziom dla użytkowników niewymienionych poniżej",
     "default_other": "Domyślne (inne urządzenia)",
     "default_tab": "Domyślna zakładka podczas otwierania panelu",
     "font_size": "Rozmiar czcionki panelu",
-    "delta": "Δ",
     "description": "Opis",
-    "dtw_blend_w": "Waga mieszania",
-    "dtw_blended": "Wynik mieszany",
-    "dtw_ddtw": "Wynik DDTW",
-    "dtw_l1": "Wynik L1",
-    "dtw_matched_profile": "(dopasowany profil cyklu)",
     "duration": "Czas trwania",
-    "duration_agreement": "Zgodność czasu trwania",
-    "emphasis": "Podkreślenie",
     "enable_access_control": "Włącz kontrolę dostępu dla poszczególnych użytkowników",
     "energy": "Energia",
-    "energy_agreement": "Zgodność energii",
-    "event_timeline": "Oś czasu zdarzeń",
     "event_type": "Typ zdarzenia",
     "expected": "Oczekiwane",
+    "suspected_profile": "{name} (przypuszczalny)",
+    "runner_up_profile": "{name} (drugi najlepszy)",
     "expected_duration": "Oczekiwany czas trwania (min)",
     "file_kb": "Plik (kB)",
-    "final_score": "Wynik końcowy",
     "from": "Od",
     "gap_s": "Luka (y)",
     "group_name": "Nazwa grupy",
     "head_trim": "Przycięcie początku (s)",
-    "health": "Zdrowie",
     "hide_tabs": "Ukryj karty dla osób niebędących administratorami",
-    "in_use": "W użyciu",
     "json_data": "Dane JSON",
     "label": "Dopasowany program",
     "last": "Ostatnie",
     "last_checked": "Ostatnio sprawdzane:",
     "load_from_file": "Załaduj z pliku",
-    "mae_score": "Wynik MAE",
     "manual_duration": "Ręczny czas trwania (min, opcjonalnie)",
     "match": "Dopasowanie",
     "members": "Członkowie",
-    "metric": "Metryka",
     "mode_existing_profile": "Dodaj do istniejącego profilu",
     "mode_new_profile": "Utwórz nowy profil",
     "models_fine_tuned": "(dostrojone modele: {count})",
-    "n_classic_suggestions": "{n} klasyczne",
-    "n_ml_suggestions": "{n} ML",
     "n_selected": "Wybrano {n}",
-    "n_tuning_suggestions": "{n} sugestia dostrajania",
-    "na": "nd.",
+    "n_tuning_suggestions": "{n} sugestii dostrajania",
+    "n_tuning_suggestions_one": "{n} sugestia dostrajania",
+    "n_tuning_suggestions_few": "{n} sugestie dostrajania",
+    "n_tuning_suggestions_many": "{n} sugestii dostrajania",
+    "n_tuning_suggestions_other": "{n} sugestii dostrajania",
     "new_profile_name": "Nowa nazwa profilu",
     "notes": "Notatki",
-    "of": "z",
-    "outcome": "Wynik",
     "panel_default_tab": "Zakładka domyślna",
     "panel_language": "Język panelu",
     "per_cycle_short": "cykl",
-    "pg_autofill_tip": "Wypełnij automatycznie zakres na podstawie bieżącej wartości ({lo}–{hi})",
     "pg_best_value": "Znaleziona najlepsza wartość",
     "pg_current_value": "Bieżąca wartość:",
     "pg_drag_hint": "Przeciągnij linię na wykresie",
     "pg_anti_wrinkle": "Antygniotowy",
-    "pg_dtw": "DTW",
     "pg_ev_ending": "Kończenie",
     "pg_ev_running": "Działa",
     "pg_group_advanced": "Przypadki brzegowe",
     "pg_group_detection": "Wyzwalacze wykrywania",
     "pg_group_timing": "Reguły czasowe",
     "pg_idle": "Bezczynny",
-    "pg_last_run": "Ostatnie uruchomienie: {date}",
-    "pg_match_score": "Wynik dopasowania",
-    "pg_pct_of": "{p}% z {total}",
     "pg_poor_match": "Kiepskie dopasowanie",
     "pg_preset": "Preset piaskownicy",
     "pg_preset_name": "Nazwa nowego presetu",
     "pg_preset_none": "Wybierz preset…",
     "pg_strong_match": "Silne dopasowanie",
-    "pg_tile_ambiguous": "Niejednoznaczny",
-    "pg_tile_ambiguous_tip": "Cykle z niemal równym dopasowaniem do dwóch programów",
-    "pg_tile_detected": "Wykryto",
-    "pg_tile_detected_tip": "Cykle, w których moc przekroczyła próg startu na tyle długo, by zostać zarejestrowana jako działanie",
-    "pg_tile_matched": "Dopasowano",
-    "pg_tile_matched_tip": "Cykle poprawnie przypisane do znanego programu",
-    "pg_time_left": "Pozostały czas",
     "pg_weak_match": "Słabe dopasowanie",
     "phase_name": "Nazwa fazy",
     "name": "Nazwa",
     "phase_timeline": "Oś czasu faz",
     "power": "Moc",
     "profile": "Profil",
-    "profile_index": "indeks profilu →",
     "profile_name": "Nazwa profilu",
     "program": "Program",
-    "program_tip": "Zastąp profil dopasowywany do bieżącego cyklu. Automatyczne wykrywanie pozwala integracji automatycznie wybrać najlepsze dopasowanie. Przypnij określony program, aby wymusić dopasowanie, gdy automatyczne wykrywanie jest błędne lub wiesz, co jest uruchomione. Wybierz program przed uruchomieniem urządzenia, a zostanie zastosowany, gdy tylko rozpocznie się następny cykl.",
+    "program_tip": "Wybierz, do którego programu dopasowany jest bieżący cykl. Automatyczne wykrywanie wybiera najlepsze dopasowanie. Przypnij program, gdy automatyczne wykrywanie się myli; program wybrany przed startem dotyczy następnego cyklu.",
     "progress": "Postęp",
     "raw_socket": "Surowe gniazdo",
-    "read_only": "Tylko do odczytu",
     "ref_cycle": "Cykl referencyjny (opcjonalnie)",
-    "refresh_interval": "Interwał odświeżania (s)",
     "remaining": "Pozostały",
     "reminder_every": "Przypominaj co (cykle)",
     "remove_label": "- Usuń etykietę -",
     "rename_profile": "Zmień nazwę profilu",
-    "replay_duration": "Odtwarzanie",
     "resulting_profile": "Wynikowy profil",
     "save_mode": "Tryb oszczędzania",
-    "score": "Wynik",
-    "score_breakdown": "Rozbicie wyniku",
     "seconds_from_start": "Sekundy od początku",
     "select_profile": "Wybierz opcję Profil",
     "setting": "Ustawienie",
-    "settings_a": "Ustawienia A (bieżące)",
-    "settings_a_short": "A",
     "settings_advanced": "Zaawansowane",
-    "settings_b": "Ustawienia B (test)",
-    "settings_b_short": "B",
     "settings_basic": "Podstawowe",
     "settings_detail_level": "Poziom szczegółowości ustawień",
-    "settings_overrides": "Zastąpienia ustawień",
     "show_debug": "Pokaż kartę debugowania dopasowania na żywo na stronie Status (pewność, niejednoznaczność, najlepsi kandydaci)",
     "show_expected": "Pokaż oczekiwaną nakładkę krzywej (dopasowany profil, pomarańczowy)",
     "show_raw": "Pokaż przełącznik surowych odczytów gniazdka na wykresie mocy na żywo",
     "sparkline": "Ostatni trend czasu trwania cykli",
-    "stage2": "Etap 2 – podstawowe podobieństwo",
-    "stage3": "Etap 3 – DTW",
-    "stage4": "Etap 4 – zgodność",
     "status": "Status",
     "tail_trim": "Przycięcie końca (s)",
     "tap_to_dismiss": "dotknij wykresu, aby zamknąć",
@@ -580,7 +525,6 @@
     "ungrouped": "Rozgrupowane",
     "unlabelled": "Nieoznakowane",
     "unlabelled_paren": "(bez etykiety)",
-    "warp_path": "Ścieżka dopasowania",
     "input": "Wejście:",
     "start": "Początek",
     "end": "Koniec",
@@ -605,9 +549,8 @@
     "n_shown": ", pokazano {n}",
     "cycles_title": "Cykle ({n})",
     "pg_detecting": "Wykrywanie",
-    "pg_best_marker": "Najlepszy: {v}",
     "pg_time_left_model": "Pozostały czas (model)",
-    "pg_time_left_model_tip": "Szacowany przez model pozostały czas (estymator faz + mieszanie z ML), a nie statyczne odliczanie",
+    "pg_time_left_model_tip": "Szacowane na podstawie faz programu, a nie stałe odliczanie",
     "phase": "Faza",
     "pg_mode_history": "Testuj na historii",
     "pg_ev_detected": "Wykryto",
@@ -647,18 +590,8 @@
     "pg_mode_optimize": "Optymalizuj",
     "pg_group_matching": "Dopasowywanie programów",
     "pg_zoom_hint": "kliknij dwukrotnie, aby zresetować powiększenie",
-    "aria_playground_chart2": "Interaktywny wykres mocy cyklu: najedź, aby odczytać czas/moc, przewiń, aby powiększyć, przeciągnij, aby przesunąć",
     "pg_alert_timeout_end": "Zakończono z powodu limitu czasu, nie na podstawie prognozy",
     "pg_alert_indefinite": "Działałby w nieskończoność",
-    "pg_alert_stress_cap": "Osiągnięto limit bezpieczeństwa",
-    "pg_alert_stress_ok": "Wykrycie stanu bezczynności: cykl zatrzymany",
-    "pg_alert_stress_warn": "Pobór mocy w trybie bezczynności powyżej progu zatrzymania",
-    "pg_stress_group": "Test zatrzymania w stanie bezczynności",
-    "pg_stress_idle_auto": "Auto",
-    "pg_stress_idle_w": "Poziom bezczynności (W)",
-    "pg_stress_idle_w_desc": "Zastąp automatycznie wykrytą wartość minimalną w trybie czuwania (pozostaw puste dla automatycznego wykrycia).",
-    "pg_stress_toggle": "Testuj wykrywanie stanu bezczynności",
-    "pg_stress_toggle_desc": "Symuluje, że urządzenie utrzymuje pobór mocy w trybie czuwania po zakończeniu nagrywania -- pokazuje, czy i kiedy WashData zatrzyma cykl.",
     "task_pg_history": "Test na historii",
     "task_pg_sweep": "Optymalizuj",
     "task_reprocess": "Ponowne przetwarzanie",
@@ -668,16 +601,9 @@
     "pg_recent_runs": "Ostatnie uruchomienia",
     "pg_load_run": "Wczytaj ponownie to uruchomienie",
     "pg_match_confidence": "Pewność dopasowania",
-    "pg_envelope_fit": "Zgodność z obwiednią",
-    "pg_envelope_fit_tip": "Jak dokładnie cykl mieści się w zapisanej obwiedni mocy tego profilu, inne spojrzenie niż pewność dopasowania.",
     "n_imported_note": ", {n} zaimportowanych",
     "enable_online": "Włącz funkcje online",
-    "store_brand": "Marka urządzenia",
-    "store_model": "Model urządzenia",
     "anonymous": "Anonimowo",
-    "rate_quality": "Oceń jakość",
-    "rate_n": "{n} gwiazdek",
-    "approved_only": "Tylko zatwierdzone",
     "adopt_settings": "Przyjmij ustawienia",
     "flags": "Flagi",
     "include_phase_map": "Dołącz mapę faz",
@@ -694,7 +620,6 @@
     "cat_custom_phases": "Fazy niestandardowe",
     "cat_profile_groups": "Grupy profili",
     "cat_settings": "Ustawienia wykrywania i rozpoznawania",
-    "cat_matching_config": "Strojenie rozpoznawania",
     "cat_ml_models": "Modele ML",
     "cat_feedback": "Etykiety opinii i weryfikacji",
     "cat_suggestions": "Sugestie",
@@ -714,7 +639,6 @@
     "conflict_overwrite": "Nadpisz",
     "hist_csv_data": "Dane CSV",
     "hist_from_recorder": "Albo wczytaj ją z Home Assistant",
-    "days": "dni",
     "hist_keep": "Zachowaj ten cykl",
     "hist_looks_complete": "zakończony",
     "peak_power_short": "Szczyt",
@@ -735,7 +659,44 @@
     "zoom_hint_touch_zoomed": "przybliż dwoma palcami · dotknij dwukrotnie, aby zresetować",
     "cycles_since_service": "{since} / {total} cykli",
     "total_cycles_run": "cykli łącznie",
-    "correct_total_cycles": "Popraw łączną liczbę"
+    "correct_total_cycles": "Popraw łączną liczbę",
+    "hist_reason_already_recorded": "nakłada się na cykl już zarejestrowany przez WashData",
+    "share_consent": "Potwierdzam, że te cykle przebiegły normalnie do końca, bez przerwania",
+    "show_internal": "Pokaż ustawienia wewnętrzne",
+    "show_internal_tip": "Ustawienia, które WashData stroi za Ciebie (próbkowanie, watchdog, częstotliwość dopasowania, progi). Widoczne, gdy to urządzenie ma własną wartość, konflikt lub sugestię.",
+    "rate_n": "{n} gwiazdek",
+    "rate_quality": "Oceń jakość",
+    "pg_autolabel": "Automatyczne oznaczanie",
+    "pg_label_review": "Prosi o przegląd",
+    "pg_ev_match_reverted": "Dopasowanie cofnięte",
+    "pg_ev_verified_pause": "Potwierdzona pauza",
+    "n_samples": "{n} próbek",
+    "n_samples_one": "{n} próbka",
+    "n_samples_few": "{n} próbki",
+    "n_samples_many": "{n} próbek",
+    "n_samples_other": "{n} próbki",
+    "n_cycles": "{n} cykli",
+    "n_cycles_one": "{n} cykl",
+    "n_cycles_few": "{n} cykle",
+    "n_cycles_many": "{n} cykli",
+    "n_cycles_other": "{n} cyklu",
+    "energy_per_cycle": "{v}/cykl",
+    "energy_total": "łącznie {v}",
+    "automation_off": "(wyłączona)",
+    "ref_cycle_none": "Brak",
+    "share_name": "Pokazuj moją nazwę w udostępnianych treściach",
+    "cat_backfill_cycles": "Cykle znalezione w zaimportowanej historii mocy",
+    "pg_compare_profile": "Porównaj z profilem",
+    "pg_obj_early": "Wskaźnik wczesnych końców",
+    "pg_obj_endlag": "Opóźnienie końca (mediana)",
+    "pg_obj_split": "Wskaźnik podzielonych cykli",
+    "pg_sweep_cycles": "Ostatnie cykle",
+    "cycle_context": "Historia z recordera wokół cyklu",
+    "cycle_context_off": "Wyłączone",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Historia z recordera",
+    "before_start": "Przed startem",
+    "after_end": "Po zakończeniu"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -745,11 +706,9 @@
   },
   "ml": {
     "builtin_models": "● Korzystanie z wbudowanych modeli",
-    "fit_fair": "Akceptowalny",
     "fit_good": "Dobry",
     "fit_slight": "Niewielki",
     "fit_strong": "Mocny",
-    "fit_weak": "Słaby",
     "fit_word": "dopasowanie",
     "personalized": "● Spersonalizowane dla tego urządzenia",
     "better_than_baseline": "{pct}% lepiej niż szacunek bazowy ({metric})",
@@ -757,21 +716,33 @@
     "trend_declining_tip": "Dopasowanie tego modelu pogorszyło się w ostatnich ponownych sprawdzeniach, przejrzenie większej liczby cykli może pomóc mu ponownie się nauczyć.",
     "trend_steady_tip": "Dopasowanie tego modelu pozostało mniej więcej stabilne w ostatnich ponownych sprawdzeniach.",
     "cap_blurb": {
-      "end": "Wykrywanie, kiedy cykl faktycznie się zakończył",
-      "live_match": "Szybsze rozpoznawanie uruchomionego programu",
-      "quality": "Wykrywanie błędnie rozpoznanych lub uszkodzonych cykli",
-      "remaining_time": "Przewidywanie, ile czasu pozostało",
       "total_energy": "Przewidywanie całkowitej energii i kosztu"
     },
     "cap_label": {
-      "end": "Wykrywanie końca cyklu",
-      "live_match": "Rozpoznawanie programu",
-      "quality": "Kontrola jakości cyklu",
-      "remaining_time": "Szacowanie pozostałego czasu",
       "total_energy": "Szacowanie energii"
     },
-    "metric_auc": "AUC {auc} na danych walidacyjnych",
-    "metric_mae": "błąd {model} względem modelu bazowego {baseline}"
+    "metric_mae": "błąd {model} względem modelu bazowego {baseline}",
+    "fine_tuned_at": "dostrojono {when}",
+    "held_out_count": "zmierzono na {count} cyklach walidacyjnych",
+    "held_out_count_one": "zmierzono na {count} cyklu walidacyjnym",
+    "held_out_count_few": "zmierzono na {count} cyklach walidacyjnych",
+    "held_out_count_many": "zmierzono na {count} cyklach walidacyjnych",
+    "held_out_count_other": "zmierzono na {count} cyklu walidacyjnego",
+    "last_run_not_promoted": "Ostatnie sprawdzenie ({when}): {reason}",
+    "never": "nigdy",
+    "skip_reason": {
+      "fit_failed": "Trenowanie nie powiodło się: {error}",
+      "holdout_too_small": "Za mało cykli, by rzetelnie przetestować nowy model: do testów można było odłożyć {held_out}, a potrzeba {min}.",
+      "insufficient_rows": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczonych, czystych cykli.",
+      "insufficient_rows_one": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczony, czysty cykl.",
+      "insufficient_rows_few": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczone, czyste cykle.",
+      "insufficient_rows_many": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczonych, czystych cykli.",
+      "insufficient_rows_other": "Wciąż za mało użytecznych cykli: jak dotąd {count} oznaczonego, czystego cyklu.",
+      "not_better_than_incumbent": "Nowy model nie był lepszy od używanego (błąd {model} wobec {incumbent}), więc zachowano obecny.",
+      "not_better_than_naive": "Nowy model nie był wyraźnie lepszy od prostego oszacowania (błąd {model} wobec {naive}).",
+      "unknown": "Nie nauczono się niczego nowego."
+    },
+    "trained_unknown": "w nieznanym momencie"
   },
   "modal": {
     "auto_label": "Cykle automatycznego etykietowania",
@@ -780,7 +751,6 @@
     "cycle": "Cykl",
     "edit_group": "Edytuj grupę profili",
     "edit_phase": "Edytuj fazę",
-    "import_config": "Importuj konfigurację",
     "label_cycle": "Cykl etykiet",
     "merge_cycles": "Połącz {n} cykli",
     "new_group": "Nowa grupa profili",
@@ -795,6 +765,8 @@
     "delete_automation_title": "Usuń automatyzację",
     "delete_automation_msg": "Usunąć automatyzację \"{name}\" z Home Assistant? Tej operacji nie można cofnąć.",
     "remove_legacy_title": "Usuń starsze akcje",
+    "reset_phase_msg": "Cofnąć edycję fazy \"{name}\" i przywrócić wbudowaną fazę? Programy zachowają swoje zakresy.",
+    "reset_phase_title": "Resetuj fazę",
     "remove_legacy_msg": "Usunąć starsze niestandardowe akcje? Przestaną się uruchamiać przy zdarzeniach cyklu. Nie można tego cofnąć z panelu.",
     "discard_recording_title": "Odrzuć nagranie",
     "discard_recording_msg": "Odrzucić zapisane nagranie? Tej operacji nie można cofnąć.",
@@ -815,32 +787,46 @@
     "store_share_device": "Udostępnij konfigurację urządzenia",
     "export_select": "Eksport - wybierz dane",
     "import_wizard": "Import - wybierz dane",
-    "history_import": "Import historii mocy"
+    "history_import": "Import historii mocy",
+    "apply_suggestions_title": "Zastosuj sugestie",
+    "remove_task_title": "Usuń zadanie",
+    "remove_task_msg": "Usunąć przypomnienie \"{task}\"? Jego wpisy w dzienniku konserwacji zostaną zachowane.",
+    "apply_suggestions_msg": "Zmienić te ustawienia ({n})? Integracja zostanie przeładowana po zapisaniu.",
+    "discard_settings_title": "Odrzucić niezapisane zmiany?",
+    "discard_settings_msg": "Niezapisane zmiany ustawień: {n}. Opuścić Ustawienia i je odrzucić?",
+    "profile_title": "Profil · {name}",
+    "undo_import_msg": "Dane i ustawienia tego urządzenia wrócą do stanu sprzed ostatniego importu ({when}). Cykle zarejestrowane i zmiany wprowadzone od tego czasu zostaną utracone.",
+    "undo_import_ok": "Cofnij import",
+    "undo_import_title": "Cofnij ostatni import"
   },
   "msg": {
     "pg_canvas_empty3": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń lub użyj dwóch palców, aby powiększyć, i przeciągnij, aby przesunąć.",
+    "pg_preset_delete_confirm": "Usunąć preset \"{name}\"?",
+    "pg_preset_limit": "Osiągnięto limit presetów ({n})",
+    "pg_preset_overwrite": "Nadpisać preset \"{name}\"?",
     "tail_trim_hint": "Ile sekund usunąć z końca",
-    "store_sibling_hint": "Nic nie udostępniono dla Twojego dokładnego modelu? Bardzo podobny model tej samej marki to zwykle dobry punkt wyjścia.",
-    "store_declare_appliance": "Wskaż WashData, jakie urządzenie posiadasz, a ta karta pokaże konfiguracje udostępnione dla niego przez innych użytkowników. Możesz też wpisać markę powyżej, aby się rozejrzeć.",
-    "refresh_catalog_hint": "Listy marek i urządzeń społeczności są przechowywane w pamięci podręcznej, aby wspólny sklep nie przekroczył swojego dziennego limitu zapytań. Odśwież, aby pobrać pozycje dodane lub zatwierdzone przez innych.",
+    "store_sibling_hint": "Nic nie udostępniono dla Twojego modelu? Pokrewny model tej samej marki to zwykle dobry początek.",
+    "store_declare_appliance": "Wskaż WashData, jakie urządzenie posiadasz, aby zobaczyć konfiguracje udostępnione dla niego przez innych. Możesz też wpisać markę powyżej, aby się rozejrzeć.",
+    "refresh_catalog_hint": "Listy marek i urządzeń społeczności są buforowane, aby oszczędzać dzienny limit sklepu. Odśwież, aby zobaczyć pozycje dodane lub zatwierdzone przez innych.",
     "head_trim_hint": "Ile sekund usunąć z początku",
     "appliance_monitor": "Monitor urządzenia",
     "artifact_dip_detail": "Moc spadła poniżej normalnego zakresu przez ~{n}s.",
     "artifact_footer": "Zaznaczono na powyższym wykresie. Są to artefakty przejściowe (np. otwarcie drzwi w połowie cyklu), niekoniecznie problemy.",
     "artifact_header": "W tym cyklu wykryto {n} anomalii",
-    "artifact_pause_detail": "Moc spadła prawie do zera przez ~{n}s, a następnie wzrosła – prawdopodobnie drzwi zostały otwarte w trakcie cyklu lub cykl był wstrzymany.",
+    "artifact_header_one": "W tym cyklu wykryto {n} anomalię",
+    "artifact_header_few": "W tym cyklu wykryto {n} anomalie",
+    "artifact_header_many": "W tym cyklu wykryto {n} anomalii",
+    "artifact_header_other": "W tym cyklu wykryto {n} anomalii",
+    "artifact_pause_detail": "Moc spadła prawie do zera na ~{n}s, a potem wróciła. Prawdopodobnie otwarto drzwi lub wstrzymano cykl.",
     "artifact_spike_detail": "Moc przekroczyła normalny zakres przez ~{n}s.",
     "auto_label_intro": "Przypisz profile do nieoznakowanych cykli, których pewność dopasowania przekracza próg.",
     "automations_intro": "WashData uruchamia zdarzenia {start} / {end} i udostępnia encje, więc powiadomienia i akcje najlepiej budować jako normalne automatyzacje Home Assistant. Automatyzacje korzystające z tego urządzenia są widoczne poniżej.",
-    "cleanup_intro": "Wszystkie oznaczone cykle nałożone na siebie. Zaznacz odstające cykle, a następnie usuń im etykietę (zostaną w historii, ale przestaną kształtować ten profil) albo usuń je całkowicie.",
+    "cleanup_intro": "Wszystkie oznaczone cykle nałożone na siebie. Zaznacz odstające, a potem usuń im etykietę (zostaną w historii, ale przestaną kształtować ten profil) lub je usuń.",
     "clear_debug_hint": "Usuń zapisane dane debugowania, aby zwolnić miejsce.",
     "collecting_data": "Zbieranie danych. Brakujące cykle do rozpoczęcia dostrajania: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Profile nakładkowe (słabe)",
-    "compare_profiles_tip": "Nałóż inne koperty profili na powyższy wykres, aby zobaczyć, która z nich najlepiej pasuje do tego cyklu.",
+    "compare_profiles_tip": "Nałóż inne profile na wykres, aby zobaczyć, który najlepiej pasuje do tego cyklu.",
     "compare_selected_cycles": "Wybrane cykle (pełne) – pokaż / ukryj",
-    "consider_new_profile": "Rozważ utworzenie nowego profilu.",
-    "coverage_gap": "ostatnie cykle nie mają pasującego profilu ({pct}% z ostatnich 30).",
-    "coverage_gap_similar_cycles": "Znaleziono {count} podobnych nieoznaczonych cykli – utwórz profil, aby zacząć je dopasowywać.",
     "cycles_deleted": "Usunięto cykle: {count}",
     "enough_data": "Wystarczająco danych do nauki ({current}/{min} cykli).",
     "export_description": "Wybierz dokładnie, które profile, cykle, ustawienia i inne dane wyeksportować do pliku JSON, albo przeanalizuj plik i zaimportuj tylko wybrane części.",
@@ -848,30 +834,28 @@
     "feedback_prompt": "Potwierdź, że wszystko było w porządku, popraw program lub zignoruj.",
     "feedback_relabel_hint": "Ponowne oznaczenie tego cyklu również go rozwiązuje.",
     "filter_by_profile": "Filtruj według profilu…",
-    "group_modal_help": "Grupuj programy o tym samym kształcie, różniące się temperaturą/wirowaniem (czas trwania może się różnić). Dopasowanie ocenia grupę jako jednego kandydata, a następnie wybiera najlepiej dopasowanego członka. Wybierz co najmniej 2; nakładka pokazuje, jak bardzo są podobni.",
+    "group_modal_help": "Grupuj programy o tym samym kształcie, różniące się temperaturą lub wirowaniem. Dopasowanie ocenia grupę jako całość, a potem wybiera najlepiej pasującego członka. Wybierz co najmniej 2; nakładka pokazuje, jak bardzo są podobne.",
     "group_not_cohesive": "Te profile nie są na tyle podobne, aby można było je bezpiecznie grupować, więc dopasowywanie traktuje je indywidualnie, dopóki nie usuniesz wartości odstającej lub nie podzielisz grupy.",
     "group_preview_hint": "Zaznacz co najmniej 2 członków, aby podejrzeć i porównać ich krzywe mocy.",
-    "import_intro": "Załaduj wyeksportowany plik lub wklej poniżej ładunek JSON.",
-    "legacy_actions_title": "{count} starsze działanie niestandardowe nadal działa",
+    "legacy_actions_title": "Starsze działania niestandardowe nadal działające: {count}",
+    "legacy_actions_title_one": "{count} starsze działanie niestandardowe nadal działa",
+    "legacy_actions_title_few": "{count} starsze działania niestandardowe nadal działają",
+    "legacy_actions_title_many": "{count} starszych działań niestandardowych nadal działa",
+    "legacy_actions_title_other": "Starsze działania niestandardowe nadal działające: {count}",
     "live_chart_loading": "Wykres mocy na żywo pojawia się po otrzymaniu odczytów.",
     "loading": "Załadunek…",
     "loading_curve": "Ładowanie krzywej…",
     "loading_settings": "Ładowanie ustawień…",
     "log_buffer_hint": "Najpierw najnowsze · buforuje ostatnie 500 rekordów ha_washdata od ponownego uruchomienia · przeciągnij dolną krawędź, aby zmienić rozmiar.",
-    "maintenance_advisory": "Zwiększenie czasu trwania/energii może wskazywać na konieczność konserwacji urządzenia (np. odkamieniania, czyszczenia filtra).",
     "maintenance_due": "Wymagana konserwacja: {items}",
-    "maintenance_intro": "Zapisuj czynności serwisowe wykonywane przy tym urządzeniu i otrzymuj przypomnienia, gdy każde zadanie znów będzie wymagane.",
+    "maintenance_intro": "Zapisuj serwis tego urządzenia i otrzymuj przypomnienia, gdy każde zadanie znów będzie wymagane.",
     "maintenance_load_error": "Nie można wczytać danych konserwacji: {error}",
     "maintenance_requires_access": "Konserwacja i eksport/import wymagają pełnego dostępu.",
-    "manual_duration_hint": "Średnia/oczekiwana długość cyklu profilu, używana do szacunków pozostałego czasu. Edytuj, aby to ustawić; pozostawienie go bez zmian powoduje zachowanie bieżącej wartości.",
-    "matching_tuning_intro": "Podczas nauki WashData dostosowuje również wpływ dopasowania programu na kształt w porównaniu z czasem trwania i energią.",
+    "manual_duration_hint": "Oczekiwana długość cyklu profilu, używana do szacowania pozostałego czasu. Pozostaw bez zmian, aby zachować bieżącą wartość.",
     "merge_intro": "Wybrane cykle są łączone w jeden (kolejność chronologiczna; przerwy wypełnione 0 W). Wybierz wynikowy profil.",
     "ml_intro": "WashData jest dostarczana z inteligentnymi modelami, które działają od razu po wyjęciu z pudełka.",
     "ml_learned_intro": "Modele dopasowane do tej maszyny.",
-    "ml_loading": "ładowanie ML…",
     "ml_settings_intro": "Dwa niezależne przełączniki: jeden stosuje modele w trakcie trwania cyklu, drugi pozwala WashData dostosować je do Twojej maszyny w miarę upływu czasu.",
-    "name_first_program": "Masz wystarczająco dużo cykli – nadaj nazwę pierwszemu programowi, aby rozpocząć dopasowywanie.",
-    "near_duplicate_cluster": "Wykryto prawie zduplikowany klaster profili. Grupowanie umożliwia niezawodne wybieranie podobnych programów (np. tego samego programu w innej temperaturze/wirowaniu).",
     "no_cycles_match": "Żaden cykl nie pasuje do bieżącego filtra.",
     "no_cycles_profile": "Brak cykli dla tego profilu.",
     "no_cycles_selected": "Najpierw wybierz co najmniej jeden cykl.",
@@ -896,79 +880,66 @@
     "no_suggestions": "Brak aktywnych sugestii.",
     "notify_services_hint": "Użyj identyfikatorów usług {entity} (oddzielonych przecinkami dla kilku). Zmienne szablonu: {vars}.",
     "old_actions_warning": "Skonfigurowano przy użyciu starego edytora akcji (teraz usuniętego). Nadal uruchamiają się w przypadku wydarzeń cyklicznych, ale nie można ich już tutaj edytować. Przekształć je w normalną automatyzację lub usuń.",
-    "onboarding_progress": "Zaobserwowano {n} / 3 cykli",
-    "onboarding_watching": "Używaj urządzenia normalnie – WashData obserwuje. Po 3 cyklach rozpocznie się dopasowywanie programów.",
     "pending_feedback": "Oczekuje na informację zwrotną dotyczącą wykrycia",
     "performance_trend": "Trend wydajności ({n} cykli)",
-    "pg_analysis_empty": "Wczytaj cykl, aby zobaczyć analizę dopasowania.",
     "pg_apply_confirm": "Zastosować najlepszą wartość: {label} = {value}?",
-    "pg_canvas_empty": "Wybierz cykl powyżej, a następnie naciśnij Wczytaj, aby zobaczyć jego przebieg mocy.",
-    "pg_chart_caption": "Współczynnik wykrywania/dopasowania dla wartości {param}",
     "pg_ctrl_intro": "Wartości pochodzą z aktywnych ustawień integracji dla tego urządzenia. Zmiany pozostają w piaskownicy, dopóki nie zapiszesz ich w integracji.",
     "pg_live_unavailable": "Aktywne ustawienia niedostępne, wyświetlane są wartości domyślne.",
     "pg_load_live_confirm": "Odrzucić zmiany w piaskownicy ({n}) i wczytać ponownie bieżące ustawienia integracji?",
-    "pg_match_rate": "{pct}% skuteczności dopasowania na {total} cyklach",
     "pg_matches_live": "Zgodne z aktywnymi ustawieniami",
     "pg_n_changed": "Zmienione względem aktywnych ustawień: {n}",
     "pg_sugg_none": "Wszystkie sugestie już odpowiadają bieżącym ustawieniom",
-    "pg_preset_delete_confirm": "Usunąć preset \"{name}\"?",
-    "pg_preset_limit": "Osiągnięto limit presetów ({n})",
-    "pg_preset_overwrite": "Nadpisać preset \"{name}\"?",
     "pg_publish_one_confirm": "Zapisać {label} = {value} w ustawieniach tego urządzenia?",
     "pg_restart_note": "Uruchom ponownie Home Assistant, aby włączyć narzędzia symulacji.",
-    "pg_sim_progress": "{done} / {total} cykli",
-    "pg_starting": "Rozpoczynanie…",
-    "pg_stress_synthetic": "symulacja bezczynności zaczyna się tutaj",
-    "pg_sweep_intro": "Co by było, gdyby {param} był inny? Przetestuj {steps} wartości na swoich ostatnich {cycles} cyklach, aby znaleźć ustawienie, przy którym najwięcej cykli jest poprawnie dopasowanych.",
-    "pg_sweep_step": "Krok {done} / {total}",
-    "pg_verdict_bad": "Wymaga uwagi: wiele cykli pozostaje niewykrytych.",
-    "pg_verdict_good": "Dobrze dostrojone: większość cykli jest poprawnie rozpoznawana i dopasowywana.",
-    "pg_verdict_ok": "Akceptowalnie: część cykli pominięto. Spróbuj obniżyć próg startu.",
     "phase_catalog_intro": "Nazwane segmenty cyklu (pranie wstępne, podgrzewanie, wirowanie…). Przypisz je do profilu z panelu sterowania.",
     "phase_ranges_intro": "Zakresy faz (minuty od początku cyklu) nałożone na krzywą średnią. Edytuj wartości, aby wyświetlić podgląd na żywo.",
-    "playground_intro": "Bezpieczna piaskownica do odtwarzania wcześniejszych cykli z innymi ustawieniami, porównywania dwóch konfiguracji obok siebie i sprawdzania, jak cykl dopasowuje się do profilu. Nic tutaj nie zmienia Twoich aktywnych danych, dopóki wyraźnie tego nie zastosujesz.",
-    "playground_needs_restart": "Uruchom ponownie Home Assistant, aby włączyć narzędzia Piaskownicy.",
-    "preferences_admin": "Preferencje, panel i kontrola dostępu",
-    "preferences_adv": "Preferencje",
+    "playground_intro": "Wypróbuj ustawienia na rzeczywistych danych swoich cykli. Nic tutaj nie zmienia aktywnych ustawień, dopóki ich nie zastosujesz.",
     "prefs_personal": "Dotyczą one wyłącznie Twojego konta Home Assistant.",
     "font_size_hint": "Powiększ lub pomniejsz wszystko w tym panelu. Dotyczy Twojego konta na tym urządzeniu.",
-    "process_history_hint": "Ponownie uruchom dopasowywanie na wszystkich zapisanych cyklach, odśwież sugestie dostrajania, ponownie wytrenuj modele ML (jeśli włączone), przelicz koszty cykli według zapisanych cen energii i przelicz kondycję cykli. Uruchom to po serii przeglądów.",
+    "process_history_hint": "Ponownie uruchom dopasowanie na wszystkich zapisanych cyklach, odśwież sugestie, ponownie wytrenuj modele ML (jeśli włączone), przelicz koszty cykli według zapisanych cen i przelicz kondycję cykli. Uruchom to po serii przeglądów.",
     "profile_deleted": "Profil usunięty",
-    "profile_poor_health_detail": "Cykle przypisane do tego profilu mają niespójne kształty lub niską pewność. Rozważ przebudowę koperty lub przejrzenie oznakowanych cykli.",
     "profiles_intro": "Kliknij profil, aby zobaczyć statystyki, fazy i porządki. Grupuj niemal identyczne programy (ten sam kształt/czas trwania, różna temperatura lub wirowanie), aby dopasowanie umożliwiało niezawodne wybieranie między nimi.",
-    "rbac_hint": "Gdy opcja jest wyłączona, każdy użytkownik Home Assistant ma pełny dostęp (domyślnie). Administratorzy zawsze mają pełny dostęp i mogą zarządzać wszystkimi.",
-    "recent_logs": "Najnowsze rekordy ha_washdata",
+    "rbac_hint": "Wyłączone: każdy użytkownik Home Assistant ma pełny dostęp (domyślnie). Administratorzy zawsze mają pełny dostęp i mogą zarządzać wszystkimi.",
     "recording_in_progress": "Trwa nagrywanie",
     "reminders_intro": "Pokaż przypomnienie w panelu po tylu cyklach od ostatniego serwisu. Pozostaw puste lub 0, aby wyłączyć przypomnienie.",
     "restart_gap_footer": "Zaznaczone na wykresie. Dane mocy są niedostępne dla tych przedziałów; dopasowanie używało tylko rzeczywistych odczytów.",
-    "restart_gap_header": "{n} przerwa restartu HA podczas tego cyklu",
+    "restart_gap_header": "{n} przerwy restartu HA podczas tego cyklu",
+    "restart_gap_header_one": "{n} przerwa restartu HA podczas tego cyklu",
+    "restart_gap_header_few": "{n} przerwy restartu HA podczas tego cyklu",
+    "restart_gap_header_many": "{n} przerw restartu HA podczas tego cyklu",
+    "restart_gap_header_other": "{n} przerwy restartu HA podczas tego cyklu",
     "restart_gap_item": "{dur} przerwa",
-    "review_confirm_help": "Sprawdź, czy ten cykl został prawidłowo wykryty. Twoje recenzje szkolą model na Twojej maszynie – im więcej cykli potwierdzisz, tym lepsze dopasowanie i punktacja kondycji. Wystarczy szybkie dobre/złe.",
+    "review_confirm_help": "Czy ten cykl został wykryty poprawnie? Potwierdzanie cykli poprawia dopasowanie dla Twojej maszyny. Wystarczy szybkie Dobry/Zły.",
     "review_in_settings": "Przejrzyj w Ustawieniach",
     "review_notes_placeholder": "Notatki (opcjonalnie)",
     "review_notes_tip": "Notatki tekstowe do własnego użytku. Nieużywane podczas dopasowywania lub treningu.",
-    "review_profile_tip": "Program tego cyklu jest oznaczony jako. Jeśli automatycznie wykryty program był błędny, popraw go tutaj - etykietowanie uczy dopasowywania dla przyszłych cykli.",
-    "review_quality_tip": "Jak czysty jest ten cykl. Dobry = podręcznikowy przykład tego programu; Zły = wykryty, ale głośny lub nietypowy; Nieużyteczny = błędnie wykryty (połączony, obcięty lub fałszywy). Określa wynik kondycji i liczbę cykli, które mogą trenować model.",
-    "review_recorded_tip": "Oznacz to jako ręcznie wybrany cykl referencyjny dla swojego programu – pełni tę samą rolę, co cykl nagrany ręcznie. Cykle referencyjne są zawsze zachowywane, zaszczepiają pasujący szablon i nigdy nie są usuwane podczas czyszczenia. (To jest „złota”/nagrana flaga; obie są tym samym.)",
-    "review_tags_tip": "Opcjonalne flagi opisujące, co poszło nie tak w tym cyklu, więc szkolenie i czyszczenie mogą to wyjaśnić.",
+    "review_profile_tip": "Program, którym oznaczono ten cykl. Jeśli jest błędny, popraw go tutaj; etykiety uczą dopasowanie.",
+    "review_quality_tip": "Jak czysty jest ten cykl. Dobry: podręcznikowy przebieg tego programu. Zły: wykryty, ale zaszumiony lub nietypowy. Nie nadaje się do użytku: błędnie wykryty (połączony, ucięty lub fałszywy). Wpływa na wynik kondycji i na to, które cykle trenują model.",
+    "review_recorded_tip": "Oznacz jako ręcznie wybrany cykl referencyjny jego programu, tak jak cykl nagrany ręcznie. Cykle referencyjne są zawsze zachowywane, tworzą szablon dopasowania i nigdy nie są usuwane przy czyszczeniu.",
+    "review_tags_tip": "Opcjonalne flagi opisujące, co poszło nie tak, aby trenowanie i czyszczenie mogły to uwzględnić.",
     "review_to_cycles": "Otwórz kolejkę przeglądu Cykli",
     "samples_decimated": "Wyświetlanie {shown} z {total} próbek (przerzedzone do wyświetlania; szczyty zachowane). Szeroka przerwa oznacza tu przerzedzenie, a nie brakujące dane.",
-    "saving_triggers_reload": "Zapisanie powoduje przeładowanie integracji. Jednostki HA mogą przez chwilę być wyświetlane jako niedostępne.",
+    "saving_triggers_reload": "Zapisanie przeładowuje integrację. Encje mogą przez chwilę być niedostępne.",
     "search_placeholder": "Ustawienia wyszukiwania…",
     "see_recorder": "Zobacz widżet rejestratora poniżej",
     "setting_changed": "Zmieniono z {old} na {new} dnia {date}",
     "settings_basic_note": "Wyświetlane są podstawowe ustawienia. Przełącz na Zaawansowane, aby zobaczyć pełną listę.",
-    "shape_drift_advisory": "⚠ Dryf kształtu",
-    "shape_drift_detail": "Wzorzec mocy dla tego profilu zmienił się z biegiem czasu – możliwe zużycie urządzenia lub konieczna konserwacja (np. odkamienianie, czyszczenie filtra).",
     "show_all_settings": "Pokaż wszystkie ustawienia",
-    "showing_suggestions": "Wyświetlam ustawienie {count} z sugestiami.",
-    "split_intro": "Kliknij wykres, aby dodać lub usunąć punkt podziału albo automatycznie wykryć na podstawie pustych przerw. Każdy powstały segment może otrzymać swój własny profil.",
-    "storage_diagnostics": "Statystyki przechowywania, konserwacja, eksport/import",
+    "showing_suggestions": "Wyświetlam {count} ustawienia z sugestiami.",
+    "showing_suggestions_one": "Wyświetlam {count} ustawienie z sugestiami.",
+    "showing_suggestions_few": "Wyświetlam {count} ustawienia z sugestiami.",
+    "showing_suggestions_many": "Wyświetlam {count} ustawień z sugestiami.",
+    "showing_suggestions_other": "Wyświetlam {count} ustawienia z sugestiami.",
+    "split_intro": "Kliknij wykres, aby dodać lub usunąć punkt podziału, albo wykryj podział automatycznie po przerwach bezczynności. Każda część może dostać własny profil.",
     "sug_staged": "Ustawiono {key} = {val}. Zapisz, aby zastosować.",
     "sug_muted": "To ustawienie nie będzie więcej sugerowane",
     "sug_mute_failed": "Nie udało się wyciszyć sugestii",
     "sug_unmuted_all": "Wyciszone sugestie przywrócone",
-    "n_suggestions_muted": "{count} wyciszonych; automatyczny tuner nie będzie proponować tych ustawień.",
+    "n_suggestions_muted": "Wyciszono {count} sugestii; automatyczny tuner nie będzie ich proponować.",
+    "n_suggestions_muted_one": "Wyciszono {count} sugestię; automatyczny tuner nie będzie jej proponować.",
+    "n_suggestions_muted_few": "Wyciszono {count} sugestie; automatyczny tuner nie będzie ich proponować.",
+    "n_suggestions_muted_many": "Wyciszono {count} sugestii; automatyczny tuner nie będzie ich proponować.",
+    "n_suggestions_muted_other": "Wyciszono {count} sugestii; automatyczny tuner nie będzie ich proponować.",
     "toast_auto_detect_enabled": "Automatyczne wykrywanie włączone",
     "toast_auto_label_complete": "Automatyczne oznaczanie zakończone",
     "toast_auto_label_failed": "Automatyczne oznaczanie nie powiodło się: {error}",
@@ -984,7 +955,6 @@
     "toast_no_automation": "Nie można tu utworzyć automatyzacji",
     "toast_profile_name_required": "Wymagana jest nazwa profilu",
     "toast_program_set": "Ustawiony program: {program}",
-    "toast_rebuild_failed": "Odbudowanie nie powiodło się: {error}",
     "toast_resume_failed": "Wznowienie nie powiodło się: {error}",
     "toast_revert_failed": "Przywracanie nie powiodło się: {error}",
     "toast_reverted": "Cofnięto: {key}",
@@ -995,95 +965,82 @@
     "trend_energy_up": "Trend wzrostowy w zakresie energii ({pct}%/cykl) – ostatnia średnia {avg}",
     "trim_destructive_confirm": "To zachowa tylko {pct}% cyklu i tej operacji nie można cofnąć. Kontynuować?",
     "trim_intro": "Przeciągnij czerwone uchwyty lub wprowadź wartości. Wszystko poza oknem jest usuwane.",
-    "tuning_suggestions_available": "Sugestia dostrojenia {count} dostępna z obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
+    "tuning_suggestions_available": "Dostępne sugestie dostrojenia na podstawie obserwowanych cykli: {count}. Pojawiają się obok odpowiednich pól.",
+    "tuning_suggestions_available_one": "Dostępna jest {count} sugestia dostrojenia na podstawie obserwowanych cykli. Pojawia się obok odpowiedniego pola.",
+    "tuning_suggestions_available_few": "Dostępne są {count} sugestie dostrojenia na podstawie obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
+    "tuning_suggestions_available_many": "Dostępnych jest {count} sugestii dostrojenia na podstawie obserwowanych cykli. Pojawiają się obok odpowiednich pól.",
+    "tuning_suggestions_available_other": "Dostępne sugestie dostrojenia na podstawie obserwowanych cykli: {count}. Pojawiają się obok odpowiednich pól.",
     "unsure_detected_prefix": "WashData nie jest pewien, czy został wykryty",
-    "updated": "Zaktualizowano",
     "warmup_badge": "Wciąż się uczy ({done}/{needed} cykli)",
-    "warmup_detail": "Ten profil potrzebuje {needed} oznaczonych cykli, zanim rozpocznie się automatyczne dopasowywanie. Każdy potwierdzony cykl pomaga mu się uczyć.",
+    "warmup_detail": "Dopasowanie już działa. WashData prosi o potwierdzenie pierwszych {needed} cykli tego profilu, zanim zacznie oznaczać samodzielnie.",
     "wipe_history_warning": "Usuń trwale wszystkie cykle i profile. Nie można tego cofnąć.",
     "compare_overlay_tip": "Nałóż wyuczone obwiednie profili, aby zobaczyć, który program przypomina każdy cykl.",
-    "duration_trend_up_tip": "Czas trwania rośnie ({pct}%/cykl)",
-    "duration_trend_down_tip": "Czas trwania spada ({pct}%/cykl)",
-    "energy_trend_up_tip": "Energia rośnie ({pct}%/cykl)",
-    "energy_trend_down_tip": "Energia spada ({pct}%/cykl)",
-    "performance_trending": "Trend wydajności",
-    "pg_select_cycle_hint": "Wybierz cykl i kliknij ↺, aby wczytać",
-    "pg_sweep_progress": "Krok {done} / {total}",
-    "pg_analysis_hint": "Wybierz cykl i kliknij ↺, aby wczytać analizę.",
     "diagnostics_load_failed": "Nie udało się wczytać diagnostyki: {error}",
-    "manual_duration_ref_hint": "Używane tylko wtedy, gdy nie wybrano cyklu referencyjnego. Cykl referencyjny ustawia czas trwania na podstawie własnej długości.",
+    "manual_duration_ref_hint": "Używane tylko bez cyklu referencyjnego; cykl referencyjny ustawia czas trwania według własnej długości.",
+    "duration_learned_hint": "Wyliczone z cykli tego programu (bez wartości odstających) i aktualizowane po każdym nowym. Aby to zmienić, przytnij lub usuń cykle, które odbiegają.",
     "toast_convert_rolled_back": "Konwersja nie powiodła się i została wycofana (nie pozostawiono żadnej automatyzacji): {error}",
     "toast_convert_orphan": "Automatyzacja została utworzona, ale wyczyszczenie starych akcji nie powiodło się. Nie próbuj ponownie: usuń stare akcje ręcznie, aby uniknąć zduplikowanej automatyzacji.",
-    "advisory_duration_trend_up": "Cykle '{name}' trwają coraz dłużej (około +{pct}% na cykl). Jeśli zachowanie urządzenia się zmieniło, nagraj ponownie lub przebuduj ten profil.",
-    "advisory_energy_trend_up": "'{name}' pobiera coraz więcej energii (około +{pct}% na cykl) - warto sprawdzić urządzenie, jeśli jest to nieoczekiwane.",
-    "advisory_poor_health": "'{name}' ma niski wskaźnik dopasowania - jego ostatnie cykle mocno się różnią lub słabo pasują. Przejrzyj jego cykle lub nagraj profil ponownie, aby rozpoznawanie i szacunki czasu pozostały dokładne.",
-    "advisory_shape_drift": "'{name}' znacząco odbiegł od pierwotnego kształtu krzywej mocy. Zachowanie urządzenia mogło zmienić się z czasem (np. kamień, zużycie). Rozważ ponowne nagranie tego profilu na podstawie ostatnich cykli.",
-    "advisory_shape_drift_corr": "'{name}' znacząco odbiegł od pierwotnego kształtu krzywej mocy (korelacja {corr}). Zachowanie urządzenia mogło zmienić się z czasem (np. kamień, zużycie). Rozważ ponowne nagranie tego profilu na podstawie ostatnich cykli.",
-    "advisory_unmatchable": "'{name}' nigdy nie zostanie dopasowany: nie stoi za nim żaden cykl z danymi o mocy, więc WashData nie ma z czym porównać trwającego cyklu. Oznacz jakiś cykl tym programem (lub nagraj jeden), aby profil wrócił do dopasowywania.",
-    "advisory_unmatchable_no_duration": "'{name}' nigdy nie zostanie dopasowany: ma cykl z danymi o mocy, ale bez użytecznego czasu trwania, więc WashData nie ma długości odniesienia, według której mierzy dopasowanie. Nagraj ten program ponownie lub ustaw jego oczekiwany czas trwania, aby wrócił do dopasowywania.",
+    "advisory_duration_trend_up": "Cykle '{name}' trwają coraz dłużej (około +{pct}% na cykl). Jeśli urządzenie się zmieniło, nagraj ponownie lub odbuduj ten profil.",
+    "advisory_energy_trend_up": "'{name}' zużywa więcej energii z każdym cyklem (około +{pct}% na cykl). Sprawdź urządzenie, jeśli to nieoczekiwane.",
+    "advisory_poor_health": "'{name}' słabo pasuje: jego ostatnie cykle mocno się różnią lub są słabo dopasowane. Przejrzyj jego cykle lub nagraj go ponownie, aby dopasowanie i szacunki pozostały dokładne.",
+    "advisory_shape_drift": "'{name}' odbiegł od pierwotnego kształtu krzywej mocy, być może przez kamień lub zużycie. Rozważ ponowne nagranie na podstawie ostatnich cykli.",
+    "advisory_shape_drift_corr": "'{name}' odbiegł od pierwotnego kształtu krzywej mocy (korelacja {corr}), być może przez kamień lub zużycie. Rozważ ponowne nagranie na podstawie ostatnich cykli.",
+    "advisory_unmatchable": "'{name}' nigdy nie zostanie dopasowany: nie stoi za nim żaden cykl z danymi o mocy. Oznacz lub nagraj cykl tego programu, aby to naprawić.",
+    "advisory_unmatchable_no_duration": "'{name}' nigdy nie zostanie dopasowany: jego cykl nie ma użytecznego czasu trwania. Nagraj ten program ponownie lub ustaw jego oczekiwany czas trwania.",
     "pg_no_alerts": "W tym uruchomieniu nie wykryto żadnych problemów.",
     "pg_override_active": "Używane są Twoje edytowane ustawienia zamiast bieżących",
     "pg_history_empty": "Naciśnij Uruchom, aby odtworzyć swoje cykle.",
     "pg_history_summary": "{detected}/{total} wykryto · {correct} poprawnie dopasowano",
     "pg_sweep_no_metric": "Za mało danych, aby ocenić ten cel.",
     "pg_sweep_intro2": "Znajdź ustawienie, które najlepiej spełnia cel dla Twoich ostatnich cykli. Nic się nie zmieni, dopóki go nie zastosujesz.",
-    "pg_running_history": "Odtwarzanie Twoich cykli…",
-    "pg_running_sweep": "Testowanie wartości w Twoich cyklach…",
     "pg_row_load_hint": "Wczytaj ten cykl na wykresie powyżej",
-    "pg_history_intro2": "Odtwórz swoje ostatnie cykle przez rzeczywisty detektor i mechanizm dopasowywania programów z ustawieniami powyżej. Kliknij dowolny wiersz, aby wczytać dany cykl na wykresie; zmień ustawienie, aby zobaczyć porównanie przed zmianą i po niej.",
+    "pg_history_intro2": "Odtwórz ostatnie cykle przez rzeczywisty detektor i mechanizm dopasowania z ustawieniami powyżej. Kliknij wiersz, aby wczytać go na wykres; zmień ustawienie, aby porównać przed i po.",
     "pg_simulating": "Symulowanie cyklu…",
-    "pg_canvas_empty2": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń, aby powiększyć, i przeciągnij, aby przesunąć.",
     "pg_apply_settings_confirm": "Zapisać te ustawienia ({n}) w tym urządzeniu? {list}",
-    "pg_stress_terminated_detail": "Ustabilizował się na ~{idle}W w trybie bezczynności -- cykl zakończył się {h} godz {m} min później przez {reason}.",
-    "pg_stress_above_threshold_detail": "Pobór mocy w trybie bezczynności ~{idle}W jest równy lub wyższy od efektywnego progu zatrzymania ({stop}W) -- cykl nigdy nie został rozpoznany jako nieaktywny. Zwiększ stop_threshold_w, aby to naprawić.",
-    "pg_stress_hit_cap_detail": "Cykl działał {h} godz {m} min bez zatrzymania -- wymuszono zatrzymanie przez limit bezpieczeństwa. Pobór mocy w trybie bezczynności {idle}W wobec progu zatrzymania {stop}W.",
     "no_logs_match": "Żadne wpisy dziennika nie pasują do tych filtrów.",
     "pg_analysis_hint2": "Wybierz cykl i naciśnij Uruchom, aby wczytać analizę dopasowania.",
-    "pg_analysis_empty2": "Naciśnij Uruchom, aby zobaczyć analizę dopasowania.",
-    "imported_readonly": "Zaimportowano ze sklepu społecznościowego. Wyświetlane w celach referencyjnych i do dopasowywania. Nie liczy się do Twoich statystyk i nie można go edytować.",
+    "imported_readonly": "Zaimportowany ze sklepu społeczności. Służy jako odniesienie i do dopasowania, nie liczy się do statystyk i nie można go edytować.",
     "merge_no_imports": "Zaimportowanych nagrań nie można scalić z rzeczywistym cyklem. Odznacz je, aby scalić.",
-    "store_enable_hint": "Włącz funkcje online w Ustawieniach, aby przeglądać i importować cykle referencyjne społeczności.",
-    "advisory_duration_outlier": "Cykle oznaczone jako '{name}' ({n}) są zbyt odległe od jego zwykłej długości, aby kiedykolwiek mogły zostać z nim dopasowane (największe odchylenie: {ratio}x). Prawdopodobnie są błędnie oznaczone albo jedno nagranie objęło dwa uruchomienia. Oznacz je ponownie lub podziel, aby przestały zniekształcać szacowany czas tego programu.",
+    "store_enable_hint": "Włącz funkcje online w Preferencje > Online i społeczność, aby przeglądać i importować cykle referencyjne społeczności.",
+    "advisory_duration_outlier": "Cykle oznaczone jako ‘{name}’ ({n}) odbiegają od jego zwykłej długości zbyt mocno, aby kiedykolwiek zostały dopasowane (najgorszy: {ratio}x). Prawdopodobnie są błędnie oznaczone lub zawierają dwa przebiegi. Oznacz je ponownie lub podziel, aby przestały zaburzać szacowany czas.",
     "standby_above_stop_title": "Nadal pobiera {idle} W w momencie zakończenia cyklu",
     "standby_above_stop_sub": "{n} z ostatnich {total} cykli. Opóźnienie Wyłączenia zaczyna biec dopiero wtedy, gdy moc spadnie poniżej Progu Zatrzymania ({stop} W), więc cykle kończą się z opóźnieniem albo trzeba je zatrzymywać ręcznie.",
-    "online_intro": "Udostępniaj i pobieraj cykle referencyjne z innymi użytkownikami WashData. Wszystkie funkcje online są dobrowolne i domyślnie wyłączone.",
     "store_share_intro": "Prześlij ten cykl referencyjny, aby inni z tym samym urządzeniem mogli go używać. Zostanie sprawdzony przed publicznym udostępnieniem.",
-    "online_intro_global": "Przeglądaj i udostępniaj nagrania referencyjne innym użytkownikom WashData oraz potwierdzaj wpisy urządzeń. Jedno połączenie dotyczy całej integracji WashData; markę i model urządzenia ustawia się osobno dla każdego urządzenia w sekcji Podstawowe. Wszystkie funkcje online są dobrowolne i domyślnie wyłączone.",
+    "online_intro_global": "Przeglądaj i udostępniaj nagrania referencyjne innym użytkownikom WashData. Jedno połączenie obejmuje wszystkie Twoje urządzenia WashData; markę i model ustawia się dla każdego urządzenia w sekcji Podstawowe. Funkcje online są wyłączone, dopóki ich nie włączysz.",
     "online_unavailable": "Funkcje online nie są dostępne na tym serwerze.",
     "store_picker_offline": "Włącz funkcje online w kółku zębatym ustawień, aby wybierać z katalogu społeczności.",
     "pick_brand_first": "Najpierw wybierz markę urządzenia.",
-    "model_not_found": "Nie ma go jeszcze w katalogu.",
-    "connect_to_confirm": "Połącz się w kółku zębatym ustawień, aby potwierdzić lub ocenić.",
+    "custom_task_limit": "Osiągnięto limit zadań ({max}).",
+    "custom_tasks_intro": "Dodaj wszystko inne, o czym chcesz otrzymywać przypomnienia. Zadanie staje się wymagane, gdy upłynie którykolwiek z interwałów; pozostaw jeden pusty lub 0, aby używać tylko drugiego.",
+    "maintenance_due_sensor_hint": "Czujnik binarny Wymagana konserwacja jest włączony, gdy którekolwiek zadanie jest wymagane; możesz go użyć we własnych automatyzacjach powiadomień.",
+    "maintenance_supporter_intro": "Maintenance Supporter to osobna integracja, która potrafi znacznie więcej: dowolne urządzenie lub zadanie, harmonogramy według czasu, użycia lub czujnika, powiadomienia i historia. Może korzystać z licznika cykli WashData.",
     "adopt_settings_hint": "Zastosuj ustawienia wykrywania i dopasowywania udostępnionego urządzenia do tego urządzenia",
-    "include_settings_hint": "Dołącz progi wykrywania, wagi dopasowywania i inne parametry do udostępnianego pakietu",
+    "include_settings_hint": "Udostępnij progi wykrywania i dopasowania tego urządzenia (bez powiadomień, encji i ceny energii). Inni sami zdecydują, czy je zastosować.",
     "onboard_download": "Pobierz gotową konfigurację ze sklepu społeczności",
-    "share_consent": "Udostępniasz rzeczywiste dane ze swojego urządzenia. Nie udostępniaj, jeśli Twoje wzorce użytkowania są prywatne.",
     "share_device_none": "Nie skonfigurowano jeszcze żadnych urządzeń. Najpierw dodaj urządzenie.",
     "share_guideline_naming": "Używaj czytelnych nazw programów (np. 'Cotton 40', 'Eco 60'), żeby inni mogli je zidentyfikować",
-    "share_guideline_quality": "Udostępniaj tylko cykle, które zakończyły się normalnie: bez przerw w połowie cyklu, otwierania drzwi ani chwilowych zaników zasilania.",
+    "share_guideline_quality": "Udostępniaj tylko cykle zakończone normalnie: bez przerw, otwierania drzwi i chwilowych zaników zasilania.",
     "share_guideline_review": "Przejrzyj swoje profile przed udostępnieniem -- usuń te, które wyglądają błędnie",
     "share_guidelines_title": "Przed udostępnieniem",
-    "store_download_device_intro": "Pobierz konfigurację urządzenia ze społeczności i zastosuj ją do nowego lub istniejącego urządzenia",
+    "store_download_device_intro": "Dodaj do swojego urządzenia wszystkie udostępnione programy i ich cykle referencyjne. Twoje własne cykle i statystyki pozostaną bez zmian.",
     "store_share_device_intro": "Prześlij {brand} {model} wraz z wybranymi cyklami referencyjnymi. Inne osoby z tym samym urządzeniem mogą przyjąć Twoje programy. Wpisy są sprawdzane przed publikacją.",
     "share_profile_no_cycles": "Brak cykli referencyjnych. Aby dołączyć ten profil, oznacz cykl jako ⭐ na karcie Cykle",
-    "advisory_phase_inconsistent": "Wygląda na to, że '{name}' miesza różne programy lub temperatury - jego cykle nagrzewają się przez bardzo różne czasy. Podzielenie go na osobne profile (np. dla każdej temperatury) poprawi dopasowanie i szacowanie czasu.",
-    "advisory_phase_inconsistent_title": "⚠ Prawdopodobnie pomieszane programy",
-    "export_select_intro": "Zaznacz dokładnie to, co ma zostać uwzględnione. Wybranie profili bez ich cykli i tak eksportuje rozpoznawalny program (jego wyuczony kształt jest przenoszony razem z nim).",
-    "import_analyze_hint": "Wczytaj wyeksportowany plik (lub wklej jego JSON). WashData go przeanalizuje i pokaże dokładnie, co można zaimportować, zanim cokolwiek się zmieni.",
+    "export_select_intro": "Zaznacz, co uwzględnić. Profile bez swoich cykli i tak eksportują rozpoznawalny program.",
+    "import_analyze_hint": "Wczytaj wyeksportowany plik (lub wklej jego JSON). WashData pokaże, co można zaimportować, zanim cokolwiek się zmieni.",
     "analyzing": "Analizowanie…",
-    "device_type_mismatch_warn": "Ten eksport pochodzi z innego typu urządzenia ({src} vs {local}). Programy i cykle można nadal zaimportować jako dane referencyjne, ale ustawienia specyficzne dla urządzenia oraz import rzeczywistej historii są wyłączone.",
+    "device_type_mismatch_warn": "Ten eksport pochodzi z innego typu urządzenia ({src} vs {local}). Programy i cykle można nadal zaimportować jako dane referencyjne, ale bez ustawień urządzenia i rzeczywistej historii.",
     "merge_hint": "Zaimportowane elementy są dodawane; nic lokalnego nie zostaje utracone. Konflikty nazw rozwiązuje się poniżej.",
     "replace_warn": "Każda zaznaczona kategoria zostaje wyczyszczona i zastąpiona danymi z pliku. Niezaznaczone kategorie pozostają nietknięte.",
     "dest_reference_hint": "Zaimportowane cykle jedynie poprawiają rozpoznawanie programów i nigdy nie wpływają na statystyki zużycia/energii.",
-    "dest_real_history_hint": "Zaimportowane cykle liczą się jako własna historia tego urządzenia i zasilają statystyki energii/zużycia. Użyj przy przenoszeniu jednego urządzenia do nowej instalacji.",
-    "import_history_description": "Twoja inteligentna wtyczka działała już przed WashData? Wgraj eksport historii jej czujnika mocy albo wczytaj ją wprost z Home Assistant - normalne wykrywanie przebiegnie po tych danych, więc dawne cykle pojawią się na liście Cykle, gotowe do nazwania.",
-    "hist_input_hint": "Wgraj plik CSV pobrany z panelu Historia (encja, stan, ostatnia zmiana) albo pozwól WashData wczytać historię czujnika bezpośrednio. Wykrywanie przebiegnie dokładnie tak samo jak na żywo, a Ty wybierasz, które z odnalezionych cykli zachować.",
-    "hist_recorder_hint": "Odczytuje dane od wybranej daty do teraz. Home Assistant domyślnie przechowuje szczegółową historię przez 10 dni, a potem już tylko średnie godzinowe, zbyt zgrubne do wykrywania cykli - wcześniejszą datę wybieraj tylko wtedy, gdy Twój recorder jest ustawiony na dłuższe przechowywanie.",
-    "hist_scanning": "Odtwarzamy Twoją historię przez detektor. Działa to w tle - możesz zamknąć to okno i wrócić później.",
+    "dest_real_history_hint": "Zaimportowane cykle liczą się jako własna historia i statystyki tego urządzenia. Użyj tego przy przenoszeniu urządzenia do nowej instalacji.",
+    "import_history_description": "Miałeś inteligentną wtyczkę przed WashData? Wgraj jej historię mocy lub odczytaj ją z Home Assistant. Wykrywanie przebiegnie po tych danych, a dawne cykle pojawią się na liście Cykle, gotowe do nazwania.",
+    "hist_input_hint": "Wgraj plik CSV z panelu Historia (encja, stan, ostatnia zmiana) albo pozwól WashData odczytać historię czujnika bezpośrednio. Wykrywanie na żywo przebiegnie po tych danych, a Ty wybierzesz, które cykle zachować.",
+    "hist_recorder_hint": "Odczytuje dane od wybranej daty do teraz. Home Assistant domyślnie przechowuje szczegółową historię przez 10 dni; starsze średnie godzinowe są zbyt zgrubne do wykrywania cykli.",
+    "hist_scanning": "Twoja historia przechodzi przez detektor w tle. Możesz zamknąć to okno i wrócić później.",
     "hist_imported_count": "Zaimportowane cykle: {n}.",
     "hist_duplicates": "Już wcześniej zaimportowane i pominięte: {n}.",
     "hist_capped": "Osiągnięto limit zaimportowanych cykli na urządzenie; reszta nie została zapisana.",
-    "hist_next_step": "Są na liście Cykle, oznaczone jako zaimportowana historia. Otwórz jeden z nich i przyciskiem Oznacz nadaj mu nazwę programu, do którego należy.",
+    "hist_next_step": "Są na liście Cykle, oznaczone jako zaimportowana historia. Otwórz jeden i użyj Oznacz, aby nadać nazwę programu.",
     "hist_rows_read": "Wczytane odczyty: {n}",
     "hist_breaks": "Przerwy, w których czujnik był niedostępny: {n}",
     "hist_other_entity": "Pominięte odczyty innych encji: {n}",
@@ -1095,25 +1052,76 @@
     "hist_scan_capped": "Pokazywane są tylko pierwsze kandydatury (znaleziono: {n}).",
     "hist_recorder_empty": "Home Assistant nie ma szczegółowej historii tego czujnika w tym okresie.",
     "hist_scan_failed": "Skanowanie nie powiodło się.",
-    "hist_scan_expired": "To skanowanie nie jest już dostępne. Uruchom je ponownie.",
+    "hist_scan_expired": "To skanowanie nie jest już dostępne. Zeskanuj ponownie.",
     "hist_import_failed": "Import nie powiódł się.",
-    "imported_history_readonly": "Wykryty w zaimportowanej historii mocy. Wpływa na dopasowywanie programów, ale nie liczy się do Twoich statystyk i nie można go przyciąć ani podzielić. Oznacz go, aby nadać mu nazwę programu.",
-    "odometer_intro": "Ta łączna liczba tylko rośnie. Usunięcie zapisu cyklu jej nie zmienia, a licznik działa dalej także po przekroczeniu limitu przechowywanej historii, więc przypomnienia serwisowe pozostają prawidłowe.",
-    "odometer_correct_hint": "Ustaw tę wartość, jeśli WashData zapisał cykl, który nigdy się nie odbył, albo jeśli urządzenie wykonało już cykle przed instalacją WashData.",
+    "imported_history_readonly": "Wykryty w zaimportowanej historii mocy. Pomaga w dopasowaniu, ale nie liczy się do statystyk i nie można go przyciąć ani podzielić. Oznacz go, aby nadać nazwę programu.",
+    "odometer_intro": "Ta suma tylko rośnie. Usunięcie cyklu jej nie zmniejsza, więc przypomnienia serwisowe pozostają prawidłowe.",
+    "odometer_correct_hint": "Ustaw to, jeśli WashData policzył cykl, który się nie odbył, albo urządzenie wykonało cykle przed instalacją WashData.",
     "no_reminders_set": "Nie ustawiono jeszcze żadnych przypomnień serwisowych.",
     "toast_program_armed": "Program ustawiony na następny cykl: {program}",
     "toast_range_required": "Ustaw prawidłowy zakres Od/Do",
-    "no_profiles_option": "(brak profili, dodaj nowy)"
+    "no_profiles_option": "(brak profili, dodaj nowy)",
+    "compare_cycles_title": "Porównaj cykle ({count})",
+    "edit_builtin_phase": "To jest wbudowana faza. Zapisanie tworzy własną kopię; usuń kopię, aby przywrócić oryginał.",
+    "fetch_error": "Nie udało się załadować danych.",
+    "connection_lost": "Utracono połączenie - wyświetlane są dane z godz. {time}.",
+    "pg_notify_partial": "Znaczniki pokazują tylko powiadomienia o starcie, prawie gotowe, zakończeniu, kamieniach milowych i cichych godzinach. Aktualizacje na żywo, przypomnienia o rozładunku i alerty przekroczenia czasu nie są symulowane.",
+    "connect_to_confirm": "Połącz się w kółku zębatym ustawień, aby potwierdzić lub ocenić.",
+    "coverage_gap_cluster": "Ostatnie nieoznakowane cykle ({count}) trwające około {min} min wyglądają na jeden program, którego jeszcze nie utworzono.",
+    "pg_label_yes": "Na końcu cyklu zostałby oznaczony jako \"{name}\"",
+    "pg_label_no": "Trafiłby do przeglądu: {reason}",
+    "live_match_debug_tip": "Zaufanie: jak dokładnie bieżąca krzywa mocy pasuje do najlepszego profilu-kandydata (0-100%). Niejednoznaczne: wyniki dwóch najlepszych kandydatów różnią się o mniej niż 5%, więc etykieta jest niepewna aż do zakończenia cyklu.",
+    "automation_alias_started": "{device}: cykl rozpoczęty",
+    "automation_alias_finished": "{device}: cykl zakończony",
+    "automation_desc_started": "Uruchamiana, gdy rozpoczyna się cykl urządzenia {device}. Dodaj własne akcje (powiadomienia, światła, ...).",
+    "automation_desc_finished": "Uruchamiana, gdy kończy się cykl urządzenia {device}. Dodaj własne akcje (powiadomienia, światła, ...).",
+    "feedback_detected": "WashData wykrył: {name}",
+    "import_undo_hint": "Zachowano punkt przywracania sprzed ostatniego importu ({when}): {profiles} profil(e) i {cycles} cykl(e).",
+    "replace_undo_hint": "Najpierw zapisywany jest punkt przywracania, więc ten import można cofnąć w sekcji Eksportuj/Importuj.",
+    "pg_in_sample_note": "Te cykle pomogły zbudować profile, z którymi są porównywane, więc wyniki są optymistyczne: przy nowych cyklach spodziewaj się nieco mniej poprawnych dopasowań.",
+    "hist_tail_trimmed": "Przycięto {min} min oczekiwania po zakończeniu cyklu, tak samo jak robi to działająca integracja",
+    "hist_truncated": "zatrzymano na limicie odczytów ({n}), więc reszta historii nie została przeskanowana",
+    "hist_warn_kw": "Najwyższy odczyt to tylko {w}. Ten czujnik chyba podaje kilowaty; WashData potrzebuje watów, więc nie da się wykryć cykli.",
+    "hist_warn_naive_time": "{n} znaczników czasu nie ma strefy czasowej i zostało odczytanych jako UTC. Jeśli plik używa czasu lokalnego, cykle są przesunięte o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu mogą zostać pominięte.",
+    "hist_warn_naive_time_one": "{n} znacznik czasu nie ma strefy czasowej i został odczytany jako UTC. Jeśli plik używa czasu lokalnego, cykle są przesunięte o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu mogą zostać pominięte.",
+    "hist_warn_naive_time_few": "{n} znaczniki czasu nie mają strefy czasowej i zostały odczytane jako UTC. Jeśli plik używa czasu lokalnego, cykle są przesunięte o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu mogą zostać pominięte.",
+    "hist_warn_naive_time_many": "{n} znaczników czasu nie ma strefy czasowej i zostało odczytanych jako UTC. Jeśli plik używa czasu lokalnego, cykle są przesunięte o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu mogą zostać pominięte.",
+    "hist_warn_naive_time_other": "{n} znacznika czasu nie ma strefy czasowej i zostało odczytane jako UTC. Jeśli plik używa czasu lokalnego, cykle są przesunięte o Twoją różnicę względem UTC, a odczyty w pobliżu zmiany czasu mogą zostać pominięte.",
+    "pg_compare_profile_tip": "Wybiera tylko profil nakładany na wykres. Symulacja zawsze sama dopasowuje program do cyklu, tak jak działająca integracja.",
+    "pg_outcome_stale": "Ustawienia zmieniły się od uruchomienia tej symulacji. Nadal pokazuje ona stary wynik.",
+    "pg_sweep_guarded": "Kończy więcej cykli przedwcześnie, dzieli więcej z nich lub pomija cykle wykrywane przy obecnym ustawieniu, więc nigdy nie jest zalecane.",
+    "pg_sweep_keep_current": "Zachowaj obecną wartość ({value}, {metric}): żadna wartość nie była lepsza o co najmniej jeden cykl.",
+    "pg_sweep_n_cycles": "na {count} cyklach",
+    "pg_sweep_n_cycles_one": "na {count} cyklu",
+    "pg_sweep_n_cycles_few": "na {count} cyklach",
+    "pg_sweep_n_cycles_many": "na {count} cyklach",
+    "pg_sweep_n_cycles_other": "na {count} cyklu",
+    "pg_task_busy": "Dla tego urządzenia trwa już przebieg „Testuj na historii” lub „Optymalizuj”. Poczekaj na jego zakończenie lub go anuluj.",
+    "cycle_context_loading": "Wczytywanie historii z recordera…",
+    "cycle_context_note": "Szary: historia czujnika mocy z recordera wokół tego cyklu. Nie jest częścią cyklu i nie wpływa na czas trwania, energię ani dopasowanie.",
+    "cycle_context_none": "Recorder nie przechowuje żadnych odczytów z okresu wokół tego cyklu (Home Assistant domyślnie przechowuje historię przez 10 dni).",
+    "cycle_context_tip": "Tylko podgląd: pokazuje historię czujnika mocy z recordera wokół tego cyklu, jeśli jest jeszcze przechowywana. Aby dołączać nieudane próby startu do przyszłych cykli, użyj ustawienia Wstępny zapis krzywej (Ustawienia > Wykrywanie > Start Cyklu), które zmienia zapisane czasy trwania.",
+    "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W). Nic nie zostało zapisane; zmień obie wartości razem."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
     "anti_wrinkle": "Okresowe obroty bębna po zakończeniu cyklu w celu zapobiegania gnieceniu tkanin.",
+    "baking": "Grzałka pracuje w wysokiej temperaturze, tworząc skórkę i miąższ.",
+    "cooking": "Główna faza przygotowania z włączoną grzałką i wentylatorem.",
     "cool_down": "Obracanie bez ogrzewania pod koniec cyklu.",
+    "cool_down_af": "Chłodzenie samym wentylatorem po grzaniu.",
     "drain_and_switch": "Okres przejścia z trybu prania do trybu suszenia.",
     "dry": "Etap suszenia przy użyciu grzejnika i/lub ciepła resztkowego.",
     "drying": "Główny okres podgrzewania.",
     "heat_up": "Wstępne rozgrzewanie grzejnika przed rozpoczęciem pełnego suszenia.",
+    "keep_warm": "Lekkie grzanie, by jedzenie pozostało ciepłe.",
+    "keep_warm_bm": "Lekkie grzanie, by chleb pozostał ciepły po upieczeniu.",
+    "kneading": "Silnik miesza i wyrabia ciasto. Duży pobór mocy.",
+    "pause_af": "Krótka przerwa na potrząśnięcie lub sprawdzenie.",
+    "pre_heat": "Wstępne nagrzewanie komory przed właściwym przygotowaniem.",
     "pre_rinse": "Wstępne spryskanie przed praniem w detergencie.",
+    "proving": "Wyrastanie w niskiej temperaturze: drożdże fermentują, a ciasto rośnie.",
+    "resting": "Krótka przerwa przy małej mocy między wyrabianiem, by gluten się rozluźnił.",
     "pre_wash": "Wstępne namoczenie lub obróbka wstępna przed praniem zasadniczym.",
     "rinse": "Etap płukania czystą wodą. Faza ta może powtarzać się wielokrotnie.",
     "sanitize": "Etap czyszczenia w wysokiej temperaturze w programach odkażania.",
@@ -1126,6 +1134,7 @@
     "wash_dw": "Pranie w detergencie głównym z ogrzewaniem."
   },
   "placeholder": {
+    "custom_task": "np. Wyczyść uszczelkę drzwi",
     "add": "dodaj…",
     "group_name": "np. Bawełna 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1153,10 +1162,10 @@
   "section": {
     "dishwasher": {
       "label": "Zmywarka",
-      "intro": "Obsługa końca cyklu w zmywarkach, które zazwyczaj kończą długą, niemal cichą fazą suszenia przed krótkim końcowym odpompowaniem wody."
+      "intro": "Obsługa końca cyklu w zmywarkach, które często długo i cicho suszą przed krótkim końcowym odpompowaniem."
     },
     "anti_wrinkle": {
-      "intro": "Tryb antygniotowy wykrywa impulsy bębnowania przy niskiej mocy po fazie głównej i utrzymuje je przyłączone do zakończonego cyklu.",
+      "intro": "Dołącza do zakończonego cyklu impulsy obracania bębna o niskiej mocy, które suszarka wykonuje po fazie głównej.",
       "label": "Antygniotowy"
     },
     "basic": {
@@ -1164,7 +1173,7 @@
       "label": "Podstawowe"
     },
     "delay": {
-      "intro": "Wykrywanie opóźnionego startu identyfikuje, gdy urządzenie jest zasilane, ale jeszcze nie rozpoczęło cyklu.",
+      "intro": "Wykrywa urządzenie, które jest włączone i czeka na opóźniony start.",
       "label": "Opóźniony Start"
     },
     "detection": {
@@ -1188,157 +1197,149 @@
       "label": "Czas i Watchdog"
     },
     "triggers": {
-      "intro": "Opcjonalne zewnętrzne sygnały: wyzwalacz zakończenia, czujnik drzwi, przełącznik pauzy i przypomnienie o rozładunku.",
+      "intro": "Opcjonalne dodatki: wyzwalacz zakończenia, czujnik drzwi, przełącznik pauzy i przypomnienie o rozładunku.",
       "label": "Wyzwalacze i Drzwi"
-    },
-    "phase_eta": {
-      "label": "Pozostały czas",
-      "intro": "Pozostały czas uwzględniający fazy, dla urządzeń, których długość cyklu zależy od temperatury lub wirowania."
     }
   },
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Zwolnienie po cichej fazie suszenia",
-      "doc": "Gdy cykl przekroczy oczekiwany czas trwania, jak długo zmywarka musi pozostać cicha (poniżej Progu Zatrzymania), zanim WashData przestanie czekać na końcowe odpompowanie wody i zakończy cykl. Zwiększ tę wartość, jeśli Twoje urządzenie ma długą cichą fazę suszenia przed późnym końcowym odpompowaniem, które jest pomijane - szersze okno pozwala, aby wyuczony czas trwania podążał za sezonowym dryfem (chłodniejsza woda na wlocie = dłuższe cykle), zamiast trzymać się starej średniej. Może jedynie skrócić oczekiwanie względem wewnętrznego 30-minutowego limitu końcowego odpompowania, nigdy go nie wydłuża."
+      "doc": "Po upływie oczekiwanego czasu trwania: jak długo zmywarka musi pozostać poniżej Progu Zatrzymania, zanim WashData przestanie czekać na końcowe odpompowanie. Zwiększ, jeśli późne odpompowanie po długim suszeniu jest pomijane. Oczekiwanie nigdy nie przekracza 30 minut."
     },
     "anti_crease_finalize_ratio": {
-      "doc": "Jak daleko w oczekiwanym czasie trwania dopasowanego programu musi znajdować się cykl, zanim WashData może uznać obserwowane obracanie bębna o niskiej mocy za antygniotowy ogon i zakończyć w tym miejscu cykl. Oczekiwany czas trwania to średnia programu, więc w suszarce, której czas suszenia z czujnikiem wilgotności zależy od wsadu, większość uruchomień nigdy nie osiąga 98% tej wartości, a ogon ciągnie się aż do awaryjnego limitu czasu - często 15 do 40 minut po tym, jak maszyna faktycznie się zatrzymała. W takiej suszarce obniż tę wartość (np. 0,75). W pralkach pozostaw wartość domyślną: pralka spędza większość cyklu poniżej ustawienia Maks. Moc Antygniotowa, więc ten ułamek jest jedyną rzeczą oddzielającą cichą fazę w środku prania od ogona, a jego obniżenie może skrócić pranie o połowę. Pozostaw puste dla wartości domyślnej (0,98). To inne ustawienie niż Współczynnik inteligentnego zakończenia, które steruje osobnym sprawdzeniem wcześniejszego zakończenia.",
+      "doc": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim obracanie bębna o niskiej mocy zostanie uznane za ogon antygniotowy. Obniż (np. 0,75) w suszarkach, które dostosowują czas do wsadu. W pralkach zostaw wartość domyślną (0,98), inaczej pranie może się skończyć w połowie.",
       "label": "Współczynnik zakończenia trybu antygniotowego"
     },
     "anti_wrinkle_enabled": {
-      "doc": "Rozpoznawaj krótkie impulsy suszenia o małej mocy, które suszarka emituje po głównej fazie nagrzewania, i pamiętaj o ich dołączeniu do zakończonego cyklu, zamiast odczytywać je jako nowe cykle.",
+      "doc": "Dołączaj krótkie impulsy obracania bębna o niskiej mocy po głównej fazie grzania suszarki do zakończonego cyklu, zamiast traktować je jako nowe cykle.",
       "label": "Włącz Wykrywanie Antygniotowe"
     },
     "anti_wrinkle_exit_power": {
-      "doc": "Moc musi spaść poniżej tej wartości pomiędzy impulsami, aby tryb przeciwzmarszczkowy pozostał aktywny.",
+      "doc": "W trybie antygniotowym moc poniżej tej wartości oznacza przerwę między impulsami obrotów, a przerwa dłuższa niż Maks. Odstęp Impulsów kończy tryb. Jeśli Próg Zatrzymania jest wyższy, używany jest on, więc to ustawienie działa tylko powyżej Progu Zatrzymania.",
       "label": "Próg Wyjścia Mocy"
     },
     "anti_wrinkle_idle_timeout": {
-      "doc": "Jak długo maszyna może pozostać cicha między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy. Ustaw powyżej najdłuższej przerwy, jaką suszarka zostawia między impulsami, w przeciwnym razie każdy kolejny impuls zostanie odczytany jako fałszywy start.",
+      "doc": "Jak długo suszarka może być cicha między impulsami obracania, zanim tryb antygniotowy się zakończy. Ustaw powyżej najdłuższej przerwy suszarki, inaczej kolejne impulsy zostaną odczytane jako fałszywe starty.",
       "label": "Maks. Odstęp Impulsów"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Impulsy dłuższe niż ten traktowane są jako prawdziwy cykl, a nie przeciwzmarszczkowy upadek.",
+      "doc": "Impuls dłuższy niż ten czas liczy się jako prawdziwy cykl, a nie obracanie antygniotowe.",
       "label": "Maks. Czas Trwania"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Impuls powyżej tej mocy traktowany jest jako prawdziwy nowy cykl, a nie przeciwzmarszczkowy upadek. Ustaw tuż powyżej mocy impulsu opadającego.",
+      "doc": "Impuls powyżej tej mocy liczy się jako prawdziwy nowy cykl, a nie obracanie bębna. Ustaw tuż powyżej mocy impulsów obracania.",
       "label": "Maks. Moc Antygniotowa"
     },
     "auto_label_confidence": {
-      "doc": "Jeśli wynik dopasowania na koniec cyklu jest równy lub wyższy, program jest automatycznie oznaczany bez monitu o potwierdzenie. Podnieś, aby wymagać większej pewności przed automatycznym etykietowaniem; opuść go, aby bardziej zautomatyzować. Działa w połączeniu z Learning Confidence poniżej.",
+      "doc": "Wynik dopasowania na koniec cyklu, od którego program jest oznaczany bez pytania. Podnieś dla większej pewności; obniż, aby automatycznie oznaczać więcej cykli. Utrzymuj powyżej Pewności Uczenia.",
       "label": "Pewność Automatycznego Etykietowania"
     },
     "auto_maintenance": {
-      "doc": "Wykonuj nocne porządki: odbuduj obwiednie profili, ponownie oblicz kondycję cykli, usuń ślady debugowania i zachowaj najnowsze cykle.",
+      "doc": "Nocne porządki: oznacz starsze cykle, które teraz wyraźnie pasują do programu, odbuduj krzywe programów, odśwież oznaczenia anomalii i kondycję cykli oraz usuń ślady debugowania, jeśli Zapisuj Ślady Debugowania jest wyłączone. Cykle i ich przebiegi mocy są zawsze zachowywane.",
       "label": "Automatyczna Konserwacja (nocne czyszczenie)"
     },
     "completion_min_seconds": {
-      "doc": "Cykle krótsze niż ta są odrzucane jako cykle widma (przebiegi próbne, otwarcie drzwi w celu dodania skarpetki).",
+      "doc": "Cykle krótsze niż ten czas (przebiegi próbne, otwarcie drzwi, by dorzucić skarpetkę) są zapisywane jako przerwane i nie dostają powiadomienia o zakończeniu.",
       "label": "Minimalny Czas Trwania Cyklu"
     },
     "delay_confirm_seconds": {
-      "doc": "Zasilanie musi pozostać w paśmie czuwania przez tak długi czas, zanim urządzenie zostanie potraktowane jako oczekujące na uruchomienie, a nie działające.",
+      "doc": "Moc musi tyle czasu pozostawać w paśmie czuwania, zanim urządzenie zostanie uznane za czekające na start.",
       "label": "Sekundy Potwierdzenia"
     },
     "delay_start_detect_enabled": {
-      "doc": "Wykryj, kiedy urządzenie jest włączone i czeka (opóźniony start / tryb czuwania), ale nie rozpoczęło swojego cyklu, dzięki czemu pobieranie w trybie gotowości nie jest mylone z cyklem pracy.",
+      "doc": "Wykrywaj urządzenie, które jest włączone i czeka na opóźniony start, aby jego pobór w czuwaniu nie był brany za pracujący cykl.",
       "label": "Włącz Wykrywanie Opóźnionego Startu"
     },
     "delay_timeout_hours": {
-      "doc": "Po tylu godzinach przestań czekać w trybie opóźnionego startu i wróć do stanu bezczynności, aby maszyna pozostawiona pod napięciem, ale nigdy nie uruchomiona, nie czekała wiecznie.",
+      "doc": "Przestań czekać na opóźniony start po tylu godzinach i wróć do stanu bezczynności.",
       "label": "Czas Oczekiwania (godziny)"
     },
     "device_type": {
-      "doc": "Klasa urządzenia. Ustawia rozsądne domyślne ustawienia wykrywania (progi, opóźnienie wyłączenia, obsługa końcówek) dostosowane do tego typu urządzenia; zmień go tylko wtedy, gdy urządzenie zostało pierwotnie skonfigurowane jako niewłaściwego typu.",
+      "doc": "Ustawia domyślne parametry wykrywania (progi, opóźnienie wyłączenia, obsługa końca) dla tego rodzaju urządzenia. Zmieniaj tylko, jeśli urządzenie skonfigurowano z niewłaściwym typem.",
       "label": "Typ Urządzenia"
     },
     "door_sensor_entity": {
-      "doc": "Opcjonalny czujnik binarny drzwi. Służy do wykrywania, kiedy urządzenie zostało otwarte/rozładowane po cyklu.",
+      "doc": "Opcjonalny czujnik drzwi. Pokazuje, kiedy urządzenie zostało otwarte w celu rozładunku po cyklu.",
       "label": "Encja Czujnika Drzwi"
     },
     "duration_tolerance": {
-      "doc": "Tolerancja dla szacunków pozostałego czasu (uczenie się informacji zwrotnej, brak dopasowania). Jeśli rzeczywisty czas trwania mieści się w granicach +/-X% szacunkowej wartości, liczy się to jako dobre dopasowanie.",
+      "doc": "Dotyczy tylko informacji zwrotnej uczenia: cykl w granicach +/-X% szacowanego czasu trwania liczy się jako dobre oszacowanie. Nie wpływa na dopasowanie.",
       "label": "Tolerancja Szacowania"
     },
     "enable_ml_models": {
-      "doc": "Podczas trwania cyklu pozwól modelom udoskonalić wyniki na żywo: bardziej stabilne oszacowanie pozostałego czasu i energii/kosztów oraz zabezpieczenie przed przedwczesnym zatrzymaniem w przypadku wykrycia końca (może zawsze opóźnić zakończenie, nigdy nie zakończyć wcześniej i jest ograniczone). Używa Twoich dopracowanych modeli, jeśli są dostępne, w przeciwnym razie wbudowanych. Off = tylko klasyczna logika oparta na zasilaniu (nadal niezawodna).",
+      "doc": "Używaj modelu wytrenowanego na tej maszynie do przewidywania energii i kosztu trwającego cyklu oraz pozwól dobrze znanemu programowi, który kończy się nietypowo wcześnie, zakończyć się bez pełnego opóźnienia wyłączenia. Wyłączone: tylko logika oparta na mocy.",
       "label": "Stosuj inteligentne modele podczas cyklu"
     },
     "end_energy_threshold": {
-      "doc": "Podczas odliczania opóźnienia wyłączenia skumulowana energia (waty x czas) jest porównywana z tym progiem. Jeśli zostanie przekroczony, odliczanie zostanie zresetowane – utrzymując bębny zapobiegające zagnieceniom i końcówki suszące w zmywarce dołączone do cyklu, zamiast je skracać. Podnieś go, jeśli cykle kończą się zbyt wcześnie podczas schładzania; obniż ją, jeśli wykrywanie jest powolne.",
+      "doc": "Energia dozwolona w czasie opóźnienia wyłączenia. Powyżej tej wartości cykl trwa dalej, więc obroty bębna i końcowe suszenie pozostają jego częścią. Obniż, jeśli cykle kończą się w trakcie ogona; podnieś, jeśli zakończone cykle wciąż czekają.",
       "label": "Energia Zakończenia"
     },
-    "end_repeat_count": {
-      "doc": "Liczba kolejnych odczytów poniżej progu wymaganych przed zakończeniem cyklu. 1 jest odpowiedni dla większości wtyczek. Zwiększ do 2-3, jeśli inteligentna wtyczka czasami zgłasza w połowie cyklu próbkę fałszywie zerową, a cykle kończą się przedwcześnie.",
-      "label": "Liczba Powtórzeń Zakończenia"
-    },
     "energy_price_entity": {
-      "doc": "Sensor z aktualną ceną energii elektrycznej za kWh (np. taryfa dynamiczna). Musi to być cena, a nie własna encja mocy lub energii wtyczki: ma pierwszeństwo przed statyczną ceną poniżej, więc licznik kWh wskazany tutaj wycenia każdy cykl według wskazania licznika zamiast Twojej taryfy. Gdy Koszt ważony czasem jest włączony, każdy cykl jest naliczany według ceny obowiązującej w każdej chwili jego trwania; w przeciwnym razie zostaje na nim zamrożona cena obowiązująca w momencie zakończenia.",
+      "doc": "Czujnik z bieżącą ceną za kWh (np. taryfa dynamiczna). Ma pierwszeństwo przed ceną statyczną poniżej, więc musi to być cena, a nie czujnik mocy lub energii wtyczki.",
       "label": "Encja Ceny Energii"
     },
     "energy_price_static": {
-      "doc": "Stała cena za kWh używana do danych o kosztach, gdy powyżej nie określono żadnej jednostki ceny rzeczywistej.",
+      "doc": "Stała cena za kWh, używana, gdy nie ustawiono encji ceny.",
       "label": "Statyczna Cena Energii (za kWh)"
     },
     "energy_sensor": {
-      "doc": "Opcjonalny skumulowany licznik energii (total_increasing kWh/Wh, np. własny licznik całkowitego zużycia wtyczki). Po ustawieniu energia raportowana dla każdego cyklu jest pobierana z różnicy wskazań tego licznika między początkiem a końcem, co pozwala uniknąć zaniżania wynikającego z całkowania wolno raportującego czujnika mocy. W razie braku odczytu, nieznanej jednostki lub niedodatniej różnicy następuje powrót do wartości całkowanej. Pozostaw puste, aby nadal całkować czujnik mocy.",
+      "doc": "Opcjonalny licznik kWh lub Wh (total_increasing, np. własny licznik wtyczki). Energia cyklu jest wtedy odczytywana z niego, co jest dokładniejsze niż obliczanie z wolnego czujnika mocy. Jeśli jego odczyt jest nieużyteczny, używana jest wartość obliczona.",
       "label": "Encja Licznika Energii"
     },
     "expose_debug_entities": {
-      "doc": "Publikuj dodatkowe jednostki diagnostyczne HA (pewność dopasowania, niejednoznaczność, elementy wewnętrzne stanu). Opcja Off utrzymuje listę encji w czystości podczas normalnego użytkowania.",
+      "doc": "Dodaj encje diagnostyczne (pewność dopasowania, niejednoznaczność, stan wewnętrzny). Wyłączone: lista encji pozostaje czysta.",
       "label": "Ujawnij Encje Debugowania"
     },
     "external_end_trigger": {
-      "doc": "Czujnik binarny, którego zmiana stanu oznacza koniec cyklu (np. „zakończony” styk urządzenia lub integracja towarzysząca).",
+      "doc": "Czujnik binarny, którego zmiana oznacza koniec cyklu (np. styk „zakończono” lub inna integracja).",
       "label": "Encja Zewnętrznego Wyzwalacza"
     },
     "external_end_trigger_enabled": {
-      "doc": "Pozwól zewnętrznemu czujnikowi binarnemu zasygnalizować koniec cyklu, oprócz wbudowanej detekcji opartej na mocy.",
+      "doc": "Pozwól czujnikowi binarnemu sygnalizować koniec cyklu, oprócz wykrywania na podstawie mocy.",
       "label": "Włącz Zewnętrzny Wyzwalacz Zakończenia"
     },
     "external_end_trigger_inverted": {
-      "doc": "Traktuj wyłączenie czujnika wyzwalającego (a nie włączenie) jako sygnał zakończenia cyklu.",
+      "doc": "Traktuj wyłączenie czujnika (a nie włączenie) jako sygnał końca.",
       "label": "Odwróć Zewnętrzny Wyzwalacz (wyzwalaj przy WYŁ)"
     },
     "learning_confidence": {
-      "doc": "Jeśli wynik dopasowania mieści się pomiędzy tą wartością a Pewnością Automatycznego Etykietowania, powiadomienie zwrotne poprosi o zweryfikowanie zidentyfikowanego programu. Poniżej tego wyniku dopasowanie jest zbyt niepewne, aby je pokazywać. Musi pozostać poniżej Pewności Automatycznego Etykietowania.",
+      "doc": "Najniższy wynik dopasowania, przy którym zakończony cykl dostaje etykietę. Wyraźny zwycięzca jest etykietowany; wynik na styk trafia do kolejki przeglądu w Cyklach. Poniżej tej wartości nic nie jest etykietowane ani nie ma pytania. Utrzymuj poniżej Pewności Automatycznego Etykietowania.",
       "label": "Pewność Uczenia"
     },
     "linked_device": {
-      "doc": "Opcjonalnie zagnieżdż to urządzenie WashData pod innym urządzeniem (np. inteligentną wtyczką) w rejestrze urządzeń HA, pokazanym jako „Połączono przez…”.",
+      "doc": "Opcjonalnie. Pokaż to urządzenie WashData pod innym urządzeniem (np. inteligentną wtyczką) w Home Assistant jako „Połączono przez…”.",
       "label": "Grupuj pod Urządzeniem"
     },
     "min_off_gap": {
-      "doc": "Jeśli urządzenie wyłączy się na krócej niż ten czas, sekwencja włączenia/wyłączenia/włączenia jest traktowana jako jeden ciągły cykl. Zapobiega podziałowi programów namaczania (urządzenie wyłącza się na kilka minut w połowie prania) na dwa oddzielne cykle. Ustaw go na krótszy niż przerwa między obciążeniami, jeśli chcesz, aby były one liczone jako oddzielne cykle. Domyślne ustawienia typu urządzenia chronią typową przerwę w cyklu dla każdego urządzenia.",
+      "doc": "Przerwa krótsza niż ten czas nie dzieli cyklu, więc pauzy namaczania pozostają w jednym praniu. Utrzymuj krótszą niż przerwa między kolejnymi wsadami, inaczej połączą się w jeden cykl.",
       "label": "Minimalna Przerwa Wyłączenia"
     },
     "min_power": {
-      "doc": "Absolutna minimalna moc uważana za aktywną. Odczyty poniżej są traktowane jako 0 W (tryb czuwania), odfiltrowując obciążenie fantomowe inteligentnych wtyczek i diod LED stanu czuwania.",
+      "doc": "Odczyty poniżej tej wartości liczą się jako 0 W (czuwanie). Odfiltrowuje pobór jałowy inteligentnych wtyczek i diod czuwania.",
       "label": "Minimalna Moc"
     },
     "ml_training_enabled": {
-      "doc": "Okresowo analizuj sprawdzone cykle przez noc i dostosowuj modele do konkretnej maszyny. Zmiana zostaje utrzymana tylko wtedy, gdy rzeczywiście osiąga lepsze wyniki w przetrzymywanych cyklach, więc może to tylko pomóc lub pozostać bez zmian – nigdy nie cofać się.",
+      "doc": "Od czasu do czasu trenuj ponownie model energii na zakończonych cyklach tej maszyny. Nowy model zostaje tylko wtedy, gdy na cyklach testowych wypada lepiej niż proste oszacowanie.",
       "label": "Ucz się od tej maszyny"
     },
     "ml_training_hour": {
-      "doc": "Lokalna godzina dnia (0-23), w której należy dokonać dostrajania w nocy. Wybierz spokojną godzinę, na przykład 2 (02:00).",
+      "doc": "Godzina (0-23) nocnego trenowania. Wybierz spokojną godzinę, np. 2.",
       "label": "Ucz się o godzinie"
     },
     "ml_training_interval_days": {
-      "doc": "Sprawdzaj ponownie, czy nie ma ulepszeń, najwyżej raz na tę liczbę dni.",
+      "doc": "Trenuj ponownie najwyżej raz na tyle dni.",
       "label": "Sprawdzaj co najwyżej co"
     },
     "ml_training_min_cycles": {
-      "doc": "Przed dostrojeniem poczekaj, aż zarejestrowanych zostanie co najmniej tyle cykli, aby było z czego się uczyć.",
+      "doc": "Przed trenowaniem poczekaj na co najmniej tyle zarejestrowanych cykli.",
       "label": "Wymagane minimum cykli"
     },
     "name": {
-      "doc": "Nazwa wyświetlana na liście integracji HA i rejestrze urządzeń.",
+      "doc": "Nazwa tego urządzenia wyświetlana w Home Assistant.",
       "label": "Nazwa Urządzenia"
     },
     "no_update_active_timeout": {
-      "doc": "Jeśli przez tak długi czas nie zostaną dostarczone żadne aktualizacje zasilania, załóż, że wtyczka została odłączona od sieci i wymuś zatrzymanie, aby uniknąć cyklu zombie. Domyślna wartość 600 s pozwala na opóźnienie w chmurze lub siatce.",
+      "doc": "Jeśli przez ten czas w trakcie cyklu nie nadejdzie żadna aktualizacja mocy, przyjmij, że wtyczka jest offline, i wymuś zatrzymanie cyklu. Domyślne 600 s uwzględnia opóźnienia chmury lub sieci mesh.",
       "label": "Limit Czasu Braku Aktualizacji"
     },
     "notify_before_end_minutes": {
@@ -1346,35 +1347,35 @@
       "label": "Alert Przed Zakończeniem"
     },
     "notify_channel": {
-      "doc": "Nazwa kanału powiadomień Androida dla wiadomości startowych/na żywo (steruje dźwiękiem i priorytetem poszczególnych kanałów w aplikacji mobilnej). Blank używa domyślnej aplikacji towarzyszącej.",
+      "doc": "Kanał Androida dla wiadomości o starcie i na żywo; kanał ustala dźwięk i priorytet. Puste: domyślny kanał aplikacji.",
       "label": "Kanał Android (start/na żywo)"
     },
     "notify_cycle_timers": {
-      "doc": "Powiadomienia w określonych minutach cyklu (np. o konieczności dodania zmiękczacza). Wiadomość obsługuje {device}, {program}, {minutes}. Włącz automatyczną pauzę, aby wstrzymać w tym momencie i otrzymać interaktywne powiadomienie za pomocą przycisku Wznów; wznów poprzez panel, usługę wstrzymania/wznowienia lub akcję powiadomienia.",
+      "doc": "Powiadomienia w ustalonych minutach cyklu (np. aby dodać płyn do płukania). Wiadomość obsługuje {device}, {program}, {minutes}. Z automatyczną pauzą cykl również się tam wstrzymuje, a powiadomienie dostaje przycisk Wznów.",
       "label": "Timery Cyklu"
     },
     "notify_finish_channel": {
-      "doc": "Nazwa kanału powiadomień Androida dla wiadomości końcowej. Blank ponownie wykorzystuje kanał startowy/na żywo.",
+      "doc": "Kanał Androida dla wiadomości o zakończeniu. Puste: używany jest kanał startu i na żywo.",
       "label": "Kanał Android (zakończenie)"
     },
     "notify_finish_message": {
-      "doc": "Treść wysyłana po zakończeniu cyklu. Zmienne szablonu: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} i {vs_typical} są tutaj najbardziej przydatne.",
+      "doc": "Treść wysyłana po zakończeniu cyklu. Zmienne: {device}, {program}, {duration} (minuty), {duration_hm} (1 h 05 min), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed lub force_stopped; przerwane cykle nic nie wysyłają). Przy każdej innej zmiennej używany jest tekst domyślny.",
       "label": "Wiadomość Zakończenia"
     },
     "notify_finish_services": {
-      "doc": "notify.* usługi wywoływane po zakończeniu cyklu. Dodaj po jednym na cel; pozostaw puste, aby nie było powiadomienia o zakończeniu.",
+      "doc": "Usługi notify.* wywoływane po zakończeniu cyklu. Pozostaw puste, aby nic nie wysyłać.",
       "label": "Usługi Zakończenia"
     },
     "notify_fire_events": {
-      "doc": "Odpalaj także zdarzenia ha_washdata_* na początku/zakończeniu cyklu, dzięki czemu możesz budować własne automatyzacje.",
+      "doc": "Wysyłaj też zdarzenia ha_washdata_* przy starcie i zakończeniu cyklu dla własnych automatyzacji.",
       "label": "Wysyłaj Zdarzenia HA dla Powiadomień"
     },
     "notify_icon": {
-      "doc": "Mała ikona wyświetlana w powiadomieniu (np. mdi:washing-machine). Android rysuje ją na pasku stanu; iOS pokazuje ją zamiast ikony aplikacji i wymaga aplikacji mobilnej Home Assistant (companion app) w wersji 2026.8 lub nowszej. Pozostaw puste, aby użyć domyślnej ikony platformy.",
+      "doc": "Mała ikona w powiadomieniu (np. mdi:washing-machine). Wysyłana tylko do celów mobile_app, nie do grup notify. W iOS zastępuje ikonę aplikacji i wymaga aplikacji mobilnej 2026.8 lub nowszej. Puste: domyślna ikona platformy.",
       "label": "Ikona Powiadomienia"
     },
     "notify_live_chronometer": {
-      "doc": "Wyświetlaj w powiadomieniu licznik czasu aktualizacji na żywo (na platformach, które je obsługują) zamiast statycznego oszacowania.",
+      "doc": "Pokazuj w powiadomieniu odliczanie na żywo (gdzie to obsługiwane) zamiast stałego oszacowania.",
       "label": "Używaj Chronometru na Żywo"
     },
     "notify_live_interval_seconds": {
@@ -1382,143 +1383,135 @@
       "label": "Interwał Aktualizacji na Żywo"
     },
     "notify_live_overrun_percent": {
-      "doc": "Jeśli cykl przekroczy szacunkową wartość o więcej niż ten procent, wyślij alert o przekroczeniu.",
+      "doc": "Aktualizacje na żywo kończą się, gdy cykl przekroczy oczekiwany czas trwania o ten procent (20 = do 1,2x oczekiwanego czasu).",
       "label": "% Przekroczenia przed Alertem"
     },
     "notify_live_services": {
-      "doc": "notify.* usługi wymagały aktualizacji postępu na żywo podczas trwania cyklu. Pozostaw puste, aby wyłączyć powiadomienia o postępie na żywo.",
+      "doc": "Usługi notify.* dla aktualizacji postępu na żywo w trakcie cyklu. Pozostaw puste, aby je wyłączyć.",
       "label": "Usługi Aktualizacji na Żywo"
     },
     "notify_only_when_home": {
-      "doc": "Wysyłaj powiadomienia tylko wtedy, gdy co najmniej jedna z połączonych osób (powyżej) jest w domu.",
+      "doc": "Powiadamiaj tylko, gdy co najmniej jedna z osób powyżej jest w domu.",
       "label": "Powiadamiaj Tylko Gdy Jestem w Domu"
     },
     "notify_people": {
-      "doc": "osoba.* podmioty wykorzystywane przez funkcję „Powiadamiaj tylko, gdy jesteś w domu” w celu ustalenia, czy ktoś jest w domu.",
+      "doc": "Encje person.*, które sprawdza „Powiadamiaj Tylko Gdy Jestem w Domu”.",
       "label": "Osoby (dla Tylko Gdy Jestem w Domu)"
     },
     "notify_pre_complete_message": {
-      "doc": "Treść alertu przed zakończeniem / prawie gotowe. Zmienne szablonu: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "doc": "Treść każdej aktualizacji postępu na żywo. Zmienne szablonu: {device}, {program}, {minutes} (pozostałe minuty). Przy każdej innej zmiennej używany jest tekst domyślny.",
       "label": "Wiadomość Przed Zakończeniem"
     },
     "notify_reminder_message": {
-      "doc": "Treść przypomnienia o wciąż oczekującym rozładunku. Puste używa wbudowanej wartości domyślnej. Zmienne szablonu: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "doc": "Treść jednorazowego Alertu Przed Zakończeniem. Zmienne szablonu: {device}, {program}, {minutes} (ustawienie Alert Przed Zakończeniem). Przy każdej innej zmiennej używany jest tekst domyślny.",
       "label": "Wiadomość Przypomnienia"
     },
     "notify_start_message": {
-      "doc": "Treść wysyłana po rozpoczęciu cyklu. Zmienne szablonu: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "doc": "Treść wysyłana po rozpoczęciu cyklu. Zmienne szablonu: {device}, {program}. Przy każdej innej zmiennej używany jest tekst domyślny.",
       "label": "Wiadomość Startu"
     },
     "notify_start_services": {
-      "doc": "notify.* usługi wywoływane po rozpoczęciu cyklu. Dodaj po jednym na cel (telefon, pulpit nawigacyjny itp.); pozostaw puste, aby nie było powiadomienia o rozpoczęciu.",
+      "doc": "Usługi notify.* wywoływane po rozpoczęciu cyklu (telefon, pulpit, ...). Pozostaw puste, aby nic nie wysyłać.",
       "label": "Usługi Startu"
     },
     "notify_timeout_seconds": {
-      "doc": "Automatycznie odrzuć powiadomienie po tylu sekundach (na platformach, które je obsługują). 0 przechowuje go do momentu ręcznego usunięcia.",
+      "doc": "Zamknij powiadomienie po tylu sekundach (gdzie to obsługiwane). 0 zostawia je, dopóki go nie zamkniesz.",
       "label": "Automatyczne Zamknięcie Po"
     },
     "notify_title": {
-      "doc": "Tytuł powiadomienia. Zmienne szablonu: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Tytuł powiadomienia. Podstawiane jest tylko {device}; przy każdej innej zmiennej używany jest tytuł domyślny.",
       "label": "Tytuł Powiadomienia"
     },
     "notify_unload_delay_minutes": {
-      "doc": "Minuty po zakończeniu cyklu przed wysłaniem wciąż oczekującego przypomnienia o „rozładowaniu maszyny”. Ustaw 0, aby wyłączyć przypomnienie.",
+      "doc": "Minuty po zakończeniu cyklu przed przypomnieniem „rozładuj maszynę”. 0 je wyłącza.",
       "label": "Opóźnienie Przypomnienia o Rozładunku"
     },
     "notify_unload_repeat": {
-      "doc": "Ponownie wysyła przypomnienie o rozładunku co „Opóźnienie Przypomnienia o Rozładunku” minut, dopóki rozładunek nie zostanie potwierdzony lub nie dotkniesz „Przestań przypominać” w powiadomieniu. Wymaga sposobu potwierdzenia rozładunku: Encji Czujnika Drzwi, Encji Potwierdzenia Rozładunku albo opcji „Ręczne potwierdzanie rozładunku” poniżej. Przycisk odrzucenia działa w powiadomieniach aplikacji mobilnej Home Assistant (companion app).",
+      "doc": "Ponawiaj przypomnienie o rozładunku co „Opóźnienie Przypomnienia o Rozładunku” minut, aż rozładunek zostanie potwierdzony lub dotkniesz „Przestań przypominać” (aplikacja mobilna). Wymaga Encji Czujnika Drzwi, Encji Potwierdzenia Rozładunku lub „Ręczne potwierdzanie rozładunku”.",
       "label": "Powtarzaj do rozładowania"
     },
     "off_delay": {
-      "doc": "Czas oczekiwania po spadku mocy przed ogłoszeniem zakończenia cyklu. Jeżeli w tym oknie zasilanie zostanie przywrócone, cykl będzie przebiegał płynnie – eliminując przerwy pomiędzy etapami prania. Zmywarki mają długie fazy suszenia (wyłączenie zasilania na 20–60 minut), więc opóźnienie wyłączenia musi być dłuższe, aby całe pranie+suszenie trwało w jednym cyklu.",
+      "doc": "Jak długo moc musi pozostać niska, zanim cykl zostanie zakończony. Powrót mocy w tym czasie kontynuuje cykl. Zmywarki podczas suszenia mogą być bezczynne 20-60 min, więc ustaw dłuższy czas.",
       "label": "Opóźnienie Wyłączenia"
     },
     "pause_cuts_power": {
-      "doc": "Kiedy cykl zostanie wstrzymany, wyłącz także Jednostkę Przełączającą poniżej. Tylko do urządzeń, których wtyczkę można bezpiecznie odciąć w połowie cyklu.",
+      "doc": "Gdy cykl jest wstrzymany, wyłącz też Encję Przełącznika poniżej. Tylko dla urządzeń, które mogą bezpiecznie stracić zasilanie w trakcie cyklu.",
       "label": "Pauza Odcina Zasilanie (przez przełącznik)"
     },
     "power_off_delay": {
-      "doc": "Jak długo moc musi pozostawać poniżej „Próg Wyłączenia Zasilania” po zakończeniu cyklu, zanim stan wróci do „Wyłączony”. Używane tylko wtedy, gdy „Próg Wyłączenia Zasilania” jest większy niż 0. Sprawdzane w rytmie działania w tle, więc efektywne opóźnienie jest zaokrąglane w górę do następnego taktu wygaśnięcia stanu.",
+      "doc": "Jak długo moc musi pozostać poniżej Progu Wyłączenia Zasilania po cyklu, zanim stan wróci do Wyłączony. Używane tylko, gdy ten próg jest większy niż 0. Sprawdzane okresowo, więc rzeczywiste oczekiwanie może być nieco dłuższe.",
       "label": "Opóźnienie Wyłączenia Zasilania"
     },
     "power_off_threshold_w": {
-      "doc": "Opcjonalne wykrywanie stanu „Wyłączony” na podstawie mocy. Gdy wartość jest większa niż 0, po zakończeniu cyklu, jeśli moc pozostaje poniżej tego poziomu przez czas „Opóźnienie Wyłączenia Zasilania”, urządzenie jest traktowane jako wyłączone, a stan wraca do „Wyłączony”. Pozostaw 0, aby wyłączyć (wartość domyślna). Ustaw powyżej rzeczywistego poziomu wyłączonego urządzenia, a poniżej „Próg Zatrzymania” oraz poniżej poboru w trybie czuwania po zakończeniu; jeśli wartość nie jest niższa niż „Próg Zatrzymania”, jest ignorowana. Po włączeniu zastępuje „Opóźnienie Resetowania Postępu” przy powrocie do „Wyłączony”, więc zakończone urządzenie pozostaje w stanie „Zakończony”/„Czysty”, dopóki nie zostanie faktycznie wyłączone.",
+      "doc": "Po cyklu moc poniżej tej wartości przez Opóźnienie Wyłączenia Zasilania ustawia stan na Wyłączony, zamiast robić to po Opóźnieniu Resetowania Postępu. Ustaw powyżej poboru wyłączonego urządzenia, a poniżej czuwania i Progu Zatrzymania. 0 wyłącza (domyślnie).",
       "label": "Próg Wyłączenia Zasilania"
     },
     "power_sensor": {
-      "doc": "Jednostka czujnika zgłaszająca moc bieżącą tego urządzenia w watach (np. sensor.washer_power). Cała detekcja cykli opiera się na tym sygnale.",
+      "doc": "Czujnik podający bieżącą moc tego urządzenia w watach (np. sensor.washer_power). Na nim opiera się całe wykrywanie.",
       "label": "Czujnik Mocy"
     },
-    "profile_duration_tolerance": {
-      "doc": "Pasmo +/- wokół średniego czasu trwania profilu używanego podczas dopasowywania. Wartość 0,25 oznacza, że profil 60-minutowy odpowiada cyklom 45-75-minutowym.",
-      "label": "Tolerancja Czasu Profilu"
-    },
     "profile_match_interval": {
-      "doc": "Jak często podejmować próby dopasowania profilu podczas cyklu biegowego. Domyślnie 300 s (5 minut) równoważy szybkość wykrywania i procesor.",
+      "doc": "Jak często dopasowywać trwający cykl do profili. Domyślnie 300 s (5 min).",
       "label": "Interwał Dopasowania"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "Maksymalna długość cyklu w stosunku do profilu. 1.3 oznacza, że cykl musi trwać krócej niż 130% czasu trwania profilu, aby uzyskać zgodność.",
+      "doc": "Program jest odrzucany, gdy cykl trwa dłużej niż ta wielokrotność jego typowego czasu trwania. 1,8: cykl o 80% dłuższy niż program przestaje być do niego dopasowywany.",
       "label": "Maksymalna Proporcja Czasu Trwania"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "Minimalna długość cyklu w stosunku do profilu. Wartość 0,9 oznacza, że aby cykl był zgodny, musi wynosić co najmniej 90% czasu trwania profilu.",
+      "doc": "Program jest brany pod uwagę dopiero, gdy cykl trwa już taką część jego typowego czasu trwania. 0,10: program 2-godzinny staje się kandydatem po 12 minutach. Nie stosuje się w pierwszych 15 minutach cyklu.",
       "label": "Minimalna Proporcja Czasu Trwania"
     },
     "profile_match_threshold": {
-      "doc": "Minimalny wynik podobieństwa (0-1) wymagany na koniec cyklu, aby zaakceptować identyfikację programu. Podnieś go, aby ograniczyć błędne identyfikacje; obniż go, jeśli programy twojego komputera nie są dopasowane. Wartość domyślna 0,4 to konserwatywny punkt wyjścia.",
+      "doc": "Wynik dopasowania na żywo, którego cykl potrzebuje, zanim Inteligentne zakończenie lub zakończenie antygniotowe może go zakończyć wcześniej. Nie zmienia wyświetlanego programu. Podnieś, jeśli słabe dopasowania kończą cykle za wcześnie; obniż, jeśli wyraźne dopasowania czekają przez opóźnienie wyłączenia.",
       "label": "Próg Dopasowania"
     },
     "profile_unmatch_threshold": {
-      "doc": "Jeśli dopasowanie na żywo w trakcie cyklu spadnie poniżej tego wyniku, wstępna identyfikacja zostanie wyczyszczona. Trzymaj je nieco poniżej Progu Dopasowania, aby krótki spadek podobieństwa nie przełączył wyświetlania z powrotem na brak dopasowania.",
+      "doc": "Jeśli wynik dopasowania na żywo spadnie poniżej tej wartości, bieżące przypuszczenie programu jest czyszczone. Utrzymuj nieco poniżej Progu Dopasowania, aby krótki spadek go nie resetował.",
       "label": "Próg Niedopasowania"
     },
     "progress_reset_delay": {
-      "doc": "Po zakończeniu utrzymaj postęp na poziomie 100% przez tak długi czas, aby na pulpitach nawigacyjnych pojawił się komunikat Ukończono, zanim przejdziesz do stanu bezczynności.",
+      "doc": "Po cyklu utrzymuj postęp na 100% przez ten czas, zanim nastąpi reset do stanu Bezczynny.",
       "label": "Opóźnienie Resetowania Postępu"
     },
     "pump_stuck_duration": {
-      "doc": "Przez kilka sekund pompa może pracować nieprzerwanie, zanim zostanie oznaczona jako prawdopodobnie zablokowana (wywołane zostanie zdarzenie zablokowania pompy).",
+      "doc": "Jak długo pompa może pracować bez przerwy, zanim zostanie wywołane zdarzenie zaciętej pompy.",
       "label": "Czas Zacięcia Pompy"
     },
     "sampling_interval": {
-      "doc": "Oczekiwany czas pomiędzy odczytami czujnika – używany do określenia rozmiaru okna wygładzającego i prawidłowego rozpoczęcia odbijania. Każda aktualizacja czujnika jest rejestrowana niezależnie od tej wartości; kalibruje jedynie dalsze obliczenia. Silnik sugestii mierzy rzeczywistą kadencję czujnika z poprzednich cykli i ustawia ją automatycznie.",
+      "doc": "Minimalny czas między przetwarzanymi odczytami. Odczyty, które nadejdą szybciej, są pomijane (niskie odczyty w trakcie cyklu są zawsze zachowywane). Ustaw interwał raportowania wtyczki lub mniej; wyższa wartość tylko odrzuca odczyty.",
       "label": "Interwał Próbkowania"
     },
     "save_debug_traces": {
-      "doc": "Przechowuj ślad pełnej mocy i pasujące dane debugowania dla każdego cyklu. Przydatne do rozwiązywania problemów, ale zwiększa rozmiar pamięci.",
+      "doc": "Zapisuj też przy każdym cyklu dane debugowania mechanizmu dopasowania (wyniki każdego kandydata), do rozwiązywania problemów. Dodaje około 20 KB na cykl.",
       "label": "Zapisuj Ślady Debugowania"
     },
     "smart_termination_duration_ratio": {
-      "doc": "Jak daleko w oczekiwanym czasie trwania dopasowanego programu musi znajdować się cykl, zanim Inteligentne zakończenie może go zakończyć wcześniej po spadku mocy. Oczekiwany czas trwania to średnia programu, więc w urządzeniach, których czas pracy bardzo się waha - pralki z zimną wodą dopływową zimą wobec ciepłej latem, suszarki z suszeniem czujnikowym, programy zależne od wsadu - około połowa wszystkich uruchomień kończy się krócej niż ta średnia i nigdy nie doczeka się szybkiego zakończenia, kończąc dopiero przez awaryjny limit czasu, kilka minut później. W takich maszynach obniż tę wartość (np. 0,85), aby wcześniejsze zakończenie nadal się uruchamiało; zwiększ ją w stronę 1,0, aby zachować większą ostrożność. Pozostaw puste dla wartości domyślnej (0,98, a dla zmywarek 0,99). Może jedynie zakończyć cykl wcześniej, nigdy później, i nigdy nie uruchamia się przy niejednoznacznym dopasowaniu lub dopasowaniu o niskiej pewności.",
+      "doc": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej. Jeśli czasy pracy się wahają (temperatura wody, suszenie z czujnikiem, wielkość wsadu), obniż go (np. 0,85). Pozostaw puste dla 0,98 (0,99 w zmywarkach).",
       "label": "Współczynnik inteligentnego zakończenia"
     },
-    "smoothing_window": {
-      "doc": "W jakim stopniu surowy sygnał mocy jest wygładzany. Niski (2) reaguje, ale jest głośny; wysoki (5) wygładza skoki, ale dodaje opóźnienia.",
-      "label": "Okno Wygładzania"
-    },
     "start_duration_threshold": {
-      "doc": "Moc musi pozostać powyżej progu rozruchu przez tak długi czas, aby potwierdzić prawdziwy start i zapobiec rozpoczęciu cyklu przez przełączniki włączania/wyłączania trwające ułamek sekundy.",
+      "doc": "Moc musi tyle czasu pozostawać powyżej Progu Startu, zanim cykl się rozpocznie, aby krótkie włączenia i wyłączenia były ignorowane.",
       "label": "Czas Trwania Startu"
     },
     "start_energy_threshold": {
-      "doc": "Energia (moc x czas), jaką urządzenie musi zużyć przed PRACĄ. Krótki skok dużej mocy ma bardzo niską energię i jest ignorowany, co zapobiega fałszywym startom.",
+      "doc": "Energia, którą urządzenie musi zużyć, zanim cykl zostanie uznany za pracujący. Krótki skok mocy zużywa mało energii, więc nie rozpoczyna cyklu.",
       "label": "Energia Startu"
     },
     "start_threshold_w": {
-      "doc": "Moc musi wzrosnąć powyżej tego poziomu, aby potwierdzić rozpoczęcie cyklu. Ustawienie zbyt niskiego poziomu powoduje falowe starty z zasilania w trybie gotowości; pominięte są programy zbyt wysokie i wolno uruchamiające się (napełnianie na zimno). Silnik sugestii ustawia tę wartość tuż powyżej zaobserwowanej najniższej mocy czynnej maszyny.",
+      "doc": "Moc musi wzrosnąć powyżej tej wartości, aby rozpocząć cykl. Za nisko: pobór w czuwaniu powoduje fałszywe starty. Za wysoko: wolno startujące programy (zimne napełnianie) są pomijane.",
       "label": "Próg Startu"
     },
     "stop_threshold_w": {
-      "doc": "Moc musi spaść poniżej tego poziomu, zanim rozpocznie się odliczanie opóźnienia wyłączenia. Ustaw go poniżej progu początkowego – odstęp między nimi to pasmo histerezy zapobiegające migotaniu. W przypadku ustawienia zbyt wysokiego, fazy o małej mocy (zatrzymanie płukania, zapobieganie zagnieceniom) błędnie uruchamiają sekwencję końcową.",
+      "doc": "Moc musi spaść poniżej tej wartości, zanim zacznie się odliczanie opóźnienia wyłączenia. Utrzymuj poniżej Progu Startu. Przy zbyt wysokiej wartości fazy o niskiej mocy (przerwy w płukaniu, tryb antygniotowy) omyłkowo uruchamiają odliczanie końca.",
       "label": "Próg Zatrzymania"
     },
     "switch_entity": {
-      "doc": "Opcjonalny przełącznik wyłączany podczas pauzy i włączany ponownie po wznowieniu, używany razem z opcją „Pauza powoduje również odcięcie zasilania”.",
+      "doc": "Opcjonalny przełącznik wyłączany przy pauzie i włączany przy wznowieniu, razem z „Pauza Odcina Zasilanie (przez przełącznik)”.",
       "label": "Encja Przełącznika"
     },
     "watchdog_interval": {
-      "doc": "Jak często funkcja nadzorująca działająca w tle sprawdza, czy czujniki nie uległy zablokowaniu i nie upłynęły limity czasu. Domyślnie 30 s.",
+      "doc": "Jak często kontrola w tle szuka zablokowanych czujników i przekroczonych limitów czasu. Domyślnie 30 s.",
       "label": "Interwał Watchdog"
     },
     "notify_milestone_message": {
@@ -1526,131 +1519,86 @@
       "label": "Wiadomość o kamieniu milowym"
     },
     "notify_milestones": {
-      "doc": "Rozdzielone przecinkami liczby cykli, które po osiągnięciu wyzwalają jednorazowe powiadomienie z gratulacjami (np. 50, 100, 500, 1000). Puste wyłącza powiadomienia o kamieniach milowych.",
+      "doc": "Liczby cykli, które wyzwalają jednorazowe powiadomienie z gratulacjami, oddzielone przecinkami (np. 50, 100, 500, 1000). Puste je wyłącza.",
       "label": "Kamienie milowe cykli"
     },
     "notify_quiet_end_hour": {
-      "doc": "Koniec okna „nie przeszkadzać” (0–23). Wstrzymane powiadomienia są dostarczane o tej godzinie. Pozostaw puste, aby wyłączyć.",
+      "doc": "Koniec okna „nie przeszkadzać” (0-23); wstrzymane powiadomienia są wtedy wysyłane. Puste je wyłącza.",
       "label": "Koniec cichych godzin"
     },
     "notify_quiet_start_hour": {
-      "doc": "Początek okna „nie przeszkadzać” (0–23). Powiadomienia o zakończeniu, przypomnienia i powiadomienia o czystym praniu, które wypadłyby w cichych godzinach, są wstrzymywane i dostarczane po zakończeniu okna. Pozostaw puste, aby wyłączyć. Obsługuje okna przekraczające północ (np. początek 22, koniec 7).",
+      "doc": "Początek okna „nie przeszkadzać” (0-23). Powiadomienia o zakończeniu, przypomnienia i powiadomienia o czystym praniu w tym oknie są wstrzymywane do jego końca. Może przechodzić przez północ (np. 22 do 7). Puste je wyłącza.",
       "label": "Początek cichych godzin"
     },
     "peak_rate_message": {
-      "doc": "Opcjonalny własny tekst wskazówki o taryfie szczytowej dołączanej do powiadomienia o starcie. Zmienne szablonu: {device}, {price}. Puste używa wbudowanej wartości domyślnej.",
+      "doc": "Własny tekst wskazówki o taryfie szczytowej. Zmienne szablonu: {device}, {price}. Puste: tekst domyślny.",
       "label": "Wiadomość o taryfie szczytowej"
     },
     "peak_rate_threshold": {
-      "doc": "Gdy cykl się rozpoczyna, a bieżąca cena za kWh jest równa tej wartości lub wyższa, do powiadomienia o starcie dołączana jest wskazówka o taryfie szczytowej. 0 lub puste wyłącza wskazówkę.",
+      "doc": "Jeśli cena za kWh na starcie cyklu jest równa tej wartości lub wyższa, dodaj wskazówkę o taryfie szczytowej do powiadomienia o starcie. 0 lub puste ją wyłącza.",
       "label": "Próg taryfy szczytowej (za kWh)"
-    },
-    "dtw_bandwidth": {
-      "label": "Tolerancja dopasowania kształtu",
-      "doc": "Jak bardzo mechanizm dopasowywania może zniekształcić cykl w czasie, aby dopasować go do kształtu zapisanego programu. Wyższa wartość toleruje większe wahania tempa; zbyt wysoka grozi dopasowaniem niewłaściwego programu."
-    },
-    "corr_weight": {
-      "label": "Waga kształtu względem poziomu",
-      "doc": "Równowaga między kształtem krzywej a bezwzględnym poziomem mocy przy ocenie dopasowania. Wyższa preferuje kształt; niższa preferuje zgodność poziomu mocy."
-    },
-    "duration_weight": {
-      "label": "Waga czasu trwania",
-      "doc": "Jak silnie preferowany jest program, którego typowy czas trwania odpowiada temu cyklowi."
-    },
-    "energy_weight": {
-      "label": "Waga energii",
-      "doc": "Jak silnie preferowany jest program, którego typowe zużycie energii odpowiada temu cyklowi."
     },
     "store_brand": {
       "label": "Marka urządzenia",
-      "doc": "Opcjonalne. Marka urządzenia wybrana z katalogu społeczności. Używana do wyszukiwania i udostępniania pasujących nagrań referencyjnych. Pozostaw puste, jeśli nie korzystasz z funkcji online."
+      "doc": "Opcjonalnie. Marka urządzenia z katalogu społeczności, używana do wyszukiwania i udostępniania nagrań referencyjnych. Pozostaw puste, jeśli nie korzystasz z funkcji online."
     },
     "store_model": {
       "label": "Model urządzenia",
-      "doc": "Opcjonalne. Model urządzenia wybrany z katalogu społeczności po ustawieniu marki. Jeśli Twojego modelu nie ma na liście, możesz go dodać do katalogu."
+      "doc": "Opcjonalnie. Model urządzenia z katalogu społeczności (najpierw wybierz markę). Jeśli go nie ma na liście, możesz go dodać."
     },
     "show_contributor": {
       "doc": "Pokaż nazwę współtwórcy na profilach pobranych ze sklepu społeczności"
     },
-    "enable_phase_matching": {
-      "label": "Pozostały czas uwzględniający fazy",
-      "doc": "Dzieli każdy trwający cykl na fazy (podgrzewanie, pranie, wirowanie) i planuje pozostały czas dla każdej fazy, łącząc go z klasycznym szacowaniem - opierając się na budżecie faz na początku cyklu, a na klasycznym szacowaniu pod koniec. Personalizuje to odliczanie do tego, jak długo urządzenie faktycznie się nagrzewa i pracuje, co jest najbardziej zauważalne w pierwszej połowie cyklu. Wyłączone = tylko klasyczne szacowanie. Wpływa to wyłącznie na wyświetlanie pozostałego czasu; dopasowanie programów i wykrywanie cykli pozostają bez zmian."
-    },
-    "keep_min_score": {
-      "label": "Min. wynik dopasowania",
-      "doc": "Minimalny wynik podobieństwa potrzebny kandydatowi, by pozostać w wyścigu dopasowań. Domyślna wartość 0,1 jest celowo łagodna - dopuszcza nawet słabych kandydatów i polega na późniejszych etapach w wyborze najlepszego dopasowania. Zwiększ, by wcześniej odrzucać mało prawdopodobne profile; zmniejsz, by poszerzyć początkową pulę kandydatów."
-    },
-    "dtw_blend": {
-      "label": "Mieszanie znieksztalcenia",
-      "doc": "Jak bardzo wynik wyrównania DTW zastępuje wynik główny Etapu 2. 0 = używaj tylko wyniku Etapu 2, 1 = używaj tylko wyniku DTW, 0,5 (domyślnie) = równe mieszanie. Zwiększ, by bardziej polegać na wyrównaniu, gdy programy mają podobne poziomy mocy, ale różne wzorce czasowe."
-    },
-    "dtw_ensemble_w": {
-      "label": "Mix kombinacji DTW",
-      "doc": "W trybie kombinacji DTW (domyślnym), waga skalowanego L1 względem pochodnego DTW (DDTW). 1,0 = tylko skalowane L1, 0 = tylko DDTW, 0,7 = domyślnie. Wariant skalowany L1 porównuje poziomy mocy; wariant pochodny reaguje na zmiany mocy w czasie. Kombinacja łączy oba."
-    },
-    "dtw_ddtw_scale": {
-      "label": "Skala pochodnej DTW",
-      "doc": "Odległość półnasycenia dla oceniania pochodnym DTW. Wynik spada do połowy, gdy odległość DDTW równa się tej wartości. Mniejsza = większa wrażliwość na różnice kształtu. Domyślna wartość 30 jest skalibrowana do typowych przebiegów mocy urządzeń. Dotyczy tylko trybów DTW kombinacji i ddtw."
-    },
-    "dtw_refine_top_n": {
-      "label": "Liczba doprecyzowanych kandydatow",
-      "doc": "Ile najlepszych kandydatów Etapu 2 jest ponownie ocenianych przez DTW. DTW jest kosztowniejszy, więc stosowany jest tylko do N najlepszych kandydatów. Domyślnie 5. Zwiększ (do 7-9), jeśli właściwy profil czasem zajmuje tylko 4. lub 5. miejsce po Etapie 2 - DTW może go uratować. Zmniejszenie nieznacznie przyspiesza dopasowanie."
-    },
-    "duration_scale": {
-      "label": "Ostrość czasu trwania",
-      "doc": "Ostrość kary za niezgodność czasu trwania w Etapie 4. To logarytm stosunku, przy którym wynik zgodności spada do połowy. Mniejszy = surowszy: niezgodność czasu trwania bardziej obniża wynik. Domyślna wartość 0,175 odpowiada tolerancji ok. 18% przy połowie wagi. Używaj razem z Wagą Czasu Trwania."
-    },
-    "energy_scale": {
-      "label": "Ostrość energii",
-      "doc": "Ostrość kary za niezgodność energii w Etapie 4. Mniejszy = surowszy: niezgodność energii bardziej obniża wynik. Domyślna wartość 0,25 jest celowo bardziej łagodna niż Ostrość Czasu Trwania, ponieważ energia zmienia się z obciążeniem. Używaj razem z Wagą Energii."
-    },
     "power_profile_interval_min": {
       "label": "Interwał profilu mocy",
-      "doc": "Rozmiar segmentu dla atrybutu senzora power_profile na profil (płaska tablica średnich watów na slot zużywana przez zewnętrzne planerzy jak EMHASS i tibber_prices). Mniejsze segmenty zachowują krótkie skoki mocy ostre; większe segmenty wygładzają kształt. Domyślnie 15 min. Tylko do odczytu; nie wpływa na wykrywanie."
+      "doc": "Rozmiar przedziału atrybutu power_profile (średnie waty na slot) używanego przez planery takie jak EMHASS i tibber_prices. Mniejszy zachowuje krótkie skoki; większy wygładza krzywą. Domyślnie 15 min. Nie wpływa na wykrywanie."
     },
     "notify_live_silent": {
       "label": "Ciche aktualizacje na żywo",
-      "doc": "Tylko iOS. Odświeżaj postęp na żywo po cichu: każda aktualizacja przychodzi bez dźwięku i wibracji, z niższym priorytetem oszczędzającym baterię, więc iOS może je na krótko grupować. Pierwsza aktualizacja cyklu (ta, która uruchamia Live Activity) oraz powiadomienia o rozpoczęciu i zakończeniu nadal powiadamiają jak zwykle. Wyłącz, aby otrzymywać sygnał przy każdej aktualizacji."
+      "doc": "Tylko iOS. Aktualizuj postęp na żywo po cichu, z priorytetem oszczędzającym baterię, który iOS może grupować. Pierwsza aktualizacja oraz powiadomienia o starcie i zakończeniu nadal powiadamiają. Wyłączone: każda aktualizacja powiadamia."
     },
     "notify_live_sticky": {
       "label": "Zachowaj powiadomienie na żywo po dotknięciu",
-      "doc": "Tylko Android. Ustaw powiadomienie o postępie na żywo jako trwałe (przypięte), aby dotknięcie nie odrzucało aktywnego wątku. Wyłączone zachowuje domyślne zachowanie, gdzie dotknięcie odrzuca powiadomienie."
+      "doc": "Tylko Android. Zachowaj powiadomienie o postępie na żywo po dotknięciu. Wyłączone: dotknięcie je zamyka."
     },
     "notify_live_click_action": {
       "label": "Cel dotknięcia powiadomienia",
-      "doc": "Gdzie prowadzi dotknięcie powiadomienia z tego urządzenia, w systemach Android i iOS. Puste pole otwiera panel WashData na tym urządzeniu. Wpisz ścieżkę pulpitu nawigacyjnego (np. /lovelace/laundry) lub pełny URL, aby otworzyć coś innego, albo „none”, aby dotknięcie nie otwierało niczego."
+      "doc": "Co otwiera dotknięcie powiadomienia tego urządzenia. Puste: panel WashData tego urządzenia. Wpisz ścieżkę pulpitu (np. /lovelace/laundry) lub URL albo „none”, aby dotknięcie nic nie otwierało."
     },
     "door_opens_at_end": {
       "label": "Drzwi otwierają się automatycznie na końcu",
-      "doc": "Dla zmywarek, które na końcu cyklu otwierają drzwi w celu suszenia (AirDry i podobne). Po włączeniu otwarcie drzwi podczas działającego cyklu nie zatrzymuje go na zawsze; jeśli drzwi pozostaną otwarte przez czas oczekiwania poniżej, WashData uznaje cykl za zakończony. Krótkie otwarcie (dodawanie naczynia) jest ignorowane. Wymaga encji czujnika drzwi."
+      "doc": "Dla zmywarek, które na końcu otwierają drzwi, aby suszyć (np. AirDry). Drzwi otwarte przez czas oczekiwania poniżej kończą cykl zamiast go wstrzymywać; krótkie otwarcie jest ignorowane. Wymaga Encji Czujnika Drzwi."
     },
     "door_end_dwell_seconds": {
       "label": "Czas otwarcia drzwi do zakończenia cyklu",
-      "doc": "Jak długo drzwi muszą pozostać otwarte, zanim WashData zakończy cykl, gdy włączone jest \"Drzwi otwierają się automatycznie na końcu\". Wystarczająco długo, aby zignorować szybkie dodawanie naczyń (domyślnie 60 s), wystarczająco krótko, aby szybko zakończyć, gdy maszyna otworzy drzwi."
+      "doc": "Przy włączonym „Drzwi otwierają się automatycznie na końcu”: jak długo drzwi muszą pozostać otwarte, zanim cykl się zakończy. Na tyle długo, aby zignorować dołożenie naczynia (domyślnie 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cykle kształtujące program",
-      "doc": "Które cykle są używane do zbudowania krzywej mocy każdego programu i do dopasowania do niej zakończonego cyklu. Odznaczenie danego rodzaju sprawia, że przestaje on wpływać na Twoje programy, ale nic nie zostaje usunięte - cykle pozostają na liście Cykle i nadal można je oznaczyć lub usunąć. Przydatne, jeśli nie masz zaufania do zaimportowanych danych. Nie ma to wpływu na statystyki: zawsze liczą tylko cykle, które to urządzenie faktycznie wykonało. Odznaczenie wszystkiego jest ignorowane, ponieważ program bez żadnych cykli nigdy nie mógłby zostać dopasowany."
+      "doc": "Które rodzaje cykli kształtują krzywą i dopasowanie każdego programu. Odznaczenie rodzaju niczego nie usuwa; przydatne, jeśli nie ufasz zaimportowanym danym. Statystyki zawsze liczą tylko cykle tej maszyny. Odznaczenie wszystkich jest ignorowane."
     },
     "energy_price_dynamic": {
       "label": "Koszt ważony czasem",
-      "doc": "Nalicza każdy cykl według ceny obowiązującej w każdej chwili jego trwania, zamiast według jednej ceny z momentu zakończenia. Działa tylko z encją ceny (cena statyczna nie może się zmieniać). Nie wymaga dodatkowej konfiguracji: cena jest śledzona na bieżąco w trakcie cyklu, a Przetwarzanie historii w Diagnostyce przelicza koszty starszych cykli z recordera. Wyłączone = klasyczne działanie, jedna cena zamrożona na koniec."
+      "doc": "Naliczaj każdy cykl według ceny obowiązującej w każdej chwili jego trwania, a nie ceny z chwili zakończenia. Wymaga encji ceny. Przetwarzanie historii (Diagnostyka) przelicza koszty starszych cykli."
     },
     "curve_preroll_seconds": {
-      "doc": "Ile sekund odczytów z przerwanych prób startu WashData może dołączyć na początku krzywej cyklu. Krzywa cyklu zwykle zaczyna się od tej próby startu, która ostatecznie się powiodła, więc w maszynie, która próbuje kilka razy, zanim się rozkręci - wybór programu, blokada drzwi, pierwsze napełnianie - w każdej krzywej brakuje pierwszych minut rzeczywistej pracy. Ustaw tę wartość nieco powyżej najdłuższego takiego rozbiegu Twojej maszyny (300 s w zupełności wystarczy w większości przypadków). 0 wyłącza tę funkcję. Pamiętaj, że jej włączenie przesuwa zapisany początek wcześniej, więc cykle zapisane przed zmianą i po niej mają różne czasy trwania dla tego samego programu; wyuczone średnie będą się przesuwać, dopóki starsze cykle nie wypadną z historii.",
+      "doc": "Dołącza odczyty z nieudanych prób startu na początek cyklu, dla maszyn, które wykonują próby przed startem (blokada drzwi, pierwsze napełnianie). 300 s wystarcza w większości przypadków; 0 = wyłączone. Zapisany początek przesuwa się wcześniej, więc wyuczone czasy trwania przez jakiś czas się zmieniają.",
       "label": "Wstępny zapis krzywej"
     },
     "unload_confirm_entity": {
       "label": "Encja Potwierdzenia Rozładunku",
-      "doc": "Opcjonalna encja, której aktywacja oznacza, że wsad został wyjęty, dla maszyn, w których nie da się zamontować czujnika drzwi. Działa dowolny rodzaj: przycisk Zigbee lub NFC, pomocnik input_button, czujnik ruchu przed maszyną, scena. Każda zmiana stanu liczy się jako potwierdzenie, z wyjątkiem wyłączenia i przejścia w stan niedostępny. Ustawienie tej opcji włącza też przypomnienie o rozładunku na urządzeniu bez Encji Czujnika Drzwi."
+      "doc": "Opcjonalnie. Dowolna encja, która potwierdza wyjęcie wsadu, dla maszyn bez czujnika drzwi (przycisk, input_button, czujnik ruchu, scena). Liczy się każda zmiana stanu poza wyłączeniem i niedostępnością. Włącza też przypomnienie o rozładunku."
     },
     "unload_track_without_door": {
       "label": "Ręczne potwierdzanie rozładunku",
-      "doc": "Uruchamia przypomnienie o rozładunku na urządzeniu bez Encji Czujnika Drzwi i bez Encji Potwierdzenia Rozładunku, a rozładunek potwierdzasz z własnej automatyzacji: naciśnij encję przycisku „Oznacz jako rozładowane” lub wywołaj usługę ha_washdata.mark_unloaded. Ignorowane, gdy ustawiona jest Encja Czujnika Drzwi, która już dostarcza ten sygnał."
+      "doc": "Uruchamiaj przypomnienie o rozładunku bez czujnika drzwi i encji potwierdzenia. Potwierdź rozładunek z własnej automatyzacji przyciskiem „Oznacz jako rozładowane” lub usługą ha_washdata.mark_unloaded. Ignorowane, gdy ustawiono Encję Czujnika Drzwi."
     },
     "notify_icon_color": {
       "label": "Kolor Powiadomienia",
-      "doc": "Kolor akcentu powiadomień tego urządzenia, aby pralkę, suszarkę i zmywarkę można było odróżnić na pierwszy rzut oka. iOS koloruje ikonę oraz pasek postępu Live Activity na ekranie blokady i w Dynamic Island. Android otrzymuje ten sam kolor, ale to telefon decyduje, co z nim zrobi: niektóre kolorują ikonę, a wiele (zwłaszcza Samsung One UI) całkowicie go ignoruje. Obie platformy rozumieją Hex (np. #03A9F4). Pozostaw puste, aby użyć domyślnego koloru platformy."
+      "doc": "Kolor akcentu powiadomień tego urządzenia, aby łatwo odróżnić pralkę, suszarkę i zmywarkę. W iOS wypełnia kółko za ikoną i koloruje pasek Live Activity. Wiele telefonów z Androidem (zwłaszcza Samsung) go ignoruje. Użyj zapisu hex, np. #03A9F4. Puste: domyślny kolor platformy."
+    },
+    "share_name": {
+      "doc": "Pokazuj nazwę swojego konta jako autora udostępnianych cykli. Wyłączone: udostępniane bez nazwy."
     }
   },
   "setting_group": {
@@ -1677,9 +1625,6 @@
     },
     "door_pause": {
       "label": "Drzwi i Pauza"
-    },
-    "dtw_refinement": {
-      "label": "Uściślenie DTW"
     },
     "duration_gates": {
       "label": "Bramki Czasowe"
@@ -1757,17 +1702,20 @@
     "rebuilding": "Przebudowywanie…",
     "analyzing": "Analizowanie…",
     "resetting": "Resetowanie…",
-    "reverting": "Przywracanie…",
     "trimming": "Przycinanie…",
     "splitting": "Dzielenie…",
+    "stalled": "Utknął",
     "deleting": "Usuwanie…",
     "imported": "Zaimportowano",
     "preparing": "Przygotowywanie…",
-    "unlabelling": "Usuwanie etykiety…"
+    "unlabelling": "Usuwanie etykiety…",
+    "working": "Przetwarzanie…",
+    "match_uncertain": "Niepewne: {top} lub {runner}",
+    "match_uncertain_single": "Niepewne: może {top}",
+    "match_sure": "~{pct}% pewności",
+    "match_uncertain_tip": "WashData nie wybrał jeszcze programu. Liczba pokazuje, jak często wiodący kandydat, {top}, okazywał się trafny w poprzednich cyklach przy takiej przewadze. Tylko informacyjnie."
   },
   "suggestion": {
-    "both_agree": "WashData zaleca",
-    "calibrated_label": "Skalibrowano",
     "observed_label": "Zmierzono",
     "impact": {
       "auto_label_confidence": {
@@ -1781,10 +1729,6 @@
       "end_energy_threshold": {
         "higher": "Zamyka tylko cykle o znacznym zużyciu energii",
         "lower": "Zamyka również krótsze lub mniej energochłonne cykle"
-      },
-      "end_repeat_count": {
-        "higher": "Wymaga więcej powtórzeń sygnału końca – bardziej niezawodne, nieco wolniejsze",
-        "lower": "Kończy po mniejszej liczbie powtórzeń – szybsze wykrywanie, większe ryzyko fałszywego zakończenia"
       },
       "learning_confidence": {
         "higher": "Uczy się tylko z bardzo pewnych dopasowań – wolniejsze, ale bardziej niezawodne",
@@ -1824,40 +1768,25 @@
       }
     },
     "reason": {
-      "auto_label_confidence": "Pewność na 15. percentylu dla {cycles} etykiet automatycznych, których użytkownik nigdy nie poprawił ({p15}).",
       "completion_min_seconds": "Połowa czasu trwania p05 poprawnego cyklu ({minutes} min) dla {cycles} cykli; odfiltrowuje fałszywe cykle.{excl}",
-      "dead_zone_batch": "Utrzymane krótkie (mediana okna niestabilności rozruchu dla {cycles} cykli = {s}s), aby rzeczywisty koniec był szybko wykrywany.",
-      "dead_zone_from_dip": "Na podstawie wczesnego spadku mocy wykrytego przy {s}s.",
-      "end_energy_default": "Domyślna zalecana wartość bazowa dla progu szumu na końcu cyklu.",
-      "end_energy_false": "Energia p95 fałszywych zakończeń ({p95}Wh) dla {cycles} cykli, z dolną granicą 0.2% mediany energii cyklu ({floor}Wh).",
-      "end_energy_no_false": "Brak fałszywych zakończeń dla {cycles} cykli; dolna granica 0.2% mediany energii cyklu ({floor}Wh).",
-      "end_repeat_count": "{false}/{total} poprawnych cykli ({pct}%) miało wewnętrzną pauzę >60s, która została wznowiona; wymagaj {val} potwierdzeń zakończenia.",
-      "learning_confidence": "Pewność p05 dla {cycles} cykli oznaczonych przez użytkownika ({p05}); poniżej tej wartości żądaj weryfikacji.",
       "match_interval": "Na podstawie obserwowanej częstotliwości aktualizacji (mediana={median}s) * 10.",
       "match_interval_capped": "Ograniczone tak, aby {persistence} kolejnych dopasowań zmieściło się w {pct}% najkrótszego programu ({shortest}s); sama częstotliwość aktualizacji (mediana={median}s) sugerowałaby dłuższy interwał.",
-      "match_interval_floored": "Sam najkrótszy program ({shortest}s) ograniczyłby tę wartość do {cap}s, poniżej minimum {minimum}s, więc jest ona utrzymywana na minimum: seria {persistence} kolejnych dopasowań zajmuje {budget}s, czyli więcej niż {pct}% tego programu. Dopasowywanie uruchamia się tylko wtedy, gdy nadejdzie nowy odczyt (mediana={median}s), więc minimum nie kosztuje nic.",
+      "match_interval_floored": "Najkrótszy program ({shortest}s) ograniczyłby tę wartość do {cap}s, poniżej minimum {minimum}s, więc użyto minimum: {persistence} kolejnych dopasowań zajmuje {budget}s, ponad {pct}% tego programu. Dopasowanie uruchamia się tylko po nadejściu odczytu (mediana={median}s), więc nic to nie kosztuje.",
       "max_duration_ratio": "Na podstawie czasów trwania oznaczonych cykli (p95={p95}).",
-      "min_active": "Na podstawie minimalnej mocy czynnej ({min}W) zaobserwowanej w ostatnim cyklu.",
-      "min_duration_ratio": "Utrzymane jak najniżej, aby program był rozpoznawany na wczesnym etapie cyklu; progi pewności i niejednoznaczności zapobiegają przedwczesnym decyzjom.",
       "min_off_gap": "Na podstawie {gaps} zaobserwowanych przerw między cyklami (p05={p05}s). Minimum urządzenia: {floor}s.",
       "min_off_gap_bridge": "Dobrane tak, aby pokryć najdłuższy cichy odcinek wewnątrz cyklu: {span}s + zapas 60s, z {spans} pokrytych przerw w {cycles} poprawnych cyklach (pozostaje poniżej {ceiling}s, czyli najkrótszej przerwy, jaką zostawiasz między kolejnymi uruchomieniami).",
       "min_power": "40% najniższej mocy czynnej p05 ({p05}W) w {cycles} poprawnych cyklach, tak aby próg wyłączenia pozostał poniżej rzeczywistego poboru.{excl}",
-      "ml_auto_label": "Najniższa pewność, przy której model jakości nadal uznawał cykl za poprawny (p10 z {cycles} poprawnych cykli = {p10}).",
-      "ml_end_repeat": "{false}/{total} cykli ({pct}%) miało pauzę, którą detektor końca ocenił powyżej 50%; wymagaj {val} potwierdzeń zakończenia.",
-      "ml_off_delay": "Pauzy potwierdzone przez detektor końca: p95 {p95}s + zapas 60s, z {pauses} pauz zweryfikowanych przez model w {cycles} cyklach (minimum {floor}s).",
       "no_update_timeout": "Na podstawie obserwowanej częstotliwości aktualizacji (p95={p95}s) * 20 (min. 60s).",
       "off_delay_cadence": "Na podstawie obserwowanej częstotliwości aktualizacji (p95={p95}s) * 5",
       "off_delay_device_floor": "Użyto bezpiecznego minimum specyficznego dla urządzenia {device} ({floor}s).",
       "off_delay_generic_floor": "Użyto ogólnego bezpiecznego minimum ({floor}s).",
       "off_delay_pauses": "Dobrane tak, aby przetrwać rzeczywiste pauzy: pauza w cyklu p95 {p95}s + zapas 60s, z {pauses} pauz w {cycles} poprawnych cyklach (minimum {floor}s).",
-      "profile_match_threshold": "Pewność p10 dla {cycles} poprawnych etykiet automatycznych ({p10}); bezpieczny próg potwierdzenia na żywo.",
-      "sampling_interval": "Mediana interwału aktualizacji zaobserwowana w {cycles} poprawnych cyklach ({si}s).{excl}",
-      "smoothing_window": "Dobrane do wygładzania ~30s odczytów przy próbkowaniu {si}s ({samples} próbek).",
-      "start_duration": "Utrzymane krótkie (~jeden interwał próbkowania {si}s), aby wykrywanie rozpoczynało się jak najwcześniej, jednocześnie ignorując pojedyncze skoki.",
-      "thr_batch": "Utrzymane tuż powyżej najniższej mocy czynnej p05 w {cycles} cyklach ({p05}W), aby start był wykrywany jak najwcześniej, a próg zatrzymania pozostawał poniżej najniższej mocy pracy urządzenia.",
-      "tol_per_profile": "p75 wariancji czasu trwania na profil w {profiles} profilach ({cycles} cykli); spójne profile nie są karane.",
-      "tol_pooled": "Na podstawie łącznej wariancji czasu trwania {cycles} ostatnich oznaczonych cykli (odchylenie p95={dev}).",
-      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s i co najmniej 2x powyżej interwału próbkowania {median}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań."
+      "standby_floor": "Każdy ostatni cykl nadal pobierał {idle}W w chwili zakończenia, więc próg poniżej tej wartości nigdy nie wykryje wyłączenia urządzenia. Utrzymany powyżej niej; {cycles} czystych cykli w historii nigdy nie spadło poniżej niego na dłużej niż {pause}s.",
+      "thr_batch": "Tuż powyżej najniższej mocy czynnej (p05) w {cycles} cyklach ({p05}W), aby starty były wykrywane wcześnie, a próg zatrzymania pozostał poniżej najniższej mocy pracy.",
+      "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s i co najmniej 2x powyżej interwału próbkowania {median}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań.",
+      "end_energy_floor": "Podniesiono do minimum wynikającego z progu zatrzymania ({stop} W) w czasie opóźnienia wyłączenia ({off_delay} s); poniżej niego cykl może się zakończyć tylko ścieżką awaryjną.",
+      "max_duration_ratio_default": "Przywrócono wartość domyślną: niższy górny limit odrzuca właściwy program za każdym razem, gdy cykl trwa dłużej niż zwykle.",
+      "min_duration_ratio_default": "Przywrócono wartość domyślną: wyższy dolny limit uniemożliwia rozpoznanie trwającego cyklu, dopóki nie jest on mocno zaawansowany."
     },
     "exclusions": {
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",
@@ -1875,7 +1804,8 @@
         "no_power": "bez mocy",
         "no_active_power": "bez aktywnej mocy"
       }
-    }
+    },
+    "now_value": "(obecnie {v})"
   },
   "tab": {
     "advanced": "Zaawansowany",
@@ -1906,13 +1836,17 @@
   },
   "toast": {
     "catalog_refreshed": "Katalog społeczności odświeżony",
+    "task_name_required": "Nadaj zadaniu nazwę",
+    "task_added": "Dodano zadanie",
+    "task_save_failed": "Nie można zapisać zadania: {error}",
+    "task_removed": "Usunięto zadanie",
+    "maint_logged": "Oznaczono jako wykonane: {task}",
     "access_saved": "Kontrola dostępu zapisana",
     "all_wiped": "Wszystkie dane zostały usunięte",
     "analysis_complete_none": "Analiza ukończona: brak nowych sugestii",
     "auto_label_complete": "Automatyczne etykietowanie zakończone",
     "automation_deleted": "Automatyzacja usunięta",
     "correction_submitted": "Poprawka złożona",
-    "cycle_deleted": "Cykl usunięty",
     "cycle_force_stopped": "Cykl wymuszony zatrzymany",
     "cycle_labelled": "Cykl oznaczony",
     "cycle_paused": "Cykl wstrzymany",
@@ -1928,11 +1862,9 @@
     "group_deleted": "Grupa usunięta",
     "group_name_required": "Nazwa grupy jest wymagana",
     "group_saved": "Grupa zapisana",
-    "import_successful": "Import udany; przeładowanie integracji",
     "json_required": "Wymagane są dane JSON",
     "legacy_removed": "Usunięto starsze działania",
     "logs_exported": "Logi wyeksportowane",
-    "matching_reverted": "Dopasowane wagi przywrócono do wartości domyślnych",
     "min_2_profiles": "Wybierz co najmniej 2 profile dla grupy",
     "ml_training_no_improvement": "Trening ukończony: poziom bazowy utrzymany (brak poprawy)",
     "models_reverted": "Modele na urządzeniu przywrócono do stanu bazowego",
@@ -1942,8 +1874,8 @@
     "pg_preset_loaded": "Preset \"{name}\" wczytany",
     "pg_preset_saved": "Preset \"{name}\" zapisany",
     "pg_sugg_loaded": "Załadowano {n} sugerowanych wartości - uruchom piaskownicę, aby porównać",
-    "pg_sugg_ml_loaded": "Załadowano {n} wartości skalibrowanych przez ML - uruchom piaskownicę, aby porównać",
     "phase_name_required": "Nazwa fazy jest wymagana",
+    "phase_reset": "Przywrócono wbudowaną wersję fazy \"{name}\"",
     "phase_updated": "Faza zaktualizowana",
     "phases_saved": "Fazy zapisane",
     "preferences_saved": "Preferencje zostały zapisane",
@@ -1990,15 +1922,11 @@
     "store_name_required": "Wprowadź nazwę profilu",
     "store_import_failed": "Import nie powiódł się: {error}",
     "store_imported": "Zaimportowano do {profile}",
-    "store_program_required": "Wprowadź nazwę programu",
     "store_no_appliance": "Najpierw ustaw markę i model urządzenia w Ustawieniach.",
     "store_share_failed": "Udostępnianie nie powiodło się: {error}",
     "store_shared": "Udostępniono w sklepie społecznościowym, oczekuje na weryfikację.",
     "contrib_device_changed": "Dodano do sklepu społecznościowego, ale wybrane urządzenie zmieniło się, gdy formularz był otwarty. Wybierz je w Ustawieniach.",
     "appliance_added": "Urządzenie dodane, oczekuje na zatwierdzenie",
-    "thanks_confirming": "Dziękujemy za potwierdzenie",
-    "device_approved": "Zatwierdzone przez społeczność",
-    "rating_saved": "Ocena jakości zapisana",
     "brand_added": "Marka dodana, oczekuje na zatwierdzenie",
     "profile_added": "Profil dodany, oczekuje na zatwierdzenie",
     "saved_except_conflicts": "Zapisano. Popraw podświetlone konflikty, aby zapisać pozostałe.",
@@ -2021,7 +1949,52 @@
     "odometer_saved": "Łączna liczba cykli zapisana",
     "odometer_save_failed": "Nie udało się zapisać łącznej liczby: {error}",
     "store_pick_profile_share": "Wybierz profil do udostępnienia",
-    "remove_failed": "Usuwanie nie powiodło się: {error}"
+    "remove_failed": "Usuwanie nie powiodło się: {error}",
+    "analysis_complete": "Analiza ukończona: sugestie: {count}",
+    "analysis_failed": "Analiza nie powiodła się: {error}",
+    "auto_detect_failed": "Automatyczne wykrywanie nie powiodło się: {error}",
+    "auto_label_failed": "Automatyczne oznaczanie nie powiodło się: {error}",
+    "could_not_load_cycle": "Nie można załadować cyklu: {error}",
+    "create_failed": "Tworzenie nie powiodło się: {error}",
+    "cycles_deleted": "Usunięte cykle: {count}",
+    "debug_cleared": "Wyczyszczone ślady debugowania: {count}",
+    "discard_failed": "Odrzucenie nie powiodło się: {error}",
+    "error": "Błąd: {error}",
+    "export_failed": "Eksport nie powiódł się: {error}",
+    "import_failed": "Import nie powiódł się: {error}",
+    "invalid_json": "\"{key}\" nie jest prawidłowym JSON - popraw go lub wyczyść pole przed zapisaniem.",
+    "label_failed": "Oznaczanie nie powiodło się: {error}",
+    "ml_training_promoted": "Trening ukończony: wdrożone modele: {count}",
+    "pause_failed": "Wstrzymanie nie powiodło się: {error}",
+    "phase_created": "Utworzono fazę \"{name}\"",
+    "phase_deleted": "Usunięto fazę \"{name}\"",
+    "profile_created": "Utworzono profil \"{name}\"",
+    "rename_failed": "Zmiana nazwy nie powiodła się: {error}",
+    "save_failed": "Zapisywanie nie powiodło się: {error}",
+    "split_complete": "Podzielono na cykle: {count}",
+    "start_failed": "Uruchomienie nie powiodło się: {error}",
+    "stop_failed": "Zatrzymanie nie powiodło się: {error}",
+    "update_failed": "Aktualizacja nie powiodła się: {error}",
+    "store_download_skipped": "Pominięto nagrań: {n} (zbyt krótkie, ze zbyt wieloma przerwami lub już są na Twoim urządzeniu).",
+    "store_import_low_quality": "To nagranie jest zbyt krótkie, ma zbyt wiele przerw lub jest niewiarygodne, więc nie można go zaimportować.",
+    "store_import_duplicate": "To nagranie jest już na Twoim urządzeniu.",
+    "device_approved": "Zatwierdzone przez społeczność",
+    "thanks_confirming": "Dziękujemy za potwierdzenie",
+    "rating_saved": "Ocena jakości zapisana",
+    "store_download_partial": "Nie udało się pobrać programów: {n}; spróbuj ponownie później.",
+    "import_no_restore_point": "Zaimportowano, ale nie udało się zapisać punktu przywracania, więc tego importu nie można cofnąć",
+    "import_undo_failed": "Nie udało się cofnąć importu: {error}",
+    "import_undone": "Import cofnięty: przywrócono {profiles} profil(e) i {cycles} cykl(e)",
+    "auto_label_cancelled": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cykli.",
+    "auto_label_cancelled_one": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cyklu.",
+    "auto_label_cancelled_few": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cykli.",
+    "auto_label_cancelled_many": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cykli.",
+    "auto_label_cancelled_other": "Automatyczne oznaczanie anulowano po oznaczeniu {count} cyklu.",
+    "auto_label_done": "Automatyczne oznaczanie zakończone: oznaczono {count} cykli, bez etykiety pozostało: {skipped}.",
+    "auto_label_done_one": "Automatyczne oznaczanie zakończone: oznaczono {count} cykl, bez etykiety pozostało: {skipped}.",
+    "auto_label_done_few": "Automatyczne oznaczanie zakończone: oznaczono {count} cykle, bez etykiety pozostało: {skipped}.",
+    "auto_label_done_many": "Automatyczne oznaczanie zakończone: oznaczono {count} cykli, bez etykiety pozostało: {skipped}.",
+    "auto_label_done_other": "Automatyczne oznaczanie zakończone: oznaczono {count} cyklu, bez etykiety pozostało: {skipped}."
   },
   "trend": {
     "down": "Trend w dół",
@@ -2029,6 +2002,10 @@
   },
   "maint": {
     "bearing_service": "Serwis łożysk",
+    "salt": "Uzupełnij sól",
+    "rinse_aid": "Uzupełnij nabłyszczacz",
+    "lint_filter": "Wyczyść filtr kłaczków",
+    "condenser_clean": "Wyczyść skraplacz",
     "descale": "Odkamienianie",
     "drum_clean": "Wyczyść bęben",
     "filter_clean": "Wyczyść filtr",
@@ -2036,34 +2013,22 @@
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy ciszy po oczekiwanym czasie trwania, zanim zwolnione zostanie oczekiwanie na końcowe odpompowanie wody",
-    "smart_termination_duration_ratio": "Ułamek oczekiwanego czasu trwania dopasowanego programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż go w przypadku maszyn zależnych od wsadu lub temperatury",
-    "anti_crease_finalize_ratio": "Ułamek oczekiwanego czasu trwania dopasowanego programu, który cykl musi osiągnąć, zanim antygniotowy ogon obracania bębna może zostać zakończony; obniż go w suszarkach z długim ogonem obracania, w pralkach pozostaw wartość domyślną",
+    "smart_termination_duration_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż, jeśli czasy pracy się wahają",
+    "anti_crease_finalize_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim ogon antygniotowy może go zakończyć; obniż w suszarkach, w pralkach zostaw wartość domyślną",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
-    "anti_wrinkle_exit_power": "Moc musi spaść poniżej tej wartości pomiędzy impulsami, aby tryb antygniotowy pozostał aktywny",
+    "anti_wrinkle_exit_power": "Poziom mocy w przerwach między impulsami obrotów; działa tylko powyżej Progu Zatrzymania",
     "anti_wrinkle_idle_timeout": "Dozwolony czas ciszy między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy",
     "anti_wrinkle_max_duration": "Dłuższy impuls kończy tryb antygniotowy i otwiera nowy cykl",
     "anti_wrinkle_max_power": "Impuls powyżej tej wartości kończy tryb antygniotowy i otwiera nowy cykl",
     "completion_min_seconds": "Najkrótszy przebieg liczony jako prawdziwy cykl",
-    "end_repeat_count": "Kolejne niskie odczyty przed zakończeniem",
     "interrupted_min_seconds": "Krótkie cykle oznaczane jako przerwane",
     "min_off_gap": "Przerwa wymagana do rozdzielenia dwóch cykli",
     "off_delay": "Sekundy niskiej mocy przed zakończeniem cyklu",
     "start_duration_threshold": "Sekundy powyżej progu, by potwierdzić start",
     "start_threshold_w": "Minimalna moc w watach, by uznać za rozpoczęty",
     "stop_threshold_w": "Poniżej tej wartości urządzenie liczone jest jako wyłączone",
-    "dtw_bandwidth": "Etap 3: pasmo zniekształcenia Sakoe-Chiba (0 = DTW wyłączony; domyślnie 0,2 = 20% długości cyklu)",
-    "corr_weight": "Etap 2: balans między kształtem krzywej (korelacja) a poziomem mocy (MAE); domyślnie 0,45",
-    "duration_weight": "Etap 4: jak mocno zgodność czasu trwania wpływa na wynik końcowy (domyślnie 0,22)",
-    "energy_weight": "Etap 4: jak mocno zgodność energii wpływa na wynik końcowy (domyślnie 0,22)",
-    "profile_match_min_duration_ratio": "Etap 1: minimalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Etap 1: maksymalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 1,8 (180%)",
-    "keep_min_score": "Etap 2: minimalny wynik, by pozostać w wyścigu; domyślnie 0,1 dopuszcza słabe dopasowania, późniejsze etapy wybierają najlepsze",
-    "dtw_blend": "Etap 3: 0 = tylko wynik główny, 1 = tylko wynik DTW, 0,5 = równe mieszanie (domyślnie)",
-    "dtw_ensemble_w": "Etap 3 (tryb kombinacji): waga skalowanego L1 względem pochodnego DTW; domyślnie 0,7 faworyzuje poziom",
-    "dtw_ddtw_scale": "Etap 3: odległość półnasycenia DDTW; mniejsza = bardziej wrażliwa na kształt (domyślnie 30)",
-    "dtw_refine_top_n": "Etap 3: kandydaci ponownie oceniani przez DTW; zwiększ do 7-9, jeśli właściwy profil zajmuje 4-5 miejsce (domyślnie 5)",
-    "duration_scale": "Etap 4: logarytm stosunku, przy którym zgodność czasu trwania spada do połowy; mniejszy = surowsza kara (domyślnie 0,175)",
-    "energy_scale": "Etap 4: logarytm stosunku, przy którym zgodność energii spada do połowy; mniejszy = surowsza kara (domyślnie 0,25)",
+    "profile_match_min_duration_ratio": "Minimalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Maksymalna długość cyklu jako ułamek czasu trwania profilu; domyślnie 1,8 (180%)",
     "curve_preroll_seconds": "Sekundy odczytów z przerwanych prób startu dołączane na początku krzywej cyklu; 0 = wyłączone"
   },
   "col": {
@@ -2071,12 +2036,14 @@
     "status_tip": "Wynik cyklu: Zakończony (naturalny koniec), Przerwany (nagły spadek mocy), Wymuszone zatrzymanie (ręczne) lub Wymaga sprawdzenia (oczekuje opinii).",
     "date_tip": "Data i godzina rozpoczęcia cyklu.",
     "duration_tip": "Całkowity czas działania cyklu od początku do końca.",
-    "energy_tip": "Całkowite zużycie energii (kWh). Obliczone przez całkowanie mocy w czasie.",
-    "cost_tip": "Koszt energii dla tego cyklu, zamrożony w chwili zakończenia. Gdy Koszt ważony czasem jest włączony, krzywa mocy jest naliczana według ceny obowiązującej w każdej chwili; w przeciwnym razie energia x jedna cena obowiązująca na koniec. Ustaw cenę w Ustawieniach, aby wartość się pojawiła.",
+    "energy_tip": "Całkowita zużyta energia (kWh), obliczona z mocy w czasie.",
+    "cost_tip": "Koszt energii tego cyklu, ustalony w chwili zakończenia. Przy włączonym Koszcie ważonym czasem każda chwila jest naliczana po swojej cenie; w przeciwnym razie po cenie z końca. Ustaw cenę w Ustawieniach, aby to wypełnić.",
     "confidence_tip": "Pewność dopasowania profilu (0-100%). Jak dokładnie krzywa mocy cyklu dopasowała się do zidentyfikowanego programu.",
-    "health_tip": "Kondycja cyklu ML (wyższa = lepsza). Kliknij cykl, aby go sprawdzić i ocenić.",
     "flags_tip": "Flagi społeczności i wskaźniki jakości danych",
-    "cost_dynamic_tip": "Ważone czasem: naliczone według ceny obowiązującej w trakcie cyklu (efektywnie {price} {cur}/kWh)."
+    "cost_dynamic_tip": "Ważone czasem: naliczone według ceny obowiązującej w trakcie cyklu (efektywnie {price} {cur}/kWh).",
+    "dbg_conf": "Zauf.",
+    "dbg_mae": "MAE",
+    "dbg_corr": "Kor."
   },
   "stat": {
     "avg": "śr.",
@@ -2100,7 +2067,10 @@
     "notify_finish": "Zostałoby wysłane powiadomienie o zakończeniu.",
     "notify_milestone": "Zostałoby wysłane powiadomienie o osiągnięciu etapu.",
     "notify_held": "Powiadomienie zostało wstrzymane z powodu godzin ciszy.",
-    "finished": "Cykl osiągnął stan końcowy i zakończył się."
+    "finished": "Cykl osiągnął stan końcowy i zakończył się.",
+    "match_reverted": "Program wrócił do wykrywania: jego wynik spadł znacznie poniżej własnego szczytu.",
+    "verified_pause": "Wyrównanie na żywo potwierdziło (lub zniosło) pauzę wewnątrz programu. Dopóki pauza trwa, cykl nie zostanie zakończony.",
+    "stalled": "Cykl pozostawał na poborze czuwania dłużej, niż ten program kiedykolwiek tam pauzuje, a praca nie była skończona. Pokazany jako Wstrzymany (Utknął); cykl pozostaje otwarty."
   },
   "store": {
     "search_ph2": "Szukaj według marki lub modelu…",
@@ -2109,11 +2079,7 @@
     "programs_count": "Programy: {n}",
     "browse": "Przeglądaj",
     "device": "Urządzenie",
-    "favorites": "Ulubione",
-    "search_ph": "Szukaj według marki lub modelu…",
     "no_results": "Nie znaleziono pasujących urządzeń. Spróbuj innego wyszukiwania.",
-    "n_programs": "{n} programów",
-    "n_cycles": "{n} cykli",
     "no_programs": "Brak udostępnionych programów dla tego urządzenia.",
     "no_cycles": "Brak udostępnionych cykli referencyjnych dla tego programu.",
     "anon": "anonimowo",
@@ -2125,19 +2091,21 @@
     "merge_target": "Scal z profilem",
     "description": "Opis (opcjonalnie)",
     "contributed_by": "od {name}",
+    "website": "Strona sklepu ↗",
+    "website_tip": "Otwórz stronę sklepu społecznościowego",
+    "favorites": "Ulubione",
     "rating_summary": "★ {avg} ({n})",
     "no_ratings": "Brak ocen",
-    "website": "Strona sklepu ↗",
-    "website_tip": "Otwórz stronę sklepu społecznościowego"
+    "unreachable": "Nie udało się połączyć ze sklepem społecznościowym. Sprawdź połączenie i spróbuj ponownie."
   },
   "settings": {
     "gear": {
-      "title": "Ustawienia"
+      "title": "Preferencje"
     }
   },
   "link": {
-    "manual": "Instrukcja ↗",
-    "add_appliance": "Dodaj swoje urządzenie"
+    "maintenance_supporter": "Maintenance Supporter na GitHubie ↗",
+    "manual": "Instrukcja ↗"
   },
   "tip": {
     "add_brand": "Marki nie ma na liście? Dodaj ją do katalogu społeczności",
@@ -2171,7 +2139,13 @@
     "rebuild": {
       "envelopes": "Przeliczanie obwiedni"
     },
-    "cancelling": "Anulowanie..."
+    "cancelling": "Anulowanie...",
+    "auto_label": {
+      "running": "Automatyczne etykietowanie cykli"
+    },
+    "store_download": {
+      "running": "Pobieranie ze sklepu"
+    }
   },
   "setup": {
     "hdr": {
@@ -2180,26 +2154,24 @@
     },
     "phase0": {
       "washer": "WashData już wykrywa Twoje cykle. Nagraj pierwszy cykl, aby włączyć nazwy programów i szacunki czasu.",
-      "dishwasher": "WashData obserwuje. Zmywarki mają złożone cykle – nagranie pierwszego cyklu jest zdecydowanie zalecane. Jeśli wykryty cykl trwa zbyt długo, użyj edytora cyklu, aby go przyciąć przed zapisaniem jako profil.",
+      "dishwasher": "WashData obserwuje. Cykle zmywarki są złożone, więc nagraj pierwszy cykl. Jeśli wykryty cykl trwa za długo, przytnij go w edytorze cyklu przed zapisaniem jako profil.",
       "generic": "WashData obserwuje. Nagraj lub oznacz wykryty cykl, aby zacząć tworzyć profile."
     },
     "phase1a": {
-      "labelled": "Dobry początek – Twój pierwszy program jest zapisany. Aby uzyskać najczystsze dane, rozważ nagranie następnego cyklu za pomocą widżetu rejestratora."
+      "labelled": "Dobry początek: Twój pierwszy program jest zapisany. Aby mieć najczystsze dane, nagraj następny cykl rejestratorem."
     },
     "phase1b": {
-      "recorded": "Nagranie zostało zapisane jako {profile_name}. Teraz nagraj lub oznacz inne popularne programy, aby rozszerzyć pokrycie."
+      "recorded": "Nagranie zapisano jako {profile_name}. Teraz nagraj lub oznacz pozostałe często używane programy."
     },
     "phase1c": {
-      "verify": "Masz {count} programów ze społeczności. Uruchom cykl, aby sprawdzić, czy WashData rozpoznaje go poprawnie – dopasowanie będzie się poprawiać w miarę jak urządzenie buduje własną historię."
+      "verify": "Masz programy ze społeczności ({count}). Uruchom cykl, aby sprawdzić, czy WashData go rozpoznaje; dopasowanie poprawia się, gdy urządzenie buduje własną historię."
     },
     "phase2": {
-      "cluster": "WashData zauważył {count} cykli, które nie pasują do żadnego zapisanego programu – wyglądają podobnie do siebie. Chcesz utworzyć dla nich nowy profil?",
+      "cluster": "WashData zauważył podobne cykle ({count}), które nie pasują do żadnego zapisanego programu. Utworzyć dla nich nowy profil?",
       "unmatched": "Twój ostatni cykl nie pasował do żadnego zapisanego programu. Czy to nowy program?"
     },
     "phase3": {
-      "suggestions": "WashData ma zalecenia dotyczące ustawień oparte na historii Twoich cykli – przejrzyj je, aby poprawić dokładność wykrywania.",
-      "groups": "Niektóre Twoje profile wyglądają jak ten sam program w różnych temperaturach. Zorganizuj je w grupę dla lepszego dopasowania.",
-      "phases": "Dodaj fazy programu do {profile_name} dla dokładniejszych szacunków pozostałego czasu."
+      "suggestions": "WashData ma sugestie ustawień na podstawie historii Twoich cykli. Przejrzyj je, aby poprawić wykrywanie."
     },
     "phase4": {
       "healthy": "To urządzenie jest w pełni skonfigurowane ({profile_count} profili)."
@@ -2212,12 +2184,58 @@
       "create_from_cluster": "Utwórz profil z tych cykli",
       "create_profile": "Utwórz dla niego profil",
       "review_suggestions": "Przejrzyj sugestie",
-      "organise_profiles": "Zorganizuj profile",
-      "configure_phases": "Skonfiguruj fazy",
       "skip_step": "Pomiń ten krok",
       "skip_forever": "Nie pokazuj ponownie",
       "hide_guidance": "Ukryj wskazówki",
       "show_guidance": "Pokaż wskazówki"
     }
+  },
+  "access": {
+    "edit": "Edycja",
+    "full": "Pełny",
+    "inherit": "Dziedzicz",
+    "none": "Brak (ukryte)",
+    "read": "Odczyt"
+  },
+  "pg_label_reason": {
+    "no_winner": "Żaden program nie pasuje",
+    "below_floor": "Poniżej progu \"Pewność Uczenia\"",
+    "ambiguous": "Oznaczone jako niejednoznaczne",
+    "margin": "Zbyt blisko drugiego najlepszego programu",
+    "unknown_profile": "Program już nie istnieje",
+    "not_evaluated": "Nie oceniono"
+  },
+  "diagram": {
+    "accum": "akum.",
+    "auto": "auto",
+    "below_off": "poniżej = wył.",
+    "confirmed": "potwierdzono",
+    "energy_counts": "energia się liczy",
+    "feedback": "opinia",
+    "gap_below_min": "przerwa poniżej min. = jeden cykl",
+    "heat_phase": "faza grzania",
+    "held_at_100": "pozostaje na 100%",
+    "ignored": "ignorowane",
+    "kept": "zachowane",
+    "max": "maks.",
+    "min": "min.",
+    "minus_tol": "-tol",
+    "no_match": "brak dopasowania",
+    "no_updates": "brak aktualizacji",
+    "off_delay_wait": "opóźnienie wyłączenia",
+    "off_gap": "przerwa wył.",
+    "plus_tol": "+tol",
+    "profile": "profil",
+    "reading_interval": "typowy interwał odczytów",
+    "sensor_offline": "czujnik offline: wymuszone zatrzymanie",
+    "si": "IP",
+    "spike_ignored": "skok zignorowany",
+    "spike_ignored_short": "skok: zignorowany",
+    "start": "start",
+    "stop": "stop",
+    "tail_energy_resets": "energia końcówki powyżej progu: licznik się zeruje",
+    "thr": "próg",
+    "too_short": "za krótki",
+    "tumble_kept": "impulsy bębna zachowane"
   }
 }

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData セットアップ",
-        "description": "洗濯機またはその他の家電製品を設定します。\n\n電力センサーが必要です。\n\nセットアップ後、サイドバーの WashData パネルを開くか（または [/ha-washdata](/ha-washdata) にアクセスして）、サイクルの確認、検出の調整、プロファイルの管理を行ってください。",
+        "description": "洗濯機などの家電を設定します。電力センサーが必要です。\n\nセットアップ後、サイドバーから WashData パネル（[/ha-washdata](/ha-washdata)）を開くと、サイクル、プロファイル、すべての設定を確認できます。",
         "data": {
           "name": "デバイス名",
           "device_type": "デバイスの種類",
@@ -12,43 +12,41 @@
         },
         "data_description": {
           "name": "このデバイスのわかりやすい名前（例：「洗濯機」、「食器洗い機」）。",
-          "device_type": "家電製品の種類を選択します。検出とラベル付けの精度向上に役立ちます。",
-          "power_sensor": "スマートプラグからリアルタイムの消費電力（ワット）を報告するセンサーエンティティ。",
-          "min_power": "このしきい値（ワット）を超える電力値は、家電製品が動作中であることを示します。ほとんどのデバイスでは 2W から始めてください。"
+          "device_type": "この種類の家電向けの検出のデフォルトを設定します。",
+          "power_sensor": "リアルタイムの電力をワット単位で報告するスマートプラグのセンサー。",
+          "min_power": "この値（ワット）を超える測定値は、家電が動作中であることを示します。ほとんどのデバイスには 2 W が適しています。"
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "デバイス名、家電の種類、または電力センサーを更新します。\n\nWashData パネル（サイドバー、または [/ha-washdata](/ha-washdata)）で、検出、サイクル、プロファイル、通知を管理できます。",
+        "title": "WashData の再設定",
+        "description": "デバイス名、家電の種類、電力センサーを変更します。\n\nその他の設定はすべて WashData パネル（サイドバー、または [/ha-washdata](/ha-washdata)）にあります。",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "デバイス名",
+          "device_type": "デバイスの種類",
+          "power_sensor": "電力センサー",
+          "min_power": "最小電力しきい値 (W)"
         }
       }
     },
     "error": {
-      "cannot_connect": "接続に失敗しました",
-      "invalid_auth": "認証に失敗しました",
       "unknown": "予期しないエラーが発生しました",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "電力しきい値は 0 より大きくする必要があります"
     },
     "abort": {
       "already_configured": "このデバイスはすでに設定されています",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "再設定が成功しました"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
-        "description": "デバイス名を変更するか、主要なハードウェア設定を変更します。すべての検出・照合・通知の設定は [WashData パネル](/ha-washdata) で確認できます（サイドバーからもアクセス可能）。",
+        "title": "WashData 設定",
+        "description": "デバイス名や主要な設定を変更します。その他の設定はすべて、サイドバーの [WashData パネル](/ha-washdata) にあります。",
         "data": {
           "name": "デバイス名",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "デバイスの種類",
+          "power_sensor": "電力センサー",
+          "min_power": "最小電力しきい値 (W)"
         }
       }
     },
@@ -60,7 +58,7 @@
       "notify_live_waiting_message": "{device}: まだ一致するプロファイルがありません。",
       "vs_typical_longer": "通常より {pct}% 長い",
       "vs_typical_shorter": "通常より {pct}% 短い",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "電力しきい値は 0 より大きくする必要があります"
     }
   },
   "selector": {
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "プロファイル名",
-          "description": "既存のプロファイル名（プロファイル管理メニューでプロファイルを作成）。ラベルを削除するには空白にします。"
+          "description": "既存のプロファイル名（プロファイルは WashData パネルで作成）。空欄にするとラベルを削除します。"
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "信頼度しきい値",
-          "description": "ラベルを適用する最小照合信頼度（0.50-0.95）。"
+          "description": "ラベルを適用する最小照合信頼度（0.50-0.95）。空欄にすると、デバイスの「自動ラベル信頼度」設定が使用されます。"
         }
       }
     },
     "export_config": {
       "name": "設定をエクスポート",
-      "description": "このデバイスのプロファイル、サイクル、設定を JSON ファイルにエクスポートします（デバイスごと）。",
+      "description": "このデバイスのプロファイル、サイクル、設定を JSON ファイルにエクスポートします。",
       "fields": {
         "device_id": {
           "name": "デバイス",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "サイクルフィードバックを送信",
-      "description": "完了したサイクルの自動検出されたプログラムを確認または修正します。`entry_id`（上級者向け）または `device_id`（推奨）のいずれかを指定します。",
+      "description": "完了したサイクルで検出されたプログラムを確認または修正します。`device_id`（推奨）または `entry_id` を指定します。",
       "fields": {
         "device_id": {
           "name": "デバイス",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "取り出し済みとしてマーク",
-      "description": "WashData デバイスから終了した中身を取り出したことを確認し、クリーン状態と取り出しリマインダーを解除します。",
+      "description": "終了した中身を取り出したことを確認します。クリーン状態と取り出しリマインダーを解除します。",
       "fields": {
         "device_id": {
           "name": "デバイス",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "照合の曖昧さ"
+      },
+      "maintenance_due": {
+        "name": "メンテナンス時期",
+        "state": {
+          "on": "要対応",
+          "off": "対応不要"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "要対応タスク ID"
+          },
+          "due_tasks": {
+            "name": "要対応タスク",
+            "state": {
+              "descale": "スケール除去",
+              "filter_clean": "フィルターの清掃",
+              "drum_clean": "ドラムの清掃",
+              "bearing_service": "ベアリングの整備",
+              "other": "その他",
+              "salt": "塩の補充",
+              "rinse_aid": "リンス剤の補充",
+              "lint_filter": "糸くずフィルターの清掃",
+              "condenser_clean": "コンデンサーの清掃"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "しわ防止",
           "interrupted": "中断",
           "force_stopped": "強制停止",
-          "rinse": "すすぎ",
           "unknown": "不明",
           "clean": "クリーン",
           "delay_wait": "開始を待っています"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "サイクル異常",
+            "state": {
+              "overrun": "超過中",
+              "stalled": "停滞中"
+            }
+          }
         }
       },
       "washer_program": {

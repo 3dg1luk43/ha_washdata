@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData-instellingen",
-        "description": "Configureer uw wasmachine of ander apparaat.\n\nVermogenssensor is vereist.\n\nNa de installatie opent u het WashData-paneel via de zijbalk (of ga naar [/ha-washdata](/ha-washdata)) om cycli te bekijken, detectie af te stellen en profielen te beheren.",
+        "description": "Stel een wasmachine of ander apparaat in. Een vermogenssensor is vereist.\n\nOpen na de installatie het WashData-paneel via de zijbalk ([/ha-washdata](/ha-washdata)) voor cycli, profielen en alle instellingen.",
         "data": {
           "name": "Apparaatnaam",
           "device_type": "Apparaattype",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Een beschrijvende naam voor dit apparaat (bijvoorbeeld 'Wasmachine', 'Vaatwasser').",
-          "device_type": "Welk type apparaat is dit? Helpt bij het op maat maken van detectie en labeling.",
-          "power_sensor": "De sensorentiteit die het realtime energieverbruik (in watt) van uw slimme stekker rapporteert.",
-          "min_power": "Vermogensmetingen boven deze drempel (in watt) geven aan dat het apparaat werkt. Begin met 2W voor de meeste apparaten."
+          "device_type": "Stelt de detectiestandaarden in voor dit soort apparaat.",
+          "power_sensor": "De sensor van de slimme stekker die het actuele vermogen in watt meldt.",
+          "min_power": "Metingen boven deze waarde (in watt) betekenen dat het apparaat draait. 2 W past bij de meeste apparaten."
         }
       },
       "reconfigure": {
         "title": "WashData opnieuw configureren",
-        "description": "Werk de apparaatnaam, het type apparaat of de vermogenssensor bij.\n\nHet WashData-paneel (zijbalk of [/ha-washdata](/ha-washdata)) is waar detectie, cycli, profielen en meldingen worden beheerd.",
+        "description": "Wijzig de apparaatnaam, het apparaattype of de vermogenssensor.\n\nAl het andere staat in het WashData-paneel (zijbalk of [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Apparaatnaam",
           "device_type": "Apparaattype",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Kan geen verbinding maken",
-      "invalid_auth": "Ongeldige authenticatie",
       "unknown": "Onverwachte fout",
       "invalid_power": "Vermogensdrempel moet groter zijn dan 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData-instellingen",
-        "description": "Geef het apparaat een nieuwe naam of wijzig de basishardware-instellingen. Alle instellingen voor detectie, matching en meldingen bevinden zich in het [WashData-paneel](/ha-washdata) (ook bereikbaar via de zijbalk).",
+        "description": "Geef het apparaat een nieuwe naam of wijzig de basisinstellingen. Al het andere staat in het [WashData-paneel](/ha-washdata) in de zijbalk.",
         "data": {
           "name": "Apparaatnaam",
           "device_type": "Apparaattype",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profielnaam",
-          "description": "De naam van een bestaand profiel (maak profielen aan in het menu Profielen beheren). Laat leeg om het label te verwijderen."
+          "description": "Naam van een bestaand profiel (maak profielen aan in het WashData-paneel). Laat leeg om het label te verwijderen."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Betrouwbaarheidsdrempel",
-          "description": "Minimale matchbetrouwbaarheid (0,50-0,95) om labels toe te passen."
+          "description": "Minimale matchbetrouwbaarheid (0,50-0,95) om labels toe te passen. Laat leeg om de instelling \"Auto-label betrouwbaarheid\" van het apparaat te gebruiken."
         }
       }
     },
     "export_config": {
       "name": "Configuratie exporteren",
-      "description": "Exporteer de profielen, cycli en instellingen van dit apparaat naar een JSON-bestand (per apparaat).",
+      "description": "Exporteer de profielen, cycli en instellingen van dit apparaat naar een JSON-bestand.",
       "fields": {
         "device_id": {
           "name": "Apparaat",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Cyclusfeedback indienen",
-      "description": "Bevestig of corrigeer een automatisch gedetecteerd programma na een voltooide cyclus. Geef `entry_id` (geavanceerd) of `device_id` (aanbevolen) op.",
+      "description": "Bevestig of corrigeer het gedetecteerde programma van een voltooide cyclus. Geef `device_id` (aanbevolen) of `entry_id` op.",
       "fields": {
         "device_id": {
           "name": "Apparaat",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Markeren als uitgeladen",
-      "description": "Bevestig dat de voltooide lading uit een WashData-apparaat is gehaald, waarmee de staat \"Schoon\" en een eventuele uitlaadherinnering worden gewist.",
+      "description": "Bevestig dat de voltooide lading is uitgehaald. Wist de staat \"Schoon\" en een eventuele uitlaadherinnering.",
       "fields": {
         "device_id": {
           "name": "Apparaat",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Match-dubbelzinnigheid"
+      },
+      "maintenance_due": {
+        "name": "Onderhoud nodig",
+        "state": {
+          "on": "Nodig",
+          "off": "Niet nodig"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID's van openstaande taken"
+          },
+          "due_tasks": {
+            "name": "Openstaande taken",
+            "state": {
+              "descale": "Ontkalken",
+              "filter_clean": "Filter reinigen",
+              "drum_clean": "Trommel reinigen",
+              "bearing_service": "Lageronderhoud",
+              "other": "Overig",
+              "salt": "Zout bijvullen",
+              "rinse_aid": "Glansmiddel bijvullen",
+              "lint_filter": "Pluizenfilter reinigen",
+              "condenser_clean": "Condensor reinigen"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Anti-kreuk",
           "interrupted": "Onderbroken",
           "force_stopped": "Geforceerd gestopt",
-          "rinse": "Spoelen",
           "unknown": "Onbekend",
           "clean": "Schoon",
           "delay_wait": "Wachten om te beginnen"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Cyclusafwijking",
+            "state": {
+              "overrun": "Loopt langer",
+              "stalled": "Vastgelopen"
+            }
+          }
         }
       },
       "washer_program": {

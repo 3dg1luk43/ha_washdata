@@ -24,38 +24,46 @@ Replays are deliberately run **unmatched** (no profile matcher): a confident
 match closes the cycle via Smart Termination long before `min_off_gap` is
 consulted, so the matched path would not exercise the bound at all.
 
-Usage:  python3 devtools/min_off_gap_eval.py
+**Production config and keepalives (audit TESTING-08 / MATCH-EVAL-09).** Each
+candidate value is replayed with the detector config ``build_detector_config``
+builds from the export's own entry data and options with ``min_off_gap``
+overridden (what a settings change does), so every other gate runs at the value
+the device really runs, device-resolved defaults included. Until 0.5.8 a
+hand-rolled ``_cfg`` passed 14 options through and filled the missing ones with
+its own defaults: start/stop thresholds 2.0 / 2.0 W on every device (shipped 3.0 /
+1.2 W), a dishwasher's completion minimum 600 s (900 s) and Smart Termination
+ratio 0.98 (0.99), a dryer's start gates 5 s / 0.2 Wh (30 s / 0.5 Wh), and every
+option it did not list at the dataclass default. Every replay goes through the
+Playground replay (``playground._DetailSim``, unmatched), which emulates the live
+watchdog's keepalives inside silent stretches at the device's
+``watchdog_interval``: the old bare-detector loop saw a silence as one interval at
+the next real reading, so no end gate was evaluated inside it. The stop threshold
+is the production config's. ``--all-formats`` reads diagnostics dumps too (the
+``devtools/eval.py`` corpus loader, clones dropped); by default only the export
+format is read, as before. Figures taken before this rewrite (the suggestion
+engine's "152 clean cycles" note) measured the old loop.
+
+Usage:  python3 devtools/min_off_gap_eval.py [--all-formats] [--jobs N]
+
+Exit codes: 0 ok, 2 no usable export in cycle_data/.
 """
 from __future__ import annotations
 
-import json
+import argparse
+import logging
 import sys
-from datetime import datetime, timedelta, timezone
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+from typing import Any, Callable
 
 import numpy as np
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
-
-from custom_components.ha_washdata.cycle_detector import (  # noqa: E402
-    CycleDetector,
-    CycleDetectorConfig,
-)
-from custom_components.ha_washdata.const import (  # noqa: E402
-    DEFAULT_MIN_OFF_GAP,
-    DEFAULT_MIN_OFF_GAP_BY_DEVICE,
-)
-from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
-    _CLEAN_ACTIVE_FLOOR_RATIO,
-    _cycle_readings,
-    _parse_ts,
-    _resumed_low_runs,
-    select_clean_cycles,
-)
+sys.path.insert(0, str(REPO / "devtools"))
 
 #: Candidate lower-bound statistics over the measured bridged spans.
-CANDIDATES: dict[str, callable] = {
+CANDIDATES: dict[str, Callable[[list[float], list[float]], float]] = {
     "p95_all": lambda spans, _sig: float(np.percentile(spans, 95)),
     "p95_significant": lambda _spans, sig: float(np.percentile(sig, 95)) if sig else 0.0,
     "p99_significant": lambda _spans, sig: float(np.percentile(sig, 99)) if sig else 0.0,
@@ -67,49 +75,37 @@ BUFFER_S = 60.0
 SIGNIFICANT_S = 60.0
 
 
-def _cfg(opts: dict, device_type: str, min_off_gap: int) -> CycleDetectorConfig:
-    """Detector config from an export's own options, overriding min_off_gap."""
-    g = opts.get
-    return CycleDetectorConfig(
-        min_power=float(g("min_power", 2.0)),
-        off_delay=int(g("off_delay", 180)),
-        device_type=device_type,
-        completion_min_seconds=int(g("completion_min_seconds", 600)),
-        start_duration_threshold=float(g("start_duration_threshold", 5.0)),
-        start_energy_threshold=float(g("start_energy_threshold", 0.2)),
-        end_energy_threshold=float(g("end_energy_threshold", 0.05)),
-        end_repeat_count=int(g("end_repeat_count", 1)),
-        min_off_gap=min_off_gap,
-        start_threshold_w=float(g("start_threshold_w", 2.0)),
-        stop_threshold_w=float(g("stop_threshold_w", 2.0)),
-        power_off_threshold_w=float(g("power_off_threshold_w", 0.0)),
-        power_off_delay=float(g("power_off_delay", 30.0)),
-        anti_wrinkle_enabled=bool(g("anti_wrinkle_enabled", False)),
-        delay_detect_enabled=bool(g("delay_start_detect_enabled", False)),
+def _cfg(entry_data: dict, options: dict, device_type: str, min_off_gap: int | None) -> Any:
+    """The production detector config for these options, ``min_off_gap`` overridden."""
+    from custom_components.ha_washdata.const import CONF_MIN_OFF_GAP  # noqa: PLC0415
+    from custom_components.ha_washdata.detector_config import (  # noqa: PLC0415
+        build_detector_config,
     )
 
+    opts = dict(options)
+    if min_off_gap is not None:
+        opts[CONF_MIN_OFF_GAP] = int(min_off_gap)
+    return build_detector_config(opts, entry_data, device_type)
 
-def _replay(cfg: CycleDetectorConfig, segments, tail_s: float = 7200.0) -> list[dict]:
-    """Feed (offset, power) segments through a real detector; return ended cycles.
 
-    ``segments`` is already a flat, monotonically increasing trace. A long quiet
-    tail is appended so any cycle still open at the end is allowed to finalize.
-    """
-    ended: list[dict] = []
-    det = CycleDetector(
-        config=cfg,
-        on_state_change=lambda _o, _n: None,
-        on_cycle_end=lambda d: ended.append(d),
-        profile_matcher=None,
+def _replay(cfg: Any, options: dict, points: list[tuple[float, float]]) -> list[dict]:
+    """Feed (offset, power) points through the unmatched Playground replay; return
+    the cycles it ended (the real detector, live keepalives, the synthetic tail)."""
+    from custom_components.ha_washdata import playground  # noqa: PLC0415
+
+    cycle = {
+        "id": "min-off-gap-eval",
+        "start_time": "2026-01-01T12:00:00+00:00",
+        "power_data": [[float(t), float(p)] for t, p in points],
+    }
+    sim = playground._DetailSim(  # noqa: SLF001
+        cycle, cfg, None, None, options, None, compute_series=False
     )
-    base = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-    for off, pw in segments:
-        det.process_reading(float(pw), base + timedelta(seconds=float(off)))
-    last = segments[-1][0]
-    step = 30.0
-    for i in range(1, int(tail_s / step) + 1):
-        det.process_reading(0.0, base + timedelta(seconds=last + i * step))
-    return ended
+    if not sim.ready:
+        return []
+    sim.step(0, sim.n_readings)
+    sim.run_tail()
+    return list(sim.captured)
 
 
 def _active_span(points: list[tuple[float, float]], stop: float) -> float:
@@ -135,6 +131,12 @@ def _is_split(ended: list[dict], points, stop: float) -> bool:
 
 
 def _bridged_spans(clean: list[dict], stop: float) -> tuple[list[float], int]:
+    from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
+        _CLEAN_ACTIVE_FLOOR_RATIO,
+        _cycle_readings,
+        _resumed_low_runs,
+    )
+
     spans: list[float] = []
     traced = 0
     for c in clean:
@@ -154,6 +156,8 @@ def _bridged_spans(clean: list[dict], stop: float) -> tuple[list[float], int]:
 
 
 def _real_gaps(cycles: list[dict]) -> list[float]:
+    from custom_components.ha_washdata.suggestion_engine import _parse_ts  # noqa: PLC0415
+
     timed = []
     for c in cycles:
         if c.get("status") not in ("completed", "force_stopped"):
@@ -169,11 +173,13 @@ def _real_gaps(cycles: list[dict]) -> list[float]:
     ]
 
 
-def _shipped_suggestion(doc, device_type, clean, raw, stop) -> int | None:
+def _shipped_suggestion(device_type, clean, raw, stop) -> int | None:
     """Whatever `SuggestionEngine._suggest_min_off_gap` proposes for this export."""
-    from unittest.mock import MagicMock
+    from unittest.mock import MagicMock  # noqa: PLC0415
 
-    from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
+    from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
+        SuggestionEngine,
+    )
 
     hass = MagicMock()
     hass.config_entries.async_get_entry.return_value = None
@@ -188,80 +194,137 @@ def _shipped_suggestion(doc, device_type, clean, raw, stop) -> int | None:
     return int(out["value"]) if out else None
 
 
-def main() -> int:
-    exports = sorted((REPO / "cycle_data").rglob("*.json"))
+def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] | None:
+    """One export: (report lines, per-candidate totals), or None when unusable."""
+    path_s, all_formats = job
+    import end_gate_eval  # noqa: PLC0415
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        DEFAULT_MIN_OFF_GAP,
+        resolve_min_off_gap_default,
+    )
+    from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
+        _cycle_readings,
+        select_clean_cycles,
+    )
+
+    end_gate_eval._integration()  # noqa: SLF001
+    path = Path(path_s)
+    doc = end_gate_eval._load_doc(path, all_formats)  # noqa: SLF001
+    if doc is None:
+        return None
+    device_type = (doc.get("device_fingerprint") or {}).get("device_type")
+    cycles = ((doc.get("data") or {}).get("past_cycles")) or []
+    if not device_type or len(cycles) < 5:
+        return None
+    entry_data = {k: v for k, v in (doc.get("entry_data") or {}).items() if v is not None}
+    options = {k: v for k, v in (doc.get("entry_options") or {}).items() if v is not None}
+    options.setdefault("device_type", device_type)
+    replay_opts = {**entry_data, **options}
+    stop = float(_cfg(entry_data, options, device_type, None).stop_threshold_w)
+    clean, _ = select_clean_cycles(cycles, stop_threshold_w=stop)
+    traces = [c for c in clean if len(_cycle_readings(c)) >= 10]
+    spans, traced = _bridged_spans(clean, stop)
+    if traced < 5 or len(spans) < 3 or not traces:
+        return None
+    significant = [s for s in spans if s > SIGNIFICANT_S]
+    gaps = _real_gaps(cycles)
+    floor = resolve_min_off_gap_default(device_type)
+
+    from decisive_margin_eval import _key  # noqa: PLC0415
+
+    lines = [f"\n=== {_key(path)}"]
+    lines.append(
+        f"    {device_type}  traced={traced}  spans={len(spans)} "
+        f"(>{SIGNIFICANT_S:.0f}s: {len(significant)})  stop={stop:g} W  "
+        f"device default={floor}s  shortest real gap="
+        + (f"{min(gaps):.0f}s" if gaps else "n/a")
+    )
+
+    # The value the shipped heuristic actually proposes, evaluated alongside
+    # the raw candidates so the regression is validated, not just the choice.
+    shipped = _shipped_suggestion(device_type, clean, cycles, stop)
+    candidates = dict(CANDIDATES)
+    if shipped is not None:
+        candidates["SHIPPED"] = lambda _s, _g, v=shipped: float(v) - BUFFER_S
+    else:
+        lines.append("      SHIPPED          -> (suppressed)")
+
+    totals: dict[str, dict[str, int]] = {}
+    for name, fn in candidates.items():
+        value = int(max(DEFAULT_MIN_OFF_GAP, round(fn(spans, significant) + BUFFER_S)))
+        cfg_split = _cfg(entry_data, options, device_type, value)
+        splits = 0
+        split_ids: list[str] = []
+        for c in traces:
+            pts = _cycle_readings(c)
+            if _is_split(_replay(cfg_split, replay_opts, pts), pts, stop):
+                splits += 1
+                split_ids.append(str(c.get("id"))[:12])
+        # Merge probe: replay a cycle, hold quiet for the user's shortest real
+        # inter-load gap, then replay it again. Two cycles must come out.
+        merges = 0
+        if gaps:
+            probe_gap = min(gaps)
+            a = _cycle_readings(traces[0])
+            end = a[-1][0]
+            joined = list(a)
+            joined += [(end + probe_gap + t, p) for t, p in a]
+            if len(_replay(cfg_split, replay_opts, joined)) < 2:
+                merges = 1
+        totals[name] = {"split": splits, "merge": merges, "cycles": len(traces)}
+        ids = (" " + ",".join(split_ids)) if split_ids else ""
+        merge_txt = ("MERGED" if merges else "ok") if gaps else "n/a"
+        lines.append(
+            f"      {name:16} -> {value:>6}s   splits {splits}/{len(traces)}{ids}"
+            f"   merge probe: {merge_txt}"
+        )
+    return lines, totals
+
+
+def _paths(all_formats: bool) -> list[str]:
+    corpus = REPO / "cycle_data"
+    if not corpus.is_dir():
+        return []
+    if all_formats:
+        import end_gate_eval  # noqa: PLC0415
+
+        devices, _clones = end_gate_eval._corpus_module().load_corpus(corpus)  # noqa: SLF001
+        return [str(corpus / dev.path) for dev in devices]
+    return [str(p) for p in sorted(corpus.rglob("*.json"))]
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument("--all-formats", action="store_true",
+                    help="read every corpus shape (diagnostics dumps too), clones dropped")
+    ap.add_argument("--jobs", type=int, default=1, help="parallel worker processes")
+    args = ap.parse_args(argv)
+
+    jobs = [(p, args.all_formats) for p in _paths(args.all_formats)]
+    if args.jobs > 1:
+        from decisive_margin_eval import _silence_logging  # noqa: PLC0415
+
+        with ProcessPoolExecutor(max_workers=args.jobs, initializer=_silence_logging) as pool:
+            results = list(pool.map(_scan, jobs))
+    else:
+        results = [_scan(j) for j in jobs]
+    results = [r for r in results if r is not None]
+    if not results:
+        print("no usable export in cycle_data/ (>= 5 cycles, >= 5 clean traces)",
+              file=sys.stderr)
+        return 2
+
     totals = {
         name: {"split": 0, "merge": 0, "cycles": 0}
         for name in list(CANDIDATES) + ["SHIPPED"]
     }
-
-    for path in exports:
-        try:
-            doc = json.loads(path.read_text(encoding="utf-8"))
-        except Exception:
-            continue
-        device_type = (doc.get("device_fingerprint") or {}).get("device_type")
-        cycles = ((doc.get("data") or {}).get("past_cycles")) or []
-        if not device_type or len(cycles) < 5:
-            continue
-        opts = doc.get("entry_options") or {}
-        stop = float(opts.get("stop_threshold_w") or 1.0)
-        clean, _ = select_clean_cycles(cycles, stop_threshold_w=stop)
-        traces = [c for c in clean if len(_cycle_readings(c)) >= 10]
-        spans, traced = _bridged_spans(clean, stop)
-        if traced < 5 or len(spans) < 3 or not traces:
-            continue
-        significant = [s for s in spans if s > SIGNIFICANT_S]
-        gaps = _real_gaps(cycles)
-        floor = DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(device_type, DEFAULT_MIN_OFF_GAP)
-
-        print(f"\n=== {path.relative_to(REPO)}")
-        print(
-            f"    {device_type}  traced={traced}  spans={len(spans)} "
-            f"(>{SIGNIFICANT_S:.0f}s: {len(significant)})  "
-            f"blind floor={floor}s  shortest real gap="
-            f"{min(gaps):.0f}s" if gaps else f"    {device_type}  traced={traced}"
-        )
-
-        # The value the shipped heuristic actually proposes, evaluated alongside
-        # the raw candidates so the regression is validated, not just the choice.
-        shipped = _shipped_suggestion(doc, device_type, clean, cycles, stop)
-        candidates = dict(CANDIDATES)
-        if shipped is not None:
-            candidates["SHIPPED"] = lambda _s, _g, v=shipped: float(v) - BUFFER_S
-        else:
-            print("      SHIPPED          -> (suppressed)")
-
-        for name, fn in candidates.items():
-            value = int(max(DEFAULT_MIN_OFF_GAP, round(fn(spans, significant) + BUFFER_S)))
-            cfg_split = _cfg(opts, device_type, value)
-            splits = 0
-            split_ids: list[str] = []
-            for c in traces:
-                pts = _cycle_readings(c)
-                if _is_split(_replay(cfg_split, pts), pts, stop):
-                    splits += 1
-                    split_ids.append(str(c.get("id"))[:12])
-            # Merge probe: replay a cycle, hold quiet for the user's shortest real
-            # inter-load gap, then replay it again. Two cycles must come out.
-            merges = 0
-            if gaps:
-                probe_gap = min(gaps)
-                a = _cycle_readings(traces[0])
-                end = a[-1][0]
-                joined = list(a)
-                joined += [(end + probe_gap + t, p) for t, p in a]
-                if len(_replay(cfg_split, joined)) < 2:
-                    merges = 1
-            totals[name]["split"] += splits
-            totals[name]["merge"] += merges
-            totals[name]["cycles"] += len(traces)
-            ids = (" " + ",".join(split_ids)) if split_ids else ""
-            merge_txt = ("MERGED" if merges else "ok") if gaps else "n/a"
-            print(
-                f"      {name:16} -> {value:>6}s   splits {splits}/{len(traces)}{ids}"
-                f"   merge probe: {merge_txt}"
-            )
+    for lines, part in results:
+        print("\n".join(lines))
+        for name, t in part.items():
+            for key, val in t.items():
+                totals[name][key] += val
 
     print("\n=== totals (lower is better; splits are disqualifying) ===")
     for name, t in totals.items():
@@ -273,4 +336,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    # Only as a script: a library call (the tests) must not leave logging disabled.
+    logging.disable(logging.CRITICAL)
     raise SystemExit(main())

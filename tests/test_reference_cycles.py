@@ -32,8 +32,9 @@ BASE = datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
 
 
 @pytest.fixture
-def mock_hass():
+def mock_hass(tmp_path):
     hass = MagicMock()
+    hass.config.path = lambda *a: str(tmp_path.joinpath(*a))  # HA's Store writes here
 
     async def _exec(func, *args, **kwargs):
         if inspect.iscoroutinefunction(func):
@@ -88,7 +89,9 @@ async def test_add_reference_cycle_is_isolated(store):
     refs = store.get_reference_cycles()
     assert len(refs) == 1
     assert refs[0]["meta"]["source"] == "store:x1"
-    assert refs[0]["ml_review"]["golden"] is True
+    # Not forced golden (audit STORE-04): it may define the shape only in a
+    # profile with none of the user's own cycles.
+    assert not (refs[0].get("ml_review") or {}).get("golden")
     assert refs[0]["status"] == "completed"
 
 

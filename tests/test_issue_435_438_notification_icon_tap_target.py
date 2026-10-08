@@ -41,7 +41,6 @@ from custom_components.ha_washdata.const import (
 from custom_components.ha_washdata.manager import (
     WashDataManager,
     _CLEAR_NOTIFICATION_MARKER,
-    _MOBILE_ONLY_EXTRA_KEYS,
 )
 
 
@@ -54,7 +53,6 @@ def mock_hass() -> Any:
     hass.async_create_task = MagicMock(
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()
     )
-    hass.components.persistent_notification.async_create = MagicMock()
     hass.config_entries.async_get_entry = MagicMock()
     # A legacy notify.<service> target has no entity state, which is the path that
     # carries a data payload.
@@ -83,17 +81,6 @@ def _payloads(mock_hass: Any) -> list[dict[str, Any]]:
 
 # ── #435: notification icon ───────────────────────────────────────────────────
 
-def test_mobile_target_gets_the_notification_icon_key(mock_hass: Any) -> None:
-    """One key, both platforms: Android status bar and iOS 2026.8+ app-icon slot."""
-    mgr = _make_manager(mock_hass, {CONF_NOTIFY_ICON: "mdi:washing-machine"})
-    mgr._notify_finish_services = ["notify.mobile_app_iphone"]
-
-    mgr._dispatch_notification("done", event_type=NOTIFY_EVENT_FINISH)
-
-    data = _payloads(mock_hass)[0]["data"]
-    assert data["notification_icon"] == "mdi:washing-machine"
-
-
 def test_non_mobile_target_keeps_only_the_plain_icon_key(mock_hass: Any) -> None:
     mgr = _make_manager(mock_hass, {CONF_NOTIFY_ICON: "mdi:washing-machine"})
     mgr._notify_finish_services = ["notify.signal"]
@@ -117,11 +104,6 @@ def test_no_icon_configured_adds_neither_key(mock_hass: Any) -> None:
 
 
 # ── #438: notification tap target ─────────────────────────────────────────────
-
-def test_url_is_a_mobile_only_key() -> None:
-    assert "url" in _MOBILE_ONLY_EXTRA_KEYS
-    assert "clickAction" in _MOBILE_ONLY_EXTRA_KEYS
-
 
 def test_blank_resolves_to_this_appliances_deep_link(mock_hass: Any) -> None:
     mgr = _make_manager(mock_hass, {})

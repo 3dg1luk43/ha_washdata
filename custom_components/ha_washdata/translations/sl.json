@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Nastavitev WashData",
-        "description": "Konfigurirajte svoj pralni stroj ali drugo napravo.\n\nSenzor moči je obvezen.\n\nPo nastavitvi odprite ploščo WashData s stranske vrstice (ali pojdite na [/ha-washdata](/ha-washdata)) za ogled ciklov, prilagoditev zaznavanja in upravljanje profilov.",
+        "description": "Nastavite pralni stroj ali drugo napravo. Potreben je senzor moči.\n\nPo nastavitvi odprite ploščo WashData v stranski vrstici ([/ha-washdata](/ha-washdata)) za cikle, profile in vse nastavitve.",
         "data": {
           "name": "Ime naprave",
           "device_type": "Vrsta naprave",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Prijazno ime za to napravo (npr. \"Pralni stroj\", \"Pomivalni stroj\").",
-          "device_type": "Kakšna vrsta naprave je to? Pomaga pri prilagajanju odkrivanja in označevanja.",
-          "power_sensor": "Entiteta senzorja, ki poroča o porabi energije v realnem času (v vatih) iz vašega pametnega vtiča.",
-          "min_power": "Odčitki moči nad tem pragom (v vatih) pomenijo, da naprava deluje. Začnite z 2 W za večino naprav."
+          "device_type": "Nastavi privzete vrednosti zaznavanja za to vrsto naprave.",
+          "power_sensor": "Senzor pametnega vtiča, ki poroča trenutno moč v vatih.",
+          "min_power": "Odčitki nad to vrednostjo (v vatih) pomenijo, da naprava deluje. 2 W ustreza večini naprav."
         }
       },
       "reconfigure": {
         "title": "Ponovno konfigurirajte WashData",
-        "description": "Posodobite ime naprave, vrsto naprave ali senzor moči.\n\nPlosca WashData (stranska vrstica ali [/ha-washdata](/ha-washdata)) je namenjena upravljanju zaznavanja, ciklov, profilov in obvestil.",
+        "description": "Spremenite ime naprave, vrsto naprave ali senzor moči.\n\nVse drugo je v plošči WashData (stranska vrstica ali [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Ime naprave",
           "device_type": "Vrsta naprave",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Povezava ni uspela",
-      "invalid_auth": "Neveljavna avtentikacija",
       "unknown": "Nepričakovana napaka",
       "invalid_power": "Prag moči mora biti večji od 0"
     },
@@ -49,7 +47,7 @@
           "min_power": "Najmanjši prag moči (W)"
         },
         "title": "Nastavitve WashData",
-        "description": "Preimenujte napravo ali spremenite njene osnovne nastavitve strojne opreme. Vse nastavitve zaznavanja, ujemanja in obveščanja so na [plošči WashData](/ha-washdata) (dostopna tudi s stranske vrstice)."
+        "description": "Preimenujte napravo ali spremenite njene osnovne nastavitve. Vse drugo je v [plošči WashData](/ha-washdata) v stranski vrstici."
       }
     },
     "error": {
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Ime profila",
-          "description": "Ime obstoječega profila (profile ustvarite v meniju Upravljanje profilov). Pustite prazno, da odstranite oznako."
+          "description": "Ime obstoječega profila (profile ustvarite v plošči WashData). Pustite prazno, da odstranite oznako."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Prag zaupanja",
-          "description": "Najmanjše zaupanje ujemanja (0,50–0,95) za uporabo oznak."
+          "description": "Najmanjše zaupanje ujemanja (0,50–0,95) za uporabo oznak. Pustite prazno, da se uporabi nastavitev naprave „Zaupanje samodejnega označevanja“."
         }
       }
     },
     "export_config": {
       "name": "Izvozi konfiguracijo",
-      "description": "Izvozite profile, cikle in nastavitve te naprave v datoteko JSON (na strežnik).",
+      "description": "Izvozite profile, cikle in nastavitve te naprave v datoteko JSON.",
       "fields": {
         "device_id": {
           "name": "Naprava",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Pošlji povratne informacije o ciklu",
-      "description": "Po zaključenem ciklu potrdite ali popravite samodejno zaznan program. Navedite `entry_id` (napredno) ali `device_id` (priporočeno).",
+      "description": "Potrdite ali popravite zaznani program končanega cikla. Navedite `device_id` (priporočeno) ali `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Naprava",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Označi kot raztovorjeno",
-      "description": "Potrdite, da je bila končana vsebina vzeta iz naprave WashData, s čimer se počisti stanje „čisto“ in morebitni opomnik za raztovarjanje.",
+      "description": "Potrdite, da je bila končana vsebina vzeta ven. Počisti stanje „čisto“ in opomnik za raztovarjanje.",
       "fields": {
         "device_id": {
           "name": "Naprava",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Dvoumnost ujemanja"
+      },
+      "maintenance_due": {
+        "name": "Vzdrževanje na vrsti",
+        "state": {
+          "on": "Na vrsti",
+          "off": "Ni na vrsti"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID-ji nalog na vrsti"
+          },
+          "due_tasks": {
+            "name": "Naloge na vrsti",
+            "state": {
+              "descale": "Odstranjevanje vodnega kamna",
+              "filter_clean": "Očisti filter",
+              "drum_clean": "Očisti boben",
+              "bearing_service": "Servis ležajev",
+              "other": "Drugo",
+              "salt": "Dopolni sol",
+              "rinse_aid": "Dopolni sredstvo za izpiranje",
+              "lint_filter": "Očisti filter za vlakna",
+              "condenser_clean": "Očisti kondenzator"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -317,9 +341,17 @@
           "delay_wait": "Čakam na začetek",
           "interrupted": "Prekinjeno",
           "force_stopped": "Prisilno ustavljeno",
-          "rinse": "Izpiranje",
           "unknown": "Neznano",
           "clean": "čisto"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalija cikla",
+            "state": {
+              "overrun": "Traja predolgo",
+              "stalled": "V zastoju"
+            }
+          }
         }
       },
       "washer_program": {

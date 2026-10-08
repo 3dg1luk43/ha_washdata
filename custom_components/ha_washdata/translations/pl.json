@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Konfiguracja WashData",
-        "description": "Skonfiguruj swoją pralkę lub inne urządzenie.\n\nCzujnik mocy jest wymagany.\n\nPo konfiguracji otwórz panel WashData z paska bocznego (lub przejdź do [/ha-washdata](/ha-washdata)), aby przeglądać cykle, dostosowywać wykrywanie i zarządzać profilami.",
+        "description": "Skonfiguruj pralkę lub inne urządzenie. Wymagany jest czujnik mocy.\n\nPo konfiguracji otwórz panel WashData z paska bocznego ([/ha-washdata](/ha-washdata)), aby zobaczyć cykle, profile i wszystkie ustawienia.",
         "data": {
           "name": "Nazwa urządzenia",
           "device_type": "Typ urządzenia",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Przyjazna nazwa tego urządzenia (np. „Pralka”, „Zmywarka”).",
-          "device_type": "Jakiego typu jest to urządzenie? Pomaga dostosować wykrywanie i etykietowanie.",
-          "power_sensor": "Encja czujnika, która raportuje zużycie energii w czasie rzeczywistym (w watach) przez inteligentną wtyczkę.",
-          "min_power": "Odczyty mocy powyżej tego progu (w watach) wskazują, że urządzenie pracuje. Zacznij od 2 W dla większości urządzeń."
+          "device_type": "Ustawia domyślne parametry wykrywania dla tego rodzaju urządzenia.",
+          "power_sensor": "Czujnik inteligentnej wtyczki, który podaje bieżącą moc w watach.",
+          "min_power": "Odczyty powyżej tej wartości (w watach) oznaczają, że urządzenie pracuje. 2 W pasuje do większości urządzeń."
         }
       },
       "reconfigure": {
         "title": "Rekonfiguracja WashData",
-        "description": "Zaktualizuj nazwę urządzenia, typ urządzenia lub czujnik mocy.\n\nPanel WashData (pasek boczny lub [/ha-washdata](/ha-washdata)) służy do zarządzania wykrywaniem, cyklami, profilami i powiadomieniami.",
+        "description": "Zmień nazwę urządzenia, jego typ lub czujnik mocy.\n\nWszystko inne znajdziesz w panelu WashData (pasek boczny lub [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Nazwa urządzenia",
           "device_type": "Typ urządzenia",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Nie udało się połączyć",
-      "invalid_auth": "Nieprawidłowe uwierzytelnienie",
       "unknown": "Nieoczekiwany błąd",
       "invalid_power": "Próg mocy musi być większy niż 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "Ustawienia WashData",
-        "description": "Zmień nazwę urządzenia lub zmień jego podstawowe ustawienia sprzętowe. Wszystkie ustawienia wykrywania, dopasowania i powiadomień znajdują się w [panelu WashData](/ha-washdata) (dostępny również z paska bocznego).",
+        "description": "Zmień nazwę urządzenia lub jego podstawowe ustawienia. Wszystko inne znajdziesz w [panelu WashData](/ha-washdata) na pasku bocznym.",
         "data": {
           "name": "Nazwa urządzenia",
           "device_type": "Typ urządzenia",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Nazwa profilu",
-          "description": "Nazwa istniejącego profilu (utwórz profile w menu Zarządzaj profilami). Pozostaw puste, aby usunąć etykietę."
+          "description": "Nazwa istniejącego profilu (profile tworzy się w panelu WashData). Pozostaw puste, aby usunąć etykietę."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Próg pewności",
-          "description": "Minimalna pewność dopasowania (0,50–0,95), aby zastosować etykiety."
+          "description": "Minimalna pewność dopasowania (0,50–0,95), aby zastosować etykiety. Pozostaw puste, aby użyć ustawienia urządzenia „Pewność Automatycznego Etykietowania”."
         }
       }
     },
     "export_config": {
       "name": "Eksportuj konfigurację",
-      "description": "Eksportuj profile, cykle i ustawienia tego urządzenia do pliku JSON (na urządzenie).",
+      "description": "Eksportuj profile, cykle i ustawienia tego urządzenia do pliku JSON.",
       "fields": {
         "device_id": {
           "name": "Urządzenie",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Prześlij opinię dotyczącą cyklu",
-      "description": "Potwierdź lub popraw automatycznie wykryty program po zakończeniu cyklu. Podaj `entry_id` (zaawansowane) lub `device_id` (zalecane).",
+      "description": "Potwierdź lub popraw wykryty program zakończonego cyklu. Podaj `device_id` (zalecane) lub `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Urządzenie",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Oznacz jako rozładowane",
-      "description": "Potwierdź, że gotowy wsad został wyjęty z urządzenia WashData, co kasuje stan „Czysty” i ewentualne przypomnienie o rozładunku.",
+      "description": "Potwierdź, że gotowy wsad został wyjęty. Kasuje stan „Czysty” i przypomnienie o rozładunku.",
       "fields": {
         "device_id": {
           "name": "Urządzenie",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Niejednoznaczność dopasowania"
+      },
+      "maintenance_due": {
+        "name": "Wymagana konserwacja",
+        "state": {
+          "on": "Wymagana",
+          "off": "Niewymagana"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID wymaganych zadań"
+          },
+          "due_tasks": {
+            "name": "Wymagane zadania",
+            "state": {
+              "descale": "Odkamienianie",
+              "filter_clean": "Wyczyść filtr",
+              "drum_clean": "Wyczyść bęben",
+              "bearing_service": "Serwis łożysk",
+              "other": "Inne",
+              "salt": "Uzupełnij sól",
+              "rinse_aid": "Uzupełnij nabłyszczacz",
+              "lint_filter": "Wyczyść filtr kłaczków",
+              "condenser_clean": "Wyczyść skraplacz"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Antygniotowy",
           "interrupted": "Przerwany",
           "force_stopped": "Wymuszone zatrzymanie",
-          "rinse": "Płukanie",
           "unknown": "Nieznany",
           "clean": "Czysty",
           "delay_wait": "Oczekiwanie na start"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalia cyklu",
+            "state": {
+              "overrun": "Działa długo",
+              "stalled": "Utknął"
+            }
+          }
         }
       },
       "washer_program": {

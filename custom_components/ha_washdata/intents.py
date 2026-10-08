@@ -29,7 +29,7 @@ The single intent registered here is :data:`INTENT_STATUS`
 Wiring trigger sentences
 ------------------------
 Registering the :class:`intent.IntentHandler` (via :func:`async_setup_intents`)
-makes the intent handleable — it can be fired immediately from automations, the
+makes the intent handleable: it can be fired immediately from automations, the
 ``intent_script`` integration, developer tools, or the Assist pipeline **once a
 sentence maps text to it**. Home Assistant has no public runtime API for a
 *custom* integration to inject sentences into the built-in conversation agent,
@@ -60,7 +60,12 @@ declare the same intent via the ``intent_script`` integration.
 
 This module has no import-time side effects: it only defines constants, helpers
 and the handler class. Registration happens when :func:`async_setup_intents` is
-called from ``async_setup_entry`` (guarded to run once per HA instance).
+called from ``async_setup_entry`` (guarded to run once per HA instance). It
+needs neither the ``conversation`` nor the ``intent`` integration loaded:
+``intent.async_register`` stores the handler in ``hass.data`` and every consumer
+(the Assist agent, ``intent_script``, the LLM API) looks it up per request, so
+``conversation`` is only an after-dependency in the manifest (item 487). A hard
+dependency made a broken or absent Assist stack block the whole integration.
 """
 
 from __future__ import annotations
@@ -85,7 +90,6 @@ from .const import (
     STATE_ENDING,
     STATE_FINISHED,
     STATE_PAUSED,
-    STATE_RINSE,
     STATE_RUNNING,
     STATE_STARTING,
     STATE_USER_PAUSED,
@@ -104,7 +108,6 @@ _ACTIVE_STATES = frozenset(
         STATE_ENDING,
         STATE_PAUSED,
         STATE_USER_PAUSED,
-        STATE_RINSE,
         STATE_ANTI_WRINKLE,
     }
 )
@@ -136,7 +139,7 @@ def _minutes_from_seconds(seconds: Any) -> int | None:
     """Return whole minutes (>=1) from a seconds value, or None when unusable."""
     try:
         value = float(seconds)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if value <= 0:
         return None
@@ -149,7 +152,7 @@ def _minutes_since(end: Any, now: datetime) -> int | None:
         return None
     try:
         delta = (now - end).total_seconds()
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if delta < 0:
         return 0
@@ -306,7 +309,7 @@ async def _localized_templates(
             continue
         try:
             loaded = await hass.async_add_executor_job(_load_intent_file, lg)
-        except (AttributeError, TypeError):
+        except (AttributeError, TypeError, OverflowError):
             # Only a hass without a usable executor (the minimal test stand-in)
             # reads on the loop. A broad except here would also catch a real
             # executor failure - e.g. "cannot schedule new futures after

@@ -58,7 +58,7 @@ class Task:
 
     id: str
     entry_id: str
-    kind: str          # 'reprocess' | 'ml_training' | 'pg_history' | 'pg_sweep'
+    kind: str          # reprocess, rebuild, ml_training, auto_label, trim, split, merge, store_download, history_import, history_import_apply, pg_history, pg_sweep, pg_detail (ws_api's reg.create calls)
     label: str         # English fallback shown only if no label_key resolves
     # Panel-localizable label: the pill renders _t(label_key, label_params, label)
     # so per-step progress text is translated. When label_key is None the pill

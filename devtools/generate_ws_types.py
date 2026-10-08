@@ -19,17 +19,20 @@
 
 Reads the single-source-of-truth contract in
 ``custom_components/ha_washdata/ws_schema.py`` (``WS_COMMANDS`` + the
-``WS_RESPONSE_TYPES`` ``TypedDict`` registry) and emits two generated files:
+``WS_RESPONSE_TYPES`` and ``WS_TASK_RESULT_TYPES`` ``TypedDict`` registries) and
+emits two generated files:
 
-* ``custom_components/ha_washdata/www/ws-types.d.ts`` — TypeScript declarations:
-  one ``interface`` per response ``TypedDict`` (and every nested one), a
-  ``*Request`` interface per command, and ``WashDataWsRequests`` /
-  ``WashDataWsResponses`` command-name -> type maps.
-* ``docs/WS_API.md`` — a human-readable reference: one section per command with
-  its request-parameter table and response-field table.
+* ``custom_components/ha_washdata/www/ws-types.d.ts`` - TypeScript declarations:
+  one ``interface`` per response or task-result ``TypedDict`` (and every nested
+  one), a ``*Request`` interface per command, ``WashDataWsRequests`` /
+  ``WashDataWsResponses`` command-name -> type maps, and a ``WashDataTaskResults``
+  task-kind -> result map.
+* ``docs/WS_API.md`` - a human-readable reference: one section per command with
+  its request-parameter table and response-field table, then one per typed task
+  result.
 
 Runnable fully offline and idempotent (running it twice produces byte-identical
-output). No Home Assistant imports — ``ws_schema`` is dependency-free.
+output). No Home Assistant imports: ``ws_schema`` is dependency-free.
 
 Usage::
 
@@ -53,7 +56,7 @@ _PKG_DIR = _REPO_ROOT / "custom_components" / "ha_washdata"
 TS_OUT = _PKG_DIR / "www" / "ws-types.d.ts"
 MD_OUT = _REPO_ROOT / "docs" / "WS_API.md"
 
-_AUTOGEN = "AUTO-GENERATED — do not edit; run devtools/generate_ws_types.py"
+_AUTOGEN = "AUTO-GENERATED - do not edit; run devtools/generate_ws_types.py"
 
 
 def _load_schema() -> Any:
@@ -197,7 +200,9 @@ def _collect_response_types(schema: Any) -> dict[str, type]:
     """All response TypedDicts + every nested TypedDict they reference."""
     collected: dict[str, type] = {}
     # Seed with the registered response types, then expand transitively.
-    seed = list(dict.fromkeys(schema.WS_RESPONSE_TYPES.values()))
+    seed = list(dict.fromkeys([
+        *schema.WS_RESPONSE_TYPES.values(), *schema.WS_TASK_RESULT_TYPES.values(),
+    ]))
     for td in seed:
         collected[td.__name__] = td
     changed = True
@@ -270,6 +275,13 @@ def _emit_ts(schema: Any) -> str:
     lines.append("}")
     lines.append("")
 
+    # Task kind -> finished result map (TaskSnapshot.result).
+    lines.append("export interface WashDataTaskResults {")
+    for kind, td in schema.WS_TASK_RESULT_TYPES.items():
+        lines.append(f'  "{kind}": {td.__name__};')
+    lines.append("}")
+    lines.append("")
+
     return "\n".join(lines)
 
 
@@ -284,7 +296,7 @@ def _emit_md(schema: Any) -> str:
     lines.append(
         "This document is generated from "
         "`custom_components/ha_washdata/ws_schema.py`. Every command is prefixed "
-        f"with `{schema.WS_PREFIX}/` on the wire. Do not edit by hand — run "
+        f"with `{schema.WS_PREFIX}/` on the wire. Do not edit by hand - run "
         "`python3 devtools/generate_ws_types.py`."
     )
     lines.append("")
@@ -298,7 +310,7 @@ def _emit_md(schema: Any) -> str:
         params = spec.get("params", [])
         names = ", ".join(
             p["name"] if p.get("required") else f"{p['name']}?" for p in params
-        ) or "—"
+        ) or "-"
         resp = schema.WS_RESPONSE_TYPES[command].__name__
         lines.append(f"| `{command}` | {names} | `{resp}` |")
     lines.append("")
@@ -341,6 +353,27 @@ def _emit_md(schema: Any) -> str:
                 "_Open-ended: additional top-level keys from an upstream summary "
                 "may be present._"
             )
+        lines.append("")
+
+    # Typed task results (TaskSnapshot.result once the task has finished).
+    lines.append("# Task results")
+    lines.append("")
+    lines.append(
+        "A command answering `StartTaskResponse` runs as a background task; its "
+        "outcome arrives as `TaskSnapshot.result` (via `get_task_result` or "
+        "`subscribe_tasks`). Task kinds with a typed result:"
+    )
+    lines.append("")
+    for kind, td in schema.WS_TASK_RESULT_TYPES.items():
+        hints = typing.get_type_hints(td)
+        required = set(getattr(td, "__required_keys__", ()) or ())
+        lines.append(f"## `{kind}` (`{td.__name__}`)")
+        lines.append("")
+        lines.append("| Field | Always present | Type |")
+        lines.append("| --- | --- | --- |")
+        for field, ann in hints.items():
+            always = "yes" if field in required else "no"
+            lines.append(f"| `{field}` | {always} | {_md_type(ann)} |")
         lines.append("")
 
     return "\n".join(lines)

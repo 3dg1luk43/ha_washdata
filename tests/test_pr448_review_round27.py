@@ -31,8 +31,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from custom_components.ha_washdata.const import BANKED_TAIL_REPAIR_KEY
-
 
 class _Mgr:
     """The scheduler in isolation: it touches only the store and _spawn_tracked."""
@@ -92,69 +90,148 @@ def test_a_finished_run_does_not_block_a_later_import() -> None:
 
 
 @pytest.mark.parametrize(
-    "module, handler",
+    "handler, extra, store_call, result",
     [
-        ("ws_api", "ws_import_config"),
-        ("ws_api", "ws_import_config_selective"),
+        ("ws_import_config", {}, "async_import_data", {"entry_options": {}}),
+        (
+            "ws_import_config_selective",
+            {"selection": {}, "mode": "merge", "conflict_resolutions": {},
+             "cycle_destination": "reference", "apply_settings": False},
+            "async_import_data_selective",
+            {},
+        ),
     ],
 )
-def test_both_ws_import_handlers_schedule_the_repair(module: str, handler: str) -> None:
-    """Asserted on the source: driving these needs a live connection, a manager
-    and the per-entry write lock. What matters is that neither handler relies on
-    the options write below it to reload the entry."""
-    import importlib
-    import inspect
+async def test_both_ws_import_handlers_schedule_the_repair(
+    handler: str, extra: dict, store_call: str, result: dict
+) -> None:
+    """Driven, not read: a cycles-only import (no options, so no entry write and
+    no reload) must still schedule the repair itself. Was a search of each
+    handler's source for the call (audit TESTING-13)."""
+    from unittest.mock import AsyncMock
 
-    mod = importlib.import_module(f"custom_components.ha_washdata.{module}")
-    src = inspect.getsource(getattr(mod, handler))
-    assert "async_schedule_banked_tail_repair()" in src
+    from custom_components.ha_washdata import ws_api
+
+    manager = MagicMock()
+    setattr(manager.profile_store, store_call, AsyncMock(return_value=result))
+    entry = MagicMock()
+    entry.options = {}
+    entry.data = {}
+    hass = MagicMock()
+    hass.data = {}
+    hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
+    connection = MagicMock()
+    msg = {"id": 1, "entry_id": "e1", "json_data": "{}", **extra}
+
+    with patch.object(ws_api, "_get_manager", return_value=manager), \
+            patch.object(ws_api, "_get_entry", return_value=entry):
+        await getattr(ws_api, handler).__wrapped__(hass, connection, msg)
+
+    connection.send_error.assert_not_called()
+    getattr(manager.profile_store, store_call).assert_awaited_once()
+    hass.config_entries.async_update_entry.assert_not_called()
+    manager.async_schedule_banked_tail_repair.assert_called_once_with()
 
 
-def test_the_import_config_service_schedules_the_repair() -> None:
+async def test_the_import_config_service_schedules_the_repair(
+    hass, tmp_path, enable_custom_integrations
+) -> None:
     """The legacy `import_config` service reads a file straight into
     `async_import_data`, and writes the entry only when the payload carried
-    settings."""
-    from pathlib import Path
+    settings. A cycles-only file must still schedule the repair.
 
-    src = (
-        Path(__file__).resolve().parents[1]
-        / "custom_components"
-        / "ha_washdata"
-        / "__init__.py"
-    ).read_text()
-    assert "manager.async_schedule_banked_tail_repair()" in src
+    Driven through the real service on a real hass, where it used to be a search
+    of `__init__.py`'s text (audit TESTING-13).
+    """
+    import json
 
+    from homeassistant.config_entries import ConfigEntryState
+    from homeassistant.helpers import device_registry as dr
+    from homeassistant.setup import async_setup_component
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-def test_an_old_selective_import_arms_the_marker() -> None:
-    """The half this test file exists to connect to: the store really does set
-    the marker on an old payload, so the scheduling above is not hypothetical."""
-    from custom_components.ha_washdata.profile_store import (
-        _export_predates_banked_tail_repair,
+    import custom_components.ha_washdata as washdata
+    from custom_components.ha_washdata.const import DOMAIN
+
+    assert await async_setup_component(hass, "http", {"http": {}})
+    hass.states.async_set("sensor.p", "0")
+    entry = MockConfigEntry(
+        domain=DOMAIN, title="Washer",
+        data={"name": "Washer", "power_sensor": "sensor.p", "device_type": "washing_machine"},
+        options={}, version=3, minor_version=11,
     )
+    entry.add_to_hass(hass)
+    entry.mock_state(hass, ConfigEntryState.LOADED)
+    assert await washdata.async_setup_entry(hass, entry)
+    await hass.async_block_till_done()
+    reg = dr.async_get(hass)
+    dev = reg.async_get_device(identifiers={(DOMAIN, entry.entry_id)}) or reg.async_get_or_create(
+        config_entry_id=entry.entry_id, identifiers={(DOMAIN, entry.entry_id)}, name="Washer"
+    )
+    manager = hass.data[DOMAIN][entry.entry_id]
+    schedule = MagicMock(wraps=manager.async_schedule_banked_tail_repair)
+    manager.async_schedule_banked_tail_repair = schedule
 
-    assert _export_predates_banked_tail_repair({"version": 12}) is True
-    assert _export_predates_banked_tail_repair({"version": 13}) is False
+    path = tmp_path / "cycles_only.json"
+    path.write_text(json.dumps({
+        "version": 12,
+        "data": {
+            "profiles": {"Cotton": {"avg_duration": 3600.0}},
+            "past_cycles": [{
+                "id": "c1", "start_time": "2026-01-01T00:00:00+00:00", "duration": 3600.0,
+                "status": "completed", "profile_name": "Cotton",
+                "power_data": [[0, 100.0], [1800, 500.0], [3600, 0.0]],
+            }],
+        },
+    }))
+    hass.config.allowlist_external_dirs = {str(tmp_path)}
+    options_before = dict(entry.options)
+
+    await hass.services.async_call(
+        DOMAIN, "import_config", {"device_id": dev.id, "path": str(path)}, blocking=True
+    )
+    await hass.async_block_till_done()
+
+    assert dict(entry.options) == options_before, "a cycles-only import wrote options"
+    schedule.assert_called_once_with()
+    await hass.config_entries.async_unload(entry.entry_id)
 
 
 # --------------------------------------------------------------------------
 # round 28: the second per-entry WS lock was never released on unload
 # --------------------------------------------------------------------------
-def test_unload_releases_both_per_entry_ws_locks() -> None:
+async def test_unload_releases_both_per_entry_ws_locks() -> None:
     """`_entry_options_lock` is a second per-entry lock built exactly like the
     write lock, and `async_unload_entry` popped only the write one - so every
     removed config entry left an asyncio.Lock in `hass.data` for the lifetime of
-    the process. Asserted on source: the pop sits inside a long unload coroutine
-    that needs a fully built entry to reach."""
-    from pathlib import Path
+    the process.
 
-    src = (
-        Path(__file__).resolve().parents[1]
-        / "custom_components"
-        / "ha_washdata"
-        / "__init__.py"
-    ).read_text()
-    assert "hass.data.get(_WS_WRITE_LOCKS_KEY, {}).pop(entry.entry_id, None)" in src
-    assert "hass.data.get(_WS_OPTIONS_LOCKS_KEY, {}).pop(entry.entry_id, None)" in src
+    Driven through the real `async_unload_entry` (platform unload stubbed), where
+    it used to be a search of `__init__.py`'s text (audit TESTING-13). A second
+    entry stays loaded so the last-entry panel teardown is not reached.
+    """
+    from unittest.mock import AsyncMock
+
+    from custom_components.ha_washdata import async_unload_entry, ws_api
+    from custom_components.ha_washdata.const import DOMAIN
+
+    manager = MagicMock()
+    manager.async_shutdown = AsyncMock()
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"e1": manager, "e2": MagicMock()}}
+    hass.config_entries.async_unload_platforms = AsyncMock(return_value=True)
+    entry = MagicMock()
+    entry.entry_id = "e1"
+
+    for get_lock in (ws_api._entry_write_lock, ws_api._entry_options_lock):
+        get_lock(hass, "e1")
+        get_lock(hass, "e2")
+
+    assert await async_unload_entry(hass, entry) is True
+
+    manager.async_shutdown.assert_awaited_once()
+    for key in (ws_api._WS_WRITE_LOCKS_KEY, ws_api._WS_OPTIONS_LOCKS_KEY):
+        assert set(hass.data[key]) == {"e2"}, key
 
 
 def test_the_two_lock_keys_are_distinct() -> None:
@@ -165,49 +242,6 @@ def test_the_two_lock_keys_are_distinct() -> None:
     )
 
     assert _WS_OPTIONS_LOCKS_KEY != _WS_WRITE_LOCKS_KEY
-
-
-# --------------------------------------------------------------------------
-# round 28: three docs describing pre-item-355/356/353 behaviour
-# --------------------------------------------------------------------------
-def test_the_end_gate_comment_does_not_claim_a_fixed_ratio() -> None:
-    """Item 355 made the bar device-resolved (0.90 for washers), so "never fires
-    before 1.05x expected" became false for exactly the device type the change
-    was made for."""
-    import inspect
-
-    from custom_components.ha_washdata import cycle_detector
-
-    src = inspect.getsource(cycle_detector)
-    assert "never fires before 1.05x expected" not in src
-    assert "resolve_end_gate_late_ratio" in src
-
-
-def test_the_tuner_docstring_describes_the_implemented_rule() -> None:
-    """Item 356 implemented the three-way template rule; the docstring still
-    called it deferred, which would tell a maintainer item 347 is open."""
-    import inspect
-
-    from custom_components.ha_washdata.ml import matching_tuner
-
-    doc = inspect.getdoc(matching_tuner._snaps) or ""
-    assert "deferred" not in doc
-    assert "duration is closest to the profile" not in doc
-    assert "three-way" in doc
-
-
-def test_the_repair_docstring_admits_it_rewrites_reference_cycles() -> None:
-    """Item 353 put `reference_cycles` in scope, golden ones included. The first
-    paragraph still said only `past_cycles` is touched, which is the paragraph a
-    maintainer reads first."""
-    import inspect
-
-    from custom_components.ha_washdata.profile_store import ProfileStore
-
-    doc = inspect.getdoc(ProfileStore.async_repair_banked_tails) or ""
-    assert "Only ``past_cycles`` is touched" not in doc
-    assert "reference_cycles" in doc
-    assert "golden" in doc
 
 
 # --------------------------------------------------------------------------
@@ -370,24 +404,52 @@ def test_a_silent_live_update_stays_silent_across_a_reload() -> None:
     assert extra.get("push") == {"interruption-level": "passive"}
 
 
-def test_the_reload_path_actually_passes_the_flag() -> None:
+async def test_the_reload_path_actually_passes_the_flag(hass, freezer) -> None:
     """The tests above pin the MECHANISM and all pass with the call site reverted,
-    which would pin nothing. `async_reload_config` needs a fully built manager,
-    a config entry and a live detector to reach, so the call site is asserted on
-    source - the same pattern the other hard-to-reach call sites here use.
+    which would pin nothing. This drives the call site: a REAL manager mid-cycle
+    with a live activity running, then a settings save through
+    `async_reload_config`. The flag must survive and the next live tick must not
+    re-run the handover (a `clear_notification` on the lifecycle tag).
 
-    The complement matters too: every OTHER reset is a cycle boundary and must
-    keep resetting the flag, so exactly one call site may carry the keyword.
+    Was a source-text check that the keyword appeared once in manager.py (audit
+    TESTING-13). The complement - every cycle boundary still resets it - is
+    driven through the real cycle end in test_issue_446_cycle_token_gate.py.
     """
-    import inspect
+    from .real_manager import boot, feed, make_entry, record_notify
 
-    from custom_components.ha_washdata.manager import WashDataManager
+    calls = record_notify(hass)
+    entry = make_entry(hass, {"notify_live_services": ["notify.mobile_app_phone"]})
+    mgr = await boot(hass, entry)
+    # A profile, so live cards are sent at all.
+    await feed(hass, freezer, 500, 900)
+    await feed(hass, freezer, 0, 300)
+    await hass.async_block_till_done()
+    await mgr.profile_store.create_profile("Cotton", mgr.profile_store.get_past_cycles()[0]["id"])
 
-    reload_src = inspect.getsource(WashDataManager.async_reload_config)
-    assert "_reset_live_notification_state(keep_activity_started=True)" in reload_src
+    await feed(hass, freezer, 500, 300)
+    assert mgr._live_activity_started is True
+    lifecycle = mgr._lifecycle_tag
 
-    whole = inspect.getsource(inspect.getmodule(WashDataManager))
-    assert whole.count("_reset_live_notification_state(keep_activity_started=True)") == 1
+    def lifecycle_clears() -> int:
+        return sum(
+            1 for c in calls
+            if c.get("message") == "clear_notification"
+            and (c.get("data") or {}).get("tag") == lifecycle
+        )
+
+    handovers = lifecycle_clears()
+    assert handovers == 1, "the first live card hands the lifecycle card over once"
+
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, "notify_live_interval_seconds": 60}
+    )
+    await mgr.async_reload_config(entry)
+    assert mgr._live_activity_started is True, "a settings save is not a cycle boundary"
+
+    await feed(hass, freezer, 500, 600)
+    assert mgr.detector.state == "running"
+    assert lifecycle_clears() == handovers, "the reload re-ran the lifecycle handover"
+    await mgr.async_shutdown()
 
 
 # --------------------------------------------------------------------------
@@ -559,17 +621,6 @@ def test_an_already_started_activity_does_not_hand_over_again() -> None:
     assert [e for e in m.log if e[0] == "clear"] == []
 
 
-def test_the_shutdown_docstring_no_longer_claims_both_tags_are_cleared() -> None:
-    """Round 25 gated the lifecycle clear on `_CYCLE_IN_PROGRESS_STATES` because it
-    carries the FINISHED alert. The docstring still said both tags go outright,
-    which is the sentence a maintainer would trust when undoing the gate."""
-    import inspect
-
-    from custom_components.ha_washdata.manager import WashDataManager
-
-    doc = inspect.getdoc(WashDataManager._clear_live_progress_notification) or ""
-    assert "so both tags are cleared outright" not in doc
-    assert "_CYCLE_IN_PROGRESS_STATES" in doc
 
 
 # --------------------------------------------------------------------------

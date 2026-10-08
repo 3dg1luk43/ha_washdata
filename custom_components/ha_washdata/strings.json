@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData Setup",
-        "description": "Configure your washing machine or other appliance.\n\nPower sensor is required.\n\nAfter setup, open the WashData panel from the sidebar (or go to [/ha-washdata](/ha-washdata)) to view cycles, tune detection and manage profiles.",
+        "description": "Set up a washing machine or other appliance. A power sensor is required.\n\nAfter setup, open the WashData panel from the sidebar ([/ha-washdata](/ha-washdata)) to see cycles, profiles and all settings.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "A friendly name for this device (e.g., 'Washing Machine', 'Dishwasher').",
-          "device_type": "What type of appliance is this? Helps tailor detection and labeling.",
-          "power_sensor": "The sensor entity that reports real-time power consumption (in watts) from your smart plug.",
-          "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices."
+          "device_type": "Sets detection defaults for this kind of appliance.",
+          "power_sensor": "The smart plug sensor that reports live power in watts.",
+          "min_power": "Readings above this (in watts) mean the appliance is running. 2 W suits most devices."
         }
       },
       "reconfigure": {
         "title": "Reconfigure WashData",
-        "description": "Update the device name, appliance type, or power sensor.\n\nThe WashData panel (sidebar, or [/ha-washdata](/ha-washdata)) is where detection, cycles, profiles and notifications are managed.",
+        "description": "Change the device name, appliance type or power sensor.\n\nEverything else is in the WashData panel (sidebar, or [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect",
-      "invalid_auth": "Invalid authentication",
       "unknown": "Unexpected error",
       "invalid_power": "Power threshold must be greater than 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData Settings",
-        "description": "Rename the device or change its core hardware settings. All detection, matching and notification settings are in the [WashData panel](/ha-washdata) (also reachable from the sidebar).",
+        "description": "Rename the device or change its core settings. Everything else is in the [WashData panel](/ha-washdata) in the sidebar.",
         "data": {
           "name": "Device Name",
           "device_type": "Device Type",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profile Name",
-          "description": "The name of an existing profile (create profiles in Manage Profiles menu). Leave blank to remove label."
+          "description": "An existing profile name (create profiles in the WashData panel). Leave blank to remove the label."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Confidence Threshold",
-          "description": "Minimum match confidence (0.50-0.95) to apply labels."
+          "description": "Minimum match confidence (0.50-0.95) to apply labels. Leave empty to use the device's Auto-Label Confidence setting."
         }
       }
     },
     "export_config": {
       "name": "Export Config",
-      "description": "Export this device's profiles, cycles, and settings to a JSON file (per device).",
+      "description": "Export this device's profiles, cycles and settings to a JSON file.",
       "fields": {
         "device_id": {
           "name": "Device",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Submit Cycle Feedback",
-      "description": "Confirm or correct an auto-detected program after a completed cycle. Provide either `entry_id` (advanced) or `device_id` (recommended).",
+      "description": "Confirm or correct the detected program of a finished cycle. Give `device_id` (recommended) or `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Device",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Mark Unloaded",
-      "description": "Confirm the finished load has been taken out of a WashData device, clearing the Clean state and any unload reminder.",
+      "description": "Confirm the finished load was taken out. Clears the Clean state and any unload reminder.",
       "fields": {
         "device_id": {
           "name": "Device",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Match Ambiguity"
+      },
+      "maintenance_due": {
+        "name": "Maintenance due",
+        "state": {
+          "on": "Due",
+          "off": "Not due"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Due task IDs"
+          },
+          "due_tasks": {
+            "name": "Due tasks",
+            "state": {
+              "descale": "Descale",
+              "filter_clean": "Clean filter",
+              "drum_clean": "Clean drum",
+              "bearing_service": "Bearing service",
+              "other": "Other",
+              "salt": "Refill salt",
+              "rinse_aid": "Refill rinse aid",
+              "lint_filter": "Clean lint filter",
+              "condenser_clean": "Clean condenser"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Anti-Wrinkle",
           "interrupted": "Interrupted",
           "force_stopped": "Force Stopped",
-          "rinse": "Rinse",
           "unknown": "Unknown",
           "clean": "Clean",
           "delay_wait": "Delay Start"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Cycle anomaly",
+            "state": {
+              "overrun": "Running long",
+              "stalled": "Stalled"
+            }
+          }
         }
       },
       "washer_program": {

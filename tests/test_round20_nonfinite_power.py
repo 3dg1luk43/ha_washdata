@@ -151,14 +151,60 @@ def test_the_event_path_still_accepts_a_real_reading(manager: Any) -> None:
 # sites left the cache poisonable at setup and reload.
 
 
-def test_every_power_reading_site_routes_through_the_helper() -> None:
-    """Structural guard, and the ONLY coverage for two of the six sites.
+async def test_a_nan_sensor_at_setup_does_not_seed_the_cache(hass: Any) -> None:
+    """The setup seed, driven through a REAL `async_setup`: a non-finite sensor
+    leaves the cache unset instead of seeding a nan the #409 resync could never
+    heal. Was covered only by the source regex below (audit TESTING-13)."""
+    import math
 
-    The setup seed and the config-reload re-seed both live inside
-    `WashDataManager.async_setup` / the options-update handler, so reaching them
-    means booting all of setup; this test pins them instead. If that is ever
-    considered too indirect, the fix is to extract those blocks, not to drop the
-    assertion.
+    from custom_components.ha_washdata.const import DOMAIN
+    from custom_components.ha_washdata.manager import WashDataManager
+
+    from .real_manager import POWER, make_entry
+
+    entry = make_entry(hass)
+    hass.states.async_set(POWER, "nan", {"unit_of_measurement": "W"})
+    mgr = WashDataManager(hass, entry)
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = mgr
+    await mgr.async_setup()
+    await hass.async_block_till_done()
+
+    assert math.isfinite(mgr._current_power)
+    assert mgr._last_reading_time is None
+    await mgr.async_shutdown()
+
+
+async def test_a_nan_new_sensor_at_reload_is_not_fed_to_the_detector(hass: Any) -> None:
+    """The config-reload re-seed, driven through a REAL `async_reload_config`
+    that swaps the power sensor to one reporting nan."""
+    import math
+
+    from .real_manager import boot, make_entry
+
+    entry = make_entry(hass)
+    mgr = await boot(hass, entry)
+    hass.states.async_set("sensor.other_plug_power", "nan", {"unit_of_measurement": "W"})
+    fed: list[float] = []
+    real = mgr.detector.process_reading
+    mgr.detector.process_reading = lambda power, *a, **k: (fed.append(power), real(power, *a, **k))[1]
+
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, "power_sensor": "sensor.other_plug_power"}
+    )
+    await mgr.async_reload_config(entry)
+    await hass.async_block_till_done()
+
+    assert mgr.power_sensor_entity_id == "sensor.other_plug_power"
+    assert all(math.isfinite(p) for p in fed), fed
+    await mgr.async_shutdown()
+
+
+def test_every_power_reading_site_routes_through_the_helper() -> None:
+    """Structural lint: no NEW site may parse a power state with a bare float().
+
+    The six known sites are driven by the behaviour tests in this module (the
+    setup seed and the config-reload re-seed through a real manager, above); this
+    regex only exists to catch a seventh, which no behaviour test can find.
 
     The energy-price and energy-sensor readers are deliberately excluded:
     different consumer, different fallback contract, and they are recorded as

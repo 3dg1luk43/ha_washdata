@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData beállítása",
-        "description": "Állítsa be a mosógépet vagy más készüléket.\n\nTeljesítményérzékelő szükséges.\n\nA beállítás után nyissa meg a WashData panelt az oldalsávból (vagy lépjen ide: [/ha-washdata](/ha-washdata)), ahol megtekintheti a ciklusokat, finomhangolhatja a felismerést és kezelheti a profilokat.",
+        "description": "Állítson be egy mosógépet vagy más készüléket. Teljesítményérzékelő szükséges.\n\nA beállítás után nyissa meg a WashData panelt az oldalsávból ([/ha-washdata](/ha-washdata)) a ciklusok, profilok és az összes beállítás megtekintéséhez.",
         "data": {
           "name": "Eszköz neve",
           "device_type": "Eszköz típusa",
@@ -12,43 +12,41 @@
         },
         "data_description": {
           "name": "Barátságos név ennek az eszköznek (pl. „Mosógép”, „Mosogatógép”).",
-          "device_type": "Milyen típusú készülék ez? Segít személyre szabni az észlelést és a címkézést.",
-          "power_sensor": "Az érzékelő entitás, amely valós idejű energiafogyasztást jelent (wattban) az okosdugóról.",
-          "min_power": "Az e küszöbérték feletti teljesítményértékek (wattban) azt jelzik, hogy a készülék működik. Kezdje 2 W-tal a legtöbb eszköz esetében."
+          "device_type": "Beállítja az észlelési alapértékeket ehhez a készüléktípushoz.",
+          "power_sensor": "Az okoskonnektor érzékelője, amely az élő teljesítményt jelenti wattban.",
+          "min_power": "Az e feletti leolvasások (wattban) azt jelentik, hogy a készülék működik. A legtöbb eszközhöz 2 W megfelelő."
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Frissítse az eszköz nevét, a készülék típusát vagy a teljesítményérzékelőt.\n\nA WashData panel (oldalsáv vagy [/ha-washdata](/ha-washdata)) a felismerés, ciklusok, profilok és értesítések kezelésére szolgál.",
+        "title": "WashData újrakonfigurálása",
+        "description": "Módosítsa az eszköz nevét, a készülék típusát vagy a teljesítményérzékelőt.\n\nMinden más a WashData panelen található (oldalsáv vagy [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Eszköz neve",
+          "device_type": "Eszköz típusa",
+          "power_sensor": "Teljesítmény érzékelő",
+          "min_power": "Minimális teljesítmény küszöb (W)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Nem sikerült csatlakozni",
-      "invalid_auth": "Érvénytelen hitelesítés",
       "unknown": "Váratlan hiba",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie"
     },
     "abort": {
       "already_configured": "Az eszköz már konfigurálva van",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Az újrakonfigurálás sikeres volt"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
-        "description": "Nevezze át az eszközt, vagy módosítsa az alap hardverbeállításait. Az összes felismerési, egyeztetési és értesítési beállítás a [WashData panelen](/ha-washdata) található (az oldalsávból is elérhető).",
+        "title": "WashData beállításai",
+        "description": "Nevezze át az eszközt, vagy módosítsa az alapbeállításait. Minden más az oldalsáv [WashData paneljén](/ha-washdata) található.",
         "data": {
           "name": "Eszköz neve",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Eszköz típusa",
+          "power_sensor": "Teljesítmény érzékelő",
+          "min_power": "Minimális teljesítmény küszöb (W)"
         }
       }
     },
@@ -60,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Még nincs illeszkedő profil.",
       "vs_typical_longer": "{pct}%-kal hosszabb a szokásosnál",
       "vs_typical_shorter": "{pct}%-kal rövidebb a szokásosnál",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie"
     }
   },
   "selector": {
@@ -70,7 +68,7 @@
         "dryer": "Szárítógép",
         "washer_dryer": "Mosó-szárító kombó",
         "dishwasher": "Mosogatógép",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Forrólevegős sütő",
         "bread_maker": "Kenyérsütő",
         "pump": "Szivattyú / búvárszivattyú",
         "generic": "Egyéb (haladó)",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profil neve",
-          "description": "Egy meglévő profil neve (profilok létrehozása a Profilok kezelése menüben). Hagyja üresen a címke eltávolításához."
+          "description": "Egy meglévő profil neve (profilokat a WashData panelen hozhat létre). Hagyja üresen a címke eltávolításához."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Magabiztossági küszöb",
-          "description": "Minimális egyezési megbízhatóság (0,50–0,95) a címkék alkalmazásához."
+          "description": "Minimális egyezési megbízhatóság (0,50-0,95) a címkék alkalmazásához. Hagyja üresen az eszköz Automatikus jelölési megbízhatóság beállításának használatához."
         }
       }
     },
     "export_config": {
       "name": "Konfiguráció exportálása",
-      "description": "Exportálja az eszköz profiljait, ciklusait és beállításait JSON-fájlba (eszközönként).",
+      "description": "Az eszköz profiljainak, ciklusainak és beállításainak exportálása JSON-fájlba.",
       "fields": {
         "device_id": {
           "name": "Eszköz",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Ciklus visszajelzés küldése",
-      "description": "Erősítse meg vagy javítsa ki az automatikusan észlelt programot a ciklus befejezése után. Adja meg az „entry_id” (speciális) vagy az „device_id” (ajánlott) értéket.",
+      "description": "Egy befejezett ciklus észlelt programjának megerősítése vagy javítása. Adja meg a `device_id` (ajánlott) vagy az `entry_id` értéket.",
       "fields": {
         "device_id": {
           "name": "Eszköz",
@@ -272,18 +270,18 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "ML-tanítás indítása",
+      "description": "Tanítsa újra kézzel az eszközön futó ML-modelleket az eszköz saját címkézett ciklusaiból (kísérleti).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Eszköz",
+          "description": "A WashData eszköz, amelynek modelljeit újra szeretné tanítani."
         }
       }
     },
     "mark_unloaded": {
       "name": "Megjelölés kirakodottként",
-      "description": "Annak megerősítése, hogy a kész adagot kivették a WashData eszközből, ami törli a „Tiszta” állapotot és a kirakodási emlékeztetőt.",
+      "description": "Megerősíti, hogy a kész adagot kivették. Törli a „Tiszta” állapotot és a kirakodási emlékeztetőt.",
       "fields": {
         "device_id": {
           "name": "Eszköz",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Találat kétértelműsége"
+      },
+      "maintenance_due": {
+        "name": "Esedékes karbantartás",
+        "state": {
+          "on": "Esedékes",
+          "off": "Nem esedékes"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Esedékes feladatok azonosítói"
+          },
+          "due_tasks": {
+            "name": "Esedékes feladatok",
+            "state": {
+              "descale": "Vízkőmentesítés",
+              "filter_clean": "Szűrő tisztítása",
+              "drum_clean": "Dob tisztítása",
+              "bearing_service": "Csapágy szerviz",
+              "other": "Egyéb",
+              "salt": "Só utántöltése",
+              "rinse_aid": "Öblítőszer utántöltése",
+              "lint_filter": "Szöszszűrő tisztítása",
+              "condenser_clean": "Kondenzátor tisztítása"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Ránctalanító",
           "interrupted": "Megszakított",
           "force_stopped": "Kényszer leállított",
-          "rinse": "Öblítés",
           "unknown": "Ismeretlen",
           "clean": "Tiszta",
           "delay_wait": "Várakozás a kezdésre"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Ciklusrendellenesség",
+            "state": {
+              "overrun": "Sokáig fut",
+              "stalled": "Elakadt"
+            }
+          }
         }
       },
       "washer_program": {

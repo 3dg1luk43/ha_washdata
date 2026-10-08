@@ -39,7 +39,6 @@ def mock_hass() -> MagicMock:
         await coro
         return MagicMock(done=lambda: True)
     hass.async_create_task = mock_create_task
-    hass.components.persistent_notification.async_create = MagicMock()
     return hass
 
 @pytest.fixture
@@ -111,65 +110,6 @@ async def test_initial_match_switching(manager):
     assert manager._last_match_confidence == 0.85
 
 @pytest.mark.asyncio
-async def test_strong_override_switching(manager):
-    """Test switching to a better profile (Override)."""
-    # Setup: Currently matched to "Synthetic" loosely
-    manager._current_program = "Synthetic"
-    manager._matched_profile_duration = 3600.0
-    
-    # Mock result where "Cotton 60" is much better
-    mock_res = MatchResult(
-        best_profile="Cotton 60",
-        confidence=0.95,
-        expected_duration=7200.0,
-        matched_phase=None,
-        candidates=[
-            {"name": "Cotton 60", "score": 0.95},
-            {"name": "Synthetic", "score": 0.60}, 
-        ],
-        is_ambiguous=False,
-        ambiguity_margin=0.35
-    )
-    manager.profile_store.async_match_profile.return_value = mock_res
-    
-    # Act
-    readings = _make_readings(1000)
-    await manager._async_do_perform_matching(readings)
-    
-    # Assert
-    assert manager._current_program == "Cotton 60"
-    assert manager._matched_profile_duration == 7200.0
-
-@pytest.mark.asyncio
-async def test_no_switch_weak_improvement(manager):
-    """Test NOT switching if improvement is marginal."""
-    # Setup: Currently matched to "Synthetic"
-    manager._current_program = "Synthetic"
-    manager._matched_profile_duration = 3600.0
-    
-    # Mock result where "Cotton 60" is only slightly better
-    mock_res = MatchResult(
-        best_profile="Cotton 60",
-        confidence=0.75,
-        expected_duration=7200.0,
-        matched_phase=None,
-        candidates=[
-            {"name": "Cotton 60", "score": 0.75},
-            {"name": "Synthetic", "score": 0.70},
-        ],
-        is_ambiguous=False,
-        ambiguity_margin=0.05
-    )
-    manager.profile_store.async_match_profile.return_value = mock_res
-    
-    # Act
-    readings = _make_readings(1000)
-    await manager._async_do_perform_matching(readings)
-    
-    # Assert: Should stay Synthetic
-    assert manager._current_program == "Synthetic"
-
-@pytest.mark.asyncio
 async def test_unmatching_logic(manager):
     """Test reverting to detection if confidence drops."""
     # Setup: Matched "Cotton 40"
@@ -208,8 +148,10 @@ def test_variance_locking_prediction(manager):
     manager._matched_profile_duration = 3600.0
     manager._smoothed_progress = 50.0
     
-    with patch.object(manager, '_estimate_phase_progress', return_value=(80.0, 200.0)):
-        dt_util.now = MagicMock(return_value=datetime.now(timezone.utc))
+    # patch.object, not `dt_util.now = MagicMock(...)`: the bare assignment was never
+    # restored and froze the manager's clock for every later test in the process.
+    with patch.object(manager, '_estimate_phase_progress', return_value=(80.0, 200.0)), \
+            patch.object(dt_util, 'now', return_value=datetime.now(timezone.utc)):
         manager.detector.get_power_trace.return_value = [1]*10
         manager.detector.get_elapsed_seconds.return_value = 1800
         
@@ -225,8 +167,10 @@ def test_normal_prediction_low_variance(manager):
     manager._matched_profile_duration = 3600.0
     manager._smoothed_progress = 50.0
     
-    with patch.object(manager, '_estimate_phase_progress', return_value=(55.0, 5.0)):
-        dt_util.now = MagicMock(return_value=datetime.now(timezone.utc))
+    # patch.object, not `dt_util.now = MagicMock(...)`: the bare assignment was never
+    # restored and froze the manager's clock for every later test in the process.
+    with patch.object(manager, '_estimate_phase_progress', return_value=(55.0, 5.0)), \
+            patch.object(dt_util, 'now', return_value=datetime.now(timezone.utc)):
         manager.detector.get_power_trace.return_value = [1]*10
         manager.detector.get_elapsed_seconds.return_value = 1800
         

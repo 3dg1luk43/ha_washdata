@@ -35,7 +35,25 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Any
 
-from .const import CONF_NOTIFY_QUIET_END_HOUR, CONF_NOTIFY_QUIET_START_HOUR
+from .const import (
+    CONF_NOTIFY_QUIET_END_HOUR,
+    CONF_NOTIFY_QUIET_START_HOUR,
+    STATE_INTERRUPTED,
+)
+
+
+def cycle_end_is_finish(status: Any) -> bool:
+    """Whether a cycle that ended with ``status`` counts as a finished run.
+
+    Decides both the "finished" notification and entry into the Clean state (and
+    so the unload reminder) - audit MANAGER-10. An ``interrupted`` cycle is a
+    false start, a cancelled programme or a plug pulled early (the terminal-drop
+    finalize files those as interrupted too): nothing finished, nothing to unload.
+    A ``force_stopped`` cycle (watchdog or the user's Force Stop) ran a programme
+    the user may still want to hear about, so it keeps both; the finish template's
+    ``{status}`` tells it apart. A missing/unknown status keeps today's behaviour.
+    """
+    return status != STATE_INTERRUPTED
 
 
 def quiet_hours_bounds(options: Any) -> tuple[int, int] | None:
@@ -54,7 +72,7 @@ def quiet_hours_bounds(options: Any) -> tuple[int, int] | None:
         end = int(raw_end)
         if start != raw_start or end != raw_end:
             return None
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     if not (0 <= start <= 23) or not (0 <= end <= 23):
         return None
@@ -99,7 +117,11 @@ def seconds_until_quiet_end(
     if target <= when:
         # End hour is earlier today (wrap-around window) -> it lands tomorrow.
         target = target + timedelta(days=1)
-    return max(0.0, (target - when).total_seconds())
+    # The target is a local wall-clock time, but the wait is real seconds:
+    # subtracting two datetimes that share one ZoneInfo uses their wall-clock
+    # fields, so on a DST night the hold ended an hour early (autumn) or late
+    # (spring). `timestamp()` honours each side's own UTC offset.
+    return max(0.0, target.timestamp() - when.timestamp())
 
 
 def milestone_crossed(prev_count: int, cur_count: int, milestones: Any) -> int | None:
@@ -124,7 +146,7 @@ def milestone_crossed(prev_count: int, cur_count: int, milestones: Any) -> int |
             continue
         try:
             m = int(raw)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
         if m != raw or m <= 0:
             continue

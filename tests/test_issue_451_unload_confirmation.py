@@ -65,7 +65,6 @@ def _make_manager(hass: HomeAssistant, options: dict[str, Any]) -> WashDataManag
     mgr.profile_store.async_add_cycle = AsyncMock()
     mgr.profile_store.async_clear_active_cycle = AsyncMock()
     mgr.profile_store.async_rebuild_envelope = AsyncMock()
-    mgr.profile_store.confirm_match_ranking_snapshots = MagicMock()
     mgr.profile_store.async_match_profile = AsyncMock(
         return_value=MagicMock(best_profile=None, confidence=0.0, ranking=[])
     )

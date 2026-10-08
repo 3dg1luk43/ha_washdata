@@ -65,30 +65,11 @@ def test_preload_puts_every_model_in_sys_modules() -> None:
     assert engine._MANIFEST_MODELS_CACHE is not None
 
 
-@pytest.mark.parametrize("capability", ["quality", "live_match", "end"])
+@pytest.mark.parametrize("capability", ["quality", "end"])
 def test_resolve_scorer_after_preload_does_not_import(
     capability: str, no_imports: None
 ) -> None:
-    score_fn, source = engine.resolve_scorer(capability, None)
-    assert source == "baseline"
-    assert 0.0 <= score_fn({}) <= 1.0
-
-
-def test_stale_spec_schema_guard_does_not_import(no_imports: None) -> None:
-    """The on-device schema guard also reads the baseline through the cache."""
-
-    class _Store:
-        def get_ml_model_versions(self):
-            return {
-                "end": {
-                    "spec": {
-                        "kind": "standardized_logistic",
-                        "feature_columns": ["gone_column"],
-                    }
-                }
-            }
-
-    score_fn, source = engine.resolve_scorer("end", _Store())
+    score_fn, source = engine.resolve_scorer(capability)
     assert source == "baseline"
     assert 0.0 <= score_fn({}) <= 1.0
 
@@ -106,7 +87,7 @@ def test_failed_module_import_is_cached_once(monkeypatch: pytest.MonkeyPatch) ->
     assert engine._load_model_module("cycle_end_detector_model") is None
     assert engine._load_model_module("cycle_end_detector_model") is None
     assert len(calls) == 1
-    score_fn, source = engine.resolve_scorer("end", None)
+    score_fn, source = engine.resolve_scorer("end")
     assert (score_fn, source) == (None, None)
 
 

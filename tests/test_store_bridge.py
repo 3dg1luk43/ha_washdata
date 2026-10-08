@@ -26,6 +26,11 @@ from custom_components.ha_washdata import store_account
 from custom_components.ha_washdata.profile_store import ProfileStore
 from custom_components.ha_washdata.store import StoreBridge, _cycle_upload_stats
 
+
+def _trace(peak: int, n: int = 40, step: int = 60) -> list[list[int]]:
+    """A store trace that clears the import quality bar (>= 30 points, audit STORE-03)."""
+    return [[i * step, peak if i < n - 2 else (100 if i == n - 2 else 0)] for i in range(n)]
+
 BASE = datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
 
 
@@ -59,9 +64,12 @@ class FakeClient:
         self.confirmed = None
         self.rated = None
         self.last_refresh_token = None
+        self.token_uid = "u1"  # the uid the token endpoint returns (audit STORE-18)
     async def ensure_id_token(self, rt):
         self.last_refresh_token = rt  # record so tests can assert the token is forwarded
         return self.token
+    def verified_uid(self, rt):
+        return self.token_uid if rt == self.last_refresh_token else None
     async def get_cycle(self, cid):
         return self.cycle
     async def search_devices(self, brand, appliance_type, model_query=None, include_pending=False):
@@ -72,12 +80,12 @@ class FakeClient:
         return [{"id": "bosch", "brand": "Bosch", "status": "approved"}]
     async def get_profiles(self, did, include_pending=True):
         self.last_get_profiles = {"did": did, "include_pending": include_pending}
-        return [{"id": "p1", "program": "Cotton 40"}]
+        return getattr(self, "profiles", [{"id": "p1", "program": "Cotton 40"}])
     async def device_profiles(self, brand, model, appliance_type):
         self.last_device_profiles = {"brand": brand, "model": model, "appliance_type": appliance_type}
         return {"device_id": f"{appliance_type}__{brand.lower()}__{model.lower()}", "items": [{"id": "p1", "program": "Cotton 40"}]}
     async def get_cycles(self, pid):
-        return [{"id": "c1"}]
+        return getattr(self, "cycles", [{"id": "c1"}])
     async def get_device_quality(self, did):
         return {"avg": 4.5, "count": 2}
     async def confirm_device(self, rt, uid, did):
@@ -184,12 +192,6 @@ async def test_confirm_and_rate_when_connected(bridge):
 
 
 @pytest.mark.asyncio
-async def test_get_device_quality(bridge):
-    br, ps, hass = bridge
-    assert await br.get_device_quality("d1") == {"avg": 4.5, "count": 2}
-
-
-@pytest.mark.asyncio
 async def test_device_profiles_maps_type(bridge):
     br, ps, hass = bridge
     res = await br.device_profiles("Bosch", "WAT", "washing_machine")
@@ -203,7 +205,7 @@ async def test_import_cycle_adds_reference(bridge):
     br, ps, hass = bridge
     br._client.cycle = {
         "id": "storecyc", "program_lc": "cotton-40", "createdAt": "2026-01-01T00:00:00Z",
-        "importable": [[0, 2000], [60, 100], [120, 0]],
+        "importable": _trace(2000),
         "trace": {"points": [[0, 2000]], "sampleIntervalSec": 60},
     }
     res = await br.import_cycle("storecyc", new_profile_name="Cotton 40")
@@ -214,7 +216,7 @@ async def test_import_cycle_adds_reference(bridge):
     # The full importable waveform must be persisted (not truncated/wrong): all three
     # samples survive the store round-trip.
     stored = ps.get_cycle_power_data(refs[0]["id"])
-    assert [[round(o), round(w)] for o, w in stored] == [[0, 2000], [60, 100], [120, 0]]
+    assert [[round(o), round(w)] for o, w in stored] == _trace(2000)
 
 
 @pytest.mark.asyncio
@@ -301,16 +303,16 @@ async def test_download_device_adopts_bundle(bridge):
     br, ps, hass = bridge
     br._client.bundle = {"device_id": "d1", "profiles": [
         {"id": "p1", "program": "Cotton 40", "cycles": [
-            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+            {"id": "c1", "importable": _trace(2000), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
         ]},
         {"id": "p2", "program": "Eco 50", "cycles": [
-            {"id": "c2", "importable": [[0, 1500], [60, 50], [120, 0]], "createdAt": "t",
+            {"id": "c2", "importable": _trace(1500), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
         ]},
     ]}
     res = await br.download_device("d1")
-    assert res == {"profiles_adopted": 2, "cycles_imported": 2, "phases_applied": 0, "settings": {}}
+    assert res == {"profiles_adopted": 2, "cycles_imported": 2, "cycles_skipped": 0, "phases_applied": 0, "settings": {}}
     refs = ps.get_reference_cycles()
     assert {r["profile_name"] for r in refs} == {"Cotton 40", "Eco 50"}
     assert ps.get_past_cycles() == []  # real data untouched
@@ -321,15 +323,15 @@ async def test_download_device_is_idempotent(bridge):
     br, ps, hass = bridge
     br._client.bundle = {"device_id": "d1", "profiles": [
         {"id": "p1", "program": "Cotton 40", "cycles": [
-            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+            {"id": "c1", "importable": _trace(2000), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
         ]},
     ]}
     first = await br.download_device("d1")
-    assert first == {"profiles_adopted": 1, "cycles_imported": 1, "phases_applied": 0, "settings": {}}
+    assert first == {"profiles_adopted": 1, "cycles_imported": 1, "cycles_skipped": 0, "phases_applied": 0, "settings": {}}
     # Re-downloading the same device must not duplicate the already-imported cycle.
     second = await br.download_device("d1")
-    assert second == {"profiles_adopted": 0, "cycles_imported": 0, "phases_applied": 0, "settings": {}}
+    assert second == {"profiles_adopted": 0, "cycles_imported": 0, "cycles_skipped": 0, "phases_applied": 0, "settings": {}}
     assert len(ps.get_reference_cycles()) == 1
 
 
@@ -377,7 +379,7 @@ async def test_download_device_applies_phases(bridge):
     br._client.bundle = {"device_id": "d1", "profiles": [
         {"id": "p1", "program": "Cotton 40", "phases": [{"name": "Rinse", "start": 0, "end": 300}],
          "cycles": [
-            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+            {"id": "c1", "importable": _trace(2000), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
          ]},
     ]}
@@ -411,7 +413,7 @@ async def test_download_device_returns_settings(bridge):
     br, ps, hass = bridge
     br._client.bundle = {"device_id": "d1", "settings": {"off_delay": 180}, "profiles": [
         {"id": "p1", "program": "Cotton 40", "cycles": [
-            {"id": "c1", "importable": [[0, 2000], [60, 100], [120, 0]], "createdAt": "t",
+            {"id": "c1", "importable": _trace(2000), "createdAt": "t",
              "trace": {"sampleIntervalSec": 60}},
         ]},
     ]}
@@ -431,3 +433,195 @@ async def test_get_profiles_browses_pending_inclusively(bridge):
     assert br._client.last_get_profiles == {
         "did": "dishwasher__ikea__tallboda", "include_pending": True,
     }
+
+
+@pytest.mark.asyncio
+async def test_a_bundle_saves_once_and_rebuilds_each_program_once(bridge):
+    """Audit STORE-10: every cycle used to rebuild its envelope and rewrite the
+    whole store (40 saves for a 40-cycle bundle)."""
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "profiles": [
+        {"id": "p1", "program": "Cotton 40", "cycles": [
+            {"id": f"c{i}", "importable": _trace(2000 + i), "createdAt": "t"} for i in range(3)
+        ]},
+        {"id": "p2", "program": "Eco 50", "cycles": [
+            {"id": "c9", "importable": _trace(1500), "createdAt": "t"},
+        ]},
+    ]}
+    ps._store.async_save.reset_mock()
+    with patch.object(ps, "async_rebuild_envelope", AsyncMock()) as rebuild:
+        seen = []
+        res = await br.download_device("d1", progress=lambda d, t: seen.append((d, t)))
+    assert res["cycles_imported"] == 4
+    assert ps._store.async_save.await_count == 1
+    assert sorted(c.args[0] for c in rebuild.await_args_list) == ["Cotton 40", "Eco 50"]
+    assert seen[0] == (0, 4) and seen[-1] == (3, 4)
+
+
+@pytest.mark.asyncio
+async def test_a_cancelled_download_keeps_what_it_imported(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "profiles": [
+        {"id": "p1", "program": "Cotton 40", "cycles": [
+            {"id": f"c{i}", "importable": _trace(2000 + i), "createdAt": "t"} for i in range(3)
+        ]},
+    ]}
+    calls = {"n": 0}
+
+    def _cancel() -> bool:
+        calls["n"] += 1
+        return calls["n"] > 2
+
+    res = await br.download_device("d1", should_cancel=_cancel)
+    assert res["cancelled"] is True and res["cycles_imported"] == 2
+    assert len(ps.get_reference_cycles()) == 2
+
+
+# ── audit STORE-18: the stored uid is the token's, never the caller's ───────────
+
+@pytest.mark.asyncio
+async def test_connect_stores_the_uid_the_token_belongs_to(bridge):
+    br, ps, hass = bridge
+    br._client.token_uid = "real-uid"
+    res = await br.connect("refresh", "someone-else", "Alice")
+    assert res["uid"] == "real-uid"
+    assert store_account.get_account(hass)["uid"] == "real-uid"
+
+
+@pytest.mark.asyncio
+async def test_connect_refuses_a_token_without_a_verified_uid(bridge):
+    br, ps, hass = bridge
+    br._client.token_uid = None
+    assert await br.connect("refresh", "u1", "Alice") == {"error": "token_invalid"}
+    assert store_account.get_account(hass) == {}
+
+
+# ── audit STORE-14: the uploader name is published only on opt-in ───────────────
+
+@pytest.mark.asyncio
+async def test_shared_cycles_carry_no_name_unless_the_user_opted_in(bridge):
+    br, ps, hass = bridge
+    await br.connect("refresh", "u1", "Alice Realname")
+    await ps.async_add_cycle({
+        "start_time": BASE.isoformat(), "duration": 3600, "status": "completed",
+        "profile_name": "Cotton 40", "power_data": [[i * 60.0, 1000.0] for i in range(61)],
+    })
+    cid = ps.get_past_cycles()[0]["id"]
+    item = [{"local_cycle_id": cid, "program": "Cotton 40"}]
+    assert store_account.get_prefs(hass)["share_name"] is False
+    await br.share_cycle(cid, "Cotton 40", "Bosch", "WAT", "washer", sample_interval_sec=60)
+    await br.share_device("Bosch", "WAT", "washer", item)
+    assert br._client.uploaded["name"] is None
+    assert br._client.uploaded_bundle["name"] is None
+    await store_account.async_set_prefs(hass, {"share_name": True})
+    await br.share_cycle(cid, "Cotton 40", "Bosch", "WAT", "washer", sample_interval_sec=60)
+    await br.share_device("Bosch", "WAT", "washer", item)
+    assert br._client.uploaded["name"] == "Alice Realname"
+    assert br._client.uploaded_bundle["name"] == "Alice Realname"
+
+
+# ── audit STORE-09: an unreachable store is an error, not "nothing new" ─────────
+
+_OK_PROG = {"id": "p1", "program": "Cotton 40", "cycles": [
+    {"id": "c1", "importable": _trace(2000), "createdAt": "t"},
+]}
+_FAILED_PROG = {"id": "p2", "program": "Eco 50", "cycles": [], "cycles_unavailable": True}
+
+
+@pytest.mark.asyncio
+async def test_an_unreachable_store_is_an_error_not_an_empty_download(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "settings": {}, "profiles": [], "error": "store_unreachable"}
+    assert await br.download_device("d1") == {"error": "store_unreachable"}
+    assert ps.get_reference_cycles() == []
+
+
+@pytest.mark.asyncio
+async def test_an_unread_program_is_not_reported_as_already_on_the_device(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "profiles": [_OK_PROG]}
+    await br.download_device("d1")
+    # Re-download: the readable program is already here, the other one failed.
+    br._client.bundle = {"device_id": "d1", "failed_profiles": 1, "profiles": [_OK_PROG, _FAILED_PROG]}
+    res = await br.download_device("d1")
+    assert res["error"] == "store_unreachable" and res["failed_profiles"] == 1
+
+
+@pytest.mark.asyncio
+async def test_a_partly_read_bundle_imports_what_it_got_and_says_so(bridge):
+    br, ps, hass = bridge
+    br._client.bundle = {"device_id": "d1", "failed_profiles": 1, "profiles": [_OK_PROG, _FAILED_PROG]}
+    res = await br.download_device("d1")
+    assert res["cycles_imported"] == 1 and res["partial"] is True and res["failed_profiles"] == 1
+    assert "error" not in res
+    assert len(ps.get_reference_cycles()) == 1
+
+
+@pytest.mark.asyncio
+async def test_browse_reads_pass_an_unreachable_store_through(bridge):
+    br, ps, hass = bridge
+    br._client.profiles = None
+    br._client.cycles = None
+    assert await br.get_profiles("d") is None
+    assert await br.get_cycles("p") is None
+    br._client.profiles = []
+    br._client.cycles = []
+    assert await br.get_profiles("d") == []
+    assert await br.get_cycles("p") == []
+
+
+@pytest.mark.asyncio
+async def test_ws_browse_tells_an_unreachable_store_from_an_empty_one():
+    from custom_components.ha_washdata import ws_api
+
+    manager = MagicMock()
+    conn = MagicMock()
+    for result, expected in ((None, {"items": [], "error": "store_unreachable"}), ([], {"items": []})):
+        manager.store_bridge.get_profiles = AsyncMock(return_value=result)
+        manager.store_bridge.get_cycles = AsyncMock(return_value=result)
+        with patch.object(ws_api, "_store_ctx", return_value=(manager, {})):
+            await ws_api.ws_store_get_profiles.__wrapped__(
+                MagicMock(), conn, {"id": 1, "entry_id": "e", "device_id": "d"})
+            assert conn.send_result.call_args.args == (1, expected)
+            await ws_api.ws_store_get_cycles.__wrapped__(
+                MagicMock(), conn, {"id": 2, "entry_id": "e", "profile_id": "p"})
+            assert conn.send_result.call_args.args == (2, expected)
+
+
+# ── audit STORE-20: browse rows are slimmed for a 120 px sparkline ──────────────
+
+@pytest.mark.asyncio
+async def test_browse_cycles_drop_importable_and_downsample_the_trace(bridge):
+    br, ps, hass = bridge
+    pts = [[i * 5.0, 2000.0 if i == 1234 else 10.0] for i in range(5000)]
+    br._client.cycles = [{
+        "id": "c1", "stats": {"peak_w": 2000.0}, "uploaderName": None, "downloads": 3,
+        "trace": {"points": pts, "sampleIntervalSec": 5}, "importable": pts,
+    }]
+    hass.async_add_executor_job.reset_mock()
+    row = (await br.get_cycles("p1"))[0]
+    assert hass.async_add_executor_job.await_count == 1  # off the event loop
+    assert "importable" not in row
+    spark = row["trace"]["points"]
+    assert len(spark) == 200 and row["trace"]["sampleIntervalSec"] == 5
+    assert max(w for _o, w in spark) == 2000.0  # the peak survives (LTTB)
+    assert spark[0] == [0.0, 10.0] and spark[-1] == [pts[-1][0], 10.0]
+    assert {k: row[k] for k in ("id", "stats", "uploaderName", "downloads")} == {
+        "id": "c1", "stats": {"peak_w": 2000.0}, "uploaderName": None, "downloads": 3,
+    }
+    assert "importable" in br._client.cycles[0]  # the client's rows are not mutated
+
+
+@pytest.mark.asyncio
+async def test_browse_cycles_never_raise_on_an_untyped_trace(bridge):
+    br, ps, hass = bridge
+    br._client.cycles = [
+        {"id": "a", "trace": {"points": [[0, 1], {"o": 1, "w": 2}, ["x", 3], [5], None,
+                                         [float("nan"), 4], [60, 2]]}},
+        {"id": "b", "trace": "garbage", "importable": None},
+        {"id": "c"},
+    ]
+    rows = await br.get_cycles("p1")
+    assert rows[0]["trace"]["points"] == [[0.0, 1.0], [60.0, 2.0]]
+    assert rows[1] == {"id": "b", "trace": "garbage"}
+    assert rows[2] == {"id": "c"}

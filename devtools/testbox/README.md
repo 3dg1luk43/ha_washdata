@@ -16,23 +16,39 @@ bug** (importing a configuration silently rebound the device to the exporter's
 power sensor - register item 317).
 
 It is a complement, not a replacement. Detection maths, matching accuracy and
-progress estimation belong in `run_tests.sh`, where time can be frozen and 606
-recorded cycles can be replayed in 30 seconds. What belongs here is everything
-that crosses the boundary into Home Assistant.
+progress estimation belong in `run_tests.sh` (time frozen; `--slow` replays the
+recorded `cycle_data/` corpus) and the `devtools/*_eval.py` harnesses. What
+belongs here is everything that crosses the boundary into Home Assistant.
+
+**The Home Assistant version floats.** `docker-compose.yml` pins
+`home-assistant:stable`, so the box runs whatever stable was last pulled (2026.9.3
+when this was written), not a fixed release. Read it with
+`./hactl.py ws get_config | grep '"version"'` and quote it when citing a box run.
 
 ## Quick start
 
 ```bash
 cd devtools/testbox
 ./up.sh --fresh        # ~40 s: container, config, owner user, long-lived token
-./smoke.sh             # ~5 min: one full cycle end to end, then the assertions
+./smoke.sh             # ~12 min: one full cycle end to end, then the assertions
 ./down.sh              # stop (add --wipe to delete config/ too)
 ```
 
 `./smoke.sh` is the whole point in one command: it creates a device through the
 real config flow, seeds it from a real export, replays a recorded 76 min washing
-machine cycle at 60x, waits for the cycle to close, and then runs 15 checks that
-no mocked Home Assistant can make (see *What smoke.sh proves* below).
+machine cycle at 60x, waits for the cycle to close, and then runs the 22 checks
+in `assert_run.py` that no mocked Home Assistant can make (see *What smoke.sh
+proves* below). Most of the ~12 min is the wait for the cycle to close (see
+*Current known state*).
+
+**The default seed data is private.** Without `--export`, `smoke.sh` seeds from
+the maintainer's own exports under the gitignored `cycle_data/me/`
+(`washdata_export_01KXGA3C.json` for a washing machine, `washdata_export_01KDMTAA.json`
+for `--type dishwasher`), so on any other checkout it stops at
+`export not found`. Pass your own WashData export instead:
+`./smoke.sh --fresh --export /path/to/washdata_export.json [--cycle N]`. It needs
+at least one stored cycle with its power trace; `--cycle` picks which one is
+replayed (default 0), and its profiles seed the matcher.
 
 ## Paths
 
@@ -180,6 +196,40 @@ Two consequences worth knowing:
 - `notify_live_interval_seconds` is floored at 30 in the manager, so at 60x one
   live update covers ~30 min of appliance time.
 
+Three more wall-clock quantities do not scale and change behaviour, so a box run
+cannot judge them (measured in the 0.5.7 review campaign, register item 389).
+None is a bug; each has a way to test it that does not compress time:
+
+- **The start-energy gate** is in Wh, so at 60x it takes 60x more appliance time
+  to fill. A cycle with a low-power prelude is recorded starting ~8 min late
+  (start offset +9 min against +1 min typical); its end is unaffected.
+  *Test it* by replay: `devtools/start_gate_eval.py` feeds a raw history (a
+  diagnostics dump's 24 h `power_trace`, a History CSV download, or a recorder
+  database) through the real detector in real time and reports missed, late and
+  phantom starts per gate value. In the box, `./hactl.py set-options <id>
+  start_energy_threshold=<default / speedup>` removes the artefact, since the
+  energy a compressed prelude delivers shrinks by the same factor.
+- **`STANDBY_BAND_WINDOW_S`** (600 s) is a constant, not an option, so it cannot
+  be scaled: at 60x it is 10 h of appliance time and the standby-band finalize can
+  never fire. *Test it* at 2x (20 min of appliance time): `./smoke.sh` writes
+  60x timings in step 3, so after it run `./hactl.py set-options <id>
+  off_delay=<v> min_off_gap=<v> sampling_interval=<v> watchdog_interval=<v>
+  profile_match_interval=<v> completion_min_seconds=<v> interrupted_min_seconds=<v>`
+  with each `<v>` the shipped value halved, then `./hactl.py replay <export> --cycle N --speedup 2` on a cycle whose
+  tail holds a flat standby above `stop_threshold_w`
+  (`tests/test_issue_445_standby_above_stop.py` has the shape). By replay, a
+  stored trace that ends in such a standby goes through the finalize in real time
+  in `devtools/end_gate_eval.py --loo --all-formats`.
+- **Back-to-back washes merge.** A 7 min gap between two washes becomes 7 s,
+  shorter than the 10 s `min_off_gap` step 3 writes, so the box keeps as one cycle
+  what a real-time replay splits in two. *Test it* by replay:
+  `devtools/min_off_gap_eval.py` replays every trace at each candidate
+  `min_off_gap` and runs a merge probe (one cycle replayed twice, the user's
+  shortest real gap between loads apart), and
+  `devtools/start_gate_eval.py` reports `merged` against the stored records of a
+  raw history. In the box, 2x with the halved options above keeps every gap and
+  every option in proportion.
+
 After the trace ends the replay pushes 0 W once and stops. Home Assistant drops
 unchanged states, so repeated 0 W produces no further events - which is exactly
 the report-on-change plug behaviour behind #424/#427, and means the **watchdog is
@@ -221,9 +271,10 @@ same power sensor. That cross-talk surfaces as unrelated assertion failures -
 two devices' live notifications land on two tags, so "live updates share one
 dedicated tag" fails for reasons that have nothing to do with the code.
 
-`./smoke.sh` reports **19 of 20** on a clean box at 60x for a washing machine;
-the one failure is the seeded export's own `notify.mobile_app_s24` target, which
-does not exist in the box and raises `ServiceNotFound`. `--type dishwasher`
+`./smoke.sh` reports **22 of 22** on a clean box at 60x for a washing machine.
+(It used to report 19 of 20: the seeded export's own `notify.mobile_app_s24`
+target does not exist in the box and raised `ServiceNotFound`. Step 3 now points
+every notify option at the box's own `testbox` targets.) `--type dishwasher`
 previously seeded the **washing-machine** export regardless of type - so the
 dishwasher path was being exercised against washing-machine profiles and the
 run matched programmes like "30 deg / 2:09 / 800rpm". The export now follows
@@ -245,9 +296,9 @@ there. Register item 320.
 
 - **Timing is compressed**, so it cannot judge cycle-end accuracy or ETA
   convergence in minutes. Those live in `run_tests.sh --slow` and
-  `devtools/dtw_ab_eval.py`.
+  `devtools/end_gate_eval.py --loo`.
 - **One appliance, one trace per run.** Matching accuracy over the corpus stays
-  in the benchmark suite.
+  in `devtools/eval.py`, which drives the shipped matcher.
 - **The companion app is not here.** The box proves Home Assistant accepted and
   delivered the payload; whether iOS then renders a Live Activity from it is
   still only verifiable on a phone.

@@ -8,7 +8,8 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { bootPanel, clickTab, assertWsCalled } from '../helpers/panel';
+import { bootPanel, clickTab, assertWsCalled, assertWsNotCalled, setHandler } from '../helpers/panel';
+import { DEFAULT_HANDLERS } from '../helpers/ws-handlers';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -60,6 +61,43 @@ test('workbench: model time-left readout and phase field are present', async ({ 
   // static countdown).
   await expect(page.locator('#wd-pg-rem')).toBeAttached({ timeout: 8_000 });
   await expect(page.locator('#wd-pg-phase')).toBeAttached();
+});
+
+test('workbench: the phase bar paints the replay\'s live phase runs', async ({ page }) => {
+  // It read `phases` off the profile rows, which get_profiles never sends, so it
+  // could not draw. It now draws runs of series[].phase (Wash, then Spin).
+  await clickTab(page, 'playground');
+  await page.locator('button[data-action="pg-run"]').click();
+  await expect(page.locator('.wd-pg-alerts-card')).toBeVisible({ timeout: 8_000 });
+  const canvas = page.locator('canvas#wd-pg-canvas');
+  await expect.poll(() => canvas.evaluate((c: HTMLCanvasElement) => {
+    const ctx = c.getContext('2d');
+    if (!ctx) return 0;
+    const band = Math.max(4, Math.round(c.height * 0.03));
+    const d = ctx.getImageData(0, c.height - band, c.width, band).data;
+    let tinted = 0;
+    for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 0 && d[i] - d[i + 1] > 40) tinted++;
+    return tinted;
+  }), { timeout: 8_000 }).toBeGreaterThan(20);
+});
+
+test('workbench: the outcome says whether the cycle would be auto-labelled', async ({ page }) => {
+  // The replay now runs the manager's own cycle-end label verdict (audit F7).
+  await clickTab(page, 'playground');
+  await page.locator('button[data-action="pg-run"]').click();
+  const card = page.locator('.wd-pg-alerts-card');
+  await expect(card).toContainText('Auto-label', { timeout: 8_000 });
+  await expect(card).toContainText('Cotton 40°C');
+});
+
+test('drawer/history: a row says why it would ask for review', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const runBtn = page.locator('button[data-action="pg-run-history"]');
+  await expect(runBtn).toBeVisible({ timeout: 8_000 });
+  await runBtn.click();
+  const glyph = page.locator('.wd-pg-label-glyph').first();
+  await expect(glyph).toBeAttached({ timeout: 8_000 });
+  await expect(glyph).toHaveAttribute('title', /Too close to the runner-up/);
 });
 
 test('workbench: outcome + alerts card appears after a sim run', async ({ page }) => {
@@ -116,16 +154,13 @@ test('control panel: editing a value marks it changed and reveals its publish bu
   await expect(page.locator('.wd-pg-ctrl')).toContainText('Matches live settings');
 });
 
-test('control panel: sandbox-only matcher knobs get no publish button', async ({ page }) => {
+test('removed Playground controls stay gone', async ({ page }) => {
+  // 0.5.8: matcher knobs, the idle stress toggle and the DTW scorer. (Presets came back.)
   await clickTab(page, 'playground');
-  const corr = page.locator('.wd-pg-param-inp[data-pgkey="corr_weight"]');
-  await expect(corr).toBeVisible({ timeout: 8_000 });
-  await corr.fill('0.6');
-  // It IS a staged change (the sim honours it) but it is not a real config option.
-  await expect(page.locator('.wd-pg-ctrl')).toContainText('1 changed');
-  await expect(page.locator('.wd-pg-pub[data-pgkey="corr_weight"]')).toHaveCount(0);
-  // ...and the bulk publish button must not offer it either.
-  await expect(page.locator('button[data-action="pg-apply-settings"]')).toHaveCount(0);
+  await expect(page.locator('.wd-pg-ctrl')).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="corr_weight"]')).toHaveCount(0);
+  await expect(page.locator('#wd-pg-stress-toggle')).toHaveCount(0);
+  await assertWsNotCalled(page, 'ha_washdata/get_dtw_debug');
 });
 
 test('control panel: Load live settings discards sandbox edits', async ({ page }) => {
@@ -145,14 +180,36 @@ test('control panel: save a preset, then load it back', async ({ page }) => {
   const inp = page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]');
   await expect(inp).toBeVisible({ timeout: 8_000 });
   await inp.fill('222');
+  const save = page.locator('button[data-action="pg-preset-save"]');
+  await expect(save).toBeDisabled();             // no name typed yet
   await page.locator('#wd-pg-preset-name').fill('My preset');
-  await page.locator('button[data-action="pg-preset-save"]').click();
-  await assertWsCalled(page, 'ha_washdata/save_playground_preset');
-  // The saved preset is selectable; loading it overwrites the sandbox values.
+  await expect(save).toBeEnabled();
+  await save.click();
+  const [call] = await assertWsCalled(page, 'ha_washdata/save_playground_preset');
+  // A preset is the whole control panel, not just the edited field.
+  expect(call.name).toBe('My preset');
+  expect((call.values as Record<string, unknown>).off_delay).toBe(222);
+  expect((call.values as Record<string, unknown>).min_off_gap).toBe(180);
+  await expect(page.locator('.wd-toast')).toContainText('Preset "My preset" saved');
+  // The saved preset is selected; loading it overwrites the sandbox values.
+  await expect(page.locator('#wd-pg-preset-sel')).toHaveValue('My preset');
   await inp.fill('120');
-  await page.locator('#wd-pg-preset-sel').selectOption('My preset');
   await page.locator('button[data-action="pg-preset-load"]').click();
   await expect(inp).toHaveValue('222');
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('1 changed');
+});
+
+test('control panel: load a stored preset stages only what differs from live', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const load = page.locator('button[data-action="pg-preset-load"]');
+  await expect(load).toBeDisabled({ timeout: 8_000 });   // nothing selected yet
+  await page.locator('#wd-pg-preset-sel').selectOption('Quiet nights');
+  await load.click();
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="off_delay"]')).toHaveValue('300');
+  await expect(page.locator('.wd-pg-param-inp[data-pgkey="min_off_gap"]')).toHaveValue('240');
+  await expect(page.locator('.wd-pg-ctrl')).toContainText('2 changed');
+  // Loading is sandbox-only: nothing is written to the device.
+  await assertWsNotCalled(page, 'ha_washdata/set_options');
 });
 
 test('control panel: delete a preset', async ({ page }) => {
@@ -161,7 +218,25 @@ test('control panel: delete a preset', async ({ page }) => {
   await page.locator('#wd-pg-preset-sel').selectOption('Quiet nights');
   page.once('dialog', d => d.accept());   // confirm()
   await page.locator('button[data-action="pg-preset-delete"]').click();
-  await assertWsCalled(page, 'ha_washdata/delete_playground_preset');
+  const [call] = await assertWsCalled(page, 'ha_washdata/delete_playground_preset');
+  expect(call.name).toBe('Quiet nights');
+  await expect(page.locator('#wd-pg-preset-sel option')).toHaveCount(1);   // just the placeholder
+});
+
+test('control panel: a preset name renders as text, never as markup', async ({ page }) => {
+  const name = '<img src=x onerror="window.__pg_pwned=1">';
+  const base = DEFAULT_HANDLERS['ha_washdata/get_playground_settings'] as Record<string, unknown>;
+  await setHandler(page, 'ha_washdata/get_playground_settings', {
+    ...base, presets: [{ name, values: { off_delay: 300 }, created_at: null, updated_at: null }],
+  });
+  await clickTab(page, 'playground');
+  const sel = page.locator('#wd-pg-preset-sel');
+  await expect(sel).toBeVisible({ timeout: 8_000 });
+  await expect(sel.locator('option').nth(1)).toHaveText(name);
+  await sel.selectOption({ index: 1 });
+  await page.locator('button[data-action="pg-preset-load"]').click();
+  await expect(page.locator('.wd-toast')).toContainText(`Preset "${name}" loaded`);
+  expect(await page.evaluate(() => (window as any).__pg_pwned)).toBeUndefined();
 });
 
 test('control panel: Load suggested stages classic suggestion values', async ({ page }) => {
@@ -176,25 +251,13 @@ test('control panel: Load suggested stages classic suggestion values', async ({ 
   await expect(inp).toHaveValue('90');
 });
 
-test('control panel: Load Calibrated (ML) stages ML suggestion values', async ({ page }) => {
-  await clickTab(page, 'playground');
-  // Mock has ml_suggestions: {off_delay: 85, end_repeat_count: 2}.
-  const btn = page.locator('button[data-action="pg-load-calibrated"]');
-  await expect(btn).toBeVisible({ timeout: 8_000 });
-  await btn.click();
-  const inp = page.locator('input[data-pgkey="off_delay"]');
-  await expect(inp).toHaveValue('85');
-});
-
-test('control panel: suggestion buttons show the suggestion count in their label', async ({ page }) => {
-  // Mock returns 2 classic and 2 ML suggestions — count must appear in label.
+test('control panel: the suggestion button shows the suggestion count in its label', async ({ page }) => {
+  // Mock returns 2 classic suggestions - the count must appear in the label.
   await clickTab(page, 'playground');
   const classic = page.locator('button[data-action="pg-load-suggested"]');
   await expect(classic).toBeVisible({ timeout: 8_000 });
   await expect(classic).toContainText('(2)');
-  const ml = page.locator('button[data-action="pg-load-calibrated"]');
-  await expect(ml).toBeVisible();
-  await expect(ml).toContainText('(2)');
+  await expect(page.locator('button[data-action="pg-load-calibrated"]')).toHaveCount(0);
 });
 
 // ─── "Across your cycles" drawer: History + Optimize sub-tabs ────────────────
@@ -249,6 +312,31 @@ test('drawer/optimize: running a 1D sweep starts a sweep task', async ({ page })
   await page.locator('#wd-pg-sw-steps').fill('3');
   await page.locator('button[data-action="pg-sweep-run2"]').click();
   await assertWsCalled(page, 'ha_washdata/start_playground_sweep');
+});
+
+// PLAYGROUND-23: both replay cycles against profiles built partly from those same
+// cycles (no leave-one-out), so their results are in-sample and say so.
+test('drawer/history: the result says it is in-sample and optimistic', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await expect(page.locator('.wd-pg-insample')).toHaveCount(0);
+  await page.locator('button[data-action="pg-run-history"]').click();
+  await expect(page.locator('table.wd-pg-htable')).toBeVisible({ timeout: 8_000 });
+  const note = page.locator('.wd-pg-insample');
+  await expect(note).toHaveCount(1);
+  await expect(note).toContainText('optimistic');
+});
+
+test('drawer/optimize: the sweep result says it is in-sample and optimistic', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
+  await expect(page.locator('.wd-pg-insample')).toHaveCount(0);
+  await page.locator('#wd-pg-sw-from').fill('60');
+  await page.locator('#wd-pg-sw-to').fill('240');
+  await page.locator('#wd-pg-sw-steps').fill('3');
+  await page.locator('button[data-action="pg-sweep-run2"]').click();
+  const note = page.locator('.wd-pg-insample');
+  await expect(note).toHaveCount(1, { timeout: 8_000 });
+  await expect(note).toContainText('optimistic');
 });
 
 // ─── Mobile ──────────────────────────────────────────────────────────────────

@@ -18,7 +18,7 @@
 
 Single source of truth for the cycle-progress math. Both the live integration
 (``manager.WashDataManager`` - thin wrappers over these functions) and the
-Playground's headless simulation (``playground.SimRunner``) call the SAME
+Playground's headless replay (``playground.py``) call the SAME
 functions here, so the panel's what-if replay is byte-for-byte what the running
 integration computes. Nothing here touches Home Assistant; every function is
 pure given a ``ProfileStore`` (read-only), the entry options mapping, and a
@@ -34,6 +34,7 @@ import logging
 import math
 from dataclasses import dataclass
 from datetime import datetime
+from operator import le as _le
 from typing import Any, cast
 
 import numpy as np
@@ -41,19 +42,23 @@ import numpy as np
 from .const import (
     CYCLE_OVERRUN_ANOMALY_RATIO,
     DEVICE_SMOOTHING_THRESHOLDS,
-    ML_PROGRESS_BLEND_WEIGHT,
     STATE_ENDING,
     STATE_PAUSED,
     STATE_RUNNING,
 )
-from .profile_store import decompress_power_data
+from .profile_store import _envelope_y, decompress_power_data
 from .time_utils import power_data_to_offsets
 
 _LOGGER = logging.getLogger(__name__)
 
-# Minimum progress before an energy projection is trusted (mirrors the manager
-# class constant of the same purpose).
-PROJECTION_MIN_PROGRESS = 3.0
+# Minimum progress before an energy projection is shown. 10, not 3 (audit
+# PROGRESS-04): at 3% both divisors were off by 77-101% MAPE over 670 LOO folds
+# (devtools/energy_projection_eval.py), at 10% the energy-share divisor is 50%.
+PROJECTION_MIN_PROGRESS = 10.0
+
+# Floor on the matched profile's cumulative-energy share used as the projection
+# divisor: below it the curve's start is noise and the division explodes.
+PROJECTION_MIN_ENERGY_FRACTION = 0.05
 
 # The progress EMA weights below are per *estimate*, and were chosen against the
 # manager's 5 s estimate throttle. See :func:`_dt_scaled_alpha`.
@@ -61,6 +66,9 @@ SMOOTHING_NOMINAL_DT_S = 5.0
 
 # Cache type for profile_end_expectation: (profile_name, base_expectation_dict).
 EndExpCache = tuple[str, dict[str, float]] | None
+
+# How many of a profile's most recent traces its end expectation is taken from.
+_END_EXPECTATION_CYCLES = 20
 
 
 @dataclass
@@ -93,14 +101,24 @@ def profile_end_expectation(
     else:
         from .ml.feature_extraction import profile_expectation
 
+        # The 20 most recent non-empty traces, oldest first - walked newest-first
+        # and stopped there, so a long history is not decompressed just to be
+        # thrown away (49-248 ms on the largest corpus profiles, on the event
+        # loop, once per cycle start).
+        cycles = store.get_past_cycles() or []
+        if not isinstance(cycles, (list, tuple)):
+            cycles = list(cycles)
         points_list: list[list[tuple[float, float]]] = []
-        for cycle in store.get_past_cycles():
+        for cycle in reversed(cycles):
             if cycle.get("profile_name") != profile_name:
                 continue
             pts = decompress_power_data(cycle)
             if pts:
                 points_list.append(pts)
-        base = profile_expectation(points_list[-20:])
+                if len(points_list) >= _END_EXPECTATION_CYCLES:
+                    break
+        points_list.reverse()
+        base = profile_expectation(points_list)
         if base is None:
             return None, cache
         cache = (profile_name, dict(base))
@@ -113,61 +131,6 @@ def profile_end_expectation(
 EndExpFn = Any  # Callable[[str, float], dict[str, float] | None]
 
 
-def ml_progress_percent(
-    store: Any,
-    options: Any,
-    matched_duration: float,
-    trace: list[tuple[datetime, float]],
-    profile_name: str,
-    end_expectation_fn: EndExpFn,
-    logger: logging.Logger | None = None,
-) -> float | None:
-    """ML completion-fraction estimate (0-100) for the running cycle, or None.
-
-    Uses the on-device ``remaining_time`` regressor; gated on the ML opt-in and
-    inert until training promotes a regressor. ``end_expectation_fn(name, dur)``
-    supplies the profile expectation (the manager passes its cached
-    ``_profile_end_expectation``; the Playground wraps :func:`profile_end_expectation`)
-    so history is only decompressed after the cheap gates pass. Never raises.
-    """
-    logger = logger or _LOGGER
-    try:
-        from .ml.engine import ml_models_enabled, resolve_regressor
-
-        if not ml_models_enabled(options):
-            return None
-        if (
-            not profile_name
-            or profile_name in ("off", "detecting...", "restored...")
-            or profile_name not in store.get_profiles()
-        ):
-            return None
-        predict_fn, _src = resolve_regressor("remaining_time", store)
-        if predict_fn is None:
-            return None
-        if not trace or len(trace) < 4:
-            return None
-        expectation = end_expectation_fn(
-            profile_name, float(matched_duration or 0.0)
-        )
-        if expectation is None:
-            return None
-        t0 = trace[0][0]
-        pts = [(float((t - t0).total_seconds()), float(p)) for t, p in trace]
-        from .ml.feature_extraction import progress_features
-
-        feat = progress_features(pts, expectation)
-        if feat is None:
-            return None
-        frac = float(predict_fn(feat))
-        if not math.isfinite(frac):
-            return None
-        return float(min(max(frac, 0.0), 0.99)) * 100.0
-    except Exception as err:  # noqa: BLE001 - ML must never break estimates
-        logger.debug("ML progress estimate skipped: %s", err)
-        return None
-
-
 def ml_energy_total(
     store: Any,
     options: Any,
@@ -178,8 +141,12 @@ def ml_energy_total(
     logger: logging.Logger | None = None,
 ) -> float | None:
     """Predicted total cycle energy (Wh) from the on-device ``total_energy``
-    regressor, or None. ``end_expectation_fn`` as in :func:`ml_progress_percent`.
-    Never raises.
+    regressor, or None. Never raises.
+
+    ``end_expectation_fn(name, dur)`` supplies the profile expectation (the
+    manager passes its cached ``_profile_end_expectation``; the Playground wraps
+    :func:`profile_end_expectation`) so history is only decompressed after the
+    cheap gates pass.
     """
     logger = logger or _LOGGER
     try:
@@ -225,37 +192,13 @@ def ml_energy_total(
         return None
 
 
-def estimate_phase_progress(
-    store: Any,
-    current_power_data: list[tuple[datetime, float]] | list[tuple[str, float]],
-    current_duration: float,
-    profile_name: str,
-    logger: logging.Logger | None = None,
-    quiet_threshold_w: float = 0.0,
-) -> tuple[float, float] | None:
-    """Estimate cycle progress by analyzing which phase we're in.
+_PHASE_ENVELOPE_CACHE: dict[tuple[Any, int, Any], tuple[Any, tuple[dict[str, Any], Any, float]]] = {}
 
-    Uses cached statistical envelope built from ALL cycles labeled with this
-    profile, normalized by TIME to account for different sampling rates. Returns
-    ``(progress_pct, variance_watts)`` or ``None`` if estimation fails.
 
-    ``quiet_threshold_w`` is the detector's own off-noise floor
-    (``CycleDetectorConfig.stop_threshold_w``, itself derived from the configured
-    minimum power). A window that never rises above it is *not* the appliance
-    doing something, so it carries no phase information and the scan declines
-    rather than guessing (#386); a dead-flat window declines for the same reason
-    at any power level. The default 0.0 leaves only the flatness rule for callers
-    that do not know the floor.
-    """
-    logger = logger or _LOGGER
-    # Get cached envelope (fast - already computed and stored)
-    envelope = store.get_envelope(profile_name)
-
-    if envelope is None:
-        logger.debug("No envelope cached for profile %s", profile_name)
-        return None
-
-    # Convert cached lists back to numpy arrays
+def _parse_phase_envelope(
+    envelope: dict[str, Any], profile_name: str, logger: logging.Logger
+) -> tuple[dict[str, Any], Any, float] | None:
+    """``(arrays, time_grid, target_duration)`` of a stored envelope, read-only."""
     try:
         env_min = envelope.get("min", [])
         env_max = envelope.get("max", [])
@@ -287,9 +230,124 @@ def estimate_phase_progress(
             envelope.get("time_grid", []), dtype=float
         )
         target_duration = float(envelope.get("target_duration", 0.0) or 0.0)
-    except (KeyError, ValueError, TypeError, IndexError) as e:
+    except (KeyError, ValueError, TypeError, IndexError, OverflowError) as e:
         logger.warning("Invalid envelope format for %s: %s", profile_name, e)
         return None
+    for _arr in (*envelope_arrays.values(), time_grid):
+        _arr.setflags(write=False)
+    return envelope_arrays, time_grid, target_duration
+
+
+def _window_values(
+    power_data: Any, window_s: float
+) -> np.ndarray[Any, np.dtype[np.float64]] | None:
+    """Powers of the trailing ``window_s`` of a ``(datetime, power)`` trace.
+
+    Exactly what ``power_data_to_offsets`` + the ``offsets >= last - window``
+    mask in :func:`estimate_phase_progress` select (same anchor, same 0.1 s
+    rounding, same skipped rows), without converting the whole trace. Only the
+    ``datetime`` format the detector hands out takes this path, and only when
+    its timestamps never go backwards: then everything before the first row
+    that falls out of the window is out of it too. Anything else returns None
+    and the caller converts the whole trace as before.
+    """
+    try:
+        if not isinstance(power_data, (list, tuple)) or not power_data:
+            return None
+        first = power_data[0]
+        if not (
+            isinstance(first, (list, tuple))
+            and len(first) >= 2
+            and isinstance(first[0], datetime)
+        ):
+            return None
+        stamps = [row[0] for row in power_data]
+        if not all(map(_le, stamps, stamps[1:])):
+            return None
+
+        def _row(row: Any) -> tuple[datetime, float] | None:
+            # The same rows `power_data_to_offsets` keeps (and the same order of
+            # checks, so the same one anchors the offsets).
+            try:
+                ts = row[0]
+                if not isinstance(ts, datetime):
+                    return None
+                return ts, float(row[1])
+            except (TypeError, ValueError, AttributeError, IndexError, OverflowError):
+                return None
+
+        anchor: float | None = None
+        for row in power_data:
+            kept = _row(row)
+            if kept is not None:
+                anchor = kept[0].timestamp()
+                break
+        if anchor is None:
+            return np.array([], dtype=float)
+        window_start: float | None = None
+        tail: list[float] = []
+        for row in reversed(power_data):
+            kept = _row(row)
+            if kept is None:
+                continue
+            offset = round(kept[0].timestamp() - anchor, 1)
+            if window_start is None:
+                window_start = max(0, offset - window_s)
+            if offset < window_start:
+                break
+            tail.append(kept[1])
+        tail.reverse()
+        return np.array(tail)
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
+
+
+def estimate_phase_progress(
+    store: Any,
+    current_power_data: list[tuple[datetime, float]] | list[tuple[str, float]],
+    current_duration: float,
+    profile_name: str,
+    logger: logging.Logger | None = None,
+    quiet_threshold_w: float = 0.0,
+) -> tuple[float, float] | None:
+    """Estimate cycle progress by analyzing which phase we're in.
+
+    Uses cached statistical envelope built from ALL cycles labeled with this
+    profile, normalized by TIME to account for different sampling rates. Returns
+    ``(progress_pct, variance_watts)`` or ``None`` if estimation fails.
+
+    ``quiet_threshold_w`` is the detector's own off-noise floor
+    (``CycleDetectorConfig.stop_threshold_w``, itself derived from the configured
+    minimum power). A window that never rises above it is *not* the appliance
+    doing something, so it carries no phase information and the scan declines
+    rather than guessing (#386); a dead-flat window declines for the same reason
+    at any power level. The default 0.0 leaves only the flatness rule for callers
+    that do not know the floor.
+    """
+    logger = logger or _LOGGER
+    # Get cached envelope (fast - already computed and stored)
+    envelope = store.get_envelope(profile_name)
+
+    if envelope is None:
+        logger.debug("No envelope cached for profile %s", profile_name)
+        return None
+
+    # Parse the stored lists into arrays once per envelope build, not on every
+    # 5 s estimate (audit PERF-06: ~20% of a 17 ms call, on the event loop).
+    # Keyed on the envelope object and its `updated` stamp; arrays are read-only.
+    _key = (profile_name, id(envelope), envelope.get("updated"))
+    _hit = _PHASE_ENVELOPE_CACHE.get(_key)
+    if _hit is not None and _hit[0] is envelope:
+        _parsed = _hit[1]
+    else:
+        _parsed = _parse_phase_envelope(envelope, profile_name, logger)
+        if _parsed is None:
+            return None
+        if len(_PHASE_ENVELOPE_CACHE) > 32:
+            _PHASE_ENVELOPE_CACHE.clear()
+        # The envelope itself is held, so its id cannot be recycled while cached.
+        _PHASE_ENVELOPE_CACHE[_key] = (envelope, _parsed)
+    envelope_arrays, time_grid, target_duration = _parsed
 
     if len(time_grid) == 0 or target_duration <= 0:
         if target_duration > 0 and len(envelope_arrays["avg"]) > 0:
@@ -305,23 +363,33 @@ def estimate_phase_progress(
             logger.debug("Envelope missing time grid/duration, cannot estimate phase")
             return None
 
-    # Extract power offsets from current cycle (any format -> [offset, power])
-    current_offsets_list = power_data_to_offsets(
-        cast(list[list[Any] | tuple[Any, ...]], current_power_data)
-    )
-    current_offsets = np.array([o for o, _ in current_offsets_list])
-    current_values = np.array([p for _, p in current_offsets_list])
-    if current_offsets.size == 0:
-        logger.debug("No valid current power offsets, cannot estimate phase")
-        return None
-
     # Use sliding window on TIME, not sample count
     window_duration = min(60.0, target_duration * 0.25)
-    current_time = current_offsets[-1]
-    window_start_time = max(0, current_time - window_duration)
+    # Only the last `window_duration` seconds of the trace are read, so convert
+    # only those (audit PROGRESS-17: the whole trace was converted on every 5 s
+    # estimate, on the event loop). `_window_values` returns exactly what the
+    # full conversion + time mask selects, or None to take that full path.
+    _windowed = _window_values(current_power_data, window_duration)
+    if _windowed is None:
+        # Extract power offsets from current cycle (any format -> [offset, power])
+        current_offsets_list = power_data_to_offsets(
+            cast(list[list[Any] | tuple[Any, ...]], current_power_data)
+        )
+        current_offsets = np.array([o for o, _ in current_offsets_list])
+        current_values = np.array([p for _, p in current_offsets_list])
+        if current_offsets.size == 0:
+            logger.debug("No valid current power offsets, cannot estimate phase")
+            return None
+        current_time = current_offsets[-1]
+        window_start_time = max(0, current_time - window_duration)
 
-    window_mask = current_offsets >= window_start_time
-    current_window_values = current_values[window_mask]
+        window_mask = current_offsets >= window_start_time
+        current_window_values = current_values[window_mask]
+    elif _windowed.size == 0:
+        logger.debug("No valid current power offsets, cannot estimate phase")
+        return None
+    else:
+        current_window_values = _windowed
 
     if len(current_window_values) < 3:
         logger.debug("Insufficient data in current window for phase estimation")
@@ -605,7 +673,7 @@ def _dt_scaled_alpha(alpha: float, dt_s: float | None) -> float:
         alpha_dt = 1 - (1 - alpha) ** (dt / SMOOTHING_NOMINAL_DT_S)
 
     ``dt_s`` of ``None`` (or <= 0) keeps the nominal weight, so every caller that
-    does not track its own cadence - and the golden snapshot - is unchanged.
+    does not track its own cadence (and the Playground replay) is unchanged.
     """
     if dt_s is None or not math.isfinite(dt_s) or dt_s <= 0.0:
         return alpha
@@ -615,23 +683,36 @@ def _dt_scaled_alpha(alpha: float, dt_s: float | None) -> float:
     return 1.0 - (1.0 - alpha) ** steps
 
 
+def ema_seed(
+    prev_smoothed: float, prev_program: str | None, program: str | None
+) -> float:
+    """The EMA state an estimate for ``program`` continues from (audit PROGRESS-09).
+
+    A programme switch or a pin re-seeds to 0.0 (a cold start, i.e. the raw
+    estimate for the new programme). Carrying the old percent onto the new
+    duration read 62-67 min against a 90 min truth and took up to 12 min to
+    settle; an honest backwards jump at a switch is the correct information.
+    """
+    if prev_program is not None and program != prev_program:
+        return 0.0
+    return prev_smoothed
+
+
 def _compute_progress_base(
     device_type: str,
     matched_duration: float,
     duration_so_far: float,
     prev_smoothed: float,
     phase_result: tuple[float, float] | None,
-    ml_pct: float | None,
     logger: logging.Logger | None = None,
     dt_seconds: float | None = None,
 ) -> ProgressResult | None:
-    """The blend + EMA + monotonicity + back-calculation body of the estimate loop.
+    """The EMA + monotonicity + back-calculation body of the estimate loop.
 
     Pure arithmetic: the caller supplies ``phase_result`` (from
-    :func:`estimate_phase_progress`, or ``None`` to force the linear fallback) and
-    ``ml_pct`` (from :func:`ml_progress_percent`, or ``None``); both the live
-    manager and the Playground compute those via the same functions, so this is
-    the single implementation of the smoothing/back-calc. Returns ``None`` when no
+    :func:`estimate_phase_progress`, or ``None`` to force the linear fallback);
+    the live manager and the Playground compute it via the same function, so this
+    is the single implementation of the smoothing/back-calc. Returns ``None`` when no
     profile duration is known (caller clears the estimate). Behavior-identical to
     the matched-duration branch of ``manager._update_remaining_only``.
     """
@@ -642,10 +723,6 @@ def _compute_progress_base(
     # --- PHASE-AWARE ESTIMATION ---
     if phase_result is not None:
         phase_progress, phase_variance = phase_result
-
-        if ml_pct is not None:
-            w = ML_PROGRESS_BLEND_WEIGHT
-            phase_progress = (1.0 - w) * phase_progress + w * ml_pct
 
         if prev_smoothed == 0.0:
             smoothed = phase_progress
@@ -665,8 +742,12 @@ def _compute_progress_base(
             smoothing_threshold = DEVICE_SMOOTHING_THRESHOLDS.get(device_type, 5.0)
             if phase_progress < current_smoothed - smoothing_threshold:
                 # Backward step: damping here exists to resist regression, not to
-                # track, so it stays per-estimate (unscaled) on purpose.
-                smoothed = (current_smoothed * 0.95) + (phase_progress * 0.05)
+                # track. It is still a time constant, not a step count (audit
+                # PROGRESS-13): per estimate, the Playground's 30 s steps (and a
+                # plug reporting every 30 s live) gave way to a real drop 6x
+                # slower than a 5 s plug. dt=None keeps the plain 95/5 step.
+                beta = _dt_scaled_alpha(0.05, dt_seconds)
+                smoothed = (current_smoothed * (1.0 - beta)) + (phase_progress * beta)
                 logger.debug(
                     "Progress drop detected (%.1f%% < %.1f%% - %.1f%%), "
                     "applying heavy damping for %s",
@@ -680,10 +761,22 @@ def _compute_progress_base(
                 smoothed = (prev_smoothed * (1.0 - alpha)) + (phase_progress * alpha)
 
         smoothed = min(99.0, smoothed)
+        if duration_so_far >= matched_duration and prev_smoothed > smoothed:
+            # Past the expected end the cycle is finishing, not going backwards.
+            # In an overrun tail the phase scan declines on quiet windows, so the
+            # branches alternate: the linear one reaches 100%, then the next phase
+            # estimate's backward step (and its 99% cap) pulled the shown progress
+            # back to ~97% (audit PROGRESS-13 follow-up). Hold what was shown.
+            smoothed = prev_smoothed
         progress = smoothed
 
         remaining = matched_duration * (1.0 - (progress / 100.0))
         remaining = max(0.0, remaining)
+        if duration_so_far >= matched_duration:
+            # Overrun: the 99% cap would pin remaining at 1% of the profile for as
+            # long as the run lasts, re-arming the live chronometer "now + 36 s"
+            # every tick (audit PROGRESS-06). The linear branch already says 0.
+            remaining = 0.0
         total = duration_so_far + remaining
 
         logger.debug(
@@ -699,18 +792,16 @@ def _compute_progress_base(
     remaining = max(matched_dur - duration_so_far, 0.0)
     progress = (duration_so_far / matched_dur) * 100.0
 
-    if ml_pct is not None:
-        w = ML_PROGRESS_BLEND_WEIGHT
-        progress = (1.0 - w) * progress + w * ml_pct
-        remaining = max(matched_dur * (1.0 - progress / 100.0), 0.0)
-
     if prev_smoothed > 0:
         lin_alpha = _dt_scaled_alpha(0.1, dt_seconds)
         smoothed = (prev_smoothed * (1.0 - lin_alpha)) + (progress * lin_alpha)
     else:
         smoothed = progress
 
-    progress = max(0.0, min(smoothed, 100.0))
+    # Clamped in the carried state too: unclamped, a run past a short mis-match
+    # carried 146% into the correct longer programme (audit PROGRESS-09).
+    smoothed = max(0.0, min(smoothed, 100.0))
+    progress = smoothed
     remaining = max(matched_dur * (1.0 - progress / 100.0), 0.0)
     total = duration_so_far + remaining
     logger.debug(
@@ -727,69 +818,56 @@ def compute_progress(
     duration_so_far: float,
     prev_smoothed: float,
     phase_result: tuple[float, float] | None,
-    ml_pct: float | None,
     logger: logging.Logger | None = None,
-    phase_remaining_s: float | None = None,
     dt_seconds: float | None = None,
 ) -> ProgressResult | None:
-    """Progress/remaining estimate, optionally blended with a phase-resolved ETA.
-
-    When ``phase_remaining_s`` is provided (opt-in phase matching for a supported
-    device type), the phase-budget remaining is converted to a completion PERCENT
-    and blended into the phase-progress signal **before** delegating to
-    :func:`_compute_progress_base` - so the blend rides the proven, golden-locked
-    EMA + monotonicity + back-calculation guards (design §8, "one smoothing
-    implementation"), rather than re-deriving a raw, unsmoothed progress. The
-    blend leans on the phase budget early (low base progress) and on the proven
-    phase estimate late::
-
-        phase_pct = duration_so_far / (duration_so_far + phase_remaining_s) * 100
-        f = base_phase_progress / 100
-        blended = (1 - f) * phase_pct + f * base_phase_progress
-
-    Because this feeds the percent-domain smoothing, the displayed progress stays
-    monotone/smoothed (no tick-to-tick jitter or collapse-to-99%), and remaining
-    is re-derived by the base from ``matched_duration``.
-
-    Behaviour is BYTE-IDENTICAL to before when ``phase_remaining_s is None`` (the
-    default) - the golden progress snapshot and every existing caller are
-    unaffected. This is the single implementation of the blend; the manager and
-    the Playground SimRunner both go through it.
-    """
-    blended = False
-    if phase_remaining_s is not None and matched_duration and matched_duration > 0:
-        try:
-            pr = float(phase_remaining_s)
-        except (TypeError, ValueError):
-            pr = float("nan")
-        if math.isfinite(pr) and pr >= 0.0:
-            denom = duration_so_far + pr
-            phase_pct = (duration_so_far / denom * 100.0) if denom > 0 else 0.0
-            phase_pct = max(0.0, min(100.0, phase_pct))
-            if phase_result is not None:
-                base_pp, variance = phase_result
-                f = max(0.0, min(1.0, float(base_pp) / 100.0))
-                phase_result = ((1.0 - f) * phase_pct + f * float(base_pp), variance)
-            else:
-                # No envelope phase-progress: blend the phase budget's implied
-                # percent with the linear (elapsed/matched) percent, still leaning
-                # on the phase budget early and the linear estimate late.
-                lin_pct = max(0.0, min(100.0, duration_so_far / matched_duration * 100.0))
-                f = lin_pct / 100.0
-                phase_result = ((1.0 - f) * phase_pct + f * lin_pct, 0.0)
-            blended = True
-
-    base = _compute_progress_base(
+    """Progress/remaining estimate: the one entry point for the manager and the
+    Playground replay (the phase-resolved ETA blend that used to sit here was
+    removed, audit PROGRESS-01/02: it never ran in production, and revived it was
+    10% worse at 25% on washers)."""
+    return _compute_progress_base(
         device_type, matched_duration, duration_so_far, prev_smoothed,
-        phase_result, ml_pct, logger, dt_seconds,
+        phase_result, logger, dt_seconds,
     )
-    if base is None or not blended:
-        return base
-    # Relabel the source for diagnostics; values already reflect the blend.
-    return ProgressResult(
-        base.progress, base.smoothed, base.remaining, base.total,
-        base.phase_progress, "phase_blend",
-    )
+
+
+def phase_timeline_span(
+    ranges: list[dict[str, Any]], expected_duration: float | None
+) -> float:
+    """Seconds the progress fraction maps onto: ``max(last range end, expected)``.
+
+    Phase ranges are minutes into the programme, so a profile that marks only
+    Wash 0-30 / Rinse 30-60 on a 100 min programme reads Rinse at minute 45 and
+    no phase at minute 80 (audit PROGRESS-10). Stretching the ranges over the
+    whole cycle (the old scale, the last range end) named Wash at 45%. Ranges
+    that run past the expected duration keep their own end. 0.0 when unusable.
+    """
+    span = max((float(r.get("end") or 0.0) for r in ranges), default=0.0)
+    try:
+        expected = float(expected_duration or 0.0)
+    except (TypeError, ValueError, OverflowError):
+        expected = 0.0
+    if math.isfinite(expected) and expected > span:
+        span = expected
+    return span if math.isfinite(span) and span > 0.0 else 0.0
+
+
+def phase_at(
+    ranges: list[dict[str, Any]], position_s: float, span_s: float
+) -> str | None:
+    """The range containing ``position_s``: ``[start, end)``, the timeline's own
+    end included. None in a gap or past every range - no nearest-phase guess.
+    The panel's Status timeline applies the same rule."""
+    at_end = position_s >= span_s
+    for r in sorted(ranges, key=lambda x: float(x.get("start") or 0.0)):
+        start = float(r.get("start") or 0.0)
+        end = float(r.get("end") or 0.0)
+        if end <= start:
+            continue
+        if start <= position_s < end or (at_end and end >= span_s and start <= position_s):
+            name = str(r.get("name") or "").strip()
+            return name or None
+    return None
 
 
 def current_phase(
@@ -797,13 +875,17 @@ def current_phase(
     state: str,
     current_program: str | None,
     cycle_progress: float,
+    expected_duration: float | None = None,
 ) -> str | None:
-    """Live phase from the profile's configured ranges + ML-blended progress.
+    """Live phase from the profile's configured ranges + the smoothed progress.
 
     Indexed by the smoothed progress fraction rather than raw elapsed seconds, so
-    overrun/underrun cycles still name the phase correctly. Returns ``None`` when
-    not running, no profile is matched, or the profile has no configured phase
-    ranges. Never raises.
+    overrun/underrun cycles still name the phase correctly; the fraction maps onto
+    :func:`phase_timeline_span` (the matched profile's ``expected_duration`` unless
+    the ranges run longer), so ranges are read at their real minutes. Returns
+    ``None`` when not running, no profile is matched, the profile has no phase
+    ranges, or no range covers this point (audit PROGRESS-11: no guessed phase).
+    Never raises.
     """
     try:
         if state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
@@ -814,13 +896,61 @@ def current_phase(
         ranges = store.get_profile_phase_ranges(profile)
         if not ranges:
             return None
-        nominal = max((float(r.get("end") or 0.0) for r in ranges), default=0.0)
-        if nominal <= 0.0:
+        span = phase_timeline_span(ranges, expected_duration)
+        if span <= 0.0:
             return None
         frac = max(0.0, min(1.0, float(cycle_progress) / 100.0))
-        return store.check_phase_match(profile, frac * nominal)
+        return phase_at(ranges, frac * span, span)
     except Exception:  # noqa: BLE001 - phase readout must never break
         return None
+
+
+_ENERGY_CURVES: dict[tuple[str, int, Any], tuple[Any, tuple[np.ndarray, np.ndarray] | None]] = {}
+
+
+def envelope_energy_fraction(
+    store: Any, program: str | None, progress_pct: float
+) -> float | None:
+    """Share of the matched profile's energy used by ``progress_pct`` (audit PROGRESS-04).
+
+    The cumulative integral of the envelope's ``avg`` curve, read at the same
+    fraction of its time grid. Energy does not accrue linearly in time - heaters
+    front-load it - so ``energy / time_fraction`` projected washers 1.89x too high
+    at 25%. None without a usable envelope (the caller falls back to that).
+    """
+    if not program or store is None:
+        return None
+    try:
+        env = store.get_envelope(program)
+    except Exception:  # noqa: BLE001 - a projection input, never fatal
+        return None
+    if not isinstance(env, dict):
+        return None
+    key = (program, id(env), env.get("updated"))
+    hit = _ENERGY_CURVES.get(key)
+    if hit is None or hit[0] is not env:
+        if len(_ENERGY_CURVES) > 64:
+            _ENERGY_CURVES.clear()
+        curve = None
+        try:
+            tg = np.asarray(env.get("time_grid") or [], dtype=float)
+            avg = _envelope_y(env.get("avg"))
+            if tg.size >= 2 and avg.size == tg.size and np.all(np.isfinite(avg)):
+                cum = np.concatenate(
+                    ([0.0], np.cumsum(np.diff(tg) * (avg[1:] + avg[:-1]) / 2.0))
+                )
+                if cum[-1] > 0 and tg[-1] > tg[0]:
+                    curve = (tg, cum / cum[-1])
+        except (TypeError, ValueError, OverflowError):
+            curve = None
+        # The envelope itself is held, so its id cannot be recycled while cached.
+        _ENERGY_CURVES[key] = (env, curve)
+    curve = _ENERGY_CURVES[key][1]
+    if curve is None:
+        return None
+    tg, frac = curve
+    x = tg[0] + (tg[-1] - tg[0]) * min(max(float(progress_pct) / 100.0, 0.0), 1.0)
+    return max(float(np.interp(x, tg, frac)), PROJECTION_MIN_ENERGY_FRACTION)
 
 
 def projected_energy(
@@ -839,8 +969,10 @@ def projected_energy(
 ) -> tuple[float | None, float | None]:
     """Project total energy (Wh) and cost for the running cycle.
 
-    Prefers the on-device ``total_energy`` regressor; otherwise falls back to
-    ``energy_so_far / progress_fraction``. Returns ``(wh, cost)``; both values are
+    Prefers the on-device ``total_energy`` regressor; otherwise divides
+    ``energy_so_far`` by the matched profile's cumulative-energy share at this
+    progress (:func:`envelope_energy_fraction`), and by the time fraction only
+    when the profile has no usable envelope. Returns ``(wh, cost)``; both values are
     ``None`` when progress is too low or there is no energy yet. Never raises.
 
     ``cost_so_far`` is the dynamic-tariff cost already incurred (#426): the energy
@@ -868,13 +1000,16 @@ def projected_energy(
             end_expectation_fn, logger,
         )
         if projected_wh is None:
-            projected_wh = energy_so_far / (progress / 100.0)
+            fraction = envelope_energy_fraction(store, current_program, progress)
+            projected_wh = energy_so_far / (
+                fraction if fraction is not None else progress / 100.0
+            )
         projected_wh = max(projected_wh, energy_so_far)
         # A valid price of 0 (free/zero tariff) must yield cost 0.0, not None; only an
         # absent or non-numeric price is "unknown".
         try:
             price_val = float(price)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             price_val = None
         if price_val is None:
             cost = None
@@ -885,7 +1020,7 @@ def projected_energy(
             if cost_so_far_wh is not None:
                 try:
                     charged_wh = float(cost_so_far_wh)
-                except (TypeError, ValueError):
+                except (TypeError, ValueError, OverflowError):
                     charged_wh = energy_so_far
             remaining_wh = max(0.0, projected_wh - charged_wh)
             cost = float(cost_so_far) + (remaining_wh / 1000.0) * price_val

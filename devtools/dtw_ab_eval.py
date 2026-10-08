@@ -15,53 +15,138 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""A/B accuracy evaluation of the Stage-3 DTW variants in the matching pipeline.
+"""Prototype tables for Stage 3 (DTW) and Stage 5 (grouping) - NOT the shipped matcher.
 
-Compares, on a leave-one-out basis, how well each DTW mode ranks the *correct*
-profile for a labelled cycle:
+    python3 devtools/dtw_ab_eval.py                 # grouping prototype (default)
+    python3 devtools/dtw_ab_eval.py --checkpoints   # mid-cycle top-1 (#400)
 
-  * baseline   - DTW disabled (Stage-2 core similarity only)
-  * legacy     - original DTW: raw sequences, distance/len, fixed 50 W scale
-  * scaled     - new default: both sequences resampled to a common grid and the
-                 distance expressed relative to the current peak
-  * ddtw       - derivative DTW: warps on curve slope (shape), scale-invariant
+**This harness does not run the shipped matcher; ``devtools/eval.py`` does.** It
+calls ``analysis.compute_matches_worker`` directly, with one representative
+training cycle per profile as the template (the shipped matcher uses the rebuilt
+envelope), a prototype Stage 5 (mean-duration grouping, its own member picker,
+no cohesion gate, no ``collapse_group_candidates``), no 12-point floor and no
+``label_confidence``. Since audit MATCH-EVAL-04 / MATCH-CORE-07 the Stage 1-4
+config is at least the shipped one: each source's ``min/max_duration_ratio``,
+``dtw_bandwidth``, ``energy_mode`` and replay overrides come from the store a real
+``WashDataManager`` builds from that export's options (``_shipped_cfg``, via
+``end_gate_eval._production``); until then it used a partial config (1.5 upper
+ratio, shipped 1.8; no energy mode in the grouped table). Use it to compare
+prototype variants against each other, never as a figure for the product, and
+re-measure anything that matters with ``devtools/eval.py`` (its
+``--config-override`` covers options and constants).
+
+It scores **complete** cycles (the default table) or fixed prefixes
+(``--checkpoints``) once each, so it cannot judge the ENDING gate, the prefix
+guard or the mid-cycle switch: use ``end_gate_eval.py``, ``prefix_guard_eval.py``
+and ``decisive_margin_eval.py``.
 
 Matching is always done WITHIN a single device (source file), because production
 only ever matches a cycle against that device's own profiles. Real data is loaded
-from cycle_data/; a controlled synthetic set with deliberate time-warping is also
-evaluated to stress the warping behaviour.
+from cycle_data/ (``tests/benchmarks/parameter_optimizer.DataLoader``).
 
-Run from the repo root:  python3 devtools/dtw_ab_eval.py
+**Retired tables (audit MATCH-EVAL-10).** The module used to carry six more
+tables that ``main()`` could not reach; they were deleted rather than wired,
+because each ran the pre-item-303 pipeline (query and template on different time
+grids, ~6 points of top-1) on a partial config. What they recorded, kept here as
+the documented results (none was re-measured on the shipped path unless noted):
+
+* DTW variant A/B (``baseline`` off / ``legacy`` / ``scaled`` / ``ddtw``, plus a
+  synthetic time-warped set): off 62.4% ... ensemble 70.7% top-1. Superseded:
+  on the shipped path (eval.py, audit MR-05) DTW off costs -2.16 pp mid-cycle
+  and is +0.16 pp (n.s.) at cycle end; see const.py ``DEFAULT_DTW_MODE``.
+* Precision (commit recall over leave-one-cycle-out folds vs false positives over
+  leave-one-PROFILE-out negatives, at the 0.4 commit threshold): widening the
+  upper duration ratio 1.3 -> 1.5 lifted commit recall 71.6% -> 73.4% (the gate
+  is 1.8 since item 311); ``MATCH_CORR_WEIGHT`` 0.6 -> 0.45 lifted top-1
+  74% -> 79.5% and the recall-FP net 10.7% -> 13.7%; the Stage-4 weight x scale
+  grid (0.22, scales halved) lifted the net 13.7% -> 17.4% with FP 62.7% ->
+  59.9%. The "clean negatives" variant excluded held-out profiles with a
+  near-duplicate sibling (within 15% duration and 20% mean power).
+* Generalisation: per-device and split-half OLD (pre-tuning) vs NEW (tuned)
+  top-1, a guard against over-fitting the pooled sweep.
+* Stage-5 additive tie-break (``_stage5_rerank``): among candidates within 0.10 of
+  the top score, add ``lambda x (0.4 peak + 0.3 tail + 0.3 mean-power
+  agreement)``, lambda 0.3 / 0.5 / 0.8. **Tried and rejected: it hurt the
+  recall-FP net and is redundant with Stage 4.** The shipped Stage 5 picks a
+  group member by integrated-energy agreement instead (item 99). Do not re-add it.
+* Stage-4 tuning grid (weight 0.15 / 0.22 / 0.30 x scale factor 0.5 / 0.75 / 1.0
+  around the then-best config): the source of the shipped 0.22 / halved scales.
+
+Run from the repo root.
 """
 from __future__ import annotations
 
+import logging
 import math
-import random
-import sys
 from collections import defaultdict
+import sys
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from custom_components.ha_washdata import analysis
-from custom_components.ha_washdata.signal_processing import (
-    resample_adaptive,
-    resample_uniform,
-)  # noqa: E402
-from custom_components.ha_washdata.signal_processing import resample_adaptive  # noqa: E402
+REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(REPO / "devtools"))
 
 RESAMPLE_L = 150  # length used to build each profile's average sample curve
 
-VARIANTS: dict[str, dict] = {
-    "baseline (DTW off)": {"dtw_bandwidth": 0.0},
-    "legacy L1":          {"dtw_bandwidth": 0.20, "dtw_mode": "legacy"},
-    "scaled L1 (new)":    {"dtw_bandwidth": 0.20, "dtw_mode": "scaled"},
-    "DDTW":               {"dtw_bandwidth": 0.20, "dtw_mode": "ddtw"},
-}
-_BASE_CFG = {"min_duration_ratio": 0.10, "max_duration_ratio": 1.5}  # production defaults
-DEFAULT_THR = 0.4  # DEFAULT_PROFILE_MATCH_THRESHOLD (commit threshold)
+#: Printed above every table: the numbers below are a prototype's.
+BANNER = (
+    "NOT THE SHIPPED MATCHER: representative-cycle templates (not envelopes) and a\n"
+    "prototype Stage 5. Stage 1-4 config is each device's shipped one. Quote\n"
+    "devtools/eval.py, not this."
+)
+
+
+def _integration() -> None:
+    """Import the integration names this module uses (deferred: ~3 s, not for --help)."""
+    global analysis, resample_adaptive, resample_uniform  # noqa: PLW0603
+    from custom_components.ha_washdata import analysis as _analysis  # noqa: PLC0415
+    from custom_components.ha_washdata.signal_processing import (  # noqa: PLC0415
+        resample_adaptive as _ra,
+        resample_uniform as _ru,
+    )
+
+    analysis, resample_adaptive, resample_uniform = _analysis, _ra, _ru
+
+
+analysis = resample_adaptive = resample_uniform = None  # bound by _integration()
+
+
+@lru_cache(maxsize=None)
+def _shipped_cfg_cached(source: str, device_type: str) -> tuple:
+    import end_gate_eval  # noqa: PLC0415
+
+    doc = None
+    if source.endswith(".json"):
+        doc = end_gate_eval._load_doc(Path(source), True)  # noqa: SLF001
+    if not doc:
+        doc = {"device_fingerprint": {"device_type": device_type}}
+    elif not any(
+        (doc.get(k) or {}).get("device_type")
+        for k in ("device_fingerprint", "entry_options", "entry_data")
+    ):
+        # Add the fallback type only: replacing the document dropped the export's
+        # options, and the tables then ran on default duration/DTW/energy settings.
+        doc = {**doc, "device_fingerprint": {
+            **(doc.get("device_fingerprint") or {}), "device_type": device_type}}
+    _cfg, store, _opts = end_gate_eval._production(doc, {})  # noqa: SLF001
+    cfg = {
+        "min_duration_ratio": store._min_duration_ratio,  # noqa: SLF001
+        "max_duration_ratio": store._max_duration_ratio,  # noqa: SLF001
+        "dtw_bandwidth": store.dtw_bandwidth,
+        "energy_mode": store.energy_mode,
+        **store._matching_overrides(),  # noqa: SLF001
+    }
+    return tuple(sorted(cfg.items()))
+
+
+def _shipped_cfg(source: str, cycles: list | None = None) -> dict:
+    """The Stage 1-4 config ``ProfileStore.async_match_profile`` hands the worker
+    for this source, from a store a real ``WashDataManager`` built on its options.
+    ``in_progress`` is the caller's (live ticks set it, the cycle-end match not)."""
+    return dict(_shipped_cfg_cached(source, _device_type(source, cycles)))
 
 
 # ── data helpers ────────────────────────────────────────────────────────────
@@ -204,230 +289,6 @@ def _agree(a: float, b: float, scale: float = 0.2) -> float:
     return 1.0 / (1.0 + abs(math.log(a / b)) / scale)
 
 
-def _stage5_rerank(cands: list[dict], current: list[float], margin: float, lam: float) -> list[dict]:
-    """PROTOTYPE Stage-5: among shape-ambiguous top candidates (a near-duplicate
-    'group'), re-rank by discriminative features shape/DTW ignore - peak power
-    (spin/rpm) and tail energy (temperature -> heating duration)."""
-    if len(cands) < 2:
-        return cands
-    top = cands[0]["score"]
-    amb = [c for c in cands if top - c["score"] < margin]
-    if len(amb) < 2:
-        return cands
-    cur = np.asarray(current, dtype=float)
-    if cur.size == 0:
-        return cands
-    cur_peak = float(cur.max())
-    cur_tail = float(cur[int(len(cur) * 0.8):].mean()) if len(cur) >= 5 else float(cur.mean())
-    cur_energy = float(cur.mean())
-    for c in amb:
-        s = np.asarray(c.get("sample") or [], dtype=float)
-        if s.size == 0:
-            continue
-        disc = (
-            0.4 * _agree(cur_peak, float(s.max()))
-            + 0.3 * _agree(cur_tail, float(s[int(len(s) * 0.8):].mean()) if len(s) >= 5 else float(s.mean()))
-            + 0.3 * _agree(cur_energy, float(s.mean()))
-        )
-        c["score"] = c["score"] + lam * disc
-    cands.sort(key=lambda x: x["score"], reverse=True)
-    return cands
-
-
-def _rank_of(candidates: list[dict], true_name: str) -> int | None:
-    for i, c in enumerate(candidates):
-        if c["name"] == true_name:
-            return i + 1
-    return None
-
-
-def evaluate(cycles_by_source: dict, config: dict) -> tuple[int, int, float, int]:
-    """Return (correct_top1, total_evaluated, sum_reciprocal_rank, missed)."""
-    cfg = {**_BASE_CFG, **config}
-    correct = 0
-    total = 0
-    mrr_sum = 0.0
-    missed = 0  # true profile absent from candidates entirely
-    for _source, by_profile in cycles_by_source.items():
-        if len(by_profile) < 2:
-            continue  # need alternatives to be confused with
-        for name, cycles in by_profile.items():
-            if len(cycles) < 2:
-                continue  # need a held-out target while still representing the profile
-            for idx, target in enumerate(cycles):
-                q = _query_grid(target)
-                if q is None:
-                    continue
-                pw, used_dt = q
-                dur = target.get("_dur") or _duration(target, pw)
-                snaps = _build_snapshots(by_profile, (name, idx), used_dt)
-                if len(snaps) < 2:
-                    continue
-                cands = analysis.compute_matches_worker(pw, dur, snaps, cfg)
-                if cfg.get("stage5"):
-                    cands = _stage5_rerank(cands, pw, cfg.get("s5_margin", 0.10), cfg.get("s5_lambda", 0.5))
-                total += 1
-                rank = _rank_of(cands, name)
-                if rank is None:
-                    missed += 1
-                    continue
-                mrr_sum += 1.0 / rank
-                if rank == 1:
-                    correct += 1
-    return correct, total, mrr_sum, missed
-
-
-def evaluate_precision(by_source: dict, config: dict, threshold: float = DEFAULT_THR) -> dict:
-    """Recall vs false-positive at the production commit threshold.
-
-    * recall  - positive folds (leave-one-cycle-out): correct profile ranked #1
-                AND committed (score >= threshold).
-    * fp       - negative folds (leave-one-PROFILE-out): the whole true profile is
-                removed from the pool, so the correct action is 'no confident
-                match'. A commit (score >= threshold to some other profile) is a
-                false positive. (Somewhat inflated by near-duplicate profiles on
-                the same device, e.g. "Eco 50" vs "Eco 50 C".)
-    """
-    cfg = {**_BASE_CFG, **config}
-    pos_total = pos_ok = 0
-    neg_total = neg_fp = 0
-    for _src, by_profile in by_source.items():
-        if len(by_profile) < 2:
-            continue
-        for name, cycles in by_profile.items():
-            if len(cycles) < 2:
-                continue
-            for idx, target in enumerate(cycles):
-                q = _query_grid(target)
-                if q is None:
-                    continue
-                pw, used_dt = q
-                snaps = _build_snapshots(by_profile, (name, idx), used_dt)
-                if len(snaps) < 2:
-                    continue
-                cands = analysis.compute_matches_worker(pw, target["_dur"], snaps, cfg)
-                if cfg.get("stage5"):
-                    cands = _stage5_rerank(cands, pw, cfg.get("s5_margin", 0.10), cfg.get("s5_lambda", 0.5))
-                pos_total += 1
-                if cands and cands[0]["name"] == name and cands[0]["score"] >= threshold:
-                    pos_ok += 1
-        # Per-profile representative duration + mean power (for clean-negative
-        # filtering: a held-out profile with a near-duplicate sibling in the
-        # pool is excluded, since a confident match to the sibling is not a
-        # genuine false positive).
-        prof_stat = {}
-        for pn, cs in by_profile.items():
-            durs = [c["_dur"] for c in cs if c.get("_dur")]
-            mps = [float(np.mean(c["_pw"])) for c in cs if c.get("_pw")]
-            if durs and mps:
-                prof_stat[pn] = (float(np.median(durs)), float(np.median(mps)))
-        clean_neg = bool(cfg.get("clean_negatives"))
-
-        if len(by_profile) >= 3:  # need >=2 other profiles to remain a fair pool
-            for name, cycles in by_profile.items():
-                others = {n: cs for n, cs in by_profile.items() if n != name}
-                # Cheap pre-check on a nominal grid; the real snapshots are built
-                # per target below, since each query now defines the grid.
-                if len(_build_snapshots(others, None, 5.0)) < 2:
-                    continue
-                if clean_neg and name in prof_stat:
-                    d0, p0 = prof_stat[name]
-                    has_sibling = any(
-                        on != name and on in prof_stat
-                        and abs(prof_stat[on][0] - d0) / max(d0, 1) < 0.15
-                        and abs(prof_stat[on][1] - p0) / max(p0, 1) < 0.20
-                        for on in others
-                    )
-                    if has_sibling:
-                        continue  # legit near-duplicate present -> not a clean negative
-                for target in cycles:
-                    q = _query_grid(target)
-                    if q is None:
-                        continue
-                    pw, used_dt = q
-                    snaps = _build_snapshots(others, None, used_dt)
-                    if len(snaps) < 2:
-                        continue
-                    cands = analysis.compute_matches_worker(pw, target["_dur"], snaps, cfg)
-                    if cfg.get("stage5"):
-                        cands = _stage5_rerank(cands, pw, cfg.get("s5_margin", 0.10), cfg.get("s5_lambda", 0.5))
-                    neg_total += 1
-                    if cands and cands[0]["score"] >= threshold:
-                        neg_fp += 1
-    return {
-        "recall": pos_ok / pos_total if pos_total else 0.0,
-        "fp": neg_fp / neg_total if neg_total else 0.0,
-        "pos": pos_total, "neg": neg_total,
-    }
-
-
-def _run_precision(label: str, by_source: dict) -> None:
-    _prep_cycles(by_source)
-    print(f"\n=== PRECISION: {label} ===")
-    print("Commit = top score >= match_threshold. Recall over positive folds; "
-          "FP over leave-one-profile-out negatives.")
-    print(f"{'setting':<34}{'recall':>9}{'FP':>8}{'net':>8}{'pos':>6}{'neg':>6}")
-
-    def _row(tag: str, cfg: dict, thr: float = DEFAULT_THR) -> None:
-        r = evaluate_precision(by_source, cfg, thr)
-        net = r["recall"] - r["fp"]
-        print(f"{tag:<34}{r['recall']*100:>8.1f}%{r['fp']*100:>7.1f}%{net*100:>7.1f}%{r['pos']:>6}{r['neg']:>6}")
-
-    # Stage-4 duration/energy WEIGHT x SCALE grid on the net metric (recall-FP).
-    # A cell beating the current net (default w=0.15, scale=1.0) without raising
-    # FP would be a genuine near-duplicate discrimination gain.
-    _row("best (w=0.15 sc=1.0)", {**_BEST})
-    for f in (0.5, 0.75, 1.0):
-        for w in (0.15, 0.22, 0.30):
-            _row(f"w={w} sc={f}", {
-                **_BEST, "duration_weight": w, "energy_weight": w,
-                "duration_scale": 0.35 * f, "energy_scale": 0.5 * f,
-            })
-
-
-# Pre-tuning defaults (start of this campaign) vs current tuned production config.
-_OLD_CFG = {
-    "dtw_bandwidth": 0.20, "dtw_mode": "legacy", "dtw_refine_top_n": 3,
-    "corr_weight": 0.60, "duration_weight": 0.15, "energy_weight": 0.15,
-    "duration_scale": 0.35, "energy_scale": 0.50,
-    "min_duration_ratio": 0.10, "max_duration_ratio": 1.3,
-}
-def _run_generalization(by_source: dict) -> None:
-    """Guard against over-fitting the pooled sweep: check the OLD->NEW gain per
-    device and across a device-level split (tune-half vs held-out-half)."""
-    # NEW uses _BEST (ensemble, top-5, band 0.20) + gate 1.5; corr/dur/energy
-    # weights + scales come from the tuned const defaults (0.45/0.22/0.175/0.25).
-    _NEW_CFG = {**_BEST, "max_duration_ratio": 1.5}
-    _prep_cycles(by_source)
-    print("\n=== GENERALIZATION: OLD (pre-tuning) vs NEW (tuned) top-1, per device ===")
-    print(f"{'device (source)':<40}{'n':>5}{'OLD':>8}{'NEW':>8}{'Δ':>8}")
-    srcs = sorted(s for s in by_source if len(by_source[s]) >= 2)
-    per = []
-    for src in srcs:
-        sub = {src: by_source[src]}
-        oc, ot, _om, _o = evaluate(sub, {**_OLD_CFG})
-        nc, nt, _nm, _n = evaluate(sub, {**_NEW_CFG})
-        if ot == 0:
-            continue
-        o_acc, n_acc = oc / ot, nc / nt
-        per.append((src, ot, o_acc, n_acc))
-        label = src.split("/")[-1][:38]
-        print(f"{label:<40}{ot:>5}{o_acc*100:>7.0f}%{n_acc*100:>7.0f}%{(n_acc-o_acc)*100:>+7.0f}")
-
-    improved = sum(1 for _s, _n, o, n in per if n > o + 1e-9)
-    worse = sum(1 for _s, _n, o, n in per if n < o - 1e-9)
-    print(f"devices improved: {improved} | unchanged: {len(per)-improved-worse} | worse: {worse}")
-
-    # Device-level split: aggregate OLD/NEW top-1 on each half independently.
-    half = len(srcs) // 2
-    for tag, group in (("split A", srcs[:half]), ("split B", srcs[half:])):
-        sub = {s: by_source[s] for s in group}
-        oc, ot, _m, _x = evaluate(sub, {**_OLD_CFG})
-        nc, nt, _m2, _x2 = evaluate(sub, {**_NEW_CFG})
-        if ot:
-            print(f"{tag}: OLD {oc/ot*100:.1f}%  NEW {nc/nt*100:.1f}%  (n={ot})")
-
-
 def _group_by_source(cycles: list[dict]) -> dict:
     by_source: dict = defaultdict(lambda: defaultdict(list))
     for c in cycles:
@@ -436,109 +297,6 @@ def _group_by_source(cycles: list[dict]) -> dict:
         if name and c.get("power_data"):
             by_source[src][name].append(c)
     return by_source
-
-
-# ── synthetic dataset (controlled ground truth + time warping) ──────────────
-
-def _archetype(kind: str) -> list[float]:
-    """A clean per-step power template for a program archetype."""
-    if kind == "cotton_hot":      # heat ramp -> wash oscillation -> spin spikes
-        seg = ([200 + 18 * i for i in range(40)] + [900 + (120 if i % 4 else -60) for i in range(60)]
-               + [300 + (250 if i % 3 == 0 else 0) for i in range(30)] + [1200 if i % 2 else 250 for i in range(20)])
-    elif kind == "quick_cold":    # short, moderate wash + spin spikes (shares spin with cotton)
-        seg = ([250 + (200 if i % 3 == 0 else 0) for i in range(35)] + [1150 if i % 2 else 240 for i in range(18)])
-    elif kind == "eco_low":       # long, low, gentle + drying tail
-        seg = ([120 + (60 if i % 5 == 0 else 0) for i in range(90)] + [40 for i in range(40)])
-    elif kind == "dishwasher_eco":  # early wash spikes then long low drying tail
-        seg = ([1600 if i % 6 < 2 else 240 for i in range(60)] + [16 for i in range(120)])
-    else:
-        seg = [100] * 50
-    return [float(x) for x in seg]
-
-
-def _warp_instance(template: list[float], rng: random.Random) -> list[float]:
-    """Time-warp + amplitude-jitter + noise a template into a realistic instance."""
-    amp = rng.uniform(0.85, 1.15)
-    stretch = rng.uniform(0.8, 1.25)
-    n = max(8, int(len(template) * stretch))
-    resampled = _resample(template, n)
-    out = []
-    for v in resampled:
-        out.append(max(0.0, v * amp + rng.gauss(0, 0.04 * max(v, 20))))
-    return out
-
-
-def synth_dataset(instances_per: int = 9, seed: int = 7) -> list[dict]:
-    rng = random.Random(seed)
-    kinds = ["cotton_hot", "quick_cold", "eco_low", "dishwasher_eco"]
-    cycles = []
-    for kind in kinds:
-        tmpl = _archetype(kind)
-        for _ in range(instances_per):
-            pw = _warp_instance(tmpl, rng)
-            dt = 30.0
-            cycles.append({
-                "_source": "synthetic",
-                "profile_name": kind,
-                "duration": len(pw) * dt,
-                "power_data": [[i * dt, p] for i, p in enumerate(pw)],
-            })
-    return cycles
-
-
-# ── reporting ───────────────────────────────────────────────────────────────
-
-def _run(label: str, by_source: dict, variants: dict[str, dict]) -> None:
-    _prep_cycles(by_source)
-    n_sources = sum(1 for s in by_source.values() if len(s) >= 2)
-    n_cycles = sum(len(cs) for s in by_source.values() for cs in s.values())
-    print(f"\n=== {label} ===")
-    print(f"sources with >=2 profiles: {n_sources} | total labelled cycles: {n_cycles}")
-    print(f"{'variant':<26}{'top-1 acc':>11}{'MRR':>9}{'n':>7}{'missed':>8}")
-    base_acc = None
-    best = (None, -1.0)
-    for name, cfg in variants.items():
-        correct, total, mrr_sum, missed = evaluate(by_source, cfg)
-        if total == 0:
-            print(f"{name:<26}{'n/a':>11}")
-            continue
-        acc = correct / total
-        mrr = mrr_sum / total
-        if name.startswith("baseline"):
-            base_acc = acc
-        if acc > best[1]:
-            best = (name, acc)
-        delta = "" if base_acc is None else f"  ({(acc - base_acc) * 100:+.1f} vs base)"
-        print(f"{name:<26}{acc * 100:>10.1f}%{mrr:>9.3f}{total:>7}{missed:>8}{delta}")
-    if best[0]:
-        print(f"best: {best[0]} ({best[1] * 100:.1f}%)")
-
-
-# Current tuned best (ensemble, w=0.7, ddtw_scale=30, band 0.20, top_n 5, blend 0.5).
-_BEST = {"dtw_bandwidth": 0.20, "dtw_mode": "ensemble", "dtw_ddtw_scale": 30,
-         "dtw_ensemble_w": 0.7, "dtw_refine_top_n": 5}
-
-
-def _tuning_variants() -> dict[str, dict]:
-    """Sweep the Stage-2 corr/MAE weight and the Stage-4 duration/energy
-    agreement weights around the current best. These target the dominant error
-    (near-duplicate profiles that differ mainly in duration/energy). Band /
-    top-N / blend were already concluded in earlier rounds."""
-    v: dict[str, dict] = {
-        "baseline (DTW off)": {"dtw_bandwidth": 0.0},
-        "best so far":        dict(_BEST),
-    }
-    # Stage-4 duration/energy WEIGHT x SCALE grid. Hypothesis: a sharper agreement
-    # scale + higher weight separates near-duplicate siblings (which the weight-
-    # only boost couldn't, because the loose default scale gave siblings high
-    # agreement too). scale factor multiplies both default scales (dur 0.35, en 0.5).
-    for f in (0.5, 0.75, 1.0):
-        for w in (0.15, 0.22, 0.30):
-            v[f"w={w} sc={f}"] = {
-                **_BEST, "duration_weight": w, "energy_weight": w,
-                "duration_scale": 0.35 * f, "energy_scale": 0.5 * f,
-            }
-    return v
 
 
 def _profile_aggs(by_profile: dict) -> dict:
@@ -642,15 +400,17 @@ def _pick_member(pw: list[float], dur: float, members: list[str], by_profile: di
     return best
 
 
-def _grouped_once(by_source: dict, base: dict, dur_tol: float, corr_min: float) -> tuple:
-    """One grouping-threshold pass. Returns (flat_ok, exact_ok, group_ok, total,
-    n_multi_groups, grouped_profiles)."""
+def _grouped_once(by_source: dict, dur_tol: float, corr_min: float) -> tuple:
+    """One grouping-threshold pass, each source on its shipped Stage 1-4 config.
+    Returns (flat_ok, exact_ok, group_ok, total, n_multi_groups, grouped_profiles,
+    bestmem_ok, bestmem_group_ok)."""
     flat_ok = exact_ok = group_ok = total = 0
     n_multi_groups = grouped_profiles = 0
     bestmem_ok = bestmem_group_ok = 0
-    for by_profile in by_source.values():
+    for source, by_profile in by_source.items():
         if len(by_profile) < 2:
             continue
+        base = _shipped_cfg(source, [c for cs in by_profile.values() for c in cs])
         groups = _form_groups(_profile_aggs(by_profile), dur_tol, corr_min)
         gid = {m: root for root, members in groups.items() for m in members}
         for members in groups.values():
@@ -793,15 +553,10 @@ def _run_checkpoints(by_source: dict) -> None:
     fracs = [i / 10 for i in range(1, 10)]
     res: dict[tuple[str, float], list[int]] = {}
     for source, by_profile in by_source.items():
-        dev = _device_type(
-            source, [c for cs in by_profile.values() for c in cs]
-        )
-        base = {
-            **_BEST,
-            "max_duration_ratio": 1.5,
-            # Mirror the production gate (item 100) rather than one global mode.
-            "energy_mode": analysis.stage4_energy_mode(dev),
-        }
+        flat = [c for cs in by_profile.values() for c in cs]
+        dev = _device_type(source, flat)
+        # The device's shipped Stage 1-4 config (energy mode by device type, item 100).
+        base = _shipped_cfg(source, flat)
         if len(by_profile) < 2:
             continue
         for name, cycles in by_profile.items():
@@ -867,11 +622,10 @@ def _run_checkpoints(by_source: dict) -> None:
 def _run_grouped(by_source: dict) -> None:
     """Prototype the hierarchical design across grouping tightness thresholds."""
     _prep_cycles(by_source)
-    base = {**_BEST, "max_duration_ratio": 1.5}
     print("\n=== HIERARCHICAL grouped matching prototype ===")
     print(f"{'grouping (durtol,corr)':<24}{'groups':>8}{'profs':>7}{'flat':>8}{'grouped':>9}{'GROUP':>8}{'bestmem':>9}{'bmGROUP':>9}")
     for dt, cm in ((0.12, 0.90), (0.20, 0.85), (0.30, 0.80), (0.40, 0.75)):
-        fo, eo, go, tot, ng, gp, bo, bgo = _grouped_once(by_source, base, dt, cm)
+        fo, eo, go, tot, ng, gp, bo, bgo = _grouped_once(by_source, dt, cm)
         if not tot:
             continue
         print(f"±{int(dt*100)}% corr>{cm:<14}{ng:>8}{gp:>7}{fo/tot*100:>7.1f}%{eo/tot*100:>8.1f}%"
@@ -880,55 +634,41 @@ def _run_grouped(by_source: dict) -> None:
     print("GROUP = right cluster only; bestmem/bmGROUP = #400 best-member scoring")
 
 
-def _run_stage5(by_source: dict) -> None:
-    """Prototype Stage-5: tie-break shape-ambiguous top candidates by
-    discriminative features (peak/spin + tail/total energy). Reports top-1 AND
-    the recall/FP net so we can tell real discrimination from confidence inflation."""
-    _prep_cycles(by_source)
-    base = {**_BEST, "max_duration_ratio": 1.5}
-    print("\n=== STAGE-5 tie-break prototype (near-duplicate discrimination) ===")
-    print(f"{'variant':<26}{'top-1':>8}{'MRR':>8}{'recall':>9}{'FP':>7}{'net':>7}")
+def main(argv: list[str] | None = None) -> int:
+    import argparse  # noqa: PLC0415
 
-    def row(tag: str, cfg: dict) -> None:
-        c, t, mrr, _m = evaluate(by_source, cfg)
-        pr = evaluate_precision(by_source, cfg)
-        top1 = (c / t * 100) if t else 0.0
-        net = (pr["recall"] - pr["fp"]) * 100
-        print(f"{tag:<26}{top1:>7.1f}%{(mrr / t if t else 0):>8.3f}{pr['recall']*100:>8.1f}%{pr['fp']*100:>6.1f}%{net:>+6.1f}")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument("--checkpoints", action="store_true",
+                    help="mid-cycle top-1 at 10..90%% of each cycle (#400)")
+    args = ap.parse_args(argv)
 
-    row("NEW (no stage5)", base)
-    for lam in (0.3, 0.5, 0.8):
-        row(f"stage5 lam={lam}", {**base, "stage5": True, "s5_lambda": lam, "s5_margin": 0.10})
+    corpus = REPO / "cycle_data"
+    if not corpus.is_dir():
+        print("no corpus: cycle_data/ is missing", file=sys.stderr)
+        return 2
+    _integration()
+    from tests.benchmarks.parameter_optimizer import DataLoader  # noqa: PLC0415
 
-    # Trustworthy absolute FP: exclude held-out profiles that have a legitimate
-    # near-duplicate sibling in the pool (those confident matches aren't errors).
-    all_pr = evaluate_precision(by_source, base)
-    clean_pr = evaluate_precision(by_source, {**base, "clean_negatives": True})
-    print(f"\nFalse-positive rate (production config):")
-    print(f"  all negatives:   {all_pr['fp']*100:.1f}%  (n={all_pr['neg']})  <- inflated by near-duplicate profiles")
-    print(f"  clean negatives: {clean_pr['fp']*100:.1f}%  (n={clean_pr['neg']})  <- profiles with no near-duplicate sibling")
-
-
-def main() -> None:
-    print("DTW A/B accuracy evaluation (leave-one-out, within-device matching)")
-    checkpoints = "--checkpoints" in sys.argv
-
-    # Real cycle_data/ is the discriminating benchmark.
-    try:
-        from tests.benchmarks.parameter_optimizer import DataLoader
-        loader = DataLoader([str(Path(__file__).resolve().parent.parent / "cycle_data")])
-        loader.load_data()
-        real = [c for c in loader.cycles if c.get("profile_name") and c.get("power_data")]
-        if not real:
-            print("\n(no labelled real cycles found)")
-            return
-        if checkpoints:
-            _run_checkpoints(_group_by_source(real))
-        else:
-            _run_grouped(_group_by_source(real))
-    except Exception as exc:  # pragma: no cover
-        print(f"\n(real data unavailable: {exc})")
+    print("Leave-one-out, within-device matching (prototype tables)")
+    print(BANNER)
+    loader = DataLoader([str(corpus)])
+    loader.load_data()
+    real = [c for c in loader.cycles if c.get("profile_name") and c.get("power_data")]
+    if not real:
+        print("no labelled real cycles in cycle_data/", file=sys.stderr)
+        return 2
+    by_source = _group_by_source(real)
+    if args.checkpoints:
+        _run_checkpoints(by_source)
+    else:
+        _run_grouped(by_source)
+    print("\n" + BANNER)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    # Only as a script: a library call (the tests) must not leave logging disabled.
+    logging.disable(logging.CRITICAL)
+    raise SystemExit(main())

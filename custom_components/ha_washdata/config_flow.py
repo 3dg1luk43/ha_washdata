@@ -23,8 +23,8 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.const import CONF_NAME
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
 from .const import (
@@ -164,7 +164,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is None:
@@ -189,7 +189,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle reconfigure flow to change sensor, device type, or name."""
         entry = self._get_reconfigure_entry()
         errors: dict[str, str] = {}
@@ -207,10 +207,21 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
                 # NB: intentionally do NOT write entry.data here — post-3.6 the
                 # structural fields live in options and the display name is carried
                 # by the entry title (see test_reconfigure_saves_and_aborts_on_valid_input).
+                # Update only (audit PLATFORM-15): the entry's update listener
+                # already reloads in place (sensor swap included, item 61);
+                # async_update_reload_and_abort ALSO scheduled a full unload/setup,
+                # which interrupted a running cycle and raced the in-place reload.
+                if entry.state is config_entries.ConfigEntryState.LOADED:
+                    self.hass.config_entries.async_update_entry(
+                        entry, title=user_input[CONF_NAME], options=new_options
+                    )
+                    return self.async_abort(reason="reconfigure_successful")
+                # Not loaded (a failed setup, often what the reconfigure is fixing):
+                # the update listener is registered only by a successful setup, so
+                # nothing would apply the options until a restart. Reload instead.
                 return self.async_update_reload_and_abort(
-                    entry,
-                    title=user_input[CONF_NAME],
-                    options=new_options,
+                    entry, title=user_input[CONF_NAME], options=new_options,
+                    reason="reconfigure_successful",
                 )
 
         schema = _structural_schema(entry)
@@ -244,7 +255,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Show the minimal options form."""
         entry = self._config_entry
         errors: dict[str, str] = {}

@@ -1,431 +1,92 @@
 # Contributing to WashData
 
-Thank you for your interest in contributing to WashData! 🎉 This document provides guidelines and instructions for contributing to the project.
+Thanks for helping. Please read the [Code of Conduct](CODE_OF_CONDUCT.md) first.
 
-## Code of Conduct
+## Contributor PR flow (non-translation PRs)
 
-Before contributing, please review our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold these standards.
+**Agree the work before you write code.** WashData does not accept unsolicited pull requests. The maintainer is a volunteer, often with
+unreleased work in progress, so a surprise PR easily duplicates or conflicts with it.
 
----
+1. **Open an issue** with a template: [Bug report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml),
+   [Feature request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml) or
+   [Documentation](https://github.com/3dg1luk43/ha_washdata/issues/new?template=documentation.yml).
+   Blank issues are disabled.
+2. **Tick the box** saying you want to build it ("Contributing a Fix" / "Contributing an Implementation").
+3. **Wait for the `accepted` label.** Only the maintainer adds it; use the issue to agree scope and
+   approach.
+4. **Open the PR**, fill in the template, and link the issue with `Closes #NNN`.
 
-## Table of Contents
+Closed automatically:
 
-- [Getting Started](#getting-started)
-- [Development Setup](#development-setup)
-- [Types of Contributions](#types-of-contributions)
-- [Contributor PR Flow (Non-Translation PRs)](#contributor-pr-flow-non-translation-prs)
-- [Pull Request Process](#pull-request-process)
-- [Coding Standards](#coding-standards)
-- [Testing](#testing)
-- [Git Commit Messages](#git-commit-messages)
-- [Localization & Translations](#localization--translations)
-- [Questions & Support](#questions--support)
+- an issue that skips the template (a template with an empty field is not closed; the bot asks
+  you to fill it in)
+- a PR with no linked issue, 3 days after the bot's warning (a PR whose linked issue is not yet
+  accepted is not closed: it waits for the maintainer)
+- a PR whose template is left empty, 5 days after the warning, or deleted, at once
 
----
+If a bot or the maintainer closed your issue and the problem is still there, comment `/reopen` on it.
 
-## Getting Started
+**Translations are the exception:** they need no issue or label (see below). Documentation PRs go
+through the same flow as code.
 
-### Prerequisites
+## Bug reports
 
-- Python 3.11+
-- Home Assistant development environment knowledge (helpful but not required)
-- Git and GitHub account
+Include your WashData and Home Assistant versions, steps to reproduce, and the error text from the
+Home Assistant log (a few full lines are enough). A diagnostics download from the device helps most.
 
-### Fork & Clone
+## Development setup
 
-1. **Fork the repository** on GitHub
-2. **Clone your fork locally**:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/ha_washdata.git
-   cd ha_washdata
-   ```
-3. **Add upstream remote** to stay in sync:
-   ```bash
-   git remote add upstream https://github.com/3dg1luk43/ha_washdata.git
-   ```
-4. **Initialize translator submodule** (required for translation tooling):
-   ```bash
-   git submodule update --init --recursive
-   ```
-   This populates `scripts/ha_integration_translator`.
-
-### Create a Feature Branch
+Python 3.13. Fork [the repository](https://github.com/3dg1luk43/ha_washdata) on GitHub first, then clone your fork:
 
 ```bash
-git checkout -b feature/your-feature-name
-# or for bug fixes:
-git checkout -b fix/brief-description
-```
-
-Use descriptive branch names (e.g., `feature/cycle-detection-improvement`, `fix/timezone-bug`).
-
----
-
-## Development Setup
-
-### 1. Create Virtual Environment
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
-
-On Windows, if VS Code does not auto-detect the interpreter from `.venv`, set local
-workspace overrides to `.venv\\Scripts\\python.exe` (and use that interpreter for pytest).
-
-### 2. Install Dependencies
-
-```bash
+git clone https://github.com/YOUR_USERNAME/ha_washdata.git
+cd ha_washdata
+git submodule update --init --recursive   # translation tooling
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
+./devtools/install_hooks.sh               # pre-commit hook for the panel build
 ```
 
-### 3. Install Git Hooks (recommended)
+Before you push:
 
 ```bash
-./devtools/install_hooks.sh
+./run_tests.sh                                              # fast suite
+python3 -m compileall custom_components/ha_washdata tests/ -q
 ```
 
-The `pre-commit` hook refuses a commit whose minified panel bundles were not rebuilt
-from the sources being committed. Those artifacts are generated but **committed**, because they are
-the bytes users download. Bypass a deliberate WIP commit with `git commit --no-verify`.
-
-After editing `custom_components/ha_washdata/www/ha-washdata-panel.js` or
-`custom_components/ha_washdata/www/ha-washdata-card.js`:
-
-```bash
-node devtools/build_panel.mjs
-git add custom_components/ha_washdata/www/*.min.js \
-        custom_components/ha_washdata/www/build-manifest.json
-```
-
-### 4. Syntax Check
-
-Verify your Python code before committing:
-
-```bash
-python3 -m compileall custom_components/ha_washdata tests/ --quiet
-```
-
-### 5. Run Tests Locally
-
-```bash
-./run_tests.sh
-# or manually:
-pytest tests/ -v
-```
-
-### 6. Testing with Mock Socket
-
-To simulate a washing machine with power readings:
-
-```bash
-python3 devtools/mqtt_mock_socket.py --default LONG --variability 0.15
-```
-
-For the full testing guide, see the [Testing wiki page](https://github.com/3dg1luk43/ha_washdata/wiki/Testing).
-
----
-
-## Types of Contributions
-
-> **Always use a template.** Every issue must be opened through one of the templates below (blank issues are disabled). A free-form issue that skips the template entirely is closed automatically with a pointer back here, because it lacks the details needed to triage it. An issue that *uses* a template but leaves a field blank is not auto-closed for that reason - the completeness checks will just ask you to fill in what is missing.
-
-### 🐛 Bug Reports
-
-Found a bug? Open an issue using our [bug report template](.github/ISSUE_TEMPLATE/bug_report.yml). Include:
-
-- Clear description of the issue
-- Steps to reproduce
-- Your WashData version and Home Assistant version
-- Any logs or error evidence - a few lines from the HA log showing the actual error text are enough (paste the full entry, not a truncated fragment); you don't need debug-level output, and an attached log file also counts
-
-If you also want to submit a fix yourself, check the **"Contributing a Fix"** box at the bottom of the form and follow the [contributor PR flow](#contributor-pr-flow-non-translation-prs) below. **Do not open a PR yet** - wait for the `accepted` label first.
-
-### ✨ Feature Requests
-
-Have an idea? Open an issue using our [feature request template](.github/ISSUE_TEMPLATE/feature_request.yml). Describe:
-
-- What the feature should do
-- Why it would be useful
-- How it should work (with examples if possible)
-
-If you also want to implement it yourself, check the **"Contributing an Implementation"** box at the bottom of the form and follow the [contributor PR flow](#contributor-pr-flow-non-translation-prs) below. **Do not start building or open a PR yet** - wait for the `accepted` label first, so you do not invest effort in something that will not be merged.
-
-### 🌍 Translations
-
-**Submit translations via GitLocalize** - no GitHub fork required.
-
-See [Localization & Translations](#localization--translations) section below.
-
-### 📚 Documentation
-
-Improve READMEs, guides, or docstrings. Documentation changes are welcome, but they go through the **same [contributor PR flow](#contributor-pr-flow-non-translation-prs) as code** - open a [Documentation issue](https://github.com/3dg1luk43/ha_washdata/issues/new?template=documentation.yml) first, tick the PR-intent box, and wait for the `accepted` label before opening a PR. (Only translations skip this.)
-
-### 🔍 Code Review
-
-Review open PRs and provide constructive feedback. Even experienced contributors value a second set of eyes.
-
----
-
-## Contributor PR Flow (Non-Translation PRs)
-
-> **The golden rule: agree the work with the maintainer *before* you write any code.**
-> WashData does not accept unsolicited PRs. Every non-translation change must be discussed and approved up front, so you never invest effort in something that is already being worked on, already decided against, or that needs a different approach than the one you have in mind.
-
-**Translations are the only exception** (including PRs opened automatically by [GitLocalize](https://gitlocalize.com/repo/10819)): no issue, no label, no waiting. Everything else - bug fixes, features, refactors, documentation, tests - goes through this flow:
-
-1. **Open an issue.** Create a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml), [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml), or [Documentation](https://github.com/3dg1luk43/ha_washdata/issues/new?template=documentation.yml) issue describing what you want to change. Blank issues are disabled - you must pick a template and fill it in.
-2. **Say you want to build it.** Tick the "Contributing a Fix" / "Contributing an Implementation" box in the issue form.
-3. **Wait for the `accepted` label.** The maintainer reviews the issue and, if they agree the work should go ahead and that you should be the one to do it, adds the `accepted` label. Only the maintainer can apply it. **This step is the conversation** - use it to confirm scope and approach before you start coding.
-4. **Then open your PR**, referencing the already-accepted issue with `Closes #NNN`.
-
-### What gets a PR closed automatically
-
-- **No linked issue.** A PR with no `accepted` issue behind it is closed after a short grace period.
-- **A PR opened in parallel with the issue.** Opening a PR at the same time as (or right after) a brand-new issue that has not been accepted yet defeats the entire purpose of the flow, which is to agree the work *first*. Such PRs are not reviewed - the linked issue must **already** carry the `accepted` label at the moment you open the PR.
-- **A missing or empty template.** Deleting the PR template, or leaving its sections blank, means the PR cannot be reviewed, and it is closed.
-
-> **Why so strict?** The maintainer is a volunteer, often with unreleased work in progress that is not visible on the tracker. A surprise PR that duplicates that work, conflicts with it, or takes an approach that will not be merged wastes everyone's time. A short issue and a quick "go ahead" protects you from building something that is rejected on arrival.
-
----
-
-## Pull Request Process
-
-### Before You Start
-
-1. **Follow the contributor flow above** (for non-translation PRs): open an issue, get the `accepted` label, *then* start work and come back here. If you have not been through that flow, stop and do it first - a PR without a pre-accepted issue is closed automatically.
-
-2. **Sync with upstream**: Ensure your branch is up-to-date with `main`
-   ```bash
-   git fetch upstream
-   git rebase upstream/main
-   ```
-
-3. **Check for existing work**: Search issues and PRs to avoid duplicate efforts
-
-### Making Your Changes
-
-1. **Write clean, focused code**:
-   - One feature/fix per PR (don't mix unrelated changes)
-   - Follow the project's coding standards (see below)
-   - Include comments for complex logic
-
-2. **Test your changes**:
-   ```bash
-   ./run_tests.sh
-   python3 -m compileall custom_components/ha_washdata tests/ --quiet
-   ```
-
-3. **Update documentation**:
-   - Docstrings for functions/classes
-   - README if adding UI components
-   - CHANGELOG if it's a user-facing change
-
-### Submitting Your PR
-
-1. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-2. **Open a Pull Request** on GitHub with:
-   - Clear title describing the change
-   - Detailed description (use our PR template)
-   - Reference the accepted issue: `Closes #NNN` (required - see [contributor PR flow](#contributor-pr-flow-non-translation-prs))
-   - Screenshots for UI changes
-
-3. **Respond to reviews**:
-   - Be open to feedback
-   - Make requested changes promptly
-   - If you disagree, explain your reasoning
-   - Re-request review after making changes
-
-### PR Title Format
-
-- `[FEATURE]` - New features
-- `[FIX]` - Bug fixes
-- `[REFACTOR]` - Code reorganization (no behavior change)
-- `[DOCS]` - Documentation only
-- `[TEST]` - Test improvements
-- `[PERF]` - Performance improvements
-
-Example: `[FIX] Handle timezone-aware datetime in cycle detection`
-
----
-
-## Coding Standards
-
-### Python Style
-
-- **PEP 8** compliance (with Black formatter preferences)
-- **Type hints** for better IDE support
-- **Docstrings** for all public functions/classes (Google style)
-- **No hardcoded UI strings** - use `strings.json` and `translations/` for all user-facing text
-
-### Project Guardrails
-
-- **ONLY NumPy** for calculations (no SciPy or ML libraries)
-- **No external API calls** - all processing must be local
-- **Timezone-aware datetimes** - ALWAYS use `dt_util.now()`
-- **No inline UI strings** - use translation keys instead
-- **Respect 32KB event data limit** - exclude large data from fired events
-
-See [CLAUDE.md](CLAUDE.md) for full technical details.
-
-### File Organization
-
-- New feature files go in `custom_components/ha_washdata/`
-- Tests go in `tests/` mirroring the module structure
-- Documentation additions go in `docs/` folder
-- Do NOT modify core architecture files without discussion
-
----
-
-## Testing
-
-### Running Tests
-
-```bash
-# All tests
-pytest tests/ -v
-
-# Specific test file
-pytest tests/test_cycle_detector.py -v
-
-# With coverage
-pytest tests/ --cov=custom_components.ha_washdata
-```
-
-### Writing Tests
-
-- Use `pytest` framework
-- Mock external dependencies (Home Assistant services, etc.)
-- Aim for >80% code coverage on new code
-- Test both happy-path and edge cases
-
-Example test structure:
-
-```python
-import pytest
-from unittest.mock import Mock, AsyncMock
-
-@pytest.fixture
-def mock_manager():
-    """Fixture providing a mock WashDataManager."""
-    return Mock()
-
-@pytest.mark.asyncio
-async def test_cycle_detection(mock_manager):
-    """Test that cycles are detected correctly."""
-    mock_manager.some_method.return_value = "expected_value"
-    assert mock_manager.some_method() == "expected_value"
-```
-
----
-
-## Git Commit Messages
-
-Write clear, descriptive commit messages:
-
-```text
-type: brief summary (50 chars max)
-
-Longer explanation of what changed and why. Wrap at 72 characters.
-Explain the problem you're solving, not just the code changes.
-
-- Bullet point for major changes
-- Another detail
-
-Fixes #123
-```
-
-**Types**:
-- `feat:` New feature
-- `fix:` Bug fix
-- `refactor:` Code reorganization
-- `docs:` Documentation
-- `test:` Test additions/improvements
-- `perf:` Performance improvements
-- `chore:` Build, config, dependencies
-
-**Examples**:
-- `feat: Add predictive end-time calculation`
-- `fix: Handle null power readings gracefully`
-- `docs: Update TESTING.md with mock socket guide`
-
----
-
-## Localization & Translations
-
-### Submitting a translation via GitLocalize
-
-Translations are managed through **[GitLocalize](https://gitlocalize.com/repo/10819)** - a web-based translation platform where you can contribute without ever touching a fork or opening a PR manually.
-
-1. **Visit the project on GitLocalize:** https://gitlocalize.com/repo/10819
-2. Select your language (or request a new one using the platform's "Add language" feature).
-3. Translate or correct strings in the browser editor - full context is shown alongside each key.
-4. Submit your changes; GitLocalize will open a PR to this repo automatically.
-
-> **Do NOT open a GitHub issue to report a bad translation** - go to GitLocalize and correct it there.
-
-### What to keep in mind when translating
-
-- **Preserve `{placeholder}` tokens exactly** - e.g. `{device}`, `{duration}` must appear verbatim in your translated string.
-- **Domain context matters** - "match" means a *detected program run*, not a sports match; "logs" means *diagnostic output*, not lumber. Translate with that context in mind.
-- **Do not use automated machine translation** - machine translators produce domain-wrong output and have corrupted WashData's translation files in the past. All work must be done by a fluent speaker who understands the appliance-monitoring domain.
-
-### Adding a brand-new language
-
-If your language is not yet listed on GitLocalize, use the platform's "Add language" feature to request it. Once set up, all subsequent work happens on GitLocalize - no manual file copying or forking required.
-
-### For maintainers: adding new translation keys
-
-When a new key is added to `en.json` / `strings.json`, GitLocalize automatically detects it and marks it as "needs translation" for every language on the platform - community translators pick it up from there.
-
-Maintainer steps after adding a key:
-1. Run `python3 devtools/sync_translations.py` - removes deprecated keys from all non-English HA-layer files (safe, no network).
-2. Translate the new keys into all languages via **Claude subagents with explicit domain context** - never via `translate.py` or any machine translator. See the "Translation maintenance" section of `CLAUDE.md` for the full procedure.
-
----
-
-## Questions & Support
-
-### Getting Help
-
-- **Question about contributing?** → Open a Discussion on GitHub
-- **Found a bug?** → Open an Issue with the bug report template
-- **Have a feature idea?** → Open an Issue with the feature request template
-- **Need development help?** → Reach out to maintainers via discussion
-
-### Communication
-
-- **Be respectful** and assume good intentions
-- **Search first** - your question may already be answered
-- **Provide context** - share relevant code/logs
-- **Be patient** - maintainers are volunteers
-
----
-
-## Recognition
-
-Contributors to WashData are recognized in:
-
-- [CHANGELOG.md](CHANGELOG.md) for significant contributions
-- GitHub's contributor graph
-- Project README acknowledgments (major contributors)
-
-Thank you for making WashData better! 🌟
-
----
+More test modes, the real-Home-Assistant test box and the mock MQTT plug:
+[Testing](https://github.com/3dg1luk43/ha_washdata/wiki/Testing). Architecture and the detailed
+rules: [CLAUDE.md](CLAUDE.md) and [How it works](https://github.com/3dg1luk43/ha_washdata/wiki/Implementation-Details).
+
+## Rules for code changes
+
+- **NumPy only.** No SciPy, scikit-learn or other libraries at runtime, ML code included.
+- **Local only.** No external API calls outside the opt-in Community Store.
+- **Time:** `dt_util.now()` for timestamps, UTC (`time_utils.utc_now()`) for any interval.
+- **No UI text in code.** Home Assistant strings go in `strings.json` and `translations/en.json`;
+  panel strings go through `_t()` with the English text in `translations/panel/en.json`.
+- **Event data stays under 32 KB:** never put power traces in a fired event.
+- **Panel edits:** after changing `www/*.js`, run `node devtools/build_panel.mjs` and commit the
+  rebuilt `.min.js` files and `build-manifest.json` in the same commit. The pre-commit hook and CI
+  check this.
+- **New services** need entries in `services.yaml`, `strings.json` and a schema.
+- **Bug fixes come with a test** that reproduces the issue (`tests/test_issue_<number>_*.py`).
+- **User-facing changes get a CHANGELOG entry:** one or two lines, symptom and fix.
+- One fix or feature per PR. Screenshots for UI changes.
+
+PR titles: `[FIX]`, `[FEATURE]`, `[REFACTOR]`, `[DOCS]`, `[TEST]`, `[PERF]`, e.g.
+`[FIX] Handle a power sensor going unavailable mid-cycle`.
+
+## Translations
+
+Translate on [GitLocalize](https://gitlocalize.com/repo/10819); it opens the PR for you. To fix a
+bad translation, correct it there instead of opening an issue.
+
+- Keep every `{placeholder}` exactly as it is.
+- Think appliance, not sport: a "match" is a recognised program, "logs" are diagnostic output.
+- **No machine translation.** It has corrupted these files before.
 
 ## License
 
-By contributing to WashData you agree that your contributions will be licensed under the
-**GNU Affero General Public License v3.0 or later** (AGPL-3.0-or-later), the same licence
-that covers the project. See [LICENSE](LICENSE) for the full terms.
-
-This software is provided free of charge. No contributor is required to assign copyright
-to the maintainer; you retain copyright in your own contributions while granting the project
-the right to distribute them under AGPL-3.0-or-later.
-
-**Last Updated**: 2026-08-11
+Contributions are licensed under [AGPL-3.0-or-later](LICENSE), like the project. You keep the
+copyright in your own work.

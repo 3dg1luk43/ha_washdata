@@ -220,6 +220,47 @@ def _ensure_gzip(path: Path) -> None:
             pass
 
 
+def _gzip_is_current(path: Path) -> bool:
+    """True when ``<path>.gz`` exists and decompresses to exactly ``path``'s bytes.
+
+    A content check, not an mtime check (see :func:`_ensure_gzip` for why mtimes
+    cannot be trusted here). Decompressing is ~20x cheaper than recompressing.
+    """
+    import gzip
+    import zlib
+
+    gz = path.with_suffix(path.suffix + ".gz")
+    try:
+        return gzip.decompress(gz.read_bytes()) == path.read_bytes()
+    except (OSError, EOFError, zlib.error):  # missing, truncated or corrupt
+        return False
+
+
+def _prepare_translations(directory: Path) -> bool:
+    """Pre-compress every panel translation file; True if the directory exists.
+
+    Audit UI-18: the panel fetches its English and user-language dictionaries
+    (130-250 KB each) on every cold load, and aiohttp serves a ``.gz`` sibling only
+    if one exists. Thirty-five files take ~0.6 s to compress at level 9, so unlike
+    the two JS assets an unchanged ``.gz`` is kept (verified by content, ~30 ms for
+    the whole directory) and only a missing or stale one is rebuilt. A ``.gz`` whose
+    source was removed is deleted: aiohttp would otherwise keep serving it.
+    """
+    if not directory.is_dir():
+        return False
+    try:
+        sources = sorted(directory.glob("*.json"))
+        for src in sources:
+            if src.is_file() and not _gzip_is_current(src):
+                _ensure_gzip(src)
+        for gz in directory.glob("*.json.gz"):
+            if not gz.with_suffix("").is_file():
+                gz.unlink(missing_ok=True)
+    except OSError as exc:  # read-only install: serve uncompressed
+        _LOGGER.debug("Could not pre-compress panel translations (%s)", exc)
+    return True
+
+
 def _prepare_asset(source_name: str, www: Path | None = None) -> Path:
     """Resolve the best variant of an asset and make sure its .gz is current.
 
@@ -289,8 +330,11 @@ def get_cache_buster(filename: str = CARD_NAME) -> str:
         src_mtime = os.stat(base / "www" / filename).st_mtime_ns
         try:
             panel_dir = base / "translations" / "panel"
+            # Sources only: the .gz siblings are rewritten at startup, and folding
+            # their mtime in would change the URL (and refetch the panel) on every
+            # restart.
             trans_mtime = max(
-                (os.stat(f).st_mtime_ns for f in panel_dir.iterdir() if f.is_file()),
+                (os.stat(f).st_mtime_ns for f in panel_dir.glob("*.json") if f.is_file()),
                 default=0,
             )
         except OSError:
@@ -622,9 +666,9 @@ async def _do_register_panel(hass: HomeAssistant, src: Path) -> bool:
         served = await hass.async_add_executor_job(_prepare_asset, PANEL_JS_NAME)
         await _async_register_path(hass, PANEL_JS_URL, str(served))
 
-        # Per-language translation files.
+        # Per-language translation files, pre-compressed like the JS (audit UI-18).
         trans_src = Path(__file__).parent / "translations" / PANEL_TRANSLATIONS_DIRNAME
-        if await hass.async_add_executor_job(trans_src.is_dir):
+        if await hass.async_add_executor_job(_prepare_translations, trans_src):
             await _async_register_path(hass, PANEL_TRANSLATIONS_URL, str(trans_src))
 
         # Brand icon (panel header).  Track registration so ws_get_constants

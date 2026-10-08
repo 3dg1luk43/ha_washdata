@@ -54,7 +54,6 @@ def _cfg(**over) -> CycleDetectorConfig:
         off_delay=180,
         min_off_gap=480,
         device_type="washing_machine",
-        smoothing_window=1,
         completion_min_seconds=600,
         start_threshold_w=3.84,
         stop_threshold_w=2.56,

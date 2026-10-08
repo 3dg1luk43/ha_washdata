@@ -402,9 +402,3 @@ async def test_d7_get_settings_changelog_missing_manager():
     connection.send_result.assert_not_called()
 
 
-def test_d7_command_registered():
-    """The new command must be wired into the registration block."""
-    import inspect
-
-    src = inspect.getsource(ws_api.async_register_commands)
-    assert "ws_get_settings_changelog" in src

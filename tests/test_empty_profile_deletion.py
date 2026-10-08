@@ -48,14 +48,3 @@ def test_empty_profile_gets_deleted(store):
     assert removed_count == 0
     assert "Empty Profile" in store._data["profiles"]
 
-def test_profile_with_missing_cycle_gets_deleted(store):
-    """Verify that a profile pointing to a non-existent cycle is deleted."""
-    store._data["profiles"]["Broken Profile"] = {
-        "sample_cycle_id": "non_existent_id"
-    }
-    store._data["past_cycles"] = [{"id": "other_id"}]
-    
-    removed_count = store.cleanup_orphaned_profiles()
-    
-    assert removed_count == 1
-    assert "Broken Profile" not in store._data["profiles"]

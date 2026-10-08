@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Postavljanje WashData",
-        "description": "Konfigurirajte svoju perilicu rublja ili neki drugi uređaj.\n\nSenzor snage je obavezan.\n\nNakon postavljanja otvorite WashData panel s bočne trake (ili idite na [/ha-washdata](/ha-washdata)) za pregled ciklusa, podešavanje otkrivanja i upravljanje profilima.",
+        "description": "Postavite perilicu rublja ili drugi uređaj. Potreban je senzor snage.\n\nNakon postavljanja otvorite WashData panel s bočne trake ([/ha-washdata](/ha-washdata)) za cikluse, profile i sve postavke.",
         "data": {
           "name": "Naziv uređaja",
           "device_type": "Vrsta uređaja",
@@ -12,43 +12,41 @@
         },
         "data_description": {
           "name": "Prijateljski naziv za ovaj uređaj (npr. \"Perilica rublja\", \"Perilica posuđa\").",
-          "device_type": "Koja je ovo vrsta uređaja? Pomaže u prilagođavanju otkrivanja i označavanja.",
-          "power_sensor": "Entitet senzora koji prijavljuje potrošnju energije u stvarnom vremenu (u vatima) iz vašeg pametnog utikača.",
-          "min_power": "Očitavanje snage iznad ovog praga (u vatima) znači da uređaj radi. Počnite s 2 W za većinu uređaja."
+          "device_type": "Postavlja zadane vrijednosti otkrivanja za ovu vrstu uređaja.",
+          "power_sensor": "Senzor pametnog utikača koji javlja trenutnu snagu u vatima.",
+          "min_power": "Očitanja iznad ove vrijednosti (u vatima) znače da uređaj radi. 2 W odgovara većini uređaja."
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Ažurirajte naziv uređaja, vrstu uređaja ili senzor snage.\n\nWashData panel (bočna traka ili [/ha-washdata](/ha-washdata)) služi za upravljanje otkrivanjem, ciklusima, profilima i obavijestima.",
+        "title": "Ponovna konfiguracija WashData",
+        "description": "Promijenite naziv uređaja, vrstu uređaja ili senzor snage.\n\nSve ostalo je u WashData panelu (bočna traka ili [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Naziv uređaja",
+          "device_type": "Vrsta uređaja",
+          "power_sensor": "Senzor snage",
+          "min_power": "Minimalni prag snage (W)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Povezivanje nije uspjelo",
-      "invalid_auth": "Nevažeća provjera autentičnosti",
       "unknown": "Neočekivana pogreška",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Prag snage mora biti veći od 0"
     },
     "abort": {
       "already_configured": "Uređaj je već konfiguriran",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Ponovna konfiguracija je uspjela"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
-        "description": "Preimenujte uređaj ili promijenite njegove osnovne postavke hardvera. Sve postavke otkrivanja, podudaranja i obavijesti nalaze se na [WashData panelu](/ha-washdata) (dostupan i s bočne trake).",
+        "title": "Postavke WashData",
+        "description": "Preimenujte uređaj ili promijenite njegove osnovne postavke. Sve ostalo je u [WashData panelu](/ha-washdata) na bočnoj traci.",
         "data": {
           "name": "Naziv uređaja",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Vrsta uređaja",
+          "power_sensor": "Senzor snage",
+          "min_power": "Minimalni prag snage (W)"
         }
       }
     },
@@ -60,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Nijedan profil još nije podudaran.",
       "vs_typical_longer": "{pct}% dulje nego obično",
       "vs_typical_shorter": "{pct}% kraće nego obično",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Prag snage mora biti veći od 0"
     }
   },
   "selector": {
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Ime profila",
-          "description": "Naziv postojećeg profila (izradite profile u izborniku Upravljanje profilima). Ostavite prazno za uklanjanje oznake."
+          "description": "Naziv postojećeg profila (profile izradite u WashData panelu). Ostavite prazno za uklanjanje oznake."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Prag povjerenja",
-          "description": "Minimalna pouzdanost podudaranja (0,50-0,95) za primjenu oznaka."
+          "description": "Minimalna pouzdanost podudaranja (0,50-0,95) za primjenu oznaka. Ostavite prazno za korištenje postavke uređaja „Pouzdanost za automatsko označavanje”."
         }
       }
     },
     "export_config": {
       "name": "Izvoz konfiguracije",
-      "description": "Izvezite profile, cikluse i postavke ovog uređaja u JSON datoteku (po uređaju).",
+      "description": "Izvezite profile, cikluse i postavke ovog uređaja u JSON datoteku.",
       "fields": {
         "device_id": {
           "name": "Uređaj",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Pošaljite povratne informacije o ciklusu",
-      "description": "Potvrdite ili ispravite automatski otkriveni program nakon završenog ciklusa. Navedite `entry_id` (napredno) ili `device_id` (preporučeno).",
+      "description": "Potvrdite ili ispravite otkriveni program završenog ciklusa. Navedite `device_id` (preporučeno) ili `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Uređaj",
@@ -272,18 +270,18 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "Pokreni ML treniranje",
+      "description": "Ručno ponovno istrenirajte ML modele na uređaju pomoću vlastitih označenih ciklusa ovog uređaja (eksperimentalno).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Uređaj",
+          "description": "WashData uređaj čije modele treba ponovno istrenirati."
         }
       }
     },
     "mark_unloaded": {
       "name": "Označi kao istovareno",
-      "description": "Potvrdite da je gotov sadržaj izvađen iz WashData uređaja, čime se briše stanje \"Čist\" i svaki podsjetnik za istovar.",
+      "description": "Potvrdite da je gotov sadržaj izvađen. Briše stanje \"Čist\" i podsjetnik za istovar.",
       "fields": {
         "device_id": {
           "name": "Uređaj",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Dvosmislenost podudaranja"
+      },
+      "maintenance_due": {
+        "name": "Održavanje na redu",
+        "state": {
+          "on": "Na redu",
+          "off": "Nije na redu"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID-ovi zadataka na redu"
+          },
+          "due_tasks": {
+            "name": "Zadaci na redu",
+            "state": {
+              "descale": "Uklanjanje kamenca",
+              "filter_clean": "Očisti filtar",
+              "drum_clean": "Očisti bubanj",
+              "bearing_service": "Servis ležajeva",
+              "other": "Ostalo",
+              "salt": "Dopuni sol",
+              "rinse_aid": "Dopuni sredstvo za ispiranje",
+              "lint_filter": "Očisti filtar za dlačice",
+              "condenser_clean": "Očisti kondenzator"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Protiv bora",
           "interrupted": "Prekinut",
           "force_stopped": "Prisilno zaustavljeno",
-          "rinse": "Ispiranje",
           "unknown": "Nepoznato",
           "clean": "Čist",
           "delay_wait": "Čekanje na početak"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalija ciklusa",
+            "state": {
+              "overrun": "Traje predugo",
+              "stalled": "Zaglavljeno"
+            }
+          }
         }
       },
       "washer_program": {

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData-asetukset",
-        "description": "Määritä pesukoneesi tai muu laite.\n\nTehoanturi tarvitaan.\n\nAsetuksen jälkeen avaa WashData-paneeli sivupalkista (tai siirry osoitteeseen [/ha-washdata](/ha-washdata)) nähdäksesi syklit, säätääksesi tunnistuksen ja hallitaksesi profiileja.",
+        "description": "Määritä pesukone tai muu laite. Tehoanturi tarvitaan.\n\nAsetuksen jälkeen avaa WashData-paneeli sivupalkista ([/ha-washdata](/ha-washdata)) nähdäksesi syklit, profiilit ja kaikki asetukset.",
         "data": {
           "name": "Laitteen nimi",
           "device_type": "Laitteen tyyppi",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Ystävällinen nimi tälle laitteelle (esim. 'pesukone', 'astianpesukone').",
-          "device_type": "Minkä tyyppinen laite tämä on? Auttaa räätälöimään havaitsemista ja merkitsemistä.",
-          "power_sensor": "Anturientiteetti, joka raportoi reaaliaikaisen virrankulutuksen (watteina) älypistokkeesta.",
-          "min_power": "Tämän kynnyksen ylittävät teholukemat (watteina) osoittavat, että laite on käynnissä. Aloita 2 watilla useimmissa laitteissa."
+          "device_type": "Asettaa tunnistuksen oletukset tämän tyyppiselle laitteelle.",
+          "power_sensor": "Älypistokkeen anturi, joka raportoi reaaliaikaisen tehon watteina.",
+          "min_power": "Tämän ylittävät lukemat (watteina) tarkoittavat, että laite on käynnissä. 2 W sopii useimmille laitteille."
         }
       },
       "reconfigure": {
         "title": "Konfiguroi WashData uudelleen",
-        "description": "Päivitä laitteen nimi, laitteen tyyppi tai tehoanturi.\n\nWashData-paneelissa (sivupalkki tai [/ha-washdata](/ha-washdata)) hallitaan tunnistusta, syklejä, profiileja ja ilmoituksia.",
+        "description": "Muuta laitteen nimeä, laitetyyppiä tai tehoanturia.\n\nKaikki muu on WashData-paneelissa (sivupalkki tai [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Laitteen nimi",
           "device_type": "Laitteen tyyppi",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Yhteyden muodostaminen epäonnistui",
-      "invalid_auth": "Virheellinen todennus",
       "unknown": "Odottamaton virhe",
       "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData-asetukset",
-        "description": "Nimeä laite uudelleen tai muuta sen ydinlaitteiston asetuksia. Kaikki tunnistus-, täsmäytys- ja ilmoitusasetukset ovat [WashData-paneelissa](/ha-washdata) (saavutettavissa myös sivupalkista).",
+        "description": "Nimeä laite uudelleen tai muuta sen perusasetuksia. Kaikki muu on sivupalkin [WashData-paneelissa](/ha-washdata).",
         "data": {
           "name": "Laitteen nimi",
           "device_type": "Laitteen tyyppi",
@@ -70,7 +68,7 @@
         "dryer": "Kuivausrumpu",
         "washer_dryer": "Pesukone-kuivausrumpu yhdistelmä",
         "dishwasher": "Astianpesukone",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Airfryer",
         "bread_maker": "Leipäkone",
         "pump": "Pumppu / sumpupumppu",
         "generic": "Muu (edistynyt)",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profiilin nimi",
-          "description": "Olemassa olevan profiilin nimi (luo profiilit Profiilien hallinta -valikossa). Jätä tyhjäksi poistaaksesi tarran."
+          "description": "Olemassa olevan profiilin nimi (luo profiilit WashData-paneelissa). Jätä tyhjäksi poistaaksesi merkinnän."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Luottamuskynnys",
-          "description": "Vähimmäisosumavarmuus (0,50–0,95) tunnisteiden lisäämistä varten."
+          "description": "Vähimmäisosumavarmuus (0,50-0,95) tunnisteiden lisäämistä varten. Jätä tyhjäksi käyttääksesi laitteen Automaattimerkinnän varmuus -asetusta."
         }
       }
     },
     "export_config": {
       "name": "Vie kokoonpano",
-      "description": "Vie tämän laitteen profiilit, syklit ja asetukset JSON-tiedostoon (laitetta kohti).",
+      "description": "Vie tämän laitteen profiilit, syklit ja asetukset JSON-tiedostoon.",
       "fields": {
         "device_id": {
           "name": "Laite",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Lähetä syklipalaute",
-      "description": "Vahvista tai korjaa automaattisesti tunnistettu ohjelma suoritetun jakson jälkeen. Anna joko \"entry_id\" (lisäasetukset) tai \"device_id\" (suositus).",
+      "description": "Vahvista tai korjaa valmiin syklin tunnistettu ohjelma. Anna `device_id` (suositus) tai `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Laite",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Merkitse puretuksi",
-      "description": "Vahvista, että valmiin syklin sisältö on otettu pois WashData-laitteesta: Puhdas-tila ja purkamismuistutus nollataan.",
+      "description": "Vahvista, että valmis kuorma on otettu pois. Poistaa Puhdas-tilan ja mahdollisen purkamismuistutuksen.",
       "fields": {
         "device_id": {
           "name": "Laite",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Vastaavuuden epäselvyys"
+      },
+      "maintenance_due": {
+        "name": "Huolto tarpeen",
+        "state": {
+          "on": "Tarpeen",
+          "off": "Ei tarpeen"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Ajankohtaisten tehtävien tunnukset"
+          },
+          "due_tasks": {
+            "name": "Ajankohtaiset tehtävät",
+            "state": {
+              "descale": "Kalkinpoisto",
+              "filter_clean": "Puhdista suodatin",
+              "drum_clean": "Puhdista rumpu",
+              "bearing_service": "Laakerihuolto",
+              "other": "Muu",
+              "salt": "Lisää suolaa",
+              "rinse_aid": "Lisää huuhtelukirkastetta",
+              "lint_filter": "Puhdista nukkasihti",
+              "condenser_clean": "Puhdista lauhdutin"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Ryppyjenesto",
           "interrupted": "Keskeytynyt",
           "force_stopped": "Pakotettu pysäytys",
-          "rinse": "Huuhtelu",
           "unknown": "Tuntematon",
           "clean": "Puhdas",
           "delay_wait": "Odotetaan aloitusta"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Syklin poikkeama",
+            "state": {
+              "overrun": "Käy pitkään",
+              "stalled": "Jumissa"
+            }
+          }
         }
       },
       "washer_program": {

@@ -53,6 +53,10 @@ class MockProfileStore:
     def get_past_cycles(self):
         return self.past_cycles
 
+    def get_lifetime_cycle_count(self):
+        # The real getter floors at len(past_cycles); the cooldown reads it.
+        return len(self.past_cycles)
+
     def get_profiles(self):
         return self.profiles
 
@@ -127,7 +131,11 @@ def test_watchdog_suggestion(learning_manager):
     for _ in range(30):
         learning_manager.process_power_reading(100, now, now - timedelta(seconds=3))
         now += timedelta(seconds=3)
-    
+    # Intervals are held until the cycle ends on its own (#458).
+    assert learning_manager.close_cycle_cadence(
+        {"status": "completed", "termination_reason": "timeout"}
+    )
+
     # Trigger update
     learning_manager._update_operational_suggestions(now)
     
@@ -137,8 +145,11 @@ def test_watchdog_suggestion(learning_manager):
     watchdog = sugg.get(CONF_WATCHDOG_INTERVAL, {}).get("value")
     assert watchdog == 30
     
-    timeout = sugg.get(CONF_NO_UPDATE_ACTIVE_TIMEOUT, {}).get("value")
-    assert timeout == 60
+    # Floored at the device's own default (register item 165): p95 x 20 alone
+    # would have taken a deliberate default down to a minute. That floor is the
+    # value this unset key already runs with, so it is not prompted at all
+    # (audit SUGGEST-10: unset keys are compared against their effective value).
+    assert CONF_NO_UPDATE_ACTIVE_TIMEOUT not in sugg
 
 def test_duration_learning(learning_manager):
     store = learning_manager.profile_store
@@ -155,7 +166,11 @@ def test_duration_learning(learning_manager):
         
     learning_manager._update_model_suggestions()
     sugg = learning_manager.profile_store.get_suggestions()
-    assert CONF_PROFILE_DURATION_TOLERANCE in sugg
+    # Audit SUGGEST-12: the tolerances change no outcome, so they are no longer
+    # suggested; and a tight duration spread never pulls the Stage-1 ceiling below
+    # the shipped 1.8 (SUGGEST-09).
+    assert CONF_PROFILE_DURATION_TOLERANCE not in sugg
+    assert "profile_match_max_duration_ratio" not in sugg
 
 @pytest.mark.asyncio
 async def test_process_cycle_end_with_feedback(learning_manager):
@@ -226,55 +241,6 @@ async def test_submit_feedback_lifecycle(learning_manager):
     assert learning_manager.profile_store.feedback[cycle_id]["corrected_profile"] == "Actual"
     assert cycle_data["profile_name"] == "Actual"
     assert "Actual" in learning_manager.profile_store.rebuilt_profiles
-
-def test_suggestion_engine_run_simulation(mock_hass):
-    from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
-    from custom_components.ha_washdata.const import CONF_STOP_THRESHOLD_W
-    
-    store = MockProfileStore()
-    engine = SuggestionEngine(mock_hass, "test_entry", store)
-    
-    cycle_data = {
-        "power_data": [
-            ("2026-02-05T10:00:00", 100.0),
-            ("2026-02-05T10:01:00", 100.0),
-            ("2026-02-05T10:02:00", 10.0),
-            ("2026-02-05T10:03:00", 100.0),
-            ("2026-02-05T10:04:00", 100.0),
-            ("2026-02-05T10:05:00", 100.0),
-            ("2026-02-05T10:06:00", 100.0),
-            ("2026-02-05T10:07:00", 100.0),
-            ("2026-02-05T10:08:00", 100.0),
-            ("2026-02-05T10:09:00", 100.0),
-        ]
-    }
-    
-    suggestions = engine.run_simulation(cycle_data)
-    assert CONF_STOP_THRESHOLD_W in suggestions
-    assert suggestions[CONF_STOP_THRESHOLD_W]["value"] == 8.0 # 10.0 * 0.8
-
-@pytest.mark.asyncio
-async def test_process_cycle_end_triggers_simulation(learning_manager):
-    """Test that process_cycle_end triggers background simulation."""
-    cycle_data = {
-        "id": "test_sim_1",
-        "power_data": [("2026-02-05T10:00:00", 100.0)] * 20,
-        "duration": 1200,
-        "status": "completed"
-    }
-    
-    # Mock suggestion engine to verify it's called
-    learning_manager.suggestion_engine.run_simulation = MagicMock(return_value={})
-    
-    # Trigger cycle end
-    learning_manager.process_cycle_end(cycle_data)
-    
-    # It fires an async task, we need to wait or check task list
-    # For simplicity, we can await the internal async method directly if we want to be sure,
-    # but here we test the "fire" part.
-    await learning_manager._async_run_simulation(cycle_data)
-    
-    learning_manager.suggestion_engine.run_simulation.assert_called_once_with(cycle_data)
 
 
 # ---------------------------------------------------------------------------

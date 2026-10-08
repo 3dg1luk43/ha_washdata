@@ -49,6 +49,7 @@ from custom_components.ha_washdata.const import (
     CONF_OFF_DELAY,
     CONF_POWER_SENSOR,
 )
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_NAME
 
 
@@ -57,6 +58,7 @@ def _make_entry(*, title: str, data_name: str, options: dict | None = None):
     entry = MagicMock()
     entry.entry_id = "entry_1"
     entry.title = title
+    entry.state = ConfigEntryState.LOADED  # a reconfigure of an unloaded entry reloads it
     entry.data = {
         CONF_NAME: data_name,
         CONF_POWER_SENSOR: "sensor.39c0_power",
@@ -135,7 +137,7 @@ def test_get_options_still_merges_data_under_options_for_every_other_key():
 async def test_reconfigure_rename_updates_the_title_and_leaves_data_stale():
     flow = cf_mod.ConfigFlow()
     flow.hass = MagicMock()
-    flow.async_update_reload_and_abort = MagicMock(return_value={"type": "abort"})
+    flow.async_abort = MagicMock(return_value={"type": "abort"})
     flow.async_show_form = MagicMock(return_value={"type": "form"})
     entry = _make_entry(title="Washing Machine", data_name="Washing Machine")
     flow._get_reconfigure_entry = MagicMock(return_value=entry)
@@ -147,7 +149,7 @@ async def test_reconfigure_rename_updates_the_title_and_leaves_data_stale():
         CONF_MIN_POWER: 5.0,
     })
 
-    kwargs = flow.async_update_reload_and_abort.call_args[1]
+    kwargs = flow.hass.config_entries.async_update_entry.call_args[1]
     assert kwargs["title"] == "Dishwasher"
     assert "data" not in kwargs, "reconfigure must not write entry.data"
     assert CONF_NAME not in kwargs["options"], "the name never belongs in options"

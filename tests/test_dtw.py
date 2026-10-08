@@ -45,6 +45,13 @@ def test_dtw_band_constraint():
     assert isinstance(dist_wide, float)
 
 
+def test_dtw_warps_away_a_time_shift():
+    """A one-sample shift that costs Euclidean distance sqrt(2) costs DTW nothing."""
+    x = np.array([0.0, 1.0, 0.0, 0.0])
+    y = np.array([0.0, 0.0, 1.0, 0.0])
+    assert compute_dtw_lite(x, y, band_width_ratio=0.5) == 0.0
+
+
 def test_dtw_normalization():
     """Test DTW with identical signals."""
     x = np.ones(100)

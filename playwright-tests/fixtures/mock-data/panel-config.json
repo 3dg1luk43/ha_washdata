@@ -1,8 +1,8 @@
 {
   "is_admin": true,
-  "access_level": "full",
+  "user": {"id": "user-admin", "name": "Admin"},
   "prefs": {
-    "settings_level": "advanced",
+    "settings_level": "basic",
     "onboarding_dismissed": false,
     "show_raw": false,
     "show_debug": false,

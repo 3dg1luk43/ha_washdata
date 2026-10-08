@@ -50,33 +50,35 @@ def manager(mock_hass, mock_config_entry):
     return manager
 
 @pytest.mark.asyncio
-async def test_run_post_cycle_processing_calls_maintenance(manager):
-    """Test that _run_post_cycle_processing calls async_run_maintenance."""
-    
-    await manager._run_post_cycle_processing()
-    
-    # Verify maintenance was called (no params in current API)
-    manager.profile_store.async_run_maintenance.assert_called_once_with()
+async def test_run_post_cycle_processing_is_scoped_not_full_maintenance(manager):
+    """Register item 456: the cycle end refreshes what it touched, never the full
+    maintenance (every envelope, every cycle's artifacts, every unlabelled cycle
+    re-matched), which stays nightly."""
+    manager.profile_store.async_post_cycle_refresh = AsyncMock(
+        return_value={"orphaned_profiles": 0, "refreshed_artifacts": 1}
+    )
+
+    await manager._run_post_cycle_processing(["Cotton 40"])
+
+    manager.profile_store.async_post_cycle_refresh.assert_awaited_once_with(["Cotton 40"])
+    manager.profile_store.async_run_maintenance.assert_not_called()
 
 @pytest.mark.asyncio
 async def test_run_post_cycle_processing_logs_activity(manager):
-    """Test that we log when merges/splits occur."""
-    
-    # Return some activity
-    manager.profile_store.async_run_maintenance.return_value = {
-        "merged_cycles": 2,
-        "split_cycles": 1,
-    }
-    
+    """An orphaned profile removed after a cycle end is logged."""
+    manager.profile_store.async_post_cycle_refresh = AsyncMock(
+        return_value={"orphaned_profiles": 2, "refreshed_artifacts": 0}
+    )
+
     # Patch the instance-level DeviceLoggerAdapter (holds a reference to the real
     # logger, so patching the module-level _LOGGER name has no effect).
     with patch.object(manager, "_logger") as mock_logger:
-        await manager._run_post_cycle_processing()
+        await manager._run_post_cycle_processing([])
 
         # Verify info log
         mock_logger.info.assert_called()
         args, _ = mock_logger.info.call_args_list[0]
-        assert "merged" in args[0].lower() or "split" in args[0].lower()
+        assert "orphaned" in args[0].lower()
 
 @pytest.mark.asyncio
 async def test_process_cycle_end_triggers_processing(manager):
@@ -102,7 +104,7 @@ async def test_process_cycle_end_triggers_processing(manager):
     # Minimal setup to make _process_cycle_end run without errors
     cycle_data = {"start_time": "2023-01-01T12:00:00", "duration": 1000}
     manager.detector.get_current_cycle_data = MagicMock(return_value=cycle_data)
-    manager.profile_store.add_cycle = MagicMock()
+    manager.profile_store.async_add_cycle = AsyncMock(return_value=set())
     
     manager._on_cycle_end(cycle_data)
     

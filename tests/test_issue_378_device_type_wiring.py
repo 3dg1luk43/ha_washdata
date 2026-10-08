@@ -28,13 +28,11 @@ gap went unnoticed.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch
 
 import pytest
 
-from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata import manager as mgr_mod
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
@@ -78,7 +76,6 @@ def _make_entry(device_type: str) -> Any:
 def _build_manager(mock_hass: Any, entry: Any) -> WashDataManager:
     """Construct a manager with a *real* CycleDetector (only ProfileStore mocked)."""
     mock_hass.config_entries.async_get_entry.return_value = entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"):
         return WashDataManager(mock_hass, entry)
 

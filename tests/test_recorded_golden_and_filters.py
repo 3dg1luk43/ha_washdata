@@ -26,7 +26,7 @@ from custom_components.ha_washdata.profile_store import (
     _flag_recorded_cycles_golden,
     _is_recorded_cycle,
 )
-from custom_components.ha_washdata.ws_api import _suggestion_equivalent, _health_model_sig
+from custom_components.ha_washdata.ws_api import _suggestion_equivalent
 
 
 # ── recorded == golden backfill ────────────────────────────────────────────
@@ -197,27 +197,3 @@ def test_suggestion_equivalent_missing_current_shows():
 def test_suggestion_equivalent_string_fallback():
     assert _suggestion_equivalent("auto", "auto") is True
     assert _suggestion_equivalent("auto", "manual") is False
-
-
-# ── persisted-health model signature ───────────────────────────────────────
-
-
-class _FakeStore:
-    def __init__(self, versions):
-        self._versions = versions
-
-    def get_ml_model_versions(self):
-        return self._versions
-
-
-def test_health_model_sig_baseline_vs_ondevice_differ():
-    baseline = _health_model_sig(_FakeStore({}))
-    trained = _health_model_sig(_FakeStore({"quality": {"trained_at": "2026-07-01T00:00:00+00:00"}}))
-    assert baseline == "quality:base|end:base"
-    assert trained != baseline
-    assert "2026-07-01" in trained
-
-
-def test_health_model_sig_stable_for_same_models():
-    v = {"quality": {"trained_at": "2026-07-01T00:00:00+00:00"}}
-    assert _health_model_sig(_FakeStore(v)) == _health_model_sig(_FakeStore(dict(v)))

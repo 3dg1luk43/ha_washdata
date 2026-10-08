@@ -136,7 +136,10 @@ def test_option_defaults_carry_the_effective_end_wait_pair():
     # A dishwasher's prior is far longer - this is the one that surprises people.
     dw = _call_get_devices({}, {"device_type": "dishwasher"})["option_defaults"]
     assert dw["min_off_gap"] == 3600
-    assert dw["off_delay"] == 1800
+    # The default IN FORCE, not the suggestion engine's per-device floor (item
+    # 388a): no device stores an off delay at creation and the manager falls back
+    # to the scalar, so 1800 was a number the dishwasher never ran on.
+    assert dw["off_delay"] == 180
     # Both are ints: the panel renders them into number inputs and compares them.
     for key in ("min_off_gap", "off_delay"):
         assert isinstance(wm[key], int) and isinstance(dw[key], int)

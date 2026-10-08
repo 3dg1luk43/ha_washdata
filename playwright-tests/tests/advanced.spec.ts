@@ -1,5 +1,6 @@
 /**
- * Advanced tab tests (device-scoped tools only: Maintenance, Diagnostics, ML).
+ * Advanced tab tests (editor tools: Diagnostics, ML). Maintenance moved under
+ * Cycles in 0.5.8 (audit UI-25).
  * My Preferences / Panel Settings / Access Control / Online moved to the header
  * gear (see gear.spec.ts). Logs were removed entirely.
  */
@@ -14,11 +15,10 @@ test.beforeEach(async ({ page }) => {
 
 // ─── Default subtab ───────────────────────────────────────────────────────────
 
-test('advanced tab renders Maintenance by default', async ({ page }) => {
+test('advanced tab opens on Diagnostics; Maintenance lives under Cycles', async ({ page }) => {
   await clickTab(page, 'advanced');
-  const maintTab = page.locator('[data-ptab="maintenance"]').first();
-  await expect(maintTab).toBeVisible({ timeout: 8_000 });
-  await expect(page.locator('button[data-action="maint-add"]').first()).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('[data-ptab="diagnostics"].active').first()).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('[data-ptab="maintenance"]')).toHaveCount(0);
 });
 
 test('Logs subtab is gone from Advanced', async ({ page }) => {
@@ -80,20 +80,25 @@ test('import config button is present in diagnostics subtab', async ({ page }) =
 
 // ─── Maintenance ──────────────────────────────────────────────────────────────
 
-test('maintenance subtab is visible in advanced tab', async ({ page }) => {
-  await clickTab(page, 'advanced');
-  const maintTab = page.locator('[data-ptab="maintenance"]').first();
-  await expect(maintTab).toBeVisible({ timeout: 8_000 });
-  await maintTab.click();
-  const maintContent = page.locator('button[data-action="maint-add"]').first();
-  await expect(maintContent).toBeVisible({ timeout: 5_000 });
+async function openMaintenance(page) {
+  await clickTab(page, 'history');
+  const sub = page.locator('[data-hsub="maintenance"]').first();
+  await expect(sub).toBeVisible({ timeout: 8_000 });
+  await sub.click();
+}
+
+test('maintenance is a Cycles sub-tab', async ({ page }) => {
+  await openMaintenance(page);
+  await expect(page.locator('button[data-action="maint-add"]').first()).toBeVisible({ timeout: 5_000 });
+  // ...and back to the cycle list.
+  await page.locator('[data-hsub="cycles"]').first().click();
+  await expect(page.locator('button[data-action="maint-add"]')).toHaveCount(0);
 });
 
 // ─── Service status / lifetime odometer (#414) ───────────────────────────────
 
 test('maintenance shows the lifetime odometer, not the stored-history count', async ({ page }) => {
-  await clickTab(page, 'advanced');
-  await page.locator('[data-ptab="maintenance"]').first().click();
+  await openMaintenance(page);
   const card = page.locator('.wd-card', { hasText: 'Service Status' }).first();
   await expect(card).toBeVisible({ timeout: 8_000 });
   // 212 comes from lifetime_cycle_count, past the 200-record retention cap.
@@ -102,16 +107,14 @@ test('maintenance shows the lifetime odometer, not the stored-history count', as
 });
 
 test('maintenance shows how close each service task is', async ({ page }) => {
-  await clickTab(page, 'advanced');
-  await page.locator('[data-ptab="maintenance"]').first().click();
+  await openMaintenance(page);
   const card = page.locator('.wd-card', { hasText: 'Service Status' }).first();
   await expect(card).toBeVisible({ timeout: 8_000 });
   await expect(card).toContainText('12 / 30 cycles');
 });
 
 test('the odometer can be corrected by hand', async ({ page }) => {
-  await clickTab(page, 'advanced');
-  await page.locator('[data-ptab="maintenance"]').first().click();
+  await openMaintenance(page);
   const input = page.locator('#wd-maint-odometer').first();
   await expect(input).toBeVisible({ timeout: 8_000 });
   await expect(input).toHaveValue('212');

@@ -38,8 +38,6 @@ from datetime import datetime, timezone, timedelta
 from typing import Any
 from unittest.mock import MagicMock
 
-import pytest
-
 from custom_components.ha_washdata.cycle_detector import (
     CycleDetector,
     CycleDetectorConfig,
@@ -483,38 +481,33 @@ class TestDishwasherPassiveDryingIntegration:
             step_s=30.0,
         )
 
-        if not completed:
-            pytest.skip("Cycle did not complete — check test timing parameters")
+        # A cycle that never completes is the regression, not a timing problem:
+        # skipping here turned it yellow instead of red (audit TESTING-13).
+        assert len(completed) == 1, (
+            f"Cycle did not complete (state {det.state}); the deferral never released"
+        )
 
         cycle_data = completed[0]
-        end_time = cycle_data.get("end_time")
-        assert end_time is not None, "end_time must be present in completed cycle data"
+        from homeassistant.util import dt as dt_util
 
-        # The end_time should be well after the terminal drain spike (120 min).
-        # With keep_tail=True for dishwasher timeout, end_time = timeout timestamp,
-        # not _last_active_time.  The terminal spike was at 120 min; the cycle must
-        # report a duration substantially longer than 120 min.
-        start_time = cycle_data.get("start_time")
-        if start_time:
-            if isinstance(end_time, str):
-                from homeassistant.util import dt as dt_util
-                end_dt = dt_util.parse_datetime(end_time)
-            else:
-                end_dt = end_time
-            if isinstance(start_time, str):
-                from homeassistant.util import dt as dt_util
-                start_dt = dt_util.parse_datetime(start_time)
-            else:
-                start_dt = start_time
-            if end_dt and start_dt:
-                stored_duration_s = (end_dt - start_dt).total_seconds()
-                # With keep_tail=True, stored duration must be > 120 min (7200s).
-                # It should be close to the timeout time (past 85% of expected).
-                assert stored_duration_s > 8000, (
-                    f"Stored cycle duration {stored_duration_s:.0f}s is too short. "
-                    f"Expected > 8000s (> 133 min). The terminal drain spike at 120 min "
-                    f"must NOT be used as the cycle end_time."
-                )
+        def _as_dt(value):
+            return dt_util.parse_datetime(value) if isinstance(value, str) else value
+
+        end_dt = _as_dt(cycle_data.get("end_time"))
+        start_dt = _as_dt(cycle_data.get("start_time"))
+        assert end_dt is not None, "end_time must be present in completed cycle data"
+        assert start_dt is not None, "start_time must be present in completed cycle data"
+
+        # The end keeps its tail (here via Smart Termination at the expected
+        # duration), so end_time is the end decision, not _last_active_time. The
+        # terminal spike was at ~116 min; the stored duration must be well past it.
+        stored_duration_s = (end_dt - start_dt).total_seconds()
+        assert end_dt > terminal_spike_ts
+        assert stored_duration_s > 8000, (
+            f"Stored cycle duration {stored_duration_s:.0f}s is too short. "
+            f"Expected > 8000s (> 133 min). The terminal drain spike at 116 min "
+            f"must NOT be used as the cycle end_time."
+        )
 
 
 class TestEndSpikeProgressGate:

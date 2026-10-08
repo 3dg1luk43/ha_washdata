@@ -27,6 +27,7 @@ Power-data format notes:
 """
 from __future__ import annotations
 
+import copy
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -573,3 +574,104 @@ async def test_current_version_data_returned_unchanged():
     result = await store._async_migrate_func(STORAGE_VERSION, 1, data)
     assert result["profiles"]["Standard"]["device_type"] == "dryer"
     assert len(result["past_cycles"]) == 1
+
+
+# ---------------------------------------------------------------------------
+# v16 -> v17: state of the ML parts removed in 0.5.8 is dropped
+# ---------------------------------------------------------------------------
+
+
+def _v16_store_with_removed_ml_state() -> dict[str, Any]:
+    """A v16 store as an ML-enabled 0.5.7 install left it."""
+    return {
+        "past_cycles": [_offset_cycle("c1"), _offset_cycle("c2")],
+        "reference_cycles": [{"id": "r1", "profile_name": "Standard"}],
+        "backfill_cycles": [{"id": "b1", "profile_name": "Standard"}],
+        "profiles": {"Standard": {"avg_duration": 120.0, "phases": [], "device_type": "washing_machine"}},
+        "feedback_history": {"c1": {"cycle_id": "c1", "user_confirmed": True}},
+        "match_ranking_history": [
+            {"start_time_iso": _START_ISO, "cycle_id": "u1", "features": {"margin": 0.2},
+             "top1_profile": "Standard", "confirmed_label": "Standard"},
+            {"start_time_iso": _START_ISO, "cycle_id": "u1", "features": {"margin": 0.3},
+             "top1_profile": "Standard", "confirmed_label": None},
+        ],
+        "matching_config": {
+            "config": {"corr_weight": 0.6, "duration_weight": 0.15, "energy_weight": 0.15},
+            "trained_at": "2026-07-01T02:00:00+00:00",
+        },
+        "ml_model_versions": {
+            "end": {"trained_at": "2026-07-01T02:00:00+00:00", "spec": {"kind": "standardized_logistic"}},
+            "live_match": {"trained_at": "2026-07-01T02:00:00+00:00", "spec": {"kind": "standardized_logistic"}},
+            "quality": {"trained_at": "2026-07-01T02:00:00+00:00", "spec": {"kind": "standardized_logistic"}},
+            "remaining_time": {"trained_at": "2026-07-01T02:00:00+00:00", "spec": {"kind": "standardized_linear"}},
+            "total_energy": {"trained_at": "2026-07-01T02:00:00+00:00", "spec": {"kind": "standardized_linear"}},
+        },
+        "ml_training_history": {
+            "end": [{"ts": "2026-07-01T02:00:00+00:00", "score": 0.9, "higher_better": True}],
+            "live_match": [{"ts": "2026-07-01T02:00:00+00:00", "score": 0.6, "higher_better": True}],
+            "quality": [{"ts": "2026-07-01T02:00:00+00:00", "score": 0.7, "higher_better": True}],
+            "total_energy": [{"ts": "2026-07-01T02:00:00+00:00", "score": 0.03, "higher_better": False}],
+        },
+        "ml_last_training_run": "2026-07-01T02:00:00+00:00",
+    }
+
+
+@pytest.mark.asyncio
+async def test_v16_to_v17_drops_the_removed_ml_state():
+    """Ranking snapshots, the tuner's record and every model record but
+    total_energy's go (live_match / quality lost their consumer; end /
+    remaining_time are no longer trained, audit ML-11)."""
+    store = _make_store()
+    result = await store._async_migrate_func(16, 1, _v16_store_with_removed_ml_state())
+    assert "match_ranking_history" not in result
+    assert "matching_config" not in result
+    assert set(result["ml_model_versions"]) == {"total_energy"}
+    assert set(result["ml_training_history"]) == {"total_energy"}
+    assert result["ml_last_training_run"] == "2026-07-01T02:00:00+00:00"
+
+
+@pytest.mark.asyncio
+async def test_v16_to_v17_never_touches_cycles_or_labels():
+    store = _make_store()
+    before = _v16_store_with_removed_ml_state()
+    expected = {
+        k: before[k] for k in (
+            "past_cycles", "reference_cycles", "backfill_cycles", "profiles", "feedback_history",
+        )
+    }
+    expected = copy.deepcopy(expected)
+    result = await store._async_migrate_func(16, 1, before)
+    for key, value in expected.items():
+        assert result[key] == value, key
+
+
+@pytest.mark.asyncio
+async def test_v16_to_v17_is_idempotent():
+    store = _make_store()
+    once = await store._async_migrate_func(16, 1, _v16_store_with_removed_ml_state())
+    snapshot = copy.deepcopy(once)
+    twice = await store._async_migrate_func(16, 1, once)
+    assert twice == snapshot
+
+
+@pytest.mark.asyncio
+async def test_v16_to_v17_tolerates_a_store_without_the_keys():
+    """A fresh or ML-off install carries none of it, or carries odd shapes."""
+    store = _make_store()
+    result = await store._async_migrate_func(16, 1, {"past_cycles": [], "profiles": {}})
+    assert "match_ranking_history" not in result and "matching_config" not in result
+    odd = {"past_cycles": [], "profiles": {}, "ml_model_versions": None,
+           "ml_training_history": ["legacy"], "match_ranking_history": "junk"}
+    result = await store._async_migrate_func(16, 1, odd)
+    assert result["ml_model_versions"] is None
+    assert result["ml_training_history"] == ["legacy"]
+    assert "match_ranking_history" not in result
+
+
+@pytest.mark.asyncio
+async def test_full_chain_v1_to_current_drops_the_removed_ml_state():
+    store = _make_store()
+    data = {"past_cycles": [], "profiles": {}, "matching_config": {"config": {}},
+            "match_ranking_history": []}
+    result = await store._async_migrate_func(1, 1, data)
+    assert "matching_config" not in result and "match_ranking_history" not in result

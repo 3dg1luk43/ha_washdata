@@ -104,8 +104,8 @@ def _match_tuple(tail_power: float | None) -> tuple:
         None,
         False,  # is_confident_mismatch
         False,  # is_ambiguous
-        False,  # is_prefix_ambiguous (widened) - the guard the report shows failing
-        False,  # is_prefix_ambiguous_full_shape (legacy)
+        False,  # element 7, retired (the #364 prefix-fit flag, removed in 0.5.8)
+        False,  # is_prefix_ambiguous_full_shape (#288)
         tail_power,
     )
 
@@ -161,6 +161,19 @@ def _arm_ending_then_keep_washing(
     return t
 
 
+def _stay_quiet(detector: CycleDetector, t: int, seconds: int = 250) -> None:
+    """Quiet after the decision sample, long enough for the washer's 240 s Smart
+    debounce but short of the 480 s fallback timeout.
+
+    Since audit DETECT-04 the washer debounce counts QUIET time, not time in ENDING,
+    so the washing resumed inside ENDING no longer pre-pays it: the decision sample
+    alone ends nothing, whatever the #364 guard says. These tests keep judging the
+    guard and the threshold on a genuinely quiet tail instead.
+    """
+    for k in range(1, seconds // 10 + 1):
+        detector.process_reading(1.0, _dt(t + 10 * k))
+
+
 def test_path_a_blocked_while_still_washing() -> None:
     """The reported case: ENDING Smart Termination must not fire at the short
     profile's 0.98 anchor while the drum is still pulling ~150 W."""
@@ -199,12 +212,14 @@ def test_guard_inert_without_tail_power() -> None:
     detector = _make_detector(completed)
     _run_wash(detector, None)
     assert detector._matched_tail_power is None
-    _arm_ending_then_keep_washing(detector, None)
+    t = _arm_ending_then_keep_washing(detector, None)
+    _stay_quiet(detector, t)
 
-    # Pre-fix behaviour, asserted deliberately: with no tail power the guard has no
-    # opinion and the split still happens. This is what pins the fix to the guard
-    # rather than to some incidental change in the surrounding state machine - the
-    # identical trace with a tail power does NOT split (test above).
+    # With no tail power the guard has no opinion, so Smart Termination ends the
+    # cycle on the quiet tail exactly as it would without the guard. (The identical
+    # trace WITH a tail power is blocked mid-wash - test above. Since audit DETECT-04
+    # the decision sample alone no longer splits either way: the washer debounce
+    # counts quiet time, which `_stay_quiet` provides.)
     assert completed, "with no tail power the guard must stay out of the way"
     assert completed[0]["termination_reason"] == TerminationReason.SMART
 
@@ -219,13 +234,11 @@ def test_short_tuples_leave_new_fields_at_safe_defaults() -> None:
 
     detector.update_match(("P", 0.7, 3600.0, None, False, True, True))
     assert detector._matched_tail_power is None
-    # No element 8: the narrow flag mirrors the widened one, so the anti-crease
-    # gate is exactly as conservative as it was before #364.
-    assert detector._match_prefix_ambiguous is True
+    # No element 8: the #288 flag is read from element 7, where pre-#364 callers
+    # put it, so the anti-crease gate is exactly as conservative as before #364.
     assert detector._match_prefix_ambiguous_full_shape is True
 
     detector.update_match(("P", 0.7, 3600.0, None, False, False))
-    assert detector._match_prefix_ambiguous is False
     assert detector._match_prefix_ambiguous_full_shape is False
 
 
@@ -279,7 +292,7 @@ def test_match_confidence_threshold_is_honoured() -> None:
     completed: list[dict] = []
     detector = _make_detector(completed, match_confidence_threshold=0.75)
     _run_wash(detector, None)  # guard inert, so only the threshold can block
-    _arm_ending_then_keep_washing(detector, None)
+    _stay_quiet(detector, _arm_ending_then_keep_washing(detector, None))
 
     assert not completed, (
         "conf 0.60 is below the configured 0.75 threshold, so the fast end-path "
@@ -290,7 +303,7 @@ def test_match_confidence_threshold_is_honoured() -> None:
     baseline: list[dict] = []
     det2 = _make_detector(baseline, match_confidence_threshold=0.4)
     _run_wash(det2, None)
-    _arm_ending_then_keep_washing(det2, None)
+    _stay_quiet(det2, _arm_ending_then_keep_washing(det2, None))
     assert baseline and baseline[0]["termination_reason"] == TerminationReason.SMART
 
 
@@ -298,19 +311,19 @@ def test_block_reason_reports_still_active() -> None:
     """The #346 diagnostic must name the new blocker, so a late finish caused by
     this guard is traceable in the log."""
     reason = CycleDetector._smart_term_block_reason(
-        4700.0, SHORT_EXPECTED, 0.98, True, False, False, False
+        4700.0, SHORT_EXPECTED, 0.98, True, False, False
     )
     assert reason == "still_active"
     # Order: the pre-existing reasons still win, so existing logs are unchanged.
     assert (
         CycleDetector._smart_term_block_reason(
-            4700.0, SHORT_EXPECTED, 0.98, True, True, False, False
+            4700.0, SHORT_EXPECTED, 0.98, True, True, False
         )
         == "match_ambiguous"
     )
     assert (
         CycleDetector._smart_term_block_reason(
-            4700.0, SHORT_EXPECTED, 0.98, True, False, False, True
+            4700.0, SHORT_EXPECTED, 0.98, True, False, True
         )
         is None
     )
@@ -330,20 +343,23 @@ def test_tail_power_survives_snapshot_roundtrip() -> None:
     snap = detector.get_state_snapshot()
     assert snap["matched_tail_power"] == PROFILE_TAIL_W
     assert snap["match_prefix_ambiguous_full_shape"] is False
+    # The retired #364 prefix-fit flag is no longer written (removed in 0.5.8).
+    assert "match_prefix_ambiguous" not in snap
 
     restored = _make_detector([])
     restored.restore_state_snapshot(snap)
     assert restored._matched_tail_power == PROFILE_TAIL_W
     assert restored._match_prefix_ambiguous_full_shape is False
 
-    # Pre-#364 snapshot: no narrow flag, so it must fall back to the widened one
-    # rather than defaulting to False (which would LOOSEN the anti-crease gate).
+    # Pre-#364 snapshot: no narrow flag, only the old single one, so it must fall
+    # back to that rather than defaulting to False (which would LOOSEN the
+    # anti-crease gate).
     legacy = dict(snap)
     legacy.pop("match_prefix_ambiguous_full_shape")
     legacy.pop("matched_tail_power")
+    legacy["match_prefix_ambiguous"] = True
     older = _make_detector([])
     older.restore_state_snapshot(legacy)
-    assert older._match_prefix_ambiguous is True
     assert older._match_prefix_ambiguous_full_shape is True
     assert older._matched_tail_power is None
 

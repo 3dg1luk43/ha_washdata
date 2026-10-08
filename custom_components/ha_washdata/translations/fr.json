@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configuration des données de lavage",
-        "description": "Configurez votre lave-linge ou autre appareil.\n\nUn capteur de puissance est requis.\n\nUne fois la configuration terminée, ouvrez le panneau WashData depuis la barre latérale (ou accédez à [/ha-washdata](/ha-washdata)) pour consulter les cycles, affiner la détection et gérer les profils.",
+        "description": "Configurez un lave-linge ou un autre appareil. Un capteur de puissance est requis.\n\nAprès la configuration, ouvrez le panneau WashData depuis la barre latérale ([/ha-washdata](/ha-washdata)) pour voir les cycles, les profils et tous les réglages.",
         "data": {
           "name": "Nom de l'appareil",
           "device_type": "Type d'appareil",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Un nom convivial pour cet appareil (par exemple, « Machine à laver », « Lave-vaisselle »).",
-          "device_type": "De quel type d'appareil s'agit-il ? Aide à adapter la détection et l’étiquetage.",
-          "power_sensor": "L'entité de capteur qui signale la consommation d'énergie en temps réel (en watts) de votre prise intelligente.",
-          "min_power": "Les lectures de puissance supérieures à ce seuil (en watts) indiquent que l'appareil est en marche. Commencez avec 2 W pour la plupart des appareils."
+          "device_type": "Définit les valeurs de détection par défaut pour ce type d'appareil.",
+          "power_sensor": "Le capteur de la prise connectée qui indique la puissance actuelle en watts.",
+          "min_power": "Au-dessus de cette valeur (en watts), l'appareil est considéré en marche. 2 W convient à la plupart des appareils."
         }
       },
       "reconfigure": {
         "title": "Reconfigurer WashData",
-        "description": "Mettez à jour le nom de l'appareil, le type d'appareil ou le capteur de puissance.\n\nLe panneau WashData (barre latérale ou [/ha-washdata](/ha-washdata)) permet de gérer la détection, les cycles, les profils et les notifications.",
+        "description": "Modifiez le nom de l'appareil, son type ou le capteur de puissance.\n\nTout le reste se trouve dans le panneau WashData (barre latérale ou [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Nom de l'appareil",
           "device_type": "Type d'appareil",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Échec de la connexion",
-      "invalid_auth": "Authentification invalide",
       "unknown": "Erreur inattendue",
       "invalid_power": "Le seuil de puissance doit être supérieur à 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "Paramètres WashData",
-        "description": "Renommez l'appareil ou modifiez ses paramètres matériels de base. Tous les paramètres de détection, de correspondance et de notification se trouvent dans le [panneau WashData](/ha-washdata) (également accessible depuis la barre latérale).",
+        "description": "Renommez l'appareil ou modifiez ses réglages de base. Tout le reste se trouve dans le [panneau WashData](/ha-washdata) de la barre latérale.",
         "data": {
           "name": "Nom du périphérique",
           "device_type": "Type d'appareil",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Nom du profil",
-          "description": "Le nom d'un profil existant (créer des profils dans le menu Gérer les profils). Laissez vide pour supprimer l’étiquette."
+          "description": "Nom d'un profil existant (créez les profils dans le panneau WashData). Laissez vide pour retirer l'étiquette."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Seuil de confiance",
-          "description": "Confiance de correspondance minimale (0,50-0,95) pour appliquer les étiquettes."
+          "description": "Confiance de correspondance minimale (0,50-0,95) pour appliquer les étiquettes. Laissez vide pour utiliser le réglage Confiance d'étiquetage automatique de l'appareil."
         }
       }
     },
     "export_config": {
       "name": "Exporter la configuration",
-      "description": "Exportez les profils, cycles et paramètres de cet appareil vers un fichier JSON (par appareil).",
+      "description": "Exportez les profils, cycles et réglages de cet appareil vers un fichier JSON.",
       "fields": {
         "device_id": {
           "name": "Appareil",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Soumettre des commentaires sur le cycle",
-      "description": "Confirmez ou corrigez un programme détecté automatiquement après un cycle terminé. Fournissez soit `entry_id` (avancé) ou `device_id` (recommandé).",
+      "description": "Confirmez ou corrigez le programme détecté d'un cycle terminé. Indiquez `device_id` (recommandé) ou `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Appareil",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Marquer comme déchargé",
-      "description": "Confirmer que la charge terminée a été sortie d'un appareil WashData, ce qui efface l'état Propre et tout rappel de déchargement.",
+      "description": "Confirmez que la charge terminée a été sortie. Efface l'état Propre et tout rappel de déchargement.",
       "fields": {
         "device_id": {
           "name": "Appareil",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Ambiguïté des correspondances"
+      },
+      "maintenance_due": {
+        "name": "Entretien à effectuer",
+        "state": {
+          "on": "À effectuer",
+          "off": "À jour"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID des tâches à effectuer"
+          },
+          "due_tasks": {
+            "name": "Tâches à effectuer",
+            "state": {
+              "descale": "Détartrer",
+              "filter_clean": "Nettoyer le filtre",
+              "drum_clean": "Nettoyer le tambour",
+              "bearing_service": "Entretien des roulements",
+              "other": "Autre",
+              "salt": "Recharger le sel",
+              "rinse_aid": "Recharger le liquide de rinçage",
+              "lint_filter": "Nettoyer le filtre à peluches",
+              "condenser_clean": "Nettoyer le condenseur"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Anti-faux plis",
           "interrupted": "Interrompu",
           "force_stopped": "Arrêt forcé",
-          "rinse": "Rinçage",
           "unknown": "Inconnu",
           "clean": "Propre",
           "delay_wait": "En attendant de commencer"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalie du cycle",
+            "state": {
+              "overrun": "Dépassement",
+              "stalled": "Bloqué"
+            }
+          }
         }
       },
       "washer_program": {

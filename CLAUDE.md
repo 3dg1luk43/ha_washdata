@@ -2,9 +2,10 @@
 
 Guidance for Claude Code when working in this repository.
 
-**Detail lives elsewhere on purpose.** `docs/internal/INTEGRATION_REFERENCE.md` (+ 14 deep-dives
-under `docs/internal/reference/`) is the canonical engineering reference: module maps, subsystem
-walkthroughs, tuning provenance, and the discrepancy/tech-debt register. This file holds only the
+**Detail lives elsewhere on purpose.** `docs/internal/` is **local-only** (gitignored since 0.5.8; a fresh
+clone or CI checkout does not have it, and the checks that read it skip themselves). In it,
+`INTEGRATION_REFERENCE.md` (+ 14 deep-dives under `docs/internal/reference/`) is the canonical engineering reference: module maps, subsystem
+walkthroughs, tuning provenance; the discrepancy/tech-debt register is `docs/internal/register/`. This file holds only the
 rules and traps; when you need the "why" or the measured numbers, read the reference.
 
 ## Project Overview
@@ -29,12 +30,17 @@ pip install -r requirements-dev.txt
 ## Commands
 
 ```bash
-./run_tests.sh                  # fast suite (default, ~30s - skips slow + benchmark)
-./run_tests.sh --slow           # real-data replays, stress simulations
-./run_tests.sh --bench          # benchmarks
-./run_tests.sh --e2e            # Playwright E2E (618 tests, chromium + mobile-chrome, ~2 min)
+./run_tests.sh                  # fast suite (default; pytest-xdist, one worker per core up to 8: ~30 s on 4 cores; --serial = one process)
+./run_tests.sh --slow           # slow tier on pytest-xdist --dist loadgroup (one group per suggestion-loop device; ~4.5 min on 4 cores)
+./run_tests.sh --bench          # none left: work budgets run in the fast suite (tests/test_perf_budgets.py)
+./run_tests.sh --e2e            # Playwright E2E (chromium + mobile-chrome, ~2 min)
 ./run_tests.sh --e2e-min        # same E2E against the minified build (the bytes users download)
 ./run_tests.sh --all            # everything (~13 min)
+devtools/verify.sh              # quick: generated files, docs_check, fast suite, E2E readable (~3 min on 4 cores)
+devtools/verify.sh full         # pre-push: + slow suite, E2E min, release_check --skip-tests, end_gate --check, eval.py gate on one dynamically shared core budget; ~10 min cold on this 4C/8T box, ~6.7 min after a Python-only change (E2E/end-gate reported `cached` when their inputs are unchanged since a pass)
+devtools/verify.sh full --box   # + the real-HA test box (never by default; the summary names changed files that need it)
+devtools/verify.sh full --no-cache   # run every stage regardless of the result cache (use before a release)
+devtools/release_check.sh --skip-tests   # every release check except the test suites
 
 pytest tests/test_cycle_detector.py -v
 pytest tests/test_cycle_detector.py::test_function_name -v
@@ -51,12 +57,26 @@ node devtools/build_panel.mjs --check   # verify only; non-zero if stale
 devtools/release_check.sh               # release preflight (what CI runs)
 devtools/release_check.sh --fix         # regenerate artifacts instead of failing
 devtools/release_check.sh --full --tag v0.5.6
+python3 devtools/docs_check.py          # doc anchors/constants/register ids/deep-dive identifiers/em-dash ratchet vs code
 
-python3 devtools/end_gate_eval.py            # ENDING fallback-gate lag/early-end/split (item 329)
-python3 devtools/decisive_margin_eval.py     # mid-cycle switch bypass, runner-up exposure
+python3 devtools/eval.py run --mode fast     # LOO matcher accuracy on the SHIPPED path (audit F1)
+python3 devtools/eval.py compare BASE.json NEW.json   # paired deltas, McNemar, guarded metrics
+python3 devtools/end_gate_eval.py --loo      # ENDING fallback-gate lag/early-end/split (item 329); add --all-formats (diagnostics dumps + user-Contributed, item 465) and --shipped-watchdog; --jobs N (default cpu-1, max 8; rows identical to --jobs 1)
+python3 devtools/energy_projection_eval.py   # projected-energy accuracy, LOO (audit PROGRESS-04)
+python3 devtools/ml_energy_gate_eval.py      # on-device total_energy promotion gate vs naive and incumbent (audit ML-12)
+python3 devtools/terminal_drop_plugpull_eval.py   # dishwasher plug-pull fast finalize, LOO (audit ML-08); --rule off|ungated|guarded
+python3 devtools/margin_display_fit.py       # fits the Status card's "~N% sure" knots from an eval.py run (MATCH-DECIDE-15)
+python3 devtools/eta_eval.py --all-formats   # first-ETA timing + ETA error by elapsed fraction, LOO (item 475)
+python3 devtools/decisive_margin_eval.py --loo   # mid-cycle switch bypass, runner-up exposure; --switching: commit/switch accuracy
+python3 devtools/end_gate_eval.py --loo --all-formats --check devtools/end_gate_baseline.json   # exit 1 on an end-gate regression
 python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
+python3 devtools/start_gate_eval.py <diag.json|history.csv|sqlite:db>   # start gates on a raw idle+cycle history (missed/late/phantom)
+python3 devtools/lead_in_eval.py               # stored cycle start vs raw onset on the start-gate manifest (#463)
+python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)
+python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed point / ladder / oscillation / erased cycles (F10)
 
-python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG   # mock appliance
+python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug into a real HA (web UI :8081)
+python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent
 
 cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its README.md)
 cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 20 checks (~12 min)
@@ -67,8 +87,8 @@ cd devtools/testbox && ./hactl.py ws ha_washdata/get_profiles entry_id=<id>   # 
 
 ### Two tiers of test, and what each can prove
 
-`run_tests.sh` is the fast, deterministic tier: frozen time, 606 recorded cycles, pure
-detection/matching/progress maths. It is where accuracy lives. But **93 of its 237 modules build
+`devtools/verify.sh full` is the pre-push run (add `--box` when the change needs a real HA, see below). `run_tests.sh` is the fast, deterministic tier: frozen time, the recorded `cycle_data/` corpus, pure
+detection/matching/progress maths. It is where accuracy lives. But **about a third of its modules build
 Home Assistant with `MagicMock()`**, and a MagicMock accepts any service call - so code Home
 Assistant rejects outright used to pass every test (register item 316: `title: None` killed every
 `clear_notification` for months while all ten of the tests covering it passed). Two things close
@@ -77,8 +97,9 @@ that gap; keep both working:
 - `tests/conftest.py` has an **autouse guard** that replays every recorded service call through
   Home Assistant's real schemas. Do not "simplify" it away - reintroducing item 316 fails 13 tests
   because of it. When adding a notification path, assert on the payload *and* let the guard run.
-- `devtools/testbox/` is a **real HA container** (2026.9.x, what users run; the in-process test HA
-  is pinned to 2026.2.3 - which is upstream's newest, so that gap cannot be closed from PyPI, item
+- `devtools/testbox/` is a **real HA container** (floats on HA `:stable`, 2026.9.3 at last check; the in-process test HA
+  is pinned to 2026.2.3 - the newest Home Assistant and pytest-homeassistant-custom-component that
+  install on the Python 3.13 the suite runs on, so that gap cannot be closed from PyPI here, item
   322) with the working tree bind-mounted in and a notify platform that records every delivered
   payload. It proves delivery, config flow, storage migration, WS API and entity wiring, and it
   found three real bugs in its first hours (items 317, 323, and the corrected 320). Timing there is
@@ -130,27 +151,30 @@ because the usual miss is rebuilding and then committing only the source. `--no-
 
 ### Core components
 
-- **`manager.py`** (~8580 lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
+- **`manager.py`** (~9.2k lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
   async profile matching every 5 min, entity updates. Runs its own long jobs (ML training, health
   recompute) as plain executor/`async_create_task` jobs; the `task_registry` wiring lives in `ws_api.py`.
-- **`cycle_detector.py`** (~3400 lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
+- **`cycle_detector.py`** (~4.7k lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
   power thresholds + energy gates, dryer anti-wrinkle, external triggers.
-- **`profile_store.py`** (~8610 lines) - learned profiles + matching pipeline orchestration (numeric
+- **`profile_store.py`** (~10.9k lines) - learned profiles + matching pipeline orchestration (numeric
   Stages 1-4 run in `analysis.py::compute_matches_worker`; profile_store adds Stage-5 grouping and
-  rebuilds the `MatchResult`). Also match ranking history (`record_match_ranking_snapshot` /
-  `confirm_match_ranking_snapshots`), the training dataset for `live_match` retraining.
+  rebuilds the `MatchResult`). (The live_match ranking-snapshot history was removed in 0.5.8 with
+  the ML early commit it trained.)
 - **`config_flow.py`** (~260 lines) - minimal HA flow (setup, reconfigure, small options flow). The
-  180+ tunables are edited in the **panel** and persisted via `ws_set_options`, not HA flows.
-- **`__init__.py`** (~1420 lines) - entry point, services, config migration. Every registered service
-  needs matching entries in `services.yaml` and `strings.json`.
+  ~100 tunables are edited in the **panel** and persisted via `ws_set_options`, not HA flows.
+- **`__init__.py`** (~1.7k lines) - entry point, services, config migration. Every registered service
+  needs matching entries in `services.yaml` and `strings.json`, **and a schema in `_SERVICE_SCHEMAS`**
+  (enforced by `tests/test_audit_service_schemas.py`); resolve its device with `_service_manager`.
 
 **Pure-statistics per-profile heuristics** (no ML, never raise, surfaced via `ws_get_profiles`):
-`compute_profile_health`, `compute_profile_trends`, `suggest_coverage_gaps`,
-`compute_profile_advisories`, `compute_envelope_conformance`, `detect_cycle_artifacts`,
-`compute_profile_terminal_signature`. Detail in
-reference 02. Two traps: **there is no generic "Recommendations" banner** - advisories render per
-code, and `poor_health`/`shape_drift`/`duration_trend_up`/`energy_trend_up` ship over the WS but
-render nowhere, so a new code needs its render path too (register item 161). Conformance is
+`compute_profile_health`, `compute_profile_trends`,
+`suggest_coverage_gaps`, `compute_profile_advisories`, `compute_envelope_conformance`,
+`detect_cycle_artifacts`, `compute_profile_terminal_signature`. Detail in reference 02. Two traps:
+**there is no generic "Recommendations" banner** - advisories render per code, and since 0.5.8 the
+panel's poor-fit / trend / shape-drift warnings render **only** from `profile_advisories` (register
+item 428), so the maintenance-log suppression applies; a new code needs its render path too. Coverage
+gaps render on Profiles (measured useful, item 432); profile-group *suggestions* were measured harmful
+and deleted - do not re-add them without `devtools/advisory_usefulness_eval.py`. Conformance is
 complementary to `MatchResult.confidence`: confidence measures shape *correlation*, conformance
 measures absolute *level/spread*.
 
@@ -162,28 +186,44 @@ measures absolute *level/spread*.
   `compact_price_timeline`; #426). No filtering, **no DTW** (that is in `analysis.py`).
 - **`progress.py`** - **single source of truth** for progress / remaining-time / phase /
   projected-energy math. Pure, no HA. `manager.py`'s equivalents are thin wrappers and the Playground
-  `SimRunner` calls the same functions, so the what-if replay is byte-identical to the live estimator.
-  Locked by a golden snapshot; **never fork this math**.
+  replay calls the same functions, so the what-if replay is byte-identical to the live estimator.
+  Locked by `tests/test_progress_module.py` and the Playground parity tests (there is no separate
+  golden snapshot file); **never fork this math**.
 - **`notification_rules.py`** - pure notification *decision* predicates shared by `manager.py` and the
   Playground sim. **Delivery stays in the manager**; only thresholds/gating live here.
+- **`match_rules.py`** (audit F7) - the manager's post-match rules as pure functions: program
+  switching (initial commit, which an ambiguous winner earns only after `MATCH_AMBIGUOUS_COMMIT_FACTOR`
+  x persistence wins; decisive-margin switches; persistent switches by a clear or rising challenger;
+  divergence/unmatch reverts), the
+  envelope verified pause and its releases, the consistency override, the cycle-end label verdict.
+  `manager._async_do_perform_matching` and the Playground replay both call them (the alignment await
+  stays in the manager), and the detector's dishwasher match freeze calls the pause release too.
+  **Never re-implement a rule in either caller**; `devtools/playground_parity_eval.py` measures it.
 - **`learning.py`** - feedback system with confidence tracking. Label provenance in
   `profile_store._AUTO_LABEL_SOURCES` (`auto_match`/`auto_label_post`/`auto_label_service`/
   `auto_label_backfill`): anything in that tuple means "the matcher guessed this", which the
   `original_auto_label` preservation checks consult before overwriting.
 - **`phase_catalog.py`** - phase labels mapped to time ranges. Live phase is indexed by the
-  **ML-blended progress fraction** (not raw elapsed), so the readout survives overrun/underrun.
+  **smoothed progress fraction** (not raw elapsed), so the readout survives overrun/underrun.
   Separate from phase-*segmented matching* below.
-- **`phase_segmenter.py`** / **`phase_match.py`** (0.5.1) - unsupervised regime segmenter and per-role
-  duration/energy agreement + `phase_eta`. Consumed **only** by the opt-in phase-resolved ETA blend in
-  `progress.py`; does **not** change program (Stage 1-5) matching. Gated by `enable_phase_matching`
-  AND `LIVE_PHASE_DEVICE_TYPES`.
+- The 0.5.1 phase-resolved ETA stack (`phase_segmenter.py`, `phase_match.py`, `enable_phase_matching`)
+  was **removed** in 0.5.8 (audit PROGRESS-01/02): it never ran (no profile carried `device_type`), and
+  revived it missed its own Phase-0 bar on washers. The live phase readout is `phase_catalog.py`.
 - **`suggestion_engine.py`** - `select_clean_cycles()` filters mis-detected cycles first;
-  `SuggestionEngine` (classic) and `MLSuggestionEngine` (gated) produce suggestions;
+  `SuggestionEngine` produces suggestions (the ML-calibrated engine was deleted in 0.5.8, item 424);
   `reconcile_suggestions()` enforces cross-parameter invariants.
 - **`playground.py`** - headless, executor-safe backend for the Playground tab. Never touches HA,
   **never raises** (returns `{"error": ...}`). Replays stored cycles through a *fresh* real
   `CycleDetector` + the real matcher - no client-side detection copy. History/optimize run as
   detached, registry-tracked background tasks, chunked across small executor jobs. Reference 09.
+  **Replay parity is what every replay harness measures, so keep it exact:** the sim runs the real
+  `ProfileStore.async_match_profile` / `async_verify_alignment` through a `_SimStore` view and the
+  manager's own `match_rules`, and the live watchdog's keepalives are emulated inside silent
+  stretches. Before 0.5.8 top-1 differed from live on 26.5% of matches and a silent soak could never
+  split (items 387a/390); until audit F7 the sim kept its own matcher copy (188/1180 calls differed)
+  and never set the verified pause (17/176 replays ended differently). Replay figures taken before
+  either measured a different matcher and different end gates. The outcome carries `would_label` /
+  `label_reason` from the cycle-end label verdict.
 - **`history_import.py`** (#344) - turns raw power history into candidate cycles. Same contract:
   pure, executor-safe, hass-free, never raises. A raw HA history **cannot** be fed to one detector
   (it is change-based, so steady 0 W emits no rows and the detector force-stops instead), hence the
@@ -208,15 +248,18 @@ plus a soft `cycle_anomaly`/`overrun_ratio` that is visible-only and **never a n
 ### Data flow
 
 ```
-Power sensor change -> manager.async_handle_power_change() -> CycleDetector
-  -> [every 5 min] ProfileStore async match (executor-offloaded NumPy)
-  -> entity updates -> [on cycle end] learning feedback loop
+Power sensor change -> manager._async_power_changed (sync @callback) -> CycleDetector.process_reading
+  -> [match tick: profile_match_interval, 5 min default, halved until the first commit]
+     ProfileStore.async_match_profile (executor-offloaded NumPy) -> match_rules -> detector
+  -> one entity refresh per power event
+  -> [on cycle end] one complete-cycle match + label_verdict -> learning feedback loop
+     (one coalesced store write, item 456)
 ```
 
 ### Data persistence
 
 `homeassistant.helpers.storage.Store` (JSON). Profiles, cycle history, phase catalog, detected
-cycles, `profile_groups`, `suggestions`, per-cycle `ml_review`, `ml_model_versions`, `matching_config`.
+cycles, `profile_groups`, `suggestions`, per-cycle `ml_review`, `ml_model_versions`.
 
 **Three cycle lists, three different claims about a cycle** - mixing them up loses user data or fakes
 provenance:
@@ -224,11 +267,11 @@ provenance:
 | | `past_cycles` | `reference_cycles` | `backfill_cycles` |
 |---|---|---|---|
 | origin | observed live | community-store download | replayed from raw history (#344) |
-| trust | real | curated, **golden by construction** | auto-detected, unverified |
+| trust | real | community download; **reference shape only in a profile with none of your own** (`_effective_golden_flags`, audit STORE-04), quality-gated + content-deduped on download | auto-detected, unverified |
 | shapes envelopes + matching once labelled | yes | yes | yes |
 | lifetime energy / cycle count, ML training, feedback queue | yes | no | no |
 | shareable to the store | golden only | no | never |
-| retention eviction (cap 200, oldest first) | yes | no | no (capped per import) |
+| kept | every cycle with its full trace (no retention cap since 0.5.8, item 463) | all | all (capped per import) |
 
 **Two views over those lists, not interchangeable:**
 
@@ -237,8 +280,10 @@ provenance:
   delete or re-point a profile whose `sample_cycle_id` resolves to nothing, so one forgotten list
   silently destroys an import-only profile.
 - `iter_evidence_cycles()` - **only what the user allows to shape a profile**
-  (`CONF_PROFILE_EVIDENCE_SOURCES`). Used by exactly four sites that must agree: envelope build,
-  matcher snapshot pool, `_select_reference_cycle_id`, `has_real_profiles`.
+  (`CONF_PROFILE_EVIDENCE_SOURCES`). Every reader that answers "what does this profile look like"
+  goes through it and must agree: envelope build, matcher snapshot pool (live and Playground),
+  `_select_reference_cycle_id`, `has_real_profiles`, and the per-profile statistics the detector is
+  fed (pause catalogue, terminal signature and spins, duration resolution, unmatchable checks).
 
 **Never gate GC or a lookup on the evidence view.** An excluded cycle is still a stored cycle. Usage
 statistics are likewise not evidence. An empty/unknown selection falls back to all three - a setting
@@ -249,39 +294,51 @@ must not be able to make every profile unmatchable.
 `ml/` adds ML **alongside** the proven detection/matching code - it never replaces it. NumPy-only, no
 sklearn/torch/scipy at runtime. Baselines are trained offline in the `/root/ml_washdata` lab and
 shipped as base64 blobs; on-device training writes specs into the profile store and **never touches
-the baseline files**. Full detail in reference 07 and `ml/README.md`.
+the baseline files**. Full detail in reference 07.
 
 **Feature flags (`const.py`):** `SHOW_ML_LAB` (panel ML insights + the consolidated **ML Training**
-tab), `ENABLE_ML_SUGGESTIONS`, `ENABLE_ML_TRAINING`, and the per-device `CONF_ENABLE_ML_MODELS`
+tab), `ENABLE_ML_TRAINING`, and the per-device `CONF_ENABLE_ML_MODELS`
 (`ml_models_enabled(options)`, default off) which gates feeding ML into live decisions.
 
-**Five gated runtime consumers** of `CONF_ENABLE_ML_MODELS`:
+**Two gated runtime consumers** of `CONF_ENABLE_ML_MODELS`, plus the energy projection:
 
 1. **ML end-detection guard** - asymmetric anti-premature-stop: can only **defer, never end early**.
-2. **ML early match commit** - commits the initial match without the persistence counter at
-   `ML_MATCH_COMMIT_THRESHOLD`.
-3. **ML quality gate** - downgrades auto-labeling to a feedback request at cycle end.
-4. **ML remaining-time regressor** - blends a completion fraction into the phase-aware progress
-   *before* EMA smoothing. No shipped baseline, inert until on-device training promotes one.
-5. **Terminal-drop fast finalize** - pure statistics, no trained model. **Asymmetric, the opposite of
+   **Frozen off by `ENABLE_ML_END_GUARD = False`** whatever the device option (audit ML-05: 0
+   premature ends prevented on 292 replayed cycles, washer median lag +5.3 min). The code stays;
+   its tests patch the flag on.
+2. **Terminal-drop fast finalize** - pure statistics, no trained model. **Asymmetric, the opposite of
    the end-guard: it can only ever shorten the wait**, and only for an anomalously-early drop on a
    *familiar* cycle (peak within the learned range, else it may be a NEW program and is deferred).
+   **Dishwashers get it without the option** (`TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES`, audit ML-08),
+   but on that path only with a committed, unambiguous match or a hand-picked program
+   (`detector_config.terminal_drop_may_fire`): ungated it split a real unmatched cycle.
 
-Panel `ml_health` and `MLSuggestionEngine` go through `resolve_scorer` directly and are **not** gated
-on `CONF_ENABLE_ML_MODELS`.
+The `total_energy` regressor (live projected energy) is the **only head trained on-device**, and
+the one trained head with a live consumer. **Removed in 0.5.8** (maintainer decisions 2026-10-04,
+register item 210 moot): the ML early match commit (audit ML-01/02: 31% of its commits wrong) with
+its `live_match` model, training head and ranking snapshots; the ML quality gate (ML-06: 0 fires on
+eligible cycles) and the quality head's training (ML-10: untrainable on any real install); on-device
+training of the `end` head, whose consumer stays frozen (ML-11: the classifier gate promoted worse
+models on 4-7 held-out positives); the `remaining_time` regressor with its progress blend and
+`ENABLE_ML_REMAINING_TIME` (ML-07: worse than naive on 7 of 8 installs); the matcher weight tuner (MR-10: never
+promoted on a real export) with `revert_matching_config` and `matching_config`. Storage v17 drops
+their stored state. Do not re-add any of them without a replay that beats what they replaced.
 
-**Modules:** `engine.py` exposes `resolve_scorer(capability, store)` (classifiers) and
-`resolve_regressor` (regressors). **All ML inference must go through them** so trained models are
-actually used. `trainer.py` (logistic + ridge), `training_task.py` (label derivation + promotion),
-`feature_extraction.py`, `matching_tuner.py` (`tune_matching_config`: leave-one-out tuning of the
-matcher's bounded scoring weights; **can never change structural matching behaviour**, only the
-emphasis between shape/level/energy).
+Panel `ml_health` goes through `resolve_scorer` directly and is **not** gated on
+`CONF_ENABLE_ML_MODELS` (its "Cycle health" chip and review-queue role were removed in 0.5.8, item 426;
+the per-cycle score is still computed, by the shipped quality baseline). The ML Training tab lists
+only capabilities with a live consumer.
 
-**Promotion discipline:** classifiers promote when held-out AUC is within `ML_TRAINING_AUC_MARGIN`
-(0.02) of the baseline - `new_auc >= baseline - margin`, an intentional tolerance letting
-personalisation win at a tiny AUC cost. Regressors promote only when held-out MAE beats the naive
-elapsed/expected baseline by `ML_TRAINING_REGRESSION_MARGIN`. Revert via `revert_ml_models` /
-`revert_matching_config`.
+**Modules:** `engine.py` exposes `resolve_scorer(capability)` (the shipped classifier baselines) and
+`resolve_regressor(capability, store)` (on-device regressors). **All ML inference must go through
+them** so trained models are actually used. `trainer.py` (ridge fit + spec scoring), `training_task.py`
+(prefix dataset + promotion of `total_energy`), `feature_extraction.py`.
+
+**Promotion discipline:** the regressor promotes only when all three hold, on the same held-out
+rows: its MAE beats the naive elapsed/expected baseline by `ML_TRAINING_REGRESSION_MARGIN`, it is
+strictly below the incumbent model's MAE (audit ML-12), and there are at least
+`ML_TRAINING_MIN_HOLDOUT_CYCLES` held-out cycles (PROGRESS-16). Keep all three. (The classifier
+AUC/balanced-accuracy gate went with classifier training in 0.5.8.) Revert via `revert_ml_models`.
 
 **Coupling contract with the lab:** each model's `FEATURE_COLUMNS` and the standardized-logistic
 scoring math are duplicated in `wash_ml/*` and **must stay byte-identical**.
@@ -297,7 +354,12 @@ any promotion. The integration is self-sufficient at test/run time (parity fixtu
 
 ### Datetime and energy
 
-- **Always `dt_util.now()`** for timezone-aware datetimes, never `datetime.now()`.
+- **Always `dt_util.now()`** for timezone-aware datetimes, never `datetime.now()`. For any
+  **interval** (elapsed, `dt`, durations, timers) use `time_utils.utc_now()` and `dt_util.as_utc()`:
+  two aware datetimes sharing HA's one ZoneInfo subtract on wall-clock fields, so local stamps are
+  an hour off across a DST change (audit DETECT-01: a spring-forward soak split a wash). The
+  detector converts every reading to UTC at `process_reading`; keep `as_local` for display and
+  quiet-hours only.
 - All time/energy calculations must be dt-aware (timestamps, not sample counts).
 - Energy integration: use the shared `signal_processing.integrate_wh(ts, power, max_gap_s=...)` +
   `energy_gap_threshold_s(ts)`. Both persistence paths route through it - **do not reintroduce an
@@ -311,6 +373,15 @@ any promotion. The integration is self-sufficient at test/run time (parity fixtu
   templates, `title=`, `placeholder=`, `aria-label=`, settings schema labels/docs/intros, or tooltips.
   The English value goes in `translations/panel/en.json` as canonical source and as the `_t()`
   fallback. Only exception: the hardcoded `'WashData'` brand name.
+- **`_t()` HTML-escapes every substituted var** (audit UI-21: a translated string put typed
+  search text into the page raw). Wrap a var that is markup on purpose in `_html(...)`; use
+  `_tText(...)` for a sink that escapes itself or is plain text (toast, confirm modal, native
+  `confirm()`, `title`/`aria-label` through `_esc`, `textContent`), or the value is escaped twice.
+  Pass raw values, not pre-escaped ones.
+- **Plurals:** a numeric `count` (else `n`) var selects `key_<category>` via
+  `Intl.PluralRules(lang)`, then `key_other`, then the plain key. Add `key_one`/`key_other` to
+  `en.json` and every category each language needs (`_few`/`_many` for pl/cs/ru, ...); keep the
+  plain key as the fallback.
 - Settings schema strings auto-resolve at render time (`setting.{key}.label`, `setting.{key}.doc`,
   `section.{id}.label`, `section.{id}.intro`, `setting_group.{slug}.label`) - adding the key to
   `translations/panel/en.json` is all that is needed.
@@ -350,11 +421,11 @@ arrive via [GitLocalize](https://gitlocalize.com/repo/10819) as PRs; merge them 
 Deterministic and idempotent; never drop user data (cycles, labels, corrections); add tests with
 old-schema fixtures. **Two separate layers, tested separately:**
 
-1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.11. `VERSION` /
-   `MINOR_VERSION` live on the flow class in `config_flow.py` and must be bumped with it. Tested in
-   `tests/test_migration_harness.py`. The one-pass legacy path writes the current version directly, so
-   a bump also means updating the `minor_version=` at the end of the bulk migration.
-2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->13
+1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.11. The version
+   lives in `const.py` (`CONFIG_ENTRY_VERSION` / `CONFIG_ENTRY_MINOR_VERSION`), which the flow class,
+   every stepwise block and the one-pass legacy migration all read: a bump is that constant plus one
+   new migration step. Tested in `tests/test_migration_harness.py`.
+2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->17
    (`STORAGE_VERSION` in `const.py`). Tested in `tests/test_migration_v032.py`. Call
    `_async_migrate_func(old_version, 1, data)` **directly** - do not go through
    `ProfileStore.async_load()` (needs file I/O).
@@ -367,13 +438,22 @@ old-schema fixtures. **Two separate layers, tested separately:**
    Per-version steps are listed in reference 02 / the register. Recent: v9->v10 `reference_cycles`,
    v10->v11 marker-only (phase-profile cache self-populates on next envelope rebuild), v11->v12
    `backfill_cycles` (additive `setdefault`), v12->v13 marker-only
-   (`BANKED_TAIL_REPAIR_KEY` set so the one-time banked-tail duration repair runs once).
+   (`BANKED_TAIL_REPAIR_KEY` set so the one-time banked-tail duration repair runs once), v13->v14
+   marker-only by **assignment** (re-arms that repair after its #424 correction; v13 had already
+   cleared the key), v14->v15 pure data repair (review-queue answers stamped `manual`, audit
+   MANAGER-01; idempotent), v15->v16 review-queue cleanup (drops pending requests the item-433
+   rule would not raise; records no answer; idempotent), v16->v17 drops the state of the ML parts
+   removed in 0.5.8 (`match_ranking_history`, `matching_config`, every model record but
+   `total_energy`'s; no cycle or label; idempotent).
 
 ## Matching Pipeline
 
 All scoring constants live in `const.py` under "Matching pipeline scoring constants" (`MATCH_*`).
 Tuning provenance, A/B tables and measured accuracies are in reference 02 and
-`devtools/dtw_ab_eval.py` - not repeated here.
+`devtools/dtw_ab_eval.py` - not repeated here. **`dtw_ab_eval.py` does not run the shipped matcher**
+(audit MATCH-EVAL-01: no envelope templates, partial config); measure matcher changes with
+`devtools/eval.py`, which drives `ProfileStore.async_match_profile` leave-one-out with the config a
+real `WashDataManager` builds, and use `end_gate_eval.py --loo` (in-sample flatters confidence).
 
 **Every harness a tuning claim rests on must be committed.** Item 306's 427-cycle end-lag
 measurement was not, so when a review round proposed tightening that same gate there was no way to
@@ -403,7 +483,10 @@ Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for
   the observed duration is a prefix, and the sharp kernel costs -6.4pp at 60% elapsed. Weight and scale move
   **together** (a sharper scale with higher weight separates near-duplicates; raising weight alone was
   net-negative). `energy_agreement` uses mean power by default, **integrated energy** for
-  `washing_machine`/`washer_dryer` via `energy_mode`.
+  `washing_machine`/`washer_dryer` via `energy_mode`. On a **completed** integrated-mode match the
+  candidate's expected energy is the median of its own cycles (`envelope["energy_ref"]`, item 497,
+  `MATCH_ENERGY_REF_MIN_CYCLES`), not the warped envelope's mean x duration; mid-cycle keeps the
+  template value (the prefix variant was measured and caused early washer ends).
 - **Stage 5 - profile groups (shipped, hierarchical):** the user groups near-duplicate profiles.
   `_grouped_snapshots` returns the snapshots **unchanged** and only maps each **cohesive** group
   (pairwise envelope correlation >= `GROUP_MIN_COHESION`) to its members; loose groups are not mapped
@@ -418,11 +501,14 @@ Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for
   temperature). Three safeguards, all applied on a group win *before* the result is built: the
   top-level ambiguity gate, the member-fit backstop (`member_fit < 0.55 * best["score"]`), and the
   overrun guard (`current_duration > best_duration * 1.05`). The last two set `is_ambiguous`, which
-  is what blocks confident labelling and Smart Termination (register item 214).
+  blocks Smart Termination (register item 214) and every label path: both cycle-end gates and
+  `auto_label_cycles` check `is_ambiguous` as well as `label_confidence` and the margin (item 387b/c;
+  until 0.5.8 they read only the last two, so these safeguards never stopped a label).
   **The additive tie-break `_stage5_rerank` was tried and rejected (hurt net, redundant with Stage-4).
   It survives only in `devtools/dtw_ab_eval.py` as a documented negative result - do not re-add it.**
   Design rationale: register item 99 and
-  `docs/superpowers/specs/2026-08-14-cycle-variant-discrimination-design.md` (Phase 0.5).
+  `docs/superpowers/specs/2026-08-14-cycle-variant-discrimination-design.md` (Phase 0.5; gitignored,
+  local only).
 
 **Match confidence** = the top candidate's final blended pipeline score (`best["score"]`), 0-1. It is
 a similarity score, **not a calibrated probability**. **Ambiguity:**
@@ -445,23 +531,41 @@ calibrated against it. The chosen member's own score is `member_confidence`, and
 member_confidence)`. Using `confidence` to gate a label is register item 206: the cycle got labelled
 with a member the matcher was far less sure of than the number suggested.
 
+**Every auto-label goes through `profile_store.label_verdict(result, floor)`** (margin >=
+`MATCH_LABEL_MIN_MARGIN`, not `is_ambiguous`, `label_confidence >= floor`). At cycle end the manager
+runs **one complete-cycle match** and labels from it (audit MATCH-DECIDE-02); the last live tick is
+a prefix match whose winner differed from the complete one on 17.5% of cycles. The live `program`
+is display only. Do not reintroduce a second cycle-end label path.
+
+**Prefix guard (item 491):** the #364 prefix-fit term (`is_prefix_ambiguous`, Stage 6) was removed in
+0.5.8: since #400 the matcher already scores a running cycle on each candidate's truncated curve, so
+the term never fired at a split moment (0/713 genuine ends, 0/7 quiet positives) and cost half the
+matcher's CPU per live match. The only prefix flag left is `is_prefix_ambiguous_full_shape` (#288,
+anti-crease finalize only), composed only by `profile_store._match_prefix_ambiguity`; MatchContext
+element 7 is a retired always-False slot. Do not re-add a prefix guard without
+`devtools/prefix_guard_eval.py --quiet-cuts --sweep` showing catches where splits happen.
+
 ## Known Technical Debt
 
-The `[FIXED]` register in `docs/internal/INTEGRATION_REFERENCE.md` §7 is the live tracker - read it
-there rather than duplicating status here. Three design decisions are currently open for the
-maintainer (register items 195, 207, 210). The old `.dev_notes/` folder is deprecated - do not rely
-on it.
+`docs/internal/register/OPEN.md` is the live tracker (one short row per open item, owner, detail
+below) - read it there rather than duplicating status here. Closed items and their history are in
+`register/ARCHIVE.md` (append-only, ~850 KB: grep it by item number, do not read it whole). The old
+`.dev_notes/` folder is deprecated - do not rely on it.
 
 ## Internal Reference Documentation
 
-`docs/internal/INTEGRATION_REFERENCE.md` is canonical: module map, subsystem summaries, and the
-**discrepancy & tech-debt register**, which is the single source of truth for known bugs, dead code,
-naming traps, and doc inaccuracies.
+`docs/internal/INTEGRATION_REFERENCE.md` is canonical for the module map and subsystem summaries. The
+**discrepancy & tech-debt register** (`docs/internal/register/OPEN.md` + `ARCHIVE.md`, split out in
+audit DOCS-03) is the single source of truth for known bugs, dead code, naming traps, and doc
+inaccuracies.
 
 **Maintenance rule (critical):** every time a bug is fixed, a feature is added, a constant changes
-value, a module grows significantly, or a naming trap is resolved, **update the register**: mark
-fixed items `[FIXED]` with the commit hash, add new `[CODE]` items, update `[NOTE]` items, update
-module map line counts if a file grows by >100 lines, and update the §7 quick-reference table.
+value, a module grows significantly, or a naming trap is resolved, **update the register**: a fixed
+item leaves OPEN.md and gets its full row at the top of ARCHIVE.md as `FIXED` with the commit hash;
+a new open item gets the next free id (unique across both files, `docs_check.py` enforces it) and a
+row of at most 300 characters in OPEN.md with its detail below; a change that closes nothing gets a
+`FIXED`/`NOTE` row at the top of ARCHIVE.md. Update module map line counts if a file grows by >100
+lines.
 
 Deep-dives under `docs/internal/reference/` are supplementary; the register is what matters most to
 keep current.
@@ -472,8 +576,12 @@ keep current.
 - Use `DeviceLoggerAdapter` for all logging in `manager.py` and `profile_store.py`.
 - `scripts/` is a git submodule (`ha_integration_translator`) - `git submodule update --init`.
 - Tests reproduce specific GitHub issues (`test_issue_*.py`) - maintain this pattern for bug fixes.
-- Mark new pytest tests `slow` if they replay `cycle_data/` traces, fan out over many cycles, boot
-  full HA, or take >1.5s (`pytestmark = pytest.mark.slow` at module level).
+- Mark new pytest tests `slow` if they replay `cycle_data/` traces, fan out over many cycles, or
+  take >1.5s (`pytestmark = pytest.mark.slow` at module level). A real in-process boot through
+  `hass.config_entries.async_setup` is under 1 s: use the `setup_washdata_entry` fixture
+  (`tests/conftest.py`) rather than a MagicMock hass. `pytest-timeout` is 60 s per fast test and
+  1800 s per slow one; a new `hass = MagicMock()` site fails
+  `tests/test_audit_testing_07_no_new_magicmock_hass.py` (allow-list, `--update` to rewrite).
 - **Playwright E2E** in `playwright-tests/` covers the panel across chromium + mobile-chrome. When
   adding panel features, add or update the matching spec. Minification is a real transform, so
   `--e2e-min` (port 4568, so `reuseExistingServer` cannot hand the run a stale readable-source server)

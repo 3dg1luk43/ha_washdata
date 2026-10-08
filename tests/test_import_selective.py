@@ -27,8 +27,9 @@ from custom_components.ha_washdata.profile_store import ProfileStore
 
 
 @pytest.fixture
-def mock_hass():
+def mock_hass(tmp_path):
     hass = MagicMock()
+    hass.config.path = lambda *a: str(tmp_path.joinpath(*a))  # HA's Store writes here
 
     async def _exec(func, *args, **kwargs):
         if inspect.iscoroutinefunction(func):
@@ -629,3 +630,21 @@ async def test_a_matching_device_import_still_carries_the_reason(store):
     assert summary["device_type_match"] is True
     refs = store._data.get("reference_cycles") or []
     assert refs and any(c.get("termination_reason") == "smart" for c in refs)
+
+
+# ── register item 384: the user's length correction survives the import ─────
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("source_type,kept", [("dishwasher", True), ("washing_machine", False)])
+async def test_real_to_reference_keeps_a_manual_duration(store, source_type, kept):
+    cyc = _cyc("p1", "ECO", 2000, dur=7000)
+    cyc["manual_duration"] = 14040.0
+    payload = _payload(profiles={"ECO": {"avg_duration": 14000}}, past=[cyc],
+                       device_type=source_type)
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["profiles", "real_cycles"]},
+        cycle_destination="reference", local_device_type="dishwasher",
+    )
+    ref = store.get_reference_cycles()[0]
+    assert ref.get("manual_duration") == (14040.0 if kept else None)
+    assert store.profile_trusted_min_duration("ECO") == (14040.0 if kept else ref["duration"])

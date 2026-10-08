@@ -337,13 +337,14 @@ def test_min_off_gap_falls_back_to_gap_heuristic_without_traces() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_end_energy_ignores_single_outlier() -> None:
-    # Many clean cycles + one cycle carrying a long, high-ish pause. The old
-    # max-based rule would be dominated by that outlier; p95 stays sane.
+def test_end_energy_is_only_ever_a_correction() -> None:
+    # Audit SUGGEST-12: the end gate only runs once the whole off_delay window is
+    # below stop, so a value at or above stop x off_delay / 3600 decides nothing;
+    # the false-end statistic suggested here was a no-op. Only a value BELOW that
+    # floor (#376: it forbids what the power gate allows) is corrected.
     cycles = [_cycle(_clean_trace(), cid=f"c{i}") for i in range(12)]
     out = _engine(cycles).run_batch_simulation(cycles)
-    end_e = out[CONF_END_ENERGY_THRESHOLD]["value"]
-    assert 0.01 <= end_e <= 5.0
+    assert CONF_END_ENERGY_THRESHOLD not in out
 
 
 # ---------------------------------------------------------------------------
@@ -403,34 +404,3 @@ def test_stop_start_fall_back_without_gap() -> None:
 # 5. duration_tolerance: per-profile, not penalised by a loose profile
 # ---------------------------------------------------------------------------
 
-
-def test_duration_tolerance_per_profile() -> None:
-    # Profile A is tight (±2%), profile B is loose (±30%). A pooled p95 would be
-    # dragged up by B; the per-profile p75 keeps the global tolerance moderate.
-    profiles = {"A": {"avg_duration": 3600.0}, "B": {"avg_duration": 3600.0}}
-    cycles: list[dict[str, Any]] = []
-    tight = [0.98, 1.0, 1.02, 0.99, 1.01, 1.0]
-    loose = [0.7, 1.3, 0.75, 1.25, 0.8, 1.2]
-    for i, r in enumerate(tight):
-        cycles.append(
-            _cycle(_clean_trace(), cid=f"a{i}", profile="A", duration=3600.0 * r)
-        )
-    for i, r in enumerate(loose):
-        cycles.append(
-            _cycle(_clean_trace(), cid=f"b{i}", profile="B", duration=3600.0 * r)
-        )
-
-    hass = MagicMock()
-    hass.config_entries.async_get_entry.return_value = None
-    store = MagicMock()
-    store.get_past_cycles.return_value = cycles
-    store.get_profiles.return_value = profiles
-    store.get_suggestions.return_value = {}
-    engine = SuggestionEngine(hass, "e", store, device_type="washing_machine")
-
-    out = engine.generate_model_suggestions()
-    assert CONF_DURATION_TOLERANCE in out
-    tol = out[CONF_DURATION_TOLERANCE]["value"]
-    assert out[CONF_PROFILE_DURATION_TOLERANCE]["value"] == tol
-    assert 0.10 <= tol <= 0.50
-    assert "per-profile" in out[CONF_DURATION_TOLERANCE]["reason"].lower()

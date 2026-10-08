@@ -20,9 +20,10 @@
 With a washer, a dryer and a dishwasher live at the same time, every card on the
 iOS Lock Screen renders in the same default blue, and the per-device icon is the
 only thing telling them apart. One configured colour now maps to the three keys
-the companion apps read: ``color`` (Android notification accent),
-``notification_icon_color`` (iOS icon glyph) and ``progress_bar_color`` (iOS Live
-Activity bar). Unset keeps the payload byte-identical to before.
+the companion apps read: ``color`` (Android accent, iOS icon disc),
+``notification_icon_color`` (Live Activity icon tint, live updates only since #465)
+and ``progress_bar_color`` (iOS Live Activity bar). Unset keeps the payload
+byte-identical to before.
 """
 
 from typing import Any
@@ -50,7 +51,6 @@ def mock_hass() -> Any:
     hass.async_create_task = MagicMock(
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()
     )
-    hass.components.persistent_notification.async_create = MagicMock()
     hass.config_entries.async_get_entry = MagicMock()
     # A legacy notify.<service> target has no entity state, which is the path that
     # carries a data payload.
@@ -79,15 +79,22 @@ def _payloads(mock_hass: Any) -> list[dict[str, Any]]:
 
 # ── Payload keys ──────────────────────────────────────────────────────────────
 
-def test_mobile_target_gets_all_three_colour_keys(mock_hass: Any) -> None:
-    mgr = _make_manager(mock_hass, {CONF_NOTIFY_ICON_COLOR: "#4CAF50"})
+def test_mobile_target_gets_the_disc_and_bar_colour(mock_hass: Any) -> None:
+    """#465: iOS draws `notification_icon` as a glyph (`notification_icon_color`,
+    white by default) on a `color` disc. One value in both hid the icon, so an
+    ordinary notification carries only the disc colour."""
+    mgr = _make_manager(
+        mock_hass, {CONF_NOTIFY_ICON: "mdi:washing-machine", CONF_NOTIFY_ICON_COLOR: "#4CAF50"}
+    )
     mgr._notify_finish_services = ["notify.mobile_app_iphone"]
 
     mgr._dispatch_notification("done", event_type=NOTIFY_EVENT_FINISH)
 
     data = _payloads(mock_hass)[0]["data"]
-    for key in _COLOR_KEYS:
-        assert data[key] == "#4CAF50", key
+    assert data["notification_icon"] == "mdi:washing-machine"
+    assert data["color"] == "#4CAF50"
+    assert data["progress_bar_color"] == "#4CAF50"
+    assert "notification_icon_color" not in data
 
 
 def test_live_update_carries_the_progress_bar_colour(mock_hass: Any) -> None:

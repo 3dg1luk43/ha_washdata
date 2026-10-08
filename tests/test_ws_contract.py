@@ -17,8 +17,8 @@
 """Contract tests for the type-safe WebSocket API layer (Group H1).
 
 The important test here is :func:`test_registered_commands_match_ws_commands`: it
-enumerates every ``@websocket_command`` ``type`` literal in ``ws_api.py`` and
-asserts it has a matching entry in ``ws_schema.WS_COMMANDS`` (and vice-versa), so
+runs the real ``async_register_commands`` and asserts every command it registers
+has a matching entry in ``ws_schema.WS_COMMANDS`` (and vice-versa), so
 adding / removing / renaming a WS command *must* update the contract or the suite
 fails. The rest cover the debug-only response validator and the generator.
 
@@ -27,15 +27,15 @@ generated files).
 """
 from __future__ import annotations
 
-import ast
 import importlib.util
 import inspect
 import logging
-import re
 from pathlib import Path
 
 import pytest
 from unittest.mock import MagicMock
+
+from homeassistant.components import websocket_api
 
 from custom_components.ha_washdata import ws_api
 from custom_components.ha_washdata import ws_schema
@@ -44,32 +44,25 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 _TS_OUT = _REPO_ROOT / "custom_components" / "ha_washdata" / "www" / "ws-types.d.ts"
 _MD_OUT = _REPO_ROOT / "docs" / "WS_API.md"
 
-# `ha_washdata/<command>` appears in ws_api.py only in the @websocket_command
-# `type` literals (the bare command names used elsewhere have no slash), so this
-# regex is a faithful enumeration of the registered command set.
-_TYPE_RE = re.compile(r"ha_washdata/([a-z0-9_]+)")
+def _register() -> dict[str, tuple]:
+    """Run the REAL `async_register_commands` and return what it registered.
+
+    `websocket_api.async_register_command` only stores ``(handler, schema)`` under
+    ``hass.data["websocket_api"][type]``, so a bare hass with a real dict is all it
+    needs. This replaced a regex over the module source (which also counted a
+    decorated handler that was never put in the registration list) and an AST read
+    of the list itself (audit TESTING-13).
+    """
+    hass = MagicMock()
+    hass.data = {}
+    ws_api.async_register_commands(hass)
+    return hass.data[websocket_api.DOMAIN]
 
 
 def _registered_commands() -> set[str]:
-    src = inspect.getsource(ws_api)
-    return set(_TYPE_RE.findall(src))
-
-
-def _registration_handlers() -> list[str]:
-    """Handler names in async_register_commands' ``handlers = [...]`` list.
-
-    AST-parsed (not a raw token scan) so a ``ws_*`` name mentioned only in a comment
-    or elsewhere in the function body can't leak in and produce a false result.
-    """
-    tree = ast.parse(inspect.getsource(ws_api.async_register_commands))
-    names: list[str] = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Assign) and any(
-            isinstance(t, ast.Name) and t.id == "handlers" for t in node.targets
-        ) and isinstance(node.value, (ast.List, ast.Tuple)):
-            names = [e.id for e in node.value.elts if isinstance(e, ast.Name)]
-    assert names, "could not find the `handlers = [...]` list in async_register_commands"
-    return list(dict.fromkeys(names))
+    registered = _register()
+    assert all(t.startswith("ha_washdata/") for t in registered), sorted(registered)
+    return {t.split("/", 1)[1] for t in registered}
 
 
 def test_every_registered_handler_is_decorated():
@@ -82,15 +75,12 @@ def test_every_registered_handler_is_decorated():
     class of bug - it caught a dropped decorator on ``ws_trigger_ml_training`` that
     had un-registered the entire Playground + task-registry command set.
     """
-    missing = [
-        name
-        for name in _registration_handlers()
-        if getattr(getattr(ws_api, name, None), "_ws_command", None) is None
-    ]
-    assert not missing, (
-        "WS handlers wired into async_register_commands but missing the "
-        f"@websocket_command decorator (would abort registration): {missing}"
-    )
+    registered = _register()  # raises on a missing decorator
+    assert registered
+    for command, (handler, _schema) in registered.items():
+        inner = getattr(handler, "__wrapped__", None)
+        assert inner is not None, f"{command} is not wrapped by the RBAC _guard"
+        assert inner._ws_command == command
 
 
 def test_detached_task_runners_are_plain_coroutines():
@@ -153,6 +143,14 @@ def test_every_response_type_is_a_typeddict():
         assert hasattr(td, "__annotations__"), f"{command}: not a TypedDict"
 
 
+def test_task_result_types_name_real_task_kinds():
+    """Each typed task result is a TypedDict keyed by a kind ws_api really creates."""
+    source = inspect.getsource(ws_api)
+    for kind, td in ws_schema.WS_TASK_RESULT_TYPES.items():
+        assert hasattr(td, "__required_keys__"), f"{kind}: not a TypedDict"
+        assert f'"{kind}"' in source, f"no task of kind {kind!r} in ws_api.py"
+
+
 def test_command_params_have_valid_shape():
     valid_types = {
         "str", "int", "float", "bool", "dict", "list",
@@ -197,13 +195,8 @@ def test_validate_ws_contract_allows_extras_on_open_responses():
     assert ws_api._validate_ws_contract(
         "run_suggestion_analysis", {"ok": True, "count": 3, "anything_else": 42}
     ) == []
-    # The Playground one-shot commands return large open result dicts (rows / series
-    # / sweep grids / an {"error": ...} marker), so they are also open responses -
-    # extra keys must not be flagged.
-    for cmd in ("run_playground_cycle_detail", "run_playground_history", "run_playground_sweep"):
-        assert cmd in ws_schema.WS_OPEN_RESPONSES
-        assert ws_api._validate_ws_contract(cmd, {"whatever": 1, "series": []}) == []
-        assert ws_api._validate_ws_contract(cmd, {"error": "boom"}) == []
+    # The task snapshot splats a variant key set, so it is open too.
+    assert "get_task_result" in ws_schema.WS_OPEN_RESPONSES
 
 
 def test_validate_ws_contract_task_start_commands_are_strict():
@@ -281,10 +274,10 @@ def test_generated_files_exist_and_are_current():
     assert ts.strip() and md.strip()
 
     # Spot-check that known commands / types made it into both artifacts.
-    for token in ("GetProfilesResponse", "RunPlaygroundCycleDetailResponse",
+    for token in ("GetProfilesResponse", "StartTaskResponse",
                   "WashDataWsResponses"):
         assert token in ts, token
-    for command in ("run_playground_cycle_detail", "get_dtw_debug", "get_devices"):
+    for command in ("start_playground_cycle_detail", "get_playground_settings", "get_devices"):
         assert command in md, command
 
     # The committed files must be up to date with the schema (idempotent gen).
@@ -293,3 +286,28 @@ def test_generated_files_exist_and_are_current():
         "Generated WS type artifacts are out of date; run "
         "`python3 devtools/generate_ws_types.py`"
     )
+
+
+def test_every_handler_param_matches_ws_commands():
+    """Audit PLATFORM-17: names-only parity let a param added to one side ship a
+    wrong ws-types.d.ts / WS_API.md. Walk each handler's voluptuous schema."""
+    import voluptuous as vol
+
+    mismatches = []
+    for name in dir(ws_api):
+        handler = getattr(ws_api, name)
+        if not (name.startswith("ws_") and hasattr(handler, "_ws_command")):
+            continue
+        cmd = handler._ws_command.split("/", 1)[-1]
+        spec = ws_schema.WS_COMMANDS.get(cmd)
+        assert spec is not None, cmd
+        have = {}
+        if isinstance(handler._ws_schema, vol.Schema):
+            for key in handler._ws_schema.schema:
+                key_name = str(key.schema) if isinstance(key, vol.Marker) else str(key)
+                if key_name not in ("id", "type"):
+                    have[key_name] = isinstance(key, vol.Required)
+        want = {p["name"]: p["required"] for p in spec["params"]}
+        if have != want:
+            mismatches.append((cmd, have, want))
+    assert mismatches == []

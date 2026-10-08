@@ -21,6 +21,7 @@ from __future__ import annotations
 from asyncio import Task
 import hashlib
 import logging
+import math
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -33,10 +34,14 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.const import EntityCategory, UnitOfEnergy
 from homeassistant.helpers import entity_registry
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.dispatcher import (
+    async_dispatcher_connect,
+    async_dispatcher_send,
+)
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
+from .time_utils import utc_now
 from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -71,13 +76,18 @@ from .const import (
     STATE_DELAY_WAIT,
     STATE_INTERRUPTED,
     STATE_FORCE_STOPPED,
-    STATE_RINSE,
     STATE_UNKNOWN,
     STATE_CLEAN,
 )
 from .manager import WashDataManager
 
 _LOGGER = logging.getLogger(__name__)
+
+# The per-profile count sensors' own signal (register item 456). They read only
+# the profile summaries and envelopes, which change at a cycle end or a profile
+# edit, so rewriting all of them on every live refresh was pure cost (audit
+# PERF-01). Sent by WasherProfileSensorManager when the summaries change.
+SIGNAL_WASHER_PROFILES_UPDATE = "ha_washdata_profiles_update_{}"
 
 
 _STATIC_DIAGNOSTIC_SUFFIXES = {
@@ -200,6 +210,7 @@ async def async_setup_entry(
         )
 
     async_add_entities(entities)
+    manager.sensor_add_entities = async_add_entities
 
     # Reconcile diagnostics at startup so stale unavailable entries are auto-removed.
     cleanup_orphaned_diagnostic_entities(hass, manager, entry)
@@ -210,10 +221,33 @@ async def async_setup_entry(
     entry.async_on_unload(profile_sensor_manager.unsubscribe)
 
 
+@callback
+def async_reconcile_device_type_sensors(
+    hass: HomeAssistant, manager: WashDataManager, entry: ConfigEntry
+) -> None:
+    """Add or drop the pump-only sensor after an in-place device type change.
+
+    Options apply through the update listener without re-running platform setup
+    (audit PLATFORM-15), so a washer turned pump never got PumpRunsTodaySensor
+    and a pump turned washer kept it until a restart. Removing the registry entry
+    also removes the live entity.
+    """
+    if manager.device_type == DEVICE_TYPE_PUMP and manager.sensor_add_entities is not None:
+        entity_id = entity_registry.async_get(hass).async_get_entity_id(
+            "sensor", DOMAIN, f"{entry.entry_id}_pump_runs_today"
+        )
+        if entity_id is None or hass.states.get(entity_id) is None:
+            manager.sensor_add_entities([PumpRunsTodaySensor(manager, entry)])
+    cleanup_orphaned_diagnostic_entities(hass, manager, entry)
+
+
 class WasherBaseSensor(SensorEntity):
     """Base sensor for ha_washdata."""
 
     _attr_has_entity_name = True
+    # Pushed by the manager's update signal. Polling re-wrote every entity every
+    # 30 s, idle included (audit PERF-02); only clock-driven values poll.
+    _attr_should_poll = False
 
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize."""
@@ -264,7 +298,6 @@ class WasherStateSensor(WasherBaseSensor):
                 STATE_DELAY_WAIT,
                 STATE_INTERRUPTED,
                 STATE_FORCE_STOPPED,
-                STATE_RINSE,
                 STATE_UNKNOWN,
                 STATE_CLEAN,
             ],
@@ -291,8 +324,10 @@ class WasherStateSensor(WasherBaseSensor):
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]
+        # No per-reading counter here (audit PLATFORM-07): `samples_recorded`
+        # changed on every power reading, so each reading wrote a new state row
+        # and a new attribute row to the recorder. The debug sensor keeps it.
         attrs: dict[str, Any] = {
-            "samples_recorded": self._manager.samples_recorded,
             "current_program_guess": self._manager.current_program,
             "sub_state": self._manager.sub_state,
         }
@@ -435,7 +470,9 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE, STATE_DELAY_WAIT):
+        if self._manager.check_state() in (
+            STATE_OFF, STATE_IDLE, STATE_ANTI_WRINKLE, STATE_DELAY_WAIT
+        ):
             return None
         if self._manager.time_remaining is not None:
             return int(self._manager.time_remaining / 60)
@@ -461,22 +498,39 @@ class WasherTotalDurationSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state() == STATE_OFF:
+        if self._manager.check_state() in (STATE_OFF, STATE_IDLE):  # idle: #452
             return None
         if self._manager.total_duration:
             return int(self._manager.total_duration / 60)
         return None
 
-    @property
-    def extra_state_attributes(self):  # type: ignore[override]
-        """Return extra state attributes."""
-        return {
-            "last_updated": self._manager.last_total_duration_update,
-        }
+    # No `last_updated` attribute any more (audit PERF-13): it was stamped on every
+    # estimate, so the entity wrote a state_changed event, i.e. one recorder row,
+    # every 5 s even while the whole-minute value stood still. An unrecorded
+    # attribute would not help: the recorder writes a row for every state_changed.
+    # The entity's own `last_changed` says when the total last moved.
+
+
+def _whole_percent(value: Any) -> int | None:
+    """Progress rounded half-up to a whole percent (the card's Math.round)."""
+    if value is None:
+        return None
+    try:
+        pct = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(pct):
+        return None
+    return int(math.floor(pct + 0.5))
 
 
 class WasherProgressSensor(WasherBaseSensor):
-    """Sensor for cycle progress percentage."""
+    """Sensor for cycle progress percentage.
+
+    The state is a whole percent (audit PERF-13): as a raw float it changed on
+    every estimate, and every state_changed event is a recorder row. The panel
+    reads the unrounded figure over the WS API, not from this entity.
+    """
 
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the progress sensor."""
@@ -484,14 +538,17 @@ class WasherProgressSensor(WasherBaseSensor):
             key="cycle_progress",
             translation_key="cycle_progress",
             native_unit_of_measurement="%",
-            suggested_display_precision=1,
+            suggested_display_precision=0,
             icon="mdi:progress-clock",
         )
         super().__init__(manager, entry)
+        # The projection attributes, refreshed when the shown percent moves.
+        self._attrs_key: tuple[Any, ...] | None = None
+        self._attrs: dict[str, float] | None = None
 
     @property
     def native_value(self):  # type: ignore[override]
-        return self._manager.cycle_progress
+        return _whole_percent(self._manager.cycle_progress)
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]
@@ -500,15 +557,23 @@ class WasherProgressSensor(WasherBaseSensor):
         Derived from accumulated energy and the (ML-blended) progress estimate.
         Keys are present only while a projection is available, so the attributes
         stay clean when idle or early in a cycle.
+
+        Refreshed when the shown percent changes or a projection appears or goes,
+        not on every estimate: the projection moves with each reading, so it would
+        otherwise write the state_changed row the whole-percent state saves.
         """
-        attrs: dict[str, float] = {}
         projected_wh = self._manager.projected_energy_wh
-        if projected_wh is not None:
-            attrs["projected_energy_kwh"] = round(float(projected_wh) / 1000.0, 3)
         projected_cost = self._manager.projected_cost
-        if projected_cost is not None:
-            attrs["projected_cost"] = round(float(projected_cost), 2)
-        return attrs or None
+        key = (self.native_value, projected_wh is None, projected_cost is None)
+        if key != self._attrs_key:
+            attrs: dict[str, float] = {}
+            if projected_wh is not None:
+                attrs["projected_energy_kwh"] = round(float(projected_wh) / 1000.0, 3)
+            if projected_cost is not None:
+                attrs["projected_cost"] = round(float(projected_cost), 2)
+            self._attrs_key = key
+            self._attrs = attrs or None
+        return self._attrs
 
 
 class WasherPowerSensor(WasherBaseSensor):
@@ -533,6 +598,9 @@ class WasherPowerSensor(WasherBaseSensor):
 class WasherElapsedTimeSensor(WasherBaseSensor):
     """Sensor for elapsed cycle time."""
 
+    # Elapsed time advances with the clock even when a quiet plug sends nothing.
+    _attr_should_poll = True
+
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the elapsed time sensor."""
         self.entity_description = SensorEntityDescription(
@@ -540,6 +608,12 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
             translation_key="elapsed_time",
             native_unit_of_measurement="s",
             device_class=SensorDeviceClass.DURATION,
+            # Shown in minutes like time remaining / total duration (#232). The
+            # native unit stays seconds: HA applies a suggested unit only when the
+            # entity is first registered, so an existing entity keeps the unit its
+            # history and automations use (no state_class, so no statistics) until
+            # its owner picks another one in the entity settings, which HA converts.
+            suggested_unit_of_measurement="min",
             suggested_display_precision=0,
             icon="mdi:timer-outline",
         )
@@ -547,12 +621,15 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state() == STATE_OFF:
+        if self._manager.check_state() in (STATE_OFF, STATE_IDLE):  # idle: #452
             return 0
         start = self._manager.cycle_start_time
         if start:
-            delta = dt_util.now() - start
-            return int(delta.total_seconds())
+            # Whole minutes (audit PLATFORM-07): to the second it changed on every
+            # state write, one recorder row per power reading. UTC, like every
+            # interval (DST).
+            delta = utc_now() - dt_util.as_utc(start)
+            return int(delta.total_seconds()) // 60 * 60
         return 0
 
 
@@ -580,9 +657,20 @@ class WasherDebugSensor(WasherBaseSensor):
         detector = self._manager.detector
         stats = self._manager.sample_interval_stats
         # pylint: disable=protected-access
+        # The confidence comes from the same result as top_candidates and
+        # last_match_details (audit MATCH-DECIDE-14), not the committed program's
+        # `_last_match_confidence`, which moves only when the switching rules commit
+        # or re-confirm the program.
+        # That one is still the Match Confidence sensor's state; it is the fallback
+        # here only while there is no result to describe.
+        last = getattr(self._manager, "_last_match_result", None)
         attrs: dict[str, Any] = {
             "sub_state": detector.sub_state,
-            "match_confidence": getattr(self._manager, "_last_match_confidence", 0.0),
+            "match_confidence": (
+                float(getattr(last, "confidence", 0.0) or 0.0)
+                if last is not None
+                else getattr(self._manager, "_last_match_confidence", 0.0)
+            ),
             "cycle_id": getattr(detector, "_current_cycle_start", None),
             "samples": detector.samples_recorded,
             "energy_accum": getattr(detector, "_energy_since_idle_wh", 0.0),
@@ -713,11 +801,43 @@ class WasherProfileCountSensor(WasherBaseSensor):
         # Override unique ID to be profile specific
         self._attr_unique_id = f"{entry.entry_id}_profile_count_{self._profile_token}"
 
+    # One state write reads `available`, `native_value` and
+    # `extra_state_attributes`; take one profile snapshot for all three instead of
+    # three lookups per write (audit PERF-01).
+    _write_snapshot: dict[str, Any] | None = None
+    _write_snapshot_valid: bool = False
+
+    def _profile(self) -> dict[str, Any] | None:
+        if self._write_snapshot_valid:
+            return self._write_snapshot
+        return self._manager.profile_store.get_profile(self._profile_name)
+
+    async def async_added_to_hass(self) -> None:
+        """Listen to the profiles signal, not the live one (register item 456)."""
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass,
+                SIGNAL_WASHER_PROFILES_UPDATE.format(self._entry.entry_id),
+                self._update_callback,
+            )
+        )
+
+    @callback
+    def _update_callback(self) -> None:
+        """Write state from a single profile snapshot."""
+        self._write_snapshot = self._manager.profile_store.get_profile(self._profile_name)
+        self._write_snapshot_valid = True
+        try:
+            self.async_write_ha_state()
+        finally:
+            self._write_snapshot = None
+            self._write_snapshot_valid = False
+
     @property
     def native_value(self) -> int:  # type: ignore[override]
         """Return the cycle count."""
         # Fetch fresh count from store if available
-        profile = self._manager.profile_store.get_profile(self._profile_name)
+        profile = self._profile()
         if profile:
             return profile.get("cycle_count", 0)
         return 0
@@ -725,12 +845,12 @@ class WasherProfileCountSensor(WasherBaseSensor):
     @property
     def available(self) -> bool:  # type: ignore[override]
         """Return True if profile still exists."""
-        return self._manager.profile_store.get_profile(self._profile_name) is not None
+        return self._profile() is not None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:  # type: ignore[override]
         """Return profile statistics."""
-        profile = self._manager.profile_store.get_profile(self._profile_name)
+        profile = self._profile()
         if not profile:
             return None
 
@@ -796,17 +916,22 @@ class WasherProfileSensorManager:
         self._entry = entry
         self._async_add_entities = async_add_entities
         self._sensors: dict[str, WasherProfileCountSensor] = {}
-        self._diagnostics_cleanup_done: bool = False
 
         # Determine the signal string. It must match SIGNAL_WASHER_UPDATE from const.py
         # which is "washdata_update_{}"
         self._signal = SIGNAL_WASHER_UPDATE.format(entry.entry_id)
         self._update_task: Task[None] | None = None
         self._pending_update: bool = False
+        # The summaries revision last acted on; held, so `is` stays meaningful.
+        # Seeded with today's: the sensors about to be created are written from it.
+        self._seen_revision: object | None = None
+        try:
+            self._seen_revision = manager.profile_store.profile_summaries_revision()
+        except Exception:  # noqa: BLE001 - None just means "refresh on first notify"
+            self._seen_revision = None
 
-        # Register callback for ALL updates (simplest hook we have)
-        # Ideally we'd have a specific profile update signal, but general update is fine
-        # as long as we debounce or check efficiently.
+        # Every live refresh comes through here; it is turned into the profiles
+        # signal only when the profile summaries actually changed.
         self._unsub_dispatcher = async_dispatcher_connect(
             manager.hass,
             self._signal,
@@ -818,7 +943,6 @@ class WasherProfileSensorManager:
         cleanup_orphaned_diagnostic_entities(
             self._manager.hass, self._manager, self._entry
         )
-        self._diagnostics_cleanup_done = True
 
     def unsubscribe(self) -> None:
         """Remove the dispatcher subscription."""
@@ -834,7 +958,18 @@ class WasherProfileSensorManager:
 
     @callback
     def _update_callback(self) -> None:
-        """Handle updates."""
+        """Handle updates: act only when the profile summaries changed."""
+        try:
+            revision = self._manager.profile_store.profile_summaries_revision()
+        except Exception:  # noqa: BLE001 - a failed check must not freeze the sensors
+            revision = object()
+        if revision is self._seen_revision:
+            return
+        self._seen_revision = revision
+        async_dispatcher_send(
+            self._manager.hass,
+            SIGNAL_WASHER_PROFILES_UPDATE.format(self._entry.entry_id),
+        )
         if self._update_task and not self._update_task.done():
             self._pending_update = True
             return
@@ -968,6 +1103,8 @@ class PumpRunsTodaySensor(WasherBaseSensor):
 
     Only created when device type is ``pump``.
     """
+    # A rolling 24 h count: runs age out with the clock, not with an update.
+    _attr_should_poll = True
 
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         self.entity_description = SensorEntityDescription(
@@ -987,8 +1124,8 @@ class WasherCycleCountSensor(WasherBaseSensor):
     """Odometer: how many cycles this appliance has run, ever.
 
     Reports the monotonic lifetime counter, not ``len(stored history)`` (#414). The
-    stored-history number is capped at ``max_past_cycles`` and shrinks when the user
-    deletes a record, so as a state it was unusable for the thing people build on it:
+    stored-history number shrinks when the user deletes a record (and was capped at
+    200 until 0.5.8), so as a state it was unusable for the thing people build on it:
     an "every N cycles" maintenance schedule, whether WashData's own reminders or an
     external integration's. The old number is still available as the
     ``stored_cycles`` attribute.

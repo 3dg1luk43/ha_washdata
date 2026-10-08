@@ -38,12 +38,10 @@ produces. Any field either writer forgets fails here.
 from __future__ import annotations
 
 import dataclasses
-from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata import manager as mgr_mod
 from custom_components.ha_washdata.manager import WashDataManager
@@ -70,7 +68,6 @@ from custom_components.ha_washdata.const import (
     CONF_POWER_OFF_DELAY,
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_POWER_SENSOR,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_THRESHOLD,
@@ -102,7 +99,6 @@ OPTIONS_B: dict[str, Any] = {
     CONF_POWER_OFF_DELAY: 77.0,
     CONF_PROFILE_MATCH_INTERVAL: 600,
     CONF_PROFILE_MATCH_THRESHOLD: 0.55,
-    CONF_PROFILE_DURATION_TOLERANCE: 0.42,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO: 0.15,
     CONF_ANTI_WRINKLE_ENABLED: True,
     CONF_ANTI_WRINKLE_MAX_POWER: 321.0,
@@ -149,7 +145,6 @@ def _entry(options: dict[str, Any]) -> Any:
 def _build(mock_hass: Any, entry: Any) -> WashDataManager:
     """A manager with a *real* CycleDetector, so config is the real dataclass."""
     mock_hass.config_entries.async_get_entry.return_value = entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"):
         return WashDataManager(mock_hass, entry)
 
@@ -201,7 +196,10 @@ async def test_b_every_field_actually_moved_off_its_default(mock_hass) -> None:
     unchanged = sorted(k for k, v in default_cfg.items() if tuned_cfg[k] == v)
     # device_type is the one field OPTIONS_B deliberately leaves alone: changing it
     # re-resolves half the device-type defaults and would mask a real difference.
-    assert unchanged == ["device_type"], (
+    # min_duration_ratio is the FINISH-DEFERRAL ratio, a constant since audit
+    # DETECT-02: it used to be fed from profile_match_min_duration_ratio, the
+    # matcher's Stage-1 bound, which made the deferral inert.
+    assert unchanged == ["device_type", "min_duration_ratio"], (
         f"these detector settings ignore their option: {unchanged}"
     )
 
@@ -220,17 +218,3 @@ async def test_c_min_off_gap_reaches_the_detector_on_a_reload(mock_hass) -> None
     await _reload(mgr, _entry({CONF_MIN_OFF_GAP: 10}))
 
     assert mgr.detector.config.min_off_gap == 10
-
-
-@pytest.mark.asyncio
-async def test_d_duration_tolerance_reaches_the_detector_at_construction(
-    mock_hass,
-) -> None:
-    """The other half: a restart must not reset the tolerance to 0.25.
-
-    ``_should_defer_finish`` reads it live for the deferral ceiling, so a device
-    tuned to 0.42 ran at 0.25 after every restart until the next settings save.
-    """
-    mgr = _build(mock_hass, _entry({CONF_PROFILE_DURATION_TOLERANCE: 0.42}))
-
-    assert mgr.detector.config.profile_duration_tolerance == pytest.approx(0.42)

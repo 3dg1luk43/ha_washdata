@@ -283,7 +283,6 @@ from custom_components.ha_washdata.const import (  # noqa: E402
     DEVICE_TYPE_WASHING_MACHINE,
 )
 from custom_components.ha_washdata.manager import WashDataManager  # noqa: E402
-from homeassistant.util import dt as dt_util  # noqa: E402
 
 
 @pytest.fixture
@@ -317,7 +316,6 @@ def _entry(evidence=None):
 
 def _manager(hass, entry):
     hass.config_entries.async_get_entry.return_value = entry
-    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
     with patch("custom_components.ha_washdata.manager.ProfileStore"):
         return WashDataManager(hass, entry)
 

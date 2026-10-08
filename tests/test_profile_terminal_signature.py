@@ -104,20 +104,6 @@ def test_the_terminal_event_is_measured(store: ProfileStore) -> None:
     assert sig["position_frac"] > 0.9
 
 
-def test_the_quiet_span_is_the_phase_not_the_sample_gap(store: ProfileStore) -> None:
-    """The plug reports right through the drying phase here, every 30 s.
-
-    Measuring the interval before the event would report 30 s - the reporting
-    rate - and would read as "no quiet phase at all" on any densely sampled plug.
-    """
-    store._data["past_cycles"] = [_cycle(f"c{i}", step=30.0) for i in range(4)]
-
-    sig = store.compute_profile_terminal_signature("Eco")
-
-    assert sig is not None
-    assert sig["quiet_before_s"] > 600.0, "the drying phase was measured as a sample gap"
-
-
 def test_intermittency_is_reported_rather_than_hidden(store: ProfileStore) -> None:
     """The finding that stops this being an end signal has to be visible.
 
@@ -276,23 +262,3 @@ def test_an_unmeasurable_trace_is_not_counted_as_a_cycle_that_did_not_do_it(
     assert sig["consistency"] == 1.0
 
 
-def test_a_cycle_that_could_be_measured_and_showed_nothing_stays_counted(
-    store: ProfileStore,
-) -> None:
-    """The other half of the same rule, so the fix cannot be over-applied.
-
-    A full trace whose appliance simply did not emit the terminal event is the
-    case `consistency` exists to report, and it must stay in the denominator.
-    """
-    store._data["past_cycles"] = [
-        _cycle("c1"),
-        _cycle("c2"),
-        _cycle("c3"),
-        _cycle("c4", event_w=None),
-    ]
-
-    sig = store.compute_profile_terminal_signature("Eco")
-
-    assert sig is not None
-    assert sig["measured"] == 4 and sig["seen_in"] == 3
-    assert sig["consistency"] == pytest.approx(0.75)

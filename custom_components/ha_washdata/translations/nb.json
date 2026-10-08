@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData-oppsett",
-        "description": "Konfigurer vaskemaskinen din eller et annet apparat.\n\nStrømsensor er nødvendig.\n\nEtter oppsett åpner du WashData-panelet fra sidefeltet (eller gå til [/ha-washdata](/ha-washdata)) for å se sykluser, justere registrering og administrere profiler.",
+        "description": "Sett opp en vaskemaskin eller et annet apparat. En strømsensor er påkrevd.\n\nÅpne etter oppsettet WashData-panelet fra sidefeltet ([/ha-washdata](/ha-washdata)) for å se sykluser, profiler og alle innstillinger.",
         "data": {
           "name": "Enhetsnavn",
           "device_type": "Enhetstype",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Et vennlig navn for denne enheten (f.eks. \"Vaskemaskin\", \"Oppvaskmaskin\").",
-          "device_type": "Hva slags apparat er dette? Hjelper med å skreddersy deteksjon og merking.",
-          "power_sensor": "Sensorenheten som rapporterer strømforbruk i sanntid (i watt) fra smartpluggen din.",
-          "min_power": "Effektavlesninger over denne terskelen (i watt) indikerer at apparatet er i gang. Start med 2W for de fleste enheter."
+          "device_type": "Angir deteksjonsstandarder for denne typen apparat.",
+          "power_sensor": "Smartpluggens sensor som rapporterer gjeldende effekt i watt.",
+          "min_power": "Målinger over denne verdien (i watt) betyr at apparatet går. 2 W passer for de fleste enheter."
         }
       },
       "reconfigure": {
         "title": "Rekonfigurer WashData",
-        "description": "Oppdater enhetsnavnet, apparattypen eller strømsensoren.\n\nWashData-panelet (sidefeltet eller [/ha-washdata](/ha-washdata)) er der registrering, sykluser, profiler og varsler administreres.",
+        "description": "Endre enhetsnavn, apparattype eller strømsensor.\n\nAlt annet finnes i WashData-panelet (sidefeltet eller [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Enhetsnavn",
           "device_type": "Enhetstype",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Kunne ikke koble til",
-      "invalid_auth": "Ugyldig autentisering",
       "unknown": "Uventet feil",
       "invalid_power": "Effektterskelen må være større enn 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "WashData-innstillinger",
-        "description": "Gi enheten nytt navn eller endre de grunnleggende maskinvareinnstillingene. Alle innstillinger for registrering, matching og varsler finnes i [WashData-panelet](/ha-washdata) (også tilgjengelig fra sidefeltet).",
+        "description": "Gi enheten nytt navn eller endre grunninnstillingene. Alt annet finnes i [WashData-panelet](/ha-washdata) i sidefeltet.",
         "data": {
           "name": "Enhetsnavn",
           "device_type": "Enhetstype",
@@ -70,7 +68,7 @@
         "dryer": "Tørketrommel",
         "washer_dryer": "Vaske-tørketrommel kombi",
         "dishwasher": "Oppvaskmaskin",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Airfryer",
         "bread_maker": "Brødbaker",
         "pump": "Pumpe / Sump Pump",
         "generic": "Annet (avansert)",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profilnavn",
-          "description": "Navnet på en eksisterende profil (opprett profiler i Administrer profiler-menyen). La stå tomt for å fjerne etiketten."
+          "description": "Navnet på en eksisterende profil (opprett profiler i WashData-panelet). La stå tomt for å fjerne merkingen."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Konfidensgrense",
-          "description": "Minste matchkonfidens (0,50–0,95) for å bruke etiketter."
+          "description": "Minste matchkonfidens (0,50–0,95) for å bruke etiketter. La feltet stå tomt for å bruke enhetens innstilling \"Auto-merking konfidensgrad\"."
         }
       }
     },
     "export_config": {
       "name": "Eksporter konfig",
-      "description": "Eksporter denne enhetens profiler, sykluser og innstillinger til en JSON-fil (per enhet).",
+      "description": "Eksporter denne enhetens profiler, sykluser og innstillinger til en JSON-fil.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Send tilbakemelding om syklus",
-      "description": "Bekreft eller korriger et automatisk oppdaget program etter en fullført syklus. Oppgi enten «entry_id» (avansert) eller «device_id» (anbefalt).",
+      "description": "Bekreft eller korriger det oppdagede programmet for en fullført syklus. Oppgi `device_id` (anbefalt) eller `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Merk som utlastet",
-      "description": "Bekreft at den ferdige vasken er tatt ut av en WashData-enhet, noe som fjerner tilstanden \"Rengjøre\" og en eventuell utlastingspåminnelse.",
+      "description": "Bekreft at den ferdige vasken er tatt ut. Fjerner tilstanden \"Ren\" og en eventuell utlastingspåminnelse.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Match Tvetydighet"
+      },
+      "maintenance_due": {
+        "name": "Vedlikehold forfaller",
+        "state": {
+          "on": "Forfalt",
+          "off": "Ikke forfalt"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID-er for forfalte oppgaver"
+          },
+          "due_tasks": {
+            "name": "Forfalte oppgaver",
+            "state": {
+              "descale": "Avkalking",
+              "filter_clean": "Rengjør filter",
+              "drum_clean": "Rengjør trommel",
+              "bearing_service": "Lagerservice",
+              "other": "Annet",
+              "salt": "Fyll på salt",
+              "rinse_aid": "Fyll på glansemiddel",
+              "lint_filter": "Rengjør lofilter",
+              "condenser_clean": "Rengjør kondensator"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Anti-rynke",
           "interrupted": "Avbrutt",
           "force_stopped": "Tving stoppet",
-          "rinse": "Skylle",
           "unknown": "Ukjent",
-          "clean": "Rengjøre",
+          "clean": "Ren",
           "delay_wait": "Venter på å starte"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Syklusavvik",
+            "state": {
+              "overrun": "Kjører lenger",
+              "stalled": "Stoppet opp"
+            }
+          }
         }
       },
       "washer_program": {

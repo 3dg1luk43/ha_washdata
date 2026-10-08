@@ -27,7 +27,7 @@ async function openTriggersSection(page) {
 
 test('the unload confirmation settings render in Triggers & Door', async ({ page }) => {
   await page.goto('/');
-  await bootPanel(page, {}, BUTTON_STATES);
+  await bootPanel(page, {}, BUTTON_STATES, { settingsLevel: 'advanced' });
   await openTriggersSection(page);
 
   await expect(page.locator('.wd-field[data-field="unload_confirm_entity"]')).toBeVisible({ timeout: 8_000 });
@@ -36,7 +36,7 @@ test('the unload confirmation settings render in Triggers & Door', async ({ page
 
 test('the confirmation picker offers button-ish domains, not just binary_sensor', async ({ page }) => {
   await page.goto('/');
-  await bootPanel(page, {}, BUTTON_STATES);
+  await bootPanel(page, {}, BUTTON_STATES, { settingsLevel: 'advanced' });
   await openTriggersSection(page);
 
   const inp = page.locator('input[data-opt="unload_confirm_entity"]').first();

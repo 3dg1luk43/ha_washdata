@@ -28,6 +28,7 @@ def _store_with_cycles(cycles: list[dict]) -> ProfileStore:
     store = MagicMock(spec=ProfileStore)
     store.get_past_cycles.return_value = cycles
     store.suggest_coverage_gaps = ProfileStore.suggest_coverage_gaps.__get__(store, ProfileStore)
+    store._coverage_shape_clusters = ProfileStore._coverage_shape_clusters.__get__(store, ProfileStore)
     return store
 
 
@@ -52,8 +53,8 @@ def test_no_gaps_when_all_matched():
 
 
 def test_no_gaps_when_too_few_unmatched():
-    # 4 unmatched < default min_unmatched=5
-    cycles = [_matched()] * 16 + [_unmatched()] * 4
+    # 2 unmatched < default min_unmatched=3 (5 until register item 436)
+    cycles = [_matched()] * 18 + [_unmatched()] * 2
     store = _store_with_cycles(cycles)
     result = store.suggest_coverage_gaps()
     assert result == {}
@@ -162,17 +163,6 @@ def test_low_confidence_not_counted_as_unmatched():
 # ---------------------------------------------------------------------------
 
 
-def test_result_has_expected_keys():
-    cycles = [_matched()] * 15 + [_unmatched(1800.0)] * 5 + [_unmatched(1900.0)] * 3
-    store = _store_with_cycles(cycles)
-    result = store.suggest_coverage_gaps()
-    assert "unmatched_count" in result
-    assert "low_confidence_count" in result
-    assert "unmatched_rate" in result
-    assert "suggest_create" in result
-    assert "duration_clusters" in result
-
-
 def test_unmatched_rate_correct():
     # 6 unmatched in 30 recent = 20%
     cycles = [_matched()] * 24 + [_unmatched()] * 6
@@ -190,6 +180,7 @@ def test_exception_returns_empty_dict():
     store = MagicMock(spec=ProfileStore)
     store.get_past_cycles.side_effect = RuntimeError("store error")
     store.suggest_coverage_gaps = ProfileStore.suggest_coverage_gaps.__get__(store, ProfileStore)
+    store._coverage_shape_clusters = ProfileStore._coverage_shape_clusters.__get__(store, ProfileStore)
     assert store.suggest_coverage_gaps() == {}
 
 
@@ -204,3 +195,25 @@ def test_custom_thresholds():
     store = _store_with_cycles(cycles)
     result = store.suggest_coverage_gaps(min_unmatched=3, min_unmatched_rate=0.20)
     assert result["suggest_create"] is True
+
+
+def test_a_three_cycle_programme_is_now_found():
+    """Register item 436: programmes with 3-4 cycles were almost never caught (2/18
+    held out) because the finder needed 5 unmatched cycles."""
+    cycles = [_matched()] * 17 + [_unmatched()] * 3
+    store = _store_with_cycles(cycles)
+    assert store.suggest_coverage_gaps().get("unmatched_count") == 3
+
+
+def test_a_cycle_that_matched_a_known_programme_well_is_not_a_new_programme():
+    """Unmatched only because the margin was small: it is not evidence of a
+    programme the user has not created (live false alarms 6 -> 2 of the clusters)."""
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+    st = ProfileStore.__new__(ProfileStore)
+    sure = [{"id": f"s{i}", "duration": 3600.0, "power_data": [[0, 1], [60, 2]], "match_confidence": 0.85}
+            for i in range(3)]
+    assert st._coverage_shape_clusters(  # noqa: SLF001
+        sure, {}, 900.0, cluster_mode="relative", relative_tol=0.25, shape_mode="index",
+        subset=True, max_traces=5, threshold=0.75, max_confidence=0.7,
+    ) == []

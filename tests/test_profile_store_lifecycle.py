@@ -126,23 +126,22 @@ async def test_profile_matching_logic(store):
     assert result.confidence > 0.1 # Low because data is sparse, but should be best
 
 @pytest.mark.asyncio
-async def test_retention_enforcement(store):
-    """Test that retention limits are respected."""
-    store._max_past_cycles = 5
-    
+async def test_every_full_trace_is_kept(store):
+    """Register item 463: no per-program trace cap (it was 20). Every labelled
+    cycle keeps its power trace, however many the program has."""
     start_base = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-    for i in range(10):
-        cycle_data = {
+    for i in range(25):
+        await store.async_add_cycle({
             "start_time": (start_base + timedelta(hours=i)).isoformat(),
             "duration": 100.0,
-            "status": "completed"
-        }
-        await store.async_add_cycle(cycle_data)
-        
-    assert len(store.get_past_cycles()) == 5
-    # Should be the 5 newest
-    newest_start = max(c["start_time"] for c in store.get_past_cycles())
-    assert newest_start == (start_base + timedelta(hours=9)).isoformat()
+            "status": "completed",
+            "profile_name": "Eco",
+            "power_data": [[0.0, 500.0], [50.0, 500.0], [100.0, 0.0]],
+        })
+
+    cycles = store.get_past_cycles()
+    assert len(cycles) == 25
+    assert all(c.get("power_data") for c in cycles)
 
 @pytest.mark.asyncio
 async def test_profile_rename_and_assignment(store):

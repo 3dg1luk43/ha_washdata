@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Konfigurimi WashData",
-        "description": "Konfiguro makinën larëse ose pajisje tjetër.\n\nKërkohet sensori i fuqisë.\n\nPas konfigurimit, hap panelin WashData nga shiriti anësor (ose shko te [/ha-washdata](/ha-washdata)) për të parë ciklet, rregulluar zbulimin dhe menaxhuar profilet.",
+        "description": "Konfiguro një makinë larëse ose pajisje tjetër. Kërkohet një sensor fuqie.\n\nPas konfigurimit, hap panelin WashData nga shiriti anësor ([/ha-washdata](/ha-washdata)) për të parë ciklet, profilet dhe të gjitha cilësimet.",
         "data": {
           "name": "Emri i pajisjes",
           "device_type": "Lloji i pajisjes",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Një emër miqësor për këtë pajisje (p.sh., \"Lavatriçe\", \"Pjatalarëse\").",
-          "device_type": "Çfarë lloj pajisjeje është kjo? Ndihmon në përshtatjen e zbulimit dhe etiketimit.",
-          "power_sensor": "Njësia e sensorit që raporton konsumin e energjisë në kohë reale (në vat) nga spina juaj inteligjente.",
-          "min_power": "Leximet e fuqisë mbi këtë prag (në vat) tregojnë se pajisja është në punë. Filloni me 2 W për shumicën e pajisjeve."
+          "device_type": "Cakton parazgjedhjet e zbulimit për këtë lloj pajisjeje.",
+          "power_sensor": "Sensori i spinës inteligjente që raporton fuqinë në kohë reale, në vat.",
+          "min_power": "Leximet mbi këtë vlerë (në vat) tregojnë se pajisja është në punë. 2 W u përshtatet shumicës së pajisjeve."
         }
       },
       "reconfigure": {
         "title": "Rikonfiguro WashData",
-        "description": "Përditëso emrin e pajisjes, llojin e pajisjes ose sensorin e fuqisë.\n\nPaneli WashData (shiriti anësor, ose [/ha-washdata](/ha-washdata)) është ku menaxhohen zbulimi, ciklet, profilet dhe njoftimet.",
+        "description": "Ndrysho emrin e pajisjes, llojin e saj ose sensorin e fuqisë.\n\nGjithçka tjetër është në panelin WashData (shiriti anësor, ose [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Emri i pajisjes",
           "device_type": "Lloji i pajisjes",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Lidhja dështoi",
-      "invalid_auth": "Vërtetim i pavlefshëm",
       "unknown": "Gabim i papritur",
       "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "Cilësimet WashData",
-        "description": "Riemërtoni pajisjen ose ndryshoni cilësimet e saj bazë të harduerit. Të gjitha cilësimet e zbulimit, përputhjes dhe njoftimeve janë në [panelin WashData](/ha-washdata) (i arritshëm edhe nga shiriti anësor).",
+        "description": "Riemërtoni pajisjen ose ndryshoni cilësimet e saj bazë. Gjithçka tjetër është në [panelin WashData](/ha-washdata) në shiritin anësor.",
         "data": {
           "name": "Emri i pajisjes",
           "device_type": "Lloji i pajisjes",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Emri i profilit",
-          "description": "Emri i një profili ekzistues (krijoni profile në menunë Menaxho profilet). Lëreni bosh për të hequr etiketën."
+          "description": "Emri i një profili ekzistues (krijoni profile në panelin WashData). Lëreni bosh për të hequr etiketën."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Pragu i besueshmërisë",
-          "description": "Besueshmëria minimale e përputhjes (0,50–0,95) për të aplikuar etiketat."
+          "description": "Besueshmëria minimale e përputhjes (0,50-0,95) për të aplikuar etiketat. Lëreni bosh për të përdorur cilësimin Besueshmëria e etiketimit automatik të pajisjes."
         }
       }
     },
     "export_config": {
       "name": "Eksporto konfigurimin",
-      "description": "Eksporto profilet, ciklet dhe cilësimet e kësaj pajisjeje në një skedar JSON (për pajisje).",
+      "description": "Eksporto profilet, ciklet dhe cilësimet e kësaj pajisjeje në një skedar JSON.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Dërgo komente për ciklin",
-      "description": "Konfirmo ose korrigjo një program të zbuluar automatikisht pas një cikli të përfunduar. Jep `entry_id` (i avancuar) ose `device_id` (rekomandohet).",
+      "description": "Konfirmo ose korrigjo programin e zbuluar të një cikli të përfunduar. Jep `device_id` (rekomandohet) ose `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Shëno si të shkarkuar",
-      "description": "Konfirmo se ngarkesa e përfunduar është hequr nga një pajisje WashData, duke pastruar gjendjen \"I pastër\" dhe çdo kujtesë për shkarkim.",
+      "description": "Konfirmo se ngarkesa e përfunduar u hoq. Pastron gjendjen \"I pastër\" dhe çdo kujtesë për shkarkim.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Paqartësia e përputhjes"
+      },
+      "maintenance_due": {
+        "name": "Mirëmbajtje e nevojshme",
+        "state": {
+          "on": "E nevojshme",
+          "off": "Jo e nevojshme"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "ID-të e detyrave të nevojshme"
+          },
+          "due_tasks": {
+            "name": "Detyrat e nevojshme",
+            "state": {
+              "descale": "Heqja e gurëve",
+              "filter_clean": "Pastro filtrin",
+              "drum_clean": "Pastro tamburin",
+              "bearing_service": "Servisi i kushinetave",
+              "other": "Tjetër",
+              "salt": "Rimbush kripën",
+              "rinse_aid": "Rimbush lëngun shpëlarës",
+              "lint_filter": "Pastro filtrin e pushit",
+              "condenser_clean": "Pastro kondensatorin"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Kundër rrudhave",
           "interrupted": "E ndërprerë",
           "force_stopped": "Ndaluar me forcë",
-          "rinse": "Shpëlarje",
           "unknown": "E panjohur",
           "clean": "I pastër",
           "delay_wait": "Në pritje për të filluar"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomali e ciklit",
+            "state": {
+              "overrun": "Po zgjat",
+              "stalled": "I ngecur"
+            }
+          }
         }
       },
       "washer_program": {

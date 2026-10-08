@@ -80,7 +80,9 @@ def test_async_offload_returns_none_not_placeholder_tuple(
 ) -> None:
     """With real readings and no manual override, the wrapper offloads and returns None."""
     wrapper, mgr = wrapper_and_manager({})
-    mgr._spawn_tracked = MagicMock()  # capture the offload without running a task
+    # Capture the offload without running it; close the coroutine so it is not
+    # left unawaited for a later test's garbage collection to report.
+    mgr._spawn_tracked = MagicMock(side_effect=lambda coro: coro.close())
     result = wrapper(_readings())
     assert result is None  # NOT (None, 0.0, 0.0, None)
     mgr._spawn_tracked.assert_called_once()

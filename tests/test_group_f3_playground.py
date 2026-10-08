@@ -19,11 +19,8 @@
 Covers Playground WebSocket commands and their pure helper logic in
 ``playground.py``:
 
-- ``get_dtw_debug`` (via :func:`playground.dtw_debug_payload`) returns the
-  Stage 2 / DTW / Stage 4 score breakdown, the two resampled traces on a shared
-  grid, and the DTW warping path for one cycle vs one profile.
 - override plumbing (``build_sim_config``, ``apply_match_overrides``,
-  ``finalize_sweep_1d``, ``finalize_sweep_2d``).
+  ``finalize_sweep_1d``).
 
 Fast, pure-unit tests (no HA boot, no file I/O).
 """
@@ -97,7 +94,6 @@ def _base_config(**overrides) -> CycleDetectorConfig:
         min_off_gap=60,
         start_threshold_w=10.0,
         stop_threshold_w=5.0,
-        end_repeat_count=1,
     )
     cfg.update(overrides)
     return CycleDetectorConfig(**cfg)
@@ -154,122 +150,6 @@ def test_build_sim_config_empty_override_returns_base():
 
 
 # ---------------------------------------------------------------------------
-# dtw_debug_payload
-# ---------------------------------------------------------------------------
-
-def test_dtw_debug_returns_full_breakdown():
-    store = _default_store()
-    out = playground.dtw_debug_payload(store, "c1", "Cotton 40")
-
-    assert out["profile_name"] == "Cotton 40"
-    assert out["grid_n"] == playground.MATCH_DTW_RESAMPLE_N
-    assert len(out["cycle_trace"]) == out["grid_n"]
-    assert len(out["profile_trace"]) == out["grid_n"]
-    # every trace point is [t, w]
-    assert all(len(p) == 2 for p in out["cycle_trace"])
-
-    for key in ("correlation", "mae_score", "score"):
-        assert key in out["stage2"]
-    for key in ("l1_score", "ddtw_score", "blend_weight", "blended_score"):
-        assert key in out["dtw"]
-    for key in ("duration_agreement", "energy_agreement", "final_score"):
-        assert key in out["stage4"]
-
-    # warp path is a list of [i, j] index pairs
-    assert out["warp_path"]
-    assert all(len(p) == 2 for p in out["warp_path"])
-
-    # c1 IS the profile's own sample cycle -> scores are (near) perfect
-    assert out["stage2"]["score"] == pytest.approx(1.0, abs=1e-6)
-    assert out["stage4"]["final_score"] == pytest.approx(1.0, abs=1e-6)
-
-
-def test_dtw_debug_defaults_profile_to_cycle_label():
-    store = _default_store()
-    out = playground.dtw_debug_payload(store, "c2", None)
-    assert out["profile_name"] == "Cotton 40"
-    assert "stage2" in out
-
-
-def test_dtw_debug_missing_cycle_errors():
-    store = _default_store()
-    out = playground.dtw_debug_payload(store, "does-not-exist", None)
-    assert out == {"error": "cycle_not_found"}
-
-
-def test_dtw_debug_missing_profile_errors():
-    store = _default_store()
-    out = playground.dtw_debug_payload(store, "c1", "Nonexistent Profile")
-    assert out["error"] == "profile_not_found"
-    assert out["profile_name"] == "Nonexistent Profile"
-
-
-def test_dtw_debug_unlabeled_cycle_no_profile_errors():
-    cycle = _make_cycle("u1", 1)
-    cycle["profile_name"] = None
-    cycle["label"] = None
-    store = _make_store([cycle], {})
-    out = playground.dtw_debug_payload(store, "u1", None)
-    assert out["error"] == "no_profile"
-
-
-# ---------------------------------------------------------------------------
-# WS handler wiring
-# ---------------------------------------------------------------------------
-
-def _make_hass_with_manager(store: ProfileStore, base_config: CycleDetectorConfig):
-    manager = MagicMock()
-    manager.profile_store = store
-    manager.detector.config = base_config
-
-    hass = MagicMock()
-    hass.data = {DOMAIN: {"e1": manager}}
-    hass.config_entries.async_entries.return_value = []
-
-    async def _exec(fn, *args):
-        return fn(*args)
-
-    hass.async_add_executor_job = _exec
-    return hass
-
-
-async def test_ws_get_dtw_debug_sends_result():
-    store = _default_store()
-    hass = _make_hass_with_manager(store, _base_config())
-    connection = MagicMock()
-    msg = {"id": 3, "entry_id": "e1", "cycle_id": "c1", "profile_name": "Cotton 40"}
-    await ws_api.ws_get_dtw_debug.__wrapped__(hass, connection, msg)
-
-    connection.send_result.assert_called_once()
-    payload = connection.send_result.call_args[0][1]
-    assert payload["profile_name"] == "Cotton 40"
-    assert "warp_path" in payload
-    connection.send_error.assert_not_called()
-
-
-async def test_ws_get_dtw_debug_missing_cycle_sends_error():
-    store = _default_store()
-    hass = _make_hass_with_manager(store, _base_config())
-    connection = MagicMock()
-    msg = {"id": 4, "entry_id": "e1", "cycle_id": "ghost"}
-    await ws_api.ws_get_dtw_debug.__wrapped__(hass, connection, msg)
-
-    connection.send_result.assert_not_called()
-    connection.send_error.assert_called_once()
-    assert connection.send_error.call_args[0][1] == "cycle_not_found"
-
-
-async def test_ws_get_dtw_debug_no_manager():
-    hass = MagicMock()
-    hass.data = {DOMAIN: {}}
-    connection = MagicMock()
-    msg = {"id": 1, "entry_id": "missing", "cycle_id": "c1"}
-    await ws_api.ws_get_dtw_debug.__wrapped__(hass, connection, msg)
-    connection.send_error.assert_called_once()
-    assert connection.send_error.call_args[0][1] == "not_found"
-
-
-# ---------------------------------------------------------------------------
 # Registration / RBAC wiring
 # ---------------------------------------------------------------------------
 
@@ -277,10 +157,18 @@ def test_playground_tab_whitelisted():
     assert "playground" in ws_api._PANEL_TABS
 
 
-def test_playground_history_is_read_level():
-    # run_playground_history does not start with get_, so it must be
-    # explicitly whitelisted to gate at the 'read' level.
-    assert "run_playground_history" in ws_api._READ_WRITE_COMMANDS
+def test_the_removed_playground_commands_are_gone():
+    # 0.5.8 UI removals: the DTW visualizer. (The settings presets came back.)
+    assert not hasattr(ws_api, "ws_get_dtw_debug")
+    assert "get_dtw_debug" not in ws_api._READ_WRITE_COMMANDS
+
+
+def test_the_one_shot_playground_commands_are_gone():
+    # Audit PLAYGROUND-17: unused by the panel (it starts registry tasks) and each
+    # ran a whole batch in one executor call. The Python functions stay.
+    for cmd in ("run_playground_cycle_detail", "run_playground_history", "run_playground_sweep"):
+        assert cmd not in ws_api._READ_WRITE_COMMANDS
+        assert not hasattr(ws_api, f"ws_{cmd}")
 
 
 # ─── Playground tab-open cost (lazy suggestions) ──────────────────────────────
@@ -334,7 +222,6 @@ async def test_playground_settings_can_skip_suggestion_computation():
     store.get_suggestions.reset_mock()
     lean = await _call(False)
     assert lean["classic_suggestions"] == {}
-    assert lean["ml_suggestions"] is None
     assert store.get_suggestions.call_count == 0
     # The values the fields actually need are still there.
     assert "effective" in lean and "presets" in lean
@@ -345,30 +232,3 @@ async def test_playground_settings_can_skip_suggestion_computation():
     assert full["classic_suggestions"].get("off_delay") == 240
 
 
-def test_playground_snapshots_include_every_evidence_category():
-    """A profile sampled from a backfilled cycle must still be a Playground candidate.
-
-    The snapshot pool was built from `past_cycles + reference_cycles`, so such a profile
-    produced no candidate at all and the sandbox reported the cycle as unmatched - a wrong
-    answer that would have been read as a matcher problem.
-    """
-    from unittest.mock import MagicMock
-
-    from custom_components.ha_washdata import playground as pg
-
-    store = MagicMock()
-    backfilled = {
-        "id": "b1", "profile_name": "Cotton 40", "duration": 3600,
-        "power_data": [[float(i * 60), 1500.0] for i in range(61)],
-    }
-    store._data = {
-        "profiles": {"Cotton 40": {"avg_duration": 3600, "sample_cycle_id": "b1"}},
-        "past_cycles": [], "reference_cycles": [], "backfill_cycles": [backfilled],
-    }
-    store.iter_evidence_cycles = MagicMock(return_value=[backfilled])
-    store._grouped_snapshots = MagicMock(side_effect=lambda snaps: (snaps, {}, {}))
-
-    snaps, _config, _members, _member_snaps = pg._build_match_snapshots(store)
-
-    assert [s["name"] for s in snaps] == ["Cotton 40"]
-    store.iter_evidence_cycles.assert_called_once()

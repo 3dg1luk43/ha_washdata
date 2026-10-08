@@ -6,7 +6,11 @@
  * groups them by subsystem prefix, reports line numbers and method sizes,
  * and flags oversized methods (>100 lines).
  *
- * Usage: node devtools/gen_panel_map.mjs
+ * Usage: node devtools/gen_panel_map.mjs           # rewrite the map
+ *        node devtools/gen_panel_map.mjs --check   # exit 1 if the committed map is stale
+ *
+ * The output is deterministic (no date), so --check can gate it; build_panel.mjs
+ * regenerates it on every build, so a normal panel rebuild keeps it current.
  */
 
 import fs from 'node:fs';
@@ -117,14 +121,13 @@ for (const m of methods) byGroup[groupFor(m.name)].push(m);
 const OVERSIZE = 100;
 const oversized = methods.filter(m => m.size > OVERSIZE).sort((a, b) => b.size - a.size);
 
-const now = new Date().toISOString().slice(0, 10);
 const out = [
   `# Panel Navigation Map`,
   ``,
-  `Auto-generated ${now} from \`www/ha-washdata-panel.js\` (${total} lines, ${methods.length} methods).`,
+  `Auto-generated from \`www/ha-washdata-panel.js\` (${total} lines, ${methods.length} methods).`,
   `Regenerate: \`node devtools/gen_panel_map.mjs\``,
   ``,
-  `Each entry: **Method name** — line number (method size in lines).`,
+  `Each entry: **Method name** - line number (method size in lines).`,
   `Methods >${OVERSIZE} lines are flagged ⚠ and summarised in the table at the bottom.`,
   ``,
   `---`,
@@ -137,7 +140,7 @@ for (const g of GROUPS) {
   out.push(`## ${g.label}`);
   out.push(``);
   for (const m of members) {
-    out.push(`- **${m.name}** — L${m.line} (${m.size} lines)${m.size > OVERSIZE ? ' ⚠' : ''}`);
+    out.push(`- **${m.name}** - L${m.line} (${m.size} lines)${m.size > OVERSIZE ? ' ⚠' : ''}`);
   }
   out.push(``);
 }
@@ -150,6 +153,20 @@ for (const m of oversized) {
 }
 out.push(``);
 
-fs.writeFileSync(OUT, out.join('\n'));
-console.log(`Written: ${OUT}`);
-console.log(`  ${methods.length} methods, ${oversized.length} oversized (>${OVERSIZE} lines)`);
+const rendered = out.join('\n');
+if (!fs.existsSync(path.dirname(OUT))) {
+  // docs/internal is local-only (gitignored since 0.5.8): nothing to check or write
+  // in a CI checkout or a fresh clone.
+  console.log('docs/internal not present (local-only): PANEL_MAP skipped.');
+} else if (process.argv.includes('--check')) {
+  const current = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : '';
+  if (current !== rendered) {
+    console.error('docs/internal/PANEL_MAP.md is stale. Run: node devtools/gen_panel_map.mjs');
+    process.exit(1);
+  }
+  console.log('PANEL_MAP.md is current.');
+} else {
+  fs.writeFileSync(OUT, rendered);
+  console.log(`Written: ${OUT}`);
+  console.log(`  ${methods.length} methods, ${oversized.length} oversized (>${OVERSIZE} lines)`);
+}

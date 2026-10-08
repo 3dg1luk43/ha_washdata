@@ -31,7 +31,7 @@ import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
-from custom_components.ha_washdata.const import STATE_RUNNING
+from custom_components.ha_washdata.const import MATCH_AMBIGUOUS_COMMIT_FACTOR, STATE_RUNNING
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.profile_store import MatchResult
 
@@ -318,16 +318,18 @@ async def test_ambiguous_result_does_not_commit_before_persistence(
 async def test_ambiguous_result_commits_when_persistent(
     manager: WashDataManager,
 ) -> None:
-    """An ambiguous result CAN commit once the persistence threshold is met.
-
-    Gate is: (not is_ambiguous OR is_persistent).  When is_persistent=True,
-    the ambiguity no longer blocks the switch.
+    """An ambiguous result CAN commit, after MATCH_AMBIGUOUS_COMMIT_FACTOR x
+    the persistence a clear one needs (match_rules.decide_switch, Case 1).
     """
     manager.profile_store.async_match_profile = AsyncMock(
         return_value=_make_result(PROFILE_COTTON, ambiguous=True, duration=3600.0)
     )
 
     for _ in range(3):
+        await manager._async_do_perform_matching(_make_readings())
+    assert manager._current_program == "detecting..."
+
+    for _ in range(3 * (MATCH_AMBIGUOUS_COMMIT_FACTOR - 1)):
         await manager._async_do_perform_matching(_make_readings())
 
     assert manager._current_program == PROFILE_COTTON

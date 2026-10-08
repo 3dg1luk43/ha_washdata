@@ -144,8 +144,9 @@ jobs:
                 `${BOT_MARKER} tag:${release.tag_name}\n` +
                 `🎉 A fix or feature related to this issue shipped in [**${releaseName}**](${releaseUrl}).\n\n` +
                 `Please update WashData and verify the behavior on your setup. ` +
-                `If everything works for you, no action is needed — this issue will auto-close after **5 days** of inactivity. ` +
-                `If the problem still persists after updating, leave a comment here and @${context.repo.owner} will take another look. 🙏`;
+                `If everything works for you, no action is needed: this issue will auto-close after **5 days** of inactivity. ` +
+                `If the problem still persists after updating, leave a comment here and @${context.repo.owner} will take another look. ` +
+                `If it has closed by the time you test, comment \`/reopen\` to reopen it. 🙏`;
 
               await github.rest.issues.createComment({
                 owner: context.repo.owner,

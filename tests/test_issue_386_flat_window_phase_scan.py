@@ -115,7 +115,6 @@ def test_flat_tail_falls_back_to_the_clock():
         progress.estimate_phase_progress(
             _store(), _power_data(elapsed, 0.0), elapsed, "Eco 50"
         ),
-        None,
     )
     assert result.source == "linear"
     # 8400 - 6880 = 1520 s, not the 60 s the capped phase estimate produced.

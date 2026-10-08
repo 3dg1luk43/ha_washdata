@@ -3,6 +3,7 @@
     "min": "min",
     "entity_not_found": "Entitet ikke fundet",
     "running_long": "Kører længere",
+    "stalled": "Gået i stå",
     "remaining": "tilbage",
     "progress": "fremgang",
     "show_time_remaining": "Vis resterende tid",
@@ -48,16 +49,16 @@
     }
   },
   "badge": {
-    "quiet_tail_tip": "Mod slutningen bliver dette program stille i omkring {mins} min og trækker derefter cirka {watts} W i {secs} s, før det er færdigt. Set i {seen} af {measured} målte cyklusser: apparatet gør det ikke ved hver kørsel.",
+    "quiet_tail_tip": "Mod slutningen bliver dette program stille i ca. {mins} min og trækker derefter ca. {watts} W i {secs} s. Set i {seen} af {measured} målte cyklusser.",
     "quiet_tail": "~{mins} min stille slutfase",
-    "artifact_tip": "{n} registrerede anomalier (f.eks. dør åbnet midt i cyklus) – åben for at se dem på grafen",
+    "artifact_tip": "{n} registrerede anomalier (f.eks. dør åbnet midt i cyklussen) - åbn for at se dem på grafen",
+    "artifact_tip_one": "{n} registreret anomali (f.eks. dør åbnet midt i cyklussen) - åbn for at se den på grafen",
+    "artifact_tip_other": "{n} registrerede anomalier (f.eks. dør åbnet midt i cyklussen) - åbn for at se dem på grafen",
     "auto": "(auto-detekteret)",
     "built_in_tag": "indbygget",
     "declining": "↘ faldende",
     "energy_low": "Lavere energiforbrug end normalt",
     "energy_spike": "Højere energiforbrug end normalt",
-    "fair_fit": "acceptabel kvalitet",
-    "fair_fit_tip": "Moderat matchkonsistens - nogle cyklusser, der er tildelt denne profil, har lavere konfidensscore. Mærk flere cyklusser, eller optag profilen igen for at forbedre nøjagtigheden.",
     "feedback_requested": "Feedback anmodet",
     "golden_cycle": "Registreret referencecyklus",
     "duration_outlier": "{n} cyklus(ser) med afvigende længde",
@@ -67,26 +68,37 @@
     "overrun": "Løb længere end normalt",
     "underrun": "Færdig hurtigere end normalt",
     "poor_fit": "dårlig kvalitet",
-    "poor_fit_tip": "Inkonsekvent matchhistorik: overvej at genopbygge denne profil",
-    "restart_gap_tip": "{n} HA-genstartsgab: strømsporet har et hul",
+    "restart_gap_tip": "{n} HA-genstartsgab: strømsporet har huller",
+    "restart_gap_tip_one": "{n} HA-genstartsgab: strømsporet har et hul",
+    "restart_gap_tip_other": "{n} HA-genstartsgab: strømsporet har huller",
     "reviewed": "Gennemgået",
     "steady": "→ stabil",
-    "using_defaults": "Brug af afsendte standardindstillinger",
-    "using_tuned": "Brug af indstillede vægte",
     "overrun_ratio": "({x}x forventet)",
     "underrun_ratio": "({pct}% af forventet)",
-    "awaiting_tip": "Afventer godkendelse fra fællesskabet",
-    "awaiting_n": "Afventer godkendelse · {n} bekræftet",
-    "approved": "Godkendt",
-    "awaiting": "Afventer godkendelse",
     "imported_tip": "Importeret fra fællesskabsbutikken. Bruges kun til matchning, tælles ikke med i statistikken.",
     "unmatchable": "kan ikke matches",
     "not_importable": "ikke her",
     "exists": "findes",
     "backfilled_tip": "Registreret i importeret effekthistorik. Påvirker kun programmatchning, tælles ikke med i statistikken.",
-    "armed": "(gælder for næste cyklus)"
+    "armed": "(gælder for næste cyklus)",
+    "awaiting_tip": "Afventer godkendelse fra fællesskabet",
+    "awaiting_n": "Afventer godkendelse · {n} bekræftet",
+    "awaiting": "Afventer godkendelse",
+    "approved": "Godkendt",
+    "matcher_unused": "Endnu ikke genkendt i dine cyklusser",
+    "matcher_used": "Genkendt i {n} af dine cyklusser",
+    "matcher_used_one": "Genkendt i {n} af dine cyklusser",
+    "matcher_used_other": "Genkendt i {n} af dine cyklusser",
+    "matcher_used_tip": "Cyklusser på dette apparat, som WashData selv har matchet med dette importerede program. En import, der aldrig matcher, passer måske ikke til dit apparat; du kan fjerne den. Tælles lokalt; intet sendes til fællesskabsbutikken."
   },
   "btn": {
+    "log_done_task": "Log som udført: {task}",
+    "add_task": "Tilføj opgave",
+    "pg_preset_delete": "Slet forudindstilling",
+    "pg_preset_load": "Indlæs forudindstilling",
+    "pg_preset_load_tip": "Erstat værdierne i legepladsen med denne forudindstilling (de aktive indstillinger røres ikke)",
+    "pg_preset_save": "Gem som forudindstilling",
+    "pg_preset_save_tip": "Gem alle værdier nedenfor som en navngiven forudindstilling for denne enhed",
     "reset_zoom": "Nulstil zoom",
     "set_brand_model": "Angiv mærke og model",
     "refresh_catalog": "Opdater katalog",
@@ -97,12 +109,11 @@
     "add_timer": "+ Tilføj timer",
     "apply_all": "Anvend alle",
     "apply_label": "Påfør etiket",
-    "apply_set_b": "Anvend sæt B",
     "apply_split": "Påfør Split",
     "apply_trim": "Anvend beskæring",
     "auto_detect_split": "Automatisk registrering",
     "auto_label_cycles": "Auto-label cyklusser",
-    "auto_label_cycles_tip": "Tildel automatisk profilnavne til umærkede cyklusser, hvis matchkonfidens overstiger tærsklen",
+    "auto_label_cycles_tip": "Navngiv umærkede cyklusser, hvis matchkonfidens når tærsklen.",
     "cancel": "Annuller",
     "clear_debug": "Ryd fejlretningsdata",
     "clear_splits": "Ryd",
@@ -112,8 +123,6 @@
     "convert_to_automation": "Konverter til automatisering",
     "correct": "Korriger…",
     "create": "Opret",
-    "create_from_cluster": "Opret profil fra {count} cyklusser",
-    "create_profile": "+ Opret profil",
     "delete": "Slet",
     "delete_group": "Slet gruppe",
     "delete_group_tip": "Slet kun denne gruppe - medlemsprofilerne bevares",
@@ -124,22 +133,19 @@
     "done": "Færdig",
     "edit": "Rediger",
     "export": "Eksportér",
-    "export_json": "Eksporter til JSON",
     "force_stop": "Tving stop",
     "force_stop_tip": "Afslut den aktuelle cyklus øjeblikkeligt og markér den som tvangsstoppet",
     "from_template": "Fra skabelon ▾",
     "ignore": "Ignorer",
     "import_json": "Importer fra JSON",
-    "import_overwrite": "Importer (overskriver data)",
     "inspect": "Inspicer",
     "label": "Mærk",
-    "load": "Indlæs",
     "load_more": "Indlæs flere",
     "manage": "Administrer",
     "merge": "Flet sammen",
     "new_automation": "＋ Ny automatisering",
     "new_group": "+ Ny gruppe",
-    "new_group_tip": "Gruppér næsten identiske profiler (samme form/varighed, forskellig temperatur eller centrifugering) så matcheren pålideligt vælger mellem dem",
+    "new_group_tip": "Gruppér næsten identiske profiler (samme form, anden temperatur eller centrifugering), så matchningen kan skelne dem.",
     "new_phase": "+ Ny fase",
     "new_profile": "+ Ny profil",
     "new_profile_tip": "Opret en ny programprofil fra en eksisterende mærket cyklus eller optagelse",
@@ -147,36 +153,25 @@
     "on_cycle_started": "På cyklus startet",
     "pause_cycle": "Pause",
     "pause_cycle_tip": "Sæt den kørende cyklus på pause – apparatet genoptager, hvor det slap",
-    "pg_apply_device": "Anvend på enhed",
-    "pg_autofill": "Autoudfyld",
-    "pg_load_calibrated": "Indlæs kalibrerede (ML) ({n})",
-    "pg_load_calibrated_tip": "Indlæser ML-kalibrerede indstillinger som legeplads-tilsidesættelser",
     "pg_load_live": "Indlæs aktive indstillinger",
     "pg_load_live_tip": "Genindlæs integrationens aktuelle indstillinger, og kassér alle ændringer i legepladsen",
     "pg_load_suggested": "Indlæs forslag ({n})",
     "pg_load_suggested_tip": "Indlæser auto-tunerens aktuelle forslag som legeplads-tilsidesættelser",
-    "pg_preset_delete": "Slet forudindstilling",
-    "pg_preset_load": "Indlæs forudindstilling",
-    "pg_preset_load_tip": "Erstat værdierne i legepladsen med denne forudindstilling (de aktive indstillinger røres ikke)",
-    "pg_preset_save": "Gem som forudindstilling",
-    "pg_preset_save_tip": "Gem alle værdier nedenfor som en navngiven forudindstilling for denne enhed",
     "pg_publish_all": "Gem {n} i integrationen",
     "pg_publish_one": "Gem {label} i integrationen",
-    "play": "Afspil",
     "process": "Behandl",
     "process_history": "Behandl nu",
     "process_recording": "Gem optagelse",
     "process_tip": "Gem det optagede spor som en ny eller eksisterende profil",
     "rebuild": "Genopbyg konvolutter",
     "rebuild_envelope": "Genopbyg konvolut",
-    "rebuild_tip": "Genberegn den forventede effektkonvolut (min/max-bånd) for alle profiler fra deres mærkede cyklusser – kør efter mærkning af nye cyklusser eller korrigering af gamle",
+    "rebuild_tip": "Genopbyg hver profils forventede effektbånd ud fra dens mærkede cyklusser. Kør efter mærkning eller rettelse af cyklusser.",
     "rec_start_tip": "Begynd at optage apparatets effektspor – start umiddelbart inden du kører en cyklus",
     "rec_stop": "Stop",
     "rec_stop_tip": "Stop optagelsen og behold det indfangede spor til gennemgang",
     "record": "Start optagelse",
     "refresh": "Opdater",
     "refresh_diag_tip": "Genindlæs lagerstatistik",
-    "refresh_logs_tip": "Genindlæs de nyeste logposter",
     "refresh_settings_tip": "Genindlæs indstillinger fra serveren",
     "relabel": "Ommærk ({count})",
     "remove": "Fjern",
@@ -184,7 +179,6 @@
     "reset": "Nulstil",
     "reset_ml_models_tip": "Kassér de finjusterede modeller og gå tilbage til de indbyggede. WashData kan lære dem igen senere.",
     "reset_to_builtin": "Nulstil til indbyggede modeller",
-    "reset_to_defaults": "Nulstil til standardindstillinger",
     "resume_cycle": "Fortsæt",
     "resume_cycle_tip": "Genoptag den satte cyklus",
     "revert_settings": "Annuller ændringer",
@@ -197,8 +191,6 @@
     "run_analysis": "🔍 Kør forslagsanalyse",
     "run_analysis_tip": "Analyser dine optagede cyklusser nu, og opdater indstillingsforslag",
     "run_auto_label": "Kør Auto-label",
-    "run_both": "Kør A mod B",
-    "run_simulation": "Kør simulering",
     "save": "Gem",
     "save_access_control": "Gem adgangskontrol",
     "save_group": "Gem gruppe",
@@ -210,10 +202,8 @@
     "save_settings": "Gem indstillinger",
     "select": "Vælg",
     "select_all": "Vælg alle",
-    "select_last20": "Seneste 20",
     "select_none": "Ryd",
     "show_only": "Vis kun",
-    "skip_setup": "Spring opsætning over",
     "split": "Opdel",
     "stop": "Stop",
     "submit_correction": "Send rettelse",
@@ -222,36 +212,32 @@
     "trim_split": "Beskær / Opdel",
     "undo": "Fortryd",
     "unlabel_selected": "Fjern mærkning ({n})",
-    "unlabel_selected_tip": "Fjerner profilmærkningen fra de valgte cyklusser. De bliver i din historik og kan mærkes igen senere - de påvirker bare ikke længere denne profil.",
+    "unlabel_selected_tip": "Fjern mærkningen fra de valgte cyklusser. De bliver i din historik, men former ikke længere denne profil.",
     "use": "Brug",
     "wipe_all": "Slet alle data",
+    "pg_rerun": "Opdater simulering",
     "delete_selected": "Slet valgte ({n})",
-    "group_suggest": "Gruppe {n}: {members}",
     "pg_apply_best": "Anvend bedste",
-    "pg_apply_to_settings": "Gem i indstillinger",
     "pg_apply_to_settings_tip": "Kopiér de værdier, du har redigeret her, til denne enheds aktive indstillinger",
     "import": "Importér",
     "disconnect": "Afbryd forbindelse",
     "connect_github": "Forbind GitHub",
-    "save_appliance": "Gem apparat",
     "share_to_store": "Del i butikken",
     "share": "Del",
-    "confirm_appliance": "Bekræft dette apparat",
-    "confirmed": "Bekræftet",
     "browse_community_setups": "Gennemse fællesskabsopsætninger",
     "download_device": "Download denne opsætning",
     "share_device": "⬆ Del dette apparat",
-    "share_device_tip": "Del dette apparat og dets optagede referencecyklusser til fællesskabsbutikken, så andre med samme maskine kan overtage dem",
+    "share_device_tip": "Del dette apparat og dets referencecyklusser til fællesskabsbutikken, så ejere af samme maskine kan overtage dem.",
     "share_n": "Del {n} cyklus/cyklusser",
     "export_selected": "Eksportér (vælg data)",
     "export_all": "Hurtig eksport af alt",
-    "import_raw": "Avanceret: erstat alt fra JSON",
     "download_export": "Download eksport",
     "analyze_import": "Analysér fil",
     "import_selected": "Importér valgte",
     "back": "Tilbage",
     "mute_suggestion": "Stop med at foreslå denne indstilling",
     "reset_muted": "Nulstil undertrykte forslag",
+    "reset_phase_tip": "Fortryd din ændring og gendan den indbyggede fase",
     "import_power_history": "Importér effekthistorik",
     "hist_read_recorder": "Læs fra Home Assistant",
     "hist_scan": "Scan efter cyklusser",
@@ -260,7 +246,12 @@
     "save_total_cycles": "Gem total",
     "clear": "Ryd",
     "add_brand": "Tilføj mærke",
-    "add_appliance": "Tilføj apparat"
+    "add_appliance": "Tilføj apparat",
+    "retry": "Prøv igen",
+    "confirm_appliance": "Bekræft dette apparat",
+    "confirmed": "Bekræftet",
+    "create_profile_from_gap": "Opret profil",
+    "undo_import": "Fortryd seneste import"
   },
   "note": {
     "off_delay": {
@@ -268,10 +259,6 @@
     }
   },
   "conflict": {
-    "anti_wrinkle_exit": {
-      "exit": "Skal være under stoptærsklen ({stop} W); ellers ignoreres antikrøl-afslutningseffekten",
-      "stop": "Skal være over antikrøl-afslutningseffekten ({exit} W)"
-    },
     "anti_wrinkle_max": {
       "max": "Skal være over starttærsklen ({start} W); ellers omgås antikrøl-varighedsgrænsen",
       "start": "Skal være under antikrøl-maksimumeffekten ({max} W)"
@@ -309,14 +296,14 @@
       "threshold": "Skal være under stoptærsklen ({stop} W) for at have effekt"
     },
     "price_entity": {
-      "power_sensor": "Dette er apparatets Effektsensor, ikke en pris. En prisenhed har forrang over den statiske pris nedenfor, så cyklusser ville blive beregnet til watt pr. kWh - ryd dette felt.",
-      "energy_sensor": "Dette er apparatets Energimåler, ikke en pris. En prisenhed har forrang over den statiske pris nedenfor, så cyklusser ville blive beregnet til måleraflæsningen pr. kWh - ryd dette felt.",
-      "device_class": "Denne sensor måler {dc}, ikke en pris pr. kWh. En prisenhed har forrang over den statiske pris nedenfor - ryd dette felt, eller peg det på en tarifsensor.",
-      "unit": "Denne sensor aflæses i {unit}, hvilket ikke er en pris pr. kWh. En prisenhed har forrang over den statiske pris nedenfor - ryd dette felt, eller peg det på en tarifsensor."
+      "power_sensor": "Dette er apparatets Effektsensor, ikke en pris. Cyklusser ville blive beregnet i watt pr. kWh; ryd dette felt.",
+      "energy_sensor": "Dette er apparatets Energimåler, ikke en pris. Cyklusser ville blive beregnet til måleraflæsningen pr. kWh; ryd dette felt.",
+      "device_class": "Denne sensor måler {dc}, ikke en pris pr. kWh. Ryd dette felt, eller vælg en tarifsensor.",
+      "unit": "Denne sensor måler i {unit}, ikke en pris pr. kWh. Ryd dette felt, eller vælg en tarifsensor."
     },
     "pump_stuck": {
-      "duration": "Skal være kortere end ingen-opdatering-timeout ({to} s) for at fastsat-alarmen udløses inden watchdog stopper cyklussen",
-      "timeout": "Skal overstige pumpe-faststidvarighed ({ps} s) for at alarmen udløses inden cyklussen tvangstopper"
+      "duration": "Skal være under Timeout uden opdatering ({to} s), så alarmen for fastklemt pumpe kan udløses først",
+      "timeout": "Skal være over Varighed for fastklemt pumpe ({ps} s), så alarmen for fastklemt pumpe kan udløses først"
     },
     "start_dur": {
       "sampling": "Samplingsinterval overskrider startvarigheden ({sdt} s); enkeltmålingsspidser kan åbne en cyklus",
@@ -334,10 +321,15 @@
       "sampling": "Samplingsinterval bør højst være halvdelen af watchdog-intervallet ({wi} s)"
     },
     "settings_banner": "Indstillingskonflikter: {n}. Tjek de fremhævede sektioner og ret dem, inden du gemmer.",
-    "settings_banner_btn": "Gå til første"
+    "settings_banner_btn": "Gå til første",
+    "end_energy": {
+      "energy": "For streng til Stoptærskel ({w} W) i løbet af Slukkeforsinkelse ({d} s); cyklussen kan kun afsluttes via en reservevej",
+      "stop": "Slutenergi ({e} Wh på {d} s) tillader kun {p} W"
+    }
   },
   "hdr": {
-    "ab_comparison": "A/B-indstillingssammenligning",
+    "custom_tasks": "Dine egne opgaver",
+    "maintenance_supporter": "Brug for mere?",
     "access_control": "Adgangskontrol",
     "add_maintenance": "Tilføj vedligeholdelseshændelse",
     "automation_delete": "Slet denne automatisering",
@@ -346,28 +338,22 @@
     "automation_review_this_cycle": "Gennemgå denne cyklus",
     "automations": "Automatiseringer",
     "clear_debug": "Ryd fejlretningsspor",
-    "cycle_simulator": "Cyklussimulator",
     "diagnostics_pref": "Diagnostik",
     "display": "Vise",
-    "dtw_inspector": "DTW-inspektor",
     "export_import": "Eksport/import",
-    "getting_started": "Kom godt i gang",
     "live_power": "Live effekt",
     "logs": "Logfiler",
-    "logs_diagnostics": "Diagnostik",
     "maintenance": "Vedligeholdelseshandlinger",
     "maintenance_log": "Vedligeholdelseslog",
     "maintenance_reminders": "Servicepåmindelser",
     "manual_recording": "Manuel optagelse",
-    "manual_recording_tip": "Kør en cyklus bevidst mens WashData optager effektsporet. Klik på Start optagelse umiddelbart inden apparatet starter, Stop når det er færdigt, og derefter Behandle for at gemme det som en navngivet profil.",
+    "manual_recording_tip": "Optag en cyklus bevidst: tryk på Start lige før apparatet starter og Stop, når det er færdigt, og derefter Behandl for at gemme den som en profil.",
     "ml_learned": "Hvad WashData har lært",
-    "ml_matching_tuning": "Program-matchende finjustering",
     "ml_settings_card": "Indstillinger",
     "ml_smart_learning": "Smart læring",
     "my_preferences": "Mine præferencer",
     "no_automations": "Ingen automatiseringer refererer til denne enhed endnu.",
     "panel_settings": "Panelindstillinger",
-    "param_sweep": "Parametersweep",
     "pg_settings_source": "Indstillingernes kilde",
     "phase_catalog": "Fasekatalog",
     "playground": "Legeplads",
@@ -376,11 +362,8 @@
     "status": "Status",
     "status_graph": "Statusgraf",
     "storage_stats": "Opbevaringsstatistik",
-    "test_history": "Test på historik",
     "toggle_sidebar": "Skift Home Assistant-sidebjælken",
-    "tools_and_data": "Værktøjer og data",
     "wipe_history": "Tør historie",
-    "recommendations": "Anbefalinger ({n})",
     "pg_detection_params": "Registreringsindstillinger",
     "pg_outcome": "Simuleringsresultat",
     "pg_across_cycles": "På tværs af dine cyklusser",
@@ -388,7 +371,8 @@
     "online_account": "Fællesskabsbutik og onlinefunktioner",
     "import_power_history": "Importér effekthistorik",
     "service_status": "Servicestatus",
-    "online_account_tab": "Online & fællesskab"
+    "online_account_tab": "Online & fællesskab",
+    "live_match_debug": "Live-match-fejlretning"
   },
   "health": {
     "fair": "Acceptabel matchkvalitet",
@@ -396,7 +380,12 @@
     "poor": "⚠ Dårlig matchkvalitet"
   },
   "lbl": {
-    "envelope_position_tip": "Position på det matchede programs egen registrerede kurve, {pct} %. Måles ved at justere denne cyklus ind efter profilen i stedet for at tælle tid, så den holder stik, når en kørsel er længere eller kortere end normalt. Den opdateres, mens apparatet er stille, så den kan halte bagefter under en aktiv fase.",
+    "task_name": "Opgave",
+    "every_cycles": "Hver (cyklusser)",
+    "every_days": "Hver (dage)",
+    "new_task_name": "Ny opgave",
+    "days_since_service": "{since} / {total} dage",
+    "envelope_position_tip": "Position på det matchede programs optagede kurve: {pct} %. Findes ved at justere cyklussen efter profilen, så den passer, selv når en kørsel er længere eller kortere. Opdateres, mens apparatet er stille, så den kan halte bagefter.",
     "envelope_position": "kurve {pct} %",
     "aria_playground_chart3": "Interaktiv effektgraf for cyklussen: hold markøren over for at aflæse tid/effekt, rul eller knib for at zoome, træk for at panorere",
     "device_unresolved": "Utilgængelig enhed ({id})",
@@ -408,10 +397,8 @@
     "aria_cycle_chart": "Cyklussens effektkurve",
     "aria_envelope_chart": "Diagram over profilens effektindhylning",
     "aria_phase_chart": "Diagram for faseredigering",
-    "aria_playground_chart": "Cyklussens effektkurve med trækbare detektionstærskler",
     "aria_power_chart": "Diagram over effektforbrug",
     "aria_spaghetti_chart": "Overlejrede effektkurver for cyklusser",
-    "aria_sweep_chart": "Diagram over resultater fra parametersweep",
     "artifact_anomaly": "Anomali",
     "artifact_high_power": "Høj effekt",
     "artifact_interruption": "Afbrydelse",
@@ -425,155 +412,105 @@
     "cohesion_good": "sammenhæng {pct} %",
     "cohesion_low": "⚠ lav sammenhæng {pct} %",
     "compare_profiles": "Sammenlign med profiler",
-    "concurrency": "Samtidighed",
     "confidence": "Tillid",
     "confidence_threshold": "Tillidsgrænse",
     "correct_duration": "Korrekt varighed (min, valgfrit)",
     "correct_profile": "Korrekt profil",
-    "correlation": "Korrelation",
     "cost": "Omkostning",
     "create_new_profile": "+ Opret ny profil...",
     "current_phase": "Aktuel fase",
-    "curves": "Kurver",
     "cycle": "Cyklus",
     "cycle_date_display": "Visning af cyklusdato",
-    "cycle_health": "Cyklussundhed",
-    "cycle_index": "cyklusindeks →",
-    "cycles": "Cyklusser",
+    "cycle_context": "Recorder-historik omkring cyklussen",
+    "cycle_context_off": "Fra",
+    "cycle_context_minutes": "{min} min",
+    "cycle_context_series": "Recorder-historik",
+    "before_start": "Før start",
+    "after_end": "Efter slut",
     "cycles_count": "Cykler",
     "cycles_lc": "cyklusser",
-    "dashed": "stiplet",
     "date": "Dato",
     "debug_traces": "Debug Spor",
-    "default": "Standard",
     "default_access_level": "Standardniveau for brugere, der ikke er angivet nedenfor",
     "default_other": "Standard (andre enheder)",
     "default_tab": "Standardfane ved åbning af panelet",
-    "delta": "Δ",
     "description": "Beskrivelse",
-    "dtw_blend_w": "Blandingsvægt",
-    "dtw_blended": "Blandet score",
-    "dtw_ddtw": "DDTW-score",
-    "dtw_l1": "L1-score",
-    "dtw_matched_profile": "(cyklussens matchede profil)",
     "duration": "Varighed",
-    "duration_agreement": "Varighedsoverensstemmelse",
-    "emphasis": "Vægt",
     "enable_access_control": "Aktiver adgangskontrol pr. bruger",
     "energy": "Energi",
-    "energy_agreement": "Energioverensstemmelse",
-    "event_timeline": "Hændelsestidslinje",
     "event_type": "Hændelsestype",
     "expected": "Forventet",
+    "suspected_profile": "{name} (formodet)",
+    "runner_up_profile": "{name} (nummer to)",
     "expected_duration": "Forventet varighed (min)",
     "file_kb": "Fil (kB)",
-    "final_score": "Endelig score",
     "from": "Fra",
     "gap_s": "Mellemrum (s)",
     "group_name": "Gruppenavn",
     "head_trim": "Beskær start (s)",
-    "health": "Sundhed",
     "hide_tabs": "Skjul faner for ikke-administratorer",
-    "in_use": "I brug",
     "json_data": "JSON-data",
     "label": "Matchet profil",
     "last": "Seneste",
     "last_checked": "Sidst tjekket:",
     "load_from_file": "Indlæs fra fil",
-    "mae_score": "MAE-score",
     "manual_duration": "Manuel varighed (min, valgfri)",
     "match": "Match",
     "members": "Medlemmer",
-    "metric": "Metrik",
     "mode_existing_profile": "Føj til eksisterende profil",
     "mode_new_profile": "Opret ny profil",
     "models_fine_tuned": "(finjusterede modeller: {count})",
-    "n_classic_suggestions": "{n} klassisk",
-    "n_ml_suggestions": "{n} ML",
     "n_selected": "{n} valgt",
     "n_tuning_suggestions": "{n} justeringsforslag",
-    "na": "n/a",
+    "n_tuning_suggestions_one": "{n} justeringsforslag",
+    "n_tuning_suggestions_other": "{n} justeringsforslag",
     "new_profile_name": "Nyt profilnavn",
     "notes": "Noter",
-    "of": "af",
-    "outcome": "Resultat",
     "panel_default_tab": "Standardfane",
     "panel_language": "Panelsprog",
     "per_cycle_short": "cyklus",
-    "pg_autofill_tip": "Autoudfyld interval fra aktuel værdi ({lo}–{hi})",
     "pg_best_value": "Bedste værdi fundet",
     "pg_current_value": "Aktuel værdi:",
     "pg_drag_hint": "Træk linjen på grafen",
-    "pg_dtw": "DTW",
     "pg_ev_ending": "Afslutter",
     "pg_ev_running": "Kører",
     "pg_group_advanced": "Særtilfælde",
     "pg_group_detection": "Registreringsudløsere",
     "pg_group_timing": "Tidsregler",
     "pg_idle": "Inaktiv",
+    "pg_poor_match": "Dårligt match",
     "pg_preset": "Forudindstilling til legepladsen",
     "pg_preset_name": "Navn på ny forudindstilling",
     "pg_preset_none": "Vælg en forudindstilling…",
-    "pg_stress_group": "Test af inaktiv afslutning",
-    "pg_stress_idle_auto": "Auto",
-    "pg_stress_idle_w": "Inaktivt niveau (W)",
-    "pg_stress_idle_w_desc": "Tilsidesæt den automatisk registrerede standby-minimumsgrænse (lad feltet være tomt for automatisk).",
-    "pg_stress_toggle": "Test inaktiv afslutning",
-    "pg_stress_toggle_desc": "Simulerer at apparatet forbliver ved sit standbyforbrug efter optagelsens afslutning - viser om og hvornår WashData stopper cyklussen.",
-    "pg_last_run": "Seneste kørsel: {date}",
-    "pg_match_score": "Matchscore",
-    "pg_pct_of": "{p}% af {total}",
-    "pg_poor_match": "Dårligt match",
     "pg_strong_match": "Stærkt match",
-    "pg_tile_ambiguous": "Tvetydig",
-    "pg_tile_ambiguous_tip": "Cyklusser med næsten uafgjort mellem to programmer",
-    "pg_tile_detected": "Registreret",
-    "pg_tile_detected_tip": "Cyklusser hvor effekten krydsede starttærsklen længe nok til at blive registreret som kørende",
-    "pg_tile_matched": "Matchet",
-    "pg_tile_matched_tip": "Cyklusser der er korrekt tilskrevet et kendt program",
-    "pg_time_left": "Tid tilbage",
     "pg_weak_match": "Svagt match",
     "phase_name": "Fasenavn",
     "name": "Navn",
     "phase_timeline": "Fasetidslinje",
     "power": "Effekt",
     "profile": "Profil",
-    "profile_index": "profilindeks →",
     "profile_name": "Profilnavn",
     "program": "Program",
-    "program_tip": "Tilsidesæt, hvilket profil der matches med den aktuelle cyklus. Automatisk registrering lader integrationen automatisk vælge den bedste match. Fastgør et bestemt program for at tvinge det til at matche, når automatisk registrering er forkert, eller du ved, hvad der kører. Vælg et, før du starter apparatet, så anvendes det, så snart den næste cyklus begynder.",
+    "program_tip": "Vælg, hvilket program den aktuelle cyklus matches med. Automatisk registrering vælger det bedste match. Fastgør et program, når automatisk registrering tager fejl; vælges det før start, gælder det for næste cyklus.",
     "progress": "Fremskridt",
     "raw_socket": "Rå stikkontakt",
-    "read_only": "Skrivebeskyttet",
     "ref_cycle": "Referencecyklus (valgfrit)",
-    "refresh_interval": "Opdateringsinterval (s)",
     "remaining": "Tilbage",
     "reminder_every": "Påmind hver (cyklusser)",
     "remove_label": "- Fjern etiket -",
     "rename_profile": "Omdøb profil",
-    "replay_duration": "Afspilning",
     "resulting_profile": "Resulterende profil",
     "save_mode": "Gem tilstand",
-    "score": "Score",
-    "score_breakdown": "Scoreopdeling",
     "seconds_from_start": "Sekunder fra start",
     "select_profile": "Vælg Profil",
     "setting": "Indstilling",
-    "settings_a": "Indstillinger A (nuværende)",
-    "settings_a_short": "A",
     "settings_advanced": "Avanceret",
-    "settings_b": "Indstillinger B (test)",
-    "settings_b_short": "B",
     "settings_basic": "Grundlæggende",
     "settings_detail_level": "Detaljeniveau for indstillinger",
-    "settings_overrides": "Tilsidesættelser af indstillinger",
     "show_debug": "Vis live-match-fejlretningskort på statussiden (tillid, tvetydighed, topkandidater)",
     "show_expected": "Vis forventet kurveoverlejring (matchet profil, orange)",
     "show_raw": "Vis kontakt for råe stikkontaktværdier i live strømgraf",
     "sparkline": "Tendens for seneste cyklusvarigheder",
-    "stage2": "Trin 2 – kerneligning",
-    "stage3": "Trin 3 – DTW",
-    "stage4": "Trin 4 – overensstemmelse",
     "status": "Status",
     "tail_trim": "Beskær slut (s)",
     "tap_to_dismiss": "tryk på grafen for at lukke",
@@ -584,7 +521,6 @@
     "ungrouped": "Ugrupperet",
     "unlabelled": "Umærket",
     "unlabelled_paren": "(umærket)",
-    "warp_path": "Warp-sti",
     "input": "Input:",
     "start": "Start",
     "end": "Slut",
@@ -609,9 +545,8 @@
     "n_shown": ", {n} vist",
     "cycles_title": "Cyklusser ({n})",
     "pg_detecting": "Registrerer",
-    "pg_best_marker": "Bedste: {v}",
     "pg_time_left_model": "Tid tilbage (model)",
-    "pg_time_left_model_tip": "Modelberegnet resterende tid (faseberegner + ML-blanding), ikke en statisk nedtælling",
+    "pg_time_left_model_tip": "Beregnet ud fra programmets faser, ikke en fast nedtælling",
     "phase": "Fase",
     "pg_mode_history": "Test på historik",
     "pg_ev_detected": "Registreret",
@@ -651,12 +586,8 @@
     "pg_mode_optimize": "Optimér",
     "pg_group_matching": "Programgenkendelse",
     "pg_zoom_hint": "dobbeltklik for at nulstille zoom",
-    "aria_playground_chart2": "Interaktiv effektgraf for cyklussen: hold markøren over for at aflæse tid/effekt, rul for at zoome, træk for at panorere",
     "pg_alert_timeout_end": "Afsluttet ved timeout, ikke ved forudsigelse",
     "pg_alert_indefinite": "Ville køre i det uendelige",
-    "pg_alert_stress_cap": "Sikkerhedsgrænse nået",
-    "pg_alert_stress_ok": "Inaktiv afslutning: cyklus stoppet",
-    "pg_alert_stress_warn": "Standbyforbrug over stoptærskel",
     "task_pg_history": "Test på historik",
     "task_pg_sweep": "Optimér",
     "task_reprocess": "Genbehandling",
@@ -666,16 +597,9 @@
     "pg_recent_runs": "Seneste kørsler",
     "pg_load_run": "Genindlæs denne kørsel",
     "pg_match_confidence": "Matchsikkerhed",
-    "pg_envelope_fit": "Envelope-tilpasning",
-    "pg_envelope_fit_tip": "Hvor tæt cyklussen holder sig inden for denne profils gemte effekt-envelope, en anden vinkel end matchsikkerhed.",
     "n_imported_note": ", {n} importeret",
     "enable_online": "Aktivér onlinefunktioner",
-    "store_brand": "Apparatets mærke",
-    "store_model": "Apparatets model",
     "anonymous": "Anonym",
-    "rate_quality": "Bedøm kvalitet",
-    "rate_n": "{n} stjerner",
-    "approved_only": "Kun godkendte",
     "adopt_settings": "Overtag også indstillinger",
     "flags": "Flags",
     "include_phase_map": "Inkludér fasekort",
@@ -692,7 +616,6 @@
     "cat_custom_phases": "Brugerdefinerede faser",
     "cat_profile_groups": "Profilgrupper",
     "cat_settings": "Registrerings- & genkendelsesindstillinger",
-    "cat_matching_config": "Finjustering af genkendelse",
     "cat_ml_models": "ML-modeller",
     "cat_feedback": "Feedback & gennemgangsetiketter",
     "cat_suggestions": "Forslag",
@@ -715,7 +638,6 @@
     "hist_csv_data": "CSV-data",
     "hist_from_recorder": "Eller læs den fra Home Assistant",
     "hist_since": "Siden",
-    "days": "dage",
     "hist_keep": "Behold denne cyklus",
     "hist_looks_complete": "komplet",
     "peak_power_short": "Spids",
@@ -735,7 +657,34 @@
     "zoom_hint_touch_zoomed": "knib for at zoome · dobbelttryk for at nulstille",
     "cycles_since_service": "{since} / {total} cyklusser",
     "total_cycles_run": "cyklusser i alt",
-    "correct_total_cycles": "Ret totalen"
+    "correct_total_cycles": "Ret totalen",
+    "hist_reason_already_recorded": "overlapper en cyklus, som WashData allerede har registreret",
+    "share_consent": "Jeg bekræfter, at disse cyklusser er gennemført normalt uden afbrydelse",
+    "show_internal": "Vis interne indstillinger",
+    "show_internal_tip": "Indstillinger, som WashData justerer for dig (sampling, watchdog, matchfrekvens, tærskler). Vises, når denne enhed har sin egen værdi, en konflikt eller et forslag.",
+    "rate_n": "{n} stjerner",
+    "rate_quality": "Bedøm kvalitet",
+    "pg_autolabel": "Auto-mærkning",
+    "pg_label_review": "Beder om gennemgang",
+    "pg_ev_match_reverted": "Match trukket tilbage",
+    "pg_ev_verified_pause": "Bekræftet pause",
+    "n_samples": "{n} målinger",
+    "n_samples_one": "{n} måling",
+    "n_samples_other": "{n} målinger",
+    "n_cycles": "{n} cyklusser",
+    "n_cycles_one": "{n} cyklus",
+    "n_cycles_other": "{n} cyklusser",
+    "energy_per_cycle": "{v}/cyklus",
+    "energy_total": "{v} i alt",
+    "automation_off": "(slået fra)",
+    "ref_cycle_none": "Ingen",
+    "share_name": "Vis mit navn på det, jeg deler",
+    "pg_compare_profile": "Sammenlign med profil",
+    "pg_obj_endlag": "Slutforsinkelse (median)",
+    "pg_obj_early": "Rate for tidlig afslutning",
+    "pg_obj_split": "Opdelingsrate",
+    "pg_sweep_cycles": "Seneste cyklusser",
+    "cat_backfill_cycles": "Cyklusser fundet i importeret effekthistorik"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -745,11 +694,9 @@
   },
   "ml": {
     "builtin_models": "● Brug af indbyggede modeller",
-    "fit_fair": "Acceptabel",
     "fit_good": "God",
     "fit_slight": "Let",
     "fit_strong": "Stærk",
-    "fit_weak": "Svag",
     "fit_word": "tilpasning",
     "personalized": "● Personliggjort til denne maskine",
     "better_than_baseline": "{pct}% bedre end grundlinjeestimatet ({metric})",
@@ -757,30 +704,39 @@
     "trend_declining_tip": "Denne models tilpasning er blevet dårligere ved de seneste gentjek. At gennemgå flere cyklusser kan hjælpe den med at lære igen.",
     "trend_steady_tip": "Denne models tilpasning har holdt sig nogenlunde stabil ved de seneste gentjek.",
     "cap_blurb": {
-      "end": "At vide, hvornår en cyklus reelt er færdig",
-      "live_match": "At identificere det kørende program hurtigere",
-      "quality": "At opdage fejldetekterede eller beskadigede cyklusser",
-      "remaining_time": "At forudsige, hvor lang tid der er tilbage",
       "total_energy": "At forudsige samlet energi og omkostning"
     },
     "cap_label": {
-      "end": "Registrering af cyklusslut",
-      "live_match": "Programgenkendelse",
-      "quality": "Kvalitetstjek af cyklus",
-      "remaining_time": "Estimat af resterende tid",
       "total_energy": "Energiestimat"
     },
-    "metric_auc": "AUC {auc} på valideringsdata",
-    "metric_mae": "fejl {model} mod baseline {baseline}"
+    "metric_mae": "fejl {model} mod baseline {baseline}",
+    "fine_tuned_at": "finjusteret {when}",
+    "never": "aldrig",
+    "trained_unknown": "på et ukendt tidspunkt",
+    "held_out_count": "målt på {count} tilbageholdte valideringscyklusser",
+    "held_out_count_one": "målt på {count} tilbageholdt valideringscyklus",
+    "held_out_count_other": "målt på {count} tilbageholdte valideringscyklusser",
+    "last_run_not_promoted": "Sidste tjek ({when}): {reason}",
+    "skip_reason": {
+      "insufficient_rows": "Endnu ikke nok brugbare cyklusser: {count} mærkede, rene cyklusser indtil videre.",
+      "insufficient_rows_one": "Endnu ikke nok brugbare cyklusser: {count} mærket, ren cyklus indtil videre.",
+      "insufficient_rows_other": "Endnu ikke nok brugbare cyklusser: {count} mærkede, rene cyklusser indtil videre.",
+      "fit_failed": "Træningen mislykkedes: {error}",
+      "unknown": "Intet nyt blev lært.",
+      "holdout_too_small": "For få cyklusser til at teste en ny model retvisende: {held_out} kunne holdes tilbage til test, der kræves {min}.",
+      "not_better_than_naive": "Den nye model var ikke tydeligt bedre end det simple skøn (fejl {model} mod {naive}).",
+      "not_better_than_incumbent": "Den nye model var ikke bedre end den, der er i brug (fejl {model} mod {incumbent}), så den nuværende blev beholdt."
+    }
   },
   "modal": {
+    "remove_task_title": "Fjern opgave",
+    "remove_task_msg": "Fjern påmindelsen \"{task}\"? Dens poster i vedligeholdelsesloggen bevares.",
     "auto_label": "Auto-label cyklusser",
     "correct_feedback": "Korriger feedback",
     "create_profile": "Opret profil",
     "cycle": "Cyklus",
     "edit_group": "Rediger profilgruppe",
     "edit_phase": "Rediger fase",
-    "import_config": "Importer konfiguration",
     "label_cycle": "Mærk cyklus",
     "merge_cycles": "Flet {n} cyklusser",
     "new_group": "Ny profilgruppe",
@@ -795,6 +751,8 @@
     "delete_automation_title": "Slet automatisering",
     "delete_automation_msg": "Slet automatiseringen \"{name}\" fra Home Assistant? Dette kan ikke fortrydes.",
     "remove_legacy_title": "Fjern ældre handlinger",
+    "reset_phase_msg": "Fortryd din ændring af \"{name}\" og gendan den indbyggede fase? Programmer beholder deres områder.",
+    "reset_phase_title": "Nulstil fase",
     "remove_legacy_msg": "Fjern de ældre brugerdefinerede handlinger? De vil ikke længere blive udløst ved cyklushændelser. Dette kan ikke fortrydes fra panelet.",
     "discard_recording_title": "Kassér optagelse",
     "discard_recording_msg": "Kassér den gemte optagelse? Dette kan ikke fortrydes.",
@@ -815,63 +773,77 @@
     "store_share_device": "Del dette apparat",
     "export_select": "Eksport - vælg data",
     "import_wizard": "Import - vælg data",
-    "history_import": "Importér effekthistorik"
+    "history_import": "Importér effekthistorik",
+    "apply_suggestions_title": "Anvend forslag",
+    "apply_suggestions_msg": "Ændre disse {n} indstillinger? Integrationen genindlæses efter gemning.",
+    "discard_settings_title": "Kassér ikke-gemte ændringer?",
+    "discard_settings_msg": "Ikke-gemte ændringer af indstillinger: {n}. Vil du forlade Indstillinger og kassere dem?",
+    "profile_title": "Profil · {name}",
+    "undo_import_msg": "Denne enheds data og indstillinger vender tilbage til, hvordan de var før den seneste import ({when}). Cyklusser og ændringer siden da går tabt.",
+    "undo_import_ok": "Fortryd import",
+    "undo_import_title": "Fortryd seneste import"
   },
   "msg": {
+    "custom_task_limit": "Du har nået grænsen på {max} opgaver.",
+    "custom_tasks_intro": "Tilføj alt andet, du vil mindes om. En opgave forfalder, når et af intervallerne er nået; lad det ene være tomt eller 0 for kun at bruge det andet.",
+    "maintenance_due_sensor_hint": "Den binære sensor Vedligeholdelse forfalder er tændt, mens en opgave er forfalden, til dine egne notifikationsautomatiseringer.",
+    "maintenance_supporter_intro": "Maintenance Supporter er en separat integration, der kan meget mere: ethvert apparat eller enhver opgave, intervaller efter tid, brug eller en sensor, notifikationer og en historik. Den kan bruge WashDatas cyklustæller.",
     "pg_canvas_empty3": "Vælg en cyklus ovenfor, og tryk på Kør for at simulere den. Hold derefter markøren over for at aflæse værdier, rul eller knib for at zoome, og træk for at panorere.",
+    "pg_preset_delete_confirm": "Slet forudindstillingen \"{name}\"?",
+    "pg_preset_limit": "Grænsen for forudindstillinger er nået ({n})",
+    "pg_preset_overwrite": "Overskriv forudindstillingen \"{name}\"?",
     "tail_trim_hint": "Fjern så mange sekunder fra slutningen",
-    "store_sibling_hint": "Er der intet delt til netop din model? En nært beslægtet model fra samme mærke er normalt et godt udgangspunkt.",
-    "store_declare_appliance": "Fortæl WashData, hvilket apparat du har, så viser denne fane de opsætninger, andre har delt til det. Du kan også skrive et mærke ovenfor for at se dig omkring.",
-    "refresh_catalog_hint": "Fællesskabets lister over mærker og apparater gemmes i cachen, så fællesskabsbutikken holder sig inden for sin daglige grænse. Opdater for at hente bidrag, som andre har tilføjet eller godkendt.",
+    "store_sibling_hint": "Intet delt til din model? En beslægtet model fra samme mærke er normalt en god start.",
+    "store_declare_appliance": "Fortæl WashData, hvilket apparat du har, for at se opsætninger, andre har delt til det. Eller skriv et mærke ovenfor for at se dig omkring.",
+    "refresh_catalog_hint": "Fællesskabets lister over mærker og apparater caches for at spare butikkens daglige budget. Opdater for at se poster, som andre har tilføjet eller godkendt.",
     "head_trim_hint": "Fjern så mange sekunder fra starten",
     "appliance_monitor": "Apparat monitor",
     "artifact_dip_detail": "Faldt under det normale effektbånd i ~{n}s.",
     "artifact_footer": "Fremhævet på grafen ovenfor. Disse er forbigående artefakter (f.eks. døren åbnet midt i cyklussen), ikke nødvendigvis problemer.",
     "artifact_header": "{n} uregelmæssigheder opdaget i denne cyklus",
-    "artifact_pause_detail": "Effekten faldt til næsten nul i ~{n}s og genoptog derefter – sandsynligvis blev døren åbnet midt i cyklussen, eller cyklussen blev sat på pause.",
+    "artifact_header_one": "{n} uregelmæssighed opdaget i denne cyklus",
+    "artifact_header_other": "{n} uregelmæssigheder opdaget i denne cyklus",
+    "artifact_pause_detail": "Effekten faldt til næsten nul i ~{n}s og vendte derefter tilbage. Døren blev sandsynligvis åbnet, eller cyklussen blev sat på pause.",
     "artifact_spike_detail": "Steg over det normale effektbånd i ~{n}s.",
     "auto_label_intro": "Tildel profiler til umærkede cyklusser, hvis matchkonfidens rydder tærsklen.",
     "automations_intro": "WashData udløser {start} / {end}-hændelser og stiller entiteter til rådighed, så notifikationer og handlinger bedst bygges som normale Home Assistant-automatiseringer. Automatiseringer, der bruger denne enhed, vises nedenfor.",
-    "cleanup_intro": "Hver mærket cyklus overlejret. Sæt kryds ved afvigelser, og fjern derefter deres mærkning (de bliver i historikken, men påvirker ikke længere denne profil), eller slet dem helt.",
+    "cleanup_intro": "Alle mærkede cyklusser overlejret. Sæt kryds ved afvigere, og fjern derefter deres mærkning (de bliver i historikken, men former ikke længere denne profil), eller slet dem.",
     "clear_debug_hint": "Fjern gemte fejlretningsdata for at frigøre plads.",
     "collecting_data": "Indsamler data. Cyklusser der stadig mangler, før finjustering kan starte: {need} ({current}/{min}).",
     "compare_overlay_profiles": "Overlejringsprofiler (svage)",
-    "compare_profiles_tip": "Overlæg andre profilkonvolutter på skemaet ovenfor for at se, hvilken der passer bedst til denne cyklus.",
+    "compare_profiles_tip": "Overlejr andre profiler på grafen for at se, hvilken der passer bedst til denne cyklus.",
     "compare_selected_cycles": "Valgte cyklusser (fast) – vis/skjul",
-    "consider_new_profile": "Overvej at oprette en ny profil.",
-    "coverage_gap": "seneste cyklusser har ingen matchende profil ({pct}% af sidste 30).",
-    "coverage_gap_similar_cycles": "{count} lignende umærkede cyklusser fundet – opret en profil for at begynde at matche dem.",
     "cycles_deleted": "{count} cyklus(ser) slettet",
+    "cycle_context_loading": "Indlæser recorder-historik…",
+    "cycle_context_note": "Grå: effektsensorens recorder-historik omkring denne cyklus. Den er ikke en del af cyklussen og påvirker ikke varighed, energi eller matchning.",
+    "cycle_context_none": "Recorderen har ingen målinger omkring denne cyklus (Home Assistant gemmer som standard 10 dages historik).",
+    "cycle_context_tip": "Kun visning: viser effektsensorens recorder-historik omkring denne cyklus, hvis den stadig findes. For at tilføje mislykkede startforsøg til fremtidige cyklusser skal du bruge Kurveoptakt (Indstillinger > Registrering > Cyklusstart), som ændrer gemte varigheder.",
     "enough_data": "Nok data til at lære af ({current}/{min} cyklusser).",
     "export_description": "Vælg præcis hvilke profiler, cyklusser, indstillinger og mere der skal eksporteres til JSON, eller analysér en fil og importér kun de dele, du vil have.",
     "feedback_cycles_pending": "Til gennemgang: {n}",
     "feedback_prompt": "Bekræft, at det var rigtigt, ret programmet, eller ignorer.",
     "feedback_relabel_hint": "At mærke denne cyklus om løser også gennemgangen.",
     "filter_by_profile": "Filtrer efter profil…",
-    "group_modal_help": "Gruppér programmer med samme form, der adskiller sig i temperatur/centrifugering (varigheden kan variere). Matching scorer gruppen som én kandidat, og vælger derefter det bedst passende medlem. Vælg mindst 2; overlejringen viser, hvor ens de er.",
+    "group_modal_help": "Gruppér programmer med samme form, der adskiller sig i temperatur eller centrifugering. Matchningen scorer gruppen som én og vælger derefter det bedst passende medlem. Vælg mindst 2; overlejringen viser, hvor ens de er.",
     "group_not_cohesive": "Disse profiler er ikke ens nok til at gruppere pålideligt, så matching behandler dem individuelt, indtil du fjerner afvigelsen eller opdeler gruppen.",
     "group_preview_hint": "Markér 2 eller flere medlemmer for at forhåndsvise og sammenligne deres effektkurver.",
-    "import_intro": "Indlæs en eksporteret fil, eller indsæt en JSON-nyttelast nedenfor.",
-    "legacy_actions_title": "{count} ældre tilpasset handling kører stadig",
+    "legacy_actions_title": "{count} ældre tilpassede handlinger kører stadig",
+    "legacy_actions_title_one": "{count} ældre tilpasset handling kører stadig",
+    "legacy_actions_title_other": "{count} ældre tilpassede handlinger kører stadig",
     "live_chart_loading": "Direkte strømdiagram vises, når målinger ankommer.",
     "loading": "Indlæser...",
     "loading_curve": "Indlæser kurve...",
     "loading_settings": "Indlæser indstillinger...",
     "log_buffer_hint": "Nyeste først · buffer de sidste 500 ha_washdata-poster siden genstart · træk i den nederste kant for at ændre størrelsen.",
-    "maintenance_advisory": "Øget varighed/energi kan indikere nødvendig vedligeholdelse af apparatet (f.eks. afkalkning, filterrensning).",
     "maintenance_due": "Vedligeholdelse forfalder: {items}",
-    "maintenance_intro": "Log den service, du udfører på dette apparat, og bliv mindet om det, når hver opgave forfalder igen.",
+    "maintenance_intro": "Log service på dette apparat, og få en påmindelse, når hver opgave forfalder igen.",
     "maintenance_load_error": "Kunne ikke indlæse vedligeholdelsesdata: {error}",
     "maintenance_requires_access": "Vedligeholdelse og eksport/import kræver fuld adgang.",
-    "manual_duration_hint": "Profilens gennemsnitlige/forventede cykluslængde, brugt til resterende tidsberegninger. Rediger for at indstille det; ved at lade den være uændret beholder den aktuelle værdi.",
-    "matching_tuning_intro": "Ved læring justerer WashData også, hvor meget programtilpasning vejer form kontra varighed og energi.",
+    "manual_duration_hint": "Profilens forventede cykluslængde, brugt til estimater af resterende tid. Lad den være uændret for at beholde den aktuelle værdi.",
     "merge_intro": "De valgte cyklusser kombineres til én (kronologisk rækkefølge; huller udfyldt med 0 W). Vælg den resulterende profil.",
     "ml_intro": "WashData leveres med smarte modeller, der fungerer ud af kassen.",
     "ml_learned_intro": "Modeller finjusteret til denne maskine.",
-    "ml_loading": "indlæser ML...",
     "ml_settings_intro": "To uafhængige kontakter: Den ene anvender modellerne, mens en cyklus kører, den anden lader WashData finjustere dem til din maskine over tid.",
-    "name_first_program": "Du har nok cyklusser – navngiv dit første program for at begynde matchning.",
-    "near_duplicate_cluster": "næsten dublet profilklynge fundet. Gruppering gør det muligt for matchning pålideligt at vælge mellem look-alikes (f.eks. samme program ved forskellig temperatur/spin).",
     "no_cycles_match": "Ingen cyklusser matcher det aktuelle filter.",
     "no_cycles_profile": "Ingen cyklusser for denne profil.",
     "no_cycles_selected": "Vælg mindst én cyklus først.",
@@ -896,73 +868,52 @@
     "no_suggestions": "Ingen aktive forslag.",
     "notify_services_hint": "Brug {entity}-service-ID'er (kommaseparerede for flere). Skabelonvariabler: {vars}.",
     "old_actions_warning": "Konfigureret med den gamle handlingseditor (nu fjernet). De skyder stadig på cyklusbegivenheder, men kan ikke længere redigeres her. Konverter dem til en normal automatisering, eller fjern dem.",
-    "onboarding_progress": "{n} / 3 cyklusser observeret",
-    "onboarding_watching": "Lad dit apparat køre normalt – WashData holder øje. Efter 3 cyklusser begynder programmatchning.",
     "pending_feedback": "Afventer detektionsfeedback",
     "performance_trend": "Præstationstendens ({n} cyklusser)",
-    "pg_analysis_empty": "Indlæs en cyklus for at se matchanalyse.",
     "pg_apply_confirm": "Anvend bedste værdi: {label} = {value}?",
-    "pg_canvas_empty": "Vælg en cyklus ovenfor, og tryk derefter på Indlæs for at se dens effektkurve.",
-    "pg_chart_caption": "Registrerings-/matchrate på tværs af værdier for {param}",
     "pg_ctrl_intro": "Værdierne tager udgangspunkt i denne enheds aktive indstillinger i integrationen. Ændringer bliver i legepladsen, indtil du gemmer dem i integrationen.",
     "pg_live_unavailable": "Aktive indstillinger er ikke tilgængelige, viser standardværdier.",
     "pg_load_live_confirm": "Kassér {n} ændring(er) i legepladsen, og genindlæs integrationens aktuelle indstillinger?",
-    "pg_match_rate": "{pct}% matchrate på {total} cyklusser",
     "pg_matches_live": "Svarer til de aktive indstillinger",
     "pg_n_changed": "{n} ændret i forhold til de aktive indstillinger",
     "pg_sugg_none": "Alle forslag stemmer allerede overens med de aktive indstillinger",
-    "pg_preset_delete_confirm": "Slet forudindstillingen \"{name}\"?",
-    "pg_preset_limit": "Grænsen for forudindstillinger er nået ({n})",
-    "pg_preset_overwrite": "Overskriv forudindstillingen \"{name}\"?",
     "pg_publish_one_confirm": "Gem {label} = {value} i denne enheds indstillinger?",
     "pg_restart_note": "Genstart Home Assistant for at aktivere simuleringsværktøjerne.",
-    "pg_sim_progress": "{done} / {total} cyklusser",
-    "pg_starting": "Starter…",
-    "pg_stress_synthetic": "inaktiv simulering begynder her",
-    "pg_sweep_intro": "Hvad hvis {param} var anderledes? Test {steps} værdier på tværs af dine seneste {cycles} cyklusser for at finde indstillingen, hvor flest cyklusser matches korrekt.",
-    "pg_sweep_step": "Trin {done} / {total}",
-    "pg_verdict_bad": "Kræver opmærksomhed: mange cyklusser bliver ikke registreret.",
-    "pg_verdict_good": "Godt indstillet: de fleste cyklusser identificeres og matches korrekt.",
-    "pg_verdict_ok": "Acceptabelt: nogle cyklusser blev overset. Prøv at sænke starttærsklen.",
     "phase_catalog_intro": "Navngivne segmenter af en cyklus (Forvask, Opvarmning, Centrifugering…). Tildel dem til en profil fra dens kontrolpanel.",
     "phase_ranges_intro": "Faseområder (minutter fra cyklusstart) overlejret på gennemsnitskurven. Rediger værdier for at få vist live.",
-    "playground_intro": "En sikker sandkasse til at afspille tidligere cyklusser med andre indstillinger, sammenligne to opsætninger side om side og undersøge, hvordan en cyklus justeres til en profil. Intet her ændrer dine aktive data, før du udtrykkeligt anvender det.",
-    "playground_needs_restart": "Genstart Home Assistant for at aktivere Legeplads-værktøjerne.",
-    "preferences_admin": "Præferencer, panel og adgangskontrol",
-    "preferences_adv": "Præferencer",
+    "playground_intro": "Afprøv indstillinger på dine rigtige cyklusdata. Intet her ændrer dine aktive indstillinger, før du anvender det.",
     "prefs_personal": "Disse gælder kun for din Home Assistant-konto.",
-    "process_history_hint": "Kør matching igen på alle gemte cyklusser, opdater justeringsforslag, gentræn ML-modellerne (hvis aktiveret), genberegn cyklussernes omkostninger ud fra dine registrerede energipriser, og genberegn cyklernes tilstand. Kør dette efter en batch af gennemgange.",
+    "process_history_hint": "Kør matchning igen på alle gemte cyklusser, opdater forslag, gentræn ML-modeller (hvis aktiveret), genberegn omkostninger ud fra registrerede priser, og genberegn cyklussundhed. Kør det efter en række gennemgange.",
     "profile_deleted": "Profil slettet",
-    "profile_poor_health_detail": "Cykler, der er tildelt denne profil, har inkonsekvente former eller lav tillid. Overvej at genopbygge konvolutten eller gennemgå mærkede cyklusser.",
     "profiles_intro": "Klik på en profil for statistik, faser og oprydning. Gruppér næsten identiske programmer (samme form/varighed, forskellig temperatur eller centrifugering), så du kan matche pålideligt valg mellem dem.",
-    "rbac_hint": "Når den er slået fra, har alle Home Assistant-brugere fuld adgang (standard). Administratorer har altid fuld adgang og kan administrere alle.",
-    "recent_logs": "Seneste ha_washdata-poster",
+    "rbac_hint": "Fra: alle Home Assistant-brugere har fuld adgang (standard). Administratorer har altid fuld adgang og kan administrere alle.",
     "recording_in_progress": "Optagelse i gang",
     "reminders_intro": "Vis en påmindelse i panelet så mange cyklusser efter sidste service. Lad feltet være tomt eller 0 for at slå en påmindelse fra.",
     "restart_gap_footer": "Fremhævet på grafen. Strømdata mangler for disse intervaller; matching brugte kun rigtige aflæsninger.",
     "restart_gap_header": "{n} HA-genstartsgab under denne cyklus",
+    "restart_gap_header_one": "{n} HA-genstartsgab under denne cyklus",
+    "restart_gap_header_other": "{n} HA-genstartsgab under denne cyklus",
     "restart_gap_item": "{dur} gab",
-    "review_confirm_help": "Bekræft, om denne cyklus blev registreret korrekt. Dine anmeldelser træner modellen på din maskine - jo flere cyklusser du bekræfter, jo bedre matchning og sundhedsscore får du. En hurtig god/dårlig er nok.",
+    "review_confirm_help": "Blev denne cyklus registreret korrekt? Bekræftede cyklusser forbedrer matchningen for din maskine. En hurtig God/Dårlig er nok.",
     "review_in_settings": "Gennemgå i Indstillinger",
     "review_notes_placeholder": "Noter (valgfrit)",
     "review_notes_tip": "Fritekstnoter til din egen reference. Bruges ikke til match eller træning.",
-    "review_profile_tip": "Programmet denne cyklus er mærket som. Hvis det auto-detekterede program var forkert, skal du rette det her - mærkning lærer matchning til fremtidige cyklusser.",
-    "review_quality_tip": "Hvor ren er denne cyklus. Godt = et lærebogseksempel på dette program; Dårlig = opdaget, men støjende eller atypisk; Ubrugelig = fejlopdaget (fusioneret, trunkeret eller falsk). Driver sundhedsscore og hvilke cyklusser der må træne modellen.",
-    "review_recorded_tip": "Marker dette som en håndplukket referencecyklus for dets program - samme rolle som en manuelt optaget cyklus. Referencecyklusser opbevares altid, danner grundlag for matchskabelonen og droppes aldrig ved oprydning. (Dette er det \"gyldne\"/optagede flag; begge er det samme.)",
-    "review_tags_tip": "Valgfrie flag, der beskriver, hvad der gik galt med denne cyklus, så træning og oprydning kan forklare det.",
-    "review_to_cycles": "Åbn køen Cycles review",
+    "review_profile_tip": "Det program, denne cyklus er mærket som. Hvis det er forkert, så ret det her; mærkninger lærer matchningen.",
+    "review_quality_tip": "Hvor ren denne cyklus er. God: et lærebogseksempel på dette program. Dårlig: registreret, men støjende eller usædvanlig. Ubrugelig: fejlregistreret (sammenlagt, afkortet eller falsk). Påvirker sundhedsscoren og hvilke cyklusser der træner modellen.",
+    "review_recorded_tip": "Markér dette som en håndplukket referencecyklus for dets program, som en manuelt optaget cyklus. Referencecyklusser beholdes altid, danner grundlag for matchskabelonen og fjernes aldrig ved oprydning.",
+    "review_tags_tip": "Valgfrie flag for, hvad der gik galt, så træning og oprydning kan tage højde for det.",
+    "review_to_cycles": "Åbn gennemgangskøen under Cykler",
     "samples_decimated": "Viser {shown} af {total} prøver (udtyndet til visning; spidser bevares). Et bredt hul her er udtynding, ikke manglende data.",
-    "saving_triggers_reload": "Gemning udløser en genindlæsning af integration. HA-enheder kan kortvarigt vises som utilgængelige.",
+    "saving_triggers_reload": "Når du gemmer, genindlæses integrationen. Entiteter kan kortvarigt vises som utilgængelige.",
     "search_placeholder": "Søgeindstillinger...",
     "see_recorder": "Se optager-widget nedenfor",
     "setting_changed": "Ændret fra {old} til {new} den {date}",
     "settings_basic_note": "Viser væsentlige indstillinger. Skift til Avanceret for hele listen.",
-    "shape_drift_advisory": "⚠ Formdrift",
-    "shape_drift_detail": "Effektmønsteret for denne profil har ændret sig over tid – mulig slid på apparatet eller vedligeholdelse nødvendig (f.eks. afkalkning, filterrensning).",
     "show_all_settings": "Vis alle indstillinger",
-    "showing_suggestions": "Viser indstillingen {count} med forslag.",
-    "split_intro": "Klik på grafen for at tilføje eller fjerne et opdelingspunkt, eller automatisk detektere ved inaktive huller. Hvert resulterende segment kan få sin egen profil.",
-    "storage_diagnostics": "Lagerstatistik, vedligeholdelse, eksport/import",
+    "showing_suggestions": "Viser {count} indstillinger med forslag.",
+    "showing_suggestions_one": "Viser {count} indstilling med forslag.",
+    "showing_suggestions_other": "Viser {count} indstillinger med forslag.",
+    "split_intro": "Klik på grafen for at tilføje eller fjerne et opdelingspunkt, eller registrer automatisk ud fra pauser i tomgang. Hver del kan få sin egen profil.",
     "sug_staged": "Indstillet {key} = {val}. Gem for at anvende.",
     "toast_auto_detect_enabled": "Automatisk registrering aktiveret",
     "toast_auto_label_complete": "Automatisk mærkning fuldført",
@@ -979,7 +930,6 @@
     "toast_no_automation": "Kan ikke oprette automatisering her",
     "toast_profile_name_required": "Profilnavn er påkrævet",
     "toast_program_set": "Program valgt: {program}",
-    "toast_rebuild_failed": "Genopbygning mislykkedes: {error}",
     "toast_resume_failed": "Genoptagelse mislykkedes: {error}",
     "toast_revert_failed": "Tilbagerulning mislykkedes: {error}",
     "toast_reverted": "{key} tilbageført",
@@ -990,100 +940,83 @@
     "trend_energy_up": "Energitrends op ({pct} %/cyklus) – seneste gennemsnit {avg}",
     "trim_destructive_confirm": "Dermed bevares kun {pct}% af cyklussen. Dette kan ikke fortrydes. Fortsæt?",
     "trim_intro": "Træk i de røde håndtag, eller indtast værdier. Alt uden for vinduet fjernes.",
-    "tuning_suggestions_available": "{count} indstillingsforslag tilgængeligt fra observerede cyklusser. De vises ved siden af de relevante felter.",
+    "tuning_suggestions_available": "{count} indstillingsforslag tilgængelige fra observerede cyklusser. De vises ved siden af de relevante felter.",
+    "tuning_suggestions_available_one": "{count} indstillingsforslag tilgængeligt fra observerede cyklusser. Det vises ved siden af det relevante felt.",
+    "tuning_suggestions_available_other": "{count} indstillingsforslag tilgængelige fra observerede cyklusser. De vises ved siden af de relevante felter.",
     "unsure_detected_prefix": "WashData er usikker på, om det er registreret",
-    "updated": "Opdateret",
     "warmup_badge": "Lærer stadig ({done}/{needed} cyklusser)",
-    "warmup_detail": "Denne profil har brug for {needed} mærkede cyklusser, før automatisk matchning begynder. Hver bekræftet cyklus hjælper den med at lære.",
+    "warmup_detail": "Matchning virker allerede. WashData beder dig bekræfte de første {needed} cyklusser for denne profil, før den mærker på egen hånd.",
     "wipe_history_warning": "Slet alle cyklusser og profiler permanent. Kan ikke fortrydes.",
     "compare_overlay_tip": "Læg indlærte profilindhylninger oven på hinanden for at se, hvilket program hver cyklus ligner.",
-    "duration_trend_up_tip": "Varighed stiger ({pct}%/cyklus)",
-    "duration_trend_down_tip": "Varighed falder ({pct}%/cyklus)",
-    "energy_trend_up_tip": "Energi stiger ({pct}%/cyklus)",
-    "energy_trend_down_tip": "Energi falder ({pct}%/cyklus)",
-    "performance_trending": "Ydelsestendens",
-    "pg_select_cycle_hint": "Vælg en cyklus og klik på ↺ for at indlæse",
-    "pg_sweep_progress": "Trin {done} / {total}",
-    "pg_analysis_hint": "Vælg en cyklus og klik på ↺ for at indlæse analysen.",
     "diagnostics_load_failed": "Kunne ikke indlæse diagnostik: {error}",
-    "manual_duration_ref_hint": "Bruges kun, når der ikke er valgt en referencecyklus. En referencecyklus fastsætter varigheden ud fra sin egen længde.",
+    "manual_duration_ref_hint": "Bruges kun uden en referencecyklus; en referencecyklus fastsætter varigheden ud fra sin egen længde.",
+    "duration_learned_hint": "Beregnet ud fra programmets cyklusser (uden afvigere) og opdateret efter hver ny cyklus. Vil du ændre den, kan du beskære eller fjerne de cyklusser, der afviger.",
     "toast_convert_rolled_back": "Konverteringen mislykkedes og blev rullet tilbage (ingen automatisering blev efterladt): {error}",
     "toast_convert_orphan": "Automatiseringen blev oprettet, men rydningen af de gamle handlinger mislykkedes. Prøv ikke igen: fjern de gamle handlinger manuelt for at undgå en dubleret automatisering.",
-    "advisory_duration_trend_up": "Cyklusserne for '{name}' bliver gradvist længere (ca. +{pct}% pr. cyklus). Hvis apparatets adfærd har ændret sig, så optag eller genopbyg denne profil.",
-    "advisory_energy_trend_up": "'{name}' trækker gradvist mere energi (ca. +{pct}% pr. cyklus) - værd at tjekke apparatet, hvis det er uventet.",
-    "advisory_poor_health": "'{name}' har en lav pasningsscore - dens seneste cyklusser varierer meget eller matcher svagt. Gennemgå dens cyklusser, eller optag profilen igen, så matchning og tidsestimater forbliver præcise.",
-    "advisory_shape_drift": "'{name}' har afveget markant fra sin oprindelige effektkurve. Apparatet kan have ændret adfærd med tiden (f.eks. kalk, slid). Overvej at optage denne profil igen med nye cyklusser.",
-    "advisory_shape_drift_corr": "'{name}' har afveget markant fra sin oprindelige effektkurve (korrelation {corr}). Apparatet kan have ændret adfærd med tiden (f.eks. kalk, slid). Overvej at optage denne profil igen med nye cyklusser.",
-    "advisory_unmatchable": "'{name}' kan aldrig matches: der ligger ingen cyklus med effektdata bag den, så WashData har intet at sammenligne en kørende cyklus med. Mærk en cyklus af dette program (eller optag en) for at få den med i matchningen igen.",
-    "advisory_unmatchable_no_duration": "'{name}' kan aldrig matches: cyklussen bag den har effektdata, men ingen brugbar varighed, så WashData har ingen længde at måle et match op imod. Optag dette program igen, eller angiv dets forventede varighed, for at få det med i matchningen igen.",
+    "advisory_duration_trend_up": "Cyklusserne for '{name}' bliver længere og længere (ca. +{pct}% pr. cyklus). Hvis apparatet har ændret sig, så optag eller genopbyg denne profil.",
+    "advisory_energy_trend_up": "'{name}' bruger mere energi for hver cyklus (ca. +{pct}% pr. cyklus). Tjek apparatet, hvis det er uventet.",
+    "advisory_poor_health": "'{name}' passer dårligt: dens seneste cyklusser varierer meget eller matcher svagt. Gennemgå dens cyklusser, eller optag den igen, så matchning og estimater forbliver præcise.",
+    "advisory_shape_drift": "'{name}' har fjernet sig fra sin oprindelige effektkurve, måske på grund af kalk eller slid. Overvej at optage den igen med nye cyklusser.",
+    "advisory_shape_drift_corr": "'{name}' har fjernet sig fra sin oprindelige effektkurve (korrelation {corr}), måske på grund af kalk eller slid. Overvej at optage den igen med nye cyklusser.",
+    "advisory_unmatchable": "'{name}' kan aldrig matches: der ligger ingen cyklus med effektdata bag den. Mærk eller optag en cyklus af dette program for at løse det.",
+    "advisory_unmatchable_no_duration": "'{name}' kan aldrig matches: dens cyklus har ingen brugbar varighed. Optag dette program igen, eller angiv dets forventede varighed.",
     "pg_no_alerts": "Ingen problemer registreret i denne kørsel.",
     "pg_override_active": "Bruger dine redigerede indstillinger mod de nuværende",
     "pg_history_empty": "Tryk på Kør for at afspille dine cyklusser igen.",
     "pg_history_summary": "{detected}/{total} registreret · {correct} matchet korrekt",
     "pg_sweep_no_metric": "Ikke nok data til at score dette mål.",
     "pg_sweep_intro2": "Find den indstilling, der bedst opfylder et mål på tværs af dine seneste cyklusser. Intet ændres, før du anvender det.",
-    "pg_running_history": "Dine cyklusser afspilles igen…",
-    "pg_running_sweep": "Værdier testes på tværs af dine cyklusser…",
     "pg_row_load_hint": "Indlæs denne cyklus i grafen ovenfor",
-    "pg_history_intro2": "Afspil dine seneste cyklusser igennem den rigtige detektor og genkendelse med indstillingerne ovenfor. Klik på en række for at indlæse den cyklus i grafen; rediger en indstilling for at se en før/efter-sammenligning.",
+    "pg_history_intro2": "Afspil seneste cyklusser gennem den rigtige detektor og matcher med indstillingerne ovenfor. Klik på en række for at indlæse den i grafen; skift en indstilling for at sammenligne før og efter.",
     "pg_simulating": "Simulerer cyklus…",
-    "pg_canvas_empty2": "Vælg en cyklus ovenfor, og tryk på Kør for at simulere den. Hold derefter markøren over for at aflæse værdier, rul for at zoome, og træk for at panorere.",
     "pg_apply_settings_confirm": "Gem disse {n} indstilling(er) på denne enhed? {list}",
-    "pg_stress_terminated_detail": "Stabiliserede sig på ~{idle}W inaktiv -- cyklussen sluttede {h} t {m} min senere via {reason}.",
-    "pg_stress_above_threshold_detail": "Standbyforbruget på ~{idle}W er på eller over den effektive stoptærskel ({stop}W) -- cyklussen blev aldrig registreret som inaktiv. Hæv stop_threshold_w for at rette dette.",
-    "pg_stress_hit_cap_detail": "Cyklussen kørte {h} t {m} min uden at stoppe -- tvangsstoppet af sikkerhedsgrænsen. Standbyforbrug {idle}W mod stoptærskel {stop}W.",
     "no_logs_match": "Ingen logposter matcher disse filtre.",
     "pg_analysis_hint2": "Vælg en cyklus, og tryk på Kør for at indlæse matchanalysen.",
-    "pg_analysis_empty2": "Tryk på Kør for at se matchanalysen.",
-    "imported_readonly": "Importeret fra fællesskabsbutikken. Vises til reference og matchning. Tælles ikke med i din statistik og kan ikke redigeres.",
+    "imported_readonly": "Importeret fra fællesskabsbutikken. Bruges til reference og matchning, tælles ikke med i din statistik og kan ikke redigeres.",
     "merge_no_imports": "Importerede optagelser kan ikke flettes ind i en rigtig cyklus. Fravælg dem for at flette.",
-    "store_enable_hint": "Aktivér onlinefunktioner i Indstillinger for at gennemse og importere fællesskabets referencecyklusser.",
-    "advisory_duration_outlier": "{n} cyklus(ser) mærket '{name}' ligger for langt fra programmets sædvanlige længde til nogensinde at kunne matche det (værst: {ratio}x). De er sandsynligvis mærket forkert, eller én optagelse har fanget to kørsler. Mærk dem om, eller del dem op, så de ikke længere skævvrider tidsestimatet for dette program.",
+    "store_enable_hint": "Slå onlinefunktioner til under Præferencer > Online & fællesskab for at gennemse og importere fællesskabets referencecyklusser.",
+    "advisory_duration_outlier": "{n} cyklus(ser) mærket '{name}' ligger for langt fra dens sædvanlige længde til nogensinde at matche (værst: {ratio}x). De er sandsynligvis fejlmærket eller indeholder to kørsler. Mærk dem igen, eller opdel dem, så de ikke længere skævvrider tidsestimatet.",
     "standby_above_stop_title": "Trak stadig {idle} W, da cyklussen sluttede",
     "standby_above_stop_sub": "{n} af de sidste {total} cyklusser. Slukkeforsinkelsen starter først, når effekten er under Stoptærskel ({stop} W), så cyklusser slutter for sent eller skal stoppes manuelt.",
-    "online_intro": "Del referencecyklusser med andre WashData-brugere, og download dem. Alle onlinefunktioner er valgfrie og slået fra som standard.",
     "store_share_intro": "Upload denne referencecyklus, så andre med samme apparat kan bruge den. Den gennemgås, før den vises offentligt.",
-    "online_intro_global": "Gennemse og del referenceoptagelser med andre WashData-brugere, og bekræft apparatposter. Én forbindelse gælder for hele din WashData-integration; apparatets mærke og model angives pr. enhed under Grundlæggende. Alle onlinefunktioner er valgfrie og slået fra som standard.",
+    "online_intro_global": "Gennemse og del referenceoptagelser med andre WashData-brugere. Én forbindelse dækker alle dine WashData-enheder; mærke og model angives pr. enhed under Grundlæggende. Onlinefunktioner er slået fra, indtil du slår dem til.",
     "online_unavailable": "Onlinefunktioner er ikke tilgængelige på denne server.",
     "store_picker_offline": "Aktivér onlinefunktioner i indstillingstandhjulet for at vælge fra fællesskabskataloget.",
     "pick_brand_first": "Vælg først et apparatmærke.",
-    "model_not_found": "Ikke i kataloget endnu.",
-    "connect_to_confirm": "Opret forbindelse i indstillingstandhjulet for at bekræfte eller bedømme.",
     "adopt_settings_hint": "Overskriver dette apparats detektions- og matchgrænser med de delte. Dine notifikationer, entiteter og energipris ændres aldrig.",
-    "include_settings_hint": "Deler dette apparats detektions- og matchgrænser (ikke dine notifikationer, entiteter eller energipris). Brugerne vælger selv, om de vil anvende dem.",
+    "include_settings_hint": "Del denne enheds registrerings- og matchtærskler (ikke notifikationer, entiteter eller energipris). Andre vælger selv, om de vil anvende dem.",
     "onboard_download": "Nyt apparat? Overtag en klar opsætning (programmer, referencecyklusser og faser) fra en anden WashData-bruger med samme apparat.",
-    "share_consent": "Jeg bekræfter, at disse cyklusser er gennemført normalt uden afbrydelse",
     "share_device_none": "Ingen delbare cyklusser endnu. Markér først en optaget eller håndplukket cyklus som referencecyklus (⭐) under fanen Cyklusser.",
     "share_guideline_naming": "Navngiv hver profil præcis som vist på apparatets drejeknap eller display (f.eks. 'Cotton 40', 'Eco 60').",
-    "share_guideline_quality": "Del kun cyklusser, der er gennemført normalt -- ingen afbrydelser midt i cyklen, åbning af dør eller strømudfald.",
+    "share_guideline_quality": "Del kun cyklusser, der sluttede normalt: ingen afbrydelser, døråbninger eller strømudfald.",
     "share_guideline_review": "Din upload starter som afventende og vises offentligt, når nok fællesskabsmedlemmer bekræfter den.",
     "share_guidelines_title": "Inden du deler",
-    "store_download_device_intro": "Overtag alle delte programmer og deres referencecyklusser til dit apparat. Dine egne optagede cyklusser og statistik påvirkes ikke.",
+    "store_download_device_intro": "Tilføj alle delte programmer og deres referencecyklusser til din enhed. Dine egne cyklusser og din statistik påvirkes ikke.",
     "store_share_device_intro": "Upload {brand} {model} med de referencecyklusser, du vælger. Andre med samme apparat kan overtage dine programmer. Bidrag gennemgås inden offentliggørelse.",
     "share_profile_no_cycles": "Ingen referencecyklusser -- markér en cyklus som ⭐ under fanen Cyklusser for at inkludere denne profil",
-    "advisory_phase_inconsistent": "'{name}' ser ud til at blande forskellige programmer eller temperaturer - dens cyklusser varmer op i meget forskellige tidsrum. Hvis du deler den op i separate profiler (f.eks. pr. temperatur), forbedres matchningen og tidsestimaterne.",
-    "advisory_phase_inconsistent_title": "⚠ Muligvis blandede programmer",
-    "export_select_intro": "Markér præcis hvad der skal inkluderes. At vælge profiler uden deres cyklusser eksporterer stadig et genkendeligt program (den lærte form følger med).",
-    "import_analyze_hint": "Indlæs en eksporteret fil (eller indsæt dens JSON). WashData analyserer den og viser præcis hvad der kan importeres, før noget ændres.",
+    "export_select_intro": "Sæt kryds ved det, der skal med. Profiler uden deres cyklusser eksporterer stadig et program, der kan matches.",
+    "import_analyze_hint": "Indlæs en eksporteret fil (eller indsæt dens JSON). WashData viser, hvad der kan importeres, før noget ændres.",
     "analyzing": "Analyserer…",
-    "device_type_mismatch_warn": "Denne eksport er fra en anden apparattype ({src} vs {local}). Programmer og cyklusser kan stadig importeres som referencedata, men apparatspecifikke indstillinger og import af rigtig historik er deaktiveret.",
+    "device_type_mismatch_warn": "Denne eksport er fra en anden apparattype ({src} vs {local}). Programmer og cyklusser kan stadig importeres som referencedata, men ikke enhedsindstillinger eller rigtig historik.",
     "merge_hint": "Importerede elementer tilføjes; intet lokalt går tabt. Navnekonflikter løses nedenfor.",
     "replace_warn": "Hver markeret kategori slettes og erstattes fra filen. Ikke-markerede kategorier forbliver uændrede.",
     "dest_reference_hint": "Importerede cyklusser forbedrer kun programgenkendelse og påvirker aldrig forbrugs-/energistatistik.",
-    "dest_real_history_hint": "Importerede cyklusser tæller som dette apparats egen historik og indgår i energi-/forbrugsstatistik. Brug dette til at flytte ét apparat til en ny installation.",
+    "dest_real_history_hint": "Importerede cyklusser tæller som dette apparats egen historik og statistik. Brug dette til at flytte et apparat til en ny installation.",
     "sug_muted": "Vil ikke foreslå denne indstilling igen",
     "sug_mute_failed": "Kunne ikke undertrykke forslaget",
     "sug_unmuted_all": "Undertrykte forslag nulstillet",
-    "n_suggestions_muted": "{count} undertrykt; autotuner vil ikke foreslå disse.",
+    "n_suggestions_muted": "{count} forslag undertrykt; autotuneren vil ikke foreslå disse.",
+    "n_suggestions_muted_one": "{count} forslag undertrykt; autotuneren vil ikke foreslå det.",
+    "n_suggestions_muted_other": "{count} forslag undertrykt; autotuneren vil ikke foreslå disse.",
     "font_size_hint": "Gør alt i dette panel større eller mindre. Gælder for din konto på denne enhed.",
-    "import_history_description": "Havde du allerede et smartstik, før du fik WashData? Upload en historikeksport fra dets effektsensor, eller lad den blive læst direkte fra Home Assistant, og den normale registrering kører hen over den, så tidligere cyklusser dukker op i din Cykler-liste, klar til at få navn.",
-    "hist_input_hint": "Upload en CSV-fil hentet fra Historik-panelet (entitet, tilstand, sidst ændret), eller lad WashData læse sensorens historik direkte. Registreringen kører derefter hen over den præcis som live, og du vælger, hvilke af de fundne cyklusser du vil beholde.",
-    "hist_recorder_hint": "Læser fra den dato, du vælger, og frem til nu. Home Assistant gemmer som standard detaljeret historik i 10 dage og derefter kun timegennemsnit, som er for grove at registrere cyklusser ud fra - vælg kun en dato længere tilbage, hvis din recorder er sat til at gemme mere.",
-    "hist_scanning": "Din historik spilles igennem registreringen. Dette kører i baggrunden - du kan lukke denne dialog og vende tilbage til den senere.",
+    "import_history_description": "Havde du et smartstik før WashData? Upload dets effekthistorik, eller læs den fra Home Assistant. Registreringen kører hen over den, og tidligere cyklusser vises i din Cykler-liste, klar til at blive navngivet.",
+    "hist_input_hint": "Upload en CSV fra Historik-panelet (entitet, tilstand, sidst ændret), eller lad WashData læse sensorens historik direkte. Live-registreringen kører hen over den, og du vælger, hvilke cyklusser der skal beholdes.",
+    "hist_recorder_hint": "Læser fra den valgte dato og frem til nu. Home Assistant gemmer som standard detaljeret historik i 10 dage; ældre timegennemsnit er for grove til cyklusregistrering.",
+    "hist_scanning": "Din historik køres gennem detektoren i baggrunden. Du kan lukke denne dialog og vende tilbage senere.",
     "hist_imported_count": "{n} cyklusser importeret.",
     "hist_duplicates": "{n} var allerede importeret og blev sprunget over.",
     "hist_capped": "Grænsen pr. enhed for importerede cyklusser blev nået; resten blev ikke gemt.",
-    "hist_next_step": "De ligger i din Cykler-liste, mærket som importeret historik. Åbn en, og brug Mærk til at give det tilhørende program navn.",
+    "hist_next_step": "De ligger i din Cykler-liste, mærket som importeret historik. Åbn en, og brug Mærk til at navngive dens program.",
     "hist_rows_read": "{n} aflæsninger læst",
     "hist_entity_substituted": "læste {used} (denne enhed er konfigureret til {wanted})",
     "hist_breaks": "{n} huller hvor sensoren var utilgængelig",
@@ -1097,55 +1030,86 @@
     "hist_scan_failed": "Scanningen mislykkedes.",
     "hist_scan_expired": "Den scanning er ikke længere tilgængelig. Scan igen.",
     "hist_import_failed": "Importen mislykkedes.",
-    "imported_history_readonly": "Registreret i importeret effekthistorik. Den påvirker programmatchning, men tælles ikke med i din statistik og kan ikke beskæres eller opdeles. Mærk den for at give programmet navn.",
-    "odometer_intro": "Denne total kan kun stige. Sletning af en cyklusregistrering ændrer den ikke, og den tæller videre ud over grænsen for den gemte historik, så servicepåmindelser bliver ved med at være korrekte.",
-    "odometer_correct_hint": "Angiv dette, hvis WashData har registreret en kørsel, der aldrig har fundet sted, eller hvis apparatet allerede havde kørt cyklusser, før WashData blev installeret.",
+    "imported_history_readonly": "Fundet i importeret effekthistorik. Den hjælper matchningen, men tælles ikke med i din statistik og kan ikke beskæres eller opdeles. Mærk den for at navngive programmet.",
+    "odometer_intro": "Denne total stiger kun. Sletning af en cyklus sænker den ikke, så servicepåmindelser forbliver korrekte.",
+    "odometer_correct_hint": "Angiv dette, hvis WashData har talt en kørsel, der aldrig fandt sted, eller apparatet kørte cyklusser, før WashData blev installeret.",
     "no_reminders_set": "Der er endnu ikke angivet nogen servicepåmindelser.",
     "toast_program_armed": "Program valgt til næste cyklus: {program}",
     "toast_range_required": "Angiv et gyldigt Fra/Til-interval.",
-    "no_profiles_option": "(ingen profiler endnu, tilføj en)"
+    "no_profiles_option": "(ingen profiler endnu, tilføj en)",
+    "compare_cycles_title": "Sammenlign {count} cyklusser",
+    "edit_builtin_phase": "Dette er en indbygget fase. Når du gemmer, oprettes en brugerdefineret kopi; slet kopien for at gendanne originalen.",
+    "fetch_error": "Kunne ikke indlæse data.",
+    "connection_lost": "Forbindelsen blev afbrudt - viser data fra {time}.",
+    "pg_notify_partial": "Markører viser kun notifikationer for start, næsten færdig, færdig, milepæle og stilletimer. Live-opdateringer, aflæsningspåmindelser og advarsler om overskridelse simuleres ikke.",
+    "connect_to_confirm": "Opret forbindelse i indstillingstandhjulet for at bekræfte eller bedømme.",
+    "coverage_gap_cluster": "{count} nylige umærkede cyklusser på omkring {min} min ligner ét program, som du endnu ikke har oprettet.",
+    "pg_label_yes": "Ville blive mærket \"{name}\" ved cyklussens afslutning",
+    "pg_label_no": "Ville bede om gennemgang: {reason}",
+    "live_match_debug_tip": "Tillid: hvor tæt den aktuelle effektkurve matcher den bedste kandidatprofil (0-100%). Tvetydig: de to bedste kandidater scorer inden for 5% af hinanden - etiketten er usikker, indtil cyklussen er færdig.",
+    "automation_alias_started": "{device}: cyklus startet",
+    "automation_alias_finished": "{device}: cyklus færdig",
+    "automation_desc_started": "Kører, når en {device}-cyklus starter. Tilføj dine handlinger (notifikation, lys, ...).",
+    "automation_desc_finished": "Kører, når en {device}-cyklus er færdig. Tilføj dine handlinger (notifikation, lys, ...).",
+    "feedback_detected": "WashData registrerede: {name}",
+    "pg_outcome_stale": "Indstillingerne er ændret, siden denne simulering kørte. Den viser stadig det gamle resultat.",
+    "pg_compare_profile_tip": "Vælger kun den profil, der tegnes oven på grafen. Simuleringen genkender altid cyklussen på egen hånd, ligesom integrationen gør under drift.",
+    "pg_task_busy": "En kørsel af Test på historik eller Optimér er allerede i gang for denne enhed. Vent på den, eller annuller den.",
+    "pg_sweep_guarded": "Afslutter flere cyklusser for tidligt, opdeler flere af dem eller overser cyklusser, som den nuværende indstilling fanger, så den anbefales aldrig.",
+    "pg_sweep_n_cycles": "over {count} cyklusser",
+    "pg_sweep_n_cycles_one": "over {count} cyklus",
+    "pg_sweep_n_cycles_other": "over {count} cyklusser",
+    "pg_sweep_keep_current": "Behold den nuværende værdi ({value}, {metric}): ingen værdi klarede sig bedre med mindst én cyklus.",
+    "hist_truncated": "stoppede ved grænsen på {n} aflæsninger, så resten af historikken blev ikke gennemgået",
+    "hist_warn_kw": "Den højeste måling er kun {w}. Denne sensor ser ud til at rapportere kilowatt; WashData har brug for watt, så ingen cyklusser kan registreres.",
+    "hist_warn_naive_time": "{n} tidsstempler har ingen tidszone og blev læst som UTC. Hvis filen bruger lokal tid, er cyklusser forskudt med din UTC-forskydning, og målinger omkring et sommertidsskift kan gå tabt.",
+    "hist_warn_naive_time_one": "{n} tidsstempel har ingen tidszone og blev læst som UTC. Hvis filen bruger lokal tid, er cyklusser forskudt med din UTC-forskydning, og målinger omkring et sommertidsskift kan gå tabt.",
+    "hist_warn_naive_time_other": "{n} tidsstempler har ingen tidszone og blev læst som UTC. Hvis filen bruger lokal tid, er cyklusser forskudt med din UTC-forskydning, og målinger omkring et sommertidsskift kan gå tabt.",
+    "hist_tail_trimmed": "{min} min ventetid efter cyklussens afslutning blev skåret fra, ligesom integrationen gør under drift",
+    "invalid_threshold_pair": "Stoptærskel ({stop} W) skal være under Starttærskel ({start} W). Intet blev gemt; ændr begge sammen.",
+    "import_undo_hint": "Et gendannelsespunkt fra før den seneste import ({when}) er bevaret: {profiles} profil(er) og {cycles} cyklus(ser).",
+    "replace_undo_hint": "Der gemmes først et gendannelsespunkt, så du kan fortryde denne import under Eksport/import.",
+    "pg_in_sample_note": "Disse cyklusser var med til at bygge de profiler, de matches mod, så resultaterne er optimistiske: forvent lidt færre korrekte match på nye cyklusser."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
-    "smart_termination_duration_ratio": "Andel af det genkendte programs forventede varighed, som en cyklus skal nå, før smart afslutning må afslutte den tidligt; sænk den for belastnings- eller temperaturafhængige maskiner",
+    "smart_termination_duration_ratio": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før smart afslutning må afslutte den tidligt; sænk den, hvis køretiderne varierer",
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
-    "end_repeat_count": "Lave målinger i træk før afslutning",
     "interrupted_min_seconds": "Korte cyklusser markeres som afbrudt",
     "min_off_gap": "Mellemrum, der kræves for at adskille to cyklusser",
     "off_delay": "Sekunder med lav effekt, før cyklussen slutter",
     "start_duration_threshold": "Sekunder over tærsklen for at bekræfte start",
     "start_threshold_w": "Minimum watt for at tælle som startet",
     "stop_threshold_w": "Under dette tælles maskinen som slukket",
-    "dtw_bandwidth": "Trin 3: Sakoe-Chiba-tidsforvrængningsband (0 = DTW slukket; standard 0,2 = 20% af cykellængde)",
-    "corr_weight": "Trin 2: balance mellem kurveform (korrelation) og effektniveau (MAE); standard 0,45",
-    "duration_weight": "Trin 4: hvor stærkt varighedsoverensstemmelse påvirker slutscoren (standard 0,22)",
-    "energy_weight": "Trin 4: hvor stærkt energioverensstemmelse påvirker slutscoren (standard 0,22)",
-    "profile_match_min_duration_ratio": "Trin 1: korteste cykellængde som brøkdel af profilvarighed; standard 0,1 (10%)",
-    "profile_match_max_duration_ratio": "Trin 1: længste cykellængde som brøkdel af profilvarighed; standard 1,8 (180%)",
-    "keep_min_score": "Trin 2: minimumsscore for at komme videre; standard 0,1 tillader svage match, senere trin vælger det bedste",
-    "dtw_blend": "Trin 3: 0 = kun kernescore, 1 = kun DTW-score, 0,5 = ligelig blanding (standard)",
-    "dtw_ensemble_w": "Trin 3 (ensemble-tilstand): vægt på skaleret L1 kontra derivativ DTW; standard 0,7 foretrækker niveaubevidst",
-    "dtw_ddtw_scale": "Trin 3: DDTW-halvmætningsafstand; mindre = mere formfølsom (standard 30)",
-    "dtw_refine_top_n": "Trin 3: kandidater DTW gen-scorer; hæv til 7-9 hvis korrekt profil placerer sig 4.-5. (standard 5)",
-    "duration_scale": "Trin 4: log-forhold der varighedsoverensstemmelse halveres; lavere = strengere straf (standard 0,175)",
-    "energy_scale": "Trin 4: log-forhold der energioverensstemmelse halveres; lavere = strengere straf (standard 0,25)",
+    "profile_match_min_duration_ratio": "Korteste cykluslængde som andel af profilens varighed; standard 0,1 (10%)",
+    "profile_match_max_duration_ratio": "Længste cykluslængde som andel af profilens varighed; standard 1,8 (180%)",
     "anti_wrinkle_idle_timeout": "Tilladt stilletid mellem to tumle-pulser, før anti-rynke slutter",
     "anti_wrinkle_max_power": "En puls over dette afslutter anti-rynke og åbner en ny cyklus",
     "anti_wrinkle_enabled": "Opfange tumle-pulserne efter hovedfasen i stedet for at læse dem som nye cyklusser",
     "anti_wrinkle_max_duration": "En puls længere end dette afslutter anti-rynke og åbner en ny cyklus",
-    "anti_wrinkle_exit_power": "Effekten skal falde under dette mellem pulserne, for at anti-rynke forbliver aktiv",
-    "anti_crease_finalize_ratio": "Andel af det genkendte programs forventede varighed, som en cyklus skal nå, før anti-rynke-efterløbet må afsluttes; sænk den på tørretumblere med langt efterløb, lad vaskemaskiner stå på standardværdien",
+    "anti_wrinkle_exit_power": "Stille niveau mellem tumle-pulser; virker kun over Stoptærsklen",
+    "anti_crease_finalize_ratio": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før anti-rynke-efterløbet må afslutte den; sænk den på tørretumblere, lad vaskemaskiner stå på standard",
     "curve_preroll_seconds": "Sekunders målinger fra afbrudte startforsøg, der tages med forrest i en cyklus' kurve; 0 = fra"
   },
   "phase_desc": {
     "anti_crease": "Lejlighedsvis korte tumblinger efter færdiggørelse for at reducere rynker.",
     "anti_wrinkle": "Periodisk tumbling efter cyklus for at reducere rynker.",
+    "baking": "Varmelegeme ved høj temperatur aktivt for at danne skorpe og krumme.",
+    "cooking": "Hovedtilberedning med varmelegeme og blæser aktive.",
     "cool_down": "Tumling uden varme nær cyklusslut.",
+    "cool_down_af": "Afkøling kun med blæser efter opvarmningen.",
     "drain_and_switch": "Overgangsperiode fra vask til tørretilstand.",
     "dry": "Tørretrin med varmelegeme og/eller restvarme.",
     "drying": "Hovedopvarmet tumleperiode.",
     "heat_up": "Indledende opvarmning af varmeapparatet, før fuld tørring begynder.",
+    "keep_warm": "Lav varme for at holde maden varm.",
+    "keep_warm_bm": "Lav varme for at holde brødet varmt efter bagningen.",
+    "kneading": "Motoren blander og ælter dejen. Højt strømforbrug.",
+    "pause_af": "Kort pause til at ryste eller tjekke maden.",
+    "pre_heat": "Indledende opvarmning af kammeret før selve tilberedningen.",
     "pre_rinse": "Indledende spray ned før vaskemiddel vask.",
+    "proving": "Hævning ved lav varme, så gæren kan arbejde og dejen hæve.",
+    "resting": "Kort pause ved lav effekt mellem æltningerne, så glutenen slapper af.",
     "pre_wash": "Indledende iblødsætning eller forbehandling før hovedvasken.",
     "rinse": "Renvandsskylningstrin. Denne fase kan gentages flere gange.",
     "sanitize": "Rengøringstrin ved høj temperatur til desinfektionsprogrammer.",
@@ -1158,6 +1122,7 @@
     "wash_dw": "Hovedvaskemiddel med varme."
   },
   "placeholder": {
+    "custom_task": "f.eks. rengør dørpakning",
     "add": "tilføj…",
     "group_name": "f.eks. Bomuld 2:47",
     "json_buttons": "[{\"action\":\"ID\",\"title\":\"Label\"}]",
@@ -1185,10 +1150,10 @@
   "section": {
     "dishwasher": {
       "label": "Opvaskemaskine",
-      "intro": "Håndtering af cyklusafslutning for opvaskemaskiner, der typisk slutter med en lang, næsten lydløs tørrefase før en kort sidste udpumpning."
+      "intro": "Sluthåndtering for opvaskemaskiner, som ofte tørrer stille længe før en kort sidste udpumpning."
     },
     "anti_wrinkle": {
-      "intro": "Anti-rynke-tilstand registrerer tumble-pulser med lav effekt efter den vigtigste fase og holder dem tilknyttet den afsluttede cyklus.",
+      "intro": "Holder en tørretumblers tumlepulser med lav effekt efter hovedfasen sammen med den færdige cyklus.",
       "label": "Anti-rynke"
     },
     "basic": {
@@ -1196,7 +1161,7 @@
       "label": "Grundlæggende"
     },
     "delay": {
-      "intro": "Registrering af forsinket start identificerer, hvornår et apparat er tændt, men endnu ikke har påbegyndt sin cyklus.",
+      "intro": "Registrerer et apparat, der er tændt og venter på en forsinket start.",
       "label": "Forsinket start"
     },
     "detection": {
@@ -1220,161 +1185,153 @@
       "label": "Timing og Watchdog"
     },
     "triggers": {
-      "intro": "Valgfrie eksterne signaler: en slutudløser, en dørsensor, en pausekontakt og aflæsningspåmindelsen.",
+      "intro": "Valgfrie ekstrafunktioner: slutudløser, dørsensor, pausekontakt og aflæsningspåmindelse.",
       "label": "Udløsere og døre"
-    },
-    "phase_eta": {
-      "label": "Resterende tid",
-      "intro": "Fasebevidst resterende tid, til maskiner hvis cykluslængde afhænger af temperatur eller centrifugering."
     }
   },
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Frigivelse efter stille tørrefase",
-      "doc": "Når cyklussen overskrider sin forventede varighed: hvor længe opvaskemaskinen skal forblive stille (under Stoptærskel), før WashData holder op med at vente på en sidste udpumpning og afslutter cyklussen. Hæv den, hvis din maskine har en lang stille tørrefase før en sen sidste udpumpning, der bliver overset - et bredere vindue lader den indlærte varighed følge sæsonudsving (koldere indløbsvand = længere cyklusser) i stedet for at låse sig til det gamle gennemsnit. Den forkorter kun ventetiden i forhold til den interne grænse på 30 minutter for slutspidsen, aldrig forlænger den."
+      "doc": "Efter den forventede varighed: hvor længe opvaskemaskinen skal blive under Stoptærskel, før WashData holder op med at vente på den sidste udpumpning. Hæv den, hvis en sen udpumpning efter lang tørring overses. Ventetiden er aldrig over 30 minutter."
     },
     "anti_crease_finalize_ratio": {
       "label": "Forhold for anti-rynke-afslutning",
-      "doc": "Hvor langt en cyklus skal være inde i det genkendte programs forventede varighed, før WashData må afgøre, at den lavenergi-tumling, den ser, er anti-rynke-efterløbet, og afslutte cyklussen dér. Den forventede varighed er programmets gennemsnit, så på en tørretumbler, hvis køretid med fugtsensor følger tøjmængden, når de fleste kørsler aldrig 98% af den, og efterløbet bliver i stedet stående til reserve-timeoutet - ofte 15 til 40 minutter efter at maskinen faktisk stoppede. Sænk denne værdi (f.eks. 0,75) på sådan en tørretumbler. Lad vaskemaskiner stå på standardværdien: en vaskemaskine ligger under Maks. anti-rynkeeffekt det meste af sin cyklus, så denne brøkdel er det eneste, der skiller en stille fase midt i vasken fra efterløbet, og en sænkning kan halvere en vask. Lad feltet stå tomt for standarden (0,98). Dette er en anden indstilling end Forhold for smart afslutning, som styrer en separat kontrol for tidlig afslutning."
+      "doc": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før dens tumling med lav effekt tæller som anti-rynke-efterløbet. Sænk den (f.eks. 0,75) på tørretumblere med fugtsensor. Lad vaskemaskiner stå på standard (0,98), ellers kan en vask slutte halvvejs."
     },
     "anti_wrinkle_enabled": {
-      "doc": "Genkend de korte tørretumblerimpulser med lav effekt, som en tørretumbler udsender efter hovedvarmefasen, og hold dem fastgjort til den færdige cyklus i stedet for at læse dem som nye cyklusser.",
+      "doc": "Hold en tørretumblers korte tumlepulser med lav effekt efter hovedvarmefasen sammen med den færdige cyklus i stedet for at læse dem som nye cyklusser.",
       "label": "Aktivér anti-rynke registrering"
     },
     "anti_wrinkle_exit_power": {
-      "doc": "Strømmen skal falde under dette mellem pulserne for at anti-rynketilstand forbliver aktiv.",
+      "doc": "I anti-rynke-tilstand tæller effekt under dette som stille mellem tumle-pulser, og stilhed længere end Maks. pulspause afslutter tilstanden. Stoptærsklen bruges, når den er højere, så dette ændrer kun noget, når det sættes over Stoptærsklen.",
       "label": "Udgangstærskel for effekt"
     },
     "anti_wrinkle_idle_timeout": {
-      "doc": "Hvor længe maskinen må forblive stille mellem to tumle-pulser, før anti-rynketilstand slutter. Sæt den højere end den længste pause, din tørretumbler efterlader mellem to pulser, ellers læses hver efterfølgende puls som en falsk start.",
+      "doc": "Hvor længe tørretumbleren må være stille mellem tumlepulser, før anti-rynke-tilstand slutter. Sæt den over din tørretumblers længste pause, ellers læses senere pulser som falske starter.",
       "label": "Maks. pulspause"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Pulser længere end dette behandles som en ægte cyklus snarere end en anti-rynke tumbling.",
+      "doc": "En længere puls tæller som en rigtig cyklus, ikke som anti-rynke-tumling.",
       "label": "Maks. varighed"
     },
     "anti_wrinkle_max_power": {
-      "doc": "En puls over denne effekt behandles som en rigtig ny cyklus, ikke en anti-rynke tumbling. Indstil lige over tumle-pulseffekten.",
+      "doc": "En puls over denne effekt tæller som en rigtig ny cyklus, ikke som tumling. Sæt den lige over effekten af dine tumlepulser.",
       "label": "Maks. anti-rynkeeffekt"
     },
     "auto_label_confidence": {
-      "doc": "Hvis matchscoren ved cyklusslut er på eller over denne, mærkes programmet automatisk uden nogen bekræftelsesprompt. Hæv den for at kræve større sikkerhed før automatisk mærkning; sænk den for at automatisere mere. Fungerer sammen med Læringskonfidens nedenunder.",
+      "doc": "Matchscore ved cyklusslut, ved eller over hvilken programmet mærkes uden at spørge. Hæv den for mere sikkerhed; sænk den for at mærke flere cyklusser automatisk. Hold den over Læringskonfidens.",
       "label": "Auto-mærkning konfidens"
     },
     "auto_maintenance": {
-      "doc": "Kør natlig rengøring: genopbyg profilkonvolutter, genberegn cyklus-sundhed, beskær fejlretningsspor og behold de seneste cyklusser.",
+      "doc": "Natlig oprydning: mærk gamle cyklusser, der nu tydeligt matcher et program, genopbyg programkurver, opdater anomalimarkeringer og cyklussundhed, og fjern fejlretningsspor, hvis Gem fejlretningsspor er slået fra. Cyklusser og deres effektspor beholdes altid.",
       "label": "Automatisk vedligeholdelse (natlig oprydning)"
     },
     "completion_min_seconds": {
-      "doc": "Cykler, der er kortere end dette, kasseres som spøgelsescyklusser (testkørsler, åbning af døren for at tilføje en sok).",
+      "doc": "Cyklusser, der er kortere end dette (testkørsler, åbning af døren for at lægge en sok i), gemmes som Afbrudt og får ingen underretning om afslutning.",
       "label": "Minimum cyklusvarighed"
     },
     "curve_preroll_seconds": {
       "label": "Kurveoptakt",
-      "doc": "Hvor mange sekunders målinger fra afbrudte startforsøg WashData må tage med forrest i en cyklus' kurve. En cyklus' kurve begynder normalt ved det startforsøg, der endelig lykkes, så på en maskine, der prøver sig frem et par gange, før den går rigtigt i gang - programvalg, dørlås, første indløb - mangler de første minutters reelle aktivitet i hver kurve. Sæt værdien lidt højere end den længste sådan optakt, din maskine har (300 s er rigeligt for de fleste). 0 slår det fra. Vær opmærksom på, at når det slås til, rykkes den registrerede start tidligere, så cyklusser fra før og efter ændringen bærer forskellige varigheder for det samme program; de indlærte gennemsnit vil glide, indtil de ældre cyklusser er faldet ud."
+      "doc": "Tilføjer målinger fra mislykkede startforsøg forrest i en cyklus, til maskiner der prøver sig frem før start (dørlås, første vandpåfyldning). 300 s dækker de fleste; 0 = fra. Registrerede starter rykker tidligere, så lærte varigheder glider en tid."
     },
     "delay_confirm_seconds": {
-      "doc": "Strømmen skal forblive i standby-båndet så længe, før apparatet behandles som ventende på at starte i stedet for at køre.",
+      "doc": "Effekten skal blive i standby-båndet så længe, før apparatet tæller som ventende på start.",
       "label": "Bekræftelsessekunder"
     },
     "delay_start_detect_enabled": {
-      "doc": "Registrer, når apparatet er tændt og venter (forsinket start/standby), men ikke har startet sin cyklus, så standby-tegning forveksles ikke med en kørende cyklus.",
+      "doc": "Registrer et apparat, der er tændt og venter på en forsinket start, så dets standbyforbrug ikke forveksles med en kørende cyklus.",
       "label": "Aktivér registrering af forsinket start"
     },
     "delay_timeout_hours": {
-      "doc": "Stop med at vente i forsinket starttilstand efter disse mange timer, og vend tilbage til tomgang, så en maskine, der forbliver tændt, men aldrig startet, ikke venter for evigt.",
+      "doc": "Opgiv at vente på en forsinket start efter så mange timer, og vend tilbage til tomgang.",
       "label": "Timeout-timer"
     },
     "device_type": {
-      "doc": "Apparat klasse. Indstiller fornuftige detekteringsstandarder (tærskelværdier, off-forsinkelse, sluthåndtering) indstillet til den pågældende apparattype; ændre det kun, hvis enheden oprindeligt var konfigureret som den forkerte type.",
+      "doc": "Indstiller registreringsstandarder (tærskler, slukkeforsinkelse, sluthåndtering) for denne type apparat. Skift den kun, hvis enheden blev opsat som den forkerte type.",
       "label": "Enhedstype"
     },
     "door_sensor_entity": {
-      "doc": "Valgfri dør binær sensor. Bruges til at registrere, når apparatet er blevet åbnet/tømt efter en cyklus.",
+      "doc": "Valgfri dørsensor. Viser, hvornår apparatet blev åbnet for at blive tømt efter en cyklus.",
       "label": "Dørsensorenhed"
     },
     "duration_tolerance": {
-      "doc": "Tolerance for resterende tidsberegninger (indlæringsfeedback, ikke matchende). Hvis den faktiske varighed er inden for +/-X% af estimatet, tæller det som et godt match.",
+      "doc": "Kun læringsfeedback: en cyklus inden for +/-X% af sin estimerede varighed tæller som et godt estimat. Påvirker ikke matchning.",
       "label": "Estimeringstolerance"
     },
     "enable_ml_models": {
-      "doc": "Mens en cyklus kører, lad modellerne forfine resultaterne i realtid: et mere stabilt estimat for tilbageværende tid og energi/omkostningsestimat og en anti-prematur-stop-vagt ved slutdetektering (det kan kun forsinke en finish, aldrig afslutte en tidligt og er afgrænset). Bruger dine finjusterede modeller, når de er tilgængelige, ellers de indbyggede. Off = kun den klassiske strømbaserede logik (stadig pålidelig).",
+      "doc": "Brug en model trænet på denne maskine til at forudsige en kørende cyklus' energi og omkostning, og lad et velkendt program, der stopper usædvanligt tidligt, slutte uden den fulde slukkeforsinkelse. Fra: kun effektbaseret logik.",
       "label": "Anvend smarte modeller under en cyklus"
     },
     "end_energy_threshold": {
-      "doc": "Under nedtællingen af slukket forsinkelse sammenlignes akkumuleret energi (watt x tid) med denne tærskel. Hvis det overskrides, nulstilles nedtællingen - ved at holde anti-krøl tumblere og opvaskemaskinens tørrehaler fastgjort til cyklussen i stedet for at afkorte dem. Hæv den, hvis cyklusser slutter for tidligt under nedkøling; sænk den, hvis detektionen er træg.",
+      "doc": "Energi, der tillades under slukkeforsinkelsen. Mere end dette, og cyklussen fortsætter, så tumlinger og tørrehaler forbliver en del af den. Sænk den, hvis cyklusser slutter under en hale; hæv den, hvis færdige cyklusser bliver ved med at vente.",
       "label": "Slutenergi"
     },
-    "end_repeat_count": {
-      "doc": "Antallet af på hinanden følgende aflæsninger under stop-tærskel, der kræves, før cyklussen slutter. 1 er fint til de fleste stik. Hæv til 2-3, hvis dit smartstik lejlighedsvis rapporterer en falsk nul-prøve midt i cyklussen, og dine cyklusser slutter for tidligt.",
-      "label": "Slutgentagelsesantal"
-    },
     "energy_price_entity": {
-      "doc": "Sensor med den aktuelle elpris pr. kWh (f.eks. en dynamisk tarif). Skal være en pris, ikke stikkets egen effekt- eller energienhed: den har forrang over den statiske pris nedenfor, så en kWh-tæller her beregner hver cyklus til måleraflæsningen i stedet for til din tarif. Med Tidsvægtede omkostninger slået til beregnes hver cyklus til den pris, der gjaldt i hvert øjeblik, den kørte; ellers fryses den pris, der gjaldt, da den sluttede, fast på den.",
+      "doc": "Sensor med den aktuelle pris pr. kWh (f.eks. en dynamisk tarif). Den har forrang over den statiske pris nedenfor, så den skal være en pris, ikke stikkets effekt- eller energisensor.",
       "label": "Energiprisenhed"
     },
     "energy_price_static": {
-      "doc": "Fast pris pr. kWh brugt til omkostningstal, når der ikke er angivet en levende prisenhed ovenfor.",
+      "doc": "Fast pris pr. kWh, brugt når der ikke er angivet en prisenhed.",
       "label": "Statisk energipris (per kWh)"
     },
     "energy_sensor": {
-      "doc": "Valgfri kumulativ energitæller (total_increasing i kWh/Wh, f.eks. stikkets egen levetidsmåler). Når den er angivet, tages hver cyklus' rapporterede energi fra denne tællers forskel mellem start og slut, hvilket undgår den undertælling, du får ved at integrere en langsomt rapporterende effektsensor. Falder tilbage til den integrerede værdi, hvis aflæsningen mangler, dens enhed er ukendt, eller forskellen ikke er positiv. Lad feltet stå tomt for at fortsætte med at integrere effektsensoren.",
+      "doc": "Valgfri kWh- eller Wh-tæller (total_increasing, f.eks. stikkets egen måler). Cyklussens energi læses så fra den, hvilket er mere præcist end at beregne den ud fra en langsom effektsensor. Hvis dens måling er ubrugelig, bruges den beregnede værdi.",
       "label": "Energimålerenhed"
     },
     "expose_debug_entities": {
-      "doc": "Udgiv ekstra diagnostiske HA-enheder (match konfidens, tvetydighed, interne tilstande). Fra holder enhedslisten ren til normal brug.",
+      "doc": "Tilføj diagnostiske entiteter (matchkonfidens, tvetydighed, intern tilstand). Fra holder entitetslisten ren.",
       "label": "Vis fejlretningsenheder"
     },
     "external_end_trigger": {
-      "doc": "Binær sensor, hvis tilstandsændring markerer cyklussens afslutning (f.eks. en apparat \"færdig\" kontakt eller en ledsagende integration).",
+      "doc": "Binær sensor, hvis ændring markerer cyklussens afslutning (f.eks. en \"færdig\"-kontakt eller en anden integration).",
       "label": "Ekstern udløserenhed"
     },
     "external_end_trigger_enabled": {
-      "doc": "Lad en ekstern binær sensor signalere slutningen af en cyklus, ud over den indbyggede strømbaserede detektering.",
+      "doc": "Lad en binær sensor signalere en cyklus' afslutning ud over den effektbaserede registrering.",
       "label": "Aktivér ekstern slutudløser"
     },
     "external_end_trigger_inverted": {
-      "doc": "Behandl triggersensoren, der slukker (i stedet for ON), som slutsignalet.",
+      "doc": "Behandl, at sensoren slukker (ikke tænder), som slutsignalet.",
       "label": "Inverter ekstern udløser (udløs ved SLUK)"
     },
     "learning_confidence": {
-      "doc": "Hvis matchscoren ligger mellem denne og Auto-mærkning konfidens, beder en feedbackmeddelelse dig om at bekræfte det identificerede program. Under denne score er matchet for usikkert til at blive vist. Skal holdes under Auto-mærkning konfidens.",
+      "doc": "Laveste matchscore for at mærke en færdig cyklus. En klar vinder mærkes; et tæt løb går til gennemgangskøen under Cykler. Under denne værdi mærkes eller spørges der ikke. Hold den under Auto-mærkning konfidens.",
       "label": "Læringskonfidens"
     },
     "linked_device": {
-      "doc": "Indlejr eventuelt denne WashData-enhed under en anden enhed (f.eks. smartstikket) i HA-enhedsregistret, vist som \"Forbundet via ...\".",
+      "doc": "Valgfri. Vis denne WashData-enhed under en anden enhed (f.eks. smartstikket) i Home Assistant som \"Forbundet via ...\".",
       "label": "Gruppe under enhed"
     },
     "min_off_gap": {
-      "doc": "Hvis maskinen slukker i mindre end denne tid, behandles tænd/sluk/tænd-sekvensen som én kontinuerlig cyklus. Forhindrer iblødsætningsprogrammer (maskinen slukker i flere minutter midt i vask) i at blive opdelt i to separate cyklusser. Indstil den kortere end afstanden mellem dine ryg-til-ryg-belastninger, hvis du vil have dem, der tælles som separate cyklusser. Standardindstillinger for enhedstype beskytter den typiske pause i cyklussen for hvert apparat.",
+      "doc": "En slukket periode kortere end dette deler ikke en cyklus, så iblødsætningspauser forbliver i én vask. Hold den kortere end pausen mellem vaske lige efter hinanden, ellers flettes de til én cyklus.",
       "label": "Minimum slukket mellemrum"
     },
     "min_power": {
-      "doc": "Absolut minimumseffekt anses for aktiv. Aflæsninger under dette behandles som 0 W (standby), hvilket frafiltrerer fantombelastningen af smarte stik og standby-LED'er.",
+      "doc": "Målinger under dette tæller som 0 W (standby). Filtrerer tomgangsforbruget fra smartstik og standby-LED'er fra.",
       "label": "Minimumseffekt"
     },
     "ml_training_enabled": {
-      "doc": "Studér med jævne mellemrum dine gennemgåede cyklusser natten over, og finjuster modellerne til denne specifikke maskine. En ændring bevares kun, når den virkelig scorer bedre på udholdte cyklusser, så dette kan kun hjælpe eller forblive det samme - aldrig gå tilbage.",
+      "doc": "Gentræn energimodellen på denne maskines færdige cyklusser med jævne mellemrum. En ny model beholdes kun, hvis den slår det simple estimat på testcyklusser.",
       "label": "Lær fra denne maskine"
     },
     "ml_training_hour": {
-      "doc": "Lokal tid på dagen (0-23) for at foretage finjusteringen natten over. Vælg en stille time såsom 2 (02:00).",
+      "doc": "Time på dagen (0-23) for natlig træning. Vælg en stille time, f.eks. 2.",
       "label": "Lær på tidspunktet"
     },
     "ml_training_interval_days": {
-      "doc": "Tjek igen for forbedringer højst én gang pr. så mange dage.",
+      "doc": "Gentræn højst én gang hver så mange dage.",
       "label": "Tjek højst én gang hver"
     },
     "ml_training_min_cycles": {
-      "doc": "Vent til mindst så mange cyklusser er blevet optaget, før du finjusterer, så der er nok at lære af.",
+      "doc": "Vent på mindst så mange optagede cyklusser før træning.",
       "label": "Cykler nødvendige først"
     },
     "name": {
-      "doc": "Vist navn vist i HA-integrationslisten og enhedsregistret.",
+      "doc": "Navnet, der vises i Home Assistant for denne enhed.",
       "label": "Enhedsnavn"
     },
     "no_update_active_timeout": {
-      "doc": "Hvis der ikke ankommer strømopdateringer i så lang tid, mens du kører, antag, at stikket faldt offline og tvinges til at stoppe for at undgå en zombiecyklus. Standard 600 s giver mulighed for sky eller mesh lag.",
+      "doc": "Hvis ingen effektopdatering kommer så længe under en cyklus, antages stikket at være offline, og cyklussen tvangsstoppes. Standarden på 600 s giver plads til forsinkelser i sky eller mesh.",
       "label": "Timeout uden opdatering"
     },
     "notify_before_end_minutes": {
@@ -1382,35 +1339,35 @@
       "label": "Forhåndsadvarsel om afslutning"
     },
     "notify_channel": {
-      "doc": "Android-notifikationskanalnavn for start-/livebeskeder (styrer lyd pr. kanal og prioritet på mobilappen). Blank bruger standardappen for den ledsagende app.",
+      "doc": "Android-kanal for start- og livebeskeder; kanalen bestemmer lyd og prioritet. Tom: appens standard.",
       "label": "Android-kanal (start/live)"
     },
     "notify_cycle_timers": {
-      "doc": "Meddelelser på bestemte minutter i en cyklus (f.eks. for at tilføje blødgøringsmiddel). Besked understøtter {device}, {program}, {minutes}. Aktiver Auto-pause for at holde pause på det tidspunkt og modtage en interaktiv meddelelse med en Genoptag-knap; genoptage via panelet, pause/genoptag-tjenesten eller meddelelseshandlingen.",
+      "doc": "Notifikationer ved bestemte minutter inde i en cyklus (f.eks. for at tilføje skyllemiddel). Beskeden understøtter {device}, {program}, {minutes}. Med Auto-pause sættes cyklussen også på pause dér, og notifikationen får en Genoptag-knap.",
       "label": "Cyklustimere"
     },
     "notify_finish_channel": {
-      "doc": "Navn på Android-underretningskanal for slutbeskeden. Blank genbruger start/live-kanalen.",
+      "doc": "Android-kanal for slutbeskeden. Tom: start-/livekanalen genbruges.",
       "label": "Android-kanal (slut)"
     },
     "notify_finish_message": {
-      "doc": "Tekst sendt, når en cyklus afsluttes. Skabelonvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}. {time_finished} og {vs_typical} er mest nyttige her.",
+      "doc": "Tekst, der sendes, når en cyklus slutter. Variabler: {device}, {program}, {duration} (minutter), {duration_hm} (1 h 05 min), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed eller force_stopped; afbrudte cyklusser sender intet). Med enhver anden variabel bruges standardteksten.",
       "label": "Slutbesked"
     },
     "notify_finish_services": {
-      "doc": "notify.* tjenester kaldet, når en cyklus afsluttes. Tilføj en pr. mål; efterlad tom for ingen færdigmelding.",
+      "doc": "notify.*-tjenester, der kaldes, når en cyklus slutter. Lad være tomt for ingen.",
       "label": "Sluttjenester"
     },
     "notify_fire_events": {
-      "doc": "Affyr også ha_washdata_* begivenheder på cyklus start/afslutning, så du kan bygge dine egne automatiseringer.",
+      "doc": "Udløs også ha_washdata_*-hændelser ved cyklusstart og -slut til dine egne automatiseringer.",
       "label": "Send HA-hændelser til notifikationer"
     },
     "notify_icon": {
-      "doc": "Det lille ikon, der vises på notifikationen (f.eks. mdi:washing-machine). Android tegner det i statuslinjen; iOS viser det i stedet for appens ikon og kræver companion-appen 2026.8 eller nyere. Lad stå tomt for platformens standard.",
+      "doc": "Lille ikon på notifikationen (f.eks. mdi:washing-machine). Sendes kun til mobile_app-mål, ikke til notify-grupper. På iOS erstatter det app-ikonet og kræver companion-appen 2026.8 eller nyere. Tom: platformens standard.",
       "label": "Notifikationsikon"
     },
     "notify_live_chronometer": {
-      "doc": "Vis en live-opdatering nedtællingstimer i notifikationen (på platforme, der understøtter det) i stedet for et statisk estimat.",
+      "doc": "Vis en kørende nedtælling i notifikationen (hvor det understøttes) i stedet for et fast estimat.",
       "label": "Brug live kronometer"
     },
     "notify_live_interval_seconds": {
@@ -1418,143 +1375,135 @@
       "label": "Live opdateringsinterval"
     },
     "notify_live_overrun_percent": {
-      "doc": "Hvis en cyklus løber forbi sit estimat med mere end denne procentdel, skal du sende en advarsel om overløb.",
+      "doc": "Live-opdateringer stopper, når en cyklus kører denne procentdel over sin forventede varighed (20 = op til 1,2x den forventede tid).",
       "label": "Live overskridelsesprocent før advarsel"
     },
     "notify_live_services": {
-      "doc": "notify.*-tjenester opfordrede til live statusopdateringer, mens en cyklus kører. Lad stå tomt for at deaktivere notifikationer om live-fremskridt.",
+      "doc": "notify.*-tjenester for live-statusopdateringer, mens en cyklus kører. Lad være tomt for at slå dem fra.",
       "label": "Live fremdriftstjenester"
     },
     "notify_only_when_home": {
-      "doc": "Send kun notifikationer, når mindst én af de tilknyttede personer (ovenfor) er hjemme.",
+      "doc": "Giv kun besked, når mindst én af personerne ovenfor er hjemme.",
       "label": "Underret kun når hjemme"
     },
     "notify_people": {
-      "doc": "person.* enheder, der bruges af \"Meddel kun når hjemme\" til at afgøre, om nogen er hjemme.",
+      "doc": "person.*-entiteter, som \"Underret kun når hjemme\" tjekker.",
       "label": "Personer (for kun når hjemme)"
     },
     "notify_pre_complete_message": {
-      "doc": "Tekst i før-slut / næsten-færdig-advarslen. Skabelonvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "doc": "Tekst i hver live-statusopdatering. Skabelonvariabler: {device}, {program}, {minutes} (minutter tilbage). Med enhver anden variabel bruges standardteksten.",
       "label": "Besked om næsten færdig"
     },
     "notify_reminder_message": {
-      "doc": "Tekst i påmindelsen om stadig ventende tømning. Tom bruger den indbyggede standard. Skabelonvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "doc": "Tekst i Forhåndsadvarsel om afslutning, der sendes én gang. Skabelonvariabler: {device}, {program}, {minutes} (indstillingen Forhåndsadvarsel om afslutning). Med enhver anden variabel bruges standardteksten.",
       "label": "Påmindelsesbesked"
     },
     "notify_start_message": {
-      "doc": "Tekst sendt, når en cyklus starter. Skabelonvariabler: {device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}.",
+      "doc": "Tekst, der sendes, når en cyklus starter. Skabelonvariabler: {device}, {program}. Med enhver anden variabel bruges standardteksten.",
       "label": "Startbesked"
     },
     "notify_start_services": {
-      "doc": "notify.* tjenester kaldet, når en cyklus starter. Tilføj en pr. mål (telefon, dashboard osv.); efterlad tom for ingen startmeddelelse.",
+      "doc": "notify.*-tjenester, der kaldes, når en cyklus starter (telefon, dashboard, ...). Lad være tomt for ingen.",
       "label": "Starttjenester"
     },
     "notify_timeout_seconds": {
-      "doc": "Afvis automatisk meddelelsen efter så mange sekunder (på platforme, der understøtter den). 0 beholder den, indtil den afvises manuelt.",
+      "doc": "Luk notifikationen efter så mange sekunder (hvor det understøttes). 0 beholder den, til du lukker den.",
       "label": "Auto-afvis efter"
     },
     "notify_title": {
-      "doc": "Underretningstitel. Skabelonvariabler: {device}, {program}, {duration}, {energy}, {cost}, {date}, {time}, {minutes}.",
+      "doc": "Underretningstitel. Kun {device} udskiftes; med enhver anden variabel bruges standardtitlen.",
       "label": "Notifikationstitel"
     },
     "notify_unload_delay_minutes": {
-      "doc": "Minutter efter en cyklus er afsluttet, før du sender den stadig ventende påmindelse om \"aflæs maskinen\". Indstil 0 for at deaktivere påmindelsen.",
+      "doc": "Minutter efter en cyklus' afslutning før påmindelsen \"tøm maskinen\". 0 slår den fra.",
       "label": "Forsinkelse for aflæsningspåmindelse"
     },
     "notify_unload_repeat": {
-      "doc": "Bliv ved med at gensende aflæsningspåmindelsen hvert \"Forsinkelse for aflæsningspåmindelse\" minutter, indtil aflæsningen er bekræftet, eller du trykker på \"Stop påmindelser\" i notifikationen. Kræver en måde at bekræfte aflæsningen på: en Dørsensorenhed, en Aflæsningsbekræftelsesenhed eller indstillingen \"Bekræft aflæsning manuelt\" nedenfor. Knappen til at afvise virker på notifikationer fra Home Assistant companion-appen (mobil).",
+      "doc": "Send aflæsningspåmindelsen igen hvert \"Forsinkelse for aflæsningspåmindelse\" minut, indtil aflæsningen er bekræftet, eller du trykker \"Stop påmindelser\" (mobilapp). Kræver en Dørsensorenhed, en Aflæsningsbekræftelsesenhed eller \"Bekræft aflæsning manuelt\".",
       "label": "Gentag indtil aflæsset"
     },
     "off_delay": {
-      "doc": "Tid til at vente efter strømfald, før cyklussen erklæres afsluttet. Hvis strømmen genoptages inden for dette vindue, fortsætter cyklussen problemfrit - dette slår bro mellem pauser mellem vasketrinene. Opvaskemaskiner har lange tørrefaser (strøm fra i 20-60 min), så slukningsforsinkelsen skal overstige det for at holde hele vask+tør som én cyklus.",
+      "doc": "Hvor længe effekten skal forblive lav, før cyklussen er færdig. Kommer effekten tilbage inden for denne tid, fortsætter cyklussen. Opvaskemaskiner kan være stille i 20-60 min under tørring, så sæt den længere end det.",
       "label": "Slukkeforsinkelse"
     },
     "pause_cuts_power": {
-      "doc": "Når en cyklus er sat på pause, skal du også slukke for Switch Entity nedenfor. Kun til apparater, hvis stik sikkert kan afbrydes midt i cyklussen.",
+      "doc": "Når en cyklus sættes på pause, slukkes også Kontaktenheden nedenfor. Kun til apparater, der sikkert kan miste strøm midt i en cyklus.",
       "label": "Pause afbryder også strøm (via kontakt)"
     },
     "power_off_delay": {
-      "doc": "Hvor længe effekten skal forblive under Slukketærskel, efter at en cyklus er afsluttet, før tilstanden vender tilbage til Slukket. Bruges kun, når Slukketærskel er over 0. Kontrolleres i baggrundstakten, så den effektive forsinkelse rundes op til næste tilstandsudløbstakt.",
+      "doc": "Hvor længe effekten skal blive under Slukketærskel efter en cyklus, før tilstanden går tilbage til Fra. Bruges kun, når den tærskel er over 0. Tjekkes periodisk, så den reelle ventetid kan være lidt længere.",
       "label": "Slukkeforsinkelse"
     },
     "power_off_threshold_w": {
-      "doc": "Valgfri effektbaseret registrering af slukning. Når værdien er over 0, betragtes maskinen som slukket, og tilstanden vender tilbage til Slukket, når en cyklus er afsluttet, og effekten forbliver under dette niveau i hele Slukkeforsinkelsen. Lad den stå på 0 for at deaktivere (standard). Sæt den over det reelle slukkede nulniveau og under Stoptærskel samt under maskinens standbyforbrug i tilstanden færdig-men-tændt; hvis den ikke er under Stoptærskel, ignoreres den. Når den er aktiveret, erstatter den Forsinkelse ved nulstilling af fremskridt for at vende tilbage til Slukket, så en færdig maskine forbliver i Færdig/Ren, indtil den faktisk slukkes.",
+      "doc": "Efter en cyklus sætter effekt under denne i Slukkeforsinkelse tilstanden til Fra, i stedet for at Forsinkelse ved nulstilling af fremskridt gør det. Sæt den over forbruget i slukket tilstand, under standby og Stoptærskel. 0 slår den fra (standard).",
       "label": "Slukketærskel"
     },
     "power_sensor": {
-      "doc": "Sensorenheden rapporterer strøm i watt for dette apparat (f.eks. sensor.washer_power). Al cyklusdetektion er baseret på dette signal.",
+      "doc": "Sensoren, der rapporterer dette apparats aktuelle effekt i watt (f.eks. sensor.washer_power). Al registrering bygger på den.",
       "label": "Effektsensor"
     },
-    "profile_duration_tolerance": {
-      "doc": "+/- båndet omkring en profilgennemsnitsvarighed brugt under matchning. 0,25 betyder, at en 60 min profil matcher 45-75 min cyklusser.",
-      "label": "Profilvarighedstolerance"
-    },
     "profile_match_interval": {
-      "doc": "Hvor ofte skal man forsøge profilmatching under en løbecyklus. Standard 300 s (5 minutter) balancerer registreringshastighed og CPU.",
+      "doc": "Hvor ofte en kørende cyklus matches mod profilerne. Standard 300 s (5 min).",
       "label": "Matchinterval"
     },
     "profile_match_max_duration_ratio": {
-      "doc": "Maksimal cykluslængde i forhold til profilen. 1.3 betyder, at en cyklus skal være under 130 % af profilens varighed for at matche.",
+      "doc": "Et program droppes, når cyklussen har kørt længere end dette multiplum af dets typiske varighed. 1,8: en cyklus 80% længere end programmet matcher det ikke længere.",
       "label": "Maksimum varighed ratio"
     },
     "profile_match_min_duration_ratio": {
-      "doc": "Minimum cykluslængde i forhold til profilen. 0,9 betyder, at en cyklus skal være mindst 90 % af profilens varighed for at matche.",
+      "doc": "Et program overvejes først, når cyklussen har kørt denne andel af dets typiske varighed. 0,10: et program på 2 timer bliver kandidat efter 12 minutter. Anvendes ikke i en cyklus' første 15 minutter.",
       "label": "Minimum varighed ratio"
     },
     "profile_match_threshold": {
-      "doc": "Minimum lighedsscore (0-1) kræves ved cyklusslut for at acceptere en programidentifikation. Hæv den for at reducere forkerte identifikationer; sænk den, hvis din maskines programmer ikke bliver matchet. Standard 0,4 er et konservativt udgangspunkt.",
+      "doc": "Live-matchscore, en cyklus skal have, før smart afslutning eller anti-rynke-afslutningen må afslutte den tidligt. Ændrer ikke det viste program. Hæv den, hvis svage match afslutter cyklusser for tidligt; sænk den, hvis klare match venter hele slukkeforsinkelsen.",
       "label": "Matchtærskel"
     },
     "profile_unmatch_threshold": {
-      "doc": "Hvis et live-match midt i cyklussen falder under denne score, slettes den foreløbige identifikation. Hold den lidt under Matchtærskel, så et kort dyk i lighed ikke sætter visningen tilbage til uden match.",
+      "doc": "Hvis live-matchscoren falder under denne, ryddes det aktuelle programgæt. Hold den lidt under Matchtærskel, så et kort dyk ikke nulstiller det.",
       "label": "Fejlmatchtærskel"
     },
     "progress_reset_delay": {
-      "doc": "Når du er færdig, skal du holde status på 100 % så længe, så fuldført er synlig på dashboards, før du nulstiller til inaktiv.",
+      "doc": "Hold fremskridt på 100 % så længe efter en cyklus, før der nulstilles til Inaktiv.",
       "label": "Forsinkelse ved nulstilling af fremskridt"
     },
     "pump_stuck_duration": {
-      "doc": "Sekunder kan en pumpe køre uafbrudt, før den er markeret som muligvis sidder fast (udløser hændelsen stuck-pumpe).",
+      "doc": "Hvor længe en pumpe må køre uafbrudt, før hændelsen for fastklemt pumpe udløses.",
       "label": "Varighed for fastklemt pumpe"
     },
     "sampling_interval": {
-      "doc": "Forventet tid mellem sensoraflæsninger - bruges til at dimensionere udjævningsvinduet og starte debounce korrekt. Hver sensoropdatering registreres uanset denne værdi; den kalibrerer kun nedstrømsberegningerne. Forslagsmotoren måler din sensors faktiske kadence fra tidligere cyklusser og indstiller denne automatisk.",
+      "doc": "Mindste tid mellem behandlede målinger. Målinger, der kommer hurtigere, springes over (lave målinger under en cyklus beholdes altid). Sæt den til dit stiks rapporteringsinterval eller lavere; en højere værdi smider kun målinger væk.",
       "label": "Samplingsinterval"
     },
     "save_debug_traces": {
-      "doc": "Gem fuld effektsporing og matchende fejlretningsdata for hver cyklus. Nyttig til fejlfinding, men øger lagerstørrelsen.",
+      "doc": "Gem også matcherens fejlretningsdata (alle kandidaters scorer) med hver cyklus til fejlfinding. Fylder ca. 20 KB pr. cyklus.",
       "label": "Gem fejlretningsspor"
     },
     "smart_termination_duration_ratio": {
-      "doc": "Hvor langt en cyklus skal være inde i det genkendte programs forventede varighed, før smart afslutning må afslutte den tidligt, når effekten falder. Den forventede varighed er programmets gennemsnit, så på apparater med stærkt varierende køretid - vaskemaskiner med koldt vinter- kontra varmt sommerindløbsvand, tørretumblere med fugtsensor, belastningsafhængige programmer - slutter omkring halvdelen af alle kørsler kortere end dette gennemsnit og får aldrig den hurtige afslutning, men slutter først minutter senere via reserve-timeoutet. Sænk denne værdi (f.eks. 0,85) på sådanne maskiner, så den tidlige afslutning stadig udløses; hæv den mod 1,0 for at være mere forsigtig. Lad feltet stå tomt for standarden (0,98 eller 0,99 for opvaskemaskiner). Den kan kun afslutte en cyklus tidligere, aldrig senere, og udløses aldrig ved en tvetydig eller usikker genkendelse.",
+      "doc": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før smart afslutning må afslutte den tidligt. Hvis køretiderne varierer (vandtemperatur, fugtsensor, mængde), så sænk den (f.eks. 0,85). Lad være tom for 0,98 (0,99 på opvaskemaskiner).",
       "label": "Forhold for smart afslutning"
     },
-    "smoothing_window": {
-      "doc": "Hvor meget råeffektsignalet udjævnes. Lav (2) er lydhør, men støjende; høj (5) udglatter pigge, men tilføjer forsinkelse.",
-      "label": "Glatningsvindue"
-    },
     "start_duration_threshold": {
-      "doc": "Strømmen skal forblive over starttærsklen så længe for at bekræfte en reel start, hvilket forhindrer, at tænd/sluk-skift på et splitsekund starter en cyklus.",
+      "doc": "Effekten skal blive over Starttærskel så længe, før en cyklus starter, så korte tænd/sluk-udsving ignoreres.",
       "label": "Startvarighed"
     },
     "start_energy_threshold": {
-      "doc": "Energi (strøm x tid), apparatet skal forbruge, før det KØRES. En kort højeffektspids har meget lav energi og ignoreres, hvilket forhindrer falske starter.",
+      "doc": "Energi, apparatet skal bruge, før cyklussen tæller som kørende. En kort effektspids bruger lidt energi, så den starter ikke en cyklus.",
       "label": "Startenergi"
     },
     "start_threshold_w": {
-      "doc": "Strømmen skal stige over dette niveau for at bekræfte, at en cyklus er startet. Hvis den indstilles for lavt, forårsager det falske starter fra standby-strøm; for høje og langsomt startende programmer (koldfyldning) savnes. Forslagsmotoren indstiller dette lige over maskinens observerede laveste aktive effekt.",
+      "doc": "Effekten skal stige over denne for at starte en cyklus. For lav: standbyeffekt giver falske starter. For høj: langsomt startende programmer (koldt vandindtag) overses.",
       "label": "Starttærskel"
     },
     "stop_threshold_w": {
-      "doc": "Strømmen skal falde til under dette niveau, før nedtællingen af slukket forsinkelse begynder. Indstil den under starttærsklen - mellemrummet mellem dem er hysteresebåndet, der forhindrer flimmer. Hvis den er indstillet for højt, vil laveffektfaser (skyllestop, anti-krøl) fejlagtigt udløse slutsekvensen.",
+      "doc": "Effekten skal falde under denne, før slukkeforsinkelsen begynder at tælle. Hold den under Starttærskel. For høj, og faser med lav effekt (skyllepauser, anti-rynke) starter slutnedtællingen ved en fejl.",
       "label": "Stoptærskel"
     },
     "switch_entity": {
-      "doc": "Valgfri kontakt slås fra ved pause og tændes igen ved genoptagelse, bruges sammen med \"Pause afbryder også strømmen\".",
+      "doc": "Valgfri kontakt, der slukkes ved pause og tændes igen ved genoptagelse, med \"Pause afbryder også strøm\".",
       "label": "Kontaktenhed"
     },
     "watchdog_interval": {
-      "doc": "Hvor ofte vagthunden i baggrunden tjekker for fastholdte sensorer og forløbne timeouts. Standard 30 s.",
+      "doc": "Hvor ofte baggrundstjekket leder efter gået i stå-sensorer og timeouts. Standard 30 s.",
       "label": "Watchdog-interval"
     },
     "notify_milestone_message": {
@@ -1562,127 +1511,82 @@
       "label": "Milepælsbesked"
     },
     "notify_milestones": {
-      "doc": "Kommaseparerede cyklustællinger, der udløser en engangs-fejringsnotifikation, når de nås (f.eks. 50, 100, 500, 1000). Tom deaktiverer milepælsnotifikationer.",
+      "doc": "Cyklusantal, der udløser en engangsnotifikation til fejring, kommasepareret (f.eks. 50, 100, 500, 1000). Tom slår dem fra.",
       "label": "Cyklusmilepæle"
     },
     "notify_quiet_end_hour": {
-      "doc": "Afslutning på forstyr-ikke-vinduet (0-23). Tilbageholdte notifikationer leveres på denne time. Lad feltet være tomt for at deaktivere.",
+      "doc": "Slutningen af forstyr ikke-vinduet (0-23); tilbageholdte notifikationer sendes da. Tom slår det fra.",
       "label": "Stilletimer slut"
     },
     "notify_quiet_start_hour": {
-      "doc": "Start på et forstyr-ikke-vindue (0-23). Notifikationer om afslutning, påmindelser og ren-vasketøj, der ville blive udløst i stilletimerne, tilbageholdes og leveres, når vinduet slutter. Lad feltet være tomt for at deaktivere. Understøtter vinduer, der krydser midnat (f.eks. start 22, slut 7).",
+      "doc": "Start på et forstyr ikke-vindue (0-23). Slut-, påmindelses- og ren vask-notifikationer i dette vindue holdes tilbage, til det slutter. Kan gå hen over midnat (f.eks. 22 til 7). Tom slår det fra.",
       "label": "Stilletimer start"
     },
     "peak_rate_message": {
-      "doc": "Valgfri brugerdefineret tekst til spidsbelastningstippet, der føjes til startnotifikationen. Skabelonvariabler: {device}, {price}. Tom bruger den indbyggede standard.",
+      "doc": "Egen tekst til spidstarif-tippet. Skabelonvariabler: {device}, {price}. Tom bruger standarden.",
       "label": "Spidsbelastningsbesked"
     },
     "peak_rate_threshold": {
-      "doc": "Når en cyklus starter, og den aktuelle pris pr. kWh er på eller over denne værdi, føjes et spidsbelastningstip til startnotifikationen. 0 eller tom deaktiverer tippet.",
+      "doc": "Hvis prisen pr. kWh er på eller over denne, når en cyklus starter, tilføjes et spidstarif-tip til startnotifikationen. 0 eller tom slår det fra.",
       "label": "Spidsbelastningstærskel (pr. kWh)"
-    },
-    "dtw_bandwidth": {
-      "label": "Tolerance for formgenkendelse",
-      "doc": "Hvor meget genkendelsen må forvrænge en cyklus i tid for at passe til formen på et gemt program. Højere tillader mere hastighedsvariation; for højt risikerer at genkende det forkerte program."
-    },
-    "corr_weight": {
-      "label": "Vægt: form kontra niveau",
-      "doc": "Balance mellem kurveform og absolut effektniveau, når en genkendelse vurderes. Højere foretrækker formen; lavere foretrækker at ramme effektniveauet."
-    },
-    "duration_weight": {
-      "label": "Vægt på varighed",
-      "doc": "Hvor stærkt et program, hvis typiske køretid passer til denne cyklus, foretrækkes."
-    },
-    "energy_weight": {
-      "label": "Vægt på energi",
-      "doc": "Hvor stærkt et program, hvis typiske energiforbrug passer til denne cyklus, foretrækkes."
     },
     "store_brand": {
       "label": "Apparatets mærke",
-      "doc": "Valgfrit. Apparatets mærke, valgt fra fællesskabskataloget. Bruges til at finde og dele matchende referenceoptagelser. Lad stå tomt, hvis du ikke bruger onlinefunktioner."
+      "doc": "Valgfri. Dit apparats mærke fra fællesskabskataloget, bruges til at finde og dele referenceoptagelser. Lad være tom, hvis du ikke bruger onlinefunktioner."
     },
     "store_model": {
       "label": "Apparatets model",
-      "doc": "Valgfrit. Apparatets model, valgt fra fællesskabskataloget, når et mærke er angivet. Hvis din model ikke er på listen, kan du tilføje den til kataloget."
+      "doc": "Valgfri. Dit apparats model fra fællesskabskataloget (vælg først et mærke). Hvis den ikke er på listen, kan du tilføje den."
     },
     "show_contributor": {
       "doc": "Viser tilskrivningen 'af <contributor>' på fællesskabsapparater og referencecyklusser."
     },
-    "enable_phase_matching": {
-      "label": "Fasebevidst resterende tid",
-      "doc": "Opdel hver kørende cyklus i faser (opvarmning, vask, centrifugering) og budgettér den resterende tid pr. fase, blandet med det klassiske estimat - tidligt i cyklussen læner den sig op ad fasebudgettet og mod slutningen op ad det klassiske estimat. Dette tilpasser nedtællingen til, hvor længe din maskine faktisk varmer op og kører, hvilket er mest mærkbart i den første halvdel af en cyklus. Fra = kun det klassiske estimat. Kun visningen af resterende tid påvirkes; programmatchning og cyklusregistrering er uændrede."
-    },
-    "keep_min_score": {
-      "label": "Min. matchingsscore",
-      "doc": "Laveste lighedsscore en kandidat behøver for at forblive i matcheprocessen. Standard 0,1 er bevidst tillåtende – det tillader selv svage kandidater og stoler på at senere trin finder den bedste match. Hæv for at skære usandsynlige profiler fra tidligere; sænk for at udvide den indledende kandidatpulje."
-    },
-    "dtw_blend": {
-      "label": "DTW-blanding",
-      "doc": "Hvor meget DTW-justeringsscoren erstatter kerneresultatet fra Trin 2. 0 = brug kun Trin 2-scoren, 1 = brug kun DTW-scoren, 0,5 (standard) = ligelig blanding. Hæv for at stole mere på tidsjustering når programmer har ensartede effektniveauer men forskellige timingmønstre."
-    },
-    "dtw_ensemble_w": {
-      "label": "DTW-ensemblemiks",
-      "doc": "I ensemble-DTW-tilstand (standard) er dette vægten på skaleret L1 kontra derivativ DTW (DDTW). 1,0 = kun skaleret L1, 0 = kun DDTW, 0,7 = standard. Den skalerede variant sammenligner effektniveauer; den derivative reagerer på hvordan effekten ændres over tid. Ensemble blander begge."
-    },
-    "dtw_ddtw_scale": {
-      "label": "Derivativ DTW-skala",
-      "doc": "Halvmætningsafstand for derivativ DTW-scoring. Scoren halveres når DDTW-afstanden er lig denne værdi. Lavere = mere følsom for formforskelle. Standard 30 er kalibreret til typiske husholdningsapparaters effektprofiler. Påvirker kun ensemble- og ddtw-DTW-tilstande."
-    },
-    "dtw_refine_top_n": {
-      "label": "DTW-forfiningsnummer",
-      "doc": "Hvor mange topkandidater fra Trin 2 der gen-scores af DTW. DTW er mere kostbar så det anvendes kun på de N bedste. Standard 5. Hæv (til 7-9) hvis den korrekte profil sommetider kun når 4. eller 5. plads efter Trin 2 – DTW kan redde den. Lavere giver lidt hurtigere matching."
-    },
-    "duration_scale": {
-      "label": "Varighedsskarphed",
-      "doc": "Skarphed i Trin 4's straf for varighedsoverensstemmelse. Det er log-forholdet ved hvilket overensstemmelses-scoren halveres. Lavere = strengere: et varighedsafvigelse skader mere. Standard 0,175 svarer til omtrent 18% varighedstolerens ved halvvægt. Par med Varighedsvægt."
-    },
-    "energy_scale": {
-      "label": "Energiskarphed",
-      "doc": "Skarphed i Trin 4's straf for energioverensstemmelse. Lavere = strengere: et energiafvigelse skader mere. Standard 0,25 er bevidst mere tillåtende end varighedsskarphed fordi energi varierer med belastning. Par med Energivægt."
-    },
     "power_profile_interval_min": {
       "label": "Effektprofil-interval",
-      "doc": "Bucket-størrelse for effektprofilsensorens attribut power_profile (det flade array af gennemsnitlige watt-værdier pr. slot, der bruges af eksterne planlæggere som EMHASS og tibber_prices). Mindre buckets holder korte effektspidser skarpe; større buckets glatter kurven. Standard 15 min. Kun til visning; påvirker ikke detektering."
+      "doc": "Bucketstørrelse for attributten power_profile (gennemsnitlig watt pr. slot), som planlæggere som EMHASS og tibber_prices bruger. Mindre bevarer korte spidser; større udglatter kurven. Standard 15 min. Påvirker ikke registreringen."
     },
     "notify_live_silent": {
       "label": "Lydløse live-opdateringer",
-      "doc": "Kun iOS. Opdater live-forløbet lydløst: hver opdatering kommer uden lyd eller vibration og med en lavere, batterivenlig prioritet, som iOS kortvarigt kan samle i grupper. Den første opdatering i en cyklus (den, der starter Live-aktiviteten) samt start- og slutnotifikationerne giver stadig besked som normalt. Slå dette fra for at få besked ved hver opdatering."
+      "doc": "Kun iOS. Opdater live-status lydløst med en batterivenlig prioritet, som iOS kan samle. Den første opdatering og start-/slutnotifikationerne giver stadig besked. Fra: hver opdatering giver besked."
     },
     "notify_live_sticky": {
       "label": "Behold live-notifikation ved tryk",
-      "doc": "Kun Android. Gør live-forløbsnotifikationen vedvarende (sticky), så et tryk ikke afviser den. Slukket: standardadfærd, hvor et tryk afviser notifikationen."
+      "doc": "Kun Android. Behold live-statusnotifikationen ved tryk. Fra: et tryk lukker den."
     },
     "notify_live_click_action": {
       "label": "Trykdestination for notifikation",
-      "doc": "Hvor et tryk på en notifikation fra dette apparat åbner, på Android og iOS. Tomt åbner WashData-panelet på dette apparat. Angiv en dashboard-sti (f.eks. /lovelace/laundry) eller en fuld URL for at sende det et andet sted hen, eller \"none\" for slet ingen trykdestination."
+      "doc": "Hvad et tryk på dette apparats notifikation åbner. Tom: WashData-panelet for dette apparat. Angiv en dashboard-sti (f.eks. /lovelace/laundry) eller URL, eller \"none\" for ingen trykhandling."
     },
     "door_opens_at_end": {
       "label": "Dør åbner automatisk ved afslutning",
-      "doc": "Til opvaskemaskiner, der springer døren op ved afslutningen af cyklussen for at tørre (AirDry og lignende). Når dette er aktiveret, sætter en døråbning under en aktiv cyklus den ikke på pause for evigt; hvis døren forbliver åben i den konfigurerede opholdsperiode, betragter WashData cyklussen som afsluttet. En kort åbning (tilføjelse af en tallerken) ignoreres. Kræver en dørsensorenhed."
+      "doc": "Til opvaskemaskiner, der åbner døren ved slutningen for at tørre (f.eks. AirDry). En dør, der står åben i ventetiden nedenfor, afslutter cyklussen i stedet for at sætte den på pause; en kort åbning ignoreres. Kræver en Dørsensorenhed."
     },
     "door_end_dwell_seconds": {
       "label": "Dørens åbningstid ved afslutning",
-      "doc": "Hvor længe døren skal forblive åben, før WashData afslutter cyklussen, når \"Dør åbner automatisk ved afslutning\" er aktiveret. Lang nok til at ignorere hurtig tilføjelse af en tallerken (standard 60 s), kort nok til at afslutte hurtigt, når maskinen springer døren op."
+      "doc": "Med \"Dør åbner automatisk ved afslutning\" slået til: hvor længe døren skal stå åben, før cyklussen slutter. Længe nok til at ignorere, at en tallerken sættes ind (standard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cyklusser, der former et program",
-      "doc": "Hvilke cyklusser der bruges til at opbygge hvert programs effektkurve og til at matche en afsluttet cyklus mod den. Fravælger du en type, former den ikke længere dine programmer, uden at noget slettes - cyklusserne bliver i din Cykler-liste og kan stadig mærkes eller fjernes. Nyttigt, hvis du ikke stoler på importerede data. Statistikken påvirkes ikke: den tæller altid kun de cyklusser, som denne maskine faktisk har kørt. At fravælge alt ignoreres, da et program uden cyklusser bag sig aldrig kunne matche."
+      "doc": "Hvilke typer cyklusser der former hvert programs kurve og matchning. At fjerne krydset ved en type sletter intet; nyttigt, hvis du ikke stoler på importerede data. Statistik tæller altid kun denne maskines cyklusser. At fjerne alle ignoreres."
     },
     "energy_price_dynamic": {
       "label": "Tidsvægtede omkostninger",
-      "doc": "Beregn hver cyklus til den pris, der gjaldt i hvert øjeblik, den kørte, i stedet for den ene pris, der gjaldt, da den sluttede. Gælder kun for en prisenhed (en statisk pris kan ikke ændre sig). Kræver ingen ekstra opsætning: prisen følges live, mens cyklussen kører, og \"Behandl historik\" under Diagnostik genberegner omkostningerne for ældre cyklusser ud fra recorderen. Fra = den klassiske adfærd, én pris frosset ved slutningen."
+      "doc": "Beregn hver cyklus til prisen i hvert øjeblik, den kørte, i stedet for prisen, da den sluttede. Kræver en prisenhed. Behandl historik (Diagnostik) genberegner ældre cyklusser."
     },
     "unload_confirm_entity": {
       "label": "Aflæsningsbekræftelsesenhed",
-      "doc": "Valgfri enhed, hvis aktivering betyder, at vasken er taget ud, til maskiner der ikke kan have en dørsensor. Alle typer virker: en Zigbee- eller NFC-knap, en input_button-hjælper, en bevægelsessensor foran maskinen, en scene. Enhver tilstandsændring tæller som en bekræftelse, bortset fra at blive slukket og at blive utilgængelig. Når denne indstilles, aktiveres aflæsningspåmindelsen også på en enhed uden Dørsensorenhed."
+      "doc": "Valgfri. En hvilken som helst entitet, der bekræfter, at vasken er taget ud, til maskiner uden dørsensor (en knap, input_button, bevægelsessensor, scene). Hver tilstandsændring tæller, undtagen at slukke eller blive utilgængelig. Aktiverer også aflæsningspåmindelsen."
     },
     "unload_track_without_door": {
       "label": "Bekræft aflæsning manuelt",
-      "doc": "Kør aflæsningspåmindelsen på en enhed uden Dørsensorenhed og uden Aflæsningsbekræftelsesenhed, og bekræft i stedet aflæsningen fra din egen automatisering: tryk på knapenheden \"Markér som aflæsset\", eller kald handlingen ha_washdata.mark_unloaded. Ignoreres, når en Dørsensorenhed er angivet, da den allerede leverer signalet."
+      "doc": "Kør aflæsningspåmindelsen uden dørsensor eller bekræftelsesentitet. Bekræft aflæsningen fra din egen automatisering med knappen \"Markér som aflæsset\" eller tjenesten ha_washdata.mark_unloaded. Ignoreres, når en Dørsensorenhed er angivet."
     },
     "notify_icon_color": {
       "label": "Notifikationsfarve",
-      "doc": "Accentfarve til denne enheds notifikationer, så en vaskemaskine, en tørretumbler og en opvaskemaskine kan skelnes fra hinanden på et øjeblik. iOS farver ikonet og Liveaktivitetens fremdriftslinje på den låste skærm og i Dynamic Island. Android får den samme farve sendt, men hvad telefonen bruger den til, er op til den: nogle farver ikonet, og mange (især Samsung One UI) ignorerer den helt. Begge forstår hex-værdier (f.eks. #03A9F4). Lad stå tomt for platformens standard."
+      "doc": "Accentfarve for dette apparats notifikationer, så vaskemaskine, tørretumbler og opvaskemaskine er lette at skelne. På iOS fylder den cirklen bag ikonet og farver Live Activity-bjælken. Mange Android-telefoner (især Samsung) ignorerer den. Brug hex, f.eks. #03A9F4. Tom: platformens standard."
+    },
+    "share_name": {
+      "doc": "Vis dit kontonavn som uploader af cyklusser, du deler. Fra: delt uden navn."
     }
   },
   "setting_group": {
@@ -1709,9 +1613,6 @@
     },
     "door_pause": {
       "label": "Dør og pause"
-    },
-    "dtw_refinement": {
-      "label": "DTW-raffinering"
     },
     "duration_gates": {
       "label": "Varighedsporte"
@@ -1789,17 +1690,20 @@
     "rebuilding": "Genopbygger…",
     "analyzing": "Analyserer…",
     "resetting": "Nulstiller…",
-    "reverting": "Tilbagefører…",
     "trimming": "Beskærer…",
     "splitting": "Opdeler…",
+    "stalled": "Gået i stå",
     "deleting": "Sletter…",
     "imported": "Importeret",
     "preparing": "Forbereder…",
-    "unlabelling": "Fjerner mærkning…"
+    "unlabelling": "Fjerner mærkning…",
+    "working": "Arbejder…",
+    "match_uncertain": "Usikker: {top} eller {runner}",
+    "match_uncertain_single": "Usikker: måske {top}",
+    "match_sure": "~{pct}% sikker",
+    "match_uncertain_tip": "WashData har endnu ikke lagt sig fast på et program. Tallet viser, hvor ofte det førende gæt, {top}, var rigtigt i tidligere cyklusser, når det førte med så meget. Kun til information."
   },
   "suggestion": {
-    "both_agree": "WashData anbefaler",
-    "calibrated_label": "Kalibreret",
     "observed_label": "Observeret",
     "impact": {
       "auto_label_confidence": {
@@ -1813,10 +1717,6 @@
       "end_energy_threshold": {
         "higher": "Afslutter kun cyklusser med væsentligt energiforbrug",
         "lower": "Afslutter også kortere eller lavenergi-cyklusser"
-      },
-      "end_repeat_count": {
-        "higher": "Slutsignal skal gentages flere gange – mere robust, lidt langsommere",
-        "lower": "Slutter efter færre gentagelser – hurtigere detektering, mere risiko for falsk afslutning"
       },
       "learning_confidence": {
         "higher": "Lærer kun fra meget sikre matches – langsommere men mere pålidelig",
@@ -1856,40 +1756,25 @@
       }
     },
     "reason": {
-      "auto_label_confidence": "Konfidens ved 15. percentil for {cycles} automatiske etiketter, som brugeren aldrig rettede ({p15}).",
       "completion_min_seconds": "Halvdelen af p05-varigheden for rene cyklusser ({minutes} min) på tværs af {cycles} cyklusser; filtrerer spøgelsescyklusser fra.{excl}",
-      "dead_zone_batch": "Holdt kort (median for opstarts-ustabilitetsvindue på tværs af {cycles} cyklusser = {s}s), så et reelt slut registreres hurtigt.",
-      "dead_zone_from_dip": "Baseret på et tidligt effektfald registreret ved {s}s.",
-      "end_energy_default": "Standardanbefalet baseline for støjgrænsen ved cyklusslut.",
-      "end_energy_false": "p95 for energi ved falske slut ({p95}Wh) på tværs af {cycles} cyklusser, med gulv på 0.2% af medianens cyklusenergi ({floor}Wh).",
-      "end_energy_no_false": "Ingen falske slut på tværs af {cycles} cyklusser; med gulv på 0.2% af medianens cyklusenergi ({floor}Wh).",
-      "end_repeat_count": "{false}/{total} rene cyklusser ({pct}%) havde en intern pause på >60s, der blev genoptaget; kræver {val} slutbekræftelse(r).",
-      "learning_confidence": "p05-konfidens for {cycles} brugermærkede cyklusser ({p05}); under dette anmodes om verificering.",
       "match_interval": "Baseret på observeret opdateringskadence (median={median}s) * 10.",
       "match_interval_capped": "Begrænset, så {persistence} på hinanden følgende match kan være inden for {pct}% af det korteste program ({shortest}s); opdateringskadencen alene (median={median}s) ville have foreslået et længere interval.",
-      "match_interval_floored": "Alene det korteste program ({shortest}s) ville begrænse dette til {cap}s, under minimumsgrænsen på {minimum}s, så det holdes der: {persistence} match i træk tager {budget}s, hvilket er mere end {pct}% af det program. Matchning kører kun, når en måling kommer ind (median={median}s), så minimum koster ikke noget.",
+      "match_interval_floored": "Det korteste program ({shortest}s) ville begrænse dette til {cap}s, under minimummet på {minimum}s, så minimummet bruges: {persistence} match i træk tager {budget}s, over {pct}% af det program. Matchning kører kun, når en måling kommer (median={median}s), så det koster intet.",
       "max_duration_ratio": "Baseret på varigheder for mærkede cyklusser (p95={p95}).",
-      "min_active": "Baseret på laveste aktive effekt ({min}W) observeret i sidste cyklus.",
-      "min_duration_ratio": "Holdt så lav som muligt, så et program genkendes tidligt i cyklussen; konfidens- og tvetydighedsgrænserne forhindrer forhastede beslutninger.",
       "min_off_gap": "Baseret på {gaps} observerede mellemrum mellem cyklusser (p05={p05}s). Enhedsgulv: {floor}s.",
       "min_off_gap_bridge": "Dimensioneret til at bygge bro over den længste stille periode i en cyklus: {span}s + 60s buffer, fra {spans} dækkede mellemrum på tværs af {cycles} rene cyklusser (holder sig under dit korteste mellemrum på {ceiling}s mellem to kørsler).",
       "min_power": "40% af den laveste aktive effekt ved p05 ({p05}W) på tværs af {cycles} rene cyklusser, hvilket holder sluk-tærsklen under reelt forbrug.{excl}",
-      "ml_auto_label": "Laveste konfidens, som kvalitetsmodellen stadig vurderede som ren (p10 af {cycles} rene cyklusser = {p10}).",
-      "ml_end_repeat": "{false}/{total} cyklusser ({pct}%) havde en pause, som slutdetektoren vurderede til >50%; kræver {val} slutbekræftelse(r).",
-      "ml_off_delay": "Pauser bekræftet af slutdetektoren: p95 {p95}s + 60s buffer, fra {pauses} modelverificerede pauser på tværs af {cycles} cyklusser (gulv {floor}s).",
       "no_update_timeout": "Baseret på observeret opdateringskadence (p95={p95}s) * 20 (min 60s).",
       "off_delay_cadence": "Baseret på observeret opdateringskadence (p95={p95}s) * 5",
       "off_delay_device_floor": "Brugte et enhedsspecifikt sikkert minimum for {device} ({floor}s).",
       "off_delay_generic_floor": "Brugte et generisk sikkert minimum ({floor}s).",
       "off_delay_pauses": "Dimensioneret til at vare længere end reelle pauser: p95 for pause i cyklussen {p95}s + 60s buffer, fra {pauses} pauser på tværs af {cycles} rene cyklusser (gulv {floor}s).",
-      "profile_match_threshold": "p10-konfidens for {cycles} korrekte automatiske etiketter ({p10}); sikkert gulv for direkte matchning.",
-      "sampling_interval": "Median for opdateringsintervallet observeret på tværs af {cycles} rene cyklusser ({si}s).{excl}",
-      "smoothing_window": "Dimensioneret til at udjævne ~30s aflæsninger ved {si}s sampling ({samples} prøver).",
-      "start_duration": "Holdt kort (~ét samplingsinterval på {si}s), så detekteringen starter så tidligt som muligt, men stadig ignorerer enkelte spidser.",
-      "thr_batch": "Holdt lige over den laveste aktive effekt ved p05 på tværs af {cycles} cyklusser ({p05}W), så en start fanges så tidligt som muligt, og stoptærsklen forbliver under maskinens laveste driftseffekt.",
-      "tol_per_profile": "p75 for varighedsvariansen pr. profil på tværs af {profiles} profiler ({cycles} cyklusser); stramme profiler straffes ikke.",
-      "tol_pooled": "Baseret på samlet varighedsvarians for {cycles} seneste mærkede cyklusser (p95 afvigelse={dev}).",
-      "watchdog": "Holdt så lavt som forsvarligt (lige over p95-opdateringsmellemrummet på {p95}s og mindst 2x samplingintervallet på {median}s, min. 30s), så stilstande fanges hurtigt uden falske stop."
+      "standby_floor": "Alle nylige cyklusser trak stadig {idle}W, da de sluttede, så en tærskel derunder aldrig vil kunne registrere, at apparatet slukker. Holdt over denne grænse; de {cycles} rene cyklusser i oversigten pauserede aldrig under den i mere end {pause}s.",
+      "thr_batch": "Lige over den laveste aktive effekt (p05) over {cycles} cyklusser ({p05}W), så starter fanges tidligt, og stoptærsklen holdes under den laveste køreeffekt.",
+      "watchdog": "Holdt så lavt som forsvarligt (lige over p95-opdateringsmellemrummet på {p95}s og mindst 2x samplingintervallet på {median}s, min. 30s), så stilstande fanges hurtigt uden falske stop.",
+      "end_energy_floor": "Hævet til den nedre grænse, som stoptærsklen ({stop} W) i løbet af slukkeforsinkelsen ({off_delay} s) giver; under den kan cyklussen kun afsluttes via en reservevej.",
+      "max_duration_ratio_default": "Tilbage til standardværdien: et lavere loft afviser det rigtige program, når en kørsel varer længere end normalt.",
+      "min_duration_ratio_default": "Tilbage til standardværdien: en højere bundgrænse forhindrer en igangværende cyklus i at blive genkendt, før den er godt i gang."
     },
     "exclusions": {
       "summary": "{total} fejldetekterede cyklus(ser) udelukket: {parts}.",
@@ -1907,7 +1792,8 @@
         "no_power": "ingen effekt",
         "no_active_power": "ingen aktiv effekt"
       }
-    }
+    },
+    "now_value": "(nu {v})"
   },
   "tab": {
     "advanced": "Avanceret",
@@ -1937,6 +1823,11 @@
     "wrong_profile": "Forkert profil"
   },
   "toast": {
+    "task_name_required": "Giv opgaven et navn",
+    "task_added": "Opgave tilføjet",
+    "task_save_failed": "Kunne ikke gemme opgaven: {error}",
+    "task_removed": "Opgave fjernet",
+    "maint_logged": "Logget som udført: {task}",
     "catalog_refreshed": "Fællesskabskataloget er opdateret",
     "access_saved": "Adgangskontrol gemt",
     "all_wiped": "Alle data slettet",
@@ -1944,7 +1835,6 @@
     "auto_label_complete": "Auto-etiket fuldført",
     "automation_deleted": "Automatisering slettet",
     "correction_submitted": "Rettelse indsendt",
-    "cycle_deleted": "Cyklus slettet",
     "cycle_force_stopped": "Cyklus tvunget standset",
     "cycle_labelled": "Cyklus mærket",
     "cycle_paused": "Cyklus sat på pause",
@@ -1960,11 +1850,9 @@
     "group_deleted": "Gruppe slettet",
     "group_name_required": "Gruppenavn er påkrævet",
     "group_saved": "Gruppen er gemt",
-    "import_successful": "Importen lykkedes; integration genindlæsning",
     "json_required": "JSON-data er påkrævet",
     "legacy_removed": "Ældre handlinger blev fjernet",
     "logs_exported": "Logfiler eksporteret",
-    "matching_reverted": "Matchende vægte vendt tilbage til standardindstillingerne",
     "min_2_profiles": "Vælg mindst 2 profiler til en gruppe",
     "ml_training_no_improvement": "Træning gennemført: baseline bibeholdt (ingen forbedring)",
     "models_reverted": "Modeller på enheden er vendt tilbage til baseline",
@@ -1974,8 +1862,8 @@
     "pg_preset_loaded": "Forudindstillingen \"{name}\" er indlæst",
     "pg_preset_saved": "Forudindstillingen \"{name}\" er gemt",
     "pg_sugg_loaded": "{n} foreslåede(t) værdi(er) indlæst - kør legepladsen for at sammenligne",
-    "pg_sugg_ml_loaded": "{n} ML-kalibrerede(t) værdi(er) indlæst - kør legepladsen for at sammenligne",
     "phase_name_required": "Fasenavn er påkrævet",
+    "phase_reset": "\"{name}\" gendannet til den indbyggede fase",
     "phase_updated": "Fase opdateret",
     "phases_saved": "Faser gemt",
     "preferences_saved": "Præferencer gemt",
@@ -2022,14 +1910,10 @@
     "store_name_required": "Indtast et profilnavn",
     "store_import_failed": "Import mislykkedes: {error}",
     "store_imported": "Importeret til {profile}",
-    "store_program_required": "Indtast et programnavn",
     "store_no_appliance": "Angiv først dit apparats mærke og model i Indstillinger.",
     "store_share_failed": "Deling mislykkedes: {error}",
     "store_shared": "Delt i fællesskabsbutikken, afventer gennemgang.",
     "appliance_added": "Apparat tilføjet, afventer godkendelse",
-    "thanks_confirming": "Tak for bekræftelsen",
-    "device_approved": "Godkendt af fællesskabet",
-    "rating_saved": "Kvalitetsbedømmelse gemt",
     "brand_added": "Mærke tilføjet, afventer godkendelse",
     "profile_added": "Profil tilføjet, afventer godkendelse",
     "saved_except_conflicts": "Gemt. Løs de markerede konflikter for at gemme resten.",
@@ -2053,13 +1937,58 @@
     "odometer_save_failed": "Kunne ikke gemme totalen: {error}",
     "contrib_device_changed": "Tilføjet til fællesskabsbutikken, men apparatet blev skiftet, mens formularen var åben. Vælg det i Indstillinger.",
     "store_pick_profile_share": "Vælg en profil at dele til",
-    "remove_failed": "Fjernelse mislykkedes: {error}"
+    "remove_failed": "Fjernelse mislykkedes: {error}",
+    "analysis_complete": "Analyse færdig: {count} forslag",
+    "analysis_failed": "Analyse mislykkedes: {error}",
+    "auto_detect_failed": "Automatisk registrering mislykkedes: {error}",
+    "auto_label_failed": "Automatisk mærkning mislykkedes: {error}",
+    "auto_label_done": "Auto-mærkning fuldført: {count} cyklusser mærket, {skipped} ikke mærket.",
+    "auto_label_done_one": "Auto-mærkning fuldført: {count} cyklus mærket, {skipped} ikke mærket.",
+    "auto_label_done_other": "Auto-mærkning fuldført: {count} cyklusser mærket, {skipped} ikke mærket.",
+    "auto_label_cancelled": "Auto-mærkning annulleret efter mærkning af {count} cyklusser.",
+    "auto_label_cancelled_one": "Auto-mærkning annulleret efter mærkning af {count} cyklus.",
+    "auto_label_cancelled_other": "Auto-mærkning annulleret efter mærkning af {count} cyklusser.",
+    "could_not_load_cycle": "Kunne ikke indlæse cyklus: {error}",
+    "create_failed": "Oprettelse mislykkedes: {error}",
+    "cycles_deleted": "{count} cyklus(ser) slettet",
+    "debug_cleared": "{count} debug-spor ryddet",
+    "discard_failed": "Kassering mislykkedes: {error}",
+    "error": "Fejl: {error}",
+    "export_failed": "Eksport mislykkedes: {error}",
+    "import_failed": "Import mislykkedes: {error}",
+    "invalid_json": "\"{key}\" er ikke gyldig JSON - ret det, eller ryd feltet, før du gemmer.",
+    "label_failed": "Mærkning mislykkedes: {error}",
+    "ml_training_promoted": "Træning gennemført: {count} model(ler) aktiveret",
+    "pause_failed": "Pause mislykkedes: {error}",
+    "phase_created": "Fase \"{name}\" oprettet",
+    "phase_deleted": "Fase \"{name}\" slettet",
+    "profile_created": "Profil \"{name}\" oprettet",
+    "rename_failed": "Omdøbning mislykkedes: {error}",
+    "save_failed": "Lagring mislykkedes: {error}",
+    "split_complete": "Opdelt i {count} cyklusser",
+    "start_failed": "Start mislykkedes: {error}",
+    "stop_failed": "Stop mislykkedes: {error}",
+    "update_failed": "Opdatering mislykkedes: {error}",
+    "store_download_skipped": "{n} optagelse(r) sprunget over: for korte, med for mange huller eller allerede på dit apparat.",
+    "store_import_low_quality": "Denne optagelse er for kort, har for mange huller eller er urealistisk og kan ikke importeres.",
+    "store_import_duplicate": "Denne optagelse er allerede på dit apparat.",
+    "device_approved": "Godkendt af fællesskabet",
+    "thanks_confirming": "Tak for bekræftelsen",
+    "rating_saved": "Kvalitetsbedømmelse gemt",
+    "store_download_partial": "{n} program(mer) kunne ikke hentes; prøv igen senere.",
+    "import_no_restore_point": "Importeret, men der kunne ikke gemmes et gendannelsespunkt, så denne import kan ikke fortrydes",
+    "import_undo_failed": "Importen kunne ikke fortrydes: {error}",
+    "import_undone": "Import fortrudt: {profiles} profil(er) og {cycles} cyklus(ser) gendannet"
   },
   "trend": {
     "down": "Trend nedad",
     "up": "Opadgående tendens"
   },
   "maint": {
+    "salt": "Påfyld salt",
+    "rinse_aid": "Påfyld afspændingsmiddel",
+    "lint_filter": "Rengør fnugfilter",
+    "condenser_clean": "Rengør kondensator",
     "bearing_service": "Lejeservice",
     "descale": "Afkalk",
     "drum_clean": "Rengør tromle",
@@ -2071,12 +2000,14 @@
     "status_tip": "Cyklusresultat: Fuldført (naturlig afslutning), Afbrudt (pludseligt effektfald), Tvunget stoppet (manuelt) eller Kræver gennemgang (feedback afventer).",
     "date_tip": "Dato og klokkeslæt, hvor cyklussen startede.",
     "duration_tip": "Samlet kørselstid for cyklussen fra start til slut.",
-    "energy_tip": "Samlet forbrugt energi (kWh). Beregnet ved at integrere effekten over tid.",
-    "cost_tip": "Energiomkostninger for denne cyklus, frosset ved afslutningen. Med Tidsvægtede omkostninger slået til beregnes effektkurven til den pris, der gjaldt i hvert øjeblik, ellers energi x den ene pris, der gjaldt til sidst. Angiv en pris under Indstillinger for at udfylde den.",
+    "energy_tip": "Samlet energiforbrug (kWh), beregnet ud fra effekt over tid.",
+    "cost_tip": "Energiomkostning for denne cyklus, fastlåst ved afslutning. Med Tidsvægtede omkostninger slået til beregnes hvert øjeblik til sin egen pris; ellers til prisen ved slutningen. Angiv en pris i Indstillinger for at udfylde dette.",
     "confidence_tip": "Profilmatchkonfidens (0-100 %). Hvor tæt cyklussens effektkurve matchede det identificerede program.",
-    "health_tip": "ML-cyklussundhed (højere = bedre). Klik på en cyklus for at inspicere og gennemgå den.",
     "flags_tip": "Gennemgangs-, anomali- og kildeflags for cyklussen. Hold musen over et ikon for detaljer.",
-    "cost_dynamic_tip": "Tidsvægtet: beregnet til den pris, der gjaldt under cyklussen (effektivt {price} {cur}/kWh)."
+    "cost_dynamic_tip": "Tidsvægtet: beregnet til den pris, der gjaldt under cyklussen (effektivt {price} {cur}/kWh).",
+    "dbg_conf": "Tillid",
+    "dbg_mae": "MAE",
+    "dbg_corr": "Korr."
   },
   "stat": {
     "avg": "gns.",
@@ -2100,7 +2031,10 @@
     "notify_finish": "Der ville blive sendt en færdignotifikation.",
     "notify_milestone": "Der ville blive sendt en milepælsnotifikation.",
     "notify_held": "En notifikation blev holdt tilbage på grund af stilletimer.",
-    "finished": "Cyklussen nåede en sluttilstand og stoppede."
+    "finished": "Cyklussen nåede en sluttilstand og stoppede.",
+    "match_reverted": "Programmet faldt tilbage til registrering: dets score faldt et godt stykke under sit eget højdepunkt.",
+    "verified_pause": "Live-justeringen bekræftede (eller frigav) en pause inde i programmet. Så længe den gælder, afsluttes cyklussen ikke.",
+    "stalled": "Cyklussen lå på standbyeffekt længere, end dette program nogensinde holder pause dér, med arbejde tilbage. Vises som Pause (Gået i stå); cyklussen forbliver åben."
   },
   "store": {
     "search_ph2": "Søg efter mærke eller model…",
@@ -2109,11 +2043,7 @@
     "programs_count": "Programmer: {n}",
     "browse": "Gennemse",
     "device": "Enhed",
-    "favorites": "Favoritter",
-    "search_ph": "Søg efter mærke eller model…",
     "no_results": "Ingen matchende apparater fundet. Prøv en anden søgning.",
-    "n_programs": "{n} programmer",
-    "n_cycles": "{n} cyklusser",
     "no_programs": "Ingen delte programmer for dette apparat endnu.",
     "no_cycles": "Ingen referencecyklusser delt for dette program endnu.",
     "anon": "anonym",
@@ -2125,19 +2055,21 @@
     "merge_target": "Flet ind i profil",
     "description": "Beskrivelse (valgfrit)",
     "contributed_by": "af {name}",
+    "website": "Fællesskabsbutikkens websted ↗",
+    "website_tip": "Åbn fællesskabsbutikkens websted",
+    "favorites": "Favoritter",
     "rating_summary": "★ {avg} ({n})",
     "no_ratings": "Ingen bedømmelser endnu",
-    "website": "Fællesskabsbutikkens websted ↗",
-    "website_tip": "Åbn fællesskabsbutikkens websted"
+    "unreachable": "Kunne ikke få forbindelse til fællesskabsbutikken. Tjek din forbindelse, og prøv igen."
   },
   "settings": {
     "gear": {
-      "title": "Indstillinger"
+      "title": "Præferencer"
     }
   },
   "link": {
-    "manual": "Manual ↗",
-    "add_appliance": "Tilføj dit apparat"
+    "maintenance_supporter": "Maintenance Supporter på GitHub ↗",
+    "manual": "Manual ↗"
   },
   "tip": {
     "add_brand": "Mærke ikke på listen? Tilføj det til fællesskabskataloget",
@@ -2171,7 +2103,13 @@
     "rebuild": {
       "envelopes": "Genopbygger envelopes"
     },
-    "cancelling": "Annullerer..."
+    "cancelling": "Annullerer...",
+    "auto_label": {
+      "running": "Mærker cyklusser automatisk"
+    },
+    "store_download": {
+      "running": "Henter fra butikken"
+    }
   },
   "setup": {
     "hdr": {
@@ -2180,26 +2118,24 @@
     },
     "phase0": {
       "washer": "WashData registrerer allerede dine cyklusser. Optag din første cyklus for at aktivere programnavne og tidsestimater.",
-      "dishwasher": "WashData holder øje. Opvaskemaskiner har komplekse cyklusser – det anbefales stærkt at optage din første cyklus. Hvis en registreret cyklus kører for længe, brug cyklus-editoren til at beskære den, inden du gemmer den som en profil.",
+      "dishwasher": "WashData holder øje. Opvaskecyklusser er komplekse, så optag din første cyklus. Hvis en registreret cyklus kører for længe, så beskær den i cykluseditoren, før du gemmer den som en profil.",
       "generic": "WashData holder øje. Optag eller mærk en registreret cyklus for at begynde at opbygge profiler."
     },
     "phase1a": {
-      "labelled": "Godt gået – dit første program er gemt. For de reneste data kan du overveje at optage din næste cyklus med optagelses-widgetten."
+      "labelled": "God start: dit første program er gemt. For de reneste data skal du optage din næste cyklus med optageren."
     },
     "phase1b": {
-      "recorded": "Din optagelse blev gemt som {profile_name}. Optag nu eller mærk dine andre hyppigt brugte programmer for at opbygge dækning."
+      "recorded": "Din optagelse blev gemt som {profile_name}. Optag eller mærk nu dine andre almindelige programmer."
     },
     "phase1c": {
-      "verify": "Du har {count} programmer fra fællesskabet. Kør en cyklus for at bekræfte, at WashData genkender den korrekt – matchningen forbedres, efterhånden som din enhed opbygger sin egen historik."
+      "verify": "Du har {count} programmer fra fællesskabet. Kør en cyklus for at tjekke, at WashData genkender den; matchningen bliver bedre, efterhånden som din enhed opbygger sin egen historik."
     },
     "phase2": {
-      "cluster": "WashData har set {count} cyklusser, der ikke matcher noget gemt program – de ligner hinanden. Vil du oprette en ny profil til dem?",
+      "cluster": "WashData har set {count} ens cyklusser, der ikke matcher noget gemt program. Opret en ny profil til dem?",
       "unmatched": "Din seneste cyklus matchede ikke noget gemt program. Er det et nyt program?"
     },
     "phase3": {
-      "suggestions": "WashData har indstillingsanbefalinger baseret på din cyklushistorik – gennemgå dem for at forbedre registreringens nøjagtighed.",
-      "groups": "Nogle af dine profiler ligner det samme program ved forskellige temperaturer. Organiser dem i en gruppe for bedre matchning.",
-      "phases": "Tilføj programfaser til {profile_name} for mere præcise estimater af den resterende tid."
+      "suggestions": "WashData har indstillingsforslag ud fra din cyklushistorik. Gennemgå dem for at forbedre registreringen."
     },
     "phase4": {
       "healthy": "Dette apparat er fuldt opsat ({profile_count} profiler)."
@@ -2212,12 +2148,58 @@
       "create_from_cluster": "Opret profil fra disse cyklusser",
       "create_profile": "Opret en profil til den",
       "review_suggestions": "Gennemgå anbefalinger",
-      "organise_profiles": "Organiser profiler",
-      "configure_phases": "Konfigurer faser",
       "skip_step": "Spring dette trin over",
       "skip_forever": "Vis ikke igen",
       "hide_guidance": "Skjul vejledning",
       "show_guidance": "Vis vejledning"
     }
+  },
+  "access": {
+    "edit": "Rediger",
+    "full": "Fuld",
+    "inherit": "Arv",
+    "none": "Ingen (skjult)",
+    "read": "Læs"
+  },
+  "pg_label_reason": {
+    "no_winner": "Intet program passede",
+    "below_floor": "Under læringskonfidensen",
+    "ambiguous": "Markeret som tvetydig",
+    "margin": "For tæt på nummer to",
+    "unknown_profile": "Programmet findes ikke længere",
+    "not_evaluated": "Ikke evalueret"
+  },
+  "diagram": {
+    "accum": "opsamlet",
+    "auto": "auto",
+    "below_off": "under = slukket",
+    "confirmed": "bekræftet",
+    "energy_counts": "energi tæller",
+    "feedback": "feedback",
+    "gap_below_min": "mellemrum under min = én cyklus",
+    "heat_phase": "varmefase",
+    "held_at_100": "holdt på 100%",
+    "ignored": "ignoreret",
+    "kept": "beholdt",
+    "max": "maks",
+    "min": "min",
+    "minus_tol": "-tol",
+    "no_match": "intet match",
+    "no_updates": "ingen opdateringer",
+    "off_delay_wait": "slukkeforsinkelse",
+    "off_gap": "slukket mellemrum",
+    "plus_tol": "+tol",
+    "profile": "profil",
+    "reading_interval": "typisk målingsinterval",
+    "sensor_offline": "sensor offline: tving stop",
+    "si": "SI",
+    "spike_ignored": "spids ignoreret",
+    "spike_ignored_short": "spids: ignoreret",
+    "start": "start",
+    "stop": "stop",
+    "tail_energy_resets": "restenergi > tærskel: timer nulstilles",
+    "thr": "tærsk.",
+    "too_short": "for kort",
+    "tumble_kept": "tumlepulser beholdt"
   }
 }

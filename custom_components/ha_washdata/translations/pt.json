@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configuração WashData",
-        "description": "Configure a sua máquina de lavar ou outro electrodoméstico.\n\nÉ necessário um sensor de potência.\n\nApós a configuração, abra o painel WashData a partir da barra lateral (ou aceda a [/ha-washdata](/ha-washdata)) para ver os ciclos, ajustar a deteção e gerir perfis.",
+        "description": "Configure uma máquina de lavar ou outro eletrodoméstico. É necessário um sensor de potência.\n\nApós a configuração, abra o painel WashData a partir da barra lateral ([/ha-washdata](/ha-washdata)) para ver ciclos, perfis e todas as definições.",
         "data": {
           "name": "Nome do dispositivo",
           "device_type": "Tipo de dispositivo",
@@ -12,14 +12,14 @@
         },
         "data_description": {
           "name": "Um nome descritivo para este dispositivo (por exemplo, 'Máquina de lavar', 'Máquina de lavar loiça').",
-          "device_type": "Que tipo de electrodoméstico é este? Ajuda a personalizar a detecção e a rotulagem.",
-          "power_sensor": "A entidade do sensor que reporta o consumo de energia em tempo real (em watts) da sua tomada inteligente.",
-          "min_power": "Leituras de potência acima deste limiar (em watts) indicam que o electrodoméstico está a funcionar. Comece com 2W para a maioria dos dispositivos."
+          "device_type": "Define os valores de deteção predefinidos para este tipo de eletrodoméstico.",
+          "power_sensor": "O sensor da tomada inteligente que reporta a potência atual em watts.",
+          "min_power": "Leituras acima deste valor (em watts) indicam que o eletrodoméstico está a funcionar. 2 W serve para a maioria dos dispositivos."
         }
       },
       "reconfigure": {
         "title": "Reconfigurar WashData",
-        "description": "Actualize o nome do dispositivo, o tipo de electrodoméstico ou o sensor de potência.\n\nO painel WashData (barra lateral, ou [/ha-washdata](/ha-washdata)) é onde a deteção, os ciclos, os perfis e as notificações são geridos.",
+        "description": "Altere o nome do dispositivo, o tipo de eletrodoméstico ou o sensor de potência.\n\nTudo o resto está no painel WashData (barra lateral, ou [/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Nome do dispositivo",
           "device_type": "Tipo de dispositivo",
@@ -29,8 +29,6 @@
       }
     },
     "error": {
-      "cannot_connect": "Falha ao ligar",
-      "invalid_auth": "Autenticação inválida",
       "unknown": "Erro inesperado",
       "invalid_power": "O limiar de potência tem de ser maior do que 0"
     },
@@ -43,7 +41,7 @@
     "step": {
       "init": {
         "title": "Definições WashData",
-        "description": "Mude o nome do dispositivo ou altere as suas definições de hardware principais. Todas as definições de deteção, correspondência e notificações estão no [painel WashData](/ha-washdata) (também acessível a partir da barra lateral).",
+        "description": "Mude o nome do dispositivo ou altere as suas definições principais. Tudo o resto está no [painel WashData](/ha-washdata) na barra lateral.",
         "data": {
           "name": "Nome do dispositivo",
           "device_type": "Tipo de dispositivo",
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Nome do perfil",
-          "description": "O nome de um perfil existente (crie perfis no menu Gerir perfis). Deixe em branco para remover o rótulo."
+          "description": "Nome de um perfil existente (crie perfis no painel WashData). Deixe em branco para remover o rótulo."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Limiar de confiança",
-          "description": "Confiança mínima de correspondência (0,50-0,95) para aplicar rótulos."
+          "description": "Confiança mínima de correspondência (0,50-0,95) para aplicar rótulos. Deixe vazio para usar a definição Confiança de Rotulagem Automática do dispositivo."
         }
       }
     },
     "export_config": {
       "name": "Exportar configuração",
-      "description": "Exporte os perfis, ciclos e definições deste dispositivo para um ficheiro JSON (por dispositivo).",
+      "description": "Exporte os perfis, ciclos e definições deste dispositivo para um ficheiro JSON.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Enviar feedback do ciclo",
-      "description": "Confirme ou corrija um programa detectado automaticamente após um ciclo concluído. Forneça `entry_id` (avançado) ou `device_id` (recomendado).",
+      "description": "Confirme ou corrija o programa detetado de um ciclo concluído. Indique `device_id` (recomendado) ou `entry_id`.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -283,7 +281,7 @@
     },
     "mark_unloaded": {
       "name": "Marcar como descarregado",
-      "description": "Confirme que a carga terminada foi retirada de um dispositivo WashData, limpando o estado Limpo e qualquer lembrete de descarga.",
+      "description": "Confirme que a carga terminada foi retirada. Limpa o estado Limpo e qualquer lembrete de descarga.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Ambiguidade de correspondência"
+      },
+      "maintenance_due": {
+        "name": "Manutenção pendente",
+        "state": {
+          "on": "Pendente",
+          "off": "Não pendente"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "IDs das tarefas pendentes"
+          },
+          "due_tasks": {
+            "name": "Tarefas pendentes",
+            "state": {
+              "descale": "Descalcificar",
+              "filter_clean": "Limpar o filtro",
+              "drum_clean": "Limpar o tambor",
+              "bearing_service": "Manutenção de rolamentos",
+              "other": "Outro",
+              "salt": "Repor o sal",
+              "rinse_aid": "Repor o abrilhantador",
+              "lint_filter": "Limpar o filtro de cotão",
+              "condenser_clean": "Limpar o condensador"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Anti-vincos",
           "interrupted": "Interrompido",
           "force_stopped": "Parado forçosamente",
-          "rinse": "Enxaguar",
           "unknown": "Desconhecido",
-          "clean": "Limpar",
+          "clean": "Limpo",
           "delay_wait": "Esperando para começar"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Anomalia do ciclo",
+            "state": {
+              "overrun": "Em atraso",
+              "stalled": "Parado"
+            }
+          }
         }
       },
       "washer_program": {

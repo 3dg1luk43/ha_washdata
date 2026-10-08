@@ -12,17 +12,30 @@ import cycles from '../fixtures/mock-data/cycles.json';
 import profiles from '../fixtures/mock-data/profiles.json';
 import options from '../fixtures/mock-data/options.json';
 
-/** Minimal power history (no active cycle, just a flat idle line). */
+/** Minimal power history (no active cycle, just a flat idle line). Idle `live` is
+ * [offset_s, watts] pairs from the oldest recent reading, as ws_get_power_history sends. */
 const IDLE_POWER_HISTORY = {
-  live: Array.from({ length: 20 }, (_, i) => ({ t: Date.now() / 1000 - (19 - i) * 30, p: 1.2 })),
+  live: Array.from({ length: 20 }, (_, i) => [i * 30, 1.2]),
   raw: [],
+  restart_gaps: [],
   cycle_active: false,
   cycle_elapsed_s: 0,
-  profile_envelope: null,
+};
+
+/** Device-resolved defaults (ws_api._resolved_option_defaults('washing_machine')). */
+const OPTION_DEFAULTS = {
+  sampling_interval: 2.0,
+  watchdog_interval: 30,
+  start_duration_threshold: 5.0,
+  smart_termination_duration_ratio: 0.98,
+  anti_crease_finalize_ratio: 0.98,
+  profile_match_max_duration_ratio: 1.8,
+  min_off_gap: 480,
+  off_delay: 180,
 };
 
 /** Minimal suggestions (none to keep Settings tab clean by default). */
-const NO_SUGGESTIONS = { suggestions: [] };
+const NO_SUGGESTIONS = { suggestions: [], locked_suggestions: [] };
 
 const EMPTY_MAINTENANCE = {
   log: [],
@@ -31,7 +44,13 @@ const EMPTY_MAINTENANCE = {
   reminders: { descale: 30 },
   // #414: cycles run since each task, and the odometer they are measured against.
   cycles_since: { descale: 12, filter_clean: 12, drum_clean: 12, bearing_service: 12, other: 12 },
+  // #461: custom tasks, every active reminder with its progress, and the limits.
+  custom_tasks: [],
+  status: [
+    { id: 'descale', custom: false, name: null, cycles_interval: 30, days_interval: 0, cycles_since: 12, days_since: null, due: false },
+  ],
   lifetime_cycle_count: 212,
+  limits: { tasks_max: 20, name_max: 60, cycles_max: 100000, days_max: 3650 },
 };
 
 const EMPTY_CHANGELOG = { changelog: [] };
@@ -40,7 +59,7 @@ const EMPTY_FEEDBACKS = { feedbacks: [] };
 
 const EMPTY_PHASE_CATALOG = { phases: [], device_type: '' };
 
-const EMPTY_PROFILE_GROUPS = { groups: [], suggestions: [], min_cohesion: 0.85 };
+const EMPTY_PROFILE_GROUPS = { groups: [], min_cohesion: 0.85 };
 
 const EMPTY_DIAGNOSTICS = {
   stats: {
@@ -49,19 +68,32 @@ const EMPTY_DIAGNOSTICS = {
     profile_count: 3,
     store_version: 8,
   },
+  // No restore point: "Undo last import" stays hidden until a replace import
+  // leaves one behind (register item 195).
+  import_undo: null,
 };
 
 const EMPTY_ML_STATUS = {
+  available: true,
   on_device_models: {},
   cycle_count: 0,
   min_cycles: 20,
   last_trained: null,
   enabled: false,
+  interval_days: 7,
   hour: 2,
   running: false,
+  last_run: {},
 };
 
-const EMPTY_ML_COMPARISON = { comparisons: [] };
+const EMPTY_ML_COMPARISON = {
+  enabled: true,
+  cycle_count: 0,
+  evaluated_count: 0,
+  cycles: [],
+  model_source: { quality: 'baseline', end: 'baseline' },
+  profile_stats: {},
+};
 
 const EMPTY_LOGS = { logs: [] };
 
@@ -80,7 +112,7 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   'ha_washdata/get_phase_catalog': EMPTY_PHASE_CATALOG,
   'ha_washdata/get_profiles': profiles,
   'ha_washdata/get_profile_groups': EMPTY_PROFILE_GROUPS,
-  'ha_washdata/get_options': { options },
+  'ha_washdata/get_options': { options, defaults: OPTION_DEFAULTS },
   'ha_washdata/get_settings_changelog': EMPTY_CHANGELOG,
   'ha_washdata/get_ml_comparison': EMPTY_ML_COMPARISON,
   'ha_washdata/get_ml_training_status': EMPTY_ML_STATUS,
@@ -90,16 +122,18 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   'ha_washdata/get_suggestions': NO_SUGGESTIONS,
   // Write commands — return success so form submissions don't throw.
   'ha_washdata/set_options': { success: true },
+  'ha_washdata/undo_import': { success: true, summary: { restored_from: '2026-10-01T10:00:00+00:00', counts: { profiles: 2, real_cycles: 5, reference_cycles: 0, backfill_cycles: 0 } } },
   'ha_washdata/set_lifetime_cycle_count': { success: true, lifetime_cycle_count: 250 },
   'ha_washdata/set_user_prefs': { success: true },
   'ha_washdata/set_panel_config': { success: true },
-  'ha_washdata/trigger_ml_training': { ok: true, message: 'Training started' },
+  // Task result (mock-hass TASK_START): manager.async_run_ml_training's summary.
+  'ha_washdata/trigger_ml_training': { ok: true, promoted: [], results: [] },
   // Historical power-data import (#344). The two `__history_import_*_result` keys are
   // not real commands: they are the payloads TASK_START hands back as each detached
   // task's result, mirroring how the playground task keys work.
   'ha_washdata/history_import_begin': { token: 'tok-1', max_bytes: 33554432, chunk_bytes: 524288 },
   'ha_washdata/history_import_chunk': { received_bytes: 128, next_seq: 1 },
-  'ha_washdata/history_import_recorder': { token: 'tok-rec', rows: 2400, entity_id: 'sensor.washer_power', days: 10, truncated: false },
+  'ha_washdata/history_import_recorder': { token: 'tok-rec', rows: 2400, entity_id: 'sensor.washer_power', days: 10, start_date: '2026-07-18', truncated: false },
   'ha_washdata/__history_import_scan_result': {
     segments: [
       { index: 0, start_time: '2026-07-21T09:14:00+00:00', end_time: '2026-07-21T10:28:00+00:00',
@@ -118,23 +152,41 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
     found: 2, capped: false, truncated_blocks: 0, partial: false, token: 'tok-1',
   },
   'ha_washdata/__history_import_apply_result': { imported: 1, duplicates: 0, capped: false, total_backfill: 1 },
-  'ha_washdata/revert_ml_models': { ok: true },
-  'ha_washdata/revert_matching_config': { ok: true },
+  'ha_washdata/revert_ml_models': { success: true },
   'ha_washdata/label_cycle': { success: true },
-  'ha_washdata/delete_cycles': { success: true },
-  'ha_washdata/create_profile': { success: true },
+  'ha_washdata/create_profile': { success: true, name: 'New Profile' },
   'ha_washdata/delete_profile': { success: true },
-  'ha_washdata/add_maintenance_event': { success: true, id: 'maint-001' },
+  'ha_washdata/add_maintenance_event': {
+    success: true,
+    event: { id: 'maint-001', date: '2026-07-20T09:00:00+00:00', event_type: 'descale', notes: '', cycle_count_at_log: 212 },
+  },
   'ha_washdata/delete_maintenance_event': { success: true },
-  'ha_washdata/save_maintenance_reminders': { success: true },
+  'ha_washdata/add_maintenance_task': {
+    success: true,
+    task: { id: 'custom_0123456789', name: 'Door seal', cycles: 0, days: 30, since: '2026-07-20T09:00:00+00:00', since_cycle_count: 212 },
+  },
+  'ha_washdata/update_maintenance_task': {
+    success: true,
+    task: { id: 'custom_0123456789', name: 'Door gasket', cycles: 0, days: 30, since: '2026-07-20T09:00:00+00:00', since_cycle_count: 212 },
+  },
+  'ha_washdata/delete_maintenance_task': { success: true },
   // Split/trim run as background tasks; these are the payloads get_task_result returns.
   'ha_washdata/apply_split': { success: true, new_ids: ['cyc-split-a', 'cyc-split-b'] },
   'ha_washdata/trim_cycle': { success: true },
   'ha_washdata/apply_merge': { success: true, new_id: 'cyc-merged' },
   'ha_washdata/rebuild_envelopes': { success: true, rebuilt: 3 },
-  'ha_washdata/analyze_split': { segments: [[0, 600], [900, 1740]], split_offsets: [600], samples: [], full_duration_s: 1740 },
+  'ha_washdata/analyze_split': { segments: [[0, 600], [900, 1740]], split_offsets: [600], samples: [], sample_count: 0, decimated: false, full_duration_s: 1740 },
+  // Recorder history around a cycle (item 513): nothing recorded by default, so a
+  // spec that does not ask for it draws no context.
+  'ha_washdata/get_cycle_context': {
+    cycle_id: 'cyc-001', available: false, reason: 'no_history', entity_id: 'sensor.washer_power',
+    before_s: 600, after_s: 600, trace_end_s: 1740, after_end_s: 0, before: [], after: [],
+  },
   'ha_washdata/get_cycle_power_data': {
+    cycle_id: 'cyc-001',
     samples: Array.from({ length: 30 }, (_, i) => [i * 60, i < 2 || i > 27 ? 3 : 900]),
+    sample_count: 30,
+    decimated: false,
     full_duration_s: 1740,
   },
   'ha_washdata/run_playground_cycle_detail': {
@@ -151,11 +203,11 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
       { t: 1700, type: 'finished', detail: 'reason=smart', severity: 'info' },
     ],
     alerts: [],
-    outcome: { detected: true, detected_count: 1, termination_reason: 'smart', status: 'completed', final_duration_s: 1740, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, expected_s: 1720, overrun_ratio: 1.01, projected_energy_wh: 485, projected_cost: 2.5 },
+    outcome: { detected: true, detected_count: 1, termination_reason: 'smart', status: 'completed', final_duration_s: 1740, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, expected_s: 1720, overrun_ratio: 1.01, projected_energy_wh: 485, projected_cost: 2.5, would_label: true, label_profile: 'Cotton 40°C', label_reason: 'ok' },
   },
   'ha_washdata/run_playground_history': {
     rows: [
-      { cycle_id: 'cyc-001', label: 'Cotton 40°C', detected: true, detected_count: 1, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, termination_reason: 'smart', duration_s: 1740, expected_s: 1720, overrun_ratio: 1.01, alerts: [] },
+      { cycle_id: 'cyc-001', label: 'Cotton 40°C', detected: true, detected_count: 1, matched_profile: 'Cotton 40°C', match_correct: true, confidence: 0.82, termination_reason: 'smart', duration_s: 1740, expected_s: 1720, overrun_ratio: 1.01, alerts: [], would_label: false, label_profile: null, label_reason: 'margin' },
     ],
     summary: { cycles: 1, detected: 1, labelled: 1, match_correct: 1, match_wrong: 0, unmatched: 0, false_end: 0 },
   },
@@ -165,7 +217,7 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   },
   // Playground settings control panel: the live effective values the sandbox opens
   // on, plus this device's saved presets. `publishable` mirrors the backend
-  // allow-list (real config options only; Stage 2-4 matcher knobs are absent).
+  // allow-list (every key is a real option).
   'ha_washdata/get_playground_settings': {
     effective: {
       min_power: 2,
@@ -185,17 +237,6 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
       dishwasher_end_spike_quiet_release: 600,
       profile_match_min_duration_ratio: 0.1,
       profile_match_max_duration_ratio: 1.5,
-      corr_weight: 0.45,
-      keep_min_score: 0.1,
-      dtw_bandwidth: 0.2,
-      dtw_blend: 0.5,
-      dtw_ensemble_w: 0.7,
-      dtw_ddtw_scale: 30,
-      dtw_refine_top_n: 5,
-      duration_weight: 0.22,
-      energy_weight: 0.22,
-      duration_scale: 0.175,
-      energy_scale: 0.25,
     },
     presets: [
       { name: 'Quiet nights', values: { off_delay: 300, min_off_gap: 240 }, created_at: '2026-08-01T10:00:00+00:00', updated_at: '2026-08-01T10:00:00+00:00' },
@@ -210,25 +251,15 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
     ],
     preset_limit: 30,
     classic_suggestions: { off_delay: 90, min_off_gap: 240 },
-    ml_suggestions: { off_delay: 85, end_repeat_count: 2 },
-    ml_suggestions_enabled: true,
   },
   'ha_washdata/save_playground_preset': {
     success: true,
     presets: [
-      { name: 'Quiet nights', values: { off_delay: 300 }, created_at: '2026-08-01T10:00:00+00:00', updated_at: '2026-08-01T10:00:00+00:00' },
       { name: 'My preset', values: { off_delay: 222 }, created_at: '2026-08-16T10:00:00+00:00', updated_at: '2026-08-16T10:00:00+00:00' },
+      { name: 'Quiet nights', values: { off_delay: 300 }, created_at: '2026-08-01T10:00:00+00:00', updated_at: '2026-08-01T10:00:00+00:00' },
     ],
   },
   'ha_washdata/delete_playground_preset': { success: true, presets: [] },
-  'ha_washdata/get_dtw_debug': {
-    stage2: { correlation: 0.91, mae_score: 0.88, score: 0.90 },
-    dtw: { l1_score: 0.87, ddtw_score: 0.85, blend_weight: 0.7, blended_score: 0.86 },
-    stage4: { duration_agreement: 0.94, energy_agreement: 0.88, final_score: 0.91 },
-    cycle_trace: Array.from({ length: 30 }, (_, i) => Math.sin(i / 5) * 500 + 600),
-    profile_trace: Array.from({ length: 30 }, (_, i) => Math.sin(i / 5) * 480 + 590),
-    warp_path: [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]],
-  },
 };
 
 /**
@@ -241,4 +272,4 @@ export function buildHandlers(overrides: Record<string, unknown> = {}): Record<s
 
 /** Convenience: return a devices payload with a single running device. */
 export { deviceIdle, cycles, profiles, options };
-export { IDLE_POWER_HISTORY, EMPTY_MAINTENANCE, EMPTY_CHANGELOG, EMPTY_ML_STATUS };
+export { IDLE_POWER_HISTORY, OPTION_DEFAULTS, EMPTY_MAINTENANCE, EMPTY_CHANGELOG, EMPTY_ML_STATUS };

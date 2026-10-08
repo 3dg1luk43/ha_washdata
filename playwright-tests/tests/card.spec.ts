@@ -163,6 +163,62 @@ test('detail: pressing Pause calls button.press on the discovered pause entity',
   ).toBeTruthy();
 });
 
+test('detail: tapping the program select does not run the card tap_action (#468)', async ({ page }) => {
+  // The select stopped pointerdown and click but not pointerup, which reached the
+  // card and ran more-info: the dialog closed the dropdown before a pick.
+  await mount(page, { entity: 'sensor.wm_state', layout: 'detail', buttons: ['program'] }, RUN);
+  const fired = await page.evaluate(() => {
+    const card = (window as any).__card;
+    const sel = card.shadowRoot.getElementById('prog-select');
+    let n = 0;
+    card.addEventListener('hass-more-info', () => { n += 1; });
+    const opts = { bubbles: true, composed: true, clientX: 10, clientY: 10, pointerId: 1 };
+    sel.dispatchEvent(new PointerEvent('pointerdown', opts));
+    sel.dispatchEvent(new PointerEvent('pointerup', opts));
+    sel.dispatchEvent(new MouseEvent('click', opts));
+    return n;
+  });
+  expect(fired).toBe(0);
+});
+
+test('detail with controls: the button role sits on a part without them', async ({ page }) => {
+  // A role="button" may not contain interactive controls: with action buttons or
+  // the program selector the keyboard target is the top row, not the whole card.
+  await mount(page, { entity: 'sensor.wm_state', layout: 'detail', buttons: ['pause', 'program'] }, RUN);
+  const got = await page.evaluate(() => {
+    const card = (window as any).__card;
+    const els = card.shadowRoot.querySelectorAll('[role="button"]');
+    const el = els[0];
+    let fired: string | null = null;
+    card.addEventListener('hass-more-info', (ev: any) => { fired = ev.detail && ev.detail.entityId; });
+    el.focus();
+    el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    return { n: els.length, nested: !!el.querySelector('button, select'), fired };
+  });
+  expect(got.n).toBe(1);
+  expect(got.nested).toBe(false);
+  expect(got.fired).toBe('sensor.wm_state');
+});
+
+test('a role found in live states is not cached before its sensor appears', async ({ page }) => {
+  // The registry lacks the time sensor, so the suffix fallback looks in live
+  // states; caching that miss left the card without a time once it appeared.
+  const data = JSON.parse(JSON.stringify(RUN));
+  delete data.entities['sensor.wm_time_remaining'];
+  const time = data.states['sensor.wm_time_remaining'];
+  delete data.states['sensor.wm_time_remaining'];
+  await mount(page, { entity: 'sensor.wm_state', layout: 'tile' }, data);
+  const before = await page.evaluate(() => (window as any).__card.shadowRoot.getElementById('state').textContent);
+  expect(before).not.toContain('16 min');
+  const after = await page.evaluate((t: any) => {
+    const card = (window as any).__card;
+    const h = card._hass;
+    card.hass = { ...h, states: { ...h.states, 'sensor.wm_time_remaining': t } };
+    return card.shadowRoot.getElementById('state').textContent;
+  }, time);
+  expect(after).toContain('16 min');
+});
+
 test('glance: renders one row per device with state dot and time', async ({ page }) => {
   await mount(page, { entity: 'sensor.wm_state', entities: ['sensor.wm_state'], layout: 'glance' }, RUN);
   const rows = await page.evaluate(() => {
@@ -240,4 +296,38 @@ test('detail: a foreign integration\'s entry id is never used as the token', asy
   data.devices.d1 = { name: 'Washing Machine', config_entries: ['other_entry'], primary_config_entry: 'other_entry' };
   await mount(page, { entity: 'sensor.wm_state', layout: 'detail', buttons: ['open_panel'] }, data);
   expect(await clickOpenPanel(page)).toEqual(['/ha-washdata?device=Washing%20Machine']);
+});
+
+test('tile: keyboard Enter opens more-info like a tap (audit UI-17)', async ({ page }) => {
+  await mount(page, { entity: 'sensor.wm_state', layout: 'tile' }, RUN);
+  const got = await page.evaluate(() => {
+    const card = (window as any).__card;
+    const el = card.shadowRoot.querySelector('[role="button"]');
+    if (!el) return { focusable: false, fired: null };
+    let fired: string | null = null;
+    card.addEventListener('hass-more-info', (ev: any) => { fired = ev.detail && ev.detail.entityId; });
+    el.focus();
+    el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    return { focusable: el.tabIndex === 0, fired };
+  });
+  expect(got.focusable).toBe(true);
+  expect(got.fired).toBe('sensor.wm_state');
+});
+
+test('tile: tap_action none leaves the card out of the tab order', async ({ page }) => {
+  await mount(page, { entity: 'sensor.wm_state', layout: 'tile', tap_action: { action: 'none' } }, RUN);
+  const n = await page.evaluate(() => (window as any).__card.shadowRoot.querySelectorAll('[role="button"]').length);
+  expect(n).toBe(0);
+});
+
+test('tile: an editor tap_action change rebuilds the keyboard binding', async ({ page }) => {
+  // _attachGestures binds focus only at build time; setConfig must rebuild when
+  // the tap action is switched on or off, or the card keeps the old behaviour.
+  await mount(page, { entity: 'sensor.wm_state', layout: 'tile', tap_action: { action: 'none' } }, RUN);
+  const count = () => page.evaluate(() => (window as any).__card.shadowRoot.querySelectorAll('[role="button"]').length);
+  expect(await count()).toBe(0);
+  await page.evaluate(() => (window as any).__card.setConfig({ entity: 'sensor.wm_state', layout: 'tile', tap_action: { action: 'more-info' } }));
+  expect(await count()).toBe(1);
+  await page.evaluate(() => (window as any).__card.setConfig({ entity: 'sensor.wm_state', layout: 'tile', tap_action: { action: 'none' } }));
+  expect(await count()).toBe(0);
 });

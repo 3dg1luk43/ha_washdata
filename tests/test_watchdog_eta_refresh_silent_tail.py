@@ -136,7 +136,6 @@ async def test_watchdog_countdown_advances_with_zero_readings(
     manager._matched_profile_duration = 9000.0  # 150 min
     manager._smoothed_progress = 0.0
     manager._estimate_phase_progress = MagicMock(return_value=None)
-    manager._ml_progress_percent = MagicMock(return_value=None)
     manager._update_projected_energy = MagicMock()
     manager._update_cycle_anomaly = MagicMock()
     manager.detector.get_power_trace = MagicMock(return_value=[])

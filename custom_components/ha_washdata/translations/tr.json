@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "WashData Kurulumu",
-        "description": "Çamaşır makinenizi veya diğer cihazınızı yapılandırın.\n\nGüç sensörü gereklidir.\n\nKurulumdan sonra döngüleri görüntülemek, algılamayı ayarlamak ve profilleri yönetmek için kenar çubuğundan WashData panelini açın (veya [/ha-washdata](/ha-washdata) adresine gidin).",
+        "description": "Bir çamaşır makinesi veya başka bir cihaz kurun. Güç sensörü gereklidir.\n\nKurulumdan sonra döngüleri, profilleri ve tüm ayarları görmek için kenar çubuğundan WashData panelini açın ([/ha-washdata](/ha-washdata)).",
         "data": {
           "name": "Cihaz Adı",
           "device_type": "Cihaz Türü",
@@ -12,43 +12,41 @@
         },
         "data_description": {
           "name": "Bu cihaz için kolay bir ad (ör. 'Çamaşır Makinesi', 'Bulaşık Makinesi').",
-          "device_type": "Bu ne tür bir cihaz? Tespit ve etiketlemenin özel olarak yapılmasına yardımcı olur.",
-          "power_sensor": "Akıllı prizinizin gerçek zamanlı güç tüketimini (watt cinsinden) bildiren sensör varlığı.",
-          "min_power": "Bu eşiğin üzerindeki güç değerleri (watt cinsinden) cihazın çalıştığını gösterir. Çoğu cihaz için 2W ile başlayın."
+          "device_type": "Bu tür cihaz için algılama varsayılanlarını ayarlar.",
+          "power_sensor": "Canlı gücü watt cinsinden bildiren akıllı priz sensörü.",
+          "min_power": "Bunun üzerindeki okumalar (watt) cihazın çalıştığı anlamına gelir. Çoğu cihaz için 2 W uygundur."
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
-        "description": "Cihaz adını, cihaz türünü veya güç sensörünü güncelleyin.\n\nAlgılama, döngüler, profiller ve bildirimler WashData panelinde (kenar çubuğu veya [/ha-washdata](/ha-washdata)) yönetilir.",
+        "title": "WashData'yı Yeniden Yapılandır",
+        "description": "Cihaz adını, cihaz türünü veya güç sensörünü değiştirin.\n\nDiğer her şey WashData panelindedir (kenar çubuğu veya [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Cihaz Adı",
+          "device_type": "Cihaz Türü",
+          "power_sensor": "Güç Sensörü",
+          "min_power": "Minimum Güç Eşiği (W)"
         }
       }
     },
     "error": {
-      "cannot_connect": "Bağlantı başarısız oldu",
-      "invalid_auth": "Geçersiz kimlik doğrulama",
       "unknown": "Beklenmeyen hata",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır"
     },
     "abort": {
       "already_configured": "Cihaz zaten yapılandırılmış",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Yeniden yapılandırma başarılı oldu"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
-        "description": "Cihazı yeniden adlandırın veya temel donanım ayarlarını değiştirin. Tüm algılama, eşleştirme ve bildirim ayarları [WashData panelinde](/ha-washdata) bulunur (kenar çubuğundan da erişilebilir).",
+        "title": "WashData Ayarları",
+        "description": "Cihazı yeniden adlandırın veya temel ayarlarını değiştirin. Diğer her şey kenar çubuğundaki [WashData panelinde](/ha-washdata) bulunur.",
         "data": {
           "name": "Cihaz Adı",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Cihaz Türü",
+          "power_sensor": "Güç Sensörü",
+          "min_power": "Minimum Güç Eşiği (W)"
         }
       }
     },
@@ -60,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Henüz eşleşen profil yok.",
       "vs_typical_longer": "olağandan %{pct} daha uzun",
       "vs_typical_shorter": "olağandan %{pct} daha kısa",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır"
     }
   },
   "selector": {
@@ -93,7 +91,7 @@
         },
         "profile_name": {
           "name": "Profil Adı",
-          "description": "Mevcut bir profilin adı (Profilleri Yönet menüsünde profiller oluşturun). Etiketi kaldırmak için boş bırakın."
+          "description": "Mevcut bir profil adı (profilleri WashData panelinde oluşturun). Etiketi kaldırmak için boş bırakın."
         }
       }
     },
@@ -143,13 +141,13 @@
         },
         "confidence_threshold": {
           "name": "Güven Eşiği",
-          "description": "Etiketleri uygulamak için minimum eşleşme güvenirliği (0,50-0,95)."
+          "description": "Etiketleri uygulamak için minimum eşleşme güvenirliği (0,50-0,95). Cihazın Otomatik Etiket Güveni ayarını kullanmak için boş bırakın."
         }
       }
     },
     "export_config": {
       "name": "Yapılandırmayı Dışa Aktar",
-      "description": "Bu cihazın profillerini, döngülerini ve ayarlarını bir JSON dosyasına (cihaz başına) aktarın.",
+      "description": "Bu cihazın profillerini, döngülerini ve ayarlarını bir JSON dosyasına aktarın.",
       "fields": {
         "device_id": {
           "name": "Cihaz",
@@ -177,7 +175,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Döngü Geri Bildirimi Gönder",
-      "description": "Tamamlanan bir döngüden sonra otomatik olarak algılanan bir programı onaylayın veya düzeltin. \"Entry_id\" (gelişmiş) veya \"device_id\" (önerilen) bilgilerini sağlayın.",
+      "description": "Biten bir döngünün algılanan programını onaylayın veya düzeltin. `device_id` (önerilen) veya `entry_id` verin.",
       "fields": {
         "device_id": {
           "name": "Cihaz",
@@ -272,18 +270,18 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "ML Eğitimini Başlat",
+      "description": "Cihazdaki ML modellerini bu cihazın kendi etiketlenmiş döngülerinden manuel olarak yeniden eğitin (deneysel).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Cihaz",
+          "description": "Modelleri yeniden eğitilecek WashData cihazı."
         }
       }
     },
     "mark_unloaded": {
       "name": "Boşaltıldı Olarak İşaretle",
-      "description": "Bir WashData cihazındaki tamamlanmış yükün çıkarıldığını onaylar, Temiz durumunu ve varsa boşaltma hatırlatıcısını temizler.",
+      "description": "Biten yükün çıkarıldığını onaylayın. Temiz durumunu ve varsa boşaltma hatırlatıcısını temizler.",
       "fields": {
         "device_id": {
           "name": "Cihaz",
@@ -299,6 +297,32 @@
       },
       "match_ambiguity": {
         "name": "Eşleşme Belirsizliği"
+      },
+      "maintenance_due": {
+        "name": "Bakım zamanı",
+        "state": {
+          "on": "Zamanı geldi",
+          "off": "Zamanı gelmedi"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "Zamanı gelen görev kimlikleri"
+          },
+          "due_tasks": {
+            "name": "Zamanı gelen görevler",
+            "state": {
+              "descale": "Kireç çözme",
+              "filter_clean": "Filtreyi temizle",
+              "drum_clean": "Tamburu temizle",
+              "bearing_service": "Rulman servisi",
+              "other": "Diğer",
+              "salt": "Tuz ekle",
+              "rinse_aid": "Parlatıcı ekle",
+              "lint_filter": "Tüy filtresini temizle",
+              "condenser_clean": "Kondenseri temizle"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -316,10 +340,18 @@
           "anti_wrinkle": "Kırışıklık Karşıtı",
           "interrupted": "Kesintiye uğradı",
           "force_stopped": "Zorla Durduruldu",
-          "rinse": "Durulmak",
           "unknown": "Bilinmiyor",
           "clean": "Temiz",
           "delay_wait": "Başlamak için Bekleniyor"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "Döngü anomalisi",
+            "state": {
+              "overrun": "Uzun sürüyor",
+              "stalled": "Takıldı"
+            }
+          }
         }
       },
       "washer_program": {

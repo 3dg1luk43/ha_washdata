@@ -74,7 +74,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                body: `Closing this issue due to ${INACTIVITY_DAYS} days of inactivity after it was marked **done**.\n\nIf the problem still persists, please reopen the issue (or create a new one) and assign **@${OWNER_LOGIN}** - I'll take another look. 🙏`,
+                body: `Closing this issue due to ${INACTIVITY_DAYS} days of inactivity after it was marked **done**.\n\nIf the problem is still there, comment \`/reopen\` on this issue (or open a new one) and **@${OWNER_LOGIN}** will take another look. 🙏`,
               });
 
               await github.rest.issues.update({
