@@ -117,3 +117,12 @@ def test_the_grant_file_sets_the_worker_count(tmp_path):
     assert end_gate_eval._granted(2, grant) == end_gate_eval.MAX_JOBS  # noqa: SLF001
     grant.write_text("half")
     assert end_gate_eval._granted(2, grant) == 2  # noqa: SLF001
+
+
+def test_an_empty_corpus_exits_2_not_a_regression(tmp_path, monkeypatch):
+    # With --check, exit 1 means "the end gates regressed"; a corpus with nothing
+    # to replay must not be reported as one.
+    baseline = Path(end_gate_eval.__file__).resolve().parent / "end_gate_baseline.json"
+    (tmp_path / "cycle_data").mkdir()
+    monkeypatch.setattr(end_gate_eval, "REPO", tmp_path)
+    assert end_gate_eval.main(["--check", str(baseline)]) == 2

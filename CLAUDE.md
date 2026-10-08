@@ -98,7 +98,8 @@ that gap; keep both working:
   Home Assistant's real schemas. Do not "simplify" it away - reintroducing item 316 fails 13 tests
   because of it. When adding a notification path, assert on the payload *and* let the guard run.
 - `devtools/testbox/` is a **real HA container** (floats on HA `:stable`, 2026.9.3 at last check; the in-process test HA
-  is pinned to 2026.2.3 - which is upstream's newest, so that gap cannot be closed from PyPI, item
+  is pinned to 2026.2.3 - the newest Home Assistant and pytest-homeassistant-custom-component that
+  install on the Python 3.13 the suite runs on, so that gap cannot be closed from PyPI here, item
   322) with the working tree bind-mounted in and a notify platform that records every delivered
   payload. It proves delivery, config flow, storage migration, WS API and entity wiring, and it
   found three real bugs in its first hours (items 317, 323, and the corrected 320). Timing there is

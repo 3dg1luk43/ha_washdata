@@ -1654,8 +1654,10 @@ def main(argv: list[str] | None = None) -> int:
             rows.extend(_measure_export(path, args.no_shortening, args.loo, **kw))
 
     if not rows:
+        # 2, not 1: with --check a missing corpus must not read as an end-gate
+        # regression (the other harnesses exit 2 for "nothing to measure" too).
         print("no replayable cycles found - is cycle_data/ present?")
-        return 1
+        return 2
 
     _print_summary(rows)
     if args.json:

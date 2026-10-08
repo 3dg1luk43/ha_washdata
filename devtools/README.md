@@ -89,13 +89,13 @@ python3 devtools/eval.py run --config-override '{"const": {"MATCH_DURATION_WEIGH
 ## Other harnesses
 
 Each script's docstring says what it measures, on which corpus, and the figures it last produced.
-All replay the shipped code; run with `--help` for options.
+All but `dtw_ab_eval.py` replay the shipped code; run with `--help` for options.
 
 | Script | Measures |
 |---|---|
 | `end_gate_eval.py --loo --all-formats` | end lag, early ends and splits per device type; `--check end_gate_baseline.json` exits 1 on a regression |
 | `decisive_margin_eval.py --loo` | the mid-cycle switch bypass; `--switching` adds commit and switch accuracy |
-| `prefix_guard_eval.py` | the prefix-ambiguity guard on genuine ends and random cuts |
+| `prefix_guard_eval.py` | Smart-Termination split guards on genuine ends and random cuts (the #364 prefix term, removed in 0.5.8, is kept here only as a harness copy) |
 | `min_off_gap_eval.py` | `min_off_gap` split/merge bounds (replays unmatched) |
 | `start_gate_eval.py --manifest cycle_data/github_issues/start_gate_sources.jsonl` | start gates on raw continuous histories: missed, late, phantom starts per idle day, per device type |
 | `eta_eval.py --all-formats` | first-ETA timing and ETA error by elapsed fraction |
@@ -105,7 +105,7 @@ All replay the shipped code; run with `--help` for options.
 | `playground_parity_eval.py --mode replay` | Playground replay vs the real manager |
 | `suggestion_loop_eval.py` | Apply all, repeated to a fixed point |
 | `margin_display_fit.py` | the Status card's "~N% sure" knots, from an `eval.py --mode full` run |
-| `dtw_ab_eval.py` | complete-cycle DTW variants; not the shipped matcher (it says so) |
+| `dtw_ab_eval.py` | the Stage-5 grouping prototype (default) and mid-cycle top-1 with `--checkpoints`; not the shipped matcher (it says so) |
 | `analyze_diag.py` | what the suggestion engine proposes for one export |
 
 **Raw histories are not corpus files.** The GitHub issue attachments (diagnostics dumps,

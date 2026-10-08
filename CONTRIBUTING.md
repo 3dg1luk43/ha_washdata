@@ -20,8 +20,9 @@ Closed automatically:
 
 - an issue that skips the template (a template with an empty field is not closed; the bot asks
   you to fill it in)
-- a PR with no linked `accepted` issue, or opened before its issue was accepted
-- a PR whose template is deleted or left empty
+- a PR with no linked issue, 3 days after the bot's warning (a PR whose linked issue is not yet
+  accepted is not closed: it waits for the maintainer)
+- a PR whose template is left empty, 5 days after the warning, or deleted, at once
 
 If a bot or the maintainer closed your issue and the problem is still there, comment `/reopen` on it.
 

@@ -37,9 +37,10 @@ the fix is released.
   through a cloud service). Without notify targets, automations or the Community Store's online
   features, nothing leaves Home Assistant.
 - **Community Store** (off by default): when you enable online features, browsing fetches shared
-  setups, and only what you choose to share is uploaded (program curves, reference traces, appliance
-  brand, model and type). Your name is shown only if you turn that on. Turning online features off
-  clears the stored credential.
+  setups, and only what you choose to share is uploaded: program curves and reference traces with
+  their timing, summary statistics and quality, the program's phases, the appliance's brand, model,
+  type and shareable detection settings, and your store account ID. Your name is shown only if you
+  turn that on. Turning online features off clears the stored credential.
 
 ## Access control
 
