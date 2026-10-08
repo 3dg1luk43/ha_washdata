@@ -20,9 +20,11 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - Much less CPU, disk and recorder load; a faster, simpler panel.
 - Safer store downloads and permission-checked services.
 - Harmful suggestions, no-op settings and unused ML removed.
+- Back up first: going back to 0.5.7 trims your history.
 
 ### Breaking changes
 
+- **Back up before upgrading: going back to 0.5.7 deletes history.** 0.5.8 keeps every cycle and trace and stores them in a new format (v17); 0.5.7 trims that back to 200 cycles and 20 traces per program.
 - **`binary_sensor.<device>_running` stays on for the whole cycle** ([#464](https://github.com/3dg1luk43/ha_washdata/issues/464)), through soaks, pauses and the end wait. Automations that treat "off" as finished now fire only at the real end.
 - **The state sensor can read `idle`** (display on between cycles) where it read `off`, **and `paused` while a cycle is stalled.** Automations waiting for `off` should accept `idle` too, or use the running sensor.
 - **Fewer recorder writes**: the state sensor drops `samples_recorded` (the debug sensor keeps `samples`), the total duration sensor drops `last_updated`, elapsed time moves in whole minutes and progress in whole percent.
@@ -167,9 +169,10 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### For developers
 
-- WebSocket: `auto_label_cycles` and `store_download_device` return `{task_id}`; removed `list_tasks`, `store_get_device_quality`, `get_dtw_debug`, the three one-shot `run_playground_*` commands, the sweep's `param_y`/`values_y` and `start_playground_cycle_detail`'s `stress_*`; `start_playground_sweep` takes at most 20 values. See `docs/WS_API.md`.
+- WebSocket: `auto_label_cycles` and `store_download_device` return `{task_id}`; new `add_maintenance_task`, `update_maintenance_task`, `delete_maintenance_task`, `get_cycle_context` and `undo_import`; removed `list_tasks`, `store_get_device_quality`, `get_dtw_debug`, `revert_matching_config`, the three one-shot `run_playground_*` commands, the sweep's `param_y`/`values_y` and `start_playground_cycle_detail`'s `stress_*`; `start_playground_sweep` takes at most 20 values. See `docs/WS_API.md`.
 - WebSocket responses drop `get_profile_groups.suggestions` and every `ml_suggestions*` / `settings_comparison` field; `get_devices` gains `match_uncertainty` and `expected_duration_s`, `get_profiles` gains `profile_matcher_counts`; Playground overrides accept only real options.
 - `ha_washdata_cycle_ended` gains `match_margin` and `label_applied`; new event `ha_washdata_cycle_stalled`. The state sensor's never-used `rinse` option is removed.
+- Storage format v17 (from v13): the migration drops the removed ML parts' state (`match_ranking_history`, `matching_config`, every model record but `total_energy`'s) and keeps every cycle and label. The manifest's `iot_class` is `calculated`.
 - `match_rules.py` holds the post-match rules shared by the manager and the Playground; `devtools/playground_parity_eval.py` measures replay against the real manager. Playground outcomes gain `would_label`, `label_profile`, `label_reason`.
 - Panel strings: `_t()` escapes substituted values (`_html()` for deliberate markup, `_tText()` for plain-text sinks); plurals resolve `key_<category>` through `Intl.PluralRules`.
 - Harnesses use the production config; `end_gate_eval.py --check` and `eval.py baseline-status` flag regressions; `analyze_diag.py` runs the real suggestion engine; new `ml_energy_gate_eval.py`, `terminal_drop_plugpull_eval.py`, `suggestion_loop_eval.py`.
