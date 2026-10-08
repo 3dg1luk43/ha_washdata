@@ -277,8 +277,11 @@ class History:
         last = max((p[0] for p in (self.reported[-1:] + self.draw[-1:])), default=None)
         if last is not None:
             # The mock was down from here: no reading, and every open span ends.
-            if self.reported and self.reported[-1][1] is not None:
-                self.reported.append((last + 1.0, None))
+            # Both traces: an unmarked draw held its last value across the downtime,
+            # drawn flat and counted in energy_true_wh.
+            for trace in (self.reported, self.draw):
+                if trace and trace[-1][1] is not None:
+                    trace.append((last + 1.0, None))
             for span in self.spans:
                 if span[2] is None:
                     span[2] = last

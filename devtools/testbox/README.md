@@ -212,10 +212,10 @@ None is a bug; each has a way to test it that does not compress time:
 - **`STANDBY_BAND_WINDOW_S`** (600 s) is a constant, not an option, so it cannot
   be scaled: at 60x it is 10 h of appliance time and the standby-band finalize can
   never fire. *Test it* at 2x (20 min of appliance time): `./smoke.sh` writes
-  60x timings in step 3, so after it run `./hactl.py set-options <id>` with the
-  shipped `off_delay`, `min_off_gap`, `sampling_interval`, `watchdog_interval`,
-  `profile_match_interval`, `completion_min_seconds` and `interrupted_min_seconds`
-  halved, then `./hactl.py replay <export> --cycle N --speedup 2` on a cycle whose
+  60x timings in step 3, so after it run `./hactl.py set-options <id>
+  off_delay=<v> min_off_gap=<v> sampling_interval=<v> watchdog_interval=<v>
+  profile_match_interval=<v> completion_min_seconds=<v> interrupted_min_seconds=<v>`
+  with each `<v>` the shipped value halved, then `./hactl.py replay <export> --cycle N --speedup 2` on a cycle whose
   tail holds a flat standby above `stop_threshold_w`
   (`tests/test_issue_445_standby_above_stop.py` has the shape). By replay, a
   stored trace that ends in such a standby goes through the finalize in real time

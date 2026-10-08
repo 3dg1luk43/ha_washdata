@@ -499,6 +499,8 @@ def test_history_survives_a_restart_with_a_gap(tmp_path):
 
     h2 = History(path)
     assert h2.reported == [(now, 100.0), (now + 2000, 0.0), (now + 2001, None)]  # mock was down
+    # The true draw is closed at the same point, or it reads flat across the downtime.
+    assert h2.draw == [(now, 100.0), (now + 2001, None)]
     assert h2.spans == [["relay", now + 1000, now + 2000]]  # closed where the record stops
     assert h2.since(None)[0] is True
     h2.close()
