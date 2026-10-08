@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "WashData Setup",
+        "title": "Postavljanje WashData",
         "description": "Postavite mašinu za pranje veša ili drugi uređaj. Potreban je senzor snage.\n\nNakon postavljanja otvorite WashData panel s bočne trake ([/ha-washdata](/ha-washdata)) za cikluse, profile i sve postavke.",
         "data": {
           "name": "Naziv uređaja",
@@ -18,13 +18,13 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Rekonfiguracija WashData",
         "description": "Promijenite naziv uređaja, tip uređaja ili senzor snage.\n\nSve ostalo je u WashData panelu (bočna traka ili [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Naziv uređaja",
+          "device_type": "Tip uređaja",
+          "power_sensor": "Senzor snage",
+          "min_power": "Minimalni prag snage (W)"
         }
       }
     },
@@ -40,13 +40,13 @@
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Postavke WashData",
         "description": "Preimenujte uređaj ili promijenite njegove osnovne postavke. Sve ostalo je u [WashData panelu](/ha-washdata) na bočnoj traci.",
         "data": {
           "name": "Naziv uređaja",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Tip uređaja",
+          "power_sensor": "Senzor snage",
+          "min_power": "Minimalni prag snage (W)"
         }
       }
     },
@@ -72,7 +72,7 @@
         "bread_maker": "Pekač hljeba",
         "pump": "Pumpa / Drenažna pumpa",
         "generic": "Ostalo (napredno)",
-        "other": "Threshold Device"
+        "other": "Uređaj s pragom"
       }
     }
   },

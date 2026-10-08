@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "WashData の再設定",
         "description": "デバイス名、家電の種類、電力センサーを変更します。\n\nその他の設定はすべて WashData パネル（サイドバー、または [/ha-washdata](/ha-washdata)）にあります。",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "デバイス名",
+          "device_type": "デバイスの種類",
+          "power_sensor": "電力センサー",
+          "min_power": "最小電力しきい値 (W)"
         }
       }
     },
     "error": {
       "unknown": "予期しないエラーが発生しました",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "電力しきい値は 0 より大きくする必要があります"
     },
     "abort": {
       "already_configured": "このデバイスはすでに設定されています",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "再設定が成功しました"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "WashData 設定",
         "description": "デバイス名や主要な設定を変更します。その他の設定はすべて、サイドバーの [WashData パネル](/ha-washdata) にあります。",
         "data": {
           "name": "デバイス名",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "デバイスの種類",
+          "power_sensor": "電力センサー",
+          "min_power": "最小電力しきい値 (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: まだ一致するプロファイルがありません。",
       "vs_typical_longer": "通常より {pct}% 長い",
       "vs_typical_shorter": "通常より {pct}% 短い",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "電力しきい値は 0 より大きくする必要があります"
     }
   },
   "selector": {

@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "WashData újrakonfigurálása",
         "description": "Módosítsa az eszköz nevét, a készülék típusát vagy a teljesítményérzékelőt.\n\nMinden más a WashData panelen található (oldalsáv vagy [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Eszköz neve",
+          "device_type": "Eszköz típusa",
+          "power_sensor": "Teljesítmény érzékelő",
+          "min_power": "Minimális teljesítmény küszöb (W)"
         }
       }
     },
     "error": {
       "unknown": "Váratlan hiba",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie"
     },
     "abort": {
       "already_configured": "Az eszköz már konfigurálva van",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Az újrakonfigurálás sikeres volt"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "WashData beállításai",
         "description": "Nevezze át az eszközt, vagy módosítsa az alapbeállításait. Minden más az oldalsáv [WashData paneljén](/ha-washdata) található.",
         "data": {
           "name": "Eszköz neve",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Eszköz típusa",
+          "power_sensor": "Teljesítmény érzékelő",
+          "min_power": "Minimális teljesítmény küszöb (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Még nincs illeszkedő profil.",
       "vs_typical_longer": "{pct}%-kal hosszabb a szokásosnál",
       "vs_typical_shorter": "{pct}%-kal rövidebb a szokásosnál",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie"
     }
   },
   "selector": {
@@ -68,7 +68,7 @@
         "dryer": "Szárítógép",
         "washer_dryer": "Mosó-szárító kombó",
         "dishwasher": "Mosogatógép",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Forrólevegős sütő",
         "bread_maker": "Kenyérsütő",
         "pump": "Szivattyú / búvárszivattyú",
         "generic": "Egyéb (haladó)",
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "ML-tanítás indítása",
+      "description": "Tanítsa újra kézzel az eszközön futó ML-modelleket az eszköz saját címkézett ciklusaiból (kísérleti).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Eszköz",
+          "description": "A WashData eszköz, amelynek modelljeit újra szeretné tanítani."
         }
       }
     },

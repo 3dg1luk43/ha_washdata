@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Επαναδιαμόρφωση WashData",
         "description": "Αλλάξτε το όνομα, τον τύπο συσκευής ή τον αισθητήρα ισχύος.\n\nΌλα τα υπόλοιπα βρίσκονται στον πίνακα WashData (πλευρική γραμμή ή [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Όνομα συσκευής",
+          "device_type": "Τύπος συσκευής",
+          "power_sensor": "Αισθητήρας ισχύος",
+          "min_power": "Ελάχιστο όριο ισχύος (W)"
         }
       }
     },
     "error": {
       "unknown": "Απρόσμενο σφάλμα",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Το όριο ισχύος πρέπει να είναι μεγαλύτερο από 0"
     },
     "abort": {
       "already_configured": "Η συσκευή έχει ήδη διαμορφωθεί",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Η εκ νέου διαμόρφωση ήταν επιτυχής"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Ρυθμίσεις WashData",
         "description": "Μετονομάστε τη συσκευή ή αλλάξτε τις βασικές ρυθμίσεις της. Όλα τα υπόλοιπα βρίσκονται στον [πίνακα WashData](/ha-washdata) στην πλευρική γραμμή.",
         "data": {
           "name": "Όνομα συσκευής",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Τύπος συσκευής",
+          "power_sensor": "Αισθητήρας ισχύος",
+          "min_power": "Ελάχιστο όριο ισχύος (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Δεν έχει αναγνωριστεί ακόμη κανένα προφίλ.",
       "vs_typical_longer": "{pct}% περισσότερο από το συνηθισμένο",
       "vs_typical_shorter": "{pct}% λιγότερο από το συνηθισμένο",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Το όριο ισχύος πρέπει να είναι μεγαλύτερο από 0"
     }
   },
   "selector": {
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
+      "name": "Έναρξη εκπαίδευσης ML",
       "description": "Χειροκίνητα επανεκπαιδεύστε τα μοντέλα on-device ML από τους χαρακτηρισμένους κύκλους αυτής της συσκευής (πειραματικό).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Συσκευή",
+          "description": "Η συσκευή WashData της οποίας τα μοντέλα θα επανεκπαιδευτούν."
         }
       }
     },

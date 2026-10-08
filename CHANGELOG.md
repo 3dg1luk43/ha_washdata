@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
-## 0.5.8 - trimming the fat - Unreleased
+## 0.5.8 - trimming the fat - 2026-10-08
 
 ### TL;DR
 
@@ -150,7 +150,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **Export / Import (choose data) works on phones** ([#460](https://github.com/3dg1luk43/ha_washdata/issues/460)). Thanks to @Aaroneisele55
 - **A long notify service can be removed again** ([#467](https://github.com/3dg1luk43/ha_washdata/issues/467)): its pill now cuts the text short instead of pushing the remove button out of view; hover shows the full value. Thanks to @wilpatat
 - **ML Training lists only models something uses** and says why a model was not trained.
-- **Every language**: counts, numbers, costs and dates follow your language and Home Assistant settings ("€0.21"), about 100 more labels are translated, and settings search finds translated words. Icelandic now calls a cycle "lota" throughout.
+- **Every language**: counts, numbers, costs and dates follow your language and Home Assistant settings ("€0.21"), about 100 more labels are translated, as are the setup, reconfigure and options dialogs in 20 more languages, and settings search finds translated words. Icelandic now calls a cycle "lota" throughout.
 - **Settings search text and store data can no longer inject markup** into the panel. When the store cannot be reached, the Store tab says so.
 - **The dashboard card works by keyboard** and picks up new translations after an upgrade.
 - **A relabel in Review sticks** ([#469](https://github.com/3dg1luk43/ha_washdata/issues/469)): after Save Review the open dialog showed the old label, so the save looked lost, and saving back to that label was skipped. It now shows the label just saved. Thanks to @TRON4R

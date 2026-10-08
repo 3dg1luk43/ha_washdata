@@ -18,13 +18,13 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Rekonfigurace WashData",
         "description": "Změňte název zařízení, typ spotřebiče nebo senzor výkonu.\n\nVše ostatní je v panelu WashData (postranní panel nebo [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Název zařízení",
+          "device_type": "Typ zařízení",
+          "power_sensor": "Výkonový senzor",
+          "min_power": "Minimální práh výkonu (W)"
         }
       }
     },
@@ -40,13 +40,13 @@
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Nastavení WashData",
         "description": "Přejmenujte zařízení nebo změňte jeho základní nastavení. Vše ostatní je v [panelu WashData](/ha-washdata) v postranním panelu.",
         "data": {
           "name": "Název zařízení",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Typ zařízení",
+          "power_sensor": "Výkonový senzor",
+          "min_power": "Minimální práh výkonu (W)"
         }
       }
     },

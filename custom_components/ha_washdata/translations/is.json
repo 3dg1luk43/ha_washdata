@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Endurstilla WashData",
         "description": "Breyttu heiti tækisins, tegund tækis eða aflskynjara.\n\nAllt annað er í WashData-spjaldinu (hliðarstikan eða [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Nafn tækis",
+          "device_type": "Tegund tækis",
+          "power_sensor": "Aflskynjari",
+          "min_power": "Lágmarksaflsþröskuldur (W)"
         }
       }
     },
     "error": {
       "unknown": "Óvænt villa",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0"
     },
     "abort": {
       "already_configured": "Tæki er þegar stillt",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Endurstilling heppnaðist"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Stillingar WashData",
         "description": "Endurnefndu tækið eða breyttu grunnstillingum þess. Allt annað er í [WashData-spjaldinu](/ha-washdata) á hliðarstikunni.",
         "data": {
           "name": "Nafn tækis",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Tegund tækis",
+          "power_sensor": "Aflskynjari",
+          "min_power": "Lágmarksaflsþröskuldur (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Ekkert snið hefur enn verið greint.",
       "vs_typical_longer": "{pct}% lengri en venjulega",
       "vs_typical_shorter": "{pct}% styttri en venjulega",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0"
     }
   },
   "selector": {
@@ -68,7 +68,7 @@
         "dryer": "Þurrkari",
         "washer_dryer": "Þvottavél-þurrkari samsettur",
         "dishwasher": "Uppþvottavél",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Loftsteikingarpottur",
         "bread_maker": "Brauðgerðarmaður",
         "pump": "Dæla / Sump Pump",
         "generic": "Annað (háþróað)",

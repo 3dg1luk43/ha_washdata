@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Riconfigura WashData",
         "description": "Cambia il nome del dispositivo, il tipo di elettrodomestico o il sensore di potenza.\n\nTutto il resto è nel pannello WashData (barra laterale, o [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Nome dispositivo",
+          "device_type": "Tipo di dispositivo",
+          "power_sensor": "Sensore di potenza",
+          "min_power": "Soglia di potenza minima (W)"
         }
       }
     },
     "error": {
       "unknown": "Errore imprevisto",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "La soglia di potenza deve essere maggiore di 0"
     },
     "abort": {
       "already_configured": "Il dispositivo è già configurato",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "La riconfigurazione è avvenuta con successo"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Impostazioni WashData",
         "description": "Rinomina il dispositivo o modifica le sue impostazioni principali. Tutto il resto è nel [pannello WashData](/ha-washdata) nella barra laterale.",
         "data": {
           "name": "Nome del dispositivo",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Tipo di dispositivo",
+          "power_sensor": "Sensore di potenza",
+          "min_power": "Soglia di potenza minima (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: nessun profilo ancora riconosciuto.",
       "vs_typical_longer": "{pct}% più lungo del solito",
       "vs_typical_shorter": "{pct}% più corto del solito",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "La soglia di potenza deve essere maggiore di 0"
     }
   },
   "selector": {

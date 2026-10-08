@@ -18,13 +18,13 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "WashData 재구성",
         "description": "장치 이름, 가전 유형 또는 전력 센서를 변경합니다.\n\n그 밖의 모든 설정은 WashData 패널(사이드바 또는 [/ha-washdata](/ha-washdata))에 있습니다.",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "장치 이름",
+          "device_type": "장치 유형",
+          "power_sensor": "전력 센서",
+          "min_power": "최소 전력 임계값 (W)"
         }
       }
     },
@@ -40,13 +40,13 @@
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "WashData 설정",
         "description": "장치 이름이나 핵심 설정을 변경합니다. 그 밖의 모든 설정은 사이드바의 [WashData 패널](/ha-washdata)에 있습니다.",
         "data": {
           "name": "장치 이름",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "장치 유형",
+          "power_sensor": "전력 센서",
+          "min_power": "최소 전력 임계값 (W)"
         }
       }
     },
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
+      "name": "ML 훈련 시작",
       "description": "이 기기의 자체 라벨이 지정된 주기에서 기기 내 ML 모델을 수동으로 재교육합니다(실험용).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "장치",
+          "description": "모델을 재훈련할 WashData 장치입니다."
         }
       }
     },

@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "WashData neu konfigurieren",
         "description": "Ändern Sie den Gerätenamen, den Gerätetyp oder den Leistungssensor.\n\nAlles andere finden Sie im WashData-Panel (Seitenleiste oder [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Gerätename",
+          "device_type": "Gerätetyp",
+          "power_sensor": "Leistungssensor",
+          "min_power": "Mindestleistungsschwelle (W)"
         }
       }
     },
     "error": {
       "unknown": "Unerwarteter Fehler",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein"
     },
     "abort": {
       "already_configured": "Gerät ist bereits konfiguriert",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Die Neukonfiguration war erfolgreich"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "WashData-Einstellungen",
         "description": "Benennen Sie das Gerät um oder ändern Sie seine Grundeinstellungen. Alles andere finden Sie im [WashData-Panel](/ha-washdata) in der Seitenleiste.",
         "data": {
           "name": "Name des Geräts",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Gerätetyp",
+          "power_sensor": "Leistungssensor",
+          "min_power": "Mindestleistungsschwelle (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Noch kein Profil erkannt.",
       "vs_typical_longer": "{pct}% länger als üblich",
       "vs_typical_shorter": "{pct}% kürzer als üblich",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein"
     }
   },
   "selector": {
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "ML-Training starten",
+      "description": "Die ML-Modelle auf dem Gerät manuell aus den eigenen zugeordneten Zyklen dieses Geräts neu trainieren (experimentell).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Gerät",
+          "description": "Das WashData-Gerät, dessen Modelle neu trainiert werden sollen."
         }
       }
     },

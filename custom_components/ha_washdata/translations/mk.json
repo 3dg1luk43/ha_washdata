@@ -40,7 +40,7 @@
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Поставки на WashData",
         "description": "Преименувајте го уредот или сменете ги неговите основни поставки. Сè друго е во [панелот WashData](/ha-washdata) во страничната лента.",
         "data": {
           "name": "Име на уред",
@@ -270,7 +270,7 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
+      "name": "Покрени ML обука",
       "description": "Рачно обучете ги моделите ML на уредот од означените циклуси на овој уред (експериментални).",
       "fields": {
         "device_id": {

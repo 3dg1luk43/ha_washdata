@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "WashData Setup",
+        "title": "Konfigurera WashData",
         "description": "Konfigurera en tvättmaskin eller annan apparat. En effektsensor krävs.\n\nÖppna efter konfigurationen WashData-panelen från sidofältet ([/ha-washdata](/ha-washdata)) för att se cykler, profiler och alla inställningar.",
         "data": {
           "name": "Enhetens namn",
@@ -68,9 +68,9 @@
         "dryer": "Torktumlare",
         "washer_dryer": "Kombination av tvättmaskin och torktumlare",
         "dishwasher": "Diskmaskin",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Airfryer",
         "bread_maker": "Brödmaskin",
-        "pump": "Pump / Sump Pump",
+        "pump": "Pump / Dräneringspump",
         "generic": "Annat (avancerat)",
         "other": "Tröskelenhet"
       }
@@ -270,7 +270,7 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
+      "name": "Starta ML-träning",
       "description": "Träna om ML-modellerna på enheten manuellt från enhetens egna märkta cykler (experimentell).",
       "fields": {
         "device_id": {

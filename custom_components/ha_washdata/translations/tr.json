@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "WashData'yı Yeniden Yapılandır",
         "description": "Cihaz adını, cihaz türünü veya güç sensörünü değiştirin.\n\nDiğer her şey WashData panelindedir (kenar çubuğu veya [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Cihaz Adı",
+          "device_type": "Cihaz Türü",
+          "power_sensor": "Güç Sensörü",
+          "min_power": "Minimum Güç Eşiği (W)"
         }
       }
     },
     "error": {
       "unknown": "Beklenmeyen hata",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır"
     },
     "abort": {
       "already_configured": "Cihaz zaten yapılandırılmış",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Yeniden yapılandırma başarılı oldu"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "WashData Ayarları",
         "description": "Cihazı yeniden adlandırın veya temel ayarlarını değiştirin. Diğer her şey kenar çubuğundaki [WashData panelinde](/ha-washdata) bulunur.",
         "data": {
           "name": "Cihaz Adı",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Cihaz Türü",
+          "power_sensor": "Güç Sensörü",
+          "min_power": "Minimum Güç Eşiği (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Henüz eşleşen profil yok.",
       "vs_typical_longer": "olağandan %{pct} daha uzun",
       "vs_typical_shorter": "olağandan %{pct} daha kısa",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır"
     }
   },
   "selector": {
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "ML Eğitimini Başlat",
+      "description": "Cihazdaki ML modellerini bu cihazın kendi etiketlenmiş döngülerinden manuel olarak yeniden eğitin (deneysel).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Cihaz",
+          "description": "Modelleri yeniden eğitilecek WashData cihazı."
         }
       }
     },

@@ -18,47 +18,47 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Genkonfigurer WashData",
         "description": "Skift enhedsnavn, apparattype eller effektsensor.\n\nAlt andet findes i WashData-panelet (sidebjælken eller [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Enhedens navn",
+          "device_type": "Enhedstype",
+          "power_sensor": "Strømsensor",
+          "min_power": "Minimum effekttærskel (W)"
         }
       }
     },
     "error": {
       "unknown": "Uventet fejl",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Effekttærsklen skal være større end 0"
     },
     "abort": {
       "already_configured": "Enheden er allerede konfigureret",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Genkonfigurationen lykkedes"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "WashData-indstillinger",
         "description": "Omdøb enheden eller skift dens grundindstillinger. Alt andet findes i [WashData-panelet](/ha-washdata) i sidebjælken.",
         "data": {
           "name": "Enhedsnavn",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Enhedstype",
+          "power_sensor": "Strømsensor",
+          "min_power": "Minimum effekttærskel (W)"
         }
       }
     },
     "error": {
-      "timer_default_message": "{device}: {minutes} min timer",
+      "timer_default_message": "{device}: timer på {minutes} min",
       "timer_pause_action_title": "Genoptag cyklus",
       "timer_pause_body_suffix": "Cyklussen er sat på pause. Åbn WashData-panelet for at genoptage.",
       "unload_dismiss_action_title": "Stop påmindelser",
       "notify_live_waiting_message": "{device}: Ingen profil genkendt endnu.",
       "vs_typical_longer": "{pct}% længere end normalt",
       "vs_typical_shorter": "{pct}% kortere end normalt",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Effekttærsklen skal være større end 0"
     }
   },
   "selector": {
@@ -68,7 +68,7 @@
         "dryer": "Tørretumbler",
         "washer_dryer": "Vaske-tørretumbler kombi",
         "dishwasher": "Opvaskemaskine",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Airfryer",
         "bread_maker": "Brødmaskine",
         "pump": "Pumpe / Sump Pumpe",
         "generic": "Andet (avanceret)",
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "Start ML-træning",
+      "description": "Gentræn ML-modellerne på enheden manuelt ud fra enhedens egne mærkede cyklusser (eksperimentel).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Enhed",
+          "description": "WashData-enheden, hvis modeller skal gentrænes."
         }
       }
     },

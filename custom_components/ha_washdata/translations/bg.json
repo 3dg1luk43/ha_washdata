@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Преконфигуриране на WashData",
         "description": "Променете името на устройството, типа на уреда или сензора за мощност.\n\nВсичко останало е в панела на WashData (странична лента или [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Име на устройството",
+          "device_type": "Тип устройство",
+          "power_sensor": "Сензор за мощност",
+          "min_power": "Минимален праг на мощност (W)"
         }
       }
     },
     "error": {
       "unknown": "Неочаквана грешка",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Прагът на мощност трябва да е по-голям от 0"
     },
     "abort": {
       "already_configured": "Устройството вече е конфигурирано",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Преконфигурирането беше успешно"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Настройки на WashData",
         "description": "Преименувайте устройството или променете основните му настройки. Всичко останало е в [панела на WashData](/ha-washdata) в страничната лента.",
         "data": {
           "name": "Име на устройството",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Тип устройство",
+          "power_sensor": "Сензор за мощност",
+          "min_power": "Минимален праг на мощност (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Все още няма съвпадащ профил.",
       "vs_typical_longer": "{pct}% по-дълго от обичайното",
       "vs_typical_shorter": "{pct}% по-кратко от обичайното",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Прагът на мощност трябва да е по-голям от 0"
     }
   },
   "selector": {
@@ -82,7 +82,7 @@
       "description": "Присвоете съществуващ профил към минал цикъл или премахнете етикета.",
       "fields": {
         "device_id": {
-          "name": "устройство",
+          "name": "Устройство",
           "description": "Устройството на пералната машина за етикетиране."
         },
         "cycle_id": {
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
+      "name": "Стартиране на ML обучение",
       "description": "Ръчно преквалификация на моделите ML на устройство от собствените етикети на това устройство (експериментални).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Устройство",
+          "description": "Устройството WashData, чиито модели да се преобучат."
         }
       }
     },
@@ -355,7 +355,7 @@
         }
       },
       "washer_program": {
-        "name": "програма"
+        "name": "Програма"
       },
       "time_remaining": {
         "name": "Оставащо време"

@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Opätovná konfigurácia WashData",
         "description": "Zmeňte názov zariadenia, typ spotrebiča alebo snímač výkonu.\n\nVšetko ostatné je v paneli WashData (bočný panel alebo [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Názov zariadenia",
+          "device_type": "Typ zariadenia",
+          "power_sensor": "Snímač výkonu",
+          "min_power": "Minimálny prah výkonu (W)"
         }
       }
     },
     "error": {
       "unknown": "Neočakávaná chyba",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Prah výkonu musí byť väčší ako 0"
     },
     "abort": {
       "already_configured": "Zariadenie je už nakonfigurované",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Opätovná konfigurácia bola úspešná"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Nastavenia WashData",
         "description": "Premenujte zariadenie alebo zmeňte jeho základné nastavenia. Všetko ostatné je v [paneli WashData](/ha-washdata) v bočnom paneli.",
         "data": {
           "name": "Názov zariadenia",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Typ zariadenia",
+          "power_sensor": "Snímač výkonu",
+          "min_power": "Minimálny prah výkonu (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Zatiaľ nebol rozpoznaný žiadny profil.",
       "vs_typical_longer": "o {pct}% dlhšie než zvyčajne",
       "vs_typical_shorter": "o {pct}% kratšie než zvyčajne",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Prah výkonu musí byť väčší ako 0"
     }
   },
   "selector": {
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "Spustiť ML tréning",
+      "description": "Ručne pretrénujte ML modely v zariadení z vlastných označených cyklov tohto zariadenia (experimentálne).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Zariadenie",
+          "description": "Zariadenie WashData, ktorého modely sa majú pretrénovať."
         }
       }
     },

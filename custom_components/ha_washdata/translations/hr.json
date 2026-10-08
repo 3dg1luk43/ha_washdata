@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Ponovna konfiguracija WashData",
         "description": "Promijenite naziv uređaja, vrstu uređaja ili senzor snage.\n\nSve ostalo je u WashData panelu (bočna traka ili [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Naziv uređaja",
+          "device_type": "Vrsta uređaja",
+          "power_sensor": "Senzor snage",
+          "min_power": "Minimalni prag snage (W)"
         }
       }
     },
     "error": {
       "unknown": "Neočekivana pogreška",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Prag snage mora biti veći od 0"
     },
     "abort": {
       "already_configured": "Uređaj je već konfiguriran",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Ponovna konfiguracija je uspjela"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Postavke WashData",
         "description": "Preimenujte uređaj ili promijenite njegove osnovne postavke. Sve ostalo je u [WashData panelu](/ha-washdata) na bočnoj traci.",
         "data": {
           "name": "Naziv uređaja",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Vrsta uređaja",
+          "power_sensor": "Senzor snage",
+          "min_power": "Minimalni prag snage (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Nijedan profil još nije podudaran.",
       "vs_typical_longer": "{pct}% dulje nego obično",
       "vs_typical_shorter": "{pct}% kraće nego obično",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Prag snage mora biti veći od 0"
     }
   },
   "selector": {
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "Pokreni ML treniranje",
+      "description": "Ručno ponovno istrenirajte ML modele na uređaju pomoću vlastitih označenih ciklusa ovog uređaja (eksperimentalno).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Uređaj",
+          "description": "WashData uređaj čije modele treba ponovno istrenirati."
         }
       }
     },

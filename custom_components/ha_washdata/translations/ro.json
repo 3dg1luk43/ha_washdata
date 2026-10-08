@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Reconfigurare WashData",
         "description": "Schimbați numele dispozitivului, tipul aparatului sau senzorul de putere.\n\nTot restul se află în panoul WashData (bara laterală sau [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Numele dispozitivului",
+          "device_type": "Tip de dispozitiv",
+          "power_sensor": "Senzor de putere",
+          "min_power": "Pragul minim de putere (W)"
         }
       }
     },
     "error": {
       "unknown": "Eroare neașteptată",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0"
     },
     "abort": {
       "already_configured": "Dispozitivul este deja configurat",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Reconfigurarea s-a realizat cu succes"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Setări WashData",
         "description": "Redenumiți dispozitivul sau modificați setările sale de bază. Tot restul se află în [panoul WashData](/ha-washdata) din bara laterală.",
         "data": {
           "name": "Numele dispozitivului",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Tip de dispozitiv",
+          "power_sensor": "Senzor de putere",
+          "min_power": "Pragul minim de putere (W)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Niciun profil nu a fost recunoscut încă.",
       "vs_typical_longer": "cu {pct}% mai mult decât de obicei",
       "vs_typical_shorter": "cu {pct}% mai puțin decât de obicei",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0"
     }
   },
   "selector": {
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
-      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "name": "Porniți antrenarea ML",
+      "description": "Reantrenați manual modelele ML de pe dispozitiv pe baza ciclurilor etichetate ale acestui dispozitiv (experimental).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Dispozitiv",
+          "description": "Dispozitivul WashData pentru care se reantrenează modelele."
         }
       }
     },

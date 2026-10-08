@@ -18,35 +18,35 @@
         }
       },
       "reconfigure": {
-        "title": "Reconfigure WashData",
+        "title": "Повторная настройка WashData",
         "description": "Измените имя устройства, тип прибора или датчик мощности.\n\nВсё остальное находится в панели WashData (боковая панель или [/ha-washdata](/ha-washdata)).",
         "data": {
-          "name": "Device Name",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "name": "Имя устройства",
+          "device_type": "Тип устройства",
+          "power_sensor": "Датчик мощности",
+          "min_power": "Минимальный порог мощности (Вт)"
         }
       }
     },
     "error": {
       "unknown": "Неожиданная ошибка",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Порог мощности должен быть больше 0"
     },
     "abort": {
       "already_configured": "Устройство уже настроено",
-      "reconfigure_successful": "Reconfiguration was successful"
+      "reconfigure_successful": "Повторная настройка выполнена успешно"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "WashData Settings",
+        "title": "Настройки WashData",
         "description": "Переименуйте устройство или измените его основные настройки. Всё остальное находится в [панели WashData](/ha-washdata) на боковой панели.",
         "data": {
           "name": "Имя устройства",
-          "device_type": "Device Type",
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power Threshold (W)"
+          "device_type": "Тип устройства",
+          "power_sensor": "Датчик мощности",
+          "min_power": "Минимальный порог мощности (Вт)"
         }
       }
     },
@@ -58,7 +58,7 @@
       "notify_live_waiting_message": "{device}: Профиль пока не распознан.",
       "vs_typical_longer": "на {pct}% дольше обычного",
       "vs_typical_shorter": "на {pct}% короче обычного",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Порог мощности должен быть больше 0"
     }
   },
   "selector": {
@@ -270,12 +270,12 @@
       }
     },
     "trigger_ml_training": {
-      "name": "Trigger ML Training",
+      "name": "Запустить обучение ML",
       "description": "Вручную переобучите модели машинного обучения на устройстве из собственных помеченных циклов этого устройства (экспериментально).",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "The WashData device to retrain models for."
+          "name": "Устройство",
+          "description": "Устройство WashData, модели которого нужно переобучить."
         }
       }
     },
