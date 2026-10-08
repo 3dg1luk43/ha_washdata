@@ -21,3 +21,8 @@ numpy>=1.24
 # Property-based tests (tests/test_detector_properties.py: DST, time-shift and
 # reporting-cadence invariance of the cycle detector). Test-time only.
 hypothesis>=6.100
+
+# Cross-worker cache lock in tests/test_suggestion_loop_fixed_point.py. Imported at
+# module level, so the fast job collects it too; locally it came in only through an
+# unrelated package, which is why CI alone failed. Test-time only.
+filelock>=3.12
