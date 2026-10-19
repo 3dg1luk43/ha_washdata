@@ -11,10 +11,23 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### TL;DR
 
+- New Automations tab: ready-made templates and 18 WashData triggers for your own automations.
 - Dryers with anti-crease tumbling finish again instead of running for hours.
 - Clearing every notify service really stops notifications.
-- The Logs drawer can be closed on a phone again.
 - Live updates can name the finish time and arrive on a locked Android phone.
+- Nine fewer settings; the HA events always fire.
+- The Logs drawer can be closed on a phone again.
+
+### Breaking changes
+
+- **Removed settings**: Fire HA Events for Notifications (the `ha_washdata_*` events always fire), Sampling Interval (each device type's own: 2 s for washers, washer-dryers and dishwashers, 10 s pumps, 30 s others), Unmatch Threshold (0.35), Estimate Tolerance (it fed nothing), Anti-Wrinkle Exit Power (0.8 W or the Stop Threshold, whichever is higher), and the ML training hour, minimum cycles and interval (02:00, 30 cycles, at most weekly; training on demand is unchanged). Stored values, and those of settings removed in 0.5.8, are cleaned up on upgrade.
+- **The External End Trigger is on whenever its sensor is set**: the separate switch is gone. Upgrading clears the sensor where the switch was off, so nothing changes.
+
+### Features
+
+- **WashData triggers for automations** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): WashData appears under Integrations in Home Assistant's add-trigger dialog, and its triggers under a WashData device, entity or area: cycle started, finished, ended (any reason), program recognised, phase started, finishing soon, running long, paused, resumed, stalled, anti-wrinkle started, still tumbling after the cycle, unload pending, unloaded, state changed, maintenance due, milestone reached and pump stuck. Each fires once, also across a restart, and carries the program, duration, energy and the plug's switch. The device page offers the same triggers.
+- **Automation templates** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): the new Automations tab installs ready-made Home Assistant blueprints for your appliance in one click and opens the result in Home Assistant's editor. "End a long dryer anti-crease phase" switches the dryer's plug off at the first tumble after a wait and back on, optionally only when someone is home; a new cycle cancels it. "Turn something on while a cycle runs" covers lights and helpers. WashData itself never switches the plug. Share your own by pull request. Thanks to @gkotoole
+- **Automations tab**: lists the automations that use the appliance and starts new ones from any WashData trigger. Automations WashData creates get a "WashData" label and category, so Home Assistant's automation list can filter them.
 
 ### Fixes
 
@@ -27,6 +40,11 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - **Live update text with the finish time** ([#479](https://github.com/3dg1luk43/ha_washdata/issues/479)): the new `{finish_time}` variable (e.g. 14:30) lets the text name the end instead of repeating the Android chronometer's countdown. A text with an unknown variable now logs a warning instead of silently sending the default text. Thanks to @kineticscreen
 - **Live updates arrive while an Android phone is locked** ([#479](https://github.com/3dg1luk43/ha_washdata/issues/479)): they are sent at high priority, so the phone no longer holds them back. They stay silent.
+
+### Panel
+
+- Save Debug Traces, Auto Maintenance and Power Profile Interval moved to the internal settings tier.
+- Notifications no longer has an Automations section; it moved to the Automations tab.
 
 ## 0.5.8 - trimming the fat - 2026-10-08
 

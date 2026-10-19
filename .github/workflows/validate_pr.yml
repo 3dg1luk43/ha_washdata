@@ -202,6 +202,22 @@ jobs:
               return;
             }
 
+            // Automation templates (blueprints, #478) are reviewed on their own merits:
+            // a PR that only adds or edits files under blueprints/ needs no accepted
+            // issue. The maintainer still reviews and merges every one.
+            const BLUEPRINTS_DIR = 'custom_components/ha_washdata/blueprints/';
+            let isBlueprintPR = false;
+            try {
+              const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: prNumber, per_page: 100 });
+              isBlueprintPR = files.length > 0 && files.every(f => f.filename.startsWith(BLUEPRINTS_DIR));
+            } catch (e) {
+              console.warn(`Could not fetch changed files: ${e.message}`);
+            }
+            if (isBlueprintPR) {
+              console.log('Blueprint-only PR - skipping issue link check.');
+              return;
+            }
+
             // Extract all issue number references from the PR body. Use the
             // re-fetched body, not the event payload's: the contributor may have
             // edited the description to add the issue reference after the event
