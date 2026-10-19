@@ -306,19 +306,13 @@
       "timeout": "Moet groter zijn dan Duur pomp vastzitten ({ps} s) zodat het vastgelopen-alarm eerst kan afgaan"
     },
     "start_dur": {
-      "sampling": "Bemonsteringsinterval overschrijdt de startduur ({sdt} s); pieken met één meting kunnen een cyclus openen",
       "threshold": "Moet minimaal één bemonsteringsinterval ({si} s) zijn om valse starts met één meting te voorkomen"
-    },
-    "unmatch": {
-      "match": "Moet boven de niet-overeenkomstdrempel ({un}) liggen",
-      "unmatch": "Moet onder de overeenkomstdrempel ({match}) liggen; anders wordt een bevestigde overeenkomst direct ongedaan gemaakt"
     },
     "cascade_toast": "Andere instellingen aangepast voor consistentie: {n}",
     "suggestion_resolves": "Pas hieronder de openstaande suggestie ({val}) toe om dit op te lossen",
     "use_fix": "Gebruik {val}",
     "watchdog": {
-      "interval": "Moet minimaal 2x het bemonsteringsinterval ({si} s) zijn",
-      "sampling": "Bemonsteringsinterval moet maximaal de helft van het watchdog-interval ({wi} s) zijn"
+      "interval": "Moet minimaal 2x het bemonsteringsinterval ({si} s) zijn"
     },
     "settings_banner": "Instellingsconflicten: {n}. Controleer de gemarkeerde secties en los ze op voordat u opslaat.",
     "settings_banner_btn": "Ga naar eerste",
@@ -661,7 +655,7 @@
     "hist_reason_already_recorded": "overlapt met een cyclus die WashData al heeft vastgelegd",
     "share_consent": "Ik bevestig dat deze cycli normaal zijn voltooid zonder onderbreking",
     "show_internal": "Interne instellingen tonen",
-    "show_internal_tip": "Instellingen die WashData voor u afstemt (sampling, waakhond, matchfrequentie, drempels). Getoond als dit apparaat een eigen waarde, een conflict of een suggestie heeft.",
+    "show_internal_tip": "Instellingen die WashData voor u aanpast (watchdog, matchfrequentie, drempelwaarden). Getoond wanneer dit apparaat een eigen waarde, een conflict of een suggestie heeft.",
     "rate_n": "{n} sterren",
     "rate_quality": "Kwaliteit beoordelen",
     "pg_autolabel": "Auto-label",
@@ -1087,7 +1081,6 @@
     "anti_wrinkle_max_power": "Een puls boven dit niveau beëindigt anti-kreuk en opent een nieuwe cyclus",
     "anti_wrinkle_enabled": "De tuimelpulsen na de hoofdfase opvangen in plaats van ze als nieuwe cycli te lezen",
     "anti_wrinkle_max_duration": "Een puls die langer is dan dit beëindigt anti-kreuk en opent een nieuwe cyclus",
-    "anti_wrinkle_exit_power": "Stil niveau tussen tuimelpulsen; werkt alleen boven de Stopdrempel",
     "anti_crease_finalize_ratio": "Deel van de gemiddelde programmaduur dat een cyclus moet halen voordat de anti-kreuknaloop hem mag afronden; verlaag bij drogers, laat wasmachines op de standaard",
     "curve_preroll_seconds": "Seconden aan metingen uit afgebroken startpogingen die vooraan in de curve van een cyclus worden opgenomen; 0 = uit"
   },
@@ -1202,10 +1195,6 @@
       "doc": "Houd de korte trommelpulsen met laag vermogen van een droger na de hoofdverwarmingsfase bij de voltooide cyclus, in plaats van ze als nieuwe cycli te lezen.",
       "label": "Anti-kreuk detectie inschakelen"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "In anti-kreukmodus telt vermogen onder deze waarde als stil tussen tuimelpulsen, en langer stil dan de Max. pulspauze beëindigt de modus. Is de Stopdrempel hoger, dan wordt die gebruikt; deze waarde doet dus alleen iets boven de Stopdrempel.",
-      "label": "Drempel uitgangsverwarming"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Hoe lang de droger tussen trommelpulsen stil mag zijn voordat de anti-kreukmodus eindigt. Stel het hoger in dan de langste pauze van uw droger, anders worden latere pulsen als valse starts gelezen.",
       "label": "Max. pulspauze"
@@ -1254,10 +1243,6 @@
       "doc": "Optionele deursensor. Toont wanneer het apparaat na een cyclus is geopend om uit te laden.",
       "label": "Deursensorentiteit"
     },
-    "duration_tolerance": {
-      "doc": "Alleen leerfeedback: een cyclus binnen +/-X% van de geschatte duur telt als een goede schatting. Heeft geen invloed op herkenning.",
-      "label": "Schattingstolerantie"
-    },
     "enable_ml_models": {
       "doc": "Gebruik een op deze machine getraind model om energie en kosten van een lopende cyclus te voorspellen, en laat een bekend programma dat ongewoon vroeg stopt eindigen zonder de volledige uitschakelvertraging. Uit: alleen logica op basis van vermogen.",
       "label": "Slimme modellen gebruiken tijdens een cyclus"
@@ -1283,12 +1268,8 @@
       "label": "Foutopsporingsentiteiten blootstellen"
     },
     "external_end_trigger": {
-      "doc": "Binaire sensor waarvan de wijziging het einde van de cyclus markeert (bijv. een \"klaar\"-contact of een andere integratie).",
+      "doc": "Optionele binaire sensor die de cyclus beëindigt wanneer hij inschakelt, aanvullend op vermogensgebaseerde detectie (bijv. een klaar-contact of een andere integratie). Leeg laten om uit te schakelen.",
       "label": "Externe triggerentiteit"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Laat een binaire sensor het einde van een cyclus melden, naast de detectie op basis van vermogen.",
-      "label": "Externe eindtrigger inschakelen"
     },
     "external_end_trigger_inverted": {
       "doc": "Gebruik het UIT gaan (niet AAN) van de sensor als eindsignaal.",
@@ -1313,18 +1294,6 @@
     "ml_training_enabled": {
       "doc": "Train het energiemodel af en toe opnieuw op de voltooide cycli van deze machine. Een nieuw model wordt alleen bewaard als het de eenvoudige schatting verslaat op testcycli.",
       "label": "Leren van deze machine"
-    },
-    "ml_training_hour": {
-      "doc": "Uur van de dag (0-23) voor de nachtelijke training. Kies een rustig uur, bijv. 2.",
-      "label": "Leren om uur"
-    },
-    "ml_training_interval_days": {
-      "doc": "Train hooguit eens per zoveel dagen opnieuw.",
-      "label": "Controleer maximaal elke"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Wacht tot er minstens zoveel cycli zijn opgenomen voordat er wordt getraind.",
-      "label": "Eerst benodigde cycli"
     },
     "name": {
       "doc": "Naam van dit apparaat in Home Assistant.",
@@ -1357,10 +1326,6 @@
     "notify_finish_services": {
       "doc": "notify.*-services die worden aangeroepen als een cyclus klaar is. Laat leeg voor geen.",
       "label": "Eindservices"
-    },
-    "notify_fire_events": {
-      "doc": "Vuur ook ha_washdata_*-gebeurtenissen af bij start en einde van een cyclus, voor uw eigen automatiseringen.",
-      "label": "HA-gebeurtenissen afvuren voor meldingen"
     },
     "notify_icon": {
       "doc": "Klein pictogram op de melding (bijv. mdi:washing-machine). Wordt alleen naar mobile_app-doelen gestuurd, niet naar notify-groepen. Op iOS vervangt het het app-pictogram en is companion-app 2026.8 of nieuwer nodig. Leeg: platformstandaard.",
@@ -1458,10 +1423,6 @@
       "doc": "Live matchscore die een cyclus nodig heeft voordat de slimme beëindiging of de anti-kreukafronding hem vroeg mag beëindigen. Verandert het getoonde programma niet. Verhoog als zwakke matches cycli te vroeg beëindigen; verlaag als duidelijke matches de uitschakelvertraging afwachten.",
       "label": "Afstemmingsdrempel"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Zakt de live matchscore hieronder, dan wordt de huidige programmagok gewist. Houd het iets onder de Afstemmingsdrempel, zodat een korte dip hem niet reset.",
-      "label": "Niet-afstemmingsdrempel"
-    },
     "progress_reset_delay": {
       "doc": "Houd na een cyclus de voortgang zo lang op 100% voordat er wordt teruggezet naar Inactief.",
       "label": "Voortgangsreset vertraging"
@@ -1469,10 +1430,6 @@
     "pump_stuck_duration": {
       "doc": "Hoe lang een pomp onafgebroken mag draaien voordat de gebeurtenis Vastgelopen pomp afgaat.",
       "label": "Duur pomp vastzitten"
-    },
-    "sampling_interval": {
-      "doc": "Minimale tijd tussen verwerkte metingen. Metingen die eerder binnenkomen, worden overgeslagen (lage metingen tijdens een cyclus blijven altijd). Stel het in op het meldinterval van uw stekker of lager; een hogere waarde gooit alleen metingen weg.",
-      "label": "Samplinginterval"
     },
     "save_debug_traces": {
       "doc": "Bewaar ook de foutopsporingsgegevens van de herkenning (de scores van elke kandidaat) bij elke cyclus, voor probleemoplossing. Kost ongeveer 20 KB per cyclus.",
@@ -1644,9 +1601,6 @@
     "services": {
       "label": "Services"
     },
-    "signal_processing": {
-      "label": "Signaalverwerking"
-    },
     "thresholds_gap": {
       "label": "Drempelwaarden & interval"
     },
@@ -1709,10 +1663,6 @@
       "auto_label_confidence": {
         "higher": "Minder automatische labels – meer cycli gaan naar beoordeling",
         "lower": "Meer automatische labels – sommige kunnen onjuist zijn"
-      },
-      "duration_tolerance": {
-        "higher": "Accepteert een bredere duurtolerantie – flexibelere herkenning",
-        "lower": "Vereist nauwkeurigere duurovereenkomst – strenger, maar kan ongewone cycli weigeren"
       },
       "end_energy_threshold": {
         "higher": "Sluit alleen cycli af met aanzienlijk energieverbruik",
@@ -2183,16 +2133,11 @@
     "kept": "behouden",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "geen match",
     "no_updates": "geen updates",
     "off_delay_wait": "uitschakelvertraging",
     "off_gap": "uit-interval",
-    "plus_tol": "+tol",
-    "profile": "profiel",
-    "reading_interval": "typisch meetinterval",
     "sensor_offline": "sensor offline: geforceerde stop",
-    "si": "SI",
     "spike_ignored": "piek genegeerd",
     "spike_ignored_short": "piek: genegeerd",
     "start": "start",

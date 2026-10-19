@@ -45,6 +45,7 @@ from custom_components.ha_washdata.const import (
     CONF_DEVICE_TYPE,
     CONF_NOTIFY_EVENTS,
     CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_FIRE_EVENTS,
     CONF_NOTIFY_LIVE_SERVICES,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_START_SERVICES,
@@ -54,6 +55,7 @@ from custom_components.ha_washdata.const import (
     NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
     NOTIFY_EVENT_START,
+    RETIRED_OPTION_KEYS,
 )
 
 SVC = "notify.old_service"
@@ -85,7 +87,8 @@ def _lists(entry: MockConfigEntry) -> dict[str, Any]:
 
 
 def _no_retired_keys(entry: MockConfigEntry) -> None:
-    for key in (CONF_NOTIFY_SERVICE, CONF_NOTIFY_EVENTS):
+    assert CONF_NOTIFY_FIRE_EVENTS in RETIRED_OPTION_KEYS  # #478
+    for key in RETIRED_OPTION_KEYS:
         assert key not in entry.options, key
         assert key not in entry.data, key
 
@@ -182,6 +185,24 @@ async def test_the_keys_are_dropped_from_entry_data_too(hass: HomeAssistant) -> 
     assert _lists(entry) == {k: None for k in LISTS}
 
 
+@pytest.mark.parametrize("value", [True, False])
+async def test_the_fire_events_toggle_is_dropped(hass: HomeAssistant, value: bool) -> None:
+    """#478: the bus events always fire, so the step drops the retired toggle
+    from options and data and touches nothing else."""
+    entry = _entry(
+        hass, {CONF_NOTIFY_FIRE_EVENTS: value, CONF_NOTIFY_FINISH_SERVICES: ["notify.a"]},
+        data={"name": "Washer", CONF_NOTIFY_FIRE_EVENTS: value},
+    )
+
+    assert await async_migrate_entry(hass, entry) is True
+
+    _no_retired_keys(entry)
+    assert entry.data == {"name": "Washer"}
+    assert dict(entry.options) == {
+        CONF_OFF_DELAY: 120, CONF_NOTIFY_FINISH_SERVICES: ["notify.a"],
+    }
+
+
 async def test_a_clean_3_11_entry_only_advances(hass: HomeAssistant) -> None:
     entry = _entry(hass, {CONF_NOTIFY_FINISH_SERVICES: ["notify.a"]})
     before = dict(entry.options)
@@ -202,7 +223,7 @@ async def test_migration_is_idempotent(hass: HomeAssistant) -> None:
 
     # The step's helper on its own output is a no-op as well.
     opts, data = dict(entry.options), dict(entry.data)
-    assert washdata._retire_legacy_notify_service(opts, data) == []
+    assert washdata._retire_options(opts, data) == []
     assert (data, opts) == (first[0], first[1])
 
 
@@ -220,6 +241,7 @@ async def test_one_pass_and_stepwise_agree_on_lists_saved_empty(
         CONF_POWER_SENSOR: "sensor.p",
         CONF_NOTIFY_SERVICE: SVC,
         CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_FINISH, NOTIFY_EVENT_LIVE],
+        CONF_NOTIFY_FIRE_EVENTS: False,
         **CLEARED,
     }
     legacy = _entry(hass, dict(options), minor=5)
@@ -274,6 +296,7 @@ async def test_import_of_an_old_export_strips_the_retired_keys(hass: HomeAssista
         {"entry_options": {
             CONF_NOTIFY_SERVICE: SVC,
             CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_FINISH],
+            CONF_NOTIFY_FIRE_EVENTS: False,
             CONF_OFF_DELAY: 300,
         }},
         "import_config",
@@ -300,7 +323,8 @@ async def test_undo_import_does_not_restore_the_retired_keys(hass: HomeAssistant
 
     await ws_api._async_restore_entry_options(  # noqa: SLF001
         hass, entry,
-        {CONF_NOTIFY_SERVICE: SVC, CONF_NOTIFY_EVENTS: [], CONF_OFF_DELAY: 120},
+        {CONF_NOTIFY_SERVICE: SVC, CONF_NOTIFY_EVENTS: [], CONF_NOTIFY_FIRE_EVENTS: True,
+         CONF_OFF_DELAY: 120},
     )
 
     _no_retired_keys(entry)

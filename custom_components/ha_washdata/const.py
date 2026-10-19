@@ -53,12 +53,9 @@ CONF_NOTIFY_SERVICE = "notify_service"  # Deprecated - kept for migration only
 CONF_NOTIFY_ACTIONS = "notify_actions"
 CONF_NOTIFY_PEOPLE = "notify_people"
 CONF_NOTIFY_ONLY_WHEN_HOME = "notify_only_when_home"
+# Retired by #478: the ha_washdata_* bus events always fire. Kept for migration only.
 CONF_NOTIFY_FIRE_EVENTS = "notify_fire_events"
 CONF_NOTIFY_EVENTS = "notify_events"  # Deprecated - kept for migration only
-# The pre-0.3 single-service notification keys, read by NOTHING at runtime since
-# #472. The 3.11 -> 3.12 migration converts and drops them, and an import strips
-# them, so a stray copy cannot keep notifying after the per-event lists are cleared.
-RETIRED_NOTIFY_OPTION_KEYS = frozenset({CONF_NOTIFY_SERVICE, CONF_NOTIFY_EVENTS})
 CONF_NOTIFY_START_SERVICES = "notify_start_services"
 CONF_NOTIFY_FINISH_SERVICES = "notify_finish_services"
 CONF_NOTIFY_LIVE_SERVICES = "notify_live_services"
@@ -66,18 +63,18 @@ CONF_NOTIFY_CYCLE_TIMERS = "notify_cycle_timers"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
 CONF_LOW_POWER_NO_UPDATE_TIMEOUT = "low_power_no_update_timeout"
 CONF_SMOOTHING_WINDOW = "smoothing_window"  # Removed in 0.5.8: never read; key kept for old migrations
-CONF_SAMPLING_INTERVAL = "sampling_interval"
+CONF_SAMPLING_INTERVAL = "sampling_interval"  # Retired in 0.5.9: the device type's default applies; key kept for migration and the panel's resolved defaults
 CONF_START_DURATION_THRESHOLD = (
     "start_duration_threshold"  # Debounce for start detection
 )
 CONF_DEVICE_TYPE = "device_type"
-CONF_PROFILE_DURATION_TOLERANCE = "profile_duration_tolerance"
+CONF_PROFILE_DURATION_TOLERANCE = "profile_duration_tolerance"  # Never read (audit DOCS-01); key kept for migration
 
 
 CONF_INTERRUPTED_MIN_SECONDS = "interrupted_min_seconds"  # Internal use only
 CONF_PROGRESS_RESET_DELAY = "progress_reset_delay"
 CONF_LEARNING_CONFIDENCE = "learning_confidence"
-CONF_DURATION_TOLERANCE = "duration_tolerance"
+CONF_DURATION_TOLERANCE = "duration_tolerance"  # Retired in 0.5.9: only fed an unread feedback field; key kept for migration
 CONF_AUTO_LABEL_CONFIDENCE = "auto_label_confidence"
 CONF_AUTO_MAINTENANCE = "auto_maintenance"
 CONF_PROFILE_MATCH_INTERVAL = "profile_match_interval"
@@ -107,14 +104,14 @@ CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
 )
 CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"  # Noise events before auto-tune
-CONF_EXTERNAL_END_TRIGGER_ENABLED = "external_end_trigger_enabled"  # Enable external cycle end trigger
-CONF_EXTERNAL_END_TRIGGER = "external_end_trigger"  # Binary sensor entity for external cycle end
+CONF_EXTERNAL_END_TRIGGER_ENABLED = "external_end_trigger_enabled"  # Retired in 0.5.9: the trigger is on whenever its entity is set; key kept for migration
+CONF_EXTERNAL_END_TRIGGER = "external_end_trigger"  # Binary sensor entity that ends the cycle; set = on
 CONF_EXTERNAL_END_TRIGGER_INVERTED = "external_end_trigger_inverted"  # Invert external trigger logic (trigger on OFF)
 CONF_ANTI_WRINKLE_ENABLED = "anti_wrinkle_enabled"  # Dryer anti-wrinkle shielding
 CONF_ANTI_WRINKLE_MAX_POWER = "anti_wrinkle_max_power"  # W threshold for anti-wrinkle spikes
 CONF_ANTI_WRINKLE_MAX_DURATION = "anti_wrinkle_max_duration"  # Seconds to treat as anti-wrinkle
-CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W: quiet level in anti-wrinkle, floored at stop_threshold_w
-CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below exit power before anti-wrinkle ends
+CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # Retired in 0.5.9: fixed at max(DEFAULT_ANTI_WRINKLE_EXIT_POWER, stop_threshold_w); key kept for migration
+CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below the exit level before anti-wrinkle ends
 CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE = "dishwasher_end_spike_quiet_release"  # Dishwasher: sustained-quiet seconds after expected duration that release the end-of-cycle drain wait early (#379)
 CONF_SMART_TERMINATION_DURATION_RATIO = "smart_termination_duration_ratio"  # Fraction of the matched profile's expected (mean) duration that Smart Termination requires before it may fire (#393)
 CONF_ANTI_CREASE_FINALIZE_RATIO = "anti_crease_finalize_ratio"  # Fraction of the matched profile's expected (mean) duration the anti-crease finalise requires before it may fire (#429)
@@ -277,7 +274,6 @@ DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes rem
 DEFAULT_NOTIFY_REMINDER_MESSAGE = "{device}: about {minutes} minutes left."
 DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE = "{device}: No profile matched yet."
 DEFAULT_NOTIFY_ONLY_WHEN_HOME = False
-DEFAULT_NOTIFY_FIRE_EVENTS = True
 DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
@@ -314,12 +310,10 @@ DEFAULT_POWER_PROFILE_INTERVAL_MIN = 15  # power_profile attribute bucket (#367)
 DEFAULT_NAME = "Washing Machine"
 # Seconds without updates while active before forced stop (publish-on-change sockets)
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 600  # 10 minutes
-DEFAULT_SMOOTHING_WINDOW = 2
 DEFAULT_SAMPLING_INTERVAL = 30.0  # Seconds
 DEFAULT_START_DURATION_THRESHOLD = 5.0  # Seconds (debounce)
 DEFAULT_END_ENERGY_THRESHOLD = 0.05  # Wh - Require effectively zero energy to end
 DEFAULT_DEVICE_TYPE = "washing_machine"
-DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
 
 DEFAULT_INTERRUPTED_MIN_SECONDS = 150  # Internal use only, not exposed
 
@@ -334,7 +328,6 @@ DEFAULT_PROGRESS_RESET_DELAY = 1800  # Seconds (30 minutes state expiry/unload w
 DEFAULT_POWER_OFF_THRESHOLD_W = 0.0  # Disabled
 DEFAULT_POWER_OFF_DELAY = 30  # Seconds
 DEFAULT_LEARNING_CONFIDENCE = 0.6  # Minimum confidence to request user verification
-DEFAULT_DURATION_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging
 DEFAULT_AUTO_LABEL_CONFIDENCE = 0.9  # High confidence auto-label threshold
 DEFAULT_AUTO_MAINTENANCE = True  # Enable nightly cleanup by default
 DEFAULT_COMPLETION_MIN_SECONDS = 600  # 10 minutes
@@ -562,6 +555,7 @@ DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Ghost cycles before threshold ad
 DEFAULT_ANTI_WRINKLE_ENABLED = False
 DEFAULT_ANTI_WRINKLE_MAX_POWER = 400.0  # W
 DEFAULT_ANTI_WRINKLE_MAX_DURATION = 60.0  # s
+# Quiet level in anti-wrinkle, floored at stop_threshold_w (no longer a setting).
 DEFAULT_ANTI_WRINKLE_EXIT_POWER = 0.8  # W
 # Quiet gap a machine may leave between two anti-wrinkle pulses before the mode
 # ends. Keeps the previous hardcoded behaviour as the default; dryers whose
@@ -594,7 +588,7 @@ CYCLE_ANOMALY_STALLED = "stalled"  # the state sensor's cycle_anomaly while stal
 
 # Profile Matching Thresholds
 CONF_PROFILE_MATCH_THRESHOLD = "profile_match_threshold"
-CONF_PROFILE_UNMATCH_THRESHOLD = "profile_unmatch_threshold"
+CONF_PROFILE_UNMATCH_THRESHOLD = "profile_unmatch_threshold"  # Retired in 0.5.9: fixed at DEFAULT_PROFILE_UNMATCH_THRESHOLD; key kept for migration
 
 DEFAULT_PROFILE_MATCH_THRESHOLD = 0.4
 DEFAULT_PROFILE_UNMATCH_THRESHOLD = 0.35
@@ -1727,11 +1721,11 @@ SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
     # 1800 s off_delay is a 30 min end lag on a 1 s plug. Audit STORE-06.)
     # Matching
     CONF_PROFILE_MATCH_THRESHOLD,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-    # (profile_duration_tolerance dropped: nothing reads it - audit DOCS-01.)
-    CONF_DURATION_TOLERANCE,
+    # (profile_duration_tolerance dropped: nothing reads it - audit DOCS-01. The
+    # unmatch threshold and duration tolerance are no longer settings since
+    # 0.5.9; a bundle still carrying them has them dropped.)
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
 )
@@ -1741,8 +1735,6 @@ SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
 # setting is also >= 0 there.
 _SHARED_UNIT_INTERVAL_KEYS = frozenset({
     CONF_PROFILE_MATCH_THRESHOLD,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
-    CONF_DURATION_TOLERANCE,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
 })
@@ -1799,14 +1791,48 @@ QC_MANUAL = 3      # a plain detected cycle flagged golden by hand
 # Config keys for the scheduled, opt-in retraining loop. All gated behind
 # ENABLE_ML_TRAINING; nothing runs and no options render when that flag is False.
 CONF_ML_TRAINING_ENABLED = "ml_training_enabled"        # per-device opt-in
-CONF_ML_TRAINING_HOUR = "ml_training_hour"              # local hour (0-23) to train
-CONF_ML_TRAINING_MIN_CYCLES = "ml_training_min_cycles"  # min labelled clean cycles before training
-CONF_ML_TRAINING_INTERVAL_DAYS = "ml_training_interval_days"  # min days between retrains
+# Retired in 0.5.9 (fixed below; the promotion gate guards quality). Kept for migration only.
+CONF_ML_TRAINING_HOUR = "ml_training_hour"
+CONF_ML_TRAINING_MIN_CYCLES = "ml_training_min_cycles"
+CONF_ML_TRAINING_INTERVAL_DAYS = "ml_training_interval_days"
 
 DEFAULT_ML_TRAINING_ENABLED = False
-DEFAULT_ML_TRAINING_HOUR = 2          # 02:00 local - quiet hour
-DEFAULT_ML_TRAINING_MIN_CYCLES = 30   # need a meaningful corpus first
-DEFAULT_ML_TRAINING_INTERVAL_DAYS = 7 # retrain at most weekly
+ML_TRAINING_HOUR = 2           # 02:00 local - quiet hour
+ML_TRAINING_MIN_CYCLES = 30    # stored cycles before a scheduled run; the manual trigger skips it
+ML_TRAINING_INTERVAL_DAYS = 7  # scheduled retrain at most weekly
+
+# Option keys read by NOTHING at runtime. The 3.11 -> 3.12 migration drops them
+# from options and data (after converting the two whose value still meant
+# something: ``notify_service`` into the per-event lists, #472, and a disabled
+# ``external_end_trigger_enabled`` into a cleared entity), and an import or an
+# undo-import strips them, so a stray copy can never come back.
+RETIRED_OPTION_KEYS = frozenset({
+    # Notifications: the pre-0.3 single-service pair (#472), the "Fire HA
+    # events" toggle (#478: the bus events always fire).
+    CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_EVENTS,
+    CONF_NOTIFY_FIRE_EVENTS,
+    # 0.5.9 option trim: behaviour fixed at the shipped value.
+    CONF_DURATION_TOLERANCE,  # only fed an unread feedback field
+    CONF_ANTI_WRINKLE_EXIT_POWER,  # max(0.8 W, stop_threshold_w)
+    CONF_PROFILE_UNMATCH_THRESHOLD,  # 0.35
+    CONF_SAMPLING_INTERVAL,  # the device type's default (resolve_sampling_interval_default)
+    CONF_ML_TRAINING_HOUR,
+    CONF_ML_TRAINING_MIN_CYCLES,
+    CONF_ML_TRAINING_INTERVAL_DAYS,
+    # 0.5.9: the external end trigger is on whenever its entity is set.
+    CONF_EXTERNAL_END_TRIGGER_ENABLED,
+    # Leftovers of settings removed earlier that no step stripped.
+    CONF_END_REPEAT_COUNT,
+    CONF_SMOOTHING_WINDOW,
+    CONF_PROFILE_DURATION_TOLERANCE,
+    "max_past_cycles",  # retention caps, removed in 0.5.8 (item 463)
+    "max_full_traces_per_profile",
+    "max_full_traces_unlabeled",
+    "enable_phase_matching",  # phase-resolved ETA, removed in 0.5.8
+    "auto_merge_gap_seconds",  # auto-merge, removed in 0.4.0
+    "auto_merge_lookback_hours",
+})
 
 # (The classifier promotion gate - AUC margin, balanced-accuracy margin, minimum
 # positives - was removed in 0.5.8 with on-device classifier training: audit ML-11

@@ -30,7 +30,6 @@ from custom_components.ha_washdata.learning import LearningManager
 from custom_components.ha_washdata.const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
 )
 
 
@@ -66,7 +65,6 @@ def learning_manager(mock_hass):
     entry.options = {
         CONF_AUTO_LABEL_CONFIDENCE: 0.9,
         CONF_LEARNING_CONFIDENCE: 0.6,
-        CONF_DURATION_TOLERANCE: 0.1,
     }
     entry.title = "Test Entry"
     mock_hass.config_entries.async_get_entry.return_value = entry

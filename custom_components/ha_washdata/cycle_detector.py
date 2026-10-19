@@ -33,6 +33,7 @@ from . import match_rules
 from .log_utils import DeviceLoggerAdapter
 from .time_utils import utc_now
 from .const import (
+    DEFAULT_ANTI_WRINKLE_EXIT_POWER,
     TERMINAL_EVENT_PEAK_FRAC,
     DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN,
     ANTI_WRINKLE_ELIGIBLE_REASONS,
@@ -456,7 +457,8 @@ class CycleDetectorConfig:
     anti_wrinkle_enabled: bool = False
     anti_wrinkle_max_power: float = 400.0
     anti_wrinkle_max_duration: float = 60.0
-    anti_wrinkle_exit_power: float = 0.8
+    # (No anti_wrinkle_exit_power since 0.5.9: the quiet level is
+    # max(DEFAULT_ANTI_WRINKLE_EXIT_POWER, stop_threshold_w), see the two readers.)
     anti_wrinkle_idle_timeout: float = 120.0
     # Dishwasher only: sustained-quiet seconds (after reaching expected duration)
     # that release the end-of-cycle pump-out/drain wait early (#379). Defaults to
@@ -3055,14 +3057,14 @@ class CycleDetector:
                 self._anti_wrinkle_candidate_start_power = 0.0
 
             if self._state == STATE_ANTI_WRINKLE:
-                # Track time in idle. Quiet is below the exit power OR the stop
-                # threshold, whichever is higher, so the exit power only matters when
-                # set above stop. Not a "true off" level below stop (#285 #296 #325):
+                # Track time in idle. Quiet is below 0.8 W OR the stop threshold,
+                # whichever is higher (the exit power was a setting until 0.5.9 and
+                # only ever mattered above stop). Not a "true off" level below stop (#285 #296 #325):
                 # after 33 of 139 corpus washer/dryer cycles the appliance idled
                 # between the 0.8 W default and its stop threshold, which would hold
                 # anti-wrinkle (and with it Clean and the unload reminder) for the
                 # 2 h cap. The #296 tail's baseline above stop is the tail floor's job.
-                effective_exit = max(self._config.anti_wrinkle_exit_power, self._config.stop_threshold_w)
+                effective_exit = max(DEFAULT_ANTI_WRINKLE_EXIT_POWER, self._config.stop_threshold_w)
                 if power < effective_exit:
                     # Low-power gap invalidates any burst candidate collected while in anti-wrinkle.
                     self._anti_wrinkle_candidate_start = None
@@ -5010,7 +5012,7 @@ class CycleDetector:
         # accepted as tail (read before _finish_cycle clears the readings). Twice
         # its lowest reading, never under the anti-wrinkle exit level.
         tail_floor = max(
-            float(self._config.anti_wrinkle_exit_power),
+            DEFAULT_ANTI_WRINKLE_EXIT_POWER,
             float(self._config.stop_threshold_w),
             2.0 * min(
                 (

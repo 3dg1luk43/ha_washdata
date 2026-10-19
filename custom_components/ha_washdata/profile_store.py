@@ -2069,7 +2069,6 @@ class ProfileStore:
         min_duration_ratio: float = 0.50,
         max_duration_ratio: float = 1.50,
         save_debug_traces: bool = False,
-        unmatch_threshold: float = 0.35,
         device_name: str = "",
     ) -> None:
         """Initialize the profile store."""
@@ -2078,7 +2077,6 @@ class ProfileStore:
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self._min_duration_ratio = min_duration_ratio
         self._max_duration_ratio = max_duration_ratio
-        self._unmatch_threshold = unmatch_threshold
         self.dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
         # Stage-4 energy-agreement mode ("mean"|"integrated"); the manager sets it
         # from the device type via analysis.stage4_energy_mode. Default "mean"

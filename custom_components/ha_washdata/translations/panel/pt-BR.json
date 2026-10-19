@@ -257,19 +257,13 @@
       "timeout": "Deve ser maior que a Duração da Bomba Travada ({ps} s) para que o alarme de bomba travada possa disparar primeiro"
     },
     "start_dur": {
-      "sampling": "O Intervalo de amostragem ultrapassa a Duração de início ({sdt} s); picos de amostra única podem abrir um ciclo",
       "threshold": "Deve ser pelo menos um Intervalo de amostragem ({si} s) para evitar falsas partidas de amostra única"
-    },
-    "unmatch": {
-      "match": "Deve ser acima do Limiar de não correspondência ({un})",
-      "unmatch": "Deve ser abaixo do Limiar de correspondência ({match}); caso contrário, uma correspondência confirmada é imediatamente desfeita"
     },
     "cascade_toast": "Outras configurações ajustadas por consistência: {n}",
     "suggestion_resolves": "Aplique a sugestão pendente ({val}) abaixo para corrigir este conflito",
     "use_fix": "Usar {val}",
     "watchdog": {
-      "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)",
-      "sampling": "O Intervalo de amostragem deve ser no máximo metade do Intervalo watchdog ({wi} s)"
+      "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)"
     },
     "end_energy": {
       "energy": "Restritivo demais para o Limite de Parada ({w} W) durante o Atraso de Desligamento ({d} s); o ciclo só pode terminar por um mecanismo alternativo",
@@ -611,7 +605,7 @@
     "hist_reason_already_recorded": "se sobrepõe a um ciclo que o WashData já registrou",
     "share_consent": "Confirmo que estes ciclos terminaram normalmente, sem interrupção",
     "show_internal": "Mostrar configurações internas",
-    "show_internal_tip": "Configurações que o WashData ajusta para você (amostragem, watchdog, cadência de correspondência, limites). Exibidas quando este dispositivo tem um valor próprio, um conflito ou uma sugestão.",
+    "show_internal_tip": "Configurações que o WashData ajusta para você (watchdog, cadência de correspondência, limites). Exibidas quando este dispositivo tem um valor próprio, um conflito ou uma sugestão.",
     "rate_n": "{n} estrelas",
     "rate_quality": "Avaliar a qualidade",
     "pg_autolabel": "Rotulagem automática",
@@ -1144,10 +1138,6 @@
       "doc": "Manter os pulsos curtos de giro de baixa potência de uma secadora após a fase principal de aquecimento dentro do ciclo concluído, em vez de lê-los como novos ciclos.",
       "label": "Ativar Detecção Antiamasso"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "No modo antiamasso, a potência abaixo deste valor conta como silêncio entre pulsos de giro, e um silêncio maior que o Intervalo Máximo Entre Pulsos encerra o modo. Se o Limite de Parada for mais alto, ele é usado, então isto só muda algo acima do Limite de Parada.",
-      "label": "Limite de Saída de Potência"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Quanto tempo a secadora pode ficar em silêncio entre pulsos de giro antes de o modo antiamasso terminar. Defina acima da pausa mais longa da sua secadora, ou os pulsos seguintes serão lidos como falsas partidas.",
       "label": "Intervalo Máximo Entre Pulsos"
@@ -1196,10 +1186,6 @@
       "doc": "Sensor de porta opcional. Mostra quando o eletrodoméstico foi aberto para descarregar após um ciclo.",
       "label": "Entidade do Sensor de Porta"
     },
-    "duration_tolerance": {
-      "doc": "Apenas para aprendizado: um ciclo dentro de +/-X% da duração estimada conta como uma boa estimativa. Não afeta a correspondência.",
-      "label": "Tolerância de Estimativa"
-    },
     "enable_ml_models": {
       "doc": "Usar um modelo treinado nesta máquina para prever a energia e o custo de um ciclo em andamento, e permitir que um programa bem conhecido que para cedo demais termine sem todo o atraso de desligamento. Desligado: apenas lógica baseada em potência.",
       "label": "Aplicar modelos inteligentes durante um ciclo"
@@ -1225,12 +1211,8 @@
       "label": "Expor Entidades de Depuração"
     },
     "external_end_trigger": {
-      "doc": "Sensor binário cuja mudança marca o fim do ciclo (ex.: um contato \"concluído\" ou outra integração).",
+      "doc": "Sensor binário opcional que encerra o ciclo quando é ativado, além da detecção baseada no consumo (ex.: um contato \"concluído\" ou outra integração). Deixe vazio para desativar.",
       "label": "Entidade do Gatilho Externo"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Permitir que um sensor binário sinalize o fim de um ciclo, além da detecção baseada em potência.",
-      "label": "Ativar Gatilho de Fim Externo"
     },
     "external_end_trigger_inverted": {
       "doc": "Tratar a passagem do sensor para desligado (e não para ligado) como sinal de fim.",
@@ -1255,18 +1237,6 @@
     "ml_training_enabled": {
       "doc": "Retreinar de tempos em tempos o modelo de energia com os ciclos concluídos desta máquina. Um modelo novo só é mantido se superar a estimativa simples em ciclos de teste.",
       "label": "Aprender com esta máquina"
-    },
-    "ml_training_hour": {
-      "doc": "Hora do dia (0-23) para o treino noturno. Escolha um horário tranquilo, ex.: 2.",
-      "label": "Aprender na hora"
-    },
-    "ml_training_interval_days": {
-      "doc": "Retreinar no máximo uma vez a cada este número de dias.",
-      "label": "Verificar no máximo a cada"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Esperar por pelo menos este número de ciclos gravados antes de treinar.",
-      "label": "Ciclos necessários primeiro"
     },
     "name": {
       "doc": "Nome exibido no Home Assistant para este dispositivo.",
@@ -1299,10 +1269,6 @@
     "notify_finish_services": {
       "doc": "Serviços notify.* a chamar quando um ciclo termina. Deixe vazio para nenhum.",
       "label": "Serviços de Fim"
-    },
-    "notify_fire_events": {
-      "doc": "Disparar também eventos ha_washdata_* no início e no fim do ciclo, para suas próprias automações.",
-      "label": "Disparar Eventos HA para Notificações"
     },
     "notify_icon": {
       "doc": "Ícone pequeno da notificação (ex.: mdi:washing-machine). Enviado só para destinos mobile_app, não para grupos notify. No iOS substitui o ícone do aplicativo e requer o aplicativo companion 2026.8 ou mais recente. Em branco: padrão da plataforma.",
@@ -1400,10 +1366,6 @@
       "doc": "Pontuação de correspondência ao vivo de que um ciclo precisa antes de o Encerramento inteligente ou o fim antiamasso poderem finalizá-lo mais cedo. Não altera o programa exibido. Aumente se correspondências fracas finalizam ciclos cedo demais; reduza se correspondências claras esperam todo o atraso de desligamento.",
       "label": "Limite de Correspondência"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Se a pontuação de correspondência ao vivo cair abaixo deste valor, o palpite atual de programa é limpo. Mantenha um pouco abaixo do Limite de Correspondência para que uma queda breve não o redefina.",
-      "label": "Limite de Não Correspondência"
-    },
     "progress_reset_delay": {
       "doc": "Após um ciclo, manter o progresso em 100% por este tempo antes de voltar a Ocioso.",
       "label": "Atraso de Redefinição de Progresso"
@@ -1411,10 +1373,6 @@
     "pump_stuck_duration": {
       "doc": "Quanto tempo uma bomba pode funcionar sem parar antes de disparar o evento de bomba travada.",
       "label": "Duração da Bomba Travada"
-    },
-    "sampling_interval": {
-      "doc": "Tempo mínimo entre leituras processadas. Leituras que chegam antes são ignoradas (leituras baixas durante um ciclo são sempre mantidas). Defina no intervalo de envio do seu plugue ou menos; um valor maior só descarta leituras.",
-      "label": "Intervalo de Amostragem"
     },
     "save_debug_traces": {
       "doc": "Salvar também com cada ciclo os dados de depuração do comparador (as pontuações de cada candidato), para solução de problemas. Adiciona cerca de 20 KB por ciclo.",
@@ -1585,9 +1543,6 @@
     },
     "services": {
       "label": "Serviços"
-    },
-    "signal_processing": {
-      "label": "Processamento de Sinal"
     },
     "thresholds_gap": {
       "label": "Limites e Intervalo"
@@ -1839,10 +1794,6 @@
         "higher": "Rotula menos ciclos automaticamente; mais vão para revisão",
         "lower": "Rotula mais ciclos automaticamente; alguns podem ser mal identificados"
       },
-      "duration_tolerance": {
-        "higher": "Aceita um intervalo de duração mais amplo – correspondência mais flexível",
-        "lower": "Exige duração mais próxima – mais rigoroso, pode rejeitar ciclos incomuns"
-      },
       "end_energy_threshold": {
         "higher": "Encerra apenas ciclos que consumiram energia substancial",
         "lower": "Encerra também ciclos curtos ou de baixa energia"
@@ -1944,7 +1895,6 @@
     "smart_termination_duration_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de o Encerramento inteligente poder finalizá-lo mais cedo; reduza se os tempos de execução variarem",
     "anti_crease_finalize_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de a cauda antiamasso poder finalizá-lo; reduza em secadoras, deixe as lavadoras no padrão",
     "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",
-    "anti_wrinkle_exit_power": "Nível considerado silêncio entre pulsos de giro; só tem efeito acima do Limite de Parada",
     "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de giro antes de o modo antiamasso terminar",
     "anti_wrinkle_max_duration": "Um pulso mais longo do que isso encerra o modo antiamasso e abre um novo ciclo",
     "anti_wrinkle_max_power": "Um pulso acima disso encerra o modo antiamasso e abre um novo ciclo",
@@ -2201,16 +2151,11 @@
     "kept": "mantido",
     "max": "máx.",
     "min": "mín.",
-    "minus_tol": "-tol",
     "no_match": "sem corresp.",
     "no_updates": "sem atualizações",
     "off_delay_wait": "espera até desligar",
     "off_gap": "intervalo",
-    "plus_tol": "+tol",
-    "profile": "perfil",
-    "reading_interval": "intervalo típico de leitura",
     "sensor_offline": "sensor offline: parada forçada",
-    "si": "IA",
     "spike_ignored": "pico ignorado",
     "spike_ignored_short": "pico: ignorado",
     "start": "início",

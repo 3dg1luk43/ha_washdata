@@ -217,6 +217,8 @@ def test_every_playground_key_is_publishable():
     # The sandbox-only matcher knobs are gone, so every key is a real option.
     assert "profile_match_min_duration_ratio" in playground.PUBLISHABLE_SETTING_KEYS
     assert "off_delay" in playground.PUBLISHABLE_SETTING_KEYS
+    # A retired setting (0.5.9) cannot be what-if'd or published.
+    assert "anti_wrinkle_exit_power" not in playground.PUBLISHABLE_SETTING_KEYS
     assert playground.PUBLISHABLE_SETTING_KEYS == playground.SETTING_KEYS
 
 

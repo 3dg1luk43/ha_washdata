@@ -11,7 +11,6 @@
   "energy_price_entity": null,
   "notify_service": "",
   "notify_finish_message": "Your {device} is done! Ran for {duration}.",
-  "notify_fire_events": true,
   "peak_rate_threshold": null,
   "notify_quiet_start_hour": null,
   "notify_quiet_end_hour": null,

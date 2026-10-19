@@ -312,19 +312,13 @@
       "timeout": "Mora presegati Trajanje zataknjenosti črpalke ({ps} s), da se alarm zataknjene črpalke sproži prvi"
     },
     "start_dur": {
-      "sampling": "Interval vzorčenja presega Trajanje zagona ({sdt} s); enotni vzorčni impulz lahko odpre cikel",
       "threshold": "Mora biti vsaj en Interval vzorčenja ({si} s), da se preprečijo lažni zagoni iz ene same vzorčne vrednosti"
-    },
-    "unmatch": {
-      "match": "Mora biti nad Pragom neujemanja ({un})",
-      "unmatch": "Mora biti pod Pragom ujemanja ({match}); sicer se potrjeno ujemanje takoj razveljavi"
     },
     "cascade_toast": "Druge nastavitve, prilagojene za doslednost: {n}",
     "suggestion_resolves": "Uveljavite čakajoči predlog ({val}) spodaj za odpravo tega konflikta",
     "use_fix": "Uporabi {val}",
     "watchdog": {
-      "interval": "Mora biti vsaj 2× Interval vzorčenja ({si} s)",
-      "sampling": "Interval vzorčenja mora biti največ polovica Intervala nadzornika ({wi} s)"
+      "interval": "Mora biti vsaj 2× Interval vzorčenja ({si} s)"
     },
     "settings_banner": "Konflikti nastavitev: {n}. Preverite označene razdelke in jih popravite pred shranjevanjem.",
     "settings_banner_btn": "Pojdi na prvega",
@@ -663,7 +657,7 @@
     "hist_reason_already_recorded": "se prekriva s ciklom, ki ga je WashData že zabeležil",
     "share_consent": "Potrjujem, da so se ti cikli normalno izvedli do konca brez prekinitve",
     "show_internal": "Prikaži notranje nastavitve",
-    "show_internal_tip": "Nastavitve, ki jih WashData uglasi namesto vas (vzorčenje, nadzornik, pogostost ujemanja, pragovi). Prikazane so, ko ima ta naprava lastno vrednost, konflikt ali predlog.",
+    "show_internal_tip": "Nastavitve, ki jih WashData uravnava za vas (watchdog, ritem ujemanja, pragovi). Prikazano, ko ima ta naprava lastno vrednost, konflikt ali predlog.",
     "rate_n": "{n} zvezdic",
     "rate_quality": "Oceni kakovost",
     "pg_autolabel": "Samodejno označevanje",
@@ -1214,10 +1208,6 @@
       "doc": "Kratke pulze vrtenja pri nizki moči po glavni fazi segrevanja sušilnega stroja obdržite pri končanem ciklu, namesto da bi jih brali kot nove cikle.",
       "label": "Omogoči zaznavanje zaščite pred gubami"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "V načinu zaščite pred gubami moč pod to vrednostjo šteje kot mirovanje med impulzi vrtenja, mirovanje, daljše od Maks. razmika med impulzi, pa način konča. Če je Prag zaustavitve višji, se uporabi ta, zato nastavitev nekaj spremeni le nad Pragom zaustavitve.",
-      "label": "Prag izhodne moči"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Kako dolgo sme sušilni stroj mirovati med pulzi vrtenja, preden se način zaščite pred gubami konča. Nastavite nad najdaljši premor vašega stroja, sicer se poznejši pulzi berejo kot lažni zagoni.",
       "label": "Maks. razmik med impulzi"
@@ -1266,10 +1256,6 @@
       "doc": "Neobvezen senzor vrat. Pokaže, kdaj je bila naprava po ciklu odprta za raztovarjanje.",
       "label": "Entiteta senzorja vrat"
     },
-    "duration_tolerance": {
-      "doc": "Samo za povratne informacije učenja: cikel znotraj +/-X% ocenjenega trajanja šteje za dobro oceno. Ne vpliva na ujemanje.",
-      "label": "Toleranca ocene"
-    },
     "enable_ml_models": {
       "doc": "Uporabite model, naučen na tem stroju, za napoved energije in stroška cikla, ki poteka, in pustite, da se dobro znan program, ki se nenavadno zgodaj ustavi, konča brez polne zamude izklopa. Izklopljeno: samo logika na podlagi moči.",
       "label": "Uporabi pametne modele med ciklom"
@@ -1295,12 +1281,8 @@
       "label": "Izpostavi entitete za odpravljanje napak"
     },
     "external_end_trigger": {
-      "doc": "Binarni senzor, katerega sprememba označuje konec cikla (npr. kontakt »končano« ali druga integracija).",
+      "doc": "Izbirni binarni senzor, ki konča cikel, ko se vklopi, poleg zaznavanja na podlagi porabe (npr. stik \"dokončano\" ali druga integracija). Prazno = izklopljeno.",
       "label": "Zunanja sprožilna entiteta"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Dovolite binarnemu senzorju, da sporoči konec cikla, poleg zaznavanja na podlagi moči.",
-      "label": "Omogoči zunanji sprožilec za konec"
     },
     "external_end_trigger_inverted": {
       "doc": "IZKLOP senzorja (ne vklop) obravnavajte kot signal konca.",
@@ -1325,18 +1307,6 @@
     "ml_training_enabled": {
       "doc": "Občasno ponovno naučite model energije na končanih ciklih tega stroja. Nov model se obdrži le, če na testnih ciklih premaga preprosto oceno.",
       "label": "Uči se iz te naprave"
-    },
-    "ml_training_hour": {
-      "doc": "Ura dneva (0-23) za nočno učenje. Izberite mirno uro, npr. 2.",
-      "label": "Uči se ob uri"
-    },
-    "ml_training_interval_days": {
-      "doc": "Ponovno učite največ enkrat na toliko dni.",
-      "label": "Preverjaj največ vsakih"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Pred učenjem počakajte vsaj na toliko posnetih ciklov.",
-      "label": "Najprej potrebno število ciklov"
     },
     "name": {
       "doc": "Ime te naprave, prikazano v Home Assistant.",
@@ -1369,10 +1339,6 @@
     "notify_finish_services": {
       "doc": "Storitve notify.*, ki se kličejo ob koncu cikla. Pustite prazno za nobeno.",
       "label": "Storitve ob dokončanju"
-    },
-    "notify_fire_events": {
-      "doc": "Sprožite tudi dogodke ha_washdata_* ob začetku in koncu cikla za lastne avtomatizacije.",
-      "label": "Sproži HA dogodke za obvestila"
     },
     "notify_icon": {
       "doc": "Majhna ikona na obvestilu (npr. mdi:washing-machine). Pošilja se samo ciljem mobile_app, ne skupinam notify. Na iOS nadomesti ikono aplikacije in zahteva mobilno aplikacijo 2026.8 ali novejšo. Prazno: privzeta ikona platforme.",
@@ -1470,10 +1436,6 @@
       "doc": "Ocena ujemanja v živo, ki jo cikel potrebuje, preden ga Pametni zaključek ali zaključek zaščite pred gubami sme predčasno končati. Ne spremeni prikazanega programa. Zvišajte, če šibka ujemanja prezgodaj končajo cikle; znižajte, če jasna ujemanja čakajo zamudo izklopa.",
       "label": "Prag ujemanja"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Če ocena ujemanja v živo pade pod to vrednost, se trenutno ugibanje programa počisti. Držite malo pod Pragom ujemanja, da ga kratek padec ne ponastavi.",
-      "label": "Prag neujemanja"
-    },
     "progress_reset_delay": {
       "doc": "Po ciklu držite napredek na 100% toliko časa, preden se ponastavi na Nedejavno.",
       "label": "Zamuda ponastavitve napredka"
@@ -1481,10 +1443,6 @@
     "pump_stuck_duration": {
       "doc": "Kako dolgo sme črpalka delovati brez premora, preden se sproži dogodek zataknjene črpalke.",
       "label": "Trajanje zataknjenosti črpalke"
-    },
-    "sampling_interval": {
-      "doc": "Najkrajši čas med obdelanimi odčitki. Odčitki, ki pridejo prej, se preskočijo (nizki odčitki med ciklom se vedno ohranijo). Nastavite na interval poročanja vtiča ali manj; višja vrednost samo zavrže odčitke.",
-      "label": "Interval vzorčenja"
     },
     "save_debug_traces": {
       "doc": "Ob vsakem ciklu shranite tudi podatke za odpravljanje napak ujemanja (ocene vseh kandidatov), za reševanje težav. Doda približno 20 KB na cikel.",
@@ -1656,9 +1614,6 @@
     "services": {
       "label": "Storitve"
     },
-    "signal_processing": {
-      "label": "Obdelava signala"
-    },
     "thresholds_gap": {
       "label": "Pragovi in presledek"
     },
@@ -1721,10 +1676,6 @@
       "auto_label_confidence": {
         "higher": "Manj ciklov je samodejno označenih; več gre v pregled",
         "lower": "Več ciklov je samodejno označenih; nekateri so lahko napačno prepoznani"
-      },
-      "duration_tolerance": {
-        "higher": "Sprejme širši razpon trajanja – bolj prilagodljivo ujemanje",
-        "lower": "Zahteva bližje ujemanje trajanja – strožje, a lahko zavrne neobičajne cikle"
       },
       "end_energy_threshold": {
         "higher": "Zaključi samo cikle z znatno porabo energije",
@@ -2016,7 +1967,6 @@
     "smart_termination_duration_ratio": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden ga Pametni zaključek sme predčasno končati; znižajte, če se časi delovanja razlikujejo",
     "anti_crease_finalize_ratio": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden ga rep zaščite pred gubami sme zaključiti; znižajte pri sušilnih strojih, pri pralnih pustite privzeto",
     "anti_wrinkle_enabled": "Vsrkaj vrtilne impulze po glavni fazi, namesto da jih obravnavaš kot nove cikle",
-    "anti_wrinkle_exit_power": "Raven mirovanja med impulzi vrtenja; učinkuje le nad Pragom zaustavitve",
     "anti_wrinkle_idle_timeout": "Dovoljeni mir med dvema vrtilnima impulzoma, preden se zaščita pred gubami konča",
     "anti_wrinkle_max_duration": "Daljši impulz konča zaščito pred gubami in odpre nov cikel",
     "anti_wrinkle_max_power": "Impulz nad to vrednostjo konča zaščito pred gubami in odpre nov cikel",
@@ -2219,16 +2169,11 @@
     "kept": "ohranjeno",
     "max": "maks.",
     "min": "min.",
-    "minus_tol": "-tol",
     "no_match": "ni ujemanja",
     "no_updates": "ni posodobitev",
     "off_delay_wait": "zamuda izklopa",
     "off_gap": "presledek izkl.",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "tipični interval odčitkov",
     "sensor_offline": "senzor brez povezave: prisilna ustavitev",
-    "si": "IV",
     "spike_ignored": "skok prezrt",
     "spike_ignored_short": "skok: prezrt",
     "start": "zagon",

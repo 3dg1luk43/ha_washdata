@@ -257,19 +257,13 @@
       "timeout": "Deve superare la Durata pompa bloccata ({ps} s) perché l'allarme pompa bloccata possa scattare per primo"
     },
     "start_dur": {
-      "sampling": "L'Intervallo di campionamento supera la Durata di avvio ({sdt} s); picchi su un singolo campione possono aprire un ciclo",
       "threshold": "Dovrebbe essere almeno un Intervallo di campionamento ({si} s) per evitare falsi avvii su un singolo campione"
-    },
-    "unmatch": {
-      "match": "Deve essere superiore alla Soglia di non corrispondenza ({un})",
-      "unmatch": "Deve essere inferiore alla Soglia di corrispondenza ({match}); altrimenti una corrispondenza confermata viene annullata istantaneamente"
     },
     "cascade_toast": "Altre impostazioni adattate per coerenza: {n}",
     "suggestion_resolves": "Applica la proposta in attesa ({val}) in basso per correggere questo",
     "use_fix": "Usa {val}",
     "watchdog": {
-      "interval": "Dovrebbe essere almeno 2x l'Intervallo di campionamento ({si} s)",
-      "sampling": "L'Intervallo di campionamento dovrebbe essere al massimo la metà dell'Intervallo watchdog ({wi} s)"
+      "interval": "Dovrebbe essere almeno 2x l'Intervallo di campionamento ({si} s)"
     },
     "end_energy": {
       "energy": "Troppo restrittiva per la Soglia di arresto ({w} W) nell'arco del Ritardo spegnimento ({d} s); il ciclo può terminare solo tramite un percorso di riserva",
@@ -611,7 +605,7 @@
     "hist_reason_already_recorded": "si sovrappone a un ciclo già registrato da WashData",
     "share_consent": "Confermo che questi cicli sono terminati normalmente, senza interruzioni",
     "show_internal": "Mostra impostazioni interne",
-    "show_internal_tip": "Impostazioni che WashData regola per te (campionamento, supervisore, cadenza di corrispondenza, soglie). Mostrate quando questo dispositivo ha un valore proprio, un conflitto o un suggerimento.",
+    "show_internal_tip": "Impostazioni che WashData regola per te (supervisore, cadenza di corrispondenza, soglie). Mostrate quando questo dispositivo ha un valore proprio, un conflitto o un suggerimento.",
     "rate_n": "{n} stelle",
     "rate_quality": "Valuta la qualità",
     "pg_autolabel": "Etichettatura automatica",
@@ -1038,7 +1032,6 @@
     "smart_termination_duration_ratio": "Frazione della durata media del programma che un ciclo deve raggiungere prima che la Terminazione intelligente possa chiuderlo in anticipo; abbassala se le durate variano",
     "anti_crease_finalize_ratio": "Frazione della durata media del programma che un ciclo deve raggiungere prima che la coda antirughe possa concluderlo; abbassala sulle asciugatrici, lascia le lavatrici al valore predefinito",
     "anti_wrinkle_enabled": "Assorbire gli impulsi di rotazione dopo la fase principale invece di leggerli come nuovi cicli",
-    "anti_wrinkle_exit_power": "Livello considerato silenzio tra gli impulsi di rotazione; ha effetto solo sopra la Soglia di arresto",
     "anti_wrinkle_idle_timeout": "Tempo di silenzio consentito tra due impulsi di rotazione prima che la modalità antirughe termini",
     "anti_wrinkle_max_duration": "Un impulso più lungo di questo termina la modalità antirughe e apre un nuovo ciclo",
     "anti_wrinkle_max_power": "Un impulso superiore a questo termina la modalità antirughe e apre un nuovo ciclo",
@@ -1164,10 +1157,6 @@
       "doc": "Mantieni nel ciclo terminato i brevi impulsi di rotazione a bassa potenza di un'asciugatrice dopo la fase principale di riscaldamento, invece di leggerli come nuovi cicli.",
       "label": "Abilita rilevamento antirughe"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "In modalità antirughe, una potenza sotto questo valore conta come silenzio tra gli impulsi di rotazione, e un silenzio più lungo dell'Intervallo massimo tra impulsi termina la modalità. Se la Soglia di arresto è più alta si usa quella, quindi questo valore conta solo se è sopra la Soglia di arresto.",
-      "label": "Soglia potenza uscita"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Quanto a lungo l'asciugatrice può restare in silenzio tra un impulso e l'altro prima che la modalità antirughe termini. Impostalo oltre la pausa più lunga della tua asciugatrice, altrimenti gli impulsi successivi vengono letti come false partenze.",
       "label": "Intervallo massimo tra impulsi"
@@ -1216,10 +1205,6 @@
       "doc": "Sensore porta facoltativo. Mostra quando l'elettrodomestico è stato aperto per scaricarlo dopo un ciclo.",
       "label": "Entità sensore porta"
     },
-    "duration_tolerance": {
-      "doc": "Solo per l'apprendimento: un ciclo entro +/-X% della durata stimata conta come una buona stima. Non incide sulla corrispondenza.",
-      "label": "Tolleranza stima"
-    },
     "enable_ml_models": {
       "doc": "Usa un modello addestrato su questa macchina per prevedere energia e costo di un ciclo in corso, e lascia che un programma ben noto che si ferma insolitamente presto termini senza l'intero ritardo spegnimento. Disattivato: solo logica basata sulla potenza.",
       "label": "Applica modelli intelligenti durante un ciclo"
@@ -1245,12 +1230,8 @@
       "label": "Esponi entità di debug"
     },
     "external_end_trigger": {
-      "doc": "Sensore binario il cui cambiamento segna la fine del ciclo (es. un contatto \"finito\" o un'altra integrazione).",
+      "doc": "Sensore binario opzionale che termina il ciclo quando si attiva, in aggiunta al rilevamento basato sull'assorbimento (es. un contatto \"finito\" o un'altra integrazione). Lascia vuoto per disattivarlo.",
       "label": "Entità trigger esterno"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Lascia che un sensore binario segnali la fine di un ciclo, oltre al rilevamento basato sulla potenza.",
-      "label": "Abilita trigger di fine esterno"
     },
     "external_end_trigger_inverted": {
       "doc": "Considera come segnale di fine il passaggio del sensore a OFF (non a ON).",
@@ -1275,18 +1256,6 @@
     "ml_training_enabled": {
       "doc": "Riaddestra di tanto in tanto il modello dell'energia sui cicli terminati di questa macchina. Un nuovo modello viene tenuto solo se batte la stima semplice sui cicli di prova.",
       "label": "Impara da questa macchina"
-    },
-    "ml_training_hour": {
-      "doc": "Ora del giorno (0-23) per l'addestramento notturno. Scegli un'ora tranquilla, es. 2.",
-      "label": "Impara all'ora"
-    },
-    "ml_training_interval_days": {
-      "doc": "Numero minimo di giorni tra due riaddestramenti.",
-      "label": "Controlla al massimo ogni"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Attendi almeno questo numero di cicli registrati prima dell'addestramento.",
-      "label": "Cicli necessari prima"
     },
     "name": {
       "doc": "Nome mostrato in Home Assistant per questo dispositivo.",
@@ -1319,10 +1288,6 @@
     "notify_finish_services": {
       "doc": "Servizi notify.* da chiamare quando un ciclo termina. Lascia vuoto per nessuno.",
       "label": "Servizi di fine"
-    },
-    "notify_fire_events": {
-      "doc": "Genera anche eventi ha_washdata_* all'inizio e alla fine del ciclo, per le tue automazioni.",
-      "label": "Genera eventi HA per le notifiche"
     },
     "notify_icon": {
       "doc": "Piccola icona della notifica (es. mdi:washing-machine). Inviata solo ai destinatari mobile_app, non ai gruppi notify. Su iOS sostituisce l'icona dell'app e richiede l'app companion 2026.8 o successiva. Vuoto: predefinito della piattaforma.",
@@ -1420,10 +1385,6 @@
       "doc": "Punteggio di corrispondenza in tempo reale che serve a un ciclo prima che la Terminazione intelligente o la chiusura antirughe possano terminarlo in anticipo. Non cambia il programma mostrato. Alzalo se corrispondenze deboli chiudono i cicli troppo presto; abbassalo se corrispondenze chiare aspettano tutto il ritardo spegnimento.",
       "label": "Soglia di corrispondenza"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Se il punteggio di corrispondenza in tempo reale scende sotto questo valore, l'ipotesi di programma attuale viene cancellata. Tienilo un po' sotto la Soglia di corrispondenza, così un breve calo non la azzera.",
-      "label": "Soglia di non corrispondenza"
-    },
     "progress_reset_delay": {
       "doc": "Dopo un ciclo, mantieni l'avanzamento al 100% per questo tempo prima di tornare a Inattivo.",
       "label": "Ritardo reset avanzamento"
@@ -1431,10 +1392,6 @@
     "pump_stuck_duration": {
       "doc": "Per quanto tempo una pompa può funzionare senza sosta prima che scatti l'evento pompa bloccata.",
       "label": "Durata pompa bloccata"
-    },
-    "sampling_interval": {
-      "doc": "Tempo minimo tra letture elaborate. Le letture che arrivano prima vengono saltate (le letture basse durante un ciclo vengono sempre conservate). Impostalo sull'intervallo di invio della tua presa o meno; un valore più alto scarta solo letture.",
-      "label": "Intervallo di campionamento"
     },
     "save_debug_traces": {
       "doc": "Salva anche con ogni ciclo i dati di debug del comparatore (i punteggi di ogni candidato), per la risoluzione dei problemi. Aggiunge circa 20 KB per ciclo.",
@@ -1605,9 +1562,6 @@
     },
     "services": {
       "label": "Servizi"
-    },
-    "signal_processing": {
-      "label": "Elaborazione del segnale"
     },
     "thresholds_gap": {
       "label": "Soglie e intervallo"
@@ -1858,10 +1812,6 @@
       "auto_label_confidence": {
         "higher": "Etichetta meno cicli automaticamente; più vanno in revisione",
         "lower": "Etichetta più cicli automaticamente; alcuni possono essere mal identificati"
-      },
-      "duration_tolerance": {
-        "higher": "Accetta un intervallo di durata più ampio – corrispondenza più flessibile",
-        "lower": "Richiede una durata più vicina – più rigoroso, può rifiutare cicli insoliti"
       },
       "end_energy_threshold": {
         "higher": "Chiude solo i cicli che hanno consumato energia sostanziale",
@@ -2201,16 +2151,11 @@
     "kept": "mantenuto",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "non abbinato",
     "no_updates": "nessun aggiornamento",
     "off_delay_wait": "ritardo spegnimento",
     "off_gap": "intervallo",
-    "plus_tol": "+tol",
-    "profile": "profilo",
-    "reading_interval": "intervallo tipico di lettura",
     "sensor_offline": "sensore offline: arresto forzato",
-    "si": "IC",
     "spike_ignored": "picco ignorato",
     "spike_ignored_short": "picco: ignorato",
     "start": "avvio",

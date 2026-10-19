@@ -257,19 +257,13 @@
       "timeout": "Trebuie să depășească Durata Pompei Blocate ({ps} s) ca alarma pompei blocate să se poată declanșa prima"
     },
     "start_dur": {
-      "sampling": "Intervalul de eșantionare depășește Durata de pornire ({sdt} s); vârfurile pe un singur eșantion pot deschide un ciclu",
       "threshold": "Ar trebui să fie de cel puțin un Interval de eșantionare ({si} s) pentru a preveni pornirile false pe un singur eșantion"
-    },
-    "unmatch": {
-      "match": "Trebuie să fie peste Pragul de non-potrivire ({un})",
-      "unmatch": "Trebuie să fie sub Pragul de potrivire ({match}); altfel o potrivire confirmată este anulată instantaneu"
     },
     "cascade_toast": "Alte setări ajustate pentru consecvență: {n}",
     "suggestion_resolves": "Aplicați sugestia în așteptare ({val}) de mai jos pentru a remedia aceasta",
     "use_fix": "Folosiți {val}",
     "watchdog": {
-      "interval": "Ar trebui să fie de cel puțin 2x Intervalul de eșantionare ({si} s)",
-      "sampling": "Intervalul de eșantionare ar trebui să fie cel mult jumătate din Intervalul watchdog ({wi} s)"
+      "interval": "Ar trebui să fie de cel puțin 2x Intervalul de eșantionare ({si} s)"
     },
     "end_energy": {
       "energy": "Prea strict pentru Pragul de Oprire ({w} W) pe durata Întârzierii la Oprire ({d} s); ciclul se poate încheia doar printr-o cale de rezervă",
@@ -611,7 +605,7 @@
     "hist_reason_already_recorded": "se suprapune cu un ciclu deja înregistrat de WashData",
     "share_consent": "Confirm că aceste cicluri s-au încheiat normal, fără întreruperi",
     "show_internal": "Afișează setările interne",
-    "show_internal_tip": "Setări pe care WashData le reglează pentru dvs. (eșantionare, watchdog, cadența potrivirii, praguri). Afișate când acest dispozitiv are o valoare proprie, un conflict sau o sugestie.",
+    "show_internal_tip": "Setări pe care WashData le reglează pentru dvs. (watchdog, cadența potrivirii, praguri). Afișate când acest dispozitiv are o valoare proprie, un conflict sau o sugestie.",
     "rate_n": "{n} stele",
     "rate_quality": "Evaluați calitatea",
     "pg_autolabel": "Etichetare automată",
@@ -1144,10 +1138,6 @@
       "doc": "Păstrați în ciclul încheiat impulsurile scurte de rotire cu putere redusă ale unui uscător de după faza principală de încălzire, în loc să fie citite ca cicluri noi.",
       "label": "Activați Detectarea Anti-Șifonare"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "În modul anti-șifonare, puterea sub această valoare contează ca liniște între impulsurile de rotire, iar o liniște mai lungă decât Interval Maxim Între Impulsuri încheie modul. Dacă Prag de Oprire este mai mare, se folosește acela, deci această setare contează doar peste Prag de Oprire.",
-      "label": "Prag Putere de Ieșire"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Cât timp poate sta uscătorul liniștit între impulsurile de rotire înainte ca modul anti-șifonare să se încheie. Setați-l peste cea mai lungă pauză a uscătorului dvs., altfel impulsurile ulterioare sunt citite ca porniri false.",
       "label": "Interval Maxim Între Impulsuri"
@@ -1196,10 +1186,6 @@
       "doc": "Senzor de ușă opțional. Arată când aparatul a fost deschis pentru descărcare după un ciclu.",
       "label": "Entitate Senzor Ușă"
     },
-    "duration_tolerance": {
-      "doc": "Doar pentru învățare: un ciclu în limita a +/-X% din durata estimată contează ca estimare bună. Nu afectează potrivirea.",
-      "label": "Toleranță Estimare"
-    },
     "enable_ml_models": {
       "doc": "Folosiți un model antrenat pe această mașină pentru a prezice energia și costul unui ciclu în desfășurare și lăsați un program bine cunoscut care se oprește neobișnuit de devreme să se încheie fără întreaga întârziere la oprire. Oprit: doar logică bazată pe putere.",
       "label": "Aplicați modele inteligente în timpul unui ciclu"
@@ -1225,12 +1211,8 @@
       "label": "Expuneți Entitățile de Depanare"
     },
     "external_end_trigger": {
-      "doc": "Senzor binar a cărui schimbare marchează finalul ciclului (de ex. un contact „gata” sau altă integrare).",
+      "doc": "Senzor binar opțional care termină ciclul când se activează, pe lângă detecția bazată pe consum (de ex. un contact \"gata\" sau altă integrare). Lasă gol pentru a-l dezactiva.",
       "label": "Entitate Declanșator Extern"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Lăsați un senzor binar să semnaleze finalul unui ciclu, pe lângă detectarea bazată pe putere.",
-      "label": "Activați Declanșatorul Extern de Sfârșit"
     },
     "external_end_trigger_inverted": {
       "doc": "Considerați trecerea senzorului pe OPRIT (nu pe PORNIT) drept semnal de final.",
@@ -1255,18 +1237,6 @@
     "ml_training_enabled": {
       "doc": "Reantrenați din când în când modelul de energie pe ciclurile încheiate ale acestei mașini. Un model nou este păstrat doar dacă bate estimarea simplă pe ciclurile de test.",
       "label": "Învățați de la această mașină"
-    },
-    "ml_training_hour": {
-      "doc": "Ora din zi (0-23) pentru antrenarea de noapte. Alegeți o oră liniștită, de ex. 2.",
-      "label": "Învățați la ora"
-    },
-    "ml_training_interval_days": {
-      "doc": "Numărul minim de zile între două reantrenări.",
-      "label": "Verificați cel mult la fiecare"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Așteptați cel puțin acest număr de cicluri înregistrate înainte de antrenare.",
-      "label": "Cicluri necesare mai întâi"
     },
     "name": {
       "doc": "Numele afișat în Home Assistant pentru acest dispozitiv.",
@@ -1299,10 +1269,6 @@
     "notify_finish_services": {
       "doc": "Servicii notify.* apelate când un ciclu se încheie. Lăsați gol pentru niciunul.",
       "label": "Servicii de Finalizare"
-    },
-    "notify_fire_events": {
-      "doc": "Declanșați și evenimente ha_washdata_* la pornirea și la finalul ciclului, pentru propriile automatizări.",
-      "label": "Declanșați Evenimente HA pentru Notificări"
     },
     "notify_icon": {
       "doc": "Pictogramă mică pe notificare (de ex. mdi:washing-machine). Se trimite doar către ținte mobile_app, nu către grupuri notify. Pe iOS înlocuiește pictograma aplicației și necesită aplicația companion 2026.8 sau mai nouă. Gol: implicitul platformei.",
@@ -1400,10 +1366,6 @@
       "doc": "Scorul de potrivire în timp real de care are nevoie un ciclu înainte ca Terminarea inteligentă sau finalul anti-șifonare să îl poată încheia mai devreme. Nu schimbă programul afișat. Creșteți-l dacă potrivirile slabe încheie ciclurile prea devreme; scădeți-l dacă potrivirile clare așteaptă întreaga întârziere la oprire.",
       "label": "Prag de Potrivire"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Dacă scorul de potrivire în timp real scade sub această valoare, presupunerea curentă de program este ștearsă. Păstrați-l puțin sub Pragul de Potrivire, ca o scădere scurtă să nu o reseteze.",
-      "label": "Prag de Nepotrivire"
-    },
     "progress_reset_delay": {
       "doc": "După un ciclu, păstrați progresul la 100% atât timp înainte de revenirea la Inactiv.",
       "label": "Întârziere Resetare Progres"
@@ -1411,10 +1373,6 @@
     "pump_stuck_duration": {
       "doc": "Cât timp poate funcționa o pompă fără oprire înainte de declanșarea evenimentului de pompă blocată.",
       "label": "Durata Pompei Blocate"
-    },
-    "sampling_interval": {
-      "doc": "Timpul minim între citirile procesate. Citirile care sosesc mai devreme sunt sărite (citirile scăzute în timpul unui ciclu sunt păstrate mereu). Setați-l la intervalul de raportare al prizei dvs. sau mai jos; o valoare mai mare doar aruncă citiri.",
-      "label": "Interval de Eșantionare"
     },
     "save_debug_traces": {
       "doc": "Salvați și datele de depanare ale potrivirii (scorurile fiecărui candidat) cu fiecare ciclu, pentru depanare. Adaugă aproximativ 20 KB pe ciclu.",
@@ -1585,9 +1543,6 @@
     },
     "services": {
       "label": "Servicii"
-    },
-    "signal_processing": {
-      "label": "Procesare Semnal"
     },
     "thresholds_gap": {
       "label": "Praguri și Pauză"
@@ -1839,10 +1794,6 @@
         "higher": "Etichetează mai puține cicluri automat; mai multe merg la revizuire",
         "lower": "Etichetează mai multe cicluri automat; unele pot fi identificate greșit"
       },
-      "duration_tolerance": {
-        "higher": "Acceptă un interval de durată mai larg – potrivire mai flexibilă",
-        "lower": "Necesită durată mai apropiată – mai strict, poate respinge cicluri neobișnuite"
-      },
       "end_energy_threshold": {
         "higher": "Închide doar ciclurile care au consumat energie substanțială",
         "lower": "Închide și cicluri scurte sau cu consum redus de energie"
@@ -1944,7 +1895,6 @@
     "smart_termination_duration_ratio": "Fracțiunea din durata medie a programului pe care un ciclu trebuie să o atingă înainte ca Terminarea inteligentă să îl poată încheia mai devreme; reduceți-o dacă duratele variază",
     "anti_crease_finalize_ratio": "Fracțiunea din durata medie a programului pe care un ciclu trebuie să o atingă înainte ca finalul anti-șifonare să îl poată încheia; reduceți-o la uscătoare, lăsați mașinile de spălat la implicit",
     "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
-    "anti_wrinkle_exit_power": "Nivelul considerat liniște între impulsurile de rotire; are efect doar peste Prag de Oprire",
     "anti_wrinkle_idle_timeout": "Timp de liniște permis între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie",
     "anti_wrinkle_max_duration": "Un impuls mai lung decât acesta încheie modul anti-șifonare și deschide un ciclu nou",
     "anti_wrinkle_max_power": "Un impuls peste această valoare încheie modul anti-șifonare și deschide un ciclu nou",
@@ -2201,16 +2151,11 @@
     "kept": "păstrat",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "nepotrivit",
     "no_updates": "fără actualizări",
     "off_delay_wait": "întârziere oprire",
     "off_gap": "pauză",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "interval tipic de citire",
     "sensor_offline": "senzor offline: oprire forțată",
-    "si": "IE",
     "spike_ignored": "vârf ignorat",
     "spike_ignored_short": "vârf: ignorat",
     "start": "pornire",

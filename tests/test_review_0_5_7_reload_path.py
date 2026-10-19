@@ -33,7 +33,6 @@ import pytest
 
 from custom_components.ha_washdata import manager as mgr_mod
 from custom_components.ha_washdata.const import (
-    CONF_AUTO_LABEL_CONFIDENCE,
     CONF_DEVICE_TYPE,
     CONF_LEARNING_CONFIDENCE,
     CONF_LOW_POWER_NO_UPDATE_TIMEOUT,
@@ -42,7 +41,6 @@ from custom_components.ha_washdata.const import (
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_OFF_DELAY,
     CONF_POWER_SENSOR,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PROGRESS_RESET_DELAY,
     DEFAULT_OFF_DELAY,
     DEVICE_TYPE_WASHING_MACHINE,
@@ -156,20 +154,19 @@ async def test_b_an_idle_reload_does_not_restore_either(mock_hass) -> None:
 
 TUNED = {
     CONF_LEARNING_CONFIDENCE: 0.77,
-    CONF_AUTO_LABEL_CONFIDENCE: 0.91,
     CONF_MATCH_PERSISTENCE: 5,
-    CONF_PROFILE_UNMATCH_THRESHOLD: 0.21,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT: 1234,
     CONF_LOW_POWER_NO_UPDATE_TIMEOUT: 4321,
     CONF_OFF_DELAY: 222,
     CONF_PROGRESS_RESET_DELAY: 999,
-    "duration_tolerance": 0.33,
 }
 ATTRS = (
-    "_learning_confidence", "_auto_label_confidence", "_match_persistence",
-    "_unmatch_threshold", "_no_update_active_timeout", "_low_power_no_update_timeout",
+    "_learning_confidence", "_match_persistence",
+    "_no_update_active_timeout", "_low_power_no_update_timeout",
     "_off_delay", "_progress_reset_delay",
-)  # (`_duration_tolerance` was write-only and is gone: audit MANAGER-14.)
+)  # (`_duration_tolerance` was write-only and is gone: audit MANAGER-14;
+#    `_auto_label_confidence` likewise since 0.5.9, and `_unmatch_threshold` is
+#    the fixed default since 0.5.9, not a setting.)
 
 
 @pytest.mark.asyncio

@@ -18,7 +18,7 @@ def make_entry(hass, options: dict[str, Any] | None = None, title="Washer", entr
     opts = {
         "power_sensor": POWER, "device_type": "washing_machine",
         "min_power": 2.0, "off_delay": 60, "min_off_gap": 60,
-        "sampling_interval": 1, "watchdog_interval": 30,
+        "watchdog_interval": 30,
         "completion_min_seconds": 300,
         "notify_finish_services": ["notify.mobile_app_phone"],
         "notify_start_services": ["notify.mobile_app_phone"],

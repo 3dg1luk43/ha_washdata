@@ -62,7 +62,6 @@ def mock_entry():
         "off_delay": 120, # 2 mins
         "no_update_active_timeout": 300, # 5 mins
         "low_power_no_update_timeout": 3600, # 60 mins
-        "smoothing_window": 1,
         "completion_min_seconds": 60,
     }
     return entry

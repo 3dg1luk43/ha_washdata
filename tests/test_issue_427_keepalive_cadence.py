@@ -66,7 +66,6 @@ def mock_entry():
         "watchdog_interval": 30,
         "no_update_active_timeout": 387,
         "low_power_no_update_timeout": 3600,
-        "smoothing_window": 1,
         "completion_min_seconds": 600,
     }
     return entry

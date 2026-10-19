@@ -257,19 +257,13 @@
       "timeout": "Doit dépasser la Durée de blocage de la pompe ({ps} s) pour que l'alarme de pompe bloquée puisse se déclencher en premier"
     },
     "start_dur": {
-      "sampling": "L'Intervalle d'échantillonnage dépasse la Durée de démarrage ({sdt} s) ; des pics sur un seul échantillon peuvent ouvrir un cycle",
       "threshold": "Devrait être au moins un Intervalle d'échantillonnage ({si} s) pour éviter les faux démarrages sur un seul échantillon"
-    },
-    "unmatch": {
-      "match": "Doit être supérieur au Seuil de non-correspondance ({un})",
-      "unmatch": "Doit être inférieur au Seuil de correspondance ({match}) ; sinon une correspondance confirmée est immédiatement annulée"
     },
     "cascade_toast": "Autres paramètres ajustés pour la cohérence : {n}",
     "suggestion_resolves": "Appliquez la suggestion en attente ({val}) ci-dessous pour corriger ceci",
     "use_fix": "Utiliser {val}",
     "watchdog": {
-      "interval": "Devrait être au moins 2x l'Intervalle d'échantillonnage ({si} s)",
-      "sampling": "L'Intervalle d'échantillonnage devrait être au plus la moitié de l'Intervalle watchdog ({wi} s)"
+      "interval": "Devrait être au moins 2x l'Intervalle d'échantillonnage ({si} s)"
     },
     "end_energy": {
       "energy": "Trop strict pour le Seuil d'arrêt ({w} W) sur le Délai d'arrêt ({d} s) ; le cycle ne peut se terminer que par une voie de secours",
@@ -611,7 +605,7 @@
     "hist_reason_already_recorded": "chevauche un cycle déjà enregistré par WashData",
     "share_consent": "Je confirme que ces cycles se sont terminés normalement, sans interruption",
     "show_internal": "Afficher les paramètres internes",
-    "show_internal_tip": "Réglages que WashData ajuste pour vous (échantillonnage, chien de garde, cadence de correspondance, seuils). Affichés quand cet appareil a sa propre valeur, un conflit ou une suggestion.",
+    "show_internal_tip": "Réglages que WashData ajuste pour vous (chien de garde, cadence de correspondance, seuils). Affichés quand cet appareil a sa propre valeur, un conflit ou une suggestion.",
     "rate_n": "{n} étoiles",
     "rate_quality": "Évaluer la qualité",
     "pg_autolabel": "Étiquetage automatique",
@@ -1038,7 +1032,6 @@
     "smart_termination_duration_ratio": "Fraction de la durée moyenne du programme qu'un cycle doit atteindre avant que la Terminaison intelligente puisse l'arrêter plus tôt ; baissez-la si les durées varient",
     "anti_crease_finalize_ratio": "Fraction de la durée moyenne du programme qu'un cycle doit atteindre avant que la traîne anti-froissement puisse le terminer ; baissez-la sur les sèche-linge, gardez la valeur par défaut sur les lave-linge",
     "anti_wrinkle_enabled": "Absorber les impulsions de culbutage après la phase principale au lieu de les lire comme de nouveaux cycles",
-    "anti_wrinkle_exit_power": "Niveau considéré comme silence entre les impulsions de culbutage ; n'agit qu'au-dessus du Seuil d'arrêt",
     "anti_wrinkle_idle_timeout": "Temps de silence autorisé entre deux impulsions de culbutage avant la fin de l'anti-froissement",
     "anti_wrinkle_max_duration": "Une impulsion plus longue met fin à l'anti-froissement et ouvre un nouveau cycle",
     "anti_wrinkle_max_power": "Une impulsion au-dessus de ce seuil met fin à l'anti-froissement et ouvre un nouveau cycle",
@@ -1164,10 +1157,6 @@
       "doc": "Rattacher au cycle terminé les courtes impulsions de rotation à faible puissance d'un sèche-linge après la phase de chauffe principale, au lieu de les lire comme de nouveaux cycles.",
       "label": "Activer la détection anti-froissement"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "En mode anti-froissement, une puissance sous cette valeur compte comme du silence entre les impulsions de culbutage, et un silence plus long que l'Intervalle maximal entre impulsions termine le mode. Le Seuil d'arrêt est utilisé s'il est plus élevé : ce réglage n'a donc d'effet qu'au-dessus du Seuil d'arrêt.",
-      "label": "Seuil de puissance de sortie"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Durée pendant laquelle le sèche-linge peut rester silencieux entre deux impulsions avant la fin du mode anti-froissement. Réglez-la au-dessus de la plus longue pause de votre sèche-linge, sinon les impulsions suivantes sont lues comme de faux démarrages.",
       "label": "Intervalle maximal entre impulsions"
@@ -1216,10 +1205,6 @@
       "doc": "Capteur de porte facultatif. Indique quand l'appareil a été ouvert pour être déchargé après un cycle.",
       "label": "Entité capteur de porte"
     },
-    "duration_tolerance": {
-      "doc": "Retour d'apprentissage uniquement : un cycle à +/-X % de sa durée estimée compte comme une bonne estimation. N'affecte pas la correspondance.",
-      "label": "Tolérance d'estimation"
-    },
     "enable_ml_models": {
       "doc": "Utiliser un modèle entraîné sur cette machine pour prévoir l'énergie et le coût d'un cycle en cours, et laisser un programme bien connu qui s'arrête anormalement tôt se terminer sans tout le délai d'arrêt. Désactivé : logique basée sur la puissance uniquement.",
       "label": "Appliquer les modèles intelligents pendant un cycle"
@@ -1245,12 +1230,8 @@
       "label": "Exposer les entités de débogage"
     },
     "external_end_trigger": {
-      "doc": "Capteur binaire dont le changement marque la fin du cycle (p. ex. un contact « terminé » ou une autre intégration).",
+      "doc": "Capteur binaire optionnel qui termine le cycle quand il s'active, en plus de la détection par la consommation (p. ex. un contact « terminé » ou une autre intégration). Laisser vide pour le désactiver.",
       "label": "Entité de déclencheur externe"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Laisser un capteur binaire signaler la fin d'un cycle, en plus de la détection basée sur la puissance.",
-      "label": "Activer le déclencheur de fin externe"
     },
     "external_end_trigger_inverted": {
       "doc": "Considérer le passage du capteur à OFF (et non à ON) comme signal de fin.",
@@ -1275,18 +1256,6 @@
     "ml_training_enabled": {
       "doc": "Réentraîner de temps en temps le modèle d'énergie sur les cycles terminés de cette machine. Un nouveau modèle n'est gardé que s'il bat l'estimation simple sur des cycles de test.",
       "label": "Apprendre de cette machine"
-    },
-    "ml_training_hour": {
-      "doc": "Heure de la journée (0-23) pour l'entraînement nocturne. Choisissez une heure calme, p. ex. 2.",
-      "label": "Apprendre à l'heure"
-    },
-    "ml_training_interval_days": {
-      "doc": "Nombre minimal de jours entre deux réentraînements.",
-      "label": "Vérifier au plus tous les"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Attendre au moins ce nombre de cycles enregistrés avant l'entraînement.",
-      "label": "Cycles nécessaires d'abord"
     },
     "name": {
       "doc": "Nom affiché dans Home Assistant pour cet appareil.",
@@ -1319,10 +1288,6 @@
     "notify_finish_services": {
       "doc": "Services notify.* à appeler à la fin d'un cycle. Laissez vide pour aucun.",
       "label": "Services de fin"
-    },
-    "notify_fire_events": {
-      "doc": "Émettre aussi des événements ha_washdata_* au début et à la fin du cycle, pour vos propres automatisations.",
-      "label": "Déclencher des événements HA pour les notifications"
     },
     "notify_icon": {
       "doc": "Petite icône de la notification (p. ex. mdi:washing-machine). Envoyée uniquement aux cibles mobile_app, pas aux groupes notify. Sur iOS, elle remplace l'icône de l'application et nécessite l'application compagnon 2026.8 ou plus récente. Vide : valeur par défaut de la plateforme.",
@@ -1420,10 +1385,6 @@
       "doc": "Score de correspondance en direct dont un cycle a besoin avant que la Terminaison intelligente ou la fin anti-froissement puisse l'arrêter plus tôt. Ne change pas le programme affiché. Augmentez-le si des correspondances faibles arrêtent des cycles trop tôt ; baissez-le si des correspondances nettes attendent tout le délai d'arrêt.",
       "label": "Seuil de correspondance"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Si le score de correspondance en direct passe sous cette valeur, l'hypothèse de programme actuelle est effacée. Gardez-le un peu sous le Seuil de correspondance pour qu'une brève baisse ne la réinitialise pas.",
-      "label": "Seuil de non-correspondance"
-    },
     "progress_reset_delay": {
       "doc": "Après un cycle, garder la progression à 100 % pendant ce délai avant de revenir à Inactif.",
       "label": "Délai de réinitialisation de progression"
@@ -1431,10 +1392,6 @@
     "pump_stuck_duration": {
       "doc": "Durée pendant laquelle une pompe peut tourner sans arrêt avant le déclenchement de l'événement de pompe bloquée.",
       "label": "Durée de blocage de la pompe"
-    },
-    "sampling_interval": {
-      "doc": "Temps minimal entre deux mesures traitées. Les mesures arrivées plus tôt sont ignorées (les mesures basses pendant un cycle sont toujours conservées). Réglez-le sur l'intervalle de remontée de votre prise ou moins ; une valeur plus élevée ne fait que jeter des mesures.",
-      "label": "Intervalle d'échantillonnage"
     },
     "save_debug_traces": {
       "doc": "Enregistrer aussi avec chaque cycle les données de débogage du moteur de correspondance (les scores de chaque candidat), pour le dépannage. Ajoute environ 20 Ko par cycle.",
@@ -1605,9 +1562,6 @@
     },
     "services": {
       "label": "Services"
-    },
-    "signal_processing": {
-      "label": "Traitement du signal"
     },
     "thresholds_gap": {
       "label": "Seuils et intervalle"
@@ -1858,10 +1812,6 @@
       "auto_label_confidence": {
         "higher": "Étiquette moins de cycles automatiquement ; davantage sont envoyés en révision",
         "lower": "Étiquette plus de cycles automatiquement ; certains peuvent être mal identifiés"
-      },
-      "duration_tolerance": {
-        "higher": "Accepte une plage de durée plus large – correspondance plus flexible",
-        "lower": "Exige une durée plus proche – plus strict, peut rejeter des cycles inhabituels"
       },
       "end_energy_threshold": {
         "higher": "Clôture uniquement les cycles ayant consommé une énergie significative",
@@ -2201,16 +2151,11 @@
     "kept": "conservé",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "non reconnu",
     "no_updates": "aucune mise à jour",
     "off_delay_wait": "délai d'arrêt",
     "off_gap": "intervalle",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "intervalle de lecture typique",
     "sensor_offline": "capteur hors ligne : arrêt forcé",
-    "si": "IE",
     "spike_ignored": "pic ignoré",
     "spike_ignored_short": "pic : ignoré",
     "start": "démarrage",

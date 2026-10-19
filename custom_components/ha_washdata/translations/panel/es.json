@@ -257,19 +257,13 @@
       "timeout": "Debe superar la Duración de bomba atascada ({ps} s) para que la alarma de bomba atascada pueda saltar primero"
     },
     "start_dur": {
-      "sampling": "El Intervalo de muestreo supera la Duración de inicio ({sdt} s); los picos de una sola muestra pueden abrir un ciclo",
       "threshold": "Debería ser al menos un Intervalo de muestreo ({si} s) para evitar falsos arranques de una sola muestra"
-    },
-    "unmatch": {
-      "match": "Debe ser superior al Umbral de no coincidencia ({un})",
-      "unmatch": "Debe ser inferior al Umbral de coincidencia ({match}); de lo contrario, una coincidencia confirmada se deshace instantáneamente"
     },
     "cascade_toast": "Otros ajustes modificados por coherencia: {n}",
     "suggestion_resolves": "Aplique la sugerencia pendiente ({val}) abajo para corregir esto",
     "use_fix": "Usar {val}",
     "watchdog": {
-      "interval": "Debería ser al menos 2x el Intervalo de muestreo ({si} s)",
-      "sampling": "El Intervalo de muestreo debería ser como máximo la mitad del Intervalo watchdog ({wi} s)"
+      "interval": "Debería ser al menos 2x el Intervalo de muestreo ({si} s)"
     },
     "end_energy": {
       "energy": "Demasiado estricto para el Umbral de parada ({w} W) durante el Retardo de apagado ({d} s); el ciclo solo puede terminar mediante una vía de respaldo",
@@ -611,7 +605,7 @@
     "hist_reason_already_recorded": "se solapa con un ciclo que WashData ya registró",
     "share_consent": "Confirmo que estos ciclos terminaron con normalidad, sin interrupciones",
     "show_internal": "Mostrar ajustes internos",
-    "show_internal_tip": "Ajustes que WashData afina por usted (muestreo, vigilancia, cadencia de coincidencia, umbrales). Se muestran cuando este dispositivo tiene un valor propio, un conflicto o una sugerencia.",
+    "show_internal_tip": "Ajustes que WashData afina por usted (vigilancia, cadencia de coincidencia, umbrales). Se muestran cuando este dispositivo tiene un valor propio, un conflicto o una sugestión.",
     "rate_n": "{n} estrellas",
     "rate_quality": "Valorar la calidad",
     "pg_autolabel": "Etiquetado automático",
@@ -1038,7 +1032,6 @@
     "smart_termination_duration_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la Terminación inteligente pueda finalizarlo antes de tiempo; redúzcala si la duración varía",
     "anti_crease_finalize_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la cola antiarrugas pueda terminarlo; redúzcala en secadoras, deje las lavadoras en el valor predeterminado",
     "anti_wrinkle_enabled": "Absorber los pulsos de volteo tras la fase principal en lugar de leerlos como nuevos ciclos",
-    "anti_wrinkle_exit_power": "Nivel que cuenta como silencio entre pulsos de volteo; solo actúa por encima del Umbral de parada",
     "anti_wrinkle_idle_timeout": "Tiempo de silencio permitido entre dos pulsos de volteo antes de que finalice el modo antiarrugas",
     "anti_wrinkle_max_duration": "Un pulso más largo que esto finaliza el modo antiarrugas y abre un nuevo ciclo",
     "anti_wrinkle_max_power": "Un pulso por encima de esto finaliza el modo antiarrugas y abre un nuevo ciclo",
@@ -1164,10 +1157,6 @@
       "doc": "Mantener los pulsos cortos de volteo de baja potencia de una secadora tras la fase principal de calor dentro del ciclo terminado, en lugar de leerlos como ciclos nuevos.",
       "label": "Habilitar detección antiarrugas"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "En modo antiarrugas, una potencia por debajo de este valor cuenta como silencio entre pulsos de volteo, y un silencio más largo que el Intervalo máximo entre pulsos termina el modo. Si el Umbral de parada es más alto, se usa ese, así que esto solo cambia algo si está por encima del Umbral de parada.",
-      "label": "Umbral de potencia de salida"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Cuánto tiempo puede estar en silencio la secadora entre pulsos de volteo antes de que termine el modo antiarrugas. Ajústelo por encima de la pausa más larga de su secadora, o los pulsos posteriores se leerán como falsos arranques.",
       "label": "Intervalo máximo entre pulsos"
@@ -1216,10 +1205,6 @@
       "doc": "Sensor de puerta opcional. Muestra cuándo se abrió el electrodoméstico para descargarlo tras un ciclo.",
       "label": "Entidad de sensor de puerta"
     },
-    "duration_tolerance": {
-      "doc": "Solo para el aprendizaje: un ciclo dentro de +/-X% de su duración estimada cuenta como una buena estimación. No afecta a la coincidencia.",
-      "label": "Tolerancia de estimación"
-    },
     "enable_ml_models": {
       "doc": "Usar un modelo entrenado en esta máquina para predecir la energía y el costo de un ciclo en marcha, y dejar que un programa bien conocido que se detiene inusualmente pronto termine sin todo el retardo de apagado. Desactivado: solo lógica basada en la potencia.",
       "label": "Aplicar modelos inteligentes durante un ciclo"
@@ -1245,12 +1230,8 @@
       "label": "Exponer entidades de depuración"
     },
     "external_end_trigger": {
-      "doc": "Sensor binario cuyo cambio marca el final del ciclo (p. ej. un contacto de \"terminado\" u otra integración).",
+      "doc": "Sensor binario opcional que termina el ciclo cuando se activa, además de la detección por consumo (p. ej. un contacto «terminado» u otra integración). Dejar vacío para desactivarlo.",
       "label": "Entidad disparadora externa"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Dejar que un sensor binario indique el final de un ciclo, además de la detección basada en la potencia.",
-      "label": "Habilitar disparador de fin externo"
     },
     "external_end_trigger_inverted": {
       "doc": "Tomar como señal de fin el paso del sensor a apagado (no a encendido).",
@@ -1275,18 +1256,6 @@
     "ml_training_enabled": {
       "doc": "Reentrenar de vez en cuando el modelo de energía con los ciclos terminados de esta máquina. Un modelo nuevo solo se conserva si supera a la estimación simple en ciclos de prueba.",
       "label": "Aprender de esta máquina"
-    },
-    "ml_training_hour": {
-      "doc": "Hora del día (0-23) para el entrenamiento nocturno. Elija una hora tranquila, p. ej. 2.",
-      "label": "Aprender a la hora"
-    },
-    "ml_training_interval_days": {
-      "doc": "Reentrenar como máximo una vez cada este número de días.",
-      "label": "Comprobar como máximo cada"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Esperar a tener al menos este número de ciclos grabados antes de entrenar.",
-      "label": "Ciclos necesarios primero"
     },
     "name": {
       "doc": "Nombre que se muestra en Home Assistant para este dispositivo.",
@@ -1319,10 +1288,6 @@
     "notify_finish_services": {
       "doc": "Servicios notify.* a los que llamar al terminar un ciclo. Déjelo vacío para ninguno.",
       "label": "Servicios de fin"
-    },
-    "notify_fire_events": {
-      "doc": "Lanzar también eventos ha_washdata_* al inicio y al final del ciclo, para sus propias automatizaciones.",
-      "label": "Disparar eventos de HA para notificaciones"
     },
     "notify_icon": {
       "doc": "Icono pequeño de la notificación (p. ej. mdi:washing-machine). Solo se envía a destinos mobile_app, no a grupos notify. En iOS sustituye al icono de la aplicación y requiere la aplicación complementaria 2026.8 o posterior. En blanco: el predeterminado de la plataforma.",
@@ -1420,10 +1385,6 @@
       "doc": "Puntuación de coincidencia en vivo que necesita un ciclo antes de que la Terminación inteligente o el final antiarrugas puedan terminarlo antes de tiempo. No cambia el programa mostrado. Súbala si coincidencias débiles terminan ciclos demasiado pronto; bájela si coincidencias claras esperan todo el retardo de apagado.",
       "label": "Umbral de coincidencia"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Si la puntuación de coincidencia en vivo cae por debajo de este valor, se borra la suposición actual de programa. Manténgala un poco por debajo del Umbral de coincidencia para que una caída breve no la reinicie.",
-      "label": "Umbral de no coincidencia"
-    },
     "progress_reset_delay": {
       "doc": "Tras un ciclo, mantener el progreso al 100% durante este tiempo antes de volver a Inactivo.",
       "label": "Retardo de reinicio de progreso"
@@ -1431,10 +1392,6 @@
     "pump_stuck_duration": {
       "doc": "Cuánto tiempo puede funcionar una bomba sin parar antes de que salte el evento de bomba atascada.",
       "label": "Duración de bomba atascada"
-    },
-    "sampling_interval": {
-      "doc": "Tiempo mínimo entre lecturas procesadas. Las lecturas que llegan antes se omiten (las lecturas bajas durante un ciclo siempre se conservan). Póngalo en el intervalo de informe de su enchufe o menos; un valor mayor solo descarta lecturas.",
-      "label": "Intervalo de muestreo"
     },
     "save_debug_traces": {
       "doc": "Guardar también con cada ciclo los datos de depuración del comparador (las puntuaciones de cada candidato), para solucionar problemas. Añade unos 20 KB por ciclo.",
@@ -1605,9 +1562,6 @@
     },
     "services": {
       "label": "Servicios"
-    },
-    "signal_processing": {
-      "label": "Procesamiento de señal"
     },
     "thresholds_gap": {
       "label": "Umbrales y brecha"
@@ -1858,10 +1812,6 @@
       "auto_label_confidence": {
         "higher": "Etiqueta menos ciclos automáticamente; más van a revisión",
         "lower": "Etiqueta más ciclos automáticamente; algunos pueden ser mal identificados"
-      },
-      "duration_tolerance": {
-        "higher": "Acepta un rango de duración más amplio – correspondencia más flexible",
-        "lower": "Exige una duración más cercana – más estricto, puede rechazar ciclos inusuales"
       },
       "end_energy_threshold": {
         "higher": "Solo cierra ciclos que usaron energía significativa",
@@ -2201,16 +2151,11 @@
     "kept": "conservado",
     "max": "máx.",
     "min": "mín.",
-    "minus_tol": "-tol",
     "no_match": "no coincide",
     "no_updates": "sin actualizaciones",
     "off_delay_wait": "retardo de apagado",
     "off_gap": "brecha",
-    "plus_tol": "+tol",
-    "profile": "perfil",
-    "reading_interval": "intervalo típico de lectura",
     "sensor_offline": "sensor caído: parada forzada",
-    "si": "IM",
     "spike_ignored": "pico ignorado",
     "spike_ignored_short": "pico: ignorado",
     "start": "inicio",

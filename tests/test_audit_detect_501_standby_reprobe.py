@@ -251,7 +251,7 @@ def _standby_day() -> list[tuple[datetime, float | None]]:
 
 
 def test_start_gate_eval_counts_flickers_not_probes() -> None:
-    device = sge.Device("washing_machine", {}, {"min_power": 3.24, "sampling_interval": 1.0}, [])
+    device = sge.Device("washing_machine", {}, {"min_power": 3.24}, [])
     config, manager = sge.detector_setup(device, {})
     readings = _standby_day()
     result = sge.replay(readings, config, manager)

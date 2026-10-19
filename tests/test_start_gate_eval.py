@@ -34,7 +34,6 @@ OPTIONS = {
     "min_power": 2.0,
     "start_duration_threshold": 5.0,
     "start_energy_threshold": 0.2,
-    "sampling_interval": 1.0,
 }
 
 
@@ -43,13 +42,17 @@ def _at(seconds: float) -> datetime:
 
 
 def _day() -> tuple[list[tuple[datetime, float | None]], float]:
-    """Idle (0.3 W every 30 s), a 1 s 1500 W blip, then a wash after a door-lock probe."""
+    """Idle (0.3 W every 30 s), a 2 s 1500 W blip, then a wash after a door-lock probe.
+
+    Readings at least 2 s apart: the washer's sampling throttle (its device default,
+    not a setting since 0.5.9) would drop a closer one.
+    """
     rows: list[tuple[float, float]] = []
     t = 0.0
     while t < 7200:
         rows.append((t, 0.3))
         t += 30
-    rows += [(7200.0, 1500.0), (7201.0, 1500.0), (7202.0, 0.3)]
+    rows += [(7200.0, 1500.0), (7202.0, 1500.0), (7204.0, 0.3)]
     t = 7230.0
     while t < WASH - 60:
         rows.append((t, 0.3))
@@ -112,7 +115,7 @@ def test_baseline_and_variants_on_a_synthetic_day():
     assert base["phantoms"] == 0 and base["idle_probes"] == 1
     assert base["idle_days"] > 0
 
-    # Looser duration gate: the 1 s blip carries 0.4 Wh and now commits.
+    # Looser duration gate: the 2 s blip carries 0.8 Wh and now commits.
     loose = v["start_duration_threshold=0.5"]["summary"]
     assert loose["phantoms"] == 1 and loose["missed"] == 0
     assert loose["phantom_starts"] == [_at(7200).isoformat()]
@@ -140,11 +143,14 @@ def test_the_sampling_throttle_drops_a_start_reading():
 
     Found on a real washer (sampling 40.3 s): a 5 W reading 20 s after the last
     processed one was dropped, so the start was recorded 20 s late, as live did.
+    Since 0.5.9 the throttle is the device default and a stored value is ignored,
+    so the 40 s here is a ``--set`` what-if.
     """
     doc = {"data": {"past_cycles": []}, "entry_data": {},
            "entry_options": {**OPTIONS, "sampling_interval": 40.0}}
     device = sge.load_device(doc, None)
-    config, manager = sge.detector_setup(device, {})
+    assert sge.detector_setup(device, {})[1]["sampling_interval"] == 2.0
+    config, manager = sge.detector_setup(device, {"sampling_interval": 40.0})
     rows = [(0, 3.0), (20, 0.0), (40, 5.0), (60.5, 61.0), (83, 48.0)]
     rows += [(83 + 20 * k, 1500.0) for k in range(1, 30)]
     result = sge.replay([(_at(s), p) for s, p in rows], config, manager)

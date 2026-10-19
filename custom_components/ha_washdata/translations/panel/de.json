@@ -306,19 +306,13 @@
       "timeout": "Muss größer als die Dauer der feststeckenden Pumpe ({ps} s) sein, damit der Festsitzen-Alarm zuerst auslösen kann"
     },
     "start_dur": {
-      "sampling": "Abtastintervall überschreitet die Startdauer ({sdt} s); einzelne Messwertspitzen können einen Zyklus öffnen",
       "threshold": "Sollte mindestens ein Abtastintervall ({si} s) betragen, um Einzelmesswert-Fehlstarts zu verhindern"
-    },
-    "unmatch": {
-      "match": "Muss über dem Nicht-Übereinstimmungs-Schwellenwert ({un}) liegen",
-      "unmatch": "Muss unter dem Übereinstimmungsschwellenwert ({match}) liegen; andernfalls wird eine bestätigte Übereinstimmung sofort aufgehoben"
     },
     "cascade_toast": "Andere Einstellungen zur Konsistenz angepasst: {n}",
     "suggestion_resolves": "Unten den ausstehenden Vorschlag ({val}) übernehmen, um dies zu beheben",
     "use_fix": "Verwende {val}",
     "watchdog": {
-      "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen",
-      "sampling": "Abtastintervall sollte höchstens die Hälfte des Watchdog-Intervalls ({wi} s) betragen"
+      "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen"
     },
     "settings_banner": "Einstellungskonflikte: {n}. Prüfen Sie die markierten Abschnitte und beheben Sie sie vor dem Speichern.",
     "settings_banner_btn": "Zum ersten",
@@ -661,7 +655,7 @@
     "hist_reason_already_recorded": "überschneidet sich mit einem Zyklus, den WashData bereits aufgezeichnet hat",
     "share_consent": "Ich bestätige, dass diese Zyklen normal und ohne Unterbrechung abgeschlossen wurden",
     "show_internal": "Interne Einstellungen anzeigen",
-    "show_internal_tip": "Einstellungen, die WashData für Sie abstimmt (Abtastung, Watchdog, Abgleichrhythmus, Schwellenwerte). Werden angezeigt, wenn dieses Gerät einen eigenen Wert, einen Konflikt oder einen Vorschlag hat.",
+    "show_internal_tip": "Einstellungen, die WashData für Sie anpasst (Watchdog, Match-Häufigkeit, Schwellenwerte). Wird angezeigt, wenn dieses Gerät einen eigenen Wert, einen Konflikt oder einen Vorschlag hat.",
     "rate_n": "{n} Sterne",
     "rate_quality": "Qualität bewerten",
     "pg_autolabel": "Automatische Beschriftung",
@@ -1087,7 +1081,6 @@
     "anti_wrinkle_max_power": "Ein Impuls darüber beendet den Knitterschutz und öffnet einen neuen Zyklus",
     "anti_wrinkle_enabled": "Die Trommelimpulse nach der Hauptphase schlucken, statt sie als neue Zyklen zu lesen",
     "anti_wrinkle_max_duration": "Ein längerer Impuls beendet den Knitterschutz und öffnet einen neuen Zyklus",
-    "anti_wrinkle_exit_power": "Pegel, der zwischen Trommelimpulsen als Stille gilt; wirkt nur über dem Stoppschwellenwert",
     "anti_crease_finalize_ratio": "Anteil der durchschnittlichen Programmdauer, den ein Zyklus erreichen muss, bevor der Knitterschutz-Nachlauf ihn abschließen darf; bei Trocknern senken, Waschmaschinen beim Standard lassen",
     "curve_preroll_seconds": "Sekunden an Messwerten aus abgebrochenen Startversuchen, die an den Anfang der Kurve eines Zyklus übernommen werden; 0 = aus"
   },
@@ -1202,10 +1195,6 @@
       "doc": "Die kurzen Trommelimpulse eines Trockners mit geringer Leistung nach der Hauptheizphase beim abgeschlossenen Zyklus behalten, statt sie als neue Zyklen zu werten.",
       "label": "Knitterschutzerkennung aktivieren"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "Im Knitterschutz gilt Leistung unter diesem Wert als Stille zwischen Trommelimpulsen, und Stille länger als die Maximale Impulspause beendet den Modus. Ist der Stoppschwellenwert höher, wird er verwendet; dieser Wert wirkt also nur, wenn er über dem Stoppschwellenwert liegt.",
-      "label": "Ausgangsleistungsschwellenwert"
-    },
     "anti_wrinkle_max_duration": {
       "doc": "Ein längerer Impuls gilt als echter Zyklus, nicht als Knitterschutz-Trommeln.",
       "label": "Maximale Dauer"
@@ -1250,10 +1239,6 @@
       "doc": "Optionaler Türsensor. Zeigt, wann das Gerät nach einem Zyklus zum Entladen geöffnet wurde.",
       "label": "Türsensor-Entität"
     },
-    "duration_tolerance": {
-      "doc": "Nur Lernfeedback: Ein Zyklus innerhalb von +/-X % seiner geschätzten Dauer gilt als gute Schätzung. Beeinflusst den Abgleich nicht.",
-      "label": "Schätzungstoleranz"
-    },
     "enable_ml_models": {
       "doc": "Ein auf dieser Maschine trainiertes Modell sagt Energie und Kosten eines laufenden Zyklus voraus, und ein gut bekanntes Programm, das ungewöhnlich früh stoppt, darf ohne die volle Abschaltverzögerung enden. Aus: nur leistungsbasierte Logik.",
       "label": "Intelligente Modelle während eines Zyklus anwenden"
@@ -1279,12 +1264,8 @@
       "label": "Debug-Entitäten anzeigen"
     },
     "external_end_trigger": {
-      "doc": "Binärsensor, dessen Änderung das Zyklusende markiert (z. B. ein „Fertig“-Kontakt oder eine andere Integration).",
+      "doc": "Optionaler Binärsensor, der den Zyklus beendet, wenn er einschaltet, zusätzlich zur leistungsbasierten Erkennung (z.B. ein Fertig-Kontakt oder eine andere Integration). Leer lassen zum Deaktivieren.",
       "label": "Externe Auslöser-Entität"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Einen Binärsensor das Zyklusende melden lassen, zusätzlich zur leistungsbasierten Erkennung.",
-      "label": "Externen Endauslöser aktivieren"
     },
     "external_end_trigger_inverted": {
       "doc": "Das Ausschalten (statt Einschalten) des Sensors als Endsignal werten.",
@@ -1309,18 +1290,6 @@
     "ml_training_enabled": {
       "doc": "Das Energiemodell regelmäßig mit den abgeschlossenen Zyklen dieser Maschine neu trainieren. Ein neues Modell wird nur behalten, wenn es auf Testzyklen die einfache Schätzung schlägt.",
       "label": "Von dieser Maschine lernen"
-    },
-    "ml_training_hour": {
-      "doc": "Uhrzeit (0-23) für das nächtliche Training. Wählen Sie eine ruhige Stunde, z. B. 2.",
-      "label": "Lernen zur Stunde"
-    },
-    "ml_training_interval_days": {
-      "doc": "Höchstens einmal alle so vielen Tage neu trainieren.",
-      "label": "Höchstens alle prüfen"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Mit dem Training warten, bis mindestens so viele Zyklen aufgezeichnet sind.",
-      "label": "Zuerst benötigte Zyklen"
     },
     "name": {
       "doc": "Name dieses Geräts in Home Assistant.",
@@ -1353,10 +1322,6 @@
     "notify_finish_services": {
       "doc": "notify.*-Dienste, die beim Zyklusende aufgerufen werden. Leer lassen für keine.",
       "label": "Enddienste"
-    },
-    "notify_fire_events": {
-      "doc": "Zusätzlich ha_washdata_*-Ereignisse bei Zyklusstart und -ende auslösen, für Ihre eigenen Automatisierungen.",
-      "label": "HA-Ereignisse für Benachrichtigungen auslösen"
     },
     "notify_icon": {
       "doc": "Kleines Symbol auf der Benachrichtigung (z. B. mdi:washing-machine). Wird nur an mobile_app-Ziele gesendet, nicht an notify-Gruppen. Unter iOS ersetzt es das App-Symbol und erfordert die Companion-App 2026.8 oder neuer. Leer: Plattformstandard.",
@@ -1454,10 +1419,6 @@
       "doc": "Live-Übereinstimmungswert, den ein Zyklus braucht, bevor die intelligente Beendigung oder der Knitterschutz-Abschluss ihn vorzeitig beenden darf. Ändert nicht das angezeigte Programm. Erhöhen, wenn schwache Zuordnungen Zyklen zu früh beenden; senken, wenn eindeutige Zuordnungen die Abschaltverzögerung abwarten.",
       "label": "Abgleichschwellenwert"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Fällt der Live-Übereinstimmungswert darunter, wird die aktuelle Programmvermutung gelöscht. Etwas unter dem Abgleichschwellenwert halten, damit ein kurzer Einbruch sie nicht zurücksetzt.",
-      "label": "Nichtübereinstimmungsschwellenwert"
-    },
     "progress_reset_delay": {
       "doc": "Nach einem Zyklus den Fortschritt so lange auf 100 % halten, bevor auf Leerlauf zurückgesetzt wird.",
       "label": "Fortschritts-Reset-Verzögerung"
@@ -1465,10 +1426,6 @@
     "pump_stuck_duration": {
       "doc": "Wie lange eine Pumpe ununterbrochen laufen darf, bevor das Ereignis „Pumpe steckengeblieben“ ausgelöst wird.",
       "label": "Dauer der feststeckenden Pumpe"
-    },
-    "sampling_interval": {
-      "doc": "Mindestzeit zwischen verarbeiteten Messwerten. Früher eintreffende Messwerte werden übersprungen (niedrige Werte während eines Zyklus bleiben immer erhalten). Auf das Meldeintervall Ihrer Steckdose oder niedriger einstellen; ein höherer Wert verwirft nur Messwerte.",
-      "label": "Abtastintervall"
     },
     "save_debug_traces": {
       "doc": "Zusätzlich die Debug-Daten des Abgleichs (die Bewertungen aller Kandidaten) mit jedem Zyklus speichern, zur Fehlerbehebung. Belegt etwa 20 KB pro Zyklus.",
@@ -1644,9 +1601,6 @@
     "services": {
       "label": "Dienste"
     },
-    "signal_processing": {
-      "label": "Signalverarbeitung"
-    },
     "thresholds_gap": {
       "label": "Schwellenwerte & Lücke"
     },
@@ -1709,10 +1663,6 @@
       "auto_label_confidence": {
         "higher": "Weniger automatische Beschriftungen – mehr Zyklen kommen zur Überprüfung",
         "lower": "Mehr automatische Beschriftungen – einzelne könnten falsch zugeordnet sein"
-      },
-      "duration_tolerance": {
-        "higher": "Akzeptiert einen größeren Dauerkorridor – flexiblere Erkennung",
-        "lower": "Erfordert engere Dauerübereinstimmung – strenger, kann ungewöhnliche Zyklen ablehnen"
       },
       "end_energy_threshold": {
         "higher": "Beendet nur Zyklen mit wesentlichem Energieverbrauch",
@@ -2183,16 +2133,11 @@
     "kept": "behalten",
     "max": "max",
     "min": "min",
-    "minus_tol": "-Tol",
     "no_match": "kein Treffer",
     "no_updates": "keine Updates",
     "off_delay_wait": "Abschaltverzögerung",
     "off_gap": "Aus-Lücke",
-    "plus_tol": "+Tol",
-    "profile": "Profil",
-    "reading_interval": "typisches Messintervall",
     "sensor_offline": "Sensor offline: Zwangsstopp",
-    "si": "AI",
     "spike_ignored": "Spitze ignoriert",
     "spike_ignored_short": "Spitze: ignoriert",
     "start": "Start",

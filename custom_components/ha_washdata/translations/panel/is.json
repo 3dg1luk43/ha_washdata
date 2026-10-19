@@ -306,19 +306,13 @@
       "timeout": "Verður að vera yfir Tímamörkum fastrar dælu ({ps} s) svo viðvörun um fasta dælu geti farið fyrst í gang"
     },
     "start_dur": {
-      "sampling": "Sýnitakabil fer yfir Ræsingarlengd ({sdt} s); einstaks sýnis toppar gætu opnað lotu",
       "threshold": "Ætti að vera að minnsta kosti eitt Sýnitakabil ({si} s) til að koma í veg fyrir einstaks sýnis rangar ræsingar"
-    },
-    "unmatch": {
-      "match": "Verður að vera yfir Ósamsvarþröskuldi ({un})",
-      "unmatch": "Verður að vera undir Samsvarþröskuldi ({match}); annars er staðfest samsvörun afturkölluð samstundis"
     },
     "cascade_toast": "Aðrar stillingar leiðréttar til samræmis: {n}",
     "suggestion_resolves": "Notaðu tillöguna hér að neðan ({val}) til að laga þetta",
     "use_fix": "Nota {val}",
     "watchdog": {
-      "interval": "Ætti að vera að minnsta kosti 2x Sýnitakabil ({si} s)",
-      "sampling": "Sýnitakabil ætti að vera í mesta lagi helmingur Gæsluabils ({wi} s)"
+      "interval": "Ætti að vera að minnsta kosti 2x Sýnitakabil ({si} s)"
     },
     "settings_banner": "Árekstrar í stillingum: {n}. Skoðaðu auðkenndu hlutana og lagaðu þá áður en þú vistar.",
     "settings_banner_btn": "Fara á fyrsta",
@@ -661,7 +655,7 @@
     "hist_reason_already_recorded": "skarast á við lotu sem WashData hefur þegar skráð",
     "share_consent": "Ég staðfesti að þessar lotur kláruðust eðlilega án truflana",
     "show_internal": "Sýna innri stillingar",
-    "show_internal_tip": "Stillingar sem WashData fínstillir fyrir þig (sýnataka, gæsla, tíðni samsvörunar, þröskuldar). Birtast þegar þetta tæki hefur eigið gildi, árekstur eða tillögu.",
+    "show_internal_tip": "Stillingar sem WashData stillir fyrir þig (watchdog, samsvörunarfrekni, þröskuldar). Sýnt þegar þetta tæki hefur eigið gildi, árekstr eða tillögu.",
     "rate_n": "{n} stjörnur",
     "rate_quality": "Gefa gæðum einkunn",
     "pg_autolabel": "Sjálfvirk merking",
@@ -1087,7 +1081,6 @@
     "anti_wrinkle_max_power": "Púls yfir þessu slekkur á hrukkuleysi og opnar nýja lotu",
     "anti_wrinkle_enabled": "Fangar veltipúlsana eftir aðalfasann í stað þess að lesa þá sem nýjar lotur",
     "anti_wrinkle_max_duration": "Púls sem er lengri en þetta slekkur á hrukkuleysi og opnar nýja lotu",
-    "anti_wrinkle_exit_power": "Kyrrðarstig milli veltipúlsa; virkar aðeins yfir Stöðvunarþröskuldi",
     "anti_crease_finalize_ratio": "Hlutfall af meðallengd kerfisins sem lota þarf að ná áður en hrukkuvarnarhalinn má ljúka henni; lækkaðu það á þurrkurum, hafðu þvottavélar á sjálfgefnu",
     "curve_preroll_seconds": "Sekúndur af mælingum úr misheppnuðum ræsitilraunum sem teknar eru með fremst í ferli lotu; 0 = slökkt"
   },
@@ -1202,10 +1195,6 @@
       "doc": "Haltu stuttum, aflitlum veltipúlsum þurrkara eftir aðalhitunarfasann við lotuna sem lauk, í stað þess að túlka þá sem nýjar lotur.",
       "label": "Virkja hrukkuleysisgreiningu"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "Í hrukkuleysisstillingu telst afl undir þessu kyrrð milli veltipúlsa, og kyrrð lengri en Hám. púlsbil lýkur stillingunni. Stöðvunarþröskuldurinn er notaður ef hann er hærri, svo þetta breytir aðeins einhverju þegar það er sett yfir Stöðvunarþröskuld.",
-      "label": "Útgönguaflþröskuldur"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Hversu lengi þurrkarinn má vera kyrr á milli veltipúlsa áður en hrukkuvarnarstillingu lýkur. Stilltu það yfir lengsta hlé þurrkarans, annars eru síðari púlsar túlkaðir sem rangar ræsingar.",
       "label": "Hám. púlsbil"
@@ -1254,10 +1243,6 @@
       "doc": "Valfrjáls hurðarskynjari. Sýnir hvenær tækið var opnað til að tæma það eftir lotu.",
       "label": "Dyraskynjareining"
     },
-    "duration_tolerance": {
-      "doc": "Aðeins námsendurgjöf: lota innan +/-X% af áætlaðri lengd sinni telst gott mat. Hefur ekki áhrif á samsvörun.",
-      "label": "Vikmörk mats"
-    },
     "enable_ml_models": {
       "doc": "Notaðu líkan sem er þjálfað á þessari vél til að spá fyrir um orku og kostnað lotu í gangi, og leyfðu vel þekktu kerfi sem stöðvast óvenju snemma að ljúka án fullrar slökkvitafar. Slökkt: aðeins aflbyggð rökfræði.",
       "label": "Nota greind líkön meðan á lotu stendur"
@@ -1283,12 +1268,8 @@
       "label": "Birta villuleitareiningar"
     },
     "external_end_trigger": {
-      "doc": "Tvíundarskynjari þar sem breyting markar lok lotunnar (t.d. „lokið“-snerta eða önnur samþætting).",
+      "doc": "Valfrjáls tvíundarskynjari sem lýkur lotu þegar hann kveikist, til viðbótar við orku-greiningu (t.d. 'lokið' tengill eða önnur samþætting). Láttu tómt til að slökkva.",
       "label": "Ytri kveikjaeining"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Leyfðu tvíundarskynjara að gefa merki um lok lotu, til viðbótar við aflbyggða greiningu.",
-      "label": "Virkja ytri lokakveikin"
     },
     "external_end_trigger_inverted": {
       "doc": "Líttu á það þegar skynjarinn fer í SLÖKKT (ekki KVEIKT) sem lokamerkið.",
@@ -1313,18 +1294,6 @@
     "ml_training_enabled": {
       "doc": "Endurþjálfaðu orkulíkanið á loknum lotum þessarar vélar öðru hvoru. Nýju líkani er aðeins haldið ef það slær einfalda matið á prófunarlotum.",
       "label": "Læra af þessari vél"
-    },
-    "ml_training_hour": {
-      "doc": "Klukkustund dags (0-23) fyrir næturþjálfun. Veldu rólegan tíma, t.d. 2.",
-      "label": "Læra á klst."
-    },
-    "ml_training_interval_days": {
-      "doc": "Endurþjálfaðu í mesta lagi einu sinni á svona mörgum dögum.",
-      "label": "Athuga í mesta lagi á hverju"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Bíddu eftir að minnsta kosti svona mörgum skráðum lotum áður en þjálfað er.",
-      "label": "Lotur þarf fyrst"
     },
     "name": {
       "doc": "Heitið sem birtist í Home Assistant fyrir þetta tæki.",
@@ -1357,10 +1326,6 @@
     "notify_finish_services": {
       "doc": "notify.* þjónustur sem kallað er á þegar lotu lýkur. Skildu eftir autt fyrir engar.",
       "label": "Lokaþjónustur"
-    },
-    "notify_fire_events": {
-      "doc": "Sendu einnig ha_washdata_* atburði við upphaf og lok lotu, fyrir þína eigin sjálfvirkni.",
-      "label": "Kveikja HA viðburði fyrir tilkynningar"
     },
     "notify_icon": {
       "doc": "Lítið tákn á tilkynningunni (t.d. mdi:washing-machine). Aðeins sent til mobile_app-viðtakenda, ekki notify-hópa. Á iOS kemur það í stað forritstáknsins og krefst fylgiforritsins 2026.8 eða nýrra. Autt: sjálfgefið á kerfinu.",
@@ -1458,10 +1423,6 @@
       "doc": "Samsvörunarskor í beinni sem lota þarf áður en snjöll lokun eða hrukkuvarnarlok mega ljúka henni snemma. Breytir ekki kerfinu sem birtist. Hækkaðu það ef veikar samsvaranir ljúka lotum of snemma; lækkaðu það ef skýrar samsvaranir bíða út slökkvitöfina.",
       "label": "Samsvarþröskuldur"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Ef samsvörunarskorið í beinni fer undir þetta er núverandi ágiskun um kerfi hreinsuð. Hafðu það aðeins undir Samsvarþröskuldi svo stutt dýfa endurstilli hana ekki.",
-      "label": "Ósamsvarþröskuldur"
-    },
     "progress_reset_delay": {
       "doc": "Eftir lotu er framvindu haldið í 100% svona lengi áður en hún er endurstillt í Aðgerðarlaus.",
       "label": "Töf á endurstillingu framvindu"
@@ -1469,10 +1430,6 @@
     "pump_stuck_duration": {
       "doc": "Hversu lengi dæla má ganga samfellt áður en atburðurinn um fasta dælu er sendur.",
       "label": "Tímamörk fastrar dælu"
-    },
-    "sampling_interval": {
-      "doc": "Lágmarkstími milli unninna mælinga. Mælingum sem berast fyrr er sleppt (lágum mælingum á meðan lota stendur er alltaf haldið). Stilltu þetta á tilkynningarbil innstungunnar eða lægra; hærra gildi hendir bara mælingum.",
-      "label": "Sýnitakabil"
     },
     "save_debug_traces": {
       "doc": "Geymdu einnig villuleitargögn samsvörunarinnar (skor allra valkosta) með hverri lotu, fyrir bilanaleit. Tekur um 20 KB á hverja lotu.",
@@ -1644,9 +1601,6 @@
     "services": {
       "label": "Þjónustur"
     },
-    "signal_processing": {
-      "label": "Merkjavinnsla"
-    },
     "thresholds_gap": {
       "label": "Þröskuldar og bil"
     },
@@ -1709,10 +1663,6 @@
       "auto_label_confidence": {
         "higher": "Merkir færri lotur sjálfkrafa – fleiri fara í yfirferð",
         "lower": "Merkir fleiri lotur sjálfkrafa – sumar kunna að vera rangar"
-      },
-      "duration_tolerance": {
-        "higher": "Þiggur víðara lengdarsvið – sveigjanlegri samsvörun",
-        "lower": "Krefst nákvæmari lengdarsamsvörunar – strangara en getur hafnað óvenjulegum lotum"
       },
       "end_energy_threshold": {
         "higher": "Lokar aðeins lotum með umtalsverðan orkuNotkun",
@@ -2183,16 +2133,11 @@
     "kept": "haldið",
     "max": "hám.",
     "min": "lágm.",
-    "minus_tol": "-vikm.",
     "no_match": "engin samsvörun",
     "no_updates": "engar uppfærslur",
     "off_delay_wait": "slökkvitöf",
     "off_gap": "slökkubil",
-    "plus_tol": "+vikm.",
-    "profile": "prófíll",
-    "reading_interval": "dæmigert mælibil",
     "sensor_offline": "skynjari ótengdur: þvinguð stöðvun",
-    "si": "SB",
     "spike_ignored": "toppur hunsaður",
     "spike_ignored_short": "toppur: hunsaður",
     "start": "ræsing",

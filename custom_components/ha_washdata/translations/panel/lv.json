@@ -311,19 +311,13 @@
       "timeout": "Jābūt lielākam par iestatījumu Iestrēgušā sūkņa ilgums ({ps} s), lai iestrēgšanas signāls nostrādātu pirmais"
     },
     "start_dur": {
-      "sampling": "Paraugu ņemšanas intervāls pārsniedz starta ilgumu ({sdt} s); viena parauga smailes var atvērt ciklu",
       "threshold": "Jābūt vismaz vienam paraugu ņemšanas intervālam ({si} s), lai novērstu viena parauga viltus startus"
-    },
-    "unmatch": {
-      "match": "Jābūt virs neatbilstības sliekšņa ({un})",
-      "unmatch": "Jābūt zem atbilstības sliekšņa ({match}); pretējā gadījumā apstiprināta atbilstība uzreiz tiek atcelta"
     },
     "cascade_toast": "Konsekvences labad pielāgoti arī citi iestatījumi: {n}",
     "suggestion_resolves": "Lai to labotu, lietojiet zemāk esošo gaidošo ieteikumu ({val})",
     "use_fix": "Izmantot {val}",
     "watchdog": {
-      "interval": "Jābūt vismaz 2x lielākam par paraugu ņemšanas intervālu ({si} s)",
-      "sampling": "Paraugu ņemšanas intervālam jābūt ne vairāk kā pusei sargsuna intervāla ({wi} s)"
+      "interval": "Jābūt vismaz 2x lielākam par paraugu ņemšanas intervālu ({si} s)"
     },
     "end_energy": {
       "energy": "Pārāk stingrs, ja Apstāšanās slieksnis ir {w} W un Izslēgšanas aizkave ir {d} s; cikls var beigties tikai ar rezerves mehānismu",
@@ -659,7 +653,7 @@
     "hist_reason_already_recorded": "pārklājas ar ciklu, ko WashData jau ir ierakstījis",
     "share_consent": "Apstiprinu, ka šie cikli normāli noritēja līdz beigām bez pārtraukumiem",
     "show_internal": "Rādīt iekšējos iestatījumus",
-    "show_internal_tip": "Iestatījumi, ko WashData regulē jūsu vietā (paraugu ņemšana, sargsuns, saskaņošanas biežums, sliekšņi). Tiek rādīti, ja šai ierīcei ir sava vērtība, konflikts vai ieteikums.",
+    "show_internal_tip": "Iestatījumi, ko WashData regulē jūsu vietā (sargsuns, saskaņošanas biežums, sliekšņi). Tiek rādīti, ja šai ierīcei ir sava vērtība, konflikts vai ieteikums.",
     "rate_n": "{n} zvaigznes",
     "rate_quality": "Novērtēt kvalitāti",
     "pg_autolabel": "Automātiskā marķēšana",
@@ -1198,10 +1192,6 @@
       "doc": "Saglabāt žāvētāja īsos zemas jaudas griešanās impulsus pēc galvenās karsēšanas fāzes kopā ar pabeigto ciklu, nevis uzskatīt tos par jauniem cikliem.",
       "label": "Iespējot pretgrumbu noteikšanu"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "Pretgrumbu režīmā jauda zem šīs vērtības tiek uzskatīta par pauzi starp griešanas impulsiem, un pauze, kas ilgāka par Maks. atstarpi starp impulsiem, režīmu beidz. Ja Apstāšanās slieksnis ir augstāks, tiek izmantots tas, tāpēc šis iestatījums kaut ko maina tikai virs Apstāšanās sliekšņa.",
-      "label": "Izejas jaudas slieksnis"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Cik ilgi žāvētājs drīkst palikt kluss starp griešanās impulsiem, pirms pretgrumbu režīms beidzas. Iestatiet to garāku par garāko žāvētāja pauzi, citādi vēlākie impulsi tiek uzskatīti par kļūdainiem startiem.",
       "label": "Maks. atstarpe starp impulsiem"
@@ -1250,10 +1240,6 @@
       "doc": "Neobligāts durvju sensors. Rāda, kad ierīce pēc cikla tika atvērta izkraušanai.",
       "label": "Durvju sensora entītija"
     },
-    "duration_tolerance": {
-      "doc": "Tikai mācīšanās atgriezeniskajai saitei: cikls +/-X% robežās no aplēstā ilguma tiek uzskatīts par labu aplēsi. Neietekmē saskaņošanu.",
-      "label": "Novērtējuma tolerance"
-    },
     "enable_ml_models": {
       "doc": "Izmantot šai mašīnai apmācītu modeli, lai prognozētu darbojošā cikla enerģiju un izmaksas, un ļaut labi zināmai programmai, kas apstājas neparasti agri, beigties bez pilnas izslēgšanas aizkaves. Izslēgts: tikai uz jaudu balstīta loģika.",
       "label": "Lietot viedos modeļus cikla laikā"
@@ -1279,12 +1265,8 @@
       "label": "Atklāt atkļūdošanas entītijas"
     },
     "external_end_trigger": {
-      "doc": "Binārais sensors, kura maiņa iezīmē cikla beigas (piemēram, \"pabeigts\" kontakts vai cita integrācija).",
+      "doc": "Neobligāts binārs sensors, kas ieslēdzoties beidz ciklu, papildus jaudas noteikšanai (piemēram, \"pabeigts\" kontakts vai cita integrācija). Atstājiet tukšu, lai to izslēgtu.",
       "label": "Ārējā aktivatora entītija"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Ļaut binārajam sensoram signalizēt cikla beigas papildus jaudas noteikšanai.",
-      "label": "Iespējot ārējo beigu aktivatoru"
     },
     "external_end_trigger_inverted": {
       "doc": "Uzskatīt sensora pāreju uz IZSLĒGTS (nevis IESLĒGTS) par beigu signālu.",
@@ -1309,18 +1291,6 @@
     "ml_training_enabled": {
       "doc": "Laiku pa laikam pārtrenēt enerģijas modeli ar šīs mašīnas pabeigtajiem cikliem. Jauns modelis tiek paturēts tikai tad, ja testa ciklos tas pārspēj vienkāršo aplēsi.",
       "label": "Mācīties no šīs mašīnas"
-    },
-    "ml_training_hour": {
-      "doc": "Diennakts stunda (0-23) nakts apmācībai. Izvēlieties klusu stundu, piemēram, 2.",
-      "label": "Mācīties stundā"
-    },
-    "ml_training_interval_days": {
-      "doc": "Pārtrenēt ne biežāk kā reizi tik daudzās dienās.",
-      "label": "Pārbaudīt ne biežāk kā ik"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Pirms apmācības pagaidīt vismaz tik daudz ierakstītu ciklu.",
-      "label": "Nepieciešami cikli vispirms"
     },
     "name": {
       "doc": "Šīs ierīces nosaukums Home Assistant.",
@@ -1353,10 +1323,6 @@
     "notify_finish_services": {
       "doc": "notify.* pakalpojumi, ko izsaukt, kad cikls beidzas. Atstājiet tukšu, ja nevajag.",
       "label": "Beigu pakalpojumi"
-    },
-    "notify_fire_events": {
-      "doc": "Izraisīt arī ha_washdata_* notikumus cikla sākumā un beigās jūsu automatizācijām.",
-      "label": "Aktivēt HA notikumus paziņojumiem"
     },
     "notify_icon": {
       "doc": "Maza ikona paziņojumā (piem., mdi:washing-machine). Tiek sūtīta tikai uz mobile_app mērķiem, ne uz notify grupām. iOS ierīcēs tā aizstāj lietotnes ikonu, un tai vajag pavadošo lietotni 2026.8 vai jaunāku. Tukšs: platformas noklusējums.",
@@ -1454,10 +1420,6 @@
       "doc": "Reāllaika atbilstības rezultāts, kas ciklam vajadzīgs, pirms Viedā pabeigšana vai pretgrumbu pabeigšana drīkst to beigt agrāk. Tas nemaina rādīto programmu. Paaugstiniet to, ja vājas atbilstības beidz ciklus agri; samaziniet, ja skaidras atbilstības gaida izslēgšanas aizkavi.",
       "label": "Atbilstības slieksnis"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Ja reāllaika atbilstības rezultāts nokrītas zem šī, pašreizējais programmas minējums tiek notīrīts. Turiet to nedaudz zem Atbilstības sliekšņa, lai īss kritums to neatiestatītu.",
-      "label": "Neatbilstības slieksnis"
-    },
     "progress_reset_delay": {
       "doc": "Pēc cikla turēt progresu 100% tik ilgi, pirms atiestatīšanas uz dīkstāvi.",
       "label": "Progresa atiestatīšanas aizkave"
@@ -1465,10 +1427,6 @@
     "pump_stuck_duration": {
       "doc": "Cik ilgi sūknis drīkst darboties bez pārtraukuma, pirms tiek izraisīts iestrēguša sūkņa notikums.",
       "label": "Iestrēgušā sūkņa ilgums"
-    },
-    "sampling_interval": {
-      "doc": "Minimālais laiks starp apstrādātajiem rādījumiem. Ātrāk pienākušie rādījumi tiek izlaisti (zemi rādījumi cikla laikā vienmēr tiek saglabāti). Iestatiet to vienādu ar spraudņa ziņošanas intervālu vai mazāku; lielāka vērtība tikai izmet rādījumus.",
-      "label": "Paraugu ņemšanas intervāls"
     },
     "save_debug_traces": {
       "doc": "Kopā ar katru ciklu saglabāt arī saskaņotāja atkļūdošanas datus (katra kandidāta rezultātus) problēmu novēršanai. Pievieno apmēram 20 KB katram ciklam.",
@@ -1639,9 +1597,6 @@
     },
     "services": {
       "label": "Pakalpojumi"
-    },
-    "signal_processing": {
-      "label": "Signālu apstrāde"
     },
     "thresholds_gap": {
       "label": "Sliekšņi un atstarpe"
@@ -1893,10 +1848,6 @@
         "higher": "Automātiski iezīmē mazāk ciklu; vairāk nonāk pārskatīšanā",
         "lower": "Automātiski iezīmē vairāk ciklu; daži var tikt nepareizi identificēti"
       },
-      "duration_tolerance": {
-        "higher": "Pieņem plašāku ilguma diapazonu – elastīgāka atbilstības noteikšana",
-        "lower": "Prasa precīzāku ilguma atbilstību – stingrāks, bet var noraidīt neparastus ciklus"
-      },
       "end_energy_threshold": {
         "higher": "Aizver tikai ciklus, kas patērēja ievērojamu enerģiju",
         "lower": "Aizver arī īsākus vai zemas enerģijas ciklus"
@@ -1998,7 +1949,6 @@
     "smart_termination_duration_ratio": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms Viedā pabeigšana drīkst to beigt agrāk; samaziniet, ja darbības laiks mainās",
     "anti_crease_finalize_ratio": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms pretgrumbu aste drīkst to pabeigt; žāvētājiem samaziniet, veļas mašīnām atstājiet noklusējumu",
     "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",
-    "anti_wrinkle_exit_power": "Jaudas līmenis pauzēs starp griešanas impulsiem; darbojas tikai virs Apstāšanās sliekšņa",
     "anti_wrinkle_idle_timeout": "Atļautais klusuma laiks starp diviem griešanās impulsiem, pirms pretgrumbu režīms beidzas",
     "anti_wrinkle_max_duration": "Impulss, kas garāks par šo, beidz pretgrumbu režīmu un sāk jaunu ciklu",
     "anti_wrinkle_max_power": "Impulss, kas pārsniedz šo, beidz pretgrumbu režīmu un sāk jaunu ciklu",
@@ -2201,16 +2151,11 @@
     "kept": "saglabāts",
     "max": "maks.",
     "min": "min.",
-    "minus_tol": "-tol.",
     "no_match": "nav atbilstības",
     "no_updates": "nav atjauninājumu",
     "off_delay_wait": "izslēgšanas aizkave",
     "off_gap": "izslēgšanas atstarpe",
-    "plus_tol": "+tol.",
-    "profile": "profils",
-    "reading_interval": "tipisks rādījumu intervāls",
     "sensor_offline": "sensors bezsaistē: piespiedu apturēšana",
-    "si": "PI",
     "spike_ignored": "smaile ignorēta",
     "spike_ignored_short": "smaile: ignorēta",
     "start": "starts",

@@ -53,7 +53,6 @@ from .const import (
     CONF_CURVE_PREROLL_SECONDS,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_UNLOAD_CONFIRM_ENTITY,
-    CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_END_ENERGY_THRESHOLD,
     CONF_ENERGY_SENSOR,
@@ -73,7 +72,7 @@ from .const import (
     CONF_POWER_SENSOR,
     CONF_ENERGY_PRICE_ENTITY,
     CONF_NOTIFY_PEOPLE,
-    RETIRED_NOTIFY_OPTION_KEYS,
+    RETIRED_OPTION_KEYS,
     CONF_SAMPLING_INTERVAL,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
@@ -205,7 +204,8 @@ _CYCLE_STRIP_KEYS = frozenset({"power_data", "power_trace", "debug_data", "sampl
 # The keys the suggestion engine can still produce. A stored suggestion for any
 # other key - one written by an older version for a setting no longer suggested
 # (sampling_interval, smoothing_window, start debounce, the confidence ladder, the
-# tolerances, end_repeat_count; audit SUGGEST-01/04/12) - is never shown or applied.
+# tolerances, end_repeat_count; audit SUGGEST-01/04/12) or for a setting retired
+# since (the anti-wrinkle exit power, 0.5.9) - is never shown or applied.
 _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
@@ -224,7 +224,6 @@ _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_COMPLETION_MIN_SECONDS,
     # Device-class-specific suggestions from reconcile_suggestions
     CONF_POWER_OFF_THRESHOLD_W,
-    CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_PUMP_STUCK_DURATION,
 )
@@ -607,11 +606,12 @@ _IMPORT_LOCAL_BINDING_KEYS = _OPTIONS_IDENTITY_KEYS | frozenset({
 })
 
 # Everything an import drops from the payload's options: this device's bindings,
-# plus the retired single-service notification keys (#472). An old export still
-# carries ``notify_service``; nothing reads it any more, but writing it back would
-# leave a dead key the panel cannot show or remove. Undo strips the same set from
-# the restore point, which may predate the 3.12 migration.
-_IMPORT_STRIP_KEYS = _IMPORT_LOCAL_BINDING_KEYS | RETIRED_NOTIFY_OPTION_KEYS
+# plus every retired option key (``RETIRED_OPTION_KEYS``: #472's ``notify_service``,
+# the 0.5.9 option trim, ...). An old export still carries them; nothing reads them
+# any more, but writing one back would leave a dead key the panel cannot show or
+# remove. Undo strips the same set from the restore point, which may predate the
+# 3.12 migration.
+_IMPORT_STRIP_KEYS = _IMPORT_LOCAL_BINDING_KEYS | RETIRED_OPTION_KEYS
 
 
 def _json_safe(value: Any) -> Any:
@@ -1946,6 +1946,11 @@ def ws_get_options(
     # Basic shows the same name as the device list (which serves entry.title) and a
     # save can never echo the creation-time name back over the current one.
     options = {**entry.data, **entry.options, CONF_NAME: entry.title}
+    # A retired key still stored (an entry migrated to 3.12 before the 0.5.9 trim)
+    # is read by nothing; shown, a stale sampling_interval would override the
+    # resolved default the panel's cadence conflict rules read.
+    for key in RETIRED_OPTION_KEYS:
+        options.pop(key, None)
     # Device-resolved defaults for the cadence settings whose defaults vary by
     # device type (#396). The panel uses these as the render/conflict-check
     # fallback for an unset field so it shows (and validates against) the value the
@@ -2137,6 +2142,12 @@ async def ws_set_options(
         # entry title, never persisted in options (matches the config-flow invariant
         # that CONF_NAME is absent from options).
         for key in _OPTIONS_IDENTITY_KEYS:
+            new_options.pop(key, None)
+
+        # Retired keys are read by nothing (RETIRED_OPTION_KEYS): a client that
+        # still submits one (an older panel, the Revert of an old changelog row)
+        # must not write it back, and a stray stored copy goes with this save.
+        for key in RETIRED_OPTION_KEYS:
             new_options.pop(key, None)
 
         # Register item 515: a save must not leave the stop threshold at or above
@@ -6330,13 +6341,10 @@ async def ws_get_ml_training_status(
     """Return on-device ML training status for the Tuning > ML Training panel."""
     from .const import (  # pylint: disable=import-outside-toplevel
         CONF_ML_TRAINING_ENABLED,
-        CONF_ML_TRAINING_HOUR,
-        CONF_ML_TRAINING_INTERVAL_DAYS,
-        CONF_ML_TRAINING_MIN_CYCLES,
         DEFAULT_ML_TRAINING_ENABLED,
-        DEFAULT_ML_TRAINING_HOUR,
-        DEFAULT_ML_TRAINING_INTERVAL_DAYS,
-        DEFAULT_ML_TRAINING_MIN_CYCLES,
+        ML_TRAINING_HOUR,
+        ML_TRAINING_INTERVAL_DAYS,
+        ML_TRAINING_MIN_CYCLES,
     )
 
     entry_id: str = msg["entry_id"]
@@ -6447,9 +6455,10 @@ async def ws_get_ml_training_status(
             "running": bool(getattr(manager, "_ml_training_running", False)),
             "last_trained": last.isoformat() if last else None,
             "cycle_count": len(store.get_past_cycles()),
-            "min_cycles": int(merged.get(CONF_ML_TRAINING_MIN_CYCLES, DEFAULT_ML_TRAINING_MIN_CYCLES)),
-            "interval_days": int(merged.get(CONF_ML_TRAINING_INTERVAL_DAYS, DEFAULT_ML_TRAINING_INTERVAL_DAYS)),
-            "hour": int(merged.get(CONF_ML_TRAINING_HOUR, DEFAULT_ML_TRAINING_HOUR)),
+            # Fixed since 0.5.9 (no longer settings); still reported for the panel.
+            "min_cycles": ML_TRAINING_MIN_CYCLES,
+            "interval_days": ML_TRAINING_INTERVAL_DAYS,
+            "hour": ML_TRAINING_HOUR,
             "on_device_models": models,
             "last_run": last_run,
         },
@@ -7593,7 +7602,9 @@ async def _history_import_scan_task(
             reg.finish(task, state=task_registry.STATE_ERROR, error=str(parsed.get("error")))
             return
         samples, report = parsed
-        sampling_interval = options.get(CONF_SAMPLING_INTERVAL)
+        # The device type's cadence, which the manager throttles at (0.5.9: no
+        # longer a setting); the cadence gate never drops below its own floor.
+        sampling_interval = resolve_sampling_interval_default(base_config.device_type)
         # Blocks, gates and densification, a slice per job (audit PLAYGROUND-11).
         builder = history_import.ScanBuilder(
             samples, base_config,

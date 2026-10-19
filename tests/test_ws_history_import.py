@@ -89,7 +89,7 @@ def _manager(hass):
 def _entry():
     return SimpleNamespace(
         entry_id="e",
-        options={"device_type": "washing_machine", "sampling_interval": 5.0},
+        options={"device_type": "washing_machine"},
         data={},
     )
 

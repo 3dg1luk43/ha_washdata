@@ -314,19 +314,13 @@
       "timeout": "Turi būti didesnis už „Siurblio įstrigimo trukmė“ ({ps} s), kad įstrigimo aliarmas suveiktų pirmas"
     },
     "start_dur": {
-      "sampling": "Mėginių ėmimo intervalas viršija paleidimo trukmę ({sdt} s); vieno mėginio smaigaliai gali atidaryti ciklą",
       "threshold": "Turi būti bent vienas mėginių ėmimo intervalas ({si} s), kad išvengtumėte klaidingo paleidimo iš vieno mėginio"
-    },
-    "unmatch": {
-      "match": "Turi būti aukščiau neatitikimo slenksčio ({un})",
-      "unmatch": "Turi būti žemiau atitikimo slenksčio ({match}); priešingu atveju patvirtintas atitikimas iškart panaikinamas"
     },
     "cascade_toast": "Dėl nuoseklumo pakoreguoti ir kiti nustatymai: {n}",
     "suggestion_resolves": "Pritaikykite žemiau esantį laukiantį pasiūlymą ({val}), kad tai ištaisytumėte",
     "use_fix": "Naudoti {val}",
     "watchdog": {
-      "interval": "Turi būti bent 2 kartus didesnis nei mėginių ėmimo intervalas ({si} s)",
-      "sampling": "Mėginių ėmimo intervalas turi būti ne daugiau kaip pusė stebėjimo intervalo ({wi} s)"
+      "interval": "Turi būti bent 2 kartus didesnis nei mėginių ėmimo intervalas ({si} s)"
     },
     "end_energy": {
       "energy": "Per griežta, kai Sustabdymo slenkstis yra {w} W, o Išjungimo delsimas {d} s; ciklas gali baigtis tik atsarginiu būdu",
@@ -663,7 +657,7 @@
     "hist_reason_already_recorded": "persidengia su ciklu, kurį WashData jau įrašė",
     "share_consent": "Patvirtinu, kad šie ciklai normaliai baigėsi be pertraukimų",
     "show_internal": "Rodyti vidinius nustatymus",
-    "show_internal_tip": "Nustatymai, kuriuos WashData derina už jus (mėginių ėmimas, stebėjimas, atitikimo dažnis, slenksčiai). Rodomi, kai šis įrenginys turi savo reikšmę, konfliktą ar pasiūlymą.",
+    "show_internal_tip": "Nustatymai, kuriuos WashData derina už jus (stebėjimas, atitikimo dažnis, slenksčiai). Rodomi, kai šis įrenginys turi savo reikšmę, konfliktą ar pasiūlymą.",
     "rate_n": "{n} žvaigždutės",
     "rate_quality": "Įvertinti kokybę",
     "pg_autolabel": "Automatinis žymėjimas",
@@ -1214,10 +1208,6 @@
       "doc": "Trumpus mažos galios džiovyklės būgno impulsus po pagrindinės šildymo fazės laikyti baigto ciklo dalimi, o ne naujais ciklais.",
       "label": "Įjungti apsaugą nuo raukšlių"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "Apsaugos nuo raukšlių režimu galia, mažesnė už šią, laikoma pauze tarp sukimo impulsų, o pauzė, ilgesnė nei Maks. tarpas tarp impulsų, režimą baigia. Jei Sustabdymo slenkstis didesnis, naudojamas jis, todėl šis nustatymas ką nors keičia tik tada, kai nustatytas virš Sustabdymo slenksčio.",
-      "label": "Išėjimo galios slenkstis"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Kiek ilgai džiovyklė gali tylėti tarp būgno impulsų, kol baigiasi apsaugos nuo raukšlių režimas. Nustatykite ilgesnį nei ilgiausias jūsų džiovyklės tarpas, antraip vėlesni impulsai bus laikomi klaidingais paleidimais.",
       "label": "Maks. tarpas tarp impulsų"
@@ -1266,10 +1256,6 @@
       "doc": "Pasirenkamas durų jutiklis. Rodo, kada prietaisas po ciklo buvo atidarytas iškrauti.",
       "label": "Durų jutiklio objektas"
     },
-    "duration_tolerance": {
-      "doc": "Tik mokymosi grįžtamajam ryšiui: ciklas, kurio trukmė neviršija +/-X% įvertintos, laikomas geru įverčiu. Atpažinimui įtakos neturi.",
-      "label": "Įvertinimo tolerancija"
-    },
     "enable_ml_models": {
       "doc": "Naudoti šiame aparate apmokytą modelį veikiančio ciklo energijai ir kainai prognozuoti, o gerai žinomai programai, kuri sustoja neįprastai anksti, leisti baigtis nelaukiant viso išjungimo delsimo. Išjungta: tik galia pagrįsta logika.",
       "label": "Taikyti išmaniuosius modelius ciklo metu"
@@ -1295,12 +1281,8 @@
       "label": "Rodyti derinimo objektus"
     },
     "external_end_trigger": {
-      "doc": "Dvejetainis jutiklis, kurio pasikeitimas žymi ciklo pabaigą (pvz., „baigta“ kontaktas ar kita integracija).",
+      "doc": "Neprivalomas dvejetainis jutiklis, kuris baigia ciklą įsijungus, be galia pagrįsto aptikimo (pvz., \"baigta\" kontaktas ar kita integracija). Palikite tuščia, kad išjungtumėte.",
       "label": "Išorinio trigerio objektas"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Leisti dvejetainiam jutikliui pranešti apie ciklo pabaigą kartu su galia pagrįstu aptikimu.",
-      "label": "Įjungti išorinį pabaigos trigerį"
     },
     "external_end_trigger_inverted": {
       "doc": "Pabaigos signalu laikyti jutiklio išsijungimą, o ne įsijungimą.",
@@ -1325,18 +1307,6 @@
     "ml_training_enabled": {
       "doc": "Kartkartėmis iš naujo apmokyti energijos modelį pagal šio aparato baigtus ciklus. Naujas modelis paliekamas tik tada, kai patikros cikluose pranoksta paprastą įvertį.",
       "label": "Mokytis iš šio įrenginio"
-    },
-    "ml_training_hour": {
-      "doc": "Paros valanda (0-23) naktiniam mokymui. Pasirinkite ramią valandą, pvz., 2.",
-      "label": "Mokymosi valanda"
-    },
-    "ml_training_interval_days": {
-      "doc": "Mokyti iš naujo ne dažniau kaip kartą per tiek dienų.",
-      "label": "Maks. tikrinimo intervalas"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Prieš mokymą palaukti, kol bus įrašyta bent tiek ciklų.",
-      "label": "Reikalingi ciklai"
     },
     "name": {
       "doc": "Šio įrenginio pavadinimas, rodomas Home Assistant.",
@@ -1369,10 +1339,6 @@
     "notify_finish_services": {
       "doc": "notify.* paslaugos, iškviečiamos ciklui pasibaigus. Palikite tuščią, jei nereikia.",
       "label": "Baigimo paslaugos"
-    },
-    "notify_fire_events": {
-      "doc": "Taip pat skelbti ha_washdata_* įvykius ciklo pradžioje ir pabaigoje, kad galėtumėte kurti savo automatizavimus.",
-      "label": "Paleisti HA įvykius pranešimams"
     },
     "notify_icon": {
       "doc": "Maža piktograma pranešime (pvz., mdi:washing-machine). Siunčiama tik mobile_app gavėjams, ne notify grupėms. iOS ji pakeičia programėlės piktogramą; tam reikia programėlės 2026.8 ar naujesnės versijos. Tuščia: platformos numatytoji.",
@@ -1470,10 +1436,6 @@
       "doc": "Tiesioginės atitikties balas, kurio ciklui reikia, kad išmanusis užbaigimas ar apsaugos nuo raukšlių užbaigimas galėtų jį užbaigti anksčiau. Rodomos programos jis nekeičia. Padidinkite, jei silpnos atitiktys per anksti užbaigia ciklus; sumažinkite, jei aiškios atitiktys laukia išjungimo delsimo.",
       "label": "Atitikimo slenkstis"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Jei tiesioginės atitikties balas nukrenta žemiau šios reikšmės, dabartinis programos spėjimas išvalomas. Laikykite šiek tiek žemiau Atitikimo slenksčio, kad trumpas kritimas jo nepanaikintų.",
-      "label": "Neatitikimo slenkstis"
-    },
     "progress_reset_delay": {
       "doc": "Po ciklo tiek laiko rodyti 100 % pažangą, prieš grįžtant į būseną „Tuščia eiga“.",
       "label": "Pažangos atstatymo delsimas"
@@ -1481,10 +1443,6 @@
     "pump_stuck_duration": {
       "doc": "Kiek ilgai siurblys gali veikti be pertraukos, kol suveikia įstrigusio siurblio įvykis.",
       "label": "Siurblio įstrigimo trukmė"
-    },
-    "sampling_interval": {
-      "doc": "Mažiausias laikas tarp apdorojamų rodmenų. Anksčiau gauti rodmenys praleidžiami (žemi rodmenys ciklo metu visada išsaugomi). Nustatykite lygų savo kištuko ataskaitų intervalui arba mažesnį; didesnė reikšmė tik išmeta rodmenis.",
-      "label": "Mėginių ėmimo intervalas"
     },
     "save_debug_traces": {
       "doc": "Su kiekvienu ciklu taip pat saugoti atitikimo modulio derinimo duomenis (kiekvieno kandidato balus) trikčių šalinimui. Prideda apie 20 KB kiekvienam ciklui.",
@@ -1655,9 +1613,6 @@
     },
     "services": {
       "label": "Paslaugos"
-    },
-    "signal_processing": {
-      "label": "Signalo apdorojimas"
     },
     "thresholds_gap": {
       "label": "Slenksčiai ir tarpai"
@@ -1911,10 +1866,6 @@
         "higher": "Automatiškai pažymi mažiau ciklų; daugiau siunčiama peržiūrėti",
         "lower": "Automatiškai pažymi daugiau ciklų; kai kurie gali būti neteisingai identifikuoti"
       },
-      "duration_tolerance": {
-        "higher": "Priima platesnį trukmės diapazoną – lankstesnis atitikimas",
-        "lower": "Reikalauja tikslesnio trukmės atitikimo – griežtesnė, bet gali atmesti neįprastus ciklus"
-      },
       "end_energy_threshold": {
         "higher": "Uždaro tik ciklus, kurie sunaudojo daug energijos",
         "lower": "Uždaro ir trumpesnius arba mažiau energijos naudojančius ciklus"
@@ -2016,7 +1967,6 @@
     "smart_termination_duration_ratio": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau; sumažinkite, jei veikimo trukmė svyruoja",
     "anti_crease_finalize_ratio": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad apsaugos nuo raukšlių uodega galėtų jį užbaigti; džiovyklėms sumažinkite, skalbyklėms palikite numatytąją",
     "anti_wrinkle_enabled": "Sugerkite būgninius impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
-    "anti_wrinkle_exit_power": "Galios lygis pauzėse tarp sukimo impulsų; veikia tik virš Sustabdymo slenksčio",
     "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgninių impulsų prieš pasibaigiant apsaugai nuo raukšlių",
     "anti_wrinkle_max_duration": "Ilgesnis nei šis impulsas užbaigia apsaugą nuo raukšlių ir pradeda naują ciklą",
     "anti_wrinkle_max_power": "Už šią didesnis impulsas užbaigia apsaugą nuo raukšlių ir pradeda naują ciklą",
@@ -2219,16 +2169,11 @@
     "kept": "išlaikyta",
     "max": "maks.",
     "min": "min.",
-    "minus_tol": "-tol.",
     "no_match": "nėra atitikties",
     "no_updates": "nėra atnaujinimų",
     "off_delay_wait": "išjungimo delsimas",
     "off_gap": "išjungimo tarpas",
-    "plus_tol": "+tol.",
-    "profile": "profilis",
-    "reading_interval": "įprastas rodmenų intervalas",
     "sensor_offline": "jutiklis neprisijungęs: priverstinis sustabdymas",
-    "si": "MI",
     "spike_ignored": "smaigalys ignoruojamas",
     "spike_ignored_short": "smaigalys: ignoruojamas",
     "start": "paleidimas",

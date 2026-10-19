@@ -174,17 +174,11 @@ const _SETTINGS_SECTIONS = [
       { key: 'power_off_delay', label: 'Power Off Delay', unit: 's', type: 'number', min: 0, def: 30,
         doc: 'How long power must stay below the Power Off Threshold after a cycle before the state returns to Off. Only used when that threshold is above 0. Checked periodically, so the real wait can be slightly longer.' },
     ] },
-    { sub: 'Signal Processing', fields: [
-      { key: 'sampling_interval', label: 'Sampling Interval', internal: true, unit: 's', type: 'number', min: 1, def: 30,
-        doc: 'Minimum time between processed readings. Readings that arrive sooner are skipped (low readings during a cycle are always kept). Set it to your plug\'s reporting interval or lower; a higher value only throws readings away.' },
-    ] },
   ] },
   { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', notDeviceTypes: ['other'], groups: [
     { sub: 'Match Scoring', fields: [
       { key: 'profile_match_threshold', label: 'Match Threshold', type: 'number', step: 0.01, min: 0, max: 1, def: 0.4,
         doc: 'Live match score a cycle needs before Smart Termination or the anti-crease finish may end it early. It does not change the shown program. Raise it if weak matches end cycles early; lower it if clear matches wait the off delay.' },
-      { key: 'profile_unmatch_threshold', label: 'Unmatch Threshold', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.35,
-        doc: 'If the live match score drops below this, the current program guess is cleared. Keep it a little below the Match Threshold so a brief dip does not reset it.' },
       { key: 'profile_match_interval', label: 'Match Interval', internal: true, unit: 's', type: 'number', min: 0,
         doc: 'How often to match a running cycle against profiles. Default 300 s (5 min).' },
     ] },
@@ -193,8 +187,6 @@ const _SETTINGS_SECTIONS = [
         doc: 'A program is only considered after the cycle has run this fraction of its typical duration. 0.10: a 2-hour program becomes a candidate after 12 minutes. Not applied in a cycle\'s first 15 minutes.' },
       { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', internal: true, type: 'number', step: 0.01, min: 0, def: 1.8,
         doc: 'A program is dropped once the cycle has run longer than this multiple of its typical duration. 1.8: a cycle 80% longer than the program no longer matches it.' },
-      { key: 'duration_tolerance', label: 'Estimate Tolerance', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
-        doc: 'Learning feedback only: a cycle within +/-X% of its estimated duration counts as a good estimate. Does not affect matching.' },
     ] },
     { sub: 'Profile Evidence', fields: [
       { key: 'profile_evidence_sources', label: 'Cycles that shape a program', type: 'checkboxlist', def: ['real_cycles', 'reference_cycles', 'backfill_cycles'],
@@ -218,15 +210,15 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Housekeeping', fields: [
       { key: 'progress_reset_delay', label: 'Progress Reset Delay', unit: 's', type: 'number', min: 0, def: 1800,
         doc: 'After a cycle, keep progress at 100% this long before resetting to Idle.' },
-      { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', type: 'checkbox', def: true,
+      { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', internal: true, type: 'checkbox', def: true,
         doc: 'Nightly cleanup: label old cycles that now clearly match a program, rebuild program curves, refresh anomaly marks and cycle health, and remove debug traces if Save Debug Traces is off. Cycles and their power traces are always kept.' },
-      { key: 'power_profile_interval_min', label: 'Power Profile Interval', unit: 'min', type: 'number', min: 1, def: 15,
+      { key: 'power_profile_interval_min', label: 'Power Profile Interval', internal: true, unit: 'min', type: 'number', min: 1, def: 15,
         doc: 'Bucket size of the power_profile attribute (average watts per slot) used by planners such as EMHASS and tibber_prices. Smaller keeps short spikes; larger smooths the curve. Default 15 min. Does not affect detection.' },
     ] },
     { sub: 'Debug', fields: [
       { key: 'expose_debug_entities', label: 'Expose Debug Entities', internal: true, type: 'checkbox',
         doc: 'Add diagnostic entities (match confidence, ambiguity, internal state). Off keeps the entity list clean.' },
-      { key: 'save_debug_traces', label: 'Save Debug Traces', type: 'checkbox',
+      { key: 'save_debug_traces', label: 'Save Debug Traces', internal: true, type: 'checkbox', def: false,
         doc: 'Also store the matcher\'s debug data (every candidate\'s scores) with each cycle, for troubleshooting. Adds about 20 KB per cycle.' },
     ] },
   ] },
@@ -237,8 +229,6 @@ const _SETTINGS_SECTIONS = [
       doc: 'A pulse above this power counts as a real new cycle, not a tumble. Set it just above your tumble-pulse power.' },
     { key: 'anti_wrinkle_max_duration', label: 'Max Duration', unit: 's', type: 'number', min: 0, def: 60,
       doc: 'A pulse longer than this counts as a real cycle, not an anti-wrinkle tumble.' },
-    { key: 'anti_wrinkle_exit_power', label: 'Exit Power Threshold', internal: true, unit: 'W', type: 'number', step: 0.1, min: 0, def: 0.8,
-      doc: 'In anti-wrinkle mode, power below this counts as quiet between tumble pulses, and quiet for longer than the Max Pulse Gap ends the mode. The Stop Threshold is used when it is higher, so this only changes anything when set above the Stop Threshold.' },
     { key: 'anti_wrinkle_idle_timeout', label: 'Max Pulse Gap', unit: 's', type: 'number', step: 30, min: 0, def: 120,
       doc: 'How long the dryer may stay quiet between tumble pulses before anti-wrinkle mode ends. Set it above your dryer\'s longest gap, or later pulses are read as false starts.' },
     { key: 'anti_crease_finalize_ratio', label: 'Anti-Crease Finalize Ratio', type: 'number', step: 0.01, min: 0.5, max: 1.0, def: 0.98,
@@ -258,10 +248,8 @@ const _SETTINGS_SECTIONS = [
   ] },
   { id: 'triggers', label: 'Triggers & Door', intro: 'Optional extras: end trigger, door sensor, pause switch and unload reminder.', groups: [
     { sub: 'External End Trigger', fields: [
-      { key: 'external_end_trigger_enabled', label: 'Enable External End Trigger', type: 'checkbox',
-        doc: 'Let a binary sensor signal the end of a cycle, in addition to power-based detection.' },
       { key: 'external_end_trigger', label: 'External Trigger Entity', type: 'entity', domain: 'binary_sensor',
-        doc: 'Binary sensor whose change marks the cycle end (e.g. a "finished" contact or another integration).' },
+        doc: 'Optional binary sensor that ends the cycle when it turns on, in addition to power-based detection (e.g. a "finished" contact or another integration). Leave empty to turn it off.' },
       { key: 'external_end_trigger_inverted', label: 'Invert External Trigger (trigger on OFF)', type: 'checkbox',
         doc: 'Treat the sensor turning OFF (not ON) as the end signal.' },
     ] },
@@ -303,8 +291,6 @@ const _SETTINGS_SECTIONS = [
         doc: 'person.* entities that "Notify Only When Home" checks.' },
       { key: 'notify_only_when_home', label: 'Notify Only When Home', type: 'checkbox',
         doc: 'Only notify when at least one of the people above is home.' },
-      { key: 'notify_fire_events', label: 'Fire HA Events for Notifications', type: 'checkbox', def: true,
-        doc: 'Also fire ha_washdata_* events on cycle start and finish for your own automations.' },
     ] },
     { sub: 'Timing', fields: [
       { key: 'notify_before_end_minutes', label: 'Pre-End Alert', unit: 'min', type: 'number', min: 0, def: 0,
@@ -370,12 +356,6 @@ const _SETTINGS_SECTIONS = [
       doc: 'Use a model trained on this machine to predict a running cycle\'s energy and cost, and let a well-known program that stops unusually early finish without the full off delay. Off: power-based logic only.' },
     { key: 'ml_training_enabled', label: 'Learn from this machine', type: 'checkbox', def: false,
       doc: 'Retrain the energy model on this machine\'s finished cycles from time to time. A new model is kept only if it beats the simple estimate on test cycles.' },
-    { key: 'ml_training_hour', label: 'Learn at hour', unit: 'h', type: 'number', min: 0, max: 23, def: 2,
-      doc: 'Hour of day (0-23) for overnight training. Pick a quiet hour, e.g. 2.' },
-    { key: 'ml_training_min_cycles', label: 'Cycles needed first', type: 'number', min: 5, def: 30,
-      doc: 'Wait for at least this many recorded cycles before training.' },
-    { key: 'ml_training_interval_days', label: 'Check at most every', unit: 'days', type: 'number', min: 1, def: 7,
-      doc: 'Retrain at most once every this many days.' },
   ] },
 ];
 
@@ -505,12 +485,13 @@ const _SETTING_CONFLICTS = [
     }),
   },
   {
-    // watchdog_interval >= 2 * sampling_interval (avoid false-zero injections)
+    // watchdog_interval >= 2 * sampling_interval (avoid false-zero injections). The
+    // sampling interval is the device type's cadence, not a setting since 0.5.9: it
+    // comes from the backend's resolved defaults, so only the watchdog is flagged.
     keys: ['watchdog_interval', 'sampling_interval'],
     check: v => v.watchdog_interval != null && v.sampling_interval != null && v.watchdog_interval < 2 * v.sampling_interval,
     fieldErrors: v => ({
       watchdog_interval:  { msgKey: 'conflict.watchdog.interval',  msgVars: {si: v.sampling_interval}, msgFb: `Should be at least 2× Sampling Interval (${v.sampling_interval} s)`, fixVal: +(2 * v.sampling_interval + 1) },
-      sampling_interval:  { msgKey: 'conflict.watchdog.sampling',  msgVars: {wi: v.watchdog_interval}, msgFb: `Sampling Interval should be at most half of Watchdog Interval (${v.watchdog_interval} s)`, fixVal: +Math.floor(v.watchdog_interval / 2) },
     }),
   },
   {
@@ -523,12 +504,12 @@ const _SETTING_CONFLICTS = [
     }),
   },
   {
-    // start_duration_threshold >= sampling_interval (debounce must span at least one sample)
+    // start_duration_threshold >= sampling_interval (debounce must span at least one
+    // sample). The sampling interval is the device type's cadence (resolved default).
     keys: ['start_duration_threshold', 'sampling_interval'],
     check: v => v.start_duration_threshold != null && v.sampling_interval != null && v.start_duration_threshold < v.sampling_interval,
     fieldErrors: v => ({
       start_duration_threshold: { msgKey: 'conflict.start_dur.threshold', msgVars: {si: v.sampling_interval}, msgFb: `Should be at least one Sampling Interval (${v.sampling_interval} s) to prevent single-sample false starts`, fixVal: v.sampling_interval },
-      sampling_interval:        { msgKey: 'conflict.start_dur.sampling',  msgVars: {sdt: v.start_duration_threshold}, msgFb: `Sampling Interval exceeds Start Duration (${v.start_duration_threshold} s); single-sample spikes can open a cycle`, fixVal: v.start_duration_threshold },
     }),
   },
   {
@@ -552,18 +533,8 @@ const _SETTING_CONFLICTS = [
       auto_label_confidence:   { msgKey: 'conflict.confidence.auto',           msgVars: {match: v.profile_match_threshold}, msgFb: `Must be at or above Match Threshold (${v.profile_match_threshold})`, fixVal: +(v.profile_match_threshold).toFixed(2) },
     }),
   },
-  {
-    // profile_unmatch_threshold < profile_match_threshold (committed match must not immediately un-match)
-    keys: ['profile_unmatch_threshold', 'profile_match_threshold'],
-    check: v => v.profile_unmatch_threshold != null && v.profile_match_threshold != null && v.profile_unmatch_threshold >= v.profile_match_threshold,
-    fieldErrors: v => ({
-      profile_unmatch_threshold: { msgKey: 'conflict.unmatch.unmatch', msgVars: {match: v.profile_match_threshold}, msgFb: `Must be below Match Threshold (${v.profile_match_threshold}); otherwise a committed match un-matches instantly`, fixVal: +(v.profile_match_threshold - 0.05).toFixed(2) },
-      profile_match_threshold:   { msgKey: 'conflict.unmatch.match',   msgVars: {un: v.profile_unmatch_threshold},   msgFb: `Must be above Unmatch Threshold (${v.profile_unmatch_threshold})`, fixVal: +(v.profile_unmatch_threshold + 0.05).toFixed(2) },
-    }),
-  },
-  // (No anti_wrinkle_exit_power vs stop_threshold_w rule: the detector counts quiet
-  // below the higher of the two, so any pair is valid and the old "must be below
-  // stop" fix moved the exit power to where it does nothing; #285 #296 #325.)
+  // (No unmatch-vs-match rule: the unmatch threshold is fixed at 0.35 since 0.5.9,
+  // and the anti-wrinkle exit power is fixed at max(0.8 W, stop); #285 #296 #325.)
   {
     // anti_wrinkle_max_power > start_threshold_w — only for devices that support anti-wrinkle
     keys: ['anti_wrinkle_max_power', 'start_threshold_w'],
@@ -1989,16 +1960,14 @@ const _DIAGRAM_BY_KEY = {
   progress_reset_delay: 'progress_reset', completion_min_seconds: 'min_duration',
   // New diagrams
   min_off_gap: 'min_off_gap',
-  duration_tolerance: 'duration_tolerance',
   start_duration_threshold: 'start_duration',
   end_energy_threshold: 'end_energy_thresh',
-  profile_match_threshold: 'confidence', profile_unmatch_threshold: 'confidence',
+  profile_match_threshold: 'confidence',
   auto_label_confidence: 'confidence', learning_confidence: 'confidence',
   no_update_active_timeout: 'watchdog_timeout',
   anti_wrinkle_enabled: 'anti_wrinkle', anti_wrinkle_max_power: 'anti_wrinkle',
-  anti_wrinkle_max_duration: 'anti_wrinkle', anti_wrinkle_exit_power: 'anti_wrinkle',
+  anti_wrinkle_max_duration: 'anti_wrinkle',
   anti_wrinkle_idle_timeout: 'anti_wrinkle', anti_crease_finalize_ratio: 'anti_wrinkle',
-  sampling_interval: 'sampling',
 };
 
 // Rect that really clips an absolutely-positioned popover: the viewport
@@ -2102,12 +2071,6 @@ function _diagram(id, tText) {
         <rect class="fw" x="96" y="20" width="46" height="58"/>
         <polyline class="ln" points="8,40 90,40 96,74 142,74 148,40 175,40 175,74 190,74"/>
         <text x="98" y="16">${_esc(_tText('diagram.off_delay_wait', {}, 'off-delay wait'))}</text>`);
-    case 'duration_tolerance':
-      return wrap(`${base}
-        <rect class="fz" x="60" y="36" width="80" height="22"/>
-        <line class="ax" x1="60" y1="47" x2="140" y2="47"/>
-        <line class="ln" x1="100" y1="30" x2="100" y2="64"/>
-        <text x="62" y="30">${_esc(_tText('diagram.minus_tol', {}, '-tol'))}</text><text x="120" y="30">${_esc(_tText('diagram.plus_tol', {}, '+tol'))}</text><text x="84" y="74">${_esc(_tText('diagram.profile', {}, 'profile'))}</text>`);
     case 'match_ratios':
       return wrap(`${base}
         <line class="ax" x1="20" y1="47" x2="180" y2="47"/>
@@ -2186,19 +2149,6 @@ function _diagram(id, tText) {
         <polyline class="ln" points="8,78 14,78 24,30 54,30 68,78 84,60 96,78 110,60 122,78 136,60 148,78 162,60 174,78 192,78"/>
         <text x="10" y="14">${_esc(_tText('diagram.heat_phase', {}, 'heat phase'))}</text>
         <text x="82" y="40">${_esc(_tText('diagram.tumble_kept', {}, 'tumble pulses kept'))}</text>`);
-    case 'sampling':
-      // Vertical tick marks at regular intervals showing sensor cadence.
-      return wrap(`${base}
-        <line class="ok" x1="24" y1="30" x2="24" y2="78"/>
-        <line class="ok" x1="62" y1="30" x2="62" y2="78"/>
-        <line class="ok" x1="100" y1="30" x2="100" y2="78"/>
-        <line class="ok" x1="138" y1="30" x2="138" y2="78"/>
-        <line class="ok" x1="176" y1="30" x2="176" y2="78"/>
-        <line class="fz" x1="8" y1="54" x2="192" y2="54"/>
-        <text x="36" y="50">${_esc(_tText('diagram.si', {}, 'SI'))}</text>
-        <text x="74" y="50">${_esc(_tText('diagram.si', {}, 'SI'))}</text>
-        <text x="112" y="50">${_esc(_tText('diagram.si', {}, 'SI'))}</text>
-        <text x="10" y="14">${_esc(_tText('diagram.reading_interval', {}, 'typical reading interval'))}</text>`);
     default:
       return '';
   }
@@ -5833,7 +5783,7 @@ class HaWashdataPanel extends HTMLElement {
       ? `<p class="wd-info" style="margin:0 0 10px;font-size:.82em">${this._t('msg.settings_basic_note', {}, 'Showing essential settings. Switch to Advanced for the full list.')}</p>`
       : '';
     // Advanced only: reveal the internal tuning fields (search always finds them).
-    const internalToggle = basicMode ? '' : `<label class="wd-check-inline" style="font-size:.82em;display:inline-flex;align-items:center;gap:6px" title="${_esc(this._t('lbl.show_internal_tip', {}, 'Settings WashData tunes for you (sampling, watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.'))}">
+    const internalToggle = basicMode ? '' : `<label class="wd-check-inline" style="font-size:.82em;display:inline-flex;align-items:center;gap:6px" title="${_esc(this._t('lbl.show_internal_tip', {}, 'Settings WashData tunes for you (watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.'))}">
       <input type="checkbox" id="wd-settings-internal-chk" data-action="set-settings-internal" ${this._pref('show_internal', false) ? 'checked' : ''}>
       ${this._t('lbl.show_internal', {}, 'Show internal settings')}</label>`;
 
@@ -6938,7 +6888,6 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_enabled',    'Enable Anti-Wrinkle Detection', '', 'Absorb the tumble pulses after the main phase instead of reading them as new cycles', 'advanced', 'bool'],
       ['anti_wrinkle_max_power',  'Max Anti-Wrinkle Power','W', 'A pulse above this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_max_duration','Max Anti-Wrinkle Duration','s', 'A pulse longer than this ends anti-wrinkle and opens a new cycle', 'advanced'],
-      ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Quiet level between tumble pulses; only takes effect above the Stop Threshold', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
       ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
       ['smart_termination_duration_ratio', 'Smart Termination Ratio', '', 'Fraction of the program\'s average duration a cycle must reach before Smart Termination may end it early; lower it if run times vary', 'advanced'],
@@ -15391,9 +15340,8 @@ class HaWashdataPanel extends HTMLElement {
       // A blank/cleared value for a key that was never stored is a no-op: there is
       // nothing to clear, and writing it would pin an empty string into options.
       if (!(k in baseline) && (val === '' || val === null)) continue;
-      // A never-stored switch rendered at its default (energy_price_dynamic,
-      // notify_fire_events) is not an edit either: submitting it rewrote options the
-      // user never touched. Lists keep their own normalisation (evidence sources).
+      // A never-stored switch rendered at its default (energy_price_dynamic) is
+      // not an edit either: submitting it rewrote options the user never touched. Lists keep their own normalisation (evidence sources).
       if (!(k in baseline) && typeof val === 'boolean') {
         const d = (this._optDefaults && k in this._optDefaults) ? this._optDefaults[k] : (_FIELD_BY_KEY[k] || {}).def;
         if (d !== undefined && JSON.stringify(val) === JSON.stringify(d)) continue;

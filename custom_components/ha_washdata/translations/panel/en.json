@@ -308,19 +308,13 @@
       "timeout": "Must exceed Pump Stuck Duration ({ps} s) so the stuck alarm can fire first"
     },
     "start_dur": {
-      "sampling": "Sampling Interval exceeds Start Duration ({sdt} s); single-sample spikes can open a cycle",
       "threshold": "Should be at least one Sampling Interval ({si} s) to prevent single-sample false starts"
-    },
-    "unmatch": {
-      "match": "Must be above Unmatch Threshold ({un})",
-      "unmatch": "Must be below Match Threshold ({match}); otherwise a committed match un-matches instantly"
     },
     "cascade_toast": "Other settings adjusted for consistency: {n}",
     "suggestion_resolves": "Stage the pending suggestion ({val}) below to fix this",
     "use_fix": "Use {val}",
     "watchdog": {
-      "interval": "Should be at least 2x Sampling Interval ({si} s)",
-      "sampling": "Sampling Interval should be at most half of Watchdog Interval ({wi} s)"
+      "interval": "Should be at least 2x Sampling Interval ({si} s)"
     },
     "end_energy": {
       "energy": "Too strict for Stop Threshold ({w} W) over Off Delay ({d} s); the cycle can only end through a fallback path",
@@ -662,7 +656,7 @@
     "hist_reason_already_recorded": "overlaps a cycle WashData already recorded",
     "share_consent": "I confirm these cycles ran to normal completion without interruption",
     "show_internal": "Show internal settings",
-    "show_internal_tip": "Settings WashData tunes for you (sampling, watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.",
+    "show_internal_tip": "Settings WashData tunes for you (watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.",
     "rate_n": "{n} stars",
     "rate_quality": "Rate quality",
     "pg_autolabel": "Auto-label",
@@ -1099,7 +1093,6 @@
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
     "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
     "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
-    "anti_wrinkle_exit_power": "Quiet level between tumble pulses; only takes effect above the Stop Threshold",
     "curve_preroll_seconds": "Seconds of readings from aborted start attempts carried into the front of a cycle's curve; 0 = off"
   },
   "phase_desc": {
@@ -1209,10 +1202,6 @@
       "doc": "Keep a dryer's short low-power tumble pulses after the main heat phase with the finished cycle, instead of reading them as new cycles.",
       "label": "Enable Anti-Wrinkle Detection"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "In anti-wrinkle mode, power below this counts as quiet between tumble pulses, and quiet for longer than the Max Pulse Gap ends the mode. The Stop Threshold is used when it is higher, so this only changes anything when set above the Stop Threshold.",
-      "label": "Exit Power Threshold"
-    },
     "anti_wrinkle_idle_timeout": {
       "label": "Max Pulse Gap",
       "doc": "How long the dryer may stay quiet between tumble pulses before anti-wrinkle mode ends. Set it above your dryer's longest gap, or later pulses are read as false starts."
@@ -1273,10 +1262,6 @@
       "doc": "Optional door sensor. Shows when the appliance was opened to unload after a cycle.",
       "label": "Door Sensor Entity"
     },
-    "duration_tolerance": {
-      "doc": "Learning feedback only: a cycle within +/-X% of its estimated duration counts as a good estimate. Does not affect matching.",
-      "label": "Estimate Tolerance"
-    },
     "enable_ml_models": {
       "doc": "Use a model trained on this machine to predict a running cycle's energy and cost, and let a well-known program that stops unusually early finish without the full off delay. Off: power-based logic only.",
       "label": "Apply smart models during a cycle"
@@ -1306,12 +1291,8 @@
       "label": "Expose Debug Entities"
     },
     "external_end_trigger": {
-      "doc": "Binary sensor whose change marks the cycle end (e.g. a \"finished\" contact or another integration).",
+      "doc": "Optional binary sensor that ends the cycle when it turns on, in addition to power-based detection (e.g. a \"finished\" contact or another integration). Leave empty to turn it off.",
       "label": "External Trigger Entity"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Let a binary sensor signal the end of a cycle, in addition to power-based detection.",
-      "label": "Enable External End Trigger"
     },
     "external_end_trigger_inverted": {
       "doc": "Treat the sensor turning OFF (not ON) as the end signal.",
@@ -1336,18 +1317,6 @@
     "ml_training_enabled": {
       "doc": "Retrain the energy model on this machine's finished cycles from time to time. A new model is kept only if it beats the simple estimate on test cycles.",
       "label": "Learn from this machine"
-    },
-    "ml_training_hour": {
-      "doc": "Hour of day (0-23) for overnight training. Pick a quiet hour, e.g. 2.",
-      "label": "Learn at hour"
-    },
-    "ml_training_interval_days": {
-      "doc": "Retrain at most once every this many days.",
-      "label": "Check at most every"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Wait for at least this many recorded cycles before training.",
-      "label": "Cycles needed first"
     },
     "name": {
       "doc": "Name shown in Home Assistant for this device.",
@@ -1380,10 +1349,6 @@
     "notify_finish_services": {
       "doc": "notify.* services to call when a cycle finishes. Leave empty for none.",
       "label": "Finish Services"
-    },
-    "notify_fire_events": {
-      "doc": "Also fire ha_washdata_* events on cycle start and finish for your own automations.",
-      "label": "Fire HA Events for Notifications"
     },
     "notify_icon": {
       "doc": "Small icon on the notification (e.g. mdi:washing-machine). Sent only to mobile_app targets, not notify groups. On iOS it replaces the app icon and needs companion app 2026.8 or newer. Blank: platform default.",
@@ -1529,10 +1494,6 @@
       "doc": "Live match score a cycle needs before Smart Termination or the anti-crease finish may end it early. It does not change the shown program. Raise it if weak matches end cycles early; lower it if clear matches wait the off delay.",
       "label": "Match Threshold"
     },
-    "profile_unmatch_threshold": {
-      "doc": "If the live match score drops below this, the current program guess is cleared. Keep it a little below the Match Threshold so a brief dip does not reset it.",
-      "label": "Unmatch Threshold"
-    },
     "progress_reset_delay": {
       "doc": "After a cycle, keep progress at 100% this long before resetting to Idle.",
       "label": "Progress Reset Delay"
@@ -1540,10 +1501,6 @@
     "pump_stuck_duration": {
       "doc": "How long a pump may run nonstop before the stuck-pump event fires.",
       "label": "Pump Stuck Duration"
-    },
-    "sampling_interval": {
-      "doc": "Minimum time between processed readings. Readings that arrive sooner are skipped (low readings during a cycle are always kept). Set it to your plug's reporting interval or lower; a higher value only throws readings away.",
-      "label": "Sampling Interval"
     },
     "save_debug_traces": {
       "doc": "Also store the matcher's debug data (every candidate's scores) with each cycle, for troubleshooting. Adds about 20 KB per cycle.",
@@ -1667,9 +1624,6 @@
     "services": {
       "label": "Services"
     },
-    "signal_processing": {
-      "label": "Signal Processing"
-    },
     "thresholds_gap": {
       "label": "Thresholds & Gap"
     },
@@ -1720,10 +1674,6 @@
       "auto_label_confidence": {
         "higher": "Labels fewer cycles automatically; more go to review",
         "lower": "Labels more cycles automatically; some may be misidentified"
-      },
-      "duration_tolerance": {
-        "higher": "Accepts a wider duration range – more flexible matching",
-        "lower": "Requires closer duration match – stricter but may reject unusual cycles"
       },
       "end_energy_threshold": {
         "higher": "Closes only cycles that used substantial energy",
@@ -2183,16 +2133,11 @@
     "kept": "kept",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "no match",
     "no_updates": "no updates",
     "off_delay_wait": "off-delay wait",
     "off_gap": "off-gap",
-    "plus_tol": "+tol",
-    "profile": "profile",
-    "reading_interval": "typical reading interval",
     "sensor_offline": "sensor offline: force-stop",
-    "si": "SI",
     "spike_ignored": "spike ignored",
     "spike_ignored_short": "spike: ignored",
     "start": "start",

@@ -70,7 +70,6 @@ def _diag_manager(*, store_debug: bool, scheduler_armed: bool = True):
     manager.profile_store.export_data.return_value = {}
     manager.diag_buffer.redacted_snapshot.return_value = {}
     manager.profile_store.save_debug_traces = store_debug
-    manager._notify_fire_events = True
     manager._remove_maintenance_scheduler = (
         (lambda: None) if scheduler_armed else None
     )

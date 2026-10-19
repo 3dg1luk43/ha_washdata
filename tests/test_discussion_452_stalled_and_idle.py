@@ -382,14 +382,13 @@ def test_learned_standby_level_reads_the_resting_draw_above_stop() -> None:
 # ─── Manager / entities ───────────────────────────────────────────────────────
 
 
-def _view(det: CycleDetector, *, clean: bool = False, fire: bool = True) -> SimpleNamespace:
+def _view(det: CycleDetector, *, clean: bool = False) -> SimpleNamespace:
     view = SimpleNamespace(
         detector=det,
         recorder=SimpleNamespace(is_recording=False),
         _is_clean_state=clean,
         _is_user_paused=False,
         _cycle_anomaly="none",
-        _notify_fire_events=fire,
         entry_id="e1",
         config_entry=SimpleNamespace(title="Washer"),
         device_type="washing_machine",
@@ -425,9 +424,6 @@ def test_stall_event_fires_once_with_a_small_payload() -> None:
     assert event == EVENT_CYCLE_STALLED
     assert data["entry_id"] == "e1" and data["program"] == "Cotton"
     assert "power_data" not in data and len(repr(data)) < 1024
-    quiet = _view(_stalled_detector(), fire=False)
-    WashDataManager._check_stall_event(quiet)
-    quiet.hass.bus.async_fire.assert_not_called()
 
 
 def test_idle_reads_through_check_state_clean_and_the_duration_sensors() -> None:
@@ -486,7 +482,6 @@ def test_start_gate_eval_counts_idle_off_changes() -> None:
     sge = _load("wd_start_gate_eval_452", "devtools/start_gate_eval.py")
     device = sge.Device("washing_machine", {}, {
         "min_power": 2.0, "start_threshold_w": START, "stop_threshold_w": STOP,
-        "sampling_interval": 1.0,
     }, [])
     config, manager = sge.detector_setup(device, {})
     manager["standby_level_w"] = 4.5

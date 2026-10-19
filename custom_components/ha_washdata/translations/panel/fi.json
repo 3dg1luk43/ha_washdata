@@ -306,19 +306,13 @@
       "timeout": "Oltava suurempi kuin Pumpun jumiutumiskesto ({ps} s), jotta jumihälytys ehtii laueta ensin"
     },
     "start_dur": {
-      "sampling": "Näytteenottoväli ylittää käynnistyksen keston ({sdt} s); yksittäiset piikit voivat avata syklin",
       "threshold": "Tulee olla vähintään yksi näytteenottoväli ({si} s) yksittäisen näytteen väärän käynnistyksen estämiseksi"
-    },
-    "unmatch": {
-      "match": "Täytyy olla yli eritäsmäytyskynnyksen ({un})",
-      "unmatch": "Täytyy olla alle täsmäytyskynnyksen ({match}); muuten vahvistettu vastaavuus purkautuu heti"
     },
     "cascade_toast": "Muita asetuksia muutettiin johdonmukaisuuden vuoksi: {n}",
     "suggestion_resolves": "Ota alla oleva ehdotus ({val}) käyttöön tämän korjaamiseksi",
     "use_fix": "Käytä {val}",
     "watchdog": {
-      "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)",
-      "sampling": "Näytteenottovälin tulee olla enintään puolet tarkkailijavälistä ({wi} s)"
+      "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)"
     },
     "settings_banner": "Asetusten ristiriitoja: {n}. Tarkista korostetut osiot ja korjaa ne ennen tallentamista.",
     "settings_banner_btn": "Siirry ensimmäiseen",
@@ -655,7 +649,7 @@
     "hist_reason_already_recorded": "on päällekkäin syklin kanssa, jonka WashData on jo tallentanut",
     "share_consent": "Vahvistan, että nämä syklit suoritettiin normaalisti loppuun ilman keskeytystä",
     "show_internal": "Näytä sisäiset asetukset",
-    "show_internal_tip": "Asetukset, jotka WashData säätää puolestasi (näytteenotto, tarkkailija, täsmäytystiheys, kynnykset). Näytetään, kun tällä laitteella on oma arvo, ristiriita tai ehdotus.",
+    "show_internal_tip": "Asetukset, jotka WashData säätää puolestasi (tarkkailija, täsmäytystiheys, kynnykset). Näytetään, kun tällä laitteella on oma arvo, ristiriita tai ehdotus.",
     "rate_n": "{n} tähteä",
     "rate_quality": "Arvioi laatu",
     "pg_autolabel": "Automaattimerkintä",
@@ -1075,7 +1069,6 @@
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
     "smart_termination_duration_ratio": "Osuus ohjelman keskimääräisestä kestosta, joka syklin on saavutettava ennen kuin älykäs lopetus voi päättää sen aikaisin; laske sitä, jos ajoajat vaihtelevat",
     "anti_wrinkle_enabled": "Sulauta päävaiheen jälkeiset rumpupulssit sen sijaan, että lukisit ne uusina sykleinä",
-    "anti_wrinkle_exit_power": "Hiljainen taso rumpupulssien välillä; vaikuttaa vain Pysäytyskynnyksen yläpuolella",
     "anti_wrinkle_idle_timeout": "Kahden rumpupulssin välillä sallittu hiljainen aika ennen kuin ryppyjenesto päättyy",
     "anti_wrinkle_max_duration": "Tätä pidempi pulssi päättää ryppyjeneston ja aloittaa uuden syklin",
     "anti_wrinkle_max_power": "Tätä suurempi pulssi päättää ryppyjeneston ja aloittaa uuden syklin",
@@ -1202,10 +1195,6 @@
       "doc": "Pidä kuivausrummun lyhyet vähätehoiset rummutuspulssit päälämpövaiheen jälkeen valmiissa syklissä sen sijaan, että ne luettaisiin uusiksi sykleiksi.",
       "label": "Ota ryppyjenesto käyttöön"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "Ryppyjenestotilassa tätä pienempi teho lasketaan hiljaiseksi rumpupulssien välillä, ja Pulssien enimmäisväliä pidempi hiljaisuus lopettaa tilan. Jos Pysäytyskynnys on suurempi, käytetään sitä, joten tällä on vaikutusta vain, kun se on Pysäytyskynnystä suurempi.",
-      "label": "Poistumistehokynnys"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Kuinka kauan kuivausrumpu saa olla hiljaa rummutuspulssien välillä, ennen kuin ryppyjenestotila päättyy. Aseta se pidemmäksi kuin rumpusi pisin tauko, muuten myöhemmät pulssit luetaan vääriksi käynnistyksiksi.",
       "label": "Pulssien enimmäisväli"
@@ -1254,10 +1243,6 @@
       "doc": "Valinnainen ovianturi. Näyttää, milloin laite avattiin purkamista varten syklin jälkeen.",
       "label": "Ovianturin entiteetti"
     },
-    "duration_tolerance": {
-      "doc": "Vain oppimispalaute: sykli, joka poikkeaa arvioidusta kestostaan enintään +/-X %, lasketaan hyväksi arvioksi. Ei vaikuta täsmäytykseen.",
-      "label": "Arviotoleranssi"
-    },
     "enable_ml_models": {
       "doc": "Käytä tällä koneella koulutettua mallia käynnissä olevan syklin energian ja kustannusten ennustamiseen, ja anna tutun ohjelman, joka pysähtyy epätavallisen aikaisin, päättyä odottamatta koko sammutusviivettä. Pois: vain tehoon perustuva logiikka.",
       "label": "Käytä älykkäitä malleja syklin aikana"
@@ -1283,12 +1268,8 @@
       "label": "Näytä virheenkorjausentiteetit"
     },
     "external_end_trigger": {
-      "doc": "Binäärianturi, jonka muutos merkitsee syklin loppua (esim. \"valmis\"-kosketin tai toinen integraatio).",
+      "doc": "Valinnainen binäärianturi, joka päättää syklin käynnistyessään, tehotunnistuksen lisäksi (esim. \"valmis\"-kosketin tai toinen integraatio). Jätä tyhjäksi poistaaksesi käytöstä.",
       "label": "Ulkoisen signaalin entiteetti"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Anna binäärianturin ilmoittaa syklin päättymisestä tehoon perustuvan tunnistuksen lisäksi.",
-      "label": "Ota ulkoinen päätyssignaali käyttöön"
     },
     "external_end_trigger_inverted": {
       "doc": "Käsittele anturin kytkeytymistä POIS (ei PÄÄLLE) päättymissignaalina.",
@@ -1313,18 +1294,6 @@
     "ml_training_enabled": {
       "doc": "Kouluta energiamalli ajoittain uudelleen tämän koneen valmiilla sykleillä. Uusi malli otetaan käyttöön vain, jos se päihittää yksinkertaisen arvion testisykleillä.",
       "label": "Opi tästä koneesta"
-    },
-    "ml_training_hour": {
-      "doc": "Vuorokauden tunti (0-23) yökoulutukselle. Valitse hiljainen tunti, esim. 2.",
-      "label": "Opi tunnilla"
-    },
-    "ml_training_interval_days": {
-      "doc": "Kouluta uudelleen enintään kerran näin monessa päivässä.",
-      "label": "Tarkista enintään joka"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Odota vähintään näin montaa tallennettua sykliä ennen koulutusta.",
-      "label": "Tarvittavat syklit ensin"
     },
     "name": {
       "doc": "Tämän laitteen nimi Home Assistantissa.",
@@ -1357,10 +1326,6 @@
     "notify_finish_services": {
       "doc": "notify.*-palvelut, joita kutsutaan syklin päättyessä. Jätä tyhjäksi, jos et halua ilmoitusta.",
       "label": "Lopetuspalvelut"
-    },
-    "notify_fire_events": {
-      "doc": "Lähetä myös ha_washdata_*-tapahtumat syklin alussa ja lopussa omia automaatioitasi varten.",
-      "label": "Käynnistä HA-tapahtumat ilmoituksille"
     },
     "notify_icon": {
       "doc": "Pieni kuvake ilmoituksessa (esim. mdi:washing-machine). Lähetetään vain mobile_app-kohteisiin, ei notify-ryhmiin. iOS:ssä se korvaa sovelluksen kuvakkeen ja vaatii kumppanisovelluksen 2026.8 tai uudemman. Tyhjä: alustan oletus.",
@@ -1458,10 +1423,6 @@
       "doc": "Reaaliaikaiset täsmäytyspisteet, jotka sykli tarvitsee, ennen kuin älykäs lopetus tai ryppyjeneston lopetus voi päättää sen aikaisin. Ei muuta näytettävää ohjelmaa. Nosta sitä, jos heikot täsmäytykset päättävät syklejä liian aikaisin; laske sitä, jos selvät täsmäytykset odottavat sammutusviiveen.",
       "label": "Täsmäytyskynnys"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Jos reaaliaikaiset täsmäytyspisteet putoavat tämän alle, nykyinen ohjelma-arvaus tyhjennetään. Pidä se hieman Täsmäytyskynnystä pienempänä, jotta lyhyt notkahdus ei nollaa sitä.",
-      "label": "Eritäsmäytyskynnys"
-    },
     "progress_reset_delay": {
       "doc": "Pidä edistyminen syklin jälkeen 100 %:ssa näin kauan ennen paluuta Tyhjäkäynti-tilaan.",
       "label": "Edistymisen nollausviive"
@@ -1469,10 +1430,6 @@
     "pump_stuck_duration": {
       "doc": "Kuinka kauan pumppu saa käydä yhtäjaksoisesti, ennen kuin jumiutuneen pumpun tapahtuma laukeaa.",
       "label": "Pumpun jumiutumiskesto"
-    },
-    "sampling_interval": {
-      "doc": "Käsiteltyjen lukemien välinen vähimmäisaika. Aiemmin saapuvat lukemat ohitetaan (syklin aikaiset matalat lukemat säilytetään aina). Aseta se pistokkeesi raportointiväliin tai pienemmäksi; suurempi arvo vain heittää lukemia pois.",
-      "label": "Näytteenottoväli"
     },
     "save_debug_traces": {
       "doc": "Tallenna jokaisen syklin mukana myös täsmäyttimen virheenkorjaustiedot (jokaisen ehdokkaan pisteet) vianetsintää varten. Lisää noin 20 KB sykliä kohden.",
@@ -1644,9 +1601,6 @@
     "services": {
       "label": "Palvelut"
     },
-    "signal_processing": {
-      "label": "Signaalinkäsittely"
-    },
     "thresholds_gap": {
       "label": "Kynnykset ja väli"
     },
@@ -1709,10 +1663,6 @@
       "auto_label_confidence": {
         "higher": "Vähemmän automaattisia merkintöjä – useammat syklit menevät tarkistukseen",
         "lower": "Enemmän automaattisia merkintöjä – osa voi olla virheellisiä"
-      },
-      "duration_tolerance": {
-        "higher": "Hyväksyy laajemman kestoalueen – joustavampi tunnistus",
-        "lower": "Edellyttää tarkempaa kestomatchausta – tiukempi, mutta voi hylätä epätavalliset syklit"
       },
       "end_energy_threshold": {
         "higher": "Sulkee vain syklit, jotka kuluttivat merkittävästi energiaa",
@@ -2183,16 +2133,11 @@
     "kept": "säilytetty",
     "max": "maks.",
     "min": "min.",
-    "minus_tol": "-tol.",
     "no_match": "ei osumaa",
     "no_updates": "ei päivityksiä",
     "off_delay_wait": "sammutusviive",
     "off_gap": "sammutusväli",
-    "plus_tol": "+tol.",
-    "profile": "profiili",
-    "reading_interval": "tyypillinen lukemaväli",
     "sensor_offline": "anturi offline: pakotettu pysäytys",
-    "si": "NV",
     "spike_ignored": "piikki ohitettu",
     "spike_ignored_short": "piikki: ohitettu",
     "start": "käynnistys",

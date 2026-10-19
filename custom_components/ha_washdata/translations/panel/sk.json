@@ -312,19 +312,13 @@
       "timeout": "Musí presiahnuť Trvanie zaseknutia čerpadla ({ps} s), aby sa alarm zaseknutia spustil skôr"
     },
     "start_dur": {
-      "sampling": "Interval vzorkovania presahuje Trvanie spustenia ({sdt} s); impulz z jednej vzorky môže otvoriť cyklus",
       "threshold": "Mal by byť aspoň jeden Interval vzorkovania ({si} s), aby sa predišlo falošným štartom z jednej vzorky"
-    },
-    "unmatch": {
-      "match": "Musí byť nad Prahom nezhody ({un})",
-      "unmatch": "Musí byť pod Prahom zhody ({match}); inak sa potvrdená zhoda ihneď zruší"
     },
     "cascade_toast": "Ďalšie nastavenia upravené pre zachovanie konzistencie: {n}",
     "suggestion_resolves": "Uplatnite nižšie čakajúci návrh ({val}) na vyriešenie tohto konfliktu",
     "use_fix": "Použiť {val}",
     "watchdog": {
-      "interval": "Mal by byť aspoň 2× Interval vzorkovania ({si} s)",
-      "sampling": "Interval vzorkovania by mal byť najviac polovica Intervalu watchdog ({wi} s)"
+      "interval": "Mal by byť aspoň 2× Interval vzorkovania ({si} s)"
     },
     "settings_banner": "Konflikty nastavení: {n}. Skontrolujte zvýraznené sekcie a opravte ich pred uložením.",
     "settings_banner_btn": "Prejsť na prvý",
@@ -663,7 +657,7 @@
     "hist_reason_already_recorded": "prekrýva sa s cyklom, ktorý WashData už zaznamenal",
     "share_consent": "Potvrdzujem, že tieto cykly prebehli normálne až do konca bez prerušenia",
     "show_internal": "Zobraziť interné nastavenia",
-    "show_internal_tip": "Nastavenia, ktoré WashData ladí za vás (vzorkovanie, watchdog, frekvencia párovania, prahy). Zobrazia sa, keď má toto zariadenie vlastnú hodnotu, konflikt alebo návrh.",
+    "show_internal_tip": "Nastavenia, ktoré WashData ladí za vás (watchdog, kadencia párovania, prahy). Zobrazí sa, keď má toto zariadenie vlastnú hodnotu, konflikt alebo návrh.",
     "rate_n": "{n} hviezdičiek",
     "rate_quality": "Ohodnotiť kvalitu",
     "pg_autolabel": "Automatické označenie",
@@ -1214,10 +1208,6 @@
       "doc": "Ponechať krátke pulzy bubna s nízkym výkonom po hlavnej fáze ohrevu sušičky pri dokončenom cykle, namiesto ich čítania ako nových cyklov.",
       "label": "Povoliť detekciu ochrany pred krčením"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "V režime ochrany pred krčením sa výkon pod touto hodnotou počíta ako pokoj medzi impulzmi otáčania a pokoj dlhší ako Max. medzera medzi impulzmi režim ukončí. Ak je Prah zastavenia vyšší, použije sa on, takže nastavenie má vplyv len nad Prahom zastavenia.",
-      "label": "Prah výkonu ukončenia"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Ako dlho môže sušička medzi pulzmi bubna zostať v pokoji, než režim ochrany pred krčením skončí. Nastavte nad najdlhšiu medzeru vašej sušičky, inak sa ďalšie pulzy vyhodnotia ako falošné štarty.",
       "label": "Max. medzera medzi impulzmi"
@@ -1262,10 +1252,6 @@
       "doc": "Voliteľný senzor dverí. Ukazuje, kedy bol spotrebič po cykle otvorený kvôli vyloženiu.",
       "label": "Entita senzora dverí"
     },
-    "duration_tolerance": {
-      "doc": "Len pre spätnú väzbu učenia: cyklus v rozmedzí +/-X % odhadovanej doby sa počíta ako dobrý odhad. Neovplyvňuje párovanie.",
-      "label": "Tolerancia odhadu"
-    },
     "enable_ml_models": {
       "doc": "Použiť model natrénovaný na tomto stroji na predpoveď energie a nákladov bežiaceho cyklu a nechať dobre známy program, ktorý skončí nezvyčajne skoro, dokončiť bez celého oneskorenia vypnutia. Vypnuté: len logika založená na výkone.",
       "label": "Použiť inteligentné modely počas cyklu"
@@ -1291,12 +1277,8 @@
       "label": "Zobraziť ladiace entity"
     },
     "external_end_trigger": {
-      "doc": "Binárny senzor, ktorého zmena označuje koniec cyklu (napr. kontakt „dokončené“ alebo iná integrácia).",
+      "doc": "Voliteľný binárny snímač, ktorý ukončí cyklus po aktivácii, dopĺňa detekciu na základe príkonu (napr. kontakt \"dokončené\" alebo iná integrácia). Prázdne = vypnuté.",
       "label": "Entita externého spúšte"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Nechať binárny senzor signalizovať koniec cyklu, navyše k detekcii podľa výkonu.",
-      "label": "Povoliť externý spúšť ukončenia"
     },
     "external_end_trigger_inverted": {
       "doc": "Brať VYPNUTIE senzora (nie zapnutie) ako signál konca.",
@@ -1321,18 +1303,6 @@
     "ml_training_enabled": {
       "doc": "Občas pretrénovať model energie na dokončených cykloch tohto stroja. Nový model sa ponechá len vtedy, keď na testovacích cykloch prekoná jednoduchý odhad.",
       "label": "Učiť sa z tohto stroja"
-    },
-    "ml_training_hour": {
-      "doc": "Hodina dňa (0-23) pre nočný tréning. Vyberte pokojnú hodinu, napr. 2.",
-      "label": "Učiť sa v hodine"
-    },
-    "ml_training_interval_days": {
-      "doc": "Pretrénovať najviac raz za tento počet dní.",
-      "label": "Kontrolovať maximálne každých"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Pred tréningom počkať aspoň na tento počet zaznamenaných cyklov.",
-      "label": "Najprv potrebné cykly"
     },
     "name": {
       "doc": "Názov tohto zariadenia zobrazený v Home Assistant.",
@@ -1365,10 +1335,6 @@
     "notify_finish_services": {
       "doc": "Služby notify.* volané po dokončení cyklu. Ponechajte prázdne pre žiadne.",
       "label": "Služby pri dokončení"
-    },
-    "notify_fire_events": {
-      "doc": "Tiež vyvolať udalosti ha_washdata_* pri štarte a dokončení cyklu pre vlastné automatizácie.",
-      "label": "Spúšťať HA udalosti pre upozornenia"
     },
     "notify_icon": {
       "doc": "Malá ikona v upozornení (napr. mdi:washing-machine). Posiela sa len na ciele mobile_app, nie na skupiny notify. V iOS nahradí ikonu aplikácie a vyžaduje mobilnú aplikáciu 2026.8 alebo novšiu. Prázdne: predvolená ikona platformy.",
@@ -1466,10 +1432,6 @@
       "doc": "Živé skóre zhody, ktoré cyklus potrebuje, než ho Inteligentné ukončenie alebo dokončenie ochrany pred krčením smie ukončiť skôr. Nemení zobrazený program. Zvýšte, ak slabé zhody ukončujú cykly predčasne; znížte, ak jasné zhody čakajú celé oneskorenie vypnutia.",
       "label": "Prah zhody"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Ak živé skóre zhody klesne pod túto hodnotu, aktuálny odhad programu sa vymaže. Držte trochu pod Prahom zhody, aby ho krátky pokles nevynuloval.",
-      "label": "Prah nezhody"
-    },
     "progress_reset_delay": {
       "doc": "Po cykle držať priebeh na 100 % počas tohto času, než sa resetuje na Nečinný.",
       "label": "Oneskorenie obnovenia priebehu"
@@ -1477,10 +1439,6 @@
     "pump_stuck_duration": {
       "doc": "Ako dlho smie čerpadlo bežať bez prestávky, než sa spustí udalosť zaseknutého čerpadla.",
       "label": "Trvanie zaseknutia čerpadla"
-    },
-    "sampling_interval": {
-      "doc": "Minimálny čas medzi spracovanými hodnotami. Hodnoty, ktoré prídu skôr, sa preskočia (nízke hodnoty počas cyklu sa vždy ponechajú). Nastavte interval hlásenia vašej zásuvky alebo menej; vyššia hodnota len zahadzuje údaje.",
-      "label": "Interval vzorkovania"
     },
     "save_debug_traces": {
       "doc": "Ukladať ku každému cyklu aj ladiace údaje párovania (skóre všetkých kandidátov) na riešenie problémov. Pridáva asi 20 KB na cyklus.",
@@ -1656,9 +1614,6 @@
     "services": {
       "label": "Služby"
     },
-    "signal_processing": {
-      "label": "Spracovanie signálu"
-    },
     "thresholds_gap": {
       "label": "Prahy a medzera"
     },
@@ -1721,10 +1676,6 @@
       "auto_label_confidence": {
         "higher": "Menej cyklov je označených automaticky; viac ide na kontrolu",
         "lower": "Viac cyklov je označených automaticky; niektoré môžu byť nesprávne určené"
-      },
-      "duration_tolerance": {
-        "higher": "Akceptuje širší rozsah trvania – flexibilnejšie porovnávanie",
-        "lower": "Vyžaduje bližšiu zhodu trvania – prísnejšie, ale môže odmietnuť nezvyčajné cykly"
       },
       "end_energy_threshold": {
         "higher": "Uzatvára iba cykly so značnou spotrebou energie",
@@ -2016,7 +1967,6 @@
     "smart_termination_duration_ratio": "Zlomok priemernej doby trvania programu, ktorý musí cyklus dosiahnuť, než ho Inteligentné ukončenie smie ukončiť skôr; znížte, ak doby behu kolíšu",
     "anti_crease_finalize_ratio": "Zlomok priemernej doby trvania programu, ktorý musí cyklus dosiahnuť, než ho chvost ochrany pred krčením smie dokončiť; pri sušičkách znížte, pri práčkach ponechajte predvolené",
     "anti_wrinkle_enabled": "Pohltiť impulzy bubna po hlavnej fáze namiesto ich čítania ako nové cykly",
-    "anti_wrinkle_exit_power": "Úroveň pokoja medzi impulzmi otáčania; prejaví sa len nad Prahom zastavenia",
     "anti_wrinkle_idle_timeout": "Povolený pokoj medzi dvoma impulzmi bubna, než sa ochrana pred krčením skončí",
     "anti_wrinkle_max_duration": "Dlhší impulz ukončí ochranu pred krčením a otvorí nový cyklus",
     "anti_wrinkle_max_power": "Impulz nad touto hodnotou ukončí ochranu pred krčením a otvorí nový cyklus",
@@ -2219,16 +2169,11 @@
     "kept": "ponechané",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "bez zhody",
     "no_updates": "bez aktualizácií",
     "off_delay_wait": "oneskorenie vypnutia",
     "off_gap": "medzera vyp.",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "typický interval meraní",
     "sensor_offline": "senzor offline: nútené zastavenie",
-    "si": "IV",
     "spike_ignored": "špička ignorovaná",
     "spike_ignored_short": "špička: ignorovaná",
     "start": "spustenie",

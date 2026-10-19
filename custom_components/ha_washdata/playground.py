@@ -54,7 +54,6 @@ from .signal_processing import (
 )
 from .const import (
     CONF_ANTI_WRINKLE_ENABLED,
-    CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE,
     CONF_SMART_TERMINATION_DURATION_RATIO,
@@ -79,7 +78,6 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
@@ -175,7 +173,6 @@ _OVERRIDE_FIELD_MAP: dict[str, tuple[str, Callable[[Any], Any]]] = {
     CONF_ANTI_WRINKLE_ENABLED: ("anti_wrinkle_enabled", _coerce_bool),
     CONF_ANTI_WRINKLE_MAX_POWER: ("anti_wrinkle_max_power", float),
     CONF_ANTI_WRINKLE_MAX_DURATION: ("anti_wrinkle_max_duration", float),
-    CONF_ANTI_WRINKLE_EXIT_POWER: ("anti_wrinkle_exit_power", float),
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT: ("anti_wrinkle_idle_timeout", float),
     CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE: ("dishwasher_end_spike_quiet_release", float),
     CONF_SMART_TERMINATION_DURATION_RATIO: ("smart_termination_duration_ratio", float),
@@ -850,9 +847,7 @@ class _DetailSim:
             DEFAULT_MATCH_PERSISTENCE,
             minimum=1,
         )
-        self.unmatch_threshold = self.options.get(
-            CONF_PROFILE_UNMATCH_THRESHOLD, DEFAULT_PROFILE_UNMATCH_THRESHOLD
-        )
+        self.unmatch_threshold = DEFAULT_PROFILE_UNMATCH_THRESHOLD  # fixed (0.5.9)
         self.learning_floor = float(
             option_float(
                 self.options.get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
@@ -1609,7 +1604,6 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
         "anti_wrinkle_enabled": getattr(config, "anti_wrinkle_enabled", None),
         "anti_wrinkle_max_power": getattr(config, "anti_wrinkle_max_power", None),
         "anti_wrinkle_max_duration": getattr(config, "anti_wrinkle_max_duration", None),
-        "anti_wrinkle_exit_power": getattr(config, "anti_wrinkle_exit_power", None),
         "anti_wrinkle_idle_timeout": getattr(config, "anti_wrinkle_idle_timeout", None),
         "dishwasher_end_spike_quiet_release": getattr(config, "dishwasher_end_spike_quiet_release", None),
         "smart_termination_duration_ratio": getattr(config, "smart_termination_duration_ratio", None),

@@ -50,7 +50,6 @@ def manager(hass: Any) -> WashDataManager:
     ps.async_save = AsyncMock()
     mgr._run_post_cycle_processing = AsyncMock()
     mgr._learning_confidence = 0.6
-    mgr._auto_label_confidence = 0.9
     mgr.learning_manager.process_cycle_end = MagicMock()
     return mgr
 

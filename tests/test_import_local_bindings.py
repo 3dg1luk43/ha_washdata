@@ -167,9 +167,12 @@ async def test_the_guard_covers_the_keys_a_selector_can_clear():
     from custom_components.ha_washdata import const
 
     numeric = ws_api.numeric_option_keys()
+    # A retired key (RETIRED_OPTION_KEYS) never survives a save at all, so it would
+    # read as "cleared" here; the import strips every one of them anyway.
     candidates = sorted({
         value for name, value in vars(const).items()
         if name.startswith("CONF_") and isinstance(value, str) and value not in numeric
+        and value not in const.RETIRED_OPTION_KEYS
     })
     cleared: set[str] = set()
     for key in candidates:

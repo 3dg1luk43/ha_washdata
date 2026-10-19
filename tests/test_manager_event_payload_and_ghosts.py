@@ -59,8 +59,6 @@ async def test_cycle_end_event_payload_excludes_large_fields(
     hass: HomeAssistant, manager: WashDataManager
 ) -> None:
     """Cycle ended event should strip heavy fields to stay within HA event limits."""
-    manager._notify_fire_events = True
-    manager._auto_label_confidence = 0.0
     manager.profile_store.get_profiles = MagicMock(return_value={})
     manager.profile_store.async_add_cycle = AsyncMock()
     manager.profile_store.async_clear_active_cycle = AsyncMock()
@@ -145,7 +143,6 @@ async def test_short_high_energy_cycle_is_not_marked_noise(
 def _wire_cycle_end_mocks(manager: WashDataManager) -> None:
     """Stub the heavy/persistence calls in _async_process_cycle_end so a test can
     exercise just the terminal-state reset logic."""
-    manager._auto_label_confidence = 0.0
     manager._cycle_anomaly = "none"
     manager._last_match_result = None
     manager._notify_finish_services = []

@@ -257,19 +257,13 @@
       "timeout": "Tem de exceder a Duração de Bomba Presa ({ps} s) para que o alarme de bomba presa possa disparar primeiro"
     },
     "start_dur": {
-      "sampling": "O Intervalo de amostragem excede a Duração de arranque ({sdt} s); picos de amostra única podem abrir um ciclo",
       "threshold": "Deve ser pelo menos um Intervalo de amostragem ({si} s) para evitar falsos arranques de amostra única"
-    },
-    "unmatch": {
-      "match": "Deve ser superior ao Limiar de não correspondência ({un})",
-      "unmatch": "Deve ser inferior ao Limiar de correspondência ({match}); caso contrário, uma correspondência confirmada é imediatamente anulada"
     },
     "cascade_toast": "Outras definições ajustadas por consistência: {n}",
     "suggestion_resolves": "Aplique a sugestão pendente ({val}) abaixo para corrigir este conflito",
     "use_fix": "Usar {val}",
     "watchdog": {
-      "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)",
-      "sampling": "O Intervalo de amostragem deve ser no máximo metade do Intervalo watchdog ({wi} s)"
+      "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)"
     },
     "end_energy": {
       "energy": "Demasiado restritivo para o Limiar de Paragem ({w} W) durante o Atraso de Desligamento ({d} s); o ciclo só pode terminar por um mecanismo de recurso",
@@ -611,7 +605,7 @@
     "hist_reason_already_recorded": "sobrepõe-se a um ciclo que o WashData já registou",
     "share_consent": "Confirmo que estes ciclos terminaram normalmente, sem interrupções",
     "show_internal": "Mostrar definições internas",
-    "show_internal_tip": "Definições que o WashData afina por si (amostragem, watchdog, cadência de correspondência, limiares). Mostradas quando este dispositivo tem um valor próprio, um conflito ou uma sugestão.",
+    "show_internal_tip": "Definições que o WashData afina por si (watchdog, cadência de correspondência, limiares). Mostradas quando este dispositivo tem um valor próprio, um conflito ou uma sugestão.",
     "rate_n": "{n} estrelas",
     "rate_quality": "Avaliar a qualidade",
     "pg_autolabel": "Rotulagem automática",
@@ -1038,7 +1032,6 @@
     "smart_termination_duration_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de a Terminação inteligente o poder terminar mais cedo; reduza-a se os tempos de execução variarem",
     "anti_crease_finalize_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de a cauda anti-vincos o poder terminar; reduza-a em máquinas de secar, deixe as máquinas de lavar na predefinição",
     "anti_wrinkle_enabled": "Absorver os pulsos de rotação após a fase principal em vez de os ler como novos ciclos",
-    "anti_wrinkle_exit_power": "Nível considerado silêncio entre pulsos de rotação; só tem efeito acima do Limiar de Paragem",
     "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de rotação antes de o modo anti-vincos terminar",
     "anti_wrinkle_max_duration": "Um pulso mais longo do que isto termina o modo anti-vincos e abre um novo ciclo",
     "anti_wrinkle_max_power": "Um pulso acima disto termina o modo anti-vincos e abre um novo ciclo",
@@ -1164,10 +1157,6 @@
       "doc": "Manter os curtos impulsos de rotação de baixa potência de uma máquina de secar após a fase principal de aquecimento dentro do ciclo terminado, em vez de os ler como novos ciclos.",
       "label": "Activar Detecção Anti-Vincos"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "No modo anti-vincos, a potência abaixo deste valor conta como silêncio entre pulsos de rotação, e um silêncio mais longo do que o Intervalo Máximo Entre Pulsos termina o modo. Se o Limiar de Paragem for mais alto, é esse o usado, por isso isto só tem efeito acima do Limiar de Paragem.",
-      "label": "Limiar de Saída de Potência"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Quanto tempo a máquina de secar pode ficar em silêncio entre impulsos de rotação antes de o modo anti-vincos terminar. Defina-o acima da pausa mais longa da sua máquina, senão os impulsos seguintes são lidos como falsos arranques.",
       "label": "Intervalo Máximo Entre Pulsos"
@@ -1216,10 +1205,6 @@
       "doc": "Sensor de porta opcional. Mostra quando o eletrodoméstico foi aberto para descarregar após um ciclo.",
       "label": "Entidade do Sensor de Porta"
     },
-    "duration_tolerance": {
-      "doc": "Apenas para aprendizagem: um ciclo dentro de +/-X% da sua duração estimada conta como uma boa estimativa. Não afeta a correspondência.",
-      "label": "Tolerância de Estimativa"
-    },
     "enable_ml_models": {
       "doc": "Usar um modelo treinado nesta máquina para prever a energia e o custo de um ciclo em curso, e deixar que um programa bem conhecido que para invulgarmente cedo termine sem todo o atraso de desligamento. Desligado: apenas lógica baseada na potência.",
       "label": "Aplicar modelos inteligentes durante um ciclo"
@@ -1245,12 +1230,8 @@
       "label": "Expor Entidades de Depuração"
     },
     "external_end_trigger": {
-      "doc": "Sensor binário cuja mudança marca o fim do ciclo (p. ex. um contacto \"concluído\" ou outra integração).",
+      "doc": "Sensor binário opcional que termina o ciclo quando é activado, além da detecção baseada no consumo (p. ex. um contacto \"concluído\" ou outra integração). Deixar vazio para desactivar.",
       "label": "Entidade do Gatilho Externo"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Deixar um sensor binário sinalizar o fim de um ciclo, além da deteção baseada na potência.",
-      "label": "Activar Gatilho de Fim Externo"
     },
     "external_end_trigger_inverted": {
       "doc": "Tratar a passagem do sensor a desligado (e não a ligado) como sinal de fim.",
@@ -1275,18 +1256,6 @@
     "ml_training_enabled": {
       "doc": "Retreinar de vez em quando o modelo de energia com os ciclos terminados desta máquina. Um modelo novo só é mantido se superar a estimativa simples em ciclos de teste.",
       "label": "Aprender com esta máquina"
-    },
-    "ml_training_hour": {
-      "doc": "Hora do dia (0-23) para o treino noturno. Escolha uma hora calma, p. ex. 2.",
-      "label": "Aprender às horas"
-    },
-    "ml_training_interval_days": {
-      "doc": "Retreinar no máximo uma vez a cada este número de dias.",
-      "label": "Verificar no máximo de"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Esperar por pelo menos este número de ciclos gravados antes de treinar.",
-      "label": "Ciclos necessários primeiro"
     },
     "name": {
       "doc": "Nome mostrado no Home Assistant para este dispositivo.",
@@ -1319,10 +1288,6 @@
     "notify_finish_services": {
       "doc": "Serviços notify.* a chamar quando um ciclo termina. Deixe vazio para nenhum.",
       "label": "Serviços de Fim"
-    },
-    "notify_fire_events": {
-      "doc": "Disparar também eventos ha_washdata_* no início e no fim do ciclo, para as suas próprias automatizações.",
-      "label": "Disparar Eventos HA para Notificações"
     },
     "notify_icon": {
       "doc": "Ícone pequeno da notificação (p. ex. mdi:washing-machine). Enviado apenas para destinos mobile_app, não para grupos notify. No iOS substitui o ícone da aplicação e requer a aplicação companion 2026.8 ou mais recente. Em branco: a predefinição da plataforma.",
@@ -1420,10 +1385,6 @@
       "doc": "Pontuação de correspondência ao vivo de que um ciclo precisa antes de a Terminação inteligente ou o fim anti-vincos o poderem terminar mais cedo. Não altera o programa mostrado. Aumente-a se correspondências fracas terminarem ciclos cedo demais; reduza-a se correspondências claras esperarem todo o atraso de desligamento.",
       "label": "Limiar de Correspondência"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Se a pontuação de correspondência ao vivo descer abaixo deste valor, a suposição atual de programa é limpa. Mantenha-a um pouco abaixo do Limiar de Correspondência para que uma descida breve não a reponha.",
-      "label": "Limiar de Não Correspondência"
-    },
     "progress_reset_delay": {
       "doc": "Após um ciclo, manter o progresso a 100% durante este tempo antes de voltar a Inativo.",
       "label": "Atraso de Reposição de Progresso"
@@ -1431,10 +1392,6 @@
     "pump_stuck_duration": {
       "doc": "Quanto tempo uma bomba pode funcionar sem parar antes de disparar o evento de bomba presa.",
       "label": "Duração de Bomba Presa"
-    },
-    "sampling_interval": {
-      "doc": "Tempo mínimo entre leituras processadas. As leituras que chegam mais cedo são ignoradas (as leituras baixas durante um ciclo são sempre mantidas). Defina-o para o intervalo de reporte da sua tomada ou menos; um valor maior só descarta leituras.",
-      "label": "Intervalo de Amostragem"
     },
     "save_debug_traces": {
       "doc": "Guardar também com cada ciclo os dados de depuração do comparador (as pontuações de cada candidato), para resolução de problemas. Acrescenta cerca de 20 KB por ciclo.",
@@ -1605,9 +1562,6 @@
     },
     "services": {
       "label": "Serviços"
-    },
-    "signal_processing": {
-      "label": "Processamento de Sinal"
     },
     "thresholds_gap": {
       "label": "Limiares e Intervalo"
@@ -1858,10 +1812,6 @@
       "auto_label_confidence": {
         "higher": "Etiqueta menos ciclos automaticamente; mais vão para revisão",
         "lower": "Etiqueta mais ciclos automaticamente; alguns podem ser mal identificados"
-      },
-      "duration_tolerance": {
-        "higher": "Aceita um intervalo de duração mais amplo – correspondência mais flexível",
-        "lower": "Exige duração mais próxima – mais rigoroso, pode rejeitar ciclos invulgares"
       },
       "end_energy_threshold": {
         "higher": "Fecha apenas ciclos que consumiram energia substancial",
@@ -2201,16 +2151,11 @@
     "kept": "mantido",
     "max": "máx.",
     "min": "mín.",
-    "minus_tol": "-tol",
     "no_match": "sem corresp.",
     "no_updates": "sem atualizações",
     "off_delay_wait": "espera até desligar",
     "off_gap": "intervalo",
-    "plus_tol": "+tol",
-    "profile": "perfil",
-    "reading_interval": "intervalo típico de leitura",
     "sensor_offline": "sensor offline: paragem forçada",
-    "si": "IA",
     "spike_ignored": "pico ignorado",
     "spike_ignored_short": "pico: ignorado",
     "start": "início",

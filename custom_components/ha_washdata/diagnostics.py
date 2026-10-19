@@ -154,7 +154,6 @@ async def async_get_config_entry_diagnostics(
                 "save_debug_traces": bool(
                     getattr(manager.profile_store, "save_debug_traces", False)
                 ),
-                "notify_fire_events": bool(getattr(manager, "_notify_fire_events", False)),
             },
         },
         "store_export": _redact(exported),

@@ -239,9 +239,11 @@ test('notification fields are present in settings', async ({ page }) => {
   const notifSec = page.locator('button[data-sec="notifications"]').first();
   await expect(notifSec).toBeVisible({ timeout: 8_000 });
   await notifSec.click();
-  // notify_fire_events is a checkbox switch; target the visible field container
-  const notifyField = page.locator('.wd-field-switch:has(input[data-opt="notify_fire_events"])').first();
+  // notify_only_when_home is a checkbox switch; target the visible field container
+  const notifyField = page.locator('.wd-field-switch:has(input[data-opt="notify_only_when_home"])').first();
   await expect(notifyField).toBeVisible({ timeout: 8_000 });
+  // #478 retired "Fire HA Events for Notifications": the bus events always fire.
+  await expect(page.locator('input[data-opt="notify_fire_events"]')).toHaveCount(0);
 });
 
 test('revert button appears when changes have been staged', async ({ page }) => {

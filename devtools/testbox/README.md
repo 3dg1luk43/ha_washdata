@@ -153,10 +153,12 @@ fits in minutes. Three things have to move together, and getting any of them
 wrong looks like a bug in the integration:
 
 1. **The timing options.** The detector's gates are wall-clock, so `smoke.sh`
-   divides `off_delay`, `min_off_gap`, `sampling_interval` and
-   `watchdog_interval` by roughly the same factor. Everything else stays at the
-   shipped default - the point is to exercise production behaviour, not a
-   bespoke configuration.
+   divides `off_delay`, `min_off_gap` and `watchdog_interval` by roughly the
+   same factor. Everything else stays at the shipped default - the point is to
+   exercise production behaviour, not a bespoke configuration. The reading
+   throttle cannot be scaled since 0.5.9 (it is the device type's own: 2 s for
+   wet appliances, i.e. 2 min of appliance time at 60x), so readings closer
+   than that are dropped unless they fall to low power; the checks pass with it.
 2. **The seeded history.** `hactl.py compress-export` rescales the export's
    clock by the same factor (cycle durations and sample offsets, the profiles'
    duration statistics, the envelopes' time grids; shapes untouched). Without
@@ -213,7 +215,7 @@ None is a bug; each has a way to test it that does not compress time:
   be scaled: at 60x it is 10 h of appliance time and the standby-band finalize can
   never fire. *Test it* at 2x (20 min of appliance time): `./smoke.sh` writes
   60x timings in step 3, so after it run `./hactl.py set-options <id>
-  off_delay=<v> min_off_gap=<v> sampling_interval=<v> watchdog_interval=<v>
+  off_delay=<v> min_off_gap=<v> watchdog_interval=<v>
   profile_match_interval=<v> completion_min_seconds=<v> interrupted_min_seconds=<v>`
   with each `<v>` the shipped value halved, then `./hactl.py replay <export> --cycle N --speedup 2` on a cycle whose
   tail holds a flat standby above `stop_threshold_w`

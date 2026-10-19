@@ -61,14 +61,15 @@ from .const import (
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
-    RETIRED_NOTIFY_OPTION_KEYS,
+    RETIRED_OPTION_KEYS,
+    CONF_EXTERNAL_END_TRIGGER,
+    CONF_EXTERNAL_END_TRIGGER_ENABLED,
     CONF_NOTIFY_START_SERVICES,
     CONF_NOTIFY_FINISH_SERVICES,
     CONF_NOTIFY_LIVE_SERVICES,
     CONF_NOTIFY_ACTIONS,
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
-    CONF_NOTIFY_FIRE_EVENTS,
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_NOTIFY_TIMEOUT_SECONDS,
@@ -76,7 +77,6 @@ from .const import (
     CONF_NOTIFY_FINISH_CHANNEL,
     CONF_NOTIFY_REMINDER_MESSAGE,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
-    DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
     DEFAULT_NOTIFY_TIMEOUT_SECONDS,
@@ -85,19 +85,13 @@ from .const import (
     DEFAULT_NOTIFY_REMINDER_MESSAGE,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
     CONF_AUTO_LABEL_CONFIDENCE,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_LEARNING_CONFIDENCE,
-    DEFAULT_DURATION_TOLERANCE,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_SMOOTHING_WINDOW,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_INTERRUPTED_MIN_SECONDS,
-    DEFAULT_SMOOTHING_WINDOW,
-    DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
@@ -289,13 +283,11 @@ def _heal_seeded_cadence(options: dict[str, Any], device_type: Any) -> list[str]
     return healed
 
 
-def _retire_legacy_notify_service(
-    options: dict[str, Any], data: dict[str, Any]
-) -> list[str]:
-    """Convert the deprecated ``notify_service`` to per-event lists, then drop it (#472).
+def _convert_legacy_notify_service(options: dict[str, Any]) -> list[str]:
+    """Convert the deprecated ``notify_service`` to per-event lists, in place (#472).
 
-    In place. The manager used to fall back to ``options[notify_service]`` (gated
-    by ``notify_events``) whenever all three per-event lists were empty, so a user
+    The manager used to fall back to ``options[notify_service]`` (gated by
+    ``notify_events``) whenever all three per-event lists were empty, so a user
     who cleared every list kept getting notified and could never remove the key:
     the panel merges over ``entry.options``. That fallback is gone; this converts
     with EXACTLY its rule so nobody's delivered notifications change:
@@ -306,9 +298,8 @@ def _retire_legacy_notify_service(
     - empty or absent ``notify_events`` -> start, finish AND live;
     - otherwise each list only when its event is in ``notify_events``.
 
-    Only ``options`` is read, as the runtime read only options. Both keys are then
-    popped from ``options`` and ``data`` whatever happened. Returns the list keys
-    filled. Shared by the 3.11 -> 3.12 step and the one-pass legacy path.
+    Only ``options`` is read, as the runtime read only options. Returns the list
+    keys filled. The two keys themselves are dropped by ``_retire_options``.
     """
     converted: list[str] = []
     svc = options.get(CONF_NOTIFY_SERVICE)
@@ -334,10 +325,42 @@ def _retire_legacy_notify_service(
             if not events or event in events:
                 options[key] = [svc]
                 converted.append(key)
-    for key in RETIRED_NOTIFY_OPTION_KEYS:
+    return converted
+
+
+def _retire_options(options: dict[str, Any], data: dict[str, Any]) -> list[str]:
+    """Drop every ``RETIRED_OPTION_KEYS`` key from ``options`` and ``data``, in place.
+
+    ``notify_service`` is converted first (``_convert_legacy_notify_service``), so
+    nobody's notifications change; every other retired key is read by nothing.
+    Idempotent: on its own output it changes nothing and returns ``[]``. Returns
+    the notification list keys filled. Shared by the 3.11 -> 3.12 step and the
+    one-pass legacy path; the import and undo-import strip the same set.
+    """
+    converted = _convert_legacy_notify_service(options)
+    for key in RETIRED_OPTION_KEYS:
         options.pop(key, None)
         data.pop(key, None)
     return converted
+
+
+def _merge_external_end_trigger(options: dict[str, Any], data: dict[str, Any]) -> bool:
+    """Fold the retired on/off flag into the trigger entity (0.5.9), in place.
+
+    The manager listened to ``options[external_end_trigger]`` only while
+    ``options[external_end_trigger_enabled]`` was truthy (absent meant off).
+    Since 0.5.9 a set entity alone turns the trigger on, so where the flag was
+    off the entity is cleared from ``options``, and nobody's cycle ends change;
+    a copy in ``data`` was never read and goes in every case. The flag itself
+    goes with ``RETIRED_OPTION_KEYS``. Runs ONCE, inside the versioned
+    migration, before ``_retire_options``: on migrated options (no flag left) it
+    would clear a trigger that is on. Returns True when an options entity was
+    cleared.
+    """
+    data.pop(CONF_EXTERNAL_END_TRIGGER, None)
+    if options.get(CONF_EXTERNAL_END_TRIGGER_ENABLED):
+        return False
+    return bool(options.pop(CONF_EXTERNAL_END_TRIGGER, None))
 
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -468,26 +491,32 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             healed or "nothing",
         )
 
-    # 3.11 -> 3.12 (#472): retire the deprecated single notify_service. Converted
-    # into the per-event lists by the runtime fallback's own rule, then dropped
-    # from options and data unconditionally; see _retire_legacy_notify_service.
+    # 3.11 -> 3.12: drop every retired option key (RETIRED_OPTION_KEYS). Two
+    # still carried meaning and are converted first, so no notification and no
+    # cycle end changes: the deprecated single notify_service becomes the
+    # per-event lists by the runtime fallback's own rule (#472), and a disabled
+    # external end trigger loses its entity (0.5.9: a set entity means on). The
+    # rest (notify_fire_events #478, the 0.5.9 option trim, leftovers of removed
+    # features) were read by nothing. See _merge_external_end_trigger and
+    # _retire_options.
     if version == 3 and minor_version == 11:
         new_opts = dict(entry.options)
         new_data = dict(entry.data)
         # Computed BEFORE the update, like the 3.10 -> 3.11 step.
-        removed = sorted(
-            (set(entry.options) | set(entry.data)) & RETIRED_NOTIFY_OPTION_KEYS
-        )
-        converted = _retire_legacy_notify_service(new_opts, new_data)
+        removed = sorted((set(entry.options) | set(entry.data)) & RETIRED_OPTION_KEYS)
+        trigger_cleared = _merge_external_end_trigger(new_opts, new_data)
+        converted = _retire_options(new_opts, new_data)
         hass.config_entries.async_update_entry(
             entry, data=new_data, options=new_opts, minor_version=12
         )
         minor_version = 12
         _log.debug(
-            "Migrated WashData entry from 3.11 to 3.12 (legacy notify keys "
-            "dropped: %s; lists filled from notify_service: %s)",
+            "Migrated WashData entry from 3.11 to 3.12 (retired keys dropped: %s; "
+            "lists filled from notify_service: %s; disabled external end trigger "
+            "cleared: %s)",
             removed or "none",
             converted or "none",
+            trigger_cleared,
         )
 
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
@@ -522,21 +551,20 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             options[CONF_NOTIFY_FINISH_SERVICES] = [legacy_svc]
         if CONF_NOTIFY_LIVE_SERVICES not in options and NOTIFY_EVENT_LIVE in legacy_events:
             options[CONF_NOTIFY_LIVE_SERVICES] = [legacy_svc]
-    # Same retirement as the 3.11 -> 3.12 step (#472). The block above only fills
-    # ABSENT lists; an entry whose lists were saved as [] was notified by the
-    # runtime fallback instead, and this converts it by that rule before dropping
-    # both keys, so neither path changes what anyone receives.
-    _retire_legacy_notify_service(options, data)
+    # Same retirement as the 3.11 -> 3.12 step. The block above only fills ABSENT
+    # lists; an entry whose lists were saved as [] was notified by the runtime
+    # fallback instead, and this converts it by that rule before dropping both
+    # keys, so neither path changes what anyone receives. The external end
+    # trigger is folded the same way, and every other retired key dropped.
+    _merge_external_end_trigger(options, data)
+    _retire_options(options, data)
 
+    # (duration_tolerance, smoothing_window and profile_duration_tolerance are no
+    # longer seeded: retired keys, read by nothing.)
     options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
     options.setdefault(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)
-    options.setdefault(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE)
     options.setdefault(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE)
     options.setdefault(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
-    options.setdefault(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
-    options.setdefault(
-        CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE
-    )
     options.setdefault(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS)
 
     options.setdefault(
@@ -591,7 +619,6 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(CONF_NOTIFY_ACTIONS, [])
     options.setdefault(CONF_NOTIFY_PEOPLE, [])
     options.setdefault(CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME)
-    options.setdefault(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
     options.setdefault(
         CONF_NOTIFY_LIVE_INTERVAL_SECONDS, DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
     )

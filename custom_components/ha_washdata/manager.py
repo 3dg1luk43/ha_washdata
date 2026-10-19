@@ -76,12 +76,10 @@ from .const import (
     CONF_NOTIFY_CYCLE_TIMERS,
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
-    CONF_NOTIFY_FIRE_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_LOW_POWER_NO_UPDATE_TIMEOUT, # Import new constant
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
-    CONF_AUTO_LABEL_CONFIDENCE,
     CONF_AUTO_MAINTENANCE,
     CONF_MAINTENANCE_REMINDER_CYCLES,
     CONF_PROFILE_MATCH_INTERVAL,
@@ -90,12 +88,9 @@ from .const import (
     CONF_WATCHDOG_INTERVAL,
     CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     CONF_NOTIFY_BEFORE_END_MINUTES,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_DEVICE_TYPE,
-    CONF_SAMPLING_INTERVAL,
     CONF_SAVE_DEBUG_TRACES,
     CONF_DTW_BANDWIDTH,
-    CONF_EXTERNAL_END_TRIGGER_ENABLED,
     CONF_EXTERNAL_END_TRIGGER,
     CONF_EXTERNAL_END_TRIGGER_INVERTED,
     CONF_PUMP_STUCK_DURATION,
@@ -121,7 +116,6 @@ from .const import (
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_PROFILE_EVIDENCE_SOURCES,
     DEFAULT_LEARNING_CONFIDENCE,
-    DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_AUTO_MAINTENANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
@@ -187,7 +181,6 @@ from .const import (
     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
     DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
-    DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
     DEFAULT_NOTIFY_LIVE_CHRONOMETER,
@@ -638,7 +631,6 @@ class WashDataManager:
         self._remove_timer_action_listener: Any | None = None
         self._timer_ui_strings: dict[str, str] = {}
         self._notify_only_when_home = DEFAULT_NOTIFY_ONLY_WHEN_HOME
-        self._notify_fire_events = DEFAULT_NOTIFY_FIRE_EVENTS
         self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
         self._notify_live_overrun_percent = DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
         self._notify_live_chronometer = DEFAULT_NOTIFY_LIVE_CHRONOMETER
@@ -822,13 +814,10 @@ class WashDataManager:
         self._remove_state_expiry_timer = None
 
         # Components
-        # Coerced (audit F7 finding): a non-numeric stored value raised inside every
-        # match tick (`float()` in the initial commit, `<` in the unmatch check).
-        unmatch_threshold = option_float(
-            config_entry.options.get(CONF_PROFILE_UNMATCH_THRESHOLD),
-            DEFAULT_PROFILE_UNMATCH_THRESHOLD,
-        )
-        self._unmatch_threshold = unmatch_threshold
+        # Fixed since 0.5.9 (no longer a setting; forcing 0.35 on every corpus
+        # entry that set another value was neutral or better on the LOO switching
+        # replay and identical on the Playground parity replay).
+        self._unmatch_threshold = DEFAULT_PROFILE_UNMATCH_THRESHOLD
 
         self.profile_store = ProfileStore(
             hass,
@@ -842,7 +831,6 @@ class WashDataManager:
                 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
             ),
             save_debug_traces=config_entry.options.get(CONF_SAVE_DEBUG_TRACES, False),
-            unmatch_threshold=unmatch_threshold,
             device_name=config_entry.title,
         )
         self.profile_store.dtw_bandwidth = float(
@@ -914,9 +902,6 @@ class WashDataManager:
             config_entry.options.get(
                 CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME
             )
-        )
-        self._notify_fire_events = bool(
-            config_entry.options.get(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
         )
         self._notify_live_interval_seconds = int(
             config_entry.options.get(
@@ -1086,11 +1071,10 @@ class WashDataManager:
                 resolve_watchdog_interval_default(self.device_type),
             )
         )
+        # The reading throttle: the device type's cadence (no longer a setting since
+        # 0.5.9; the start-gate replay was identical or earlier at the default).
         self._sampling_interval = float(
-            config_entry.options.get(
-                CONF_SAMPLING_INTERVAL,
-                resolve_sampling_interval_default(self.device_type),
-            )
+            resolve_sampling_interval_default(self.device_type)
         )
         self._current_program: str = "off"
         self._time_remaining: float | None = None
@@ -1457,7 +1441,7 @@ class WashDataManager:
             # Fallback for restart-recovery: fires only if the immediate notification in
             # _on_state_change was missed (e.g., HA restarted mid-cycle before snapshot).
             if not getattr(self, "_notified_start", False):
-                if self._notify_fire_events and not self._start_event_fired:
+                if not self._start_event_fired:
                     self.hass.bus.async_fire(
                         EVENT_CYCLE_STARTED,
                         {
@@ -2154,10 +2138,8 @@ class WashDataManager:
             options.get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
             DEFAULT_LEARNING_CONFIDENCE,
         )
-        self._auto_label_confidence = option_float(
-            options.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
-            DEFAULT_AUTO_LABEL_CONFIDENCE,
-        )
+        # (No `_auto_label_confidence`: it was write-only. The learning manager
+        # reads the option itself at cycle end.)
         # Clamped to >= 1, the same floor `SuggestionEngine` applies to this key:
         # its interval cap is computed FROM this number, and zero would disable the
         # gate rather than tighten it (every `counter >= 0` is true).
@@ -2166,12 +2148,6 @@ class WashDataManager:
             DEFAULT_MATCH_PERSISTENCE,
             minimum=1,
         )
-        self._unmatch_threshold = option_float(
-            options.get(CONF_PROFILE_UNMATCH_THRESHOLD), DEFAULT_PROFILE_UNMATCH_THRESHOLD
-        )
-        store = getattr(self, "profile_store", None)
-        if store is not None and hasattr(store, "_unmatch_threshold"):
-            store._unmatch_threshold = self._unmatch_threshold  # pylint: disable=protected-access
         self._progress_reset_delay = int(
             options.get(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
         )
@@ -2532,9 +2508,6 @@ class WashDataManager:
                 CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME
             )
         )
-        self._notify_fire_events = bool(
-            config_entry.options.get(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
-        )
         self._notify_before_end_minutes = int(
             config_entry.options.get(
                 CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
@@ -2651,12 +2624,8 @@ class WashDataManager:
 
         # Update sampling interval
         old_sampling = self._sampling_interval
-        new_sampling = float(
-            config_entry.options.get(
-                CONF_SAMPLING_INTERVAL,
-                resolve_sampling_interval_default(self.device_type),
-            )
-        )
+        # Follows a device-type change (no longer a setting since 0.5.9).
+        new_sampling = float(resolve_sampling_interval_default(self.device_type))
         if old_sampling != new_sampling:
             self._sampling_interval = new_sampling
             self._logger.info(
@@ -2907,15 +2876,8 @@ class WashDataManager:
             self._remove_external_trigger_listener()
             self._remove_external_trigger_listener = None
 
-        # Check if enabled
-        enabled = self.config_entry.options.get(
-            CONF_EXTERNAL_END_TRIGGER_ENABLED, False
-        )
-        if not enabled:
-            self._logger.debug("External cycle end trigger is disabled")
-            return
-
-        # Get entity ID
+        # On whenever an entity is set (0.5.9: the separate on/off flag is gone;
+        # the 3.12 migration cleared the entity where that flag was off).
         entity_id = self.config_entry.options.get(CONF_EXTERNAL_END_TRIGGER, "")
         if not entity_id:
             self._logger.debug("External cycle end trigger: no entity configured")
@@ -3457,10 +3419,8 @@ class WashDataManager:
         external end-of-cycle binary sensor and it currently has a usable state, an
         authoritative end signal already exists, so the time-based failsafe would only
         do harm (it would truncate a long programme that the trigger will end cleanly).
-        Returns False if disabled, unconfigured, or the entity is missing/unavailable.
+        Returns False if unconfigured or the entity is missing/unavailable.
         """
-        if not self.config_entry.options.get(CONF_EXTERNAL_END_TRIGGER_ENABLED, False):
-            return False
         entity_id = self.config_entry.options.get(CONF_EXTERNAL_END_TRIGGER, "")
         if not entity_id:
             return False
@@ -3513,9 +3473,8 @@ class WashDataManager:
         from .const import (
             ENABLE_ML_TRAINING,
             CONF_ML_TRAINING_ENABLED,
-            CONF_ML_TRAINING_HOUR,
             DEFAULT_ML_TRAINING_ENABLED,
-            DEFAULT_ML_TRAINING_HOUR,
+            ML_TRAINING_HOUR,
         )
 
         if self._remove_ml_training_scheduler:
@@ -3529,11 +3488,7 @@ class WashDataManager:
             self._logger.debug("On-device ML training disabled")
             return
 
-        try:
-            hour = int(opts.get(CONF_ML_TRAINING_HOUR, DEFAULT_ML_TRAINING_HOUR))
-        except (TypeError, ValueError, OverflowError):
-            hour = DEFAULT_ML_TRAINING_HOUR
-        hour = max(0, min(23, hour))
+        hour = ML_TRAINING_HOUR  # fixed since 0.5.9
 
         async def _scheduled(_now: datetime) -> None:
             await self.async_run_ml_training(force=False)
@@ -3551,17 +3506,14 @@ class WashDataManager:
         """
         from .const import (
             ENABLE_ML_TRAINING,
-            CONF_ML_TRAINING_MIN_CYCLES,
-            CONF_ML_TRAINING_INTERVAL_DAYS,
-            DEFAULT_ML_TRAINING_MIN_CYCLES,
-            DEFAULT_ML_TRAINING_INTERVAL_DAYS,
             EVENT_ML_TRAINING_COMPLETE,
+            ML_TRAINING_INTERVAL_DAYS,
+            ML_TRAINING_MIN_CYCLES,
         )
 
         if not ENABLE_ML_TRAINING:
             return {"ok": False, "reason": "ml_training_disabled"}
 
-        opts = {**self.config_entry.data, **self.config_entry.options}
         # Snapshot on the event loop before any executor offload (training):
         # get_past_cycles() returns the live mutable list, so a
         # concurrent cycle add / retention trim could otherwise change the input
@@ -3575,7 +3527,7 @@ class WashDataManager:
             }:
                 self._logger.debug("Skipping scheduled ML training: device active")
                 return {"ok": False, "reason": "device_active"}
-            min_cycles = int(opts.get(CONF_ML_TRAINING_MIN_CYCLES, DEFAULT_ML_TRAINING_MIN_CYCLES))
+            min_cycles = ML_TRAINING_MIN_CYCLES  # fixed since 0.5.9
             if len(cycles) < min_cycles:
                 self._logger.debug(
                     "Skipping scheduled ML training: need %d cycles, have %d",
@@ -3584,9 +3536,7 @@ class WashDataManager:
                 )
                 return {"ok": False, "reason": f"need {min_cycles} cycles, have {len(cycles)}"}
             # Respect the minimum retrain interval.
-            interval_days = int(
-                opts.get(CONF_ML_TRAINING_INTERVAL_DAYS, DEFAULT_ML_TRAINING_INTERVAL_DAYS)
-            )
+            interval_days = ML_TRAINING_INTERVAL_DAYS  # fixed since 0.5.9
             last = self._last_ml_training_at()
             if last is not None:
                 age_days = (utc_now() - last).total_seconds() / 86400.0
@@ -3995,8 +3945,6 @@ class WashDataManager:
         if key == getattr(self, "_stall_event_key", None):
             return
         self._stall_event_key = key
-        if not self._notify_fire_events:
-            return
         self.hass.bus.async_fire(
             EVENT_CYCLE_STALLED,
             {
@@ -5100,27 +5048,27 @@ class WashDataManager:
                 self._start_watchdog()  # Start watchdog when cycle starts
 
                 # Fire the start event immediately on cycle detection so listeners always
-                # receive it, even when no profile match occurs yet.
-                if self._notify_fire_events:
-                    self.hass.bus.async_fire(
-                        EVENT_CYCLE_STARTED,
-                        {
-                            "entry_id": self.entry_id,
-                            "device_name": self.config_entry.title,
-                            "device_type": self.device_type,
-                            "program": self._current_program or "unknown",
-                            "start_time": self._cycle_start_time.isoformat(),
-                        },
-                    )
-                    self._start_event_fired = True
-                    # Mark the start fully handled ONLY when there is no push to send, so
-                    # the restart-recovery fallback does not re-enter for event-only
-                    # configs. When a push service/action IS configured, leave
-                    # _notified_start False so the push block below still fires: a config
-                    # with both events and push must get both (event delivery is tracked
-                    # separately by _start_event_fired).
-                    if not (self._notify_start_services or self._notify_actions):
-                        self._notified_start = True
+                # receive it, even when no profile match occurs yet. Always fired since
+                # #478 retired the "Fire HA events" option.
+                self.hass.bus.async_fire(
+                    EVENT_CYCLE_STARTED,
+                    {
+                        "entry_id": self.entry_id,
+                        "device_name": self.config_entry.title,
+                        "device_type": self.device_type,
+                        "program": self._current_program or "unknown",
+                        "start_time": self._cycle_start_time.isoformat(),
+                    },
+                )
+                self._start_event_fired = True
+                # Mark the start fully handled ONLY when there is no push to send, so
+                # the restart-recovery fallback does not re-enter for event-only
+                # configs. When a push service/action IS configured, leave
+                # _notified_start False so the push block below still fires: a config
+                # with both events and push must get both (event delivery is tracked
+                # separately by _start_event_fired).
+                if not (self._notify_start_services or self._notify_actions):
+                    self._notified_start = True
 
                 # Fire push notification immediately - do not wait for profile matching.
                 if not self._notified_start and (self._notify_start_services or self._notify_actions):
@@ -6338,21 +6286,21 @@ class WashDataManager:
             except (TypeError, ValueError, OverflowError):
                 match_margin = None
 
-        if self._notify_fire_events:
-            self.hass.bus.async_fire(
-                EVENT_CYCLE_ENDED,
-                {
-                    "entry_id": self.entry_id,
-                    "device_name": self.config_entry.title,
-                    "cycle_data": event_cycle_data,
-                    "program": display_program,
-                    "match_margin": match_margin,
-                    "label_applied": bool(label_gate_ok),
-                    "duration": event_cycle_data.get("duration"),
-                    "start_time": event_cycle_data.get("start_time"),
-                    "end_time": event_cycle_data.get("end_time") or utc_now().isoformat(),
-                },
-            )
+        self.hass.bus.async_fire(
+            EVENT_CYCLE_ENDED,
+            {
+                "entry_id": self.entry_id,
+                "device_name": self.config_entry.title,
+                "cycle_data": event_cycle_data,
+                "program": display_program,
+                "match_margin": match_margin,
+                "label_applied": bool(label_gate_ok),
+                "duration": event_cycle_data.get("duration"),
+                "start_time": event_cycle_data.get("start_time"),
+                "end_time": event_cycle_data.get("end_time") or utc_now().isoformat(),
+            },
+        )
+
 
         # Purge pending live entries and reset counters. No service-level clear
         # here: the activity is ended below, AFTER the finished notification has

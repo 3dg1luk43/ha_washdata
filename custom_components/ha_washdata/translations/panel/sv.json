@@ -306,19 +306,13 @@
       "timeout": "Måste vara över Pumpens fastnadsvaraktighet ({ps} s) så att larmet för fastnad pump kan utlösas först"
     },
     "start_dur": {
-      "sampling": "Samplingsintervall överstiger startvaraktighet ({sdt} s); enstaka mätvärdestoppar kan öppna en cykel",
       "threshold": "Bör vara minst ett samplingsintervall ({si} s) för att förhindra falsklarm med enstaka mätvärden"
-    },
-    "unmatch": {
-      "match": "Måste vara över avmatchningströskel ({un})",
-      "unmatch": "Måste vara under matchningströskel ({match}); annars avmatchas en bekräftad matchning omedelbart"
     },
     "cascade_toast": "Andra inställningar justerades för konsekvens: {n}",
     "suggestion_resolves": "Tillämpa förslaget nedan ({val}) för att lösa detta",
     "use_fix": "Använd {val}",
     "watchdog": {
-      "interval": "Bör vara minst 2x samplingsintervallet ({si} s)",
-      "sampling": "Samplingsintervall bör vara högst hälften av vakthundsintervallet ({wi} s)"
+      "interval": "Bör vara minst 2x samplingsintervallet ({si} s)"
     },
     "settings_banner": "Inställningskonflikter: {n}. Kontrollera de markerade avsnitten och åtgärda dem innan du sparar.",
     "settings_banner_btn": "Gå till första",
@@ -661,7 +655,7 @@
     "hist_reason_already_recorded": "överlappar en cykel som WashData redan har registrerat",
     "share_consent": "Jag bekräftar att dessa cykler slutfördes normalt utan avbrott",
     "show_internal": "Visa interna inställningar",
-    "show_internal_tip": "Inställningar som WashData justerar åt dig (sampling, vakthund, matchningsfrekvens, trösklar). Visas när den här enheten har ett eget värde, en konflikt eller ett förslag.",
+    "show_internal_tip": "Inställningar som WashData justerar åt dig (watchdog, matchningsfrekvens, trösklar). Visas när den här enheten har ett eget värde, en konflikt eller ett förslag.",
     "rate_n": "{n} stjärnor",
     "rate_quality": "Betygsätt kvalitet",
     "pg_autolabel": "Automärkning",
@@ -1087,7 +1081,6 @@
     "anti_wrinkle_max_power": "En puls över detta avslutar skrynkelskyddet och öppnar en ny cykel",
     "anti_wrinkle_enabled": "Fånga upp tumlingspulserna efter huvudfasen i stället för att läsa dem som nya cykler",
     "anti_wrinkle_max_duration": "En puls längre än detta avslutar skrynkelskyddet och öppnar en ny cykel",
-    "anti_wrinkle_exit_power": "Tyst nivå mellan tumlingspulser; gäller bara över Stopptröskeln",
     "anti_crease_finalize_ratio": "Andel av programmets genomsnittliga längd som en cykel måste nå innan skrynkelskyddssvansen får avsluta den; sänk den på torktumlare, låt tvättmaskiner stå kvar på standard",
     "curve_preroll_seconds": "Sekunders mätvärden från avbrutna startförsök som tas med främst i en cykels kurva; 0 = av"
   },
@@ -1202,10 +1195,6 @@
       "doc": "Håll en torktumlares korta tumlingspulser med låg effekt efter huvudvärmefasen kvar i den avslutade cykeln, i stället för att läsa dem som nya cykler.",
       "label": "Aktivera skrynkelskyddsdetektering"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "I skrynkelskyddsläget räknas effekt under detta som tyst mellan tumlingspulser, och tystnad längre än Maks. pulspaus avslutar läget. Stopptröskeln används när den är högre, så detta påverkar bara något när det är satt över Stopptröskeln.",
-      "label": "Avslutningseffekttröskel"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Hur länge torktumlaren får vara tyst mellan tumlingspulser innan skrynkelskyddsläget avslutas. Ställ in den över torktumlarens längsta paus, annars läses senare pulser som falska starter.",
       "label": "Maks. pulspaus"
@@ -1254,10 +1243,6 @@
       "doc": "Valfri dörrsensor. Visar när apparaten öppnades för att tömmas efter en cykel.",
       "label": "Dörrsensorentitet"
     },
-    "duration_tolerance": {
-      "doc": "Endast inlärningsfeedback: en cykel inom +/-X % av sin uppskattade längd räknas som en bra uppskattning. Påverkar inte matchningen.",
-      "label": "Uppskattingstolerans"
-    },
     "enable_ml_models": {
       "doc": "Använd en modell tränad på den här maskinen för att förutsäga en pågående cykels energi och kostnad, och låt ett välkänt program som stannar ovanligt tidigt avslutas utan hela avfördröjningen. Av: endast effektbaserad logik.",
       "label": "Tillämpa smarta modeller under en cykel"
@@ -1283,12 +1268,8 @@
       "label": "Exponera felsökningsentiteter"
     },
     "external_end_trigger": {
-      "doc": "Binär sensor vars ändring markerar cykelns slut (t.ex. en \"klar\"-kontakt eller en annan integration).",
+      "doc": "Valfri binär sensor som avslutar cykeln när den slår på, utöver strömbaserad detektering (t.ex. en 'klar'-kontakt eller en annan integration). Lämna tomt för att stänga av.",
       "label": "Extern utlösarentitet"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Låt en binär sensor signalera slutet på en cykel, utöver den effektbaserade detekteringen.",
-      "label": "Aktivera extern slututlösare"
     },
     "external_end_trigger_inverted": {
       "doc": "Behandla att sensorn slås AV (inte PÅ) som slutsignalen.",
@@ -1313,18 +1294,6 @@
     "ml_training_enabled": {
       "doc": "Träna om energimodellen på den här maskinens avslutade cykler då och då. En ny modell behålls bara om den slår den enkla uppskattningen på testcykler.",
       "label": "Lär dig av denna maskin"
-    },
-    "ml_training_hour": {
-      "doc": "Timme på dygnet (0-23) för nattlig träning. Välj en lugn timme, t.ex. 2.",
-      "label": "Lär dig vid timmen"
-    },
-    "ml_training_interval_days": {
-      "doc": "Träna om högst en gång per så här många dagar.",
-      "label": "Kontrollera som mest varje"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Vänta tills minst så här många cykler har spelats in innan träning.",
-      "label": "Cykler som behövs först"
     },
     "name": {
       "doc": "Namnet som visas i Home Assistant för den här enheten.",
@@ -1357,10 +1326,6 @@
     "notify_finish_services": {
       "doc": "notify.*-tjänster som anropas när en cykel är klar. Lämna tomt för inga.",
       "label": "Sluttjänster"
-    },
-    "notify_fire_events": {
-      "doc": "Avfyra även ha_washdata_*-händelser vid cykelstart och -slut, för dina egna automationer.",
-      "label": "Avfyra HA-händelser för meddelanden"
     },
     "notify_icon": {
       "doc": "Liten ikon på aviseringen (t.ex. mdi:washing-machine). Skickas bara till mobile_app-mål, inte till notify-grupper. På iOS ersätter den appikonen och kräver companion-appen 2026.8 eller senare. Tomt: plattformens standard.",
@@ -1458,10 +1423,6 @@
       "doc": "Live-matchningspoäng som en cykel behöver innan smart avslutning eller skrynkelskyddsavslutet får avsluta den i förtid. Ändrar inte det visade programmet. Höj den om svaga matchningar avslutar cykler för tidigt; sänk den om tydliga matchningar väntar ut avfördröjningen.",
       "label": "Matchningströskel"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Om live-matchningspoängen sjunker under detta rensas den aktuella programgissningen. Håll den lite under Matchningströskel så att en kort dipp inte nollställer den.",
-      "label": "Omatchningströskel"
-    },
     "progress_reset_delay": {
       "doc": "Efter en cykel, håll förloppet på 100 % så här länge innan återställning till Inaktiv.",
       "label": "Förloppåterställningsfördröjning"
@@ -1469,10 +1430,6 @@
     "pump_stuck_duration": {
       "doc": "Hur länge en pump får köras oavbrutet innan händelsen för fastnad pump utlöses.",
       "label": "Pumpens fastnadsvaraktighet"
-    },
-    "sampling_interval": {
-      "doc": "Minsta tid mellan bearbetade mätvärden. Mätvärden som kommer tidigare hoppas över (låga mätvärden under en cykel behålls alltid). Ställ in den på kontaktens rapporteringsintervall eller lägre; ett högre värde slänger bara mätvärden.",
-      "label": "Samplingsintervall"
     },
     "save_debug_traces": {
       "doc": "Spara även matcharens felsökningsdata (alla kandidaters poäng) med varje cykel, för felsökning. Tar cirka 20 KB per cykel.",
@@ -1644,9 +1601,6 @@
     "services": {
       "label": "Tjänster"
     },
-    "signal_processing": {
-      "label": "Signalbehandling"
-    },
     "thresholds_gap": {
       "label": "Trösklar och lucka"
     },
@@ -1709,10 +1663,6 @@
       "auto_label_confidence": {
         "higher": "Färre automatiska märkningar – fler cykler går till granskning",
         "lower": "Fler automatiska märkningar – vissa kan vara felaktiga"
-      },
-      "duration_tolerance": {
-        "higher": "Accepterar ett bredare varaktighetsintervall – flexiblare igenkänning",
-        "lower": "Kräver noggrannare varaktighetsmatchning – striktare men kan avvisa ovanliga cykler"
       },
       "end_energy_threshold": {
         "higher": "Avslutar bara cykler med betydande energiförbrukning",
@@ -2183,16 +2133,11 @@
     "kept": "behållen",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "ingen matchning",
     "no_updates": "inga uppdateringar",
     "off_delay_wait": "avfördröjning",
     "off_gap": "avlucka",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "typiskt mätintervall",
     "sensor_offline": "sensor offline: tvångsstopp",
-    "si": "SI",
     "spike_ignored": "topp ignorerad",
     "spike_ignored_short": "topp: ignorerad",
     "start": "start",

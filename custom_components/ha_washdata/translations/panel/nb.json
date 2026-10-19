@@ -306,19 +306,13 @@
       "timeout": "Må være over Pumpe fastsittingsvarighet ({ps} s) slik at alarmen for fastsittende pumpe kan utløses først"
     },
     "start_dur": {
-      "sampling": "Samplingsintervall overskrider startvarigheten ({sdt} s); enkeltmålingsstøt kan åpne en syklus",
       "threshold": "Bør være minst ett samplingsintervall ({si} s) for å forhindre falske starter med enkeltmålinger"
-    },
-    "unmatch": {
-      "match": "Må være over avmatch-terskelen ({un})",
-      "unmatch": "Må være under matchingsterskelen ({match}); ellers avmatchs en bekreftet match øyeblikkelig"
     },
     "cascade_toast": "Andre innstillinger justert for konsistens: {n}",
     "suggestion_resolves": "Bruk forslaget nedenfor ({val}) for å løse dette",
     "use_fix": "Bruk {val}",
     "watchdog": {
-      "interval": "Bør være minst 2x samplingsintervallet ({si} s)",
-      "sampling": "Samplingsintervall bør være høyst halvparten av vaktbikkjeintervallet ({wi} s)"
+      "interval": "Bør være minst 2x samplingsintervallet ({si} s)"
     },
     "settings_banner": "Innstillingskonflikter: {n}. Sjekk de fremhevede seksjonene og rett dem opp før du lagrer.",
     "settings_banner_btn": "Gå til første",
@@ -661,7 +655,7 @@
     "hist_reason_already_recorded": "overlapper en syklus WashData allerede har registrert",
     "share_consent": "Jeg bekrefter at disse syklusene ble fullført normalt uten avbrudd",
     "show_internal": "Vis interne innstillinger",
-    "show_internal_tip": "Innstillinger som WashData justerer for deg (sampling, vokter, samsvarsfrekvens, terskler). Vises når denne enheten har sin egen verdi, en konflikt eller et forslag.",
+    "show_internal_tip": "Innstillinger WashData justerer for deg (watchdog, matchfrekvens, terskler). Vises når denne enheten har sin egen verdi, en konflikt eller et forslag.",
     "rate_n": "{n} stjerner",
     "rate_quality": "Vurder kvalitet",
     "pg_autolabel": "Auto-merking",
@@ -1087,7 +1081,6 @@
     "anti_wrinkle_max_power": "En puls over dette avslutter anti-rynke og åpner en ny syklus",
     "anti_wrinkle_enabled": "Fange opp trommelpulsene etter hovedfasen i stedet for å lese dem som nye sykluser",
     "anti_wrinkle_max_duration": "En puls lengre enn dette avslutter anti-rynke og åpner en ny syklus",
-    "anti_wrinkle_exit_power": "Stille nivå mellom trommelpulser; virker bare over Stoppterskelen",
     "anti_crease_finalize_ratio": "Andel av programmets gjennomsnittlige varighet som en syklus må nå før anti-rynke-etterløpet kan avslutte den; senk den på tørketromler, la vaskemaskiner stå på standard",
     "curve_preroll_seconds": "Sekunder med målinger fra avbrutte startforsøk som tas med fremst i kurven til en syklus; 0 = av"
   },
@@ -1202,10 +1195,6 @@
       "doc": "Hold en tørketrommels korte trommelpulser med lav effekt etter hovedvarmefasen sammen med den ferdige syklusen, i stedet for å lese dem som nye sykluser.",
       "label": "Aktiver anti-rynke-deteksjon"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "I anti-rynkemodus regnes effekt under dette som stille mellom trommelpulser, og stillhet lenger enn Maks. pulspause avslutter modusen. Stoppterskelen brukes når den er høyere, så dette endrer bare noe når det settes over Stoppterskelen.",
-      "label": "Utgangseffektterskel"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Hvor lenge tørketrommelen kan være stille mellom trommelpulser før anti-rynkemodus slutter. Sett den over tørketrommelens lengste pause, ellers leses senere pulser som falske starter.",
       "label": "Maks. pulspause"
@@ -1254,10 +1243,6 @@
       "doc": "Valgfri dørsensor. Viser når apparatet ble åpnet for å tømmes etter en syklus.",
       "label": "Dørsensorenhet"
     },
-    "duration_tolerance": {
-      "doc": "Bare læringsfeedback: en syklus innenfor +/-X % av anslått varighet teller som et godt anslag. Påvirker ikke matching.",
-      "label": "Estimattoleranse"
-    },
     "enable_ml_models": {
       "doc": "Bruk en modell trent på denne maskinen til å forutsi en kjørende syklus' energi og kostnad, og la et velkjent program som stopper uvanlig tidlig, avslutte uten full av-forsinkelse. Av: bare effektbasert logikk.",
       "label": "Bruk smarte modeller under syklus"
@@ -1283,12 +1268,8 @@
       "label": "Vis feilsøkingsenheter"
     },
     "external_end_trigger": {
-      "doc": "Binær sensor der en endring markerer syklusslutt (f.eks. en \"ferdig\"-kontakt eller en annen integrasjon).",
+      "doc": "Valgfri binær sensor som avslutter syklusen når den slår på, i tillegg til strømbasert deteksjon (f.eks. en 'ferdig'-kontakt eller en annen integrasjon). La feltet stå tomt for å deaktivere.",
       "label": "Ekstern utløserenhet"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "La en binær sensor signalisere slutten på en syklus, i tillegg til den effektbaserte deteksjonen.",
-      "label": "Aktiver ekstern slutt-utløser"
     },
     "external_end_trigger_inverted": {
       "doc": "Behandle at sensoren slår seg AV (ikke PÅ) som sluttsignalet.",
@@ -1313,18 +1294,6 @@
     "ml_training_enabled": {
       "doc": "Tren energimodellen på nytt med jevne mellomrom på denne maskinens ferdige sykluser. En ny modell beholdes bare hvis den slår det enkle anslaget på testsykluser.",
       "label": "Lær fra denne maskinen"
-    },
-    "ml_training_hour": {
-      "doc": "Time på døgnet (0-23) for nattlig trening. Velg en rolig time, f.eks. 2.",
-      "label": "Lær ved time"
-    },
-    "ml_training_interval_days": {
-      "doc": "Tren på nytt høyst én gang hver så mange dager.",
-      "label": "Sjekk høyst hvert"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Vent på minst så mange registrerte sykluser før trening.",
-      "label": "Sykluser som trengs først"
     },
     "name": {
       "doc": "Navnet som vises i Home Assistant for denne enheten.",
@@ -1357,10 +1326,6 @@
     "notify_finish_services": {
       "doc": "notify.*-tjenester som kalles når en syklus er ferdig. La stå tomt for ingen.",
       "label": "Sluttjenester"
-    },
-    "notify_fire_events": {
-      "doc": "Utløs også ha_washdata_*-hendelser ved syklusstart og -slutt, til dine egne automasjoner.",
-      "label": "Aktiver HA-hendelser for varsler"
     },
     "notify_icon": {
       "doc": "Lite ikon på varselet (f.eks. mdi:washing-machine). Sendes bare til mobile_app-mål, ikke til notify-grupper. På iOS erstatter det appikonet og krever companion-appen 2026.8 eller nyere. Tom: plattformens standard.",
@@ -1458,10 +1423,6 @@
       "doc": "Live-matchpoeng en syklus trenger før smart avslutning eller anti-rynke-avslutningen kan avslutte den tidlig. Endrer ikke det viste programmet. Hev den hvis svake match avslutter sykluser for tidlig; senk den hvis tydelige match venter hele av-forsinkelsen.",
       "label": "Samsvarsterskel"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Hvis live-matchpoengene faller under denne, fjernes det gjeldende programgjettet. Hold den litt under Samsvarsterskel, slik at et kort fall ikke tilbakestiller det.",
-      "label": "Ikke-samsvarsterskel"
-    },
     "progress_reset_delay": {
       "doc": "Etter en syklus, hold fremdriften på 100 % så lenge før tilbakestilling til Inaktiv.",
       "label": "Fremdriftsreset-forsinkelse"
@@ -1469,10 +1430,6 @@
     "pump_stuck_duration": {
       "doc": "Hvor lenge en pumpe kan gå sammenhengende før hendelsen for fastsittende pumpe utløses.",
       "label": "Pumpe fastsittingsvarighet"
-    },
-    "sampling_interval": {
-      "doc": "Minste tid mellom behandlede målinger. Målinger som kommer tidligere, hoppes over (lave målinger under en syklus beholdes alltid). Sett den til pluggens rapporteringsintervall eller lavere; en høyere verdi kaster bare målinger.",
-      "label": "Sampling-intervall"
     },
     "save_debug_traces": {
       "doc": "Lagre også matcherens feilsøkingsdata (poengsummene til alle kandidater) med hver syklus, for feilsøking. Bruker omtrent 20 KB per syklus.",
@@ -1644,9 +1601,6 @@
     "services": {
       "label": "Tjenester"
     },
-    "signal_processing": {
-      "label": "Signalbehandling"
-    },
     "thresholds_gap": {
       "label": "Terskler og interval"
     },
@@ -1709,10 +1663,6 @@
       "auto_label_confidence": {
         "higher": "Færre automatiske etiketter – flere sykluser sendes til gjennomgang",
         "lower": "Flere automatiske etiketter – noen kan være feilmerket"
-      },
-      "duration_tolerance": {
-        "higher": "Aksepterer et bredere varighetsintervall – mer fleksibel gjenkjenning",
-        "lower": "Krever tettere varighetssamsvar – strengere, men kan avvise uvanlige sykluser"
       },
       "end_energy_threshold": {
         "higher": "Avslutter bare sykluser med betydelig energiforbruk",
@@ -2183,16 +2133,11 @@
     "kept": "beholdt",
     "max": "maks",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "ingen treff",
     "no_updates": "ingen oppdateringer",
     "off_delay_wait": "av-forsinkelse",
     "off_gap": "av-gap",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "typisk måleintervall",
     "sensor_offline": "sensor frakoblet: tvangsstopp",
-    "si": "SI",
     "spike_ignored": "topp ignorert",
     "spike_ignored_short": "topp: ignorert",
     "start": "start",

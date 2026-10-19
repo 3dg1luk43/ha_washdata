@@ -312,19 +312,13 @@
       "timeout": "Musi przekraczać Czas Zacięcia Pompy ({ps} s), aby alarm zacięcia zadziałał pierwszy"
     },
     "start_dur": {
-      "sampling": "Interwał Próbkowania przekracza Czas Trwania Startu ({sdt} s); pojedynczy impuls może otworzyć cykl",
       "threshold": "Powinien wynosić co najmniej jeden Interwał Próbkowania ({si} s), aby zapobiec fałszywym startom z pojedynczej próbki"
-    },
-    "unmatch": {
-      "match": "Musi być powyżej Progu Niedopasowania ({un})",
-      "unmatch": "Musi być poniżej Progu Dopasowania ({match}); w przeciwnym razie potwierdzone dopasowanie natychmiast się cofa"
     },
     "cascade_toast": "Inne ustawienia dostosowane w celu zachowania spójności: {n}",
     "suggestion_resolves": "Zastosuj oczekującą sugestię ({val}) poniżej, aby rozwiązać ten konflikt",
     "use_fix": "Użyj {val}",
     "watchdog": {
-      "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)",
-      "sampling": "Interwał Próbkowania powinien wynosić co najwyżej połowę Interwału Watchdog ({wi} s)"
+      "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)"
     },
     "settings_banner": "Konflikty ustawień: {n}. Sprawdź podświetlone sekcje i popraw je przed zapisaniem.",
     "settings_banner_btn": "Przejdź do pierwszego",
@@ -663,7 +657,7 @@
     "hist_reason_already_recorded": "nakłada się na cykl już zarejestrowany przez WashData",
     "share_consent": "Potwierdzam, że te cykle przebiegły normalnie do końca, bez przerwania",
     "show_internal": "Pokaż ustawienia wewnętrzne",
-    "show_internal_tip": "Ustawienia, które WashData stroi za Ciebie (próbkowanie, watchdog, częstotliwość dopasowania, progi). Widoczne, gdy to urządzenie ma własną wartość, konflikt lub sugestię.",
+    "show_internal_tip": "Ustawienia, które WashData dostosowuje za Ciebie (watchdog, rytm dopasowywania, progi). Wyświetlane, gdy urządzenie ma własną wartość, konflikt lub sugestię.",
     "rate_n": "{n} gwiazdek",
     "rate_quality": "Oceń jakość",
     "pg_autolabel": "Automatyczne oznaczanie",
@@ -1214,10 +1208,6 @@
       "doc": "Dołączaj krótkie impulsy obracania bębna o niskiej mocy po głównej fazie grzania suszarki do zakończonego cyklu, zamiast traktować je jako nowe cykle.",
       "label": "Włącz Wykrywanie Antygniotowe"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "W trybie antygniotowym moc poniżej tej wartości oznacza przerwę między impulsami obrotów, a przerwa dłuższa niż Maks. Odstęp Impulsów kończy tryb. Jeśli Próg Zatrzymania jest wyższy, używany jest on, więc to ustawienie działa tylko powyżej Progu Zatrzymania.",
-      "label": "Próg Wyjścia Mocy"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Jak długo suszarka może być cicha między impulsami obracania, zanim tryb antygniotowy się zakończy. Ustaw powyżej najdłuższej przerwy suszarki, inaczej kolejne impulsy zostaną odczytane jako fałszywe starty.",
       "label": "Maks. Odstęp Impulsów"
@@ -1262,10 +1252,6 @@
       "doc": "Opcjonalny czujnik drzwi. Pokazuje, kiedy urządzenie zostało otwarte w celu rozładunku po cyklu.",
       "label": "Encja Czujnika Drzwi"
     },
-    "duration_tolerance": {
-      "doc": "Dotyczy tylko informacji zwrotnej uczenia: cykl w granicach +/-X% szacowanego czasu trwania liczy się jako dobre oszacowanie. Nie wpływa na dopasowanie.",
-      "label": "Tolerancja Szacowania"
-    },
     "enable_ml_models": {
       "doc": "Używaj modelu wytrenowanego na tej maszynie do przewidywania energii i kosztu trwającego cyklu oraz pozwól dobrze znanemu programowi, który kończy się nietypowo wcześnie, zakończyć się bez pełnego opóźnienia wyłączenia. Wyłączone: tylko logika oparta na mocy.",
       "label": "Stosuj inteligentne modele podczas cyklu"
@@ -1291,12 +1277,8 @@
       "label": "Ujawnij Encje Debugowania"
     },
     "external_end_trigger": {
-      "doc": "Czujnik binarny, którego zmiana oznacza koniec cyklu (np. styk „zakończono” lub inna integracja).",
+      "doc": "Opcjonalny czujnik binarny kończący cykl po włączeniu, uzupełniający wykrywanie na podstawie mocy (np. styk \"zakończono\" lub inna integracja). Zostaw puste, aby wyłączyć.",
       "label": "Encja Zewnętrznego Wyzwalacza"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Pozwól czujnikowi binarnemu sygnalizować koniec cyklu, oprócz wykrywania na podstawie mocy.",
-      "label": "Włącz Zewnętrzny Wyzwalacz Zakończenia"
     },
     "external_end_trigger_inverted": {
       "doc": "Traktuj wyłączenie czujnika (a nie włączenie) jako sygnał końca.",
@@ -1321,18 +1303,6 @@
     "ml_training_enabled": {
       "doc": "Od czasu do czasu trenuj ponownie model energii na zakończonych cyklach tej maszyny. Nowy model zostaje tylko wtedy, gdy na cyklach testowych wypada lepiej niż proste oszacowanie.",
       "label": "Ucz się od tej maszyny"
-    },
-    "ml_training_hour": {
-      "doc": "Godzina (0-23) nocnego trenowania. Wybierz spokojną godzinę, np. 2.",
-      "label": "Ucz się o godzinie"
-    },
-    "ml_training_interval_days": {
-      "doc": "Trenuj ponownie najwyżej raz na tyle dni.",
-      "label": "Sprawdzaj co najwyżej co"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Przed trenowaniem poczekaj na co najmniej tyle zarejestrowanych cykli.",
-      "label": "Wymagane minimum cykli"
     },
     "name": {
       "doc": "Nazwa tego urządzenia wyświetlana w Home Assistant.",
@@ -1365,10 +1335,6 @@
     "notify_finish_services": {
       "doc": "Usługi notify.* wywoływane po zakończeniu cyklu. Pozostaw puste, aby nic nie wysyłać.",
       "label": "Usługi Zakończenia"
-    },
-    "notify_fire_events": {
-      "doc": "Wysyłaj też zdarzenia ha_washdata_* przy starcie i zakończeniu cyklu dla własnych automatyzacji.",
-      "label": "Wysyłaj Zdarzenia HA dla Powiadomień"
     },
     "notify_icon": {
       "doc": "Mała ikona w powiadomieniu (np. mdi:washing-machine). Wysyłana tylko do celów mobile_app, nie do grup notify. W iOS zastępuje ikonę aplikacji i wymaga aplikacji mobilnej 2026.8 lub nowszej. Puste: domyślna ikona platformy.",
@@ -1466,10 +1432,6 @@
       "doc": "Wynik dopasowania na żywo, którego cykl potrzebuje, zanim Inteligentne zakończenie lub zakończenie antygniotowe może go zakończyć wcześniej. Nie zmienia wyświetlanego programu. Podnieś, jeśli słabe dopasowania kończą cykle za wcześnie; obniż, jeśli wyraźne dopasowania czekają przez opóźnienie wyłączenia.",
       "label": "Próg Dopasowania"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Jeśli wynik dopasowania na żywo spadnie poniżej tej wartości, bieżące przypuszczenie programu jest czyszczone. Utrzymuj nieco poniżej Progu Dopasowania, aby krótki spadek go nie resetował.",
-      "label": "Próg Niedopasowania"
-    },
     "progress_reset_delay": {
       "doc": "Po cyklu utrzymuj postęp na 100% przez ten czas, zanim nastąpi reset do stanu Bezczynny.",
       "label": "Opóźnienie Resetowania Postępu"
@@ -1477,10 +1439,6 @@
     "pump_stuck_duration": {
       "doc": "Jak długo pompa może pracować bez przerwy, zanim zostanie wywołane zdarzenie zaciętej pompy.",
       "label": "Czas Zacięcia Pompy"
-    },
-    "sampling_interval": {
-      "doc": "Minimalny czas między przetwarzanymi odczytami. Odczyty, które nadejdą szybciej, są pomijane (niskie odczyty w trakcie cyklu są zawsze zachowywane). Ustaw interwał raportowania wtyczki lub mniej; wyższa wartość tylko odrzuca odczyty.",
-      "label": "Interwał Próbkowania"
     },
     "save_debug_traces": {
       "doc": "Zapisuj też przy każdym cyklu dane debugowania mechanizmu dopasowania (wyniki każdego kandydata), do rozwiązywania problemów. Dodaje około 20 KB na cykl.",
@@ -1656,9 +1614,6 @@
     "services": {
       "label": "Usługi"
     },
-    "signal_processing": {
-      "label": "Przetwarzanie Sygnału"
-    },
     "thresholds_gap": {
       "label": "Progi i Przerwy"
     },
@@ -1721,10 +1676,6 @@
       "auto_label_confidence": {
         "higher": "Mniej cykli jest oznaczanych automatycznie; więcej trafia do przeglądu",
         "lower": "Więcej cykli jest oznaczanych automatycznie; niektóre mogą być błędnie zidentyfikowane"
-      },
-      "duration_tolerance": {
-        "higher": "Akceptuje szerszy zakres czasu trwania – bardziej elastyczne dopasowanie",
-        "lower": "Wymaga bliższego dopasowania czasu trwania – bardziej rygorystyczne, ale może odrzucić nietypowe cykle"
       },
       "end_energy_threshold": {
         "higher": "Zamyka tylko cykle o znacznym zużyciu energii",
@@ -2016,7 +1967,6 @@
     "smart_termination_duration_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż, jeśli czasy pracy się wahają",
     "anti_crease_finalize_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim ogon antygniotowy może go zakończyć; obniż w suszarkach, w pralkach zostaw wartość domyślną",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
-    "anti_wrinkle_exit_power": "Poziom mocy w przerwach między impulsami obrotów; działa tylko powyżej Progu Zatrzymania",
     "anti_wrinkle_idle_timeout": "Dozwolony czas ciszy między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy",
     "anti_wrinkle_max_duration": "Dłuższy impuls kończy tryb antygniotowy i otwiera nowy cykl",
     "anti_wrinkle_max_power": "Impuls powyżej tej wartości kończy tryb antygniotowy i otwiera nowy cykl",
@@ -2219,16 +2169,11 @@
     "kept": "zachowane",
     "max": "maks.",
     "min": "min.",
-    "minus_tol": "-tol",
     "no_match": "brak dopasowania",
     "no_updates": "brak aktualizacji",
     "off_delay_wait": "opóźnienie wyłączenia",
     "off_gap": "przerwa wył.",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "typowy interwał odczytów",
     "sensor_offline": "czujnik offline: wymuszone zatrzymanie",
-    "si": "IP",
     "spike_ignored": "skok zignorowany",
     "spike_ignored_short": "skok: zignorowany",
     "start": "start",

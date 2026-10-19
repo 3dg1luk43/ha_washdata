@@ -28,6 +28,8 @@ from custom_components.ha_washdata.const import (
     CONF_EXTERNAL_END_TRIGGER_INVERTED
 )
 
+TRIGGER = "binary_sensor.test_trigger"
+
 @pytest.fixture
 def mock_hass():
     hass = MagicMock()
@@ -48,8 +50,7 @@ def mock_entry():
     entry.options = {
         CONF_MIN_POWER: 2.0,
         CONF_POWER_SENSOR: "sensor.test_power",
-        CONF_EXTERNAL_END_TRIGGER_ENABLED: True,
-        CONF_EXTERNAL_END_TRIGGER: "binary_sensor.test_trigger",
+        CONF_EXTERNAL_END_TRIGGER: TRIGGER,
         CONF_EXTERNAL_END_TRIGGER_INVERTED: False,
     }
     entry.data = {}
@@ -135,3 +136,33 @@ def test_external_trigger_no_state_change(manager):
     }
     manager._handle_external_trigger_change(event)
     manager.detector.user_stop.assert_not_called()
+
+# ── 0.5.9: a set entity alone turns the trigger on ──────────────────────────
+
+
+@pytest.mark.parametrize("stale_flag", [None, False, True])
+async def test_a_set_entity_subscribes_whatever_a_stale_flag_says(manager, stale_flag):
+    """The on/off flag is retired (the 3.12 migration cleared the entity where it
+    was off), so only the entity decides; a stray stored flag is ignored."""
+    if stale_flag is not None:
+        manager.config_entry.options[CONF_EXTERNAL_END_TRIGGER_ENABLED] = stale_flag
+    with patch(
+        "custom_components.ha_washdata.manager.async_track_state_change_event",
+        return_value=MagicMock(),
+    ) as track:
+        await manager._setup_external_end_trigger()
+    track.assert_called_once()
+    assert track.call_args.args[1] == [TRIGGER]
+    manager.hass.states.get = MagicMock(return_value=create_state("off"))
+    assert manager._external_end_trigger_available() is True
+
+
+async def test_no_entity_means_no_trigger(manager):
+    manager.config_entry.options.pop(CONF_EXTERNAL_END_TRIGGER)
+    manager.config_entry.options[CONF_EXTERNAL_END_TRIGGER_ENABLED] = True
+    with patch(
+        "custom_components.ha_washdata.manager.async_track_state_change_event",
+    ) as track:
+        await manager._setup_external_end_trigger()
+    track.assert_not_called()
+    assert manager._external_end_trigger_available() is False

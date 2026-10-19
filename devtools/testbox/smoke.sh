@@ -114,7 +114,6 @@ $HACTL set-options "$ENTRY" \
   notify_live_chronometer=true \
   notify_before_end_minutes=20 \
   profile_match_interval=10 \
-  sampling_interval=1 \
   watchdog_interval=5 \
   start_duration_threshold=1 \
   off_delay=10 \

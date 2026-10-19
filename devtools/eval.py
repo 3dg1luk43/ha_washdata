@@ -567,6 +567,21 @@ def fresh_store(dev: Device, data: dict, override: dict):
     return st, mgr
 
 
+def auto_label_floor(mgr) -> float:
+    """The auto-label threshold the learning manager reads at cycle end.
+
+    Read from the entry options as ``learning.py`` does (the manager's own copy,
+    ``_auto_label_confidence``, was write-only and is gone since 0.5.9).
+    """
+    from custom_components.ha_washdata import const as C  # noqa: PLC0415
+    from custom_components.ha_washdata.options_utils import option_float  # noqa: PLC0415
+
+    return float(option_float(
+        mgr.config_entry.options.get(C.CONF_AUTO_LABEL_CONFIDENCE, C.DEFAULT_AUTO_LABEL_CONFIDENCE),
+        C.DEFAULT_AUTO_LABEL_CONFIDENCE,
+    ))
+
+
 def device_config(dev: Device, override: dict) -> dict:
     st, mgr = fresh_store(dev, {}, override)
     return {
@@ -576,7 +591,7 @@ def device_config(dev: Device, override: dict) -> dict:
         "min_ratio": st._min_duration_ratio, "max_ratio": st._max_duration_ratio,  # noqa: SLF001
         "dtw_bandwidth": st.dtw_bandwidth, "energy_mode": st.energy_mode,
         "evidence": list(st.evidence_sources),
-        "auto_label_conf": float(mgr._auto_label_confidence),  # noqa: SLF001
+        "auto_label_conf": auto_label_floor(mgr),
         "learning_conf": float(mgr._learning_confidence),  # noqa: SLF001
     }
 
@@ -696,7 +711,7 @@ async def run_folds(dev: Device, base: dict, idxs: list[int], cuts: tuple[float,
             continue
         st, mgr = fresh_store(dev, fd, override)
         await st.async_rebuild_envelope(label)
-        thr = float(mgr._auto_label_confidence)  # noqa: SLF001
+        thr = auto_label_floor(mgr)
         thr_learn = float(mgr._learning_confidence or 0.0)  # noqa: SLF001
         for cut in cuts:
             # A cut above 1.0 is an ABSOLUTE elapsed time in seconds (``5m`` -> 300):
