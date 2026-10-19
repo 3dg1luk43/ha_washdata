@@ -48,6 +48,43 @@ const _PG_MAX_BATCH_CYCLES = 50;
 // The external integration the Maintenance section points to (#461). It reads the
 // cycle-count sensor (translation_key "cycle_count", unit "cycles"), a public contract.
 const _MAINTENANCE_SUPPORTER_URL = 'https://github.com/iluebbe/maintenance_supporter';
+// Where contributors learn to share an automation template (#478, by pull request).
+const _BLUEPRINT_CONTRIBUTING_URL = 'https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#automation-templates';
+// The label and automation category on everything the panel creates in Home
+// Assistant (#478): found by name, case-insensitively, else created. A brand name.
+const _WD_LABEL_NAME = 'WashData';
+const _WD_LABEL_ICON = 'mdi:washing-machine';
+// How long a new automation may take to show up as an entity before the panel
+// gives up labelling it (HA reloads automations after the config POST returns).
+const _AUTOMATION_ENTITY_WAIT_MS = 5000;
+
+// The WashData integration triggers (#478, `trigger: ha_washdata.<key>`), in the
+// order of const.DEVICE_TRIGGER_TYPES. `only`: the device types the trigger is
+// offered for (const.DEVICE_TRIGGER_ONLY_FOR; absent = every type). `options`: the
+// defaults in triggers.yaml. `name`: the English of `trigger.<key>.name` (strings.json
+// `triggers.<key>.name`). tests/test_panel_trigger_table.py keeps it in step.
+const _TRIGGER_MATCHING_TYPES = ['washing_machine', 'dryer', 'washer_dryer', 'dishwasher', 'air_fryer', 'bread_maker', 'pump', 'generic'];
+const _TRIGGER_TUMBLING_TYPES = ['washing_machine', 'dryer', 'washer_dryer'];
+const _WD_TRIGGERS = [
+  { key: 'cycle_started', name: 'Cycle started' },
+  { key: 'program_recognised', name: 'Program recognised', only: _TRIGGER_MATCHING_TYPES },
+  { key: 'phase_started', name: 'Phase started', only: _TRIGGER_MATCHING_TYPES },
+  { key: 'finishing_soon', name: 'Finishing soon', only: _TRIGGER_MATCHING_TYPES, options: { minutes: 10 } },
+  { key: 'cycle_overrun', name: 'Cycle running long', only: _TRIGGER_MATCHING_TYPES, options: { percent: 20 } },
+  { key: 'cycle_paused', name: 'Cycle paused', options: { include_detected: false } },
+  { key: 'cycle_resumed', name: 'Cycle resumed', options: { include_detected: false } },
+  { key: 'cycle_stalled', name: 'Cycle stalled' },
+  { key: 'cycle_finished', name: 'Cycle finished' },
+  { key: 'cycle_ended', name: 'Cycle ended', options: { status: 'any' } },
+  { key: 'anti_wrinkle_started', name: 'Anti-wrinkle started', only: _TRIGGER_TUMBLING_TYPES },
+  { key: 'still_tumbling', name: 'Still tumbling after the cycle', only: _TRIGGER_TUMBLING_TYPES, options: { minutes: 15 } },
+  { key: 'unload_pending', name: 'Unload pending' },
+  { key: 'unloaded', name: 'Unloaded' },
+  { key: 'state_changed', name: 'State changed' },
+  { key: 'maintenance_due', name: 'Maintenance due' },
+  { key: 'milestone_reached', name: 'Cycle milestone reached' },
+  { key: 'pump_stuck', name: 'Pump stuck', only: ['pump'] },
+];
 
 // Detector states that mean "a cycle is in flight". Single source for the device
 // bar dot, the status header and the pause/resume/force-stop controls -- these
@@ -825,15 +862,32 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
   .wd-dot, .wd-devdot, .wd-rec-active, .wd-spin, .wd-toast { animation: none !important; }
   * { scroll-behavior: auto !important; }
 }
-/* Notifications > Automations: split "New" dropdown + pills. */
-.wd-auto-dd summary { cursor: pointer; list-style: none; }
-.wd-auto-dd summary::-webkit-details-marker { display: none; }
-.wd-auto-dd summary::marker { content: ''; }
-.wd-auto-pill { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; background: var(--secondary-background-color); border: 1px solid var(--divider-color); border-radius: 16px; padding: 3px 4px 3px 12px; }
-.wd-auto-pill-link { text-decoration: none; color: var(--primary-text-color); font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Automations tab: pills, the WashData label badge and the trigger list (#478). */
+.wd-auto-badge { flex: 0 0 auto; margin-left: 4px; padding: 0 7px; border-radius: 10px; font-size: .72em; font-weight: 600; line-height: 1.6;
+  background: var(--primary-color); color: var(--text-primary-color, var(--wd-white)); }
+.wd-auto-trig-list { margin-top: 10px; padding: 10px; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); }
+.wd-auto-trig-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr)); gap: 6px; }
+.wd-auto-trig { justify-content: flex-start; text-align: left; white-space: normal; min-width: 0; overflow-wrap: anywhere; }
+.wd-auto-pill { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; box-sizing: border-box; background: var(--secondary-background-color); border: 1px solid var(--divider-color); border-radius: 16px; padding: 3px 4px 3px 12px; }
+.wd-auto-pill-link { min-width: 0; text-decoration: none; color: var(--primary-text-color); font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wd-auto-pill-link:hover { text-decoration: underline; }
 .wd-auto-pill-x { flex: 0 0 auto; border: none; background: transparent; color: var(--secondary-text-color); cursor: pointer; font-size: 1.15em; line-height: 1; padding: 0 5px; border-radius: 50%; }
 .wd-auto-pill-x:hover { background: var(--error-color, #f44336); color: var(--wd-white); }
+/* Automations tab: template (blueprint) cards; one column on a phone (#478). */
+.wd-bp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 12px; }
+.wd-bp-card { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 14px; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--card-background-color); }
+.wd-bp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.wd-bp-name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.wd-bp-status { flex: 0 0 auto; margin-left: 0; }
+.wd-bp-desc { margin: 0; font-size: .86em; line-height: 1.5; color: var(--secondary-text-color); white-space: pre-line; overflow-wrap: anywhere; }
+.wd-bp-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.wd-bp-tags .wd-tag { margin-left: 0; }
+.wd-bp-inputs { font-size: .8em; color: var(--secondary-text-color); overflow-wrap: anywhere; }
+.wd-bp-needed { color: var(--primary-text-color); }
+.wd-bp-card .wd-card-actions { margin-top: auto; padding-top: 4px; }
+.wd-bp-card .wd-btn, .wd-bp-modal .wd-btn { white-space: normal; }
+.wd-bp-yaml { margin: 0; max-height: 55vh; overflow: auto; padding: 12px; border-radius: var(--wd-radius-md); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: .8em; line-height: 1.45; white-space: pre; }
+a.wd-btn { text-decoration: none; }
 .wd-field-hint { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px; }
 /* Derived-value note (#445): informational, never an error - no red, no fix button. */
 .wd-setting-note { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px;
@@ -1105,6 +1159,7 @@ button.wd-profile-card { display: block; }
 .wd-toast-success { background: var(--success-color, #4caf50); color: var(--wd-white); }
 .wd-toast-error   { background: var(--error-color, #f44336); color: var(--wd-white); }
 .wd-toast-info    { background: var(--info-color, #2196f3); color: var(--wd-white); }
+.wd-toast-warning { background: var(--warning-color, #ff9800); color: var(--wd-white); }
 /* D4: undo toast — action button + row layout */
 .wd-toast { display: flex; align-items: center; gap: 14px; }
 .wd-toast-action { background: rgba(255,255,255,.22); color: inherit; border: none; border-radius: 6px; padding: 5px 12px; font: inherit; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: .04em; font-size: .85em; }
@@ -1587,6 +1642,37 @@ function _wsErrText(err) {
     ? ' (the integration is probably still starting up; this should stop on its own)'
     : '';
   return `${code || 'error'}${msg ? ': ' + msg : ''}${hint}`;
+}
+
+// The message of a failed hass.callApi (HA's REST errors carry it in
+// body.message) or WS call (message). Plain text.
+function _haErrText(e) {
+  if (e == null) return '';
+  if (typeof e === 'string') return e;
+  if (e.body && typeof e.body === 'object' && e.body.message) return String(e.body.message);
+  if (e.message) return String(e.message);
+  return _wsErrText(e);
+}
+
+// HA's blueprint/list returns only an installed blueprint's metadata, so "the same
+// version" is judged on what that carries: name, description, source and the
+// inputs (keys, and which have a default). A trigger- or action-only change
+// between two versions is not visible from here (#478).
+function _bpSameMetadata(md, b) {
+  const norm = v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
+  if (norm(md.name) !== norm(b.name) || norm(md.description) !== norm(b.description)
+      || norm(md.source_url) !== norm(b.source_url)) return false;
+  const theirs = [];
+  const walk = inputs => {
+    for (const [k, v] of Object.entries(inputs || {})) {
+      const spec = (v && typeof v === 'object') ? v : {};
+      if (spec.input && typeof spec.input === 'object') walk(spec.input);  // a section
+      else theirs.push(k + ('default' in spec ? '=' : ''));
+    }
+  };
+  walk(md.input);
+  const ours = (b.inputs || []).map(i => i.key + (i.has_default ? '=' : ''));
+  return theirs.sort().join('|') === ours.sort().join('|');
 }
 
 function _esc(s) {
@@ -3705,7 +3791,7 @@ class HaWashdataPanel extends HTMLElement {
     this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._importUndo = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
-    this._deviceAutomations = [];   // per-device; re-fetched on the settings tab
+    this._deviceAutomations = [];   // per-device; re-fetched on the Automations tab
     this._selectMode = false; this._cycleSel = new Set();
     this._cycleFilter = { text: '', status: '' };
     this._profSubtab = 'profiles';
@@ -3890,17 +3976,22 @@ class HaWashdataPanel extends HTMLElement {
         if (this._constants.mlTrainingAvailable) {
           this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'settings') this._renderPreservingFormEdits(); });
         }
-        // Automations related to this device (for the Notifications > Automations list).
-        this._autoLoading = true;
-        this._loadDeviceAutomations(eid).finally(() => {
-          this._autoLoading = false;
-          if (this._tab === 'settings') this._renderPreservingFormEdits();
-        });
         // Community-store account card lives at the bottom of the Settings tab;
         // load the connection status in the background so it fills in when ready.
         if (this._constants.storeOnlineAvailable) {
           this._loadStoreStatus(eid).finally(() => { if (this._tab === 'settings') this._renderPreservingFormEdits(); });
         }
+      } else if (this._tab === 'automations') {
+        // The saved options carry the legacy custom actions and the device type
+        // the template catalog is filtered by.
+        try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
+        this._autoLoading = true;
+        this._loadWdLabel().then(() => { if (this._tab === 'automations') this._render(); });
+        this._loadDeviceAutomations(eid).finally(() => {
+          this._autoLoading = false;
+          if (this._tab === 'automations') this._render();
+        });
+        await Promise.all([this._loadBlueprintCatalog(), this._loadInstalledBlueprints()]);
       } else if (this._tab === 'store') {
         try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
         if (!this._profiles.length) this._fetchProfiles(eid);  // needed for the import "merge into existing" dropdown
@@ -4285,7 +4376,7 @@ class HaWashdataPanel extends HTMLElement {
     const panel = cfg.panel || {};
     if (!this._tabInitialized) {
       const dt = (cfg.prefs && cfg.prefs.default_tab) || panel.default_tab;
-      if (dt && ['status', 'history', 'profiles', 'settings', 'playground'].includes(dt)) this._tab = dt;
+      if (dt && ['status', 'history', 'profiles', 'settings', 'automations', 'playground'].includes(dt)) this._tab = dt;
       this._tabInitialized = true;
     }
   }
@@ -4309,6 +4400,9 @@ class HaWashdataPanel extends HTMLElement {
     const hidden = (!admin && this._panelCfg && this._panelCfg.panel && this._panelCfg.panel.hidden_tabs) || [];
     const ids = ['status', 'history', 'profiles'];
     if (this._canEdit()) ids.push('settings');
+    // #478: everyone may browse the automation templates; creating, installing
+    // and deleting stay admin-only inside the tab (Home Assistant's own rule).
+    ids.push('automations');
     // F3: Playground (what-if simulator / A-B / DTW inspector) — edit access only.
     if (this._canEdit()) ids.push('playground');
     // Community Store — only when the backend exposes it AND online features are on.
@@ -4742,7 +4836,7 @@ class HaWashdataPanel extends HTMLElement {
     const confIndicator = this._conflictKeysFromOpts().size > 0 ? ' ⚠' : '';
     const pgBusy = this._busy.has('pg-sim') || this._busy.has('pg-sweep');
     const pgSpinner = pgBusy ? `<span class="wd-spin" style="margin-left:4px;vertical-align:middle"></span>` : '';
-    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator, playground: this._t('tab.playground',{},'Playground') + pgSpinner, store: this._t('tab.store',{},'Store'), advanced: this._t('tab.advanced',{},'Advanced') };
+    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator, automations: this._t('tab.automations',{},'Automations'), playground: this._t('tab.playground',{},'Playground') + pgSpinner, store: this._t('tab.store',{},'Store'), advanced: this._t('tab.advanced',{},'Advanced') };
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
     const tabBtns = visible.map(id =>
@@ -4764,6 +4858,7 @@ class HaWashdataPanel extends HTMLElement {
       ${pane('history', () => this._htmlHistoryTab())}
       ${pane('profiles', () => this._htmlProfiles())}
       ${pane('settings', () => this._htmlSettings())}
+      ${pane('automations', () => this._htmlAutomationsTab())}
       ${pane('playground', () => this._htmlPlayground())}
       ${pane('store', () => this._htmlStore())}
       ${pane('advanced', () => this._htmlPanel())}
@@ -6408,61 +6503,311 @@ class HaWashdataPanel extends HTMLElement {
     if (this._modal === m) this._render();
   }
 
-  // Automations subcategory at the top of Notifications. Replaces the old custom
-  // action editor: WashData fires ha_washdata_cycle_started / _ended events and
-  // exposes entities, so users build native HA automations. This shows the
-  // automations already related to this device (deep-linking to the editor) and
-  // a split "New" button that opens a blank automation or one prefilled with a
-  // cycle-started / cycle-finished trigger for this device.
+  // The Automations tab (#478). WashData offers device triggers and entities, so
+  // notifications and actions are native HA automations. The tab lists the
+  // automations that use this device (deep-linking to the editor), creates a
+  // blank one or one prefilled with a cycle trigger, converts legacy custom
+  // actions, and installs the blueprint templates shipped with the integration.
+  _htmlAutomationsTab() {
+    return `${this._htmlAutomations()}${this._htmlBlueprints()}`;
+  }
+
   _htmlAutomations() {
+    // Home Assistant's automation config API is admin-only, so are the buttons.
+    const admin = this._isAdmin();
     const list = this._deviceAutomations || [];
+    // The WashData label (#478) as a badge, read from HA's entity registry so a
+    // label added or removed in Home Assistant shows on the next render.
+    const labelId = this._wdLabelId;
+    const regEnts = (this._hass && this._hass.entities) || {};
+    const labelled = a => !!labelId && Array.isArray(regEnts[a.entity_id] && regEnts[a.entity_id].labels) && regEnts[a.entity_id].labels.includes(labelId);
+    const badge = `<span class="wd-auto-badge" title="${this._t('lbl.automation_wd_label', {}, 'Carries the WashData label')}">${_WD_LABEL_NAME}</span>`;
     const pills = list.length
-      ? list.map(a => `<span class="wd-auto-pill">` +
+      ? list.map(a => `<span class="wd-auto-pill" data-autoid="${_esc(a.id)}">` +
           `<a class="wd-auto-pill-link" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top" title="${this._t('hdr.automation_open', {}, 'Open in the automation editor')}">🔗 ${_esc(a.name)}${a.enabled ? '' : ` <span style="opacity:.6">${this._t('lbl.automation_off', {}, '(off)')}</span>`}</a>` +
-          `<button type="button" class="wd-auto-pill-x" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="${this._t('hdr.automation_delete', {}, 'Delete this automation')}">×</button>` +
+          (labelled(a) ? badge : '') +
+          (admin ? `<button type="button" class="wd-auto-pill-x" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="${this._t('hdr.automation_delete', {}, 'Delete this automation')}">×</button>` : '') +
         `</span>`).join('')
       : `<span class="wd-info" style="margin:0">${this._autoLoading ? this._t('msg.loading', {}, 'Loading…') : this._t('hdr.no_automations', {}, 'No automations reference this device yet.')}</span>`;
     // Legacy custom actions from the removed editor: still fired by the backend,
     // but no longer editable. Offer a one-click convert to a real automation.
-    const legacy = Array.isArray(this._opts.notify_actions) ? this._opts.notify_actions : [];
+    const legacy = (this._canEdit() && Array.isArray(this._opts.notify_actions)) ? this._opts.notify_actions : [];
     const legacyBlock = legacy.length ? `
-      <div style="border:1px solid var(--warning-color,#ff9800);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:rgba(255,152,0,.08)">
+      <div class="wd-auto-legacy" style="border:1px solid var(--warning-color,#ff9800);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:rgba(255,152,0,.08)">
         <div style="font-weight:600;margin-bottom:4px">${this._t('msg.legacy_actions_title', {count: legacy.length}, `${legacy.length} legacy custom action${legacy.length > 1 ? 's' : ''} still running`)}</div>
         <p class="wd-info" style="margin:0 0 8px">${this._t('msg.old_actions_warning', {}, 'Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.')}</p>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-convert-legacy">${this._t('btn.convert_to_automation', {}, 'Convert to automation')}</button>
+          ${admin ? `<button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-convert-legacy">${this._t('btn.convert_to_automation', {}, 'Convert to automation')}</button>` : ''}
           <button type="button" class="wd-btn wd-btn-danger wd-btn-sm" data-action="auto-remove-legacy">${this._t('btn.remove', {}, 'Remove')}</button>
         </div>
       </div>` : '';
-    return `
-      <div class="wd-subhead">${this._t('hdr.automations', {}, 'Automations')}</div>
-      <p class="wd-info" style="margin-bottom:10px">${this._t('msg.automations_intro', {start: _html('<code>ha_washdata_cycle_started</code>'), end: _html('<code>ha_washdata_cycle_ended</code>')}, 'WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.')}</p>
+    // "Start from a trigger" opens an in-card list rather than a popover: up to 18
+    // entries, and a popover is clipped by .wd-main on a phone.
+    const creating = this._autoCreating;
+    const spin = key => creating === key ? '<span class="wd-spin"></span> ' : '';
+    const dis = creating ? 'disabled' : '';
+    const dev = this._devices[this._selIdx];
+    const trigs = dev ? this._deviceTriggers(dev.entry_id) : [];
+    const trigOpen = !!this._autoTrigOpen && trigs.length > 0;
+    const trigList = trigOpen ? `
+      <div class="wd-auto-trig-list" id="wd-auto-trig-list">
+        <p class="wd-info" style="margin:0 0 8px">${this._t('msg.auto_trigger_hint', {}, 'Creates an automation with this trigger for this device and opens it in Home Assistant.')}</p>
+        <div class="wd-auto-trig-grid">${trigs.map(t => `<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm wd-auto-trig" data-action="auto-new-trigger" data-trigger="${t.key}" ${dis}>${spin(t.key)}${this._t(`trigger.${t.key}.name`, {}, t.name)}</button>`).join('')}</div>
+      </div>` : '';
+    const newRow = admin ? `
+      <div class="wd-auto-new" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-new" ${dis}>${spin('new')}${this._t('btn.new_automation', {}, '＋ New Automation')}</button>
+        ${trigs.length ? `<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm wd-auto-trig-toggle" data-action="auto-toggle-triggers" aria-expanded="${trigOpen}" aria-controls="wd-auto-trig-list">${trigOpen ? this._t('btn.from_trigger_open', {}, 'Start from a trigger ▴') : this._t('btn.from_trigger', {}, 'Start from a trigger ▾')}</button>` : ''}
+      </div>${trigList}` : '';
+    // HA's automation list takes ?label= (its label page links the same way), so
+    // the link opens it filtered once the label exists. /config is admin-only.
+    const allHref = '/config/automation/dashboard' + (labelId ? '?historyBack=1&label=' + encodeURIComponent(labelId) : '');
+    const allLink = admin ? `<p class="wd-info wd-auto-all-row" style="margin:12px 0 0"><a class="wd-auto-all" href="${_esc(allHref)}" title="${this._t('hdr.automations_all_tip', {}, 'Home Assistant\'s automation list, filtered by the WashData label. Automations created here also sit in the WashData category.')}" style="color:var(--primary-color);text-decoration:none;font-weight:500">${this._t('link.automations_all', {}, 'All WashData automations in Home Assistant')}</a></p>` : '';
+    return `<div class="wd-card wd-auto-card">
+      <div class="wd-card-title">${this._t('hdr.automations_used', {}, 'Automations using this device')}</div>
+      <p class="wd-info" style="margin-bottom:10px">${this._t('msg.automations_tab_intro', {}, 'WashData offers device triggers (cycle started, cycle finished, cycle stalled and more) for your own Home Assistant automations. Automations that use this device are listed here.')}</p>
       ${legacyBlock}
       <div class="wd-auto-pills" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">${pills}</div>
-      <div class="wd-auto-new" style="display:flex;gap:6px;align-items:center;margin-bottom:18px">
-        <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-new">${this._t('btn.new_automation', {}, '＋ New Automation')}</button>
-        <details class="wd-auto-dd" style="position:relative">
-          <summary class="wd-btn wd-btn-secondary wd-btn-sm">${this._t('btn.from_template', {}, 'From template ▾')}</summary>
-          <div class="wd-auto-dd-menu" style="position:absolute;z-index:5;margin-top:4px;background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:6px;min-width:190px;box-shadow:0 4px 14px rgba(0,0,0,.25)">
-            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-started" style="width:100%;margin-bottom:4px">${this._t('btn.on_cycle_started', {}, 'On cycle started')}</button>
-            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-finished" style="width:100%">${this._t('btn.on_cycle_finished', {}, 'On cycle finished')}</button>
-          </div>
-        </details>
+      ${newRow}
+      ${allLink}
+    </div>`;
+  }
+
+  // The WashData triggers this device offers (const.DEVICE_TRIGGER_ONLY_FOR, via
+  // _WD_TRIGGERS) that can be built for it here.
+  _deviceTriggers(entryId) {
+    const type = this._curDeviceType();
+    return _WD_TRIGGERS.filter(t => (!t.only || (!!type && t.only.includes(type))) && this._triggerConfig(entryId, t));
+  }
+
+  _curDeviceType() {
+    const dev = this._devices[this._selIdx];
+    return (this._opts && this._opts.device_type) || (dev && dev.options && dev.options.device_type) || '';
+  }
+
+  // One WashData trigger in an automation: the integration trigger (#478) on this
+  // device with its default options. With no device registry entry in sight, the
+  // bus event for the two that have one (the events always fire); null otherwise.
+  _triggerConfig(entryId, t) {
+    const deviceId = this._washdataDeviceId(entryId);
+    if (deviceId) return { trigger: `${_DOMAIN}.${t.key}`, target: { device_id: [deviceId] }, options: { ...(t.options || {}) } };
+    if (t.key === 'cycle_started' || t.key === 'cycle_finished') return this._cycleTrigger(entryId, t.key);
+    return null;
+  }
+
+  // ── Automation templates (blueprints shipped with the integration, #478) ──
+
+  // The shipped catalog never changes while this version runs: fetch it once. A
+  // failure is not cached, so the next visit retries (e.g. right after a restart).
+  async _loadBlueprintCatalog() {
+    if (Array.isArray(this._bpCatalog)) return;
+    try {
+      const r = await this._ws({ type: `${_DOMAIN}/blueprints/list` });
+      const list = (r && Array.isArray(r.blueprints)) ? r.blueprints : [];
+      if (r && r.error && !list.length) throw r;
+      this._bpCatalog = list; this._bpCatalogError = false;
+    } catch (_) { this._bpCatalog = null; this._bpCatalogError = true; }
+  }
+
+  // HA's blueprint/list (admin-only): path -> {metadata} | {error}. Null when it
+  // is unknown (non-admin, or the call failed); the cards then show no status.
+  async _loadInstalledBlueprints() {
+    if (!this._isAdmin()) { this._bpInstalled = null; return; }
+    try {
+      const r = await this._ws({ type: 'blueprint/list', domain: 'automation' });
+      this._bpInstalled = (r && typeof r === 'object') ? r : {};
+    } catch (_) { this._bpInstalled = null; }
+  }
+
+  _bpById(id) { return (this._bpCatalog || []).find(b => b.id === id) || null; }
+
+  // Display name / description: translated by id, else the YAML text. Plain text.
+  // The "WashData: " prefix names the blueprint in HA's list; here it is noise.
+  _bpName(b) {
+    const raw = String(b.name || b.id).replace(/^WashData:\s*/i, '');
+    return this._tText(`blueprint.${b.id}.name`, {}, raw.charAt(0).toUpperCase() + raw.slice(1));
+  }
+  _bpDesc(b) { return this._tText(`blueprint.${b.id}.description`, {}, b.description || ''); }
+
+  // 'same' | 'different' | 'none', or null when the installed list is unknown.
+  _bpInstalledState(b) {
+    const all = this._bpInstalled;
+    if (!all || !b.path) return null;
+    const hit = all[b.path];
+    if (!hit) return 'none';
+    return (hit.metadata && _bpSameMetadata(hit.metadata, b)) ? 'same' : 'different';
+  }
+
+  _htmlBlueprints() {
+    const admin = this._isAdmin();
+    const type = this._curDeviceType();
+    let body;
+    if (Array.isArray(this._bpCatalog)) {
+      const shown = this._bpCatalog.filter(b => {
+        const types = Array.isArray(b.device_types) && b.device_types.length ? b.device_types : ['all'];
+        return types.includes('all') || (!!type && types.includes(type));
+      });
+      body = shown.length
+        ? `<div class="wd-bp-grid">${shown.map(b => this._htmlBlueprintCard(b, admin)).join('')}</div>`
+        : `<p class="wd-info">${this._t('msg.bp_none', {}, 'No templates for this appliance type yet.')}</p>`;
+    } else if (this._bpCatalogError) {
+      body = `<p class="wd-info">${this._t('msg.bp_load_failed', {}, 'Templates could not be loaded.')}</p>`;
+    } else {
+      body = `<p class="wd-info">${this._t('msg.loading', {}, 'Loading…')}</p>`;
+    }
+    return `<div class="wd-card wd-bp-section">
+      <div class="wd-card-title">${this._t('hdr.bp_templates', {}, 'Templates')}</div>
+      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.bp_intro', {}, 'Ready-made automations for this appliance, installed as Home Assistant blueprints.')}</p>
+      ${admin ? '' : `<p class="wd-info wd-bp-admin-hint" style="margin-bottom:12px">${this._t('msg.bp_admin_only', {}, 'An administrator installs templates.')}</p>`}
+      ${body}
+      <p class="wd-info wd-bp-footer" style="margin-top:14px"><a href="${_BLUEPRINT_CONTRIBUTING_URL}" target="_blank" rel="noopener noreferrer" style="color:var(--primary-color);text-decoration:none;font-weight:500">${this._t('link.bp_share', {}, 'Share your own template by pull request ↗')}</a></p>
+    </div>`;
+  }
+
+  _htmlBlueprintCard(b, admin) {
+    const st = this._bpInstalledState(b);
+    const badge = st === 'same'
+      ? `<span class="wd-tag wd-tag-approved wd-bp-status">${this._t('badge.bp_installed', {}, 'Installed')}</span>`
+      : st === 'different'
+        ? `<span class="wd-tag wd-tag-pending wd-bp-status">${this._t('badge.bp_installed_other', {}, 'Other version installed')}</span>`
+        : '';
+    const tags = (b.tags || []).map(t => `<span class="wd-tag">${_esc(t)}</span>`).join('');
+    // The device input is filled in by the panel; list only what is left.
+    const inputs = (b.inputs || []).filter(i => i.key !== 'washdata_device');
+    const names = list => list.map(i => i.name || i.key).join(' · ');
+    const needed = inputs.filter(i => !i.has_default), tunable = inputs.filter(i => i.has_default);
+    const inputLines = (needed.length ? `<div class="wd-bp-inputs wd-bp-needed">${this._t('lbl.bp_you_choose', {inputs: names(needed)}, 'You choose: {inputs}')}</div>` : '')
+      + (tunable.length ? `<div class="wd-bp-inputs">${this._t('lbl.bp_adjustable', {inputs: names(tunable)}, 'Adjustable: {inputs}')}</div>` : '');
+    const busy = this._busy.has('bp-' + b.id);
+    const spin = busy ? '<span class="wd-spin"></span> ' : '';
+    const main = !admin ? ''
+      : b.one_click
+        ? `<button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-bp-use" data-bpid="${_esc(b.id)}" ${busy ? 'disabled' : ''}>${spin}${this._t('btn.bp_use', {}, 'Use with this device')}</button>`
+        : `<button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-bp-install" data-bpid="${_esc(b.id)}" ${busy ? 'disabled' : ''}>${spin}${this._t('btn.bp_install', {}, 'Install template')}</button>`;
+    return `<div class="wd-bp-card" data-bpid="${_esc(b.id)}">
+      <div class="wd-bp-head"><span class="wd-bp-name">${_esc(this._bpName(b))}</span>${badge}</div>
+      <p class="wd-bp-desc">${_esc(this._bpDesc(b))}</p>
+      ${tags ? `<div class="wd-bp-tags">${tags}</div>` : ''}
+      ${inputLines}
+      <div class="wd-card-actions">${main}<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-bp-yaml" data-bpid="${_esc(b.id)}">${this._t('btn.bp_view_yaml', {}, 'View YAML')}</button></div>
+    </div>`;
+  }
+
+  _htmlBlueprintYamlModal(m) {
+    const b = this._bpById(m.bpId);
+    if (!b) return '';
+    const importUrl = b.source_url
+      ? 'https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=' + encodeURIComponent(b.source_url) : '';
+    return `<h2 id="wd-modal-title">${_esc(this._bpName(b))}</h2>
+      <pre class="wd-bp-yaml" tabindex="0" aria-label="${_esc(this._tText('lbl.bp_yaml', {}, 'Blueprint YAML'))}">${_esc(b.yaml || '')}</pre>
+      <div class="wd-modal-actions">
+        ${importUrl ? `<a class="wd-btn wd-btn-secondary wd-bp-import" href="${_esc(importUrl)}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_open_in_ha', {}, 'Open in Home Assistant ↗')}</a>` : ''}
+        <button type="button" class="wd-btn wd-btn-secondary" data-maction="bp-copy">${this._t('btn.copy', {}, 'Copy')}</button>
+        <button type="button" class="wd-btn wd-btn-primary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
       </div>`;
   }
 
+  async _bpCopyYaml(b) {
+    const text = (b && b.yaml) || '';
+    let ok = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); ok = true; }
+    } catch (_) { ok = false; }
+    if (!ok) {
+      // A plain-http Home Assistant has no async clipboard API (secure contexts only).
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        ok = document.execCommand('copy');
+        ta.remove();
+      } catch (_) { ok = false; }
+    }
+    if (ok) this._showToast(this._tText('toast.copied', {}, 'Copied'));
+    else this._showToast(this._tText('toast.copy_failed', {}, 'Copy failed. Select the text and copy it by hand.'), 'error');
+  }
+
+  // A template's main button (admin-only, like HA's blueprint/save). 'use': install
+  // the blueprint unless this version is already there, create an automation from
+  // it for this device and open it. 'install': install only, then HA's blueprint
+  // page, where the user fills in the inputs the template cannot default.
+  _bpStart(b, mode) {
+    if (!this._isAdmin() || this._busy.has('bp-' + b.id)) return;
+    const st = this._bpInstalledState(b);
+    if (st === 'different') { this._bpConfirmReplace(b, mode); return; }
+    this._bpRun(b, mode, st === 'same' ? 'skip' : 'save');
+  }
+
+  // Never overwrite a different installed copy (the user may have edited it)
+  // without asking.
+  _bpConfirmReplace(b, mode) {
+    this._modal = { type: 'confirm',
+      title: this._tText('modal.bp_replace_title', {}, 'Replace the installed template?'),
+      message: this._tText('modal.bp_replace_msg', {name: this._bpName(b)}, 'Home Assistant has a different version of "{name}". Replace it with the one from this WashData version? Automations that use it change with it.'),
+      okLabel: this._tText('btn.replace', {}, 'Replace'), okPrimary: true,
+      onOk: () => this._bpRun(b, mode, 'override') };
+    this._render();
+  }
+
+  // save: 'save' | 'override' | 'skip'. Each step reports its own failure; a
+  // saved blueprint stays installed when the automation step fails after it.
+  async _bpRun(b, mode, save) {
+    const key = 'bp-' + b.id;
+    const dev = this._devices[this._selIdx];
+    if (!dev || this._busy.has(key)) return;
+    const deviceId = mode === 'use' ? this._washdataDeviceId(dev.entry_id) : null;
+    this._busy.add(key); this._render();
+    try {
+      if (save !== 'skip') {
+        const msg = { type: 'blueprint/save', domain: 'automation', path: b.path, yaml: b.yaml };
+        if (b.source_url) msg.source_url = b.source_url;
+        if (save === 'override') msg.allow_override = true;
+        try {
+          await this._ws(msg);
+        } catch (e) {
+          // Installed meanwhile, or the installed list was unavailable: ask first.
+          if (e && e.code === 'already_exists' && save !== 'override') { this._bpConfirmReplace(b, mode); return; }
+          this._showToast(this._tText('toast.bp_install_failed', {error: _haErrText(e)}, 'Could not install the template: {error}'), 'error');
+          return;
+        }
+        this._loadInstalledBlueprints().then(() => { if (this._tab === 'automations') this._render(); });
+      }
+      // No device registry entry to fill in: hand the inputs to HA's own form.
+      if (mode !== 'use' || !deviceId) {
+        this._showToast(this._tText('toast.bp_installed_finish', {}, 'Template installed. Fill in the rest in Home Assistant.'));
+        this._navigate('/config/blueprint/dashboard');
+        return;
+      }
+      // Plain text (_tText): written into the user's automation config.
+      const config = {
+        alias: `${dev.title || 'WashData'}: ${this._bpName(b)}`,
+        description: this._bpDesc(b),
+        use_blueprint: { path: b.path, input: { washdata_device: deviceId } },
+      };
+      const id = 'washdata_' + Date.now().toString(36);
+      try {
+        if (!this._hass || !this._hass.callApi) throw new Error(this._tText('msg.toast_no_automation', {}, 'Cannot create automation here'));
+        await this._hass.callApi('POST', 'config/automation/config/' + id, config);
+      } catch (e) {
+        this._showToast(this._tText('toast.bp_automation_failed', {error: _haErrText(e)}, 'The template is installed, but the automation could not be created: {error}'), 'error');
+        return;
+      }
+      if (await this._labelAutomation(id)) this._showToast(this._tText('toast.bp_automation_created', {}, 'Automation created with the default settings; opening it'));
+      this._navigate('/config/automation/edit/' + id);
+    } finally {
+      this._busy.delete(key); this._render();
+    }
+  }
+
   // Load automations related to this device via HA's native related-items
-  // search, so the Notifications > Automations list mirrors the device page.
+  // search, so the Automations tab's list mirrors the device page.
   async _loadDeviceAutomations(entryId) {
     this._deviceAutomations = [];
     const hass = this._hass;
     if (!hass || !hass.callWS) return;
     try {
-      let deviceId = null;
-      const devices = hass.devices || {};
-      for (const d of Object.values(devices)) {
-        if ((d.config_entries || []).includes(entryId)) { deviceId = d.id; break; }
-      }
+      const deviceId = this._washdataDeviceId(entryId);
       const related = deviceId
         ? await hass.callWS({ type: 'search/related', item_type: 'device', item_id: deviceId })
         : await hass.callWS({ type: 'search/related', item_type: 'config_entry', item_id: entryId });
@@ -6476,6 +6821,28 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { if (this._isActiveEntry(entryId)) this._deviceAutomations = []; }
   }
 
+  // The WashData device of an entry: registry identifier [ha_washdata, entry_id],
+  // else the first device listing the entry. Null when hass carries no devices.
+  _washdataDeviceId(entryId) {
+    const devices = (this._hass && this._hass.devices) || {};
+    let fallback = null;
+    for (const d of Object.values(devices)) {
+      if ((d.identifiers || []).some(i => Array.isArray(i) && i[0] === _DOMAIN && i[1] === entryId)) return d.id;
+      if (!fallback && (d.config_entries || []).includes(entryId)) fallback = d.id;
+    }
+    return fallback;
+  }
+
+  // A WashData cycle trigger for an automation: the native device trigger (#478,
+  // type cycle_started / cycle_finished), or the bus event when the device is
+  // unknown (the events always fire; cycle_ended also covers interrupted runs).
+  _cycleTrigger(entryId, type) {
+    const deviceId = this._washdataDeviceId(entryId);
+    if (deviceId) return { trigger: 'device', domain: _DOMAIN, device_id: deviceId, type };
+    const eventType = type === 'cycle_started' ? 'ha_washdata_cycle_started' : 'ha_washdata_cycle_ended';
+    return { trigger: 'event', event_type: eventType, event_data: { entry_id: entryId } };
+  }
+
   // Navigate the HA frontend (e.g. to the automation editor) via the standard
   // location-changed event so the app router handles it.
   _navigate(path) {
@@ -6485,38 +6852,119 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { try { window.location.assign(path); } catch (__) { /* ignore */ } }
   }
 
-  // Create an automation prefilled with a WashData cycle trigger for this
-  // device, then open it in the editor for the user to complete.
-  async _newAutomationFromEvent(kind) {
+  // "New automation" (key null: no trigger) and "Start from a trigger" (#478):
+  // create the automation for this device, label it, open it in the editor.
+  async _newAutomation(triggerKey) {
     const dev = this._devices[this._selIdx];
-    if (!dev) return;
+    if (!dev || this._autoCreating) return;
     const hass = this._hass;
-    const eventType = kind === 'started' ? 'ha_washdata_cycle_started' : 'ha_washdata_cycle_ended';
-    // Plain text (_tText): these are written into the user's automation config.
+    if (!hass || !hass.callApi) { this._navigate('/config/automation/edit/new'); return; }
+    const t = triggerKey ? _WD_TRIGGERS.find(x => x.key === triggerKey) : null;
+    const trigger = t ? this._triggerConfig(dev.entry_id, t) : null;
+    if (triggerKey && !trigger) return;
+    // Plain text (_tText): written into the user's automation config.
     const device = dev.title || 'WashData';
-    const config = {
-      alias: kind === 'started'
-        ? this._tText('msg.automation_alias_started', {device}, '{device}: cycle started')
-        : this._tText('msg.automation_alias_finished', {device}, '{device}: cycle finished'),
-      description: kind === 'started'
-        ? this._tText('msg.automation_desc_started', {device}, 'Runs when a {device} cycle starts. Add your actions (notify, lights, ...).')
-        : this._tText('msg.automation_desc_finished', {device}, 'Runs when a {device} cycle finishes. Add your actions (notify, lights, ...).'),
-      mode: 'single',
-      trigger: [{ platform: 'event', event_type: eventType, event_data: { entry_id: dev.entry_id } }],
-      condition: [],
-      action: [],
+    const config = t ? {
+      alias: this._tText('msg.automation_alias_trigger', {device, trigger: this._tText(`trigger.${t.key}.name`, {}, t.name)}, '{device}: {trigger}'),
+      description: this._tText('msg.automation_desc_trigger', {device}, 'Created by WashData for {device}. Add your actions (notify, lights, ...).'),
+      mode: 'single', triggers: [trigger], conditions: [], actions: [],
+    } : {
+      alias: this._tText('msg.automation_alias_new', {device}, '{device}: new automation'),
+      description: '',
+      mode: 'single', triggers: [], conditions: [], actions: [],
     };
     const id = 'washdata_' + Date.now().toString(36);
+    this._autoCreating = triggerKey || 'new'; this._render();
     try {
-      if (hass && hass.callApi) {
+      try {
         await hass.callApi('POST', 'config/automation/config/' + id, config);
-        this._navigate('/config/automation/edit/' + id);
-      } else {
-        this._navigate('/config/automation/edit/new');
+      } catch (e) {
+        this._showToast(this._tText('msg.toast_automation_failed', {error: _haErrText(e)}, 'Could not create automation: {error}'), 'error');
+        return;
       }
-    } catch (e) {
-      this._showToast(this._tText('msg.toast_automation_failed', {error: e.message || e}, 'Could not create automation: ' + (e.message || e)), 'error');
+      await this._labelAutomation(id);
+      this._navigate('/config/automation/edit/' + id);
+    } finally {
+      this._autoCreating = null; this._render();
     }
+  }
+
+  // Put the WashData label and the WashData automation category on an automation
+  // the panel just created (#478), so HA's automation list can filter by either.
+  // Soft: never throws and never undoes the creation. False (after a warning)
+  // when any part did not stick.
+  async _labelAutomation(id) {
+    let ok = false;
+    try {
+      const [label, category] = await Promise.allSettled([
+        this._ensureNamedRegistryItem({ type: 'config/label_registry/list' },
+          { type: 'config/label_registry/create', name: _WD_LABEL_NAME, icon: _WD_LABEL_ICON }, 'label_id'),
+        this._ensureNamedRegistryItem({ type: 'config/category_registry/list', scope: 'automation' },
+          { type: 'config/category_registry/create', scope: 'automation', name: _WD_LABEL_NAME, icon: _WD_LABEL_ICON }, 'category_id'),
+      ]);
+      const labelId = label.status === 'fulfilled' ? label.value : null;
+      const categoryId = category.status === 'fulfilled' ? category.value : null;
+      if (labelId) this._wdLabelId = labelId;
+      const entityId = (labelId || categoryId) ? await this._waitAutomationEntity(id) : null;
+      if (entityId) {
+        const update = { type: 'config/entity_registry/update', entity_id: entityId };
+        if (labelId) {
+          const ent = this._hass && this._hass.entities && this._hass.entities[entityId];
+          const existing = (ent && Array.isArray(ent.labels)) ? ent.labels : [];
+          update.labels = existing.includes(labelId) ? existing.slice() : [...existing, labelId];
+        }
+        if (categoryId) update.categories = { automation: categoryId };
+        await this._ws(update);
+        ok = !!(labelId && categoryId);
+      }
+    } catch (_) { ok = false; }
+    if (!ok) this._softWarn(this._tText('toast.automation_label_failed', {}, 'Automation created, but the WashData label or category could not be added.'));
+    return ok;
+  }
+
+  // A registry item by name (case-insensitive), created when missing. A create that
+  // fails because the name was taken meanwhile is answered from a second list.
+  async _ensureNamedRegistryItem(listMsg, createMsg, idKey) {
+    const want = String(createMsg.name).trim().toLowerCase();
+    const find = r => (Array.isArray(r) ? r : []).find(x => x && String(x.name || '').trim().toLowerCase() === want);
+    let hit = find(await this._ws(listMsg));
+    if (!hit) {
+      try { hit = await this._ws(createMsg); } catch (e) { hit = find(await this._ws(listMsg)); if (!hit) throw e; }
+    }
+    if (!hit || !hit[idKey]) throw new Error('no ' + idKey);
+    return hit[idKey];
+  }
+
+  // The entity of the automation with config id `id`, once HA has loaded it (it
+  // reloads automations after the config POST returns); null after the wait.
+  async _waitAutomationEntity(id, timeoutMs = _AUTOMATION_ENTITY_WAIT_MS) {
+    const until = Date.now() + timeoutMs;
+    for (;;) {
+      const states = (this._hass && this._hass.states) || {};
+      for (const eid of Object.keys(states)) {
+        const st = states[eid];
+        if (eid.startsWith('automation.') && st && st.attributes && st.attributes.id === id) return eid;
+      }
+      if (Date.now() >= until) return null;
+      await new Promise(r => setTimeout(r, 150));
+    }
+  }
+
+  // A warning that must survive the navigation into the automation editor that
+  // follows it: the panel's own toast, and Home Assistant's (hass-notification).
+  _softWarn(message) {
+    this._showToast(message, 'warning', { duration: 6000 });
+    try { this.dispatchEvent(new CustomEvent('hass-notification', { bubbles: true, composed: true, detail: { message, duration: 8000 } })); } catch (_) { /* ignore */ }
+  }
+
+  // The WashData label's id (or null), for the badges and the filtered link. Any
+  // user may list labels.
+  async _loadWdLabel() {
+    try {
+      const r = await this._ws({ type: 'config/label_registry/list' });
+      const hit = (Array.isArray(r) ? r : []).find(x => x && String(x.name || '').trim().toLowerCase() === _WD_LABEL_NAME.toLowerCase());
+      this._wdLabelId = hit ? hit.label_id : null;
+    } catch (_) { /* keep what is known */ }
   }
 
   // Migrate legacy notify_actions (from the removed actions editor) into a real
@@ -6529,16 +6977,18 @@ class HaWashdataPanel extends HTMLElement {
     const hass = this._hass;
     const actions = Array.isArray(this._opts.notify_actions) ? this._opts.notify_actions : [];
     if (!dev || !actions.length) return;
+    const triggers = [
+      this._cycleTrigger(dev.entry_id, 'cycle_started'),
+      this._cycleTrigger(dev.entry_id, 'cycle_finished'),
+    ];
+    const nameVar = triggers[0].trigger === 'device' ? '{{ trigger.device_name }}' : '{{ trigger.event.data.device_name }}';
     const config = {
       alias: `${dev.title || 'WashData'}: migrated custom actions`,
-      description: 'Migrated from WashData legacy custom actions (which ran on cycle start, finish and live). Trim the triggers as needed. Note: old {device}/{duration}-style placeholders are NOT templated here - replace them with Jinja templates such as {{ trigger.event.data.device_name }}.',
+      description: 'Migrated from WashData legacy custom actions (which ran on cycle start, finish and live). Trim the triggers as needed. Note: old {device}/{duration}-style placeholders are NOT templated here - replace them with Jinja templates such as ' + nameVar + '.',
       mode: 'single',
-      trigger: [
-        { platform: 'event', event_type: 'ha_washdata_cycle_started', event_data: { entry_id: dev.entry_id } },
-        { platform: 'event', event_type: 'ha_washdata_cycle_ended', event_data: { entry_id: dev.entry_id } },
-      ],
-      condition: [],
-      action: actions,
+      triggers,
+      conditions: [],
+      actions: actions,
     };
     const id = 'washdata_' + Date.now().toString(36);
     if (!hass || !hass.callApi) { this._showToast(this._t('msg.toast_no_automation', {}, 'Cannot create automation here'), 'error'); return; }
@@ -6548,7 +6998,8 @@ class HaWashdataPanel extends HTMLElement {
       created = true;
       await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { notify_actions: [] } });
       if (this._isActiveEntry(dev.entry_id)) this._opts = { ...this._opts, notify_actions: [] };  // don't write the old device's opts if switched
-      this._showToast(this._t('msg.toast_automation_migrated', {}, 'Actions migrated to an automation; opening editor'));
+      // Never throws: a label that does not stick only warns.
+      if (await this._labelAutomation(id)) this._showToast(this._t('msg.toast_automation_migrated', {}, 'Actions migrated to an automation; opening editor'));
       this._navigate('/config/automation/edit/' + id);
     } catch (e) {
       const errTxt = e.message || e;
@@ -6572,7 +7023,7 @@ class HaWashdataPanel extends HTMLElement {
       } catch (_) { stillHasActions = null; }
       if (stillHasActions === false) {
         // The clear actually went through despite the error — keep the automation.
-        this._showToast(this._t('msg.toast_automation_migrated', {}, 'Actions migrated to an automation; opening editor'));
+        if (await this._labelAutomation(id)) this._showToast(this._t('msg.toast_automation_migrated', {}, 'Actions migrated to an automation; opening editor'));
         this._navigate('/config/automation/edit/' + id);
         return;
       }
@@ -6618,9 +7069,7 @@ class HaWashdataPanel extends HTMLElement {
         const fields = (grp.fields || []).filter(f => this._settingFieldVisible(f)).map(f => this._renderField(f, o)).filter(Boolean).join('');
         return fields ? `<div class="wd-subhead">${_esc(this._t('setting_group.' + _slugSub(grp.sub) + '.label', {}, grp.sub))}</div><div class="wd-form-grid">${fields}</div>` : '';
       }).join('');
-      // The automations manager is an advanced power-feature; keep Basic mode clean.
-      const autos = basicMode ? '' : this._htmlAutomations();
-      return `${autos}${varsHint}${groups}`;
+      return `${varsHint}${groups}`;
     }
 
     if (sec.groups) {
@@ -8843,6 +9292,7 @@ class HaWashdataPanel extends HTMLElement {
       ['history', this._t('tab.history', {}, 'Cycles')],
       ['profiles', this._t('tab.profiles', {}, 'Profiles')],
       ['settings', this._t('tab.settings', {}, 'Settings')],
+      ['automations', this._t('tab.automations', {}, 'Automations')],
       ['playground', this._t('tab.playground', {}, 'Playground')],
     ];
     const opts = tabsAll.map(([v, l]) => `<option value="${v}" ${(cur.default_tab || '') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
@@ -8886,6 +9336,7 @@ class HaWashdataPanel extends HTMLElement {
       ['history', this._t('tab.history', {}, 'Cycles')],
       ['profiles', this._t('tab.profiles', {}, 'Profiles')],
       ['settings', this._t('tab.settings', {}, 'Settings')],
+      ['automations', this._t('tab.automations', {}, 'Automations')],
       ['playground', this._t('tab.playground', {}, 'Playground')],
     ];
     const dtOpts = tabOpts.map(([v, l]) => `<option value="${v}" ${(p.default_tab || 'status') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
@@ -10238,6 +10689,7 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'export-select') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlExportSelectModal(m)}</div></div>`;
     if (m.type === 'import-wizard') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlImportWizardModal(m)}</div></div>`;
     if (m.type === 'history-import') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlHistoryImportModal(m)}</div></div>`;
+    if (m.type === 'bp-yaml') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg wd-bp-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlBlueprintYamlModal(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -13922,13 +14374,14 @@ class HaWashdataPanel extends HTMLElement {
 
   _onActAuto(a, btn, dev, eid, sr) {
     if (a === 'auto-new') {
-      this._navigate('/config/automation/edit/new');
+      this._newAutomation(null);
 
-    } else if (a === 'auto-new-started') {
-      this._newAutomationFromEvent('started');
+    } else if (a === 'auto-toggle-triggers') {
+      this._autoTrigOpen = !this._autoTrigOpen;
+      this._render();
 
-    } else if (a === 'auto-new-finished') {
-      this._newAutomationFromEvent('finished');
+    } else if (a === 'auto-new-trigger') {
+      this._newAutomation(btn.dataset.trigger);
 
     } else if (a === 'auto-delete') {
       const autoId = btn.dataset.autoid, autoName = btn.dataset.autoname || 'this automation';
@@ -13944,6 +14397,12 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'auto-convert-legacy') {
       this._convertLegacyActions();
+
+    } else if (a === 'auto-bp-use' || a === 'auto-bp-install' || a === 'auto-bp-yaml') {
+      const b = this._bpById(btn.dataset.bpid);
+      if (!b) return;
+      if (a === 'auto-bp-yaml') { this._modal = { type: 'bp-yaml', bpId: b.id }; this._render(); }
+      else this._bpStart(b, a === 'auto-bp-use' ? 'use' : 'install');
 
     } else if (a === 'auto-remove-legacy') {
       this._modal = { type: 'confirm', title: this._t('modal.remove_legacy_title', {}, 'Remove Legacy Actions'), message: this._t('modal.remove_legacy_msg', {}, 'Remove the legacy custom actions? They will stop firing on cycle events. This cannot be undone from the panel.'), okLabel: this._t('btn.remove', {}, 'Remove'),
@@ -14191,6 +14650,7 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
     if (action === 'ok' && m && m.onOk) { const fn = m.onOk; this._modal = null; this._render(); await fn(); this._render(); return; }
+    if (action === 'bp-copy' && m && m.type === 'bp-yaml') { await this._bpCopyYaml(this._bpById(m.bpId)); return; }
 
     // ---- Profile group management ----
     if (m && m.type === 'profile-group') {

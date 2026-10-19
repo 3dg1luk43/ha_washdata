@@ -95,7 +95,9 @@
     "matcher_used_two": "Ujemanje najdeno v {n} vaših ciklih",
     "matcher_used_few": "Ujemanje najdeno v {n} vaših ciklih",
     "matcher_used_other": "Ujemanje najdeno v {n} vaših ciklih",
-    "matcher_used_tip": "Cikli na tej napravi, ki jih je WashData sam ujel s tem uvoženim programom. Uvoz, ki se nikoli ne ujema, morda ne ustreza vaši napravi; lahko ga odstranite. Šteto lokalno; v trgovino se nič ne pošlje."
+    "matcher_used_tip": "Cikli na tej napravi, ki jih je WashData sam ujel s tem uvoženim programom. Uvoz, ki se nikoli ne ujema, morda ne ustreza vaši napravi; lahko ga odstranite. Šteto lokalno; v trgovino se nič ne pošlje.",
+    "bp_installed": "Nameščeno",
+    "bp_installed_other": "Nameščena druga različica"
   },
   "btn": {
     "pg_preset_delete": "Izbriši prednastavitev",
@@ -148,7 +150,6 @@
     "export": "Izvozi",
     "force_stop": "Prisilna ustavitev",
     "force_stop_tip": "Takoj zaključi trenutni cikel in ga označi kot prisilno ustavljen",
-    "from_template": "Iz predloge ▾",
     "ignore": "Prezri",
     "import_json": "Uvozi iz JSON",
     "inspect": "Preglej",
@@ -162,8 +163,6 @@
     "new_phase": "+ Nova faza",
     "new_profile": "+ Nov profil",
     "new_profile_tip": "Ustvari nov profil programa iz obstoječega označenega cikla ali posnetka",
-    "on_cycle_finished": "Ob koncu cikla",
-    "on_cycle_started": "Ob začetku cikla",
     "pause_cycle": "Premor",
     "pause_cycle_tip": "Zaustavi delujoči cikel – naprava se bo nadaljevala tam, kjer je ostala",
     "process": "Obdelaj",
@@ -257,7 +256,14 @@
     "confirmed": "Potrjeno",
     "create_profile_from_gap": "Ustvari profil",
     "undo_import": "Razveljavi zadnji uvoz",
-    "pg_rerun": "Posodobi simulacijo"
+    "pg_rerun": "Posodobi simulacijo",
+    "from_trigger": "Začni iz sprožilca ▾",
+    "bp_use": "Uporabi s to napravo",
+    "bp_install": "Namesti predlogo",
+    "bp_view_yaml": "Prikaži YAML",
+    "copy": "Kopiraj",
+    "replace": "Zamenjaj",
+    "from_trigger_open": "Začni iz sprožilca ▴"
   },
   "note": {
     "off_delay": {
@@ -372,7 +378,10 @@
     "import_power_history": "Uvoz zgodovine moči",
     "service_status": "Stanje servisa",
     "online_account_tab": "Splet in skupnost",
-    "live_match_debug": "Diagnostika sprotnega ujemanja"
+    "live_match_debug": "Diagnostika sprotnega ujemanja",
+    "automations_used": "Avtomatizacije, ki uporabljajo to napravo",
+    "bp_templates": "Predloge",
+    "automations_all_tip": "Seznam avtomatizacij Home Assistant, filtriran po oznaki WashData. Avtomatizacije, ustvarjene tukaj, so tudi v kategoriji WashData."
   },
   "health": {
     "fair": "Sprejemljiva kakovost profila",
@@ -690,7 +699,11 @@
     "cycle_context_minutes": "{min} min",
     "cycle_context_series": "Zgodovina iz recorderja",
     "before_start": "Pred začetkom",
-    "after_end": "Po koncu"
+    "after_end": "Po koncu",
+    "bp_you_choose": "Izberete: {inputs}",
+    "bp_adjustable": "Nastavljivo: {inputs}",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Nosi oznako WashData"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -791,7 +804,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Podatki in nastavitve te naprave se vrnejo v stanje pred zadnjim uvozom ({when}). Cikli, posneti od takrat, in spremembe od takrat bodo izgubljeni.",
     "undo_import_ok": "Razveljavi uvoz",
-    "undo_import_title": "Razveljavi zadnji uvoz"
+    "undo_import_title": "Razveljavi zadnji uvoz",
+    "bp_replace_title": "Zamenjati nameščeno predlogo?",
+    "bp_replace_msg": "Home Assistant ima drugo različico \"{name}\". Zamenjati jo z različico iz te različice WashData? Avtomatizacije, ki jo uporabljajo, se bodo spremenile skupaj z njo."
   },
   "msg": {
     "pg_canvas_empty3": "Izberite cikel zgoraj in pritisnite Zaženi za simulacijo. Nato pomaknite kazalec za prikaz vrednosti, drsajte ali uporabite dva prsta za povečavo in povlecite za premikanje.",
@@ -814,7 +829,6 @@
     "artifact_pause_detail": "Moč je za ~{n}s padla skoraj na nič in se nato vrnila. Verjetno so bila odprta vrata ali je bil cikel zaustavljen.",
     "artifact_spike_detail": "Presegl normalni pas moči za ~{n} s.",
     "auto_label_intro": "Dodelite profile neoznačenim ciklom, katerih ujemanje presega prag.",
-    "automations_intro": "WashData sproži dogodke {start} / {end} in razkrije entitete, zato je obvestila in dejanja najbolje graditi kot navadne avtomatizacije Home Assistant. Spodaj so prikazane avtomatizacije, ki uporabljajo to napravo.",
     "cleanup_intro": "Vsi označeni cikli drug čez drugega. Obkljukajte odstopajoče, nato jim odstranite oznako (ostanejo v zgodovini, a ne oblikujejo več tega profila) ali jih izbrišite.",
     "clear_debug_hint": "Odstranite shranjene podatke za odpravljanje napak, da sprostite prostor.",
     "collecting_data": "Zbiranje podatkov. Še potrebnih ciklov pred začetkom natančnega prilagajanja: {need} ({current}/{min}).",
@@ -1065,10 +1079,6 @@
     "pg_label_yes": "Ob koncu cikla bi bil označen kot \"{name}\"",
     "pg_label_no": "Bil bi poslan v pregled: {reason}",
     "live_match_debug_tip": "Zaupanje: kako natančno se trenutna krivulja moči ujema z najboljšim kandidatnim profilom (0-100 %). Dvoumno: rezultata dveh najboljših kandidatov se razlikujeta za manj kot 5 %, zato je oznaka negotova, dokler se cikel ne konča.",
-    "automation_alias_started": "{device}: cikel se je začel",
-    "automation_alias_finished": "{device}: cikel je končan",
-    "automation_desc_started": "Zažene se, ko se začne cikel naprave {device}. Dodajte svoja dejanja (obvestila, luči, ...).",
-    "automation_desc_finished": "Zažene se, ko se cikel naprave {device} konča. Dodajte svoja dejanja (obvestila, luči, ...).",
     "feedback_detected": "WashData je zaznal: {name}",
     "import_undo_hint": "Shranjena je obnovitvena točka izpred zadnjega uvoza ({when}): {profiles} profilov in {cycles} ciklov.",
     "replace_undo_hint": "Najprej se shrani obnovitvena točka, zato lahko ta uvoz razveljavite v razdelku Izvoz / Uvoz.",
@@ -1095,7 +1105,16 @@
     "cycle_context_note": "Sivo: zgodovina senzorja moči iz recorderja okoli tega cikla. Ni del cikla in ne vpliva na trajanje, energijo ali ujemanje.",
     "cycle_context_none": "Recorder okoli tega cikla ne hrani nobenih odčitkov (Home Assistant privzeto hrani zgodovino 10 dni).",
     "cycle_context_tip": "Samo za prikaz: pokaže zgodovino senzorja moči iz recorderja okoli tega cikla, če je še shranjena. Če želite neuspele poskuse zagona dodati prihodnjim ciklom, uporabite Uvodne sekunde krivulje (Nastavitve > Zaznavanje > Začetek cikla), kar spremeni shranjena trajanja.",
-    "invalid_threshold_pair": "Prag zaustavitve ({stop} W) mora biti pod Pragom zagona ({start} W). Nič ni bilo shranjeno; spremenite obe vrednosti hkrati."
+    "invalid_threshold_pair": "Prag zaustavitve ({stop} W) mora biti pod Pragom zagona ({start} W). Nič ni bilo shranjeno; spremenite obe vrednosti hkrati.",
+    "automations_tab_intro": "WashData ponuja sprožilce naprave (cikel se je začel, cikel je končan, cikel se je ustavil in še več) za vaše lastne avtomatizacije Home Assistant. Avtomatizacije, ki uporabljajo to napravo, so navedene tukaj.",
+    "bp_intro": "Pripravljene avtomatizacije za to napravo, nameščene kot blueprinti Home Assistant.",
+    "bp_admin_only": "Predloge namesti skrbnik.",
+    "bp_none": "Za ta tip naprave še ni predlog.",
+    "bp_load_failed": "Predlog ni bilo mogoče naložiti.",
+    "auto_trigger_hint": "Ustvari avtomatizacijo s tem sprožilcem za to napravo in jo odpre v Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Ustvaril WashData za {device}. Dodajte svoja dejanja (obvestilo, luči, ...).",
+    "automation_alias_new": "{device}: nova avtomatizacija"
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1774,7 +1793,8 @@
     "subtab_profiles": "Profili",
     "maintenance": "Vzdrževanje",
     "playground": "Peskovnik",
-    "store": "Trgovina"
+    "store": "Trgovina",
+    "automations": "Avtomatizacije"
   },
   "tag": {
     "early_end": "Zgodnji konec",
@@ -1945,7 +1965,14 @@
     "auto_label_done_one": "Samodejno označevanje dokončano: označen je {count} cikel, brez oznake: {skipped}.",
     "auto_label_done_two": "Samodejno označevanje dokončano: označena sta {count} cikla, brez oznake: {skipped}.",
     "auto_label_done_few": "Samodejno označevanje dokončano: označeni so {count} cikli, brez oznake: {skipped}.",
-    "auto_label_done_other": "Samodejno označevanje dokončano: označenih je {count} ciklov, brez oznake: {skipped}."
+    "auto_label_done_other": "Samodejno označevanje dokončano: označenih je {count} ciklov, brez oznake: {skipped}.",
+    "bp_install_failed": "Predloge ni bilo mogoče namestiti: {error}",
+    "bp_installed_finish": "Predloga nameščena. Izpolnite preostanek v Home Assistant.",
+    "bp_automation_failed": "Predloga je nameščena, vendar avtomatizacije ni bilo mogoče ustvariti: {error}",
+    "bp_automation_created": "Avtomatizacija ustvarjena s privzetimi nastavitvami; odpiranje",
+    "copied": "Kopirano",
+    "copy_failed": "Kopiranje ni uspelo. Izberite besedilo in ga ročno kopirajte.",
+    "automation_label_failed": "Avtomatizacija ustvarjena, toda oznake ali kategorije WashData ni bilo mogoče dodati."
   },
   "trend": {
     "down": "Padajoči trend",
@@ -2055,7 +2082,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter na GitHubu ↗",
-    "manual": "Priročnik ↗"
+    "manual": "Priročnik ↗",
+    "bp_share": "Delite lastno predlogo s pull requestom ↗",
+    "bp_open_in_ha": "Odpri v Home Assistant ↗",
+    "automations_all": "Vse avtomatizacije WashData v Home Assistant"
   },
   "tip": {
     "add_brand": "Znamke ni na seznamu? Dodajte jo v katalog skupnosti",
@@ -2182,5 +2212,71 @@
     "thr": "prag",
     "too_short": "prekratek",
     "tumble_kept": "vrtilni impulzi ohranjeni"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Vklopi nekaj med ciklom",
+      "description": "Vklopi luč, stikalo ali pomožni preklop, ko se cikel WashData začne, in ga izklopi, ko se konča, tudi po lažnem zagonu.\n\nZahteva WashData 0.5.9 ali novejši."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Zaključi dolgo fazo zaščite pred gubami sušilnika",
+      "description": "Za sušilnike, ki po koncu programa nadaljujejo z vrtanjem v zaščiti pred gubami ure in ure. Deluje šele, ko WashData meni, da je program končan (cikel je končan ali zaščita pred gubami se je začela). Počaka, nato izklopi pametno vtičnico sušilnika v trenutku nizke moči in jo privzeto znova vklopi. Nov cikel, ki se začne medtem, jo prekliče.\n\nTveganje: preklopi rele, medtem ko je sušilnik priključen. Uporabljajte samo z vtičnico, primerno za vaš sušilnik, in na lastno odgovornost. WashData nikoli sam ne preklopi vtičnice; to naredi ta avtomatizacija.\n\nZahteva WashData 0.5.9 ali novejši."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Cikel se je začel"
+    },
+    "program_recognised": {
+      "name": "Program prepoznan"
+    },
+    "phase_started": {
+      "name": "Faza se je začela"
+    },
+    "finishing_soon": {
+      "name": "Kmalu konec"
+    },
+    "cycle_overrun": {
+      "name": "Cikel traja predolgo"
+    },
+    "cycle_paused": {
+      "name": "Cikel je ustavljen"
+    },
+    "cycle_resumed": {
+      "name": "Cikel je nadaljeval"
+    },
+    "cycle_stalled": {
+      "name": "Cikel se je ustavil"
+    },
+    "cycle_finished": {
+      "name": "Cikel je končan"
+    },
+    "cycle_ended": {
+      "name": "Cikel je zaključen"
+    },
+    "anti_wrinkle_started": {
+      "name": "Zaščita pred gubami se je začela"
+    },
+    "still_tumbling": {
+      "name": "Po koncu cikla še vedno bobna"
+    },
+    "unload_pending": {
+      "name": "Čaka na raztovarjanje"
+    },
+    "unloaded": {
+      "name": "Razloženo"
+    },
+    "state_changed": {
+      "name": "Stanje se je spremenilo"
+    },
+    "maintenance_due": {
+      "name": "Vzdrževanje potrebno"
+    },
+    "milestone_reached": {
+      "name": "Dosežen mejnik cikla"
+    },
+    "pump_stuck": {
+      "name": "Črpalka se je zataknila"
+    }
   }
 }

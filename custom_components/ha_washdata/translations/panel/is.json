@@ -89,7 +89,9 @@
     "matcher_used": "Samsvaraði {n} af lotunum þínum",
     "matcher_used_one": "Samsvaraði {n} af lotunum þínum",
     "matcher_used_other": "Samsvaraði {n} af lotunum þínum",
-    "matcher_used_tip": "Lotur á þessu tæki sem WashData samsvaraði sjálft við þetta innflutta kerfi. Innflutningur sem aldrei samsvarar passar hugsanlega ekki við tækið þitt; þú getur fjarlægt hann. Talið á staðnum; ekkert er sent í samfélagsverslunina."
+    "matcher_used_tip": "Lotur á þessu tæki sem WashData samsvaraði sjálft við þetta innflutta kerfi. Innflutningur sem aldrei samsvarar passar hugsanlega ekki við tækið þitt; þú getur fjarlægt hann. Talið á staðnum; ekkert er sent í samfélagsverslunina.",
+    "bp_installed": "Uppsett",
+    "bp_installed_other": "Önnur útgáfa uppsett"
   },
   "btn": {
     "log_done_task": "Skrá sem lokið: {task}",
@@ -135,7 +137,6 @@
     "export": "Útflutningur",
     "force_stop": "Þvingaðu stöðvun",
     "force_stop_tip": "Endaðu núverandi lotu strax og merktu hana sem þvingað stöðvaða",
-    "from_template": "Frá sniðmáti ▾",
     "ignore": "Hunsa",
     "import_json": "Flytja inn frá JSON",
     "inspect": "Skoðaðu",
@@ -149,8 +150,6 @@
     "new_phase": "+ Nýr áfangi",
     "new_profile": "+ Nýtt snið",
     "new_profile_tip": "Búðu til nýjan prófíl fyrir kerfi úr núverandi merktri lotu eða upptöku",
-    "on_cycle_finished": "Þegar lotu lýkur",
-    "on_cycle_started": "Þegar lota hefst",
     "pause_cycle": "Gera hlé",
     "pause_cycle_tip": "Gerðu hlé á gengandi lotu – tækið mun halda áfram þar sem það stoppaði",
     "pg_load_live": "Sækja virkar stillingar",
@@ -251,7 +250,14 @@
     "confirm_appliance": "Staðfesta þetta tæki",
     "confirmed": "Staðfest",
     "create_profile_from_gap": "Búðu til prófíl",
-    "undo_import": "Afturkalla síðasta innflutning"
+    "undo_import": "Afturkalla síðasta innflutning",
+    "from_trigger": "Hefja af kveikju ▾",
+    "bp_use": "Nota með þessu tæki",
+    "bp_install": "Setja upp sniðmát",
+    "bp_view_yaml": "Skoða YAML",
+    "copy": "Afrita",
+    "replace": "Skipta út",
+    "from_trigger_open": "Hefja af kveikju ▴"
   },
   "note": {
     "off_delay": {
@@ -366,7 +372,10 @@
     "import_power_history": "Flytja inn aflsögu",
     "service_status": "Staða þjónustu",
     "online_account_tab": "Net & samfélag",
-    "live_match_debug": "Villuleit samsvörunar í beinni"
+    "live_match_debug": "Villuleit samsvörunar í beinni",
+    "automations_used": "Sjálfvirkni sem notar þetta tæki",
+    "bp_templates": "Sniðmát",
+    "automations_all_tip": "Sjálvvirknilisti Home Assistant, síaur eftir WashData-merkimiðanum. Sjálvvirkni búinn til hér er einnig í WashData-flokki."
   },
   "health": {
     "fair": "Viðunanlegt prófíl",
@@ -678,7 +687,11 @@
     "pg_obj_early": "Hlutfall of snemmbúinna loka",
     "pg_obj_split": "Hlutfall skiptra lota",
     "pg_sweep_cycles": "Nýlegar lotur",
-    "cat_backfill_cycles": "Lotur fundnar í innfluttri aflsögu"
+    "cat_backfill_cycles": "Lotur fundnar í innfluttri aflsögu",
+    "bp_you_choose": "Þú velur: {inputs}",
+    "bp_adjustable": "Stillanleg: {inputs}",
+    "bp_yaml": "Blueprint-YAML",
+    "automation_wd_label": "Ber WashData-merkimiðann"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -775,7 +788,9 @@
     "profile_title": "Prófíll · {name}",
     "undo_import_msg": "Gögn og stillingar þessa tækis fara aftur í það horf sem var fyrir síðasta innflutning ({when}). Lotur og breytingar síðan þá tapast.",
     "undo_import_ok": "Afturkalla innflutning",
-    "undo_import_title": "Afturkalla síðasta innflutning"
+    "undo_import_title": "Afturkalla síðasta innflutning",
+    "bp_replace_title": "Skipta út uppsettu sniðmáti?",
+    "bp_replace_msg": "Home Assistant er með aðra útgáfu af \"{name}\". Skipta henni út með þeirri sem er í þessari WashData-útgáfu? Sjálfvirkni sem notar hana breytist með henni."
   },
   "msg": {
     "custom_task_limit": "Þú hefur náð hámarki upp á {max} verk.",
@@ -800,7 +815,6 @@
     "artifact_pause_detail": "Aflið féll nærri núlli í ~{n}s og kom svo aftur. Líklega var hurðin opnuð eða gert hlé á lotunni.",
     "artifact_spike_detail": "Fór yfir venjulegt aflband í ~{n}s.",
     "auto_label_intro": "Úthlutaðu sniðum á ómerktar lotur þar sem samsvörun þeirra hreinsar þröskuldinn.",
-    "automations_intro": "WashData sendir {start} / {end} atburði og birtir einingar, þannig að tilkynningar og aðgerðir eru best smíðaðar sem venjulegar Home Assistant sjálfvirkingar. Sjálfvirkingar sem nota þetta tæki birtast hér að neðan.",
     "cleanup_intro": "Allar merktar lotur lagðar hver yfir aðra. Hakaðu við frávik og fjarlægðu svo merkingu þeirra (þær haldast í sögunni en móta ekki lengur þetta snið) eða eyddu þeim.",
     "clear_debug_hint": "Fjarlægðu vistuð villuleitargögn til að losa um pláss.",
     "collecting_data": "Safnar gögnum. Lotur sem vantar áður en fínstilling getur hafist: {need} ({current}/{min}).",
@@ -1041,10 +1055,6 @@
     "pg_label_yes": "Yrði merkt \"{name}\" við lok lotu",
     "pg_label_no": "Myndi biðja um endurskoðun: {reason}",
     "live_match_debug_tip": "Öryggi: hversu vel núverandi aflferill passar við efsta kandídatsprófílinn (0-100%). Óljóst: tveir bestu kandídatarnir eru innan við 5% hvor frá öðrum - merkið er óvíst þar til lotunni lýkur.",
-    "automation_alias_started": "{device}: lota hafin",
-    "automation_alias_finished": "{device}: lotu lokið",
-    "automation_desc_started": "Keyrir þegar lota hefst á {device}. Bættu við aðgerðum (tilkynning, ljós, ...).",
-    "automation_desc_finished": "Keyrir þegar lotu lýkur á {device}. Bættu við aðgerðum (tilkynning, ljós, ...).",
     "feedback_detected": "WashData greindi: {name}",
     "pg_outcome_stale": "Stillingum hefur verið breytt síðan þessi hermun keyrði. Hún sýnir enn gömlu niðurstöðuna.",
     "pg_compare_profile_tip": "Velur aðeins sniðið sem er teiknað yfir ritið. Hermunin finnur alltaf samsvörun fyrir lotuna sjálf, eins og samþættingin gerir í rauntíma.",
@@ -1063,7 +1073,16 @@
     "invalid_threshold_pair": "Stöðvunarþröskuldur ({stop} W) verður að vera undir Ræsingarþröskuldi ({start} W). Ekkert var vistað; breyttu báðum saman.",
     "import_undo_hint": "Endurheimtarpunktur frá því fyrir síðasta innflutning ({when}) er geymdur með {profiles} prófíl(um) og {cycles} lotu(m).",
     "replace_undo_hint": "Endurheimtarpunktur er vistaður fyrst, svo þú getur afturkallað þennan innflutning undir Útflutningur / Innflutningur.",
-    "pg_in_sample_note": "Þessar lotur hjálpuðu til við að byggja sniðin sem þær eru bornar saman við, svo niðurstöðurnar eru bjartsýnar: búast má við aðeins færri réttum samsvörunum á nýjum lotum."
+    "pg_in_sample_note": "Þessar lotur hjálpuðu til við að byggja sniðin sem þær eru bornar saman við, svo niðurstöðurnar eru bjartsýnar: búast má við aðeins færri réttum samsvörunum á nýjum lotum.",
+    "automations_tab_intro": "WashData býður upp á tækjakveikjur (lota hafin, lotu lokið, lota stöðvuð og fleiri) fyrir þínar eigin Home Assistant sjálfvirkingar. Sjálfvirkni sem notar þetta tæki er skráð hér.",
+    "bp_intro": "Tilbúnar sjálfvirkingar fyrir þetta tæki, settar upp sem Home Assistant blueprints.",
+    "bp_admin_only": "Stjórnandi setur upp sniðmát.",
+    "bp_none": "Engin sniðmát fyrir þennan tækjategund enn.",
+    "bp_load_failed": "Sniðmát gátu ekki hlaðist.",
+    "auto_trigger_hint": "Býr til sjálvvirkni með þssari kveikju fyrir þetta tæki og opnar hana í Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Búið til af WashData fyrir {device}. Bættu við aðgerðum (þkynning, ljós, ...).",
+    "automation_alias_new": "{device}: ný sjálvvirkni"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
@@ -1761,7 +1780,8 @@
     "subtab_profiles": "Snið",
     "maintenance": "Viðhald",
     "playground": "Tilraunasvæði",
-    "store": "Verslun"
+    "store": "Verslun",
+    "automations": "Sjálfvirkni"
   },
   "tag": {
     "early_end": "Snemma enda",
@@ -1928,7 +1948,14 @@
     "store_download_partial": "Ekki tókst að sækja {n} kerfi; reyndu aftur síðar.",
     "import_no_restore_point": "Flutt inn, en ekki tókst að vista endurheimtarpunkt, svo ekki er hægt að afturkalla þennan innflutning",
     "import_undo_failed": "Ekki tókst að afturkalla innflutninginn: {error}",
-    "import_undone": "Innflutningur afturkallaður: endurheimti {profiles} prófíl(a) og {cycles} lotu(r)"
+    "import_undone": "Innflutningur afturkallaður: endurheimti {profiles} prófíl(a) og {cycles} lotu(r)",
+    "bp_install_failed": "Gat ekki sett upp sniðmátið: {error}",
+    "bp_installed_finish": "Sniðmát uppsett. Fylltu inn afganginn í Home Assistant.",
+    "bp_automation_failed": "Sniðmátið er uppsett, en sjálfvirknin gat ekki verið búin til: {error}",
+    "bp_automation_created": "Sjálfvirkni búin til með sjálfgefnum stillingum; opnar hana",
+    "copied": "Afritað",
+    "copy_failed": "Afritun mistókst. Veldu textann og afritu handvirkt.",
+    "automation_label_failed": "Sjálvvirkni búinn til, en WashData-merkimiðann eða flokkinn var ekki hægt að bæta við."
   },
   "trend": {
     "down": "Stefnir niður",
@@ -2019,7 +2046,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter á GitHub ↗",
-    "manual": "Handbók ↗"
+    "manual": "Handbók ↗",
+    "bp_share": "Deildu þínu eigin sniðmáti með pull request ↗",
+    "bp_open_in_ha": "Opna í Home Assistant ↗",
+    "automations_all": "Öll WashData-sjálvvirkni í Home Assistant"
   },
   "tip": {
     "add_brand": "Vörumerki ekki á listanum? Bættu því við samfélagsskrána",
@@ -2146,5 +2176,71 @@
     "thr": "þrösk.",
     "too_short": "of stutt",
     "tumble_kept": "veltupúlsum haldið"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Kveikja á einhverju á meðan lota keyrir",
+      "description": "Kveikir á ljósi, rofa eða víxlahjálp þegar WashData-lota hefst og slökkvar þegar henni lýkur, einnig eftir ranga ræsingu.\n\nKrefst WashData 0.5.9 eða nýrra."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Ljúka langri hrukkuleysiáfanga á þurrkara",
+      "description": "Fyrir þurrkara sem halda áfram að velta í hrukkuleysi í klukkustundir eftir kerfið. Keyrir aðeins eftir að WashData telur kerfið lokið (lotu lokið eða hrukkuleysi hafið). Hún bíður, slökkvar síðan á snjalltengil þurrkarans í lágafls-augnablik og, sjálfgefið, kveikir á honum aftur. Ný lota sem byrjar á meðan hættir við hana.\n\nÁhætta: þetta skiptir um relé á meðan þurrkarinn er tengdur. Notaðu það aðeins með tengi sem er gert fyrir þurrkarann þinn og á eigin áhættu. WashData skiptir aldrei sjálf um tengilinn; það gerir þessi sjálfvirkni.\n\nKrefst WashData 0.5.9 eða nýrra."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Lota hafin"
+    },
+    "program_recognised": {
+      "name": "Forrit þekkt"
+    },
+    "phase_started": {
+      "name": "Fasi hafinn"
+    },
+    "finishing_soon": {
+      "name": "Nálægt lokum"
+    },
+    "cycle_overrun": {
+      "name": "Lota rennur yfir"
+    },
+    "cycle_paused": {
+      "name": "Hlé á lotu"
+    },
+    "cycle_resumed": {
+      "name": "Lota haldið áfram"
+    },
+    "cycle_stalled": {
+      "name": "Lota stöðvuð"
+    },
+    "cycle_finished": {
+      "name": "Lotu lokið"
+    },
+    "cycle_ended": {
+      "name": "Lotu lokið (hvaða ástæða sem er)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Hrukkuleysi hafið"
+    },
+    "still_tumbling": {
+      "name": "Þurrkari enn í gangi eftir lotu"
+    },
+    "unload_pending": {
+      "name": "Losun í bið"
+    },
+    "unloaded": {
+      "name": "Losað"
+    },
+    "state_changed": {
+      "name": "Staða breytt"
+    },
+    "maintenance_due": {
+      "name": "Viðhald tímabært"
+    },
+    "milestone_reached": {
+      "name": "Lotumark náð"
+    },
+    "pump_stuck": {
+      "name": "Dæla föst"
+    }
   }
 }

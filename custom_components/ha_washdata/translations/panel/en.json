@@ -89,7 +89,9 @@
     "awaiting_tip": "Awaiting community approval",
     "awaiting_n": "Awaiting approval · {n} confirmed",
     "awaiting": "Awaiting approval",
-    "approved": "Approved"
+    "approved": "Approved",
+    "bp_installed": "Installed",
+    "bp_installed_other": "Other version installed"
   },
   "btn": {
     "log_done_task": "Log done: {task}",
@@ -143,7 +145,6 @@
     "export_selected": "Export (choose data)",
     "force_stop": "Force Stop",
     "force_stop_tip": "Immediately end the current cycle and mark it as force-stopped",
-    "from_template": "From template ▾",
     "hist_goto_cycles": "Show me the cycles",
     "hist_import_n": "Import {n} cycles",
     "hist_read_recorder": "Read from Home Assistant",
@@ -165,8 +166,6 @@
     "new_phase": "+ New Phase",
     "new_profile": "+ New Profile",
     "new_profile_tip": "Create a new program profile from an existing labelled cycle or recording",
-    "on_cycle_finished": "On cycle finished",
-    "on_cycle_started": "On cycle started",
     "pause_cycle": "Pause",
     "pause_cycle_tip": "Pause the running cycle – the appliance will resume where it left off",
     "pg_apply_best": "Apply best",
@@ -251,7 +250,14 @@
     "unlabel_selected_tip": "Remove the label from the selected cycles. They stay in your history but stop shaping this profile.",
     "use": "Use",
     "wipe_all": "Wipe All Data",
-    "pg_rerun": "Update simulation"
+    "pg_rerun": "Update simulation",
+    "from_trigger": "Start from a trigger ▾",
+    "bp_use": "Use with this device",
+    "bp_install": "Install template",
+    "bp_view_yaml": "View YAML",
+    "copy": "Copy",
+    "replace": "Replace",
+    "from_trigger_open": "Start from a trigger ▴"
   },
   "note": {
     "off_delay": {
@@ -366,7 +372,10 @@
     "storage_stats": "Storage Stats",
     "toggle_sidebar": "Toggle Home Assistant sidebar",
     "wipe_history": "Wipe History",
-    "live_match_debug": "Live Match Debug"
+    "live_match_debug": "Live Match Debug",
+    "automations_used": "Automations using this device",
+    "bp_templates": "Templates",
+    "automations_all_tip": "Home Assistant's automation list, filtered by the WashData label. Automations created here also sit in the WashData category."
   },
   "health": {
     "fair": "Acceptable profile quality",
@@ -678,7 +687,11 @@
     "pg_obj_endlag": "End delay (median)",
     "pg_obj_early": "Early-end rate",
     "pg_obj_split": "Split rate",
-    "pg_sweep_cycles": "Recent cycles"
+    "pg_sweep_cycles": "Recent cycles",
+    "bp_you_choose": "You choose: {inputs}",
+    "bp_adjustable": "Adjustable: {inputs}",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Carries the WashData label"
   },
   "log": {
     "all_levels": "All levels",
@@ -786,7 +799,9 @@
     "wipe_all_msg": "⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.",
     "wipe_all_ok": "Wipe Everything",
     "wipe_all_title": "Wipe All Data",
-    "profile_title": "Profile · {name}"
+    "profile_title": "Profile · {name}",
+    "bp_replace_title": "Replace the installed template?",
+    "bp_replace_msg": "Home Assistant has a different version of \"{name}\". Replace it with the one from this WashData version? Automations that use it change with it."
   },
   "msg": {
     "custom_task_limit": "You have reached the limit of {max} tasks.",
@@ -811,7 +826,6 @@
     "artifact_pause_detail": "Power dropped to near zero for ~{n}s, then resumed. The door was probably opened or the cycle paused.",
     "artifact_spike_detail": "Drew above the usual power band for ~{n}s.",
     "auto_label_intro": "Assign profiles to unlabelled cycles whose match confidence clears the threshold.",
-    "automations_intro": "WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.",
     "cleanup_intro": "All labelled cycles overlaid. Tick outliers, then unlabel them (kept in history, no longer shaping this profile) or delete them.",
     "clear_debug_hint": "Remove stored debug data to free space.",
     "collecting_data": "Collecting data. Cycles still needed before fine-tuning can start: {need} ({current}/{min}).",
@@ -1055,10 +1069,6 @@
     "pg_label_yes": "Would be labelled \"{name}\" at cycle end",
     "pg_label_no": "Would ask for review: {reason}",
     "live_match_debug_tip": "Confidence: how closely the current power curve matches the top candidate profile (0-100%). Ambiguous: the two best candidates score within 5% of each other - the label is uncertain until the cycle finishes.",
-    "automation_alias_started": "{device}: cycle started",
-    "automation_alias_finished": "{device}: cycle finished",
-    "automation_desc_started": "Runs when a {device} cycle starts. Add your actions (notify, lights, ...).",
-    "automation_desc_finished": "Runs when a {device} cycle finishes. Add your actions (notify, lights, ...).",
     "feedback_detected": "WashData detected: {name}",
     "pg_outcome_stale": "Settings changed since this simulation ran. It still shows the old result.",
     "pg_compare_profile_tip": "Only picks the profile drawn over the graph. The simulation always matches the cycle on its own, as the live integration does.",
@@ -1074,7 +1084,16 @@
     "hist_warn_naive_time_one": "{n} timestamp has no time zone and was read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.",
     "hist_warn_naive_time_other": "{n} timestamps have no time zone and were read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.",
     "hist_tail_trimmed": "{min} min of waiting after the cycle ended were trimmed, as the live integration trims them",
-    "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W). Nothing was saved; change both together."
+    "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W). Nothing was saved; change both together.",
+    "automations_tab_intro": "WashData offers device triggers (cycle started, cycle finished, cycle stalled and more) for your own Home Assistant automations. Automations that use this device are listed here.",
+    "bp_intro": "Ready-made automations for this appliance, installed as Home Assistant blueprints.",
+    "bp_admin_only": "An administrator installs templates.",
+    "bp_none": "No templates for this appliance type yet.",
+    "bp_load_failed": "Templates could not be loaded.",
+    "auto_trigger_hint": "Creates an automation with this trigger for this device and opens it in Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Created by WashData for {device}. Add your actions (notify, lights, ...).",
+    "automation_alias_new": "{device}: new automation"
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1772,7 +1791,8 @@
     "status": "Overview",
     "subtab_phase_catalog": "Phase Catalog",
     "subtab_profiles": "Profiles",
-    "store": "Store"
+    "store": "Store",
+    "automations": "Automations"
   },
   "tag": {
     "early_end": "Early end",
@@ -1939,7 +1959,14 @@
     "unlabel_done": "Unlabelled {count} cycle(s)",
     "unlabel_failed": "Unlabel failed: {error}",
     "update_failed": "Update failed: {error}",
-    "store_download_partial": "{n} program(s) could not be downloaded; try again later."
+    "store_download_partial": "{n} program(s) could not be downloaded; try again later.",
+    "bp_install_failed": "Could not install the template: {error}",
+    "bp_installed_finish": "Template installed. Fill in the rest in Home Assistant.",
+    "bp_automation_failed": "The template is installed, but the automation could not be created: {error}",
+    "bp_automation_created": "Automation created with the default settings; opening it",
+    "copied": "Copied",
+    "copy_failed": "Copy failed. Select the text and copy it by hand.",
+    "automation_label_failed": "Automation created, but the WashData label or category could not be added."
   },
   "trend": {
     "down": "Trending down",
@@ -2019,7 +2046,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter on GitHub ↗",
-    "manual": "Manual ↗"
+    "manual": "Manual ↗",
+    "bp_share": "Share your own template by pull request ↗",
+    "bp_open_in_ha": "Open in Home Assistant ↗",
+    "automations_all": "All WashData automations in Home Assistant"
   },
   "tip": {
     "add_brand": "Brand not listed? Add it to the community catalog",
@@ -2146,5 +2176,71 @@
     "thr": "thr",
     "too_short": "too short",
     "tumble_kept": "tumble pulses kept"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Turn something on while a cycle runs",
+      "description": "Turns a light, switch or toggle helper on when a WashData cycle starts and off when it ends, also after a false start.\n\nNeeds WashData 0.5.9 or newer."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "End a long dryer anti-crease phase",
+      "description": "For dryers that keep tumbling in anti-crease for hours after the program. It runs only after WashData considers the program finished (cycle finished or anti-crease started). It waits, then switches the dryer's smart plug off in a low-power moment and, by default, back on. A new cycle starting in the meantime cancels it.\n\nRisk: this switches a relay while the dryer is plugged in. Use it only with a plug rated for your dryer and at your own risk. WashData never switches the plug itself; this automation does.\n\nNeeds WashData 0.5.9 or newer."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Cycle started"
+    },
+    "program_recognised": {
+      "name": "Program recognised"
+    },
+    "phase_started": {
+      "name": "Phase started"
+    },
+    "finishing_soon": {
+      "name": "Finishing soon"
+    },
+    "cycle_overrun": {
+      "name": "Cycle running long"
+    },
+    "cycle_paused": {
+      "name": "Cycle paused"
+    },
+    "cycle_resumed": {
+      "name": "Cycle resumed"
+    },
+    "cycle_stalled": {
+      "name": "Cycle stalled"
+    },
+    "cycle_finished": {
+      "name": "Cycle finished"
+    },
+    "cycle_ended": {
+      "name": "Cycle ended"
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-wrinkle started"
+    },
+    "still_tumbling": {
+      "name": "Still tumbling after the cycle"
+    },
+    "unload_pending": {
+      "name": "Unload pending"
+    },
+    "unloaded": {
+      "name": "Unloaded"
+    },
+    "state_changed": {
+      "name": "State changed"
+    },
+    "maintenance_due": {
+      "name": "Maintenance due"
+    },
+    "milestone_reached": {
+      "name": "Cycle milestone reached"
+    },
+    "pump_stuck": {
+      "name": "Pump stuck"
+    }
   }
 }

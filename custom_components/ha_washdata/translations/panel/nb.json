@@ -89,7 +89,9 @@
     "matcher_used": "Gjenkjent i {n} av syklusene dine",
     "matcher_used_one": "Gjenkjent i {n} av syklusene dine",
     "matcher_used_other": "Gjenkjent i {n} av syklusene dine",
-    "matcher_used_tip": "Sykluser på dette apparatet som WashData selv har matchet med dette importerte programmet. En import som aldri matcher, passer kanskje ikke til apparatet ditt; du kan fjerne den. Telles lokalt; ingenting sendes til fellesskapsbutikken."
+    "matcher_used_tip": "Sykluser på dette apparatet som WashData selv har matchet med dette importerte programmet. En import som aldri matcher, passer kanskje ikke til apparatet ditt; du kan fjerne den. Telles lokalt; ingenting sendes til fellesskapsbutikken.",
+    "bp_installed": "Installert",
+    "bp_installed_other": "Annen versjon installert"
   },
   "btn": {
     "log_done_task": "Loggfør som utført: {task}",
@@ -135,7 +137,6 @@
     "export": "Eksporter",
     "force_stop": "Tving stopp",
     "force_stop_tip": "Avslutt gjeldende syklus umiddelbart og marker den som tvangsstoppet",
-    "from_template": "Fra mal ▾",
     "ignore": "Overse",
     "import_json": "Importer fra JSON",
     "inspect": "Undersøk",
@@ -149,8 +150,6 @@
     "new_phase": "+ Ny fase",
     "new_profile": "+ Ny profil",
     "new_profile_tip": "Opprett en ny programprofil fra en eksisterende merket syklus eller opptak",
-    "on_cycle_finished": "På syklus ferdig",
-    "on_cycle_started": "På syklus startet",
     "pause_cycle": "Pause",
     "pause_cycle_tip": "Sett den kjørende syklusen på pause – apparatet fortsetter der det slapp",
     "pg_load_live": "Last inn aktive innstillinger",
@@ -251,7 +250,14 @@
     "confirm_appliance": "Bekreft dette apparatet",
     "confirmed": "Bekreftet",
     "create_profile_from_gap": "Opprett profil",
-    "undo_import": "Angre siste import"
+    "undo_import": "Angre siste import",
+    "from_trigger": "Start fra en trigger ▾",
+    "bp_use": "Bruk med dette apparatet",
+    "bp_install": "Installer mal",
+    "bp_view_yaml": "Vis YAML",
+    "copy": "Kopier",
+    "replace": "Erstatt",
+    "from_trigger_open": "Start fra en trigger ▴"
   },
   "note": {
     "off_delay": {
@@ -366,7 +372,10 @@
     "import_power_history": "Importer effekthistorikk",
     "service_status": "Servicestatus",
     "online_account_tab": "Nett & fellesskap",
-    "live_match_debug": "Feilsøking av direkte match"
+    "live_match_debug": "Feilsøking av direkte match",
+    "automations_used": "Automasjoner som bruker dette apparatet",
+    "bp_templates": "Maler",
+    "automations_all_tip": "Home Assistants automatiseringsliste, filtrert etter WashData-etiketten. Automatiseringer opprettet her finnes også i WashData-kategorien."
   },
   "health": {
     "fair": "Akseptabel profilkvalitet",
@@ -678,7 +687,11 @@
     "pg_obj_early": "Rate for tidlig slutt",
     "pg_obj_split": "Oppdelingsrate",
     "pg_sweep_cycles": "Siste sykluser",
-    "cat_backfill_cycles": "Sykluser funnet i importert effekthistorikk"
+    "cat_backfill_cycles": "Sykluser funnet i importert effekthistorikk",
+    "bp_you_choose": "Du velger: {inputs}",
+    "bp_adjustable": "Justerbar: {inputs}",
+    "bp_yaml": "Blueprint-YAML",
+    "automation_wd_label": "Har WashData-etiketten"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -775,7 +788,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Denne enhetens data og innstillinger går tilbake til slik de var før siste import ({when}). Sykluser og endringer siden da går tapt.",
     "undo_import_ok": "Angre import",
-    "undo_import_title": "Angre siste import"
+    "undo_import_title": "Angre siste import",
+    "bp_replace_title": "Erstatte den installerte malen?",
+    "bp_replace_msg": "Home Assistant har en annen versjon av \"{name}\". Erstatte den med den fra denne WashData-versjonen? Automasjoner som bruker den, endres med den."
   },
   "msg": {
     "custom_task_limit": "Du har nådd grensen på {max} oppgaver.",
@@ -800,7 +815,6 @@
     "artifact_pause_detail": "Effekten falt til nær null i ~{n}s og kom deretter tilbake. Døren ble sannsynligvis åpnet, eller syklusen ble satt på pause.",
     "artifact_spike_detail": "Gikk over det vanlige effektbåndet i ~{n}s.",
     "auto_label_intro": "Tilordne profiler til umerkede sykluser hvis matchkonfidens klarerer terskelen.",
-    "automations_intro": "WashData utløser {start} / {end}-hendelser og gjør entiteter tilgjengelige, slik at varsler og handlinger best bygges som vanlige Home Assistant-automatiseringer. Automatiseringer som bruker denne enheten, vises nedenfor.",
     "cleanup_intro": "Alle merkede sykluser lagt over hverandre. Kryss av for uteliggere, og fjern deretter merkingen (de blir i historikken, men former ikke lenger denne profilen), eller slett dem.",
     "clear_debug_hint": "Fjern lagrede feilsøkingsdata for å frigjøre plass.",
     "collecting_data": "Samler inn data. Sykluser som mangler før finjustering kan starte: {need} ({current}/{min}).",
@@ -1041,10 +1055,6 @@
     "pg_label_yes": "Ville blitt merket \"{name}\" ved syklusens slutt",
     "pg_label_no": "Ville bedt om gjennomgang: {reason}",
     "live_match_debug_tip": "Konfidens: hvor godt den nåværende effektkurven samsvarer med den beste kandidatprofilen (0-100%). Tvetydig: de to beste kandidatene scorer innenfor 5% av hverandre - merket er usikkert til syklusen er ferdig.",
-    "automation_alias_started": "{device}: syklus startet",
-    "automation_alias_finished": "{device}: syklus ferdig",
-    "automation_desc_started": "Kjører når en {device}-syklus starter. Legg til handlingene dine (varsel, lys, ...).",
-    "automation_desc_finished": "Kjører når en {device}-syklus er ferdig. Legg til handlingene dine (varsel, lys, ...).",
     "feedback_detected": "WashData oppdaget: {name}",
     "pg_outcome_stale": "Innstillingene er endret siden denne simuleringen kjørte. Den viser fortsatt det gamle resultatet.",
     "pg_compare_profile_tip": "Velger bare profilen som tegnes over grafen. Simuleringen gjenkjenner alltid syklusen på egen hånd, slik integrasjonen gjør under drift.",
@@ -1063,7 +1073,16 @@
     "invalid_threshold_pair": "Stoppterskel ({stop} W) må være under Startterskel ({start} W). Ingenting ble lagret; endre begge samtidig.",
     "import_undo_hint": "Et gjenopprettingspunkt fra før siste import ({when}) er beholdt: {profiles} profil(er) og {cycles} syklus(er).",
     "replace_undo_hint": "Et gjenopprettingspunkt lagres først, så du kan angre denne importen fra Eksporter / Importer.",
-    "pg_in_sample_note": "Disse syklusene var med på å bygge profilene de matches mot, så resultatene er optimistiske: forvent litt færre riktige match på nye sykluser."
+    "pg_in_sample_note": "Disse syklusene var med på å bygge profilene de matches mot, så resultatene er optimistiske: forvent litt færre riktige match på nye sykluser.",
+    "automations_tab_intro": "WashData tilbyr enhetstriggers (syklus startet, syklus ferdig, syklus stoppet opp og mer) for dine egne Home Assistant-automasjoner. Automasjoner som bruker dette apparatet, er listet her.",
+    "bp_intro": "Ferdige automasjoner for dette apparatet, installert som Home Assistant-blueprints.",
+    "bp_admin_only": "En administrator installerer maler.",
+    "bp_none": "Ingen maler for denne apparattypen ennå.",
+    "bp_load_failed": "Maler kunne ikke lastes.",
+    "auto_trigger_hint": "Oppretter en automatisering med denne triggeren for denne enheten og åpner den i Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Opprettet av WashData for {device}. Legg til handlingene dine (varsel, lys, ...).",
+    "automation_alias_new": "{device}: ny automatisering"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",
@@ -1761,7 +1780,8 @@
     "subtab_profiles": "Profiler",
     "maintenance": "Vedlikehold",
     "playground": "Sandkasse",
-    "store": "Butikk"
+    "store": "Butikk",
+    "automations": "Automasjoner"
   },
   "tag": {
     "early_end": "Tidlig slutt",
@@ -1928,7 +1948,14 @@
     "store_download_partial": "{n} program(mer) kunne ikke lastes ned; prøv igjen senere.",
     "import_no_restore_point": "Importert, men det kunne ikke lagres et gjenopprettingspunkt, så denne importen kan ikke angres",
     "import_undo_failed": "Kunne ikke angre importen: {error}",
-    "import_undone": "Import angret: {profiles} profil(er) og {cycles} syklus(er) gjenopprettet"
+    "import_undone": "Import angret: {profiles} profil(er) og {cycles} syklus(er) gjenopprettet",
+    "bp_install_failed": "Kunne ikke installere malen: {error}",
+    "bp_installed_finish": "Mal installert. Fyll inn resten i Home Assistant.",
+    "bp_automation_failed": "Malen er installert, men automasjonen kunne ikke opprettes: {error}",
+    "bp_automation_created": "Automasjon opprettet med standardinnstillinger; åpner den",
+    "copied": "Kopiert",
+    "copy_failed": "Kopiering mislyktes. Velg teksten og kopier manuelt.",
+    "automation_label_failed": "Automatisering opprettet, men WashData-etiketten eller kategorien kunne ikke legges til."
   },
   "trend": {
     "down": "Trender nedover",
@@ -2019,7 +2046,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter på GitHub ↗",
-    "manual": "Håndbok ↗"
+    "manual": "Håndbok ↗",
+    "bp_share": "Del din egen mal via en pull request ↗",
+    "bp_open_in_ha": "Åpne i Home Assistant ↗",
+    "automations_all": "Alle WashData-automatiseringer i Home Assistant"
   },
   "tip": {
     "add_brand": "Merke ikke oppført? Legg det til i fellesskapskatalogen",
@@ -2146,5 +2176,71 @@
     "thr": "tersk.",
     "too_short": "for kort",
     "tumble_kept": "tumlepulser beholdt"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Slå noe på mens en syklus kjører",
+      "description": "Slår på et lys, en bryter eller en vekslehjelper når en WashData-syklus starter, og av igjen når den slutter, også etter en falsk start.\n\nKrever WashData 0.5.9 eller nyere."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Avslutt en lang anti-rynke-fase på tørketrommelen",
+      "description": "For tørketromler som fortsetter å tumle i anti-rynke i timevis etter programmet. Kjører bare etter at WashData anser programmet som ferdig (syklus ferdig eller anti-rynke startet). Den venter, slår deretter av tørketrommelens smart plug av i et øyeblikk med lavt forbruk og, som standard, på igjen. En ny syklus som starter i mellomtiden, avbryter den.\n\nRisiko: dette kobler om et relé mens tørketrommelen er koblet til. Bruk det bare med en plugg som er egnet for tørketrommelen din, og på eget ansvar. WashData kobler aldri pluggen selv; det gjør denne automasjonen.\n\nKrever WashData 0.5.9 eller nyere."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Syklus startet"
+    },
+    "program_recognised": {
+      "name": "Program gjenkjent"
+    },
+    "phase_started": {
+      "name": "Fase startet"
+    },
+    "finishing_soon": {
+      "name": "Snart ferdig"
+    },
+    "cycle_overrun": {
+      "name": "Syklus kjører for lenge"
+    },
+    "cycle_paused": {
+      "name": "Syklus satt på pause"
+    },
+    "cycle_resumed": {
+      "name": "Syklus gjenopptatt"
+    },
+    "cycle_stalled": {
+      "name": "Syklus stoppet opp"
+    },
+    "cycle_finished": {
+      "name": "Syklus ferdig"
+    },
+    "cycle_ended": {
+      "name": "Syklus avsluttet (enhver årsak)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-rynke startet"
+    },
+    "still_tumbling": {
+      "name": "Tørketrommelen kjører fortsatt etter syklusen"
+    },
+    "unload_pending": {
+      "name": "Utlasting venter"
+    },
+    "unloaded": {
+      "name": "Tømt"
+    },
+    "state_changed": {
+      "name": "Tilstand endret"
+    },
+    "maintenance_due": {
+      "name": "Vedlikehold forfaller"
+    },
+    "milestone_reached": {
+      "name": "Syklusmilepæl nådd"
+    },
+    "pump_stuck": {
+      "name": "Pumpe satt fast"
+    }
   }
 }

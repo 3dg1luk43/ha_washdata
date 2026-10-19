@@ -787,6 +787,48 @@ class GetSetupStatusResponse(TypedDict, total=False):
     step_key: str | None
 
 
+class BlueprintInput(TypedDict):
+    """One blueprint input; ``selector`` is the selector type name (``number``...)."""
+
+    key: str
+    name: str
+    description: str
+    selector: str | None
+    has_default: bool
+
+
+class BlueprintItem(TypedDict):
+    """A blueprint shipped in ``blueprints/automation/`` (#478).
+
+    ``path`` is where HA's ``blueprint/save`` puts it (under
+    ``blueprints/automation/``); ``one_click`` is true when every input but
+    ``washdata_device`` has a default, so the automation can be saved with only
+    the device filled in.
+    """
+
+    id: str
+    name: str
+    description: str
+    device_types: list[str]
+    min_version: str
+    tags: list[str]
+    source_url: str
+    path: str
+    yaml: str
+    one_click: bool
+    inputs: list[BlueprintInput]
+
+
+class _BlueprintsListBase(TypedDict):
+    blueprints: list[BlueprintItem]
+
+
+class BlueprintsListResponse(_BlueprintsListBase, total=False):
+    """The blueprint catalog; ``error`` only when catalog.json could not be read."""
+
+    error: str
+
+
 WS_RESPONSE_TYPES: dict[str, type] = {
     "get_devices": GetDevicesResponse,
     "get_device_cycles": GetDeviceCyclesResponse,
@@ -900,6 +942,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_upload_device": StoreUploadDeviceResponse,
     "store_download_device": StartTaskResponse,
     "get_shareable_cycles": GetShareableCyclesResponse,
+    "blueprints/list": BlueprintsListResponse,
 }
 
 #: Map a task-registry ``kind`` -> the TypedDict of its finished ``result``
@@ -1233,6 +1276,7 @@ WS_COMMANDS: dict[str, dict] = {
     "store_upload_device": {"params": [_entry(), _p("items", "list"), _p("include_phases", "list", False), _p("include_settings", "bool", False)]},
     "store_download_device": {"params": [_entry(), _p("device_id", "str"), _p("include_settings", "bool", False)]},
     "get_shareable_cycles": {"params": [_entry()]},
+    "blueprints/list": {"params": []},
 }
 
 

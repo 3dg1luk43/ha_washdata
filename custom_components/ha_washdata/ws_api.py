@@ -112,6 +112,7 @@ from .const import (
     SHOW_ML_LAB,
     STATE_COLORS,
 )
+from . import blueprint_catalog
 from . import history_import
 from . import playground
 from . import task_registry
@@ -696,7 +697,7 @@ _PANEL_STORE_FILE = "ha_washdata_panel"
 _PANEL_DATA_KEY = "ha_washdata_panel_cfg"
 
 _LEVEL_RANK = {"none": 0, "read": 1, "edit": 2, "full": 3}
-_PANEL_TABS = ("status", "history", "profiles", "settings", "tools", "panel", "ml_lab", "playground")
+_PANEL_TABS = ("status", "history", "profiles", "settings", "automations", "tools", "panel", "ml_lab", "playground")
 
 # Valid values for the two per-user string prefs (validated in ws_set_user_prefs).
 _PREF_DATE_FORMATS = ("relative", "absolute")
@@ -728,6 +729,8 @@ _FULL_COMMANDS = frozenset({
 # Commands allowed for any authenticated user regardless of device permissions.
 _OPEN_COMMANDS = frozenset({
     "get_constants", "get_panel_config", "set_user_prefs",
+    # The shipped blueprint catalog (#478): static files, no device data.
+    "blueprints/list",
 })
 # Admin-only commands.
 # Commands that require administrator access ALWAYS — even when RBAC is disabled
@@ -1458,6 +1461,28 @@ async def ws_get_shareable_cycles(hass, connection, msg):
                  {"items": items, "phase_programs": phase_programs, "all_programs": all_programs})
 
 
+_BLUEPRINT_CATALOG_KEY = f"{DOMAIN}_blueprint_catalog"
+
+
+@websocket_api.websocket_command({vol.Required("type"): "ha_washdata/blueprints/list"})
+@websocket_api.async_response
+async def ws_blueprints_list(hass, connection, msg):
+    """The automation blueprints this version ships (#478), read once per run.
+
+    The files ship with the integration, so they only change with an update,
+    which needs a restart: caching for the life of ``hass`` is exact.
+    """
+    data = hass.data.get(_BLUEPRINT_CATALOG_KEY)
+    if data is None:
+        try:
+            data = await hass.async_add_executor_job(blueprint_catalog.load_catalog)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            data = {"blueprints": [], "error": str(exc)}
+        if not data.get("error"):
+            hass.data[_BLUEPRINT_CATALOG_KEY] = data
+    _send_result(connection, msg["id"], "blueprints/list", data)
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
     """Register all WebSocket commands for the WashData panel.
 
@@ -1548,6 +1573,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         # Historical power-data import: staged ingest, background scan, apply
         ws_history_import_begin, ws_history_import_chunk, ws_history_import_recorder,
         ws_start_history_import_scan, ws_apply_history_import,
+        # Automation blueprints shipped with the integration (#478)
+        ws_blueprints_list,
     ]
     for handler in handlers:
         websocket_api.async_register_command(hass, _guard(handler))

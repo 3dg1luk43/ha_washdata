@@ -1661,6 +1661,97 @@ EVENT_CYCLE_ENDED = "ha_washdata_cycle_ended"
 # Signals
 SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
 
+# Triggers (#478). The manager sends SIGNAL_DEVICE_TRIGGER for its entry with
+# ``(trigger_type, variables)`` at the moment each occurrence happens; the device
+# triggers (``device_trigger.py``) and the integration triggers (``trigger.py``,
+# ``trigger: ha_washdata.<type>``) both listen to it, so the two can never fire
+# differently. Option filters live in ``trigger_rules.py``.
+SIGNAL_DEVICE_TRIGGER = "ha_washdata_device_trigger_{}"
+# hass.data key: {entry_id: number of attached triggers}, so the manager knows
+# whether an announcement is worth an immediate snapshot write.
+DATA_TRIGGER_LISTENERS = "ha_washdata_trigger_listeners"
+TRIGGER_CYCLE_STARTED = "cycle_started"
+TRIGGER_PROGRAM_RECOGNISED = "program_recognised"
+TRIGGER_PHASE_STARTED = "phase_started"
+TRIGGER_FINISHING_SOON = "finishing_soon"
+TRIGGER_CYCLE_OVERRUN = "cycle_overrun"
+TRIGGER_CYCLE_PAUSED = "cycle_paused"
+TRIGGER_CYCLE_RESUMED = "cycle_resumed"
+TRIGGER_CYCLE_STALLED = "cycle_stalled"
+TRIGGER_CYCLE_FINISHED = "cycle_finished"
+# Any end of a cycle that fired cycle_started, interrupted false starts included,
+# so a "while running" automation always gets its off.
+TRIGGER_CYCLE_ENDED = "cycle_ended"
+TRIGGER_ANTI_WRINKLE_STARTED = "anti_wrinkle_started"
+TRIGGER_STILL_TUMBLING = "still_tumbling"
+TRIGGER_UNLOAD_PENDING = "unload_pending"
+TRIGGER_UNLOADED = "unloaded"
+TRIGGER_STATE_CHANGED = "state_changed"
+TRIGGER_MAINTENANCE_DUE = "maintenance_due"
+TRIGGER_MILESTONE_REACHED = "milestone_reached"
+TRIGGER_PUMP_STUCK = "pump_stuck"
+DEVICE_TRIGGER_TYPES = (
+    TRIGGER_CYCLE_STARTED,
+    TRIGGER_PROGRAM_RECOGNISED,
+    TRIGGER_PHASE_STARTED,
+    TRIGGER_FINISHING_SOON,
+    TRIGGER_CYCLE_OVERRUN,
+    TRIGGER_CYCLE_PAUSED,
+    TRIGGER_CYCLE_RESUMED,
+    TRIGGER_CYCLE_STALLED,
+    TRIGGER_CYCLE_FINISHED,
+    TRIGGER_CYCLE_ENDED,
+    TRIGGER_ANTI_WRINKLE_STARTED,
+    TRIGGER_STILL_TUMBLING,
+    TRIGGER_UNLOAD_PENDING,
+    TRIGGER_UNLOADED,
+    TRIGGER_STATE_CHANGED,
+    TRIGGER_MAINTENANCE_DUE,
+    TRIGGER_MILESTONE_REACHED,
+    TRIGGER_PUMP_STUCK,
+)
+# The device types with profile matching: a Threshold Device (`other`) never
+# recognises a program, so it has no program, phase or time estimate to report.
+_MATCHING_DEVICE_TYPES = (
+    DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_WASHER_DRYER,
+    DEVICE_TYPE_DISHWASHER,
+    DEVICE_TYPE_AIR_FRYER,
+    DEVICE_TYPE_BREAD_MAKER,
+    DEVICE_TYPE_PUMP,
+    DEVICE_TYPE_GENERIC,
+)
+# The device types that tumble a load after the program (cycle_detector anti_wrinkle_active).
+_TUMBLING_DEVICE_TYPES = (
+    DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_WASHER_DRYER,
+)
+# Types offered only for some device types; every other type is offered for all.
+# The manager never sends a type its device type is not offered.
+DEVICE_TRIGGER_ONLY_FOR = {
+    TRIGGER_PROGRAM_RECOGNISED: _MATCHING_DEVICE_TYPES,
+    TRIGGER_PHASE_STARTED: _MATCHING_DEVICE_TYPES,
+    TRIGGER_FINISHING_SOON: _MATCHING_DEVICE_TYPES,
+    TRIGGER_CYCLE_OVERRUN: _MATCHING_DEVICE_TYPES,
+    TRIGGER_ANTI_WRINKLE_STARTED: _TUMBLING_DEVICE_TYPES,
+    TRIGGER_STILL_TUMBLING: _TUMBLING_DEVICE_TYPES,
+    TRIGGER_PUMP_STUCK: (DEVICE_TYPE_PUMP,),
+}
+TRIGGER_FINISHING_SOON_DEFAULT_MINUTES = 10
+TRIGGER_CYCLE_OVERRUN_DEFAULT_PERCENT = 20
+TRIGGER_STILL_TUMBLING_DEFAULT_MINUTES = 15
+# still_tumbling (#478): a burst opens when the power reaches the start threshold
+# and closes at or below the stop threshold (the detector's own hysteresis, so a
+# standby sitting between the two never counts). Only a burst no longer than this
+# is a tumble; tracking stops this long after the finish.
+STILL_TUMBLING_MAX_BURST_S = 300.0
+STILL_TUMBLING_GIVE_UP_S = 4 * 3600.0
+# maintenance_due: how often the due list is re-read between cycle ends (a
+# day-interval task falls due at any time of day).
+TRIGGER_MAINTENANCE_RECHECK_S = 60.0
+
 # Learning & Feedback
 
 SERVICE_SUBMIT_FEEDBACK = (

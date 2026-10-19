@@ -92,7 +92,9 @@
     "matcher_used_one": "Saskaņots ar {n} jūsu ciklu",
     "matcher_used_zero": "Saskaņots ar {n} jūsu cikliem",
     "matcher_used_other": "Saskaņots ar {n} jūsu cikliem",
-    "matcher_used_tip": "Šīs ierīces cikli, kurus WashData pats saskaņoja ar šo importēto programmu. Imports, kas nekad netiek saskaņots, var neatbilst jūsu ierīcei; to var noņemt. Tiek skaitīts lokāli; uz veikalu nekas netiek sūtīts."
+    "matcher_used_tip": "Šīs ierīces cikli, kurus WashData pats saskaņoja ar šo importēto programmu. Imports, kas nekad netiek saskaņots, var neatbilst jūsu ierīcei; to var noņemt. Tiek skaitīts lokāli; uz veikalu nekas netiek sūtīts.",
+    "bp_installed": "Instalēts",
+    "bp_installed_other": "Instalēta cita versija"
   },
   "btn": {
     "pg_preset_delete": "Dzēst priekšiestatījumu",
@@ -136,7 +138,6 @@
     "export": "Eksportēt",
     "force_stop": "Piespiedu apstāšanās",
     "force_stop_tip": "Nekavējoties pārtraukt pašreizējo ciklu un atzīmēt to kā piespiedu kārtā apturētu",
-    "from_template": "No veidnes ▾",
     "ignore": "Ignorēt",
     "import_json": "Importēt no JSON",
     "inspect": "Pārbaudīt",
@@ -150,8 +151,6 @@
     "new_phase": "+ Jauns posms",
     "new_profile": "+ Jauns profils",
     "new_profile_tip": "Izveidot jaunu programmas profilu no esoša iezīmēta cikla vai ieraksta",
-    "on_cycle_finished": "Cikls ir pabeigts",
-    "on_cycle_started": "Cikls sākās",
     "pause_cycle": "Pauze",
     "pause_cycle_tip": "Pauzēt pašreizējo ciklu – ierīce turpinās no pārtraukuma vietas",
     "pg_load_live": "Ielādēt aktīvos iestatījumus",
@@ -254,7 +253,14 @@
     "confirmed": "Apstiprināts",
     "create_profile_from_gap": "Izveidot profilu",
     "undo_import": "Atsaukt pēdējo importēšanu",
-    "pg_rerun": "Atjaunināt simulāciju"
+    "pg_rerun": "Atjaunināt simulāciju",
+    "from_trigger": "Sākt no trigera ▾",
+    "bp_use": "Izmantot ar šo ierīci",
+    "bp_install": "Instalēt veidni",
+    "bp_view_yaml": "Skatīt YAML",
+    "copy": "Kopēt",
+    "replace": "Aizstāt",
+    "from_trigger_open": "Sākt no trigera ▴"
   },
   "note": {
     "off_delay": {
@@ -369,7 +375,10 @@
     "import_power_history": "Jaudas vēstures importēšana",
     "service_status": "Apkopes statuss",
     "online_account_tab": "Tiešsaiste un kopiena",
-    "live_match_debug": "Tiešraides atbilstības atkļūdošana"
+    "live_match_debug": "Tiešraides atbilstības atkļūdošana",
+    "automations_used": "Automatizācijas, kas izmanto šo ierīci",
+    "bp_templates": "Veidnes",
+    "automations_all_tip": "Home Assistant automatizāciju saraksts, filtrēts pēc WashData etiķetes. Šeit izveidotās automatizācijas atrodas arī WashData kategorijā."
   },
   "health": {
     "fair": "Pieņemama profila kvalitāte",
@@ -684,7 +693,11 @@
     "cycle_context_minutes": "{min} min",
     "cycle_context_series": "Recorder vēsture",
     "before_start": "Pirms sākuma",
-    "after_end": "Pēc beigām"
+    "after_end": "Pēc beigām",
+    "bp_you_choose": "Jūs izvēlaties: {inputs}",
+    "bp_adjustable": "Pielāgojams: {inputs}",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Satur WashData etiķeti"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -783,7 +796,9 @@
     "profile_title": "Profils · {name}",
     "undo_import_msg": "Šīs ierīces dati un iestatījumi tiek atjaunoti stāvoklī pirms pēdējās importēšanas ({when}). Kopš tā laika reģistrētie cikli un veiktās izmaiņas tiek zaudēti.",
     "undo_import_ok": "Atsaukt importēšanu",
-    "undo_import_title": "Atsaukt pēdējo importēšanu"
+    "undo_import_title": "Atsaukt pēdējo importēšanu",
+    "bp_replace_title": "Aizstāt instalēto veidni?",
+    "bp_replace_msg": "Home Assistant ir cita \"{name}\" versija. Aizstāt ar šo no šīs WashData versijas? Automatizācijas, kas to izmanto, mainīsies līdz ar to."
   },
   "msg": {
     "pg_canvas_empty3": "Izvēlieties ciklu augšā un nospiediet Palaist, lai to simulētu. Pēc tam turiet kursoru virs, lai nolasītu vērtības, ritiniet vai tuviniet ar diviem pirkstiem un velciet, lai pārvietotu.",
@@ -805,7 +820,6 @@
     "artifact_pause_detail": "Jauda ~{n}s krita gandrīz līdz nullei, pēc tam atjaunojās. Visticamāk, tika atvērtas durvis vai cikls tika pauzēts.",
     "artifact_spike_detail": "Pārsniedza parasto jaudas joslu ~{n}s.",
     "auto_label_intro": "Piešķiriet profilus nemarķētiem cikliem, kuru atbilstības pārliecība notīra slieksni.",
-    "automations_intro": "WashData aktivizē {start} / {end} notikumus un atklāj entītijas, tāpēc paziņojumus un darbības vislabāk veidot kā parastas Home Assistant automatizācijas. Zemāk redzamas automatizācijas, kas izmanto šo ierīci.",
     "cleanup_intro": "Visi marķētie cikli pārklāti viens uz otra. Atzīmējiet novirzes un noņemiet tiem marķējumu (paliek vēsturē, bet vairs neveido šo profilu) vai izdzēsiet tos.",
     "clear_debug_hint": "Noņemiet saglabātos atkļūdošanas datus, lai atbrīvotu vietu.",
     "collecting_data": "Notiek datu vākšana. Vēl nepieciešamie cikli, lai varētu sākt precizēšanu: {need} ({current}/{min}).",
@@ -1051,10 +1065,6 @@
     "pg_label_yes": "Cikla beigās tiktu marķēts kā \"{name}\"",
     "pg_label_no": "Lūgtu pārskatīšanu: {reason}",
     "live_match_debug_tip": "Pārliecība: cik precīzi pašreizējā jaudas līkne atbilst labākajam kandidāta profilam (0-100%). Neskaidra: divu labāko kandidātu rezultāti atšķiras mazāk nekā par 5% - atzīme ir nedroša, līdz cikls beidzas.",
-    "automation_alias_started": "{device}: cikls sākās",
-    "automation_alias_finished": "{device}: cikls beidzās",
-    "automation_desc_started": "Darbojas, kad sākas ierīces {device} cikls. Pievienojiet savas darbības (paziņojumi, gaismas, ...).",
-    "automation_desc_finished": "Darbojas, kad beidzas ierīces {device} cikls. Pievienojiet savas darbības (paziņojumi, gaismas, ...).",
     "feedback_detected": "WashData noteica: {name}",
     "import_undo_hint": "Tiek glabāts atjaunošanas punkts no laika pirms pēdējās importēšanas ({when}): {profiles} profili un {cycles} cikli.",
     "replace_undo_hint": "Vispirms tiek saglabāts atjaunošanas punkts, tāpēc šo importēšanu var atsaukt sadaļā Eksportēt / importēt.",
@@ -1079,7 +1089,16 @@
     "cycle_context_note": "Pelēkā krāsā: jaudas sensora recorder vēsture ap šo ciklu. Tā nav cikla daļa un neietekmē ilgumu, enerģiju vai saskaņošanu.",
     "cycle_context_none": "Recorder nesatur nolasījumus pirms un pēc šī cikla (Home Assistant pēc noklusējuma glabā vēsturi 10 dienas).",
     "cycle_context_tip": "Tikai attēlošanai: rāda jaudas sensora recorder vēsturi ap šo ciklu, ja tā vēl glabājas. Lai turpmākajiem cikliem pievienotu neizdevušos starta mēģinājumus, izmantojiet Līknes ievadsekundes (Iestatījumi > Noteikšana > Cikla sākums), kas maina saglabātos ilgumus.",
-    "invalid_threshold_pair": "Apstāšanās slieksnim ({stop} W) jābūt zemākam par Starta slieksni ({start} W). Nekas netika saglabāts; mainiet abas vērtības kopā."
+    "invalid_threshold_pair": "Apstāšanās slieksnim ({stop} W) jābūt zemākam par Starta slieksni ({start} W). Nekas netika saglabāts; mainiet abas vērtības kopā.",
+    "automations_tab_intro": "WashData piedāvā ierīces trigerus (cikls sākās, cikls beidzās, cikls iestrēga un citus) jūsu pašu Home Assistant automatizācijām. Šeit uzskaitītas automatizācijas, kas izmanto šo ierīci.",
+    "bp_intro": "Gatavās automatizācijas šai ierīcei, instalētas kā Home Assistant blueprinti.",
+    "bp_admin_only": "Veidnes instalē administrators.",
+    "bp_none": "Šim ierīces tipam veidņu vēl nav.",
+    "bp_load_failed": "Veidnes nevarēja ielādēt.",
+    "auto_trigger_hint": "Izveido automatizāciju ar šo trigeri šai ierīcei un atver to Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Izveidojis WashData priekš {device}. Pievienojiet savas darbības (paziņojums, gaismas, ...).",
+    "automation_alias_new": "{device}: jauna automatizācija"
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1670,7 +1689,8 @@
     "subtab_profiles": "Profili",
     "maintenance": "Apkope",
     "playground": "Izmēģinājumu laukums",
-    "store": "Veikals"
+    "store": "Veikals",
+    "automations": "Automatizācijas"
   },
   "tag": {
     "early_end": "Agrās beigas",
@@ -1839,7 +1859,14 @@
     "auto_label_done": "Automātiskā marķēšana pabeigta: marķēti {count} cikli, bez marķējuma palika {skipped}.",
     "auto_label_done_zero": "Automātiskā marķēšana pabeigta: marķēti {count} cikli, bez marķējuma palika {skipped}.",
     "auto_label_done_one": "Automātiskā marķēšana pabeigta: marķēts {count} cikls, bez marķējuma palika {skipped}.",
-    "auto_label_done_other": "Automātiskā marķēšana pabeigta: marķēti {count} cikli, bez marķējuma palika {skipped}."
+    "auto_label_done_other": "Automātiskā marķēšana pabeigta: marķēti {count} cikli, bez marķējuma palika {skipped}.",
+    "bp_install_failed": "Nevarēja instalēt veidni: {error}",
+    "bp_installed_finish": "Veidne instalēta. Aizpildiet pārējo Home Assistantā.",
+    "bp_automation_failed": "Veidne ir instalēta, taču automatizāciju nevarēja izveidot: {error}",
+    "bp_automation_created": "Automatizācija izveidota ar noklusējuma iestatījumiem; atvēršana",
+    "copied": "Nokopēts",
+    "copy_failed": "Kopēšana neizdevās. Atlasiet tekstu un kopējiet to manuāli.",
+    "automation_label_failed": "Automatizācija izveidota, bet WashData etiķeti vai kategoriju nevarēja pievienot."
   },
   "suggestion": {
     "observed_label": "Novērotais",
@@ -2037,7 +2064,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter vietnē GitHub ↗",
-    "manual": "Rokasgrāmata ↗"
+    "manual": "Rokasgrāmata ↗",
+    "bp_share": "Kopīgojiet savu veidni ar pull request ↗",
+    "bp_open_in_ha": "Atvērt Home Assistantā ↗",
+    "automations_all": "Visas WashData automatizācijas Home Assistant"
   },
   "tip": {
     "add_brand": "Zīmola nav sarakstā? Pievienojiet to kopienas katalogam",
@@ -2164,5 +2194,71 @@
     "thr": "slieksnis",
     "too_short": "par īsu",
     "tumble_kept": "trumuļa impulsi saglabāti"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Ieslēgt kaut ko cikla laikā",
+      "description": "Ieslēdz gaismu, slēdzi vai pārslēgšanas palīgu, kad sākas WashData cikls, un izslēdz, kad tas beidzas, arī pēc viltus starta.\n\nNepieciešams WashData 0.5.9 vai jaunāks."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Beigt žāvētāja garo pretgrumbu fāzi",
+      "description": "Žāvētājiem, kas pēc programmas stundām turpina darbināt pretgrumbu režīmā. Darbojas tikai pēc tam, kad WashData uzskata programmu par pabeigtu (cikls beidzies vai pretgrumbu režīms sācies). Tas gaida, pēc tam izslēdz žāvētāja viedligzdas strāvu zemās jaudas brīdī un pēc noklusējuma ieslēdz atpakaļ. Jauns cikls, kas pa to laiku sākas, atceļ to.\n\nRisks: tas pārslēdz releju, kamēr žāvētājs ir iesprausts. Izmantojiet tikai ar kontaktligzdu, kas paredzēta jūsu žāvētājam, un uz savu risku. WashData pati nekad nepārslēdz kontaktligzdu; to dara šī automatizācija.\n\nNepieciešams WashData 0.5.9 vai jaunāks."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Cikls sākās"
+    },
+    "program_recognised": {
+      "name": "Programma atpazīta"
+    },
+    "phase_started": {
+      "name": "Fāze sākās"
+    },
+    "finishing_soon": {
+      "name": "Drīz beigsies"
+    },
+    "cycle_overrun": {
+      "name": "Cikls ilgst pārāk ilgi"
+    },
+    "cycle_paused": {
+      "name": "Cikls pauzēts"
+    },
+    "cycle_resumed": {
+      "name": "Cikls atsākās"
+    },
+    "cycle_stalled": {
+      "name": "Cikls iestrēga"
+    },
+    "cycle_finished": {
+      "name": "Cikls beidzās"
+    },
+    "cycle_ended": {
+      "name": "Cikls beidzās (jebkāda iemesla dēļ)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Pretgrumbu režīms sākās"
+    },
+    "still_tumbling": {
+      "name": "Vēl grozās pēc cikla"
+    },
+    "unload_pending": {
+      "name": "Izkraušana gaida"
+    },
+    "unloaded": {
+      "name": "Izkrauts"
+    },
+    "state_changed": {
+      "name": "Statuss mainījās"
+    },
+    "maintenance_due": {
+      "name": "Apkope nepieciešama"
+    },
+    "milestone_reached": {
+      "name": "Cikla atskaites punkts sasniegts"
+    },
+    "pump_stuck": {
+      "name": "Sūknis iestrēdzis"
+    }
   }
 }

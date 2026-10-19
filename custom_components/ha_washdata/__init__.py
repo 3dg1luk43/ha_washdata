@@ -1669,7 +1669,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_key="no_config_entry",
                 )
 
-            hass.data[DOMAIN][entry_id].mark_unloaded("mark_unloaded service")
+            hass.data[DOMAIN][entry_id].mark_unloaded(
+                "mark_unloaded service", how="service"
+            )
 
         hass.services.async_register(
             DOMAIN, "mark_unloaded", _guarded_service(hass, "mark_unloaded", handle_mark_unloaded),

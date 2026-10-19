@@ -43,7 +43,9 @@
     "matcher_used_one": "Corrisponde a {n} dei tuoi cicli",
     "matcher_used_many": "Corrisponde a {n} dei tuoi cicli",
     "matcher_used_other": "Corrisponde a {n} dei tuoi cicli",
-    "matcher_used_tip": "Cicli di questo elettrodomestico che WashData ha associato da solo a questo programma importato. Un'importazione che non trova mai corrispondenza potrebbe non adattarsi al tuo elettrodomestico; puoi rimuoverla. Conteggiato in locale; nulla viene inviato allo store della community."
+    "matcher_used_tip": "Cicli di questo elettrodomestico che WashData ha associato da solo a questo programma importato. Un'importazione che non trova mai corrispondenza potrebbe non adattarsi al tuo elettrodomestico; puoi rimuoverla. Conteggiato in locale; nulla viene inviato allo store della community.",
+    "bp_installed": "Installato",
+    "bp_installed_other": "Altra versione installata"
   },
   "btn": {
     "log_done_task": "Segna come fatto: {task}",
@@ -89,7 +91,6 @@
     "export": "Esporta",
     "force_stop": "Forza l'arresto",
     "force_stop_tip": "Termina immediatamente il ciclo corrente e lo contrassegna come arrestato forzatamente",
-    "from_template": "Dal modello ▾",
     "ignore": "Ignorare",
     "import_json": "Importa da JSON",
     "inspect": "Ispezionare",
@@ -103,8 +104,6 @@
     "new_phase": "+ Nuova fase",
     "new_profile": "+ Nuovo profilo",
     "new_profile_tip": "Crea un nuovo profilo di programma da un ciclo etichettato esistente o da una registrazione",
-    "on_cycle_finished": "Il ciclo è terminato",
-    "on_cycle_started": "Il ciclo è iniziato",
     "pause_cycle": "Pausa",
     "pause_cycle_tip": "Metti in pausa il ciclo in corso – l'elettrodomestico riprenderà da dove si era fermato",
     "pg_load_live": "Carica le impostazioni attive",
@@ -205,7 +204,14 @@
     "confirmed": "Confermato",
     "create_profile_from_gap": "Crea profilo",
     "undo_import": "Annulla l'ultima importazione",
-    "pg_rerun": "Aggiorna simulazione"
+    "pg_rerun": "Aggiorna simulazione",
+    "from_trigger": "Avvia da un trigger ▾",
+    "bp_use": "Usa con questo dispositivo",
+    "bp_install": "Installa modello",
+    "bp_view_yaml": "Visualizza YAML",
+    "copy": "Copia",
+    "replace": "Sostituisci",
+    "from_trigger_open": "Avvia da un trigger ▴"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -315,7 +321,10 @@
     "import_power_history": "Importa lo storico di potenza",
     "service_status": "Stato della manutenzione",
     "online_account_tab": "Online e community",
-    "live_match_debug": "Debug abbinamento in tempo reale"
+    "live_match_debug": "Debug abbinamento in tempo reale",
+    "automations_used": "Automazioni che usano questo dispositivo",
+    "bp_templates": "Modelli",
+    "automations_all_tip": "L’elenco delle automazioni di Home Assistant, filtrato per l’etichetta WashData. Le automazioni create qui si trovano anche nella categoria WashData."
   },
   "health": {
     "fair": "Qualità profilo accettabile",
@@ -630,7 +639,11 @@
     "pg_obj_early": "Tasso di conclusioni anticipate",
     "pg_obj_endlag": "Ritardo di fine (mediana)",
     "pg_obj_split": "Tasso di divisioni",
-    "pg_sweep_cycles": "Cicli recenti"
+    "pg_sweep_cycles": "Cicli recenti",
+    "bp_you_choose": "Scegli tu: {inputs}",
+    "bp_adjustable": "Regolabile: {inputs}",
+    "bp_yaml": "YAML del modello",
+    "automation_wd_label": "Porta l’etichetta WashData"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -729,7 +742,9 @@
     "profile_title": "Profilo · {name}",
     "undo_import_msg": "Dati e impostazioni di questo dispositivo tornano com'erano prima dell'ultima importazione ({when}). I cicli e le modifiche successivi vanno persi.",
     "undo_import_ok": "Annulla importazione",
-    "undo_import_title": "Annulla l'ultima importazione"
+    "undo_import_title": "Annulla l'ultima importazione",
+    "bp_replace_title": "Sostituire il modello installato?",
+    "bp_replace_msg": "Home Assistant ha una versione diversa di \"{name}\". Sostituirla con quella di questa versione di WashData? Le automazioni che la usano cambieranno di conseguenza."
   },
   "msg": {
     "custom_task_limit": "Hai raggiunto il limite di {max} attività.",
@@ -755,7 +770,6 @@
     "artifact_pause_detail": "La potenza è scesa quasi a zero per ~{n}s, poi è tornata. Probabilmente è stata aperta la porta o il ciclo è stato messo in pausa.",
     "artifact_spike_detail": "Ha superato la banda di potenza normale per ~{n}s.",
     "auto_label_intro": "Assegnare profili a cicli senza etichetta la cui confidenza di corrispondenza supera la soglia.",
-    "automations_intro": "WashData genera gli eventi {start} / {end} ed espone entità, quindi le notifiche e le azioni si costruiscono al meglio come normali automatizzazioni di Home Assistant. Le automatizzazioni che utilizzano questo dispositivo appaiono di seguito.",
     "cleanup_intro": "Tutti i cicli etichettati sovrapposti. Spunta i valori anomali, poi rimuovi la loro etichetta (restano nella cronologia, ma smettono di plasmare questo profilo) o eliminali.",
     "clear_debug_hint": "Rimuovi i dati di debug archiviati per liberare spazio.",
     "collecting_data": "Raccolta dati. Cicli ancora necessari prima che l'ottimizzazione possa iniziare: {need} ({current}/{min}).",
@@ -1001,10 +1015,6 @@
     "pg_label_yes": "Verrebbe etichettato \"{name}\" a fine ciclo",
     "pg_label_no": "Richiederebbe una revisione: {reason}",
     "live_match_debug_tip": "Fiducia: quanto la curva di potenza attuale corrisponde al profilo candidato migliore (0-100%). Ambiguo: i due candidati migliori hanno punteggi entro il 5% l'uno dall'altro; l'etichetta resta incerta finché il ciclo non termina.",
-    "automation_alias_started": "{device}: ciclo avviato",
-    "automation_alias_finished": "{device}: ciclo terminato",
-    "automation_desc_started": "Viene eseguita quando inizia un ciclo di {device}. Aggiungi le tue azioni (notifica, luci, ...).",
-    "automation_desc_finished": "Viene eseguita quando termina un ciclo di {device}. Aggiungi le tue azioni (notifica, luci, ...).",
     "feedback_detected": "WashData ha rilevato: {name}",
     "import_undo_hint": "Viene conservato un punto di ripristino precedente all'ultima importazione ({when}): {profiles} profilo/i e {cycles} ciclo/i.",
     "replace_undo_hint": "Prima viene salvato un punto di ripristino, così puoi annullare questa importazione da Esporta/Importa.",
@@ -1025,7 +1035,16 @@
     "pg_sweep_n_cycles_one": "su {count} ciclo",
     "pg_sweep_n_cycles_many": "su {count} cicli",
     "pg_sweep_n_cycles_other": "su {count} cicli",
-    "pg_task_busy": "Per questo dispositivo è già in corso un'esecuzione di Prova sullo storico o Ottimizza. Attendi che finisca o annullala."
+    "pg_task_busy": "Per questo dispositivo è già in corso un'esecuzione di Prova sullo storico o Ottimizza. Attendi che finisca o annullala.",
+    "automations_tab_intro": "WashData offre trigger di dispositivo (ciclo avviato, ciclo terminato, ciclo bloccato e altro) per le tue automazioni di Home Assistant. Le automazioni che usano questo dispositivo sono elencate qui.",
+    "bp_intro": "Automazioni pronte per questo elettrodomestico, installate come modelli di Home Assistant.",
+    "bp_admin_only": "I modelli vengono installati da un amministratore.",
+    "bp_none": "Ancora nessun modello per questo tipo di elettrodomestico.",
+    "bp_load_failed": "I modelli non hanno potuto essere caricati.",
+    "auto_trigger_hint": "Crea un’automazione con questo trigger per questo dispositivo e la apre in Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Creata da WashData per {device}. Aggiungi le tue azioni (notifica, luci, ...).",
+    "automation_alias_new": "{device}: nuova automazione"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
@@ -1635,7 +1654,8 @@
     "subtab_profiles": "Profili",
     "maintenance": "Manutenzione",
     "playground": "Playground",
-    "store": "Store"
+    "store": "Store",
+    "automations": "Automazioni"
   },
   "tag": {
     "early_end": "Fine anticipata",
@@ -1804,7 +1824,14 @@
     "auto_label_done": "Etichettatura automatica completata: {count} cicli etichettati, {skipped} senza etichetta.",
     "auto_label_done_one": "Etichettatura automatica completata: {count} ciclo etichettato, {skipped} senza etichetta.",
     "auto_label_done_many": "Etichettatura automatica completata: {count} cicli etichettati, {skipped} senza etichetta.",
-    "auto_label_done_other": "Etichettatura automatica completata: {count} cicli etichettati, {skipped} senza etichetta."
+    "auto_label_done_other": "Etichettatura automatica completata: {count} cicli etichettati, {skipped} senza etichetta.",
+    "bp_install_failed": "Impossibile installare il modello: {error}",
+    "bp_installed_finish": "Modello installato. Completa il resto in Home Assistant.",
+    "bp_automation_failed": "Il modello è installato, ma l'automazione non ha potuto essere creata: {error}",
+    "bp_automation_created": "Automazione creata con le impostazioni predefinite; apertura in corso",
+    "copied": "Copiato",
+    "copy_failed": "Copia non riuscita. Seleziona il testo e copialo manualmente.",
+    "automation_label_failed": "Automazione creata, ma l’etichetta o la categoria WashData non ha potuto essere aggiunta."
   },
   "suggestion": {
     "observed_label": "Osservato",
@@ -1983,7 +2010,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter su GitHub ↗",
-    "manual": "Manuale ↗"
+    "manual": "Manuale ↗",
+    "bp_share": "Condividi il tuo modello tramite pull request ↗",
+    "bp_open_in_ha": "Apri in Home Assistant ↗",
+    "automations_all": "Tutte le automazioni WashData in Home Assistant"
   },
   "tip": {
     "add_brand": "Marca non elencata? Aggiungila al catalogo della community",
@@ -2164,5 +2194,71 @@
     "thr": "soglia",
     "too_short": "troppo breve",
     "tumble_kept": "rotazioni mantenute"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Accendi qualcosa mentre un ciclo è in corso",
+      "description": "Accende una luce, un interruttore o un helper a levetta quando un ciclo WashData inizia e lo spegne quando finisce, anche dopo una falsa partenza.\n\nRichiede WashData 0.5.9 o versione successiva."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Terminare una lunga fase antirughe dell'asciugatrice",
+      "description": "Per le asciugatrici che continuano a girare in modalità antirughe per ore dopo il programma. Si avvia solo quando WashData considera il programma terminato (ciclo concluso o antirughe avviato). Attende, poi spegne la presa intelligente dell'asciugatrice in un momento di basso consumo e, per impostazione predefinita, la riaccende. Un nuovo ciclo avviato nel frattempo lo annulla.\n\nRischio: questo commuta un relè mentre l'asciugatrice è collegata. Usalo solo con una presa adatta alla tua asciugatrice e a tuo rischio. WashData non commuta mai la presa da solo; lo fa questa automazione.\n\nRichiede WashData 0.5.9 o versione successiva."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Ciclo avviato"
+    },
+    "program_recognised": {
+      "name": "Programma riconosciuto"
+    },
+    "phase_started": {
+      "name": "Fase avviata"
+    },
+    "finishing_soon": {
+      "name": "In fase di completamento"
+    },
+    "cycle_overrun": {
+      "name": "Ciclo in ritardo"
+    },
+    "cycle_paused": {
+      "name": "Ciclo in pausa"
+    },
+    "cycle_resumed": {
+      "name": "Ciclo ripreso"
+    },
+    "cycle_stalled": {
+      "name": "Ciclo bloccato"
+    },
+    "cycle_finished": {
+      "name": "Ciclo terminato"
+    },
+    "cycle_ended": {
+      "name": "Ciclo concluso (qualsiasi motivo)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Antirughe avviato"
+    },
+    "still_tumbling": {
+      "name": "Ancora in rotazione dopo il ciclo"
+    },
+    "unload_pending": {
+      "name": "Scarico in attesa"
+    },
+    "unloaded": {
+      "name": "Scaricato"
+    },
+    "state_changed": {
+      "name": "Stato cambiato"
+    },
+    "maintenance_due": {
+      "name": "Manutenzione in scadenza"
+    },
+    "milestone_reached": {
+      "name": "Traguardo cicli raggiunto"
+    },
+    "pump_stuck": {
+      "name": "Pompa bloccata"
+    }
   }
 }

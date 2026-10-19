@@ -55,6 +55,7 @@ import voluptuous as vol
 
 import homeassistant.helpers.event as evt
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import script as script_helper
 from homeassistant.helpers import translation
 from homeassistant.helpers.start import async_at_started
@@ -106,6 +107,24 @@ from .const import (
     EVENT_CYCLE_STARTED,
     EVENT_CYCLE_ENDED,
     EVENT_CYCLE_STALLED,
+    SIGNAL_DEVICE_TRIGGER,
+    TRIGGER_ANTI_WRINKLE_STARTED,
+    TRIGGER_CYCLE_ENDED,
+    TRIGGER_CYCLE_FINISHED,
+    TRIGGER_CYCLE_STALLED,
+    TRIGGER_CYCLE_STARTED,
+    TRIGGER_CYCLE_OVERRUN,
+    TRIGGER_FINISHING_SOON,
+    TRIGGER_MAINTENANCE_DUE,
+    TRIGGER_MAINTENANCE_RECHECK_S,
+    TRIGGER_PHASE_STARTED,
+    TRIGGER_PROGRAM_RECOGNISED,
+    DATA_TRIGGER_LISTENERS,
+    TRIGGER_MILESTONE_REACHED,
+    TRIGGER_PUMP_STUCK,
+    TRIGGER_STILL_TUMBLING,
+    TRIGGER_UNLOAD_PENDING,
+    TRIGGER_UNLOADED,
     CYCLE_ANOMALY_STALLED,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
@@ -260,6 +279,7 @@ from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
 from . import match_rules
+from . import trigger_rules
 from .maintenance import effective_reminders
 from .frontend import PANEL_URL_PATH
 
@@ -310,6 +330,18 @@ _SENSOR_SWAP_BLOCKED_STATES = frozenset(
         STATE_ANTI_WRINKLE,
     }
 )
+
+# #478: the live triggers whose announcement the snapshot keeps (trigger_marks).
+_MARKED_TRIGGERS = frozenset({
+    TRIGGER_PROGRAM_RECOGNISED, TRIGGER_PHASE_STARTED,
+    TRIGGER_FINISHING_SOON, TRIGGER_CYCLE_OVERRUN,
+})
+
+# #478: the device triggers fired as the state entity enters a state.
+_STATE_TRIGGERS = {
+    STATE_ANTI_WRINKLE: TRIGGER_ANTI_WRINKLE_STARTED,
+    STATE_CLEAN: TRIGGER_UNLOAD_PENDING,
+}
 
 # States in which a cycle is under way, so a manually picked program applies to it
 # right now rather than being armed for the next one (#411). ANTI_WRINKLE is
@@ -768,6 +800,32 @@ class WashDataManager:
         # cycle end clears this one after the finished alert has been delivered.
         self._live_notification_tag = f"ha_washdata_{self.entry_id}_live"
         self._start_event_fired = False
+        # Device triggers (#478). cycle_started rides on _start_event_fired, which
+        # the snapshot persists; _cycle_ended_pending owes that start its
+        # cycle_ended, whatever the end turns out to be (a ghost included), and is
+        # rebuilt from that flag on restore. The two state triggers fire once per
+        # cycle end: _trigger_end_seq counts the ends this manager saw, and each
+        # state remembers the end it fired for, so a probe that leaves and
+        # re-enters the state stays quiet and a state restored at setup (no end
+        # seen yet) never fires.
+        self._cycle_ended_pending = False
+        self._trigger_end_seq = 0
+        self._state_trigger_fired: dict[str, int] = {
+            STATE_ANTI_WRINKLE: 0,
+            STATE_CLEAN: 0,
+        }
+        self._trigger_ended_program: str | None = None
+        # Triggers v2 (#478): the edges of what the entities show (state, pause,
+        # program, phase, remaining time, overrun), checked on every entity
+        # refresh and baselined after the restore so a restart replays nothing;
+        # the post-finish tumble tracker (still_tumbling); the due maintenance
+        # tasks, re-read at most every TRIGGER_MAINTENANCE_RECHECK_S.
+        self._live_triggers = trigger_rules.LiveTriggerTracker()
+        self._tumble_tracker = trigger_rules.TumbleTracker()
+        self._maintenance_triggers = trigger_rules.MaintenanceDueTracker()
+        self._maintenance_checked: tuple[datetime, int] | None = None
+        self._tumble_held: dict[str, Any] | None = None
+        self._restored_trigger_marks: Any = None
         self._cycle_start_time: datetime | None = None
         # Per-cycle UUID: the identity token the live match and the cycle-end tail
         # check so work for one cycle never lands on the next, even when both share
@@ -1455,6 +1513,13 @@ class WashDataManager:
                         },
                     )
                     self._start_event_fired = True
+                    self._cycle_ended_pending = True
+                    self._on_trigger_cycle_started()
+                    self._fire_device_trigger(
+                        TRIGGER_CYCLE_STARTED,
+                        self._current_program,
+                        start_time=(self._cycle_start_time or utc_now()).isoformat(),
+                    )
 
                 if self._notify_start_services or self._notify_actions:
                     msg_template = self.config_entry.options.get(
@@ -1900,6 +1965,9 @@ class WashDataManager:
                     self._start_event_fired = bool(
                         active_snapshot_to_restore.get("start_event_fired", False)
                     )
+                    # The restored cycle's start was signalled: its end owes a
+                    # cycle_ended trigger (#478).
+                    self._cycle_ended_pending = self._start_event_fired
                     # One-shot per-cycle state (audit MANAGER-08); junk is dropped.
                     _fired = active_snapshot_to_restore.get("fired_cycle_timers")
                     self._fired_cycle_timers = {
@@ -1908,6 +1976,12 @@ class WashDataManager:
                     }
                     self._notified_pre_completion = bool(
                         active_snapshot_to_restore.get("notified_pre_completion", False)
+                    )
+                    self._pump_stuck = bool(
+                        active_snapshot_to_restore.get("pump_stuck", False)
+                    )
+                    self._restored_trigger_marks = active_snapshot_to_restore.get(
+                        "trigger_marks"
                     )
                     _gaps = active_snapshot_to_restore.get("restart_gaps")
                     self._restart_gaps = [
@@ -2234,6 +2308,8 @@ class WashDataManager:
 
         # Attempt to restore state (BEFORE starting listener)
         await self._attempt_state_restoration()
+        # What the restored cycle shows was announced before the restart (#478).
+        self._trigger_baseline()
 
         # Restore last cycle end time to ensure ghost cycle suppression works after restart
         try:
@@ -3072,7 +3148,7 @@ class WashDataManager:
         if door_open:
             if self._is_clean_state:
                 # User opened the door after the cycle - laundry retrieved
-                self.mark_unloaded("door opened")
+                self.mark_unloaded("door opened", how="door")
             elif (
                 self._door_opens_at_end
                 and self.detector.state in (STATE_RUNNING, STATE_ENDING)
@@ -3168,7 +3244,9 @@ class WashDataManager:
             )
             return
 
-        self.mark_unloaded(f"{self._unload_confirm_entity} -> {new_val}")
+        self.mark_unloaded(
+            f"{self._unload_confirm_entity} -> {new_val}", how="confirm_entity"
+        )
 
     def _rearm_unload_confirm_window(self) -> None:
         """Restart the replay window for the configured entity.
@@ -3205,7 +3283,7 @@ class WashDataManager:
             return True
         return elapsed < UNLOAD_CONFIRM_REPLAY_GRACE_S
 
-    def mark_unloaded(self, source: str = "manual") -> bool:
+    def mark_unloaded(self, source: str = "manual", how: str = "manual") -> bool:
         """Clear the Clean state: the load has been taken out (#153, #451).
 
         Single owner of the "laundry retrieved" transition, shared by the door-open
@@ -3214,12 +3292,16 @@ class WashDataManager:
         entails. Idempotent: a confirmation arriving when nothing is waiting is a
         no-op, which is what an automation that fires on every button press needs.
 
+        ``how`` names the path for the ``unloaded`` trigger (#478): ``door``,
+        ``confirm_entity``, ``button``, ``service`` or ``manual``.
+
         Returns True when a Clean state was actually cleared.
         """
         if not self._is_clean_state:
             return False
 
         self._logger.debug("Unload confirmed (%s): clearing Clean state", source)
+        waiting_since = self._clean_state_start
         self._is_clean_state = False
         self._clean_state_start = None
         self._notified_clean_laundry = False
@@ -3227,6 +3309,16 @@ class WashDataManager:
         # Dismiss a delivered clean reminder (and purge any queued ones) so it does
         # not linger on the phone after the laundry is taken.
         self._clear_clean_notification()
+        self._fire_device_trigger(
+            TRIGGER_UNLOADED,
+            self._trigger_ended_program,
+            how=how,
+            minutes_waiting=(
+                round((utc_now() - waiting_since).total_seconds() / 60.0, 1)
+                if isinstance(waiting_since, datetime)
+                else None
+            ),
+        )
         self._notify_update()
         return True
 
@@ -3841,6 +3933,10 @@ class WashDataManager:
 
         now = utc_now()
 
+        # still_tumbling (#478) sees every reading, before the throttle: a short
+        # tumble may be a single report. Passive, detection never sees it.
+        self._track_tumble(power, now)
+
         # Throttle updates to avoid CPU overload on noisy sensors.
         # Low-power readings bypass throttling when:
         #   (a) a cycle is active (RUNNING/ENDING/PAUSED) — critical end-of-cycle signal, or
@@ -3945,6 +4041,7 @@ class WashDataManager:
         if key == getattr(self, "_stall_event_key", None):
             return
         self._stall_event_key = key
+        self._fire_device_trigger(TRIGGER_CYCLE_STALLED, self._current_program)
         self.hass.bus.async_fire(
             EVENT_CYCLE_STALLED,
             {
@@ -4643,6 +4740,12 @@ class WashDataManager:
                         "threshold_seconds": self._pump_stuck_duration,
                     },
                 )
+                self._fire_device_trigger(
+                    TRIGGER_PUMP_STUCK,
+                    self._current_program,
+                    elapsed_seconds=round(adjusted_elapsed),
+                    threshold_seconds=self._pump_stuck_duration,
+                )
                 self._notify_update()
 
         # 0. ZOMBIE KILLER (Hard Limit)
@@ -5069,6 +5172,14 @@ class WashDataManager:
                 # separately by _start_event_fired).
                 if not (self._notify_start_services or self._notify_actions):
                     self._notified_start = True
+                # The device trigger, at the same moment (#478).
+                self._cycle_ended_pending = True
+                self._on_trigger_cycle_started()
+                self._fire_device_trigger(
+                    TRIGGER_CYCLE_STARTED,
+                    self._current_program,
+                    start_time=self._cycle_start_time.isoformat(),
+                )
 
                 # Fire push notification immediately - do not wait for profile matching.
                 if not self._notified_start and (self._notify_start_services or self._notify_actions):
@@ -5146,6 +5257,13 @@ class WashDataManager:
         duration = cycle_data["duration"]
         max_power = cycle_data.get("max_power", 0)
 
+        # Before the detector moves to its terminal state (anti-wrinkle included),
+        # so the state triggers see this end (#478).
+        self._trigger_end_seq += 1
+        self._trigger_ended_program = self._trigger_program(self._current_program)
+        fire_ended = bool(getattr(self, "_cycle_ended_pending", False))
+        self._cycle_ended_pending = False
+
         # Coalesce this cycle end's store writes from its first one: the cadence
         # commit below already spawns a suggestion pass that saves (item 456).
         try:
@@ -5204,6 +5322,8 @@ class WashDataManager:
         if duration < 60 and cycle_energy_wh < 0.05:
             self._handle_noise_cycle(max_power)
             self._discard_cycle_cleanup()
+            if fire_ended:  # its start was announced, so its end is too (#478)
+                self._fire_cycle_ended(cycle_data, cycle_energy_wh)
             return  # Do not store this as a real cycle
         if self.device_type == "dishwasher" and prev_cycle_end_time is not None:
             # Pump-out suppression: dishwashers end cycles with a brief drain pump
@@ -5226,6 +5346,8 @@ class WashDataManager:
                     )
                     self._handle_noise_cycle(max_power)
                     self._discard_cycle_cleanup()
+                    if fire_ended:
+                        self._fire_cycle_ended(cycle_data, cycle_energy_wh)
                     return  # Do not store this as a real cycle
 
         # Store energy for notification and persistence (calculated above for ghost detection)
@@ -5258,6 +5380,7 @@ class WashDataManager:
                     cycle_data,
                     cycle_token=end_token,
                     price_timeline=end_price_timeline,
+                    fire_ended=fire_ended,
                 )
             )
 
@@ -5802,6 +5925,12 @@ class WashDataManager:
         # the pre-completion reminder twice, and a second restart lost the first gap.
         snapshot["fired_cycle_timers"] = sorted(self._fired_cycle_timers)
         snapshot["notified_pre_completion"] = bool(self._notified_pre_completion)
+        # Once per cycle, like the stuck-pump event and trigger it gates (#478).
+        snapshot["pump_stuck"] = bool(self._pump_stuck)
+        # What the live triggers announced, so a restart announces none again.
+        tracker = getattr(self, "_live_triggers", None)
+        if tracker is not None:
+            snapshot["trigger_marks"] = tracker.marks()
         snapshot["restart_gaps"] = list(self._restart_gaps)
         snapshot["live_activity_started"] = bool(self._live_activity_started)
         # When the power sensor last really reported, and the value the manager
@@ -5895,6 +6024,7 @@ class WashDataManager:
         cycle_data: dict[str, Any],
         cycle_token: str | None = None,
         price_timeline: list[tuple[float, float]] | None = None,
+        fire_ended: bool = True,
     ) -> None:
         """Process cycle completion, then close it whatever failed (MANAGER-12).
 
@@ -5904,11 +6034,21 @@ class WashDataManager:
         store itself; arming the expiry timer then would outlive the unload.
         """
         failed = False
+        # ``fire_ended``: this cycle's start fired cycle_started, so it owes one
+        # cycle_ended (#478). The steps fire it next to the bus event; a failure
+        # before that point fires it here, so a "while running" automation is
+        # never left on.
+        ended = {"pending": fire_ended}
         try:
-            await self._async_cycle_end_steps(cycle_data, cycle_token, price_timeline)
+            await self._async_cycle_end_steps(
+                cycle_data, cycle_token, price_timeline, ended
+            )
         except Exception:  # pylint: disable=broad-exception-caught
             failed = True
             self._logger.exception("Cycle-end processing failed; closing the cycle anyway")
+            if ended["pending"]:
+                ended["pending"] = False
+                self._fire_cycle_ended(cycle_data)
         finally:
             if not self._is_shutdown:
                 await self._async_close_cycle_end(
@@ -5920,6 +6060,7 @@ class WashDataManager:
         cycle_data: dict[str, Any],
         cycle_token: str | None = None,
         price_timeline: list[tuple[float, float]] | None = None,
+        ended: dict[str, bool] | None = None,
     ) -> None:
         """Process cycle completion asynchronously (heavy tasks).
 
@@ -6301,6 +6442,22 @@ class WashDataManager:
             },
         )
 
+        # The device trigger (#478): not for an interrupted false start, the same
+        # rule as the finished push.
+        trigger_program = self._trigger_program(display_program)
+        if cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
+            self._trigger_ended_program = trigger_program
+        end_vars = self._cycle_end_trigger_vars(cycle_data, label_applied=label_gate_ok)
+        if notif_rules.cycle_end_is_finish(cycle_data.get("status")):
+            self._fire_device_trigger(TRIGGER_CYCLE_FINISHED, trigger_program, **end_vars)
+            # Not when a new cycle already started during the awaits above.
+            if cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
+                self._arm_tumble_tracker(cycle_data)
+        if ended is None or ended["pending"]:
+            if ended is not None:
+                ended["pending"] = False
+            self._fire_device_trigger(TRIGGER_CYCLE_ENDED, trigger_program, **end_vars)
+            self._release_held_tumble(cycle_data.get("status"))
 
         # Purge pending live entries and reset counters. No service-level clear
         # here: the activity is ended below, AFTER the finished notification has
@@ -6424,6 +6581,7 @@ class WashDataManager:
         # and a finish delivery channel is configured. Respects quiet hours via
         # _dispatch_notification's finish-type gate.
         if cycle_persisted:
+            self._fire_milestone_trigger(prev_lifetime_count, cur_lifetime_count)
             self._maybe_notify_milestone(prev_lifetime_count, cur_lifetime_count)
 
         # Request user feedback if we had a confident match.
@@ -6840,6 +6998,30 @@ class WashDataManager:
                 return int(self.cycle_count)
             except Exception:  # noqa: BLE001
                 return 0
+
+    def _fire_milestone_trigger(self, prev_count: int | None, cur_count: int | None) -> None:
+        """milestone_reached (#478) at the milestone notification's moment, whether
+        or not a notification target is set. Never raises."""
+        try:
+            if cur_count is None:
+                cur_count = self._lifetime_cycle_count()
+            if prev_count is None:
+                prev_count = cur_count - 1
+            crossed = self._milestone_crossed(
+                prev_count,
+                cur_count,
+                self.config_entry.options.get(
+                    CONF_NOTIFY_MILESTONES, DEFAULT_NOTIFY_MILESTONES
+                ),
+            )
+            if crossed is not None:
+                self._fire_device_trigger(
+                    TRIGGER_MILESTONE_REACHED,
+                    self._trigger_ended_program,
+                    cycle_count=crossed,
+                )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Milestone trigger failed", exc_info=True)
 
     def _maybe_notify_milestone(
         self, prev_count: int | None = None, cur_count: int | None = None
@@ -8782,7 +8964,313 @@ class WashDataManager:
 
     def _notify_update(self) -> None:
         """Notify entities of update."""
+        self._check_state_triggers()
         async_dispatcher_send(self.hass, SIGNAL_WASHER_UPDATE.format(self.entry_id))
+
+    # ------------------------------------------------------------------
+    # Device triggers (#478)
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _trigger_program(program: Any) -> str | None:
+        """A real program name for the trigger variables, None for a placeholder."""
+        if isinstance(program, str) and program and match_rules.program_is_committed(
+            program
+        ):
+            return program
+        return None
+
+    def _trigger_switch_entity(self) -> str | None:
+        """The relay an automation may switch: the configured switch entity, else
+        the one ``switch.`` entity on the power sensor's device, else None."""
+        configured = self.config_entry.options.get(
+            CONF_SWITCH_ENTITY
+        ) or self.config_entry.data.get(CONF_SWITCH_ENTITY)
+        if isinstance(configured, str) and configured.startswith("switch."):
+            return configured
+        ent_reg = er.async_get(self.hass)
+        source = ent_reg.async_get(self.power_sensor_entity_id)
+        device_id = getattr(source, "device_id", None)
+        if not isinstance(device_id, str):
+            return None
+        switches = [
+            e.entity_id
+            for e in er.async_entries_for_device(ent_reg, device_id)
+            if e.domain == "switch"
+        ]
+        return switches[0] if len(switches) == 1 else None
+
+    def _fire_device_trigger(
+        self, trigger_type: str, program: Any, /, **extra: Any
+    ) -> None:
+        """Send one trigger occurrence with its variables. Never raises.
+
+        The one firing path for the device triggers and the integration triggers
+        (#478). A type the device type is not offered is never sent.
+        """
+        try:
+            if not trigger_rules.trigger_offered(trigger_type, self.device_type):
+                return
+            switch_entity: str | None = None
+            try:
+                switch_entity = self._trigger_switch_entity()
+            except Exception:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Could not resolve the plug's switch", exc_info=True)
+            # An occurrence's own variables win (program_recognised's program).
+            variables: dict[str, Any] = {
+                "entry_id": self.entry_id,
+                "device_name": self.config_entry.title,
+                "device_type": self.device_type,
+                "program": self._trigger_program(program),
+                "power_entity": self.power_sensor_entity_id,
+                "switch_entity": switch_entity,
+                **extra,
+            }
+            async_dispatcher_send(
+                self.hass,
+                SIGNAL_DEVICE_TRIGGER.format(self.entry_id),
+                trigger_type,
+                variables,
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.warning("Device trigger %s failed", trigger_type, exc_info=True)
+
+    def _cycle_end_trigger_vars(
+        self,
+        cycle_data: dict[str, Any],
+        *,
+        label_applied: bool = False,
+        energy_wh: float | None = None,
+    ) -> dict[str, Any]:
+        """The cycle_finished / cycle_ended variables. Small and JSON-safe."""
+        wh = self._cycle_report_energy_wh(cycle_data) if energy_wh is None else energy_wh
+        anomaly = cycle_data.get("anomaly")
+        return {
+            "status": cycle_data.get("status"),
+            "duration": cycle_data.get("duration"),
+            "energy_kwh": round(wh / 1000, 3) if math.isfinite(wh) else None,
+            "start_time": cycle_data.get("start_time"),
+            "end_time": cycle_data.get("end_time") or utc_now().isoformat(),
+            "label_applied": bool(label_applied),
+            # The cycle's frozen runtime/post-cycle anomaly (overrun, underrun,
+            # stalled), "none" without one.
+            "anomaly": anomaly if isinstance(anomaly, str) and anomaly else "none",
+        }
+
+    def _fire_cycle_ended(
+        self, cycle_data: dict[str, Any], energy_wh: float | None = None
+    ) -> None:
+        """cycle_ended for an end the cycle-end steps never announce (a discarded
+        ghost, or steps that failed first). Never raises."""
+        try:
+            variables = self._cycle_end_trigger_vars(cycle_data, energy_wh=energy_wh)
+        except Exception:  # pylint: disable=broad-exception-caught
+            variables = {"status": cycle_data.get("status"), "label_applied": False}
+        self._fire_device_trigger(
+            TRIGGER_CYCLE_ENDED, self._trigger_ended_program, **variables
+        )
+        self._release_held_tumble(cycle_data.get("status"))
+
+    def _check_state_triggers(self) -> None:
+        """The triggers that follow what the entities show, on every refresh (#478):
+        anti_wrinkle_started / unload_pending as the state entity enters those
+        states, once per cycle end (see ``_state_trigger_fired``), then the live
+        edges and maintenance_due."""
+        fired = getattr(self, "_state_trigger_fired", None)
+        if fired is None:  # a stand-in manager built without __init__
+            return
+        state = self.check_state()
+        if (
+            isinstance(state, str)
+            and state in _STATE_TRIGGERS
+            and fired[state] != self._trigger_end_seq
+        ):
+            fired[state] = self._trigger_end_seq
+            self._fire_device_trigger(_STATE_TRIGGERS[state], self._trigger_ended_program)
+        self._check_live_triggers(state)
+        self._check_maintenance_triggers()
+
+    def _live_trigger_inputs(self, state: Any) -> trigger_rules.LiveInputs:
+        """What the entities show now, for the live trigger edges (#478)."""
+        # A cycle whose cycle_started went out and whose end has not been seen.
+        active = bool(getattr(self, "_cycle_ended_pending", False))
+        program = self._trigger_program(self._current_program) if active else None
+        reason: str | None = None
+        if active and state == STATE_USER_PAUSED:
+            reason = trigger_rules.PAUSE_USER
+        elif active and state == STATE_PAUSED:
+            reason = (
+                trigger_rules.PAUSE_STALLED
+                if getattr(self.detector, "stalled", False) is True
+                else trigger_rules.PAUSE_DETECTED
+            )
+        remaining = self._time_remaining if active else None
+        if not isinstance(remaining, (int, float)) or not math.isfinite(remaining):
+            remaining = None
+        # The pre-completion reminder's own gate: a trusted, unfinished estimate.
+        trusted = (
+            remaining
+            if remaining is not None
+            and float(self._cycle_progress or 0.0) < 100
+            and not self._last_match_ambiguous
+            else None
+        )
+        expected = self._matched_profile_duration if active else None
+        ratio = self._overrun_ratio if expected else None
+        phase = (
+            progress_mod.current_phase_range(
+                self.profile_store,
+                self.detector.state,
+                self._current_program,
+                self._cycle_progress,
+                self._matched_profile_duration,
+            )
+            if program
+            else None
+        )
+        phase_name = str(phase.get("name") or "").strip() if phase else ""
+        return trigger_rules.LiveInputs(
+            state=state if isinstance(state, str) else None,
+            cycle_active=active,
+            program=program,
+            phase=phase_name or None,
+            phase_start_s=float(phase.get("start") or 0.0) if phase_name else None,
+            pause_reason=reason,
+            user_pause_since=self._user_pause_start,
+            time_remaining_s=remaining,
+            remaining_s=trusted,
+            overrun_ratio=ratio if isinstance(ratio, (int, float)) and ratio > 0 else None,
+            expected_duration_s=float(expected) if expected else None,
+        )
+
+    def _check_live_triggers(self, state: Any) -> None:
+        """Send the live edges since the last refresh (#478). Never raises."""
+        tracker = getattr(self, "_live_triggers", None)
+        if tracker is None:
+            return
+        try:
+            occurrences = tracker.tick(self._live_trigger_inputs(state), utc_now())
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Live trigger check failed", exc_info=True)
+            return
+        for trigger_type, variables in occurrences:
+            self._fire_device_trigger(trigger_type, self._current_program, **variables)
+        # A restart must not announce these again: the snapshot carries the marks,
+        # written now rather than at the next 60 s save when something listens.
+        if any(t in _MARKED_TRIGGERS for t, _ in occurrences) and self._has_trigger_listeners():
+            try:
+                snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
+                self._spawn_tracked(self.profile_store.async_save_active_cycle(snapshot))
+            except Exception:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Could not save the trigger marks", exc_info=True)
+
+    def _has_trigger_listeners(self) -> bool:
+        """Whether a device or integration trigger listens to this entry (#478)."""
+        listeners = self.hass.data.get(DATA_TRIGGER_LISTENERS)
+        return isinstance(listeners, dict) and listeners.get(self.entry_id, 0) > 0
+
+    def _trigger_baseline(self) -> None:
+        """Take what the entities show as already announced (#478): after the
+        restore, so a restart replays no live trigger, no due maintenance task and
+        no stall that was already reported. Never raises."""
+        try:
+            restored, self._restored_trigger_marks = (
+                getattr(self, "_restored_trigger_marks", None), None
+            )
+            self._live_triggers.baseline(
+                self._live_trigger_inputs(self.check_state()), utc_now(), restored
+            )
+            self._maintenance_triggers.update(self.maintenance_status)
+            self._maintenance_checked = (utc_now(), self._lifetime_cycle_count())
+            info = self.detector.stall_info() if self.detector.stalled is True else None
+            if isinstance(info, dict) and info.get("stalled_since"):
+                self._stall_event_key = info["stalled_since"]
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Trigger baseline failed", exc_info=True)
+
+    def _check_maintenance_triggers(self) -> None:
+        """maintenance_due for each task that fell due (#478). The list is re-read
+        when the odometer moved or TRIGGER_MAINTENANCE_RECHECK_S passed, so it
+        follows the Maintenance due sensor without a store pass per reading."""
+        checked = getattr(self, "_maintenance_checked", None)
+        if checked is None:  # not set up yet: the baseline takes the first look
+            return
+        try:
+            now = utc_now()
+            count = self._lifetime_cycle_count()
+            if count == checked[1] and (
+                (now - checked[0]).total_seconds() < TRIGGER_MAINTENANCE_RECHECK_S
+            ):
+                return
+            self._maintenance_checked = (now, count)
+            for variables in self._maintenance_triggers.update(self.maintenance_status):
+                self._fire_device_trigger(
+                    TRIGGER_MAINTENANCE_DUE, self._current_program, **variables
+                )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Maintenance trigger check failed", exc_info=True)
+
+    def _arm_tumble_tracker(self, cycle_data: dict[str, Any]) -> None:
+        """Watch for tumbles after this finished cycle (still_tumbling, #478)."""
+        if not trigger_rules.trigger_offered(TRIGGER_STILL_TUMBLING, self.device_type):
+            return
+        try:
+            end = dt_util.parse_datetime(str(cycle_data.get("end_time") or ""))
+            finished_at = dt_util.as_utc(end) if end is not None else utc_now()
+            self._tumble_tracker.arm(
+                finished_at,
+                float(self._current_power),
+                float(self.detector.config.start_threshold_w),
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not arm the tumble tracker", exc_info=True)
+
+    def _track_tumble(self, power: float, now: datetime) -> None:
+        """Feed a raw reading to the tumble tracker; send still_tumbling at the end
+        of a tumble. Passive: detection never sees it. Never raises."""
+        tracker = getattr(self, "_tumble_tracker", None)
+        if tracker is None or not tracker.armed:
+            return
+        try:
+            cfg = self.detector.config
+            variables = tracker.reading(
+                power, now, float(cfg.start_threshold_w), float(cfg.stop_threshold_w)
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Tumble tracking failed", exc_info=True)
+            return
+        if variables is None:
+            return
+        if getattr(self, "_cycle_ended_pending", False):
+            # A cycle started since the finish. Without anti-wrinkle a tumble is
+            # detected as a false start, so the tumble is held until that cycle
+            # ends: sent if it ends interrupted, dropped if it finishes (which
+            # re-arms the tracker for its own finish), see _release_held_tumble.
+            # Of several, the last is held, crossing from the last one sent.
+            held = getattr(self, "_tumble_held", None)
+            if held is not None:
+                variables["_prev_minutes"] = held.get("_prev_minutes")
+            self._tumble_held = variables
+            return
+        self._fire_device_trigger(
+            TRIGGER_STILL_TUMBLING, self._trigger_ended_program, **variables
+        )
+
+    def _release_held_tumble(self, status: Any) -> None:
+        """After a cycle_ended: a false start (interrupted) was a tumble, so a
+        tumble held during it is sent now; any other end drops it (#478)."""
+        held, self._tumble_held = getattr(self, "_tumble_held", None), None
+        if held is None or notif_rules.cycle_end_is_finish(status):
+            return
+        if self._tumble_tracker.armed:
+            self._fire_device_trigger(
+                TRIGGER_STILL_TUMBLING, self._trigger_ended_program, **held
+            )
+
+    def _on_trigger_cycle_started(self) -> None:
+        """cycle_started went out: a new cycle owes its own live edges (#478)."""
+        tracker = getattr(self, "_live_triggers", None)
+        if tracker is not None:
+            tracker.new_cycle()
 
     def _notify_update_deferrable(self) -> None:
         """Notify, unless a power reading is being handled: its handler notifies

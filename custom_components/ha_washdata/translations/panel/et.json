@@ -89,7 +89,9 @@
     "matcher_used": "Sobitatud {n} teie tsükliga",
     "matcher_used_one": "Sobitatud {n} teie tsükliga",
     "matcher_used_other": "Sobitatud {n} teie tsükliga",
-    "matcher_used_tip": "Selle seadme tsüklid, mille WashData sobitas iseseisvalt selle imporditud programmiga. Import, mis kunagi ei sobitu, ei pruugi teie seadmele sobida; selle võib eemaldada. Loendatakse kohalikult; poodi ei saadeta midagi."
+    "matcher_used_tip": "Selle seadme tsüklid, mille WashData sobitas iseseisvalt selle imporditud programmiga. Import, mis kunagi ei sobitu, ei pruugi teie seadmele sobida; selle võib eemaldada. Loendatakse kohalikult; poodi ei saadeta midagi.",
+    "bp_installed": "Installitud",
+    "bp_installed_other": "Muu versioon installitud"
   },
   "btn": {
     "pg_preset_delete": "Kustuta eelseadistus",
@@ -133,7 +135,6 @@
     "export": "Ekspordi",
     "force_stop": "Sundpeatus",
     "force_stop_tip": "Lõpeta praegune tsükkel kohe ja märgi see sundpeatunuks",
-    "from_template": "Mallist ▾",
     "ignore": "Ignoreeri",
     "import_json": "Import JSON-ist",
     "inspect": "Kontrollige",
@@ -147,8 +148,6 @@
     "new_phase": "+ Uus etapp",
     "new_profile": "+ Uus profiil",
     "new_profile_tip": "Loo uus programmide profiil olemasolevast märgistatud tsüklist või salvestusest",
-    "on_cycle_finished": "Tsükkel lõppenud",
-    "on_cycle_started": "Tsükkel algas",
     "pause_cycle": "Paus",
     "pause_cycle_tip": "Peata käimasolev tsükkel – seade jätkab sealt, kus pooleli jäi",
     "pg_load_live": "Laadi aktiivsed seaded",
@@ -251,7 +250,14 @@
     "confirmed": "Kinnitatud",
     "create_profile_from_gap": "Loo profiil",
     "undo_import": "Võta viimane import tagasi",
-    "pg_rerun": "Uuenda simulatsiooni"
+    "pg_rerun": "Uuenda simulatsiooni",
+    "from_trigger": "Käivita triggerilt ▾",
+    "bp_use": "Kasuta selle seadmega",
+    "bp_install": "Installi mall",
+    "bp_view_yaml": "Vaata YAML-i",
+    "copy": "Kopeeri",
+    "replace": "Asenda",
+    "from_trigger_open": "Käivita triggerilt ▴"
   },
   "note": {
     "off_delay": {
@@ -366,7 +372,10 @@
     "import_power_history": "Võimsuse ajaloo import",
     "service_status": "Hoolduse olek",
     "online_account_tab": "Veeb ja kogukond",
-    "live_match_debug": "Reaalajas vaste silumine"
+    "live_match_debug": "Reaalajas vaste silumine",
+    "automations_used": "Seda seadet kasutavad automatiseerimised",
+    "bp_templates": "Mallid",
+    "automations_all_tip": "Home Assistanti automatiseerimiste nimekiri, filtreeritud WashData sildi järgi. Siia loodud automatiseerimised asuvad ka WashData kategoorias."
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -678,7 +687,11 @@
     "cycle_context_minutes": "{min} min",
     "cycle_context_series": "Salvesti ajalugu",
     "before_start": "Enne algust",
-    "after_end": "Pärast lõppu"
+    "after_end": "Pärast lõppu",
+    "bp_you_choose": "Vali sina: {inputs}",
+    "bp_adjustable": "Kohandatav: {inputs}",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Kannab WashData silti"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -775,7 +788,9 @@
     "profile_title": "Profiil · {name}",
     "undo_import_msg": "Selle seadme andmed ja seaded taastatakse viimase impordi ({when}) eelsesse olekusse. Pärast seda salvestatud tsüklid ja tehtud muudatused lähevad kaotsi.",
     "undo_import_ok": "Võta import tagasi",
-    "undo_import_title": "Võta viimane import tagasi"
+    "undo_import_title": "Võta viimane import tagasi",
+    "bp_replace_title": "Asenda installitud mall?",
+    "bp_replace_msg": "Home Assistantil on \"{name}\" teistsugune versioon. Asendada see WashData selle versiooniga? Seda kasutavad automatiseerimised muutuvad koos sellega."
   },
   "msg": {
     "pg_canvas_empty3": "Vali ülalt tsükkel ja vajuta Käivita, et seda simuleerida. Seejärel hõljuta väärtuste lugemiseks, keri või näpista suumimiseks ja lohista liigutamiseks.",
@@ -796,7 +811,6 @@
     "artifact_pause_detail": "Võimsus langes umbes {n}s ajaks peaaegu nulli ja taastus siis. Tõenäoliselt avati uks või tsükkel peatati.",
     "artifact_spike_detail": "Ületas tavapärase võimsusriba umbes {n}s jooksul.",
     "auto_label_intro": "Määrake profiilid märgistamata tsüklitele, mille sobivuse usaldus eemaldab läve.",
-    "automations_intro": "WashData käivitab {start} / {end} sündmusi ja avaldab olemeid, seega on teated ja toimingud kõige paremini ehitada tavaliste Home Assistanti automaatikana. Seda seadet kasutavad automaatikad kuvatakse allpool.",
     "cleanup_intro": "Kõik märgistatud tsüklid on kohakuti. Märgi kõrvalekalded ja eemalda nende märgistus (jäävad ajalukku, kuid ei kujunda enam seda profiili) või kustuta need.",
     "clear_debug_hint": "Ruumi vabastamiseks eemaldage salvestatud silumisandmed.",
     "collecting_data": "Andmete kogumine. Tsükleid on enne peenhäälestuse algust veel vaja: {need} ({current}/{min}).",
@@ -1037,10 +1051,6 @@
     "pg_label_yes": "Märgistataks tsükli lõpus kui \"{name}\"",
     "pg_label_no": "Paluks ülevaatamist: {reason}",
     "live_match_debug_tip": "Usaldus: kui hästi praegune võimsuskõver vastab parimale kandidaatprofiilile (0-100%). Ebaselge: kahe parima kandidaadi skoorid erinevad teineteisest vähem kui 5% - silt jääb ebakindlaks, kuni tsükkel lõpeb.",
-    "automation_alias_started": "{device}: tsükkel algas",
-    "automation_alias_finished": "{device}: tsükkel lõppes",
-    "automation_desc_started": "Käivitub, kui seadme {device} tsükkel algab. Lisa oma toimingud (teavitus, tuled, ...).",
-    "automation_desc_finished": "Käivitub, kui seadme {device} tsükkel lõpeb. Lisa oma toimingud (teavitus, tuled, ...).",
     "feedback_detected": "WashData tuvastas: {name}",
     "import_undo_hint": "Säilitatakse viimase impordi ({when}) eelne taastepunkt: {profiles} profiili ja {cycles} tsüklit.",
     "replace_undo_hint": "Esmalt salvestatakse taastepunkt, nii et saad selle impordi jaotises Eksport / Import tagasi võtta.",
@@ -1063,7 +1073,16 @@
     "cycle_context_note": "Hall: võimsusanduri salvesti ajalugu selle tsükli ümber. See ei ole tsükli osa ega mõjuta kestust, energiat ega sobitamist.",
     "cycle_context_none": "Salvestis pole selle tsükli ümber ühtegi näitu (Home Assistant hoiab vaikimisi 10 päeva ajalugu).",
     "cycle_context_tip": "Ainult kuvamiseks: näitab võimsusanduri salvesti ajalugu selle tsükli ümber, kui see on veel alles. Katkenud käivituskatsete lisamiseks tulevastesse tsüklitesse kasutage sätet Kõvera eeljooks (Seaded > Tuvastamine > Tsükli Algus), mis muudab salvestatud kestusi.",
-    "invalid_threshold_pair": "Peatumise Lävi ({stop} W) peab olema väiksem kui Käivitumise Lävi ({start} W). Midagi ei salvestatud; muutke mõlemat korraga."
+    "invalid_threshold_pair": "Peatumise Lävi ({stop} W) peab olema väiksem kui Käivitumise Lävi ({start} W). Midagi ei salvestatud; muutke mõlemat korraga.",
+    "automations_tab_intro": "WashData pakub seadme triggereid (tsükkel algas, tsükkel lõppes, tsükkel seiskus jne) teie enda Home Assistanti automatiseerimistele. Seda seadet kasutavad automatiseerimised on siin loetletud.",
+    "bp_intro": "Valmis automatiseerimised sellele seadmele, installitud Home Assistanti blueprintidena.",
+    "bp_admin_only": "Malle installib administraator.",
+    "bp_none": "Selle seadme tüübi jaoks pole malle veel.",
+    "bp_load_failed": "Malle ei saanud laadida.",
+    "auto_trigger_hint": "Loob automatiseerimise selle triggeriga selle seadme jaoks ja avab selle Home Assistantis.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Loodud WashData poolt {device} jaoks. Lisa oma toimingud (teavitus, tuled, ...).",
+    "automation_alias_new": "{device}: uus automatiseerimine"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
@@ -1673,7 +1692,8 @@
     "subtab_profiles": "Profiilid",
     "maintenance": "Hooldus",
     "playground": "Katseala",
-    "store": "Pood"
+    "store": "Pood",
+    "automations": "Automatiseerimised"
   },
   "tag": {
     "early_end": "Varajane lõpp",
@@ -1840,7 +1860,14 @@
     "auto_label_cancelled_other": "Automaatne märgistamine tühistati pärast {count} tsükli märgistamist.",
     "auto_label_done": "Automaatne märgistamine on lõpetatud: märgistati {count} tsüklit, märgistamata jäi {skipped}.",
     "auto_label_done_one": "Automaatne märgistamine on lõpetatud: märgistati {count} tsükkel, märgistamata jäi {skipped}.",
-    "auto_label_done_other": "Automaatne märgistamine on lõpetatud: märgistati {count} tsüklit, märgistamata jäi {skipped}."
+    "auto_label_done_other": "Automaatne märgistamine on lõpetatud: märgistati {count} tsüklit, märgistamata jäi {skipped}.",
+    "bp_install_failed": "Malli ei saanud installida: {error}",
+    "bp_installed_finish": "Mall installitud. Täida ülejäänu Home Assistantis.",
+    "bp_automation_failed": "Mall on installitud, kuid automatiseerimist ei saanud luua: {error}",
+    "bp_automation_created": "Automatiseerimine loodud vaikesätetega; avatakse",
+    "copied": "Kopeeritud",
+    "copy_failed": "Kopeerimine ebaõnnestus. Vali tekst ja kopeeri käsitsi.",
+    "automation_label_failed": "Automatiseerimine loodud, kuid WashData silti või kategooriat ei saanud lisada."
   },
   "suggestion": {
     "observed_label": "Mõõdetud",
@@ -2019,7 +2046,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter GitHubis ↗",
-    "manual": "Juhend ↗"
+    "manual": "Juhend ↗",
+    "bp_share": "Jaga oma malli pull requestiga ↗",
+    "bp_open_in_ha": "Ava Home Assistantis ↗",
+    "automations_all": "Kõik WashData automatiseerimised Home Assistantis"
   },
   "tip": {
     "add_brand": "Brändi pole loendis? Lisa see kogukonna kataloogi",
@@ -2146,5 +2176,71 @@
     "thr": "lävi",
     "too_short": "liiga lühike",
     "tumble_kept": "trummelimpulsid säilitatud"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Lülita midagi sisse tsükli ajal",
+      "description": "Lülitab tule, lüliti või abiüksuse sisse, kui WashData tsükkel algab, ja välja, kui see lõpeb, ka pärast vale-käivitust.\n\nVajab WashData 0.5.9 või uuemat."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Lõpeta kuivati pikk kortsudevastane faas",
+      "description": "Kuivatitele, mis jätkavad tunde pärast programmi kortsudevastases režiimis trummelimist. Töötab ainult siis, kui WashData loeb programmi lõpetatuks (tsükkel lõppes või kortsudevastane algas). See ootab, seejärel lülitab kuivati nutipistiku välja madala võimsuse hetkel ja vaikimisi uuesti sisse. Vahepeal algav uus tsükkel tühistab selle.\n\nOht: see lülitab releed, kui kuivati on pistikusse ühendatud. Kasuta ainult pistikuga, mis sobib su kuivatile, ja omal vastutusel. WashData ei lülita pistikut kunagi ise; seda teeb see automatiseerimine.\n\nVajab WashData 0.5.9 või uuemat."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Tsükkel algas"
+    },
+    "program_recognised": {
+      "name": "Programm tuvastati"
+    },
+    "phase_started": {
+      "name": "Faas algas"
+    },
+    "finishing_soon": {
+      "name": "Lõpeb peagi"
+    },
+    "cycle_overrun": {
+      "name": "Tsükkel kestab liiga kaua"
+    },
+    "cycle_paused": {
+      "name": "Tsükkel peatati"
+    },
+    "cycle_resumed": {
+      "name": "Tsükkel jätkus"
+    },
+    "cycle_stalled": {
+      "name": "Tsükkel seiskus"
+    },
+    "cycle_finished": {
+      "name": "Tsükkel lõppes"
+    },
+    "cycle_ended": {
+      "name": "Tsükkel lõppes (mistahes põhjusel)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Kortsudevastane algas"
+    },
+    "still_tumbling": {
+      "name": "Tuumab veel pärast tsüklit"
+    },
+    "unload_pending": {
+      "name": "Mahalaadimine ootab"
+    },
+    "unloaded": {
+      "name": "Mahalaadimine tehtud"
+    },
+    "state_changed": {
+      "name": "Olek muutus"
+    },
+    "maintenance_due": {
+      "name": "Hooldus on vajalik"
+    },
+    "milestone_reached": {
+      "name": "Tsükli verstapost saavutati"
+    },
+    "pump_stuck": {
+      "name": "Pump on ummistunud"
+    }
   }
 }

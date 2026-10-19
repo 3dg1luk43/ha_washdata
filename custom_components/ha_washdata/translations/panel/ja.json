@@ -86,7 +86,9 @@
         "matcher_unused": "まだあなたのサイクルにマッチしていません",
         "matcher_used": "あなたのサイクル {n} 件にマッチ",
         "matcher_used_other": "あなたのサイクル {n} 件にマッチ",
-        "matcher_used_tip": "この機器のサイクルのうち、WashData がこのインポート済みプログラムに自動でマッチさせたものです。一度もマッチしないインポートはお使いの機器に合わない可能性があるため、削除できます。カウントはローカルで行われ、ストアには何も送信されません。"
+        "matcher_used_tip": "この機器のサイクルのうち、WashData がこのインポート済みプログラムに自動でマッチさせたものです。一度もマッチしないインポートはお使いの機器に合わない可能性があるため、削除できます。カウントはローカルで行われ、ストアには何も送信されません。",
+        "bp_installed": "インストール済み",
+        "bp_installed_other": "別バージョンがインストール済み"
     },
     "btn": {
         "pg_preset_delete": "プリセットを削除",
@@ -130,7 +132,6 @@
         "export": "エクスポート",
         "force_stop": "強制停止",
         "force_stop_tip": "現在のサイクルをすぐに終了し、強制停止としてマークします",
-        "from_template": "テンプレートから▾",
         "ignore": "無視する",
         "import_json": "JSONからインポート",
         "inspect": "検査する",
@@ -144,8 +145,6 @@
         "new_phase": "+ 新しいフェーズ",
         "new_profile": "+ 新しいプロファイル",
         "new_profile_tip": "既存のラベル付きサイクルまたは記録から新しいプログラムプロファイルを作成します",
-        "on_cycle_finished": "サイクル終了時",
-        "on_cycle_started": "サイクル開始時",
         "pause_cycle": "一時停止",
         "pause_cycle_tip": "実行中のサイクルを一時停止します – 家電は停止した場所から再開します",
         "pg_load_live": "有効な設定を読み込む",
@@ -248,7 +247,14 @@
         "confirmed": "確認済み",
         "create_profile_from_gap": "プロファイルを作成",
         "undo_import": "前回のインポートを元に戻す",
-        "pg_rerun": "シミュレーションを更新"
+        "pg_rerun": "シミュレーションを更新",
+        "from_trigger": "トリガーから開始 ▾",
+        "bp_use": "このデバイスで使用",
+        "bp_install": "テンプレートをインストール",
+        "bp_view_yaml": "YAMLを表示",
+        "copy": "コピー",
+        "replace": "置換",
+        "from_trigger_open": "トリガーから開始 ▴"
     },
     "note": {
         "off_delay": {
@@ -363,7 +369,10 @@
         "import_power_history": "電力履歴のインポート",
         "service_status": "メンテナンス状況",
         "online_account_tab": "オンラインとコミュニティ",
-        "live_match_debug": "ライブマッチのデバッグ"
+        "live_match_debug": "ライブマッチのデバッグ",
+        "automations_used": "このデバイスを使用しているオートメーション",
+        "bp_templates": "テンプレート",
+        "automations_all_tip": "WashDataラベルでフィルタリングされたHome Assistantのオートメーション一覧。ここで作成したオートメーションはWashDataカテゴリにも入ります。"
     },
     "health": {
         "fair": "プロファイル品質: 普通",
@@ -672,7 +681,11 @@
         "cycle_context_minutes": "{min}分",
         "cycle_context_series": "レコーダー履歴",
         "before_start": "開始前",
-        "after_end": "終了後"
+        "after_end": "終了後",
+        "bp_you_choose": "あなたが選択: {inputs}",
+        "bp_adjustable": "調整可能: {inputs}",
+        "bp_yaml": "ブループリント YAML",
+        "automation_wd_label": "WashDataラベルを持つ"
     },
     "log": {
         "all_levels": "すべてのレベル",
@@ -767,7 +780,9 @@
         "profile_title": "プロファイル · {name}",
         "undo_import_msg": "このデバイスのデータと設定が、前回のインポート（{when}）より前の状態に戻ります。それ以降に記録されたサイクルや行った変更は失われます。",
         "undo_import_ok": "インポートを元に戻す",
-        "undo_import_title": "前回のインポートを元に戻す"
+        "undo_import_title": "前回のインポートを元に戻す",
+        "bp_replace_title": "インストール済みのテンプレートを置換しますか?",
+        "bp_replace_msg": "Home Assistantには「{name}」の別バージョンが入っています。このWashDataバージョンのものに置き換えますか? それを使用するオートメーションも変わります。"
     },
     "msg": {
         "pg_canvas_empty3": "上でサイクルを選び、「実行」を押してシミュレーションします。その後、ホバーで値を表示、スクロールまたはピンチでズーム、ドラッグで移動できます。",
@@ -787,7 +802,6 @@
         "artifact_pause_detail": "電力が約{n}秒間ほぼゼロに落ちた後、再開しました。ドアが開かれたか、サイクルが一時停止された可能性があります。",
         "artifact_spike_detail": "通常の電力帯の上側に約{n}秒間現れました。",
         "auto_label_intro": "一致信頼度がしきい値をクリアするラベルのないサイクルにプロファイルを割り当てます。",
-        "automations_intro": "WashData は {start} / {end} イベントを発火しエンティティを公開するため、通知やアクションは通常の Home Assistant オートメーションとして構築するのが最適です。このデバイスを使用するオートメーションは以下に表示されます。",
         "cleanup_intro": "ラベル付きのサイクルをすべて重ねて表示します。外れ値にチェックを入れて、ラベルを解除する（履歴には残り、このプロファイルには使われなくなります）か削除します。",
         "clear_debug_hint": "保存されているデバッグ データを削除して領域を解放します。",
         "collecting_data": "データを収集中です。微調整を開始するために必要な残りサイクル数: {need}（{current}/{min}）。",
@@ -1023,10 +1037,6 @@
         "pg_label_yes": "サイクル終了時に「{name}」とラベル付けされます",
         "pg_label_no": "見直しを依頼します: {reason}",
         "live_match_debug_tip": "信頼度: 現在の電力カーブが最上位の候補プロファイルにどれだけ一致しているか (0-100%)。あいまい: 上位 2 つの候補のスコア差が 5% 以内です。サイクルが終了するまでラベルは確定しません。",
-        "automation_alias_started": "{device}: サイクル開始",
-        "automation_alias_finished": "{device}: サイクル終了",
-        "automation_desc_started": "{device} のサイクルが開始したときに実行されます。アクション (通知、照明、...) を追加してください。",
-        "automation_desc_finished": "{device} のサイクルが終了したときに実行されます。アクション (通知、照明、...) を追加してください。",
         "feedback_detected": "WashData の検出結果: {name}",
         "import_undo_hint": "前回のインポート（{when}）より前の復元ポイントが保持されています: {profiles} 件のプロファイルと {cycles} 件のサイクル。",
         "replace_undo_hint": "先に復元ポイントが保存されるため、このインポートは「エクスポート/インポート」から元に戻せます。",
@@ -1047,7 +1057,16 @@
         "cycle_context_note": "グレー: このサイクル前後の電力センサーのレコーダー履歴です。サイクルの一部ではなく、所要時間、エネルギー、マッチングには影響しません。",
         "cycle_context_none": "レコーダーにはこのサイクル前後の測定値がありません（Home Assistant は既定で 10 日分の履歴を保持します）。",
         "cycle_context_tip": "表示専用です。このサイクル前後の電力センサーのレコーダー履歴を、まだ保持されていれば表示します。失敗した開始試行を今後のサイクルに含めるには「曲線のプリロール」（設定 > 検出 > サイクル開始）を使ってください。保存される所要時間が変わります。",
-        "invalid_threshold_pair": "停止しきい値（{stop} W）は開始しきい値（{start} W）より小さくする必要があります。何も保存されていません。2 つを合わせて変更してください。"
+        "invalid_threshold_pair": "停止しきい値（{stop} W）は開始しきい値（{start} W）より小さくする必要があります。何も保存されていません。2 つを合わせて変更してください。",
+        "automations_tab_intro": "WashDataはデバイストリガー（サイクル開始、サイクル終了、サイクル停滞など）をご自身のHome Assistantオートメーションに提供します。このデバイスを使用するオートメーションがここに表示されます。",
+        "bp_intro": "この機器向けの既製オートメーション。Home Assistantのブループリントとしてインストールされます。",
+        "bp_admin_only": "テンプレートは管理者がインストールします。",
+        "bp_none": "この機器タイプのテンプレートはまだありません。",
+        "bp_load_failed": "テンプレートを読み込めませんでした。",
+        "auto_trigger_hint": "このデバイスにこのトリガーを使用したオートメーションを作成し、Home Assistantで開きます。",
+        "automation_alias_trigger": "{device}: {trigger}",
+        "automation_desc_trigger": "{device}のためにWashDataで作成。アクションを追加してください（通知、ライト、...）。",
+        "automation_alias_new": "{device}: 新しいオートメーション"
     },
     "pg_desc": {
         "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -1657,7 +1676,8 @@
         "subtab_profiles": "プロファイル",
         "maintenance": "メンテナンス",
         "playground": "プレイグラウンド",
-        "store": "ストア"
+        "store": "ストア",
+        "automations": "オートメーション"
     },
     "tag": {
         "early_end": "早期終了",
@@ -1822,7 +1842,14 @@
         "auto_label_cancelled": "{count} 件のサイクルにラベル付けした時点で、自動ラベル付けをキャンセルしました。",
         "auto_label_cancelled_other": "{count} 件のサイクルにラベル付けした時点で、自動ラベル付けをキャンセルしました。",
         "auto_label_done": "自動ラベル付け完了: {count} 件のサイクルにラベル付けし、{skipped} 件はラベルなしのままです。",
-        "auto_label_done_other": "自動ラベル付け完了: {count} 件のサイクルにラベル付けし、{skipped} 件はラベルなしのままです。"
+        "auto_label_done_other": "自動ラベル付け完了: {count} 件のサイクルにラベル付けし、{skipped} 件はラベルなしのままです。",
+        "bp_install_failed": "テンプレートをインストールできませんでした: {error}",
+        "bp_installed_finish": "テンプレートをインストールしました。残りの設定をHome Assistantで入力してください。",
+        "bp_automation_failed": "テンプレートはインストールされましたが、オートメーションを作成できませんでした: {error}",
+        "bp_automation_created": "デフォルト設定でオートメーションを作成しました; 開いています",
+        "copied": "コピーしました",
+        "copy_failed": "コピーできませんでした。テキストを選択して手動でコピーしてください。",
+        "automation_label_failed": "オートメーションを作成しましたが、WashDataのラベルまたはカテゴリを追加できませんでした。"
     },
     "suggestion": {
         "observed_label": "観測値",
@@ -2001,7 +2028,10 @@
     },
     "link": {
         "maintenance_supporter": "GitHub の Maintenance Supporter ↗",
-        "manual": "マニュアル ↗"
+        "manual": "マニュアル ↗",
+        "bp_share": "プルリクエストで自分のテンプレートを共有 ↗",
+        "bp_open_in_ha": "Home Assistantで開く ↗",
+        "automations_all": "Home AssistantのすべてのWashDataオートメーション"
     },
     "tip": {
         "add_brand": "ブランドが一覧にありませんか？コミュニティカタログに追加してください",
@@ -2128,5 +2158,71 @@
         "thr": "しきい値",
         "too_short": "短すぎる",
         "tumble_kept": "タンブルパルスを保持"
+    },
+    "blueprint": {
+        "cycle_running_indicator": {
+            "name": "サイクル実行中に何かをオンにする",
+            "description": "WashDataのサイクルが開始するとライト、スイッチ、またはトグルヘルパーをオンにし、終了したときにオフにします。誤起動後も対応します。\n\nWashData 0.5.9以降が必要です。"
+        },
+        "dryer_anti_crease_power_cut": {
+            "name": "乾燥機の長いしわ防止フェーズを終了する",
+            "description": "プログラム後もしわ防止モードで何時間も回り続ける乾燥機向けです。WashDataがプログラム終了と判断した後（サイクル終了またはしわ防止開始）にのみ動作します。待機し、消費電力が低い瞬間に乾燥機のスマートプラグをオフにし、デフォルトでは再びオンにします。その間に新しいサイクルが開始するとキャンセルされます。\n\nリスク: 乾燥機が接続されている状態でリレーを切り替えます。乾燥機に対応した定格のプラグでのみ、自己責任でご使用ください。WashDataはプラグを直接切り替えません; このオートメーションが行います。\n\nWashData 0.5.9以降が必要です。"
+        }
+    },
+    "trigger": {
+        "cycle_started": {
+            "name": "サイクル開始"
+        },
+        "program_recognised": {
+            "name": "プログラムが認識された"
+        },
+        "phase_started": {
+            "name": "フェーズが開始された"
+        },
+        "finishing_soon": {
+            "name": "もうすぐ終わる"
+        },
+        "cycle_overrun": {
+            "name": "サイクルが長引いている"
+        },
+        "cycle_paused": {
+            "name": "サイクルが一時停止された"
+        },
+        "cycle_resumed": {
+            "name": "サイクルが再開された"
+        },
+        "cycle_stalled": {
+            "name": "サイクル停滞"
+        },
+        "cycle_finished": {
+            "name": "サイクル終了"
+        },
+        "cycle_ended": {
+            "name": "サイクル終了（理由を問わず）"
+        },
+        "anti_wrinkle_started": {
+            "name": "しわ防止開始"
+        },
+        "still_tumbling": {
+            "name": "サイクル後もまだ回転中"
+        },
+        "unload_pending": {
+            "name": "取り出し待ち"
+        },
+        "unloaded": {
+            "name": "取り出し済み"
+        },
+        "state_changed": {
+            "name": "状態が変わった"
+        },
+        "maintenance_due": {
+            "name": "メンテナンスが必要"
+        },
+        "milestone_reached": {
+            "name": "サイクルのマイルストーンに達した"
+        },
+        "pump_stuck": {
+            "name": "ポンプが詰まっている"
+        }
     }
 }

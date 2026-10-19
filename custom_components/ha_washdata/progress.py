@@ -852,9 +852,9 @@ def phase_timeline_span(
     return span if math.isfinite(span) and span > 0.0 else 0.0
 
 
-def phase_at(
+def phase_range_at(
     ranges: list[dict[str, Any]], position_s: float, span_s: float
-) -> str | None:
+) -> dict[str, Any] | None:
     """The range containing ``position_s``: ``[start, end)``, the timeline's own
     end included. None in a gap or past every range - no nearest-phase guess.
     The panel's Status timeline applies the same rule."""
@@ -865,9 +865,17 @@ def phase_at(
         if end <= start:
             continue
         if start <= position_s < end or (at_end and end >= span_s and start <= position_s):
-            name = str(r.get("name") or "").strip()
-            return name or None
+            return r
     return None
+
+
+def phase_at(
+    ranges: list[dict[str, Any]], position_s: float, span_s: float
+) -> str | None:
+    """The name of :func:`phase_range_at`'s range, or None."""
+    r = phase_range_at(ranges, position_s, span_s)
+    name = str(r.get("name") or "").strip() if r is not None else ""
+    return name or None
 
 
 def current_phase(
@@ -887,6 +895,22 @@ def current_phase(
     ranges, or no range covers this point (audit PROGRESS-11: no guessed phase).
     Never raises.
     """
+    found = current_phase_range(
+        store, state, current_program, cycle_progress, expected_duration
+    )
+    name = str(found.get("name") or "").strip() if found is not None else ""
+    return name or None
+
+
+def current_phase_range(
+    store: Any,
+    state: str,
+    current_program: str | None,
+    cycle_progress: float,
+    expected_duration: float | None = None,
+) -> dict[str, Any] | None:
+    """The phase range :func:`current_phase` names (its ``start`` orders phases
+    for the ``phase_started`` trigger, #478), or None. Never raises."""
     try:
         if state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
             return None
@@ -900,7 +924,7 @@ def current_phase(
         if span <= 0.0:
             return None
         frac = max(0.0, min(1.0, float(cycle_progress) / 100.0))
-        return phase_at(ranges, frac * span, span)
+        return phase_range_at(ranges, frac * span, span)
     except Exception:  # noqa: BLE001 - phase readout must never break
         return None
 

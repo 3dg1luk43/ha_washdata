@@ -95,7 +95,9 @@
     "matcher_used_few": "Dopasowano do {n} Twoich cykli",
     "matcher_used_many": "Dopasowano do {n} Twoich cykli",
     "matcher_used_other": "Dopasowano do {n} cyklu",
-    "matcher_used_tip": "Cykle na tym urządzeniu, które WashData samodzielnie dopasował do tego zaimportowanego programu. Import, który nigdy nie zostaje dopasowany, może nie pasować do Twojego urządzenia; możesz go usunąć. Liczone lokalnie; nic nie jest wysyłane do sklepu."
+    "matcher_used_tip": "Cykle na tym urządzeniu, które WashData samodzielnie dopasował do tego zaimportowanego programu. Import, który nigdy nie zostaje dopasowany, może nie pasować do Twojego urządzenia; możesz go usunąć. Liczone lokalnie; nic nie jest wysyłane do sklepu.",
+    "bp_installed": "Zainstalowany",
+    "bp_installed_other": "Zainstalowana inna wersja"
   },
   "btn": {
     "pg_preset_delete": "Usuń preset",
@@ -148,7 +150,6 @@
     "export": "Eksportuj",
     "force_stop": "Wymuś zatrzymanie",
     "force_stop_tip": "Natychmiast zakończ bieżący cykl i oznacz go jako wymuszony do zatrzymania",
-    "from_template": "Z szablonu ▾",
     "ignore": "Ignoruj",
     "import_json": "Importuj z JSON",
     "inspect": "Zbadaj",
@@ -162,8 +163,6 @@
     "new_phase": "+ Nowa faza",
     "new_profile": "+ Nowy profil",
     "new_profile_tip": "Utwórz nowy profil programu z istniejącego oznakowanego cyklu lub nagrania",
-    "on_cycle_finished": "Po zakończeniu cyklu",
-    "on_cycle_started": "Po rozpoczęciu cyklu",
     "pause_cycle": "Pauza",
     "pause_cycle_tip": "Wstrzymaj bieżący cykl – urządzenie wznowi pracę od miejsca, w którym zostało zatrzymane",
     "process": "Przetwórz",
@@ -257,7 +256,14 @@
     "confirmed": "Potwierdzone",
     "create_profile_from_gap": "Utwórz profil",
     "undo_import": "Cofnij ostatni import",
-    "pg_rerun": "Aktualizuj symulację"
+    "pg_rerun": "Aktualizuj symulację",
+    "from_trigger": "Uruchom z wyzwalacza ▾",
+    "bp_use": "Użyj z tym urządzeniem",
+    "bp_install": "Zainstaluj szablon",
+    "bp_view_yaml": "Zobacz YAML",
+    "copy": "Kopiuj",
+    "replace": "Zastąp",
+    "from_trigger_open": "Uruchom z wyzwalacza ▴"
   },
   "note": {
     "off_delay": {
@@ -372,7 +378,10 @@
     "import_power_history": "Import historii mocy",
     "service_status": "Status serwisu",
     "online_account_tab": "Online i społeczność",
-    "live_match_debug": "Debugowanie dopasowania na żywo"
+    "live_match_debug": "Debugowanie dopasowania na żywo",
+    "automations_used": "Automatyzacje używające tego urządzenia",
+    "bp_templates": "Szablony",
+    "automations_all_tip": "Lista automatyzacji Home Assistant filtrowana według etykiety WashData. Automatyzacje utworzone tutaj znajdują się również w kategorii WashData."
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -690,7 +699,11 @@
     "cycle_context_minutes": "{min} min",
     "cycle_context_series": "Historia z recordera",
     "before_start": "Przed startem",
-    "after_end": "Po zakończeniu"
+    "after_end": "Po zakończeniu",
+    "bp_you_choose": "Do wyboru: {inputs}",
+    "bp_adjustable": "Konfigurowalny: {inputs}",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Zawiera etykietę WashData"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -791,7 +804,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Dane i ustawienia tego urządzenia wrócą do stanu sprzed ostatniego importu ({when}). Cykle zarejestrowane i zmiany wprowadzone od tego czasu zostaną utracone.",
     "undo_import_ok": "Cofnij import",
-    "undo_import_title": "Cofnij ostatni import"
+    "undo_import_title": "Cofnij ostatni import",
+    "bp_replace_title": "Zastąpić zainstalowany szablon?",
+    "bp_replace_msg": "Home Assistant ma inną wersję \"{name}\". Zastąpić ją wersją z tej wersji WashData? Automatyzacje, które go używają, zmienią się razem z nim."
   },
   "msg": {
     "pg_canvas_empty3": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń lub użyj dwóch palców, aby powiększyć, i przeciągnij, aby przesunąć.",
@@ -814,7 +829,6 @@
     "artifact_pause_detail": "Moc spadła prawie do zera na ~{n}s, a potem wróciła. Prawdopodobnie otwarto drzwi lub wstrzymano cykl.",
     "artifact_spike_detail": "Moc przekroczyła normalny zakres przez ~{n}s.",
     "auto_label_intro": "Przypisz profile do nieoznakowanych cykli, których pewność dopasowania przekracza próg.",
-    "automations_intro": "WashData uruchamia zdarzenia {start} / {end} i udostępnia encje, więc powiadomienia i akcje najlepiej budować jako normalne automatyzacje Home Assistant. Automatyzacje korzystające z tego urządzenia są widoczne poniżej.",
     "cleanup_intro": "Wszystkie oznaczone cykle nałożone na siebie. Zaznacz odstające, a potem usuń im etykietę (zostaną w historii, ale przestaną kształtować ten profil) lub je usuń.",
     "clear_debug_hint": "Usuń zapisane dane debugowania, aby zwolnić miejsce.",
     "collecting_data": "Zbieranie danych. Brakujące cykle do rozpoczęcia dostrajania: {need} ({current}/{min}).",
@@ -1065,10 +1079,6 @@
     "pg_label_yes": "Na końcu cyklu zostałby oznaczony jako \"{name}\"",
     "pg_label_no": "Trafiłby do przeglądu: {reason}",
     "live_match_debug_tip": "Zaufanie: jak dokładnie bieżąca krzywa mocy pasuje do najlepszego profilu-kandydata (0-100%). Niejednoznaczne: wyniki dwóch najlepszych kandydatów różnią się o mniej niż 5%, więc etykieta jest niepewna aż do zakończenia cyklu.",
-    "automation_alias_started": "{device}: cykl rozpoczęty",
-    "automation_alias_finished": "{device}: cykl zakończony",
-    "automation_desc_started": "Uruchamiana, gdy rozpoczyna się cykl urządzenia {device}. Dodaj własne akcje (powiadomienia, światła, ...).",
-    "automation_desc_finished": "Uruchamiana, gdy kończy się cykl urządzenia {device}. Dodaj własne akcje (powiadomienia, światła, ...).",
     "feedback_detected": "WashData wykrył: {name}",
     "import_undo_hint": "Zachowano punkt przywracania sprzed ostatniego importu ({when}): {profiles} profil(e) i {cycles} cykl(e).",
     "replace_undo_hint": "Najpierw zapisywany jest punkt przywracania, więc ten import można cofnąć w sekcji Eksportuj/Importuj.",
@@ -1095,7 +1105,16 @@
     "cycle_context_note": "Szary: historia czujnika mocy z recordera wokół tego cyklu. Nie jest częścią cyklu i nie wpływa na czas trwania, energię ani dopasowanie.",
     "cycle_context_none": "Recorder nie przechowuje żadnych odczytów z okresu wokół tego cyklu (Home Assistant domyślnie przechowuje historię przez 10 dni).",
     "cycle_context_tip": "Tylko podgląd: pokazuje historię czujnika mocy z recordera wokół tego cyklu, jeśli jest jeszcze przechowywana. Aby dołączać nieudane próby startu do przyszłych cykli, użyj ustawienia Wstępny zapis krzywej (Ustawienia > Wykrywanie > Start Cyklu), które zmienia zapisane czasy trwania.",
-    "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W). Nic nie zostało zapisane; zmień obie wartości razem."
+    "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W). Nic nie zostało zapisane; zmień obie wartości razem.",
+    "automations_tab_intro": "WashData udostępnia wyzwalacze urządzenia (cykl rozpoczęty, cykl zakończony, cykl utknął i inne) dla własnych automatyzacji Home Assistant. Automatyzacje używające tego urządzenia są tutaj wymienione.",
+    "bp_intro": "Gotowe automatyzacje dla tego urządzenia, zainstalowane jako blueprinty Home Assistant.",
+    "bp_admin_only": "Szablony instaluje administrator.",
+    "bp_none": "Brak szablonów dla tego typu urządzenia.",
+    "bp_load_failed": "Nie można załadować szablonów.",
+    "auto_trigger_hint": "Tworzy automatyzację z tym wyzwalaczem dla tego urządzenia i otwiera ją w Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Utworzone przez WashData dla {device}. Dodaj swoje akcje (powiadomienie, światła, ...).",
+    "automation_alias_new": "{device}: nowa automatyzacja"
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1774,7 +1793,8 @@
     "subtab_profiles": "Profile",
     "maintenance": "Konserwacja",
     "playground": "Piaskownica",
-    "store": "Sklep"
+    "store": "Sklep",
+    "automations": "Automatyzacje"
   },
   "tag": {
     "early_end": "Wczesny koniec",
@@ -1945,7 +1965,14 @@
     "auto_label_done_one": "Automatyczne oznaczanie zakończone: oznaczono {count} cykl, bez etykiety pozostało: {skipped}.",
     "auto_label_done_few": "Automatyczne oznaczanie zakończone: oznaczono {count} cykle, bez etykiety pozostało: {skipped}.",
     "auto_label_done_many": "Automatyczne oznaczanie zakończone: oznaczono {count} cykli, bez etykiety pozostało: {skipped}.",
-    "auto_label_done_other": "Automatyczne oznaczanie zakończone: oznaczono {count} cyklu, bez etykiety pozostało: {skipped}."
+    "auto_label_done_other": "Automatyczne oznaczanie zakończone: oznaczono {count} cyklu, bez etykiety pozostało: {skipped}.",
+    "bp_install_failed": "Nie można zainstalować szablonu: {error}",
+    "bp_installed_finish": "Szablon zainstalowany. Uzupełnij resztę w Home Assistant.",
+    "bp_automation_failed": "Szablon jest zainstalowany, ale nie można było utworzyć automatyzacji: {error}",
+    "bp_automation_created": "Automatyzacja utworzona z ustawieniami domyślnymi; otwieram",
+    "copied": "Skopiowano",
+    "copy_failed": "Kopiowanie nie powiodło się. Zaznacz tekst i skopiuj go ręcznie.",
+    "automation_label_failed": "Automatyzacja utworzona, ale etykiety ani kategorii WashData nie można było dodać."
   },
   "trend": {
     "down": "Trend w dół",
@@ -2055,7 +2082,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter na GitHubie ↗",
-    "manual": "Instrukcja ↗"
+    "manual": "Instrukcja ↗",
+    "bp_share": "Podziel się własnym szablonem przez pull request ↗",
+    "bp_open_in_ha": "Otwórz w Home Assistant ↗",
+    "automations_all": "Wszystkie automatyzacje WashData w Home Assistant"
   },
   "tip": {
     "add_brand": "Marki nie ma na liście? Dodaj ją do katalogu społeczności",
@@ -2182,5 +2212,71 @@
     "thr": "próg",
     "too_short": "za krótki",
     "tumble_kept": "impulsy bębna zachowane"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Włącz coś podczas działania cyklu",
+      "description": "Włącza światło, przełącznik lub pomocnika przełączającego, gdy cykl WashData się rozpoczyna, i wyłącza, gdy się kończy, także po fałszywym starcie.\n\nWymaga WashData 0.5.9 lub nowszego."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Zakończ długą fazę antygniotową suszarki",
+      "description": "Dla suszarek, które nadal kręcą bębnem w trybie antygniotowym przez wiele godzin po zakończeniu programu. Uruchamia się dopiero gdy WashData uzna program za zakończony (cykl zakończony lub tryb antygniotowy rozpoczęty). Czeka, a następnie wyłącza inteligentne gniazdo suszarki w momencie niskiego poboru mocy i domyślnie włącza je z powrotem. Nowy cykl rozpoczęty w międzyczasie anuluje tę automatyzację.\n\nRyzyko: wyłącza przekaźnik, gdy suszarka jest podłączona. Używaj tylko z gniazdem przystosowanym do Twojej suszarki i na własne ryzyko. WashData nigdy nie przełącza gniazda samodzielnie; robi to ta automatyzacja.\n\nWymaga WashData 0.5.9 lub nowszego."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Cykl rozpoczęty"
+    },
+    "program_recognised": {
+      "name": "Program rozpoznany"
+    },
+    "phase_started": {
+      "name": "Faza rozpoczęta"
+    },
+    "finishing_soon": {
+      "name": "Zaraz koniec"
+    },
+    "cycle_overrun": {
+      "name": "Cykl trwa za długo"
+    },
+    "cycle_paused": {
+      "name": "Cykl wstrzymany"
+    },
+    "cycle_resumed": {
+      "name": "Cykl wznowiony"
+    },
+    "cycle_stalled": {
+      "name": "Cykl utknął"
+    },
+    "cycle_finished": {
+      "name": "Cykl zakończony"
+    },
+    "cycle_ended": {
+      "name": "Cykl zakończony"
+    },
+    "anti_wrinkle_started": {
+      "name": "Tryb antygniotowy rozpoczęty"
+    },
+    "still_tumbling": {
+      "name": "Nadal kręci po zakończeniu cyklu"
+    },
+    "unload_pending": {
+      "name": "Oczekuje na rozładunek"
+    },
+    "unloaded": {
+      "name": "Wyładowany"
+    },
+    "state_changed": {
+      "name": "Stan zmieniony"
+    },
+    "maintenance_due": {
+      "name": "Wymagana konserwacja"
+    },
+    "milestone_reached": {
+      "name": "Osiągnięto kamień milowy cyklu"
+    },
+    "pump_stuck": {
+      "name": "Pompa zablokowana"
+    }
   }
 }

@@ -389,6 +389,7 @@ def _view(det: CycleDetector, *, clean: bool = False) -> SimpleNamespace:
         _is_clean_state=clean,
         _is_user_paused=False,
         _cycle_anomaly="none",
+        _fire_device_trigger=MagicMock(),
         entry_id="e1",
         config_entry=SimpleNamespace(title="Washer"),
         device_type="washing_machine",
@@ -424,6 +425,8 @@ def test_stall_event_fires_once_with_a_small_payload() -> None:
     assert event == EVENT_CYCLE_STALLED
     assert data["entry_id"] == "e1" and data["program"] == "Cotton"
     assert "power_data" not in data and len(repr(data)) < 1024
+    # The cycle_stalled device trigger (#478) fires at the same moment, once.
+    view._fire_device_trigger.assert_called_once_with("cycle_stalled", "Cotton")
 
 
 def test_idle_reads_through_check_state_clean_and_the_duration_sensors() -> None:

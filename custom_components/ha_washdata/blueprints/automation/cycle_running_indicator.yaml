@@ -1,0 +1,55 @@
+blueprint:
+  name: "WashData: turn something on while a cycle runs"
+  description: >-
+    Turns a light, switch or toggle helper on when a WashData cycle starts and
+    off when it ends, also after a false start.
+
+
+    Needs WashData 0.5.9 or newer.
+  domain: automation
+  author: WashData
+  source_url: https://github.com/3dg1luk43/ha_washdata/blob/main/custom_components/ha_washdata/blueprints/automation/cycle_running_indicator.yaml
+  input:
+    washdata_device:
+      name: Appliance
+      description: The WashData device to follow.
+      selector:
+        device:
+          filter:
+            - integration: ha_washdata
+    target_entity:
+      name: Turn on while running
+      description: A light, switch or toggle helper.
+      selector:
+        entity:
+          filter:
+            - domain:
+                - light
+                - switch
+                - input_boolean
+
+mode: queued
+max_exceeded: silent
+
+triggers:
+  - trigger: ha_washdata.cycle_started
+    id: started
+    target:
+      device_id: !input washdata_device
+  - trigger: ha_washdata.cycle_ended
+    id: finished
+    target:
+      device_id: !input washdata_device
+
+actions:
+  - if:
+      - condition: trigger
+        id: started
+    then:
+      - action: homeassistant.turn_on
+        target:
+          entity_id: !input target_entity
+    else:
+      - action: homeassistant.turn_off
+        target:
+          entity_id: !input target_entity

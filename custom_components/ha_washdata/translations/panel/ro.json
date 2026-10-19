@@ -43,7 +43,9 @@
     "matcher_used_one": "Potrivit cu {n} dintre ciclurile dvs.",
     "matcher_used_few": "Potrivit cu {n} dintre ciclurile dvs.",
     "matcher_used_other": "Potrivit cu {n} dintre ciclurile dvs.",
-    "matcher_used_tip": "Cicluri ale acestui aparat pe care WashData le-a asociat singur cu acest program importat. Un import care nu se potrivește niciodată s-ar putea să nu fie potrivit pentru aparatul dvs.; îl puteți elimina. Numărat local; nimic nu este trimis către magazinul comunității."
+    "matcher_used_tip": "Cicluri ale acestui aparat pe care WashData le-a asociat singur cu acest program importat. Un import care nu se potrivește niciodată s-ar putea să nu fie potrivit pentru aparatul dvs.; îl puteți elimina. Numărat local; nimic nu este trimis către magazinul comunității.",
+    "bp_installed": "Instalat",
+    "bp_installed_other": "Altă versiune instalată"
   },
   "btn": {
     "log_done_task": "Marcați ca efectuat: {task}",
@@ -89,7 +91,6 @@
     "export": "Exportați",
     "force_stop": "Oprire forțată",
     "force_stop_tip": "Termina imediat ciclul curent și marchează-l ca oprit forțat",
-    "from_template": "Din șablon ▾",
     "ignore": "Ignorați",
     "import_json": "Importați din JSON",
     "inspect": "Inspectați",
@@ -103,8 +104,6 @@
     "new_phase": "+ Fază nouă",
     "new_profile": "+ Profil nou",
     "new_profile_tip": "Creați un nou profil de program dintr-un ciclu etichetat existent sau o înregistrare",
-    "on_cycle_finished": "La terminarea ciclului",
-    "on_cycle_started": "La pornirea ciclului",
     "pause_cycle": "Pauză",
     "pause_cycle_tip": "Puneți în pauză ciclul în curs – aparatul va relua de unde a rămas",
     "pg_load_live": "Încarcă setările active",
@@ -205,7 +204,14 @@
     "confirmed": "Confirmat",
     "create_profile_from_gap": "Creați profil",
     "undo_import": "Anulați ultimul import",
-    "pg_rerun": "Actualizează simularea"
+    "pg_rerun": "Actualizează simularea",
+    "from_trigger": "Pornire de la un declanșator ▾",
+    "bp_use": "Folosiți cu acest dispozitiv",
+    "bp_install": "Instalați șablonul",
+    "bp_view_yaml": "Vizualizați YAML",
+    "copy": "Copiați",
+    "replace": "Înlocuiți",
+    "from_trigger_open": "Pornire de la un declanșator ▴"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -315,7 +321,10 @@
     "import_power_history": "Importați istoricul de putere",
     "service_status": "Starea întreținerii",
     "online_account_tab": "Online și comunitate",
-    "live_match_debug": "Depanare potrivire în timp real"
+    "live_match_debug": "Depanare potrivire în timp real",
+    "automations_used": "Automatizări care folosesc acest dispozitiv",
+    "bp_templates": "Șabloane",
+    "automations_all_tip": "Lista de automatizări din Home Assistant, filtrată după eticheta WashData. Automatizările create aici se află și în categoria WashData."
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -630,7 +639,11 @@
     "pg_obj_early": "Rata de sfârșituri anticipate",
     "pg_obj_endlag": "Întârzierea sfârșitului (mediană)",
     "pg_obj_split": "Rata de divizare",
-    "pg_sweep_cycles": "Cicluri recente"
+    "pg_sweep_cycles": "Cicluri recente",
+    "bp_you_choose": "Alegeți: {inputs}",
+    "bp_adjustable": "Reglabil: {inputs}",
+    "bp_yaml": "YAML-ul șablonului",
+    "automation_wd_label": "Are eticheta WashData"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -729,7 +742,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Datele și setările acestui dispozitiv revin la starea de dinainte de ultimul import ({when}). Ciclurile și modificările de după se pierd.",
     "undo_import_ok": "Anulați importul",
-    "undo_import_title": "Anulați ultimul import"
+    "undo_import_title": "Anulați ultimul import",
+    "bp_replace_title": "Înlocuiți șablonul instalat?",
+    "bp_replace_msg": "Home Assistant are o altă versiune a \"{name}\". O înlocuiți cu cea din această versiune WashData? Automatizările care o folosesc se vor schimba odată cu ea."
   },
   "msg": {
     "custom_task_limit": "Ați atins limita de {max} sarcini.",
@@ -755,7 +770,6 @@
     "artifact_pause_detail": "Puterea a scăzut aproape la zero timp de ~{n}s, apoi a revenit. Probabil ușa a fost deschisă sau ciclul a fost pus pe pauză.",
     "artifact_spike_detail": "A depășit banda de putere obișnuită timp de ~{n}s.",
     "auto_label_intro": "Atribuiți profiluri ciclurilor neetichetate a căror încredere de potrivire depășește pragul.",
-    "automations_intro": "WashData declanșează evenimente {start} / {end} și expune entități, astfel că notificările și acțiunile sunt cel mai bine construite ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
     "cleanup_intro": "Toate ciclurile etichetate suprapuse. Bifați valorile aberante, apoi eliminați-le eticheta (rămân în istoric, dar nu mai modelează acest profil) sau ștergeți-le.",
     "clear_debug_hint": "Eliminați datele de depanare stocate pentru a elibera spațiu.",
     "collecting_data": "Se colectează date. Cicluri încă necesare înainte ca reglajul fin să poată începe: {need} ({current}/{min}).",
@@ -1001,10 +1015,6 @@
     "pg_label_yes": "Ar fi etichetat \"{name}\" la sfârșitul ciclului",
     "pg_label_no": "Ar solicita revizuire: {reason}",
     "live_match_debug_tip": "Încredere: cât de bine se potrivește curba de putere curentă cu profilul candidat principal (0-100%). Ambiguu: cei mai buni doi candidați au scoruri la mai puțin de 5% unul de altul; eticheta rămâne incertă până la finalul ciclului.",
-    "automation_alias_started": "{device}: ciclu pornit",
-    "automation_alias_finished": "{device}: ciclu încheiat",
-    "automation_desc_started": "Rulează când {device} pornește un ciclu. Adăugați acțiunile dvs. (notificare, lumini, ...).",
-    "automation_desc_finished": "Rulează când {device} încheie un ciclu. Adăugați acțiunile dvs. (notificare, lumini, ...).",
     "feedback_detected": "WashData a detectat: {name}",
     "import_undo_hint": "Se păstrează un punct de restaurare de dinainte de ultimul import ({when}): {profiles} profil(uri) și {cycles} ciclu(ri).",
     "replace_undo_hint": "Mai întâi se salvează un punct de restaurare, astfel încât puteți anula acest import din Export / Import.",
@@ -1025,7 +1035,16 @@
     "pg_sweep_n_cycles_one": "pe {count} ciclu",
     "pg_sweep_n_cycles_few": "pe {count} cicluri",
     "pg_sweep_n_cycles_other": "pe {count} de cicluri",
-    "pg_task_busy": "O rulare Testează pe istoric sau Optimizează este deja în desfășurare pentru acest dispozitiv. Așteptați să se termine sau anulați-o."
+    "pg_task_busy": "O rulare Testează pe istoric sau Optimizează este deja în desfășurare pentru acest dispozitiv. Așteptați să se termine sau anulați-o.",
+    "automations_tab_intro": "WashData oferă declanșatoare de dispozitiv (ciclu pornit, ciclu terminat, ciclu blocat și altele) pentru propriile automatizări Home Assistant. Automatizările care folosesc acest dispozitiv sunt listate aici.",
+    "bp_intro": "Automatizări gata de utilizat pentru acest aparat, instalate ca șabloane Home Assistant.",
+    "bp_admin_only": "Un administrator instalează șabloanele.",
+    "bp_none": "Niciun șablon pentru acest tip de aparat deocamdată.",
+    "bp_load_failed": "Șabloanele nu au putut fi încărcate.",
+    "auto_trigger_hint": "Creează o automatizare cu acest declanșator pentru acest dispozitiv și o deschide în Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Creată de WashData pentru {device}. Adăugați acțiunile dvs. (notificare, lumini, ...).",
+    "automation_alias_new": "{device}: automatizare nouă"
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1616,7 +1635,8 @@
     "subtab_profiles": "Profiluri",
     "maintenance": "Întreținere",
     "playground": "Zonă de test",
-    "store": "Magazin"
+    "store": "Magazin",
+    "automations": "Automatizări"
   },
   "tag": {
     "early_end": "Sfârșit anticipat",
@@ -1785,7 +1805,14 @@
     "auto_label_done": "Etichetare automată finalizată: {count} de cicluri etichetate, neetichetate: {skipped}.",
     "auto_label_done_one": "Etichetare automată finalizată: {count} ciclu etichetat, neetichetate: {skipped}.",
     "auto_label_done_few": "Etichetare automată finalizată: {count} cicluri etichetate, neetichetate: {skipped}.",
-    "auto_label_done_other": "Etichetare automată finalizată: {count} de cicluri etichetate, neetichetate: {skipped}."
+    "auto_label_done_other": "Etichetare automată finalizată: {count} de cicluri etichetate, neetichetate: {skipped}.",
+    "bp_install_failed": "Nu s-a putut instala șablonul: {error}",
+    "bp_installed_finish": "Șablon instalat. Completați restul în Home Assistant.",
+    "bp_automation_failed": "Șablonul este instalat, dar automatizarea nu a putut fi creată: {error}",
+    "bp_automation_created": "Automatizare creată cu setările implicite; deschidere în curs",
+    "copied": "Copiat",
+    "copy_failed": "Copiere eșuată. Selectați textul și copiați-l manual.",
+    "automation_label_failed": "Automatizare creată, dar eticheta sau categoria WashData nu a putut fi adăugată."
   },
   "suggestion": {
     "observed_label": "Observat",
@@ -1983,7 +2010,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter pe GitHub ↗",
-    "manual": "Manual ↗"
+    "manual": "Manual ↗",
+    "bp_share": "Partajați propriul șablon printr-un pull request ↗",
+    "bp_open_in_ha": "Deschideți în Home Assistant ↗",
+    "automations_all": "Toate automatizările WashData din Home Assistant"
   },
   "tip": {
     "add_brand": "Marca nu este listată? Adăugați-o în catalogul comunității",
@@ -2164,5 +2194,71 @@
     "thr": "prag",
     "too_short": "prea scurt",
     "tumble_kept": "rotiri păstrate"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Activați ceva în timp ce rulează un ciclu",
+      "description": "Pornește o lumină, un comutator sau un helper de comutare când un ciclu WashData începe și îl oprește când se termină, inclusiv după o pornire falsă.\n\nNecesită WashData 0.5.9 sau mai nou."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Terminarea unei faze lungi anti-șifonare a uscătorului",
+      "description": "Pentru uscătoarele care continuă să se rotească în modul anti-șifonare ore întregi după program. Rulează numai după ce WashData consideră programul terminat (ciclu terminat sau anti-șifonare pornit). Așteaptă, apoi oprește priza inteligentă a uscătorului într-un moment de consum redus și, implicit, o repornește. Un nou ciclu care pornește între timp îl anulează.\n\nRisc: aceasta comută un releu în timp ce uscătorul este conectat. Utilizați doar cu o priză omologată pentru uscătorul dvs. și pe propriul risc. WashData nu comută niciodată priza singur; această automatizare o face.\n\nNecesită WashData 0.5.9 sau mai nou."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Ciclu pornit"
+    },
+    "program_recognised": {
+      "name": "Program recunoscut"
+    },
+    "phase_started": {
+      "name": "Fază pornită"
+    },
+    "finishing_soon": {
+      "name": "Se termină curând"
+    },
+    "cycle_overrun": {
+      "name": "Ciclu în depășire"
+    },
+    "cycle_paused": {
+      "name": "Ciclu în pauză"
+    },
+    "cycle_resumed": {
+      "name": "Ciclu reluat"
+    },
+    "cycle_stalled": {
+      "name": "Ciclu blocat"
+    },
+    "cycle_finished": {
+      "name": "Ciclu terminat"
+    },
+    "cycle_ended": {
+      "name": "Ciclu încheiat (orice motiv)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-șifonare pornit"
+    },
+    "still_tumbling": {
+      "name": "Încă se rotește după ciclu"
+    },
+    "unload_pending": {
+      "name": "Descărcare în așteptare"
+    },
+    "unloaded": {
+      "name": "Descărcat"
+    },
+    "state_changed": {
+      "name": "Stare schimbată"
+    },
+    "maintenance_due": {
+      "name": "Mentenanță necesară"
+    },
+    "milestone_reached": {
+      "name": "Reper de cicluri atins"
+    },
+    "pump_stuck": {
+      "name": "Pompă blocată"
+    }
   }
 }

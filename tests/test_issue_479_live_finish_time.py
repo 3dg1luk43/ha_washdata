@@ -44,6 +44,10 @@ async def _manager(hass: Any, message: str | None = None) -> WashDataManager:
     }
     if message is not None:
         options["notify_pre_complete_message"] = message
+    # The service the entry targets exists: a live tick may clear the lifecycle
+    # tag through it, and a call to a missing service fails its task at teardown.
+    if not hass.services.has_service("notify", "mobile_app_phone"):
+        record_notify(hass)
     mgr = await boot(hass, make_entry(hass, options, title="Washing Machine"))
     mgr.detector._state = "running"
     mgr._notify_live_interval_seconds = 30

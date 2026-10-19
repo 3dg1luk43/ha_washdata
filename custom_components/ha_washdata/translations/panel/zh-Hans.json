@@ -86,7 +86,9 @@
         "matcher_unused": "尚未匹配到您的任何周期",
         "matcher_used": "已匹配您的 {n} 个周期",
         "matcher_used_other": "已匹配您的 {n} 个周期",
-        "matcher_used_tip": "此设备上由 WashData 自动匹配到此导入程序的周期。从未匹配过的导入程序可能不适合您的设备，可以删除。仅在本地统计，不会向商店发送任何内容。"
+        "matcher_used_tip": "此设备上由 WashData 自动匹配到此导入程序的周期。从未匹配过的导入程序可能不适合您的设备，可以删除。仅在本地统计，不会向商店发送任何内容。",
+        "bp_installed": "已安装",
+        "bp_installed_other": "已安装其他版本"
     },
     "btn": {
         "pg_preset_delete": "删除预设",
@@ -130,7 +132,6 @@
         "export": "导出",
         "force_stop": "强制停止",
         "force_stop_tip": "立即结束当前周期并将其标记为强制停止",
-        "from_template": "从模板 ▾",
         "ignore": "忽略",
         "import_json": "从 JSON 导入",
         "inspect": "检查",
@@ -144,8 +145,6 @@
         "new_phase": "+ 新建阶段",
         "new_profile": "+ 新建配置文件",
         "new_profile_tip": "从现有已标记的周期或录制中创建新程序配置文件",
-        "on_cycle_finished": "周期完成时",
-        "on_cycle_started": "周期开始时",
         "pause_cycle": "暂停",
         "pause_cycle_tip": "暂停正在运行的周期 – 设备将从中断处恢复",
         "pg_load_live": "加载生效设置",
@@ -248,7 +247,14 @@
         "confirmed": "已确认",
         "create_profile_from_gap": "创建配置文件",
         "undo_import": "撤销上次导入",
-        "pg_rerun": "更新模拟"
+        "pg_rerun": "更新模拟",
+        "from_trigger": "从触发器开始 ▾",
+        "bp_use": "用于此设备",
+        "bp_install": "安装模板",
+        "bp_view_yaml": "查看 YAML",
+        "copy": "复制",
+        "replace": "替换",
+        "from_trigger_open": "从触发器开始 ▴"
     },
     "note": {
         "off_delay": {
@@ -363,7 +369,10 @@
         "import_power_history": "导入功率历史",
         "service_status": "保养状态",
         "online_account_tab": "在线与社区",
-        "live_match_debug": "实时匹配调试"
+        "live_match_debug": "实时匹配调试",
+        "automations_used": "使用此设备的自动化",
+        "bp_templates": "模板",
+        "automations_all_tip": "Home Assistant 的自动化列表，按 WashData 标签过滤。在此创建的自动化也在 WashData 类别中。"
     },
     "health": {
         "fair": "配置文件质量尚可",
@@ -672,7 +681,11 @@
         "cycle_context_minutes": "{min} 分钟",
         "cycle_context_series": "记录器历史",
         "before_start": "开始前",
-        "after_end": "结束后"
+        "after_end": "结束后",
+        "bp_you_choose": "您选择: {inputs}",
+        "bp_adjustable": "可调整: {inputs}",
+        "bp_yaml": "蓝图 YAML",
+        "automation_wd_label": "包含 WashData 标签"
     },
     "log": {
         "all_levels": "所有级别",
@@ -767,7 +780,9 @@
         "profile_title": "配置文件 · {name}",
         "undo_import_msg": "此设备的数据和设置将恢复到上次导入（{when}）之前的状态。此后记录的周期和所做的更改都将丢失。",
         "undo_import_ok": "撤销导入",
-        "undo_import_title": "撤销上次导入"
+        "undo_import_title": "撤销上次导入",
+        "bp_replace_title": "替换已安装的模板？",
+        "bp_replace_msg": "Home Assistant 中已有 \"{name}\" 的其他版本。用此 WashData 版本中的内容替换吗？使用该模板的自动化也会随之改变。"
     },
     "msg": {
         "pg_canvas_empty3": "在上方选择一个周期并按“运行”进行模拟。然后悬停查看数值，滚动或双指缩放，拖动平移。",
@@ -787,7 +802,6 @@
         "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复。可能是开了门或周期被暂停。",
         "artifact_spike_detail": "超出通常功率范围约 {n} 秒。",
         "auto_label_intro": "为置信度达到阈值的未标记周期分配配置文件。",
-        "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为常规 Home Assistant 自动化。使用此设备的自动化显示在下方。",
         "cleanup_intro": "叠加显示所有已标记的周期。勾选离群值，然后取消其标记（保留在历史中，不再用于构建此配置文件）或将其删除。",
         "clear_debug_hint": "删除存储的调试数据以释放空间。",
         "collecting_data": "正在收集数据。开始微调前还需要的周期数：{need}（{current}/{min}）。",
@@ -1023,10 +1037,6 @@
         "pg_label_yes": "周期结束时将被标记为“{name}”",
         "pg_label_no": "将请求审查：{reason}",
         "live_match_debug_tip": "置信度：当前功率曲线与排名第一的候选配置文件的吻合程度（0-100%）。不明确：两个最佳候选的得分相差不到 5%，在周期结束前标签尚不确定。",
-        "automation_alias_started": "{device}：周期已开始",
-        "automation_alias_finished": "{device}：周期已完成",
-        "automation_desc_started": "{device} 周期开始时运行。请添加您的动作（通知、灯光等）。",
-        "automation_desc_finished": "{device} 周期完成时运行。请添加您的动作（通知、灯光等）。",
         "feedback_detected": "WashData 检测到：{name}",
         "import_undo_hint": "已保留上次导入（{when}）之前的还原点：{profiles} 个配置文件和 {cycles} 个周期。",
         "replace_undo_hint": "系统会先保存一个还原点，因此您可以在“导出 / 导入”中撤销此次导入。",
@@ -1047,7 +1057,16 @@
         "cycle_context_note": "灰色：功率传感器在此周期前后的记录器历史。它不属于该周期，不影响时长、能耗或匹配。",
         "cycle_context_none": "记录器中没有此周期前后的读数（Home Assistant 默认保留 10 天的历史）。",
         "cycle_context_tip": "仅用于显示：显示功率传感器在此周期前后的记录器历史（如仍保留）。若要将失败的启动尝试并入以后的周期，请使用“曲线前导采样”（设置 > 检测 > 周期开始），这会改变存储的时长。",
-        "invalid_threshold_pair": "停止阈值（{stop} W）必须低于启动阈值（{start} W）。未保存任何内容；请同时修改这两个值。"
+        "invalid_threshold_pair": "停止阈值（{stop} W）必须低于启动阈值（{start} W）。未保存任何内容；请同时修改这两个值。",
+        "automations_tab_intro": "WashData 为您自己的 Home Assistant 自动化提供设备触发器（周期开始、周期完成、周期停滞等）。使用此设备的自动化将在此处列出。",
+        "bp_intro": "此设备的现成自动化，以 Home Assistant 蓝图形式安装。",
+        "bp_admin_only": "模板由管理员安装。",
+        "bp_none": "此设备类型暂无模板。",
+        "bp_load_failed": "模板加载失败。",
+        "auto_trigger_hint": "为此设备创建包含此触发器的自动化，并在 Home Assistant 中打开。",
+        "automation_alias_trigger": "{device}: {trigger}",
+        "automation_desc_trigger": "由 WashData 为 {device} 创建。添加您的动作（通知、灯光等）。",
+        "automation_alias_new": "{device}: 新建自动化"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1657,7 +1676,8 @@
         "subtab_profiles": "配置文件",
         "maintenance": "维护",
         "playground": "试验场",
-        "store": "商店"
+        "store": "商店",
+        "automations": "自动化"
     },
     "tag": {
         "early_end": "提前结束",
@@ -1822,7 +1842,14 @@
         "auto_label_cancelled": "自动标记已取消，此前已标记 {count} 个周期。",
         "auto_label_cancelled_other": "自动标记已取消，此前已标记 {count} 个周期。",
         "auto_label_done": "自动标记完成：已标记 {count} 个周期，{skipped} 个保持未标记。",
-        "auto_label_done_other": "自动标记完成：已标记 {count} 个周期，{skipped} 个保持未标记。"
+        "auto_label_done_other": "自动标记完成：已标记 {count} 个周期，{skipped} 个保持未标记。",
+        "bp_install_failed": "无法安装模板: {error}",
+        "bp_installed_finish": "模板已安装。请在 Home Assistant 中填写其余内容。",
+        "bp_automation_failed": "模板已安装，但无法创建自动化: {error}",
+        "bp_automation_created": "已使用默认设置创建自动化; 正在打开",
+        "copied": "已复制",
+        "copy_failed": "复制失败。请选择文本并手动复制。",
+        "automation_label_failed": "自动化已创建，但无法添加 WashData 标签或类别。"
     },
     "suggestion": {
         "observed_label": "观测值",
@@ -2001,7 +2028,10 @@
     },
     "link": {
         "maintenance_supporter": "GitHub 上的 Maintenance Supporter ↗",
-        "manual": "手册 ↗"
+        "manual": "手册 ↗",
+        "bp_share": "通过 pull request 分享您的模板 ↗",
+        "bp_open_in_ha": "在 Home Assistant 中打开 ↗",
+        "automations_all": "Home Assistant 中所有 WashData 自动化"
     },
     "tip": {
         "add_brand": "品牌未收录？将其添加到社区目录",
@@ -2128,5 +2158,71 @@
         "thr": "阈值",
         "too_short": "太短",
         "tumble_kept": "保留翻滚脉冲"
+    },
+    "blueprint": {
+        "cycle_running_indicator": {
+            "name": "周期运行时打开某物",
+            "description": "当 WashData 周期开始时打开灯、开关或切换辅助设备，周期结束时关闭，误启动后同样适用。\n\n需要 WashData 0.5.9 或更高版本。"
+        },
+        "dryer_anti_crease_power_cut": {
+            "name": "终止烘干机长时间抗皱阶段",
+            "description": "适用于程序结束后仍在抗皱模式下持续滚动数小时的烘干机。仅在 WashData 认为程序已完成后运行（周期完成或抗皱开始）。等待后，在低功耗时刻关闭烘干机的智能插座，并在默认情况下重新开启。期间若有新周期开始则取消。\n\n风险：烘干机处于插电状态时切换继电器。请仅使用适合您烘干机额定功率的插座，并自行承担风险。WashData 本身不切换插座；这由此自动化完成。\n\n需要 WashData 0.5.9 或更高版本。"
+        }
+    },
+    "trigger": {
+        "cycle_started": {
+            "name": "周期已开始"
+        },
+        "program_recognised": {
+            "name": "程序已识别"
+        },
+        "phase_started": {
+            "name": "阶段已开始"
+        },
+        "finishing_soon": {
+            "name": "即将完成"
+        },
+        "cycle_overrun": {
+            "name": "周期运行过长"
+        },
+        "cycle_paused": {
+            "name": "周期已暂停"
+        },
+        "cycle_resumed": {
+            "name": "周期已恢复"
+        },
+        "cycle_stalled": {
+            "name": "周期已停滞"
+        },
+        "cycle_finished": {
+            "name": "周期已完成"
+        },
+        "cycle_ended": {
+            "name": "周期已结束（任何原因）"
+        },
+        "anti_wrinkle_started": {
+            "name": "抗皱已开始"
+        },
+        "still_tumbling": {
+            "name": "周期结束后仍在翻滚"
+        },
+        "unload_pending": {
+            "name": "待卸载"
+        },
+        "unloaded": {
+            "name": "已取出"
+        },
+        "state_changed": {
+            "name": "状态已变更"
+        },
+        "maintenance_due": {
+            "name": "需要维护"
+        },
+        "milestone_reached": {
+            "name": "达到周期里程碑"
+        },
+        "pump_stuck": {
+            "name": "泵被卡住"
+        }
     }
 }

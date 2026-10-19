@@ -30,6 +30,33 @@ export interface ApplySuggestionsResponse {
   applied: string[];
 }
 
+export interface BlueprintInput {
+  key: string;
+  name: string;
+  description: string;
+  selector: string | null;
+  has_default: boolean;
+}
+
+export interface BlueprintItem {
+  id: string;
+  name: string;
+  description: string;
+  device_types: string[];
+  min_version: string;
+  tags: string[];
+  source_url: string;
+  path: string;
+  yaml: string;
+  one_click: boolean;
+  inputs: BlueprintInput[];
+}
+
+export interface BlueprintsListResponse {
+  blueprints: BlueprintItem[];
+  error?: string;
+}
+
 export interface CancelTaskResponse {
   cancelled: boolean;
 }
@@ -1148,6 +1175,9 @@ export interface GetShareableCyclesRequest {
   entry_id: string;
 }
 
+export interface BlueprintsListRequest {
+}
+
 // ── Command maps ───────────────────────────────────────────────────────────
 
 export interface WashDataWsRequests {
@@ -1263,6 +1293,7 @@ export interface WashDataWsRequests {
   "ha_washdata/store_upload_device": StoreUploadDeviceRequest;
   "ha_washdata/store_download_device": StoreDownloadDeviceRequest;
   "ha_washdata/get_shareable_cycles": GetShareableCyclesRequest;
+  "ha_washdata/blueprints/list": BlueprintsListRequest;
 }
 
 export interface WashDataWsResponses {
@@ -1378,6 +1409,7 @@ export interface WashDataWsResponses {
   "ha_washdata/store_upload_device": StoreUploadDeviceResponse;
   "ha_washdata/store_download_device": StartTaskResponse;
   "ha_washdata/get_shareable_cycles": GetShareableCyclesResponse;
+  "ha_washdata/blueprints/list": BlueprintsListResponse;
 }
 
 export interface WashDataTaskResults {

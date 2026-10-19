@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand - run `python3 devtools/generate_ws_types.py`.
 
-**112 commands.**
+**113 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -120,6 +120,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_upload_device` | entry_id, items, include_phases?, include_settings? | `StoreUploadDeviceResponse` |
 | `store_download_device` | entry_id, device_id, include_settings? | `StartTaskResponse` |
 | `get_shareable_cycles` | entry_id | `GetShareableCyclesResponse` |
+| `blueprints/list` | - | `BlueprintsListResponse` |
 
 ## `ha_washdata/get_devices`
 
@@ -2039,6 +2040,19 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `items` | no | list |
 | `phase_programs` | no | list |
 | `all_programs` | no | list |
+
+## `ha_washdata/blueprints/list`
+
+**Request parameters**
+
+_None._
+
+**Response** (`BlueprintsListResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `blueprints` | yes | list[BlueprintItem] |
+| `error` | no | str |
 
 # Task results
 

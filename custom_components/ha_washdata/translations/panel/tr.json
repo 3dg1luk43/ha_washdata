@@ -89,7 +89,9 @@
         "matcher_used": "Döngülerinizden {n} tanesiyle eşleşti",
         "matcher_used_one": "Döngülerinizden {n} tanesiyle eşleşti",
         "matcher_used_other": "Döngülerinizden {n} tanesiyle eşleşti",
-        "matcher_used_tip": "WashData'nın bu cihazda kendi başına bu içe aktarılan programla eşleştirdiği döngüler. Hiç eşleşmeyen bir içe aktarma cihazınıza uymuyor olabilir; kaldırabilirsiniz. Yerel olarak sayılır; mağazaya hiçbir şey gönderilmez."
+        "matcher_used_tip": "WashData'nın bu cihazda kendi başına bu içe aktarılan programla eşleştirdiği döngüler. Hiç eşleşmeyen bir içe aktarma cihazınıza uymuyor olabilir; kaldırabilirsiniz. Yerel olarak sayılır; mağazaya hiçbir şey gönderilmez.",
+        "bp_installed": "Yüklendi",
+        "bp_installed_other": "Başka sürüm yüklü"
     },
     "btn": {
         "pg_preset_delete": "Ön ayarı sil",
@@ -133,7 +135,6 @@
         "export": "Dışa Aktar",
         "force_stop": "Zorla Durdur",
         "force_stop_tip": "Geçerli döngüyü hemen sonlandırın ve zorla durduruldu olarak işaretleyin",
-        "from_template": "Şablondan ▾",
         "ignore": "Yoksay",
         "import_json": "JSON'dan içe aktar",
         "inspect": "İncele",
@@ -147,8 +148,6 @@
         "new_phase": "+ Yeni Aşama",
         "new_profile": "+ Yeni Profil",
         "new_profile_tip": "Mevcut etiketlenmiş bir döngüden veya kayıttan yeni bir program profili oluşturun",
-        "on_cycle_finished": "Döngü bittiğinde",
-        "on_cycle_started": "Döngü başladığında",
         "pause_cycle": "Duraklat",
         "pause_cycle_tip": "Çalışan döngüyü duraklatın – cihaz kaldığı yerden devam edecek",
         "pg_load_live": "Etkin ayarları yükle",
@@ -251,7 +250,14 @@
         "confirmed": "Onaylandı",
         "create_profile_from_gap": "Profil oluştur",
         "undo_import": "Son içe aktarmayı geri al",
-        "pg_rerun": "Simülasyonu güncelle"
+        "pg_rerun": "Simülasyonu güncelle",
+        "from_trigger": "Tetikleyiciden başlat ▾",
+        "bp_use": "Bu cihazla kullan",
+        "bp_install": "Şablonu yükle",
+        "bp_view_yaml": "YAML'ı görüntüle",
+        "copy": "Kopyala",
+        "replace": "Değiştir",
+        "from_trigger_open": "Tetikleyiciden başlat ▴"
     },
     "note": {
         "off_delay": {
@@ -366,7 +372,10 @@
         "import_power_history": "Güç geçmişini içe aktar",
         "service_status": "Bakım Durumu",
         "online_account_tab": "Çevrimiçi ve Topluluk",
-        "live_match_debug": "Canlı Eşleşme Hata Ayıklama"
+        "live_match_debug": "Canlı Eşleşme Hata Ayıklama",
+        "automations_used": "Bu cihazı kullanan otomasyonlar",
+        "bp_templates": "Şablonlar",
+        "automations_all_tip": "Home Assistant'ın otomasyon listesi, WashData etiketine göre filtreli. Burada oluşturulan otomasyonlar aynı zamanda WashData kategorisindedir."
     },
     "health": {
         "fair": "Kabul edilebilir profil kalitesi",
@@ -678,7 +687,11 @@
         "cycle_context_minutes": "{min} dk",
         "cycle_context_series": "Kaydedici geçmişi",
         "before_start": "Başlangıçtan önce",
-        "after_end": "Bitişten sonra"
+        "after_end": "Bitişten sonra",
+        "bp_you_choose": "Siz seçersiniz: {inputs}",
+        "bp_adjustable": "Ayarlanabilir: {inputs}",
+        "bp_yaml": "Blueprint YAML",
+        "automation_wd_label": "WashData etiketini taşır"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -775,7 +788,9 @@
         "profile_title": "Profil · {name}",
         "undo_import_msg": "Bu cihazın verileri ve ayarları son içe aktarmadan ({when}) önceki haline döner. O zamandan beri kaydedilen döngüler ve yapılan değişiklikler kaybolur.",
         "undo_import_ok": "İçe aktarmayı geri al",
-        "undo_import_title": "Son içe aktarmayı geri al"
+        "undo_import_title": "Son içe aktarmayı geri al",
+        "bp_replace_title": "Yüklü şablon değiştirilsin mi?",
+        "bp_replace_msg": "Home Assistant'ta \"{name}\" için farklı bir sürüm var. Bu WashData sürümündekiyle değiştirilsin mi? Bunu kullanan otomasyonlar da değişir."
     },
     "msg": {
         "pg_canvas_empty3": "Yukarıdan bir döngü seçin ve simüle etmek için Çalıştır'a basın. Ardından değerleri okumak için üzerine gelin, yakınlaştırmak için kaydırın veya iki parmak kullanın ve kaydırmak için sürükleyin.",
@@ -796,7 +811,6 @@
         "artifact_pause_detail": "Güç ~{n} sn boyunca sıfıra yakın düştü, sonra devam etti. Muhtemelen kapı açıldı veya döngü duraklatıldı.",
         "artifact_spike_detail": "Normal güç bandının üzerinde yaklaşık ~{n} saniye sürdü.",
         "auto_label_intro": "Eşleşme güveni eşiği geçen etiketsiz döngülere profil atayın.",
-        "automations_intro": "WashData, {start} / {end} olaylarını tetikler ve varlıkları gösterir; bu nedenle bildirimler ve eylemler en iyi şekilde normal Home Assistant otomasyonları olarak oluşturulur. Bu cihazı kullanan otomasyonlar aşağıda görünür.",
         "cleanup_intro": "Tüm etiketli döngüler üst üste. Aykırı olanları işaretleyin, sonra etiketlerini kaldırın (geçmişte kalırlar, artık bu profili şekillendirmezler) veya silin.",
         "clear_debug_hint": "Saklanan hata ayıklama verilerini kaldırarak boş alan açın.",
         "collecting_data": "Veri toplanıyor. İnce ayarın başlaması için gereken döngü sayısı: {need} ({current}/{min}).",
@@ -1037,10 +1051,6 @@
         "pg_label_yes": "Döngü sonunda \"{name}\" olarak etiketlenirdi",
         "pg_label_no": "İnceleme isterdi: {reason}",
         "live_match_debug_tip": "Güven: mevcut güç eğrisinin en iyi aday profille ne kadar yakından eşleştiği (%0-100). Belirsiz: en iyi iki adayın puanları arasındaki fark %5'ten az - döngü bitene kadar etiket belirsizdir.",
-        "automation_alias_started": "{device}: döngü başladı",
-        "automation_alias_finished": "{device}: döngü bitti",
-        "automation_desc_started": "Bir {device} döngüsü başladığında çalışır. Eylemlerinizi ekleyin (bildirim, ışıklar, ...).",
-        "automation_desc_finished": "Bir {device} döngüsü bittiğinde çalışır. Eylemlerinizi ekleyin (bildirim, ışıklar, ...).",
         "feedback_detected": "WashData algıladı: {name}",
         "import_undo_hint": "Son içe aktarmadan ({when}) önceki bir geri yükleme noktası saklanıyor: {profiles} profil ve {cycles} döngü.",
         "replace_undo_hint": "Önce bir geri yükleme noktası kaydedilir, böylece bu içe aktarmayı Dışa / İçe Aktar bölümünden geri alabilirsiniz.",
@@ -1063,7 +1073,16 @@
         "cycle_context_note": "Gri: güç sensörünün bu döngü çevresindeki kaydedici geçmişi. Döngünün parçası değildir; süreyi, enerjiyi veya eşleştirmeyi etkilemez.",
         "cycle_context_none": "Kaydedicide bu döngünün çevresine ait okuma yok (Home Assistant varsayılan olarak 10 günlük geçmiş tutar).",
         "cycle_context_tip": "Yalnızca görüntüleme: hâlâ saklanıyorsa güç sensörünün bu döngü çevresindeki kaydedici geçmişini gösterir. Başarısız başlatma denemelerini gelecekteki döngülere eklemek için Eğri Ön Kaydı'nı kullanın (Ayarlar > Algılama > Döngü Başlangıcı); bu, kaydedilen süreleri değiştirir.",
-        "invalid_threshold_pair": "Durdurma Eşiği ({stop} W), Başlangıç Eşiği'nden ({start} W) düşük olmalı. Hiçbir şey kaydedilmedi; ikisini birlikte değiştirin."
+        "invalid_threshold_pair": "Durdurma Eşiği ({stop} W), Başlangıç Eşiği'nden ({start} W) düşük olmalı. Hiçbir şey kaydedilmedi; ikisini birlikte değiştirin.",
+        "automations_tab_intro": "WashData, kendi Home Assistant otomasyonlarınız için cihaz tetikleyicileri sunar (döngü başladı, döngü bitti, döngü takıldı ve daha fazlası). Bu cihazı kullanan otomasyonlar burada listelenir.",
+        "bp_intro": "Bu cihaz için hazır otomasyonlar, Home Assistant blueprint'leri olarak yüklenir.",
+        "bp_admin_only": "Şablonları bir yönetici yükler.",
+        "bp_none": "Bu cihaz türü için henüz şablon yok.",
+        "bp_load_failed": "Şablonlar yüklenemedi.",
+        "auto_trigger_hint": "Bu tetikleyiciyle bu cihaz için bir otomasyon oluşturur ve Home Assistant'ta açar.",
+        "automation_alias_trigger": "{device}: {trigger}",
+        "automation_desc_trigger": "{device} için WashData tarafından oluşturuldu. Eylemlerinizi ekleyin (bildir, ışıklar, ...).",
+        "automation_alias_new": "{device}: yeni otomasyon"
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1673,7 +1692,8 @@
         "subtab_profiles": "Profiller",
         "maintenance": "Bakım",
         "playground": "Test Alanı",
-        "store": "Mağaza"
+        "store": "Mağaza",
+        "automations": "Otomasyonlar"
     },
     "tag": {
         "early_end": "Erken bitiş",
@@ -1840,7 +1860,14 @@
         "auto_label_cancelled_other": "Otomatik etiketleme {count} döngü etiketlendikten sonra iptal edildi.",
         "auto_label_done": "Otomatik etiketleme tamamlandı: {count} döngü etiketlendi, {skipped} döngü etiketsiz kaldı.",
         "auto_label_done_one": "Otomatik etiketleme tamamlandı: {count} döngü etiketlendi, {skipped} döngü etiketsiz kaldı.",
-        "auto_label_done_other": "Otomatik etiketleme tamamlandı: {count} döngü etiketlendi, {skipped} döngü etiketsiz kaldı."
+        "auto_label_done_other": "Otomatik etiketleme tamamlandı: {count} döngü etiketlendi, {skipped} döngü etiketsiz kaldı.",
+        "bp_install_failed": "Şablon yüklenemedi: {error}",
+        "bp_installed_finish": "Şablon yüklendi. Geri kalanını Home Assistant'ta doldurun.",
+        "bp_automation_failed": "Şablon yüklendi ancak otomasyon oluşturulamadı: {error}",
+        "bp_automation_created": "Otomasyon varsayılan ayarlarla oluşturuldu; açılıyor",
+        "copied": "Kopyalandı",
+        "copy_failed": "Kopyalama başarısız. Metni seçin ve elle kopyalayın.",
+        "automation_label_failed": "Otomasyon oluşturuldu, ancak WashData etiketi veya kategorisi eklenemedi."
     },
     "suggestion": {
         "observed_label": "Gözlemlenen",
@@ -2019,7 +2046,10 @@
     },
     "link": {
         "maintenance_supporter": "GitHub'da Maintenance Supporter ↗",
-        "manual": "Kılavuz ↗"
+        "manual": "Kılavuz ↗",
+        "bp_share": "Kendi şablonunuzu pull request ile paylaşın ↗",
+        "bp_open_in_ha": "Home Assistant'ta aç ↗",
+        "automations_all": "Home Assistant'taki tüm WashData otomasyonları"
     },
     "tip": {
         "add_brand": "Marka listede yok mu? Topluluk kataloğuna ekleyin",
@@ -2146,5 +2176,71 @@
         "thr": "eşik",
         "too_short": "çok kısa",
         "tumble_kept": "tambur darbeleri korundu"
+    },
+    "blueprint": {
+        "cycle_running_indicator": {
+            "name": "Döngü çalışırken bir şey aç",
+            "description": "WashData döngüsü başladığında bir ışık, anahtar veya açma/kapama yardımcısını açar; döngü bittiğinde, yanlış başlatma sonrasında da kapatır.\n\nWashData 0.5.9 veya üzeri gerekir."
+        },
+        "dryer_anti_crease_power_cut": {
+            "name": "Uzun kurutucu kırışıklık önleme fazını sonlandır",
+            "description": "Programdan sonra saatlerce kırışıklık önleme modunda dönen kurutucular için. Yalnızca WashData programın bittiğini değerlendirdikten sonra çalışır (döngü bitti veya kırışıklık önleme başladı). Bekler, ardından düşük güç anında kurutucunun akıllı fişini kapatır ve varsayılan olarak geri açar. Bu sırada başlayan yeni bir döngü iptal eder.\n\nRisk: bu, kurutucu prize takılıyken röleyi değiştirir. Yalnızca kurutucunuza uygun bir priz ile ve kendi sorumluluğunuzda kullanın. WashData fiş'i hiçbir zaman kendisi kapatmaz; bunu bu otomasyon yapar.\n\nWashData 0.5.9 veya üzeri gerekir."
+        }
+    },
+    "trigger": {
+        "cycle_started": {
+            "name": "Döngü başladı"
+        },
+        "program_recognised": {
+            "name": "Program tanındı"
+        },
+        "phase_started": {
+            "name": "Aşama başladı"
+        },
+        "finishing_soon": {
+            "name": "Yakında bitiyor"
+        },
+        "cycle_overrun": {
+            "name": "Döngü çok uzun sürüyor"
+        },
+        "cycle_paused": {
+            "name": "Döngü duraklatıldı"
+        },
+        "cycle_resumed": {
+            "name": "Döngü devam etti"
+        },
+        "cycle_stalled": {
+            "name": "Döngü takıldı"
+        },
+        "cycle_finished": {
+            "name": "Döngü bitti"
+        },
+        "cycle_ended": {
+            "name": "Döngü sona erdi (herhangi bir nedenle)"
+        },
+        "anti_wrinkle_started": {
+            "name": "Kırışıklık önleme başladı"
+        },
+        "still_tumbling": {
+            "name": "Döngüden sonra hâlâ dönüyor"
+        },
+        "unload_pending": {
+            "name": "Boşaltma bekliyor"
+        },
+        "unloaded": {
+            "name": "Boşaltıldı"
+        },
+        "state_changed": {
+            "name": "Durum değişti"
+        },
+        "maintenance_due": {
+            "name": "Bakım gerekiyor"
+        },
+        "milestone_reached": {
+            "name": "Döngü kilometre taşına ulaşıldı"
+        },
+        "pump_stuck": {
+            "name": "Pompa takıldı"
+        }
     }
 }

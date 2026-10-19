@@ -95,7 +95,9 @@
     "matcher_used_few": "Priradené k {n} vašim cyklom",
     "matcher_used_many": "Priradené k {n} cyklu",
     "matcher_used_other": "Priradené k {n} vašim cyklom",
-    "matcher_used_tip": "Cykly na tomto spotrebiči, ktoré WashData sám priradil k tomuto importovanému programu. Import, ktorý sa nikdy nepriradí, nemusí zodpovedať vášmu spotrebiču; môžete ho odstrániť. Počítané lokálne; do obchodu sa nič neodosiela."
+    "matcher_used_tip": "Cykly na tomto spotrebiči, ktoré WashData sám priradil k tomuto importovanému programu. Import, ktorý sa nikdy nepriradí, nemusí zodpovedať vášmu spotrebiču; môžete ho odstrániť. Počítané lokálne; do obchodu sa nič neodosiela.",
+    "bp_installed": "Nainštalované",
+    "bp_installed_other": "Nainštalovaná iná verzia"
   },
   "btn": {
     "pg_preset_delete": "Odstrániť prednastavenie",
@@ -148,7 +150,6 @@
     "export": "Exportovať",
     "force_stop": "Nútené zastavenie",
     "force_stop_tip": "Okamžite ukončiť aktuálny cyklus a označiť ho ako nútene zastavený",
-    "from_template": "Zo šablóny ▾",
     "ignore": "Ignorovať",
     "import_json": "Importovať z JSON",
     "inspect": "Skontrolovať",
@@ -162,8 +163,6 @@
     "new_phase": "+ Nová fáza",
     "new_profile": "+ Nový profil",
     "new_profile_tip": "Vytvoriť nový profil programu z existujúceho označeného cyklu alebo nahrávky",
-    "on_cycle_finished": "Po dokončení cyklu",
-    "on_cycle_started": "Pri spustení cyklu",
     "pause_cycle": "Pozastaviť",
     "pause_cycle_tip": "Pozastaviť bežiaci cyklus – spotrebič pokračuje tam, kde prestal",
     "process": "Spracovať",
@@ -257,7 +256,14 @@
     "confirmed": "Potvrdené",
     "create_profile_from_gap": "Vytvoriť profil",
     "undo_import": "Vrátiť späť posledný import",
-    "pg_rerun": "Aktualizovať simuláciu"
+    "pg_rerun": "Aktualizovať simuláciu",
+    "from_trigger": "Spustiť zo spúšťača ▾",
+    "bp_use": "Použiť s týmto zariadením",
+    "bp_install": "Nainštalovať šablónu",
+    "bp_view_yaml": "Zobraziť YAML",
+    "copy": "Kopírovať",
+    "replace": "Nahradiť",
+    "from_trigger_open": "Spustiť zo spúšťača ▴"
   },
   "note": {
     "off_delay": {
@@ -372,7 +378,10 @@
     "import_power_history": "Import histórie výkonu",
     "service_status": "Stav servisu",
     "online_account_tab": "Online a komunita",
-    "live_match_debug": "Ladenie zhody v reálnom čase"
+    "live_match_debug": "Ladenie zhody v reálnom čase",
+    "automations_used": "Automatizácie používajúce toto zariadenie",
+    "bp_templates": "Šablóny",
+    "automations_all_tip": "Zoznam automatizácií Home Assistant filtrovaný podľa štítku WashData. Automatizácie vytvorené tu sú tiež v kategórii WashData."
   },
   "health": {
     "fair": "Prijateľná kvalita profilu",
@@ -690,7 +699,11 @@
     "cycle_context_minutes": "{min} min",
     "cycle_context_series": "História z recordera",
     "before_start": "Pred začiatkom",
-    "after_end": "Po skončení"
+    "after_end": "Po skončení",
+    "bp_you_choose": "Na výber: {inputs}",
+    "bp_adjustable": "Nastaviteľné: {inputs}",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Nesie štítok WashData"
   },
   "log": {
     "all_levels": "Všetky úrovne",
@@ -791,7 +804,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Údaje a nastavenia tohto zariadenia sa vrátia do stavu pred posledným importom ({when}). Cykly zaznamenané a zmeny vykonané odvtedy sa stratia.",
     "undo_import_ok": "Vrátiť import späť",
-    "undo_import_title": "Vrátiť späť posledný import"
+    "undo_import_title": "Vrátiť späť posledný import",
+    "bp_replace_title": "Nahradiť nainštalovanú šablónu?",
+    "bp_replace_msg": "Home Assistant má inú verziu \"{name}\". Nahradiť ju verziou z tejto verzie WashData? Automatizácie, ktoré ju používajú, sa zmenia s ňou."
   },
   "msg": {
     "pg_canvas_empty3": "Vyberte cyklus vyššie a stlačením Spustiť ho nasimulujte. Potom prejdením myšou zobrazíte hodnoty, kolieskom alebo dvoma prstami priblížite a ťahaním posuniete.",
@@ -814,7 +829,6 @@
     "artifact_pause_detail": "Výkon klesol takmer na nulu na ~{n}s a potom sa obnovil. Pravdepodobne boli otvorené dvierka alebo bol cyklus pozastavený.",
     "artifact_spike_detail": "Bol nad bežným pásmom výkonu počas ~{n} s.",
     "auto_label_intro": "Priradiť profily neoznačeným cyklom, ktorých zhoda prekračuje prah.",
-    "automations_intro": "WashData spúšťa udalosti {start} / {end} a sprístupňuje entity, takže notifikácie a akcie sa najlepšie vytvárajú ako bežné automatizácie Home Assistant. Automatizácie používajúce toto zariadenie sú zobrazené nižšie.",
     "cleanup_intro": "Všetky označené cykly cez seba. Zaškrtnite odľahlé a potom im odoberte štítok (zostanú v histórii, ale prestanú tvoriť tento profil) alebo ich odstráňte.",
     "clear_debug_hint": "Odstráňte uložené údaje ladenia, aby ste uvoľnili miesto.",
     "collecting_data": "Zbieranie dát. Zostávajúce cykly do spustenia doladenia: {need} ({current}/{min}).",
@@ -1065,10 +1079,6 @@
     "pg_label_yes": "Na konci cyklu by bol označený ako \"{name}\"",
     "pg_label_no": "Vyžiadala by sa kontrola: {reason}",
     "live_match_debug_tip": "Spoľahlivosť: ako presne aktuálna krivka príkonu zodpovedá najlepšiemu kandidátskemu profilu (0-100 %). Nejednoznačné: dvaja najlepší kandidáti majú skóre v rozmedzí 5 % od seba, takže štítok je neistý až do konca cyklu.",
-    "automation_alias_started": "{device}: cyklus spustený",
-    "automation_alias_finished": "{device}: cyklus dokončený",
-    "automation_desc_started": "Spustí sa, keď začne cyklus zariadenia {device}. Pridajte svoje akcie (oznámenia, svetlá, ...).",
-    "automation_desc_finished": "Spustí sa, keď skončí cyklus zariadenia {device}. Pridajte svoje akcie (oznámenia, svetlá, ...).",
     "feedback_detected": "WashData rozpoznal: {name}",
     "import_undo_hint": "Uchováva sa bod obnovenia spred posledného importu ({when}): {profiles} profilov a {cycles} cyklov.",
     "replace_undo_hint": "Najprv sa uloží bod obnovenia, takže tento import môžete vrátiť späť v časti Export / Import.",
@@ -1095,7 +1105,16 @@
     "cycle_context_note": "Sivou: história senzora výkonu z recordera okolo tohto cyklu. Nie je súčasťou cyklu a neovplyvňuje trvanie, energiu ani párovanie.",
     "cycle_context_none": "Recorder okolo tohto cyklu neuchováva žiadne merania (Home Assistant štandardne uchováva históriu 10 dní).",
     "cycle_context_tip": "Len na zobrazenie: ukazuje históriu senzora výkonu z recordera okolo tohto cyklu, ak je ešte uložená. Ak chcete pridávať neúspešné pokusy o spustenie do budúcich cyklov, použite Nábeh krivky (Nastavenia > Detekcia > Začiatok cyklu), ktorý mení uložené doby trvania.",
-    "invalid_threshold_pair": "Prah zastavenia ({stop} W) musí byť nižší ako Prah spustenia ({start} W). Nič sa neuložilo; zmeňte obe hodnoty spolu."
+    "invalid_threshold_pair": "Prah zastavenia ({stop} W) musí byť nižší ako Prah spustenia ({start} W). Nič sa neuložilo; zmeňte obe hodnoty spolu.",
+    "automations_tab_intro": "WashData ponúka spúšťače zariadenia (cyklus spustený, cyklus dokončený, cyklus zaseknutý a ďalšie) pre vlastné automatizácie Home Assistant. Automatizácie používajúce toto zariadenie sú tu uvedené.",
+    "bp_intro": "Hotové automatizácie pre toto zariadenie, nainštalované ako blueprinty Home Assistant.",
+    "bp_admin_only": "Šablóny inštaluje správca.",
+    "bp_none": "Pre tento typ spotrebiča zatiaľ nie sú žiadne šablóny.",
+    "bp_load_failed": "Šablóny sa nepodarilo načítať.",
+    "auto_trigger_hint": "Vytvorí automatizáciu s týmto spúšťačom pre toto zariadenie a otvorí ju v Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Vytvorené WashData pre {device}. Pridajte svoje akcie (upozornenie, svetlá, ...).",
+    "automation_alias_new": "{device}: nová automatizácia"
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1774,7 +1793,8 @@
     "subtab_profiles": "Profily",
     "maintenance": "Údržba",
     "playground": "Testovacie prostredie",
-    "store": "Obchod"
+    "store": "Obchod",
+    "automations": "Automatizácie"
   },
   "tag": {
     "early_end": "Predčasné ukončenie",
@@ -1945,7 +1965,14 @@
     "auto_label_done_one": "Automatické označovanie dokončené: označený {count} cyklus, bez označenia zostalo: {skipped}.",
     "auto_label_done_few": "Automatické označovanie dokončené: označené {count} cykly, bez označenia zostalo: {skipped}.",
     "auto_label_done_many": "Automatické označovanie dokončené: označené {count} cyklu, bez označenia zostalo: {skipped}.",
-    "auto_label_done_other": "Automatické označovanie dokončené: označených {count} cyklov, bez označenia zostalo: {skipped}."
+    "auto_label_done_other": "Automatické označovanie dokončené: označených {count} cyklov, bez označenia zostalo: {skipped}.",
+    "bp_install_failed": "Šablónu sa nepodarilo nainštalovať: {error}",
+    "bp_installed_finish": "Šablóna nainštalovaná. Doplňte zvyšok v Home Assistant.",
+    "bp_automation_failed": "Šablóna je nainštalovaná, ale automatizáciu sa nepodarilo vytvoriť: {error}",
+    "bp_automation_created": "Automatizácia vytvorená s predvolenými nastaveniami; otváram",
+    "copied": "Skopírované",
+    "copy_failed": "Kopírovanie zlyhalo. Vyberte text a skopírujte ho ručne.",
+    "automation_label_failed": "Automatizácia vytvorená, ale štítok alebo kategória WashData nemohli byť pridané."
   },
   "trend": {
     "down": "Klesajúci trend",
@@ -2055,7 +2082,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter na GitHube ↗",
-    "manual": "Príručka ↗"
+    "manual": "Príručka ↗",
+    "bp_share": "Zdieľajte vlastnú šablónu cez pull request ↗",
+    "bp_open_in_ha": "Otvoriť v Home Assistant ↗",
+    "automations_all": "Všetky automatizácie WashData v Home Assistant"
   },
   "tip": {
     "add_brand": "Značka nie je uvedená? Pridajte ju do katalógu komunity",
@@ -2182,5 +2212,71 @@
     "thr": "prah",
     "too_short": "príliš krátky",
     "tumble_kept": "impulzy bubna ponechané"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Zapnúť niečo počas behu cyklu",
+      "description": "Zapne svetlo, prepínač alebo pomocný prepínač, keď cyklus WashData začne, a vypne, keď skončí, aj po falošnom štarte.\n\nVyžaduje WashData 0.5.9 alebo novší."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Ukončiť dlhú fázu ochrany pred krčením sušičky",
+      "description": "Pre sušičky, ktoré pokračujú v bubnovaní v ochrane pred krčením celé hodiny po skončení programu. Spustí sa až keď WashData považuje program za dokončený (cyklus dokončený alebo ochrana pred krčením spustená). Počká, potom vypne zástrčku sušičky v momente nízkej spotreby a predvolene ju znova zapne. Nový cyklus spustený medzitým ju zruší.\n\nRiziko: prepína relé, keď je sušička zapojená. Používajte len so zástrčkou určenou pre vašu sušičku a na vlastné riziko. WashData zástrčku sám nikdy neprepína; robí to táto automatizácia.\n\nVyžaduje WashData 0.5.9 alebo novší."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Cyklus spustený"
+    },
+    "program_recognised": {
+      "name": "Program rozpoznaný"
+    },
+    "phase_started": {
+      "name": "Fáza spustená"
+    },
+    "finishing_soon": {
+      "name": "Čoskoro koniec"
+    },
+    "cycle_overrun": {
+      "name": "Cyklus trvá príliš dlho"
+    },
+    "cycle_paused": {
+      "name": "Cyklus pozastavený"
+    },
+    "cycle_resumed": {
+      "name": "Cyklus obnovený"
+    },
+    "cycle_stalled": {
+      "name": "Cyklus zaseknutý"
+    },
+    "cycle_finished": {
+      "name": "Cyklus dokončený"
+    },
+    "cycle_ended": {
+      "name": "Cyklus ukončený"
+    },
+    "anti_wrinkle_started": {
+      "name": "Ochrana pred krčením spustená"
+    },
+    "still_tumbling": {
+      "name": "Stále bubnuje po skončení cyklu"
+    },
+    "unload_pending": {
+      "name": "Čaká na vyloženie"
+    },
+    "unloaded": {
+      "name": "Vyložené"
+    },
+    "state_changed": {
+      "name": "Stav zmenený"
+    },
+    "maintenance_due": {
+      "name": "Servis potrebný"
+    },
+    "milestone_reached": {
+      "name": "Dosiahnutý míľnik cyklu"
+    },
+    "pump_stuck": {
+      "name": "Čerpadlo zaseknuté"
+    }
   }
 }
