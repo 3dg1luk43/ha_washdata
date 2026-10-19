@@ -72,8 +72,6 @@ class WashDataProgramSelect(SelectEntity):
             self._attr_icon = "mdi:tumble-dryer"
         elif dtype == "dishwasher":
             self._attr_icon = "mdi:dishwasher"
-        elif dtype == "air_fryer":
-            self._attr_icon = "mdi:pot-steam"
         else:
             self._attr_icon = "mdi:washing-machine"  # Default and washing_machine
 

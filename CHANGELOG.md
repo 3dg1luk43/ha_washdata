@@ -15,12 +15,13 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - Dryers with anti-crease tumbling finish again instead of running for hours.
 - Clearing every notify service really stops notifications.
 - Live updates can name the finish time and arrive on a locked Android phone.
-- Nine fewer settings; the HA events always fire.
+- Nine fewer settings and two fewer device types; the HA events always fire.
 - The Logs drawer can be closed on a phone again.
 
 ### Breaking changes
 
 - **Removed settings**: Fire HA Events for Notifications (the `ha_washdata_*` events always fire), Sampling Interval (each device type's own: 2 s for washers, washer-dryers and dishwashers, 10 s pumps, 30 s others), Unmatch Threshold (0.35), Estimate Tolerance (it fed nothing), Anti-Wrinkle Exit Power (0.8 W or the Stop Threshold, whichever is higher), and the ML training hour, minimum cycles and interval (02:00, 30 cycles, at most weekly; training on demand is unchanged). Stored values, and those of settings removed in 0.5.8, are cleaned up on upgrade.
+- **Air Fryer and Bread Maker device types removed**: existing devices become Other (Advanced) on upgrade and keep the values they ran on (shortest completed cycle, minimum off gap and, on bread makers, the 2 hour quiet-time limit) as settings, so detection does not change. Built-in phases a program uses are kept as custom phases. Their exports import as Other (Advanced). The progress bar smooths backward steps like Other (Advanced) does, and the air fryer icon is the generic one.
 - **The External End Trigger is on whenever its sensor is set**: the separate switch is gone. Upgrading clears the sensor where the switch was off, so nothing changes.
 
 ### Features

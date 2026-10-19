@@ -54,7 +54,7 @@ from custom_components.ha_washdata.suggestion_engine import reconcile_suggestion
 
 _ALL_DEVICE_TYPES = [
     "washing_machine", "dryer", "washer_dryer", "dishwasher",
-    "air_fryer", "bread_maker", "pump", "generic", "other",
+    "pump", "generic", "other",
 ]
 
 

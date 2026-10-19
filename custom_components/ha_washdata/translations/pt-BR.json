@@ -68,8 +68,6 @@
         "dryer": "Secador",
         "washer_dryer": "Combinação Lavadora e Secadora",
         "dishwasher": "Máquina de lavar louça",
-        "air_fryer": "Fritadeira de ar",
-        "bread_maker": "Máquina de fazer pão",
         "pump": "Bomba / Bomba de depósito",
         "generic": "Outro (avançado)",
         "other": "Dispositivo de limite"

@@ -8,7 +8,7 @@
 A Home Assistant integration that watches an appliance through its smart plug. It detects each
 cycle, recognises which program ran from the power curve, and tells you how long is left.
 
-Works with washing machines, dryers, washer-dryers, dishwashers, air fryers, bread makers and pumps.
+Works with washing machines, dryers, washer-dryers, dishwashers and pumps.
 Two catch-all types cover the rest: **Other (Advanced)** (full program matching) and **Threshold
 Device** (on/off detection only).
 

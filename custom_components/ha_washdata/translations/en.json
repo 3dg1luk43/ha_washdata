@@ -112,8 +112,6 @@
         "dryer": "Dryer",
         "washer_dryer": "Washer-Dryer Combo",
         "dishwasher": "Dishwasher",
-        "air_fryer": "Air Fryer",
-        "bread_maker": "Bread Maker",
         "pump": "Pump / Sump Pump",
         "generic": "Other (Advanced)",
         "other": "Threshold Device"

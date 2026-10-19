@@ -6,8 +6,6 @@
     {"id": "dryer",           "label": "Dryer"},
     {"id": "washer_dryer",    "label": "Washer-Dryer Combo"},
     {"id": "dishwasher",      "label": "Dishwasher"},
-    {"id": "air_fryer",       "label": "Air Fryer"},
-    {"id": "bread_maker",     "label": "Bread Maker"},
     {"id": "pump",            "label": "Pump / Sump Pump"},
     {"id": "generic",         "label": "Other (Advanced)"},
     {"id": "other",           "label": "Threshold Device"}

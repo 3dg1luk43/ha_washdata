@@ -68,8 +68,6 @@
         "dryer": "건조기",
         "washer_dryer": "세탁기-건조기 콤보",
         "dishwasher": "식기세척기",
-        "air_fryer": "에어프라이어",
-        "bread_maker": "빵 제조기",
         "pump": "펌프 / 배수 펌프",
         "generic": "기타(고급)",
         "other": "임계값 장치"

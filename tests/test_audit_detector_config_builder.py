@@ -22,7 +22,7 @@ from custom_components.ha_washdata.manager import WashDataManager
 
 DEVICES = [
     "washing_machine", "dishwasher", "dryer", "washer_dryer", "pump", "other",
-    "generic", "air_fryer", "bread_maker",
+    "generic",
 ]
 CHOICES: dict[str, list[Any]] = {
     C.CONF_MIN_POWER: [1.0, 5.5], C.CONF_OFF_DELAY: [60, 600], C.CONF_MIN_OFF_GAP: [120, 3600],

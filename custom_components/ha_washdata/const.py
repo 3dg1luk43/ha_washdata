@@ -969,8 +969,6 @@ DEVICE_TYPE_WASHING_MACHINE = "washing_machine"
 DEVICE_TYPE_DRYER = "dryer"
 DEVICE_TYPE_WASHER_DRYER = "washer_dryer"
 DEVICE_TYPE_DISHWASHER = "dishwasher"
-DEVICE_TYPE_AIR_FRYER = "air_fryer"
-DEVICE_TYPE_BREAD_MAKER = "bread_maker"
 DEVICE_TYPE_PUMP = "pump"
 # Full-featured generic type for predictable appliances that don't fit any of the
 # named categories. Participates in profile matching/learning like any other
@@ -981,6 +979,11 @@ DEVICE_TYPE_GENERIC = "generic"
 # Config entries whose stored device_type is no longer supported are migrated
 # to this bucket on load (see __init__.py), preserving their tuned options.
 DEVICE_TYPE_OTHER = "other"
+# Removed in 0.5.9 (maintainer decision 2026-10-19). Kept only for the migration
+# that moves an entry on one of them to DEVICE_TYPE_GENERIC: see
+# RETIRED_DEVICE_TYPE_OPTIONS below and options_utils.retire_device_type.
+DEVICE_TYPE_AIR_FRYER = "air_fryer"
+DEVICE_TYPE_BREAD_MAKER = "bread_maker"
 
 # Device types whose Stage-4 "energy agreement" compares INTEGRATED energy
 # (mean power x duration) instead of mean power. On these, same-base program
@@ -1002,11 +1005,33 @@ DEVICE_TYPES = {
     DEVICE_TYPE_DRYER: "Dryer",
     DEVICE_TYPE_WASHER_DRYER: "Washer-Dryer Combo",
     DEVICE_TYPE_DISHWASHER: "Dishwasher",
-    DEVICE_TYPE_AIR_FRYER: "Air Fryer",
-    DEVICE_TYPE_BREAD_MAKER: "Bread Maker",
     DEVICE_TYPE_PUMP: "Pump / Sump Pump",
     DEVICE_TYPE_GENERIC: "Other (Advanced)",
     DEVICE_TYPE_OTHER: "Threshold Device",
+}
+
+# 0.5.9: an entry on a removed device type migrates to DEVICE_TYPE_GENERIC (full
+# matching and learning), and every setting where the old type ran on a default of
+# its own keeps that value as an explicit option, so the detector it runs does not
+# change. Only the values that differ from generic's are listed (the rest resolve
+# the same): the completion floor and the minimum off gap the config builder took
+# from DEVICE_COMPLETION_THRESHOLDS / DEFAULT_MIN_OFF_GAP_BY_DEVICE. A key the user
+# has set is kept. Frozen: these are the values the old types shipped with.
+RETIRED_DEVICE_TYPE_OPTIONS: dict[str, dict[str, int]] = {
+    DEVICE_TYPE_AIR_FRYER: {CONF_COMPLETION_MIN_SECONDS: 300, CONF_MIN_OFF_GAP: 120},
+    DEVICE_TYPE_BREAD_MAKER: {CONF_COMPLETION_MIN_SECONDS: 1800, CONF_MIN_OFF_GAP: 600},
+}
+# What the manager reads when low_power_no_update_timeout is unset.
+DEFAULT_LOW_POWER_NO_UPDATE_TIMEOUT = 3600.0
+# ...and a floor rather than a default, as (floor, value when unset): the manager's
+# low-power silence budget was max(DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE[type],
+# low_power_no_update_timeout), so the migrated option is the max of the two,
+# whatever the user stored. (The bread maker's 7200 s in that map was never its
+# no_update_active_timeout: the manager reads that one with the scalar default.)
+RETIRED_DEVICE_TYPE_OPTION_FLOORS: dict[str, dict[str, tuple[float, float]]] = {
+    DEVICE_TYPE_BREAD_MAKER: {
+        CONF_LOW_POWER_NO_UPDATE_TIMEOUT: (7200.0, DEFAULT_LOW_POWER_NO_UPDATE_TIMEOUT),
+    },
 }
 
 # Standby-band stuck-in-RUNNING finalize (#296).  Some appliances finish but hold
@@ -1022,8 +1047,7 @@ DEVICE_TYPES = {
 # never end an active low-power phase: it needs a matched profile, elapsed >= 2x
 # expected, and the whole recent window flat + below a small fraction of the cycle's
 # own peak.  Restricted to wet appliances where a stuck baseline is unambiguously
-# anomalous (bread-maker keep-warm, pump, air-fryer etc. have legitimate holds and
-# are excluded).
+# anomalous (a pump, a keep-warm hold etc. can be legitimate and are excluded).
 STANDBY_BAND_FINALIZE_DEVICE_TYPES = (
     DEVICE_TYPE_WASHING_MACHINE,
     DEVICE_TYPE_WASHER_DRYER,
@@ -1217,7 +1241,6 @@ QUIET_PULSE_MAX_S = 30.0
 
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 14400,  # 4 hours (Drying can be long)
-    DEVICE_TYPE_BREAD_MAKER: 7200,  # 2 hours (Proving/Rising is very low-power for extended periods)
     DEVICE_TYPE_PUMP: DEFAULT_PUMP_STUCK_DURATION + 60,  # Must exceed stuck-alarm threshold so the alarm fires before the watchdog
 }
 
@@ -1339,7 +1362,6 @@ DEFAULT_SMART_TERMINATION_DURATION_RATIO = 0.98
 
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
-    DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
     DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
 }
 
@@ -1366,8 +1388,6 @@ DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_DRYER: 3.0,  # More linear, less phase repetition
     DEVICE_TYPE_WASHER_DRYER: 5.0,  # Combined washer+dryer, use washer defaults
     DEVICE_TYPE_DISHWASHER: 5.0,  # Similar to washing machine with distinct phases
-    DEVICE_TYPE_AIR_FRYER: 2.0,  # Constant load with sudden drop
-    DEVICE_TYPE_BREAD_MAKER: 5.0,  # Large power swings between kneading, proving, baking
     DEVICE_TYPE_PUMP: 2.0,  # Binary on/off spikes; minimal smoothing needed
     DEVICE_TYPE_GENERIC: 3.0,  # Neutral middle ground for unknown appliance types
 }
@@ -1378,8 +1398,6 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_DRYER: 600,  # 10 min
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (same as washer)
     DEVICE_TYPE_DISHWASHER: 900,  # 15 min
-    DEVICE_TYPE_AIR_FRYER: 300,  # 5 min minimum
-    DEVICE_TYPE_BREAD_MAKER: 1800,  # 30 min (even express bread takes 30+ min)
     DEVICE_TYPE_PUMP: 5,  # 5 s - pump cycles can be under 30 seconds
 }
 
@@ -1394,8 +1412,6 @@ DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_DRYER: 300,  # 5 min (Cool down gaps?)
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (longer for combined cycles)
     DEVICE_TYPE_DISHWASHER: 3600,  # 1 hour (Drying pauses)
-    DEVICE_TYPE_AIR_FRYER: 120,  # 2 min (Shaking food)
-    DEVICE_TYPE_BREAD_MAKER: 600,  # 10 min (Resting between knead/prove keeps same cycle together)
     DEVICE_TYPE_PUMP: 60,  # 1 min (Pumps can cycle every 3-5 min in heavy rain)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
@@ -1408,8 +1424,6 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_DRYER: 0.5,  # Heater kicks in hard
     DEVICE_TYPE_WASHER_DRYER: 0.3,  # Mix of washer and dryer
     DEVICE_TYPE_DISHWASHER: 0.2,  # Pump/Heater
-    DEVICE_TYPE_AIR_FRYER: 0.2,  # Heater kicks in
-    DEVICE_TYPE_BREAD_MAKER: 0.2,  # Kneading motor starts (~200W for a few seconds)
     DEVICE_TYPE_PUMP: 0.003,  # ~100W motor for ~0.1 s is enough to confirm a pump cycle
 }
 # Default sampling interval by device type
@@ -1717,8 +1731,6 @@ _MATCHING_DEVICE_TYPES = (
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_WASHER_DRYER,
     DEVICE_TYPE_DISHWASHER,
-    DEVICE_TYPE_AIR_FRYER,
-    DEVICE_TYPE_BREAD_MAKER,
     DEVICE_TYPE_PUMP,
     DEVICE_TYPE_GENERIC,
 )

@@ -301,14 +301,14 @@ def test_standby_band_ignores_fluctuating_activity(base_config, mock_callbacks):
 
 
 def test_standby_band_excludes_non_wet_device(mock_callbacks):
-    """Control: bread makers (keep-warm hold is legitimate) are excluded from the
-    standby-band finalize."""
-    from custom_components.ha_washdata.const import DEVICE_TYPE_BREAD_MAKER
+    """Control: a non-wet appliance (a keep-warm hold can be legitimate) is
+    excluded from the standby-band finalize."""
+    from custom_components.ha_washdata.const import DEVICE_TYPE_GENERIC
 
     config = CycleDetectorConfig(
         min_power=5.0,
         off_delay=60,
-        device_type=DEVICE_TYPE_BREAD_MAKER,
+        device_type=DEVICE_TYPE_GENERIC,
         interrupted_min_seconds=150,
         completion_min_seconds=600,
         start_duration_threshold=0.0,

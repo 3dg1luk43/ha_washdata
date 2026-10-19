@@ -11,7 +11,7 @@ rules and traps; when you need the "why" or the measured numbers, read the refer
 ## Project Overview
 
 WashData is a Home Assistant custom integration that monitors appliances (washing machines, dryers,
-washer-dryer combos, dishwashers, air fryers, bread makers, pumps) via smart power plugs. It detects
+washer-dryer combos, dishwashers, pumps) via smart power plugs. It detects
 cycles, learns power-consumption profiles per program, and estimates time remaining.
 
 Two catch-all device types: **Other (Advanced)** (`generic`, full matching/learning with neutral

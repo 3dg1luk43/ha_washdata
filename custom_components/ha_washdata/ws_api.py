@@ -125,7 +125,7 @@ from .detector_config import (
     inverted_threshold_pair,
 )
 from .maintenance import editor_types, effective_reminders
-from .options_utils import strip_null_options
+from .options_utils import retire_device_type, strip_null_options
 from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
@@ -2070,6 +2070,9 @@ async def ws_set_options(
         # Resolve the effective device type option-first (submission -> existing
         # options -> data -> default) so the pump-only key is dropped correctly even
         # when the submission omits device_type.
+        # A device type removed in 0.5.9 (a stale panel) lands as generic, with
+        # that type's own defaults kept, as the migration does.
+        retire_device_type(new_options, {})
         effective_device_type = new_options.get(
             CONF_DEVICE_TYPE, entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
         )
@@ -4251,6 +4254,11 @@ async def async_apply_imported_entry_options(
         entry_options_updates.pop(key, None)
     if not entry_options_updates:
         return
+    # An export of a device type removed in 0.5.9 lands as generic, with that
+    # type's own defaults kept as options (as the migration does).
+    _merged = {**entry.options, **entry_options_updates}
+    for key in retire_device_type(_merged, {}):
+        entry_options_updates[key] = _merged[key]
     async with _entry_options_lock(hass, entry.entry_id):
         # Read INSIDE the lock: a snapshot taken before the `async with` suspended
         # would silently revert a ws_set_options that committed while we waited.
@@ -4593,6 +4601,8 @@ async def _async_restore_entry_options(
             k: v for k, v in snapshot_options.items() if k not in _IMPORT_STRIP_KEYS
         }
         restored.update({k: current[k] for k in _IMPORT_LOCAL_BINDING_KEYS if k in current})
+        # A restore point taken before 0.5.9 can name a removed device type.
+        retire_device_type(restored, {})
         restored = strip_null_options(restored)
         restored, _ = drop_invalid_numeric_options(restored)
         if restored == current:

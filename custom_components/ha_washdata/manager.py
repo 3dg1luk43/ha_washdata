@@ -129,6 +129,7 @@ from .const import (
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
+    DEFAULT_LOW_POWER_NO_UPDATE_TIMEOUT,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_PROFILE_UNMATCH_THRESHOLD,
@@ -647,7 +648,7 @@ class WashDataManager:
         # Initialize attributes to satisfy pylint
         self._off_delay = float(DEFAULT_OFF_DELAY)
         self._no_update_active_timeout = float(DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
-        self._low_power_no_update_timeout = 3600.0 # Default 1h
+        self._low_power_no_update_timeout = DEFAULT_LOW_POWER_NO_UPDATE_TIMEOUT
         self._notify_before_end_minutes = float(DEFAULT_NOTIFY_BEFORE_END_MINUTES)
         self._notify_start_services: list[str] = []
         self._notify_finish_services: list[str] = []
@@ -2194,7 +2195,7 @@ class WashDataManager:
             options.get(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
         )
         self._low_power_no_update_timeout = float(
-            options.get(CONF_LOW_POWER_NO_UPDATE_TIMEOUT, 3600.0)
+            options.get(CONF_LOW_POWER_NO_UPDATE_TIMEOUT, DEFAULT_LOW_POWER_NO_UPDATE_TIMEOUT)
         )
         self._off_delay = float(
             _option_then_data(
@@ -2278,6 +2279,19 @@ class WashDataManager:
                 )
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.exception("Failed re-scoping custom phases for %s", self.entry_id)
+        # After the re-scope, so a custom phase it brought back is not duplicated.
+        try:
+            adopted = await self.profile_store.async_adopt_retired_builtin_phases(
+                self.device_type
+            )
+            if adopted:
+                self._logger.info(
+                    "Kept %d built-in phase(s) of a device type removed in 0.5.9 "
+                    "as custom phases, because profiles still use them.",
+                    adopted,
+                )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.exception("Failed keeping retired built-in phases for %s", self.entry_id)
 
         # Preset maintenance reminders count from when they first apply (#461).
         self._sync_maintenance_baselines()

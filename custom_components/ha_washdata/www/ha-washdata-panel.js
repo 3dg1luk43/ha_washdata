@@ -63,7 +63,7 @@ const _AUTOMATION_ENTITY_WAIT_MS = 5000;
 // offered for (const.DEVICE_TRIGGER_ONLY_FOR; absent = every type). `options`: the
 // defaults in triggers.yaml. `name`: the English of `trigger.<key>.name` (strings.json
 // `triggers.<key>.name`). tests/test_panel_trigger_table.py keeps it in step.
-const _TRIGGER_MATCHING_TYPES = ['washing_machine', 'dryer', 'washer_dryer', 'dishwasher', 'air_fryer', 'bread_maker', 'pump', 'generic'];
+const _TRIGGER_MATCHING_TYPES = ['washing_machine', 'dryer', 'washer_dryer', 'dishwasher', 'pump', 'generic'];
 const _TRIGGER_TUMBLING_TYPES = ['washing_machine', 'dryer', 'washer_dryer'];
 const _WD_TRIGGERS = [
   { key: 'cycle_started', name: 'Cycle started' },

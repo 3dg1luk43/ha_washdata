@@ -309,8 +309,6 @@ class WasherStateSensor(WasherBaseSensor):
             return "mdi:tumble-dryer"
         if dtype == "dishwasher":
             return "mdi:dishwasher"
-        if dtype == "air_fryer":
-            return "mdi:pot-steam"
         if dtype == "pump":
             return "mdi:water-pump"
         return "mdi:washing-machine"

@@ -114,8 +114,10 @@ from .time_utils import (
     utc_now,
 )
 from .maintenance import clean_task_name, coerce_interval, is_due
+from .options_utils import canonical_device_type
 from .phase_catalog import (
     DEFAULT_PHASES_BY_DEVICE,
+    RETIRED_BUILTIN_PHASES,
     _builtin_phase_id,
     get_builtin_phase_by_id,
     merge_phase_catalog,
@@ -1807,7 +1809,11 @@ def build_import_manifest(
         return {"error": str(exc)}
 
     scan = _scan_data(data_dict, entry_options=meta.get("entry_options"))
-    source_dt = str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+    # An export of a device type removed in 0.5.9 is the same kind of device as
+    # the generic entry it migrated to.
+    source_dt = canonical_device_type(
+        str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+    )
     device_type_match = (not source_dt) or (source_dt == local_device_type)
 
     local_names = {str(n).casefold() for n in (local_profile_names or [])}
@@ -4819,6 +4825,66 @@ class ProfileStore:
         if repaired:
             await self.async_save()
         return repaired
+
+    async def async_adopt_retired_builtin_phases(self, device_type: str) -> int:
+        """Keep the removed device types' built-in phases a profile still uses (0.5.9).
+
+        Profiles assign phases by name, and the Air Fryer / Bread Maker built-ins
+        went with their device types, so a migrated entry's "Kneading" range named
+        a phase no catalog lists: the panel's phase editor showed it blank, and a
+        save there dropped it. Each such name becomes a custom phase of this
+        entry's device type, with the built-in's id and English description. A
+        name the catalog already has is left to it. Idempotent; saves only on a
+        change. Returns the number of phases created.
+        """
+        target = str(device_type or "").strip()
+        in_use: set[str] = set()
+        for profile in self.get_profiles().values():
+            for assigned in profile.get("phases") or []:
+                if isinstance(assigned, dict):
+                    name = str(assigned.get("name", "")).strip()
+                    if name:
+                        in_use.add(name.casefold())
+        if not in_use:
+            return 0
+        catalog = {
+            str(p.get("name", "")).strip().casefold()
+            for p in self.list_phase_catalog(target)
+        }
+        missing = in_use - catalog
+        if not missing:
+            return 0
+        # "Keep Warm" was a built-in of both types: take the description of the
+        # type whose phases this entry uses most.
+        ranked = sorted(
+            RETIRED_BUILTIN_PHASES.items(),
+            key=lambda kv: -sum(1 for name, _ in kv[1] if name.casefold() in in_use),
+        )
+        phases = self._get_shared_custom_phases()
+        taken_ids = {str(p.get("id", "")) for p in phases}
+        adopted = 0
+        for old_type, builtins in ranked:
+            for name, description in builtins:
+                if name.casefold() not in missing:
+                    continue
+                missing.discard(name.casefold())
+                phase_id = _builtin_phase_id(old_type, name)
+                if phase_id in taken_ids:
+                    phase_id = str(uuid.uuid4())
+                taken_ids.add(phase_id)
+                phases.append(
+                    {
+                        "id": phase_id,
+                        "name": name,
+                        "description": description,
+                        "device_type": target,
+                        "created_at": dt_util.now().isoformat(),
+                    }
+                )
+                adopted += 1
+        if adopted:
+            await self.async_save()
+        return adopted
 
     def list_custom_phases(self, device_type: str) -> list[dict[str, Any]]:
         """Return shared custom phases relevant to the requested device type."""
@@ -10217,7 +10283,9 @@ class ProfileStore:
 
         # Device-type gating: block device-specific categories and force reference-only
         # cycle destination when the source device type does not match this device.
-        source_dt = str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+        source_dt = canonical_device_type(
+            str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+        )
         # Keep this identical to build_import_manifest so the analysis shown to the user
         # (which disables device-specific categories / real-history on a mismatch) cannot
         # diverge from what the apply actually does. An unknown local device type is treated

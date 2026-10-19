@@ -68,8 +68,6 @@
         "dryer": "烘干机",
         "washer_dryer": "洗衣机烘干机组合",
         "dishwasher": "洗碗机",
-        "air_fryer": "空气炸锅",
-        "bread_maker": "面包机",
         "pump": "泵/污水泵",
         "generic": "其他（高级）",
         "other": "阈值装置"

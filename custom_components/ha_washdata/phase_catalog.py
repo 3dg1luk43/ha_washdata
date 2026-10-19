@@ -205,75 +205,31 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
             "is_default": True,
         },
     ],
-    # #190: these two lists went with the removed device types in 0.5.0 (4fde004)
-    # although both types stayed, so a bread maker was offered Pre-Wash and Spin.
-    DEVICE_TYPE_BREAD_MAKER: [
-        {
-            "name": "Kneading",
-            "description": "Motor-driven dough mixing and development. High power draw.",
-            "translation_key": "phase_desc.kneading",
-            "is_default": True,
-        },
-        {
-            "name": "Resting",
-            "description": "Short low-power pause between kneading stages for gluten relaxation.",
-            "translation_key": "phase_desc.resting",
-            "is_default": True,
-        },
-        {
-            "name": "Proving",
-            "description": "Low-heat rising period to allow yeast fermentation and dough expansion.",
-            "translation_key": "phase_desc.proving",
-            "is_default": True,
-        },
-        {
-            "name": "Baking",
-            "description": "High-temperature heating element active for crust and crumb formation.",
-            "translation_key": "phase_desc.baking",
-            "is_default": True,
-        },
-        {
-            "name": "Keep Warm",
-            "description": "Low-heat holding stage to keep the loaf warm after baking.",
-            "translation_key": "phase_desc.keep_warm_bm",
-            "is_default": True,
-        },
-    ],
-    DEVICE_TYPE_AIR_FRYER: [
-        {
-            "name": "Pre-Heat",
-            "description": "Initial chamber heating before full cooking.",
-            "translation_key": "phase_desc.pre_heat",
-            "is_default": True,
-        },
-        {
-            "name": "Cooking",
-            "description": "Main cooking phase with active heater and fan.",
-            "translation_key": "phase_desc.cooking",
-            "is_default": True,
-        },
-        {
-            "name": "Pause",
-            "description": "Short pause for shaking or inspection.",
-            "translation_key": "phase_desc.pause_af",
-            "is_default": True,
-        },
-        {
-            "name": "Cool Down",
-            "description": "Fan-only cool-down stage after heating.",
-            "translation_key": "phase_desc.cool_down_af",
-            "is_default": True,
-        },
-        {
-            "name": "Keep Warm",
-            "description": "Low-heat holding stage to keep food warm.",
-            "translation_key": "phase_desc.keep_warm",
-            "is_default": True,
-        },
-    ],
     # A pump run is one phase; without an entry it fell back to the union of every
     # list above (washing phases included).
     DEVICE_TYPE_PUMP: [],
+}
+
+# The built-in phases of the device types removed in 0.5.9, as (name, description).
+# Profiles assign phases BY NAME, so a migrated Bread Maker's "Kneading" range would
+# name a phase no catalog lists any more (the panel's phase editor shows it blank).
+# ``ProfileStore.async_adopt_retired_builtin_phases`` turns each one a profile still
+# uses into a custom phase. Nothing else reads this table.
+RETIRED_BUILTIN_PHASES: dict[str, list[tuple[str, str]]] = {
+    DEVICE_TYPE_BREAD_MAKER: [
+        ("Kneading", "Motor-driven dough mixing and development. High power draw."),
+        ("Resting", "Short low-power pause between kneading stages for gluten relaxation."),
+        ("Proving", "Low-heat rising period to allow yeast fermentation and dough expansion."),
+        ("Baking", "High-temperature heating element active for crust and crumb formation."),
+        ("Keep Warm", "Low-heat holding stage to keep the loaf warm after baking."),
+    ],
+    DEVICE_TYPE_AIR_FRYER: [
+        ("Pre-Heat", "Initial chamber heating before full cooking."),
+        ("Cooking", "Main cooking phase with active heater and fan."),
+        ("Pause", "Short pause for shaking or inspection."),
+        ("Cool Down", "Fan-only cool-down stage after heating."),
+        ("Keep Warm", "Low-heat holding stage to keep food warm."),
+    ],
 }
 
 
@@ -419,7 +375,7 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
         # catalog device_type before discarding, so legacy overrides are preserved.
         # Only an override is guarded (no id, or a built-in's id): a phase the user
         # created has its own id and stays, even when a built-in list added later
-        # shares its name (the air fryer's "Pause", 0.5.8).
+        # shares its name.
         if not item_device_type and normalized_name.casefold() in all_builtin_names:
             active_dt_key = (str(device_type or "").strip().casefold(), normalized_name.casefold())
             if active_dt_key in builtin_by_name:

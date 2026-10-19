@@ -68,8 +68,6 @@
         "dryer": "ドライヤー",
         "washer_dryer": "洗濯乾燥機コンボ",
         "dishwasher": "食器洗い機",
-        "air_fryer": "エアーフライヤー",
-        "bread_maker": "パンメーカー",
         "pump": "ポンプ/サンプポンプ",
         "generic": "その他（上級）",
         "other": "閾値デバイス"

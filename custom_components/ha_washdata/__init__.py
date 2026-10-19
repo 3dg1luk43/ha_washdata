@@ -114,7 +114,7 @@ from .const import (
     CONF_RUNNING_DEAD_ZONE,
 )
 from .log_utils import DeviceLoggerAdapter
-from .options_utils import strip_null_options
+from .options_utils import retire_device_type, strip_null_options
 
 try:  # pragma: no cover - present in every supported HA, guarded on principle
     from homeassistant.setup import SetupPhases, async_pause_setup
@@ -498,18 +498,27 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # external end trigger loses its entity (0.5.9: a set entity means on). The
     # rest (notify_fire_events #478, the 0.5.9 option trim, leftovers of removed
     # features) were read by nothing. See _merge_external_end_trigger and
-    # _retire_options.
+    # _retire_options. An Air Fryer or Bread Maker (removed in 0.5.9) becomes
+    # Other (Advanced) with its own defaults kept as options (retire_device_type).
     if version == 3 and minor_version == 11:
         new_opts = dict(entry.options)
         new_data = dict(entry.data)
         # Computed BEFORE the update, like the 3.10 -> 3.11 step.
         removed = sorted((set(entry.options) | set(entry.data)) & RETIRED_OPTION_KEYS)
+        old_type = new_opts.get(CONF_DEVICE_TYPE, new_data.get(CONF_DEVICE_TYPE))
         trigger_cleared = _merge_external_end_trigger(new_opts, new_data)
         converted = _retire_options(new_opts, new_data)
+        retyped = retire_device_type(new_opts, new_data)
         hass.config_entries.async_update_entry(
             entry, data=new_data, options=new_opts, minor_version=12
         )
         minor_version = 12
+        if retyped:
+            _log.info(
+                "Device type %r was removed in 0.5.9; migrated to %r with its own "
+                "defaults kept as options: %s",
+                old_type, new_opts[CONF_DEVICE_TYPE], retyped[1:] or "none",
+            )
         _log.debug(
             "Migrated WashData entry from 3.11 to 3.12 (retired keys dropped: %s; "
             "lists filled from notify_service: %s; disabled external end trigger "
@@ -536,6 +545,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         options[CONF_POWER_SENSOR] = data[CONF_POWER_SENSOR]
     if CONF_NOTIFY_SERVICE not in options and CONF_NOTIFY_SERVICE in data:
         options[CONF_NOTIFY_SERVICE] = data[CONF_NOTIFY_SERVICE]
+    # Same retirement as the 3.11 -> 3.12 step, BEFORE the seeding below: the
+    # completion floor is seeded from the device type, and a value seeded for
+    # generic would read as the user's own and keep the old type's from landing.
+    retire_device_type(options, data)
 
     # Migrate legacy single CONF_NOTIFY_SERVICE into per-event service lists.
     # Users who configured a notify service before 0.3.x would otherwise lose
