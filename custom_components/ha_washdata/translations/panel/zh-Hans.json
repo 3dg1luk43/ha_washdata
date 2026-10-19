@@ -1339,7 +1339,7 @@
             "label": "通知图标"
         },
         "notify_live_chronometer": {
-            "doc": "在通知中显示实时倒计时（如支持），而不是固定的估计值。",
+            "doc": "Android: 在通知文字旁边添加倒计时至预计完成时间。在完成前消息中使用 {finish_time} 可显示完成时间，而不是第二个倒计时。",
             "label": "使用实时计时器"
         },
         "notify_live_interval_seconds": {
@@ -1363,7 +1363,7 @@
             "label": "人员（仅在家时通知用）"
         },
         "notify_pre_complete_message": {
-            "doc": "每次实时进度更新的正文。模板变量：{device}、{program}、{minutes}（剩余分钟数）。使用其他变量时将改用默认文本。",
+            "doc": "每次实时进度更新的正文。模板变量：{device}、{program}、{minutes}（剩余分钟数）、{finish_time}（预计完成时间，例如 14:30）。使用其他变量时将改用默认文本。",
             "label": "完成前消息"
         },
         "notify_reminder_message": {

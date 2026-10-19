@@ -1375,7 +1375,7 @@
       "label": "Ikona upozornenia"
     },
     "notify_live_chronometer": {
-      "doc": "Zobraziť v upozornení živé odpočítavanie (kde je podporované) namiesto pevného odhadu.",
+      "doc": "Android: pridá odpočítavanie do odhadovaného konca vedľa textu upozornenia. Použite {finish_time} v Správe pred dokončením, aby sa miesto druhého odpočítavania zobrazil čas konca.",
       "label": "Použiť živý chronometer"
     },
     "notify_live_interval_seconds": {
@@ -1399,7 +1399,7 @@
       "label": "Osoby (pre Iba keď doma)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text každej živej aktualizácie priebehu. Premenné šablóny: {device}, {program}, {minutes} (zostávajúce minúty). Pri akejkoľvek inej premennej sa použije predvolený text.",
+      "doc": "Text každej živej aktualizácie priebehu. Premenné šablóny: {device}, {program}, {minutes} (zostávajúce minúty), {finish_time} (odhadovaný koniec, napr. 14:30). Pri akejkoľvek inej premennej sa použije predvolený text.",
       "label": "Správa pred dokončením"
     },
     "notify_reminder_message": {

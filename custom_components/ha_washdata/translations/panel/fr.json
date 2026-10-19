@@ -1329,7 +1329,7 @@
       "label": "Icône de notification"
     },
     "notify_live_chronometer": {
-      "doc": "Afficher un compte à rebours en direct dans la notification (si pris en charge) au lieu d'une estimation fixe.",
+      "doc": "Android : ajoute un compte à rebours jusqu'à la fin estimée à côté du texte de notification. Utilisez {finish_time} dans Message de pré-achèvement pour afficher l'heure de fin à la place d'un second compte à rebours.",
       "label": "Utiliser le chronomètre en direct"
     },
     "notify_live_interval_seconds": {
@@ -1353,7 +1353,7 @@
       "label": "Personnes (pour Notifier uniquement à la maison)"
     },
     "notify_pre_complete_message": {
-      "doc": "Texte de chaque mise à jour de progression en direct. Variables du modèle : {device}, {program}, {minutes} (minutes restantes). Avec toute autre variable, le texte par défaut est utilisé.",
+      "doc": "Texte de chaque mise à jour de progression en direct. Variables du modèle : {device}, {program}, {minutes} (minutes restantes), {finish_time} (heure de fin estimée, ex. 14:30). Avec toute autre variable, le texte par défaut est utilisé.",
       "label": "Message de pré-achèvement"
     },
     "notify_reminder_message": {

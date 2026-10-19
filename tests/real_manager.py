@@ -9,7 +9,7 @@ from typing import Any
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed, async_fire_time_changed_exact
 from homeassistant.util import dt as dt_util
 
-from custom_components.ha_washdata.const import DOMAIN
+from custom_components.ha_washdata.const import CONFIG_ENTRY_MINOR_VERSION, DOMAIN
 from custom_components.ha_washdata.manager import WashDataManager
 
 POWER = "sensor.plug_power"
@@ -29,7 +29,7 @@ def make_entry(hass, options: dict[str, Any] | None = None, title="Washer", entr
         kw["entry_id"] = entry_id
     entry = MockConfigEntry(domain=DOMAIN, title=title,
         data={"name": title, "power_sensor": POWER, "device_type": "washing_machine"},
-        options=opts, version=3, minor_version=11, **kw)
+        options=opts, version=3, minor_version=CONFIG_ENTRY_MINOR_VERSION, **kw)
     entry.add_to_hass(hass)
     return entry
 

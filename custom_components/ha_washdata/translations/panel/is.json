@@ -1367,7 +1367,7 @@
       "label": "Tilkynningatákn"
     },
     "notify_live_chronometer": {
-      "doc": "Sýndu niðurtalningu í gangi í tilkynningunni (þar sem það er stutt) í stað fasts mats.",
+      "doc": "Android: bætir við niðurtalningu að áætluðum lokum við hliðina á tilkynningartextanum. Notaðu {finish_time} í For-lokarskilaboðin til að sýna lokatímann í stað annarrar niðurtalningar.",
       "label": "Nota beina tímamæling"
     },
     "notify_live_interval_seconds": {
@@ -1391,7 +1391,7 @@
       "label": "Fólk (fyrir Aðeins Heima)"
     },
     "notify_pre_complete_message": {
-      "doc": "Texti hverrar framvinduuppfærslu í beinni. Sniðbreytur: {device}, {program}, {minutes} (mínútur eftir). Ef önnur breyta er notuð gildir sjálfgefni textinn.",
+      "doc": "Texti hverrar framvinduuppfærslu í beinni. Sniðbreytur: {device}, {program}, {minutes} (mínútur eftir), {finish_time} (áætlaður lokatími, t.d. 14:30). Ef önnur breyta er notuð gildir sjálfgefni textinn.",
       "label": "For-lokar­skilaboð"
     },
     "notify_reminder_message": {

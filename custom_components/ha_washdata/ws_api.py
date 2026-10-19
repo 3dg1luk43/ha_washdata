@@ -73,6 +73,7 @@ from .const import (
     CONF_POWER_SENSOR,
     CONF_ENERGY_PRICE_ENTITY,
     CONF_NOTIFY_PEOPLE,
+    RETIRED_NOTIFY_OPTION_KEYS,
     CONF_SAMPLING_INTERVAL,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
@@ -604,6 +605,13 @@ _IMPORT_LOCAL_BINDING_KEYS = _OPTIONS_IDENTITY_KEYS | frozenset({
     CONF_LINKED_DEVICE,
     CONF_NOTIFY_PEOPLE,
 })
+
+# Everything an import drops from the payload's options: this device's bindings,
+# plus the retired single-service notification keys (#472). An old export still
+# carries ``notify_service``; nothing reads it any more, but writing it back would
+# leave a dead key the panel cannot show or remove. Undo strips the same set from
+# the restore point, which may predate the 3.12 migration.
+_IMPORT_STRIP_KEYS = _IMPORT_LOCAL_BINDING_KEYS | RETIRED_NOTIFY_OPTION_KEYS
 
 
 def _json_safe(value: Any) -> Any:
@@ -4201,7 +4209,7 @@ async def async_apply_imported_entry_options(
     The caller holds the per-entry write lock; order is always write -> options.
     """
     entry_options_updates = dict(config_updates.get("entry_options", {}) or {})
-    for key in _IMPORT_LOCAL_BINDING_KEYS:
+    for key in _IMPORT_STRIP_KEYS:
         entry_options_updates.pop(key, None)
     if not entry_options_updates:
         return
@@ -4544,7 +4552,7 @@ async def _async_restore_entry_options(
     async with _entry_options_lock(hass, entry.entry_id):
         current = dict(entry.options)
         restored = {
-            k: v for k, v in snapshot_options.items() if k not in _IMPORT_LOCAL_BINDING_KEYS
+            k: v for k, v in snapshot_options.items() if k not in _IMPORT_STRIP_KEYS
         }
         restored.update({k: current[k] for k in _IMPORT_LOCAL_BINDING_KEYS if k in current})
         restored = strip_null_options(restored)

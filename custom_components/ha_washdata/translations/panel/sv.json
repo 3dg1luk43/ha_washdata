@@ -1367,7 +1367,7 @@
       "label": "Meddelandeikon"
     },
     "notify_live_chronometer": {
-      "doc": "Visa en löpande nedräkning i aviseringen (där det stöds) i stället för en fast uppskattning.",
+      "doc": "Android: lägger till en nedräkning till beräknat slut bredvid aviseringstexten. Använd {finish_time} i Nästan klart-meddelande för att visa sluttiden i stället för en andra nedräkning.",
       "label": "Använd direktkronometer"
     },
     "notify_live_interval_seconds": {
@@ -1391,7 +1391,7 @@
       "label": "Personer (för Bara när hemma)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text i varje liveuppdatering av förloppet. Mallvariabler: {device}, {program}, {minutes} (minuter kvar). Med någon annan variabel används standardtexten.",
+      "doc": "Text i varje liveuppdatering av förloppet. Mallvariabler: {device}, {program}, {minutes} (minuter kvar), {finish_time} (beräknad sluttid, t.ex. 14:30). Med någon annan variabel används standardtexten.",
       "label": "Nästan klart-meddelande"
     },
     "notify_reminder_message": {

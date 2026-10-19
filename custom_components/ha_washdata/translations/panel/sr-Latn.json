@@ -1363,7 +1363,7 @@
       "label": "Ikona obaveštenja"
     },
     "notify_live_chronometer": {
-      "doc": "Prikažite odbrojavanje uživo u obaveštenju (gde je podržano) umesto fiksne procene.",
+      "doc": "Android: dodaje odbrojavanje do procenjenog završetka pored teksta obaveštenja. Koristite {finish_time} u Poruci pre završetka da prikažete vreme završetka umesto drugog odbrojavanja.",
       "label": "Koristi živi hronometar"
     },
     "notify_live_interval_seconds": {
@@ -1387,7 +1387,7 @@
       "label": "Osobe (za Samo kad su kod kuće)"
     },
     "notify_pre_complete_message": {
-      "doc": "Tekst svakog ažuriranja napretka uživo. Promenljive šablona: {device}, {program}, {minutes} (preostali minuti). Za svaku drugu promenljivu koristi se podrazumevani tekst.",
+      "doc": "Tekst svakog ažuriranja napretka uživo. Promenljive šablona: {device}, {program}, {minutes} (preostali minuti), {finish_time} (procenjeni završetak, npr. 14:30). Za svaku drugu promenljivu koristi se podrazumevani tekst.",
       "label": "Poruka pre završetka"
     },
     "notify_reminder_message": {

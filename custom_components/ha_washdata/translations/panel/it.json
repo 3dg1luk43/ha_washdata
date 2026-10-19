@@ -1329,7 +1329,7 @@
       "label": "Icona notifica"
     },
     "notify_live_chronometer": {
-      "doc": "Mostra un conto alla rovescia in corso nella notifica (dove supportato) invece di una stima fissa.",
+      "doc": "Android: aggiunge un conto alla rovescia fino al termine stimato accanto al testo della notifica. Usa {finish_time} in Messaggio pre-completamento per mostrare l'ora di fine invece di un secondo conto alla rovescia.",
       "label": "Usa cronometro in tempo reale"
     },
     "notify_live_interval_seconds": {
@@ -1353,7 +1353,7 @@
       "label": "Persone (per Solo a Casa)"
     },
     "notify_pre_complete_message": {
-      "doc": "Testo di ogni aggiornamento di avanzamento in tempo reale. Variabili di modello: {device}, {program}, {minutes} (minuti rimanenti). Con qualsiasi altra variabile si usa il testo predefinito.",
+      "doc": "Testo di ogni aggiornamento di avanzamento in tempo reale. Variabili di modello: {device}, {program}, {minutes} (minuti rimanenti), {finish_time} (ora di fine stimata, es. 14:30). Con qualsiasi altra variabile si usa il testo predefinito.",
       "label": "Messaggio pre-completamento"
     },
     "notify_reminder_message": {

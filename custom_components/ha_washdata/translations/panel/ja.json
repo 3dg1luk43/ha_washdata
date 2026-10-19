@@ -1339,7 +1339,7 @@
             "label": "通知アイコン"
         },
         "notify_live_chronometer": {
-            "doc": "固定の推定値の代わりに、通知にリアルタイムのカウントダウンタイマーを表示します（対応している場合）。",
+            "doc": "Android: 通知テキストの横に推定完了時刻までのカウントダウンを追加します。2つ目のカウントダウンの代わりに完了時刻を表示するには、完了前メッセージで {finish_time} を使用してください。",
             "label": "ライブクロノメーターを使用"
         },
         "notify_live_interval_seconds": {
@@ -1363,7 +1363,7 @@
             "label": "対象ユーザー（在宅時のみ）"
         },
         "notify_pre_complete_message": {
-            "doc": "ライブ進捗更新ごとの本文。テンプレート変数: {device}、{program}、{minutes}（残り分数）。それ以外の変数を使うと既定の本文になります。",
+            "doc": "ライブ進捗更新ごとの本文。テンプレート変数: {device}、{program}、{minutes}（残り分数）、{finish_time}（推定完了時刻、例: 14:30）。それ以外の変数を使うと既定の本文になります。",
             "label": "完了前メッセージ"
         },
         "notify_reminder_message": {

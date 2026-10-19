@@ -1339,7 +1339,7 @@
             "label": "Értesítés ikonja"
         },
         "notify_live_chronometer": {
-            "doc": "Élő visszaszámláló az értesítésben (ahol támogatott) rögzített becslés helyett.",
+            "doc": "Android: visszaszámlálót ad hozzá az értesítési szöveg mellé a becsült befejezésig. A {finish_time} változóval a Befejezés előtti üzenetben a befejezési idő jelenik meg egy második visszaszámláló helyett.",
             "label": "Élő kronométer használata"
         },
         "notify_live_interval_seconds": {
@@ -1363,7 +1363,7 @@
             "label": "Személyek (Csak otthon értesítéshez)"
         },
         "notify_pre_complete_message": {
-            "doc": "Minden élő folyamatfrissítés szövege. Sablonváltozók: {device}, {program}, {minutes} (hátralévő perc). Más változóval az alapértelmezett szöveget küldi.",
+            "doc": "Minden élő folyamatfrissítés szövege. Sablonváltozók: {device}, {program}, {minutes} (hátralévő perc), {finish_time} (becsült befejezés, pl. 14:30). Más változóval az alapértelmezett szöveget küldi.",
             "label": "Befejezés előtti üzenet"
         },
         "notify_reminder_message": {

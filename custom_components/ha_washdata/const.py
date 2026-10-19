@@ -55,6 +55,10 @@ CONF_NOTIFY_PEOPLE = "notify_people"
 CONF_NOTIFY_ONLY_WHEN_HOME = "notify_only_when_home"
 CONF_NOTIFY_FIRE_EVENTS = "notify_fire_events"
 CONF_NOTIFY_EVENTS = "notify_events"  # Deprecated - kept for migration only
+# The pre-0.3 single-service notification keys, read by NOTHING at runtime since
+# #472. The 3.11 -> 3.12 migration converts and drops them, and an import strips
+# them, so a stray copy cannot keep notifying after the per-event lists are cleared.
+RETIRED_NOTIFY_OPTION_KEYS = frozenset({CONF_NOTIFY_SERVICE, CONF_NOTIFY_EVENTS})
 CONF_NOTIFY_START_SERVICES = "notify_start_services"
 CONF_NOTIFY_FINISH_SERVICES = "notify_finish_services"
 CONF_NOTIFY_LIVE_SERVICES = "notify_live_services"
@@ -1195,6 +1199,25 @@ ANTI_CREASE_SPIN_WAIT_MAX_RATIO = 1.25      # never block past this x expected
 ANTI_CREASE_SPIN_ARM_MIN_SHARE = 0.5
 ANTI_CREASE_SPIN_ARM_MIN_MEMBERS = 2
 
+# Issue #474: a dryer's anti-crease tumble pulses (Miele T220A: ~125 W for 5-10 s
+# every ~70 s; #478 AEG TR719A4B: 130-300 W for 6-12 s every ~120 s) are above
+# stop_threshold_w, and since DETECT-04 every reading there restarted the quiet
+# tally, so Smart Termination and the off_delay/min_off_gap fallback never saw
+# enough quiet and the cycle ran to the 8 h cap. On these device types an
+# excursion above stop_threshold_w that peaks at or below anti_wrinkle_max_power
+# and lasts at most QUIET_PULSE_MAX_S (its first reading to the first reading back
+# below stop) leaves the quiet tallies and the last activity where they stood
+# before it (its own span is not counted as quiet, the fallback's energy window
+# skips it), and it does not resume RUNNING from PAUSED / ENDING. A
+# longer or hotter excursion (resumed heating, a fan-only phase) resets as before.
+# 30 s is 2.5x the longest pulse in both reports and far below any drying phase;
+# a plug polled slower than this cannot show a pulse that short, so it keeps the
+# old behaviour. Dryers only: a washer's soak drum turns have the same shape
+# mid-wash, and on the 24 washer-dryer corpus cycles the rule moved 3 ends and
+# (under the #296 tumble tail) cut 3 stored runs short of their own last turns.
+QUIET_PULSE_DEVICE_TYPES = (DEVICE_TYPE_DRYER,)
+QUIET_PULSE_MAX_S = 30.0
+
 # Device Type Defaults
 # Device Type Defaults (Maps)
 
@@ -1635,7 +1658,7 @@ FAILED_RESTORE_STORE_SUFFIX = "failed_restore"
 # leaves an entry a version short, which then re-migrates on every start - and repeating
 # the literals in three places is what made that easy to do.
 CONFIG_ENTRY_VERSION = 3
-CONFIG_ENTRY_MINOR_VERSION = 11
+CONFIG_ENTRY_MINOR_VERSION = 12
 
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"

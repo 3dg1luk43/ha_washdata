@@ -1363,7 +1363,7 @@
       "label": "Benachrichtigungssymbol"
     },
     "notify_live_chronometer": {
-      "doc": "Einen laufenden Countdown in der Benachrichtigung anzeigen (wo unterstützt) statt einer festen Schätzung.",
+      "doc": "Android: Fügt der Benachrichtigung einen Countdown bis zum voraussichtlichen Ende hinzu. Mit {finish_time} in der Vorend-Nachricht wird die Endzeit statt eines zweiten Countdowns angezeigt.",
       "label": "Live-Chronometer verwenden"
     },
     "notify_live_interval_seconds": {
@@ -1387,7 +1387,7 @@
       "label": "Personen (für Nur wenn zu Hause)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text jedes Live-Fortschrittsupdates. Vorlagenvariablen: {device}, {program}, {minutes} (verbleibende Minuten). Bei jeder anderen Variable wird der Standardtext verwendet.",
+      "doc": "Text jedes Live-Fortschrittsupdates. Vorlagenvariablen: {device}, {program}, {minutes} (verbleibende Minuten), {finish_time} (voraussichtliche Endzeit, z. B. 14:30). Bei jeder anderen Variable wird der Standardtext verwendet.",
       "label": "Vorend-Nachricht"
     },
     "notify_reminder_message": {

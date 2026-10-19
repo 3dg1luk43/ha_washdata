@@ -1329,7 +1329,7 @@
       "label": "Ícone da Notificação"
     },
     "notify_live_chronometer": {
-      "doc": "Mostrar uma contagem decrescente em curso na notificação (onde suportado) em vez de uma estimativa fixa.",
+      "doc": "Android: adiciona uma contagem decrescente até ao fim estimado junto ao texto da notificação. Use {finish_time} em Mensagem Pré-Conclusão para mostrar a hora de fim em vez de uma segunda contagem.",
       "label": "Usar Cronómetro em Tempo Real"
     },
     "notify_live_interval_seconds": {
@@ -1353,7 +1353,7 @@
       "label": "Pessoas (para Apenas Quando em Casa)"
     },
     "notify_pre_complete_message": {
-      "doc": "Texto de cada atualização de progresso ao vivo. Variáveis de modelo: {device}, {program}, {minutes} (minutos restantes). Com qualquer outra variável é usado o texto predefinido.",
+      "doc": "Texto de cada atualização de progresso ao vivo. Variáveis de modelo: {device}, {program}, {minutes} (minutos restantes), {finish_time} (hora de fim estimada, ex. 14:30). Com qualquer outra variável é usado o texto predefinido.",
       "label": "Mensagem Pré-Conclusão"
     },
     "notify_reminder_message": {

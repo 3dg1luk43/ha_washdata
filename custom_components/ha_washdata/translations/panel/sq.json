@@ -1338,7 +1338,7 @@
             "label": "Ikona e njoftimit"
         },
         "notify_live_chronometer": {
-            "doc": "Shfaq në njoftim një kohëmatës live numërimi mbrapsht (ku mbështetet) në vend të një vlerësimi fiks.",
+            "doc": "Android: shton një numërim mbrapsht deri te fundi i vlerësuar pranë tekstit të njoftimit. Përdorni {finish_time} në Mesazh para-përfundimi për të treguar orën e mbarimit në vend të një numërimi mbrapsht të dytë.",
             "label": "Përdor kronometër live"
         },
         "notify_live_interval_seconds": {
@@ -1362,7 +1362,7 @@
             "label": "Njerëzit (për Vetëm kur në shtëpi)"
         },
         "notify_pre_complete_message": {
-            "doc": "Teksti i çdo përditësimi live të progresit. Variablat shabllon: {device}, {program}, {minutes} (minutat e mbetura). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
+            "doc": "Teksti i çdo përditësimi live të progresit. Variablat shabllon: {device}, {program}, {minutes} (minutat e mbetura), {finish_time} (fundi i vlerësuar, p.sh. 14:30). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
             "label": "Mesazh para-përfundimi"
         },
         "notify_reminder_message": {

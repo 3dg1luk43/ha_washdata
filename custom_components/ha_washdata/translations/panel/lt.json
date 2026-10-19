@@ -1379,7 +1379,7 @@
       "label": "Pranešimo piktograma"
     },
     "notify_live_chronometer": {
-      "doc": "Pranešime rodyti tiesioginį atgalinės atskaitos laikmatį (kur palaikoma), o ne fiksuotą įvertį.",
+      "doc": "Android: pranešimo teksto šone prideda atgalinę atskaičiavimą iki numatomos pabaigos. Naudokite {finish_time} Žinutėje prieš baigimą, kad pabaigos laikas būtų rodomas vietoje antros atgalinės atskaičiavimo.",
       "label": "Naudoti tiesioginį chronometrą"
     },
     "notify_live_interval_seconds": {
@@ -1403,7 +1403,7 @@
       "label": "Žmonės (kai namuose)"
     },
     "notify_pre_complete_message": {
-      "doc": "Kiekvieno tiesioginio eigos atnaujinimo tekstas. Šablono kintamieji: {device}, {program}, {minutes} (likusios minutės). Su bet kuriuo kitu kintamuoju naudojamas numatytasis tekstas.",
+      "doc": "Kiekvieno tiesioginio eigos atnaujinimo tekstas. Šablono kintamieji: {device}, {program}, {minutes} (likusios minutės), {finish_time} (numatoma pabaiga, pvz. 14:30). Su bet kuriuo kitu kintamuoju naudojamas numatytasis tekstas.",
       "label": "Žinutė prieš baigimą"
     },
     "notify_reminder_message": {

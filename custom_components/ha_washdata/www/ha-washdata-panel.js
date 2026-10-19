@@ -314,7 +314,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_live_overrun_percent', label: 'Live Overrun % Before Alert', unit: '%', type: 'number', min: 0, def: 20,
         doc: 'Live updates stop once a cycle runs this percent past its expected duration (20 = up to 1.2x the expected time).' },
       { key: 'notify_live_chronometer', label: 'Use Live Chronometer', type: 'checkbox',
-        doc: 'Show a live countdown timer in the notification (where supported) instead of a fixed estimate.' },
+        doc: 'Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Pre-Complete Message to show the finish time instead of a second countdown.' },
       { key: 'notify_live_silent', label: 'Silent Live Updates', type: 'checkbox', def: true,
         doc: 'iOS only. Update live progress silently, at a battery-saving priority that iOS may batch. The first update and the start/finish notifications still alert. Off: every update alerts.' },
       { key: 'notify_live_sticky', label: 'Keep Live Notification On Tap', type: 'checkbox',
@@ -336,7 +336,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration} min.', basic: true,
         doc: 'Body sent when a cycle finishes. Variables: {device}, {program}, {duration} (minutes), {duration_hm} (1 h 05 min), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed or force_stopped; interrupted cycles send nothing). Any other variable falls back to the default text.' },
       { key: 'notify_pre_complete_message', label: 'Pre-Complete Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',
-        doc: 'Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left). Any other variable falls back to the default text.' },
+        doc: 'Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left), {finish_time} (estimated finish, e.g. 14:30). Any other variable falls back to the default text.' },
       { key: 'notify_reminder_message', label: 'Reminder Message', type: 'textarea', def: '',
         doc: 'Text of the one-time Pre-End Alert. Template variables: {device}, {program}, {minutes} (the Pre-End Alert setting). Any other variable falls back to the default text.' },
       { key: 'notify_channel', label: 'Android Channel (start/live)', type: 'text', def: '',
@@ -1297,7 +1297,8 @@ button.wd-profile-card { display: block; }
 /* min-height:0 so the row below can actually shrink and hand its overflow to
    .wd-main, instead of the shell growing to fit and pushing past the host. */
 .wd-shell { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.wd-content-row { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+/* position: relative anchors the narrow-screen log drawer below the header (#473). */
+.wd-content-row { display: flex; flex: 1; overflow: hidden; min-height: 0; position: relative; }
 .wd-main { flex: 1; overflow-y: auto; min-width: 0; }
 .wd-log-drawer {
   position: relative; width: 0; overflow: hidden;
@@ -1324,9 +1325,13 @@ button.wd-profile-card { display: block; }
 }
 .wd-log-close-btn:hover { opacity: 1; background: var(--secondary-background-color); }
 .wd-gear-btn.log-active { background: rgba(255,255,255,.22); }
+/* Narrow screens: the drawer covers the content row, never the header. A fixed,
+   top:0 drawer sat over the header and under the iPhone status bar, so neither its
+   close button nor the header's burger, gear and Logs toggle could be tapped (#473). */
 @media (max-width: 680px) {
-  .wd-log-drawer.open { width: 100vw !important; position: fixed; top: 0; right: 0; bottom: 0; z-index: 30; border-left: none; }
+  .wd-log-drawer.open { width: auto !important; position: absolute; inset: 0; z-index: 45; border-left: none; }  /* above the sticky .wd-nav (40) */
   .wd-log-resize { display: none; }
+  .wd-log-close-btn { min-width: 44px; min-height: 44px; }
 }
 .wd-pg-delta-up { color: var(--success-color, #4caf50); font-weight: 700; }
 .wd-pg-delta-down { color: var(--error-color, #f44336); font-weight: 700; }
@@ -2311,7 +2316,9 @@ class HaWashdataPanel extends HTMLElement {
     this._logComponent = '';    // filter by component/module e.g. 'playground' ('' = all)
     this._logSearch = '';       // free-text search across messages
     try {
-      this._logOpen = localStorage.getItem('wd-log-open') === '1';
+      // Not restored on a narrow screen, where the drawer covers the whole pane (#473).
+      this._logOpen = localStorage.getItem('wd-log-open') === '1'
+        && !(window.matchMedia && window.matchMedia('(max-width: 680px)').matches);
       this._logDrawerWidth = Math.max(280, parseInt(localStorage.getItem('wd-log-width') || '380', 10) || 380);
     } catch (_) {
       this._logOpen = false;
@@ -3440,6 +3447,7 @@ class HaWashdataPanel extends HTMLElement {
     // Escape always closes the top modal (even from a field inside it).
     if (e.key === 'Escape') {
       if (this._modal) { e.preventDefault(); this._onModalAction('cancel', null); }
+      else if (this._logOpen) { e.preventDefault(); this._toggleLogDrawer(); }
       return;
     }
     // Trap Tab / Shift+Tab within the open modal so focus can't escape to the
@@ -9495,6 +9503,13 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Log drawer (slide-in side panel) ────────────────────────────────────────
 
+  _toggleLogDrawer() {
+    this._logOpen = !this._logOpen;
+    try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
+    this._render();
+    if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
+  }
+
   _htmlLogDrawer() {
     return `<div class="wd-log-drawer open" style="width:${this._logDrawerWidth}px">
       <div class="wd-log-resize" title="${_esc(this._t('lbl.drag_to_resize', {}, 'Drag to resize'))}"></div>
@@ -9502,7 +9517,7 @@ class HaWashdataPanel extends HTMLElement {
         <span>${this._t('hdr.logs', {}, 'Logs')}</span>
         <div style="display:flex;align-items:center;gap:6px">
           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-export" style="padding:3px 8px">${this._t('btn.export', {}, 'Export')}</button>
-          <button class="wd-log-close-btn" data-action="toggle-log-drawer" title="${_esc(this._t('btn.close', {}, 'Close'))}">✕</button>
+          <button class="wd-log-close-btn" data-action="toggle-log-drawer" title="${_esc(this._t('btn.close', {}, 'Close'))}" aria-label="${_esc(this._t('btn.close', {}, 'Close'))}">✕</button>
         </div>
       </div>
       <div class="wd-log-drawer-body">
@@ -13442,10 +13457,7 @@ class HaWashdataPanel extends HTMLElement {
         .catch(e => this._showToast(this._tText('msg.toast_error', { error: e.message || e }, 'Error: ' + (e.message || e)), 'error'));
 
     } else if (a === 'toggle-log-drawer') {
-      this._logOpen = !this._logOpen;
-      try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
-      this._render();
-      if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
+      this._toggleLogDrawer();
     } else if (a === 'add-device') {
       this._navigate(`/config/integrations/integration/${_DOMAIN}`);
     } else if (a === 'goto-feedbacks') {

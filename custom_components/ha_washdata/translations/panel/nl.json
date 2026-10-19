@@ -1367,7 +1367,7 @@
       "label": "Meldingspictogram"
     },
     "notify_live_chronometer": {
-      "doc": "Toon een lopende afteltimer in de melding (waar ondersteund) in plaats van een vaste schatting.",
+      "doc": "Android: voegt een afteltimer tot het verwachte einde toe naast de meldingstekst. Gebruik {finish_time} in het Bijna klaar-bericht om de eindtijd te tonen in plaats van een tweede afteltimer.",
       "label": "Live chronometer gebruiken"
     },
     "notify_live_interval_seconds": {
@@ -1391,7 +1391,7 @@
       "label": "Personen (voor Alleen thuis)"
     },
     "notify_pre_complete_message": {
-      "doc": "Tekst van elke live voortgangsupdate. Sjabloonvariabelen: {device}, {program}, {minutes} (resterende minuten). Bij elke andere variabele wordt de standaardtekst gebruikt.",
+      "doc": "Tekst van elke live voortgangsupdate. Sjabloonvariabelen: {device}, {program}, {minutes} (resterende minuten), {finish_time} (geschatte eindtijd, bijv. 14:30). Bij elke andere variabele wordt de standaardtekst gebruikt.",
       "label": "Bijna klaar-bericht"
     },
     "notify_reminder_message": {

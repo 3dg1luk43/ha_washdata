@@ -1367,7 +1367,7 @@
       "label": "Varselikon"
     },
     "notify_live_chronometer": {
-      "doc": "Vis en løpende nedtelling i varselet (der det støttes) i stedet for et fast anslag.",
+      "doc": "Android: legger til en nedtelling til forventet slutt ved siden av varselteksten. Bruk {finish_time} i Nesten ferdig-melding for å vise sluttiden i stedet for en andre nedtelling.",
       "label": "Bruk direktekronometer"
     },
     "notify_live_interval_seconds": {
@@ -1391,7 +1391,7 @@
       "label": "Personer (for Kun hjemme)"
     },
     "notify_pre_complete_message": {
-      "doc": "Tekst i hver live fremdriftsoppdatering. Malvariabler: {device}, {program}, {minutes} (minutter igjen). Med andre variabler brukes standardteksten.",
+      "doc": "Tekst i hver live fremdriftsoppdatering. Malvariabler: {device}, {program}, {minutes} (minutter igjen), {finish_time} (beregnet sluttid, f.eks. 14:30). Med andre variabler brukes standardteksten.",
       "label": "Nesten ferdig-melding"
     },
     "notify_reminder_message": {

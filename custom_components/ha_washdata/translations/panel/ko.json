@@ -1339,7 +1339,7 @@
             "label": "알림 아이콘"
         },
         "notify_live_chronometer": {
-            "doc": "고정된 추정치 대신 알림에 실시간 카운트다운 타이머를 표시합니다(지원되는 경우).",
+            "doc": "Android: 알림 텍스트 옆에 예상 완료 시각까지의 카운트다운을 추가합니다. 두 번째 카운트다운 대신 완료 시각을 표시하려면 완료 전 메시지에서 {finish_time}을 사용하세요.",
             "label": "라이브 크로노미터 사용"
         },
         "notify_live_interval_seconds": {
@@ -1363,7 +1363,7 @@
             "label": "사람 (집에 있을 때)"
         },
         "notify_pre_complete_message": {
-            "doc": "각 라이브 진행 업데이트의 텍스트. 템플릿 변수: {device}, {program}, {minutes}(남은 분). 다른 변수를 쓰면 기본 텍스트가 사용됩니다.",
+            "doc": "각 라이브 진행 업데이트의 텍스트. 템플릿 변수: {device}, {program}, {minutes}(남은 분), {finish_time}(예상 완료 시각, 예: 14:30). 다른 변수를 쓰면 기본 텍스트가 사용됩니다.",
             "label": "완료 전 메시지"
         },
         "notify_reminder_message": {

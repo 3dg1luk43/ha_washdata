@@ -69,7 +69,6 @@ from .const import (
     CONF_PROFILE_EVIDENCE_SOURCES,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
-    CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_ACTIONS,
     CONF_NOTIFY_START_SERVICES,
     CONF_NOTIFY_FINISH_SERVICES,
@@ -78,7 +77,6 @@ from .const import (
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
     CONF_NOTIFY_FIRE_EVENTS,
-    CONF_NOTIFY_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_LOW_POWER_NO_UPDATE_TIMEOUT, # Import new constant
     CONF_PROGRESS_RESET_DELAY,
@@ -486,6 +484,7 @@ _MOBILE_ONLY_EXTRA_KEYS = (
     "timeout",
     "channel",
     "priority",
+    "ttl",
     "actions",
     "sticky",
     "clickAction",
@@ -629,6 +628,7 @@ class WashDataManager:
         self._notify_finish_services: list[str] = []
         self._notify_live_services: list[str] = []
         self._notify_actions: list[dict[str, Any]] = []
+        self._warned_notify_templates: set[str] = set()
         self._notify_script: Any = None  # cached Script; invalidated on options reload
         self._notify_people: list[str] = []
         self._notify_cycle_timers: list[dict[str, Any]] = []
@@ -2360,7 +2360,13 @@ class WashDataManager:
         self.async_schedule_banked_tail_repair()
 
     def _load_notify_services(self, config_entry: ConfigEntry) -> None:
-        """Load notification service lists, migrating legacy single-service config."""
+        """Load the per-event notification service lists.
+
+        No fallback to the deprecated single ``notify_service``: it kept notifying
+        after the user cleared every list (#472). The 3.11 -> 3.12 migration
+        converts it by the old fallback's rule and drops it, so a stray copy (an
+        old import, a hand-edited entry) is inert.
+        """
         self._notify_start_services = list(config_entry.options.get(CONF_NOTIFY_START_SERVICES, []) or [])
         self._notify_finish_services = list(config_entry.options.get(CONF_NOTIFY_FINISH_SERVICES, []) or [])
         self._notify_live_services = list(config_entry.options.get(CONF_NOTIFY_LIVE_SERVICES, []) or [])
@@ -2369,17 +2375,6 @@ class WashDataManager:
             t for t in raw_timers
             if isinstance(t, dict) and isinstance(t.get("offset_minutes"), (int, float)) and t["offset_minutes"] > 0
         ]
-        # Backward compat: migrate old single notify_service + notify_events to new per-event lists
-        if not (self._notify_start_services or self._notify_finish_services or self._notify_live_services):
-            _old_svc = config_entry.options.get(CONF_NOTIFY_SERVICE, "")
-            _old_events = list(config_entry.options.get(CONF_NOTIFY_EVENTS, []) or [])
-            if _old_svc:
-                if not _old_events or NOTIFY_EVENT_START in _old_events:
-                    self._notify_start_services = [_old_svc]
-                if not _old_events or NOTIFY_EVENT_FINISH in _old_events:
-                    self._notify_finish_services = [_old_svc]
-                if not _old_events or NOTIFY_EVENT_LIVE in _old_events:
-                    self._notify_live_services = [_old_svc]
 
     async def async_reload_config(self, config_entry: ConfigEntry) -> None:
         """
@@ -7016,12 +7011,29 @@ class WashDataManager:
         try:
             return text_template.format(**kwargs)
         except Exception as err:  # pylint: disable=broad-exception-caught
-            self._logger.debug(
-                "Failed to format notification template %r with %s: %s",
-                text_template,
-                kwargs,
-                err,
-            )
+            # Once per template at warning level: a typo'd variable silently
+            # sent the default text instead, and looked like the setting was
+            # ignored (#479). Debug for the repeats, so live ticks don't spam.
+            warned = getattr(self, "_warned_notify_templates", None)
+            if warned is None:
+                warned = self._warned_notify_templates = set()
+            if text_template not in warned:
+                warned.add(text_template)
+                self._logger.warning(
+                    "Notification text %r could not be filled in (%s: %s); "
+                    "sending the default text. Available variables: %s",
+                    text_template,
+                    type(err).__name__,
+                    err,
+                    ", ".join("{" + k + "}" for k in sorted(kwargs)),
+                )
+            else:
+                self._logger.debug(
+                    "Failed to format notification template %r with %s: %s",
+                    text_template,
+                    kwargs,
+                    err,
+                )
 
         if fallback_template:
             try:
@@ -7948,6 +7960,12 @@ class WashDataManager:
         """
         if self._notify_live_sticky:
             extra_vars["sticky"] = "true"
+        # #479: Android delivers a normal-priority push late while the phone dozes,
+        # so a locked phone showed a stale bar. `priority: high` + `ttl: 0` is the
+        # companion app's documented immediate delivery; it does not make the
+        # notification audible (that is the channel's job) and iOS ignores both.
+        extra_vars["priority"] = "high"
+        extra_vars["ttl"] = 0
         if self._notify_live_silent and self._live_activity_started:
             extra_vars["silent"] = True
             extra_vars["push"] = {"interruption-level": "passive"}
@@ -8059,12 +8077,18 @@ class WashDataManager:
             CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
             DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
         )
+        # {finish_time} (#479): the estimated finish as a clock time, so a message
+        # shown next to the Android chronometer need not repeat the minutes left.
+        finish_time = dt_util.as_local(
+            now + timedelta(seconds=remaining_seconds)
+        ).strftime("%H:%M")
         msg = self._safe_format_template(
             msg_template,
             fallback_template=DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
             device=self.config_entry.title,
             minutes=minutes_left,
             program=self._current_program,
+            finish_time=finish_time,
         )
 
         extra_vars: dict[str, Any] = {

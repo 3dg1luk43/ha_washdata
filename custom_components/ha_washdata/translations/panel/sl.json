@@ -1379,7 +1379,7 @@
       "label": "Ikona obvestila"
     },
     "notify_live_chronometer": {
-      "doc": "V obvestilu prikažite odštevanje v živo (kjer je podprto) namesto fiksne ocene.",
+      "doc": "Android: doda odštevanje do ocenjenega konca ob besedilu obvestila. Uporabite {finish_time} v Sporočilu pred dokončanjem, da prikažete čas konca namesto drugega odštevanja.",
       "label": "Uporabi sprotni kronometer"
     },
     "notify_live_interval_seconds": {
@@ -1403,7 +1403,7 @@
       "label": "Osebe (za Samo ko doma)"
     },
     "notify_pre_complete_message": {
-      "doc": "Besedilo vsake sprotne posodobitve napredka. Spremenljivke predloge: {device}, {program}, {minutes} (preostale minute). Pri vsaki drugi spremenljivki se uporabi privzeto besedilo.",
+      "doc": "Besedilo vsake sprotne posodobitve napredka. Spremenljivke predloge: {device}, {program}, {minutes} (preostale minute), {finish_time} (ocenjeni konec, npr. 14:30). Pri vsaki drugi spremenljivki se uporabi privzeto besedilo.",
       "label": "Sporočilo pred dokončanjem"
     },
     "notify_reminder_message": {

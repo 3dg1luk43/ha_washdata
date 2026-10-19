@@ -1355,7 +1355,7 @@
             "label": "Bildirim Simgesi"
         },
         "notify_live_chronometer": {
-            "doc": "Bildirimde sabit bir tahmin yerine canlı bir geri sayım sayacı gösterin (destekleniyorsa).",
+            "doc": "Android: bildirim metninin yanına tahmini bitişe kadar geri sayım ekler. İkinci bir geri sayım yerine bitiş saatini göstermek için Bitiş Öncesi Mesaj'da {finish_time} kullanın.",
             "label": "Canlı Kronometre Kullan"
         },
         "notify_live_interval_seconds": {
@@ -1379,7 +1379,7 @@
             "label": "Kişiler (Evde İken için)"
         },
         "notify_pre_complete_message": {
-            "doc": "Her canlı ilerleme güncellemesinin metni. Şablon değişkenleri: {device}, {program}, {minutes} (kalan dakika). Başka bir değişken kullanılırsa varsayılan metin gönderilir.",
+            "doc": "Her canlı ilerleme güncellemesinin metni. Şablon değişkenleri: {device}, {program}, {minutes} (kalan dakika), {finish_time} (tahmini bitiş, örn. 14:30). Başka bir değişken kullanılırsa varsayılan metin gönderilir.",
             "label": "Bitiş Öncesi Mesaj"
         },
         "notify_reminder_message": {

@@ -1329,7 +1329,7 @@
       "label": "Icono de notificación"
     },
     "notify_live_chronometer": {
-      "doc": "Mostrar una cuenta atrás en marcha en la notificación (donde se admita) en lugar de una estimación fija.",
+      "doc": "Android: agrega una cuenta atrás hasta el fin estimado junto al texto de notificación. Use {finish_time} en Mensaje de pre-finalización para mostrar la hora de fin en lugar de una segunda cuenta atrás.",
       "label": "Usar cronómetro en vivo"
     },
     "notify_live_interval_seconds": {
@@ -1353,7 +1353,7 @@
       "label": "Personas (para solo cuando esté en casa)"
     },
     "notify_pre_complete_message": {
-      "doc": "Texto de cada actualización de progreso en vivo. Variables de plantilla: {device}, {program}, {minutes} (minutos restantes). Cualquier otra variable hace que se use el texto predeterminado.",
+      "doc": "Texto de cada actualización de progreso en vivo. Variables de plantilla: {device}, {program}, {minutes} (minutos restantes), {finish_time} (hora de finalización estimada, ej. 14:30). Cualquier otra variable hace que se use el texto predeterminado.",
       "label": "Mensaje de pre-finalización"
     },
     "notify_reminder_message": {

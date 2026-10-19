@@ -1363,7 +1363,7 @@
       "label": "Paziņojuma ikona"
     },
     "notify_live_chronometer": {
-      "doc": "Rādīt paziņojumā reāllaika atpakaļskaitīšanas taimeri (kur atbalstīts), nevis fiksētu aplēsi.",
+      "doc": "Android: pievieno atpakaļskaitīšanu līdz paredzamajam beigu laikam blakus paziņojuma tekstam. Lai beigu laiku rādītu otrās atpakaļskaitīšanas vietā, izmantojiet {finish_time} Gandrīz pabeigšanas ziņojumā.",
       "label": "Izmantot tiešraides hronometru"
     },
     "notify_live_interval_seconds": {
@@ -1387,7 +1387,7 @@
       "label": "Personas (priekš Tikai mājās)"
     },
     "notify_pre_complete_message": {
-      "doc": "Katra tiešraides progresa atjauninājuma teksts. Veidnes mainīgie: {device}, {program}, {minutes} (atlikušās minūtes). Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
+      "doc": "Katra tiešraides progresa atjauninājuma teksts. Veidnes mainīgie: {device}, {program}, {minutes} (atlikušās minūtes), {finish_time} (paredzamais beigu laiks, piem. 14:30). Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
       "label": "Gandrīz pabeigšanas ziņojums"
     },
     "notify_reminder_message": {

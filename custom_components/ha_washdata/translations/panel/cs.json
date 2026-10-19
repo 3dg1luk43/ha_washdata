@@ -1375,7 +1375,7 @@
       "label": "Ikona oznámení"
     },
     "notify_live_chronometer": {
-      "doc": "Zobrazit v oznámení živý odpočet (kde je podporován) místo pevného odhadu.",
+      "doc": "Android: přidá odpočet do odhadovaného konce vedle textu oznámení. Použijte {finish_time} ve Zprávě před dokončením, aby se místo druhého odpočtu zobrazil čas konce.",
       "label": "Použít živý chronometr"
     },
     "notify_live_interval_seconds": {
@@ -1399,7 +1399,7 @@
       "label": "Osoby (pro Pouze když doma)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text každé živé aktualizace průběhu. Proměnné šablony: {device}, {program}, {minutes} (zbývající minuty). U jakékoli jiné proměnné se použije výchozí text.",
+      "doc": "Text každé živé aktualizace průběhu. Proměnné šablony: {device}, {program}, {minutes} (zbývající minuty), {finish_time} (odhadovaný konec, např. 14:30). U jakékoli jiné proměnné se použije výchozí text.",
       "label": "Zpráva před dokončením"
     },
     "notify_reminder_message": {

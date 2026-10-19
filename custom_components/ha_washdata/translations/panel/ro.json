@@ -1309,7 +1309,7 @@
       "label": "Pictogramă Notificare"
     },
     "notify_live_chronometer": {
-      "doc": "Afișați o numărătoare inversă în desfășurare în notificare (unde este acceptată) în loc de o estimare fixă.",
+      "doc": "Android: adaugă o numărătoare inversă până la finalizarea estimată lângă textul notificării. Folosiți {finish_time} în Mesaj Pre-Finalizare pentru a afișa ora de finalizare în loc de o a doua numărătoare.",
       "label": "Utilizați Cronometru în Timp Real"
     },
     "notify_live_interval_seconds": {
@@ -1333,7 +1333,7 @@
       "label": "Persoane (pentru Doar Când Acasă)"
     },
     "notify_pre_complete_message": {
-      "doc": "Textul fiecărei actualizări de progres în timp real. Variabile de șablon: {device}, {program}, {minutes} (minute rămase). Cu orice altă variabilă se folosește textul implicit.",
+      "doc": "Textul fiecărei actualizări de progres în timp real. Variabile de șablon: {device}, {program}, {minutes} (minute rămase), {finish_time} (ora estimată de finalizare, ex. 14:30). Cu orice altă variabilă se folosește textul implicit.",
       "label": "Mesaj Pre-Finalizare"
     },
     "notify_reminder_message": {

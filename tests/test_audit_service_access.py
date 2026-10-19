@@ -23,7 +23,7 @@ from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 import custom_components.ha_washdata as washdata
-from custom_components.ha_washdata.const import DOMAIN
+from custom_components.ha_washdata.const import CONFIG_ENTRY_MINOR_VERSION, DOMAIN
 
 LOCAL = "sensor.my_plug_power"
 FOREIGN = "sensor.someone_elses_plug_power"
@@ -35,7 +35,7 @@ async def _setup(hass):
     entry = MockConfigEntry(
         domain=DOMAIN, title="Washer",
         data={"name": "Washer", "power_sensor": LOCAL, "device_type": "washing_machine"},
-        options={}, version=3, minor_version=11,
+        options={}, version=3, minor_version=CONFIG_ENTRY_MINOR_VERSION,
     )
     entry.add_to_hass(hass)
     entry.mock_state(hass, ConfigEntryState.LOADED)

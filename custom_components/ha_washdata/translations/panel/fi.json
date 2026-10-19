@@ -1367,7 +1367,7 @@
       "label": "Ilmoituksen kuvake"
     },
     "notify_live_chronometer": {
-      "doc": "Näytä ilmoituksessa reaaliaikainen ajastin (jos tuettu) kiinteän arvion sijaan.",
+      "doc": "Android: lisää ilmoitustekstin viereen laskevan ajastimen arvioituun valmistumiseen. Käytä {finish_time} Ennen valmistumista -viestissä, jos haluat näyttää valmistumisajan toisen laskevan ajastimen sijaan.",
       "label": "Käytä suoraa kronometriä"
     },
     "notify_live_interval_seconds": {
@@ -1391,7 +1391,7 @@
       "label": "Henkilöt (Ilmoita vain kotona ollessa)"
     },
     "notify_pre_complete_message": {
-      "doc": "Jokaisen live-edistymispäivityksen teksti. Mallin muuttujat: {device}, {program}, {minutes} (jäljellä olevat minuutit). Muulla muuttujalla käytetään oletustekstiä.",
+      "doc": "Jokaisen live-edistymispäivityksen teksti. Mallin muuttujat: {device}, {program}, {minutes} (jäljellä olevat minuutit), {finish_time} (arvioitu valmistumisaika, esim. 14:30). Muulla muuttujalla käytetään oletustekstiä.",
       "label": "Ennen valmistumista -viesti"
     },
     "notify_reminder_message": {

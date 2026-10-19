@@ -1367,7 +1367,7 @@
       "label": "Teavituse Ikoon"
     },
     "notify_live_chronometer": {
-      "doc": "Kuvage teavituses (kus toetatud) fikseeritud hinnangu asemel reaalajas pöördloendur.",
+      "doc": "Android: lisab teavituse teksti kõrvale eeldatava lõpuni kuluva loenduri. Kasutage {finish_time} Eel-Lõpetamise Sõnumis, et näidata lõpuaega teise loenduri asemel.",
       "label": "Kasuta Elavat Kronomeetrit"
     },
     "notify_live_interval_seconds": {
@@ -1391,7 +1391,7 @@
       "label": "Inimesed (Ainult Kodus Olles)"
     },
     "notify_pre_complete_message": {
-      "doc": "Iga reaalajas edenemisuuenduse tekst. Malli muutujad: {device}, {program}, {minutes} (järelejäänud minutid). Muu muutuja korral kasutatakse vaiketeksti.",
+      "doc": "Iga reaalajas edenemisuuenduse tekst. Malli muutujad: {device}, {program}, {minutes} (järelejäänud minutid), {finish_time} (eeldatav lõpp, nt 14:30). Muu muutuja korral kasutatakse vaiketeksti.",
       "label": "Eel-Lõpetamise Sõnum"
     },
     "notify_reminder_message": {

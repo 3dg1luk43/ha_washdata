@@ -58,7 +58,10 @@ from .const import (
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_EVENTS,
+    NOTIFY_EVENT_START,
+    NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
+    RETIRED_NOTIFY_OPTION_KEYS,
     CONF_NOTIFY_START_SERVICES,
     CONF_NOTIFY_FINISH_SERVICES,
     CONF_NOTIFY_LIVE_SERVICES,
@@ -286,6 +289,57 @@ def _heal_seeded_cadence(options: dict[str, Any], device_type: Any) -> list[str]
     return healed
 
 
+def _retire_legacy_notify_service(
+    options: dict[str, Any], data: dict[str, Any]
+) -> list[str]:
+    """Convert the deprecated ``notify_service`` to per-event lists, then drop it (#472).
+
+    In place. The manager used to fall back to ``options[notify_service]`` (gated
+    by ``notify_events``) whenever all three per-event lists were empty, so a user
+    who cleared every list kept getting notified and could never remove the key:
+    the panel merges over ``entry.options``. That fallback is gone; this converts
+    with EXACTLY its rule so nobody's delivered notifications change:
+
+    - only when ``options[notify_service]`` is a non-empty string AND all three
+      lists are empty or absent (a list the panel saved as ``[]`` counts as empty:
+      it submits ``[]`` for fields the user never touched, so it is not a choice);
+    - empty or absent ``notify_events`` -> start, finish AND live;
+    - otherwise each list only when its event is in ``notify_events``.
+
+    Only ``options`` is read, as the runtime read only options. Both keys are then
+    popped from ``options`` and ``data`` whatever happened. Returns the list keys
+    filled. Shared by the 3.11 -> 3.12 step and the one-pass legacy path.
+    """
+    converted: list[str] = []
+    svc = options.get(CONF_NOTIFY_SERVICE)
+    lists_empty = not (
+        options.get(CONF_NOTIFY_START_SERVICES)
+        or options.get(CONF_NOTIFY_FINISH_SERVICES)
+        or options.get(CONF_NOTIFY_LIVE_SERVICES)
+    )
+    if isinstance(svc, str) and svc and lists_empty:
+        raw_events = options.get(CONF_NOTIFY_EVENTS)
+        try:
+            # Same coercion as the runtime's `list(... or [])`.
+            events = list(raw_events or [])
+        except TypeError:
+            # The runtime raised here and the entry never set up, so nothing was
+            # delivered: a non-empty event list that names no event keeps it so.
+            events = [raw_events]
+        for event, key in (
+            (NOTIFY_EVENT_START, CONF_NOTIFY_START_SERVICES),
+            (NOTIFY_EVENT_FINISH, CONF_NOTIFY_FINISH_SERVICES),
+            (NOTIFY_EVENT_LIVE, CONF_NOTIFY_LIVE_SERVICES),
+        ):
+            if not events or event in events:
+                options[key] = [svc]
+                converted.append(key)
+    for key in RETIRED_NOTIFY_OPTION_KEYS:
+        options.pop(key, None)
+        data.pop(key, None)
+    return converted
+
+
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
@@ -414,6 +468,28 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             healed or "nothing",
         )
 
+    # 3.11 -> 3.12 (#472): retire the deprecated single notify_service. Converted
+    # into the per-event lists by the runtime fallback's own rule, then dropped
+    # from options and data unconditionally; see _retire_legacy_notify_service.
+    if version == 3 and minor_version == 11:
+        new_opts = dict(entry.options)
+        new_data = dict(entry.data)
+        # Computed BEFORE the update, like the 3.10 -> 3.11 step.
+        removed = sorted(
+            (set(entry.options) | set(entry.data)) & RETIRED_NOTIFY_OPTION_KEYS
+        )
+        converted = _retire_legacy_notify_service(new_opts, new_data)
+        hass.config_entries.async_update_entry(
+            entry, data=new_data, options=new_opts, minor_version=12
+        )
+        minor_version = 12
+        _log.debug(
+            "Migrated WashData entry from 3.11 to 3.12 (legacy notify keys "
+            "dropped: %s; lists filled from notify_service: %s)",
+            removed or "none",
+            converted or "none",
+        )
+
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
@@ -446,6 +522,11 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             options[CONF_NOTIFY_FINISH_SERVICES] = [legacy_svc]
         if CONF_NOTIFY_LIVE_SERVICES not in options and NOTIFY_EVENT_LIVE in legacy_events:
             options[CONF_NOTIFY_LIVE_SERVICES] = [legacy_svc]
+    # Same retirement as the 3.11 -> 3.12 step (#472). The block above only fills
+    # ABSENT lists; an entry whose lists were saved as [] was notified by the
+    # runtime fallback instead, and this converts it by that rule before dropping
+    # both keys, so neither path changes what anyone receives.
+    _retire_legacy_notify_service(options, data)
 
     options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
     options.setdefault(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)

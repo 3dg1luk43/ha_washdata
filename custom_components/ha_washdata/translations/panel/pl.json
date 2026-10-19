@@ -1375,7 +1375,7 @@
       "label": "Ikona Powiadomienia"
     },
     "notify_live_chronometer": {
-      "doc": "Pokazuj w powiadomieniu odliczanie na żywo (gdzie to obsługiwane) zamiast stałego oszacowania.",
+      "doc": "Android: dodaje odliczanie do szacowanego zakończenia obok tekstu powiadomienia. Użyj {finish_time} w Wiadomości Przed Zakończeniem, aby wyświetlić godzinę zakończenia zamiast drugiego odliczania.",
       "label": "Używaj Chronometru na Żywo"
     },
     "notify_live_interval_seconds": {
@@ -1399,7 +1399,7 @@
       "label": "Osoby (dla Tylko Gdy Jestem w Domu)"
     },
     "notify_pre_complete_message": {
-      "doc": "Treść każdej aktualizacji postępu na żywo. Zmienne szablonu: {device}, {program}, {minutes} (pozostałe minuty). Przy każdej innej zmiennej używany jest tekst domyślny.",
+      "doc": "Treść każdej aktualizacji postępu na żywo. Zmienne szablonu: {device}, {program}, {minutes} (pozostałe minuty), {finish_time} (szacowana godzina zakończenia, np. 14:30). Przy każdej innej zmiennej używany jest tekst domyślny.",
       "label": "Wiadomość Przed Zakończeniem"
     },
     "notify_reminder_message": {

@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
+## 0.5.9 - Unreleased
+
+### TL;DR
+
+- Dryers with anti-crease tumbling finish again instead of running for hours.
+- Clearing every notify service really stops notifications.
+- The Logs drawer can be closed on a phone again.
+- Live updates can name the finish time and arrive on a locked Android phone.
+
+### Fixes
+
+- **A dryer with anti-crease tumbling did not finish until the 8 hour limit** ([#474](https://github.com/3dg1luk43/ha_washdata/issues/474), 0.5.8 regression): each short tumble pulse restarted the quiet time the end needs. Short pulses (up to 30 s, at most the Anti-Wrinkle Max Power) no longer restart it. Replayed AEG cycles with their tumbling tail end a median 6.4 minutes after the program instead of 74; washers, washer-dryers and dishwashers are unchanged. Thanks to @christianh87 for the analysis and @gkotoole for the export.
+- **Notifications kept coming after you cleared every notify service** ([#472](https://github.com/3dg1luk43/ha_washdata/issues/472)), on devices set up before 0.3: the old single notify service took over whenever the lists were empty. It is now moved into the lists once on upgrade, where you can see and remove it, and never used otherwise. Thanks to @tivoo for the analysis.
+- **The Logs drawer could not be closed on a phone** ([#473](https://github.com/3dg1luk43/ha_washdata/issues/473)): it covered the header and its close button sat under the status bar, and it reopened on every visit. It now opens below the header, does not reopen by itself on a phone, and Escape closes it. Thanks to @daneverest
+
+### Notifications
+
+- **Live update text with the finish time** ([#479](https://github.com/3dg1luk43/ha_washdata/issues/479)): the new `{finish_time}` variable (e.g. 14:30) lets the text name the end instead of repeating the Android chronometer's countdown. A text with an unknown variable now logs a warning instead of silently sending the default text. Thanks to @kineticscreen
+- **Live updates arrive while an Android phone is locked** ([#479](https://github.com/3dg1luk43/ha_washdata/issues/479)): they are sent at high priority, so the phone no longer holds them back. They stay silent.
+
 ## 0.5.8 - trimming the fat - 2026-10-08
 
 ### TL;DR

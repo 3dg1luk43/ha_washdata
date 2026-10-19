@@ -22,7 +22,7 @@ import itertools
 import logging
 import math
 import traceback
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from typing import Any, Callable, cast
 import numpy as np
@@ -100,6 +100,8 @@ from .const import (
     ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC,
     ANTI_CREASE_TERMINAL_MATCH_FRAC,
     ANTI_CREASE_SPIN_WAIT_MAX_RATIO,
+    QUIET_PULSE_DEVICE_TYPES,
+    QUIET_PULSE_MAX_S,
 )
 
 # The dishwasher end-spike wait window is shared between two code paths
@@ -340,6 +342,25 @@ def effective_curve_preroll_seconds(value: Any) -> float:
     if not math.isfinite(window) or window <= 0:
         return 0.0
     return min(window, CURVE_PREROLL_MAX_SECONDS)
+
+
+@dataclass(frozen=True)
+class _QuietPulse:
+    """An open excursion above stop that may still prove a short pulse (#474).
+
+    ``below`` / ``gapfree`` / ``unobserved`` are the three quiet tallies as they
+    stood at the excursion's first reading, that reading's own interval (spent at
+    the previous, quiet level) already credited, and ``last_active`` the last
+    activity before it. They are put back if the excursion closes as a pulse; see
+    :meth:`CycleDetector._opens_quiet_pulse`.
+    """
+
+    start: datetime
+    peak: float
+    below: float
+    gapfree: float
+    unobserved: float
+    last_active: datetime | None
 
 
 @dataclass(frozen=True)
@@ -736,6 +757,13 @@ class CycleDetector:
         # outage and so was NOT added to `_time_below_threshold` (item 266). Only
         # the hazard gate reads it, to place the quiet run's start honestly.
         self._time_below_unobserved: float = 0.0
+        # #474: the open excursion that may still prove a short pulse, and the
+        # spans [first reading, first reading back below stop) of the pulses the
+        # current quiet run has already absorbed (the fallback's energy and flat-
+        # standby windows leave their readings out). Not persisted: a restart
+        # mid-pulse just lets that pulse reset the tallies as before.
+        self._quiet_pulse: _QuietPulse | None = None
+        self._quiet_pulse_spans: list[tuple[datetime, datetime]] = []
         self._last_process_time: datetime | None = None
 
         # New State Machine trackers
@@ -2334,6 +2362,8 @@ class CycleDetector:
             self._time_below_threshold = 0.0
             self._time_below_threshold_gapfree = 0.0
             self._time_below_unobserved = 0.0
+        self._quiet_pulse = None
+        self._quiet_pulse_spans = []
         self._last_match_time = None
         self._match_committed = False
         self._matched_profile = None
@@ -2492,6 +2522,84 @@ class CycleDetector:
         ):
             return min(configured_ratio, 0.90)
         return configured_ratio
+
+    def _opens_quiet_pulse(self, power: float, prev_high: bool) -> bool:
+        """Whether this reading opens an excursion that may prove a short pulse (#474).
+
+        Only on ``QUIET_PULSE_DEVICE_TYPES`` with a cycle open, on the first
+        reading above ``stop_threshold_w`` after a quiet one, at or below
+        ``anti_wrinkle_max_power``. Such an excursion that closes within
+        ``QUIET_PULSE_MAX_S`` (its first reading back below stop) is an anti-crease
+        tumble pulse, and the quiet tallies get back what it reset
+        (:meth:`_close_quiet_pulse`): since DETECT-04 Smart Termination needs that
+        quiet, and a pulse every ~70 s otherwise kept it under the 120 s debounce,
+        and the off_delay / min_off_gap fallback with it, until the 8 h cap. A
+        longer or hotter excursion resets as before (:meth:`_extend_quiet_pulse`),
+        which keeps DETECT-04's protection against resumed heating or a fan-only
+        phase.
+        """
+        return (
+            not prev_high
+            and self._config.device_type in QUIET_PULSE_DEVICE_TYPES
+            and self._state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+            and power <= float(self._config.anti_wrinkle_max_power)
+        )
+
+    def _extend_quiet_pulse(self, timestamp: datetime, power: float) -> None:
+        """A later reading above stop: the open pulse stays one only if short and low."""
+        pulse = self._quiet_pulse
+        if pulse is not None and (
+            power > float(self._config.anti_wrinkle_max_power)
+            or (timestamp - pulse.start).total_seconds() > QUIET_PULSE_MAX_S
+        ):
+            self._quiet_pulse = pulse = None
+        if pulse is None:
+            # This excursion resets the quiet run, and the spans belong to it.
+            self._quiet_pulse_spans.clear()
+        elif power > pulse.peak:
+            self._quiet_pulse = replace(pulse, peak=float(power))
+
+    def _close_quiet_pulse(self, timestamp: datetime, unobserved: float) -> bool:
+        """First reading back below stop: give a short pulse's quiet back (#474).
+
+        True when the excursion opened by :meth:`_opens_quiet_pulse` closed within
+        ``QUIET_PULSE_MAX_S`` with no recorded outage in its last interval: the
+        three tallies return to where they stood at its first reading, so its own
+        span is not counted as quiet either. Otherwise False, and the caller
+        credits this reading's interval as usual, on tallies the excursion reset.
+        """
+        pulse = self._quiet_pulse
+        if pulse is None:
+            return False
+        self._quiet_pulse = None
+        span_s = (timestamp - pulse.start).total_seconds()
+        if span_s > QUIET_PULSE_MAX_S or unobserved > 0:
+            self._quiet_pulse_spans.clear()
+            return False
+        self._time_below_threshold = pulse.below
+        self._time_below_threshold_gapfree = pulse.gapfree
+        self._time_below_unobserved = pulse.unobserved
+        # Not activity either: the stored cycle ends where the programme did, not
+        # on the last pulse before the end gate closed (`_finish_cycle`).
+        self._last_active_time = pulse.last_active
+        keep_s = max(float(self._config.off_delay), STANDBY_BAND_WINDOW_S)
+        self._quiet_pulse_spans = [
+            sp for sp in self._quiet_pulse_spans
+            if (timestamp - sp[1]).total_seconds() <= keep_s
+        ]
+        self._quiet_pulse_spans.append((pulse.start, timestamp))
+        self._logger.debug(
+            "Short %.0fW pulse (%.0fs) left the quiet timers alone (#474): "
+            "quiet %.0fs",
+            pulse.peak,
+            span_s,
+            pulse.below,
+        )
+        return True
+
+    def _in_quiet_pulse(self, ts: datetime) -> bool:
+        """Whether a reading belongs to a pulse the quiet tallies ignored (#474)."""
+        return any(start <= ts < end for start, end in self._quiet_pulse_spans)
 
     def process_reading(
         self,
@@ -2735,15 +2843,17 @@ class CycleDetector:
             (self._last_power or 0.0) * (high_dt / 3600.0) if high_dt > 0 else 0.0
         )
 
-        if is_high:
-            self._time_above_threshold += high_dt
-            self._time_below_threshold = 0.0
-            self._time_below_threshold_gapfree = 0.0
-            self._time_below_unobserved = 0.0
-            # Energy for the guarded interval, computed with high_dt above.
-            self._energy_since_idle_wh += high_step_wh
-            self._last_active_time = timestamp
-        else:
+        # #474 (dryers): an excursion above stop that may still prove a short
+        # anti-crease pulse. The interval up to its first reading was spent at the
+        # previous, quiet level, so it is credited below before the tallies are
+        # kept aside; the pulse then resets them like any excursion, and its first
+        # reading back below stop puts them back if it stayed short and low.
+        opens_pulse = is_high and self._opens_quiet_pulse(power, prev_high)
+        if is_high and not opens_pulse:
+            self._extend_quiet_pulse(timestamp, power)
+        absorbed = not is_high and self._close_quiet_pulse(timestamp, unobserved)
+
+        if (not is_high and not absorbed) or opens_pulse:
             # Quiet nobody saw is not quiet (item 266). The watchdog keeps
             # injecting while the sensor is unavailable, and crediting those
             # ticks let a dropout that began on a low reading run out the
@@ -2793,6 +2903,24 @@ class CycleDetector:
                 self._time_below_threshold_gapfree = 0.0
             else:
                 self._time_below_threshold_gapfree += dt
+        if opens_pulse:
+            self._quiet_pulse = _QuietPulse(
+                timestamp,
+                float(power),
+                self._time_below_threshold,
+                self._time_below_threshold_gapfree,
+                self._time_below_unobserved,
+                self._last_active_time,
+            )
+        if is_high:
+            self._time_above_threshold += high_dt
+            self._time_below_threshold = 0.0
+            self._time_below_threshold_gapfree = 0.0
+            self._time_below_unobserved = 0.0
+            # Energy for the guarded interval, computed with high_dt above.
+            self._energy_since_idle_wh += high_step_wh
+            self._last_active_time = timestamp
+        else:
             self._time_above_threshold = 0.0
 
         self._time_in_state += dt
@@ -3306,8 +3434,11 @@ class CycleDetector:
                 return
 
             if is_high:
-                # Resume to RUNNING
-                self._transition_to(STATE_RUNNING, timestamp)
+                # Resume to RUNNING, unless this is a dryer pulse that may still
+                # prove short (#474): the next reading decides, and a short one
+                # leaves the quiet run (and this state) as it was.
+                if self._quiet_pulse is None:
+                    self._transition_to(STATE_RUNNING, timestamp)
             else:
                 # Periodic profile matching during pause
                 self._try_profile_match(timestamp)
@@ -3419,6 +3550,13 @@ class CycleDetector:
                         and current_duration >= (effective_expected * 0.90)
                     )
                     terminal_spike = near_expected or long_ending_tail
+
+                # A dryer pulse that may still prove short (#474) does not resume
+                # the run either: one that outlasts QUIET_PULSE_MAX_S or tops
+                # anti_wrinkle_max_power is judged by the rules below on its next
+                # reading, so ENDING (and its time in state) survives the pulses.
+                if self._quiet_pulse is not None:
+                    return
 
                 if terminal_spike:
                     self._logger.debug(
@@ -3921,7 +4059,9 @@ class CycleDetector:
                     recent_window = []
                     for r in reversed(self._power_readings):
                         if (timestamp - r[0]).total_seconds() <= gate_window:
-                            recent_window.append(r)
+                            # Not the pulses the quiet timers ignored (#474).
+                            if not self._in_quiet_pulse(r[0]):
+                                recent_window.append(r)
                         else:
                             break
                     recent_window.reverse()
@@ -4154,6 +4294,8 @@ class CycleDetector:
         if new_state not in (STATE_OFF, STATE_STARTING):
             self._standby_reprobe = False
         if new_state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            self._quiet_pulse = None  # #474: so do its pulses
+            self._quiet_pulse_spans = []
             self._clear_stall()  # #452: a stall belongs to one open cycle
             self._stall_spans = []  # item 511
             self._user_pause_spans = []  # item 514
@@ -4272,6 +4414,8 @@ class CycleDetector:
         boundary: datetime | None = None
         for ts, p in reversed(self._power_readings):
             if (timestamp - ts).total_seconds() <= span:
+                if self._in_quiet_pulse(ts):
+                    continue  # a pulse the quiet timers ignored (#474)
                 powers.append(float(p))
                 window_ts.append(ts)
             else:
@@ -5567,6 +5711,12 @@ class CycleDetector:
                 readings = [r for r in readings if r[0] <= end_time]
         else:
             end_time = self._last_active_time or timestamp
+            if self._config.device_type in QUIET_PULSE_DEVICE_TYPES:
+                # Pulses the quiet timers ignored (#474) sit after the last
+                # activity and above stop, where the trailing trim keeps them.
+                # Without such pulses every later reading is below stop and
+                # trimmed anyway, so this cuts nothing else.
+                readings = [r for r in readings if r[0] <= end_time]
 
         if not self._current_cycle_start:
             self.reset(timestamp=timestamp)
@@ -5807,6 +5957,8 @@ class CycleDetector:
             self._energy_since_idle_wh = snapshot.get("accumulated_energy_wh", 0.0)
             self._time_above_threshold = snapshot.get("time_above", 0.0)
             self._time_below_threshold = snapshot.get("time_below", 0.0)
+            self._quiet_pulse = None  # #474: not persisted (see __init__)
+            self._quiet_pulse_spans = []
             # Old snapshots lack the gap-free tally, and the plain value they do
             # carry may already include outage-sized intervals — the exact
             # contamination this field exists to exclude — so it must NOT be used

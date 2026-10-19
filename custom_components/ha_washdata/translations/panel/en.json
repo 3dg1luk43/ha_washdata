@@ -1394,7 +1394,7 @@
       "label": "Notification Colour"
     },
     "notify_live_chronometer": {
-      "doc": "Show a live countdown timer in the notification (where supported) instead of a fixed estimate.",
+      "doc": "Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Pre-Complete Message to show the finish time instead of a second countdown.",
       "label": "Use Live Chronometer"
     },
     "notify_live_click_action": {
@@ -1438,7 +1438,7 @@
       "label": "People (for Only When Home)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left). Any other variable falls back to the default text.",
+      "doc": "Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left), {finish_time} (estimated finish, e.g. 14:30). Any other variable falls back to the default text.",
       "label": "Pre-Complete Message"
     },
     "notify_quiet_end_hour": {

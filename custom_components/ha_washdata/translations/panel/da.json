@@ -1367,7 +1367,7 @@
       "label": "Notifikationsikon"
     },
     "notify_live_chronometer": {
-      "doc": "Vis en kørende nedtælling i notifikationen (hvor det understøttes) i stedet for et fast estimat.",
+      "doc": "Android: tilføjer en nedtælling til det forventede sluttidspunkt ved siden af notifikationsteksten. Brug {finish_time} i Besked om næsten færdig for at vise sluttidspunktet i stedet for en anden nedtælling.",
       "label": "Brug live kronometer"
     },
     "notify_live_interval_seconds": {
@@ -1391,7 +1391,7 @@
       "label": "Personer (for kun når hjemme)"
     },
     "notify_pre_complete_message": {
-      "doc": "Tekst i hver live-statusopdatering. Skabelonvariabler: {device}, {program}, {minutes} (minutter tilbage). Med enhver anden variabel bruges standardteksten.",
+      "doc": "Tekst i hver live-statusopdatering. Skabelonvariabler: {device}, {program}, {minutes} (minutter tilbage), {finish_time} (forventet sluttidspunkt, f.eks. 14:30). Med enhver anden variabel bruges standardteksten.",
       "label": "Besked om næsten færdig"
     },
     "notify_reminder_message": {
