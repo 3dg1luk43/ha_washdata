@@ -244,7 +244,7 @@ def test_triggers_yaml_strings_and_icons_match_the_options() -> None:
                 assert list(select["options"]) == list(validator.container), (key, name)
                 labels = strings["selector"][select["translation_key"]]["options"]
                 assert set(labels) == set(select["options"]), (key, name)
-    assert "—" not in (COMPONENT / "triggers.yaml").read_text(encoding="utf-8")
+    assert "\u2014" not in (COMPONENT / "triggers.yaml").read_text(encoding="utf-8")
 
 
 def test_state_options_are_the_state_sensor_values() -> None:
