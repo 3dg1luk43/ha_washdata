@@ -150,11 +150,21 @@ ML_PROVIDER_THROTTLE_SECONDS = 30.0
 # with one tier at min_off_gap, end_gate_eval --shipped-watchdog) and an 80.8 min
 # dishwasher drying phase at 0.7-0.9 W on a 1.5 W stop (it split replayed
 # unmatched). Neither reaches 0.75 x stop; 2 h is 1.5x the longer one.
+#
+# Dryers (QUIET_PULSE_DEVICE_TYPES, #474) wait DRYER_QUIET_S instead: a Miele
+# resting at 2.5 W on a 5 W stop, unmatched or revoked, waited the 2 h tier after
+# every programme. Same rule on the dryer corpus (169 traces, 98 unique, all
+# formats): the one resumed flat sub-stop pause longer than the device's
+# max(off_delay, min_off_gap) is 27.7 min at 1.0-1.6 W on a 4 W stop (#478 AEG
+# `e3222c3320ea`, the compressor straight down and back up, stored as one run);
+# 42 min is 1.5x it. The others were standby before anti-crease pulses or between
+# separate loads.
 ENDING_FLAT_STANDBY_MIN_READINGS = 3
 ENDING_FLAT_STANDBY_SPREAD_FRAC = 0.25
 ENDING_FLAT_STANDBY_SPREAD_FLOOR_W = 0.2
 ENDING_FLAT_STANDBY_NEAR_STOP_FRAC = 0.75
 ENDING_FLAT_STANDBY_LOOSE_QUIET_S = 7200.0
+ENDING_FLAT_STANDBY_DRYER_QUIET_S = 2520.0
 if not 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1:
     raise ValueError("DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)")
 from .signal_processing import (
@@ -4401,7 +4411,8 @@ class CycleDetector:
         ENDING_FLAT_STANDBY_SPREAD_FRAC x the highest) of each other, after
         max(off_delay, min_off_gap) of quiet when every reading is at least
         ENDING_FLAT_STANDBY_NEAR_STOP_FRAC x stop_threshold_w, else after
-        ENDING_FLAT_STANDBY_LOOSE_QUIET_S. A window reaching back past the start
+        ENDING_FLAT_STANDBY_LOOSE_QUIET_S (ENDING_FLAT_STANDBY_DRYER_QUIET_S on a
+        dryer, #474). A window reaching back past the start
         of the quiet holds an above-stop reading and so is not flat.
         """
         quiet = self._time_below_threshold
@@ -4433,7 +4444,12 @@ class CycleDetector:
         near_stop = lo >= ENDING_FLAT_STANDBY_NEAR_STOP_FRAC * float(
             self._config.stop_threshold_w
         )
-        if not near_stop and quiet < max(base_wait, ENDING_FLAT_STANDBY_LOOSE_QUIET_S):
+        loose_quiet = (
+            ENDING_FLAT_STANDBY_DRYER_QUIET_S
+            if self._config.device_type in QUIET_PULSE_DEVICE_TYPES
+            else ENDING_FLAT_STANDBY_LOOSE_QUIET_S
+        )
+        if not near_stop and quiet < max(base_wait, loose_quiet):
             return False
         return not self._window_has_outage_gap([boundary, *window_ts])
 

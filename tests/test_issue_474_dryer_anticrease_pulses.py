@@ -20,6 +20,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 from custom_components.ha_washdata import const as C
+from custom_components.ha_washdata import cycle_detector as cd
 from custom_components.ha_washdata.const import TerminationReason
 from custom_components.ha_washdata.cycle_detector import (
     STATE_ENDING,
@@ -164,15 +165,56 @@ def test_miele_pulses_end_by_fallback_when_the_match_is_revoked():
 
 
 def test_unmatched_default_energy_gate_ends_like_a_pulse_free_run():
-    """With the default 0.05 Wh the standby alone holds the energy gate, so only the
-    DETECT-08 flat-standby release (2 h of quiet) ends it. The pulses are left out
-    of that window too, so the cycle ends instead of hitting the 8 h cap."""
+    """With the default 0.05 Wh the 2.5 W standby alone holds the energy gate, so
+    only the DETECT-08 flat-standby release ends it: on a dryer after
+    ENDING_FLAT_STANDBY_DRYER_QUIET_S (42 min) of quiet, which the pulses do not
+    reset and their own seconds do not count toward (8 of every 70 s here)."""
     run = _Run(_miele_cfg(), lambda _t: _match(None, 0.0, 0.0))
     run.run(_dryer(MIELE_EXPECTED, 2300.0, MIELE_TAIL), 9 * 3600, 10.0)
     assert len(run.ends) == 1
     assert run.ends[0]["termination_reason"] == TerminationReason.TIMEOUT
-    assert _end_min(run, MIELE_EXPECTED) < 160.0
+    assert 42.0 < _end_min(run, MIELE_EXPECTED) < 55.0
     assert abs(run.ends[0]["duration"] - MIELE_EXPECTED) < 30.0
+
+
+def _flat_tail(s: float) -> float:
+    """A flat 2.4-2.6 W standby under the 5 W stop: below the near-stop tier."""
+    return 2.5 + (0.1 if int(s) % 20 < 10 else -0.1)
+
+
+def test_unmatched_dryer_on_a_flat_standby_ends_after_the_dryer_tier():
+    run = _Run(_miele_cfg(), lambda _t: _match(None, 0.0, 0.0))
+    run.run(_dryer(MIELE_EXPECTED, 2300.0, _flat_tail), 9 * 3600, 10.0)
+    assert len(run.ends) == 1
+    assert run.ends[0]["termination_reason"] == TerminationReason.TIMEOUT
+    tier_min = cd.ENDING_FLAT_STANDBY_DRYER_QUIET_S / 60.0
+    assert tier_min <= _end_min(run, MIELE_EXPECTED) < tier_min + 2.0
+
+
+def test_a_washer_with_the_same_flat_standby_still_waits_the_loose_tier():
+    run = _Run(_miele_cfg("washing_machine"), lambda _t: _match(None, 0.0, 0.0))
+    run.run(_dryer(MIELE_EXPECTED, 2300.0, _flat_tail), 9 * 3600, 10.0)
+    assert len(run.ends) == 1
+    loose_min = cd.ENDING_FLAT_STANDBY_LOOSE_QUIET_S / 60.0
+    assert loose_min <= _end_min(run, MIELE_EXPECTED) < loose_min + 2.0
+
+
+def test_a_27_7_min_flat_dryer_pause_is_still_bridged():
+    """The longest resumed flat sub-stop pause in the dryer corpus (#478 AEG
+    `e3222c3320ea`, 27.7 min): the dryer tier is 1.5x it, so it stays one cycle."""
+    programme = MIELE_EXPECTED
+    pause_at, pause_s = 0.5 * programme, 27.7 * 60
+
+    def power_at(t: float) -> float:
+        r = t - 60
+        if pause_at <= r < pause_at + pause_s:
+            return _flat_tail(r)
+        return _dryer(programme + pause_s, 2300.0, _flat_tail)(t)
+
+    run = _Run(_miele_cfg(), lambda _t: _match(None, 0.0, 0.0))
+    run.run(power_at, 9 * 3600, 10.0)
+    assert len(run.ends) == 1
+    assert run.ends[0]["duration"] > programme + pause_s - 60.0
 
 
 def test_aeg_heat_pump_pulses_end():
