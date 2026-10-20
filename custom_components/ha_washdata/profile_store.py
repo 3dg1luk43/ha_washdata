@@ -32,7 +32,7 @@ import statistics
 import threading
 import time
 import uuid
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta
 from typing import Any, TypeAlias, cast
 
@@ -43,6 +43,8 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    PRICE_TIMELINE_MAX_POINTS,
+    PRICE_TIMELINE_PRICE_DECIMALS,
     CLUSTER_RESAMPLE_N,
     CLUSTER_SHAPE_SIMILARITY_THRESHOLD,
     GROUP_MIN_COHESION,
@@ -97,6 +99,8 @@ from .const import (
 )
 from .features import compute_signature
 from .signal_processing import (
+    compact_price_timeline,
+    cycle_cost,
     resample_uniform,
     resample_adaptive,
     Segment,
@@ -640,6 +644,144 @@ def decompress_power_data(cycle: CycleDict) -> list[tuple[float, float]]:
         start_time_iso = start_time_raw.isoformat()
     offsets = power_data_to_offsets(cast(list[list[Any] | tuple[Any, ...]], raw), start_time_iso)
     return [(float(o), float(p)) for o, p in offsets]
+
+
+def cycle_report_energy_wh(cycle: Mapping[str, Any]) -> float:
+    """User-facing energy (Wh): the meter figure when one was captured, else the
+    integrated ``energy_wh`` (issue #316). Cost, lifetime totals, notifications and
+    the panel use this; matching, ML and envelopes always use ``energy_wh``."""
+    meter = cycle.get("energy_meter_wh")
+    if meter is not None:
+        try:
+            return float(meter)
+        except (ValueError, TypeError, OverflowError):
+            pass
+    try:
+        return float(cycle.get("energy_wh", 0.0))
+    except (ValueError, TypeError, OverflowError):
+        return 0.0
+
+
+def _price_window(
+    timeline: Any, start_off: float, end_off: float
+) -> list[tuple[float, float]]:
+    """A cycle's frozen price timeline cut to ``[start_off, end_off]`` and re-based
+    to ``start_off``: the price in force at ``start_off`` opens it at 0, the changes
+    inside follow. Empty when no price is known at ``start_off``."""
+    try:
+        points = sorted((float(o), float(p)) for o, p in timeline)
+    except (TypeError, ValueError, OverflowError):
+        return []
+    anchor: float | None = None
+    window: list[tuple[float, float]] = []
+    for off, price in points:
+        if off <= start_off:
+            anchor = price
+        elif off <= end_off:
+            window.append((off - start_off, price))
+    if anchor is None:
+        return []
+    return compact_price_timeline(
+        [(0.0, anchor), *window],
+        max_points=PRICE_TIMELINE_MAX_POINTS,
+        decimals=PRICE_TIMELINE_PRICE_DECIMALS,
+    )
+
+
+def _set_dynamic_cost(cycle: CycleDict, points: list[tuple[float, float]]) -> bool:
+    """Cost ``cycle`` against ``points`` (offsets from its start) the way the live
+    cycle end does (manager._async_apply_dynamic_cost). True when it worked."""
+    xy = decompress_power_data(cycle)
+    if len(xy) < 2 or not points:
+        return False
+    ts = np.asarray([t for t, _ in xy], dtype=float)
+    power = np.asarray([pw for _, pw in xy], dtype=float)
+    result = cycle_cost(
+        ts, power, points,
+        max_gap_s=energy_gap_threshold_s(ts),
+        report_wh=cycle_report_energy_wh(cycle),
+    )
+    if result is None:
+        return False
+    cost, effective = result
+    cycle["cost"] = round(cost, 4)
+    cycle["energy_price"] = round(effective, 6)
+    cycle["energy_price_mode"] = "dynamic"
+    cycle["price_timeline"] = [[round(o, 1), pr] for o, pr in points]
+    return True
+
+
+def carry_cycle_cost(
+    piece: CycleDict, parent: CycleDict, start_off: float, end_off: float
+) -> None:
+    """Give a piece split out of ``parent`` its own cost (#471).
+
+    The piece is charged at the price its parent was charged at: the slice of the
+    parent's frozen price timeline for a time-weighted cost, else the parent's
+    single price. A parent with no cost gives the piece none. Never raises."""
+    try:
+        if parent.get("cost") is None:
+            return
+        for key in ("cost", "energy_price", "energy_price_mode", "price_timeline"):
+            piece.pop(key, None)
+        timeline = parent.get("price_timeline")
+        if parent.get("energy_price_mode") == "dynamic" and timeline:
+            if _set_dynamic_cost(piece, _price_window(timeline, start_off, end_off)):
+                return
+        price = parent.get("energy_price")
+        if price is None:
+            return
+        price_f = float(price)
+        piece["energy_price"] = price_f
+        piece["energy_price_mode"] = "fixed"
+        piece["cost"] = round(cycle_report_energy_wh(piece) / 1000.0 * price_f, 4)
+    except (TypeError, ValueError, OverflowError):
+        _LOGGER.debug("Could not carry the cost onto a split cycle", exc_info=True)
+
+
+def merge_cycle_cost(merged: CycleDict, parts: list[dict[str, Any]]) -> None:
+    """Cost of a cycle merged from ``parts`` (#471): the sum of the parts' costs,
+    each already charged at its own price. ``parts`` are the parts' pricing as it
+    stood before the merge: ``offset`` (start, s after the merged start),
+    ``cost``, ``energy_price``, ``energy_price_mode``, ``price_timeline``. Leaves
+    no cost when any part had none. Never raises."""
+    try:
+        for key in ("cost", "energy_price", "energy_price_mode", "price_timeline"):
+            merged.pop(key, None)
+        if not parts or any(p.get("cost") is None for p in parts):
+            return
+        total = sum(float(p["cost"]) for p in parts)
+        modes = {p.get("energy_price_mode") or "fixed" for p in parts}
+        prices = {p.get("energy_price") for p in parts}
+        merged["cost"] = round(total, 4)
+        if modes == {"fixed"} and len(prices) == 1 and None not in prices:
+            merged["energy_price"] = float(next(iter(prices)))
+            merged["energy_price_mode"] = "fixed"
+            return
+        kwh = cycle_report_energy_wh(merged) / 1000.0
+        if kwh > 0:
+            merged["energy_price"] = round(total / kwh, 6)
+        merged["energy_price_mode"] = "dynamic"
+        timeline: list[tuple[float, float]] = []
+        for part in parts:
+            pts = part.get("price_timeline")
+            if pts:
+                timeline.extend(
+                    (float(part["offset"]) + float(o), float(pr)) for o, pr in pts
+                )
+            elif part.get("energy_price") is not None:
+                timeline.append((float(part["offset"]), float(part["energy_price"])))
+        if timeline:
+            merged["price_timeline"] = [
+                [round(o, 1), pr]
+                for o, pr in compact_price_timeline(
+                    sorted(timeline),
+                    max_points=PRICE_TIMELINE_MAX_POINTS,
+                    decimals=PRICE_TIMELINE_PRICE_DECIMALS,
+                )
+            ]
+    except (TypeError, ValueError, OverflowError, KeyError):
+        _LOGGER.debug("Could not merge cycle costs", exc_info=True)
 
 
 def earliest_sustained_quiet_offset(
@@ -11171,6 +11313,7 @@ class ProfileStore:
         cycles.pop(idx)  # Remove original — all segments validated, safe to mutate
 
         new_ids: list[str] = []
+        piece_bounds: list[tuple[CycleDict, float, float]] = []
         original_profile = cycle.get("profile_name")
         start_ts = start_dt_base_parsed.timestamp()
 
@@ -11216,6 +11359,22 @@ class ProfileStore:
             }
             await self.async_add_cycle(new_cycle)
             new_ids.append(new_cycle["id"])
+            piece_bounds.append((new_cycle, seg_start, seg_end))
+
+        # #471: a piece is rebuilt from the trace only, so it had no cost. Share a
+        # captured meter reading by each piece's integrated energy (the total stays
+        # what the meter measured), then charge each piece at its parent's price.
+        meter = cycle.get("energy_meter_wh")
+        total_wh = sum(float(pc.get("energy_wh") or 0.0) for pc, _, _ in piece_bounds)
+        for piece, seg_start, seg_end in piece_bounds:
+            if meter is not None and total_wh > 0:
+                try:
+                    piece["energy_meter_wh"] = round(
+                        float(meter) * float(piece.get("energy_wh") or 0.0) / total_wh, 3
+                    )
+                except (TypeError, ValueError, OverflowError):
+                    pass
+            carry_cycle_cost(piece, cycle, seg_start, seg_end)
 
         # Fix profile refs (handle original sample cycle logic)
         original_sample_id = cycle.get("id")
@@ -11327,6 +11486,22 @@ class ProfileStore:
         if not c1_start_dt:
             return None
 
+        # #471: each part's pricing and reported energy, captured before c1 is
+        # rewritten, so the merged cycle can carry the parts' total cost.
+        merge_parts: list[dict[str, Any]] = []
+        any_meter = False
+        for part in target_cycles:
+            part_ts = _value_to_timestamp(part.get("start_time"))
+            any_meter = any_meter or part.get("energy_meter_wh") is not None
+            merge_parts.append({
+                "offset": (part_ts - c1_start_dt.timestamp()) if part_ts is not None else 0.0,
+                "cost": part.get("cost"),
+                "energy_price": part.get("energy_price"),
+                "energy_price_mode": part.get("energy_price_mode"),
+                "price_timeline": part.get("price_timeline"),
+                "report_wh": cycle_report_energy_wh(part),
+            })
+
         # Helper to get parsed points from a cycle
         def get_points(cy: CycleDict) -> list[tuple[float, float, float]]:
             # content: [(timestamp, offset, power)]
@@ -11429,6 +11604,14 @@ class ProfileStore:
                 )
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.warning("Energy recompute failed after cycle merge", exc_info=True)
+
+        # A meter reading of one part does not describe the whole: the merged
+        # figure is the sum of every part's reported energy (meter or integrated).
+        if any_meter:
+            c1["energy_meter_wh"] = round(sum(p["report_wh"] for p in merge_parts), 3)
+        else:
+            c1.pop("energy_meter_wh", None)
+        merge_cycle_cost(c1, merge_parts)
 
         # New Hash ID
         new_id = hashlib.sha256(f"{c1['start_time']}_{c1['duration']}".encode()).hexdigest()[:12]

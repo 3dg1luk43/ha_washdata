@@ -256,6 +256,7 @@ from .learning import LearningManager
 from .profile_store import (
     MatchResult,
     ProfileStore,
+    cycle_report_energy_wh,
     decompress_power_data,
 )
 from .signal_processing import (
@@ -5871,16 +5872,7 @@ class WashDataManager:
         ML, anomaly, envelopes); only cost/lifetime/notifications/panel display
         prefer the more accurate meter figure when one was captured (issue #316).
         """
-        meter = cycle_data.get("energy_meter_wh")
-        if meter is not None:
-            try:
-                return float(meter)
-            except (ValueError, TypeError, OverflowError):
-                pass
-        try:
-            return float(cycle_data.get("energy_wh", 0.0))
-        except (ValueError, TypeError, OverflowError):
-            return 0.0
+        return cycle_report_energy_wh(cycle_data)
 
     def _in_anticrease_tail(self) -> bool:
         """The detector sits in a #296 anti-crease tail (register item 393a).
