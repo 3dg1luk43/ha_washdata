@@ -770,6 +770,35 @@ async def test_a_tumble_held_for_a_newer_cycle_survives_the_older_cycle_end(
     assert manager._tumble_held is not None  # noqa: SLF001
 
 
+async def test_a_failed_cycle_end_also_leaves_a_newer_cycles_tumble_held(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """The fallback cycle_ended of steps that failed keeps the same rule."""
+    entry = await setup_washdata_entry(
+        "Dryer", device_type="dryer", power_sensor=POWER, options=DRYER
+    )
+    manager = _manager(hass, entry)
+    release = asyncio.Event()
+
+    async def _failing_steps(*_args, **_kwargs):
+        await release.wait()
+        raise RuntimeError("steps failed")
+
+    manager._cycle_ended_pending = True  # noqa: SLF001
+    with patch.object(manager, "_async_cycle_end_steps", side_effect=_failing_steps):
+        manager._on_cycle_end({  # noqa: SLF001
+            "duration": 1800.0, "max_power": 800.0, "status": "completed",
+            "start_time": "2026-10-20T10:00:00+00:00", "end_time": "2026-10-20T10:30:00+00:00",
+            "power_data": [[0.0, 800.0], [900.0, 800.0], [1800.0, 0.0]],
+        })
+        await asyncio.sleep(0)
+        manager._ranking_snapshot_cycle_id = "cycle-b"  # noqa: SLF001
+        manager._tumble_held = {"minutes_since_finish": 3.0, "_prev_minutes": None}  # noqa: SLF001
+        release.set()
+        await hass.async_block_till_done()
+    assert manager._tumble_held is not None  # noqa: SLF001
+
+
 async def test_still_tumbling_needs_tumbles(
     hass: HomeAssistant, setup_washdata_entry, freezer
 ) -> None:

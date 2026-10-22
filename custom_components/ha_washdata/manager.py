@@ -6105,7 +6105,7 @@ class WashDataManager:
             self._logger.exception("Cycle-end processing failed; closing the cycle anyway")
             if ended["pending"]:
                 ended["pending"] = False
-                self._fire_cycle_ended(cycle_data)
+                self._fire_cycle_ended(cycle_data, cycle_token=cycle_token)
         finally:
             if not self._is_shutdown:
                 await self._async_close_cycle_end(
@@ -9130,10 +9130,15 @@ class WashDataManager:
         }
 
     def _fire_cycle_ended(
-        self, cycle_data: dict[str, Any], energy_wh: float | None = None
+        self,
+        cycle_data: dict[str, Any],
+        energy_wh: float | None = None,
+        *,
+        cycle_token: str | None = None,
     ) -> None:
         """cycle_ended for an end the cycle-end steps never announce (a discarded
-        ghost, or steps that failed first). Never raises."""
+        ghost, or steps that failed first). ``cycle_token`` is the failed steps'
+        cycle: a tumble held for a newer one is left to that cycle. Never raises."""
         try:
             variables = self._cycle_end_trigger_vars(cycle_data, energy_wh=energy_wh)
         except Exception:  # pylint: disable=broad-exception-caught
@@ -9141,7 +9146,8 @@ class WashDataManager:
         self._fire_device_trigger(
             TRIGGER_CYCLE_ENDED, self._trigger_ended_program, **variables
         )
-        self._release_held_tumble(cycle_data.get("status"))
+        if cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
+            self._release_held_tumble(cycle_data.get("status"))
 
     def _check_state_triggers(self) -> None:
         """The triggers that follow what the entities show, on every refresh (#478):
