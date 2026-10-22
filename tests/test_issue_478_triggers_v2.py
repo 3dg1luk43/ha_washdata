@@ -947,6 +947,20 @@ def test_a_restore_keeps_the_announced_marks() -> None:
     ]
 
 
+@pytest.mark.parametrize("bad", [10**400, 1e400, float("inf"), float("nan")])
+def test_oversized_numbers_from_a_snapshot_or_store_never_raise(bad: Any) -> None:
+    """An oversized int raises OverflowError on float()/isfinite() where 1e400 is
+    already inf, so both are pinned: a restored mark, an option and a task row."""
+    now = dt_util.utcnow()
+    tracker = trigger_rules.LiveTriggerTracker()
+    tracker.baseline(_inputs(program="Cotton"), now,
+                     {"program": "Cotton", "phase": "Wash", "phase_start": bad})
+    assert tracker.marks()["phase_start"] is None
+    assert trigger_rules._int_option({"minutes": bad}, "minutes", 10) in (10, bad)
+    assert trigger_rules._due_reason({"cycles_interval": bad, "cycles_since": 1}) in (
+        "cycles", "days")
+
+
 def test_a_new_cycle_announces_again() -> None:
     now = dt_util.utcnow()
     tracker = trigger_rules.LiveTriggerTracker()

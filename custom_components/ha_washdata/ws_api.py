@@ -4254,14 +4254,14 @@ async def async_apply_imported_entry_options(
         entry_options_updates.pop(key, None)
     if not entry_options_updates:
         return
-    # An export of a device type removed in 0.5.9 lands as generic, with that
-    # type's own defaults kept as options (as the migration does).
-    _merged = {**entry.options, **entry_options_updates}
-    for key in retire_device_type(_merged, {}):
-        entry_options_updates[key] = _merged[key]
     async with _entry_options_lock(hass, entry.entry_id):
         # Read INSIDE the lock: a snapshot taken before the `async with` suspended
         # would silently revert a ws_set_options that committed while we waited.
+        # An export of a device type removed in 0.5.9 lands as generic, with that
+        # type's own defaults kept as options (as the migration does).
+        _merged = {**entry.options, **entry_options_updates}
+        for key in retire_device_type(_merged, {}):
+            entry_options_updates[key] = _merged[key]
         # A persisted null survives options.get(key, DEFAULT) and breaks setup
         # (#389), so the same write-boundary strip as ws_set_options applies.
         entry_options_updates = _without_inverted_threshold_pair(

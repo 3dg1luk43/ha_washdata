@@ -13,6 +13,8 @@ built-in phases a profile still uses become custom phases.
 """
 from __future__ import annotations
 
+import asyncio
+
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -319,6 +321,30 @@ async def test_a_full_export_import_lands_as_generic(hass: HomeAssistant) -> Non
         CONF_DEVICE_TYPE: "generic", CONF_OFF_DELAY: 300, CONF_MIN_OFF_GAP: 900,
         CONF_COMPLETION_MIN_SECONDS: 1800, CONF_LOW_POWER_NO_UPDATE_TIMEOUT: 7200.0,
     }
+
+
+async def test_an_import_reads_the_options_a_waiting_save_committed(
+    hass: HomeAssistant,
+) -> None:
+    """The retired type's defaults are filled from the options as they stand once
+    the import holds the options lock: a save that committed while the import
+    waited keeps its value instead of being overwritten by a default."""
+    entry = _entry(hass, options={CONF_DEVICE_TYPE: "generic"}, minor=CONFIG_ENTRY_MINOR_VERSION)
+    lock = ws_api._entry_options_lock(hass, entry.entry_id)  # noqa: SLF001
+    await lock.acquire()
+    task = hass.async_create_task(ws_api.async_apply_imported_entry_options(
+        hass, entry, {"entry_options": {CONF_DEVICE_TYPE: "bread_maker"}}, "import_config",
+    ))
+    for _ in range(5):
+        await asyncio.sleep(0)
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, CONF_MIN_OFF_GAP: 1234},
+    )
+    lock.release()
+    await task
+
+    assert entry.options[CONF_DEVICE_TYPE] == "generic"
+    assert entry.options[CONF_MIN_OFF_GAP] == 1234
 
 
 async def test_an_undo_import_of_an_old_restore_point_lands_as_generic(

@@ -188,33 +188,39 @@ jobs:
             const STRINGS_SOURCE = 'custom_components/ha_washdata/strings.json';
             const isLocalizationFile = (f) => f.startsWith(TRANSLATIONS_DIR) || f === STRINGS_SOURCE;
 
-            let isLocalizationPR = false;
-            try {
-              const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: prNumber, per_page: 100 });
-              const filenames = files.map(f => f.filename);
-              isLocalizationPR = filenames.length > 0 && filenames.every(isLocalizationFile);
-            } catch (e) {
-              console.warn(`Could not fetch changed files: ${e.message}`);
-            }
-
-            if (isLocalizationPR) {
-              console.log('Localization-only PR (translations/strings.json) - skipping issue link check.');
-              return;
-            }
-
             // Automation templates (blueprints, #478) are reviewed on their own merits:
             // a PR that only adds or edits files under blueprints/ needs no accepted
             // issue. The maintainer still reviews and merges every one.
             const BLUEPRINTS_DIR = 'custom_components/ha_washdata/blueprints/';
-            let isBlueprintPR = false;
+
+            let exemptReason = null;
             try {
               const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: prNumber, per_page: 100 });
-              isBlueprintPR = files.length > 0 && files.every(f => f.filename.startsWith(BLUEPRINTS_DIR));
+              const filenames = files.map(f => f.filename);
+              if (filenames.length > 0 && filenames.every(isLocalizationFile)) {
+                exemptReason = 'Localization-only PR (translations/strings.json)';
+              } else if (filenames.length > 0 && filenames.every(f => f.startsWith(BLUEPRINTS_DIR))) {
+                exemptReason = 'Blueprint-only PR';
+              }
             } catch (e) {
               console.warn(`Could not fetch changed files: ${e.message}`);
             }
-            if (isBlueprintPR) {
-              console.log('Blueprint-only PR - skipping issue link check.');
+
+            if (exemptReason) {
+              // A PR flagged before it was narrowed to exempt files still carries the
+              // auto-close label and notice; clear them, or the scheduled closer
+              // closes an exempt PR three days later.
+              for (const name of ['needs accepted issue', 'awaiting maintainer']) {
+                try {
+                  await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name });
+                } catch (_) {}
+              }
+              const prComments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: prNumber, per_page: 100 });
+              const notice = prComments.find(c => c.body && c.body.includes(BOT_MARKER));
+              if (notice) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: notice.id });
+              }
+              console.log(`${exemptReason} - skipping issue link check.`);
               return;
             }
 

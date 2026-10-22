@@ -80,8 +80,9 @@ PR titles: `[FIX]`, `[FEATURE]`, `[REFACTOR]`, `[DOCS]`, `[TEST]`, `[PERF]`, e.g
 ## Automation templates
 
 Templates are [Home Assistant blueprints](https://www.home-assistant.io/docs/automation/using_blueprints/)
-that ship with WashData and appear in the panel's Automations tab. Share one by pull request,
-[using the template PR form](https://github.com/3dg1luk43/ha_washdata/compare/main...main?template=blueprint.md).
+that ship with WashData and appear in the panel's Automations tab. Share one by pull request: push
+your branch to your fork, open the pull request against `main`, then add `?template=blueprint.md` to
+the page address (`&template=blueprint.md` if it already has a `?`) to load the template PR form.
 These PRs need no accepted issue; each one is reviewed before it is merged.
 
 - One YAML file in `custom_components/ha_washdata/blueprints/automation/` plus its entry in

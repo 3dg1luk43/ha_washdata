@@ -363,7 +363,9 @@ class _QuietPulse:
     stood at the excursion's first reading, that reading's own interval (spent at
     the previous, quiet level) already credited, and ``last_active`` the last
     activity before it. They are put back if the excursion closes as a pulse; see
-    :meth:`CycleDetector._opens_quiet_pulse`.
+    :meth:`CycleDetector._opens_quiet_pulse`. ``resume`` records that the first
+    reading would have resumed RUNNING from PAUSED or ENDING; that transition is
+    made, at ``start``, if the excursion proves not to be a pulse.
     """
 
     start: datetime
@@ -372,6 +374,7 @@ class _QuietPulse:
     gapfree: float
     unobserved: float
     last_active: datetime | None
+    resume: bool = False
 
 
 @dataclass(frozen=True)
@@ -2546,7 +2549,7 @@ class CycleDetector:
         (:meth:`_close_quiet_pulse`): since DETECT-04 Smart Termination needs that
         quiet, and a pulse every ~70 s otherwise kept it under the 120 s debounce,
         and the off_delay / min_off_gap fallback with it, until the 8 h cap. A
-        longer or hotter excursion resets as before (:meth:`_extend_quiet_pulse`),
+        longer or hotter excursion resets as before (:meth:`_reject_quiet_pulse`),
         which keeps DETECT-04's protection against resumed heating or a fan-only
         phase.
         """
@@ -2564,30 +2567,41 @@ class CycleDetector:
             power > float(self._config.anti_wrinkle_max_power)
             or (timestamp - pulse.start).total_seconds() > QUIET_PULSE_MAX_S
         ):
-            self._quiet_pulse = pulse = None
+            self._reject_quiet_pulse(pulse)
+            pulse = None
         if pulse is None:
             # This excursion resets the quiet run, and the spans belong to it.
             self._quiet_pulse_spans.clear()
         elif power > pulse.peak:
             self._quiet_pulse = replace(pulse, peak=float(power))
 
-    def _close_quiet_pulse(self, timestamp: datetime, unobserved: float) -> bool:
+    def _reject_quiet_pulse(self, pulse: _QuietPulse) -> None:
+        """The excursion was not a pulse: it resets the quiet run as before #474,
+        and resumes RUNNING where its first reading would have."""
+        self._quiet_pulse = None
+        self._quiet_pulse_spans.clear()
+        if pulse.resume and self._state in (STATE_PAUSED, STATE_ENDING):
+            self._transition_to(STATE_RUNNING, pulse.start)
+
+    def _close_quiet_pulse(self, timestamp: datetime, unseen: bool) -> bool:
         """First reading back below stop: give a short pulse's quiet back (#474).
 
         True when the excursion opened by :meth:`_opens_quiet_pulse` closed within
-        ``QUIET_PULSE_MAX_S`` with no recorded outage in its last interval: the
-        three tallies return to where they stood at its first reading, so its own
-        span is not counted as quiet either. Otherwise False, and the caller
-        credits this reading's interval as usual, on tallies the excursion reset.
+        ``QUIET_PULSE_MAX_S`` on a reading somebody saw (``unseen``: a recorded
+        outage in its last interval, or a keepalive that could not read the
+        sensor): the three tallies return to where they stood at its first
+        reading, so its own span is not counted as quiet either. Otherwise False,
+        and the caller credits this reading's interval as usual, on tallies the
+        excursion reset.
         """
         pulse = self._quiet_pulse
         if pulse is None:
             return False
-        self._quiet_pulse = None
         span_s = (timestamp - pulse.start).total_seconds()
-        if span_s > QUIET_PULSE_MAX_S or unobserved > 0:
-            self._quiet_pulse_spans.clear()
+        if span_s > QUIET_PULSE_MAX_S or unseen:
+            self._reject_quiet_pulse(pulse)
             return False
+        self._quiet_pulse = None
         self._time_below_threshold = pulse.below
         self._time_below_threshold_gapfree = pulse.gapfree
         self._time_below_unobserved = pulse.unobserved
@@ -2863,7 +2877,9 @@ class CycleDetector:
         opens_pulse = is_high and self._opens_quiet_pulse(power, prev_high)
         if is_high and not opens_pulse:
             self._extend_quiet_pulse(timestamp, power)
-        absorbed = not is_high and self._close_quiet_pulse(timestamp, unobserved)
+        absorbed = not is_high and self._close_quiet_pulse(
+            timestamp, unobserved > 0 or (synthetic and not observed)
+        )
 
         if (not is_high and not absorbed) or opens_pulse:
             # Quiet nobody saw is not quiet (item 266). The watchdog keeps
@@ -3449,8 +3465,11 @@ class CycleDetector:
                 # Resume to RUNNING, unless this is a dryer pulse that may still
                 # prove short (#474): the next reading decides, and a short one
                 # leaves the quiet run (and this state) as it was.
-                if self._quiet_pulse is None:
+                pulse = self._quiet_pulse
+                if pulse is None:
                     self._transition_to(STATE_RUNNING, timestamp)
+                elif pulse.start == timestamp:
+                    self._quiet_pulse = replace(pulse, resume=True)
             else:
                 # Periodic profile matching during pause
                 self._try_profile_match(timestamp)
@@ -3564,10 +3583,18 @@ class CycleDetector:
                     terminal_spike = near_expected or long_ending_tail
 
                 # A dryer pulse that may still prove short (#474) does not resume
-                # the run either: one that outlasts QUIET_PULSE_MAX_S or tops
-                # anti_wrinkle_max_power is judged by the rules below on its next
-                # reading, so ENDING (and its time in state) survives the pulses.
-                if self._quiet_pulse is not None:
+                # the run either, so ENDING (and its time in state) survives the
+                # pulses. One that outlasts QUIET_PULSE_MAX_S or tops
+                # anti_wrinkle_max_power gets what the rules below decide for its
+                # first reading (`_reject_quiet_pulse`).
+                pulse = self._quiet_pulse
+                if pulse is not None:
+                    if (
+                        pulse.start == timestamp
+                        and not terminal_spike
+                        and not past_expected
+                    ):
+                        self._quiet_pulse = replace(pulse, resume=True)
                     return
 
                 if terminal_spike:

@@ -172,7 +172,7 @@ def describe(trigger_type: str, device_name: Any) -> str:
 def _int_option(options: dict[str, Any], key: str, default: int) -> int:
     try:
         return int(options.get(key, default))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return default
 
 
@@ -479,7 +479,11 @@ def _str_or_none(value: Any) -> str | None:
 def _float_or_none(value: Any) -> float | None:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
-    return float(value) if math.isfinite(value) else None
+    try:
+        out = float(value)  # an oversized int raises rather than giving inf
+    except OverflowError:
+        return None
+    return out if math.isfinite(out) else None
 
 
 def _int_or_none(value: Any) -> int | None:
@@ -602,6 +606,6 @@ def _due_reason(row: dict[str, Any]) -> str:
     try:
         cycles = int(row.get("cycles_interval") or 0)
         since = int(row.get("cycles_since") or 0)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         cycles, since = 0, 0
     return "cycles" if cycles > 0 and since >= cycles else "days"

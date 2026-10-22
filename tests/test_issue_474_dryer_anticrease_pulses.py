@@ -295,3 +295,69 @@ def test_a_dryer_pulse_ignored_mid_run_keeps_the_fallback_gate():
     assert len(run.ends) == 1
     assert _end_min(run, programme) > 0.0
     assert abs(run.ends[0]["duration"] - programme) < 30.0
+
+
+def _drive_to(state: str) -> tuple[CycleDetector, float, list[str]]:
+    """A matched dryer (expected far longer than the run, so it is never past it)
+    fed its programme and a flat 2.5 W tail until it first reaches ``state``."""
+    programme = MIELE_EXPECTED
+    seen: list[str] = []
+    det = CycleDetector(
+        _miele_cfg(), lambda _old, new: seen.append(new), lambda _c: None,
+        profile_matcher=lambda _r: _match("Long", 0.8, 3 * programme),
+    )
+    power = _dryer(programme, 2300.0, lambda _s: 2.5)
+    t = 0.0
+    with patch("homeassistant.util.dt.now", side_effect=lambda: T0 + timedelta(seconds=t)):
+        while det.state != state or t < 60 + programme:
+            det.process_reading(power(t), T0 + timedelta(seconds=t))
+            t += 5.0
+            assert t < 60 + programme + 3600, det.state
+    seen.clear()
+    return det, t, seen
+
+
+def _feed(det: CycleDetector, t: float, power: float, **kw) -> None:
+    with patch("homeassistant.util.dt.now", return_value=T0 + timedelta(seconds=t)):
+        det.process_reading(power, T0 + timedelta(seconds=t), **kw)
+
+
+def test_a_too_long_excursion_closing_low_resumes_running_as_before():
+    """A slow plug sees an excursion as one high reading and the next one low, 40 s
+    later. Not a pulse, so its first reading resumes RUNNING from PAUSED, or from
+    ENDING in its first 120 s, as that reading did before #474; it is not left in
+    the state on a quiet run the excursion reset."""
+    for state in (C.STATE_PAUSED, STATE_ENDING):
+        det, t, seen = _drive_to(state)
+        _feed(det, t, 125.0)
+        assert det.state == state  # may still prove a pulse
+        _feed(det, t + 40.0, 2.5)
+        assert seen[:1] == [STATE_RUNNING], state
+
+
+def test_a_short_excursion_closing_low_still_keeps_the_state():
+    for state in (C.STATE_PAUSED, STATE_ENDING):
+        det, t, seen = _drive_to(state)
+        _feed(det, t, 125.0)
+        _feed(det, t + 10.0, 2.5)
+        assert seen == [] and det.state == state, state
+
+
+def test_an_unread_keepalive_does_not_close_a_pulse():
+    """A keepalive that could not read the sensor proves nothing about the pulse's
+    end, so the quiet the pulse reset is not given back; a keepalive that did read
+    it closes the pulse like a real reading."""
+    for observed in (False, True):
+        det, t, _seen = _drive_to(STATE_ENDING)
+        for _ in range(30):  # past ENDING's first 120 s
+            _feed(det, t, 2.5)
+            t += 5.0
+        quiet = det._time_below_threshold  # noqa: SLF001
+        _feed(det, t, 125.0)
+        _feed(det, t + 10.0, 2.5, synthetic=True, observed=observed)
+        if observed:  # back to where the pulse's first reading left it
+            assert det._time_below_threshold == quiet + 5.0  # noqa: SLF001
+        else:
+            assert det._time_below_threshold == 10.0  # noqa: SLF001
+            assert det._time_below_threshold_gapfree == 0.0  # noqa: SLF001
+            assert not det._quiet_pulse_spans  # noqa: SLF001
