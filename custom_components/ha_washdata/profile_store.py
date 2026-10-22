@@ -4115,15 +4115,20 @@ class ProfileStore:
         """The programs whose finished cycle marks each task done (#480).
 
         ``{task_id: [profile names]}`` for built-in types and custom tasks alike,
-        copies, empty lists left out. Never raises.
+        copies, empty lists left out. Only names that are still profiles: every
+        removal path also drops its name (``_rename_maintenance_program``), this
+        covers one that does not (a partial import). Never raises.
         """
         raw = self._data.get("maintenance_programs")
         if not isinstance(raw, dict):
             return {}
+        profiles = self._data.get("profiles")
+        if not isinstance(profiles, dict):
+            profiles = {}
         out: dict[str, list[str]] = {}
         for task_id, names in raw.items():
             if isinstance(task_id, str) and isinstance(names, list):
-                clean = [n for n in names if isinstance(n, str) and n]
+                clean = [n for n in names if isinstance(n, str) and n in profiles]
                 if clean:
                     out[task_id] = clean
         return out
@@ -9838,6 +9843,7 @@ class ProfileStore:
             else:
                 self._data.get("profiles", {}).pop(old_profile, None)
                 self._data.get("envelopes", {}).pop(old_profile, None)
+                self._rename_maintenance_program(old_profile, None)  # #480
         if profile_name:
             touched.add(profile_name)
         return touched
@@ -11017,6 +11023,10 @@ class ProfileStore:
                 if isinstance(src_val, dict):
                     base = cur if isinstance(cur, dict) else {}
                     for k, v in src_val.items():
+                        if key == "maintenance_programs" and isinstance(base.get(k), list):
+                            # A task both stores configure does what either named.
+                            base[k] = list(dict.fromkeys([*base[k], *v]))
+                            continue
                         base.setdefault(k, v)  # keep-mine on key collision
                     self._data[key] = base
                 elif isinstance(src_val, list):

@@ -190,3 +190,48 @@ async def test_a_profile_removed_with_its_last_cycle_or_by_gc_leaves_no_associat
 
     assert store.cleanup_orphaned_profiles() == 1
     assert store.get_maintenance_programs() == {}
+
+
+async def test_moving_a_programs_last_imported_cycle_away_drops_the_association(
+    hass: HomeAssistant,
+) -> None:
+    store = _store(hass, "Imported 90", "Eco")
+    ref = {"id": "r1", "profile_name": "Imported 90", "start_time": END, "duration": 60.0}
+    store._data["reference_cycles"] = [ref]  # noqa: SLF001
+    with patch.object(store, "async_save", AsyncMock()):
+        await store.async_set_maintenance_programs("drum_clean", ["Imported 90"])
+    store._relabel_non_real_cycle(ref, "Eco")  # noqa: SLF001
+    assert "Imported 90" not in store.get_profiles()
+    assert store._data["maintenance_programs"] == {}  # noqa: SLF001
+
+
+async def test_a_name_that_is_no_longer_a_program_is_not_offered(hass: HomeAssistant) -> None:
+    store = _store(hass, "Eco")
+    store._data["maintenance_programs"] = {"drum_clean": ["Gone", "Eco"], "descale": ["Gone"]}  # noqa: SLF001
+    assert store.get_maintenance_programs() == {"drum_clean": ["Eco"]}
+
+
+async def test_a_merge_import_unites_the_lists_of_a_task_both_stores_have(
+    hass: HomeAssistant,
+) -> None:
+    store = _store(hass, "Eco", "Cotton 90")
+    with patch.object(store, "async_save", AsyncMock()):
+        await store.async_set_maintenance_programs("drum_clean", ["Eco"])
+    payload = {
+        "version": 11,
+        "device_fingerprint": {"device_type": "washing_machine"},
+        "data": {
+            "profiles": {}, "past_cycles": [], "reference_cycles": [],
+            "maintenance_log": [], "maintenance_tasks": [],
+            "maintenance_programs": {"drum_clean": ["Cotton 90", "Eco"]},
+        },
+        "entry_data": {}, "entry_options": {},
+    }
+    with patch.object(store, "async_save", AsyncMock()), patch.object(
+        store, "async_save_pre_import_snapshot", AsyncMock(return_value=True)
+    ):
+        await store.async_import_data_selective(
+            payload, selection={"categories": ["maintenance_log"]}, mode="merge",
+            local_device_type="washing_machine",
+        )
+    assert store.get_maintenance_programs() == {"drum_clean": ["Eco", "Cotton 90"]}
