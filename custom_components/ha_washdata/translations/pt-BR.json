@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Um nome amigável para este dispositivo (por exemplo, 'Máquina de lavar', 'Lava-louças').",
           "device_type": "Define os padrões de detecção para este tipo de eletrodoméstico.",
-          "power_sensor": "O sensor do plugue inteligente que informa a potência atual em watts.",
+          "power_sensor": "O sensor de potência do plugue inteligente (W ou kW), não o seu medidor de energia (kWh).",
           "min_power": "Leituras acima deste valor (em watts) indicam que o aparelho está funcionando. 2 W serve para a maioria dos dispositivos."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Erro inesperado",
-      "invalid_power": "O limite de potência deve ser maior que 0"
+      "invalid_power": "O limite de potência deve ser maior que 0",
+      "power_sensor_energy": "Este é um medidor de energia (kWh), não um sensor de potência. Escolha o sensor de potência do plugue (W ou kW). Se o plugue não tiver um, um helper Sensor derivativo pode criar um a partir do medidor."
     },
     "abort": {
       "already_configured": "O dispositivo já está configurado",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Nenhum perfil identificado ainda.",
       "vs_typical_longer": "{pct}% mais longo que o normal",
       "vs_typical_shorter": "{pct}% mais curto que o normal",
-      "invalid_power": "O limite de potência deve ser maior que 0"
+      "invalid_power": "O limite de potência deve ser maior que 0",
+      "power_sensor_energy": "Este é um medidor de energia (kWh), não um sensor de potência. Escolha o sensor de potência do plugue (W ou kW). Se o plugue não tiver um, um helper Sensor derivativo pode criar um a partir do medidor."
     }
   },
   "selector": {

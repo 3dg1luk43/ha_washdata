@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Popisný název pro toto zařízení (např. 'Pračka', 'Myčka nádobí').",
           "device_type": "Nastaví výchozí hodnoty detekce pro tento druh spotřebiče.",
-          "power_sensor": "Senzor chytré zásuvky, který hlásí aktuální výkon ve wattech.",
+          "power_sensor": "Výkonový senzor chytré zásuvky (W nebo kW), ne její měřič energie (kWh).",
           "min_power": "Hodnoty nad touto mezí (ve wattech) znamenají, že spotřebič běží. Pro většinu zařízení stačí 2 W."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Neočekávaná chyba",
-      "invalid_power": "Práh výkonu musí být větší než 0"
+      "invalid_power": "Práh výkonu musí být větší než 0",
+      "power_sensor_energy": "Toto je měřič energie (kWh), ne výkonový senzor. Vyberte výkonový senzor zásuvky (W nebo kW). Pokud ho zásuvka nemá, může ho z měřiče vytvořit pomocník „Derivační senzor“."
     },
     "abort": {
       "already_configured": "Zařízení je již nakonfigurováno",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Zatím nebyl rozpoznán žádný profil.",
       "vs_typical_longer": "o {pct}% déle než obvykle",
       "vs_typical_shorter": "o {pct}% kratší než obvykle",
-      "invalid_power": "Práh výkonu musí být větší než 0"
+      "invalid_power": "Práh výkonu musí být větší než 0",
+      "power_sensor_energy": "Toto je měřič energie (kWh), ne výkonový senzor. Vyberte výkonový senzor zásuvky (W nebo kW). Pokud ho zásuvka nemá, může ho z měřiče vytvořit pomocník „Derivační senzor“."
     }
   },
   "selector": {

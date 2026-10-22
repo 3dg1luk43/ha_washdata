@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Një emër miqësor për këtë pajisje (p.sh., \"Lavatriçe\", \"Pjatalarëse\").",
           "device_type": "Cakton parazgjedhjet e zbulimit për këtë lloj pajisjeje.",
-          "power_sensor": "Sensori i spinës inteligjente që raporton fuqinë në kohë reale, në vat.",
+          "power_sensor": "Sensori i fuqisë i spinës inteligjente (W ose kW), jo matësi i saj i energjisë (kWh).",
           "min_power": "Leximet mbi këtë vlerë (në vat) tregojnë se pajisja është në punë. 2 W u përshtatet shumicës së pajisjeve."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Gabim i papritur",
-      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0"
+      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0",
+      "power_sensor_energy": "Ky është një matës energjie (kWh), jo një sensor fuqie. Zgjidhni sensorin e fuqisë të spinës (W ose kW). Nëse spina nuk ka të tillë, një ndihmës Derivative mund ta krijojë nga matësi."
     },
     "abort": {
       "already_configured": "Pajisja është konfiguruar tashmë",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ende nuk është njohur asnjë profil.",
       "vs_typical_longer": "{pct}% më gjatë se zakonisht",
       "vs_typical_shorter": "{pct}% më shkurt se zakonisht",
-      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0"
+      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0",
+      "power_sensor_energy": "Ky është një matës energjie (kWh), jo një sensor fuqie. Zgjidhni sensorin e fuqisë të spinës (W ose kW). Nëse spina nuk ka të tillë, një ndihmës Derivative mund ta krijojë nga matësi."
     }
   },
   "selector": {

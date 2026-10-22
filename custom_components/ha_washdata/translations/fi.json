@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Ystävällinen nimi tälle laitteelle (esim. 'pesukone', 'astianpesukone').",
           "device_type": "Asettaa tunnistuksen oletukset tämän tyyppiselle laitteelle.",
-          "power_sensor": "Älypistokkeen anturi, joka raportoi reaaliaikaisen tehon watteina.",
+          "power_sensor": "Älypistokkeen tehon anturi (W tai kW), ei sen energiamittari (kWh).",
           "min_power": "Tämän ylittävät lukemat (watteina) tarkoittavat, että laite on käynnissä. 2 W sopii useimmille laitteille."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Odottamaton virhe",
-      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
+      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0",
+      "power_sensor_energy": "Tämä on energiamittari (kWh), ei tehon anturi. Valitse pistokkeen tehon anturi (W tai kW). Jos pistokkeessa ei ole sellaista, apuri Derivaatta -sensori voi luoda sen mittarista."
     },
     "abort": {
       "already_configured": "Laite on jo määritetty",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Yhtään profiilia ei ole vielä tunnistettu.",
       "vs_typical_longer": "{pct}% tavallista pidempi",
       "vs_typical_shorter": "{pct}% tavallista lyhyempi",
-      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
+      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0",
+      "power_sensor_energy": "Tämä on energiamittari (kWh), ei tehon anturi. Valitse pistokkeen tehon anturi (W tai kW). Jos pistokkeessa ei ole sellaista, apuri Derivaatta -sensori voi luoda sen mittarista."
     }
   },
   "selector": {

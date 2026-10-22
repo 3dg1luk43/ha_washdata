@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Et vennlig navn for denne enheten (f.eks. \"Vaskemaskin\", \"Oppvaskmaskin\").",
           "device_type": "Angir deteksjonsstandarder for denne typen apparat.",
-          "power_sensor": "Smartpluggens sensor som rapporterer gjeldende effekt i watt.",
+          "power_sensor": "Smartpluggens strømsensor (W eller kW), ikke energimåleren (kWh).",
           "min_power": "Målinger over denne verdien (i watt) betyr at apparatet går. 2 W passer for de fleste enheter."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Uventet feil",
-      "invalid_power": "Effektterskelen må være større enn 0"
+      "invalid_power": "Effektterskelen må være større enn 0",
+      "power_sensor_energy": "Dette er en energimåler (kWh), ikke en strømsensor. Velg smartpluggens strømsensor (W eller kW). Hvis pluggen ikke har en, kan en Derivat-sensor-hjelper lage en ut fra måleren."
     },
     "abort": {
       "already_configured": "Enheten er allerede konfigurert",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ingen profil gjenkjent ennå.",
       "vs_typical_longer": "{pct}% lengre enn vanlig",
       "vs_typical_shorter": "{pct}% kortere enn vanlig",
-      "invalid_power": "Effektterskelen må være større enn 0"
+      "invalid_power": "Effektterskelen må være større enn 0",
+      "power_sensor_energy": "Dette er en energimåler (kWh), ikke en strømsensor. Velg smartpluggens strømsensor (W eller kW). Hvis pluggen ikke har en, kan en Derivat-sensor-hjelper lage en ut fra måleren."
     }
   },
   "selector": {

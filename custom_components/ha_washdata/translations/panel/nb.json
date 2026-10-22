@@ -325,6 +325,9 @@
     "end_energy": {
       "energy": "For streng for Stoppterskel ({w} W) i løpet av Av-forsinkelse ({d} s); syklusen kan bare avsluttes via en reservevei",
       "stop": "Sluttenergi ({e} Wh på {d} s) tillater bare {p} W"
+    },
+    "power_sensor": {
+      "energy": "Denne sensoren teller energi ({unit}), ikke effekt, så ingen syklus kan oppdages. Velg pluggens strømsensor (W eller kW)."
     }
   },
   "hdr": {
@@ -375,7 +378,8 @@
     "live_match_debug": "Feilsøking av direkte match",
     "automations_used": "Automasjoner som bruker dette apparatet",
     "bp_templates": "Maler",
-    "automations_all_tip": "Home Assistants automatiseringsliste, filtrert etter WashData-etiketten. Automatiseringer opprettet her finnes også i WashData-kategorien."
+    "automations_all_tip": "Home Assistants automatiseringsliste, filtrert etter WashData-etiketten. Automatiseringer opprettet her finnes også i WashData-kategorien.",
+    "maint_done_by_program": "Utført automatisk"
   },
   "health": {
     "fair": "Akseptabel profilkvalitet",
@@ -691,7 +695,10 @@
     "bp_you_choose": "Du velger: {inputs}",
     "bp_adjustable": "Justerbar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
-    "automation_wd_label": "Har WashData-etiketten"
+    "automation_wd_label": "Har WashData-etiketten",
+    "done_by_none": "Ikke angitt",
+    "done_by_programs": "Utført automatisk av: {programs}",
+    "done_by_cycle": "Utført av en syklus med {program}"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -1082,7 +1089,8 @@
     "auto_trigger_hint": "Oppretter en automatisering med denne triggeren for denne enheten og åpner den i Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Opprettet av WashData for {device}. Legg til handlingene dine (varsel, lys, ...).",
-    "automation_alias_new": "{device}: ny automatisering"
+    "automation_alias_new": "{device}: ny automatisering",
+    "maint_done_by_program_intro": "En oppgave regnes som utført når en syklus med et av programmene dens er ferdig, for eksempel trommelrengjøring når Bomull 90 kjører. Bare sykluser WashData er sikker på, eller som du har valgt selv, teller."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",
@@ -1413,7 +1421,7 @@
       "label": "Avslåingsterskel"
     },
     "power_sensor": {
-      "doc": "Sensoren som rapporterer dette apparatets gjeldende effekt i watt (f.eks. sensor.washer_power). All deteksjon bygger på den.",
+      "doc": "Sensoren som rapporterer dette apparatets gjeldende effekt i W eller kW (f.eks. sensor.washer_power), ikke energimåleren (kWh). All deteksjon bygger på den.",
       "label": "Strømsensor"
     },
     "profile_match_interval": {

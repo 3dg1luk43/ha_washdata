@@ -331,6 +331,9 @@
     "end_energy": {
       "energy": "Prestrogo za Prag zaustavitve ({w} W) v času Zamude izklopa ({d} s); cikel se lahko konča le po nadomestni poti",
       "stop": "Energija konca ({e} Wh v {d} s) dovoljuje le {p} W"
+    },
+    "power_sensor": {
+      "energy": "Ta senzor šteje energijo ({unit}), ne pa moč, zato ni mogoče zaznati nobenega cikla. Izberite senzor moči vtiča (W ali kW)."
     }
   },
   "hdr": {
@@ -381,7 +384,8 @@
     "live_match_debug": "Diagnostika sprotnega ujemanja",
     "automations_used": "Avtomatizacije, ki uporabljajo to napravo",
     "bp_templates": "Predloge",
-    "automations_all_tip": "Seznam avtomatizacij Home Assistant, filtriran po oznaki WashData. Avtomatizacije, ustvarjene tukaj, so tudi v kategoriji WashData."
+    "automations_all_tip": "Seznam avtomatizacij Home Assistant, filtriran po oznaki WashData. Avtomatizacije, ustvarjene tukaj, so tudi v kategoriji WashData.",
+    "maint_done_by_program": "Samodejno opravljeno"
   },
   "health": {
     "fair": "Sprejemljiva kakovost profila",
@@ -703,7 +707,10 @@
     "bp_you_choose": "Izberete: {inputs}",
     "bp_adjustable": "Nastavljivo: {inputs}",
     "bp_yaml": "Blueprint YAML",
-    "automation_wd_label": "Nosi oznako WashData"
+    "automation_wd_label": "Nosi oznako WashData",
+    "done_by_none": "Ni nastavljeno",
+    "done_by_programs": "Samodejno opravljeno s programi: {programs}",
+    "done_by_cycle": "Opravljeno s ciklom programa {program}"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -1114,7 +1121,8 @@
     "auto_trigger_hint": "Ustvari avtomatizacijo s tem sprožilcem za to napravo in jo odpre v Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Ustvaril WashData za {device}. Dodajte svoja dejanja (obvestilo, luči, ...).",
-    "automation_alias_new": "{device}: nova avtomatizacija"
+    "automation_alias_new": "{device}: nova avtomatizacija",
+    "maint_done_by_program_intro": "Naloga šteje kot opravljena, ko se konča cikel enega od njenih programov, na primer čiščenje bobna po programu Bombaž 90. Štejejo samo cikli, ki jih WashData prepozna z gotovostjo, ali tisti, pri katerih ste program izbrali sami."
   },
   "phase_desc": {
     "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
@@ -1426,7 +1434,7 @@
       "label": "Prag izklopa napajanja"
     },
     "power_sensor": {
-      "doc": "Senzor, ki poroča trenutno moč te naprave v vatih (npr. sensor.washer_power). Vse zaznavanje temelji na njem.",
+      "doc": "Senzor, ki poroča trenutno moč te naprave v W ali kW (npr. sensor.washer_power), ne njen merilnik energije (kWh). Vse zaznavanje temelji na njem.",
       "label": "Senzor moči"
     },
     "profile_match_interval": {

@@ -325,6 +325,9 @@
         "end_energy": {
             "energy": "Kapatma Gecikmesi ({d} s) boyunca Durdurma Eşiği ({w} W) için fazla katı; döngü yalnızca bir yedek yoldan bitebilir",
             "stop": "Bitiş Enerjisi ({d} s içinde {e} Wh) yalnızca {p} W değerine izin verir"
+        },
+        "power_sensor": {
+            "energy": "Bu sensör gücü değil enerjiyi ({unit}) sayar, bu yüzden hiçbir döngü algılanamaz. Prizin güç sensörünü seçin (W veya kW)."
         }
     },
     "hdr": {
@@ -375,7 +378,8 @@
         "live_match_debug": "Canlı Eşleşme Hata Ayıklama",
         "automations_used": "Bu cihazı kullanan otomasyonlar",
         "bp_templates": "Şablonlar",
-        "automations_all_tip": "Home Assistant'ın otomasyon listesi, WashData etiketine göre filtreli. Burada oluşturulan otomasyonlar aynı zamanda WashData kategorisindedir."
+        "automations_all_tip": "Home Assistant'ın otomasyon listesi, WashData etiketine göre filtreli. Burada oluşturulan otomasyonlar aynı zamanda WashData kategorisindedir.",
+        "maint_done_by_program": "Otomatik tamamlanma"
     },
     "health": {
         "fair": "Kabul edilebilir profil kalitesi",
@@ -691,7 +695,10 @@
         "bp_you_choose": "Siz seçersiniz: {inputs}",
         "bp_adjustable": "Ayarlanabilir: {inputs}",
         "bp_yaml": "Blueprint YAML",
-        "automation_wd_label": "WashData etiketini taşır"
+        "automation_wd_label": "WashData etiketini taşır",
+        "done_by_none": "Ayarlanmadı",
+        "done_by_programs": "Otomatik tamamlayan programlar: {programs}",
+        "done_by_cycle": "Tamamlayan döngü: {program}"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -1082,7 +1089,8 @@
         "auto_trigger_hint": "Bu tetikleyiciyle bu cihaz için bir otomasyon oluşturur ve Home Assistant'ta açar.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device} için WashData tarafından oluşturuldu. Eylemlerinizi ekleyin (bildir, ışıklar, ...).",
-        "automation_alias_new": "{device}: yeni otomasyon"
+        "automation_alias_new": "{device}: yeni otomasyon",
+        "maint_done_by_program_intro": "Bir görev, programlarından birinin döngüsü bittiğinde yapıldı sayılır; örneğin Pamuklu 90 çalıştığında tambur temizliği. Yalnızca WashData'nın emin olduğu veya programını sizin seçtiğiniz döngüler sayılır."
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1401,7 +1409,7 @@
             "label": "Güç Kapatma Eşiği"
         },
         "power_sensor": {
-            "doc": "Bu cihazın canlı gücünü watt cinsinden bildiren sensör (örn. sensor.washer_power). Tüm algılama buna dayanır.",
+            "doc": "Bu cihazın canlı gücünü W veya kW cinsinden bildiren sensör (örn. sensor.washer_power), enerji sayacı (kWh) değil. Tüm algılama buna dayanır.",
             "label": "Güç Sensörü"
         },
         "profile_match_interval": {

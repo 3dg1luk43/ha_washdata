@@ -61,6 +61,7 @@ from .const import (
     TERMINAL_QUIET_MIN_OBSERVATIONS,
     MAINTENANCE_COUNT_FROM_ENABLE_TYPES,
     MAINTENANCE_CUSTOM_TASK_MAX,
+    MAINTENANCE_PROGRAMS_MAX,
     MAINTENANCE_CUSTOM_TASK_PREFIX,
     MAINTENANCE_EVENT_TYPES,
     MAINTENANCE_INTERVAL_CYCLES_MAX,
@@ -1671,7 +1672,9 @@ _EXPORT_CATEGORIES: dict[str, dict[str, Any]] = {
     # The custom task definitions travel with the log entries that reference them
     # (#461). The preset types' counting baselines do not: they are re-stamped on
     # the target at its next config load.
-    "maintenance_log":  {"keys": ["maintenance_log", "maintenance_tasks"], "kind": "list"},
+    # The programs that mark a task done (#480) travel with them.
+    "maintenance_log":  {"keys": ["maintenance_log", "maintenance_tasks", "maintenance_programs"],
+                         "kind": "mixed"},
     "ml_models":        {"keys": ["ml_model_versions", "ml_training_history", "ml_last_training_run"],
                          "kind": "mixed", "device_specific": True},
     "history_logs":     {"keys": ["auto_adjustments", "settings_changelog"], "kind": "list"},
@@ -3865,14 +3868,16 @@ class ProfileStore:
         Built-in types with a positive interval in ``reminder_cfg`` (in its order),
         then this device's custom tasks with any interval set. Each row is
         ``{"id", "custom", "name", "cycles_interval", "days_interval",
-        "cycles_since", "days_since", "due"}``; ``name`` is the user's text for a
-        custom task and None for a built-in type (callers translate those);
-        ``days_since`` is whole days, or None when there is no date to count from.
-        A task is due when either of its intervals is reached.
+        "cycles_since", "days_since", "due", "programs"}``; ``name`` is the user's
+        text for a custom task and None for a built-in type (callers translate
+        those); ``days_since`` is whole days, or None when there is no date to count
+        from; ``programs`` mark the task done when they finish (#480). A task is due
+        when either of its intervals is reached.
         """
         rows: list[dict[str, Any]] = []
         try:
             latest = self._latest_maintenance_by_type()
+            programs = self.get_maintenance_programs()
 
             def _row(task_id: str, name: str | None, cycles: int, days: int) -> None:
                 since_cycles, since_days = self._maintenance_since(task_id, latest)
@@ -3885,6 +3890,7 @@ class ProfileStore:
                     "cycles_since": since_cycles,
                     "days_since": None if since_days is None else int(since_days),
                     "due": is_due(since_cycles, cycles, since_days, days),
+                    "programs": programs.get(task_id, []),
                 })
 
             if isinstance(reminder_cfg, dict):
@@ -4089,8 +4095,141 @@ class ProfileStore:
         if len(remaining) == len(raw):
             return False
         self._data["maintenance_tasks"] = remaining
+        programs = self._data.get("maintenance_programs")
+        if isinstance(programs, dict):
+            programs.pop(task_id, None)
         await self.async_save()
         return True
+
+    # ── Done by a program (#480) ─────────────────────────────────────────────
+
+    def get_maintenance_programs(self) -> dict[str, list[str]]:
+        """The programs whose finished cycle marks each task done (#480).
+
+        ``{task_id: [profile names]}`` for built-in types and custom tasks alike,
+        copies, empty lists left out. Never raises.
+        """
+        raw = self._data.get("maintenance_programs")
+        if not isinstance(raw, dict):
+            return {}
+        out: dict[str, list[str]] = {}
+        for task_id, names in raw.items():
+            if isinstance(task_id, str) and isinstance(names, list):
+                clean = [n for n in names if isinstance(n, str) and n]
+                if clean:
+                    out[task_id] = clean
+        return out
+
+    async def async_set_maintenance_programs(
+        self, task_id: str, programs: Any
+    ) -> list[str]:
+        """Set the programs that mark ``task_id`` done when they finish (#480).
+
+        Persists and returns the stored list (duplicates dropped, order kept); an
+        empty list turns it off. Raises ``ValueError`` for an unknown task, a name
+        that is not one of this device's programs, or too many programs.
+        """
+        if (
+            task_id not in MAINTENANCE_EVENT_TYPES
+            and self._find_maintenance_task(task_id) is None
+        ):
+            raise ValueError(f"Unknown maintenance task: {task_id!r}")
+        if not isinstance(programs, (list, tuple)):
+            raise ValueError("Programs must be a list of program names")
+        profiles = self._data.get("profiles", {})
+        names: list[str] = []
+        for name in programs:
+            if not isinstance(name, str) or name not in profiles:
+                raise ValueError(f"Unknown program: {name!r}")
+            if name not in names:
+                names.append(name)
+        if len(names) > MAINTENANCE_PROGRAMS_MAX:
+            raise ValueError(f"At most {MAINTENANCE_PROGRAMS_MAX} programs per task")
+        raw = self._data.get("maintenance_programs")
+        if not isinstance(raw, dict):
+            raw = {}
+            self._data["maintenance_programs"] = raw
+        if names:
+            raw[task_id] = names
+        else:
+            raw.pop(task_id, None)
+        await self.async_save()
+        return list(names)
+
+    def log_maintenance_done_by_program(self, cycle: dict[str, Any]) -> list[str]:
+        """Log as done every task that lists this finished cycle's program (#480).
+
+        The caller passes a persisted, finished, labelled cycle (a label is only
+        written by a confident match or a hand-picked program). The entry is dated
+        at the cycle's end and stamped with the odometer that already counts it,
+        so the task restarts from zero; it names the program and the cycle, and a
+        cycle never logs a task twice. In memory only: the cycle-end save persists
+        it. Returns the task ids logged. Never raises.
+        """
+        try:
+            program = cycle.get("profile_name")
+            if not isinstance(program, str) or not program:
+                return []
+            cycle_id = cycle.get("id")
+            when = cycle.get("end_time")
+            parsed = _parse_maintenance_dt(when) if isinstance(when, str) else None
+            if parsed is None:
+                when = dt_util.now().isoformat()
+                parsed = _parse_maintenance_dt(when)
+            log = self._data.get("maintenance_log")
+            if not isinstance(log, list):
+                log = []
+                self._data["maintenance_log"] = log
+            done: list[str] = []
+            for task_id, names in self.get_maintenance_programs().items():
+                if program not in names:
+                    continue
+                custom = self._find_maintenance_task(task_id)
+                if task_id not in MAINTENANCE_EVENT_TYPES and custom is None:
+                    continue
+                if cycle_id and any(
+                    isinstance(e, dict)
+                    and e.get("cycle_id") == cycle_id
+                    and e.get("event_type") == task_id
+                    for e in log
+                ):
+                    continue
+                entry: dict[str, Any] = {
+                    "id": uuid.uuid4().hex[:12],
+                    "date": when,
+                    "event_type": task_id,
+                    "notes": "",
+                    "cycle_count_at_log": self._odometer_at(parsed),
+                    "program": program,
+                    "cycle_id": cycle_id,
+                }
+                if custom is not None:
+                    entry["task_name"] = str(custom.get("name") or "")
+                log.append(entry)
+                done.append(task_id)
+            return done
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Maintenance done-by-program failed", exc_info=True)
+            return []
+
+    def _rename_maintenance_program(self, old: str, new: str | None) -> None:
+        """Follow a program rename (``new``) or deletion (None) in the lists (#480)."""
+        raw = self._data.get("maintenance_programs")
+        if not isinstance(raw, dict):
+            return
+        for task_id in list(raw):
+            names = raw[task_id]
+            if not isinstance(names, list) or old not in names:
+                continue
+            kept: list[str] = []
+            for name in names:
+                name = new if name == old else name
+                if name and name not in kept:
+                    kept.append(name)
+            if kept:
+                raw[task_id] = kept
+            else:
+                del raw[task_id]
 
     def has_recent_maintenance(
         self, event_type: str, days: int = MAINTENANCE_RECENT_SUPPRESS_DAYS
@@ -9508,6 +9647,9 @@ class ProfileStore:
                 if isinstance(mems, list) and old_name in mems:
                     g["members"] = [new_name if m == old_name else m for m in mems]
 
+            # 5. The maintenance tasks this program marks done (#480).
+            self._rename_maintenance_program(old_name, new_name)
+
             self._logger.info(
                 "Renamed profile '%s' to '%s', updated %s cycles and associated feedback",
                 old_name,
@@ -9542,6 +9684,7 @@ class ProfileStore:
                 if unlabel_cycles:
                     cycle["profile_name"] = None
                 count += 1
+        self._rename_maintenance_program(name, None)  # #480
 
         await self.async_save()
         action = "unlabeled" if unlabel_cycles else "orphaned"
@@ -9568,6 +9711,7 @@ class ProfileStore:
         self._data["ml_model_versions"] = {}
         self._data["profile_groups"] = {}
         self._data["maintenance_log"] = []
+        self._data["maintenance_programs"] = {}  # names the profiles wiped above
         self._data.pop("armed_program", None)
         self._data["playground_presets"] = {}
         # State of the ML parts removed in 0.5.8 (storage v17 drops it on load; an

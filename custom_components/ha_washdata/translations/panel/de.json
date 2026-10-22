@@ -325,6 +325,9 @@
     "end_energy": {
       "energy": "Zu streng für Stoppschwellenwert ({w} W) während der Abschaltverzögerung ({d} s); der Zyklus kann nur über einen Ausweichpfad enden",
       "stop": "Endenergie ({e} Wh in {d} s) lässt nur {p} W zu"
+    },
+    "power_sensor": {
+      "energy": "Dieser Sensor zählt Energie ({unit}), keine Leistung, daher kann kein Zyklus erkannt werden. Wählen Sie den Leistungssensor der Steckdose (W oder kW)."
     }
   },
   "hdr": {
@@ -375,7 +378,8 @@
     "live_match_debug": "Live-Match-Debug",
     "automations_used": "Automatisierungen, die dieses Gerät verwenden",
     "bp_templates": "Vorlagen",
-    "automations_all_tip": "Die Automatisierungsliste von Home Assistant, gefiltert nach dem WashData-Label. Hier erstellte Automatisierungen befinden sich auch in der WashData-Kategorie."
+    "automations_all_tip": "Die Automatisierungsliste von Home Assistant, gefiltert nach dem WashData-Label. Hier erstellte Automatisierungen befinden sich auch in der WashData-Kategorie.",
+    "maint_done_by_program": "Automatisch erledigt"
   },
   "health": {
     "fair": "Akzeptable Übereinstimmungsqualität",
@@ -691,7 +695,10 @@
     "bp_you_choose": "Ihre Wahl: {inputs}",
     "bp_adjustable": "Anpassbar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
-    "automation_wd_label": "Trägt das WashData-Label"
+    "automation_wd_label": "Trägt das WashData-Label",
+    "done_by_none": "Nicht festgelegt",
+    "done_by_programs": "Automatisch erledigt durch: {programs}",
+    "done_by_cycle": "Erledigt durch einen Zyklus mit {program}"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -1082,7 +1089,8 @@
     "auto_trigger_hint": "Erstellt eine Automatisierung mit diesem Trigger für dieses Gerät und öffnet sie in Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Von WashData für {device} erstellt. Fügen Sie Ihre Aktionen hinzu (Benachrichtigung, Licht, ...).",
-    "automation_alias_new": "{device}: neue Automatisierung"
+    "automation_alias_new": "{device}: neue Automatisierung",
+    "maint_done_by_program_intro": "Eine Aufgabe gilt als erledigt, wenn ein Zyklus eines ihrer Programme endet, zum Beispiel die Trommelreinigung, wenn Baumwolle 90 läuft. Es zählen nur Zyklen, bei denen WashData sicher ist oder die Sie selbst gewählt haben."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
@@ -1409,7 +1417,7 @@
       "label": "Abschaltschwellenwert"
     },
     "power_sensor": {
-      "doc": "Der Sensor, der die aktuelle Leistung dieses Geräts in Watt meldet (z. B. sensor.washer_power). Die gesamte Erkennung basiert darauf.",
+      "doc": "Der Sensor, der die aktuelle Leistung dieses Geräts in W oder kW meldet (z. B. sensor.washer_power), nicht sein Energiezähler (kWh). Die gesamte Erkennung basiert darauf.",
       "label": "Leistungssensor"
     },
     "profile_match_interval": {

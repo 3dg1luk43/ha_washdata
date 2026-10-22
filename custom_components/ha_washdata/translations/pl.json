@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Przyjazna nazwa tego urządzenia (np. „Pralka”, „Zmywarka”).",
           "device_type": "Ustawia domyślne parametry wykrywania dla tego rodzaju urządzenia.",
-          "power_sensor": "Czujnik inteligentnej wtyczki, który podaje bieżącą moc w watach.",
+          "power_sensor": "Czujnik mocy inteligentnej wtyczki (W lub kW), a nie jej licznik energii (kWh).",
           "min_power": "Odczyty powyżej tej wartości (w watach) oznaczają, że urządzenie pracuje. 2 W pasuje do większości urządzeń."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Nieoczekiwany błąd",
-      "invalid_power": "Próg mocy musi być większy niż 0"
+      "invalid_power": "Próg mocy musi być większy niż 0",
+      "power_sensor_energy": "To jest licznik energii (kWh), a nie czujnik mocy. Wybierz czujnik mocy wtyczki (W lub kW). Jeśli wtyczka go nie ma, pomocnik „Sensor pochodnej” może go utworzyć z licznika."
     },
     "abort": {
       "already_configured": "Urządzenie jest już skonfigurowane",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Nie rozpoznano jeszcze żadnego profilu.",
       "vs_typical_longer": "o {pct}% dłużej niż zwykle",
       "vs_typical_shorter": "o {pct}% krócej niż zwykle",
-      "invalid_power": "Próg mocy musi być większy niż 0"
+      "invalid_power": "Próg mocy musi być większy niż 0",
+      "power_sensor_energy": "To jest licznik energii (kWh), a nie czujnik mocy. Wybierz czujnik mocy wtyczki (W lub kW). Jeśli wtyczka go nie ma, pomocnik „Sensor pochodnej” może go utworzyć z licznika."
     }
   },
   "selector": {

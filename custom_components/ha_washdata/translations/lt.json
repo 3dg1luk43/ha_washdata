@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Patogus šio įrenginio pavadinimas (pvz., 'Skalbimo mašina', 'Indaplovė').",
           "device_type": "Nustato šio prietaiso tipo numatytuosius aptikimo nustatymus.",
-          "power_sensor": "Išmaniojo kištuko jutiklis, pranešantis esamą galią vatais.",
+          "power_sensor": "Išmaniojo kištuko galios jutiklis (W arba kW), o ne jo energijos skaitiklis (kWh).",
           "min_power": "Rodmenys virš šios ribos (vatais) reiškia, kad prietaisas veikia. Daugeliui įrenginių tinka 2 W."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Netikėta klaida",
-      "invalid_power": "Galios slenkstis turi būti didesnis nei 0"
+      "invalid_power": "Galios slenkstis turi būti didesnis nei 0",
+      "power_sensor_energy": "Tai energijos skaitiklis (kWh), o ne galios jutiklis. Pasirinkite kištuko galios jutiklį (W arba kW). Jei kištukas jo neturi, jį iš skaitiklio gali sukurti pagalbininkas „Išvestinis jutiklis“."
     },
     "abort": {
       "already_configured": "Įrenginys jau sukonfigūruotas",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Kol kas neatpažintas joks profilis.",
       "vs_typical_longer": "{pct}% ilgiau nei įprastai",
       "vs_typical_shorter": "{pct}% trumpiau nei įprastai",
-      "invalid_power": "Galios slenkstis turi būti didesnis nei 0"
+      "invalid_power": "Galios slenkstis turi būti didesnis nei 0",
+      "power_sensor_energy": "Tai energijos skaitiklis (kWh), o ne galios jutiklis. Pasirinkite kištuko galios jutiklį (W arba kW). Jei kištukas jo neturi, jį iš skaitiklio gali sukurti pagalbininkas „Išvestinis jutiklis“."
     }
   },
   "selector": {

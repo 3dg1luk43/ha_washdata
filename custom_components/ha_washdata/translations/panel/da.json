@@ -325,6 +325,9 @@
     "end_energy": {
       "energy": "For streng til Stoptærskel ({w} W) i løbet af Slukkeforsinkelse ({d} s); cyklussen kan kun afsluttes via en reservevej",
       "stop": "Slutenergi ({e} Wh på {d} s) tillader kun {p} W"
+    },
+    "power_sensor": {
+      "energy": "Denne sensor tæller energi ({unit}), ikke effekt, så ingen cyklus kan registreres. Vælg stikkets effektsensor (W eller kW)."
     }
   },
   "hdr": {
@@ -375,7 +378,8 @@
     "live_match_debug": "Live-match-fejlretning",
     "automations_used": "Automatiseringer, der bruger dette apparat",
     "bp_templates": "Skabeloner",
-    "automations_all_tip": "Home Assistants automatiseringsliste, filtreret efter WashData-etiketten. Automatiseringer oprettet her findes også i WashData-kategorien."
+    "automations_all_tip": "Home Assistants automatiseringsliste, filtreret efter WashData-etiketten. Automatiseringer oprettet her findes også i WashData-kategorien.",
+    "maint_done_by_program": "Udført automatisk"
   },
   "health": {
     "fair": "Acceptabel matchkvalitet",
@@ -691,7 +695,10 @@
     "bp_you_choose": "Du vælger: {inputs}",
     "bp_adjustable": "Justerbar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
-    "automation_wd_label": "Bærer WashData-etiketten"
+    "automation_wd_label": "Bærer WashData-etiketten",
+    "done_by_none": "Ikke angivet",
+    "done_by_programs": "Udført automatisk af: {programs}",
+    "done_by_cycle": "Udført af en cyklus med {program}"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -1082,7 +1089,8 @@
     "auto_trigger_hint": "Opretter en automatisering med denne trigger for dette apparat og åbner den i Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Oprettet af WashData for {device}. Tilføj dine handlinger (notifikation, lys, ...).",
-    "automation_alias_new": "{device}: ny automatisering"
+    "automation_alias_new": "{device}: ny automatisering",
+    "maint_done_by_program_intro": "En opgave tæller som udført, når en cyklus med et af dens programmer afsluttes, for eksempel tromlerengøring, når Bomuld 90 kører. Kun cyklusser, som WashData er sikker på, eller som du selv har valgt, tæller med."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
@@ -1413,7 +1421,7 @@
       "label": "Slukketærskel"
     },
     "power_sensor": {
-      "doc": "Sensoren, der rapporterer dette apparats aktuelle effekt i watt (f.eks. sensor.washer_power). Al registrering bygger på den.",
+      "doc": "Sensoren, der rapporterer dette apparats aktuelle effekt i W eller kW (f.eks. sensor.washer_power), ikke dets energimåler (kWh). Al registrering bygger på den.",
       "label": "Effektsensor"
     },
     "profile_match_interval": {

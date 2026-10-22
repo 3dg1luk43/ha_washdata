@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Um nome descritivo para este dispositivo (por exemplo, 'Máquina de lavar', 'Máquina de lavar loiça').",
           "device_type": "Define os valores de deteção predefinidos para este tipo de eletrodoméstico.",
-          "power_sensor": "O sensor da tomada inteligente que reporta a potência atual em watts.",
+          "power_sensor": "O sensor de potência da tomada inteligente (W ou kW), não o seu contador de energia (kWh).",
           "min_power": "Leituras acima deste valor (em watts) indicam que o eletrodoméstico está a funcionar. 2 W serve para a maioria dos dispositivos."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Erro inesperado",
-      "invalid_power": "O limiar de potência tem de ser maior do que 0"
+      "invalid_power": "O limiar de potência tem de ser maior do que 0",
+      "power_sensor_energy": "Isto é um contador de energia (kWh), não um sensor de potência. Escolha o sensor de potência da tomada (W ou kW). Se a tomada não tiver nenhum, um helper Derivada pode criar um a partir do contador."
     },
     "abort": {
       "already_configured": "O dispositivo já está configurado",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: ainda nenhum perfil reconhecido.",
       "vs_typical_longer": "{pct}% mais longo do que o habitual",
       "vs_typical_shorter": "{pct}% mais curto do que o habitual",
-      "invalid_power": "O limiar de potência tem de ser maior do que 0"
+      "invalid_power": "O limiar de potência tem de ser maior do que 0",
+      "power_sensor_energy": "Isto é um contador de energia (kWh), não um sensor de potência. Escolha o sensor de potência da tomada (W ou kW). Se a tomada não tiver nenhum, um helper Derivada pode criar um a partir do contador."
     }
   },
   "selector": {

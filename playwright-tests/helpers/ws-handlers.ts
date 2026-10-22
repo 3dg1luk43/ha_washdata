@@ -47,8 +47,11 @@ const EMPTY_MAINTENANCE = {
   // #461: custom tasks, every active reminder with its progress, and the limits.
   custom_tasks: [],
   status: [
-    { id: 'descale', custom: false, name: null, cycles_interval: 30, days_interval: 0, cycles_since: 12, days_since: null, due: false },
+    { id: 'descale', custom: false, name: null, cycles_interval: 30, days_interval: 0, cycles_since: 12, days_since: null, due: false, programs: [] },
   ],
+  // #480: the programs a task can be marked done by, and what each task has.
+  programs_available: ['Cotton 40', 'Cotton 90', 'Eco'],
+  programs: {},
   lifetime_cycle_count: 212,
   limits: { tasks_max: 20, name_max: 60, cycles_max: 100000, days_max: 3650 },
 };
@@ -170,6 +173,7 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
     task: { id: 'custom_0123456789', name: 'Door gasket', cycles: 0, days: 30, since: '2026-07-20T09:00:00+00:00', since_cycle_count: 212 },
   },
   'ha_washdata/delete_maintenance_task': { success: true },
+  'ha_washdata/set_maintenance_programs': { success: true, task_id: 'drum_clean', programs: ['Cotton 90'] },
   // Split/trim run as background tasks; these are the payloads get_task_result returns.
   'ha_washdata/apply_split': { success: true, new_ids: ['cyc-split-a', 'cyc-split-b'] },
   'ha_washdata/trim_cycle': { success: true },

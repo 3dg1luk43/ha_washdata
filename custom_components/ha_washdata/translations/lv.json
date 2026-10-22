@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Šīs ierīces draudzīgs nosaukums (piemēram, “Veļas mašīna”, “Trauku mazgājamā mašīna”).",
           "device_type": "Iestata šāda veida ierīcei piemērotus noteikšanas noklusējumus.",
-          "power_sensor": "Viedā spraudņa sensors, kas ziņo pašreizējo jaudu vatos.",
+          "power_sensor": "Viedā spraudņa jaudas sensors (W vai kW), nevis tā enerģijas skaitītājs (kWh).",
           "min_power": "Rādījumi virs šīs vērtības (vatos) nozīmē, ka ierīce darbojas. Lielākajai daļai ierīču der 2 W."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Negaidīta kļūda",
-      "invalid_power": "Jaudas slieksnim jābūt lielākam par 0"
+      "invalid_power": "Jaudas slieksnim jābūt lielākam par 0",
+      "power_sensor_energy": "Šis ir enerģijas skaitītājs (kWh), nevis jaudas sensors. Izvēlieties spraudņa jaudas sensoru (W vai kW). Ja spraudnim tāda nav, palīgrīks Derivative var to izveidot no skaitītāja."
     },
     "abort": {
       "already_configured": "Ierīce jau ir konfigurēta",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Vēl nav atpazīts neviens profils.",
       "vs_typical_longer": "{pct}% ilgāk nekā parasti",
       "vs_typical_shorter": "{pct}% īsāk nekā parasti",
-      "invalid_power": "Jaudas slieksnim jābūt lielākam par 0"
+      "invalid_power": "Jaudas slieksnim jābūt lielākam par 0",
+      "power_sensor_energy": "Šis ir enerģijas skaitītājs (kWh), nevis jaudas sensors. Izvēlieties spraudņa jaudas sensoru (W vai kW). Ja spraudnim tāda nav, palīgrīks Derivative var to izveidot no skaitītāja."
     }
   },
   "selector": {

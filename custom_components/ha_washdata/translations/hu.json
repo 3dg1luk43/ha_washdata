@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Barátságos név ennek az eszköznek (pl. „Mosógép”, „Mosogatógép”).",
           "device_type": "Beállítja az észlelési alapértékeket ehhez a készüléktípushoz.",
-          "power_sensor": "Az okoskonnektor érzékelője, amely az élő teljesítményt jelenti wattban.",
+          "power_sensor": "Az okoskonnektor teljesítmény érzékelője (W vagy kW), nem az energiamérője (kWh).",
           "min_power": "Az e feletti leolvasások (wattban) azt jelentik, hogy a készülék működik. A legtöbb eszközhöz 2 W megfelelő."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Váratlan hiba",
-      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie"
+      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie",
+      "power_sensor_energy": "Ez egy energiamérő (kWh), nem teljesítmény érzékelő. Válassza a konnektor teljesítmény érzékelőjét (W vagy kW). Ha a konnektornak nincs ilyen, egy Származékos érzékelő segéddel létrehozhat egyet a mérőből."
     },
     "abort": {
       "already_configured": "Az eszköz már konfigurálva van",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Még nincs illeszkedő profil.",
       "vs_typical_longer": "{pct}%-kal hosszabb a szokásosnál",
       "vs_typical_shorter": "{pct}%-kal rövidebb a szokásosnál",
-      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie"
+      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie",
+      "power_sensor_energy": "Ez egy energiamérő (kWh), nem teljesítmény érzékelő. Válassza a konnektor teljesítmény érzékelőjét (W vagy kW). Ha a konnektornak nincs ilyen, egy Származékos érzékelő segéddel létrehozhat egyet a mérőből."
     }
   },
   "selector": {

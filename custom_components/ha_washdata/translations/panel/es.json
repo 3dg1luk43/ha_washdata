@@ -274,6 +274,9 @@
     "end_energy": {
       "energy": "Demasiado estricto para el Umbral de parada ({w} W) durante el Retardo de apagado ({d} s); el ciclo solo puede terminar mediante una vía de respaldo",
       "stop": "La Energía de fin ({e} Wh en {d} s) solo permite {p} W"
+    },
+    "power_sensor": {
+      "energy": "Este sensor mide energía ({unit}), no potencia, así que no se puede detectar ningún ciclo. Elija el sensor de potencia del enchufe (W o kW)."
     }
   },
   "hdr": {
@@ -324,7 +327,8 @@
     "live_match_debug": "Depuración de coincidencia en vivo",
     "automations_used": "Automatizaciones que usan este dispositivo",
     "bp_templates": "Plantillas",
-    "automations_all_tip": "La lista de automatizaciones de Home Assistant, filtrada por la etiqueta WashData. Las automatizaciones creadas aquí también están en la categoría WashData."
+    "automations_all_tip": "La lista de automatizaciones de Home Assistant, filtrada por la etiqueta WashData. Las automatizaciones creadas aquí también están en la categoría WashData.",
+    "maint_done_by_program": "Hecho automáticamente"
   },
   "health": {
     "fair": "Calidad de perfil aceptable",
@@ -643,7 +647,10 @@
     "bp_you_choose": "Usted elige: {inputs}",
     "bp_adjustable": "Ajustable: {inputs}",
     "bp_yaml": "YAML de la plantilla",
-    "automation_wd_label": "Lleva la etiqueta WashData"
+    "automation_wd_label": "Lleva la etiqueta WashData",
+    "done_by_none": "Sin definir",
+    "done_by_programs": "Hecho automáticamente por: {programs}",
+    "done_by_cycle": "Hecho por un ciclo {program}"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -1044,7 +1051,8 @@
     "auto_trigger_hint": "Crea una automatización con este disparador para este dispositivo y la abre en Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Creada por WashData para {device}. Añade tus acciones (notificar, luces, ...).",
-    "automation_alias_new": "{device}: nueva automatización"
+    "automation_alias_new": "{device}: nueva automatización",
+    "maint_done_by_program_intro": "Una tarea cuenta como hecha cuando termina un ciclo de uno de sus programas, por ejemplo la limpieza del tambor cuando se ejecuta Algodón 90. Solo cuentan los ciclos de los que WashData está seguro o que usted eligió."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
@@ -1375,7 +1383,7 @@
       "label": "Umbral de apagado"
     },
     "power_sensor": {
-      "doc": "El sensor que informa la potencia actual de este electrodoméstico en vatios (p. ej. sensor.washer_power). Toda la detección se basa en él.",
+      "doc": "El sensor que informa la potencia actual de este electrodoméstico en W o kW (p. ej. sensor.washer_power), no su medidor de energía (kWh). Toda la detección se basa en él.",
       "label": "Sensor de potencia"
     },
     "profile_match_interval": {

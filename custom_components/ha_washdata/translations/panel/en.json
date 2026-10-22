@@ -325,6 +325,9 @@
     "end_energy": {
       "energy": "Too strict for Stop Threshold ({w} W) over Off Delay ({d} s); the cycle can only end through a fallback path",
       "stop": "End Energy Threshold ({e} Wh over {d} s) only permits {p} W"
+    },
+    "power_sensor": {
+      "energy": "This sensor counts energy ({unit}), not power, so no cycle can be detected. Pick the plug's power sensor (W or kW)."
     }
   },
   "hdr": {
@@ -375,7 +378,8 @@
     "live_match_debug": "Live Match Debug",
     "automations_used": "Automations using this device",
     "bp_templates": "Templates",
-    "automations_all_tip": "Home Assistant's automation list, filtered by the WashData label. Automations created here also sit in the WashData category."
+    "automations_all_tip": "Home Assistant's automation list, filtered by the WashData label. Automations created here also sit in the WashData category.",
+    "maint_done_by_program": "Done automatically"
   },
   "health": {
     "fair": "Acceptable profile quality",
@@ -691,7 +695,10 @@
     "bp_you_choose": "You choose: {inputs}",
     "bp_adjustable": "Adjustable: {inputs}",
     "bp_yaml": "Blueprint YAML",
-    "automation_wd_label": "Carries the WashData label"
+    "automation_wd_label": "Carries the WashData label",
+    "done_by_none": "Not set",
+    "done_by_programs": "Done automatically by: {programs}",
+    "done_by_cycle": "Done by a {program} cycle"
   },
   "log": {
     "all_levels": "All levels",
@@ -1093,7 +1100,8 @@
     "auto_trigger_hint": "Creates an automation with this trigger for this device and opens it in Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Created by WashData for {device}. Add your actions (notify, lights, ...).",
-    "automation_alias_new": "{device}: new automation"
+    "automation_alias_new": "{device}: new automation",
+    "maint_done_by_program_intro": "A task counts as done when a cycle of one of its programs finishes, for example the drum clean when Cotton 90 runs. Only cycles WashData is sure of, or that you picked, count."
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1480,7 +1488,7 @@
       "doc": "Bucket size of the power_profile attribute (average watts per slot) used by planners such as EMHASS and tibber_prices. Smaller keeps short spikes; larger smooths the curve. Default 15 min. Does not affect detection."
     },
     "power_sensor": {
-      "doc": "The sensor that reports this appliance's live power in watts (e.g. sensor.washer_power). All detection is based on it.",
+      "doc": "The sensor that reports this appliance's live power in W or kW (e.g. sensor.washer_power), not its energy counter (kWh). All detection is based on it.",
       "label": "Power Sensor"
     },
     "profile_evidence_sources": {

@@ -274,6 +274,9 @@
     "end_energy": {
       "energy": "Prea strict pentru Pragul de Oprire ({w} W) pe durata Întârzierii la Oprire ({d} s); ciclul se poate încheia doar printr-o cale de rezervă",
       "stop": "Energia de Sfârșit ({e} Wh în {d} s) permite doar {p} W"
+    },
+    "power_sensor": {
+      "energy": "Acest senzor contorizează energie ({unit}), nu putere, deci niciun ciclu nu poate fi detectat. Alegeți senzorul de putere al prizei (W sau kW)."
     }
   },
   "hdr": {
@@ -324,7 +327,8 @@
     "live_match_debug": "Depanare potrivire în timp real",
     "automations_used": "Automatizări care folosesc acest dispozitiv",
     "bp_templates": "Șabloane",
-    "automations_all_tip": "Lista de automatizări din Home Assistant, filtrată după eticheta WashData. Automatizările create aici se află și în categoria WashData."
+    "automations_all_tip": "Lista de automatizări din Home Assistant, filtrată după eticheta WashData. Automatizările create aici se află și în categoria WashData.",
+    "maint_done_by_program": "Efectuat automat"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -643,7 +647,10 @@
     "bp_you_choose": "Alegeți: {inputs}",
     "bp_adjustable": "Reglabil: {inputs}",
     "bp_yaml": "YAML-ul șablonului",
-    "automation_wd_label": "Are eticheta WashData"
+    "automation_wd_label": "Are eticheta WashData",
+    "done_by_none": "Nedefinit",
+    "done_by_programs": "Efectuat automat de: {programs}",
+    "done_by_cycle": "Efectuat de un ciclu {program}"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -1044,7 +1051,8 @@
     "auto_trigger_hint": "Creează o automatizare cu acest declanșator pentru acest dispozitiv și o deschide în Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Creată de WashData pentru {device}. Adăugați acțiunile dvs. (notificare, lumini, ...).",
-    "automation_alias_new": "{device}: automatizare nouă"
+    "automation_alias_new": "{device}: automatizare nouă",
+    "maint_done_by_program_intro": "O sarcină contează ca efectuată când se termină un ciclu al unuia dintre programele sale, de exemplu curățarea tamburului când rulează Bumbac 90. Contează doar ciclurile de care WashData este sigur sau pe care le-ați ales."
   },
   "phase_desc": {
     "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
@@ -1356,7 +1364,7 @@
       "label": "Prag Oprire Alimentare"
     },
     "power_sensor": {
-      "doc": "Senzorul care raportează puterea curentă a acestui aparat în wați (de ex. sensor.washer_power). Toată detectarea se bazează pe el.",
+      "doc": "Senzorul care raportează puterea curentă a acestui aparat în W sau kW (de ex. sensor.washer_power), nu contorul său de energie (kWh). Toată detectarea se bazează pe el.",
       "label": "Senzor de Putere"
     },
     "profile_match_interval": {

@@ -274,6 +274,9 @@
     "end_energy": {
       "energy": "Restritivo demais para o Limite de Parada ({w} W) durante o Atraso de Desligamento ({d} s); o ciclo só pode terminar por um mecanismo alternativo",
       "stop": "A Energia de Fim ({e} Wh em {d} s) só permite {p} W"
+    },
+    "power_sensor": {
+      "energy": "Este sensor mede energia ({unit}), não potência, então nenhum ciclo pode ser detectado. Escolha o sensor de potência do plugue (W ou kW)."
     }
   },
   "hdr": {
@@ -324,7 +327,8 @@
     "live_match_debug": "Depuração da correspondência em tempo real",
     "automations_used": "Automações que usam este dispositivo",
     "bp_templates": "Modelos",
-    "automations_all_tip": "A lista de automações do Home Assistant, filtrada pelo rótulo WashData. As automações criadas aqui também ficam na categoria WashData."
+    "automations_all_tip": "A lista de automações do Home Assistant, filtrada pelo rótulo WashData. As automações criadas aqui também ficam na categoria WashData.",
+    "maint_done_by_program": "Feito automaticamente"
   },
   "health": {
     "fair": "Qualidade de perfil aceitável",
@@ -643,7 +647,10 @@
     "bp_you_choose": "Você escolhe: {inputs}",
     "bp_adjustable": "Ajustável: {inputs}",
     "bp_yaml": "YAML do modelo",
-    "automation_wd_label": "Tem o rótulo WashData"
+    "automation_wd_label": "Tem o rótulo WashData",
+    "done_by_none": "Não definido",
+    "done_by_programs": "Feito automaticamente por: {programs}",
+    "done_by_cycle": "Feito por um ciclo {program}"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -1044,7 +1051,8 @@
     "auto_trigger_hint": "Cria uma automação com este gatilho para este dispositivo e a abre no Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Criada pelo WashData para {device}. Adicione suas ações (notificar, luzes, ...).",
-    "automation_alias_new": "{device}: nova automação"
+    "automation_alias_new": "{device}: nova automação",
+    "maint_done_by_program_intro": "Uma tarefa conta como feita quando termina um ciclo de um dos programas dela, por exemplo a limpeza do tambor quando o Algodão 90 é executado. Só contam os ciclos de que o WashData tem certeza ou que você escolheu."
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -1356,7 +1364,7 @@
       "label": "Limite de Desligamento"
     },
     "power_sensor": {
-      "doc": "O sensor que informa a potência atual deste eletrodoméstico em watts (ex.: sensor.washer_power). Toda a detecção se baseia nele.",
+      "doc": "O sensor que informa a potência atual deste eletrodoméstico em W ou kW (ex.: sensor.washer_power), não o seu medidor de energia (kWh). Toda a detecção se baseia nele.",
       "label": "Sensor de Potência"
     },
     "profile_match_interval": {

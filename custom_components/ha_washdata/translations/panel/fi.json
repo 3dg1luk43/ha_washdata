@@ -325,6 +325,9 @@
     "end_energy": {
       "energy": "Liian tiukka Pysäytyskynnykselle ({w} W) Sammutusviiveen ({d} s) aikana; sykli voi päättyä vain varapolun kautta",
       "stop": "Lopetuksen energiakynnys ({e} Wh / {d} s) sallii vain {p} W"
+    },
+    "power_sensor": {
+      "energy": "Tämä anturi mittaa energiaa ({unit}), ei tehoa, joten syklejä ei voida tunnistaa. Valitse pistokkeen tehoanturi (W tai kW)."
     }
   },
   "hdr": {
@@ -375,7 +378,8 @@
     "live_match_debug": "Reaaliaikaisen täsmäytyksen virheenkorjaus",
     "automations_used": "Tätä laitetta käyttävät automaatiot",
     "bp_templates": "Mallit",
-    "automations_all_tip": "Home Assistantin automaatiolista, suodatettuna WashData-etiketin mukaan. Täältä luodut automaatiot löytyvät myös WashData-luokasta."
+    "automations_all_tip": "Home Assistantin automaatiolista, suodatettuna WashData-etiketin mukaan. Täältä luodut automaatiot löytyvät myös WashData-luokasta.",
+    "maint_done_by_program": "Automaattinen kuittaus"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -691,7 +695,10 @@
     "bp_you_choose": "Sinä valitset: {inputs}",
     "bp_adjustable": "Säädettävä: {inputs}",
     "bp_yaml": "Blueprint-YAML",
-    "automation_wd_label": "Sisältää WashData-etiketin"
+    "automation_wd_label": "Sisältää WashData-etiketin",
+    "done_by_none": "Ei asetettu",
+    "done_by_programs": "Automaattinen kuittaus: {programs}",
+    "done_by_cycle": "Tehty syklillä: {program}"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -1082,7 +1089,8 @@
     "auto_trigger_hint": "Luo automaation tällä triggerillä tälle laitteelle ja avaa sen Home Assistantissa.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "WashDatan luoma automaatio laitteelle {device}. Lisää omat toimintosi (ilmoitus, valot, ...).",
-    "automation_alias_new": "{device}: uusi automaatio"
+    "automation_alias_new": "{device}: uusi automaatio",
+    "maint_done_by_program_intro": "Tehtävä lasketaan tehdyksi, kun jonkin sen ohjelman sykli päättyy, esimerkiksi rummun puhdistus, kun Puuvilla 90 -ohjelma ajetaan. Vain syklit, joista WashData on varma tai joiden ohjelman valitsit itse, lasketaan."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
@@ -1413,7 +1421,7 @@
       "label": "Virran sammutuksen kynnys"
     },
     "power_sensor": {
-      "doc": "Anturi, joka raportoi tämän laitteen reaaliaikaisen tehon watteina (esim. sensor.washer_power). Kaikki tunnistus perustuu siihen.",
+      "doc": "Anturi, joka raportoi tämän laitteen reaaliaikaisen tehon yksikössä W tai kW (esim. sensor.washer_power), ei sen energiamittari (kWh). Kaikki tunnistus perustuu siihen.",
       "label": "Tehoanturi"
     },
     "profile_match_interval": {

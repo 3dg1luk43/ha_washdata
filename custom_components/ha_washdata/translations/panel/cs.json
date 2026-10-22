@@ -331,6 +331,9 @@
     "end_energy": {
       "energy": "Příliš přísné pro Práh zastavení ({w} W) po dobu Zpoždění vypnutí ({d} s); cyklus může skončit jen záložní cestou",
       "stop": "Energie konce ({e} Wh za {d} s) povoluje jen {p} W"
+    },
+    "power_sensor": {
+      "energy": "Tento senzor počítá energii ({unit}), ne výkon, takže nelze detekovat žádný cyklus. Vyberte snímač výkonu zásuvky (W nebo kW)."
     }
   },
   "hdr": {
@@ -381,7 +384,8 @@
     "live_match_debug": "Ladění shody v reálném čase",
     "automations_used": "Automatizace používající toto zařízení",
     "bp_templates": "Šablony",
-    "automations_all_tip": "Seznam automatizací Home Assistant filtrovaný podle štítku WashData. Automatizace vytvořené zde jsou také v kategorii WashData."
+    "automations_all_tip": "Seznam automatizací Home Assistant filtrovaný podle štítku WashData. Automatizace vytvořené zde jsou také v kategorii WashData.",
+    "maint_done_by_program": "Hotovo automaticky"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -703,7 +707,10 @@
     "bp_you_choose": "Na výběr: {inputs}",
     "bp_adjustable": "Nastavitelné: {inputs}",
     "bp_yaml": "Blueprint YAML",
-    "automation_wd_label": "Nese štítek WashData"
+    "automation_wd_label": "Nese štítek WashData",
+    "done_by_none": "Nenastaveno",
+    "done_by_programs": "Hotovo automaticky po programech: {programs}",
+    "done_by_cycle": "Hotovo cyklem programu {program}"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -1114,7 +1121,8 @@
     "auto_trigger_hint": "Vytvoří automatizaci s tímto spouštěčem pro toto zařízení a otevře ji v Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Vytvořeno WashData pro {device}. Přidejte své akce (oznámení, světla, ...).",
-    "automation_alias_new": "{device}: nová automatizace"
+    "automation_alias_new": "{device}: nová automatizace",
+    "maint_done_by_program_intro": "Úkol se počítá jako hotový, když skončí cyklus některého z jeho programů, například čištění bubnu po programu Bavlna 90. Počítají se jen cykly, u kterých má WashData jistotu, nebo u kterých jste program vybrali sami."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1422,7 +1430,7 @@
       "label": "Práh vypnutí napájení"
     },
     "power_sensor": {
-      "doc": "Senzor, který hlásí aktuální výkon tohoto spotřebiče ve wattech (např. sensor.washer_power). Veškerá detekce vychází z něj.",
+      "doc": "Senzor, který hlásí aktuální výkon tohoto spotřebiče ve W nebo kW (např. sensor.washer_power), ne jeho měřič energie (kWh). Veškerá detekce vychází z něj.",
       "label": "Snímač výkonu"
     },
     "profile_match_interval": {

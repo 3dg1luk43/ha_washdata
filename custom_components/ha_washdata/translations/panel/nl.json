@@ -325,6 +325,9 @@
     "end_energy": {
       "energy": "Te streng voor Stopdrempel ({w} W) gedurende Uitschakelvertraging ({d} s); de cyclus kan alleen via een terugvalpad eindigen",
       "stop": "Eindenergie ({e} Wh in {d} s) staat slechts {p} W toe"
+    },
+    "power_sensor": {
+      "energy": "Deze sensor telt energie ({unit}), geen vermogen, dus er kan geen cyclus worden gedetecteerd. Kies de vermogenssensor van de stekker (W of kW)."
     }
   },
   "hdr": {
@@ -375,7 +378,8 @@
     "live_match_debug": "Foutopsporing live-match",
     "automations_used": "Automatiseringen die dit apparaat gebruiken",
     "bp_templates": "Sjablonen",
-    "automations_all_tip": "De automatiseringslijst van Home Assistant, gefilterd op het WashData-label. Hier aangemaakt automatiseringen staan ook in de WashData-categorie."
+    "automations_all_tip": "De automatiseringslijst van Home Assistant, gefilterd op het WashData-label. Hier aangemaakt automatiseringen staan ook in de WashData-categorie.",
+    "maint_done_by_program": "Automatisch afgevinkt"
   },
   "health": {
     "fair": "Acceptabele profielkwaliteit",
@@ -691,7 +695,10 @@
     "bp_you_choose": "U kiest: {inputs}",
     "bp_adjustable": "Aanpasbaar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
-    "automation_wd_label": "Heeft het WashData-label"
+    "automation_wd_label": "Heeft het WashData-label",
+    "done_by_none": "Niet ingesteld",
+    "done_by_programs": "Automatisch afgevinkt door: {programs}",
+    "done_by_cycle": "Afgevinkt door een cyclus met {program}"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -1082,7 +1089,8 @@
     "auto_trigger_hint": "Maakt een automatisering met deze trigger voor dit apparaat en opent deze in Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Aangemaakt door WashData voor {device}. Voeg uw acties toe (melding, lampen, ...).",
-    "automation_alias_new": "{device}: nieuwe automatisering"
+    "automation_alias_new": "{device}: nieuwe automatisering",
+    "maint_done_by_program_intro": "Een taak telt als gedaan wanneer een cyclus van een van de bijbehorende programma's klaar is, bijvoorbeeld de trommelreiniging wanneer Katoen 90 draait. Alleen cycli waarvan WashData zeker is, of die je zelf hebt gekozen, tellen mee."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: stille seconden na de verwachte duur voordat de wachttijd op het wegpompen aan het einde van de cyclus wordt vrijgegeven",
@@ -1413,7 +1421,7 @@
       "label": "Uitschakeldrempel"
     },
     "power_sensor": {
-      "doc": "De sensor die het actuele vermogen van dit apparaat in watt meldt (bijv. sensor.washer_power). Alle detectie is erop gebaseerd.",
+      "doc": "De sensor die het actuele vermogen van dit apparaat in W of kW meldt (bijv. sensor.washer_power), niet de energiemeter (kWh). Alle detectie is erop gebaseerd.",
       "label": "Vermogenssensor"
     },
     "profile_match_interval": {

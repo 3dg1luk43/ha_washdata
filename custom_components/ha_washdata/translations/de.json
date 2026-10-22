@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Ein benutzerfreundlicher Name für dieses Gerät (z. B. „Waschmaschine“, „Geschirrspüler“).",
           "device_type": "Legt die Erkennungsstandards für diese Geräteart fest.",
-          "power_sensor": "Der Smart-Plug-Sensor, der die aktuelle Leistung in Watt meldet.",
+          "power_sensor": "Der Leistungssensor des Smart-Plugs (W oder kW), nicht sein Energiezähler (kWh).",
           "min_power": "Werte über diesem Wert (in Watt) bedeuten, dass das Gerät läuft. 2 W passen für die meisten Geräte."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Unerwarteter Fehler",
-      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein"
+      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein",
+      "power_sensor_energy": "Das ist ein Energiezähler (kWh), kein Leistungssensor. Wählen Sie den Leistungssensor des Smart-Plugs (W oder kW). Hat der Smart-Plug keinen, kann ein Ableitungssensor-Helfer aus dem Zähler einen erstellen."
     },
     "abort": {
       "already_configured": "Gerät ist bereits konfiguriert",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Noch kein Profil erkannt.",
       "vs_typical_longer": "{pct}% länger als üblich",
       "vs_typical_shorter": "{pct}% kürzer als üblich",
-      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein"
+      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein",
+      "power_sensor_energy": "Das ist ein Energiezähler (kWh), kein Leistungssensor. Wählen Sie den Leistungssensor des Smart-Plugs (W oder kW). Hat der Smart-Plug keinen, kann ein Ableitungssensor-Helfer aus dem Zähler einen erstellen."
     }
   },
   "selector": {

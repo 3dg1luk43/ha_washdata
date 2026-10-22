@@ -13,7 +13,7 @@
         "data_description": {
           "name": "이 장치의 이름입니다(예: '세탁기', '식기세척기').",
           "device_type": "이 종류의 가전제품에 맞는 감지 기본값을 설정합니다.",
-          "power_sensor": "실시간 전력을 와트 단위로 보고하는 스마트 플러그 센서입니다.",
+          "power_sensor": "에너지 계량기(kWh)가 아닌 스마트 플러그의 전력 센서(W 또는 kW)입니다.",
           "min_power": "이 값(와트)보다 높은 측정값은 가전제품이 작동 중임을 뜻합니다. 대부분의 장치에는 2 W가 적합합니다."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "예기치 않은 오류",
-      "invalid_power": "전력 임계값은 0보다 커야 합니다"
+      "invalid_power": "전력 임계값은 0보다 커야 합니다",
+      "power_sensor_energy": "이것은 에너지 계량기(kWh)이며 전력 센서가 아닙니다. 플러그의 전력 센서(W 또는 kW)를 선택하세요. 플러그에 전력 센서가 없으면 도함수 센서 헬퍼로 계량기에서 만들 수 있습니다."
     },
     "abort": {
       "already_configured": "장치가 이미 구성되어 있습니다",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: 아직 일치하는 프로필이 없습니다.",
       "vs_typical_longer": "평소보다 {pct}% 더 김",
       "vs_typical_shorter": "평소보다 {pct}% 더 짧음",
-      "invalid_power": "전력 임계값은 0보다 커야 합니다"
+      "invalid_power": "전력 임계값은 0보다 커야 합니다",
+      "power_sensor_energy": "이것은 에너지 계량기(kWh)이며 전력 센서가 아닙니다. 플러그의 전력 센서(W 또는 kW)를 선택하세요. 플러그에 전력 센서가 없으면 도함수 센서 헬퍼로 계량기에서 만들 수 있습니다."
     }
   },
   "selector": {

@@ -17,6 +17,7 @@
 """Constants for the WashData integration."""
 
 import math
+from collections.abc import Mapping
 from enum import StrEnum
 from typing import Any
 
@@ -1437,6 +1438,65 @@ DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
 }
 
 
+# Power units Home Assistant's sensor platform accepts (UnitOfPower), as factors to
+# watts (#481). Case matters: "mW" is milliwatts, "MW" megawatts. Any other unit,
+# or none, reads as watts, as every reading did before.
+POWER_UNIT_TO_W: dict[str, float] = {
+    "mW": 0.001,
+    "W": 1.0,
+    "kW": 1000.0,
+    "MW": 1_000_000.0,
+    "GW": 1_000_000_000.0,
+}
+# A rate of energy is power too: Home Assistant's Derivative helper turns a kWh
+# counter into "kWh/h" (#481). Factors to Wh, and the time unit in hours.
+_RATE_ENERGY_TO_WH: dict[str, float] = {"Wh": 1.0, "kWh": 1000.0, "MWh": 1_000_000.0}
+_RATE_TIME_IN_H: dict[str, float] = {"s": 1.0 / 3600.0, "min": 1.0 / 60.0, "h": 1.0, "d": 24.0}
+# Units of an energy counter (UnitOfEnergy, lowercased): never a power sensor (#481).
+ENERGY_UNITS = frozenset({
+    "mwh", "wh", "kwh", "gwh", "twh", "j", "kj", "mj", "gj", "cal", "kcal", "mcal", "gcal",
+})
+ENERGY_DEVICE_CLASSES = frozenset({"energy", "energy_storage"})
+
+
+def power_unit_scale(unit: Any, min_power: Any = DEFAULT_MIN_POWER) -> float:
+    """Factor that turns a power sensor's reading into watts (#481).
+
+    ``unit`` is the sensor's ``unit_of_measurement``. 1.0 for watts, an unknown
+    unit or none ("kw" in any case is kilowatts; an energy rate such as the
+    Derivative helper's "kWh/h" is power too). A device whose Min Power was evidently set in the sensor's own
+    unit keeps raw readings, so a setup made to work on raw kilowatts before
+    0.5.9 (thresholds under 1) does not change: below 1 W for a kilowatt (or
+    larger) sensor, 1000 W or more for a milliwatt one. Never raises.
+    """
+    text = unit.strip() if isinstance(unit, str) else ""
+    # "kw" is unambiguous (a hand-made template sensor); "mw" is not, so it stays W.
+    scale = POWER_UNIT_TO_W.get(text, 1000.0 if text.lower() == "kw" else 1.0)
+    energy, slash, per = text.partition("/")
+    if slash and energy.strip() in _RATE_ENERGY_TO_WH and per.strip() in _RATE_TIME_IN_H:
+        scale = _RATE_ENERGY_TO_WH[energy.strip()] / _RATE_TIME_IN_H[per.strip()]
+    try:
+        floor = float(min_power)
+    except (TypeError, ValueError, OverflowError):
+        return scale
+    if (scale > 1.0 and floor < 1.0) or (scale < 1.0 and floor >= 1000.0):
+        return 1.0
+    return scale
+
+
+def is_energy_counter(attributes: Any) -> bool:
+    """Whether a sensor's attributes prove it counts energy (kWh), not power (#481).
+
+    Only positive evidence counts: no attributes (an entity Home Assistant has not
+    loaded yet) is not an energy counter.
+    """
+    if not isinstance(attributes, Mapping):
+        return False
+    device_class = str(attributes.get("device_class") or "").strip().lower()
+    unit = str(attributes.get("unit_of_measurement") or "").strip().lower()
+    return device_class in ENERGY_DEVICE_CLASSES or unit in ENERGY_UNITS
+
+
 def resolve_sampling_interval_default(device_type: str) -> float:
     """Device-resolved default sampling interval (#396).
 
@@ -2049,6 +2109,9 @@ MAINTENANCE_CUSTOM_TASK_MAX = 20
 MAINTENANCE_TASK_NAME_MAX = 60
 MAINTENANCE_INTERVAL_CYCLES_MAX = 100000
 MAINTENANCE_INTERVAL_DAYS_MAX = 3650
+# Programs whose finished cycle marks a task done (#480): per task, at most this
+# many, stored as {task_id: [profile names]} under "maintenance_programs".
+MAINTENANCE_PROGRAMS_MAX = 20
 # A logged maintenance event of a matching type within this many days suppresses
 # the "needs maintenance" nag advisory (duration-trend / shape-drift).
 MAINTENANCE_RECENT_SUPPRESS_DAYS = 30

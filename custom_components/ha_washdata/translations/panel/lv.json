@@ -328,6 +328,9 @@
     "end_energy": {
       "energy": "Pārāk stingrs, ja Apstāšanās slieksnis ir {w} W un Izslēgšanas aizkave ir {d} s; cikls var beigties tikai ar rezerves mehānismu",
       "stop": "Beigu enerģija ({e} Wh {d} s laikā) pieļauj tikai {p} W"
+    },
+    "power_sensor": {
+      "energy": "Šis sensors skaita enerģiju ({unit}), nevis jaudu, tāpēc nevar noteikt nevienu ciklu. Izvēlieties spraudņa jaudas sensoru (W vai kW)."
     }
   },
   "hdr": {
@@ -378,7 +381,8 @@
     "live_match_debug": "Tiešraides atbilstības atkļūdošana",
     "automations_used": "Automatizācijas, kas izmanto šo ierīci",
     "bp_templates": "Veidnes",
-    "automations_all_tip": "Home Assistant automatizāciju saraksts, filtrēts pēc WashData etiķetes. Šeit izveidotās automatizācijas atrodas arī WashData kategorijā."
+    "automations_all_tip": "Home Assistant automatizāciju saraksts, filtrēts pēc WashData etiķetes. Šeit izveidotās automatizācijas atrodas arī WashData kategorijā.",
+    "maint_done_by_program": "Automātiska izpilde"
   },
   "health": {
     "fair": "Pieņemama profila kvalitāte",
@@ -697,7 +701,10 @@
     "bp_you_choose": "Jūs izvēlaties: {inputs}",
     "bp_adjustable": "Pielāgojams: {inputs}",
     "bp_yaml": "Blueprint YAML",
-    "automation_wd_label": "Satur WashData etiķeti"
+    "automation_wd_label": "Satur WashData etiķeti",
+    "done_by_none": "Nav iestatīts",
+    "done_by_programs": "Automātiski izpilda: {programs}",
+    "done_by_cycle": "Izpildīts ar ciklu: {program}"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -1098,7 +1105,8 @@
     "auto_trigger_hint": "Izveido automatizāciju ar šo trigeri šai ierīcei un atver to Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Izveidojis WashData priekš {device}. Pievienojiet savas darbības (paziņojums, gaismas, ...).",
-    "automation_alias_new": "{device}: jauna automatizācija"
+    "automation_alias_new": "{device}: jauna automatizācija",
+    "maint_done_by_program_intro": "Uzdevums tiek uzskatīts par izpildītu, kad beidzas kādas tā programmas cikls, piemēram, tromeļa tīrīšana, kad darbojas programma Kokvilna 90. Tiek ieskaitīti tikai cikli, par kuriem WashData ir pārliecināts vai kuru programmu izvēlējāties jūs."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
@@ -1410,7 +1418,7 @@
       "label": "Barošanas izslēgšanas slieksnis"
     },
     "power_sensor": {
-      "doc": "Sensors, kas ziņo šīs ierīces pašreizējo jaudu vatos (piem., sensor.washer_power). Uz tā balstās visa noteikšana.",
+      "doc": "Sensors, kas ziņo šīs ierīces pašreizējo jaudu W vai kW (piem., sensor.washer_power), nevis tās enerģijas skaitītājs (kWh). Uz tā balstās visa noteikšana.",
       "label": "Jaudas sensors"
     },
     "profile_match_interval": {

@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Prijateljski naziv za ovaj uređaj (npr. 'Mašina za pranje veša', 'Mašina za pranje sudova').",
           "device_type": "Postavlja zadane vrijednosti detekcije za ovu vrstu uređaja.",
-          "power_sensor": "Senzor pametnog utikača koji javlja trenutnu snagu u vatima.",
+          "power_sensor": "Senzor snage pametnog utikača (W ili kW), a ne njegovo brojilo energije (kWh).",
           "min_power": "Očitanja iznad ove vrijednosti (u vatima) znače da uređaj radi. 2 W odgovara većini uređaja."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Neočekivana greška",
-      "invalid_power": "Prag snage mora biti veći od 0"
+      "invalid_power": "Prag snage mora biti veći od 0",
+      "power_sensor_energy": "Ovo je brojilo energije (kWh), a ne senzor snage. Odaberite senzor snage utikača (W ili kW). Ako ga utikač nema, pomagač Derivative ga može napraviti iz brojila."
     },
     "abort": {
       "already_configured": "Uređaj je već konfigurisan",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Nijedan profil još nije podudaran.",
       "vs_typical_longer": "{pct}% duže nego obično",
       "vs_typical_shorter": "{pct}% kraće nego obično",
-      "invalid_power": "Prag snage mora biti veći od 0"
+      "invalid_power": "Prag snage mora biti veći od 0",
+      "power_sensor_energy": "Ovo je brojilo energije (kWh), a ne senzor snage. Odaberite senzor snage utikača (W ili kW). Ako ga utikač nema, pomagač Derivative ga može napraviti iz brojila."
     }
   },
   "selector": {

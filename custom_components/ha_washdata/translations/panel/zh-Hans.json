@@ -322,6 +322,9 @@
         "end_energy": {
             "energy": "对于停止阈值 ({w} W) 和关闭延迟 ({d} s) 而言过于严格；周期只能通过备用路径结束",
             "stop": "结束能耗 ({d} s 内 {e} Wh) 只允许 {p} W"
+        },
+        "power_sensor": {
+            "energy": "该传感器统计的是电能（{unit}），不是功率，因此无法检测周期。请选择插座的功率传感器（W 或 kW）。"
         }
     },
     "hdr": {
@@ -372,7 +375,8 @@
         "live_match_debug": "实时匹配调试",
         "automations_used": "使用此设备的自动化",
         "bp_templates": "模板",
-        "automations_all_tip": "Home Assistant 的自动化列表，按 WashData 标签过滤。在此创建的自动化也在 WashData 类别中。"
+        "automations_all_tip": "Home Assistant 的自动化列表，按 WashData 标签过滤。在此创建的自动化也在 WashData 类别中。",
+        "maint_done_by_program": "自动完成"
     },
     "health": {
         "fair": "配置文件质量尚可",
@@ -685,7 +689,10 @@
         "bp_you_choose": "您选择: {inputs}",
         "bp_adjustable": "可调整: {inputs}",
         "bp_yaml": "蓝图 YAML",
-        "automation_wd_label": "包含 WashData 标签"
+        "automation_wd_label": "包含 WashData 标签",
+        "done_by_none": "未设置",
+        "done_by_programs": "由以下程序自动完成：{programs}",
+        "done_by_cycle": "由 {program} 周期完成"
     },
     "log": {
         "all_levels": "所有级别",
@@ -1066,7 +1073,8 @@
         "auto_trigger_hint": "为此设备创建包含此触发器的自动化，并在 Home Assistant 中打开。",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "由 WashData 为 {device} 创建。添加您的动作（通知、灯光等）。",
-        "automation_alias_new": "{device}: 新建自动化"
+        "automation_alias_new": "{device}: 新建自动化",
+        "maint_done_by_program_intro": "当任务所选程序之一的周期结束时，该任务即算作完成，例如运行“棉布 90”后清洁滚筒即完成。只有 WashData 确认识别的周期，或您手动选择了程序的周期才会计入。"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1385,7 +1393,7 @@
             "label": "电源关闭阈值"
         },
         "power_sensor": {
-            "doc": "以瓦为单位报告此设备实时功率的传感器（例如 sensor.washer_power）。所有检测都基于它。",
+            "doc": "以 W 或 kW 为单位报告此设备实时功率的传感器（例如 sensor.washer_power），而不是它的电能表（kWh）。所有检测都基于它。",
             "label": "功率传感器"
         },
         "profile_match_interval": {

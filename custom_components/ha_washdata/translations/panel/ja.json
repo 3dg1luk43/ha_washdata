@@ -322,6 +322,9 @@
         "end_energy": {
             "energy": "停止しきい値 ({w} W) とオフ遅延 ({d} s) に対して厳しすぎます。サイクルはフォールバック経路でしか終了できません",
             "stop": "終了エネルギー ({d} s で {e} Wh) では {p} W までしか許容されません"
+        },
+        "power_sensor": {
+            "energy": "このセンサーは電力ではなくエネルギー（{unit}）を計測するため、サイクルを検出できません。プラグの電力センサー（W または kW）を選んでください。"
         }
     },
     "hdr": {
@@ -372,7 +375,8 @@
         "live_match_debug": "ライブマッチのデバッグ",
         "automations_used": "このデバイスを使用しているオートメーション",
         "bp_templates": "テンプレート",
-        "automations_all_tip": "WashDataラベルでフィルタリングされたHome Assistantのオートメーション一覧。ここで作成したオートメーションはWashDataカテゴリにも入ります。"
+        "automations_all_tip": "WashDataラベルでフィルタリングされたHome Assistantのオートメーション一覧。ここで作成したオートメーションはWashDataカテゴリにも入ります。",
+        "maint_done_by_program": "自動完了"
     },
     "health": {
         "fair": "プロファイル品質: 普通",
@@ -685,7 +689,10 @@
         "bp_you_choose": "あなたが選択: {inputs}",
         "bp_adjustable": "調整可能: {inputs}",
         "bp_yaml": "ブループリント YAML",
-        "automation_wd_label": "WashDataラベルを持つ"
+        "automation_wd_label": "WashDataラベルを持つ",
+        "done_by_none": "未設定",
+        "done_by_programs": "次のプログラムで自動完了: {programs}",
+        "done_by_cycle": "{program} のサイクルで完了"
     },
     "log": {
         "all_levels": "すべてのレベル",
@@ -1066,7 +1073,8 @@
         "auto_trigger_hint": "このデバイスにこのトリガーを使用したオートメーションを作成し、Home Assistantで開きます。",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device}のためにWashDataで作成。アクションを追加してください（通知、ライト、...）。",
-        "automation_alias_new": "{device}: 新しいオートメーション"
+        "automation_alias_new": "{device}: 新しいオートメーション",
+        "maint_done_by_program_intro": "タスクは、設定したプログラムのいずれかのサイクルが終了すると完了とみなされます。たとえば、綿 90 の運転でドラムの清掃が完了します。WashData が確実に認識したサイクルか、プログラムを自分で選んだサイクルだけが対象です。"
     },
     "pg_desc": {
         "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -1385,7 +1393,7 @@
             "label": "電源オフしきい値"
         },
         "power_sensor": {
-            "doc": "この家電のリアルタイムの電力をワット単位で報告するセンサー（例: sensor.washer_power）。すべての検出はこのセンサーに基づきます。",
+            "doc": "この家電のリアルタイムの電力を W または kW で報告するセンサー（例: sensor.washer_power）。エネルギーメーター（kWh）ではありません。すべての検出はこのセンサーに基づきます。",
             "label": "電力センサー"
         },
         "profile_match_interval": {

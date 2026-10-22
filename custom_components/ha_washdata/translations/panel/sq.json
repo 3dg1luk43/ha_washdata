@@ -320,6 +320,9 @@
         "end_energy": {
             "energy": "Shumë e rreptë për Pragun e ndalimit ({w} W) gjatë Vonesës së fikjes ({d} s); cikli mund të përfundojë vetëm përmes një rruge rezervë",
             "stop": "Energjia e fundit ({e} Wh gjatë {d} s) lejon vetëm {p} W"
+        },
+        "power_sensor": {
+            "energy": "Ky sensor numëron energjinë ({unit}), jo fuqinë, prandaj nuk mund të zbulohet asnjë cikël. Zgjidhni sensorin e fuqisë të spinës (W ose kW)."
         }
     },
     "hdr": {
@@ -370,7 +373,8 @@
         "live_match_debug": "Korrigjimi i përputhjes live",
         "automations_used": "Automatizime që përdorin këtë pajisje",
         "bp_templates": "Shabllone",
-        "automations_all_tip": "Lista e automatizimeve të Home Assistant, filtruar sipas etiketës WashData. Automatizimeve të krijuara këtu gjenden edhe në kategorinë WashData."
+        "automations_all_tip": "Lista e automatizimeve të Home Assistant, filtruar sipas etiketës WashData. Automatizimeve të krijuara këtu gjenden edhe në kategorinë WashData.",
+        "maint_done_by_program": "Kryhet automatikisht"
     },
     "health": {
         "fair": "Cilësi e pranueshme e profilit",
@@ -686,7 +690,10 @@
         "bp_you_choose": "Zgjedhni ju: {inputs}",
         "bp_adjustable": "I rregullueshëm: {inputs}",
         "bp_yaml": "Blueprint YAML",
-        "automation_wd_label": "Mbart etiketën WashData"
+        "automation_wd_label": "Mbart etiketën WashData",
+        "done_by_none": "E pacaktuar",
+        "done_by_programs": "Kryhet automatikisht nga: {programs}",
+        "done_by_cycle": "U krye nga një cikël {program}"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -1077,7 +1084,8 @@
         "auto_trigger_hint": "Krijon një automatizim me këtë trigger për këtë pajisje dhe e hap në Home Assistant.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "Krijuar nga WashData për {device}. Shtoni veprimet tuaja (njoftim, dritat, ...).",
-        "automation_alias_new": "{device}: automatizim i ri"
+        "automation_alias_new": "{device}: automatizim i ri",
+        "maint_done_by_program_intro": "Një detyrë quhet e kryer kur përfundon një cikël i njërit prej programeve të saj, për shembull pastrimi i tamburit kur ekzekutohet programi Pambuk 90. Llogariten vetëm ciklet për të cilat WashData është i sigurt, ose programin e të cilave e zgjodhët ju."
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1385,7 +1393,7 @@
             "label": "Pragu i fikjes së energjisë"
         },
         "power_sensor": {
-            "doc": "Sensori që raporton fuqinë live të kësaj pajisjeje në vat (p.sh. sensor.washer_power). I gjithë zbulimi bazohet në të.",
+            "doc": "Sensori që raporton fuqinë live të kësaj pajisjeje në W ose kW (p.sh. sensor.washer_power), jo matësi i saj i energjisë (kWh). I gjithë zbulimi bazohet në të.",
             "label": "Sensori i fuqisë"
         },
         "profile_match_interval": {

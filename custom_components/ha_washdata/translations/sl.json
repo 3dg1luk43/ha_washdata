@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Prijazno ime za to napravo (npr. \"Pralni stroj\", \"Pomivalni stroj\").",
           "device_type": "Nastavi privzete vrednosti zaznavanja za to vrsto naprave.",
-          "power_sensor": "Senzor pametnega vtiča, ki poroča trenutno moč v vatih.",
+          "power_sensor": "Senzor moči pametnega vtiča (W ali kW), ne njegov merilnik energije (kWh).",
           "min_power": "Odčitki nad to vrednostjo (v vatih) pomenijo, da naprava deluje. 2 W ustreza večini naprav."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Nepričakovana napaka",
-      "invalid_power": "Prag moči mora biti večji od 0"
+      "invalid_power": "Prag moči mora biti večji od 0",
+      "power_sensor_energy": "To je merilnik energije (kWh), ne senzor moči. Izberite senzor moči vtiča (W ali kW). Če ga vtič nima, ga lahko iz merilnika ustvari pomočnik Senzor odvoda."
     },
     "abort": {
       "already_configured": "Naprava je že konfigurirana",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Noben profil se še ne ujema.",
       "vs_typical_longer": "{pct}% dlje kot običajno",
       "vs_typical_shorter": "{pct}% krajše kot običajno",
-      "invalid_power": "Prag moči mora biti večji od 0"
+      "invalid_power": "Prag moči mora biti večji od 0",
+      "power_sensor_energy": "To je merilnik energije (kWh), ne senzor moči. Izberite senzor moči vtiča (W ali kW). Če ga vtič nima, ga lahko iz merilnika ustvari pomočnik Senzor odvoda."
     }
   },
   "selector": {

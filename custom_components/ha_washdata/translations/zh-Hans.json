@@ -13,7 +13,7 @@
         "data_description": {
           "name": "该设备的友好名称（例如“洗衣机”、“洗碗机”）。",
           "device_type": "为此类家电设置检测默认值。",
-          "power_sensor": "以瓦为单位报告实时功率的智能插头传感器。",
+          "power_sensor": "智能插头的功率传感器（W 或 kW），而不是它的电能表（kWh）。",
           "min_power": "高于此值（瓦）的读数表示设备正在运行。大多数设备适合 2 W。"
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "意外错误",
-      "invalid_power": "功率阈值必须大于 0"
+      "invalid_power": "功率阈值必须大于 0",
+      "power_sensor_energy": "这是电能表（kWh），不是功率传感器。请选择插头的功率传感器（W 或 kW）。如果插头没有功率传感器，可以用“变化率传感器”辅助元素从电能表生成一个。"
     },
     "abort": {
       "already_configured": "设备已配置",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}：尚未匹配到配置文件。",
       "vs_typical_longer": "比平常长 {pct}%",
       "vs_typical_shorter": "比平常短 {pct}%",
-      "invalid_power": "功率阈值必须大于 0"
+      "invalid_power": "功率阈值必须大于 0",
+      "power_sensor_energy": "这是电能表（kWh），不是功率传感器。请选择插头的功率传感器（W 或 kW）。如果插头没有功率传感器，可以用“变化率传感器”辅助元素从电能表生成一个。"
     }
   },
   "selector": {

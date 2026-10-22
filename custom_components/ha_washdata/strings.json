@@ -13,7 +13,7 @@
         "data_description": {
           "name": "A friendly name for this device (e.g., 'Washing Machine', 'Dishwasher').",
           "device_type": "Sets detection defaults for this kind of appliance.",
-          "power_sensor": "The smart plug sensor that reports live power in watts.",
+          "power_sensor": "The smart plug's power sensor (W or kW), not its energy counter (kWh).",
           "min_power": "Readings above this (in watts) mean the appliance is running. 2 W suits most devices."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Unexpected error",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Power threshold must be greater than 0",
+      "power_sensor_energy": "This is an energy counter (kWh), not a power sensor. Pick the plug's power sensor (W or kW). If the plug has none, a Derivative helper can make one from the counter."
     },
     "abort": {
       "already_configured": "Device is already configured",
@@ -58,7 +59,8 @@
       "unload_dismiss_action_title": "Stop reminding",
       "vs_typical_longer": "{pct}% longer than usual",
       "vs_typical_shorter": "{pct}% shorter than usual",
-      "notify_live_waiting_message": "{device}: No profile matched yet."
+      "notify_live_waiting_message": "{device}: No profile matched yet.",
+      "power_sensor_energy": "This is an energy counter (kWh), not a power sensor. Pick the plug's power sensor (W or kW). If the plug has none, a Derivative helper can make one from the counter."
     }
   },
   "device_automation": {

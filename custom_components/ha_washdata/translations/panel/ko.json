@@ -322,6 +322,9 @@
         "end_energy": {
             "energy": "중지 임계값 ({w} W)과 오프 지연 ({d} s)에 비해 너무 엄격합니다. 사이클이 대체 경로로만 종료될 수 있습니다",
             "stop": "종료 에너지 ({d} s 동안 {e} Wh)로는 {p} W까지만 허용됩니다"
+        },
+        "power_sensor": {
+            "energy": "이 센서는 전력이 아닌 에너지({unit})를 측정하므로 사이클을 감지할 수 없습니다. 플러그의 전력 센서(W 또는 kW)를 선택하세요."
         }
     },
     "hdr": {
@@ -372,7 +375,8 @@
         "live_match_debug": "실시간 매칭 디버그",
         "automations_used": "이 장치를 사용하는 자동화",
         "bp_templates": "템플릿",
-        "automations_all_tip": "WashData 라벨로 필터링된 Home Assistant의 자동화 목록입니다. 여기서 생성된 자동화는 WashData 카테고리에도 있습니다."
+        "automations_all_tip": "WashData 라벨로 필터링된 Home Assistant의 자동화 목록입니다. 여기서 생성된 자동화는 WashData 카테고리에도 있습니다.",
+        "maint_done_by_program": "자동 완료"
     },
     "health": {
         "fair": "프로파일 품질: 보통",
@@ -685,7 +689,10 @@
         "bp_you_choose": "선택 사항: {inputs}",
         "bp_adjustable": "조정 가능: {inputs}",
         "bp_yaml": "블루프린트 YAML",
-        "automation_wd_label": "WashData 라벨을 포함합니다"
+        "automation_wd_label": "WashData 라벨을 포함합니다",
+        "done_by_none": "설정 안 됨",
+        "done_by_programs": "다음 프로그램으로 자동 완료: {programs}",
+        "done_by_cycle": "{program} 사이클로 완료"
     },
     "log": {
         "all_levels": "모든 레벨",
@@ -1066,7 +1073,8 @@
         "auto_trigger_hint": "이 장치에 대해 이 트리거가 있는 자동화를 생성하고 Home Assistant에서 엽니다.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "WashData가 {device}를 위해 생성했습니다. 작업을 추가하세요(알림, 조명, ...).",
-        "automation_alias_new": "{device}: 새 자동화"
+        "automation_alias_new": "{device}: 새 자동화",
+        "maint_done_by_program_intro": "작업에 지정한 프로그램 중 하나의 사이클이 끝나면 작업이 완료된 것으로 간주됩니다. 예를 들어 면 90이 실행되면 드럼 청소가 완료됩니다. WashData가 확실히 인식했거나 프로그램을 직접 선택한 사이클만 해당됩니다."
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -1385,7 +1393,7 @@
             "label": "전원 꺼짐 임계값"
         },
         "power_sensor": {
-            "doc": "이 기기의 실시간 전력을 와트 단위로 보고하는 센서입니다(예: sensor.washer_power). 모든 감지는 이 센서를 기반으로 합니다.",
+            "doc": "이 기기의 실시간 전력을 W 또는 kW 단위로 보고하는 센서입니다(예: sensor.washer_power). 에너지 계량기(kWh)가 아닙니다. 모든 감지는 이 센서를 기반으로 합니다.",
             "label": "전력 센서"
         },
         "profile_match_interval": {

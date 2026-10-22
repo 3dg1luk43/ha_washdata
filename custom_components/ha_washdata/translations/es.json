@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Un nombre descriptivo para este dispositivo (p. ej., «Lavadora», «Lavavajillas»).",
           "device_type": "Define los valores de detección predeterminados para este tipo de electrodoméstico.",
-          "power_sensor": "El sensor del enchufe inteligente que informa la potencia actual en vatios.",
+          "power_sensor": "El sensor de potencia del enchufe inteligente (W o kW), no su medidor de energía (kWh).",
           "min_power": "Las lecturas por encima de este valor (en vatios) indican que el electrodoméstico está en marcha. 2 W sirve para la mayoría de los dispositivos."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Error inesperado",
-      "invalid_power": "El umbral de potencia debe ser mayor que 0"
+      "invalid_power": "El umbral de potencia debe ser mayor que 0",
+      "power_sensor_energy": "Es un medidor de energía (kWh), no un sensor de potencia. Elija el sensor de potencia del enchufe (W o kW). Si el enchufe no tiene, un ayudante Sensor de derivación puede crear uno a partir del medidor."
     },
     "abort": {
       "already_configured": "El dispositivo ya está configurado",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: todavía no se ha reconocido ningún perfil.",
       "vs_typical_longer": "{pct}% más largo de lo habitual",
       "vs_typical_shorter": "{pct}% más corto de lo habitual",
-      "invalid_power": "El umbral de potencia debe ser mayor que 0"
+      "invalid_power": "El umbral de potencia debe ser mayor que 0",
+      "power_sensor_energy": "Es un medidor de energía (kWh), no un sensor de potencia. Elija el sensor de potencia del enchufe (W o kW). Si el enchufe no tiene, un ayudante Sensor de derivación puede crear uno a partir del medidor."
     }
   },
   "selector": {

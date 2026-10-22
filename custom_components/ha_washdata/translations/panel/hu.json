@@ -325,6 +325,9 @@
         "end_energy": {
             "energy": "Túl szigorú a Leállítási küszöbhöz ({w} W) a Kikapcsolási késleltetés ({d} s) alatt; a ciklus csak tartalék úton érhet véget",
             "stop": "A Záró energia ({e} Wh {d} s alatt) csak {p} W-ot enged meg"
+        },
+        "power_sensor": {
+            "energy": "Ez az érzékelő energiát mér ({unit}), nem teljesítményt, így egyetlen ciklus sem észlelhető. Válassza a konnektor teljesítmény érzékelőjét (W vagy kW)."
         }
     },
     "hdr": {
@@ -375,7 +378,8 @@
         "live_match_debug": "Élő egyezés hibakeresése",
         "automations_used": "Ezt az eszközt használó automatizálások",
         "bp_templates": "Sablonok",
-        "automations_all_tip": "A Home Assistant automatizálási listája, WashData-címke szerint szűrve. Az itt létrehozott automatizálások a WashData-kategóriában is szerepelnek."
+        "automations_all_tip": "A Home Assistant automatizálási listája, WashData-címke szerint szűrve. Az itt létrehozott automatizálások a WashData-kategóriában is szerepelnek.",
+        "maint_done_by_program": "Automatikus elvégzés"
     },
     "health": {
         "fair": "Elfogadható profilminőség",
@@ -691,7 +695,10 @@
         "bp_you_choose": "Ön választja: {inputs}",
         "bp_adjustable": "Állítható: {inputs}",
         "bp_yaml": "Blueprint YAML",
-        "automation_wd_label": "Viseli a WashData-címkét"
+        "automation_wd_label": "Viseli a WashData-címkét",
+        "done_by_none": "Nincs beállítva",
+        "done_by_programs": "Automatikusan elvégzi: {programs}",
+        "done_by_cycle": "Elvégezte egy ciklus: {program}"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -1082,7 +1089,8 @@
         "auto_trigger_hint": "Létrehoz egy automatizálást ezzel a triggerrel ehhez az eszközhöz, és megnyitja a Home Assistantban.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "A WashData hozta létre {device} számára. Adja hozzá a saját műveleteit (értesítés, világítás, ...).",
-        "automation_alias_new": "{device}: új automatizálás"
+        "automation_alias_new": "{device}: új automatizálás",
+        "maint_done_by_program_intro": "Egy feladat akkor számít elvégzettnek, ha a hozzá tartozó programok egyikének ciklusa befejeződik, például a dob tisztítása, amikor a Pamut 90 program fut. Csak azok a ciklusok számítanak, amelyekben a WashData biztos, vagy amelyeknek a programját Ön választotta."
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid bukdácsolás a befejezés után a ráncok csökkentése érdekében.",
@@ -1386,7 +1394,7 @@
             "label": "Kikapcsolás teljesítményküszöbe"
         },
         "power_sensor": {
-            "doc": "Az érzékelő, amely a készülék élő teljesítményét jelenti wattban (pl. sensor.washer_power). Minden észlelés ezen alapul.",
+            "doc": "Az érzékelő, amely a készülék élő teljesítményét jelenti W vagy kW egységben (pl. sensor.washer_power), nem az energiamérője (kWh). Minden észlelés ezen alapul.",
             "label": "Teljesítmény érzékelő"
         },
         "profile_match_interval": {

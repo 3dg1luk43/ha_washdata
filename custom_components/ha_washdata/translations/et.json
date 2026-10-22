@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Selle seadme sõbralik nimi (nt 'pesumasin', 'nõudepesumasin').",
           "device_type": "Määrab seda tüüpi seadme tuvastamise vaikesätted.",
-          "power_sensor": "Nutipistiku andur, mis teatab reaalajas võimsust vattides.",
+          "power_sensor": "Nutipistiku võimsussensor (W või kW), mitte selle energiaarvesti (kWh).",
           "min_power": "Sellest suuremad näidud (vattides) tähendavad, et seade töötab. Enamikule seadmetele sobib 2 W."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Ootamatu viga",
-      "invalid_power": "Võimsuslävi peab olema suurem kui 0"
+      "invalid_power": "Võimsuslävi peab olema suurem kui 0",
+      "power_sensor_energy": "See on energiaarvesti (kWh), mitte võimsussensor. Valige pistiku võimsussensor (W või kW). Kui pistikul seda pole, saab abimees Tuletisandur selle arvesti näidust luua."
     },
     "abort": {
       "already_configured": "Seade on juba konfigureeritud",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ühtki profiili pole veel tuvastatud.",
       "vs_typical_longer": "{pct}% tavapärasest pikem",
       "vs_typical_shorter": "{pct}% tavapärasest lühem",
-      "invalid_power": "Võimsuslävi peab olema suurem kui 0"
+      "invalid_power": "Võimsuslävi peab olema suurem kui 0",
+      "power_sensor_energy": "See on energiaarvesti (kWh), mitte võimsussensor. Valige pistiku võimsussensor (W või kW). Kui pistikul seda pole, saab abimees Tuletisandur selle arvesti näidust luua."
     }
   },
   "selector": {

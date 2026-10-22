@@ -127,6 +127,8 @@ from .const import (
     TRIGGER_UNLOADED,
     CYCLE_ANOMALY_STALLED,
     DEFAULT_MIN_POWER,
+    power_unit_scale,
+    is_energy_counter,
     DEFAULT_OFF_DELAY,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_LOW_POWER_NO_UPDATE_TIMEOUT,
@@ -635,6 +637,7 @@ class WashDataManager:
         self.power_sensor_entity_id = config_entry.options.get(
             CONF_POWER_SENSOR, config_entry.data.get(CONF_POWER_SENSOR)
         )
+        self._power_scale_logged = False  # #481: say once that kW is converted
         # A sensor change saved while a cycle was under way, applied once the
         # detector leaves _SENSOR_SWAP_BLOCKED_STATES (audit MANAGER-11).
         self._pending_power_sensor: str | None = None
@@ -1658,7 +1661,7 @@ class WashDataManager:
         power_is_valid = False
 
         if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-            _restore_power = _finite_power(state.state)
+            _restore_power = self._state_power(state)
             if _restore_power is None:
                 # Not numeric, or nan/inf: treat as 0W and do not restore by power.
                 # Leaving power_is_valid False is what keeps a non-finite reading out
@@ -2806,7 +2809,7 @@ class WashDataManager:
         # Force update from new sensor
         state = self.hass.states.get(self.power_sensor_entity_id)
         if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-            _reload_power = _finite_power(state.state)
+            _reload_power = self._state_power(state)
             if _reload_power is not None:
                 self.detector.process_reading(_reload_power, utc_now())
             else:
@@ -3924,7 +3927,7 @@ class WashDataManager:
             self.detector.mark_sensor_unavailable(utc_now())
             return
 
-        power = _finite_power(new_state.state)
+        power = self._state_power(new_state)
         if power is None:
             self.detector.mark_sensor_unavailable(utc_now())
             return
@@ -3970,7 +3973,7 @@ class WashDataManager:
         if old_state is not None and old_state.state not in (
             STATE_UNKNOWN, STATE_UNAVAILABLE
         ):
-            _prev = _finite_power(old_state.state)
+            _prev = self._state_power(old_state)
             if _prev is not None:
                 prev_raw_power = _prev
         is_low_power = power < min_p and (
@@ -4540,7 +4543,7 @@ class WashDataManager:
         state = self.hass.states.get(self.power_sensor_entity_id)
         if state is None or state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE):
             return None
-        power = _finite_power(state.state)
+        power = self._state_power(state)
         if power is None:
             return None
         report_ts = getattr(state, "last_reported", None) or state.last_updated
@@ -4548,16 +4551,59 @@ class WashDataManager:
             return None
         return power, report_ts
 
+    def power_scale(self, unit: Any = None, *, from_state: bool = True) -> float:
+        """Factor from the power sensor's unit to watts (#481): 1000 for a kW sensor.
+
+        ``unit`` defaults to the sensor's current ``unit_of_measurement``. A device
+        whose Min Power was set in the sensor's own unit keeps raw readings (see
+        ``const.power_unit_scale``). The recorder readers in ws_api scale with it,
+        so the charts and the history import read what the detector reads.
+        """
+        if unit is None and from_state:
+            state = self.hass.states.get(self.power_sensor_entity_id)
+            unit = state.attributes.get("unit_of_measurement") if state else None
+        try:
+            min_power = self.detector.config.min_power
+        except AttributeError:
+            min_power = DEFAULT_MIN_POWER
+        return power_unit_scale(unit, min_power)
+
+    def _state_power(self, state: State) -> float | None:
+        """A power sensor state as watts: finite, scaled by its own unit (#481)."""
+        power = _finite_power(state.state)
+        if power is None:
+            return None
+        scale = self.power_scale(
+            getattr(state, "attributes", {}).get("unit_of_measurement"), from_state=False
+        )
+        if scale != 1.0 and not self._power_scale_logged:
+            self._power_scale_logged = True
+            self._logger.info(
+                "Power sensor %s reports %s; reading it as watts (x%g)",
+                self.power_sensor_entity_id,
+                state.attributes.get("unit_of_measurement"),
+                scale,
+            )
+        return power * scale
+
     def _read_power_state_at_setup(self) -> None:
         """Feed the power entity's current state once at setup and seed the caches."""
         state = self.hass.states.get(self.power_sensor_entity_id)
+        if state is not None and is_energy_counter(state.attributes):
+            # #481: set up before the flow refused one; the panel flags it too.
+            self._logger.warning(
+                "Power sensor %s is an energy counter (%s), not a power sensor: no "
+                "cycle can be detected. Pick the plug's power sensor in Settings.",
+                self.power_sensor_entity_id,
+                state.attributes.get("unit_of_measurement"),
+            )
         if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
             # A non-finite reading is skipped entirely, which leaves the cache
             # unset, i.e. the pre-#409 behaviour. Seeding it with a nan instead
             # would be PERMANENT: _resync_power_from_state returns early precisely
             # when the sensor is non-finite, so the healing path could never
             # overwrite it, and every later watchdog comparison would be False.
-            power = _finite_power(state.state)
+            power = self._state_power(state)
             if power is not None:
                 try:
                     now = utc_now()
@@ -6367,6 +6413,22 @@ class WashDataManager:
             except Exception:  # noqa: BLE001 - counter must never break cycle end
                 prev_lifetime_count = None
                 cur_lifetime_count = None
+
+        # #480: a finished cycle of a program a maintenance task names ("Cotton 90"
+        # for the drum clean) logs that task as done. Only with a label the gate
+        # above wrote, after the odometer counts this cycle; persisted by the save
+        # below.
+        if (
+            cycle_persisted
+            and label_gate_ok
+            and cycle_data.get("profile_name")
+            and notif_rules.cycle_end_is_finish(cycle_data.get("status"))
+        ):
+            for task_id in self.profile_store.log_maintenance_done_by_program(cycle_data):
+                self._logger.info(
+                    "Maintenance '%s' logged as done by program '%s'",
+                    task_id, cycle_data.get("profile_name"),
+                )
 
         # B1: accumulate lifetime energy for the HA Energy dashboard sensor. Runs
         # exactly once per persisted cycle so the TOTAL_INCREASING meter never

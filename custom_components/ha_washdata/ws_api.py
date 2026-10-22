@@ -86,6 +86,7 @@ from .const import (
     CURVE_PREROLL_MAX_SECONDS,
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
+    is_energy_counter,
     resolve_start_duration_default,
     resolve_smart_termination_duration_ratio_default,
     MAINTENANCE_CUSTOM_TASK_MAX,
@@ -388,6 +389,17 @@ def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
     return [_pt(pairs[i]) for i in sorted(keep)]
 
 
+def _power_scale(manager: Any) -> float:
+    """``manager.power_scale()`` (#481), or 1.0 when it gives no usable factor."""
+    try:
+        scale = manager.power_scale()
+    except Exception:  # pylint: disable=broad-exception-caught
+        return 1.0
+    if isinstance(scale, bool) or not isinstance(scale, (int, float)):
+        return 1.0
+    return float(scale) if math.isfinite(scale) and scale > 0 else 1.0
+
+
 async def _recorder_power(
     hass: HomeAssistant,
     entity_id: str,
@@ -395,8 +407,12 @@ async def _recorder_power(
     *,
     end_dt: Any = None,
     keep_unavailable: bool = False,
+    scale: float = 1.0,
 ) -> list[tuple[float, float | None]]:
     """Raw (unix_ts, watts) readings for entity_id over a window, via the recorder.
+
+    ``scale`` turns the sensor's unit into watts (``manager.power_scale()``, #481),
+    applied before the rounding so a kW reading keeps its watts.
 
     ``end_dt`` defaults to now (the live chart overlay's use). Passing it lets a caller
     read the history in bounded windows instead of one unbounded query - a month of
@@ -432,7 +448,7 @@ async def _recorder_power(
                 # synthetic leading gap (or the same reading twice).
                 if start_ts is not None and ts < start_ts:
                     ts = start_ts
-                rows.append((ts, round(float(s.state), 1)))
+                rows.append((ts, round(float(s.state) * scale, 1)))
             except (ValueError, TypeError, OverflowError):
                 if keep_unavailable:
                     try:
@@ -1503,6 +1519,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_maintenance_log, ws_add_maintenance_event, ws_delete_maintenance_event,
         ws_set_lifetime_cycle_count,
         ws_add_maintenance_task, ws_update_maintenance_task, ws_delete_maintenance_task,
+        ws_set_maintenance_programs,
         # Cycles
         ws_label_cycle, ws_delete_cycle, ws_auto_label_cycles,
         # Phase catalog
@@ -2195,6 +2212,22 @@ async def ws_set_options(
                 msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
             )
             return
+
+        # #481: an energy counter (kWh) as the power sensor detects nothing. Refused
+        # only when this save picks it, so an entry already on one still saves its
+        # other settings (the panel flags the field).
+        _sensor = msg["options"].get(CONF_POWER_SENSOR)
+        if _sensor and _sensor != entry.options.get(
+            CONF_POWER_SENSOR, entry.data.get(CONF_POWER_SENSOR)
+        ):
+            _sensor_state = hass.states.get(str(_sensor))
+            if _sensor_state is not None and is_energy_counter(_sensor_state.attributes):
+                connection.send_error(
+                    msg["id"], "invalid_power_sensor",
+                    f"{_sensor} is an energy counter (kWh), not a power sensor. Pick the "
+                    "plug's power sensor (W or kW).",
+                )
+                return
 
         update_kwargs: dict[str, Any] = {"options": new_options}
         if isinstance(submitted_name, str) and submitted_name.strip():
@@ -2925,6 +2958,9 @@ async def ws_get_maintenance_log(
         "custom_tasks": store.get_maintenance_tasks(),
         # Every active reminder (built-in and custom) with its progress.
         "status": status,
+        # The programs a task can be marked done by (#480), and what each task has.
+        "programs_available": sorted(store.get_profiles()),
+        "programs": store.get_maintenance_programs(),
         "lifetime_cycle_count": manager.lifetime_cycle_count,
         "limits": {
             "tasks_max": MAINTENANCE_CUSTOM_TASK_MAX,
@@ -3181,6 +3217,43 @@ async def ws_update_maintenance_task(
         )
         manager.notify_update()
         _send_result(connection, msg["id"], "update_maintenance_task", {"success": True, "task": task})
+    except ValueError as exc:
+        connection.send_error(msg["id"], "invalid_format", str(exc))
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/set_maintenance_programs",
+        vol.Required("entry_id"): str,
+        vol.Required("task_id"): str,
+        vol.Required("programs"): [str],
+    }
+)
+@websocket_api.async_response
+async def ws_set_maintenance_programs(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Set the programs whose finished cycle marks a maintenance task done (#480).
+
+    Built-in types and custom tasks alike; an empty list turns it off.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        programs = await manager.profile_store.async_set_maintenance_programs(
+            msg["task_id"], msg["programs"]
+        )
+        manager.notify_update()
+        _send_result(connection, msg["id"], "set_maintenance_programs", {
+            "success": True, "task_id": msg["task_id"], "programs": programs,
+        })
     except ValueError as exc:
         connection.send_error(msg["id"], "invalid_format", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -5166,7 +5239,7 @@ async def ws_get_cycle_context(
                 lo = start_ts - before_s
                 rows = await _recorder_power(
                     hass, entity_id, start_dt - timedelta(seconds=before_s),
-                    end_dt=start_dt, keep_unavailable=True,
+                    end_dt=start_dt, keep_unavailable=True, scale=_power_scale(manager),
                 )
                 out["before"] = _cycle_context_points(
                     rows, start_ts, lo, start_ts, hi_inclusive=False
@@ -5176,6 +5249,7 @@ async def ws_get_cycle_context(
             if after_s > 0 and after_end_dt > end_dt:
                 rows = await _recorder_power(
                     hass, entity_id, end_dt, end_dt=after_end_dt, keep_unavailable=True,
+                    scale=_power_scale(manager),
                 )
                 out["after"] = _cycle_context_points(
                     rows, start_ts, end_dt.timestamp(), after_end_dt.timestamp(),
@@ -5935,7 +6009,9 @@ async def ws_get_power_history(
             if with_raw:
                 ent = getattr(manager, "power_sensor_entity_id", None)
                 if ent:
-                    samples = await _recorder_power(hass, ent, start_dt)
+                    samples = await _recorder_power(
+                        hass, ent, start_dt, scale=_power_scale(manager)
+                    )
                     start_ts = start_dt.timestamp()
                     out["raw"] = _downsample(
                         [[max(0.0, round(ts - start_ts, 1)), w] for ts, w in samples], 400
@@ -7465,6 +7541,7 @@ async def ws_history_import_recorder(
         connection.send_error(msg["id"], "not_found", "This device has no power sensor configured")
         return
 
+    scale = _power_scale(manager)
     now = dt_util.now()
     days = int(msg.get("days") or 10)
     start_date = msg.get("start_date")
@@ -7497,7 +7574,9 @@ async def ws_history_import_recorder(
     for day in range(1, days + 1):
         window_start = now - timedelta(days=day)
         window_end = now - timedelta(days=day - 1)
-        day_rows = await _recorder_power(hass, entity_id, window_start, end_dt=window_end)
+        day_rows = await _recorder_power(
+            hass, entity_id, window_start, end_dt=window_end, scale=scale
+        )
         oldest_queried = window_start
         queried_days += 1
         if day_rows:
@@ -7538,13 +7617,16 @@ async def ws_history_import_recorder(
 
 
 def _history_samples(
-    slot: dict[str, Any], entity_id: str | None, parser: Any = None
+    slot: dict[str, Any], entity_id: str | None, parser: Any = None, scale: float = 1.0
 ) -> Any:
     """Turn a staging slot into samples, whichever way it was filled.
 
     Executor-side: CSV parsing is pure Python over megabytes of text, so the scan task
     steps a ``HistoryCsvParser`` across jobs first and hands it in (``parser``).
     Returns either a ``(samples, report)`` pair or an ``{"error": ...}`` marker.
+    ``scale`` turns a CSV of the configured sensor into watts (#481); a recorder
+    read is scaled when it is fetched, and a file of another entity is left alone
+    (its unit is unknown, so the kW hint can still flag it).
     """
     if slot.get("source") == "recorder":
         # `parser` is then a stepped RecorderReadings (audit PLAYGROUND-11).
@@ -7575,6 +7657,8 @@ def _history_samples(
     )
     if isinstance(parsed, dict):
         return parsed
+    if scale != 1.0 and not parsed.entity_substituted_from:
+        parsed.samples = [(t, None if p is None else p * scale) for t, p in parsed.samples]
     report = parsed.report()
     report["source"] = "csv"
     return parsed.samples, report
@@ -7634,7 +7718,9 @@ async def _history_import_scan_task(
                     return
                 await hass.async_add_executor_job(parser.step, history_import.PARSE_STEP_ROWS)
                 reg.update(task, done=parser.done)
-        parsed = await hass.async_add_executor_job(_history_samples, slot, entity_id, parser)
+        parsed = await hass.async_add_executor_job(
+            _history_samples, slot, entity_id, parser, _power_scale(manager)
+        )
         if isinstance(parsed, dict):
             reg.finish(task, state=task_registry.STATE_ERROR, error=str(parsed.get("error")))
             return

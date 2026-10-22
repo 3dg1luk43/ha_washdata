@@ -11,12 +11,13 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### TL;DR
 
-- New Automations tab: ready-made templates and 18 WashData triggers for your own automations.
+- New Automations tab: ready-made templates and 18 WashData triggers.
 - Dryers with anti-crease tumbling finish again instead of running for hours.
+- Maintenance tasks tick themselves off when their program runs.
+- kW power sensors work as they are; an energy counter is refused.
 - Clearing every notify service really stops notifications.
 - Live updates can name the finish time and arrive on a locked Android phone.
 - Nine fewer settings and two fewer device types; the HA events always fire.
-- The Logs drawer can be closed on a phone again.
 
 ### Breaking changes
 
@@ -29,6 +30,8 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **WashData triggers for automations** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): WashData appears under Integrations in Home Assistant's add-trigger dialog, and its triggers under a WashData device, entity or area: cycle started, finished, ended (any reason), program recognised, phase started, finishing soon, running long, paused, resumed, stalled, anti-wrinkle started, still tumbling after the cycle, unload pending, unloaded, state changed, maintenance due, milestone reached and pump stuck. Each fires once, also across a restart, and carries the program, duration, energy and the plug's switch. The device page offers the same triggers.
 - **Automation templates** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): the new Automations tab installs ready-made Home Assistant blueprints for your appliance in one click and opens the result in Home Assistant's editor. "End a long dryer anti-crease phase" switches the dryer's plug off at the first tumble after a wait and back on, optionally only when someone is home; a new cycle cancels it. "Turn something on while a cycle runs" covers lights and helpers. WashData itself never switches the plug. Share your own by pull request. Thanks to @gkotoole
 - **Automations tab**: lists the automations that use the appliance and starts new ones from any WashData trigger. Automations WashData creates get a "WashData" label and category, so Home Assistant's automation list can filter them.
+- **Maintenance done by a program** ([#480](https://github.com/3dg1luk43/ha_washdata/issues/480)): a task can name the programs that do it, such as the drum clean done by Cotton 90, or your own "Hot wash" every 30 days done by any 60 or 90 program. A finished cycle of one of them logs the task as done, so its reminder restarts by itself. Only cycles with a confident label or a program you picked count. Set it under Cycles > Maintenance > Service Reminders > Done automatically. Thanks to @Alexx3105
+- **kW power sensors work without a template sensor** ([#481](https://github.com/3dg1luk43/ha_washdata/issues/481)): a power sensor in kW (or mW) is read as watts, live, in the cycle charts and in the history import. A device already set up for raw kilowatt readings (Min Power under 1) keeps reading them raw. An energy counter (kWh) can no longer be picked as the power sensor in setup, reconfigure or Settings, and Settings flags one already in use: it never detects a cycle. Thanks to @neliasen
 
 ### Fixes
 
@@ -47,6 +50,11 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - Save Debug Traces, Auto Maintenance and Power Profile Interval moved to the internal settings tier.
 - Notifications no longer has an Automations section; it moved to the Automations tab.
+
+### For developers
+
+- WebSocket: new `set_maintenance_programs` (#480); `get_maintenance_log` gains `programs_available`, `programs` and a `programs` list on each `status` row, and a log entry written by a cycle carries `program` and `cycle_id`.
+- `WashDataManager.power_scale()` is the factor from the power sensor's unit to watts (#481); every recorder read of the power sensor (`ws_api._recorder_power`) takes it.
 
 ## 0.5.8 - trimming the fat - 2026-10-08
 

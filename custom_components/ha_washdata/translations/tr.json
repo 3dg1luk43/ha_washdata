@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Bu cihaz için kolay bir ad (ör. 'Çamaşır Makinesi', 'Bulaşık Makinesi').",
           "device_type": "Bu tür cihaz için algılama varsayılanlarını ayarlar.",
-          "power_sensor": "Canlı gücü watt cinsinden bildiren akıllı priz sensörü.",
+          "power_sensor": "Akıllı prizin güç sensörü (W veya kW), enerji sayacı (kWh) değil.",
           "min_power": "Bunun üzerindeki okumalar (watt) cihazın çalıştığı anlamına gelir. Çoğu cihaz için 2 W uygundur."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Beklenmeyen hata",
-      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır"
+      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır",
+      "power_sensor_energy": "Bu bir enerji sayacı (kWh), güç sensörü değil. Prizin güç sensörünü seçin (W veya kW). Prizde yoksa, Türev sensörü yardımcısı sayaçtan bir tane oluşturabilir."
     },
     "abort": {
       "already_configured": "Cihaz zaten yapılandırılmış",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Henüz eşleşen profil yok.",
       "vs_typical_longer": "olağandan %{pct} daha uzun",
       "vs_typical_shorter": "olağandan %{pct} daha kısa",
-      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır"
+      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır",
+      "power_sensor_energy": "Bu bir enerji sayacı (kWh), güç sensörü değil. Prizin güç sensörünü seçin (W veya kW). Prizde yoksa, Türev sensörü yardımcısı sayaçtan bir tane oluşturabilir."
     }
   },
   "selector": {

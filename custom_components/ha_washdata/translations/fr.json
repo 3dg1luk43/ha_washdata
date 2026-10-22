@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Un nom convivial pour cet appareil (par exemple, « Machine à laver », « Lave-vaisselle »).",
           "device_type": "Définit les valeurs de détection par défaut pour ce type d'appareil.",
-          "power_sensor": "Le capteur de la prise connectée qui indique la puissance actuelle en watts.",
+          "power_sensor": "Le capteur de puissance de la prise connectée (W ou kW), pas son compteur d'énergie (kWh).",
           "min_power": "Au-dessus de cette valeur (en watts), l'appareil est considéré en marche. 2 W convient à la plupart des appareils."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Erreur inattendue",
-      "invalid_power": "Le seuil de puissance doit être supérieur à 0"
+      "invalid_power": "Le seuil de puissance doit être supérieur à 0",
+      "power_sensor_energy": "Il s'agit d'un compteur d'énergie (kWh), pas d'un capteur de puissance. Choisissez le capteur de puissance de la prise (W ou kW). Si la prise n'en a pas, un assistant Capteur de dérivée peut en créer un à partir du compteur."
     },
     "abort": {
       "already_configured": "L'appareil est déjà configuré",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device} : aucun profil reconnu pour le moment.",
       "vs_typical_longer": "{pct}% plus long que d'habitude",
       "vs_typical_shorter": "{pct}% plus court que d'habitude",
-      "invalid_power": "Le seuil de puissance doit être supérieur à 0"
+      "invalid_power": "Le seuil de puissance doit être supérieur à 0",
+      "power_sensor_energy": "Il s'agit d'un compteur d'énergie (kWh), pas d'un capteur de puissance. Choisissez le capteur de puissance de la prise (W ou kW). Si la prise n'en a pas, un assistant Capteur de dérivée peut en créer un à partir du compteur."
     }
   },
   "selector": {

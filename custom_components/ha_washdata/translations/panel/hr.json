@@ -328,6 +328,9 @@
     "end_energy": {
       "energy": "Prestrogo za Prag zaustavljanja ({w} W) tijekom Odgode isključivanja ({d} s); ciklus može završiti samo rezervnim putem",
       "stop": "Energija završetka ({e} Wh tijekom {d} s) dopušta samo {p} W"
+    },
+    "power_sensor": {
+      "energy": "Ovaj senzor broji energiju ({unit}), a ne snagu, pa se nijedan ciklus ne može otkriti. Odaberite senzor snage utikača (W ili kW)."
     }
   },
   "hdr": {
@@ -378,7 +381,8 @@
     "live_match_debug": "Dijagnostika podudaranja uživo",
     "automations_used": "Automatizacije koje koriste ovaj uređaj",
     "bp_templates": "Predlošci",
-    "automations_all_tip": "Popis automatizacija Home Assistant, filtriran prema WashData oznaci. Automatizacije stvorene ovdje nalaze se i u WashData kategoriji."
+    "automations_all_tip": "Popis automatizacija Home Assistant, filtriran prema WashData oznaci. Automatizacije stvorene ovdje nalaze se i u WashData kategoriji.",
+    "maint_done_by_program": "Automatski obavljeno"
   },
   "health": {
     "fair": "Prihvatljiva kvaliteta profila",
@@ -697,7 +701,10 @@
     "bp_you_choose": "Birate: {inputs}",
     "bp_adjustable": "Prilagodljivo: {inputs}",
     "bp_yaml": "Blueprint YAML",
-    "automation_wd_label": "Nosi WashData oznaku"
+    "automation_wd_label": "Nosi WashData oznaku",
+    "done_by_none": "Nije postavljeno",
+    "done_by_programs": "Automatski obavljeno programima: {programs}",
+    "done_by_cycle": "Obavljeno ciklusom programa {program}"
   },
   "log": {
     "all_levels": "Sve razine",
@@ -1098,7 +1105,8 @@
     "auto_trigger_hint": "Stvara automatizaciju s ovim okidačem za ovaj uređaj i otvara je u Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Stvorio WashData za {device}. Dodajte svoje radnje (obavijest, svjetla, ...).",
-    "automation_alias_new": "{device}: nova automatizacija"
+    "automation_alias_new": "{device}: nova automatizacija",
+    "maint_done_by_program_intro": "Zadatak se smatra obavljenim kada završi ciklus jednog od njegovih programa, na primjer čišćenje bubnja nakon programa Pamuk 90. Računaju se samo ciklusi koje WashData pouzdano prepozna ili oni za koje ste sami odabrali program."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka prevrtanja nakon završetka kako bi se smanjile bore.",
@@ -1410,7 +1418,7 @@
       "label": "Prag isključivanja napajanja"
     },
     "power_sensor": {
-      "doc": "Senzor koji javlja trenutnu snagu ovog uređaja u vatima (npr. sensor.washer_power). Cijelo otkrivanje temelji se na njemu.",
+      "doc": "Senzor koji javlja trenutnu snagu ovog uređaja u W ili kW (npr. sensor.washer_power), a ne njegovo brojilo energije (kWh). Cijelo otkrivanje temelji se na njemu.",
       "label": "Senzor snage"
     },
     "profile_match_interval": {

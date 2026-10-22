@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Un nume prietenos pentru acest dispozitiv (de exemplu, „Mașină de spălat”, „Mașină de spălat vase”).",
           "device_type": "Stabilește valorile implicite de detectare pentru acest tip de aparat.",
-          "power_sensor": "Senzorul prizei inteligente care raportează puterea curentă în wați.",
+          "power_sensor": "Senzorul de putere al prizei inteligente (W sau kW), nu contorul său de energie (kWh).",
           "min_power": "Citirile peste această valoare (în wați) înseamnă că aparatul funcționează. 2 W se potrivește pentru majoritatea dispozitivelor."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Eroare neașteptată",
-      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0"
+      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0",
+      "power_sensor_energy": "Acesta este un contor de energie (kWh), nu un senzor de putere. Alegeți senzorul de putere al prizei (W sau kW). Dacă priza nu are unul, un helper Senzor de derivare poate crea unul din contor."
     },
     "abort": {
       "already_configured": "Dispozitivul este deja configurat",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Niciun profil nu a fost recunoscut încă.",
       "vs_typical_longer": "cu {pct}% mai mult decât de obicei",
       "vs_typical_shorter": "cu {pct}% mai puțin decât de obicei",
-      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0"
+      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0",
+      "power_sensor_energy": "Acesta este un contor de energie (kWh), nu un senzor de putere. Alegeți senzorul de putere al prizei (W sau kW). Dacă priza nu are unul, un helper Senzor de derivare poate crea unul din contor."
     }
   },
   "selector": {

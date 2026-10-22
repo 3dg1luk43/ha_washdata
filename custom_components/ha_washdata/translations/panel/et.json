@@ -325,6 +325,9 @@
     "end_energy": {
       "energy": "Liiga range, kui Peatumise Lävi on {w} W ja Väljalülitumise Viivitus {d} s; tsükkel saab lõppeda ainult varumehhanismi kaudu",
       "stop": "Lõpu Energia ({e} Wh {d} s jooksul) lubab ainult {p} W"
+    },
+    "power_sensor": {
+      "energy": "See andur loeb energiat ({unit}), mitte võimsust, seega ei saa ühtegi tsüklit tuvastada. Valige pistiku võimsusandur (W või kW)."
     }
   },
   "hdr": {
@@ -375,7 +378,8 @@
     "live_match_debug": "Reaalajas vaste silumine",
     "automations_used": "Seda seadet kasutavad automatiseerimised",
     "bp_templates": "Mallid",
-    "automations_all_tip": "Home Assistanti automatiseerimiste nimekiri, filtreeritud WashData sildi järgi. Siia loodud automatiseerimised asuvad ka WashData kategoorias."
+    "automations_all_tip": "Home Assistanti automatiseerimiste nimekiri, filtreeritud WashData sildi järgi. Siia loodud automatiseerimised asuvad ka WashData kategoorias.",
+    "maint_done_by_program": "Märgitakse automaatselt tehtuks"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -691,7 +695,10 @@
     "bp_you_choose": "Vali sina: {inputs}",
     "bp_adjustable": "Kohandatav: {inputs}",
     "bp_yaml": "Blueprint YAML",
-    "automation_wd_label": "Kannab WashData silti"
+    "automation_wd_label": "Kannab WashData silti",
+    "done_by_none": "Määramata",
+    "done_by_programs": "Märgitakse automaatselt tehtuks programmiga: {programs}",
+    "done_by_cycle": "Tehtud tsükliga: {program}"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -1082,7 +1089,8 @@
     "auto_trigger_hint": "Loob automatiseerimise selle triggeriga selle seadme jaoks ja avab selle Home Assistantis.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Loodud WashData poolt {device} jaoks. Lisa oma toimingud (teavitus, tuled, ...).",
-    "automation_alias_new": "{device}: uus automatiseerimine"
+    "automation_alias_new": "{device}: uus automatiseerimine",
+    "maint_done_by_program_intro": "Ülesanne loetakse tehtuks, kui lõpeb tsükkel mõne selle programmiga, näiteks trumli puhastus, kui käib programm Puuvill 90. Arvesse lähevad ainult tsüklid, milles WashData on kindel või mille programmi valisite ise."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
@@ -1413,7 +1421,7 @@
       "label": "Toite Väljalülitamise Lävi"
     },
     "power_sensor": {
-      "doc": "Andur, mis teatab selle seadme reaalajas võimsust vattides (nt sensor.washer_power). Kogu tuvastus põhineb sellel.",
+      "doc": "Andur, mis teatab selle seadme reaalajas võimsust ühikutes W või kW (nt sensor.washer_power), mitte selle energiaarvesti (kWh). Kogu tuvastus põhineb sellel.",
       "label": "Võimsusandur"
     },
     "profile_match_interval": {

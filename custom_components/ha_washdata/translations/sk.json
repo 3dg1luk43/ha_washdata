@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Priateľský názov pre toto zariadenie (napr. „Práčka“, „Umývačka riadu“).",
           "device_type": "Nastaví predvolené hodnoty detekcie pre tento druh spotrebiča.",
-          "power_sensor": "Senzor inteligentnej zásuvky, ktorý hlási aktuálny výkon vo wattoch.",
+          "power_sensor": "Snímač výkonu inteligentnej zásuvky (W alebo kW), nie jej merač energie (kWh).",
           "min_power": "Hodnoty nad touto hranicou (vo wattoch) znamenajú, že spotrebič beží. Pre väčšinu zariadení stačia 2 W."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Neočakávaná chyba",
-      "invalid_power": "Prah výkonu musí byť väčší ako 0"
+      "invalid_power": "Prah výkonu musí byť väčší ako 0",
+      "power_sensor_energy": "Toto je merač energie (kWh), nie snímač výkonu. Vyberte snímač výkonu zásuvky (W alebo kW). Ak ho zásuvka nemá, môže ho z merača vytvoriť pomocník „Derivačný snímač“."
     },
     "abort": {
       "already_configured": "Zariadenie je už nakonfigurované",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Zatiaľ nebol rozpoznaný žiadny profil.",
       "vs_typical_longer": "o {pct}% dlhšie než zvyčajne",
       "vs_typical_shorter": "o {pct}% kratšie než zvyčajne",
-      "invalid_power": "Prah výkonu musí byť väčší ako 0"
+      "invalid_power": "Prah výkonu musí byť väčší ako 0",
+      "power_sensor_energy": "Toto je merač energie (kWh), nie snímač výkonu. Vyberte snímač výkonu zásuvky (W alebo kW). Ak ho zásuvka nemá, môže ho z merača vytvoriť pomocník „Derivačný snímač“."
     }
   },
   "selector": {

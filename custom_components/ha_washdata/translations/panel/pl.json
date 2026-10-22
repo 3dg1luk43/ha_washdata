@@ -331,6 +331,9 @@
     "end_energy": {
       "energy": "Zbyt restrykcyjne dla Progu Zatrzymania ({w} W) w czasie Opóźnienia Wyłączenia ({d} s); cykl może się zakończyć tylko ścieżką awaryjną",
       "stop": "Energia Zakończenia ({e} Wh w ciągu {d} s) dopuszcza tylko {p} W"
+    },
+    "power_sensor": {
+      "energy": "Ten czujnik zlicza energię ({unit}), a nie moc, więc nie da się wykryć żadnego cyklu. Wybierz czujnik mocy wtyczki (W lub kW)."
     }
   },
   "hdr": {
@@ -381,7 +384,8 @@
     "live_match_debug": "Debugowanie dopasowania na żywo",
     "automations_used": "Automatyzacje używające tego urządzenia",
     "bp_templates": "Szablony",
-    "automations_all_tip": "Lista automatyzacji Home Assistant filtrowana według etykiety WashData. Automatyzacje utworzone tutaj znajdują się również w kategorii WashData."
+    "automations_all_tip": "Lista automatyzacji Home Assistant filtrowana według etykiety WashData. Automatyzacje utworzone tutaj znajdują się również w kategorii WashData.",
+    "maint_done_by_program": "Wykonane automatycznie"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -703,7 +707,10 @@
     "bp_you_choose": "Do wyboru: {inputs}",
     "bp_adjustable": "Konfigurowalny: {inputs}",
     "bp_yaml": "Blueprint YAML",
-    "automation_wd_label": "Zawiera etykietę WashData"
+    "automation_wd_label": "Zawiera etykietę WashData",
+    "done_by_none": "Nie ustawiono",
+    "done_by_programs": "Wykonane automatycznie przez: {programs}",
+    "done_by_cycle": "Wykonane przez cykl programu {program}"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -1114,7 +1121,8 @@
     "auto_trigger_hint": "Tworzy automatyzację z tym wyzwalaczem dla tego urządzenia i otwiera ją w Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Utworzone przez WashData dla {device}. Dodaj swoje akcje (powiadomienie, światła, ...).",
-    "automation_alias_new": "{device}: nowa automatyzacja"
+    "automation_alias_new": "{device}: nowa automatyzacja",
+    "maint_done_by_program_intro": "Zadanie liczy się jako wykonane, gdy zakończy się cykl jednego z jego programów, np. czyszczenie bębna po programie Bawełna 90. Liczą się tylko cykle, co do których WashData ma pewność, lub z programem wybranym przez Ciebie."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1422,7 +1430,7 @@
       "label": "Próg Wyłączenia Zasilania"
     },
     "power_sensor": {
-      "doc": "Czujnik podający bieżącą moc tego urządzenia w watach (np. sensor.washer_power). Na nim opiera się całe wykrywanie.",
+      "doc": "Czujnik podający bieżącą moc tego urządzenia w W lub kW (np. sensor.washer_power), a nie jego licznik energii (kWh). Na nim opiera się całe wykrywanie.",
       "label": "Czujnik Mocy"
     },
     "profile_match_interval": {

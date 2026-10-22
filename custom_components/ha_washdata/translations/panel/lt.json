@@ -331,6 +331,9 @@
     "end_energy": {
       "energy": "Per griežta, kai Sustabdymo slenkstis yra {w} W, o Išjungimo delsimas {d} s; ciklas gali baigtis tik atsarginiu būdu",
       "stop": "Pabaigos energija ({e} Wh per {d} s) leidžia tik {p} W"
+    },
+    "power_sensor": {
+      "energy": "Šis jutiklis skaičiuoja energiją ({unit}), o ne galią, todėl negalima aptikti nė vieno ciklo. Pasirinkite kištuko galios jutiklį (W arba kW)."
     }
   },
   "hdr": {
@@ -381,7 +384,8 @@
     "live_match_debug": "Tiesioginės atitikties derinimas",
     "automations_used": "Automatikos, naudojančios šį įrenginį",
     "bp_templates": "Šablonai",
-    "automations_all_tip": "Home Assistant automatizavimų sąrašas, filtruotas pagal WashData žymą. Čia sukurti automatizavimai taip pat yra WashData kategorijoje."
+    "automations_all_tip": "Home Assistant automatizavimų sąrašas, filtruotas pagal WashData žymą. Čia sukurti automatizavimai taip pat yra WashData kategorijoje.",
+    "maint_done_by_program": "Atliekama automatiškai"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -703,7 +707,10 @@
     "bp_you_choose": "Pasirenkate jūs: {inputs}",
     "bp_adjustable": "Reguliuojama: {inputs}",
     "bp_yaml": "Blueprint YAML",
-    "automation_wd_label": "Turi WashData žymą"
+    "automation_wd_label": "Turi WashData žymą",
+    "done_by_none": "Nenustatyta",
+    "done_by_programs": "Automatiškai atlieka: {programs}",
+    "done_by_cycle": "Atlikta ciklu: {program}"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -1114,7 +1121,8 @@
     "auto_trigger_hint": "Sukuria automatizavimą su šiuo paleidikliu šiam įrenginiui ir atidaro jį Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Sukurta WashData, skirta {device}. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",
-    "automation_alias_new": "{device}: naujas automatizavimas"
+    "automation_alias_new": "{device}: naujas automatizavimas",
+    "maint_done_by_program_intro": "Užduotis laikoma atlikta, kai baigiasi vienos iš jos programų ciklas, pavyzdžiui, būgno valymas, kai paleidžiama programa Medvilnė 90. Įskaičiuojami tik ciklai, kuriuos WashData atpažino užtikrintai arba kurių programą pasirinkote jūs."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1426,7 +1434,7 @@
       "label": "Maitinimo išjungimo slenkstis"
     },
     "power_sensor": {
-      "doc": "Jutiklis, pranešantis esamą šio prietaiso galią vatais (pvz., sensor.washer_power). Juo pagrįstas visas aptikimas.",
+      "doc": "Jutiklis, pranešantis esamą šio prietaiso galią W arba kW (pvz., sensor.washer_power), o ne jo energijos skaitiklis (kWh). Juo pagrįstas visas aptikimas.",
       "label": "Galios jutiklis"
     },
     "profile_match_interval": {

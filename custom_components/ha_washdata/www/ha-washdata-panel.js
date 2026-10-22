@@ -158,8 +158,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'Optional. Your appliance model from the community catalog (pick a brand first). If it is not listed, you can add it.' },
     ] },
     { sub: 'Basic configuration', fields: [
-      { key: 'power_sensor', label: 'Power Sensor', basic: true, type: 'entity', domain: 'sensor',
-        doc: 'The sensor that reports this appliance\'s live power in watts (e.g. sensor.washer_power). All detection is based on it.' },
+      { key: 'power_sensor', label: 'Power Sensor', basic: true, type: 'entity', domain: 'sensor', notEnergy: true,
+        doc: 'The sensor that reports this appliance\'s live power in W or kW (e.g. sensor.washer_power), not its energy counter (kWh). All detection is based on it.' },
       { key: 'min_power', label: 'Minimum Power', unit: 'W', type: 'number', step: 0.1, min: 0, def: 2.0, basic: true,
         doc: 'Readings below this count as 0 W (standby). Filters out the idle draw of smart plugs and standby LEDs.' },
       { key: 'off_delay', label: 'Off Delay', unit: 's', type: 'number', min: 0, def: 180, basic: true,
@@ -475,6 +475,24 @@ function _nonPriceReason(id, vals, ctx) {
   return null;
 }
 
+// Units and device classes of an energy counter (#481). Mirrors const.ENERGY_UNITS /
+// ENERGY_DEVICE_CLASSES - keep in step.
+const _ENERGY_DEVICE_CLASSES = new Set(['energy', 'energy_storage']);
+const _ENERGY_UNITS = new Set(['mwh', 'wh', 'kwh', 'gwh', 'twh', 'j', 'kj', 'mj', 'gj', 'cal', 'kcal', 'mcal', 'gcal']);
+
+// Why the chosen Power Sensor cannot be one: it counts energy (#481), or null. Only
+// positive evidence, as the backend refuses it.
+function _energyCounterReason(id, ctx) {
+  const st = (id && ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
+  if (!st) return null;
+  const attrs = st.attributes || {};
+  const dc = String(attrs.device_class == null ? '' : attrs.device_class).trim().toLowerCase();
+  const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
+  if (!_ENERGY_DEVICE_CLASSES.has(dc) && !_ENERGY_UNITS.has(unit.toLowerCase())) return null;
+  return { msgKey: 'conflict.power_sensor.energy', msgVars: {unit: unit || dc},
+    msgFb: `This sensor counts energy (${unit || dc}), not power, so no cycle can be detected. Pick the plug's power sensor (W or kW).` };
+}
+
 const _SETTING_CONFLICTS = [
   {
     // energy_price_entity pointing at something that is provably not a price (#439).
@@ -484,6 +502,12 @@ const _SETTING_CONFLICTS = [
     keys: ['energy_price_entity', 'energy_sensor', 'power_sensor'],
     check: (v, ctx) => _nonPriceReason(v.energy_price_entity, v, ctx) != null,
     fieldErrors: (v, ctx) => ({ energy_price_entity: _nonPriceReason(v.energy_price_entity, v, ctx) }),
+  },
+  {
+    // #481: the Power Sensor is an energy counter (kWh), which never reads as power.
+    keys: ['power_sensor'],
+    check: (v, ctx) => _energyCounterReason(v.power_sensor, ctx) != null,
+    fieldErrors: (v, ctx) => ({ power_sensor: _energyCounterReason(v.power_sensor, ctx) }),
   },
   {
     // start_threshold_w > stop_threshold_w (hysteresis band must be positive)
@@ -6009,6 +6033,8 @@ class HaWashdataPanel extends HTMLElement {
       const ids = Object.keys(states)
         .filter(e => !domains || domains.some(d => e.startsWith(d + '.')))
         .filter(e => !f.notPrice || _nonPriceReason(e, o, this._conflictCtx()) == null)
+        // `notEnergy` drops energy counters (kWh) from the Power Sensor picker (#481).
+        .filter(e => !f.notEnergy || _energyCounterReason(e, this._conflictCtx()) == null)
         .sort().slice(0, 500);
       if (!this._entityListCache) this._entityListCache = {};
       this._entityListCache[f.key] = ids;
@@ -9146,11 +9172,13 @@ class HaWashdataPanel extends HTMLElement {
     const rows = log.length ? log.map(e => {
       const del = canEdit ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="maint-delete" data-mid="${_esc(e.id)}">${this._t('btn.delete', {}, 'Delete')}</button>` : '';
       const notes = e.notes ? `<div class="wd-info" style="margin-top:2px">${_esc(e.notes)}</div>` : '';
+      const byCycle = e.program ? `<div class="wd-info" style="margin-top:2px">${this._t('lbl.done_by_cycle', { program: e.program }, 'Done by a {program} cycle')}</div>` : '';
       return `<div class="wd-card" style="background:var(--secondary-background-color);padding:10px 12px">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
           <div>
             <div style="font-weight:600">${_esc(this._maintLabel(e.event_type, e.task_name))}</div>
             <div class="wd-info" style="margin-top:2px">${_fmtDate(e.date)}</div>
+            ${byCycle}
             ${notes}
           </div>
           ${del}
@@ -9173,6 +9201,26 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-field"><label>${this._t('lbl.every_days', {}, 'Every (days)')}</label><input type="number" min="0" step="1" id="wd-mtask-new-days" placeholder="0"></div>
         <div class="wd-field"><button class="wd-btn wd-btn-sm" data-action="maint-task-add">${this._t('btn.add_task', {}, 'Add task')}</button></div>
       </div>` : `<p class="wd-info" style="margin-top:8px">${this._t('msg.custom_task_limit', { max: tasksMax }, 'You have reached the limit of {max} tasks.')}</p>`;
+    // Done by a program (#480): a finished cycle of a ticked program logs the task
+    // as done. One collapsible row per task, saved by "Save reminders".
+    const progAvail = Array.isArray(mt.programs_available) ? mt.programs_available : [];
+    const progMap = (mt.programs && typeof mt.programs === 'object') ? mt.programs : {};
+    const progTasks = eventTypes.map(t => ({ id: t, name: this._maintLabel(t) }))
+      .concat(customTasks.map(t => ({ id: t.id, name: t.name || t.id })));
+    const progRows = progTasks.map(task => {
+      const chosen = new Set(Array.isArray(progMap[task.id]) ? progMap[task.id] : []);
+      const summary = chosen.size ? _esc([...chosen].join(', ')) : this._t('lbl.done_by_none', {}, 'Not set');
+      const boxes = progAvail.map(p => `<label class="wd-switch-lbl" style="display:flex;align-items:center;gap:8px;margin:2px 0">` +
+        `<span class="wd-switch"><input type="checkbox" data-prog="${_esc(p)}" ${chosen.has(p) ? 'checked' : ''}><span class="wd-switch-slider"></span></span>` +
+        `<span class="wd-switch-text">${_esc(p)}</span></label>`).join('');
+      return `<details class="wd-maint-progs" data-mprog-row="${_esc(task.id)}" style="margin-top:6px">
+        <summary style="cursor:pointer"><span style="font-weight:600">${_esc(task.name)}</span> <span class="wd-info">${summary}</span></summary>
+        <div class="wd-checkboxlist" style="margin:6px 0 0 4px">${boxes}</div>
+      </details>`;
+    }).join('');
+    const progSection = progAvail.length && progTasks.length ? `<div class="wd-subhead" style="margin-top:16px">${this._t('hdr.maint_done_by_program', {}, 'Done automatically')}</div>
+      <p class="wd-info">${this._t('msg.maint_done_by_program_intro', {}, 'A task counts as done when a cycle of one of its programs finishes, for example the drum clean when Cotton 90 runs. Only cycles WashData is sure of, or that you picked, count.')}</p>
+      ${progRows}` : '';
     const remEditor = canEdit ? `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.maintenance_reminders', {}, 'Service Reminders')}</div>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.reminders_intro', {}, 'Show a reminder in the panel this many cycles after the last service. Leave blank or 0 to turn a reminder off.')}</p>
@@ -9183,6 +9231,7 @@ class HaWashdataPanel extends HTMLElement {
       <p class="wd-info">${this._t('msg.custom_tasks_intro', {}, 'Add anything else you want to be reminded of. A task is due when either interval is reached; leave one blank or 0 to use only the other.')}</p>
       ${taskRows}
       ${newTaskRow}
+      ${progSection}
       <p class="wd-info" style="margin-top:12px">${this._t('msg.maintenance_due_sensor_hint', {}, 'The Maintenance due binary sensor is on while any task is due, for your own notification automations.')}</p>
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="maint-save-reminders">${this._t('btn.save_reminders', {}, 'Save reminders')}</button></div>
     </div>` : '';
@@ -9207,11 +9256,14 @@ class HaWashdataPanel extends HTMLElement {
       }
       const pct = Math.max(0, Math.min(100, Math.round(frac * 100)));
       const barColor = r.due ? 'var(--warning-color,#ff9800)' : 'var(--primary-color)';
+      const doneBy = Array.isArray(r.programs) && r.programs.length
+        ? `<div class="wd-info" style="margin-top:2px">${this._t('lbl.done_by_programs', { programs: r.programs.join(', ') }, 'Done automatically by: {programs}')}</div>` : '';
       return `<div style="margin-top:10px" data-mstatus="${_esc(r.id)}">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
           <span style="font-weight:600">${_esc(r.custom ? (r.name || r.id) : this._maintLabel(r.id))}</span>
           <span class="wd-info">${parts.join(' · ')}</span>
         </div>
+        ${doneBy}
         <div style="height:6px;margin-top:4px;border-radius:3px;background:var(--divider-color);overflow:hidden">
           <div style="height:100%;border-radius:3px;width:${pct}%;background:${barColor}"></div>
         </div>
@@ -14484,6 +14536,16 @@ class HaWashdataPanel extends HTMLElement {
         if (days !== (t.days || 0)) patch.days = days;
         if (Object.keys(patch).length) updates.push({ task_id: t.id, ...patch });
       }
+      // Done by a program (#480): only the rows whose ticks changed.
+      const progMap = (mt.programs && typeof mt.programs === 'object') ? mt.programs : {};
+      const progUpdates = [];
+      sr.querySelectorAll('[data-mprog-row]').forEach(row => {
+        const tid = row.dataset.mprogRow;
+        const chosen = Array.from(row.querySelectorAll('input[data-prog]')).filter(c => c.checked).map(c => c.dataset.prog);
+        const before = Array.isArray(progMap[tid]) ? progMap[tid] : [];
+        const same = chosen.length === before.length && chosen.every(p => before.includes(p));
+        if (!same) progUpdates.push({ task_id: tid, programs: chosen });
+      });
       // Read before _busyRun: its first render rebuilds the inputs.
       const newTask = this._maintNewTaskInput(sr);
       this._busyRun('maint-save-reminders', async () => {
@@ -14493,6 +14555,9 @@ class HaWashdataPanel extends HTMLElement {
           }
           for (const u of updates) {
             await this._ws({ type: `${_DOMAIN}/update_maintenance_task`, entry_id: eid, ...u });
+          }
+          for (const u of progUpdates) {
+            await this._ws({ type: `${_DOMAIN}/set_maintenance_programs`, entry_id: eid, ...u });
           }
           if (newTask.name) await this._maintAddTask(eid, newTask);
           await this._fetchMaintenance(eid);

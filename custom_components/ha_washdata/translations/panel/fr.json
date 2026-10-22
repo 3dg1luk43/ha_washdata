@@ -274,6 +274,9 @@
     "end_energy": {
       "energy": "Trop strict pour le Seuil d'arrêt ({w} W) sur le Délai d'arrêt ({d} s) ; le cycle ne peut se terminer que par une voie de secours",
       "stop": "L'Énergie de fin ({e} Wh sur {d} s) n'autorise que {p} W"
+    },
+    "power_sensor": {
+      "energy": "Ce capteur compte l'énergie ({unit}), pas la puissance, donc aucun cycle ne peut être détecté. Choisissez le capteur de puissance de la prise (W ou kW)."
     }
   },
   "hdr": {
@@ -324,7 +327,8 @@
     "live_match_debug": "Débogage de la correspondance en direct",
     "automations_used": "Automatisations utilisant cet appareil",
     "bp_templates": "Modèles",
-    "automations_all_tip": "La liste des automatisations de Home Assistant, filtrée par l’étiquette WashData. Les automatisations créées ici sont également dans la catégorie WashData."
+    "automations_all_tip": "La liste des automatisations de Home Assistant, filtrée par l’étiquette WashData. Les automatisations créées ici sont également dans la catégorie WashData.",
+    "maint_done_by_program": "Fait automatiquement"
   },
   "health": {
     "fair": "Qualité de profil acceptable",
@@ -643,7 +647,10 @@
     "bp_you_choose": "Vous choisissez : {inputs}",
     "bp_adjustable": "Réglable : {inputs}",
     "bp_yaml": "YAML du modèle",
-    "automation_wd_label": "Porte l’étiquette WashData"
+    "automation_wd_label": "Porte l’étiquette WashData",
+    "done_by_none": "Non défini",
+    "done_by_programs": "Fait automatiquement par : {programs}",
+    "done_by_cycle": "Fait par un cycle {program}"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -1044,7 +1051,8 @@
     "auto_trigger_hint": "Crée une automatisation avec ce déclencheur pour cet appareil et l’ouvre dans Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Créée par WashData pour {device}. Ajoutez vos actions (notifier, lumières, ...).",
-    "automation_alias_new": "{device}: nouvelle automatisation"
+    "automation_alias_new": "{device}: nouvelle automatisation",
+    "maint_done_by_program_intro": "Une tâche compte comme faite quand un cycle de l'un de ses programmes se termine, par exemple le nettoyage du tambour quand Coton 90 tourne. Seuls comptent les cycles dont WashData est sûr ou que vous avez choisis."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
@@ -1375,7 +1383,7 @@
       "label": "Seuil de mise hors tension"
     },
     "power_sensor": {
-      "doc": "Le capteur qui indique la puissance actuelle de cet appareil en watts (p. ex. sensor.washer_power). Toute la détection repose sur lui.",
+      "doc": "Le capteur qui indique la puissance actuelle de cet appareil en W ou kW (p. ex. sensor.washer_power), pas son compteur d'énergie (kWh). Toute la détection repose sur lui.",
       "label": "Capteur de puissance"
     },
     "profile_match_interval": {

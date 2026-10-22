@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Een beschrijvende naam voor dit apparaat (bijvoorbeeld 'Wasmachine', 'Vaatwasser').",
           "device_type": "Stelt de detectiestandaarden in voor dit soort apparaat.",
-          "power_sensor": "De sensor van de slimme stekker die het actuele vermogen in watt meldt.",
+          "power_sensor": "De vermogenssensor van de slimme stekker (W of kW), niet de energiemeter (kWh).",
           "min_power": "Metingen boven deze waarde (in watt) betekenen dat het apparaat draait. 2 W past bij de meeste apparaten."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Onverwachte fout",
-      "invalid_power": "Vermogensdrempel moet groter zijn dan 0"
+      "invalid_power": "Vermogensdrempel moet groter zijn dan 0",
+      "power_sensor_energy": "Dit is een energiemeter (kWh), geen vermogenssensor. Kies de vermogenssensor van de slimme stekker (W of kW). Heeft de stekker er geen, dan kan een Afgeleide-helper er een maken uit de meter."
     },
     "abort": {
       "already_configured": "Apparaat is al geconfigureerd",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: nog geen profiel herkend.",
       "vs_typical_longer": "{pct}% langer dan gebruikelijk",
       "vs_typical_shorter": "{pct}% korter dan gebruikelijk",
-      "invalid_power": "Vermogensdrempel moet groter zijn dan 0"
+      "invalid_power": "Vermogensdrempel moet groter zijn dan 0",
+      "power_sensor_energy": "Dit is een energiemeter (kWh), geen vermogenssensor. Kies de vermogenssensor van de slimme stekker (W of kW). Heeft de stekker er geen, dan kan een Afgeleide-helper er een maken uit de meter."
     }
   },
   "selector": {

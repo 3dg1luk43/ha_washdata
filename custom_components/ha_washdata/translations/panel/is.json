@@ -325,6 +325,9 @@
     "end_energy": {
       "energy": "Of strangt fyrir Stöðvunarþröskuld ({w} W) yfir Slökkvitöf ({d} s); lotan getur aðeins endað eftir varaleið",
       "stop": "Lokaorka ({e} Wh á {d} s) leyfir aðeins {p} W"
+    },
+    "power_sensor": {
+      "energy": "Þessi skynjari telur orku ({unit}), ekki afl, svo engin lota getur greinst. Veldu aflskynjara innstungunnar (W eða kW)."
     }
   },
   "hdr": {
@@ -375,7 +378,8 @@
     "live_match_debug": "Villuleit samsvörunar í beinni",
     "automations_used": "Sjálfvirkni sem notar þetta tæki",
     "bp_templates": "Sniðmát",
-    "automations_all_tip": "Sjálvvirknilisti Home Assistant, síaur eftir WashData-merkimiðanum. Sjálvvirkni búinn til hér er einnig í WashData-flokki."
+    "automations_all_tip": "Sjálvvirknilisti Home Assistant, síaur eftir WashData-merkimiðanum. Sjálvvirkni búinn til hér er einnig í WashData-flokki.",
+    "maint_done_by_program": "Lokið sjálfkrafa"
   },
   "health": {
     "fair": "Viðunanlegt prófíl",
@@ -691,7 +695,10 @@
     "bp_you_choose": "Þú velur: {inputs}",
     "bp_adjustable": "Stillanleg: {inputs}",
     "bp_yaml": "Blueprint-YAML",
-    "automation_wd_label": "Ber WashData-merkimiðann"
+    "automation_wd_label": "Ber WashData-merkimiðann",
+    "done_by_none": "Ekki stillt",
+    "done_by_programs": "Lokið sjálfkrafa með: {programs}",
+    "done_by_cycle": "Lokið með lotu á {program}"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -1082,7 +1089,8 @@
     "auto_trigger_hint": "Býr til sjálvvirkni með þssari kveikju fyrir þetta tæki og opnar hana í Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Búið til af WashData fyrir {device}. Bættu við aðgerðum (þkynning, ljós, ...).",
-    "automation_alias_new": "{device}: ný sjálvvirkni"
+    "automation_alias_new": "{device}: ný sjálvvirkni",
+    "maint_done_by_program_intro": "Verk telst lokið þegar lota með einu af kerfum þess lýkur, til dæmis tromluhreinsun þegar Bómull 90 keyrir. Aðeins lotur sem WashData er viss um, eða sem þú valdir, teljast með."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
@@ -1413,7 +1421,7 @@
       "label": "Slökkunarþröskuldur"
     },
     "power_sensor": {
-      "doc": "Skynjarinn sem gefur upp núverandi afl þessa tækis í vöttum (t.d. sensor.washer_power). Öll greining byggist á honum.",
+      "doc": "Skynjarinn sem gefur upp núverandi afl þessa tækis í W eða kW (t.d. sensor.washer_power), ekki orkumælir þess (kWh). Öll greining byggist á honum.",
       "label": "Aflskynjari"
     },
     "profile_match_interval": {

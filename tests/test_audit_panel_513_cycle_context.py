@@ -58,7 +58,8 @@ class _Recorder:
         self.rows = rows  # [(unix_ts, watts | None)]
         self.calls = []
 
-    async def __call__(self, hass, entity_id, start_dt, *, end_dt=None, keep_unavailable=False):
+    async def __call__(self, hass, entity_id, start_dt, *, end_dt=None, keep_unavailable=False,
+                       scale=1.0):
         self.calls.append((entity_id, start_dt, end_dt, keep_unavailable))
         lo = start_dt.timestamp()
         hi = end_dt.timestamp()

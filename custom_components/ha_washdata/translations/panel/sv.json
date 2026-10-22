@@ -325,6 +325,9 @@
     "end_energy": {
       "energy": "För strikt för Stopptröskel ({w} W) under Avfördröjning ({d} s); cykeln kan bara avslutas via en reservväg",
       "stop": "Slutenergi ({e} Wh på {d} s) tillåter bara {p} W"
+    },
+    "power_sensor": {
+      "energy": "Den här sensorn räknar energi ({unit}), inte effekt, så ingen cykel kan upptäckas. Välj kontaktens effektsensor (W eller kW)."
     }
   },
   "hdr": {
@@ -375,7 +378,8 @@
     "live_match_debug": "Felsökning av livematchning",
     "automations_used": "Automatiseringar som använder den här enheten",
     "bp_templates": "Mallar",
-    "automations_all_tip": "Home Assistants automatiseringslista, filtrerad efter WashData-etiketten. Automatiseringar skapade här finns också i WashData-kategorin."
+    "automations_all_tip": "Home Assistants automatiseringslista, filtrerad efter WashData-etiketten. Automatiseringar skapade här finns också i WashData-kategorin.",
+    "maint_done_by_program": "Klar automatiskt"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -691,7 +695,10 @@
     "bp_you_choose": "Du väljer: {inputs}",
     "bp_adjustable": "Justerbar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
-    "automation_wd_label": "Har WashData-etiketten"
+    "automation_wd_label": "Har WashData-etiketten",
+    "done_by_none": "Inte angivet",
+    "done_by_programs": "Klar automatiskt efter: {programs}",
+    "done_by_cycle": "Klar efter en cykel med {program}"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -1082,7 +1089,8 @@
     "auto_trigger_hint": "Skapar en automatisering med denna trigger för denna enhet och öppnar den i Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Skapad av WashData för {device}. Lägg till dina åtgärder (avisering, lampor, ...).",
-    "automation_alias_new": "{device}: ny automatisering"
+    "automation_alias_new": "{device}: ny automatisering",
+    "maint_done_by_program_intro": "En uppgift räknas som klar när en cykel med ett av dess program avslutas, till exempel trumrengöring när Bomull 90 körs. Bara cykler som WashData är säker på, eller som du själv har valt, räknas."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
@@ -1413,7 +1421,7 @@
       "label": "Avstängningströskel"
     },
     "power_sensor": {
-      "doc": "Sensorn som rapporterar apparatens aktuella effekt i watt (t.ex. sensor.washer_power). All detektering bygger på den.",
+      "doc": "Sensorn som rapporterar apparatens aktuella effekt i W eller kW (t.ex. sensor.washer_power), inte dess energimätare (kWh). All detektering bygger på den.",
       "label": "Effektsensor"
     },
     "profile_match_interval": {

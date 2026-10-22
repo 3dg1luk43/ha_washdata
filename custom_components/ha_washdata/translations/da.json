@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Et venligt navn for denne enhed (f.eks. \"Vaskemaskine\", \"Opvaskemaskine\").",
           "device_type": "Indstiller registreringsstandarder for denne type apparat.",
-          "power_sensor": "Smartstikkets sensor, der rapporterer aktuel effekt i watt.",
+          "power_sensor": "Smartstikkets strømsensor (W eller kW), ikke dets energimåler (kWh).",
           "min_power": "Målinger over denne værdi (i watt) betyder, at apparatet kører. 2 W passer til de fleste enheder."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Uventet fejl",
-      "invalid_power": "Effekttærsklen skal være større end 0"
+      "invalid_power": "Effekttærsklen skal være større end 0",
+      "power_sensor_energy": "Dette er en energimåler (kWh), ikke en strømsensor. Vælg smartstikkets strømsensor (W eller kW). Hvis stikket ikke har en, kan en Afledt sensor-hjælper lave en ud fra måleren."
     },
     "abort": {
       "already_configured": "Enheden er allerede konfigureret",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ingen profil genkendt endnu.",
       "vs_typical_longer": "{pct}% længere end normalt",
       "vs_typical_shorter": "{pct}% kortere end normalt",
-      "invalid_power": "Effekttærsklen skal være større end 0"
+      "invalid_power": "Effekttærsklen skal være større end 0",
+      "power_sensor_energy": "Dette er en energimåler (kWh), ikke en strømsensor. Vælg smartstikkets strømsensor (W eller kW). Hvis stikket ikke har en, kan en Afledt sensor-hjælper lave en ud fra måleren."
     }
   },
   "selector": {

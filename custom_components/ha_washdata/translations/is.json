@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Vingjarnlegt nafn fyrir þetta tæki (t.d. „Þvottavél“, „Uppþvottavél“).",
           "device_type": "Stillir sjálfgefin greiningargildi fyrir þessa tegund tækis.",
-          "power_sensor": "Skynjari snjalltengilsins sem gefur upp núverandi afl í vöttum.",
+          "power_sensor": "Aflskynjari snjalltengilsins (W eða kW), ekki orkumælir hans (kWh).",
           "min_power": "Mælingar yfir þessu (í vöttum) þýða að tækið er í gangi. 2 W hentar flestum tækjum."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Óvænt villa",
-      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0"
+      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0",
+      "power_sensor_energy": "Þetta er orkumælir (kWh), ekki aflskynjari. Veldu aflskynjara snjalltengilsins (W eða kW). Ef tengillinn hefur engan getur Derivative-hjálpari búið hann til út frá mælinum."
     },
     "abort": {
       "already_configured": "Tæki er þegar stillt",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ekkert snið hefur enn verið greint.",
       "vs_typical_longer": "{pct}% lengri en venjulega",
       "vs_typical_shorter": "{pct}% styttri en venjulega",
-      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0"
+      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0",
+      "power_sensor_energy": "Þetta er orkumælir (kWh), ekki aflskynjari. Veldu aflskynjara snjalltengilsins (W eða kW). Ef tengillinn hefur engan getur Derivative-hjálpari búið hann til út frá mælinum."
     }
   },
   "selector": {

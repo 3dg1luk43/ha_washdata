@@ -217,6 +217,7 @@ class MaintenanceStatusRow(TypedDict):
     cycles_since: int
     days_since: int | None
     due: bool
+    programs: list[str]
 
 
 class MaintenanceLimits(TypedDict):
@@ -234,6 +235,8 @@ class GetMaintenanceLogResponse(TypedDict):
     cycles_since: dict[str, int]
     custom_tasks: list[MaintenanceTask]
     status: list[MaintenanceStatusRow]
+    programs_available: list[str]
+    programs: dict[str, list[str]]
     lifetime_cycle_count: int
     limits: MaintenanceLimits
 
@@ -241,6 +244,14 @@ class GetMaintenanceLogResponse(TypedDict):
 class MaintenanceTaskResponse(TypedDict):
     success: bool
     task: MaintenanceTask
+
+
+class SetMaintenanceProgramsResponse(TypedDict):
+    """The programs that now mark ``task_id`` done when they finish (#480)."""
+
+    success: bool
+    task_id: str
+    programs: list[str]
 
 
 class SetLifetimeCycleCountResponse(TypedDict):
@@ -852,6 +863,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "delete_maintenance_event": SuccessResponse,
     "add_maintenance_task": MaintenanceTaskResponse,
     "update_maintenance_task": MaintenanceTaskResponse,
+    "set_maintenance_programs": SetMaintenanceProgramsResponse,
     "delete_maintenance_task": SuccessResponse,
     "set_lifetime_cycle_count": SetLifetimeCycleCountResponse,
     "label_cycle": SuccessResponse,
@@ -1057,6 +1069,9 @@ WS_COMMANDS: dict[str, dict] = {
         _p("days", "int", False),
     ]},
     "delete_maintenance_task": {"params": [_entry(), _p("task_id", "str")]},
+    "set_maintenance_programs": {"params": [
+        _entry(), _p("task_id", "str"), _p("programs", "list[str]"),
+    ]},
     "set_lifetime_cycle_count": {"params": [_entry(), _p("count", "int")]},
     "label_cycle": {"params": [
         _entry(),

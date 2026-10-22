@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Ett vänligt namn för den här enheten (t.ex. \"Tvättmaskin\", \"Diskmaskin\").",
           "device_type": "Ställer in standardvärden för detektering för den här typen av apparat.",
-          "power_sensor": "Den smarta kontaktens sensor som rapporterar aktuell effekt i watt.",
+          "power_sensor": "Den smarta kontaktens effektsensor (W eller kW), inte dess energimätare (kWh).",
           "min_power": "Mätvärden över detta (i watt) betyder att apparaten är igång. 2 W passar de flesta enheter."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Oväntat fel",
-      "invalid_power": "Effekttröskeln måste vara större än 0"
+      "invalid_power": "Effekttröskeln måste vara större än 0",
+      "power_sensor_energy": "Det här är en energimätare (kWh), inte en effektsensor. Välj den smarta kontaktens effektsensor (W eller kW). Om kontakten saknar en kan en Derivatasensor-hjälpare skapa en från mätaren."
     },
     "abort": {
       "already_configured": "Enheten är redan konfigurerad",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ingen profil matchad ännu.",
       "vs_typical_longer": "{pct}% längre än vanligt",
       "vs_typical_shorter": "{pct}% kortare än vanligt",
-      "invalid_power": "Effekttröskeln måste vara större än 0"
+      "invalid_power": "Effekttröskeln måste vara större än 0",
+      "power_sensor_energy": "Det här är en energimätare (kWh), inte en effektsensor. Välj den smarta kontaktens effektsensor (W eller kW). Om kontakten saknar en kan en Derivatasensor-hjälpare skapa en från mätaren."
     }
   },
   "selector": {
