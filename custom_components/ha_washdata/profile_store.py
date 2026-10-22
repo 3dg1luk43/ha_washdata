@@ -10991,6 +10991,16 @@ class ProfileStore:
                 if key not in data_dict:
                     continue
                 src_val = data_dict.get(key)
+                if key == "maintenance_programs" and isinstance(src_val, dict):
+                    # Program names follow the profiles' import (#480): an
+                    # "import as copy" renamed the file's profile.
+                    src_val = {
+                        task_id: list(dict.fromkeys(
+                            name_remap.get(n, n) for n in names if isinstance(n, str)
+                        ))
+                        for task_id, names in src_val.items()
+                        if isinstance(names, list)
+                    }
                 if mode == "replace":
                     self._data[key] = src_val
                     continue
@@ -11507,14 +11517,19 @@ class ProfileStore:
 
         # #471: a piece is rebuilt from the trace only, so it had no cost. Share a
         # captured meter reading by each piece's integrated energy (the total stays
-        # what the meter measured), then charge each piece at its parent's price.
+        # what the meter measured), by its duration when the trace integrates to
+        # nothing, then charge each piece at its parent's price.
         meter = cycle.get("energy_meter_wh")
-        total_wh = sum(float(pc.get("energy_wh") or 0.0) for pc, _, _ in piece_bounds)
+        weight_key = "energy_wh"
+        total_w = sum(float(pc.get("energy_wh") or 0.0) for pc, _, _ in piece_bounds)
+        if total_w <= 0:
+            weight_key = "duration"
+            total_w = sum(float(pc.get("duration") or 0.0) for pc, _, _ in piece_bounds)
         for piece, seg_start, seg_end in piece_bounds:
-            if meter is not None and total_wh > 0:
+            if meter is not None and total_w > 0:
                 try:
                     piece["energy_meter_wh"] = round(
-                        float(meter) * float(piece.get("energy_wh") or 0.0) / total_wh, 3
+                        float(meter) * float(piece.get(weight_key) or 0.0) / total_w, 3
                     )
                 except (TypeError, ValueError, OverflowError):
                     pass
@@ -11633,10 +11648,10 @@ class ProfileStore:
         # #471: each part's pricing and reported energy, captured before c1 is
         # rewritten, so the merged cycle can carry the parts' total cost.
         merge_parts: list[dict[str, Any]] = []
-        any_meter = False
+        part_meters: list[bool] = []
         for part in target_cycles:
             part_ts = _value_to_timestamp(part.get("start_time"))
-            any_meter = any_meter or part.get("energy_meter_wh") is not None
+            part_meters.append(part.get("energy_meter_wh") is not None)
             merge_parts.append({
                 "offset": (part_ts - c1_start_dt.timestamp()) if part_ts is not None else 0.0,
                 "cost": part.get("cost"),
@@ -11749,6 +11764,11 @@ class ProfileStore:
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.warning("Energy recompute failed after cycle merge", exc_info=True)
 
+        # Only the parts the merge consumed: one it skipped (no usable trace) stays
+        # in history with its own energy and cost.
+        consumed = [True] + [c.get("id") in ids_to_remove for c in target_cycles[1:]]
+        merge_parts = [p for p, keep in zip(merge_parts, consumed) if keep]
+        any_meter = any(m for m, keep in zip(part_meters, consumed) if keep)
         # A meter reading of one part does not describe the whole: the merged
         # figure is the sum of every part's reported energy (meter or integrated).
         if any_meter:

@@ -5435,6 +5435,11 @@ class WashDataManager:
         # which replaces this cycle's timeline with the NEW cycle's opening sample
         # before the task reaches the costing step (#426).
         end_price_timeline = list(self._price_timeline)
+        # still_tumbling (#478): armed here, before the pipeline below awaits the
+        # final match and the store, so a tumble in those seconds is counted. A
+        # cycle that starts during them holds its tumbles (_release_held_tumble).
+        if notif_rules.cycle_end_is_finish(cycle_data.get("status")):
+            self._arm_tumble_tracker(cycle_data)
         if not self._is_shutdown:
             self._cycle_end_task = self._spawn_tracked(
                 self._async_process_cycle_end(
@@ -6518,9 +6523,6 @@ class WashDataManager:
         end_vars = self._cycle_end_trigger_vars(cycle_data, label_applied=label_gate_ok)
         if notif_rules.cycle_end_is_finish(cycle_data.get("status")):
             self._fire_device_trigger(TRIGGER_CYCLE_FINISHED, trigger_program, **end_vars)
-            # Not when a new cycle already started during the awaits above.
-            if cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
-                self._arm_tumble_tracker(cycle_data)
         if ended is None or ended["pending"]:
             if ended is not None:
                 ended["pending"] = False

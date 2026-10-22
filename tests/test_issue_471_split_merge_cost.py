@@ -169,3 +169,36 @@ def test_carry_never_raises_on_a_broken_timeline() -> None:
     # Unusable timeline: falls back to the parent's single price.
     assert piece["energy_price_mode"] == "fixed"
     assert piece["cost"] == pytest.approx(0.25)
+
+
+async def test_a_metered_parent_whose_trace_is_flat_shares_its_meter_by_duration(
+    store: ProfileStore,
+) -> None:
+    """A zero-energy trace gives no energy weights; the meter reading is still the
+    parent's and is shared by duration, so the pieces keep its cost."""
+    flat = [[float(t), 0.0] for t in range(0, 7800 + 1, 30)]
+    parent = _cycle("p", START, flat, energy_wh=0.0, energy_meter_wh=3000.0,
+                    cost=0.9, energy_price=0.30, energy_price_mode="fixed")
+    a, b = await _split(store, parent)
+    assert a["energy_meter_wh"] + b["energy_meter_wh"] == pytest.approx(3000.0, abs=0.01)
+    assert a["energy_meter_wh"] == pytest.approx(1500.0, abs=0.01)
+    assert a["cost"] + b["cost"] == pytest.approx(0.9, abs=0.01)
+
+
+async def test_a_part_the_merge_skips_keeps_its_own_energy_and_cost(store: ProfileStore) -> None:
+    """A selected cycle with no usable trace is not consumed: it stays in history,
+    so its energy and cost are not added to the merged record as well."""
+    first = _cycle("a", START, [[float(t), 2000.0] for t in range(0, 3601, 30)],
+                   energy_meter_wh=2000.0, cost=0.6, energy_price=0.30, energy_price_mode="fixed")
+    blank = _cycle("b", START + timedelta(seconds=3700), [[0.0, 0.0], [60.0, 0.0]],
+                   energy_meter_wh=500.0, cost=0.15, energy_price=0.30, energy_price_mode="fixed")
+    blank["power_data"] = []
+    third = _cycle("c", START + timedelta(seconds=4200), [[float(t), 1000.0] for t in range(0, 3601, 30)],
+                   energy_meter_wh=1000.0, cost=0.3, energy_price=0.30, energy_price_mode="fixed")
+    store._data["past_cycles"] = [first, blank, third]
+    merged_id = await store.apply_merge_interactive(["a", "b", "c"], None)
+    ids = [c["id"] for c in store._data["past_cycles"]]
+    assert "b" in ids  # skipped, still stored
+    merged = next(c for c in store._data["past_cycles"] if c["id"] == merged_id)
+    assert merged["energy_meter_wh"] == pytest.approx(3000.0)
+    assert merged["cost"] == pytest.approx(0.9)

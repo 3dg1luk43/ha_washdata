@@ -28,10 +28,12 @@ integration, device registry and the real manager and detector (no cycle_data).
 """
 from __future__ import annotations
 
+import asyncio
 import json
 from datetime import timedelta
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 import voluptuous as vol
@@ -705,6 +707,35 @@ async def test_still_tumbling_fires_once_past_its_minutes(
         await _tumble(hass, freezer, 120)
     assert len(_of(calls, "tumbling")) == 1
     assert len(_of(calls, "tumbling_default")) == 1
+
+
+async def test_the_tumble_watch_starts_when_the_cycle_ends(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """Armed in the synchronous end path, not after the final match and the store
+    are awaited, so a tumble in those seconds is counted."""
+    entry = await setup_washdata_entry(
+        "Dryer", device_type="dryer", power_sensor=POWER, options=DRYER
+    )
+    manager = _manager(hass, entry)
+    assert not manager._tumble_tracker.armed  # noqa: SLF001
+    release = asyncio.Event()
+    real_match = manager._run_final_match_from_cycle_data  # noqa: SLF001
+
+    async def _slow_match(cycle_data):
+        await release.wait()  # the final match takes its time on the executor
+        return await real_match(cycle_data)
+
+    with patch.object(manager, "_run_final_match_from_cycle_data", side_effect=_slow_match):
+        manager._on_cycle_end({  # noqa: SLF001
+            "duration": 1800.0, "max_power": 800.0, "status": "completed",
+            "start_time": "2026-10-20T10:00:00+00:00", "end_time": "2026-10-20T10:30:00+00:00",
+            "power_data": [[0.0, 800.0], [900.0, 800.0], [1800.0, 0.0]],
+        })
+        await asyncio.sleep(0)
+        assert manager._tumble_tracker.armed  # noqa: SLF001  # while the match runs
+        release.set()
+        await hass.async_block_till_done()
 
 
 async def test_still_tumbling_needs_tumbles(

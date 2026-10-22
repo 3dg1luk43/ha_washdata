@@ -145,3 +145,30 @@ async def test_an_interrupted_cycle_does_not_count(
     await hass.async_block_till_done()
 
     assert store.get_maintenance_log() == []
+
+
+async def test_an_imported_copy_takes_its_programs_with_it(hass: HomeAssistant) -> None:
+    """Selective import "as a copy" renames the file's profile; the task's program
+    list follows it instead of naming the unrelated local profile."""
+    store = _store(hass, "Cotton 90")
+    payload = {
+        "version": 11,
+        "device_fingerprint": {"device_type": "washing_machine"},
+        "data": {
+            "profiles": {"Cotton 90": {"avg_duration": 5400.0}},
+            "past_cycles": [], "reference_cycles": [],
+            "maintenance_log": [], "maintenance_tasks": [],
+            "maintenance_programs": {"drum_clean": ["Cotton 90"]},
+        },
+        "entry_data": {}, "entry_options": {},
+    }
+    with patch.object(store, "async_save", AsyncMock()), patch.object(
+        store, "async_save_pre_import_snapshot", AsyncMock(return_value=True)
+    ):
+        await store.async_import_data_selective(
+            payload, selection={"categories": ["profiles", "maintenance_log"]},
+            conflict_resolutions={"Cotton 90": "import_as_copy"},
+            local_device_type="washing_machine",
+        )
+    assert "Cotton 90 (imported)" in store.get_profiles()
+    assert store.get_maintenance_programs() == {"drum_clean": ["Cotton 90 (imported)"]}
