@@ -172,3 +172,21 @@ async def test_an_imported_copy_takes_its_programs_with_it(hass: HomeAssistant) 
         )
     assert "Cotton 90 (imported)" in store.get_profiles()
     assert store.get_maintenance_programs() == {"drum_clean": ["Cotton 90 (imported)"]}
+
+
+async def test_a_profile_removed_with_its_last_cycle_or_by_gc_leaves_no_association(
+    hass: HomeAssistant,
+) -> None:
+    store = _store(hass, "Imported 90", "Broken")
+    store._data["reference_cycles"] = [  # noqa: SLF001
+        {"id": "r1", "profile_name": "Imported 90", "start_time": END, "duration": 60.0}
+    ]
+    store._data["profiles"]["Broken"]["sample_cycle_id"] = "gone"  # noqa: SLF001
+    with patch.object(store, "async_save", AsyncMock()):
+        await store.async_set_maintenance_programs("drum_clean", ["Imported 90", "Broken"])
+        assert await store.delete_cycle("r1")
+    assert "Imported 90" not in store.get_profiles()
+    assert store.get_maintenance_programs() == {"drum_clean": ["Broken"]}
+
+    assert store.cleanup_orphaned_profiles() == 1
+    assert store.get_maintenance_programs() == {}

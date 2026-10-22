@@ -713,7 +713,11 @@ def _set_dynamic_cost(cycle: CycleDict, points: list[tuple[float, float]]) -> bo
 
 
 def carry_cycle_cost(
-    piece: CycleDict, parent: CycleDict, start_off: float, end_off: float
+    piece: CycleDict,
+    parent: CycleDict,
+    start_off: float,
+    end_off: float,
+    logger: logging.Logger | logging.LoggerAdapter[Any] = _LOGGER,
 ) -> None:
     """Give a piece split out of ``parent`` its own cost (#471).
 
@@ -737,10 +741,14 @@ def carry_cycle_cost(
         piece["energy_price_mode"] = "fixed"
         piece["cost"] = round(cycle_report_energy_wh(piece) / 1000.0 * price_f, 4)
     except (TypeError, ValueError, OverflowError):
-        _LOGGER.debug("Could not carry the cost onto a split cycle", exc_info=True)
+        logger.debug("Could not carry the cost onto a split cycle", exc_info=True)
 
 
-def merge_cycle_cost(merged: CycleDict, parts: list[dict[str, Any]]) -> None:
+def merge_cycle_cost(
+    merged: CycleDict,
+    parts: list[dict[str, Any]],
+    logger: logging.Logger | logging.LoggerAdapter[Any] = _LOGGER,
+) -> None:
     """Cost of a cycle merged from ``parts`` (#471): the sum of the parts' costs,
     each already charged at its own price. ``parts`` are the parts' pricing as it
     stood before the merge: ``offset`` (start, s after the merged start),
@@ -782,7 +790,7 @@ def merge_cycle_cost(merged: CycleDict, parts: list[dict[str, Any]]) -> None:
                 )
             ]
     except (TypeError, ValueError, OverflowError, KeyError):
-        _LOGGER.debug("Could not merge cycle costs", exc_info=True)
+        logger.debug("Could not merge cycle costs", exc_info=True)
 
 
 def earliest_sustained_quiet_offset(
@@ -5922,6 +5930,7 @@ class ProfileStore:
 
         for name in orphaned:
             del self._data["profiles"][name]
+            self._rename_maintenance_program(name, None)  # #480
             self._logger.info(
                 "Cleaned up orphaned profile '%s' (cycle no longer exists)", name
             )
@@ -11139,6 +11148,7 @@ class ProfileStore:
             else:
                 self._data.get("profiles", {}).pop(profile_name, None)
                 self._data.get("envelopes", {}).pop(profile_name, None)
+                self._rename_maintenance_program(profile_name, None)  # #480
         await self.async_save()
         return True
 
@@ -11533,7 +11543,7 @@ class ProfileStore:
                     )
                 except (TypeError, ValueError, OverflowError):
                     pass
-            carry_cycle_cost(piece, cycle, seg_start, seg_end)
+            carry_cycle_cost(piece, cycle, seg_start, seg_end, self._logger)
 
         # Fix profile refs (handle original sample cycle logic)
         original_sample_id = cycle.get("id")
@@ -11775,7 +11785,7 @@ class ProfileStore:
             c1["energy_meter_wh"] = round(sum(p["report_wh"] for p in merge_parts), 3)
         else:
             c1.pop("energy_meter_wh", None)
-        merge_cycle_cost(c1, merge_parts)
+        merge_cycle_cost(c1, merge_parts, self._logger)
 
         # New Hash ID
         new_id = hashlib.sha256(f"{c1['start_time']}_{c1['duration']}".encode()).hexdigest()[:12]

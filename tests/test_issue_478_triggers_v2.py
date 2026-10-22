@@ -738,6 +738,38 @@ async def test_the_tumble_watch_starts_when_the_cycle_ends(
         await hass.async_block_till_done()
 
 
+async def test_a_tumble_held_for_a_newer_cycle_survives_the_older_cycle_end(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """Cycle B starts (a tumble read as a false start) while A's end is still being
+    processed: the tumble held for B is B's to release, not A's to drop."""
+    entry = await setup_washdata_entry(
+        "Dryer", device_type="dryer", power_sensor=POWER, options=DRYER
+    )
+    manager = _manager(hass, entry)
+    release = asyncio.Event()
+    real_match = manager._run_final_match_from_cycle_data  # noqa: SLF001
+
+    async def _slow_match(cycle_data):
+        await release.wait()
+        return await real_match(cycle_data)
+
+    manager._cycle_ended_pending = True  # noqa: SLF001  # A's start was announced
+    with patch.object(manager, "_run_final_match_from_cycle_data", side_effect=_slow_match):
+        manager._on_cycle_end({  # noqa: SLF001
+            "duration": 1800.0, "max_power": 800.0, "status": "completed",
+            "start_time": "2026-10-20T10:00:00+00:00", "end_time": "2026-10-20T10:30:00+00:00",
+            "power_data": [[0.0, 800.0], [900.0, 800.0], [1800.0, 0.0]],
+        })
+        await asyncio.sleep(0)
+        # B started during A's awaits and its tumble was held.
+        manager._ranking_snapshot_cycle_id = "cycle-b"  # noqa: SLF001
+        manager._tumble_held = {"minutes_since_finish": 3.0, "_prev_minutes": None}  # noqa: SLF001
+        release.set()
+        await hass.async_block_till_done()
+    assert manager._tumble_held is not None  # noqa: SLF001
+
+
 async def test_still_tumbling_needs_tumbles(
     hass: HomeAssistant, setup_washdata_entry, freezer
 ) -> None:

@@ -6527,7 +6527,10 @@ class WashDataManager:
             if ended is not None:
                 ended["pending"] = False
             self._fire_device_trigger(TRIGGER_CYCLE_ENDED, trigger_program, **end_vars)
-            self._release_held_tumble(cycle_data.get("status"))
+            # A tumble held now belongs to a cycle that started during the awaits
+            # above: that cycle's own end releases it, not this one's.
+            if cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
+                self._release_held_tumble(cycle_data.get("status"))
 
         # Purge pending live entries and reset counters. No service-level clear
         # here: the activity is ended below, AFTER the finished notification has
