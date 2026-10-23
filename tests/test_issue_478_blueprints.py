@@ -273,6 +273,24 @@ async def test_ws_blueprints_list_reports_an_unreadable_catalog(
     assert res["result"]["blueprints"] == [] and res["result"]["error"]
 
 
+async def test_ws_blueprints_list_does_not_send_the_exception_text(
+    hass, setup_washdata_entry, hass_ws_client, monkeypatch, caplog
+) -> None:
+    """The command is open to every signed-in user; an exception can carry a path."""
+    await setup_washdata_entry()
+
+    def _boom(*_a, **_k):
+        raise FileNotFoundError("/config/custom_components/secret/catalog.json")
+
+    monkeypatch.setattr(blueprint_catalog, "load_catalog", _boom)
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": f"{DOMAIN}/blueprints/list"})
+    res = await client.receive_json()
+    assert res["success"], res
+    assert res["result"]["error"] and "/config" not in res["result"]["error"]
+    assert "secret/catalog.json" in caplog.text  # logged on the server instead
+
+
 # ─── Installed and used on a real Home Assistant ─────────────────────────────
 
 
@@ -430,6 +448,19 @@ async def test_anti_crease_cuts_and_restores_the_plug(hass, setup_washdata_entry
     await _advance(hass, 3)
     assert [c.data["entity_id"] for c in calls["on"]] == [[PLUG]]
     assert done == [{"on": True}]
+
+
+@needs_device_trigger
+async def test_anti_crease_reads_a_kw_sensor_as_watts(hass, setup_washdata_entry, tmp_path) -> None:
+    """0.18 kW is a 180 W tumble, not 0.18 W under the 10 W threshold (#481)."""
+    entry, calls, _done = await _anti_crease(hass, setup_washdata_entry, tmp_path)
+    hass.states.async_set(POWER, "0.18", {"unit_of_measurement": "kW"})
+    await _settle()
+    await _tumble(hass, entry)
+    assert not calls["off"]  # still tumbling at 180 W
+    hass.states.async_set(POWER, "0.0025", {"unit_of_measurement": "kW"})
+    await _settle()
+    assert [c.data["entity_id"] for c in calls["off"]] == [[PLUG]]
 
 
 @needs_device_trigger

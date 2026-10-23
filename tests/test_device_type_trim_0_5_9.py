@@ -396,3 +396,14 @@ def test_a_non_string_device_type_is_no_retired_type(bad: Any) -> None:
     assert retire_device_type(opts, data) == []
     assert opts == {CONF_DEVICE_TYPE: bad} and data == {CONF_DEVICE_TYPE: bad}
     assert canonical_device_type(bad) == bad
+
+
+def test_a_null_options_device_type_falls_back_to_the_retired_data_type() -> None:
+    """A stored null in options is no device type: the retired one in data decides,
+    so its defaults are kept instead of the entry silently turning generic."""
+    opts: dict[str, Any] = {CONF_DEVICE_TYPE: None}
+    data = {CONF_DEVICE_TYPE: "bread_maker"}
+    written = retire_device_type(opts, data)
+    assert opts[CONF_DEVICE_TYPE] == "generic" and data[CONF_DEVICE_TYPE] == "generic"
+    assert {k: opts[k] for k in FROZEN["bread_maker"]} == FROZEN["bread_maker"]
+    assert set(FROZEN["bread_maker"]) <= set(written)

@@ -4623,23 +4623,7 @@ class WashDataManager:
                     "Dropped the restored %s cycle: it was read from an energy counter",
                     self.detector.state,
                 )
-                if self._cycle_ended_pending:  # its start was announced (#478)
-                    self._cycle_ended_pending = False
-                    self._trigger_ended_program = self._trigger_program(
-                        self._current_program
-                    )
-                    # The restore puts the start on the detector; the manager's
-                    # own copy is set by the next state change, not yet here.
-                    start = self._cycle_start_time or self.detector.current_cycle_start
-                    self._fire_cycle_ended({
-                        "status": "interrupted",
-                        "start_time": start.isoformat() if start is not None else None,
-                        "end_time": utc_now().isoformat(),
-                        "duration": (
-                            (utc_now() - dt_util.as_utc(start)).total_seconds()
-                            if start is not None else 0.0
-                        ),
-                    })
+                self._end_dropped_cycle()
                 self.detector.reset(STATE_OFF)
                 self._spawn_tracked(self.profile_store.async_clear_active_cycle())
         if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
@@ -9178,6 +9162,31 @@ class WashDataManager:
             "anomaly": anomaly if isinstance(anomaly, str) and anomaly else "none",
         }
 
+    def _end_dropped_cycle(self) -> None:
+        """Before a cycle is dropped by a detector reset (which fires no cycle end):
+        if its start was announced, send the end owed to it (#478), as an
+        interrupted cycle. Never raises."""
+        if not self._cycle_ended_pending:
+            return
+        self._cycle_ended_pending = False
+        try:
+            self._trigger_ended_program = self._trigger_program(self._current_program)
+            # A restore puts the start on the detector; the manager's own copy is
+            # only set by the next state change.
+            start = self._cycle_start_time or self.detector.current_cycle_start
+            now = utc_now()
+            self._fire_cycle_ended({
+                "status": "interrupted",
+                "start_time": start.isoformat() if start is not None else None,
+                "end_time": now.isoformat(),
+                "duration": (
+                    (now - dt_util.as_utc(start)).total_seconds()
+                    if start is not None else 0.0
+                ),
+            })
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not end the dropped cycle", exc_info=True)
+
     def _fire_cycle_ended(
         self,
         cycle_data: dict[str, Any],
@@ -10115,6 +10124,7 @@ class WashDataManager:
         # But should we clear current program?
         if self.detector.state != "off":
             self._logger.info("Forcing detector reset before recording")
+            self._end_dropped_cycle()
             self.detector.reset()
 
         await self.recorder.start_recording()

@@ -2,7 +2,7 @@
 
 Automation templates are Home Assistant blueprints that ship with WashData. A PR that only touches
 `custom_components/ha_washdata/blueprints/` needs no accepted issue, but every template is reviewed
-before it is merged. See [CONTRIBUTING](../../CONTRIBUTING.md#automation-templates).
+before it is merged. See [CONTRIBUTING](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#automation-templates).
 
 ## Description
 

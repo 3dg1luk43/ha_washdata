@@ -196,7 +196,9 @@ def retire_device_type(
     Shared by the 3.11 -> 3.12 step, the one-pass legacy migration, the import,
     the undo-import and ``ws_set_options``.
     """
-    retired = options.get(CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE))
+    retired = options.get(CONF_DEVICE_TYPE)
+    if not retired:  # absent, or a stored null: the type is the one in data
+        retired = data.get(CONF_DEVICE_TYPE)
     # A list or dict (a hand-edited import, a stray WS payload) is not hashable:
     # it is no retired type, rather than a TypeError that fails the whole save.
     data_type = data.get(CONF_DEVICE_TYPE)

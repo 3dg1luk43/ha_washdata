@@ -291,6 +291,28 @@ async def test_a_discarded_ghost_still_ends_what_it_started(
     assert bus[0].data["duration"] == 30.0 and "power_data" not in bus[0].data["cycle_data"]
 
 
+async def test_starting_a_recording_ends_an_announced_cycle(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """A recording resets a running cycle without a cycle end; the end owed to
+    its announced start goes out first."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    seen = _listen(hass, entry)
+    bus = async_capture_events(hass, EVENT_CYCLE_ENDED)
+    manager.detector._state = "running"  # noqa: SLF001
+    manager._cycle_ended_pending = True  # noqa: SLF001
+
+    await manager.async_start_recording()
+    await hass.async_block_till_done()
+
+    ended = [v for t, v in seen if t == "cycle_ended"]
+    assert len(ended) == 1 and ended[0]["status"] == "interrupted"
+    assert len(bus) == 1
+    assert manager._cycle_ended_pending is False  # noqa: SLF001
+    await manager.async_stop_recording()
+
+
 async def test_cycle_ended_survives_a_failed_cycle_end(
     hass: HomeAssistant, setup_washdata_entry
 ) -> None:

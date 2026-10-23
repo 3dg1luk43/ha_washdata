@@ -98,6 +98,10 @@ variables:
   presence_entities: !input presence_entities
   plug_switch_input: !input plug_switch
   power_entity: "{{ trigger.power_entity | default('', true) }}"
+  # The reading in watts, as WashData reads it: a kW (or mW) sensor is converted.
+  power_factor: >-
+    {% set unit = state_attr(power_entity, 'unit_of_measurement') if power_entity else none %}
+    {{ {'mW': 0.001, 'kW': 1000, 'kw': 1000, 'MW': 1000000, 'kWh/h': 1000}.get(unit, 1) }}
   plug_switch: "{{ plug_switch_input or trigger.switch_entity | default('', true) }}"
 
 actions:
@@ -124,14 +128,16 @@ actions:
       - condition: template
         value_template: >-
           {{ not (is_number(states(power_entity))
-                  and states(power_entity) | float < low_power_w | float) }}
+                  and states(power_entity) | float * power_factor | float
+                      < low_power_w | float) }}
     then:
       - wait_for_trigger:
           - trigger: template
             id: low_power
             value_template: >-
               {{ is_number(states(power_entity))
-                 and states(power_entity) | float < low_power_w | float }}
+                 and states(power_entity) | float * power_factor | float
+                     < low_power_w | float }}
           - trigger: ha_washdata.cycle_started
             id: new_cycle
             target:

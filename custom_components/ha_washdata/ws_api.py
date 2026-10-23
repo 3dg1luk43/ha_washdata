@@ -1514,8 +1514,11 @@ async def ws_blueprints_list(hass, connection, msg):
     if data is None:
         try:
             data = await hass.async_add_executor_job(blueprint_catalog.load_catalog)
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            data = {"blueprints": [], "error": str(exc)}
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Logged here, not sent: the exception text can hold a file path, and
+            # this command is open to every signed-in user.
+            _LOGGER.exception("Could not read the automation templates")
+            data = {"blueprints": [], "error": "Could not read the automation templates"}
         if not data.get("error"):
             hass.data[_BLUEPRINT_CATALOG_KEY] = data
     _send_result(connection, msg["id"], "blueprints/list", data)

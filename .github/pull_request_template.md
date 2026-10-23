@@ -8,7 +8,7 @@
 > Closed automatically: PRs linking no issue, PRs opened in parallel with a brand-new issue, and PRs
 > with this template deleted or unfilled. **Translation PRs** (only `translations/` and
 > `strings.json`) and **automation template PRs** (only `blueprints/`, see
-> [CONTRIBUTING](../CONTRIBUTING.md#automation-templates)) are exempt from the accepted-issue
+> [CONTRIBUTING](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#automation-templates)) are exempt from the accepted-issue
 > requirement, but still have to fill this template in. GitLocalize's own PRs are exempt from both.
 
 Closes #<!-- must already have the `accepted` label -->
