@@ -19,6 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.util import dt as dt_util
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_capture_events
 
@@ -299,6 +300,8 @@ async def test_a_cycle_restored_on_an_energy_counter_is_dropped(
     manager = hass.data[DOMAIN][entry.entry_id]
     hass.states.async_set(ENERGY, "412.7", {"unit_of_measurement": "kWh", "device_class": "energy"})
     manager.detector._state = "running"  # noqa: SLF001  # as the restore left it
+    started = dt_util.utcnow() - timedelta(minutes=40)
+    manager.detector._current_cycle_start = started  # noqa: SLF001
     manager._cycle_ended_pending = True  # noqa: SLF001  # its start was announced
     ended = async_capture_events(hass, "ha_washdata_cycle_ended")
     triggers: list[str] = []
@@ -314,3 +317,17 @@ async def test_a_cycle_restored_on_an_energy_counter_is_dropped(
     # The end owed to its announced start goes out, as an interrupted cycle.
     assert triggers == ["cycle_ended"]
     assert len(ended) == 1 and ended[0].data["cycle_data"]["status"] == "interrupted"
+    # The start the restore put on the detector, not "unknown, 0 s".
+    assert ended[0].data["start_time"] == started.isoformat()
+    assert ended[0].data["duration"] > 0
+
+
+async def test_a_kw_reading_that_overflows_as_watts_is_rejected(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    entry = await setup_washdata_entry(power_sensor=POWER)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    hass.states.async_set(POWER, "1e308", {"unit_of_measurement": "kW"})
+    assert manager._state_power(hass.states.get(POWER)) is None  # noqa: SLF001
+    hass.states.async_set(POWER, "2.1", {"unit_of_measurement": "kW"})
+    assert manager._state_power(hass.states.get(POWER)) == pytest.approx(2100.0)  # noqa: SLF001

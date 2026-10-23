@@ -4600,7 +4600,9 @@ class WashDataManager:
                 state.attributes.get("unit_of_measurement"),
                 scale,
             )
-        return power * scale
+        watts = power * scale
+        # 1e308 kW is finite, its watts are not: rejected like any non-finite value.
+        return watts if math.isfinite(watts) else None
 
     def _read_power_state_at_setup(self) -> None:
         """Feed the power entity's current state once at setup and seed the caches."""
@@ -4626,7 +4628,9 @@ class WashDataManager:
                     self._trigger_ended_program = self._trigger_program(
                         self._current_program
                     )
-                    start = self._cycle_start_time
+                    # The restore puts the start on the detector; the manager's
+                    # own copy is set by the next state change, not yet here.
+                    start = self._cycle_start_time or self.detector.current_cycle_start
                     self._fire_cycle_ended({
                         "status": "interrupted",
                         "start_time": start.isoformat() if start is not None else None,
