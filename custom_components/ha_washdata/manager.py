@@ -4605,6 +4605,16 @@ class WashDataManager:
                 self.power_sensor_entity_id,
                 state.attributes.get("unit_of_measurement"),
             )
+            if self.detector.state in _SENSOR_SWAP_BLOCKED_STATES:
+                # A cycle restored here is a phantom the kWh total held open. Its
+                # readings are ignored now, so nothing could end it, and while it
+                # ran a new power sensor would wait for its end: drop it.
+                self._logger.warning(
+                    "Dropped the restored %s cycle: it was read from an energy counter",
+                    self.detector.state,
+                )
+                self.detector.reset(STATE_OFF)
+                self._spawn_tracked(self.profile_store.async_clear_active_cycle())
         if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
             # A non-finite reading is skipped entirely, which leaves the cache
             # unset, i.e. the pre-#409 behaviour. Seeding it with a nan instead

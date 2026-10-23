@@ -286,3 +286,19 @@ async def test_a_recorder_read_is_scaled_before_it_is_rounded() -> None:
             keep_unavailable=True, scale=1000.0,
         )
     assert rows == [(start.timestamp(), 2134.0), (start.timestamp() + 10, None)]
+
+
+async def test_a_cycle_restored_on_an_energy_counter_is_dropped(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """A phantom cycle restored on an energy counter could never end (its readings
+    are ignored) and would block a new power sensor until it did: setup drops it."""
+    entry = await setup_washdata_entry(power_sensor=ENERGY)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    hass.states.async_set(ENERGY, "412.7", {"unit_of_measurement": "kWh", "device_class": "energy"})
+    manager.detector._state = "running"  # noqa: SLF001  # as the restore left it
+    with patch.object(manager.profile_store, "async_clear_active_cycle", AsyncMock()) as clear:
+        manager._read_power_state_at_setup()  # noqa: SLF001
+        await hass.async_block_till_done()
+    assert manager.detector.state == "off"
+    clear.assert_awaited()
