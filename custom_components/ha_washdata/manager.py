@@ -376,6 +376,14 @@ _NON_PRICE_UNITS = frozenset(
 )
 
 
+# Kept out of the ha_washdata_cycle_ended event: HA's 32 KB event limit. A chatty
+# dynamic tariff can add hundreds of price entries (#426); the cost and effective
+# price it produced ride along instead.
+_EVENT_EXCLUDED_FIELDS = frozenset(
+    {"power_data", "debug_data", "power_trace", "price_timeline"}
+)
+
+
 def _finite_power(raw: Any) -> float | None:
     """Parse a power sensor's state string, rejecting non-finite values.
 
@@ -4613,6 +4621,21 @@ class WashDataManager:
                     "Dropped the restored %s cycle: it was read from an energy counter",
                     self.detector.state,
                 )
+                if self._cycle_ended_pending:  # its start was announced (#478)
+                    self._cycle_ended_pending = False
+                    self._trigger_ended_program = self._trigger_program(
+                        self._current_program
+                    )
+                    start = self._cycle_start_time
+                    self._fire_cycle_ended({
+                        "status": "interrupted",
+                        "start_time": start.isoformat() if start is not None else None,
+                        "end_time": utc_now().isoformat(),
+                        "duration": (
+                            (utc_now() - dt_util.as_utc(start)).total_seconds()
+                            if start is not None else 0.0
+                        ),
+                    })
                 self.detector.reset(STATE_OFF)
                 self._spawn_tracked(self.profile_store.async_clear_active_cycle())
         if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
@@ -6123,7 +6146,9 @@ class WashDataManager:
             self._logger.exception("Cycle-end processing failed; closing the cycle anyway")
             if ended["pending"]:
                 ended["pending"] = False
-                self._fire_cycle_ended(cycle_data, cycle_token=cycle_token)
+                self._fire_cycle_ended(
+                    cycle_data, cycle_token=cycle_token, bus=not ended.get("bus")
+                )
         finally:
             if not self._is_shutdown:
                 await self._async_close_cycle_end(
@@ -6483,14 +6508,8 @@ class WashDataManager:
 
         # Prepare cycle data for event (enrich if needed)
         # IMPORTANT: Exclude large fields to prevent exceeding HA's 32KB event data limit
-        excluded_fields = {
-            "power_data", "debug_data", "power_trace",
-            # A chatty dynamic tariff can add hundreds of entries (#426); the
-            # cost and effective price it produced ride along instead.
-            "price_timeline",
-        }
         event_cycle_data = {
-            k: v for k, v in cycle_data.items() if k not in excluded_fields
+            k: v for k, v in cycle_data.items() if k not in _EVENT_EXCLUDED_FIELDS
         }
         event_cycle_data["device_type"] = self.device_type
         # The program to SHOW: the stored label, else THIS cycle's captured live
@@ -6532,6 +6551,8 @@ class WashDataManager:
                 "end_time": event_cycle_data.get("end_time") or utc_now().isoformat(),
             },
         )
+        if ended is not None:
+            ended["bus"] = True  # a failure after this point owes the trigger only
 
         # The device trigger (#478): not for an interrupted false start, the same
         # rule as the finished push.
@@ -9159,10 +9180,35 @@ class WashDataManager:
         energy_wh: float | None = None,
         *,
         cycle_token: str | None = None,
+        bus: bool = True,
     ) -> None:
-        """cycle_ended for an end the cycle-end steps never announce (a discarded
-        ghost, or steps that failed first). ``cycle_token`` is the failed steps'
-        cycle: a tumble held for a newer one is left to that cycle. Never raises."""
+        """The end owed to a start that was announced, for an end the cycle-end
+        steps never announce (a discarded ghost or pump-out, a dropped restored
+        cycle, or steps that failed first): the ``ha_washdata_cycle_ended`` event
+        (``bus``; False when the failed steps had sent it) and the cycle_ended
+        trigger. ``cycle_token`` is the failed steps' cycle: a tumble held for a
+        newer one is left to that cycle. Never raises."""
+        if bus:
+            try:
+                event_cycle_data = {
+                    k: v for k, v in cycle_data.items() if k not in _EVENT_EXCLUDED_FIELDS
+                }
+                self.hass.bus.async_fire(
+                    EVENT_CYCLE_ENDED,
+                    {
+                        "entry_id": self.entry_id,
+                        "device_name": self.config_entry.title,
+                        "cycle_data": event_cycle_data,
+                        "program": self._trigger_ended_program or "unknown",
+                        "match_margin": None,
+                        "label_applied": False,
+                        "duration": cycle_data.get("duration"),
+                        "start_time": cycle_data.get("start_time"),
+                        "end_time": cycle_data.get("end_time") or utc_now().isoformat(),
+                    },
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Could not fire the cycle-ended event", exc_info=True)
         try:
             variables = self._cycle_end_trigger_vars(cycle_data, energy_wh=energy_wh)
         except Exception:  # pylint: disable=broad-exception-caught

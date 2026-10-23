@@ -18,8 +18,9 @@ from datetime import timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from homeassistant.core import HomeAssistant
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from pytest_homeassistant_custom_component.common import MockConfigEntry, async_capture_events
 
 from custom_components.ha_washdata import ws_api
 from custom_components.ha_washdata.config_flow import ConfigFlow, OptionsFlowHandler
@@ -28,6 +29,7 @@ from custom_components.ha_washdata.const import (
     CONF_MIN_POWER,
     CONF_POWER_SENSOR,
     DOMAIN,
+    SIGNAL_DEVICE_TRIGGER,
     is_energy_counter,
     power_unit_scale,
 )
@@ -297,8 +299,18 @@ async def test_a_cycle_restored_on_an_energy_counter_is_dropped(
     manager = hass.data[DOMAIN][entry.entry_id]
     hass.states.async_set(ENERGY, "412.7", {"unit_of_measurement": "kWh", "device_class": "energy"})
     manager.detector._state = "running"  # noqa: SLF001  # as the restore left it
+    manager._cycle_ended_pending = True  # noqa: SLF001  # its start was announced
+    ended = async_capture_events(hass, "ha_washdata_cycle_ended")
+    triggers: list[str] = []
+    async_dispatcher_connect(
+        hass, SIGNAL_DEVICE_TRIGGER.format(entry.entry_id),
+        callback(lambda t, _v: triggers.append(t)),
+    )
     with patch.object(manager.profile_store, "async_clear_active_cycle", AsyncMock()) as clear:
         manager._read_power_state_at_setup()  # noqa: SLF001
         await hass.async_block_till_done()
     assert manager.detector.state == "off"
     clear.assert_awaited()
+    # The end owed to its announced start goes out, as an interrupted cycle.
+    assert triggers == ["cycle_ended"]
+    assert len(ended) == 1 and ended[0].data["cycle_data"]["status"] == "interrupted"

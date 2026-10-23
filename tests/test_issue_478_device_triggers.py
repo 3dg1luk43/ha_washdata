@@ -44,6 +44,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import (
     MockConfigEntry,
+    async_capture_events,
     async_get_device_automations,
 )
 
@@ -275,6 +276,8 @@ async def test_a_discarded_ghost_still_ends_what_it_started(
     ghost = {"duration": 30.0, "status": "completed", "max_power": 3.0,
              "start_time": "2026-10-19T08:00:00+00:00", "power_data": []}
 
+    bus = async_capture_events(hass, EVENT_CYCLE_ENDED)
+
     manager._cycle_ended_pending = True  # noqa: SLF001 - its start fired
     manager._on_cycle_end(dict(ghost))  # noqa: SLF001
     manager._on_cycle_end(dict(ghost))  # noqa: SLF001 - nothing owed any more
@@ -283,6 +286,9 @@ async def test_a_discarded_ghost_still_ends_what_it_started(
     assert [t for t, _ in seen] == ["cycle_ended"]
     assert seen[0][1]["status"] == "completed" and seen[0][1]["duration"] == 30.0
     assert not manager.profile_store.get_past_cycles()
+    # The HA event owed to ha_washdata_cycle_started is sent too, once.
+    assert len(bus) == 1
+    assert bus[0].data["duration"] == 30.0 and "power_data" not in bus[0].data["cycle_data"]
 
 
 async def test_cycle_ended_survives_a_failed_cycle_end(
@@ -292,11 +298,15 @@ async def test_cycle_ended_survives_a_failed_cycle_end(
     manager = hass.data[DOMAIN][entry.entry_id]
     seen = _listen(hass, entry)
 
+    bus = async_capture_events(hass, EVENT_CYCLE_ENDED)
+
     with patch.object(manager, "_async_cycle_end_steps", side_effect=RuntimeError("x")):
         await manager._async_process_cycle_end(  # noqa: SLF001
             {"duration": 900.0, "status": "completed", "energy_wh": 120.0,
              "start_time": "2026-10-19T08:00:00+00:00"},
         )
+    await hass.async_block_till_done()
+    assert len(bus) == 1  # the steps never sent it, so the fallback does
 
     assert [t for t, _ in seen] == ["cycle_ended"]
     assert seen[0][1]["energy_kwh"] == 0.12
