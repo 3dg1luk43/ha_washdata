@@ -364,3 +364,33 @@ async def test_a_recorder_reading_that_is_not_finite_is_a_break() -> None:
         )
     s0 = start.timestamp()
     assert rows == [(s0, 2100.0), (s0 + 10, None), (s0 + 20, None)]
+
+
+async def test_a_recorder_read_scales_each_state_by_its_own_unit(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """A sensor that switched from W to kW keeps its old readings in watts."""
+    from datetime import datetime, timezone
+    from types import SimpleNamespace
+
+    entry = await setup_washdata_entry(power_sensor=POWER)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    start = datetime(2026, 10, 20, 10, 0, tzinfo=timezone.utc)
+    states = [
+        SimpleNamespace(state="500", last_changed=start, attributes={"unit_of_measurement": "W"}),
+        SimpleNamespace(state="2.1", last_changed=start + timedelta(seconds=10),
+                        attributes={"unit_of_measurement": "kW"}),
+    ]
+
+    class _Instance:
+        async def async_add_executor_job(self, fn, *args):
+            return fn(*args)
+
+    with patch("homeassistant.components.recorder.history.state_changes_during_period",
+               return_value={POWER: states}), \
+         patch("homeassistant.components.recorder.get_instance", return_value=_Instance()):
+        rows = await ws_api._recorder_power(  # noqa: SLF001
+            hass, POWER, start, end_dt=start + timedelta(minutes=1),
+            scale=ws_api._power_scaler(manager),  # noqa: SLF001
+        )
+    assert rows == [(start.timestamp(), 500.0), (start.timestamp() + 10, 2100.0)]

@@ -28,6 +28,7 @@ import os
 import re
 import time
 import uuid
+from collections.abc import Callable
 from datetime import timedelta
 from typing import Any
 
@@ -389,15 +390,28 @@ def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
     return [_pt(pairs[i]) for i in sorted(keep)]
 
 
-def _power_scale(manager: Any) -> float:
-    """``manager.power_scale()`` (#481), or 1.0 when it gives no usable factor."""
+def _power_scale(manager: Any, unit: Any = None, *, from_state: bool = True) -> float:
+    """``manager.power_scale(...)`` (#481), or 1.0 when it gives no usable factor.
+
+    Without ``unit`` the sensor's current unit (a CSV carries none); with
+    ``from_state=False`` the given ``unit``, a recorded state's own.
+    """
     try:
-        scale = manager.power_scale()
+        scale = (
+            manager.power_scale() if from_state
+            else manager.power_scale(unit, from_state=False)
+        )
     except Exception:  # pylint: disable=broad-exception-caught
         return 1.0
     if isinstance(scale, bool) or not isinstance(scale, (int, float)):
         return 1.0
     return float(scale) if math.isfinite(scale) and scale > 0 else 1.0
+
+
+def _power_scaler(manager: Any) -> Callable[[Any], float]:
+    """The factor for a recorded state's own unit: a sensor whose unit changed
+    keeps each reading in the unit it was recorded in."""
+    return lambda unit: _power_scale(manager, unit, from_state=False)
 
 
 async def _recorder_power(
@@ -407,12 +421,13 @@ async def _recorder_power(
     *,
     end_dt: Any = None,
     keep_unavailable: bool = False,
-    scale: float = 1.0,
+    scale: float | Callable[[Any], float] = 1.0,
 ) -> list[tuple[float, float | None]]:
     """Raw (unix_ts, watts) readings for entity_id over a window, via the recorder.
 
-    ``scale`` turns the sensor's unit into watts (``manager.power_scale()``, #481),
-    applied before the rounding so a kW reading keeps its watts.
+    ``scale`` turns the sensor's unit into watts (#481): a factor, or a function of
+    each recorded state's own unit (``_power_scaler``), applied before the rounding
+    so a kW reading keeps its watts.
 
     ``end_dt`` defaults to now (the live chart overlay's use). Passing it lets a caller
     read the history in bounded windows instead of one unbounded query - a month of
@@ -448,7 +463,11 @@ async def _recorder_power(
                 # synthetic leading gap (or the same reading twice).
                 if start_ts is not None and ts < start_ts:
                     ts = start_ts
-                watts = float(s.state) * scale
+                factor = (
+                    scale(getattr(s, "attributes", {}).get("unit_of_measurement"))
+                    if callable(scale) else scale
+                )
+                watts = float(s.state) * factor
                 if not math.isfinite(watts):  # "inf", or a reading that overflows
                     raise ValueError("non-finite power")
                 rows.append((ts, round(watts, 1)))
@@ -5242,7 +5261,7 @@ async def ws_get_cycle_context(
                 lo = start_ts - before_s
                 rows = await _recorder_power(
                     hass, entity_id, start_dt - timedelta(seconds=before_s),
-                    end_dt=start_dt, keep_unavailable=True, scale=_power_scale(manager),
+                    end_dt=start_dt, keep_unavailable=True, scale=_power_scaler(manager),
                 )
                 out["before"] = _cycle_context_points(
                     rows, start_ts, lo, start_ts, hi_inclusive=False
@@ -5252,7 +5271,7 @@ async def ws_get_cycle_context(
             if after_s > 0 and after_end_dt > end_dt:
                 rows = await _recorder_power(
                     hass, entity_id, end_dt, end_dt=after_end_dt, keep_unavailable=True,
-                    scale=_power_scale(manager),
+                    scale=_power_scaler(manager),
                 )
                 out["after"] = _cycle_context_points(
                     rows, start_ts, end_dt.timestamp(), after_end_dt.timestamp(),
@@ -6013,7 +6032,7 @@ async def ws_get_power_history(
                 ent = getattr(manager, "power_sensor_entity_id", None)
                 if ent:
                     samples = await _recorder_power(
-                        hass, ent, start_dt, scale=_power_scale(manager)
+                        hass, ent, start_dt, scale=_power_scaler(manager)
                     )
                     start_ts = start_dt.timestamp()
                     out["raw"] = _downsample(
@@ -7544,7 +7563,7 @@ async def ws_history_import_recorder(
         connection.send_error(msg["id"], "not_found", "This device has no power sensor configured")
         return
 
-    scale = _power_scale(manager)
+    scale = _power_scaler(manager)
     now = dt_util.now()
     days = int(msg.get("days") or 10)
     start_date = msg.get("start_date")
