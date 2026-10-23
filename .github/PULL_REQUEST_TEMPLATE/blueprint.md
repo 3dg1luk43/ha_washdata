@@ -22,10 +22,10 @@ before it is merged. See [CONTRIBUTING](../../CONTRIBUTING.md#automation-templat
 ## Checklist
 
 - [ ] One template per PR: a YAML file in `blueprints/automation/` and its entry in `blueprints/catalog.json`
-- [ ] The `washdata_device` input is a device selector filtered to `ha_washdata`, and the triggers are WashData device triggers
+- [ ] The `washdata_device` input is a device selector filtered to `integration: ha_washdata`, and the triggers are WashData device triggers
 - [ ] Every other input has a default where a sensible one exists (then it installs in one click)
 - [ ] The description says plainly what it switches or sends, and any risk
-- [ ] It cannot switch a heating appliance on unattended, and a new cycle starting cancels anything still waiting
+- [ ] It never starts a heating appliance's program (restoring a plug's power is stated in the description and can be limited), and a new cycle starting cancels anything still waiting
 - [ ] `source_url` points at the file's own path on `main`
 - [ ] No em dash characters
 

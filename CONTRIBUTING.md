@@ -91,8 +91,9 @@ These PRs need no accepted issue; each one is reviewed before it is merged.
   WashData's device triggers (cycle started, finished, ended, anti-wrinkle started, stalled, unload
   pending).
 - Give every other input a default where one makes sense: the template then installs in one click.
-- Say plainly what it switches or sends and what can go wrong. Never switch a heating appliance on
-  unattended, and let a new cycle cancel anything still waiting.
+- Say plainly what it switches or sends and what can go wrong. Never start a heating appliance's
+  program. Restoring a plug's power is allowed when the description says so and the user can limit
+  it (for example to someone being home). Let a new cycle cancel anything still waiting.
 - Run `pytest tests/test_issue_478_blueprints.py` before opening the PR.
 
 ## Translations

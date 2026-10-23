@@ -55,7 +55,7 @@ folder and restart.
 | :--- | :--- |
 | **Name** | e.g. "Washing Machine" |
 | **Device Type** | sets the detection defaults for that kind of appliance |
-| **Power Sensor** | the plug's power entity, in **watts** |
+| **Power Sensor** | the plug's power entity (W, kW or mW), not its energy counter (kWh) |
 | **Minimum Power** | below this the appliance counts as off (default 2 W) |
 
 Everything else is in the **WashData** panel in the sidebar. Before you start, check your plug

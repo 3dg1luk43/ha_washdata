@@ -156,7 +156,7 @@ def canonical_device_type(device_type: Any) -> Any:
     an Air Fryer or Bread Maker export still counts as the same kind of device as
     the entry it migrated to.
     """
-    if device_type in RETIRED_DEVICE_TYPE_OPTIONS:
+    if isinstance(device_type, str) and device_type in RETIRED_DEVICE_TYPE_OPTIONS:
         return DEVICE_TYPE_GENERIC
     return device_type
 
@@ -197,9 +197,12 @@ def retire_device_type(
     the undo-import and ``ws_set_options``.
     """
     retired = options.get(CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE))
-    if data.get(CONF_DEVICE_TYPE) in RETIRED_DEVICE_TYPE_OPTIONS:
+    # A list or dict (a hand-edited import, a stray WS payload) is not hashable:
+    # it is no retired type, rather than a TypeError that fails the whole save.
+    data_type = data.get(CONF_DEVICE_TYPE)
+    if isinstance(data_type, str) and data_type in RETIRED_DEVICE_TYPE_OPTIONS:
         data[CONF_DEVICE_TYPE] = DEVICE_TYPE_GENERIC
-    if retired not in RETIRED_DEVICE_TYPE_OPTIONS:
+    if not isinstance(retired, str) or retired not in RETIRED_DEVICE_TYPE_OPTIONS:
         return []
     written = [CONF_DEVICE_TYPE]
     options[CONF_DEVICE_TYPE] = DEVICE_TYPE_GENERIC

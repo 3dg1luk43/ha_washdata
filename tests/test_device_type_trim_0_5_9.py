@@ -384,3 +384,15 @@ def test_a_selective_import_treats_the_export_as_generic(device_type: str) -> No
     assert "error" not in manifest, manifest
     assert manifest["device_type_match"] is True
     assert manifest["real_history_allowed"] is True
+
+
+@pytest.mark.parametrize("bad", [["air_fryer"], {"type": "air_fryer"}, 3])
+def test_a_non_string_device_type_is_no_retired_type(bad: Any) -> None:
+    """A list or dict is unhashable: it must read as not retired, not raise and
+    fail the whole save, import or undo."""
+    from custom_components.ha_washdata.options_utils import canonical_device_type
+
+    opts, data = {CONF_DEVICE_TYPE: bad}, {CONF_DEVICE_TYPE: bad}
+    assert retire_device_type(opts, data) == []
+    assert opts == {CONF_DEVICE_TYPE: bad} and data == {CONF_DEVICE_TYPE: bad}
+    assert canonical_device_type(bad) == bad
