@@ -23,6 +23,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - **Removed settings**: Fire HA Events for Notifications (the `ha_washdata_*` events always fire), Sampling Interval (each device type's own: 2 s for washers, washer-dryers and dishwashers, 10 s pumps, 30 s others), Unmatch Threshold (0.35), Estimate Tolerance (it fed nothing), Anti-Wrinkle Exit Power (0.8 W or the Stop Threshold, whichever is higher), and the ML training hour, minimum cycles and interval (02:00, 30 cycles, at most weekly; training on demand is unchanged). Stored values, and those of settings removed in 0.5.8, are cleaned up on upgrade.
 - **Air Fryer and Bread Maker device types removed**: existing devices become Other (Advanced) on upgrade and keep the values they ran on (shortest completed cycle, minimum off gap and, on bread makers, the 2 hour quiet-time limit) as settings, so detection does not change. Built-in phases a program uses are kept as custom phases. Their exports import as Other (Advanced). The progress bar smooths backward steps like Other (Advanced) does, and the air fryer icon is the generic one.
+- **An empty notify list sends nothing**: with no notify service and no notification action, start, finish, reminder and unload notifications no longer go to the Home Assistant sidebar (a cycle timer still does). Add `notify.persistent_notification` to a list to keep them there.
 - **The External End Trigger is on whenever its sensor is set**: the separate switch is gone. Upgrading clears the sensor where the switch was off, so nothing changes.
 
 ### Features
@@ -31,7 +32,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **Automation templates** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): the new Automations tab installs ready-made blueprints in one click: end a long dryer anti-crease phase by cutting the plug, or turn something on while a cycle runs. WashData itself never switches the plug. Share your own by pull request. Thanks to @gkotoole
 - **Automations tab**: lists the automations that use the appliance and starts new ones from any WashData trigger; the ones WashData creates get a "WashData" label and category.
 - **Maintenance done by a program** ([#480](https://github.com/3dg1luk43/ha_washdata/issues/480)): a task can name the programs that do it (the drum clean by Cotton 90), and a finished cycle of one logs it as done. Only cycles with a confident label or a program you picked count. Thanks to @Alexx3105
-- **kW power sensors work without a template sensor** ([#481](https://github.com/3dg1luk43/ha_washdata/issues/481)): kW and mW are read as watts; a setup tuned for raw kilowatts (Min Power under 1) is unchanged. An energy counter (kWh) can no longer be picked as the power sensor, and Settings flags one in use. Thanks to @neliasen
+- **kW power sensors work without a template sensor** ([#481](https://github.com/3dg1luk43/ha_washdata/issues/481)): kW and mW are read as watts; a setup tuned for raw kilowatts (Min Power under 1) is unchanged. An energy counter (kWh) can no longer be picked as the power sensor; one already in use is flagged in Settings and its readings are ignored. Thanks to @neliasen
 
 ### Fixes
 

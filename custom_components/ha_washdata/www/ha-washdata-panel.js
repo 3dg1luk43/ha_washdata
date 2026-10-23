@@ -488,7 +488,11 @@ function _energyCounterReason(id, ctx) {
   const attrs = st.attributes || {};
   const dc = String(attrs.device_class == null ? '' : attrs.device_class).trim().toLowerCase();
   const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
-  if (!_ENERGY_DEVICE_CLASSES.has(dc) && !_ENERGY_UNITS.has(unit.toLowerCase())) return null;
+  // An energy unit, or an energy device class without a power unit (a power unit
+  // wins over a device class set wrong on a template), as const.is_energy_counter.
+  const powerUnit = ['mW', 'W', 'kW', 'MW', 'GW'].includes(unit) || unit.toLowerCase() === 'kw'
+    || /^(Wh|kWh|MWh)\s*\/\s*(s|min|h|d)$/.test(unit);
+  if (!_ENERGY_UNITS.has(unit.toLowerCase()) && !(_ENERGY_DEVICE_CLASSES.has(dc) && !powerUnit)) return null;
   return { msgKey: 'conflict.power_sensor.energy', msgVars: {unit: unit || dc},
     msgFb: `This sensor counts energy (${unit || dc}), not power, so no cycle can be detected. Pick the plug's power sensor (W or kW).` };
 }

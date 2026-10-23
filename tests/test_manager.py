@@ -118,17 +118,19 @@ def test_check_pre_completion_notification(manager: WashDataManager, mock_hass: 
     manager._notify_before_end_minutes = 5
     manager._notified_pre_completion = False
     manager._cycle_progress = 90
-    
+    manager._notify_finish_services = ["notify.mobile_app_phone"]
+
     manager._check_pre_completion_notification()
-    
+
     assert manager._notified_pre_completion is True
-    # Verify persistent notification called since no notify_service configured
-    pn.async_create.assert_called_once()
-    args = pn.async_create.call_args[0]
+    # The reminder goes to the Finish services; an empty list would send nothing
+    # (no sidebar fallback, #472).
+    pn.async_create.assert_not_called()
+    domain, service, data = mock_hass.services.async_call.call_args[0][:3]
+    assert (domain, service) == ("notify", "mobile_app_phone")
     # Reminder now uses its own distinct message (DEFAULT_NOTIFY_REMINDER_MESSAGE),
     # not the live "Less than N minutes remaining" template.
-    assert args[0] is mock_hass
-    assert "5 minutes left" in args[1]
+    assert "5 minutes left" in data["message"]
 
 def test_check_pre_completion_disabled(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
     """Test disabled notification."""

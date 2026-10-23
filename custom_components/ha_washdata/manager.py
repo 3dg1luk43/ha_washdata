@@ -4569,7 +4569,15 @@ class WashDataManager:
         return power_unit_scale(unit, min_power)
 
     def _state_power(self, state: State) -> float | None:
-        """A power sensor state as watts: finite, scaled by its own unit (#481)."""
+        """A power sensor state as watts: finite, scaled by its own unit (#481).
+
+        None for an energy counter, like any value that is not a power: a kWh
+        total read as watts never drops below the thresholds, so it held a
+        phantom cycle open until the 8 h cap. Setup refuses one now; an entry
+        configured on one before stays loaded so Settings can fix it.
+        """
+        if is_energy_counter(getattr(state, "attributes", None)):
+            return None
         power = _finite_power(state.state)
         if power is None:
             return None
@@ -7499,7 +7507,7 @@ class WashDataManager:
                 targets.append("actions")
             if service_sent:
                 # _send_notification_service falls back to a persistent
-                # notification only when no notify services are configured.
+                # notification only for a cycle timer with no notify services.
                 targets.extend(services if services else ["persistent_notification"])
             self._log_notification(
                 event_type, message, targets=", ".join(targets)
@@ -7678,6 +7686,12 @@ class WashDataManager:
 
         if not sent:
             if event_type == NOTIFY_EVENT_LIVE:
+                return False
+            # An empty list means that notification is not sent (the panel's
+            # "Leave empty for none", #472). Only a cycle timer, which has no list
+            # of its own, falls back to the sidebar when Start and Finish are both
+            # empty. A configured target that could not carry it still does.
+            if not services and event_type != NOTIFY_EVENT_TIMER:
                 return False
             # A dismiss marker is not content: if no target could carry it, there is
             # nothing to show. Falling through would post a persistent-notification

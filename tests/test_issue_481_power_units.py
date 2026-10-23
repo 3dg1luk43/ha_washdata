@@ -72,6 +72,28 @@ def test_is_energy_counter() -> None:
     assert not is_energy_counter({"unit_of_measurement": "kW", "device_class": "power"})
     assert not is_energy_counter({})
     assert not is_energy_counter(None)
+    # A power unit wins over an energy device class set wrong on a template.
+    assert not is_energy_counter({"device_class": "energy", "unit_of_measurement": "W"})
+    assert not is_energy_counter({"device_class": "energy", "unit_of_measurement": "kWh/h"})
+    assert is_energy_counter({"device_class": "energy_storage"})
+
+
+async def test_an_entry_on_an_energy_counter_ignores_its_readings(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Set up on a kWh counter before setup refused one: its total never reads as
+    power (it held a phantom cycle open), and the entry stays loaded."""
+    entry = await setup_washdata_entry(power_sensor=ENERGY)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    for i in range(10):
+        freezer.tick(timedelta(seconds=30))
+        hass.states.async_set(
+            ENERGY, str(412.7 + i * 0.1),
+            {"unit_of_measurement": "kWh", "device_class": "energy"}, force_update=True,
+        )
+        await hass.async_block_till_done()
+    assert manager.detector.state == "off"
+    assert not manager.diag_buffer.power_samples(0.0)
 
 
 # ─── Live readings ────────────────────────────────────────────────────────────

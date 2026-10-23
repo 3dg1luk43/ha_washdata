@@ -28,6 +28,7 @@ from custom_components.ha_washdata.const import (
     NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
     NOTIFY_EVENT_START,
+    NOTIFY_EVENT_TIMER,
 )
 from custom_components.ha_washdata.manager import WashDataManager
 
@@ -95,10 +96,10 @@ def test_service_notification_logs_at_info_with_target(
 def test_persistent_fallback_is_named_in_log(
     make_manager: Callable[..., WashDataManager], caplog: pytest.LogCaptureFixture
 ) -> None:
-    """With no notify service configured the persistent-notification fallback is logged."""
+    """A cycle timer with no notify service logs its sidebar fallback by name."""
     mgr = make_manager({})
     with caplog.at_level(logging.DEBUG, logger=_MANAGER_LOGGER):
-        mgr._dispatch_notification("Started", event_type=NOTIFY_EVENT_START)
+        mgr._dispatch_notification("Timer", event_type=NOTIFY_EVENT_TIMER)
     sent = [r for r in caplog.records if "Notification sent" in r.message]
     # Target name appears in the DEBUG record only (kept out of INFO to avoid PII leakage).
     debug_records = [r for r in sent if r.levelno == logging.DEBUG]

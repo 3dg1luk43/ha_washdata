@@ -37,7 +37,7 @@ import pytest
 import voluptuous as vol
 from homeassistant.components.device_automation import DeviceAutomationType
 from homeassistant.components.device_automation import trigger as da_trigger
-from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -255,9 +255,11 @@ async def test_an_interrupted_false_start_ends_but_does_not_finish(
 
 def _listen(hass: HomeAssistant, entry: MockConfigEntry) -> list[tuple[str, dict]]:
     seen: list[tuple[str, dict]] = []
+    # A @callback runs in the loop as the signal is sent; a plain lambda is run as
+    # an executor job, so an assert straight after the send could find it empty.
     async_dispatcher_connect(
         hass, SIGNAL_DEVICE_TRIGGER.format(entry.entry_id),
-        lambda t, v: seen.append((t, v)),
+        callback(lambda t, v: seen.append((t, v))),
     )
     return seen
 

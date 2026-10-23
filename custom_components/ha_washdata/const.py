@@ -1484,17 +1484,29 @@ def power_unit_scale(unit: Any, min_power: Any = DEFAULT_MIN_POWER) -> float:
     return scale
 
 
+def _is_power_unit(text: str) -> bool:
+    """A unit ``power_unit_scale`` reads as power: W, kW, ..., or an energy rate."""
+    if text in POWER_UNIT_TO_W or text.lower() == "kw":
+        return True
+    energy, slash, per = text.partition("/")
+    return bool(slash) and energy.strip() in _RATE_ENERGY_TO_WH and per.strip() in _RATE_TIME_IN_H
+
+
 def is_energy_counter(attributes: Any) -> bool:
     """Whether a sensor's attributes prove it counts energy (kWh), not power (#481).
 
-    Only positive evidence counts: no attributes (an entity Home Assistant has not
-    loaded yet) is not an energy counter.
+    An energy unit, or an energy device class without a power unit (a power unit
+    wins over a device class set wrong on a hand-made template). Only positive
+    evidence counts: no attributes (an entity Home Assistant has not loaded yet)
+    is not an energy counter.
     """
     if not isinstance(attributes, Mapping):
         return False
+    unit = str(attributes.get("unit_of_measurement") or "").strip()
+    if unit.lower() in ENERGY_UNITS:
+        return True
     device_class = str(attributes.get("device_class") or "").strip().lower()
-    unit = str(attributes.get("unit_of_measurement") or "").strip().lower()
-    return device_class in ENERGY_DEVICE_CLASSES or unit in ENERGY_UNITS
+    return device_class in ENERGY_DEVICE_CLASSES and not _is_power_unit(unit)
 
 
 def resolve_sampling_interval_default(device_type: str) -> float:
