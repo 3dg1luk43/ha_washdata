@@ -331,3 +331,36 @@ async def test_a_kw_reading_that_overflows_as_watts_is_rejected(
     assert manager._state_power(hass.states.get(POWER)) is None  # noqa: SLF001
     hass.states.async_set(POWER, "2.1", {"unit_of_measurement": "kW"})
     assert manager._state_power(hass.states.get(POWER)) == pytest.approx(2100.0)  # noqa: SLF001
+
+
+def test_a_csv_reading_that_overflows_as_watts_is_a_break() -> None:
+    slot = {"source": "csv", "chunks": [_csv(POWER, [0.0, 0.4, 1e308, 1.9, 0.2, 0.0])]}
+    samples, report = ws_api._history_samples(slot, POWER, None, 1000.0)  # noqa: SLF001
+    assert all(p is None or p < 1e6 for _, p in samples)
+    assert report["peak_w"] == pytest.approx(1900.0)
+
+
+async def test_a_recorder_reading_that_is_not_finite_is_a_break() -> None:
+    from datetime import datetime, timezone
+    from types import SimpleNamespace
+
+    start = datetime(2026, 10, 20, 10, 0, tzinfo=timezone.utc)
+    states = [
+        SimpleNamespace(state="2.1", last_changed=start),
+        SimpleNamespace(state="1e308", last_changed=start + timedelta(seconds=10)),
+        SimpleNamespace(state="inf", last_changed=start + timedelta(seconds=20)),
+    ]
+
+    class _Instance:
+        async def async_add_executor_job(self, fn, *args):
+            return fn(*args)
+
+    with patch("homeassistant.components.recorder.history.state_changes_during_period",
+               return_value={POWER: states}), \
+         patch("homeassistant.components.recorder.get_instance", return_value=_Instance()):
+        rows = await ws_api._recorder_power(  # noqa: SLF001
+            SimpleNamespace(), POWER, start, end_dt=start + timedelta(minutes=1),
+            keep_unavailable=True, scale=1000.0,
+        )
+    s0 = start.timestamp()
+    assert rows == [(s0, 2100.0), (s0 + 10, None), (s0 + 20, None)]

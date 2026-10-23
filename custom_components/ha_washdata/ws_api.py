@@ -448,7 +448,10 @@ async def _recorder_power(
                 # synthetic leading gap (or the same reading twice).
                 if start_ts is not None and ts < start_ts:
                     ts = start_ts
-                rows.append((ts, round(float(s.state) * scale, 1)))
+                watts = float(s.state) * scale
+                if not math.isfinite(watts):  # "inf", or a reading that overflows
+                    raise ValueError("non-finite power")
+                rows.append((ts, round(watts, 1)))
             except (ValueError, TypeError, OverflowError):
                 if keep_unavailable:
                     try:
@@ -7658,7 +7661,11 @@ def _history_samples(
     if isinstance(parsed, dict):
         return parsed
     if scale != 1.0 and not parsed.entity_substituted_from:
-        parsed.samples = [(t, None if p is None else p * scale) for t, p in parsed.samples]
+        # A reading that overflows as watts is a break, like a non-numeric one.
+        parsed.samples = [
+            (t, p * scale if p is not None and math.isfinite(p * scale) else None)
+            for t, p in parsed.samples
+        ]
     report = parsed.report()
     report["source"] = "csv"
     return parsed.samples, report
