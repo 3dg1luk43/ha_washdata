@@ -31,7 +31,7 @@ device-automation listing and the automation integration.
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import voluptuous as vol
@@ -303,14 +303,33 @@ async def test_starting_a_recording_ends_an_announced_cycle(
     manager.detector._state = "running"  # noqa: SLF001
     manager._cycle_ended_pending = True  # noqa: SLF001
 
-    await manager.async_start_recording()
-    await hass.async_block_till_done()
+    with patch.object(manager.profile_store, "async_clear_active_cycle", AsyncMock()) as clear:
+        await manager.async_start_recording()
+        await hass.async_block_till_done()
 
     ended = [v for t, v in seen if t == "cycle_ended"]
     assert len(ended) == 1 and ended[0]["status"] == "interrupted"
     assert len(bus) == 1
     assert manager._cycle_ended_pending is False  # noqa: SLF001
+    clear.assert_awaited()  # a restart cannot bring the dropped cycle back
     await manager.async_stop_recording()
+
+
+async def test_a_milestone_names_its_own_cycles_program(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """Another cycle can end while this one's steps await: the milestone carries
+    the program its own steps captured, not the manager's latest."""
+    entry = await setup_washdata_entry(
+        power_sensor=POWER, options={**FAST, "notify_milestones": [10]}
+    )
+    manager = hass.data[DOMAIN][entry.entry_id]
+    seen = _listen(hass, entry)
+    manager._trigger_ended_program = "Next cycle's program"  # noqa: SLF001
+    manager._fire_milestone_trigger(9, 10, program="Cotton 40")  # noqa: SLF001
+    await hass.async_block_till_done()
+    milestone = [v for t, v in seen if t == "milestone_reached"]
+    assert len(milestone) == 1 and milestone[0]["program"] == "Cotton 40"
 
 
 async def test_a_failed_restore_ends_an_announced_cycle(

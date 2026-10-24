@@ -6689,7 +6689,9 @@ class WashDataManager:
         # and a finish delivery channel is configured. Respects quiet hours via
         # _dispatch_notification's finish-type gate.
         if cycle_persisted:
-            self._fire_milestone_trigger(prev_lifetime_count, cur_lifetime_count)
+            self._fire_milestone_trigger(
+                prev_lifetime_count, cur_lifetime_count, program=trigger_program
+            )
             self._maybe_notify_milestone(prev_lifetime_count, cur_lifetime_count)
 
         # Request user feedback if we had a confident match.
@@ -7107,9 +7109,13 @@ class WashDataManager:
             except Exception:  # noqa: BLE001
                 return 0
 
-    def _fire_milestone_trigger(self, prev_count: int | None, cur_count: int | None) -> None:
+    def _fire_milestone_trigger(
+        self, prev_count: int | None, cur_count: int | None, *, program: Any = None
+    ) -> None:
         """milestone_reached (#478) at the milestone notification's moment, whether
-        or not a notification target is set. Never raises."""
+        or not a notification target is set. ``program`` is the ended cycle's own,
+        captured by its cycle-end steps: another cycle can end while they await.
+        Never raises."""
         try:
             if cur_count is None:
                 cur_count = self._lifetime_cycle_count()
@@ -7125,7 +7131,7 @@ class WashDataManager:
             if crossed is not None:
                 self._fire_device_trigger(
                     TRIGGER_MILESTONE_REACHED,
-                    self._trigger_ended_program,
+                    program if program is not None else self._trigger_ended_program,
                     cycle_count=crossed,
                 )
         except Exception:  # pylint: disable=broad-exception-caught
@@ -10134,6 +10140,11 @@ class WashDataManager:
             self._logger.info("Forcing detector reset before recording")
             self._end_dropped_cycle()
             self.detector.reset()
+            # The dropped cycle's snapshot too, or a restart would bring it back.
+            try:
+                await self.profile_store.async_clear_active_cycle()
+            except Exception:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Clearing the dropped cycle's snapshot raised", exc_info=True)
 
         await self.recorder.start_recording()
         self._notify_update()
