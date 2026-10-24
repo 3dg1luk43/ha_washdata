@@ -330,6 +330,12 @@ async def test_a_milestone_names_its_own_cycles_program(
     await hass.async_block_till_done()
     milestone = [v for t, v in seen if t == "milestone_reached"]
     assert len(milestone) == 1 and milestone[0]["program"] == "Cotton 40"
+    # An unmatched cycle's milestone has no program, not the newer cycle's.
+    manager._fire_milestone_trigger(19, 20, program=None)  # noqa: SLF001
+    manager._fire_milestone_trigger(9, 10, program=None)  # noqa: SLF001
+    await hass.async_block_till_done()
+    milestone = [v for t, v in seen if t == "milestone_reached"]
+    assert len(milestone) == 2 and milestone[1]["program"] is None
 
 
 async def test_a_failed_restore_ends_an_announced_cycle(

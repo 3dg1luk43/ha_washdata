@@ -376,6 +376,9 @@ _NON_PRICE_UNITS = frozenset(
 )
 
 
+# "Not passed", where None is a real value (an unmatched cycle's program).
+_UNSET: Any = object()
+
 # Kept out of the ha_washdata_cycle_ended event: HA's 32 KB event limit. A chatty
 # dynamic tariff can add hundreds of price entries (#426); the cost and effective
 # price it produced ride along instead.
@@ -7110,12 +7113,12 @@ class WashDataManager:
                 return 0
 
     def _fire_milestone_trigger(
-        self, prev_count: int | None, cur_count: int | None, *, program: Any = None
+        self, prev_count: int | None, cur_count: int | None, *, program: Any = _UNSET
     ) -> None:
         """milestone_reached (#478) at the milestone notification's moment, whether
         or not a notification target is set. ``program`` is the ended cycle's own,
-        captured by its cycle-end steps: another cycle can end while they await.
-        Never raises."""
+        captured by its cycle-end steps (None for an unmatched one): another cycle
+        can end while they await. Never raises."""
         try:
             if cur_count is None:
                 cur_count = self._lifetime_cycle_count()
@@ -7131,7 +7134,7 @@ class WashDataManager:
             if crossed is not None:
                 self._fire_device_trigger(
                     TRIGGER_MILESTONE_REACHED,
-                    program if program is not None else self._trigger_ended_program,
+                    self._trigger_ended_program if program is _UNSET else program,
                     cycle_count=crossed,
                 )
         except Exception:  # pylint: disable=broad-exception-caught
