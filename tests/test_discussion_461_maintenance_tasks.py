@@ -82,7 +82,7 @@ def test_presets_per_device_type():
     }
     assert maintenance.default_reminders("dryer") == {"lint_filter": 10, "condenser_clean": 30}
     # Washers (and every type without a preset) keep today's three.
-    for device_type in ("washing_machine", "washer_dryer", "air_fryer", "generic", "nope"):
+    for device_type in ("washing_machine", "washer_dryer", "pump", "generic", "nope"):
         assert maintenance.default_reminders(device_type) == DEFAULT_MAINTENANCE_REMINDER_CYCLES
 
 

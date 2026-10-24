@@ -13,7 +13,7 @@
         "data_description": {
           "name": "A friendly name for this device (e.g., 'Washing Machine', 'Dishwasher').",
           "device_type": "Sets detection defaults for this kind of appliance.",
-          "power_sensor": "The smart plug sensor that reports live power in watts.",
+          "power_sensor": "The smart plug's power sensor (W or kW), not its energy counter (kWh).",
           "min_power": "Readings above this (in watts) mean the appliance is running. 2 W suits most devices."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Unexpected error",
-      "invalid_power": "Power threshold must be greater than 0"
+      "invalid_power": "Power threshold must be greater than 0",
+      "power_sensor_energy": "This is an energy counter (kWh), not a power sensor. Pick the plug's power sensor (W or kW). If the plug has none, a Derivative helper can make one from the counter."
     },
     "abort": {
       "already_configured": "Device is already configured",
@@ -58,7 +59,52 @@
       "unload_dismiss_action_title": "Stop reminding",
       "vs_typical_longer": "{pct}% longer than usual",
       "vs_typical_shorter": "{pct}% shorter than usual",
-      "notify_live_waiting_message": "{device}: No profile matched yet."
+      "notify_live_waiting_message": "{device}: No profile matched yet.",
+      "power_sensor_energy": "This is an energy counter (kWh), not a power sensor. Pick the plug's power sensor (W or kW). If the plug has none, a Derivative helper can make one from the counter."
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Cycle started",
+      "program_recognised": "Program recognised",
+      "phase_started": "Phase started",
+      "finishing_soon": "Finishing soon",
+      "cycle_overrun": "Cycle running long",
+      "cycle_paused": "Cycle paused",
+      "cycle_resumed": "Cycle resumed",
+      "cycle_stalled": "Cycle stalled",
+      "cycle_finished": "Cycle finished",
+      "cycle_ended": "Cycle ended (any reason)",
+      "anti_wrinkle_started": "Anti-wrinkle started",
+      "still_tumbling": "Still tumbling after the cycle",
+      "unload_pending": "Unload pending",
+      "unloaded": "Unloaded",
+      "state_changed": "State changed",
+      "maintenance_due": "Maintenance due",
+      "milestone_reached": "Cycle milestone reached",
+      "pump_stuck": "Pump stuck"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Phase",
+      "minutes": "Minutes",
+      "percent": "Longer by (%)",
+      "include_detected": "Include detected pauses",
+      "status": "Ended as",
+      "from": "From",
+      "to": "To",
+      "task": "Task"
+    },
+    "extra_fields_descriptions": {
+      "program": "Only this program, by its exact name. Leave empty for any program.",
+      "phase": "Only this phase, by its name. Leave empty for any phase.",
+      "minutes": "Finishing soon: minutes left. Still tumbling: minutes after the finish.",
+      "percent": "Percent over the program's usual duration.",
+      "include_detected": "Also trigger on pauses WashData sees in the power, such as a soak or a stall.",
+      "status": "Only cycles that ended this way.",
+      "from": "Only changes from this state. Leave empty for any.",
+      "to": "Only changes to this state. Leave empty for any.",
+      "task": "Only this task, by its name or id. Leave empty for any task."
     }
   },
   "selector": {
@@ -68,11 +114,35 @@
         "dryer": "Dryer",
         "washer_dryer": "Washer-Dryer Combo",
         "dishwasher": "Dishwasher",
-        "air_fryer": "Air Fryer",
-        "bread_maker": "Bread Maker",
         "pump": "Pump / Sump Pump",
         "generic": "Other (Advanced)",
         "other": "Threshold Device"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Any",
+        "completed": "Completed",
+        "force_stopped": "Force stopped",
+        "interrupted": "Interrupted"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Off",
+        "idle": "Idle",
+        "starting": "Starting",
+        "running": "Running",
+        "paused": "Paused",
+        "user_paused": "Paused by user",
+        "ending": "Ending",
+        "finished": "Finished",
+        "anti_wrinkle": "Anti-Wrinkle",
+        "delay_wait": "Delay Start",
+        "interrupted": "Interrupted",
+        "force_stopped": "Force Stopped",
+        "unknown": "Unknown",
+        "clean": "Clean"
       }
     }
   },
@@ -288,6 +358,150 @@
           "description": "The WashData device whose finished load has been taken out."
         }
       }
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Cycle started",
+      "description": "Triggers when the appliance starts a cycle."
+    },
+    "program_recognised": {
+      "name": "Program recognised",
+      "description": "Triggers when WashData recognises the running cycle's program, or switches it to another program.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Only this program, by its exact name. Leave empty for any program."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Phase started",
+      "description": "Triggers when the running cycle enters a new phase of its program.",
+      "fields": {
+        "phase": {
+          "name": "Phase",
+          "description": "Only this phase, by its name. Leave empty for any phase."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Finishing soon",
+      "description": "Triggers once per cycle, when the time remaining first drops to this many minutes.",
+      "fields": {
+        "minutes": {
+          "name": "Minutes left",
+          "description": "Trigger when this many minutes or fewer are left."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Cycle running long",
+      "description": "Triggers once per cycle, when it runs this much longer than its program usually takes.",
+      "fields": {
+        "percent": {
+          "name": "Longer by",
+          "description": "Percent over the program's usual duration."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Cycle paused",
+      "description": "Triggers when you pause a cycle, and optionally when the appliance pauses on its own.",
+      "fields": {
+        "include_detected": {
+          "name": "Include detected pauses",
+          "description": "Also trigger on pauses WashData sees in the power, such as a soak or a stall, not only on pauses you start."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Cycle resumed",
+      "description": "Triggers when a paused cycle continues.",
+      "fields": {
+        "include_detected": {
+          "name": "Include detected pauses",
+          "description": "Also trigger on pauses WashData sees in the power, such as a soak or a stall, not only on pauses you start."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Cycle stalled",
+      "description": "Triggers when a running cycle halts at a low, flat power level."
+    },
+    "cycle_finished": {
+      "name": "Cycle finished",
+      "description": "Triggers when a cycle finishes, also when you stop it. Not for a false start.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Only this program, by its exact name. Leave empty for any program."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Cycle ended",
+      "description": "Triggers when a cycle ends for any reason, false starts included.",
+      "fields": {
+        "status": {
+          "name": "Ended as",
+          "description": "Only cycles that ended this way."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-wrinkle started",
+      "description": "Triggers when the appliance starts tumbling the finished load against creases."
+    },
+    "still_tumbling": {
+      "name": "Still tumbling after the cycle",
+      "description": "Triggers once when the appliance still tumbles in short bursts this many minutes after the cycle finished. Stops at a new cycle or 4 hours after the finish.",
+      "fields": {
+        "minutes": {
+          "name": "Minutes after the finish",
+          "description": "Trigger at the first tumble at least this long after the finish."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Unload pending",
+      "description": "Triggers when a cycle finished and the load is still inside."
+    },
+    "unloaded": {
+      "name": "Unloaded",
+      "description": "Triggers when the load is taken out after a cycle: the door opened or the unload was confirmed."
+    },
+    "state_changed": {
+      "name": "State changed",
+      "description": "Triggers when the WashData state changes.",
+      "fields": {
+        "from": {
+          "name": "From",
+          "description": "Only changes from this state. Leave empty for any."
+        },
+        "to": {
+          "name": "To",
+          "description": "Only changes to this state. Leave empty for any."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Maintenance due",
+      "description": "Triggers when a maintenance task becomes due.",
+      "fields": {
+        "task": {
+          "name": "Task",
+          "description": "Only this task, by its name or id. Leave empty for any task."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Cycle milestone reached",
+      "description": "Triggers when the lifetime cycle count reaches one of the milestones set for notifications."
+    },
+    "pump_stuck": {
+      "name": "Pump stuck",
+      "description": "Triggers when a pump runs longer than its stuck limit."
     }
   },
   "entity": {

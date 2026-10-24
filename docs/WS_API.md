@@ -4,7 +4,7 @@
 
 This document is generated from `custom_components/ha_washdata/ws_schema.py`. Every command is prefixed with `ha_washdata/` on the wire. Do not edit by hand - run `python3 devtools/generate_ws_types.py`.
 
-**112 commands.**
+**114 commands.**
 
 | Command | Request params | Response type |
 | --- | --- | --- |
@@ -31,6 +31,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `add_maintenance_task` | entry_id, name, cycles?, days? | `MaintenanceTaskResponse` |
 | `update_maintenance_task` | entry_id, task_id, name?, cycles?, days? | `MaintenanceTaskResponse` |
 | `delete_maintenance_task` | entry_id, task_id | `SuccessResponse` |
+| `set_maintenance_programs` | entry_id, task_id, programs | `SetMaintenanceProgramsResponse` |
 | `set_lifetime_cycle_count` | entry_id, count | `SetLifetimeCycleCountResponse` |
 | `label_cycle` | entry_id, cycle_id, profile_name?, new_profile_name? | `SuccessResponse` |
 | `delete_cycle` | entry_id, cycle_id | `SuccessResponse` |
@@ -120,6 +121,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_upload_device` | entry_id, items, include_phases?, include_settings? | `StoreUploadDeviceResponse` |
 | `store_download_device` | entry_id, device_id, include_settings? | `StartTaskResponse` |
 | `get_shareable_cycles` | entry_id | `GetShareableCyclesResponse` |
+| `blueprints/list` | - | `BlueprintsListResponse` |
 
 ## `ha_washdata/get_devices`
 
@@ -421,6 +423,8 @@ _None._
 | `cycles_since` | yes | dict[str, number] |
 | `custom_tasks` | yes | list[MaintenanceTask] |
 | `status` | yes | list[MaintenanceStatusRow] |
+| `programs_available` | yes | list[str] |
+| `programs` | yes | dict[str, list[str]] |
 | `lifetime_cycle_count` | yes | number |
 | `limits` | yes | MaintenanceLimits |
 
@@ -508,6 +512,24 @@ _None._
 | Field | Always present | Type |
 | --- | --- | --- |
 | `success` | yes | bool |
+
+## `ha_washdata/set_maintenance_programs`
+
+**Request parameters**
+
+| Param | Required | Type |
+| --- | --- | --- |
+| `entry_id` | yes | str |
+| `task_id` | yes | str |
+| `programs` | yes | list[str] |
+
+**Response** (`SetMaintenanceProgramsResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `success` | yes | bool |
+| `task_id` | yes | str |
+| `programs` | yes | list[str] |
 
 ## `ha_washdata/set_lifetime_cycle_count`
 
@@ -2039,6 +2061,19 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `items` | no | list |
 | `phase_programs` | no | list |
 | `all_programs` | no | list |
+
+## `ha_washdata/blueprints/list`
+
+**Request parameters**
+
+_None._
+
+**Response** (`BlueprintsListResponse`)
+
+| Field | Always present | Type |
+| --- | --- | --- |
+| `blueprints` | yes | list[BlueprintItem] |
+| `error` | no | str |
 
 # Task results
 

@@ -26,8 +26,8 @@ Closed automatically:
 
 If a bot or the maintainer closed your issue and the problem is still there, comment `/reopen` on it.
 
-**Translations are the exception:** they need no issue or label (see below). Documentation PRs go
-through the same flow as code.
+**Translations and automation templates are the exception:** they need no issue or label (see
+below). Documentation PRs go through the same flow as code.
 
 ## Bug reports
 
@@ -76,6 +76,25 @@ rules: [CLAUDE.md](CLAUDE.md) and [How it works](https://github.com/3dg1luk43/ha
 
 PR titles: `[FIX]`, `[FEATURE]`, `[REFACTOR]`, `[DOCS]`, `[TEST]`, `[PERF]`, e.g.
 `[FIX] Handle a power sensor going unavailable mid-cycle`.
+
+## Automation templates
+
+Templates are [Home Assistant blueprints](https://www.home-assistant.io/docs/automation/using_blueprints/)
+that ship with WashData and appear in the panel's Automations tab. Share one by pull request: push
+your branch to your fork, open the pull request against `main`, then add `?template=blueprint.md` to
+the page address (`&template=blueprint.md` if it already has a `?`) to load the template PR form.
+These PRs need no accepted issue; each one is reviewed before it is merged.
+
+- One YAML file in `custom_components/ha_washdata/blueprints/automation/` plus its entry in
+  `blueprints/catalog.json` (device types it suits, the WashData version it needs).
+- Input `washdata_device` is a device selector filtered to `integration: ha_washdata`; trigger on
+  WashData's device triggers (cycle started, finished, ended, anti-wrinkle started, stalled, unload
+  pending).
+- Give every other input a default where one makes sense: the template then installs in one click.
+- Say plainly what it switches or sends and what can go wrong. Never start a heating appliance's
+  program. Restoring a plug's power is allowed when the description says so and the user can limit
+  it (for example to someone being home). Let a new cycle cancel anything still waiting.
+- Run `pytest tests/test_issue_478_blueprints.py` before opening the PR.
 
 ## Translations
 

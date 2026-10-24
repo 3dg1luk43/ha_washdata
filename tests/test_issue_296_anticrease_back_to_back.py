@@ -85,7 +85,6 @@ def _config_from_options(opts: dict) -> CycleDetectorConfig:
         anti_wrinkle_enabled=opts["anti_wrinkle_enabled"],
         anti_wrinkle_max_power=opts["anti_wrinkle_max_power"],
         anti_wrinkle_max_duration=opts["anti_wrinkle_max_duration"],
-        anti_wrinkle_exit_power=opts["anti_wrinkle_exit_power"],
         delay_detect_enabled=opts["delay_start_detect_enabled"],
     )
 

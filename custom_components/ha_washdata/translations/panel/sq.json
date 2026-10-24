@@ -89,7 +89,9 @@
         "matcher_used": "U përputh me {n} nga ciklet tuaja",
         "matcher_used_one": "U përputh me {n} nga ciklet tuaja",
         "matcher_used_other": "U përputh me {n} nga ciklet tuaja",
-        "matcher_used_tip": "Cikle në këtë pajisje që WashData i përputhi vetë me këtë program të importuar. Një import që nuk përputhet kurrë mund të mos i përshtatet pajisjes suaj; mund ta hiqni. Numërohet në vend; asgjë nuk dërgohet në dyqan."
+        "matcher_used_tip": "Cikle në këtë pajisje që WashData i përputhi vetë me këtë program të importuar. Një import që nuk përputhet kurrë mund të mos i përshtatet pajisjes suaj; mund ta hiqni. Numërohet në vend; asgjë nuk dërgohet në dyqan.",
+        "bp_installed": "Instaluar",
+        "bp_installed_other": "Instaluar version tjetër"
     },
     "btn": {
         "pg_preset_delete": "Fshi konfigurimin",
@@ -133,7 +135,6 @@
         "export": "Eksporto",
         "force_stop": "Ndalim i detyruar",
         "force_stop_tip": "Përfundo menjëherë ciklin aktual dhe shënoje si të ndaluar me forcë",
-        "from_template": "Nga shablloni ▾",
         "ignore": "Injorojë",
         "import_json": "Importo nga JSON",
         "inspect": "Inspekto",
@@ -147,8 +148,6 @@
         "new_phase": "+ Fazë e re",
         "new_profile": "+ Profil i ri",
         "new_profile_tip": "Krijo një profil të ri programi nga një cikël ekzistues i etiketuar ose regjistrim",
-        "on_cycle_finished": "Kur cikli përfundon",
-        "on_cycle_started": "Kur cikli fillon",
         "pause_cycle": "Ndalo",
         "pause_cycle_tip": "Ndalo ciklin aktiv – pajisja do të vazhdojë nga aty ku kishte mbetur",
         "pg_load_live": "Ngarko cilësimet aktive",
@@ -251,7 +250,14 @@
         "confirmed": "Konfirmuar",
         "create_profile_from_gap": "Krijo profilin",
         "undo_import": "Zhbëj importimin e fundit",
-        "pg_rerun": "Përditëso simulimin"
+        "pg_rerun": "Përditëso simulimin",
+        "from_trigger": "Fillo nga trigger ▾",
+        "bp_use": "Përdor me këtë pajisje",
+        "bp_install": "Instalo shablonin",
+        "bp_view_yaml": "Shiko YAML",
+        "copy": "Kopjo",
+        "replace": "Zëvendëso",
+        "from_trigger_open": "Fillo nga trigger ▴"
     },
     "conflict": {
         "anti_wrinkle_max": {
@@ -301,25 +307,22 @@
             "timeout": "Duhet të jetë më e madhe se Kohëzgjatja e pompës së bllokuar ({ps} s), që alarmi i bllokimit të ndizet i pari"
         },
         "start_dur": {
-            "sampling": "Intervali i Kampionimit tejkalon Kohëzgjatjen e Nisjes ({sdt} s); majat me kampion të vetëm mund të hapin një cikël",
             "threshold": "Duhet të jetë të paktën një Interval Kampionimi ({si} s) për të parandaluar fillimet e rreme me kampion të vetëm"
-        },
-        "unmatch": {
-            "match": "Duhet të jetë mbi Pragun e Mosperputhjeve ({un})",
-            "unmatch": "Duhet të jetë nën Pragun e Përputhjes ({match}); përndryshe një përputhje e konfirmuar zhbëhet menjëherë"
         },
         "cascade_toast": "Cilësime të tjera të rregulluara për konsistencë: {n}",
         "suggestion_resolves": "Zbato sugjerimin e pritshëm ({val}) më poshtë për ta rregulluar këtë",
         "use_fix": "Përdor {val}",
         "watchdog": {
-            "interval": "Duhet të jetë të paktën 2× Intervali i Kampionimit ({si} s)",
-            "sampling": "Intervali i Kampionimit duhet të jetë të paktën gjysma e Intervalit të Rojtarit ({wi} s)"
+            "interval": "Duhet të jetë të paktën 2× Intervali i Kampionimit ({si} s)"
         },
         "settings_banner": "Konflikte cilësimesh: {n}. Kontrolloni seksionet e theksuara dhe korrigjojini para ruajtjes.",
         "settings_banner_btn": "Shko te i pari",
         "end_energy": {
             "energy": "Shumë e rreptë për Pragun e ndalimit ({w} W) gjatë Vonesës së fikjes ({d} s); cikli mund të përfundojë vetëm përmes një rruge rezervë",
             "stop": "Energjia e fundit ({e} Wh gjatë {d} s) lejon vetëm {p} W"
+        },
+        "power_sensor": {
+            "energy": "Ky sensor numëron energjinë ({unit}), jo fuqinë, prandaj nuk mund të zbulohet asnjë cikël. Zgjidhni sensorin e fuqisë të spinës (W ose kW)."
         }
     },
     "hdr": {
@@ -367,7 +370,11 @@
         "import_power_history": "Importo historikun e fuqisë",
         "service_status": "Statusi i mirëmbajtjes",
         "online_account_tab": "Online dhe komuniteti",
-        "live_match_debug": "Korrigjimi i përputhjes live"
+        "live_match_debug": "Korrigjimi i përputhjes live",
+        "automations_used": "Automatizime që përdorin këtë pajisje",
+        "bp_templates": "Shabllone",
+        "automations_all_tip": "Lista e automatizimeve të Home Assistant, filtruar sipas etiketës WashData. Automatizimeve të krijuara këtu gjenden edhe në kategorinë WashData.",
+        "maint_done_by_program": "Kryhet automatikisht"
     },
     "health": {
         "fair": "Cilësi e pranueshme e profilit",
@@ -650,7 +657,7 @@
         "hist_reason_already_recorded": "mbivendoset me një cikël që WashData e ka regjistruar tashmë",
         "share_consent": "Konfirmoj që këto cikle përfunduan normalisht, pa ndërprerje",
         "show_internal": "Shfaq cilësimet e brendshme",
-        "show_internal_tip": "Cilësime që WashData i rregullon për ju (kampionimi, rojtari, shpeshtësia e përputhjes, pragjet). Shfaqen kur kjo pajisje ka vlerën e vet, një konflikt ose një sugjerim.",
+        "show_internal_tip": "Cilësime që WashData i rregullon për ju (rojtari, shpeshtësia e përputhjes, pragjet). Shfaqen kur kjo pajisje ka vlerën e vet, një konflikt ose një sugjerim.",
         "rate_n": "{n} yje",
         "rate_quality": "Vlerëso cilësinë",
         "pg_autolabel": "Etiketim automatik",
@@ -679,7 +686,14 @@
         "cycle_context_minutes": "{min} min",
         "cycle_context_series": "Historiku i regjistruesit",
         "before_start": "Para fillimit",
-        "after_end": "Pas përfundimit"
+        "after_end": "Pas përfundimit",
+        "bp_you_choose": "Zgjedhni ju: {inputs}",
+        "bp_adjustable": "I rregullueshëm: {inputs}",
+        "bp_yaml": "Blueprint YAML",
+        "automation_wd_label": "Mbart etiketën WashData",
+        "done_by_none": "E pacaktuar",
+        "done_by_programs": "Kryhet automatikisht nga: {programs}",
+        "done_by_cycle": "U krye nga një cikël {program}"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -776,7 +790,9 @@
         "profile_title": "Profili · {name}",
         "undo_import_msg": "Të dhënat dhe cilësimet e kësaj pajisjeje kthehen si ishin para importimit të fundit ({when}). Ciklet e regjistruara dhe ndryshimet e bëra që atëherë humbasin.",
         "undo_import_ok": "Zhbëj importimin",
-        "undo_import_title": "Zhbëj importimin e fundit"
+        "undo_import_title": "Zhbëj importimin e fundit",
+        "bp_replace_title": "Zëvendësohet shabloni i instaluar?",
+        "bp_replace_msg": "Home Assistant ka një version tjetër të \"{name}\". Zëvendësohet me atë nga ky version WashData? Automatizimeve që e përdorin do t'u ndryshohet."
     },
     "msg": {
         "pg_canvas_empty3": "Zgjidhni një cikël më sipër dhe shtypni Ekzekuto për ta simuluar. Pastaj kaloni kursorin për të lexuar vlerat, rrëshqitni ose zmadhoni me dy gishta dhe tërhiqni për të lëvizur.",
@@ -797,7 +813,6 @@
         "artifact_pause_detail": "Fuqia ra pothuajse në zero për ~{n} s, pastaj u rikthye. Ndoshta dera u hap ose cikli u vu në pauzë.",
         "artifact_spike_detail": "Shkoi mbi brezin e zakonshëm të fuqisë për ~{n} s.",
         "auto_label_intro": "Cakto profile te ciklet e paetiketuara që besueshmëria e tyre e përputhjes tejkalon pragun.",
-        "automations_intro": "WashData ndez ngjarje {start} / {end} dhe ekspozon entitete, kështu njoftimet dhe veprimet ndërtohen më mirë si automatizime normale të Home Assistant. Automatizimi që përdorin këtë pajisje shfaqen më poshtë.",
         "cleanup_intro": "Të gjitha ciklet e etiketuara, të mbivendosura. Shëno ciklet jashtë norme, pastaj hiq etiketën e tyre (mbeten në historik, nuk e formësojnë më këtë profil) ose fshiji.",
         "clear_debug_hint": "Hiqni të dhënat e ruajtura të korrigjimit për të liruar hapësirën.",
         "collecting_data": "Duke mbledhur të dhëna. Cikle që nevojiten para se të fillojë rregullimi i hollë: {need} ({current}/{min}).",
@@ -1038,10 +1053,6 @@
         "pg_label_yes": "Do të etiketohej \"{name}\" në fund të ciklit",
         "pg_label_no": "Do të kërkonte rishikim: {reason}",
         "live_match_debug_tip": "Besueshmëria: sa ngushtë përputhet kurba aktuale e fuqisë me profilin kandidat më të mirë (0-100%). E paqartë: pikët e dy kandidatëve më të mirë janë brenda 5% të njëri-tjetrit - etiketa mbetet e pasigurt derisa të përfundojë cikli.",
-        "automation_alias_started": "{device}: cikli filloi",
-        "automation_alias_finished": "{device}: cikli përfundoi",
-        "automation_desc_started": "Ekzekutohet kur fillon një cikël i {device}. Shtoni veprimet tuaja (njoftim, drita, ...).",
-        "automation_desc_finished": "Ekzekutohet kur përfundon një cikël i {device}. Shtoni veprimet tuaja (njoftim, drita, ...).",
         "feedback_detected": "WashData zbuloi: {name}",
         "import_undo_hint": "Ruhet një pikë rikthimi nga para importimit të fundit ({when}): {profiles} profil(e) dhe {cycles} cikël(cikle).",
         "replace_undo_hint": "Fillimisht ruhet një pikë rikthimi, kështu që mund ta zhbëni këtë importim nga Eksporto / Importo.",
@@ -1064,27 +1075,27 @@
         "cycle_context_note": "Gri: historiku i regjistruesit për sensorin e fuqisë rreth këtij cikli. Nuk është pjesë e ciklit dhe nuk ndikon në kohëzgjatje, energji ose përputhje.",
         "cycle_context_none": "Regjistruesi nuk ka lexime rreth këtij cikli (si parazgjedhje Home Assistant ruan historikun e 10 ditëve).",
         "cycle_context_tip": "Vetëm për shfaqje: tregon historikun e regjistruesit për sensorin e fuqisë rreth këtij cikli, nëse ruhet ende. Për të shtuar përpjekjet e dështuara të nisjes në ciklet e ardhshme, përdorni Sekondat hyrëse të kurbës (Cilësimet > Zbulim > Fillimi i ciklit), që ndryshon kohëzgjatjet e ruajtura.",
-        "invalid_threshold_pair": "Pragu i ndalimit ({stop} W) duhet të jetë më i ulët se Pragu i nisjes ({start} W). Nuk u ruajt asgjë; ndryshojini të dy bashkë."
+        "invalid_threshold_pair": "Pragu i ndalimit ({stop} W) duhet të jetë më i ulët se Pragu i nisjes ({start} W). Nuk u ruajt asgjë; ndryshojini të dy bashkë.",
+        "automations_tab_intro": "WashData ofron triggerë pajisje (cikël filloi, cikël mbaroi, cikël u ngec dhe më shumë) për automatizimeve tuaja të Home Assistant. Automatizimeve që përdorin këtë pajisje janë listuar këtu.",
+        "bp_intro": "Automatizime gati për këtë pajisje, të instalaura si blueprinte të Home Assistant.",
+        "bp_admin_only": "Shabllonët i instalon një administrator.",
+        "bp_none": "Ende nuk ka shabllone për këtë tip pajisje.",
+        "bp_load_failed": "Shabllonët nuk mund të ngarkoheshin.",
+        "auto_trigger_hint": "Krijon një automatizim me këtë trigger për këtë pajisje dhe e hap në Home Assistant.",
+        "automation_alias_trigger": "{device}: {trigger}",
+        "automation_desc_trigger": "Krijuar nga WashData për {device}. Shtoni veprimet tuaja (njoftim, dritat, ...).",
+        "automation_alias_new": "{device}: automatizim i ri",
+        "maint_done_by_program_intro": "Një detyrë quhet e kryer kur përfundon një cikël i njërit prej programeve të saj, për shembull pastrimi i tamburit kur ekzekutohet programi Pambuk 90. Llogariten vetëm ciklet për të cilat WashData është i sigurt, ose programin e të cilave e zgjodhët ju."
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
         "anti_wrinkle": "Rrotullimi periodik pas ciklit për të reduktuar rrudhat.",
-        "baking": "Elementi ngrohës punon në temperaturë të lartë për të formuar koren dhe brendësinë.",
-        "cooking": "Faza kryesore e gatimit me ngrohësin dhe ventilatorin në punë.",
         "cool_down": "Rrotullimi pa ngrohje afër fundit të ciklit.",
-        "cool_down_af": "Ftohje vetëm me ventilator pas ngrohjes.",
         "drain_and_switch": "Periudha e tranzicionit nga mënyra e larjes në tharje.",
         "dry": "Faza e tharjes duke përdorur ngrohës dhe/ose nxehtësi të mbetur.",
         "drying": "Periudha kryesore e tumbullimit me ngrohje.",
         "heat_up": "Ngrohja fillestare e ngrohësit përpara se të fillojë tharja e plotë.",
-        "keep_warm": "Mbajtje me nxehtësi të ulët që ushqimi të qëndrojë i ngrohtë.",
-        "keep_warm_bm": "Mbajtje me nxehtësi të ulët që buka të qëndrojë e ngrohtë pas pjekjes.",
-        "kneading": "Motori përzien dhe mbrun brumin. Konsum i lartë i fuqisë.",
-        "pause_af": "Pauzë e shkurtër për tundje ose kontroll.",
-        "pre_heat": "Ngrohja fillestare e dhomës përpara gatimit të plotë.",
         "pre_rinse": "Spërkatja fillestare përpara larjes me detergjent.",
-        "proving": "Ngritje me nxehtësi të ulët: majaja fermenton dhe brumi fryhet.",
-        "resting": "Pauzë e shkurtër me fuqi të ulët midis fazave të mbrujtjes, që gluteni të çlodhet.",
         "pre_wash": "Thithja fillestare ose trajtimi paraprak përpara larjes kryesore.",
         "rinse": "Faza e shpëlarjes me ujë të pastër. Kjo fazë mund të përsëritet disa herë.",
         "sanitize": "Faza e pastrimit me temperaturë të lartë për programet e higjenizimit.",
@@ -1173,10 +1184,6 @@
             "doc": "Mban me ciklin e përfunduar pulset e shkurtra me fuqi të ulët të tharëses pas fazës kryesore të nxehjes, në vend që t'i lexojë si cikle të reja.",
             "label": "Aktivizo zbulimin kundër rrudhave"
         },
-        "anti_wrinkle_exit_power": {
-            "doc": "Në modalitetin kundër rrudhave, fuqia nën këtë vlerë llogaritet si qetësi mes pulseve të rrotullimit, dhe qetësia më e gjatë se Hendeku maks. i pulseve e mbyll modalitetin. Nëse Pragu i ndalimit është më i lartë, përdoret ai, prandaj ky cilësim ndryshon diçka vetëm kur vendoset mbi Pragun e ndalimit.",
-            "label": "Pragu i fuqisë së daljes"
-        },
         "anti_wrinkle_idle_timeout": {
             "label": "Hendeku maks. i pulseve",
             "doc": "Sa gjatë mund të qëndrojë e qetë tharësja mes pulseve të rrotullimit përpara se të mbarojë modaliteti kundër rrudhave. Vendoseni mbi hendekun më të gjatë të tharëses suaj, përndryshe pulset e mëvonshme lexohen si nisje të gabuara."
@@ -1225,10 +1232,6 @@
             "doc": "Sensor opsional i derës. Tregon kur pajisja u hap për t'u shkarkuar pas një cikli.",
             "label": "Entiteta e sensorit të derës"
         },
-        "duration_tolerance": {
-            "doc": "Vetëm për reagimin e të mësuarit: një cikël brenda +/-X% të kohëzgjatjes së vlerësuar llogaritet si vlerësim i mirë. Nuk ndikon në përputhje.",
-            "label": "Toleranca e vlerësimit"
-        },
         "enable_ml_models": {
             "doc": "Përdor një model të trajnuar në këtë makinë për të parashikuar energjinë dhe koston e një cikli në punë, dhe lejon një program të njohur mirë që ndalon jashtëzakonisht herët të përfundojë pa pritur gjithë vonesën e fikjes. Joaktiv: vetëm logjika e bazuar në fuqi.",
             "label": "Apliko modele inteligjente gjatë ciklit"
@@ -1254,12 +1257,8 @@
             "label": "Ekspono entitetet e korrigjimit"
         },
         "external_end_trigger": {
-            "doc": "Sensor binar, ndryshimi i të cilit shënon fundin e ciklit (p.sh. një kontakt \"e përfunduar\" ose një integrim tjetër).",
+            "doc": "Sensor binar opsional që mbaron ciklin kur ndizet, përveç zbulimit të bazuar në fuqi (p.sh. kontakt \"e përfunduar\" ose integrim tjetër). Lëreni bosh për ta çaktivizuar.",
             "label": "Entiteta e aktivizuesit të jashtëm"
-        },
-        "external_end_trigger_enabled": {
-            "doc": "Lejon një sensor binar të sinjalizojë fundin e një cikli, përveç zbulimit të bazuar në fuqi.",
-            "label": "Aktivizo aktivizuesin e jashtëm të fundit"
         },
         "external_end_trigger_inverted": {
             "doc": "Trajtojeni kalimin e sensorit në OFF (jo ON) si sinjal përfundimi.",
@@ -1284,18 +1283,6 @@
         "ml_training_enabled": {
             "doc": "Ritrajnon herë pas here modelin e energjisë me ciklet e përfunduara të kësaj makine. Një model i ri mbahet vetëm nëse e tejkalon vlerësimin e thjeshtë në ciklet e testimit.",
             "label": "Mëso nga kjo makinë"
-        },
-        "ml_training_hour": {
-            "doc": "Ora e ditës (0-23) për trajnimin e natës. Zgjidhni një orë të qetë, p.sh. 2.",
-            "label": "Mëso në orën"
-        },
-        "ml_training_interval_days": {
-            "doc": "Ritrajnon më së shumti një herë në kaq ditë.",
-            "label": "Kontrolloje më shumë çdo"
-        },
-        "ml_training_min_cycles": {
-            "doc": "Pret të paktën kaq cikle të regjistruara përpara trajnimit.",
-            "label": "Ciklet e nevojshme fillimisht"
         },
         "name": {
             "doc": "Emri që shfaqet në Home Assistant për këtë pajisje.",
@@ -1329,16 +1316,12 @@
             "doc": "Shërbimet notify.* që thirren kur përfundon një cikël. Lëreni bosh për asnjë.",
             "label": "Shërbime përfundimi"
         },
-        "notify_fire_events": {
-            "doc": "Lësho gjithashtu ngjarjet ha_washdata_* në fillimin dhe përfundimin e ciklit, për automatizimet tuaja.",
-            "label": "Aktivizo ngjarje HA për njoftime"
-        },
         "notify_icon": {
             "doc": "Ikona e vogël në njoftim (p.sh. mdi:washing-machine). Dërgohet vetëm te marrësit mobile_app, jo te grupet notify. Në iOS zëvendëson ikonën e aplikacionit dhe kërkon aplikacionin shoqërues 2026.8 ose më të ri. Bosh: parazgjedhja e platformës.",
             "label": "Ikona e njoftimit"
         },
         "notify_live_chronometer": {
-            "doc": "Shfaq në njoftim një kohëmatës live numërimi mbrapsht (ku mbështetet) në vend të një vlerësimi fiks.",
+            "doc": "Android: shton një numërim mbrapsht deri te fundi i vlerësuar pranë tekstit të njoftimit. Përdorni {finish_time} në Mesazh para-përfundimi për të treguar orën e mbarimit në vend të një numërimi mbrapsht të dytë.",
             "label": "Përdor kronometër live"
         },
         "notify_live_interval_seconds": {
@@ -1362,7 +1345,7 @@
             "label": "Njerëzit (për Vetëm kur në shtëpi)"
         },
         "notify_pre_complete_message": {
-            "doc": "Teksti i çdo përditësimi live të progresit. Variablat shabllon: {device}, {program}, {minutes} (minutat e mbetura). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
+            "doc": "Teksti i çdo përditësimi live të progresit. Variablat shabllon: {device}, {program}, {minutes} (minutat e mbetura), {finish_time} (fundi i vlerësuar, p.sh. 14:30). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
             "label": "Mesazh para-përfundimi"
         },
         "notify_reminder_message": {
@@ -1410,7 +1393,7 @@
             "label": "Pragu i fikjes së energjisë"
         },
         "power_sensor": {
-            "doc": "Sensori që raporton fuqinë live të kësaj pajisjeje në vat (p.sh. sensor.washer_power). I gjithë zbulimi bazohet në të.",
+            "doc": "Sensori që raporton fuqinë live të kësaj pajisjeje në W ose kW (p.sh. sensor.washer_power), jo matësi i saj i energjisë (kWh). I gjithë zbulimi bazohet në të.",
             "label": "Sensori i fuqisë"
         },
         "profile_match_interval": {
@@ -1429,10 +1412,6 @@
             "doc": "Rezultati i përputhjes në kohë reale që i duhet një cikli përpara se Përfundimi i Zgjuar ose finalizimi kundër rrudhave ta mbyllin herët. Nuk ndryshon programin e shfaqur. Rriteni nëse përputhjet e dobëta i mbyllin ciklet herët; uleni nëse përputhjet e qarta presin vonesën e fikjes.",
             "label": "Pragu i përputhjes"
         },
-        "profile_unmatch_threshold": {
-            "doc": "Nëse rezultati i përputhjes në kohë reale bie nën këtë vlerë, hamendja aktuale e programit pastrohet. Mbajeni pak më të ulët se Pragu i përputhjes, që një rënie e shkurtër të mos e rivendosë.",
-            "label": "Pragu i mosperputhjeve"
-        },
         "progress_reset_delay": {
             "doc": "Pas një cikli, mbaje progresin në 100% kaq gjatë përpara se të rivendoset në \"Idle\".",
             "label": "Vonesë rivendosjeje të progresit"
@@ -1440,10 +1419,6 @@
         "pump_stuck_duration": {
             "doc": "Sa gjatë mund të punojë pa ndalim një pompë përpara se të lëshohet ngjarja e pompës së bllokuar.",
             "label": "Kohëzgjatja e pompës së bllokuar"
-        },
-        "sampling_interval": {
-            "doc": "Koha minimale ndërmjet leximeve të përpunuara. Leximet që vijnë më herët anashkalohen (leximet e ulëta gjatë ciklit ruhen gjithmonë). Vendoseni sa intervali i raportimit të prizës suaj ose më pak; një vlerë më e lartë vetëm hedh poshtë lexime.",
-            "label": "Intervali i kampionimit"
         },
         "save_debug_traces": {
             "doc": "Ruan gjithashtu me çdo cikël të dhënat e korrigjimit të përputhjes (pikët e çdo kandidati), për zgjidhjen e problemeve. Shton rreth 20 KB për cikël.",
@@ -1619,9 +1594,6 @@
         "services": {
             "label": "Shërbime"
         },
-        "signal_processing": {
-            "label": "Përpunimi i sinjalit"
-        },
         "thresholds_gap": {
             "label": "Pragjet dhe hendeku"
         },
@@ -1694,7 +1666,8 @@
         "subtab_profiles": "Profile",
         "maintenance": "Mirëmbajtja",
         "playground": "Zona e provave",
-        "store": "Dyqani"
+        "store": "Dyqani",
+        "automations": "Automatizime"
     },
     "tag": {
         "early_end": "Fund i hershëm",
@@ -1861,7 +1834,14 @@
         "auto_label_cancelled_other": "Etiketimi automatik u anulua pasi u etiketuan {count} cikle.",
         "auto_label_done": "Etiketimi automatik përfundoi: u etiketuan {count} cikle, pa etiketë: {skipped}.",
         "auto_label_done_one": "Etiketimi automatik përfundoi: u etiketua {count} cikël, pa etiketë: {skipped}.",
-        "auto_label_done_other": "Etiketimi automatik përfundoi: u etiketuan {count} cikle, pa etiketë: {skipped}."
+        "auto_label_done_other": "Etiketimi automatik përfundoi: u etiketuan {count} cikle, pa etiketë: {skipped}.",
+        "bp_install_failed": "Nuk mund të instalohej shabloni: {error}",
+        "bp_installed_finish": "Shabloni u instalua. Plotëso të tjerat në Home Assistant.",
+        "bp_automation_failed": "Shabloni është instaluar, por automatizimi nuk mund të krijohej: {error}",
+        "bp_automation_created": "Automatizimi u krijua me cilësimet e parazgjedhura; po hapet",
+        "copied": "Kopjuar",
+        "copy_failed": "Kopjimi dështoi. Zgjidh tekstin dhe kopjoje me dorë.",
+        "automation_label_failed": "Automatizimi u krijua, por etiketa ose kategoria e WashData nuk mund të shtohej."
     },
     "suggestion": {
         "observed_label": "I vëzhguar",
@@ -1869,10 +1849,6 @@
             "auto_label_confidence": {
                 "higher": "Etiketimet automatike zvogëlohen; më shumë cikle shkojnë për rishikim",
                 "lower": "Etiketimet automatike rriten; disa mund të identifikohen gabim"
-            },
-            "duration_tolerance": {
-                "higher": "Pranon gamë më të gjerë kohëzgjatjeje – përputhje më fleksibël",
-                "lower": "Kërkon përputhje më të ngushtë kohëzgjatjeje – më rigoroze por mund të refuzojë cikle të pazakonshme"
             },
             "end_energy_threshold": {
                 "higher": "Mbyll vetëm ciklet që kanë konsumuar energji të konsiderueshme",
@@ -1979,7 +1955,6 @@
         "start_threshold_w": "Watt minimalë për t'u llogaritur si nisur",
         "stop_threshold_w": "Nën këtë, makina llogaritet e fikur",
         "anti_wrinkle_enabled": "Thith pulset e rrotullimit pas fazës kryesore në vend që t'i lexojë si cikle të reja",
-        "anti_wrinkle_exit_power": "Niveli i qetësisë mes pulseve të rrotullimit; vepron vetëm mbi Pragun e ndalimit",
         "anti_wrinkle_idle_timeout": "Koha e qetësisë e lejuar mes dy pulseve të rrotullimit para se të mbarojë modaliteti kundër rrudhave",
         "anti_wrinkle_max_duration": "Një puls më i gjatë se ky e mbaron modalitetin kundër rrudhave dhe hap një cikël të ri",
         "anti_wrinkle_max_power": "Një puls mbi këtë e mbaron modalitetin kundër rrudhave dhe hap një cikël të ri",
@@ -2064,7 +2039,10 @@
     },
     "link": {
         "maintenance_supporter": "Maintenance Supporter në GitHub ↗",
-        "manual": "Manuali ↗"
+        "manual": "Manuali ↗",
+        "bp_share": "Ndaj shablonin tënd me pull request ↗",
+        "bp_open_in_ha": "Hap në Home Assistant ↗",
+        "automations_all": "Të gjitha automatizimeve WashData në Home Assistant"
     },
     "tip": {
         "add_brand": "Marka nuk është në listë? Shtojeni në katalogun e komunitetit",
@@ -2183,16 +2161,11 @@
         "kept": "mbajtur",
         "max": "maks.",
         "min": "min.",
-        "minus_tol": "-tol.",
         "no_match": "pa përputhje",
         "no_updates": "pa përditësime",
         "off_delay_wait": "pritje fikjeje",
         "off_gap": "hendek fikjeje",
-        "plus_tol": "+tol.",
-        "profile": "profili",
-        "reading_interval": "intervali tipik i leximeve",
         "sensor_offline": "sensori jashtë linje: ndalim i detyruar",
-        "si": "IK",
         "spike_ignored": "maja injorohet",
         "spike_ignored_short": "maja: injoruar",
         "start": "nisja",
@@ -2201,5 +2174,71 @@
         "thr": "prag",
         "too_short": "shumë i shkurtër",
         "tumble_kept": "pulset e rrotullimit mbahen"
+    },
+    "blueprint": {
+        "cycle_running_indicator": {
+            "name": "Ndiz diçka gjatë kohës kur cikli punon",
+            "description": "Ndez një dritë, çelës ose ndihmës ndezje/fikje kur fillon cikli WashData dhe e fik kur mbaron, edhe pas nisje të rreme.\n\nKërkon WashData 0.5.9 ose më të ri."
+        },
+        "dryer_anti_crease_power_cut": {
+            "name": "Mbaro fazën e gjatë kundër rrudhave të tharëses",
+            "description": "Për tharëse që vazhdojnë të rrotullohen në modalitetin kundër rrudhave për orë pas programit. Ekzekutohet vetëm pasi WashData e konsideron programin të përfunduar (cikël mbaroi ose filloi kundër rrudhave). Pret, pastaj fikë prizën e zgjuar të tharëses në një moment me konsum të ulët dhe, si parazgjedhje, e rindez. Një cikël i ri që fillon ndërkohë e anulon.\n\nRisk: kjo ndryshon releun ndërsa tharësja është e lidhur. Përdore vetëm me prizë të vlerësuar për tharësen tënde dhe me rrezik tënd. WashData nuk e fikë kurrë prizën vetë; këtë e bën ky automatizim.\n\nKërkon WashData 0.5.9 ose më të ri."
+        }
+    },
+    "trigger": {
+        "cycle_started": {
+            "name": "Cikli filloi"
+        },
+        "program_recognised": {
+            "name": "Programi u njoh"
+        },
+        "phase_started": {
+            "name": "Faza filloi"
+        },
+        "finishing_soon": {
+            "name": "Po mbaron së shpejti"
+        },
+        "cycle_overrun": {
+            "name": "Cikli po zgjat shumë"
+        },
+        "cycle_paused": {
+            "name": "Cikli u ndërpre"
+        },
+        "cycle_resumed": {
+            "name": "Cikli u vazhdua"
+        },
+        "cycle_stalled": {
+            "name": "Cikli u ngec"
+        },
+        "cycle_finished": {
+            "name": "Cikli mbaroi"
+        },
+        "cycle_ended": {
+            "name": "Cikli përfundoi (çdo arsye)"
+        },
+        "anti_wrinkle_started": {
+            "name": "Kundër rrudhave filloi"
+        },
+        "still_tumbling": {
+            "name": "Vazhdon të rrotullohet pas ciklit"
+        },
+        "unload_pending": {
+            "name": "Shkarkim në pritje"
+        },
+        "unloaded": {
+            "name": "U shkarkua"
+        },
+        "state_changed": {
+            "name": "Gjendja ndryshoi"
+        },
+        "maintenance_due": {
+            "name": "Mirëmbajtja është e nevojshme"
+        },
+        "milestone_reached": {
+            "name": "Pika kyçe e ciklit u arrit"
+        },
+        "pump_stuck": {
+            "name": "Pompa u bllokua"
+        }
     }
 }

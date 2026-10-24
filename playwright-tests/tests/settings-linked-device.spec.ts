@@ -19,11 +19,10 @@ import de from '../../custom_components/ha_washdata/translations/panel/de.json';
 const LINKED = 'dev-plug-1';
 
 // The shared options fixture omits the cadence keys, so Advanced mode falls back to
-// the schema literals - and 30 s watchdog / 30 s sampling trips the panel's own
-// watchdog >= 2x sampling rule, sending every save down the conflict branch. Supply
-// a self-consistent set so these tests exercise the normal save path.
+// the schema literals. Supply a self-consistent set so these tests exercise the
+// normal save path. (The sampling interval is not a setting since 0.5.9; no
+// defaults are mocked here, so the watchdog >= 2x sampling rule stays quiet.)
 const CADENCE = {
-  sampling_interval: 10,
   watchdog_interval: 30,
   no_update_active_timeout: 600,
   start_duration_threshold: 10,
@@ -162,34 +161,34 @@ test('an off-screen cascade fix still reaches the save payload (#406 guard)', as
   // against the mutated _opts would call it unchanged and silently drop it, so the
   // diff must use the untouched _preCascadeOpts baseline.
   //
-  // no_update_active_timeout (50) <= watchdog_interval (100) conflicts. Taking the
-  // offered watchdog fix (25) then breaks watchdog >= 2x sampling (30), whose only
-  // other fixable key - sampling_interval - lives in the Detection section.
+  // Stop Threshold (5 W) at or above Start Threshold (4 W) conflicts. Taking the
+  // offered stop fix (3.2) then breaks min_power <= stop (3.5 W), whose only other
+  // fixable key - min_power - lives in the Basic section. (Until 0.5.9 this used the
+  // watchdog >= 2x sampling rule; the sampling interval is no longer a setting.)
   await bootSettingsRaw(page, {
-    sampling_interval: 30,
-    watchdog_interval: 100,
-    no_update_active_timeout: 50,
-    start_duration_threshold: 30,
-    end_energy_threshold: 0.2,
+    ...CADENCE,
+    start_threshold_w: 4,
+    stop_threshold_w: 5,
+    min_power: 3.5,
   }, {});
 
-  await page.locator('.wd-sec-btn', { hasText: 'Timing' }).click();
-  const fix = page.locator('.wd-conflict-fix[data-ckey="watchdog_interval"]').first();
+  await page.locator('.wd-sec-btn', { hasText: 'Detection' }).click();
+  const fix = page.locator('.wd-conflict-fix[data-ckey="stop_threshold_w"]').first();
   await expect(fix).toBeVisible({ timeout: 5_000 });
   await fix.click();
 
-  // The off-screen cascade landed on sampling_interval.
+  // The off-screen cascade landed on min_power.
   await expect.poll(async () => page.evaluate(() =>
     JSON.stringify((document.querySelector('#wd-panel') as any)._cascadePending),
-  )).toContain('sampling_interval');
+  )).toContain('min_power');
 
   await page.locator('#wd-settings-save').click();
   await expect.poll(async () =>
     (await page.evaluate(() => (window as any).__get_calls('ha_washdata/set_options'))).length,
   ).toBe(1);
   const [call] = await page.evaluate(() => (window as any).__get_calls('ha_washdata/set_options'));
-  expect(call.options.watchdog_interval).toBe(25);
-  expect(call.options.sampling_interval).toBe(12);
+  expect(call.options.stop_threshold_w).toBe(3.2);
+  expect(call.options.min_power).toBe(2.6);
 });
 
 /**

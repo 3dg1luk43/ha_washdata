@@ -43,7 +43,9 @@
     "matcher_used_one": "Corresponde a {n} dos seus ciclos",
     "matcher_used_many": "Corresponde a {n} dos seus ciclos",
     "matcher_used_other": "Corresponde a {n} dos seus ciclos",
-    "matcher_used_tip": "Ciclos deste aparelho que o WashData associou sozinho a este programa importado. Uma importação que nunca corresponde pode não servir para o seu aparelho; você pode removê-la. Contado localmente; nada é enviado para a loja da comunidade."
+    "matcher_used_tip": "Ciclos deste aparelho que o WashData associou sozinho a este programa importado. Uma importação que nunca corresponde pode não servir para o seu aparelho; você pode removê-la. Contado localmente; nada é enviado para a loja da comunidade.",
+    "bp_installed": "Instalado",
+    "bp_installed_other": "Outra versão instalada"
   },
   "btn": {
     "log_done_task": "Registrar como feito: {task}",
@@ -89,7 +91,6 @@
     "export": "Exportar",
     "force_stop": "Forçar parada",
     "force_stop_tip": "Encerrar imediatamente o ciclo atual e marcá-lo como parado forçadamente",
-    "from_template": "A partir de modelo ▾",
     "ignore": "Ignorar",
     "import_json": "Importar de JSON",
     "inspect": "Inspecionar",
@@ -103,8 +104,6 @@
     "new_phase": "+ Nova fase",
     "new_profile": "+ Novo perfil",
     "new_profile_tip": "Criar um novo perfil de programa a partir de um ciclo rotulado existente ou de uma gravação",
-    "on_cycle_finished": "Ao terminar o ciclo",
-    "on_cycle_started": "Ao iniciar o ciclo",
     "pause_cycle": "Pausar",
     "pause_cycle_tip": "Pausar o ciclo em andamento – o eletrodoméstico retomará onde parou",
     "pg_load_live": "Carregar as configurações ativas",
@@ -205,7 +204,14 @@
     "confirmed": "Confirmado",
     "create_profile_from_gap": "Criar perfil",
     "undo_import": "Desfazer a última importação",
-    "pg_rerun": "Atualizar simulação"
+    "pg_rerun": "Atualizar simulação",
+    "from_trigger": "Iniciar a partir de um gatilho ▾",
+    "bp_use": "Usar com este dispositivo",
+    "bp_install": "Instalar modelo",
+    "bp_view_yaml": "Ver YAML",
+    "copy": "Copiar",
+    "replace": "Substituir",
+    "from_trigger_open": "Iniciar a partir de um gatilho ▴"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -257,23 +263,20 @@
       "timeout": "Deve ser maior que a Duração da Bomba Travada ({ps} s) para que o alarme de bomba travada possa disparar primeiro"
     },
     "start_dur": {
-      "sampling": "O Intervalo de amostragem ultrapassa a Duração de início ({sdt} s); picos de amostra única podem abrir um ciclo",
       "threshold": "Deve ser pelo menos um Intervalo de amostragem ({si} s) para evitar falsas partidas de amostra única"
-    },
-    "unmatch": {
-      "match": "Deve ser acima do Limiar de não correspondência ({un})",
-      "unmatch": "Deve ser abaixo do Limiar de correspondência ({match}); caso contrário, uma correspondência confirmada é imediatamente desfeita"
     },
     "cascade_toast": "Outras configurações ajustadas por consistência: {n}",
     "suggestion_resolves": "Aplique a sugestão pendente ({val}) abaixo para corrigir este conflito",
     "use_fix": "Usar {val}",
     "watchdog": {
-      "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)",
-      "sampling": "O Intervalo de amostragem deve ser no máximo metade do Intervalo watchdog ({wi} s)"
+      "interval": "Deve ser pelo menos 2x o Intervalo de amostragem ({si} s)"
     },
     "end_energy": {
       "energy": "Restritivo demais para o Limite de Parada ({w} W) durante o Atraso de Desligamento ({d} s); o ciclo só pode terminar por um mecanismo alternativo",
       "stop": "A Energia de Fim ({e} Wh em {d} s) só permite {p} W"
+    },
+    "power_sensor": {
+      "energy": "Este sensor mede energia ({unit}), não potência, então nenhum ciclo pode ser detectado. Escolha o sensor de potência do plugue (W ou kW)."
     }
   },
   "hdr": {
@@ -321,7 +324,11 @@
     "import_power_history": "Importar histórico de potência",
     "service_status": "Status da manutenção",
     "online_account_tab": "Online e comunidade",
-    "live_match_debug": "Depuração da correspondência em tempo real"
+    "live_match_debug": "Depuração da correspondência em tempo real",
+    "automations_used": "Automações que usam este dispositivo",
+    "bp_templates": "Modelos",
+    "automations_all_tip": "A lista de automações do Home Assistant, filtrada pelo rótulo WashData. As automações criadas aqui também ficam na categoria WashData.",
+    "maint_done_by_program": "Feito automaticamente"
   },
   "health": {
     "fair": "Qualidade de perfil aceitável",
@@ -611,7 +618,7 @@
     "hist_reason_already_recorded": "se sobrepõe a um ciclo que o WashData já registrou",
     "share_consent": "Confirmo que estes ciclos terminaram normalmente, sem interrupção",
     "show_internal": "Mostrar configurações internas",
-    "show_internal_tip": "Configurações que o WashData ajusta para você (amostragem, watchdog, cadência de correspondência, limites). Exibidas quando este dispositivo tem um valor próprio, um conflito ou uma sugestão.",
+    "show_internal_tip": "Configurações que o WashData ajusta para você (watchdog, cadência de correspondência, limites). Exibidas quando este dispositivo tem um valor próprio, um conflito ou uma sugestão.",
     "rate_n": "{n} estrelas",
     "rate_quality": "Avaliar a qualidade",
     "pg_autolabel": "Rotulagem automática",
@@ -636,7 +643,14 @@
     "pg_obj_early": "Taxa de fins antecipados",
     "pg_obj_endlag": "Atraso do fim (mediana)",
     "pg_obj_split": "Taxa de divisões",
-    "pg_sweep_cycles": "Ciclos recentes"
+    "pg_sweep_cycles": "Ciclos recentes",
+    "bp_you_choose": "Você escolhe: {inputs}",
+    "bp_adjustable": "Ajustável: {inputs}",
+    "bp_yaml": "YAML do modelo",
+    "automation_wd_label": "Tem o rótulo WashData",
+    "done_by_none": "Não definido",
+    "done_by_programs": "Feito automaticamente por: {programs}",
+    "done_by_cycle": "Feito por um ciclo {program}"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -735,7 +749,9 @@
     "profile_title": "Perfil · {name}",
     "undo_import_msg": "Os dados e configurações deste dispositivo voltam ao estado anterior à última importação ({when}). Os ciclos e alterações posteriores são perdidos.",
     "undo_import_ok": "Desfazer importação",
-    "undo_import_title": "Desfazer a última importação"
+    "undo_import_title": "Desfazer a última importação",
+    "bp_replace_title": "Substituir o modelo instalado?",
+    "bp_replace_msg": "O Home Assistant tem uma versão diferente de \"{name}\". Substituí-la pela desta versão do WashData? As automações que a usam serão alteradas com ela."
   },
   "msg": {
     "custom_task_limit": "Você atingiu o limite de {max} tarefas.",
@@ -761,7 +777,6 @@
     "artifact_pause_detail": "A potência caiu quase a zero por ~{n}s e depois voltou. Provavelmente a porta foi aberta ou o ciclo foi pausado.",
     "artifact_spike_detail": "Ultrapassou a banda de potência habitual por ~{n}s.",
     "auto_label_intro": "Atribua perfis a ciclos sem rótulo cuja confiança de correspondência supere o limite.",
-    "automations_intro": "O WashData dispara eventos {start} / {end} e expõe entidades, portanto as notificações e ações são melhor criadas como automatizações normais do Home Assistant. As automatizações que usam este dispositivo aparecem abaixo.",
     "cleanup_intro": "Todos os ciclos rotulados sobrepostos. Marque os valores discrepantes e depois remova o rótulo deles (continuam no histórico, mas deixam de moldar este perfil) ou exclua-os.",
     "clear_debug_hint": "Remova os dados de depuração armazenados para liberar espaço.",
     "collecting_data": "Coletando dados. Ciclos ainda necessários para que o ajuste fino possa começar: {need} ({current}/{min}).",
@@ -1007,10 +1022,6 @@
     "pg_label_yes": "Seria rotulado como \"{name}\" no fim do ciclo",
     "pg_label_no": "Solicitaria revisão: {reason}",
     "live_match_debug_tip": "Confiança: o quanto a curva de potência atual corresponde ao perfil candidato principal (0-100%). Ambíguo: os dois melhores candidatos têm pontuações a menos de 5% um do outro; o rótulo fica incerto até o ciclo terminar.",
-    "automation_alias_started": "{device}: ciclo iniciado",
-    "automation_alias_finished": "{device}: ciclo finalizado",
-    "automation_desc_started": "Executada quando um ciclo de {device} começa. Adicione suas ações (notificar, luzes, ...).",
-    "automation_desc_finished": "Executada quando um ciclo de {device} termina. Adicione suas ações (notificar, luzes, ...).",
     "feedback_detected": "O WashData detectou: {name}",
     "import_undo_hint": "Um ponto de restauração de antes da última importação ({when}) é mantido: {profiles} perfil(is) e {cycles} ciclo(s).",
     "replace_undo_hint": "Um ponto de restauração é salvo primeiro, então você pode desfazer esta importação em Exportar / Importar.",
@@ -1031,27 +1042,27 @@
     "pg_sweep_n_cycles_one": "em {count} ciclo",
     "pg_sweep_n_cycles_many": "em {count} ciclos",
     "pg_sweep_n_cycles_other": "em {count} ciclos",
-    "pg_task_busy": "Já há uma execução de Testar no histórico ou Otimizar em andamento para este dispositivo. Aguarde até que termine ou cancele."
+    "pg_task_busy": "Já há uma execução de Testar no histórico ou Otimizar em andamento para este dispositivo. Aguarde até que termine ou cancele.",
+    "automations_tab_intro": "O WashData oferece gatilhos de dispositivo (ciclo iniciado, ciclo concluído, ciclo travado e mais) para suas próprias automações do Home Assistant. As automações que usam este dispositivo estão listadas aqui.",
+    "bp_intro": "Automações prontas para este eletrodoméstico, instaladas como modelos do Home Assistant.",
+    "bp_admin_only": "Um administrador instala os modelos.",
+    "bp_none": "Ainda não há modelos para este tipo de eletrodoméstico.",
+    "bp_load_failed": "Os modelos não puderam ser carregados.",
+    "auto_trigger_hint": "Cria uma automação com este gatilho para este dispositivo e a abre no Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Criada pelo WashData para {device}. Adicione suas ações (notificar, luzes, ...).",
+    "automation_alias_new": "{device}: nova automação",
+    "maint_done_by_program_intro": "Uma tarefa conta como feita quando termina um ciclo de um dos programas dela, por exemplo a limpeza do tambor quando o Algodão 90 é executado. Só contam os ciclos de que o WashData tem certeza ou que você escolheu."
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
     "anti_wrinkle": "Giro periódico pós-ciclo para reduzir amassados.",
-    "baking": "Resistência de alta temperatura ativa para formar a casca e o miolo.",
-    "cooking": "Fase principal de cozimento com resistência e ventilador ativos.",
     "cool_down": "Giro sem calor perto do fim do ciclo.",
-    "cool_down_af": "Resfriamento só com o ventilador após o aquecimento.",
     "drain_and_switch": "Período de transição do modo de lavagem para o modo de secagem.",
     "dry": "Etapa de secagem com aquecedor e/ou calor residual.",
     "drying": "Período principal de giro com calor.",
     "heat_up": "Aquecimento inicial do aquecedor antes do início da secagem completa.",
-    "keep_warm": "Fase de calor baixo para manter a comida quente.",
-    "keep_warm_bm": "Fase de calor baixo para manter o pão quente depois de assar.",
-    "kneading": "O motor mistura e sova a massa. Consumo alto.",
-    "pause_af": "Pausa curta para chacoalhar ou conferir a comida.",
-    "pre_heat": "Aquecimento inicial da câmara antes do cozimento completo.",
     "pre_rinse": "Pulverização inicial antes da lavagem com detergente.",
-    "proving": "Fermentação com calor baixo para o fermento agir e a massa crescer.",
-    "resting": "Pausa curta de baixa potência entre as sovas para relaxar o glúten.",
     "pre_wash": "Imersão inicial ou pré-tratamento antes da lavagem principal.",
     "rinse": "Etapa de enxágue com água limpa. Esta fase pode se repetir várias vezes.",
     "sanitize": "Etapa de limpeza em alta temperatura para programas de higienização.",
@@ -1144,10 +1155,6 @@
       "doc": "Manter os pulsos curtos de giro de baixa potência de uma secadora após a fase principal de aquecimento dentro do ciclo concluído, em vez de lê-los como novos ciclos.",
       "label": "Ativar Detecção Antiamasso"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "No modo antiamasso, a potência abaixo deste valor conta como silêncio entre pulsos de giro, e um silêncio maior que o Intervalo Máximo Entre Pulsos encerra o modo. Se o Limite de Parada for mais alto, ele é usado, então isto só muda algo acima do Limite de Parada.",
-      "label": "Limite de Saída de Potência"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Quanto tempo a secadora pode ficar em silêncio entre pulsos de giro antes de o modo antiamasso terminar. Defina acima da pausa mais longa da sua secadora, ou os pulsos seguintes serão lidos como falsas partidas.",
       "label": "Intervalo Máximo Entre Pulsos"
@@ -1196,10 +1203,6 @@
       "doc": "Sensor de porta opcional. Mostra quando o eletrodoméstico foi aberto para descarregar após um ciclo.",
       "label": "Entidade do Sensor de Porta"
     },
-    "duration_tolerance": {
-      "doc": "Apenas para aprendizado: um ciclo dentro de +/-X% da duração estimada conta como uma boa estimativa. Não afeta a correspondência.",
-      "label": "Tolerância de Estimativa"
-    },
     "enable_ml_models": {
       "doc": "Usar um modelo treinado nesta máquina para prever a energia e o custo de um ciclo em andamento, e permitir que um programa bem conhecido que para cedo demais termine sem todo o atraso de desligamento. Desligado: apenas lógica baseada em potência.",
       "label": "Aplicar modelos inteligentes durante um ciclo"
@@ -1225,12 +1228,8 @@
       "label": "Expor Entidades de Depuração"
     },
     "external_end_trigger": {
-      "doc": "Sensor binário cuja mudança marca o fim do ciclo (ex.: um contato \"concluído\" ou outra integração).",
+      "doc": "Sensor binário opcional que encerra o ciclo quando é ativado, além da detecção baseada no consumo (ex.: um contato \"concluído\" ou outra integração). Deixe vazio para desativar.",
       "label": "Entidade do Gatilho Externo"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Permitir que um sensor binário sinalize o fim de um ciclo, além da detecção baseada em potência.",
-      "label": "Ativar Gatilho de Fim Externo"
     },
     "external_end_trigger_inverted": {
       "doc": "Tratar a passagem do sensor para desligado (e não para ligado) como sinal de fim.",
@@ -1255,18 +1254,6 @@
     "ml_training_enabled": {
       "doc": "Retreinar de tempos em tempos o modelo de energia com os ciclos concluídos desta máquina. Um modelo novo só é mantido se superar a estimativa simples em ciclos de teste.",
       "label": "Aprender com esta máquina"
-    },
-    "ml_training_hour": {
-      "doc": "Hora do dia (0-23) para o treino noturno. Escolha um horário tranquilo, ex.: 2.",
-      "label": "Aprender na hora"
-    },
-    "ml_training_interval_days": {
-      "doc": "Retreinar no máximo uma vez a cada este número de dias.",
-      "label": "Verificar no máximo a cada"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Esperar por pelo menos este número de ciclos gravados antes de treinar.",
-      "label": "Ciclos necessários primeiro"
     },
     "name": {
       "doc": "Nome exibido no Home Assistant para este dispositivo.",
@@ -1300,16 +1287,12 @@
       "doc": "Serviços notify.* a chamar quando um ciclo termina. Deixe vazio para nenhum.",
       "label": "Serviços de Fim"
     },
-    "notify_fire_events": {
-      "doc": "Disparar também eventos ha_washdata_* no início e no fim do ciclo, para suas próprias automações.",
-      "label": "Disparar Eventos HA para Notificações"
-    },
     "notify_icon": {
       "doc": "Ícone pequeno da notificação (ex.: mdi:washing-machine). Enviado só para destinos mobile_app, não para grupos notify. No iOS substitui o ícone do aplicativo e requer o aplicativo companion 2026.8 ou mais recente. Em branco: padrão da plataforma.",
       "label": "Ícone da Notificação"
     },
     "notify_live_chronometer": {
-      "doc": "Mostrar uma contagem regressiva em andamento na notificação (onde houver suporte) em vez de uma estimativa fixa.",
+      "doc": "Android: adiciona uma contagem regressiva até o fim estimado ao lado do texto da notificação. Use {finish_time} em Mensagem Pré-Conclusão para exibir a hora de término em vez de uma segunda contagem.",
       "label": "Usar Cronômetro ao Vivo"
     },
     "notify_live_interval_seconds": {
@@ -1333,7 +1316,7 @@
       "label": "Pessoas (para Apenas Quando em Casa)"
     },
     "notify_pre_complete_message": {
-      "doc": "Texto de cada atualização de progresso ao vivo. Variáveis de modelo: {device}, {program}, {minutes} (minutos restantes). Com qualquer outra variável, é usado o texto padrão.",
+      "doc": "Texto de cada atualização de progresso ao vivo. Variáveis de modelo: {device}, {program}, {minutes} (minutos restantes), {finish_time} (hora de término estimada, ex. 14:30). Com qualquer outra variável, é usado o texto padrão.",
       "label": "Mensagem Pré-Conclusão"
     },
     "notify_reminder_message": {
@@ -1381,7 +1364,7 @@
       "label": "Limite de Desligamento"
     },
     "power_sensor": {
-      "doc": "O sensor que informa a potência atual deste eletrodoméstico em watts (ex.: sensor.washer_power). Toda a detecção se baseia nele.",
+      "doc": "O sensor que informa a potência atual deste eletrodoméstico em W ou kW (ex.: sensor.washer_power), não o seu medidor de energia (kWh). Toda a detecção se baseia nele.",
       "label": "Sensor de Potência"
     },
     "profile_match_interval": {
@@ -1400,10 +1383,6 @@
       "doc": "Pontuação de correspondência ao vivo de que um ciclo precisa antes de o Encerramento inteligente ou o fim antiamasso poderem finalizá-lo mais cedo. Não altera o programa exibido. Aumente se correspondências fracas finalizam ciclos cedo demais; reduza se correspondências claras esperam todo o atraso de desligamento.",
       "label": "Limite de Correspondência"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Se a pontuação de correspondência ao vivo cair abaixo deste valor, o palpite atual de programa é limpo. Mantenha um pouco abaixo do Limite de Correspondência para que uma queda breve não o redefina.",
-      "label": "Limite de Não Correspondência"
-    },
     "progress_reset_delay": {
       "doc": "Após um ciclo, manter o progresso em 100% por este tempo antes de voltar a Ocioso.",
       "label": "Atraso de Redefinição de Progresso"
@@ -1411,10 +1390,6 @@
     "pump_stuck_duration": {
       "doc": "Quanto tempo uma bomba pode funcionar sem parar antes de disparar o evento de bomba travada.",
       "label": "Duração da Bomba Travada"
-    },
-    "sampling_interval": {
-      "doc": "Tempo mínimo entre leituras processadas. Leituras que chegam antes são ignoradas (leituras baixas durante um ciclo são sempre mantidas). Defina no intervalo de envio do seu plugue ou menos; um valor maior só descarta leituras.",
-      "label": "Intervalo de Amostragem"
     },
     "save_debug_traces": {
       "doc": "Salvar também com cada ciclo os dados de depuração do comparador (as pontuações de cada candidato), para solução de problemas. Adiciona cerca de 20 KB por ciclo.",
@@ -1586,9 +1561,6 @@
     "services": {
       "label": "Serviços"
     },
-    "signal_processing": {
-      "label": "Processamento de Sinal"
-    },
     "thresholds_gap": {
       "label": "Limites e Intervalo"
     },
@@ -1661,7 +1633,8 @@
     "subtab_profiles": "Perfis",
     "maintenance": "Manutenção",
     "playground": "Área de testes",
-    "store": "Loja"
+    "store": "Loja",
+    "automations": "Automações"
   },
   "tag": {
     "early_end": "Fim antecipado",
@@ -1830,7 +1803,14 @@
     "auto_label_done": "Rotulagem automática concluída: {count} ciclos rotulados, {skipped} sem rótulo.",
     "auto_label_done_one": "Rotulagem automática concluída: {count} ciclo rotulado, {skipped} sem rótulo.",
     "auto_label_done_many": "Rotulagem automática concluída: {count} ciclos rotulados, {skipped} sem rótulo.",
-    "auto_label_done_other": "Rotulagem automática concluída: {count} ciclos rotulados, {skipped} sem rótulo."
+    "auto_label_done_other": "Rotulagem automática concluída: {count} ciclos rotulados, {skipped} sem rótulo.",
+    "bp_install_failed": "Não foi possível instalar o modelo: {error}",
+    "bp_installed_finish": "Modelo instalado. Preencha o resto no Home Assistant.",
+    "bp_automation_failed": "O modelo está instalado, mas a automação não pôde ser criada: {error}",
+    "bp_automation_created": "Automação criada com as configurações padrão; abrindo",
+    "copied": "Copiado",
+    "copy_failed": "Falha ao copiar. Selecione o texto e copie-o manualmente.",
+    "automation_label_failed": "Automação criada, mas o rótulo ou categoria WashData não pôde ser adicionado."
   },
   "suggestion": {
     "observed_label": "Observado",
@@ -1838,10 +1818,6 @@
       "auto_label_confidence": {
         "higher": "Rotula menos ciclos automaticamente; mais vão para revisão",
         "lower": "Rotula mais ciclos automaticamente; alguns podem ser mal identificados"
-      },
-      "duration_tolerance": {
-        "higher": "Aceita um intervalo de duração mais amplo – correspondência mais flexível",
-        "lower": "Exige duração mais próxima – mais rigoroso, pode rejeitar ciclos incomuns"
       },
       "end_energy_threshold": {
         "higher": "Encerra apenas ciclos que consumiram energia substancial",
@@ -1944,7 +1920,6 @@
     "smart_termination_duration_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de o Encerramento inteligente poder finalizá-lo mais cedo; reduza se os tempos de execução variarem",
     "anti_crease_finalize_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de a cauda antiamasso poder finalizá-lo; reduza em secadoras, deixe as lavadoras no padrão",
     "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",
-    "anti_wrinkle_exit_power": "Nível considerado silêncio entre pulsos de giro; só tem efeito acima do Limite de Parada",
     "anti_wrinkle_idle_timeout": "Tempo de silêncio permitido entre dois pulsos de giro antes de o modo antiamasso terminar",
     "anti_wrinkle_max_duration": "Um pulso mais longo do que isso encerra o modo antiamasso e abre um novo ciclo",
     "anti_wrinkle_max_power": "Um pulso acima disso encerra o modo antiamasso e abre um novo ciclo",
@@ -2033,7 +2008,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter no GitHub ↗",
-    "manual": "Manual ↗"
+    "manual": "Manual ↗",
+    "bp_share": "Compartilhe seu próprio modelo por pull request ↗",
+    "bp_open_in_ha": "Abrir no Home Assistant ↗",
+    "automations_all": "Todas as automações WashData no Home Assistant"
   },
   "tip": {
     "add_brand": "Marca não listada? Adicione-a ao catálogo da comunidade",
@@ -2201,16 +2179,11 @@
     "kept": "mantido",
     "max": "máx.",
     "min": "mín.",
-    "minus_tol": "-tol",
     "no_match": "sem corresp.",
     "no_updates": "sem atualizações",
     "off_delay_wait": "espera até desligar",
     "off_gap": "intervalo",
-    "plus_tol": "+tol",
-    "profile": "perfil",
-    "reading_interval": "intervalo típico de leitura",
     "sensor_offline": "sensor offline: parada forçada",
-    "si": "IA",
     "spike_ignored": "pico ignorado",
     "spike_ignored_short": "pico: ignorado",
     "start": "início",
@@ -2219,5 +2192,71 @@
     "thr": "limite",
     "too_short": "curto demais",
     "tumble_kept": "giros mantidos"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Ativar algo enquanto um ciclo está em andamento",
+      "description": "Ativa uma luz, interruptor ou helper de alternância quando um ciclo WashData começa e desativa quando termina, inclusive após uma falsa partida.\n\nRequer WashData 0.5.9 ou mais recente."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Encerrar uma longa fase antiamasso de secadora",
+      "description": "Para secadoras que continuam girando no modo antiamasso por horas após o programa. Só é executado quando o WashData considera o programa concluído (ciclo concluído ou antiamasso iniciado). Aguarda e depois desliga o plugue inteligente da secadora em um momento de baixa potência e, por padrão, o liga novamente. Um novo ciclo que comece enquanto isso o cancela.\n\nRisco: isso comuta um relé enquanto a secadora está conectada. Use apenas com um plugue adequado para a sua secadora e por sua conta e risco. O WashData nunca comuta o plugue por si próprio; esta automação faz isso.\n\nRequer WashData 0.5.9 ou mais recente."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Ciclo iniciado"
+    },
+    "program_recognised": {
+      "name": "Programa reconhecido"
+    },
+    "phase_started": {
+      "name": "Fase iniciada"
+    },
+    "finishing_soon": {
+      "name": "Encerrando em breve"
+    },
+    "cycle_overrun": {
+      "name": "Ciclo em atraso"
+    },
+    "cycle_paused": {
+      "name": "Ciclo pausado"
+    },
+    "cycle_resumed": {
+      "name": "Ciclo retomado"
+    },
+    "cycle_stalled": {
+      "name": "Ciclo travado"
+    },
+    "cycle_finished": {
+      "name": "Ciclo concluído"
+    },
+    "cycle_ended": {
+      "name": "Ciclo encerrado (qualquer motivo)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Antiamasso iniciado"
+    },
+    "still_tumbling": {
+      "name": "Ainda girando após o ciclo"
+    },
+    "unload_pending": {
+      "name": "Descarga pendente"
+    },
+    "unloaded": {
+      "name": "Descarregado"
+    },
+    "state_changed": {
+      "name": "Estado alterado"
+    },
+    "maintenance_due": {
+      "name": "Manutenção devida"
+    },
+    "milestone_reached": {
+      "name": "Marco de ciclos alcançado"
+    },
+    "pump_stuck": {
+      "name": "Bomba travada"
+    }
   }
 }

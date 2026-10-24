@@ -35,7 +35,11 @@ from custom_components.ha_washdata.const import (
     CONF_NOTIFY_CHANNEL,
     CONF_NOTIFY_FINISH_CHANNEL,
     CONF_NOTIFY_REMINDER_MESSAGE,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_FIRE_EVENTS,
+    CONF_NOTIFY_START_SERVICES,
     CONF_NOTIFY_TIMEOUT_SECONDS,
     CONF_OFF_DELAY,
     CONF_POWER_SENSOR,
@@ -71,6 +75,7 @@ def legacy_entry() -> DummyEntry:
             CONF_DEVICE_TYPE: "Washing Machine",
             CONF_POWER_SENSOR: "sensor.washer_power",
             CONF_NOTIFY_SERVICE: "notify.mobile_app",
+            CONF_NOTIFY_FIRE_EVENTS: False,
             "some_other_key": "preserve-me",
         },
         options={},
@@ -103,7 +108,16 @@ async def test_migration_with_harness_moves_and_preserves_fields(
     assert legacy_entry.options[CONF_OFF_DELAY] == 120
     assert legacy_entry.options[CONF_DEVICE_TYPE] == "Washing Machine"
     assert legacy_entry.options[CONF_POWER_SENSOR] == "sensor.washer_power"
-    assert legacy_entry.options[CONF_NOTIFY_SERVICE] == "notify.mobile_app"
+    # #472: the deprecated single service is converted into the per-event lists
+    # (one-pass rule: start and finish; live only on an explicit opt-in) and
+    # then dropped, so clearing those lists later actually stops notifications.
+    assert CONF_NOTIFY_SERVICE not in legacy_entry.options
+    assert legacy_entry.options[CONF_NOTIFY_START_SERVICES] == ["notify.mobile_app"]
+    assert legacy_entry.options[CONF_NOTIFY_FINISH_SERVICES] == ["notify.mobile_app"]
+    assert CONF_NOTIFY_LIVE_SERVICES not in legacy_entry.options
+    # #478: the "Fire HA events" toggle is retired the same way, not defaulted back.
+    assert CONF_NOTIFY_FIRE_EVENTS not in legacy_entry.options
+    assert CONF_NOTIFY_FIRE_EVENTS not in legacy_entry.data
 
     # 3.5 notification delivery options are populated with defaults.
     assert (

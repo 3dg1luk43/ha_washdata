@@ -39,10 +39,8 @@ from custom_components.ha_washdata.suggestion_engine import (
 from custom_components.ha_washdata.const import (
     CONF_MIN_OFF_GAP,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
-    CONF_DURATION_TOLERANCE,
     CONF_END_ENERGY_THRESHOLD,
     CONF_OFF_DELAY,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_WATCHDOG_INTERVAL,

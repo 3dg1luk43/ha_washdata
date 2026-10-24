@@ -35,8 +35,15 @@ and why none does today.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, MutableMapping
 from typing import Any
+
+from .const import (
+    CONF_DEVICE_TYPE,
+    DEVICE_TYPE_GENERIC,
+    RETIRED_DEVICE_TYPE_OPTION_FLOORS,
+    RETIRED_DEVICE_TYPE_OPTIONS,
+)
 
 # Dropping a key and storing None are the same thing to every reader that takes
 # no default (`.get(key)`, `.get(key) or None`, `.get(key, "")` behind a falsy
@@ -140,3 +147,73 @@ def option_int(value: Any, default: int, minimum: int | None = None) -> int:
     if minimum is not None and result < minimum:
         return minimum
     return result
+
+
+def canonical_device_type(device_type: Any) -> Any:
+    """``device_type``, or ``generic`` for a type removed in 0.5.9.
+
+    For a device type read from outside this entry (an export's fingerprint), so
+    an Air Fryer or Bread Maker export still counts as the same kind of device as
+    the entry it migrated to.
+    """
+    if isinstance(device_type, str) and device_type in RETIRED_DEVICE_TYPE_OPTIONS:
+        return DEVICE_TYPE_GENERIC
+    return device_type
+
+
+def _runs_as_set(value: Any) -> bool:
+    """Whether the config builder uses this stored value instead of the default.
+
+    Mirrors ``detector_config.build_detector_config``'s ``opt``: a missing, null or
+    non-numeric value (or a non-finite one) falls back to the device default, so
+    it is not the user's setting.
+    """
+    if value is None:
+        return False
+    if isinstance(value, bool):
+        return True
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return False
+    return math.isfinite(number)
+
+
+def retire_device_type(
+    options: MutableMapping[str, Any], data: MutableMapping[str, Any]
+) -> list[str]:
+    """Move an entry off a device type removed in 0.5.9, in place.
+
+    The device type is read options-first, then ``data`` (as the manager reads
+    it). When it is Air Fryer or Bread Maker it becomes ``generic`` in options,
+    and every per-type default that differs from generic's
+    (``RETIRED_DEVICE_TYPE_OPTIONS``) is written into options unless the user has
+    set the key, so the detector runs the same values. A floor
+    (``RETIRED_DEVICE_TYPE_OPTION_FLOORS``) is written as the max of the floor and
+    the stored value, as the manager applied it. A retired type left in ``data``
+    becomes ``generic`` too. Idempotent. Returns the options keys it wrote.
+
+    Shared by the 3.11 -> 3.12 step, the one-pass legacy migration, the import,
+    the undo-import and ``ws_set_options``.
+    """
+    retired = options.get(CONF_DEVICE_TYPE)
+    if not retired:  # absent, or a stored null: the type is the one in data
+        retired = data.get(CONF_DEVICE_TYPE)
+    # A list or dict (a hand-edited import, a stray WS payload) is not hashable:
+    # it is no retired type, rather than a TypeError that fails the whole save.
+    data_type = data.get(CONF_DEVICE_TYPE)
+    if isinstance(data_type, str) and data_type in RETIRED_DEVICE_TYPE_OPTIONS:
+        data[CONF_DEVICE_TYPE] = DEVICE_TYPE_GENERIC
+    if not isinstance(retired, str) or retired not in RETIRED_DEVICE_TYPE_OPTIONS:
+        return []
+    written = [CONF_DEVICE_TYPE]
+    options[CONF_DEVICE_TYPE] = DEVICE_TYPE_GENERIC
+    for key, value in RETIRED_DEVICE_TYPE_OPTIONS[retired].items():
+        if not _runs_as_set(options.get(key)):
+            options[key] = value
+            written.append(key)
+    for key, (floor, unset) in RETIRED_DEVICE_TYPE_OPTION_FLOORS.get(retired, {}).items():
+        if option_float(options.get(key), unset) < floor:
+            options[key] = floor
+            written.append(key)
+    return written

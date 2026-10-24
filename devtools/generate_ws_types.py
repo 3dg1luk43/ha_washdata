@@ -42,6 +42,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import types
 import typing
@@ -191,7 +192,8 @@ def _md_type(tp: Any) -> str:
 
 
 def _pascal(command: str) -> str:
-    return "".join(part.capitalize() for part in command.split("_"))
+    # A nested command (`blueprints/list`) splits on `/` too: `BlueprintsList`.
+    return "".join(part.capitalize() for part in re.split(r"[_/]", command))
 
 
 # ─── TypeScript emitter ─────────────────────────────────────────────────────────

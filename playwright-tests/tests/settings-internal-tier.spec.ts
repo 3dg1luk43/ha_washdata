@@ -31,7 +31,7 @@ test('Basic shows identity and everyday settings, not detection internals', asyn
   for (const key of ['name', 'min_power', 'off_delay', 'store_brand', 'store_model']) {
     await expect(field(page, key).first()).toBeAttached();
   }
-  for (const key of ['start_threshold_w', 'min_off_gap', 'sampling_interval']) {
+  for (const key of ['start_threshold_w', 'min_off_gap', 'watchdog_interval']) {
     await expect(field(page, key)).toHaveCount(0);
   }
 });
@@ -54,4 +54,41 @@ test('an internal field the device has its own value for stays visible', async (
   await openSettings(page, 'advanced', { watchdog_interval: 90 });
   await page.locator('.wd-section-nav [data-sec="timing"]').click();
   await expect(field(page, 'watchdog_interval').first()).toBeAttached();
+});
+
+test('housekeeping and debug extras are internal (0.5.9)', async ({ page }) => {
+  await openSettings(page, 'advanced');
+  await page.locator('.wd-section-nav [data-sec="timing"]').click();
+  await expect(field(page, 'progress_reset_delay').first()).toBeAttached();
+  for (const key of ['auto_maintenance', 'power_profile_interval_min', 'save_debug_traces']) {
+    await expect(field(page, key)).toHaveCount(0);
+  }
+  await page.locator('#wd-settings-internal-chk').click();
+  for (const key of ['auto_maintenance', 'power_profile_interval_min', 'save_debug_traces']) {
+    await expect(field(page, key).first()).toBeAttached();
+  }
+});
+
+test('the settings retired in 0.5.9 are gone even with internal settings shown', async ({ page }) => {
+  // A stale stored value (an entry migrated before the trim) must not bring one back.
+  await openSettings(page, 'advanced', {
+    sampling_interval: 40, profile_unmatch_threshold: 0.25, duration_tolerance: 0.4,
+    anti_wrinkle_exit_power: 0.2, external_end_trigger_enabled: false,
+    ml_training_hour: 1, ml_training_min_cycles: 5, ml_training_interval_days: 1,
+  });
+  await page.locator('#wd-settings-internal-chk').click();
+  const gone: Record<string, string[]> = {
+    detection: ['sampling_interval'],
+    matching: ['profile_unmatch_threshold', 'duration_tolerance'],
+    anti_wrinkle: ['anti_wrinkle_exit_power'],
+    triggers: ['external_end_trigger_enabled'],
+  };
+  for (const [sec, keys] of Object.entries(gone)) {
+    await page.locator(`.wd-section-nav [data-sec="${sec}"]`).click();
+    for (const key of keys) await expect(field(page, key)).toHaveCount(0);
+  }
+  // The end trigger is one field now: setting the sensor turns it on.
+  await expect(field(page, 'external_end_trigger').first()).toBeAttached();
+  await page.locator('#wd-settings-search').fill('sampling');
+  await expect(field(page, 'sampling_interval')).toHaveCount(0);
 });

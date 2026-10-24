@@ -92,7 +92,9 @@
         "matcher_used_one": "Podudaranje u {n} od vaših ciklusa",
         "matcher_used_few": "Podudaranje u {n} od vaših ciklusa",
         "matcher_used_other": "Podudaranje u {n} od vaših ciklusa",
-        "matcher_used_tip": "Ciklusi na ovom uređaju koje je WashData sam podudario s ovim uvezenim programom. Uvoz koji se nikada ne podudari možda ne odgovara vašem uređaju; možete ga ukloniti. Broji se lokalno; ništa se ne šalje u trgovinu."
+        "matcher_used_tip": "Ciklusi na ovom uređaju koje je WashData sam podudario s ovim uvezenim programom. Uvoz koji se nikada ne podudari možda ne odgovara vašem uređaju; možete ga ukloniti. Broji se lokalno; ništa se ne šalje u trgovinu.",
+        "bp_installed": "Instalirano",
+        "bp_installed_other": "Instalirana druga verzija"
     },
     "btn": {
         "pg_preset_delete": "Izbriši konfiguraciju",
@@ -145,7 +147,6 @@
         "export": "Izvoz",
         "force_stop": "Prisilno zaustavi",
         "force_stop_tip": "Odmah završi trenutni ciklus i označi ga kao prisilno zaustavljen",
-        "from_template": "Iz šablona ▾",
         "ignore": "Ignoriraj",
         "import_json": "Uvoz iz JSON-a",
         "inspect": "Pregledaj",
@@ -159,8 +160,6 @@
         "new_phase": "+ Nova faza",
         "new_profile": "+ Novi profil",
         "new_profile_tip": "Kreirajte novi profil programa iz postojećeg označenog ciklusa ili snimanja",
-        "on_cycle_finished": "Završen ciklus",
-        "on_cycle_started": "Započeo ciklus",
         "pause_cycle": "Pauza",
         "pause_cycle_tip": "Pauzirajte aktivni ciklus – uređaj će se nastaviti od mjesta na kojem je stao",
         "process": "Obradi",
@@ -254,7 +253,14 @@
         "confirmed": "Potvrđeno",
         "create_profile_from_gap": "Kreirajte profil",
         "undo_import": "Poništi posljednji uvoz",
-        "pg_rerun": "Ažuriraj simulaciju"
+        "pg_rerun": "Ažuriraj simulaciju",
+        "from_trigger": "Pokrenite s okidačem ▾",
+        "bp_use": "Koristite s ovim uređajem",
+        "bp_install": "Instalirajte predložak",
+        "bp_view_yaml": "Prikažite YAML",
+        "copy": "Kopirajte",
+        "replace": "Zamijenite",
+        "from_trigger_open": "Pokrenite s okidačem ▴"
     },
     "note": {
         "off_delay": {
@@ -309,25 +315,22 @@
             "timeout": "Mora premašiti Trajanje zaglavljivanja pumpe ({ps} s) kako bi se alarm zaglavljivanja aktivirao prvi"
         },
         "start_dur": {
-            "sampling": "Interval uzorkovanja premašuje Trajanje pokretanja ({sdt} s); skokovi s jednim uzorkom mogu otvoriti ciklus",
             "threshold": "Treba biti najmanje jedan Interval uzorkovanja ({si} s) kako bi se spriječili lažni startovi s jednim uzorkom"
-        },
-        "unmatch": {
-            "match": "Mora biti iznad Praga nepodudaranja ({un})",
-            "unmatch": "Mora biti ispod Praga podudaranja ({match}); inače se potvrđeno podudaranje odmah poništava"
         },
         "cascade_toast": "Druge postavke prilagođene radi dosljednosti: {n}",
         "suggestion_resolves": "Primijenite prijedlog na čekanju ({val}) ispod za rješavanje ovog sukoba",
         "use_fix": "Koristite {val}",
         "watchdog": {
-            "interval": "Treba biti najmanje 2× Interval uzorkovanja ({si} s)",
-            "sampling": "Interval uzorkovanja treba biti najviše polovina Intervala čuvara ({wi} s)"
+            "interval": "Treba biti najmanje 2× Interval uzorkovanja ({si} s)"
         },
         "settings_banner": "Konflikti postavki: {n}. Provjerite istaknute sekcije i ispravite ih prije pohrane.",
         "settings_banner_btn": "Idi na prvi",
         "end_energy": {
             "energy": "Prestrogo za Prag zaustavljanja ({w} W) i Kašnjenje isključivanja ({d} s); ciklus se može završiti samo rezervnim putem",
             "stop": "Završna energija ({e} Wh tokom {d} s) dopušta samo {p} W"
+        },
+        "power_sensor": {
+            "energy": "Ovaj senzor broji energiju ({unit}), a ne snagu, pa se nijedan ciklus ne može otkriti. Odaberite senzor snage utikača (W ili kW)."
         }
     },
     "hdr": {
@@ -375,7 +378,11 @@
         "import_power_history": "Uvoz historije snage",
         "service_status": "Status servisa",
         "online_account_tab": "Online i zajednica",
-        "live_match_debug": "Dijagnostika podudaranja uživo"
+        "live_match_debug": "Dijagnostika podudaranja uživo",
+        "automations_used": "Automatizacije koje koriste ovaj uređaj",
+        "bp_templates": "Predlošci",
+        "automations_all_tip": "Lista automatizacija Home Assistant, filtrirana po WashData etiketi. Automatizacije kreirane ovdje nalaze se i u WashData kategoriji.",
+        "maint_done_by_program": "Automatski obavljeno"
     },
     "health": {
         "fair": "Prihvatljiva kvaliteta podudaranja",
@@ -659,7 +666,7 @@
         "hist_reason_already_recorded": "preklapa se s ciklusom koji je WashData već zabilježio",
         "share_consent": "Potvrđujem da su ovi ciklusi normalno završeni bez prekida",
         "show_internal": "Prikaži interne postavke",
-        "show_internal_tip": "Postavke koje WashData podešava umjesto vas (uzorkovanje, čuvar, učestalost podudaranja, pragovi). Prikazuju se kad ovaj uređaj ima vlastitu vrijednost, konflikt ili prijedlog.",
+        "show_internal_tip": "Postavke koje WashData podešava umjesto vas (watchdog, ritam podudaranja, pragovi). Prikazuje se kad uređaj ima vlastitu vrijednost, konflikt ili prijedlog.",
         "rate_n": "{n} zvjezdica",
         "rate_quality": "Ocijeni kvalitet",
         "pg_autolabel": "Automatsko označavanje",
@@ -690,7 +697,14 @@
         "cycle_context_minutes": "{min} min",
         "cycle_context_series": "Historija recordera",
         "before_start": "Prije početka",
-        "after_end": "Nakon kraja"
+        "after_end": "Nakon kraja",
+        "bp_you_choose": "Birate: {inputs}",
+        "bp_adjustable": "Prilagodljivo: {inputs}",
+        "bp_yaml": "Blueprint YAML",
+        "automation_wd_label": "Nosi WashData etiketu",
+        "done_by_none": "Nije postavljeno",
+        "done_by_programs": "Automatski obavljeno programima: {programs}",
+        "done_by_cycle": "Obavljeno ciklusom programa {program}"
     },
     "log": {
         "all_levels": "Svi nivoi",
@@ -789,7 +803,9 @@
         "profile_title": "Profil · {name}",
         "undo_import_msg": "Podaci i postavke ovog uređaja vraćaju se na stanje prije posljednjeg uvoza ({when}). Ciklusi zabilježeni i promjene napravljene od tada bit će izgubljeni.",
         "undo_import_ok": "Poništi uvoz",
-        "undo_import_title": "Poništi posljednji uvoz"
+        "undo_import_title": "Poništi posljednji uvoz",
+        "bp_replace_title": "Zamijeniti instalirani predložak?",
+        "bp_replace_msg": "Home Assistant ima drugu verziju \"{name}\". Zamijeniti je verzijom iz ove verzije WashData? Automatizacije koje ga koriste mijenjaju se s njim."
     },
     "msg": {
         "pg_canvas_empty3": "Odaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim pređite mišem za prikaz vrijednosti, pomjerajte točkić ili koristite dva prsta za zumiranje i povucite za pomjeranje.",
@@ -811,7 +827,6 @@
         "artifact_pause_detail": "Snaga je pala gotovo na nulu na ~{n}s, a zatim se vratila. Vjerovatno su vrata otvorena ili je ciklus pauziran.",
         "artifact_spike_detail": "Prešao iznad uobičajenog pojasa snage za ~{n}s.",
         "auto_label_intro": "Dodijelite profile neoznačenim ciklusima čija pouzdanost podudaranja briše prag.",
-        "automations_intro": "WashData pokreće događaje {start} / {end} i izlaže entitete, pa je obavijesti i radnje najbolje graditi kao normalne automatizacije Home Assistanta. Automatizacije koje koriste ovaj uređaj prikazane su ispod.",
         "cleanup_intro": "Svi označeni ciklusi jedan preko drugog. Označite odstupajuće, zatim im uklonite oznaku (ostaju u historiji, ali više ne oblikuju ovaj profil) ili ih izbrišite.",
         "clear_debug_hint": "Uklonite pohranjene podatke za otklanjanje grešaka kako biste oslobodili prostor.",
         "collecting_data": "Prikupljanje podataka. Još potrebnih ciklusa prije početka finog podešavanja: {need} ({current}/{min}).",
@@ -1057,10 +1072,6 @@
         "pg_label_yes": "Na kraju ciklusa bio bi označen kao \"{name}\"",
         "pg_label_no": "Bio bi poslan na pregled: {reason}",
         "live_match_debug_tip": "Pouzdanost: koliko tačno trenutna kriva snage odgovara najboljem profilu kandidatu (0-100%). Dvosmisleno: rezultati dva najbolja kandidata razlikuju se za manje od 5%, pa je etiketa nesigurna dok se ciklus ne završi.",
-        "automation_alias_started": "{device}: ciklus je pokrenut",
-        "automation_alias_finished": "{device}: ciklus je završen",
-        "automation_desc_started": "Pokreće se kada započne ciklus uređaja {device}. Dodajte svoje akcije (obavještenja, svjetla, ...).",
-        "automation_desc_finished": "Pokreće se kada se završi ciklus uređaja {device}. Dodajte svoje akcije (obavještenja, svjetla, ...).",
         "feedback_detected": "WashData je prepoznao: {name}",
         "import_undo_hint": "Čuva se tačka vraćanja od prije posljednjeg uvoza ({when}): {profiles} profila i {cycles} ciklusa.",
         "replace_undo_hint": "Prvo se sprema tačka vraćanja, pa ovaj uvoz možete poništiti u odjeljku Izvoz/uvoz.",
@@ -1085,27 +1096,27 @@
         "cycle_context_note": "Sivo: historija senzora snage iz recordera oko ovog ciklusa. Nije dio ciklusa i ne utiče na trajanje, energiju ni podudaranje.",
         "cycle_context_none": "Recorder nema očitanja oko ovog ciklusa (Home Assistant standardno čuva historiju 10 dana).",
         "cycle_context_tip": "Samo za prikaz: pokazuje historiju senzora snage iz recordera oko ovog ciklusa, ako je još sačuvana. Da biste neuspjele pokušaje pokretanja dodali budućim ciklusima, koristite Uvodne sekunde krivulje (Postavke > Detekcija > Početak ciklusa), što mijenja sačuvana trajanja.",
-        "invalid_threshold_pair": "Prag zaustavljanja ({stop} W) mora biti ispod Praga pokretanja ({start} W). Ništa nije sačuvano; promijenite obje vrijednosti zajedno."
+        "invalid_threshold_pair": "Prag zaustavljanja ({stop} W) mora biti ispod Praga pokretanja ({start} W). Ništa nije sačuvano; promijenite obje vrijednosti zajedno.",
+        "automations_tab_intro": "WashData nudi okidače uređaja (ciklus pokrenut, ciklus završen, ciklus zaglavljen i više) za vlastite automatizacije Home Assistanta. Automatizacije koje koriste ovaj uređaj navedene su ovdje.",
+        "bp_intro": "Gotove automatizacije za ovaj uređaj, instalirane kao blueprinti Home Assistanta.",
+        "bp_admin_only": "Predloške instalira administrator.",
+        "bp_none": "Za ovaj tip uređaja još nema predložaka.",
+        "bp_load_failed": "Predlošci se nisu mogli učitati.",
+        "auto_trigger_hint": "Kreira automatizaciju s ovim okidačem za ovaj uređaj i otvara je u Home Assistant.",
+        "automation_alias_trigger": "{device}: {trigger}",
+        "automation_desc_trigger": "Kreirao WashData za {device}. Dodajte svoje radnje (obavijest, svjetla, ...).",
+        "automation_alias_new": "{device}: nova automatizacija",
+        "maint_done_by_program_intro": "Zadatak se smatra obavljenim kada završi ciklus jednog od njegovih programa, na primjer čišćenje bubnja nakon programa Pamuk 90. Računaju se samo ciklusi koje WashData pouzdano prepozna ili oni za koje ste sami odabrali program."
     },
     "phase_desc": {
         "anti_crease": "Povremena kratka spuštanja nakon završetka za smanjenje bora.",
         "anti_wrinkle": "Periodično prevrtanje nakon ciklusa za smanjenje bora.",
-        "baking": "Grijač na visokoj temperaturi stvara koru i sredinu hljeba.",
-        "cooking": "Glavna faza pripreme s uključenim grijačem i ventilatorom.",
         "cool_down": "Vrtanje bez grijanja blizu kraja ciklusa.",
-        "cool_down_af": "Hlađenje samo ventilatorom nakon grijanja.",
         "drain_and_switch": "Period prijelaza sa pranja na način sušenja.",
         "dry": "Faza sušenja pomoću grijača i/ili preostale topline.",
         "drying": "Glavni period grijanja.",
         "heat_up": "Početno zagrijavanje grijača prije početka potpunog sušenja.",
-        "keep_warm": "Lagano grijanje da hrana ostane topla.",
-        "keep_warm_bm": "Lagano grijanje da hljeb ostane topao nakon pečenja.",
-        "kneading": "Motor miješa i mijesi tijesto. Velika potrošnja snage.",
-        "pause_af": "Kratka pauza za protresanje ili provjeru.",
-        "pre_heat": "Početno zagrijavanje komore prije pune pripreme.",
         "pre_rinse": "Prvo prskanje prije pranja deterdžentom.",
-        "proving": "Narastanje na niskoj toplini: kvasac fermentira i tijesto se širi.",
-        "resting": "Kratka pauza male snage između miješenja da se gluten opusti.",
         "pre_wash": "Prvo namakanje ili predtretman prije glavnog pranja.",
         "rinse": "Faza ispiranja čistom vodom. Ova faza se može ponoviti više puta.",
         "sanitize": "Faza čišćenja na visokim temperaturama za programe dezinfekcije.",
@@ -1198,10 +1209,6 @@
             "doc": "Zadržite kratke impulse prevrtanja niske snage nakon glavne faze grijanja sušilice uz završeni ciklus, umjesto da se čitaju kao novi ciklusi.",
             "label": "Omogućiti detekciju anti-gužvanja"
         },
-        "anti_wrinkle_exit_power": {
-            "doc": "U režimu anti-gužvanja snaga ispod ove vrijednosti smatra se mirovanjem između impulsa okretanja, a mirovanje duže od Maksimalnog razmaka između impulsa završava režim. Ako je Prag zaustavljanja viši, koristi se on, pa ova postavka nešto mijenja samo iznad Praga zaustavljanja.",
-            "label": "Prag izlazne snage"
-        },
         "anti_wrinkle_idle_timeout": {
             "doc": "Koliko dugo sušilica smije mirovati između impulsa prevrtanja prije nego što režim anti-gužvanja završi. Postavite iznad najdužeg razmaka vaše sušilice, inače se kasniji impulsi čitaju kao lažni počeci.",
             "label": "Maksimalni razmak između impulsa"
@@ -1250,10 +1257,6 @@
             "doc": "Opcioni senzor vrata. Pokazuje kad je uređaj otvoren radi istovara nakon ciklusa.",
             "label": "Entitet senzora vrata"
         },
-        "duration_tolerance": {
-            "doc": "Samo za povratne informacije učenja: ciklus unutar +/-X% procijenjenog trajanja računa se kao dobra procjena. Ne utiče na podudaranje.",
-            "label": "Tolerancija procjene"
-        },
         "enable_ml_models": {
             "doc": "Koristite model treniran na ovoj mašini za predviđanje energije i troška ciklusa koji traje, i dozvolite dobro poznatom programu koji neobično rano stane da završi bez punog kašnjenja isključivanja. Isključeno: samo logika zasnovana na snazi.",
             "label": "Primijeniti pametne modele tokom ciklusa"
@@ -1279,12 +1282,8 @@
             "label": "Izložiti entitete za otklanjanje grešaka"
         },
         "external_end_trigger": {
-            "doc": "Binarni senzor čija promjena označava kraj ciklusa (npr. kontakt \"završeno\" ili druga integracija).",
+            "doc": "Neobavezni binarni senzor koji završava ciklus kad se uključi, kao dopuna detekciji na temelju potrošnje (npr. kontakt \"završeno\" ili druga integracija). Ostavite prazno za isključivanje.",
             "label": "Entitet vanjskog okidača"
-        },
-        "external_end_trigger_enabled": {
-            "doc": "Dozvolite binarnom senzoru da signalizira kraj ciklusa, uz detekciju zasnovanu na snazi.",
-            "label": "Omogućiti vanjski okidač kraja"
         },
         "external_end_trigger_inverted": {
             "doc": "Smatrajte ISKLJUČIVANJE senzora (a ne uključivanje) signalom kraja.",
@@ -1309,18 +1308,6 @@
         "ml_training_enabled": {
             "doc": "Povremeno ponovo trenirajte model energije na završenim ciklusima ove mašine. Novi model se zadržava samo ako na testnim ciklusima nadmaši jednostavnu procjenu.",
             "label": "Učiti od ove mašine"
-        },
-        "ml_training_hour": {
-            "doc": "Sat u danu (0-23) za noćno treniranje. Odaberite miran sat, npr. 2.",
-            "label": "Učiti u satu"
-        },
-        "ml_training_interval_days": {
-            "doc": "Ponovo trenirajte najviše jednom u ovoliko dana.",
-            "label": "Provjeravati najvjše svakih"
-        },
-        "ml_training_min_cycles": {
-            "doc": "Prije treniranja sačekajte barem ovoliko zabilježenih ciklusa.",
-            "label": "Ciklusi potrebni prvo"
         },
         "name": {
             "doc": "Naziv ovog uređaja prikazan u Home Assistantu.",
@@ -1354,16 +1341,12 @@
             "doc": "notify.* usluge koje se pozivaju kad ciklus završi. Ostavite prazno za nijednu.",
             "label": "Usluge završetka"
         },
-        "notify_fire_events": {
-            "doc": "Pokrenite i događaje ha_washdata_* pri početku i završetku ciklusa za vlastite automatizacije.",
-            "label": "Pokrenuti HA događaje za obavijesti"
-        },
         "notify_icon": {
             "doc": "Mala ikona na obavještenju (npr. mdi:washing-machine). Šalje se samo na mobile_app ciljeve, ne na notify grupe. Na iOS-u zamjenjuje ikonu aplikacije i zahtijeva mobilnu aplikaciju 2026.8 ili noviju. Prazno: zadana ikona platforme.",
             "label": "Ikona obavijesti"
         },
         "notify_live_chronometer": {
-            "doc": "Prikažite odbrojavanje uživo u obavještenju (gdje je podržano) umjesto fiksne procjene.",
+            "doc": "Android: dodaje odbrojavanje do procijenjenog završetka pored teksta obavještenja. Koristite {finish_time} u Poruci pred završetak da prikažete vrijeme završetka umjesto drugog odbrojavanja.",
             "label": "Koristiti hronometar uživo"
         },
         "notify_live_interval_seconds": {
@@ -1387,7 +1370,7 @@
             "label": "Osobe (za samo dok su kod kuće)"
         },
         "notify_pre_complete_message": {
-            "doc": "Tekst svakog ažuriranja napretka uživo. Varijable predloška: {device}, {program}, {minutes} (preostale minute). Za svaku drugu varijablu koristi se zadani tekst.",
+            "doc": "Tekst svakog ažuriranja napretka uživo. Varijable predloška: {device}, {program}, {minutes} (preostale minute), {finish_time} (procijenjeni završetak, npr. 14:30). Za svaku drugu varijablu koristi se zadani tekst.",
             "label": "Poruka pred završetak"
         },
         "notify_reminder_message": {
@@ -1435,7 +1418,7 @@
             "label": "Prag isključivanja napajanja"
         },
         "power_sensor": {
-            "doc": "Senzor koji javlja trenutnu snagu ovog uređaja u vatima (npr. sensor.washer_power). Cijela detekcija se zasniva na njemu.",
+            "doc": "Senzor koji javlja trenutnu snagu ovog uređaja u W ili kW (npr. sensor.washer_power), a ne njegovo brojilo energije (kWh). Cijela detekcija se zasniva na njemu.",
             "label": "Senzor snage"
         },
         "profile_match_interval": {
@@ -1454,10 +1437,6 @@
             "doc": "Rezultat podudaranja uživo koji ciklus treba prije nego što ga Pametni završetak ili završetak anti-gužvanja smije ranije završiti. Ne mijenja prikazani program. Povećajte ako slaba podudaranja prerano završavaju cikluse; smanjite ako jasna podudaranja čekaju kašnjenje isključivanja.",
             "label": "Prag podudaranja"
         },
-        "profile_unmatch_threshold": {
-            "doc": "Ako rezultat podudaranja uživo padne ispod ove vrijednosti, trenutna pretpostavka programa se briše. Držite malo ispod Praga podudaranja kako je kratak pad ne bi poništio.",
-            "label": "Prag nepodudaranja"
-        },
         "progress_reset_delay": {
             "doc": "Nakon ciklusa držite napredak na 100% ovoliko dugo prije vraćanja na Mirovanje.",
             "label": "Kašnjenje poništavanja napretka"
@@ -1465,10 +1444,6 @@
         "pump_stuck_duration": {
             "doc": "Koliko dugo pumpa smije raditi bez prekida prije nego što se pokrene događaj zaglavljene pumpe.",
             "label": "Trajanje zaglavljivanja pumpe"
-        },
-        "sampling_interval": {
-            "doc": "Najkraće vrijeme između obrađenih očitanja. Očitanja koja stignu ranije se preskaču (niska očitanja tokom ciklusa se uvijek zadržavaju). Postavite na interval javljanja utikača ili manje; veća vrijednost samo odbacuje očitanja.",
-            "label": "Interval uzorkovanja"
         },
         "save_debug_traces": {
             "doc": "Uz svaki ciklus čuvajte i podatke otklanjanja grešaka podudaranja (rezultate svih kandidata), za rješavanje problema. Dodaje oko 20 KB po ciklusu.",
@@ -1640,9 +1615,6 @@
         "services": {
             "label": "Usluge"
         },
-        "signal_processing": {
-            "label": "Obrada signala"
-        },
         "thresholds_gap": {
             "label": "Pragovi i razmak"
         },
@@ -1705,10 +1677,6 @@
             "auto_label_confidence": {
                 "higher": "Manje ciklusa se automatski označava; više ih odlazi na pregled",
                 "lower": "Više ciklusa se automatski označava; neki mogu biti pogrešno identificirani"
-            },
-            "duration_tolerance": {
-                "higher": "Prihvata širi raspon trajanja – fleksibilnije podudaranje",
-                "lower": "Zahtijeva bliže podudaranje trajanja – strože, ali može odbiti neobične cikluse"
             },
             "end_energy_threshold": {
                 "higher": "Zatvara samo cikluse sa značajnom potrošnjom energije",
@@ -1807,7 +1775,8 @@
         "subtab_profiles": "Profili",
         "maintenance": "Održavanje",
         "playground": "Testno okruženje",
-        "store": "Trgovina"
+        "store": "Trgovina",
+        "automations": "Automatizacija"
     },
     "tag": {
         "early_end": "Rani kraj",
@@ -1976,7 +1945,14 @@
         "auto_label_done": "Automatsko označavanje završeno: označeno je {count} ciklusa, bez oznake: {skipped}.",
         "auto_label_done_one": "Automatsko označavanje završeno: označen je {count} ciklus, bez oznake: {skipped}.",
         "auto_label_done_few": "Automatsko označavanje završeno: označena su {count} ciklusa, bez oznake: {skipped}.",
-        "auto_label_done_other": "Automatsko označavanje završeno: označeno je {count} ciklusa, bez oznake: {skipped}."
+        "auto_label_done_other": "Automatsko označavanje završeno: označeno je {count} ciklusa, bez oznake: {skipped}.",
+        "bp_install_failed": "Predložak se nije mogao instalirati: {error}",
+        "bp_installed_finish": "Predložak instaliran. Popunite ostatak u Home Assistantu.",
+        "bp_automation_failed": "Predložak je instaliran, ali automatizacija se nije mogla kreirati: {error}",
+        "bp_automation_created": "Automatizacija kreirana s zadanim postavkama; otvaranje",
+        "copied": "Kopirano",
+        "copy_failed": "Kopiranje nije uspjelo. Odaberite tekst i kopirajte ga ručno.",
+        "automation_label_failed": "Automatizacija kreirana, ali etiketa ili kategorija WashData nije mogla biti dodana."
     },
     "trend": {
         "down": "Opadajući trend",
@@ -1998,7 +1974,6 @@
         "smart_termination_duration_ratio": "Udio prosječnog trajanja programa koji ciklus mora dostići prije nego što ga Pametni završetak smije ranije završiti; smanjite ako vremena rada variraju",
         "anti_crease_finalize_ratio": "Udio prosječnog trajanja programa koji ciklus mora dostići prije nego što ga rep anti-gužvanja smije dovršiti; smanjite kod sušilica, kod mašina za veš ostavite zadano",
         "anti_wrinkle_enabled": "Upij impulse bubnja nakon glavne faze, a ne čitaj ih kao nove cikluse",
-        "anti_wrinkle_exit_power": "Nivo mirovanja između impulsa okretanja; djeluje samo iznad Praga zaustavljanja",
         "anti_wrinkle_idle_timeout": "Dozvoljeno vrijeme mirovanja između dva impulsa bubnja prije nego što se anti-gužvanje završi",
         "anti_wrinkle_max_duration": "Duži impuls završava anti-gužvanje i otvara novi ciklus",
         "anti_wrinkle_max_power": "Impuls iznad ove vrijednosti završava anti-gužvanje i otvara novi ciklus",
@@ -2087,7 +2062,10 @@
     },
     "link": {
         "maintenance_supporter": "Maintenance Supporter na GitHubu ↗",
-        "manual": "Priručnik ↗"
+        "manual": "Priručnik ↗",
+        "bp_share": "Podijelite vlastiti predložak putem pull requesta ↗",
+        "bp_open_in_ha": "Otvori u Home Assistantu ↗",
+        "automations_all": "Sve WashData automatizacije u Home Assistant"
     },
     "tip": {
         "add_brand": "Marke nema na spisku? Dodajte je u katalog zajednice",
@@ -2201,16 +2179,11 @@
         "kept": "zadržano",
         "max": "maks.",
         "min": "min.",
-        "minus_tol": "-tol",
         "no_match": "nema podudaranja",
         "no_updates": "nema ažuriranja",
         "off_delay_wait": "kašnjenje isključivanja",
         "off_gap": "razmak isklj.",
-        "plus_tol": "+tol",
-        "profile": "profil",
-        "reading_interval": "tipični interval očitanja",
         "sensor_offline": "senzor van mreže: prisilno zaustavljanje",
-        "si": "IU",
         "spike_ignored": "skok zanemaren",
         "spike_ignored_short": "skok: zanemaren",
         "start": "pokretanje",
@@ -2219,5 +2192,71 @@
         "thr": "prag",
         "too_short": "prekratak",
         "tumble_kept": "impulsi bubnja zadržani"
+    },
+    "blueprint": {
+        "cycle_running_indicator": {
+            "name": "Uključite nešto dok ciklus traje",
+            "description": "Uključuje svjetlo, prekidač ili pomoćni preklopnik kada ciklus WashData počne i isključuje ga kada završi, i nakon lažnog pokretanja.\n\nZahtijeva WashData 0.5.9 ili noviji."
+        },
+        "dryer_anti_crease_power_cut": {
+            "name": "Završite dugu fazu anti-gužvanja sušilice",
+            "description": "Za sušilice koje nastavljaju prevrtati u anti-gužvanju satima nakon programa. Pokreće se tek kada WashData smatra da je program završen (ciklus završen ili anti-gužvanje pokrenuto). Čeka, zatim isključuje pametni utikač sušilice u trenutku niske potrošnje i zadano ga ponovo uključi. Novi ciklus koji počne u međuvremenu otkazuje je.\n\nRizik: ovo prebacuje relej dok je sušilica priključena. Koristite samo s utikačem prikladnim za vašu sušilicu i na vlastiti rizik. WashData nikada sam ne prebacuje utikač; to radi ova automatizacija.\n\nZahtijeva WashData 0.5.9 ili noviji."
+        }
+    },
+    "trigger": {
+        "cycle_started": {
+            "name": "Ciklus pokrenut"
+        },
+        "program_recognised": {
+            "name": "Program prepoznat"
+        },
+        "phase_started": {
+            "name": "Faza pokrenuta"
+        },
+        "finishing_soon": {
+            "name": "Uskoro kraj"
+        },
+        "cycle_overrun": {
+            "name": "Ciklus traje predugo"
+        },
+        "cycle_paused": {
+            "name": "Ciklus pauziran"
+        },
+        "cycle_resumed": {
+            "name": "Ciklus nastavljen"
+        },
+        "cycle_stalled": {
+            "name": "Ciklus zaglavljen"
+        },
+        "cycle_finished": {
+            "name": "Ciklus završen"
+        },
+        "cycle_ended": {
+            "name": "Ciklus završen"
+        },
+        "anti_wrinkle_started": {
+            "name": "Anti-gužvanje pokrenuto"
+        },
+        "still_tumbling": {
+            "name": "Još uvijek se vrti nakon ciklusa"
+        },
+        "unload_pending": {
+            "name": "Istovar na čekanju"
+        },
+        "unloaded": {
+            "name": "Istovaren"
+        },
+        "state_changed": {
+            "name": "Stanje promijenjeno"
+        },
+        "maintenance_due": {
+            "name": "Servis potreban"
+        },
+        "milestone_reached": {
+            "name": "Dostignut miljokaz ciklusa"
+        },
+        "pump_stuck": {
+            "name": "Pumpa zaglavljena"
+        }
     }
 }

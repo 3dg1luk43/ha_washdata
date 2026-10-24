@@ -1,0 +1,166 @@
+# WashData integration triggers (#478): `trigger: ha_washdata.<key>`.
+# Names, descriptions and field labels are in strings.json / translations under
+# "triggers"; the option schemas are trigger_rules.OPTION_FIELDS (a test keeps the
+# two in step). Every trigger targets WashData devices or their entities.
+
+.target: &target
+  entity:
+    - integration: ha_washdata
+  device:
+    - integration: ha_washdata
+
+.program_filter: &program_filter
+  program:
+    required: false
+    example: Cotton 40
+    selector:
+      text:
+
+.include_detected: &include_detected
+  include_detected:
+    required: false
+    default: false
+    selector:
+      boolean:
+
+cycle_started:
+  target: *target
+
+program_recognised:
+  target: *target
+  fields: *program_filter
+
+phase_started:
+  target: *target
+  fields:
+    phase:
+      required: false
+      example: Rinse
+      selector:
+        text:
+
+finishing_soon:
+  target: *target
+  fields:
+    minutes:
+      required: true
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 240
+          step: 1
+          mode: box
+          unit_of_measurement: min
+
+cycle_overrun:
+  target: *target
+  fields:
+    percent:
+      required: true
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 500
+          step: 1
+          mode: box
+          unit_of_measurement: "%"
+
+cycle_paused:
+  target: *target
+  fields: *include_detected
+
+cycle_resumed:
+  target: *target
+  fields: *include_detected
+
+cycle_stalled:
+  target: *target
+
+cycle_finished:
+  target: *target
+  fields: *program_filter
+
+cycle_ended:
+  target: *target
+  fields:
+    status:
+      required: true
+      default: any
+      selector:
+        select:
+          translation_key: trigger_cycle_status
+          options:
+            - any
+            - completed
+            - force_stopped
+            - interrupted
+
+anti_wrinkle_started:
+  target: *target
+
+still_tumbling:
+  target: *target
+  fields:
+    minutes:
+      required: true
+      default: 15
+      selector:
+        number:
+          min: 1
+          max: 240
+          step: 1
+          mode: box
+          unit_of_measurement: min
+
+unload_pending:
+  target: *target
+
+unloaded:
+  target: *target
+
+state_changed:
+  target: *target
+  fields:
+    from:
+      required: false
+      selector:
+        select:
+          translation_key: trigger_state
+          options: &washdata_states
+            - "off"
+            - idle
+            - starting
+            - running
+            - paused
+            - user_paused
+            - ending
+            - finished
+            - anti_wrinkle
+            - delay_wait
+            - interrupted
+            - force_stopped
+            - unknown
+            - clean
+    to:
+      required: false
+      selector:
+        select:
+          translation_key: trigger_state
+          options: *washdata_states
+
+maintenance_due:
+  target: *target
+  fields:
+    task:
+      required: false
+      example: descale
+      selector:
+        text:
+
+milestone_reached:
+  target: *target
+
+pump_stuck:
+  target: *target

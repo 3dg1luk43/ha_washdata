@@ -30,6 +30,33 @@ export interface ApplySuggestionsResponse {
   applied: string[];
 }
 
+export interface BlueprintInput {
+  key: string;
+  name: string;
+  description: string;
+  selector: string | null;
+  has_default: boolean;
+}
+
+export interface BlueprintItem {
+  id: string;
+  name: string;
+  description: string;
+  device_types: string[];
+  min_version: string;
+  tags: string[];
+  source_url: string;
+  path: string;
+  yaml: string;
+  one_click: boolean;
+  inputs: BlueprintInput[];
+}
+
+export interface BlueprintsListResponse {
+  blueprints: BlueprintItem[];
+  error?: string;
+}
+
 export interface CancelTaskResponse {
   cancelled: boolean;
 }
@@ -168,6 +195,8 @@ export interface GetMaintenanceLogResponse {
   cycles_since: Record<string, number>;
   custom_tasks: MaintenanceTask[];
   status: MaintenanceStatusRow[];
+  programs_available: string[];
+  programs: Record<string, string[]>;
   lifetime_cycle_count: number;
   limits: MaintenanceLimits;
 }
@@ -346,6 +375,7 @@ export interface MaintenanceStatusRow {
   cycles_since: number;
   days_since: number | null;
   due: boolean;
+  programs: string[];
 }
 
 export interface MaintenanceTask {
@@ -410,6 +440,12 @@ export interface RunSuggestionAnalysisResponse {
 export interface SetLifetimeCycleCountResponse {
   success: boolean;
   lifetime_cycle_count: number;
+}
+
+export interface SetMaintenanceProgramsResponse {
+  success: boolean;
+  task_id: string;
+  programs: string[];
 }
 
 export interface SetSuggestionLockResponse {
@@ -676,6 +712,12 @@ export interface UpdateMaintenanceTaskRequest {
 export interface DeleteMaintenanceTaskRequest {
   entry_id: string;
   task_id: string;
+}
+
+export interface SetMaintenanceProgramsRequest {
+  entry_id: string;
+  task_id: string;
+  programs: string[];
 }
 
 export interface SetLifetimeCycleCountRequest {
@@ -1148,6 +1190,9 @@ export interface GetShareableCyclesRequest {
   entry_id: string;
 }
 
+export interface BlueprintsListRequest {
+}
+
 // ── Command maps ───────────────────────────────────────────────────────────
 
 export interface WashDataWsRequests {
@@ -1174,6 +1219,7 @@ export interface WashDataWsRequests {
   "ha_washdata/add_maintenance_task": AddMaintenanceTaskRequest;
   "ha_washdata/update_maintenance_task": UpdateMaintenanceTaskRequest;
   "ha_washdata/delete_maintenance_task": DeleteMaintenanceTaskRequest;
+  "ha_washdata/set_maintenance_programs": SetMaintenanceProgramsRequest;
   "ha_washdata/set_lifetime_cycle_count": SetLifetimeCycleCountRequest;
   "ha_washdata/label_cycle": LabelCycleRequest;
   "ha_washdata/delete_cycle": DeleteCycleRequest;
@@ -1263,6 +1309,7 @@ export interface WashDataWsRequests {
   "ha_washdata/store_upload_device": StoreUploadDeviceRequest;
   "ha_washdata/store_download_device": StoreDownloadDeviceRequest;
   "ha_washdata/get_shareable_cycles": GetShareableCyclesRequest;
+  "ha_washdata/blueprints/list": BlueprintsListRequest;
 }
 
 export interface WashDataWsResponses {
@@ -1288,6 +1335,7 @@ export interface WashDataWsResponses {
   "ha_washdata/delete_maintenance_event": SuccessResponse;
   "ha_washdata/add_maintenance_task": MaintenanceTaskResponse;
   "ha_washdata/update_maintenance_task": MaintenanceTaskResponse;
+  "ha_washdata/set_maintenance_programs": SetMaintenanceProgramsResponse;
   "ha_washdata/delete_maintenance_task": SuccessResponse;
   "ha_washdata/set_lifetime_cycle_count": SetLifetimeCycleCountResponse;
   "ha_washdata/label_cycle": SuccessResponse;
@@ -1378,6 +1426,7 @@ export interface WashDataWsResponses {
   "ha_washdata/store_upload_device": StoreUploadDeviceResponse;
   "ha_washdata/store_download_device": StartTaskResponse;
   "ha_washdata/get_shareable_cycles": GetShareableCyclesResponse;
+  "ha_washdata/blueprints/list": BlueprintsListResponse;
 }
 
 export interface WashDataTaskResults {

@@ -41,8 +41,8 @@ Nothing here touches Home Assistant. Log lines are returned as
 ``(level, message, args)`` tuples for the caller to emit, so the manager's log
 output is unchanged and the Playground can drop it. Moved verbatim from
 ``manager.py``: every constant, ordering and edge case is the manager's. The
-functions do not raise on well-formed matcher output (the manager coerces
-``profile_unmatch_threshold`` with ``option_float`` before passing it in).
+functions do not raise on well-formed matcher output (the unmatch threshold
+the callers pass is the fixed ``DEFAULT_PROFILE_UNMATCH_THRESHOLD`` since 0.5.9).
 """
 from __future__ import annotations
 
@@ -301,8 +301,9 @@ def decide_switch(
 ) -> list[LogLine]:
     """Cases 1-3 and the switch itself. Mutates ``state`` and ``tick``.
 
-    ``unmatch_threshold`` is passed exactly as the manager holds it (the raw
-    option): Case 1 floors it through ``float``, Case 3 compares it as is.
+    ``unmatch_threshold`` is passed exactly as the manager holds it (the fixed
+    default since 0.5.9): Case 1 floors it through ``float``, Case 3 compares it
+    as is.
     Returns this step's log lines (``tick.log`` holds :func:`begin_tick`'s).
     """
     log: list[LogLine] = []

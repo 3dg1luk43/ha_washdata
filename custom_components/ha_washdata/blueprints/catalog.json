@@ -1,0 +1,12 @@
+{
+  "dryer_anti_crease_power_cut": {
+    "device_types": ["dryer", "washer_dryer"],
+    "min_version": "0.5.9",
+    "tags": ["anti-crease", "smart plug"]
+  },
+  "cycle_running_indicator": {
+    "device_types": ["all"],
+    "min_version": "0.5.9",
+    "tags": ["light", "status"]
+  }
+}

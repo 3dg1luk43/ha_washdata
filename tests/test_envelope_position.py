@@ -63,7 +63,6 @@ def _manager(*, mapped: float, span: float, matched: str | None = "Eco") -> Any:
     # Every scalar the surrounding code compares against has to be real.
     mgr._unmatch_threshold = 0.2
     mgr._match_threshold = 0.5
-    mgr._auto_label_confidence = 0.8
     mgr._learning_confidence = 0.6
     mgr._last_match_confidence = 0.9
     mgr._ambiguity_margin = 0.05

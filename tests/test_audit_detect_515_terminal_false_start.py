@@ -249,7 +249,7 @@ def _harness_summary() -> dict[str, Any]:
         "washing_machine",
         {},
         {"min_power": 2.0, CONF_START_THRESHOLD_W: START, CONF_STOP_THRESHOLD_W: STOP,
-         "sampling_interval": 1.0, "completion_min_seconds": 600},
+         "completion_min_seconds": 600},
         [],
     )
     config, manager = sge.detector_setup(device, {})

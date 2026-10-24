@@ -33,7 +33,9 @@ def manager(mock_hass):
     entry.options = {
         "power_sensor": "sensor.power",
         "min_power": 10.0,
-        "sampling_interval": 30.0,
+        # A dryer throttles at its device default, 30 s (sampling_interval is not a
+        # setting since 0.5.9).
+        "device_type": "dryer",
     }
     entry.data = {}
     

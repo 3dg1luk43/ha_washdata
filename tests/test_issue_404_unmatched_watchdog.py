@@ -36,7 +36,6 @@ import pytest
 from custom_components.ha_washdata.const import (
     CONF_DEVICE_TYPE,
     CONF_EXTERNAL_END_TRIGGER,
-    CONF_EXTERNAL_END_TRIGGER_ENABLED,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -168,7 +167,6 @@ async def test_external_end_trigger_available_skips_the_guard() -> None:
         hass,
         {
             CONF_DEVICE_TYPE: "washer_dryer",
-            CONF_EXTERNAL_END_TRIGGER_ENABLED: True,
             CONF_EXTERNAL_END_TRIGGER: "binary_sensor.aeg_done",
         },
     )
@@ -189,7 +187,6 @@ async def test_external_trigger_unavailable_does_not_skip_the_guard() -> None:
         hass,
         {
             CONF_DEVICE_TYPE: "washer_dryer",
-            CONF_EXTERNAL_END_TRIGGER_ENABLED: True,
             CONF_EXTERNAL_END_TRIGGER: "binary_sensor.aeg_done",
         },
     )

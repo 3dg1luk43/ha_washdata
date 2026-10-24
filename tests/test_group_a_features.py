@@ -33,7 +33,6 @@ import pytest
 from custom_components.ha_washdata.const import (
     CLUSTER_SHAPE_SIMILARITY_THRESHOLD,
     CONF_AUTO_LABEL_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
     CONF_LEARNING_CONFIDENCE,
     CYCLE_UNDERRUN_ANOMALY_RATIO,
     ENERGY_ANOMALY_Z_THRESHOLD,
@@ -541,7 +540,6 @@ def _learning_manager(mock_hass, labeled_count: int, auto_label_conf: float = 0.
     entry.options = {
         CONF_AUTO_LABEL_CONFIDENCE: auto_label_conf,
         CONF_LEARNING_CONFIDENCE: 0.5,
-        CONF_DURATION_TOLERANCE: 0.1,
     }
     mock_hass.config_entries.async_get_entry.return_value = entry
     mgr = LearningManager(mock_hass, "test_entry", store)

@@ -76,7 +76,6 @@ def dryer_config_with_anti_wrinkle() -> CycleDetectorConfig:
         anti_wrinkle_enabled=True,
         anti_wrinkle_max_power=400.0,
         anti_wrinkle_max_duration=60.0,
-        anti_wrinkle_exit_power=0.8,
     )
 
 
@@ -237,7 +236,6 @@ def test_anti_wrinkle_for_washing_machine(mock_callbacks: dict[str, Mock]) -> No
         anti_wrinkle_enabled=True,
         anti_wrinkle_max_power=400.0,
         anti_wrinkle_max_duration=60.0,
-        anti_wrinkle_exit_power=0.8,
     )
 
     detector = CycleDetector(
@@ -269,7 +267,6 @@ def test_anti_wrinkle_enabled_washer_dryer(mock_callbacks: dict[str, Mock]) -> N
         anti_wrinkle_enabled=True,
         anti_wrinkle_max_power=400.0,
         anti_wrinkle_max_duration=60.0,
-        anti_wrinkle_exit_power=0.8,
     )
     
     detector = CycleDetector(
@@ -334,7 +331,6 @@ def dryer_config_long_pulse_gap() -> CycleDetectorConfig:
         anti_wrinkle_enabled=True,
         anti_wrinkle_max_power=400.0,
         anti_wrinkle_max_duration=60.0,
-        anti_wrinkle_exit_power=0.8,
         anti_wrinkle_idle_timeout=900.0,
     )
 
@@ -458,7 +454,6 @@ def test_anti_wrinkle_idle_timeout_never_below_dynamic_floor(
         anti_wrinkle_enabled=True,
         anti_wrinkle_max_power=400.0,
         anti_wrinkle_max_duration=60.0,
-        anti_wrinkle_exit_power=0.8,
         anti_wrinkle_idle_timeout=0.0,
     )
     detector = CycleDetector(

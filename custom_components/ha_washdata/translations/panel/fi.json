@@ -89,7 +89,9 @@
     "matcher_used": "Täsmäytetty {n} sykliisi",
     "matcher_used_one": "Täsmäytetty {n} sykliisi",
     "matcher_used_other": "Täsmäytetty {n} sykliisi",
-    "matcher_used_tip": "Tämän laitteen syklit, jotka WashData täsmäytti itse tähän tuotuun ohjelmaan. Jos tuonti ei koskaan täsmää, se ei ehkä sovi laitteellesi, ja voit poistaa sen. Lasketaan paikallisesti; mitään ei lähetetä kauppaan."
+    "matcher_used_tip": "Tämän laitteen syklit, jotka WashData täsmäytti itse tähän tuotuun ohjelmaan. Jos tuonti ei koskaan täsmää, se ei ehkä sovi laitteellesi, ja voit poistaa sen. Lasketaan paikallisesti; mitään ei lähetetä kauppaan.",
+    "bp_installed": "Asennettu",
+    "bp_installed_other": "Eri versio asennettu"
   },
   "btn": {
     "pg_preset_delete": "Poista esiasetus",
@@ -133,7 +135,6 @@
     "export": "Vie",
     "force_stop": "Pakota pysäytys",
     "force_stop_tip": "Lopeta nykyinen sykli välittömästi ja merkitse se pakotetusti pysäytetyksi",
-    "from_template": "Mallista ▾",
     "ignore": "Sivuuta",
     "import_json": "Tuo JSONista",
     "inspect": "Tarkasta",
@@ -147,8 +148,6 @@
     "new_phase": "+ Uusi vaihe",
     "new_profile": "+ Uusi profiili",
     "new_profile_tip": "Luo uusi ohjelmaprofiili olemassa olevasta merkitystä syklistä tai tallennuksesta",
-    "on_cycle_finished": "Kierros päättyi",
-    "on_cycle_started": "Kierros alkoi",
     "pause_cycle": "Tauko",
     "pause_cycle_tip": "Keskeytä käynnissä oleva sykli – laite jatkaa siitä, mihin se jäi",
     "pg_load_live": "Lataa aktiiviset asetukset",
@@ -251,7 +250,14 @@
     "confirmed": "Vahvistettu",
     "create_profile_from_gap": "Luo profiili",
     "undo_import": "Kumoa viimeisin tuonti",
-    "pg_rerun": "Päivitä simulaatio"
+    "pg_rerun": "Päivitä simulaatio",
+    "from_trigger": "Käynnistä triggerillä ▾",
+    "bp_use": "Käytä tämän laitteen kanssa",
+    "bp_install": "Asenna malli",
+    "bp_view_yaml": "Näytä YAML",
+    "copy": "Kopioi",
+    "replace": "Korvaa",
+    "from_trigger_open": "Käynnistä triggerillä ▴"
   },
   "note": {
     "off_delay": {
@@ -306,25 +312,22 @@
       "timeout": "Oltava suurempi kuin Pumpun jumiutumiskesto ({ps} s), jotta jumihälytys ehtii laueta ensin"
     },
     "start_dur": {
-      "sampling": "Näytteenottoväli ylittää käynnistyksen keston ({sdt} s); yksittäiset piikit voivat avata syklin",
       "threshold": "Tulee olla vähintään yksi näytteenottoväli ({si} s) yksittäisen näytteen väärän käynnistyksen estämiseksi"
-    },
-    "unmatch": {
-      "match": "Täytyy olla yli eritäsmäytyskynnyksen ({un})",
-      "unmatch": "Täytyy olla alle täsmäytyskynnyksen ({match}); muuten vahvistettu vastaavuus purkautuu heti"
     },
     "cascade_toast": "Muita asetuksia muutettiin johdonmukaisuuden vuoksi: {n}",
     "suggestion_resolves": "Ota alla oleva ehdotus ({val}) käyttöön tämän korjaamiseksi",
     "use_fix": "Käytä {val}",
     "watchdog": {
-      "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)",
-      "sampling": "Näytteenottovälin tulee olla enintään puolet tarkkailijavälistä ({wi} s)"
+      "interval": "Tulisi olla vähintään 2x näytteenottoväli ({si} s)"
     },
     "settings_banner": "Asetusten ristiriitoja: {n}. Tarkista korostetut osiot ja korjaa ne ennen tallentamista.",
     "settings_banner_btn": "Siirry ensimmäiseen",
     "end_energy": {
       "energy": "Liian tiukka Pysäytyskynnykselle ({w} W) Sammutusviiveen ({d} s) aikana; sykli voi päättyä vain varapolun kautta",
       "stop": "Lopetuksen energiakynnys ({e} Wh / {d} s) sallii vain {p} W"
+    },
+    "power_sensor": {
+      "energy": "Tämä anturi mittaa energiaa ({unit}), ei tehoa, joten syklejä ei voida tunnistaa. Valitse pistokkeen tehoanturi (W tai kW)."
     }
   },
   "hdr": {
@@ -372,7 +375,11 @@
     "import_power_history": "Tuo tehohistoria",
     "service_status": "Huollon tila",
     "online_account_tab": "Verkko ja yhteisö",
-    "live_match_debug": "Reaaliaikaisen täsmäytyksen virheenkorjaus"
+    "live_match_debug": "Reaaliaikaisen täsmäytyksen virheenkorjaus",
+    "automations_used": "Tätä laitetta käyttävät automaatiot",
+    "bp_templates": "Mallit",
+    "automations_all_tip": "Home Assistantin automaatiolista, suodatettuna WashData-etiketin mukaan. Täältä luodut automaatiot löytyvät myös WashData-luokasta.",
+    "maint_done_by_program": "Automaattinen kuittaus"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -655,7 +662,7 @@
     "hist_reason_already_recorded": "on päällekkäin syklin kanssa, jonka WashData on jo tallentanut",
     "share_consent": "Vahvistan, että nämä syklit suoritettiin normaalisti loppuun ilman keskeytystä",
     "show_internal": "Näytä sisäiset asetukset",
-    "show_internal_tip": "Asetukset, jotka WashData säätää puolestasi (näytteenotto, tarkkailija, täsmäytystiheys, kynnykset). Näytetään, kun tällä laitteella on oma arvo, ristiriita tai ehdotus.",
+    "show_internal_tip": "Asetukset, jotka WashData säätää puolestasi (tarkkailija, täsmäytystiheys, kynnykset). Näytetään, kun tällä laitteella on oma arvo, ristiriita tai ehdotus.",
     "rate_n": "{n} tähteä",
     "rate_quality": "Arvioi laatu",
     "pg_autolabel": "Automaattimerkintä",
@@ -684,7 +691,14 @@
     "cycle_context_minutes": "{min} min",
     "cycle_context_series": "Tallentimen historia",
     "before_start": "Ennen alkua",
-    "after_end": "Lopun jälkeen"
+    "after_end": "Lopun jälkeen",
+    "bp_you_choose": "Sinä valitset: {inputs}",
+    "bp_adjustable": "Säädettävä: {inputs}",
+    "bp_yaml": "Blueprint-YAML",
+    "automation_wd_label": "Sisältää WashData-etiketin",
+    "done_by_none": "Ei asetettu",
+    "done_by_programs": "Automaattinen kuittaus: {programs}",
+    "done_by_cycle": "Tehty syklillä: {program}"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -781,7 +795,9 @@
     "profile_title": "Profiili · {name}",
     "undo_import_msg": "Tämän laitteen tiedot ja asetukset palautetaan viimeisintä tuontia ({when}) edeltävään tilaan. Sen jälkeen tallennetut syklit ja tehdyt muutokset menetetään.",
     "undo_import_ok": "Kumoa tuonti",
-    "undo_import_title": "Kumoa viimeisin tuonti"
+    "undo_import_title": "Kumoa viimeisin tuonti",
+    "bp_replace_title": "Korvataanko asennettu malli?",
+    "bp_replace_msg": "Home Assistantilla on eri versio kohteesta \"{name}\". Korvataanko se tämän WashData-version mallilla? Sitä käyttävät automaatiot muuttuvat sen mukana."
   },
   "msg": {
     "pg_canvas_empty3": "Valitse jakso yltä ja paina Suorita simuloidaksesi sen. Vie sitten osoitin päälle lukeaksesi arvoja, vieritä tai nipistä zoomataksesi ja vedä panoroidaksesi.",
@@ -802,7 +818,6 @@
     "artifact_pause_detail": "Teho laski lähes nollaan noin {n} sekunniksi ja palasi sitten. Ovi avattiin todennäköisesti tai sykli keskeytettiin.",
     "artifact_spike_detail": "Ylitti tavallisen tehon ylärajan noin {n} sekunnin ajan.",
     "auto_label_intro": "Määritä profiilit nimeämättömille sykleille, joiden osuvuusvarmuus tyhjentää kynnyksen.",
-    "automations_intro": "WashData laukaisee {start} / {end}-tapahtumat ja tarjoaa entiteetit, joten ilmoitukset ja toiminnot kannattaa rakentaa tavallisina Home Assistant -automaatioina. Tätä laitetta käyttävät automaatiot näkyvät alla.",
     "cleanup_intro": "Kaikki merkityt syklit päällekkäin. Valitse poikkeamat ja poista niiden merkintä (ne jäävät historiaan, mutta eivät enää muovaa tätä profiilia) tai poista ne kokonaan.",
     "clear_debug_hint": "Poista tallennetut virheenkorjaustiedot vapauttaaksesi tilaa.",
     "collecting_data": "Kerätään tietoja. Syklejä tarvitaan vielä ennen hienosäädön aloittamista: {need} ({current}/{min}).",
@@ -1043,10 +1058,6 @@
     "pg_label_yes": "Merkittäisiin jakson lopussa nimellä \"{name}\"",
     "pg_label_no": "Pyytäisi tarkistusta: {reason}",
     "live_match_debug_tip": "Luottamus: kuinka hyvin nykyinen tehokäyrä vastaa parasta ehdokasprofiilia (0-100 %). Epäselvä: kahden parhaan ehdokkaan pisteet ovat 5 %:n sisällä toisistaan - merkintä on epävarma, kunnes sykli päättyy.",
-    "automation_alias_started": "{device}: sykli alkoi",
-    "automation_alias_finished": "{device}: sykli päättyi",
-    "automation_desc_started": "Suoritetaan, kun laitteen {device} sykli alkaa. Lisää omat toimintosi (ilmoitus, valot, ...).",
-    "automation_desc_finished": "Suoritetaan, kun laitteen {device} sykli päättyy. Lisää omat toimintosi (ilmoitus, valot, ...).",
     "feedback_detected": "WashData tunnisti: {name}",
     "import_undo_hint": "Viimeisintä tuontia ({when}) edeltävä palautuspiste säilytetään: {profiles} profiilia ja {cycles} jaksoa.",
     "replace_undo_hint": "Ensin tallennetaan palautuspiste, joten voit kumota tämän tuonnin kohdassa Vienti / tuonti.",
@@ -1069,13 +1080,22 @@
     "cycle_context_note": "Harmaa: tehoanturin tallentimen historia tämän syklin ympäriltä. Se ei ole osa sykliä eikä vaikuta kestoon, energiaan tai täsmäytykseen.",
     "cycle_context_none": "Tallentimessa ei ole lukemia tämän syklin ympäriltä (Home Assistant säilyttää oletuksena 10 päivän historian).",
     "cycle_context_tip": "Vain näyttöä varten: näyttää tehoanturin tallentimen historian tämän syklin ympäriltä, jos se on vielä tallessa. Jos haluat liittää keskeytyneet käynnistysyritykset tuleviin sykleihin, käytä asetusta Käyrän esijakso (Asetukset > Tunnistus > Syklin alku). Se muuttaa tallennettuja kestoja.",
-    "invalid_threshold_pair": "Pysäytyskynnyksen ({stop} W) on oltava pienempi kuin Käynnistyskynnys ({start} W). Mitään ei tallennettu; muuta molempia yhdessä."
+    "invalid_threshold_pair": "Pysäytyskynnyksen ({stop} W) on oltava pienempi kuin Käynnistyskynnys ({start} W). Mitään ei tallennettu; muuta molempia yhdessä.",
+    "automations_tab_intro": "WashData tarjoaa laitetriggereitä (sykli alkoi, sykli päättyi, sykli jumiutui ja lisää) omille Home Assistant -automaatioillesi. Tätä laitetta käyttävät automaatiot on listattu tässä.",
+    "bp_intro": "Valmiit automaatiot tälle laitteelle, asennettu Home Assistantin blueprinteiksi.",
+    "bp_admin_only": "Järjestelmänvalvoja asentaa mallit.",
+    "bp_none": "Tälle laitetyypille ei ole vielä malleja.",
+    "bp_load_failed": "Malleja ei voitu ladata.",
+    "auto_trigger_hint": "Luo automaation tällä triggerillä tälle laitteelle ja avaa sen Home Assistantissa.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "WashDatan luoma automaatio laitteelle {device}. Lisää omat toimintosi (ilmoitus, valot, ...).",
+    "automation_alias_new": "{device}: uusi automaatio",
+    "maint_done_by_program_intro": "Tehtävä lasketaan tehdyksi, kun jonkin sen ohjelman sykli päättyy, esimerkiksi rummun puhdistus, kun Puuvilla 90 -ohjelma ajetaan. Vain syklit, joista WashData on varma tai joiden ohjelman valitsit itse, lasketaan."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
     "smart_termination_duration_ratio": "Osuus ohjelman keskimääräisestä kestosta, joka syklin on saavutettava ennen kuin älykäs lopetus voi päättää sen aikaisin; laske sitä, jos ajoajat vaihtelevat",
     "anti_wrinkle_enabled": "Sulauta päävaiheen jälkeiset rumpupulssit sen sijaan, että lukisit ne uusina sykleinä",
-    "anti_wrinkle_exit_power": "Hiljainen taso rumpupulssien välillä; vaikuttaa vain Pysäytyskynnyksen yläpuolella",
     "anti_wrinkle_idle_timeout": "Kahden rumpupulssin välillä sallittu hiljainen aika ennen kuin ryppyjenesto päättyy",
     "anti_wrinkle_max_duration": "Tätä pidempi pulssi päättää ryppyjeneston ja aloittaa uuden syklin",
     "anti_wrinkle_max_power": "Tätä suurempi pulssi päättää ryppyjeneston ja aloittaa uuden syklin",
@@ -1094,22 +1114,12 @@
   "phase_desc": {
     "anti_crease": "Satunnaisia lyhyitä rumpujaksia valmistumisen jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
     "anti_wrinkle": "Jaksoittainen rummun pyörittäminen syklin jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
-    "baking": "Lämmitysvastus toimii korkeassa lämpötilassa, jotta kuori ja sisus muodostuvat.",
-    "cooking": "Pääkypsennysvaihe, lämmitin ja puhallin käynnissä.",
     "cool_down": "Pyöriminen ilman lämpöä syklin lopussa.",
-    "cool_down_af": "Jäähdytys pelkällä puhaltimella lämmityksen jälkeen.",
     "drain_and_switch": "Siirtymäaika pesusta kuivaustilaan.",
     "dry": "Kuivausvaihe lämmittimellä ja/tai jälkilämmöllä.",
     "drying": "Lämmitetty pääjakso.",
     "heat_up": "Lämmittimen ensimmäinen lämmitys ennen täyden kuivumisen alkamista.",
-    "keep_warm": "Pito matalalla lämmöllä, jotta ruoka pysyy lämpimänä.",
-    "keep_warm_bm": "Pito matalalla lämmöllä, jotta leipä pysyy paistamisen jälkeen lämpimänä.",
-    "kneading": "Moottori sekoittaa ja vaivaa taikinaa. Suuri tehonkulutus.",
-    "pause_af": "Lyhyt tauko ravistelua tai tarkistusta varten.",
-    "pre_heat": "Kammion alkulämmitys ennen varsinaista kypsennystä.",
     "pre_rinse": "Ensimmäinen suihkutus ennen pesuainepesua.",
-    "proving": "Kohotus matalalla lämmöllä: hiiva käy ja taikina kohoaa.",
-    "resting": "Lyhyt pienitehoinen tauko vaivausten välillä, jotta gluteeni rentoutuu.",
     "pre_wash": "Ensimmäinen liotus tai esikäsittely ennen pääpesua.",
     "rinse": "Puhdasvesihuuhteluvaihe. Tämä vaihe voi toistua useita kertoja.",
     "sanitize": "Korkean lämpötilan puhdistusvaihe desinfiointiohjelmia varten.",
@@ -1202,10 +1212,6 @@
       "doc": "Pidä kuivausrummun lyhyet vähätehoiset rummutuspulssit päälämpövaiheen jälkeen valmiissa syklissä sen sijaan, että ne luettaisiin uusiksi sykleiksi.",
       "label": "Ota ryppyjenesto käyttöön"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "Ryppyjenestotilassa tätä pienempi teho lasketaan hiljaiseksi rumpupulssien välillä, ja Pulssien enimmäisväliä pidempi hiljaisuus lopettaa tilan. Jos Pysäytyskynnys on suurempi, käytetään sitä, joten tällä on vaikutusta vain, kun se on Pysäytyskynnystä suurempi.",
-      "label": "Poistumistehokynnys"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Kuinka kauan kuivausrumpu saa olla hiljaa rummutuspulssien välillä, ennen kuin ryppyjenestotila päättyy. Aseta se pidemmäksi kuin rumpusi pisin tauko, muuten myöhemmät pulssit luetaan vääriksi käynnistyksiksi.",
       "label": "Pulssien enimmäisväli"
@@ -1254,10 +1260,6 @@
       "doc": "Valinnainen ovianturi. Näyttää, milloin laite avattiin purkamista varten syklin jälkeen.",
       "label": "Ovianturin entiteetti"
     },
-    "duration_tolerance": {
-      "doc": "Vain oppimispalaute: sykli, joka poikkeaa arvioidusta kestostaan enintään +/-X %, lasketaan hyväksi arvioksi. Ei vaikuta täsmäytykseen.",
-      "label": "Arviotoleranssi"
-    },
     "enable_ml_models": {
       "doc": "Käytä tällä koneella koulutettua mallia käynnissä olevan syklin energian ja kustannusten ennustamiseen, ja anna tutun ohjelman, joka pysähtyy epätavallisen aikaisin, päättyä odottamatta koko sammutusviivettä. Pois: vain tehoon perustuva logiikka.",
       "label": "Käytä älykkäitä malleja syklin aikana"
@@ -1283,12 +1285,8 @@
       "label": "Näytä virheenkorjausentiteetit"
     },
     "external_end_trigger": {
-      "doc": "Binäärianturi, jonka muutos merkitsee syklin loppua (esim. \"valmis\"-kosketin tai toinen integraatio).",
+      "doc": "Valinnainen binäärianturi, joka päättää syklin käynnistyessään, tehotunnistuksen lisäksi (esim. \"valmis\"-kosketin tai toinen integraatio). Jätä tyhjäksi poistaaksesi käytöstä.",
       "label": "Ulkoisen signaalin entiteetti"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Anna binäärianturin ilmoittaa syklin päättymisestä tehoon perustuvan tunnistuksen lisäksi.",
-      "label": "Ota ulkoinen päätyssignaali käyttöön"
     },
     "external_end_trigger_inverted": {
       "doc": "Käsittele anturin kytkeytymistä POIS (ei PÄÄLLE) päättymissignaalina.",
@@ -1313,18 +1311,6 @@
     "ml_training_enabled": {
       "doc": "Kouluta energiamalli ajoittain uudelleen tämän koneen valmiilla sykleillä. Uusi malli otetaan käyttöön vain, jos se päihittää yksinkertaisen arvion testisykleillä.",
       "label": "Opi tästä koneesta"
-    },
-    "ml_training_hour": {
-      "doc": "Vuorokauden tunti (0-23) yökoulutukselle. Valitse hiljainen tunti, esim. 2.",
-      "label": "Opi tunnilla"
-    },
-    "ml_training_interval_days": {
-      "doc": "Kouluta uudelleen enintään kerran näin monessa päivässä.",
-      "label": "Tarkista enintään joka"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Odota vähintään näin montaa tallennettua sykliä ennen koulutusta.",
-      "label": "Tarvittavat syklit ensin"
     },
     "name": {
       "doc": "Tämän laitteen nimi Home Assistantissa.",
@@ -1358,16 +1344,12 @@
       "doc": "notify.*-palvelut, joita kutsutaan syklin päättyessä. Jätä tyhjäksi, jos et halua ilmoitusta.",
       "label": "Lopetuspalvelut"
     },
-    "notify_fire_events": {
-      "doc": "Lähetä myös ha_washdata_*-tapahtumat syklin alussa ja lopussa omia automaatioitasi varten.",
-      "label": "Käynnistä HA-tapahtumat ilmoituksille"
-    },
     "notify_icon": {
       "doc": "Pieni kuvake ilmoituksessa (esim. mdi:washing-machine). Lähetetään vain mobile_app-kohteisiin, ei notify-ryhmiin. iOS:ssä se korvaa sovelluksen kuvakkeen ja vaatii kumppanisovelluksen 2026.8 tai uudemman. Tyhjä: alustan oletus.",
       "label": "Ilmoituksen kuvake"
     },
     "notify_live_chronometer": {
-      "doc": "Näytä ilmoituksessa reaaliaikainen ajastin (jos tuettu) kiinteän arvion sijaan.",
+      "doc": "Android: lisää ilmoitustekstin viereen laskevan ajastimen arvioituun valmistumiseen. Käytä {finish_time} Ennen valmistumista -viestissä, jos haluat näyttää valmistumisajan toisen laskevan ajastimen sijaan.",
       "label": "Käytä suoraa kronometriä"
     },
     "notify_live_interval_seconds": {
@@ -1391,7 +1373,7 @@
       "label": "Henkilöt (Ilmoita vain kotona ollessa)"
     },
     "notify_pre_complete_message": {
-      "doc": "Jokaisen live-edistymispäivityksen teksti. Mallin muuttujat: {device}, {program}, {minutes} (jäljellä olevat minuutit). Muulla muuttujalla käytetään oletustekstiä.",
+      "doc": "Jokaisen live-edistymispäivityksen teksti. Mallin muuttujat: {device}, {program}, {minutes} (jäljellä olevat minuutit), {finish_time} (arvioitu valmistumisaika, esim. 14:30). Muulla muuttujalla käytetään oletustekstiä.",
       "label": "Ennen valmistumista -viesti"
     },
     "notify_reminder_message": {
@@ -1439,7 +1421,7 @@
       "label": "Virran sammutuksen kynnys"
     },
     "power_sensor": {
-      "doc": "Anturi, joka raportoi tämän laitteen reaaliaikaisen tehon watteina (esim. sensor.washer_power). Kaikki tunnistus perustuu siihen.",
+      "doc": "Anturi, joka raportoi tämän laitteen reaaliaikaisen tehon yksikössä W tai kW (esim. sensor.washer_power), ei sen energiamittari (kWh). Kaikki tunnistus perustuu siihen.",
       "label": "Tehoanturi"
     },
     "profile_match_interval": {
@@ -1458,10 +1440,6 @@
       "doc": "Reaaliaikaiset täsmäytyspisteet, jotka sykli tarvitsee, ennen kuin älykäs lopetus tai ryppyjeneston lopetus voi päättää sen aikaisin. Ei muuta näytettävää ohjelmaa. Nosta sitä, jos heikot täsmäytykset päättävät syklejä liian aikaisin; laske sitä, jos selvät täsmäytykset odottavat sammutusviiveen.",
       "label": "Täsmäytyskynnys"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Jos reaaliaikaiset täsmäytyspisteet putoavat tämän alle, nykyinen ohjelma-arvaus tyhjennetään. Pidä se hieman Täsmäytyskynnystä pienempänä, jotta lyhyt notkahdus ei nollaa sitä.",
-      "label": "Eritäsmäytyskynnys"
-    },
     "progress_reset_delay": {
       "doc": "Pidä edistyminen syklin jälkeen 100 %:ssa näin kauan ennen paluuta Tyhjäkäynti-tilaan.",
       "label": "Edistymisen nollausviive"
@@ -1469,10 +1447,6 @@
     "pump_stuck_duration": {
       "doc": "Kuinka kauan pumppu saa käydä yhtäjaksoisesti, ennen kuin jumiutuneen pumpun tapahtuma laukeaa.",
       "label": "Pumpun jumiutumiskesto"
-    },
-    "sampling_interval": {
-      "doc": "Käsiteltyjen lukemien välinen vähimmäisaika. Aiemmin saapuvat lukemat ohitetaan (syklin aikaiset matalat lukemat säilytetään aina). Aseta se pistokkeesi raportointiväliin tai pienemmäksi; suurempi arvo vain heittää lukemia pois.",
-      "label": "Näytteenottoväli"
     },
     "save_debug_traces": {
       "doc": "Tallenna jokaisen syklin mukana myös täsmäyttimen virheenkorjaustiedot (jokaisen ehdokkaan pisteet) vianetsintää varten. Lisää noin 20 KB sykliä kohden.",
@@ -1644,9 +1618,6 @@
     "services": {
       "label": "Palvelut"
     },
-    "signal_processing": {
-      "label": "Signaalinkäsittely"
-    },
     "thresholds_gap": {
       "label": "Kynnykset ja väli"
     },
@@ -1709,10 +1680,6 @@
       "auto_label_confidence": {
         "higher": "Vähemmän automaattisia merkintöjä – useammat syklit menevät tarkistukseen",
         "lower": "Enemmän automaattisia merkintöjä – osa voi olla virheellisiä"
-      },
-      "duration_tolerance": {
-        "higher": "Hyväksyy laajemman kestoalueen – joustavampi tunnistus",
-        "lower": "Edellyttää tarkempaa kestomatchausta – tiukempi, mutta voi hylätä epätavalliset syklit"
       },
       "end_energy_threshold": {
         "higher": "Sulkee vain syklit, jotka kuluttivat merkittävästi energiaa",
@@ -1811,7 +1778,8 @@
     "subtab_profiles": "Profiilit",
     "maintenance": "Huolto",
     "playground": "Testialue",
-    "store": "Kauppa"
+    "store": "Kauppa",
+    "automations": "Automaatiot"
   },
   "tag": {
     "early_end": "Varhainen loppu",
@@ -1978,7 +1946,14 @@
     "auto_label_cancelled_other": "Automaattinen merkintä peruttiin, kun {count} sykliä oli merkitty.",
     "auto_label_done": "Automaattinen merkintä valmis: {count} sykliä merkitty, {skipped} jäi merkitsemättä.",
     "auto_label_done_one": "Automaattinen merkintä valmis: {count} sykli merkitty, {skipped} jäi merkitsemättä.",
-    "auto_label_done_other": "Automaattinen merkintä valmis: {count} sykliä merkitty, {skipped} jäi merkitsemättä."
+    "auto_label_done_other": "Automaattinen merkintä valmis: {count} sykliä merkitty, {skipped} jäi merkitsemättä.",
+    "bp_install_failed": "Mallia ei voitu asentaa: {error}",
+    "bp_installed_finish": "Malli asennettu. Täytä loput Home Assistantissa.",
+    "bp_automation_failed": "Malli on asennettu, mutta automaatiota ei voitu luoda: {error}",
+    "bp_automation_created": "Automaatio luotu oletusasetuksilla; avataan",
+    "copied": "Kopioitu",
+    "copy_failed": "Kopiointi epäonnistui. Valitse teksti ja kopioi käsin.",
+    "automation_label_failed": "Automaatio luotu, mutta WashData-etikettiä tai -luokkaa ei voitu lisätä."
   },
   "trend": {
     "down": "Trendikäs alaspäin",
@@ -2069,7 +2044,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter GitHubissa ↗",
-    "manual": "Käyttöohje ↗"
+    "manual": "Käyttöohje ↗",
+    "bp_share": "Jaa oma mallisi pull requestilla ↗",
+    "bp_open_in_ha": "Avaa Home Assistantissa ↗",
+    "automations_all": "Kaikki WashData-automaatiot Home Assistantissa"
   },
   "tip": {
     "add_brand": "Merkkiä ei ole listalla? Lisää se yhteisön luetteloon",
@@ -2183,16 +2161,11 @@
     "kept": "säilytetty",
     "max": "maks.",
     "min": "min.",
-    "minus_tol": "-tol.",
     "no_match": "ei osumaa",
     "no_updates": "ei päivityksiä",
     "off_delay_wait": "sammutusviive",
     "off_gap": "sammutusväli",
-    "plus_tol": "+tol.",
-    "profile": "profiili",
-    "reading_interval": "tyypillinen lukemaväli",
     "sensor_offline": "anturi offline: pakotettu pysäytys",
-    "si": "NV",
     "spike_ignored": "piikki ohitettu",
     "spike_ignored_short": "piikki: ohitettu",
     "start": "käynnistys",
@@ -2201,5 +2174,71 @@
     "thr": "kynnys",
     "too_short": "liian lyhyt",
     "tumble_kept": "rumpupulssit säilytetty"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Kytke jokin päälle syklin aikana",
+      "description": "Kytkee valon, kytkimen tai apuohjelman päälle kun WashData-sykli alkaa ja pois kun se päättyy, myös väärän käynnistyksen jälkeen.\n\nVaatii WashData 0.5.9 tai uudemman."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Lopeta kuivausrummun pitkä ryppyjenestovaihe",
+      "description": "Kuivausrummuille, jotka jatkavat pyörimistä ryppyjenestotilassa tunteja ohjelman jälkeen. Toimii vain kun WashData katsoo ohjelman olevan valmis (sykli päättyi tai ryppyjenesto alkoi). Se odottaa, sitten sammuttaa kuivausrummun älypistokkeen hetkellä, jolloin virrankulutus on pieni, ja oletuksena käynnistää sen uudelleen. Uuden syklin käynnistyminen sen aikana peruuttaa sen.\n\nRiski: tämä kytkee releen, kun kuivausrumpu on kytketty pistorasiaan. Käytä vain pistokkeella, joka on mitoitettu kuivausrummulle, omalla vastuullasi. WashData ei koskaan kytke pistoketta itse; tämä automaatio tekee sen.\n\nVaatii WashData 0.5.9 tai uudemman."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Sykli alkoi"
+    },
+    "program_recognised": {
+      "name": "Ohjelma tunnistettu"
+    },
+    "phase_started": {
+      "name": "Vaihe alkoi"
+    },
+    "finishing_soon": {
+      "name": "Päättyy pian"
+    },
+    "cycle_overrun": {
+      "name": "Sykli kestää liian kauan"
+    },
+    "cycle_paused": {
+      "name": "Sykli keskeytetty"
+    },
+    "cycle_resumed": {
+      "name": "Sykli jatkui"
+    },
+    "cycle_stalled": {
+      "name": "Sykli jumiutui"
+    },
+    "cycle_finished": {
+      "name": "Sykli päättyi"
+    },
+    "cycle_ended": {
+      "name": "Sykli päättyi (mistä tahansa syystä)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Ryppyjenesto alkoi"
+    },
+    "still_tumbling": {
+      "name": "Rumpaa yhä syklin jälkeen"
+    },
+    "unload_pending": {
+      "name": "Purkaminen odottaa"
+    },
+    "unloaded": {
+      "name": "Purettu"
+    },
+    "state_changed": {
+      "name": "Tila muuttui"
+    },
+    "maintenance_due": {
+      "name": "Huolto tarpeen"
+    },
+    "milestone_reached": {
+      "name": "Sykliverstaspylväs saavutettu"
+    },
+    "pump_stuck": {
+      "name": "Pumppu jumissa"
+    }
   }
 }

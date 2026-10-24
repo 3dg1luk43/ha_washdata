@@ -95,7 +95,9 @@
     "matcher_used_few": "Přiřazeno k {n} vašim cyklům",
     "matcher_used_many": "Přiřazeno k {n} cyklu",
     "matcher_used_other": "Přiřazeno k {n} vašim cyklům",
-    "matcher_used_tip": "Cykly na tomto spotřebiči, které WashData sám přiřadil k tomuto importovanému programu. Import, který se nikdy nepřiřadí, nemusí odpovídat vašemu spotřebiči; můžete jej odebrat. Počítáno lokálně; do obchodu se nic neodesílá."
+    "matcher_used_tip": "Cykly na tomto spotřebiči, které WashData sám přiřadil k tomuto importovanému programu. Import, který se nikdy nepřiřadí, nemusí odpovídat vašemu spotřebiči; můžete jej odebrat. Počítáno lokálně; do obchodu se nic neodesílá.",
+    "bp_installed": "Nainstalováno",
+    "bp_installed_other": "Nainstalována jiná verze"
   },
   "btn": {
     "pg_preset_delete": "Smazat přednastavení",
@@ -148,7 +150,6 @@
     "export": "Exportovat",
     "force_stop": "Vynutit zastavení",
     "force_stop_tip": "Okamžitě ukončit aktuální cyklus a označit ho jako vynuceně zastavený",
-    "from_template": "Ze šablony ▾",
     "ignore": "Ignorovat",
     "import_json": "Import z JSON",
     "inspect": "Kontrolovat",
@@ -162,8 +163,6 @@
     "new_phase": "+ Nová fáze",
     "new_profile": "+ Nový profil",
     "new_profile_tip": "Vytvořit nový profil programu z existujícího označeného cyklu nebo záznamu",
-    "on_cycle_finished": "Po dokončení cyklu",
-    "on_cycle_started": "Na začátku cyklu",
     "pause_cycle": "Pauza",
     "pause_cycle_tip": "Pozastavit běžící cyklus – spotřebič pokračuje tam, kde skončil",
     "process": "Zpracovat",
@@ -257,7 +256,14 @@
     "confirmed": "Potvrzeno",
     "create_profile_from_gap": "Vytvořit profil",
     "undo_import": "Vrátit zpět poslední import",
-    "pg_rerun": "Aktualizovat simulaci"
+    "pg_rerun": "Aktualizovat simulaci",
+    "from_trigger": "Spustit ze spouštěče ▾",
+    "bp_use": "Použít s tímto zařízením",
+    "bp_install": "Nainstalovat šablonu",
+    "bp_view_yaml": "Zobrazit YAML",
+    "copy": "Kopírovat",
+    "replace": "Nahradit",
+    "from_trigger_open": "Spustit ze spouštěče ▴"
   },
   "note": {
     "off_delay": {
@@ -312,25 +318,22 @@
       "timeout": "Musí překročit Délku zaseknutého čerpadla ({ps} s), aby alarm zaseknutí zazněl dřív"
     },
     "start_dur": {
-      "sampling": "Interval vzorkování překračuje Dobu trvání spuštění ({sdt} s); impulz z jednoho vzorku může otevřít cyklus",
       "threshold": "Měl by být alespoň jeden Interval vzorkování ({si} s), aby se předešlo falešným startům z jednoho vzorku"
-    },
-    "unmatch": {
-      "match": "Musí být nad Prahem neshody ({un})",
-      "unmatch": "Musí být pod Prahem shody ({match}); jinak potvrzená shoda se okamžitě zruší"
     },
     "cascade_toast": "Další nastavení upravena pro zachování konzistence: {n}",
     "suggestion_resolves": "Uplatněte níže čekající návrh ({val}) pro vyřešení tohoto konfliktu",
     "use_fix": "Použít {val}",
     "watchdog": {
-      "interval": "Měl by být alespoň 2× Interval vzorkování ({si} s)",
-      "sampling": "Interval vzorkování by měl být nejvýše polovina Intervalu hlídače ({wi} s)"
+      "interval": "Měl by být alespoň 2× Interval vzorkování ({si} s)"
     },
     "settings_banner": "Konflikty nastavení: {n}. Zkontrolujte zvýrazněné sekce a opravte je před uložením.",
     "settings_banner_btn": "Přejít na první",
     "end_energy": {
       "energy": "Příliš přísné pro Práh zastavení ({w} W) po dobu Zpoždění vypnutí ({d} s); cyklus může skončit jen záložní cestou",
       "stop": "Energie konce ({e} Wh za {d} s) povoluje jen {p} W"
+    },
+    "power_sensor": {
+      "energy": "Tento senzor počítá energii ({unit}), ne výkon, takže nelze detekovat žádný cyklus. Vyberte snímač výkonu zásuvky (W nebo kW)."
     }
   },
   "hdr": {
@@ -378,7 +381,11 @@
     "import_power_history": "Import historie výkonu",
     "service_status": "Stav servisu",
     "online_account_tab": "Online a komunita",
-    "live_match_debug": "Ladění shody v reálném čase"
+    "live_match_debug": "Ladění shody v reálném čase",
+    "automations_used": "Automatizace používající toto zařízení",
+    "bp_templates": "Šablony",
+    "automations_all_tip": "Seznam automatizací Home Assistant filtrovaný podle štítku WashData. Automatizace vytvořené zde jsou také v kategorii WashData.",
+    "maint_done_by_program": "Hotovo automaticky"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -663,7 +670,7 @@
     "hist_reason_already_recorded": "překrývá se s cyklem, který WashData již zaznamenal",
     "share_consent": "Potvrzuji, že tyto cykly proběhly normálně až do konce bez přerušení",
     "show_internal": "Zobrazit interní nastavení",
-    "show_internal_tip": "Nastavení, která WashData ladí za vás (vzorkování, hlídač, frekvence párování, prahy). Zobrazí se, když má toto zařízení vlastní hodnotu, konflikt nebo návrh.",
+    "show_internal_tip": "Nastavení, která WashData ladí za vás (watchdog, kadence párování, prahy). Zobrazí se, když má toto zařízení vlastní hodnotu, konflikt nebo návrh.",
     "rate_n": "{n} hvězdiček",
     "rate_quality": "Ohodnotit kvalitu",
     "pg_autolabel": "Automatické označení",
@@ -696,7 +703,14 @@
     "cycle_context_minutes": "{min} min",
     "cycle_context_series": "Historie z recorderu",
     "before_start": "Před začátkem",
-    "after_end": "Po konci"
+    "after_end": "Po konci",
+    "bp_you_choose": "Na výběr: {inputs}",
+    "bp_adjustable": "Nastavitelné: {inputs}",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Nese štítek WashData",
+    "done_by_none": "Nenastaveno",
+    "done_by_programs": "Hotovo automaticky po programech: {programs}",
+    "done_by_cycle": "Hotovo cyklem programu {program}"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -797,7 +811,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Data a nastavení tohoto zařízení se vrátí do stavu před posledním importem ({when}). Cykly zaznamenané a změny provedené od té doby budou ztraceny.",
     "undo_import_ok": "Vrátit import zpět",
-    "undo_import_title": "Vrátit zpět poslední import"
+    "undo_import_title": "Vrátit zpět poslední import",
+    "bp_replace_title": "Nahradit nainstalovanou šablonu?",
+    "bp_replace_msg": "Home Assistant má jinou verzi \"{name}\". Nahradit ji verzí z této verze WashData? Automatizace, které ji používají, se změní s ní."
   },
   "msg": {
     "pg_canvas_empty3": "Vyberte cyklus výše a stisknutím Spustit jej nasimulujte. Poté najetím zobrazíte hodnoty, kolečkem nebo dvěma prsty přiblížíte a tažením posunete.",
@@ -820,7 +836,6 @@
     "artifact_pause_detail": "Výkon klesl téměř na nulu na ~{n}s a pak se obnovil. Nejspíš byla otevřena dvířka nebo byl cyklus pozastaven.",
     "artifact_spike_detail": "Překročil obvyklé pásmo výkonu po dobu ~{n} s.",
     "auto_label_intro": "Přiřaďte profily neoznačeným cyklům, jejichž spolehlivost shody překročí prahovou hodnotu.",
-    "automations_intro": "WashData vyvolává události {start} / {end} a zpřístupňuje entity. Oznámení a akce se nejlépe nastavují jako standardní automatizace Home Assistant. Automatizace používající toto zařízení se zobrazují níže.",
     "cleanup_intro": "Všechny označené cykly přes sebe. Zaškrtněte odlehlé a pak jim odeberte štítek (zůstanou v historii, ale přestanou tvořit tento profil) nebo je smažte.",
     "clear_debug_hint": "Odstraňte uložená ladicí data, abyste uvolnili místo.",
     "collecting_data": "Shromažďování dat. Zbývající cykly do zahájení doladění: {need} ({current}/{min}).",
@@ -1071,10 +1086,6 @@
     "pg_label_yes": "Na konci cyklu by byl označen jako \"{name}\"",
     "pg_label_no": "Byla by vyžádána revize: {reason}",
     "live_match_debug_tip": "Spolehlivost: jak přesně aktuální křivka příkonu odpovídá nejlepšímu kandidátnímu profilu (0-100 %). Nejednoznačné: dva nejlepší kandidáti mají skóre do 5 % od sebe, takže štítek je nejistý až do konce cyklu.",
-    "automation_alias_started": "{device}: cyklus spuštěn",
-    "automation_alias_finished": "{device}: cyklus dokončen",
-    "automation_desc_started": "Spustí se, když začne cyklus zařízení {device}. Přidejte své akce (oznámení, světla, ...).",
-    "automation_desc_finished": "Spustí se, když skončí cyklus zařízení {device}. Přidejte své akce (oznámení, světla, ...).",
     "feedback_detected": "WashData rozpoznal: {name}",
     "import_undo_hint": "Je uchován bod obnovení z doby před posledním importem ({when}): {profiles} profilů a {cycles} cyklů.",
     "replace_undo_hint": "Nejprve se uloží bod obnovení, takže tento import můžete vrátit zpět v části Export / Import.",
@@ -1101,27 +1112,27 @@
     "cycle_context_note": "Šedě: historie snímače výkonu z recorderu kolem tohoto cyklu. Není součástí cyklu a neovlivňuje trvání, energii ani párování.",
     "cycle_context_none": "Recorder kolem tohoto cyklu neuchovává žádné odečty (Home Assistant ve výchozím nastavení uchovává historii 10 dní).",
     "cycle_context_tip": "Jen pro zobrazení: ukazuje historii snímače výkonu z recorderu kolem tohoto cyklu, pokud je ještě uložená. Chcete-li přidávat neúspěšné pokusy o spuštění do budoucích cyklů, použijte Náběh křivky (Nastavení > Detekce > Start cyklu), který mění uložené doby trvání.",
-    "invalid_threshold_pair": "Práh zastavení ({stop} W) musí být nižší než Práh spuštění ({start} W). Nic nebylo uloženo; změňte obě hodnoty společně."
+    "invalid_threshold_pair": "Práh zastavení ({stop} W) musí být nižší než Práh spuštění ({start} W). Nic nebylo uloženo; změňte obě hodnoty společně.",
+    "automations_tab_intro": "WashData nabízí spouštěče zařízení (cyklus spuštěn, cyklus dokončen, cyklus zaseknut a další) pro vlastní automatizace Home Assistant. Automatizace používající toto zařízení jsou uvedeny zde.",
+    "bp_intro": "Hotové automatizace pro toto zařízení, nainstalované jako blueprinty Home Assistant.",
+    "bp_admin_only": "Šablony instaluje správce.",
+    "bp_none": "Pro tento typ spotřebiče zatím nejsou žádné šablony.",
+    "bp_load_failed": "Šablony nebylo možné načíst.",
+    "auto_trigger_hint": "Vytvoří automatizaci s tímto spouštěčem pro toto zařízení a otevře ji v Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Vytvořeno WashData pro {device}. Přidejte své akce (oznámení, světla, ...).",
+    "automation_alias_new": "{device}: nová automatizace",
+    "maint_done_by_program_intro": "Úkol se počítá jako hotový, když skončí cyklus některého z jeho programů, například čištění bubnu po programu Bavlna 90. Počítají se jen cykly, u kterých má WashData jistotu, nebo u kterých jste program vybrali sami."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
     "anti_wrinkle": "Pravidelné otáčení bubnu po cyklu pro prevenci mačkání.",
-    "baking": "Topné těleso na vysoké teplotě vytváří kůrku a střídu.",
-    "cooking": "Hlavní fáze přípravy se zapnutým topením a ventilátorem.",
     "cool_down": "Otáčení bubnu bez tepla ke konci cyklu.",
-    "cool_down_af": "Chlazení jen ventilátorem po ohřevu.",
     "drain_and_switch": "Přechod z režimu praní do režimu sušení.",
     "dry": "Fáze sušení pomocí ohřívače a/nebo zbytkového tepla.",
     "drying": "Hlavní vyhřívaná perioda omílání.",
     "heat_up": "Počáteční zahřátí ohřívače před úplným sušením.",
-    "keep_warm": "Mírný ohřev, aby jídlo zůstalo teplé.",
-    "keep_warm_bm": "Mírný ohřev, aby chléb po upečení zůstal teplý.",
-    "kneading": "Motor míchá a hněte těsto. Vysoký příkon.",
-    "pause_af": "Krátká pauza na protřepání nebo kontrolu.",
-    "pre_heat": "Úvodní ohřev komory před samotnou přípravou.",
     "pre_rinse": "Počáteční ostřik před mytím detergentem.",
-    "proving": "Kynutí v mírném teple: droždí kvasí a těsto nabývá na objemu.",
-    "resting": "Krátká pauza s nízkým příkonem mezi hnětením, aby se lepek uvolnil.",
     "pre_wash": "Počáteční namáčení nebo předúprava před hlavním praním.",
     "rinse": "Fáze oplachu čistou vodou. Tato fáze se může opakovat několikrát.",
     "sanitize": "Vysokoteplotní čisticí stupeň pro sanitační programy.",
@@ -1214,10 +1225,6 @@
       "doc": "Ponechat krátké pulzy bubnu s nízkým výkonem po hlavní fázi ohřevu sušičky u dokončeného cyklu, místo aby se četly jako nové cykly.",
       "label": "Povolit detekci ochrany před zmačkáním"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "V režimu ochrany před zmačkáním se příkon pod touto hodnotou počítá jako klid mezi impulzy otáčení a klid delší než Max. mezera mezi impulzy režim ukončí. Pokud je Práh zastavení vyšší, použije se on, takže nastavení má vliv jen nad Prahem zastavení.",
-      "label": "Práh výkonu pro ukončení"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Jak dlouho může sušička mezi pulzy bubnu zůstat v klidu, než režim ochrany před zmačkáním skončí. Nastavte nad nejdelší mezeru vaší sušičky, jinak se další pulzy vyhodnotí jako falešné starty.",
       "label": "Max. mezera mezi impulzy"
@@ -1262,10 +1269,6 @@
       "doc": "Volitelný senzor dveří. Ukazuje, kdy byl spotřebič po cyklu otevřen kvůli vyložení.",
       "label": "Entita senzoru dveří"
     },
-    "duration_tolerance": {
-      "doc": "Jen pro zpětnou vazbu učení: cyklus v rozmezí +/-X % odhadované doby se počítá jako dobrý odhad. Neovlivňuje párování.",
-      "label": "Tolerance odhadu"
-    },
     "enable_ml_models": {
       "doc": "Použít model natrénovaný na tomto stroji k předpovědi energie a nákladů běžícího cyklu a nechat dobře známý program, který skončí neobvykle brzy, dokončit bez celého zpoždění vypnutí. Vypnuto: jen logika založená na výkonu.",
       "label": "Použít chytré modely během cyklu"
@@ -1291,12 +1294,8 @@
       "label": "Zobrazit ladící entity"
     },
     "external_end_trigger": {
-      "doc": "Binární senzor, jehož změna označuje konec cyklu (např. kontakt „dokončeno“ nebo jiná integrace).",
+      "doc": "Volitelný binární snímač, který ukončí cyklus při aktivaci, doplňuje detekci na základě příkonu (např. kontakt \"dokončeno\" nebo jiná integrace). Prázdné = vypnuto.",
       "label": "Entita vnějšího spouštěče"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Nechat binární senzor signalizovat konec cyklu, navíc k detekci podle výkonu.",
-      "label": "Povolit vnější spouštěč konce"
     },
     "external_end_trigger_inverted": {
       "doc": "Brát VYPNUTÍ senzoru (ne zapnutí) jako signál konce.",
@@ -1321,18 +1320,6 @@
     "ml_training_enabled": {
       "doc": "Občas přetrénovat model energie na dokončených cyklech tohoto stroje. Nový model se ponechá jen tehdy, když na testovacích cyklech překoná jednoduchý odhad.",
       "label": "Učit se z tohoto zařízení"
-    },
-    "ml_training_hour": {
-      "doc": "Hodina dne (0-23) pro noční trénování. Zvolte klidnou hodinu, např. 2.",
-      "label": "Učit v hodinu"
-    },
-    "ml_training_interval_days": {
-      "doc": "Přetrénovat nejvýše jednou za tento počet dní.",
-      "label": "Kontrolovat nejvýše každých"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Před trénováním počkat alespoň na tento počet zaznamenaných cyklů.",
-      "label": "Nejprve potřebné cykly"
     },
     "name": {
       "doc": "Název tohoto zařízení zobrazený v Home Assistant.",
@@ -1366,16 +1353,12 @@
       "doc": "Služby notify.* volané při dokončení cyklu. Ponechte prázdné pro žádné.",
       "label": "Dokončovací služby"
     },
-    "notify_fire_events": {
-      "doc": "Také vyvolat události ha_washdata_* při startu a dokončení cyklu pro vlastní automatizace.",
-      "label": "Spustit HA události pro oznámení"
-    },
     "notify_icon": {
       "doc": "Malá ikona v oznámení (např. mdi:washing-machine). Posílá se jen na cíle mobile_app, ne na skupiny notify. V iOS nahradí ikonu aplikace a vyžaduje mobilní aplikaci 2026.8 nebo novější. Prázdné: výchozí ikona platformy.",
       "label": "Ikona oznámení"
     },
     "notify_live_chronometer": {
-      "doc": "Zobrazit v oznámení živý odpočet (kde je podporován) místo pevného odhadu.",
+      "doc": "Android: přidá odpočet do odhadovaného konce vedle textu oznámení. Použijte {finish_time} ve Zprávě před dokončením, aby se místo druhého odpočtu zobrazil čas konce.",
       "label": "Použít živý chronometr"
     },
     "notify_live_interval_seconds": {
@@ -1399,7 +1382,7 @@
       "label": "Osoby (pro Pouze když doma)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text každé živé aktualizace průběhu. Proměnné šablony: {device}, {program}, {minutes} (zbývající minuty). U jakékoli jiné proměnné se použije výchozí text.",
+      "doc": "Text každé živé aktualizace průběhu. Proměnné šablony: {device}, {program}, {minutes} (zbývající minuty), {finish_time} (odhadovaný konec, např. 14:30). U jakékoli jiné proměnné se použije výchozí text.",
       "label": "Zpráva před dokončením"
     },
     "notify_reminder_message": {
@@ -1447,7 +1430,7 @@
       "label": "Práh vypnutí napájení"
     },
     "power_sensor": {
-      "doc": "Senzor, který hlásí aktuální výkon tohoto spotřebiče ve wattech (např. sensor.washer_power). Veškerá detekce vychází z něj.",
+      "doc": "Senzor, který hlásí aktuální výkon tohoto spotřebiče ve W nebo kW (např. sensor.washer_power), ne jeho měřič energie (kWh). Veškerá detekce vychází z něj.",
       "label": "Snímač výkonu"
     },
     "profile_match_interval": {
@@ -1466,10 +1449,6 @@
       "doc": "Živé skóre shody, které cyklus potřebuje, než jej Chytré ukončení nebo dokončení ochrany před zmačkáním smí ukončit dříve. Nemění zobrazený program. Zvyšte, pokud slabé shody ukončují cykly předčasně; snižte, pokud jasné shody čekají celé zpoždění vypnutí.",
       "label": "Práh shody"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Pokud živé skóre shody klesne pod tuto hodnotu, aktuální odhad programu se vymaže. Držte trochu pod Prahem shody, aby jej krátký pokles nevynuloval.",
-      "label": "Práh neshody"
-    },
     "progress_reset_delay": {
       "doc": "Po cyklu držet průběh na 100 % po tuto dobu, než se resetuje na Nečinný.",
       "label": "Zpoždění resetu průběhu"
@@ -1477,10 +1456,6 @@
     "pump_stuck_duration": {
       "doc": "Jak dlouho smí čerpadlo běžet bez přestávky, než se spustí událost zaseknutého čerpadla.",
       "label": "Délka zaseknutého čerpadla"
-    },
-    "sampling_interval": {
-      "doc": "Minimální doba mezi zpracovanými hodnotami. Hodnoty, které přijdou dříve, se přeskočí (nízké hodnoty během cyklu se vždy ponechají). Nastavte interval hlášení vaší zásuvky nebo méně; vyšší hodnota jen zahazuje data.",
-      "label": "Interval vzorkování"
     },
     "save_debug_traces": {
       "doc": "Ukládat ke každému cyklu i ladicí data párování (skóre všech kandidátů) pro řešení problémů. Přidává asi 20 KB na cyklus.",
@@ -1656,9 +1631,6 @@
     "services": {
       "label": "Služby"
     },
-    "signal_processing": {
-      "label": "Zpracování signálu"
-    },
     "thresholds_gap": {
       "label": "Prahy a mezera"
     },
@@ -1721,10 +1693,6 @@
       "auto_label_confidence": {
         "higher": "Méně cyklů je označeno automaticky; více jich jde k revizi",
         "lower": "Více cyklů je označeno automaticky; některé mohou být nesprávně určeny"
-      },
-      "duration_tolerance": {
-        "higher": "Přijímá širší rozsah délky – flexibilnější shoda",
-        "lower": "Vyžaduje bližší shodu délky – přísnější, ale může odmítnout neobvyklé cykly"
       },
       "end_energy_threshold": {
         "higher": "Uzavírá pouze cykly se značnou spotřebou energie",
@@ -1823,7 +1791,8 @@
     "subtab_profiles": "Profily",
     "maintenance": "Údržba",
     "playground": "Testovací prostředí",
-    "store": "Obchod"
+    "store": "Obchod",
+    "automations": "Automatizace"
   },
   "tag": {
     "early_end": "Předčasný konec",
@@ -1994,7 +1963,14 @@
     "auto_label_done_one": "Automatické označování dokončeno: označen {count} cyklus, bez označení zůstalo: {skipped}.",
     "auto_label_done_few": "Automatické označování dokončeno: označeny {count} cykly, bez označení zůstalo: {skipped}.",
     "auto_label_done_many": "Automatické označování dokončeno: označeno {count} cyklu, bez označení zůstalo: {skipped}.",
-    "auto_label_done_other": "Automatické označování dokončeno: označeno {count} cyklů, bez označení zůstalo: {skipped}."
+    "auto_label_done_other": "Automatické označování dokončeno: označeno {count} cyklů, bez označení zůstalo: {skipped}.",
+    "bp_install_failed": "Šablonu se nepodařilo nainstalovat: {error}",
+    "bp_installed_finish": "Šablona nainstalována. Doplňte zbytek v Home Assistant.",
+    "bp_automation_failed": "Šablona je nainstalována, ale automatizaci se nepodařilo vytvořit: {error}",
+    "bp_automation_created": "Automatizace vytvořena s výchozím nastavením; otevírám",
+    "copied": "Zkopírováno",
+    "copy_failed": "Kopírování se nezdařilo. Vyberte text a zkopírujte ho ručně.",
+    "automation_label_failed": "Automatizace vytvořena, ale štítek nebo kategorie WashData nemohly být přidány."
   },
   "trend": {
     "down": "Klesající trend",
@@ -2016,7 +1992,6 @@
     "smart_termination_duration_ratio": "Zlomek průměrné doby trvání programu, kterého musí cyklus dosáhnout, než jej Chytré ukončení smí ukončit dříve; snižte, pokud doby běhu kolísají",
     "anti_crease_finalize_ratio": "Zlomek průměrné doby trvání programu, kterého musí cyklus dosáhnout, než jej ocas ochrany před zmačkáním smí dokončit; u sušiček snižte, u praček ponechte výchozí",
     "anti_wrinkle_enabled": "Pohltit impulzy bubnu po hlavní fázi místo čtení jako nové cykly",
-    "anti_wrinkle_exit_power": "Úroveň klidu mezi impulzy otáčení; projeví se jen nad Prahem zastavení",
     "anti_wrinkle_idle_timeout": "Povolený klid mezi dvěma impulzy bubnu, než ochrana před zmačkáním skončí",
     "anti_wrinkle_max_duration": "Delší impulz ukončí ochranu před zmačkáním a otevře nový cyklus",
     "anti_wrinkle_max_power": "Impulz nad touto hodnotou ukončí ochranu před zmačkáním a otevře nový cyklus",
@@ -2105,7 +2080,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter na GitHubu ↗",
-    "manual": "Příručka ↗"
+    "manual": "Příručka ↗",
+    "bp_share": "Sdílejte vlastní šablonu přes pull request ↗",
+    "bp_open_in_ha": "Otevřít v Home Assistant ↗",
+    "automations_all": "Všechny automatizace WashData v Home Assistant"
   },
   "tip": {
     "add_brand": "Značka není uvedena? Přidejte ji do katalogu komunity",
@@ -2219,16 +2197,11 @@
     "kept": "ponecháno",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "bez shody",
     "no_updates": "bez aktualizací",
     "off_delay_wait": "zpoždění vypnutí",
     "off_gap": "mezera vyp.",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "typický interval měření",
     "sensor_offline": "senzor offline: vynucené zastavení",
-    "si": "IV",
     "spike_ignored": "špička ignorována",
     "spike_ignored_short": "špička: ignorována",
     "start": "spuštění",
@@ -2237,5 +2210,71 @@
     "thr": "práh",
     "too_short": "příliš krátký",
     "tumble_kept": "impulzy bubnu ponechány"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Zapnout něco, když běží cyklus",
+      "description": "Zapne světlo, přepínač nebo pomocnou proměnnou přepínání, když cyklus WashData začne, a vypne, když skončí, i po falešném startu.\n\nVyžaduje WashData 0.5.9 nebo novější."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Ukončit dlouhou fázi ochrany před zmačkáním sušičky",
+      "description": "Pro sušičky, které pokračují v bubnování v ochraně před zmačkáním celé hodiny po skončení programu. Spustí se až poté, co WashData považuje program za dokončený (cyklus dokončen nebo ochrana před zmačkáním zahájena). Počká, pak vypne zástrčku sušičky v okamžiku nízké spotřeby a ve výchozím nastavení ji zase zapne. Nový cyklus spuštěný mezitím ji zruší.\n\nRiziko: přepíná relé, když je sušička zapojena. Používejte pouze se zástrčkou určenou pro vaši sušičku a na vlastní riziko. WashData zástrčku sám nikdy nepřepíná; dělá to tato automatizace.\n\nVyžaduje WashData 0.5.9 nebo novější."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Cyklus zahájen"
+    },
+    "program_recognised": {
+      "name": "Program rozpoznán"
+    },
+    "phase_started": {
+      "name": "Fáze zahájena"
+    },
+    "finishing_soon": {
+      "name": "Brzy konec"
+    },
+    "cycle_overrun": {
+      "name": "Cyklus trvá příliš dlouho"
+    },
+    "cycle_paused": {
+      "name": "Cyklus pozastaven"
+    },
+    "cycle_resumed": {
+      "name": "Cyklus obnoven"
+    },
+    "cycle_stalled": {
+      "name": "Cyklus zaseknut"
+    },
+    "cycle_finished": {
+      "name": "Cyklus dokončen"
+    },
+    "cycle_ended": {
+      "name": "Cyklus ukončen"
+    },
+    "anti_wrinkle_started": {
+      "name": "Ochrana před zmačkáním zahájena"
+    },
+    "still_tumbling": {
+      "name": "Stále bubnuje po skončení cyklu"
+    },
+    "unload_pending": {
+      "name": "Čeká na vyložení"
+    },
+    "unloaded": {
+      "name": "Vyloženo"
+    },
+    "state_changed": {
+      "name": "Stav změněn"
+    },
+    "maintenance_due": {
+      "name": "Servis potřebný"
+    },
+    "milestone_reached": {
+      "name": "Dosažen milník cyklu"
+    },
+    "pump_stuck": {
+      "name": "Čerpadlo zaseknuté"
+    }
   }
 }

@@ -233,7 +233,6 @@ async def test_diagnostics_manager_state_contains_expected_fields():
     # Each flag must be set on the object that owns it (issue #407): the store owns
     # save_debug_traces, and auto_maintenance is read straight off the entry option.
     mock_manager.profile_store.save_debug_traces = False
-    mock_manager._notify_fire_events = True
     mock_manager._remove_maintenance_scheduler = None
 
     entry = MagicMock()
@@ -258,5 +257,4 @@ async def test_diagnostics_manager_state_contains_expected_fields():
         "auto_maintenance": True,
         "auto_maintenance_scheduled": False,
         "save_debug_traces": False,
-        "notify_fire_events": True,
     }

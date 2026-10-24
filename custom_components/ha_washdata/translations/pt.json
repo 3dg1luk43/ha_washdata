@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Um nome descritivo para este dispositivo (por exemplo, 'Máquina de lavar', 'Máquina de lavar loiça').",
           "device_type": "Define os valores de deteção predefinidos para este tipo de eletrodoméstico.",
-          "power_sensor": "O sensor da tomada inteligente que reporta a potência atual em watts.",
+          "power_sensor": "O sensor de potência da tomada inteligente (W ou kW), não o seu contador de energia (kWh).",
           "min_power": "Leituras acima deste valor (em watts) indicam que o eletrodoméstico está a funcionar. 2 W serve para a maioria dos dispositivos."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Erro inesperado",
-      "invalid_power": "O limiar de potência tem de ser maior do que 0"
+      "invalid_power": "O limiar de potência tem de ser maior do que 0",
+      "power_sensor_energy": "Isto é um contador de energia (kWh), não um sensor de potência. Escolha o sensor de potência da tomada (W ou kW). Se a tomada não tiver nenhum, um helper Derivada pode criar um a partir do contador."
     },
     "abort": {
       "already_configured": "O dispositivo já está configurado",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: ainda nenhum perfil reconhecido.",
       "vs_typical_longer": "{pct}% mais longo do que o habitual",
       "vs_typical_shorter": "{pct}% mais curto do que o habitual",
-      "invalid_power": "O limiar de potência tem de ser maior do que 0"
+      "invalid_power": "O limiar de potência tem de ser maior do que 0",
+      "power_sensor_energy": "Isto é um contador de energia (kWh), não um sensor de potência. Escolha o sensor de potência da tomada (W ou kW). Se a tomada não tiver nenhum, um helper Derivada pode criar um a partir do contador."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Secador",
         "washer_dryer": "Combinação Lavadora e Secadora",
         "dishwasher": "Máquina de lavar louça",
-        "air_fryer": "Fritadeira de ar",
-        "bread_maker": "Máquina de fazer pão",
         "pump": "Bomba / Bomba de depósito",
         "generic": "Outro (avançado)",
         "other": "Dispositivo de limite"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Qualquer",
+        "completed": "Concluído",
+        "force_stopped": "Parado forçosamente",
+        "interrupted": "Interrompido"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Desligado",
+        "idle": "Inactivo",
+        "starting": "A iniciar",
+        "running": "A funcionar",
+        "paused": "Em pausa",
+        "user_paused": "Em pausa pelo utilizador",
+        "ending": "A terminar",
+        "finished": "Concluído",
+        "anti_wrinkle": "Anti-vincos",
+        "delay_wait": "Esperando para começar",
+        "interrupted": "Interrompido",
+        "force_stopped": "Parado forçosamente",
+        "unknown": "Desconhecido",
+        "clean": "Limpo"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Não foi possível atribuir o perfil: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Ciclo iniciado",
+      "cycle_finished": "Ciclo terminado",
+      "cycle_ended": "Ciclo encerrado (qualquer motivo)",
+      "anti_wrinkle_started": "Anti-vincos iniciado",
+      "cycle_stalled": "Ciclo parado",
+      "unload_pending": "Descarga pendente",
+      "program_recognised": "Programa reconhecido",
+      "phase_started": "Fase iniciada",
+      "finishing_soon": "A terminar em breve",
+      "cycle_overrun": "Ciclo em atraso",
+      "cycle_paused": "Ciclo em pausa",
+      "cycle_resumed": "Ciclo retomado",
+      "still_tumbling": "Ainda a rodar após o ciclo",
+      "unloaded": "Descarregado",
+      "state_changed": "Estado alterado",
+      "maintenance_due": "Manutenção pendente",
+      "milestone_reached": "Marco de ciclos atingido",
+      "pump_stuck": "Bomba bloqueada"
+    },
+    "extra_fields": {
+      "program": "Programa",
+      "phase": "Fase",
+      "minutes": "Minutos",
+      "percent": "A mais (%)",
+      "include_detected": "Incluir pausas detectadas",
+      "status": "Terminado como",
+      "from": "De",
+      "to": "Para",
+      "task": "Tarefa"
+    },
+    "extra_fields_descriptions": {
+      "program": "Apenas este programa, pelo nome exacto. Deixar vazio para qualquer programa.",
+      "phase": "Apenas esta fase, pelo nome. Deixar vazio para qualquer fase.",
+      "minutes": "A terminar em breve: minutos restantes. Ainda a rodar: minutos após o fim.",
+      "percent": "Percentagem acima da duração habitual do programa.",
+      "include_detected": "Activar também nas pausas que o WashData detecta no consumo, como uma imersão ou uma paragem.",
+      "status": "Apenas os ciclos que terminaram desta forma.",
+      "from": "Apenas alterações desde este estado. Deixar vazio para qualquer.",
+      "to": "Apenas alterações para este estado. Deixar vazio para qualquer.",
+      "task": "Apenas esta tarefa, pelo nome ou identificador. Deixar vazio para qualquer tarefa."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Ciclo iniciado",
+      "description": "Activa quando o aparelho inicia um ciclo."
+    },
+    "program_recognised": {
+      "name": "Programa reconhecido",
+      "description": "Activa quando o WashData reconhece o programa do ciclo em curso, ou muda para outro programa.",
+      "fields": {
+        "program": {
+          "name": "Programa",
+          "description": "Apenas este programa, pelo nome exacto. Deixar vazio para qualquer programa."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fase iniciada",
+      "description": "Activa quando o ciclo em curso entra numa nova fase do seu programa.",
+      "fields": {
+        "phase": {
+          "name": "Fase",
+          "description": "Apenas esta fase, pelo nome. Deixar vazio para qualquer fase."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "A terminar em breve",
+      "description": "Activa uma vez por ciclo, quando o tempo restante desce pela primeira vez a este número de minutos.",
+      "fields": {
+        "minutes": {
+          "name": "Minutos restantes",
+          "description": "Activa quando restam este número de minutos ou menos."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Ciclo em atraso",
+      "description": "Activa uma vez por ciclo, quando demora mais do que o habitual para este programa.",
+      "fields": {
+        "percent": {
+          "name": "A mais de",
+          "description": "Percentagem acima da duração habitual do programa."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Ciclo em pausa",
+      "description": "Activa quando coloca um ciclo em pausa e, opcionalmente, quando o aparelho faz uma pausa sozinho.",
+      "fields": {
+        "include_detected": {
+          "name": "Incluir pausas detectadas",
+          "description": "Activa também nas pausas que o WashData detecta no consumo, como uma imersão ou uma paragem, não apenas nas que inicia."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Ciclo retomado",
+      "description": "Activa quando um ciclo em pausa continua.",
+      "fields": {
+        "include_detected": {
+          "name": "Incluir pausas detectadas",
+          "description": "Activa também nas pausas que o WashData detecta no consumo, como uma imersão ou uma paragem, não apenas nas que inicia."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Ciclo parado",
+      "description": "Activa quando um ciclo em marcha para a um nível de consumo baixo e estável."
+    },
+    "cycle_finished": {
+      "name": "Ciclo terminado",
+      "description": "Activa quando um ciclo termina, incluindo quando o para. Não para falsos arranques.",
+      "fields": {
+        "program": {
+          "name": "Programa",
+          "description": "Apenas este programa, pelo nome exacto. Deixar vazio para qualquer programa."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Ciclo encerrado (qualquer motivo)",
+      "description": "Activa quando um ciclo termina por qualquer motivo, incluindo falsos arranques.",
+      "fields": {
+        "status": {
+          "name": "Terminado como",
+          "description": "Apenas os ciclos que terminaram desta forma."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-vincos iniciado",
+      "description": "Activa quando o aparelho começa a rodar a roupa já terminada para evitar vincos."
+    },
+    "still_tumbling": {
+      "name": "Ainda a rodar após o ciclo",
+      "description": "Activa uma vez quando o aparelho ainda roda em curtos impulsos este número de minutos após o fim do ciclo. Para num novo ciclo ou 4 horas após o fim.",
+      "fields": {
+        "minutes": {
+          "name": "Minutos após o fim",
+          "description": "Activa na primeira rotação pelo menos este tempo após o fim."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Descarga pendente",
+      "description": "Activa quando um ciclo terminou e a roupa ainda está dentro."
+    },
+    "unloaded": {
+      "name": "Descarregado",
+      "description": "Activa quando a roupa é retirada após um ciclo: a porta foi aberta ou a descarga foi confirmada."
+    },
+    "state_changed": {
+      "name": "Estado alterado",
+      "description": "Activa quando o estado do WashData muda.",
+      "fields": {
+        "from": {
+          "name": "De",
+          "description": "Apenas alterações desde este estado. Deixar vazio para qualquer."
+        },
+        "to": {
+          "name": "Para",
+          "description": "Apenas alterações para este estado. Deixar vazio para qualquer."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Manutenção pendente",
+      "description": "Activa quando uma tarefa de manutenção fica a vencer.",
+      "fields": {
+        "task": {
+          "name": "Tarefa",
+          "description": "Apenas esta tarefa, pelo nome ou identificador. Deixar vazio para qualquer tarefa."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Marco de ciclos atingido",
+      "description": "Activa quando o contador total de ciclos atinge um dos marcos definidos para notificações."
+    },
+    "pump_stuck": {
+      "name": "Bomba bloqueada",
+      "description": "Activa quando uma bomba funciona mais tempo do que o seu limite de bloqueio."
     }
   }
 }

@@ -52,7 +52,6 @@ common_options() {
   $HACTL set-options "$1" \
     power_sensor="$SENSOR" \
     start_duration_threshold=1 \
-    sampling_interval=1 \
     watchdog_interval=5 \
     off_delay=10 \
     min_off_gap=10 \

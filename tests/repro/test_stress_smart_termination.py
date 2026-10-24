@@ -112,18 +112,15 @@ def mock_entry():
         "device_type": "dishwasher",
         "min_power": 2.0,
         "off_delay": 120,
-        "smoothing_window": 2,
         "interrupted_min_seconds": 150,
         "completion_min_seconds": 600,
         "start_duration_threshold": 5.0,
         "running_dead_zone": 0,
-        "end_repeat_count": 1,
         "start_energy_threshold": 0.005,
         "end_energy_threshold": 0.05,
         "profile_match_interval": 60,
         # Slightly wider match thresholds to handle synthetic warping
         "profile_match_threshold": 0.5, 
-        "profile_unmatch_threshold": 0.45,
         "save_debug_traces": False,
         "power_sensor": "sensor.test_power"
     }

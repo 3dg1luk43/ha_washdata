@@ -30,7 +30,6 @@ import pytest
 from custom_components.ha_washdata import analysis
 from custom_components.ha_washdata.const import (
     ANTI_WRINKLE_ELIGIBLE_REASONS,
-    CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_DEVICE_TYPE,
     CONF_PUMP_STUCK_DURATION,
@@ -44,7 +43,6 @@ from custom_components.ha_washdata.const import (
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_OFF_DELAY,
     CONF_PROFILE_MATCH_THRESHOLD,
-    CONF_SAMPLING_INTERVAL,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
@@ -189,7 +187,7 @@ def test_reconcile_end_energy_consistent_pair_unchanged() -> None:
 
 def test_reconcile_watchdog_and_timeout() -> None:
     s = {CONF_WATCHDOG_INTERVAL: _sug(20.0), CONF_NO_UPDATE_ACTIVE_TIMEOUT: _sug(25.0)}
-    out, changed = reconcile_suggestions(s, {CONF_SAMPLING_INTERVAL: 30})
+    out, changed = reconcile_suggestions(s, {})
     # Rule 3a (watchdog >= 2 x sampling) is gone with the sampling suggestion
     # (audit SUGGEST-04); Rule 3b still keeps the timeout above the watchdog.
     assert out[CONF_WATCHDOG_INTERVAL]["value"] == 20.0
@@ -248,13 +246,12 @@ def test_reconcile_anti_wrinkle_skipped_for_dishwasher() -> None:
     s = {CONF_STOP_THRESHOLD_W: _sug(0.72)}
     current = {
         CONF_DEVICE_TYPE: "dishwasher",
-        CONF_ANTI_WRINKLE_EXIT_POWER: 0.8,  # would conflict without the guard
         CONF_START_THRESHOLD_W: 0.95,
     }
     out, changed = reconcile_suggestions(s, current)
     # stop must not be raised by anti_wrinkle rule
     assert out[CONF_STOP_THRESHOLD_W]["value"] == pytest.approx(0.72, abs=0.01)
-    assert CONF_ANTI_WRINKLE_EXIT_POWER not in changed
+    assert "anti_wrinkle_exit_power" not in changed
 
 
 def test_reconcile_anti_wrinkle_fires_for_dryer() -> None:

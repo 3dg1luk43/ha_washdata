@@ -32,7 +32,6 @@ from custom_components.ha_washdata.learning import LearningManager
 from custom_components.ha_washdata.const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
 )
 
 _PROFILE = "Cotton 60°"
@@ -95,7 +94,6 @@ def _learning_manager(*, auto_label_conf: float = 0.9) -> tuple[LearningManager,
     entry.options = {
         CONF_AUTO_LABEL_CONFIDENCE: auto_label_conf,
         CONF_LEARNING_CONFIDENCE: 0.6,
-        CONF_DURATION_TOLERANCE: 0.10,
     }
     entry.title = "Test"
     hass.config_entries.async_get_entry.return_value = entry

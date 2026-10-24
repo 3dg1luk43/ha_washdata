@@ -89,7 +89,9 @@
     "matcher_used": "In {n} Ihrer Zyklen erkannt",
     "matcher_used_one": "In {n} Ihrer Zyklen erkannt",
     "matcher_used_other": "In {n} Ihrer Zyklen erkannt",
-    "matcher_used_tip": "Zyklen auf diesem Gerät, die WashData selbstständig diesem importierten Programm zugeordnet hat. Ein Import, der nie zugeordnet wird, passt vielleicht nicht zu Ihrem Gerät; Sie können ihn entfernen. Lokal gezählt; nichts wird an den Community-Store gesendet."
+    "matcher_used_tip": "Zyklen auf diesem Gerät, die WashData selbstständig diesem importierten Programm zugeordnet hat. Ein Import, der nie zugeordnet wird, passt vielleicht nicht zu Ihrem Gerät; Sie können ihn entfernen. Lokal gezählt; nichts wird an den Community-Store gesendet.",
+    "bp_installed": "Installiert",
+    "bp_installed_other": "Andere Version installiert"
   },
   "btn": {
     "log_done_task": "Als erledigt protokollieren: {task}",
@@ -135,7 +137,6 @@
     "export": "Exportieren",
     "force_stop": "Stopp erzwingen",
     "force_stop_tip": "Aktuellen Zyklus sofort beenden und als erzwungen gestoppt markieren",
-    "from_template": "Aus Vorlage ▾",
     "ignore": "Ignorieren",
     "import_json": "Import aus JSON",
     "inspect": "Überprüfen",
@@ -149,8 +150,6 @@
     "new_phase": "+ Neue Phase",
     "new_profile": "+ Neues Profil",
     "new_profile_tip": "Neues Programmprofil aus einem vorhandenen beschrifteten Zyklus oder einer Aufnahme erstellen",
-    "on_cycle_finished": "Ein Zyklus beendet",
-    "on_cycle_started": "Ein Zyklus gestartet",
     "pause_cycle": "Pause",
     "pause_cycle_tip": "Laufenden Zyklus anhalten – das Gerät setzt dort fort, wo es aufgehört hat",
     "pg_load_live": "Aktive Einstellungen laden",
@@ -251,7 +250,14 @@
     "confirm_appliance": "Dieses Gerät bestätigen",
     "confirmed": "Bestätigt",
     "create_profile_from_gap": "Profil erstellen",
-    "undo_import": "Letzten Import rückgängig machen"
+    "undo_import": "Letzten Import rückgängig machen",
+    "from_trigger": "Von Trigger starten ▾",
+    "bp_use": "Mit diesem Gerät verwenden",
+    "bp_install": "Vorlage installieren",
+    "bp_view_yaml": "YAML anzeigen",
+    "copy": "Kopieren",
+    "replace": "Ersetzen",
+    "from_trigger_open": "Von Trigger starten ▴"
   },
   "note": {
     "off_delay": {
@@ -306,25 +312,22 @@
       "timeout": "Muss größer als die Dauer der feststeckenden Pumpe ({ps} s) sein, damit der Festsitzen-Alarm zuerst auslösen kann"
     },
     "start_dur": {
-      "sampling": "Abtastintervall überschreitet die Startdauer ({sdt} s); einzelne Messwertspitzen können einen Zyklus öffnen",
       "threshold": "Sollte mindestens ein Abtastintervall ({si} s) betragen, um Einzelmesswert-Fehlstarts zu verhindern"
-    },
-    "unmatch": {
-      "match": "Muss über dem Nicht-Übereinstimmungs-Schwellenwert ({un}) liegen",
-      "unmatch": "Muss unter dem Übereinstimmungsschwellenwert ({match}) liegen; andernfalls wird eine bestätigte Übereinstimmung sofort aufgehoben"
     },
     "cascade_toast": "Andere Einstellungen zur Konsistenz angepasst: {n}",
     "suggestion_resolves": "Unten den ausstehenden Vorschlag ({val}) übernehmen, um dies zu beheben",
     "use_fix": "Verwende {val}",
     "watchdog": {
-      "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen",
-      "sampling": "Abtastintervall sollte höchstens die Hälfte des Watchdog-Intervalls ({wi} s) betragen"
+      "interval": "Sollte mindestens das 2-fache des Abtastintervalls ({si} s) betragen"
     },
     "settings_banner": "Einstellungskonflikte: {n}. Prüfen Sie die markierten Abschnitte und beheben Sie sie vor dem Speichern.",
     "settings_banner_btn": "Zum ersten",
     "end_energy": {
       "energy": "Zu streng für Stoppschwellenwert ({w} W) während der Abschaltverzögerung ({d} s); der Zyklus kann nur über einen Ausweichpfad enden",
       "stop": "Endenergie ({e} Wh in {d} s) lässt nur {p} W zu"
+    },
+    "power_sensor": {
+      "energy": "Dieser Sensor zählt Energie ({unit}), keine Leistung, daher kann kein Zyklus erkannt werden. Wählen Sie den Leistungssensor der Steckdose (W oder kW)."
     }
   },
   "hdr": {
@@ -372,7 +375,11 @@
     "import_power_history": "Leistungsverlauf importieren",
     "service_status": "Wartungsstatus",
     "online_account_tab": "Online & Community",
-    "live_match_debug": "Live-Match-Debug"
+    "live_match_debug": "Live-Match-Debug",
+    "automations_used": "Automatisierungen, die dieses Gerät verwenden",
+    "bp_templates": "Vorlagen",
+    "automations_all_tip": "Die Automatisierungsliste von Home Assistant, gefiltert nach dem WashData-Label. Hier erstellte Automatisierungen befinden sich auch in der WashData-Kategorie.",
+    "maint_done_by_program": "Automatisch erledigt"
   },
   "health": {
     "fair": "Akzeptable Übereinstimmungsqualität",
@@ -661,7 +668,7 @@
     "hist_reason_already_recorded": "überschneidet sich mit einem Zyklus, den WashData bereits aufgezeichnet hat",
     "share_consent": "Ich bestätige, dass diese Zyklen normal und ohne Unterbrechung abgeschlossen wurden",
     "show_internal": "Interne Einstellungen anzeigen",
-    "show_internal_tip": "Einstellungen, die WashData für Sie abstimmt (Abtastung, Watchdog, Abgleichrhythmus, Schwellenwerte). Werden angezeigt, wenn dieses Gerät einen eigenen Wert, einen Konflikt oder einen Vorschlag hat.",
+    "show_internal_tip": "Einstellungen, die WashData für Sie anpasst (Watchdog, Match-Häufigkeit, Schwellenwerte). Wird angezeigt, wenn dieses Gerät einen eigenen Wert, einen Konflikt oder einen Vorschlag hat.",
     "rate_n": "{n} Sterne",
     "rate_quality": "Qualität bewerten",
     "pg_autolabel": "Automatische Beschriftung",
@@ -684,7 +691,14 @@
     "pg_obj_early": "Anteil vorzeitiger Enden",
     "pg_obj_split": "Aufteilungsrate",
     "pg_sweep_cycles": "Letzte Zyklen",
-    "cat_backfill_cycles": "Im importierten Leistungsverlauf gefundene Zyklen"
+    "cat_backfill_cycles": "Im importierten Leistungsverlauf gefundene Zyklen",
+    "bp_you_choose": "Ihre Wahl: {inputs}",
+    "bp_adjustable": "Anpassbar: {inputs}",
+    "bp_yaml": "Blueprint-YAML",
+    "automation_wd_label": "Trägt das WashData-Label",
+    "done_by_none": "Nicht festgelegt",
+    "done_by_programs": "Automatisch erledigt durch: {programs}",
+    "done_by_cycle": "Erledigt durch einen Zyklus mit {program}"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -781,7 +795,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Daten und Einstellungen dieses Geräts werden auf den Stand vor dem letzten Import ({when}) zurückgesetzt. Seitdem aufgezeichnete Zyklen und vorgenommene Änderungen gehen verloren.",
     "undo_import_ok": "Import rückgängig machen",
-    "undo_import_title": "Letzten Import rückgängig machen"
+    "undo_import_title": "Letzten Import rückgängig machen",
+    "bp_replace_title": "Installierte Vorlage ersetzen?",
+    "bp_replace_msg": "Home Assistant hat eine andere Version von \"{name}\". Mit der Version aus WashData ersetzen? Automatisierungen, die sie verwenden, ändern sich mit ihr."
   },
   "msg": {
     "custom_task_limit": "Sie haben das Limit von {max} Aufgaben erreicht.",
@@ -806,7 +822,6 @@
     "artifact_pause_detail": "Die Leistung fiel für ~{n}s fast auf null und stieg dann wieder an. Wahrscheinlich wurde die Tür geöffnet oder der Zyklus angehalten.",
     "artifact_spike_detail": "Überstieg das übliche Leistungsband für ~{n}s.",
     "auto_label_intro": "Weisen Sie Profile unbeschrifteten Zyklen zu, deren Übereinstimmungskonfidenz den Schwellenwert überschreitet.",
-    "automations_intro": "WashData löst {start} / {end}-Ereignisse aus und stellt Entitäten bereit, sodass Benachrichtigungen und Aktionen am besten als normale Home Assistant-Automatisierungen eingerichtet werden. Automatisierungen, die dieses Gerät verwenden, werden unten angezeigt.",
     "cleanup_intro": "Alle beschrifteten Zyklen überlagert. Markieren Sie Ausreißer und entfernen Sie dann ihre Beschriftung (sie bleiben im Verlauf, prägen dieses Profil aber nicht mehr) oder löschen Sie sie.",
     "clear_debug_hint": "Entfernen Sie gespeicherte Debug-Daten, um Speicherplatz freizugeben.",
     "collecting_data": "Daten werden gesammelt. Noch benötigte Zyklen bis zum Start der Feinabstimmung: {need} ({current}/{min}).",
@@ -1047,10 +1062,6 @@
     "pg_label_yes": "Würde am Zyklusende als \"{name}\" beschriftet",
     "pg_label_no": "Würde um Überprüfung bitten: {reason}",
     "live_match_debug_tip": "Vertrauen: wie genau die aktuelle Leistungskurve zum besten Kandidatenprofil passt (0-100%). Mehrdeutig: Die beiden besten Kandidaten liegen weniger als 5% auseinander - das Label ist unsicher, bis der Zyklus endet.",
-    "automation_alias_started": "{device}: Zyklus gestartet",
-    "automation_alias_finished": "{device}: Zyklus beendet",
-    "automation_desc_started": "Wird ausgeführt, wenn ein {device}-Zyklus startet. Fügen Sie Ihre Aktionen hinzu (Benachrichtigung, Licht, ...).",
-    "automation_desc_finished": "Wird ausgeführt, wenn ein {device}-Zyklus endet. Fügen Sie Ihre Aktionen hinzu (Benachrichtigung, Licht, ...).",
     "feedback_detected": "Von WashData erkannt: {name}",
     "pg_outcome_stale": "Die Einstellungen wurden geändert, seit diese Simulation lief. Sie zeigt noch das alte Ergebnis.",
     "pg_compare_profile_tip": "Wählt nur das Profil, das über das Diagramm gelegt wird. Die Simulation ordnet den Zyklus immer selbstständig zu, so wie die Integration im laufenden Betrieb.",
@@ -1069,7 +1080,17 @@
     "invalid_threshold_pair": "Der Stoppschwellenwert ({stop} W) muss unter dem Startschwellenwert ({start} W) liegen. Es wurde nichts gespeichert; ändern Sie beide Werte gemeinsam.",
     "import_undo_hint": "Ein Wiederherstellungspunkt von vor dem letzten Import ({when}) wird aufbewahrt: {profiles} Profil(e) und {cycles} Zyklus/Zyklen.",
     "replace_undo_hint": "Zuvor wird ein Wiederherstellungspunkt gespeichert, sodass Sie diesen Import unter „Exportieren / Importieren“ rückgängig machen können.",
-    "pg_in_sample_note": "Diese Zyklen haben die Profile mitgebildet, mit denen sie abgeglichen werden, daher sind die Ergebnisse optimistisch: Bei neuen Zyklen ist mit etwas weniger richtigen Zuordnungen zu rechnen."
+    "pg_in_sample_note": "Diese Zyklen haben die Profile mitgebildet, mit denen sie abgeglichen werden, daher sind die Ergebnisse optimistisch: Bei neuen Zyklen ist mit etwas weniger richtigen Zuordnungen zu rechnen.",
+    "automations_tab_intro": "WashData bietet Geräte-Trigger (Zyklus gestartet, Zyklus beendet, Zyklus im Stillstand und mehr) für Ihre eigenen Home Assistant-Automatisierungen. Automatisierungen, die dieses Gerät verwenden, sind hier aufgelistet.",
+    "bp_intro": "Fertige Automatisierungen für dieses Gerät, als Home Assistant-Blueprints installiert.",
+    "bp_admin_only": "Vorlagen werden von einem Administrator installiert.",
+    "bp_none": "Noch keine Vorlagen für diesen Gerätetyp.",
+    "bp_load_failed": "Vorlagen konnten nicht geladen werden.",
+    "auto_trigger_hint": "Erstellt eine Automatisierung mit diesem Trigger für dieses Gerät und öffnet sie in Home Assistant.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Von WashData für {device} erstellt. Fügen Sie Ihre Aktionen hinzu (Benachrichtigung, Licht, ...).",
+    "automation_alias_new": "{device}: neue Automatisierung",
+    "maint_done_by_program_intro": "Eine Aufgabe gilt als erledigt, wenn ein Zyklus eines ihrer Programme endet, zum Beispiel die Trommelreinigung, wenn Baumwolle 90 läuft. Es zählen nur Zyklen, bei denen WashData sicher ist oder die Sie selbst gewählt haben."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
@@ -1087,29 +1108,18 @@
     "anti_wrinkle_max_power": "Ein Impuls darüber beendet den Knitterschutz und öffnet einen neuen Zyklus",
     "anti_wrinkle_enabled": "Die Trommelimpulse nach der Hauptphase schlucken, statt sie als neue Zyklen zu lesen",
     "anti_wrinkle_max_duration": "Ein längerer Impuls beendet den Knitterschutz und öffnet einen neuen Zyklus",
-    "anti_wrinkle_exit_power": "Pegel, der zwischen Trommelimpulsen als Stille gilt; wirkt nur über dem Stoppschwellenwert",
     "anti_crease_finalize_ratio": "Anteil der durchschnittlichen Programmdauer, den ein Zyklus erreichen muss, bevor der Knitterschutz-Nachlauf ihn abschließen darf; bei Trocknern senken, Waschmaschinen beim Standard lassen",
     "curve_preroll_seconds": "Sekunden an Messwerten aus abgebrochenen Startversuchen, die an den Anfang der Kurve eines Zyklus übernommen werden; 0 = aus"
   },
   "phase_desc": {
     "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",
     "anti_wrinkle": "Regelmäßige Trommelumwälzungen nach dem Zyklus, um Knitterung zu vermeiden.",
-    "baking": "Heizelement bei hoher Temperatur aktiv, für Kruste und Krume.",
-    "cooking": "Hauptgarphase mit aktiver Heizung und aktivem Lüfter.",
     "cool_down": "Taumeln ohne Hitze gegen Ende des Zyklus.",
-    "cool_down_af": "Abkühlen nur mit dem Lüfter nach dem Heizen.",
     "drain_and_switch": "Übergangszeit vom Wasch- zum Trocknungsmodus.",
     "dry": "Trocknungsphase mittels Heizung und/oder Restwärme.",
     "drying": "Hauptheizperiode.",
     "heat_up": "Erstes Aufwärmen der Heizung, bevor die vollständige Trocknung beginnt.",
-    "keep_warm": "Warmhaltephase mit geringer Hitze, damit das Essen warm bleibt.",
-    "keep_warm_bm": "Warmhaltephase mit geringer Hitze, damit das Brot nach dem Backen warm bleibt.",
-    "kneading": "Der Motor mischt und knetet den Teig. Hohe Leistungsaufnahme.",
-    "pause_af": "Kurze Pause zum Schütteln oder Nachsehen.",
-    "pre_heat": "Erstes Aufheizen des Garraums vor dem eigentlichen Garen.",
     "pre_rinse": "Erstes Aufsprühen vor dem Waschen mit Reinigungsmittel.",
-    "proving": "Gehzeit bei geringer Wärme, damit die Hefe arbeitet und der Teig aufgeht.",
-    "resting": "Kurze Pause mit geringer Leistung zwischen den Knetphasen, damit sich das Gluten entspannt.",
     "pre_wash": "Erstes Einweichen oder Vorbehandeln vor dem Hauptwaschgang.",
     "rinse": "Spülphase mit klarem Wasser. Diese Phase kann sich mehrmals wiederholen.",
     "sanitize": "Hochtemperatur-Reinigungsstufe für Desinfektionsprogramme.",
@@ -1202,10 +1212,6 @@
       "doc": "Die kurzen Trommelimpulse eines Trockners mit geringer Leistung nach der Hauptheizphase beim abgeschlossenen Zyklus behalten, statt sie als neue Zyklen zu werten.",
       "label": "Knitterschutzerkennung aktivieren"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "Im Knitterschutz gilt Leistung unter diesem Wert als Stille zwischen Trommelimpulsen, und Stille länger als die Maximale Impulspause beendet den Modus. Ist der Stoppschwellenwert höher, wird er verwendet; dieser Wert wirkt also nur, wenn er über dem Stoppschwellenwert liegt.",
-      "label": "Ausgangsleistungsschwellenwert"
-    },
     "anti_wrinkle_max_duration": {
       "doc": "Ein längerer Impuls gilt als echter Zyklus, nicht als Knitterschutz-Trommeln.",
       "label": "Maximale Dauer"
@@ -1250,10 +1256,6 @@
       "doc": "Optionaler Türsensor. Zeigt, wann das Gerät nach einem Zyklus zum Entladen geöffnet wurde.",
       "label": "Türsensor-Entität"
     },
-    "duration_tolerance": {
-      "doc": "Nur Lernfeedback: Ein Zyklus innerhalb von +/-X % seiner geschätzten Dauer gilt als gute Schätzung. Beeinflusst den Abgleich nicht.",
-      "label": "Schätzungstoleranz"
-    },
     "enable_ml_models": {
       "doc": "Ein auf dieser Maschine trainiertes Modell sagt Energie und Kosten eines laufenden Zyklus voraus, und ein gut bekanntes Programm, das ungewöhnlich früh stoppt, darf ohne die volle Abschaltverzögerung enden. Aus: nur leistungsbasierte Logik.",
       "label": "Intelligente Modelle während eines Zyklus anwenden"
@@ -1279,12 +1281,8 @@
       "label": "Debug-Entitäten anzeigen"
     },
     "external_end_trigger": {
-      "doc": "Binärsensor, dessen Änderung das Zyklusende markiert (z. B. ein „Fertig“-Kontakt oder eine andere Integration).",
+      "doc": "Optionaler Binärsensor, der den Zyklus beendet, wenn er einschaltet, zusätzlich zur leistungsbasierten Erkennung (z.B. ein Fertig-Kontakt oder eine andere Integration). Leer lassen zum Deaktivieren.",
       "label": "Externe Auslöser-Entität"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Einen Binärsensor das Zyklusende melden lassen, zusätzlich zur leistungsbasierten Erkennung.",
-      "label": "Externen Endauslöser aktivieren"
     },
     "external_end_trigger_inverted": {
       "doc": "Das Ausschalten (statt Einschalten) des Sensors als Endsignal werten.",
@@ -1309,18 +1307,6 @@
     "ml_training_enabled": {
       "doc": "Das Energiemodell regelmäßig mit den abgeschlossenen Zyklen dieser Maschine neu trainieren. Ein neues Modell wird nur behalten, wenn es auf Testzyklen die einfache Schätzung schlägt.",
       "label": "Von dieser Maschine lernen"
-    },
-    "ml_training_hour": {
-      "doc": "Uhrzeit (0-23) für das nächtliche Training. Wählen Sie eine ruhige Stunde, z. B. 2.",
-      "label": "Lernen zur Stunde"
-    },
-    "ml_training_interval_days": {
-      "doc": "Höchstens einmal alle so vielen Tage neu trainieren.",
-      "label": "Höchstens alle prüfen"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Mit dem Training warten, bis mindestens so viele Zyklen aufgezeichnet sind.",
-      "label": "Zuerst benötigte Zyklen"
     },
     "name": {
       "doc": "Name dieses Geräts in Home Assistant.",
@@ -1354,16 +1340,12 @@
       "doc": "notify.*-Dienste, die beim Zyklusende aufgerufen werden. Leer lassen für keine.",
       "label": "Enddienste"
     },
-    "notify_fire_events": {
-      "doc": "Zusätzlich ha_washdata_*-Ereignisse bei Zyklusstart und -ende auslösen, für Ihre eigenen Automatisierungen.",
-      "label": "HA-Ereignisse für Benachrichtigungen auslösen"
-    },
     "notify_icon": {
       "doc": "Kleines Symbol auf der Benachrichtigung (z. B. mdi:washing-machine). Wird nur an mobile_app-Ziele gesendet, nicht an notify-Gruppen. Unter iOS ersetzt es das App-Symbol und erfordert die Companion-App 2026.8 oder neuer. Leer: Plattformstandard.",
       "label": "Benachrichtigungssymbol"
     },
     "notify_live_chronometer": {
-      "doc": "Einen laufenden Countdown in der Benachrichtigung anzeigen (wo unterstützt) statt einer festen Schätzung.",
+      "doc": "Android: Fügt der Benachrichtigung einen Countdown bis zum voraussichtlichen Ende hinzu. Mit {finish_time} in der Vorend-Nachricht wird die Endzeit statt eines zweiten Countdowns angezeigt.",
       "label": "Live-Chronometer verwenden"
     },
     "notify_live_interval_seconds": {
@@ -1387,7 +1369,7 @@
       "label": "Personen (für Nur wenn zu Hause)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text jedes Live-Fortschrittsupdates. Vorlagenvariablen: {device}, {program}, {minutes} (verbleibende Minuten). Bei jeder anderen Variable wird der Standardtext verwendet.",
+      "doc": "Text jedes Live-Fortschrittsupdates. Vorlagenvariablen: {device}, {program}, {minutes} (verbleibende Minuten), {finish_time} (voraussichtliche Endzeit, z. B. 14:30). Bei jeder anderen Variable wird der Standardtext verwendet.",
       "label": "Vorend-Nachricht"
     },
     "notify_reminder_message": {
@@ -1435,7 +1417,7 @@
       "label": "Abschaltschwellenwert"
     },
     "power_sensor": {
-      "doc": "Der Sensor, der die aktuelle Leistung dieses Geräts in Watt meldet (z. B. sensor.washer_power). Die gesamte Erkennung basiert darauf.",
+      "doc": "Der Sensor, der die aktuelle Leistung dieses Geräts in W oder kW meldet (z. B. sensor.washer_power), nicht sein Energiezähler (kWh). Die gesamte Erkennung basiert darauf.",
       "label": "Leistungssensor"
     },
     "profile_match_interval": {
@@ -1454,10 +1436,6 @@
       "doc": "Live-Übereinstimmungswert, den ein Zyklus braucht, bevor die intelligente Beendigung oder der Knitterschutz-Abschluss ihn vorzeitig beenden darf. Ändert nicht das angezeigte Programm. Erhöhen, wenn schwache Zuordnungen Zyklen zu früh beenden; senken, wenn eindeutige Zuordnungen die Abschaltverzögerung abwarten.",
       "label": "Abgleichschwellenwert"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Fällt der Live-Übereinstimmungswert darunter, wird die aktuelle Programmvermutung gelöscht. Etwas unter dem Abgleichschwellenwert halten, damit ein kurzer Einbruch sie nicht zurücksetzt.",
-      "label": "Nichtübereinstimmungsschwellenwert"
-    },
     "progress_reset_delay": {
       "doc": "Nach einem Zyklus den Fortschritt so lange auf 100 % halten, bevor auf Leerlauf zurückgesetzt wird.",
       "label": "Fortschritts-Reset-Verzögerung"
@@ -1465,10 +1443,6 @@
     "pump_stuck_duration": {
       "doc": "Wie lange eine Pumpe ununterbrochen laufen darf, bevor das Ereignis „Pumpe steckengeblieben“ ausgelöst wird.",
       "label": "Dauer der feststeckenden Pumpe"
-    },
-    "sampling_interval": {
-      "doc": "Mindestzeit zwischen verarbeiteten Messwerten. Früher eintreffende Messwerte werden übersprungen (niedrige Werte während eines Zyklus bleiben immer erhalten). Auf das Meldeintervall Ihrer Steckdose oder niedriger einstellen; ein höherer Wert verwirft nur Messwerte.",
-      "label": "Abtastintervall"
     },
     "save_debug_traces": {
       "doc": "Zusätzlich die Debug-Daten des Abgleichs (die Bewertungen aller Kandidaten) mit jedem Zyklus speichern, zur Fehlerbehebung. Belegt etwa 20 KB pro Zyklus.",
@@ -1644,9 +1618,6 @@
     "services": {
       "label": "Dienste"
     },
-    "signal_processing": {
-      "label": "Signalverarbeitung"
-    },
     "thresholds_gap": {
       "label": "Schwellenwerte & Lücke"
     },
@@ -1709,10 +1680,6 @@
       "auto_label_confidence": {
         "higher": "Weniger automatische Beschriftungen – mehr Zyklen kommen zur Überprüfung",
         "lower": "Mehr automatische Beschriftungen – einzelne könnten falsch zugeordnet sein"
-      },
-      "duration_tolerance": {
-        "higher": "Akzeptiert einen größeren Dauerkorridor – flexiblere Erkennung",
-        "lower": "Erfordert engere Dauerübereinstimmung – strenger, kann ungewöhnliche Zyklen ablehnen"
       },
       "end_energy_threshold": {
         "higher": "Beendet nur Zyklen mit wesentlichem Energieverbrauch",
@@ -1811,7 +1778,8 @@
     "subtab_profiles": "Profile",
     "maintenance": "Wartung",
     "playground": "Testbereich",
-    "store": "Store"
+    "store": "Store",
+    "automations": "Automatisierungen"
   },
   "tag": {
     "early_end": "Frühes Ende",
@@ -1978,7 +1946,14 @@
     "store_download_partial": "{n} Programm(e) konnte(n) nicht heruntergeladen werden; versuchen Sie es später erneut.",
     "import_no_restore_point": "Importiert, aber es konnte kein Wiederherstellungspunkt gespeichert werden, daher kann dieser Import nicht rückgängig gemacht werden",
     "import_undo_failed": "Import konnte nicht rückgängig gemacht werden: {error}",
-    "import_undone": "Import rückgängig gemacht: {profiles} Profil(e) und {cycles} Zyklus/Zyklen wiederhergestellt"
+    "import_undone": "Import rückgängig gemacht: {profiles} Profil(e) und {cycles} Zyklus/Zyklen wiederhergestellt",
+    "bp_install_failed": "Vorlage konnte nicht installiert werden: {error}",
+    "bp_installed_finish": "Vorlage installiert. Füllen Sie den Rest in Home Assistant aus.",
+    "bp_automation_failed": "Die Vorlage ist installiert, aber die Automatisierung konnte nicht erstellt werden: {error}",
+    "bp_automation_created": "Automatisierung mit Standardeinstellungen erstellt; wird geöffnet",
+    "copied": "Kopiert",
+    "copy_failed": "Kopieren fehlgeschlagen. Text auswählen und manuell kopieren.",
+    "automation_label_failed": "Automatisierung erstellt, aber das WashData-Label oder die Kategorie konnte nicht hinzugefügt werden."
   },
   "trend": {
     "down": "Abwärtstrend",
@@ -2069,7 +2044,10 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter auf GitHub ↗",
-    "manual": "Handbuch ↗"
+    "manual": "Handbuch ↗",
+    "bp_share": "Eigene Vorlage per Pull Request teilen ↗",
+    "bp_open_in_ha": "In Home Assistant öffnen ↗",
+    "automations_all": "Alle WashData-Automatisierungen in Home Assistant"
   },
   "tip": {
     "add_brand": "Marke nicht aufgeführt? Fügen Sie sie zum Community-Katalog hinzu",
@@ -2183,16 +2161,11 @@
     "kept": "behalten",
     "max": "max",
     "min": "min",
-    "minus_tol": "-Tol",
     "no_match": "kein Treffer",
     "no_updates": "keine Updates",
     "off_delay_wait": "Abschaltverzögerung",
     "off_gap": "Aus-Lücke",
-    "plus_tol": "+Tol",
-    "profile": "Profil",
-    "reading_interval": "typisches Messintervall",
     "sensor_offline": "Sensor offline: Zwangsstopp",
-    "si": "AI",
     "spike_ignored": "Spitze ignoriert",
     "spike_ignored_short": "Spitze: ignoriert",
     "start": "Start",
@@ -2201,5 +2174,71 @@
     "thr": "Schw.",
     "too_short": "zu kurz",
     "tumble_kept": "Trommelimpulse behalten"
+  },
+  "blueprint": {
+    "cycle_running_indicator": {
+      "name": "Etwas einschalten, während ein Zyklus läuft",
+      "description": "Schaltet ein Licht, einen Schalter oder einen Umschalter ein, wenn ein WashData-Zyklus startet, und wieder aus, wenn er endet – auch nach einem Fehlstart.\n\nBenötigt WashData 0.5.9 oder neuer."
+    },
+    "dryer_anti_crease_power_cut": {
+      "name": "Lange Knitterschutz-Phase des Trockners beenden",
+      "description": "Für Trockner, die nach dem Programm stundenlang im Knitterschutz weitertrommeln. Läuft erst, nachdem WashData das Programm als beendet betrachtet (Zyklus beendet oder Knitterschutz gestartet). Sie wartet und schaltet dann den Smart Plug des Trockners in einem Moment geringer Leistung aus – standardmäßig auch wieder ein. Ein neu gestarteter Zyklus bricht sie ab.\n\nRisiko: Dabei wird ein Relais geschaltet, während der Trockner angeschlossen ist. Nur mit einem für Ihren Trockner geeigneten Stecker und auf eigenes Risiko verwenden. WashData schaltet den Stecker selbst nie; das erledigt diese Automatisierung.\n\nBenötigt WashData 0.5.9 oder neuer."
+    }
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Zyklus gestartet"
+    },
+    "program_recognised": {
+      "name": "Programm erkannt"
+    },
+    "phase_started": {
+      "name": "Phase gestartet"
+    },
+    "finishing_soon": {
+      "name": "Bald fertig"
+    },
+    "cycle_overrun": {
+      "name": "Zyklus läuft zu lang"
+    },
+    "cycle_paused": {
+      "name": "Zyklus angehalten"
+    },
+    "cycle_resumed": {
+      "name": "Zyklus fortgesetzt"
+    },
+    "cycle_stalled": {
+      "name": "Zyklus im Stillstand"
+    },
+    "cycle_finished": {
+      "name": "Zyklus beendet"
+    },
+    "cycle_ended": {
+      "name": "Zyklus beendet (beliebiger Grund)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Knitterschutz gestartet"
+    },
+    "still_tumbling": {
+      "name": "Noch trommelnd nach dem Zyklus"
+    },
+    "unload_pending": {
+      "name": "Entnahme ausstehend"
+    },
+    "unloaded": {
+      "name": "Entnommen"
+    },
+    "state_changed": {
+      "name": "Zustand geändert"
+    },
+    "maintenance_due": {
+      "name": "Wartung fällig"
+    },
+    "milestone_reached": {
+      "name": "Zyklusmeilenstein erreicht"
+    },
+    "pump_stuck": {
+      "name": "Pumpe klemmt"
+    }
   }
 }

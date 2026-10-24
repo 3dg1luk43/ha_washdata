@@ -27,7 +27,7 @@ from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_NOTIFY_BEFORE_END_MINUTES,
     CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_START,
     STATE_STARTING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING, STATE_ANTI_WRINKLE,
-    CONF_NOTIFY_ACTIONS, CONF_NOTIFY_PEOPLE, CONF_NOTIFY_ONLY_WHEN_HOME, CONF_NOTIFY_FIRE_EVENTS,
+    CONF_NOTIFY_ACTIONS, CONF_NOTIFY_PEOPLE, CONF_NOTIFY_ONLY_WHEN_HOME, EVENT_CYCLE_STARTED,
     CONF_WATCHDOG_INTERVAL, MATCH_AMBIGUOUS_COMMIT_FACTOR,
 )
 
@@ -118,17 +118,19 @@ def test_check_pre_completion_notification(manager: WashDataManager, mock_hass: 
     manager._notify_before_end_minutes = 5
     manager._notified_pre_completion = False
     manager._cycle_progress = 90
-    
+    manager._notify_finish_services = ["notify.mobile_app_phone"]
+
     manager._check_pre_completion_notification()
-    
+
     assert manager._notified_pre_completion is True
-    # Verify persistent notification called since no notify_service configured
-    pn.async_create.assert_called_once()
-    args = pn.async_create.call_args[0]
+    # The reminder goes to the Finish services; an empty list would send nothing
+    # (no sidebar fallback, #472).
+    pn.async_create.assert_not_called()
+    domain, service, data = mock_hass.services.async_call.call_args[0][:3]
+    assert (domain, service) == ("notify", "mobile_app_phone")
     # Reminder now uses its own distinct message (DEFAULT_NOTIFY_REMINDER_MESSAGE),
     # not the live "Less than N minutes remaining" template.
-    assert args[0] is mock_hass
-    assert "5 minutes left" in args[1]
+    assert "5 minutes left" in data["message"]
 
 def test_check_pre_completion_disabled(manager: WashDataManager, mock_hass: Any, pn: Any) -> None:
     """Test disabled notification."""
@@ -157,7 +159,6 @@ async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, m
     manager._matched_profile_duration = 3600
     manager._last_match_confidence = 0.98
     manager._learning_confidence = 0.70
-    manager._auto_label_confidence = 0.95
 
     # Disable finish notification for this test to avoid polluting call count
     manager._notify_finish_services = []
@@ -219,7 +220,6 @@ async def test_cycle_end_skips_feedback_low_confidence(manager: WashDataManager,
     manager._matched_profile_duration = 3600
     manager._last_match_confidence = 0.40
     manager._learning_confidence = 0.70
-    manager._auto_label_confidence = 0.95
     manager._notify_finish_services = []
     manager._notify_actions = []
 
@@ -534,7 +534,6 @@ async def test_restore_active_cycle_ending(manager: WashDataManager) -> None:
 @pytest.mark.asyncio
 async def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, mock_hass: Any) -> None:
     """Test that _on_cycle_end attempts to auto-label an unmatched cycle."""
-    manager._auto_label_confidence = 0.8
     manager.profile_store.get_profiles = MagicMock(
         return_value={"DerivedProfile": {"avg_duration": 3600}}
     )
@@ -801,13 +800,12 @@ def test_pending_notifications_release_on_person_home(
     mock_hass.services.async_call.assert_called_once()
 
 
-def test_cycle_start_event_respects_notify_fire_events_toggle(
+def test_cycle_start_event_always_fires(
     manager: WashDataManager, mock_hass: Any
 ) -> None:
-    """Cycle start events should not fire when event toggle is disabled."""
-    manager._notify_fire_events = False
-
+    """#478 retired the "Fire HA events" toggle: the start event always fires."""
     manager._on_state_change("off", "running")
 
-    mock_hass.bus.async_fire.assert_not_called()
+    fired = [c.args[0] for c in mock_hass.bus.async_fire.call_args_list]
+    assert fired.count(EVENT_CYCLE_STARTED) == 1
 
