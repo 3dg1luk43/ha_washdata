@@ -313,6 +313,32 @@ async def test_starting_a_recording_ends_an_announced_cycle(
     await manager.async_stop_recording()
 
 
+async def test_a_failed_restore_ends_an_announced_cycle(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """A snapshot that cannot be restored is dropped; if its start was announced
+    before the restart, the end it is owed goes out with its own start time."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    seen = _listen(hass, entry)
+    bus = async_capture_events(hass, EVENT_CYCLE_ENDED)
+    snapshot = {"state": "running", "start_event_fired": True,
+                "current_cycle_start": "2026-10-19T08:00:00+00:00"}
+
+    await manager._async_keep_failed_restore(snapshot, None, "boom")  # noqa: SLF001
+    await hass.async_block_till_done()
+
+    ended = [v for t, v in seen if t == "cycle_ended"]
+    assert len(ended) == 1 and ended[0]["status"] == "interrupted"
+    assert len(bus) == 1 and bus[0].data["start_time"] == "2026-10-19T08:00:00+00:00"
+    assert manager._cycle_ended_pending is False  # noqa: SLF001
+
+    # A snapshot whose start was never announced owes nothing.
+    await manager._async_keep_failed_restore({"state": "running"}, None, "boom")  # noqa: SLF001
+    await hass.async_block_till_done()
+    assert len([t for t, _ in seen if t == "cycle_ended"]) == 1
+
+
 async def test_cycle_ended_survives_a_failed_cycle_end(
     hass: HomeAssistant, setup_washdata_entry
 ) -> None:

@@ -2097,6 +2097,14 @@ class WashDataManager:
             f"{age:.0f}s" if age is not None else "unknown",
             "" if traceback_logged else f":\n{error}",
         )
+        if snapshot.get("start_event_fired") is True:
+            # Its start was announced before the restart (#478): the end it is owed
+            # goes out now, since nothing restored will ever finish it.
+            self._cycle_ended_pending = True
+            if self._cycle_start_time is None:
+                self._cycle_start_time = _snapshot_time(snapshot.get("current_cycle_start"))
+            self._end_dropped_cycle()
+            self._cycle_start_time = None
         try:
             self.detector.reset()
         except Exception:  # noqa: BLE001
