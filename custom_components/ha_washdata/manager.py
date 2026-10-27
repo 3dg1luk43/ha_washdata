@@ -2107,7 +2107,6 @@ class WashDataManager:
             if self._cycle_start_time is None:
                 self._cycle_start_time = _snapshot_time(snapshot.get("current_cycle_start"))
             self._end_dropped_cycle()
-            self._cycle_start_time = None
         try:
             self.detector.reset()
         except Exception:  # noqa: BLE001
@@ -9185,27 +9184,33 @@ class WashDataManager:
     def _end_dropped_cycle(self) -> None:
         """Before a cycle is dropped by a detector reset (which fires no cycle end):
         if its start was announced, send the end owed to it (#478), as an
-        interrupted cycle. Never raises."""
-        if not self._cycle_ended_pending:
-            return
-        self._cycle_ended_pending = False
-        try:
-            self._trigger_ended_program = self._trigger_program(self._current_program)
-            # A restore puts the start on the detector; the manager's own copy is
-            # only set by the next state change.
-            start = self._cycle_start_time or self.detector.current_cycle_start
-            now = utc_now()
-            self._fire_cycle_ended({
-                "status": "interrupted",
-                "start_time": start.isoformat() if start is not None else None,
-                "end_time": now.isoformat(),
-                "duration": (
-                    (now - dt_util.as_utc(start)).total_seconds()
-                    if start is not None else 0.0
-                ),
-            })
-        except Exception:  # pylint: disable=broad-exception-caught
-            self._logger.debug("Could not end the dropped cycle", exc_info=True)
+        interrupted cycle; then forget its session state (a user pause, a
+        hand-picked program, its start), as a normal end's terminal reset does.
+        Never raises."""
+        if self._cycle_ended_pending:
+            self._cycle_ended_pending = False
+            try:
+                self._trigger_ended_program = self._trigger_program(self._current_program)
+                # A restore puts the start on the detector; the manager's own copy
+                # is only set by the next state change.
+                start = self._cycle_start_time or self.detector.current_cycle_start
+                now = utc_now()
+                self._fire_cycle_ended({
+                    "status": "interrupted",
+                    "start_time": start.isoformat() if start is not None else None,
+                    "end_time": now.isoformat(),
+                    "duration": (
+                        (now - dt_util.as_utc(start)).total_seconds()
+                        if start is not None else 0.0
+                    ),
+                })
+            except Exception:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Could not end the dropped cycle", exc_info=True)
+        self._manual_program_active = False
+        self._is_user_paused = False
+        self._user_pause_start = None
+        self._total_user_paused_seconds = 0.0
+        self._cycle_start_time = None
 
     def _fire_cycle_ended(
         self,
