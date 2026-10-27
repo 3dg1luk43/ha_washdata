@@ -523,7 +523,7 @@
       "cycle_overrun": "Sykli kestää liian kauan",
       "cycle_paused": "Sykli keskeytetty",
       "cycle_resumed": "Sykli jatkui",
-      "still_tumbling": "Rumpaa yhä syklin jälkeen",
+      "still_tumbling": "Rumpu pyörii yhä syklin jälkeen",
       "unloaded": "Purettu",
       "state_changed": "Tila muuttui",
       "maintenance_due": "Huolto tarpeen",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Vain tämä ohjelma, tarkalla nimellä. Jätä tyhjäksi mille tahansa ohjelmalle.",
       "phase": "Vain tämä vaihe, nimellä. Jätä tyhjäksi mille tahansa vaiheelle.",
-      "minutes": "Päättyy pian: minuuttia jäljellä. Rumpaa yhä: minuuttia päättymisen jälkeen.",
+      "minutes": "Päättyy pian: minuuttia jäljellä. Rumpu pyörii yhä: minuuttia päättymisen jälkeen.",
       "percent": "Prosenttia yli ohjelman tavallisen keston.",
       "include_detected": "Käynnistä myös WashDatan tunnistamista tauoista, kuten liottamisesta tai pysähtymisestä.",
       "status": "Vain syklit, jotka päättyivät tällä tavoin.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Ryppyjenesto alkoi",
-      "description": "Käynnistyy, kun laite alkaa rumpuilla valmiin pyykin ryppyjä vastaan."
+      "description": "Käynnistyy, kun laite alkaa pyörittää valmista pyykkiä ryppyjä vastaan."
     },
     "still_tumbling": {
-      "name": "Rumpaa yhä syklin jälkeen",
-      "description": "Käynnistyy kerran, kun laite rumpuilee lyhyissä jaksoissa näin monta minuuttia syklin päättymisen jälkeen. Pysähtyy uuteen sykliin tai 4 tuntia päättymisen jälkeen.",
+      "name": "Rumpu pyörii yhä syklin jälkeen",
+      "description": "Käynnistyy kerran, kun laitteen rumpu pyörii yhä lyhyissä jaksoissa näin monta minuuttia syklin päättymisen jälkeen. Pysähtyy uuteen sykliin tai 4 tuntia päättymisen jälkeen.",
       "fields": {
         "minutes": {
           "name": "Minuuttia päättymisen jälkeen",
-          "description": "Käynnistä ensimmäisessä rummutuksessa, joka tapahtuu vähintään tämän ajan jälkeen päättymisestä."
+          "description": "Käynnistä ensimmäisessä rumpupulssissa, joka tapahtuu vähintään tämän ajan jälkeen päättymisestä."
         }
       }
     },

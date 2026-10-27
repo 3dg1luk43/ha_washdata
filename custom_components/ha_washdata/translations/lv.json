@@ -523,7 +523,7 @@
       "cycle_overrun": "Cikls ilgst pārāk ilgi",
       "cycle_paused": "Cikls pauzēts",
       "cycle_resumed": "Cikls atsākās",
-      "still_tumbling": "Vēl grozās pēc cikla",
+      "still_tumbling": "Trumulis vēl griežas pēc cikla",
       "unloaded": "Izkrauts",
       "state_changed": "Statuss mainījās",
       "maintenance_due": "Apkope nepieciešama",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Tikai šī programma, ar precīzu nosaukumu. Atstājiet tukšu jebkurai programmai.",
       "phase": "Tikai šī fāze, ar nosaukumu. Atstājiet tukšu jebkurai fāzei.",
-      "minutes": "Drīz beigsies: atlikušās minūtes. Vēl grozās: minūtes pēc beigām.",
+      "minutes": "Drīz beigsies: atlikušās minūtes. Trumulis vēl griežas: minūtes pēc beigām.",
       "percent": "Procenti virs programmas parastā ilguma.",
       "include_detected": "Aktivizēties arī WashData strāvas patēriņā atklāto paužu gadījumā, piemēram, mērcēšanai vai apstāšanās gadījumā.",
       "status": "Tikai tā beidzušies cikli.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Pretgrumbu režīms sākās",
-      "description": "Aktivizējas, kad ierīce sāk grozīt pabeigto veļu pret krokām."
+      "description": "Aktivizējas, kad ierīces trumulis sāk griezties ar pabeigto veļu pret krokām."
     },
     "still_tumbling": {
-      "name": "Vēl grozās pēc cikla",
-      "description": "Aktivizējas vienu reizi, kad ierīce vēl grozās īsos pārsprāgumos tik minūtes pēc cikla beigām. Apstājas jauna cikla sākumā vai 4 stundas pēc beigām.",
+      "name": "Trumulis vēl griežas pēc cikla",
+      "description": "Aktivizējas vienu reizi, kad ierīces trumulis vēl griežas īsos posmos tik minūtes pēc cikla beigām. Apstājas jauna cikla sākumā vai 4 stundas pēc beigām.",
       "fields": {
         "minutes": {
           "name": "Minūtes pēc beigām",
-          "description": "Aktivizēties pirmajā grozīšanā, kas ir vismaz tik ilgi pēc beigām."
+          "description": "Aktivizēties pirmajā griešanās impulsā, kas ir vismaz tik ilgi pēc beigām."
         }
       }
     },

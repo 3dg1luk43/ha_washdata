@@ -648,7 +648,7 @@
     },
     "still_tumbling": {
       "name": "Vazhdon të rrotullohet pas ciklit",
-      "description": "Aktivizohet një herë kur pajisja vazhdon të rrotullohet me shpërthime të shkurtra kaq minuta pas mbarimit të ciklit. Ndalet me një cikël të ri ose 4 orë pas mbarimit.",
+      "description": "Aktivizohet një herë kur pajisja vazhdon të rrotullohet për periudha të shkurtra kaq minuta pas mbarimit të ciklit. Ndalet me një cikël të ri ose 4 orë pas mbarimit.",
       "fields": {
         "minutes": {
           "name": "Minuta pas mbarimit",

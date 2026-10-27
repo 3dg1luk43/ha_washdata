@@ -1125,12 +1125,12 @@
     "maint_done_by_program_intro": "Úloha sa počíta ako hotová, keď skončí cyklus niektorého z jej programov, napríklad čistenie bubna po programe Bavlna 90. Počítajú sa len cykly, pri ktorých má WashData istotu, alebo pri ktorých ste program vybrali sami."
   },
   "phase_desc": {
-    "anti_crease": "Príležitostné krátke vírenia po dokončení na predchádzanie krčeniu oblečenia.",
-    "anti_wrinkle": "Pravidelné vírenie po cykle na predchádzanie krčeniu oblečenia.",
-    "cool_down": "Vírenie bez tepla blízko konca cyklu.",
+    "anti_crease": "Príležitostné krátke otáčanie bubna po dokončení na predchádzanie krčeniu oblečenia.",
+    "anti_wrinkle": "Pravidelné otáčanie bubna po cykle na predchádzanie krčeniu oblečenia.",
+    "cool_down": "Otáčanie bubna bez tepla blízko konca cyklu.",
     "drain_and_switch": "Obdobie prechodu z režimu prania do režimu sušenia.",
     "dry": "Fáza sušenia pomocou ohrievača a/alebo zvyškového tepla.",
-    "drying": "Hlavné vyhrievané obdobie sušenia s vírením.",
+    "drying": "Hlavné vyhrievané obdobie sušenia s otáčaním bubna.",
     "heat_up": "Počiatočné zahriatie ohrievača pred úplným sušením.",
     "pre_rinse": "Počiatočné striekanie pred umývaním čistiaceho prostriedku.",
     "pre_wash": "Počiatočné namáčanie alebo predbežná úprava pred hlavným praním.",
@@ -1991,8 +1991,8 @@
     "dishwasher_end_spike_quiet_release": "Umývačka: tiché sekundy po očakávanom trvaní, než sa uvoľní čakanie na záverečné odčerpanie vody",
     "smart_termination_duration_ratio": "Zlomok priemernej doby trvania programu, ktorý musí cyklus dosiahnuť, než ho Inteligentné ukončenie smie ukončiť skôr; znížte, ak doby behu kolíšu",
     "anti_crease_finalize_ratio": "Zlomok priemernej doby trvania programu, ktorý musí cyklus dosiahnuť, než ho chvost ochrany pred krčením smie dokončiť; pri sušičkách znížte, pri práčkach ponechajte predvolené",
-    "anti_wrinkle_enabled": "Pohltiť impulzy bubna po hlavnej fáze namiesto ich čítania ako nové cykly",
-    "anti_wrinkle_idle_timeout": "Povolený pokoj medzi dvoma impulzmi bubna, než sa ochrana pred krčením skončí",
+    "anti_wrinkle_enabled": "Pohltiť pulzy bubna po hlavnej fáze namiesto ich čítania ako nové cykly",
+    "anti_wrinkle_idle_timeout": "Povolený pokoj medzi dvoma pulzmi bubna, než sa ochrana pred krčením skončí",
     "anti_wrinkle_max_duration": "Dlhší impulz ukončí ochranu pred krčením a otvorí nový cyklus",
     "anti_wrinkle_max_power": "Impulz nad touto hodnotou ukončí ochranu pred krčením a otvorí nový cyklus",
     "completion_min_seconds": "Najkratší beh, ktorý sa počíta ako skutočný cyklus",
@@ -2209,7 +2209,7 @@
     "tail_energy_resets": "energia konca nad prahom: časovač sa vynuluje",
     "thr": "prah",
     "too_short": "príliš krátky",
-    "tumble_kept": "impulzy bubna ponechané"
+    "tumble_kept": "pulzy bubna ponechané"
   },
   "blueprint": {
     "cycle_running_indicator": {
@@ -2218,7 +2218,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Ukončiť dlhú fázu ochrany pred krčením sušičky",
-      "description": "Pre sušičky, ktoré pokračujú v bubnovaní v ochrane pred krčením celé hodiny po skončení programu. Spustí sa len vtedy, keď sušička po uplynutí nastaveného počtu minút od skončenia programu stále bubnuje; sušičku, ktorá sa dovtedy zastavila, nechá tak. Potom vypne zástrčku sušičky v momente nízkej spotreby a predvolene ju znova zapne. Nový cyklus spustený medzitým ju zruší.\n\nRiziko: prepína relé, keď je sušička zapojená. Používajte len so zástrčkou určenou pre vašu sušičku a na vlastné riziko. WashData zástrčku sám nikdy neprepína; robí to táto automatizácia.\n\nVyžaduje WashData 0.5.9 alebo novší."
+      "description": "Pre sušičky, ktoré pokračujú v otáčaní bubna v ochrane pred krčením celé hodiny po skončení programu. Spustí sa len vtedy, keď sušička po uplynutí nastaveného počtu minút od skončenia programu stále otáča bubnom; sušičku, ktorá sa dovtedy zastavila, nechá tak. Potom vypne zástrčku sušičky v momente nízkej spotreby a predvolene ju znova zapne. Nový cyklus spustený medzitým ju zruší.\n\nRiziko: prepína relé, keď je sušička zapojená. Používajte len so zástrčkou určenou pre vašu sušičku a na vlastné riziko. WashData zástrčku sám nikdy neprepína; robí to táto automatizácia.\n\nVyžaduje WashData 0.5.9 alebo novší."
     }
   },
   "trigger": {
@@ -2256,7 +2256,7 @@
       "name": "Ochrana pred krčením spustená"
     },
     "still_tumbling": {
-      "name": "Stále bubnuje po skončení cyklu"
+      "name": "Stále otáča bubnom po skončení cyklu"
     },
     "unload_pending": {
       "name": "Čaká na vyloženie"

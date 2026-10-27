@@ -523,7 +523,7 @@
       "cycle_overrun": "Cyklus kører for længe",
       "cycle_paused": "Cyklus sat på pause",
       "cycle_resumed": "Cyklus genoptaget",
-      "still_tumbling": "Tørretromlen kører stadig efter cyklus",
+      "still_tumbling": "Tromlen drejer stadig efter cyklus",
       "unloaded": "Tømt",
       "state_changed": "Tilstand ændret",
       "maintenance_due": "Vedligeholdelse forfalder",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Kun dette program, ved nøjagtigt navn. Lad feltet stå tomt for ethvert program.",
       "phase": "Kun denne fase, ved navn. Lad feltet stå tomt for enhver fase.",
-      "minutes": "Snart færdig: resterende minutter. Tørretromlen kører stadig: minutter efter afslutning.",
+      "minutes": "Snart færdig: resterende minutter. Tromlen drejer stadig: minutter efter afslutning.",
       "percent": "Procent over programmets normale varighed.",
       "include_detected": "Udløs også ved pauser WashData registrerer i forbruget, f.eks. iblødsætning eller stilstand.",
       "status": "Kun cyklusser der afsluttedes på denne måde.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Anti-rynke startet",
-      "description": "Udløses når apparatet begynder at tumle det færdige vasketøj mod rynker."
+      "description": "Udløses når apparatet begynder at bevæge det færdige vasketøj i tromlen mod rynker."
     },
     "still_tumbling": {
-      "name": "Tørretromlen kører stadig efter cyklus",
-      "description": "Udløses én gang når apparatet stadig tromler i korte stød dette antal minutter efter cyklussen sluttede. Stopper ved en ny cyklus eller 4 timer efter afslutning.",
+      "name": "Tromlen drejer stadig efter cyklus",
+      "description": "Udløses én gang når apparatets tromle stadig drejer i korte stød dette antal minutter efter cyklussen sluttede. Stopper ved en ny cyklus eller 4 timer efter afslutning.",
       "fields": {
         "minutes": {
           "name": "Minutter efter afslutning",
-          "description": "Udløs ved den første tumling mindst så lang tid efter afslutning."
+          "description": "Udløs ved den første tromlebevægelse mindst så lang tid efter afslutning."
         }
       }
     },

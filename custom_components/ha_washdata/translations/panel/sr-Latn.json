@@ -1160,7 +1160,7 @@
       "intro": "Obrada kraja za mašine za pranje sudova, koje često dugo i tiho suše pre kratkog završnog ispumpavanja."
     },
     "anti_wrinkle": {
-      "intro": "Zadržava kratke impulse prevrtanja niske snage nakon glavne faze mašine za sušenje uz završeni ciklus.",
+      "intro": "Zadržava kratke impulse okretanja bubnja niske snage nakon glavne faze mašine za sušenje uz završeni ciklus.",
       "label": "Zaštita od gužvanja"
     },
     "basic": {
@@ -1202,23 +1202,23 @@
       "doc": "Posle očekivanog trajanja: koliko dugo mašina za pranje sudova mora da ostane ispod Praga zaustavljanja pre nego što WashData prestane da čeka završno ispumpavanje. Povećajte ako se kasno ispumpavanje posle dugog sušenja propusti. Čekanje nikada ne prelazi 30 minuta."
     },
     "anti_crease_finalize_ratio": {
-      "doc": "Deo prosečnog trajanja programa koji ciklus mora da dostigne pre nego što se prevrtanje niske snage računa kao rep zaštite od gužvanja. Smanjite ga (npr. 0,75) kod mašina za sušenje koje se prilagođavaju količini veša. Kod mašina za veš ostavite podrazumevano (0,98), inače pranje može da se završi na pola.",
+      "doc": "Deo prosečnog trajanja programa koji ciklus mora da dostigne pre nego što se okretanje bubnja niske snage računa kao rep zaštite od gužvanja. Smanjite ga (npr. 0,75) kod mašina za sušenje koje se prilagođavaju količini veša. Kod mašina za veš ostavite podrazumevano (0,98), inače pranje može da se završi na pola.",
       "label": "Koeficijent završavanja zaštite od gužvanja"
     },
     "anti_wrinkle_enabled": {
-      "doc": "Zadržite kratke impulse prevrtanja niske snage nakon glavne faze grejanja mašine za sušenje uz završeni ciklus, umesto da se čitaju kao novi ciklusi.",
+      "doc": "Zadržite kratke impulse okretanja bubnja niske snage nakon glavne faze grejanja mašine za sušenje uz završeni ciklus, umesto da se čitaju kao novi ciklusi.",
       "label": "Omogući detekciju zaštite od gužvanja"
     },
     "anti_wrinkle_idle_timeout": {
       "label": "Maks. razmak između impulsa",
-      "doc": "Koliko dugo mašina za sušenje sme da miruje između impulsa prevrtanja pre nego što se režim zaštite od gužvanja završi. Postavite iznad najdužeg razmaka vaše mašine, inače se kasniji impulsi čitaju kao lažni startovi."
+      "doc": "Koliko dugo mašina za sušenje sme da miruje između impulsa okretanja bubnja pre nego što se režim zaštite od gužvanja završi. Postavite iznad najdužeg razmaka vaše mašine, inače se kasniji impulsi čitaju kao lažni startovi."
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Impuls duži od ovoga računa se kao pravi ciklus, a ne kao prevrtanje protiv gužvanja.",
+      "doc": "Impuls duži od ovoga računa se kao pravi ciklus, a ne kao okretanje bubnja protiv gužvanja.",
       "label": "Maks. trajanje"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Impuls iznad ove snage računa se kao pravi novi ciklus, a ne kao prevrtanje. Postavite malo iznad snage impulsa prevrtanja.",
+      "doc": "Impuls iznad ove snage računa se kao pravi novi ciklus, a ne kao okretanje bubnja. Postavite malo iznad snage impulsa okretanja bubnja.",
       "label": "Maks. snaga zaštite od gužvanja"
     },
     "auto_label_confidence": {
@@ -1262,7 +1262,7 @@
       "label": "Primeni pametne modele tokom ciklusa"
     },
     "end_energy_threshold": {
-      "doc": "Energija dozvoljena tokom kašnjenja isklopa. Iznad toga ciklus se nastavlja, pa prevrtanja i završno sušenje ostaju deo ciklusa. Smanjite ako se ciklusi završavaju tokom repa; povećajte ako završeni ciklusi i dalje čekaju.",
+      "doc": "Energija dozvoljena tokom kašnjenja isklopa. Iznad toga ciklus se nastavlja, pa okretanja bubnja i završno sušenje ostaju deo ciklusa. Smanjite ako se ciklusi završavaju tokom repa; povećajte ako završeni ciklusi i dalje čekaju.",
       "label": "Energija kraja"
     },
     "energy_price_entity": {
@@ -1980,8 +1980,8 @@
     "start_duration_threshold": "Sekundi iznad praga za potvrdu pokretanja",
     "start_threshold_w": "Minimum vati da bi se računalo kao pokrenuto",
     "stop_threshold_w": "Ispod ovoga mašina se računa kao isključena",
-    "anti_wrinkle_enabled": "Upijte impulse prevrtanja bubnja nakon glavne faze umesto da ih čitate kao nove cikluse",
-    "anti_wrinkle_idle_timeout": "Dozvoljena tišina između dva impulsa prevrtanja bubnja pre nego što se zaštita od gužvanja završi",
+    "anti_wrinkle_enabled": "Upijte impulse okretanja bubnja nakon glavne faze umesto da ih čitate kao nove cikluse",
+    "anti_wrinkle_idle_timeout": "Dozvoljena tišina između dva impulsa okretanja bubnja pre nego što se zaštita od gužvanja završi",
     "anti_wrinkle_max_duration": "Impuls duži od ovoga završava zaštitu od gužvanja i otvara novi ciklus",
     "anti_wrinkle_max_power": "Impuls iznad ovoga završava zaštitu od gužvanja i otvara novi ciklus",
     "profile_match_min_duration_ratio": "Minimalna dužina ciklusa kao deo trajanja profila; podrazumevano 0,1 (10%)",
@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Završi dugu fazu zaštite od gužvanja sušilice",
-      "description": "Za sušilice koje nastavljaju da se vrte u zaštiti od gužvanja satima posle programa. Pokreće se samo ako se sušilica još uvek vrti kada protekne podešeni broj minuta od završetka programa; sušilicu koja se do tada zaustavila ostavlja na miru. Zatim isključuje pametnu utičnicu sušilice u trenutku niske potrošnje i po podrazumevanom ponovo je uključuje. Novi ciklus koji počne u međuvremenu otkazuje je.\n\nRizik: ovo prebacuje relej dok je sušilica priključena. Koristite samo sa utičnicom prikladnom za vašu sušilicu i na sopstveni rizik. WashData nikada sam ne prebacuje utičnicu; to radi ova automatizacija.\n\nZahteva WashData 0.5.9 ili noviji."
+      "description": "Za sušilice koje nastavljaju da okreću bubanj u zaštiti od gužvanja satima posle programa. Pokreće se samo ako sušilica još uvek okreće bubanj kada protekne podešeni broj minuta od završetka programa; sušilicu koja se do tada zaustavila ostavlja na miru. Zatim isključuje pametnu utičnicu sušilice u trenutku niske potrošnje i po podrazumevanom ponovo je uključuje. Novi ciklus koji počne u međuvremenu otkazuje je.\n\nRizik: ovo prebacuje relej dok je sušilica priključena. Koristite samo sa utičnicom prikladnom za vašu sušilicu i na sopstveni rizik. WashData nikada sam ne prebacuje utičnicu; to radi ova automatizacija.\n\nZahteva WashData 0.5.9 ili noviji."
     }
   },
   "trigger": {
@@ -2238,7 +2238,7 @@
       "name": "Zaštita od gužvanja pokrenuta"
     },
     "still_tumbling": {
-      "name": "Još se okreće posle ciklusa"
+      "name": "Još okreće bubanj posle ciklusa"
     },
     "unload_pending": {
       "name": "Istovar na čekanju"

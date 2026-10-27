@@ -523,7 +523,7 @@
       "cycle_overrun": "Syklus kjører for lenge",
       "cycle_paused": "Syklus satt på pause",
       "cycle_resumed": "Syklus gjenopptatt",
-      "still_tumbling": "Tørketrommelen kjører fortsatt etter syklusen",
+      "still_tumbling": "Trommelen roterer fortsatt etter syklusen",
       "unloaded": "Tømt",
       "state_changed": "Tilstand endret",
       "maintenance_due": "Vedlikehold forfaller",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Kun dette programmet, ved nøyaktig navn. La feltet stå tomt for ethvert program.",
       "phase": "Kun denne fasen, ved navn. La feltet stå tomt for enhver fase.",
-      "minutes": "Snart ferdig: gjenværende minutter. Tørketrommelen kjører fortsatt: minutter etter slutt.",
+      "minutes": "Snart ferdig: gjenværende minutter. Trommelen roterer fortsatt: minutter etter slutt.",
       "percent": "Prosent over programmets normale varighet.",
       "include_detected": "Utlös også ved pauser WashData registrerer i forbruket, f.eks. bløtlegging eller stans.",
       "status": "Kun syklusser som ble avsluttet på denne måten.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Anti-rynke startet",
-      "description": "Utløses når apparatet begynner å tumle det ferdige tøyet mot rynker."
+      "description": "Utløses når apparatet begynner å bevege det ferdige tøyet i trommelen mot rynker."
     },
     "still_tumbling": {
-      "name": "Tørketrommelen kjører fortsatt etter syklusen",
-      "description": "Utløses én gang når apparatet fortsatt tumler i korte støt dette antall minutter etter at syklusen var ferdig. Stopper ved en ny syklus eller 4 timer etter slutt.",
+      "name": "Trommelen roterer fortsatt etter syklusen",
+      "description": "Utløses én gang når apparatets trommel fortsatt roterer i korte støt dette antall minutter etter at syklusen var ferdig. Stopper ved en ny syklus eller 4 timer etter slutt.",
       "fields": {
         "minutes": {
           "name": "Minutter etter slutt",
-          "description": "Utlös ved den første tumlingen minst så lenge etter slutt."
+          "description": "Utløs ved den første trommelbevegelsen minst så lenge etter slutt."
         }
       }
     },

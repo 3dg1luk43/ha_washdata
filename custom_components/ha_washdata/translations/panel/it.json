@@ -1074,12 +1074,12 @@
     "curve_preroll_seconds": "Secondi di letture da tentativi di avvio interrotti riportati all'inizio della curva di un ciclo; 0 = disattivato"
   },
   "phase_desc": {
-    "anti_crease": "Brevi tumble occasionali dopo il completamento per ridurre le grinze del bucato.",
-    "anti_wrinkle": "Tumble periodico post-ciclo per ridurre le grinze del bucato.",
-    "cool_down": "Burattatura senza calore verso la fine del ciclo.",
+    "anti_crease": "Brevi rotazioni occasionali del cestello dopo il completamento per ridurre le grinze del bucato.",
+    "anti_wrinkle": "Rotazione periodica del cestello post-ciclo per ridurre le grinze del bucato.",
+    "cool_down": "Rotazione del cestello senza calore verso la fine del ciclo.",
     "drain_and_switch": "Periodo di transizione dalla modalità lavaggio a asciugatura.",
     "dry": "Fase di asciugatura tramite riscaldatore e/o calore residuo.",
-    "drying": "Periodo principale di burattatura riscaldato.",
+    "drying": "Periodo principale di rotazione del cestello con calore.",
     "heat_up": "Riscaldamento iniziale del riscaldatore prima dell'inizio dell'asciugatura completa.",
     "pre_rinse": "Spruzzatura iniziale prima del lavaggio con detergente.",
     "pre_wash": "Ammollo iniziale o pretrattamento prima del lavaggio principale.",

@@ -652,7 +652,7 @@
       "fields": {
         "minutes": {
           "name": "Minute după terminare",
-          "description": "Se declanșează la prima rotație cel puțin cu atât timp după terminare."
+          "description": "Se declanșează la prima rotire cel puțin cu atât timp după terminare."
         }
       }
     },

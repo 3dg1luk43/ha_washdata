@@ -1125,7 +1125,7 @@
     "maint_done_by_program_intro": "Naloga šteje kot opravljena, ko se konča cikel enega od njenih programov, na primer čiščenje bobna po programu Bombaž 90. Štejejo samo cikli, ki jih WashData prepozna z gotovostjo, ali tisti, pri katerih ste program izbrali sami."
   },
   "phase_desc": {
-    "anti_crease": "Občasni kratki premiki po zaključku za preprečevanje gub na oblačilih.",
+    "anti_crease": "Občasno kratko vrtenje bobna po zaključku za preprečevanje gub na oblačilih.",
     "anti_wrinkle": "Periodično vrtenje po ciklu za preprečevanje gub na oblačilih.",
     "cool_down": "Vrtenje brez toplote blizu konca cikla.",
     "drain_and_switch": "Prehodno obdobje iz načina pranja v način sušenja.",
@@ -1991,8 +1991,8 @@
     "dishwasher_end_spike_quiet_release": "Pomivalni stroj: sekunde tišine po pričakovanem trajanju, preden se sprosti čakanje na končno izčrpavanje vode",
     "smart_termination_duration_ratio": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden ga Pametni zaključek sme predčasno končati; znižajte, če se časi delovanja razlikujejo",
     "anti_crease_finalize_ratio": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden ga rep zaščite pred gubami sme zaključiti; znižajte pri sušilnih strojih, pri pralnih pustite privzeto",
-    "anti_wrinkle_enabled": "Vsrkaj vrtilne impulze po glavni fazi, namesto da jih obravnavaš kot nove cikle",
-    "anti_wrinkle_idle_timeout": "Dovoljeni mir med dvema vrtilnima impulzoma, preden se zaščita pred gubami konča",
+    "anti_wrinkle_enabled": "Vsrkaj pulze vrtenja po glavni fazi, namesto da jih obravnavaš kot nove cikle",
+    "anti_wrinkle_idle_timeout": "Dovoljeni mir med dvema pulzoma vrtenja, preden se zaščita pred gubami konča",
     "anti_wrinkle_max_duration": "Daljši impulz konča zaščito pred gubami in odpre nov cikel",
     "anti_wrinkle_max_power": "Impulz nad to vrednostjo konča zaščito pred gubami in odpre nov cikel",
     "completion_min_seconds": "Najkrajši zagon, ki šteje kot pravi cikel",
@@ -2209,7 +2209,7 @@
     "tail_energy_resets": "energija repa nad pragom: odštevanje se ponastavi",
     "thr": "prag",
     "too_short": "prekratek",
-    "tumble_kept": "vrtilni impulzi ohranjeni"
+    "tumble_kept": "pulzi vrtenja ohranjeni"
   },
   "blueprint": {
     "cycle_running_indicator": {
@@ -2218,7 +2218,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Zaključi dolgo fazo zaščite pred gubami sušilnika",
-      "description": "Za sušilnike, ki po koncu programa nadaljujejo z vrtanjem v zaščiti pred gubami ure in ure. Deluje samo, če se boben sušilnika po preteku nastavljenega števila minut od konca programa še vrti; sušilnik, ki se je do takrat ustavil, pusti pri miru. Nato izklopi pametno vtičnico sušilnika v trenutku nizke moči in jo privzeto znova vklopi. Nov cikel, ki se začne medtem, jo prekliče.\n\nTveganje: preklopi rele, medtem ko je sušilnik priključen. Uporabljajte samo z vtičnico, primerno za vaš sušilnik, in na lastno odgovornost. WashData nikoli sam ne preklopi vtičnice; to naredi ta avtomatizacija.\n\nZahteva WashData 0.5.9 ali novejši."
+      "description": "Za sušilnike, ki po koncu programa nadaljujejo z vrtenjem bobna v zaščiti pred gubami ure in ure. Deluje samo, če se boben sušilnika po preteku nastavljenega števila minut od konca programa še vrti; sušilnik, ki se je do takrat ustavil, pusti pri miru. Nato izklopi pametno vtičnico sušilnika v trenutku nizke moči in jo privzeto znova vklopi. Nov cikel, ki se začne medtem, jo prekliče.\n\nTveganje: preklopi rele, medtem ko je sušilnik priključen. Uporabljajte samo z vtičnico, primerno za vaš sušilnik, in na lastno odgovornost. WashData nikoli sam ne preklopi vtičnice; to naredi ta avtomatizacija.\n\nZahteva WashData 0.5.9 ali novejši."
     }
   },
   "trigger": {
@@ -2256,7 +2256,7 @@
       "name": "Zaščita pred gubami se je začela"
     },
     "still_tumbling": {
-      "name": "Po koncu cikla še vedno bobna"
+      "name": "Po koncu cikla še vedno vrti boben"
     },
     "unload_pending": {
       "name": "Čaka na raztovarjanje"

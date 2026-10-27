@@ -652,7 +652,7 @@
       "fields": {
         "minutes": {
           "name": "Minutos após o fim",
-          "description": "Aciona na primeira rotação pelo menos este tempo após o fim."
+          "description": "Aciona no primeiro giro pelo menos este tempo após o fim."
         }
       }
     },

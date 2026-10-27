@@ -1112,12 +1112,12 @@
     "profile_match_max_duration_ratio": "Pikim tsükli pikkus profiili kestuse murdosana; vaikimisi 1,8 (180%)"
   },
   "phase_desc": {
-    "anti_crease": "Kortsude vähendamiseks tehke aeg-ajalt lühikesi tõmblusi pärast lõpetamist.",
-    "anti_wrinkle": "Perioodiline tsüklijärgne trummeldamine kortsude vähendamiseks.",
-    "cool_down": "Kuumutamine ilma kuumuseta tsükli lõpu lähedal.",
+    "anti_crease": "Kortsude vähendamiseks pöörleb trummel pärast lõpetamist aeg-ajalt lühidalt.",
+    "anti_wrinkle": "Perioodiline tsüklijärgne trumli pöörlemine kortsude vähendamiseks.",
+    "cool_down": "Trumli pöörlemine ilma kuumuseta tsükli lõpu lähedal.",
     "drain_and_switch": "Üleminekuperiood pesemiselt kuivatusrežiimile.",
     "dry": "Kuivatusaste küttekeha ja/või jääksoojuse abil.",
-    "drying": "Peamine kuumutatud trummeldamisperiood.",
+    "drying": "Peamine kuumutatud pöörlemisperiood.",
     "heat_up": "Küttekeha esialgne soojendamine enne täieliku kuivamise algust.",
     "pre_rinse": "Esmane pihustamine enne pesuvahendiga pesemist.",
     "pre_wash": "Esmane leotamine või eeltöötlus enne põhipesu.",
@@ -1206,7 +1206,7 @@
     },
     "anti_crease_finalize_ratio": {
       "label": "Kortsudevastase lõpetamise suhe",
-      "doc": "Osa programmi keskmisest kestusest, milleni tsükkel peab jõudma, enne kui selle madala võimsusega trummeldamine loetakse kortsudevastaseks sabaks. Koormust tuvastavatel kuivatitel vähendage seda (nt 0,75). Pesumasinatel jätke vaikeväärtus (0,98), muidu võib pesu poole peal lõppeda."
+      "doc": "Osa programmi keskmisest kestusest, milleni tsükkel peab jõudma, enne kui selle madala võimsusega trumli pöörlemine loetakse kortsudevastaseks sabaks. Koormust tuvastavatel kuivatitel vähendage seda (nt 0,75). Pesumasinatel jätke vaikeväärtus (0,98), muidu võib pesu poole peal lõppeda."
     },
     "anti_wrinkle_enabled": {
       "doc": "Hoidke kuivati lühikesed madala võimsusega trummelimpulsid pärast peamist kuumutusfaasi lõppenud tsükliga koos, selle asemel et lugeda neid uuteks tsükliteks.",
@@ -1217,11 +1217,11 @@
       "label": "Maksimaalne Impulsivahe"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Sellest pikem impulss loetakse tõeliseks tsükliks, mitte kortsudevastaseks trummeldamiseks.",
+      "doc": "Sellest pikem impulss loetakse tõeliseks tsükliks, mitte kortsudevastaseks trumli pöörlemiseks.",
       "label": "Maksimaalne Kestus"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Sellest suurema võimsusega impulss loetakse tõeliseks uueks tsükliks, mitte trummeldamiseks. Seadke see veidi üle oma trummelimpulsi võimsuse.",
+      "doc": "Sellest suurema võimsusega impulss loetakse tõeliseks uueks tsükliks, mitte trumli pöörlemiseks. Seadke see veidi üle oma trummelimpulsi võimsuse.",
       "label": "Maks Kortsudevastane Võimsus"
     },
     "auto_label_confidence": {
@@ -1265,7 +1265,7 @@
       "label": "Rakenda nutikaid mudeleid tsükli ajal"
     },
     "end_energy_threshold": {
-      "doc": "Väljalülitumise viivituse ajal lubatud energia. Kui seda kulub rohkem, tsükkel jätkub, nii et trummeldamised ja kuivatuse lõpuosad jäävad tsükli külge. Vähendage seda, kui tsüklid lõpevad lõpuosa ajal; suurendage, kui lõppenud tsüklid jäävad ootama.",
+      "doc": "Väljalülitumise viivituse ajal lubatud energia. Kui seda kulub rohkem, tsükkel jätkub, nii et trumli pöörlemine ja kuivatuse lõpuosad jäävad tsükli külge. Vähendage seda, kui tsüklid lõpevad lõpuosa ajal; suurendage, kui lõppenud tsüklid jäävad ootama.",
       "label": "Lõpu Energia"
     },
     "energy_price_entity": {
@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Lõpeta kuivati pikk kortsudevastane faas",
-      "description": "Kuivatitele, mis jätkavad tunde pärast programmi kortsudevastases režiimis trummelimist. Töötab ainult siis, kui kuivati trummeldab veel määratud arvu minuteid pärast programmi lõppu; kuivatit, mis on selleks ajaks seiskunud, ei puudutata. Seejärel lülitab kuivati nutipistiku välja madala võimsuse hetkel ja vaikimisi uuesti sisse. Vahepeal algav uus tsükkel tühistab selle.\n\nOht: see lülitab releed, kui kuivati on pistikusse ühendatud. Kasuta ainult pistikuga, mis sobib su kuivatile, ja omal vastutusel. WashData ei lülita pistikut kunagi ise; seda teeb see automatiseerimine.\n\nVajab WashData 0.5.9 või uuemat."
+      "description": "Kuivatitele, mis jätkavad tunde pärast programmi kortsudevastases režiimis trumli pöörlemist. Töötab ainult siis, kui kuivati trummel pöörleb veel määratud arvu minuteid pärast programmi lõppu; kuivatit, mis on selleks ajaks seiskunud, ei puudutata. Seejärel lülitab kuivati nutipistiku välja madala võimsuse hetkel ja vaikimisi uuesti sisse. Vahepeal algav uus tsükkel tühistab selle.\n\nOht: see lülitab releed, kui kuivati on pistikusse ühendatud. Kasuta ainult pistikuga, mis sobib su kuivatile, ja omal vastutusel. WashData ei lülita pistikut kunagi ise; seda teeb see automatiseerimine.\n\nVajab WashData 0.5.9 või uuemat."
     }
   },
   "trigger": {
@@ -2220,7 +2220,7 @@
       "name": "Kortsudevastane algas"
     },
     "still_tumbling": {
-      "name": "Tuumab veel pärast tsüklit"
+      "name": "Trummel pöörleb veel pärast tsüklit"
     },
     "unload_pending": {
       "name": "Mahalaadimine ootab"

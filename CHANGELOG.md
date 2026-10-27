@@ -52,6 +52,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - Save Debug Traces, Auto Maintenance and Power Profile Interval moved to the internal settings tier.
 - Notifications no longer has an Automations section; it moved to the Automations tab.
+- **Dryer tumbling is named correctly in every language**: many translations called the drum turning drumming, somersaulting, rolling or polishing; it now reads as the drum turning.
 
 ### For developers
 

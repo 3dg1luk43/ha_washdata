@@ -1104,20 +1104,20 @@
     "stop_threshold_w": "Undir þessu telst vélin af",
     "profile_match_min_duration_ratio": "Stysta lotulengd sem hlutfall af lengd sniðsins; sjálfgefið 0,1 (10%)",
     "profile_match_max_duration_ratio": "Lengsta lotulengd sem hlutfall af lengd sniðsins; sjálfgefið 1,8 (180%)",
-    "anti_wrinkle_idle_timeout": "Leyfilegur kyrrðartími milli tveggja veltipúlsa áður en hrukkuleysi lýkur",
+    "anti_wrinkle_idle_timeout": "Leyfilegur kyrrðartími milli tveggja tromlupúlsa áður en hrukkuleysi lýkur",
     "anti_wrinkle_max_power": "Púls yfir þessu slekkur á hrukkuleysi og opnar nýja lotu",
-    "anti_wrinkle_enabled": "Fangar veltipúlsana eftir aðalfasann í stað þess að lesa þá sem nýjar lotur",
+    "anti_wrinkle_enabled": "Fangar tromlupúlsana eftir aðalfasann í stað þess að lesa þá sem nýjar lotur",
     "anti_wrinkle_max_duration": "Púls sem er lengri en þetta slekkur á hrukkuleysi og opnar nýja lotu",
     "anti_crease_finalize_ratio": "Hlutfall af meðallengd kerfisins sem lota þarf að ná áður en hrukkuvarnarhalinn má ljúka henni; lækkaðu það á þurrkurum, hafðu þvottavélar á sjálfgefnu",
     "curve_preroll_seconds": "Sekúndur af mælingum úr misheppnuðum ræsitilraunum sem teknar eru með fremst í ferli lotu; 0 = slökkt"
   },
   "phase_desc": {
-    "anti_crease": "Stundum hrynur stutt eftir að því er lokið til að draga úr hrukkum.",
-    "anti_wrinkle": "Reglubundin velting eftir lotu til að draga úr hrukkum.",
-    "cool_down": "Veltur án hita undir lok lotunnar.",
+    "anti_crease": "Stundum snýst tromlan stutt eftir að því er lokið til að draga úr hrukkum.",
+    "anti_wrinkle": "Reglubundinn tromlusnúningur eftir lotu til að draga úr hrukkum.",
+    "cool_down": "Tromlusnúningur án hita undir lok lotunnar.",
     "drain_and_switch": "Aðlögunartímabil frá þvotti yfir í þurrkun.",
     "dry": "Þurrkunarstig með hitara og/eða afgangshita.",
-    "drying": "Aðal upphitað veltitímabil.",
+    "drying": "Aðal upphitað tímabil með tromlusnúningi.",
     "heat_up": "Upphitun hitari í upphafi áður en full þurrkun hefst.",
     "pre_rinse": "Sprautaðu fyrst fyrir þvottaefnisþvott.",
     "pre_wash": "Upphafsbleyting eða formeðferð fyrir aðalþvott.",
@@ -1163,7 +1163,7 @@
       "intro": "Meðhöndlun loka fyrir uppþvottavélar, sem þurrka oft lengi hljóðlaust á undan stuttri lokaútdælingu."
     },
     "anti_wrinkle": {
-      "intro": "Heldur aflitlum veltipúlsum þurrkara eftir aðalfasann við lotuna sem lauk.",
+      "intro": "Heldur aflitlum tromlupúlsum þurrkara eftir aðalfasann við lotuna sem lauk.",
       "label": "Hrukkuleysi"
     },
     "basic": {
@@ -1206,22 +1206,22 @@
     },
     "anti_crease_finalize_ratio": {
       "label": "Hlutfall fyrir lok hrukkuvarnar",
-      "doc": "Hlutfall af meðallengd kerfisins sem lota þarf að ná áður en aflítil velta hennar telst hrukkuvarnarhalinn. Lækkaðu það (t.d. 0,75) á þurrkurum með rakaskynjun. Hafðu þvottavélar á sjálfgefnu (0,98), annars getur þvottur endað í miðjum klíðum."
+      "doc": "Hlutfall af meðallengd kerfisins sem lota þarf að ná áður en aflítill tromlusnúningur hennar telst hrukkuvarnarhalinn. Lækkaðu það (t.d. 0,75) á þurrkurum með rakaskynjun. Hafðu þvottavélar á sjálfgefnu (0,98), annars getur þvottur endað í miðjum klíðum."
     },
     "anti_wrinkle_enabled": {
-      "doc": "Haltu stuttum, aflitlum veltipúlsum þurrkara eftir aðalhitunarfasann við lotuna sem lauk, í stað þess að túlka þá sem nýjar lotur.",
+      "doc": "Haltu stuttum, aflitlum tromlupúlsum þurrkara eftir aðalhitunarfasann við lotuna sem lauk, í stað þess að túlka þá sem nýjar lotur.",
       "label": "Virkja hrukkuleysisgreiningu"
     },
     "anti_wrinkle_idle_timeout": {
-      "doc": "Hversu lengi þurrkarinn má vera kyrr á milli veltipúlsa áður en hrukkuvarnarstillingu lýkur. Stilltu það yfir lengsta hlé þurrkarans, annars eru síðari púlsar túlkaðir sem rangar ræsingar.",
+      "doc": "Hversu lengi þurrkarinn má vera kyrr á milli tromlupúlsa áður en hrukkuvarnarstillingu lýkur. Stilltu það yfir lengsta hlé þurrkarans, annars eru síðari púlsar túlkaðir sem rangar ræsingar.",
       "label": "Hám. púlsbil"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Lengri púls telst raunveruleg lota, ekki hrukkuvarnarvelta.",
+      "doc": "Lengri púls telst raunveruleg lota, ekki tromlusnúningur hrukkuvarnar.",
       "label": "Hámarkslengd"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Púls yfir þessu afli telst raunveruleg ný lota, ekki velta. Stilltu það rétt yfir afl veltipúlsanna þinna.",
+      "doc": "Púls yfir þessu afli telst raunveruleg ný lota, ekki tromlusnúningur. Stilltu það rétt yfir afl tromlupúlsanna þinna.",
       "label": "Hám. hrukkuleys-afl"
     },
     "auto_label_confidence": {
@@ -1265,7 +1265,7 @@
       "label": "Nota greind líkön meðan á lotu stendur"
     },
     "end_energy_threshold": {
-      "doc": "Orka sem leyfð er á meðan slökkvitöfin stendur. Meira en þetta og lotan heldur áfram, svo veltur og þurrkhalar haldast hluti af henni. Lækkaðu það ef lotur enda á meðan hali stendur; hækkaðu það ef loknar lotur halda áfram að bíða.",
+      "doc": "Orka sem leyfð er á meðan slökkvitöfin stendur. Meira en þetta og lotan heldur áfram, svo tromlusnúningar og þurrkhalar haldast hluti af henni. Lækkaðu það ef lotur enda á meðan hali stendur; hækkaðu það ef loknar lotur halda áfram að bíða.",
       "label": "Lokaorka"
     },
     "energy_price_entity": {
@@ -2173,7 +2173,7 @@
     "tail_energy_resets": "lokaorka yfir þrösk.: teljari núllast",
     "thr": "þrösk.",
     "too_short": "of stutt",
-    "tumble_kept": "veltupúlsum haldið"
+    "tumble_kept": "tromlupúlsum haldið"
   },
   "blueprint": {
     "cycle_running_indicator": {
@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Ljúka langri hrukkuleysiáfanga á þurrkara",
-      "description": "Fyrir þurrkara sem halda áfram að velta í hrukkuleysi í klukkustundir eftir kerfið. Keyrir aðeins ef þurrkarinn er enn að velta þegar stilltur fjöldi mínútna er liðinn frá lokum kerfisins; þurrkari sem hefur stöðvast fyrir þann tíma er látinn í friði. Hún slekkur síðan á snjalltengil þurrkarans í lágafls-augnablik og, sjálfgefið, kveikir á honum aftur. Ný lota sem byrjar á meðan hættir við hana.\n\nÁhætta: þetta skiptir um relé á meðan þurrkarinn er tengdur. Notaðu það aðeins með tengi sem er gert fyrir þurrkarann þinn og á eigin áhættu. WashData skiptir aldrei sjálf um tengilinn; það gerir þessi sjálfvirkni.\n\nKrefst WashData 0.5.9 eða nýrra."
+      "description": "Fyrir þurrkara þar sem tromlan heldur áfram að snúast í hrukkuleysi í klukkustundir eftir kerfið. Keyrir aðeins ef tromla þurrkarans er enn að snúast þegar stilltur fjöldi mínútna er liðinn frá lokum kerfisins; þurrkari sem hefur stöðvast fyrir þann tíma er látinn í friði. Hún slekkur síðan á snjalltengil þurrkarans í lágafls-augnablik og, sjálfgefið, kveikir á honum aftur. Ný lota sem byrjar á meðan hættir við hana.\n\nÁhætta: þetta skiptir um relé á meðan þurrkarinn er tengdur. Notaðu það aðeins með tengi sem er gert fyrir þurrkarann þinn og á eigin áhættu. WashData skiptir aldrei sjálf um tengilinn; það gerir þessi sjálfvirkni.\n\nKrefst WashData 0.5.9 eða nýrra."
     }
   },
   "trigger": {
@@ -2220,7 +2220,7 @@
       "name": "Hrukkuleysi hafið"
     },
     "still_tumbling": {
-      "name": "Þurrkari enn í gangi eftir lotu"
+      "name": "Tromlan snýst enn eftir lotu"
     },
     "unload_pending": {
       "name": "Losun í bið"

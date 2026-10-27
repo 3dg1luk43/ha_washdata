@@ -523,7 +523,7 @@
       "cycle_overrun": "Tsükkel kestab liiga kaua",
       "cycle_paused": "Tsükkel peatati",
       "cycle_resumed": "Tsükkel jätkus",
-      "still_tumbling": "Tuumab veel pärast tsüklit",
+      "still_tumbling": "Trummel pöörleb veel pärast tsüklit",
       "unloaded": "Mahalaadimine tehtud",
       "state_changed": "Olek muutus",
       "maintenance_due": "Hooldus on vajalik",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Ainult see programm, täpse nimega. Jätke tühjaks mis tahes programmi jaoks.",
       "phase": "Ainult see faas, nimega. Jätke tühjaks mis tahes faasi jaoks.",
-      "minutes": "Lõpeb peagi: minutit jäänud. Tuumab veel: minutit pärast lõppu.",
+      "minutes": "Lõpeb peagi: minutit jäänud. Trummel pöörleb veel: minutit pärast lõppu.",
       "percent": "Protsent üle programmi tavapärase kestuse.",
       "include_detected": "Käivituge ka WashData tuvastatud pauside puhul, nagu leotamine või seiskumine.",
       "status": "Ainult tsüklid, mis lõppesid sel viisil.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Kortsudevastane algas",
-      "description": "Käivitub, kui seade alustab valmis koorma kortsude vastu tuumamist."
+      "description": "Käivitub, kui seade alustab valmis koormaga kortsude vastu trumli pöörlemist."
     },
     "still_tumbling": {
-      "name": "Tuumab veel pärast tsüklit",
-      "description": "Käivitub üks kord, kui seade tuumab lühikeste vahemaadega nii palju minuteid pärast tsükli lõppu. Peatub uue tsükli algul või 4 tundi pärast lõppu.",
+      "name": "Trummel pöörleb veel pärast tsüklit",
+      "description": "Käivitub üks kord, kui seadme trummel pöörleb veel lühikeste hoogudena nii palju minuteid pärast tsükli lõppu. Peatub uue tsükli algul või 4 tundi pärast lõppu.",
       "fields": {
         "minutes": {
           "name": "Minutit pärast lõppu",
-          "description": "Käivitub esimesel tuumamisel vähemalt nii kaua pärast lõppu."
+          "description": "Käivitub esimesel trummelimpulsil vähemalt nii kaua pärast lõppu."
         }
       }
     },

@@ -523,7 +523,7 @@
       "cycle_overrun": "Zyklus läuft zu lang",
       "cycle_paused": "Zyklus angehalten",
       "cycle_resumed": "Zyklus fortgesetzt",
-      "still_tumbling": "Noch trommelnd nach dem Zyklus",
+      "still_tumbling": "Trommel bewegt sich noch nach dem Zyklus",
       "unloaded": "Entnommen",
       "state_changed": "Zustand geändert",
       "maintenance_due": "Wartung fällig",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Nur dieses Programm, nach genauem Namen. Leer lassen für jedes Programm.",
       "phase": "Nur diese Phase, nach Name. Leer lassen für jede Phase.",
-      "minutes": "Bald fertig: verbleibende Minuten. Noch trommelnd: Minuten nach dem Ende.",
+      "minutes": "Bald fertig: verbleibende Minuten. Trommel bewegt sich noch: Minuten nach dem Ende.",
       "percent": "Prozent über die übliche Programmdauer.",
       "include_detected": "Auch bei Pausen auslösen, die WashData in der Leistung erkennt, z.B. Einweichen oder Stillstand.",
       "status": "Nur Zyklen, die auf diese Weise geendet haben.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Knitterschutz gestartet",
-      "description": "Wird ausgelöst, wenn das Gerät die fertige Ladung zur Knittervermeidung trommelnd bewegt."
+      "description": "Wird ausgelöst, wenn das Gerät die fertige Ladung zur Knittervermeidung in der Trommel bewegt."
     },
     "still_tumbling": {
-      "name": "Noch trommelnd nach dem Zyklus",
-      "description": "Wird einmal ausgelöst, wenn das Gerät noch in kurzen Stößen trommelnd arbeitet, diese Minutenzahl nach dem Ende. Hört bei einem neuen Zyklus oder 4 Stunden nach dem Ende auf.",
+      "name": "Trommel bewegt sich noch nach dem Zyklus",
+      "description": "Wird einmal ausgelöst, wenn sich die Trommel des Geräts noch in kurzen Stößen bewegt, diese Minutenzahl nach dem Ende. Hört bei einem neuen Zyklus oder 4 Stunden nach dem Ende auf.",
       "fields": {
         "minutes": {
           "name": "Minuten nach dem Ende",
-          "description": "Beim ersten Trommelvorgang auslösen, der mindestens so lange nach dem Ende liegt."
+          "description": "Bei der ersten Trommelbewegung auslösen, die mindestens so lange nach dem Ende liegt."
         }
       }
     },

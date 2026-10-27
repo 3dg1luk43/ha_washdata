@@ -523,7 +523,7 @@
       "cycle_overrun": "Ciklus traje predugo",
       "cycle_paused": "Ciklus pauziran",
       "cycle_resumed": "Ciklus nastavljen",
-      "still_tumbling": "Još se okreće posle ciklusa",
+      "still_tumbling": "Još okreće bubanj posle ciklusa",
       "unloaded": "Istovareno",
       "state_changed": "Stanje promenjeno",
       "maintenance_due": "Održavanje dospelo",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Samo ovaj program, po tačnom imenu. Ostavi prazno za bilo koji program.",
       "phase": "Samo ova faza, po imenu. Ostavi prazno za bilo koju fazu.",
-      "minutes": "Uskoro završava: minuti do kraja. Još se okreće: minuti posle završetka.",
+      "minutes": "Uskoro završava: minuti do kraja. Još okreće bubanj: minuti posle završetka.",
       "percent": "Procenat iznad uobičajenog trajanja programa.",
       "include_detected": "Aktiviraj i na pauzama koje WashData vidi u snazi, kao što su namakanje ili zastoj.",
       "status": "Samo ciklusi koji su završeni na ovaj način.",
@@ -644,11 +644,11 @@
     },
     "anti_wrinkle_started": {
       "name": "Zaštita od gužvanja pokrenuta",
-      "description": "Aktivira se kada uređaj počne da rotira završen veš kako bi sprečio gužvanje."
+      "description": "Aktivira se kada uređaj počne da okreće završen veš kako bi sprečio gužvanje."
     },
     "still_tumbling": {
-      "name": "Još se okreće posle ciklusa",
-      "description": "Aktivira se jednom kada uređaj još uvek rotira u kratkim naletima toliko minuta posle završetka ciklusa. Prestaje pri novom ciklusu ili 4 sata posle završetka.",
+      "name": "Još okreće bubanj posle ciklusa",
+      "description": "Aktivira se jednom kada uređaj još uvek okreće bubanj u kratkim naletima toliko minuta posle završetka ciklusa. Prestaje pri novom ciklusu ili 4 sata posle završetka.",
       "fields": {
         "minutes": {
           "name": "Minuta posle završetka",

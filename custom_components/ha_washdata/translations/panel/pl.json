@@ -2218,7 +2218,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Zakończ długą fazę antygniotową suszarki",
-      "description": "Dla suszarek, które nadal kręcą bębnem w trybie antygniotowym przez wiele godzin po zakończeniu programu. Uruchamia się tylko wtedy, gdy suszarka nadal kręci bębnem po upływie ustawionej liczby minut od zakończenia programu; suszarkę, która do tego czasu się zatrzymała, zostawia w spokoju. Następnie wyłącza inteligentne gniazdo suszarki w momencie niskiego poboru mocy i domyślnie włącza je z powrotem. Nowy cykl rozpoczęty w międzyczasie anuluje tę automatyzację.\n\nRyzyko: wyłącza przekaźnik, gdy suszarka jest podłączona. Używaj tylko z gniazdem przystosowanym do Twojej suszarki i na własne ryzyko. WashData nigdy nie przełącza gniazda samodzielnie; robi to ta automatyzacja.\n\nWymaga WashData 0.5.9 lub nowszego."
+      "description": "Dla suszarek, które nadal obracają bębnem w trybie antygniotowym przez wiele godzin po zakończeniu programu. Uruchamia się tylko wtedy, gdy suszarka nadal obraca bębnem po upływie ustawionej liczby minut od zakończenia programu; suszarkę, która do tego czasu się zatrzymała, zostawia w spokoju. Następnie wyłącza inteligentne gniazdo suszarki w momencie niskiego poboru mocy i domyślnie włącza je z powrotem. Nowy cykl rozpoczęty w międzyczasie anuluje tę automatyzację.\n\nRyzyko: wyłącza przekaźnik, gdy suszarka jest podłączona. Używaj tylko z gniazdem przystosowanym do Twojej suszarki i na własne ryzyko. WashData nigdy nie przełącza gniazda samodzielnie; robi to ta automatyzacja.\n\nWymaga WashData 0.5.9 lub nowszego."
     }
   },
   "trigger": {
@@ -2256,7 +2256,7 @@
       "name": "Tryb antygniotowy rozpoczęty"
     },
     "still_tumbling": {
-      "name": "Nadal kręci po zakończeniu cyklu"
+      "name": "Nadal obraca bębnem po zakończeniu cyklu"
     },
     "unload_pending": {
       "name": "Oczekuje na rozładunek"

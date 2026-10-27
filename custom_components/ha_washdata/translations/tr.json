@@ -652,7 +652,7 @@
       "fields": {
         "minutes": {
           "name": "Bitişten sonraki dakikalar",
-          "description": "Bitişten en az bu kadar sonra gerçekleşen ilk çevirmede tetikle."
+          "description": "Bitişten en az bu kadar sonra gerçekleşen ilk tambur dönüşünde tetikle."
         }
       }
     },

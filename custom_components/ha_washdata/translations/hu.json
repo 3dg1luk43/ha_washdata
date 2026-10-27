@@ -523,7 +523,7 @@
       "cycle_overrun": "Ciklus túllépi az időt",
       "cycle_paused": "Ciklus szüneteltetva",
       "cycle_resumed": "Ciklus folytatódott",
-      "still_tumbling": "A ciklus után még pörög",
+      "still_tumbling": "A ciklus után még forog a dob",
       "unloaded": "Kirakva",
       "state_changed": "Állapot megváltozott",
       "maintenance_due": "Karbantartás esedékes",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Csak ez a program, pontos névvel. Hagyja üresen bármely programhoz.",
       "phase": "Csak ez a fázis, névvel. Hagyja üresen bármely fázishoz.",
-      "minutes": "Hamarosan kész: fennmaradó percek. Még pörög: percek a befejezés után.",
+      "minutes": "Hamarosan kész: fennmaradó percek. Még forog a dob: percek a befejezés után.",
       "percent": "Százalék a program szokásos időtartama felett.",
       "include_detected": "Aktiválás a WashData által az áramfogyasztásban észlelt szünetekre is, például áztatásra vagy elakadásra.",
       "status": "Csak így végzett ciklusok.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Ránctalanítás indult",
-      "description": "Aktiválódik, amikor a készülék elkezdi a kész töltet pörgetését a gyűrődések ellen."
+      "description": "Aktiválódik, amikor a készülék elkezdi a kész töltet forgatását a gyűrődések ellen."
     },
     "still_tumbling": {
-      "name": "A ciklus után még pörög",
-      "description": "Aktiválódik egyszer, amikor a készülék ilyen sok perccel a ciklus vége után rövid lökésekben még pörög. Megáll új ciklusnál vagy 4 órával a befejezés után.",
+      "name": "A ciklus után még forog a dob",
+      "description": "Aktiválódik egyszer, amikor a készülék ilyen sok perccel a ciklus vége után rövid lökésekben még forgatja a dobot. Megáll új ciklusnál vagy 4 órával a befejezés után.",
       "fields": {
         "minutes": {
           "name": "Percek a befejezés után",
-          "description": "Aktiválás az első pörgetésnél, amely legalább ennyivel a befejezés után van."
+          "description": "Aktiválás az első dobforgásnál, amely legalább ennyivel a befejezés után van."
         }
       }
     },

@@ -1112,12 +1112,12 @@
     "curve_preroll_seconds": "Sekunden an Messwerten aus abgebrochenen Startversuchen, die an den Anfang der Kurve eines Zyklus übernommen werden; 0 = aus"
   },
   "phase_desc": {
-    "anti_crease": "Gelegentliche kurze Trommelumwälzungen nach Abschluss, um Knitterung zu vermeiden.",
-    "anti_wrinkle": "Regelmäßige Trommelumwälzungen nach dem Zyklus, um Knitterung zu vermeiden.",
-    "cool_down": "Taumeln ohne Hitze gegen Ende des Zyklus.",
+    "anti_crease": "Gelegentliche kurze Trommelbewegungen nach Abschluss, um Knitterung zu vermeiden.",
+    "anti_wrinkle": "Regelmäßige Trommelbewegungen nach dem Zyklus, um Knitterung zu vermeiden.",
+    "cool_down": "Trommelbewegung ohne Hitze gegen Ende des Zyklus.",
     "drain_and_switch": "Übergangszeit vom Wasch- zum Trocknungsmodus.",
     "dry": "Trocknungsphase mittels Heizung und/oder Restwärme.",
-    "drying": "Hauptheizperiode.",
+    "drying": "Hauptheizperiode mit Trommelbewegung.",
     "heat_up": "Erstes Aufwärmen der Heizung, bevor die vollständige Trocknung beginnt.",
     "pre_rinse": "Erstes Aufsprühen vor dem Waschen mit Reinigungsmittel.",
     "pre_wash": "Erstes Einweichen oder Vorbehandeln vor dem Hauptwaschgang.",
@@ -1206,18 +1206,18 @@
     },
     "anti_crease_finalize_ratio": {
       "label": "Verhältnis für Knitterschutz-Abschluss",
-      "doc": "Anteil der durchschnittlichen Programmdauer, den ein Zyklus erreichen muss, bevor sein Trommeln mit geringer Leistung als Knitterschutz-Nachlauf gilt. Senken Sie den Wert (z. B. 0,75) bei Trocknern mit Beladungserkennung. Lassen Sie Waschmaschinen beim Standard (0,98), sonst kann eine Wäsche mittendrin enden."
+      "doc": "Anteil der durchschnittlichen Programmdauer, den ein Zyklus erreichen muss, bevor seine Trommelbewegung mit geringer Leistung als Knitterschutz-Nachlauf gilt. Senken Sie den Wert (z. B. 0,75) bei Trocknern mit Beladungserkennung. Lassen Sie Waschmaschinen beim Standard (0,98), sonst kann eine Wäsche mittendrin enden."
     },
     "anti_wrinkle_enabled": {
       "doc": "Die kurzen Trommelimpulse eines Trockners mit geringer Leistung nach der Hauptheizphase beim abgeschlossenen Zyklus behalten, statt sie als neue Zyklen zu werten.",
       "label": "Knitterschutzerkennung aktivieren"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Ein längerer Impuls gilt als echter Zyklus, nicht als Knitterschutz-Trommeln.",
+      "doc": "Ein längerer Impuls gilt als echter Zyklus, nicht als Knitterschutz-Trommelbewegung.",
       "label": "Maximale Dauer"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Ein Impuls über dieser Leistung gilt als echter neuer Zyklus, nicht als Trommeln. Knapp über der Leistung Ihrer Trommelimpulse einstellen.",
+      "doc": "Ein Impuls über dieser Leistung gilt als echter neuer Zyklus, nicht als Trommelbewegung. Knapp über der Leistung Ihrer Trommelimpulse einstellen.",
       "label": "Max. Knitterschutzleistung"
     },
     "auto_label_confidence": {
@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Lange Knitterschutz-Phase des Trockners beenden",
-      "description": "Für Trockner, die nach dem Programm stundenlang im Knitterschutz weitertrommeln. Läuft nur, wenn der Trockner die eingestellte Anzahl Minuten nach Programmende noch trommelt; ein Trockner, der bis dahin aufgehört hat, bleibt unberührt. Sie schaltet dann den Smart Plug des Trockners in einem Moment geringer Leistung aus, standardmäßig auch wieder ein. Ein neu gestarteter Zyklus bricht sie ab.\n\nRisiko: Dabei wird ein Relais geschaltet, während der Trockner angeschlossen ist. Nur mit einem für Ihren Trockner geeigneten Stecker und auf eigenes Risiko verwenden. WashData schaltet den Stecker selbst nie; das erledigt diese Automatisierung.\n\nBenötigt WashData 0.5.9 oder neuer."
+      "description": "Für Trockner, deren Trommel sich nach dem Programm stundenlang im Knitterschutz weiterbewegt. Läuft nur, wenn sich die Trommel die eingestellte Anzahl Minuten nach Programmende noch bewegt; ein Trockner, der bis dahin aufgehört hat, bleibt unberührt. Sie schaltet dann den Smart Plug des Trockners in einem Moment geringer Leistung aus, standardmäßig auch wieder ein. Ein neu gestarteter Zyklus bricht sie ab.\n\nRisiko: Dabei wird ein Relais geschaltet, während der Trockner angeschlossen ist. Nur mit einem für Ihren Trockner geeigneten Stecker und auf eigenes Risiko verwenden. WashData schaltet den Stecker selbst nie; das erledigt diese Automatisierung.\n\nBenötigt WashData 0.5.9 oder neuer."
     }
   },
   "trigger": {
@@ -2220,7 +2220,7 @@
       "name": "Knitterschutz gestartet"
     },
     "still_tumbling": {
-      "name": "Noch trommelnd nach dem Zyklus"
+      "name": "Trommel bewegt sich noch nach dem Zyklus"
     },
     "unload_pending": {
       "name": "Entnahme ausstehend"

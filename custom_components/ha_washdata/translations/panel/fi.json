@@ -1112,7 +1112,7 @@
     "profile_match_max_duration_ratio": "Pisin sykli profiilin keston osuutena; oletus 1,8 (180 %)"
   },
   "phase_desc": {
-    "anti_crease": "Satunnaisia lyhyitä rumpujaksia valmistumisen jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
+    "anti_crease": "Satunnaisia lyhyitä rummun pyörityksiä valmistumisen jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
     "anti_wrinkle": "Jaksoittainen rummun pyörittäminen syklin jälkeen vaatteiden rypistyistä ehkäisemiseksi.",
     "cool_down": "Pyöriminen ilman lämpöä syklin lopussa.",
     "drain_and_switch": "Siirtymäaika pesusta kuivaustilaan.",
@@ -1163,7 +1163,7 @@
       "intro": "Syklin lopun käsittely astianpesukoneille, jotka kuivaavat usein pitkään hiljaa ennen lyhyttä lopullista vedenpoistoa."
     },
     "anti_wrinkle": {
-      "intro": "Pitää kuivausrummun päävaiheen jälkeiset vähätehoiset rummutuspulssit kiinni valmiissa syklissä.",
+      "intro": "Pitää kuivausrummun päävaiheen jälkeiset vähätehoiset rumpupulssit kiinni valmiissa syklissä.",
       "label": "Ryppyjenesto"
     },
     "basic": {
@@ -1206,22 +1206,22 @@
     },
     "anti_crease_finalize_ratio": {
       "label": "Ryppyjeneston lopetussuhde",
-      "doc": "Osuus ohjelman keskimääräisestä kestosta, joka syklin on saavutettava, ennen kuin sen vähätehoinen rummutus lasketaan ryppyjeneston loppuhännäksi. Laske sitä (esim. 0,75) kuormaa tunnistavissa kuivausrummuissa. Pidä pesukoneet oletusarvossa (0,98), muuten pesu voi päättyä puolivälissä."
+      "doc": "Osuus ohjelman keskimääräisestä kestosta, joka syklin on saavutettava, ennen kuin sen vähätehoinen pyöritys lasketaan ryppyjeneston loppuhännäksi. Laske sitä (esim. 0,75) kuormaa tunnistavissa kuivausrummuissa. Pidä pesukoneet oletusarvossa (0,98), muuten pesu voi päättyä puolivälissä."
     },
     "anti_wrinkle_enabled": {
-      "doc": "Pidä kuivausrummun lyhyet vähätehoiset rummutuspulssit päälämpövaiheen jälkeen valmiissa syklissä sen sijaan, että ne luettaisiin uusiksi sykleiksi.",
+      "doc": "Pidä kuivausrummun lyhyet vähätehoiset rumpupulssit päälämpövaiheen jälkeen valmiissa syklissä sen sijaan, että ne luettaisiin uusiksi sykleiksi.",
       "label": "Ota ryppyjenesto käyttöön"
     },
     "anti_wrinkle_idle_timeout": {
-      "doc": "Kuinka kauan kuivausrumpu saa olla hiljaa rummutuspulssien välillä, ennen kuin ryppyjenestotila päättyy. Aseta se pidemmäksi kuin rumpusi pisin tauko, muuten myöhemmät pulssit luetaan vääriksi käynnistyksiksi.",
+      "doc": "Kuinka kauan kuivausrumpu saa olla hiljaa rumpupulssien välillä, ennen kuin ryppyjenestotila päättyy. Aseta se pidemmäksi kuin rumpusi pisin tauko, muuten myöhemmät pulssit luetaan vääriksi käynnistyksiksi.",
       "label": "Pulssien enimmäisväli"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Tätä pidempi pulssi lasketaan todelliseksi sykliksi, ei ryppyjeneston rummutukseksi.",
+      "doc": "Tätä pidempi pulssi lasketaan todelliseksi sykliksi, ei ryppyjeneston pyöritykseksi.",
       "label": "Enimmäiskesto"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Tämän tehon ylittävä pulssi lasketaan todelliseksi uudeksi sykliksi, ei rummutukseksi. Aseta se hieman rummutuspulssien tehon yläpuolelle.",
+      "doc": "Tämän tehon ylittävä pulssi lasketaan todelliseksi uudeksi sykliksi, ei rummun pyöritykseksi. Aseta se hieman rumpupulssien tehon yläpuolelle.",
       "label": "Ryppyjeneston enimmäisteho"
     },
     "auto_label_confidence": {
@@ -1265,7 +1265,7 @@
       "label": "Käytä älykkäitä malleja syklin aikana"
     },
     "end_energy_threshold": {
-      "doc": "Sammutusviiveen aikana sallittu energia. Jos sitä kuluu enemmän, sykli jatkuu, joten rummutukset ja kuivauksen loppuvaiheet pysyvät syklissä. Laske sitä, jos syklit päättyvät loppuvaiheen aikana; nosta sitä, jos valmiit syklit jäävät odottamaan.",
+      "doc": "Sammutusviiveen aikana sallittu energia. Jos sitä kuluu enemmän, sykli jatkuu, joten rummun pyöritykset ja kuivauksen loppuvaiheet pysyvät syklissä. Laske sitä, jos syklit päättyvät loppuvaiheen aikana; nosta sitä, jos valmiit syklit jäävät odottamaan.",
       "label": "Lopetuksen energiakynnys"
     },
     "energy_price_entity": {
@@ -2220,7 +2220,7 @@
       "name": "Ryppyjenesto alkoi"
     },
     "still_tumbling": {
-      "name": "Rumpaa yhä syklin jälkeen"
+      "name": "Rumpu pyörii yhä syklin jälkeen"
     },
     "unload_pending": {
       "name": "Purkaminen odottaa"

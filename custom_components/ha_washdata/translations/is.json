@@ -523,7 +523,7 @@
       "cycle_overrun": "Lota rennur yfir",
       "cycle_paused": "Hlé á lotu",
       "cycle_resumed": "Lota haldið áfram",
-      "still_tumbling": "Þurrkari enn í gangi eftir lotu",
+      "still_tumbling": "Tromlan snýst enn eftir lotu",
       "unloaded": "Losað",
       "state_changed": "Staða breytt",
       "maintenance_due": "Viðhald tímabært",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Aðeins þetta forrit, eftir nákvæmu nafni. Láttu tómt fyrir hvaða forrit sem er.",
       "phase": "Aðeins þessi fasi, eftir nafni. Láttu tómt fyrir hvaða fasa sem er.",
-      "minutes": "Nálægt lokum: mínútur eftir. Þurrkari enn í gangi: mínútur eftir lok.",
+      "minutes": "Nálægt lokum: mínútur eftir. Tromlan snýst enn: mínútur eftir lok.",
       "percent": "Prósent yfir venjulegan tíma forritsins.",
       "include_detected": "Kveiktu einnig við hlébil sem WashData sér í orkunotkun, t.d. blótun eða stöðvun.",
       "status": "Aðeins lotur sem lauk á þennan hátt.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Hrukkuleysi hafið",
-      "description": "Kveikir þegar tækið byrjar að tumla loknum þvotti til að koma í veg fyrir hrukku."
+      "description": "Kveikir þegar tækið byrjar að snúa loknum þvotti í tromlunni til að koma í veg fyrir hrukku."
     },
     "still_tumbling": {
-      "name": "Þurrkari enn í gangi eftir lotu",
-      "description": "Kveikir einu sinni þegar tækið tumlar enn í stuttum skotum þetta margar mínútur eftir lok lotu. Stöðvast við nýja lotu eða 4 klukkustundum eftir lok.",
+      "name": "Tromlan snýst enn eftir lotu",
+      "description": "Kveikir einu sinni þegar tromla tækisins snýst enn í stuttum skotum þetta margar mínútur eftir lok lotu. Stöðvast við nýja lotu eða 4 klukkustundum eftir lok.",
       "fields": {
         "minutes": {
           "name": "Mínútur eftir lok",
-          "description": "Kveiktu við fyrsta tumblið sem er að minnsta kosti svo löngu eftir lok."
+          "description": "Kveiktu við fyrsta tromlusnúninginn sem er að minnsta kosti svo löngu eftir lok."
         }
       }
     },

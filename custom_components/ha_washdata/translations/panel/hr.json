@@ -1109,12 +1109,12 @@
     "maint_done_by_program_intro": "Zadatak se smatra obavljenim kada završi ciklus jednog od njegovih programa, na primjer čišćenje bubnja nakon programa Pamuk 90. Računaju se samo ciklusi koje WashData pouzdano prepozna ili oni za koje ste sami odabrali program."
   },
   "phase_desc": {
-    "anti_crease": "Povremena kratka prevrtanja nakon završetka kako bi se smanjile bore.",
-    "anti_wrinkle": "Periodično prevrtanje nakon ciklusa za smanjenje bora.",
-    "cool_down": "Prevrtanje bez zagrijavanja pri kraju ciklusa.",
+    "anti_crease": "Povremeno kratko okretanje bubnja nakon završetka kako bi se smanjile bore.",
+    "anti_wrinkle": "Periodično okretanje bubnja nakon ciklusa za smanjenje bora.",
+    "cool_down": "Okretanje bubnja bez zagrijavanja pri kraju ciklusa.",
     "drain_and_switch": "Prijelazno razdoblje s načina pranja na način sušenja.",
     "dry": "Faza sušenja pomoću grijača i/ili preostale topline.",
-    "drying": "Glavno grijano razdoblje prevrtanja.",
+    "drying": "Glavno grijano razdoblje okretanja bubnja.",
     "heat_up": "Početno zagrijavanje grijača prije početka potpunog sušenja.",
     "pre_rinse": "Prvo raspršivanje prije pranja deterdžentom.",
     "pre_wash": "Početno namakanje ili prethodna obrada prije glavnog pranja.",
@@ -1160,7 +1160,7 @@
       "intro": "Obrada kraja za perilice posuđa, koje često dugo i tiho suše prije kratkog završnog ispumpavanja."
     },
     "anti_wrinkle": {
-      "intro": "Zadržava kratke impulse prevrtanja male snage nakon glavne faze sušilice uz završeni ciklus.",
+      "intro": "Zadržava kratke impulse okretanja bubnja male snage nakon glavne faze sušilice uz završeni ciklus.",
       "label": "Anti-bore"
     },
     "basic": {
@@ -1202,23 +1202,23 @@
       "doc": "Nakon očekivanog trajanja: koliko dugo perilica posuđa mora ostati ispod Praga zaustavljanja prije nego što WashData prestane čekati završno ispumpavanje. Povećajte ako se kasno ispumpavanje nakon dugog sušenja propusti. Čekanje nikad ne prelazi 30 minuta."
     },
     "anti_crease_finalize_ratio": {
-      "doc": "Udio prosječnog trajanja programa koji ciklus mora dosegnuti prije nego što se prevrtanje male snage računa kao rep anti-bore. Smanjite ga (npr. 0,75) kod sušilica koje se prilagođavaju količini rublja. Kod perilica ostavite zadano (0,98), inače pranje može završiti na pola.",
+      "doc": "Udio prosječnog trajanja programa koji ciklus mora dosegnuti prije nego što se okretanje bubnja male snage računa kao rep anti-bore. Smanjite ga (npr. 0,75) kod sušilica koje se prilagođavaju količini rublja. Kod perilica ostavite zadano (0,98), inače pranje može završiti na pola.",
       "label": "Omjer dovršetka anti-bore"
     },
     "anti_wrinkle_enabled": {
-      "doc": "Zadržite kratke impulse prevrtanja male snage nakon glavne faze grijanja sušilice uz završeni ciklus, umjesto da se čitaju kao novi ciklusi.",
+      "doc": "Zadržite kratke impulse okretanja bubnja male snage nakon glavne faze grijanja sušilice uz završeni ciklus, umjesto da se čitaju kao novi ciklusi.",
       "label": "Omogući otkrivanje anti-bora"
     },
     "anti_wrinkle_idle_timeout": {
-      "doc": "Koliko dugo sušilica smije mirovati između impulsa prevrtanja prije nego što način anti-bore završi. Postavite iznad najduljeg razmaka vaše sušilice, inače se kasniji impulsi čitaju kao lažni počeci.",
+      "doc": "Koliko dugo sušilica smije mirovati između impulsa okretanja bubnja prije nego što način anti-bore završi. Postavite iznad najduljeg razmaka vaše sušilice, inače se kasniji impulsi čitaju kao lažni počeci.",
       "label": "Maks. razmak između impulsa"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Impuls dulji od ovoga računa se kao pravi ciklus, a ne kao prevrtanje protiv gužvanja.",
+      "doc": "Impuls dulji od ovoga računa se kao pravi ciklus, a ne kao okretanje bubnja protiv gužvanja.",
       "label": "Maks. trajanje"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Impuls iznad ove snage računa se kao pravi novi ciklus, a ne kao prevrtanje. Postavite malo iznad snage impulsa prevrtanja.",
+      "doc": "Impuls iznad ove snage računa se kao pravi novi ciklus, a ne kao okretanje bubnja. Postavite malo iznad snage impulsa okretanja bubnja.",
       "label": "Maks. snaga anti-bora"
     },
     "auto_label_confidence": {
@@ -1262,7 +1262,7 @@
       "label": "Primijeni pametne modele tijekom ciklusa"
     },
     "end_energy_threshold": {
-      "doc": "Energija dopuštena tijekom odgode isključivanja. Iznad toga ciklus se nastavlja, pa prevrtanja i završno sušenje ostaju dio ciklusa. Smanjite ako ciklusi završavaju tijekom repa; povećajte ako završeni ciklusi i dalje čekaju.",
+      "doc": "Energija dopuštena tijekom odgode isključivanja. Iznad toga ciklus se nastavlja, pa okretanja bubnja i završno sušenje ostaju dio ciklusa. Smanjite ako ciklusi završavaju tijekom repa; povećajte ako završeni ciklusi i dalje čekaju.",
       "label": "Energija završetka"
     },
     "energy_price_entity": {
@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Završi dugu fazu anti-bore sušilice",
-      "description": "Za sušilice koje nastavljaju prevrtati u anti-bori satima nakon programa. Pokreće se samo ako sušilica i dalje prevrće kada protekne postavljeni broj minuta od završetka programa; sušilicu koja se do tada zaustavila ostavlja na miru. Zatim isključuje pametni utikač sušilice u trenutku niske potrošnje i zadano ga ponovo uključi. Novi ciklus koji počne u međuvremenu otkazuje je.\n\nRizik: ovo prebacuje relej dok je sušilica priključena. Koristite samo s utikačem prikladnim za vašu sušilicu i na vlastiti rizik. WashData nikada sam ne prebacuje utikač; to radi ova automatizacija.\n\nZahtijeva WashData 0.5.9 ili noviji."
+      "description": "Za sušilice koje nastavljaju okretati bubanj u anti-bori satima nakon programa. Pokreće se samo ako sušilica i dalje okreće bubanj kada protekne postavljeni broj minuta od završetka programa; sušilicu koja se do tada zaustavila ostavlja na miru. Zatim isključuje pametni utikač sušilice u trenutku niske potrošnje i zadano ga ponovo uključi. Novi ciklus koji počne u međuvremenu otkazuje je.\n\nRizik: ovo prebacuje relej dok je sušilica priključena. Koristite samo s utikačem prikladnim za vašu sušilicu i na vlastiti rizik. WashData nikada sam ne prebacuje utikač; to radi ova automatizacija.\n\nZahtijeva WashData 0.5.9 ili noviji."
     }
   },
   "trigger": {
@@ -2238,7 +2238,7 @@
       "name": "Anti-bora pokrenuta"
     },
     "still_tumbling": {
-      "name": "Još uvijek se okreće nakon ciklusa"
+      "name": "Još uvijek okreće bubanj nakon ciklusa"
     },
     "unload_pending": {
       "name": "Istovar na čekanju"

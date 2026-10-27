@@ -1112,8 +1112,8 @@
     "curve_preroll_seconds": "Sekunders mätvärden från avbrutna startförsök som tas med främst i en cykels kurva; 0 = av"
   },
   "phase_desc": {
-    "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
-    "anti_wrinkle": "Periodisk tumlande efter cykeln för att förhindra skrynklor i tvätten.",
+    "anti_crease": "Enstaka korta tumlingar efter färdigställandet för att förhindra skrynklor i tvätten.",
+    "anti_wrinkle": "Periodisk tumling efter cykeln för att förhindra skrynklor i tvätten.",
     "cool_down": "Tumling utan värme nära cykelns slut.",
     "drain_and_switch": "Övergångsperiod från tvätt- till torkläge.",
     "dry": "Torkningssteg med värmare och/eller restvärme.",
@@ -2220,7 +2220,7 @@
       "name": "Skrynkelskydd startat"
     },
     "still_tumbling": {
-      "name": "Torktumlaren är fortfarande igång efter cykeln"
+      "name": "Torktumlaren tumlar fortfarande efter cykeln"
     },
     "unload_pending": {
       "name": "Lossning väntande"

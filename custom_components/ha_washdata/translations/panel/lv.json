@@ -1109,12 +1109,12 @@
     "maint_done_by_program_intro": "Uzdevums tiek uzskatīts par izpildītu, kad beidzas kādas tā programmas cikls, piemēram, tromeļa tīrīšana, kad darbojas programma Kokvilna 90. Tiek ieskaitīti tikai cikli, par kuriem WashData ir pārliecināts vai kuru programmu izvēlējāties jūs."
   },
   "phase_desc": {
-    "anti_crease": "Laiku pa laikam pēc pabeigšanas veiciet īsus gājienus, lai samazinātu grumbiņas.",
-    "anti_wrinkle": "Periodiska griešana pēc cikla, lai samazinātu grumbas.",
-    "cool_down": "Tuvošanās cikla beigām bez siltuma.",
+    "anti_crease": "Laiku pa laikam pēc pabeigšanas trumulis īsi griežas, lai samazinātu grumbiņas.",
+    "anti_wrinkle": "Periodiska trumuļa griešanās pēc cikla, lai samazinātu grumbas.",
+    "cool_down": "Trumuļa griešanās bez siltuma tuvu cikla beigām.",
     "drain_and_switch": "Pārejas periods no mazgāšanas uz žāvēšanas režīmu.",
     "dry": "Žāvēšanas posms, izmantojot sildītāju un/vai atlikušo siltumu.",
-    "drying": "Galvenais apsildāmās sūšanas periods.",
+    "drying": "Galvenais apsildāmās griešanās periods.",
     "heat_up": "Sākotnējā sildītāja iesildīšana pirms pilnīgas žāvēšanas.",
     "pre_rinse": "Sākotnējā izsmidzināšana pirms mazgāšanas ar mazgāšanas līdzekli.",
     "pre_wash": "Sākotnējā mērcēšana vai pirmapstrāde pirms galvenās mazgāšanas.",
@@ -2191,7 +2191,7 @@
     "tail_energy_resets": "beigu enerģija virs sliekšņa: taimeris atiestatās",
     "thr": "slieksnis",
     "too_short": "par īsu",
-    "tumble_kept": "trumuļa impulsi saglabāti"
+    "tumble_kept": "griešanās impulsi saglabāti"
   },
   "blueprint": {
     "cycle_running_indicator": {
@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Beigt žāvētāja garo pretgrumbu fāzi",
-      "description": "Žāvētājiem, kas pēc programmas stundām turpina darbināt pretgrumbu režīmā. Darbojas tikai tad, ja žāvētājs joprojām griežas iestatīto minūšu skaitu pēc programmas beigām; žāvētājs, kas līdz tam jau apstājies, netiek aiztikts. Pēc tam tas izslēdz žāvētāja viedligzdas strāvu zemās jaudas brīdī un pēc noklusējuma ieslēdz atpakaļ. Jauns cikls, kas pa to laiku sākas, atceļ to.\n\nRisks: tas pārslēdz releju, kamēr žāvētājs ir iesprausts. Izmantojiet tikai ar kontaktligzdu, kas paredzēta jūsu žāvētājam, un uz savu risku. WashData pati nekad nepārslēdz kontaktligzdu; to dara šī automatizācija.\n\nNepieciešams WashData 0.5.9 vai jaunāks."
+      "description": "Žāvētājiem, kuru trumulis pēc programmas stundām turpina griezties pretgrumbu režīmā. Darbojas tikai tad, ja žāvētāja trumulis joprojām griežas iestatīto minūšu skaitu pēc programmas beigām; žāvētājs, kas līdz tam jau apstājies, netiek aiztikts. Pēc tam tas izslēdz žāvētāja viedligzdas strāvu zemās jaudas brīdī un pēc noklusējuma ieslēdz atpakaļ. Jauns cikls, kas pa to laiku sākas, atceļ to.\n\nRisks: tas pārslēdz releju, kamēr žāvētājs ir iesprausts. Izmantojiet tikai ar kontaktligzdu, kas paredzēta jūsu žāvētājam, un uz savu risku. WashData pati nekad nepārslēdz kontaktligzdu; to dara šī automatizācija.\n\nNepieciešams WashData 0.5.9 vai jaunāks."
     }
   },
   "trigger": {
@@ -2238,7 +2238,7 @@
       "name": "Pretgrumbu režīms sākās"
     },
     "still_tumbling": {
-      "name": "Vēl grozās pēc cikla"
+      "name": "Trumulis vēl griežas pēc cikla"
     },
     "unload_pending": {
       "name": "Izkraušana gaida"

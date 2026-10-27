@@ -523,7 +523,7 @@
       "cycle_overrun": "Cykel kör för länge",
       "cycle_paused": "Cykel pausad",
       "cycle_resumed": "Cykel återupptagen",
-      "still_tumbling": "Torktumlaren är fortfarande igång efter cykeln",
+      "still_tumbling": "Torktumlaren tumlar fortfarande efter cykeln",
       "unloaded": "Tömd",
       "state_changed": "Tillstånd ändrat",
       "maintenance_due": "Dags för underhåll",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Endast detta program, med exakt namn. Lämna tomt för vilket program som helst.",
       "phase": "Endast denna fas, med namn. Lämna tomt för vilken fas som helst.",
-      "minutes": "Snart klar: resterande minuter. Fortfarande igång: minuter efter avslut.",
+      "minutes": "Snart klar: resterande minuter. Tumlar fortfarande: minuter efter avslut.",
       "percent": "Procent över programmets normala varaktighet.",
       "include_detected": "Utlös även vid pauser WashData ser i effekten, t.ex. blötläggning eller stillestånd.",
       "status": "Endast cyklar som avslutades på detta sätt.",
@@ -647,8 +647,8 @@
       "description": "Utlöses när apparaten börjar tumla den klara tvätten mot skrynklor."
     },
     "still_tumbling": {
-      "name": "Torktumlaren är fortfarande igång efter cykeln",
-      "description": "Utlöses en gång när apparaten fortfarande tumblar i korta stötar detta antal minuter efter att cykeln avslutades. Stoppar vid en ny cykel eller 4 timmar efter avslut.",
+      "name": "Torktumlaren tumlar fortfarande efter cykeln",
+      "description": "Utlöses en gång när apparaten fortfarande tumlar i korta stötar detta antal minuter efter att cykeln avslutades. Stoppar vid en ny cykel eller 4 timmar efter avslut.",
       "fields": {
         "minutes": {
           "name": "Minuter efter avslut",

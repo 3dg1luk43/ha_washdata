@@ -1055,12 +1055,12 @@
     "maint_done_by_program_intro": "O sarcină contează ca efectuată când se termină un ciclu al unuia dintre programele sale, de exemplu curățarea tamburului când rulează Bumbac 90. Contează doar ciclurile de care WashData este sigur sau pe care le-ați ales."
   },
   "phase_desc": {
-    "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
-    "anti_wrinkle": "Tumblare periodică post-ciclu pentru a reduce șifonarea.",
-    "cool_down": "Tumblare fără căldură aproape de sfârșitul ciclului.",
+    "anti_crease": "Rotiri scurte ocazionale ale tamburului după finalizare pentru a reduce șifonarea.",
+    "anti_wrinkle": "Rotire periodică a tamburului post-ciclu pentru a reduce șifonarea.",
+    "cool_down": "Rotirea tamburului fără căldură aproape de sfârșitul ciclului.",
     "drain_and_switch": "Perioada de tranziție de la modul de spălare la modul de uscare.",
     "dry": "Etapă de uscare folosind rezistența și/sau căldura reziduală.",
-    "drying": "Perioada principală de tumblare cu căldură.",
+    "drying": "Perioada principală de rotire a tamburului cu căldură.",
     "heat_up": "Încălzirea inițială a rezistentei înainte de a începe uscarea completă.",
     "pre_rinse": "Pulverizare inițială înainte de spălarea cu detergent.",
     "pre_wash": "Înmuiere inițială sau pre-tratament înainte de spălarea principală.",

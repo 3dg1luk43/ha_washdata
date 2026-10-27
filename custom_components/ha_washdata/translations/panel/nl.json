@@ -1104,20 +1104,20 @@
     "stop_threshold_w": "Hieronder telt de machine als uit",
     "profile_match_min_duration_ratio": "Minimale cycluslengte als fractie van de profielduur; standaard 0,1 (10%)",
     "profile_match_max_duration_ratio": "Maximale cycluslengte als fractie van de profielduur; standaard 1,8 (180%)",
-    "anti_wrinkle_idle_timeout": "Toegestane stille tijd tussen twee tuimelpulsen voordat anti-kreuk eindigt",
+    "anti_wrinkle_idle_timeout": "Toegestane stille tijd tussen twee trommelpulsen voordat anti-kreuk eindigt",
     "anti_wrinkle_max_power": "Een puls boven dit niveau beëindigt anti-kreuk en opent een nieuwe cyclus",
-    "anti_wrinkle_enabled": "De tuimelpulsen na de hoofdfase opvangen in plaats van ze als nieuwe cycli te lezen",
+    "anti_wrinkle_enabled": "De trommelpulsen na de hoofdfase opvangen in plaats van ze als nieuwe cycli te lezen",
     "anti_wrinkle_max_duration": "Een puls die langer is dan dit beëindigt anti-kreuk en opent een nieuwe cyclus",
     "anti_crease_finalize_ratio": "Deel van de gemiddelde programmaduur dat een cyclus moet halen voordat de anti-kreuknaloop hem mag afronden; verlaag bij drogers, laat wasmachines op de standaard",
     "curve_preroll_seconds": "Seconden aan metingen uit afgebroken startpogingen die vooraan in de curve van een cyclus worden opgenomen; 0 = uit"
   },
   "phase_desc": {
-    "anti_crease": "Af en toe kort tuimelen na voltooiing om rimpels te verminderen.",
-    "anti_wrinkle": "Periodiek tuimelen na de cyclus om rimpels te verminderen.",
-    "cool_down": "Tuimelen zonder warmte tegen het einde van de cyclus.",
+    "anti_crease": "Af en toe korte trommelbewegingen na voltooiing om rimpels te verminderen.",
+    "anti_wrinkle": "Periodieke trommelbewegingen na de cyclus om rimpels te verminderen.",
+    "cool_down": "Trommelbeweging zonder warmte tegen het einde van de cyclus.",
     "drain_and_switch": "Overgangsperiode van wassen naar drogen.",
     "dry": "Droogfase met behulp van verwarming en/of restwarmte.",
-    "drying": "Belangrijkste verwarmde tuimelen periode.",
+    "drying": "Belangrijkste verwarmde periode met trommelbeweging.",
     "heat_up": "Eerste opwarming van de verwarming voordat het volledig drogen begint.",
     "pre_rinse": "Eerste spray-down vóór het wassen met wasmiddel.",
     "pre_wash": "Eerste inweken of voorbehandeling vóór de hoofdwas.",
@@ -1206,7 +1206,7 @@
     },
     "anti_crease_finalize_ratio": {
       "label": "Verhouding afsluiten anti-kreuknaloop",
-      "doc": "Deel van de gemiddelde programmaduur dat een cyclus moet halen voordat het trommelen met laag vermogen als anti-kreuknaloop telt. Verlaag het (bijv. 0,75) bij drogers met beladingsdetectie. Laat wasmachines op de standaard (0,98), anders kan een was halverwege eindigen."
+      "doc": "Deel van de gemiddelde programmaduur dat een cyclus moet halen voordat de trommelbeweging met laag vermogen als anti-kreuknaloop telt. Verlaag het (bijv. 0,75) bij drogers met beladingsdetectie. Laat wasmachines op de standaard (0,98), anders kan een was halverwege eindigen."
     },
     "anti_wrinkle_enabled": {
       "doc": "Houd de korte trommelpulsen met laag vermogen van een droger na de hoofdverwarmingsfase bij de voltooide cyclus, in plaats van ze als nieuwe cycli te lezen.",
@@ -1217,11 +1217,11 @@
       "label": "Max. pulspauze"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Een langere puls telt als een echte cyclus, niet als anti-kreuktrommelen.",
+      "doc": "Een langere puls telt als een echte cyclus, niet als anti-kreuktrommelbeweging.",
       "label": "Max. duur"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Een puls boven dit vermogen telt als een echte nieuwe cyclus, niet als trommelen. Stel het net boven het vermogen van uw trommelpulsen in.",
+      "doc": "Een puls boven dit vermogen telt als een echte nieuwe cyclus, niet als trommelbeweging. Stel het net boven het vermogen van uw trommelpulsen in.",
       "label": "Max. anti-kreuk vermogen"
     },
     "auto_label_confidence": {
@@ -1265,7 +1265,7 @@
       "label": "Slimme modellen gebruiken tijdens een cyclus"
     },
     "end_energy_threshold": {
-      "doc": "Toegestane energie tijdens de uitschakelvertraging. Meer dan dit en de cyclus loopt door, zodat trommelen en droognalopen erbij blijven horen. Verlaag als cycli tijdens een naloop eindigen; verhoog als voltooide cycli blijven wachten.",
+      "doc": "Toegestane energie tijdens de uitschakelvertraging. Meer dan dit en de cyclus loopt door, zodat trommelbewegingen en droognalopen erbij blijven horen. Verlaag als cycli tijdens een naloop eindigen; verhoog als voltooide cycli blijven wachten.",
       "label": "Eindenergie"
     },
     "energy_price_entity": {
@@ -2173,7 +2173,7 @@
     "tail_energy_resets": "restenergie boven drempel: timer reset",
     "thr": "drempel",
     "too_short": "te kort",
-    "tumble_kept": "tuimelpulsen behouden"
+    "tumble_kept": "trommelpulsen behouden"
   },
   "blueprint": {
     "cycle_running_indicator": {
@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Een lange anti-kreukfase van de droger beëindigen",
-      "description": "Voor drogers die na het programma nog uren anti-kreuk blijven draaien. Wordt alleen uitgevoerd als de droger het ingestelde aantal minuten na afloop van het programma nog draait; een droger die tegen die tijd al gestopt is, wordt met rust gelaten. Hij schakelt dan de smart plug van de droger uit op een moment van laag vermogen en, standaard, weer in. Een nieuwe cyclus die ondertussen start, annuleert dit.\n\nRisico: hiermee wordt een relais geschakeld terwijl de droger is aangesloten. Gebruik het alleen met een stekker die geschikt is voor uw droger en op eigen risico. WashData schakelt de stekker zelf nooit; dat doet deze automatisering.\n\nVereist WashData 0.5.9 of nieuwer."
+      "description": "Voor drogers waarvan de trommel na het programma nog uren in anti-kreuk blijft draaien. Wordt alleen uitgevoerd als de trommel van de droger het ingestelde aantal minuten na afloop van het programma nog draait; een droger die tegen die tijd al gestopt is, wordt met rust gelaten. Hij schakelt dan de smart plug van de droger uit op een moment van laag vermogen en, standaard, weer in. Een nieuwe cyclus die ondertussen start, annuleert dit.\n\nRisico: hiermee wordt een relais geschakeld terwijl de droger is aangesloten. Gebruik het alleen met een stekker die geschikt is voor uw droger en op eigen risico. WashData schakelt de stekker zelf nooit; dat doet deze automatisering.\n\nVereist WashData 0.5.9 of nieuwer."
     }
   },
   "trigger": {
@@ -2220,7 +2220,7 @@
       "name": "Anti-kreuk gestart"
     },
     "still_tumbling": {
-      "name": "Trommel nog actief na de cyclus"
+      "name": "Trommel draait nog na de cyclus"
     },
     "unload_pending": {
       "name": "Uitladen in afwachting"

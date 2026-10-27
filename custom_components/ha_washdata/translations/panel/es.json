@@ -1058,8 +1058,8 @@
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
     "smart_termination_duration_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la Terminación inteligente pueda finalizarlo antes de tiempo; redúzcala si la duración varía",
     "anti_crease_finalize_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la cola antiarrugas pueda terminarlo; redúzcala en secadoras, deje las lavadoras en el valor predeterminado",
-    "anti_wrinkle_enabled": "Absorber los pulsos de volteo tras la fase principal en lugar de leerlos como nuevos ciclos",
-    "anti_wrinkle_idle_timeout": "Tiempo de silencio permitido entre dos pulsos de volteo antes de que finalice el modo antiarrugas",
+    "anti_wrinkle_enabled": "Absorber los pulsos de giro tras la fase principal en lugar de leerlos como nuevos ciclos",
+    "anti_wrinkle_idle_timeout": "Tiempo de silencio permitido entre dos pulsos de giro antes de que finalice el modo antiarrugas",
     "anti_wrinkle_max_duration": "Un pulso más largo que esto finaliza el modo antiarrugas y abre un nuevo ciclo",
     "anti_wrinkle_max_power": "Un pulso por encima de esto finaliza el modo antiarrugas y abre un nuevo ciclo",
     "completion_min_seconds": "Ejecución más corta que cuenta como ciclo real",
@@ -1074,12 +1074,12 @@
     "curve_preroll_seconds": "Segundos de lecturas de intentos de arranque interrumpidos incorporados al principio de la curva de un ciclo; 0 = desactivado"
   },
   "phase_desc": {
-    "anti_crease": "Volteos breves ocasionales tras finalizar para evitar que la ropa se arrugue.",
-    "anti_wrinkle": "Volteos periódicos tras el ciclo para evitar que la ropa se arrugue.",
-    "cool_down": "Girar sin calor cerca del final del ciclo.",
+    "anti_crease": "Giros breves ocasionales del tambor tras finalizar para evitar que la ropa se arrugue.",
+    "anti_wrinkle": "Giros periódicos del tambor tras el ciclo para evitar que la ropa se arrugue.",
+    "cool_down": "Giro del tambor sin calor cerca del final del ciclo.",
     "drain_and_switch": "Periodo de transición del modo lavado al secado.",
     "dry": "Etapa de secado mediante calentador y/o calor residual.",
-    "drying": "Período principal de volteo calentado.",
+    "drying": "Período principal de giro del tambor con calor.",
     "heat_up": "Calentamiento inicial del calentador antes de que comience el secado completo.",
     "pre_rinse": "Pulverización inicial antes del lavado con detergente.",
     "pre_wash": "Remojo inicial o pretratamiento antes del lavado principal.",
@@ -1125,7 +1125,7 @@
       "intro": "Gestión del final para lavavajillas, que a menudo secan en silencio durante mucho tiempo antes de un breve vaciado final."
     },
     "anti_wrinkle": {
-      "intro": "Mantiene los pulsos de volteo de baja potencia de una secadora tras la fase principal dentro del ciclo terminado.",
+      "intro": "Mantiene los pulsos de giro de baja potencia de una secadora tras la fase principal dentro del ciclo terminado.",
       "label": "Antiarrugas"
     },
     "basic": {
@@ -1168,22 +1168,22 @@
     },
     "anti_crease_finalize_ratio": {
       "label": "Proporción de finalización antiarrugas",
-      "doc": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que su volteo de baja potencia cuente como cola antiarrugas. Redúzcala (p. ej. 0,75) en secadoras con sensor de carga. Deje las lavadoras en el valor predeterminado (0,98), o un lavado puede terminar a la mitad."
+      "doc": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que su giro de baja potencia cuente como cola antiarrugas. Redúzcala (p. ej. 0,75) en secadoras con sensor de carga. Deje las lavadoras en el valor predeterminado (0,98), o un lavado puede terminar a la mitad."
     },
     "anti_wrinkle_enabled": {
-      "doc": "Mantener los pulsos cortos de volteo de baja potencia de una secadora tras la fase principal de calor dentro del ciclo terminado, en lugar de leerlos como ciclos nuevos.",
+      "doc": "Mantener los pulsos cortos de giro de baja potencia de una secadora tras la fase principal de calor dentro del ciclo terminado, en lugar de leerlos como ciclos nuevos.",
       "label": "Habilitar detección antiarrugas"
     },
     "anti_wrinkle_idle_timeout": {
-      "doc": "Cuánto tiempo puede estar en silencio la secadora entre pulsos de volteo antes de que termine el modo antiarrugas. Ajústelo por encima de la pausa más larga de su secadora, o los pulsos posteriores se leerán como falsos arranques.",
+      "doc": "Cuánto tiempo puede estar en silencio la secadora entre pulsos de giro antes de que termine el modo antiarrugas. Ajústelo por encima de la pausa más larga de su secadora, o los pulsos posteriores se leerán como falsos arranques.",
       "label": "Intervalo máximo entre pulsos"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "Un pulso más largo que esto cuenta como un ciclo real, no como volteo antiarrugas.",
+      "doc": "Un pulso más largo que esto cuenta como un ciclo real, no como giro antiarrugas.",
       "label": "Duración máxima"
     },
     "anti_wrinkle_max_power": {
-      "doc": "Un pulso por encima de esta potencia cuenta como un ciclo nuevo real, no como volteo. Ajústelo justo por encima de la potencia de sus pulsos de volteo.",
+      "doc": "Un pulso por encima de esta potencia cuenta como un ciclo nuevo real, no como giro. Ajústelo justo por encima de la potencia de sus pulsos de giro.",
       "label": "Potencia máxima antiarrugas"
     },
     "auto_label_confidence": {
@@ -1227,7 +1227,7 @@
       "label": "Aplicar modelos inteligentes durante un ciclo"
     },
     "end_energy_threshold": {
-      "doc": "Energía permitida durante el retardo de apagado. Si se supera, el ciclo continúa, de modo que los volteos y las colas de secado siguen formando parte de él. Bájela si los ciclos terminan durante una cola; súbala si los ciclos terminados siguen esperando.",
+      "doc": "Energía permitida durante el retardo de apagado. Si se supera, el ciclo continúa, de modo que los giros y las colas de secado siguen formando parte de él. Bájela si los ciclos terminan durante una cola; súbala si los ciclos terminados siguen esperando.",
       "label": "Energía de fin"
     },
     "energy_price_entity": {
@@ -2191,7 +2191,7 @@
     "tail_energy_resets": "cola > umbral: reinicia el temporizador",
     "thr": "umbral",
     "too_short": "demasiado corto",
-    "tumble_kept": "volteos conservados"
+    "tumble_kept": "giros conservados"
   },
   "blueprint": {
     "cycle_running_indicator": {

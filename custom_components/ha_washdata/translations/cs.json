@@ -523,7 +523,7 @@
       "cycle_overrun": "Cyklus trvá příliš dlouho",
       "cycle_paused": "Cyklus pozastaven",
       "cycle_resumed": "Cyklus obnoven",
-      "still_tumbling": "Stále bubnuje po skončení",
+      "still_tumbling": "Stále otáčí bubnem po skončení",
       "unloaded": "Vyloženo",
       "state_changed": "Stav změněn",
       "maintenance_due": "Servis potřebný",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Pouze tento program, přesným názvem. Prázdné = jakýkoli program.",
       "phase": "Pouze tato fáze, názvem. Prázdné = jakákoli fáze.",
-      "minutes": "Brzy konec: zbývající minuty. Stále bubnuje: minuty po skončení.",
+      "minutes": "Brzy konec: zbývající minuty. Stále otáčí bubnem: minuty po skončení.",
       "percent": "Procent nad obvyklou délkou programu.",
       "include_detected": "Spustit také při pozastaveních, která WashData zjistí ve spotřebě, například namáčení nebo zablokování.",
       "status": "Pouze cykly ukončené tímto způsobem.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Ochrana před zmačkáním zahájena",
-      "description": "Spustí se, když spotřebič začne bubnovat dokončenou náplní proti zmačkání."
+      "description": "Spustí se, když spotřebič začne otáčet bubnem s dokončenou náplní proti zmačkání."
     },
     "still_tumbling": {
-      "name": "Stále bubnuje po skončení cyklu",
-      "description": "Spustí se jednou, když spotřebič stále bubnuje v krátkých úsecích zadaný počet minut po skončení cyklu. Zastaví se při novém cyklu nebo 4 hodiny po skončení.",
+      "name": "Stále otáčí bubnem po skončení cyklu",
+      "description": "Spustí se jednou, když spotřebič stále otáčí bubnem v krátkých úsecích zadaný počet minut po skončení cyklu. Zastaví se při novém cyklu nebo 4 hodiny po skončení.",
       "fields": {
         "minutes": {
           "name": "Minuty po skončení",
-          "description": "Spustit při prvním bubnování alespoň tolik po skončení."
+          "description": "Spustit při prvním pulzu bubnu alespoň tolik po skončení."
         }
       }
     },

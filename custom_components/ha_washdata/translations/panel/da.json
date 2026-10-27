@@ -1104,20 +1104,20 @@
     "stop_threshold_w": "Under dette tælles maskinen som slukket",
     "profile_match_min_duration_ratio": "Korteste cykluslængde som andel af profilens varighed; standard 0,1 (10%)",
     "profile_match_max_duration_ratio": "Længste cykluslængde som andel af profilens varighed; standard 1,8 (180%)",
-    "anti_wrinkle_idle_timeout": "Tilladt stilletid mellem to tumle-pulser, før anti-rynke slutter",
+    "anti_wrinkle_idle_timeout": "Tilladt stilletid mellem to tromlepulser, før anti-rynke slutter",
     "anti_wrinkle_max_power": "En puls over dette afslutter anti-rynke og åbner en ny cyklus",
-    "anti_wrinkle_enabled": "Opfange tumle-pulserne efter hovedfasen i stedet for at læse dem som nye cyklusser",
+    "anti_wrinkle_enabled": "Opfange tromlepulserne efter hovedfasen i stedet for at læse dem som nye cyklusser",
     "anti_wrinkle_max_duration": "En puls længere end dette afslutter anti-rynke og åbner en ny cyklus",
     "anti_crease_finalize_ratio": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før anti-rynke-efterløbet må afslutte den; sænk den på tørretumblere, lad vaskemaskiner stå på standard",
     "curve_preroll_seconds": "Sekunders målinger fra afbrudte startforsøg, der tages med forrest i en cyklus' kurve; 0 = fra"
   },
   "phase_desc": {
-    "anti_crease": "Lejlighedsvis korte tumblinger efter færdiggørelse for at reducere rynker.",
-    "anti_wrinkle": "Periodisk tumbling efter cyklus for at reducere rynker.",
-    "cool_down": "Tumling uden varme nær cyklusslut.",
+    "anti_crease": "Lejlighedsvis korte tromlebevægelser efter færdiggørelse for at reducere rynker.",
+    "anti_wrinkle": "Periodiske tromlebevægelser efter cyklus for at reducere rynker.",
+    "cool_down": "Tromlebevægelse uden varme nær cyklusslut.",
     "drain_and_switch": "Overgangsperiode fra vask til tørretilstand.",
     "dry": "Tørretrin med varmelegeme og/eller restvarme.",
-    "drying": "Hovedopvarmet tumleperiode.",
+    "drying": "Hovedopvarmet periode med tromlebevægelse.",
     "heat_up": "Indledende opvarmning af varmeapparatet, før fuld tørring begynder.",
     "pre_rinse": "Indledende spray ned før vaskemiddel vask.",
     "pre_wash": "Indledende iblødsætning eller forbehandling før hovedvasken.",
@@ -1163,7 +1163,7 @@
       "intro": "Sluthåndtering for opvaskemaskiner, som ofte tørrer stille længe før en kort sidste udpumpning."
     },
     "anti_wrinkle": {
-      "intro": "Holder en tørretumblers tumlepulser med lav effekt efter hovedfasen sammen med den færdige cyklus.",
+      "intro": "Holder en tørretumblers tromlepulser med lav effekt efter hovedfasen sammen med den færdige cyklus.",
       "label": "Anti-rynke"
     },
     "basic": {
@@ -1206,22 +1206,22 @@
     },
     "anti_crease_finalize_ratio": {
       "label": "Forhold for anti-rynke-afslutning",
-      "doc": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før dens tumling med lav effekt tæller som anti-rynke-efterløbet. Sænk den (f.eks. 0,75) på tørretumblere med fugtsensor. Lad vaskemaskiner stå på standard (0,98), ellers kan en vask slutte halvvejs."
+      "doc": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før dens tromlebevægelse med lav effekt tæller som anti-rynke-efterløbet. Sænk den (f.eks. 0,75) på tørretumblere med fugtsensor. Lad vaskemaskiner stå på standard (0,98), ellers kan en vask slutte halvvejs."
     },
     "anti_wrinkle_enabled": {
-      "doc": "Hold en tørretumblers korte tumlepulser med lav effekt efter hovedvarmefasen sammen med den færdige cyklus i stedet for at læse dem som nye cyklusser.",
+      "doc": "Hold en tørretumblers korte tromlepulser med lav effekt efter hovedvarmefasen sammen med den færdige cyklus i stedet for at læse dem som nye cyklusser.",
       "label": "Aktivér anti-rynke registrering"
     },
     "anti_wrinkle_idle_timeout": {
-      "doc": "Hvor længe tørretumbleren må være stille mellem tumlepulser, før anti-rynke-tilstand slutter. Sæt den over din tørretumblers længste pause, ellers læses senere pulser som falske starter.",
+      "doc": "Hvor længe tørretumbleren må være stille mellem tromlepulser, før anti-rynke-tilstand slutter. Sæt den over din tørretumblers længste pause, ellers læses senere pulser som falske starter.",
       "label": "Maks. pulspause"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "En længere puls tæller som en rigtig cyklus, ikke som anti-rynke-tumling.",
+      "doc": "En længere puls tæller som en rigtig cyklus, ikke som anti-rynke-tromlebevægelse.",
       "label": "Maks. varighed"
     },
     "anti_wrinkle_max_power": {
-      "doc": "En puls over denne effekt tæller som en rigtig ny cyklus, ikke som tumling. Sæt den lige over effekten af dine tumlepulser.",
+      "doc": "En puls over denne effekt tæller som en rigtig ny cyklus, ikke som tromlebevægelse. Sæt den lige over effekten af dine tromlepulser.",
       "label": "Maks. anti-rynkeeffekt"
     },
     "auto_label_confidence": {
@@ -1265,7 +1265,7 @@
       "label": "Anvend smarte modeller under en cyklus"
     },
     "end_energy_threshold": {
-      "doc": "Energi, der tillades under slukkeforsinkelsen. Mere end dette, og cyklussen fortsætter, så tumlinger og tørrehaler forbliver en del af den. Sænk den, hvis cyklusser slutter under en hale; hæv den, hvis færdige cyklusser bliver ved med at vente.",
+      "doc": "Energi, der tillades under slukkeforsinkelsen. Mere end dette, og cyklussen fortsætter, så tromlebevægelser og tørrehaler forbliver en del af den. Sænk den, hvis cyklusser slutter under en hale; hæv den, hvis færdige cyklusser bliver ved med at vente.",
       "label": "Slutenergi"
     },
     "energy_price_entity": {
@@ -2173,7 +2173,7 @@
     "tail_energy_resets": "restenergi > tærskel: timer nulstilles",
     "thr": "tærsk.",
     "too_short": "for kort",
-    "tumble_kept": "tumlepulser beholdt"
+    "tumble_kept": "tromlepulser beholdt"
   },
   "blueprint": {
     "cycle_running_indicator": {
@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Afslut en lang anti-rynke-fase på tørretumbleren",
-      "description": "Til tørretumblere, der fortsætter med at tumble i anti-rynke i timevis efter programmet. Kører kun, hvis tørretumbleren stadig tumbler det indstillede antal minutter efter programmets afslutning; en tørretumbler, der er stoppet inden da, lades i fred. Den slukker derefter tørretumblerens smart-stik i et øjeblik med lavt strømforbrug og tænder det som standard igen. En ny cyklus, der starter i mellemtiden, annullerer den.\n\nRisiko: dette skifter et relæ, mens tørretumbleren er tilsluttet. Brug det kun med et stik, der er egnet til din tørretumbler, og på eget ansvar. WashData skifter aldrig selve stikket; det gør denne automatisering.\n\nKræver WashData 0.5.9 eller nyere."
+      "description": "Til tørretumblere, hvis tromle fortsætter med at dreje i anti-rynke i timevis efter programmet. Kører kun, hvis tørretumblerens tromle stadig drejer det indstillede antal minutter efter programmets afslutning; en tørretumbler, der er stoppet inden da, lades i fred. Den slukker derefter tørretumblerens smart-stik i et øjeblik med lavt strømforbrug og tænder det som standard igen. En ny cyklus, der starter i mellemtiden, annullerer den.\n\nRisiko: dette skifter et relæ, mens tørretumbleren er tilsluttet. Brug det kun med et stik, der er egnet til din tørretumbler, og på eget ansvar. WashData skifter aldrig selve stikket; det gør denne automatisering.\n\nKræver WashData 0.5.9 eller nyere."
     }
   },
   "trigger": {
@@ -2220,7 +2220,7 @@
       "name": "Anti-rynke startet"
     },
     "still_tumbling": {
-      "name": "Tørretromlen kører stadig efter cyklus"
+      "name": "Tromlen drejer stadig efter cyklus"
     },
     "unload_pending": {
       "name": "Tømning afventer"

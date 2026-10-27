@@ -1130,7 +1130,7 @@
     "cool_down": "Otáčení bubnu bez tepla ke konci cyklu.",
     "drain_and_switch": "Přechod z režimu praní do režimu sušení.",
     "dry": "Fáze sušení pomocí ohřívače a/nebo zbytkového tepla.",
-    "drying": "Hlavní vyhřívaná perioda omílání.",
+    "drying": "Hlavní vyhřívaná perioda otáčení bubnu.",
     "heat_up": "Počáteční zahřátí ohřívače před úplným sušením.",
     "pre_rinse": "Počáteční ostřik před mytím detergentem.",
     "pre_wash": "Počáteční namáčení nebo předúprava před hlavním praním.",
@@ -1991,8 +1991,8 @@
     "dishwasher_end_spike_quiet_release": "Myčka: tiché sekundy po očekávané době trvání, než se uvolní čekání na závěrečné odčerpání vody",
     "smart_termination_duration_ratio": "Zlomek průměrné doby trvání programu, kterého musí cyklus dosáhnout, než jej Chytré ukončení smí ukončit dříve; snižte, pokud doby běhu kolísají",
     "anti_crease_finalize_ratio": "Zlomek průměrné doby trvání programu, kterého musí cyklus dosáhnout, než jej ocas ochrany před zmačkáním smí dokončit; u sušiček snižte, u praček ponechte výchozí",
-    "anti_wrinkle_enabled": "Pohltit impulzy bubnu po hlavní fázi místo čtení jako nové cykly",
-    "anti_wrinkle_idle_timeout": "Povolený klid mezi dvěma impulzy bubnu, než ochrana před zmačkáním skončí",
+    "anti_wrinkle_enabled": "Pohltit pulzy bubnu po hlavní fázi místo čtení jako nové cykly",
+    "anti_wrinkle_idle_timeout": "Povolený klid mezi dvěma pulzy bubnu, než ochrana před zmačkáním skončí",
     "anti_wrinkle_max_duration": "Delší impulz ukončí ochranu před zmačkáním a otevře nový cyklus",
     "anti_wrinkle_max_power": "Impulz nad touto hodnotou ukončí ochranu před zmačkáním a otevře nový cyklus",
     "completion_min_seconds": "Nejkratší běh, který se počítá jako skutečný cyklus",
@@ -2209,7 +2209,7 @@
     "tail_energy_resets": "energie konce nad prahem: časovač se vynuluje",
     "thr": "práh",
     "too_short": "příliš krátký",
-    "tumble_kept": "impulzy bubnu ponechány"
+    "tumble_kept": "pulzy bubnu ponechány"
   },
   "blueprint": {
     "cycle_running_indicator": {
@@ -2218,7 +2218,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Ukončit dlouhou fázi ochrany před zmačkáním sušičky",
-      "description": "Pro sušičky, které pokračují v bubnování v ochraně před zmačkáním celé hodiny po skončení programu. Spustí se jen tehdy, když sušička po uplynutí nastaveného počtu minut od skončení programu stále bubnuje; sušičku, která se do té doby zastavila, nechá být. Poté vypne zástrčku sušičky v okamžiku nízké spotřeby a ve výchozím nastavení ji zase zapne. Nový cyklus spuštěný mezitím ji zruší.\n\nRiziko: přepíná relé, když je sušička zapojena. Používejte pouze se zástrčkou určenou pro vaši sušičku a na vlastní riziko. WashData zástrčku sám nikdy nepřepíná; dělá to tato automatizace.\n\nVyžaduje WashData 0.5.9 nebo novější."
+      "description": "Pro sušičky, které pokračují v otáčení bubnu v ochraně před zmačkáním celé hodiny po skončení programu. Spustí se jen tehdy, když sušička po uplynutí nastaveného počtu minut od skončení programu stále otáčí bubnem; sušičku, která se do té doby zastavila, nechá být. Poté vypne zástrčku sušičky v okamžiku nízké spotřeby a ve výchozím nastavení ji zase zapne. Nový cyklus spuštěný mezitím ji zruší.\n\nRiziko: přepíná relé, když je sušička zapojena. Používejte pouze se zástrčkou určenou pro vaši sušičku a na vlastní riziko. WashData zástrčku sám nikdy nepřepíná; dělá to tato automatizace.\n\nVyžaduje WashData 0.5.9 nebo novější."
     }
   },
   "trigger": {
@@ -2256,7 +2256,7 @@
       "name": "Ochrana před zmačkáním zahájena"
     },
     "still_tumbling": {
-      "name": "Stále bubnuje po skončení cyklu"
+      "name": "Stále otáčí bubnem po skončení cyklu"
     },
     "unload_pending": {
       "name": "Čeká na vyložení"

@@ -1112,12 +1112,12 @@
     "curve_preroll_seconds": "Sekunder med målinger fra avbrutte startforsøk som tas med fremst i kurven til en syklus; 0 = av"
   },
   "phase_desc": {
-    "anti_crease": "Enkelte korte fall etter ferdigstillelse for å redusere rynker.",
-    "anti_wrinkle": "Periodisk tumbling etter syklus for å redusere rynker.",
-    "cool_down": "Tumling uten varme nær syklusslutt.",
+    "anti_crease": "Enkelte korte trommelbevegelser etter ferdigstillelse for å redusere rynker.",
+    "anti_wrinkle": "Periodiske trommelbevegelser etter syklus for å redusere rynker.",
+    "cool_down": "Trommelbevegelse uten varme nær syklusslutt.",
     "drain_and_switch": "Overgangsperiode fra vaske- til tørkemodus.",
     "dry": "Tørketrinn ved bruk av varmeapparat og/eller restvarme.",
-    "drying": "Hovedoppvarmet tumleperiode.",
+    "drying": "Hovedoppvarmet periode med trommelbevegelse.",
     "heat_up": "Første oppvarming av varmeren før full tørking begynner.",
     "pre_rinse": "Spray første gang før vaskemiddelvask.",
     "pre_wash": "Innledende bløtlegging eller forbehandling før hovedvask.",
@@ -1206,7 +1206,7 @@
     },
     "anti_crease_finalize_ratio": {
       "label": "Forhold for anti-rynke-avslutning",
-      "doc": "Andel av programmets gjennomsnittlige varighet som en syklus må nå før trommelingen med lav effekt teller som anti-rynke-etterløpet. Senk den (f.eks. 0,75) på tørketromler med fuktsensor. La vaskemaskiner stå på standard (0,98), ellers kan en vask slutte halvveis."
+      "doc": "Andel av programmets gjennomsnittlige varighet som en syklus må nå før trommelbevegelsen med lav effekt teller som anti-rynke-etterløpet. Senk den (f.eks. 0,75) på tørketromler med fuktsensor. La vaskemaskiner stå på standard (0,98), ellers kan en vask slutte halvveis."
     },
     "anti_wrinkle_enabled": {
       "doc": "Hold en tørketrommels korte trommelpulser med lav effekt etter hovedvarmefasen sammen med den ferdige syklusen, i stedet for å lese dem som nye sykluser.",
@@ -1217,11 +1217,11 @@
       "label": "Maks. pulspause"
     },
     "anti_wrinkle_max_duration": {
-      "doc": "En lengre puls teller som en ekte syklus, ikke som anti-rynke-tromling.",
+      "doc": "En lengre puls teller som en ekte syklus, ikke som anti-rynke-trommelbevegelse.",
       "label": "Maks. varighet"
     },
     "anti_wrinkle_max_power": {
-      "doc": "En puls over denne effekten teller som en ekte ny syklus, ikke som tromling. Sett den like over effekten til trommelpulsene dine.",
+      "doc": "En puls over denne effekten teller som en ekte ny syklus, ikke som trommelbevegelse. Sett den like over effekten til trommelpulsene dine.",
       "label": "Maks. anti-rynke effekt"
     },
     "auto_label_confidence": {
@@ -1265,7 +1265,7 @@
       "label": "Bruk smarte modeller under syklus"
     },
     "end_energy_threshold": {
-      "doc": "Energi som tillates under av-forsinkelsen. Mer enn dette, og syklusen fortsetter, slik at tromlinger og tørkehaler forblir en del av den. Senk den hvis sykluser slutter under en hale; hev den hvis ferdige sykluser fortsetter å vente.",
+      "doc": "Energi som tillates under av-forsinkelsen. Mer enn dette, og syklusen fortsetter, slik at trommelbevegelser og tørkehaler forblir en del av den. Senk den hvis sykluser slutter under en hale; hev den hvis ferdige sykluser fortsetter å vente.",
       "label": "Sluttenergi"
     },
     "energy_price_entity": {
@@ -2173,7 +2173,7 @@
     "tail_energy_resets": "restenergi > terskel: timer nullstilles",
     "thr": "tersk.",
     "too_short": "for kort",
-    "tumble_kept": "tumlepulser beholdt"
+    "tumble_kept": "trommelpulser beholdt"
   },
   "blueprint": {
     "cycle_running_indicator": {
@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Avslutt en lang anti-rynke-fase på tørketrommelen",
-      "description": "For tørketromler som fortsetter å tumle i anti-rynke i timevis etter programmet. Kjører bare hvis tørketrommelen fortsatt tumler det innstilte antallet minutter etter at programmet er ferdig; en tørketrommel som har stoppet innen da, blir latt i fred. Den slår deretter tørketrommelens smart plug av i et øyeblikk med lavt forbruk og, som standard, på igjen. En ny syklus som starter i mellomtiden, avbryter den.\n\nRisiko: dette kobler om et relé mens tørketrommelen er koblet til. Bruk det bare med en plugg som er egnet for tørketrommelen din, og på eget ansvar. WashData kobler aldri pluggen selv; det gjør denne automasjonen.\n\nKrever WashData 0.5.9 eller nyere."
+      "description": "For tørketromler der trommelen fortsetter å rotere i anti-rynke i timevis etter programmet. Kjører bare hvis trommelen fortsatt roterer det innstilte antallet minutter etter at programmet er ferdig; en tørketrommel som har stoppet innen da, blir latt i fred. Den slår deretter tørketrommelens smart plug av i et øyeblikk med lavt forbruk og, som standard, på igjen. En ny syklus som starter i mellomtiden, avbryter den.\n\nRisiko: dette kobler om et relé mens tørketrommelen er koblet til. Bruk det bare med en plugg som er egnet for tørketrommelen din, og på eget ansvar. WashData kobler aldri pluggen selv; det gjør denne automasjonen.\n\nKrever WashData 0.5.9 eller nyere."
     }
   },
   "trigger": {
@@ -2220,7 +2220,7 @@
       "name": "Anti-rynke startet"
     },
     "still_tumbling": {
-      "name": "Tørketrommelen kjører fortsatt etter syklusen"
+      "name": "Trommelen roterer fortsatt etter syklusen"
     },
     "unload_pending": {
       "name": "Utlasting venter"

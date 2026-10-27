@@ -523,7 +523,7 @@
       "cycle_overrun": "周期运行过长",
       "cycle_paused": "周期已暂停",
       "cycle_resumed": "周期已恢复",
-      "still_tumbling": "周期结束后仍在翻滚",
+      "still_tumbling": "周期结束后仍在转动",
       "unloaded": "已取出",
       "state_changed": "状态已变更",
       "maintenance_due": "需要维护",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "仅此程序，使用准确名称。留空表示任意程序。",
       "phase": "仅此阶段，使用名称。留空表示任意阶段。",
-      "minutes": "即将完成：剩余分钟数。仍在翻滚：完成后的分钟数。",
+      "minutes": "即将完成：剩余分钟数。仍在转动：完成后的分钟数。",
       "percent": "超过程序通常时长的百分比。",
       "include_detected": "也对 WashData 在电力中检测到的暂停触发，例如浸泡或卡顿。",
       "status": "仅以此方式结束的周期。",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "抗皱已开始",
-      "description": "当设备开始翻滚已完成的衣物以防皱时触发。"
+      "description": "当设备开始转动滚筒为已完成的衣物防皱时触发。"
     },
     "still_tumbling": {
-      "name": "周期结束后仍在翻滚",
-      "description": "当周期完成后设备仍以短暂间隔翻滚达到此分钟数时，触发一次。在新周期开始或完成后4小时后停止。",
+      "name": "周期结束后仍在转动",
+      "description": "当周期完成后设备仍以短暂间隔转动达到此分钟数时，触发一次。在新周期开始或完成后4小时后停止。",
       "fields": {
         "minutes": {
           "name": "完成后的分钟数",
-          "description": "在完成后至少经过此时间的第一次翻滚时触发。"
+          "description": "在完成后至少经过此时间的第一次转动时触发。"
         }
       }
     },

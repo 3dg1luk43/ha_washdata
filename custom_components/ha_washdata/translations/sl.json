@@ -523,7 +523,7 @@
       "cycle_overrun": "Cikel traja predolgo",
       "cycle_paused": "Cikel je ustavljen",
       "cycle_resumed": "Cikel je nadaljeval",
-      "still_tumbling": "Po koncu še vedno bobna",
+      "still_tumbling": "Po koncu še vedno vrti boben",
       "unloaded": "Razloženo",
       "state_changed": "Stanje se je spremenilo",
       "maintenance_due": "Vzdrževanje potrebno",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Samo ta program, po točnem imenu. Prazno = kateri koli program.",
       "phase": "Samo ta faza, po imenu. Prazno = katera koli faza.",
-      "minutes": "Kmalu konec: preostale minute. Po koncu še vedno bobna: minute po koncu.",
+      "minutes": "Kmalu konec: preostale minute. Po koncu še vedno vrti boben: minute po koncu.",
       "percent": "Odstotkov nad običajnim trajanjem programa.",
       "include_detected": "Sproži tudi pri preminih, ki jih WashData zazna v porabi, kot je namakanje ali zasekanje.",
       "status": "Samo cikli, zaključeni na ta način.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Zaščita pred gubami se je začela",
-      "description": "Sproži, ko naprava začne bobnati s končanim pranjem proti gubanju."
+      "description": "Sproži, ko naprava začne vrteti boben s končanim pranjem proti gubanju."
     },
     "still_tumbling": {
-      "name": "Po koncu cikla še vedno bobna",
-      "description": "Sproži enkrat, ko naprava toliko minut po koncu cikla še vedno bobna v kratkih sunkih. Ustavi se pri novem ciklu ali 4 ure po koncu.",
+      "name": "Po koncu cikla še vedno vrti boben",
+      "description": "Sproži enkrat, ko naprava toliko minut po koncu cikla še vedno vrti boben v kratkih sunkih. Ustavi se pri novem ciklu ali 4 ure po koncu.",
       "fields": {
         "minutes": {
           "name": "Minute po koncu",
-          "description": "Sproži pri prvem bobnanju vsaj toliko po koncu."
+          "description": "Sproži pri prvem pulzu vrtenja vsaj toliko po koncu."
         }
       }
     },

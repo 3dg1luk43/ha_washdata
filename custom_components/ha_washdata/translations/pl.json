@@ -523,7 +523,7 @@
       "cycle_overrun": "Cykl trwa za długo",
       "cycle_paused": "Cykl wstrzymany",
       "cycle_resumed": "Cykl wznowiony",
-      "still_tumbling": "Nadal kręci po zakończeniu",
+      "still_tumbling": "Nadal obraca bębnem po zakończeniu",
       "unloaded": "Wyładowany",
       "state_changed": "Stan zmieniony",
       "maintenance_due": "Wymagana konserwacja",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Tylko ten program, po dokładnej nazwie. Zostaw puste dla dowolnego programu.",
       "phase": "Tylko ta faza, po nazwie. Zostaw puste dla dowolnej fazy.",
-      "minutes": "Zaraz koniec: pozostałe minuty. Nadal kręci: minuty po zakończeniu.",
+      "minutes": "Zaraz koniec: pozostałe minuty. Nadal obraca bębnem: minuty po zakończeniu.",
       "percent": "Procent powyżej zwykłego czasu trwania programu.",
       "include_detected": "Wyzwól też na wstrzymaniach, które WashData wykrywa w zasilaniu, takich jak moczenie lub zacięcie.",
       "status": "Tylko cykle zakończone w ten sposób.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Tryb antygniotowy rozpoczęty",
-      "description": "Wyzwala, gdy urządzenie zaczyna kręcić wypraniem po zakończeniu, aby zapobiec gnieceniu."
+      "description": "Wyzwala, gdy urządzenie zaczyna obracać bębnem z praniem po zakończeniu, aby zapobiec gnieceniu."
     },
     "still_tumbling": {
-      "name": "Nadal kręci po zakończeniu cyklu",
-      "description": "Wyzwala raz, gdy urządzenie nadal kręci w krótkich seriach tyle minut po zakończeniu cyklu. Zatrzymuje się przy nowym cyklu lub 4 godziny po zakończeniu.",
+      "name": "Nadal obraca bębnem po zakończeniu cyklu",
+      "description": "Wyzwala raz, gdy urządzenie nadal obraca bębnem w krótkich seriach tyle minut po zakończeniu cyklu. Zatrzymuje się przy nowym cyklu lub 4 godziny po zakończeniu.",
       "fields": {
         "minutes": {
           "name": "Minuty po zakończeniu",
-          "description": "Wyzwól przy pierwszym kręceniu przynajmniej tyle po zakończeniu."
+          "description": "Wyzwól przy pierwszym impulsie bębna przynajmniej tyle po zakończeniu."
         }
       }
     },

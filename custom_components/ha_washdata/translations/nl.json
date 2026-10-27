@@ -523,7 +523,7 @@
       "cycle_overrun": "Cyclus loopt te lang",
       "cycle_paused": "Cyclus gepauzeerd",
       "cycle_resumed": "Cyclus hervat",
-      "still_tumbling": "Trommel nog actief na de cyclus",
+      "still_tumbling": "Trommel draait nog na de cyclus",
       "unloaded": "Uitgeladen",
       "state_changed": "Status gewijzigd",
       "maintenance_due": "Onderhoud vereist",
@@ -544,7 +544,7 @@
     "extra_fields_descriptions": {
       "program": "Alleen dit programma, op exacte naam. Leeg laten voor elk programma.",
       "phase": "Alleen deze fase, op naam. Leeg laten voor elke fase.",
-      "minutes": "Bijna klaar: resterend minuten. Trommel nog actief: minuten na het einde.",
+      "minutes": "Bijna klaar: resterend minuten. Trommel draait nog: minuten na het einde.",
       "percent": "Procent boven de gebruikelijke programmauur.",
       "include_detected": "Activeer ook op pauzes die WashData in het vermogen ziet, zoals weken of vastlopen.",
       "status": "Alleen cycli die op deze manier eindigden.",
@@ -644,15 +644,15 @@
     },
     "anti_wrinkle_started": {
       "name": "Anti-kreuk gestart",
-      "description": "Wordt geactiveerd wanneer het apparaat de afgewerkte lading trommelend beweegt tegen kreukels."
+      "description": "Wordt geactiveerd wanneer het apparaat de afgewerkte lading in de trommel beweegt tegen kreukels."
     },
     "still_tumbling": {
-      "name": "Trommel nog actief na de cyclus",
-      "description": "Wordt eenmaal geactiveerd wanneer het apparaat nog in korte stoten trommelend werkt, dit aantal minuten na het einde van de cyclus. Stopt bij een nieuwe cyclus of 4 uur na het einde.",
+      "name": "Trommel draait nog na de cyclus",
+      "description": "Wordt eenmaal geactiveerd wanneer de trommel van het apparaat nog in korte stoten draait, dit aantal minuten na het einde van de cyclus. Stopt bij een nieuwe cyclus of 4 uur na het einde.",
       "fields": {
         "minutes": {
           "name": "Minuten na het einde",
-          "description": "Activeer bij de eerste trommelbeurt minstens zo lang na het einde."
+          "description": "Activeer bij de eerste trommelbeweging minstens zo lang na het einde."
         }
       }
     },
