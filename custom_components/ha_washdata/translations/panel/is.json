@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Ljúka langri hrukkuleysiáfanga á þurrkara",
-      "description": "Fyrir þurrkara sem halda áfram að velta í hrukkuleysi í klukkustundir eftir kerfið. Keyrir aðeins eftir að WashData telur kerfið lokið (lotu lokið eða hrukkuleysi hafið). Hún bíður, slökkvar síðan á snjalltengil þurrkarans í lágafls-augnablik og, sjálfgefið, kveikir á honum aftur. Ný lota sem byrjar á meðan hættir við hana.\n\nÁhætta: þetta skiptir um relé á meðan þurrkarinn er tengdur. Notaðu það aðeins með tengi sem er gert fyrir þurrkarann þinn og á eigin áhættu. WashData skiptir aldrei sjálf um tengilinn; það gerir þessi sjálfvirkni.\n\nKrefst WashData 0.5.9 eða nýrra."
+      "description": "Fyrir þurrkara sem halda áfram að velta í hrukkuleysi í klukkustundir eftir kerfið. Keyrir aðeins ef þurrkarinn er enn að velta þegar stilltur fjöldi mínútna er liðinn frá lokum kerfisins; þurrkari sem hefur stöðvast fyrir þann tíma er látinn í friði. Hún slekkur síðan á snjalltengil þurrkarans í lágafls-augnablik og, sjálfgefið, kveikir á honum aftur. Ný lota sem byrjar á meðan hættir við hana.\n\nÁhætta: þetta skiptir um relé á meðan þurrkarinn er tengdur. Notaðu það aðeins með tengi sem er gert fyrir þurrkarann þinn og á eigin áhættu. WashData skiptir aldrei sjálf um tengilinn; það gerir þessi sjálfvirkni.\n\nKrefst WashData 0.5.9 eða nýrra."
     }
   },
   "trigger": {

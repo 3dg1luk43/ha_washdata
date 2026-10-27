@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Lopeta kuivausrummun pitkä ryppyjenestovaihe",
-      "description": "Kuivausrummuille, jotka jatkavat pyörimistä ryppyjenestotilassa tunteja ohjelman jälkeen. Toimii vain kun WashData katsoo ohjelman olevan valmis (sykli päättyi tai ryppyjenesto alkoi). Se odottaa, sitten sammuttaa kuivausrummun älypistokkeen hetkellä, jolloin virrankulutus on pieni, ja oletuksena käynnistää sen uudelleen. Uuden syklin käynnistyminen sen aikana peruuttaa sen.\n\nRiski: tämä kytkee releen, kun kuivausrumpu on kytketty pistorasiaan. Käytä vain pistokkeella, joka on mitoitettu kuivausrummulle, omalla vastuullasi. WashData ei koskaan kytke pistoketta itse; tämä automaatio tekee sen.\n\nVaatii WashData 0.5.9 tai uudemman."
+      "description": "Kuivausrummuille, jotka jatkavat pyörimistä ryppyjenestotilassa tunteja ohjelman jälkeen. Toimii vain, jos kuivausrumpu pyörii yhä asetetun minuuttimäärän kuluttua ohjelman päättymisestä; siihen mennessä pysähtynyttä kuivausrumpua ei kosketa. Sitten se sammuttaa kuivausrummun älypistokkeen hetkellä, jolloin virrankulutus on pieni, ja oletuksena käynnistää sen uudelleen. Uuden syklin käynnistyminen sen aikana peruuttaa sen.\n\nRiski: tämä kytkee releen, kun kuivausrumpu on kytketty pistorasiaan. Käytä vain pistokkeella, joka on mitoitettu kuivausrummulle, omalla vastuullasi. WashData ei koskaan kytke pistoketta itse; tämä automaatio tekee sen.\n\nVaatii WashData 0.5.9 tai uudemman."
     }
   },
   "trigger": {

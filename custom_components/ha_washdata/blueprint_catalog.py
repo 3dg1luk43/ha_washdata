@@ -108,7 +108,9 @@ def load_catalog(root: Path = BLUEPRINT_ROOT) -> dict[str, Any]:
             raise ValueError("catalog.json is not an object")
     except (OSError, ValueError) as err:
         _LOGGER.warning("Blueprint catalog unreadable: %s", err)
-        return {"blueprints": [], "error": f"catalog unreadable: {err}"}
+        # Not the error text: an OSError names the file's path, and the list is
+        # open to every signed-in user. The warning above has the detail.
+        return {"blueprints": [], "error": "catalog unreadable"}
     items: list[dict[str, Any]] = []
     for blueprint_id, meta in catalog.items():
         if not _ID_RE.match(str(blueprint_id)) or not isinstance(meta, dict):

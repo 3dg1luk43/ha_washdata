@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Završi dugu fazu anti-bore sušilice",
-      "description": "Za sušilice koje nastavljaju prevrtati u anti-bori satima nakon programa. Pokreće se tek kada WashData smatra da je program završen (ciklus završen ili anti-bora pokrenuta). Čeka, zatim isključuje pametni utikač sušilice u trenutku niske potrošnje i zadano ga ponovo uključi. Novi ciklus koji počne u međuvremenu otkazuje je.\n\nRizik: ovo prebacuje relej dok je sušilica priključena. Koristite samo s utikačem prikladnim za vašu sušilicu i na vlastiti rizik. WashData nikada sam ne prebacuje utikač; to radi ova automatizacija.\n\nZahtijeva WashData 0.5.9 ili noviji."
+      "description": "Za sušilice koje nastavljaju prevrtati u anti-bori satima nakon programa. Pokreće se samo ako sušilica i dalje prevrće kada protekne postavljeni broj minuta od završetka programa; sušilicu koja se do tada zaustavila ostavlja na miru. Zatim isključuje pametni utikač sušilice u trenutku niske potrošnje i zadano ga ponovo uključi. Novi ciklus koji počne u međuvremenu otkazuje je.\n\nRizik: ovo prebacuje relej dok je sušilica priključena. Koristite samo s utikačem prikladnim za vašu sušilicu i na vlastiti rizik. WashData nikada sam ne prebacuje utikač; to radi ova automatizacija.\n\nZahtijeva WashData 0.5.9 ili noviji."
     }
   },
   "trigger": {

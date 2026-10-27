@@ -2218,7 +2218,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Baigti ilgą džiovyklos apsaugos nuo raukšlių fazę",
-      "description": "Džiovyklėms, kurios po programos valandas sukasi apsaugos nuo raukšlių režimu. Veikia tik tada, kai WashData laiko programą baigta (ciklas baigtas arba prasidėjo apsauga nuo raukšlių). Palaukia, tada išjungia džiovyklos išmaniojo kištuko maitinimą žemos galios momentu ir numatytai vėl įjungia. Tuo tarpu prasidedantis naujas ciklas ją atšaukia.\n\nRizika: tai perjungia relę, kol džiovyklė yra įjungta. Naudokite tik su kištuku, sertifikuotu jūsų džiovyklei, ir tik savo rizika. WashData pati niekada neišjungia kištuko; tai daro ši automatika.\n\nReikalinga WashData 0.5.9 arba naujesnė versija."
+      "description": "Džiovyklėms, kurios po programos valandas sukasi apsaugos nuo raukšlių režimu. Veikia tik tada, kai džiovyklė vis dar sukasi praėjus nustatytam minučių skaičiui po programos pabaigos; iki to laiko sustojusi džiovyklė neliečiama. Tada išjungia džiovyklos išmaniojo kištuko maitinimą žemos galios momentu ir numatytai vėl įjungia. Tuo tarpu prasidedantis naujas ciklas ją atšaukia.\n\nRizika: tai perjungia relę, kol džiovyklė yra įjungta. Naudokite tik su kištuku, sertifikuotu jūsų džiovyklei, ir tik savo rizika. WashData pati niekada neišjungia kištuko; tai daro ši automatika.\n\nReikalinga WashData 0.5.9 arba naujesnė versija."
     }
   },
   "trigger": {

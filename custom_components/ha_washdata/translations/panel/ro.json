@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Terminarea unei faze lungi anti-șifonare a uscătorului",
-      "description": "Pentru uscătoarele care continuă să se rotească în modul anti-șifonare ore întregi după program. Rulează numai după ce WashData consideră programul terminat (ciclu terminat sau anti-șifonare pornit). Așteaptă, apoi oprește priza inteligentă a uscătorului într-un moment de consum redus și, implicit, o repornește. Un nou ciclu care pornește între timp îl anulează.\n\nRisc: aceasta comută un releu în timp ce uscătorul este conectat. Utilizați doar cu o priză omologată pentru uscătorul dvs. și pe propriul risc. WashData nu comută niciodată priza singur; această automatizare o face.\n\nNecesită WashData 0.5.9 sau mai nou."
+      "description": "Pentru uscătoarele care continuă să se rotească în modul anti-șifonare ore întregi după program. Rulează numai dacă uscătorul încă se rotește după trecerea numărului de minute setat de la terminarea programului; un uscător care s-a oprit până atunci nu este afectat. Apoi oprește priza inteligentă a uscătorului într-un moment de consum redus și, implicit, o repornește. Un nou ciclu care pornește între timp îl anulează.\n\nRisc: aceasta comută un releu în timp ce uscătorul este conectat. Utilizați doar cu o priză omologată pentru uscătorul dvs. și pe propriul risc. WashData nu comută niciodată priza singur; această automatizare o face.\n\nNecesită WashData 0.5.9 sau mai nou."
     }
   },
   "trigger": {

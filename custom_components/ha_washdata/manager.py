@@ -4636,6 +4636,9 @@ class WashDataManager:
                 )
                 self._end_dropped_cycle()
                 self.detector.reset(STATE_OFF)
+                # Its program, progress and projections too: no reading moves the
+                # detector again, so nothing else would clear them (OFF branch).
+                self._update_estimates()
                 self._spawn_tracked(self.profile_store.async_clear_active_cycle())
         if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
             # A non-finite reading is skipped entirely, which leaves the cache

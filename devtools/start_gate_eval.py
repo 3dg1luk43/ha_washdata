@@ -467,7 +467,7 @@ def detector_setup(device: Device, overrides: dict[str, Any]) -> tuple[CycleDete
     def _num(key: str, default: float) -> float:
         try:
             value = float(opts.get(key, default))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return float(default)
         return value if math.isfinite(value) else float(default)
 

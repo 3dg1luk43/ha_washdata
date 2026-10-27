@@ -2218,7 +2218,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Zaključi dolgo fazo zaščite pred gubami sušilnika",
-      "description": "Za sušilnike, ki po koncu programa nadaljujejo z vrtanjem v zaščiti pred gubami ure in ure. Deluje šele, ko WashData meni, da je program končan (cikel je končan ali zaščita pred gubami se je začela). Počaka, nato izklopi pametno vtičnico sušilnika v trenutku nizke moči in jo privzeto znova vklopi. Nov cikel, ki se začne medtem, jo prekliče.\n\nTveganje: preklopi rele, medtem ko je sušilnik priključen. Uporabljajte samo z vtičnico, primerno za vaš sušilnik, in na lastno odgovornost. WashData nikoli sam ne preklopi vtičnice; to naredi ta avtomatizacija.\n\nZahteva WashData 0.5.9 ali novejši."
+      "description": "Za sušilnike, ki po koncu programa nadaljujejo z vrtanjem v zaščiti pred gubami ure in ure. Deluje samo, če se boben sušilnika po preteku nastavljenega števila minut od konca programa še vrti; sušilnik, ki se je do takrat ustavil, pusti pri miru. Nato izklopi pametno vtičnico sušilnika v trenutku nizke moči in jo privzeto znova vklopi. Nov cikel, ki se začne medtem, jo prekliče.\n\nTveganje: preklopi rele, medtem ko je sušilnik priključen. Uporabljajte samo z vtičnico, primerno za vaš sušilnik, in na lastno odgovornost. WashData nikoli sam ne preklopi vtičnice; to naredi ta avtomatizacija.\n\nZahteva WashData 0.5.9 ali novejši."
     }
   },
   "trigger": {

@@ -2182,7 +2182,7 @@
         },
         "dryer_anti_crease_power_cut": {
             "name": "Mbaro fazën e gjatë kundër rrudhave të tharëses",
-            "description": "Për tharëse që vazhdojnë të rrotullohen në modalitetin kundër rrudhave për orë pas programit. Ekzekutohet vetëm pasi WashData e konsideron programin të përfunduar (cikël mbaroi ose filloi kundër rrudhave). Pret, pastaj fikë prizën e zgjuar të tharëses në një moment me konsum të ulët dhe, si parazgjedhje, e rindez. Një cikël i ri që fillon ndërkohë e anulon.\n\nRisk: kjo ndryshon releun ndërsa tharësja është e lidhur. Përdore vetëm me prizë të vlerësuar për tharësen tënde dhe me rrezik tënd. WashData nuk e fikë kurrë prizën vetë; këtë e bën ky automatizim.\n\nKërkon WashData 0.5.9 ose më të ri."
+            "description": "Për tharëse që vazhdojnë të rrotullohen në modalitetin kundër rrudhave për orë pas programit. Ekzekutohet vetëm kur tharësja ende rrotullohet pasi kanë kaluar minutat e caktuara nga përfundimi i programit; një tharëse që ka ndaluar deri atëherë lihet e paprekur. Pastaj fikë prizën e zgjuar të tharëses në një moment me konsum të ulët dhe, si parazgjedhje, e rindez. Një cikël i ri që fillon ndërkohë e anulon.\n\nRisk: kjo ndryshon releun ndërsa tharësja është e lidhur. Përdore vetëm me prizë të vlerësuar për tharësen tënde dhe me rrezik tënd. WashData nuk e fikë kurrë prizën vetë; këtë e bën ky automatizim.\n\nKërkon WashData 0.5.9 ose më të ri."
         }
     },
     "trigger": {

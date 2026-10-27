@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Finalizar una larga fase antiarrugas de secadora",
-      "description": "Para secadoras que siguen girando en modo antiarrugas durante horas tras el programa. Solo se ejecuta cuando WashData considera el programa terminado (ciclo terminado o antiarrugas iniciado). Espera y luego apaga el enchufe inteligente de la secadora en un momento de baja potencia y, por defecto, lo vuelve a encender. Un nuevo ciclo que comience mientras tanto lo cancela.\n\nRiesgo: esto conmuta un relé mientras la secadora está enchufada. Úselo solo con un enchufe homologado para su secadora y bajo su propia responsabilidad. WashData nunca conmuta el enchufe por sí mismo; esta automatización lo hace.\n\nRequiere WashData 0.5.9 o más reciente."
+      "description": "Para secadoras que siguen girando en modo antiarrugas durante horas tras el programa. Solo se ejecuta si la secadora sigue girando una vez transcurridos los minutos configurados tras terminar el programa; una secadora que ya se ha detenido para entonces no se toca. Luego apaga el enchufe inteligente de la secadora en un momento de baja potencia y, por defecto, lo vuelve a encender. Un nuevo ciclo que comience mientras tanto lo cancela.\n\nRiesgo: esto conmuta un relé mientras la secadora está enchufada. Úselo solo con un enchufe homologado para su secadora y bajo su propia responsabilidad. WashData nunca conmuta el enchufe por sí mismo; esta automatización lo hace.\n\nRequiere WashData 0.5.9 o más reciente."
     }
   },
   "trigger": {

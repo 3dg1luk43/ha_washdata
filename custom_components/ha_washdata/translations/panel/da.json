@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Afslut en lang anti-rynke-fase på tørretumbleren",
-      "description": "Til tørretumblere, der fortsætter med at tumble i anti-rynke i timevis efter programmet. Kører kun, når WashData anser programmet for afsluttet (cyklus færdig eller anti-rynke startet). Den venter og slukker derefter tørretumblerens smart-stik i et øjeblik med lavt strømforbrug – og tænder det som standard igen. En ny cyklus, der starter i mellemtiden, annullerer den.\n\nRisiko: dette skifter et relæ, mens tørretumbleren er tilsluttet. Brug det kun med et stik, der er egnet til din tørretumbler, og på eget ansvar. WashData skifter aldrig selve stikket; det gør denne automatisering.\n\nKræver WashData 0.5.9 eller nyere."
+      "description": "Til tørretumblere, der fortsætter med at tumble i anti-rynke i timevis efter programmet. Kører kun, hvis tørretumbleren stadig tumbler det indstillede antal minutter efter programmets afslutning; en tørretumbler, der er stoppet inden da, lades i fred. Den slukker derefter tørretumblerens smart-stik i et øjeblik med lavt strømforbrug og tænder det som standard igen. En ny cyklus, der starter i mellemtiden, annullerer den.\n\nRisiko: dette skifter et relæ, mens tørretumbleren er tilsluttet. Brug det kun med et stik, der er egnet til din tørretumbler, og på eget ansvar. WashData skifter aldrig selve stikket; det gør denne automatisering.\n\nKræver WashData 0.5.9 eller nyere."
     }
   },
   "trigger": {

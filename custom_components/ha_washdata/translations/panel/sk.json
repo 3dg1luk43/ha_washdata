@@ -2218,7 +2218,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Ukončiť dlhú fázu ochrany pred krčením sušičky",
-      "description": "Pre sušičky, ktoré pokračujú v bubnovaní v ochrane pred krčením celé hodiny po skončení programu. Spustí sa až keď WashData považuje program za dokončený (cyklus dokončený alebo ochrana pred krčením spustená). Počká, potom vypne zástrčku sušičky v momente nízkej spotreby a predvolene ju znova zapne. Nový cyklus spustený medzitým ju zruší.\n\nRiziko: prepína relé, keď je sušička zapojená. Používajte len so zástrčkou určenou pre vašu sušičku a na vlastné riziko. WashData zástrčku sám nikdy neprepína; robí to táto automatizácia.\n\nVyžaduje WashData 0.5.9 alebo novší."
+      "description": "Pre sušičky, ktoré pokračujú v bubnovaní v ochrane pred krčením celé hodiny po skončení programu. Spustí sa len vtedy, keď sušička po uplynutí nastaveného počtu minút od skončenia programu stále bubnuje; sušičku, ktorá sa dovtedy zastavila, nechá tak. Potom vypne zástrčku sušičky v momente nízkej spotreby a predvolene ju znova zapne. Nový cyklus spustený medzitým ju zruší.\n\nRiziko: prepína relé, keď je sušička zapojená. Používajte len so zástrčkou určenou pre vašu sušičku a na vlastné riziko. WashData zástrčku sám nikdy neprepína; robí to táto automatizácia.\n\nVyžaduje WashData 0.5.9 alebo novší."
     }
   },
   "trigger": {

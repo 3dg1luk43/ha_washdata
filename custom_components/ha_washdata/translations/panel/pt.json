@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Terminar uma longa fase anti-vincos da máquina de secar",
-      "description": "Para máquinas de secar que continuam a rodar no modo anti-vincos durante horas após o programa. Só é executado depois de o WashData considerar o programa terminado (ciclo terminado ou anti-vincos iniciado). Aguarda e depois desliga a tomada inteligente da máquina de secar num momento de baixa potência e, por predefinição, volta a ligá-la. Um novo ciclo que comece entretanto cancela-o.\n\nRisco: isto comuta um relé enquanto a máquina de secar está ligada. Utilize apenas com uma tomada adequada à sua máquina e por sua conta e risco. O WashData nunca comuta a tomada por si próprio; esta automatização fá-lo.\n\nRequer WashData 0.5.9 ou mais recente."
+      "description": "Para máquinas de secar que continuam a rodar no modo anti-vincos durante horas após o programa. Só é executado se a máquina de secar ainda estiver a rodar decorridos os minutos definidos após o fim do programa; uma máquina de secar que já tenha parado nessa altura não é afetada. Depois desliga a tomada inteligente da máquina de secar num momento de baixa potência e, por predefinição, volta a ligá-la. Um novo ciclo que comece entretanto cancela-o.\n\nRisco: isto comuta um relé enquanto a máquina de secar está ligada. Utilize apenas com uma tomada adequada à sua máquina e por sua conta e risco. O WashData nunca comuta a tomada por si próprio; esta automatização fá-lo.\n\nRequer WashData 0.5.9 ou mais recente."
     }
   },
   "trigger": {

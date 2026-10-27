@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Een lange anti-kreukfase van de droger beëindigen",
-      "description": "Voor drogers die na het programma nog uren anti-kreuk blijven draaien. Wordt alleen uitgevoerd nadat WashData het programma als voltooid beschouwt (cyclus klaar of anti-kreuk gestart). Hij wacht, schakelt dan de smart plug van de droger uit op een moment van laag vermogen en, standaard, weer in. Een nieuwe cyclus die ondertussen start, annuleert dit.\n\nRisico: hiermee wordt een relais geschakeld terwijl de droger is aangesloten. Gebruik het alleen met een stekker die geschikt is voor uw droger en op eigen risico. WashData schakelt de stekker zelf nooit; dat doet deze automatisering.\n\nVereist WashData 0.5.9 of nieuwer."
+      "description": "Voor drogers die na het programma nog uren anti-kreuk blijven draaien. Wordt alleen uitgevoerd als de droger het ingestelde aantal minuten na afloop van het programma nog draait; een droger die tegen die tijd al gestopt is, wordt met rust gelaten. Hij schakelt dan de smart plug van de droger uit op een moment van laag vermogen en, standaard, weer in. Een nieuwe cyclus die ondertussen start, annuleert dit.\n\nRisico: hiermee wordt een relais geschakeld terwijl de droger is aangesloten. Gebruik het alleen met een stekker die geschikt is voor uw droger en op eigen risico. WashData schakelt de stekker zelf nooit; dat doet deze automatisering.\n\nVereist WashData 0.5.9 of nieuwer."
     }
   },
   "trigger": {

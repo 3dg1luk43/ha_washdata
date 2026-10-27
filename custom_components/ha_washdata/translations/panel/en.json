@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "End a long dryer anti-crease phase",
-      "description": "For dryers that keep tumbling in anti-crease for hours after the program. It runs only after WashData considers the program finished (cycle finished or anti-crease started). It waits, then switches the dryer's smart plug off in a low-power moment and, by default, back on. A new cycle starting in the meantime cancels it.\n\nRisk: this switches a relay while the dryer is plugged in. Use it only with a plug rated for your dryer and at your own risk. WashData never switches the plug itself; this automation does.\n\nNeeds WashData 0.5.9 or newer."
+      "description": "For dryers that keep tumbling in anti-crease for hours after the program. It runs only when the dryer is still tumbling the set number of minutes after the program finished; a dryer that has stopped by then is left alone. It then switches the dryer's smart plug off in a low-power moment and, by default, back on. A new cycle starting in the meantime cancels it.\n\nRisk: this switches a relay while the dryer is plugged in. Use it only with a plug rated for your dryer and at your own risk. WashData never switches the plug itself; this automation does.\n\nNeeds WashData 0.5.9 or newer."
     }
   },
   "trigger": {

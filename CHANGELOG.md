@@ -28,7 +28,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### Features
 
-- **WashData triggers for automations** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): 18 triggers (cycle, program, phase, pause, anti-wrinkle, unload, maintenance and more) in Home Assistant's add-trigger dialog and on the device page. Each fires once, also across a restart, with the program, duration, energy and the plug's switch.
+- **WashData triggers for automations** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): 18 triggers (cycle, program, phase, pause, anti-wrinkle, unload, maintenance and more) in Home Assistant's add-trigger dialog and on the device page. Each occurrence fires once, also across a restart, with the program, duration, energy and the plug's switch.
 - **Automation templates** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): the new Automations tab installs ready-made blueprints in one click: end a long dryer anti-crease phase by cutting the plug, or turn something on while a cycle runs. WashData itself never switches the plug. Share your own by pull request. Thanks to @gkotoole
 - **Automations tab**: lists the automations that use the appliance and starts new ones from any WashData trigger; the ones WashData creates get a "WashData" label and category.
 - **Maintenance done by a program** ([#480](https://github.com/3dg1luk43/ha_washdata/issues/480)): a task can name the programs that do it (the drum clean by Cotton 90), and a finished cycle of one logs it as done. Only cycles with a confident label or a program you picked count. Thanks to @Alexx3105

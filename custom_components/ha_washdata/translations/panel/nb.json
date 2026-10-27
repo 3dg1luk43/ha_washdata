@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Avslutt en lang anti-rynke-fase på tørketrommelen",
-      "description": "For tørketromler som fortsetter å tumle i anti-rynke i timevis etter programmet. Kjører bare etter at WashData anser programmet som ferdig (syklus ferdig eller anti-rynke startet). Den venter, slår deretter av tørketrommelens smart plug av i et øyeblikk med lavt forbruk og, som standard, på igjen. En ny syklus som starter i mellomtiden, avbryter den.\n\nRisiko: dette kobler om et relé mens tørketrommelen er koblet til. Bruk det bare med en plugg som er egnet for tørketrommelen din, og på eget ansvar. WashData kobler aldri pluggen selv; det gjør denne automasjonen.\n\nKrever WashData 0.5.9 eller nyere."
+      "description": "For tørketromler som fortsetter å tumle i anti-rynke i timevis etter programmet. Kjører bare hvis tørketrommelen fortsatt tumler det innstilte antallet minutter etter at programmet er ferdig; en tørketrommel som har stoppet innen da, blir latt i fred. Den slår deretter tørketrommelens smart plug av i et øyeblikk med lavt forbruk og, som standard, på igjen. En ny syklus som starter i mellomtiden, avbryter den.\n\nRisiko: dette kobler om et relé mens tørketrommelen er koblet til. Bruk det bare med en plugg som er egnet for tørketrommelen din, og på eget ansvar. WashData kobler aldri pluggen selv; det gjør denne automasjonen.\n\nKrever WashData 0.5.9 eller nyere."
     }
   },
   "trigger": {

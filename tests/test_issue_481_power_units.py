@@ -303,6 +303,8 @@ async def test_a_cycle_restored_on_an_energy_counter_is_dropped(
     started = dt_util.utcnow() - timedelta(minutes=40)
     manager.detector._current_cycle_start = started  # noqa: SLF001
     manager._cycle_ended_pending = True  # noqa: SLF001  # its start was announced
+    manager._current_program = "Cotton 40"  # noqa: SLF001
+    manager._cycle_progress = 55.0  # noqa: SLF001
     ended = async_capture_events(hass, "ha_washdata_cycle_ended")
     triggers: list[str] = []
     async_dispatcher_connect(
@@ -320,6 +322,16 @@ async def test_a_cycle_restored_on_an_energy_counter_is_dropped(
     # The start the restore put on the detector, not "unknown, 0 s".
     assert ended[0].data["start_time"] == started.isoformat()
     assert ended[0].data["duration"] > 0
+    # Nothing of the dropped cycle stays on the entities.
+    assert manager._current_program == "off" and manager._cycle_progress == 0.0  # noqa: SLF001
+
+
+def test_the_recorder_scaler_asks_once_per_unit() -> None:
+    manager = MagicMock()
+    manager.power_scale.return_value = 1000.0
+    scale = ws_api._power_scaler(manager)  # noqa: SLF001
+    assert [scale("kW") for _ in range(5)] == [1000.0] * 5
+    assert manager.power_scale.call_count == 1
 
 
 async def test_a_kw_reading_that_overflows_as_watts_is_rejected(

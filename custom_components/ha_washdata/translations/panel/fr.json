@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Arrêter une longue phase anti-froissement de sèche-linge",
-      "description": "Pour les sèche-linge qui continuent de culbuter en mode anti-froissement pendant des heures après le programme. Ne s'exécute qu'après que WashData considère le programme terminé (cycle terminé ou anti-froissement démarré). Il attend, puis coupe la prise connectée du sèche-linge dans un moment de faible consommation et, par défaut, la rallume. Un nouveau cycle démarrant entre-temps l'annule.\n\nRisque : ceci commute un relais pendant que le sèche-linge est branché. Utilisez uniquement avec une prise adaptée à votre sèche-linge et à vos risques. WashData ne commute jamais la prise lui-même ; cette automatisation le fait.\n\nNécessite WashData 0.5.9 ou plus récent."
+      "description": "Pour les sèche-linge qui continuent de culbuter en mode anti-froissement pendant des heures après le programme. Ne s'exécute que si le sèche-linge culbute encore une fois écoulé le nombre de minutes défini après la fin du programme ; un sèche-linge qui s'est arrêté d'ici là n'est pas touché. Il coupe ensuite la prise connectée du sèche-linge dans un moment de faible consommation et, par défaut, la rallume. Un nouveau cycle démarrant entre-temps l'annule.\n\nRisque : ceci commute un relais pendant que le sèche-linge est branché. Utilisez uniquement avec une prise adaptée à votre sèche-linge et à vos risques. WashData ne commute jamais la prise lui-même ; cette automatisation le fait.\n\nNécessite WashData 0.5.9 ou plus récent."
     }
   },
   "trigger": {

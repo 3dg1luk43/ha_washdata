@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Avsluta en lång skrynkelskyddsfas på torktumlaren",
-      "description": "För torktumlare som fortsätter att tumla i skrynkelskyddsläge i timmar efter programmet. Körs bara efter att WashData anser programmet som avslutat (cykel klar eller skrynkelskydd startat). Den väntar och stänger sedan av torktumlarstickan i ett ögonblick med låg effekt och, som standard, sätter på den igen. En ny cykel som startar under tiden avbryter den.\n\nRisk: detta kopplar ett relä medan torktumlaren är inkopplad. Använd det bara med ett uttag anpassat för din torktumlare och på egen risk. WashData kopplar aldrig stickan själv; det gör den här automatiseringen.\n\nKräver WashData 0.5.9 eller nyare."
+      "description": "För torktumlare som fortsätter att tumla i skrynkelskyddsläge i timmar efter programmet. Körs bara om torktumlaren fortfarande tumlar det inställda antalet minuter efter att programmet har avslutats; en torktumlare som har stannat innan dess lämnas ifred. Den stänger sedan av torktumlarstickan i ett ögonblick med låg effekt och, som standard, sätter på den igen. En ny cykel som startar under tiden avbryter den.\n\nRisk: detta kopplar ett relä medan torktumlaren är inkopplad. Använd det bara med ett uttag anpassat för din torktumlare och på egen risk. WashData kopplar aldrig stickan själv; det gör den här automatiseringen.\n\nKräver WashData 0.5.9 eller nyare."
     }
   },
   "trigger": {

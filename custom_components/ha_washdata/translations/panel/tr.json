@@ -2182,7 +2182,7 @@
         },
         "dryer_anti_crease_power_cut": {
             "name": "Uzun kurutucu kırışıklık önleme fazını sonlandır",
-            "description": "Programdan sonra saatlerce kırışıklık önleme modunda dönen kurutucular için. Yalnızca WashData programın bittiğini değerlendirdikten sonra çalışır (döngü bitti veya kırışıklık önleme başladı). Bekler, ardından düşük güç anında kurutucunun akıllı fişini kapatır ve varsayılan olarak geri açar. Bu sırada başlayan yeni bir döngü iptal eder.\n\nRisk: bu, kurutucu prize takılıyken röleyi değiştirir. Yalnızca kurutucunuza uygun bir priz ile ve kendi sorumluluğunuzda kullanın. WashData fiş'i hiçbir zaman kendisi kapatmaz; bunu bu otomasyon yapar.\n\nWashData 0.5.9 veya üzeri gerekir."
+            "description": "Programdan sonra saatlerce kırışıklık önleme modunda dönen kurutucular için. Yalnızca kurutucu, programın bitmesinden ayarlanan dakika sayısı kadar sonra hâlâ dönüyorsa çalışır; o zamana kadar durmuş bir kurutucuya dokunulmaz. Ardından düşük güç anında kurutucunun akıllı fişini kapatır ve varsayılan olarak geri açar. Bu sırada başlayan yeni bir döngü iptal eder.\n\nRisk: bu, kurutucu prize takılıyken röleyi değiştirir. Yalnızca kurutucunuza uygun bir priz ile ve kendi sorumluluğunuzda kullanın. WashData fiş'i hiçbir zaman kendisi kapatmaz; bunu bu otomasyon yapar.\n\nWashData 0.5.9 veya üzeri gerekir."
         }
     },
     "trigger": {

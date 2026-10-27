@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Lange Knitterschutz-Phase des Trockners beenden",
-      "description": "Für Trockner, die nach dem Programm stundenlang im Knitterschutz weitertrommeln. Läuft erst, nachdem WashData das Programm als beendet betrachtet (Zyklus beendet oder Knitterschutz gestartet). Sie wartet und schaltet dann den Smart Plug des Trockners in einem Moment geringer Leistung aus – standardmäßig auch wieder ein. Ein neu gestarteter Zyklus bricht sie ab.\n\nRisiko: Dabei wird ein Relais geschaltet, während der Trockner angeschlossen ist. Nur mit einem für Ihren Trockner geeigneten Stecker und auf eigenes Risiko verwenden. WashData schaltet den Stecker selbst nie; das erledigt diese Automatisierung.\n\nBenötigt WashData 0.5.9 oder neuer."
+      "description": "Für Trockner, die nach dem Programm stundenlang im Knitterschutz weitertrommeln. Läuft nur, wenn der Trockner die eingestellte Anzahl Minuten nach Programmende noch trommelt; ein Trockner, der bis dahin aufgehört hat, bleibt unberührt. Sie schaltet dann den Smart Plug des Trockners in einem Moment geringer Leistung aus, standardmäßig auch wieder ein. Ein neu gestarteter Zyklus bricht sie ab.\n\nRisiko: Dabei wird ein Relais geschaltet, während der Trockner angeschlossen ist. Nur mit einem für Ihren Trockner geeigneten Stecker und auf eigenes Risiko verwenden. WashData schaltet den Stecker selbst nie; das erledigt diese Automatisierung.\n\nBenötigt WashData 0.5.9 oder neuer."
     }
   },
   "trigger": {

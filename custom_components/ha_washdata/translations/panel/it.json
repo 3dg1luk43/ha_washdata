@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Terminare una lunga fase antirughe dell'asciugatrice",
-      "description": "Per le asciugatrici che continuano a girare in modalità antirughe per ore dopo il programma. Si avvia solo quando WashData considera il programma terminato (ciclo concluso o antirughe avviato). Attende, poi spegne la presa intelligente dell'asciugatrice in un momento di basso consumo e, per impostazione predefinita, la riaccende. Un nuovo ciclo avviato nel frattempo lo annulla.\n\nRischio: questo commuta un relè mentre l'asciugatrice è collegata. Usalo solo con una presa adatta alla tua asciugatrice e a tuo rischio. WashData non commuta mai la presa da solo; lo fa questa automazione.\n\nRichiede WashData 0.5.9 o versione successiva."
+      "description": "Per le asciugatrici che continuano a girare in modalità antirughe per ore dopo il programma. Si avvia solo se l'asciugatrice sta ancora girando trascorsi i minuti impostati dalla fine del programma; un'asciugatrice che a quel punto si è già fermata non viene toccata. Poi spegne la presa intelligente dell'asciugatrice in un momento di basso consumo e, per impostazione predefinita, la riaccende. Un nuovo ciclo avviato nel frattempo lo annulla.\n\nRischio: questo commuta un relè mentre l'asciugatrice è collegata. Usalo solo con una presa adatta alla tua asciugatrice e a tuo rischio. WashData non commuta mai la presa da solo; lo fa questa automazione.\n\nRichiede WashData 0.5.9 o versione successiva."
     }
   },
   "trigger": {

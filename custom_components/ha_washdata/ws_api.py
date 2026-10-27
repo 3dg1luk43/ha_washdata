@@ -410,8 +410,18 @@ def _power_scale(manager: Any, unit: Any = None, *, from_state: bool = True) -> 
 
 def _power_scaler(manager: Any) -> Callable[[Any], float]:
     """The factor for a recorded state's own unit: a sensor whose unit changed
-    keeps each reading in the unit it was recorded in."""
-    return lambda unit: _power_scale(manager, unit, from_state=False)
+    keeps each reading in the unit it was recorded in. Memoised per unit (a
+    history read can be millions of rows); ``from_state=False`` never touches
+    ``hass.states``, so it is safe on the recorder's executor."""
+    cache: dict[Any, float] = {}
+
+    def _scale(unit: Any) -> float:
+        key = unit if isinstance(unit, str) or unit is None else repr(unit)
+        if key not in cache:
+            cache[key] = _power_scale(manager, unit, from_state=False)
+        return cache[key]
+
+    return _scale
 
 
 async def _recorder_power(
@@ -4693,10 +4703,17 @@ async def _async_restore_entry_options(
     change to them since was the user's own, and reverting it could re-point the
     device at a sensor it no longer uses. Same write-boundary hygiene as the import.
     """
+    from . import _convert_legacy_notify_service  # pylint: disable=import-outside-toplevel
+
     async with _entry_options_lock(hass, entry.entry_id):
         current = dict(entry.options)
+        # A restore point taken before 0.5.9 can still hold the legacy
+        # notify_service: convert it as the 3.12 migration does, or the strip
+        # below drops it and the restored device stops notifying (#472).
+        snapshot = dict(snapshot_options)
+        _convert_legacy_notify_service(snapshot)
         restored = {
-            k: v for k, v in snapshot_options.items() if k not in _IMPORT_STRIP_KEYS
+            k: v for k, v in snapshot.items() if k not in _IMPORT_STRIP_KEYS
         }
         restored.update({k: current[k] for k in _IMPORT_LOCAL_BINDING_KEYS if k in current})
         # A restore point taken before 0.5.9 can name a removed device type.

@@ -271,6 +271,7 @@ async def test_ws_blueprints_list_reports_an_unreadable_catalog(
     res = await client.receive_json()
     assert res["success"], res
     assert res["result"]["blueprints"] == [] and res["result"]["error"]
+    assert str(tmp_path) not in res["result"]["error"]  # no server path to the client
 
 
 async def test_ws_blueprints_list_does_not_send_the_exception_text(

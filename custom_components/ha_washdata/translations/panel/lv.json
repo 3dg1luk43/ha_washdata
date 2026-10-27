@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Beigt žāvētāja garo pretgrumbu fāzi",
-      "description": "Žāvētājiem, kas pēc programmas stundām turpina darbināt pretgrumbu režīmā. Darbojas tikai pēc tam, kad WashData uzskata programmu par pabeigtu (cikls beidzies vai pretgrumbu režīms sācies). Tas gaida, pēc tam izslēdz žāvētāja viedligzdas strāvu zemās jaudas brīdī un pēc noklusējuma ieslēdz atpakaļ. Jauns cikls, kas pa to laiku sākas, atceļ to.\n\nRisks: tas pārslēdz releju, kamēr žāvētājs ir iesprausts. Izmantojiet tikai ar kontaktligzdu, kas paredzēta jūsu žāvētājam, un uz savu risku. WashData pati nekad nepārslēdz kontaktligzdu; to dara šī automatizācija.\n\nNepieciešams WashData 0.5.9 vai jaunāks."
+      "description": "Žāvētājiem, kas pēc programmas stundām turpina darbināt pretgrumbu režīmā. Darbojas tikai tad, ja žāvētājs joprojām griežas iestatīto minūšu skaitu pēc programmas beigām; žāvētājs, kas līdz tam jau apstājies, netiek aiztikts. Pēc tam tas izslēdz žāvētāja viedligzdas strāvu zemās jaudas brīdī un pēc noklusējuma ieslēdz atpakaļ. Jauns cikls, kas pa to laiku sākas, atceļ to.\n\nRisks: tas pārslēdz releju, kamēr žāvētājs ir iesprausts. Izmantojiet tikai ar kontaktligzdu, kas paredzēta jūsu žāvētājam, un uz savu risku. WashData pati nekad nepārslēdz kontaktligzdu; to dara šī automatizācija.\n\nNepieciešams WashData 0.5.9 vai jaunāks."
     }
   },
   "trigger": {

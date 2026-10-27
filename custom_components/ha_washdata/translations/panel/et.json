@@ -2182,7 +2182,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Lõpeta kuivati pikk kortsudevastane faas",
-      "description": "Kuivatitele, mis jätkavad tunde pärast programmi kortsudevastases režiimis trummelimist. Töötab ainult siis, kui WashData loeb programmi lõpetatuks (tsükkel lõppes või kortsudevastane algas). See ootab, seejärel lülitab kuivati nutipistiku välja madala võimsuse hetkel ja vaikimisi uuesti sisse. Vahepeal algav uus tsükkel tühistab selle.\n\nOht: see lülitab releed, kui kuivati on pistikusse ühendatud. Kasuta ainult pistikuga, mis sobib su kuivatile, ja omal vastutusel. WashData ei lülita pistikut kunagi ise; seda teeb see automatiseerimine.\n\nVajab WashData 0.5.9 või uuemat."
+      "description": "Kuivatitele, mis jätkavad tunde pärast programmi kortsudevastases režiimis trummelimist. Töötab ainult siis, kui kuivati trummeldab veel määratud arvu minuteid pärast programmi lõppu; kuivatit, mis on selleks ajaks seiskunud, ei puudutata. Seejärel lülitab kuivati nutipistiku välja madala võimsuse hetkel ja vaikimisi uuesti sisse. Vahepeal algav uus tsükkel tühistab selle.\n\nOht: see lülitab releed, kui kuivati on pistikusse ühendatud. Kasuta ainult pistikuga, mis sobib su kuivatile, ja omal vastutusel. WashData ei lülita pistikut kunagi ise; seda teeb see automatiseerimine.\n\nVajab WashData 0.5.9 või uuemat."
     }
   },
   "trigger": {

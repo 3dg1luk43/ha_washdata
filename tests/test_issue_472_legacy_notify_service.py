@@ -31,6 +31,7 @@ through Home Assistant's real ``async_update_entry``.
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from homeassistant.config_entries import ConfigEntryState
@@ -391,3 +392,23 @@ async def test_old_entry_boots_converted_and_clearing_the_lists_stops_it(
     await hass.async_block_till_done()
 
     assert len(calls) == 1, "clearing every list must stop the notifications"
+
+
+async def test_undoing_an_old_restore_point_converts_the_legacy_service(
+    hass: HomeAssistant,
+) -> None:
+    """A restore point saved by 0.5.8 still holds notify_service with empty lists:
+    undoing it after the upgrade converts it like the migration, instead of the
+    strip dropping it and the device going quiet."""
+    entry = _entry(hass, {CONF_NOTIFY_FINISH_SERVICES: ["notify.mobile_app_new"]},
+                   minor=CONFIG_ENTRY_MINOR_VERSION)
+    with patch.object(ws_api, "_record_option_changes", AsyncMock()):
+        await ws_api._async_restore_entry_options(  # noqa: SLF001
+            hass, entry,
+            {CONF_OFF_DELAY: 120, CONF_NOTIFY_SERVICE: SVC, CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_FINISH],
+             CONF_NOTIFY_START_SERVICES: [], CONF_NOTIFY_FINISH_SERVICES: [],
+             CONF_NOTIFY_LIVE_SERVICES: []},
+        )
+    assert entry.options[CONF_NOTIFY_FINISH_SERVICES] == [SVC]
+    assert not entry.options.get(CONF_NOTIFY_START_SERVICES)
+    _no_retired_keys(entry)

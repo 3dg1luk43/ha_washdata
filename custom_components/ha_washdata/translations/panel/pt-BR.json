@@ -2200,7 +2200,7 @@
     },
     "dryer_anti_crease_power_cut": {
       "name": "Encerrar uma longa fase antiamasso de secadora",
-      "description": "Para secadoras que continuam girando no modo antiamasso por horas após o programa. Só é executado quando o WashData considera o programa concluído (ciclo concluído ou antiamasso iniciado). Aguarda e depois desliga o plugue inteligente da secadora em um momento de baixa potência e, por padrão, o liga novamente. Um novo ciclo que comece enquanto isso o cancela.\n\nRisco: isso comuta um relé enquanto a secadora está conectada. Use apenas com um plugue adequado para a sua secadora e por sua conta e risco. O WashData nunca comuta o plugue por si próprio; esta automação faz isso.\n\nRequer WashData 0.5.9 ou mais recente."
+      "description": "Para secadoras que continuam girando no modo antiamasso por horas após o programa. Só é executado se a secadora ainda estiver girando depois de passados os minutos definidos após a conclusão do programa; uma secadora que já tiver parado até lá não é afetada. Depois desliga o plugue inteligente da secadora em um momento de baixa potência e, por padrão, o liga novamente. Um novo ciclo que comece enquanto isso o cancela.\n\nRisco: isso comuta um relé enquanto a secadora está conectada. Use apenas com um plugue adequado para a sua secadora e por sua conta e risco. O WashData nunca comuta o plugue por si próprio; esta automação faz isso.\n\nRequer WashData 0.5.9 ou mais recente."
     }
   },
   "trigger": {

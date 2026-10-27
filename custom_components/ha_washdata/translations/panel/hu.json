@@ -2182,7 +2182,7 @@
         },
         "dryer_anti_crease_power_cut": {
             "name": "Szárítógép hosszú ránctalanítási fázisának befejezése",
-            "description": "Olyan szárítógépekhez, amelyek a program után órákig folytatják a ránctalanítást. Csak akkor fut, ha a WashData befejezettnek tekinti a programot (ciklus befejeződött vagy ránctalanítás indult). Vár, majd alacsony fogyasztású pillanatban kikapcsolja a szárítógép okos csatlakozóját, és alapértelmezés szerint visszakapcsolja. Egy közben induló új ciklus törli.\n\nKockázat: ez a relét kapcsolja, miközben a szárítógép be van dugva. Csak a szárítógépéhez minősített csatlakozóval és saját felelősségre használja. A WashData soha nem kapcsolja a csatlakozót maga; ezt az automatizálás teszi.\n\nWashData 0.5.9 vagy újabb szükséges."
+            "description": "Olyan szárítógépekhez, amelyek a program után órákig folytatják a ránctalanítást. Csak akkor fut, ha a szárítógép a program befejezése után a beállított percszám elteltével még mindig forgatja a dobot; az addigra leállt szárítógépet nem érinti. Ezután alacsony fogyasztású pillanatban kikapcsolja a szárítógép okos csatlakozóját, és alapértelmezés szerint visszakapcsolja. Egy közben induló új ciklus törli.\n\nKockázat: ez a relét kapcsolja, miközben a szárítógép be van dugva. Csak a szárítógépéhez minősített csatlakozóval és saját felelősségre használja. A WashData soha nem kapcsolja a csatlakozót maga; ezt az automatizálás teszi.\n\nWashData 0.5.9 vagy újabb szükséges."
         }
     },
     "trigger": {
