@@ -6138,6 +6138,9 @@ class WashDataManager:
         # before that point fires it here, so a "while running" automation is
         # never left on.
         ended = {"pending": fire_ended}
+        # This cycle's program, before any await: a newer cycle's end can replace
+        # the manager-wide field while the steps run.
+        ended_program = self._trigger_ended_program
         try:
             await self._async_cycle_end_steps(
                 cycle_data, cycle_token, price_timeline, ended
@@ -6148,7 +6151,8 @@ class WashDataManager:
             if ended["pending"]:
                 ended["pending"] = False
                 self._fire_cycle_ended(
-                    cycle_data, cycle_token=cycle_token, bus=not ended.get("bus")
+                    cycle_data, cycle_token=cycle_token, bus=not ended.get("bus"),
+                    program=ended_program,
                 )
         finally:
             if not self._is_shutdown:
@@ -9222,13 +9226,17 @@ class WashDataManager:
         *,
         cycle_token: str | None = None,
         bus: bool = True,
+        program: Any = _UNSET,
     ) -> None:
         """The end owed to a start that was announced, for an end the cycle-end
         steps never announce (a discarded ghost or pump-out, a dropped restored
         cycle, or steps that failed first): the ``ha_washdata_cycle_ended`` event
         (``bus``; False when the failed steps had sent it) and the cycle_ended
         trigger. ``cycle_token`` is the failed steps' cycle: a tumble held for a
-        newer one is left to that cycle. Never raises."""
+        newer one is left to that cycle; ``program`` its own, captured before the
+        steps awaited (else the manager's field). Never raises."""
+        if program is _UNSET:
+            program = self._trigger_ended_program
         if bus:
             try:
                 event_cycle_data = {
@@ -9240,7 +9248,7 @@ class WashDataManager:
                         "entry_id": self.entry_id,
                         "device_name": self.config_entry.title,
                         "cycle_data": event_cycle_data,
-                        "program": self._trigger_ended_program or "unknown",
+                        "program": program or "unknown",
                         "match_margin": None,
                         "label_applied": False,
                         "duration": cycle_data.get("duration"),
@@ -9254,9 +9262,7 @@ class WashDataManager:
             variables = self._cycle_end_trigger_vars(cycle_data, energy_wh=energy_wh)
         except Exception:  # pylint: disable=broad-exception-caught
             variables = {"status": cycle_data.get("status"), "label_applied": False}
-        self._fire_device_trigger(
-            TRIGGER_CYCLE_ENDED, self._trigger_ended_program, **variables
-        )
+        self._fire_device_trigger(TRIGGER_CYCLE_ENDED, program, **variables)
         if cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
             self._release_held_tumble(cycle_data.get("status"))
 

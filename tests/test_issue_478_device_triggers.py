@@ -385,6 +385,32 @@ async def test_cycle_ended_survives_a_failed_cycle_end(
     assert seen[0][1]["energy_kwh"] == 0.12
 
 
+async def test_a_failed_cycle_end_keeps_its_own_program(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """A newer cycle's end can replace the manager-wide program while the failing
+    steps await: the fallback end still names this cycle's program."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    seen = _listen(hass, entry)
+    bus = async_capture_events(hass, EVENT_CYCLE_ENDED)
+    manager._trigger_ended_program = "Cotton 40"  # noqa: SLF001  # set by its _on_cycle_end
+
+    async def _steps(*_a, **_k):
+        manager._trigger_ended_program = "Eco"  # noqa: SLF001  # a newer cycle ended
+        raise RuntimeError("x")
+
+    with patch.object(manager, "_async_cycle_end_steps", side_effect=_steps):
+        await manager._async_process_cycle_end(  # noqa: SLF001
+            {"duration": 900.0, "status": "completed", "energy_wh": 120.0,
+             "start_time": "2026-10-19T08:00:00+00:00"},
+        )
+    await hass.async_block_till_done()
+    ended = [v for t, v in seen if t == "cycle_ended"]
+    assert len(ended) == 1 and ended[0]["program"] == "Cotton 40"
+    assert len(bus) == 1 and bus[0].data["program"] == "Cotton 40"
+
+
 async def test_unload_pending_fires_once_on_entering_clean(
     hass: HomeAssistant, setup_washdata_entry, freezer
 ) -> None:
