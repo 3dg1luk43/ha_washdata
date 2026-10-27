@@ -4357,7 +4357,12 @@ async def async_apply_imported_entry_options(
     un-redacted identity; identity changes go through the reconfigure flow.
     The caller holds the per-entry write lock; order is always write -> options.
     """
+    from . import _convert_legacy_notify_service  # pylint: disable=import-outside-toplevel
+
     entry_options_updates = dict(config_updates.get("entry_options", {}) or {})
+    # An export from before 0.5.9 can still carry the legacy notify_service:
+    # convert it as the 3.12 migration does, or the strip drops its target (#472).
+    _convert_legacy_notify_service(entry_options_updates)
     for key in _IMPORT_STRIP_KEYS:
         entry_options_updates.pop(key, None)
     if not entry_options_updates:

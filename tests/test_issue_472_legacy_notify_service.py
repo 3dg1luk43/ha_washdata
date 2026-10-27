@@ -412,3 +412,20 @@ async def test_undoing_an_old_restore_point_converts_the_legacy_service(
     assert entry.options[CONF_NOTIFY_FINISH_SERVICES] == [SVC]
     assert not entry.options.get(CONF_NOTIFY_START_SERVICES)
     _no_retired_keys(entry)
+
+
+async def test_importing_an_old_export_converts_the_legacy_service(
+    hass: HomeAssistant,
+) -> None:
+    """An export from before 0.5.9 carries notify_service with no lists: the import
+    converts it like the migration instead of stripping the target."""
+    entry = _entry(hass, {}, minor=CONFIG_ENTRY_MINOR_VERSION)
+    with patch.object(ws_api, "_record_option_changes", AsyncMock()):
+        await ws_api.async_apply_imported_entry_options(
+            hass, entry,
+            {"entry_options": {CONF_NOTIFY_SERVICE: SVC, CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_START]}},
+            "import_config",
+        )
+    assert entry.options[CONF_NOTIFY_START_SERVICES] == [SVC]
+    assert not entry.options.get(CONF_NOTIFY_FINISH_SERVICES)
+    _no_retired_keys(entry)

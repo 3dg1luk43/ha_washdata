@@ -969,6 +969,28 @@ def test_run_variables_filters(
         assert not any(k.startswith("_") for k in result)
 
 
+@pytest.mark.parametrize("bad", [float("inf"), float("-inf"), 10**400])
+def test_a_non_finite_or_huge_number_option_is_invalid_not_an_error(bad: Any) -> None:
+    """inf raised OverflowError out of vol.Coerce(int); it is now a vol.Invalid,
+    and the field still serializes as an integer for the device trigger editor."""
+    for trigger_type, field in (("finishing_soon", "minutes"), ("cycle_overrun", "percent"),
+                                ("still_tumbling", "minutes")):
+        with pytest.raises(vol.Invalid):
+            trigger_rules.options_schema(trigger_type)({field: bad})
+
+
+def test_number_options_still_serialize_as_integers() -> None:
+    import voluptuous_serialize  # noqa: PLC0415
+    from homeassistant.helpers import config_validation as cv  # noqa: PLC0415
+
+    for trigger_type in ("finishing_soon", "cycle_overrun", "still_tumbling"):
+        fields = voluptuous_serialize.convert(
+            vol.Schema(trigger_rules.OPTION_FIELDS[trigger_type]),
+            custom_serializer=cv.custom_serializer,
+        )
+        assert [f["type"] for f in fields] == ["integer"], trigger_type
+
+
 def test_resumed_user_only_reports_the_user_pause() -> None:
     out = trigger_rules.run_variables(
         "cycle_resumed", {},

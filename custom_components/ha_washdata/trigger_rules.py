@@ -117,7 +117,22 @@ def _same_text(wanted: Any, actual: Any) -> bool:
     return isinstance(actual, str) and str(wanted).strip().casefold() == actual.strip().casefold()
 
 
-_INT_MINUTES = vol.All(vol.Coerce(int), vol.Range(min=MINUTES_RANGE[0], max=MINUTES_RANGE[1]))
+class _CoerceInt(vol.Coerce):
+    """``vol.Coerce(int)`` that reports ``inf`` (an OverflowError) as invalid
+    instead of raising out of validation. Still a ``vol.Coerce``, so the device
+    trigger editor serializes it as an integer field."""
+
+    def __init__(self) -> None:
+        super().__init__(int)
+
+    def __call__(self, value: Any) -> int:
+        try:
+            return super().__call__(value)
+        except OverflowError as err:
+            raise vol.CoerceInvalid(self.msg or f"expected {self.type_name}") from err
+
+
+_INT_MINUTES = vol.All(_CoerceInt(), vol.Range(min=MINUTES_RANGE[0], max=MINUTES_RANGE[1]))
 _TEXT = vol.All(str, vol.Strip)
 
 # Each trigger type's options. Used as-is for a device trigger's extra fields
@@ -131,7 +146,7 @@ OPTION_FIELDS: dict[str, dict[Any, Any]] = {
     },
     TRIGGER_CYCLE_OVERRUN: {
         vol.Optional(OPT_PERCENT, default=TRIGGER_CYCLE_OVERRUN_DEFAULT_PERCENT): vol.All(
-            vol.Coerce(int), vol.Range(min=PERCENT_RANGE[0], max=PERCENT_RANGE[1])
+            _CoerceInt(), vol.Range(min=PERCENT_RANGE[0], max=PERCENT_RANGE[1])
         ),
     },
     TRIGGER_CYCLE_PAUSED: {vol.Optional(OPT_INCLUDE_DETECTED, default=False): bool},
