@@ -9185,7 +9185,8 @@ class WashDataManager:
         """Before a cycle is dropped by a detector reset (which fires no cycle end):
         if its start was announced, send the end owed to it (#478), as an
         interrupted cycle; then forget its session state (a user pause, a
-        hand-picked program, its start), as a normal end's terminal reset does.
+        hand-picked program, its start, its restart gaps), as a normal end's
+        terminal reset and persist do.
         Never raises."""
         if self._cycle_ended_pending:
             self._cycle_ended_pending = False
@@ -9211,6 +9212,8 @@ class WashDataManager:
         self._user_pause_start = None
         self._total_user_paused_seconds = 0.0
         self._cycle_start_time = None
+        # Its restart gaps too, or the next real cycle is stored with them.
+        self._restart_gaps.clear()
 
     def _fire_cycle_ended(
         self,

@@ -307,6 +307,7 @@ async def test_a_cycle_restored_on_an_energy_counter_is_dropped(
     manager._cycle_progress = 55.0  # noqa: SLF001
     manager._manual_program_active = True  # noqa: SLF001  # a hand-picked program
     manager._is_user_paused = True  # noqa: SLF001  # restored with a user pause
+    manager._restart_gaps.append({"start": "2026-10-20T09:00:00+00:00", "end": "2026-10-20T09:10:00+00:00"})  # noqa: SLF001
     ended = async_capture_events(hass, "ha_washdata_cycle_ended")
     triggers: list[str] = []
     async_dispatcher_connect(
@@ -327,6 +328,7 @@ async def test_a_cycle_restored_on_an_energy_counter_is_dropped(
     # Nothing of the dropped cycle stays on the entities.
     assert manager._current_program == "off" and manager._cycle_progress == 0.0  # noqa: SLF001
     assert not manager._manual_program_active and not manager._is_user_paused  # noqa: SLF001
+    assert manager._restart_gaps == []  # noqa: SLF001  # not stamped on the next cycle
     assert manager.check_state() != "user_paused"
 
 
