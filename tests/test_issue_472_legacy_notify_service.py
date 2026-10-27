@@ -307,15 +307,21 @@ async def test_import_of_an_old_export_strips_the_retired_keys(hass: HomeAssista
     assert entry.options[CONF_OFF_DELAY] == 300, "real tunables must still be imported"
 
 
-async def test_import_of_only_retired_keys_writes_nothing(hass: HomeAssistant) -> None:
+async def test_import_of_only_retired_keys_writes_only_their_conversion(
+    hass: HomeAssistant,
+) -> None:
+    """Import converts the legacy service like the migration (maintainer decision,
+    2026-10-27); nothing else of the retired keys is written."""
     entry = _entry(hass, {}, minor=CONFIG_ENTRY_MINOR_VERSION)
     before = dict(entry.options)
 
-    await ws_api.async_apply_imported_entry_options(
-        hass, entry, {"entry_options": {CONF_NOTIFY_SERVICE: SVC}}, "import_config"
-    )
+    with patch.object(ws_api, "_record_option_changes", AsyncMock()):
+        await ws_api.async_apply_imported_entry_options(
+            hass, entry, {"entry_options": {CONF_NOTIFY_SERVICE: SVC}}, "import_config"
+        )
 
-    assert dict(entry.options) == before
+    assert dict(entry.options) == {**before, **{k: [SVC] for k in LISTS}}
+    _no_retired_keys(entry)
 
 
 async def test_undo_import_does_not_restore_the_retired_keys(hass: HomeAssistant) -> None:
