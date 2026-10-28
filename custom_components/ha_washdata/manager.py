@@ -117,6 +117,7 @@ from .const import (
     TRIGGER_FINISHING_SOON,
     TRIGGER_MAINTENANCE_DUE,
     TRIGGER_MAINTENANCE_RECHECK_S,
+    TRIGGER_MAINTENANCE_IDLE_CHECK_S,
     TRIGGER_PHASE_STARTED,
     TRIGGER_PROGRAM_RECOGNISED,
     DATA_TRIGGER_LISTENERS,
@@ -696,6 +697,7 @@ class WashDataManager:
         self._notify_queue_store: Store[dict[str, Any]] | None = None
         self._notify_queue_on_disk = False
         self._remove_ha_stop_listener: Callable[[], None] | None = None
+        self._remove_maintenance_timer: Callable[[], None] | None = None
         self._remove_notify_queue_restore: Callable[[], None] | None = None
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
@@ -2346,6 +2348,14 @@ class WashDataManager:
         await self._attempt_state_restoration()
         # What the restored cycle shows was announced before the restart (#478).
         self._trigger_baseline()
+        # A day-interval maintenance task falls due at any time, also while an idle
+        # plug that reports only on change sends nothing (#478).
+        if self._remove_maintenance_timer is not None:
+            self._remove_maintenance_timer()
+        self._remove_maintenance_timer = async_track_time_interval(
+            self.hass, self._maintenance_tick,
+            timedelta(seconds=TRIGGER_MAINTENANCE_IDLE_CHECK_S),
+        )
 
         # Restore last cycle end time to ensure ghost cycle suppression works after restart
         try:
@@ -2889,7 +2899,9 @@ class WashDataManager:
         # Drain cancelled tasks so they don't race the freshly-reloaded ProfileStore.
         if _to_await:
             await asyncio.gather(*_to_await, return_exceptions=True)
-        for _unsub_name in ("_remove_ha_stop_listener", "_remove_notify_queue_restore"):
+        for _unsub_name in (
+            "_remove_ha_stop_listener", "_remove_notify_queue_restore", "_remove_maintenance_timer",
+        ):
             _unsub = getattr(self, _unsub_name, None)
             if _unsub is not None:
                 _unsub()
@@ -5923,7 +5935,12 @@ class WashDataManager:
         scale = {"wh": 1.0, "kwh": 1000.0, "mwh": 1_000_000.0}.get(unit)
         if scale is None:
             return None
-        return value * scale, entity_id
+        # "inf"/"nan" parse as floats, and a huge reading overflows when scaled:
+        # a non-finite figure would reach the lifetime energy total and stay there.
+        wh = value * scale
+        if not math.isfinite(wh):
+            return None
+        return wh, entity_id
 
     def _snapshot_energy_meter_start(self) -> None:
         """Capture the meter reading at cycle start (issue #316)."""
@@ -5953,7 +5970,7 @@ class WashDataManager:
         if cur_source != source:
             return None
         delta = cur_wh - start
-        if delta <= 0:
+        if not math.isfinite(delta) or delta <= 0:
             return None
         return delta
 
@@ -9404,6 +9421,12 @@ class WashDataManager:
                 )
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.debug("Maintenance trigger check failed", exc_info=True)
+
+    @callback
+    def _maintenance_tick(self, _now: datetime) -> None:
+        """The idle re-check of maintenance_due, only while a trigger listens."""
+        if self._has_trigger_listeners():
+            self._check_maintenance_triggers()
 
     def _arm_tumble_tracker(self, cycle_data: dict[str, Any]) -> None:
         """Watch for tumbles after this finished cycle (still_tumbling, #478)."""

@@ -654,13 +654,17 @@ def cycle_report_energy_wh(cycle: Mapping[str, Any]) -> float:
     meter = cycle.get("energy_meter_wh")
     if meter is not None:
         try:
-            return float(meter)
+            value = float(meter)
+            if math.isfinite(value):
+                return value
         except (ValueError, TypeError, OverflowError):
             pass
     try:
-        return float(cycle.get("energy_wh", 0.0))
+        value = float(cycle.get("energy_wh", 0.0))
     except (ValueError, TypeError, OverflowError):
         return 0.0
+    # A non-finite figure (an imported Infinity) would poison every total it reaches.
+    return value if math.isfinite(value) else 0.0
 
 
 def _price_window(

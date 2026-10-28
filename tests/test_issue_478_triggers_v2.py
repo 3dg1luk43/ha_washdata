@@ -62,6 +62,7 @@ from custom_components.ha_washdata.const import (
     DEVICE_TRIGGER_ONLY_FOR,
     DEVICE_TRIGGER_TYPES,
     DOMAIN,
+    TRIGGER_MAINTENANCE_IDLE_CHECK_S,
 )
 
 COMPONENT = Path(trigger_rules.__file__).parent
@@ -649,6 +650,38 @@ async def test_maintenance_due_and_milestone(
     assert [c["cycle_count"] for c in _of(calls, "milestone")] == [1]
     await _feed(hass, freezer, 0, 300)
     assert len(_of(calls, "due")) == 1 and len(_of(calls, "milestone")) == 1
+
+
+async def test_maintenance_due_fires_while_idle_without_readings(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """A day-interval task falls due at any time: with the appliance idle and a
+    plug that reports only on change, no reading arrives, so the hourly idle check
+    is what sends maintenance_due. Without a listener it checks nothing."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
+    manager = _manager(hass, entry)
+    rows: list[dict[str, Any]] = [{"id": "descale", "name": "Descale", "due": False}]
+    checks = []
+    check = manager._check_maintenance_triggers  # noqa: SLF001
+
+    def _spy() -> None:
+        checks.append(1)
+        check()
+
+    with patch.object(type(manager), "maintenance_status", property(lambda _s: [dict(r) for r in rows])), \
+            patch.object(manager, "_check_maintenance_triggers", _spy):
+        freezer.tick(timedelta(seconds=TRIGGER_MAINTENANCE_IDLE_CHECK_S))
+        async_fire_time_changed(hass, dt_util.utcnow())
+        await hass.async_block_till_done()
+        assert not checks  # nothing listens
+        calls = await _record(hass, {"due": _wd("maintenance_due", _device_id(hass, entry))})
+        rows[0]["due"] = True
+        rows[0]["days_since"] = 31
+        freezer.tick(timedelta(seconds=TRIGGER_MAINTENANCE_IDLE_CHECK_S))
+        async_fire_time_changed(hass, dt_util.utcnow())
+        await hass.async_block_till_done()
+    due = _of(calls, "due")
+    assert [(c["task"], c["due_reason"]) for c in due] == [("descale", "days")], calls
 
 
 async def test_pump_stuck(hass: HomeAssistant, setup_washdata_entry, freezer) -> None:

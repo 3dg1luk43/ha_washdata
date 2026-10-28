@@ -1835,6 +1835,9 @@ STILL_TUMBLING_GIVE_UP_S = 4 * 3600.0
 # maintenance_due: how often the due list is re-read between cycle ends (a
 # day-interval task falls due at any time of day).
 TRIGGER_MAINTENANCE_RECHECK_S = 60.0
+# ... and how often it is re-checked while the appliance is idle, when a plug that
+# reports only on change sends nothing: as often as the Maintenance due sensor.
+TRIGGER_MAINTENANCE_IDLE_CHECK_S = 3600.0
 
 # Learning & Feedback
 

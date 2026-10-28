@@ -76,6 +76,14 @@ def test_report_energy_handles_missing_and_bad_values() -> None:
     ) == 500.0
 
 
+@pytest.mark.parametrize("bad", [float("inf"), float("nan"), "inf", "-Infinity", 10**400])
+def test_report_energy_never_returns_a_non_finite_figure(bad: Any) -> None:
+    """A non-finite meter figure falls back to the integrated energy; a non-finite
+    integrated one reports 0, so neither reaches the lifetime total."""
+    assert WashDataManager._cycle_report_energy_wh({"energy_wh": 500.0, "energy_meter_wh": bad}) == 500.0
+    assert WashDataManager._cycle_report_energy_wh({"energy_wh": bad}) == 0.0
+
+
 # ── _read_energy_meter (unit normalization + guards) ─────────────────────────
 
 def test_read_meter_none_when_unconfigured(
@@ -125,6 +133,27 @@ def test_read_meter_falls_back_on_bad_state(
     manager.config_entry.options = {CONF_ENERGY_SENSOR: "sensor.meter"}
     _set_meter(hass, value, unit)
     assert manager._read_energy_meter() is None
+
+
+@pytest.mark.parametrize(("value", "unit"), [("inf", "kWh"), ("nan", "Wh"), ("-inf", "Wh"), ("1e308", "MWh")])
+def test_read_meter_rejects_a_non_finite_reading(
+    hass: HomeAssistant, manager: WashDataManager, value: str, unit: str
+) -> None:
+    """inf/nan parse as floats, and 1e308 MWh overflows to inf when scaled to Wh."""
+    manager.config_entry.options = {CONF_ENERGY_SENSOR: "sensor.meter"}
+    _set_meter(hass, value, unit)
+    assert manager._read_energy_meter() is None
+
+
+def test_compute_delta_rejects_a_non_finite_delta(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """Two finite readings whose difference overflows report no meter energy."""
+    manager.config_entry.options = {CONF_ENERGY_SENSOR: "sensor.meter"}
+    _set_meter(hass, "-1.7e308", "Wh")
+    manager._snapshot_energy_meter_start()
+    _set_meter(hass, "1.7e308", "Wh")
+    assert manager._compute_meter_energy_wh() is None
 
 
 # ── _compute_meter_energy_wh (delta + fallback conditions) ───────────────────
