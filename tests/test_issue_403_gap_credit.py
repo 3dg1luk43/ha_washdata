@@ -275,7 +275,6 @@ def test_anti_wrinkle_breakout_seed_excludes_the_idle_gap():
         device_type="washing_machine",
         anti_wrinkle_enabled=True,
         anti_wrinkle_max_power=400.0,
-        anti_wrinkle_exit_power=0.8,
     )
     det._state = "anti_wrinkle"
     det._state_enter_time = at(0)

@@ -58,14 +58,18 @@ from .const import (
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_EVENTS,
+    NOTIFY_EVENT_START,
+    NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
+    RETIRED_OPTION_KEYS,
+    CONF_EXTERNAL_END_TRIGGER,
+    CONF_EXTERNAL_END_TRIGGER_ENABLED,
     CONF_NOTIFY_START_SERVICES,
     CONF_NOTIFY_FINISH_SERVICES,
     CONF_NOTIFY_LIVE_SERVICES,
     CONF_NOTIFY_ACTIONS,
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
-    CONF_NOTIFY_FIRE_EVENTS,
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_NOTIFY_TIMEOUT_SECONDS,
@@ -73,7 +77,6 @@ from .const import (
     CONF_NOTIFY_FINISH_CHANNEL,
     CONF_NOTIFY_REMINDER_MESSAGE,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
-    DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
     DEFAULT_NOTIFY_TIMEOUT_SECONDS,
@@ -82,19 +85,13 @@ from .const import (
     DEFAULT_NOTIFY_REMINDER_MESSAGE,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
     CONF_AUTO_LABEL_CONFIDENCE,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_LEARNING_CONFIDENCE,
-    DEFAULT_DURATION_TOLERANCE,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_SMOOTHING_WINDOW,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_INTERRUPTED_MIN_SECONDS,
-    DEFAULT_SMOOTHING_WINDOW,
-    DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
@@ -117,7 +114,7 @@ from .const import (
     CONF_RUNNING_DEAD_ZONE,
 )
 from .log_utils import DeviceLoggerAdapter
-from .options_utils import strip_null_options
+from .options_utils import retire_device_type, strip_null_options
 
 try:  # pragma: no cover - present in every supported HA, guarded on principle
     from homeassistant.setup import SetupPhases, async_pause_setup
@@ -286,6 +283,86 @@ def _heal_seeded_cadence(options: dict[str, Any], device_type: Any) -> list[str]
     return healed
 
 
+def _convert_legacy_notify_service(options: dict[str, Any]) -> list[str]:
+    """Convert the deprecated ``notify_service`` to per-event lists, in place (#472).
+
+    The manager used to fall back to ``options[notify_service]`` (gated by
+    ``notify_events``) whenever all three per-event lists were empty, so a user
+    who cleared every list kept getting notified and could never remove the key:
+    the panel merges over ``entry.options``. That fallback is gone; this converts
+    with EXACTLY its rule so nobody's delivered notifications change:
+
+    - only when ``options[notify_service]`` is a non-empty string AND all three
+      lists are empty or absent (a list the panel saved as ``[]`` counts as empty:
+      it submits ``[]`` for fields the user never touched, so it is not a choice);
+    - empty or absent ``notify_events`` -> start, finish AND live;
+    - otherwise each list only when its event is in ``notify_events``.
+
+    Only ``options`` is read, as the runtime read only options. Returns the list
+    keys filled. The two keys themselves are dropped by ``_retire_options``.
+    """
+    converted: list[str] = []
+    svc = options.get(CONF_NOTIFY_SERVICE)
+    lists_empty = not (
+        options.get(CONF_NOTIFY_START_SERVICES)
+        or options.get(CONF_NOTIFY_FINISH_SERVICES)
+        or options.get(CONF_NOTIFY_LIVE_SERVICES)
+    )
+    if isinstance(svc, str) and svc and lists_empty:
+        raw_events = options.get(CONF_NOTIFY_EVENTS)
+        try:
+            # Same coercion as the runtime's `list(... or [])`.
+            events = list(raw_events or [])
+        except TypeError:
+            # The runtime raised here and the entry never set up, so nothing was
+            # delivered: a non-empty event list that names no event keeps it so.
+            events = [raw_events]
+        for event, key in (
+            (NOTIFY_EVENT_START, CONF_NOTIFY_START_SERVICES),
+            (NOTIFY_EVENT_FINISH, CONF_NOTIFY_FINISH_SERVICES),
+            (NOTIFY_EVENT_LIVE, CONF_NOTIFY_LIVE_SERVICES),
+        ):
+            if not events or event in events:
+                options[key] = [svc]
+                converted.append(key)
+    return converted
+
+
+def _retire_options(options: dict[str, Any], data: dict[str, Any]) -> list[str]:
+    """Drop every ``RETIRED_OPTION_KEYS`` key from ``options`` and ``data``, in place.
+
+    ``notify_service`` is converted first (``_convert_legacy_notify_service``), so
+    nobody's notifications change; every other retired key is read by nothing.
+    Idempotent: on its own output it changes nothing and returns ``[]``. Returns
+    the notification list keys filled. Shared by the 3.11 -> 3.12 step and the
+    one-pass legacy path; the import and undo-import strip the same set.
+    """
+    converted = _convert_legacy_notify_service(options)
+    for key in RETIRED_OPTION_KEYS:
+        options.pop(key, None)
+        data.pop(key, None)
+    return converted
+
+
+def _merge_external_end_trigger(options: dict[str, Any], data: dict[str, Any]) -> bool:
+    """Fold the retired on/off flag into the trigger entity (0.5.9), in place.
+
+    The manager listened to ``options[external_end_trigger]`` only while
+    ``options[external_end_trigger_enabled]`` was truthy (absent meant off).
+    Since 0.5.9 a set entity alone turns the trigger on, so where the flag was
+    off the entity is cleared from ``options``, and nobody's cycle ends change;
+    a copy in ``data`` was never read and goes in every case. The flag itself
+    goes with ``RETIRED_OPTION_KEYS``. Runs ONCE, inside the versioned
+    migration, before ``_retire_options``: on migrated options (no flag left) it
+    would clear a trigger that is on. Returns True when an options entity was
+    cleared.
+    """
+    data.pop(CONF_EXTERNAL_END_TRIGGER, None)
+    if options.get(CONF_EXTERNAL_END_TRIGGER_ENABLED):
+        return False
+    return bool(options.pop(CONF_EXTERNAL_END_TRIGGER, None))
+
+
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
@@ -414,6 +491,43 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             healed or "nothing",
         )
 
+    # 3.11 -> 3.12: drop every retired option key (RETIRED_OPTION_KEYS). Two
+    # still carried meaning and are converted first, so no notification and no
+    # cycle end changes: the deprecated single notify_service becomes the
+    # per-event lists by the runtime fallback's own rule (#472), and a disabled
+    # external end trigger loses its entity (0.5.9: a set entity means on). The
+    # rest (notify_fire_events #478, the 0.5.9 option trim, leftovers of removed
+    # features) were read by nothing. See _merge_external_end_trigger and
+    # _retire_options. An Air Fryer or Bread Maker (removed in 0.5.9) becomes
+    # Other (Advanced) with its own defaults kept as options (retire_device_type).
+    if version == 3 and minor_version == 11:
+        new_opts = dict(entry.options)
+        new_data = dict(entry.data)
+        # Computed BEFORE the update, like the 3.10 -> 3.11 step.
+        removed = sorted((set(entry.options) | set(entry.data)) & RETIRED_OPTION_KEYS)
+        old_type = new_opts.get(CONF_DEVICE_TYPE, new_data.get(CONF_DEVICE_TYPE))
+        trigger_cleared = _merge_external_end_trigger(new_opts, new_data)
+        converted = _retire_options(new_opts, new_data)
+        retyped = retire_device_type(new_opts, new_data)
+        hass.config_entries.async_update_entry(
+            entry, data=new_data, options=new_opts, minor_version=12
+        )
+        minor_version = 12
+        if retyped:
+            _log.info(
+                "Device type %r was removed in 0.5.9; migrated to %r with its own "
+                "defaults kept as options: %s",
+                old_type, new_opts[CONF_DEVICE_TYPE], retyped[1:] or "none",
+            )
+        _log.debug(
+            "Migrated WashData entry from 3.11 to 3.12 (retired keys dropped: %s; "
+            "lists filled from notify_service: %s; disabled external end trigger "
+            "cleared: %s)",
+            removed or "none",
+            converted or "none",
+            trigger_cleared,
+        )
+
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
@@ -431,6 +545,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         options[CONF_POWER_SENSOR] = data[CONF_POWER_SENSOR]
     if CONF_NOTIFY_SERVICE not in options and CONF_NOTIFY_SERVICE in data:
         options[CONF_NOTIFY_SERVICE] = data[CONF_NOTIFY_SERVICE]
+    # Same retirement as the 3.11 -> 3.12 step, BEFORE the seeding below: the
+    # completion floor is seeded from the device type, and a value seeded for
+    # generic would read as the user's own and keep the old type's from landing.
+    retire_device_type(options, data)
 
     # Migrate legacy single CONF_NOTIFY_SERVICE into per-event service lists.
     # Users who configured a notify service before 0.3.x would otherwise lose
@@ -446,16 +564,20 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             options[CONF_NOTIFY_FINISH_SERVICES] = [legacy_svc]
         if CONF_NOTIFY_LIVE_SERVICES not in options and NOTIFY_EVENT_LIVE in legacy_events:
             options[CONF_NOTIFY_LIVE_SERVICES] = [legacy_svc]
+    # Same retirement as the 3.11 -> 3.12 step. The block above only fills ABSENT
+    # lists; an entry whose lists were saved as [] was notified by the runtime
+    # fallback instead, and this converts it by that rule before dropping both
+    # keys, so neither path changes what anyone receives. The external end
+    # trigger is folded the same way, and every other retired key dropped.
+    _merge_external_end_trigger(options, data)
+    _retire_options(options, data)
 
+    # (duration_tolerance, smoothing_window and profile_duration_tolerance are no
+    # longer seeded: retired keys, read by nothing.)
     options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
     options.setdefault(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)
-    options.setdefault(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE)
     options.setdefault(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE)
     options.setdefault(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
-    options.setdefault(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
-    options.setdefault(
-        CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE
-    )
     options.setdefault(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS)
 
     options.setdefault(
@@ -510,7 +632,6 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(CONF_NOTIFY_ACTIONS, [])
     options.setdefault(CONF_NOTIFY_PEOPLE, [])
     options.setdefault(CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME)
-    options.setdefault(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
     options.setdefault(
         CONF_NOTIFY_LIVE_INTERVAL_SECONDS, DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
     )
@@ -1561,7 +1682,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_key="no_config_entry",
                 )
 
-            hass.data[DOMAIN][entry_id].mark_unloaded("mark_unloaded service")
+            hass.data[DOMAIN][entry_id].mark_unloaded(
+                "mark_unloaded service", how="service"
+            )
 
         hass.services.async_register(
             DOMAIN, "mark_unloaded", _guarded_service(hass, "mark_unloaded", handle_mark_unloaded),
@@ -1582,19 +1705,12 @@ def _apply_device_link(hass: HomeAssistant, entry: ConfigEntry) -> None:
     registry never references a deleted device or itself.
     """
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
+    from .device_trigger import washdata_device as _washdata_device  # pylint: disable=import-outside-toplevel
+
     registry = dr.async_get(hass)
-    identifier = (DOMAIN, entry.entry_id)
-    if hasattr(registry, "async_get_device_by_identifier"):
-        # HA 2026.9+ deprecated async_get_device because identifiers are no longer
-        # unique across config entries (issue #405). Our device's identifier is
-        # owned by this entry, so the by-identifier lookup is unambiguous. The
-        # attribute guard keeps us working on the older HA the manifest still
-        # supports, where the new method does not exist yet.
-        washdata_device = registry.async_get_device_by_identifier(
-            identifier, entry.entry_id
-        )
-    else:
-        washdata_device = registry.async_get_device(identifiers={identifier})
+    # The #405-guarded lookup (HA 2026.9 deprecated async_get_device), shared with
+    # the device triggers.
+    washdata_device = _washdata_device(registry, entry.entry_id)
     if washdata_device is None:
         return
 

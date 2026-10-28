@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Një emër miqësor për këtë pajisje (p.sh., \"Lavatriçe\", \"Pjatalarëse\").",
           "device_type": "Cakton parazgjedhjet e zbulimit për këtë lloj pajisjeje.",
-          "power_sensor": "Sensori i spinës inteligjente që raporton fuqinë në kohë reale, në vat.",
+          "power_sensor": "Sensori i fuqisë i spinës inteligjente (W ose kW), jo matësi i saj i energjisë (kWh).",
           "min_power": "Leximet mbi këtë vlerë (në vat) tregojnë se pajisja është në punë. 2 W u përshtatet shumicës së pajisjeve."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Gabim i papritur",
-      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0"
+      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0",
+      "power_sensor_energy": "Ky është një matës energjie (kWh), jo një sensor fuqie. Zgjidhni sensorin e fuqisë të spinës (W ose kW). Nëse spina nuk ka të tillë, një ndihmës Derivative mund ta krijojë nga matësi."
     },
     "abort": {
       "already_configured": "Pajisja është konfiguruar tashmë",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ende nuk është njohur asnjë profil.",
       "vs_typical_longer": "{pct}% më gjatë se zakonisht",
       "vs_typical_shorter": "{pct}% më shkurt se zakonisht",
-      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0"
+      "invalid_power": "Pragu i fuqisë duhet të jetë më i madh se 0",
+      "power_sensor_energy": "Ky është një matës energjie (kWh), jo një sensor fuqie. Zgjidhni sensorin e fuqisë të spinës (W ose kW). Nëse spina nuk ka të tillë, një ndihmës Derivative mund ta krijojë nga matësi."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Tharëse",
         "washer_dryer": "Kombinim larëse-tharëse",
         "dishwasher": "Pjatalarëse",
-        "air_fryer": "Fryerja me ajër",
-        "bread_maker": "Bukëbërës",
         "pump": "Pompë / Pompë kullimi",
         "generic": "Të tjera (të avancuara)",
         "other": "Pajisja e pragut"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Çfarëdo",
+        "completed": "Përfunduar",
+        "force_stopped": "Ndaluar me forcë",
+        "interrupted": "E ndërprerë"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Fikur",
+        "idle": "Në pritje",
+        "starting": "Duke filluar",
+        "running": "Në punë",
+        "paused": "Në pauzë",
+        "user_paused": "Ndërprerë nga përdoruesi",
+        "ending": "Duke përfunduar",
+        "finished": "Përfunduar",
+        "anti_wrinkle": "Kundër rrudhave",
+        "delay_wait": "Në pritje për të filluar",
+        "interrupted": "E ndërprerë",
+        "force_stopped": "Ndaluar me forcë",
+        "unknown": "E panjohur",
+        "clean": "I pastër"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Profili nuk mund të caktohej: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Cikli filloi",
+      "cycle_finished": "Cikli mbaroi",
+      "cycle_ended": "Cikli përfundoi (çdo arsye)",
+      "anti_wrinkle_started": "Kundër rrudhave filloi",
+      "cycle_stalled": "Cikli u ngec",
+      "unload_pending": "Shkarkim në pritje",
+      "program_recognised": "Programi u njoh",
+      "phase_started": "Faza filloi",
+      "finishing_soon": "Po mbaron së shpejti",
+      "cycle_overrun": "Cikli po zgjat shumë",
+      "cycle_paused": "Cikli u ndërpre",
+      "cycle_resumed": "Cikli u vazhdua",
+      "still_tumbling": "Vazhdon të rrotullohet pas ciklit",
+      "unloaded": "U shkarkua",
+      "state_changed": "Gjendja ndryshoi",
+      "maintenance_due": "Mirëmbajtja është e nevojshme",
+      "milestone_reached": "Pika kyçe e ciklit u arrit",
+      "pump_stuck": "Pompa u bllokua"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Faza",
+      "minutes": "Minuta",
+      "percent": "Më i gjatë me (%)",
+      "include_detected": "Përfshi ndërprerjet e zbuluara",
+      "status": "Përfundoi si",
+      "from": "Nga",
+      "to": "Në",
+      "task": "Detyrë"
+    },
+    "extra_fields_descriptions": {
+      "program": "Vetëm ky program, me emrin e saktë. Lëreni bosh për çdo program.",
+      "phase": "Vetëm kjo fazë, me emrin e saj. Lëreni bosh për çdo fazë.",
+      "minutes": "Po mbaron: minutat e mbetura. Vazhdon të rrotullohet: minuta pas mbarimit.",
+      "percent": "Përqindja mbi kohëzgjatjen e zakonshme të programit.",
+      "include_detected": "Aktivizoni edhe për ndërprerjet që WashData i sheh në fuqi, si njomje ose ndalim.",
+      "status": "Vetëm ciklet që përfunduan kështu.",
+      "from": "Vetëm ndryshimet nga kjo gjendje. Lëreni bosh për çdo.",
+      "to": "Vetëm ndryshimet në këtë gjendje. Lëreni bosh për çdo.",
+      "task": "Vetëm kjo detyrë, me emrin ose ID-në e saj. Lëreni bosh për çdo detyrë."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Cikli filloi",
+      "description": "Aktivizohet kur pajisja fillon një cikël."
+    },
+    "program_recognised": {
+      "name": "Programi u njoh",
+      "description": "Aktivizohet kur WashData njeh programin e ciklit të drejtuar ose kalon në një tjetër.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Vetëm ky program, me emrin e saktë. Lëreni bosh për çdo program."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Faza filloi",
+      "description": "Aktivizohet kur cikli aktiv hyn në një fazë të re të programit të tij.",
+      "fields": {
+        "phase": {
+          "name": "Faza",
+          "description": "Vetëm kjo fazë, me emrin e saj. Lëreni bosh për çdo fazë."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Po mbaron së shpejti",
+      "description": "Aktivizohet një herë për cikël, kur koha e mbetur bie për herë të parë në këto minuta.",
+      "fields": {
+        "minutes": {
+          "name": "Minuta të mbetura",
+          "description": "Aktivizo kur kanë mbetur kaq ose më pak minuta."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Cikli po zgjat shumë",
+      "description": "Aktivizohet një herë për cikël, kur ai zgjat kaq shumë më gjatë se sa zakonisht programi.",
+      "fields": {
+        "percent": {
+          "name": "Më i gjatë me",
+          "description": "Përqindja mbi kohëzgjatjen e zakonshme të programit."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Cikli u ndërpre",
+      "description": "Aktivizohet kur ndërprisni një cikël dhe, opsionalisht, kur pajisja ndalet vetë.",
+      "fields": {
+        "include_detected": {
+          "name": "Përfshi ndërprerjet e zbuluara",
+          "description": "Aktivizoni edhe për ndërprerjet që WashData i zbulon në fuqi, si njomje ose ndalim, jo vetëm ato që filloni ju."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Cikli u vazhdua",
+      "description": "Aktivizohet kur një cikël i ndërprerë vazhdon.",
+      "fields": {
+        "include_detected": {
+          "name": "Përfshi ndërprerjet e zbuluara",
+          "description": "Aktivizoni edhe për ndërprerjet që WashData i zbulon në fuqi, si njomje ose ndalim, jo vetëm ato që filloni ju."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Cikli u ngec",
+      "description": "Aktivizohet kur një cikël aktiv ndalon në një nivel të ulët, të qëndrueshëm të fuqisë."
+    },
+    "cycle_finished": {
+      "name": "Cikli mbaroi",
+      "description": "Aktivizohet kur një cikël mbaron, edhe kur e ndaloni ju. Jo për një startim të rremë.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Vetëm ky program, me emrin e saktë. Lëreni bosh për çdo program."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Cikli përfundoi (çdo arsye)",
+      "description": "Aktivizohet kur një cikël mbaron për çfarëdo arsye, duke përfshirë startimet e rreme.",
+      "fields": {
+        "status": {
+          "name": "Përfundoi si",
+          "description": "Vetëm ciklet që përfunduan kështu."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Kundër rrudhave filloi",
+      "description": "Aktivizohet kur pajisja fillon të rrotullojë ngarkesën e mbaruar kundër rrudhave."
+    },
+    "still_tumbling": {
+      "name": "Vazhdon të rrotullohet pas ciklit",
+      "description": "Aktivizohet një herë kur pajisja vazhdon të rrotullohet për periudha të shkurtra kaq minuta pas mbarimit të ciklit. Ndalet me një cikël të ri ose 4 orë pas mbarimit.",
+      "fields": {
+        "minutes": {
+          "name": "Minuta pas mbarimit",
+          "description": "Aktivizo në rrotullimin e parë të paktën kaq pas mbarimit."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Shkarkim në pritje",
+      "description": "Aktivizohet kur një cikël ka mbaruar dhe ngarkesa është ende brenda."
+    },
+    "unloaded": {
+      "name": "U shkarkua",
+      "description": "Aktivizohet kur ngarkesa nxirret pas një cikli: dera u hap ose shkarkimi u konfirmua."
+    },
+    "state_changed": {
+      "name": "Gjendja ndryshoi",
+      "description": "Aktivizohet kur gjendja e WashData ndryshon.",
+      "fields": {
+        "from": {
+          "name": "Nga",
+          "description": "Vetëm ndryshimet nga kjo gjendje. Lëreni bosh për çdo."
+        },
+        "to": {
+          "name": "Në",
+          "description": "Vetëm ndryshimet në këtë gjendje. Lëreni bosh për çdo."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Mirëmbajtja është e nevojshme",
+      "description": "Aktivizohet kur një detyrë mirëmbajtjeje bëhet e nevojshme.",
+      "fields": {
+        "task": {
+          "name": "Detyrë",
+          "description": "Vetëm kjo detyrë, me emrin ose ID-në e saj. Lëreni bosh për çdo detyrë."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Pika kyçe e ciklit u arrit",
+      "description": "Aktivizohet kur numri i cikleve gjatë gjithë jetës arrin një nga pikat kyçe të caktuara për njoftimet."
+    },
+    "pump_stuck": {
+      "name": "Pompa u bllokua",
+      "description": "Aktivizohet kur një pompë punon më gjatë se kufiri i saj i bllokimit."
     }
   }
 }

@@ -52,16 +52,17 @@ test('#158 without cycles the duration is editable and only an edit is sent', as
   expect((await renameCalls(page))[1].manual_duration_min).toBe(95);
 });
 
-// #285 #296 #325: the detector counts anti-wrinkle quiet below the HIGHER of the exit
-// power and the stop threshold, so no pair of the two is a conflict (the old rule
-// pushed the exit power below stop, exactly where it has no effect).
-test('#285 an exit power on either side of the stop threshold is not a conflict', async ({ page }) => {
+// #285 #296 #325: the detector counts anti-wrinkle quiet below the HIGHER of 0.8 W and
+// the stop threshold. The exit power was a setting that only mattered above stop (the
+// old conflict rule pushed it below stop, where it did nothing); since 0.5.9 it is not
+// a setting at all, so the field is gone and a stale stored value conflicts with nothing.
+test('#285 the exit power is no longer a setting and a stale value is not a conflict', async ({ page }) => {
   await page.goto('/');
-  await bootPanel(page);
+  await bootPanel(page, {}, {}, { settingsLevel: 'advanced' });
   const keys = await page.evaluate(() => {
     const el: any = document.querySelector('ha-washdata-panel');
     const out: string[][] = [];
-    for (const exit of [0.8, 1.2, 4.0]) {
+    for (const exit of [0.2, 1.2, 4.0]) {
       out.push([...el._conflictKeysForOpts({ device_type: 'dryer', anti_wrinkle_exit_power: exit, stop_threshold_w: 1.2, start_threshold_w: 5 }, {})]);
     }
     return out;
@@ -70,4 +71,9 @@ test('#285 an exit power on either side of the stop threshold is not a conflict'
     expect(k).not.toContain('anti_wrinkle_exit_power');
     expect(k).not.toContain('stop_threshold_w');
   }
+  await clickTab(page, 'settings');
+  await page.locator('#wd-settings-internal-chk').click();
+  await page.locator('.wd-section-nav [data-sec="anti_wrinkle"]').click();
+  await expect(page.locator('[data-opt="anti_wrinkle_idle_timeout"]').first()).toBeAttached({ timeout: 5_000 });
+  await expect(page.locator('[data-opt="anti_wrinkle_exit_power"]')).toHaveCount(0);
 });

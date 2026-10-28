@@ -89,7 +89,9 @@
     "matcher_used": "Igenkänt i {n} av dina cykler",
     "matcher_used_one": "Igenkänt i {n} av dina cykler",
     "matcher_used_other": "Igenkänt i {n} av dina cykler",
-    "matcher_used_tip": "Cykler på den här apparaten som WashData själv har matchat mot det här importerade programmet. En import som aldrig matchar kanske inte passar din apparat; du kan ta bort den. Räknas lokalt; inget skickas till gemenskapsbutiken."
+    "matcher_used_tip": "Cykler på den här apparaten som WashData själv har matchat mot det här importerade programmet. En import som aldrig matchar kanske inte passar din apparat; du kan ta bort den. Räknas lokalt; inget skickas till gemenskapsbutiken.",
+    "bp_installed": "Installerad",
+    "bp_installed_other": "Annan version installerad"
   },
   "btn": {
     "log_done_task": "Logga som klar: {task}",
@@ -135,7 +137,6 @@
     "export": "Exportera",
     "force_stop": "Tvångsstopp",
     "force_stop_tip": "Avsluta den pågående cykeln omedelbart och markera den som tvångsstopad",
-    "from_template": "Från mall ▾",
     "ignore": "Ignorera",
     "import_json": "Importera från JSON",
     "inspect": "Inspektera",
@@ -143,14 +144,11 @@
     "load_more": "Ladda fler",
     "manage": "Hantera",
     "merge": "Slå samman",
-    "new_automation": "＋ Ny automatisering",
     "new_group": "+ Ny grupp",
     "new_group_tip": "Gruppera nästan identiska profiler (samma form, annan temperatur eller centrifugering) så att matchningen kan skilja dem åt.",
     "new_phase": "+ Ny fas",
     "new_profile": "+ Ny profil",
     "new_profile_tip": "Skapa en ny programprofil från en befintlig märkt cykel eller inspelning",
-    "on_cycle_finished": "När cykeln är klar",
-    "on_cycle_started": "När cykeln startar",
     "pause_cycle": "Pausa",
     "pause_cycle_tip": "Pausa den pågående cykeln – apparaten återupptar där den slutade",
     "pg_load_live": "Ladda aktiva inställningar",
@@ -251,7 +249,24 @@
     "confirm_appliance": "Bekräfta den här apparaten",
     "confirmed": "Bekräftad",
     "create_profile_from_gap": "Skapa profil",
-    "undo_import": "Ångra senaste import"
+    "undo_import": "Ångra senaste import",
+    "replace": "Ersätt",
+    "auto_edit_in_ha": "Redigera i Home Assistant",
+    "auto_fewer_triggers": "Färre triggers",
+    "auto_more_triggers": "{count} triggers till",
+    "auto_more_triggers_one": "{count} trigger till",
+    "auto_more_triggers_other": "{count} triggers till",
+    "auto_blank": "Tom automatisering",
+    "bp_refresh": "Sök efter nya mallar på GitHub",
+    "bp_turn_on_online": "Slå på onlinefunktioner",
+    "bp_add_tip": "Skapar automatiseringen för den här apparaten med standardinställningarna och öppnar den sedan i Home Assistant",
+    "bp_add_to": "Lägg till för {device}",
+    "bp_setup_tip": "Installerar mallen och öppnar sedan Home Assistant så att du kan fylla i resten",
+    "bp_setup_in_ha": "Konfigurera i Home Assistant",
+    "bp_details": "Detaljer",
+    "bp_copy_yaml": "Kopiera YAML",
+    "bp_hide_yaml": "Dölj YAML",
+    "bp_show_yaml": "Visa YAML"
   },
   "note": {
     "off_delay": {
@@ -306,25 +321,22 @@
       "timeout": "Måste vara över Pumpens fastnadsvaraktighet ({ps} s) så att larmet för fastnad pump kan utlösas först"
     },
     "start_dur": {
-      "sampling": "Samplingsintervall överstiger startvaraktighet ({sdt} s); enstaka mätvärdestoppar kan öppna en cykel",
       "threshold": "Bör vara minst ett samplingsintervall ({si} s) för att förhindra falsklarm med enstaka mätvärden"
-    },
-    "unmatch": {
-      "match": "Måste vara över avmatchningströskel ({un})",
-      "unmatch": "Måste vara under matchningströskel ({match}); annars avmatchas en bekräftad matchning omedelbart"
     },
     "cascade_toast": "Andra inställningar justerades för konsekvens: {n}",
     "suggestion_resolves": "Tillämpa förslaget nedan ({val}) för att lösa detta",
     "use_fix": "Använd {val}",
     "watchdog": {
-      "interval": "Bör vara minst 2x samplingsintervallet ({si} s)",
-      "sampling": "Samplingsintervall bör vara högst hälften av vakthundsintervallet ({wi} s)"
+      "interval": "Bör vara minst 2x samplingsintervallet ({si} s)"
     },
     "settings_banner": "Inställningskonflikter: {n}. Kontrollera de markerade avsnitten och åtgärda dem innan du sparar.",
     "settings_banner_btn": "Gå till första",
     "end_energy": {
       "energy": "För strikt för Stopptröskel ({w} W) under Avfördröjning ({d} s); cykeln kan bara avslutas via en reservväg",
       "stop": "Slutenergi ({e} Wh på {d} s) tillåter bara {p} W"
+    },
+    "power_sensor": {
+      "energy": "Den här sensorn räknar energi ({unit}), inte effekt, så ingen cykel kan upptäckas. Välj kontaktens effektsensor (W eller kW)."
     }
   },
   "hdr": {
@@ -334,7 +346,6 @@
     "add_maintenance": "Lägg till underhållshändelse",
     "automation_delete": "Ta bort denna automatisering",
     "automation_needs_review": "Denna cykel behöver granskning",
-    "automation_open": "Öppna i automatiseringsredigeraren",
     "automation_review_this_cycle": "Granska denna cykel",
     "automations": "Automatiseringar",
     "clear_debug": "Rensa felsökningsspår",
@@ -352,7 +363,6 @@
     "ml_settings_card": "Inställningar",
     "ml_smart_learning": "Smart inlärning",
     "my_preferences": "Mina inställningar",
-    "no_automations": "Inga automatiseringar refererar till denna enhet ännu.",
     "panel_settings": "Panelinställningar",
     "pg_settings_source": "Inställningarnas källa",
     "phase_catalog": "Faskatalog",
@@ -372,7 +382,15 @@
     "import_power_history": "Importera effekthistorik",
     "service_status": "Servicestatus",
     "online_account_tab": "Online & gemenskap",
-    "live_match_debug": "Felsökning av livematchning"
+    "live_match_debug": "Felsökning av livematchning",
+    "automations_all_tip": "Home Assistants automatiseringslista, filtrerad efter WashData-etiketten. Automatiseringar skapade här finns också i WashData-kategorin.",
+    "maint_done_by_program": "Klar automatiskt",
+    "auto_start": "Skapa en ny automatisering",
+    "auto_yours": "Dina automatiseringar",
+    "bp_needs_online": "Mallbiblioteket kräver onlinefunktioner",
+    "bp_unreachable": "Mallbiblioteket gick inte att nå",
+    "bp_library": "Mallbibliotek",
+    "bp_settings": "Det här kan du ställa in"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -661,7 +679,7 @@
     "hist_reason_already_recorded": "överlappar en cykel som WashData redan har registrerat",
     "share_consent": "Jag bekräftar att dessa cykler slutfördes normalt utan avbrott",
     "show_internal": "Visa interna inställningar",
-    "show_internal_tip": "Inställningar som WashData justerar åt dig (sampling, vakthund, matchningsfrekvens, trösklar). Visas när den här enheten har ett eget värde, en konflikt eller ett förslag.",
+    "show_internal_tip": "Inställningar som WashData justerar åt dig (watchdog, matchningsfrekvens, trösklar). Visas när den här enheten har ett eget värde, en konflikt eller ett förslag.",
     "rate_n": "{n} stjärnor",
     "rate_quality": "Betygsätt kvalitet",
     "pg_autolabel": "Automärkning",
@@ -684,7 +702,19 @@
     "pg_obj_early": "Andel för tidiga slut",
     "pg_obj_split": "Uppdelningsandel",
     "pg_sweep_cycles": "Senaste cykler",
-    "cat_backfill_cycles": "Cykler hittade i importerad effekthistorik"
+    "cat_backfill_cycles": "Cykler hittade i importerad effekthistorik",
+    "bp_yaml": "Blueprint-YAML",
+    "automation_wd_label": "Har WashData-etiketten",
+    "done_by_none": "Inte angivet",
+    "done_by_programs": "Klar automatiskt efter: {programs}",
+    "done_by_cycle": "Klar efter en cykel med {program}",
+    "bp_by": "av {author}",
+    "bp_for_all": "Alla apparater",
+    "bp_for": "För",
+    "bp_needs": "Kräver",
+    "bp_needs_version": "WashData {version} eller senare",
+    "bp_author": "Författare",
+    "bp_required": "obligatorisk"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -781,7 +811,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Enhetens data och inställningar återställs till hur de var före den senaste importen ({when}). Cykler och ändringar sedan dess går förlorade.",
     "undo_import_ok": "Ångra import",
-    "undo_import_title": "Ångra senaste import"
+    "undo_import_title": "Ångra senaste import",
+    "bp_replace_title": "Ersätta den installerade mallen?",
+    "bp_replace_library_msg": "Home Assistant har en annan version av \"{name}\". Ersätta den med den från mallbiblioteket? Automatiseringar som använder den ändras med den."
   },
   "msg": {
     "custom_task_limit": "Du har nått gränsen på {max} uppgifter.",
@@ -806,7 +838,6 @@
     "artifact_pause_detail": "Effekten föll till nära noll i ~{n}s och kom sedan tillbaka. Dörren öppnades troligen eller så pausades cykeln.",
     "artifact_spike_detail": "Drog över det normala effektbandet i ~{n} s.",
     "auto_label_intro": "Tilldela profiler till omärkta cykler vars matchningskonfidens överstiger tröskeln.",
-    "automations_intro": "WashData utlöser {start} / {end}-händelser och tillhandahåller entiteter – aviseringar och åtgärder byggs bäst som vanliga Home Assistant-automatiseringar. Automatiseringar som använder den här enheten visas nedan.",
     "cleanup_intro": "Alla märkta cykler överlagrade. Kryssa i avvikare och ta sedan bort deras märkning (de ligger kvar i historiken men formar inte längre den här profilen) eller radera dem.",
     "clear_debug_hint": "Ta bort lagrad felsökningsdata för att frigöra utrymme.",
     "collecting_data": "Samlar in data. Cykler som återstår innan finjustering kan starta: {need} ({current}/{min}).",
@@ -979,7 +1010,7 @@
     "standby_above_stop_title": "Drog fortfarande {idle} W när cykeln avslutades",
     "standby_above_stop_sub": "{n} av de senaste {total} cyklerna. Avfördröjningen startar först när effekten är under Stopptröskel ({stop} W), så cykler avslutas för sent eller måste stoppas för hand.",
     "store_share_intro": "Ladda upp den här referenscykeln så att andra med samma apparat kan använda den. Den granskas innan den visas offentligt.",
-    "online_intro_global": "Bläddra bland och dela referensinspelningar med andra WashData-användare. En anslutning gäller alla dina WashData-enheter; märke och modell anges per enhet under Grundläggande. Onlinefunktioner är av tills du slår på dem.",
+    "online_intro_global": "Bläddra bland och dela referensinspelningar med andra WashData-användare, och använd biblioteket med automatiseringsmallar. En anslutning gäller alla dina WashData-enheter; märke och modell anges per enhet under Grundläggande. Onlinefunktioner är av tills du slår på dem.",
     "online_unavailable": "Onlinefunktioner är inte tillgängliga på den här servern.",
     "store_picker_offline": "Aktivera onlinefunktioner i inställningskugghjulet för att välja från gemenskapskatalogen.",
     "pick_brand_first": "Välj ett apparatmärke först.",
@@ -1047,10 +1078,6 @@
     "pg_label_yes": "Skulle märkas \"{name}\" vid cykelns slut",
     "pg_label_no": "Skulle be om granskning: {reason}",
     "live_match_debug_tip": "Konfidens: hur väl den aktuella effektkurvan matchar den bästa kandidatprofilen (0-100%). Tvetydig: de två bästa kandidaterna ligger inom 5% från varandra - etiketten är osäker tills cykeln är klar.",
-    "automation_alias_started": "{device}: cykel startad",
-    "automation_alias_finished": "{device}: cykel klar",
-    "automation_desc_started": "Körs när en {device}-cykel startar. Lägg till dina åtgärder (avisering, lampor, ...).",
-    "automation_desc_finished": "Körs när en {device}-cykel är klar. Lägg till dina åtgärder (avisering, lampor, ...).",
     "feedback_detected": "WashData upptäckte: {name}",
     "pg_outcome_stale": "Inställningarna har ändrats sedan den här simuleringen kördes. Den visar fortfarande det gamla resultatet.",
     "pg_compare_profile_tip": "Väljer bara vilken profil som ritas över grafen. Simuleringen matchar alltid cykeln på egen hand, precis som integrationen gör under drift.",
@@ -1069,7 +1096,22 @@
     "invalid_threshold_pair": "Stopptröskel ({stop} W) måste vara under Starttröskel ({start} W). Inget sparades; ändra båda tillsammans.",
     "import_undo_hint": "En återställningspunkt från före den senaste importen ({when}) finns kvar: {profiles} profil(er) och {cycles} cykel/cykler.",
     "replace_undo_hint": "En återställningspunkt sparas först, så att du kan ångra den här importen under Exportera / Importera.",
-    "pg_in_sample_note": "De här cyklerna var med och byggde de profiler de matchas mot, så resultaten är optimistiska: räkna med något färre korrekta matchningar på nya cykler."
+    "pg_in_sample_note": "De här cyklerna var med och byggde de profiler de matchas mot, så resultaten är optimistiska: räkna med något färre korrekta matchningar på nya cykler.",
+    "bp_admin_only": "En administratör installerar mallar.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Skapad av WashData för {device}. Lägg till dina åtgärder (avisering, lampor, ...).",
+    "automation_alias_new": "{device}: ny automatisering",
+    "maint_done_by_program_intro": "En uppgift räknas som klar när en cykel med ett av dess program avslutas, till exempel trumrengöring när Bomull 90 körs. Bara cykler som WashData är säker på, eller som du själv har valt, räknas.",
+    "auto_none": "Inga automatiseringar använder den här apparaten än.",
+    "auto_start_hint": "Öppnas i Home Assistants automatiseringsredigerare med den här apparaten redan ifylld.",
+    "auto_yours_intro": "Home Assistant-automatiseringar som reagerar på den här apparaten.",
+    "bp_needs_online": "Mallar laddas ner från GitHub, så biblioteket fungerar bara med onlinefunktioner påslagna. Onlinefunktionerna omfattar även Gemenskapsbutiken.",
+    "bp_needs_online_admin": "En administratör kan slå på dem i inställningskugghjulet under Online & gemenskap.",
+    "bp_stale": "GitHub gick inte att nå just nu. Det här är mallarna som laddades ner tidigare.",
+    "bp_none_yet": "Inga mallar för den här apparattypen än. Dela den första.",
+    "bp_unreachable": "Det laddas ner från GitHub. Kontrollera att Home Assistant når internet och försök sedan igen.",
+    "bp_library_intro": "Färdiga automatiseringar som WashData-användare delar på GitHub, granskade innan de listas. Bara tillgängligt med onlinefunktioner påslagna.",
+    "bp_needs_version": "Kräver WashData {version} eller senare."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
@@ -1087,29 +1129,18 @@
     "anti_wrinkle_max_power": "En puls över detta avslutar skrynkelskyddet och öppnar en ny cykel",
     "anti_wrinkle_enabled": "Fånga upp tumlingspulserna efter huvudfasen i stället för att läsa dem som nya cykler",
     "anti_wrinkle_max_duration": "En puls längre än detta avslutar skrynkelskyddet och öppnar en ny cykel",
-    "anti_wrinkle_exit_power": "Tyst nivå mellan tumlingspulser; gäller bara över Stopptröskeln",
     "anti_crease_finalize_ratio": "Andel av programmets genomsnittliga längd som en cykel måste nå innan skrynkelskyddssvansen får avsluta den; sänk den på torktumlare, låt tvättmaskiner stå kvar på standard",
     "curve_preroll_seconds": "Sekunders mätvärden från avbrutna startförsök som tas med främst i en cykels kurva; 0 = av"
   },
   "phase_desc": {
-    "anti_crease": "Enstaka korta tumlar efter färdigställandet för att förhindra skrynklor i tvätten.",
-    "anti_wrinkle": "Periodisk tumlande efter cykeln för att förhindra skrynklor i tvätten.",
-    "baking": "Värmeelement på hög temperatur aktivt för skorpa och inkråm.",
-    "cooking": "Huvudsaklig tillagning med värmeelement och fläkt aktiva.",
+    "anti_crease": "Enstaka korta tumlingar efter färdigställandet för att förhindra skrynklor i tvätten.",
+    "anti_wrinkle": "Periodisk tumling efter cykeln för att förhindra skrynklor i tvätten.",
     "cool_down": "Tumling utan värme nära cykelns slut.",
-    "cool_down_af": "Nedkylning med enbart fläkt efter uppvärmningen.",
     "drain_and_switch": "Övergångsperiod från tvätt- till torkläge.",
     "dry": "Torkningssteg med värmare och/eller restvärme.",
     "drying": "Huvudsaklig uppvärmd tumlingsperiod.",
     "heat_up": "Första uppvärmningen av värmaren innan full torkning börjar.",
-    "keep_warm": "Låg värme för att hålla maten varm.",
-    "keep_warm_bm": "Låg värme för att hålla brödet varmt efter gräddningen.",
-    "kneading": "Motorn blandar och knådar degen. Hög effektförbrukning.",
-    "pause_af": "Kort paus för att skaka eller kontrollera maten.",
-    "pre_heat": "Första uppvärmningen av kammaren före själva tillagningen.",
     "pre_rinse": "Initial sprayning innan tvättmedelstvätt.",
-    "proving": "Jäsning på låg värme så att jästen arbetar och degen växer.",
-    "resting": "Kort paus med låg effekt mellan knådningarna så att glutenet slappnar av.",
     "pre_wash": "Inledande blötläggning eller förbehandling före huvudtvätt.",
     "rinse": "Sköljningssteg med rent vatten. Denna fas kan upprepas flera gånger.",
     "sanitize": "Högtemperaturrengöringssteg för saneringsprogram.",
@@ -1202,10 +1233,6 @@
       "doc": "Håll en torktumlares korta tumlingspulser med låg effekt efter huvudvärmefasen kvar i den avslutade cykeln, i stället för att läsa dem som nya cykler.",
       "label": "Aktivera skrynkelskyddsdetektering"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "I skrynkelskyddsläget räknas effekt under detta som tyst mellan tumlingspulser, och tystnad längre än Maks. pulspaus avslutar läget. Stopptröskeln används när den är högre, så detta påverkar bara något när det är satt över Stopptröskeln.",
-      "label": "Avslutningseffekttröskel"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Hur länge torktumlaren får vara tyst mellan tumlingspulser innan skrynkelskyddsläget avslutas. Ställ in den över torktumlarens längsta paus, annars läses senare pulser som falska starter.",
       "label": "Maks. pulspaus"
@@ -1254,10 +1281,6 @@
       "doc": "Valfri dörrsensor. Visar när apparaten öppnades för att tömmas efter en cykel.",
       "label": "Dörrsensorentitet"
     },
-    "duration_tolerance": {
-      "doc": "Endast inlärningsfeedback: en cykel inom +/-X % av sin uppskattade längd räknas som en bra uppskattning. Påverkar inte matchningen.",
-      "label": "Uppskattingstolerans"
-    },
     "enable_ml_models": {
       "doc": "Använd en modell tränad på den här maskinen för att förutsäga en pågående cykels energi och kostnad, och låt ett välkänt program som stannar ovanligt tidigt avslutas utan hela avfördröjningen. Av: endast effektbaserad logik.",
       "label": "Tillämpa smarta modeller under en cykel"
@@ -1283,12 +1306,8 @@
       "label": "Exponera felsökningsentiteter"
     },
     "external_end_trigger": {
-      "doc": "Binär sensor vars ändring markerar cykelns slut (t.ex. en \"klar\"-kontakt eller en annan integration).",
+      "doc": "Valfri binär sensor som avslutar cykeln när den slår på, utöver strömbaserad detektering (t.ex. en 'klar'-kontakt eller en annan integration). Lämna tomt för att stänga av.",
       "label": "Extern utlösarentitet"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Låt en binär sensor signalera slutet på en cykel, utöver den effektbaserade detekteringen.",
-      "label": "Aktivera extern slututlösare"
     },
     "external_end_trigger_inverted": {
       "doc": "Behandla att sensorn slås AV (inte PÅ) som slutsignalen.",
@@ -1313,18 +1332,6 @@
     "ml_training_enabled": {
       "doc": "Träna om energimodellen på den här maskinens avslutade cykler då och då. En ny modell behålls bara om den slår den enkla uppskattningen på testcykler.",
       "label": "Lär dig av denna maskin"
-    },
-    "ml_training_hour": {
-      "doc": "Timme på dygnet (0-23) för nattlig träning. Välj en lugn timme, t.ex. 2.",
-      "label": "Lär dig vid timmen"
-    },
-    "ml_training_interval_days": {
-      "doc": "Träna om högst en gång per så här många dagar.",
-      "label": "Kontrollera som mest varje"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Vänta tills minst så här många cykler har spelats in innan träning.",
-      "label": "Cykler som behövs först"
     },
     "name": {
       "doc": "Namnet som visas i Home Assistant för den här enheten.",
@@ -1358,16 +1365,12 @@
       "doc": "notify.*-tjänster som anropas när en cykel är klar. Lämna tomt för inga.",
       "label": "Sluttjänster"
     },
-    "notify_fire_events": {
-      "doc": "Avfyra även ha_washdata_*-händelser vid cykelstart och -slut, för dina egna automationer.",
-      "label": "Avfyra HA-händelser för meddelanden"
-    },
     "notify_icon": {
       "doc": "Liten ikon på aviseringen (t.ex. mdi:washing-machine). Skickas bara till mobile_app-mål, inte till notify-grupper. På iOS ersätter den appikonen och kräver companion-appen 2026.8 eller senare. Tomt: plattformens standard.",
       "label": "Meddelandeikon"
     },
     "notify_live_chronometer": {
-      "doc": "Visa en löpande nedräkning i aviseringen (där det stöds) i stället för en fast uppskattning.",
+      "doc": "Android: lägger till en nedräkning till beräknat slut bredvid aviseringstexten. Använd {finish_time} i Nästan klart-meddelande för att visa sluttiden i stället för en andra nedräkning.",
       "label": "Använd direktkronometer"
     },
     "notify_live_interval_seconds": {
@@ -1391,7 +1394,7 @@
       "label": "Personer (för Bara när hemma)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text i varje liveuppdatering av förloppet. Mallvariabler: {device}, {program}, {minutes} (minuter kvar). Med någon annan variabel används standardtexten.",
+      "doc": "Text i varje liveuppdatering av förloppet. Mallvariabler: {device}, {program}, {minutes} (minuter kvar), {finish_time} (beräknad sluttid, t.ex. 14:30). Med någon annan variabel används standardtexten.",
       "label": "Nästan klart-meddelande"
     },
     "notify_reminder_message": {
@@ -1439,7 +1442,7 @@
       "label": "Avstängningströskel"
     },
     "power_sensor": {
-      "doc": "Sensorn som rapporterar apparatens aktuella effekt i watt (t.ex. sensor.washer_power). All detektering bygger på den.",
+      "doc": "Sensorn som rapporterar apparatens aktuella effekt i W eller kW (t.ex. sensor.washer_power), inte dess energimätare (kWh). All detektering bygger på den.",
       "label": "Effektsensor"
     },
     "profile_match_interval": {
@@ -1458,10 +1461,6 @@
       "doc": "Live-matchningspoäng som en cykel behöver innan smart avslutning eller skrynkelskyddsavslutet får avsluta den i förtid. Ändrar inte det visade programmet. Höj den om svaga matchningar avslutar cykler för tidigt; sänk den om tydliga matchningar väntar ut avfördröjningen.",
       "label": "Matchningströskel"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Om live-matchningspoängen sjunker under detta rensas den aktuella programgissningen. Håll den lite under Matchningströskel så att en kort dipp inte nollställer den.",
-      "label": "Omatchningströskel"
-    },
     "progress_reset_delay": {
       "doc": "Efter en cykel, håll förloppet på 100 % så här länge innan återställning till Inaktiv.",
       "label": "Förloppåterställningsfördröjning"
@@ -1469,10 +1468,6 @@
     "pump_stuck_duration": {
       "doc": "Hur länge en pump får köras oavbrutet innan händelsen för fastnad pump utlöses.",
       "label": "Pumpens fastnadsvaraktighet"
-    },
-    "sampling_interval": {
-      "doc": "Minsta tid mellan bearbetade mätvärden. Mätvärden som kommer tidigare hoppas över (låga mätvärden under en cykel behålls alltid). Ställ in den på kontaktens rapporteringsintervall eller lägre; ett högre värde slänger bara mätvärden.",
-      "label": "Samplingsintervall"
     },
     "save_debug_traces": {
       "doc": "Spara även matcharens felsökningsdata (alla kandidaters poäng) med varje cykel, för felsökning. Tar cirka 20 KB per cykel.",
@@ -1644,9 +1639,6 @@
     "services": {
       "label": "Tjänster"
     },
-    "signal_processing": {
-      "label": "Signalbehandling"
-    },
     "thresholds_gap": {
       "label": "Trösklar och lucka"
     },
@@ -1709,10 +1701,6 @@
       "auto_label_confidence": {
         "higher": "Färre automatiska märkningar – fler cykler går till granskning",
         "lower": "Fler automatiska märkningar – vissa kan vara felaktiga"
-      },
-      "duration_tolerance": {
-        "higher": "Accepterar ett bredare varaktighetsintervall – flexiblare igenkänning",
-        "lower": "Kräver noggrannare varaktighetsmatchning – striktare men kan avvisa ovanliga cykler"
       },
       "end_energy_threshold": {
         "higher": "Avslutar bara cykler med betydande energiförbrukning",
@@ -1811,7 +1799,8 @@
     "subtab_profiles": "Profiler",
     "maintenance": "Underhåll",
     "playground": "Testyta",
-    "store": "Butik"
+    "store": "Butik",
+    "automations": "Automatiseringar"
   },
   "tag": {
     "early_end": "Tidigt slut",
@@ -1978,7 +1967,14 @@
     "store_download_partial": "{n} program kunde inte laddas ned; försök igen senare.",
     "import_no_restore_point": "Importerat, men ingen återställningspunkt kunde sparas, så den här importen kan inte ångras",
     "import_undo_failed": "Det gick inte att ångra importen: {error}",
-    "import_undone": "Import ångrad: {profiles} profil(er) och {cycles} cykel/cykler återställda"
+    "import_undone": "Import ångrad: {profiles} profil(er) och {cycles} cykel/cykler återställda",
+    "bp_install_failed": "Kunde inte installera mallen: {error}",
+    "bp_installed_finish": "Mall installerad. Fyll i resten i Home Assistant.",
+    "bp_automation_failed": "Mallen är installerad, men automatiseringen kunde inte skapas: {error}",
+    "bp_automation_created": "Automatisering skapad med standardinställningar; öppnar den",
+    "copied": "Kopierad",
+    "copy_failed": "Kopiering misslyckades. Markera texten och kopiera manuellt.",
+    "automation_label_failed": "Automatisering skapad, men WashData-etiketten eller kategorin kunde inte läggas till."
   },
   "trend": {
     "down": "Nedåtgående trend",
@@ -2069,7 +2065,11 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter på GitHub ↗",
-    "manual": "Manual ↗"
+    "manual": "Manual ↗",
+    "automations_all": "Alla WashData-automatiseringar i Home Assistant",
+    "bp_share_pr": "Dela din egen mall: öppna en pull request på GitHub",
+    "bp_view_github": "Visa på GitHub",
+    "bp_import_my_ha": "Importera med My Home Assistant"
   },
   "tip": {
     "add_brand": "Märke inte med i listan? Lägg till det i gemenskapskatalogen",
@@ -2183,16 +2183,11 @@
     "kept": "behållen",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "ingen matchning",
     "no_updates": "inga uppdateringar",
     "off_delay_wait": "avfördröjning",
     "off_gap": "avlucka",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "typiskt mätintervall",
     "sensor_offline": "sensor offline: tvångsstopp",
-    "si": "SI",
     "spike_ignored": "topp ignorerad",
     "spike_ignored_short": "topp: ignorerad",
     "start": "start",
@@ -2201,5 +2196,61 @@
     "thr": "trösk.",
     "too_short": "för kort",
     "tumble_kept": "tumlingspulser behålls"
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Cykel startad"
+    },
+    "program_recognised": {
+      "name": "Program identifierat"
+    },
+    "phase_started": {
+      "name": "Fas startad"
+    },
+    "finishing_soon": {
+      "name": "Snart klar"
+    },
+    "cycle_overrun": {
+      "name": "Cykel kör för länge"
+    },
+    "cycle_paused": {
+      "name": "Cykel pausad"
+    },
+    "cycle_resumed": {
+      "name": "Cykel återupptagen"
+    },
+    "cycle_stalled": {
+      "name": "Cykel avstannad"
+    },
+    "cycle_finished": {
+      "name": "Cykel klar"
+    },
+    "cycle_ended": {
+      "name": "Cykel avslutad (valfri anledning)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Skrynkelskydd startat"
+    },
+    "still_tumbling": {
+      "name": "Torktumlaren tumlar fortfarande efter cykeln"
+    },
+    "unload_pending": {
+      "name": "Lossning väntande"
+    },
+    "unloaded": {
+      "name": "Tömd"
+    },
+    "state_changed": {
+      "name": "Tillstånd ändrat"
+    },
+    "maintenance_due": {
+      "name": "Dags för underhåll"
+    },
+    "milestone_reached": {
+      "name": "Cykelmilstolpe uppnådd"
+    },
+    "pump_stuck": {
+      "name": "Pumpen fastnad"
+    }
   }
 }

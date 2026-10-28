@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Vingjarnlegt nafn fyrir þetta tæki (t.d. „Þvottavél“, „Uppþvottavél“).",
           "device_type": "Stillir sjálfgefin greiningargildi fyrir þessa tegund tækis.",
-          "power_sensor": "Skynjari snjalltengilsins sem gefur upp núverandi afl í vöttum.",
+          "power_sensor": "Aflskynjari snjalltengilsins (W eða kW), ekki orkumælir hans (kWh).",
           "min_power": "Mælingar yfir þessu (í vöttum) þýða að tækið er í gangi. 2 W hentar flestum tækjum."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Óvænt villa",
-      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0"
+      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0",
+      "power_sensor_energy": "Þetta er orkumælir (kWh), ekki aflskynjari. Veldu aflskynjara snjalltengilsins (W eða kW). Ef tengillinn hefur engan getur Derivative-hjálpari búið hann til út frá mælinum."
     },
     "abort": {
       "already_configured": "Tæki er þegar stillt",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ekkert snið hefur enn verið greint.",
       "vs_typical_longer": "{pct}% lengri en venjulega",
       "vs_typical_shorter": "{pct}% styttri en venjulega",
-      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0"
+      "invalid_power": "Aflsþröskuldur verður að vera stærri en 0",
+      "power_sensor_energy": "Þetta er orkumælir (kWh), ekki aflskynjari. Veldu aflskynjara snjalltengilsins (W eða kW). Ef tengillinn hefur engan getur Derivative-hjálpari búið hann til út frá mælinum."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Þurrkari",
         "washer_dryer": "Þvottavél-þurrkari samsettur",
         "dishwasher": "Uppþvottavél",
-        "air_fryer": "Loftsteikingarpottur",
-        "bread_maker": "Brauðgerðarmaður",
         "pump": "Dæla / Sump Pump",
         "generic": "Annað (háþróað)",
         "other": "Þröskuldstæki"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Hvaða sem er",
+        "completed": "Lokið",
+        "force_stopped": "Þvingun stöðvuð",
+        "interrupted": "Truflað"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Slökkt",
+        "idle": "Aðgerðarlaus",
+        "starting": "Byrjar",
+        "running": "Í gangi",
+        "paused": "Gert hlé",
+        "user_paused": "Í bið af notanda",
+        "ending": "Að ljúka",
+        "finished": "Lokið",
+        "anti_wrinkle": "Anti-hrukku",
+        "delay_wait": "Bíður eftir að byrja",
+        "interrupted": "Truflað",
+        "force_stopped": "Þvingun stöðvuð",
+        "unknown": "Óþekkt",
+        "clean": "Hreint"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Ekki tókst að úthluta prófíl: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Lota hafin",
+      "cycle_finished": "Lotu lokið",
+      "cycle_ended": "Lotu lokið (hvaða ástæða sem er)",
+      "anti_wrinkle_started": "Hrukkuleysi hafið",
+      "cycle_stalled": "Lota stöðvuð",
+      "unload_pending": "Losun í bið",
+      "program_recognised": "Forrit þekkt",
+      "phase_started": "Fasi hafinn",
+      "finishing_soon": "Nálægt lokum",
+      "cycle_overrun": "Lota rennur yfir",
+      "cycle_paused": "Hlé á lotu",
+      "cycle_resumed": "Lota haldið áfram",
+      "still_tumbling": "Tromlan snýst enn eftir lotu",
+      "unloaded": "Losað",
+      "state_changed": "Staða breytt",
+      "maintenance_due": "Viðhald tímabært",
+      "milestone_reached": "Lotumark náð",
+      "pump_stuck": "Dæla föst"
+    },
+    "extra_fields": {
+      "program": "Forrit",
+      "phase": "Fasi",
+      "minutes": "Mínútur",
+      "percent": "Lengur um (%)",
+      "include_detected": "Hafa með skráðar hlébil",
+      "status": "Lauk sem",
+      "from": "Frá",
+      "to": "Til",
+      "task": "Verk"
+    },
+    "extra_fields_descriptions": {
+      "program": "Aðeins þetta forrit, eftir nákvæmu nafni. Láttu tómt fyrir hvaða forrit sem er.",
+      "phase": "Aðeins þessi fasi, eftir nafni. Láttu tómt fyrir hvaða fasa sem er.",
+      "minutes": "Nálægt lokum: mínútur eftir. Tromlan snýst enn: mínútur eftir lok.",
+      "percent": "Prósent yfir venjulegan tíma forritsins.",
+      "include_detected": "Kveiktu einnig við hlébil sem WashData sér í orkunotkun, t.d. blótun eða stöðvun.",
+      "status": "Aðeins lotur sem lauk á þennan hátt.",
+      "from": "Aðeins breytingar frá þessari stöðu. Láttu tómt fyrir hvaða stöðu sem er.",
+      "to": "Aðeins breytingar til þessarar stöðu. Láttu tómt fyrir hvaða stöðu sem er.",
+      "task": "Aðeins þetta verk, eftir nafni eða auðkenni. Láttu tómt fyrir hvaða verk sem er."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Lota hafin",
+      "description": "Kveikir þegar tækið byrjar lotu."
+    },
+    "program_recognised": {
+      "name": "Forrit þekkt",
+      "description": "Kveikir þegar WashData þekkir forritið fyrir gangandi lotu eða skiptir yfir í annað forrit.",
+      "fields": {
+        "program": {
+          "name": "Forrit",
+          "description": "Aðeins þetta forrit, eftir nákvæmu nafni. Láttu tómt fyrir hvaða forrit sem er."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fasi hafinn",
+      "description": "Kveikir þegar gangandi lota fer í nýjan fasa.",
+      "fields": {
+        "phase": {
+          "name": "Fasi",
+          "description": "Aðeins þessi fasi, eftir nafni. Láttu tómt fyrir hvaða fasa sem er."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Nálægt lokum",
+      "description": "Kveikir einu sinni á lotu þegar tími sem eftir er fellur í fyrsta skipti niður í þetta margar mínútur.",
+      "fields": {
+        "minutes": {
+          "name": "Mínútur eftir",
+          "description": "Kveiktu þegar svo margar mínútur eða færri eru eftir."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Lota rennur yfir",
+      "description": "Kveikir einu sinni á lotu þegar hún keyrir svo miklu lengur en forritið tekur venjulega.",
+      "fields": {
+        "percent": {
+          "name": "Lengur um",
+          "description": "Prósent yfir venjulegan tíma forritsins."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Hlé á lotu",
+      "description": "Kveikir þegar þú gerir hlé á lotu, og valkvætt þegar tækið gerir hlé sjálft.",
+      "fields": {
+        "include_detected": {
+          "name": "Hafa með skráðar hlébil",
+          "description": "Kveiktu einnig við hlébil sem WashData sér í orkunotkun, t.d. blótun eða stöðvun, ekki aðeins hlé sem þú byrjar."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Lota haldið áfram",
+      "description": "Kveikir þegar lota í bið heldur áfram.",
+      "fields": {
+        "include_detected": {
+          "name": "Hafa með skráðar hlébil",
+          "description": "Kveiktu einnig við hlébil sem WashData sér í orkunotkun, t.d. blótun eða stöðvun, ekki aðeins hlé sem þú byrjar."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Lota stöðvuð",
+      "description": "Kveikir þegar gangandi lota stöðvast við lágt, flatt orkustig."
+    },
+    "cycle_finished": {
+      "name": "Lotu lokið",
+      "description": "Kveikir þegar lotu lýkur, einnig þegar þú stoppar hana. Ekki við ranga byrjun.",
+      "fields": {
+        "program": {
+          "name": "Forrit",
+          "description": "Aðeins þetta forrit, eftir nákvæmu nafni. Láttu tómt fyrir hvaða forrit sem er."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Lotu lokið (hvaða ástæða sem er)",
+      "description": "Kveikir þegar lotu lýkur af hvaða ástæðu sem er, þ.m.t. rangar byrjanir.",
+      "fields": {
+        "status": {
+          "name": "Lauk sem",
+          "description": "Aðeins lotur sem lauk á þennan hátt."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Hrukkuleysi hafið",
+      "description": "Kveikir þegar tækið byrjar að snúa loknum þvotti í tromlunni til að koma í veg fyrir hrukku."
+    },
+    "still_tumbling": {
+      "name": "Tromlan snýst enn eftir lotu",
+      "description": "Kveikir einu sinni þegar tromla tækisins snýst enn í stuttum skotum þetta margar mínútur eftir lok lotu. Stöðvast við nýja lotu eða 4 klukkustundum eftir lok.",
+      "fields": {
+        "minutes": {
+          "name": "Mínútur eftir lok",
+          "description": "Kveiktu við fyrsta tromlusnúninginn sem er að minnsta kosti svo löngu eftir lok."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Losun í bið",
+      "description": "Kveikir þegar lotu lýkur og þvotturinn er enn inni."
+    },
+    "unloaded": {
+      "name": "Losað",
+      "description": "Kveikir þegar þvotturinn er tekinn út eftir lotu: hurðin var opnuð eða losun staðfest."
+    },
+    "state_changed": {
+      "name": "Staða breytt",
+      "description": "Kveikir þegar WashData-staðan breytist.",
+      "fields": {
+        "from": {
+          "name": "Frá",
+          "description": "Aðeins breytingar frá þessari stöðu. Láttu tómt fyrir hvaða stöðu sem er."
+        },
+        "to": {
+          "name": "Til",
+          "description": "Aðeins breytingar til þessarar stöðu. Láttu tómt fyrir hvaða stöðu sem er."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Viðhald tímabært",
+      "description": "Kveikir þegar viðhaldsverkefni er tímabært.",
+      "fields": {
+        "task": {
+          "name": "Verk",
+          "description": "Aðeins þetta verk, eftir nafni eða auðkenni. Láttu tómt fyrir hvaða verk sem er."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Lotumark náð",
+      "description": "Kveikir þegar heildarfjöldi lota nær einu af þeim mörkum sem sett hafa verið fyrir tilkynningar."
+    },
+    "pump_stuck": {
+      "name": "Dæla föst",
+      "description": "Kveikir þegar dæla keyrir lengur en takmörk hennar."
     }
   }
 }

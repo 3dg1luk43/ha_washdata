@@ -46,7 +46,6 @@ from custom_components.ha_washdata import (
 )
 from custom_components.ha_washdata.const import (
     CONF_AUTO_LABEL_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
     CONF_LEARNING_CONFIDENCE,
 )
 from custom_components.ha_washdata.learning import LearningManager
@@ -163,7 +162,6 @@ def test_a_legacy_ml_quality_score_is_ignored() -> None:
     entry.options = {
         CONF_AUTO_LABEL_CONFIDENCE: 0.9,
         CONF_LEARNING_CONFIDENCE: 0.6,
-        CONF_DURATION_TOLERANCE: 0.10,
     }
     entry.title = "Test"
     hass.config_entries.async_get_entry.return_value = entry

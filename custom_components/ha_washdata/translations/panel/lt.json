@@ -95,7 +95,9 @@
     "matcher_used_few": "Atitiko {n} jūsų ciklus",
     "matcher_used_many": "Atitiko {n} jūsų ciklo",
     "matcher_used_other": "Atitiko {n} jūsų ciklų",
-    "matcher_used_tip": "Šio prietaiso ciklai, kuriuos WashData savarankiškai atpažino kaip šią importuotą programą. Jei importuota programa niekada neatpažįstama, ji gali netikti jūsų prietaisui; galite ją pašalinti. Skaičiuojama vietoje, į parduotuvę nieko nesiunčiama."
+    "matcher_used_tip": "Šio prietaiso ciklai, kuriuos WashData savarankiškai atpažino kaip šią importuotą programą. Jei importuota programa niekada neatpažįstama, ji gali netikti jūsų prietaisui; galite ją pašalinti. Skaičiuojama vietoje, į parduotuvę nieko nesiunčiama.",
+    "bp_installed": "Įdiegta",
+    "bp_installed_other": "Įdiegta kita versija"
   },
   "btn": {
     "pg_preset_delete": "Ištrinti rinkinį",
@@ -139,7 +141,6 @@
     "export": "Eksportuoti",
     "force_stop": "Priverstinis sustabdymas",
     "force_stop_tip": "Nedelsdami nutraukti dabartinį ciklą ir pažymėti jį kaip priverstinai sustabdytą",
-    "from_template": "Iš šablono ▾",
     "ignore": "Ignoruoti",
     "import_json": "Importuoti iš JSON",
     "inspect": "Apžiūrėti",
@@ -147,14 +148,11 @@
     "load_more": "Įkelti daugiau",
     "manage": "Tvarkyti",
     "merge": "Sujungti",
-    "new_automation": "＋ Nauja automatika",
     "new_group": "+ Nauja grupė",
     "new_group_tip": "Sugrupuoti beveik vienodus profilius (ta pati forma, kita temperatūra ar gręžimas), kad atpažinimas juos atskirtų.",
     "new_phase": "+ Naujas etapas",
     "new_profile": "+ Naujas profilis",
     "new_profile_tip": "Sukurti naują programos profilį iš esamo pažymėto ciklo arba įrašo",
-    "on_cycle_finished": "Ciklas baigtas",
-    "on_cycle_started": "Prasidėjus ciklui",
     "pause_cycle": "Pauzė",
     "pause_cycle_tip": "Pristabdyti veikiantį ciklą – prietaisas tęsis nuo tos vietos, kur sustojo",
     "pg_load_live": "Įkelti aktyvius nustatymus",
@@ -257,7 +255,26 @@
     "confirmed": "Patvirtinta",
     "create_profile_from_gap": "Sukurti profilį",
     "undo_import": "Anuliuoti paskutinį importą",
-    "pg_rerun": "Atnaujinti simuliaciją"
+    "pg_rerun": "Atnaujinti simuliaciją",
+    "replace": "Pakeisti",
+    "auto_edit_in_ha": "Redaguoti Home Assistant",
+    "auto_fewer_triggers": "Mažiau paleidiklių",
+    "auto_more_triggers": "Dar {count} paleidiklių",
+    "auto_more_triggers_one": "Dar {count} paleidiklis",
+    "auto_more_triggers_few": "Dar {count} paleidikliai",
+    "auto_more_triggers_many": "Dar {count} paleidiklio",
+    "auto_more_triggers_other": "Dar {count} paleidiklių",
+    "auto_blank": "Tuščia automatika",
+    "bp_refresh": "Ieškoti naujų šablonų GitHub",
+    "bp_turn_on_online": "Įjungti interneto funkcijas",
+    "bp_add_tip": "Sukuria automatiką šiam prietaisui su numatytosiomis nuostatomis ir atidaro ją Home Assistant",
+    "bp_add_to": "Pridėti: {device}",
+    "bp_setup_tip": "Įdiegia šabloną ir atidaro Home Assistant, kad užpildytumėte likusią dalį",
+    "bp_setup_in_ha": "Nustatyti Home Assistant",
+    "bp_details": "Išsami informacija",
+    "bp_copy_yaml": "Kopijuoti YAML",
+    "bp_hide_yaml": "Slėpti YAML",
+    "bp_show_yaml": "Rodyti YAML"
   },
   "note": {
     "off_delay": {
@@ -314,23 +331,20 @@
       "timeout": "Turi būti didesnis už „Siurblio įstrigimo trukmė“ ({ps} s), kad įstrigimo aliarmas suveiktų pirmas"
     },
     "start_dur": {
-      "sampling": "Mėginių ėmimo intervalas viršija paleidimo trukmę ({sdt} s); vieno mėginio smaigaliai gali atidaryti ciklą",
       "threshold": "Turi būti bent vienas mėginių ėmimo intervalas ({si} s), kad išvengtumėte klaidingo paleidimo iš vieno mėginio"
-    },
-    "unmatch": {
-      "match": "Turi būti aukščiau neatitikimo slenksčio ({un})",
-      "unmatch": "Turi būti žemiau atitikimo slenksčio ({match}); priešingu atveju patvirtintas atitikimas iškart panaikinamas"
     },
     "cascade_toast": "Dėl nuoseklumo pakoreguoti ir kiti nustatymai: {n}",
     "suggestion_resolves": "Pritaikykite žemiau esantį laukiantį pasiūlymą ({val}), kad tai ištaisytumėte",
     "use_fix": "Naudoti {val}",
     "watchdog": {
-      "interval": "Turi būti bent 2 kartus didesnis nei mėginių ėmimo intervalas ({si} s)",
-      "sampling": "Mėginių ėmimo intervalas turi būti ne daugiau kaip pusė stebėjimo intervalo ({wi} s)"
+      "interval": "Turi būti bent 2 kartus didesnis nei mėginių ėmimo intervalas ({si} s)"
     },
     "end_energy": {
       "energy": "Per griežta, kai Sustabdymo slenkstis yra {w} W, o Išjungimo delsimas {d} s; ciklas gali baigtis tik atsarginiu būdu",
       "stop": "Pabaigos energija ({e} Wh per {d} s) leidžia tik {p} W"
+    },
+    "power_sensor": {
+      "energy": "Šis jutiklis skaičiuoja energiją ({unit}), o ne galią, todėl negalima aptikti nė vieno ciklo. Pasirinkite kištuko galios jutiklį (W arba kW)."
     }
   },
   "hdr": {
@@ -340,7 +354,6 @@
     "add_maintenance": "Pridėti priežiūros įvykį",
     "automation_delete": "Ištrinkite šią automatiką",
     "automation_needs_review": "Šį ciklą reikia peržiūrėti",
-    "automation_open": "Atidarykite automatikos rengyklėje",
     "automation_review_this_cycle": "Peržiūrėkite šį ciklą",
     "automations": "Automatikos",
     "clear_debug": "Išvalyti derinimo pėdsakus",
@@ -358,7 +371,6 @@
     "ml_settings_card": "Nustatymai",
     "ml_smart_learning": "Išmanusis mokymasis",
     "my_preferences": "Mano nuostatos",
-    "no_automations": "Dar jokia automatika nenurodo šio įrenginio.",
     "panel_settings": "Skydelio nustatymai",
     "pg_settings_source": "Nustatymų šaltinis",
     "phase_catalog": "Fazių katalogas",
@@ -378,7 +390,15 @@
     "import_power_history": "Galios istorijos importavimas",
     "service_status": "Aptarnavimo būsena",
     "online_account_tab": "Internetas ir bendruomenė",
-    "live_match_debug": "Tiesioginės atitikties derinimas"
+    "live_match_debug": "Tiesioginės atitikties derinimas",
+    "automations_all_tip": "Home Assistant automatizavimų sąrašas, filtruotas pagal WashData žymą. Čia sukurti automatizavimai taip pat yra WashData kategorijoje.",
+    "maint_done_by_program": "Atliekama automatiškai",
+    "auto_start": "Pradėti naują automatiką",
+    "auto_yours": "Jūsų automatikos",
+    "bp_needs_online": "Šablonų bibliotekai reikia interneto funkcijų",
+    "bp_unreachable": "Nepavyko pasiekti šablonų bibliotekos",
+    "bp_library": "Šablonų biblioteka",
+    "bp_settings": "Ką galite nustatyti"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -663,7 +683,7 @@
     "hist_reason_already_recorded": "persidengia su ciklu, kurį WashData jau įrašė",
     "share_consent": "Patvirtinu, kad šie ciklai normaliai baigėsi be pertraukimų",
     "show_internal": "Rodyti vidinius nustatymus",
-    "show_internal_tip": "Nustatymai, kuriuos WashData derina už jus (mėginių ėmimas, stebėjimas, atitikimo dažnis, slenksčiai). Rodomi, kai šis įrenginys turi savo reikšmę, konfliktą ar pasiūlymą.",
+    "show_internal_tip": "Nustatymai, kuriuos WashData derina už jus (stebėjimas, atitikimo dažnis, slenksčiai). Rodomi, kai šis įrenginys turi savo reikšmę, konfliktą ar pasiūlymą.",
     "rate_n": "{n} žvaigždutės",
     "rate_quality": "Įvertinti kokybę",
     "pg_autolabel": "Automatinis žymėjimas",
@@ -696,7 +716,19 @@
     "cycle_context_minutes": "{min} min",
     "cycle_context_series": "Recorder istorija",
     "before_start": "Prieš pradžią",
-    "after_end": "Po pabaigos"
+    "after_end": "Po pabaigos",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Turi WashData žymą",
+    "done_by_none": "Nenustatyta",
+    "done_by_programs": "Automatiškai atlieka: {programs}",
+    "done_by_cycle": "Atlikta ciklu: {program}",
+    "bp_by": "autorius: {author}",
+    "bp_for_all": "Visi prietaisai",
+    "bp_for": "Skirta",
+    "bp_needs": "Reikia",
+    "bp_needs_version": "WashData {version} arba naujesnė",
+    "bp_author": "Autorius",
+    "bp_required": "privaloma"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -797,7 +829,9 @@
     "profile_title": "Profilis · {name}",
     "undo_import_msg": "Šio įrenginio duomenys ir nustatymai grąžinami į būseną prieš paskutinį importą ({when}). Nuo tada įrašyti ciklai ir atlikti pakeitimai prarandami.",
     "undo_import_ok": "Anuliuoti importą",
-    "undo_import_title": "Anuliuoti paskutinį importą"
+    "undo_import_title": "Anuliuoti paskutinį importą",
+    "bp_replace_title": "Pakeisti įdiegtą šabloną?",
+    "bp_replace_library_msg": "Home Assistant turi kitą \"{name}\" versiją. Pakeisti ją versija iš šablonų bibliotekos? Ją naudojančios automatikos pasikeis kartu."
   },
   "msg": {
     "pg_canvas_empty3": "Pasirinkite ciklą aukščiau ir paspauskite Vykdyti, kad jį simuliuotumėte. Tada užveskite žymeklį, kad nuskaitytumėte reikšmes, slinkite arba priartinkite dviem pirštais ir vilkite, kad pastumtumėte.",
@@ -820,7 +854,6 @@
     "artifact_pause_detail": "Galia maždaug {n}s krito beveik iki nulio, tada atsinaujino. Greičiausiai buvo atidarytos durys arba ciklas pristabdytas.",
     "artifact_spike_detail": "Viršijo įprastą galios juostą maždaug {n}s.",
     "auto_label_intro": "Priskirkite profilius nepažymėtiems ciklams, kurių atitikties patikimumas pašalina slenkstį.",
-    "automations_intro": "WashData paleidžia {start} / {end} įvykius ir atskleidžia esybes, todėl pranešimai ir veiksmai geriausiai kuriami kaip įprasti Home Assistant automatizavimai. Žemiau rodomi automatizavimai, naudojantys šį prietaisą.",
     "cleanup_intro": "Visi pažymėti ciklai rodomi vienas ant kito. Pasirinkite nuokrypius ir panaikinkite jų žymėjimą (liks istorijoje, bet nebeformuos šio profilio) arba ištrinkite juos.",
     "clear_debug_hint": "Pašalinkite saugomus derinimo duomenis, kad atlaisvintumėte vietos.",
     "collecting_data": "Renkami duomenys. Dar reikia ciklų, kad galėtų prasidėti tikslus derinimas: {need} ({current}/{min}).",
@@ -997,7 +1030,7 @@
     "standby_above_stop_title": "Ciklui pasibaigus vis dar naudojama {idle} W",
     "standby_above_stop_sub": "{n} iš paskutinių {total} ciklų. Išjungimo delsimas prasideda tik tada, kai galia nukrenta žemiau Sustabdymo slenksčio ({stop} W), todėl ciklai baigiasi pavėluotai arba juos tenka sustabdyti rankiniu būdu.",
     "store_share_intro": "Įkelkite šį etaloninį ciklą, kad juo galėtų naudotis kiti tą patį prietaisą turintys naudotojai. Prieš paskelbiant viešai jis peržiūrimas.",
-    "online_intro_global": "Naršykite ir bendrinkite etaloninius įrašus su kitais WashData naudotojais. Vienas prisijungimas tinka visiems jūsų WashData įrenginiams; prekės ženklas ir modelis nustatomi kiekvienam įrenginiui skiltyje Pagrindiniai. Interneto funkcijos išjungtos, kol jų neįjungsite.",
+    "online_intro_global": "Naršykite ir bendrinkite etaloninius įrašus su kitais WashData naudotojais ir naudokitės automatikų šablonų biblioteka. Vienas prisijungimas tinka visiems jūsų WashData įrenginiams; prekės ženklas ir modelis nustatomi kiekvienam įrenginiui skiltyje Pagrindiniai. Interneto funkcijos išjungtos, kol jų neįjungsite.",
     "online_unavailable": "Interneto funkcijos šiame serveryje nepasiekiamos.",
     "store_picker_offline": "Įjunkite interneto funkcijas nustatymų krumpliaratyje, kad galėtumėte rinktis iš bendruomenės katalogo.",
     "pick_brand_first": "Pirmiausia pasirinkite prietaiso prekės ženklą.",
@@ -1071,10 +1104,6 @@
     "pg_label_yes": "Ciklo pabaigoje būtų pažymėtas kaip „{name}“",
     "pg_label_no": "Būtų prašoma peržiūros: {reason}",
     "live_match_debug_tip": "Pasitikėjimas: kaip tiksliai dabartinė galios kreivė atitinka geriausią kandidatinį profilį (0-100%). Neaiški: dviejų geriausių kandidatų balai skiriasi mažiau nei 5% - žyma neaiški, kol ciklas nesibaigs.",
-    "automation_alias_started": "{device}: ciklas prasidėjo",
-    "automation_alias_finished": "{device}: ciklas baigėsi",
-    "automation_desc_started": "Vykdoma, kai prasideda {device} ciklas. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",
-    "automation_desc_finished": "Vykdoma, kai baigiasi {device} ciklas. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",
     "feedback_detected": "WashData aptiko: {name}",
     "import_undo_hint": "Saugomas atkūrimo taškas, sukurtas prieš paskutinį importą ({when}): {profiles} profilių ir {cycles} ciklų.",
     "replace_undo_hint": "Pirmiausia išsaugomas atkūrimo taškas, todėl šį importą galėsite anuliuoti skiltyje Eksportas / Importas.",
@@ -1101,27 +1130,32 @@
     "cycle_context_note": "Pilka: galios jutiklio recorder istorija aplink šį ciklą. Ji nėra ciklo dalis ir neturi įtakos trukmei, energijai ar atitikimui.",
     "cycle_context_none": "Recorder neturi rodmenų prieš šį ciklą ir po jo (Home Assistant pagal numatytuosius nustatymus saugo 10 dienų istoriją).",
     "cycle_context_tip": "Tik rodymui: rodo galios jutiklio recorder istoriją aplink šį ciklą, jei ji dar saugoma. Norėdami nepavykusius paleidimo bandymus pridėti prie būsimų ciklų, naudokite „Kreivės įžanginės sekundės“ (Nustatymai > Aptikimas > Ciklo pradžia); tai pakeičia išsaugotas trukmes.",
-    "invalid_threshold_pair": "Sustabdymo slenkstis ({stop} W) turi būti mažesnis už Paleidimo slenkstį ({start} W). Niekas neišsaugota; keiskite abu kartu."
+    "invalid_threshold_pair": "Sustabdymo slenkstis ({stop} W) turi būti mažesnis už Paleidimo slenkstį ({start} W). Niekas neišsaugota; keiskite abu kartu.",
+    "bp_admin_only": "Šablonus diegia administratorius.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Sukurta WashData, skirta {device}. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",
+    "automation_alias_new": "{device}: naujas automatizavimas",
+    "maint_done_by_program_intro": "Užduotis laikoma atlikta, kai baigiasi vienos iš jos programų ciklas, pavyzdžiui, būgno valymas, kai paleidžiama programa Medvilnė 90. Įskaičiuojami tik ciklai, kuriuos WashData atpažino užtikrintai arba kurių programą pasirinkote jūs.",
+    "auto_none": "Šio prietaiso dar nenaudoja jokia automatika.",
+    "auto_start_hint": "Atidaroma Home Assistant automatikų rengyklėje, kurioje šis prietaisas jau nurodytas.",
+    "auto_yours_intro": "Home Assistant automatikos, reaguojančios į šį prietaisą.",
+    "bp_needs_online": "Šablonai atsisiunčiami iš GitHub, todėl biblioteka veikia tik įjungus interneto funkcijas. Interneto funkcijoms taip pat priklauso Bendruomenės parduotuvė.",
+    "bp_needs_online_admin": "Administratorius gali jas įjungti krumpliaračio meniu, skiltyje Internetas ir bendruomenė.",
+    "bp_stale": "Šiuo metu nepavyko pasiekti GitHub. Rodomi anksčiau atsisiųsti šablonai.",
+    "bp_none_yet": "Šiam prietaiso tipui šablonų dar nėra. Pasidalykite pirmuoju.",
+    "bp_unreachable": "Ji atsisiunčiama iš GitHub. Patikrinkite, ar Home Assistant gali prisijungti prie interneto, ir bandykite dar kartą.",
+    "bp_library_intro": "Paruoštos automatikos, kuriomis WashData naudotojai dalijasi GitHub; prieš įtraukiant į sąrašą jos peržiūrimos. Prieinama tik įjungus interneto funkcijas.",
+    "bp_needs_version": "Reikalinga WashData {version} arba naujesnė versija."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
     "anti_wrinkle": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
-    "baking": "Kaitinimas aukšta temperatūra: susidaro pluta ir minkštimas.",
-    "cooking": "Pagrindinė gaminimo fazė su įjungtu kaitintuvu ir ventiliatoriumi.",
-    "cool_down": "Vartymas be karščio artėjant ciklo pabaigai.",
-    "cool_down_af": "Vėsinimas tik ventiliatoriumi po kaitinimo.",
+    "cool_down": "Būgno sukimas be karščio artėjant ciklo pabaigai.",
     "drain_and_switch": "Perėjimo iš skalbimo į džiovinimo režimą laikotarpis.",
     "dry": "Džiovinimo etapas naudojant šildytuvą ir (arba) likutinę šilumą.",
     "drying": "Pagrindinis kaitinimo laikotarpis.",
     "heat_up": "Pradinis šildytuvo pašildymas prieš pradedant visišką džiovinimą.",
-    "keep_warm": "Silpnas kaitinimas, kad maistas liktų šiltas.",
-    "keep_warm_bm": "Silpnas kaitinimas, kad duona po kepimo liktų šilta.",
-    "kneading": "Variklis maišo ir minko tešlą. Didelė naudojama galia.",
-    "pause_af": "Trumpa pauzė supurtyti arba patikrinti.",
-    "pre_heat": "Pradinis kameros įkaitinimas prieš gaminimą.",
     "pre_rinse": "Pradinis purškimas prieš skalbimą plovikliu.",
-    "proving": "Kildinimas silpnoje šilumoje: mielės rūgsta, tešla kyla.",
-    "resting": "Trumpa mažos galios pauzė tarp minkymų, kad atsipalaiduotų glitimas.",
     "pre_wash": "Pirminis mirkymas arba paruošiamasis apdorojimas prieš pagrindinį skalbimą.",
     "rinse": "Skalavimo švariu vandeniu etapas. Ši fazė gali kartotis kelis kartus.",
     "sanitize": "Aukštos temperatūros valymo etapas, skirtas dezinfekavimo programoms.",
@@ -1214,10 +1248,6 @@
       "doc": "Trumpus mažos galios džiovyklės būgno impulsus po pagrindinės šildymo fazės laikyti baigto ciklo dalimi, o ne naujais ciklais.",
       "label": "Įjungti apsaugą nuo raukšlių"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "Apsaugos nuo raukšlių režimu galia, mažesnė už šią, laikoma pauze tarp sukimo impulsų, o pauzė, ilgesnė nei Maks. tarpas tarp impulsų, režimą baigia. Jei Sustabdymo slenkstis didesnis, naudojamas jis, todėl šis nustatymas ką nors keičia tik tada, kai nustatytas virš Sustabdymo slenksčio.",
-      "label": "Išėjimo galios slenkstis"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Kiek ilgai džiovyklė gali tylėti tarp būgno impulsų, kol baigiasi apsaugos nuo raukšlių režimas. Nustatykite ilgesnį nei ilgiausias jūsų džiovyklės tarpas, antraip vėlesni impulsai bus laikomi klaidingais paleidimais.",
       "label": "Maks. tarpas tarp impulsų"
@@ -1266,10 +1296,6 @@
       "doc": "Pasirenkamas durų jutiklis. Rodo, kada prietaisas po ciklo buvo atidarytas iškrauti.",
       "label": "Durų jutiklio objektas"
     },
-    "duration_tolerance": {
-      "doc": "Tik mokymosi grįžtamajam ryšiui: ciklas, kurio trukmė neviršija +/-X% įvertintos, laikomas geru įverčiu. Atpažinimui įtakos neturi.",
-      "label": "Įvertinimo tolerancija"
-    },
     "enable_ml_models": {
       "doc": "Naudoti šiame aparate apmokytą modelį veikiančio ciklo energijai ir kainai prognozuoti, o gerai žinomai programai, kuri sustoja neįprastai anksti, leisti baigtis nelaukiant viso išjungimo delsimo. Išjungta: tik galia pagrįsta logika.",
       "label": "Taikyti išmaniuosius modelius ciklo metu"
@@ -1295,12 +1321,8 @@
       "label": "Rodyti derinimo objektus"
     },
     "external_end_trigger": {
-      "doc": "Dvejetainis jutiklis, kurio pasikeitimas žymi ciklo pabaigą (pvz., „baigta“ kontaktas ar kita integracija).",
+      "doc": "Neprivalomas dvejetainis jutiklis, kuris baigia ciklą įsijungus, be galia pagrįsto aptikimo (pvz., \"baigta\" kontaktas ar kita integracija). Palikite tuščia, kad išjungtumėte.",
       "label": "Išorinio trigerio objektas"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Leisti dvejetainiam jutikliui pranešti apie ciklo pabaigą kartu su galia pagrįstu aptikimu.",
-      "label": "Įjungti išorinį pabaigos trigerį"
     },
     "external_end_trigger_inverted": {
       "doc": "Pabaigos signalu laikyti jutiklio išsijungimą, o ne įsijungimą.",
@@ -1325,18 +1347,6 @@
     "ml_training_enabled": {
       "doc": "Kartkartėmis iš naujo apmokyti energijos modelį pagal šio aparato baigtus ciklus. Naujas modelis paliekamas tik tada, kai patikros cikluose pranoksta paprastą įvertį.",
       "label": "Mokytis iš šio įrenginio"
-    },
-    "ml_training_hour": {
-      "doc": "Paros valanda (0-23) naktiniam mokymui. Pasirinkite ramią valandą, pvz., 2.",
-      "label": "Mokymosi valanda"
-    },
-    "ml_training_interval_days": {
-      "doc": "Mokyti iš naujo ne dažniau kaip kartą per tiek dienų.",
-      "label": "Maks. tikrinimo intervalas"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Prieš mokymą palaukti, kol bus įrašyta bent tiek ciklų.",
-      "label": "Reikalingi ciklai"
     },
     "name": {
       "doc": "Šio įrenginio pavadinimas, rodomas Home Assistant.",
@@ -1370,16 +1380,12 @@
       "doc": "notify.* paslaugos, iškviečiamos ciklui pasibaigus. Palikite tuščią, jei nereikia.",
       "label": "Baigimo paslaugos"
     },
-    "notify_fire_events": {
-      "doc": "Taip pat skelbti ha_washdata_* įvykius ciklo pradžioje ir pabaigoje, kad galėtumėte kurti savo automatizavimus.",
-      "label": "Paleisti HA įvykius pranešimams"
-    },
     "notify_icon": {
       "doc": "Maža piktograma pranešime (pvz., mdi:washing-machine). Siunčiama tik mobile_app gavėjams, ne notify grupėms. iOS ji pakeičia programėlės piktogramą; tam reikia programėlės 2026.8 ar naujesnės versijos. Tuščia: platformos numatytoji.",
       "label": "Pranešimo piktograma"
     },
     "notify_live_chronometer": {
-      "doc": "Pranešime rodyti tiesioginį atgalinės atskaitos laikmatį (kur palaikoma), o ne fiksuotą įvertį.",
+      "doc": "Android: pranešimo teksto šone prideda atgalinę atskaičiavimą iki numatomos pabaigos. Naudokite {finish_time} Žinutėje prieš baigimą, kad pabaigos laikas būtų rodomas vietoje antros atgalinės atskaičiavimo.",
       "label": "Naudoti tiesioginį chronometrą"
     },
     "notify_live_interval_seconds": {
@@ -1403,7 +1409,7 @@
       "label": "Žmonės (kai namuose)"
     },
     "notify_pre_complete_message": {
-      "doc": "Kiekvieno tiesioginio eigos atnaujinimo tekstas. Šablono kintamieji: {device}, {program}, {minutes} (likusios minutės). Su bet kuriuo kitu kintamuoju naudojamas numatytasis tekstas.",
+      "doc": "Kiekvieno tiesioginio eigos atnaujinimo tekstas. Šablono kintamieji: {device}, {program}, {minutes} (likusios minutės), {finish_time} (numatoma pabaiga, pvz. 14:30). Su bet kuriuo kitu kintamuoju naudojamas numatytasis tekstas.",
       "label": "Žinutė prieš baigimą"
     },
     "notify_reminder_message": {
@@ -1451,7 +1457,7 @@
       "label": "Maitinimo išjungimo slenkstis"
     },
     "power_sensor": {
-      "doc": "Jutiklis, pranešantis esamą šio prietaiso galią vatais (pvz., sensor.washer_power). Juo pagrįstas visas aptikimas.",
+      "doc": "Jutiklis, pranešantis esamą šio prietaiso galią W arba kW (pvz., sensor.washer_power), o ne jo energijos skaitiklis (kWh). Juo pagrįstas visas aptikimas.",
       "label": "Galios jutiklis"
     },
     "profile_match_interval": {
@@ -1470,10 +1476,6 @@
       "doc": "Tiesioginės atitikties balas, kurio ciklui reikia, kad išmanusis užbaigimas ar apsaugos nuo raukšlių užbaigimas galėtų jį užbaigti anksčiau. Rodomos programos jis nekeičia. Padidinkite, jei silpnos atitiktys per anksti užbaigia ciklus; sumažinkite, jei aiškios atitiktys laukia išjungimo delsimo.",
       "label": "Atitikimo slenkstis"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Jei tiesioginės atitikties balas nukrenta žemiau šios reikšmės, dabartinis programos spėjimas išvalomas. Laikykite šiek tiek žemiau Atitikimo slenksčio, kad trumpas kritimas jo nepanaikintų.",
-      "label": "Neatitikimo slenkstis"
-    },
     "progress_reset_delay": {
       "doc": "Po ciklo tiek laiko rodyti 100 % pažangą, prieš grįžtant į būseną „Tuščia eiga“.",
       "label": "Pažangos atstatymo delsimas"
@@ -1481,10 +1483,6 @@
     "pump_stuck_duration": {
       "doc": "Kiek ilgai siurblys gali veikti be pertraukos, kol suveikia įstrigusio siurblio įvykis.",
       "label": "Siurblio įstrigimo trukmė"
-    },
-    "sampling_interval": {
-      "doc": "Mažiausias laikas tarp apdorojamų rodmenų. Anksčiau gauti rodmenys praleidžiami (žemi rodmenys ciklo metu visada išsaugomi). Nustatykite lygų savo kištuko ataskaitų intervalui arba mažesnį; didesnė reikšmė tik išmeta rodmenis.",
-      "label": "Mėginių ėmimo intervalas"
     },
     "save_debug_traces": {
       "doc": "Su kiekvienu ciklu taip pat saugoti atitikimo modulio derinimo duomenis (kiekvieno kandidato balus) trikčių šalinimui. Prideda apie 20 KB kiekvienam ciklui.",
@@ -1656,9 +1654,6 @@
     "services": {
       "label": "Paslaugos"
     },
-    "signal_processing": {
-      "label": "Signalo apdorojimas"
-    },
     "thresholds_gap": {
       "label": "Slenksčiai ir tarpai"
     },
@@ -1731,7 +1726,8 @@
     "subtab_profiles": "Profiliai",
     "maintenance": "Priežiūra",
     "playground": "Bandymų aikštelė",
-    "store": "Parduotuvė"
+    "store": "Parduotuvė",
+    "automations": "Automatikos"
   },
   "tag": {
     "early_end": "Ankstyva pabaiga",
@@ -1902,7 +1898,14 @@
     "auto_label_done_one": "Automatinis žymėjimas baigtas: pažymėtas {count} ciklas, be žymos liko {skipped}.",
     "auto_label_done_few": "Automatinis žymėjimas baigtas: pažymėti {count} ciklai, be žymos liko {skipped}.",
     "auto_label_done_many": "Automatinis žymėjimas baigtas: pažymėta {count} ciklo, be žymos liko {skipped}.",
-    "auto_label_done_other": "Automatinis žymėjimas baigtas: pažymėta {count} ciklų, be žymos liko {skipped}."
+    "auto_label_done_other": "Automatinis žymėjimas baigtas: pažymėta {count} ciklų, be žymos liko {skipped}.",
+    "bp_install_failed": "Šablono nepavyko įdiegti: {error}",
+    "bp_installed_finish": "Šablonas įdiegtas. Likusią dalį užpildykite Home Assistant.",
+    "bp_automation_failed": "Šablonas įdiegtas, tačiau automatikos sukurti nepavyko: {error}",
+    "bp_automation_created": "Automatika sukurta su numatytosiomis nuostatomis; atidaroma",
+    "copied": "Nukopijuota",
+    "copy_failed": "Kopijuoti nepavyko. Pasirinkite tekstą ir nukopijuokite rankiniu būdu.",
+    "automation_label_failed": "Automatizavimas sukurtas, tačiau WashData žymos ar kategorijos nepavyko pridėti."
   },
   "suggestion": {
     "observed_label": "Pastebėta",
@@ -1910,10 +1913,6 @@
       "auto_label_confidence": {
         "higher": "Automatiškai pažymi mažiau ciklų; daugiau siunčiama peržiūrėti",
         "lower": "Automatiškai pažymi daugiau ciklų; kai kurie gali būti neteisingai identifikuoti"
-      },
-      "duration_tolerance": {
-        "higher": "Priima platesnį trukmės diapazoną – lankstesnis atitikimas",
-        "lower": "Reikalauja tikslesnio trukmės atitikimo – griežtesnė, bet gali atmesti neįprastus ciklus"
       },
       "end_energy_threshold": {
         "higher": "Uždaro tik ciklus, kurie sunaudojo daug energijos",
@@ -2015,9 +2014,8 @@
     "dishwasher_end_spike_quiet_release": "Indaplovė: tylos sekundės po numatytos trukmės, kol atleidžiamas ciklo pabaigos vandens išleidimo laukimas",
     "smart_termination_duration_ratio": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau; sumažinkite, jei veikimo trukmė svyruoja",
     "anti_crease_finalize_ratio": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad apsaugos nuo raukšlių uodega galėtų jį užbaigti; džiovyklėms sumažinkite, skalbyklėms palikite numatytąją",
-    "anti_wrinkle_enabled": "Sugerkite būgninius impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
-    "anti_wrinkle_exit_power": "Galios lygis pauzėse tarp sukimo impulsų; veikia tik virš Sustabdymo slenksčio",
-    "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgninių impulsų prieš pasibaigiant apsaugai nuo raukšlių",
+    "anti_wrinkle_enabled": "Sugerkite būgno impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
+    "anti_wrinkle_idle_timeout": "Tylos laikas, leidžiamas tarp dviejų būgno impulsų prieš pasibaigiant apsaugai nuo raukšlių",
     "anti_wrinkle_max_duration": "Ilgesnis nei šis impulsas užbaigia apsaugą nuo raukšlių ir pradeda naują ciklą",
     "anti_wrinkle_max_power": "Už šią didesnis impulsas užbaigia apsaugą nuo raukšlių ir pradeda naują ciklą",
     "completion_min_seconds": "Trumpiausias veikimas, laikomas tikru ciklu",
@@ -2105,7 +2103,11 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter GitHub svetainėje ↗",
-    "manual": "Vadovas ↗"
+    "manual": "Vadovas ↗",
+    "automations_all": "Visi WashData automatizavimai Home Assistant",
+    "bp_share_pr": "Pasidalykite savo šablonu: pateikite pull request GitHub",
+    "bp_view_github": "Žiūrėti GitHub",
+    "bp_import_my_ha": "Importuoti per My Home Assistant"
   },
   "tip": {
     "add_brand": "Prekės ženklo nėra sąraše? Pridėkite jį į bendruomenės katalogą",
@@ -2219,16 +2221,11 @@
     "kept": "išlaikyta",
     "max": "maks.",
     "min": "min.",
-    "minus_tol": "-tol.",
     "no_match": "nėra atitikties",
     "no_updates": "nėra atnaujinimų",
     "off_delay_wait": "išjungimo delsimas",
     "off_gap": "išjungimo tarpas",
-    "plus_tol": "+tol.",
-    "profile": "profilis",
-    "reading_interval": "įprastas rodmenų intervalas",
     "sensor_offline": "jutiklis neprisijungęs: priverstinis sustabdymas",
-    "si": "MI",
     "spike_ignored": "smaigalys ignoruojamas",
     "spike_ignored_short": "smaigalys: ignoruojamas",
     "start": "paleidimas",
@@ -2237,5 +2234,61 @@
     "thr": "slenk.",
     "too_short": "per trumpas",
     "tumble_kept": "būgno impulsai išlaikyti"
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Ciklas pradėtas"
+    },
+    "program_recognised": {
+      "name": "Programa atpažinta"
+    },
+    "phase_started": {
+      "name": "Fazė prasidėjo"
+    },
+    "finishing_soon": {
+      "name": "Baigsis greitai"
+    },
+    "cycle_overrun": {
+      "name": "Ciklas trunka per ilgai"
+    },
+    "cycle_paused": {
+      "name": "Ciklas pristabdytas"
+    },
+    "cycle_resumed": {
+      "name": "Ciklas atnaujintas"
+    },
+    "cycle_stalled": {
+      "name": "Ciklas įstrigo"
+    },
+    "cycle_finished": {
+      "name": "Ciklas baigtas"
+    },
+    "cycle_ended": {
+      "name": "Ciklas pasibaigė (bet kokia priežastis)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Apsauga nuo raukšlių pradėta"
+    },
+    "still_tumbling": {
+      "name": "Vis dar sukasi po ciklo"
+    },
+    "unload_pending": {
+      "name": "Laukiama iškrovimo"
+    },
+    "unloaded": {
+      "name": "Iškrauta"
+    },
+    "state_changed": {
+      "name": "Būsena pasikeitė"
+    },
+    "maintenance_due": {
+      "name": "Reikalinga priežiūra"
+    },
+    "milestone_reached": {
+      "name": "Ciklo riba pasiekta"
+    },
+    "pump_stuck": {
+      "name": "Siurblys įstrigo"
+    }
   }
 }

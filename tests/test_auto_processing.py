@@ -28,10 +28,6 @@ from custom_components.ha_washdata.const import DOMAIN
 @pytest.fixture
 def manager(mock_hass, mock_config_entry):
     """Fixture to provide a WashDataManager instance."""
-    # Ensure options are populated with new default if not set, or specific value
-    if "auto_merge_gap_seconds" not in mock_config_entry.options:
-        mock_config_entry.options["auto_merge_gap_seconds"] = 120
-    
     manager = WashDataManager(mock_hass, mock_config_entry)
     # Use MagicMock as base because profile_store has synchronous methods (get_profiles)
     manager.profile_store = MagicMock()

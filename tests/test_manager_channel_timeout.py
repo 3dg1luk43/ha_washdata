@@ -33,6 +33,7 @@ from custom_components.ha_washdata.const import (
     NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
     NOTIFY_EVENT_START,
+    NOTIFY_EVENT_TIMER,
     STATE_CLEAN,
 )
 from custom_components.ha_washdata.manager import WashDataManager
@@ -168,17 +169,31 @@ def test_timeout_zero_omits_key(
 def test_persistent_fallback_uses_tag_as_notification_id(
     make_manager: Callable[..., WashDataManager],
 ) -> None:
-    """With no notify service, the fallback reuses the tag as a stable id so the
-    lifecycle collapses to one card instead of accumulating."""
+    """A cycle timer with no notify service falls back to the sidebar, reusing the
+    tag as a stable id so repeated timers collapse to one card."""
     mgr = make_manager({})
     with patch("custom_components.ha_washdata.manager._pn_create") as pn:
         mgr._dispatch_notification(
-            "done",
-            event_type=NOTIFY_EVENT_FINISH,
+            "timer",
+            event_type=NOTIFY_EVENT_TIMER,
             extra_vars={"tag": mgr._lifecycle_tag},
         )
     pn.assert_called_once()
     assert pn.call_args.kwargs["notification_id"] == mgr._lifecycle_tag
+
+
+@pytest.mark.parametrize(
+    "event_type", [NOTIFY_EVENT_START, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_CLEAN, "pre_complete"]
+)
+def test_an_empty_list_sends_nothing(
+    make_manager: Callable[..., WashDataManager], event_type: str
+) -> None:
+    """#472: an empty list means that notification is not sent, so clearing every
+    list really stops them. No sidebar card either."""
+    mgr = make_manager({})
+    with patch("custom_components.ha_washdata.manager._pn_create") as pn:
+        assert mgr._dispatch_notification("done", event_type=event_type) is False
+    pn.assert_not_called()
 
 
 # --- Clean-laundry nag uses a separate tag ---------------------------------

@@ -49,7 +49,7 @@ _REAL_DT_NOW = dt_util.now
 PROFILES = 4  # several budgets scale with this; keep them in step
 CYCLES_PER_PROFILE = 3
 STEP_S = 60  # plug reporting cadence of the replays
-QUIET = {"notify_finish_services": [], "notify_start_services": [], "sampling_interval": 5}
+QUIET = {"notify_finish_services": [], "notify_start_services": []}
 
 
 # --------------------------------------------------------------------------- fixture

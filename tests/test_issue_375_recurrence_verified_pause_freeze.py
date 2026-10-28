@@ -83,7 +83,6 @@ OPTIONS = {
     "off_delay": 1800,
     "min_off_gap": 1800,
     "dishwasher_end_spike_quiet_release": 600,
-    "sampling_interval": 1,
     "watchdog_interval": 30,
 }
 LIVE_S = 6780.0  # the reporter's expected duration

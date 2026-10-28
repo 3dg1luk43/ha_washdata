@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Przyjazna nazwa tego urządzenia (np. „Pralka”, „Zmywarka”).",
           "device_type": "Ustawia domyślne parametry wykrywania dla tego rodzaju urządzenia.",
-          "power_sensor": "Czujnik inteligentnej wtyczki, który podaje bieżącą moc w watach.",
+          "power_sensor": "Czujnik mocy inteligentnej wtyczki (W lub kW), a nie jej licznik energii (kWh).",
           "min_power": "Odczyty powyżej tej wartości (w watach) oznaczają, że urządzenie pracuje. 2 W pasuje do większości urządzeń."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Nieoczekiwany błąd",
-      "invalid_power": "Próg mocy musi być większy niż 0"
+      "invalid_power": "Próg mocy musi być większy niż 0",
+      "power_sensor_energy": "To jest licznik energii (kWh), a nie czujnik mocy. Wybierz czujnik mocy wtyczki (W lub kW). Jeśli wtyczka go nie ma, pomocnik „Sensor pochodnej” może go utworzyć z licznika."
     },
     "abort": {
       "already_configured": "Urządzenie jest już skonfigurowane",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Nie rozpoznano jeszcze żadnego profilu.",
       "vs_typical_longer": "o {pct}% dłużej niż zwykle",
       "vs_typical_shorter": "o {pct}% krócej niż zwykle",
-      "invalid_power": "Próg mocy musi być większy niż 0"
+      "invalid_power": "Próg mocy musi być większy niż 0",
+      "power_sensor_energy": "To jest licznik energii (kWh), a nie czujnik mocy. Wybierz czujnik mocy wtyczki (W lub kW). Jeśli wtyczka go nie ma, pomocnik „Sensor pochodnej” może go utworzyć z licznika."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Suszarka",
         "washer_dryer": "Zestaw pralko-suszarki",
         "dishwasher": "Pomywaczka",
-        "air_fryer": "Frytkownica powietrzna",
-        "bread_maker": "Wypiekacz chleba",
         "pump": "Pompa/pompa ściekowa",
         "generic": "Inne (zaawansowane)",
         "other": "Urządzenie progowe"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Dowolny",
+        "completed": "Ukończony",
+        "force_stopped": "Wymuszone zatrzymanie",
+        "interrupted": "Przerwany"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Wyłączony",
+        "idle": "Bezczynny",
+        "starting": "Uruchamianie",
+        "running": "Pracuje",
+        "paused": "Wstrzymany",
+        "user_paused": "Wstrzymane przez użytkownika",
+        "ending": "Kończenie",
+        "finished": "Zakończony",
+        "anti_wrinkle": "Antygniotowy",
+        "delay_wait": "Oczekiwanie na start",
+        "interrupted": "Przerwany",
+        "force_stopped": "Wymuszone zatrzymanie",
+        "unknown": "Nieznany",
+        "clean": "Czysty"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Nie można przypisać profilu: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Cykl rozpoczęty",
+      "cycle_finished": "Cykl zakończony",
+      "cycle_ended": "Cykl zakończony (z dowolnego powodu)",
+      "anti_wrinkle_started": "Tryb antygniotowy rozpoczęty",
+      "cycle_stalled": "Cykl utknął",
+      "unload_pending": "Oczekuje na rozładunek",
+      "program_recognised": "Program rozpoznany",
+      "phase_started": "Faza rozpoczęta",
+      "finishing_soon": "Zaraz koniec",
+      "cycle_overrun": "Cykl trwa za długo",
+      "cycle_paused": "Cykl wstrzymany",
+      "cycle_resumed": "Cykl wznowiony",
+      "still_tumbling": "Nadal obraca bębnem po zakończeniu",
+      "unloaded": "Wyładowany",
+      "state_changed": "Stan zmieniony",
+      "maintenance_due": "Wymagana konserwacja",
+      "milestone_reached": "Osiągnięto kamień milowy cyklu",
+      "pump_stuck": "Pompa zablokowana"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Faza",
+      "minutes": "Minuty",
+      "percent": "Dłużej o (%)",
+      "include_detected": "Uwzględnij wykryte wstrzymania",
+      "status": "Zakończony jako",
+      "from": "Z",
+      "to": "Do",
+      "task": "Zadanie"
+    },
+    "extra_fields_descriptions": {
+      "program": "Tylko ten program, po dokładnej nazwie. Zostaw puste dla dowolnego programu.",
+      "phase": "Tylko ta faza, po nazwie. Zostaw puste dla dowolnej fazy.",
+      "minutes": "Zaraz koniec: pozostałe minuty. Nadal obraca bębnem: minuty po zakończeniu.",
+      "percent": "Procent powyżej zwykłego czasu trwania programu.",
+      "include_detected": "Wyzwól też na wstrzymaniach, które WashData wykrywa w zasilaniu, takich jak moczenie lub zacięcie.",
+      "status": "Tylko cykle zakończone w ten sposób.",
+      "from": "Tylko zmiany z tego stanu. Zostaw puste dla dowolnego.",
+      "to": "Tylko zmiany na ten stan. Zostaw puste dla dowolnego.",
+      "task": "Tylko to zadanie, po nazwie lub id. Zostaw puste dla dowolnego zadania."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Cykl rozpoczęty",
+      "description": "Wyzwala po uruchomieniu cyklu przez urządzenie."
+    },
+    "program_recognised": {
+      "name": "Program rozpoznany",
+      "description": "Wyzwala, gdy WashData rozpozna program bieżącego cyklu lub zmieni go na inny.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Tylko ten program, po dokładnej nazwie. Zostaw puste dla dowolnego programu."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Faza rozpoczęta",
+      "description": "Wyzwala, gdy bieżący cykl wchodzi w nową fazę swojego programu.",
+      "fields": {
+        "phase": {
+          "name": "Faza",
+          "description": "Tylko ta faza, po nazwie. Zostaw puste dla dowolnej fazy."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Zaraz koniec",
+      "description": "Wyzwala raz na cykl, gdy czas pozostały po raz pierwszy spada do podanej liczby minut.",
+      "fields": {
+        "minutes": {
+          "name": "Pozostałe minuty",
+          "description": "Wyzwól, gdy zostanie tyle minut lub mniej."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Cykl trwa za długo",
+      "description": "Wyzwala raz na cykl, gdy trwa dłużej niż zwykle o podany procent.",
+      "fields": {
+        "percent": {
+          "name": "Dłużej o",
+          "description": "Procent powyżej zwykłego czasu trwania programu."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Cykl wstrzymany",
+      "description": "Wyzwala po wstrzymaniu cyklu i opcjonalnie po samoistnym wstrzymaniu przez urządzenie.",
+      "fields": {
+        "include_detected": {
+          "name": "Uwzględnij wykryte wstrzymania",
+          "description": "Wyzwól też na wstrzymaniach, które WashData wykrywa w zasilaniu, takich jak moczenie lub zacięcie, nie tylko na wstrzymaniach przez Ciebie."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Cykl wznowiony",
+      "description": "Wyzwala po wznowieniu wstrzymanego cyklu.",
+      "fields": {
+        "include_detected": {
+          "name": "Uwzględnij wykryte wstrzymania",
+          "description": "Wyzwól też na wstrzymaniach, które WashData wykrywa w zasilaniu, takich jak moczenie lub zacięcie, nie tylko na wstrzymaniach przez Ciebie."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Cykl utknął",
+      "description": "Wyzwala, gdy bieżący cykl zatrzymuje się na niskim, stałym poziomie mocy."
+    },
+    "cycle_finished": {
+      "name": "Cykl zakończony",
+      "description": "Wyzwala po zakończeniu cyklu, również gdy go zatrzymasz. Nie dotyczy fałszywego startu.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Tylko ten program, po dokładnej nazwie. Zostaw puste dla dowolnego programu."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Cykl zakończony",
+      "description": "Wyzwala po zakończeniu cyklu z dowolnego powodu, włącznie z fałszywymi startami.",
+      "fields": {
+        "status": {
+          "name": "Zakończony jako",
+          "description": "Tylko cykle zakończone w ten sposób."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Tryb antygniotowy rozpoczęty",
+      "description": "Wyzwala, gdy urządzenie zaczyna obracać bębnem z praniem po zakończeniu, aby zapobiec gnieceniu."
+    },
+    "still_tumbling": {
+      "name": "Nadal obraca bębnem po zakończeniu cyklu",
+      "description": "Wyzwala raz, gdy urządzenie nadal obraca bębnem w krótkich seriach tyle minut po zakończeniu cyklu. Zatrzymuje się przy nowym cyklu lub 4 godziny po zakończeniu.",
+      "fields": {
+        "minutes": {
+          "name": "Minuty po zakończeniu",
+          "description": "Wyzwól przy pierwszym impulsie bębna przynajmniej tyle po zakończeniu."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Oczekuje na rozładunek",
+      "description": "Wyzwala, gdy cykl zakończył się, a bielizna jest nadal w środku."
+    },
+    "unloaded": {
+      "name": "Wyładowany",
+      "description": "Wyzwala, gdy bielizna zostaje wyjęta po cyklu: otwarto drzwi lub potwierdzono wyładunek."
+    },
+    "state_changed": {
+      "name": "Stan zmieniony",
+      "description": "Wyzwala, gdy zmienia się stan WashData.",
+      "fields": {
+        "from": {
+          "name": "Z",
+          "description": "Tylko zmiany z tego stanu. Zostaw puste dla dowolnego."
+        },
+        "to": {
+          "name": "Do",
+          "description": "Tylko zmiany na ten stan. Zostaw puste dla dowolnego."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Wymagana konserwacja",
+      "description": "Wyzwala, gdy zadanie konserwacyjne staje się wymagane.",
+      "fields": {
+        "task": {
+          "name": "Zadanie",
+          "description": "Tylko to zadanie, po nazwie lub id. Zostaw puste dla dowolnego zadania."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Osiągnięto kamień milowy cyklu",
+      "description": "Wyzwala, gdy łączna liczba cykli osiągnie jeden z kamieni milowych ustawionych dla powiadomień."
+    },
+    "pump_stuck": {
+      "name": "Pompa zablokowana",
+      "description": "Wyzwala, gdy pompa pracuje dłużej niż jej limit zablokowania."
     }
   }
 }

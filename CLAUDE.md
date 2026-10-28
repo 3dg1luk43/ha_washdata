@@ -11,7 +11,7 @@ rules and traps; when you need the "why" or the measured numbers, read the refer
 ## Project Overview
 
 WashData is a Home Assistant custom integration that monitors appliances (washing machines, dryers,
-washer-dryer combos, dishwashers, air fryers, bread makers, pumps) via smart power plugs. It detects
+washer-dryer combos, dishwashers, pumps) via smart power plugs. It detects
 cycles, learns power-consumption profiles per program, and estimates time remaining.
 
 Two catch-all device types: **Other (Advanced)** (`generic`, full matching/learning with neutral
@@ -421,7 +421,7 @@ arrive via [GitLocalize](https://gitlocalize.com/repo/10819) as PRs; merge them 
 Deterministic and idempotent; never drop user data (cycles, labels, corrections); add tests with
 old-schema fixtures. **Two separate layers, tested separately:**
 
-1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.11. The version
+1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.12. The version
    lives in `const.py` (`CONFIG_ENTRY_VERSION` / `CONFIG_ENTRY_MINOR_VERSION`), which the flow class,
    every stepwise block and the one-pass legacy migration all read: a bump is that constant plus one
    new migration step. Tested in `tests/test_migration_harness.py`.

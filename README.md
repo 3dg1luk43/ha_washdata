@@ -8,7 +8,7 @@
 A Home Assistant integration that watches an appliance through its smart plug. It detects each
 cycle, recognises which program ran from the power curve, and tells you how long is left.
 
-Works with washing machines, dryers, washer-dryers, dishwashers, air fryers, bread makers and pumps.
+Works with washing machines, dryers, washer-dryers, dishwashers and pumps.
 Two catch-all types cover the rest: **Other (Advanced)** (full program matching) and **Threshold
 Device** (on/off detection only).
 
@@ -29,9 +29,10 @@ Device** (on/off detection only).
 - **Pause / Resume**, door sensor support and a "laundry still inside" reminder.
 - **A full-screen panel** in the sidebar for status, cycles, programs, settings and a what-if
   Playground.
-- **Local only.** Everything runs inside Home Assistant. The optional
-  [Community Store](https://github.com/3dg1luk43/ha_washdata/wiki/Community-Store) is the only
-  online feature and is off by default.
+- **Local only.** Everything runs inside Home Assistant. The optional online features, the
+  [Community Store](https://github.com/3dg1luk43/ha_washdata/wiki/Community-Store) and the
+  [automation template library](https://github.com/3dg1luk43/ha_washdata/wiki/Automation-Templates),
+  are off by default.
 
 ## Install
 
@@ -55,7 +56,7 @@ folder and restart.
 | :--- | :--- |
 | **Name** | e.g. "Washing Machine" |
 | **Device Type** | sets the detection defaults for that kind of appliance |
-| **Power Sensor** | the plug's power entity, in **watts** |
+| **Power Sensor** | the plug's power entity (W, kW or mW), not its energy counter (kWh) |
 | **Minimum Power** | below this the appliance counts as off (default 2 W) |
 
 Everything else is in the **WashData** panel in the sidebar. Before you start, check your plug

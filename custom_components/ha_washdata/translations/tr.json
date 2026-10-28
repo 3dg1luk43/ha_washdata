@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Bu cihaz için kolay bir ad (ör. 'Çamaşır Makinesi', 'Bulaşık Makinesi').",
           "device_type": "Bu tür cihaz için algılama varsayılanlarını ayarlar.",
-          "power_sensor": "Canlı gücü watt cinsinden bildiren akıllı priz sensörü.",
+          "power_sensor": "Akıllı prizin güç sensörü (W veya kW), enerji sayacı (kWh) değil.",
           "min_power": "Bunun üzerindeki okumalar (watt) cihazın çalıştığı anlamına gelir. Çoğu cihaz için 2 W uygundur."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Beklenmeyen hata",
-      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır"
+      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır",
+      "power_sensor_energy": "Bu bir enerji sayacı (kWh), güç sensörü değil. Prizin güç sensörünü seçin (W veya kW). Prizde yoksa, Türev sensörü yardımcısı sayaçtan bir tane oluşturabilir."
     },
     "abort": {
       "already_configured": "Cihaz zaten yapılandırılmış",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Henüz eşleşen profil yok.",
       "vs_typical_longer": "olağandan %{pct} daha uzun",
       "vs_typical_shorter": "olağandan %{pct} daha kısa",
-      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır"
+      "invalid_power": "Güç eşiği 0'dan büyük olmalıdır",
+      "power_sensor_energy": "Bu bir enerji sayacı (kWh), güç sensörü değil. Prizin güç sensörünü seçin (W veya kW). Prizde yoksa, Türev sensörü yardımcısı sayaçtan bir tane oluşturabilir."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Kurutma makinesi",
         "washer_dryer": "Yıkama-Kurutma Makinesi Kombinasyonu",
         "dishwasher": "Bulaşık makinesi",
-        "air_fryer": "Hava Fritözü",
-        "bread_maker": "Ekmek Makinesi",
         "pump": "Pompa / Karter Pompası",
         "generic": "Diğer (Gelişmiş)",
         "other": "Eşik Cihazı"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Herhangi biri",
+        "completed": "Bitti",
+        "force_stopped": "Zorla Durduruldu",
+        "interrupted": "Kesintiye uğradı"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Kapalı",
+        "idle": "Boşta",
+        "starting": "Başlangıç",
+        "running": "Çalışıyor",
+        "paused": "Duraklatıldı",
+        "user_paused": "Kullanıcı tarafından duraklatıldı",
+        "ending": "Bitiş",
+        "finished": "Bitti",
+        "anti_wrinkle": "Kırışıklık Karşıtı",
+        "delay_wait": "Başlamak için Bekleniyor",
+        "interrupted": "Kesintiye uğradı",
+        "force_stopped": "Zorla Durduruldu",
+        "unknown": "Bilinmiyor",
+        "clean": "Temiz"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Profil atanamadı: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Döngü başladı",
+      "cycle_finished": "Döngü bitti",
+      "cycle_ended": "Döngü sona erdi (herhangi bir nedenle)",
+      "anti_wrinkle_started": "Kırışıklık önleme başladı",
+      "cycle_stalled": "Döngü takıldı",
+      "unload_pending": "Boşaltma bekliyor",
+      "program_recognised": "Program tanındı",
+      "phase_started": "Aşama başladı",
+      "finishing_soon": "Yakında bitiyor",
+      "cycle_overrun": "Döngü çok uzun sürüyor",
+      "cycle_paused": "Döngü duraklatıldı",
+      "cycle_resumed": "Döngü devam etti",
+      "still_tumbling": "Döngüden sonra hâlâ dönüyor",
+      "unloaded": "Boşaltıldı",
+      "state_changed": "Durum değişti",
+      "maintenance_due": "Bakım gerekiyor",
+      "milestone_reached": "Döngü kilometre taşına ulaşıldı",
+      "pump_stuck": "Pompa takıldı"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Aşama",
+      "minutes": "Dakikalar",
+      "percent": "Daha uzun (%)",
+      "include_detected": "Algılanan duraklamaları dahil et",
+      "status": "Şu şekilde bitti",
+      "from": "Nereden",
+      "to": "Nereye",
+      "task": "Görev"
+    },
+    "extra_fields_descriptions": {
+      "program": "Yalnızca bu program, tam adıyla. Herhangi bir program için boş bırakın.",
+      "phase": "Yalnızca bu aşama, adıyla. Herhangi bir aşama için boş bırakın.",
+      "minutes": "Yakında bitiyor: kalan dakikalar. Hâlâ dönüyor: bitişten sonraki dakikalar.",
+      "percent": "Programın olağan süresinin yüzde üzeri.",
+      "include_detected": "WashData'nın güçte gördüğü duraklamalar için de tetikle, örneğin ıslatma veya durma.",
+      "status": "Yalnızca bu şekilde biten döngüler.",
+      "from": "Yalnızca bu durumdan değişiklikler. Herhangi biri için boş bırakın.",
+      "to": "Yalnızca bu duruma değişiklikler. Herhangi biri için boş bırakın.",
+      "task": "Yalnızca bu görev, adı veya kimliğiyle. Herhangi bir görev için boş bırakın."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Döngü başladı",
+      "description": "Cihaz bir döngü başlattığında tetiklenir."
+    },
+    "program_recognised": {
+      "name": "Program tanındı",
+      "description": "WashData çalışan döngünün programını tanıdığında veya başka bir programa geçtiğinde tetiklenir.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Yalnızca bu program, tam adıyla. Herhangi bir program için boş bırakın."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Aşama başladı",
+      "description": "Çalışan döngü programının yeni bir aşamasına girdiğinde tetiklenir.",
+      "fields": {
+        "phase": {
+          "name": "Aşama",
+          "description": "Yalnızca bu aşama, adıyla. Herhangi bir aşama için boş bırakın."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Yakında bitiyor",
+      "description": "Kalan süre bu dakikaya ilk kez düştüğünde, döngü başına bir kez tetiklenir.",
+      "fields": {
+        "minutes": {
+          "name": "Kalan dakikalar",
+          "description": "Bu kadar veya daha az dakika kaldığında tetikle."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Döngü çok uzun sürüyor",
+      "description": "Döngü programın olağan süresinden bu kadar daha uzun sürdüğünde, döngü başına bir kez tetiklenir.",
+      "fields": {
+        "percent": {
+          "name": "Daha uzun",
+          "description": "Programın olağan süresinin yüzde üzeri."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Döngü duraklatıldı",
+      "description": "Bir döngüyü duraklatığınızda ve isteğe bağlı olarak cihaz kendi kendine durduğunda tetiklenir.",
+      "fields": {
+        "include_detected": {
+          "name": "Algılanan duraklamaları dahil et",
+          "description": "Yalnızca başlattığınız duraklamalar için değil, WashData'nın güçte gördüğü duraklamalar için de tetikle, örneğin ıslatma veya durma."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Döngü devam etti",
+      "description": "Duraklatılmış bir döngü devam ettiğinde tetiklenir.",
+      "fields": {
+        "include_detected": {
+          "name": "Algılanan duraklamaları dahil et",
+          "description": "Yalnızca başlattığınız duraklamalar için değil, WashData'nın güçte gördüğü duraklamalar için de tetikle, örneğin ıslatma veya durma."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Döngü takıldı",
+      "description": "Çalışan bir döngü düşük, sabit bir güç seviyesinde durduğunda tetiklenir."
+    },
+    "cycle_finished": {
+      "name": "Döngü bitti",
+      "description": "Bir döngü bittiğinde, siz durdursanız da tetiklenir. Yanlış başlatmada değil.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Yalnızca bu program, tam adıyla. Herhangi bir program için boş bırakın."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Döngü sona erdi (herhangi bir nedenle)",
+      "description": "Bir döngü herhangi bir nedenle sona erdiğinde, yanlış başlatmalar dahil, tetiklenir.",
+      "fields": {
+        "status": {
+          "name": "Şu şekilde bitti",
+          "description": "Yalnızca bu şekilde biten döngüler."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Kırışıklık önleme başladı",
+      "description": "Cihaz bitmiş çamaşırı kırışıklıklara karşı çevirmeye başladığında tetiklenir."
+    },
+    "still_tumbling": {
+      "name": "Döngüden sonra hâlâ dönüyor",
+      "description": "Cihaz döngü bittikten bu kadar dakika sonra kısa aralıklarla dönmeye devam ettiğinde bir kez tetiklenir. Yeni bir döngüde veya bitişten 4 saat sonra durur.",
+      "fields": {
+        "minutes": {
+          "name": "Bitişten sonraki dakikalar",
+          "description": "Bitişten en az bu kadar sonra gerçekleşen ilk tambur dönüşünde tetikle."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Boşaltma bekliyor",
+      "description": "Bir döngü bittiğinde ve çamaşır hâlâ içerideyken tetiklenir."
+    },
+    "unloaded": {
+      "name": "Boşaltıldı",
+      "description": "Çamaşır bir döngüden sonra çıkarıldığında tetiklenir: kapı açıldı veya boşaltma onaylandı."
+    },
+    "state_changed": {
+      "name": "Durum değişti",
+      "description": "WashData durumu değiştiğinde tetiklenir.",
+      "fields": {
+        "from": {
+          "name": "Nereden",
+          "description": "Yalnızca bu durumdan değişiklikler. Herhangi biri için boş bırakın."
+        },
+        "to": {
+          "name": "Nereye",
+          "description": "Yalnızca bu duruma değişiklikler. Herhangi biri için boş bırakın."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Bakım gerekiyor",
+      "description": "Bir bakım görevi vadesi geldiğinde tetiklenir.",
+      "fields": {
+        "task": {
+          "name": "Görev",
+          "description": "Yalnızca bu görev, adı veya kimliğiyle. Herhangi bir görev için boş bırakın."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Döngü kilometre taşına ulaşıldı",
+      "description": "Ömür boyu döngü sayısı bildirimler için ayarlanan kilometre taşlarından birine ulaştığında tetiklenir."
+    },
+    "pump_stuck": {
+      "name": "Pompa takıldı",
+      "description": "Bir pompa takılma sınırından daha uzun çalıştığında tetiklenir."
     }
   }
 }

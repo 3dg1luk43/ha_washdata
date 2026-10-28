@@ -43,7 +43,9 @@
     "matcher_used_one": "Potrivit cu {n} dintre ciclurile dvs.",
     "matcher_used_few": "Potrivit cu {n} dintre ciclurile dvs.",
     "matcher_used_other": "Potrivit cu {n} dintre ciclurile dvs.",
-    "matcher_used_tip": "Cicluri ale acestui aparat pe care WashData le-a asociat singur cu acest program importat. Un import care nu se potrivește niciodată s-ar putea să nu fie potrivit pentru aparatul dvs.; îl puteți elimina. Numărat local; nimic nu este trimis către magazinul comunității."
+    "matcher_used_tip": "Cicluri ale acestui aparat pe care WashData le-a asociat singur cu acest program importat. Un import care nu se potrivește niciodată s-ar putea să nu fie potrivit pentru aparatul dvs.; îl puteți elimina. Numărat local; nimic nu este trimis către magazinul comunității.",
+    "bp_installed": "Instalat",
+    "bp_installed_other": "Altă versiune instalată"
   },
   "btn": {
     "log_done_task": "Marcați ca efectuat: {task}",
@@ -89,7 +91,6 @@
     "export": "Exportați",
     "force_stop": "Oprire forțată",
     "force_stop_tip": "Termina imediat ciclul curent și marchează-l ca oprit forțat",
-    "from_template": "Din șablon ▾",
     "ignore": "Ignorați",
     "import_json": "Importați din JSON",
     "inspect": "Inspectați",
@@ -97,14 +98,11 @@
     "load_more": "Încărcați mai multe",
     "manage": "Gestionați",
     "merge": "Îmbinați",
-    "new_automation": "＋ Automatizare nouă",
     "new_group": "+ Grup nou",
     "new_group_tip": "Grupați profiluri aproape identice (aceeași formă, altă temperatură sau centrifugare) ca potrivirea să le poată deosebi.",
     "new_phase": "+ Fază nouă",
     "new_profile": "+ Profil nou",
     "new_profile_tip": "Creați un nou profil de program dintr-un ciclu etichetat existent sau o înregistrare",
-    "on_cycle_finished": "La terminarea ciclului",
-    "on_cycle_started": "La pornirea ciclului",
     "pause_cycle": "Pauză",
     "pause_cycle_tip": "Puneți în pauză ciclul în curs – aparatul va relua de unde a rămas",
     "pg_load_live": "Încarcă setările active",
@@ -205,7 +203,25 @@
     "confirmed": "Confirmat",
     "create_profile_from_gap": "Creați profil",
     "undo_import": "Anulați ultimul import",
-    "pg_rerun": "Actualizează simularea"
+    "pg_rerun": "Actualizează simularea",
+    "replace": "Înlocuiți",
+    "auto_edit_in_ha": "Editați în Home Assistant",
+    "auto_fewer_triggers": "Mai puține declanșatoare",
+    "auto_more_triggers": "Încă {count} de declanșatoare",
+    "auto_more_triggers_one": "Încă {count} declanșator",
+    "auto_more_triggers_few": "Încă {count} declanșatoare",
+    "auto_more_triggers_other": "Încă {count} de declanșatoare",
+    "auto_blank": "Automatizare goală",
+    "bp_refresh": "Căutați șabloane noi pe GitHub",
+    "bp_turn_on_online": "Activați funcțiile online",
+    "bp_add_tip": "Creează automatizarea pentru acest aparat cu setările implicite, apoi o deschide în Home Assistant",
+    "bp_add_to": "Adăugați la {device}",
+    "bp_setup_tip": "Instalează șablonul, apoi deschide Home Assistant pentru a completa restul",
+    "bp_setup_in_ha": "Configurați în Home Assistant",
+    "bp_details": "Detalii",
+    "bp_copy_yaml": "Copiați YAML-ul",
+    "bp_hide_yaml": "Ascundeți YAML-ul",
+    "bp_show_yaml": "Afișați YAML-ul"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -257,23 +273,20 @@
       "timeout": "Trebuie să depășească Durata Pompei Blocate ({ps} s) ca alarma pompei blocate să se poată declanșa prima"
     },
     "start_dur": {
-      "sampling": "Intervalul de eșantionare depășește Durata de pornire ({sdt} s); vârfurile pe un singur eșantion pot deschide un ciclu",
       "threshold": "Ar trebui să fie de cel puțin un Interval de eșantionare ({si} s) pentru a preveni pornirile false pe un singur eșantion"
-    },
-    "unmatch": {
-      "match": "Trebuie să fie peste Pragul de non-potrivire ({un})",
-      "unmatch": "Trebuie să fie sub Pragul de potrivire ({match}); altfel o potrivire confirmată este anulată instantaneu"
     },
     "cascade_toast": "Alte setări ajustate pentru consecvență: {n}",
     "suggestion_resolves": "Aplicați sugestia în așteptare ({val}) de mai jos pentru a remedia aceasta",
     "use_fix": "Folosiți {val}",
     "watchdog": {
-      "interval": "Ar trebui să fie de cel puțin 2x Intervalul de eșantionare ({si} s)",
-      "sampling": "Intervalul de eșantionare ar trebui să fie cel mult jumătate din Intervalul watchdog ({wi} s)"
+      "interval": "Ar trebui să fie de cel puțin 2x Intervalul de eșantionare ({si} s)"
     },
     "end_energy": {
       "energy": "Prea strict pentru Pragul de Oprire ({w} W) pe durata Întârzierii la Oprire ({d} s); ciclul se poate încheia doar printr-o cale de rezervă",
       "stop": "Energia de Sfârșit ({e} Wh în {d} s) permite doar {p} W"
+    },
+    "power_sensor": {
+      "energy": "Acest senzor contorizează energie ({unit}), nu putere, deci niciun ciclu nu poate fi detectat. Alegeți senzorul de putere al prizei (W sau kW)."
     }
   },
   "hdr": {
@@ -283,7 +296,6 @@
     "add_maintenance": "Adăugați eveniment de întreținere",
     "automation_delete": "Ștergeți această automatizare",
     "automation_needs_review": "Acest ciclu necesită revizuire",
-    "automation_open": "Deschideți în editorul de automatizări",
     "automation_review_this_cycle": "Revizuiți acest ciclu",
     "automations": "Automatizări",
     "clear_debug": "Curățați urmele de depanare",
@@ -301,7 +313,6 @@
     "ml_settings_card": "Setări",
     "ml_smart_learning": "Învățare inteligentă",
     "my_preferences": "Preferințele mele",
-    "no_automations": "Nicio automatizare nu face referire încă la acest dispozitiv.",
     "panel_settings": "Setări panou",
     "pg_settings_source": "Sursa setărilor",
     "phase_catalog": "Catalog de faze",
@@ -321,7 +332,15 @@
     "import_power_history": "Importați istoricul de putere",
     "service_status": "Starea întreținerii",
     "online_account_tab": "Online și comunitate",
-    "live_match_debug": "Depanare potrivire în timp real"
+    "live_match_debug": "Depanare potrivire în timp real",
+    "automations_all_tip": "Lista de automatizări din Home Assistant, filtrată după eticheta WashData. Automatizările create aici se află și în categoria WashData.",
+    "maint_done_by_program": "Efectuat automat",
+    "auto_start": "Creați o automatizare nouă",
+    "auto_yours": "Automatizările dvs.",
+    "bp_needs_online": "Biblioteca de șabloane necesită funcțiile online",
+    "bp_unreachable": "Biblioteca de șabloane nu a putut fi accesată",
+    "bp_library": "Biblioteca de șabloane",
+    "bp_settings": "Ce puteți seta"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -611,7 +630,7 @@
     "hist_reason_already_recorded": "se suprapune cu un ciclu deja înregistrat de WashData",
     "share_consent": "Confirm că aceste cicluri s-au încheiat normal, fără întreruperi",
     "show_internal": "Afișează setările interne",
-    "show_internal_tip": "Setări pe care WashData le reglează pentru dvs. (eșantionare, watchdog, cadența potrivirii, praguri). Afișate când acest dispozitiv are o valoare proprie, un conflict sau o sugestie.",
+    "show_internal_tip": "Setări pe care WashData le reglează pentru dvs. (watchdog, cadența potrivirii, praguri). Afișate când acest dispozitiv are o valoare proprie, un conflict sau o sugestie.",
     "rate_n": "{n} stele",
     "rate_quality": "Evaluați calitatea",
     "pg_autolabel": "Etichetare automată",
@@ -636,7 +655,19 @@
     "pg_obj_early": "Rata de sfârșituri anticipate",
     "pg_obj_endlag": "Întârzierea sfârșitului (mediană)",
     "pg_obj_split": "Rata de divizare",
-    "pg_sweep_cycles": "Cicluri recente"
+    "pg_sweep_cycles": "Cicluri recente",
+    "bp_yaml": "YAML-ul șablonului",
+    "automation_wd_label": "Are eticheta WashData",
+    "done_by_none": "Nedefinit",
+    "done_by_programs": "Efectuat automat de: {programs}",
+    "done_by_cycle": "Efectuat de un ciclu {program}",
+    "bp_by": "de {author}",
+    "bp_for_all": "Toate aparatele",
+    "bp_for": "Pentru",
+    "bp_needs": "Necesită",
+    "bp_needs_version": "WashData {version} sau mai nou",
+    "bp_author": "Autor",
+    "bp_required": "obligatoriu"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -735,7 +766,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Datele și setările acestui dispozitiv revin la starea de dinainte de ultimul import ({when}). Ciclurile și modificările de după se pierd.",
     "undo_import_ok": "Anulați importul",
-    "undo_import_title": "Anulați ultimul import"
+    "undo_import_title": "Anulați ultimul import",
+    "bp_replace_title": "Înlocuiți șablonul instalat?",
+    "bp_replace_library_msg": "Home Assistant are o altă versiune a șablonului \"{name}\". Îl înlocuiți cu cel din biblioteca de șabloane? Automatizările care îl folosesc se schimbă odată cu el."
   },
   "msg": {
     "custom_task_limit": "Ați atins limita de {max} sarcini.",
@@ -761,7 +794,6 @@
     "artifact_pause_detail": "Puterea a scăzut aproape la zero timp de ~{n}s, apoi a revenit. Probabil ușa a fost deschisă sau ciclul a fost pus pe pauză.",
     "artifact_spike_detail": "A depășit banda de putere obișnuită timp de ~{n}s.",
     "auto_label_intro": "Atribuiți profiluri ciclurilor neetichetate a căror încredere de potrivire depășește pragul.",
-    "automations_intro": "WashData declanșează evenimente {start} / {end} și expune entități, astfel că notificările și acțiunile sunt cel mai bine construite ca automatizări normale Home Assistant. Automatizările care utilizează acest dispozitiv apar mai jos.",
     "cleanup_intro": "Toate ciclurile etichetate suprapuse. Bifați valorile aberante, apoi eliminați-le eticheta (rămân în istoric, dar nu mai modelează acest profil) sau ștergeți-le.",
     "clear_debug_hint": "Eliminați datele de depanare stocate pentru a elibera spațiu.",
     "collecting_data": "Se colectează date. Cicluri încă necesare înainte ca reglajul fin să poată începe: {need} ({current}/{min}).",
@@ -935,7 +967,7 @@
     "merge_no_imports": "Înregistrările importate nu pot fi îmbinate într-un ciclu real. Deselectați-le pentru a le îmbina.",
     "store_enable_hint": "Activați funcțiile online în Preferințe > Online și comunitate pentru a răsfoi și importa cicluri de referință ale comunității.",
     "store_share_intro": "Încărcați acest ciclu de referință pentru ca alți utilizatori cu același aparat să îl poată folosi. Este examinat înainte de a apărea public.",
-    "online_intro_global": "Răsfoiți și partajați înregistrări de referință cu alți utilizatori WashData. O conexiune acoperă toate dispozitivele dvs. WashData; marca și modelul se setează pe dispozitiv în De bază. Funcțiile online sunt oprite până le activați.",
+    "online_intro_global": "Răsfoiți și partajați înregistrări de referință cu alți utilizatori WashData și folosiți biblioteca de șabloane de automatizări. O conexiune acoperă toate dispozitivele dvs. WashData; marca și modelul se setează pe dispozitiv în De bază. Funcțiile online sunt oprite până le activați.",
     "online_unavailable": "Funcțiile online nu sunt disponibile pe acest server.",
     "store_picker_offline": "Activați funcțiile online din pictograma de setări pentru a alege din catalogul comunității.",
     "pick_brand_first": "Alegeți mai întâi o marcă de aparat.",
@@ -1007,10 +1039,6 @@
     "pg_label_yes": "Ar fi etichetat \"{name}\" la sfârșitul ciclului",
     "pg_label_no": "Ar solicita revizuire: {reason}",
     "live_match_debug_tip": "Încredere: cât de bine se potrivește curba de putere curentă cu profilul candidat principal (0-100%). Ambiguu: cei mai buni doi candidați au scoruri la mai puțin de 5% unul de altul; eticheta rămâne incertă până la finalul ciclului.",
-    "automation_alias_started": "{device}: ciclu pornit",
-    "automation_alias_finished": "{device}: ciclu încheiat",
-    "automation_desc_started": "Rulează când {device} pornește un ciclu. Adăugați acțiunile dvs. (notificare, lumini, ...).",
-    "automation_desc_finished": "Rulează când {device} încheie un ciclu. Adăugați acțiunile dvs. (notificare, lumini, ...).",
     "feedback_detected": "WashData a detectat: {name}",
     "import_undo_hint": "Se păstrează un punct de restaurare de dinainte de ultimul import ({when}): {profiles} profil(uri) și {cycles} ciclu(ri).",
     "replace_undo_hint": "Mai întâi se salvează un punct de restaurare, astfel încât puteți anula acest import din Export / Import.",
@@ -1031,27 +1059,32 @@
     "pg_sweep_n_cycles_one": "pe {count} ciclu",
     "pg_sweep_n_cycles_few": "pe {count} cicluri",
     "pg_sweep_n_cycles_other": "pe {count} de cicluri",
-    "pg_task_busy": "O rulare Testează pe istoric sau Optimizează este deja în desfășurare pentru acest dispozitiv. Așteptați să se termine sau anulați-o."
+    "pg_task_busy": "O rulare Testează pe istoric sau Optimizează este deja în desfășurare pentru acest dispozitiv. Așteptați să se termine sau anulați-o.",
+    "bp_admin_only": "Un administrator instalează șabloanele.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Creată de WashData pentru {device}. Adăugați acțiunile dvs. (notificare, lumini, ...).",
+    "automation_alias_new": "{device}: automatizare nouă",
+    "maint_done_by_program_intro": "O sarcină contează ca efectuată când se termină un ciclu al unuia dintre programele sale, de exemplu curățarea tamburului când rulează Bumbac 90. Contează doar ciclurile de care WashData este sigur sau pe care le-ați ales.",
+    "auto_none": "Nicio automatizare nu folosește încă acest aparat.",
+    "auto_start_hint": "Se deschide în editorul de automatizări din Home Assistant, cu acest aparat deja completat.",
+    "auto_yours_intro": "Automatizări Home Assistant care reacționează la acest aparat.",
+    "bp_needs_online": "Șabloanele se descarcă de pe GitHub, așa că biblioteca funcționează doar cu funcțiile online activate. Funcțiile online includ și magazinul comunității.",
+    "bp_needs_online_admin": "Un administrator le poate activa din meniul cu roată dințată, la Online și comunitate.",
+    "bp_stale": "GitHub nu a putut fi accesat acum. Acestea sunt șabloanele descărcate anterior.",
+    "bp_none_yet": "Încă nu există șabloane pentru acest tip de aparat. Partajați-l pe primul.",
+    "bp_unreachable": "Se descarcă de pe GitHub. Verificați dacă Home Assistant are acces la internet, apoi încercați din nou.",
+    "bp_library_intro": "Automatizări gata făcute, partajate de utilizatorii WashData pe GitHub și verificate înainte de a fi listate. Disponibilă doar cu funcțiile online activate.",
+    "bp_needs_version": "Necesită WashData {version} sau mai nou."
   },
   "phase_desc": {
-    "anti_crease": "Tumblări scurte ocazionale după finalizare pentru a reduce șifonarea.",
-    "anti_wrinkle": "Tumblare periodică post-ciclu pentru a reduce șifonarea.",
-    "baking": "Rezistență la temperatură înaltă activă pentru formarea cojii și a miezului.",
-    "cooking": "Faza principală de gătire, cu rezistența și ventilatorul active.",
-    "cool_down": "Tumblare fără căldură aproape de sfârșitul ciclului.",
-    "cool_down_af": "Răcire doar cu ventilatorul după încălzire.",
+    "anti_crease": "Rotiri scurte ocazionale ale tamburului după finalizare pentru a reduce șifonarea.",
+    "anti_wrinkle": "Rotire periodică a tamburului post-ciclu pentru a reduce șifonarea.",
+    "cool_down": "Rotirea tamburului fără căldură aproape de sfârșitul ciclului.",
     "drain_and_switch": "Perioada de tranziție de la modul de spălare la modul de uscare.",
     "dry": "Etapă de uscare folosind rezistența și/sau căldura reziduală.",
-    "drying": "Perioada principală de tumblare cu căldură.",
+    "drying": "Perioada principală de rotire a tamburului cu căldură.",
     "heat_up": "Încălzirea inițială a rezistentei înainte de a începe uscarea completă.",
-    "keep_warm": "Etapă cu căldură redusă pentru a păstra mâncarea caldă.",
-    "keep_warm_bm": "Etapă cu căldură redusă pentru a păstra pâinea caldă după coacere.",
-    "kneading": "Motorul amestecă și frământă aluatul. Consum mare.",
-    "pause_af": "Pauză scurtă pentru scuturare sau verificare.",
-    "pre_heat": "Încălzirea inițială a camerei înainte de gătirea propriu-zisă.",
     "pre_rinse": "Pulverizare inițială înainte de spălarea cu detergent.",
-    "proving": "Dospire la căldură redusă, ca drojdia să fermenteze și aluatul să crească.",
-    "resting": "Pauză scurtă cu putere redusă între frământări, pentru relaxarea glutenului.",
     "pre_wash": "Înmuiere inițială sau pre-tratament înainte de spălarea principală.",
     "rinse": "Etapă de clătire cu apă curată. Această fază se poate repeta de mai multe ori.",
     "sanitize": "Etapă de curățare la temperatură înaltă pentru programele de igienizare.",
@@ -1144,10 +1177,6 @@
       "doc": "Păstrați în ciclul încheiat impulsurile scurte de rotire cu putere redusă ale unui uscător de după faza principală de încălzire, în loc să fie citite ca cicluri noi.",
       "label": "Activați Detectarea Anti-Șifonare"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "În modul anti-șifonare, puterea sub această valoare contează ca liniște între impulsurile de rotire, iar o liniște mai lungă decât Interval Maxim Între Impulsuri încheie modul. Dacă Prag de Oprire este mai mare, se folosește acela, deci această setare contează doar peste Prag de Oprire.",
-      "label": "Prag Putere de Ieșire"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Cât timp poate sta uscătorul liniștit între impulsurile de rotire înainte ca modul anti-șifonare să se încheie. Setați-l peste cea mai lungă pauză a uscătorului dvs., altfel impulsurile ulterioare sunt citite ca porniri false.",
       "label": "Interval Maxim Între Impulsuri"
@@ -1196,10 +1225,6 @@
       "doc": "Senzor de ușă opțional. Arată când aparatul a fost deschis pentru descărcare după un ciclu.",
       "label": "Entitate Senzor Ușă"
     },
-    "duration_tolerance": {
-      "doc": "Doar pentru învățare: un ciclu în limita a +/-X% din durata estimată contează ca estimare bună. Nu afectează potrivirea.",
-      "label": "Toleranță Estimare"
-    },
     "enable_ml_models": {
       "doc": "Folosiți un model antrenat pe această mașină pentru a prezice energia și costul unui ciclu în desfășurare și lăsați un program bine cunoscut care se oprește neobișnuit de devreme să se încheie fără întreaga întârziere la oprire. Oprit: doar logică bazată pe putere.",
       "label": "Aplicați modele inteligente în timpul unui ciclu"
@@ -1225,12 +1250,8 @@
       "label": "Expuneți Entitățile de Depanare"
     },
     "external_end_trigger": {
-      "doc": "Senzor binar a cărui schimbare marchează finalul ciclului (de ex. un contact „gata” sau altă integrare).",
+      "doc": "Senzor binar opțional care termină ciclul când se activează, pe lângă detecția bazată pe consum (de ex. un contact \"gata\" sau altă integrare). Lasă gol pentru a-l dezactiva.",
       "label": "Entitate Declanșator Extern"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Lăsați un senzor binar să semnaleze finalul unui ciclu, pe lângă detectarea bazată pe putere.",
-      "label": "Activați Declanșatorul Extern de Sfârșit"
     },
     "external_end_trigger_inverted": {
       "doc": "Considerați trecerea senzorului pe OPRIT (nu pe PORNIT) drept semnal de final.",
@@ -1255,18 +1276,6 @@
     "ml_training_enabled": {
       "doc": "Reantrenați din când în când modelul de energie pe ciclurile încheiate ale acestei mașini. Un model nou este păstrat doar dacă bate estimarea simplă pe ciclurile de test.",
       "label": "Învățați de la această mașină"
-    },
-    "ml_training_hour": {
-      "doc": "Ora din zi (0-23) pentru antrenarea de noapte. Alegeți o oră liniștită, de ex. 2.",
-      "label": "Învățați la ora"
-    },
-    "ml_training_interval_days": {
-      "doc": "Numărul minim de zile între două reantrenări.",
-      "label": "Verificați cel mult la fiecare"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Așteptați cel puțin acest număr de cicluri înregistrate înainte de antrenare.",
-      "label": "Cicluri necesare mai întâi"
     },
     "name": {
       "doc": "Numele afișat în Home Assistant pentru acest dispozitiv.",
@@ -1300,16 +1309,12 @@
       "doc": "Servicii notify.* apelate când un ciclu se încheie. Lăsați gol pentru niciunul.",
       "label": "Servicii de Finalizare"
     },
-    "notify_fire_events": {
-      "doc": "Declanșați și evenimente ha_washdata_* la pornirea și la finalul ciclului, pentru propriile automatizări.",
-      "label": "Declanșați Evenimente HA pentru Notificări"
-    },
     "notify_icon": {
       "doc": "Pictogramă mică pe notificare (de ex. mdi:washing-machine). Se trimite doar către ținte mobile_app, nu către grupuri notify. Pe iOS înlocuiește pictograma aplicației și necesită aplicația companion 2026.8 sau mai nouă. Gol: implicitul platformei.",
       "label": "Pictogramă Notificare"
     },
     "notify_live_chronometer": {
-      "doc": "Afișați o numărătoare inversă în desfășurare în notificare (unde este acceptată) în loc de o estimare fixă.",
+      "doc": "Android: adaugă o numărătoare inversă până la finalizarea estimată lângă textul notificării. Folosiți {finish_time} în Mesaj Pre-Finalizare pentru a afișa ora de finalizare în loc de o a doua numărătoare.",
       "label": "Utilizați Cronometru în Timp Real"
     },
     "notify_live_interval_seconds": {
@@ -1333,7 +1338,7 @@
       "label": "Persoane (pentru Doar Când Acasă)"
     },
     "notify_pre_complete_message": {
-      "doc": "Textul fiecărei actualizări de progres în timp real. Variabile de șablon: {device}, {program}, {minutes} (minute rămase). Cu orice altă variabilă se folosește textul implicit.",
+      "doc": "Textul fiecărei actualizări de progres în timp real. Variabile de șablon: {device}, {program}, {minutes} (minute rămase), {finish_time} (ora estimată de finalizare, ex. 14:30). Cu orice altă variabilă se folosește textul implicit.",
       "label": "Mesaj Pre-Finalizare"
     },
     "notify_reminder_message": {
@@ -1381,7 +1386,7 @@
       "label": "Prag Oprire Alimentare"
     },
     "power_sensor": {
-      "doc": "Senzorul care raportează puterea curentă a acestui aparat în wați (de ex. sensor.washer_power). Toată detectarea se bazează pe el.",
+      "doc": "Senzorul care raportează puterea curentă a acestui aparat în W sau kW (de ex. sensor.washer_power), nu contorul său de energie (kWh). Toată detectarea se bazează pe el.",
       "label": "Senzor de Putere"
     },
     "profile_match_interval": {
@@ -1400,10 +1405,6 @@
       "doc": "Scorul de potrivire în timp real de care are nevoie un ciclu înainte ca Terminarea inteligentă sau finalul anti-șifonare să îl poată încheia mai devreme. Nu schimbă programul afișat. Creșteți-l dacă potrivirile slabe încheie ciclurile prea devreme; scădeți-l dacă potrivirile clare așteaptă întreaga întârziere la oprire.",
       "label": "Prag de Potrivire"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Dacă scorul de potrivire în timp real scade sub această valoare, presupunerea curentă de program este ștearsă. Păstrați-l puțin sub Pragul de Potrivire, ca o scădere scurtă să nu o reseteze.",
-      "label": "Prag de Nepotrivire"
-    },
     "progress_reset_delay": {
       "doc": "După un ciclu, păstrați progresul la 100% atât timp înainte de revenirea la Inactiv.",
       "label": "Întârziere Resetare Progres"
@@ -1411,10 +1412,6 @@
     "pump_stuck_duration": {
       "doc": "Cât timp poate funcționa o pompă fără oprire înainte de declanșarea evenimentului de pompă blocată.",
       "label": "Durata Pompei Blocate"
-    },
-    "sampling_interval": {
-      "doc": "Timpul minim între citirile procesate. Citirile care sosesc mai devreme sunt sărite (citirile scăzute în timpul unui ciclu sunt păstrate mereu). Setați-l la intervalul de raportare al prizei dvs. sau mai jos; o valoare mai mare doar aruncă citiri.",
-      "label": "Interval de Eșantionare"
     },
     "save_debug_traces": {
       "doc": "Salvați și datele de depanare ale potrivirii (scorurile fiecărui candidat) cu fiecare ciclu, pentru depanare. Adaugă aproximativ 20 KB pe ciclu.",
@@ -1586,9 +1583,6 @@
     "services": {
       "label": "Servicii"
     },
-    "signal_processing": {
-      "label": "Procesare Semnal"
-    },
     "thresholds_gap": {
       "label": "Praguri și Pauză"
     },
@@ -1661,7 +1655,8 @@
     "subtab_profiles": "Profiluri",
     "maintenance": "Întreținere",
     "playground": "Zonă de test",
-    "store": "Magazin"
+    "store": "Magazin",
+    "automations": "Automatizări"
   },
   "tag": {
     "early_end": "Sfârșit anticipat",
@@ -1830,7 +1825,14 @@
     "auto_label_done": "Etichetare automată finalizată: {count} de cicluri etichetate, neetichetate: {skipped}.",
     "auto_label_done_one": "Etichetare automată finalizată: {count} ciclu etichetat, neetichetate: {skipped}.",
     "auto_label_done_few": "Etichetare automată finalizată: {count} cicluri etichetate, neetichetate: {skipped}.",
-    "auto_label_done_other": "Etichetare automată finalizată: {count} de cicluri etichetate, neetichetate: {skipped}."
+    "auto_label_done_other": "Etichetare automată finalizată: {count} de cicluri etichetate, neetichetate: {skipped}.",
+    "bp_install_failed": "Nu s-a putut instala șablonul: {error}",
+    "bp_installed_finish": "Șablon instalat. Completați restul în Home Assistant.",
+    "bp_automation_failed": "Șablonul este instalat, dar automatizarea nu a putut fi creată: {error}",
+    "bp_automation_created": "Automatizare creată cu setările implicite; deschidere în curs",
+    "copied": "Copiat",
+    "copy_failed": "Copiere eșuată. Selectați textul și copiați-l manual.",
+    "automation_label_failed": "Automatizare creată, dar eticheta sau categoria WashData nu a putut fi adăugată."
   },
   "suggestion": {
     "observed_label": "Observat",
@@ -1838,10 +1840,6 @@
       "auto_label_confidence": {
         "higher": "Etichetează mai puține cicluri automat; mai multe merg la revizuire",
         "lower": "Etichetează mai multe cicluri automat; unele pot fi identificate greșit"
-      },
-      "duration_tolerance": {
-        "higher": "Acceptă un interval de durată mai larg – potrivire mai flexibilă",
-        "lower": "Necesită durată mai apropiată – mai strict, poate respinge cicluri neobișnuite"
       },
       "end_energy_threshold": {
         "higher": "Închide doar ciclurile care au consumat energie substanțială",
@@ -1944,7 +1942,6 @@
     "smart_termination_duration_ratio": "Fracțiunea din durata medie a programului pe care un ciclu trebuie să o atingă înainte ca Terminarea inteligentă să îl poată încheia mai devreme; reduceți-o dacă duratele variază",
     "anti_crease_finalize_ratio": "Fracțiunea din durata medie a programului pe care un ciclu trebuie să o atingă înainte ca finalul anti-șifonare să îl poată încheia; reduceți-o la uscătoare, lăsați mașinile de spălat la implicit",
     "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
-    "anti_wrinkle_exit_power": "Nivelul considerat liniște între impulsurile de rotire; are efect doar peste Prag de Oprire",
     "anti_wrinkle_idle_timeout": "Timp de liniște permis între două impulsuri de rotire înainte ca modul anti-șifonare să se încheie",
     "anti_wrinkle_max_duration": "Un impuls mai lung decât acesta încheie modul anti-șifonare și deschide un ciclu nou",
     "anti_wrinkle_max_power": "Un impuls peste această valoare încheie modul anti-șifonare și deschide un ciclu nou",
@@ -2033,7 +2030,11 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter pe GitHub ↗",
-    "manual": "Manual ↗"
+    "manual": "Manual ↗",
+    "automations_all": "Toate automatizările WashData din Home Assistant",
+    "bp_share_pr": "Partajați propriul șablon: deschideți un pull request pe GitHub",
+    "bp_view_github": "Vedeți pe GitHub",
+    "bp_import_my_ha": "Importați cu My Home Assistant"
   },
   "tip": {
     "add_brand": "Marca nu este listată? Adăugați-o în catalogul comunității",
@@ -2201,16 +2202,11 @@
     "kept": "păstrat",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "nepotrivit",
     "no_updates": "fără actualizări",
     "off_delay_wait": "întârziere oprire",
     "off_gap": "pauză",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "interval tipic de citire",
     "sensor_offline": "senzor offline: oprire forțată",
-    "si": "IE",
     "spike_ignored": "vârf ignorat",
     "spike_ignored_short": "vârf: ignorat",
     "start": "pornire",
@@ -2219,5 +2215,61 @@
     "thr": "prag",
     "too_short": "prea scurt",
     "tumble_kept": "rotiri păstrate"
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Ciclu pornit"
+    },
+    "program_recognised": {
+      "name": "Program recunoscut"
+    },
+    "phase_started": {
+      "name": "Fază pornită"
+    },
+    "finishing_soon": {
+      "name": "Se termină curând"
+    },
+    "cycle_overrun": {
+      "name": "Ciclu în depășire"
+    },
+    "cycle_paused": {
+      "name": "Ciclu în pauză"
+    },
+    "cycle_resumed": {
+      "name": "Ciclu reluat"
+    },
+    "cycle_stalled": {
+      "name": "Ciclu blocat"
+    },
+    "cycle_finished": {
+      "name": "Ciclu terminat"
+    },
+    "cycle_ended": {
+      "name": "Ciclu încheiat (orice motiv)"
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-șifonare pornit"
+    },
+    "still_tumbling": {
+      "name": "Încă se rotește după ciclu"
+    },
+    "unload_pending": {
+      "name": "Descărcare în așteptare"
+    },
+    "unloaded": {
+      "name": "Descărcat"
+    },
+    "state_changed": {
+      "name": "Stare schimbată"
+    },
+    "maintenance_due": {
+      "name": "Mentenanță necesară"
+    },
+    "milestone_reached": {
+      "name": "Reper de cicluri atins"
+    },
+    "pump_stuck": {
+      "name": "Pompă blocată"
+    }
   }
 }

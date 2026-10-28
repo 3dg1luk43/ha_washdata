@@ -37,7 +37,6 @@ from typing import Any
 from .const import (
     CONF_ANTI_CREASE_FINALIZE_RATIO,
     CONF_ANTI_WRINKLE_ENABLED,
-    CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_IDLE_TIMEOUT,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_MAX_POWER,
@@ -67,7 +66,6 @@ from .const import (
     CONF_STOP_THRESHOLD_W,
     DEFAULT_ANTI_CREASE_FINALIZE_RATIO,
     DEFAULT_ANTI_WRINKLE_ENABLED,
-    DEFAULT_ANTI_WRINKLE_EXIT_POWER,
     DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT,
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
@@ -227,9 +225,6 @@ def build_detector_config(
         ),
         anti_wrinkle_max_duration=float(
             opt(CONF_ANTI_WRINKLE_MAX_DURATION, DEFAULT_ANTI_WRINKLE_MAX_DURATION)
-        ),
-        anti_wrinkle_exit_power=float(
-            opt(CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER)
         ),
         anti_wrinkle_idle_timeout=float(
             opt(CONF_ANTI_WRINKLE_IDLE_TIMEOUT, DEFAULT_ANTI_WRINKLE_IDLE_TIMEOUT)

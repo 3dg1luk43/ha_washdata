@@ -310,4 +310,4 @@ class WashDataMarkUnloadedButton(ButtonEntity):
 
     async def async_press(self) -> None:
         """Handle the button press."""
-        self._manager.mark_unloaded("mark unloaded button")
+        self._manager.mark_unloaded("mark unloaded button", how="button")

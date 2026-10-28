@@ -38,6 +38,7 @@ from .const import (
     DEFAULT_MIN_POWER,
     DEFAULT_DEVICE_TYPE,
     DEVICE_TYPES,
+    is_energy_counter,
 )
 
 
@@ -61,6 +62,19 @@ def _resolve_options_first(
     DEVICE_TYPES.
     """
     return entry.options.get(key, entry.data.get(key, default))
+
+
+def _power_sensor_error(hass: Any, entity_id: Any) -> str | None:
+    """``power_sensor_energy`` when the chosen sensor is an energy counter (#481).
+
+    A kWh counter never reads as power, so every cycle would go undetected. Only
+    positive evidence refuses: a sensor Home Assistant has not loaded is accepted.
+    """
+    states = getattr(hass, "states", None)
+    state = states.get(entity_id) if states is not None and isinstance(entity_id, str) else None
+    if state is not None and is_energy_counter(getattr(state, "attributes", None)):
+        return "power_sensor_energy"
+    return None
 
 
 def _merge_structural_options(
@@ -175,6 +189,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
         try:
             if user_input[CONF_MIN_POWER] <= 0:
                 errors[CONF_MIN_POWER] = "invalid_power"
+            if sensor_error := _power_sensor_error(self.hass, user_input.get(CONF_POWER_SENSOR)):
+                errors[CONF_POWER_SENSOR] = sensor_error
         except Exception:  # pylint: disable=broad-exception-caught
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
@@ -198,6 +214,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
             try:
                 if user_input[CONF_MIN_POWER] <= 0:
                     errors[CONF_MIN_POWER] = "invalid_power"
+                if sensor_error := _power_sensor_error(
+                    self.hass, user_input.get(CONF_POWER_SENSOR)
+                ):
+                    errors[CONF_POWER_SENSOR] = sensor_error
             except Exception:  # pylint: disable=broad-exception-caught
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -263,6 +283,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             if user_input.get(CONF_MIN_POWER, 0) <= 0:
                 errors[CONF_MIN_POWER] = "invalid_power"
+            if sensor_error := _power_sensor_error(self.hass, user_input.get(CONF_POWER_SENSOR)):
+                errors[CONF_POWER_SENSOR] = sensor_error
             if not errors:
                 new_name = str(user_input.get(CONF_NAME, "")).strip()
                 new_options = _merge_structural_options(entry, user_input)

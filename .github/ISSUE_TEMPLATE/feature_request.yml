@@ -48,14 +48,9 @@ body:
         - Dryer
         - Washer-Dryer Combo
         - Dishwasher
-        - Air Fryer
-        - Bread Maker
         - Pump / Sump Pump
         - Other (Advanced)
-        - Coffee Machine (deprecated)
-        - Electric Vehicle (EV) (deprecated)
-        - Heat Pump (deprecated)
-        - Oven (deprecated)
+        - Threshold Device
         - Other
     validations:
       required: true

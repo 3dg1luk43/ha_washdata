@@ -32,11 +32,9 @@ import homeassistant.util.dt as dt_util
 
 from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
     CONF_LEARNING_CONFIDENCE,
     CONF_PROFILE_MIN_WARMUP_CYCLES,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
-    DEFAULT_DURATION_TOLERANCE,
     DEFAULT_LEARNING_CONFIDENCE,
     MIN_SUGGESTION_COOLDOWN_CYCLES,
     MIN_SUGGESTION_REL_DELTA,
@@ -595,9 +593,6 @@ class LearningManager:
         learning_conf = entry.options.get(
             CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE
         )
-        duration_tol = entry.options.get(
-            CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE
-        )
 
         # A4: Warmup mode — profiles with fewer than CONF_PROFILE_MIN_WARMUP_CYCLES labeled
         # cycles skip auto-labeling entirely and always request user confirmation.
@@ -737,7 +732,6 @@ class LearningManager:
             confidence=confidence,
             estimated_duration=predicted_duration,
             actual_duration=actual_duration,
-            duration_tolerance=duration_tol,
             match_result=match_result,
         )
 
@@ -753,16 +747,11 @@ class LearningManager:
         confidence: float,
         estimated_duration: Optional[float],
         actual_duration: float,
-        duration_tolerance: float = 0.10,
         match_result: Any | None = None,
     ) -> None:
         """Request user verification for a detected cycle."""
         duration_match_pct = (
             (actual_duration / estimated_duration * 100) if estimated_duration else 0
-        )
-        tolerance_pct = duration_tolerance * 100
-        is_close_match = (
-            estimated_duration and abs(duration_match_pct - 100) <= tolerance_pct
         )
 
         # Extract match ranking from MatchResult if available (for UI visualization)
@@ -786,7 +775,8 @@ class LearningManager:
             "estimated_duration": estimated_duration,
             "actual_duration": actual_duration,
             "duration_match_pct": duration_match_pct,
-            "is_close_match": is_close_match,
+            # (No `is_close_match` since 0.5.9: nothing read it, and its tolerance
+            # was the retired duration_tolerance setting. Older records keep it.)
             "created_at": dt_util.now().isoformat(),
             "user_response": None,
             "expires_at": None,

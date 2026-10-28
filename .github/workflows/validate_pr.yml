@@ -188,17 +188,55 @@ jobs:
             const STRINGS_SOURCE = 'custom_components/ha_washdata/strings.json';
             const isLocalizationFile = (f) => f.startsWith(TRANSLATIONS_DIR) || f === STRINGS_SOURCE;
 
-            let isLocalizationPR = false;
+
+            let exemptReason = null;
             try {
               const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: prNumber, per_page: 100 });
-              const filenames = files.map(f => f.filename);
-              isLocalizationPR = filenames.length > 0 && filenames.every(isLocalizationFile);
+              // A rename counts from both ends: moving a file INTO translations/ is
+              // still a change outside it.
+              const filenames = files.flatMap(f => [f.filename, f.previous_filename].filter(Boolean));
+              if (filenames.length > 0 && filenames.every(isLocalizationFile)) {
+                exemptReason = 'Localization-only PR (translations/strings.json)';
+              }
             } catch (e) {
               console.warn(`Could not fetch changed files: ${e.message}`);
             }
 
-            if (isLocalizationPR) {
-              console.log('Localization-only PR (translations/strings.json) - skipping issue link check.');
+            if (exemptReason) {
+              // A PR flagged before it was narrowed to exempt files still carries the
+              // auto-close label and notice; clear them, or the scheduled closer
+              // closes an exempt PR three days later. A 404 means the label was not
+              // there. Any other error is retried; if a label is still on after that,
+              // the notice stays (the contributor keeps the warning) and the run
+              // fails, so it shows on the PR and can be re-run.
+              let labelsCleared = true;
+              for (const name of ['needs accepted issue', 'awaiting maintainer']) {
+                let removed = false;
+                for (let attempt = 1; attempt <= 3 && !removed; attempt++) {
+                  try {
+                    await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name });
+                    removed = true;
+                  } catch (e) {
+                    if (e.status === 404) {
+                      removed = true;
+                    } else {
+                      console.warn(`Removing label "${name}" failed (attempt ${attempt}): ${e.message}`);
+                      if (attempt < 3) await new Promise(r => setTimeout(r, 2000 * attempt));
+                    }
+                  }
+                }
+                if (!removed) labelsCleared = false;
+              }
+              if (!labelsCleared) {
+                core.setFailed('Could not remove the auto-close label from this exempt PR. The notice is kept; re-run this check.');
+                return;
+              }
+              const prComments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: prNumber, per_page: 100 });
+              const notice = prComments.find(c => c.body && c.body.includes(BOT_MARKER));
+              if (notice) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: notice.id });
+              }
+              console.log(`${exemptReason} - skipping issue link check.`);
               return;
             }
 

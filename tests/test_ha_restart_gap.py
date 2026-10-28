@@ -112,8 +112,6 @@ class TestRestartGapStoredAtCycleEnd:
         mgr.profile_store.compute_envelope_conformance = MagicMock(return_value=None)
         mgr.learning_manager = MagicMock()
         mgr.learning_manager.process_cycle_end = MagicMock()
-        # Disable auto-label path so async_match_profile is not called unconditionally
-        mgr._auto_label_confidence = 0
 
     @pytest.mark.asyncio
     async def test_restart_gap_stored_in_cycle_data(self, manager: WashDataManager) -> None:

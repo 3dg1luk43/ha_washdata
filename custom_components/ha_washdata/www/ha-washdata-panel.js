@@ -48,6 +48,94 @@ const _PG_MAX_BATCH_CYCLES = 50;
 // The external integration the Maintenance section points to (#461). It reads the
 // cycle-count sensor (translation_key "cycle_count", unit "cycles"), a public contract.
 const _MAINTENANCE_SUPPORTER_URL = 'https://github.com/iluebbe/maintenance_supporter';
+// Where contributors learn to share an automation template (#478, by pull request).
+// The automation template library (#478): its own repository, so a template PR
+// never lands on the integration. The backend downloads it (online features only).
+const _AUTOMATION_LIBRARY_URL = 'https://github.com/3dg1luk43/washdata-automations';
+// What "Share your own template" opens in GitHub's file editor.
+const _BP_SKELETON = `# One template per pull request; the library's list is generated after the merge.
+# Rules: ${_AUTOMATION_LIBRARY_URL}/blob/main/CONTRIBUTING.md
+# icon: plug
+# device_types: [dryer, washer_dryer]
+# tags: [smart plug]
+blueprint:
+  name: "WashData: what it does"
+  description: >-
+    One or two sentences: what it does and when.
+
+
+    Needs WashData 0.5.9 or newer.
+  domain: automation
+  author: Your name or GitHub handle
+  input:
+    washdata_device:
+      name: Appliance
+      selector:
+        device:
+          filter:
+            - integration: ha_washdata
+
+triggers:
+  - trigger: ha_washdata.cycle_finished
+    target:
+      device_id: !input washdata_device
+
+actions: []
+`;
+// The quick-start triggers shown before "more triggers", in this order.
+const _AUTO_FEATURED_TRIGGERS = ['cycle_finished', 'cycle_started', 'finishing_soon', 'unload_pending', 'still_tumbling', 'pump_stuck'];
+// Template tile icons (the template's "# icon:" line; blueprint_catalog.ICONS) and the
+// tab's own glyphs: Material Design Icons paths (@mdi/js 7.4.47, Apache-2.0).
+const _AUTO_ICON_PATHS = {
+  plug: 'M16 7V3H14V7H10V3H8V7C7 7 6 8 6 9V14.5L9.5 18V21H14.5V18L18 14.5V9C18 8 17 7 16 7M16 13.67L13.09 16.59L12.67 17H11.33L10.92 16.59L8 13.67V9.09C8 9.06 8.06 9 8.09 9H15.92C15.95 9 16 9.06 16 9.09V13.67Z',
+  light: 'M12,2A7,7 0 0,1 19,9C19,11.38 17.81,13.47 16,14.74V17A1,1 0 0,1 15,18H9A1,1 0 0,1 8,17V14.74C6.19,13.47 5,11.38 5,9A7,7 0 0,1 12,2M9,21V20H15V21A1,1 0 0,1 14,22H10A1,1 0 0,1 9,21M12,4A5,5 0 0,0 7,9C7,11.05 8.23,12.81 10,13.58V16H14V13.58C15.77,12.81 17,11.05 17,9A5,5 0 0,0 12,4Z',
+  bell: 'M10 21H14C14 22.1 13.1 23 12 23S10 22.1 10 21M21 19V20H3V19L5 17V11C5 7.9 7 5.2 10 4.3V4C10 2.9 10.9 2 12 2S14 2.9 14 4V4.3C17 5.2 19 7.9 19 11V17L21 19M17 11C17 8.2 14.8 6 12 6S7 8.2 7 11V18H17V11Z',
+  dryer: 'M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M7,4A1,1 0 0,0 6,5A1,1 0 0,0 7,6A1,1 0 0,0 8,5A1,1 0 0,0 7,4M10,4A1,1 0 0,0 9,5A1,1 0 0,0 10,6A1,1 0 0,0 11,5A1,1 0 0,0 10,4M12,8A6,6 0 0,0 6,14A6,6 0 0,0 12,20A6,6 0 0,0 18,14A6,6 0 0,0 12,8M8.11,10.5H10C9.76,11.88 10,12.67 10.58,13.29C11.68,14.36 12.16,15.71 11.89,17.5H10C10.24,16.12 10,15.33 9.42,14.71C8.32,13.64 7.85,12.29 8.11,10.5M12.11,10.5H14C13.76,11.88 14,12.67 14.58,13.29C15.68,14.36 16.16,15.71 15.89,17.5H14C14.24,16.12 14,15.33 13.42,14.71C12.32,13.64 11.85,12.29 12.11,10.5Z',
+  washer: 'M14.83,11.17C16.39,12.73 16.39,15.27 14.83,16.83C13.27,18.39 10.73,18.39 9.17,16.83L14.83,11.17M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M7,4A1,1 0 0,0 6,5A1,1 0 0,0 7,6A1,1 0 0,0 8,5A1,1 0 0,0 7,4M10,4A1,1 0 0,0 9,5A1,1 0 0,0 10,6A1,1 0 0,0 11,5A1,1 0 0,0 10,4M12,8A6,6 0 0,0 6,14A6,6 0 0,0 12,20A6,6 0 0,0 18,14A6,6 0 0,0 12,8Z',
+  dishwasher: 'M18,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V4A2,2 0 0,0 18,2M10,4A1,1 0 0,1 11,5A1,1 0 0,1 10,6A1,1 0 0,1 9,5A1,1 0 0,1 10,4M7,4A1,1 0 0,1 8,5A1,1 0 0,1 7,6A1,1 0 0,1 6,5A1,1 0 0,1 7,4M18,20H6V8H18V20M14.67,15.33C14.69,16.03 14.41,16.71 13.91,17.21C12.86,18.26 11.15,18.27 10.09,17.21C9.59,16.71 9.31,16.03 9.33,15.33C9.4,14.62 9.63,13.94 10,13.33C10.37,12.5 10.81,11.73 11.33,11L12,10C13.79,12.59 14.67,14.36 14.67,15.33',
+  timer: 'M12,20A7,7 0 0,1 5,13A7,7 0 0,1 12,6A7,7 0 0,1 19,13A7,7 0 0,1 12,20M19.03,7.39L20.45,5.97C20,5.46 19.55,5 19.04,4.56L17.62,6C16.07,4.74 14.12,4 12,4A9,9 0 0,0 3,13A9,9 0 0,0 12,22C17,22 21,17.97 21,13C21,10.88 20.26,8.93 19.03,7.39M11,14H13V8H11M15,1H9V3H15V1Z',
+  power: 'M7,2H17L13.5,9H17L10,22V14H7V2M9,4V12H12V14.66L14,11H10.24L13.76,4H9Z',
+  default: 'M17.5 15.5C17.5 16.61 16.61 17.5 15.5 17.5S13.5 16.61 13.5 15.5 14.4 13.5 15.5 13.5 17.5 14.4 17.5 15.5M8.5 13.5C7.4 13.5 6.5 14.4 6.5 15.5S7.4 17.5 8.5 17.5 10.5 16.61 10.5 15.5 9.61 13.5 8.5 13.5M23 15V18C23 18.55 22.55 19 22 19H21V20C21 21.11 20.11 22 19 22H5C3.9 22 3 21.11 3 20V19H2C1.45 19 1 18.55 1 18V15C1 14.45 1.45 14 2 14H3C3 10.13 6.13 7 10 7H11V5.73C10.4 5.39 10 4.74 10 4C10 2.9 10.9 2 12 2S14 2.9 14 4C14 4.74 13.6 5.39 13 5.73V7H14C17.87 7 21 10.13 21 14H22C22.55 14 23 14.45 23 15M21 16H19V14C19 11.24 16.76 9 14 9H10C7.24 9 5 11.24 5 14V16H3V17H5V20H19V17H21V16Z',
+  earth: 'M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z',
+  refresh: 'M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z',
+  alert: 'M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16',
+  github: 'M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z',
+};
+// The label and automation category on everything the panel creates in Home
+// Assistant (#478): found by name, case-insensitively, else created. A brand name.
+const _WD_LABEL_NAME = 'WashData';
+const _WD_LABEL_ICON = 'mdi:washing-machine';
+// How long a new automation may take to show up as an entity before the panel
+// gives up labelling it (HA reloads automations after the config POST returns).
+const _AUTOMATION_ENTITY_WAIT_MS = 5000;
+
+// The WashData integration triggers (#478, `trigger: ha_washdata.<key>`), in the
+// order of const.DEVICE_TRIGGER_TYPES. `only`: the device types the trigger is
+// offered for (const.DEVICE_TRIGGER_ONLY_FOR; absent = every type). `options`: the
+// defaults in triggers.yaml. `name`: the English of `trigger.<key>.name` (strings.json
+// `triggers.<key>.name`). tests/test_panel_trigger_table.py keeps it in step.
+const _TRIGGER_MATCHING_TYPES = ['washing_machine', 'dryer', 'washer_dryer', 'dishwasher', 'pump', 'generic'];
+const _TRIGGER_TUMBLING_TYPES = ['washing_machine', 'dryer', 'washer_dryer'];
+const _WD_TRIGGERS = [
+  { key: 'cycle_started', name: 'Cycle started' },
+  { key: 'program_recognised', name: 'Program recognised', only: _TRIGGER_MATCHING_TYPES },
+  { key: 'phase_started', name: 'Phase started', only: _TRIGGER_MATCHING_TYPES },
+  { key: 'finishing_soon', name: 'Finishing soon', only: _TRIGGER_MATCHING_TYPES, options: { minutes: 10 } },
+  { key: 'cycle_overrun', name: 'Cycle running long', only: _TRIGGER_MATCHING_TYPES, options: { percent: 20 } },
+  { key: 'cycle_paused', name: 'Cycle paused', options: { include_detected: false } },
+  { key: 'cycle_resumed', name: 'Cycle resumed', options: { include_detected: false } },
+  { key: 'cycle_stalled', name: 'Cycle stalled' },
+  { key: 'cycle_finished', name: 'Cycle finished' },
+  { key: 'cycle_ended', name: 'Cycle ended', options: { status: 'any' } },
+  { key: 'anti_wrinkle_started', name: 'Anti-wrinkle started', only: _TRIGGER_TUMBLING_TYPES },
+  { key: 'still_tumbling', name: 'Still tumbling after the cycle', only: _TRIGGER_TUMBLING_TYPES, options: { minutes: 15 } },
+  { key: 'unload_pending', name: 'Unload pending' },
+  { key: 'unloaded', name: 'Unloaded' },
+  { key: 'state_changed', name: 'State changed' },
+  { key: 'maintenance_due', name: 'Maintenance due' },
+  { key: 'milestone_reached', name: 'Cycle milestone reached' },
+  { key: 'pump_stuck', name: 'Pump stuck', only: ['pump'] },
+];
 
 // Detector states that mean "a cycle is in flight". Single source for the device
 // bar dot, the status header and the pause/resume/force-stop controls -- these
@@ -121,8 +209,8 @@ const _SETTINGS_SECTIONS = [
         doc: 'Optional. Your appliance model from the community catalog (pick a brand first). If it is not listed, you can add it.' },
     ] },
     { sub: 'Basic configuration', fields: [
-      { key: 'power_sensor', label: 'Power Sensor', basic: true, type: 'entity', domain: 'sensor',
-        doc: 'The sensor that reports this appliance\'s live power in watts (e.g. sensor.washer_power). All detection is based on it.' },
+      { key: 'power_sensor', label: 'Power Sensor', basic: true, type: 'entity', domain: 'sensor', notEnergy: true,
+        doc: 'The sensor that reports this appliance\'s live power in W or kW (e.g. sensor.washer_power), not its energy counter (kWh). All detection is based on it.' },
       { key: 'min_power', label: 'Minimum Power', unit: 'W', type: 'number', step: 0.1, min: 0, def: 2.0, basic: true,
         doc: 'Readings below this count as 0 W (standby). Filters out the idle draw of smart plugs and standby LEDs.' },
       { key: 'off_delay', label: 'Off Delay', unit: 's', type: 'number', min: 0, def: 180, basic: true,
@@ -174,17 +262,11 @@ const _SETTINGS_SECTIONS = [
       { key: 'power_off_delay', label: 'Power Off Delay', unit: 's', type: 'number', min: 0, def: 30,
         doc: 'How long power must stay below the Power Off Threshold after a cycle before the state returns to Off. Only used when that threshold is above 0. Checked periodically, so the real wait can be slightly longer.' },
     ] },
-    { sub: 'Signal Processing', fields: [
-      { key: 'sampling_interval', label: 'Sampling Interval', internal: true, unit: 's', type: 'number', min: 1, def: 30,
-        doc: 'Minimum time between processed readings. Readings that arrive sooner are skipped (low readings during a cycle are always kept). Set it to your plug\'s reporting interval or lower; a higher value only throws readings away.' },
-    ] },
   ] },
   { id: 'matching', label: 'Matching', intro: 'How finished cycles are matched to learned profiles and labelled.', notDeviceTypes: ['other'], groups: [
     { sub: 'Match Scoring', fields: [
       { key: 'profile_match_threshold', label: 'Match Threshold', type: 'number', step: 0.01, min: 0, max: 1, def: 0.4,
         doc: 'Live match score a cycle needs before Smart Termination or the anti-crease finish may end it early. It does not change the shown program. Raise it if weak matches end cycles early; lower it if clear matches wait the off delay.' },
-      { key: 'profile_unmatch_threshold', label: 'Unmatch Threshold', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.35,
-        doc: 'If the live match score drops below this, the current program guess is cleared. Keep it a little below the Match Threshold so a brief dip does not reset it.' },
       { key: 'profile_match_interval', label: 'Match Interval', internal: true, unit: 's', type: 'number', min: 0,
         doc: 'How often to match a running cycle against profiles. Default 300 s (5 min).' },
     ] },
@@ -193,8 +275,6 @@ const _SETTINGS_SECTIONS = [
         doc: 'A program is only considered after the cycle has run this fraction of its typical duration. 0.10: a 2-hour program becomes a candidate after 12 minutes. Not applied in a cycle\'s first 15 minutes.' },
       { key: 'profile_match_max_duration_ratio', label: 'Max Duration Ratio', internal: true, type: 'number', step: 0.01, min: 0, def: 1.8,
         doc: 'A program is dropped once the cycle has run longer than this multiple of its typical duration. 1.8: a cycle 80% longer than the program no longer matches it.' },
-      { key: 'duration_tolerance', label: 'Estimate Tolerance', internal: true, type: 'number', step: 0.01, min: 0, max: 1, def: 0.1,
-        doc: 'Learning feedback only: a cycle within +/-X% of its estimated duration counts as a good estimate. Does not affect matching.' },
     ] },
     { sub: 'Profile Evidence', fields: [
       { key: 'profile_evidence_sources', label: 'Cycles that shape a program', type: 'checkboxlist', def: ['real_cycles', 'reference_cycles', 'backfill_cycles'],
@@ -218,15 +298,15 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Housekeeping', fields: [
       { key: 'progress_reset_delay', label: 'Progress Reset Delay', unit: 's', type: 'number', min: 0, def: 1800,
         doc: 'After a cycle, keep progress at 100% this long before resetting to Idle.' },
-      { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', type: 'checkbox', def: true,
+      { key: 'auto_maintenance', label: 'Auto Maintenance (nightly cleanup)', internal: true, type: 'checkbox', def: true,
         doc: 'Nightly cleanup: label old cycles that now clearly match a program, rebuild program curves, refresh anomaly marks and cycle health, and remove debug traces if Save Debug Traces is off. Cycles and their power traces are always kept.' },
-      { key: 'power_profile_interval_min', label: 'Power Profile Interval', unit: 'min', type: 'number', min: 1, def: 15,
+      { key: 'power_profile_interval_min', label: 'Power Profile Interval', internal: true, unit: 'min', type: 'number', min: 1, def: 15,
         doc: 'Bucket size of the power_profile attribute (average watts per slot) used by planners such as EMHASS and tibber_prices. Smaller keeps short spikes; larger smooths the curve. Default 15 min. Does not affect detection.' },
     ] },
     { sub: 'Debug', fields: [
       { key: 'expose_debug_entities', label: 'Expose Debug Entities', internal: true, type: 'checkbox',
         doc: 'Add diagnostic entities (match confidence, ambiguity, internal state). Off keeps the entity list clean.' },
-      { key: 'save_debug_traces', label: 'Save Debug Traces', type: 'checkbox',
+      { key: 'save_debug_traces', label: 'Save Debug Traces', internal: true, type: 'checkbox', def: false,
         doc: 'Also store the matcher\'s debug data (every candidate\'s scores) with each cycle, for troubleshooting. Adds about 20 KB per cycle.' },
     ] },
   ] },
@@ -237,8 +317,6 @@ const _SETTINGS_SECTIONS = [
       doc: 'A pulse above this power counts as a real new cycle, not a tumble. Set it just above your tumble-pulse power.' },
     { key: 'anti_wrinkle_max_duration', label: 'Max Duration', unit: 's', type: 'number', min: 0, def: 60,
       doc: 'A pulse longer than this counts as a real cycle, not an anti-wrinkle tumble.' },
-    { key: 'anti_wrinkle_exit_power', label: 'Exit Power Threshold', internal: true, unit: 'W', type: 'number', step: 0.1, min: 0, def: 0.8,
-      doc: 'In anti-wrinkle mode, power below this counts as quiet between tumble pulses, and quiet for longer than the Max Pulse Gap ends the mode. The Stop Threshold is used when it is higher, so this only changes anything when set above the Stop Threshold.' },
     { key: 'anti_wrinkle_idle_timeout', label: 'Max Pulse Gap', unit: 's', type: 'number', step: 30, min: 0, def: 120,
       doc: 'How long the dryer may stay quiet between tumble pulses before anti-wrinkle mode ends. Set it above your dryer\'s longest gap, or later pulses are read as false starts.' },
     { key: 'anti_crease_finalize_ratio', label: 'Anti-Crease Finalize Ratio', type: 'number', step: 0.01, min: 0.5, max: 1.0, def: 0.98,
@@ -258,10 +336,8 @@ const _SETTINGS_SECTIONS = [
   ] },
   { id: 'triggers', label: 'Triggers & Door', intro: 'Optional extras: end trigger, door sensor, pause switch and unload reminder.', groups: [
     { sub: 'External End Trigger', fields: [
-      { key: 'external_end_trigger_enabled', label: 'Enable External End Trigger', type: 'checkbox',
-        doc: 'Let a binary sensor signal the end of a cycle, in addition to power-based detection.' },
       { key: 'external_end_trigger', label: 'External Trigger Entity', type: 'entity', domain: 'binary_sensor',
-        doc: 'Binary sensor whose change marks the cycle end (e.g. a "finished" contact or another integration).' },
+        doc: 'Optional binary sensor that ends the cycle when it turns on, in addition to power-based detection (e.g. a "finished" contact or another integration). Leave empty to turn it off.' },
       { key: 'external_end_trigger_inverted', label: 'Invert External Trigger (trigger on OFF)', type: 'checkbox',
         doc: 'Treat the sensor turning OFF (not ON) as the end signal.' },
     ] },
@@ -303,8 +379,6 @@ const _SETTINGS_SECTIONS = [
         doc: 'person.* entities that "Notify Only When Home" checks.' },
       { key: 'notify_only_when_home', label: 'Notify Only When Home', type: 'checkbox',
         doc: 'Only notify when at least one of the people above is home.' },
-      { key: 'notify_fire_events', label: 'Fire HA Events for Notifications', type: 'checkbox', def: true,
-        doc: 'Also fire ha_washdata_* events on cycle start and finish for your own automations.' },
     ] },
     { sub: 'Timing', fields: [
       { key: 'notify_before_end_minutes', label: 'Pre-End Alert', unit: 'min', type: 'number', min: 0, def: 0,
@@ -314,7 +388,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_live_overrun_percent', label: 'Live Overrun % Before Alert', unit: '%', type: 'number', min: 0, def: 20,
         doc: 'Live updates stop once a cycle runs this percent past its expected duration (20 = up to 1.2x the expected time).' },
       { key: 'notify_live_chronometer', label: 'Use Live Chronometer', type: 'checkbox',
-        doc: 'Show a live countdown timer in the notification (where supported) instead of a fixed estimate.' },
+        doc: 'Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Pre-Complete Message to show the finish time instead of a second countdown.' },
       { key: 'notify_live_silent', label: 'Silent Live Updates', type: 'checkbox', def: true,
         doc: 'iOS only. Update live progress silently, at a battery-saving priority that iOS may batch. The first update and the start/finish notifications still alert. Off: every update alerts.' },
       { key: 'notify_live_sticky', label: 'Keep Live Notification On Tap', type: 'checkbox',
@@ -336,7 +410,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration} min.', basic: true,
         doc: 'Body sent when a cycle finishes. Variables: {device}, {program}, {duration} (minutes), {duration_hm} (1 h 05 min), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed or force_stopped; interrupted cycles send nothing). Any other variable falls back to the default text.' },
       { key: 'notify_pre_complete_message', label: 'Pre-Complete Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',
-        doc: 'Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left). Any other variable falls back to the default text.' },
+        doc: 'Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left), {finish_time} (estimated finish, e.g. 14:30). Any other variable falls back to the default text.' },
       { key: 'notify_reminder_message', label: 'Reminder Message', type: 'textarea', def: '',
         doc: 'Text of the one-time Pre-End Alert. Template variables: {device}, {program}, {minutes} (the Pre-End Alert setting). Any other variable falls back to the default text.' },
       { key: 'notify_channel', label: 'Android Channel (start/live)', type: 'text', def: '',
@@ -370,12 +444,6 @@ const _SETTINGS_SECTIONS = [
       doc: 'Use a model trained on this machine to predict a running cycle\'s energy and cost, and let a well-known program that stops unusually early finish without the full off delay. Off: power-based logic only.' },
     { key: 'ml_training_enabled', label: 'Learn from this machine', type: 'checkbox', def: false,
       doc: 'Retrain the energy model on this machine\'s finished cycles from time to time. A new model is kept only if it beats the simple estimate on test cycles.' },
-    { key: 'ml_training_hour', label: 'Learn at hour', unit: 'h', type: 'number', min: 0, max: 23, def: 2,
-      doc: 'Hour of day (0-23) for overnight training. Pick a quiet hour, e.g. 2.' },
-    { key: 'ml_training_min_cycles', label: 'Cycles needed first', type: 'number', min: 5, def: 30,
-      doc: 'Wait for at least this many recorded cycles before training.' },
-    { key: 'ml_training_interval_days', label: 'Check at most every', unit: 'days', type: 'number', min: 1, def: 7,
-      doc: 'Retrain at most once every this many days.' },
   ] },
 ];
 
@@ -458,6 +526,28 @@ function _nonPriceReason(id, vals, ctx) {
   return null;
 }
 
+// Units and device classes of an energy counter (#481). Mirrors const.ENERGY_UNITS /
+// ENERGY_DEVICE_CLASSES - keep in step.
+const _ENERGY_DEVICE_CLASSES = new Set(['energy', 'energy_storage']);
+const _ENERGY_UNITS = new Set(['mwh', 'wh', 'kwh', 'gwh', 'twh', 'j', 'kj', 'mj', 'gj', 'cal', 'kcal', 'mcal', 'gcal']);
+
+// Why the chosen Power Sensor cannot be one: it counts energy (#481), or null. Only
+// positive evidence, as the backend refuses it.
+function _energyCounterReason(id, ctx) {
+  const st = (id && ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
+  if (!st) return null;
+  const attrs = st.attributes || {};
+  const dc = String(attrs.device_class == null ? '' : attrs.device_class).trim().toLowerCase();
+  const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
+  // An energy unit, or an energy device class without a power unit (a power unit
+  // wins over a device class set wrong on a template), as const.is_energy_counter.
+  const powerUnit = ['mW', 'W', 'kW', 'MW', 'GW'].includes(unit) || unit.toLowerCase() === 'kw'
+    || /^(Wh|kWh|MWh)\s*\/\s*(s|min|h|d)$/.test(unit);
+  if (!_ENERGY_UNITS.has(unit.toLowerCase()) && !(_ENERGY_DEVICE_CLASSES.has(dc) && !powerUnit)) return null;
+  return { msgKey: 'conflict.power_sensor.energy', msgVars: {unit: unit || dc},
+    msgFb: `This sensor counts energy (${unit || dc}), not power, so no cycle can be detected. Pick the plug's power sensor (W or kW).` };
+}
+
 const _SETTING_CONFLICTS = [
   {
     // energy_price_entity pointing at something that is provably not a price (#439).
@@ -467,6 +557,12 @@ const _SETTING_CONFLICTS = [
     keys: ['energy_price_entity', 'energy_sensor', 'power_sensor'],
     check: (v, ctx) => _nonPriceReason(v.energy_price_entity, v, ctx) != null,
     fieldErrors: (v, ctx) => ({ energy_price_entity: _nonPriceReason(v.energy_price_entity, v, ctx) }),
+  },
+  {
+    // #481: the Power Sensor is an energy counter (kWh), which never reads as power.
+    keys: ['power_sensor'],
+    check: (v, ctx) => _energyCounterReason(v.power_sensor, ctx) != null,
+    fieldErrors: (v, ctx) => ({ power_sensor: _energyCounterReason(v.power_sensor, ctx) }),
   },
   {
     // start_threshold_w > stop_threshold_w (hysteresis band must be positive)
@@ -505,12 +601,13 @@ const _SETTING_CONFLICTS = [
     }),
   },
   {
-    // watchdog_interval >= 2 * sampling_interval (avoid false-zero injections)
+    // watchdog_interval >= 2 * sampling_interval (avoid false-zero injections). The
+    // sampling interval is the device type's cadence, not a setting since 0.5.9: it
+    // comes from the backend's resolved defaults, so only the watchdog is flagged.
     keys: ['watchdog_interval', 'sampling_interval'],
     check: v => v.watchdog_interval != null && v.sampling_interval != null && v.watchdog_interval < 2 * v.sampling_interval,
     fieldErrors: v => ({
       watchdog_interval:  { msgKey: 'conflict.watchdog.interval',  msgVars: {si: v.sampling_interval}, msgFb: `Should be at least 2× Sampling Interval (${v.sampling_interval} s)`, fixVal: +(2 * v.sampling_interval + 1) },
-      sampling_interval:  { msgKey: 'conflict.watchdog.sampling',  msgVars: {wi: v.watchdog_interval}, msgFb: `Sampling Interval should be at most half of Watchdog Interval (${v.watchdog_interval} s)`, fixVal: +Math.floor(v.watchdog_interval / 2) },
     }),
   },
   {
@@ -523,12 +620,12 @@ const _SETTING_CONFLICTS = [
     }),
   },
   {
-    // start_duration_threshold >= sampling_interval (debounce must span at least one sample)
+    // start_duration_threshold >= sampling_interval (debounce must span at least one
+    // sample). The sampling interval is the device type's cadence (resolved default).
     keys: ['start_duration_threshold', 'sampling_interval'],
     check: v => v.start_duration_threshold != null && v.sampling_interval != null && v.start_duration_threshold < v.sampling_interval,
     fieldErrors: v => ({
       start_duration_threshold: { msgKey: 'conflict.start_dur.threshold', msgVars: {si: v.sampling_interval}, msgFb: `Should be at least one Sampling Interval (${v.sampling_interval} s) to prevent single-sample false starts`, fixVal: v.sampling_interval },
-      sampling_interval:        { msgKey: 'conflict.start_dur.sampling',  msgVars: {sdt: v.start_duration_threshold}, msgFb: `Sampling Interval exceeds Start Duration (${v.start_duration_threshold} s); single-sample spikes can open a cycle`, fixVal: v.start_duration_threshold },
     }),
   },
   {
@@ -552,18 +649,8 @@ const _SETTING_CONFLICTS = [
       auto_label_confidence:   { msgKey: 'conflict.confidence.auto',           msgVars: {match: v.profile_match_threshold}, msgFb: `Must be at or above Match Threshold (${v.profile_match_threshold})`, fixVal: +(v.profile_match_threshold).toFixed(2) },
     }),
   },
-  {
-    // profile_unmatch_threshold < profile_match_threshold (committed match must not immediately un-match)
-    keys: ['profile_unmatch_threshold', 'profile_match_threshold'],
-    check: v => v.profile_unmatch_threshold != null && v.profile_match_threshold != null && v.profile_unmatch_threshold >= v.profile_match_threshold,
-    fieldErrors: v => ({
-      profile_unmatch_threshold: { msgKey: 'conflict.unmatch.unmatch', msgVars: {match: v.profile_match_threshold}, msgFb: `Must be below Match Threshold (${v.profile_match_threshold}); otherwise a committed match un-matches instantly`, fixVal: +(v.profile_match_threshold - 0.05).toFixed(2) },
-      profile_match_threshold:   { msgKey: 'conflict.unmatch.match',   msgVars: {un: v.profile_unmatch_threshold},   msgFb: `Must be above Unmatch Threshold (${v.profile_unmatch_threshold})`, fixVal: +(v.profile_unmatch_threshold + 0.05).toFixed(2) },
-    }),
-  },
-  // (No anti_wrinkle_exit_power vs stop_threshold_w rule: the detector counts quiet
-  // below the higher of the two, so any pair is valid and the old "must be below
-  // stop" fix moved the exit power to where it does nothing; #285 #296 #325.)
+  // (No unmatch-vs-match rule: the unmatch threshold is fixed at 0.35 since 0.5.9,
+  // and the anti-wrinkle exit power is fixed at max(0.8 W, stop); #285 #296 #325.)
   {
     // anti_wrinkle_max_power > start_threshold_w — only for devices that support anti-wrinkle
     keys: ['anti_wrinkle_max_power', 'start_threshold_w'],
@@ -854,15 +941,102 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
   .wd-dot, .wd-devdot, .wd-rec-active, .wd-spin, .wd-toast { animation: none !important; }
   * { scroll-behavior: auto !important; }
 }
-/* Notifications > Automations: split "New" dropdown + pills. */
-.wd-auto-dd summary { cursor: pointer; list-style: none; }
-.wd-auto-dd summary::-webkit-details-marker { display: none; }
-.wd-auto-dd summary::marker { content: ''; }
-.wd-auto-pill { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; background: var(--secondary-background-color); border: 1px solid var(--divider-color); border-radius: 16px; padding: 3px 4px 3px 12px; }
-.wd-auto-pill-link { text-decoration: none; color: var(--primary-text-color); font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wd-auto-pill-link:hover { text-decoration: underline; }
-.wd-auto-pill-x { flex: 0 0 auto; border: none; background: transparent; color: var(--secondary-text-color); cursor: pointer; font-size: 1.15em; line-height: 1; padding: 0 5px; border-radius: 50%; }
-.wd-auto-pill-x:hover { background: var(--error-color, #f44336); color: var(--wd-white); }
+/* Automations tab (#478): the device's automations, quick start, the template
+   library. Sentence-case headings: this tab's sections are its content. The
+   porthole disc on each template is the one decorative element. */
+.wd-auto-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; min-height: 34px; }
+.wd-auto-h { margin: 0; font-size: 1.08em; font-weight: 600; line-height: 1.3; color: var(--primary-text-color); }
+.wd-auto-count { min-width: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 11px; font-size: .75em; font-weight: 600; line-height: 22px; text-align: center;
+  background: var(--secondary-background-color); color: var(--secondary-text-color); }
+.wd-auto-head .wd-auto-iconbtn { margin-left: auto; }
+.wd-auto-lead { margin: 0 0 16px; max-width: 72ch; font-size: .88em; line-height: 1.5; color: var(--secondary-text-color); }
+.wd-auto-hint { margin: 2px 0 10px; max-width: 72ch; font-size: .82em; line-height: 1.5; color: var(--secondary-text-color); }
+.wd-auto-empty { margin: 0 0 16px; padding: 14px 16px; border: 1px dashed var(--divider-color); border-radius: var(--wd-radius-md); font-size: .88em; color: var(--secondary-text-color); }
+.wd-auto-list { list-style: none; margin: 0 0 18px; padding: 0; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); }
+.wd-auto-row { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 4px 6px 4px 14px; }
+.wd-auto-row + .wd-auto-row { border-top: 1px solid var(--divider-color); }
+.wd-auto-state { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--disabled-text-color, #9e9e9e); }
+.wd-auto-state.on { background: var(--success-color, #43a047); }
+.wd-auto-name { flex: 1 1 auto; min-width: 0; font-size: .92em; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-auto-badge { flex: none; padding: 0 7px; border-radius: 10px; font-size: .7em; font-weight: 600; line-height: 1.7;
+  border: 1px solid var(--primary-color); color: var(--primary-color); }
+.wd-auto-off { flex: none; font-size: .78em; color: var(--secondary-text-color); }
+.wd-auto-acts { flex: none; display: flex; align-items: center; gap: 2px; }
+/* A phone: the name gets the line, the actions go under it. */
+@media (max-width: 600px) {
+  .wd-auto-row { flex-wrap: wrap; row-gap: 0; padding-top: 8px; }
+  .wd-auto-name { flex-basis: calc(100% - 60px); white-space: normal; overflow-wrap: anywhere; }
+  .wd-auto-acts { flex-basis: 100%; box-sizing: border-box; justify-content: space-between; padding-left: 10px; }
+}
+.wd-auto-edit { flex: none; padding: 7px 9px; border-radius: var(--wd-radius-sm); font-size: .82em; font-weight: 500; color: var(--primary-color); text-decoration: none; }
+.wd-auto-edit:hover { background: var(--secondary-background-color); }
+.wd-auto-del { flex: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--secondary-text-color); font-size: 1.2em; line-height: 1; cursor: pointer; }
+.wd-auto-del:hover { background: var(--error-color, #f44336); color: var(--wd-white); }
+.wd-auto-start { padding-top: 16px; border-top: 1px solid var(--divider-color); }
+.wd-auto-sub { font-size: .92em; font-weight: 600; color: var(--primary-text-color); }
+.wd-auto-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.wd-auto-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 7px 14px; border: 1px solid var(--divider-color); border-radius: 18px;
+  background: transparent; color: var(--primary-text-color); font: inherit; font-size: .84em; line-height: 1.3; text-align: left; cursor: pointer; }
+.wd-auto-chip:hover:not(:disabled) { border-color: var(--primary-color); color: var(--primary-color); }
+.wd-auto-chip:disabled { opacity: .55; cursor: default; }
+.wd-auto-chip-blank { border-style: dashed; }
+.wd-auto-more { padding: 7px 6px; border: 0; background: transparent; color: var(--primary-color); font: inherit; font-size: .84em; font-weight: 500; cursor: pointer; }
+.wd-auto-all-row { margin: 18px 0 0; font-size: .85em; }
+.wd-auto-all { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+.wd-auto-legacy { margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--warning-color, #ff9800); border-radius: var(--wd-radius-md); background: rgba(255,152,0,.08); }
+.wd-auto-legacy-title { font-weight: 600; margin-bottom: 2px; }
+.wd-auto-iconbtn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--secondary-text-color); cursor: pointer; }
+.wd-auto-iconbtn:hover:not(:disabled) { background: var(--secondary-background-color); color: var(--primary-color); }
+.wd-auto-ico { flex: none; width: 20px; height: 20px; fill: currentColor; }
+.wd-auto-chip:focus-visible, .wd-auto-more:focus-visible, .wd-auto-del:focus-visible, .wd-auto-iconbtn:focus-visible {
+  outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; }
+.wd-bp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr)); gap: 14px; }
+.wd-bp-card { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-lg); background: var(--card-background-color); }
+.wd-bp-head { display: flex; align-items: center; gap: 14px; min-width: 0; }
+/* A porthole: tinted glass inside a thin ring, a gap of card colour between. */
+.wd-bp-port { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; margin: 4px; border-radius: 50%;
+  color: var(--primary-color); background: var(--secondary-background-color);
+  background: color-mix(in srgb, var(--primary-color) 13%, var(--card-background-color));
+  box-shadow: 0 0 0 3px var(--card-background-color), 0 0 0 4.5px color-mix(in srgb, var(--primary-color) 35%, transparent); }
+.wd-bp-port .wd-auto-ico { width: 22px; height: 22px; }
+.wd-bp-port-muted { color: var(--secondary-text-color); background: var(--secondary-background-color); box-shadow: 0 0 0 3px var(--card-background-color), 0 0 0 4.5px var(--divider-color); }
+.wd-bp-titles { min-width: 0; }
+.wd-bp-name { margin: 0; font-size: .98em; font-weight: 600; line-height: 1.3; color: var(--primary-text-color); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wd-bp-by { display: block; margin-top: 2px; font-size: .78em; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-bp-desc { margin: 0; font-size: .86em; line-height: 1.5; color: var(--secondary-text-color); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.wd-bp-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.wd-bp-tag { padding: 1px 8px; border: 1px solid var(--divider-color); border-radius: 10px; font-size: .72em; line-height: 1.6; color: var(--secondary-text-color); }
+.wd-bp-status { margin-left: auto; font-size: .75em; font-weight: 600; color: var(--warning-color, #ff9800); }
+.wd-bp-status-ok { color: var(--success-color, #43a047); }
+.wd-bp-note { margin: 0 0 10px; font-size: .8em; color: var(--secondary-text-color); }
+.wd-bp-card .wd-bp-note { margin: 0; }
+.wd-bp-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 4px; }
+.wd-bp-card .wd-btn, .wd-bp-modal .wd-btn { white-space: normal; text-align: left; }
+.wd-bp-notice { display: flex; align-items: flex-start; gap: 16px; padding: 16px; border: 1px dashed var(--divider-color); border-radius: var(--wd-radius-lg); }
+.wd-bp-notice-title { margin: 4px 0 2px; font-size: .95em; font-weight: 600; color: var(--primary-text-color); }
+.wd-bp-share { display: flex; align-items: center; gap: 8px; margin: 18px 0 0; font-size: .85em; color: var(--secondary-text-color); }
+.wd-bp-share a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+.wd-bp-dhead { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.wd-bp-dhead h2 { margin: 0 0 2px; }
+.wd-bp-dbody p { margin: 0 0 10px; font-size: .9em; line-height: 1.55; max-width: 72ch; }
+.wd-bp-dbody .wd-bp-risk { display: flex; gap: 10px; padding: 10px 12px; border-left: 3px solid var(--warning-color, #ff9800); border-radius: var(--wd-radius-sm); background: rgba(255,152,0,.1); }
+.wd-bp-risk .wd-auto-ico { color: var(--warning-color, #ff9800); }
+.wd-bp-facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 14px 0; font-size: .86em; }
+.wd-bp-facts dt { color: var(--secondary-text-color); }
+.wd-bp-facts dd { margin: 0; }
+.wd-bp-dh { margin: 18px 0 8px; font-size: .92em; font-weight: 600; }
+.wd-bp-inputs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.wd-bp-inputs li { font-size: .86em; line-height: 1.45; }
+.wd-bp-in-name { font-weight: 500; }
+.wd-bp-req { font-size: .85em; color: var(--primary-color); }
+.wd-bp-in-desc { display: block; color: var(--secondary-text-color); }
+.wd-bp-dbody .wd-bp-links { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 16px 0 4px; }
+.wd-bp-links a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+.wd-bp-yaml { margin: 6px 0 8px; max-height: 45vh; overflow: auto; padding: 12px; border-radius: var(--wd-radius-md); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: .8em; line-height: 1.45; white-space: pre; }
+a.wd-btn { text-decoration: none; }
 .wd-field-hint { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px; }
 /* Derived-value note (#445): informational, never an error - no red, no fix button. */
 .wd-setting-note { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px;
@@ -1134,6 +1308,7 @@ button.wd-profile-card { display: block; }
 .wd-toast-success { background: var(--success-color, #4caf50); color: var(--wd-white); }
 .wd-toast-error   { background: var(--error-color, #f44336); color: var(--wd-white); }
 .wd-toast-info    { background: var(--info-color, #2196f3); color: var(--wd-white); }
+.wd-toast-warning { background: var(--warning-color, #ff9800); color: var(--wd-white); }
 /* D4: undo toast — action button + row layout */
 .wd-toast { display: flex; align-items: center; gap: 14px; }
 .wd-toast-action { background: rgba(255,255,255,.22); color: inherit; border: none; border-radius: 6px; padding: 5px 12px; font: inherit; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: .04em; font-size: .85em; }
@@ -1297,7 +1472,8 @@ button.wd-profile-card { display: block; }
 /* min-height:0 so the row below can actually shrink and hand its overflow to
    .wd-main, instead of the shell growing to fit and pushing past the host. */
 .wd-shell { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.wd-content-row { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+/* position: relative anchors the narrow-screen log drawer below the header (#473). */
+.wd-content-row { display: flex; flex: 1; overflow: hidden; min-height: 0; position: relative; }
 .wd-main { flex: 1; overflow-y: auto; min-width: 0; }
 .wd-log-drawer {
   position: relative; width: 0; overflow: hidden;
@@ -1324,9 +1500,13 @@ button.wd-profile-card { display: block; }
 }
 .wd-log-close-btn:hover { opacity: 1; background: var(--secondary-background-color); }
 .wd-gear-btn.log-active { background: rgba(255,255,255,.22); }
+/* Narrow screens: the drawer covers the content row, never the header. A fixed,
+   top:0 drawer sat over the header and under the iPhone status bar, so neither its
+   close button nor the header's burger, gear and Logs toggle could be tapped (#473). */
 @media (max-width: 680px) {
-  .wd-log-drawer.open { width: 100vw !important; position: fixed; top: 0; right: 0; bottom: 0; z-index: 30; border-left: none; }
+  .wd-log-drawer.open { width: auto !important; position: absolute; inset: 0; z-index: 45; border-left: none; }  /* above the sticky .wd-nav (40) */
   .wd-log-resize { display: none; }
+  .wd-log-close-btn { min-width: 44px; min-height: 44px; }
 }
 .wd-pg-delta-up { color: var(--success-color, #4caf50); font-weight: 700; }
 .wd-pg-delta-down { color: var(--error-color, #f44336); font-weight: 700; }
@@ -1611,6 +1791,37 @@ function _wsErrText(err) {
     ? ' (the integration is probably still starting up; this should stop on its own)'
     : '';
   return `${code || 'error'}${msg ? ': ' + msg : ''}${hint}`;
+}
+
+// The message of a failed hass.callApi (HA's REST errors carry it in
+// body.message) or WS call (message). Plain text.
+function _haErrText(e) {
+  if (e == null) return '';
+  if (typeof e === 'string') return e;
+  if (e.body && typeof e.body === 'object' && e.body.message) return String(e.body.message);
+  if (e.message) return String(e.message);
+  return _wsErrText(e);
+}
+
+// HA's blueprint/list returns only an installed blueprint's metadata, so "the same
+// version" is judged on what that carries: name, description, source and the
+// inputs (keys, and which have a default). A trigger- or action-only change
+// between two versions is not visible from here (#478).
+function _bpSameMetadata(md, b) {
+  const norm = v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim();
+  if (norm(md.name) !== norm(b.name) || norm(md.description) !== norm(b.description)
+      || norm(md.source_url) !== norm(b.source_url)) return false;
+  const theirs = [];
+  const walk = inputs => {
+    for (const [k, v] of Object.entries(inputs || {})) {
+      const spec = (v && typeof v === 'object') ? v : {};
+      if (spec.input && typeof spec.input === 'object') walk(spec.input);  // a section
+      else theirs.push(k + ('default' in spec ? '=' : ''));
+    }
+  };
+  walk(md.input);
+  const ours = (b.inputs || []).map(i => i.key + (i.has_default ? '=' : ''));
+  return theirs.sort().join('|') === ours.sort().join('|');
 }
 
 function _esc(s) {
@@ -1984,16 +2195,14 @@ const _DIAGRAM_BY_KEY = {
   progress_reset_delay: 'progress_reset', completion_min_seconds: 'min_duration',
   // New diagrams
   min_off_gap: 'min_off_gap',
-  duration_tolerance: 'duration_tolerance',
   start_duration_threshold: 'start_duration',
   end_energy_threshold: 'end_energy_thresh',
-  profile_match_threshold: 'confidence', profile_unmatch_threshold: 'confidence',
+  profile_match_threshold: 'confidence',
   auto_label_confidence: 'confidence', learning_confidence: 'confidence',
   no_update_active_timeout: 'watchdog_timeout',
   anti_wrinkle_enabled: 'anti_wrinkle', anti_wrinkle_max_power: 'anti_wrinkle',
-  anti_wrinkle_max_duration: 'anti_wrinkle', anti_wrinkle_exit_power: 'anti_wrinkle',
+  anti_wrinkle_max_duration: 'anti_wrinkle',
   anti_wrinkle_idle_timeout: 'anti_wrinkle', anti_crease_finalize_ratio: 'anti_wrinkle',
-  sampling_interval: 'sampling',
 };
 
 // Rect that really clips an absolutely-positioned popover: the viewport
@@ -2097,12 +2306,6 @@ function _diagram(id, tText) {
         <rect class="fw" x="96" y="20" width="46" height="58"/>
         <polyline class="ln" points="8,40 90,40 96,74 142,74 148,40 175,40 175,74 190,74"/>
         <text x="98" y="16">${_esc(_tText('diagram.off_delay_wait', {}, 'off-delay wait'))}</text>`);
-    case 'duration_tolerance':
-      return wrap(`${base}
-        <rect class="fz" x="60" y="36" width="80" height="22"/>
-        <line class="ax" x1="60" y1="47" x2="140" y2="47"/>
-        <line class="ln" x1="100" y1="30" x2="100" y2="64"/>
-        <text x="62" y="30">${_esc(_tText('diagram.minus_tol', {}, '-tol'))}</text><text x="120" y="30">${_esc(_tText('diagram.plus_tol', {}, '+tol'))}</text><text x="84" y="74">${_esc(_tText('diagram.profile', {}, 'profile'))}</text>`);
     case 'match_ratios':
       return wrap(`${base}
         <line class="ax" x1="20" y1="47" x2="180" y2="47"/>
@@ -2181,19 +2384,6 @@ function _diagram(id, tText) {
         <polyline class="ln" points="8,78 14,78 24,30 54,30 68,78 84,60 96,78 110,60 122,78 136,60 148,78 162,60 174,78 192,78"/>
         <text x="10" y="14">${_esc(_tText('diagram.heat_phase', {}, 'heat phase'))}</text>
         <text x="82" y="40">${_esc(_tText('diagram.tumble_kept', {}, 'tumble pulses kept'))}</text>`);
-    case 'sampling':
-      // Vertical tick marks at regular intervals showing sensor cadence.
-      return wrap(`${base}
-        <line class="ok" x1="24" y1="30" x2="24" y2="78"/>
-        <line class="ok" x1="62" y1="30" x2="62" y2="78"/>
-        <line class="ok" x1="100" y1="30" x2="100" y2="78"/>
-        <line class="ok" x1="138" y1="30" x2="138" y2="78"/>
-        <line class="ok" x1="176" y1="30" x2="176" y2="78"/>
-        <line class="fz" x1="8" y1="54" x2="192" y2="54"/>
-        <text x="36" y="50">${_esc(_tText('diagram.si', {}, 'SI'))}</text>
-        <text x="74" y="50">${_esc(_tText('diagram.si', {}, 'SI'))}</text>
-        <text x="112" y="50">${_esc(_tText('diagram.si', {}, 'SI'))}</text>
-        <text x="10" y="14">${_esc(_tText('diagram.reading_interval', {}, 'typical reading interval'))}</text>`);
     default:
       return '';
   }
@@ -2311,7 +2501,9 @@ class HaWashdataPanel extends HTMLElement {
     this._logComponent = '';    // filter by component/module e.g. 'playground' ('' = all)
     this._logSearch = '';       // free-text search across messages
     try {
-      this._logOpen = localStorage.getItem('wd-log-open') === '1';
+      // Not restored on a narrow screen, where the drawer covers the whole pane (#473).
+      this._logOpen = localStorage.getItem('wd-log-open') === '1'
+        && !(window.matchMedia && window.matchMedia('(max-width: 680px)').matches);
       this._logDrawerWidth = Math.max(280, parseInt(localStorage.getItem('wd-log-width') || '380', 10) || 380);
     } catch (_) {
       this._logOpen = false;
@@ -3440,6 +3632,7 @@ class HaWashdataPanel extends HTMLElement {
     // Escape always closes the top modal (even from a field inside it).
     if (e.key === 'Escape') {
       if (this._modal) { e.preventDefault(); this._onModalAction('cancel', null); }
+      else if (this._logOpen) { e.preventDefault(); this._toggleLogDrawer(); }
       return;
     }
     // Trap Tab / Shift+Tab within the open modal so focus can't escape to the
@@ -3747,7 +3940,7 @@ class HaWashdataPanel extends HTMLElement {
     this._cycles = []; this._refCycles = []; this._recState = null; this._diag = null; this._importUndo = null; this._maintenance = null; this._phases = [];
     this._mlTrainingStatus = null;  // per-device; re-fetched by _fetchTabData
     this._setupStatus = null;       // per-device; re-fetched by _fetchTabData
-    this._deviceAutomations = [];   // per-device; re-fetched on the settings tab
+    this._deviceAutomations = [];   // per-device; re-fetched on the Automations tab
     this._selectMode = false; this._cycleSel = new Set();
     this._cycleFilter = { text: '', status: '' };
     this._profSubtab = 'profiles';
@@ -3932,17 +4125,22 @@ class HaWashdataPanel extends HTMLElement {
         if (this._constants.mlTrainingAvailable) {
           this._loadMlTrainingStatus(eid).finally(() => { if (this._tab === 'settings') this._renderPreservingFormEdits(); });
         }
-        // Automations related to this device (for the Notifications > Automations list).
-        this._autoLoading = true;
-        this._loadDeviceAutomations(eid).finally(() => {
-          this._autoLoading = false;
-          if (this._tab === 'settings') this._renderPreservingFormEdits();
-        });
         // Community-store account card lives at the bottom of the Settings tab;
         // load the connection status in the background so it fills in when ready.
         if (this._constants.storeOnlineAvailable) {
           this._loadStoreStatus(eid).finally(() => { if (this._tab === 'settings') this._renderPreservingFormEdits(); });
         }
+      } else if (this._tab === 'automations') {
+        // The saved options carry the legacy custom actions and the device type
+        // the template catalog is filtered by.
+        try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
+        this._autoLoading = true;
+        this._loadWdLabel().then(() => { if (this._tab === 'automations') this._render(); });
+        this._loadDeviceAutomations(eid).finally(() => {
+          this._autoLoading = false;
+          if (this._tab === 'automations') this._render();
+        });
+        await Promise.all([this._loadBlueprintCatalog(), this._loadInstalledBlueprints()]);
       } else if (this._tab === 'store') {
         try { const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid }); if (!this._isActiveEntry(eid)) return; this._opts = r.options || {}; } catch (_) {}
         if (!this._profiles.length) this._fetchProfiles(eid);  // needed for the import "merge into existing" dropdown
@@ -4327,7 +4525,7 @@ class HaWashdataPanel extends HTMLElement {
     const panel = cfg.panel || {};
     if (!this._tabInitialized) {
       const dt = (cfg.prefs && cfg.prefs.default_tab) || panel.default_tab;
-      if (dt && ['status', 'history', 'profiles', 'settings', 'playground'].includes(dt)) this._tab = dt;
+      if (dt && ['status', 'history', 'profiles', 'settings', 'automations', 'playground'].includes(dt)) this._tab = dt;
       this._tabInitialized = true;
     }
   }
@@ -4351,6 +4549,9 @@ class HaWashdataPanel extends HTMLElement {
     const hidden = (!admin && this._panelCfg && this._panelCfg.panel && this._panelCfg.panel.hidden_tabs) || [];
     const ids = ['status', 'history', 'profiles'];
     if (this._canEdit()) ids.push('settings');
+    // #478: everyone may browse the automation templates; creating, installing
+    // and deleting stay admin-only inside the tab (Home Assistant's own rule).
+    ids.push('automations');
     // F3: Playground (what-if simulator / A-B / DTW inspector) — edit access only.
     if (this._canEdit()) ids.push('playground');
     // Community Store — only when the backend exposes it AND online features are on.
@@ -4784,7 +4985,7 @@ class HaWashdataPanel extends HTMLElement {
     const confIndicator = this._conflictKeysFromOpts().size > 0 ? ' ⚠' : '';
     const pgBusy = this._busy.has('pg-sim') || this._busy.has('pg-sweep');
     const pgSpinner = pgBusy ? `<span class="wd-spin" style="margin-left:4px;vertical-align:middle"></span>` : '';
-    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator, playground: this._t('tab.playground',{},'Playground') + pgSpinner, store: this._t('tab.store',{},'Store'), advanced: this._t('tab.advanced',{},'Advanced') };
+    const labels = { status: this._t('tab.status',{},'Overview'), history: this._t('tab.history',{},'Cycles'), profiles: this._t('tab.profiles',{},'Profiles'), settings: this._t('tab.settings',{},'Settings') + confIndicator, automations: this._t('tab.automations',{},'Automations'), playground: this._t('tab.playground',{},'Playground') + pgSpinner, store: this._t('tab.store',{},'Store'), advanced: this._t('tab.advanced',{},'Advanced') };
     const visible = this._visibleTabIds();
     if (!visible.includes(this._tab)) this._tab = 'status';
     const tabBtns = visible.map(id =>
@@ -4806,6 +5007,7 @@ class HaWashdataPanel extends HTMLElement {
       ${pane('history', () => this._htmlHistoryTab())}
       ${pane('profiles', () => this._htmlProfiles())}
       ${pane('settings', () => this._htmlSettings())}
+      ${pane('automations', () => this._htmlAutomationsTab())}
       ${pane('playground', () => this._htmlPlayground())}
       ${pane('store', () => this._htmlStore())}
       ${pane('advanced', () => this._htmlPanel())}
@@ -5825,7 +6027,7 @@ class HaWashdataPanel extends HTMLElement {
       ? `<p class="wd-info" style="margin:0 0 10px;font-size:.82em">${this._t('msg.settings_basic_note', {}, 'Showing essential settings. Switch to Advanced for the full list.')}</p>`
       : '';
     // Advanced only: reveal the internal tuning fields (search always finds them).
-    const internalToggle = basicMode ? '' : `<label class="wd-check-inline" style="font-size:.82em;display:inline-flex;align-items:center;gap:6px" title="${_esc(this._t('lbl.show_internal_tip', {}, 'Settings WashData tunes for you (sampling, watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.'))}">
+    const internalToggle = basicMode ? '' : `<label class="wd-check-inline" style="font-size:.82em;display:inline-flex;align-items:center;gap:6px" title="${_esc(this._t('lbl.show_internal_tip', {}, 'Settings WashData tunes for you (watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.'))}">
       <input type="checkbox" id="wd-settings-internal-chk" data-action="set-settings-internal" ${this._pref('show_internal', false) ? 'checked' : ''}>
       ${this._t('lbl.show_internal', {}, 'Show internal settings')}</label>`;
 
@@ -5956,6 +6158,8 @@ class HaWashdataPanel extends HTMLElement {
       const ids = Object.keys(states)
         .filter(e => !domains || domains.some(d => e.startsWith(d + '.')))
         .filter(e => !f.notPrice || _nonPriceReason(e, o, this._conflictCtx()) == null)
+        // `notEnergy` drops energy counters (kWh) from the Power Sensor picker (#481).
+        .filter(e => !f.notEnergy || _energyCounterReason(e, this._conflictCtx()) == null)
         .sort().slice(0, 500);
       if (!this._entityListCache) this._entityListCache = {};
       this._entityListCache[f.key] = ids;
@@ -6450,61 +6654,405 @@ class HaWashdataPanel extends HTMLElement {
     if (this._modal === m) this._render();
   }
 
-  // Automations subcategory at the top of Notifications. Replaces the old custom
-  // action editor: WashData fires ha_washdata_cycle_started / _ended events and
-  // exposes entities, so users build native HA automations. This shows the
-  // automations already related to this device (deep-linking to the editor) and
-  // a split "New" button that opens a blank automation or one prefilled with a
-  // cycle-started / cycle-finished trigger for this device.
+  // The Automations tab (#478). WashData offers integration triggers and entities,
+  // so notifications and actions are native HA automations. The tab lists the
+  // automations that use this device (each opens in HA's editor), starts a new
+  // one from a WashData trigger, converts legacy custom actions, and installs
+  // templates from the online template library (its own repository, downloaded
+  // only while online features are on).
+  _htmlAutomationsTab() {
+    return `${this._htmlAutomations()}${this._htmlBlueprints()}`;
+  }
+
+  _autoIcon(name) {
+    const d = _AUTO_ICON_PATHS[name] || _AUTO_ICON_PATHS.default;
+    return `<svg class="wd-auto-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
+  }
+
   _htmlAutomations() {
+    // Home Assistant's automation config API is admin-only, so are the buttons.
+    const admin = this._isAdmin();
     const list = this._deviceAutomations || [];
-    const pills = list.length
-      ? list.map(a => `<span class="wd-auto-pill">` +
-          `<a class="wd-auto-pill-link" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top" title="${this._t('hdr.automation_open', {}, 'Open in the automation editor')}">🔗 ${_esc(a.name)}${a.enabled ? '' : ` <span style="opacity:.6">${this._t('lbl.automation_off', {}, '(off)')}</span>`}</a>` +
-          `<button type="button" class="wd-auto-pill-x" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="${this._t('hdr.automation_delete', {}, 'Delete this automation')}">×</button>` +
-        `</span>`).join('')
-      : `<span class="wd-info" style="margin:0">${this._autoLoading ? this._t('msg.loading', {}, 'Loading…') : this._t('hdr.no_automations', {}, 'No automations reference this device yet.')}</span>`;
+    // The WashData label (#478) as a badge, read from HA's entity registry so a
+    // label added or removed in Home Assistant shows on the next render.
+    const labelId = this._wdLabelId;
+    const regEnts = (this._hass && this._hass.entities) || {};
+    const labelled = a => !!labelId && Array.isArray(regEnts[a.entity_id] && regEnts[a.entity_id].labels) && regEnts[a.entity_id].labels.includes(labelId);
+    const badge = `<span class="wd-auto-badge" title="${this._t('lbl.automation_wd_label', {}, 'Carries the WashData label')}">${_WD_LABEL_NAME}</span>`;
+    const delTip = this._t('hdr.automation_delete', {}, 'Delete this automation');
+    const rows = list.map(a => `<li class="wd-auto-row" data-autoid="${_esc(a.id)}">
+        <span class="wd-auto-state${a.enabled ? ' on' : ''}" aria-hidden="true"></span>
+        <span class="wd-auto-name" title="${_esc(a.name)}">${_esc(a.name)}</span>
+        ${labelled(a) ? badge : ''}${a.enabled ? '' : `<span class="wd-auto-off">${this._t('lbl.automation_off', {}, '(off)')}</span>`}
+        <span class="wd-auto-acts">
+          <a class="wd-auto-edit" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top">${this._t('btn.auto_edit_in_ha', {}, 'Edit in Home Assistant')}</a>
+          ${admin ? `<button type="button" class="wd-auto-del" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="${delTip}" aria-label="${delTip}">×</button>` : ''}
+        </span>
+      </li>`).join('');
+    const listHtml = list.length
+      ? `<ul class="wd-auto-list">${rows}</ul>`
+      : `<p class="wd-auto-empty">${this._autoLoading ? this._t('msg.loading', {}, 'Loading…') : this._t('msg.auto_none', {}, 'No automations use this appliance yet.')}</p>`;
     // Legacy custom actions from the removed editor: still fired by the backend,
     // but no longer editable. Offer a one-click convert to a real automation.
-    const legacy = Array.isArray(this._opts.notify_actions) ? this._opts.notify_actions : [];
+    const legacy = (this._canEdit() && Array.isArray(this._opts.notify_actions)) ? this._opts.notify_actions : [];
     const legacyBlock = legacy.length ? `
-      <div style="border:1px solid var(--warning-color,#ff9800);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:rgba(255,152,0,.08)">
-        <div style="font-weight:600;margin-bottom:4px">${this._t('msg.legacy_actions_title', {count: legacy.length}, `${legacy.length} legacy custom action${legacy.length > 1 ? 's' : ''} still running`)}</div>
-        <p class="wd-info" style="margin:0 0 8px">${this._t('msg.old_actions_warning', {}, 'Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.')}</p>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-convert-legacy">${this._t('btn.convert_to_automation', {}, 'Convert to automation')}</button>
+      <div class="wd-auto-legacy">
+        <div class="wd-auto-legacy-title">${this._t('msg.legacy_actions_title', {count: legacy.length}, `${legacy.length} legacy custom action${legacy.length > 1 ? 's' : ''} still running`)}</div>
+        <p class="wd-auto-hint">${this._t('msg.old_actions_warning', {}, 'Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.')}</p>
+        <div class="wd-auto-chips">
+          ${admin ? `<button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-convert-legacy">${this._t('btn.convert_to_automation', {}, 'Convert to automation')}</button>` : ''}
           <button type="button" class="wd-btn wd-btn-danger wd-btn-sm" data-action="auto-remove-legacy">${this._t('btn.remove', {}, 'Remove')}</button>
         </div>
       </div>` : '';
-    return `
-      <div class="wd-subhead">${this._t('hdr.automations', {}, 'Automations')}</div>
-      <p class="wd-info" style="margin-bottom:10px">${this._t('msg.automations_intro', {start: _html('<code>ha_washdata_cycle_started</code>'), end: _html('<code>ha_washdata_cycle_ended</code>')}, 'WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.')}</p>
-      ${legacyBlock}
-      <div class="wd-auto-pills" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">${pills}</div>
-      <div class="wd-auto-new" style="display:flex;gap:6px;align-items:center;margin-bottom:18px">
-        <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-new">${this._t('btn.new_automation', {}, '＋ New Automation')}</button>
-        <details class="wd-auto-dd" style="position:relative">
-          <summary class="wd-btn wd-btn-secondary wd-btn-sm">${this._t('btn.from_template', {}, 'From template ▾')}</summary>
-          <div class="wd-auto-dd-menu" style="position:absolute;z-index:5;margin-top:4px;background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:6px;min-width:190px;box-shadow:0 4px 14px rgba(0,0,0,.25)">
-            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-started" style="width:100%;margin-bottom:4px">${this._t('btn.on_cycle_started', {}, 'On cycle started')}</button>
-            <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-new-finished" style="width:100%">${this._t('btn.on_cycle_finished', {}, 'On cycle finished')}</button>
-          </div>
-        </details>
+    // New automation: blank or from a trigger. The common triggers show; the rest
+    // (up to 18 for a washer) open in place: a popover is clipped on a phone.
+    const creating = this._autoCreating;
+    const dis = creating ? 'disabled' : '';
+    const spin = key => creating === key ? '<span class="wd-spin"></span>' : '';
+    const dev = this._devices[this._selIdx];
+    const trigs = dev ? this._deviceTriggers(dev.entry_id) : [];
+    const featured = _AUTO_FEATURED_TRIGGERS.map(k => trigs.find(t => t.key === k)).filter(Boolean);
+    const rest = trigs.filter(t => !featured.includes(t));
+    const open = !!this._autoTrigOpen;
+    const chip = t => `<button type="button" class="wd-auto-chip wd-auto-trig" data-action="auto-new-trigger" data-trigger="${t.key}" ${dis}>${spin(t.key)}${this._t(`trigger.${t.key}.name`, {}, t.name)}</button>`;
+    const more = rest.length ? `<button type="button" class="wd-auto-more wd-auto-trig-toggle" data-action="auto-toggle-triggers" aria-expanded="${open}">${open ? this._t('btn.auto_fewer_triggers', {}, 'Fewer triggers') : this._t('btn.auto_more_triggers', {count: rest.length}, '{count} more triggers')}</button>` : '';
+    const start = admin ? `<div class="wd-auto-start">
+        <div class="wd-auto-sub">${this._t('hdr.auto_start', {}, 'Start a new automation')}</div>
+        <p class="wd-auto-hint">${this._t('msg.auto_start_hint', {}, 'Opens in Home Assistant\'s automation editor with this appliance already filled in.')}</p>
+        <div class="wd-auto-chips">
+          <button type="button" class="wd-auto-chip wd-auto-chip-blank" data-action="auto-new" ${dis}>${spin('new')}${this._t('btn.auto_blank', {}, 'Blank automation')}</button>
+          ${featured.map(chip).join('')}${open ? rest.map(chip).join('') : ''}${more}
+        </div>
+      </div>` : '';
+    // HA's automation list takes ?label= (its label page links the same way), so
+    // the link opens it filtered once the label exists. /config is admin-only.
+    const allHref = '/config/automation/dashboard' + (labelId ? '?historyBack=1&label=' + encodeURIComponent(labelId) : '');
+    const allLink = admin ? `<p class="wd-auto-all-row"><a class="wd-auto-all" href="${_esc(allHref)}" title="${this._t('hdr.automations_all_tip', {}, 'Home Assistant\'s automation list, filtered by the WashData label. Automations created here also sit in the WashData category.')}">${this._t('link.automations_all', {}, 'All WashData automations in Home Assistant')}</a></p>` : '';
+    return `<section class="wd-card wd-auto-card">
+      <div class="wd-auto-head"><h3 class="wd-auto-h">${this._t('hdr.auto_yours', {}, 'Your automations')}</h3>${list.length ? `<span class="wd-auto-count">${list.length}</span>` : ''}</div>
+      <p class="wd-auto-lead">${this._t('msg.auto_yours_intro', {}, 'Home Assistant automations that react to this appliance.')}</p>
+      ${legacyBlock}${listHtml}${start}${allLink}
+    </section>`;
+  }
+
+  // The WashData triggers this device offers (const.DEVICE_TRIGGER_ONLY_FOR, via
+  // _WD_TRIGGERS) that can be built for it here.
+  _deviceTriggers(entryId) {
+    const type = this._curDeviceType();
+    return _WD_TRIGGERS.filter(t => (!t.only || (!!type && t.only.includes(type))) && this._triggerConfig(entryId, t));
+  }
+
+  _curDeviceType() {
+    const dev = this._devices[this._selIdx];
+    return (this._opts && this._opts.device_type) || (dev && dev.options && dev.options.device_type) || '';
+  }
+
+  // One WashData trigger in an automation: the integration trigger (#478) on this
+  // device with its default options. With no device registry entry in sight, the
+  // bus event for the two that have one (the events always fire); null otherwise.
+  _triggerConfig(entryId, t) {
+    const deviceId = this._washdataDeviceId(entryId);
+    if (deviceId) return { trigger: `${_DOMAIN}.${t.key}`, target: { device_id: [deviceId] }, options: { ...(t.options || {}) } };
+    if (t.key === 'cycle_started' || t.key === 'cycle_finished') return this._cycleTrigger(entryId, t.key);
+    return null;
+  }
+
+  // ── Automation template library (#478) ──
+  // Its own repository (washdata-automations), downloaded by the backend only
+  // while online features are on, so a template PR never touches the integration.
+
+  // Fetched once per session; `refresh` asks the backend to look again (it holds
+  // a cached copy). A failure or "online features off" is not kept, so the next
+  // visit asks again.
+  async _loadBlueprintCatalog(refresh = false) {
+    if (Array.isArray(this._bpCatalog) && !refresh && !this._bpError) return;
+    if (!this._onlineEnabled()) { this._bpCatalog = null; this._bpDisabled = true; return; }
+    try {
+      const r = await this._ws(refresh ? { type: `${_DOMAIN}/blueprints/list`, refresh: true } : { type: `${_DOMAIN}/blueprints/list` });
+      const list = (r && Array.isArray(r.blueprints)) ? r.blueprints : [];
+      this._bpDisabled = !!(r && r.disabled);
+      this._bpError = !!(r && r.error);
+      this._bpCatalog = this._bpDisabled || (this._bpError && !list.length) ? null : list;
+      this._bpCatalogError = this._bpError && !list.length;
+    } catch (_) { this._bpCatalog = null; this._bpCatalogError = true; this._bpError = true; }
+  }
+
+  // HA's blueprint/list (admin-only): path -> {metadata} | {error}. Null when it
+  // is unknown (non-admin, or the call failed); the cards then show no status.
+  async _loadInstalledBlueprints() {
+    if (!this._isAdmin()) { this._bpInstalled = null; return; }
+    try {
+      const r = await this._ws({ type: 'blueprint/list', domain: 'automation' });
+      this._bpInstalled = (r && typeof r === 'object') ? r : {};
+    } catch (_) { this._bpInstalled = null; }
+  }
+
+  _bpById(id) { return (this._bpCatalog || []).find(b => b.id === id) || null; }
+
+  // Display name / description: the template's own text. Plain text. The
+  // "WashData: " prefix names the blueprint in HA's list; here it is noise.
+  _bpName(b) {
+    const raw = String(b.name || b.id).replace(/^WashData:\s*/i, '');
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
+  }
+  _bpDesc(b) { return String(b.description || ''); }
+  // The tile shows the first paragraph; Details shows all of it.
+  _bpSummary(b) { return this._bpDesc(b).split(/\n\s*\n/)[0].trim(); }
+
+  // 'same' | 'different' | 'none', or null when the installed list is unknown.
+  _bpInstalledState(b) {
+    const all = this._bpInstalled;
+    if (!all || !b.path) return null;
+    const hit = all[b.path];
+    if (!hit) return 'none';
+    return (hit.metadata && _bpSameMetadata(hit.metadata, b)) ? 'same' : 'different';
+  }
+
+  // GitHub's "new file" page in the library, prefilled with a template skeleton.
+  // Committing it from a fork ends on the pull request form.
+  _bpShareUrl() {
+    return `${_AUTOMATION_LIBRARY_URL}/new/main/automation?filename=my_template.yaml&value=${encodeURIComponent(_BP_SKELETON)}`;
+  }
+
+  _htmlBlueprints() {
+    const admin = this._isAdmin();
+    const online = this._onlineEnabled() && !this._bpDisabled;
+    const list = this._bpCatalog;
+    const refreshing = this._busy.has('bp-refresh');
+    const refreshTip = this._t('btn.bp_refresh', {}, 'Check GitHub for new templates');
+    const refreshBtn = online && Array.isArray(list)
+      ? `<button type="button" class="wd-auto-iconbtn" data-action="auto-bp-refresh" title="${refreshTip}" aria-label="${refreshTip}" ${refreshing ? 'disabled' : ''}>${refreshing ? '<span class="wd-spin"></span>' : this._autoIcon('refresh')}</button>` : '';
+    const share = `<p class="wd-bp-share">${this._autoIcon('github')}<a href="${_esc(this._bpShareUrl())}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_share_pr', {}, 'Share your own template: open a pull request on GitHub')} ↗</a></p>`;
+    let body;
+    if (!online) {
+      const busy = this._busy.has('store-account');
+      body = `<div class="wd-bp-notice">
+        <span class="wd-bp-port wd-bp-port-muted">${this._autoIcon('earth')}</span>
+        <div>
+          <div class="wd-bp-notice-title">${this._t('hdr.bp_needs_online', {}, 'The template library needs online features')}</div>
+          <p class="wd-auto-hint">${this._t('msg.bp_needs_online', {}, 'Templates are downloaded from GitHub, so the library only works with online features turned on. Online features also include the Community Store.')}</p>
+          ${admin
+            ? `<button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-online-on" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.bp_turn_on_online', {}, 'Turn on online features')}</button>`
+            : `<p class="wd-auto-hint">${this._t('msg.bp_needs_online_admin', {}, 'An administrator can turn them on in the gear menu, under Online & Community.')}</p>`}
+        </div>
+      </div>`;
+    } else if (Array.isArray(list)) {
+      const type = this._curDeviceType();
+      const shown = list.filter(b => {
+        const types = Array.isArray(b.device_types) && b.device_types.length ? b.device_types : ['all'];
+        return types.includes('all') || (!!type && types.includes(type));
+      });
+      const stale = this._bpError ? `<p class="wd-bp-note">${this._t('msg.bp_stale', {}, 'GitHub could not be reached just now. These are the templates downloaded earlier.')}</p>` : '';
+      body = shown.length
+        ? `${stale}<div class="wd-bp-grid">${shown.map(b => this._htmlBlueprintCard(b, admin)).join('')}</div>`
+        : `<p class="wd-auto-empty">${this._t('msg.bp_none_yet', {}, 'No templates for this appliance type yet. Share the first one.')}</p>`;
+    } else if (this._bpCatalogError) {
+      body = `<div class="wd-bp-notice">
+        <span class="wd-bp-port wd-bp-port-muted">${this._autoIcon('alert')}</span>
+        <div>
+          <div class="wd-bp-notice-title">${this._t('hdr.bp_unreachable', {}, 'The template library could not be reached')}</div>
+          <p class="wd-auto-hint">${this._t('msg.bp_unreachable', {}, 'It is downloaded from GitHub. Check that Home Assistant can reach the internet, then try again.')}</p>
+          <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-bp-refresh" ${refreshing ? 'disabled' : ''}>${refreshing ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.retry', {}, 'Retry')}</button>
+        </div>
+      </div>`;
+    } else {
+      body = `<p class="wd-auto-empty">${this._t('msg.loading', {}, 'Loading…')}</p>`;
+    }
+    return `<section class="wd-card wd-bp-section">
+      <div class="wd-auto-head"><h3 class="wd-auto-h">${this._t('hdr.bp_library', {}, 'Template library')}</h3>${refreshBtn}</div>
+      <p class="wd-auto-lead">${this._t('msg.bp_library_intro', {}, 'Ready-made automations shared by WashData users on GitHub, reviewed before they are listed. Available only with online features on.')}</p>
+      ${online && !admin ? `<p class="wd-auto-hint wd-bp-admin-hint">${this._t('msg.bp_admin_only', {}, 'An administrator installs templates.')}</p>` : ''}
+      ${body}
+      ${share}
+    </section>`;
+  }
+
+  // A tile's main button (admin-only, like HA's blueprint/save). A template
+  // whose only open input is the device becomes an automation for it in one
+  // click; any other is installed and finished in HA's own blueprint form.
+  _htmlBlueprintAction(b, admin, cls = 'wd-btn-sm') {
+    if (!admin || b.compatible === false) return '';
+    const busy = this._busy.has('bp-' + b.id);
+    const spin = busy ? '<span class="wd-spin"></span> ' : '';
+    const dev = this._devices[this._selIdx];
+    return b.one_click
+      ? `<button type="button" class="wd-btn wd-btn-primary ${cls}" data-action="auto-bp-use" data-bpid="${_esc(b.id)}" title="${this._t('btn.bp_add_tip', {}, 'Creates the automation for this appliance with the default settings, then opens it in Home Assistant')}" ${busy ? 'disabled' : ''}>${spin}${this._t('btn.bp_add_to', {device: (dev && dev.title) || 'WashData'}, 'Add to {device}')}</button>`
+      : `<button type="button" class="wd-btn wd-btn-primary ${cls}" data-action="auto-bp-install" data-bpid="${_esc(b.id)}" title="${this._t('btn.bp_setup_tip', {}, 'Installs the template, then opens Home Assistant to fill in the rest')}" ${busy ? 'disabled' : ''}>${spin}${this._t('btn.bp_setup_in_ha', {}, 'Set up in Home Assistant')}</button>`;
+  }
+
+  _htmlBlueprintStatus(b) {
+    const st = this._bpInstalledState(b);
+    if (st === 'same') return `<span class="wd-bp-status wd-bp-status-ok">${this._t('badge.bp_installed', {}, 'Installed')}</span>`;
+    if (st === 'different') return `<span class="wd-bp-status">${this._t('badge.bp_installed_other', {}, 'Other version installed')}</span>`;
+    return '';
+  }
+
+  _htmlBlueprintCard(b, admin) {
+    const tags = (b.tags || []).map(t => `<span class="wd-bp-tag">${_esc(t)}</span>`).join('');
+    const status = this._htmlBlueprintStatus(b);
+    const by = b.author ? `<span class="wd-bp-by">${this._t('lbl.bp_by', {author: b.author}, 'by {author}')}</span>` : '';
+    return `<article class="wd-bp-card" data-bpid="${_esc(b.id)}">
+      <div class="wd-bp-head">
+        <span class="wd-bp-port">${this._autoIcon(b.icon)}</span>
+        <div class="wd-bp-titles"><h4 class="wd-bp-name">${_esc(this._bpName(b))}</h4>${by}</div>
+      </div>
+      <p class="wd-bp-desc">${_esc(this._bpSummary(b))}</p>
+      ${tags || status ? `<div class="wd-bp-meta">${tags}${status}</div>` : ''}
+      ${b.compatible === false ? `<p class="wd-bp-note">${this._t('msg.bp_needs_version', {version: b.min_version}, 'Needs WashData {version} or newer.')}</p>` : ''}
+      <div class="wd-bp-actions">${this._htmlBlueprintAction(b, admin)}<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-bp-details" data-bpid="${_esc(b.id)}">${this._t('btn.bp_details', {}, 'Details')}</button></div>
+    </article>`;
+  }
+
+  _htmlBlueprintDetails(m) {
+    const b = this._bpById(m.bpId);
+    if (!b) return '';
+    const admin = this._isAdmin();
+    // A paragraph that starts "Risk:" is the template's warning: set apart.
+    // "Needs WashData x or newer." is for HA's own blueprint list; the facts below say it.
+    const paras = this._bpDesc(b).split(/\n\s*\n/).map(p => p.trim())
+      .filter(p => p && !/^needs washdata [\d.]+ or newer\.?$/i.test(p));
+    const desc = paras.map(p => /^risk:/i.test(p)
+      ? `<p class="wd-bp-risk">${this._autoIcon('alert')}<span>${_esc(p)}</span></p>`
+      : `<p>${_esc(p)}</p>`).join('');
+    const types = Array.isArray(b.device_types) && b.device_types.length && !b.device_types.includes('all')
+      ? b.device_types.map(t => _esc(this._deviceTypeLabel(t))).join(', ')
+      : this._t('lbl.bp_for_all', {}, 'Every appliance');
+    const facts = `<dl class="wd-bp-facts">
+        <dt>${this._t('lbl.bp_for', {}, 'For')}</dt><dd>${types}</dd>
+        ${b.min_version ? `<dt>${this._t('lbl.bp_needs', {}, 'Needs')}</dt><dd>${this._t('lbl.bp_needs_version', {version: b.min_version}, 'WashData {version} or newer')}</dd>` : ''}
+        ${b.author ? `<dt>${this._t('lbl.bp_author', {}, 'Author')}</dt><dd>${_esc(b.author)}</dd>` : ''}
+      </dl>`;
+    const inputs = (b.inputs || []).filter(i => i.key !== 'washdata_device');
+    const settings = inputs.length ? `<h3 class="wd-bp-dh">${this._t('hdr.bp_settings', {}, 'What you can set')}</h3>
+      <ul class="wd-bp-inputs">${inputs.map(i => `<li><span class="wd-bp-in-name">${_esc(i.name || i.key)}</span>${i.has_default ? '' : ` <span class="wd-bp-req">${this._t('lbl.bp_required', {}, 'required')}</span>`}${i.description ? `<span class="wd-bp-in-desc">${_esc(i.description)}</span>` : ''}</li>`).join('')}</ul>` : '';
+    const importUrl = b.source_url
+      ? 'https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=' + encodeURIComponent(b.source_url) : '';
+    const links = [
+      b.source_url ? `<a class="wd-bp-github" href="${_esc(b.source_url)}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_view_github', {}, 'View on GitHub')} ↗</a>` : '',
+      importUrl ? `<a class="wd-bp-import" href="${_esc(importUrl)}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_import_my_ha', {}, 'Import with My Home Assistant')} ↗</a>` : '',
+    ].join('');
+    const yaml = m.showYaml ? `
+      <pre class="wd-bp-yaml" tabindex="0" aria-label="${_esc(this._tText('lbl.bp_yaml', {}, 'Blueprint YAML'))}">${_esc(b.yaml || '')}</pre>
+      <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="bp-copy">${this._t('btn.bp_copy_yaml', {}, 'Copy YAML')}</button>` : '';
+    const action = this._htmlBlueprintAction(b, admin, '').replace('data-action="auto-bp-', 'data-maction="bp-');
+    return `<div class="wd-bp-dhead">
+        <span class="wd-bp-port">${this._autoIcon(b.icon)}</span>
+        <div class="wd-bp-titles"><h2 id="wd-modal-title">${_esc(this._bpName(b))}</h2>${this._htmlBlueprintStatus(b)}</div>
+      </div>
+      <div class="wd-bp-dbody">
+        ${desc}${b.compatible === false ? `<p class="wd-bp-note">${this._t('msg.bp_needs_version', {version: b.min_version}, 'Needs WashData {version} or newer.')}</p>` : ''}
+        ${facts}${settings}
+        ${links ? `<p class="wd-bp-links">${links}</p>` : ''}
+        <button type="button" class="wd-auto-more wd-bp-yaml-toggle" data-maction="bp-toggle-yaml" aria-expanded="${!!m.showYaml}">${m.showYaml ? this._t('btn.bp_hide_yaml', {}, 'Hide the YAML') : this._t('btn.bp_show_yaml', {}, 'Show the YAML')}</button>
+        ${yaml}
+      </div>
+      <div class="wd-modal-actions">
+        <button type="button" class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+        ${action}
       </div>`;
   }
 
+  async _bpCopyYaml(b) {
+    const text = (b && b.yaml) || '';
+    let ok = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); ok = true; }
+    } catch (_) { ok = false; }
+    if (!ok) {
+      // A plain-http Home Assistant has no async clipboard API (secure contexts only).
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        ok = document.execCommand('copy');
+        ta.remove();
+      } catch (_) { ok = false; }
+    }
+    if (ok) this._showToast(this._tText('toast.copied', {}, 'Copied'));
+    else this._showToast(this._tText('toast.copy_failed', {}, 'Copy failed. Select the text and copy it by hand.'), 'error');
+  }
+
+  // A template's main button (admin-only, like HA's blueprint/save). 'use': install
+  // the blueprint unless this version is already there, create an automation from
+  // it for this device and open it. 'install': install only, then HA's blueprint
+  // page, where the user fills in the inputs the template cannot default.
+  _bpStart(b, mode) {
+    if (!this._isAdmin() || this._busy.has('bp-' + b.id)) return;
+    const st = this._bpInstalledState(b);
+    if (st === 'different') { this._bpConfirmReplace(b, mode); return; }
+    this._bpRun(b, mode, st === 'same' ? 'skip' : 'save');
+  }
+
+  // Never overwrite a different installed copy (the user may have edited it)
+  // without asking.
+  _bpConfirmReplace(b, mode) {
+    this._modal = { type: 'confirm',
+      title: this._tText('modal.bp_replace_title', {}, 'Replace the installed template?'),
+      message: this._tText('modal.bp_replace_library_msg', {name: this._bpName(b)}, 'Home Assistant has a different version of "{name}". Replace it with the one from the template library? Automations that use it change with it.'),
+      okLabel: this._tText('btn.replace', {}, 'Replace'), okPrimary: true,
+      onOk: () => this._bpRun(b, mode, 'override') };
+    this._render();
+  }
+
+  // save: 'save' | 'override' | 'skip'. Each step reports its own failure; a
+  // saved blueprint stays installed when the automation step fails after it.
+  async _bpRun(b, mode, save) {
+    const key = 'bp-' + b.id;
+    const dev = this._devices[this._selIdx];
+    if (!dev || this._busy.has(key)) return;
+    const deviceId = mode === 'use' ? this._washdataDeviceId(dev.entry_id) : null;
+    this._busy.add(key); this._render();
+    try {
+      if (save !== 'skip') {
+        const msg = { type: 'blueprint/save', domain: 'automation', path: b.path, yaml: b.yaml };
+        if (b.source_url) msg.source_url = b.source_url;
+        if (save === 'override') msg.allow_override = true;
+        try {
+          await this._ws(msg);
+        } catch (e) {
+          // Installed meanwhile, or the installed list was unavailable: ask first.
+          if (e && e.code === 'already_exists' && save !== 'override') { this._bpConfirmReplace(b, mode); return; }
+          this._showToast(this._tText('toast.bp_install_failed', {error: _haErrText(e)}, 'Could not install the template: {error}'), 'error');
+          return;
+        }
+        this._loadInstalledBlueprints().then(() => { if (this._tab === 'automations') this._render(); });
+      }
+      // No device registry entry to fill in: hand the inputs to HA's own form.
+      if (mode !== 'use' || !deviceId) {
+        this._showToast(this._tText('toast.bp_installed_finish', {}, 'Template installed. Fill in the rest in Home Assistant.'));
+        this._navigate('/config/blueprint/dashboard');
+        return;
+      }
+      // Plain text (_tText): written into the user's automation config.
+      const config = {
+        alias: `${dev.title || 'WashData'}: ${this._bpName(b)}`,
+        description: this._bpDesc(b),
+        use_blueprint: { path: b.path, input: { washdata_device: deviceId } },
+      };
+      const id = 'washdata_' + Date.now().toString(36);
+      try {
+        if (!this._hass || !this._hass.callApi) throw new Error(this._tText('msg.toast_no_automation', {}, 'Cannot create automation here'));
+        await this._hass.callApi('POST', 'config/automation/config/' + id, config);
+      } catch (e) {
+        this._showToast(this._tText('toast.bp_automation_failed', {error: _haErrText(e)}, 'The template is installed, but the automation could not be created: {error}'), 'error');
+        return;
+      }
+      if (await this._labelAutomation(id)) this._showToast(this._tText('toast.bp_automation_created', {}, 'Automation created with the default settings; opening it'));
+      this._navigate('/config/automation/edit/' + id);
+    } finally {
+      this._busy.delete(key); this._render();
+    }
+  }
+
   // Load automations related to this device via HA's native related-items
-  // search, so the Notifications > Automations list mirrors the device page.
+  // search, so the Automations tab's list mirrors the device page.
   async _loadDeviceAutomations(entryId) {
     this._deviceAutomations = [];
     const hass = this._hass;
     if (!hass || !hass.callWS) return;
     try {
-      let deviceId = null;
-      const devices = hass.devices || {};
-      for (const d of Object.values(devices)) {
-        if ((d.config_entries || []).includes(entryId)) { deviceId = d.id; break; }
-      }
+      const deviceId = this._washdataDeviceId(entryId);
       const related = deviceId
         ? await hass.callWS({ type: 'search/related', item_type: 'device', item_id: deviceId })
         : await hass.callWS({ type: 'search/related', item_type: 'config_entry', item_id: entryId });
@@ -6518,6 +7066,28 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { if (this._isActiveEntry(entryId)) this._deviceAutomations = []; }
   }
 
+  // The WashData device of an entry: registry identifier [ha_washdata, entry_id],
+  // else the first device listing the entry. Null when hass carries no devices.
+  _washdataDeviceId(entryId) {
+    const devices = (this._hass && this._hass.devices) || {};
+    let fallback = null;
+    for (const d of Object.values(devices)) {
+      if ((d.identifiers || []).some(i => Array.isArray(i) && i[0] === _DOMAIN && i[1] === entryId)) return d.id;
+      if (!fallback && (d.config_entries || []).includes(entryId)) fallback = d.id;
+    }
+    return fallback;
+  }
+
+  // A WashData cycle trigger for an automation: the native device trigger (#478,
+  // type cycle_started / cycle_finished), or the bus event when the device is
+  // unknown (the events always fire; cycle_ended also covers interrupted runs).
+  _cycleTrigger(entryId, type) {
+    const deviceId = this._washdataDeviceId(entryId);
+    if (deviceId) return { trigger: 'device', domain: _DOMAIN, device_id: deviceId, type };
+    const eventType = type === 'cycle_started' ? 'ha_washdata_cycle_started' : 'ha_washdata_cycle_ended';
+    return { trigger: 'event', event_type: eventType, event_data: { entry_id: entryId } };
+  }
+
   // Navigate the HA frontend (e.g. to the automation editor) via the standard
   // location-changed event so the app router handles it.
   _navigate(path) {
@@ -6527,38 +7097,119 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { try { window.location.assign(path); } catch (__) { /* ignore */ } }
   }
 
-  // Create an automation prefilled with a WashData cycle trigger for this
-  // device, then open it in the editor for the user to complete.
-  async _newAutomationFromEvent(kind) {
+  // "New automation" (key null: no trigger) and "Start from a trigger" (#478):
+  // create the automation for this device, label it, open it in the editor.
+  async _newAutomation(triggerKey) {
     const dev = this._devices[this._selIdx];
-    if (!dev) return;
+    if (!dev || this._autoCreating) return;
     const hass = this._hass;
-    const eventType = kind === 'started' ? 'ha_washdata_cycle_started' : 'ha_washdata_cycle_ended';
-    // Plain text (_tText): these are written into the user's automation config.
+    if (!hass || !hass.callApi) { this._navigate('/config/automation/edit/new'); return; }
+    const t = triggerKey ? _WD_TRIGGERS.find(x => x.key === triggerKey) : null;
+    const trigger = t ? this._triggerConfig(dev.entry_id, t) : null;
+    if (triggerKey && !trigger) return;
+    // Plain text (_tText): written into the user's automation config.
     const device = dev.title || 'WashData';
-    const config = {
-      alias: kind === 'started'
-        ? this._tText('msg.automation_alias_started', {device}, '{device}: cycle started')
-        : this._tText('msg.automation_alias_finished', {device}, '{device}: cycle finished'),
-      description: kind === 'started'
-        ? this._tText('msg.automation_desc_started', {device}, 'Runs when a {device} cycle starts. Add your actions (notify, lights, ...).')
-        : this._tText('msg.automation_desc_finished', {device}, 'Runs when a {device} cycle finishes. Add your actions (notify, lights, ...).'),
-      mode: 'single',
-      trigger: [{ platform: 'event', event_type: eventType, event_data: { entry_id: dev.entry_id } }],
-      condition: [],
-      action: [],
+    const config = t ? {
+      alias: this._tText('msg.automation_alias_trigger', {device, trigger: this._tText(`trigger.${t.key}.name`, {}, t.name)}, '{device}: {trigger}'),
+      description: this._tText('msg.automation_desc_trigger', {device}, 'Created by WashData for {device}. Add your actions (notify, lights, ...).'),
+      mode: 'single', triggers: [trigger], conditions: [], actions: [],
+    } : {
+      alias: this._tText('msg.automation_alias_new', {device}, '{device}: new automation'),
+      description: '',
+      mode: 'single', triggers: [], conditions: [], actions: [],
     };
     const id = 'washdata_' + Date.now().toString(36);
+    this._autoCreating = triggerKey || 'new'; this._render();
     try {
-      if (hass && hass.callApi) {
+      try {
         await hass.callApi('POST', 'config/automation/config/' + id, config);
-        this._navigate('/config/automation/edit/' + id);
-      } else {
-        this._navigate('/config/automation/edit/new');
+      } catch (e) {
+        this._showToast(this._tText('msg.toast_automation_failed', {error: _haErrText(e)}, 'Could not create automation: {error}'), 'error');
+        return;
       }
-    } catch (e) {
-      this._showToast(this._tText('msg.toast_automation_failed', {error: e.message || e}, 'Could not create automation: ' + (e.message || e)), 'error');
+      await this._labelAutomation(id);
+      this._navigate('/config/automation/edit/' + id);
+    } finally {
+      this._autoCreating = null; this._render();
     }
+  }
+
+  // Put the WashData label and the WashData automation category on an automation
+  // the panel just created (#478), so HA's automation list can filter by either.
+  // Soft: never throws and never undoes the creation. False (after a warning)
+  // when any part did not stick.
+  async _labelAutomation(id) {
+    let ok = false;
+    try {
+      const [label, category] = await Promise.allSettled([
+        this._ensureNamedRegistryItem({ type: 'config/label_registry/list' },
+          { type: 'config/label_registry/create', name: _WD_LABEL_NAME, icon: _WD_LABEL_ICON }, 'label_id'),
+        this._ensureNamedRegistryItem({ type: 'config/category_registry/list', scope: 'automation' },
+          { type: 'config/category_registry/create', scope: 'automation', name: _WD_LABEL_NAME, icon: _WD_LABEL_ICON }, 'category_id'),
+      ]);
+      const labelId = label.status === 'fulfilled' ? label.value : null;
+      const categoryId = category.status === 'fulfilled' ? category.value : null;
+      if (labelId) this._wdLabelId = labelId;
+      const entityId = (labelId || categoryId) ? await this._waitAutomationEntity(id) : null;
+      if (entityId) {
+        const update = { type: 'config/entity_registry/update', entity_id: entityId };
+        if (labelId) {
+          const ent = this._hass && this._hass.entities && this._hass.entities[entityId];
+          const existing = (ent && Array.isArray(ent.labels)) ? ent.labels : [];
+          update.labels = existing.includes(labelId) ? existing.slice() : [...existing, labelId];
+        }
+        if (categoryId) update.categories = { automation: categoryId };
+        await this._ws(update);
+        ok = !!(labelId && categoryId);
+      }
+    } catch (_) { ok = false; }
+    if (!ok) this._softWarn(this._tText('toast.automation_label_failed', {}, 'Automation created, but the WashData label or category could not be added.'));
+    return ok;
+  }
+
+  // A registry item by name (case-insensitive), created when missing. A create that
+  // fails because the name was taken meanwhile is answered from a second list.
+  async _ensureNamedRegistryItem(listMsg, createMsg, idKey) {
+    const want = String(createMsg.name).trim().toLowerCase();
+    const find = r => (Array.isArray(r) ? r : []).find(x => x && String(x.name || '').trim().toLowerCase() === want);
+    let hit = find(await this._ws(listMsg));
+    if (!hit) {
+      try { hit = await this._ws(createMsg); } catch (e) { hit = find(await this._ws(listMsg)); if (!hit) throw e; }
+    }
+    if (!hit || !hit[idKey]) throw new Error('no ' + idKey);
+    return hit[idKey];
+  }
+
+  // The entity of the automation with config id `id`, once HA has loaded it (it
+  // reloads automations after the config POST returns); null after the wait.
+  async _waitAutomationEntity(id, timeoutMs = _AUTOMATION_ENTITY_WAIT_MS) {
+    const until = Date.now() + timeoutMs;
+    for (;;) {
+      const states = (this._hass && this._hass.states) || {};
+      for (const eid of Object.keys(states)) {
+        const st = states[eid];
+        if (eid.startsWith('automation.') && st && st.attributes && st.attributes.id === id) return eid;
+      }
+      if (Date.now() >= until) return null;
+      await new Promise(r => setTimeout(r, 150));
+    }
+  }
+
+  // A warning that must survive the navigation into the automation editor that
+  // follows it: the panel's own toast, and Home Assistant's (hass-notification).
+  _softWarn(message) {
+    this._showToast(message, 'warning', { duration: 6000 });
+    try { this.dispatchEvent(new CustomEvent('hass-notification', { bubbles: true, composed: true, detail: { message, duration: 8000 } })); } catch (_) { /* ignore */ }
+  }
+
+  // The WashData label's id (or null), for the badges and the filtered link. Any
+  // user may list labels.
+  async _loadWdLabel() {
+    try {
+      const r = await this._ws({ type: 'config/label_registry/list' });
+      const hit = (Array.isArray(r) ? r : []).find(x => x && String(x.name || '').trim().toLowerCase() === _WD_LABEL_NAME.toLowerCase());
+      this._wdLabelId = hit ? hit.label_id : null;
+    } catch (_) { /* keep what is known */ }
   }
 
   // Migrate legacy notify_actions (from the removed actions editor) into a real
@@ -6571,16 +7222,18 @@ class HaWashdataPanel extends HTMLElement {
     const hass = this._hass;
     const actions = Array.isArray(this._opts.notify_actions) ? this._opts.notify_actions : [];
     if (!dev || !actions.length) return;
+    const triggers = [
+      this._cycleTrigger(dev.entry_id, 'cycle_started'),
+      this._cycleTrigger(dev.entry_id, 'cycle_finished'),
+    ];
+    const nameVar = triggers[0].trigger === 'device' ? '{{ trigger.device_name }}' : '{{ trigger.event.data.device_name }}';
     const config = {
       alias: `${dev.title || 'WashData'}: migrated custom actions`,
-      description: 'Migrated from WashData legacy custom actions (which ran on cycle start, finish and live). Trim the triggers as needed. Note: old {device}/{duration}-style placeholders are NOT templated here - replace them with Jinja templates such as {{ trigger.event.data.device_name }}.',
+      description: 'Migrated from WashData legacy custom actions (which ran on cycle start, finish and live). Trim the triggers as needed. Note: old {device}/{duration}-style placeholders are NOT templated here - replace them with Jinja templates such as ' + nameVar + '.',
       mode: 'single',
-      trigger: [
-        { platform: 'event', event_type: 'ha_washdata_cycle_started', event_data: { entry_id: dev.entry_id } },
-        { platform: 'event', event_type: 'ha_washdata_cycle_ended', event_data: { entry_id: dev.entry_id } },
-      ],
-      condition: [],
-      action: actions,
+      triggers,
+      conditions: [],
+      actions: actions,
     };
     const id = 'washdata_' + Date.now().toString(36);
     if (!hass || !hass.callApi) { this._showToast(this._t('msg.toast_no_automation', {}, 'Cannot create automation here'), 'error'); return; }
@@ -6590,7 +7243,8 @@ class HaWashdataPanel extends HTMLElement {
       created = true;
       await this._ws({ type: `${_DOMAIN}/set_options`, entry_id: dev.entry_id, options: { notify_actions: [] } });
       if (this._isActiveEntry(dev.entry_id)) this._opts = { ...this._opts, notify_actions: [] };  // don't write the old device's opts if switched
-      this._showToast(this._t('msg.toast_automation_migrated', {}, 'Actions migrated to an automation; opening editor'));
+      // Never throws: a label that does not stick only warns.
+      if (await this._labelAutomation(id)) this._showToast(this._t('msg.toast_automation_migrated', {}, 'Actions migrated to an automation; opening editor'));
       this._navigate('/config/automation/edit/' + id);
     } catch (e) {
       const errTxt = e.message || e;
@@ -6614,7 +7268,7 @@ class HaWashdataPanel extends HTMLElement {
       } catch (_) { stillHasActions = null; }
       if (stillHasActions === false) {
         // The clear actually went through despite the error — keep the automation.
-        this._showToast(this._t('msg.toast_automation_migrated', {}, 'Actions migrated to an automation; opening editor'));
+        if (await this._labelAutomation(id)) this._showToast(this._t('msg.toast_automation_migrated', {}, 'Actions migrated to an automation; opening editor'));
         this._navigate('/config/automation/edit/' + id);
         return;
       }
@@ -6660,9 +7314,7 @@ class HaWashdataPanel extends HTMLElement {
         const fields = (grp.fields || []).filter(f => this._settingFieldVisible(f)).map(f => this._renderField(f, o)).filter(Boolean).join('');
         return fields ? `<div class="wd-subhead">${_esc(this._t('setting_group.' + _slugSub(grp.sub) + '.label', {}, grp.sub))}</div><div class="wd-form-grid">${fields}</div>` : '';
       }).join('');
-      // The automations manager is an advanced power-feature; keep Basic mode clean.
-      const autos = basicMode ? '' : this._htmlAutomations();
-      return `${autos}${varsHint}${groups}`;
+      return `${varsHint}${groups}`;
     }
 
     if (sec.groups) {
@@ -6930,7 +7582,6 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_enabled',    'Enable Anti-Wrinkle Detection', '', 'Absorb the tumble pulses after the main phase instead of reading them as new cycles', 'advanced', 'bool'],
       ['anti_wrinkle_max_power',  'Max Anti-Wrinkle Power','W', 'A pulse above this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_max_duration','Max Anti-Wrinkle Duration','s', 'A pulse longer than this ends anti-wrinkle and opens a new cycle', 'advanced'],
-      ['anti_wrinkle_exit_power', 'Anti-Wrinkle Exit Power','W', 'Quiet level between tumble pulses; only takes effect above the Stop Threshold', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
       ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
       ['smart_termination_duration_ratio', 'Smart Termination Ratio', '', 'Fraction of the program\'s average duration a cycle must reach before Smart Termination may end it early; lower it if run times vary', 'advanced'],
@@ -8740,11 +9391,13 @@ class HaWashdataPanel extends HTMLElement {
     const rows = log.length ? log.map(e => {
       const del = canEdit ? `<button class="wd-btn wd-btn-danger wd-btn-sm" data-action="maint-delete" data-mid="${_esc(e.id)}">${this._t('btn.delete', {}, 'Delete')}</button>` : '';
       const notes = e.notes ? `<div class="wd-info" style="margin-top:2px">${_esc(e.notes)}</div>` : '';
+      const byCycle = e.program ? `<div class="wd-info" style="margin-top:2px">${this._t('lbl.done_by_cycle', { program: e.program }, 'Done by a {program} cycle')}</div>` : '';
       return `<div class="wd-card" style="background:var(--secondary-background-color);padding:10px 12px">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
           <div>
             <div style="font-weight:600">${_esc(this._maintLabel(e.event_type, e.task_name))}</div>
             <div class="wd-info" style="margin-top:2px">${_fmtDate(e.date)}</div>
+            ${byCycle}
             ${notes}
           </div>
           ${del}
@@ -8767,6 +9420,26 @@ class HaWashdataPanel extends HTMLElement {
         <div class="wd-field"><label>${this._t('lbl.every_days', {}, 'Every (days)')}</label><input type="number" min="0" step="1" id="wd-mtask-new-days" placeholder="0"></div>
         <div class="wd-field"><button class="wd-btn wd-btn-sm" data-action="maint-task-add">${this._t('btn.add_task', {}, 'Add task')}</button></div>
       </div>` : `<p class="wd-info" style="margin-top:8px">${this._t('msg.custom_task_limit', { max: tasksMax }, 'You have reached the limit of {max} tasks.')}</p>`;
+    // Done by a program (#480): a finished cycle of a ticked program logs the task
+    // as done. One collapsible row per task, saved by "Save reminders".
+    const progAvail = Array.isArray(mt.programs_available) ? mt.programs_available : [];
+    const progMap = (mt.programs && typeof mt.programs === 'object') ? mt.programs : {};
+    const progTasks = eventTypes.map(t => ({ id: t, name: this._maintLabel(t) }))
+      .concat(customTasks.map(t => ({ id: t.id, name: t.name || t.id })));
+    const progRows = progTasks.map(task => {
+      const chosen = new Set(Array.isArray(progMap[task.id]) ? progMap[task.id] : []);
+      const summary = chosen.size ? _esc([...chosen].join(', ')) : this._t('lbl.done_by_none', {}, 'Not set');
+      const boxes = progAvail.map(p => `<label class="wd-switch-lbl" style="display:flex;align-items:center;gap:8px;margin:2px 0">` +
+        `<span class="wd-switch"><input type="checkbox" data-prog="${_esc(p)}" ${chosen.has(p) ? 'checked' : ''}><span class="wd-switch-slider"></span></span>` +
+        `<span class="wd-switch-text">${_esc(p)}</span></label>`).join('');
+      return `<details class="wd-maint-progs" data-mprog-row="${_esc(task.id)}" style="margin-top:6px">
+        <summary style="cursor:pointer"><span style="font-weight:600">${_esc(task.name)}</span> <span class="wd-info">${summary}</span></summary>
+        <div class="wd-checkboxlist" style="margin:6px 0 0 4px">${boxes}</div>
+      </details>`;
+    }).join('');
+    const progSection = progAvail.length && progTasks.length ? `<div class="wd-subhead" style="margin-top:16px">${this._t('hdr.maint_done_by_program', {}, 'Done automatically')}</div>
+      <p class="wd-info">${this._t('msg.maint_done_by_program_intro', {}, 'A task counts as done when a cycle of one of its programs finishes, for example the drum clean when Cotton 90 runs. Only cycles WashData is sure of, or that you picked, count.')}</p>
+      ${progRows}` : '';
     const remEditor = canEdit ? `<div class="wd-card">
       <div class="wd-card-title">${this._t('hdr.maintenance_reminders', {}, 'Service Reminders')}</div>
       <p class="wd-info" style="margin-bottom:12px">${this._t('msg.reminders_intro', {}, 'Show a reminder in the panel this many cycles after the last service. Leave blank or 0 to turn a reminder off.')}</p>
@@ -8777,6 +9450,7 @@ class HaWashdataPanel extends HTMLElement {
       <p class="wd-info">${this._t('msg.custom_tasks_intro', {}, 'Add anything else you want to be reminded of. A task is due when either interval is reached; leave one blank or 0 to use only the other.')}</p>
       ${taskRows}
       ${newTaskRow}
+      ${progSection}
       <p class="wd-info" style="margin-top:12px">${this._t('msg.maintenance_due_sensor_hint', {}, 'The Maintenance due binary sensor is on while any task is due, for your own notification automations.')}</p>
       <div class="wd-card-actions"><button class="wd-btn wd-btn-primary" data-action="maint-save-reminders">${this._t('btn.save_reminders', {}, 'Save reminders')}</button></div>
     </div>` : '';
@@ -8801,11 +9475,14 @@ class HaWashdataPanel extends HTMLElement {
       }
       const pct = Math.max(0, Math.min(100, Math.round(frac * 100)));
       const barColor = r.due ? 'var(--warning-color,#ff9800)' : 'var(--primary-color)';
+      const doneBy = Array.isArray(r.programs) && r.programs.length
+        ? `<div class="wd-info" style="margin-top:2px">${this._t('lbl.done_by_programs', { programs: r.programs.join(', ') }, 'Done automatically by: {programs}')}</div>` : '';
       return `<div style="margin-top:10px" data-mstatus="${_esc(r.id)}">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
           <span style="font-weight:600">${_esc(r.custom ? (r.name || r.id) : this._maintLabel(r.id))}</span>
           <span class="wd-info">${parts.join(' · ')}</span>
         </div>
+        ${doneBy}
         <div style="height:6px;margin-top:4px;border-radius:3px;background:var(--divider-color);overflow:hidden">
           <div style="height:100%;border-radius:3px;width:${pct}%;background:${barColor}"></div>
         </div>
@@ -8886,6 +9563,7 @@ class HaWashdataPanel extends HTMLElement {
       ['history', this._t('tab.history', {}, 'Cycles')],
       ['profiles', this._t('tab.profiles', {}, 'Profiles')],
       ['settings', this._t('tab.settings', {}, 'Settings')],
+      ['automations', this._t('tab.automations', {}, 'Automations')],
       ['playground', this._t('tab.playground', {}, 'Playground')],
     ];
     const opts = tabsAll.map(([v, l]) => `<option value="${v}" ${(cur.default_tab || '') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
@@ -8929,6 +9607,7 @@ class HaWashdataPanel extends HTMLElement {
       ['history', this._t('tab.history', {}, 'Cycles')],
       ['profiles', this._t('tab.profiles', {}, 'Profiles')],
       ['settings', this._t('tab.settings', {}, 'Settings')],
+      ['automations', this._t('tab.automations', {}, 'Automations')],
       ['playground', this._t('tab.playground', {}, 'Playground')],
     ];
     const dtOpts = tabOpts.map(([v, l]) => `<option value="${v}" ${(p.default_tab || 'status') === v ? 'selected' : ''}>${_esc(l)}</option>`).join('');
@@ -9495,6 +10174,13 @@ class HaWashdataPanel extends HTMLElement {
 
   // ── Log drawer (slide-in side panel) ────────────────────────────────────────
 
+  _toggleLogDrawer() {
+    this._logOpen = !this._logOpen;
+    try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
+    this._render();
+    if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
+  }
+
   _htmlLogDrawer() {
     return `<div class="wd-log-drawer open" style="width:${this._logDrawerWidth}px">
       <div class="wd-log-resize" title="${_esc(this._t('lbl.drag_to_resize', {}, 'Drag to resize'))}"></div>
@@ -9502,7 +10188,7 @@ class HaWashdataPanel extends HTMLElement {
         <span>${this._t('hdr.logs', {}, 'Logs')}</span>
         <div style="display:flex;align-items:center;gap:6px">
           <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="logs-export" style="padding:3px 8px">${this._t('btn.export', {}, 'Export')}</button>
-          <button class="wd-log-close-btn" data-action="toggle-log-drawer" title="${_esc(this._t('btn.close', {}, 'Close'))}">✕</button>
+          <button class="wd-log-close-btn" data-action="toggle-log-drawer" title="${_esc(this._t('btn.close', {}, 'Close'))}" aria-label="${_esc(this._t('btn.close', {}, 'Close'))}">✕</button>
         </div>
       </div>
       <div class="wd-log-drawer-body">
@@ -10274,6 +10960,7 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'export-select') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlExportSelectModal(m)}</div></div>`;
     if (m.type === 'import-wizard') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlImportWizardModal(m)}</div></div>`;
     if (m.type === 'history-import') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlHistoryImportModal(m)}</div></div>`;
+    if (m.type === 'bp-details') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg wd-bp-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlBlueprintDetails(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -13442,10 +14129,7 @@ class HaWashdataPanel extends HTMLElement {
         .catch(e => this._showToast(this._tText('msg.toast_error', { error: e.message || e }, 'Error: ' + (e.message || e)), 'error'));
 
     } else if (a === 'toggle-log-drawer') {
-      this._logOpen = !this._logOpen;
-      try { localStorage.setItem('wd-log-open', this._logOpen ? '1' : '0'); } catch (_) {}
-      this._render();
-      if (this._logOpen) this._fetchLogs().then(() => { if (this._logOpen) this._render(); });
+      this._toggleLogDrawer();
     } else if (a === 'add-device') {
       this._navigate(`/config/integrations/integration/${_DOMAIN}`);
     } else if (a === 'goto-feedbacks') {
@@ -13682,21 +14366,26 @@ class HaWashdataPanel extends HTMLElement {
     }
   }
 
+  // Online features on/off, integration-wide (the gear's switch and the
+  // Automations tab's "Turn on online features").
+  _setOnline(eid, on) {
+    return this._busyRun('store-account', async () => {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/store_set_online`, entry_id: eid, enabled: on });
+        this._constants.storeOnlineEnabled = !!(r && r.enabled);
+        if (this._constants.storeOnlineEnabled) { this._bpDisabled = false; await this._loadStoreStatus(eid); this._ensureStoreConnectListener(); }
+        else { this._storeStatus = { enabled: false }; this._storeConnected = false; this._bpCatalog = null; this._bpDisabled = true; }
+      } catch (e) {
+        this._showToast(this._tText('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      }
+    });
+  }
+
   _onActStore(a, btn, dev, eid, sr) {
     // ── Community Store ──────────────────────────────────────────────────────
     if (a === 'store-toggle-online') {
       // Online features are integration-wide: persist via the global store_set_online.
-      const on = !!btn.checked;
-      this._busyRun('store-account', async () => {
-        try {
-          const r = await this._ws({ type: `${_DOMAIN}/store_set_online`, entry_id: eid, enabled: on });
-          this._constants.storeOnlineEnabled = !!(r && r.enabled);
-          if (this._constants.storeOnlineEnabled) { await this._loadStoreStatus(eid); this._ensureStoreConnectListener(); }
-          else { this._storeStatus = { enabled: false }; this._storeConnected = false; }
-        } catch (e) {
-          this._showToast(this._tText('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
-        }
-      });
+      this._setOnline(eid, !!btn.checked);
 
     } else if (a === 'store-toggle-pref') {
       // Generic community-store preference toggle (declarative _STORE_PREFS).
@@ -13961,13 +14650,14 @@ class HaWashdataPanel extends HTMLElement {
 
   _onActAuto(a, btn, dev, eid, sr) {
     if (a === 'auto-new') {
-      this._navigate('/config/automation/edit/new');
+      this._newAutomation(null);
 
-    } else if (a === 'auto-new-started') {
-      this._newAutomationFromEvent('started');
+    } else if (a === 'auto-toggle-triggers') {
+      this._autoTrigOpen = !this._autoTrigOpen;
+      this._render();
 
-    } else if (a === 'auto-new-finished') {
-      this._newAutomationFromEvent('finished');
+    } else if (a === 'auto-new-trigger') {
+      this._newAutomation(btn.dataset.trigger);
 
     } else if (a === 'auto-delete') {
       const autoId = btn.dataset.autoid, autoName = btn.dataset.autoname || 'this automation';
@@ -13983,6 +14673,22 @@ class HaWashdataPanel extends HTMLElement {
 
     } else if (a === 'auto-convert-legacy') {
       this._convertLegacyActions();
+
+    } else if (a === 'auto-bp-use' || a === 'auto-bp-install' || a === 'auto-bp-details') {
+      const b = this._bpById(btn.dataset.bpid);
+      if (!b) return;
+      if (a === 'auto-bp-details') { this._modal = { type: 'bp-details', bpId: b.id }; this._render(); }
+      else this._bpStart(b, a === 'auto-bp-use' ? 'use' : 'install');
+
+    } else if (a === 'auto-bp-refresh') {
+      this._busyRun('bp-refresh', async () => { await this._loadBlueprintCatalog(true); });
+
+    } else if (a === 'auto-online-on') {
+      this._setOnline(eid, true).then(async () => {
+        if (!this._onlineEnabled()) return;
+        await this._loadBlueprintCatalog(true);
+        if (this._tab === 'automations') this._render();
+      });
 
     } else if (a === 'auto-remove-legacy') {
       this._modal = { type: 'confirm', title: this._t('modal.remove_legacy_title', {}, 'Remove Legacy Actions'), message: this._t('modal.remove_legacy_msg', {}, 'Remove the legacy custom actions? They will stop firing on cycle events. This cannot be undone from the panel.'), okLabel: this._t('btn.remove', {}, 'Remove'),
@@ -14064,6 +14770,16 @@ class HaWashdataPanel extends HTMLElement {
         if (days !== (t.days || 0)) patch.days = days;
         if (Object.keys(patch).length) updates.push({ task_id: t.id, ...patch });
       }
+      // Done by a program (#480): only the rows whose ticks changed.
+      const progMap = (mt.programs && typeof mt.programs === 'object') ? mt.programs : {};
+      const progUpdates = [];
+      sr.querySelectorAll('[data-mprog-row]').forEach(row => {
+        const tid = row.dataset.mprogRow;
+        const chosen = Array.from(row.querySelectorAll('input[data-prog]')).filter(c => c.checked).map(c => c.dataset.prog);
+        const before = Array.isArray(progMap[tid]) ? progMap[tid] : [];
+        const same = chosen.length === before.length && chosen.every(p => before.includes(p));
+        if (!same) progUpdates.push({ task_id: tid, programs: chosen });
+      });
       // Read before _busyRun: its first render rebuilds the inputs.
       const newTask = this._maintNewTaskInput(sr);
       this._busyRun('maint-save-reminders', async () => {
@@ -14073,6 +14789,9 @@ class HaWashdataPanel extends HTMLElement {
           }
           for (const u of updates) {
             await this._ws({ type: `${_DOMAIN}/update_maintenance_task`, entry_id: eid, ...u });
+          }
+          for (const u of progUpdates) {
+            await this._ws({ type: `${_DOMAIN}/set_maintenance_programs`, entry_id: eid, ...u });
           }
           if (newTask.name) await this._maintAddTask(eid, newTask);
           await this._fetchMaintenance(eid);
@@ -14230,6 +14949,12 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
     if (action === 'ok' && m && m.onOk) { const fn = m.onOk; this._modal = null; this._render(); await fn(); this._render(); return; }
+    if (m && m.type === 'bp-details') {
+      const b = this._bpById(m.bpId);
+      if (action === 'bp-copy') { await this._bpCopyYaml(b); return; }
+      if (action === 'bp-toggle-yaml') { m.showYaml = !m.showYaml; this._render(); return; }
+      if ((action === 'bp-use' || action === 'bp-install') && b) { this._modal = null; this._render(); this._bpStart(b, action === 'bp-use' ? 'use' : 'install'); return; }
+    }
 
     // ---- Profile group management ----
     if (m && m.type === 'profile-group') {
@@ -15379,9 +16104,8 @@ class HaWashdataPanel extends HTMLElement {
       // A blank/cleared value for a key that was never stored is a no-op: there is
       // nothing to clear, and writing it would pin an empty string into options.
       if (!(k in baseline) && (val === '' || val === null)) continue;
-      // A never-stored switch rendered at its default (energy_price_dynamic,
-      // notify_fire_events) is not an edit either: submitting it rewrote options the
-      // user never touched. Lists keep their own normalisation (evidence sources).
+      // A never-stored switch rendered at its default (energy_price_dynamic) is
+      // not an edit either: submitting it rewrote options the user never touched. Lists keep their own normalisation (evidence sources).
       if (!(k in baseline) && typeof val === 'boolean') {
         const d = (this._optDefaults && k in this._optDefaults) ? this._optDefaults[k] : (_FIELD_BY_KEY[k] || {}).def;
         if (d !== undefined && JSON.stringify(val) === JSON.stringify(d)) continue;

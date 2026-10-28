@@ -385,7 +385,6 @@ async def test_a_garbage_confidence_option_does_not_break_cycle_end(hass):
     from custom_components.ha_washdata.const import (
         CONF_AUTO_LABEL_CONFIDENCE,
         CONF_LEARNING_CONFIDENCE,
-        DEFAULT_AUTO_LABEL_CONFIDENCE,
         DEFAULT_LEARNING_CONFIDENCE,
     )
     from custom_components.ha_washdata.manager import WashDataManager
@@ -406,10 +405,11 @@ async def test_a_garbage_confidence_option_does_not_break_cycle_end(hass):
         mgr = WashDataManager(hass, entry)
 
     assert mgr._learning_confidence == DEFAULT_LEARNING_CONFIDENCE
-    assert mgr._auto_label_confidence == DEFAULT_AUTO_LABEL_CONFIDENCE
-    # The two comparisons that used to raise.
+    # The comparison that used to raise. (The manager's auto-label copy was
+    # write-only and is gone since 0.5.9; the garbage value no longer reaches any
+    # manager read.)
     assert (0.5 >= float(mgr._learning_confidence or 0.0)) in (True, False)
-    assert (mgr._auto_label_confidence > 0) in (True, False)
+    assert not hasattr(mgr, "_auto_label_confidence")
 
 
 @pytest.mark.parametrize("bad", ["", "three", "abc", float("inf"), float("nan"), 10 ** 400])

@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Prijateljski naziv za ovaj uređaj (npr. 'Mašina za pranje veša', 'Mašina za pranje sudova').",
           "device_type": "Postavlja zadane vrijednosti detekcije za ovu vrstu uređaja.",
-          "power_sensor": "Senzor pametnog utikača koji javlja trenutnu snagu u vatima.",
+          "power_sensor": "Senzor snage pametnog utikača (W ili kW), a ne njegovo brojilo energije (kWh).",
           "min_power": "Očitanja iznad ove vrijednosti (u vatima) znače da uređaj radi. 2 W odgovara većini uređaja."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Neočekivana greška",
-      "invalid_power": "Prag snage mora biti veći od 0"
+      "invalid_power": "Prag snage mora biti veći od 0",
+      "power_sensor_energy": "Ovo je brojilo energije (kWh), a ne senzor snage. Odaberite senzor snage utikača (W ili kW). Ako ga utikač nema, pomagač Derivative ga može napraviti iz brojila."
     },
     "abort": {
       "already_configured": "Uređaj je već konfigurisan",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Nijedan profil još nije podudaran.",
       "vs_typical_longer": "{pct}% duže nego obično",
       "vs_typical_shorter": "{pct}% kraće nego obično",
-      "invalid_power": "Prag snage mora biti veći od 0"
+      "invalid_power": "Prag snage mora biti veći od 0",
+      "power_sensor_energy": "Ovo je brojilo energije (kWh), a ne senzor snage. Odaberite senzor snage utikača (W ili kW). Ako ga utikač nema, pomagač Derivative ga može napraviti iz brojila."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Sušilica",
         "washer_dryer": "Kombinirana perilica-sušilica",
         "dishwasher": "Mašina za pranje sudova",
-        "air_fryer": "Friteza na vrući zrak",
-        "bread_maker": "Pekač hljeba",
         "pump": "Pumpa / Drenažna pumpa",
         "generic": "Ostalo (napredno)",
         "other": "Uređaj s pragom"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Bilo koji",
+        "completed": "Završen",
+        "force_stopped": "Prisilno zaustavljeno",
+        "interrupted": "Prekinut"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Isključeno",
+        "idle": "Mirovanje",
+        "starting": "Počinje",
+        "running": "Pokrenuto",
+        "paused": "Pauzirano",
+        "user_paused": "Pauzirano od strane korisnika",
+        "ending": "Kraj",
+        "finished": "Završeno",
+        "anti_wrinkle": "Anti-gužvanje",
+        "delay_wait": "Čeka se početak",
+        "interrupted": "Prekinut",
+        "force_stopped": "Prisilno zaustavljeno",
+        "unknown": "Nepoznato",
+        "clean": "Čisto"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Nije moguće dodijeliti profil: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Ciklus pokrenut",
+      "cycle_finished": "Ciklus završen",
+      "cycle_ended": "Ciklus završen (bilo koji razlog)",
+      "anti_wrinkle_started": "Anti-gužvanje pokrenuto",
+      "cycle_stalled": "Ciklus zaglavljen",
+      "unload_pending": "Istovar na čekanju",
+      "program_recognised": "Program prepoznat",
+      "phase_started": "Faza pokrenuta",
+      "finishing_soon": "Uskoro kraj",
+      "cycle_overrun": "Ciklus traje predugo",
+      "cycle_paused": "Ciklus pauziran",
+      "cycle_resumed": "Ciklus nastavljen",
+      "still_tumbling": "Još uvijek okreće bubanj nakon ciklusa",
+      "unloaded": "Istovaren",
+      "state_changed": "Stanje promijenjeno",
+      "maintenance_due": "Servis potreban",
+      "milestone_reached": "Dostignut miljokaz ciklusa",
+      "pump_stuck": "Pumpa zaglavljena"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Faza",
+      "minutes": "Minute",
+      "percent": "Dulje za (%)",
+      "include_detected": "Uključi otkrivene pauze",
+      "status": "Završen kao",
+      "from": "Iz",
+      "to": "U",
+      "task": "Zadatak"
+    },
+    "extra_fields_descriptions": {
+      "program": "Samo ovaj program, tačnim nazivom. Ostavite prazno za bilo koji program.",
+      "phase": "Samo ova faza, nazivom. Ostavite prazno za bilo koju fazu.",
+      "minutes": "Uskoro kraj: preostale minute. Još okreće bubanj: minute nakon završetka.",
+      "percent": "Posto iznad uobičajenog trajanja programa.",
+      "include_detected": "Pokrenuti i na pauzama koje WashData vidi u potrošnji, poput namakanja ili zaglavljenja.",
+      "status": "Samo ciklusi koji su završili na ovaj način.",
+      "from": "Samo promjene iz ovog stanja. Ostavite prazno za bilo koje.",
+      "to": "Samo promjene u ovo stanje. Ostavite prazno za bilo koje.",
+      "task": "Samo ovaj zadatak, nazivom ili id-om. Ostavite prazno za bilo koji zadatak."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Ciklus pokrenut",
+      "description": "Pokreće se kad uređaj pokrene ciklus."
+    },
+    "program_recognised": {
+      "name": "Program prepoznat",
+      "description": "Pokreće se kad WashData prepozna program tekućeg ciklusa ili ga prebaci na drugi.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Samo ovaj program, tačnim nazivom. Ostavite prazno za bilo koji program."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Faza pokrenuta",
+      "description": "Pokreće se kad tekući ciklus uđe u novu fazu svog programa.",
+      "fields": {
+        "phase": {
+          "name": "Faza",
+          "description": "Samo ova faza, nazivom. Ostavite prazno za bilo koju fazu."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Uskoro kraj",
+      "description": "Pokreće se jednom po ciklusu, kad preostalo vrijeme prvi put padne na zadani broj minuta.",
+      "fields": {
+        "minutes": {
+          "name": "Preostale minute",
+          "description": "Pokrenuti kad ostane toliko minuta ili manje."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Ciklus traje predugo",
+      "description": "Pokreće se jednom po ciklusu, kad traje toliko posto dulje od uobičajenog.",
+      "fields": {
+        "percent": {
+          "name": "Dulje za",
+          "description": "Posto iznad uobičajenog trajanja programa."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Ciklus pauziran",
+      "description": "Pokreće se kad pauzirate ciklus i po želji kad ga uređaj pauzira sam.",
+      "fields": {
+        "include_detected": {
+          "name": "Uključi otkrivene pauze",
+          "description": "Pokrenuti i na pauzama koje WashData vidi u potrošnji, poput namakanja ili zaglavljenja, ne samo na pauzama koje vi pokrećete."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Ciklus nastavljen",
+      "description": "Pokreće se kad pauzirani ciklus nastavi.",
+      "fields": {
+        "include_detected": {
+          "name": "Uključi otkrivene pauze",
+          "description": "Pokrenuti i na pauzama koje WashData vidi u potrošnji, poput namakanja ili zaglavljenja, ne samo na pauzama koje vi pokrećete."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Ciklus zaglavljen",
+      "description": "Pokreće se kad tekući ciklus zastane na niskoj, ravnoj razini potrošnje."
+    },
+    "cycle_finished": {
+      "name": "Ciklus završen",
+      "description": "Pokreće se kad se ciklus završi, uključujući kad ga vi zaustavite. Ne za lažni start.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Samo ovaj program, tačnim nazivom. Ostavite prazno za bilo koji program."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Ciklus završen",
+      "description": "Pokreće se kad ciklus završi iz bilo kojeg razloga, uključujući lažne startove.",
+      "fields": {
+        "status": {
+          "name": "Završen kao",
+          "description": "Samo ciklusi koji su završili na ovaj način."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-gužvanje pokrenuto",
+      "description": "Pokreće se kad uređaj počne okretati završen veš protiv gužvanja."
+    },
+    "still_tumbling": {
+      "name": "Još uvijek okreće bubanj nakon ciklusa",
+      "description": "Pokreće se jednom kad uređaj i dalje radi kratke okrete toliko minuta nakon završetka ciklusa. Zaustavlja se novim ciklusom ili 4 sata nakon završetka.",
+      "fields": {
+        "minutes": {
+          "name": "Minute nakon završetka",
+          "description": "Pokrenuti pri prvom okretanju barem toliko nakon završetka."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Istovar na čekanju",
+      "description": "Pokreće se kad je ciklus završio, a veš je i dalje unutra."
+    },
+    "unloaded": {
+      "name": "Istovaren",
+      "description": "Pokreće se kad je veš izvađen nakon ciklusa: vrata su otvorena ili istovar je potvrđen."
+    },
+    "state_changed": {
+      "name": "Stanje promijenjeno",
+      "description": "Pokreće se kad se WashData stanje promijeni.",
+      "fields": {
+        "from": {
+          "name": "Iz",
+          "description": "Samo promjene iz ovog stanja. Ostavite prazno za bilo koje."
+        },
+        "to": {
+          "name": "U",
+          "description": "Samo promjene u ovo stanje. Ostavite prazno za bilo koje."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Servis potreban",
+      "description": "Pokreće se kad zadatak servisa postane dospijeli.",
+      "fields": {
+        "task": {
+          "name": "Zadatak",
+          "description": "Samo ovaj zadatak, nazivom ili id-om. Ostavite prazno za bilo koji zadatak."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Dostignut miljokaz ciklusa",
+      "description": "Pokreće se kad ukupan broj ciklusa dostigne jedan od miljokaza postavljenih za obavijesti."
+    },
+    "pump_stuck": {
+      "name": "Pumpa zaglavljena",
+      "description": "Pokreće se kad pumpa radi dulje od njezine granice zaglavljenja."
     }
   }
 }

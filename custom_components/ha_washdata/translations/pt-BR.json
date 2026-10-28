@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Um nome amigável para este dispositivo (por exemplo, 'Máquina de lavar', 'Lava-louças').",
           "device_type": "Define os padrões de detecção para este tipo de eletrodoméstico.",
-          "power_sensor": "O sensor do plugue inteligente que informa a potência atual em watts.",
+          "power_sensor": "O sensor de potência do plugue inteligente (W ou kW), não o seu medidor de energia (kWh).",
           "min_power": "Leituras acima deste valor (em watts) indicam que o aparelho está funcionando. 2 W serve para a maioria dos dispositivos."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Erro inesperado",
-      "invalid_power": "O limite de potência deve ser maior que 0"
+      "invalid_power": "O limite de potência deve ser maior que 0",
+      "power_sensor_energy": "Este é um medidor de energia (kWh), não um sensor de potência. Escolha o sensor de potência do plugue (W ou kW). Se o plugue não tiver um, um helper Sensor derivativo pode criar um a partir do medidor."
     },
     "abort": {
       "already_configured": "O dispositivo já está configurado",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Nenhum perfil identificado ainda.",
       "vs_typical_longer": "{pct}% mais longo que o normal",
       "vs_typical_shorter": "{pct}% mais curto que o normal",
-      "invalid_power": "O limite de potência deve ser maior que 0"
+      "invalid_power": "O limite de potência deve ser maior que 0",
+      "power_sensor_energy": "Este é um medidor de energia (kWh), não um sensor de potência. Escolha o sensor de potência do plugue (W ou kW). Se o plugue não tiver um, um helper Sensor derivativo pode criar um a partir do medidor."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Secador",
         "washer_dryer": "Combinação Lavadora e Secadora",
         "dishwasher": "Máquina de lavar louça",
-        "air_fryer": "Fritadeira de ar",
-        "bread_maker": "Máquina de fazer pão",
         "pump": "Bomba / Bomba de depósito",
         "generic": "Outro (avançado)",
         "other": "Dispositivo de limite"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Qualquer",
+        "completed": "Concluído",
+        "force_stopped": "Parada forçada",
+        "interrupted": "Interrompido"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Desligado",
+        "idle": "Ocioso",
+        "starting": "Iniciando",
+        "running": "Em funcionamento",
+        "paused": "Pausado",
+        "user_paused": "Pausado pelo usuário",
+        "ending": "Encerrando",
+        "finished": "Concluído",
+        "anti_wrinkle": "Anti-amasso",
+        "delay_wait": "Esperando para começar",
+        "interrupted": "Interrompido",
+        "force_stopped": "Parada forçada",
+        "unknown": "Desconhecido",
+        "clean": "Limpo"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Não foi possível atribuir o perfil: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Ciclo iniciado",
+      "cycle_finished": "Ciclo concluído",
+      "cycle_ended": "Ciclo encerrado (qualquer motivo)",
+      "anti_wrinkle_started": "Antiamasso iniciado",
+      "cycle_stalled": "Ciclo travado",
+      "unload_pending": "Descarga pendente",
+      "program_recognised": "Programa reconhecido",
+      "phase_started": "Fase iniciada",
+      "finishing_soon": "Encerrando em breve",
+      "cycle_overrun": "Ciclo em atraso",
+      "cycle_paused": "Ciclo pausado",
+      "cycle_resumed": "Ciclo retomado",
+      "still_tumbling": "Ainda girando após o ciclo",
+      "unloaded": "Descarregado",
+      "state_changed": "Estado alterado",
+      "maintenance_due": "Manutenção devida",
+      "milestone_reached": "Marco de ciclos alcançado",
+      "pump_stuck": "Bomba travada"
+    },
+    "extra_fields": {
+      "program": "Programa",
+      "phase": "Fase",
+      "minutes": "Minutos",
+      "percent": "A mais (%)",
+      "include_detected": "Incluir pausas detectadas",
+      "status": "Encerrado como",
+      "from": "De",
+      "to": "Para",
+      "task": "Tarefa"
+    },
+    "extra_fields_descriptions": {
+      "program": "Somente este programa, pelo nome exato. Deixe vazio para qualquer programa.",
+      "phase": "Somente esta fase, pelo nome. Deixe vazio para qualquer fase.",
+      "minutes": "Encerrando em breve: minutos restantes. Ainda girando: minutos após o fim.",
+      "percent": "Percentagem acima da duração habitual do programa.",
+      "include_detected": "Acionar também nas pausas que o WashData detecta no consumo, como um molho ou uma parada.",
+      "status": "Somente ciclos que encerraram dessa forma.",
+      "from": "Somente mudanças a partir deste estado. Deixe vazio para qualquer.",
+      "to": "Somente mudanças para este estado. Deixe vazio para qualquer.",
+      "task": "Somente esta tarefa, pelo nome ou id. Deixe vazio para qualquer tarefa."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Ciclo iniciado",
+      "description": "Aciona quando o aparelho inicia um ciclo."
+    },
+    "program_recognised": {
+      "name": "Programa reconhecido",
+      "description": "Aciona quando o WashData reconhece o programa do ciclo em andamento ou muda para outro programa.",
+      "fields": {
+        "program": {
+          "name": "Programa",
+          "description": "Somente este programa, pelo nome exato. Deixe vazio para qualquer programa."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fase iniciada",
+      "description": "Aciona quando o ciclo em andamento entra em uma nova fase do programa.",
+      "fields": {
+        "phase": {
+          "name": "Fase",
+          "description": "Somente esta fase, pelo nome. Deixe vazio para qualquer fase."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Encerrando em breve",
+      "description": "Aciona uma vez por ciclo, quando o tempo restante cai pela primeira vez para este número de minutos.",
+      "fields": {
+        "minutes": {
+          "name": "Minutos restantes",
+          "description": "Aciona quando restam este número de minutos ou menos."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Ciclo em atraso",
+      "description": "Aciona uma vez por ciclo, quando dura mais do que o normal para este programa.",
+      "fields": {
+        "percent": {
+          "name": "A mais de",
+          "description": "Percentagem acima da duração habitual do programa."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Ciclo pausado",
+      "description": "Aciona quando você pausa um ciclo e, opcionalmente, quando o aparelho pausa sozinho.",
+      "fields": {
+        "include_detected": {
+          "name": "Incluir pausas detectadas",
+          "description": "Acionar também nas pausas que o WashData detecta no consumo, como um molho ou uma parada, não apenas nas que você inicia."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Ciclo retomado",
+      "description": "Aciona quando um ciclo pausado continua.",
+      "fields": {
+        "include_detected": {
+          "name": "Incluir pausas detectadas",
+          "description": "Acionar também nas pausas que o WashData detecta no consumo, como um molho ou uma parada, não apenas nas que você inicia."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Ciclo travado",
+      "description": "Aciona quando um ciclo em andamento para em um nível de consumo baixo e constante."
+    },
+    "cycle_finished": {
+      "name": "Ciclo concluído",
+      "description": "Aciona quando um ciclo termina, mesmo que você o pare. Não para uma partida falsa.",
+      "fields": {
+        "program": {
+          "name": "Programa",
+          "description": "Somente este programa, pelo nome exato. Deixe vazio para qualquer programa."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Ciclo encerrado (qualquer motivo)",
+      "description": "Aciona quando um ciclo termina por qualquer motivo, incluindo partidas falsas.",
+      "fields": {
+        "status": {
+          "name": "Encerrado como",
+          "description": "Somente ciclos que encerraram dessa forma."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Antiamasso iniciado",
+      "description": "Aciona quando o aparelho começa a girar a carga terminada para evitar amassados."
+    },
+    "still_tumbling": {
+      "name": "Ainda girando após o ciclo",
+      "description": "Aciona uma vez quando o aparelho ainda gira em breves rajadas este número de minutos após o fim do ciclo. Para com um novo ciclo ou 4 horas após o fim.",
+      "fields": {
+        "minutes": {
+          "name": "Minutos após o fim",
+          "description": "Aciona no primeiro giro pelo menos este tempo após o fim."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Descarga pendente",
+      "description": "Aciona quando um ciclo terminou e a carga ainda está dentro."
+    },
+    "unloaded": {
+      "name": "Descarregado",
+      "description": "Aciona quando a carga é retirada após um ciclo: a porta foi aberta ou a descarga foi confirmada."
+    },
+    "state_changed": {
+      "name": "Estado alterado",
+      "description": "Aciona quando o estado do WashData muda.",
+      "fields": {
+        "from": {
+          "name": "De",
+          "description": "Somente mudanças a partir deste estado. Deixe vazio para qualquer."
+        },
+        "to": {
+          "name": "Para",
+          "description": "Somente mudanças para este estado. Deixe vazio para qualquer."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Manutenção devida",
+      "description": "Aciona quando uma tarefa de manutenção fica pendente.",
+      "fields": {
+        "task": {
+          "name": "Tarefa",
+          "description": "Somente esta tarefa, pelo nome ou id. Deixe vazio para qualquer tarefa."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Marco de ciclos alcançado",
+      "description": "Aciona quando o contador total de ciclos atinge um dos marcos definidos para notificações."
+    },
+    "pump_stuck": {
+      "name": "Bomba travada",
+      "description": "Aciona quando uma bomba funciona por mais tempo do que seu limite de travamento."
     }
   }
 }

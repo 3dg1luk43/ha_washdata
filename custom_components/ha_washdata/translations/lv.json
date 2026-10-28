@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Šīs ierīces draudzīgs nosaukums (piemēram, “Veļas mašīna”, “Trauku mazgājamā mašīna”).",
           "device_type": "Iestata šāda veida ierīcei piemērotus noteikšanas noklusējumus.",
-          "power_sensor": "Viedā spraudņa sensors, kas ziņo pašreizējo jaudu vatos.",
+          "power_sensor": "Viedā spraudņa jaudas sensors (W vai kW), nevis tā enerģijas skaitītājs (kWh).",
           "min_power": "Rādījumi virs šīs vērtības (vatos) nozīmē, ka ierīce darbojas. Lielākajai daļai ierīču der 2 W."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Negaidīta kļūda",
-      "invalid_power": "Jaudas slieksnim jābūt lielākam par 0"
+      "invalid_power": "Jaudas slieksnim jābūt lielākam par 0",
+      "power_sensor_energy": "Šis ir enerģijas skaitītājs (kWh), nevis jaudas sensors. Izvēlieties spraudņa jaudas sensoru (W vai kW). Ja spraudnim tāda nav, palīgrīks Derivative var to izveidot no skaitītāja."
     },
     "abort": {
       "already_configured": "Ierīce jau ir konfigurēta",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Vēl nav atpazīts neviens profils.",
       "vs_typical_longer": "{pct}% ilgāk nekā parasti",
       "vs_typical_shorter": "{pct}% īsāk nekā parasti",
-      "invalid_power": "Jaudas slieksnim jābūt lielākam par 0"
+      "invalid_power": "Jaudas slieksnim jābūt lielākam par 0",
+      "power_sensor_energy": "Šis ir enerģijas skaitītājs (kWh), nevis jaudas sensors. Izvēlieties spraudņa jaudas sensoru (W vai kW). Ja spraudnim tāda nav, palīgrīks Derivative var to izveidot no skaitītāja."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Žāvētājs",
         "washer_dryer": "Kombinētais veļas mazgājamās mašīnas-žāvētājs",
         "dishwasher": "Trauku mazgājamā mašīna",
-        "air_fryer": "Gaisa cepeškrāsns",
-        "bread_maker": "Maizes gatavotājs",
         "pump": "Sūknis / Drenāžas sūknis",
         "generic": "Cits (papildu)",
         "other": "Sliekšņa ierīce"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Jebkurš",
+        "completed": "Pabeigts",
+        "force_stopped": "Piespiedu kārtā apturēta",
+        "interrupted": "Pārtrauca"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Izslēgts",
+        "idle": "Dīkstāvē",
+        "starting": "Sākas",
+        "running": "Darbojas",
+        "paused": "Pauzēts",
+        "user_paused": "Lietotāja apturēts",
+        "ending": "Beigas",
+        "finished": "Pabeigts",
+        "anti_wrinkle": "Pretgrumbu",
+        "delay_wait": "Gaida sākumu",
+        "interrupted": "Pārtrauca",
+        "force_stopped": "Piespiedu kārtā apturēta",
+        "unknown": "Nezināms",
+        "clean": "Tīrs"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Neizdevās piešķirt profilu: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Cikls sākās",
+      "cycle_finished": "Cikls beidzās",
+      "cycle_ended": "Cikls beidzās (jebkāda iemesla dēļ)",
+      "anti_wrinkle_started": "Pretgrumbu režīms sākās",
+      "cycle_stalled": "Cikls iestrēga",
+      "unload_pending": "Izkraušana gaida",
+      "program_recognised": "Programma atpazīta",
+      "phase_started": "Fāze sākās",
+      "finishing_soon": "Drīz beigsies",
+      "cycle_overrun": "Cikls ilgst pārāk ilgi",
+      "cycle_paused": "Cikls pauzēts",
+      "cycle_resumed": "Cikls atsākās",
+      "still_tumbling": "Trumulis vēl griežas pēc cikla",
+      "unloaded": "Izkrauts",
+      "state_changed": "Statuss mainījās",
+      "maintenance_due": "Apkope nepieciešama",
+      "milestone_reached": "Cikla atskaites punkts sasniegts",
+      "pump_stuck": "Sūknis iestrēdzis"
+    },
+    "extra_fields": {
+      "program": "Programma",
+      "phase": "Fāze",
+      "minutes": "Minūtes",
+      "percent": "Garāks par (%)",
+      "include_detected": "Iekļaut atklātās pauzes",
+      "status": "Beidzās kā",
+      "from": "No",
+      "to": "Uz",
+      "task": "Uzdevums"
+    },
+    "extra_fields_descriptions": {
+      "program": "Tikai šī programma, ar precīzu nosaukumu. Atstājiet tukšu jebkurai programmai.",
+      "phase": "Tikai šī fāze, ar nosaukumu. Atstājiet tukšu jebkurai fāzei.",
+      "minutes": "Drīz beigsies: atlikušās minūtes. Trumulis vēl griežas: minūtes pēc beigām.",
+      "percent": "Procenti virs programmas parastā ilguma.",
+      "include_detected": "Aktivizēties arī WashData strāvas patēriņā atklāto paužu gadījumā, piemēram, mērcēšanai vai apstāšanās gadījumā.",
+      "status": "Tikai tā beidzušies cikli.",
+      "from": "Tikai izmaiņas no šī statusa. Atstājiet tukšu jebkuram.",
+      "to": "Tikai izmaiņas uz šo statusu. Atstājiet tukšu jebkuram.",
+      "task": "Tikai šis uzdevums, pēc nosaukuma vai ID. Atstājiet tukšu jebkuram uzdevumam."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Cikls sākās",
+      "description": "Aktivizējas, kad ierīce uzsāk ciklu."
+    },
+    "program_recognised": {
+      "name": "Programma atpazīta",
+      "description": "Aktivizējas, kad WashData atpazīst darbojošā cikla programmu vai pārslēdzas uz citu.",
+      "fields": {
+        "program": {
+          "name": "Programma",
+          "description": "Tikai šī programma, ar precīzu nosaukumu. Atstājiet tukšu jebkurai programmai."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fāze sākās",
+      "description": "Aktivizējas, kad aktīvais cikls iestājas programmas jaunā fāzē.",
+      "fields": {
+        "phase": {
+          "name": "Fāze",
+          "description": "Tikai šī fāze, ar nosaukumu. Atstājiet tukšu jebkurai fāzei."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Drīz beigsies",
+      "description": "Aktivizējas vienu reizi ciklā, kad atlikušais laiks pirmo reizi nokrīt līdz šim minūšu skaitam.",
+      "fields": {
+        "minutes": {
+          "name": "Atlikušās minūtes",
+          "description": "Aktivizēties, kad atlikušas tik vai mazāk minūtes."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Cikls ilgst pārāk ilgi",
+      "description": "Aktivizējas vienu reizi ciklā, kad tas ilgst par tik ilgāk nekā programmas parastais ilgums.",
+      "fields": {
+        "percent": {
+          "name": "Garāks par",
+          "description": "Procenti virs programmas parastā ilguma."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Cikls pauzēts",
+      "description": "Aktivizējas, kad pauzējat ciklu, un pēc izvēles, kad ierīce apstājas pati.",
+      "fields": {
+        "include_detected": {
+          "name": "Iekļaut atklātās pauzes",
+          "description": "Aktivizēties arī WashData atklāto paužu gadījumā, piemēram, mērcēšanai vai apstāšanās gadījumā, ne tikai jūsu uzsākto paužu gadījumā."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Cikls atsākās",
+      "description": "Aktivizējas, kad pauzēts cikls turpinās.",
+      "fields": {
+        "include_detected": {
+          "name": "Iekļaut atklātās pauzes",
+          "description": "Aktivizēties arī WashData atklāto paužu gadījumā, piemēram, mērcēšanai vai apstāšanās gadījumā, ne tikai jūsu uzsākto paužu gadījumā."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Cikls iestrēga",
+      "description": "Aktivizējas, kad darbojošais cikls apstājas pie zema, nemainīga jaudas līmeņa."
+    },
+    "cycle_finished": {
+      "name": "Cikls beidzās",
+      "description": "Aktivizējas, kad cikls beidzas, arī tad, ja jūs to apturējat. Ne viltus palaišanas gadījumā.",
+      "fields": {
+        "program": {
+          "name": "Programma",
+          "description": "Tikai šī programma, ar precīzu nosaukumu. Atstājiet tukšu jebkurai programmai."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Cikls beidzās (jebkāda iemesla dēļ)",
+      "description": "Aktivizējas, kad cikls beidzas jebkura iemesla dēļ, ieskaitot viltus palaišanas.",
+      "fields": {
+        "status": {
+          "name": "Beidzās kā",
+          "description": "Tikai tā beidzušies cikli."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Pretgrumbu režīms sākās",
+      "description": "Aktivizējas, kad ierīces trumulis sāk griezties ar pabeigto veļu pret krokām."
+    },
+    "still_tumbling": {
+      "name": "Trumulis vēl griežas pēc cikla",
+      "description": "Aktivizējas vienu reizi, kad ierīces trumulis vēl griežas īsos posmos tik minūtes pēc cikla beigām. Apstājas jauna cikla sākumā vai 4 stundas pēc beigām.",
+      "fields": {
+        "minutes": {
+          "name": "Minūtes pēc beigām",
+          "description": "Aktivizēties pirmajā griešanās impulsā, kas ir vismaz tik ilgi pēc beigām."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Izkraušana gaida",
+      "description": "Aktivizējas, kad cikls ir beidzies un veļa vēl ir iekšā."
+    },
+    "unloaded": {
+      "name": "Izkrauts",
+      "description": "Aktivizējas, kad veļa tiek izņemta pēc cikla: durvis atvērtas vai izkraušana apstiprināta."
+    },
+    "state_changed": {
+      "name": "Statuss mainījās",
+      "description": "Aktivizējas, kad mainās WashData statuss.",
+      "fields": {
+        "from": {
+          "name": "No",
+          "description": "Tikai izmaiņas no šī statusa. Atstājiet tukšu jebkuram."
+        },
+        "to": {
+          "name": "Uz",
+          "description": "Tikai izmaiņas uz šo statusu. Atstājiet tukšu jebkuram."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Apkope nepieciešama",
+      "description": "Aktivizējas, kad apkopes uzdevums kļūst nepieciešams.",
+      "fields": {
+        "task": {
+          "name": "Uzdevums",
+          "description": "Tikai šis uzdevums, pēc nosaukuma vai ID. Atstājiet tukšu jebkuram uzdevumam."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Cikla atskaites punkts sasniegts",
+      "description": "Aktivizējas, kad mūža ciklu skaits sasniedz vienu no paziņojumiem iestatītajiem atskaites punktiem."
+    },
+    "pump_stuck": {
+      "name": "Sūknis iestrēdzis",
+      "description": "Aktivizējas, kad sūknis darbojas ilgāk par tā iestrēgšanas robežu."
     }
   }
 }

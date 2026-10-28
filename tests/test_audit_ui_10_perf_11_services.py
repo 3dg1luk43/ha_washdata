@@ -34,7 +34,11 @@ from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 import custom_components.ha_washdata as washdata
-from custom_components.ha_washdata.const import CONF_AUTO_LABEL_CONFIDENCE, DOMAIN
+from custom_components.ha_washdata.const import (
+    CONF_AUTO_LABEL_CONFIDENCE,
+    CONFIG_ENTRY_MINOR_VERSION,
+    DOMAIN,
+)
 
 
 async def _setup(hass, title: str, sensor: str, options: dict[str, Any] | None = None):
@@ -43,7 +47,7 @@ async def _setup(hass, title: str, sensor: str, options: dict[str, Any] | None =
     entry = MockConfigEntry(
         domain=DOMAIN, title=title,
         data={"name": title, "power_sensor": sensor, "device_type": "washing_machine"},
-        options=dict(options or {}), version=3, minor_version=11,
+        options=dict(options or {}), version=3, minor_version=CONFIG_ENTRY_MINOR_VERSION,
     )
     entry.add_to_hass(hass)
     entry.mock_state(hass, ConfigEntryState.LOADED)

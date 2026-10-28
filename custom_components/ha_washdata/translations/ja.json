@@ -13,7 +13,7 @@
         "data_description": {
           "name": "このデバイスのわかりやすい名前（例：「洗濯機」、「食器洗い機」）。",
           "device_type": "この種類の家電向けの検出のデフォルトを設定します。",
-          "power_sensor": "リアルタイムの電力をワット単位で報告するスマートプラグのセンサー。",
+          "power_sensor": "スマートプラグの電力センサー（W または kW）。エネルギーメーター（kWh）ではありません。",
           "min_power": "この値（ワット）を超える測定値は、家電が動作中であることを示します。ほとんどのデバイスには 2 W が適しています。"
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "予期しないエラーが発生しました",
-      "invalid_power": "電力しきい値は 0 より大きくする必要があります"
+      "invalid_power": "電力しきい値は 0 より大きくする必要があります",
+      "power_sensor_energy": "これはエネルギーメーター（kWh）で、電力センサーではありません。プラグの電力センサー（W または kW）を選んでください。プラグに電力センサーがない場合は、微分センサーのヘルパーでメーターから作成できます。"
     },
     "abort": {
       "already_configured": "このデバイスはすでに設定されています",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: まだ一致するプロファイルがありません。",
       "vs_typical_longer": "通常より {pct}% 長い",
       "vs_typical_shorter": "通常より {pct}% 短い",
-      "invalid_power": "電力しきい値は 0 より大きくする必要があります"
+      "invalid_power": "電力しきい値は 0 より大きくする必要があります",
+      "power_sensor_energy": "これはエネルギーメーター（kWh）で、電力センサーではありません。プラグの電力センサー（W または kW）を選んでください。プラグに電力センサーがない場合は、微分センサーのヘルパーでメーターから作成できます。"
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "ドライヤー",
         "washer_dryer": "洗濯乾燥機コンボ",
         "dishwasher": "食器洗い機",
-        "air_fryer": "エアーフライヤー",
-        "bread_maker": "パンメーカー",
         "pump": "ポンプ/サンプポンプ",
         "generic": "その他（上級）",
         "other": "閾値デバイス"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "すべて",
+        "completed": "完了",
+        "force_stopped": "強制停止",
+        "interrupted": "中断"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "オフ",
+        "idle": "待機中",
+        "starting": "起動中",
+        "running": "動作中",
+        "paused": "一時停止中",
+        "user_paused": "ユーザーにより一時停止中",
+        "ending": "終了中",
+        "finished": "完了",
+        "anti_wrinkle": "しわ防止",
+        "delay_wait": "開始を待っています",
+        "interrupted": "中断",
+        "force_stopped": "強制停止",
+        "unknown": "不明",
+        "clean": "クリーン"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "プロファイルを割り当てできませんでした：{error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "サイクル開始",
+      "cycle_finished": "サイクル終了",
+      "cycle_ended": "サイクル終了（理由を問わず）",
+      "anti_wrinkle_started": "しわ防止開始",
+      "cycle_stalled": "サイクル停滞",
+      "unload_pending": "取り出し待ち",
+      "program_recognised": "プログラムが認識された",
+      "phase_started": "フェーズが開始された",
+      "finishing_soon": "もうすぐ終わる",
+      "cycle_overrun": "サイクルが長引いている",
+      "cycle_paused": "サイクルが一時停止された",
+      "cycle_resumed": "サイクルが再開された",
+      "still_tumbling": "サイクル後もまだ回転中",
+      "unloaded": "取り出し済み",
+      "state_changed": "状態が変わった",
+      "maintenance_due": "メンテナンスが必要",
+      "milestone_reached": "サイクルのマイルストーンに達した",
+      "pump_stuck": "ポンプが詰まっている"
+    },
+    "extra_fields": {
+      "program": "プログラム",
+      "phase": "フェーズ",
+      "minutes": "分",
+      "percent": "長い分 (%)",
+      "include_detected": "検出された一時停止を含む",
+      "status": "終了状態",
+      "from": "変更元",
+      "to": "変更先",
+      "task": "タスク"
+    },
+    "extra_fields_descriptions": {
+      "program": "このプログラムのみ、正確な名前で指定。任意のプログラムは空白にしてください。",
+      "phase": "このフェーズのみ、名前で指定。任意のフェーズは空白にしてください。",
+      "minutes": "もうすぐ終わる: 残り分数。まだ回転中: 終了後の分数。",
+      "percent": "プログラムの通常所要時間を超える割合。",
+      "include_detected": "浸け置きや停滞など、WashData が電力で検出した一時停止でもトリガーします。",
+      "status": "この方法で終了したサイクルのみ。",
+      "from": "この状態からの変化のみ。任意の場合は空白にしてください。",
+      "to": "この状態への変化のみ。任意の場合は空白にしてください。",
+      "task": "このタスクのみ、名前または ID で指定。任意のタスクは空白にしてください。"
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "サイクル開始",
+      "description": "機器がサイクルを開始したときにトリガーします。"
+    },
+    "program_recognised": {
+      "name": "プログラムが認識された",
+      "description": "WashData が実行中のサイクルのプログラムを認識したとき、または別のプログラムに切り替わったときにトリガーします。",
+      "fields": {
+        "program": {
+          "name": "プログラム",
+          "description": "このプログラムのみ、正確な名前で指定。任意のプログラムは空白にしてください。"
+        }
+      }
+    },
+    "phase_started": {
+      "name": "フェーズが開始された",
+      "description": "実行中のサイクルがプログラムの新しいフェーズに入ったときにトリガーします。",
+      "fields": {
+        "phase": {
+          "name": "フェーズ",
+          "description": "このフェーズのみ、名前で指定。任意のフェーズは空白にしてください。"
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "もうすぐ終わる",
+      "description": "残り時間が初めてこの分数に達したとき、サイクルごとに一度トリガーします。",
+      "fields": {
+        "minutes": {
+          "name": "残り分数",
+          "description": "この分数以下になったときにトリガーします。"
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "サイクルが長引いている",
+      "description": "プログラムの通常所要時間よりこれだけ長くかかったとき、サイクルごとに一度トリガーします。",
+      "fields": {
+        "percent": {
+          "name": "長い分",
+          "description": "プログラムの通常所要時間を超える割合。"
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "サイクルが一時停止された",
+      "description": "サイクルを一時停止したとき、またはオプションで機器が自動的に停止したときにトリガーします。",
+      "fields": {
+        "include_detected": {
+          "name": "検出された一時停止を含む",
+          "description": "自分で開始した一時停止だけでなく、浸け置きや停滞など WashData が電力で検出した一時停止でもトリガーします。"
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "サイクルが再開された",
+      "description": "一時停止中のサイクルが再開されたときにトリガーします。",
+      "fields": {
+        "include_detected": {
+          "name": "検出された一時停止を含む",
+          "description": "自分で開始した一時停止だけでなく、浸け置きや停滞など WashData が電力で検出した一時停止でもトリガーします。"
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "サイクル停滞",
+      "description": "実行中のサイクルが低くて安定した電力レベルで止まったときにトリガーします。"
+    },
+    "cycle_finished": {
+      "name": "サイクル終了",
+      "description": "サイクルが終了したときにトリガーします。自分で停止した場合も同様。誤起動では発動しません。",
+      "fields": {
+        "program": {
+          "name": "プログラム",
+          "description": "このプログラムのみ、正確な名前で指定。任意のプログラムは空白にしてください。"
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "サイクル終了（理由を問わず）",
+      "description": "誤起動を含む、何らかの理由でサイクルが終了したときにトリガーします。",
+      "fields": {
+        "status": {
+          "name": "終了状態",
+          "description": "この方法で終了したサイクルのみ。"
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "しわ防止開始",
+      "description": "機器がしわ防止のために終了した洗濯物を回し始めたときにトリガーします。"
+    },
+    "still_tumbling": {
+      "name": "サイクル後もまだ回転中",
+      "description": "サイクル終了後この分数が経過してもまだ短い間隔で回転している場合に一度トリガーします。新しいサイクルが始まるか、終了後4時間で停止します。",
+      "fields": {
+        "minutes": {
+          "name": "終了後の分数",
+          "description": "終了後少なくともこの時間が経過した最初の回転でトリガーします。"
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "取り出し待ち",
+      "description": "サイクルが終了し、洗濯物がまだ中にあるときにトリガーします。"
+    },
+    "unloaded": {
+      "name": "取り出し済み",
+      "description": "サイクル後に洗濯物が取り出されたときにトリガーします: ドアが開いたか、取り出しが確認されました。"
+    },
+    "state_changed": {
+      "name": "状態が変わった",
+      "description": "WashData の状態が変わったときにトリガーします。",
+      "fields": {
+        "from": {
+          "name": "変更元",
+          "description": "この状態からの変化のみ。任意の場合は空白にしてください。"
+        },
+        "to": {
+          "name": "変更先",
+          "description": "この状態への変化のみ。任意の場合は空白にしてください。"
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "メンテナンスが必要",
+      "description": "メンテナンスタスクが必要になったときにトリガーします。",
+      "fields": {
+        "task": {
+          "name": "タスク",
+          "description": "このタスクのみ、名前または ID で指定。任意のタスクは空白にしてください。"
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "サイクルのマイルストーンに達した",
+      "description": "生涯サイクル数が通知に設定されたマイルストーンの一つに達したときにトリガーします。"
+    },
+    "pump_stuck": {
+      "name": "ポンプが詰まっている",
+      "description": "ポンプが詰まり制限よりも長く動作しているときにトリガーします。"
     }
   }
 }

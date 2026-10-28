@@ -23,7 +23,6 @@ from custom_components.ha_washdata.const import (
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
     CONF_PROFILE_DURATION_TOLERANCE,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
@@ -97,7 +96,6 @@ def mock_entry():
     entry.options = {
         CONF_AUTO_LABEL_CONFIDENCE: 0.9,
         CONF_LEARNING_CONFIDENCE: 0.6,
-        CONF_DURATION_TOLERANCE: 0.1
     }
     entry.title = "Test Entry"
     return entry
@@ -267,12 +265,12 @@ def _make_lm(mock_hass, options, past_cycle_count=0, apply_cycle_count=0):
 def test_suggestion_min_abs_delta_by_key_suffix() -> None:
     """_suggestion_min_abs_delta returns sensible per-category minimums."""
     assert _suggestion_min_abs_delta("start_threshold_w") == 0.3
-    assert _suggestion_min_abs_delta("anti_wrinkle_exit_power") == 0.3
+    assert _suggestion_min_abs_delta("anti_wrinkle_max_power") == 0.3
     assert _suggestion_min_abs_delta("off_delay") == 5.0
     assert _suggestion_min_abs_delta("no_update_active_timeout") == 5.0
     assert _suggestion_min_abs_delta("duration_ratio") == 0.02
     assert _suggestion_min_abs_delta("auto_label_confidence") == 0.02
-    assert _suggestion_min_abs_delta("end_repeat_count") == 1.0
+    assert _suggestion_min_abs_delta("any_count") == 1.0
     assert _suggestion_min_abs_delta("unknown_key") == 0.05
 
 

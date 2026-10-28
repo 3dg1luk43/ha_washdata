@@ -26,8 +26,8 @@ Closed automatically:
 
 If a bot or the maintainer closed your issue and the problem is still there, comment `/reopen` on it.
 
-**Translations are the exception:** they need no issue or label (see below). Documentation PRs go
-through the same flow as code.
+**Translations and automation templates are the exception:** they need no issue or label (see
+below). Documentation PRs go through the same flow as code.
 
 ## Bug reports
 
@@ -61,7 +61,8 @@ rules: [CLAUDE.md](CLAUDE.md) and [How it works](https://github.com/3dg1luk43/ha
 ## Rules for code changes
 
 - **NumPy only.** No SciPy, scikit-learn or other libraries at runtime, ML code included.
-- **Local only.** No external API calls outside the opt-in Community Store.
+- **Local only.** No external calls outside the opt-in online features (Community Store, automation
+  template library).
 - **Time:** `dt_util.now()` for timestamps, UTC (`time_utils.utc_now()`) for any interval.
 - **No UI text in code.** Home Assistant strings go in `strings.json` and `translations/en.json`;
   panel strings go through `_t()` with the English text in `translations/panel/en.json`.
@@ -76,6 +77,12 @@ rules: [CLAUDE.md](CLAUDE.md) and [How it works](https://github.com/3dg1luk43/ha
 
 PR titles: `[FIX]`, `[FEATURE]`, `[REFACTOR]`, `[DOCS]`, `[TEST]`, `[PERF]`, e.g.
 `[FIX] Handle a power sensor going unavailable mid-cycle`.
+
+## Automation templates
+
+Templates live in their own repository,
+[washdata-automations](https://github.com/3dg1luk43/washdata-automations), not here: share one there by
+pull request (its CONTRIBUTING lists the rules). A template PR against this repository is closed.
 
 ## Translations
 

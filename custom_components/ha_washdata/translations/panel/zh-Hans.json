@@ -86,7 +86,9 @@
         "matcher_unused": "尚未匹配到您的任何周期",
         "matcher_used": "已匹配您的 {n} 个周期",
         "matcher_used_other": "已匹配您的 {n} 个周期",
-        "matcher_used_tip": "此设备上由 WashData 自动匹配到此导入程序的周期。从未匹配过的导入程序可能不适合您的设备，可以删除。仅在本地统计，不会向商店发送任何内容。"
+        "matcher_used_tip": "此设备上由 WashData 自动匹配到此导入程序的周期。从未匹配过的导入程序可能不适合您的设备，可以删除。仅在本地统计，不会向商店发送任何内容。",
+        "bp_installed": "已安装",
+        "bp_installed_other": "已安装其他版本"
     },
     "btn": {
         "pg_preset_delete": "删除预设",
@@ -130,7 +132,6 @@
         "export": "导出",
         "force_stop": "强制停止",
         "force_stop_tip": "立即结束当前周期并将其标记为强制停止",
-        "from_template": "从模板 ▾",
         "ignore": "忽略",
         "import_json": "从 JSON 导入",
         "inspect": "检查",
@@ -138,14 +139,11 @@
         "load_more": "加载更多",
         "manage": "管理",
         "merge": "合并",
-        "new_automation": "＋ 新建自动化",
         "new_group": "+ 新建组",
         "new_group_tip": "将几乎相同的配置文件（形状相同，温度或转速不同）分组，使匹配能够区分它们。",
         "new_phase": "+ 新建阶段",
         "new_profile": "+ 新建配置文件",
         "new_profile_tip": "从现有已标记的周期或录制中创建新程序配置文件",
-        "on_cycle_finished": "周期完成时",
-        "on_cycle_started": "周期开始时",
         "pause_cycle": "暂停",
         "pause_cycle_tip": "暂停正在运行的周期 – 设备将从中断处恢复",
         "pg_load_live": "加载生效设置",
@@ -248,7 +246,23 @@
         "confirmed": "已确认",
         "create_profile_from_gap": "创建配置文件",
         "undo_import": "撤销上次导入",
-        "pg_rerun": "更新模拟"
+        "pg_rerun": "更新模拟",
+        "replace": "替换",
+        "auto_edit_in_ha": "在 Home Assistant 中编辑",
+        "auto_fewer_triggers": "收起触发器",
+        "auto_more_triggers": "还有 {count} 个触发器",
+        "auto_more_triggers_other": "还有 {count} 个触发器",
+        "auto_blank": "空白自动化",
+        "bp_refresh": "在 GitHub 上检查新模板",
+        "bp_turn_on_online": "开启在线功能",
+        "bp_add_tip": "使用默认设置为此家电创建自动化，然后在 Home Assistant 中打开",
+        "bp_add_to": "添加到 {device}",
+        "bp_setup_tip": "安装模板，然后打开 Home Assistant 填写其余内容",
+        "bp_setup_in_ha": "在 Home Assistant 中设置",
+        "bp_details": "详情",
+        "bp_copy_yaml": "复制 YAML",
+        "bp_hide_yaml": "隐藏 YAML",
+        "bp_show_yaml": "显示 YAML"
     },
     "note": {
         "off_delay": {
@@ -303,25 +317,22 @@
             "timeout": "必须大于泵卡住时长（{ps} 秒），以便卡泵警报先触发"
         },
         "start_dur": {
-            "sampling": "采样间隔超过启动时长 ({sdt} 秒)；单样本尖峰可能触发周期开始",
             "threshold": "应至少为一个采样间隔 ({si} 秒) 以防止单样本误启动"
-        },
-        "unmatch": {
-            "match": "必须高于不匹配阈值 ({un})",
-            "unmatch": "必须低于匹配阈值 ({match})；否则已确认的匹配会立即取消"
         },
         "cascade_toast": "为保持一致性而调整的其他设置：{n}",
         "suggestion_resolves": "应用下方的待处理建议（{val}）以修复此问题",
         "use_fix": "使用 {val}",
         "watchdog": {
-            "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍",
-            "sampling": "采样间隔应最多为看门狗间隔 ({wi} 秒) 的一半"
+            "interval": "应至少为采样间隔 ({si} 秒) 的 2 倍"
         },
         "settings_banner": "设置冲突：{n}。请检查高亮显示的部分，并在保存前修复。",
         "settings_banner_btn": "前往第一处",
         "end_energy": {
             "energy": "对于停止阈值 ({w} W) 和关闭延迟 ({d} s) 而言过于严格；周期只能通过备用路径结束",
             "stop": "结束能耗 ({d} s 内 {e} Wh) 只允许 {p} W"
+        },
+        "power_sensor": {
+            "energy": "该传感器统计的是电能（{unit}），不是功率，因此无法检测周期。请选择插座的功率传感器（W 或 kW）。"
         }
     },
     "hdr": {
@@ -331,7 +342,6 @@
         "add_maintenance": "添加维护事件",
         "automation_delete": "删除此自动化",
         "automation_needs_review": "此周期需要审查",
-        "automation_open": "在自动化编辑器中打开",
         "automation_review_this_cycle": "审查此周期",
         "automations": "自动化",
         "clear_debug": "清除调试追踪",
@@ -349,7 +359,6 @@
         "ml_settings_card": "设置",
         "ml_smart_learning": "智能学习",
         "my_preferences": "我的偏好",
-        "no_automations": "尚未有自动化引用此设备。",
         "panel_settings": "面板设置",
         "pg_settings_source": "设置来源",
         "phase_catalog": "阶段目录",
@@ -369,7 +378,15 @@
         "import_power_history": "导入功率历史",
         "service_status": "保养状态",
         "online_account_tab": "在线与社区",
-        "live_match_debug": "实时匹配调试"
+        "live_match_debug": "实时匹配调试",
+        "automations_all_tip": "Home Assistant 的自动化列表，按 WashData 标签过滤。在此创建的自动化也在 WashData 类别中。",
+        "maint_done_by_program": "自动完成",
+        "auto_start": "新建自动化",
+        "auto_yours": "您的自动化",
+        "bp_needs_online": "模板库需要在线功能",
+        "bp_unreachable": "无法连接模板库",
+        "bp_library": "模板库",
+        "bp_settings": "可设置的选项"
     },
     "health": {
         "fair": "配置文件质量尚可",
@@ -651,7 +668,7 @@
         "hist_reason_already_recorded": "与 WashData 已记录的周期重叠",
         "share_consent": "我确认这些周期均正常完成，无中断",
         "show_internal": "显示内部设置",
-        "show_internal_tip": "由 WashData 自动调校的设置（采样、看门狗、匹配频率、阈值）。当此设备有自定义值、冲突或建议时显示。",
+        "show_internal_tip": "由 WashData 自动调校的设置（看门狗、匹配频率、阈值）。当此设备有自定义值、冲突或建议时显示。",
         "rate_n": "{n} 星",
         "rate_quality": "评价质量",
         "pg_autolabel": "自动标记",
@@ -678,7 +695,19 @@
         "cycle_context_minutes": "{min} 分钟",
         "cycle_context_series": "记录器历史",
         "before_start": "开始前",
-        "after_end": "结束后"
+        "after_end": "结束后",
+        "bp_yaml": "蓝图 YAML",
+        "automation_wd_label": "包含 WashData 标签",
+        "done_by_none": "未设置",
+        "done_by_programs": "由以下程序自动完成：{programs}",
+        "done_by_cycle": "由 {program} 周期完成",
+        "bp_by": "作者：{author}",
+        "bp_for_all": "所有家电",
+        "bp_for": "适用于",
+        "bp_needs": "要求",
+        "bp_needs_version": "WashData {version} 或更高版本",
+        "bp_author": "作者",
+        "bp_required": "必填"
     },
     "log": {
         "all_levels": "所有级别",
@@ -773,7 +802,9 @@
         "profile_title": "配置文件 · {name}",
         "undo_import_msg": "此设备的数据和设置将恢复到上次导入（{when}）之前的状态。此后记录的周期和所做的更改都将丢失。",
         "undo_import_ok": "撤销导入",
-        "undo_import_title": "撤销上次导入"
+        "undo_import_title": "撤销上次导入",
+        "bp_replace_title": "替换已安装的模板？",
+        "bp_replace_library_msg": "Home Assistant 中已有另一个版本的“{name}”。要用模板库中的版本替换吗？使用它的自动化也会随之改变。"
     },
     "msg": {
         "pg_canvas_empty3": "在上方选择一个周期并按“运行”进行模拟。然后悬停查看数值，滚动或双指缩放，拖动平移。",
@@ -793,7 +824,6 @@
         "artifact_pause_detail": "功率降至接近零约 {n} 秒后恢复。可能是开了门或周期被暂停。",
         "artifact_spike_detail": "超出通常功率范围约 {n} 秒。",
         "auto_label_intro": "为置信度达到阈值的未标记周期分配配置文件。",
-        "automations_intro": "WashData 触发 {start} / {end} 事件并公开实体，因此通知和操作最好构建为常规 Home Assistant 自动化。使用此设备的自动化显示在下方。",
         "cleanup_intro": "叠加显示所有已标记的周期。勾选离群值，然后取消其标记（保留在历史中，不再用于构建此配置文件）或将其删除。",
         "clear_debug_hint": "删除存储的调试数据以释放空间。",
         "collecting_data": "正在收集数据。开始微调前还需要的周期数：{need}（{current}/{min}）。",
@@ -958,7 +988,7 @@
         "standby_above_stop_title": "周期结束时仍在消耗 {idle} W",
         "standby_above_stop_sub": "最近 {total} 个周期中有 {n} 个。关闭延迟只有在功率低于停止阈值（{stop} W）之后才开始计时，因此周期会结束过晚或需要手动停止。",
         "store_share_intro": "上传此参考周期，以便拥有相同家电的其他人使用。它会经过审核后才公开显示。",
-        "online_intro_global": "与其他 WashData 用户浏览和分享参考录制。一次连接适用于您所有的 WashData 设备；品牌和型号在“基本”下按设备设置。在线功能在您开启前保持关闭。",
+        "online_intro_global": "与其他 WashData 用户浏览和分享参考录制，并使用自动化模板库。一次连接适用于您所有的 WashData 设备；品牌和型号在“基本”下按设备设置。在线功能在您开启前保持关闭。",
         "online_unavailable": "此服务器不支持在线功能。",
         "store_picker_offline": "在设置齿轮中启用在线功能，即可从社区目录中选择。",
         "pick_brand_first": "请先选择家电品牌。",
@@ -1029,10 +1059,6 @@
         "pg_label_yes": "周期结束时将被标记为“{name}”",
         "pg_label_no": "将请求审查：{reason}",
         "live_match_debug_tip": "置信度：当前功率曲线与排名第一的候选配置文件的吻合程度（0-100%）。不明确：两个最佳候选的得分相差不到 5%，在周期结束前标签尚不确定。",
-        "automation_alias_started": "{device}：周期已开始",
-        "automation_alias_finished": "{device}：周期已完成",
-        "automation_desc_started": "{device} 周期开始时运行。请添加您的动作（通知、灯光等）。",
-        "automation_desc_finished": "{device} 周期完成时运行。请添加您的动作（通知、灯光等）。",
         "feedback_detected": "WashData 检测到：{name}",
         "import_undo_hint": "已保留上次导入（{when}）之前的还原点：{profiles} 个配置文件和 {cycles} 个周期。",
         "replace_undo_hint": "系统会先保存一个还原点，因此您可以在“导出 / 导入”中撤销此次导入。",
@@ -1053,7 +1079,22 @@
         "cycle_context_note": "灰色：功率传感器在此周期前后的记录器历史。它不属于该周期，不影响时长、能耗或匹配。",
         "cycle_context_none": "记录器中没有此周期前后的读数（Home Assistant 默认保留 10 天的历史）。",
         "cycle_context_tip": "仅用于显示：显示功率传感器在此周期前后的记录器历史（如仍保留）。若要将失败的启动尝试并入以后的周期，请使用“曲线前导采样”（设置 > 检测 > 周期开始），这会改变存储的时长。",
-        "invalid_threshold_pair": "停止阈值（{stop} W）必须低于启动阈值（{start} W）。未保存任何内容；请同时修改这两个值。"
+        "invalid_threshold_pair": "停止阈值（{stop} W）必须低于启动阈值（{start} W）。未保存任何内容；请同时修改这两个值。",
+        "bp_admin_only": "模板由管理员安装。",
+        "automation_alias_trigger": "{device}: {trigger}",
+        "automation_desc_trigger": "由 WashData 为 {device} 创建。添加您的动作（通知、灯光等）。",
+        "automation_alias_new": "{device}: 新建自动化",
+        "maint_done_by_program_intro": "当任务所选程序之一的周期结束时，该任务即算作完成，例如运行“棉布 90”后清洁滚筒即完成。只有 WashData 确认识别的周期，或您手动选择了程序的周期才会计入。",
+        "auto_none": "还没有自动化使用此家电。",
+        "auto_start_hint": "在 Home Assistant 的自动化编辑器中打开，并已预先填入此家电。",
+        "auto_yours_intro": "响应此家电的 Home Assistant 自动化。",
+        "bp_needs_online": "模板从 GitHub 下载，因此模板库仅在开启在线功能时可用。在线功能还包括社区商店。",
+        "bp_needs_online_admin": "管理员可以在齿轮菜单的“在线与社区”中开启。",
+        "bp_stale": "暂时无法连接 GitHub。以下是之前下载的模板。",
+        "bp_none_yet": "此家电类型还没有模板。来分享第一个吧。",
+        "bp_unreachable": "模板库从 GitHub 下载。请检查 Home Assistant 能否访问互联网，然后重试。",
+        "bp_library_intro": "WashData 用户在 GitHub 上分享的现成自动化，上架前经过审核。仅在开启在线功能时可用。",
+        "bp_needs_version": "需要 WashData {version} 或更高版本。"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1063,9 +1104,8 @@
         "start_duration_threshold": "确认启动所需的超阈值秒数",
         "start_threshold_w": "计为启动的最小瓦数",
         "stop_threshold_w": "低于此值机器计为关闭",
-        "anti_wrinkle_enabled": "吸收主阶段之后的翻滚脉冲，而不是将其识别为新周期",
-        "anti_wrinkle_exit_power": "翻滚脉冲之间的静止水平；仅在高于停止阈值时生效",
-        "anti_wrinkle_idle_timeout": "防皱结束前两次翻滚脉冲之间允许的静止时间",
+        "anti_wrinkle_enabled": "吸收主阶段之后的转动脉冲，而不是将其识别为新周期",
+        "anti_wrinkle_idle_timeout": "防皱结束前两次转动脉冲之间允许的静止时间",
         "anti_wrinkle_max_duration": "长于此值的脉冲将结束防皱并开启新周期",
         "anti_wrinkle_max_power": "高于此值的脉冲将结束防皱并开启新周期",
         "profile_match_min_duration_ratio": "最短周期时长占配置文件时长的比例；默认 0.1 (10%)",
@@ -1076,24 +1116,14 @@
         "curve_preroll_seconds": "并入周期曲线开头的中止启动尝试读数秒数；0 = 关闭"
     },
     "phase_desc": {
-        "anti_crease": "完成后偶尔进行短暂的翻滚以减少皱纹。",
-        "anti_wrinkle": "周期后定期翻滚以减少皱纹。",
-        "baking": "加热元件高温工作，形成面包外皮和内瓤。",
-        "cooking": "加热器和风扇工作的主烹饪阶段。",
-        "cool_down": "接近循环结束时在没有热量的情况下翻滚。",
-        "cool_down_af": "加热后仅用风扇降温的阶段。",
+        "anti_crease": "完成后偶尔进行短暂的滚筒转动以减少皱纹。",
+        "anti_wrinkle": "周期后滚筒定期转动以减少皱纹。",
+        "cool_down": "接近循环结束时滚筒在没有热量的情况下转动。",
         "drain_and_switch": "从洗涤模式到干燥模式的过渡期。",
         "dry": "使用加热器和/或余热的干燥阶段。",
-        "drying": "主要加热翻滚期。",
+        "drying": "主要加热滚筒转动期。",
         "heat_up": "完全干燥开始之前加热器初始预热。",
-        "keep_warm": "以低温保持食物温热的阶段。",
-        "keep_warm_bm": "烘烤后以低温保持面包温热的阶段。",
-        "kneading": "电机搅拌并揉制面团。功率较高。",
-        "pause_af": "用于摇晃或查看的短暂暂停。",
-        "pre_heat": "正式烹饪前对腔体进行初始加热。",
         "pre_rinse": "洗涤剂清洗前初步喷洒。",
-        "proving": "低温发酵阶段，让酵母发酵、面团膨胀。",
-        "resting": "揉面阶段之间的短暂低功率暂停，让面筋松弛。",
         "pre_wash": "主洗前的初步浸泡或预处理。",
         "rinse": "清水冲洗阶段。该阶段可能会重复多次。",
         "sanitize": "用于消毒程序的高温清洁阶段。",
@@ -1133,7 +1163,7 @@
     },
     "section": {
         "anti_wrinkle": {
-            "intro": "将烘干机在主阶段后的低功率翻滚脉冲保留在已完成的周期中。",
+            "intro": "将烘干机在主阶段后的低功率转动脉冲保留在已完成的周期中。",
             "label": "防皱"
         },
         "basic": {
@@ -1175,23 +1205,19 @@
     },
     "setting": {
         "anti_wrinkle_enabled": {
-            "doc": "将烘干机在主加热阶段后的短暂低功率翻滚脉冲保留在已完成的周期中，而不是视为新周期。",
+            "doc": "将烘干机在主加热阶段后的短暂低功率转动脉冲保留在已完成的周期中，而不是视为新周期。",
             "label": "启用防皱检测"
-        },
-        "anti_wrinkle_exit_power": {
-            "doc": "在防皱模式下，低于此值的功率视为翻滚脉冲之间的静止，静止时间超过最大脉冲间隔即结束该模式。如果停止阈值更高则使用停止阈值，因此只有将此值设置得高于停止阈值时才会有影响。",
-            "label": "退出功率阈值"
         },
         "anti_wrinkle_idle_timeout": {
             "label": "最大脉冲间隔",
-            "doc": "防皱模式结束前，烘干机在两次翻滚脉冲之间可以保持静止的时长。请设置为高于烘干机的最长间隔，否则之后的脉冲会被视为误启动。"
+            "doc": "防皱模式结束前，烘干机在两次转动脉冲之间可以保持静止的时长。请设置为高于烘干机的最长间隔，否则之后的脉冲会被视为误启动。"
         },
         "anti_wrinkle_max_duration": {
-            "doc": "比此值更长的脉冲视为真正的周期，而不是防皱翻滚。",
+            "doc": "比此值更长的脉冲视为真正的周期，而不是防皱滚筒转动。",
             "label": "最长时长"
         },
         "anti_wrinkle_max_power": {
-            "doc": "高于此功率的脉冲视为真正的新周期，而不是翻滚。请设置为略高于翻滚脉冲的功率。",
+            "doc": "高于此功率的脉冲视为真正的新周期，而不是滚筒转动。请设置为略高于转动脉冲的功率。",
             "label": "最大防皱功率"
         },
         "auto_label_confidence": {
@@ -1226,16 +1252,12 @@
             "doc": "可选门传感器。用于显示周期结束后设备何时被打开取出物品。",
             "label": "门传感器实体"
         },
-        "duration_tolerance": {
-            "doc": "仅用于学习反馈：在估计时长 +/-X% 以内的周期视为估计准确。不影响匹配。",
-            "label": "估算容差"
-        },
         "enable_ml_models": {
             "doc": "使用在此机器上训练的模型预测运行中周期的能耗和费用，并让熟悉的程序在异常提前停止时无需等待完整的关闭延迟即可结束。关闭：仅使用基于功率的逻辑。",
             "label": "在周期中应用智能模型"
         },
         "end_energy_threshold": {
-            "doc": "关闭延迟期间允许的能量。超过此值时周期会继续，从而将翻滚和烘干尾段保留在周期内。如果周期在尾段期间结束，请调低；如果已完成的周期一直在等待，请调高。",
+            "doc": "关闭延迟期间允许的能量。超过此值时周期会继续，从而将滚筒转动和烘干尾段保留在周期内。如果周期在尾段期间结束，请调低；如果已完成的周期一直在等待，请调高。",
             "label": "结束能耗"
         },
         "energy_price_entity": {
@@ -1255,12 +1277,8 @@
             "label": "暴露调试实体"
         },
         "external_end_trigger": {
-            "doc": "状态变化即表示周期结束的二元传感器（例如“完成”触点或其他集成）。",
+            "doc": "可选的二元传感器，在打开时结束周期，作为电力检测的补充（例如“完成”触点或其他集成）。留空以禁用。",
             "label": "外部触发器实体"
-        },
-        "external_end_trigger_enabled": {
-            "doc": "除基于功率的检测外，还允许二元传感器发出周期结束信号。",
-            "label": "启用外部结束触发器"
         },
         "external_end_trigger_inverted": {
             "doc": "将传感器变为关闭（而非打开）视为结束信号。",
@@ -1285,18 +1303,6 @@
         "ml_training_enabled": {
             "doc": "定期用本机已完成的周期重新训练能耗模型。只有新模型在测试周期上优于简单估算时才会保留。",
             "label": "从此机器学习"
-        },
-        "ml_training_hour": {
-            "doc": "夜间训练的时刻（0-23）。选择一个空闲时段，例如 2。",
-            "label": "学习时间（小时）"
-        },
-        "ml_training_interval_days": {
-            "doc": "每隔这么多天最多重新训练一次。",
-            "label": "最多每隔几天检查一次"
-        },
-        "ml_training_min_cycles": {
-            "doc": "至少记录这么多周期后才开始训练。",
-            "label": "需要的最少周期数"
         },
         "name": {
             "doc": "此设备在 Home Assistant 中显示的名称。",
@@ -1330,16 +1336,12 @@
             "doc": "周期结束时调用的 notify.* 服务。留空表示不调用。",
             "label": "结束服务"
         },
-        "notify_fire_events": {
-            "doc": "在周期开始和结束时同时触发 ha_washdata_* 事件，供您自己的自动化使用。",
-            "label": "为通知触发 HA 事件"
-        },
         "notify_icon": {
             "doc": "通知上的小图标（例如 mdi:washing-machine）。仅发送到 mobile_app 目标，不发送到 notify 组。在 iOS 上它会替代应用图标，需要配套应用 2026.8 或更高版本。留空：平台默认值。",
             "label": "通知图标"
         },
         "notify_live_chronometer": {
-            "doc": "在通知中显示实时倒计时（如支持），而不是固定的估计值。",
+            "doc": "Android: 在通知文字旁边添加倒计时至预计完成时间。在完成前消息中使用 {finish_time} 可显示完成时间，而不是第二个倒计时。",
             "label": "使用实时计时器"
         },
         "notify_live_interval_seconds": {
@@ -1363,7 +1365,7 @@
             "label": "人员（仅在家时通知用）"
         },
         "notify_pre_complete_message": {
-            "doc": "每次实时进度更新的正文。模板变量：{device}、{program}、{minutes}（剩余分钟数）。使用其他变量时将改用默认文本。",
+            "doc": "每次实时进度更新的正文。模板变量：{device}、{program}、{minutes}（剩余分钟数）、{finish_time}（预计完成时间，例如 14:30）。使用其他变量时将改用默认文本。",
             "label": "完成前消息"
         },
         "notify_reminder_message": {
@@ -1411,7 +1413,7 @@
             "label": "电源关闭阈值"
         },
         "power_sensor": {
-            "doc": "以瓦为单位报告此设备实时功率的传感器（例如 sensor.washer_power）。所有检测都基于它。",
+            "doc": "以 W 或 kW 为单位报告此设备实时功率的传感器（例如 sensor.washer_power），而不是它的电能表（kWh）。所有检测都基于它。",
             "label": "功率传感器"
         },
         "profile_match_interval": {
@@ -1430,10 +1432,6 @@
             "doc": "智能终止或防皱收尾提前结束周期所需的实时匹配分数。不会改变显示的程序。如果弱匹配导致周期过早结束，请调高；如果明确的匹配仍要等待关闭延迟，请调低。",
             "label": "匹配阈值"
         },
-        "profile_unmatch_threshold": {
-            "doc": "实时匹配分数低于此值时，当前的程序猜测将被清除。请设置得比匹配阈值稍低，以免短暂下降导致重置。",
-            "label": "不匹配阈值"
-        },
         "progress_reset_delay": {
             "doc": "周期结束后，进度保持 100% 的时长，之后重置为“空闲”。",
             "label": "进度重置延迟"
@@ -1441,10 +1439,6 @@
         "pump_stuck_duration": {
             "doc": "泵连续运行多长时间后触发泵卡住事件。",
             "label": "泵卡住时长"
-        },
-        "sampling_interval": {
-            "doc": "两次处理读数之间的最短时间。更早到达的读数会被跳过（周期中的低读数始终保留）。请设为插座的上报间隔或更低；更高的值只会丢弃读数。",
-            "label": "采样间隔"
         },
         "save_debug_traces": {
             "doc": "同时为每个周期存储匹配器的调试数据（每个候选的评分），便于故障排除。每个周期约增加 20 KB。",
@@ -1551,7 +1545,7 @@
         },
         "anti_crease_finalize_ratio": {
             "label": "防皱收尾比率",
-            "doc": "周期必须达到程序平均时长的多大比例，其低功率翻滚才算作防皱尾段。对于按负载感应的烘干机请调低（例如 0.75）。洗衣机请保持默认值（0.98），否则洗涤可能中途结束。"
+            "doc": "周期必须达到程序平均时长的多大比例，其低功率滚筒转动才算作防皱尾段。对于按负载感应的烘干机请调低（例如 0.75）。洗衣机请保持默认值（0.98），否则洗涤可能中途结束。"
         },
         "curve_preroll_seconds": {
             "label": "曲线前导采样",
@@ -1628,9 +1622,6 @@
         "services": {
             "label": "服务"
         },
-        "signal_processing": {
-            "label": "信号处理"
-        },
         "thresholds_gap": {
             "label": "阈值与间隔"
         },
@@ -1703,7 +1694,8 @@
         "subtab_profiles": "配置文件",
         "maintenance": "维护",
         "playground": "试验场",
-        "store": "商店"
+        "store": "商店",
+        "automations": "自动化"
     },
     "tag": {
         "early_end": "提前结束",
@@ -1868,7 +1860,14 @@
         "auto_label_cancelled": "自动标记已取消，此前已标记 {count} 个周期。",
         "auto_label_cancelled_other": "自动标记已取消，此前已标记 {count} 个周期。",
         "auto_label_done": "自动标记完成：已标记 {count} 个周期，{skipped} 个保持未标记。",
-        "auto_label_done_other": "自动标记完成：已标记 {count} 个周期，{skipped} 个保持未标记。"
+        "auto_label_done_other": "自动标记完成：已标记 {count} 个周期，{skipped} 个保持未标记。",
+        "bp_install_failed": "无法安装模板: {error}",
+        "bp_installed_finish": "模板已安装。请在 Home Assistant 中填写其余内容。",
+        "bp_automation_failed": "模板已安装，但无法创建自动化: {error}",
+        "bp_automation_created": "已使用默认设置创建自动化; 正在打开",
+        "copied": "已复制",
+        "copy_failed": "复制失败。请选择文本并手动复制。",
+        "automation_label_failed": "自动化已创建，但无法添加 WashData 标签或类别。"
     },
     "suggestion": {
         "observed_label": "观测值",
@@ -1876,10 +1875,6 @@
             "auto_label_confidence": {
                 "higher": "自动标记的循环减少，更多循环进入审核",
                 "lower": "自动标记更多循环，部分可能被误识别"
-            },
-            "duration_tolerance": {
-                "higher": "接受更宽的时长范围––匹配更灵活",
-                "lower": "要求时长更接近––更严格，但可能拒绝非常规循环"
             },
             "end_energy_threshold": {
                 "higher": "仅关闭消耗大量能量的循环",
@@ -2051,7 +2046,11 @@
     },
     "link": {
         "maintenance_supporter": "GitHub 上的 Maintenance Supporter ↗",
-        "manual": "手册 ↗"
+        "manual": "手册 ↗",
+        "automations_all": "Home Assistant 中所有 WashData 自动化",
+        "bp_share_pr": "分享您自己的模板：在 GitHub 上提交拉取请求",
+        "bp_view_github": "在 GitHub 上查看",
+        "bp_import_my_ha": "通过 My Home Assistant 导入"
     },
     "tip": {
         "add_brand": "品牌未收录？将其添加到社区目录",
@@ -2165,16 +2164,11 @@
         "kept": "保留",
         "max": "最大",
         "min": "最小",
-        "minus_tol": "-容差",
         "no_match": "无匹配",
         "no_updates": "无更新",
         "off_delay_wait": "关闭延迟等待",
         "off_gap": "关闭间隔",
-        "plus_tol": "+容差",
-        "profile": "配置文件",
-        "reading_interval": "典型读数间隔",
         "sensor_offline": "传感器离线：强制停止",
-        "si": "间隔",
         "spike_ignored": "尖峰已忽略",
         "spike_ignored_short": "尖峰：忽略",
         "start": "启动",
@@ -2182,6 +2176,62 @@
         "tail_energy_resets": "尾段能量高于阈值：计时器重置",
         "thr": "阈值",
         "too_short": "太短",
-        "tumble_kept": "保留翻滚脉冲"
+        "tumble_kept": "保留转动脉冲"
+    },
+    "trigger": {
+        "cycle_started": {
+            "name": "周期已开始"
+        },
+        "program_recognised": {
+            "name": "程序已识别"
+        },
+        "phase_started": {
+            "name": "阶段已开始"
+        },
+        "finishing_soon": {
+            "name": "即将完成"
+        },
+        "cycle_overrun": {
+            "name": "周期运行过长"
+        },
+        "cycle_paused": {
+            "name": "周期已暂停"
+        },
+        "cycle_resumed": {
+            "name": "周期已恢复"
+        },
+        "cycle_stalled": {
+            "name": "周期已停滞"
+        },
+        "cycle_finished": {
+            "name": "周期已完成"
+        },
+        "cycle_ended": {
+            "name": "周期已结束（任何原因）"
+        },
+        "anti_wrinkle_started": {
+            "name": "抗皱已开始"
+        },
+        "still_tumbling": {
+            "name": "周期结束后仍在转动"
+        },
+        "unload_pending": {
+            "name": "待卸载"
+        },
+        "unloaded": {
+            "name": "已取出"
+        },
+        "state_changed": {
+            "name": "状态已变更"
+        },
+        "maintenance_due": {
+            "name": "需要维护"
+        },
+        "milestone_reached": {
+            "name": "达到周期里程碑"
+        },
+        "pump_stuck": {
+            "name": "泵被卡住"
+        }
     }
 }

@@ -113,7 +113,7 @@ async def test_a_recorder_read_cut_by_the_row_cap_says_so_in_the_report():
     hass, conn = _hass(), _conn()
     manager, entry = _manager(hass), _entry()
 
-    async def _fake_recorder(_hass, _entity, start_dt, *, end_dt=None):
+    async def _fake_recorder(_hass, _entity, start_dt, *, end_dt=None, scale=1.0):
         base = start_dt.timestamp()
         return [(base + 5 * i, 1800.0 if i % 400 < 300 else 0.0) for i in range(2000)]
 

@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Prijazno ime za to napravo (npr. \"Pralni stroj\", \"Pomivalni stroj\").",
           "device_type": "Nastavi privzete vrednosti zaznavanja za to vrsto naprave.",
-          "power_sensor": "Senzor pametnega vtiča, ki poroča trenutno moč v vatih.",
+          "power_sensor": "Senzor moči pametnega vtiča (W ali kW), ne njegov merilnik energije (kWh).",
           "min_power": "Odčitki nad to vrednostjo (v vatih) pomenijo, da naprava deluje. 2 W ustreza večini naprav."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Nepričakovana napaka",
-      "invalid_power": "Prag moči mora biti večji od 0"
+      "invalid_power": "Prag moči mora biti večji od 0",
+      "power_sensor_energy": "To je merilnik energije (kWh), ne senzor moči. Izberite senzor moči vtiča (W ali kW). Če ga vtič nima, ga lahko iz merilnika ustvari pomočnik Senzor odvoda."
     },
     "abort": {
       "already_configured": "Naprava je že konfigurirana",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Noben profil se še ne ujema.",
       "vs_typical_longer": "{pct}% dlje kot običajno",
       "vs_typical_shorter": "{pct}% krajše kot običajno",
-      "invalid_power": "Prag moči mora biti večji od 0"
+      "invalid_power": "Prag moči mora biti večji od 0",
+      "power_sensor_energy": "To je merilnik energije (kWh), ne senzor moči. Izberite senzor moči vtiča (W ali kW). Če ga vtič nima, ga lahko iz merilnika ustvari pomočnik Senzor odvoda."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Sušilnik",
         "washer_dryer": "Pralno-sušilni stroj Combo",
         "dishwasher": "Pomivalni stroj",
-        "air_fryer": "Zračni cvrtnik",
-        "bread_maker": "pekač kruha",
         "pump": "Črpalka / zbiralna črpalka",
         "generic": "Drugo (napredno)",
         "other": "Pražna naprava"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Katero koli",
+        "completed": "Dokončano",
+        "force_stopped": "Prisilno ustavljeno",
+        "interrupted": "Prekinjeno"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Izključeno",
+        "idle": "Nedejavno",
+        "starting": "Zaganjanje",
+        "running": "V delovanju",
+        "paused": "Zaustavljeno",
+        "user_paused": "Zaustavljeno s strani uporabnika",
+        "ending": "Zaključuje se",
+        "finished": "Končano",
+        "anti_wrinkle": "Zaščita pred gubami",
+        "delay_wait": "Čakam na začetek",
+        "interrupted": "Prekinjeno",
+        "force_stopped": "Prisilno ustavljeno",
+        "unknown": "Neznano",
+        "clean": "Čisto"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Profila ni bilo mogoče dodeliti: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Cikel se je začel",
+      "cycle_finished": "Cikel je končan",
+      "cycle_ended": "Cikel je zaključen (iz kateregakoli razloga)",
+      "anti_wrinkle_started": "Zaščita pred gubami se je začela",
+      "cycle_stalled": "Cikel se je ustavil",
+      "unload_pending": "Čaka na raztovarjanje",
+      "program_recognised": "Program prepoznan",
+      "phase_started": "Faza se je začela",
+      "finishing_soon": "Kmalu konec",
+      "cycle_overrun": "Cikel traja predolgo",
+      "cycle_paused": "Cikel je ustavljen",
+      "cycle_resumed": "Cikel je nadaljeval",
+      "still_tumbling": "Po koncu še vedno vrti boben",
+      "unloaded": "Razloženo",
+      "state_changed": "Stanje se je spremenilo",
+      "maintenance_due": "Vzdrževanje potrebno",
+      "milestone_reached": "Dosežen mejnik cikla",
+      "pump_stuck": "Črpalka se je zataknila"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Faza",
+      "minutes": "Minute",
+      "percent": "Dlje za (%)",
+      "include_detected": "Vključi zaznane premore",
+      "status": "Zaključen kot",
+      "from": "Iz",
+      "to": "V",
+      "task": "Opravilo"
+    },
+    "extra_fields_descriptions": {
+      "program": "Samo ta program, po točnem imenu. Prazno = kateri koli program.",
+      "phase": "Samo ta faza, po imenu. Prazno = katera koli faza.",
+      "minutes": "Kmalu konec: preostale minute. Po koncu še vedno vrti boben: minute po koncu.",
+      "percent": "Odstotkov nad običajnim trajanjem programa.",
+      "include_detected": "Sproži tudi pri preminih, ki jih WashData zazna v porabi, kot je namakanje ali zasekanje.",
+      "status": "Samo cikli, zaključeni na ta način.",
+      "from": "Samo spremembe iz tega stanja. Prazno = katero koli.",
+      "to": "Samo spremembe v to stanje. Prazno = katero koli.",
+      "task": "Samo to opravilo, po imenu ali id. Prazno = katero koli opravilo."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Cikel se je začel",
+      "description": "Sproži, ko naprava začne cikel."
+    },
+    "program_recognised": {
+      "name": "Program prepoznan",
+      "description": "Sproži, ko WashData prepozna program tekočega cikla ali ga preklopi na drugega.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Samo ta program, po točnem imenu. Prazno = kateri koli program."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Faza se je začela",
+      "description": "Sproži, ko tekoči cikel vstopi v novo fazo svojega programa.",
+      "fields": {
+        "phase": {
+          "name": "Faza",
+          "description": "Samo ta faza, po imenu. Prazno = katera koli faza."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Kmalu konec",
+      "description": "Sproži enkrat na cikel, ko preostali čas prvič pade na toliko minut.",
+      "fields": {
+        "minutes": {
+          "name": "Preostale minute",
+          "description": "Sproži, ko ostane toliko minut ali manj."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Cikel traja predolgo",
+      "description": "Sproži enkrat na cikel, ko traja toliko odstotkov dlje kot je za program običajno.",
+      "fields": {
+        "percent": {
+          "name": "Dlje za",
+          "description": "Odstotkov nad običajnim trajanjem programa."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Cikel je ustavljen",
+      "description": "Sproži, ko ustavite cikel, in po želji, ko ga aparat ustavi sam.",
+      "fields": {
+        "include_detected": {
+          "name": "Vključi zaznane premore",
+          "description": "Sproži tudi pri preminih, ki jih WashData zazna v porabi, kot je namakanje ali zasekanje, ne samo pri preminih, ki jih začnete vi."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Cikel je nadaljeval",
+      "description": "Sproži, ko ustavljeni cikel nadaljuje.",
+      "fields": {
+        "include_detected": {
+          "name": "Vključi zaznane premore",
+          "description": "Sproži tudi pri preminih, ki jih WashData zazna v porabi, kot je namakanje ali zasekanje, ne samo pri preminih, ki jih začnete vi."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Cikel se je ustavil",
+      "description": "Sproži, ko se tekoči cikel ustavi pri nizki, ravni ravni porabe."
+    },
+    "cycle_finished": {
+      "name": "Cikel je končan",
+      "description": "Sproži, ko se cikel konča, tudi ko ga ustavite vi. Ne za lažni zagon.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Samo ta program, po točnem imenu. Prazno = kateri koli program."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Cikel je zaključen",
+      "description": "Sproži, ko se cikel konča iz katerega koli razloga, vključno z lažnimi zagoni.",
+      "fields": {
+        "status": {
+          "name": "Zaključen kot",
+          "description": "Samo cikli, zaključeni na ta način."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Zaščita pred gubami se je začela",
+      "description": "Sproži, ko naprava začne vrteti boben s končanim pranjem proti gubanju."
+    },
+    "still_tumbling": {
+      "name": "Po koncu cikla še vedno vrti boben",
+      "description": "Sproži enkrat, ko naprava toliko minut po koncu cikla še vedno vrti boben v kratkih sunkih. Ustavi se pri novem ciklu ali 4 ure po koncu.",
+      "fields": {
+        "minutes": {
+          "name": "Minute po koncu",
+          "description": "Sproži pri prvem pulzu vrtenja vsaj toliko po koncu."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Čaka na raztovarjanje",
+      "description": "Sproži, ko se je cikel končal in je pranje še vedno znotraj."
+    },
+    "unloaded": {
+      "name": "Razloženo",
+      "description": "Sproži, ko je pranje po ciklu vzeto ven: vrata so se odprla ali razlaganje je potrjeno."
+    },
+    "state_changed": {
+      "name": "Stanje se je spremenilo",
+      "description": "Sproži, ko se stanje WashData spremeni.",
+      "fields": {
+        "from": {
+          "name": "Iz",
+          "description": "Samo spremembe iz tega stanja. Prazno = katero koli."
+        },
+        "to": {
+          "name": "V",
+          "description": "Samo spremembe v to stanje. Prazno = katero koli."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Vzdrževanje potrebno",
+      "description": "Sproži, ko postane vzdrževalno opravilo potrebno.",
+      "fields": {
+        "task": {
+          "name": "Opravilo",
+          "description": "Samo to opravilo, po imenu ali id. Prazno = katero koli opravilo."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Dosežen mejnik cikla",
+      "description": "Sproži, ko skupno število ciklov doseže enega od mejnikov nastavljenih za obvestila."
+    },
+    "pump_stuck": {
+      "name": "Črpalka se je zataknila",
+      "description": "Sproži, ko črpalka teče dlje od njene omejitve zataknitve."
     }
   }
 }

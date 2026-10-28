@@ -219,7 +219,7 @@ def test_start_gate_eval_counts_wait_drops_and_held_probes() -> None:
     device = sge.Device(
         "washing_machine",
         {},
-        {"min_power": 3.24, "sampling_interval": 1.0, "delay_start_detect_enabled": True},
+        {"min_power": 3.24, "delay_start_detect_enabled": True},
         [],
     )
     config, manager = sge.detector_setup(device, {})

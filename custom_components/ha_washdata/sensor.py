@@ -44,18 +44,15 @@ from homeassistant.util import dt as dt_util
 from .time_utils import utc_now
 from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
-    CONF_DURATION_TOLERANCE,
     DOMAIN,
     CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_OFF_DELAY,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_SAMPLING_INTERVAL,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     SIGNAL_WASHER_UPDATE,
@@ -312,8 +309,6 @@ class WasherStateSensor(WasherBaseSensor):
             return "mdi:tumble-dryer"
         if dtype == "dishwasher":
             return "mdi:dishwasher"
-        if dtype == "air_fryer":
-            return "mdi:pot-steam"
         if dtype == "pump":
             return "mdi:water-pump"
         return "mdi:washing-machine"
@@ -1051,11 +1046,8 @@ class WasherSuggestionsSensor(WasherBaseSensor):
             CONF_OFF_DELAY,
             CONF_WATCHDOG_INTERVAL,
             CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-            CONF_SAMPLING_INTERVAL,
             CONF_PROFILE_MATCH_INTERVAL,
             CONF_AUTO_LABEL_CONFIDENCE,
-            CONF_DURATION_TOLERANCE,
-            CONF_PROFILE_DURATION_TOLERANCE,
             CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
             CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
             CONF_MIN_OFF_GAP,

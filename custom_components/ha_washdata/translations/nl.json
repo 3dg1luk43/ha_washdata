@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Een beschrijvende naam voor dit apparaat (bijvoorbeeld 'Wasmachine', 'Vaatwasser').",
           "device_type": "Stelt de detectiestandaarden in voor dit soort apparaat.",
-          "power_sensor": "De sensor van de slimme stekker die het actuele vermogen in watt meldt.",
+          "power_sensor": "De vermogenssensor van de slimme stekker (W of kW), niet de energiemeter (kWh).",
           "min_power": "Metingen boven deze waarde (in watt) betekenen dat het apparaat draait. 2 W past bij de meeste apparaten."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Onverwachte fout",
-      "invalid_power": "Vermogensdrempel moet groter zijn dan 0"
+      "invalid_power": "Vermogensdrempel moet groter zijn dan 0",
+      "power_sensor_energy": "Dit is een energiemeter (kWh), geen vermogenssensor. Kies de vermogenssensor van de slimme stekker (W of kW). Heeft de stekker er geen, dan kan een Afgeleide-helper er een maken uit de meter."
     },
     "abort": {
       "already_configured": "Apparaat is al geconfigureerd",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: nog geen profiel herkend.",
       "vs_typical_longer": "{pct}% langer dan gebruikelijk",
       "vs_typical_shorter": "{pct}% korter dan gebruikelijk",
-      "invalid_power": "Vermogensdrempel moet groter zijn dan 0"
+      "invalid_power": "Vermogensdrempel moet groter zijn dan 0",
+      "power_sensor_energy": "Dit is een energiemeter (kWh), geen vermogenssensor. Kies de vermogenssensor van de slimme stekker (W of kW). Heeft de stekker er geen, dan kan een Afgeleide-helper er een maken uit de meter."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Droger",
         "washer_dryer": "Was-droog combinatie",
         "dishwasher": "Afwasmachine",
-        "air_fryer": "Lucht friteuse",
-        "bread_maker": "Broodbakmachine",
         "pump": "Pomp / Sumppomp",
         "generic": "Anders (geavanceerd)",
         "other": "Drempelapparaat"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Willekeurig",
+        "completed": "Voltooid",
+        "force_stopped": "Geforceerd gestopt",
+        "interrupted": "Onderbroken"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Uit",
+        "idle": "Inactief",
+        "starting": "Opstarten",
+        "running": "Actief",
+        "paused": "Gepauzeerd",
+        "user_paused": "Gepauzeerd door gebruiker",
+        "ending": "Eindigen",
+        "finished": "Voltooid",
+        "anti_wrinkle": "Anti-kreuk",
+        "delay_wait": "Wachten om te beginnen",
+        "interrupted": "Onderbroken",
+        "force_stopped": "Geforceerd gestopt",
+        "unknown": "Onbekend",
+        "clean": "Schoon"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Kan profiel niet toewijzen: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Cyclus gestart",
+      "cycle_finished": "Cyclus voltooid",
+      "cycle_ended": "Cyclus beëindigd (elke reden)",
+      "anti_wrinkle_started": "Anti-kreuk gestart",
+      "cycle_stalled": "Cyclus vastgelopen",
+      "unload_pending": "Uitladen in afwachting",
+      "program_recognised": "Programma herkend",
+      "phase_started": "Fase gestart",
+      "finishing_soon": "Bijna klaar",
+      "cycle_overrun": "Cyclus loopt te lang",
+      "cycle_paused": "Cyclus gepauzeerd",
+      "cycle_resumed": "Cyclus hervat",
+      "still_tumbling": "Trommel draait nog na de cyclus",
+      "unloaded": "Uitgeladen",
+      "state_changed": "Status gewijzigd",
+      "maintenance_due": "Onderhoud vereist",
+      "milestone_reached": "Cyclusmijlpaal bereikt",
+      "pump_stuck": "Pomp vastgelopen"
+    },
+    "extra_fields": {
+      "program": "Programma",
+      "phase": "Fase",
+      "minutes": "Minuten",
+      "percent": "Langer met (%)",
+      "include_detected": "Gedetecteerde pauzes opnemen",
+      "status": "Beëindigd als",
+      "from": "Van",
+      "to": "Naar",
+      "task": "Taak"
+    },
+    "extra_fields_descriptions": {
+      "program": "Alleen dit programma, op exacte naam. Leeg laten voor elk programma.",
+      "phase": "Alleen deze fase, op naam. Leeg laten voor elke fase.",
+      "minutes": "Bijna klaar: resterend minuten. Trommel draait nog: minuten na het einde.",
+      "percent": "Procent boven de gebruikelijke programmauur.",
+      "include_detected": "Activeer ook op pauzes die WashData in het vermogen ziet, zoals weken of vastlopen.",
+      "status": "Alleen cycli die op deze manier eindigden.",
+      "from": "Alleen wijzigingen van deze status. Leeg laten voor elke status.",
+      "to": "Alleen wijzigingen naar deze status. Leeg laten voor elke status.",
+      "task": "Alleen deze taak, op naam of ID. Leeg laten voor elke taak."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Cyclus gestart",
+      "description": "Wordt geactiveerd wanneer het apparaat een cyclus start."
+    },
+    "program_recognised": {
+      "name": "Programma herkend",
+      "description": "Wordt geactiveerd wanneer WashData het programma van de lopende cyclus herkent of naar een ander programma schakelt.",
+      "fields": {
+        "program": {
+          "name": "Programma",
+          "description": "Alleen dit programma, op exacte naam. Leeg laten voor elk programma."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fase gestart",
+      "description": "Wordt geactiveerd wanneer de lopende cyclus een nieuwe fase ingaat.",
+      "fields": {
+        "phase": {
+          "name": "Fase",
+          "description": "Alleen deze fase, op naam. Leeg laten voor elke fase."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Bijna klaar",
+      "description": "Wordt eenmaal per cyclus geactiveerd wanneer de resterende tijd voor het eerst tot dit aantal minuten daalt.",
+      "fields": {
+        "minutes": {
+          "name": "Resterende minuten",
+          "description": "Activeer wanneer nog zoveel minuten of minder resterend zijn."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Cyclus loopt te lang",
+      "description": "Wordt eenmaal per cyclus geactiveerd wanneer hij zoveel langer loopt dan het programma normaal duurt.",
+      "fields": {
+        "percent": {
+          "name": "Langer met",
+          "description": "Procent boven de gebruikelijke programmauur."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Cyclus gepauzeerd",
+      "description": "Wordt geactiveerd wanneer u een cyclus pauzeert, en optioneel wanneer het apparaat zelf pauzeert.",
+      "fields": {
+        "include_detected": {
+          "name": "Gedetecteerde pauzes opnemen",
+          "description": "Activeer ook op pauzes die WashData in het vermogen ziet, zoals weken of vastlopen, niet alleen op pauzes die u start."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Cyclus hervat",
+      "description": "Wordt geactiveerd wanneer een gepauzeerde cyclus verdergaat.",
+      "fields": {
+        "include_detected": {
+          "name": "Gedetecteerde pauzes opnemen",
+          "description": "Activeer ook op pauzes die WashData in het vermogen ziet, zoals weken of vastlopen, niet alleen op pauzes die u start."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Cyclus vastgelopen",
+      "description": "Wordt geactiveerd wanneer een lopende cyclus stilstaat op een laag, vlak vermogensniveau."
+    },
+    "cycle_finished": {
+      "name": "Cyclus voltooid",
+      "description": "Wordt geactiveerd wanneer een cyclus eindigt, ook wanneer u hem stopt. Niet bij een valse start.",
+      "fields": {
+        "program": {
+          "name": "Programma",
+          "description": "Alleen dit programma, op exacte naam. Leeg laten voor elk programma."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Cyclus beëindigd (elke reden)",
+      "description": "Wordt geactiveerd wanneer een cyclus om welke reden dan ook eindigt, ook valse starts.",
+      "fields": {
+        "status": {
+          "name": "Beëindigd als",
+          "description": "Alleen cycli die op deze manier eindigden."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-kreuk gestart",
+      "description": "Wordt geactiveerd wanneer het apparaat de afgewerkte lading in de trommel beweegt tegen kreukels."
+    },
+    "still_tumbling": {
+      "name": "Trommel draait nog na de cyclus",
+      "description": "Wordt eenmaal geactiveerd wanneer de trommel van het apparaat nog in korte stoten draait, dit aantal minuten na het einde van de cyclus. Stopt bij een nieuwe cyclus of 4 uur na het einde.",
+      "fields": {
+        "minutes": {
+          "name": "Minuten na het einde",
+          "description": "Activeer bij de eerste trommelbeweging minstens zo lang na het einde."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Uitladen in afwachting",
+      "description": "Wordt geactiveerd wanneer een cyclus klaar is en de lading nog binnen is."
+    },
+    "unloaded": {
+      "name": "Uitgeladen",
+      "description": "Wordt geactiveerd wanneer de lading na een cyclus wordt uitgehaald: de deur is geopend of het uitladen is bevestigd."
+    },
+    "state_changed": {
+      "name": "Status gewijzigd",
+      "description": "Wordt geactiveerd wanneer de WashData-status wijzigt.",
+      "fields": {
+        "from": {
+          "name": "Van",
+          "description": "Alleen wijzigingen van deze status. Leeg laten voor elke status."
+        },
+        "to": {
+          "name": "Naar",
+          "description": "Alleen wijzigingen naar deze status. Leeg laten voor elke status."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Onderhoud vereist",
+      "description": "Wordt geactiveerd wanneer een onderhoudstaak verschuldigd is.",
+      "fields": {
+        "task": {
+          "name": "Taak",
+          "description": "Alleen deze taak, op naam of ID. Leeg laten voor elke taak."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Cyclusmijlpaal bereikt",
+      "description": "Wordt geactiveerd wanneer het totale cyclustelling een van de voor meldingen ingestelde mijlpalen bereikt."
+    },
+    "pump_stuck": {
+      "name": "Pomp vastgelopen",
+      "description": "Wordt geactiveerd wanneer een pomp langer loopt dan zijn vastlooplimiet."
     }
   }
 }

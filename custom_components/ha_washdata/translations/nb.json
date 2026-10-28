@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Et vennlig navn for denne enheten (f.eks. \"Vaskemaskin\", \"Oppvaskmaskin\").",
           "device_type": "Angir deteksjonsstandarder for denne typen apparat.",
-          "power_sensor": "Smartpluggens sensor som rapporterer gjeldende effekt i watt.",
+          "power_sensor": "Smartpluggens strømsensor (W eller kW), ikke energimåleren (kWh).",
           "min_power": "Målinger over denne verdien (i watt) betyr at apparatet går. 2 W passer for de fleste enheter."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Uventet feil",
-      "invalid_power": "Effektterskelen må være større enn 0"
+      "invalid_power": "Effektterskelen må være større enn 0",
+      "power_sensor_energy": "Dette er en energimåler (kWh), ikke en strømsensor. Velg smartpluggens strømsensor (W eller kW). Hvis pluggen ikke har en, kan en Derivat-sensor-hjelper lage en ut fra måleren."
     },
     "abort": {
       "already_configured": "Enheten er allerede konfigurert",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ingen profil gjenkjent ennå.",
       "vs_typical_longer": "{pct}% lengre enn vanlig",
       "vs_typical_shorter": "{pct}% kortere enn vanlig",
-      "invalid_power": "Effektterskelen må være større enn 0"
+      "invalid_power": "Effektterskelen må være større enn 0",
+      "power_sensor_energy": "Dette er en energimåler (kWh), ikke en strømsensor. Velg smartpluggens strømsensor (W eller kW). Hvis pluggen ikke har en, kan en Derivat-sensor-hjelper lage en ut fra måleren."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Tørketrommel",
         "washer_dryer": "Vaske-tørketrommel kombi",
         "dishwasher": "Oppvaskmaskin",
-        "air_fryer": "Airfryer",
-        "bread_maker": "Brødbaker",
         "pump": "Pumpe / Sump Pump",
         "generic": "Annet (avansert)",
         "other": "Terskelenhet"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Enhver",
+        "completed": "Ferdig",
+        "force_stopped": "Tving stoppet",
+        "interrupted": "Avbrutt"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Av",
+        "idle": "Uvirksom",
+        "starting": "Starter",
+        "running": "Løper",
+        "paused": "Pause",
+        "user_paused": "Satt på pause av brukeren",
+        "ending": "Slutt",
+        "finished": "Ferdig",
+        "anti_wrinkle": "Anti-rynke",
+        "delay_wait": "Venter på å starte",
+        "interrupted": "Avbrutt",
+        "force_stopped": "Tving stoppet",
+        "unknown": "Ukjent",
+        "clean": "Ren"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Kunne ikke tildele profil: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Syklus startet",
+      "cycle_finished": "Syklus ferdig",
+      "cycle_ended": "Syklus avsluttet (enhver årsak)",
+      "anti_wrinkle_started": "Anti-rynke startet",
+      "cycle_stalled": "Syklus stoppet opp",
+      "unload_pending": "Utlasting venter",
+      "program_recognised": "Program gjenkjent",
+      "phase_started": "Fase startet",
+      "finishing_soon": "Snart ferdig",
+      "cycle_overrun": "Syklus kjører for lenge",
+      "cycle_paused": "Syklus satt på pause",
+      "cycle_resumed": "Syklus gjenopptatt",
+      "still_tumbling": "Trommelen roterer fortsatt etter syklusen",
+      "unloaded": "Tømt",
+      "state_changed": "Tilstand endret",
+      "maintenance_due": "Vedlikehold forfaller",
+      "milestone_reached": "Syklusmilepæl nådd",
+      "pump_stuck": "Pumpe satt fast"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Fase",
+      "minutes": "Minutter",
+      "percent": "Lengre med (%)",
+      "include_detected": "Inkluder registrerte pauser",
+      "status": "Avsluttet som",
+      "from": "Fra",
+      "to": "Til",
+      "task": "Oppgave"
+    },
+    "extra_fields_descriptions": {
+      "program": "Kun dette programmet, ved nøyaktig navn. La feltet stå tomt for ethvert program.",
+      "phase": "Kun denne fasen, ved navn. La feltet stå tomt for enhver fase.",
+      "minutes": "Snart ferdig: gjenværende minutter. Trommelen roterer fortsatt: minutter etter slutt.",
+      "percent": "Prosent over programmets normale varighet.",
+      "include_detected": "Utlös også ved pauser WashData registrerer i forbruket, f.eks. bløtlegging eller stans.",
+      "status": "Kun syklusser som ble avsluttet på denne måten.",
+      "from": "Kun endringer fra denne tilstanden. La feltet stå tomt for enhver.",
+      "to": "Kun endringer til denne tilstanden. La feltet stå tomt for enhver.",
+      "task": "Kun denne oppgaven, ved navn eller ID. La feltet stå tomt for enhver oppgave."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Syklus startet",
+      "description": "Utløses når apparatet starter en syklus."
+    },
+    "program_recognised": {
+      "name": "Program gjenkjent",
+      "description": "Utløses når WashData gjenkjenner programmet for den pågående syklusen eller bytter til et annet program.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Kun dette programmet, ved nøyaktig navn. La feltet stå tomt for ethvert program."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fase startet",
+      "description": "Utløses når den pågående syklusen går inn i en ny fase.",
+      "fields": {
+        "phase": {
+          "name": "Fase",
+          "description": "Kun denne fasen, ved navn. La feltet stå tomt for enhver fase."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Snart ferdig",
+      "description": "Utløses én gang per syklus, når gjenværende tid for første gang synker til dette antall minutter.",
+      "fields": {
+        "minutes": {
+          "name": "Gjenværende minutter",
+          "description": "Utlös når så mange minutter eller færre gjenstår."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Syklus kjører for lenge",
+      "description": "Utløses én gang per syklus, når den kjører så mye lengre enn programmets normale varighet.",
+      "fields": {
+        "percent": {
+          "name": "Lengre med",
+          "description": "Prosent over programmets normale varighet."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Syklus satt på pause",
+      "description": "Utløses når du setter en syklus på pause, og valgfritt når apparatet setter seg på pause selv.",
+      "fields": {
+        "include_detected": {
+          "name": "Inkluder registrerte pauser",
+          "description": "Utlös også ved pauser WashData registrerer i forbruket, f.eks. bløtlegging eller stans, ikke bare ved pauser du starter."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Syklus gjenopptatt",
+      "description": "Utløses når en syklus som er satt på pause fortsetter.",
+      "fields": {
+        "include_detected": {
+          "name": "Inkluder registrerte pauser",
+          "description": "Utlös også ved pauser WashData registrerer i forbruket, f.eks. bløtlegging eller stans, ikke bare ved pauser du starter."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Syklus stoppet opp",
+      "description": "Utløses når en pågående syklus stopper ved et lavt, flatt effektnivå."
+    },
+    "cycle_finished": {
+      "name": "Syklus ferdig",
+      "description": "Utløses når en syklus avsluttes, også når du stopper den. Ikke ved falsk start.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Kun dette programmet, ved nøyaktig navn. La feltet stå tomt for ethvert program."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Syklus avsluttet (enhver årsak)",
+      "description": "Utløses når en syklus avsluttes av enhver årsak, inkludert falske starter.",
+      "fields": {
+        "status": {
+          "name": "Avsluttet som",
+          "description": "Kun syklusser som ble avsluttet på denne måten."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-rynke startet",
+      "description": "Utløses når apparatet begynner å bevege det ferdige tøyet i trommelen mot rynker."
+    },
+    "still_tumbling": {
+      "name": "Trommelen roterer fortsatt etter syklusen",
+      "description": "Utløses én gang når apparatets trommel fortsatt roterer i korte støt dette antall minutter etter at syklusen var ferdig. Stopper ved en ny syklus eller 4 timer etter slutt.",
+      "fields": {
+        "minutes": {
+          "name": "Minutter etter slutt",
+          "description": "Utløs ved den første trommelbevegelsen minst så lenge etter slutt."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Utlasting venter",
+      "description": "Utløses når en syklus er ferdig og tøyet fortsatt er inne."
+    },
+    "unloaded": {
+      "name": "Tømt",
+      "description": "Utløses når tøyet tas ut etter en syklus: døren ble åpnet eller utlastingen ble bekreftet."
+    },
+    "state_changed": {
+      "name": "Tilstand endret",
+      "description": "Utløses når WashData-tilstanden endres.",
+      "fields": {
+        "from": {
+          "name": "Fra",
+          "description": "Kun endringer fra denne tilstanden. La feltet stå tomt for enhver."
+        },
+        "to": {
+          "name": "Til",
+          "description": "Kun endringer til denne tilstanden. La feltet stå tomt for enhver."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Vedlikehold forfaller",
+      "description": "Utløses når en vedlikeholdsoppgave forfaller.",
+      "fields": {
+        "task": {
+          "name": "Oppgave",
+          "description": "Kun denne oppgaven, ved navn eller ID. La feltet stå tomt for enhver oppgave."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Syklusmilepæl nådd",
+      "description": "Utløses når det totale syklusantallet når en av milepælene satt for varsler."
+    },
+    "pump_stuck": {
+      "name": "Pumpe satt fast",
+      "description": "Utløses når en pumpe kjører lengre enn sin grense."
     }
   }
 }

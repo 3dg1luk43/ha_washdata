@@ -692,7 +692,7 @@ async def test_cycle_end_freezes_the_timeline_with_the_token(hass, price_manager
     """The freeze has to happen in the sync handler, beside the B1 cycle token."""
     captured = {}
 
-    async def _capture(cycle_data, cycle_token=None, price_timeline=None):
+    async def _capture(cycle_data, cycle_token=None, price_timeline=None, **_kw):
         captured["token"] = cycle_token
         captured["timeline"] = price_timeline
 

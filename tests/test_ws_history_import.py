@@ -89,7 +89,7 @@ def _manager(hass):
 def _entry():
     return SimpleNamespace(
         entry_id="e",
-        options={"device_type": "washing_machine", "sampling_interval": 5.0},
+        options={"device_type": "washing_machine"},
         data={},
     )
 
@@ -208,7 +208,7 @@ async def test_recorder_ingest_uses_the_devices_own_entity_in_day_windows():
     manager = _manager(hass)
     calls: list[tuple] = []
 
-    async def _fake_recorder(_hass, entity_id, start_dt, *, end_dt=None):
+    async def _fake_recorder(_hass, entity_id, start_dt, *, end_dt=None, scale=1.0):
         calls.append((entity_id, start_dt, end_dt))
         return [(start_dt.timestamp(), 100.0)]
 
@@ -239,7 +239,7 @@ async def test_recorder_ingest_accepts_a_start_date():
     manager = _manager(hass)
     calls: list[tuple] = []
 
-    async def _fake_recorder(_hass, entity_id, start_dt, *, end_dt=None):
+    async def _fake_recorder(_hass, entity_id, start_dt, *, end_dt=None, scale=1.0):
         calls.append((entity_id, start_dt, end_dt))
         return [(start_dt.timestamp(), 100.0)]
 
@@ -280,7 +280,7 @@ async def test_recorder_ingest_stops_after_a_run_of_empty_days():
     manager = _manager(hass)
     calls: list[tuple] = []
 
-    async def _fake_recorder(_hass, entity_id, start_dt, *, end_dt=None):
+    async def _fake_recorder(_hass, entity_id, start_dt, *, end_dt=None, scale=1.0):
         calls.append((entity_id, start_dt, end_dt))
         # Two days of data, then nothing (a 10-day recorder asked for 10 years).
         return [(start_dt.timestamp(), 100.0)] if len(calls) <= 2 else []

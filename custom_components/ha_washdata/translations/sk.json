@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Priateľský názov pre toto zariadenie (napr. „Práčka“, „Umývačka riadu“).",
           "device_type": "Nastaví predvolené hodnoty detekcie pre tento druh spotrebiča.",
-          "power_sensor": "Senzor inteligentnej zásuvky, ktorý hlási aktuálny výkon vo wattoch.",
+          "power_sensor": "Snímač výkonu inteligentnej zásuvky (W alebo kW), nie jej merač energie (kWh).",
           "min_power": "Hodnoty nad touto hranicou (vo wattoch) znamenajú, že spotrebič beží. Pre väčšinu zariadení stačia 2 W."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Neočakávaná chyba",
-      "invalid_power": "Prah výkonu musí byť väčší ako 0"
+      "invalid_power": "Prah výkonu musí byť väčší ako 0",
+      "power_sensor_energy": "Toto je merač energie (kWh), nie snímač výkonu. Vyberte snímač výkonu zásuvky (W alebo kW). Ak ho zásuvka nemá, môže ho z merača vytvoriť pomocník „Derivačný snímač“."
     },
     "abort": {
       "already_configured": "Zariadenie je už nakonfigurované",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Zatiaľ nebol rozpoznaný žiadny profil.",
       "vs_typical_longer": "o {pct}% dlhšie než zvyčajne",
       "vs_typical_shorter": "o {pct}% kratšie než zvyčajne",
-      "invalid_power": "Prah výkonu musí byť väčší ako 0"
+      "invalid_power": "Prah výkonu musí byť väčší ako 0",
+      "power_sensor_energy": "Toto je merač energie (kWh), nie snímač výkonu. Vyberte snímač výkonu zásuvky (W alebo kW). Ak ho zásuvka nemá, môže ho z merača vytvoriť pomocník „Derivačný snímač“."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Sušička",
         "washer_dryer": "Kombinovaná práčka so sušičkou",
         "dishwasher": "Umývačka riadu",
-        "air_fryer": "Vzduchová fritéza",
-        "bread_maker": "Pekáreň na chlieb",
         "pump": "Čerpadlo / Kalové čerpadlo",
         "generic": "Iné (pokročilé)",
         "other": "Prahové zariadenie"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Ľubovoľný",
+        "completed": "Dokončený",
+        "force_stopped": "Nútene zastavené",
+        "interrupted": "Prerušený"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Vypnuté",
+        "idle": "Nečinný",
+        "starting": "Spúšťa sa",
+        "running": "V prevádzke",
+        "paused": "Pozastavené",
+        "user_paused": "Pozastavené používateľom",
+        "ending": "Ukončuje sa",
+        "finished": "Dokončené",
+        "anti_wrinkle": "Ochrana proti vráskam",
+        "delay_wait": "Čaká sa na spustenie",
+        "interrupted": "Prerušený",
+        "force_stopped": "Nútene zastavené",
+        "unknown": "Neznámy",
+        "clean": "Čistý"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Nepodarilo sa priradiť profil: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Cyklus spustený",
+      "cycle_finished": "Cyklus dokončený",
+      "cycle_ended": "Cyklus ukončený (z akéhokoľvek dôvodu)",
+      "anti_wrinkle_started": "Ochrana pred krčením spustená",
+      "cycle_stalled": "Cyklus zaseknutý",
+      "unload_pending": "Čaká na vyloženie",
+      "program_recognised": "Program rozpoznaný",
+      "phase_started": "Fáza spustená",
+      "finishing_soon": "Čoskoro koniec",
+      "cycle_overrun": "Cyklus trvá príliš dlho",
+      "cycle_paused": "Cyklus pozastavený",
+      "cycle_resumed": "Cyklus obnovený",
+      "still_tumbling": "Stále otáča bubnom po skončení",
+      "unloaded": "Vyložené",
+      "state_changed": "Stav zmenený",
+      "maintenance_due": "Servis potrebný",
+      "milestone_reached": "Dosiahnutý míľnik cyklu",
+      "pump_stuck": "Čerpadlo zaseknuté"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Fáza",
+      "minutes": "Minúty",
+      "percent": "Dlhšie o (%)",
+      "include_detected": "Zahrnúť zistené pozastavenia",
+      "status": "Ukončený ako",
+      "from": "Z",
+      "to": "Do",
+      "task": "Úloha"
+    },
+    "extra_fields_descriptions": {
+      "program": "Iba tento program, presným názvom. Prázdne = ľubovoľný program.",
+      "phase": "Iba táto fáza, názvom. Prázdne = ľubovoľná fáza.",
+      "minutes": "Čoskoro koniec: zostávajúce minúty. Stále otáča bubnom: minúty po skončení.",
+      "percent": "Percent nad bežnou dĺžkou programu.",
+      "include_detected": "Spustiť aj pri pozastaveniach, ktoré WashData zistí v spotrebe, napr. namáčanie alebo zaseknutie.",
+      "status": "Iba cykly ukončené týmto spôsobom.",
+      "from": "Iba zmeny z tohto stavu. Prázdne = ľubovoľný.",
+      "to": "Iba zmeny do tohto stavu. Prázdne = ľubovoľný.",
+      "task": "Iba táto úloha, názvom alebo id. Prázdne = ľubovoľná úloha."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Cyklus spustený",
+      "description": "Spustí sa, keď spotrebič začne cyklus."
+    },
+    "program_recognised": {
+      "name": "Program rozpoznaný",
+      "description": "Spustí sa, keď WashData rozpozná program prebiehajúceho cyklu alebo ho prepne na iný.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Iba tento program, presným názvom. Prázdne = ľubovoľný program."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fáza spustená",
+      "description": "Spustí sa, keď prebiehajúci cyklus vstúpi do novej fázy svojho programu.",
+      "fields": {
+        "phase": {
+          "name": "Fáza",
+          "description": "Iba táto fáza, názvom. Prázdne = ľubovoľná fáza."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Čoskoro koniec",
+      "description": "Spustí sa raz za cyklus, keď zostávajúci čas prvýkrát klesne na zadaný počet minút.",
+      "fields": {
+        "minutes": {
+          "name": "Zostávajúce minúty",
+          "description": "Spustiť, keď zostáva toľko minút alebo menej."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Cyklus trvá príliš dlho",
+      "description": "Spustí sa raz za cyklus, keď trvá o zadané percento dlhšie ako zvyčajne.",
+      "fields": {
+        "percent": {
+          "name": "Dlhšie o",
+          "description": "Percent nad bežnou dĺžkou programu."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Cyklus pozastavený",
+      "description": "Spustí sa pri pozastavení cyklu a voliteľne pri samovoľnom pozastavení spotrebičom.",
+      "fields": {
+        "include_detected": {
+          "name": "Zahrnúť zistené pozastavenia",
+          "description": "Spustiť aj pri pozastaveniach, ktoré WashData zistí v spotrebe, napr. namáčanie alebo zaseknutie, nielen pri tých, ktoré zahájite vy."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Cyklus obnovený",
+      "description": "Spustí sa, keď pozastavený cyklus pokračuje.",
+      "fields": {
+        "include_detected": {
+          "name": "Zahrnúť zistené pozastavenia",
+          "description": "Spustiť aj pri pozastaveniach, ktoré WashData zistí v spotrebe, napr. namáčanie alebo zaseknutie, nielen pri tých, ktoré zahájite vy."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Cyklus zaseknutý",
+      "description": "Spustí sa, keď prebiehajúci cyklus zastaví na nízkej, stálej úrovni spotreby."
+    },
+    "cycle_finished": {
+      "name": "Cyklus dokončený",
+      "description": "Spustí sa po dokončení cyklu, aj keď ho zastavíte. Nie pre falošný štart.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Iba tento program, presným názvom. Prázdne = ľubovoľný program."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Cyklus ukončený",
+      "description": "Spustí sa, keď cyklus skončí z akéhokoľvek dôvodu, vrátane falošných štartov.",
+      "fields": {
+        "status": {
+          "name": "Ukončený ako",
+          "description": "Iba cykly ukončené týmto spôsobom."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Ochrana pred krčením spustená",
+      "description": "Spustí sa, keď spotrebič začne otáčaním bubna chrániť hotovú náplň pred pokrčením."
+    },
+    "still_tumbling": {
+      "name": "Stále otáča bubnom po skončení cyklu",
+      "description": "Spustí sa raz, keď spotrebič stále otáča bubnom v krátkych úsekoch zadaný počet minút po skončení cyklu. Zastaví sa pri novom cykle alebo 4 hodiny po skončení.",
+      "fields": {
+        "minutes": {
+          "name": "Minúty po skončení",
+          "description": "Spustiť pri prvom pulze bubna aspoň toľko po skončení."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Čaká na vyloženie",
+      "description": "Spustí sa, keď cyklus skončil a náplň je stále vnútri."
+    },
+    "unloaded": {
+      "name": "Vyložené",
+      "description": "Spustí sa, keď je náplň po cykle vybraná: dvere sa otvorili alebo bolo vyloženie potvrdené."
+    },
+    "state_changed": {
+      "name": "Stav zmenený",
+      "description": "Spustí sa pri zmene stavu WashData.",
+      "fields": {
+        "from": {
+          "name": "Z",
+          "description": "Iba zmeny z tohto stavu. Prázdne = ľubovoľný."
+        },
+        "to": {
+          "name": "Do",
+          "description": "Iba zmeny do tohto stavu. Prázdne = ľubovoľný."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Servis potrebný",
+      "description": "Spustí sa, keď sa stane splatná servisná úloha.",
+      "fields": {
+        "task": {
+          "name": "Úloha",
+          "description": "Iba táto úloha, názvom alebo id. Prázdne = ľubovoľná úloha."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Dosiahnutý míľnik cyklu",
+      "description": "Spustí sa, keď celkový počet cyklov dosiahne jeden z míľnikov nastavených pre upozornenia."
+    },
+    "pump_stuck": {
+      "name": "Čerpadlo zaseknuté",
+      "description": "Spustí sa, keď čerpadlo beží dlhšie ako jeho limit zaseknutia."
     }
   }
 }

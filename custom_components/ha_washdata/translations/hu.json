@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Barátságos név ennek az eszköznek (pl. „Mosógép”, „Mosogatógép”).",
           "device_type": "Beállítja az észlelési alapértékeket ehhez a készüléktípushoz.",
-          "power_sensor": "Az okoskonnektor érzékelője, amely az élő teljesítményt jelenti wattban.",
+          "power_sensor": "Az okoskonnektor teljesítmény érzékelője (W vagy kW), nem az energiamérője (kWh).",
           "min_power": "Az e feletti leolvasások (wattban) azt jelentik, hogy a készülék működik. A legtöbb eszközhöz 2 W megfelelő."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Váratlan hiba",
-      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie"
+      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie",
+      "power_sensor_energy": "Ez egy energiamérő (kWh), nem teljesítmény érzékelő. Válassza a konnektor teljesítmény érzékelőjét (W vagy kW). Ha a konnektornak nincs ilyen, egy Származékos érzékelő segéddel létrehozhat egyet a mérőből."
     },
     "abort": {
       "already_configured": "Az eszköz már konfigurálva van",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Még nincs illeszkedő profil.",
       "vs_typical_longer": "{pct}%-kal hosszabb a szokásosnál",
       "vs_typical_shorter": "{pct}%-kal rövidebb a szokásosnál",
-      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie"
+      "invalid_power": "A teljesítményküszöbnek 0-nál nagyobbnak kell lennie",
+      "power_sensor_energy": "Ez egy energiamérő (kWh), nem teljesítmény érzékelő. Válassza a konnektor teljesítmény érzékelőjét (W vagy kW). Ha a konnektornak nincs ilyen, egy Származékos érzékelő segéddel létrehozhat egyet a mérőből."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Szárítógép",
         "washer_dryer": "Mosó-szárító kombó",
         "dishwasher": "Mosogatógép",
-        "air_fryer": "Forrólevegős sütő",
-        "bread_maker": "Kenyérsütő",
         "pump": "Szivattyú / búvárszivattyú",
         "generic": "Egyéb (haladó)",
         "other": "Küszöb eszköz"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Bármilyen",
+        "completed": "Befejezett",
+        "force_stopped": "Kényszer leállított",
+        "interrupted": "Megszakított"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Kikapcsolva",
+        "idle": "Tétlen",
+        "starting": "Indulás",
+        "running": "Futás",
+        "paused": "Szüneteltetve",
+        "user_paused": "Felhasználó által szüneteltetve",
+        "ending": "Befejező",
+        "finished": "Befejezett",
+        "anti_wrinkle": "Ránctalanító",
+        "delay_wait": "Várakozás a kezdésre",
+        "interrupted": "Megszakított",
+        "force_stopped": "Kényszer leállított",
+        "unknown": "Ismeretlen",
+        "clean": "Tiszta"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "A profil hozzárendelése nem sikerült: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Ciklus indult",
+      "cycle_finished": "Ciklus befejeződött",
+      "cycle_ended": "Ciklus véget ért (bármilyen okból)",
+      "anti_wrinkle_started": "Ránctalanítás indult",
+      "cycle_stalled": "Ciklus elakadt",
+      "unload_pending": "Kirakodás függőben",
+      "program_recognised": "Program felismerve",
+      "phase_started": "Fázis elkezdődött",
+      "finishing_soon": "Hamarosan kész",
+      "cycle_overrun": "Ciklus túllépi az időt",
+      "cycle_paused": "Ciklus szüneteltetva",
+      "cycle_resumed": "Ciklus folytatódott",
+      "still_tumbling": "A ciklus után még forog a dob",
+      "unloaded": "Kirakva",
+      "state_changed": "Állapot megváltozott",
+      "maintenance_due": "Karbantartás esedékes",
+      "milestone_reached": "Ciklus mérföldkő elérve",
+      "pump_stuck": "Szivattyú elakadt"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Fázis",
+      "minutes": "Percek",
+      "percent": "Hosszabb ezzel (%)",
+      "include_detected": "Észlelt szünetek beleszámítása",
+      "status": "Végzett mint",
+      "from": "Innen",
+      "to": "Ide",
+      "task": "Feladat"
+    },
+    "extra_fields_descriptions": {
+      "program": "Csak ez a program, pontos névvel. Hagyja üresen bármely programhoz.",
+      "phase": "Csak ez a fázis, névvel. Hagyja üresen bármely fázishoz.",
+      "minutes": "Hamarosan kész: fennmaradó percek. Még forog a dob: percek a befejezés után.",
+      "percent": "Százalék a program szokásos időtartama felett.",
+      "include_detected": "Aktiválás a WashData által az áramfogyasztásban észlelt szünetekre is, például áztatásra vagy elakadásra.",
+      "status": "Csak így végzett ciklusok.",
+      "from": "Csak ebből az állapotból való változások. Hagyja üresen bármelyikhez.",
+      "to": "Csak ebbe az állapotba való változások. Hagyja üresen bármelyikhez.",
+      "task": "Csak ez a feladat, névvel vagy azonosítóval. Hagyja üresen bármely feladathoz."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Ciklus indult",
+      "description": "Aktiválódik, amikor a készülék ciklust indít."
+    },
+    "program_recognised": {
+      "name": "Program felismerve",
+      "description": "Aktiválódik, amikor a WashData felismeri a futó ciklus programját, vagy másik programra vált.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Csak ez a program, pontos névvel. Hagyja üresen bármely programhoz."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fázis elkezdődött",
+      "description": "Aktiválódik, amikor a futó ciklus a program új fázisába lép.",
+      "fields": {
+        "phase": {
+          "name": "Fázis",
+          "description": "Csak ez a fázis, névvel. Hagyja üresen bármely fázishoz."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Hamarosan kész",
+      "description": "Aktiválódik egyszer ciklusonként, amikor a hátralévő idő először erre a percszámra esik.",
+      "fields": {
+        "minutes": {
+          "name": "Hátralévő percek",
+          "description": "Aktiválás, amikor ennyi vagy kevesebb perc van hátra."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Ciklus túllépi az időt",
+      "description": "Aktiválódik egyszer ciklusonként, amikor ennyivel tovább tart a program szokásos időtartamánál.",
+      "fields": {
+        "percent": {
+          "name": "Hosszabb ezzel",
+          "description": "Százalék a program szokásos időtartama felett."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Ciklus szüneteltetva",
+      "description": "Aktiválódik, amikor szüneteltet egy ciklust, és opcionálisan amikor a készülék magától szünetel.",
+      "fields": {
+        "include_detected": {
+          "name": "Észlelt szünetek beleszámítása",
+          "description": "Aktiválás a WashData által észlelt szünetekre is, például áztatásra vagy elakadásra, nem csak az Ön által indított szünetekre."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Ciklus folytatódott",
+      "description": "Aktiválódik, amikor egy szüneteltetett ciklus folytatódik.",
+      "fields": {
+        "include_detected": {
+          "name": "Észlelt szünetek beleszámítása",
+          "description": "Aktiválás a WashData által észlelt szünetekre is, például áztatásra vagy elakadásra, nem csak az Ön által indított szünetekre."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Ciklus elakadt",
+      "description": "Aktiválódik, amikor egy futó ciklus alacsony, egyenletes teljesítményszinten megáll."
+    },
+    "cycle_finished": {
+      "name": "Ciklus befejeződött",
+      "description": "Aktiválódik, amikor egy ciklus befejeződik, akkor is, ha Ön állítja le. Hamis indításnál nem.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Csak ez a program, pontos névvel. Hagyja üresen bármely programhoz."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Ciklus véget ért (bármilyen okból)",
+      "description": "Aktiválódik, amikor egy ciklus bármilyen okból véget ér, hamis indításokat is beleértve.",
+      "fields": {
+        "status": {
+          "name": "Végzett mint",
+          "description": "Csak így végzett ciklusok."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Ránctalanítás indult",
+      "description": "Aktiválódik, amikor a készülék elkezdi a kész töltet forgatását a gyűrődések ellen."
+    },
+    "still_tumbling": {
+      "name": "A ciklus után még forog a dob",
+      "description": "Aktiválódik egyszer, amikor a készülék ilyen sok perccel a ciklus vége után rövid lökésekben még forgatja a dobot. Megáll új ciklusnál vagy 4 órával a befejezés után.",
+      "fields": {
+        "minutes": {
+          "name": "Percek a befejezés után",
+          "description": "Aktiválás az első dobforgásnál, amely legalább ennyivel a befejezés után van."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Kirakodás függőben",
+      "description": "Aktiválódik, amikor egy ciklus befejeződött és a töltet még bent van."
+    },
+    "unloaded": {
+      "name": "Kirakva",
+      "description": "Aktiválódik, amikor a töltetet kiveszi egy ciklus után: az ajtó kinyílt vagy a kirakást megerősítették."
+    },
+    "state_changed": {
+      "name": "Állapot megváltozott",
+      "description": "Aktiválódik, amikor a WashData állapota megváltozik.",
+      "fields": {
+        "from": {
+          "name": "Innen",
+          "description": "Csak ebből az állapotból való változások. Hagyja üresen bármelyikhez."
+        },
+        "to": {
+          "name": "Ide",
+          "description": "Csak ebbe az állapotba való változások. Hagyja üresen bármelyikhez."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Karbantartás esedékes",
+      "description": "Aktiválódik, amikor egy karbantartási feladat esedékessé válik.",
+      "fields": {
+        "task": {
+          "name": "Feladat",
+          "description": "Csak ez a feladat, névvel vagy azonosítóval. Hagyja üresen bármely feladathoz."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Ciklus mérföldkő elérve",
+      "description": "Aktiválódik, amikor az élettartam-ciklusszám eléri az értesítések valamelyik mérföldkövét."
+    },
+    "pump_stuck": {
+      "name": "Szivattyú elakadt",
+      "description": "Aktiválódik, amikor egy szivattyú tovább működik az elakadási korlátjánál."
     }
   }
 }

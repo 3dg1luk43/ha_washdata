@@ -23,7 +23,7 @@ from datetime import timedelta, datetime, timezone
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_POWER_SENSOR, 
-    CONF_OFF_DELAY, STATE_RUNNING, STATE_OFF, CONF_PROFILE_UNMATCH_THRESHOLD
+    CONF_OFF_DELAY, STATE_RUNNING, STATE_OFF, DEFAULT_PROFILE_UNMATCH_THRESHOLD
 )
 from custom_components.ha_washdata.profile_store import MatchResult
 
@@ -49,7 +49,6 @@ def mock_entry():
         CONF_MIN_POWER: 5.0,
         CONF_OFF_DELAY: 60,
         CONF_COMPLETION_MIN_SECONDS: 600,
-        CONF_PROFILE_UNMATCH_THRESHOLD: 0.10, # Revert to detecting if < 0.10
         "power_sensor": "sensor.test_power",
     }
     entry.data = {}
@@ -93,22 +92,24 @@ async def test_repro_match_flapping(manager, mock_hass):
         (now, 105.0)
     ]
     
+    # Around the unmatch threshold (fixed at 0.35 since 0.5.9).
+    assert DEFAULT_PROFILE_UNMATCH_THRESHOLD == 0.35
     match_high = MatchResult(
         best_profile="Profile A",
-        confidence=0.20,
+        confidence=0.50,
         expected_duration=3600,
         matched_phase="Running",
-        candidates=[{"name": "Profile A", "score": 0.20}],
+        candidates=[{"name": "Profile A", "score": 0.50}],
         is_ambiguous=False,
         ambiguity_margin=0.5
     )
     
     match_low = MatchResult(
         best_profile="Profile A",
-        confidence=0.05,
+        confidence=0.30,
         expected_duration=3600,
         matched_phase="Running",
-        candidates=[{"name": "Profile A", "score": 0.05}],
+        candidates=[{"name": "Profile A", "score": 0.30}],
         is_ambiguous=False,
         ambiguity_margin=0.5
     )

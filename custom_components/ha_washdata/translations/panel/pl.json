@@ -95,7 +95,9 @@
     "matcher_used_few": "Dopasowano do {n} Twoich cykli",
     "matcher_used_many": "Dopasowano do {n} Twoich cykli",
     "matcher_used_other": "Dopasowano do {n} cyklu",
-    "matcher_used_tip": "Cykle na tym urządzeniu, które WashData samodzielnie dopasował do tego zaimportowanego programu. Import, który nigdy nie zostaje dopasowany, może nie pasować do Twojego urządzenia; możesz go usunąć. Liczone lokalnie; nic nie jest wysyłane do sklepu."
+    "matcher_used_tip": "Cykle na tym urządzeniu, które WashData samodzielnie dopasował do tego zaimportowanego programu. Import, który nigdy nie zostaje dopasowany, może nie pasować do Twojego urządzenia; możesz go usunąć. Liczone lokalnie; nic nie jest wysyłane do sklepu.",
+    "bp_installed": "Zainstalowany",
+    "bp_installed_other": "Zainstalowana inna wersja"
   },
   "btn": {
     "pg_preset_delete": "Usuń preset",
@@ -148,7 +150,6 @@
     "export": "Eksportuj",
     "force_stop": "Wymuś zatrzymanie",
     "force_stop_tip": "Natychmiast zakończ bieżący cykl i oznacz go jako wymuszony do zatrzymania",
-    "from_template": "Z szablonu ▾",
     "ignore": "Ignoruj",
     "import_json": "Importuj z JSON",
     "inspect": "Zbadaj",
@@ -156,14 +157,11 @@
     "load_more": "Wczytaj więcej",
     "manage": "Zarządzaj",
     "merge": "Scal",
-    "new_automation": "+ Nowa automatyzacja",
     "new_group": "+ Nowa grupa",
     "new_group_tip": "Grupuj niemal identyczne profile (ten sam kształt, inna temperatura lub wirowanie), aby dopasowanie umiało je rozróżnić.",
     "new_phase": "+ Nowa faza",
     "new_profile": "+ Nowy profil",
     "new_profile_tip": "Utwórz nowy profil programu z istniejącego oznakowanego cyklu lub nagrania",
-    "on_cycle_finished": "Po zakończeniu cyklu",
-    "on_cycle_started": "Po rozpoczęciu cyklu",
     "pause_cycle": "Pauza",
     "pause_cycle_tip": "Wstrzymaj bieżący cykl – urządzenie wznowi pracę od miejsca, w którym zostało zatrzymane",
     "process": "Przetwórz",
@@ -257,7 +255,26 @@
     "confirmed": "Potwierdzone",
     "create_profile_from_gap": "Utwórz profil",
     "undo_import": "Cofnij ostatni import",
-    "pg_rerun": "Aktualizuj symulację"
+    "pg_rerun": "Aktualizuj symulację",
+    "replace": "Zastąp",
+    "auto_edit_in_ha": "Edytuj w Home Assistant",
+    "auto_fewer_triggers": "Mniej wyzwalaczy",
+    "auto_more_triggers": "Jeszcze {count} wyzwalaczy",
+    "auto_more_triggers_one": "Jeszcze {count} wyzwalacz",
+    "auto_more_triggers_few": "Jeszcze {count} wyzwalacze",
+    "auto_more_triggers_many": "Jeszcze {count} wyzwalaczy",
+    "auto_more_triggers_other": "Jeszcze {count} wyzwalacza",
+    "auto_blank": "Pusta automatyzacja",
+    "bp_refresh": "Sprawdź nowe szablony na GitHubie",
+    "bp_turn_on_online": "Włącz funkcje online",
+    "bp_add_tip": "Tworzy automatyzację dla tego urządzenia z ustawieniami domyślnymi, a następnie otwiera ją w Home Assistant",
+    "bp_add_to": "Dodaj do: {device}",
+    "bp_setup_tip": "Instaluje szablon, a następnie otwiera Home Assistant, aby uzupełnić resztę",
+    "bp_setup_in_ha": "Skonfiguruj w Home Assistant",
+    "bp_details": "Szczegóły",
+    "bp_copy_yaml": "Kopiuj YAML",
+    "bp_hide_yaml": "Ukryj YAML",
+    "bp_show_yaml": "Pokaż YAML"
   },
   "note": {
     "off_delay": {
@@ -312,25 +329,22 @@
       "timeout": "Musi przekraczać Czas Zacięcia Pompy ({ps} s), aby alarm zacięcia zadziałał pierwszy"
     },
     "start_dur": {
-      "sampling": "Interwał Próbkowania przekracza Czas Trwania Startu ({sdt} s); pojedynczy impuls może otworzyć cykl",
       "threshold": "Powinien wynosić co najmniej jeden Interwał Próbkowania ({si} s), aby zapobiec fałszywym startom z pojedynczej próbki"
-    },
-    "unmatch": {
-      "match": "Musi być powyżej Progu Niedopasowania ({un})",
-      "unmatch": "Musi być poniżej Progu Dopasowania ({match}); w przeciwnym razie potwierdzone dopasowanie natychmiast się cofa"
     },
     "cascade_toast": "Inne ustawienia dostosowane w celu zachowania spójności: {n}",
     "suggestion_resolves": "Zastosuj oczekującą sugestię ({val}) poniżej, aby rozwiązać ten konflikt",
     "use_fix": "Użyj {val}",
     "watchdog": {
-      "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)",
-      "sampling": "Interwał Próbkowania powinien wynosić co najwyżej połowę Interwału Watchdog ({wi} s)"
+      "interval": "Powinien wynosić co najmniej 2× Interwał Próbkowania ({si} s)"
     },
     "settings_banner": "Konflikty ustawień: {n}. Sprawdź podświetlone sekcje i popraw je przed zapisaniem.",
     "settings_banner_btn": "Przejdź do pierwszego",
     "end_energy": {
       "energy": "Zbyt restrykcyjne dla Progu Zatrzymania ({w} W) w czasie Opóźnienia Wyłączenia ({d} s); cykl może się zakończyć tylko ścieżką awaryjną",
       "stop": "Energia Zakończenia ({e} Wh w ciągu {d} s) dopuszcza tylko {p} W"
+    },
+    "power_sensor": {
+      "energy": "Ten czujnik zlicza energię ({unit}), a nie moc, więc nie da się wykryć żadnego cyklu. Wybierz czujnik mocy wtyczki (W lub kW)."
     }
   },
   "hdr": {
@@ -340,7 +354,6 @@
     "add_maintenance": "Dodaj zdarzenie konserwacji",
     "automation_delete": "Usuń tę automatyzację",
     "automation_needs_review": "Ten cykl wymaga przeglądu",
-    "automation_open": "Otwórz w edytorze automatyzacji",
     "automation_review_this_cycle": "Przejrzyj ten cykl",
     "automations": "Automatyka",
     "clear_debug": "Wyczyść ślady debugowania",
@@ -358,7 +371,6 @@
     "ml_settings_card": "Ustawienia",
     "ml_smart_learning": "Inteligentne uczenie się",
     "my_preferences": "Moje preferencje",
-    "no_automations": "Żadna automatyzacja nie odwołuje się jeszcze do tego urządzenia.",
     "panel_settings": "Ustawienia panelu",
     "pg_settings_source": "Źródło ustawień",
     "phase_catalog": "Katalog faz",
@@ -378,7 +390,15 @@
     "import_power_history": "Import historii mocy",
     "service_status": "Status serwisu",
     "online_account_tab": "Online i społeczność",
-    "live_match_debug": "Debugowanie dopasowania na żywo"
+    "live_match_debug": "Debugowanie dopasowania na żywo",
+    "automations_all_tip": "Lista automatyzacji Home Assistant filtrowana według etykiety WashData. Automatyzacje utworzone tutaj znajdują się również w kategorii WashData.",
+    "maint_done_by_program": "Wykonane automatycznie",
+    "auto_start": "Utwórz nową automatyzację",
+    "auto_yours": "Twoje automatyzacje",
+    "bp_needs_online": "Biblioteka szablonów wymaga funkcji online",
+    "bp_unreachable": "Nie udało się połączyć z biblioteką szablonów",
+    "bp_library": "Biblioteka szablonów",
+    "bp_settings": "Co możesz ustawić"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -663,7 +683,7 @@
     "hist_reason_already_recorded": "nakłada się na cykl już zarejestrowany przez WashData",
     "share_consent": "Potwierdzam, że te cykle przebiegły normalnie do końca, bez przerwania",
     "show_internal": "Pokaż ustawienia wewnętrzne",
-    "show_internal_tip": "Ustawienia, które WashData stroi za Ciebie (próbkowanie, watchdog, częstotliwość dopasowania, progi). Widoczne, gdy to urządzenie ma własną wartość, konflikt lub sugestię.",
+    "show_internal_tip": "Ustawienia, które WashData dostosowuje za Ciebie (watchdog, rytm dopasowywania, progi). Wyświetlane, gdy urządzenie ma własną wartość, konflikt lub sugestię.",
     "rate_n": "{n} gwiazdek",
     "rate_quality": "Oceń jakość",
     "pg_autolabel": "Automatyczne oznaczanie",
@@ -696,7 +716,19 @@
     "cycle_context_minutes": "{min} min",
     "cycle_context_series": "Historia z recordera",
     "before_start": "Przed startem",
-    "after_end": "Po zakończeniu"
+    "after_end": "Po zakończeniu",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Zawiera etykietę WashData",
+    "done_by_none": "Nie ustawiono",
+    "done_by_programs": "Wykonane automatycznie przez: {programs}",
+    "done_by_cycle": "Wykonane przez cykl programu {program}",
+    "bp_by": "autor: {author}",
+    "bp_for_all": "Wszystkie urządzenia",
+    "bp_for": "Dla",
+    "bp_needs": "Wymagania",
+    "bp_needs_version": "WashData {version} lub nowszy",
+    "bp_author": "Autor",
+    "bp_required": "wymagane"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -797,7 +829,9 @@
     "profile_title": "Profil · {name}",
     "undo_import_msg": "Dane i ustawienia tego urządzenia wrócą do stanu sprzed ostatniego importu ({when}). Cykle zarejestrowane i zmiany wprowadzone od tego czasu zostaną utracone.",
     "undo_import_ok": "Cofnij import",
-    "undo_import_title": "Cofnij ostatni import"
+    "undo_import_title": "Cofnij ostatni import",
+    "bp_replace_title": "Zastąpić zainstalowany szablon?",
+    "bp_replace_library_msg": "Home Assistant ma inną wersję \"{name}\". Zastąpić ją wersją z biblioteki szablonów? Automatyzacje, które go używają, zmienią się razem z nim."
   },
   "msg": {
     "pg_canvas_empty3": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń lub użyj dwóch palców, aby powiększyć, i przeciągnij, aby przesunąć.",
@@ -820,7 +854,6 @@
     "artifact_pause_detail": "Moc spadła prawie do zera na ~{n}s, a potem wróciła. Prawdopodobnie otwarto drzwi lub wstrzymano cykl.",
     "artifact_spike_detail": "Moc przekroczyła normalny zakres przez ~{n}s.",
     "auto_label_intro": "Przypisz profile do nieoznakowanych cykli, których pewność dopasowania przekracza próg.",
-    "automations_intro": "WashData uruchamia zdarzenia {start} / {end} i udostępnia encje, więc powiadomienia i akcje najlepiej budować jako normalne automatyzacje Home Assistant. Automatyzacje korzystające z tego urządzenia są widoczne poniżej.",
     "cleanup_intro": "Wszystkie oznaczone cykle nałożone na siebie. Zaznacz odstające, a potem usuń im etykietę (zostaną w historii, ale przestaną kształtować ten profil) lub je usuń.",
     "clear_debug_hint": "Usuń zapisane dane debugowania, aby zwolnić miejsce.",
     "collecting_data": "Zbieranie danych. Brakujące cykle do rozpoczęcia dostrajania: {need} ({current}/{min}).",
@@ -1006,7 +1039,7 @@
     "standby_above_stop_title": "Nadal pobiera {idle} W w momencie zakończenia cyklu",
     "standby_above_stop_sub": "{n} z ostatnich {total} cykli. Opóźnienie Wyłączenia zaczyna biec dopiero wtedy, gdy moc spadnie poniżej Progu Zatrzymania ({stop} W), więc cykle kończą się z opóźnieniem albo trzeba je zatrzymywać ręcznie.",
     "store_share_intro": "Prześlij ten cykl referencyjny, aby inni z tym samym urządzeniem mogli go używać. Zostanie sprawdzony przed publicznym udostępnieniem.",
-    "online_intro_global": "Przeglądaj i udostępniaj nagrania referencyjne innym użytkownikom WashData. Jedno połączenie obejmuje wszystkie Twoje urządzenia WashData; markę i model ustawia się dla każdego urządzenia w sekcji Podstawowe. Funkcje online są wyłączone, dopóki ich nie włączysz.",
+    "online_intro_global": "Przeglądaj i udostępniaj nagrania referencyjne innym użytkownikom WashData oraz korzystaj z biblioteki szablonów automatyzacji. Jedno połączenie obejmuje wszystkie Twoje urządzenia WashData; markę i model ustawia się dla każdego urządzenia w sekcji Podstawowe. Funkcje online są wyłączone, dopóki ich nie włączysz.",
     "online_unavailable": "Funkcje online nie są dostępne na tym serwerze.",
     "store_picker_offline": "Włącz funkcje online w kółku zębatym ustawień, aby wybierać z katalogu społeczności.",
     "pick_brand_first": "Najpierw wybierz markę urządzenia.",
@@ -1071,10 +1104,6 @@
     "pg_label_yes": "Na końcu cyklu zostałby oznaczony jako \"{name}\"",
     "pg_label_no": "Trafiłby do przeglądu: {reason}",
     "live_match_debug_tip": "Zaufanie: jak dokładnie bieżąca krzywa mocy pasuje do najlepszego profilu-kandydata (0-100%). Niejednoznaczne: wyniki dwóch najlepszych kandydatów różnią się o mniej niż 5%, więc etykieta jest niepewna aż do zakończenia cyklu.",
-    "automation_alias_started": "{device}: cykl rozpoczęty",
-    "automation_alias_finished": "{device}: cykl zakończony",
-    "automation_desc_started": "Uruchamiana, gdy rozpoczyna się cykl urządzenia {device}. Dodaj własne akcje (powiadomienia, światła, ...).",
-    "automation_desc_finished": "Uruchamiana, gdy kończy się cykl urządzenia {device}. Dodaj własne akcje (powiadomienia, światła, ...).",
     "feedback_detected": "WashData wykrył: {name}",
     "import_undo_hint": "Zachowano punkt przywracania sprzed ostatniego importu ({when}): {profiles} profil(e) i {cycles} cykl(e).",
     "replace_undo_hint": "Najpierw zapisywany jest punkt przywracania, więc ten import można cofnąć w sekcji Eksportuj/Importuj.",
@@ -1101,27 +1130,32 @@
     "cycle_context_note": "Szary: historia czujnika mocy z recordera wokół tego cyklu. Nie jest częścią cyklu i nie wpływa na czas trwania, energię ani dopasowanie.",
     "cycle_context_none": "Recorder nie przechowuje żadnych odczytów z okresu wokół tego cyklu (Home Assistant domyślnie przechowuje historię przez 10 dni).",
     "cycle_context_tip": "Tylko podgląd: pokazuje historię czujnika mocy z recordera wokół tego cyklu, jeśli jest jeszcze przechowywana. Aby dołączać nieudane próby startu do przyszłych cykli, użyj ustawienia Wstępny zapis krzywej (Ustawienia > Wykrywanie > Start Cyklu), które zmienia zapisane czasy trwania.",
-    "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W). Nic nie zostało zapisane; zmień obie wartości razem."
+    "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W). Nic nie zostało zapisane; zmień obie wartości razem.",
+    "bp_admin_only": "Szablony instaluje administrator.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Utworzone przez WashData dla {device}. Dodaj swoje akcje (powiadomienie, światła, ...).",
+    "automation_alias_new": "{device}: nowa automatyzacja",
+    "maint_done_by_program_intro": "Zadanie liczy się jako wykonane, gdy zakończy się cykl jednego z jego programów, np. czyszczenie bębna po programie Bawełna 90. Liczą się tylko cykle, co do których WashData ma pewność, lub z programem wybranym przez Ciebie.",
+    "auto_none": "Żadna automatyzacja nie używa jeszcze tego urządzenia.",
+    "auto_start_hint": "Otwiera edytor automatyzacji Home Assistant, w którym to urządzenie jest już wybrane.",
+    "auto_yours_intro": "Automatyzacje Home Assistant, które reagują na to urządzenie.",
+    "bp_needs_online": "Szablony są pobierane z GitHuba, więc biblioteka działa tylko przy włączonych funkcjach online. Funkcje online obejmują też Sklep społecznościowy.",
+    "bp_needs_online_admin": "Administrator może je włączyć w kółku zębatym ustawień, w sekcji Online i społeczność.",
+    "bp_stale": "Nie udało się teraz połączyć z GitHubem. To szablony pobrane wcześniej.",
+    "bp_none_yet": "Nie ma jeszcze szablonów dla tego typu urządzenia. Udostępnij pierwszy.",
+    "bp_unreachable": "Jest pobierana z GitHuba. Sprawdź, czy Home Assistant ma dostęp do internetu, i spróbuj ponownie.",
+    "bp_library_intro": "Gotowe automatyzacje udostępniane przez użytkowników WashData na GitHubie, sprawdzane przed dodaniem do listy. Dostępne tylko przy włączonych funkcjach online.",
+    "bp_needs_version": "Wymaga WashData {version} lub nowszego."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
     "anti_wrinkle": "Okresowe obroty bębna po zakończeniu cyklu w celu zapobiegania gnieceniu tkanin.",
-    "baking": "Grzałka pracuje w wysokiej temperaturze, tworząc skórkę i miąższ.",
-    "cooking": "Główna faza przygotowania z włączoną grzałką i wentylatorem.",
     "cool_down": "Obracanie bez ogrzewania pod koniec cyklu.",
-    "cool_down_af": "Chłodzenie samym wentylatorem po grzaniu.",
     "drain_and_switch": "Okres przejścia z trybu prania do trybu suszenia.",
     "dry": "Etap suszenia przy użyciu grzejnika i/lub ciepła resztkowego.",
     "drying": "Główny okres podgrzewania.",
     "heat_up": "Wstępne rozgrzewanie grzejnika przed rozpoczęciem pełnego suszenia.",
-    "keep_warm": "Lekkie grzanie, by jedzenie pozostało ciepłe.",
-    "keep_warm_bm": "Lekkie grzanie, by chleb pozostał ciepły po upieczeniu.",
-    "kneading": "Silnik miesza i wyrabia ciasto. Duży pobór mocy.",
-    "pause_af": "Krótka przerwa na potrząśnięcie lub sprawdzenie.",
-    "pre_heat": "Wstępne nagrzewanie komory przed właściwym przygotowaniem.",
     "pre_rinse": "Wstępne spryskanie przed praniem w detergencie.",
-    "proving": "Wyrastanie w niskiej temperaturze: drożdże fermentują, a ciasto rośnie.",
-    "resting": "Krótka przerwa przy małej mocy między wyrabianiem, by gluten się rozluźnił.",
     "pre_wash": "Wstępne namoczenie lub obróbka wstępna przed praniem zasadniczym.",
     "rinse": "Etap płukania czystą wodą. Faza ta może powtarzać się wielokrotnie.",
     "sanitize": "Etap czyszczenia w wysokiej temperaturze w programach odkażania.",
@@ -1214,10 +1248,6 @@
       "doc": "Dołączaj krótkie impulsy obracania bębna o niskiej mocy po głównej fazie grzania suszarki do zakończonego cyklu, zamiast traktować je jako nowe cykle.",
       "label": "Włącz Wykrywanie Antygniotowe"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "W trybie antygniotowym moc poniżej tej wartości oznacza przerwę między impulsami obrotów, a przerwa dłuższa niż Maks. Odstęp Impulsów kończy tryb. Jeśli Próg Zatrzymania jest wyższy, używany jest on, więc to ustawienie działa tylko powyżej Progu Zatrzymania.",
-      "label": "Próg Wyjścia Mocy"
-    },
     "anti_wrinkle_idle_timeout": {
       "doc": "Jak długo suszarka może być cicha między impulsami obracania, zanim tryb antygniotowy się zakończy. Ustaw powyżej najdłuższej przerwy suszarki, inaczej kolejne impulsy zostaną odczytane jako fałszywe starty.",
       "label": "Maks. Odstęp Impulsów"
@@ -1262,10 +1292,6 @@
       "doc": "Opcjonalny czujnik drzwi. Pokazuje, kiedy urządzenie zostało otwarte w celu rozładunku po cyklu.",
       "label": "Encja Czujnika Drzwi"
     },
-    "duration_tolerance": {
-      "doc": "Dotyczy tylko informacji zwrotnej uczenia: cykl w granicach +/-X% szacowanego czasu trwania liczy się jako dobre oszacowanie. Nie wpływa na dopasowanie.",
-      "label": "Tolerancja Szacowania"
-    },
     "enable_ml_models": {
       "doc": "Używaj modelu wytrenowanego na tej maszynie do przewidywania energii i kosztu trwającego cyklu oraz pozwól dobrze znanemu programowi, który kończy się nietypowo wcześnie, zakończyć się bez pełnego opóźnienia wyłączenia. Wyłączone: tylko logika oparta na mocy.",
       "label": "Stosuj inteligentne modele podczas cyklu"
@@ -1291,12 +1317,8 @@
       "label": "Ujawnij Encje Debugowania"
     },
     "external_end_trigger": {
-      "doc": "Czujnik binarny, którego zmiana oznacza koniec cyklu (np. styk „zakończono” lub inna integracja).",
+      "doc": "Opcjonalny czujnik binarny kończący cykl po włączeniu, uzupełniający wykrywanie na podstawie mocy (np. styk \"zakończono\" lub inna integracja). Zostaw puste, aby wyłączyć.",
       "label": "Encja Zewnętrznego Wyzwalacza"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Pozwól czujnikowi binarnemu sygnalizować koniec cyklu, oprócz wykrywania na podstawie mocy.",
-      "label": "Włącz Zewnętrzny Wyzwalacz Zakończenia"
     },
     "external_end_trigger_inverted": {
       "doc": "Traktuj wyłączenie czujnika (a nie włączenie) jako sygnał końca.",
@@ -1321,18 +1343,6 @@
     "ml_training_enabled": {
       "doc": "Od czasu do czasu trenuj ponownie model energii na zakończonych cyklach tej maszyny. Nowy model zostaje tylko wtedy, gdy na cyklach testowych wypada lepiej niż proste oszacowanie.",
       "label": "Ucz się od tej maszyny"
-    },
-    "ml_training_hour": {
-      "doc": "Godzina (0-23) nocnego trenowania. Wybierz spokojną godzinę, np. 2.",
-      "label": "Ucz się o godzinie"
-    },
-    "ml_training_interval_days": {
-      "doc": "Trenuj ponownie najwyżej raz na tyle dni.",
-      "label": "Sprawdzaj co najwyżej co"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Przed trenowaniem poczekaj na co najmniej tyle zarejestrowanych cykli.",
-      "label": "Wymagane minimum cykli"
     },
     "name": {
       "doc": "Nazwa tego urządzenia wyświetlana w Home Assistant.",
@@ -1366,16 +1376,12 @@
       "doc": "Usługi notify.* wywoływane po zakończeniu cyklu. Pozostaw puste, aby nic nie wysyłać.",
       "label": "Usługi Zakończenia"
     },
-    "notify_fire_events": {
-      "doc": "Wysyłaj też zdarzenia ha_washdata_* przy starcie i zakończeniu cyklu dla własnych automatyzacji.",
-      "label": "Wysyłaj Zdarzenia HA dla Powiadomień"
-    },
     "notify_icon": {
       "doc": "Mała ikona w powiadomieniu (np. mdi:washing-machine). Wysyłana tylko do celów mobile_app, nie do grup notify. W iOS zastępuje ikonę aplikacji i wymaga aplikacji mobilnej 2026.8 lub nowszej. Puste: domyślna ikona platformy.",
       "label": "Ikona Powiadomienia"
     },
     "notify_live_chronometer": {
-      "doc": "Pokazuj w powiadomieniu odliczanie na żywo (gdzie to obsługiwane) zamiast stałego oszacowania.",
+      "doc": "Android: dodaje odliczanie do szacowanego zakończenia obok tekstu powiadomienia. Użyj {finish_time} w Wiadomości Przed Zakończeniem, aby wyświetlić godzinę zakończenia zamiast drugiego odliczania.",
       "label": "Używaj Chronometru na Żywo"
     },
     "notify_live_interval_seconds": {
@@ -1399,7 +1405,7 @@
       "label": "Osoby (dla Tylko Gdy Jestem w Domu)"
     },
     "notify_pre_complete_message": {
-      "doc": "Treść każdej aktualizacji postępu na żywo. Zmienne szablonu: {device}, {program}, {minutes} (pozostałe minuty). Przy każdej innej zmiennej używany jest tekst domyślny.",
+      "doc": "Treść każdej aktualizacji postępu na żywo. Zmienne szablonu: {device}, {program}, {minutes} (pozostałe minuty), {finish_time} (szacowana godzina zakończenia, np. 14:30). Przy każdej innej zmiennej używany jest tekst domyślny.",
       "label": "Wiadomość Przed Zakończeniem"
     },
     "notify_reminder_message": {
@@ -1447,7 +1453,7 @@
       "label": "Próg Wyłączenia Zasilania"
     },
     "power_sensor": {
-      "doc": "Czujnik podający bieżącą moc tego urządzenia w watach (np. sensor.washer_power). Na nim opiera się całe wykrywanie.",
+      "doc": "Czujnik podający bieżącą moc tego urządzenia w W lub kW (np. sensor.washer_power), a nie jego licznik energii (kWh). Na nim opiera się całe wykrywanie.",
       "label": "Czujnik Mocy"
     },
     "profile_match_interval": {
@@ -1466,10 +1472,6 @@
       "doc": "Wynik dopasowania na żywo, którego cykl potrzebuje, zanim Inteligentne zakończenie lub zakończenie antygniotowe może go zakończyć wcześniej. Nie zmienia wyświetlanego programu. Podnieś, jeśli słabe dopasowania kończą cykle za wcześnie; obniż, jeśli wyraźne dopasowania czekają przez opóźnienie wyłączenia.",
       "label": "Próg Dopasowania"
     },
-    "profile_unmatch_threshold": {
-      "doc": "Jeśli wynik dopasowania na żywo spadnie poniżej tej wartości, bieżące przypuszczenie programu jest czyszczone. Utrzymuj nieco poniżej Progu Dopasowania, aby krótki spadek go nie resetował.",
-      "label": "Próg Niedopasowania"
-    },
     "progress_reset_delay": {
       "doc": "Po cyklu utrzymuj postęp na 100% przez ten czas, zanim nastąpi reset do stanu Bezczynny.",
       "label": "Opóźnienie Resetowania Postępu"
@@ -1477,10 +1479,6 @@
     "pump_stuck_duration": {
       "doc": "Jak długo pompa może pracować bez przerwy, zanim zostanie wywołane zdarzenie zaciętej pompy.",
       "label": "Czas Zacięcia Pompy"
-    },
-    "sampling_interval": {
-      "doc": "Minimalny czas między przetwarzanymi odczytami. Odczyty, które nadejdą szybciej, są pomijane (niskie odczyty w trakcie cyklu są zawsze zachowywane). Ustaw interwał raportowania wtyczki lub mniej; wyższa wartość tylko odrzuca odczyty.",
-      "label": "Interwał Próbkowania"
     },
     "save_debug_traces": {
       "doc": "Zapisuj też przy każdym cyklu dane debugowania mechanizmu dopasowania (wyniki każdego kandydata), do rozwiązywania problemów. Dodaje około 20 KB na cykl.",
@@ -1656,9 +1654,6 @@
     "services": {
       "label": "Usługi"
     },
-    "signal_processing": {
-      "label": "Przetwarzanie Sygnału"
-    },
     "thresholds_gap": {
       "label": "Progi i Przerwy"
     },
@@ -1721,10 +1716,6 @@
       "auto_label_confidence": {
         "higher": "Mniej cykli jest oznaczanych automatycznie; więcej trafia do przeglądu",
         "lower": "Więcej cykli jest oznaczanych automatycznie; niektóre mogą być błędnie zidentyfikowane"
-      },
-      "duration_tolerance": {
-        "higher": "Akceptuje szerszy zakres czasu trwania – bardziej elastyczne dopasowanie",
-        "lower": "Wymaga bliższego dopasowania czasu trwania – bardziej rygorystyczne, ale może odrzucić nietypowe cykle"
       },
       "end_energy_threshold": {
         "higher": "Zamyka tylko cykle o znacznym zużyciu energii",
@@ -1823,7 +1814,8 @@
     "subtab_profiles": "Profile",
     "maintenance": "Konserwacja",
     "playground": "Piaskownica",
-    "store": "Sklep"
+    "store": "Sklep",
+    "automations": "Automatyzacje"
   },
   "tag": {
     "early_end": "Wczesny koniec",
@@ -1994,7 +1986,14 @@
     "auto_label_done_one": "Automatyczne oznaczanie zakończone: oznaczono {count} cykl, bez etykiety pozostało: {skipped}.",
     "auto_label_done_few": "Automatyczne oznaczanie zakończone: oznaczono {count} cykle, bez etykiety pozostało: {skipped}.",
     "auto_label_done_many": "Automatyczne oznaczanie zakończone: oznaczono {count} cykli, bez etykiety pozostało: {skipped}.",
-    "auto_label_done_other": "Automatyczne oznaczanie zakończone: oznaczono {count} cyklu, bez etykiety pozostało: {skipped}."
+    "auto_label_done_other": "Automatyczne oznaczanie zakończone: oznaczono {count} cyklu, bez etykiety pozostało: {skipped}.",
+    "bp_install_failed": "Nie można zainstalować szablonu: {error}",
+    "bp_installed_finish": "Szablon zainstalowany. Uzupełnij resztę w Home Assistant.",
+    "bp_automation_failed": "Szablon jest zainstalowany, ale nie można było utworzyć automatyzacji: {error}",
+    "bp_automation_created": "Automatyzacja utworzona z ustawieniami domyślnymi; otwieram",
+    "copied": "Skopiowano",
+    "copy_failed": "Kopiowanie nie powiodło się. Zaznacz tekst i skopiuj go ręcznie.",
+    "automation_label_failed": "Automatyzacja utworzona, ale etykiety ani kategorii WashData nie można było dodać."
   },
   "trend": {
     "down": "Trend w dół",
@@ -2016,7 +2015,6 @@
     "smart_termination_duration_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż, jeśli czasy pracy się wahają",
     "anti_crease_finalize_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim ogon antygniotowy może go zakończyć; obniż w suszarkach, w pralkach zostaw wartość domyślną",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
-    "anti_wrinkle_exit_power": "Poziom mocy w przerwach między impulsami obrotów; działa tylko powyżej Progu Zatrzymania",
     "anti_wrinkle_idle_timeout": "Dozwolony czas ciszy między dwoma impulsami bębna, zanim tryb antygniotowy się zakończy",
     "anti_wrinkle_max_duration": "Dłuższy impuls kończy tryb antygniotowy i otwiera nowy cykl",
     "anti_wrinkle_max_power": "Impuls powyżej tej wartości kończy tryb antygniotowy i otwiera nowy cykl",
@@ -2105,7 +2103,11 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter na GitHubie ↗",
-    "manual": "Instrukcja ↗"
+    "manual": "Instrukcja ↗",
+    "automations_all": "Wszystkie automatyzacje WashData w Home Assistant",
+    "bp_share_pr": "Udostępnij własny szablon: otwórz pull request na GitHubie",
+    "bp_view_github": "Zobacz na GitHubie",
+    "bp_import_my_ha": "Importuj przez My Home Assistant"
   },
   "tip": {
     "add_brand": "Marki nie ma na liście? Dodaj ją do katalogu społeczności",
@@ -2219,16 +2221,11 @@
     "kept": "zachowane",
     "max": "maks.",
     "min": "min.",
-    "minus_tol": "-tol",
     "no_match": "brak dopasowania",
     "no_updates": "brak aktualizacji",
     "off_delay_wait": "opóźnienie wyłączenia",
     "off_gap": "przerwa wył.",
-    "plus_tol": "+tol",
-    "profile": "profil",
-    "reading_interval": "typowy interwał odczytów",
     "sensor_offline": "czujnik offline: wymuszone zatrzymanie",
-    "si": "IP",
     "spike_ignored": "skok zignorowany",
     "spike_ignored_short": "skok: zignorowany",
     "start": "start",
@@ -2237,5 +2234,61 @@
     "thr": "próg",
     "too_short": "za krótki",
     "tumble_kept": "impulsy bębna zachowane"
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Cykl rozpoczęty"
+    },
+    "program_recognised": {
+      "name": "Program rozpoznany"
+    },
+    "phase_started": {
+      "name": "Faza rozpoczęta"
+    },
+    "finishing_soon": {
+      "name": "Zaraz koniec"
+    },
+    "cycle_overrun": {
+      "name": "Cykl trwa za długo"
+    },
+    "cycle_paused": {
+      "name": "Cykl wstrzymany"
+    },
+    "cycle_resumed": {
+      "name": "Cykl wznowiony"
+    },
+    "cycle_stalled": {
+      "name": "Cykl utknął"
+    },
+    "cycle_finished": {
+      "name": "Cykl zakończony"
+    },
+    "cycle_ended": {
+      "name": "Cykl zakończony"
+    },
+    "anti_wrinkle_started": {
+      "name": "Tryb antygniotowy rozpoczęty"
+    },
+    "still_tumbling": {
+      "name": "Nadal obraca bębnem po zakończeniu cyklu"
+    },
+    "unload_pending": {
+      "name": "Oczekuje na rozładunek"
+    },
+    "unloaded": {
+      "name": "Wyładowany"
+    },
+    "state_changed": {
+      "name": "Stan zmieniony"
+    },
+    "maintenance_due": {
+      "name": "Wymagana konserwacja"
+    },
+    "milestone_reached": {
+      "name": "Osiągnięto kamień milowy cyklu"
+    },
+    "pump_stuck": {
+      "name": "Pompa zablokowana"
+    }
   }
 }

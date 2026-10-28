@@ -28,6 +28,7 @@ import os
 import re
 import time
 import uuid
+from collections.abc import Callable
 from datetime import timedelta
 from typing import Any
 
@@ -53,7 +54,6 @@ from .const import (
     CONF_CURVE_PREROLL_SECONDS,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_UNLOAD_CONFIRM_ENTITY,
-    CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_END_ENERGY_THRESHOLD,
     CONF_ENERGY_SENSOR,
@@ -73,6 +73,7 @@ from .const import (
     CONF_POWER_SENSOR,
     CONF_ENERGY_PRICE_ENTITY,
     CONF_NOTIFY_PEOPLE,
+    RETIRED_OPTION_KEYS,
     CONF_SAMPLING_INTERVAL,
     CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
@@ -86,6 +87,7 @@ from .const import (
     CURVE_PREROLL_MAX_SECONDS,
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
+    is_energy_counter,
     resolve_start_duration_default,
     resolve_smart_termination_duration_ratio_default,
     MAINTENANCE_CUSTOM_TASK_MAX,
@@ -112,6 +114,7 @@ from .const import (
     SHOW_ML_LAB,
     STATE_COLORS,
 )
+from . import blueprint_catalog
 from . import history_import
 from . import playground
 from . import task_registry
@@ -124,7 +127,7 @@ from .detector_config import (
     inverted_threshold_pair,
 )
 from .maintenance import editor_types, effective_reminders
-from .options_utils import strip_null_options
+from .options_utils import retire_device_type, strip_null_options
 from .setup_advisor import compute_setup_phase
 from .ws_schema import WS_OPEN_RESPONSES, WS_RESPONSE_TYPES
 
@@ -204,7 +207,8 @@ _CYCLE_STRIP_KEYS = frozenset({"power_data", "power_trace", "debug_data", "sampl
 # The keys the suggestion engine can still produce. A stored suggestion for any
 # other key - one written by an older version for a setting no longer suggested
 # (sampling_interval, smoothing_window, start debounce, the confidence ladder, the
-# tolerances, end_repeat_count; audit SUGGEST-01/04/12) - is never shown or applied.
+# tolerances, end_repeat_count; audit SUGGEST-01/04/12) or for a setting retired
+# since (the anti-wrinkle exit power, 0.5.9) - is never shown or applied.
 _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
@@ -223,7 +227,6 @@ _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_COMPLETION_MIN_SECONDS,
     # Device-class-specific suggestions from reconcile_suggestions
     CONF_POWER_OFF_THRESHOLD_W,
-    CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_PUMP_STUCK_DURATION,
 )
@@ -387,6 +390,40 @@ def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
     return [_pt(pairs[i]) for i in sorted(keep)]
 
 
+def _power_scale(manager: Any, unit: Any = None, *, from_state: bool = True) -> float:
+    """``manager.power_scale(...)`` (#481), or 1.0 when it gives no usable factor.
+
+    Without ``unit`` the sensor's current unit (a CSV carries none); with
+    ``from_state=False`` the given ``unit``, a recorded state's own.
+    """
+    try:
+        scale = (
+            manager.power_scale() if from_state
+            else manager.power_scale(unit, from_state=False)
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        return 1.0
+    if isinstance(scale, bool) or not isinstance(scale, (int, float)):
+        return 1.0
+    return float(scale) if math.isfinite(scale) and scale > 0 else 1.0
+
+
+def _power_scaler(manager: Any) -> Callable[[Any], float]:
+    """The factor for a recorded state's own unit: a sensor whose unit changed
+    keeps each reading in the unit it was recorded in. Memoised per unit (a
+    history read can be millions of rows); ``from_state=False`` never touches
+    ``hass.states``, so it is safe on the recorder's executor."""
+    cache: dict[Any, float] = {}
+
+    def _scale(unit: Any) -> float:
+        key = unit if isinstance(unit, str) or unit is None else repr(unit)
+        if key not in cache:
+            cache[key] = _power_scale(manager, unit, from_state=False)
+        return cache[key]
+
+    return _scale
+
+
 async def _recorder_power(
     hass: HomeAssistant,
     entity_id: str,
@@ -394,8 +431,13 @@ async def _recorder_power(
     *,
     end_dt: Any = None,
     keep_unavailable: bool = False,
+    scale: float | Callable[[Any], float] = 1.0,
 ) -> list[tuple[float, float | None]]:
     """Raw (unix_ts, watts) readings for entity_id over a window, via the recorder.
+
+    ``scale`` turns the sensor's unit into watts (#481): a factor, or a function of
+    each recorded state's own unit (``_power_scaler``), applied before the rounding
+    so a kW reading keeps its watts.
 
     ``end_dt`` defaults to now (the live chart overlay's use). Passing it lets a caller
     read the history in bounded windows instead of one unbounded query - a month of
@@ -431,7 +473,14 @@ async def _recorder_power(
                 # synthetic leading gap (or the same reading twice).
                 if start_ts is not None and ts < start_ts:
                     ts = start_ts
-                rows.append((ts, round(float(s.state), 1)))
+                factor = (
+                    scale(getattr(s, "attributes", {}).get("unit_of_measurement"))
+                    if callable(scale) else scale
+                )
+                watts = float(s.state) * factor
+                if not math.isfinite(watts):  # "inf", or a reading that overflows
+                    raise ValueError("non-finite power")
+                rows.append((ts, round(watts, 1)))
             except (ValueError, TypeError, OverflowError):
                 if keep_unavailable:
                     try:
@@ -605,6 +654,14 @@ _IMPORT_LOCAL_BINDING_KEYS = _OPTIONS_IDENTITY_KEYS | frozenset({
     CONF_NOTIFY_PEOPLE,
 })
 
+# Everything an import drops from the payload's options: this device's bindings,
+# plus every retired option key (``RETIRED_OPTION_KEYS``: #472's ``notify_service``,
+# the 0.5.9 option trim, ...). An old export still carries them; nothing reads them
+# any more, but writing one back would leave a dead key the panel cannot show or
+# remove. Undo strips the same set from the restore point, which may predate the
+# 3.12 migration.
+_IMPORT_STRIP_KEYS = _IMPORT_LOCAL_BINDING_KEYS | RETIRED_OPTION_KEYS
+
 
 def _json_safe(value: Any) -> Any:
     """Best-effort coercion of an option value to a JSON-serializable form."""
@@ -688,7 +745,7 @@ _PANEL_STORE_FILE = "ha_washdata_panel"
 _PANEL_DATA_KEY = "ha_washdata_panel_cfg"
 
 _LEVEL_RANK = {"none": 0, "read": 1, "edit": 2, "full": 3}
-_PANEL_TABS = ("status", "history", "profiles", "settings", "tools", "panel", "ml_lab", "playground")
+_PANEL_TABS = ("status", "history", "profiles", "settings", "automations", "tools", "panel", "ml_lab", "playground")
 
 # Valid values for the two per-user string prefs (validated in ws_set_user_prefs).
 _PREF_DATE_FORMATS = ("relative", "absolute")
@@ -720,6 +777,8 @@ _FULL_COMMANDS = frozenset({
 # Commands allowed for any authenticated user regardless of device permissions.
 _OPEN_COMMANDS = frozenset({
     "get_constants", "get_panel_config", "set_user_prefs",
+    # The automation template library (#478): public templates, no device data.
+    "blueprints/list",
 })
 # Admin-only commands.
 # Commands that require administrator access ALWAYS — even when RBAC is disabled
@@ -1450,6 +1509,25 @@ async def ws_get_shareable_cycles(hass, connection, msg):
                  {"items": items, "phase_programs": phase_programs, "all_programs": all_programs})
 
 
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/blueprints/list",
+    vol.Optional("refresh", default=False): bool,
+})
+@websocket_api.async_response
+async def ws_blueprints_list(hass, connection, msg):
+    """The automation template library (#478), downloaded from its own repository.
+
+    Only while online features are on (``disabled`` otherwise): the library lives
+    on GitHub. Cached; ``refresh`` asks for a new download (at most once a minute).
+    """
+    from . import store_account  # pylint: disable=import-outside-toplevel
+    if not store_account.online_enabled(hass):
+        _send_result(connection, msg["id"], "blueprints/list", {"blueprints": [], "disabled": True})
+        return
+    data = await blueprint_catalog.async_get_library(hass, refresh=bool(msg.get("refresh")))
+    _send_result(connection, msg["id"], "blueprints/list", data)
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
     """Register all WebSocket commands for the WashData panel.
 
@@ -1470,6 +1548,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_get_maintenance_log, ws_add_maintenance_event, ws_delete_maintenance_event,
         ws_set_lifetime_cycle_count,
         ws_add_maintenance_task, ws_update_maintenance_task, ws_delete_maintenance_task,
+        ws_set_maintenance_programs,
         # Cycles
         ws_label_cycle, ws_delete_cycle, ws_auto_label_cycles,
         # Phase catalog
@@ -1540,6 +1619,8 @@ def async_register_commands(hass: HomeAssistant) -> None:
         # Historical power-data import: staged ingest, background scan, apply
         ws_history_import_begin, ws_history_import_chunk, ws_history_import_recorder,
         ws_start_history_import_scan, ws_apply_history_import,
+        # The automation template library (#478)
+        ws_blueprints_list,
     ]
     for handler in handlers:
         websocket_api.async_register_command(hass, _guard(handler))
@@ -1938,6 +2019,11 @@ def ws_get_options(
     # Basic shows the same name as the device list (which serves entry.title) and a
     # save can never echo the creation-time name back over the current one.
     options = {**entry.data, **entry.options, CONF_NAME: entry.title}
+    # A retired key still stored (an entry migrated to 3.12 before the 0.5.9 trim)
+    # is read by nothing; shown, a stale sampling_interval would override the
+    # resolved default the panel's cadence conflict rules read.
+    for key in RETIRED_OPTION_KEYS:
+        options.pop(key, None)
     # Device-resolved defaults for the cadence settings whose defaults vary by
     # device type (#396). The panel uses these as the render/conflict-check
     # fallback for an unset field so it shows (and validates against) the value the
@@ -2030,6 +2116,9 @@ async def ws_set_options(
         # Resolve the effective device type option-first (submission -> existing
         # options -> data -> default) so the pump-only key is dropped correctly even
         # when the submission omits device_type.
+        # A device type removed in 0.5.9 (a stale panel) lands as generic, with
+        # that type's own defaults kept, as the migration does.
+        retire_device_type(new_options, {})
         effective_device_type = new_options.get(
             CONF_DEVICE_TYPE, entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
         )
@@ -2131,6 +2220,12 @@ async def ws_set_options(
         for key in _OPTIONS_IDENTITY_KEYS:
             new_options.pop(key, None)
 
+        # Retired keys are read by nothing (RETIRED_OPTION_KEYS): a client that
+        # still submits one (an older panel, the Revert of an old changelog row)
+        # must not write it back, and a stray stored copy goes with this save.
+        for key in RETIRED_OPTION_KEYS:
+            new_options.pop(key, None)
+
         # Register item 515: a save must not leave the stop threshold at or above
         # the start threshold. The panel's own conflict check holds such an edit
         # back, but the Playground publish/sweep, the per-setting Revert and any
@@ -2146,6 +2241,22 @@ async def ws_set_options(
                 msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
             )
             return
+
+        # #481: an energy counter (kWh) as the power sensor detects nothing. Refused
+        # only when this save picks it, so an entry already on one still saves its
+        # other settings (the panel flags the field).
+        _sensor = msg["options"].get(CONF_POWER_SENSOR)
+        if _sensor and _sensor != entry.options.get(
+            CONF_POWER_SENSOR, entry.data.get(CONF_POWER_SENSOR)
+        ):
+            _sensor_state = hass.states.get(str(_sensor))
+            if _sensor_state is not None and is_energy_counter(_sensor_state.attributes):
+                connection.send_error(
+                    msg["id"], "invalid_power_sensor",
+                    f"{_sensor} is an energy counter (kWh), not a power sensor. Pick the "
+                    "plug's power sensor (W or kW).",
+                )
+                return
 
         update_kwargs: dict[str, Any] = {"options": new_options}
         if isinstance(submitted_name, str) and submitted_name.strip():
@@ -2876,6 +2987,9 @@ async def ws_get_maintenance_log(
         "custom_tasks": store.get_maintenance_tasks(),
         # Every active reminder (built-in and custom) with its progress.
         "status": status,
+        # The programs a task can be marked done by (#480), and what each task has.
+        "programs_available": sorted(store.get_profiles()),
+        "programs": store.get_maintenance_programs(),
         "lifetime_cycle_count": manager.lifetime_cycle_count,
         "limits": {
             "tasks_max": MAINTENANCE_CUSTOM_TASK_MAX,
@@ -3132,6 +3246,43 @@ async def ws_update_maintenance_task(
         )
         manager.notify_update()
         _send_result(connection, msg["id"], "update_maintenance_task", {"success": True, "task": task})
+    except ValueError as exc:
+        connection.send_error(msg["id"], "invalid_format", str(exc))
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/set_maintenance_programs",
+        vol.Required("entry_id"): str,
+        vol.Required("task_id"): str,
+        vol.Required("programs"): [str],
+    }
+)
+@websocket_api.async_response
+async def ws_set_maintenance_programs(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Set the programs whose finished cycle marks a maintenance task done (#480).
+
+    Built-in types and custom tasks alike; an empty list turns it off.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        programs = await manager.profile_store.async_set_maintenance_programs(
+            msg["task_id"], msg["programs"]
+        )
+        manager.notify_update()
+        _send_result(connection, msg["id"], "set_maintenance_programs", {
+            "success": True, "task_id": msg["task_id"], "programs": programs,
+        })
     except ValueError as exc:
         connection.send_error(msg["id"], "invalid_format", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -4200,14 +4351,24 @@ async def async_apply_imported_entry_options(
     un-redacted identity; identity changes go through the reconfigure flow.
     The caller holds the per-entry write lock; order is always write -> options.
     """
+    from . import _convert_legacy_notify_service  # pylint: disable=import-outside-toplevel
+
     entry_options_updates = dict(config_updates.get("entry_options", {}) or {})
-    for key in _IMPORT_LOCAL_BINDING_KEYS:
+    # An export from before 0.5.9 can still carry the legacy notify_service:
+    # convert it as the 3.12 migration does, or the strip drops its target (#472).
+    _convert_legacy_notify_service(entry_options_updates)
+    for key in _IMPORT_STRIP_KEYS:
         entry_options_updates.pop(key, None)
     if not entry_options_updates:
         return
     async with _entry_options_lock(hass, entry.entry_id):
         # Read INSIDE the lock: a snapshot taken before the `async with` suspended
         # would silently revert a ws_set_options that committed while we waited.
+        # An export of a device type removed in 0.5.9 lands as generic, with that
+        # type's own defaults kept as options (as the migration does).
+        _merged = {**entry.options, **entry_options_updates}
+        for key in retire_device_type(_merged, {}):
+            entry_options_updates[key] = _merged[key]
         # A persisted null survives options.get(key, DEFAULT) and breaks setup
         # (#389), so the same write-boundary strip as ws_set_options applies.
         entry_options_updates = _without_inverted_threshold_pair(
@@ -4541,12 +4702,21 @@ async def _async_restore_entry_options(
     change to them since was the user's own, and reverting it could re-point the
     device at a sensor it no longer uses. Same write-boundary hygiene as the import.
     """
+    from . import _convert_legacy_notify_service  # pylint: disable=import-outside-toplevel
+
     async with _entry_options_lock(hass, entry.entry_id):
         current = dict(entry.options)
+        # A restore point taken before 0.5.9 can still hold the legacy
+        # notify_service: convert it as the 3.12 migration does, or the strip
+        # below drops it and the restored device stops notifying (#472).
+        snapshot = dict(snapshot_options)
+        _convert_legacy_notify_service(snapshot)
         restored = {
-            k: v for k, v in snapshot_options.items() if k not in _IMPORT_LOCAL_BINDING_KEYS
+            k: v for k, v in snapshot.items() if k not in _IMPORT_STRIP_KEYS
         }
         restored.update({k: current[k] for k in _IMPORT_LOCAL_BINDING_KEYS if k in current})
+        # A restore point taken before 0.5.9 can name a removed device type.
+        retire_device_type(restored, {})
         restored = strip_null_options(restored)
         restored, _ = drop_invalid_numeric_options(restored)
         if restored == current:
@@ -5110,7 +5280,7 @@ async def ws_get_cycle_context(
                 lo = start_ts - before_s
                 rows = await _recorder_power(
                     hass, entity_id, start_dt - timedelta(seconds=before_s),
-                    end_dt=start_dt, keep_unavailable=True,
+                    end_dt=start_dt, keep_unavailable=True, scale=_power_scaler(manager),
                 )
                 out["before"] = _cycle_context_points(
                     rows, start_ts, lo, start_ts, hi_inclusive=False
@@ -5120,6 +5290,7 @@ async def ws_get_cycle_context(
             if after_s > 0 and after_end_dt > end_dt:
                 rows = await _recorder_power(
                     hass, entity_id, end_dt, end_dt=after_end_dt, keep_unavailable=True,
+                    scale=_power_scaler(manager),
                 )
                 out["after"] = _cycle_context_points(
                     rows, start_ts, end_dt.timestamp(), after_end_dt.timestamp(),
@@ -5879,7 +6050,9 @@ async def ws_get_power_history(
             if with_raw:
                 ent = getattr(manager, "power_sensor_entity_id", None)
                 if ent:
-                    samples = await _recorder_power(hass, ent, start_dt)
+                    samples = await _recorder_power(
+                        hass, ent, start_dt, scale=_power_scaler(manager)
+                    )
                     start_ts = start_dt.timestamp()
                     out["raw"] = _downsample(
                         [[max(0.0, round(ts - start_ts, 1)), w] for ts, w in samples], 400
@@ -6322,13 +6495,10 @@ async def ws_get_ml_training_status(
     """Return on-device ML training status for the Tuning > ML Training panel."""
     from .const import (  # pylint: disable=import-outside-toplevel
         CONF_ML_TRAINING_ENABLED,
-        CONF_ML_TRAINING_HOUR,
-        CONF_ML_TRAINING_INTERVAL_DAYS,
-        CONF_ML_TRAINING_MIN_CYCLES,
         DEFAULT_ML_TRAINING_ENABLED,
-        DEFAULT_ML_TRAINING_HOUR,
-        DEFAULT_ML_TRAINING_INTERVAL_DAYS,
-        DEFAULT_ML_TRAINING_MIN_CYCLES,
+        ML_TRAINING_HOUR,
+        ML_TRAINING_INTERVAL_DAYS,
+        ML_TRAINING_MIN_CYCLES,
     )
 
     entry_id: str = msg["entry_id"]
@@ -6439,9 +6609,10 @@ async def ws_get_ml_training_status(
             "running": bool(getattr(manager, "_ml_training_running", False)),
             "last_trained": last.isoformat() if last else None,
             "cycle_count": len(store.get_past_cycles()),
-            "min_cycles": int(merged.get(CONF_ML_TRAINING_MIN_CYCLES, DEFAULT_ML_TRAINING_MIN_CYCLES)),
-            "interval_days": int(merged.get(CONF_ML_TRAINING_INTERVAL_DAYS, DEFAULT_ML_TRAINING_INTERVAL_DAYS)),
-            "hour": int(merged.get(CONF_ML_TRAINING_HOUR, DEFAULT_ML_TRAINING_HOUR)),
+            # Fixed since 0.5.9 (no longer settings); still reported for the panel.
+            "min_cycles": ML_TRAINING_MIN_CYCLES,
+            "interval_days": ML_TRAINING_INTERVAL_DAYS,
+            "hour": ML_TRAINING_HOUR,
             "on_device_models": models,
             "last_run": last_run,
         },
@@ -7411,6 +7582,7 @@ async def ws_history_import_recorder(
         connection.send_error(msg["id"], "not_found", "This device has no power sensor configured")
         return
 
+    scale = _power_scaler(manager)
     now = dt_util.now()
     days = int(msg.get("days") or 10)
     start_date = msg.get("start_date")
@@ -7443,7 +7615,9 @@ async def ws_history_import_recorder(
     for day in range(1, days + 1):
         window_start = now - timedelta(days=day)
         window_end = now - timedelta(days=day - 1)
-        day_rows = await _recorder_power(hass, entity_id, window_start, end_dt=window_end)
+        day_rows = await _recorder_power(
+            hass, entity_id, window_start, end_dt=window_end, scale=scale
+        )
         oldest_queried = window_start
         queried_days += 1
         if day_rows:
@@ -7484,13 +7658,16 @@ async def ws_history_import_recorder(
 
 
 def _history_samples(
-    slot: dict[str, Any], entity_id: str | None, parser: Any = None
+    slot: dict[str, Any], entity_id: str | None, parser: Any = None, scale: float = 1.0
 ) -> Any:
     """Turn a staging slot into samples, whichever way it was filled.
 
     Executor-side: CSV parsing is pure Python over megabytes of text, so the scan task
     steps a ``HistoryCsvParser`` across jobs first and hands it in (``parser``).
     Returns either a ``(samples, report)`` pair or an ``{"error": ...}`` marker.
+    ``scale`` turns a CSV of the configured sensor into watts (#481); a recorder
+    read is scaled when it is fetched, and a file of another entity is left alone
+    (its unit is unknown, so the kW hint can still flag it).
     """
     if slot.get("source") == "recorder":
         # `parser` is then a stepped RecorderReadings (audit PLAYGROUND-11).
@@ -7521,6 +7698,12 @@ def _history_samples(
     )
     if isinstance(parsed, dict):
         return parsed
+    if scale != 1.0 and not parsed.entity_substituted_from:
+        # A reading that overflows as watts is a break, like a non-numeric one.
+        parsed.samples = [
+            (t, p * scale if p is not None and math.isfinite(p * scale) else None)
+            for t, p in parsed.samples
+        ]
     report = parsed.report()
     report["source"] = "csv"
     return parsed.samples, report
@@ -7580,12 +7763,16 @@ async def _history_import_scan_task(
                     return
                 await hass.async_add_executor_job(parser.step, history_import.PARSE_STEP_ROWS)
                 reg.update(task, done=parser.done)
-        parsed = await hass.async_add_executor_job(_history_samples, slot, entity_id, parser)
+        parsed = await hass.async_add_executor_job(
+            _history_samples, slot, entity_id, parser, _power_scale(manager)
+        )
         if isinstance(parsed, dict):
             reg.finish(task, state=task_registry.STATE_ERROR, error=str(parsed.get("error")))
             return
         samples, report = parsed
-        sampling_interval = options.get(CONF_SAMPLING_INTERVAL)
+        # The device type's cadence, which the manager throttles at (0.5.9: no
+        # longer a setting); the cadence gate never drops below its own floor.
+        sampling_interval = resolve_sampling_interval_default(base_config.device_type)
         # Blocks, gates and densification, a slice per job (audit PLAYGROUND-11).
         builder = history_import.ScanBuilder(
             samples, base_config,

@@ -72,7 +72,7 @@ test('saving an untouched section does not persist fields still equal to their r
   });
   await clickTab(page, 'settings');
 
-  // Advanced mode so the Signal Processing / Cycle End fields render.
+  // Advanced mode so the Cycle End fields render.
   const chk = page.locator('#wd-settings-level-chk');
   await expect(chk).toHaveCount(1, { timeout: 5_000 });
   if (!(await chk.isChecked())) {
@@ -80,10 +80,11 @@ test('saving an untouched section does not persist fields still equal to their r
     await expect(chk).toBeChecked();
   }
 
-  // Open Detection (renders sampling_interval, start_duration_threshold,
-  // smart_termination_duration_ratio - all showing their resolved defaults - plus
-  // end_energy_threshold, which we change to make the form dirty; smoothing_window
-  // used to play that part and was removed as a dead setting).
+  // Open Detection (renders start_duration_threshold and
+  // smart_termination_duration_ratio - showing their resolved defaults - plus
+  // end_energy_threshold, which we change to make the form dirty). The sampling
+  // interval is not a setting since 0.5.9, but its resolved default still feeds
+  // the cadence conflict rules, and must never be persisted.
   await page.locator('button[data-sec="detection"]').first().click();
   const endEnergy = page.locator('input[data-opt="end_energy_threshold"]').first();
   await expect(endEnergy).toBeVisible({ timeout: 8_000 });

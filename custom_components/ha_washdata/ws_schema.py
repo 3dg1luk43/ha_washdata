@@ -217,6 +217,7 @@ class MaintenanceStatusRow(TypedDict):
     cycles_since: int
     days_since: int | None
     due: bool
+    programs: list[str]
 
 
 class MaintenanceLimits(TypedDict):
@@ -234,6 +235,8 @@ class GetMaintenanceLogResponse(TypedDict):
     cycles_since: dict[str, int]
     custom_tasks: list[MaintenanceTask]
     status: list[MaintenanceStatusRow]
+    programs_available: list[str]
+    programs: dict[str, list[str]]
     lifetime_cycle_count: int
     limits: MaintenanceLimits
 
@@ -241,6 +244,14 @@ class GetMaintenanceLogResponse(TypedDict):
 class MaintenanceTaskResponse(TypedDict):
     success: bool
     task: MaintenanceTask
+
+
+class SetMaintenanceProgramsResponse(TypedDict):
+    """The programs that now mark ``task_id`` done when they finish (#480)."""
+
+    success: bool
+    task_id: str
+    programs: list[str]
 
 
 class SetLifetimeCycleCountResponse(TypedDict):
@@ -787,6 +798,55 @@ class GetSetupStatusResponse(TypedDict, total=False):
     step_key: str | None
 
 
+class BlueprintInput(TypedDict):
+    """One blueprint input; ``selector`` is the selector type name (``number``...)."""
+
+    key: str
+    name: str
+    description: str
+    selector: str | None
+    has_default: bool
+
+
+class BlueprintItem(TypedDict):
+    """A template from the automation library (#478), a Home Assistant blueprint.
+
+    ``path`` is where HA's ``blueprint/save`` puts it (under
+    ``blueprints/automation/``); ``one_click`` is true when every input but
+    ``washdata_device`` has a default, so the automation can be saved with only
+    the device filled in. ``compatible`` is false when the template needs a newer
+    WashData than this one. ``icon`` is one of the panel's template icons or empty.
+    """
+
+    id: str
+    name: str
+    description: str
+    author: str
+    icon: str
+    device_types: list[str]
+    min_version: str
+    compatible: bool
+    tags: list[str]
+    source_url: str
+    path: str
+    yaml: str
+    one_click: bool
+    inputs: list[BlueprintInput]
+
+
+class _BlueprintsListBase(TypedDict):
+    blueprints: list[BlueprintItem]
+
+
+class BlueprintsListResponse(_BlueprintsListBase, total=False):
+    """The automation template library. ``disabled``: online features are off, so
+    nothing was downloaded. ``error`` (``unreachable``): the download failed;
+    ``blueprints`` then holds the last good list, if any."""
+
+    disabled: bool
+    error: str
+
+
 WS_RESPONSE_TYPES: dict[str, type] = {
     "get_devices": GetDevicesResponse,
     "get_device_cycles": GetDeviceCyclesResponse,
@@ -810,6 +870,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "delete_maintenance_event": SuccessResponse,
     "add_maintenance_task": MaintenanceTaskResponse,
     "update_maintenance_task": MaintenanceTaskResponse,
+    "set_maintenance_programs": SetMaintenanceProgramsResponse,
     "delete_maintenance_task": SuccessResponse,
     "set_lifetime_cycle_count": SetLifetimeCycleCountResponse,
     "label_cycle": SuccessResponse,
@@ -900,6 +961,7 @@ WS_RESPONSE_TYPES: dict[str, type] = {
     "store_upload_device": StoreUploadDeviceResponse,
     "store_download_device": StartTaskResponse,
     "get_shareable_cycles": GetShareableCyclesResponse,
+    "blueprints/list": BlueprintsListResponse,
 }
 
 #: Map a task-registry ``kind`` -> the TypedDict of its finished ``result``
@@ -1014,6 +1076,9 @@ WS_COMMANDS: dict[str, dict] = {
         _p("days", "int", False),
     ]},
     "delete_maintenance_task": {"params": [_entry(), _p("task_id", "str")]},
+    "set_maintenance_programs": {"params": [
+        _entry(), _p("task_id", "str"), _p("programs", "list[str]"),
+    ]},
     "set_lifetime_cycle_count": {"params": [_entry(), _p("count", "int")]},
     "label_cycle": {"params": [
         _entry(),
@@ -1233,6 +1298,7 @@ WS_COMMANDS: dict[str, dict] = {
     "store_upload_device": {"params": [_entry(), _p("items", "list"), _p("include_phases", "list", False), _p("include_settings", "bool", False)]},
     "store_download_device": {"params": [_entry(), _p("device_id", "str"), _p("include_settings", "bool", False)]},
     "get_shareable_cycles": {"params": [_entry()]},
+    "blueprints/list": {"params": [_p("refresh", "bool", False)]},
 }
 
 

@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
+## 0.5.9 - 2026-10-28
+
+### TL;DR
+
+- New Automations tab: 18 WashData triggers and an online template library (needs online features).
+- Dryers with anti-crease tumbling finish again instead of running for hours.
+- Maintenance tasks tick themselves off when their program runs.
+- kW power sensors work as they are; an energy counter is refused.
+- Clearing every notify service really stops notifications.
+- Live updates can name the finish time and arrive on a locked Android phone.
+- Nine fewer settings and two fewer device types; the HA events always fire.
+
+### Breaking changes
+
+- **Removed settings**: Fire HA Events for Notifications (the `ha_washdata_*` events always fire), Sampling Interval (each device type's own: 2 s for washers, washer-dryers and dishwashers, 10 s pumps, 30 s others), Unmatch Threshold (0.35), Estimate Tolerance (it fed nothing), Anti-Wrinkle Exit Power (0.8 W or the Stop Threshold, whichever is higher), and the ML training hour, minimum cycles and interval (02:00, 30 cycles, at most weekly; training on demand is unchanged). Stored values, and those of settings removed in 0.5.8, are cleaned up on upgrade.
+- **Air Fryer and Bread Maker device types removed**: existing devices become Other (Advanced) on upgrade and keep the values they ran on (shortest completed cycle, minimum off gap and, on bread makers, the 2 hour quiet-time limit) as settings, so detection does not change. Built-in phases a program uses are kept as custom phases. Their exports import as Other (Advanced). The progress bar smooths backward steps like Other (Advanced) does, and the air fryer icon is the generic one.
+- **An empty notify list sends nothing**: with no notify service and no notification action, start, finish, reminder and unload notifications no longer go to the Home Assistant sidebar (a cycle timer still does). Add `notify.persistent_notification` to a list to keep them there.
+- **The External End Trigger is on whenever its sensor is set**: the separate switch is gone. Upgrading clears the sensor where the switch was off, so nothing changes.
+
+### Features
+
+- **WashData triggers for automations** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): 18 triggers (cycle, program, phase, pause, anti-wrinkle, unload, maintenance and more) in Home Assistant's add-trigger dialog and on the device page. Each occurrence fires once, also across a restart, with the program and the plug's switch; the cycle-end triggers add duration and energy.
+- **Automation template library** ([#478](https://github.com/3dg1luk43/ha_washdata/issues/478)): ready-made blueprints in the Automations tab, added to an appliance in one click: end a long dryer anti-crease phase by cutting the plug, or turn something on while a cycle runs. The library lives in its own repository, [washdata-automations](https://github.com/3dg1luk43/washdata-automations), and is downloaded **only while online features are on**; with them off the tab says so and offers to turn them on. Each template shows its author; share your own there by pull request, straight from the tab. The automation does the switching, not WashData's detection. Thanks to @gkotoole
+- **Automations tab**: lists the automations that use the appliance, each with a link into Home Assistant's editor, and starts new ones from a WashData trigger; the ones WashData creates get a "WashData" label and category.
+- **Maintenance done by a program** ([#480](https://github.com/3dg1luk43/ha_washdata/issues/480)): a task can name the programs that do it (the drum clean by Cotton 90), and a finished cycle of one logs it as done. Only cycles with a confident label or a program you picked count. Thanks to @Alexx3105
+- **kW power sensors work without a template sensor** ([#481](https://github.com/3dg1luk43/ha_washdata/issues/481)): kW and mW are read as watts; a setup tuned for raw kilowatts (Min Power under 1) is unchanged. An energy counter (kWh) can no longer be picked as the power sensor; one already in use is flagged in Settings and its readings are ignored. Thanks to @neliasen
+
+### Fixes
+
+- **A dryer with anti-crease tumbling did not finish until the 8 hour limit** ([#474](https://github.com/3dg1luk43/ha_washdata/issues/474), 0.5.8 regression): each short tumble pulse restarted the quiet time the end needs. Short pulses (up to 30 s, at most the Anti-Wrinkle Max Power) no longer restart it. Replayed AEG cycles with their tumbling tail end a median 6.4 minutes after the program instead of 74; washers, washer-dryers and dishwashers are unchanged. Thanks to @christianh87 for the analysis and @gkotoole for the export.
+- **A dryer without a recognised program waited 2 hours after it finished** when its standby sits well under the Stop Threshold: it now waits 42 minutes (a Miele on 2.5 W: 49 minutes after the program instead of 140). Other appliances keep the 2 hour wait.
+- **Split and merged cycles had the wrong cost** ([discussion #471](https://github.com/3dg1luk43/ha_washdata/discussions/471)): splitting dropped the pieces' cost, and merging kept only the first part's. Each piece is now charged at the price the original cycle was charged at (its share of a time-weighted price, else the same single price), a meter reading is shared by energy, and a merged cycle carries the sum of its parts. Cycles split before this update stay without a cost. Thanks to @testpaul999, and @stanleys12 for pinpointing it.
+- **Notifications kept coming after you cleared every notify service** ([#472](https://github.com/3dg1luk43/ha_washdata/issues/472)), on devices set up before 0.3: the old single notify service took over whenever the lists were empty. It is now moved into the lists once on upgrade (and when an older export or restore point is imported), where you can see and remove it, and never used otherwise. Thanks to @tivoo for the analysis.
+- **The Logs drawer could not be closed on a phone** ([#473](https://github.com/3dg1luk43/ha_washdata/issues/473)): it covered the header and its close button sat under the status bar, and it reopened on every visit. It now opens below the header, does not reopen by itself on a phone, and Escape closes it. Thanks to @daneverest
+- **An energy meter reporting `inf` or `nan` broke the lifetime energy total** ([#316](https://github.com/3dg1luk43/ha_washdata/issues/316)): the reading was taken as a figure and the total stayed infinite. A non-finite meter reading is now ignored and the cycle's own energy is used.
+- **A start event without an end**: a sub-minute blip or a dishwasher pump-out sent `ha_washdata_cycle_started` but never `ha_washdata_cycle_ended`, so an automation could stay in its running state; the end now follows.
+
+### Notifications
+
+- **Live update text with the finish time** ([#479](https://github.com/3dg1luk43/ha_washdata/issues/479)): the new `{finish_time}` variable (e.g. 14:30) lets the text name the end instead of repeating the Android chronometer's countdown. A text with an unknown variable now logs a warning instead of silently sending the default text. Thanks to @kineticscreen
+- **Live updates arrive while an Android phone is locked** ([#479](https://github.com/3dg1luk43/ha_washdata/issues/479)): they are sent at high priority, so the phone no longer holds them back. They stay silent.
+
+### Panel
+
+- Save Debug Traces, Auto Maintenance and Power Profile Interval moved to the internal settings tier.
+- Notifications no longer has an Automations section; it moved to the Automations tab.
+- **Dryer tumbling is named correctly in every language**: many translations called the drum turning drumming, somersaulting, rolling or polishing; it now reads as the drum turning.
+
+### For developers
+
+- WebSocket: new `set_maintenance_programs` (#480); `get_maintenance_log` gains `programs_available`, `programs` and a `programs` list on each `status` row, and a log entry written by a cycle carries `program` and `cycle_id`.
+- `WashDataManager.power_scale()` is the factor from the power sensor's unit to watts (#481); every recorder read of the power sensor (`ws_api._recorder_power`) takes it.
+
 ## 0.5.8 - trimming the fat - 2026-10-08
 
 ### TL;DR

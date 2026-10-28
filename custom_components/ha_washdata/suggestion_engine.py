@@ -365,7 +365,7 @@ def _classify_cycle_health(
     # Abrupt end: the tail is still drawing significant power, so the cycle was
     # cut off rather than winding down naturally.  Guard with the last sample's
     # power level: if the trace ends at near-zero, the device shut down cleanly
-    # (resistive devices like pumps and bread makers hold near-peak until the
+    # (resistive devices like pumps hold near-peak until the
     # very last moment then drop to 0, so their correctly-detected cycles must
     # not be excluded by this check).
     tail = powers[-3:] if len(powers) >= 3 else powers

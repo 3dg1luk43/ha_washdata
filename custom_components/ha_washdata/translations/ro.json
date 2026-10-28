@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Un nume prietenos pentru acest dispozitiv (de exemplu, „Mașină de spălat”, „Mașină de spălat vase”).",
           "device_type": "Stabilește valorile implicite de detectare pentru acest tip de aparat.",
-          "power_sensor": "Senzorul prizei inteligente care raportează puterea curentă în wați.",
+          "power_sensor": "Senzorul de putere al prizei inteligente (W sau kW), nu contorul său de energie (kWh).",
           "min_power": "Citirile peste această valoare (în wați) înseamnă că aparatul funcționează. 2 W se potrivește pentru majoritatea dispozitivelor."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Eroare neașteptată",
-      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0"
+      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0",
+      "power_sensor_energy": "Acesta este un contor de energie (kWh), nu un senzor de putere. Alegeți senzorul de putere al prizei (W sau kW). Dacă priza nu are unul, un helper Senzor de derivare poate crea unul din contor."
     },
     "abort": {
       "already_configured": "Dispozitivul este deja configurat",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Niciun profil nu a fost recunoscut încă.",
       "vs_typical_longer": "cu {pct}% mai mult decât de obicei",
       "vs_typical_shorter": "cu {pct}% mai puțin decât de obicei",
-      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0"
+      "invalid_power": "Pragul de putere trebuie să fie mai mare decât 0",
+      "power_sensor_energy": "Acesta este un contor de energie (kWh), nu un senzor de putere. Alegeți senzorul de putere al prizei (W sau kW). Dacă priza nu are unul, un helper Senzor de derivare poate crea unul din contor."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Uscător",
         "washer_dryer": "Combo mașină de spălat cu uscător",
         "dishwasher": "Maşină de spălat vase",
-        "air_fryer": "Friteuza cu aer",
-        "bread_maker": "Aparat de paine",
         "pump": "Pompă / Pompă de colector",
         "generic": "Altele (avansate)",
         "other": "Dispozitiv de prag"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Orice",
+        "completed": "Terminat",
+        "force_stopped": "Oprit forțat",
+        "interrupted": "Întrerupt"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Oprit",
+        "idle": "Inactiv",
+        "starting": "Pornire",
+        "running": "În funcțiune",
+        "paused": "Pauză",
+        "user_paused": "Pus în pauză de utilizator",
+        "ending": "Se termină",
+        "finished": "Terminat",
+        "anti_wrinkle": "Antirid",
+        "delay_wait": "Așteaptă să Înceapă",
+        "interrupted": "Întrerupt",
+        "force_stopped": "Oprit forțat",
+        "unknown": "Necunoscut",
+        "clean": "Curat"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Nu s-a putut atribui profilul: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Ciclu pornit",
+      "cycle_finished": "Ciclu terminat",
+      "cycle_ended": "Ciclu încheiat (orice motiv)",
+      "anti_wrinkle_started": "Anti-șifonare pornit",
+      "cycle_stalled": "Ciclu blocat",
+      "unload_pending": "Descărcare în așteptare",
+      "program_recognised": "Program recunoscut",
+      "phase_started": "Fază pornită",
+      "finishing_soon": "Se termină curând",
+      "cycle_overrun": "Ciclu în depășire",
+      "cycle_paused": "Ciclu în pauză",
+      "cycle_resumed": "Ciclu reluat",
+      "still_tumbling": "Încă se rotește după ciclu",
+      "unloaded": "Descărcat",
+      "state_changed": "Stare schimbată",
+      "maintenance_due": "Mentenanță necesară",
+      "milestone_reached": "Reper de cicluri atins",
+      "pump_stuck": "Pompă blocată"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Fază",
+      "minutes": "Minute",
+      "percent": "În plus (%)",
+      "include_detected": "Include pauzele detectate",
+      "status": "Încheiat ca",
+      "from": "De la",
+      "to": "La",
+      "task": "Sarcină"
+    },
+    "extra_fields_descriptions": {
+      "program": "Doar acest program, după numele exact. Lasă gol pentru orice program.",
+      "phase": "Doar această fază, după nume. Lasă gol pentru orice fază.",
+      "minutes": "Se termină curând: minute rămase. Încă se rotește: minute după terminare.",
+      "percent": "Procent peste durata obișnuită a programului.",
+      "include_detected": "Declanșează și la pauzele pe care WashData le detectează în consum, cum ar fi o înmuiere sau o blocare.",
+      "status": "Doar ciclurile încheiate astfel.",
+      "from": "Doar modificări de la această stare. Lasă gol pentru orice.",
+      "to": "Doar modificări la această stare. Lasă gol pentru orice.",
+      "task": "Doar această sarcină, după nume sau id. Lasă gol pentru orice sarcină."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Ciclu pornit",
+      "description": "Se declanșează când aparatul pornește un ciclu."
+    },
+    "program_recognised": {
+      "name": "Program recunoscut",
+      "description": "Se declanșează când WashData recunoaște programul ciclului curent sau îl schimbă cu altul.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Doar acest program, după numele exact. Lasă gol pentru orice program."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fază pornită",
+      "description": "Se declanșează când ciclul curent intră într-o nouă fază a programului.",
+      "fields": {
+        "phase": {
+          "name": "Fază",
+          "description": "Doar această fază, după nume. Lasă gol pentru orice fază."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Se termină curând",
+      "description": "Se declanșează o dată pe ciclu, când timpul rămas scade pentru prima dată la acest număr de minute.",
+      "fields": {
+        "minutes": {
+          "name": "Minute rămase",
+          "description": "Se declanșează când mai rămân cel mult acest număr de minute."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Ciclu în depășire",
+      "description": "Se declanșează o dată pe ciclu, când durează mai mult decât de obicei pentru acest program.",
+      "fields": {
+        "percent": {
+          "name": "Depășit cu",
+          "description": "Procent peste durata obișnuită a programului."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Ciclu în pauză",
+      "description": "Se declanșează când pui un ciclu în pauză și, opțional, când aparatul face pauză singur.",
+      "fields": {
+        "include_detected": {
+          "name": "Include pauzele detectate",
+          "description": "Declanșează și la pauzele pe care WashData le detectează în consum, cum ar fi o înmuiere sau o blocare, nu doar la cele pe care le inițiezi tu."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Ciclu reluat",
+      "description": "Se declanșează când un ciclu în pauză continuă.",
+      "fields": {
+        "include_detected": {
+          "name": "Include pauzele detectate",
+          "description": "Declanșează și la pauzele pe care WashData le detectează în consum, cum ar fi o înmuiere sau o blocare, nu doar la cele pe care le inițiezi tu."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Ciclu blocat",
+      "description": "Se declanșează când un ciclu în funcțiune se oprește la un nivel de consum scăzut și stabil."
+    },
+    "cycle_finished": {
+      "name": "Ciclu terminat",
+      "description": "Se declanșează când un ciclu se termină, inclusiv dacă îl oprești tu. Nu pentru o pornire falsă.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Doar acest program, după numele exact. Lasă gol pentru orice program."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Ciclu încheiat (orice motiv)",
+      "description": "Se declanșează când un ciclu se termină din orice motiv, inclusiv porniri false.",
+      "fields": {
+        "status": {
+          "name": "Încheiat ca",
+          "description": "Doar ciclurile încheiate astfel."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-șifonare pornit",
+      "description": "Se declanșează când aparatul începe să rotească rufele terminate pentru a preveni șifonarea."
+    },
+    "still_tumbling": {
+      "name": "Încă se rotește după ciclu",
+      "description": "Se declanșează o dată când aparatul se mai rotește în scurte intervale la acest număr de minute după terminarea ciclului. Se oprește la un ciclu nou sau 4 ore după terminare.",
+      "fields": {
+        "minutes": {
+          "name": "Minute după terminare",
+          "description": "Se declanșează la prima rotire cel puțin cu atât timp după terminare."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Descărcare în așteptare",
+      "description": "Se declanșează când un ciclu s-a terminat și rufele sunt încă înăuntru."
+    },
+    "unloaded": {
+      "name": "Descărcat",
+      "description": "Se declanșează când rufele sunt scoase după un ciclu: ușa a fost deschisă sau descărcarea a fost confirmată."
+    },
+    "state_changed": {
+      "name": "Stare schimbată",
+      "description": "Se declanșează când starea WashData se schimbă.",
+      "fields": {
+        "from": {
+          "name": "De la",
+          "description": "Doar modificări de la această stare. Lasă gol pentru orice."
+        },
+        "to": {
+          "name": "La",
+          "description": "Doar modificări la această stare. Lasă gol pentru orice."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Mentenanță necesară",
+      "description": "Se declanșează când o sarcină de mentenanță devine scadentă.",
+      "fields": {
+        "task": {
+          "name": "Sarcină",
+          "description": "Doar această sarcină, după nume sau id. Lasă gol pentru orice sarcină."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Reper de cicluri atins",
+      "description": "Se declanșează când numărul total de cicluri atinge unul din reperele stabilite pentru notificări."
+    },
+    "pump_stuck": {
+      "name": "Pompă blocată",
+      "description": "Se declanșează când o pompă funcționează mai mult decât limita sa de blocare."
     }
   }
 }

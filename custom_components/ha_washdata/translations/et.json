@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Selle seadme sõbralik nimi (nt 'pesumasin', 'nõudepesumasin').",
           "device_type": "Määrab seda tüüpi seadme tuvastamise vaikesätted.",
-          "power_sensor": "Nutipistiku andur, mis teatab reaalajas võimsust vattides.",
+          "power_sensor": "Nutipistiku võimsussensor (W või kW), mitte selle energiaarvesti (kWh).",
           "min_power": "Sellest suuremad näidud (vattides) tähendavad, et seade töötab. Enamikule seadmetele sobib 2 W."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Ootamatu viga",
-      "invalid_power": "Võimsuslävi peab olema suurem kui 0"
+      "invalid_power": "Võimsuslävi peab olema suurem kui 0",
+      "power_sensor_energy": "See on energiaarvesti (kWh), mitte võimsussensor. Valige pistiku võimsussensor (W või kW). Kui pistikul seda pole, saab abimees Tuletisandur selle arvesti näidust luua."
     },
     "abort": {
       "already_configured": "Seade on juba konfigureeritud",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ühtki profiili pole veel tuvastatud.",
       "vs_typical_longer": "{pct}% tavapärasest pikem",
       "vs_typical_shorter": "{pct}% tavapärasest lühem",
-      "invalid_power": "Võimsuslävi peab olema suurem kui 0"
+      "invalid_power": "Võimsuslävi peab olema suurem kui 0",
+      "power_sensor_energy": "See on energiaarvesti (kWh), mitte võimsussensor. Valige pistiku võimsussensor (W või kW). Kui pistikul seda pole, saab abimees Tuletisandur selle arvesti näidust luua."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Kuivati",
         "washer_dryer": "Kombineeritud pesumasin-kuivati",
         "dishwasher": "Nõudepesumasin",
-        "air_fryer": "Õhufritüür",
-        "bread_maker": "Leivaküpsetaja",
         "pump": "Pump / Äravoolupump",
         "generic": "Muu (täpsem)",
         "other": "Läve seade"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Mis tahes",
+        "completed": "Valmis",
+        "force_stopped": "Sundpeatatud",
+        "interrupted": "Katkestatud"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Väljas",
+        "idle": "Ootel",
+        "starting": "Käivitamine",
+        "running": "Töötab",
+        "paused": "Peatatud",
+        "user_paused": "Kasutaja peatatud",
+        "ending": "Lõpetamine",
+        "finished": "Valmis",
+        "anti_wrinkle": "Kortsudevastane",
+        "delay_wait": "Ootab algust",
+        "interrupted": "Katkestatud",
+        "force_stopped": "Sundpeatatud",
+        "unknown": "Tundmatu",
+        "clean": "Puhas"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Profiili määramine ebaõnnestus: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Tsükkel algas",
+      "cycle_finished": "Tsükkel lõppes",
+      "cycle_ended": "Tsükkel lõppes (mistahes põhjusel)",
+      "anti_wrinkle_started": "Kortsudevastane algas",
+      "cycle_stalled": "Tsükkel seiskus",
+      "unload_pending": "Mahalaadimine ootab",
+      "program_recognised": "Programm tuvastati",
+      "phase_started": "Faas algas",
+      "finishing_soon": "Lõpeb peagi",
+      "cycle_overrun": "Tsükkel kestab liiga kaua",
+      "cycle_paused": "Tsükkel peatati",
+      "cycle_resumed": "Tsükkel jätkus",
+      "still_tumbling": "Trummel pöörleb veel pärast tsüklit",
+      "unloaded": "Mahalaadimine tehtud",
+      "state_changed": "Olek muutus",
+      "maintenance_due": "Hooldus on vajalik",
+      "milestone_reached": "Tsükli verstapost saavutati",
+      "pump_stuck": "Pump on ummistunud"
+    },
+    "extra_fields": {
+      "program": "Programm",
+      "phase": "Faas",
+      "minutes": "Minutid",
+      "percent": "Pikem kui (%)",
+      "include_detected": "Kaasa arvatud tuvastatud pausid",
+      "status": "Lõppes kui",
+      "from": "Alates",
+      "to": "Kuni",
+      "task": "Ülesanne"
+    },
+    "extra_fields_descriptions": {
+      "program": "Ainult see programm, täpse nimega. Jätke tühjaks mis tahes programmi jaoks.",
+      "phase": "Ainult see faas, nimega. Jätke tühjaks mis tahes faasi jaoks.",
+      "minutes": "Lõpeb peagi: minutit jäänud. Trummel pöörleb veel: minutit pärast lõppu.",
+      "percent": "Protsent üle programmi tavapärase kestuse.",
+      "include_detected": "Käivituge ka WashData tuvastatud pauside puhul, nagu leotamine või seiskumine.",
+      "status": "Ainult tsüklid, mis lõppesid sel viisil.",
+      "from": "Ainult muutused sellest olekust. Jätke tühjaks mis tahes jaoks.",
+      "to": "Ainult muutused sellesse olekusse. Jätke tühjaks mis tahes jaoks.",
+      "task": "Ainult see ülesanne, nime või ID järgi. Jätke tühjaks mis tahes ülesande jaoks."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Tsükkel algas",
+      "description": "Käivitub, kui seade alustab tsüklit."
+    },
+    "program_recognised": {
+      "name": "Programm tuvastati",
+      "description": "Käivitub, kui WashData tuvastab jooksva tsükli programmi või lülitub teisele programmile.",
+      "fields": {
+        "program": {
+          "name": "Programm",
+          "description": "Ainult see programm, täpse nimega. Jätke tühjaks mis tahes programmi jaoks."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Faas algas",
+      "description": "Käivitub, kui jooksev tsükkel siseneb programmi uude faasi.",
+      "fields": {
+        "phase": {
+          "name": "Faas",
+          "description": "Ainult see faas, nimega. Jätke tühjaks mis tahes faasi jaoks."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Lõpeb peagi",
+      "description": "Käivitub üks kord tsükli kohta, kui järelejäänud aeg langeb esmakordselt selle minutini.",
+      "fields": {
+        "minutes": {
+          "name": "Minutit jäänud",
+          "description": "Käivitub, kui jäänud on nii palju minuteid või vähem."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Tsükkel kestab liiga kaua",
+      "description": "Käivitub üks kord tsükli kohta, kui see kestab programmi tavapärasest kauem.",
+      "fields": {
+        "percent": {
+          "name": "Pikem kui",
+          "description": "Protsent üle programmi tavapärase kestuse."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Tsükkel peatati",
+      "description": "Käivitub, kui peatate tsükli, ja valikuliselt ka siis, kui seade peatub ise.",
+      "fields": {
+        "include_detected": {
+          "name": "Kaasa arvatud tuvastatud pausid",
+          "description": "Käivitub ka WashData tuvastatud pauside korral, nagu leotamine või seiskumine, mitte ainult teie alustatud pauside korral."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Tsükkel jätkus",
+      "description": "Käivitub, kui peatatud tsükkel jätkub.",
+      "fields": {
+        "include_detected": {
+          "name": "Kaasa arvatud tuvastatud pausid",
+          "description": "Käivitub ka WashData tuvastatud pauside korral, nagu leotamine või seiskumine, mitte ainult teie alustatud pauside korral."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Tsükkel seiskus",
+      "description": "Käivitub, kui jooksev tsükkel peatub madalal, ühtlasel võimsusetasemel."
+    },
+    "cycle_finished": {
+      "name": "Tsükkel lõppes",
+      "description": "Käivitub, kui tsükkel lõpeb, ka siis, kui te selle peatate. Mitte vale käivituse korral.",
+      "fields": {
+        "program": {
+          "name": "Programm",
+          "description": "Ainult see programm, täpse nimega. Jätke tühjaks mis tahes programmi jaoks."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Tsükkel lõppes (mistahes põhjusel)",
+      "description": "Käivitub, kui tsükkel lõpeb mis tahes põhjusel, kaasa arvatud vale käivitused.",
+      "fields": {
+        "status": {
+          "name": "Lõppes kui",
+          "description": "Ainult tsüklid, mis lõppesid sel viisil."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Kortsudevastane algas",
+      "description": "Käivitub, kui seade alustab valmis koormaga kortsude vastu trumli pöörlemist."
+    },
+    "still_tumbling": {
+      "name": "Trummel pöörleb veel pärast tsüklit",
+      "description": "Käivitub üks kord, kui seadme trummel pöörleb veel lühikeste hoogudena nii palju minuteid pärast tsükli lõppu. Peatub uue tsükli algul või 4 tundi pärast lõppu.",
+      "fields": {
+        "minutes": {
+          "name": "Minutit pärast lõppu",
+          "description": "Käivitub esimesel trummelimpulsil vähemalt nii kaua pärast lõppu."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Mahalaadimine ootab",
+      "description": "Käivitub, kui tsükkel on lõppenud ja koorma sees ootab."
+    },
+    "unloaded": {
+      "name": "Mahalaadimine tehtud",
+      "description": "Käivitub, kui koorma eemaldatakse pärast tsüklit: uks avati või mahalaadimine kinnitati."
+    },
+    "state_changed": {
+      "name": "Olek muutus",
+      "description": "Käivitub, kui WashData olek muutub.",
+      "fields": {
+        "from": {
+          "name": "Alates",
+          "description": "Ainult muutused sellest olekust. Jätke tühjaks mis tahes jaoks."
+        },
+        "to": {
+          "name": "Kuni",
+          "description": "Ainult muutused sellesse olekusse. Jätke tühjaks mis tahes jaoks."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Hooldus on vajalik",
+      "description": "Käivitub, kui hooldustöö muutub vajalikuks.",
+      "fields": {
+        "task": {
+          "name": "Ülesanne",
+          "description": "Ainult see ülesanne, nime või ID järgi. Jätke tühjaks mis tahes ülesande jaoks."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Tsükli verstapost saavutati",
+      "description": "Käivitub, kui eluaegne tsükliarv jõuab ühe teavitusse seatud verstapostini."
+    },
+    "pump_stuck": {
+      "name": "Pump on ummistunud",
+      "description": "Käivitub, kui pump töötab kauem kui selle ummistumispiirang."
     }
   }
 }

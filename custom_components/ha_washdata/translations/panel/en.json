@@ -89,7 +89,9 @@
     "awaiting_tip": "Awaiting community approval",
     "awaiting_n": "Awaiting approval · {n} confirmed",
     "awaiting": "Awaiting approval",
-    "approved": "Approved"
+    "approved": "Approved",
+    "bp_installed": "Installed",
+    "bp_installed_other": "Other version installed"
   },
   "btn": {
     "log_done_task": "Log done: {task}",
@@ -143,7 +145,6 @@
     "export_selected": "Export (choose data)",
     "force_stop": "Force Stop",
     "force_stop_tip": "Immediately end the current cycle and mark it as force-stopped",
-    "from_template": "From template ▾",
     "hist_goto_cycles": "Show me the cycles",
     "hist_import_n": "Import {n} cycles",
     "hist_read_recorder": "Read from Home Assistant",
@@ -159,14 +160,11 @@
     "manage": "Manage",
     "merge": "Merge",
     "mute_suggestion": "Stop suggesting this setting",
-    "new_automation": "＋ New Automation",
     "new_group": "+ New Group",
     "new_group_tip": "Group near-identical profiles (same shape, different temperature or spin) so matching can tell them apart.",
     "new_phase": "+ New Phase",
     "new_profile": "+ New Profile",
     "new_profile_tip": "Create a new program profile from an existing labelled cycle or recording",
-    "on_cycle_finished": "On cycle finished",
-    "on_cycle_started": "On cycle started",
     "pause_cycle": "Pause",
     "pause_cycle_tip": "Pause the running cycle – the appliance will resume where it left off",
     "pg_apply_best": "Apply best",
@@ -251,7 +249,24 @@
     "unlabel_selected_tip": "Remove the label from the selected cycles. They stay in your history but stop shaping this profile.",
     "use": "Use",
     "wipe_all": "Wipe All Data",
-    "pg_rerun": "Update simulation"
+    "pg_rerun": "Update simulation",
+    "replace": "Replace",
+    "auto_edit_in_ha": "Edit in Home Assistant",
+    "auto_fewer_triggers": "Fewer triggers",
+    "auto_more_triggers": "{count} more triggers",
+    "auto_more_triggers_one": "{count} more trigger",
+    "auto_more_triggers_other": "{count} more triggers",
+    "auto_blank": "Blank automation",
+    "bp_refresh": "Check GitHub for new templates",
+    "bp_turn_on_online": "Turn on online features",
+    "bp_add_tip": "Creates the automation for this appliance with the default settings, then opens it in Home Assistant",
+    "bp_add_to": "Add to {device}",
+    "bp_setup_tip": "Installs the template, then opens Home Assistant to fill in the rest",
+    "bp_setup_in_ha": "Set up in Home Assistant",
+    "bp_details": "Details",
+    "bp_copy_yaml": "Copy YAML",
+    "bp_hide_yaml": "Hide the YAML",
+    "bp_show_yaml": "Show the YAML"
   },
   "note": {
     "off_delay": {
@@ -308,23 +323,20 @@
       "timeout": "Must exceed Pump Stuck Duration ({ps} s) so the stuck alarm can fire first"
     },
     "start_dur": {
-      "sampling": "Sampling Interval exceeds Start Duration ({sdt} s); single-sample spikes can open a cycle",
       "threshold": "Should be at least one Sampling Interval ({si} s) to prevent single-sample false starts"
-    },
-    "unmatch": {
-      "match": "Must be above Unmatch Threshold ({un})",
-      "unmatch": "Must be below Match Threshold ({match}); otherwise a committed match un-matches instantly"
     },
     "cascade_toast": "Other settings adjusted for consistency: {n}",
     "suggestion_resolves": "Stage the pending suggestion ({val}) below to fix this",
     "use_fix": "Use {val}",
     "watchdog": {
-      "interval": "Should be at least 2x Sampling Interval ({si} s)",
-      "sampling": "Sampling Interval should be at most half of Watchdog Interval ({wi} s)"
+      "interval": "Should be at least 2x Sampling Interval ({si} s)"
     },
     "end_energy": {
       "energy": "Too strict for Stop Threshold ({w} W) over Off Delay ({d} s); the cycle can only end through a fallback path",
       "stop": "End Energy Threshold ({e} Wh over {d} s) only permits {p} W"
+    },
+    "power_sensor": {
+      "energy": "This sensor counts energy ({unit}), not power, so no cycle can be detected. Pick the plug's power sensor (W or kW)."
     }
   },
   "hdr": {
@@ -334,7 +346,6 @@
     "add_maintenance": "Add Maintenance Event",
     "automation_delete": "Delete this automation",
     "automation_needs_review": "This cycle needs review",
-    "automation_open": "Open in the automation editor",
     "automation_review_this_cycle": "Review this cycle",
     "automations": "Automations",
     "clear_debug": "Clear Debug Traces",
@@ -354,7 +365,6 @@
     "ml_settings_card": "Settings",
     "ml_smart_learning": "Smart Learning",
     "my_preferences": "My Preferences",
-    "no_automations": "No automations reference this device yet.",
     "online_account": "Community Store & online features",
     "online_account_tab": "Online & Community",
     "panel_settings": "Panel Settings",
@@ -372,7 +382,15 @@
     "storage_stats": "Storage Stats",
     "toggle_sidebar": "Toggle Home Assistant sidebar",
     "wipe_history": "Wipe History",
-    "live_match_debug": "Live Match Debug"
+    "live_match_debug": "Live Match Debug",
+    "automations_all_tip": "Home Assistant's automation list, filtered by the WashData label. Automations created here also sit in the WashData category.",
+    "maint_done_by_program": "Done automatically",
+    "auto_start": "Start a new automation",
+    "auto_yours": "Your automations",
+    "bp_needs_online": "The template library needs online features",
+    "bp_unreachable": "The template library could not be reached",
+    "bp_library": "Template library",
+    "bp_settings": "What you can set"
   },
   "health": {
     "fair": "Acceptable profile quality",
@@ -662,7 +680,7 @@
     "hist_reason_already_recorded": "overlaps a cycle WashData already recorded",
     "share_consent": "I confirm these cycles ran to normal completion without interruption",
     "show_internal": "Show internal settings",
-    "show_internal_tip": "Settings WashData tunes for you (sampling, watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.",
+    "show_internal_tip": "Settings WashData tunes for you (watchdog, match cadence, thresholds). Shown when this device has its own value, a conflict or a suggestion.",
     "rate_n": "{n} stars",
     "rate_quality": "Rate quality",
     "pg_autolabel": "Auto-label",
@@ -684,7 +702,19 @@
     "pg_obj_endlag": "End delay (median)",
     "pg_obj_early": "Early-end rate",
     "pg_obj_split": "Split rate",
-    "pg_sweep_cycles": "Recent cycles"
+    "pg_sweep_cycles": "Recent cycles",
+    "bp_yaml": "Blueprint YAML",
+    "automation_wd_label": "Carries the WashData label",
+    "done_by_none": "Not set",
+    "done_by_programs": "Done automatically by: {programs}",
+    "done_by_cycle": "Done by a {program} cycle",
+    "bp_by": "by {author}",
+    "bp_for_all": "Every appliance",
+    "bp_for": "For",
+    "bp_needs": "Needs",
+    "bp_needs_version": "WashData {version} or newer",
+    "bp_author": "Author",
+    "bp_required": "required"
   },
   "log": {
     "all_levels": "All levels",
@@ -792,7 +822,9 @@
     "wipe_all_msg": "⚠️ This permanently deletes ALL cycles and profiles. This cannot be undone.",
     "wipe_all_ok": "Wipe Everything",
     "wipe_all_title": "Wipe All Data",
-    "profile_title": "Profile · {name}"
+    "profile_title": "Profile · {name}",
+    "bp_replace_title": "Replace the installed template?",
+    "bp_replace_library_msg": "Home Assistant has a different version of \"{name}\". Replace it with the one from the template library? Automations that use it change with it."
   },
   "msg": {
     "custom_task_limit": "You have reached the limit of {max} tasks.",
@@ -817,7 +849,6 @@
     "artifact_pause_detail": "Power dropped to near zero for ~{n}s, then resumed. The door was probably opened or the cycle paused.",
     "artifact_spike_detail": "Drew above the usual power band for ~{n}s.",
     "auto_label_intro": "Assign profiles to unlabelled cycles whose match confidence clears the threshold.",
-    "automations_intro": "WashData fires {start} / {end} events and exposes entities, so notifications and actions are best built as normal Home Assistant automations. Automations that use this device appear below.",
     "cleanup_intro": "All labelled cycles overlaid. Tick outliers, then unlabel them (kept in history, no longer shaping this profile) or delete them.",
     "clear_debug_hint": "Remove stored debug data to free space.",
     "collecting_data": "Collecting data. Cycles still needed before fine-tuning can start: {need} ({current}/{min}).",
@@ -926,7 +957,7 @@
     "odometer_intro": "This total only goes up. Deleting a cycle does not lower it, so service reminders stay correct.",
     "old_actions_warning": "Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.",
     "onboard_download": "New device? Adopt a ready-made setup (programs, reference cycles and phases) from another WashData user with the same appliance.",
-    "online_intro_global": "Browse and share reference recordings with other WashData users. One connection covers all your WashData devices; brand and model are set per device under Basic. Online features are off until you turn them on.",
+    "online_intro_global": "Browse and share reference recordings with other WashData users, and use the automation template library. One connection covers all your WashData devices; brand and model are set per device under Basic. Online features are off until you turn them on.",
     "online_unavailable": "Online features are not available on this server.",
     "pending_feedback": "Pending detection feedback",
     "performance_trend": "Performance trend ({n} cycles)",
@@ -1061,10 +1092,6 @@
     "pg_label_yes": "Would be labelled \"{name}\" at cycle end",
     "pg_label_no": "Would ask for review: {reason}",
     "live_match_debug_tip": "Confidence: how closely the current power curve matches the top candidate profile (0-100%). Ambiguous: the two best candidates score within 5% of each other - the label is uncertain until the cycle finishes.",
-    "automation_alias_started": "{device}: cycle started",
-    "automation_alias_finished": "{device}: cycle finished",
-    "automation_desc_started": "Runs when a {device} cycle starts. Add your actions (notify, lights, ...).",
-    "automation_desc_finished": "Runs when a {device} cycle finishes. Add your actions (notify, lights, ...).",
     "feedback_detected": "WashData detected: {name}",
     "pg_outcome_stale": "Settings changed since this simulation ran. It still shows the old result.",
     "pg_compare_profile_tip": "Only picks the profile drawn over the graph. The simulation always matches the cycle on its own, as the live integration does.",
@@ -1080,7 +1107,22 @@
     "hist_warn_naive_time_one": "{n} timestamp has no time zone and was read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.",
     "hist_warn_naive_time_other": "{n} timestamps have no time zone and were read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.",
     "hist_tail_trimmed": "{min} min of waiting after the cycle ended were trimmed, as the live integration trims them",
-    "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W). Nothing was saved; change both together."
+    "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W). Nothing was saved; change both together.",
+    "bp_admin_only": "An administrator installs templates.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "Created by WashData for {device}. Add your actions (notify, lights, ...).",
+    "automation_alias_new": "{device}: new automation",
+    "maint_done_by_program_intro": "A task counts as done when a cycle of one of its programs finishes, for example the drum clean when Cotton 90 runs. Only cycles WashData is sure of, or that you picked, count.",
+    "auto_none": "No automations use this appliance yet.",
+    "auto_start_hint": "Opens in Home Assistant's automation editor with this appliance already filled in.",
+    "auto_yours_intro": "Home Assistant automations that react to this appliance.",
+    "bp_needs_online": "Templates are downloaded from GitHub, so the library only works with online features turned on. Online features also include the Community Store.",
+    "bp_needs_online_admin": "An administrator can turn them on in the gear menu, under Online & Community.",
+    "bp_stale": "GitHub could not be reached just now. These are the templates downloaded earlier.",
+    "bp_none_yet": "No templates for this appliance type yet. Share the first one.",
+    "bp_unreachable": "It is downloaded from GitHub. Check that Home Assistant can reach the internet, then try again.",
+    "bp_library_intro": "Ready-made automations shared by WashData users on GitHub, reviewed before they are listed. Available only with online features on.",
+    "bp_needs_version": "Needs WashData {version} or newer."
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1099,28 +1141,17 @@
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
     "anti_wrinkle_enabled": "Absorb the tumble pulses after the main phase instead of reading them as new cycles",
     "anti_wrinkle_max_duration": "A pulse longer than this ends anti-wrinkle and opens a new cycle",
-    "anti_wrinkle_exit_power": "Quiet level between tumble pulses; only takes effect above the Stop Threshold",
     "curve_preroll_seconds": "Seconds of readings from aborted start attempts carried into the front of a cycle's curve; 0 = off"
   },
   "phase_desc": {
     "anti_crease": "Occasional short tumbles after completion to reduce wrinkles.",
     "anti_wrinkle": "Periodic post-cycle tumbling to reduce wrinkles.",
-    "baking": "High-temperature heating element active for crust and crumb formation.",
-    "cooking": "Main cooking phase with active heater and fan.",
     "cool_down": "Tumbling without heat near cycle end.",
-    "cool_down_af": "Fan-only cool-down stage after heating.",
     "drain_and_switch": "Transition period from washing to drying mode.",
     "dry": "Drying stage using heater and/or residual heat.",
     "drying": "Main heated tumbling period.",
     "heat_up": "Initial heater warm-up before full drying begins.",
-    "keep_warm": "Low-heat holding stage to keep food warm.",
-    "keep_warm_bm": "Low-heat holding stage to keep the loaf warm after baking.",
-    "kneading": "Motor-driven dough mixing and development. High power draw.",
-    "pause_af": "Short pause for shaking or inspection.",
-    "pre_heat": "Initial chamber heating before full cooking.",
     "pre_rinse": "Initial spray-down before detergent wash.",
-    "proving": "Low-heat rising period to allow yeast fermentation and dough expansion.",
-    "resting": "Short low-power pause between kneading stages for gluten relaxation.",
     "pre_wash": "Initial soak or pre-treatment before the main wash.",
     "rinse": "Clean-water rinse stage. This phase may repeat multiple times.",
     "sanitize": "High-temperature cleaning stage for sanitization programs.",
@@ -1209,10 +1240,6 @@
       "doc": "Keep a dryer's short low-power tumble pulses after the main heat phase with the finished cycle, instead of reading them as new cycles.",
       "label": "Enable Anti-Wrinkle Detection"
     },
-    "anti_wrinkle_exit_power": {
-      "doc": "In anti-wrinkle mode, power below this counts as quiet between tumble pulses, and quiet for longer than the Max Pulse Gap ends the mode. The Stop Threshold is used when it is higher, so this only changes anything when set above the Stop Threshold.",
-      "label": "Exit Power Threshold"
-    },
     "anti_wrinkle_idle_timeout": {
       "label": "Max Pulse Gap",
       "doc": "How long the dryer may stay quiet between tumble pulses before anti-wrinkle mode ends. Set it above your dryer's longest gap, or later pulses are read as false starts."
@@ -1273,10 +1300,6 @@
       "doc": "Optional door sensor. Shows when the appliance was opened to unload after a cycle.",
       "label": "Door Sensor Entity"
     },
-    "duration_tolerance": {
-      "doc": "Learning feedback only: a cycle within +/-X% of its estimated duration counts as a good estimate. Does not affect matching.",
-      "label": "Estimate Tolerance"
-    },
     "enable_ml_models": {
       "doc": "Use a model trained on this machine to predict a running cycle's energy and cost, and let a well-known program that stops unusually early finish without the full off delay. Off: power-based logic only.",
       "label": "Apply smart models during a cycle"
@@ -1306,12 +1329,8 @@
       "label": "Expose Debug Entities"
     },
     "external_end_trigger": {
-      "doc": "Binary sensor whose change marks the cycle end (e.g. a \"finished\" contact or another integration).",
+      "doc": "Optional binary sensor that ends the cycle when it turns on, in addition to power-based detection (e.g. a \"finished\" contact or another integration). Leave empty to turn it off.",
       "label": "External Trigger Entity"
-    },
-    "external_end_trigger_enabled": {
-      "doc": "Let a binary sensor signal the end of a cycle, in addition to power-based detection.",
-      "label": "Enable External End Trigger"
     },
     "external_end_trigger_inverted": {
       "doc": "Treat the sensor turning OFF (not ON) as the end signal.",
@@ -1336,18 +1355,6 @@
     "ml_training_enabled": {
       "doc": "Retrain the energy model on this machine's finished cycles from time to time. A new model is kept only if it beats the simple estimate on test cycles.",
       "label": "Learn from this machine"
-    },
-    "ml_training_hour": {
-      "doc": "Hour of day (0-23) for overnight training. Pick a quiet hour, e.g. 2.",
-      "label": "Learn at hour"
-    },
-    "ml_training_interval_days": {
-      "doc": "Retrain at most once every this many days.",
-      "label": "Check at most every"
-    },
-    "ml_training_min_cycles": {
-      "doc": "Wait for at least this many recorded cycles before training.",
-      "label": "Cycles needed first"
     },
     "name": {
       "doc": "Name shown in Home Assistant for this device.",
@@ -1381,10 +1388,6 @@
       "doc": "notify.* services to call when a cycle finishes. Leave empty for none.",
       "label": "Finish Services"
     },
-    "notify_fire_events": {
-      "doc": "Also fire ha_washdata_* events on cycle start and finish for your own automations.",
-      "label": "Fire HA Events for Notifications"
-    },
     "notify_icon": {
       "doc": "Small icon on the notification (e.g. mdi:washing-machine). Sent only to mobile_app targets, not notify groups. On iOS it replaces the app icon and needs companion app 2026.8 or newer. Blank: platform default.",
       "label": "Notification Icon"
@@ -1394,7 +1397,7 @@
       "label": "Notification Colour"
     },
     "notify_live_chronometer": {
-      "doc": "Show a live countdown timer in the notification (where supported) instead of a fixed estimate.",
+      "doc": "Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Pre-Complete Message to show the finish time instead of a second countdown.",
       "label": "Use Live Chronometer"
     },
     "notify_live_click_action": {
@@ -1438,7 +1441,7 @@
       "label": "People (for Only When Home)"
     },
     "notify_pre_complete_message": {
-      "doc": "Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left). Any other variable falls back to the default text.",
+      "doc": "Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left), {finish_time} (estimated finish, e.g. 14:30). Any other variable falls back to the default text.",
       "label": "Pre-Complete Message"
     },
     "notify_quiet_end_hour": {
@@ -1506,7 +1509,7 @@
       "doc": "Bucket size of the power_profile attribute (average watts per slot) used by planners such as EMHASS and tibber_prices. Smaller keeps short spikes; larger smooths the curve. Default 15 min. Does not affect detection."
     },
     "power_sensor": {
-      "doc": "The sensor that reports this appliance's live power in watts (e.g. sensor.washer_power). All detection is based on it.",
+      "doc": "The sensor that reports this appliance's live power in W or kW (e.g. sensor.washer_power), not its energy counter (kWh). All detection is based on it.",
       "label": "Power Sensor"
     },
     "profile_evidence_sources": {
@@ -1529,10 +1532,6 @@
       "doc": "Live match score a cycle needs before Smart Termination or the anti-crease finish may end it early. It does not change the shown program. Raise it if weak matches end cycles early; lower it if clear matches wait the off delay.",
       "label": "Match Threshold"
     },
-    "profile_unmatch_threshold": {
-      "doc": "If the live match score drops below this, the current program guess is cleared. Keep it a little below the Match Threshold so a brief dip does not reset it.",
-      "label": "Unmatch Threshold"
-    },
     "progress_reset_delay": {
       "doc": "After a cycle, keep progress at 100% this long before resetting to Idle.",
       "label": "Progress Reset Delay"
@@ -1540,10 +1539,6 @@
     "pump_stuck_duration": {
       "doc": "How long a pump may run nonstop before the stuck-pump event fires.",
       "label": "Pump Stuck Duration"
-    },
-    "sampling_interval": {
-      "doc": "Minimum time between processed readings. Readings that arrive sooner are skipped (low readings during a cycle are always kept). Set it to your plug's reporting interval or lower; a higher value only throws readings away.",
-      "label": "Sampling Interval"
     },
     "save_debug_traces": {
       "doc": "Also store the matcher's debug data (every candidate's scores) with each cycle, for troubleshooting. Adds about 20 KB per cycle.",
@@ -1667,9 +1662,6 @@
     "services": {
       "label": "Services"
     },
-    "signal_processing": {
-      "label": "Signal Processing"
-    },
     "thresholds_gap": {
       "label": "Thresholds & Gap"
     },
@@ -1720,10 +1712,6 @@
       "auto_label_confidence": {
         "higher": "Labels fewer cycles automatically; more go to review",
         "lower": "Labels more cycles automatically; some may be misidentified"
-      },
-      "duration_tolerance": {
-        "higher": "Accepts a wider duration range – more flexible matching",
-        "lower": "Requires closer duration match – stricter but may reject unusual cycles"
       },
       "end_energy_threshold": {
         "higher": "Closes only cycles that used substantial energy",
@@ -1822,7 +1810,8 @@
     "status": "Overview",
     "subtab_phase_catalog": "Phase Catalog",
     "subtab_profiles": "Profiles",
-    "store": "Store"
+    "store": "Store",
+    "automations": "Automations"
   },
   "tag": {
     "early_end": "Early end",
@@ -1989,7 +1978,14 @@
     "unlabel_done": "Unlabelled {count} cycle(s)",
     "unlabel_failed": "Unlabel failed: {error}",
     "update_failed": "Update failed: {error}",
-    "store_download_partial": "{n} program(s) could not be downloaded; try again later."
+    "store_download_partial": "{n} program(s) could not be downloaded; try again later.",
+    "bp_install_failed": "Could not install the template: {error}",
+    "bp_installed_finish": "Template installed. Fill in the rest in Home Assistant.",
+    "bp_automation_failed": "The template is installed, but the automation could not be created: {error}",
+    "bp_automation_created": "Automation created with the default settings; opening it",
+    "copied": "Copied",
+    "copy_failed": "Copy failed. Select the text and copy it by hand.",
+    "automation_label_failed": "Automation created, but the WashData label or category could not be added."
   },
   "trend": {
     "down": "Trending down",
@@ -2069,7 +2065,11 @@
   },
   "link": {
     "maintenance_supporter": "Maintenance Supporter on GitHub ↗",
-    "manual": "Manual ↗"
+    "manual": "Manual ↗",
+    "automations_all": "All WashData automations in Home Assistant",
+    "bp_share_pr": "Share your own template: open a pull request on GitHub",
+    "bp_view_github": "View on GitHub",
+    "bp_import_my_ha": "Import with My Home Assistant"
   },
   "tip": {
     "add_brand": "Brand not listed? Add it to the community catalog",
@@ -2183,16 +2183,11 @@
     "kept": "kept",
     "max": "max",
     "min": "min",
-    "minus_tol": "-tol",
     "no_match": "no match",
     "no_updates": "no updates",
     "off_delay_wait": "off-delay wait",
     "off_gap": "off-gap",
-    "plus_tol": "+tol",
-    "profile": "profile",
-    "reading_interval": "typical reading interval",
     "sensor_offline": "sensor offline: force-stop",
-    "si": "SI",
     "spike_ignored": "spike ignored",
     "spike_ignored_short": "spike: ignored",
     "start": "start",
@@ -2201,5 +2196,61 @@
     "thr": "thr",
     "too_short": "too short",
     "tumble_kept": "tumble pulses kept"
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "Cycle started"
+    },
+    "program_recognised": {
+      "name": "Program recognised"
+    },
+    "phase_started": {
+      "name": "Phase started"
+    },
+    "finishing_soon": {
+      "name": "Finishing soon"
+    },
+    "cycle_overrun": {
+      "name": "Cycle running long"
+    },
+    "cycle_paused": {
+      "name": "Cycle paused"
+    },
+    "cycle_resumed": {
+      "name": "Cycle resumed"
+    },
+    "cycle_stalled": {
+      "name": "Cycle stalled"
+    },
+    "cycle_finished": {
+      "name": "Cycle finished"
+    },
+    "cycle_ended": {
+      "name": "Cycle ended"
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-wrinkle started"
+    },
+    "still_tumbling": {
+      "name": "Still tumbling after the cycle"
+    },
+    "unload_pending": {
+      "name": "Unload pending"
+    },
+    "unloaded": {
+      "name": "Unloaded"
+    },
+    "state_changed": {
+      "name": "State changed"
+    },
+    "maintenance_due": {
+      "name": "Maintenance due"
+    },
+    "milestone_reached": {
+      "name": "Cycle milestone reached"
+    },
+    "pump_stuck": {
+      "name": "Pump stuck"
+    }
   }
 }

@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Un nom convivial pour cet appareil (par exemple, « Machine à laver », « Lave-vaisselle »).",
           "device_type": "Définit les valeurs de détection par défaut pour ce type d'appareil.",
-          "power_sensor": "Le capteur de la prise connectée qui indique la puissance actuelle en watts.",
+          "power_sensor": "Le capteur de puissance de la prise connectée (W ou kW), pas son compteur d'énergie (kWh).",
           "min_power": "Au-dessus de cette valeur (en watts), l'appareil est considéré en marche. 2 W convient à la plupart des appareils."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Erreur inattendue",
-      "invalid_power": "Le seuil de puissance doit être supérieur à 0"
+      "invalid_power": "Le seuil de puissance doit être supérieur à 0",
+      "power_sensor_energy": "Il s'agit d'un compteur d'énergie (kWh), pas d'un capteur de puissance. Choisissez le capteur de puissance de la prise (W ou kW). Si la prise n'en a pas, un assistant Capteur de dérivée peut en créer un à partir du compteur."
     },
     "abort": {
       "already_configured": "L'appareil est déjà configuré",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device} : aucun profil reconnu pour le moment.",
       "vs_typical_longer": "{pct}% plus long que d'habitude",
       "vs_typical_shorter": "{pct}% plus court que d'habitude",
-      "invalid_power": "Le seuil de puissance doit être supérieur à 0"
+      "invalid_power": "Le seuil de puissance doit être supérieur à 0",
+      "power_sensor_energy": "Il s'agit d'un compteur d'énergie (kWh), pas d'un capteur de puissance. Choisissez le capteur de puissance de la prise (W ou kW). Si la prise n'en a pas, un assistant Capteur de dérivée peut en créer un à partir du compteur."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Séchoir",
         "washer_dryer": "Combo laveuse-sécheuse",
         "dishwasher": "Lave-vaisselle",
-        "air_fryer": "Friteuse à air",
-        "bread_maker": "Machine à pain",
         "pump": "Pompe / Pompe de puisard",
         "generic": "Autre (avancé)",
         "other": "Dispositif de seuil"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Tout",
+        "completed": "Terminé",
+        "force_stopped": "Arrêt forcé",
+        "interrupted": "Interrompu"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Désactivé",
+        "idle": "Inactif",
+        "starting": "Démarrage",
+        "running": "En marche",
+        "paused": "En pause",
+        "user_paused": "En pause par l'utilisateur",
+        "ending": "En cours d'arrêt",
+        "finished": "Terminé",
+        "anti_wrinkle": "Anti-faux plis",
+        "delay_wait": "En attendant de commencer",
+        "interrupted": "Interrompu",
+        "force_stopped": "Arrêt forcé",
+        "unknown": "Inconnu",
+        "clean": "Propre"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Impossible d'attribuer le profil : {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Cycle démarré",
+      "cycle_finished": "Cycle terminé",
+      "cycle_ended": "Cycle terminé (quelle que soit la raison)",
+      "anti_wrinkle_started": "Anti-froissement démarré",
+      "cycle_stalled": "Cycle bloqué",
+      "unload_pending": "Déchargement en attente",
+      "program_recognised": "Programme reconnu",
+      "phase_started": "Phase commencée",
+      "finishing_soon": "Bientôt terminé",
+      "cycle_overrun": "Cycle en retard",
+      "cycle_paused": "Cycle en pause",
+      "cycle_resumed": "Cycle repris",
+      "still_tumbling": "Toujours en rotation après le cycle",
+      "unloaded": "Déchargé",
+      "state_changed": "État modifié",
+      "maintenance_due": "Maintenance due",
+      "milestone_reached": "Jalon de cycles atteint",
+      "pump_stuck": "Pompe bloquée"
+    },
+    "extra_fields": {
+      "program": "Programme",
+      "phase": "Phase",
+      "minutes": "Minutes",
+      "percent": "Dépassement (%)",
+      "include_detected": "Inclure les pauses détectées",
+      "status": "Terminé comme",
+      "from": "De",
+      "to": "À",
+      "task": "Tâche"
+    },
+    "extra_fields_descriptions": {
+      "program": "Ce programme uniquement, par son nom exact. Laisser vide pour tout programme.",
+      "phase": "Cette phase uniquement, par son nom. Laisser vide pour toute phase.",
+      "minutes": "Bientôt terminé : minutes restantes. Toujours en rotation : minutes après la fin.",
+      "percent": "Pourcentage au-delà de la durée habituelle du programme.",
+      "include_detected": "Déclencher aussi sur les pauses que WashData détecte dans la consommation, comme un trempage ou un blocage.",
+      "status": "Seulement les cycles terminés ainsi.",
+      "from": "Seulement les changements depuis cet état. Laisser vide pour tout.",
+      "to": "Seulement les changements vers cet état. Laisser vide pour tout.",
+      "task": "Cette tâche uniquement, par son nom ou son identifiant. Laisser vide pour toute tâche."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Cycle démarré",
+      "description": "Se déclenche quand l'appareil démarre un cycle."
+    },
+    "program_recognised": {
+      "name": "Programme reconnu",
+      "description": "Se déclenche quand WashData reconnaît le programme du cycle en cours, ou le remplace par un autre programme.",
+      "fields": {
+        "program": {
+          "name": "Programme",
+          "description": "Ce programme uniquement, par son nom exact. Laisser vide pour tout programme."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Phase commencée",
+      "description": "Se déclenche quand le cycle en cours entre dans une nouvelle phase de son programme.",
+      "fields": {
+        "phase": {
+          "name": "Phase",
+          "description": "Cette phase uniquement, par son nom. Laisser vide pour toute phase."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Bientôt terminé",
+      "description": "Se déclenche une fois par cycle, quand le temps restant descend pour la première fois à ce nombre de minutes.",
+      "fields": {
+        "minutes": {
+          "name": "Minutes restantes",
+          "description": "Se déclenche quand il reste ce nombre de minutes ou moins."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Cycle en retard",
+      "description": "Se déclenche une fois par cycle, quand il dure plus longtemps que prévu pour ce programme.",
+      "fields": {
+        "percent": {
+          "name": "Dépassement de",
+          "description": "Pourcentage au-delà de la durée habituelle du programme."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Cycle en pause",
+      "description": "Se déclenche quand vous mettez un cycle en pause, et optionnellement quand l'appareil se met en pause seul.",
+      "fields": {
+        "include_detected": {
+          "name": "Inclure les pauses détectées",
+          "description": "Se déclenche aussi sur les pauses que WashData détecte dans la consommation, comme un trempage ou un blocage, pas seulement celles que vous démarrez."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Cycle repris",
+      "description": "Se déclenche quand un cycle en pause reprend.",
+      "fields": {
+        "include_detected": {
+          "name": "Inclure les pauses détectées",
+          "description": "Se déclenche aussi sur les pauses que WashData détecte dans la consommation, comme un trempage ou un blocage, pas seulement celles que vous démarrez."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Cycle bloqué",
+      "description": "Se déclenche quand un cycle s'arrête à un niveau de consommation bas et stable."
+    },
+    "cycle_finished": {
+      "name": "Cycle terminé",
+      "description": "Se déclenche quand un cycle se termine, même si vous l'arrêtez. Pas pour un faux départ.",
+      "fields": {
+        "program": {
+          "name": "Programme",
+          "description": "Ce programme uniquement, par son nom exact. Laisser vide pour tout programme."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Cycle terminé (quelle que soit la raison)",
+      "description": "Se déclenche quand un cycle se termine pour quelque raison que ce soit, faux départs inclus.",
+      "fields": {
+        "status": {
+          "name": "Terminé comme",
+          "description": "Seulement les cycles terminés ainsi."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Anti-froissement démarré",
+      "description": "Se déclenche quand l'appareil commence à faire tourner le linge terminé pour réduire le froissement."
+    },
+    "still_tumbling": {
+      "name": "Toujours en rotation après le cycle",
+      "description": "Se déclenche une fois quand l'appareil tourne encore par courtes impulsions à ce nombre de minutes après la fin du cycle. S'arrête au prochain cycle ou 4 heures après la fin.",
+      "fields": {
+        "minutes": {
+          "name": "Minutes après la fin",
+          "description": "Se déclenche à la première rotation au moins aussi longtemps après la fin."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Déchargement en attente",
+      "description": "Se déclenche quand un cycle est terminé et que le linge est toujours à l'intérieur."
+    },
+    "unloaded": {
+      "name": "Déchargé",
+      "description": "Se déclenche quand le linge est sorti après un cycle : la porte a été ouverte ou le déchargement a été confirmé."
+    },
+    "state_changed": {
+      "name": "État modifié",
+      "description": "Se déclenche quand l'état WashData change.",
+      "fields": {
+        "from": {
+          "name": "De",
+          "description": "Seulement les changements depuis cet état. Laisser vide pour tout."
+        },
+        "to": {
+          "name": "À",
+          "description": "Seulement les changements vers cet état. Laisser vide pour tout."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Maintenance due",
+      "description": "Se déclenche quand une tâche de maintenance arrive à échéance.",
+      "fields": {
+        "task": {
+          "name": "Tâche",
+          "description": "Cette tâche uniquement, par son nom ou son identifiant. Laisser vide pour toute tâche."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Jalon de cycles atteint",
+      "description": "Se déclenche quand le nombre total de cycles atteint l'un des jalons définis pour les notifications."
+    },
+    "pump_stuck": {
+      "name": "Pompe bloquée",
+      "description": "Se déclenche quand une pompe fonctionne plus longtemps que sa limite de blocage."
     }
   }
 }

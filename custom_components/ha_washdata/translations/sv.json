@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Ett vänligt namn för den här enheten (t.ex. \"Tvättmaskin\", \"Diskmaskin\").",
           "device_type": "Ställer in standardvärden för detektering för den här typen av apparat.",
-          "power_sensor": "Den smarta kontaktens sensor som rapporterar aktuell effekt i watt.",
+          "power_sensor": "Den smarta kontaktens effektsensor (W eller kW), inte dess energimätare (kWh).",
           "min_power": "Mätvärden över detta (i watt) betyder att apparaten är igång. 2 W passar de flesta enheter."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Oväntat fel",
-      "invalid_power": "Effekttröskeln måste vara större än 0"
+      "invalid_power": "Effekttröskeln måste vara större än 0",
+      "power_sensor_energy": "Det här är en energimätare (kWh), inte en effektsensor. Välj den smarta kontaktens effektsensor (W eller kW). Om kontakten saknar en kan en Derivatasensor-hjälpare skapa en från mätaren."
     },
     "abort": {
       "already_configured": "Enheten är redan konfigurerad",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Ingen profil matchad ännu.",
       "vs_typical_longer": "{pct}% längre än vanligt",
       "vs_typical_shorter": "{pct}% kortare än vanligt",
-      "invalid_power": "Effekttröskeln måste vara större än 0"
+      "invalid_power": "Effekttröskeln måste vara större än 0",
+      "power_sensor_energy": "Det här är en energimätare (kWh), inte en effektsensor. Välj den smarta kontaktens effektsensor (W eller kW). Om kontakten saknar en kan en Derivatasensor-hjälpare skapa en från mätaren."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Torktumlare",
         "washer_dryer": "Kombination av tvättmaskin och torktumlare",
         "dishwasher": "Diskmaskin",
-        "air_fryer": "Airfryer",
-        "bread_maker": "Brödmaskin",
         "pump": "Pump / Dräneringspump",
         "generic": "Annat (avancerat)",
         "other": "Tröskelenhet"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Valfri",
+        "completed": "Färdig",
+        "force_stopped": "Tvångsstoppad",
+        "interrupted": "Avbruten"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Av",
+        "idle": "Inaktiv",
+        "starting": "Startar",
+        "running": "Igång",
+        "paused": "Pausad",
+        "user_paused": "Pausad av användare",
+        "ending": "Avslutar",
+        "finished": "Färdig",
+        "anti_wrinkle": "Antirynkläge",
+        "delay_wait": "Väntar på att starta",
+        "interrupted": "Avbruten",
+        "force_stopped": "Tvångsstoppad",
+        "unknown": "Okänd",
+        "clean": "Ren"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Det gick inte att tilldela profilen: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Cykel startad",
+      "cycle_finished": "Cykel klar",
+      "cycle_ended": "Cykel avslutad (valfri anledning)",
+      "anti_wrinkle_started": "Skrynkelskydd startat",
+      "cycle_stalled": "Cykel avstannad",
+      "unload_pending": "Lossning väntande",
+      "program_recognised": "Program identifierat",
+      "phase_started": "Fas startad",
+      "finishing_soon": "Snart klar",
+      "cycle_overrun": "Cykel kör för länge",
+      "cycle_paused": "Cykel pausad",
+      "cycle_resumed": "Cykel återupptagen",
+      "still_tumbling": "Torktumlaren tumlar fortfarande efter cykeln",
+      "unloaded": "Tömd",
+      "state_changed": "Tillstånd ändrat",
+      "maintenance_due": "Dags för underhåll",
+      "milestone_reached": "Cykelmilstolpe uppnådd",
+      "pump_stuck": "Pumpen fastnad"
+    },
+    "extra_fields": {
+      "program": "Program",
+      "phase": "Fas",
+      "minutes": "Minuter",
+      "percent": "Längre med (%)",
+      "include_detected": "Inkludera detekterade pauser",
+      "status": "Avslutades som",
+      "from": "Från",
+      "to": "Till",
+      "task": "Uppgift"
+    },
+    "extra_fields_descriptions": {
+      "program": "Endast detta program, med exakt namn. Lämna tomt för vilket program som helst.",
+      "phase": "Endast denna fas, med namn. Lämna tomt för vilken fas som helst.",
+      "minutes": "Snart klar: resterande minuter. Tumlar fortfarande: minuter efter avslut.",
+      "percent": "Procent över programmets normala varaktighet.",
+      "include_detected": "Utlös även vid pauser WashData ser i effekten, t.ex. blötläggning eller stillestånd.",
+      "status": "Endast cyklar som avslutades på detta sätt.",
+      "from": "Endast ändringar från detta tillstånd. Lämna tomt för vilket som helst.",
+      "to": "Endast ändringar till detta tillstånd. Lämna tomt för vilket som helst.",
+      "task": "Endast denna uppgift, med namn eller ID. Lämna tomt för vilken uppgift som helst."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Cykel startad",
+      "description": "Utlöses när apparaten startar en cykel."
+    },
+    "program_recognised": {
+      "name": "Program identifierat",
+      "description": "Utlöses när WashData identifierar programmet för den pågående cykeln eller byter till ett annat program.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Endast detta program, med exakt namn. Lämna tomt för vilket program som helst."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Fas startad",
+      "description": "Utlöses när den pågående cykeln går in i en ny fas.",
+      "fields": {
+        "phase": {
+          "name": "Fas",
+          "description": "Endast denna fas, med namn. Lämna tomt för vilken fas som helst."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Snart klar",
+      "description": "Utlöses en gång per cykel, när återstående tid för första gången sjunker till detta antal minuter.",
+      "fields": {
+        "minutes": {
+          "name": "Återstående minuter",
+          "description": "Utlös när så många minuter eller färre återstår."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Cykel kör för länge",
+      "description": "Utlöses en gång per cykel, när den kör så mycket längre än programmets normala varaktighet.",
+      "fields": {
+        "percent": {
+          "name": "Längre med",
+          "description": "Procent över programmets normala varaktighet."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Cykel pausad",
+      "description": "Utlöses när du pausar en cykel, och valfritt när apparaten pausar av sig själv.",
+      "fields": {
+        "include_detected": {
+          "name": "Inkludera detekterade pauser",
+          "description": "Utlös även vid pauser WashData ser i effekten, t.ex. blötläggning eller stillestånd, inte bara vid pauser du startar."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Cykel återupptagen",
+      "description": "Utlöses när en pausad cykel fortsätter.",
+      "fields": {
+        "include_detected": {
+          "name": "Inkludera detekterade pauser",
+          "description": "Utlös även vid pauser WashData ser i effekten, t.ex. blötläggning eller stillestånd, inte bara vid pauser du startar."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Cykel avstannad",
+      "description": "Utlöses när en pågående cykel stannar vid en låg, jämn effektnivå."
+    },
+    "cycle_finished": {
+      "name": "Cykel klar",
+      "description": "Utlöses när en cykel slutar, även när du stoppar den. Inte vid falskt start.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Endast detta program, med exakt namn. Lämna tomt för vilket program som helst."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Cykel avslutad (valfri anledning)",
+      "description": "Utlöses när en cykel avslutas av vilken anledning som helst, inklusive falska starter.",
+      "fields": {
+        "status": {
+          "name": "Avslutades som",
+          "description": "Endast cyklar som avslutades på detta sätt."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Skrynkelskydd startat",
+      "description": "Utlöses när apparaten börjar tumla den klara tvätten mot skrynklor."
+    },
+    "still_tumbling": {
+      "name": "Torktumlaren tumlar fortfarande efter cykeln",
+      "description": "Utlöses en gång när apparaten fortfarande tumlar i korta stötar detta antal minuter efter att cykeln avslutades. Stoppar vid en ny cykel eller 4 timmar efter avslut.",
+      "fields": {
+        "minutes": {
+          "name": "Minuter efter avslut",
+          "description": "Utlös vid den första tumlingen minst så lång tid efter avslut."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Lossning väntande",
+      "description": "Utlöses när en cykel är klar och tvätten fortfarande är kvar."
+    },
+    "unloaded": {
+      "name": "Tömd",
+      "description": "Utlöses när tvätten tas ut efter en cykel: dörren öppnades eller lossningen bekräftades."
+    },
+    "state_changed": {
+      "name": "Tillstånd ändrat",
+      "description": "Utlöses när WashData-tillståndet ändras.",
+      "fields": {
+        "from": {
+          "name": "Från",
+          "description": "Endast ändringar från detta tillstånd. Lämna tomt för vilket som helst."
+        },
+        "to": {
+          "name": "Till",
+          "description": "Endast ändringar till detta tillstånd. Lämna tomt för vilket som helst."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Dags för underhåll",
+      "description": "Utlöses när en underhållsuppgift förfaller.",
+      "fields": {
+        "task": {
+          "name": "Uppgift",
+          "description": "Endast denna uppgift, med namn eller ID. Lämna tomt för vilken uppgift som helst."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Cykelmilstolpe uppnådd",
+      "description": "Utlöses när det totala cykelvärdet når en av de milstolpar som ställts in för aviseringar."
+    },
+    "pump_stuck": {
+      "name": "Pumpen fastnad",
+      "description": "Utlöses när en pump kör längre än sin fastnadsgräns."
     }
   }
 }

@@ -13,7 +13,7 @@
         "data_description": {
           "name": "该设备的友好名称（例如“洗衣机”、“洗碗机”）。",
           "device_type": "为此类家电设置检测默认值。",
-          "power_sensor": "以瓦为单位报告实时功率的智能插头传感器。",
+          "power_sensor": "智能插头的功率传感器（W 或 kW），而不是它的电能表（kWh）。",
           "min_power": "高于此值（瓦）的读数表示设备正在运行。大多数设备适合 2 W。"
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "意外错误",
-      "invalid_power": "功率阈值必须大于 0"
+      "invalid_power": "功率阈值必须大于 0",
+      "power_sensor_energy": "这是电能表（kWh），不是功率传感器。请选择插头的功率传感器（W 或 kW）。如果插头没有功率传感器，可以用“变化率传感器”辅助元素从电能表生成一个。"
     },
     "abort": {
       "already_configured": "设备已配置",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}：尚未匹配到配置文件。",
       "vs_typical_longer": "比平常长 {pct}%",
       "vs_typical_shorter": "比平常短 {pct}%",
-      "invalid_power": "功率阈值必须大于 0"
+      "invalid_power": "功率阈值必须大于 0",
+      "power_sensor_energy": "这是电能表（kWh），不是功率传感器。请选择插头的功率传感器（W 或 kW）。如果插头没有功率传感器，可以用“变化率传感器”辅助元素从电能表生成一个。"
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "烘干机",
         "washer_dryer": "洗衣机烘干机组合",
         "dishwasher": "洗碗机",
-        "air_fryer": "空气炸锅",
-        "bread_maker": "面包机",
         "pump": "泵/污水泵",
         "generic": "其他（高级）",
         "other": "阈值装置"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "任意",
+        "completed": "已完成",
+        "force_stopped": "强制停止",
+        "interrupted": "被打断"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "关闭",
+        "idle": "空闲",
+        "starting": "开始",
+        "running": "运行中",
+        "paused": "已暂停",
+        "user_paused": "用户已暂停",
+        "ending": "结束",
+        "finished": "已完成",
+        "anti_wrinkle": "抗皱",
+        "delay_wait": "等待开始",
+        "interrupted": "被打断",
+        "force_stopped": "强制停止",
+        "unknown": "未知",
+        "clean": "干净的"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "无法分配配置文件：{error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "周期已开始",
+      "cycle_finished": "周期已完成",
+      "cycle_ended": "周期已结束（任何原因）",
+      "anti_wrinkle_started": "抗皱已开始",
+      "cycle_stalled": "周期已停滞",
+      "unload_pending": "待卸载",
+      "program_recognised": "程序已识别",
+      "phase_started": "阶段已开始",
+      "finishing_soon": "即将完成",
+      "cycle_overrun": "周期运行过长",
+      "cycle_paused": "周期已暂停",
+      "cycle_resumed": "周期已恢复",
+      "still_tumbling": "周期结束后仍在转动",
+      "unloaded": "已取出",
+      "state_changed": "状态已变更",
+      "maintenance_due": "需要维护",
+      "milestone_reached": "达到周期里程碑",
+      "pump_stuck": "泵被卡住"
+    },
+    "extra_fields": {
+      "program": "程序",
+      "phase": "阶段",
+      "minutes": "分钟",
+      "percent": "超出 (%)",
+      "include_detected": "包含检测到的暂停",
+      "status": "结束状态",
+      "from": "从",
+      "to": "到",
+      "task": "任务"
+    },
+    "extra_fields_descriptions": {
+      "program": "仅此程序，使用准确名称。留空表示任意程序。",
+      "phase": "仅此阶段，使用名称。留空表示任意阶段。",
+      "minutes": "即将完成：剩余分钟数。仍在转动：完成后的分钟数。",
+      "percent": "超过程序通常时长的百分比。",
+      "include_detected": "也对 WashData 在电力中检测到的暂停触发，例如浸泡或卡顿。",
+      "status": "仅以此方式结束的周期。",
+      "from": "仅从此状态的变更。留空表示任意。",
+      "to": "仅到此状态的变更。留空表示任意。",
+      "task": "仅此任务，使用名称或 ID。留空表示任意任务。"
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "周期已开始",
+      "description": "当设备开始周期时触发。"
+    },
+    "program_recognised": {
+      "name": "程序已识别",
+      "description": "当 WashData 识别正在运行的周期程序或切换到其他程序时触发。",
+      "fields": {
+        "program": {
+          "name": "程序",
+          "description": "仅此程序，使用准确名称。留空表示任意程序。"
+        }
+      }
+    },
+    "phase_started": {
+      "name": "阶段已开始",
+      "description": "当正在运行的周期进入程序的新阶段时触发。",
+      "fields": {
+        "phase": {
+          "name": "阶段",
+          "description": "仅此阶段，使用名称。留空表示任意阶段。"
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "即将完成",
+      "description": "每个周期触发一次，当剩余时间首次降至此分钟数时。",
+      "fields": {
+        "minutes": {
+          "name": "剩余分钟数",
+          "description": "当剩余时间不超过此分钟数时触发。"
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "周期运行过长",
+      "description": "每个周期触发一次，当运行时间比程序通常时长多出这么多时。",
+      "fields": {
+        "percent": {
+          "name": "超出",
+          "description": "超过程序通常时长的百分比。"
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "周期已暂停",
+      "description": "当您暂停周期时触发，也可选在设备自行停止时触发。",
+      "fields": {
+        "include_detected": {
+          "name": "包含检测到的暂停",
+          "description": "也对 WashData 检测到的暂停触发，例如浸泡或卡顿，而不仅限于您手动暂停的情况。"
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "周期已恢复",
+      "description": "当暂停的周期继续时触发。",
+      "fields": {
+        "include_detected": {
+          "name": "包含检测到的暂停",
+          "description": "也对 WashData 检测到的暂停触发，例如浸泡或卡顿，而不仅限于您手动暂停的情况。"
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "周期已停滞",
+      "description": "当正在运行的周期在低而稳定的功率水平下停止时触发。"
+    },
+    "cycle_finished": {
+      "name": "周期已完成",
+      "description": "当周期完成时触发，包括您手动停止的情况。不包括误启动。",
+      "fields": {
+        "program": {
+          "name": "程序",
+          "description": "仅此程序，使用准确名称。留空表示任意程序。"
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "周期已结束（任何原因）",
+      "description": "当周期因任何原因结束时触发，包括误启动。",
+      "fields": {
+        "status": {
+          "name": "结束状态",
+          "description": "仅以此方式结束的周期。"
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "抗皱已开始",
+      "description": "当设备开始转动滚筒为已完成的衣物防皱时触发。"
+    },
+    "still_tumbling": {
+      "name": "周期结束后仍在转动",
+      "description": "当周期完成后设备仍以短暂间隔转动达到此分钟数时，触发一次。在新周期开始或完成后4小时后停止。",
+      "fields": {
+        "minutes": {
+          "name": "完成后的分钟数",
+          "description": "在完成后至少经过此时间的第一次转动时触发。"
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "待卸载",
+      "description": "当周期完成且衣物仍在内部时触发。"
+    },
+    "unloaded": {
+      "name": "已取出",
+      "description": "当周期结束后取出衣物时触发：门被打开或取出操作被确认。"
+    },
+    "state_changed": {
+      "name": "状态已变更",
+      "description": "当 WashData 状态变更时触发。",
+      "fields": {
+        "from": {
+          "name": "从",
+          "description": "仅从此状态的变更。留空表示任意。"
+        },
+        "to": {
+          "name": "到",
+          "description": "仅到此状态的变更。留空表示任意。"
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "需要维护",
+      "description": "当维护任务到期时触发。",
+      "fields": {
+        "task": {
+          "name": "任务",
+          "description": "仅此任务，使用名称或 ID。留空表示任意任务。"
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "达到周期里程碑",
+      "description": "当累计周期数达到为通知设置的某个里程碑时触发。"
+    },
+    "pump_stuck": {
+      "name": "泵被卡住",
+      "description": "当泵运行时间超过其卡滞限制时触发。"
     }
   }
 }

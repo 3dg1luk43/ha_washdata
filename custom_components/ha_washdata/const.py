@@ -17,6 +17,7 @@
 """Constants for the WashData integration."""
 
 import math
+from collections.abc import Mapping
 from enum import StrEnum
 from typing import Any
 
@@ -53,6 +54,7 @@ CONF_NOTIFY_SERVICE = "notify_service"  # Deprecated - kept for migration only
 CONF_NOTIFY_ACTIONS = "notify_actions"
 CONF_NOTIFY_PEOPLE = "notify_people"
 CONF_NOTIFY_ONLY_WHEN_HOME = "notify_only_when_home"
+# Retired by #478: the ha_washdata_* bus events always fire. Kept for migration only.
 CONF_NOTIFY_FIRE_EVENTS = "notify_fire_events"
 CONF_NOTIFY_EVENTS = "notify_events"  # Deprecated - kept for migration only
 CONF_NOTIFY_START_SERVICES = "notify_start_services"
@@ -62,18 +64,18 @@ CONF_NOTIFY_CYCLE_TIMERS = "notify_cycle_timers"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
 CONF_LOW_POWER_NO_UPDATE_TIMEOUT = "low_power_no_update_timeout"
 CONF_SMOOTHING_WINDOW = "smoothing_window"  # Removed in 0.5.8: never read; key kept for old migrations
-CONF_SAMPLING_INTERVAL = "sampling_interval"
+CONF_SAMPLING_INTERVAL = "sampling_interval"  # Retired in 0.5.9: the device type's default applies; key kept for migration and the panel's resolved defaults
 CONF_START_DURATION_THRESHOLD = (
     "start_duration_threshold"  # Debounce for start detection
 )
 CONF_DEVICE_TYPE = "device_type"
-CONF_PROFILE_DURATION_TOLERANCE = "profile_duration_tolerance"
+CONF_PROFILE_DURATION_TOLERANCE = "profile_duration_tolerance"  # Never read (audit DOCS-01); key kept for migration
 
 
 CONF_INTERRUPTED_MIN_SECONDS = "interrupted_min_seconds"  # Internal use only
 CONF_PROGRESS_RESET_DELAY = "progress_reset_delay"
 CONF_LEARNING_CONFIDENCE = "learning_confidence"
-CONF_DURATION_TOLERANCE = "duration_tolerance"
+CONF_DURATION_TOLERANCE = "duration_tolerance"  # Retired in 0.5.9: only fed an unread feedback field; key kept for migration
 CONF_AUTO_LABEL_CONFIDENCE = "auto_label_confidence"
 CONF_AUTO_MAINTENANCE = "auto_maintenance"
 CONF_PROFILE_MATCH_INTERVAL = "profile_match_interval"
@@ -103,14 +105,14 @@ CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
 )
 CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"  # Noise events before auto-tune
-CONF_EXTERNAL_END_TRIGGER_ENABLED = "external_end_trigger_enabled"  # Enable external cycle end trigger
-CONF_EXTERNAL_END_TRIGGER = "external_end_trigger"  # Binary sensor entity for external cycle end
+CONF_EXTERNAL_END_TRIGGER_ENABLED = "external_end_trigger_enabled"  # Retired in 0.5.9: the trigger is on whenever its entity is set; key kept for migration
+CONF_EXTERNAL_END_TRIGGER = "external_end_trigger"  # Binary sensor entity that ends the cycle; set = on
 CONF_EXTERNAL_END_TRIGGER_INVERTED = "external_end_trigger_inverted"  # Invert external trigger logic (trigger on OFF)
 CONF_ANTI_WRINKLE_ENABLED = "anti_wrinkle_enabled"  # Dryer anti-wrinkle shielding
 CONF_ANTI_WRINKLE_MAX_POWER = "anti_wrinkle_max_power"  # W threshold for anti-wrinkle spikes
 CONF_ANTI_WRINKLE_MAX_DURATION = "anti_wrinkle_max_duration"  # Seconds to treat as anti-wrinkle
-CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W: quiet level in anti-wrinkle, floored at stop_threshold_w
-CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below exit power before anti-wrinkle ends
+CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # Retired in 0.5.9: fixed at max(DEFAULT_ANTI_WRINKLE_EXIT_POWER, stop_threshold_w); key kept for migration
+CONF_ANTI_WRINKLE_IDLE_TIMEOUT = "anti_wrinkle_idle_timeout"  # Seconds below the exit level before anti-wrinkle ends
 CONF_DISHWASHER_END_SPIKE_QUIET_RELEASE = "dishwasher_end_spike_quiet_release"  # Dishwasher: sustained-quiet seconds after expected duration that release the end-of-cycle drain wait early (#379)
 CONF_SMART_TERMINATION_DURATION_RATIO = "smart_termination_duration_ratio"  # Fraction of the matched profile's expected (mean) duration that Smart Termination requires before it may fire (#393)
 CONF_ANTI_CREASE_FINALIZE_RATIO = "anti_crease_finalize_ratio"  # Fraction of the matched profile's expected (mean) duration the anti-crease finalise requires before it may fire (#429)
@@ -273,7 +275,6 @@ DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes rem
 DEFAULT_NOTIFY_REMINDER_MESSAGE = "{device}: about {minutes} minutes left."
 DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE = "{device}: No profile matched yet."
 DEFAULT_NOTIFY_ONLY_WHEN_HOME = False
-DEFAULT_NOTIFY_FIRE_EVENTS = True
 DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
@@ -310,12 +311,10 @@ DEFAULT_POWER_PROFILE_INTERVAL_MIN = 15  # power_profile attribute bucket (#367)
 DEFAULT_NAME = "Washing Machine"
 # Seconds without updates while active before forced stop (publish-on-change sockets)
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 600  # 10 minutes
-DEFAULT_SMOOTHING_WINDOW = 2
 DEFAULT_SAMPLING_INTERVAL = 30.0  # Seconds
 DEFAULT_START_DURATION_THRESHOLD = 5.0  # Seconds (debounce)
 DEFAULT_END_ENERGY_THRESHOLD = 0.05  # Wh - Require effectively zero energy to end
 DEFAULT_DEVICE_TYPE = "washing_machine"
-DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
 
 DEFAULT_INTERRUPTED_MIN_SECONDS = 150  # Internal use only, not exposed
 
@@ -330,7 +329,6 @@ DEFAULT_PROGRESS_RESET_DELAY = 1800  # Seconds (30 minutes state expiry/unload w
 DEFAULT_POWER_OFF_THRESHOLD_W = 0.0  # Disabled
 DEFAULT_POWER_OFF_DELAY = 30  # Seconds
 DEFAULT_LEARNING_CONFIDENCE = 0.6  # Minimum confidence to request user verification
-DEFAULT_DURATION_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging
 DEFAULT_AUTO_LABEL_CONFIDENCE = 0.9  # High confidence auto-label threshold
 DEFAULT_AUTO_MAINTENANCE = True  # Enable nightly cleanup by default
 DEFAULT_COMPLETION_MIN_SECONDS = 600  # 10 minutes
@@ -558,6 +556,7 @@ DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Ghost cycles before threshold ad
 DEFAULT_ANTI_WRINKLE_ENABLED = False
 DEFAULT_ANTI_WRINKLE_MAX_POWER = 400.0  # W
 DEFAULT_ANTI_WRINKLE_MAX_DURATION = 60.0  # s
+# Quiet level in anti-wrinkle, floored at stop_threshold_w (no longer a setting).
 DEFAULT_ANTI_WRINKLE_EXIT_POWER = 0.8  # W
 # Quiet gap a machine may leave between two anti-wrinkle pulses before the mode
 # ends. Keeps the previous hardcoded behaviour as the default; dryers whose
@@ -590,7 +589,7 @@ CYCLE_ANOMALY_STALLED = "stalled"  # the state sensor's cycle_anomaly while stal
 
 # Profile Matching Thresholds
 CONF_PROFILE_MATCH_THRESHOLD = "profile_match_threshold"
-CONF_PROFILE_UNMATCH_THRESHOLD = "profile_unmatch_threshold"
+CONF_PROFILE_UNMATCH_THRESHOLD = "profile_unmatch_threshold"  # Retired in 0.5.9: fixed at DEFAULT_PROFILE_UNMATCH_THRESHOLD; key kept for migration
 
 DEFAULT_PROFILE_MATCH_THRESHOLD = 0.4
 DEFAULT_PROFILE_UNMATCH_THRESHOLD = 0.35
@@ -971,8 +970,6 @@ DEVICE_TYPE_WASHING_MACHINE = "washing_machine"
 DEVICE_TYPE_DRYER = "dryer"
 DEVICE_TYPE_WASHER_DRYER = "washer_dryer"
 DEVICE_TYPE_DISHWASHER = "dishwasher"
-DEVICE_TYPE_AIR_FRYER = "air_fryer"
-DEVICE_TYPE_BREAD_MAKER = "bread_maker"
 DEVICE_TYPE_PUMP = "pump"
 # Full-featured generic type for predictable appliances that don't fit any of the
 # named categories. Participates in profile matching/learning like any other
@@ -983,6 +980,11 @@ DEVICE_TYPE_GENERIC = "generic"
 # Config entries whose stored device_type is no longer supported are migrated
 # to this bucket on load (see __init__.py), preserving their tuned options.
 DEVICE_TYPE_OTHER = "other"
+# Removed in 0.5.9 (maintainer decision 2026-10-19). Kept only for the migration
+# that moves an entry on one of them to DEVICE_TYPE_GENERIC: see
+# RETIRED_DEVICE_TYPE_OPTIONS below and options_utils.retire_device_type.
+DEVICE_TYPE_AIR_FRYER = "air_fryer"
+DEVICE_TYPE_BREAD_MAKER = "bread_maker"
 
 # Device types whose Stage-4 "energy agreement" compares INTEGRATED energy
 # (mean power x duration) instead of mean power. On these, same-base program
@@ -1004,11 +1006,33 @@ DEVICE_TYPES = {
     DEVICE_TYPE_DRYER: "Dryer",
     DEVICE_TYPE_WASHER_DRYER: "Washer-Dryer Combo",
     DEVICE_TYPE_DISHWASHER: "Dishwasher",
-    DEVICE_TYPE_AIR_FRYER: "Air Fryer",
-    DEVICE_TYPE_BREAD_MAKER: "Bread Maker",
     DEVICE_TYPE_PUMP: "Pump / Sump Pump",
     DEVICE_TYPE_GENERIC: "Other (Advanced)",
     DEVICE_TYPE_OTHER: "Threshold Device",
+}
+
+# 0.5.9: an entry on a removed device type migrates to DEVICE_TYPE_GENERIC (full
+# matching and learning), and every setting where the old type ran on a default of
+# its own keeps that value as an explicit option, so the detector it runs does not
+# change. Only the values that differ from generic's are listed (the rest resolve
+# the same): the completion floor and the minimum off gap the config builder took
+# from DEVICE_COMPLETION_THRESHOLDS / DEFAULT_MIN_OFF_GAP_BY_DEVICE. A key the user
+# has set is kept. Frozen: these are the values the old types shipped with.
+RETIRED_DEVICE_TYPE_OPTIONS: dict[str, dict[str, int]] = {
+    DEVICE_TYPE_AIR_FRYER: {CONF_COMPLETION_MIN_SECONDS: 300, CONF_MIN_OFF_GAP: 120},
+    DEVICE_TYPE_BREAD_MAKER: {CONF_COMPLETION_MIN_SECONDS: 1800, CONF_MIN_OFF_GAP: 600},
+}
+# What the manager reads when low_power_no_update_timeout is unset.
+DEFAULT_LOW_POWER_NO_UPDATE_TIMEOUT = 3600.0
+# ...and a floor rather than a default, as (floor, value when unset): the manager's
+# low-power silence budget was max(DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE[type],
+# low_power_no_update_timeout), so the migrated option is the max of the two,
+# whatever the user stored. (The bread maker's 7200 s in that map was never its
+# no_update_active_timeout: the manager reads that one with the scalar default.)
+RETIRED_DEVICE_TYPE_OPTION_FLOORS: dict[str, dict[str, tuple[float, float]]] = {
+    DEVICE_TYPE_BREAD_MAKER: {
+        CONF_LOW_POWER_NO_UPDATE_TIMEOUT: (7200.0, DEFAULT_LOW_POWER_NO_UPDATE_TIMEOUT),
+    },
 }
 
 # Standby-band stuck-in-RUNNING finalize (#296).  Some appliances finish but hold
@@ -1024,8 +1048,7 @@ DEVICE_TYPES = {
 # never end an active low-power phase: it needs a matched profile, elapsed >= 2x
 # expected, and the whole recent window flat + below a small fraction of the cycle's
 # own peak.  Restricted to wet appliances where a stuck baseline is unambiguously
-# anomalous (bread-maker keep-warm, pump, air-fryer etc. have legitimate holds and
-# are excluded).
+# anomalous (a pump, a keep-warm hold etc. can be legitimate and are excluded).
 STANDBY_BAND_FINALIZE_DEVICE_TYPES = (
     DEVICE_TYPE_WASHING_MACHINE,
     DEVICE_TYPE_WASHER_DRYER,
@@ -1195,12 +1218,30 @@ ANTI_CREASE_SPIN_WAIT_MAX_RATIO = 1.25      # never block past this x expected
 ANTI_CREASE_SPIN_ARM_MIN_SHARE = 0.5
 ANTI_CREASE_SPIN_ARM_MIN_MEMBERS = 2
 
+# Issue #474: a dryer's anti-crease tumble pulses (Miele T220A: ~125 W for 5-10 s
+# every ~70 s; #478 AEG TR719A4B: 130-300 W for 6-12 s every ~120 s) are above
+# stop_threshold_w, and since DETECT-04 every reading there restarted the quiet
+# tally, so Smart Termination and the off_delay/min_off_gap fallback never saw
+# enough quiet and the cycle ran to the 8 h cap. On these device types an
+# excursion above stop_threshold_w that peaks at or below anti_wrinkle_max_power
+# and lasts at most QUIET_PULSE_MAX_S (its first reading to the first reading back
+# below stop) leaves the quiet tallies and the last activity where they stood
+# before it (its own span is not counted as quiet, the fallback's energy window
+# skips it), and it does not resume RUNNING from PAUSED / ENDING. A
+# longer or hotter excursion (resumed heating, a fan-only phase) resets as before.
+# 30 s is 2.5x the longest pulse in both reports and far below any drying phase;
+# a plug polled slower than this cannot show a pulse that short, so it keeps the
+# old behaviour. Dryers only: a washer's soak drum turns have the same shape
+# mid-wash, and on the 24 washer-dryer corpus cycles the rule moved 3 ends and
+# (under the #296 tumble tail) cut 3 stored runs short of their own last turns.
+QUIET_PULSE_DEVICE_TYPES = (DEVICE_TYPE_DRYER,)
+QUIET_PULSE_MAX_S = 30.0
+
 # Device Type Defaults
 # Device Type Defaults (Maps)
 
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 14400,  # 4 hours (Drying can be long)
-    DEVICE_TYPE_BREAD_MAKER: 7200,  # 2 hours (Proving/Rising is very low-power for extended periods)
     DEVICE_TYPE_PUMP: DEFAULT_PUMP_STUCK_DURATION + 60,  # Must exceed stuck-alarm threshold so the alarm fires before the watchdog
 }
 
@@ -1322,7 +1363,6 @@ DEFAULT_SMART_TERMINATION_DURATION_RATIO = 0.98
 
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
-    DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
     DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
 }
 
@@ -1349,8 +1389,6 @@ DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_DRYER: 3.0,  # More linear, less phase repetition
     DEVICE_TYPE_WASHER_DRYER: 5.0,  # Combined washer+dryer, use washer defaults
     DEVICE_TYPE_DISHWASHER: 5.0,  # Similar to washing machine with distinct phases
-    DEVICE_TYPE_AIR_FRYER: 2.0,  # Constant load with sudden drop
-    DEVICE_TYPE_BREAD_MAKER: 5.0,  # Large power swings between kneading, proving, baking
     DEVICE_TYPE_PUMP: 2.0,  # Binary on/off spikes; minimal smoothing needed
     DEVICE_TYPE_GENERIC: 3.0,  # Neutral middle ground for unknown appliance types
 }
@@ -1361,8 +1399,6 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_DRYER: 600,  # 10 min
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (same as washer)
     DEVICE_TYPE_DISHWASHER: 900,  # 15 min
-    DEVICE_TYPE_AIR_FRYER: 300,  # 5 min minimum
-    DEVICE_TYPE_BREAD_MAKER: 1800,  # 30 min (even express bread takes 30+ min)
     DEVICE_TYPE_PUMP: 5,  # 5 s - pump cycles can be under 30 seconds
 }
 
@@ -1377,8 +1413,6 @@ DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_DRYER: 300,  # 5 min (Cool down gaps?)
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (longer for combined cycles)
     DEVICE_TYPE_DISHWASHER: 3600,  # 1 hour (Drying pauses)
-    DEVICE_TYPE_AIR_FRYER: 120,  # 2 min (Shaking food)
-    DEVICE_TYPE_BREAD_MAKER: 600,  # 10 min (Resting between knead/prove keeps same cycle together)
     DEVICE_TYPE_PUMP: 60,  # 1 min (Pumps can cycle every 3-5 min in heavy rain)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
@@ -1391,8 +1425,6 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_DRYER: 0.5,  # Heater kicks in hard
     DEVICE_TYPE_WASHER_DRYER: 0.3,  # Mix of washer and dryer
     DEVICE_TYPE_DISHWASHER: 0.2,  # Pump/Heater
-    DEVICE_TYPE_AIR_FRYER: 0.2,  # Heater kicks in
-    DEVICE_TYPE_BREAD_MAKER: 0.2,  # Kneading motor starts (~200W for a few seconds)
     DEVICE_TYPE_PUMP: 0.003,  # ~100W motor for ~0.1 s is enough to confirm a pump cycle
 }
 # Default sampling interval by device type
@@ -1404,6 +1436,77 @@ DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 2.0,
     DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
 }
+
+
+# Power units Home Assistant's sensor platform accepts (UnitOfPower), as factors to
+# watts (#481). Case matters: "mW" is milliwatts, "MW" megawatts. Any other unit,
+# or none, reads as watts, as every reading did before.
+POWER_UNIT_TO_W: dict[str, float] = {
+    "mW": 0.001,
+    "W": 1.0,
+    "kW": 1000.0,
+    "MW": 1_000_000.0,
+    "GW": 1_000_000_000.0,
+}
+# A rate of energy is power too: Home Assistant's Derivative helper turns a kWh
+# counter into "kWh/h" (#481). Factors to Wh, and the time unit in hours.
+_RATE_ENERGY_TO_WH: dict[str, float] = {"Wh": 1.0, "kWh": 1000.0, "MWh": 1_000_000.0}
+_RATE_TIME_IN_H: dict[str, float] = {"s": 1.0 / 3600.0, "min": 1.0 / 60.0, "h": 1.0, "d": 24.0}
+# Units of an energy counter (UnitOfEnergy, lowercased): never a power sensor (#481).
+ENERGY_UNITS = frozenset({
+    "mwh", "wh", "kwh", "gwh", "twh", "j", "kj", "mj", "gj", "cal", "kcal", "mcal", "gcal",
+})
+ENERGY_DEVICE_CLASSES = frozenset({"energy", "energy_storage"})
+
+
+def power_unit_scale(unit: Any, min_power: Any = DEFAULT_MIN_POWER) -> float:
+    """Factor that turns a power sensor's reading into watts (#481).
+
+    ``unit`` is the sensor's ``unit_of_measurement``. 1.0 for watts, an unknown
+    unit or none ("kw" in any case is kilowatts; an energy rate such as the
+    Derivative helper's "kWh/h" is power too). A device whose Min Power was evidently set in the sensor's own
+    unit keeps raw readings, so a setup made to work on raw kilowatts before
+    0.5.9 (thresholds under 1) does not change: below 1 W for a kilowatt (or
+    larger) sensor, 1000 W or more for a milliwatt one. Never raises.
+    """
+    text = unit.strip() if isinstance(unit, str) else ""
+    # "kw" is unambiguous (a hand-made template sensor); "mw" is not, so it stays W.
+    scale = POWER_UNIT_TO_W.get(text, 1000.0 if text.lower() == "kw" else 1.0)
+    energy, slash, per = text.partition("/")
+    if slash and energy.strip() in _RATE_ENERGY_TO_WH and per.strip() in _RATE_TIME_IN_H:
+        scale = _RATE_ENERGY_TO_WH[energy.strip()] / _RATE_TIME_IN_H[per.strip()]
+    try:
+        floor = float(min_power)
+    except (TypeError, ValueError, OverflowError):
+        return scale
+    if (scale > 1.0 and floor < 1.0) or (scale < 1.0 and floor >= 1000.0):
+        return 1.0
+    return scale
+
+
+def _is_power_unit(text: str) -> bool:
+    """A unit ``power_unit_scale`` reads as power: W, kW, ..., or an energy rate."""
+    if text in POWER_UNIT_TO_W or text.lower() == "kw":
+        return True
+    energy, slash, per = text.partition("/")
+    return bool(slash) and energy.strip() in _RATE_ENERGY_TO_WH and per.strip() in _RATE_TIME_IN_H
+
+
+def is_energy_counter(attributes: Any) -> bool:
+    """Whether a sensor's attributes prove it counts energy (kWh), not power (#481).
+
+    An energy unit, or an energy device class without a power unit (a power unit
+    wins over a device class set wrong on a hand-made template). Only positive
+    evidence counts: no attributes (an entity Home Assistant has not loaded yet)
+    is not an energy counter.
+    """
+    if not isinstance(attributes, Mapping):
+        return False
+    unit = str(attributes.get("unit_of_measurement") or "").strip()
+    if unit.lower() in ENERGY_UNITS:
+        return True
+    device_class = str(attributes.get("device_class") or "").strip().lower()
+    return device_class in ENERGY_DEVICE_CLASSES and not _is_power_unit(unit)
 
 
 def resolve_sampling_interval_default(device_type: str) -> float:
@@ -1635,7 +1738,7 @@ FAILED_RESTORE_STORE_SUFFIX = "failed_restore"
 # leaves an entry a version short, which then re-migrates on every start - and repeating
 # the literals in three places is what made that easy to do.
 CONFIG_ENTRY_VERSION = 3
-CONFIG_ENTRY_MINOR_VERSION = 11
+CONFIG_ENTRY_MINOR_VERSION = 12
 
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"
@@ -1643,6 +1746,98 @@ EVENT_CYCLE_ENDED = "ha_washdata_cycle_ended"
 
 # Signals
 SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
+
+# Triggers (#478). The manager sends SIGNAL_DEVICE_TRIGGER for its entry with
+# ``(trigger_type, variables)`` at the moment each occurrence happens; the device
+# triggers (``device_trigger.py``) and the integration triggers (``trigger.py``,
+# ``trigger: ha_washdata.<type>``) both listen to it, so the two can never fire
+# differently. Option filters live in ``trigger_rules.py``.
+SIGNAL_DEVICE_TRIGGER = "ha_washdata_device_trigger_{}"
+# hass.data key: {entry_id: number of attached triggers}, so the manager knows
+# whether an announcement is worth an immediate snapshot write.
+DATA_TRIGGER_LISTENERS = "ha_washdata_trigger_listeners"
+TRIGGER_CYCLE_STARTED = "cycle_started"
+TRIGGER_PROGRAM_RECOGNISED = "program_recognised"
+TRIGGER_PHASE_STARTED = "phase_started"
+TRIGGER_FINISHING_SOON = "finishing_soon"
+TRIGGER_CYCLE_OVERRUN = "cycle_overrun"
+TRIGGER_CYCLE_PAUSED = "cycle_paused"
+TRIGGER_CYCLE_RESUMED = "cycle_resumed"
+TRIGGER_CYCLE_STALLED = "cycle_stalled"
+TRIGGER_CYCLE_FINISHED = "cycle_finished"
+# Any end of a cycle that fired cycle_started, interrupted false starts included,
+# so a "while running" automation always gets its off.
+TRIGGER_CYCLE_ENDED = "cycle_ended"
+TRIGGER_ANTI_WRINKLE_STARTED = "anti_wrinkle_started"
+TRIGGER_STILL_TUMBLING = "still_tumbling"
+TRIGGER_UNLOAD_PENDING = "unload_pending"
+TRIGGER_UNLOADED = "unloaded"
+TRIGGER_STATE_CHANGED = "state_changed"
+TRIGGER_MAINTENANCE_DUE = "maintenance_due"
+TRIGGER_MILESTONE_REACHED = "milestone_reached"
+TRIGGER_PUMP_STUCK = "pump_stuck"
+DEVICE_TRIGGER_TYPES = (
+    TRIGGER_CYCLE_STARTED,
+    TRIGGER_PROGRAM_RECOGNISED,
+    TRIGGER_PHASE_STARTED,
+    TRIGGER_FINISHING_SOON,
+    TRIGGER_CYCLE_OVERRUN,
+    TRIGGER_CYCLE_PAUSED,
+    TRIGGER_CYCLE_RESUMED,
+    TRIGGER_CYCLE_STALLED,
+    TRIGGER_CYCLE_FINISHED,
+    TRIGGER_CYCLE_ENDED,
+    TRIGGER_ANTI_WRINKLE_STARTED,
+    TRIGGER_STILL_TUMBLING,
+    TRIGGER_UNLOAD_PENDING,
+    TRIGGER_UNLOADED,
+    TRIGGER_STATE_CHANGED,
+    TRIGGER_MAINTENANCE_DUE,
+    TRIGGER_MILESTONE_REACHED,
+    TRIGGER_PUMP_STUCK,
+)
+# The device types with profile matching: a Threshold Device (`other`) never
+# recognises a program, so it has no program, phase or time estimate to report.
+_MATCHING_DEVICE_TYPES = (
+    DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_WASHER_DRYER,
+    DEVICE_TYPE_DISHWASHER,
+    DEVICE_TYPE_PUMP,
+    DEVICE_TYPE_GENERIC,
+)
+# The device types that tumble a load after the program (cycle_detector anti_wrinkle_active).
+_TUMBLING_DEVICE_TYPES = (
+    DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_WASHER_DRYER,
+)
+# Types offered only for some device types; every other type is offered for all.
+# The manager never sends a type its device type is not offered.
+DEVICE_TRIGGER_ONLY_FOR = {
+    TRIGGER_PROGRAM_RECOGNISED: _MATCHING_DEVICE_TYPES,
+    TRIGGER_PHASE_STARTED: _MATCHING_DEVICE_TYPES,
+    TRIGGER_FINISHING_SOON: _MATCHING_DEVICE_TYPES,
+    TRIGGER_CYCLE_OVERRUN: _MATCHING_DEVICE_TYPES,
+    TRIGGER_ANTI_WRINKLE_STARTED: _TUMBLING_DEVICE_TYPES,
+    TRIGGER_STILL_TUMBLING: _TUMBLING_DEVICE_TYPES,
+    TRIGGER_PUMP_STUCK: (DEVICE_TYPE_PUMP,),
+}
+TRIGGER_FINISHING_SOON_DEFAULT_MINUTES = 10
+TRIGGER_CYCLE_OVERRUN_DEFAULT_PERCENT = 20
+TRIGGER_STILL_TUMBLING_DEFAULT_MINUTES = 15
+# still_tumbling (#478): a burst opens when the power reaches the start threshold
+# and closes at or below the stop threshold (the detector's own hysteresis, so a
+# standby sitting between the two never counts). Only a burst no longer than this
+# is a tumble; tracking stops this long after the finish.
+STILL_TUMBLING_MAX_BURST_S = 300.0
+STILL_TUMBLING_GIVE_UP_S = 4 * 3600.0
+# maintenance_due: how often the due list is re-read between cycle ends (a
+# day-interval task falls due at any time of day).
+TRIGGER_MAINTENANCE_RECHECK_S = 60.0
+# ... and how often it is re-checked while the appliance is idle, when a plug that
+# reports only on change sends nothing: as often as the Maintenance due sensor.
+TRIGGER_MAINTENANCE_IDLE_CHECK_S = 3600.0
 
 # Learning & Feedback
 
@@ -1704,11 +1899,11 @@ SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
     # 1800 s off_delay is a 30 min end lag on a 1 s plug. Audit STORE-06.)
     # Matching
     CONF_PROFILE_MATCH_THRESHOLD,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-    # (profile_duration_tolerance dropped: nothing reads it - audit DOCS-01.)
-    CONF_DURATION_TOLERANCE,
+    # (profile_duration_tolerance dropped: nothing reads it - audit DOCS-01. The
+    # unmatch threshold and duration tolerance are no longer settings since
+    # 0.5.9; a bundle still carrying them has them dropped.)
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
 )
@@ -1718,8 +1913,6 @@ SHAREABLE_SETTING_KEYS: tuple[str, ...] = (
 # setting is also >= 0 there.
 _SHARED_UNIT_INTERVAL_KEYS = frozenset({
     CONF_PROFILE_MATCH_THRESHOLD,
-    CONF_PROFILE_UNMATCH_THRESHOLD,
-    CONF_DURATION_TOLERANCE,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
 })
@@ -1764,6 +1957,11 @@ STORE_PROJECT_ID = "washdata-store"
 STORE_API_KEY = "AIzaSyDzq0MoWdU_21CSohZUhIIV7ZwfWppjcAk"
 STORE_WEB_ORIGIN = "https://3dg1luk43.github.io/washdata-store"
 
+# The automation template library (#478): Home Assistant blueprints in their own
+# repository, reviewed there, downloaded only while online features are on.
+AUTOMATION_LIBRARY_REPO = "https://github.com/3dg1luk43/washdata-automations"
+AUTOMATION_LIBRARY_RAW = "https://raw.githubusercontent.com/3dg1luk43/washdata-automations/main"
+
 # Reference-cycle trace format versions this integration can import.
 SUPPORTED_CYCLE_SCHEMA_VERSIONS = {1}
 
@@ -1776,14 +1974,48 @@ QC_MANUAL = 3      # a plain detected cycle flagged golden by hand
 # Config keys for the scheduled, opt-in retraining loop. All gated behind
 # ENABLE_ML_TRAINING; nothing runs and no options render when that flag is False.
 CONF_ML_TRAINING_ENABLED = "ml_training_enabled"        # per-device opt-in
-CONF_ML_TRAINING_HOUR = "ml_training_hour"              # local hour (0-23) to train
-CONF_ML_TRAINING_MIN_CYCLES = "ml_training_min_cycles"  # min labelled clean cycles before training
-CONF_ML_TRAINING_INTERVAL_DAYS = "ml_training_interval_days"  # min days between retrains
+# Retired in 0.5.9 (fixed below; the promotion gate guards quality). Kept for migration only.
+CONF_ML_TRAINING_HOUR = "ml_training_hour"
+CONF_ML_TRAINING_MIN_CYCLES = "ml_training_min_cycles"
+CONF_ML_TRAINING_INTERVAL_DAYS = "ml_training_interval_days"
 
 DEFAULT_ML_TRAINING_ENABLED = False
-DEFAULT_ML_TRAINING_HOUR = 2          # 02:00 local - quiet hour
-DEFAULT_ML_TRAINING_MIN_CYCLES = 30   # need a meaningful corpus first
-DEFAULT_ML_TRAINING_INTERVAL_DAYS = 7 # retrain at most weekly
+ML_TRAINING_HOUR = 2           # 02:00 local - quiet hour
+ML_TRAINING_MIN_CYCLES = 30    # stored cycles before a scheduled run; the manual trigger skips it
+ML_TRAINING_INTERVAL_DAYS = 7  # scheduled retrain at most weekly
+
+# Option keys read by NOTHING at runtime. The 3.11 -> 3.12 migration drops them
+# from options and data (after converting the two whose value still meant
+# something: ``notify_service`` into the per-event lists, #472, and a disabled
+# ``external_end_trigger_enabled`` into a cleared entity), and an import or an
+# undo-import strips them, so a stray copy can never come back.
+RETIRED_OPTION_KEYS = frozenset({
+    # Notifications: the pre-0.3 single-service pair (#472), the "Fire HA
+    # events" toggle (#478: the bus events always fire).
+    CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_EVENTS,
+    CONF_NOTIFY_FIRE_EVENTS,
+    # 0.5.9 option trim: behaviour fixed at the shipped value.
+    CONF_DURATION_TOLERANCE,  # only fed an unread feedback field
+    CONF_ANTI_WRINKLE_EXIT_POWER,  # max(0.8 W, stop_threshold_w)
+    CONF_PROFILE_UNMATCH_THRESHOLD,  # 0.35
+    CONF_SAMPLING_INTERVAL,  # the device type's default (resolve_sampling_interval_default)
+    CONF_ML_TRAINING_HOUR,
+    CONF_ML_TRAINING_MIN_CYCLES,
+    CONF_ML_TRAINING_INTERVAL_DAYS,
+    # 0.5.9: the external end trigger is on whenever its entity is set.
+    CONF_EXTERNAL_END_TRIGGER_ENABLED,
+    # Leftovers of settings removed earlier that no step stripped.
+    CONF_END_REPEAT_COUNT,
+    CONF_SMOOTHING_WINDOW,
+    CONF_PROFILE_DURATION_TOLERANCE,
+    "max_past_cycles",  # retention caps, removed in 0.5.8 (item 463)
+    "max_full_traces_per_profile",
+    "max_full_traces_unlabeled",
+    "enable_phase_matching",  # phase-resolved ETA, removed in 0.5.8
+    "auto_merge_gap_seconds",  # auto-merge, removed in 0.4.0
+    "auto_merge_lookback_hours",
+})
 
 # (The classifier promotion gate - AUC margin, balanced-accuracy margin, minimum
 # positives - was removed in 0.5.8 with on-device classifier training: audit ML-11
@@ -1897,6 +2129,9 @@ MAINTENANCE_CUSTOM_TASK_MAX = 20
 MAINTENANCE_TASK_NAME_MAX = 60
 MAINTENANCE_INTERVAL_CYCLES_MAX = 100000
 MAINTENANCE_INTERVAL_DAYS_MAX = 3650
+# Programs whose finished cycle marks a task done (#480): per task, at most this
+# many, stored as {task_id: [profile names]} under "maintenance_programs".
+MAINTENANCE_PROGRAMS_MAX = 20
 # A logged maintenance event of a matching type within this many days suppresses
 # the "needs maintenance" nag advisory (duration-trend / shape-drift).
 MAINTENANCE_RECENT_SUPPRESS_DAYS = 30

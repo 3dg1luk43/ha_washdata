@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Ein benutzerfreundlicher Name für dieses Gerät (z. B. „Waschmaschine“, „Geschirrspüler“).",
           "device_type": "Legt die Erkennungsstandards für diese Geräteart fest.",
-          "power_sensor": "Der Smart-Plug-Sensor, der die aktuelle Leistung in Watt meldet.",
+          "power_sensor": "Der Leistungssensor des Smart-Plugs (W oder kW), nicht sein Energiezähler (kWh).",
           "min_power": "Werte über diesem Wert (in Watt) bedeuten, dass das Gerät läuft. 2 W passen für die meisten Geräte."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Unerwarteter Fehler",
-      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein"
+      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein",
+      "power_sensor_energy": "Das ist ein Energiezähler (kWh), kein Leistungssensor. Wählen Sie den Leistungssensor des Smart-Plugs (W oder kW). Hat der Smart-Plug keinen, kann ein Ableitungssensor-Helfer aus dem Zähler einen erstellen."
     },
     "abort": {
       "already_configured": "Gerät ist bereits konfiguriert",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Noch kein Profil erkannt.",
       "vs_typical_longer": "{pct}% länger als üblich",
       "vs_typical_shorter": "{pct}% kürzer als üblich",
-      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein"
+      "invalid_power": "Die Leistungsschwelle muss größer als 0 sein",
+      "power_sensor_energy": "Das ist ein Energiezähler (kWh), kein Leistungssensor. Wählen Sie den Leistungssensor des Smart-Plugs (W oder kW). Hat der Smart-Plug keinen, kann ein Ableitungssensor-Helfer aus dem Zähler einen erstellen."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Trockner",
         "washer_dryer": "Waschmaschine-Trockner-Kombination",
         "dishwasher": "Spülmaschine",
-        "air_fryer": "Luftfritteuse",
-        "bread_maker": "Brotbackautomat",
         "pump": "Pumpe / Sumpfpumpe",
         "generic": "Andere (Fortgeschrittene)",
         "other": "Schwellengerät"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Beliebig",
+        "completed": "Abgeschlossen",
+        "force_stopped": "Erzwungen beendet",
+        "interrupted": "Unterbrochen"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Aus",
+        "idle": "Leerlauf",
+        "starting": "Beginnt",
+        "running": "Läuft",
+        "paused": "Angehalten",
+        "user_paused": "Vom Benutzer angehalten",
+        "ending": "Ende",
+        "finished": "Fertig",
+        "anti_wrinkle": "Knitterschutz",
+        "delay_wait": "Warten auf den Start",
+        "interrupted": "Unterbrochen",
+        "force_stopped": "Erzwungen beendet",
+        "unknown": "Unbekannt",
+        "clean": "Sauber"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Profil konnte nicht zugewiesen werden: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Zyklus gestartet",
+      "cycle_finished": "Zyklus beendet",
+      "cycle_ended": "Zyklus beendet (beliebiger Grund)",
+      "anti_wrinkle_started": "Knitterschutz gestartet",
+      "cycle_stalled": "Zyklus im Stillstand",
+      "unload_pending": "Entnahme ausstehend",
+      "program_recognised": "Programm erkannt",
+      "phase_started": "Phase gestartet",
+      "finishing_soon": "Bald fertig",
+      "cycle_overrun": "Zyklus läuft zu lang",
+      "cycle_paused": "Zyklus angehalten",
+      "cycle_resumed": "Zyklus fortgesetzt",
+      "still_tumbling": "Trommel bewegt sich noch nach dem Zyklus",
+      "unloaded": "Entnommen",
+      "state_changed": "Zustand geändert",
+      "maintenance_due": "Wartung fällig",
+      "milestone_reached": "Zyklusmeilenstein erreicht",
+      "pump_stuck": "Pumpe klemmt"
+    },
+    "extra_fields": {
+      "program": "Programm",
+      "phase": "Phase",
+      "minutes": "Minuten",
+      "percent": "Länger um (%)",
+      "include_detected": "Erkannte Pausen einschließen",
+      "status": "Beendet als",
+      "from": "Von",
+      "to": "An",
+      "task": "Aufgabe"
+    },
+    "extra_fields_descriptions": {
+      "program": "Nur dieses Programm, nach genauem Namen. Leer lassen für jedes Programm.",
+      "phase": "Nur diese Phase, nach Name. Leer lassen für jede Phase.",
+      "minutes": "Bald fertig: verbleibende Minuten. Trommel bewegt sich noch: Minuten nach dem Ende.",
+      "percent": "Prozent über die übliche Programmdauer.",
+      "include_detected": "Auch bei Pausen auslösen, die WashData in der Leistung erkennt, z.B. Einweichen oder Stillstand.",
+      "status": "Nur Zyklen, die auf diese Weise geendet haben.",
+      "from": "Nur Änderungen von diesem Zustand. Leer lassen für beliebige.",
+      "to": "Nur Änderungen zu diesem Zustand. Leer lassen für beliebige.",
+      "task": "Nur diese Aufgabe, nach Name oder ID. Leer lassen für jede Aufgabe."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Zyklus gestartet",
+      "description": "Wird ausgelöst, wenn das Gerät einen Zyklus startet."
+    },
+    "program_recognised": {
+      "name": "Programm erkannt",
+      "description": "Wird ausgelöst, wenn WashData das Programm des laufenden Zyklus erkennt oder auf ein anderes wechselt.",
+      "fields": {
+        "program": {
+          "name": "Programm",
+          "description": "Nur dieses Programm, nach genauem Namen. Leer lassen für jedes Programm."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Phase gestartet",
+      "description": "Wird ausgelöst, wenn der laufende Zyklus eine neue Phase beginnt.",
+      "fields": {
+        "phase": {
+          "name": "Phase",
+          "description": "Nur diese Phase, nach Name. Leer lassen für jede Phase."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Bald fertig",
+      "description": "Wird einmal pro Zyklus ausgelöst, wenn die verbleibende Zeit erstmals auf diese Minutenzahl sinkt.",
+      "fields": {
+        "minutes": {
+          "name": "Verbleibende Minuten",
+          "description": "Auslösen, wenn noch so viele Minuten oder weniger verbleiben."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Zyklus läuft zu lang",
+      "description": "Wird einmal pro Zyklus ausgelöst, wenn er so viel länger läuft als das Programm normalerweise dauert.",
+      "fields": {
+        "percent": {
+          "name": "Länger um",
+          "description": "Prozent über die übliche Programmdauer."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Zyklus angehalten",
+      "description": "Wird ausgelöst, wenn Sie einen Zyklus anhalten, oder optional wenn das Gerät selbst anhält.",
+      "fields": {
+        "include_detected": {
+          "name": "Erkannte Pausen einschließen",
+          "description": "Auch bei Pausen auslösen, die WashData in der Leistung erkennt, z.B. Einweichen oder Stillstand, nicht nur bei manuell gestarteten Pausen."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Zyklus fortgesetzt",
+      "description": "Wird ausgelöst, wenn ein angehaltener Zyklus weiterläuft.",
+      "fields": {
+        "include_detected": {
+          "name": "Erkannte Pausen einschließen",
+          "description": "Auch bei Pausen auslösen, die WashData in der Leistung erkennt, z.B. Einweichen oder Stillstand, nicht nur bei manuell gestarteten Pausen."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Zyklus im Stillstand",
+      "description": "Wird ausgelöst, wenn ein laufender Zyklus auf niedrigem, gleichmäßigem Leistungsniveau anhält."
+    },
+    "cycle_finished": {
+      "name": "Zyklus beendet",
+      "description": "Wird ausgelöst, wenn ein Zyklus endet, auch wenn Sie ihn stoppen. Nicht bei Fehlstart.",
+      "fields": {
+        "program": {
+          "name": "Programm",
+          "description": "Nur dieses Programm, nach genauem Namen. Leer lassen für jedes Programm."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Zyklus beendet (beliebiger Grund)",
+      "description": "Wird ausgelöst, wenn ein Zyklus aus beliebigem Grund endet, auch bei Fehlstarts.",
+      "fields": {
+        "status": {
+          "name": "Beendet als",
+          "description": "Nur Zyklen, die auf diese Weise geendet haben."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Knitterschutz gestartet",
+      "description": "Wird ausgelöst, wenn das Gerät die fertige Ladung zur Knittervermeidung in der Trommel bewegt."
+    },
+    "still_tumbling": {
+      "name": "Trommel bewegt sich noch nach dem Zyklus",
+      "description": "Wird einmal ausgelöst, wenn sich die Trommel des Geräts noch in kurzen Stößen bewegt, diese Minutenzahl nach dem Ende. Hört bei einem neuen Zyklus oder 4 Stunden nach dem Ende auf.",
+      "fields": {
+        "minutes": {
+          "name": "Minuten nach dem Ende",
+          "description": "Bei der ersten Trommelbewegung auslösen, die mindestens so lange nach dem Ende liegt."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Entnahme ausstehend",
+      "description": "Wird ausgelöst, wenn ein Zyklus abgeschlossen ist und die Ladung noch drin ist."
+    },
+    "unloaded": {
+      "name": "Entnommen",
+      "description": "Wird ausgelöst, wenn die Ladung nach einem Zyklus entnommen wird: Tür geöffnet oder Entnahme bestätigt."
+    },
+    "state_changed": {
+      "name": "Zustand geändert",
+      "description": "Wird ausgelöst, wenn sich der WashData-Zustand ändert.",
+      "fields": {
+        "from": {
+          "name": "Von",
+          "description": "Nur Änderungen von diesem Zustand. Leer lassen für beliebige."
+        },
+        "to": {
+          "name": "An",
+          "description": "Nur Änderungen zu diesem Zustand. Leer lassen für beliebige."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Wartung fällig",
+      "description": "Wird ausgelöst, wenn eine Wartungsaufgabe fällig wird.",
+      "fields": {
+        "task": {
+          "name": "Aufgabe",
+          "description": "Nur diese Aufgabe, nach Name oder ID. Leer lassen für jede Aufgabe."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Zyklusmeilenstein erreicht",
+      "description": "Wird ausgelöst, wenn die Gesamtzyklusanzahl einen der für Benachrichtigungen gesetzten Meilensteine erreicht."
+    },
+    "pump_stuck": {
+      "name": "Pumpe klemmt",
+      "description": "Wird ausgelöst, wenn eine Pumpe länger als ihre Zeitgrenze läuft."
     }
   }
 }

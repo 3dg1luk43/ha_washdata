@@ -13,7 +13,7 @@
         "data_description": {
           "name": "Ystävällinen nimi tälle laitteelle (esim. 'pesukone', 'astianpesukone').",
           "device_type": "Asettaa tunnistuksen oletukset tämän tyyppiselle laitteelle.",
-          "power_sensor": "Älypistokkeen anturi, joka raportoi reaaliaikaisen tehon watteina.",
+          "power_sensor": "Älypistokkeen tehon anturi (W tai kW), ei sen energiamittari (kWh).",
           "min_power": "Tämän ylittävät lukemat (watteina) tarkoittavat, että laite on käynnissä. 2 W sopii useimmille laitteille."
         }
       },
@@ -30,7 +30,8 @@
     },
     "error": {
       "unknown": "Odottamaton virhe",
-      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
+      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0",
+      "power_sensor_energy": "Tämä on energiamittari (kWh), ei tehon anturi. Valitse pistokkeen tehon anturi (W tai kW). Jos pistokkeessa ei ole sellaista, apuri Derivaatta -sensori voi luoda sen mittarista."
     },
     "abort": {
       "already_configured": "Laite on jo määritetty",
@@ -58,7 +59,8 @@
       "notify_live_waiting_message": "{device}: Yhtään profiilia ei ole vielä tunnistettu.",
       "vs_typical_longer": "{pct}% tavallista pidempi",
       "vs_typical_shorter": "{pct}% tavallista lyhyempi",
-      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0"
+      "invalid_power": "Tehokynnyksen on oltava suurempi kuin 0",
+      "power_sensor_energy": "Tämä on energiamittari (kWh), ei tehon anturi. Valitse pistokkeen tehon anturi (W tai kW). Jos pistokkeessa ei ole sellaista, apuri Derivaatta -sensori voi luoda sen mittarista."
     }
   },
   "selector": {
@@ -68,11 +70,35 @@
         "dryer": "Kuivausrumpu",
         "washer_dryer": "Pesukone-kuivausrumpu yhdistelmä",
         "dishwasher": "Astianpesukone",
-        "air_fryer": "Airfryer",
-        "bread_maker": "Leipäkone",
         "pump": "Pumppu / sumpupumppu",
         "generic": "Muu (edistynyt)",
         "other": "Kynnyslaite"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "Mikä tahansa",
+        "completed": "Valmis",
+        "force_stopped": "Pakotettu pysäytys",
+        "interrupted": "Keskeytynyt"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "Pois päältä",
+        "idle": "Odottaa",
+        "starting": "Käynnistyy",
+        "running": "Käynnissä",
+        "paused": "Keskeytetty",
+        "user_paused": "Keskeytetty käyttäjän toimesta",
+        "ending": "Loppuu",
+        "finished": "Valmis",
+        "anti_wrinkle": "Ryppyjenesto",
+        "delay_wait": "Odotetaan aloitusta",
+        "interrupted": "Keskeytynyt",
+        "force_stopped": "Pakotettu pysäytys",
+        "unknown": "Tuntematon",
+        "clean": "Puhdas"
       }
     }
   },
@@ -481,6 +507,194 @@
     },
     "assign_profile_failed": {
       "message": "Profiilin määrittäminen epäonnistui: {error}"
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "Sykli alkoi",
+      "cycle_finished": "Sykli päättyi",
+      "cycle_ended": "Sykli päättyi (mistä tahansa syystä)",
+      "anti_wrinkle_started": "Ryppyjenesto alkoi",
+      "cycle_stalled": "Sykli jumiutui",
+      "unload_pending": "Purkaminen odottaa",
+      "program_recognised": "Ohjelma tunnistettu",
+      "phase_started": "Vaihe alkoi",
+      "finishing_soon": "Päättyy pian",
+      "cycle_overrun": "Sykli kestää liian kauan",
+      "cycle_paused": "Sykli keskeytetty",
+      "cycle_resumed": "Sykli jatkui",
+      "still_tumbling": "Rumpu pyörii yhä syklin jälkeen",
+      "unloaded": "Purettu",
+      "state_changed": "Tila muuttui",
+      "maintenance_due": "Huolto tarpeen",
+      "milestone_reached": "Sykliverstaspylväs saavutettu",
+      "pump_stuck": "Pumppu jumissa"
+    },
+    "extra_fields": {
+      "program": "Ohjelma",
+      "phase": "Vaihe",
+      "minutes": "Minuutit",
+      "percent": "Pidempi kuin (%)",
+      "include_detected": "Sisällytä havaitut tauot",
+      "status": "Päättyi tilana",
+      "from": "Mistä",
+      "to": "Mihin",
+      "task": "Tehtävä"
+    },
+    "extra_fields_descriptions": {
+      "program": "Vain tämä ohjelma, tarkalla nimellä. Jätä tyhjäksi mille tahansa ohjelmalle.",
+      "phase": "Vain tämä vaihe, nimellä. Jätä tyhjäksi mille tahansa vaiheelle.",
+      "minutes": "Päättyy pian: minuuttia jäljellä. Rumpu pyörii yhä: minuuttia päättymisen jälkeen.",
+      "percent": "Prosenttia yli ohjelman tavallisen keston.",
+      "include_detected": "Käynnistä myös WashDatan tunnistamista tauoista, kuten liottamisesta tai pysähtymisestä.",
+      "status": "Vain syklit, jotka päättyivät tällä tavoin.",
+      "from": "Vain muutokset tästä tilasta. Jätä tyhjäksi mikä tahansa.",
+      "to": "Vain muutokset tähän tilaan. Jätä tyhjäksi mikä tahansa.",
+      "task": "Vain tämä tehtävä, nimellä tai tunnuksella. Jätä tyhjäksi mille tahansa tehtävälle."
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "Sykli alkoi",
+      "description": "Käynnistyy, kun laite aloittaa syklin."
+    },
+    "program_recognised": {
+      "name": "Ohjelma tunnistettu",
+      "description": "Käynnistyy, kun WashData tunnistaa käynnissä olevan syklin ohjelman tai vaihtaa sen toiseen.",
+      "fields": {
+        "program": {
+          "name": "Ohjelma",
+          "description": "Vain tämä ohjelma, tarkalla nimellä. Jätä tyhjäksi mille tahansa ohjelmalle."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "Vaihe alkoi",
+      "description": "Käynnistyy, kun käynnissä oleva sykli siirtyy ohjelmansa uuteen vaiheeseen.",
+      "fields": {
+        "phase": {
+          "name": "Vaihe",
+          "description": "Vain tämä vaihe, nimellä. Jätä tyhjäksi mille tahansa vaiheelle."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "Päättyy pian",
+      "description": "Käynnistyy kerran sykliä kohti, kun jäljellä oleva aika laskee ensimmäisen kerran näihin minuutteihin.",
+      "fields": {
+        "minutes": {
+          "name": "Minuuttia jäljellä",
+          "description": "Käynnistä, kun näin monta minuuttia tai vähemmän on jäljellä."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "Sykli kestää liian kauan",
+      "description": "Käynnistyy kerran sykliä kohti, kun se kestää tämän verran kauemmin kuin ohjelman tavallinen kesto.",
+      "fields": {
+        "percent": {
+          "name": "Pidempi kuin",
+          "description": "Prosenttia yli ohjelman tavallisen keston."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "Sykli keskeytetty",
+      "description": "Käynnistyy, kun keskeytät syklin, ja valinnaisesti kun laite keskeyttää itsestään.",
+      "fields": {
+        "include_detected": {
+          "name": "Sisällytä havaitut tauot",
+          "description": "Käynnistyy myös WashDatan havaitsemista tauoista, kuten liottamisesta tai pysähtymisestä, ei vain sinun aloittamistasi tauoista."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "Sykli jatkui",
+      "description": "Käynnistyy, kun keskeytetty sykli jatkuu.",
+      "fields": {
+        "include_detected": {
+          "name": "Sisällytä havaitut tauot",
+          "description": "Käynnistyy myös WashDatan havaitsemista tauoista, kuten liottamisesta tai pysähtymisestä, ei vain sinun aloittamistasi tauoista."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "Sykli jumiutui",
+      "description": "Käynnistyy, kun käynnissä oleva sykli pysähtyy matalalle, tasaiselle tehotasolle."
+    },
+    "cycle_finished": {
+      "name": "Sykli päättyi",
+      "description": "Käynnistyy, kun sykli päättyy, myös kun pysäytät sen. Ei väärästä käynnistyksestä.",
+      "fields": {
+        "program": {
+          "name": "Ohjelma",
+          "description": "Vain tämä ohjelma, tarkalla nimellä. Jätä tyhjäksi mille tahansa ohjelmalle."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "Sykli päättyi (mistä tahansa syystä)",
+      "description": "Käynnistyy, kun sykli päättyy mistä tahansa syystä, väärät käynnistykset mukaan lukien.",
+      "fields": {
+        "status": {
+          "name": "Päättyi tilana",
+          "description": "Vain syklit, jotka päättyivät tällä tavoin."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "Ryppyjenesto alkoi",
+      "description": "Käynnistyy, kun laite alkaa pyörittää valmista pyykkiä ryppyjä vastaan."
+    },
+    "still_tumbling": {
+      "name": "Rumpu pyörii yhä syklin jälkeen",
+      "description": "Käynnistyy kerran, kun laitteen rumpu pyörii yhä lyhyissä jaksoissa näin monta minuuttia syklin päättymisen jälkeen. Pysähtyy uuteen sykliin tai 4 tuntia päättymisen jälkeen.",
+      "fields": {
+        "minutes": {
+          "name": "Minuuttia päättymisen jälkeen",
+          "description": "Käynnistä ensimmäisessä rumpupulssissa, joka tapahtuu vähintään tämän ajan jälkeen päättymisestä."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "Purkaminen odottaa",
+      "description": "Käynnistyy, kun sykli on päättynyt ja pyykki on yhä sisällä."
+    },
+    "unloaded": {
+      "name": "Purettu",
+      "description": "Käynnistyy, kun pyykki otetaan ulos syklin jälkeen: ovi avattiin tai purku vahvistettiin."
+    },
+    "state_changed": {
+      "name": "Tila muuttui",
+      "description": "Käynnistyy, kun WashData tila muuttuu.",
+      "fields": {
+        "from": {
+          "name": "Mistä",
+          "description": "Vain muutokset tästä tilasta. Jätä tyhjäksi mikä tahansa."
+        },
+        "to": {
+          "name": "Mihin",
+          "description": "Vain muutokset tähän tilaan. Jätä tyhjäksi mikä tahansa."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "Huolto tarpeen",
+      "description": "Käynnistyy, kun huoltotehtävä erääntyy.",
+      "fields": {
+        "task": {
+          "name": "Tehtävä",
+          "description": "Vain tämä tehtävä, nimellä tai tunnuksella. Jätä tyhjäksi mille tahansa tehtävälle."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "Sykliverstaspylväs saavutettu",
+      "description": "Käynnistyy, kun elinikäinen syklimäärä saavuttaa yhden ilmoituksille asetetuista verstaspylväistä."
+    },
+    "pump_stuck": {
+      "name": "Pumppu jumissa",
+      "description": "Käynnistyy, kun pumppu toimii kauemmin kuin sen jumiutumisraja."
     }
   }
 }

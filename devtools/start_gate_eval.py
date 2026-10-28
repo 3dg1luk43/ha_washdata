@@ -467,13 +467,18 @@ def detector_setup(device: Device, overrides: dict[str, Any]) -> tuple[CycleDete
     def _num(key: str, default: float) -> float:
         try:
             value = float(opts.get(key, default))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return float(default)
         return value if math.isfinite(value) else float(default)
 
     manager = {
-        "sampling_interval": _num(
-            CONF_SAMPLING_INTERVAL, resolve_sampling_interval_default(device.device_type)
+        # The manager throttles at the device type's cadence (no longer a setting
+        # since 0.5.9, so a stored value is ignored); --set / --sweep may still
+        # what-if another one.
+        "sampling_interval": (
+            _num(CONF_SAMPLING_INTERVAL, resolve_sampling_interval_default(device.device_type))
+            if CONF_SAMPLING_INTERVAL in overrides
+            else resolve_sampling_interval_default(device.device_type)
         ),
         "watchdog_s": max(
             0.0,

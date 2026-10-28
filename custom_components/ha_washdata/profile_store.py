@@ -32,7 +32,7 @@ import statistics
 import threading
 import time
 import uuid
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta
 from typing import Any, TypeAlias, cast
 
@@ -43,6 +43,8 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    PRICE_TIMELINE_MAX_POINTS,
+    PRICE_TIMELINE_PRICE_DECIMALS,
     CLUSTER_RESAMPLE_N,
     CLUSTER_SHAPE_SIMILARITY_THRESHOLD,
     GROUP_MIN_COHESION,
@@ -59,6 +61,7 @@ from .const import (
     TERMINAL_QUIET_MIN_OBSERVATIONS,
     MAINTENANCE_COUNT_FROM_ENABLE_TYPES,
     MAINTENANCE_CUSTOM_TASK_MAX,
+    MAINTENANCE_PROGRAMS_MAX,
     MAINTENANCE_CUSTOM_TASK_PREFIX,
     MAINTENANCE_EVENT_TYPES,
     MAINTENANCE_INTERVAL_CYCLES_MAX,
@@ -97,6 +100,8 @@ from .const import (
 )
 from .features import compute_signature
 from .signal_processing import (
+    compact_price_timeline,
+    cycle_cost,
     resample_uniform,
     resample_adaptive,
     Segment,
@@ -114,8 +119,10 @@ from .time_utils import (
     utc_now,
 )
 from .maintenance import clean_task_name, coerce_interval, is_due
+from .options_utils import canonical_device_type
 from .phase_catalog import (
     DEFAULT_PHASES_BY_DEVICE,
+    RETIRED_BUILTIN_PHASES,
     _builtin_phase_id,
     get_builtin_phase_by_id,
     merge_phase_catalog,
@@ -638,6 +645,156 @@ def decompress_power_data(cycle: CycleDict) -> list[tuple[float, float]]:
         start_time_iso = start_time_raw.isoformat()
     offsets = power_data_to_offsets(cast(list[list[Any] | tuple[Any, ...]], raw), start_time_iso)
     return [(float(o), float(p)) for o, p in offsets]
+
+
+def cycle_report_energy_wh(cycle: Mapping[str, Any]) -> float:
+    """User-facing energy (Wh): the meter figure when one was captured, else the
+    integrated ``energy_wh`` (issue #316). Cost, lifetime totals, notifications and
+    the panel use this; matching, ML and envelopes always use ``energy_wh``."""
+    meter = cycle.get("energy_meter_wh")
+    if meter is not None:
+        try:
+            value = float(meter)
+            if math.isfinite(value):
+                return value
+        except (ValueError, TypeError, OverflowError):
+            pass
+    try:
+        value = float(cycle.get("energy_wh", 0.0))
+    except (ValueError, TypeError, OverflowError):
+        return 0.0
+    # A non-finite figure (an imported Infinity) would poison every total it reaches.
+    return value if math.isfinite(value) else 0.0
+
+
+def _price_window(
+    timeline: Any, start_off: float, end_off: float
+) -> list[tuple[float, float]]:
+    """A cycle's frozen price timeline cut to ``[start_off, end_off]`` and re-based
+    to ``start_off``: the price in force at ``start_off`` opens it at 0, the changes
+    inside follow. Empty when no price is known at ``start_off``."""
+    try:
+        points = sorted((float(o), float(p)) for o, p in timeline)
+    except (TypeError, ValueError, OverflowError):
+        return []
+    anchor: float | None = None
+    window: list[tuple[float, float]] = []
+    for off, price in points:
+        if off <= start_off:
+            anchor = price
+        elif off <= end_off:
+            window.append((off - start_off, price))
+    if anchor is None:
+        return []
+    return compact_price_timeline(
+        [(0.0, anchor), *window],
+        max_points=PRICE_TIMELINE_MAX_POINTS,
+        decimals=PRICE_TIMELINE_PRICE_DECIMALS,
+    )
+
+
+def _set_dynamic_cost(cycle: CycleDict, points: list[tuple[float, float]]) -> bool:
+    """Cost ``cycle`` against ``points`` (offsets from its start) the way the live
+    cycle end does (manager._async_apply_dynamic_cost). True when it worked."""
+    xy = decompress_power_data(cycle)
+    if len(xy) < 2 or not points:
+        return False
+    ts = np.asarray([t for t, _ in xy], dtype=float)
+    power = np.asarray([pw for _, pw in xy], dtype=float)
+    result = cycle_cost(
+        ts, power, points,
+        max_gap_s=energy_gap_threshold_s(ts),
+        report_wh=cycle_report_energy_wh(cycle),
+    )
+    if result is None:
+        return False
+    cost, effective = result
+    cycle["cost"] = round(cost, 4)
+    cycle["energy_price"] = round(effective, 6)
+    cycle["energy_price_mode"] = "dynamic"
+    cycle["price_timeline"] = [[round(o, 1), pr] for o, pr in points]
+    return True
+
+
+def carry_cycle_cost(
+    piece: CycleDict,
+    parent: CycleDict,
+    start_off: float,
+    end_off: float,
+    logger: logging.Logger | logging.LoggerAdapter[Any] = _LOGGER,
+) -> None:
+    """Give a piece split out of ``parent`` its own cost (#471).
+
+    The piece is charged at the price its parent was charged at: the slice of the
+    parent's frozen price timeline for a time-weighted cost, else the parent's
+    single price. A parent with no cost gives the piece none. Never raises."""
+    try:
+        if parent.get("cost") is None:
+            return
+        for key in ("cost", "energy_price", "energy_price_mode", "price_timeline"):
+            piece.pop(key, None)
+        timeline = parent.get("price_timeline")
+        if parent.get("energy_price_mode") == "dynamic" and timeline:
+            if _set_dynamic_cost(piece, _price_window(timeline, start_off, end_off)):
+                return
+        price = parent.get("energy_price")
+        if price is None:
+            return
+        price_f = float(price)
+        piece["energy_price"] = price_f
+        piece["energy_price_mode"] = "fixed"
+        piece["cost"] = round(cycle_report_energy_wh(piece) / 1000.0 * price_f, 4)
+    except (TypeError, ValueError, OverflowError):
+        logger.debug("Could not carry the cost onto a split cycle", exc_info=True)
+
+
+def merge_cycle_cost(
+    merged: CycleDict,
+    parts: list[dict[str, Any]],
+    logger: logging.Logger | logging.LoggerAdapter[Any] = _LOGGER,
+) -> None:
+    """Cost of a cycle merged from ``parts`` (#471): the sum of the parts' costs,
+    each already charged at its own price. ``parts`` are the parts' pricing as it
+    stood before the merge: ``offset`` (start, s after the merged start),
+    ``cost``, ``energy_price``, ``energy_price_mode``, ``price_timeline``. Leaves
+    no cost when any part had none. Never raises."""
+    try:
+        for key in ("cost", "energy_price", "energy_price_mode", "price_timeline"):
+            merged.pop(key, None)
+        if not parts or any(p.get("cost") is None for p in parts):
+            return
+        total = sum(float(p["cost"]) for p in parts)
+        modes = {p.get("energy_price_mode") or "fixed" for p in parts}
+        prices = {p.get("energy_price") for p in parts}
+        merged["cost"] = round(total, 4)
+        if modes == {"fixed"} and len(prices) == 1 and None not in prices:
+            merged["energy_price"] = float(next(iter(prices)))
+            merged["energy_price_mode"] = "fixed"
+            return
+        kwh = cycle_report_energy_wh(merged) / 1000.0
+        if kwh > 0:
+            merged["energy_price"] = round(total / kwh, 6)
+        merged["energy_price_mode"] = "dynamic"
+        timeline: list[tuple[float, float]] = []
+        for part in parts:
+            pts = part.get("price_timeline")
+            if pts:
+                timeline.extend(
+                    (float(part["offset"]) + float(o), float(pr)) for o, pr in pts
+                )
+            elif part.get("energy_price") is not None:
+                timeline.append((float(part["offset"]), float(part["energy_price"])))
+        if timeline:
+            merged["price_timeline"] = [
+                [round(o, 1), pr]
+                for o, pr in compact_price_timeline(
+                    sorted(timeline),
+                    max_points=PRICE_TIMELINE_MAX_POINTS,
+                    decimals=PRICE_TIMELINE_PRICE_DECIMALS,
+                )
+            ]
+    except (TypeError, ValueError, OverflowError, KeyError):
+        logger.debug("Could not merge cycle costs", exc_info=True)
 
 
 def earliest_sustained_quiet_offset(
@@ -1527,7 +1684,9 @@ _EXPORT_CATEGORIES: dict[str, dict[str, Any]] = {
     # The custom task definitions travel with the log entries that reference them
     # (#461). The preset types' counting baselines do not: they are re-stamped on
     # the target at its next config load.
-    "maintenance_log":  {"keys": ["maintenance_log", "maintenance_tasks"], "kind": "list"},
+    # The programs that mark a task done (#480) travel with them.
+    "maintenance_log":  {"keys": ["maintenance_log", "maintenance_tasks", "maintenance_programs"],
+                         "kind": "mixed"},
     "ml_models":        {"keys": ["ml_model_versions", "ml_training_history", "ml_last_training_run"],
                          "kind": "mixed", "device_specific": True},
     "history_logs":     {"keys": ["auto_adjustments", "settings_changelog"], "kind": "list"},
@@ -1807,7 +1966,11 @@ def build_import_manifest(
         return {"error": str(exc)}
 
     scan = _scan_data(data_dict, entry_options=meta.get("entry_options"))
-    source_dt = str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+    # An export of a device type removed in 0.5.9 is the same kind of device as
+    # the generic entry it migrated to.
+    source_dt = canonical_device_type(
+        str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+    )
     device_type_match = (not source_dt) or (source_dt == local_device_type)
 
     local_names = {str(n).casefold() for n in (local_profile_names or [])}
@@ -2069,7 +2232,6 @@ class ProfileStore:
         min_duration_ratio: float = 0.50,
         max_duration_ratio: float = 1.50,
         save_debug_traces: bool = False,
-        unmatch_threshold: float = 0.35,
         device_name: str = "",
     ) -> None:
         """Initialize the profile store."""
@@ -2078,7 +2240,6 @@ class ProfileStore:
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self._min_duration_ratio = min_duration_ratio
         self._max_duration_ratio = max_duration_ratio
-        self._unmatch_threshold = unmatch_threshold
         self.dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
         # Stage-4 energy-agreement mode ("mean"|"integrated"); the manager sets it
         # from the device type via analysis.stage4_energy_mode. Default "mean"
@@ -3719,14 +3880,16 @@ class ProfileStore:
         Built-in types with a positive interval in ``reminder_cfg`` (in its order),
         then this device's custom tasks with any interval set. Each row is
         ``{"id", "custom", "name", "cycles_interval", "days_interval",
-        "cycles_since", "days_since", "due"}``; ``name`` is the user's text for a
-        custom task and None for a built-in type (callers translate those);
-        ``days_since`` is whole days, or None when there is no date to count from.
-        A task is due when either of its intervals is reached.
+        "cycles_since", "days_since", "due", "programs"}``; ``name`` is the user's
+        text for a custom task and None for a built-in type (callers translate
+        those); ``days_since`` is whole days, or None when there is no date to count
+        from; ``programs`` mark the task done when they finish (#480). A task is due
+        when either of its intervals is reached.
         """
         rows: list[dict[str, Any]] = []
         try:
             latest = self._latest_maintenance_by_type()
+            programs = self.get_maintenance_programs()
 
             def _row(task_id: str, name: str | None, cycles: int, days: int) -> None:
                 since_cycles, since_days = self._maintenance_since(task_id, latest)
@@ -3739,6 +3902,7 @@ class ProfileStore:
                     "cycles_since": since_cycles,
                     "days_since": None if since_days is None else int(since_days),
                     "due": is_due(since_cycles, cycles, since_days, days),
+                    "programs": programs.get(task_id, []),
                 })
 
             if isinstance(reminder_cfg, dict):
@@ -3943,8 +4107,146 @@ class ProfileStore:
         if len(remaining) == len(raw):
             return False
         self._data["maintenance_tasks"] = remaining
+        programs = self._data.get("maintenance_programs")
+        if isinstance(programs, dict):
+            programs.pop(task_id, None)
         await self.async_save()
         return True
+
+    # ── Done by a program (#480) ─────────────────────────────────────────────
+
+    def get_maintenance_programs(self) -> dict[str, list[str]]:
+        """The programs whose finished cycle marks each task done (#480).
+
+        ``{task_id: [profile names]}`` for built-in types and custom tasks alike,
+        copies, empty lists left out. Only names that are still profiles: every
+        removal path also drops its name (``_rename_maintenance_program``), this
+        covers one that does not (a partial import). Never raises.
+        """
+        raw = self._data.get("maintenance_programs")
+        if not isinstance(raw, dict):
+            return {}
+        profiles = self._data.get("profiles")
+        if not isinstance(profiles, dict):
+            profiles = {}
+        out: dict[str, list[str]] = {}
+        for task_id, names in raw.items():
+            if isinstance(task_id, str) and isinstance(names, list):
+                clean = [n for n in names if isinstance(n, str) and n in profiles]
+                if clean:
+                    out[task_id] = clean
+        return out
+
+    async def async_set_maintenance_programs(
+        self, task_id: str, programs: Any
+    ) -> list[str]:
+        """Set the programs that mark ``task_id`` done when they finish (#480).
+
+        Persists and returns the stored list (duplicates dropped, order kept); an
+        empty list turns it off. Raises ``ValueError`` for an unknown task, a name
+        that is not one of this device's programs, or too many programs.
+        """
+        if (
+            task_id not in MAINTENANCE_EVENT_TYPES
+            and self._find_maintenance_task(task_id) is None
+        ):
+            raise ValueError(f"Unknown maintenance task: {task_id!r}")
+        if not isinstance(programs, (list, tuple)):
+            raise ValueError("Programs must be a list of program names")
+        profiles = self._data.get("profiles", {})
+        names: list[str] = []
+        for name in programs:
+            if not isinstance(name, str) or name not in profiles:
+                raise ValueError(f"Unknown program: {name!r}")
+            if name not in names:
+                names.append(name)
+        if len(names) > MAINTENANCE_PROGRAMS_MAX:
+            raise ValueError(f"At most {MAINTENANCE_PROGRAMS_MAX} programs per task")
+        raw = self._data.get("maintenance_programs")
+        if not isinstance(raw, dict):
+            raw = {}
+            self._data["maintenance_programs"] = raw
+        if names:
+            raw[task_id] = names
+        else:
+            raw.pop(task_id, None)
+        await self.async_save()
+        return list(names)
+
+    def log_maintenance_done_by_program(self, cycle: dict[str, Any]) -> list[str]:
+        """Log as done every task that lists this finished cycle's program (#480).
+
+        The caller passes a persisted, finished, labelled cycle (a label is only
+        written by a confident match or a hand-picked program). The entry is dated
+        at the cycle's end and stamped with the odometer that already counts it,
+        so the task restarts from zero; it names the program and the cycle, and a
+        cycle never logs a task twice. In memory only: the cycle-end save persists
+        it. Returns the task ids logged. Never raises.
+        """
+        try:
+            program = cycle.get("profile_name")
+            if not isinstance(program, str) or not program:
+                return []
+            cycle_id = cycle.get("id")
+            when = cycle.get("end_time")
+            parsed = _parse_maintenance_dt(when) if isinstance(when, str) else None
+            if parsed is None:
+                when = dt_util.now().isoformat()
+                parsed = _parse_maintenance_dt(when)
+            log = self._data.get("maintenance_log")
+            if not isinstance(log, list):
+                log = []
+                self._data["maintenance_log"] = log
+            done: list[str] = []
+            for task_id, names in self.get_maintenance_programs().items():
+                if program not in names:
+                    continue
+                custom = self._find_maintenance_task(task_id)
+                if task_id not in MAINTENANCE_EVENT_TYPES and custom is None:
+                    continue
+                if cycle_id and any(
+                    isinstance(e, dict)
+                    and e.get("cycle_id") == cycle_id
+                    and e.get("event_type") == task_id
+                    for e in log
+                ):
+                    continue
+                entry: dict[str, Any] = {
+                    "id": uuid.uuid4().hex[:12],
+                    "date": when,
+                    "event_type": task_id,
+                    "notes": "",
+                    "cycle_count_at_log": self._odometer_at(parsed),
+                    "program": program,
+                    "cycle_id": cycle_id,
+                }
+                if custom is not None:
+                    entry["task_name"] = str(custom.get("name") or "")
+                log.append(entry)
+                done.append(task_id)
+            return done
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Maintenance done-by-program failed", exc_info=True)
+            return []
+
+    def _rename_maintenance_program(self, old: str, new: str | None) -> None:
+        """Follow a program rename (``new``) or deletion (None) in the lists (#480)."""
+        raw = self._data.get("maintenance_programs")
+        if not isinstance(raw, dict):
+            return
+        for task_id in list(raw):
+            names = raw[task_id]
+            if not isinstance(names, list) or old not in names:
+                continue
+            kept: list[str] = []
+            for name in names:
+                name = new if name == old else name
+                if name and name not in kept:
+                    kept.append(name)
+            if kept:
+                raw[task_id] = kept
+            else:
+                del raw[task_id]
 
     def has_recent_maintenance(
         self, event_type: str, days: int = MAINTENANCE_RECENT_SUPPRESS_DAYS
@@ -4822,6 +5124,66 @@ class ProfileStore:
             await self.async_save()
         return repaired
 
+    async def async_adopt_retired_builtin_phases(self, device_type: str) -> int:
+        """Keep the removed device types' built-in phases a profile still uses (0.5.9).
+
+        Profiles assign phases by name, and the Air Fryer / Bread Maker built-ins
+        went with their device types, so a migrated entry's "Kneading" range named
+        a phase no catalog lists: the panel's phase editor showed it blank, and a
+        save there dropped it. Each such name becomes a custom phase of this
+        entry's device type, with the built-in's id and English description. A
+        name the catalog already has is left to it. Idempotent; saves only on a
+        change. Returns the number of phases created.
+        """
+        target = str(device_type or "").strip()
+        in_use: set[str] = set()
+        for profile in self.get_profiles().values():
+            for assigned in profile.get("phases") or []:
+                if isinstance(assigned, dict):
+                    name = str(assigned.get("name", "")).strip()
+                    if name:
+                        in_use.add(name.casefold())
+        if not in_use:
+            return 0
+        catalog = {
+            str(p.get("name", "")).strip().casefold()
+            for p in self.list_phase_catalog(target)
+        }
+        missing = in_use - catalog
+        if not missing:
+            return 0
+        # "Keep Warm" was a built-in of both types: take the description of the
+        # type whose phases this entry uses most.
+        ranked = sorted(
+            RETIRED_BUILTIN_PHASES.items(),
+            key=lambda kv: -sum(1 for name, _ in kv[1] if name.casefold() in in_use),
+        )
+        phases = self._get_shared_custom_phases()
+        taken_ids = {str(p.get("id", "")) for p in phases}
+        adopted = 0
+        for old_type, builtins in ranked:
+            for name, description in builtins:
+                if name.casefold() not in missing:
+                    continue
+                missing.discard(name.casefold())
+                phase_id = _builtin_phase_id(old_type, name)
+                if phase_id in taken_ids:
+                    phase_id = str(uuid.uuid4())
+                taken_ids.add(phase_id)
+                phases.append(
+                    {
+                        "id": phase_id,
+                        "name": name,
+                        "description": description,
+                        "device_type": target,
+                        "created_at": dt_util.now().isoformat(),
+                    }
+                )
+                adopted += 1
+        if adopted:
+            await self.async_save()
+        return adopted
+
     def list_custom_phases(self, device_type: str) -> list[dict[str, Any]]:
         """Return shared custom phases relevant to the requested device type."""
 
@@ -5577,6 +5939,7 @@ class ProfileStore:
 
         for name in orphaned:
             del self._data["profiles"][name]
+            self._rename_maintenance_program(name, None)  # #480
             self._logger.info(
                 "Cleaned up orphaned profile '%s' (cycle no longer exists)", name
             )
@@ -9302,6 +9665,9 @@ class ProfileStore:
                 if isinstance(mems, list) and old_name in mems:
                     g["members"] = [new_name if m == old_name else m for m in mems]
 
+            # 5. The maintenance tasks this program marks done (#480).
+            self._rename_maintenance_program(old_name, new_name)
+
             self._logger.info(
                 "Renamed profile '%s' to '%s', updated %s cycles and associated feedback",
                 old_name,
@@ -9336,6 +9702,7 @@ class ProfileStore:
                 if unlabel_cycles:
                     cycle["profile_name"] = None
                 count += 1
+        self._rename_maintenance_program(name, None)  # #480
 
         await self.async_save()
         action = "unlabeled" if unlabel_cycles else "orphaned"
@@ -9362,6 +9729,7 @@ class ProfileStore:
         self._data["ml_model_versions"] = {}
         self._data["profile_groups"] = {}
         self._data["maintenance_log"] = []
+        self._data["maintenance_programs"] = {}  # names the profiles wiped above
         self._data.pop("armed_program", None)
         self._data["playground_presets"] = {}
         # State of the ML parts removed in 0.5.8 (storage v17 drops it on load; an
@@ -9479,6 +9847,7 @@ class ProfileStore:
             else:
                 self._data.get("profiles", {}).pop(old_profile, None)
                 self._data.get("envelopes", {}).pop(old_profile, None)
+                self._rename_maintenance_program(old_profile, None)  # #480
         if profile_name:
             touched.add(profile_name)
         return touched
@@ -10219,7 +10588,9 @@ class ProfileStore:
 
         # Device-type gating: block device-specific categories and force reference-only
         # cycle destination when the source device type does not match this device.
-        source_dt = str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+        source_dt = canonical_device_type(
+            str((meta.get("device_fingerprint") or {}).get("device_type") or "") or None
+        )
         # Keep this identical to build_import_manifest so the analysis shown to the user
         # (which disables device-specific categories / real-history on a mismatch) cannot
         # diverge from what the apply actually does. An unknown local device type is treated
@@ -10639,6 +11010,16 @@ class ProfileStore:
                 if key not in data_dict:
                     continue
                 src_val = data_dict.get(key)
+                if key == "maintenance_programs" and isinstance(src_val, dict):
+                    # Program names follow the profiles' import (#480): an
+                    # "import as copy" renamed the file's profile.
+                    src_val = {
+                        task_id: list(dict.fromkeys(
+                            name_remap.get(n, n) for n in names if isinstance(n, str)
+                        ))
+                        for task_id, names in src_val.items()
+                        if isinstance(names, list)
+                    }
                 if mode == "replace":
                     self._data[key] = src_val
                     continue
@@ -10646,6 +11027,10 @@ class ProfileStore:
                 if isinstance(src_val, dict):
                     base = cur if isinstance(cur, dict) else {}
                     for k, v in src_val.items():
+                        if key == "maintenance_programs" and isinstance(base.get(k), list):
+                            # A task both stores configure does what either named.
+                            base[k] = list(dict.fromkeys([*base[k], *v]))
+                            continue
                         base.setdefault(k, v)  # keep-mine on key collision
                     self._data[key] = base
                 elif isinstance(src_val, list):
@@ -10777,6 +11162,7 @@ class ProfileStore:
             else:
                 self._data.get("profiles", {}).pop(profile_name, None)
                 self._data.get("envelopes", {}).pop(profile_name, None)
+                self._rename_maintenance_program(profile_name, None)  # #480
         await self.async_save()
         return True
 
@@ -11105,6 +11491,7 @@ class ProfileStore:
         cycles.pop(idx)  # Remove original — all segments validated, safe to mutate
 
         new_ids: list[str] = []
+        piece_bounds: list[tuple[CycleDict, float, float]] = []
         original_profile = cycle.get("profile_name")
         start_ts = start_dt_base_parsed.timestamp()
 
@@ -11150,6 +11537,27 @@ class ProfileStore:
             }
             await self.async_add_cycle(new_cycle)
             new_ids.append(new_cycle["id"])
+            piece_bounds.append((new_cycle, seg_start, seg_end))
+
+        # #471: a piece is rebuilt from the trace only, so it had no cost. Share a
+        # captured meter reading by each piece's integrated energy (the total stays
+        # what the meter measured), by its duration when the trace integrates to
+        # nothing, then charge each piece at its parent's price.
+        meter = cycle.get("energy_meter_wh")
+        weight_key = "energy_wh"
+        total_w = sum(float(pc.get("energy_wh") or 0.0) for pc, _, _ in piece_bounds)
+        if total_w <= 0:
+            weight_key = "duration"
+            total_w = sum(float(pc.get("duration") or 0.0) for pc, _, _ in piece_bounds)
+        for piece, seg_start, seg_end in piece_bounds:
+            if meter is not None and total_w > 0:
+                try:
+                    piece["energy_meter_wh"] = round(
+                        float(meter) * float(piece.get(weight_key) or 0.0) / total_w, 3
+                    )
+                except (TypeError, ValueError, OverflowError):
+                    pass
+            carry_cycle_cost(piece, cycle, seg_start, seg_end, self._logger)
 
         # Fix profile refs (handle original sample cycle logic)
         original_sample_id = cycle.get("id")
@@ -11261,6 +11669,22 @@ class ProfileStore:
         if not c1_start_dt:
             return None
 
+        # #471: each part's pricing and reported energy, captured before c1 is
+        # rewritten, so the merged cycle can carry the parts' total cost.
+        merge_parts: list[dict[str, Any]] = []
+        part_meters: list[bool] = []
+        for part in target_cycles:
+            part_ts = _value_to_timestamp(part.get("start_time"))
+            part_meters.append(part.get("energy_meter_wh") is not None)
+            merge_parts.append({
+                "offset": (part_ts - c1_start_dt.timestamp()) if part_ts is not None else 0.0,
+                "cost": part.get("cost"),
+                "energy_price": part.get("energy_price"),
+                "energy_price_mode": part.get("energy_price_mode"),
+                "price_timeline": part.get("price_timeline"),
+                "report_wh": cycle_report_energy_wh(part),
+            })
+
         # Helper to get parsed points from a cycle
         def get_points(cy: CycleDict) -> list[tuple[float, float, float]]:
             # content: [(timestamp, offset, power)]
@@ -11363,6 +11787,19 @@ class ProfileStore:
                 )
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.warning("Energy recompute failed after cycle merge", exc_info=True)
+
+        # Only the parts the merge consumed: one it skipped (no usable trace) stays
+        # in history with its own energy and cost.
+        consumed = [True] + [c.get("id") in ids_to_remove for c in target_cycles[1:]]
+        merge_parts = [p for p, keep in zip(merge_parts, consumed) if keep]
+        any_meter = any(m for m, keep in zip(part_meters, consumed) if keep)
+        # A meter reading of one part does not describe the whole: the merged
+        # figure is the sum of every part's reported energy (meter or integrated).
+        if any_meter:
+            c1["energy_meter_wh"] = round(sum(p["report_wh"] for p in merge_parts), 3)
+        else:
+            c1.pop("energy_meter_wh", None)
+        merge_cycle_cost(c1, merge_parts, self._logger)
 
         # New Hash ID
         new_id = hashlib.sha256(f"{c1['start_time']}_{c1['duration']}".encode()).hexdigest()[:12]

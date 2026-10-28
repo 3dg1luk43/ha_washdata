@@ -1,0 +1,58 @@
+{
+  "triggers": {
+    "cycle_started": {
+      "trigger": "mdi:play-circle-outline"
+    },
+    "program_recognised": {
+      "trigger": "mdi:tag-check-outline"
+    },
+    "phase_started": {
+      "trigger": "mdi:water-sync"
+    },
+    "finishing_soon": {
+      "trigger": "mdi:timer-sand"
+    },
+    "cycle_overrun": {
+      "trigger": "mdi:timer-alert-outline"
+    },
+    "cycle_paused": {
+      "trigger": "mdi:pause-circle-outline"
+    },
+    "cycle_resumed": {
+      "trigger": "mdi:play-pause"
+    },
+    "cycle_stalled": {
+      "trigger": "mdi:alert-circle-outline"
+    },
+    "cycle_finished": {
+      "trigger": "mdi:check-circle-outline"
+    },
+    "cycle_ended": {
+      "trigger": "mdi:stop-circle-outline"
+    },
+    "anti_wrinkle_started": {
+      "trigger": "mdi:tumble-dryer"
+    },
+    "still_tumbling": {
+      "trigger": "mdi:rotate-right"
+    },
+    "unload_pending": {
+      "trigger": "mdi:basket-outline"
+    },
+    "unloaded": {
+      "trigger": "mdi:basket-check-outline"
+    },
+    "state_changed": {
+      "trigger": "mdi:state-machine"
+    },
+    "maintenance_due": {
+      "trigger": "mdi:wrench-clock"
+    },
+    "milestone_reached": {
+      "trigger": "mdi:trophy-outline"
+    },
+    "pump_stuck": {
+      "trigger": "mdi:pump-off"
+    }
+  }
+}
