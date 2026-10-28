@@ -27,7 +27,6 @@ Closes #<!-- must already have the `accepted` label -->
 - [ ] Performance
 - [ ] UI
 - [ ] Translation
-- [ ] Automation template
 
 ## Testing
 
@@ -39,7 +38,7 @@ Closes #<!-- must already have the `accepted` label -->
 
 ## Checklist
 
-- [ ] The linked issue already had the `accepted` label (or this is a translation or automation template PR)
+- [ ] The linked issue already had the `accepted` label (or this is a translation PR)
 - [ ] No hardcoded UI strings - user-facing text is in `strings.json` / `translations/`
 - [ ] Rebuilt panel artifacts if I touched `www/*.js` (`node devtools/build_panel.mjs`)
 - [ ] Docs and CHANGELOG updated if the change is user-visible
