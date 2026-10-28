@@ -98,7 +98,6 @@
     "load_more": "Încărcați mai multe",
     "manage": "Gestionați",
     "merge": "Îmbinați",
-    "new_automation": "＋ Automatizare nouă",
     "new_group": "+ Grup nou",
     "new_group_tip": "Grupați profiluri aproape identice (aceeași formă, altă temperatură sau centrifugare) ca potrivirea să le poată deosebi.",
     "new_phase": "+ Fază nouă",
@@ -205,13 +204,24 @@
     "create_profile_from_gap": "Creați profil",
     "undo_import": "Anulați ultimul import",
     "pg_rerun": "Actualizează simularea",
-    "from_trigger": "Pornire de la un declanșator ▾",
-    "bp_use": "Folosiți cu acest dispozitiv",
-    "bp_install": "Instalați șablonul",
-    "bp_view_yaml": "Vizualizați YAML",
-    "copy": "Copiați",
     "replace": "Înlocuiți",
-    "from_trigger_open": "Pornire de la un declanșator ▴"
+    "auto_edit_in_ha": "Editați în Home Assistant",
+    "auto_fewer_triggers": "Mai puține declanșatoare",
+    "auto_more_triggers": "Încă {count} de declanșatoare",
+    "auto_more_triggers_one": "Încă {count} declanșator",
+    "auto_more_triggers_few": "Încă {count} declanșatoare",
+    "auto_more_triggers_other": "Încă {count} de declanșatoare",
+    "auto_blank": "Automatizare goală",
+    "bp_refresh": "Căutați șabloane noi pe GitHub",
+    "bp_turn_on_online": "Activați funcțiile online",
+    "bp_add_tip": "Creează automatizarea pentru acest aparat cu setările implicite, apoi o deschide în Home Assistant",
+    "bp_add_to": "Adăugați la {device}",
+    "bp_setup_tip": "Instalează șablonul, apoi deschide Home Assistant pentru a completa restul",
+    "bp_setup_in_ha": "Configurați în Home Assistant",
+    "bp_details": "Detalii",
+    "bp_copy_yaml": "Copiați YAML-ul",
+    "bp_hide_yaml": "Ascundeți YAML-ul",
+    "bp_show_yaml": "Afișați YAML-ul"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -286,7 +296,6 @@
     "add_maintenance": "Adăugați eveniment de întreținere",
     "automation_delete": "Ștergeți această automatizare",
     "automation_needs_review": "Acest ciclu necesită revizuire",
-    "automation_open": "Deschideți în editorul de automatizări",
     "automation_review_this_cycle": "Revizuiți acest ciclu",
     "automations": "Automatizări",
     "clear_debug": "Curățați urmele de depanare",
@@ -304,7 +313,6 @@
     "ml_settings_card": "Setări",
     "ml_smart_learning": "Învățare inteligentă",
     "my_preferences": "Preferințele mele",
-    "no_automations": "Nicio automatizare nu face referire încă la acest dispozitiv.",
     "panel_settings": "Setări panou",
     "pg_settings_source": "Sursa setărilor",
     "phase_catalog": "Catalog de faze",
@@ -325,10 +333,14 @@
     "service_status": "Starea întreținerii",
     "online_account_tab": "Online și comunitate",
     "live_match_debug": "Depanare potrivire în timp real",
-    "automations_used": "Automatizări care folosesc acest dispozitiv",
-    "bp_templates": "Șabloane",
     "automations_all_tip": "Lista de automatizări din Home Assistant, filtrată după eticheta WashData. Automatizările create aici se află și în categoria WashData.",
-    "maint_done_by_program": "Efectuat automat"
+    "maint_done_by_program": "Efectuat automat",
+    "auto_start": "Creați o automatizare nouă",
+    "auto_yours": "Automatizările dvs.",
+    "bp_needs_online": "Biblioteca de șabloane necesită funcțiile online",
+    "bp_unreachable": "Biblioteca de șabloane nu a putut fi accesată",
+    "bp_library": "Biblioteca de șabloane",
+    "bp_settings": "Ce puteți seta"
   },
   "health": {
     "fair": "Calitate acceptabilă a profilului",
@@ -644,13 +656,18 @@
     "pg_obj_endlag": "Întârzierea sfârșitului (mediană)",
     "pg_obj_split": "Rata de divizare",
     "pg_sweep_cycles": "Cicluri recente",
-    "bp_you_choose": "Alegeți: {inputs}",
-    "bp_adjustable": "Reglabil: {inputs}",
     "bp_yaml": "YAML-ul șablonului",
     "automation_wd_label": "Are eticheta WashData",
     "done_by_none": "Nedefinit",
     "done_by_programs": "Efectuat automat de: {programs}",
-    "done_by_cycle": "Efectuat de un ciclu {program}"
+    "done_by_cycle": "Efectuat de un ciclu {program}",
+    "bp_by": "de {author}",
+    "bp_for_all": "Toate aparatele",
+    "bp_for": "Pentru",
+    "bp_needs": "Necesită",
+    "bp_needs_version": "WashData {version} sau mai nou",
+    "bp_author": "Autor",
+    "bp_required": "obligatoriu"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -751,7 +768,7 @@
     "undo_import_ok": "Anulați importul",
     "undo_import_title": "Anulați ultimul import",
     "bp_replace_title": "Înlocuiți șablonul instalat?",
-    "bp_replace_msg": "Home Assistant are o altă versiune a \"{name}\". O înlocuiți cu cea din această versiune WashData? Automatizările care o folosesc se vor schimba odată cu ea."
+    "bp_replace_library_msg": "Home Assistant are o altă versiune a șablonului \"{name}\". Îl înlocuiți cu cel din biblioteca de șabloane? Automatizările care îl folosesc se schimbă odată cu el."
   },
   "msg": {
     "custom_task_limit": "Ați atins limita de {max} sarcini.",
@@ -950,7 +967,7 @@
     "merge_no_imports": "Înregistrările importate nu pot fi îmbinate într-un ciclu real. Deselectați-le pentru a le îmbina.",
     "store_enable_hint": "Activați funcțiile online în Preferințe > Online și comunitate pentru a răsfoi și importa cicluri de referință ale comunității.",
     "store_share_intro": "Încărcați acest ciclu de referință pentru ca alți utilizatori cu același aparat să îl poată folosi. Este examinat înainte de a apărea public.",
-    "online_intro_global": "Răsfoiți și partajați înregistrări de referință cu alți utilizatori WashData. O conexiune acoperă toate dispozitivele dvs. WashData; marca și modelul se setează pe dispozitiv în De bază. Funcțiile online sunt oprite până le activați.",
+    "online_intro_global": "Răsfoiți și partajați înregistrări de referință cu alți utilizatori WashData și folosiți biblioteca de șabloane de automatizări. O conexiune acoperă toate dispozitivele dvs. WashData; marca și modelul se setează pe dispozitiv în De bază. Funcțiile online sunt oprite până le activați.",
     "online_unavailable": "Funcțiile online nu sunt disponibile pe acest server.",
     "store_picker_offline": "Activați funcțiile online din pictograma de setări pentru a alege din catalogul comunității.",
     "pick_brand_first": "Alegeți mai întâi o marcă de aparat.",
@@ -1043,16 +1060,21 @@
     "pg_sweep_n_cycles_few": "pe {count} cicluri",
     "pg_sweep_n_cycles_other": "pe {count} de cicluri",
     "pg_task_busy": "O rulare Testează pe istoric sau Optimizează este deja în desfășurare pentru acest dispozitiv. Așteptați să se termine sau anulați-o.",
-    "automations_tab_intro": "WashData oferă declanșatoare de dispozitiv (ciclu pornit, ciclu terminat, ciclu blocat și altele) pentru propriile automatizări Home Assistant. Automatizările care folosesc acest dispozitiv sunt listate aici.",
-    "bp_intro": "Automatizări gata de utilizat pentru acest aparat, instalate ca șabloane Home Assistant.",
     "bp_admin_only": "Un administrator instalează șabloanele.",
-    "bp_none": "Niciun șablon pentru acest tip de aparat deocamdată.",
-    "bp_load_failed": "Șabloanele nu au putut fi încărcate.",
-    "auto_trigger_hint": "Creează o automatizare cu acest declanșator pentru acest dispozitiv și o deschide în Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Creată de WashData pentru {device}. Adăugați acțiunile dvs. (notificare, lumini, ...).",
     "automation_alias_new": "{device}: automatizare nouă",
-    "maint_done_by_program_intro": "O sarcină contează ca efectuată când se termină un ciclu al unuia dintre programele sale, de exemplu curățarea tamburului când rulează Bumbac 90. Contează doar ciclurile de care WashData este sigur sau pe care le-ați ales."
+    "maint_done_by_program_intro": "O sarcină contează ca efectuată când se termină un ciclu al unuia dintre programele sale, de exemplu curățarea tamburului când rulează Bumbac 90. Contează doar ciclurile de care WashData este sigur sau pe care le-ați ales.",
+    "auto_none": "Nicio automatizare nu folosește încă acest aparat.",
+    "auto_start_hint": "Se deschide în editorul de automatizări din Home Assistant, cu acest aparat deja completat.",
+    "auto_yours_intro": "Automatizări Home Assistant care reacționează la acest aparat.",
+    "bp_needs_online": "Șabloanele se descarcă de pe GitHub, așa că biblioteca funcționează doar cu funcțiile online activate. Funcțiile online includ și magazinul comunității.",
+    "bp_needs_online_admin": "Un administrator le poate activa din meniul cu roată dințată, la Online și comunitate.",
+    "bp_stale": "GitHub nu a putut fi accesat acum. Acestea sunt șabloanele descărcate anterior.",
+    "bp_none_yet": "Încă nu există șabloane pentru acest tip de aparat. Partajați-l pe primul.",
+    "bp_unreachable": "Se descarcă de pe GitHub. Verificați dacă Home Assistant are acces la internet, apoi încercați din nou.",
+    "bp_library_intro": "Automatizări gata făcute, partajate de utilizatorii WashData pe GitHub și verificate înainte de a fi listate. Disponibilă doar cu funcțiile online activate.",
+    "bp_needs_version": "Necesită WashData {version} sau mai nou."
   },
   "phase_desc": {
     "anti_crease": "Rotiri scurte ocazionale ale tamburului după finalizare pentru a reduce șifonarea.",
@@ -2009,9 +2031,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter pe GitHub ↗",
     "manual": "Manual ↗",
-    "bp_share": "Partajați propriul șablon printr-un pull request ↗",
-    "bp_open_in_ha": "Deschideți în Home Assistant ↗",
-    "automations_all": "Toate automatizările WashData din Home Assistant"
+    "automations_all": "Toate automatizările WashData din Home Assistant",
+    "bp_share_pr": "Partajați propriul șablon: deschideți un pull request pe GitHub",
+    "bp_view_github": "Vedeți pe GitHub",
+    "bp_import_my_ha": "Importați cu My Home Assistant"
   },
   "tip": {
     "add_brand": "Marca nu este listată? Adăugați-o în catalogul comunității",
@@ -2192,16 +2215,6 @@
     "thr": "prag",
     "too_short": "prea scurt",
     "tumble_kept": "rotiri păstrate"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Activați ceva în timp ce rulează un ciclu",
-      "description": "Pornește o lumină, un comutator sau un helper de comutare când un ciclu WashData începe și îl oprește când se termină, inclusiv după o pornire falsă.\n\nNecesită WashData 0.5.9 sau mai nou."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Terminarea unei faze lungi anti-șifonare a uscătorului",
-      "description": "Pentru uscătoarele care continuă să se rotească în modul anti-șifonare ore întregi după program. Rulează numai dacă uscătorul încă se rotește după trecerea numărului de minute setat de la terminarea programului; un uscător care s-a oprit până atunci nu este afectat. Apoi oprește priza inteligentă a uscătorului într-un moment de consum redus și, implicit, o repornește. Un nou ciclu care pornește între timp îl anulează.\n\nRisc: aceasta comută un releu în timp ce uscătorul este conectat. Utilizați doar cu o priză omologată pentru uscătorul dvs. și pe propriul risc. WashData nu comută niciodată priza singur; această automatizare o face.\n\nNecesită WashData 0.5.9 sau mai nou."
-    }
   },
   "trigger": {
     "cycle_started": {

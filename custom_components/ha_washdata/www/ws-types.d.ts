@@ -42,8 +42,11 @@ export interface BlueprintItem {
   id: string;
   name: string;
   description: string;
+  author: string;
+  icon: string;
   device_types: string[];
   min_version: string;
+  compatible: boolean;
   tags: string[];
   source_url: string;
   path: string;
@@ -54,6 +57,7 @@ export interface BlueprintItem {
 
 export interface BlueprintsListResponse {
   blueprints: BlueprintItem[];
+  disabled?: boolean;
   error?: string;
 }
 
@@ -1191,6 +1195,7 @@ export interface GetShareableCyclesRequest {
 }
 
 export interface BlueprintsListRequest {
+  refresh?: boolean;
 }
 
 // ── Command maps ───────────────────────────────────────────────────────────

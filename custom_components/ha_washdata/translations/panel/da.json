@@ -144,7 +144,6 @@
     "load_more": "Indlæs flere",
     "manage": "Administrer",
     "merge": "Flet sammen",
-    "new_automation": "＋ Ny automatisering",
     "new_group": "+ Ny gruppe",
     "new_group_tip": "Gruppér næsten identiske profiler (samme form, anden temperatur eller centrifugering), så matchningen kan skelne dem.",
     "new_phase": "+ Ny fase",
@@ -251,13 +250,23 @@
     "confirmed": "Bekræftet",
     "create_profile_from_gap": "Opret profil",
     "undo_import": "Fortryd seneste import",
-    "from_trigger": "Start fra en trigger ▾",
-    "bp_use": "Brug med dette apparat",
-    "bp_install": "Installer skabelon",
-    "bp_view_yaml": "Se YAML",
-    "copy": "Kopier",
     "replace": "Erstat",
-    "from_trigger_open": "Start fra en trigger ▴"
+    "auto_edit_in_ha": "Rediger i Home Assistant",
+    "auto_fewer_triggers": "Færre triggers",
+    "auto_more_triggers": "{count} triggers mere",
+    "auto_more_triggers_one": "{count} trigger mere",
+    "auto_more_triggers_other": "{count} triggers mere",
+    "auto_blank": "Tom automatisering",
+    "bp_refresh": "Søg efter nye skabeloner på GitHub",
+    "bp_turn_on_online": "Slå onlinefunktioner til",
+    "bp_add_tip": "Opretter automatiseringen for dette apparat med standardindstillingerne og åbner den derefter i Home Assistant",
+    "bp_add_to": "Tilføj til {device}",
+    "bp_setup_tip": "Installerer skabelonen og åbner derefter Home Assistant, så du kan udfylde resten",
+    "bp_setup_in_ha": "Opsæt i Home Assistant",
+    "bp_details": "Detaljer",
+    "bp_copy_yaml": "Kopiér YAML",
+    "bp_hide_yaml": "Skjul YAML",
+    "bp_show_yaml": "Vis YAML"
   },
   "note": {
     "off_delay": {
@@ -337,7 +346,6 @@
     "add_maintenance": "Tilføj vedligeholdelseshændelse",
     "automation_delete": "Slet denne automatisering",
     "automation_needs_review": "Denne cyklus skal gennemgås",
-    "automation_open": "Åbn i automatiseringseditoren",
     "automation_review_this_cycle": "Gennemgå denne cyklus",
     "automations": "Automatiseringer",
     "clear_debug": "Ryd fejlretningsspor",
@@ -355,7 +363,6 @@
     "ml_settings_card": "Indstillinger",
     "ml_smart_learning": "Smart læring",
     "my_preferences": "Mine præferencer",
-    "no_automations": "Ingen automatiseringer refererer til denne enhed endnu.",
     "panel_settings": "Panelindstillinger",
     "pg_settings_source": "Indstillingernes kilde",
     "phase_catalog": "Fasekatalog",
@@ -376,10 +383,14 @@
     "service_status": "Servicestatus",
     "online_account_tab": "Online & fællesskab",
     "live_match_debug": "Live-match-fejlretning",
-    "automations_used": "Automatiseringer, der bruger dette apparat",
-    "bp_templates": "Skabeloner",
     "automations_all_tip": "Home Assistants automatiseringsliste, filtreret efter WashData-etiketten. Automatiseringer oprettet her findes også i WashData-kategorien.",
-    "maint_done_by_program": "Udført automatisk"
+    "maint_done_by_program": "Udført automatisk",
+    "auto_start": "Opret en ny automatisering",
+    "auto_yours": "Dine automatiseringer",
+    "bp_needs_online": "Skabelonbiblioteket kræver onlinefunktioner",
+    "bp_unreachable": "Skabelonbiblioteket kunne ikke nås",
+    "bp_library": "Skabelonbibliotek",
+    "bp_settings": "Det kan du indstille"
   },
   "health": {
     "fair": "Acceptabel matchkvalitet",
@@ -692,13 +703,18 @@
     "pg_obj_split": "Opdelingsrate",
     "pg_sweep_cycles": "Seneste cyklusser",
     "cat_backfill_cycles": "Cyklusser fundet i importeret effekthistorik",
-    "bp_you_choose": "Du vælger: {inputs}",
-    "bp_adjustable": "Justerbar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
     "automation_wd_label": "Bærer WashData-etiketten",
     "done_by_none": "Ikke angivet",
     "done_by_programs": "Udført automatisk af: {programs}",
-    "done_by_cycle": "Udført af en cyklus med {program}"
+    "done_by_cycle": "Udført af en cyklus med {program}",
+    "bp_by": "af {author}",
+    "bp_for_all": "Alle apparater",
+    "bp_for": "Til",
+    "bp_needs": "Kræver",
+    "bp_needs_version": "WashData {version} eller nyere",
+    "bp_author": "Forfatter",
+    "bp_required": "påkrævet"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -797,7 +813,7 @@
     "undo_import_ok": "Fortryd import",
     "undo_import_title": "Fortryd seneste import",
     "bp_replace_title": "Erstat den installerede skabelon?",
-    "bp_replace_msg": "Home Assistant har en anden version af \"{name}\". Erstat den med den fra denne WashData-version? Automatiseringer, der bruger den, ændres med den."
+    "bp_replace_library_msg": "Home Assistant har en anden version af \"{name}\". Erstat den med den fra skabelonbiblioteket? Automatiseringer, der bruger den, ændres med den."
   },
   "msg": {
     "custom_task_limit": "Du har nået grænsen på {max} opgaver.",
@@ -994,7 +1010,7 @@
     "standby_above_stop_title": "Trak stadig {idle} W, da cyklussen sluttede",
     "standby_above_stop_sub": "{n} af de sidste {total} cyklusser. Slukkeforsinkelsen starter først, når effekten er under Stoptærskel ({stop} W), så cyklusser slutter for sent eller skal stoppes manuelt.",
     "store_share_intro": "Upload denne referencecyklus, så andre med samme apparat kan bruge den. Den gennemgås, før den vises offentligt.",
-    "online_intro_global": "Gennemse og del referenceoptagelser med andre WashData-brugere. Én forbindelse dækker alle dine WashData-enheder; mærke og model angives pr. enhed under Grundlæggende. Onlinefunktioner er slået fra, indtil du slår dem til.",
+    "online_intro_global": "Gennemse og del referenceoptagelser med andre WashData-brugere, og brug biblioteket med automatiseringsskabeloner. Én forbindelse dækker alle dine WashData-enheder; mærke og model angives pr. enhed under Grundlæggende. Onlinefunktioner er slået fra, indtil du slår dem til.",
     "online_unavailable": "Onlinefunktioner er ikke tilgængelige på denne server.",
     "store_picker_offline": "Aktivér onlinefunktioner i indstillingstandhjulet for at vælge fra fællesskabskataloget.",
     "pick_brand_first": "Vælg først et apparatmærke.",
@@ -1081,16 +1097,21 @@
     "import_undo_hint": "Et gendannelsespunkt fra før den seneste import ({when}) er bevaret: {profiles} profil(er) og {cycles} cyklus(ser).",
     "replace_undo_hint": "Der gemmes først et gendannelsespunkt, så du kan fortryde denne import under Eksport/import.",
     "pg_in_sample_note": "Disse cyklusser var med til at bygge de profiler, de matches mod, så resultaterne er optimistiske: forvent lidt færre korrekte match på nye cyklusser.",
-    "automations_tab_intro": "WashData tilbyder enhedstriggers (cyklus startet, cyklus færdig, cyklus gået i stå og mere) til dine egne Home Assistant-automatiseringer. Automatiseringer, der bruger dette apparat, er vist her.",
-    "bp_intro": "Færdige automatiseringer til dette apparat, installeret som Home Assistant-blueprints.",
     "bp_admin_only": "En administrator installerer skabeloner.",
-    "bp_none": "Ingen skabeloner til denne apparattype endnu.",
-    "bp_load_failed": "Skabeloner kunne ikke indlæses.",
-    "auto_trigger_hint": "Opretter en automatisering med denne trigger for dette apparat og åbner den i Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Oprettet af WashData for {device}. Tilføj dine handlinger (notifikation, lys, ...).",
     "automation_alias_new": "{device}: ny automatisering",
-    "maint_done_by_program_intro": "En opgave tæller som udført, når en cyklus med et af dens programmer afsluttes, for eksempel tromlerengøring, når Bomuld 90 kører. Kun cyklusser, som WashData er sikker på, eller som du selv har valgt, tæller med."
+    "maint_done_by_program_intro": "En opgave tæller som udført, når en cyklus med et af dens programmer afsluttes, for eksempel tromlerengøring, når Bomuld 90 kører. Kun cyklusser, som WashData er sikker på, eller som du selv har valgt, tæller med.",
+    "auto_none": "Ingen automatiseringer bruger dette apparat endnu.",
+    "auto_start_hint": "Åbner i Home Assistants automatiseringseditor med dette apparat allerede udfyldt.",
+    "auto_yours_intro": "Home Assistant-automatiseringer, der reagerer på dette apparat.",
+    "bp_needs_online": "Skabeloner hentes fra GitHub, så biblioteket virker kun med onlinefunktioner slået til. Onlinefunktioner omfatter også Fællesskabsbutikken.",
+    "bp_needs_online_admin": "En administrator kan slå dem til i indstillingstandhjulet under Online & fællesskab.",
+    "bp_stale": "GitHub kunne ikke nås lige nu. Dette er de skabeloner, der blev hentet tidligere.",
+    "bp_none_yet": "Ingen skabeloner til denne apparattype endnu. Del den første.",
+    "bp_unreachable": "Det hentes fra GitHub. Kontrollér, at Home Assistant har forbindelse til internettet, og prøv igen.",
+    "bp_library_intro": "Færdige automatiseringer delt af WashData-brugere på GitHub og gennemgået, før de vises. Kun tilgængeligt med onlinefunktioner slået til.",
+    "bp_needs_version": "Kræver WashData {version} eller nyere."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
@@ -2045,9 +2066,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter på GitHub ↗",
     "manual": "Manual ↗",
-    "bp_share": "Del din egen skabelon via pull request ↗",
-    "bp_open_in_ha": "Åbn i Home Assistant ↗",
-    "automations_all": "Alle WashData-automatiseringer i Home Assistant"
+    "automations_all": "Alle WashData-automatiseringer i Home Assistant",
+    "bp_share_pr": "Del din egen skabelon: opret en pull request på GitHub",
+    "bp_view_github": "Se på GitHub",
+    "bp_import_my_ha": "Importér med My Home Assistant"
   },
   "tip": {
     "add_brand": "Mærke ikke på listen? Tilføj det til fællesskabskataloget",
@@ -2174,16 +2196,6 @@
     "thr": "tærsk.",
     "too_short": "for kort",
     "tumble_kept": "tromlepulser beholdt"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Tænd noget, mens en cyklus kører",
-      "description": "Tænder et lys, en kontakt eller en til/fra-hjælper, når en WashData-cyklus starter, og slukker det igen, når den slutter – også efter en falsk start.\n\nKræver WashData 0.5.9 eller nyere."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Afslut en lang anti-rynke-fase på tørretumbleren",
-      "description": "Til tørretumblere, hvis tromle fortsætter med at dreje i anti-rynke i timevis efter programmet. Kører kun, hvis tørretumblerens tromle stadig drejer det indstillede antal minutter efter programmets afslutning; en tørretumbler, der er stoppet inden da, lades i fred. Den slukker derefter tørretumblerens smart-stik i et øjeblik med lavt strømforbrug og tænder det som standard igen. En ny cyklus, der starter i mellemtiden, annullerer den.\n\nRisiko: dette skifter et relæ, mens tørretumbleren er tilsluttet. Brug det kun med et stik, der er egnet til din tørretumbler, og på eget ansvar. WashData skifter aldrig selve stikket; det gør denne automatisering.\n\nKræver WashData 0.5.9 eller nyere."
-    }
   },
   "trigger": {
     "cycle_started": {

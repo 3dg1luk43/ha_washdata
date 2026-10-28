@@ -809,19 +809,23 @@ class BlueprintInput(TypedDict):
 
 
 class BlueprintItem(TypedDict):
-    """A blueprint shipped in ``blueprints/automation/`` (#478).
+    """A template from the automation library (#478), a Home Assistant blueprint.
 
     ``path`` is where HA's ``blueprint/save`` puts it (under
     ``blueprints/automation/``); ``one_click`` is true when every input but
     ``washdata_device`` has a default, so the automation can be saved with only
-    the device filled in.
+    the device filled in. ``compatible`` is false when the template needs a newer
+    WashData than this one. ``icon`` is one of the panel's template icons or empty.
     """
 
     id: str
     name: str
     description: str
+    author: str
+    icon: str
     device_types: list[str]
     min_version: str
+    compatible: bool
     tags: list[str]
     source_url: str
     path: str
@@ -835,8 +839,11 @@ class _BlueprintsListBase(TypedDict):
 
 
 class BlueprintsListResponse(_BlueprintsListBase, total=False):
-    """The blueprint catalog; ``error`` only when catalog.json could not be read."""
+    """The automation template library. ``disabled``: online features are off, so
+    nothing was downloaded. ``error`` (``unreachable``): the download failed;
+    ``blueprints`` then holds the last good list, if any."""
 
+    disabled: bool
     error: str
 
 
@@ -1291,7 +1298,7 @@ WS_COMMANDS: dict[str, dict] = {
     "store_upload_device": {"params": [_entry(), _p("items", "list"), _p("include_phases", "list", False), _p("include_settings", "bool", False)]},
     "store_download_device": {"params": [_entry(), _p("device_id", "str"), _p("include_settings", "bool", False)]},
     "get_shareable_cycles": {"params": [_entry()]},
-    "blueprints/list": {"params": []},
+    "blueprints/list": {"params": [_p("refresh", "bool", False)]},
 }
 
 

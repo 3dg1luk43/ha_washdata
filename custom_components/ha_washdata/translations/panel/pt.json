@@ -98,7 +98,6 @@
     "load_more": "Carregar mais",
     "manage": "Gerir",
     "merge": "Combinar",
-    "new_automation": "＋ Nova automatização",
     "new_group": "+ Novo grupo",
     "new_group_tip": "Agrupar perfis quase idênticos (mesma forma, temperatura ou centrifugação diferente) para que a correspondência os consiga distinguir.",
     "new_phase": "+ Nova fase",
@@ -205,13 +204,24 @@
     "create_profile_from_gap": "Criar perfil",
     "undo_import": "Anular a última importação",
     "pg_rerun": "Atualizar simulação",
-    "from_trigger": "Iniciar a partir de um gatilho ▾",
-    "bp_use": "Usar com este dispositivo",
-    "bp_install": "Instalar modelo",
-    "bp_view_yaml": "Ver YAML",
-    "copy": "Copiar",
     "replace": "Substituir",
-    "from_trigger_open": "Iniciar a partir de um gatilho ▴"
+    "auto_edit_in_ha": "Editar no Home Assistant",
+    "auto_fewer_triggers": "Menos gatilhos",
+    "auto_more_triggers": "Mais {count} gatilhos",
+    "auto_more_triggers_one": "Mais {count} gatilho",
+    "auto_more_triggers_many": "Mais {count} gatilhos",
+    "auto_more_triggers_other": "Mais {count} gatilhos",
+    "auto_blank": "Automatização em branco",
+    "bp_refresh": "Procurar novos modelos no GitHub",
+    "bp_turn_on_online": "Ativar funcionalidades online",
+    "bp_add_tip": "Cria a automatização para este eletrodoméstico com as definições predefinidas e depois abre-a no Home Assistant",
+    "bp_add_to": "Adicionar a {device}",
+    "bp_setup_tip": "Instala o modelo e depois abre o Home Assistant para preencher o resto",
+    "bp_setup_in_ha": "Configurar no Home Assistant",
+    "bp_details": "Detalhes",
+    "bp_copy_yaml": "Copiar YAML",
+    "bp_hide_yaml": "Ocultar o YAML",
+    "bp_show_yaml": "Mostrar o YAML"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -286,7 +296,6 @@
     "add_maintenance": "Adicionar evento de manutenção",
     "automation_delete": "Eliminar esta automatização",
     "automation_needs_review": "Este ciclo precisa de revisão",
-    "automation_open": "Abrir no editor de automatizações",
     "automation_review_this_cycle": "Rever este ciclo",
     "automations": "Automatizações",
     "clear_debug": "Limpar traços de depuração",
@@ -304,7 +313,6 @@
     "ml_settings_card": "Definições",
     "ml_smart_learning": "Aprendizagem inteligente",
     "my_preferences": "As minhas preferências",
-    "no_automations": "Ainda não há automatizações que referenciem este dispositivo.",
     "panel_settings": "Definições do painel",
     "pg_settings_source": "Origem das definições",
     "phase_catalog": "Catálogo de fases",
@@ -325,10 +333,14 @@
     "service_status": "Estado da manutenção",
     "online_account_tab": "Online e comunidade",
     "live_match_debug": "Depuração da correspondência em tempo real",
-    "automations_used": "Automatizações que utilizam este dispositivo",
-    "bp_templates": "Modelos",
     "automations_all_tip": "A lista de automatizações do Home Assistant, filtrada pela etiqueta WashData. As automatizações criadas aqui também estão na categoria WashData.",
-    "maint_done_by_program": "Feito automaticamente"
+    "maint_done_by_program": "Feito automaticamente",
+    "auto_start": "Criar uma nova automatização",
+    "auto_yours": "As suas automatizações",
+    "bp_needs_online": "A biblioteca de modelos precisa das funcionalidades online",
+    "bp_unreachable": "Não foi possível aceder à biblioteca de modelos",
+    "bp_library": "Biblioteca de modelos",
+    "bp_settings": "O que pode definir"
   },
   "health": {
     "fair": "Qualidade de perfil aceitável",
@@ -644,13 +656,18 @@
     "pg_obj_endlag": "Atraso do fim (mediana)",
     "pg_obj_split": "Taxa de divisões",
     "pg_sweep_cycles": "Ciclos recentes",
-    "bp_you_choose": "Você escolhe: {inputs}",
-    "bp_adjustable": "Ajustável: {inputs}",
     "bp_yaml": "YAML do modelo",
     "automation_wd_label": "Tem a etiqueta WashData",
     "done_by_none": "Não definido",
     "done_by_programs": "Feito automaticamente por: {programs}",
-    "done_by_cycle": "Feito por um ciclo {program}"
+    "done_by_cycle": "Feito por um ciclo {program}",
+    "bp_by": "por {author}",
+    "bp_for_all": "Todos os eletrodomésticos",
+    "bp_for": "Para",
+    "bp_needs": "Requer",
+    "bp_needs_version": "WashData {version} ou mais recente",
+    "bp_author": "Autor",
+    "bp_required": "obrigatório"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -751,7 +768,7 @@
     "undo_import_ok": "Anular importação",
     "undo_import_title": "Anular a última importação",
     "bp_replace_title": "Substituir o modelo instalado?",
-    "bp_replace_msg": "O Home Assistant tem uma versão diferente de \"{name}\". Substituí-la pela desta versão do WashData? As automatizações que a utilizam serão alteradas com ela."
+    "bp_replace_library_msg": "O Home Assistant tem uma versão diferente de \"{name}\". Substituí-la pela da biblioteca de modelos? As automatizações que a usam mudam com ela."
   },
   "msg": {
     "custom_task_limit": "Atingiu o limite de {max} tarefas.",
@@ -950,7 +967,7 @@
     "merge_no_imports": "As gravações importadas não podem ser combinadas com um ciclo real. Desmarque-as para combinar.",
     "store_enable_hint": "Ative as funcionalidades online em Preferências > Online e comunidade para explorar e importar ciclos de referência da comunidade.",
     "store_share_intro": "Carregue este ciclo de referência para que outras pessoas com o mesmo electrodoméstico o possam usar. É revisto antes de aparecer publicamente.",
-    "online_intro_global": "Explore e partilhe gravações de referência com outros utilizadores do WashData. Uma ligação serve todos os seus dispositivos WashData; a marca e o modelo definem-se por dispositivo em Básico. As funções online estão desligadas até as ativar.",
+    "online_intro_global": "Explore e partilhe gravações de referência com outros utilizadores do WashData e use a biblioteca de modelos de automatização. Uma ligação serve todos os seus dispositivos WashData; a marca e o modelo definem-se por dispositivo em Básico. As funções online estão desligadas até as ativar.",
     "online_unavailable": "As funcionalidades online não estão disponíveis neste servidor.",
     "store_picker_offline": "Ative as funcionalidades online no ícone de definições para escolher do catálogo da comunidade.",
     "pick_brand_first": "Escolha primeiro uma marca de electrodoméstico.",
@@ -1043,16 +1060,21 @@
     "pg_sweep_n_cycles_many": "em {count} ciclos",
     "pg_sweep_n_cycles_other": "em {count} ciclos",
     "pg_task_busy": "Já está em curso uma execução de Testar no histórico ou Otimizar para este dispositivo. Aguarde que termine ou cancele-a.",
-    "automations_tab_intro": "O WashData oferece gatilhos de dispositivo (ciclo iniciado, ciclo terminado, ciclo parado e mais) para as suas próprias automatizações do Home Assistant. As automatizações que utilizam este dispositivo estão listadas aqui.",
-    "bp_intro": "Automatizações prontas para este eletrodoméstico, instaladas como modelos do Home Assistant.",
     "bp_admin_only": "Um administrador instala os modelos.",
-    "bp_none": "Ainda não há modelos para este tipo de eletrodoméstico.",
-    "bp_load_failed": "Os modelos não puderam ser carregados.",
-    "auto_trigger_hint": "Cria uma automatização com este gatilho para este dispositivo e abre-a no Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Criada pelo WashData para {device}. Adicione as suas ações (notificar, luzes, ...).",
     "automation_alias_new": "{device}: nova automatização",
-    "maint_done_by_program_intro": "Uma tarefa conta como feita quando termina um ciclo de um dos seus programas, por exemplo a limpeza do tambor quando o Algodão 90 é executado. Só contam os ciclos de que o WashData tem a certeza ou que tenha escolhido."
+    "maint_done_by_program_intro": "Uma tarefa conta como feita quando termina um ciclo de um dos seus programas, por exemplo a limpeza do tambor quando o Algodão 90 é executado. Só contam os ciclos de que o WashData tem a certeza ou que tenha escolhido.",
+    "auto_none": "Ainda nenhuma automatização usa este eletrodoméstico.",
+    "auto_start_hint": "Abre no editor de automatizações do Home Assistant com este eletrodoméstico já preenchido.",
+    "auto_yours_intro": "Automatizações do Home Assistant que reagem a este eletrodoméstico.",
+    "bp_needs_online": "Os modelos são transferidos do GitHub, por isso a biblioteca só funciona com as funcionalidades online ativadas. As funcionalidades online também incluem a loja da comunidade.",
+    "bp_needs_online_admin": "Um administrador pode ativá-las no menu da roda dentada, em Online e comunidade.",
+    "bp_stale": "Não foi possível contactar o GitHub agora. Estes são os modelos transferidos anteriormente.",
+    "bp_none_yet": "Ainda não há modelos para este tipo de eletrodoméstico. Partilhe o primeiro.",
+    "bp_unreachable": "É transferida do GitHub. Verifique se o Home Assistant consegue aceder à Internet e tente novamente.",
+    "bp_library_intro": "Automatizações prontas a usar partilhadas por utilizadores do WashData no GitHub, revistas antes de serem listadas. Disponível apenas com as funcionalidades online ativadas.",
+    "bp_needs_version": "Requer o WashData {version} ou mais recente."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Máquina de lavar louça: segundos de silêncio após a duração esperada antes de libertar a espera da descarga de fim de ciclo",
@@ -2009,9 +2031,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter no GitHub ↗",
     "manual": "Manual ↗",
-    "bp_share": "Partilhe o seu próprio modelo via pull request ↗",
-    "bp_open_in_ha": "Abrir no Home Assistant ↗",
-    "automations_all": "Todas as automatizações WashData no Home Assistant"
+    "automations_all": "Todas as automatizações WashData no Home Assistant",
+    "bp_share_pr": "Partilhe o seu próprio modelo: abra um pull request no GitHub",
+    "bp_view_github": "Ver no GitHub",
+    "bp_import_my_ha": "Importar com My Home Assistant"
   },
   "tip": {
     "add_brand": "Marca não listada? Adicione-a ao catálogo da comunidade",
@@ -2192,16 +2215,6 @@
     "thr": "limiar",
     "too_short": "demasiado curto",
     "tumble_kept": "rotações mantidas"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Ativar algo enquanto um ciclo está em curso",
-      "description": "Ativa uma luz, interruptor ou helper de alternância quando um ciclo WashData começa e desativa quando termina, incluindo após um falso arranque.\n\nRequer WashData 0.5.9 ou mais recente."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Terminar uma longa fase anti-vincos da máquina de secar",
-      "description": "Para máquinas de secar que continuam a rodar no modo anti-vincos durante horas após o programa. Só é executado se a máquina de secar ainda estiver a rodar decorridos os minutos definidos após o fim do programa; uma máquina de secar que já tenha parado nessa altura não é afetada. Depois desliga a tomada inteligente da máquina de secar num momento de baixa potência e, por predefinição, volta a ligá-la. Um novo ciclo que comece entretanto cancela-o.\n\nRisco: isto comuta um relé enquanto a máquina de secar está ligada. Utilize apenas com uma tomada adequada à sua máquina e por sua conta e risco. O WashData nunca comuta a tomada por si próprio; esta automatização fá-lo.\n\nRequer WashData 0.5.9 ou mais recente."
-    }
   },
   "trigger": {
     "cycle_started": {

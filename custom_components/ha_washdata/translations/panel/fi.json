@@ -142,7 +142,6 @@
     "load_more": "Lataa lisää",
     "manage": "Hallitse",
     "merge": "Yhdistä",
-    "new_automation": "＋ Uusi automaatio",
     "new_group": "+ Uusi ryhmä",
     "new_group_tip": "Ryhmittele lähes samanlaiset profiilit (sama muoto, eri lämpötila tai linkous), jotta täsmäytys erottaa ne toisistaan.",
     "new_phase": "+ Uusi vaihe",
@@ -251,13 +250,23 @@
     "create_profile_from_gap": "Luo profiili",
     "undo_import": "Kumoa viimeisin tuonti",
     "pg_rerun": "Päivitä simulaatio",
-    "from_trigger": "Käynnistä triggerillä ▾",
-    "bp_use": "Käytä tämän laitteen kanssa",
-    "bp_install": "Asenna malli",
-    "bp_view_yaml": "Näytä YAML",
-    "copy": "Kopioi",
     "replace": "Korvaa",
-    "from_trigger_open": "Käynnistä triggerillä ▴"
+    "auto_edit_in_ha": "Muokkaa Home Assistantissa",
+    "auto_fewer_triggers": "Vähemmän triggereitä",
+    "auto_more_triggers": "{count} triggeriä lisää",
+    "auto_more_triggers_one": "{count} triggeri lisää",
+    "auto_more_triggers_other": "{count} triggeriä lisää",
+    "auto_blank": "Tyhjä automaatio",
+    "bp_refresh": "Tarkista uudet mallit GitHubista",
+    "bp_turn_on_online": "Ota verkkotoiminnot käyttöön",
+    "bp_add_tip": "Luo automaation tälle laitteelle oletusasetuksilla ja avaa sen Home Assistantissa",
+    "bp_add_to": "Lisää: {device}",
+    "bp_setup_tip": "Asentaa mallin ja avaa Home Assistantin, jossa täytät loput",
+    "bp_setup_in_ha": "Määritä Home Assistantissa",
+    "bp_details": "Tiedot",
+    "bp_copy_yaml": "Kopioi YAML",
+    "bp_hide_yaml": "Piilota YAML",
+    "bp_show_yaml": "Näytä YAML"
   },
   "note": {
     "off_delay": {
@@ -337,7 +346,6 @@
     "add_maintenance": "Lisää huoltotapahtuma",
     "automation_delete": "Poista tämä automaatio",
     "automation_needs_review": "Tämä sykli kaipaa tarkistamista",
-    "automation_open": "Avaa automaatioeditorissa",
     "automation_review_this_cycle": "Tarkista tämä sykli",
     "automations": "Automaatiot",
     "clear_debug": "Tyhjennä virheenkorjausjäljet",
@@ -355,7 +363,6 @@
     "ml_settings_card": "Asetukset",
     "ml_smart_learning": "Älykäs oppiminen",
     "my_preferences": "Omat asetukset",
-    "no_automations": "Mikään automaatio ei viittaa tähän laitteeseen vielä.",
     "panel_settings": "Paneelin asetukset",
     "pg_settings_source": "Asetusten lähde",
     "phase_catalog": "Vaiheen katalogi",
@@ -376,10 +383,14 @@
     "service_status": "Huollon tila",
     "online_account_tab": "Verkko ja yhteisö",
     "live_match_debug": "Reaaliaikaisen täsmäytyksen virheenkorjaus",
-    "automations_used": "Tätä laitetta käyttävät automaatiot",
-    "bp_templates": "Mallit",
     "automations_all_tip": "Home Assistantin automaatiolista, suodatettuna WashData-etiketin mukaan. Täältä luodut automaatiot löytyvät myös WashData-luokasta.",
-    "maint_done_by_program": "Automaattinen kuittaus"
+    "maint_done_by_program": "Automaattinen kuittaus",
+    "auto_start": "Aloita uusi automaatio",
+    "auto_yours": "Omat automaatiosi",
+    "bp_needs_online": "Mallikirjasto tarvitsee verkkotoiminnot",
+    "bp_unreachable": "Mallikirjastoon ei saatu yhteyttä",
+    "bp_library": "Mallikirjasto",
+    "bp_settings": "Mitä voit asettaa"
   },
   "health": {
     "fair": "Tyydyttävä profiililaatu",
@@ -692,13 +703,18 @@
     "cycle_context_series": "Tallentimen historia",
     "before_start": "Ennen alkua",
     "after_end": "Lopun jälkeen",
-    "bp_you_choose": "Sinä valitset: {inputs}",
-    "bp_adjustable": "Säädettävä: {inputs}",
     "bp_yaml": "Blueprint-YAML",
     "automation_wd_label": "Sisältää WashData-etiketin",
     "done_by_none": "Ei asetettu",
     "done_by_programs": "Automaattinen kuittaus: {programs}",
-    "done_by_cycle": "Tehty syklillä: {program}"
+    "done_by_cycle": "Tehty syklillä: {program}",
+    "bp_by": "tekijä: {author}",
+    "bp_for_all": "Kaikki laitteet",
+    "bp_for": "Sopii",
+    "bp_needs": "Vaatii",
+    "bp_needs_version": "WashData {version} tai uudempi",
+    "bp_author": "Tekijä",
+    "bp_required": "pakollinen"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -797,7 +813,7 @@
     "undo_import_ok": "Kumoa tuonti",
     "undo_import_title": "Kumoa viimeisin tuonti",
     "bp_replace_title": "Korvataanko asennettu malli?",
-    "bp_replace_msg": "Home Assistantilla on eri versio kohteesta \"{name}\". Korvataanko se tämän WashData-version mallilla? Sitä käyttävät automaatiot muuttuvat sen mukana."
+    "bp_replace_library_msg": "Home Assistantilla on eri versio kohteesta \"{name}\". Korvataanko se mallikirjaston versiolla? Sitä käyttävät automaatiot muuttuvat sen mukana."
   },
   "msg": {
     "pg_canvas_empty3": "Valitse jakso yltä ja paina Suorita simuloidaksesi sen. Vie sitten osoitin päälle lukeaksesi arvoja, vieritä tai nipistä zoomataksesi ja vedä panoroidaksesi.",
@@ -986,7 +1002,7 @@
     "standby_above_stop_title": "Laite otti yhä {idle} W jakson päättyessä",
     "standby_above_stop_sub": "{n} viimeisestä {total} jaksosta. Sammutusviive alkaa vasta, kun teho on Pysäytyskynnyksen ({stop} W) alapuolella, joten jaksot päättyvät myöhässä tai ne on pysäytettävä käsin.",
     "store_share_intro": "Lataa tämä viitesykli, jotta muut samaa laitetta käyttävät voivat hyödyntää sitä. Se tarkistetaan ennen julkaisua.",
-    "online_intro_global": "Selaa ja jaa viitetallennuksia muiden WashData-käyttäjien kanssa. Yksi yhteys kattaa kaikki WashData-laitteesi; merkki ja malli asetetaan laitekohtaisesti Perusasetukset-osiossa. Verkkotoiminnot ovat pois päältä, kunnes otat ne käyttöön.",
+    "online_intro_global": "Selaa ja jaa viitetallennuksia muiden WashData-käyttäjien kanssa ja käytä automaatioiden mallikirjastoa. Yksi yhteys kattaa kaikki WashData-laitteesi; merkki ja malli asetetaan laitekohtaisesti Perusasetukset-osiossa. Verkkotoiminnot ovat pois päältä, kunnes otat ne käyttöön.",
     "online_unavailable": "Verkkotoiminnot eivät ole käytettävissä tällä palvelimella.",
     "store_picker_offline": "Ota verkkotoiminnot käyttöön asetusten rattaasta valitaksesi yhteisön luettelosta.",
     "pick_brand_first": "Valitse ensin laitteen merkki.",
@@ -1081,16 +1097,21 @@
     "cycle_context_none": "Tallentimessa ei ole lukemia tämän syklin ympäriltä (Home Assistant säilyttää oletuksena 10 päivän historian).",
     "cycle_context_tip": "Vain näyttöä varten: näyttää tehoanturin tallentimen historian tämän syklin ympäriltä, jos se on vielä tallessa. Jos haluat liittää keskeytyneet käynnistysyritykset tuleviin sykleihin, käytä asetusta Käyrän esijakso (Asetukset > Tunnistus > Syklin alku). Se muuttaa tallennettuja kestoja.",
     "invalid_threshold_pair": "Pysäytyskynnyksen ({stop} W) on oltava pienempi kuin Käynnistyskynnys ({start} W). Mitään ei tallennettu; muuta molempia yhdessä.",
-    "automations_tab_intro": "WashData tarjoaa laitetriggereitä (sykli alkoi, sykli päättyi, sykli jumiutui ja lisää) omille Home Assistant -automaatioillesi. Tätä laitetta käyttävät automaatiot on listattu tässä.",
-    "bp_intro": "Valmiit automaatiot tälle laitteelle, asennettu Home Assistantin blueprinteiksi.",
     "bp_admin_only": "Järjestelmänvalvoja asentaa mallit.",
-    "bp_none": "Tälle laitetyypille ei ole vielä malleja.",
-    "bp_load_failed": "Malleja ei voitu ladata.",
-    "auto_trigger_hint": "Luo automaation tällä triggerillä tälle laitteelle ja avaa sen Home Assistantissa.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "WashDatan luoma automaatio laitteelle {device}. Lisää omat toimintosi (ilmoitus, valot, ...).",
     "automation_alias_new": "{device}: uusi automaatio",
-    "maint_done_by_program_intro": "Tehtävä lasketaan tehdyksi, kun jonkin sen ohjelman sykli päättyy, esimerkiksi rummun puhdistus, kun Puuvilla 90 -ohjelma ajetaan. Vain syklit, joista WashData on varma tai joiden ohjelman valitsit itse, lasketaan."
+    "maint_done_by_program_intro": "Tehtävä lasketaan tehdyksi, kun jonkin sen ohjelman sykli päättyy, esimerkiksi rummun puhdistus, kun Puuvilla 90 -ohjelma ajetaan. Vain syklit, joista WashData on varma tai joiden ohjelman valitsit itse, lasketaan.",
+    "auto_none": "Mikään automaatio ei vielä käytä tätä laitetta.",
+    "auto_start_hint": "Avautuu Home Assistantin automaatioeditoriin, jossa tämä laite on jo valmiiksi valittu.",
+    "auto_yours_intro": "Home Assistant -automaatiot, jotka reagoivat tähän laitteeseen.",
+    "bp_needs_online": "Mallit ladataan GitHubista, joten kirjasto toimii vain, kun verkkotoiminnot ovat käytössä. Verkkotoimintoihin kuuluu myös Yhteisökauppa.",
+    "bp_needs_online_admin": "Järjestelmänvalvoja voi ottaa ne käyttöön ratasvalikon kohdasta Verkko ja yhteisö.",
+    "bp_stale": "GitHubiin ei juuri nyt saatu yhteyttä. Nämä ovat aiemmin ladatut mallit.",
+    "bp_none_yet": "Tälle laitetyypille ei ole vielä malleja. Jaa ensimmäinen.",
+    "bp_unreachable": "Se ladataan GitHubista. Tarkista, että Home Assistant pääsee internetiin, ja yritä uudelleen.",
+    "bp_library_intro": "Valmiita automaatioita, joita WashData-käyttäjät jakavat GitHubissa ja jotka tarkistetaan ennen listalle pääsyä. Käytettävissä vain, kun verkkotoiminnot ovat käytössä.",
+    "bp_needs_version": "Vaatii WashData {version} tai uudemman."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
@@ -2045,9 +2066,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter GitHubissa ↗",
     "manual": "Käyttöohje ↗",
-    "bp_share": "Jaa oma mallisi pull requestilla ↗",
-    "bp_open_in_ha": "Avaa Home Assistantissa ↗",
-    "automations_all": "Kaikki WashData-automaatiot Home Assistantissa"
+    "automations_all": "Kaikki WashData-automaatiot Home Assistantissa",
+    "bp_share_pr": "Jaa oma mallisi: avaa pull request GitHubissa",
+    "bp_view_github": "Näytä GitHubissa",
+    "bp_import_my_ha": "Tuo My Home Assistantilla"
   },
   "tip": {
     "add_brand": "Merkkiä ei ole listalla? Lisää se yhteisön luetteloon",
@@ -2174,16 +2196,6 @@
     "thr": "kynnys",
     "too_short": "liian lyhyt",
     "tumble_kept": "rumpupulssit säilytetty"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Kytke jokin päälle syklin aikana",
-      "description": "Kytkee valon, kytkimen tai apuohjelman päälle kun WashData-sykli alkaa ja pois kun se päättyy, myös väärän käynnistyksen jälkeen.\n\nVaatii WashData 0.5.9 tai uudemman."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Lopeta kuivausrummun pitkä ryppyjenestovaihe",
-      "description": "Kuivausrummuille, jotka jatkavat pyörimistä ryppyjenestotilassa tunteja ohjelman jälkeen. Toimii vain, jos kuivausrumpu pyörii yhä asetetun minuuttimäärän kuluttua ohjelman päättymisestä; siihen mennessä pysähtynyttä kuivausrumpua ei kosketa. Sitten se sammuttaa kuivausrummun älypistokkeen hetkellä, jolloin virrankulutus on pieni, ja oletuksena käynnistää sen uudelleen. Uuden syklin käynnistyminen sen aikana peruuttaa sen.\n\nRiski: tämä kytkee releen, kun kuivausrumpu on kytketty pistorasiaan. Käytä vain pistokkeella, joka on mitoitettu kuivausrummulle, omalla vastuullasi. WashData ei koskaan kytke pistoketta itse; tämä automaatio tekee sen.\n\nVaatii WashData 0.5.9 tai uudemman."
-    }
   },
   "trigger": {
     "cycle_started": {

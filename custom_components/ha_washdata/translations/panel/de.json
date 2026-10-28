@@ -144,7 +144,6 @@
     "load_more": "Mehr laden",
     "manage": "Verwalten",
     "merge": "Verschmelzen",
-    "new_automation": "＋ Neue Automatisierung",
     "new_group": "+ Neue Gruppe",
     "new_group_tip": "Nahezu identische Profile gruppieren (gleiche Form, andere Temperatur oder Schleuderstufe), damit der Abgleich sie unterscheiden kann.",
     "new_phase": "+ Neue Phase",
@@ -251,13 +250,23 @@
     "confirmed": "Bestätigt",
     "create_profile_from_gap": "Profil erstellen",
     "undo_import": "Letzten Import rückgängig machen",
-    "from_trigger": "Von Trigger starten ▾",
-    "bp_use": "Mit diesem Gerät verwenden",
-    "bp_install": "Vorlage installieren",
-    "bp_view_yaml": "YAML anzeigen",
-    "copy": "Kopieren",
     "replace": "Ersetzen",
-    "from_trigger_open": "Von Trigger starten ▴"
+    "auto_edit_in_ha": "In Home Assistant bearbeiten",
+    "auto_fewer_triggers": "Weniger Trigger",
+    "auto_more_triggers": "{count} weitere Trigger",
+    "auto_more_triggers_one": "{count} weiterer Trigger",
+    "auto_more_triggers_other": "{count} weitere Trigger",
+    "auto_blank": "Leere Automatisierung",
+    "bp_refresh": "Auf GitHub nach neuen Vorlagen suchen",
+    "bp_turn_on_online": "Onlinefunktionen einschalten",
+    "bp_add_tip": "Erstellt die Automatisierung für dieses Gerät mit den Standardeinstellungen und öffnet sie dann in Home Assistant",
+    "bp_add_to": "Zu {device} hinzufügen",
+    "bp_setup_tip": "Installiert die Vorlage und öffnet dann Home Assistant, um den Rest auszufüllen",
+    "bp_setup_in_ha": "In Home Assistant einrichten",
+    "bp_details": "Details",
+    "bp_copy_yaml": "YAML kopieren",
+    "bp_hide_yaml": "YAML ausblenden",
+    "bp_show_yaml": "YAML anzeigen"
   },
   "note": {
     "off_delay": {
@@ -337,7 +346,6 @@
     "add_maintenance": "Wartungsereignis hinzufügen",
     "automation_delete": "Löschen Sie diese Automatisierung",
     "automation_needs_review": "Dieser Zyklus muss überprüft werden",
-    "automation_open": "Im Automatisierungseditor öffnen",
     "automation_review_this_cycle": "Sehen Sie sich diesen Zyklus noch einmal an",
     "automations": "Automatisierungen",
     "clear_debug": "Debug-Traces löschen",
@@ -355,7 +363,6 @@
     "ml_settings_card": "Einstellungen",
     "ml_smart_learning": "Intelligentes Lernen",
     "my_preferences": "Meine Vorlieben",
-    "no_automations": "Noch keine Automatisierungen verweisen auf dieses Gerät.",
     "panel_settings": "Panel-Einstellungen",
     "pg_settings_source": "Herkunft der Einstellungen",
     "phase_catalog": "Phasenkatalog",
@@ -376,10 +383,14 @@
     "service_status": "Wartungsstatus",
     "online_account_tab": "Online & Community",
     "live_match_debug": "Live-Match-Debug",
-    "automations_used": "Automatisierungen, die dieses Gerät verwenden",
-    "bp_templates": "Vorlagen",
     "automations_all_tip": "Die Automatisierungsliste von Home Assistant, gefiltert nach dem WashData-Label. Hier erstellte Automatisierungen befinden sich auch in der WashData-Kategorie.",
-    "maint_done_by_program": "Automatisch erledigt"
+    "maint_done_by_program": "Automatisch erledigt",
+    "auto_start": "Neue Automatisierung erstellen",
+    "auto_yours": "Ihre Automatisierungen",
+    "bp_needs_online": "Die Vorlagenbibliothek benötigt Onlinefunktionen",
+    "bp_unreachable": "Die Vorlagenbibliothek war nicht erreichbar",
+    "bp_library": "Vorlagenbibliothek",
+    "bp_settings": "Was Sie einstellen können"
   },
   "health": {
     "fair": "Akzeptable Übereinstimmungsqualität",
@@ -692,13 +703,18 @@
     "pg_obj_split": "Aufteilungsrate",
     "pg_sweep_cycles": "Letzte Zyklen",
     "cat_backfill_cycles": "Im importierten Leistungsverlauf gefundene Zyklen",
-    "bp_you_choose": "Ihre Wahl: {inputs}",
-    "bp_adjustable": "Anpassbar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
     "automation_wd_label": "Trägt das WashData-Label",
     "done_by_none": "Nicht festgelegt",
     "done_by_programs": "Automatisch erledigt durch: {programs}",
-    "done_by_cycle": "Erledigt durch einen Zyklus mit {program}"
+    "done_by_cycle": "Erledigt durch einen Zyklus mit {program}",
+    "bp_by": "von {author}",
+    "bp_for_all": "Alle Geräte",
+    "bp_for": "Für",
+    "bp_needs": "Benötigt",
+    "bp_needs_version": "WashData {version} oder neuer",
+    "bp_author": "Autor",
+    "bp_required": "erforderlich"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -797,7 +813,7 @@
     "undo_import_ok": "Import rückgängig machen",
     "undo_import_title": "Letzten Import rückgängig machen",
     "bp_replace_title": "Installierte Vorlage ersetzen?",
-    "bp_replace_msg": "Home Assistant hat eine andere Version von \"{name}\". Mit der Version aus WashData ersetzen? Automatisierungen, die sie verwenden, ändern sich mit ihr."
+    "bp_replace_library_msg": "Home Assistant hat eine andere Version von \"{name}\". Durch die Version aus der Vorlagenbibliothek ersetzen? Automatisierungen, die sie verwenden, ändern sich mit ihr."
   },
   "msg": {
     "custom_task_limit": "Sie haben das Limit von {max} Aufgaben erreicht.",
@@ -994,7 +1010,7 @@
     "standby_above_stop_title": "Zieht beim Zyklusende noch {idle} W",
     "standby_above_stop_sub": "{n} der letzten {total} Zyklen. Die Abschaltverzögerung beginnt erst, wenn die Leistung unter den Stoppschwellenwert ({stop} W) fällt, daher enden Zyklen zu spät oder müssen von Hand gestoppt werden.",
     "store_share_intro": "Laden Sie diesen Referenzzyklus hoch, damit andere mit demselben Gerät ihn nutzen können. Er wird geprüft, bevor er öffentlich erscheint.",
-    "online_intro_global": "Durchsuchen und teilen Sie Referenzaufnahmen mit anderen WashData-Nutzern. Eine Verbindung gilt für alle Ihre WashData-Geräte; Marke und Modell werden pro Gerät unter Grundlegend festgelegt. Onlinefunktionen sind aus, bis Sie sie einschalten.",
+    "online_intro_global": "Durchsuchen und teilen Sie Referenzaufnahmen mit anderen WashData-Nutzern und nutzen Sie die Bibliothek mit Automatisierungsvorlagen. Eine Verbindung gilt für alle Ihre WashData-Geräte; Marke und Modell werden pro Gerät unter Grundlegend festgelegt. Onlinefunktionen sind aus, bis Sie sie einschalten.",
     "online_unavailable": "Onlinefunktionen sind auf diesem Server nicht verfügbar.",
     "store_picker_offline": "Aktivieren Sie die Onlinefunktionen im Einstellungszahnrad, um aus dem Community-Katalog auszuwählen.",
     "pick_brand_first": "Wählen Sie zuerst eine Gerätemarke.",
@@ -1081,16 +1097,21 @@
     "import_undo_hint": "Ein Wiederherstellungspunkt von vor dem letzten Import ({when}) wird aufbewahrt: {profiles} Profil(e) und {cycles} Zyklus/Zyklen.",
     "replace_undo_hint": "Zuvor wird ein Wiederherstellungspunkt gespeichert, sodass Sie diesen Import unter „Exportieren / Importieren“ rückgängig machen können.",
     "pg_in_sample_note": "Diese Zyklen haben die Profile mitgebildet, mit denen sie abgeglichen werden, daher sind die Ergebnisse optimistisch: Bei neuen Zyklen ist mit etwas weniger richtigen Zuordnungen zu rechnen.",
-    "automations_tab_intro": "WashData bietet Geräte-Trigger (Zyklus gestartet, Zyklus beendet, Zyklus im Stillstand und mehr) für Ihre eigenen Home Assistant-Automatisierungen. Automatisierungen, die dieses Gerät verwenden, sind hier aufgelistet.",
-    "bp_intro": "Fertige Automatisierungen für dieses Gerät, als Home Assistant-Blueprints installiert.",
     "bp_admin_only": "Vorlagen werden von einem Administrator installiert.",
-    "bp_none": "Noch keine Vorlagen für diesen Gerätetyp.",
-    "bp_load_failed": "Vorlagen konnten nicht geladen werden.",
-    "auto_trigger_hint": "Erstellt eine Automatisierung mit diesem Trigger für dieses Gerät und öffnet sie in Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Von WashData für {device} erstellt. Fügen Sie Ihre Aktionen hinzu (Benachrichtigung, Licht, ...).",
     "automation_alias_new": "{device}: neue Automatisierung",
-    "maint_done_by_program_intro": "Eine Aufgabe gilt als erledigt, wenn ein Zyklus eines ihrer Programme endet, zum Beispiel die Trommelreinigung, wenn Baumwolle 90 läuft. Es zählen nur Zyklen, bei denen WashData sicher ist oder die Sie selbst gewählt haben."
+    "maint_done_by_program_intro": "Eine Aufgabe gilt als erledigt, wenn ein Zyklus eines ihrer Programme endet, zum Beispiel die Trommelreinigung, wenn Baumwolle 90 läuft. Es zählen nur Zyklen, bei denen WashData sicher ist oder die Sie selbst gewählt haben.",
+    "auto_none": "Noch keine Automatisierungen verwenden dieses Gerät.",
+    "auto_start_hint": "Öffnet den Automatisierungseditor von Home Assistant, mit diesem Gerät bereits eingetragen.",
+    "auto_yours_intro": "Home Assistant-Automatisierungen, die auf dieses Gerät reagieren.",
+    "bp_needs_online": "Vorlagen werden von GitHub heruntergeladen, daher funktioniert die Bibliothek nur mit eingeschalteten Onlinefunktionen. Zu den Onlinefunktionen gehört auch der Community-Store.",
+    "bp_needs_online_admin": "Ein Administrator kann sie im Einstellungszahnrad unter Online & Community einschalten.",
+    "bp_stale": "GitHub war gerade nicht erreichbar. Dies sind die zuvor heruntergeladenen Vorlagen.",
+    "bp_none_yet": "Noch keine Vorlagen für diesen Gerätetyp. Teilen Sie die erste.",
+    "bp_unreachable": "Sie wird von GitHub heruntergeladen. Prüfen Sie, ob Home Assistant das Internet erreicht, und versuchen Sie es dann erneut.",
+    "bp_library_intro": "Fertige Automatisierungen, die WashData-Nutzer auf GitHub teilen und die vor der Aufnahme geprüft werden. Nur mit eingeschalteten Onlinefunktionen verfügbar.",
+    "bp_needs_version": "Benötigt WashData {version} oder neuer."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
@@ -2045,9 +2066,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter auf GitHub ↗",
     "manual": "Handbuch ↗",
-    "bp_share": "Eigene Vorlage per Pull Request teilen ↗",
-    "bp_open_in_ha": "In Home Assistant öffnen ↗",
-    "automations_all": "Alle WashData-Automatisierungen in Home Assistant"
+    "automations_all": "Alle WashData-Automatisierungen in Home Assistant",
+    "bp_share_pr": "Eigene Vorlage teilen: einen Pull Request auf GitHub öffnen",
+    "bp_view_github": "Auf GitHub ansehen",
+    "bp_import_my_ha": "Mit My Home Assistant importieren"
   },
   "tip": {
     "add_brand": "Marke nicht aufgeführt? Fügen Sie sie zum Community-Katalog hinzu",
@@ -2174,16 +2196,6 @@
     "thr": "Schw.",
     "too_short": "zu kurz",
     "tumble_kept": "Trommelimpulse behalten"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Etwas einschalten, während ein Zyklus läuft",
-      "description": "Schaltet ein Licht, einen Schalter oder einen Umschalter ein, wenn ein WashData-Zyklus startet, und wieder aus, wenn er endet – auch nach einem Fehlstart.\n\nBenötigt WashData 0.5.9 oder neuer."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Lange Knitterschutz-Phase des Trockners beenden",
-      "description": "Für Trockner, deren Trommel sich nach dem Programm stundenlang im Knitterschutz weiterbewegt. Läuft nur, wenn sich die Trommel die eingestellte Anzahl Minuten nach Programmende noch bewegt; ein Trockner, der bis dahin aufgehört hat, bleibt unberührt. Sie schaltet dann den Smart Plug des Trockners in einem Moment geringer Leistung aus, standardmäßig auch wieder ein. Ein neu gestarteter Zyklus bricht sie ab.\n\nRisiko: Dabei wird ein Relais geschaltet, während der Trockner angeschlossen ist. Nur mit einem für Ihren Trockner geeigneten Stecker und auf eigenes Risiko verwenden. WashData schaltet den Stecker selbst nie; das erledigt diese Automatisierung.\n\nBenötigt WashData 0.5.9 oder neuer."
-    }
   },
   "trigger": {
     "cycle_started": {

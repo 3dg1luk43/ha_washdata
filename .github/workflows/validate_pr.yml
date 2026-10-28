@@ -188,21 +188,15 @@ jobs:
             const STRINGS_SOURCE = 'custom_components/ha_washdata/strings.json';
             const isLocalizationFile = (f) => f.startsWith(TRANSLATIONS_DIR) || f === STRINGS_SOURCE;
 
-            // Automation templates (blueprints, #478) are reviewed on their own merits:
-            // a PR that only adds or edits files under blueprints/ needs no accepted
-            // issue. The maintainer still reviews and merges every one.
-            const BLUEPRINTS_DIR = 'custom_components/ha_washdata/blueprints/';
 
             let exemptReason = null;
             try {
               const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: prNumber, per_page: 100 });
-              // A rename counts from both ends: moving a file INTO blueprints/ is
+              // A rename counts from both ends: moving a file INTO translations/ is
               // still a change outside it.
               const filenames = files.flatMap(f => [f.filename, f.previous_filename].filter(Boolean));
               if (filenames.length > 0 && filenames.every(isLocalizationFile)) {
                 exemptReason = 'Localization-only PR (translations/strings.json)';
-              } else if (filenames.length > 0 && filenames.every(f => f.startsWith(BLUEPRINTS_DIR))) {
-                exemptReason = 'Blueprint-only PR';
               }
             } catch (e) {
               console.warn(`Could not fetch changed files: ${e.message}`);

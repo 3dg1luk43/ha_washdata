@@ -144,7 +144,6 @@
     "load_more": "Last inn mer",
     "manage": "Administrer",
     "merge": "Slå sammen",
-    "new_automation": "＋ Ny automatisering",
     "new_group": "+ Ny gruppe",
     "new_group_tip": "Grupper nesten identiske profiler (samme form, annen temperatur eller sentrifugering) slik at matchingen kan skille dem.",
     "new_phase": "+ Ny fase",
@@ -251,13 +250,23 @@
     "confirmed": "Bekreftet",
     "create_profile_from_gap": "Opprett profil",
     "undo_import": "Angre siste import",
-    "from_trigger": "Start fra en trigger ▾",
-    "bp_use": "Bruk med dette apparatet",
-    "bp_install": "Installer mal",
-    "bp_view_yaml": "Vis YAML",
-    "copy": "Kopier",
     "replace": "Erstatt",
-    "from_trigger_open": "Start fra en trigger ▴"
+    "auto_edit_in_ha": "Rediger i Home Assistant",
+    "auto_fewer_triggers": "Færre triggere",
+    "auto_more_triggers": "{count} triggere til",
+    "auto_more_triggers_one": "{count} trigger til",
+    "auto_more_triggers_other": "{count} triggere til",
+    "auto_blank": "Tom automasjon",
+    "bp_refresh": "Se etter nye maler på GitHub",
+    "bp_turn_on_online": "Slå på nettfunksjoner",
+    "bp_add_tip": "Oppretter automasjonen for dette apparatet med standardinnstillingene og åpner den deretter i Home Assistant",
+    "bp_add_to": "Legg til for {device}",
+    "bp_setup_tip": "Installerer malen og åpner deretter Home Assistant så du kan fylle inn resten",
+    "bp_setup_in_ha": "Sett opp i Home Assistant",
+    "bp_details": "Detaljer",
+    "bp_copy_yaml": "Kopier YAML",
+    "bp_hide_yaml": "Skjul YAML",
+    "bp_show_yaml": "Vis YAML"
   },
   "note": {
     "off_delay": {
@@ -337,7 +346,6 @@
     "add_maintenance": "Legg til vedlikeholdshendelse",
     "automation_delete": "Slett denne automatiseringen",
     "automation_needs_review": "Denne syklusen trenger gjennomgang",
-    "automation_open": "Åpne i automatiseringseditoren",
     "automation_review_this_cycle": "Gjennomgå denne syklusen",
     "automations": "Automatiseringer",
     "clear_debug": "Fjern feilsøkingsspor",
@@ -355,7 +363,6 @@
     "ml_settings_card": "Innstillinger",
     "ml_smart_learning": "Smart læring",
     "my_preferences": "Mine preferanser",
-    "no_automations": "Ingen automatiseringer refererer til denne enheten ennå.",
     "panel_settings": "Panelinnstillinger",
     "pg_settings_source": "Kilde for innstillingene",
     "phase_catalog": "Fasekatalog",
@@ -376,10 +383,14 @@
     "service_status": "Servicestatus",
     "online_account_tab": "Nett & fellesskap",
     "live_match_debug": "Feilsøking av direkte match",
-    "automations_used": "Automasjoner som bruker dette apparatet",
-    "bp_templates": "Maler",
     "automations_all_tip": "Home Assistants automatiseringsliste, filtrert etter WashData-etiketten. Automatiseringer opprettet her finnes også i WashData-kategorien.",
-    "maint_done_by_program": "Utført automatisk"
+    "maint_done_by_program": "Utført automatisk",
+    "auto_start": "Opprett en ny automasjon",
+    "auto_yours": "Dine automasjoner",
+    "bp_needs_online": "Malbiblioteket krever nettfunksjoner",
+    "bp_unreachable": "Malbiblioteket kunne ikke nås",
+    "bp_library": "Malbibliotek",
+    "bp_settings": "Dette kan du stille inn"
   },
   "health": {
     "fair": "Akseptabel profilkvalitet",
@@ -692,13 +703,18 @@
     "pg_obj_split": "Oppdelingsrate",
     "pg_sweep_cycles": "Siste sykluser",
     "cat_backfill_cycles": "Sykluser funnet i importert effekthistorikk",
-    "bp_you_choose": "Du velger: {inputs}",
-    "bp_adjustable": "Justerbar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
     "automation_wd_label": "Har WashData-etiketten",
     "done_by_none": "Ikke angitt",
     "done_by_programs": "Utført automatisk av: {programs}",
-    "done_by_cycle": "Utført av en syklus med {program}"
+    "done_by_cycle": "Utført av en syklus med {program}",
+    "bp_by": "av {author}",
+    "bp_for_all": "Alle apparater",
+    "bp_for": "For",
+    "bp_needs": "Krever",
+    "bp_needs_version": "WashData {version} eller nyere",
+    "bp_author": "Forfatter",
+    "bp_required": "påkrevd"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -797,7 +813,7 @@
     "undo_import_ok": "Angre import",
     "undo_import_title": "Angre siste import",
     "bp_replace_title": "Erstatte den installerte malen?",
-    "bp_replace_msg": "Home Assistant har en annen versjon av \"{name}\". Erstatte den med den fra denne WashData-versjonen? Automasjoner som bruker den, endres med den."
+    "bp_replace_library_msg": "Home Assistant har en annen versjon av \"{name}\". Erstatte den med den fra malbiblioteket? Automasjoner som bruker den, endres med den."
   },
   "msg": {
     "custom_task_limit": "Du har nådd grensen på {max} oppgaver.",
@@ -994,7 +1010,7 @@
     "standby_above_stop_title": "Trakk fortsatt {idle} W da syklusen ble avsluttet",
     "standby_above_stop_sub": "{n} av de siste {total} syklusene. Av-forsinkelsen starter først når effekten er under Stoppterskel ({stop} W), så sykluser avsluttes for sent eller må stoppes for hånd.",
     "store_share_intro": "Last opp denne referansesyklusen slik at andre med samme apparat kan bruke den. Den gjennomgås før den vises offentlig.",
-    "online_intro_global": "Bla gjennom og del referanseopptak med andre WashData-brukere. Én tilkobling dekker alle WashData-enhetene dine; merke og modell angis per enhet under Grunnleggende. Nettfunksjoner er av til du slår dem på.",
+    "online_intro_global": "Bla gjennom og del referanseopptak med andre WashData-brukere, og bruk biblioteket med automasjonsmaler. Én tilkobling dekker alle WashData-enhetene dine; merke og modell angis per enhet under Grunnleggende. Nettfunksjoner er av til du slår dem på.",
     "online_unavailable": "Nettfunksjoner er ikke tilgjengelige på denne serveren.",
     "store_picker_offline": "Aktiver nettfunksjoner i innstillingstannhjulet for å velge fra fellesskapskatalogen.",
     "pick_brand_first": "Velg et apparatmerke først.",
@@ -1081,16 +1097,21 @@
     "import_undo_hint": "Et gjenopprettingspunkt fra før siste import ({when}) er beholdt: {profiles} profil(er) og {cycles} syklus(er).",
     "replace_undo_hint": "Et gjenopprettingspunkt lagres først, så du kan angre denne importen fra Eksporter / Importer.",
     "pg_in_sample_note": "Disse syklusene var med på å bygge profilene de matches mot, så resultatene er optimistiske: forvent litt færre riktige match på nye sykluser.",
-    "automations_tab_intro": "WashData tilbyr enhetstriggers (syklus startet, syklus ferdig, syklus stoppet opp og mer) for dine egne Home Assistant-automasjoner. Automasjoner som bruker dette apparatet, er listet her.",
-    "bp_intro": "Ferdige automasjoner for dette apparatet, installert som Home Assistant-blueprints.",
     "bp_admin_only": "En administrator installerer maler.",
-    "bp_none": "Ingen maler for denne apparattypen ennå.",
-    "bp_load_failed": "Maler kunne ikke lastes.",
-    "auto_trigger_hint": "Oppretter en automatisering med denne triggeren for denne enheten og åpner den i Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Opprettet av WashData for {device}. Legg til handlingene dine (varsel, lys, ...).",
     "automation_alias_new": "{device}: ny automatisering",
-    "maint_done_by_program_intro": "En oppgave regnes som utført når en syklus med et av programmene dens er ferdig, for eksempel trommelrengjøring når Bomull 90 kjører. Bare sykluser WashData er sikker på, eller som du har valgt selv, teller."
+    "maint_done_by_program_intro": "En oppgave regnes som utført når en syklus med et av programmene dens er ferdig, for eksempel trommelrengjøring når Bomull 90 kjører. Bare sykluser WashData er sikker på, eller som du har valgt selv, teller.",
+    "auto_none": "Ingen automasjoner bruker dette apparatet ennå.",
+    "auto_start_hint": "Åpnes i automasjonsredigeringen i Home Assistant med dette apparatet allerede fylt inn.",
+    "auto_yours_intro": "Home Assistant-automasjoner som reagerer på dette apparatet.",
+    "bp_needs_online": "Maler lastes ned fra GitHub, så biblioteket fungerer bare med nettfunksjoner slått på. Nettfunksjoner omfatter også Fellesskapsbutikken.",
+    "bp_needs_online_admin": "En administrator kan slå dem på i innstillingstannhjulet under Nett & fellesskap.",
+    "bp_stale": "GitHub kunne ikke nås akkurat nå. Dette er malene som ble lastet ned tidligere.",
+    "bp_none_yet": "Ingen maler for denne apparattypen ennå. Del den første.",
+    "bp_unreachable": "Det lastes ned fra GitHub. Sjekk at Home Assistant når internett, og prøv igjen.",
+    "bp_library_intro": "Ferdige automasjoner delt av WashData-brukere på GitHub og gjennomgått før de blir oppført. Bare tilgjengelig med nettfunksjoner slått på.",
+    "bp_needs_version": "Krever WashData {version} eller nyere."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",
@@ -2045,9 +2066,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter på GitHub ↗",
     "manual": "Håndbok ↗",
-    "bp_share": "Del din egen mal via en pull request ↗",
-    "bp_open_in_ha": "Åpne i Home Assistant ↗",
-    "automations_all": "Alle WashData-automatiseringer i Home Assistant"
+    "automations_all": "Alle WashData-automatiseringer i Home Assistant",
+    "bp_share_pr": "Del din egen mal: åpne en pull request på GitHub",
+    "bp_view_github": "Vis på GitHub",
+    "bp_import_my_ha": "Importer med My Home Assistant"
   },
   "tip": {
     "add_brand": "Merke ikke oppført? Legg det til i fellesskapskatalogen",
@@ -2174,16 +2196,6 @@
     "thr": "tersk.",
     "too_short": "for kort",
     "tumble_kept": "trommelpulser beholdt"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Slå noe på mens en syklus kjører",
-      "description": "Slår på et lys, en bryter eller en vekslehjelper når en WashData-syklus starter, og av igjen når den slutter, også etter en falsk start.\n\nKrever WashData 0.5.9 eller nyere."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Avslutt en lang anti-rynke-fase på tørketrommelen",
-      "description": "For tørketromler der trommelen fortsetter å rotere i anti-rynke i timevis etter programmet. Kjører bare hvis trommelen fortsatt roterer det innstilte antallet minutter etter at programmet er ferdig; en tørketrommel som har stoppet innen da, blir latt i fred. Den slår deretter tørketrommelens smart plug av i et øyeblikk med lavt forbruk og, som standard, på igjen. En ny syklus som starter i mellomtiden, avbryter den.\n\nRisiko: dette kobler om et relé mens tørketrommelen er koblet til. Bruk det bare med en plugg som er egnet for tørketrommelen din, og på eget ansvar. WashData kobler aldri pluggen selv; det gjør denne automasjonen.\n\nKrever WashData 0.5.9 eller nyere."
-    }
   },
   "trigger": {
     "cycle_started": {

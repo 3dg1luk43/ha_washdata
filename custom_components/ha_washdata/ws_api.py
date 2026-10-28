@@ -777,7 +777,7 @@ _FULL_COMMANDS = frozenset({
 # Commands allowed for any authenticated user regardless of device permissions.
 _OPEN_COMMANDS = frozenset({
     "get_constants", "get_panel_config", "set_user_prefs",
-    # The shipped blueprint catalog (#478): static files, no device data.
+    # The automation template library (#478): public templates, no device data.
     "blueprints/list",
 })
 # Admin-only commands.
@@ -1509,28 +1509,22 @@ async def ws_get_shareable_cycles(hass, connection, msg):
                  {"items": items, "phase_programs": phase_programs, "all_programs": all_programs})
 
 
-_BLUEPRINT_CATALOG_KEY = f"{DOMAIN}_blueprint_catalog"
-
-
-@websocket_api.websocket_command({vol.Required("type"): "ha_washdata/blueprints/list"})
+@websocket_api.websocket_command({
+    vol.Required("type"): "ha_washdata/blueprints/list",
+    vol.Optional("refresh", default=False): bool,
+})
 @websocket_api.async_response
 async def ws_blueprints_list(hass, connection, msg):
-    """The automation blueprints this version ships (#478), read once per run.
+    """The automation template library (#478), downloaded from its own repository.
 
-    The files ship with the integration, so they only change with an update,
-    which needs a restart: caching for the life of ``hass`` is exact.
+    Only while online features are on (``disabled`` otherwise): the library lives
+    on GitHub. Cached; ``refresh`` asks for a new download (at most once a minute).
     """
-    data = hass.data.get(_BLUEPRINT_CATALOG_KEY)
-    if data is None:
-        try:
-            data = await hass.async_add_executor_job(blueprint_catalog.load_catalog)
-        except Exception:  # pylint: disable=broad-exception-caught
-            # Logged here, not sent: the exception text can hold a file path, and
-            # this command is open to every signed-in user.
-            _LOGGER.exception("Could not read the automation templates")
-            data = {"blueprints": [], "error": "Could not read the automation templates"}
-        if not data.get("error"):
-            hass.data[_BLUEPRINT_CATALOG_KEY] = data
+    from . import store_account  # pylint: disable=import-outside-toplevel
+    if not store_account.online_enabled(hass):
+        _send_result(connection, msg["id"], "blueprints/list", {"blueprints": [], "disabled": True})
+        return
+    data = await blueprint_catalog.async_get_library(hass, refresh=bool(msg.get("refresh")))
     _send_result(connection, msg["id"], "blueprints/list", data)
 
 
@@ -1625,7 +1619,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         # Historical power-data import: staged ingest, background scan, apply
         ws_history_import_begin, ws_history_import_chunk, ws_history_import_recorder,
         ws_start_history_import_scan, ws_apply_history_import,
-        # Automation blueprints shipped with the integration (#478)
+        # The automation template library (#478)
         ws_blueprints_list,
     ]
     for handler in handlers:

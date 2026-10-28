@@ -49,7 +49,58 @@ const _PG_MAX_BATCH_CYCLES = 50;
 // cycle-count sensor (translation_key "cycle_count", unit "cycles"), a public contract.
 const _MAINTENANCE_SUPPORTER_URL = 'https://github.com/iluebbe/maintenance_supporter';
 // Where contributors learn to share an automation template (#478, by pull request).
-const _BLUEPRINT_CONTRIBUTING_URL = 'https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#automation-templates';
+// The automation template library (#478): its own repository, so a template PR
+// never lands on the integration. The backend downloads it (online features only).
+const _AUTOMATION_LIBRARY_URL = 'https://github.com/3dg1luk43/washdata-automations';
+// What "Share your own template" opens in GitHub's file editor.
+const _BP_SKELETON = `# One template per pull request; the library's list is generated after the merge.
+# Rules: ${_AUTOMATION_LIBRARY_URL}/blob/main/CONTRIBUTING.md
+# icon: plug
+# device_types: [dryer, washer_dryer]
+# tags: [smart plug]
+blueprint:
+  name: "WashData: what it does"
+  description: >-
+    One or two sentences: what it does and when.
+
+
+    Needs WashData 0.5.9 or newer.
+  domain: automation
+  author: Your name or GitHub handle
+  input:
+    washdata_device:
+      name: Appliance
+      selector:
+        device:
+          filter:
+            - integration: ha_washdata
+
+triggers:
+  - trigger: ha_washdata.cycle_finished
+    target:
+      device_id: !input washdata_device
+
+actions: []
+`;
+// The quick-start triggers shown before "more triggers", in this order.
+const _AUTO_FEATURED_TRIGGERS = ['cycle_finished', 'cycle_started', 'finishing_soon', 'unload_pending', 'still_tumbling', 'pump_stuck'];
+// Template tile icons (the template's "# icon:" line; blueprint_catalog.ICONS) and the
+// tab's own glyphs: Material Design Icons paths (@mdi/js 7.4.47, Apache-2.0).
+const _AUTO_ICON_PATHS = {
+  plug: 'M16 7V3H14V7H10V3H8V7C7 7 6 8 6 9V14.5L9.5 18V21H14.5V18L18 14.5V9C18 8 17 7 16 7M16 13.67L13.09 16.59L12.67 17H11.33L10.92 16.59L8 13.67V9.09C8 9.06 8.06 9 8.09 9H15.92C15.95 9 16 9.06 16 9.09V13.67Z',
+  light: 'M12,2A7,7 0 0,1 19,9C19,11.38 17.81,13.47 16,14.74V17A1,1 0 0,1 15,18H9A1,1 0 0,1 8,17V14.74C6.19,13.47 5,11.38 5,9A7,7 0 0,1 12,2M9,21V20H15V21A1,1 0 0,1 14,22H10A1,1 0 0,1 9,21M12,4A5,5 0 0,0 7,9C7,11.05 8.23,12.81 10,13.58V16H14V13.58C15.77,12.81 17,11.05 17,9A5,5 0 0,0 12,4Z',
+  bell: 'M10 21H14C14 22.1 13.1 23 12 23S10 22.1 10 21M21 19V20H3V19L5 17V11C5 7.9 7 5.2 10 4.3V4C10 2.9 10.9 2 12 2S14 2.9 14 4V4.3C17 5.2 19 7.9 19 11V17L21 19M17 11C17 8.2 14.8 6 12 6S7 8.2 7 11V18H17V11Z',
+  dryer: 'M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M7,4A1,1 0 0,0 6,5A1,1 0 0,0 7,6A1,1 0 0,0 8,5A1,1 0 0,0 7,4M10,4A1,1 0 0,0 9,5A1,1 0 0,0 10,6A1,1 0 0,0 11,5A1,1 0 0,0 10,4M12,8A6,6 0 0,0 6,14A6,6 0 0,0 12,20A6,6 0 0,0 18,14A6,6 0 0,0 12,8M8.11,10.5H10C9.76,11.88 10,12.67 10.58,13.29C11.68,14.36 12.16,15.71 11.89,17.5H10C10.24,16.12 10,15.33 9.42,14.71C8.32,13.64 7.85,12.29 8.11,10.5M12.11,10.5H14C13.76,11.88 14,12.67 14.58,13.29C15.68,14.36 16.16,15.71 15.89,17.5H14C14.24,16.12 14,15.33 13.42,14.71C12.32,13.64 11.85,12.29 12.11,10.5Z',
+  washer: 'M14.83,11.17C16.39,12.73 16.39,15.27 14.83,16.83C13.27,18.39 10.73,18.39 9.17,16.83L14.83,11.17M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M7,4A1,1 0 0,0 6,5A1,1 0 0,0 7,6A1,1 0 0,0 8,5A1,1 0 0,0 7,4M10,4A1,1 0 0,0 9,5A1,1 0 0,0 10,6A1,1 0 0,0 11,5A1,1 0 0,0 10,4M12,8A6,6 0 0,0 6,14A6,6 0 0,0 12,20A6,6 0 0,0 18,14A6,6 0 0,0 12,8Z',
+  dishwasher: 'M18,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V4A2,2 0 0,0 18,2M10,4A1,1 0 0,1 11,5A1,1 0 0,1 10,6A1,1 0 0,1 9,5A1,1 0 0,1 10,4M7,4A1,1 0 0,1 8,5A1,1 0 0,1 7,6A1,1 0 0,1 6,5A1,1 0 0,1 7,4M18,20H6V8H18V20M14.67,15.33C14.69,16.03 14.41,16.71 13.91,17.21C12.86,18.26 11.15,18.27 10.09,17.21C9.59,16.71 9.31,16.03 9.33,15.33C9.4,14.62 9.63,13.94 10,13.33C10.37,12.5 10.81,11.73 11.33,11L12,10C13.79,12.59 14.67,14.36 14.67,15.33',
+  timer: 'M12,20A7,7 0 0,1 5,13A7,7 0 0,1 12,6A7,7 0 0,1 19,13A7,7 0 0,1 12,20M19.03,7.39L20.45,5.97C20,5.46 19.55,5 19.04,4.56L17.62,6C16.07,4.74 14.12,4 12,4A9,9 0 0,0 3,13A9,9 0 0,0 12,22C17,22 21,17.97 21,13C21,10.88 20.26,8.93 19.03,7.39M11,14H13V8H11M15,1H9V3H15V1Z',
+  power: 'M7,2H17L13.5,9H17L10,22V14H7V2M9,4V12H12V14.66L14,11H10.24L13.76,4H9Z',
+  default: 'M17.5 15.5C17.5 16.61 16.61 17.5 15.5 17.5S13.5 16.61 13.5 15.5 14.4 13.5 15.5 13.5 17.5 14.4 17.5 15.5M8.5 13.5C7.4 13.5 6.5 14.4 6.5 15.5S7.4 17.5 8.5 17.5 10.5 16.61 10.5 15.5 9.61 13.5 8.5 13.5M23 15V18C23 18.55 22.55 19 22 19H21V20C21 21.11 20.11 22 19 22H5C3.9 22 3 21.11 3 20V19H2C1.45 19 1 18.55 1 18V15C1 14.45 1.45 14 2 14H3C3 10.13 6.13 7 10 7H11V5.73C10.4 5.39 10 4.74 10 4C10 2.9 10.9 2 12 2S14 2.9 14 4C14 4.74 13.6 5.39 13 5.73V7H14C17.87 7 21 10.13 21 14H22C22.55 14 23 14.45 23 15M21 16H19V14C19 11.24 16.76 9 14 9H10C7.24 9 5 11.24 5 14V16H3V17H5V20H19V17H21V16Z',
+  earth: 'M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z',
+  refresh: 'M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z',
+  alert: 'M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16',
+  github: 'M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z',
+};
 // The label and automation category on everything the panel creates in Home
 // Assistant (#478): found by name, case-insensitively, else created. A brand name.
 const _WD_LABEL_NAME = 'WashData';
@@ -890,31 +941,101 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
   .wd-dot, .wd-devdot, .wd-rec-active, .wd-spin, .wd-toast { animation: none !important; }
   * { scroll-behavior: auto !important; }
 }
-/* Automations tab: pills, the WashData label badge and the trigger list (#478). */
-.wd-auto-badge { flex: 0 0 auto; margin-left: 4px; padding: 0 7px; border-radius: 10px; font-size: .72em; font-weight: 600; line-height: 1.6;
-  background: var(--primary-color); color: var(--text-primary-color, var(--wd-white)); }
-.wd-auto-trig-list { margin-top: 10px; padding: 10px; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); }
-.wd-auto-trig-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr)); gap: 6px; }
-.wd-auto-trig { justify-content: flex-start; text-align: left; white-space: normal; min-width: 0; overflow-wrap: anywhere; }
-.wd-auto-pill { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; box-sizing: border-box; background: var(--secondary-background-color); border: 1px solid var(--divider-color); border-radius: 16px; padding: 3px 4px 3px 12px; }
-.wd-auto-pill-link { min-width: 0; text-decoration: none; color: var(--primary-text-color); font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wd-auto-pill-link:hover { text-decoration: underline; }
-.wd-auto-pill-x { flex: 0 0 auto; border: none; background: transparent; color: var(--secondary-text-color); cursor: pointer; font-size: 1.15em; line-height: 1; padding: 0 5px; border-radius: 50%; }
-.wd-auto-pill-x:hover { background: var(--error-color, #f44336); color: var(--wd-white); }
-/* Automations tab: template (blueprint) cards; one column on a phone (#478). */
-.wd-bp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 12px; }
-.wd-bp-card { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 14px; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--card-background-color); }
-.wd-bp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.wd-bp-name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
-.wd-bp-status { flex: 0 0 auto; margin-left: 0; }
-.wd-bp-desc { margin: 0; font-size: .86em; line-height: 1.5; color: var(--secondary-text-color); white-space: pre-line; overflow-wrap: anywhere; }
-.wd-bp-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-.wd-bp-tags .wd-tag { margin-left: 0; }
-.wd-bp-inputs { font-size: .8em; color: var(--secondary-text-color); overflow-wrap: anywhere; }
-.wd-bp-needed { color: var(--primary-text-color); }
-.wd-bp-card .wd-card-actions { margin-top: auto; padding-top: 4px; }
-.wd-bp-card .wd-btn, .wd-bp-modal .wd-btn { white-space: normal; }
-.wd-bp-yaml { margin: 0; max-height: 55vh; overflow: auto; padding: 12px; border-radius: var(--wd-radius-md); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: .8em; line-height: 1.45; white-space: pre; }
+/* Automations tab (#478): the device's automations, quick start, the template
+   library. Sentence-case headings: this tab's sections are its content. The
+   porthole disc on each template is the one decorative element. */
+.wd-auto-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; min-height: 34px; }
+.wd-auto-h { margin: 0; font-size: 1.08em; font-weight: 600; line-height: 1.3; color: var(--primary-text-color); }
+.wd-auto-count { min-width: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 11px; font-size: .75em; font-weight: 600; line-height: 22px; text-align: center;
+  background: var(--secondary-background-color); color: var(--secondary-text-color); }
+.wd-auto-head .wd-auto-iconbtn { margin-left: auto; }
+.wd-auto-lead { margin: 0 0 16px; max-width: 72ch; font-size: .88em; line-height: 1.5; color: var(--secondary-text-color); }
+.wd-auto-hint { margin: 2px 0 10px; max-width: 72ch; font-size: .82em; line-height: 1.5; color: var(--secondary-text-color); }
+.wd-auto-empty { margin: 0 0 16px; padding: 14px 16px; border: 1px dashed var(--divider-color); border-radius: var(--wd-radius-md); font-size: .88em; color: var(--secondary-text-color); }
+.wd-auto-list { list-style: none; margin: 0 0 18px; padding: 0; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); }
+.wd-auto-row { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 4px 6px 4px 14px; }
+.wd-auto-row + .wd-auto-row { border-top: 1px solid var(--divider-color); }
+.wd-auto-state { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--disabled-text-color, #9e9e9e); }
+.wd-auto-state.on { background: var(--success-color, #43a047); }
+.wd-auto-name { flex: 1 1 auto; min-width: 0; font-size: .92em; color: var(--primary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-auto-badge { flex: none; padding: 0 7px; border-radius: 10px; font-size: .7em; font-weight: 600; line-height: 1.7;
+  border: 1px solid var(--primary-color); color: var(--primary-color); }
+.wd-auto-off { flex: none; font-size: .78em; color: var(--secondary-text-color); }
+.wd-auto-acts { flex: none; display: flex; align-items: center; gap: 2px; }
+/* A phone: the name gets the line, the actions go under it. */
+@media (max-width: 600px) {
+  .wd-auto-row { flex-wrap: wrap; row-gap: 0; padding-top: 8px; }
+  .wd-auto-name { flex-basis: calc(100% - 60px); white-space: normal; overflow-wrap: anywhere; }
+  .wd-auto-acts { flex-basis: 100%; box-sizing: border-box; justify-content: space-between; padding-left: 10px; }
+}
+.wd-auto-edit { flex: none; padding: 7px 9px; border-radius: var(--wd-radius-sm); font-size: .82em; font-weight: 500; color: var(--primary-color); text-decoration: none; }
+.wd-auto-edit:hover { background: var(--secondary-background-color); }
+.wd-auto-del { flex: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--secondary-text-color); font-size: 1.2em; line-height: 1; cursor: pointer; }
+.wd-auto-del:hover { background: var(--error-color, #f44336); color: var(--wd-white); }
+.wd-auto-start { padding-top: 16px; border-top: 1px solid var(--divider-color); }
+.wd-auto-sub { font-size: .92em; font-weight: 600; color: var(--primary-text-color); }
+.wd-auto-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.wd-auto-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 7px 14px; border: 1px solid var(--divider-color); border-radius: 18px;
+  background: transparent; color: var(--primary-text-color); font: inherit; font-size: .84em; line-height: 1.3; text-align: left; cursor: pointer; }
+.wd-auto-chip:hover:not(:disabled) { border-color: var(--primary-color); color: var(--primary-color); }
+.wd-auto-chip:disabled { opacity: .55; cursor: default; }
+.wd-auto-chip-blank { border-style: dashed; }
+.wd-auto-more { padding: 7px 6px; border: 0; background: transparent; color: var(--primary-color); font: inherit; font-size: .84em; font-weight: 500; cursor: pointer; }
+.wd-auto-all-row { margin: 18px 0 0; font-size: .85em; }
+.wd-auto-all { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+.wd-auto-legacy { margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--warning-color, #ff9800); border-radius: var(--wd-radius-md); background: rgba(255,152,0,.08); }
+.wd-auto-legacy-title { font-weight: 600; margin-bottom: 2px; }
+.wd-auto-iconbtn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--secondary-text-color); cursor: pointer; }
+.wd-auto-iconbtn:hover:not(:disabled) { background: var(--secondary-background-color); color: var(--primary-color); }
+.wd-auto-ico { flex: none; width: 20px; height: 20px; fill: currentColor; }
+.wd-auto-chip:focus-visible, .wd-auto-more:focus-visible, .wd-auto-del:focus-visible, .wd-auto-iconbtn:focus-visible {
+  outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; }
+.wd-bp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr)); gap: 14px; }
+.wd-bp-card { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px; border: 1px solid var(--divider-color); border-radius: var(--wd-radius-lg); background: var(--card-background-color); }
+.wd-bp-head { display: flex; align-items: center; gap: 14px; min-width: 0; }
+/* A porthole: tinted glass inside a thin ring, a gap of card colour between. */
+.wd-bp-port { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; margin: 4px; border-radius: 50%;
+  color: var(--primary-color); background: var(--secondary-background-color);
+  background: color-mix(in srgb, var(--primary-color) 13%, var(--card-background-color));
+  box-shadow: 0 0 0 3px var(--card-background-color), 0 0 0 4.5px color-mix(in srgb, var(--primary-color) 35%, transparent); }
+.wd-bp-port .wd-auto-ico { width: 22px; height: 22px; }
+.wd-bp-port-muted { color: var(--secondary-text-color); background: var(--secondary-background-color); box-shadow: 0 0 0 3px var(--card-background-color), 0 0 0 4.5px var(--divider-color); }
+.wd-bp-titles { min-width: 0; }
+.wd-bp-name { margin: 0; font-size: .98em; font-weight: 600; line-height: 1.3; color: var(--primary-text-color); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wd-bp-by { display: block; margin-top: 2px; font-size: .78em; color: var(--secondary-text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-bp-desc { margin: 0; font-size: .86em; line-height: 1.5; color: var(--secondary-text-color); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.wd-bp-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.wd-bp-tag { padding: 1px 8px; border: 1px solid var(--divider-color); border-radius: 10px; font-size: .72em; line-height: 1.6; color: var(--secondary-text-color); }
+.wd-bp-status { margin-left: auto; font-size: .75em; font-weight: 600; color: var(--warning-color, #ff9800); }
+.wd-bp-status-ok { color: var(--success-color, #43a047); }
+.wd-bp-note { margin: 0 0 10px; font-size: .8em; color: var(--secondary-text-color); }
+.wd-bp-card .wd-bp-note { margin: 0; }
+.wd-bp-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 4px; }
+.wd-bp-card .wd-btn, .wd-bp-modal .wd-btn { white-space: normal; text-align: left; }
+.wd-bp-notice { display: flex; align-items: flex-start; gap: 16px; padding: 16px; border: 1px dashed var(--divider-color); border-radius: var(--wd-radius-lg); }
+.wd-bp-notice-title { margin: 4px 0 2px; font-size: .95em; font-weight: 600; color: var(--primary-text-color); }
+.wd-bp-share { display: flex; align-items: center; gap: 8px; margin: 18px 0 0; font-size: .85em; color: var(--secondary-text-color); }
+.wd-bp-share a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+.wd-bp-dhead { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.wd-bp-dhead h2 { margin: 0 0 2px; }
+.wd-bp-dbody p { margin: 0 0 10px; font-size: .9em; line-height: 1.55; max-width: 72ch; }
+.wd-bp-dbody .wd-bp-risk { display: flex; gap: 10px; padding: 10px 12px; border-left: 3px solid var(--warning-color, #ff9800); border-radius: var(--wd-radius-sm); background: rgba(255,152,0,.1); }
+.wd-bp-risk .wd-auto-ico { color: var(--warning-color, #ff9800); }
+.wd-bp-facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 14px 0; font-size: .86em; }
+.wd-bp-facts dt { color: var(--secondary-text-color); }
+.wd-bp-facts dd { margin: 0; }
+.wd-bp-dh { margin: 18px 0 8px; font-size: .92em; font-weight: 600; }
+.wd-bp-inputs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.wd-bp-inputs li { font-size: .86em; line-height: 1.45; }
+.wd-bp-in-name { font-weight: 500; }
+.wd-bp-req { font-size: .85em; color: var(--primary-color); }
+.wd-bp-in-desc { display: block; color: var(--secondary-text-color); }
+.wd-bp-dbody .wd-bp-links { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 16px 0 4px; }
+.wd-bp-links a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+.wd-bp-yaml { margin: 6px 0 8px; max-height: 45vh; overflow: auto; padding: 12px; border-radius: var(--wd-radius-md); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: .8em; line-height: 1.45; white-space: pre; }
 a.wd-btn { text-decoration: none; }
 .wd-field-hint { font-size: .78em; color: var(--secondary-text-color); margin-top: 4px; }
 /* Derived-value note (#445): informational, never an error - no red, no fix button. */
@@ -6533,13 +6654,19 @@ class HaWashdataPanel extends HTMLElement {
     if (this._modal === m) this._render();
   }
 
-  // The Automations tab (#478). WashData offers device triggers and entities, so
-  // notifications and actions are native HA automations. The tab lists the
-  // automations that use this device (deep-linking to the editor), creates a
-  // blank one or one prefilled with a cycle trigger, converts legacy custom
-  // actions, and installs the blueprint templates shipped with the integration.
+  // The Automations tab (#478). WashData offers integration triggers and entities,
+  // so notifications and actions are native HA automations. The tab lists the
+  // automations that use this device (each opens in HA's editor), starts a new
+  // one from a WashData trigger, converts legacy custom actions, and installs
+  // templates from the online template library (its own repository, downloaded
+  // only while online features are on).
   _htmlAutomationsTab() {
     return `${this._htmlAutomations()}${this._htmlBlueprints()}`;
+  }
+
+  _autoIcon(name) {
+    const d = _AUTO_ICON_PATHS[name] || _AUTO_ICON_PATHS.default;
+    return `<svg class="wd-auto-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
   }
 
   _htmlAutomations() {
@@ -6552,55 +6679,60 @@ class HaWashdataPanel extends HTMLElement {
     const regEnts = (this._hass && this._hass.entities) || {};
     const labelled = a => !!labelId && Array.isArray(regEnts[a.entity_id] && regEnts[a.entity_id].labels) && regEnts[a.entity_id].labels.includes(labelId);
     const badge = `<span class="wd-auto-badge" title="${this._t('lbl.automation_wd_label', {}, 'Carries the WashData label')}">${_WD_LABEL_NAME}</span>`;
-    const pills = list.length
-      ? list.map(a => `<span class="wd-auto-pill" data-autoid="${_esc(a.id)}">` +
-          `<a class="wd-auto-pill-link" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top" title="${this._t('hdr.automation_open', {}, 'Open in the automation editor')}">🔗 ${_esc(a.name)}${a.enabled ? '' : ` <span style="opacity:.6">${this._t('lbl.automation_off', {}, '(off)')}</span>`}</a>` +
-          (labelled(a) ? badge : '') +
-          (admin ? `<button type="button" class="wd-auto-pill-x" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="${this._t('hdr.automation_delete', {}, 'Delete this automation')}">×</button>` : '') +
-        `</span>`).join('')
-      : `<span class="wd-info" style="margin:0">${this._autoLoading ? this._t('msg.loading', {}, 'Loading…') : this._t('hdr.no_automations', {}, 'No automations reference this device yet.')}</span>`;
+    const delTip = this._t('hdr.automation_delete', {}, 'Delete this automation');
+    const rows = list.map(a => `<li class="wd-auto-row" data-autoid="${_esc(a.id)}">
+        <span class="wd-auto-state${a.enabled ? ' on' : ''}" aria-hidden="true"></span>
+        <span class="wd-auto-name" title="${_esc(a.name)}">${_esc(a.name)}</span>
+        ${labelled(a) ? badge : ''}${a.enabled ? '' : `<span class="wd-auto-off">${this._t('lbl.automation_off', {}, '(off)')}</span>`}
+        <span class="wd-auto-acts">
+          <a class="wd-auto-edit" href="/config/automation/edit/${encodeURIComponent(a.id)}" target="_top">${this._t('btn.auto_edit_in_ha', {}, 'Edit in Home Assistant')}</a>
+          ${admin ? `<button type="button" class="wd-auto-del" data-action="auto-delete" data-autoid="${_esc(a.id)}" data-autoname="${_esc(a.name)}" title="${delTip}" aria-label="${delTip}">×</button>` : ''}
+        </span>
+      </li>`).join('');
+    const listHtml = list.length
+      ? `<ul class="wd-auto-list">${rows}</ul>`
+      : `<p class="wd-auto-empty">${this._autoLoading ? this._t('msg.loading', {}, 'Loading…') : this._t('msg.auto_none', {}, 'No automations use this appliance yet.')}</p>`;
     // Legacy custom actions from the removed editor: still fired by the backend,
     // but no longer editable. Offer a one-click convert to a real automation.
     const legacy = (this._canEdit() && Array.isArray(this._opts.notify_actions)) ? this._opts.notify_actions : [];
     const legacyBlock = legacy.length ? `
-      <div class="wd-auto-legacy" style="border:1px solid var(--warning-color,#ff9800);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:rgba(255,152,0,.08)">
-        <div style="font-weight:600;margin-bottom:4px">${this._t('msg.legacy_actions_title', {count: legacy.length}, `${legacy.length} legacy custom action${legacy.length > 1 ? 's' : ''} still running`)}</div>
-        <p class="wd-info" style="margin:0 0 8px">${this._t('msg.old_actions_warning', {}, 'Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.')}</p>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <div class="wd-auto-legacy">
+        <div class="wd-auto-legacy-title">${this._t('msg.legacy_actions_title', {count: legacy.length}, `${legacy.length} legacy custom action${legacy.length > 1 ? 's' : ''} still running`)}</div>
+        <p class="wd-auto-hint">${this._t('msg.old_actions_warning', {}, 'Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.')}</p>
+        <div class="wd-auto-chips">
           ${admin ? `<button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-convert-legacy">${this._t('btn.convert_to_automation', {}, 'Convert to automation')}</button>` : ''}
           <button type="button" class="wd-btn wd-btn-danger wd-btn-sm" data-action="auto-remove-legacy">${this._t('btn.remove', {}, 'Remove')}</button>
         </div>
       </div>` : '';
-    // "Start from a trigger" opens an in-card list rather than a popover: up to 18
-    // entries, and a popover is clipped by .wd-main on a phone.
+    // New automation: blank or from a trigger. The common triggers show; the rest
+    // (up to 18 for a washer) open in place: a popover is clipped on a phone.
     const creating = this._autoCreating;
-    const spin = key => creating === key ? '<span class="wd-spin"></span> ' : '';
     const dis = creating ? 'disabled' : '';
+    const spin = key => creating === key ? '<span class="wd-spin"></span>' : '';
     const dev = this._devices[this._selIdx];
     const trigs = dev ? this._deviceTriggers(dev.entry_id) : [];
-    const trigOpen = !!this._autoTrigOpen && trigs.length > 0;
-    const trigList = trigOpen ? `
-      <div class="wd-auto-trig-list" id="wd-auto-trig-list">
-        <p class="wd-info" style="margin:0 0 8px">${this._t('msg.auto_trigger_hint', {}, 'Creates an automation with this trigger for this device and opens it in Home Assistant.')}</p>
-        <div class="wd-auto-trig-grid">${trigs.map(t => `<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm wd-auto-trig" data-action="auto-new-trigger" data-trigger="${t.key}" ${dis}>${spin(t.key)}${this._t(`trigger.${t.key}.name`, {}, t.name)}</button>`).join('')}</div>
+    const featured = _AUTO_FEATURED_TRIGGERS.map(k => trigs.find(t => t.key === k)).filter(Boolean);
+    const rest = trigs.filter(t => !featured.includes(t));
+    const open = !!this._autoTrigOpen;
+    const chip = t => `<button type="button" class="wd-auto-chip wd-auto-trig" data-action="auto-new-trigger" data-trigger="${t.key}" ${dis}>${spin(t.key)}${this._t(`trigger.${t.key}.name`, {}, t.name)}</button>`;
+    const more = rest.length ? `<button type="button" class="wd-auto-more wd-auto-trig-toggle" data-action="auto-toggle-triggers" aria-expanded="${open}">${open ? this._t('btn.auto_fewer_triggers', {}, 'Fewer triggers') : this._t('btn.auto_more_triggers', {count: rest.length}, '{count} more triggers')}</button>` : '';
+    const start = admin ? `<div class="wd-auto-start">
+        <div class="wd-auto-sub">${this._t('hdr.auto_start', {}, 'Start a new automation')}</div>
+        <p class="wd-auto-hint">${this._t('msg.auto_start_hint', {}, 'Opens in Home Assistant\'s automation editor with this appliance already filled in.')}</p>
+        <div class="wd-auto-chips">
+          <button type="button" class="wd-auto-chip wd-auto-chip-blank" data-action="auto-new" ${dis}>${spin('new')}${this._t('btn.auto_blank', {}, 'Blank automation')}</button>
+          ${featured.map(chip).join('')}${open ? rest.map(chip).join('') : ''}${more}
+        </div>
       </div>` : '';
-    const newRow = admin ? `
-      <div class="wd-auto-new" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-        <button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-new" ${dis}>${spin('new')}${this._t('btn.new_automation', {}, '＋ New Automation')}</button>
-        ${trigs.length ? `<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm wd-auto-trig-toggle" data-action="auto-toggle-triggers" aria-expanded="${trigOpen}" aria-controls="wd-auto-trig-list">${trigOpen ? this._t('btn.from_trigger_open', {}, 'Start from a trigger ▴') : this._t('btn.from_trigger', {}, 'Start from a trigger ▾')}</button>` : ''}
-      </div>${trigList}` : '';
     // HA's automation list takes ?label= (its label page links the same way), so
     // the link opens it filtered once the label exists. /config is admin-only.
     const allHref = '/config/automation/dashboard' + (labelId ? '?historyBack=1&label=' + encodeURIComponent(labelId) : '');
-    const allLink = admin ? `<p class="wd-info wd-auto-all-row" style="margin:12px 0 0"><a class="wd-auto-all" href="${_esc(allHref)}" title="${this._t('hdr.automations_all_tip', {}, 'Home Assistant\'s automation list, filtered by the WashData label. Automations created here also sit in the WashData category.')}" style="color:var(--primary-color);text-decoration:none;font-weight:500">${this._t('link.automations_all', {}, 'All WashData automations in Home Assistant')}</a></p>` : '';
-    return `<div class="wd-card wd-auto-card">
-      <div class="wd-card-title">${this._t('hdr.automations_used', {}, 'Automations using this device')}</div>
-      <p class="wd-info" style="margin-bottom:10px">${this._t('msg.automations_tab_intro', {}, 'WashData offers device triggers (cycle started, cycle finished, cycle stalled and more) for your own Home Assistant automations. Automations that use this device are listed here.')}</p>
-      ${legacyBlock}
-      <div class="wd-auto-pills" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">${pills}</div>
-      ${newRow}
-      ${allLink}
-    </div>`;
+    const allLink = admin ? `<p class="wd-auto-all-row"><a class="wd-auto-all" href="${_esc(allHref)}" title="${this._t('hdr.automations_all_tip', {}, 'Home Assistant\'s automation list, filtered by the WashData label. Automations created here also sit in the WashData category.')}">${this._t('link.automations_all', {}, 'All WashData automations in Home Assistant')}</a></p>` : '';
+    return `<section class="wd-card wd-auto-card">
+      <div class="wd-auto-head"><h3 class="wd-auto-h">${this._t('hdr.auto_yours', {}, 'Your automations')}</h3>${list.length ? `<span class="wd-auto-count">${list.length}</span>` : ''}</div>
+      <p class="wd-auto-lead">${this._t('msg.auto_yours_intro', {}, 'Home Assistant automations that react to this appliance.')}</p>
+      ${legacyBlock}${listHtml}${start}${allLink}
+    </section>`;
   }
 
   // The WashData triggers this device offers (const.DEVICE_TRIGGER_ONLY_FOR, via
@@ -6625,18 +6757,24 @@ class HaWashdataPanel extends HTMLElement {
     return null;
   }
 
-  // ── Automation templates (blueprints shipped with the integration, #478) ──
+  // ── Automation template library (#478) ──
+  // Its own repository (washdata-automations), downloaded by the backend only
+  // while online features are on, so a template PR never touches the integration.
 
-  // The shipped catalog never changes while this version runs: fetch it once. A
-  // failure is not cached, so the next visit retries (e.g. right after a restart).
-  async _loadBlueprintCatalog() {
-    if (Array.isArray(this._bpCatalog)) return;
+  // Fetched once per session; `refresh` asks the backend to look again (it holds
+  // a cached copy). A failure or "online features off" is not kept, so the next
+  // visit asks again.
+  async _loadBlueprintCatalog(refresh = false) {
+    if (Array.isArray(this._bpCatalog) && !refresh && !this._bpError) return;
+    if (!this._onlineEnabled()) { this._bpCatalog = null; this._bpDisabled = true; return; }
     try {
-      const r = await this._ws({ type: `${_DOMAIN}/blueprints/list` });
+      const r = await this._ws(refresh ? { type: `${_DOMAIN}/blueprints/list`, refresh: true } : { type: `${_DOMAIN}/blueprints/list` });
       const list = (r && Array.isArray(r.blueprints)) ? r.blueprints : [];
-      if (r && r.error && !list.length) throw r;
-      this._bpCatalog = list; this._bpCatalogError = false;
-    } catch (_) { this._bpCatalog = null; this._bpCatalogError = true; }
+      this._bpDisabled = !!(r && r.disabled);
+      this._bpError = !!(r && r.error);
+      this._bpCatalog = this._bpDisabled || (this._bpError && !list.length) ? null : list;
+      this._bpCatalogError = this._bpError && !list.length;
+    } catch (_) { this._bpCatalog = null; this._bpCatalogError = true; this._bpError = true; }
   }
 
   // HA's blueprint/list (admin-only): path -> {metadata} | {error}. Null when it
@@ -6651,13 +6789,15 @@ class HaWashdataPanel extends HTMLElement {
 
   _bpById(id) { return (this._bpCatalog || []).find(b => b.id === id) || null; }
 
-  // Display name / description: translated by id, else the YAML text. Plain text.
-  // The "WashData: " prefix names the blueprint in HA's list; here it is noise.
+  // Display name / description: the template's own text. Plain text. The
+  // "WashData: " prefix names the blueprint in HA's list; here it is noise.
   _bpName(b) {
     const raw = String(b.name || b.id).replace(/^WashData:\s*/i, '');
-    return this._tText(`blueprint.${b.id}.name`, {}, raw.charAt(0).toUpperCase() + raw.slice(1));
+    return raw.charAt(0).toUpperCase() + raw.slice(1);
   }
-  _bpDesc(b) { return this._tText(`blueprint.${b.id}.description`, {}, b.description || ''); }
+  _bpDesc(b) { return String(b.description || ''); }
+  // The tile shows the first paragraph; Details shows all of it.
+  _bpSummary(b) { return this._bpDesc(b).split(/\n\s*\n/)[0].trim(); }
 
   // 'same' | 'different' | 'none', or null when the installed list is unknown.
   _bpInstalledState(b) {
@@ -6668,72 +6808,147 @@ class HaWashdataPanel extends HTMLElement {
     return (hit.metadata && _bpSameMetadata(hit.metadata, b)) ? 'same' : 'different';
   }
 
+  // GitHub's "new file" page in the library, prefilled with a template skeleton.
+  // Committing it from a fork ends on the pull request form.
+  _bpShareUrl() {
+    return `${_AUTOMATION_LIBRARY_URL}/new/main/automation?filename=my_template.yaml&value=${encodeURIComponent(_BP_SKELETON)}`;
+  }
+
   _htmlBlueprints() {
     const admin = this._isAdmin();
-    const type = this._curDeviceType();
+    const online = this._onlineEnabled() && !this._bpDisabled;
+    const list = this._bpCatalog;
+    const refreshing = this._busy.has('bp-refresh');
+    const refreshTip = this._t('btn.bp_refresh', {}, 'Check GitHub for new templates');
+    const refreshBtn = online && Array.isArray(list)
+      ? `<button type="button" class="wd-auto-iconbtn" data-action="auto-bp-refresh" title="${refreshTip}" aria-label="${refreshTip}" ${refreshing ? 'disabled' : ''}>${refreshing ? '<span class="wd-spin"></span>' : this._autoIcon('refresh')}</button>` : '';
+    const share = `<p class="wd-bp-share">${this._autoIcon('github')}<a href="${_esc(this._bpShareUrl())}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_share_pr', {}, 'Share your own template: open a pull request on GitHub')} ↗</a></p>`;
     let body;
-    if (Array.isArray(this._bpCatalog)) {
-      const shown = this._bpCatalog.filter(b => {
+    if (!online) {
+      const busy = this._busy.has('store-account');
+      body = `<div class="wd-bp-notice">
+        <span class="wd-bp-port wd-bp-port-muted">${this._autoIcon('earth')}</span>
+        <div>
+          <div class="wd-bp-notice-title">${this._t('hdr.bp_needs_online', {}, 'The template library needs online features')}</div>
+          <p class="wd-auto-hint">${this._t('msg.bp_needs_online', {}, 'Templates are downloaded from GitHub, so the library only works with online features turned on. Online features also include the Community Store.')}</p>
+          ${admin
+            ? `<button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-online-on" ${busy ? 'disabled' : ''}>${busy ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.bp_turn_on_online', {}, 'Turn on online features')}</button>`
+            : `<p class="wd-auto-hint">${this._t('msg.bp_needs_online_admin', {}, 'An administrator can turn them on in the gear menu, under Online & Community.')}</p>`}
+        </div>
+      </div>`;
+    } else if (Array.isArray(list)) {
+      const type = this._curDeviceType();
+      const shown = list.filter(b => {
         const types = Array.isArray(b.device_types) && b.device_types.length ? b.device_types : ['all'];
         return types.includes('all') || (!!type && types.includes(type));
       });
+      const stale = this._bpError ? `<p class="wd-bp-note">${this._t('msg.bp_stale', {}, 'GitHub could not be reached just now. These are the templates downloaded earlier.')}</p>` : '';
       body = shown.length
-        ? `<div class="wd-bp-grid">${shown.map(b => this._htmlBlueprintCard(b, admin)).join('')}</div>`
-        : `<p class="wd-info">${this._t('msg.bp_none', {}, 'No templates for this appliance type yet.')}</p>`;
+        ? `${stale}<div class="wd-bp-grid">${shown.map(b => this._htmlBlueprintCard(b, admin)).join('')}</div>`
+        : `<p class="wd-auto-empty">${this._t('msg.bp_none_yet', {}, 'No templates for this appliance type yet. Share the first one.')}</p>`;
     } else if (this._bpCatalogError) {
-      body = `<p class="wd-info">${this._t('msg.bp_load_failed', {}, 'Templates could not be loaded.')}</p>`;
+      body = `<div class="wd-bp-notice">
+        <span class="wd-bp-port wd-bp-port-muted">${this._autoIcon('alert')}</span>
+        <div>
+          <div class="wd-bp-notice-title">${this._t('hdr.bp_unreachable', {}, 'The template library could not be reached')}</div>
+          <p class="wd-auto-hint">${this._t('msg.bp_unreachable', {}, 'It is downloaded from GitHub. Check that Home Assistant can reach the internet, then try again.')}</p>
+          <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-bp-refresh" ${refreshing ? 'disabled' : ''}>${refreshing ? '<span class="wd-spin"></span> ' : ''}${this._t('btn.retry', {}, 'Retry')}</button>
+        </div>
+      </div>`;
     } else {
-      body = `<p class="wd-info">${this._t('msg.loading', {}, 'Loading…')}</p>`;
+      body = `<p class="wd-auto-empty">${this._t('msg.loading', {}, 'Loading…')}</p>`;
     }
-    return `<div class="wd-card wd-bp-section">
-      <div class="wd-card-title">${this._t('hdr.bp_templates', {}, 'Templates')}</div>
-      <p class="wd-info" style="margin-bottom:12px">${this._t('msg.bp_intro', {}, 'Ready-made automations for this appliance, installed as Home Assistant blueprints.')}</p>
-      ${admin ? '' : `<p class="wd-info wd-bp-admin-hint" style="margin-bottom:12px">${this._t('msg.bp_admin_only', {}, 'An administrator installs templates.')}</p>`}
+    return `<section class="wd-card wd-bp-section">
+      <div class="wd-auto-head"><h3 class="wd-auto-h">${this._t('hdr.bp_library', {}, 'Template library')}</h3>${refreshBtn}</div>
+      <p class="wd-auto-lead">${this._t('msg.bp_library_intro', {}, 'Ready-made automations shared by WashData users on GitHub, reviewed before they are listed. Available only with online features on.')}</p>
+      ${online && !admin ? `<p class="wd-auto-hint wd-bp-admin-hint">${this._t('msg.bp_admin_only', {}, 'An administrator installs templates.')}</p>` : ''}
       ${body}
-      <p class="wd-info wd-bp-footer" style="margin-top:14px"><a href="${_BLUEPRINT_CONTRIBUTING_URL}" target="_blank" rel="noopener noreferrer" style="color:var(--primary-color);text-decoration:none;font-weight:500">${this._t('link.bp_share', {}, 'Share your own template by pull request ↗')}</a></p>
-    </div>`;
+      ${share}
+    </section>`;
+  }
+
+  // A tile's main button (admin-only, like HA's blueprint/save). A template
+  // whose only open input is the device becomes an automation for it in one
+  // click; any other is installed and finished in HA's own blueprint form.
+  _htmlBlueprintAction(b, admin, cls = 'wd-btn-sm') {
+    if (!admin || b.compatible === false) return '';
+    const busy = this._busy.has('bp-' + b.id);
+    const spin = busy ? '<span class="wd-spin"></span> ' : '';
+    const dev = this._devices[this._selIdx];
+    return b.one_click
+      ? `<button type="button" class="wd-btn wd-btn-primary ${cls}" data-action="auto-bp-use" data-bpid="${_esc(b.id)}" title="${this._t('btn.bp_add_tip', {}, 'Creates the automation for this appliance with the default settings, then opens it in Home Assistant')}" ${busy ? 'disabled' : ''}>${spin}${this._t('btn.bp_add_to', {device: (dev && dev.title) || 'WashData'}, 'Add to {device}')}</button>`
+      : `<button type="button" class="wd-btn wd-btn-primary ${cls}" data-action="auto-bp-install" data-bpid="${_esc(b.id)}" title="${this._t('btn.bp_setup_tip', {}, 'Installs the template, then opens Home Assistant to fill in the rest')}" ${busy ? 'disabled' : ''}>${spin}${this._t('btn.bp_setup_in_ha', {}, 'Set up in Home Assistant')}</button>`;
+  }
+
+  _htmlBlueprintStatus(b) {
+    const st = this._bpInstalledState(b);
+    if (st === 'same') return `<span class="wd-bp-status wd-bp-status-ok">${this._t('badge.bp_installed', {}, 'Installed')}</span>`;
+    if (st === 'different') return `<span class="wd-bp-status">${this._t('badge.bp_installed_other', {}, 'Other version installed')}</span>`;
+    return '';
   }
 
   _htmlBlueprintCard(b, admin) {
-    const st = this._bpInstalledState(b);
-    const badge = st === 'same'
-      ? `<span class="wd-tag wd-tag-approved wd-bp-status">${this._t('badge.bp_installed', {}, 'Installed')}</span>`
-      : st === 'different'
-        ? `<span class="wd-tag wd-tag-pending wd-bp-status">${this._t('badge.bp_installed_other', {}, 'Other version installed')}</span>`
-        : '';
-    const tags = (b.tags || []).map(t => `<span class="wd-tag">${_esc(t)}</span>`).join('');
-    // The device input is filled in by the panel; list only what is left.
-    const inputs = (b.inputs || []).filter(i => i.key !== 'washdata_device');
-    const names = list => list.map(i => i.name || i.key).join(' · ');
-    const needed = inputs.filter(i => !i.has_default), tunable = inputs.filter(i => i.has_default);
-    const inputLines = (needed.length ? `<div class="wd-bp-inputs wd-bp-needed">${this._t('lbl.bp_you_choose', {inputs: names(needed)}, 'You choose: {inputs}')}</div>` : '')
-      + (tunable.length ? `<div class="wd-bp-inputs">${this._t('lbl.bp_adjustable', {inputs: names(tunable)}, 'Adjustable: {inputs}')}</div>` : '');
-    const busy = this._busy.has('bp-' + b.id);
-    const spin = busy ? '<span class="wd-spin"></span> ' : '';
-    const main = !admin ? ''
-      : b.one_click
-        ? `<button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-bp-use" data-bpid="${_esc(b.id)}" ${busy ? 'disabled' : ''}>${spin}${this._t('btn.bp_use', {}, 'Use with this device')}</button>`
-        : `<button type="button" class="wd-btn wd-btn-primary wd-btn-sm" data-action="auto-bp-install" data-bpid="${_esc(b.id)}" ${busy ? 'disabled' : ''}>${spin}${this._t('btn.bp_install', {}, 'Install template')}</button>`;
-    return `<div class="wd-bp-card" data-bpid="${_esc(b.id)}">
-      <div class="wd-bp-head"><span class="wd-bp-name">${_esc(this._bpName(b))}</span>${badge}</div>
-      <p class="wd-bp-desc">${_esc(this._bpDesc(b))}</p>
-      ${tags ? `<div class="wd-bp-tags">${tags}</div>` : ''}
-      ${inputLines}
-      <div class="wd-card-actions">${main}<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-bp-yaml" data-bpid="${_esc(b.id)}">${this._t('btn.bp_view_yaml', {}, 'View YAML')}</button></div>
-    </div>`;
+    const tags = (b.tags || []).map(t => `<span class="wd-bp-tag">${_esc(t)}</span>`).join('');
+    const status = this._htmlBlueprintStatus(b);
+    const by = b.author ? `<span class="wd-bp-by">${this._t('lbl.bp_by', {author: b.author}, 'by {author}')}</span>` : '';
+    return `<article class="wd-bp-card" data-bpid="${_esc(b.id)}">
+      <div class="wd-bp-head">
+        <span class="wd-bp-port">${this._autoIcon(b.icon)}</span>
+        <div class="wd-bp-titles"><h4 class="wd-bp-name">${_esc(this._bpName(b))}</h4>${by}</div>
+      </div>
+      <p class="wd-bp-desc">${_esc(this._bpSummary(b))}</p>
+      ${tags || status ? `<div class="wd-bp-meta">${tags}${status}</div>` : ''}
+      ${b.compatible === false ? `<p class="wd-bp-note">${this._t('msg.bp_needs_version', {version: b.min_version}, 'Needs WashData {version} or newer.')}</p>` : ''}
+      <div class="wd-bp-actions">${this._htmlBlueprintAction(b, admin)}<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-action="auto-bp-details" data-bpid="${_esc(b.id)}">${this._t('btn.bp_details', {}, 'Details')}</button></div>
+    </article>`;
   }
 
-  _htmlBlueprintYamlModal(m) {
+  _htmlBlueprintDetails(m) {
     const b = this._bpById(m.bpId);
     if (!b) return '';
+    const admin = this._isAdmin();
+    // A paragraph that starts "Risk:" is the template's warning: set apart.
+    // "Needs WashData x or newer." is for HA's own blueprint list; the facts below say it.
+    const paras = this._bpDesc(b).split(/\n\s*\n/).map(p => p.trim())
+      .filter(p => p && !/^needs washdata [\d.]+ or newer\.?$/i.test(p));
+    const desc = paras.map(p => /^risk:/i.test(p)
+      ? `<p class="wd-bp-risk">${this._autoIcon('alert')}<span>${_esc(p)}</span></p>`
+      : `<p>${_esc(p)}</p>`).join('');
+    const types = Array.isArray(b.device_types) && b.device_types.length && !b.device_types.includes('all')
+      ? b.device_types.map(t => _esc(this._deviceTypeLabel(t))).join(', ')
+      : this._t('lbl.bp_for_all', {}, 'Every appliance');
+    const facts = `<dl class="wd-bp-facts">
+        <dt>${this._t('lbl.bp_for', {}, 'For')}</dt><dd>${types}</dd>
+        ${b.min_version ? `<dt>${this._t('lbl.bp_needs', {}, 'Needs')}</dt><dd>${this._t('lbl.bp_needs_version', {version: b.min_version}, 'WashData {version} or newer')}</dd>` : ''}
+        ${b.author ? `<dt>${this._t('lbl.bp_author', {}, 'Author')}</dt><dd>${_esc(b.author)}</dd>` : ''}
+      </dl>`;
+    const inputs = (b.inputs || []).filter(i => i.key !== 'washdata_device');
+    const settings = inputs.length ? `<h3 class="wd-bp-dh">${this._t('hdr.bp_settings', {}, 'What you can set')}</h3>
+      <ul class="wd-bp-inputs">${inputs.map(i => `<li><span class="wd-bp-in-name">${_esc(i.name || i.key)}</span>${i.has_default ? '' : ` <span class="wd-bp-req">${this._t('lbl.bp_required', {}, 'required')}</span>`}${i.description ? `<span class="wd-bp-in-desc">${_esc(i.description)}</span>` : ''}</li>`).join('')}</ul>` : '';
     const importUrl = b.source_url
       ? 'https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=' + encodeURIComponent(b.source_url) : '';
-    return `<h2 id="wd-modal-title">${_esc(this._bpName(b))}</h2>
+    const links = [
+      b.source_url ? `<a class="wd-bp-github" href="${_esc(b.source_url)}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_view_github', {}, 'View on GitHub')} ↗</a>` : '',
+      importUrl ? `<a class="wd-bp-import" href="${_esc(importUrl)}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_import_my_ha', {}, 'Import with My Home Assistant')} ↗</a>` : '',
+    ].join('');
+    const yaml = m.showYaml ? `
       <pre class="wd-bp-yaml" tabindex="0" aria-label="${_esc(this._tText('lbl.bp_yaml', {}, 'Blueprint YAML'))}">${_esc(b.yaml || '')}</pre>
+      <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="bp-copy">${this._t('btn.bp_copy_yaml', {}, 'Copy YAML')}</button>` : '';
+    const action = this._htmlBlueprintAction(b, admin, '').replace('data-action="auto-bp-', 'data-maction="bp-');
+    return `<div class="wd-bp-dhead">
+        <span class="wd-bp-port">${this._autoIcon(b.icon)}</span>
+        <div class="wd-bp-titles"><h2 id="wd-modal-title">${_esc(this._bpName(b))}</h2>${this._htmlBlueprintStatus(b)}</div>
+      </div>
+      <div class="wd-bp-dbody">
+        ${desc}${b.compatible === false ? `<p class="wd-bp-note">${this._t('msg.bp_needs_version', {version: b.min_version}, 'Needs WashData {version} or newer.')}</p>` : ''}
+        ${facts}${settings}
+        ${links ? `<p class="wd-bp-links">${links}</p>` : ''}
+        <button type="button" class="wd-auto-more wd-bp-yaml-toggle" data-maction="bp-toggle-yaml" aria-expanded="${!!m.showYaml}">${m.showYaml ? this._t('btn.bp_hide_yaml', {}, 'Hide the YAML') : this._t('btn.bp_show_yaml', {}, 'Show the YAML')}</button>
+        ${yaml}
+      </div>
       <div class="wd-modal-actions">
-        ${importUrl ? `<a class="wd-btn wd-btn-secondary wd-bp-import" href="${_esc(importUrl)}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_open_in_ha', {}, 'Open in Home Assistant ↗')}</a>` : ''}
-        <button type="button" class="wd-btn wd-btn-secondary" data-maction="bp-copy">${this._t('btn.copy', {}, 'Copy')}</button>
-        <button type="button" class="wd-btn wd-btn-primary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+        <button type="button" class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
+        ${action}
       </div>`;
   }
 
@@ -6774,7 +6989,7 @@ class HaWashdataPanel extends HTMLElement {
   _bpConfirmReplace(b, mode) {
     this._modal = { type: 'confirm',
       title: this._tText('modal.bp_replace_title', {}, 'Replace the installed template?'),
-      message: this._tText('modal.bp_replace_msg', {name: this._bpName(b)}, 'Home Assistant has a different version of "{name}". Replace it with the one from this WashData version? Automations that use it change with it.'),
+      message: this._tText('modal.bp_replace_library_msg', {name: this._bpName(b)}, 'Home Assistant has a different version of "{name}". Replace it with the one from the template library? Automations that use it change with it.'),
       okLabel: this._tText('btn.replace', {}, 'Replace'), okPrimary: true,
       onOk: () => this._bpRun(b, mode, 'override') };
     this._render();
@@ -10745,7 +10960,7 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'export-select') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlExportSelectModal(m)}</div></div>`;
     if (m.type === 'import-wizard') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlImportWizardModal(m)}</div></div>`;
     if (m.type === 'history-import') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlHistoryImportModal(m)}</div></div>`;
-    if (m.type === 'bp-yaml') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg wd-bp-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlBlueprintYamlModal(m)}</div></div>`;
+    if (m.type === 'bp-details') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg wd-bp-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlBlueprintDetails(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -14151,21 +14366,26 @@ class HaWashdataPanel extends HTMLElement {
     }
   }
 
+  // Online features on/off, integration-wide (the gear's switch and the
+  // Automations tab's "Turn on online features").
+  _setOnline(eid, on) {
+    return this._busyRun('store-account', async () => {
+      try {
+        const r = await this._ws({ type: `${_DOMAIN}/store_set_online`, entry_id: eid, enabled: on });
+        this._constants.storeOnlineEnabled = !!(r && r.enabled);
+        if (this._constants.storeOnlineEnabled) { this._bpDisabled = false; await this._loadStoreStatus(eid); this._ensureStoreConnectListener(); }
+        else { this._storeStatus = { enabled: false }; this._storeConnected = false; this._bpCatalog = null; this._bpDisabled = true; }
+      } catch (e) {
+        this._showToast(this._tText('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
+      }
+    });
+  }
+
   _onActStore(a, btn, dev, eid, sr) {
     // ── Community Store ──────────────────────────────────────────────────────
     if (a === 'store-toggle-online') {
       // Online features are integration-wide: persist via the global store_set_online.
-      const on = !!btn.checked;
-      this._busyRun('store-account', async () => {
-        try {
-          const r = await this._ws({ type: `${_DOMAIN}/store_set_online`, entry_id: eid, enabled: on });
-          this._constants.storeOnlineEnabled = !!(r && r.enabled);
-          if (this._constants.storeOnlineEnabled) { await this._loadStoreStatus(eid); this._ensureStoreConnectListener(); }
-          else { this._storeStatus = { enabled: false }; this._storeConnected = false; }
-        } catch (e) {
-          this._showToast(this._tText('toast.store_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error');
-        }
-      });
+      this._setOnline(eid, !!btn.checked);
 
     } else if (a === 'store-toggle-pref') {
       // Generic community-store preference toggle (declarative _STORE_PREFS).
@@ -14454,11 +14674,21 @@ class HaWashdataPanel extends HTMLElement {
     } else if (a === 'auto-convert-legacy') {
       this._convertLegacyActions();
 
-    } else if (a === 'auto-bp-use' || a === 'auto-bp-install' || a === 'auto-bp-yaml') {
+    } else if (a === 'auto-bp-use' || a === 'auto-bp-install' || a === 'auto-bp-details') {
       const b = this._bpById(btn.dataset.bpid);
       if (!b) return;
-      if (a === 'auto-bp-yaml') { this._modal = { type: 'bp-yaml', bpId: b.id }; this._render(); }
+      if (a === 'auto-bp-details') { this._modal = { type: 'bp-details', bpId: b.id }; this._render(); }
       else this._bpStart(b, a === 'auto-bp-use' ? 'use' : 'install');
+
+    } else if (a === 'auto-bp-refresh') {
+      this._busyRun('bp-refresh', async () => { await this._loadBlueprintCatalog(true); });
+
+    } else if (a === 'auto-online-on') {
+      this._setOnline(eid, true).then(async () => {
+        if (!this._onlineEnabled()) return;
+        await this._loadBlueprintCatalog(true);
+        if (this._tab === 'automations') this._render();
+      });
 
     } else if (a === 'auto-remove-legacy') {
       this._modal = { type: 'confirm', title: this._t('modal.remove_legacy_title', {}, 'Remove Legacy Actions'), message: this._t('modal.remove_legacy_msg', {}, 'Remove the legacy custom actions? They will stop firing on cycle events. This cannot be undone from the panel.'), okLabel: this._t('btn.remove', {}, 'Remove'),
@@ -14719,7 +14949,12 @@ class HaWashdataPanel extends HTMLElement {
       return;
     }
     if (action === 'ok' && m && m.onOk) { const fn = m.onOk; this._modal = null; this._render(); await fn(); this._render(); return; }
-    if (action === 'bp-copy' && m && m.type === 'bp-yaml') { await this._bpCopyYaml(this._bpById(m.bpId)); return; }
+    if (m && m.type === 'bp-details') {
+      const b = this._bpById(m.bpId);
+      if (action === 'bp-copy') { await this._bpCopyYaml(b); return; }
+      if (action === 'bp-toggle-yaml') { m.showYaml = !m.showYaml; this._render(); return; }
+      if ((action === 'bp-use' || action === 'bp-install') && b) { this._modal = null; this._render(); this._bpStart(b, action === 'bp-use' ? 'use' : 'install'); return; }
+    }
 
     // ---- Profile group management ----
     if (m && m.type === 'profile-group') {

@@ -145,7 +145,6 @@
     "load_more": "Ielādēt vairāk",
     "manage": "Pārvaldīt",
     "merge": "Apvienot",
-    "new_automation": "＋ Jauna automatizācija",
     "new_group": "+ Jauna grupa",
     "new_group_tip": "Grupēt gandrīz identiskus profilus (tāda pati forma, cita temperatūra vai centrifūga), lai saskaņošana tos spētu atšķirt.",
     "new_phase": "+ Jauns posms",
@@ -254,13 +253,24 @@
     "create_profile_from_gap": "Izveidot profilu",
     "undo_import": "Atsaukt pēdējo importēšanu",
     "pg_rerun": "Atjaunināt simulāciju",
-    "from_trigger": "Sākt no trigera ▾",
-    "bp_use": "Izmantot ar šo ierīci",
-    "bp_install": "Instalēt veidni",
-    "bp_view_yaml": "Skatīt YAML",
-    "copy": "Kopēt",
     "replace": "Aizstāt",
-    "from_trigger_open": "Sākt no trigera ▴"
+    "auto_edit_in_ha": "Rediģēt Home Assistantā",
+    "auto_fewer_triggers": "Mazāk trigeru",
+    "auto_more_triggers": "Vēl {count} trigeri",
+    "auto_more_triggers_zero": "Vēl {count} trigeri",
+    "auto_more_triggers_one": "Vēl {count} trigeris",
+    "auto_more_triggers_other": "Vēl {count} trigeri",
+    "auto_blank": "Tukša automatizācija",
+    "bp_refresh": "Meklēt jaunas veidnes GitHub",
+    "bp_turn_on_online": "Ieslēgt tiešsaistes funkcijas",
+    "bp_add_tip": "Izveido automatizāciju šai ierīcei ar noklusējuma iestatījumiem un atver to Home Assistantā",
+    "bp_add_to": "Pievienot: {device}",
+    "bp_setup_tip": "Instalē veidni un atver Home Assistant, lai aizpildītu pārējo",
+    "bp_setup_in_ha": "Iestatīt Home Assistantā",
+    "bp_details": "Sīkāka informācija",
+    "bp_copy_yaml": "Kopēt YAML",
+    "bp_hide_yaml": "Paslēpt YAML",
+    "bp_show_yaml": "Rādīt YAML"
   },
   "note": {
     "off_delay": {
@@ -340,7 +350,6 @@
     "add_maintenance": "Pievienot apkopes notikumu",
     "automation_delete": "Dzēst šo automatizāciju",
     "automation_needs_review": "Šis cikls ir jāpārskata",
-    "automation_open": "Atveriet automatizācijas redaktorā",
     "automation_review_this_cycle": "Pārskatiet šo ciklu",
     "automations": "Automatizācijas",
     "clear_debug": "Notīrīt atkļūdošanas pēdas",
@@ -358,7 +367,6 @@
     "ml_settings_card": "Iestatījumi",
     "ml_smart_learning": "Gudra mācīšanās",
     "my_preferences": "Manas preferences",
-    "no_automations": "Vēl neviena automatizācija neatsaucas uz šo ierīci.",
     "panel_settings": "Paneļa iestatījumi",
     "pg_settings_source": "Iestatījumu avots",
     "phase_catalog": "Fāzes katalogs",
@@ -379,10 +387,14 @@
     "service_status": "Apkopes statuss",
     "online_account_tab": "Tiešsaiste un kopiena",
     "live_match_debug": "Tiešraides atbilstības atkļūdošana",
-    "automations_used": "Automatizācijas, kas izmanto šo ierīci",
-    "bp_templates": "Veidnes",
     "automations_all_tip": "Home Assistant automatizāciju saraksts, filtrēts pēc WashData etiķetes. Šeit izveidotās automatizācijas atrodas arī WashData kategorijā.",
-    "maint_done_by_program": "Automātiska izpilde"
+    "maint_done_by_program": "Automātiska izpilde",
+    "auto_start": "Sākt jaunu automatizāciju",
+    "auto_yours": "Jūsu automatizācijas",
+    "bp_needs_online": "Veidņu bibliotēkai nepieciešamas tiešsaistes funkcijas",
+    "bp_unreachable": "Veidņu bibliotēku nevarēja sasniegt",
+    "bp_library": "Veidņu bibliotēka",
+    "bp_settings": "Ko varat iestatīt"
   },
   "health": {
     "fair": "Pieņemama profila kvalitāte",
@@ -698,13 +710,18 @@
     "cycle_context_series": "Recorder vēsture",
     "before_start": "Pirms sākuma",
     "after_end": "Pēc beigām",
-    "bp_you_choose": "Jūs izvēlaties: {inputs}",
-    "bp_adjustable": "Pielāgojams: {inputs}",
     "bp_yaml": "Blueprint YAML",
     "automation_wd_label": "Satur WashData etiķeti",
     "done_by_none": "Nav iestatīts",
     "done_by_programs": "Automātiski izpilda: {programs}",
-    "done_by_cycle": "Izpildīts ar ciklu: {program}"
+    "done_by_cycle": "Izpildīts ar ciklu: {program}",
+    "bp_by": "autors: {author}",
+    "bp_for_all": "Visas ierīces",
+    "bp_for": "Paredzēts",
+    "bp_needs": "Nepieciešams",
+    "bp_needs_version": "WashData {version} vai jaunāks",
+    "bp_author": "Autors",
+    "bp_required": "obligāts"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -805,7 +822,7 @@
     "undo_import_ok": "Atsaukt importēšanu",
     "undo_import_title": "Atsaukt pēdējo importēšanu",
     "bp_replace_title": "Aizstāt instalēto veidni?",
-    "bp_replace_msg": "Home Assistant ir cita \"{name}\" versija. Aizstāt ar šo no šīs WashData versijas? Automatizācijas, kas to izmanto, mainīsies līdz ar to."
+    "bp_replace_library_msg": "Home Assistant ir cita \"{name}\" versija. Aizstāt to ar versiju no veidņu bibliotēkas? Automatizācijas, kas to izmanto, mainīsies līdz ar to."
   },
   "msg": {
     "pg_canvas_empty3": "Izvēlieties ciklu augšā un nospiediet Palaist, lai to simulētu. Pēc tam turiet kursoru virs, lai nolasītu vērtības, ritiniet vai tuviniet ar diviem pirkstiem un velciet, lai pārvietotu.",
@@ -999,7 +1016,7 @@
     "standby_above_stop_title": "Ciklam beidzoties, joprojām patērē {idle} W",
     "standby_above_stop_sub": "{n} no pēdējiem {total} cikliem. Izslēgšanas aizkave sākas tikai tad, kad jauda ir zem Apstāšanās sliekšņa ({stop} W), tāpēc cikli beidzas ar nokavēšanos vai tie jāaptur manuāli.",
     "store_share_intro": "Augšupielādējiet šo atsauces ciklu, lai to varētu izmantot citi ar to pašu ierīci. Pirms publiskošanas tas tiek pārskatīts.",
-    "online_intro_global": "Pārlūkojiet un kopīgojiet atsauces ierakstus ar citiem WashData lietotājiem. Viens savienojums aptver visas jūsu WashData ierīces; zīmolu un modeli iestata katrai ierīcei sadaļā Pamata. Tiešsaistes funkcijas ir izslēgtas, līdz tās ieslēdzat.",
+    "online_intro_global": "Pārlūkojiet un kopīgojiet atsauces ierakstus ar citiem WashData lietotājiem un izmantojiet automatizāciju veidņu bibliotēku. Viens savienojums aptver visas jūsu WashData ierīces; zīmolu un modeli iestata katrai ierīcei sadaļā Pamata. Tiešsaistes funkcijas ir izslēgtas, līdz tās ieslēdzat.",
     "online_unavailable": "Tiešsaistes funkcijas šajā serverī nav pieejamas.",
     "store_picker_offline": "Iespējojiet tiešsaistes funkcijas iestatījumu zobratā, lai izvēlētos no kopienas kataloga.",
     "pick_brand_first": "Vispirms izvēlieties ierīces zīmolu.",
@@ -1097,16 +1114,21 @@
     "cycle_context_none": "Recorder nesatur nolasījumus pirms un pēc šī cikla (Home Assistant pēc noklusējuma glabā vēsturi 10 dienas).",
     "cycle_context_tip": "Tikai attēlošanai: rāda jaudas sensora recorder vēsturi ap šo ciklu, ja tā vēl glabājas. Lai turpmākajiem cikliem pievienotu neizdevušos starta mēģinājumus, izmantojiet Līknes ievadsekundes (Iestatījumi > Noteikšana > Cikla sākums), kas maina saglabātos ilgumus.",
     "invalid_threshold_pair": "Apstāšanās slieksnim ({stop} W) jābūt zemākam par Starta slieksni ({start} W). Nekas netika saglabāts; mainiet abas vērtības kopā.",
-    "automations_tab_intro": "WashData piedāvā ierīces trigerus (cikls sākās, cikls beidzās, cikls iestrēga un citus) jūsu pašu Home Assistant automatizācijām. Šeit uzskaitītas automatizācijas, kas izmanto šo ierīci.",
-    "bp_intro": "Gatavās automatizācijas šai ierīcei, instalētas kā Home Assistant blueprinti.",
     "bp_admin_only": "Veidnes instalē administrators.",
-    "bp_none": "Šim ierīces tipam veidņu vēl nav.",
-    "bp_load_failed": "Veidnes nevarēja ielādēt.",
-    "auto_trigger_hint": "Izveido automatizāciju ar šo trigeri šai ierīcei un atver to Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Izveidojis WashData priekš {device}. Pievienojiet savas darbības (paziņojums, gaismas, ...).",
     "automation_alias_new": "{device}: jauna automatizācija",
-    "maint_done_by_program_intro": "Uzdevums tiek uzskatīts par izpildītu, kad beidzas kādas tā programmas cikls, piemēram, tromeļa tīrīšana, kad darbojas programma Kokvilna 90. Tiek ieskaitīti tikai cikli, par kuriem WashData ir pārliecināts vai kuru programmu izvēlējāties jūs."
+    "maint_done_by_program_intro": "Uzdevums tiek uzskatīts par izpildītu, kad beidzas kādas tā programmas cikls, piemēram, tromeļa tīrīšana, kad darbojas programma Kokvilna 90. Tiek ieskaitīti tikai cikli, par kuriem WashData ir pārliecināts vai kuru programmu izvēlējāties jūs.",
+    "auto_none": "Šo ierīci vēl neizmanto neviena automatizācija.",
+    "auto_start_hint": "Atveras Home Assistant automatizāciju redaktorā, kur šī ierīce jau ir norādīta.",
+    "auto_yours_intro": "Home Assistant automatizācijas, kas reaģē uz šo ierīci.",
+    "bp_needs_online": "Veidnes tiek lejupielādētas no GitHub, tāpēc bibliotēka darbojas tikai ar ieslēgtām tiešsaistes funkcijām. Tiešsaistes funkcijās ietilpst arī Kopienas veikals.",
+    "bp_needs_online_admin": "Administrators tās var ieslēgt zobrata izvēlnē, sadaļā Tiešsaiste un kopiena.",
+    "bp_stale": "Pašlaik nevarēja sasniegt GitHub. Šīs ir iepriekš lejupielādētās veidnes.",
+    "bp_none_yet": "Šim ierīces tipam veidņu vēl nav. Kopīgojiet pirmo.",
+    "bp_unreachable": "Tā tiek lejupielādēta no GitHub. Pārbaudiet, vai Home Assistant var piekļūt internetam, un mēģiniet vēlreiz.",
+    "bp_library_intro": "Gatavas automatizācijas, ko WashData lietotāji kopīgo GitHub un kas tiek pārskatītas pirms iekļaušanas sarakstā. Pieejamas tikai ar ieslēgtām tiešsaistes funkcijām.",
+    "bp_needs_version": "Nepieciešams WashData {version} vai jaunāks."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas trumulis īsi griežas, lai samazinātu grumbiņas.",
@@ -2063,9 +2085,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter vietnē GitHub ↗",
     "manual": "Rokasgrāmata ↗",
-    "bp_share": "Kopīgojiet savu veidni ar pull request ↗",
-    "bp_open_in_ha": "Atvērt Home Assistantā ↗",
-    "automations_all": "Visas WashData automatizācijas Home Assistant"
+    "automations_all": "Visas WashData automatizācijas Home Assistant",
+    "bp_share_pr": "Kopīgojiet savu veidni: atveriet pull request GitHub",
+    "bp_view_github": "Skatīt GitHub",
+    "bp_import_my_ha": "Importēt ar My Home Assistant"
   },
   "tip": {
     "add_brand": "Zīmola nav sarakstā? Pievienojiet to kopienas katalogam",
@@ -2192,16 +2215,6 @@
     "thr": "slieksnis",
     "too_short": "par īsu",
     "tumble_kept": "griešanās impulsi saglabāti"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Ieslēgt kaut ko cikla laikā",
-      "description": "Ieslēdz gaismu, slēdzi vai pārslēgšanas palīgu, kad sākas WashData cikls, un izslēdz, kad tas beidzas, arī pēc viltus starta.\n\nNepieciešams WashData 0.5.9 vai jaunāks."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Beigt žāvētāja garo pretgrumbu fāzi",
-      "description": "Žāvētājiem, kuru trumulis pēc programmas stundām turpina griezties pretgrumbu režīmā. Darbojas tikai tad, ja žāvētāja trumulis joprojām griežas iestatīto minūšu skaitu pēc programmas beigām; žāvētājs, kas līdz tam jau apstājies, netiek aiztikts. Pēc tam tas izslēdz žāvētāja viedligzdas strāvu zemās jaudas brīdī un pēc noklusējuma ieslēdz atpakaļ. Jauns cikls, kas pa to laiku sākas, atceļ to.\n\nRisks: tas pārslēdz releju, kamēr žāvētājs ir iesprausts. Izmantojiet tikai ar kontaktligzdu, kas paredzēta jūsu žāvētājam, un uz savu risku. WashData pati nekad nepārslēdz kontaktligzdu; to dara šī automatizācija.\n\nNepieciešams WashData 0.5.9 vai jaunāks."
-    }
   },
   "trigger": {
     "cycle_started": {

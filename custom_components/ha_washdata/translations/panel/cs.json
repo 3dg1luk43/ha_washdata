@@ -157,7 +157,6 @@
     "load_more": "Načíst více",
     "manage": "Spravovat",
     "merge": "Spojit",
-    "new_automation": "＋ Nová automatizace",
     "new_group": "+ Nová skupina",
     "new_group_tip": "Seskupit téměř stejné profily (stejný tvar, jiná teplota nebo odstřeďování), aby je párování dokázalo rozlišit.",
     "new_phase": "+ Nová fáze",
@@ -257,13 +256,25 @@
     "create_profile_from_gap": "Vytvořit profil",
     "undo_import": "Vrátit zpět poslední import",
     "pg_rerun": "Aktualizovat simulaci",
-    "from_trigger": "Spustit ze spouštěče ▾",
-    "bp_use": "Použít s tímto zařízením",
-    "bp_install": "Nainstalovat šablonu",
-    "bp_view_yaml": "Zobrazit YAML",
-    "copy": "Kopírovat",
     "replace": "Nahradit",
-    "from_trigger_open": "Spustit ze spouštěče ▴"
+    "auto_edit_in_ha": "Upravit v Home Assistant",
+    "auto_fewer_triggers": "Méně spouštěčů",
+    "auto_more_triggers": "Ještě {count} spouštěčů",
+    "auto_more_triggers_one": "Ještě {count} spouštěč",
+    "auto_more_triggers_few": "Ještě {count} spouštěče",
+    "auto_more_triggers_many": "Ještě {count} spouštěče",
+    "auto_more_triggers_other": "Ještě {count} spouštěčů",
+    "auto_blank": "Prázdná automatizace",
+    "bp_refresh": "Zkontrolovat nové šablony na GitHubu",
+    "bp_turn_on_online": "Zapnout online funkce",
+    "bp_add_tip": "Vytvoří automatizaci pro tento spotřebič s výchozím nastavením a pak ji otevře v Home Assistant",
+    "bp_add_to": "Přidat k: {device}",
+    "bp_setup_tip": "Nainstaluje šablonu a pak otevře Home Assistant, kde doplníte zbytek",
+    "bp_setup_in_ha": "Nastavit v Home Assistant",
+    "bp_details": "Podrobnosti",
+    "bp_copy_yaml": "Kopírovat YAML",
+    "bp_hide_yaml": "Skrýt YAML",
+    "bp_show_yaml": "Zobrazit YAML"
   },
   "note": {
     "off_delay": {
@@ -343,7 +354,6 @@
     "add_maintenance": "Přidat údržbovou událost",
     "automation_delete": "Smazat tuto automatizaci",
     "automation_needs_review": "Tento cyklus vyžaduje revizi",
-    "automation_open": "Otevřete v editoru automatizace",
     "automation_review_this_cycle": "Zopakujte si tento cyklus",
     "automations": "Automatizace",
     "clear_debug": "Vymazat trasování ladění",
@@ -361,7 +371,6 @@
     "ml_settings_card": "Nastavení",
     "ml_smart_learning": "Chytré učení",
     "my_preferences": "Moje preference",
-    "no_automations": "Na toto zařízení zatím neodkazuje žádná automatizace.",
     "panel_settings": "Nastavení panelu",
     "pg_settings_source": "Zdroj nastavení",
     "phase_catalog": "Katalog fází",
@@ -382,10 +391,14 @@
     "service_status": "Stav servisu",
     "online_account_tab": "Online a komunita",
     "live_match_debug": "Ladění shody v reálném čase",
-    "automations_used": "Automatizace používající toto zařízení",
-    "bp_templates": "Šablony",
     "automations_all_tip": "Seznam automatizací Home Assistant filtrovaný podle štítku WashData. Automatizace vytvořené zde jsou také v kategorii WashData.",
-    "maint_done_by_program": "Hotovo automaticky"
+    "maint_done_by_program": "Hotovo automaticky",
+    "auto_start": "Vytvořit novou automatizaci",
+    "auto_yours": "Vaše automatizace",
+    "bp_needs_online": "Knihovna šablon vyžaduje online funkce",
+    "bp_unreachable": "Ke knihovně šablon se nepodařilo připojit",
+    "bp_library": "Knihovna šablon",
+    "bp_settings": "Co můžete nastavit"
   },
   "health": {
     "fair": "Přijatelná shoda",
@@ -704,13 +717,18 @@
     "cycle_context_series": "Historie z recorderu",
     "before_start": "Před začátkem",
     "after_end": "Po konci",
-    "bp_you_choose": "Na výběr: {inputs}",
-    "bp_adjustable": "Nastavitelné: {inputs}",
     "bp_yaml": "Blueprint YAML",
     "automation_wd_label": "Nese štítek WashData",
     "done_by_none": "Nenastaveno",
     "done_by_programs": "Hotovo automaticky po programech: {programs}",
-    "done_by_cycle": "Hotovo cyklem programu {program}"
+    "done_by_cycle": "Hotovo cyklem programu {program}",
+    "bp_by": "autor: {author}",
+    "bp_for_all": "Všechny spotřebiče",
+    "bp_for": "Pro",
+    "bp_needs": "Požadavky",
+    "bp_needs_version": "WashData {version} nebo novější",
+    "bp_author": "Autor",
+    "bp_required": "povinné"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -813,7 +831,7 @@
     "undo_import_ok": "Vrátit import zpět",
     "undo_import_title": "Vrátit zpět poslední import",
     "bp_replace_title": "Nahradit nainstalovanou šablonu?",
-    "bp_replace_msg": "Home Assistant má jinou verzi \"{name}\". Nahradit ji verzí z této verze WashData? Automatizace, které ji používají, se změní s ní."
+    "bp_replace_library_msg": "Home Assistant má jinou verzi \"{name}\". Nahradit ji verzí z knihovny šablon? Automatizace, které ji používají, se změní s ní."
   },
   "msg": {
     "pg_canvas_empty3": "Vyberte cyklus výše a stisknutím Spustit jej nasimulujte. Poté najetím zobrazíte hodnoty, kolečkem nebo dvěma prsty přiblížíte a tažením posunete.",
@@ -1021,7 +1039,7 @@
     "standby_above_stop_title": "Při ukončení cyklu stále odebírá {idle} W",
     "standby_above_stop_sub": "{n} z posledních {total} cyklů. Zpoždění vypnutí se začne počítat až ve chvíli, kdy příkon klesne pod Práh zastavení ({stop} W), takže cykly končí pozdě nebo je nutné je zastavit ručně.",
     "store_share_intro": "Nahrajte tento referenční cyklus, aby jej mohli používat ostatní se stejným spotřebičem. Před zveřejněním bude zkontrolován.",
-    "online_intro_global": "Procházejte a sdílejte referenční záznamy s ostatními uživateli WashData. Jedno připojení platí pro všechna vaše zařízení WashData; značka a model se nastavují pro každé zařízení v sekci Základní. Online funkce jsou vypnuté, dokud je nezapnete.",
+    "online_intro_global": "Procházejte a sdílejte referenční záznamy s ostatními uživateli WashData a používejte knihovnu šablon automatizací. Jedno připojení platí pro všechna vaše zařízení WashData; značka a model se nastavují pro každé zařízení v sekci Základní. Online funkce jsou vypnuté, dokud je nezapnete.",
     "online_unavailable": "Online funkce nejsou na tomto serveru dostupné.",
     "store_picker_offline": "Povolte online funkce v ozubeném kolečku nastavení, abyste mohli vybírat z katalogu komunity.",
     "pick_brand_first": "Nejprve vyberte značku spotřebiče.",
@@ -1113,16 +1131,21 @@
     "cycle_context_none": "Recorder kolem tohoto cyklu neuchovává žádné odečty (Home Assistant ve výchozím nastavení uchovává historii 10 dní).",
     "cycle_context_tip": "Jen pro zobrazení: ukazuje historii snímače výkonu z recorderu kolem tohoto cyklu, pokud je ještě uložená. Chcete-li přidávat neúspěšné pokusy o spuštění do budoucích cyklů, použijte Náběh křivky (Nastavení > Detekce > Start cyklu), který mění uložené doby trvání.",
     "invalid_threshold_pair": "Práh zastavení ({stop} W) musí být nižší než Práh spuštění ({start} W). Nic nebylo uloženo; změňte obě hodnoty společně.",
-    "automations_tab_intro": "WashData nabízí spouštěče zařízení (cyklus spuštěn, cyklus dokončen, cyklus zaseknut a další) pro vlastní automatizace Home Assistant. Automatizace používající toto zařízení jsou uvedeny zde.",
-    "bp_intro": "Hotové automatizace pro toto zařízení, nainstalované jako blueprinty Home Assistant.",
     "bp_admin_only": "Šablony instaluje správce.",
-    "bp_none": "Pro tento typ spotřebiče zatím nejsou žádné šablony.",
-    "bp_load_failed": "Šablony nebylo možné načíst.",
-    "auto_trigger_hint": "Vytvoří automatizaci s tímto spouštěčem pro toto zařízení a otevře ji v Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Vytvořeno WashData pro {device}. Přidejte své akce (oznámení, světla, ...).",
     "automation_alias_new": "{device}: nová automatizace",
-    "maint_done_by_program_intro": "Úkol se počítá jako hotový, když skončí cyklus některého z jeho programů, například čištění bubnu po programu Bavlna 90. Počítají se jen cykly, u kterých má WashData jistotu, nebo u kterých jste program vybrali sami."
+    "maint_done_by_program_intro": "Úkol se počítá jako hotový, když skončí cyklus některého z jeho programů, například čištění bubnu po programu Bavlna 90. Počítají se jen cykly, u kterých má WashData jistotu, nebo u kterých jste program vybrali sami.",
+    "auto_none": "Žádná automatizace zatím nepoužívá tento spotřebič.",
+    "auto_start_hint": "Otevře editor automatizací Home Assistant, kde už je tento spotřebič vybraný.",
+    "auto_yours_intro": "Automatizace Home Assistant, které reagují na tento spotřebič.",
+    "bp_needs_online": "Šablony se stahují z GitHubu, takže knihovna funguje jen se zapnutými online funkcemi. Online funkce zahrnují také Komunitní obchod.",
+    "bp_needs_online_admin": "Správce je může zapnout v ozubeném kolečku nastavení, v části Online a komunita.",
+    "bp_stale": "K GitHubu se teď nepodařilo připojit. Zobrazují se dříve stažené šablony.",
+    "bp_none_yet": "Pro tento typ spotřebiče zatím nejsou žádné šablony. Sdílejte první.",
+    "bp_unreachable": "Stahuje se z GitHubu. Zkontrolujte, že má Home Assistant přístup k internetu, a zkuste to znovu.",
+    "bp_library_intro": "Hotové automatizace, které sdílejí uživatelé WashData na GitHubu a které se před zařazením do seznamu kontrolují. Dostupné jen se zapnutými online funkcemi.",
+    "bp_needs_version": "Vyžaduje WashData {version} nebo novější."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -2081,9 +2104,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter na GitHubu ↗",
     "manual": "Příručka ↗",
-    "bp_share": "Sdílejte vlastní šablonu přes pull request ↗",
-    "bp_open_in_ha": "Otevřít v Home Assistant ↗",
-    "automations_all": "Všechny automatizace WashData v Home Assistant"
+    "automations_all": "Všechny automatizace WashData v Home Assistant",
+    "bp_share_pr": "Sdílejte vlastní šablonu: otevřete pull request na GitHubu",
+    "bp_view_github": "Zobrazit na GitHubu",
+    "bp_import_my_ha": "Importovat přes My Home Assistant"
   },
   "tip": {
     "add_brand": "Značka není uvedena? Přidejte ji do katalogu komunity",
@@ -2210,16 +2234,6 @@
     "thr": "práh",
     "too_short": "příliš krátký",
     "tumble_kept": "pulzy bubnu ponechány"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Zapnout něco, když běží cyklus",
-      "description": "Zapne světlo, přepínač nebo pomocnou proměnnou přepínání, když cyklus WashData začne, a vypne, když skončí, i po falešném startu.\n\nVyžaduje WashData 0.5.9 nebo novější."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Ukončit dlouhou fázi ochrany před zmačkáním sušičky",
-      "description": "Pro sušičky, které pokračují v otáčení bubnu v ochraně před zmačkáním celé hodiny po skončení programu. Spustí se jen tehdy, když sušička po uplynutí nastaveného počtu minut od skončení programu stále otáčí bubnem; sušičku, která se do té doby zastavila, nechá být. Poté vypne zástrčku sušičky v okamžiku nízké spotřeby a ve výchozím nastavení ji zase zapne. Nový cyklus spuštěný mezitím ji zruší.\n\nRiziko: přepíná relé, když je sušička zapojena. Používejte pouze se zástrčkou určenou pro vaši sušičku a na vlastní riziko. WashData zástrčku sám nikdy nepřepíná; dělá to tato automatizace.\n\nVyžaduje WashData 0.5.9 nebo novější."
-    }
   },
   "trigger": {
     "cycle_started": {

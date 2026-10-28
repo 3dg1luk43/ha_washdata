@@ -144,7 +144,6 @@
     "load_more": "Ladda fler",
     "manage": "Hantera",
     "merge": "Slå samman",
-    "new_automation": "＋ Ny automatisering",
     "new_group": "+ Ny grupp",
     "new_group_tip": "Gruppera nästan identiska profiler (samma form, annan temperatur eller centrifugering) så att matchningen kan skilja dem åt.",
     "new_phase": "+ Ny fas",
@@ -251,13 +250,23 @@
     "confirmed": "Bekräftad",
     "create_profile_from_gap": "Skapa profil",
     "undo_import": "Ångra senaste import",
-    "from_trigger": "Starta från en trigger ▾",
-    "bp_use": "Använd med den här enheten",
-    "bp_install": "Installera mall",
-    "bp_view_yaml": "Visa YAML",
-    "copy": "Kopiera",
     "replace": "Ersätt",
-    "from_trigger_open": "Starta från en trigger ▴"
+    "auto_edit_in_ha": "Redigera i Home Assistant",
+    "auto_fewer_triggers": "Färre triggers",
+    "auto_more_triggers": "{count} triggers till",
+    "auto_more_triggers_one": "{count} trigger till",
+    "auto_more_triggers_other": "{count} triggers till",
+    "auto_blank": "Tom automatisering",
+    "bp_refresh": "Sök efter nya mallar på GitHub",
+    "bp_turn_on_online": "Slå på onlinefunktioner",
+    "bp_add_tip": "Skapar automatiseringen för den här apparaten med standardinställningarna och öppnar den sedan i Home Assistant",
+    "bp_add_to": "Lägg till för {device}",
+    "bp_setup_tip": "Installerar mallen och öppnar sedan Home Assistant så att du kan fylla i resten",
+    "bp_setup_in_ha": "Konfigurera i Home Assistant",
+    "bp_details": "Detaljer",
+    "bp_copy_yaml": "Kopiera YAML",
+    "bp_hide_yaml": "Dölj YAML",
+    "bp_show_yaml": "Visa YAML"
   },
   "note": {
     "off_delay": {
@@ -337,7 +346,6 @@
     "add_maintenance": "Lägg till underhållshändelse",
     "automation_delete": "Ta bort denna automatisering",
     "automation_needs_review": "Denna cykel behöver granskning",
-    "automation_open": "Öppna i automatiseringsredigeraren",
     "automation_review_this_cycle": "Granska denna cykel",
     "automations": "Automatiseringar",
     "clear_debug": "Rensa felsökningsspår",
@@ -355,7 +363,6 @@
     "ml_settings_card": "Inställningar",
     "ml_smart_learning": "Smart inlärning",
     "my_preferences": "Mina inställningar",
-    "no_automations": "Inga automatiseringar refererar till denna enhet ännu.",
     "panel_settings": "Panelinställningar",
     "pg_settings_source": "Inställningarnas källa",
     "phase_catalog": "Faskatalog",
@@ -376,10 +383,14 @@
     "service_status": "Servicestatus",
     "online_account_tab": "Online & gemenskap",
     "live_match_debug": "Felsökning av livematchning",
-    "automations_used": "Automatiseringar som använder den här enheten",
-    "bp_templates": "Mallar",
     "automations_all_tip": "Home Assistants automatiseringslista, filtrerad efter WashData-etiketten. Automatiseringar skapade här finns också i WashData-kategorin.",
-    "maint_done_by_program": "Klar automatiskt"
+    "maint_done_by_program": "Klar automatiskt",
+    "auto_start": "Skapa en ny automatisering",
+    "auto_yours": "Dina automatiseringar",
+    "bp_needs_online": "Mallbiblioteket kräver onlinefunktioner",
+    "bp_unreachable": "Mallbiblioteket gick inte att nå",
+    "bp_library": "Mallbibliotek",
+    "bp_settings": "Det här kan du ställa in"
   },
   "health": {
     "fair": "Acceptabel profilkvalitet",
@@ -692,13 +703,18 @@
     "pg_obj_split": "Uppdelningsandel",
     "pg_sweep_cycles": "Senaste cykler",
     "cat_backfill_cycles": "Cykler hittade i importerad effekthistorik",
-    "bp_you_choose": "Du väljer: {inputs}",
-    "bp_adjustable": "Justerbar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
     "automation_wd_label": "Har WashData-etiketten",
     "done_by_none": "Inte angivet",
     "done_by_programs": "Klar automatiskt efter: {programs}",
-    "done_by_cycle": "Klar efter en cykel med {program}"
+    "done_by_cycle": "Klar efter en cykel med {program}",
+    "bp_by": "av {author}",
+    "bp_for_all": "Alla apparater",
+    "bp_for": "För",
+    "bp_needs": "Kräver",
+    "bp_needs_version": "WashData {version} eller senare",
+    "bp_author": "Författare",
+    "bp_required": "obligatorisk"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -797,7 +813,7 @@
     "undo_import_ok": "Ångra import",
     "undo_import_title": "Ångra senaste import",
     "bp_replace_title": "Ersätta den installerade mallen?",
-    "bp_replace_msg": "Home Assistant har en annan version av \"{name}\". Ersätt den med den från den här WashData-versionen? Automatiseringar som använder den ändras med den."
+    "bp_replace_library_msg": "Home Assistant har en annan version av \"{name}\". Ersätta den med den från mallbiblioteket? Automatiseringar som använder den ändras med den."
   },
   "msg": {
     "custom_task_limit": "Du har nått gränsen på {max} uppgifter.",
@@ -994,7 +1010,7 @@
     "standby_above_stop_title": "Drog fortfarande {idle} W när cykeln avslutades",
     "standby_above_stop_sub": "{n} av de senaste {total} cyklerna. Avfördröjningen startar först när effekten är under Stopptröskel ({stop} W), så cykler avslutas för sent eller måste stoppas för hand.",
     "store_share_intro": "Ladda upp den här referenscykeln så att andra med samma apparat kan använda den. Den granskas innan den visas offentligt.",
-    "online_intro_global": "Bläddra bland och dela referensinspelningar med andra WashData-användare. En anslutning gäller alla dina WashData-enheter; märke och modell anges per enhet under Grundläggande. Onlinefunktioner är av tills du slår på dem.",
+    "online_intro_global": "Bläddra bland och dela referensinspelningar med andra WashData-användare, och använd biblioteket med automatiseringsmallar. En anslutning gäller alla dina WashData-enheter; märke och modell anges per enhet under Grundläggande. Onlinefunktioner är av tills du slår på dem.",
     "online_unavailable": "Onlinefunktioner är inte tillgängliga på den här servern.",
     "store_picker_offline": "Aktivera onlinefunktioner i inställningskugghjulet för att välja från gemenskapskatalogen.",
     "pick_brand_first": "Välj ett apparatmärke först.",
@@ -1081,16 +1097,21 @@
     "import_undo_hint": "En återställningspunkt från före den senaste importen ({when}) finns kvar: {profiles} profil(er) och {cycles} cykel/cykler.",
     "replace_undo_hint": "En återställningspunkt sparas först, så att du kan ångra den här importen under Exportera / Importera.",
     "pg_in_sample_note": "De här cyklerna var med och byggde de profiler de matchas mot, så resultaten är optimistiska: räkna med något färre korrekta matchningar på nya cykler.",
-    "automations_tab_intro": "WashData erbjuder enhetstriggers (cykel startad, cykel klar, cykel avstannad och mer) för dina egna Home Assistant-automatiseringar. Automatiseringar som använder den här enheten listas här.",
-    "bp_intro": "Färdiga automatiseringar för den här apparaten, installerade som Home Assistant-blueprints.",
     "bp_admin_only": "En administratör installerar mallar.",
-    "bp_none": "Inga mallar för den här apparattypen ännu.",
-    "bp_load_failed": "Mallarna kunde inte laddas.",
-    "auto_trigger_hint": "Skapar en automatisering med denna trigger för denna enhet och öppnar den i Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Skapad av WashData för {device}. Lägg till dina åtgärder (avisering, lampor, ...).",
     "automation_alias_new": "{device}: ny automatisering",
-    "maint_done_by_program_intro": "En uppgift räknas som klar när en cykel med ett av dess program avslutas, till exempel trumrengöring när Bomull 90 körs. Bara cykler som WashData är säker på, eller som du själv har valt, räknas."
+    "maint_done_by_program_intro": "En uppgift räknas som klar när en cykel med ett av dess program avslutas, till exempel trumrengöring när Bomull 90 körs. Bara cykler som WashData är säker på, eller som du själv har valt, räknas.",
+    "auto_none": "Inga automatiseringar använder den här apparaten än.",
+    "auto_start_hint": "Öppnas i Home Assistants automatiseringsredigerare med den här apparaten redan ifylld.",
+    "auto_yours_intro": "Home Assistant-automatiseringar som reagerar på den här apparaten.",
+    "bp_needs_online": "Mallar laddas ner från GitHub, så biblioteket fungerar bara med onlinefunktioner påslagna. Onlinefunktionerna omfattar även Gemenskapsbutiken.",
+    "bp_needs_online_admin": "En administratör kan slå på dem i inställningskugghjulet under Online & gemenskap.",
+    "bp_stale": "GitHub gick inte att nå just nu. Det här är mallarna som laddades ner tidigare.",
+    "bp_none_yet": "Inga mallar för den här apparattypen än. Dela den första.",
+    "bp_unreachable": "Det laddas ner från GitHub. Kontrollera att Home Assistant når internet och försök sedan igen.",
+    "bp_library_intro": "Färdiga automatiseringar som WashData-användare delar på GitHub, granskade innan de listas. Bara tillgängligt med onlinefunktioner påslagna.",
+    "bp_needs_version": "Kräver WashData {version} eller senare."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: tysta sekunder efter förväntad varaktighet innan väntan på tömning vid cykelslut frisläpps",
@@ -2045,9 +2066,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter på GitHub ↗",
     "manual": "Manual ↗",
-    "bp_share": "Dela din egen mall via en pull request ↗",
-    "bp_open_in_ha": "Öppna i Home Assistant ↗",
-    "automations_all": "Alla WashData-automatiseringar i Home Assistant"
+    "automations_all": "Alla WashData-automatiseringar i Home Assistant",
+    "bp_share_pr": "Dela din egen mall: öppna en pull request på GitHub",
+    "bp_view_github": "Visa på GitHub",
+    "bp_import_my_ha": "Importera med My Home Assistant"
   },
   "tip": {
     "add_brand": "Märke inte med i listan? Lägg till det i gemenskapskatalogen",
@@ -2174,16 +2196,6 @@
     "thr": "trösk.",
     "too_short": "för kort",
     "tumble_kept": "tumlingspulser behålls"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Sätt på något medan en cykel körs",
-      "description": "Sätter på ett ljus, en kontakt eller en växlingshjälpare när en WashData-cykel startar och stänger av den när den slutar, även efter en falsk start.\n\nKräver WashData 0.5.9 eller nyare."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Avsluta en lång skrynkelskyddsfas på torktumlaren",
-      "description": "För torktumlare som fortsätter att tumla i skrynkelskyddsläge i timmar efter programmet. Körs bara om torktumlaren fortfarande tumlar det inställda antalet minuter efter att programmet har avslutats; en torktumlare som har stannat innan dess lämnas ifred. Den stänger sedan av torktumlarstickan i ett ögonblick med låg effekt och, som standard, sätter på den igen. En ny cykel som startar under tiden avbryter den.\n\nRisk: detta kopplar ett relä medan torktumlaren är inkopplad. Använd det bara med ett uttag anpassat för din torktumlare och på egen risk. WashData kopplar aldrig stickan själv; det gör den här automatiseringen.\n\nKräver WashData 0.5.9 eller nyare."
-    }
   },
   "trigger": {
     "cycle_started": {

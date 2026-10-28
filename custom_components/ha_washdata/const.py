@@ -1954,6 +1954,11 @@ STORE_PROJECT_ID = "washdata-store"
 STORE_API_KEY = "AIzaSyDzq0MoWdU_21CSohZUhIIV7ZwfWppjcAk"
 STORE_WEB_ORIGIN = "https://3dg1luk43.github.io/washdata-store"
 
+# The automation template library (#478): Home Assistant blueprints in their own
+# repository, reviewed there, downloaded only while online features are on.
+AUTOMATION_LIBRARY_REPO = "https://github.com/3dg1luk43/washdata-automations"
+AUTOMATION_LIBRARY_RAW = "https://raw.githubusercontent.com/3dg1luk43/washdata-automations/main"
+
 # Reference-cycle trace format versions this integration can import.
 SUPPORTED_CYCLE_SCHEMA_VERSIONS = {1}
 

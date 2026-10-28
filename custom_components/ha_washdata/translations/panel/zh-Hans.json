@@ -139,7 +139,6 @@
         "load_more": "加载更多",
         "manage": "管理",
         "merge": "合并",
-        "new_automation": "＋ 新建自动化",
         "new_group": "+ 新建组",
         "new_group_tip": "将几乎相同的配置文件（形状相同，温度或转速不同）分组，使匹配能够区分它们。",
         "new_phase": "+ 新建阶段",
@@ -248,13 +247,22 @@
         "create_profile_from_gap": "创建配置文件",
         "undo_import": "撤销上次导入",
         "pg_rerun": "更新模拟",
-        "from_trigger": "从触发器开始 ▾",
-        "bp_use": "用于此设备",
-        "bp_install": "安装模板",
-        "bp_view_yaml": "查看 YAML",
-        "copy": "复制",
         "replace": "替换",
-        "from_trigger_open": "从触发器开始 ▴"
+        "auto_edit_in_ha": "在 Home Assistant 中编辑",
+        "auto_fewer_triggers": "收起触发器",
+        "auto_more_triggers": "还有 {count} 个触发器",
+        "auto_more_triggers_other": "还有 {count} 个触发器",
+        "auto_blank": "空白自动化",
+        "bp_refresh": "在 GitHub 上检查新模板",
+        "bp_turn_on_online": "开启在线功能",
+        "bp_add_tip": "使用默认设置为此家电创建自动化，然后在 Home Assistant 中打开",
+        "bp_add_to": "添加到 {device}",
+        "bp_setup_tip": "安装模板，然后打开 Home Assistant 填写其余内容",
+        "bp_setup_in_ha": "在 Home Assistant 中设置",
+        "bp_details": "详情",
+        "bp_copy_yaml": "复制 YAML",
+        "bp_hide_yaml": "隐藏 YAML",
+        "bp_show_yaml": "显示 YAML"
     },
     "note": {
         "off_delay": {
@@ -334,7 +342,6 @@
         "add_maintenance": "添加维护事件",
         "automation_delete": "删除此自动化",
         "automation_needs_review": "此周期需要审查",
-        "automation_open": "在自动化编辑器中打开",
         "automation_review_this_cycle": "审查此周期",
         "automations": "自动化",
         "clear_debug": "清除调试追踪",
@@ -352,7 +359,6 @@
         "ml_settings_card": "设置",
         "ml_smart_learning": "智能学习",
         "my_preferences": "我的偏好",
-        "no_automations": "尚未有自动化引用此设备。",
         "panel_settings": "面板设置",
         "pg_settings_source": "设置来源",
         "phase_catalog": "阶段目录",
@@ -373,10 +379,14 @@
         "service_status": "保养状态",
         "online_account_tab": "在线与社区",
         "live_match_debug": "实时匹配调试",
-        "automations_used": "使用此设备的自动化",
-        "bp_templates": "模板",
         "automations_all_tip": "Home Assistant 的自动化列表，按 WashData 标签过滤。在此创建的自动化也在 WashData 类别中。",
-        "maint_done_by_program": "自动完成"
+        "maint_done_by_program": "自动完成",
+        "auto_start": "新建自动化",
+        "auto_yours": "您的自动化",
+        "bp_needs_online": "模板库需要在线功能",
+        "bp_unreachable": "无法连接模板库",
+        "bp_library": "模板库",
+        "bp_settings": "可设置的选项"
     },
     "health": {
         "fair": "配置文件质量尚可",
@@ -686,13 +696,18 @@
         "cycle_context_series": "记录器历史",
         "before_start": "开始前",
         "after_end": "结束后",
-        "bp_you_choose": "您选择: {inputs}",
-        "bp_adjustable": "可调整: {inputs}",
         "bp_yaml": "蓝图 YAML",
         "automation_wd_label": "包含 WashData 标签",
         "done_by_none": "未设置",
         "done_by_programs": "由以下程序自动完成：{programs}",
-        "done_by_cycle": "由 {program} 周期完成"
+        "done_by_cycle": "由 {program} 周期完成",
+        "bp_by": "作者：{author}",
+        "bp_for_all": "所有家电",
+        "bp_for": "适用于",
+        "bp_needs": "要求",
+        "bp_needs_version": "WashData {version} 或更高版本",
+        "bp_author": "作者",
+        "bp_required": "必填"
     },
     "log": {
         "all_levels": "所有级别",
@@ -789,7 +804,7 @@
         "undo_import_ok": "撤销导入",
         "undo_import_title": "撤销上次导入",
         "bp_replace_title": "替换已安装的模板？",
-        "bp_replace_msg": "Home Assistant 中已有 \"{name}\" 的其他版本。用此 WashData 版本中的内容替换吗？使用该模板的自动化也会随之改变。"
+        "bp_replace_library_msg": "Home Assistant 中已有另一个版本的“{name}”。要用模板库中的版本替换吗？使用它的自动化也会随之改变。"
     },
     "msg": {
         "pg_canvas_empty3": "在上方选择一个周期并按“运行”进行模拟。然后悬停查看数值，滚动或双指缩放，拖动平移。",
@@ -973,7 +988,7 @@
         "standby_above_stop_title": "周期结束时仍在消耗 {idle} W",
         "standby_above_stop_sub": "最近 {total} 个周期中有 {n} 个。关闭延迟只有在功率低于停止阈值（{stop} W）之后才开始计时，因此周期会结束过晚或需要手动停止。",
         "store_share_intro": "上传此参考周期，以便拥有相同家电的其他人使用。它会经过审核后才公开显示。",
-        "online_intro_global": "与其他 WashData 用户浏览和分享参考录制。一次连接适用于您所有的 WashData 设备；品牌和型号在“基本”下按设备设置。在线功能在您开启前保持关闭。",
+        "online_intro_global": "与其他 WashData 用户浏览和分享参考录制，并使用自动化模板库。一次连接适用于您所有的 WashData 设备；品牌和型号在“基本”下按设备设置。在线功能在您开启前保持关闭。",
         "online_unavailable": "此服务器不支持在线功能。",
         "store_picker_offline": "在设置齿轮中启用在线功能，即可从社区目录中选择。",
         "pick_brand_first": "请先选择家电品牌。",
@@ -1065,16 +1080,21 @@
         "cycle_context_none": "记录器中没有此周期前后的读数（Home Assistant 默认保留 10 天的历史）。",
         "cycle_context_tip": "仅用于显示：显示功率传感器在此周期前后的记录器历史（如仍保留）。若要将失败的启动尝试并入以后的周期，请使用“曲线前导采样”（设置 > 检测 > 周期开始），这会改变存储的时长。",
         "invalid_threshold_pair": "停止阈值（{stop} W）必须低于启动阈值（{start} W）。未保存任何内容；请同时修改这两个值。",
-        "automations_tab_intro": "WashData 为您自己的 Home Assistant 自动化提供设备触发器（周期开始、周期完成、周期停滞等）。使用此设备的自动化将在此处列出。",
-        "bp_intro": "此设备的现成自动化，以 Home Assistant 蓝图形式安装。",
         "bp_admin_only": "模板由管理员安装。",
-        "bp_none": "此设备类型暂无模板。",
-        "bp_load_failed": "模板加载失败。",
-        "auto_trigger_hint": "为此设备创建包含此触发器的自动化，并在 Home Assistant 中打开。",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "由 WashData 为 {device} 创建。添加您的动作（通知、灯光等）。",
         "automation_alias_new": "{device}: 新建自动化",
-        "maint_done_by_program_intro": "当任务所选程序之一的周期结束时，该任务即算作完成，例如运行“棉布 90”后清洁滚筒即完成。只有 WashData 确认识别的周期，或您手动选择了程序的周期才会计入。"
+        "maint_done_by_program_intro": "当任务所选程序之一的周期结束时，该任务即算作完成，例如运行“棉布 90”后清洁滚筒即完成。只有 WashData 确认识别的周期，或您手动选择了程序的周期才会计入。",
+        "auto_none": "还没有自动化使用此家电。",
+        "auto_start_hint": "在 Home Assistant 的自动化编辑器中打开，并已预先填入此家电。",
+        "auto_yours_intro": "响应此家电的 Home Assistant 自动化。",
+        "bp_needs_online": "模板从 GitHub 下载，因此模板库仅在开启在线功能时可用。在线功能还包括社区商店。",
+        "bp_needs_online_admin": "管理员可以在齿轮菜单的“在线与社区”中开启。",
+        "bp_stale": "暂时无法连接 GitHub。以下是之前下载的模板。",
+        "bp_none_yet": "此家电类型还没有模板。来分享第一个吧。",
+        "bp_unreachable": "模板库从 GitHub 下载。请检查 Home Assistant 能否访问互联网，然后重试。",
+        "bp_library_intro": "WashData 用户在 GitHub 上分享的现成自动化，上架前经过审核。仅在开启在线功能时可用。",
+        "bp_needs_version": "需要 WashData {version} 或更高版本。"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -2027,9 +2047,10 @@
     "link": {
         "maintenance_supporter": "GitHub 上的 Maintenance Supporter ↗",
         "manual": "手册 ↗",
-        "bp_share": "通过 pull request 分享您的模板 ↗",
-        "bp_open_in_ha": "在 Home Assistant 中打开 ↗",
-        "automations_all": "Home Assistant 中所有 WashData 自动化"
+        "automations_all": "Home Assistant 中所有 WashData 自动化",
+        "bp_share_pr": "分享您自己的模板：在 GitHub 上提交拉取请求",
+        "bp_view_github": "在 GitHub 上查看",
+        "bp_import_my_ha": "通过 My Home Assistant 导入"
     },
     "tip": {
         "add_brand": "品牌未收录？将其添加到社区目录",
@@ -2156,16 +2177,6 @@
         "thr": "阈值",
         "too_short": "太短",
         "tumble_kept": "保留转动脉冲"
-    },
-    "blueprint": {
-        "cycle_running_indicator": {
-            "name": "周期运行时打开某物",
-            "description": "当 WashData 周期开始时打开灯、开关或切换辅助设备，周期结束时关闭，误启动后同样适用。\n\n需要 WashData 0.5.9 或更高版本。"
-        },
-        "dryer_anti_crease_power_cut": {
-            "name": "终止烘干机长时间抗皱阶段",
-            "description": "适用于程序结束后仍在抗皱模式下持续转动数小时的烘干机。仅当程序结束后经过设定的分钟数、烘干机仍在转动时才运行；届时已停止的烘干机则不做任何处理。随后，在低功耗时刻关闭烘干机的智能插座，并在默认情况下重新开启。期间若有新周期开始则取消。\n\n风险：烘干机处于插电状态时切换继电器。请仅使用适合您烘干机额定功率的插座，并自行承担风险。WashData 本身不切换插座；这由此自动化完成。\n\n需要 WashData 0.5.9 或更高版本。"
-        }
     },
     "trigger": {
         "cycle_started": {

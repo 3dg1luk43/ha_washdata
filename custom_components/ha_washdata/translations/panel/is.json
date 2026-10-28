@@ -144,7 +144,6 @@
     "load_more": "Hlaða meira",
     "manage": "Stjórna",
     "merge": "Sameina",
-    "new_automation": "＋ Ný sjálfvirkni",
     "new_group": "+ Nýr hópur",
     "new_group_tip": "Flokkaðu næstum eins snið (sama lögun, annað hitastig eða vinding) svo samsvörunin geti greint þau í sundur.",
     "new_phase": "+ Nýr áfangi",
@@ -251,13 +250,23 @@
     "confirmed": "Staðfest",
     "create_profile_from_gap": "Búðu til prófíl",
     "undo_import": "Afturkalla síðasta innflutning",
-    "from_trigger": "Hefja af kveikju ▾",
-    "bp_use": "Nota með þessu tæki",
-    "bp_install": "Setja upp sniðmát",
-    "bp_view_yaml": "Skoða YAML",
-    "copy": "Afrita",
     "replace": "Skipta út",
-    "from_trigger_open": "Hefja af kveikju ▴"
+    "auto_edit_in_ha": "Breyta í Home Assistant",
+    "auto_fewer_triggers": "Færri kveikjur",
+    "auto_more_triggers": "{count} kveikjur í viðbót",
+    "auto_more_triggers_one": "{count} kveikja í viðbót",
+    "auto_more_triggers_other": "{count} kveikjur í viðbót",
+    "auto_blank": "Auð sjálfvirkni",
+    "bp_refresh": "Leita að nýjum sniðmátum á GitHub",
+    "bp_turn_on_online": "Kveikja á nettengdum eiginleikum",
+    "bp_add_tip": "Býr til sjálfvirknina fyrir þetta tæki með sjálfgefnum stillingum og opnar hana svo í Home Assistant",
+    "bp_add_to": "Bæta við fyrir {device}",
+    "bp_setup_tip": "Setur upp sniðmátið og opnar svo Home Assistant til að fylla inn afganginn",
+    "bp_setup_in_ha": "Setja upp í Home Assistant",
+    "bp_details": "Nánar",
+    "bp_copy_yaml": "Afrita YAML",
+    "bp_hide_yaml": "Fela YAML",
+    "bp_show_yaml": "Sýna YAML"
   },
   "note": {
     "off_delay": {
@@ -337,7 +346,6 @@
     "add_maintenance": "Bæta við viðhaldsatburði",
     "automation_delete": "Eyða þessari sjálfvirkni",
     "automation_needs_review": "Þessi lota þarfnast endurskoðunar",
-    "automation_open": "Opnaðu í sjálfvirkni ritlinum",
     "automation_review_this_cycle": "Skoðaðu þessa lotu",
     "automations": "Sjálfvirkni",
     "clear_debug": "Hreinsaðu villuleitarspor",
@@ -355,7 +363,6 @@
     "ml_settings_card": "Stillingar",
     "ml_smart_learning": "Snjallt nám",
     "my_preferences": "Mínar óskir",
-    "no_automations": "Engar sjálfvirkni vísar til þessa tækis ennþá.",
     "panel_settings": "Pallborðsstillingar",
     "pg_settings_source": "Uppruni stillinga",
     "phase_catalog": "Áfangaskrá",
@@ -376,10 +383,14 @@
     "service_status": "Staða þjónustu",
     "online_account_tab": "Net & samfélag",
     "live_match_debug": "Villuleit samsvörunar í beinni",
-    "automations_used": "Sjálfvirkni sem notar þetta tæki",
-    "bp_templates": "Sniðmát",
     "automations_all_tip": "Sjálvvirknilisti Home Assistant, síaur eftir WashData-merkimiðanum. Sjálvvirkni búinn til hér er einnig í WashData-flokki.",
-    "maint_done_by_program": "Lokið sjálfkrafa"
+    "maint_done_by_program": "Lokið sjálfkrafa",
+    "auto_start": "Búa til nýja sjálfvirkni",
+    "auto_yours": "Þín sjálfvirkni",
+    "bp_needs_online": "Sniðmátasafnið þarf nettengda eiginleika",
+    "bp_unreachable": "Ekki náðist í sniðmátasafnið",
+    "bp_library": "Sniðmátasafn",
+    "bp_settings": "Það sem þú getur stillt"
   },
   "health": {
     "fair": "Viðunanlegt prófíl",
@@ -692,13 +703,18 @@
     "pg_obj_split": "Hlutfall skiptra lota",
     "pg_sweep_cycles": "Nýlegar lotur",
     "cat_backfill_cycles": "Lotur fundnar í innfluttri aflsögu",
-    "bp_you_choose": "Þú velur: {inputs}",
-    "bp_adjustable": "Stillanleg: {inputs}",
     "bp_yaml": "Blueprint-YAML",
     "automation_wd_label": "Ber WashData-merkimiðann",
     "done_by_none": "Ekki stillt",
     "done_by_programs": "Lokið sjálfkrafa með: {programs}",
-    "done_by_cycle": "Lokið með lotu á {program}"
+    "done_by_cycle": "Lokið með lotu á {program}",
+    "bp_by": "eftir {author}",
+    "bp_for_all": "Öll tæki",
+    "bp_for": "Fyrir",
+    "bp_needs": "Krefst",
+    "bp_needs_version": "WashData {version} eða nýrra",
+    "bp_author": "Höfundur",
+    "bp_required": "nauðsynlegt"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -797,7 +813,7 @@
     "undo_import_ok": "Afturkalla innflutning",
     "undo_import_title": "Afturkalla síðasta innflutning",
     "bp_replace_title": "Skipta út uppsettu sniðmáti?",
-    "bp_replace_msg": "Home Assistant er með aðra útgáfu af \"{name}\". Skipta henni út með þeirri sem er í þessari WashData-útgáfu? Sjálfvirkni sem notar hana breytist með henni."
+    "bp_replace_library_msg": "Home Assistant er með aðra útgáfu af \"{name}\". Skipta henni út fyrir þá úr sniðmátasafninu? Sjálfvirkni sem notar hana breytist með henni."
   },
   "msg": {
     "custom_task_limit": "Þú hefur náð hámarki upp á {max} verk.",
@@ -994,7 +1010,7 @@
     "standby_above_stop_title": "Dró enn {idle} W þegar lotunni lauk",
     "standby_above_stop_sub": "{n} af síðustu {total} lotum. Slökkvitöf fer ekki af stað fyrr en aflið er komið undir Stöðvunarþröskuld ({stop} W), svo lotur enda of seint eða þarf að stöðva handvirkt.",
     "store_share_intro": "Hladdu þessari viðmiðunarlotu upp svo aðrir með sama tæki geti notað hana. Hún er yfirfarin áður en hún birtist opinberlega.",
-    "online_intro_global": "Skoðaðu og deildu viðmiðunarupptökum með öðrum WashData-notendum. Ein tenging nær yfir öll WashData-tækin þín; vörumerki og gerð eru stillt fyrir hvert tæki undir Grunnstillingar. Nettengdir eiginleikar eru óvirkir þar til þú kveikir á þeim.",
+    "online_intro_global": "Skoðaðu og deildu viðmiðunarupptökum með öðrum WashData-notendum og notaðu safn sjálfvirknisniðmáta. Ein tenging nær yfir öll WashData-tækin þín; vörumerki og gerð eru stillt fyrir hvert tæki undir Grunnstillingar. Nettengdir eiginleikar eru óvirkir þar til þú kveikir á þeim.",
     "online_unavailable": "Nettengdir eiginleikar eru ekki í boði á þessum netþjóni.",
     "store_picker_offline": "Virkjaðu nettengda eiginleika í stillingatannhjólinu til að velja úr samfélagsskránni.",
     "pick_brand_first": "Veldu fyrst vörumerki tækis.",
@@ -1081,16 +1097,21 @@
     "import_undo_hint": "Endurheimtarpunktur frá því fyrir síðasta innflutning ({when}) er geymdur með {profiles} prófíl(um) og {cycles} lotu(m).",
     "replace_undo_hint": "Endurheimtarpunktur er vistaður fyrst, svo þú getur afturkallað þennan innflutning undir Útflutningur / Innflutningur.",
     "pg_in_sample_note": "Þessar lotur hjálpuðu til við að byggja sniðin sem þær eru bornar saman við, svo niðurstöðurnar eru bjartsýnar: búast má við aðeins færri réttum samsvörunum á nýjum lotum.",
-    "automations_tab_intro": "WashData býður upp á tækjakveikjur (lota hafin, lotu lokið, lota stöðvuð og fleiri) fyrir þínar eigin Home Assistant sjálfvirkingar. Sjálfvirkni sem notar þetta tæki er skráð hér.",
-    "bp_intro": "Tilbúnar sjálfvirkingar fyrir þetta tæki, settar upp sem Home Assistant blueprints.",
     "bp_admin_only": "Stjórnandi setur upp sniðmát.",
-    "bp_none": "Engin sniðmát fyrir þennan tækjategund enn.",
-    "bp_load_failed": "Sniðmát gátu ekki hlaðist.",
-    "auto_trigger_hint": "Býr til sjálvvirkni með þssari kveikju fyrir þetta tæki og opnar hana í Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Búið til af WashData fyrir {device}. Bættu við aðgerðum (þkynning, ljós, ...).",
     "automation_alias_new": "{device}: ný sjálvvirkni",
-    "maint_done_by_program_intro": "Verk telst lokið þegar lota með einu af kerfum þess lýkur, til dæmis tromluhreinsun þegar Bómull 90 keyrir. Aðeins lotur sem WashData er viss um, eða sem þú valdir, teljast með."
+    "maint_done_by_program_intro": "Verk telst lokið þegar lota með einu af kerfum þess lýkur, til dæmis tromluhreinsun þegar Bómull 90 keyrir. Aðeins lotur sem WashData er viss um, eða sem þú valdir, teljast með.",
+    "auto_none": "Engin sjálfvirkni notar þetta tæki enn.",
+    "auto_start_hint": "Opnast í sjálfvirkniritli Home Assistant með þetta tæki þegar útfyllt.",
+    "auto_yours_intro": "Home Assistant-sjálfvirkni sem bregst við þessu tæki.",
+    "bp_needs_online": "Sniðmát eru sótt frá GitHub, svo safnið virkar aðeins þegar kveikt er á nettengdum eiginleikum. Nettengdir eiginleikar ná líka yfir Samfélagsverslunina.",
+    "bp_needs_online_admin": "Stjórnandi getur kveikt á þeim í stillingatannhjólinu, undir Net & samfélag.",
+    "bp_stale": "Ekki náðist í GitHub rétt í þessu. Þetta eru sniðmátin sem voru sótt áður.",
+    "bp_none_yet": "Engin sniðmát enn fyrir þessa tækjategund. Deildu því fyrsta.",
+    "bp_unreachable": "Það er sótt frá GitHub. Gakktu úr skugga um að Home Assistant nái sambandi við internetið og reyndu svo aftur.",
+    "bp_library_intro": "Tilbúin sjálfvirkni sem WashData-notendur deila á GitHub, yfirfarin áður en hún er birt. Aðeins í boði þegar kveikt er á nettengdum eiginleikum.",
+    "bp_needs_version": "Krefst WashData {version} eða nýrra."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
@@ -2045,9 +2066,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter á GitHub ↗",
     "manual": "Handbók ↗",
-    "bp_share": "Deildu þínu eigin sniðmáti með pull request ↗",
-    "bp_open_in_ha": "Opna í Home Assistant ↗",
-    "automations_all": "Öll WashData-sjálvvirkni í Home Assistant"
+    "automations_all": "Öll WashData-sjálvvirkni í Home Assistant",
+    "bp_share_pr": "Deildu þínu eigin sniðmáti: opnaðu pull request á GitHub",
+    "bp_view_github": "Skoða á GitHub",
+    "bp_import_my_ha": "Flytja inn með My Home Assistant"
   },
   "tip": {
     "add_brand": "Vörumerki ekki á listanum? Bættu því við samfélagsskrána",
@@ -2174,16 +2196,6 @@
     "thr": "þrösk.",
     "too_short": "of stutt",
     "tumble_kept": "tromlupúlsum haldið"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Kveikja á einhverju á meðan lota keyrir",
-      "description": "Kveikir á ljósi, rofa eða víxlahjálp þegar WashData-lota hefst og slökkvar þegar henni lýkur, einnig eftir ranga ræsingu.\n\nKrefst WashData 0.5.9 eða nýrra."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Ljúka langri hrukkuleysiáfanga á þurrkara",
-      "description": "Fyrir þurrkara þar sem tromlan heldur áfram að snúast í hrukkuleysi í klukkustundir eftir kerfið. Keyrir aðeins ef tromla þurrkarans er enn að snúast þegar stilltur fjöldi mínútna er liðinn frá lokum kerfisins; þurrkari sem hefur stöðvast fyrir þann tíma er látinn í friði. Hún slekkur síðan á snjalltengil þurrkarans í lágafls-augnablik og, sjálfgefið, kveikir á honum aftur. Ný lota sem byrjar á meðan hættir við hana.\n\nÁhætta: þetta skiptir um relé á meðan þurrkarinn er tengdur. Notaðu það aðeins með tengi sem er gert fyrir þurrkarann þinn og á eigin áhættu. WashData skiptir aldrei sjálf um tengilinn; það gerir þessi sjálfvirkni.\n\nKrefst WashData 0.5.9 eða nýrra."
-    }
   },
   "trigger": {
     "cycle_started": {

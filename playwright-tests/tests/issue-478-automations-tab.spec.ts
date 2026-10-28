@@ -2,11 +2,11 @@
  * #478: the Automations tab.
  *
  * The Notifications > Automations subsection moved to its own top-level tab, which
- * also offers the blueprint templates shipped with the integration
- * (ha_washdata/blueprints/list), filtered to the device type. An administrator
- * installs one with HA's blueprint/save; a template whose only open input is the
- * device ("one_click") then becomes an automation for this device in the same
- * click. Everyone may read a template's YAML.
+ * also offers the online template library (ha_washdata/blueprints/list, its own
+ * repository on GitHub, only with online features on), filtered to the device
+ * type. An administrator installs a template with HA's blueprint/save; one whose
+ * only open input is the device ("one_click") then becomes an automation for this
+ * device in the same click. Everyone may read a template's details and YAML.
  *
  * v2: "Start from a trigger" lists every WashData integration trigger the device
  * type offers, and everything the panel creates gets the "WashData" label and the
@@ -18,6 +18,7 @@ import { test, expect } from '@playwright/test';
 import { bootPanel, clickTab, assertWsCalled, assertWsNotCalled } from '../helpers/panel';
 import optionsData from '../fixtures/mock-data/options.json';
 import panelConfig from '../fixtures/mock-data/panel-config.json';
+import constants from '../fixtures/mock-data/constants.json';
 
 const ENTRY = 'test-entry-001';
 const HASS = {
@@ -26,14 +27,18 @@ const HASS = {
     wd: { id: 'wd-device', identifiers: [['ha_washdata', ENTRY]], config_entries: [ENTRY] },
   },
 };
-const SRC = 'https://github.com/3dg1luk43/ha_washdata/blob/main/custom_components/ha_washdata/blueprints/automation/';
+const SRC = 'https://github.com/3dg1luk43/washdata-automations/blob/main/automation/';
+const ONLINE = { 'ha_washdata/get_constants': { ...constants, store_online_enabled: true } };
 
 const DRYER = {
   id: 'dryer_anti_crease_power_cut',
   name: 'WashData: end a long dryer anti-crease phase',
-  description: 'For dryers that keep tumbling.\n\nNeeds WashData 0.5.9 or newer.',
+  description: 'Ends the anti-crease tumbling.\n\nRisk: it switches a relay.\n\nNeeds WashData 0.5.9 or newer.',
+  author: 'WashData',
+  icon: 'plug',
   device_types: ['dryer', 'washer_dryer'],
   min_version: '0.5.9',
+  compatible: true,
   tags: ['anti-crease', 'smart plug'],
   source_url: SRC + 'dryer_anti_crease_power_cut.yaml',
   path: 'ha_washdata/dryer_anti_crease_power_cut.yaml',
@@ -41,15 +46,18 @@ const DRYER = {
   one_click: true,
   inputs: [
     { key: 'washdata_device', name: 'Dryer', description: '', selector: 'device', has_default: false },
-    { key: 'wait_minutes', name: 'Wait first', description: '', selector: 'number', has_default: true },
+    { key: 'wait_minutes', name: 'Wait first', description: 'Minutes after the program.', selector: 'number', has_default: true },
   ],
 };
 const INDICATOR = {
   id: 'cycle_running_indicator',
   name: 'WashData: turn something on while a cycle runs',
   description: 'Turns a light on while a cycle runs.',
+  author: 'Alex',
+  icon: 'light',
   device_types: ['all'],
   min_version: '0.5.9',
+  compatible: true,
   tags: ['light'],
   source_url: SRC + 'cycle_running_indicator.yaml',
   path: 'ha_washdata/cycle_running_indicator.yaml',
@@ -78,6 +86,7 @@ async function openTab(
 ) {
   await page.goto('/');
   await bootPanel(page, {
+    ...ONLINE,
     'ha_washdata/blueprints/list': CATALOG,
     'blueprint/list': {},
     'blueprint/save': { overrides_existing: false },
@@ -132,7 +141,7 @@ test('the tab follows Settings and Notifications no longer carries the automatio
   await page.locator('button[data-sec="notifications"]').first().click();
   await expect(page.locator('input[data-opt="notify_only_when_home"]').first()).toBeAttached({ timeout: 8_000 });
   await expect(page.locator('[data-action="auto-new"]')).toHaveCount(0);
-  await expect(page.locator('.wd-auto-pills')).toHaveCount(0);
+  await expect(page.locator('.wd-auto-list, .wd-auto-empty')).toHaveCount(0);
 
   await clickTab(page, 'automations');
   await expect(page.locator('[data-action="auto-new"]')).toBeVisible({ timeout: 8_000 });
@@ -145,18 +154,98 @@ test('a washer sees only the templates for every device type', async ({ page }) 
   await expect(card(page, 'dryer_anti_crease_power_cut')).toHaveCount(0);
 });
 
-test('a dryer sees both templates, with name, tags and inputs', async ({ page }) => {
+test('a dryer sees both templates: name, author, summary and tags', async ({ page }) => {
   await openTab(page, DRYER_OPTIONS);
   const dryer = card(page, 'dryer_anti_crease_power_cut');
   await expect(dryer).toBeVisible();
   await expect(card(page, 'cycle_running_indicator')).toBeVisible();
   await expect(dryer.locator('.wd-bp-name')).toHaveText('End a long dryer anti-crease phase');
-  await expect(dryer.locator('.wd-bp-tags .wd-tag')).toHaveText(['anti-crease', 'smart plug']);
-  await expect(dryer.locator('.wd-bp-inputs')).toContainText('Wait first');
-  // The device input is the panel's to fill, never listed.
-  await expect(dryer.locator('.wd-bp-inputs')).not.toContainText('Dryer');
-  await expect(card(page, 'cycle_running_indicator').locator('.wd-bp-needed')).toContainText('Turn on while running');
-  await expect(page.locator('.wd-bp-footer a')).toHaveAttribute('href', /CONTRIBUTING\.md#automation-templates$/);
+  await expect(dryer.locator('.wd-bp-by')).toHaveText('by WashData');
+  await expect(card(page, 'cycle_running_indicator').locator('.wd-bp-by')).toHaveText('by Alex');
+  // The tile shows the first paragraph only; the rest is in Details.
+  await expect(dryer.locator('.wd-bp-desc')).toHaveText('Ends the anti-crease tumbling.');
+  await expect(dryer.locator('.wd-bp-tag')).toHaveText(['anti-crease', 'smart plug']);
+  await expect(dryer.locator('[data-action="auto-bp-use"]')).toHaveText('Add to Test Washer');
+  await expect(card(page, 'cycle_running_indicator').locator('[data-action="auto-bp-install"]')).toHaveText('Set up in Home Assistant');
+  await expect(page.locator('.wd-bp-section .wd-auto-lead')).toContainText('only with online features on');
+});
+
+test('a long description is clamped on the tile', async ({ page }) => {
+  const long = { ...DRYER, description: 'word '.repeat(150).trim() };
+  await openTab(page, { ...DRYER_OPTIONS, 'ha_washdata/blueprints/list': { blueprints: [long, INDICATOR] } });
+  const desc = card(page, 'dryer_anti_crease_power_cut').locator('.wd-bp-desc');
+  const h = await desc.evaluate((el) => [el.clientHeight, el.scrollHeight]);
+  expect(h[0]).toBeLessThan(h[1]);
+  expect(h[0]).toBeLessThan(90);
+});
+
+test('the share link opens GitHub\'s new-file form in the library, prefilled', async ({ page }) => {
+  await openTab(page);
+  const href = await page.locator('.wd-bp-share a').getAttribute('href');
+  expect(href).toMatch(/^https:\/\/github\.com\/3dg1luk43\/washdata-automations\/new\/main\/automation\?filename=my_template\.yaml&value=/);
+  const value = new URL(href!).searchParams.get('value')!;
+  expect(value).toContain('author: ');
+  expect(value).toContain('- integration: ha_washdata');
+  expect(value).toContain('device_id: !input washdata_device');
+  expect(value).toContain('# icon: plug');
+  expect(value).not.toContain('catalog.json');
+  await expect(page.locator('.wd-bp-share a')).toHaveAttribute('target', '_blank');
+  await expect(page.locator('.wd-bp-share a')).toContainText('pull request on GitHub');
+});
+
+test('with online features off the library says so and downloads nothing', async ({ page }) => {
+  await openTab(page, { 'ha_washdata/get_constants': constants });
+  const notice = page.locator('.wd-bp-section .wd-bp-notice');
+  await expect(notice).toContainText('needs online features');
+  await expect(page.locator('.wd-bp-card')).toHaveCount(0);
+  await assertWsNotCalled(page, 'ha_washdata/blueprints/list');
+  // The share link works without them: it is a plain link to GitHub.
+  await expect(page.locator('.wd-bp-share a')).toBeVisible();
+});
+
+test('an administrator turns online features on from the tab and gets the library', async ({ page }) => {
+  await openTab(page, { 'ha_washdata/get_constants': constants, 'ha_washdata/store_set_online': { enabled: true } });
+  await page.locator('[data-action="auto-online-on"]').click();
+  await expect(card(page, 'cycle_running_indicator')).toBeVisible({ timeout: 8_000 });
+  const [on] = await assertWsCalled(page, 'ha_washdata/store_set_online');
+  expect(on).toMatchObject({ entry_id: ENTRY, enabled: true });
+  await assertWsCalled(page, 'ha_washdata/blueprints/list');
+});
+
+test('a non-admin with online features off is told who can turn them on', async ({ page }) => {
+  await openTab(page, { 'ha_washdata/get_constants': constants, 'ha_washdata/get_panel_config': { ...panelConfig, is_admin: false } });
+  await expect(page.locator('.wd-bp-notice')).toContainText('administrator');
+  await expect(page.locator('[data-action="auto-online-on"]')).toHaveCount(0);
+});
+
+test('backend says disabled: the library shows the online notice', async ({ page }) => {
+  await openTab(page, { 'ha_washdata/blueprints/list': { blueprints: [], disabled: true } });
+  await expect(page.locator('.wd-bp-notice')).toContainText('needs online features');
+});
+
+test('an unreachable library offers a retry that asks for a fresh download', async ({ page }) => {
+  await openTab(page, { 'ha_washdata/blueprints/list': { blueprints: [], error: 'unreachable' } });
+  await expect(page.locator('.wd-bp-notice')).toContainText('could not be reached');
+  await page.evaluate((cat) => { (window as any).__ws_handlers['ha_washdata/blueprints/list'] = () => cat; }, CATALOG);
+  await page.locator('.wd-bp-notice [data-action="auto-bp-refresh"]').click();
+  await expect(card(page, 'cycle_running_indicator')).toBeVisible({ timeout: 8_000 });
+  const calls = await assertWsCalled(page, 'ha_washdata/blueprints/list', 2);
+  expect(calls[calls.length - 1].refresh).toBe(true);
+});
+
+test('a failed refresh keeps the earlier list and says so', async ({ page }) => {
+  await openTab(page, { 'ha_washdata/blueprints/list': { blueprints: [INDICATOR], error: 'unreachable' } });
+  await expect(card(page, 'cycle_running_indicator')).toBeVisible();
+  await expect(page.locator('.wd-bp-section .wd-bp-note')).toContainText('downloaded earlier');
+});
+
+test('a template for a newer WashData cannot be added', async ({ page }) => {
+  const future = { ...INDICATOR, id: 'future', compatible: false, min_version: '0.6.0', path: 'ha_washdata/future.yaml' };
+  await openTab(page, { 'ha_washdata/blueprints/list': { blueprints: [future] } });
+  const tile = card(page, 'future');
+  await expect(tile.locator('.wd-bp-note')).toHaveText('Needs WashData 0.6.0 or newer.');
+  await expect(tile.locator('[data-action="auto-bp-use"], [data-action="auto-bp-install"]')).toHaveCount(0);
+  await expect(tile.locator('[data-action="auto-bp-details"]')).toBeVisible();
 });
 
 test('one click installs the blueprint, creates the automation for this device and opens it', async ({ page }) => {
@@ -238,12 +327,12 @@ test('a non-admin reads templates but cannot install them', async ({ page }) => 
   await expect(page.locator('[data-action="auto-toggle-triggers"]')).toHaveCount(0);
   // HA's automation list is under /config, which is admin-only.
   await expect(page.locator('a.wd-auto-all')).toHaveCount(0);
-  await expect(page.locator('[data-action="auto-bp-yaml"]')).toHaveCount(2);
+  await expect(page.locator('[data-action="auto-bp-details"]')).toHaveCount(2);
   await assertWsNotCalled(page, 'blueprint/list');
 });
 
-test('View YAML shows the blueprint, copies it and links to My Home Assistant', async ({ page }) => {
-  await openTab(page);
+test('Details shows the whole template, its settings and where each link goes', async ({ page }) => {
+  await openTab(page, DRYER_OPTIONS);
   await page.evaluate(() => {
     (window as any).__copied = null;
     Object.defineProperty(navigator, 'clipboard', {
@@ -251,14 +340,26 @@ test('View YAML shows the blueprint, copies it and links to My Home Assistant', 
       value: { writeText: (t: string) => { (window as any).__copied = t; return Promise.resolve(); } },
     });
   });
-  await card(page, 'cycle_running_indicator').locator('[data-action="auto-bp-yaml"]').click();
+  await card(page, 'dryer_anti_crease_power_cut').locator('[data-action="auto-bp-details"]').click();
   const modal = page.locator('.wd-modal');
-  await expect(modal.locator('.wd-bp-yaml')).toHaveText(INDICATOR.yaml.trimEnd());
+  await expect(modal.locator('h2')).toHaveText('End a long dryer anti-crease phase');
+  await expect(modal.locator('.wd-bp-risk')).toHaveText('Risk: it switches a relay.');
+  // The version line is the facts' job, not repeated as text.
+  await expect(modal.locator('.wd-bp-dbody > p', { hasText: 'Needs WashData 0.5.9 or newer.' })).toHaveCount(0);
+  await expect(modal.locator('.wd-bp-facts')).toContainText('WashData 0.5.9 or newer');
+  await expect(modal.locator('.wd-bp-facts')).toContainText('WashData');
+  await expect(modal.locator('.wd-bp-inputs li')).toHaveText(['Wait firstMinutes after the program.']);
+  await expect(modal.locator('a.wd-bp-github')).toHaveAttribute('href', DRYER.source_url);
+  await expect(modal.locator('a.wd-bp-github')).toContainText('View on GitHub');
   await expect(modal.locator('a.wd-bp-import')).toHaveAttribute('href',
-    'https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=' + encodeURIComponent(INDICATOR.source_url));
+    'https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=' + encodeURIComponent(DRYER.source_url));
+  await expect(modal.locator('a.wd-bp-import')).toContainText('My Home Assistant');
 
+  await expect(modal.locator('.wd-bp-yaml')).toHaveCount(0);
+  await modal.locator('[data-maction="bp-toggle-yaml"]').click();
+  await expect(modal.locator('.wd-bp-yaml')).toHaveText(DRYER.yaml.trimEnd());
   await modal.locator('[data-maction="bp-copy"]').click();
-  await expect.poll(() => page.evaluate(() => (window as any).__copied)).toBe(INDICATOR.yaml);
+  await expect.poll(() => page.evaluate(() => (window as any).__copied)).toBe(DRYER.yaml);
   await expect(page.locator('.wd-toast')).toContainText('Copied');
 
   // The modal stays inside the viewport and scrolls its own content.
@@ -269,6 +370,14 @@ test('View YAML shows the blueprint, copies it and links to My Home Assistant', 
   expect(box!.x + box!.width).toBeLessThanOrEqual(vp.width + 0.5);
   await modal.locator('[data-maction="cancel"]').click();
   await expect(modal).toHaveCount(0);
+});
+
+test('Add from Details installs and opens the automation like the tile does', async ({ page }) => {
+  await openTab(page, DRYER_OPTIONS);
+  await card(page, 'dryer_anti_crease_power_cut').locator('[data-action="auto-bp-details"]').click();
+  await page.locator('.wd-modal [data-maction="bp-use"]').click();
+  await expect(page).toHaveURL(/\/config\/automation\/edit\/washdata_[a-z0-9]+$/, { timeout: 8_000 });
+  await assertWsCalled(page, 'blueprint/save');
 });
 
 test('legacy custom actions still offer the converter on the tab', async ({ page }) => {
@@ -393,8 +502,9 @@ test('the trigger list follows the device type', async ({ page }) => {
   for (const k of ['program_recognised', 'phase_started', 'finishing_soon', 'cycle_overrun', 'anti_wrinkle_started', 'still_tumbling', 'pump_stuck']) {
     expect(keys).not.toContain(k);
   }
-  expect(keys).toEqual(['cycle_started', 'cycle_paused', 'cycle_resumed', 'cycle_stalled', 'cycle_finished',
-    'cycle_ended', 'unload_pending', 'unloaded', 'state_changed', 'maintenance_due', 'milestone_reached']);
+  // The common ones first, then the rest in their usual order.
+  expect(keys).toEqual(['cycle_finished', 'cycle_started', 'unload_pending', 'cycle_paused', 'cycle_resumed',
+    'cycle_stalled', 'cycle_ended', 'unloaded', 'state_changed', 'maintenance_due', 'milestone_reached']);
 });
 
 test('a trigger with options is saved with their defaults', async ({ page }) => {
@@ -421,9 +531,9 @@ test('automations carrying the WashData label get a badge, and the list link fil
   };
   await openTab(page, { 'config/label_registry/list': [{ label_id: 'wd_label', name: 'WashData' }] }, hass,
     { automation: ['automation.wd', 'automation.own'] });
-  await expect(page.locator('.wd-auto-pill[data-autoid="a1"] .wd-auto-badge')).toHaveText('WashData');
-  await expect(page.locator('.wd-auto-pill[data-autoid="a2"]')).toBeVisible();
-  await expect(page.locator('.wd-auto-pill[data-autoid="a2"] .wd-auto-badge')).toHaveCount(0);
+  await expect(page.locator('.wd-auto-row[data-autoid="a1"] .wd-auto-badge')).toHaveText('WashData');
+  await expect(page.locator('.wd-auto-row[data-autoid="a2"]')).toBeVisible();
+  await expect(page.locator('.wd-auto-row[data-autoid="a2"] .wd-auto-badge')).toHaveCount(0);
   const link = page.locator('a.wd-auto-all');
   await expect(link).toHaveAttribute('href', '/config/automation/dashboard?historyBack=1&label=wd_label');
   await expect(link).toHaveAttribute('title', /WashData label/);
@@ -466,7 +576,7 @@ test.describe('phone', () => {
     }
   });
 
-  test('a long labelled automation pill stays inside the card', async ({ page }) => {
+  test('a long labelled automation row stays inside the card', async ({ page }) => {
     const name = 'Test Washer: cycle finished, tell everyone in the house at once';
     const hass = {
       ...HASS,
@@ -475,11 +585,15 @@ test.describe('phone', () => {
     };
     await openTab(page, { 'config/label_registry/list': [{ label_id: 'wd_label', name: 'WashData' }] }, hass,
       { automation: ['automation.wd'] });
-    const pill = page.locator('.wd-auto-pill[data-autoid="a1"]');
-    await expect(pill.locator('.wd-auto-badge')).toBeVisible();
-    const p = await pill.boundingBox();
-    const c = await page.locator('.wd-auto-pills').boundingBox();
-    expect(p!.x + p!.width).toBeLessThanOrEqual(c!.x + c!.width + 0.5);
+    const row = page.locator('.wd-auto-row[data-autoid="a1"]');
+    await expect(row.locator('.wd-auto-badge')).toBeVisible();
+    // The whole name shows, wrapped, and the actions stay inside the list.
+    await expect(row.locator('.wd-auto-name')).toHaveText(name);
+    const c = await page.locator('.wd-auto-list').boundingBox();
+    for (const el of [row.locator('.wd-auto-name'), row.locator('.wd-auto-edit'), row.locator('.wd-auto-del')]) {
+      const r = await el.boundingBox();
+      expect(r!.x + r!.width).toBeLessThanOrEqual(c!.x + c!.width + 0.5);
+    }
   });
 
   test('the trigger list stays inside the card', async ({ page }) => {

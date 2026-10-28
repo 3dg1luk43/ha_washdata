@@ -142,7 +142,6 @@
     "load_more": "Laadi rohkem",
     "manage": "Halda",
     "merge": "Ühendage",
-    "new_automation": "＋ Uus automaatika",
     "new_group": "+ Uus grupp",
     "new_group_tip": "Rühmita peaaegu identsed profiilid (sama kuju, erinev temperatuur või tsentrifuugimine), et sobitamine eristaks neid.",
     "new_phase": "+ Uus etapp",
@@ -251,13 +250,23 @@
     "create_profile_from_gap": "Loo profiil",
     "undo_import": "Võta viimane import tagasi",
     "pg_rerun": "Uuenda simulatsiooni",
-    "from_trigger": "Käivita triggerilt ▾",
-    "bp_use": "Kasuta selle seadmega",
-    "bp_install": "Installi mall",
-    "bp_view_yaml": "Vaata YAML-i",
-    "copy": "Kopeeri",
     "replace": "Asenda",
-    "from_trigger_open": "Käivita triggerilt ▴"
+    "auto_edit_in_ha": "Muuda Home Assistantis",
+    "auto_fewer_triggers": "Vähem triggereid",
+    "auto_more_triggers": "Veel {count} triggerit",
+    "auto_more_triggers_one": "Veel {count} trigger",
+    "auto_more_triggers_other": "Veel {count} triggerit",
+    "auto_blank": "Tühi automatiseerimine",
+    "bp_refresh": "Otsi GitHubist uusi malle",
+    "bp_turn_on_online": "Lülita veebifunktsioonid sisse",
+    "bp_add_tip": "Loob selle seadme jaoks vaikesätetega automatiseerimise ja avab selle Home Assistantis",
+    "bp_add_to": "Lisa: {device}",
+    "bp_setup_tip": "Installib malli ja avab Home Assistanti, et saaksid ülejäänu täita",
+    "bp_setup_in_ha": "Seadista Home Assistantis",
+    "bp_details": "Üksikasjad",
+    "bp_copy_yaml": "Kopeeri YAML",
+    "bp_hide_yaml": "Peida YAML",
+    "bp_show_yaml": "Näita YAML-i"
   },
   "note": {
     "off_delay": {
@@ -337,7 +346,6 @@
     "add_maintenance": "Lisa hooldussündmus",
     "automation_delete": "Kustutage see automatiseerimine",
     "automation_needs_review": "See tsükkel vajab ülevaatamist",
-    "automation_open": "Avage automaatikaredaktoris",
     "automation_review_this_cycle": "Vaadake see tsükkel üle",
     "automations": "Automatiseerimised",
     "clear_debug": "Tühjenda silumisjäljed",
@@ -355,7 +363,6 @@
     "ml_settings_card": "Seaded",
     "ml_smart_learning": "Nutikas õppimine",
     "my_preferences": "Minu eelistused",
-    "no_automations": "Sellele seadmele ei viita veel ükski automaatika.",
     "panel_settings": "Paneeli sätted",
     "pg_settings_source": "Seadete allikas",
     "phase_catalog": "Faaside kataloog",
@@ -376,10 +383,14 @@
     "service_status": "Hoolduse olek",
     "online_account_tab": "Veeb ja kogukond",
     "live_match_debug": "Reaalajas vaste silumine",
-    "automations_used": "Seda seadet kasutavad automatiseerimised",
-    "bp_templates": "Mallid",
     "automations_all_tip": "Home Assistanti automatiseerimiste nimekiri, filtreeritud WashData sildi järgi. Siia loodud automatiseerimised asuvad ka WashData kategoorias.",
-    "maint_done_by_program": "Märgitakse automaatselt tehtuks"
+    "maint_done_by_program": "Märgitakse automaatselt tehtuks",
+    "auto_start": "Alusta uut automatiseerimist",
+    "auto_yours": "Sinu automatiseerimised",
+    "bp_needs_online": "Mallide kogu vajab veebifunktsioone",
+    "bp_unreachable": "Mallide koguga ei saanud ühendust",
+    "bp_library": "Mallide kogu",
+    "bp_settings": "Mida saad seadistada"
   },
   "health": {
     "fair": "Rahuldav profiili kvaliteet",
@@ -692,13 +703,18 @@
     "cycle_context_series": "Salvesti ajalugu",
     "before_start": "Enne algust",
     "after_end": "Pärast lõppu",
-    "bp_you_choose": "Vali sina: {inputs}",
-    "bp_adjustable": "Kohandatav: {inputs}",
     "bp_yaml": "Blueprint YAML",
     "automation_wd_label": "Kannab WashData silti",
     "done_by_none": "Määramata",
     "done_by_programs": "Märgitakse automaatselt tehtuks programmiga: {programs}",
-    "done_by_cycle": "Tehtud tsükliga: {program}"
+    "done_by_cycle": "Tehtud tsükliga: {program}",
+    "bp_by": "autor: {author}",
+    "bp_for_all": "Kõik seadmed",
+    "bp_for": "Sobib",
+    "bp_needs": "Vajab",
+    "bp_needs_version": "WashData {version} või uuem",
+    "bp_author": "Autor",
+    "bp_required": "kohustuslik"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -797,7 +813,7 @@
     "undo_import_ok": "Võta import tagasi",
     "undo_import_title": "Võta viimane import tagasi",
     "bp_replace_title": "Asenda installitud mall?",
-    "bp_replace_msg": "Home Assistantil on \"{name}\" teistsugune versioon. Asendada see WashData selle versiooniga? Seda kasutavad automatiseerimised muutuvad koos sellega."
+    "bp_replace_library_msg": "Home Assistantil on \"{name}\" teistsugune versioon. Kas asendada see mallide kogu versiooniga? Seda kasutavad automatiseerimised muutuvad koos sellega."
   },
   "msg": {
     "pg_canvas_empty3": "Vali ülalt tsükkel ja vajuta Käivita, et seda simuleerida. Seejärel hõljuta väärtuste lugemiseks, keri või näpista suumimiseks ja lohista liigutamiseks.",
@@ -986,7 +1002,7 @@
     "standby_above_stop_title": "Tsükli lõppedes tarbis endiselt {idle} W",
     "standby_above_stop_sub": "{n} viimasest {total} tsüklist. Väljalülitumise viivitus hakkab kulgema alles siis, kui võimsus langeb alla Peatumise Läve ({stop} W), seega lõppevad tsüklid hiljaks jäädes või tuleb need käsitsi peatada.",
     "store_share_intro": "Laadi see võrdlustsükkel üles, et teised sama seadmega kasutajad saaksid seda kasutada. See vaadatakse üle enne avalikuks muutumist.",
-    "online_intro_global": "Sirvi ja jaga võrdlussalvestisi teiste WashData kasutajatega. Üks ühendus kehtib kõigile sinu WashData seadmetele; bränd ja mudel määratakse iga seadme jaoks jaotises Põhiline. Veebifunktsioonid on välja lülitatud, kuni sa need sisse lülitad.",
+    "online_intro_global": "Sirvi ja jaga võrdlussalvestisi teiste WashData kasutajatega ning kasuta automatiseerimiste mallide kogu. Üks ühendus kehtib kõigile sinu WashData seadmetele; bränd ja mudel määratakse iga seadme jaoks jaotises Põhiline. Veebifunktsioonid on välja lülitatud, kuni sa need sisse lülitad.",
     "online_unavailable": "Veebifunktsioonid ei ole selles serveris saadaval.",
     "store_picker_offline": "Luba veebifunktsioonid seadete hammasrattast, et valida kogukonna kataloogist.",
     "pick_brand_first": "Vali kõigepealt seadme bränd.",
@@ -1081,16 +1097,21 @@
     "cycle_context_none": "Salvestis pole selle tsükli ümber ühtegi näitu (Home Assistant hoiab vaikimisi 10 päeva ajalugu).",
     "cycle_context_tip": "Ainult kuvamiseks: näitab võimsusanduri salvesti ajalugu selle tsükli ümber, kui see on veel alles. Katkenud käivituskatsete lisamiseks tulevastesse tsüklitesse kasutage sätet Kõvera eeljooks (Seaded > Tuvastamine > Tsükli Algus), mis muudab salvestatud kestusi.",
     "invalid_threshold_pair": "Peatumise Lävi ({stop} W) peab olema väiksem kui Käivitumise Lävi ({start} W). Midagi ei salvestatud; muutke mõlemat korraga.",
-    "automations_tab_intro": "WashData pakub seadme triggereid (tsükkel algas, tsükkel lõppes, tsükkel seiskus jne) teie enda Home Assistanti automatiseerimistele. Seda seadet kasutavad automatiseerimised on siin loetletud.",
-    "bp_intro": "Valmis automatiseerimised sellele seadmele, installitud Home Assistanti blueprintidena.",
     "bp_admin_only": "Malle installib administraator.",
-    "bp_none": "Selle seadme tüübi jaoks pole malle veel.",
-    "bp_load_failed": "Malle ei saanud laadida.",
-    "auto_trigger_hint": "Loob automatiseerimise selle triggeriga selle seadme jaoks ja avab selle Home Assistantis.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Loodud WashData poolt {device} jaoks. Lisa oma toimingud (teavitus, tuled, ...).",
     "automation_alias_new": "{device}: uus automatiseerimine",
-    "maint_done_by_program_intro": "Ülesanne loetakse tehtuks, kui lõpeb tsükkel mõne selle programmiga, näiteks trumli puhastus, kui käib programm Puuvill 90. Arvesse lähevad ainult tsüklid, milles WashData on kindel või mille programmi valisite ise."
+    "maint_done_by_program_intro": "Ülesanne loetakse tehtuks, kui lõpeb tsükkel mõne selle programmiga, näiteks trumli puhastus, kui käib programm Puuvill 90. Arvesse lähevad ainult tsüklid, milles WashData on kindel või mille programmi valisite ise.",
+    "auto_none": "Ükski automatiseerimine ei kasuta veel seda seadet.",
+    "auto_start_hint": "Avaneb Home Assistanti automatiseerimiste redaktoris, kus see seade on juba valitud.",
+    "auto_yours_intro": "Home Assistanti automatiseerimised, mis reageerivad sellele seadmele.",
+    "bp_needs_online": "Mallid laaditakse alla GitHubist, seega töötab kogu ainult sisselülitatud veebifunktsioonidega. Veebifunktsioonide hulka kuulub ka Kogukonna pood.",
+    "bp_needs_online_admin": "Administraator saab need sisse lülitada hammasratta menüüs jaotises Veeb ja kogukond.",
+    "bp_stale": "GitHubiga ei saanud praegu ühendust. Need on varem alla laaditud mallid.",
+    "bp_none_yet": "Selle seadmetüübi jaoks pole veel malle. Jaga esimest.",
+    "bp_unreachable": "See laaditakse alla GitHubist. Kontrolli, et Home Assistant pääseb internetti, ja proovi uuesti.",
+    "bp_library_intro": "Valmis automatiseerimised, mida WashData kasutajad GitHubis jagavad; need vaadatakse enne loendisse lisamist üle. Saadaval ainult sisselülitatud veebifunktsioonidega.",
+    "bp_needs_version": "Vajab WashData {version} või uuemat."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
@@ -2045,9 +2066,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter GitHubis ↗",
     "manual": "Juhend ↗",
-    "bp_share": "Jaga oma malli pull requestiga ↗",
-    "bp_open_in_ha": "Ava Home Assistantis ↗",
-    "automations_all": "Kõik WashData automatiseerimised Home Assistantis"
+    "automations_all": "Kõik WashData automatiseerimised Home Assistantis",
+    "bp_share_pr": "Jaga oma malli: ava GitHubis pull request",
+    "bp_view_github": "Vaata GitHubis",
+    "bp_import_my_ha": "Impordi My Home Assistantiga"
   },
   "tip": {
     "add_brand": "Brändi pole loendis? Lisa see kogukonna kataloogi",
@@ -2174,16 +2196,6 @@
     "thr": "lävi",
     "too_short": "liiga lühike",
     "tumble_kept": "trummelimpulsid säilitatud"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Lülita midagi sisse tsükli ajal",
-      "description": "Lülitab tule, lüliti või abiüksuse sisse, kui WashData tsükkel algab, ja välja, kui see lõpeb, ka pärast vale-käivitust.\n\nVajab WashData 0.5.9 või uuemat."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Lõpeta kuivati pikk kortsudevastane faas",
-      "description": "Kuivatitele, mis jätkavad tunde pärast programmi kortsudevastases režiimis trumli pöörlemist. Töötab ainult siis, kui kuivati trummel pöörleb veel määratud arvu minuteid pärast programmi lõppu; kuivatit, mis on selleks ajaks seiskunud, ei puudutata. Seejärel lülitab kuivati nutipistiku välja madala võimsuse hetkel ja vaikimisi uuesti sisse. Vahepeal algav uus tsükkel tühistab selle.\n\nOht: see lülitab releed, kui kuivati on pistikusse ühendatud. Kasuta ainult pistikuga, mis sobib su kuivatile, ja omal vastutusel. WashData ei lülita pistikut kunagi ise; seda teeb see automatiseerimine.\n\nVajab WashData 0.5.9 või uuemat."
-    }
   },
   "trigger": {
     "cycle_started": {

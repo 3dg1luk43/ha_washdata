@@ -139,7 +139,6 @@
         "load_more": "さらに読み込む",
         "manage": "管理",
         "merge": "マージ",
-        "new_automation": "＋ 新しい自動化",
         "new_group": "+ 新しいグループ",
         "new_group_tip": "ほぼ同じプロファイル（形状が同じで温度や脱水が異なるもの）をグループ化し、マッチングで区別できるようにします。",
         "new_phase": "+ 新しいフェーズ",
@@ -248,13 +247,22 @@
         "create_profile_from_gap": "プロファイルを作成",
         "undo_import": "前回のインポートを元に戻す",
         "pg_rerun": "シミュレーションを更新",
-        "from_trigger": "トリガーから開始 ▾",
-        "bp_use": "このデバイスで使用",
-        "bp_install": "テンプレートをインストール",
-        "bp_view_yaml": "YAMLを表示",
-        "copy": "コピー",
         "replace": "置換",
-        "from_trigger_open": "トリガーから開始 ▴"
+        "auto_edit_in_ha": "Home Assistant で編集",
+        "auto_fewer_triggers": "トリガーを折りたたむ",
+        "auto_more_triggers": "さらに {count} 件のトリガー",
+        "auto_more_triggers_other": "さらに {count} 件のトリガー",
+        "auto_blank": "空のオートメーション",
+        "bp_refresh": "GitHub で新しいテンプレートを確認",
+        "bp_turn_on_online": "オンライン機能をオンにする",
+        "bp_add_tip": "この家電用のオートメーションをデフォルト設定で作成し、Home Assistant で開きます",
+        "bp_add_to": "{device} に追加",
+        "bp_setup_tip": "テンプレートをインストールしてから Home Assistant を開き、残りを入力します",
+        "bp_setup_in_ha": "Home Assistant で設定",
+        "bp_details": "詳細",
+        "bp_copy_yaml": "YAML をコピー",
+        "bp_hide_yaml": "YAML を隠す",
+        "bp_show_yaml": "YAML を表示"
     },
     "note": {
         "off_delay": {
@@ -334,7 +342,6 @@
         "add_maintenance": "メンテナンスイベントの追加",
         "automation_delete": "このオートメーションを削除します",
         "automation_needs_review": "このサイクルは見直す必要がある",
-        "automation_open": "オートメーションエディターで開く",
         "automation_review_this_cycle": "このサイクルを見直す",
         "automations": "自動化",
         "clear_debug": "デバッグトレースをクリアする",
@@ -352,7 +359,6 @@
         "ml_settings_card": "設定",
         "ml_smart_learning": "スマートラーニング",
         "my_preferences": "個人設定",
-        "no_automations": "このデバイスを参照するオートメーションはまだありません。",
         "panel_settings": "パネル設定",
         "pg_settings_source": "設定の取得元",
         "phase_catalog": "フェーズカタログ",
@@ -373,10 +379,14 @@
         "service_status": "メンテナンス状況",
         "online_account_tab": "オンラインとコミュニティ",
         "live_match_debug": "ライブマッチのデバッグ",
-        "automations_used": "このデバイスを使用しているオートメーション",
-        "bp_templates": "テンプレート",
         "automations_all_tip": "WashDataラベルでフィルタリングされたHome Assistantのオートメーション一覧。ここで作成したオートメーションはWashDataカテゴリにも入ります。",
-        "maint_done_by_program": "自動完了"
+        "maint_done_by_program": "自動完了",
+        "auto_start": "新しいオートメーションを作成",
+        "auto_yours": "あなたのオートメーション",
+        "bp_needs_online": "テンプレートライブラリにはオンライン機能が必要です",
+        "bp_unreachable": "テンプレートライブラリに接続できませんでした",
+        "bp_library": "テンプレートライブラリ",
+        "bp_settings": "設定できる項目"
     },
     "health": {
         "fair": "プロファイル品質: 普通",
@@ -686,13 +696,18 @@
         "cycle_context_series": "レコーダー履歴",
         "before_start": "開始前",
         "after_end": "終了後",
-        "bp_you_choose": "あなたが選択: {inputs}",
-        "bp_adjustable": "調整可能: {inputs}",
         "bp_yaml": "ブループリント YAML",
         "automation_wd_label": "WashDataラベルを持つ",
         "done_by_none": "未設定",
         "done_by_programs": "次のプログラムで自動完了: {programs}",
-        "done_by_cycle": "{program} のサイクルで完了"
+        "done_by_cycle": "{program} のサイクルで完了",
+        "bp_by": "作成者: {author}",
+        "bp_for_all": "すべての家電",
+        "bp_for": "対象",
+        "bp_needs": "必要条件",
+        "bp_needs_version": "WashData {version} 以降",
+        "bp_author": "作成者",
+        "bp_required": "必須"
     },
     "log": {
         "all_levels": "すべてのレベル",
@@ -789,7 +804,7 @@
         "undo_import_ok": "インポートを元に戻す",
         "undo_import_title": "前回のインポートを元に戻す",
         "bp_replace_title": "インストール済みのテンプレートを置換しますか?",
-        "bp_replace_msg": "Home Assistantには「{name}」の別バージョンが入っています。このWashDataバージョンのものに置き換えますか? それを使用するオートメーションも変わります。"
+        "bp_replace_library_msg": "Home Assistant には別のバージョンの「{name}」があります。テンプレートライブラリのものに置換しますか？これを使うオートメーションも一緒に変わります。"
     },
     "msg": {
         "pg_canvas_empty3": "上でサイクルを選び、「実行」を押してシミュレーションします。その後、ホバーで値を表示、スクロールまたはピンチでズーム、ドラッグで移動できます。",
@@ -973,7 +988,7 @@
         "standby_above_stop_title": "サイクル終了時にまだ {idle} W を消費しています",
         "standby_above_stop_sub": "直近 {total} サイクル中 {n} 件。オフ遅延は電力が停止しきい値 ({stop} W) を下回ってから始まるため、サイクルの終了が遅れたり、手動で停止する必要が生じたりします。",
         "store_share_intro": "この基準サイクルをアップロードすると、同じ家電を持つ他のユーザーが利用できます。公開前に審査されます。",
-        "online_intro_global": "他の WashData ユーザーと基準録音を閲覧・共有できます。1 つの接続ですべての WashData デバイスに対応します。ブランドとモデルは「基本」でデバイスごとに設定します。オンライン機能は、オンにするまでオフのままです。",
+        "online_intro_global": "他の WashData ユーザーと基準録音を閲覧・共有し、オートメーションのテンプレートライブラリを利用できます。1 つの接続ですべての WashData デバイスに対応します。ブランドとモデルは「基本」でデバイスごとに設定します。オンライン機能は、オンにするまでオフのままです。",
         "online_unavailable": "このサーバーではオンライン機能を利用できません。",
         "store_picker_offline": "設定（歯車アイコン）でオンライン機能を有効にすると、コミュニティカタログから選択できます。",
         "pick_brand_first": "先に家電ブランドを選択してください。",
@@ -1065,16 +1080,21 @@
         "cycle_context_none": "レコーダーにはこのサイクル前後の測定値がありません（Home Assistant は既定で 10 日分の履歴を保持します）。",
         "cycle_context_tip": "表示専用です。このサイクル前後の電力センサーのレコーダー履歴を、まだ保持されていれば表示します。失敗した開始試行を今後のサイクルに含めるには「曲線のプリロール」（設定 > 検出 > サイクル開始）を使ってください。保存される所要時間が変わります。",
         "invalid_threshold_pair": "停止しきい値（{stop} W）は開始しきい値（{start} W）より小さくする必要があります。何も保存されていません。2 つを合わせて変更してください。",
-        "automations_tab_intro": "WashDataはデバイストリガー（サイクル開始、サイクル終了、サイクル停滞など）をご自身のHome Assistantオートメーションに提供します。このデバイスを使用するオートメーションがここに表示されます。",
-        "bp_intro": "この機器向けの既製オートメーション。Home Assistantのブループリントとしてインストールされます。",
         "bp_admin_only": "テンプレートは管理者がインストールします。",
-        "bp_none": "この機器タイプのテンプレートはまだありません。",
-        "bp_load_failed": "テンプレートを読み込めませんでした。",
-        "auto_trigger_hint": "このデバイスにこのトリガーを使用したオートメーションを作成し、Home Assistantで開きます。",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device}のためにWashDataで作成。アクションを追加してください（通知、ライト、...）。",
         "automation_alias_new": "{device}: 新しいオートメーション",
-        "maint_done_by_program_intro": "タスクは、設定したプログラムのいずれかのサイクルが終了すると完了とみなされます。たとえば、綿 90 の運転でドラムの清掃が完了します。WashData が確実に認識したサイクルか、プログラムを自分で選んだサイクルだけが対象です。"
+        "maint_done_by_program_intro": "タスクは、設定したプログラムのいずれかのサイクルが終了すると完了とみなされます。たとえば、綿 90 の運転でドラムの清掃が完了します。WashData が確実に認識したサイクルか、プログラムを自分で選んだサイクルだけが対象です。",
+        "auto_none": "この家電を使うオートメーションはまだありません。",
+        "auto_start_hint": "この家電が入力済みの状態で、Home Assistant のオートメーションエディタが開きます。",
+        "auto_yours_intro": "この家電に反応する Home Assistant のオートメーションです。",
+        "bp_needs_online": "テンプレートは GitHub からダウンロードされるため、ライブラリはオンライン機能がオンのときだけ使えます。オンライン機能にはコミュニティストアも含まれます。",
+        "bp_needs_online_admin": "管理者は歯車アイコンのメニューの「オンラインとコミュニティ」でオンにできます。",
+        "bp_stale": "今は GitHub に接続できませんでした。以前にダウンロードしたテンプレートを表示しています。",
+        "bp_none_yet": "この家電タイプのテンプレートはまだありません。最初の 1 つを共有しましょう。",
+        "bp_unreachable": "ライブラリは GitHub からダウンロードされます。Home Assistant がインターネットに接続できることを確認してから、もう一度お試しください。",
+        "bp_library_intro": "WashData ユーザーが GitHub で共有した既製のオートメーションで、掲載前にレビューされています。オンライン機能がオンのときだけ利用できます。",
+        "bp_needs_version": "WashData {version} 以降が必要です。"
     },
     "pg_desc": {
         "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -2027,9 +2047,10 @@
     "link": {
         "maintenance_supporter": "GitHub の Maintenance Supporter ↗",
         "manual": "マニュアル ↗",
-        "bp_share": "プルリクエストで自分のテンプレートを共有 ↗",
-        "bp_open_in_ha": "Home Assistantで開く ↗",
-        "automations_all": "Home AssistantのすべてのWashDataオートメーション"
+        "automations_all": "Home AssistantのすべてのWashDataオートメーション",
+        "bp_share_pr": "自分のテンプレートを共有: GitHub でプルリクエストを作成",
+        "bp_view_github": "GitHub で表示",
+        "bp_import_my_ha": "My Home Assistant でインポート"
     },
     "tip": {
         "add_brand": "ブランドが一覧にありませんか？コミュニティカタログに追加してください",
@@ -2156,16 +2177,6 @@
         "thr": "しきい値",
         "too_short": "短すぎる",
         "tumble_kept": "回転パルスを保持"
-    },
-    "blueprint": {
-        "cycle_running_indicator": {
-            "name": "サイクル実行中に何かをオンにする",
-            "description": "WashDataのサイクルが開始するとライト、スイッチ、またはトグルヘルパーをオンにし、終了したときにオフにします。誤起動後も対応します。\n\nWashData 0.5.9以降が必要です。"
-        },
-        "dryer_anti_crease_power_cut": {
-            "name": "乾燥機の長いしわ防止フェーズを終了する",
-            "description": "プログラム後もしわ防止モードで何時間も回り続ける乾燥機向けです。プログラム終了から設定した分数が経過した時点で乾燥機がまだ回っている場合にのみ動作します。その時点で既に停止している乾燥機には何もしません。その後、消費電力が低い瞬間に乾燥機のスマートプラグをオフにし、デフォルトでは再びオンにします。その間に新しいサイクルが開始するとキャンセルされます。\n\nリスク: 乾燥機が接続されている状態でリレーを切り替えます。乾燥機に対応した定格のプラグでのみ、自己責任でご使用ください。WashDataはプラグを直接切り替えません; このオートメーションが行います。\n\nWashData 0.5.9以降が必要です。"
-        }
     },
     "trigger": {
         "cycle_started": {

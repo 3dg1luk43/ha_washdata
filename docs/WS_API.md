@@ -121,7 +121,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `store_upload_device` | entry_id, items, include_phases?, include_settings? | `StoreUploadDeviceResponse` |
 | `store_download_device` | entry_id, device_id, include_settings? | `StartTaskResponse` |
 | `get_shareable_cycles` | entry_id | `GetShareableCyclesResponse` |
-| `blueprints/list` | - | `BlueprintsListResponse` |
+| `blueprints/list` | refresh? | `BlueprintsListResponse` |
 
 ## `ha_washdata/get_devices`
 
@@ -2066,13 +2066,16 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 
 **Request parameters**
 
-_None._
+| Param | Required | Type |
+| --- | --- | --- |
+| `refresh` | no | bool |
 
 **Response** (`BlueprintsListResponse`)
 
 | Field | Always present | Type |
 | --- | --- | --- |
 | `blueprints` | yes | list[BlueprintItem] |
+| `disabled` | no | bool |
 | `error` | no | str |
 
 # Task results

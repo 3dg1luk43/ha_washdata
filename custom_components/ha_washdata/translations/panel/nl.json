@@ -144,7 +144,6 @@
     "load_more": "Meer laden",
     "manage": "Beheren",
     "merge": "Samenvoegen",
-    "new_automation": "＋ Nieuwe automatisering",
     "new_group": "+ Nieuwe groep",
     "new_group_tip": "Groepeer bijna identieke profielen (zelfde vorm, andere temperatuur of centrifuge) zodat de herkenning ze uit elkaar kan houden.",
     "new_phase": "+ Nieuwe Fase",
@@ -251,13 +250,23 @@
     "confirmed": "Bevestigd",
     "create_profile_from_gap": "Profiel aanmaken",
     "undo_import": "Laatste import ongedaan maken",
-    "from_trigger": "Starten vanuit een trigger ▾",
-    "bp_use": "Gebruiken met dit apparaat",
-    "bp_install": "Sjabloon installeren",
-    "bp_view_yaml": "YAML bekijken",
-    "copy": "Kopiëren",
     "replace": "Vervangen",
-    "from_trigger_open": "Starten vanuit een trigger ▴"
+    "auto_edit_in_ha": "Bewerken in Home Assistant",
+    "auto_fewer_triggers": "Minder triggers",
+    "auto_more_triggers": "Nog {count} triggers",
+    "auto_more_triggers_one": "Nog {count} trigger",
+    "auto_more_triggers_other": "Nog {count} triggers",
+    "auto_blank": "Lege automatisering",
+    "bp_refresh": "Op GitHub zoeken naar nieuwe sjablonen",
+    "bp_turn_on_online": "Onlinefuncties inschakelen",
+    "bp_add_tip": "Maakt de automatisering voor dit apparaat aan met de standaardinstellingen en opent die daarna in Home Assistant",
+    "bp_add_to": "Toevoegen aan {device}",
+    "bp_setup_tip": "Installeert het sjabloon en opent daarna Home Assistant om de rest in te vullen",
+    "bp_setup_in_ha": "Instellen in Home Assistant",
+    "bp_details": "Details",
+    "bp_copy_yaml": "YAML kopiëren",
+    "bp_hide_yaml": "YAML verbergen",
+    "bp_show_yaml": "YAML tonen"
   },
   "note": {
     "off_delay": {
@@ -337,7 +346,6 @@
     "add_maintenance": "Onderhoudsgebeurtenis toevoegen",
     "automation_delete": "Verwijder deze automatisering",
     "automation_needs_review": "Deze cyclus moet worden herzien",
-    "automation_open": "Openen in de automatiseringseditor",
     "automation_review_this_cycle": "Bekijk deze cyclus",
     "automations": "Automatiseringen",
     "clear_debug": "Wis foutopsporingssporen",
@@ -355,7 +363,6 @@
     "ml_settings_card": "Instellingen",
     "ml_smart_learning": "Slim leren",
     "my_preferences": "Mijn voorkeuren",
-    "no_automations": "Er zijn nog geen automatiseringen die naar dit apparaat verwijzen.",
     "panel_settings": "Paneelinstellingen",
     "pg_settings_source": "Herkomst van de instellingen",
     "phase_catalog": "Fasecatalogus",
@@ -376,10 +383,14 @@
     "service_status": "Onderhoudsstatus",
     "online_account_tab": "Online & community",
     "live_match_debug": "Foutopsporing live-match",
-    "automations_used": "Automatiseringen die dit apparaat gebruiken",
-    "bp_templates": "Sjablonen",
     "automations_all_tip": "De automatiseringslijst van Home Assistant, gefilterd op het WashData-label. Hier aangemaakt automatiseringen staan ook in de WashData-categorie.",
-    "maint_done_by_program": "Automatisch afgevinkt"
+    "maint_done_by_program": "Automatisch afgevinkt",
+    "auto_start": "Nieuwe automatisering maken",
+    "auto_yours": "Uw automatiseringen",
+    "bp_needs_online": "De sjabloonbibliotheek heeft onlinefuncties nodig",
+    "bp_unreachable": "De sjabloonbibliotheek was niet bereikbaar",
+    "bp_library": "Sjabloonbibliotheek",
+    "bp_settings": "Wat u kunt instellen"
   },
   "health": {
     "fair": "Acceptabele profielkwaliteit",
@@ -692,13 +703,18 @@
     "pg_obj_split": "Splitspercentage",
     "pg_sweep_cycles": "Recente cycli",
     "cat_backfill_cycles": "Cycli gevonden in geïmporteerde vermogensgeschiedenis",
-    "bp_you_choose": "U kiest: {inputs}",
-    "bp_adjustable": "Aanpasbaar: {inputs}",
     "bp_yaml": "Blueprint-YAML",
     "automation_wd_label": "Heeft het WashData-label",
     "done_by_none": "Niet ingesteld",
     "done_by_programs": "Automatisch afgevinkt door: {programs}",
-    "done_by_cycle": "Afgevinkt door een cyclus met {program}"
+    "done_by_cycle": "Afgevinkt door een cyclus met {program}",
+    "bp_by": "door {author}",
+    "bp_for_all": "Elk apparaat",
+    "bp_for": "Voor",
+    "bp_needs": "Vereist",
+    "bp_needs_version": "WashData {version} of nieuwer",
+    "bp_author": "Auteur",
+    "bp_required": "verplicht"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -797,7 +813,7 @@
     "undo_import_ok": "Import ongedaan maken",
     "undo_import_title": "Laatste import ongedaan maken",
     "bp_replace_title": "Het geïnstalleerde sjabloon vervangen?",
-    "bp_replace_msg": "Home Assistant heeft een andere versie van \"{name}\". Vervangen door de versie van WashData? Automatiseringen die het gebruiken, veranderen mee."
+    "bp_replace_library_msg": "Home Assistant heeft een andere versie van \"{name}\". Vervangen door de versie uit de sjabloonbibliotheek? Automatiseringen die het gebruiken, veranderen mee."
   },
   "msg": {
     "custom_task_limit": "Je hebt de limiet van {max} taken bereikt.",
@@ -994,7 +1010,7 @@
     "standby_above_stop_title": "Verbruikte nog {idle} W toen de cyclus eindigde",
     "standby_above_stop_sub": "{n} van de laatste {total} cycli. De uitschakelvertraging start pas zodra het vermogen onder de Stopdrempel ({stop} W) ligt, waardoor cycli te laat eindigen of met de hand gestopt moeten worden.",
     "store_share_intro": "Upload deze referentiecyclus zodat anderen met hetzelfde apparaat hem kunnen gebruiken. Hij wordt beoordeeld voordat hij openbaar verschijnt.",
-    "online_intro_global": "Bekijk en deel referentieopnamen met andere WashData-gebruikers. Eén verbinding geldt voor al uw WashData-apparaten; merk en model stelt u per apparaat in onder Basis. Onlinefuncties staan uit totdat u ze inschakelt.",
+    "online_intro_global": "Bekijk en deel referentieopnamen met andere WashData-gebruikers en gebruik de bibliotheek met automatiseringssjablonen. Eén verbinding geldt voor al uw WashData-apparaten; merk en model stelt u per apparaat in onder Basis. Onlinefuncties staan uit totdat u ze inschakelt.",
     "online_unavailable": "Onlinefuncties zijn niet beschikbaar op deze server.",
     "store_picker_offline": "Schakel onlinefuncties in via het instellingentandwiel om te kiezen uit de communitycatalogus.",
     "pick_brand_first": "Kies eerst een merk van het apparaat.",
@@ -1081,16 +1097,21 @@
     "import_undo_hint": "Er wordt een herstelpunt van vóór de laatste import ({when}) bewaard: {profiles} profiel(en) en {cycles} cyclus(sen).",
     "replace_undo_hint": "Eerst wordt een herstelpunt opgeslagen, zodat deze import via Exporteren / importeren ongedaan kan worden gemaakt.",
     "pg_in_sample_note": "Deze cycli hebben de profielen helpen opbouwen waarmee ze worden vergeleken, dus de resultaten zijn optimistisch: verwacht bij nieuwe cycli iets minder juiste matches.",
-    "automations_tab_intro": "WashData biedt apparaattriggers (cyclus gestart, cyclus klaar, cyclus vastgelopen en meer) voor uw eigen Home Assistant-automatiseringen. Automatiseringen die dit apparaat gebruiken, staan hier.",
-    "bp_intro": "Kant-en-klare automatiseringen voor dit apparaat, geïnstalleerd als Home Assistant-blueprints.",
     "bp_admin_only": "Een beheerder installeert sjablonen.",
-    "bp_none": "Nog geen sjablonen voor dit apparaattype.",
-    "bp_load_failed": "Sjablonen konden niet worden geladen.",
-    "auto_trigger_hint": "Maakt een automatisering met deze trigger voor dit apparaat en opent deze in Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Aangemaakt door WashData voor {device}. Voeg uw acties toe (melding, lampen, ...).",
     "automation_alias_new": "{device}: nieuwe automatisering",
-    "maint_done_by_program_intro": "Een taak telt als gedaan wanneer een cyclus van een van de bijbehorende programma's klaar is, bijvoorbeeld de trommelreiniging wanneer Katoen 90 draait. Alleen cycli waarvan WashData zeker is, of die je zelf hebt gekozen, tellen mee."
+    "maint_done_by_program_intro": "Een taak telt als gedaan wanneer een cyclus van een van de bijbehorende programma's klaar is, bijvoorbeeld de trommelreiniging wanneer Katoen 90 draait. Alleen cycli waarvan WashData zeker is, of die je zelf hebt gekozen, tellen mee.",
+    "auto_none": "Nog geen automatiseringen gebruiken dit apparaat.",
+    "auto_start_hint": "Opent in de automatiseringseditor van Home Assistant, met dit apparaat al ingevuld.",
+    "auto_yours_intro": "Home Assistant-automatiseringen die op dit apparaat reageren.",
+    "bp_needs_online": "Sjablonen worden van GitHub gedownload, dus de bibliotheek werkt alleen als onlinefuncties aan staan. Onlinefuncties omvatten ook de Communitystore.",
+    "bp_needs_online_admin": "Een beheerder kan ze inschakelen via het instellingentandwiel, onder Online & community.",
+    "bp_stale": "GitHub was zojuist niet bereikbaar. Dit zijn de eerder gedownloade sjablonen.",
+    "bp_none_yet": "Nog geen sjablonen voor dit apparaattype. Deel het eerste.",
+    "bp_unreachable": "Deze wordt van GitHub gedownload. Controleer of Home Assistant het internet kan bereiken en probeer het daarna opnieuw.",
+    "bp_library_intro": "Kant-en-klare automatiseringen die WashData-gebruikers op GitHub delen, gecontroleerd voordat ze worden opgenomen. Alleen beschikbaar als onlinefuncties aan staan.",
+    "bp_needs_version": "Vereist WashData {version} of nieuwer."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: stille seconden na de verwachte duur voordat de wachttijd op het wegpompen aan het einde van de cyclus wordt vrijgegeven",
@@ -2045,9 +2066,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter op GitHub ↗",
     "manual": "Handleiding ↗",
-    "bp_share": "Deel uw eigen sjabloon via een pull request ↗",
-    "bp_open_in_ha": "Openen in Home Assistant ↗",
-    "automations_all": "Alle WashData-automatiseringen in Home Assistant"
+    "automations_all": "Alle WashData-automatiseringen in Home Assistant",
+    "bp_share_pr": "Deel uw eigen sjabloon: open een pull request op GitHub",
+    "bp_view_github": "Bekijken op GitHub",
+    "bp_import_my_ha": "Importeren met My Home Assistant"
   },
   "tip": {
     "add_brand": "Merk niet vermeld? Voeg het toe aan de communitycatalogus",
@@ -2174,16 +2196,6 @@
     "thr": "drempel",
     "too_short": "te kort",
     "tumble_kept": "trommelpulsen behouden"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Iets inschakelen terwijl een cyclus loopt",
-      "description": "Schakelt een lamp, schakelaar of wisselassistent in wanneer een WashData-cyclus start en uit wanneer hij eindigt, ook na een valse start.\n\nVereist WashData 0.5.9 of nieuwer."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Een lange anti-kreukfase van de droger beëindigen",
-      "description": "Voor drogers waarvan de trommel na het programma nog uren in anti-kreuk blijft draaien. Wordt alleen uitgevoerd als de trommel van de droger het ingestelde aantal minuten na afloop van het programma nog draait; een droger die tegen die tijd al gestopt is, wordt met rust gelaten. Hij schakelt dan de smart plug van de droger uit op een moment van laag vermogen en, standaard, weer in. Een nieuwe cyclus die ondertussen start, annuleert dit.\n\nRisico: hiermee wordt een relais geschakeld terwijl de droger is aangesloten. Gebruik het alleen met een stekker die geschikt is voor uw droger en op eigen risico. WashData schakelt de stekker zelf nooit; dat doet deze automatisering.\n\nVereist WashData 0.5.9 of nieuwer."
-    }
   },
   "trigger": {
     "cycle_started": {

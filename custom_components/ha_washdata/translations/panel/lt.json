@@ -148,7 +148,6 @@
     "load_more": "Įkelti daugiau",
     "manage": "Tvarkyti",
     "merge": "Sujungti",
-    "new_automation": "＋ Nauja automatika",
     "new_group": "+ Nauja grupė",
     "new_group_tip": "Sugrupuoti beveik vienodus profilius (ta pati forma, kita temperatūra ar gręžimas), kad atpažinimas juos atskirtų.",
     "new_phase": "+ Naujas etapas",
@@ -257,13 +256,25 @@
     "create_profile_from_gap": "Sukurti profilį",
     "undo_import": "Anuliuoti paskutinį importą",
     "pg_rerun": "Atnaujinti simuliaciją",
-    "from_trigger": "Pradėti nuo paleidiklio ▾",
-    "bp_use": "Naudoti su šiuo įrenginiu",
-    "bp_install": "Diegti šabloną",
-    "bp_view_yaml": "Peržiūrėti YAML",
-    "copy": "Kopijuoti",
     "replace": "Pakeisti",
-    "from_trigger_open": "Pradėti nuo paleidiklio ▴"
+    "auto_edit_in_ha": "Redaguoti Home Assistant",
+    "auto_fewer_triggers": "Mažiau paleidiklių",
+    "auto_more_triggers": "Dar {count} paleidiklių",
+    "auto_more_triggers_one": "Dar {count} paleidiklis",
+    "auto_more_triggers_few": "Dar {count} paleidikliai",
+    "auto_more_triggers_many": "Dar {count} paleidiklio",
+    "auto_more_triggers_other": "Dar {count} paleidiklių",
+    "auto_blank": "Tuščia automatika",
+    "bp_refresh": "Ieškoti naujų šablonų GitHub",
+    "bp_turn_on_online": "Įjungti interneto funkcijas",
+    "bp_add_tip": "Sukuria automatiką šiam prietaisui su numatytosiomis nuostatomis ir atidaro ją Home Assistant",
+    "bp_add_to": "Pridėti: {device}",
+    "bp_setup_tip": "Įdiegia šabloną ir atidaro Home Assistant, kad užpildytumėte likusią dalį",
+    "bp_setup_in_ha": "Nustatyti Home Assistant",
+    "bp_details": "Išsami informacija",
+    "bp_copy_yaml": "Kopijuoti YAML",
+    "bp_hide_yaml": "Slėpti YAML",
+    "bp_show_yaml": "Rodyti YAML"
   },
   "note": {
     "off_delay": {
@@ -343,7 +354,6 @@
     "add_maintenance": "Pridėti priežiūros įvykį",
     "automation_delete": "Ištrinkite šią automatiką",
     "automation_needs_review": "Šį ciklą reikia peržiūrėti",
-    "automation_open": "Atidarykite automatikos rengyklėje",
     "automation_review_this_cycle": "Peržiūrėkite šį ciklą",
     "automations": "Automatikos",
     "clear_debug": "Išvalyti derinimo pėdsakus",
@@ -361,7 +371,6 @@
     "ml_settings_card": "Nustatymai",
     "ml_smart_learning": "Išmanusis mokymasis",
     "my_preferences": "Mano nuostatos",
-    "no_automations": "Dar jokia automatika nenurodo šio įrenginio.",
     "panel_settings": "Skydelio nustatymai",
     "pg_settings_source": "Nustatymų šaltinis",
     "phase_catalog": "Fazių katalogas",
@@ -382,10 +391,14 @@
     "service_status": "Aptarnavimo būsena",
     "online_account_tab": "Internetas ir bendruomenė",
     "live_match_debug": "Tiesioginės atitikties derinimas",
-    "automations_used": "Automatikos, naudojančios šį įrenginį",
-    "bp_templates": "Šablonai",
     "automations_all_tip": "Home Assistant automatizavimų sąrašas, filtruotas pagal WashData žymą. Čia sukurti automatizavimai taip pat yra WashData kategorijoje.",
-    "maint_done_by_program": "Atliekama automatiškai"
+    "maint_done_by_program": "Atliekama automatiškai",
+    "auto_start": "Pradėti naują automatiką",
+    "auto_yours": "Jūsų automatikos",
+    "bp_needs_online": "Šablonų bibliotekai reikia interneto funkcijų",
+    "bp_unreachable": "Nepavyko pasiekti šablonų bibliotekos",
+    "bp_library": "Šablonų biblioteka",
+    "bp_settings": "Ką galite nustatyti"
   },
   "health": {
     "fair": "Priimtina profilio kokybė",
@@ -704,13 +717,18 @@
     "cycle_context_series": "Recorder istorija",
     "before_start": "Prieš pradžią",
     "after_end": "Po pabaigos",
-    "bp_you_choose": "Pasirenkate jūs: {inputs}",
-    "bp_adjustable": "Reguliuojama: {inputs}",
     "bp_yaml": "Blueprint YAML",
     "automation_wd_label": "Turi WashData žymą",
     "done_by_none": "Nenustatyta",
     "done_by_programs": "Automatiškai atlieka: {programs}",
-    "done_by_cycle": "Atlikta ciklu: {program}"
+    "done_by_cycle": "Atlikta ciklu: {program}",
+    "bp_by": "autorius: {author}",
+    "bp_for_all": "Visi prietaisai",
+    "bp_for": "Skirta",
+    "bp_needs": "Reikia",
+    "bp_needs_version": "WashData {version} arba naujesnė",
+    "bp_author": "Autorius",
+    "bp_required": "privaloma"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -813,7 +831,7 @@
     "undo_import_ok": "Anuliuoti importą",
     "undo_import_title": "Anuliuoti paskutinį importą",
     "bp_replace_title": "Pakeisti įdiegtą šabloną?",
-    "bp_replace_msg": "Home Assistant turi kitą \"{name}\" versiją. Pakeisti ją šia WashData versija? Jį naudojančios automatikos keičiasi kartu."
+    "bp_replace_library_msg": "Home Assistant turi kitą \"{name}\" versiją. Pakeisti ją versija iš šablonų bibliotekos? Ją naudojančios automatikos pasikeis kartu."
   },
   "msg": {
     "pg_canvas_empty3": "Pasirinkite ciklą aukščiau ir paspauskite Vykdyti, kad jį simuliuotumėte. Tada užveskite žymeklį, kad nuskaitytumėte reikšmes, slinkite arba priartinkite dviem pirštais ir vilkite, kad pastumtumėte.",
@@ -1012,7 +1030,7 @@
     "standby_above_stop_title": "Ciklui pasibaigus vis dar naudojama {idle} W",
     "standby_above_stop_sub": "{n} iš paskutinių {total} ciklų. Išjungimo delsimas prasideda tik tada, kai galia nukrenta žemiau Sustabdymo slenksčio ({stop} W), todėl ciklai baigiasi pavėluotai arba juos tenka sustabdyti rankiniu būdu.",
     "store_share_intro": "Įkelkite šį etaloninį ciklą, kad juo galėtų naudotis kiti tą patį prietaisą turintys naudotojai. Prieš paskelbiant viešai jis peržiūrimas.",
-    "online_intro_global": "Naršykite ir bendrinkite etaloninius įrašus su kitais WashData naudotojais. Vienas prisijungimas tinka visiems jūsų WashData įrenginiams; prekės ženklas ir modelis nustatomi kiekvienam įrenginiui skiltyje Pagrindiniai. Interneto funkcijos išjungtos, kol jų neįjungsite.",
+    "online_intro_global": "Naršykite ir bendrinkite etaloninius įrašus su kitais WashData naudotojais ir naudokitės automatikų šablonų biblioteka. Vienas prisijungimas tinka visiems jūsų WashData įrenginiams; prekės ženklas ir modelis nustatomi kiekvienam įrenginiui skiltyje Pagrindiniai. Interneto funkcijos išjungtos, kol jų neįjungsite.",
     "online_unavailable": "Interneto funkcijos šiame serveryje nepasiekiamos.",
     "store_picker_offline": "Įjunkite interneto funkcijas nustatymų krumpliaratyje, kad galėtumėte rinktis iš bendruomenės katalogo.",
     "pick_brand_first": "Pirmiausia pasirinkite prietaiso prekės ženklą.",
@@ -1113,16 +1131,21 @@
     "cycle_context_none": "Recorder neturi rodmenų prieš šį ciklą ir po jo (Home Assistant pagal numatytuosius nustatymus saugo 10 dienų istoriją).",
     "cycle_context_tip": "Tik rodymui: rodo galios jutiklio recorder istoriją aplink šį ciklą, jei ji dar saugoma. Norėdami nepavykusius paleidimo bandymus pridėti prie būsimų ciklų, naudokite „Kreivės įžanginės sekundės“ (Nustatymai > Aptikimas > Ciklo pradžia); tai pakeičia išsaugotas trukmes.",
     "invalid_threshold_pair": "Sustabdymo slenkstis ({stop} W) turi būti mažesnis už Paleidimo slenkstį ({start} W). Niekas neišsaugota; keiskite abu kartu.",
-    "automations_tab_intro": "WashData siūlo įrenginio paleidiklius (ciklas pradėtas, ciklas baigtas, ciklas įstrigo ir daugiau) jūsų pačių Home Assistant automatikoms. Čia išvardytos automatikos, naudojančios šį įrenginį.",
-    "bp_intro": "Paruoštos automatikos šiam prietaisui, įdiegtos kaip Home Assistant blueprintai.",
     "bp_admin_only": "Šablonus diegia administratorius.",
-    "bp_none": "Šiam prietaiso tipui šablonų dar nėra.",
-    "bp_load_failed": "Šablonų nepavyko įkelti.",
-    "auto_trigger_hint": "Sukuria automatizavimą su šiuo paleidikliu šiam įrenginiui ir atidaro jį Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Sukurta WashData, skirta {device}. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",
     "automation_alias_new": "{device}: naujas automatizavimas",
-    "maint_done_by_program_intro": "Užduotis laikoma atlikta, kai baigiasi vienos iš jos programų ciklas, pavyzdžiui, būgno valymas, kai paleidžiama programa Medvilnė 90. Įskaičiuojami tik ciklai, kuriuos WashData atpažino užtikrintai arba kurių programą pasirinkote jūs."
+    "maint_done_by_program_intro": "Užduotis laikoma atlikta, kai baigiasi vienos iš jos programų ciklas, pavyzdžiui, būgno valymas, kai paleidžiama programa Medvilnė 90. Įskaičiuojami tik ciklai, kuriuos WashData atpažino užtikrintai arba kurių programą pasirinkote jūs.",
+    "auto_none": "Šio prietaiso dar nenaudoja jokia automatika.",
+    "auto_start_hint": "Atidaroma Home Assistant automatikų rengyklėje, kurioje šis prietaisas jau nurodytas.",
+    "auto_yours_intro": "Home Assistant automatikos, reaguojančios į šį prietaisą.",
+    "bp_needs_online": "Šablonai atsisiunčiami iš GitHub, todėl biblioteka veikia tik įjungus interneto funkcijas. Interneto funkcijoms taip pat priklauso Bendruomenės parduotuvė.",
+    "bp_needs_online_admin": "Administratorius gali jas įjungti krumpliaračio meniu, skiltyje Internetas ir bendruomenė.",
+    "bp_stale": "Šiuo metu nepavyko pasiekti GitHub. Rodomi anksčiau atsisiųsti šablonai.",
+    "bp_none_yet": "Šiam prietaiso tipui šablonų dar nėra. Pasidalykite pirmuoju.",
+    "bp_unreachable": "Ji atsisiunčiama iš GitHub. Patikrinkite, ar Home Assistant gali prisijungti prie interneto, ir bandykite dar kartą.",
+    "bp_library_intro": "Paruoštos automatikos, kuriomis WashData naudotojai dalijasi GitHub; prieš įtraukiant į sąrašą jos peržiūrimos. Prieinama tik įjungus interneto funkcijas.",
+    "bp_needs_version": "Reikalinga WashData {version} arba naujesnė versija."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -2081,9 +2104,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter GitHub svetainėje ↗",
     "manual": "Vadovas ↗",
-    "bp_share": "Pasidalykite savo šablonu pull requestu ↗",
-    "bp_open_in_ha": "Atidaryti Home Assistant ↗",
-    "automations_all": "Visi WashData automatizavimai Home Assistant"
+    "automations_all": "Visi WashData automatizavimai Home Assistant",
+    "bp_share_pr": "Pasidalykite savo šablonu: pateikite pull request GitHub",
+    "bp_view_github": "Žiūrėti GitHub",
+    "bp_import_my_ha": "Importuoti per My Home Assistant"
   },
   "tip": {
     "add_brand": "Prekės ženklo nėra sąraše? Pridėkite jį į bendruomenės katalogą",
@@ -2210,16 +2234,6 @@
     "thr": "slenk.",
     "too_short": "per trumpas",
     "tumble_kept": "būgno impulsai išlaikyti"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Įjungti ką nors ciklo metu",
-      "description": "Įjungia šviesą, jungiklį ar perjungimo pagalbinę priemonę, kai prasideda WashData ciklas, ir išjungia, kai jis baigiasi, taip pat po netikros pradžios.\n\nReikalinga WashData 0.5.9 arba naujesnė versija."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Baigti ilgą džiovyklos apsaugos nuo raukšlių fazę",
-      "description": "Džiovyklėms, kurios po programos valandas sukasi apsaugos nuo raukšlių režimu. Veikia tik tada, kai džiovyklė vis dar sukasi praėjus nustatytam minučių skaičiui po programos pabaigos; iki to laiko sustojusi džiovyklė neliečiama. Tada išjungia džiovyklos išmaniojo kištuko maitinimą žemos galios momentu ir numatytai vėl įjungia. Tuo tarpu prasidedantis naujas ciklas ją atšaukia.\n\nRizika: tai perjungia relę, kol džiovyklė yra įjungta. Naudokite tik su kištuku, sertifikuotu jūsų džiovyklei, ir tik savo rizika. WashData pati niekada neišjungia kištuko; tai daro ši automatika.\n\nReikalinga WashData 0.5.9 arba naujesnė versija."
-    }
   },
   "trigger": {
     "cycle_started": {

@@ -154,7 +154,6 @@
     "load_more": "Učitaj više",
     "manage": "Upravljaj",
     "merge": "Spoji",
-    "new_automation": "＋ Nova automatizacija",
     "new_group": "+ Nova grupa",
     "new_group_tip": "Grupirajte gotovo iste profile (isti oblik, različita temperatura ili centrifuga) kako bi ih podudaranje moglo razlikovati.",
     "new_phase": "+ Nova faza",
@@ -254,13 +253,24 @@
     "create_profile_from_gap": "Stvori profil",
     "undo_import": "Poništi zadnji uvoz",
     "pg_rerun": "Ažuriraj simulaciju",
-    "from_trigger": "Pokreni s okidačem ▾",
-    "bp_use": "Koristi s ovim uređajem",
-    "bp_install": "Instaliraj predložak",
-    "bp_view_yaml": "Prikaži YAML",
-    "copy": "Kopiraj",
     "replace": "Zamijeni",
-    "from_trigger_open": "Pokreni s okidačem ▴"
+    "auto_edit_in_ha": "Uredi u Home Assistantu",
+    "auto_fewer_triggers": "Manje okidača",
+    "auto_more_triggers": "Još {count} okidača",
+    "auto_more_triggers_one": "Još {count} okidač",
+    "auto_more_triggers_few": "Još {count} okidača",
+    "auto_more_triggers_other": "Još {count} okidača",
+    "auto_blank": "Prazna automatizacija",
+    "bp_refresh": "Provjeri nove predloške na GitHubu",
+    "bp_turn_on_online": "Uključi online značajke",
+    "bp_add_tip": "Stvara automatizaciju za ovaj uređaj sa zadanim postavkama, zatim je otvara u Home Assistantu",
+    "bp_add_to": "Dodaj za: {device}",
+    "bp_setup_tip": "Instalira predložak, zatim otvara Home Assistant da popunite ostatak",
+    "bp_setup_in_ha": "Postavi u Home Assistantu",
+    "bp_details": "Detalji",
+    "bp_copy_yaml": "Kopiraj YAML",
+    "bp_hide_yaml": "Sakrij YAML",
+    "bp_show_yaml": "Prikaži YAML"
   },
   "note": {
     "off_delay": {
@@ -340,7 +350,6 @@
     "add_maintenance": "Dodaj događaj održavanja",
     "automation_delete": "Izbriši ovu automatizaciju",
     "automation_needs_review": "Ovaj ciklus treba revidirati",
-    "automation_open": "Otvorite u uređivaču automatizacije",
     "automation_review_this_cycle": "Pregledajte ovaj ciklus",
     "automations": "Automatizacije",
     "clear_debug": "Obrišite tragove otklanjanja pogrešaka",
@@ -358,7 +367,6 @@
     "ml_settings_card": "Postavke",
     "ml_smart_learning": "Pametno učenje",
     "my_preferences": "Moje postavke",
-    "no_automations": "Još nijedna automatizacija ne spominje ovaj uređaj.",
     "panel_settings": "Postavke ploče",
     "pg_settings_source": "Izvor postavki",
     "phase_catalog": "Katalog faza",
@@ -379,10 +387,14 @@
     "service_status": "Status servisa",
     "online_account_tab": "Online i zajednica",
     "live_match_debug": "Dijagnostika podudaranja uživo",
-    "automations_used": "Automatizacije koje koriste ovaj uređaj",
-    "bp_templates": "Predlošci",
     "automations_all_tip": "Popis automatizacija Home Assistant, filtriran prema WashData oznaci. Automatizacije stvorene ovdje nalaze se i u WashData kategoriji.",
-    "maint_done_by_program": "Automatski obavljeno"
+    "maint_done_by_program": "Automatski obavljeno",
+    "auto_start": "Stvori novu automatizaciju",
+    "auto_yours": "Vaše automatizacije",
+    "bp_needs_online": "Biblioteka predložaka zahtijeva online značajke",
+    "bp_unreachable": "Biblioteka predložaka nije dostupna",
+    "bp_library": "Biblioteka predložaka",
+    "bp_settings": "Što možete postaviti"
   },
   "health": {
     "fair": "Prihvatljiva kvaliteta profila",
@@ -698,13 +710,18 @@
     "cycle_context_series": "Povijest recordera",
     "before_start": "Prije početka",
     "after_end": "Nakon završetka",
-    "bp_you_choose": "Birate: {inputs}",
-    "bp_adjustable": "Prilagodljivo: {inputs}",
     "bp_yaml": "Blueprint YAML",
     "automation_wd_label": "Nosi WashData oznaku",
     "done_by_none": "Nije postavljeno",
     "done_by_programs": "Automatski obavljeno programima: {programs}",
-    "done_by_cycle": "Obavljeno ciklusom programa {program}"
+    "done_by_cycle": "Obavljeno ciklusom programa {program}",
+    "bp_by": "autor: {author}",
+    "bp_for_all": "Svi uređaji",
+    "bp_for": "Za",
+    "bp_needs": "Zahtjevi",
+    "bp_needs_version": "WashData {version} ili noviji",
+    "bp_author": "Autor",
+    "bp_required": "obavezno"
   },
   "log": {
     "all_levels": "Sve razine",
@@ -805,7 +822,7 @@
     "undo_import_ok": "Poništi uvoz",
     "undo_import_title": "Poništi zadnji uvoz",
     "bp_replace_title": "Zamijeniti instalirani predložak?",
-    "bp_replace_msg": "Home Assistant ima drugu verziju \"{name}\". Zamijeniti je verzijom iz ove verzije WashData? Automatizacije koje ga koriste mijenjaju se s njim."
+    "bp_replace_library_msg": "Home Assistant ima drugu verziju \"{name}\". Zamijeniti je verzijom iz biblioteke predložaka? Automatizacije koje ga koriste mijenjaju se s njim."
   },
   "msg": {
     "pg_canvas_empty3": "Odaberite ciklus iznad i pritisnite Pokreni da ga simulirate. Zatim prijeđite mišem za prikaz vrijednosti, pomičite kotačić ili koristite dva prsta za zumiranje i povucite za pomicanje.",
@@ -1007,7 +1024,7 @@
     "standby_above_stop_title": "Još uvijek povlači {idle} W kada je ciklus završio",
     "standby_above_stop_sub": "{n} od posljednjih {total} ciklusa. Odgoda isključivanja počinje tek kada snaga padne ispod Praga zaustavljanja ({stop} W), pa ciklusi završavaju sa zakašnjenjem ili ih treba zaustaviti ručno.",
     "store_share_intro": "Prenesite ovaj referentni ciklus kako bi ga mogli koristiti drugi s istim uređajem. Pregledava se prije nego što postane javno dostupan.",
-    "online_intro_global": "Pregledavajte i dijelite referentne snimke s drugim korisnicima WashData. Jedna veza vrijedi za sve vaše WashData uređaje; marka i model postavljaju se za svaki uređaj pod Osnovno. Mrežne značajke isključene su dok ih ne uključite.",
+    "online_intro_global": "Pregledavajte i dijelite referentne snimke s drugim korisnicima WashData te koristite biblioteku predložaka automatizacija. Jedna veza vrijedi za sve vaše WashData uređaje; marka i model postavljaju se za svaki uređaj pod Osnovno. Online značajke isključene su dok ih ne uključite.",
     "online_unavailable": "Online značajke nisu dostupne na ovom poslužitelju.",
     "store_picker_offline": "Omogućite online značajke u zupčaniku postavki kako biste birali iz kataloga zajednice.",
     "pick_brand_first": "Najprije odaberite marku uređaja.",
@@ -1097,16 +1114,21 @@
     "cycle_context_none": "Recorder nema očitanja oko ovog ciklusa (Home Assistant standardno čuva povijest 10 dana).",
     "cycle_context_tip": "Samo za prikaz: pokazuje povijest senzora snage iz recordera oko ovog ciklusa, ako je još spremljena. Da biste neuspjele pokušaje pokretanja dodali budućim ciklusima, koristite Uvodne sekunde krivulje (Postavke > Otkrivanje > Početak ciklusa), što mijenja spremljena trajanja.",
     "invalid_threshold_pair": "Prag zaustavljanja ({stop} W) mora biti ispod Praga pokretanja ({start} W). Ništa nije spremljeno; promijenite obje vrijednosti zajedno.",
-    "automations_tab_intro": "WashData nudi okidače uređaja (ciklus pokrenut, ciklus završen, ciklus zaglavljen i više) za vlastite automatizacije Home Assistanta. Automatizacije koje koriste ovaj uređaj navedene su ovdje.",
-    "bp_intro": "Gotove automatizacije za ovaj uređaj, instalirane kao blueprinti Home Assistanta.",
     "bp_admin_only": "Predloške instalira administrator.",
-    "bp_none": "Za ovaj tip uređaja još nema predložaka.",
-    "bp_load_failed": "Predlošci se nisu mogli učitati.",
-    "auto_trigger_hint": "Stvara automatizaciju s ovim okidačem za ovaj uređaj i otvara je u Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Stvorio WashData za {device}. Dodajte svoje radnje (obavijest, svjetla, ...).",
     "automation_alias_new": "{device}: nova automatizacija",
-    "maint_done_by_program_intro": "Zadatak se smatra obavljenim kada završi ciklus jednog od njegovih programa, na primjer čišćenje bubnja nakon programa Pamuk 90. Računaju se samo ciklusi koje WashData pouzdano prepozna ili oni za koje ste sami odabrali program."
+    "maint_done_by_program_intro": "Zadatak se smatra obavljenim kada završi ciklus jednog od njegovih programa, na primjer čišćenje bubnja nakon programa Pamuk 90. Računaju se samo ciklusi koje WashData pouzdano prepozna ili oni za koje ste sami odabrali program.",
+    "auto_none": "Još nijedna automatizacija ne koristi ovaj uređaj.",
+    "auto_start_hint": "Otvara uređivač automatizacija Home Assistanta u kojem je ovaj uređaj već odabran.",
+    "auto_yours_intro": "Automatizacije Home Assistanta koje reagiraju na ovaj uređaj.",
+    "bp_needs_online": "Predlošci se preuzimaju s GitHuba, pa biblioteka radi samo s uključenim online značajkama. Online značajke uključuju i Zajedničku trgovinu.",
+    "bp_needs_online_admin": "Administrator ih može uključiti u zupčaniku postavki, pod Online i zajednica.",
+    "bp_stale": "GitHub trenutno nije dostupan. Ovo su ranije preuzeti predlošci.",
+    "bp_none_yet": "Za ovaj tip uređaja još nema predložaka. Podijelite prvi.",
+    "bp_unreachable": "Preuzima se s GitHuba. Provjerite ima li Home Assistant pristup internetu pa pokušajte ponovno.",
+    "bp_library_intro": "Gotove automatizacije koje korisnici WashData dijele na GitHubu, pregledane prije objave na popisu. Dostupno samo s uključenim online značajkama.",
+    "bp_needs_version": "Zahtijeva WashData {version} ili noviji."
   },
   "phase_desc": {
     "anti_crease": "Povremeno kratko okretanje bubnja nakon završetka kako bi se smanjile bore.",
@@ -2063,9 +2085,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter na GitHubu ↗",
     "manual": "Priručnik ↗",
-    "bp_share": "Podijelite vlastiti predložak putem pull requesta ↗",
-    "bp_open_in_ha": "Otvori u Home Assistantu ↗",
-    "automations_all": "Sve WashData automatizacije u Home Assistant"
+    "automations_all": "Sve WashData automatizacije u Home Assistant",
+    "bp_share_pr": "Podijelite vlastiti predložak: otvorite pull request na GitHubu",
+    "bp_view_github": "Pogledaj na GitHubu",
+    "bp_import_my_ha": "Uvezi putem My Home Assistant"
   },
   "tip": {
     "add_brand": "Marke nema na popisu? Dodajte je u katalog zajednice",
@@ -2192,16 +2215,6 @@
     "thr": "prag",
     "too_short": "prekratak",
     "tumble_kept": "impulsi bubnja zadržani"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Uključi nešto dok ciklus traje",
-      "description": "Uključuje svjetlo, prekidač ili pomoćni preklopnik kada ciklus WashData počne i isključuje ga kad završi, i nakon lažnog pokretanja.\n\nZahtijeva WashData 0.5.9 ili noviji."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Završi dugu fazu anti-bore sušilice",
-      "description": "Za sušilice koje nastavljaju okretati bubanj u anti-bori satima nakon programa. Pokreće se samo ako sušilica i dalje okreće bubanj kada protekne postavljeni broj minuta od završetka programa; sušilicu koja se do tada zaustavila ostavlja na miru. Zatim isključuje pametni utikač sušilice u trenutku niske potrošnje i zadano ga ponovo uključi. Novi ciklus koji počne u međuvremenu otkazuje je.\n\nRizik: ovo prebacuje relej dok je sušilica priključena. Koristite samo s utikačem prikladnim za vašu sušilicu i na vlastiti rizik. WashData nikada sam ne prebacuje utikač; to radi ova automatizacija.\n\nZahtijeva WashData 0.5.9 ili noviji."
-    }
   },
   "trigger": {
     "cycle_started": {

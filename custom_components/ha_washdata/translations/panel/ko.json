@@ -139,7 +139,6 @@
         "load_more": "더 불러오기",
         "manage": "관리",
         "merge": "병합",
-        "new_automation": "＋ 새로운 자동화",
         "new_group": "+ 새 그룹",
         "new_group_tip": "거의 같은 프로필(형태는 같고 온도나 탈수가 다른 프로필)을 그룹으로 묶어 매칭이 구분할 수 있게 합니다.",
         "new_phase": "+ 새로운 단계",
@@ -248,13 +247,22 @@
         "create_profile_from_gap": "프로필 만들기",
         "undo_import": "마지막 가져오기 실행 취소",
         "pg_rerun": "시뮬레이션 업데이트",
-        "from_trigger": "트리거에서 시작 ▾",
-        "bp_use": "이 장치에서 사용",
-        "bp_install": "템플릿 설치",
-        "bp_view_yaml": "YAML 보기",
-        "copy": "복사",
         "replace": "교체",
-        "from_trigger_open": "트리거에서 시작 ▴"
+        "auto_edit_in_ha": "Home Assistant에서 편집",
+        "auto_fewer_triggers": "트리거 접기",
+        "auto_more_triggers": "트리거 {count}개 더 보기",
+        "auto_more_triggers_other": "트리거 {count}개 더 보기",
+        "auto_blank": "빈 자동화",
+        "bp_refresh": "GitHub에서 새 템플릿 확인",
+        "bp_turn_on_online": "온라인 기능 켜기",
+        "bp_add_tip": "이 가전제품용 자동화를 기본 설정으로 만든 다음 Home Assistant에서 엽니다",
+        "bp_add_to": "{device}에 추가",
+        "bp_setup_tip": "템플릿을 설치한 다음 Home Assistant를 열어 나머지를 입력합니다",
+        "bp_setup_in_ha": "Home Assistant에서 설정",
+        "bp_details": "세부 정보",
+        "bp_copy_yaml": "YAML 복사",
+        "bp_hide_yaml": "YAML 숨기기",
+        "bp_show_yaml": "YAML 보기"
     },
     "note": {
         "off_delay": {
@@ -334,7 +342,6 @@
         "add_maintenance": "유지보수 이벤트 추가",
         "automation_delete": "이 자동화 삭제",
         "automation_needs_review": "이 주기에는 검토가 필요합니다.",
-        "automation_open": "자동화 편집기에서 열기",
         "automation_review_this_cycle": "이 주기를 검토하세요",
         "automations": "자동화",
         "clear_debug": "디버그 추적 지우기",
@@ -352,7 +359,6 @@
         "ml_settings_card": "설정",
         "ml_smart_learning": "스마트러닝",
         "my_preferences": "내 환경설정",
-        "no_automations": "아직 이 장치를 참조하는 자동화가 없습니다.",
         "panel_settings": "패널 설정",
         "pg_settings_source": "설정 출처",
         "phase_catalog": "단계 카탈로그",
@@ -373,10 +379,14 @@
         "service_status": "유지보수 상태",
         "online_account_tab": "온라인 및 커뮤니티",
         "live_match_debug": "실시간 매칭 디버그",
-        "automations_used": "이 장치를 사용하는 자동화",
-        "bp_templates": "템플릿",
         "automations_all_tip": "WashData 라벨로 필터링된 Home Assistant의 자동화 목록입니다. 여기서 생성된 자동화는 WashData 카테고리에도 있습니다.",
-        "maint_done_by_program": "자동 완료"
+        "maint_done_by_program": "자동 완료",
+        "auto_start": "새 자동화 만들기",
+        "auto_yours": "내 자동화",
+        "bp_needs_online": "템플릿 라이브러리에는 온라인 기능이 필요합니다",
+        "bp_unreachable": "템플릿 라이브러리에 연결할 수 없습니다",
+        "bp_library": "템플릿 라이브러리",
+        "bp_settings": "설정할 수 있는 항목"
     },
     "health": {
         "fair": "프로파일 품질: 보통",
@@ -686,13 +696,18 @@
         "cycle_context_series": "레코더 이력",
         "before_start": "시작 전",
         "after_end": "종료 후",
-        "bp_you_choose": "선택 사항: {inputs}",
-        "bp_adjustable": "조정 가능: {inputs}",
         "bp_yaml": "블루프린트 YAML",
         "automation_wd_label": "WashData 라벨을 포함합니다",
         "done_by_none": "설정 안 됨",
         "done_by_programs": "다음 프로그램으로 자동 완료: {programs}",
-        "done_by_cycle": "{program} 사이클로 완료"
+        "done_by_cycle": "{program} 사이클로 완료",
+        "bp_by": "작성자: {author}",
+        "bp_for_all": "모든 가전제품",
+        "bp_for": "대상",
+        "bp_needs": "요구 사항",
+        "bp_needs_version": "WashData {version} 이상",
+        "bp_author": "작성자",
+        "bp_required": "필수"
     },
     "log": {
         "all_levels": "모든 레벨",
@@ -789,7 +804,7 @@
         "undo_import_ok": "가져오기 실행 취소",
         "undo_import_title": "마지막 가져오기 실행 취소",
         "bp_replace_title": "설치된 템플릿을 교체하시겠습니까?",
-        "bp_replace_msg": "Home Assistant에 \"{name}\"의 다른 버전이 있습니다. 이 WashData 버전의 것으로 교체하시겠습니까? 이를 사용하는 자동화도 함께 변경됩니다."
+        "bp_replace_library_msg": "Home Assistant에 다른 버전의 \"{name}\"이(가) 있습니다. 템플릿 라이브러리의 버전으로 교체하시겠습니까? 이를 사용하는 자동화도 함께 바뀝니다."
     },
     "msg": {
         "pg_canvas_empty3": "위에서 사이클을 선택하고 실행을 눌러 시뮬레이션하세요. 그런 다음 마우스를 올려 값을 확인하고, 스크롤 또는 두 손가락으로 확대/축소하고, 드래그하여 이동할 수 있습니다.",
@@ -973,7 +988,7 @@
         "standby_above_stop_title": "사이클이 끝났을 때 여전히 {idle} W를 사용 중입니다",
         "standby_above_stop_sub": "최근 {total}개 사이클 중 {n}개입니다. 오프 지연은 전력이 중지 임계값({stop} W) 아래로 내려간 뒤에야 시작되므로, 사이클이 늦게 끝나거나 수동으로 정지해야 합니다.",
         "store_share_intro": "이 참조 주기를 업로드하면 같은 가전제품을 사용하는 다른 사용자가 이용할 수 있습니다. 공개되기 전에 검토를 거칩니다.",
-        "online_intro_global": "다른 WashData 사용자와 참조 녹음을 탐색하고 공유하세요. 하나의 연결로 모든 WashData 기기에 적용되며, 브랜드와 모델은 '기본'에서 기기별로 설정합니다. 온라인 기능은 직접 켜기 전까지 꺼져 있습니다.",
+        "online_intro_global": "다른 WashData 사용자와 참조 녹음을 탐색하고 공유하며, 자동화 템플릿 라이브러리를 사용하세요. 하나의 연결로 모든 WashData 기기에 적용되며, 브랜드와 모델은 '기본'에서 기기별로 설정합니다. 온라인 기능은 직접 켜기 전까지 꺼져 있습니다.",
         "online_unavailable": "이 서버에서는 온라인 기능을 사용할 수 없습니다.",
         "store_picker_offline": "설정(톱니바퀴)에서 온라인 기능을 활성화하면 커뮤니티 카탈로그에서 선택할 수 있습니다.",
         "pick_brand_first": "먼저 가전제품 브랜드를 선택하세요.",
@@ -1065,16 +1080,21 @@
         "cycle_context_none": "레코더에 이 사이클 전후의 측정값이 없습니다(Home Assistant는 기본적으로 10일간의 이력을 보관합니다).",
         "cycle_context_tip": "표시 전용입니다. 이 사이클 전후의 전력 센서 레코더 이력을 아직 남아 있으면 보여 줍니다. 실패한 시작 시도를 이후 사이클에 포함하려면 곡선 프리롤(설정 > 감지 > 사이클 시작)을 사용하세요. 저장되는 소요 시간이 바뀝니다.",
         "invalid_threshold_pair": "중지 임계값({stop} W)은 시작 임계값({start} W)보다 낮아야 합니다. 아무것도 저장되지 않았습니다. 두 값을 함께 변경하세요.",
-        "automations_tab_intro": "WashData는 사용자 자신의 Home Assistant 자동화를 위한 장치 트리거(사이클 시작, 사이클 완료, 사이클 멈춤 등)를 제공합니다. 이 장치를 사용하는 자동화가 여기에 나열됩니다.",
-        "bp_intro": "이 가전제품을 위한 기성 자동화로, Home Assistant 블루프린트로 설치됩니다.",
         "bp_admin_only": "관리자가 템플릿을 설치합니다.",
-        "bp_none": "이 가전제품 유형의 템플릿이 아직 없습니다.",
-        "bp_load_failed": "템플릿을 불러올 수 없습니다.",
-        "auto_trigger_hint": "이 장치에 대해 이 트리거가 있는 자동화를 생성하고 Home Assistant에서 엽니다.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "WashData가 {device}를 위해 생성했습니다. 작업을 추가하세요(알림, 조명, ...).",
         "automation_alias_new": "{device}: 새 자동화",
-        "maint_done_by_program_intro": "작업에 지정한 프로그램 중 하나의 사이클이 끝나면 작업이 완료된 것으로 간주됩니다. 예를 들어 면 90이 실행되면 드럼 청소가 완료됩니다. WashData가 확실히 인식했거나 프로그램을 직접 선택한 사이클만 해당됩니다."
+        "maint_done_by_program_intro": "작업에 지정한 프로그램 중 하나의 사이클이 끝나면 작업이 완료된 것으로 간주됩니다. 예를 들어 면 90이 실행되면 드럼 청소가 완료됩니다. WashData가 확실히 인식했거나 프로그램을 직접 선택한 사이클만 해당됩니다.",
+        "auto_none": "아직 이 가전제품을 사용하는 자동화가 없습니다.",
+        "auto_start_hint": "이 가전제품이 미리 입력된 상태로 Home Assistant의 자동화 편집기가 열립니다.",
+        "auto_yours_intro": "이 가전제품에 반응하는 Home Assistant 자동화입니다.",
+        "bp_needs_online": "템플릿은 GitHub에서 다운로드되므로 라이브러리는 온라인 기능이 켜져 있을 때만 작동합니다. 온라인 기능에는 커뮤니티 스토어도 포함됩니다.",
+        "bp_needs_online_admin": "관리자가 톱니바퀴 메뉴의 '온라인 및 커뮤니티'에서 켤 수 있습니다.",
+        "bp_stale": "지금은 GitHub에 연결할 수 없습니다. 이전에 다운로드한 템플릿입니다.",
+        "bp_none_yet": "아직 이 가전제품 유형의 템플릿이 없습니다. 첫 번째 템플릿을 공유해 보세요.",
+        "bp_unreachable": "라이브러리는 GitHub에서 다운로드됩니다. Home Assistant가 인터넷에 연결되어 있는지 확인한 후 다시 시도하세요.",
+        "bp_library_intro": "WashData 사용자가 GitHub에서 공유한 기성 자동화로, 목록에 오르기 전에 검토를 거칩니다. 온라인 기능이 켜져 있을 때만 사용할 수 있습니다.",
+        "bp_needs_version": "WashData {version} 이상이 필요합니다."
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -2027,9 +2047,10 @@
     "link": {
         "maintenance_supporter": "GitHub의 Maintenance Supporter ↗",
         "manual": "설명서 ↗",
-        "bp_share": "풀 리퀘스트로 자신의 템플릿 공유 ↗",
-        "bp_open_in_ha": "Home Assistant에서 열기 ↗",
-        "automations_all": "Home Assistant의 모든 WashData 자동화"
+        "automations_all": "Home Assistant의 모든 WashData 자동화",
+        "bp_share_pr": "내 템플릿 공유: GitHub에서 풀 리퀘스트 열기",
+        "bp_view_github": "GitHub에서 보기",
+        "bp_import_my_ha": "My Home Assistant로 가져오기"
     },
     "tip": {
         "add_brand": "브랜드가 목록에 없나요? 커뮤니티 카탈로그에 추가하세요",
@@ -2156,16 +2177,6 @@
         "thr": "임계값",
         "too_short": "너무 짧음",
         "tumble_kept": "회전 펄스 유지됨"
-    },
-    "blueprint": {
-        "cycle_running_indicator": {
-            "name": "사이클 실행 중 무언가를 켜기",
-            "description": "WashData 사이클이 시작될 때 조명, 스위치 또는 토글 헬퍼를 켜고, 사이클이 끝날 때 끕니다. 잘못된 시작 이후에도 적용됩니다.\n\nWashData 0.5.9 이상이 필요합니다."
-        },
-        "dryer_anti_crease_power_cut": {
-            "name": "건조기의 긴 주름 방지 단계 종료",
-            "description": "프로그램 이후에도 주름 방지 모드로 몇 시간씩 계속 회전하는 건조기를 위한 자동화입니다. 프로그램 완료 후 설정한 시간(분)이 지난 시점에도 건조기가 아직 회전하고 있을 때만 실행됩니다. 그때 이미 멈춘 건조기는 그대로 둡니다. 그런 다음 저전력 순간에 건조기의 스마트 플러그를 끄고, 기본적으로 다시 켭니다. 그 사이에 새로운 사이클이 시작되면 취소됩니다.\n\n위험: 건조기가 플러그에 꽂혀 있는 동안 릴레이를 전환합니다. 건조기에 맞는 정격 플러그만 사용하고, 사용자 책임 하에 사용하세요. WashData는 직접 플러그를 전환하지 않습니다; 이 자동화가 그 역할을 합니다.\n\nWashData 0.5.9 이상이 필요합니다."
-        }
     },
     "trigger": {
         "cycle_started": {

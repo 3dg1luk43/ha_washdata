@@ -157,7 +157,6 @@
     "load_more": "Wczytaj więcej",
     "manage": "Zarządzaj",
     "merge": "Scal",
-    "new_automation": "+ Nowa automatyzacja",
     "new_group": "+ Nowa grupa",
     "new_group_tip": "Grupuj niemal identyczne profile (ten sam kształt, inna temperatura lub wirowanie), aby dopasowanie umiało je rozróżnić.",
     "new_phase": "+ Nowa faza",
@@ -257,13 +256,25 @@
     "create_profile_from_gap": "Utwórz profil",
     "undo_import": "Cofnij ostatni import",
     "pg_rerun": "Aktualizuj symulację",
-    "from_trigger": "Uruchom z wyzwalacza ▾",
-    "bp_use": "Użyj z tym urządzeniem",
-    "bp_install": "Zainstaluj szablon",
-    "bp_view_yaml": "Zobacz YAML",
-    "copy": "Kopiuj",
     "replace": "Zastąp",
-    "from_trigger_open": "Uruchom z wyzwalacza ▴"
+    "auto_edit_in_ha": "Edytuj w Home Assistant",
+    "auto_fewer_triggers": "Mniej wyzwalaczy",
+    "auto_more_triggers": "Jeszcze {count} wyzwalaczy",
+    "auto_more_triggers_one": "Jeszcze {count} wyzwalacz",
+    "auto_more_triggers_few": "Jeszcze {count} wyzwalacze",
+    "auto_more_triggers_many": "Jeszcze {count} wyzwalaczy",
+    "auto_more_triggers_other": "Jeszcze {count} wyzwalacza",
+    "auto_blank": "Pusta automatyzacja",
+    "bp_refresh": "Sprawdź nowe szablony na GitHubie",
+    "bp_turn_on_online": "Włącz funkcje online",
+    "bp_add_tip": "Tworzy automatyzację dla tego urządzenia z ustawieniami domyślnymi, a następnie otwiera ją w Home Assistant",
+    "bp_add_to": "Dodaj do: {device}",
+    "bp_setup_tip": "Instaluje szablon, a następnie otwiera Home Assistant, aby uzupełnić resztę",
+    "bp_setup_in_ha": "Skonfiguruj w Home Assistant",
+    "bp_details": "Szczegóły",
+    "bp_copy_yaml": "Kopiuj YAML",
+    "bp_hide_yaml": "Ukryj YAML",
+    "bp_show_yaml": "Pokaż YAML"
   },
   "note": {
     "off_delay": {
@@ -343,7 +354,6 @@
     "add_maintenance": "Dodaj zdarzenie konserwacji",
     "automation_delete": "Usuń tę automatyzację",
     "automation_needs_review": "Ten cykl wymaga przeglądu",
-    "automation_open": "Otwórz w edytorze automatyzacji",
     "automation_review_this_cycle": "Przejrzyj ten cykl",
     "automations": "Automatyka",
     "clear_debug": "Wyczyść ślady debugowania",
@@ -361,7 +371,6 @@
     "ml_settings_card": "Ustawienia",
     "ml_smart_learning": "Inteligentne uczenie się",
     "my_preferences": "Moje preferencje",
-    "no_automations": "Żadna automatyzacja nie odwołuje się jeszcze do tego urządzenia.",
     "panel_settings": "Ustawienia panelu",
     "pg_settings_source": "Źródło ustawień",
     "phase_catalog": "Katalog faz",
@@ -382,10 +391,14 @@
     "service_status": "Status serwisu",
     "online_account_tab": "Online i społeczność",
     "live_match_debug": "Debugowanie dopasowania na żywo",
-    "automations_used": "Automatyzacje używające tego urządzenia",
-    "bp_templates": "Szablony",
     "automations_all_tip": "Lista automatyzacji Home Assistant filtrowana według etykiety WashData. Automatyzacje utworzone tutaj znajdują się również w kategorii WashData.",
-    "maint_done_by_program": "Wykonane automatycznie"
+    "maint_done_by_program": "Wykonane automatycznie",
+    "auto_start": "Utwórz nową automatyzację",
+    "auto_yours": "Twoje automatyzacje",
+    "bp_needs_online": "Biblioteka szablonów wymaga funkcji online",
+    "bp_unreachable": "Nie udało się połączyć z biblioteką szablonów",
+    "bp_library": "Biblioteka szablonów",
+    "bp_settings": "Co możesz ustawić"
   },
   "health": {
     "fair": "Akceptowalna jakość profilu",
@@ -704,13 +717,18 @@
     "cycle_context_series": "Historia z recordera",
     "before_start": "Przed startem",
     "after_end": "Po zakończeniu",
-    "bp_you_choose": "Do wyboru: {inputs}",
-    "bp_adjustable": "Konfigurowalny: {inputs}",
     "bp_yaml": "Blueprint YAML",
     "automation_wd_label": "Zawiera etykietę WashData",
     "done_by_none": "Nie ustawiono",
     "done_by_programs": "Wykonane automatycznie przez: {programs}",
-    "done_by_cycle": "Wykonane przez cykl programu {program}"
+    "done_by_cycle": "Wykonane przez cykl programu {program}",
+    "bp_by": "autor: {author}",
+    "bp_for_all": "Wszystkie urządzenia",
+    "bp_for": "Dla",
+    "bp_needs": "Wymagania",
+    "bp_needs_version": "WashData {version} lub nowszy",
+    "bp_author": "Autor",
+    "bp_required": "wymagane"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -813,7 +831,7 @@
     "undo_import_ok": "Cofnij import",
     "undo_import_title": "Cofnij ostatni import",
     "bp_replace_title": "Zastąpić zainstalowany szablon?",
-    "bp_replace_msg": "Home Assistant ma inną wersję \"{name}\". Zastąpić ją wersją z tej wersji WashData? Automatyzacje, które go używają, zmienią się razem z nim."
+    "bp_replace_library_msg": "Home Assistant ma inną wersję \"{name}\". Zastąpić ją wersją z biblioteki szablonów? Automatyzacje, które go używają, zmienią się razem z nim."
   },
   "msg": {
     "pg_canvas_empty3": "Wybierz cykl powyżej i naciśnij Uruchom, aby go zasymulować. Następnie najedź, aby odczytać wartości, przewiń lub użyj dwóch palców, aby powiększyć, i przeciągnij, aby przesunąć.",
@@ -1021,7 +1039,7 @@
     "standby_above_stop_title": "Nadal pobiera {idle} W w momencie zakończenia cyklu",
     "standby_above_stop_sub": "{n} z ostatnich {total} cykli. Opóźnienie Wyłączenia zaczyna biec dopiero wtedy, gdy moc spadnie poniżej Progu Zatrzymania ({stop} W), więc cykle kończą się z opóźnieniem albo trzeba je zatrzymywać ręcznie.",
     "store_share_intro": "Prześlij ten cykl referencyjny, aby inni z tym samym urządzeniem mogli go używać. Zostanie sprawdzony przed publicznym udostępnieniem.",
-    "online_intro_global": "Przeglądaj i udostępniaj nagrania referencyjne innym użytkownikom WashData. Jedno połączenie obejmuje wszystkie Twoje urządzenia WashData; markę i model ustawia się dla każdego urządzenia w sekcji Podstawowe. Funkcje online są wyłączone, dopóki ich nie włączysz.",
+    "online_intro_global": "Przeglądaj i udostępniaj nagrania referencyjne innym użytkownikom WashData oraz korzystaj z biblioteki szablonów automatyzacji. Jedno połączenie obejmuje wszystkie Twoje urządzenia WashData; markę i model ustawia się dla każdego urządzenia w sekcji Podstawowe. Funkcje online są wyłączone, dopóki ich nie włączysz.",
     "online_unavailable": "Funkcje online nie są dostępne na tym serwerze.",
     "store_picker_offline": "Włącz funkcje online w kółku zębatym ustawień, aby wybierać z katalogu społeczności.",
     "pick_brand_first": "Najpierw wybierz markę urządzenia.",
@@ -1113,16 +1131,21 @@
     "cycle_context_none": "Recorder nie przechowuje żadnych odczytów z okresu wokół tego cyklu (Home Assistant domyślnie przechowuje historię przez 10 dni).",
     "cycle_context_tip": "Tylko podgląd: pokazuje historię czujnika mocy z recordera wokół tego cyklu, jeśli jest jeszcze przechowywana. Aby dołączać nieudane próby startu do przyszłych cykli, użyj ustawienia Wstępny zapis krzywej (Ustawienia > Wykrywanie > Start Cyklu), które zmienia zapisane czasy trwania.",
     "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W). Nic nie zostało zapisane; zmień obie wartości razem.",
-    "automations_tab_intro": "WashData udostępnia wyzwalacze urządzenia (cykl rozpoczęty, cykl zakończony, cykl utknął i inne) dla własnych automatyzacji Home Assistant. Automatyzacje używające tego urządzenia są tutaj wymienione.",
-    "bp_intro": "Gotowe automatyzacje dla tego urządzenia, zainstalowane jako blueprinty Home Assistant.",
     "bp_admin_only": "Szablony instaluje administrator.",
-    "bp_none": "Brak szablonów dla tego typu urządzenia.",
-    "bp_load_failed": "Nie można załadować szablonów.",
-    "auto_trigger_hint": "Tworzy automatyzację z tym wyzwalaczem dla tego urządzenia i otwiera ją w Home Assistant.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Utworzone przez WashData dla {device}. Dodaj swoje akcje (powiadomienie, światła, ...).",
     "automation_alias_new": "{device}: nowa automatyzacja",
-    "maint_done_by_program_intro": "Zadanie liczy się jako wykonane, gdy zakończy się cykl jednego z jego programów, np. czyszczenie bębna po programie Bawełna 90. Liczą się tylko cykle, co do których WashData ma pewność, lub z programem wybranym przez Ciebie."
+    "maint_done_by_program_intro": "Zadanie liczy się jako wykonane, gdy zakończy się cykl jednego z jego programów, np. czyszczenie bębna po programie Bawełna 90. Liczą się tylko cykle, co do których WashData ma pewność, lub z programem wybranym przez Ciebie.",
+    "auto_none": "Żadna automatyzacja nie używa jeszcze tego urządzenia.",
+    "auto_start_hint": "Otwiera edytor automatyzacji Home Assistant, w którym to urządzenie jest już wybrane.",
+    "auto_yours_intro": "Automatyzacje Home Assistant, które reagują na to urządzenie.",
+    "bp_needs_online": "Szablony są pobierane z GitHuba, więc biblioteka działa tylko przy włączonych funkcjach online. Funkcje online obejmują też Sklep społecznościowy.",
+    "bp_needs_online_admin": "Administrator może je włączyć w kółku zębatym ustawień, w sekcji Online i społeczność.",
+    "bp_stale": "Nie udało się teraz połączyć z GitHubem. To szablony pobrane wcześniej.",
+    "bp_none_yet": "Nie ma jeszcze szablonów dla tego typu urządzenia. Udostępnij pierwszy.",
+    "bp_unreachable": "Jest pobierana z GitHuba. Sprawdź, czy Home Assistant ma dostęp do internetu, i spróbuj ponownie.",
+    "bp_library_intro": "Gotowe automatyzacje udostępniane przez użytkowników WashData na GitHubie, sprawdzane przed dodaniem do listy. Dostępne tylko przy włączonych funkcjach online.",
+    "bp_needs_version": "Wymaga WashData {version} lub nowszego."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -2081,9 +2104,10 @@
   "link": {
     "maintenance_supporter": "Maintenance Supporter na GitHubie ↗",
     "manual": "Instrukcja ↗",
-    "bp_share": "Podziel się własnym szablonem przez pull request ↗",
-    "bp_open_in_ha": "Otwórz w Home Assistant ↗",
-    "automations_all": "Wszystkie automatyzacje WashData w Home Assistant"
+    "automations_all": "Wszystkie automatyzacje WashData w Home Assistant",
+    "bp_share_pr": "Udostępnij własny szablon: otwórz pull request na GitHubie",
+    "bp_view_github": "Zobacz na GitHubie",
+    "bp_import_my_ha": "Importuj przez My Home Assistant"
   },
   "tip": {
     "add_brand": "Marki nie ma na liście? Dodaj ją do katalogu społeczności",
@@ -2210,16 +2234,6 @@
     "thr": "próg",
     "too_short": "za krótki",
     "tumble_kept": "impulsy bębna zachowane"
-  },
-  "blueprint": {
-    "cycle_running_indicator": {
-      "name": "Włącz coś podczas działania cyklu",
-      "description": "Włącza światło, przełącznik lub pomocnika przełączającego, gdy cykl WashData się rozpoczyna, i wyłącza, gdy się kończy, także po fałszywym starcie.\n\nWymaga WashData 0.5.9 lub nowszego."
-    },
-    "dryer_anti_crease_power_cut": {
-      "name": "Zakończ długą fazę antygniotową suszarki",
-      "description": "Dla suszarek, które nadal obracają bębnem w trybie antygniotowym przez wiele godzin po zakończeniu programu. Uruchamia się tylko wtedy, gdy suszarka nadal obraca bębnem po upływie ustawionej liczby minut od zakończenia programu; suszarkę, która do tego czasu się zatrzymała, zostawia w spokoju. Następnie wyłącza inteligentne gniazdo suszarki w momencie niskiego poboru mocy i domyślnie włącza je z powrotem. Nowy cykl rozpoczęty w międzyczasie anuluje tę automatyzację.\n\nRyzyko: wyłącza przekaźnik, gdy suszarka jest podłączona. Używaj tylko z gniazdem przystosowanym do Twojej suszarki i na własne ryzyko. WashData nigdy nie przełącza gniazda samodzielnie; robi to ta automatyzacja.\n\nWymaga WashData 0.5.9 lub nowszego."
-    }
   },
   "trigger": {
     "cycle_started": {

@@ -142,7 +142,6 @@
         "load_more": "Több betöltése",
         "manage": "Kezelése",
         "merge": "Egyesítés",
-        "new_automation": "＋ Új automatizálás",
         "new_group": "+ Új csoport",
         "new_group_tip": "Csoportosítsa a közel azonos profilokat (azonos alak, eltérő hőmérséklet vagy centrifugálás), hogy az egyeztetés meg tudja különböztetni őket.",
         "new_phase": "+ Új fázis",
@@ -251,13 +250,23 @@
         "create_profile_from_gap": "Profil létrehozása",
         "undo_import": "Utolsó importálás visszavonása",
         "pg_rerun": "Szimuláció frissítése",
-        "from_trigger": "Indítás triggerről ▾",
-        "bp_use": "Használat ezzel az eszközzel",
-        "bp_install": "Sablon telepítése",
-        "bp_view_yaml": "YAML megtekintése",
-        "copy": "Másolás",
         "replace": "Csere",
-        "from_trigger_open": "Indítás triggerről ▴"
+        "auto_edit_in_ha": "Szerkesztés a Home Assistantban",
+        "auto_fewer_triggers": "Kevesebb trigger",
+        "auto_more_triggers": "További {count} trigger",
+        "auto_more_triggers_one": "További {count} trigger",
+        "auto_more_triggers_other": "További {count} trigger",
+        "auto_blank": "Üres automatizálás",
+        "bp_refresh": "Új sablonok keresése a GitHubon",
+        "bp_turn_on_online": "Online funkciók bekapcsolása",
+        "bp_add_tip": "Létrehozza az automatizálást ehhez a készülékhez az alapértelmezett beállításokkal, majd megnyitja a Home Assistantban",
+        "bp_add_to": "Hozzáadás: {device}",
+        "bp_setup_tip": "Telepíti a sablont, majd megnyitja a Home Assistantot a többi kitöltéséhez",
+        "bp_setup_in_ha": "Beállítás a Home Assistantban",
+        "bp_details": "Részletek",
+        "bp_copy_yaml": "YAML másolása",
+        "bp_hide_yaml": "YAML elrejtése",
+        "bp_show_yaml": "YAML megjelenítése"
     },
     "note": {
         "off_delay": {
@@ -337,7 +346,6 @@
         "add_maintenance": "Karbantartási esemény hozzáadása",
         "automation_delete": "Törölje ezt az automatizálást",
         "automation_needs_review": "Ezt a ciklust felül kell vizsgálni",
-        "automation_open": "Nyissa meg az automatizálási szerkesztőben",
         "automation_review_this_cycle": "Tekintse át ezt a ciklust",
         "automations": "Automatizálások",
         "clear_debug": "Törölje a hibakeresési nyomokat",
@@ -355,7 +363,6 @@
         "ml_settings_card": "Beállítások elemre",
         "ml_smart_learning": "Intelligens tanulás",
         "my_preferences": "Saját preferenciáim",
-        "no_automations": "Egyelőre egyetlen automatika sem utal erre az eszközre.",
         "panel_settings": "Panelbeállítások",
         "pg_settings_source": "Beállítások forrása",
         "phase_catalog": "Fázis katalógus",
@@ -376,10 +383,14 @@
         "service_status": "Szerviz állapota",
         "online_account_tab": "Online és közösség",
         "live_match_debug": "Élő egyezés hibakeresése",
-        "automations_used": "Ezt az eszközt használó automatizálások",
-        "bp_templates": "Sablonok",
         "automations_all_tip": "A Home Assistant automatizálási listája, WashData-címke szerint szűrve. Az itt létrehozott automatizálások a WashData-kategóriában is szerepelnek.",
-        "maint_done_by_program": "Automatikus elvégzés"
+        "maint_done_by_program": "Automatikus elvégzés",
+        "auto_start": "Új automatizálás létrehozása",
+        "auto_yours": "Az Ön automatizálásai",
+        "bp_needs_online": "A sablontárhoz online funkciók szükségesek",
+        "bp_unreachable": "A sablontár nem érhető el",
+        "bp_library": "Sablontár",
+        "bp_settings": "Amit beállíthat"
     },
     "health": {
         "fair": "Elfogadható profilminőség",
@@ -692,13 +703,18 @@
         "cycle_context_series": "Rögzítő-előzmények",
         "before_start": "Kezdés előtt",
         "after_end": "Befejezés után",
-        "bp_you_choose": "Ön választja: {inputs}",
-        "bp_adjustable": "Állítható: {inputs}",
         "bp_yaml": "Blueprint YAML",
         "automation_wd_label": "Viseli a WashData-címkét",
         "done_by_none": "Nincs beállítva",
         "done_by_programs": "Automatikusan elvégzi: {programs}",
-        "done_by_cycle": "Elvégezte egy ciklus: {program}"
+        "done_by_cycle": "Elvégezte egy ciklus: {program}",
+        "bp_by": "szerző: {author}",
+        "bp_for_all": "Minden készülék",
+        "bp_for": "Ehhez",
+        "bp_needs": "Szükséges",
+        "bp_needs_version": "WashData {version} vagy újabb",
+        "bp_author": "Szerző",
+        "bp_required": "kötelező"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -797,7 +813,7 @@
         "undo_import_ok": "Importálás visszavonása",
         "undo_import_title": "Utolsó importálás visszavonása",
         "bp_replace_title": "Cseréljük az installált sablont?",
-        "bp_replace_msg": "A Home Assistantban a \"{name}\" más verziója van. Cseréljük a WashData ezen verziójában lévőre? Az azt használó automatizálások együtt változnak."
+        "bp_replace_library_msg": "A Home Assistantban a \"{name}\" más verziója van. Lecseréli a sablontárban lévőre? Az ezt használó automatizálások vele együtt változnak."
     },
     "msg": {
         "pg_canvas_empty3": "Válassz ki egy ciklust fent, és nyomd meg a Futtatás gombot a szimulációhoz. Ezután vidd rá a mutatót az értékek leolvasásához, görgess vagy csippents a nagyításhoz, és húzd az eltoláshoz.",
@@ -986,7 +1002,7 @@
         "standby_above_stop_title": "A ciklus végén még mindig {idle} W-ot vett fel",
         "standby_above_stop_sub": "Az utolsó {total} ciklusból {n}. A kikapcsolási késleltetés csak akkor indul el, amikor a teljesítmény a Leállítási küszöb ({stop} W) alá esik, így a ciklusok későn fejeződnek be, vagy kézzel kell leállítani őket.",
         "store_share_intro": "Töltse fel ezt a referenciaciklust, hogy az azonos készülékkel rendelkezők is használhassák. Nyilvános megjelenés előtt ellenőrzésre kerül.",
-        "online_intro_global": "Böngésszen és osszon meg referenciafelvételeket más WashData-felhasználókkal. Egy kapcsolat az összes WashData-eszközére vonatkozik; a márka és a modell eszközönként, az Alapok szakaszban állítható. Az online funkciók addig ki vannak kapcsolva, amíg be nem kapcsolja őket.",
+        "online_intro_global": "Böngésszen és osszon meg referenciafelvételeket más WashData-felhasználókkal, és használja az automatizálási sablontárat. Egy kapcsolat az összes WashData-eszközére vonatkozik; a márka és a modell eszközönként, az Alapok szakaszban állítható. Az online funkciók addig ki vannak kapcsolva, amíg be nem kapcsolja őket.",
         "online_unavailable": "Az online funkciók nem érhetők el ezen a szerveren.",
         "store_picker_offline": "A közösségi katalógusból való választáshoz engedélyezze az online funkciókat a beállítások fogaskerekénél.",
         "pick_brand_first": "Először válasszon készülékmárkát.",
@@ -1081,16 +1097,21 @@
         "cycle_context_none": "A rögzítő nem tárol leolvasásokat a ciklus körül (a Home Assistant alapértelmezés szerint 10 napnyi előzményt őriz meg).",
         "cycle_context_tip": "Csak megjelenítés: a teljesítményérzékelő rögzítő-előzményeit mutatja a ciklus körül, ha még megvannak. Ha a megszakadt indítási kísérleteket a jövőbeli ciklusokhoz szeretné adni, használja a Görbe előfutama beállítást (Beállítások > Érzékelés > Ciklus indítása), amely megváltoztatja a tárolt időtartamokat.",
         "invalid_threshold_pair": "A Leállítási küszöbnek ({stop} W) kisebbnek kell lennie az Indítási küszöbnél ({start} W). Semmi sem lett mentve; a kettőt együtt módosítsa.",
-        "automations_tab_intro": "A WashData eszköztriggereket kínál (ciklus indult, ciklus befejeződött, ciklus elakadt és más) saját Home Assistant-automatizálásaihoz. Az eszközt használó automatizálások itt vannak felsorolva.",
-        "bp_intro": "Kész automatizálások ehhez az eszközhöz, Home Assistant blueprintekként telepítve.",
         "bp_admin_only": "A sablonokat egy rendszergazda telepíti.",
-        "bp_none": "Ehhez az eszköztípushoz még nincsenek sablonok.",
-        "bp_load_failed": "A sablonok nem tölthetők be.",
-        "auto_trigger_hint": "Létrehoz egy automatizálást ezzel a triggerrel ehhez az eszközhöz, és megnyitja a Home Assistantban.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "A WashData hozta létre {device} számára. Adja hozzá a saját műveleteit (értesítés, világítás, ...).",
         "automation_alias_new": "{device}: új automatizálás",
-        "maint_done_by_program_intro": "Egy feladat akkor számít elvégzettnek, ha a hozzá tartozó programok egyikének ciklusa befejeződik, például a dob tisztítása, amikor a Pamut 90 program fut. Csak azok a ciklusok számítanak, amelyekben a WashData biztos, vagy amelyeknek a programját Ön választotta."
+        "maint_done_by_program_intro": "Egy feladat akkor számít elvégzettnek, ha a hozzá tartozó programok egyikének ciklusa befejeződik, például a dob tisztítása, amikor a Pamut 90 program fut. Csak azok a ciklusok számítanak, amelyekben a WashData biztos, vagy amelyeknek a programját Ön választotta.",
+        "auto_none": "Ezt a készüléket még egyetlen automatizálás sem használja.",
+        "auto_start_hint": "A Home Assistant automatizálási szerkesztőjében nyílik meg, ahol ez a készülék már ki van választva.",
+        "auto_yours_intro": "Home Assistant-automatizálások, amelyek erre a készülékre reagálnak.",
+        "bp_needs_online": "A sablonok a GitHubról töltődnek le, ezért a sablontár csak bekapcsolt online funkciókkal működik. Az online funkciókhoz tartozik a Közösségi bolt is.",
+        "bp_needs_online_admin": "Egy rendszergazda kapcsolhatja be őket a fogaskerék menüben, az Online és közösség részben.",
+        "bp_stale": "A GitHub most nem volt elérhető. Ezek a korábban letöltött sablonok.",
+        "bp_none_yet": "Ehhez a készüléktípushoz még nincsenek sablonok. Ossza meg az elsőt.",
+        "bp_unreachable": "A GitHubról töltődik le. Ellenőrizze, hogy a Home Assistant eléri-e az internetet, majd próbálja újra.",
+        "bp_library_intro": "Kész automatizálások, amelyeket WashData-felhasználók osztanak meg a GitHubon, és listázás előtt átnézésre kerülnek. Csak bekapcsolt online funkciókkal érhető el.",
+        "bp_needs_version": "WashData {version} vagy újabb szükséges."
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid dobforgások a befejezés után a ráncok csökkentése érdekében.",
@@ -2045,9 +2066,10 @@
     "link": {
         "maintenance_supporter": "Maintenance Supporter a GitHubon ↗",
         "manual": "Kézikönyv ↗",
-        "bp_share": "Ossza meg saját sablonját pull requesttel ↗",
-        "bp_open_in_ha": "Megnyitás a Home Assistantban ↗",
-        "automations_all": "Minden WashData-automatizálás a Home Assistantban"
+        "automations_all": "Minden WashData-automatizálás a Home Assistantban",
+        "bp_share_pr": "Ossza meg saját sablonját: nyisson pull requestet a GitHubon",
+        "bp_view_github": "Megtekintés a GitHubon",
+        "bp_import_my_ha": "Importálás a My Home Assistanttal"
     },
     "tip": {
         "add_brand": "A márka nem szerepel a listában? Adja hozzá a közösségi katalógushoz",
@@ -2174,16 +2196,6 @@
         "thr": "küszöb",
         "too_short": "túl rövid",
         "tumble_kept": "dobpulzusok megtartva"
-    },
-    "blueprint": {
-        "cycle_running_indicator": {
-            "name": "Kapcsoljon be valamit ciklus alatt",
-            "description": "Bekapcsol egy lámpát, kapcsolót vagy váltó-segédelemet, amikor WashData-ciklus indul, és kikapcsolja, amikor véget ér, hamis indítás után is.\n\nWashData 0.5.9 vagy újabb szükséges."
-        },
-        "dryer_anti_crease_power_cut": {
-            "name": "Szárítógép hosszú ránctalanítási fázisának befejezése",
-            "description": "Olyan szárítógépekhez, amelyek a program után órákig folytatják a ránctalanítást. Csak akkor fut, ha a szárítógép a program befejezése után a beállított percszám elteltével még mindig forgatja a dobot; az addigra leállt szárítógépet nem érinti. Ezután alacsony fogyasztású pillanatban kikapcsolja a szárítógép okos csatlakozóját, és alapértelmezés szerint visszakapcsolja. Egy közben induló új ciklus törli.\n\nKockázat: ez a relét kapcsolja, miközben a szárítógép be van dugva. Csak a szárítógépéhez minősített csatlakozóval és saját felelősségre használja. A WashData soha nem kapcsolja a csatlakozót maga; ezt az automatizálás teszi.\n\nWashData 0.5.9 vagy újabb szükséges."
-        }
     },
     "trigger": {
         "cycle_started": {

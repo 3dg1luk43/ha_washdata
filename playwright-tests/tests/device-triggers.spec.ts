@@ -72,11 +72,12 @@ test('"Cycle started" uses the cycle_started integration trigger', async ({ page
 
 test('without a known device the bus event is the fallback', async ({ page }) => {
   await openAutomations(page);
-  await page.locator('[data-action="auto-toggle-triggers"]').click();
-  // Only the two triggers with a bus event can be built without the device.
+  // Only the two triggers with a bus event can be built without the device; both
+  // are quick-start ones, so there is no "more triggers" toggle.
+  await expect(page.locator('[data-action="auto-toggle-triggers"]')).toHaveCount(0);
   const keys = await page.locator('[data-action="auto-new-trigger"]').evaluateAll(
     (els) => els.map((e) => (e as HTMLElement).dataset.trigger));
-  expect(keys).toEqual(['cycle_started', 'cycle_finished']);
+  expect(keys).toEqual(['cycle_finished', 'cycle_started']);
   await page.locator('[data-action="auto-new-trigger"][data-trigger="cycle_finished"]').click();
 
   const [call] = await posted(page);

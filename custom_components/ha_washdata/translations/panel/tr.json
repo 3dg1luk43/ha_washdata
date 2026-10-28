@@ -142,7 +142,6 @@
         "load_more": "Daha fazla yükle",
         "manage": "Yönet",
         "merge": "Birleştir",
-        "new_automation": "＋ Yeni Otomasyon",
         "new_group": "+ Yeni Grup",
         "new_group_tip": "Neredeyse aynı profilleri (aynı şekil, farklı sıcaklık veya sıkma) gruplayın; böylece eşleştirme onları ayırt edebilir.",
         "new_phase": "+ Yeni Aşama",
@@ -251,13 +250,23 @@
         "create_profile_from_gap": "Profil oluştur",
         "undo_import": "Son içe aktarmayı geri al",
         "pg_rerun": "Simülasyonu güncelle",
-        "from_trigger": "Tetikleyiciden başlat ▾",
-        "bp_use": "Bu cihazla kullan",
-        "bp_install": "Şablonu yükle",
-        "bp_view_yaml": "YAML'ı görüntüle",
-        "copy": "Kopyala",
         "replace": "Değiştir",
-        "from_trigger_open": "Tetikleyiciden başlat ▴"
+        "auto_edit_in_ha": "Home Assistant'ta düzenle",
+        "auto_fewer_triggers": "Daha az tetikleyici",
+        "auto_more_triggers": "{count} tetikleyici daha",
+        "auto_more_triggers_one": "{count} tetikleyici daha",
+        "auto_more_triggers_other": "{count} tetikleyici daha",
+        "auto_blank": "Boş otomasyon",
+        "bp_refresh": "Yeni şablonlar için GitHub'ı kontrol et",
+        "bp_turn_on_online": "Çevrimiçi özellikleri aç",
+        "bp_add_tip": "Bu cihaz için varsayılan ayarlarla otomasyonu oluşturur, ardından Home Assistant'ta açar",
+        "bp_add_to": "Ekle: {device}",
+        "bp_setup_tip": "Şablonu yükler, ardından geri kalanını doldurmanız için Home Assistant'ı açar",
+        "bp_setup_in_ha": "Home Assistant'ta kur",
+        "bp_details": "Ayrıntılar",
+        "bp_copy_yaml": "YAML'ı kopyala",
+        "bp_hide_yaml": "YAML'ı gizle",
+        "bp_show_yaml": "YAML'ı göster"
     },
     "note": {
         "off_delay": {
@@ -337,7 +346,6 @@
         "add_maintenance": "Bakım Kaydı Ekle",
         "automation_delete": "Bu otomasyonu sil",
         "automation_needs_review": "Bu döngü inceleme gerektiriyor",
-        "automation_open": "Otomasyon düzenleyicisinde aç",
         "automation_review_this_cycle": "Bu döngüyü incele",
         "automations": "Otomasyonlar",
         "clear_debug": "Hata Ayıklama İzlerini Temizle",
@@ -355,7 +363,6 @@
         "ml_settings_card": "Ayarlar",
         "ml_smart_learning": "Akıllı Öğrenme",
         "my_preferences": "Tercihlerim",
-        "no_automations": "Henüz bu cihaza referans veren otomasyon yok.",
         "panel_settings": "Panel Ayarları",
         "pg_settings_source": "Ayarların kaynağı",
         "phase_catalog": "Aşama Kataloğu",
@@ -376,10 +383,14 @@
         "service_status": "Bakım Durumu",
         "online_account_tab": "Çevrimiçi ve Topluluk",
         "live_match_debug": "Canlı Eşleşme Hata Ayıklama",
-        "automations_used": "Bu cihazı kullanan otomasyonlar",
-        "bp_templates": "Şablonlar",
         "automations_all_tip": "Home Assistant'ın otomasyon listesi, WashData etiketine göre filtreli. Burada oluşturulan otomasyonlar aynı zamanda WashData kategorisindedir.",
-        "maint_done_by_program": "Otomatik tamamlanma"
+        "maint_done_by_program": "Otomatik tamamlanma",
+        "auto_start": "Yeni otomasyon oluştur",
+        "auto_yours": "Otomasyonlarınız",
+        "bp_needs_online": "Şablon kitaplığı çevrimiçi özellikler gerektirir",
+        "bp_unreachable": "Şablon kitaplığına ulaşılamadı",
+        "bp_library": "Şablon kitaplığı",
+        "bp_settings": "Ayarlayabilecekleriniz"
     },
     "health": {
         "fair": "Kabul edilebilir profil kalitesi",
@@ -692,13 +703,18 @@
         "cycle_context_series": "Kaydedici geçmişi",
         "before_start": "Başlangıçtan önce",
         "after_end": "Bitişten sonra",
-        "bp_you_choose": "Siz seçersiniz: {inputs}",
-        "bp_adjustable": "Ayarlanabilir: {inputs}",
         "bp_yaml": "Blueprint YAML",
         "automation_wd_label": "WashData etiketini taşır",
         "done_by_none": "Ayarlanmadı",
         "done_by_programs": "Otomatik tamamlayan programlar: {programs}",
-        "done_by_cycle": "Tamamlayan döngü: {program}"
+        "done_by_cycle": "Tamamlayan döngü: {program}",
+        "bp_by": "yazar: {author}",
+        "bp_for_all": "Tüm cihazlar",
+        "bp_for": "Uygun",
+        "bp_needs": "Gerekli",
+        "bp_needs_version": "WashData {version} veya üzeri",
+        "bp_author": "Yazar",
+        "bp_required": "zorunlu"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -797,7 +813,7 @@
         "undo_import_ok": "İçe aktarmayı geri al",
         "undo_import_title": "Son içe aktarmayı geri al",
         "bp_replace_title": "Yüklü şablon değiştirilsin mi?",
-        "bp_replace_msg": "Home Assistant'ta \"{name}\" için farklı bir sürüm var. Bu WashData sürümündekiyle değiştirilsin mi? Bunu kullanan otomasyonlar da değişir."
+        "bp_replace_library_msg": "Home Assistant'ta \"{name}\" için farklı bir sürüm var. Şablon kitaplığındakiyle değiştirilsin mi? Bunu kullanan otomasyonlar da değişir."
     },
     "msg": {
         "pg_canvas_empty3": "Yukarıdan bir döngü seçin ve simüle etmek için Çalıştır'a basın. Ardından değerleri okumak için üzerine gelin, yakınlaştırmak için kaydırın veya iki parmak kullanın ve kaydırmak için sürükleyin.",
@@ -986,7 +1002,7 @@
         "standby_above_stop_title": "Döngü bittiğinde hâlâ {idle} W çekiyordu",
         "standby_above_stop_sub": "Son {total} döngünün {n} tanesi. Kapatma Gecikmesi ancak güç Durdurma Eşiğinin ({stop} W) altına indiğinde başlar, bu yüzden döngüler geç biter veya elle durdurulmaları gerekir.",
         "store_share_intro": "Aynı cihaza sahip diğerlerinin kullanabilmesi için bu referans döngüyü yükleyin. Herkese açık olmadan önce incelenir.",
-        "online_intro_global": "Diğer WashData kullanıcılarıyla referans kayıtlarına göz atın ve paylaşın. Tek bağlantı tüm WashData cihazlarınızı kapsar; marka ve model her cihaz için Temel altında ayarlanır. Çevrimiçi özellikler siz açana kadar kapalıdır.",
+        "online_intro_global": "Diğer WashData kullanıcılarıyla referans kayıtlarına göz atın ve paylaşın, otomasyon şablon kitaplığını kullanın. Tek bağlantı tüm WashData cihazlarınızı kapsar; marka ve model her cihaz için Temel altında ayarlanır. Çevrimiçi özellikler siz açana kadar kapalıdır.",
         "online_unavailable": "Çevrimiçi özellikler bu sunucuda kullanılamıyor.",
         "store_picker_offline": "Topluluk kataloğundan seçim yapmak için ayarlar dişlisinde çevrimiçi özellikleri etkinleştirin.",
         "pick_brand_first": "Önce bir cihaz markası seçin.",
@@ -1081,16 +1097,21 @@
         "cycle_context_none": "Kaydedicide bu döngünün çevresine ait okuma yok (Home Assistant varsayılan olarak 10 günlük geçmiş tutar).",
         "cycle_context_tip": "Yalnızca görüntüleme: hâlâ saklanıyorsa güç sensörünün bu döngü çevresindeki kaydedici geçmişini gösterir. Başarısız başlatma denemelerini gelecekteki döngülere eklemek için Eğri Ön Kaydı'nı kullanın (Ayarlar > Algılama > Döngü Başlangıcı); bu, kaydedilen süreleri değiştirir.",
         "invalid_threshold_pair": "Durdurma Eşiği ({stop} W), Başlangıç Eşiği'nden ({start} W) düşük olmalı. Hiçbir şey kaydedilmedi; ikisini birlikte değiştirin.",
-        "automations_tab_intro": "WashData, kendi Home Assistant otomasyonlarınız için cihaz tetikleyicileri sunar (döngü başladı, döngü bitti, döngü takıldı ve daha fazlası). Bu cihazı kullanan otomasyonlar burada listelenir.",
-        "bp_intro": "Bu cihaz için hazır otomasyonlar, Home Assistant blueprint'leri olarak yüklenir.",
         "bp_admin_only": "Şablonları bir yönetici yükler.",
-        "bp_none": "Bu cihaz türü için henüz şablon yok.",
-        "bp_load_failed": "Şablonlar yüklenemedi.",
-        "auto_trigger_hint": "Bu tetikleyiciyle bu cihaz için bir otomasyon oluşturur ve Home Assistant'ta açar.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device} için WashData tarafından oluşturuldu. Eylemlerinizi ekleyin (bildir, ışıklar, ...).",
         "automation_alias_new": "{device}: yeni otomasyon",
-        "maint_done_by_program_intro": "Bir görev, programlarından birinin döngüsü bittiğinde yapıldı sayılır; örneğin Pamuklu 90 çalıştığında tambur temizliği. Yalnızca WashData'nın emin olduğu veya programını sizin seçtiğiniz döngüler sayılır."
+        "maint_done_by_program_intro": "Bir görev, programlarından birinin döngüsü bittiğinde yapıldı sayılır; örneğin Pamuklu 90 çalıştığında tambur temizliği. Yalnızca WashData'nın emin olduğu veya programını sizin seçtiğiniz döngüler sayılır.",
+        "auto_none": "Bu cihazı henüz hiçbir otomasyon kullanmıyor.",
+        "auto_start_hint": "Home Assistant'ın otomasyon düzenleyicisinde, bu cihaz önceden doldurulmuş olarak açılır.",
+        "auto_yours_intro": "Bu cihaza tepki veren Home Assistant otomasyonları.",
+        "bp_needs_online": "Şablonlar GitHub'dan indirilir, bu yüzden kitaplık yalnızca çevrimiçi özellikler açıkken çalışır. Topluluk Mağazası da çevrimiçi özelliklere dahildir.",
+        "bp_needs_online_admin": "Bir yönetici bunları dişli menüsünde, Çevrimiçi ve Topluluk altında açabilir.",
+        "bp_stale": "GitHub'a şu anda ulaşılamadı. Bunlar daha önce indirilen şablonlar.",
+        "bp_none_yet": "Bu cihaz türü için henüz şablon yok. İlkini siz paylaşın.",
+        "bp_unreachable": "Kitaplık GitHub'dan indirilir. Home Assistant'ın internete erişebildiğini kontrol edin ve tekrar deneyin.",
+        "bp_library_intro": "WashData kullanıcılarının GitHub'da paylaştığı, listelenmeden önce incelenen hazır otomasyonlar. Yalnızca çevrimiçi özellikler açıkken kullanılabilir.",
+        "bp_needs_version": "WashData {version} veya üzeri gerekir."
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -2045,9 +2066,10 @@
     "link": {
         "maintenance_supporter": "GitHub'da Maintenance Supporter ↗",
         "manual": "Kılavuz ↗",
-        "bp_share": "Kendi şablonunuzu pull request ile paylaşın ↗",
-        "bp_open_in_ha": "Home Assistant'ta aç ↗",
-        "automations_all": "Home Assistant'taki tüm WashData otomasyonları"
+        "automations_all": "Home Assistant'taki tüm WashData otomasyonları",
+        "bp_share_pr": "Kendi şablonunuzu paylaşın: GitHub'da bir pull request açın",
+        "bp_view_github": "GitHub'da görüntüle",
+        "bp_import_my_ha": "My Home Assistant ile içe aktar"
     },
     "tip": {
         "add_brand": "Marka listede yok mu? Topluluk kataloğuna ekleyin",
@@ -2174,16 +2196,6 @@
         "thr": "eşik",
         "too_short": "çok kısa",
         "tumble_kept": "tambur darbeleri korundu"
-    },
-    "blueprint": {
-        "cycle_running_indicator": {
-            "name": "Döngü çalışırken bir şey aç",
-            "description": "WashData döngüsü başladığında bir ışık, anahtar veya açma/kapama yardımcısını açar; döngü bittiğinde, yanlış başlatma sonrasında da kapatır.\n\nWashData 0.5.9 veya üzeri gerekir."
-        },
-        "dryer_anti_crease_power_cut": {
-            "name": "Uzun kurutucu kırışıklık önleme fazını sonlandır",
-            "description": "Programdan sonra saatlerce kırışıklık önleme modunda dönen kurutucular için. Yalnızca kurutucu, programın bitmesinden ayarlanan dakika sayısı kadar sonra hâlâ dönüyorsa çalışır; o zamana kadar durmuş bir kurutucuya dokunulmaz. Ardından düşük güç anında kurutucunun akıllı fişini kapatır ve varsayılan olarak geri açar. Bu sırada başlayan yeni bir döngü iptal eder.\n\nRisk: bu, kurutucu prize takılıyken röleyi değiştirir. Yalnızca kurutucunuza uygun bir priz ile ve kendi sorumluluğunuzda kullanın. WashData fiş'i hiçbir zaman kendisi kapatmaz; bunu bu otomasyon yapar.\n\nWashData 0.5.9 veya üzeri gerekir."
-        }
     },
     "trigger": {
         "cycle_started": {
