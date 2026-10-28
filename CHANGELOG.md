@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
-## 0.5.9 - Unreleased
+## 0.5.9 - 2026-10-28
 
 ### TL;DR
 
