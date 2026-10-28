@@ -131,9 +131,24 @@ def async_connect_trigger_signal(
 
 
 @callback
+def washdata_device(registry: dr.DeviceRegistry, entry_id: str) -> dr.DeviceEntry | None:
+    """The WashData device of a config entry, or None before its entities exist.
+
+    HA 2026.9+ deprecated ``async_get_device`` because identifiers are no longer
+    unique across config entries (#405). This device's identifier is owned by its
+    entry, so the by-identifier lookup is unambiguous; the attribute guard keeps the
+    older HA the manifest still supports, where that method does not exist yet.
+    """
+    identifier = (DOMAIN, entry_id)
+    if hasattr(registry, "async_get_device_by_identifier"):
+        return registry.async_get_device_by_identifier(identifier, entry_id)
+    return registry.async_get_device(identifiers={identifier})
+
+
+@callback
 def washdata_device_id(hass: HomeAssistant, entry_id: str) -> str | None:
-    """The WashData device of a config entry, or None before its entities exist."""
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry_id)})
+    """The WashData device's id for a config entry, or None before it exists."""
+    device = washdata_device(dr.async_get(hass), entry_id)
     return device.id if device is not None else None
 
 

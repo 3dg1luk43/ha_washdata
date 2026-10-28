@@ -1705,19 +1705,12 @@ def _apply_device_link(hass: HomeAssistant, entry: ConfigEntry) -> None:
     registry never references a deleted device or itself.
     """
     _log = DeviceLoggerAdapter(_LOGGER, entry.title)
+    from .device_trigger import washdata_device as _washdata_device  # pylint: disable=import-outside-toplevel
+
     registry = dr.async_get(hass)
-    identifier = (DOMAIN, entry.entry_id)
-    if hasattr(registry, "async_get_device_by_identifier"):
-        # HA 2026.9+ deprecated async_get_device because identifiers are no longer
-        # unique across config entries (issue #405). Our device's identifier is
-        # owned by this entry, so the by-identifier lookup is unambiguous. The
-        # attribute guard keeps us working on the older HA the manifest still
-        # supports, where the new method does not exist yet.
-        washdata_device = registry.async_get_device_by_identifier(
-            identifier, entry.entry_id
-        )
-    else:
-        washdata_device = registry.async_get_device(identifiers={identifier})
+    # The #405-guarded lookup (HA 2026.9 deprecated async_get_device), shared with
+    # the device triggers.
+    washdata_device = _washdata_device(registry, entry.entry_id)
     if washdata_device is None:
         return
 

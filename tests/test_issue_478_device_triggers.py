@@ -31,7 +31,7 @@ device-automation listing and the automation integration.
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import voluptuous as vol
@@ -505,3 +505,22 @@ async def test_switch_entity_is_none_when_the_plug_has_two(
     assert trig["device_name"] == "Washer" and trig["device_type"] == "washing_machine"
     assert trig["description"] == "Washer cycle started"
     assert {"id", "idx", "alias"} <= set(trig)
+
+
+def test_the_device_lookup_uses_the_by_identifier_api_when_ha_has_it() -> None:
+    """#405: HA 2026.9 deprecated async_get_device; the trigger lookup shares the
+    guard with _apply_device_link and falls back on an older HA."""
+    from types import SimpleNamespace
+
+    from custom_components.ha_washdata.device_trigger import washdata_device
+
+    new_ha = MagicMock()
+    new_ha.async_get_device_by_identifier.return_value = SimpleNamespace(id="dev1")
+    assert washdata_device(new_ha, "e1").id == "dev1"
+    new_ha.async_get_device_by_identifier.assert_called_once_with((DOMAIN, "e1"), "e1")
+    new_ha.async_get_device.assert_not_called()
+
+    old_ha = MagicMock(spec=["async_get_device"])
+    old_ha.async_get_device.return_value = SimpleNamespace(id="dev2")
+    assert washdata_device(old_ha, "e1").id == "dev2"
+    old_ha.async_get_device.assert_called_once_with(identifiers={(DOMAIN, "e1")})
