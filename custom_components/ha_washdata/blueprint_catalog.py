@@ -23,8 +23,8 @@ version, tags and icon; ``automation/<id>.yaml`` is the blueprint. That reposito
 generates catalog.json from the templates after each merge (its tools/library.py).
 
 ``describe`` is pure. ``async_get_library`` downloads, parses and caches the
-library and never raises: a failure comes back as ``{"blueprints": [...], "error":
-"unreachable"}`` with the last good list, if any. The caller checks that online
+library and never raises: a failure, a single template included, comes back as
+``{"blueprints": [...], "error": "unreachable"}`` with the last good list, if any. The caller checks that online
 features are on.
 """
 from __future__ import annotations
@@ -237,6 +237,10 @@ async def async_fetch_library(hass: HomeAssistant) -> dict[str, Any]:
             texts[blueprint_id] = result
     version = hass.data.get("ha_washdata_version") or None
     items = await hass.async_add_executor_job(describe_all, catalog, texts, version)
+    if len(texts) < len(ids):
+        # A file that did not download is a failed download, not a smaller library:
+        # cached for ERROR_TTL_S, and the last complete list wins.
+        return {"blueprints": items, "error": "unreachable"}
     return {"blueprints": items}
 
 

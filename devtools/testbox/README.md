@@ -156,7 +156,9 @@ wrong looks like a bug in the integration:
    sets fixed short values sized for 60x, whatever `--speedup` is: `off_delay`
    and `min_off_gap` 10 s, `watchdog_interval` 5 s, `profile_match_interval`
    10 s, `start_duration_threshold` 1 s, `completion_min_seconds` and
-   `interrupted_min_seconds` 5 s. Everything else stays at the shipped default.
+   `interrupted_min_seconds` 5 s. Every other option is what the imported export
+   carried, or what a reused entry already had, so check the effective options
+   (`./hactl.py ws ha_washdata/get_options entry_id=<id>`) before reading a result.
    At another `--speedup` these are not rescaled, so a replay is not a
    proportional copy of the real cycle. The reading
    throttle cannot be scaled since 0.5.9 (it is the device type's own: 2 s for

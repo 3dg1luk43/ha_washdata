@@ -163,15 +163,14 @@ async def test_list_downloads_the_library(
     hass, setup_washdata_entry, hass_ws_client, hass_read_only_access_token, aioclient_mock
 ) -> None:
     """Any signed-in user gets the documented shape, in catalog order; a broken
-    file, a bad id and a missing file are skipped, never requested out of the folder."""
+    file and a bad id are skipped, never requested out of the folder."""
     await setup_washdata_entry()
     await store_account.async_set_online(hass, True)
     _serve(
         aioclient_mock,
-        {"good": META, "broken": META, "../escape": META, "missing": META, "second": {**META, "icon": "light"}},
+        {"good": META, "broken": META, "../escape": META, "second": {**META, "icon": "light"}},
         {"good": GOOD, "broken": "blueprint: [\n", "second": NEEDS_INPUT},
     )
-    aioclient_mock.get(_url("missing"), status=404)
     client = await hass_ws_client(hass, hass_read_only_access_token)
     await client.send_json_auto_id({"type": f"{DOMAIN}/blueprints/list"})
     res = await client.receive_json()
@@ -246,3 +245,41 @@ async def test_an_unreachable_library_keeps_the_last_good_list(
     result = await _list()
     assert result["error"] == "unreachable"
     assert [b["id"] for b in result["blueprints"]] == ["good"]
+
+
+async def test_a_template_that_did_not_download_is_an_error(
+    hass, setup_washdata_entry, hass_ws_client, aioclient_mock, monkeypatch
+) -> None:
+    """One failed file is a failed download, not a smaller library: it is retried
+    after ERROR_TTL_S, not cached for hours, and the last complete list wins."""
+    await setup_washdata_entry()
+    await store_account.async_set_online(hass, True)
+    clock = [1000.0]
+    monkeypatch.setattr(blueprint_catalog.time, "monotonic", lambda: clock[0])
+    client = await hass_ws_client(hass)
+
+    async def _list():
+        await client.send_json_auto_id({"type": f"{DOMAIN}/blueprints/list"})
+        res = await client.receive_json()
+        assert res["success"], res
+        return res["result"]
+
+    catalog = {"good": META, "second": META}
+    aioclient_mock.get(CATALOG_URL, text=json.dumps(catalog))
+    aioclient_mock.get(_url("good"), text=GOOD)
+    aioclient_mock.get(_url("second"), status=500)
+    result = await _list()
+    assert result["error"] == "unreachable"
+    assert [b["id"] for b in result["blueprints"]] == ["good"]
+    aioclient_mock.clear_requests()
+    _serve(aioclient_mock, catalog, {"good": GOOD, "second": NEEDS_INPUT})
+    clock[0] += blueprint_catalog.ERROR_TTL_S
+    assert [b["id"] for b in (await _list())["blueprints"]] == ["good", "second"]
+    aioclient_mock.clear_requests()
+    aioclient_mock.get(CATALOG_URL, text=json.dumps(catalog))
+    aioclient_mock.get(_url("good"), text=GOOD)
+    aioclient_mock.get(_url("second"), status=404)
+    clock[0] += blueprint_catalog.CACHE_TTL_S
+    result = await _list()
+    assert result["error"] == "unreachable"
+    assert [b["id"] for b in result["blueprints"]] == ["good", "second"]
