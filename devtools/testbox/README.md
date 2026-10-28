@@ -153,9 +153,12 @@ fits in minutes. Three things have to move together, and getting any of them
 wrong looks like a bug in the integration:
 
 1. **The timing options.** The detector's gates are wall-clock, so `smoke.sh`
-   divides `off_delay`, `min_off_gap` and `watchdog_interval` by roughly the
-   same factor. Everything else stays at the shipped default - the point is to
-   exercise production behaviour, not a bespoke configuration. The reading
+   sets fixed short values sized for 60x, whatever `--speedup` is: `off_delay`
+   and `min_off_gap` 10 s, `watchdog_interval` 5 s, `profile_match_interval`
+   10 s, `start_duration_threshold` 1 s, `completion_min_seconds` and
+   `interrupted_min_seconds` 5 s. Everything else stays at the shipped default.
+   At another `--speedup` these are not rescaled, so a replay is not a
+   proportional copy of the real cycle. The reading
    throttle cannot be scaled since 0.5.9 (it is the device type's own: 2 s for
    wet appliances, i.e. 2 min of appliance time at 60x), so readings closer
    than that are dropped unless they fall to low power; the checks pass with it.

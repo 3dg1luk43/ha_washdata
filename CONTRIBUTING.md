@@ -61,7 +61,8 @@ rules: [CLAUDE.md](CLAUDE.md) and [How it works](https://github.com/3dg1luk43/ha
 ## Rules for code changes
 
 - **NumPy only.** No SciPy, scikit-learn or other libraries at runtime, ML code included.
-- **Local only.** No external API calls outside the opt-in Community Store.
+- **Local only.** No external calls outside the opt-in online features (Community Store, automation
+  template library).
 - **Time:** `dt_util.now()` for timestamps, UTC (`time_utils.utc_now()`) for any interval.
 - **No UI text in code.** Home Assistant strings go in `strings.json` and `translations/en.json`;
   panel strings go through `_t()` with the English text in `translations/panel/en.json`.

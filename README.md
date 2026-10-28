@@ -29,9 +29,10 @@ Device** (on/off detection only).
 - **Pause / Resume**, door sensor support and a "laundry still inside" reminder.
 - **A full-screen panel** in the sidebar for status, cycles, programs, settings and a what-if
   Playground.
-- **Local only.** Everything runs inside Home Assistant. The optional
-  [Community Store](https://github.com/3dg1luk43/ha_washdata/wiki/Community-Store) is the only
-  online feature and is off by default.
+- **Local only.** Everything runs inside Home Assistant. The optional online features, the
+  [Community Store](https://github.com/3dg1luk43/ha_washdata/wiki/Community-Store) and the
+  [automation template library](https://github.com/3dg1luk43/ha_washdata/wiki/Automation-Templates),
+  are off by default.
 
 ## Install
 

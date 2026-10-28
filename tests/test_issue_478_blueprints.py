@@ -116,6 +116,16 @@ def test_describe_cuts_long_text_and_drops_odd_values() -> None:
     assert len(blueprint_catalog.describe("long", long, META)["description"]) == blueprint_catalog.DESCRIPTION_MAX
 
 
+@pytest.mark.parametrize("url", ["javascript:alert(1)", "JavaScript:alert(1)", "http://example.com/x.yaml", "data:text/html,x"])
+def test_describe_drops_a_source_url_that_is_not_https(url: str) -> None:
+    """The panel links it ("View on GitHub"); only an https URL may reach that href."""
+    text = GOOD.replace(
+        "https://github.com/3dg1luk43/washdata-automations/blob/main/automation/good.yaml", url
+    )
+    assert blueprint_catalog.describe("good", text, META)["source_url"] == ""
+    assert blueprint_catalog.describe("good", GOOD, META)["source_url"].startswith("https://github.com/")
+
+
 def test_describe_flags_a_template_for_a_newer_washdata() -> None:
     meta = {**META, "min_version": "0.6.0"}
     assert blueprint_catalog.describe("good", GOOD, meta, "0.5.9")["compatible"] is False

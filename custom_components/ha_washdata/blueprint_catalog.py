@@ -97,6 +97,12 @@ def _text(value: Any, limit: int) -> str:
     return value if len(value) <= limit else value[: limit - 1].rstrip() + "…"
 
 
+def _https(url: str) -> str:
+    """An https URL or nothing: the panel puts it in a link's href, where a
+    ``javascript:`` value would run in the Home Assistant frontend."""
+    return url if url.lower().startswith("https://") else ""
+
+
 def iter_inputs(inputs: Any) -> list[tuple[str, dict[str, Any]]]:
     """Flatten a blueprint's ``input`` mapping, sections included, in file order."""
     out: list[tuple[str, dict[str, Any]]] = []
@@ -165,7 +171,7 @@ def describe(
         "min_version": min_version,
         "compatible": _compatible(min_version, washdata_version),
         "tags": [_text(t, TAG_MAX) for t in tags if isinstance(t, str)][:TAGS_MAX] if isinstance(tags, list) else [],
-        "source_url": _text(bp.get("source_url"), 300),
+        "source_url": _https(_text(bp.get("source_url"), 300)),
         "path": f"{INSTALL_DIR}/{blueprint_id}.yaml",
         "yaml": text,
         # HA refuses to save an automation with an input that has no value, so
