@@ -19,13 +19,19 @@ Thank you for contributing a translation to WashData!
 
 <!-- e.g. French (fr), Brazilian Portuguese (pt-BR) -->
 
-## What was changed
+## Description
 
 <!-- Briefly describe what you added or corrected. -->
+
+## What was changed
 
 - [ ] New language added
 - [ ] Corrected existing translation(s)
 - [ ] Updated strings to match recent English changes
+
+## Type of Change
+
+- [x] Translation
 
 ## Specific corrections (if applicable)
 

@@ -897,7 +897,7 @@
     "no_settings_match": "Engar stillingar passa við \"{q}\"",
     "no_split_points": "Engin skipting stig ennþá.",
     "no_suggestions": "Engar virkar tillögur.",
-    "notify_services_hint": "Notaðu {entity} þjónustuauðkenni (aðskilin með kommum fyrir mörg). Sniðmátsbreytur: {vars}.",
+    "notify_services_hint": "Bættu {entity} þjónustum við hvern lista hér fyrir neðan. Sniðmátsbreytur: {vars}.",
     "old_actions_warning": "Stillt með gamla aðgerðaritlinum (nú fjarlægður). Þeir virkjast enn við lotuviðburði en ekki er lengur hægt að breyta þeim hér. Umbreyttu þeim í venjulega sjálfvirkni eða fjarlægðu þau.",
     "pending_feedback": "Bíður viðbrögð við uppgötvunum",
     "performance_trend": "Árangursþróun ({n} lotur)",
@@ -1326,7 +1326,7 @@
       "label": "Lágm. slökkubil"
     },
     "min_power": {
-      "doc": "Mælingar undir þessu teljast 0 W (biðstaða). Síar burt biðstöðunotkun snjalltengla og biðstöðuljósa.",
+      "doc": "Neðri mörk biðstöðu. Nema þröskuldarnir séu stilltir sérstaklega er Ræsingarþröskuldur sjálfgefið rétt yfir þessu gildi og Stöðvunarþröskuldur 60% af því, svo mælingar undir því ræsa ekki lotu. Hækkaðu það ef biðstöðunotkun innstungunnar eða biðstöðuljósa ræsir lotur.",
       "label": "Lágmarksafl"
     },
     "ml_training_enabled": {
@@ -1338,7 +1338,7 @@
       "label": "Nafn tækis"
     },
     "no_update_active_timeout": {
-      "doc": "Ef engin afluppfærsla berst svona lengi á meðan lota er í gangi er gert ráð fyrir að innstungan sé ótengd og lotan er þvinguð til að stöðvast. Sjálfgefið 600 s gefur svigrúm fyrir tafir í skýi eða möskvaneti.",
+      "doc": "Hversu lengi innstungan má vera þögul á meðan lota er í gangi áður en WashData hættir að treysta síðustu mælingu hennar. Lota sem þagnar við lágt afl lýkur þá yfirleitt eðlilega; lota sem þagnar við hátt afl er ekki þvinguð til að stöðvast fyrr en hún er komin vel fram yfir væntanlega lengd sína. Sjálfgefið 600 s gefur svigrúm fyrir tafir í skýi eða möskvaneti.",
       "label": "Engin-uppfærsla-tímamark"
     },
     "notify_before_end_minutes": {

@@ -195,7 +195,7 @@ const _PALETTE = [
 // type: number | text | textarea | checkbox | select | entity | device | devicetype | list
 // `doc` is shown in a hover tooltip (condensed from SETTINGS_VISUALIZED.md).
 // Defined before _SETTINGS_SECTIONS because notification field docs reference it.
-const _NOTIFY_VARS = '{device}, {duration}, {minutes}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}';
+const _NOTIFY_VARS = '{device}, {duration}, {duration_hm}, {minutes}, {finish_time}, {program}, {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status}';
 const _SETTINGS_SECTIONS = [
   { id: 'basic', label: 'Basic', intro: 'Core identity and the essentials most setups need.', groups: [
     { sub: 'Device info', fields: [
@@ -212,7 +212,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'power_sensor', label: 'Power Sensor', basic: true, type: 'entity', domain: 'sensor', notEnergy: true,
         doc: 'The sensor that reports this appliance\'s live power in W or kW (e.g. sensor.washer_power), not its energy counter (kWh). All detection is based on it.' },
       { key: 'min_power', label: 'Minimum Power', unit: 'W', type: 'number', step: 0.1, min: 0, def: 2.0, basic: true,
-        doc: 'Readings below this count as 0 W (standby). Filters out the idle draw of smart plugs and standby LEDs.' },
+        doc: 'The idle floor. Unless you set them, the Start Threshold defaults just above it and the Stop Threshold to 60% of it, so readings below it do not start a cycle. Raise it if the idle draw of the plug or standby LEDs starts cycles.' },
       { key: 'off_delay', label: 'Off Delay', unit: 's', type: 'number', min: 0, def: 180, basic: true,
         doc: 'How long power must stay low before the cycle is finished. Power coming back within this time continues the cycle. Dishwashers can be idle 20-60 min while drying, so set it longer than that.' },
       { key: 'linked_device', label: 'Group Under Device', type: 'device',
@@ -293,7 +293,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'watchdog_interval', label: 'Watchdog Interval', internal: true, unit: 's', type: 'number', min: 1, def: 30,
         doc: 'How often the background check looks for stalled sensors and timeouts. Default 30 s.' },
       { key: 'no_update_active_timeout', label: 'No-Update Timeout', internal: true, unit: 's', type: 'number', min: 0, def: 600,
-        doc: 'If no power update arrives for this long during a cycle, assume the plug went offline and force-stop the cycle. The default 600 s allows for cloud or mesh delays.' },
+        doc: 'How long the plug may stay silent during a cycle before WashData stops trusting its last reading. A cycle silent at low power then usually ends normally; one silent at high power is force-stopped only well past its expected length. The default 600 s allows for cloud or mesh delays.' },
     ] },
     { sub: 'Housekeeping', fields: [
       { key: 'progress_reset_delay', label: 'Progress Reset Delay', unit: 's', type: 'number', min: 0, def: 1800,
@@ -7309,7 +7309,7 @@ class HaWashdataPanel extends HTMLElement {
     const trainCard = '';
 
     if (sec.id === 'notifications') {
-      const varsHint = `<p class="wd-info" style="margin-bottom:16px">${this._t('msg.notify_services_hint', {entity: _html('<code>notify.&lt;name&gt;</code>'), vars: _html('<code>' + _esc(_NOTIFY_VARS) + '</code>')}, 'Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.')}</p>`;
+      const varsHint = `<p class="wd-info" style="margin-bottom:16px">${this._t('msg.notify_services_hint', {entity: _html('<code>notify.&lt;name&gt;</code>'), vars: _html('<code>' + _esc(_NOTIFY_VARS) + '</code>')}, 'Add {entity} services to each list below. Template variables: {vars}.')}</p>`;
       const groups = sec.groups.map(grp => {
         const fields = (grp.fields || []).filter(f => this._settingFieldVisible(f)).map(f => this._renderField(f, o)).filter(Boolean).join('');
         return fields ? `<div class="wd-subhead">${_esc(this._t('setting_group.' + _slugSub(grp.sub) + '.label', {}, grp.sub))}</div><div class="wd-form-grid">${fields}</div>` : '';
@@ -9798,6 +9798,8 @@ class HaWashdataPanel extends HTMLElement {
   // strings through _esc or a _t() var, which is escaped.
   _htmlStoreProfile() {
     const items = this._storeCycles || [];
+    // "Shared by <name>" follows the Show contributor names pref, like the catalog's "by".
+    const showNames = ((this._constants && this._constants.storePrefs) || {}).show_contributor !== false;
     const rows = items.map(c => {
       const stats = (c.stats && typeof c.stats === 'object') ? c.stats : {};
       const spark = this._storeSparkline((c.trace && c.trace.points) || []);
@@ -9816,7 +9818,7 @@ class HaWashdataPanel extends HTMLElement {
           ${spark}
           <div class="wd-store-cycle-stats">
             <div><b>${dur}</b> · ${energy} · ${peak} ${tag}</div>
-            <div class="wd-info">${this._t('store.uploaded_by', {name: uploader}, 'Shared by {name}')} · ⬇ ${_fmtNum(_storeCount(c.downloads), 0)} · ${rating}</div>
+            <div class="wd-info">${showNames ? this._t('store.uploaded_by', {name: uploader}, 'Shared by {name}') + ' · ' : ''}⬇ ${_fmtNum(_storeCount(c.downloads), 0)} · ${rating}</div>
           </div>
           <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="store-import" data-cycle-id="${_esc(c.id)}">${this._t('btn.import', {}, 'Import')}</button>
         </div>
@@ -11820,7 +11822,7 @@ class HaWashdataPanel extends HTMLElement {
     if (arts.length) {
       const items = arts.map(a => {
         const detail = a.detail_key ? this._tText(a.detail_key, a.detail_params || {}, a.detail || '') : (a.detail || '');
-        return `<li><b>${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</b> ${this._t('lbl.at', {}, 'at')} ${_fmtClock(a.start_s)}–${_fmtClock(a.end_s)} — ${_esc(detail)}</li>`;
+        return `<li><b>${_esc(_artifactLabel(a.type, (k, v, f) => this._t(k, v, f)))}</b> ${this._t('lbl.at', {}, 'at')} ${_fmtClock(a.start_s)}–${_fmtClock(a.end_s)}: ${_esc(detail)}</li>`;
       }).join('');
       artifactBox = `<div class="wd-card" style="margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--warning-color,#ff9800)">
         <div style="font-weight:600;font-size:.9em">⚠ ${this._t('msg.artifact_header', {n: arts.length}, `${arts.length} anomal${arts.length > 1 ? 'ies' : 'y'} detected during this cycle`)}</div>

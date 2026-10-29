@@ -911,7 +911,7 @@
     "no_settings_match": "Žiadne nastavenia sa nezhodujú s \"{q}\"",
     "no_split_points": "Zatiaľ žiadne body rozdelenia.",
     "no_suggestions": "Žiadne aktívne návrhy.",
-    "notify_services_hint": "Použite ID služieb {entity} (oddelené čiarkami pre viacero). Premenné šablóny: {vars}.",
+    "notify_services_hint": "Pridajte služby {entity} do každého zoznamu nižšie. Premenné šablóny: {vars}.",
     "old_actions_warning": "Nakonfigurované pomocou starého editora akcií (teraz odstránený). Stále sa spúšťajú pri udalostiach cyklu, ale už ich tu nemožno upravovať. Premeňte ich na normálnu automatizáciu alebo ich odstráňte.",
     "pending_feedback": "Čaká sa na spätnú väzbu k detekcii",
     "performance_trend": "Trend výkonnosti ({n} cyklov)",
@@ -1337,7 +1337,7 @@
       "label": "Min. medzera vypnutia"
     },
     "min_power": {
-      "doc": "Hodnoty pod touto hranicou sa počítajú ako 0 W (pohotovosť). Odfiltruje pokojový odber inteligentných zásuviek a pohotovostných LED.",
+      "doc": "Pokojová spodná hranica. Ak ich nenastavíte sami, má Prah spustenia predvolenú hodnotu tesne nad ňou a Prah zastavenia 60 % z nej, takže hodnoty pod ňou cyklus nespustia. Zvýšte ju, ak cykly spúšťa pokojový odber zásuvky alebo pohotovostných LED.",
       "label": "Minimálny výkon"
     },
     "ml_training_enabled": {
@@ -1349,7 +1349,7 @@
       "label": "Názov zariadenia"
     },
     "no_update_active_timeout": {
-      "doc": "Ak počas cyklu počas tohto času nepríde žiadna aktualizácia výkonu, predpokladá sa, že zásuvka je offline, a cyklus sa vynútene zastaví. Predvolených 600 s počíta s oneskorením cloudu alebo mesh siete.",
+      "doc": "Ako dlho smie zásuvka počas cyklu nič neposielať, skôr než WashData prestane dôverovať jej poslednej hodnote. Cyklus, ktorý stíchne pri nízkom výkone, potom zvyčajne skončí normálne; cyklus, ktorý stíchne pri vysokom výkone, sa nútene zastaví až výrazne po svojej očakávanej dĺžke. Predvolených 600 s počíta s oneskorením cloudu alebo mesh siete.",
       "label": "Časový limit bez aktualizácie"
     },
     "notify_before_end_minutes": {

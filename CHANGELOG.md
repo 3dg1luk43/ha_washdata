@@ -53,6 +53,8 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - Save Debug Traces, Auto Maintenance and Power Profile Interval moved to the internal settings tier.
 - Notifications no longer has an Automations section; it moved to the Automations tab.
+- **Help texts corrected in every language**: Minimum Power said readings below it count as 0 W (it sets the default Start and Stop Thresholds), No-Update Timeout said a silent plug force-stops the cycle (a cycle silent at low power ends normally, one at high power only well past its expected length), and the Notifications intro said to enter services comma-separated (they are picked into lists). The intro now lists every template variable.
+- **Show contributor names** now also hides "Shared by" on recordings in the Store tab, as its description says.
 - **Dryer tumbling is named correctly in every language**: many translations called the drum turning drumming, somersaulting, rolling or polishing; it now reads as the drum turning.
 
 ### For developers

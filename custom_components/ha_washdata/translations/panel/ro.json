@@ -854,7 +854,7 @@
     "no_settings_match": "Nicio setare nu corespunde cu \"{q}\"",
     "no_split_points": "Niciun punct de divizare încă.",
     "no_suggestions": "Nicio sugestie activă.",
-    "notify_services_hint": "Utilizați ID-urile de serviciu {entity} (separate prin virgulă pentru mai multe). Variabile șablon: {vars}.",
+    "notify_services_hint": "Adăugați servicii {entity} în fiecare listă de mai jos. Variabile șablon: {vars}.",
     "old_actions_warning": "Configurat cu vechiul editor de acțiuni (acum eliminat). Încă se declanșează la evenimentele de ciclu, dar nu mai pot fi editate aici. Convertiți-le într-o automatizare normală sau eliminați-le.",
     "pending_feedback": "Feedback de detecție în așteptare",
     "performance_trend": "Tendință de performanță ({n} cicluri)",
@@ -1270,7 +1270,7 @@
       "label": "Pauză Minimă de Oprire"
     },
     "min_power": {
-      "doc": "Citirile sub această valoare contează ca 0 W (standby). Filtrează consumul în repaus al prizelor inteligente și al LED-urilor de standby.",
+      "doc": "Nivelul minim în repaus. Dacă nu le setați, Pragul de Pornire este implicit puțin peste această valoare, iar Pragul de Oprire la 60% din ea, astfel că citirile sub ea nu pornesc un ciclu. Măriți-o dacă consumul în repaus al prizei sau al LED-urilor de standby pornește cicluri.",
       "label": "Putere Minimă"
     },
     "ml_training_enabled": {
@@ -1282,7 +1282,7 @@
       "label": "Numele Dispozitivului"
     },
     "no_update_active_timeout": {
-      "doc": "Dacă în timpul unui ciclu nu sosește nicio actualizare de putere atât timp, se presupune că priza a ieșit offline și ciclul este oprit forțat. Valoarea implicită de 600 s lasă loc întârzierilor din cloud sau din rețeaua mesh.",
+      "doc": "Cât timp poate priza să nu trimită date în timpul unui ciclu înainte ca WashData să nu mai aibă încredere în ultima ei citire. Un ciclu rămas fără date la putere redusă se încheie apoi de obicei normal; unul rămas fără date la putere mare este oprit forțat abia cu mult peste durata așteptată. Valoarea implicită de 600 s lasă loc întârzierilor din cloud sau din rețeaua mesh.",
       "label": "Timeout Fără Actualizare"
     },
     "notify_before_end_minutes": {

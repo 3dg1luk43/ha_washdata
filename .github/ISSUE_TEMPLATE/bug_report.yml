@@ -155,7 +155,7 @@ body:
         3. Only after the `accepted` label is added should you open a PR referencing this issue.
 
 
-        **Do not** open a PR now, alongside this issue. A PR opened in parallel with a not-yet-accepted issue skips the agree-first step and will not be considered - it is closed automatically. Do not start significant work before the label is added either, so you never build something that cannot be merged.
+        **Do not** open a PR now, alongside this issue. A PR opened in parallel with a not-yet-accepted issue skips the agree-first step: it is not reviewed and waits until the maintainer decides on the issue. Do not start significant work before the label is added either, so you never build something that cannot be merged.
       options:
-        - label: I plan to submit a PR fixing this, and I understand I must wait for the `accepted` label before opening it (opening one now / in parallel will be closed)
+        - label: I plan to submit a PR fixing this, and I understand I must wait for the `accepted` label before opening it (one opened now / in parallel is not reviewed until then)
           required: false

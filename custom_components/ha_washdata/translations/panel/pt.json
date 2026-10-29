@@ -854,7 +854,7 @@
     "no_settings_match": "Nenhuma definição corresponde a \"{q}\"",
     "no_split_points": "Nenhum ponto de divisão ainda.",
     "no_suggestions": "Nenhuma sugestão activa.",
-    "notify_services_hint": "Use os IDs de serviço {entity} (separados por vírgulas para múltiplos). Variáveis de modelo: {vars}.",
+    "notify_services_hint": "Adicione serviços {entity} a cada lista abaixo. Variáveis de modelo: {vars}.",
     "old_actions_warning": "Configurado com o antigo editor de acções (agora removido). Ainda são accionadas em eventos de ciclo, mas já não podem ser editadas aqui. Converta-as numa automatização normal ou remova-as.",
     "pending_feedback": "Feedback de detecção pendente",
     "performance_trend": "Tendência de desempenho ({n} ciclos)",
@@ -1289,7 +1289,7 @@
       "label": "Intervalo Mínimo de Desligamento"
     },
     "min_power": {
-      "doc": "Leituras abaixo disto contam como 0 W (espera). Filtra o consumo em repouso das tomadas inteligentes e dos LED de espera.",
+      "doc": "O nível mínimo em repouso. Se não os definir, o Limiar de Início fica por predefinição logo acima dele e o Limiar de Paragem em 60% dele, pelo que as leituras abaixo dele não iniciam um ciclo. Aumente-o se o consumo em repouso da tomada ou dos LED de espera iniciar ciclos.",
       "label": "Potência Mínima"
     },
     "ml_training_enabled": {
@@ -1301,7 +1301,7 @@
       "label": "Nome do Dispositivo"
     },
     "no_update_active_timeout": {
-      "doc": "Se não chegar nenhuma atualização de potência durante este tempo num ciclo, assume-se que a tomada ficou offline e o ciclo é parado à força. A predefinição de 600 s dá margem a atrasos da nuvem ou da rede mesh.",
+      "doc": "Quanto tempo a tomada pode ficar em silêncio durante um ciclo antes de o WashData deixar de confiar na sua última leitura. Um ciclo em silêncio a baixa potência costuma então terminar normalmente; um em silêncio a alta potência só é parado forçosamente muito depois da sua duração esperada. A predefinição de 600 s dá margem a atrasos da nuvem ou da rede mesh.",
       "label": "Timeout Sem Actualização"
     },
     "notify_before_end_minutes": {

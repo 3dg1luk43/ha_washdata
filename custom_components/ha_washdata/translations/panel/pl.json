@@ -911,7 +911,7 @@
     "no_settings_match": "Żadne ustawienia nie pasują do „{q}”",
     "no_split_points": "Nie ma jeszcze punktów podziału.",
     "no_suggestions": "Brak aktywnych sugestii.",
-    "notify_services_hint": "Użyj identyfikatorów usług {entity} (oddzielonych przecinkami dla kilku). Zmienne szablonu: {vars}.",
+    "notify_services_hint": "Dodaj usługi {entity} do każdej z poniższych list. Zmienne szablonu: {vars}.",
     "old_actions_warning": "Skonfigurowano przy użyciu starego edytora akcji (teraz usuniętego). Nadal uruchamiają się w przypadku wydarzeń cyklicznych, ale nie można ich już tutaj edytować. Przekształć je w normalną automatyzację lub usuń.",
     "pending_feedback": "Oczekuje na informację zwrotną dotyczącą wykrycia",
     "performance_trend": "Trend wydajności ({n} cykli)",
@@ -1337,7 +1337,7 @@
       "label": "Minimalna Przerwa Wyłączenia"
     },
     "min_power": {
-      "doc": "Odczyty poniżej tej wartości liczą się jako 0 W (czuwanie). Odfiltrowuje pobór jałowy inteligentnych wtyczek i diod czuwania.",
+      "doc": "Dolna granica poboru jałowego. Jeśli ich nie ustawisz, Próg Startu jest domyślnie ustawiany tuż powyżej niej, a Próg Zatrzymania na 60% jej wartości, więc odczyty poniżej niej nie rozpoczynają cyklu. Zwiększ ją, jeśli pobór jałowy wtyczki lub diod LED czuwania uruchamia cykle.",
       "label": "Minimalna Moc"
     },
     "ml_training_enabled": {
@@ -1349,7 +1349,7 @@
       "label": "Nazwa Urządzenia"
     },
     "no_update_active_timeout": {
-      "doc": "Jeśli przez ten czas w trakcie cyklu nie nadejdzie żadna aktualizacja mocy, przyjmij, że wtyczka jest offline, i wymuś zatrzymanie cyklu. Domyślne 600 s uwzględnia opóźnienia chmury lub sieci mesh.",
+      "doc": "Jak długo wtyczka może nie przesyłać odczytów w trakcie cyklu, zanim WashData przestanie ufać ostatniemu z nich. Cykl bez odczytów przy niskiej mocy zazwyczaj kończy się wtedy normalnie; cykl bez odczytów przy wysokiej mocy zostaje przymusowo zatrzymany dopiero znacznie po przekroczeniu oczekiwanego czasu trwania. Domyślne 600 s uwzględnia opóźnienia chmury lub sieci mesh.",
       "label": "Limit Czasu Braku Aktualizacji"
     },
     "notify_before_end_minutes": {

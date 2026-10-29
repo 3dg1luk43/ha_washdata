@@ -198,7 +198,7 @@ reviews:
 
     - path: "CHANGELOG.md"
       instructions: |
-        Each release opens with a short TL;DR that is rewritten as a whole when entries change. Entries are direct: symptom, cause, fix, measured numbers, issue link, "Thanks to @user". No narration or case history. No em dashes.
+        Each release opens with a short TL;DR that is rewritten as a whole when entries change. Entries are direct: symptom, cause, fix, measured numbers, issue link, "Thanks to @user". An entry for something found internally, with no GitHub issue or discussion behind it, carries no link: do not ask for one. No narration or case history. No em dashes.
 
     - path: "{README.md,CONTRIBUTING.md,SECURITY.md,docs/**/*.md}"
       instructions: |

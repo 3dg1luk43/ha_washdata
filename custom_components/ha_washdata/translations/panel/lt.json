@@ -911,7 +911,7 @@
     "no_settings_match": "Jokie nustatymai neatitinka „{q}“",
     "no_split_points": "Dar nėra padalintų taškų.",
     "no_suggestions": "Nėra aktyvių pasiūlymų.",
-    "notify_services_hint": "Naudokite {entity} paslaugų ID (keliems – atskirkite kableliais). Šablono kintamieji: {vars}.",
+    "notify_services_hint": "Pridėkite {entity} paslaugas į kiekvieną toliau esantį sąrašą. Šablono kintamieji: {vars}.",
     "old_actions_warning": "Sukonfigūruota naudojant seną veiksmų rengyklę (dabar pašalinta). Jie vis dar suaktyvinami ciklo įvykiuose, bet čia jų redaguoti nebegalima. Konvertuokite juos į įprastą automatiką arba pašalinkite.",
     "pending_feedback": "Laukiama aptikimo atsiliepimo",
     "performance_trend": "Našumo tendencija ({n} ciklai)",
@@ -1341,7 +1341,7 @@
       "label": "Min. išjungimo tarpas"
     },
     "min_power": {
-      "doc": "Žemesni rodmenys laikomi 0 W (budėjimo režimas). Filtruoja išmaniųjų kištukų ir budėjimo šviesos diodų suvartojimą.",
+      "doc": "Budėjimo galios apatinė riba. Jei slenksčių nenustatote patys, Paleidimo slenkstis pagal numatymą būna šiek tiek virš jos, o Sustabdymo slenkstis sudaro 60% jos, todėl žemesni rodmenys ciklo nepaleidžia. Padidinkite ją, jei ciklus paleidžia kištuko ar budėjimo šviesos diodų suvartojimas.",
       "label": "Minimali galia"
     },
     "ml_training_enabled": {
@@ -1353,7 +1353,7 @@
       "label": "Įrenginio pavadinimas"
     },
     "no_update_active_timeout": {
-      "doc": "Jei ciklo metu tiek laiko negaunama galios atnaujinimų, laikoma, kad kištukas atsijungė, ir ciklas priverstinai sustabdomas. Numatytoji 600 s reikšmė atsižvelgia į debesies ar mesh tinklo delsas.",
+      "doc": "Kiek laiko kištukas ciklo metu gali nesiųsti duomenų, kol WashData nustoja pasitikėti paskutiniu jo rodmeniu. Jei jis nutyla esant mažai galiai, ciklas po to dažniausiai baigiasi įprastai; jei esant didelei galiai, ciklas priverstinai sustabdomas tik gerokai viršijus numatomą trukmę. Numatytoji 600 s reikšmė atsižvelgia į debesies ar mesh tinklo delsas.",
       "label": "Be atnaujinimų skirtasis laikas"
     },
     "notify_before_end_minutes": {

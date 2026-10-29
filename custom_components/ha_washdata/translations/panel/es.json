@@ -854,7 +854,7 @@
     "no_settings_match": "Ninguna configuración coincide con \"{q}\"",
     "no_split_points": "Aún no hay puntos de división.",
     "no_suggestions": "No hay sugerencias activas.",
-    "notify_services_hint": "Use los IDs de servicio {entity} (separados por comas para varios). Variables de plantilla: {vars}.",
+    "notify_services_hint": "Añada servicios {entity} a cada lista de abajo. Variables de plantilla: {vars}.",
     "old_actions_warning": "Configurado con el antiguo editor de acciones (ahora eliminado). Todavía se activan en eventos de ciclo pero ya no se pueden editar aquí. Conviértalos en una automatización normal o elimínelos.",
     "pending_feedback": "Comentarios de detección pendientes",
     "performance_trend": "Tendencia de rendimiento ({n} ciclos)",
@@ -1289,7 +1289,7 @@
       "label": "Brecha mínima de apagado"
     },
     "min_power": {
-      "doc": "Las lecturas por debajo de este valor cuentan como 0 W (en espera). Filtra el consumo en reposo de los enchufes inteligentes y los LED de espera.",
+      "doc": "El nivel mínimo en reposo. Si no los configura, el Umbral de inicio se sitúa por defecto justo por encima y el Umbral de parada en el 60% de este valor, así que las lecturas por debajo no inician un ciclo. Auméntelo si el consumo en reposo del enchufe o de los LED de espera inicia ciclos.",
       "label": "Potencia mínima"
     },
     "ml_training_enabled": {
@@ -1301,7 +1301,7 @@
       "label": "Nombre del dispositivo"
     },
     "no_update_active_timeout": {
-      "doc": "Si no llega ninguna actualización de potencia durante este tiempo en un ciclo, se supone que el enchufe se desconectó y se fuerza la detención del ciclo. El valor predeterminado de 600 s da margen a los retrasos de la nube o de la red mesh.",
+      "doc": "Cuánto tiempo puede quedarse en silencio el enchufe durante un ciclo antes de que WashData deje de fiarse de su última lectura. Un ciclo en silencio a baja potencia suele terminar entonces con normalidad; uno en silencio a alta potencia solo se detiene a la fuerza mucho después de su duración prevista. El valor predeterminado de 600 s da margen a los retrasos de la nube o de la red mesh.",
       "label": "Tiempo de espera sin actualización"
     },
     "notify_before_end_minutes": {

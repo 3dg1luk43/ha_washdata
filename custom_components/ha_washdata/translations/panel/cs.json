@@ -911,7 +911,7 @@
     "no_settings_match": "Žádné nastavení neodpovídá „{q}“",
     "no_split_points": "Zatím žádné dělené body.",
     "no_suggestions": "Žádné aktivní návrhy.",
-    "notify_services_hint": "Zadejte ID služeb {entity} (více oddělete čárkou). Proměnné šablony: {vars}.",
+    "notify_services_hint": "Přidejte služby {entity} do každého seznamu níže. Proměnné šablony: {vars}.",
     "old_actions_warning": "Nakonfigurováno pomocí starého editoru akcí (nyní odstraněno). Stále se spouštějí při událostech cyklu, ale zde je již nelze upravovat. Převeďte je na normální automatizaci nebo je odstraňte.",
     "pending_feedback": "Čeká na zpětnou vazbu detekce",
     "performance_trend": "Trend výkonu ({n} cyklů)",
@@ -1337,7 +1337,7 @@
       "label": "Min. mezera vypnutí"
     },
     "min_power": {
-      "doc": "Hodnoty pod touto mezí se počítají jako 0 W (pohotovost). Odfiltruje klidový odběr chytrých zásuvek a pohotovostních LED.",
+      "doc": "Klidová spodní hranice. Pokud je nenastavíte sami, má Práh spuštění výchozí hodnotu těsně nad ní a Práh zastavení 60 % z ní, takže hodnoty pod ní cyklus nespustí. Zvyšte ji, pokud cykly spouští klidový odběr zásuvky nebo pohotovostních LED.",
       "label": "Minimální výkon"
     },
     "ml_training_enabled": {
@@ -1349,7 +1349,7 @@
       "label": "Název zařízení"
     },
     "no_update_active_timeout": {
-      "doc": "Pokud během cyklu po tuto dobu nepřijde žádná aktualizace výkonu, předpokládá se, že zásuvka je offline, a cyklus se vynuceně zastaví. Výchozích 600 s počítá se zpožděním cloudu nebo mesh sítě.",
+      "doc": "Jak dlouho smí zásuvka během cyklu nic neposílat, než WashData přestane věřit její poslední hodnotě. Cyklus, který se odmlčí při nízkém výkonu, pak obvykle skončí normálně; cyklus, který se odmlčí při vysokém výkonu, se vynuceně zastaví až výrazně po své očekávané délce. Výchozích 600 s počítá se zpožděním cloudu nebo mesh sítě.",
       "label": "Timeout bez aktualizace"
     },
     "notify_before_end_minutes": {

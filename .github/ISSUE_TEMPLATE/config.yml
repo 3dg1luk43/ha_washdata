@@ -15,12 +15,13 @@ contact_links:
     url: https://gitlocalize.com/repo/10819
     about: >
       Translations are handled entirely on GitLocalize, which opens PRs for you
-      automatically. Do NOT open an issue (or a manual PR) to report or fix a
-      translation - correct it directly on GitLocalize.
+      automatically. Do NOT open an issue to report or fix a translation - correct it
+      directly on GitLocalize (a manual PR is only for an urgent fix).
 
   - name: 🛠️ Want to submit code? Read this first
     url: https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs
     about: >
       Before writing any code, open a Bug Report or Feature Request and wait for
-      the maintainer to add the `accepted` label. PRs opened without a
-      pre-accepted issue are closed automatically.
+      the maintainer to add the `accepted` label. A PR that links no issue
+      is closed automatically; one linked to an issue not yet accepted waits
+      unreviewed.

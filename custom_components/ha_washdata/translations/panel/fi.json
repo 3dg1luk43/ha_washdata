@@ -889,7 +889,7 @@
     "no_settings_match": "Yksikään asetus ei vastaa \"{q}\"",
     "no_split_points": "Ei jakopisteitä vielä.",
     "no_suggestions": "Ei aktiivisia ehdotuksia.",
-    "notify_services_hint": "Käytä {entity}-palvelun tunnuksia (pilkulla eroteltuna usealle). Mallimuuttujat: {vars}.",
+    "notify_services_hint": "Lisää {entity}-palveluita jokaiseen alla olevaan luetteloon. Mallimuuttujat: {vars}.",
     "old_actions_warning": "Määritetty vanhalla toimintoeditorilla (nyt poistettu). Ne käynnistyvät edelleen syklitapahtumissa, mutta niitä ei voi enää muokata täällä. Muunna ne normaaliksi automaatioksi tai poista ne.",
     "pending_feedback": "Odottaa tunnistuspalautetta",
     "performance_trend": "Tehotrendi ({n} jaksoa)",
@@ -1326,7 +1326,7 @@
       "label": "Pienin sammutusväli"
     },
     "min_power": {
-      "doc": "Tätä pienemmät lukemat lasketaan 0 W:ksi (valmiustila). Suodattaa pois älypistokkeiden ja valmiustilan LEDien tyhjäkäyntikulutuksen.",
+      "doc": "Tyhjäkäynnin alaraja. Ellet aseta niitä itse, Käynnistyskynnys on oletuksena hieman tämän yläpuolella ja Pysäytyskynnys 60% tästä, joten tätä pienemmät lukemat eivät käynnistä sykliä. Nosta arvoa, jos pistokkeen tai valmiustilan LEDien tyhjäkäyntikulutus käynnistää syklejä.",
       "label": "Minimiteho"
     },
     "ml_training_enabled": {
@@ -1338,7 +1338,7 @@
       "label": "Laitteen nimi"
     },
     "no_update_active_timeout": {
-      "doc": "Jos tehopäivitystä ei tule näin pitkään syklin aikana, oletetaan pistokkeen menneen offline-tilaan ja sykli pysäytetään pakolla. Oletus 600 s sallii pilvi- tai mesh-viiveet.",
+      "doc": "Kuinka kauan pistoke saa olla hiljaa syklin aikana, ennen kuin WashData lakkaa luottamasta sen viimeisimpään lukemaan. Matalalla teholla hiljaa pysyvä sykli päättyy silloin yleensä normaalisti; korkealla teholla hiljaa pysyvä sykli pysäytetään pakolla vasta, kun se on kestänyt selvästi odotettua pidempään. Oletus 600 s sallii pilvi- tai mesh-viiveet.",
       "label": "Päivityksettömyyden aikakatkaisuaika"
     },
     "notify_before_end_minutes": {

@@ -911,7 +911,7 @@
     "no_settings_match": "Nobena nastavitev se ne ujema z \"{q}\"",
     "no_split_points": "Še ni točk razdelitve.",
     "no_suggestions": "Ni aktivnih predlogov.",
-    "notify_services_hint": "Uporabite ID-je storitev {entity} (ločene z vejicami za več storitev). Spremenljivke predloge: {vars}.",
+    "notify_services_hint": "Dodajte storitve {entity} na vsak seznam spodaj. Spremenljivke predloge: {vars}.",
     "old_actions_warning": "Konfigurirano s starim urejevalnikom dejanj (zdaj odstranjen). Še vedno se sprožijo ob dogodkih cikla, vendar jih tukaj ni več mogoče urejati. Pretvorite jih v običajno avtomatizacijo ali jih odstranite.",
     "pending_feedback": "Čakajoče povratne informacije o zaznavi",
     "performance_trend": "Trend uspešnosti ({n} ciklov)",
@@ -1341,7 +1341,7 @@
       "label": "Min. presledek izklopa"
     },
     "min_power": {
-      "doc": "Odčitki pod to vrednostjo štejejo kot 0 W (pripravljenost). Izloči porabo v mirovanju pametnih vtičev in LED-ic pripravljenosti.",
+      "doc": "Spodnja meja mirovanja. Če ju ne nastavite sami, je Prag zagona privzeto tik nad njo, Prag zaustavitve pa na 60% njene vrednosti, zato odčitki pod njo ne sprožijo cikla. Povišajte jo, če cikle sproža poraba v mirovanju vtiča ali LED-ic pripravljenosti.",
       "label": "Minimalna moč"
     },
     "ml_training_enabled": {
@@ -1353,7 +1353,7 @@
       "label": "Ime naprave"
     },
     "no_update_active_timeout": {
-      "doc": "Če med ciklom toliko časa ne pride nobena posodobitev moči, se predpostavi, da je vtič brez povezave, in cikel se prisilno ustavi. Privzetih 600 s pokrije zamude oblaka ali mesh omrežja.",
+      "doc": "Kako dolgo lahko vtič med ciklom ne pošilja podatkov, preden WashData preneha zaupati njegovemu zadnjemu odčitku. Cikel brez podatkov pri nizki moči se tedaj običajno konča normalno; cikel brez podatkov pri visoki moči se prisilno ustavi šele precej po pričakovanem trajanju. Privzetih 600 s pokrije zamude oblaka ali mesh omrežja.",
       "label": "Časovna omejitev brez posodobitve"
     },
     "notify_before_end_minutes": {

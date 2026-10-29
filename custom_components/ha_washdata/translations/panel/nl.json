@@ -897,7 +897,7 @@
     "no_settings_match": "Er zijn geen instellingen die overeenkomen met '{q}'",
     "no_split_points": "Er zijn nog geen splitpunten.",
     "no_suggestions": "Geen actieve suggesties.",
-    "notify_services_hint": "Gebruik {entity}-service-ID's (kommagescheiden voor meerdere). Sjabloonvariabelen: {vars}.",
+    "notify_services_hint": "Voeg {entity}-services toe aan elke lijst hieronder. Sjabloonvariabelen: {vars}.",
     "old_actions_warning": "Geconfigureerd met de oude actie-editor (nu verwijderd). Ze vuren nog steeds op cyclusevenementen, maar kunnen hier niet langer worden bewerkt. Converteer ze naar een normale automatisering of verwijder ze.",
     "pending_feedback": "In afwachting van detectiefeedback",
     "performance_trend": "Prestatietrend ({n} cycli)",
@@ -1326,7 +1326,7 @@
       "label": "Min. uitschakelinterval"
     },
     "min_power": {
-      "doc": "Metingen hieronder tellen als 0 W (stand-by). Filtert het ruststroomverbruik van slimme stekkers en stand-by-LED's weg.",
+      "doc": "De ondergrens voor ruststroomverbruik. Tenzij je ze zelf instelt, ligt de Startdrempel standaard net daarboven en de Stopdrempel op 60% ervan, zodat metingen daaronder geen cyclus starten. Verhoog deze waarde als het ruststroomverbruik van de stekker of stand-by-LED's cycli start.",
       "label": "Minimaal vermogen"
     },
     "ml_training_enabled": {
@@ -1338,7 +1338,7 @@
       "label": "Apparaatnaam"
     },
     "no_update_active_timeout": {
-      "doc": "Komt er tijdens een cyclus zo lang geen vermogensupdate binnen, dan wordt aangenomen dat de stekker offline is en wordt de cyclus geforceerd gestopt. De standaard 600 s houdt rekening met cloud- of mesh-vertraging.",
+      "doc": "Hoe lang de stekker tijdens een cyclus geen updates mag sturen voordat WashData de laatste meting niet meer vertrouwt. Een cyclus die bij laag vermogen stil blijft, eindigt dan meestal normaal; een cyclus die bij hoog vermogen stil blijft, wordt pas ruim na de verwachte duur geforceerd gestopt. De standaard 600 s houdt rekening met cloud- of mesh-vertraging.",
       "label": "Time-out zonder update"
     },
     "notify_before_end_minutes": {

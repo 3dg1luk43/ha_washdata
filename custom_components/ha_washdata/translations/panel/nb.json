@@ -897,7 +897,7 @@
     "no_settings_match": "Ingen innstillinger samsvarer med \"{q}\"",
     "no_split_points": "Ingen delpoeng ennå.",
     "no_suggestions": "Ingen aktive forslag.",
-    "notify_services_hint": "Bruk {entity}-tjeneste-ID-er (kommaseparert for flere). Malvariabler: {vars}.",
+    "notify_services_hint": "Legg til {entity}-tjenester i hver liste nedenfor. Malvariabler: {vars}.",
     "old_actions_warning": "Konfigurert med den gamle handlingsredigereren (nå fjernet). De utløses fortsatt ved syklushendelser, men kan ikke lenger redigeres her. Konverter dem til en vanlig automatisering, eller fjern dem.",
     "pending_feedback": "Venter på tilbakemelding på gjenkjenning",
     "performance_trend": "Ytelsestrend ({n} sykluser)",
@@ -1326,7 +1326,7 @@
       "label": "Min. av-intervall"
     },
     "min_power": {
-      "doc": "Målinger under dette teller som 0 W (standby). Filtrerer bort tomgangsforbruket til smartplugger og standby-lysdioder.",
+      "doc": "Nedre grense for tomgangsforbruk. Med mindre du angir dem selv, ligger Startterskel som standard like over den og Stoppterskel på 60% av den, slik at målinger under den ikke starter en syklus. Øk den hvis tomgangsforbruket til pluggen eller standby-lysdioder starter sykluser.",
       "label": "Minimum effekt"
     },
     "ml_training_enabled": {
@@ -1338,7 +1338,7 @@
       "label": "Enhetsnavn"
     },
     "no_update_active_timeout": {
-      "doc": "Hvis ingen effektoppdatering kommer på så lenge under en syklus, antas pluggen å være frakoblet, og syklusen tvangsstoppes. Standarden på 600 s gir rom for forsinkelser i sky eller mesh.",
+      "doc": "Hvor lenge pluggen kan være taus under en syklus før WashData slutter å stole på den siste målingen. En syklus som blir taus ved lav effekt, avsluttes da som regel normalt; en som blir taus ved høy effekt, tvangsstoppes først godt etter forventet varighet. Standarden på 600 s gir rom for forsinkelser i sky eller mesh.",
       "label": "Tid uten oppdatering"
     },
     "notify_before_end_minutes": {

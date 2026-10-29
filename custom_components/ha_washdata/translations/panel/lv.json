@@ -900,7 +900,7 @@
     "no_settings_match": "Neviens iestatījums neatbilst \"{q}\"",
     "no_split_points": "Vēl nav sadalīti punkti.",
     "no_suggestions": "Nav aktīvu ieteikumu.",
-    "notify_services_hint": "Izmantojiet {entity} pakalpojumu ID (vairākiem – atdaliet ar komatiem). Veidnes mainīgie: {vars}.",
+    "notify_services_hint": "Pievienojiet {entity} pakalpojumus katrā tālāk esošajā sarakstā. Veidnes mainīgie: {vars}.",
     "old_actions_warning": "Konfigurēts ar veco darbību redaktoru (tagad noņemts). Tie joprojām aktivizē cikla notikumus, taču tos vairs nevar rediģēt šeit. Pārvērtiet tos par parastu automatizāciju vai noņemiet tos.",
     "pending_feedback": "Gaida atsauksmes par noteikšanu",
     "performance_trend": "Veiktspējas tendence ({n} cikli)",
@@ -1324,7 +1324,7 @@
       "label": "Min. izslēgšanas atstarpe"
     },
     "min_power": {
-      "doc": "Rādījumi zem šīs vērtības tiek uzskatīti par 0 W (gaidstāve). Atfiltrē viedo spraudņu un gaidstāves gaismas diožu dīkstāves patēriņu.",
+      "doc": "Dīkstāves jaudas apakšējā robeža. Ja sliekšņus neiestatāt paši, Starta slieksnis pēc noklusējuma ir nedaudz virs tās, bet Apstāšanās slieksnis ir 60% no tās, tāpēc rādījumi zem tās ciklu nesāk. Paaugstiniet to, ja ciklus sāk spraudņa vai gaidstāves gaismas diožu dīkstāves patēriņš.",
       "label": "Minimālā jauda"
     },
     "ml_training_enabled": {
@@ -1336,7 +1336,7 @@
       "label": "Ierīces nosaukums"
     },
     "no_update_active_timeout": {
-      "doc": "Ja cikla laikā tik ilgi nepienāk neviens jaudas atjauninājums, tiek pieņemts, ka spraudnis ir bezsaistē, un cikls tiek piespiedu kārtā apturēts. Noklusējuma 600 s pieļauj mākoņa vai tīkla aizkavi.",
+      "doc": "Cik ilgi spraudnis cikla laikā drīkst nesūtīt datus, pirms WashData pārstāj uzticēties tā pēdējam rādījumam. Ja tas apklust pie zemas jaudas, cikls pēc tam vairumā gadījumu beidzas kā parasti; ja pie augstas jaudas, cikls tiek piespiedu kārtā apturēts tikai krietni pārsniedzot paredzamo ilgumu. Noklusējuma 600 s pieļauj mākoņa vai tīkla aizkavi.",
       "label": "Laiks bez atjauninājuma"
     },
     "notify_before_end_minutes": {

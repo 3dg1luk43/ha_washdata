@@ -8,7 +8,7 @@ body:
       value: |
         Thanks for helping improve our documentation!
 
-        Want to fix it yourself? Open this issue first and tick the box below. Wait for the maintainer to add the `accepted` label before opening a PR - documentation PRs go through the same [contributor flow](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs) as code (a PR opened without an accepted issue, or in parallel with a fresh one, is closed automatically). The only exception is translations, which are handled on [GitLocalize](https://gitlocalize.com/repo/10819).
+        Want to fix it yourself? Open this issue first and tick the box below. Wait for the maintainer to add the `accepted` label before opening a PR - documentation PRs go through the same [contributor flow](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md#contributor-pr-flow-non-translation-prs) as code (a PR that links no issue is closed automatically; one opened in parallel with a fresh issue waits unreviewed until the maintainer decides). The only exception is translations, which are handled on [GitLocalize](https://gitlocalize.com/repo/10819).
 
   - type: checkboxes
     id: preflight

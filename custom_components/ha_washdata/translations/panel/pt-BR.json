@@ -854,7 +854,7 @@
     "no_settings_match": "Nenhuma configuração corresponde a \"{q}\"",
     "no_split_points": "Nenhum ponto de divisão ainda.",
     "no_suggestions": "Nenhuma sugestão ativa.",
-    "notify_services_hint": "Use os IDs de serviço de {entity} (separados por vírgula para múltiplos). Variáveis de template: {vars}.",
+    "notify_services_hint": "Adicione serviços de {entity} a cada lista abaixo. Variáveis de template: {vars}.",
     "old_actions_warning": "Configurado com o antigo editor de ações (agora removido). Ainda são acionadas em eventos de ciclo, mas não podem mais ser editadas aqui. Converta-as em uma automação normal ou remova-as.",
     "pending_feedback": "Feedback de detecção pendente",
     "performance_trend": "Tendência de desempenho ({n} ciclos)",
@@ -1270,7 +1270,7 @@
       "label": "Intervalo Mínimo de Desligamento"
     },
     "min_power": {
-      "doc": "Leituras abaixo disso contam como 0 W (espera). Filtra o consumo em repouso de plugues inteligentes e LEDs de espera.",
+      "doc": "O nível mínimo em repouso. A menos que você os defina, o Limite de Início fica por padrão logo acima dele e o Limite de Parada em 60% dele, então leituras abaixo dele não iniciam um ciclo. Aumente-o se o consumo em repouso do plugue ou dos LEDs de espera iniciar ciclos.",
       "label": "Potência Mínima"
     },
     "ml_training_enabled": {
@@ -1282,7 +1282,7 @@
       "label": "Nome do Dispositivo"
     },
     "no_update_active_timeout": {
-      "doc": "Se nenhuma atualização de potência chegar por este tempo durante um ciclo, considera-se que o plugue ficou offline e o ciclo é parado à força. O padrão de 600 s dá margem para atrasos da nuvem ou da rede mesh.",
+      "doc": "Quanto tempo o plugue pode ficar em silêncio durante um ciclo antes de o WashData deixar de confiar na última leitura dele. Um ciclo em silêncio com baixa potência então costuma terminar normalmente; um em silêncio com alta potência só é parado forçadamente bem depois da duração esperada. O padrão de 600 s dá margem para atrasos da nuvem ou da rede mesh.",
       "label": "Timeout Sem Atualização"
     },
     "notify_before_end_minutes": {
