@@ -175,7 +175,7 @@ wrong looks like a bug in the integration:
    dishwasher cycle can never reach its end gate: the detector logs
    `Deferring dishwasher cycle end: elapsed 388s < minimum 1800s` forever. The
    default is therefore a washing machine; `--type dishwasher` needs
-   `--speedup 4` or lower: ~30 min at 4, longer below it.
+   `--speedup 4` or lower: ~35 min at 4, longer below it.
 
    **Raising the speedup is self-defeating, not merely ineffective**, and this
    is the real ceiling (register item 357). Item 331 made that floor drop to the
