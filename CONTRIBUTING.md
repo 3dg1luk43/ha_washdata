@@ -22,7 +22,7 @@ Closed automatically:
 - an issue with missing information, 5 days after the bot asks for it, unless you fill in
   everything it asks for or reply
 - a PR with no linked issue, 3 days after the bot's warning (a PR whose linked issue is not yet
-  accepted is not closed: it waits for the maintainer)
+  accepted waits for the maintainer instead, as long as its template is filled in)
 - a PR whose template is left empty, 5 days after the warning, or deleted, at once
 
 If a bot or the maintainer closed your issue and the problem is still there, comment `/reopen` on it.
