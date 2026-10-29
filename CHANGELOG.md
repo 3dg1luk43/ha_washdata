@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
+## 0.5.9.1 - 2026-10-29
+
+### TL;DR
+
+- Setting help texts that described behaviour WashData does not have are corrected.
+- Show contributor names also hides who shared a Store recording.
+- Wiki and docs checked against the code; screenshots retaken.
+
+### Panel
+
+- **Help texts corrected in every language**: Minimum Power said readings below it count as 0 W (it sets the default Start and Stop Thresholds), No-Update Timeout said a silent plug force-stops the cycle (a cycle silent at low power usually ends normally, one at high power is force-stopped only well past its expected length), and the Notifications intro said to enter services comma-separated (they are picked into lists). The intro now lists every template variable.
+- **Show contributor names** now also hides "Shared by" on recordings in the Store tab, as its description says.
+
+### Docs
+
+- The wiki, README, contributing guide and PR and issue templates were checked against the code and corrected: missing 0.5.9 features (Automations tab, 18 triggers), wrong defaults and entity ids, Force End listed as force stopped, a store website download that does not exist, and the auto-close rules for PRs and issues. Panel screenshots and two setting graphs were redone.
+
 ## 0.5.9 - 2026-10-28
 
 ### TL;DR
@@ -53,8 +70,6 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - Save Debug Traces, Auto Maintenance and Power Profile Interval moved to the internal settings tier.
 - Notifications no longer has an Automations section; it moved to the Automations tab.
-- **Help texts corrected in every language**: Minimum Power said readings below it count as 0 W (it sets the default Start and Stop Thresholds), No-Update Timeout said a silent plug force-stops the cycle (a cycle silent at low power ends normally, one at high power only well past its expected length), and the Notifications intro said to enter services comma-separated (they are picked into lists). The intro now lists every template variable.
-- **Show contributor names** now also hides "Shared by" on recordings in the Store tab, as its description says.
 - **Dryer tumbling is named correctly in every language**: many translations called the drum turning drumming, somersaulting, rolling or polishing; it now reads as the drum turning.
 
 ### For developers
