@@ -1338,7 +1338,7 @@
       "label": "Nafn tækis"
     },
     "no_update_active_timeout": {
-      "doc": "Hversu lengi innstungan má vera þögul á meðan lota er í gangi áður en WashData hættir að treysta síðustu mælingu hennar. Lota sem þagnar við lágt afl lýkur þá eðlilega; lota sem þagnar við hátt afl er ekki þvinguð til að stöðvast fyrr en hún er komin vel fram yfir væntanlega lengd sína. Sjálfgefið 600 s gefur svigrúm fyrir tafir í skýi eða möskvaneti.",
+      "doc": "Hversu lengi innstungan má vera þögul á meðan lota er í gangi áður en WashData hættir að treysta síðustu mælingu hennar. Lota sem þagnar við lágt afl lýkur þá yfirleitt eðlilega; lota sem þagnar við hátt afl er ekki þvinguð til að stöðvast fyrr en hún er komin vel fram yfir væntanlega lengd sína. Sjálfgefið 600 s gefur svigrúm fyrir tafir í skýi eða möskvaneti.",
       "label": "Engin-uppfærsla-tímamark"
     },
     "notify_before_end_minutes": {

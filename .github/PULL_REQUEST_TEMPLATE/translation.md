@@ -23,6 +23,8 @@ Thank you for contributing a translation to WashData!
 
 <!-- Briefly describe what you added or corrected. -->
 
+## What was changed
+
 - [ ] New language added
 - [ ] Corrected existing translation(s)
 - [ ] Updated strings to match recent English changes

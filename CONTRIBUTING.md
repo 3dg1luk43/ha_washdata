@@ -19,8 +19,8 @@ unreleased work in progress, so a surprise PR easily duplicates or conflicts wit
 Closed automatically:
 
 - an issue that skips the template
-- an issue with missing information, 5 days after the bot asks for it, unless you update it or
-  reply
+- an issue with missing information, 5 days after the bot asks for it, unless you fill in
+  everything it asks for or reply
 - a PR with no linked issue, 3 days after the bot's warning (a PR whose linked issue is not yet
   accepted is not closed: it waits for the maintainer)
 - a PR whose template is left empty, 5 days after the warning, or deleted, at once

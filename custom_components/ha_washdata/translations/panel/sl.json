@@ -1353,7 +1353,7 @@
       "label": "Ime naprave"
     },
     "no_update_active_timeout": {
-      "doc": "Kako dolgo lahko vtič med ciklom ne pošilja podatkov, preden WashData preneha zaupati njegovemu zadnjemu odčitku. Cikel brez podatkov pri nizki moči se tedaj konča normalno; cikel brez podatkov pri visoki moči se prisilno ustavi šele precej po pričakovanem trajanju. Privzetih 600 s pokrije zamude oblaka ali mesh omrežja.",
+      "doc": "Kako dolgo lahko vtič med ciklom ne pošilja podatkov, preden WashData preneha zaupati njegovemu zadnjemu odčitku. Cikel brez podatkov pri nizki moči se tedaj običajno konča normalno; cikel brez podatkov pri visoki moči se prisilno ustavi šele precej po pričakovanem trajanju. Privzetih 600 s pokrije zamude oblaka ali mesh omrežja.",
       "label": "Časovna omejitev brez posodobitve"
     },
     "notify_before_end_minutes": {

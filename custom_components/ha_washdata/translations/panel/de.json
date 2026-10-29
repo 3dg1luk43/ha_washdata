@@ -1334,7 +1334,7 @@
       "label": "Gerätename"
     },
     "no_update_active_timeout": {
-      "doc": "Wie lange die Steckdose während eines Zyklus keine Werte senden darf, bevor WashData ihrem letzten Messwert nicht mehr vertraut. Ein Zyklus, der bei niedriger Leistung verstummt, endet dann normal; einer, der bei hoher Leistung verstummt, wird erst deutlich nach seiner erwarteten Dauer zwangsweise gestoppt. Der Standard von 600 s lässt Spielraum für Cloud- oder Mesh-Verzögerungen.",
+      "doc": "Wie lange die Steckdose während eines Zyklus keine Werte senden darf, bevor WashData ihrem letzten Messwert nicht mehr vertraut. Ein Zyklus, der bei niedriger Leistung verstummt, endet dann in der Regel normal; einer, der bei hoher Leistung verstummt, wird erst deutlich nach seiner erwarteten Dauer zwangsweise gestoppt. Der Standard von 600 s lässt Spielraum für Cloud- oder Mesh-Verzögerungen.",
       "label": "Timeout ohne Aktualisierung"
     },
     "notify_before_end_minutes": {

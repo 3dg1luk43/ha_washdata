@@ -1310,7 +1310,7 @@
             "label": "Emri i pajisjes"
         },
         "no_update_active_timeout": {
-            "doc": "Sa kohë mund të heshtë priza gjatë një cikli përpara se WashData të mos i besojë më leximit të saj të fundit. Një cikël që hesht me fuqi të ulët përfundon atëherë normalisht; një që hesht me fuqi të lartë ndalet me forcë vetëm shumë përtej kohëzgjatjes së pritur. Parazgjedhja 600 s lejon vonesat e resë ose të rrjetit mesh.",
+            "doc": "Sa kohë mund të heshtë priza gjatë një cikli përpara se WashData të mos i besojë më leximit të saj të fundit. Një cikël që hesht me fuqi të ulët zakonisht përfundon atëherë normalisht; një që hesht me fuqi të lartë ndalet me forcë vetëm shumë përtej kohëzgjatjes së pritur. Parazgjedhja 600 s lejon vonesat e resë ose të rrjetit mesh.",
             "label": "Koha e skadimit pa përditësim"
         },
         "notify_before_end_minutes": {

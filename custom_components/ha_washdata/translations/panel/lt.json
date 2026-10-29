@@ -1353,7 +1353,7 @@
       "label": "Įrenginio pavadinimas"
     },
     "no_update_active_timeout": {
-      "doc": "Kiek laiko kištukas ciklo metu gali nesiųsti duomenų, kol WashData nustoja pasitikėti paskutiniu jo rodmeniu. Jei jis nutyla esant mažai galiai, ciklas po to baigiasi įprastai; jei esant didelei galiai, ciklas priverstinai sustabdomas tik gerokai viršijus numatomą trukmę. Numatytoji 600 s reikšmė atsižvelgia į debesies ar mesh tinklo delsas.",
+      "doc": "Kiek laiko kištukas ciklo metu gali nesiųsti duomenų, kol WashData nustoja pasitikėti paskutiniu jo rodmeniu. Jei jis nutyla esant mažai galiai, ciklas po to dažniausiai baigiasi įprastai; jei esant didelei galiai, ciklas priverstinai sustabdomas tik gerokai viršijus numatomą trukmę. Numatytoji 600 s reikšmė atsižvelgia į debesies ar mesh tinklo delsas.",
       "label": "Be atnaujinimų skirtasis laikas"
     },
     "notify_before_end_minutes": {

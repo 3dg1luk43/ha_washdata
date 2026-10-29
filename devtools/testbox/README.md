@@ -175,7 +175,7 @@ wrong looks like a bug in the integration:
    dishwasher cycle can never reach its end gate: the detector logs
    `Deferring dishwasher cycle end: elapsed 388s < minimum 1800s` forever. The
    default is therefore a washing machine; `--type dishwasher` needs
-   `--speedup 4` or lower and takes ~30 min.
+   `--speedup 4` or lower: ~30 min at 4, longer below it.
 
    **Raising the speedup is self-defeating, not merely ineffective**, and this
    is the real ceiling (register item 357). Item 331 made that floor drop to the
@@ -251,7 +251,7 @@ Each of these is unreachable from a mocked Home Assistant:
 2. A real export imports through the real storage migration, and profiles appear.
 3. `ws_set_options` persists, reloads the entry and takes effect.
 4. A replayed cycle is detected and stored (at least one new cycle).
-5. Notifications are *delivered*: start/finish alerts, live updates.
+5. Notifications are *delivered*: at least one start or finish alert, and live updates.
 6. Live updates reach mobile targets only, on their own dedicated tag.
 7. The dismissals arrive - the lifecycle hand-over and the live-activity end.
    This is the #446 failure mode, and it is the check the unit suite cannot make.
@@ -285,7 +285,7 @@ every notify option at the box's own `testbox` targets.) `--type dishwasher`
 previously seeded the **washing-machine** export regardless of type - so the
 dishwasher path was being exercised against washing-machine profiles and the
 run matched programmes like "30 deg / 2:09 / 800rpm". The export now follows
-`--type`, and a dishwasher run takes ~30 min at any speedup for the reasons in
+`--type`, and a dishwasher run takes at least ~30 min whatever the speedup, for the reasons in
 *Time compression* above. `./check_notify_actions.sh` passes. The whole notification lifecycle is proven
 against a real service bus: start, a live update on its own tag, mobile-only
 routing, the lifecycle hand-over dismissal, the live-activity end, the finished

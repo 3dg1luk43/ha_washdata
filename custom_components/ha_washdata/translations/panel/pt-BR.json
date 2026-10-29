@@ -1282,7 +1282,7 @@
       "label": "Nome do Dispositivo"
     },
     "no_update_active_timeout": {
-      "doc": "Quanto tempo o plugue pode ficar em silêncio durante um ciclo antes de o WashData deixar de confiar na última leitura dele. Um ciclo em silêncio com baixa potência então termina normalmente; um em silêncio com alta potência só é parado forçadamente bem depois da duração esperada. O padrão de 600 s dá margem para atrasos da nuvem ou da rede mesh.",
+      "doc": "Quanto tempo o plugue pode ficar em silêncio durante um ciclo antes de o WashData deixar de confiar na última leitura dele. Um ciclo em silêncio com baixa potência então costuma terminar normalmente; um em silêncio com alta potência só é parado forçadamente bem depois da duração esperada. O padrão de 600 s dá margem para atrasos da nuvem ou da rede mesh.",
       "label": "Timeout Sem Atualização"
     },
     "notify_before_end_minutes": {

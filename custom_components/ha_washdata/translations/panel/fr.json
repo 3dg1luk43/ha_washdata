@@ -1301,7 +1301,7 @@
       "label": "Nom de l'appareil"
     },
     "no_update_active_timeout": {
-      "doc": "Durée pendant laquelle la prise peut rester silencieuse au cours d'un cycle avant que WashData cesse de se fier à sa dernière mesure. Un cycle silencieux à faible puissance se termine alors normalement ; un cycle silencieux à forte puissance n'est arrêté de force que bien au-delà de sa durée prévue. La valeur par défaut de 600 s laisse de la marge aux délais du cloud ou du maillage.",
+      "doc": "Durée pendant laquelle la prise peut rester silencieuse au cours d'un cycle avant que WashData cesse de se fier à sa dernière mesure. Un cycle silencieux à faible puissance se termine alors en général normalement ; un cycle silencieux à forte puissance n'est arrêté de force que bien au-delà de sa durée prévue. La valeur par défaut de 600 s laisse de la marge aux délais du cloud ou du maillage.",
       "label": "Délai d'expiration sans mise à jour"
     },
     "notify_before_end_minutes": {

@@ -1301,7 +1301,7 @@
       "label": "Nome dispositivo"
     },
     "no_update_active_timeout": {
-      "doc": "Per quanto tempo la presa può restare in silenzio durante un ciclo prima che WashData smetta di fidarsi della sua ultima lettura. Un ciclo in silenzio a bassa potenza termina quindi normalmente; uno in silenzio ad alta potenza viene arrestato forzatamente solo ben oltre la sua durata prevista. Il valore predefinito di 600 s lascia margine ai ritardi del cloud o della rete mesh.",
+      "doc": "Per quanto tempo la presa può restare in silenzio durante un ciclo prima che WashData smetta di fidarsi della sua ultima lettura. Un ciclo in silenzio a bassa potenza in genere termina quindi normalmente; uno in silenzio ad alta potenza viene arrestato forzatamente solo ben oltre la sua durata prevista. Il valore predefinito di 600 s lascia margine ai ritardi del cloud o della rete mesh.",
       "label": "Timeout senza aggiornamenti"
     },
     "notify_before_end_minutes": {

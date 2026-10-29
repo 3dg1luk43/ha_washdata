@@ -1301,7 +1301,7 @@
       "label": "Nombre del dispositivo"
     },
     "no_update_active_timeout": {
-      "doc": "Cuánto tiempo puede quedarse en silencio el enchufe durante un ciclo antes de que WashData deje de fiarse de su última lectura. Un ciclo en silencio a baja potencia termina entonces con normalidad; uno en silencio a alta potencia solo se detiene a la fuerza mucho después de su duración prevista. El valor predeterminado de 600 s da margen a los retrasos de la nube o de la red mesh.",
+      "doc": "Cuánto tiempo puede quedarse en silencio el enchufe durante un ciclo antes de que WashData deje de fiarse de su última lectura. Un ciclo en silencio a baja potencia suele terminar entonces con normalidad; uno en silencio a alta potencia solo se detiene a la fuerza mucho después de su duración prevista. El valor predeterminado de 600 s da margen a los retrasos de la nube o de la red mesh.",
       "label": "Tiempo de espera sin actualización"
     },
     "notify_before_end_minutes": {

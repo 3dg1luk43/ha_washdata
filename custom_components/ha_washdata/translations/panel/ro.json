@@ -1282,7 +1282,7 @@
       "label": "Numele Dispozitivului"
     },
     "no_update_active_timeout": {
-      "doc": "Cât timp poate priza să nu trimită date în timpul unui ciclu înainte ca WashData să nu mai aibă încredere în ultima ei citire. Un ciclu rămas fără date la putere redusă se încheie apoi normal; unul rămas fără date la putere mare este oprit forțat abia cu mult peste durata așteptată. Valoarea implicită de 600 s lasă loc întârzierilor din cloud sau din rețeaua mesh.",
+      "doc": "Cât timp poate priza să nu trimită date în timpul unui ciclu înainte ca WashData să nu mai aibă încredere în ultima ei citire. Un ciclu rămas fără date la putere redusă se încheie apoi de obicei normal; unul rămas fără date la putere mare este oprit forțat abia cu mult peste durata așteptată. Valoarea implicită de 600 s lasă loc întârzierilor din cloud sau din rețeaua mesh.",
       "label": "Timeout Fără Actualizare"
     },
     "notify_before_end_minutes": {

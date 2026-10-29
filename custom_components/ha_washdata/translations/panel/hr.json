@@ -1336,7 +1336,7 @@
       "label": "Naziv uređaja"
     },
     "no_update_active_timeout": {
-      "doc": "Koliko dugo utikač smije ne slati podatke tijekom ciklusa prije nego što WashData prestane vjerovati njegovom posljednjem očitanju. Ciklus bez podataka pri maloj snazi tada završava normalno; ciklus bez podataka pri velikoj snazi prisilno se zaustavlja tek znatno nakon očekivanog trajanja. Zadanih 600 s pokriva kašnjenja oblaka ili mesh mreže.",
+      "doc": "Koliko dugo utikač smije ne slati podatke tijekom ciklusa prije nego što WashData prestane vjerovati njegovom posljednjem očitanju. Ciklus bez podataka pri maloj snazi tada obično završava normalno; ciklus bez podataka pri velikoj snazi prisilno se zaustavlja tek znatno nakon očekivanog trajanja. Zadanih 600 s pokriva kašnjenja oblaka ili mesh mreže.",
       "label": "Vremensko ograničenje bez ažuriranja"
     },
     "notify_before_end_minutes": {

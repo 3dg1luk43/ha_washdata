@@ -1349,7 +1349,7 @@
       "label": "Název zařízení"
     },
     "no_update_active_timeout": {
-      "doc": "Jak dlouho smí zásuvka během cyklu nic neposílat, než WashData přestane věřit její poslední hodnotě. Cyklus, který se odmlčí při nízkém výkonu, pak skončí normálně; cyklus, který se odmlčí při vysokém výkonu, se vynuceně zastaví až výrazně po své očekávané délce. Výchozích 600 s počítá se zpožděním cloudu nebo mesh sítě.",
+      "doc": "Jak dlouho smí zásuvka během cyklu nic neposílat, než WashData přestane věřit její poslední hodnotě. Cyklus, který se odmlčí při nízkém výkonu, pak obvykle skončí normálně; cyklus, který se odmlčí při vysokém výkonu, se vynuceně zastaví až výrazně po své očekávané délce. Výchozích 600 s počítá se zpožděním cloudu nebo mesh sítě.",
       "label": "Timeout bez aktualizace"
     },
     "notify_before_end_minutes": {

@@ -1338,7 +1338,7 @@
       "label": "Enhetsnavn"
     },
     "no_update_active_timeout": {
-      "doc": "Hvor lenge pluggen kan være taus under en syklus før WashData slutter å stole på den siste målingen. En syklus som blir taus ved lav effekt, avsluttes da normalt; en som blir taus ved høy effekt, tvangsstoppes først godt etter forventet varighet. Standarden på 600 s gir rom for forsinkelser i sky eller mesh.",
+      "doc": "Hvor lenge pluggen kan være taus under en syklus før WashData slutter å stole på den siste målingen. En syklus som blir taus ved lav effekt, avsluttes da som regel normalt; en som blir taus ved høy effekt, tvangsstoppes først godt etter forventet varighet. Standarden på 600 s gir rom for forsinkelser i sky eller mesh.",
       "label": "Tid uten oppdatering"
     },
     "notify_before_end_minutes": {

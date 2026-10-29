@@ -1338,7 +1338,7 @@
       "label": "Enhedsnavn"
     },
     "no_update_active_timeout": {
-      "doc": "Hvor længe stikket må være tavst under en cyklus, før WashData holder op med at stole på dets seneste måling. En cyklus, der bliver tavs ved lav effekt, slutter så normalt; en, der bliver tavs ved høj effekt, tvangsstoppes først et godt stykke efter sin forventede varighed. Standarden på 600 s giver plads til forsinkelser i sky eller mesh.",
+      "doc": "Hvor længe stikket må være tavst under en cyklus, før WashData holder op med at stole på dets seneste måling. En cyklus, der bliver tavs ved lav effekt, slutter så som regel normalt; en, der bliver tavs ved høj effekt, tvangsstoppes først et godt stykke efter sin forventede varighed. Standarden på 600 s giver plads til forsinkelser i sky eller mesh.",
       "label": "Timeout uden opdatering"
     },
     "notify_before_end_minutes": {

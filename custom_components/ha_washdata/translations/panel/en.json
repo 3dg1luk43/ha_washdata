@@ -1361,7 +1361,7 @@
       "label": "Device Name"
     },
     "no_update_active_timeout": {
-      "doc": "How long the plug may stay silent during a cycle before WashData stops trusting its last reading. A cycle silent at low power then ends normally; one silent at high power is force-stopped only well past its expected length. The default 600 s allows for cloud or mesh delays.",
+      "doc": "How long the plug may stay silent during a cycle before WashData stops trusting its last reading. A cycle silent at low power then usually ends normally; one silent at high power is force-stopped only well past its expected length. The default 600 s allows for cloud or mesh delays.",
       "label": "No-Update Timeout"
     },
     "notify_before_end_minutes": {

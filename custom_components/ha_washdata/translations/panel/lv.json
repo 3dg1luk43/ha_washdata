@@ -1336,7 +1336,7 @@
       "label": "Ierīces nosaukums"
     },
     "no_update_active_timeout": {
-      "doc": "Cik ilgi spraudnis cikla laikā drīkst nesūtīt datus, pirms WashData pārstāj uzticēties tā pēdējam rādījumam. Ja tas apklust pie zemas jaudas, cikls pēc tam beidzas kā parasti; ja pie augstas jaudas, cikls tiek piespiedu kārtā apturēts tikai krietni pārsniedzot paredzamo ilgumu. Noklusējuma 600 s pieļauj mākoņa vai tīkla aizkavi.",
+      "doc": "Cik ilgi spraudnis cikla laikā drīkst nesūtīt datus, pirms WashData pārstāj uzticēties tā pēdējam rādījumam. Ja tas apklust pie zemas jaudas, cikls pēc tam vairumā gadījumu beidzas kā parasti; ja pie augstas jaudas, cikls tiek piespiedu kārtā apturēts tikai krietni pārsniedzot paredzamo ilgumu. Noklusējuma 600 s pieļauj mākoņa vai tīkla aizkavi.",
       "label": "Laiks bez atjauninājuma"
     },
     "notify_before_end_minutes": {

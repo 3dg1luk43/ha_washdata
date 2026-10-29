@@ -1349,7 +1349,7 @@
       "label": "Názov zariadenia"
     },
     "no_update_active_timeout": {
-      "doc": "Ako dlho smie zásuvka počas cyklu nič neposielať, skôr než WashData prestane dôverovať jej poslednej hodnote. Cyklus, ktorý stíchne pri nízkom výkone, potom skončí normálne; cyklus, ktorý stíchne pri vysokom výkone, sa nútene zastaví až výrazne po svojej očakávanej dĺžke. Predvolených 600 s počíta s oneskorením cloudu alebo mesh siete.",
+      "doc": "Ako dlho smie zásuvka počas cyklu nič neposielať, skôr než WashData prestane dôverovať jej poslednej hodnote. Cyklus, ktorý stíchne pri nízkom výkone, potom zvyčajne skončí normálne; cyklus, ktorý stíchne pri vysokom výkone, sa nútene zastaví až výrazne po svojej očakávanej dĺžke. Predvolených 600 s počíta s oneskorením cloudu alebo mesh siete.",
       "label": "Časový limit bez aktualizácie"
     },
     "notify_before_end_minutes": {

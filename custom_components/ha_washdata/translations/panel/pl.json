@@ -1349,7 +1349,7 @@
       "label": "Nazwa Urządzenia"
     },
     "no_update_active_timeout": {
-      "doc": "Jak długo wtyczka może nie przesyłać odczytów w trakcie cyklu, zanim WashData przestanie ufać ostatniemu z nich. Cykl bez odczytów przy niskiej mocy kończy się wtedy normalnie; cykl bez odczytów przy wysokiej mocy zostaje przymusowo zatrzymany dopiero znacznie po przekroczeniu oczekiwanego czasu trwania. Domyślne 600 s uwzględnia opóźnienia chmury lub sieci mesh.",
+      "doc": "Jak długo wtyczka może nie przesyłać odczytów w trakcie cyklu, zanim WashData przestanie ufać ostatniemu z nich. Cykl bez odczytów przy niskiej mocy zazwyczaj kończy się wtedy normalnie; cykl bez odczytów przy wysokiej mocy zostaje przymusowo zatrzymany dopiero znacznie po przekroczeniu oczekiwanego czasu trwania. Domyślne 600 s uwzględnia opóźnienia chmury lub sieci mesh.",
       "label": "Limit Czasu Braku Aktualizacji"
     },
     "notify_before_end_minutes": {

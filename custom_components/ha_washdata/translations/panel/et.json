@@ -1338,7 +1338,7 @@
       "label": "Seadme Nimi"
     },
     "no_update_active_timeout": {
-      "doc": "Kui kaua võib pistik tsükli ajal vaikida, enne kui WashData lakkab selle viimast näitu usaldamast. Madalal võimsusel vaikima jäänud tsükkel lõpeb siis tavapäraselt; kõrgel võimsusel vaikima jäänud tsükkel peatatakse sunniviisiliselt alles siis, kui see on kestnud oodatust tublisti kauem. Vaikimisi 600 s arvestab pilve- või mesh-võrgu viivitustega.",
+      "doc": "Kui kaua võib pistik tsükli ajal vaikida, enne kui WashData lakkab selle viimast näitu usaldamast. Madalal võimsusel vaikima jäänud tsükkel lõpeb siis enamasti tavapäraselt; kõrgel võimsusel vaikima jäänud tsükkel peatatakse sunniviisiliselt alles siis, kui see on kestnud oodatust tublisti kauem. Vaikimisi 600 s arvestab pilve- või mesh-võrgu viivitustega.",
       "label": "Ilma Uuenduseta Aegumine"
     },
     "notify_before_end_minutes": {

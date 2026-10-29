@@ -1311,7 +1311,7 @@
             "label": "Eszköz neve"
         },
         "no_update_active_timeout": {
-            "doc": "Ennyi ideig maradhat csendben a konnektor ciklus közben, mielőtt a WashData már nem bízik az utolsó leolvasásában. Ha alacsony teljesítménynél hallgat el, a ciklus ezután szabályosan véget ér; ha magas teljesítménynél, a ciklust csak jóval a várt hosszán túl állítja le kényszerrel. Az alapértelmezett 600 mp a felhő- vagy mesh-hálózati késéseket is kibírja.",
+            "doc": "Ennyi ideig maradhat csendben a konnektor ciklus közben, mielőtt a WashData már nem bízik az utolsó leolvasásában. Ha alacsony teljesítménynél hallgat el, a ciklus ezután általában szabályosan véget ér; ha magas teljesítménynél, a ciklust csak jóval a várt hosszán túl állítja le kényszerrel. Az alapértelmezett 600 mp a felhő- vagy mesh-hálózati késéseket is kibírja.",
             "label": "Frissítés nélküli időtúllépés"
         },
         "notify_before_end_minutes": {

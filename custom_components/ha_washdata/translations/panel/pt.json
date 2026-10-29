@@ -1301,7 +1301,7 @@
       "label": "Nome do Dispositivo"
     },
     "no_update_active_timeout": {
-      "doc": "Quanto tempo a tomada pode ficar em silêncio durante um ciclo antes de o WashData deixar de confiar na sua última leitura. Um ciclo em silêncio a baixa potência termina então normalmente; um em silêncio a alta potência só é parado forçosamente muito depois da sua duração esperada. A predefinição de 600 s dá margem a atrasos da nuvem ou da rede mesh.",
+      "doc": "Quanto tempo a tomada pode ficar em silêncio durante um ciclo antes de o WashData deixar de confiar na sua última leitura. Um ciclo em silêncio a baixa potência costuma então terminar normalmente; um em silêncio a alta potência só é parado forçosamente muito depois da sua duração esperada. A predefinição de 600 s dá margem a atrasos da nuvem ou da rede mesh.",
       "label": "Timeout Sem Actualização"
     },
     "notify_before_end_minutes": {

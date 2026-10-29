@@ -1338,7 +1338,7 @@
       "label": "Laitteen nimi"
     },
     "no_update_active_timeout": {
-      "doc": "Kuinka kauan pistoke saa olla hiljaa syklin aikana, ennen kuin WashData lakkaa luottamasta sen viimeisimpään lukemaan. Matalalla teholla hiljaa pysyvä sykli päättyy silloin normaalisti; korkealla teholla hiljaa pysyvä sykli pysäytetään pakolla vasta, kun se on kestänyt selvästi odotettua pidempään. Oletus 600 s sallii pilvi- tai mesh-viiveet.",
+      "doc": "Kuinka kauan pistoke saa olla hiljaa syklin aikana, ennen kuin WashData lakkaa luottamasta sen viimeisimpään lukemaan. Matalalla teholla hiljaa pysyvä sykli päättyy silloin yleensä normaalisti; korkealla teholla hiljaa pysyvä sykli pysäytetään pakolla vasta, kun se on kestänyt selvästi odotettua pidempään. Oletus 600 s sallii pilvi- tai mesh-viiveet.",
       "label": "Päivityksettömyyden aikakatkaisuaika"
     },
     "notify_before_end_minutes": {

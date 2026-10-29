@@ -1326,7 +1326,7 @@
             "label": "Cihaz Adı"
         },
         "no_update_active_timeout": {
-            "doc": "Prizin bir döngü sırasında, WashData son okumasına güvenmeyi bırakmadan önce ne kadar süre sessiz kalabileceği. Düşük güçte sessiz kalan bir döngü bu durumda normal şekilde biter; yüksek güçte sessiz kalan bir döngü ancak beklenen süresini epeyce aştığında zorla durdurulur. Varsayılan 600 sn, bulut veya ağ gecikmelerine pay bırakır.",
+            "doc": "Prizin bir döngü sırasında, WashData son okumasına güvenmeyi bırakmadan önce ne kadar süre sessiz kalabileceği. Düşük güçte sessiz kalan bir döngü bu durumda genellikle normal şekilde biter; yüksek güçte sessiz kalan bir döngü ancak beklenen süresini epeyce aştığında zorla durdurulur. Varsayılan 600 sn, bulut veya ağ gecikmelerine pay bırakır.",
             "label": "Güncelleme Yok Zaman Aşımı"
         },
         "notify_before_end_minutes": {

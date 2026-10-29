@@ -1338,7 +1338,7 @@
       "label": "Apparaatnaam"
     },
     "no_update_active_timeout": {
-      "doc": "Hoe lang de stekker tijdens een cyclus geen updates mag sturen voordat WashData de laatste meting niet meer vertrouwt. Een cyclus die bij laag vermogen stil blijft, eindigt dan normaal; een cyclus die bij hoog vermogen stil blijft, wordt pas ruim na de verwachte duur geforceerd gestopt. De standaard 600 s houdt rekening met cloud- of mesh-vertraging.",
+      "doc": "Hoe lang de stekker tijdens een cyclus geen updates mag sturen voordat WashData de laatste meting niet meer vertrouwt. Een cyclus die bij laag vermogen stil blijft, eindigt dan meestal normaal; een cyclus die bij hoog vermogen stil blijft, wordt pas ruim na de verwachte duur geforceerd gestopt. De standaard 600 s houdt rekening met cloud- of mesh-vertraging.",
       "label": "Time-out zonder update"
     },
     "notify_before_end_minutes": {

@@ -293,7 +293,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'watchdog_interval', label: 'Watchdog Interval', internal: true, unit: 's', type: 'number', min: 1, def: 30,
         doc: 'How often the background check looks for stalled sensors and timeouts. Default 30 s.' },
       { key: 'no_update_active_timeout', label: 'No-Update Timeout', internal: true, unit: 's', type: 'number', min: 0, def: 600,
-        doc: 'How long the plug may stay silent during a cycle before WashData stops trusting its last reading. A cycle silent at low power then ends normally; one silent at high power is force-stopped only well past its expected length. The default 600 s allows for cloud or mesh delays.' },
+        doc: 'How long the plug may stay silent during a cycle before WashData stops trusting its last reading. A cycle silent at low power then usually ends normally; one silent at high power is force-stopped only well past its expected length. The default 600 s allows for cloud or mesh delays.' },
     ] },
     { sub: 'Housekeeping', fields: [
       { key: 'progress_reset_delay', label: 'Progress Reset Delay', unit: 's', type: 'number', min: 0, def: 1800,
