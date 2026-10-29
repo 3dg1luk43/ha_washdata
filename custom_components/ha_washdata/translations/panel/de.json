@@ -897,7 +897,7 @@
     "no_settings_match": "Keine Einstellungen stimmen mit „{q}“ überein",
     "no_split_points": "Noch keine geteilten Punkte.",
     "no_suggestions": "Keine aktiven Vorschläge.",
-    "notify_services_hint": "Verwenden Sie {entity}-Dienst-IDs (kommagetrennt für mehrere). Template-Variablen: {vars}.",
+    "notify_services_hint": "Fügen Sie jeder Liste unten {entity}-Dienste hinzu. Template-Variablen: {vars}.",
     "old_actions_warning": "Konfiguriert mit dem alten Aktionseditor (jetzt entfernt). Sie werden weiterhin auf Zyklusereignisse ausgelöst, können hier jedoch nicht mehr bearbeitet werden. Wandeln Sie in eine normale Automatisierung um oder entfernen Sie sie.",
     "pending_feedback": "Ausstehende Rückmeldung zur Erkennung",
     "performance_trend": "Leistungstrend ({n} Zyklen)",
@@ -1322,7 +1322,7 @@
       "label": "Mindest-Aus-Lücke"
     },
     "min_power": {
-      "doc": "Werte darunter gelten als 0 W (Standby). Filtert die Leerlaufleistung von Smart Plugs und Standby-LEDs heraus.",
+      "doc": "Die Untergrenze für den Leerlauf. Sofern Sie sie nicht selbst festlegen, liegt der Startschwellenwert standardmäßig knapp darüber und der Stoppschwellenwert bei 60% davon, sodass Werte darunter keinen Zyklus starten. Erhöhen Sie den Wert, wenn die Leerlaufleistung der Steckdose oder Standby-LEDs Zyklen startet.",
       "label": "Mindestleistung"
     },
     "ml_training_enabled": {
@@ -1334,7 +1334,7 @@
       "label": "Gerätename"
     },
     "no_update_active_timeout": {
-      "doc": "Kommt während eines Zyklus so lange keine Leistungsaktualisierung, gilt die Steckdose als offline und der Zyklus wird zwangsweise gestoppt. Der Standard von 600 s lässt Spielraum für Cloud- oder Mesh-Verzögerungen.",
+      "doc": "Wie lange die Steckdose während eines Zyklus keine Werte senden darf, bevor WashData ihrem letzten Messwert nicht mehr vertraut. Ein Zyklus, der bei niedriger Leistung verstummt, endet dann normal; einer, der bei hoher Leistung verstummt, wird erst deutlich nach seiner erwarteten Dauer zwangsweise gestoppt. Der Standard von 600 s lässt Spielraum für Cloud- oder Mesh-Verzögerungen.",
       "label": "Timeout ohne Aktualisierung"
     },
     "notify_before_end_minutes": {

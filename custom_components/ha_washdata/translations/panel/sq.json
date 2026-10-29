@@ -884,7 +884,7 @@
         "no_settings_match": "Asnjë cilësim nuk përputhet me \"{q}\"",
         "no_split_points": "Asnjë pikë ndarjeje ende.",
         "no_suggestions": "Asnjë sugjerim aktiv.",
-        "notify_services_hint": "Përdorni ID-të e shërbimit {entity} (të ndara me presje për shumë). Variablat e shabllonit: {vars}.",
+        "notify_services_hint": "Shtoni shërbime {entity} në secilën listë më poshtë. Variablat e shabllonit: {vars}.",
         "old_actions_warning": "Konfiguruar me redaktuesin e vjetër të veprimeve (tani i hequr). Ato ende ndezin në ngjarjet e ciklit, por nuk mund të modifikohen më këtu. Shndërrojini ato në një automatizim normal ose hiqni ato.",
         "pending_feedback": "Koment në pritje të zbulimit",
         "performance_trend": "Tendenca e performancës ({n} cikle)",
@@ -1298,7 +1298,7 @@
             "label": "Hendeku min. i fikjes"
         },
         "min_power": {
-            "doc": "Leximet nën këtë vlerë llogariten si 0 W (gatishmëri). Filtron konsumin në pritje të prizave inteligjente dhe LED-ve të gatishmërisë.",
+            "doc": "Niveli minimal në pritje. Nëse nuk i caktoni vetë, Pragu i nisjes vendoset si parazgjedhje pak mbi të dhe Pragu i ndalimit në 60% të tij, kështu që leximet nën të nuk nisin një cikël. Rriteni nëse konsumi në pritje i prizës ose i LED-ve të gatishmërisë nis cikle.",
             "label": "Fuqia minimale"
         },
         "ml_training_enabled": {
@@ -1310,7 +1310,7 @@
             "label": "Emri i pajisjes"
         },
         "no_update_active_timeout": {
-            "doc": "Nëse gjatë një cikli nuk vjen asnjë përditësim fuqie për kaq kohë, supozohet se priza doli jashtë linje dhe cikli ndalet me forcë. Parazgjedhja 600 s lejon vonesat e resë ose të rrjetit mesh.",
+            "doc": "Sa kohë mund të heshtë priza gjatë një cikli përpara se WashData të mos i besojë më leximit të saj të fundit. Një cikël që hesht me fuqi të ulët përfundon atëherë normalisht; një që hesht me fuqi të lartë ndalet me forcë vetëm shumë përtej kohëzgjatjes së pritur. Parazgjedhja 600 s lejon vonesat e resë ose të rrjetit mesh.",
             "label": "Koha e skadimit pa përditësim"
         },
         "notify_before_end_minutes": {

@@ -18,8 +18,9 @@ unreleased work in progress, so a surprise PR easily duplicates or conflicts wit
 
 Closed automatically:
 
-- an issue that skips the template (a template with an empty field is not closed; the bot asks
-  you to fill it in)
+- an issue that skips the template
+- an issue with missing information, 5 days after the bot asks for it, unless you update it or
+  reply
 - a PR with no linked issue, 3 days after the bot's warning (a PR whose linked issue is not yet
   accepted is not closed: it waits for the maintainer)
 - a PR whose template is left empty, 5 days after the warning, or deleted, at once
@@ -41,7 +42,6 @@ Python 3.13. Fork [the repository](https://github.com/3dg1luk43/ha_washdata) on 
 ```bash
 git clone https://github.com/YOUR_USERNAME/ha_washdata.git
 cd ha_washdata
-git submodule update --init --recursive   # translation tooling
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 ./devtools/install_hooks.sh               # pre-commit hook for the panel build

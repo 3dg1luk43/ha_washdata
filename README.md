@@ -100,7 +100,7 @@ wash + dry combination.
 | `button.<name>_pause_cycle` / `_resume_cycle` | Pause and resume a cycle (Pause can also cut the plug's power) |
 | `button.<name>_force_end_cycle` | End a stuck cycle |
 | `button.<name>_mark_unloaded` | Confirm the load is out (available in `clean`) |
-| `sensor.<name>_pump_runs_today` | Pump devices only: runs in the last 24 h |
+| `sensor.<name>_pump_runs_last_24_h` | Pump devices only: runs in the last 24 h |
 
 State meanings: `idle` means the display is on between cycles; `paused` covers quiet spells and a
 cycle halted on standby power (sub-state Stalled); `user_paused` is your own pause; `ending` is the
@@ -130,7 +130,7 @@ data:
 
 | Problem | Try |
 | :--- | :--- |
-| Cycles start on standby blips | Raise **Start Energy** (e.g. 2 Wh). |
+| Cycles start on standby blips | Raise **Start Energy** (e.g. 2 Wh; Settings > Advanced > Show internal settings). |
 | A cycle ends during a soak or pause | Raise **Off Delay** or **Min Off Gap** above the longest quiet spell in the program. For a soak you start yourself, press **Pause**. |
 | One run is split into two cycles | Raise **Min Off Gap** above the quiet gap before the tail. |
 | Program shows "unknown" | Label a few runs of that program; group near-identical profiles. |

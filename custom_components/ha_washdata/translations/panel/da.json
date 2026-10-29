@@ -897,7 +897,7 @@
     "no_settings_match": "Ingen indstillinger matcher \"{q}\"",
     "no_split_points": "Ingen opdeling af point endnu.",
     "no_suggestions": "Ingen aktive forslag.",
-    "notify_services_hint": "Brug {entity}-service-ID'er (kommaseparerede for flere). Skabelonvariabler: {vars}.",
+    "notify_services_hint": "Tilføj {entity}-services til hver liste nedenfor. Skabelonvariabler: {vars}.",
     "old_actions_warning": "Konfigureret med den gamle handlingseditor (nu fjernet). De skyder stadig på cyklusbegivenheder, men kan ikke længere redigeres her. Konverter dem til en normal automatisering, eller fjern dem.",
     "pending_feedback": "Afventer detektionsfeedback",
     "performance_trend": "Præstationstendens ({n} cyklusser)",
@@ -1326,7 +1326,7 @@
       "label": "Minimum slukket mellemrum"
     },
     "min_power": {
-      "doc": "Målinger under dette tæller som 0 W (standby). Filtrerer tomgangsforbruget fra smartstik og standby-LED'er fra.",
+      "doc": "Den nedre grænse for tomgangsforbrug. Medmindre du selv angiver dem, ligger Starttærskel som standard lige over den og Stoptærskel på 60% af den, så målinger under den ikke starter en cyklus. Hæv den, hvis tomgangsforbruget fra stikket eller standby-LED'er starter cyklusser.",
       "label": "Minimumseffekt"
     },
     "ml_training_enabled": {
@@ -1338,7 +1338,7 @@
       "label": "Enhedsnavn"
     },
     "no_update_active_timeout": {
-      "doc": "Hvis ingen effektopdatering kommer så længe under en cyklus, antages stikket at være offline, og cyklussen tvangsstoppes. Standarden på 600 s giver plads til forsinkelser i sky eller mesh.",
+      "doc": "Hvor længe stikket må være tavst under en cyklus, før WashData holder op med at stole på dets seneste måling. En cyklus, der bliver tavs ved lav effekt, slutter så normalt; en, der bliver tavs ved høj effekt, tvangsstoppes først et godt stykke efter sin forventede varighed. Standarden på 600 s giver plads til forsinkelser i sky eller mesh.",
       "label": "Timeout uden opdatering"
     },
     "notify_before_end_minutes": {

@@ -897,7 +897,7 @@
     "no_settings_match": "Inga inställningar matchar \"{q}\"",
     "no_split_points": "Inga delningspunkter ännu.",
     "no_suggestions": "Inga aktiva förslag.",
-    "notify_services_hint": "Använd {entity}-tjänst-ID:n (kommaavgränsade för flera). Mallvariabler: {vars}.",
+    "notify_services_hint": "Lägg till {entity}-tjänster i varje lista nedan. Mallvariabler: {vars}.",
     "old_actions_warning": "Konfigurerad med den gamla åtgärdsredigeraren (nu borttagen). De utlöses fortfarande vid cykelhändelser men kan inte längre redigeras här. Konvertera dem till en normal automatisering, eller ta bort dem.",
     "pending_feedback": "Väntande detektionsfeedback",
     "performance_trend": "Prestandatrend ({n} cykler)",
@@ -1326,7 +1326,7 @@
       "label": "Min. avlucka"
     },
     "min_power": {
-      "doc": "Mätvärden under detta räknas som 0 W (standby). Filtrerar bort tomgångsförbrukningen från smarta kontakter och standby-lysdioder.",
+      "doc": "Den nedre gränsen för tomgångsförbrukning. Om du inte anger dem själv ligger Starttröskel som standard strax över den och Stopptröskel på 60% av den, så att mätvärden under den inte startar någon cykel. Höj den om tomgångsförbrukningen från kontakten eller standby-lysdioder startar cykler.",
       "label": "Minimieffekt"
     },
     "ml_training_enabled": {
@@ -1338,7 +1338,7 @@
       "label": "Enhetsnamn"
     },
     "no_update_active_timeout": {
-      "doc": "Om ingen effektuppdatering kommer på så här lång tid under en cykel antas kontakten vara offline och cykeln tvångsstoppas. Standardvärdet 600 s ger utrymme för fördröjningar i moln eller mesh.",
+      "doc": "Hur länge kontakten får vara tyst under en cykel innan WashData slutar lita på dess senaste mätvärde. En cykel som tystnar vid låg effekt avslutas då normalt; en som tystnar vid hög effekt tvångsstoppas först en bra bit efter sin förväntade längd. Standardvärdet 600 s ger utrymme för fördröjningar i moln eller mesh.",
       "label": "Tidsgräns utan uppdatering"
     },
     "notify_before_end_minutes": {

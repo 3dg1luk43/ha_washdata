@@ -889,7 +889,7 @@
         "no_settings_match": "\"{q}\" ile eşleşen ayar yok",
         "no_split_points": "Henüz bölme noktası yok.",
         "no_suggestions": "Aktif öneri yok.",
-        "notify_services_hint": "{entity} hizmet kimliklerini kullanın (birden fazlası için virgülle ayrın). Şablon değişkenleri: {vars}.",
+        "notify_services_hint": "Aşağıdaki her listeye {entity} hizmetleri ekleyin. Şablon değişkenleri: {vars}.",
         "old_actions_warning": "Eski eylem düzenleyiciyle yapılandırılmıştır (artık kaldırılmıştır). Döngü etkinliklerinde hala tetikleniyorlar ancak artık burada düzenlenemezler. Bunları normal bir otomasyona dönüştürün veya kaldırın.",
         "pending_feedback": "Bekleyen algılama geri bildirimi",
         "performance_trend": "Performans trendi ({n} döngü)",
@@ -1314,7 +1314,7 @@
             "label": "Min. Kapalı Aralık"
         },
         "min_power": {
-            "doc": "Bunun altındaki okumalar 0 W (bekleme) sayılır. Akıllı prizlerin ve bekleme LED'lerinin boşta tüketimini filtreler.",
+            "doc": "Boşta tüketimin taban değeri. Siz ayarlamadıkça Başlangıç Eşiği varsayılan olarak bunun hemen üzerinde, Durdurma Eşiği ise bunun %60'ında olur; böylece bunun altındaki okumalar döngü başlatmaz. Prizin veya bekleme LED'lerinin boşta tüketimi döngü başlatıyorsa bunu yükseltin.",
             "label": "Minimum Güç"
         },
         "ml_training_enabled": {
@@ -1326,7 +1326,7 @@
             "label": "Cihaz Adı"
         },
         "no_update_active_timeout": {
-            "doc": "Bir döngü sırasında bu süre boyunca güç güncellemesi gelmezse prizin çevrimdışı olduğu varsayılır ve döngü zorla durdurulur. Varsayılan 600 sn, bulut veya ağ gecikmelerine pay bırakır.",
+            "doc": "Prizin bir döngü sırasında, WashData son okumasına güvenmeyi bırakmadan önce ne kadar süre sessiz kalabileceği. Düşük güçte sessiz kalan bir döngü bu durumda normal şekilde biter; yüksek güçte sessiz kalan bir döngü ancak beklenen süresini epeyce aştığında zorla durdurulur. Varsayılan 600 sn, bulut veya ağ gecikmelerine pay bırakır.",
             "label": "Güncelleme Yok Zaman Aşımı"
         },
         "notify_before_end_minutes": {

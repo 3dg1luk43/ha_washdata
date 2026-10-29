@@ -854,7 +854,7 @@
     "no_settings_match": "Aucun paramètre ne correspond à \"{q}\"",
     "no_split_points": "Pas encore de points de partage.",
     "no_suggestions": "Aucune suggestion active.",
-    "notify_services_hint": "Utilisez les IDs de service {entity} (séparés par des virgules pour plusieurs). Variables de gabarit : {vars}.",
+    "notify_services_hint": "Ajoutez des services {entity} à chaque liste ci-dessous. Variables de gabarit : {vars}.",
     "old_actions_warning": "Configuré avec l'ancien éditeur d'actions (maintenant supprimé). Ils se déclenchent toujours sur les événements du cycle mais ne peuvent plus être modifiés ici. Convertissez-les en une automatisation normale ou supprimez-les.",
     "pending_feedback": "En attente de retour de détection",
     "performance_trend": "Tendance des performances ({n} cycles)",
@@ -1289,7 +1289,7 @@
       "label": "Intervalle d'arrêt minimal"
     },
     "min_power": {
-      "doc": "Les mesures en dessous comptent comme 0 W (veille). Filtre la consommation au repos des prises connectées et des voyants de veille.",
+      "doc": "Le plancher de veille. Sauf si vous les définissez, le Seuil de démarrage se place par défaut juste au-dessus et le Seuil d'arrêt à 60 % de cette valeur, si bien que les mesures en dessous ne démarrent pas de cycle. Augmentez cette valeur si la consommation au repos de la prise ou des voyants de veille démarre des cycles.",
       "label": "Puissance minimale"
     },
     "ml_training_enabled": {
@@ -1301,7 +1301,7 @@
       "label": "Nom de l'appareil"
     },
     "no_update_active_timeout": {
-      "doc": "Si aucune mise à jour de puissance n'arrive pendant ce délai au cours d'un cycle, la prise est supposée hors ligne et le cycle est arrêté de force. La valeur par défaut de 600 s laisse de la marge aux délais du cloud ou du maillage.",
+      "doc": "Durée pendant laquelle la prise peut rester silencieuse au cours d'un cycle avant que WashData cesse de se fier à sa dernière mesure. Un cycle silencieux à faible puissance se termine alors normalement ; un cycle silencieux à forte puissance n'est arrêté de force que bien au-delà de sa durée prévue. La valeur par défaut de 600 s laisse de la marge aux délais du cloud ou du maillage.",
       "label": "Délai d'expiration sans mise à jour"
     },
     "notify_before_end_minutes": {

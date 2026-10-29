@@ -175,7 +175,7 @@ wrong looks like a bug in the integration:
    dishwasher cycle can never reach its end gate: the detector logs
    `Deferring dishwasher cycle end: elapsed 388s < minimum 1800s` forever. The
    default is therefore a washing machine; `--type dishwasher` needs
-   `--speedup 4` or lower and takes ~35 min.
+   `--speedup 4` or lower and takes ~30 min.
 
    **Raising the speedup is self-defeating, not merely ineffective**, and this
    is the real ceiling (register item 357). Item 331 made that floor drop to the
@@ -186,8 +186,8 @@ wrong looks like a bug in the integration:
    The floor then holds the cycle open to 1800 s, which pushes elapsed to 7.3x
    the profile, which is what killed the match in the first place. Deadlock:
    `No profile match candidates ... duration ratio filter`, then
-   `elapsed 1003s < minimum 1800s`, forever. A 60x run takes 16 min and still
-   fails 2 of 19 checks (no cycle recorded).
+   `elapsed 1003s < minimum 1800s`, forever. A 60x run took 16 min and still
+   failed 2 of the then 19 checks (no cycle recorded).
 
    So the floor is only relative for a cycle that stays matched, and a
    compressed one cannot. Making it relative in the UNMATCHED case is not
@@ -250,8 +250,8 @@ Each of these is unreachable from a mocked Home Assistant:
 1. The config flow creates a working entry, and platforms create their entities.
 2. A real export imports through the real storage migration, and profiles appear.
 3. `ws_set_options` persists, reloads the entry and takes effect.
-4. A replayed cycle is detected, matched and stored exactly once.
-5. Notifications are *delivered*: start, live updates, pre-complete, finish.
+4. A replayed cycle is detected and stored (at least one new cycle).
+5. Notifications are *delivered*: start/finish alerts, live updates.
 6. Live updates reach mobile targets only, on their own dedicated tag.
 7. The dismissals arrive - the lifecycle hand-over and the live-activity end.
    This is the #446 failure mode, and it is the check the unit suite cannot make.

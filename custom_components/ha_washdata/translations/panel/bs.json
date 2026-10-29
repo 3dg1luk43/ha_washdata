@@ -900,7 +900,7 @@
         "no_settings_match": "Nijedna postavka ne odgovara \"{q}\"",
         "no_split_points": "Još nema podijeljenih bodova.",
         "no_suggestions": "Nema aktivnih prijedloga.",
-        "notify_services_hint": "Koristite ID-ove servisa {entity} (odvojene zarezima za više). Varijable predloška: {vars}.",
+        "notify_services_hint": "Dodajte servise {entity} u svaku listu ispod. Varijable predloška: {vars}.",
         "old_actions_warning": "Konfigurisano sa starim uređivačem akcija (sada uklonjeno). I dalje se aktiviraju na događaje ciklusa, ali se više ne mogu uređivati ovdje. Pretvorite ih u normalnu automatizaciju ili ih uklonite.",
         "pending_feedback": "Čeka se povratna informacija o detekciji",
         "performance_trend": "Trend performansi ({n} ciklusa)",
@@ -1324,7 +1324,7 @@
             "label": "Min razmak isključivanja"
         },
         "min_power": {
-            "doc": "Očitanja ispod ove vrijednosti računaju se kao 0 W (pripravnost). Filtrira potrošnju u mirovanju pametnih utikača i LED lampica pripravnosti.",
+            "doc": "Donja granica mirovanja. Ako ih ne postavite sami, Prag pokretanja se zadano postavlja tik iznad nje, a Prag zaustavljanja na 60% njene vrijednosti, pa očitanja ispod nje ne pokreću ciklus. Povećajte je ako potrošnja u mirovanju utikača ili LED lampica pripravnosti pokreće cikluse.",
             "label": "Minimalna snaga"
         },
         "ml_training_enabled": {
@@ -1336,7 +1336,7 @@
             "label": "Naziv uređaja"
         },
         "no_update_active_timeout": {
-            "doc": "Ako tokom ciklusa ovoliko dugo ne stigne nijedno ažuriranje snage, pretpostavlja se da je utikač van mreže i ciklus se prisilno zaustavlja. Zadanih 600 s pokriva kašnjenja oblaka ili mesh mreže.",
+            "doc": "Koliko dugo utikač smije ne slati podatke tokom ciklusa prije nego što WashData prestane vjerovati njegovom posljednjem očitanju. Ciklus bez podataka pri niskoj snazi tada se završava normalno; ciklus bez podataka pri visokoj snazi prisilno se zaustavlja tek znatno nakon očekivanog trajanja. Zadanih 600 s pokriva kašnjenja oblaka ili mesh mreže.",
             "label": "Timeout bez ažuriranja"
         },
         "notify_before_end_minutes": {

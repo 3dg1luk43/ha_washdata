@@ -889,7 +889,7 @@
     "no_settings_match": "Ükski seade ei vasta \"{q}\"",
     "no_split_points": "Jagatud punkte pole veel.",
     "no_suggestions": "Aktiivseid soovitusi pole.",
-    "notify_services_hint": "Kasutage {entity} teenuse ID-sid (mitme korral komadega eraldatult). Malli muutujad: {vars}.",
+    "notify_services_hint": "Lisage {entity} teenuseid igasse allolevasse loendisse. Malli muutujad: {vars}.",
     "old_actions_warning": "Seadistatud vana toimingute redaktoriga (nüüd eemaldatud). Need käivituvad endiselt tsüklisündmustele, kuid neid ei saa siin enam redigeerida. Teisendage need tavaliseks automaatikaks või eemaldage need.",
     "pending_feedback": "Ootab tuvastamise tagasisidet",
     "performance_trend": "Toimivuse trend ({n} tsüklit)",
@@ -1326,7 +1326,7 @@
       "label": "Min Väljalülitumise Vahe"
     },
     "min_power": {
-      "doc": "Sellest väiksemaid näite loetakse 0 W-ks (ooterežiim). Filtreerib välja nutipistikute ja ooterežiimi LED-ide tühikäigutarbimise.",
+      "doc": "Tühikäigu alampiir. Kui neid pole eraldi määratud, on Käivitumise Lävi vaikimisi veidi sellest kõrgemal ja Peatumise Lävi 60% sellest, nii et sellest väiksemad näidud tsüklit ei käivita. Tõstke seda, kui pistiku või ooterežiimi LED-ide tühikäigutarbimine käivitab tsükleid.",
       "label": "Minimaalne Võimsus"
     },
     "ml_training_enabled": {
@@ -1338,7 +1338,7 @@
       "label": "Seadme Nimi"
     },
     "no_update_active_timeout": {
-      "doc": "Kui tsükli ajal ei saabu nii kaua ühtegi võimsusvärskendust, eeldatakse, et pistik läks võrgust ära, ja tsükkel peatatakse sunniviisiliselt. Vaikimisi 600 s arvestab pilve- või mesh-võrgu viivitustega.",
+      "doc": "Kui kaua võib pistik tsükli ajal vaikida, enne kui WashData lakkab selle viimast näitu usaldamast. Madalal võimsusel vaikima jäänud tsükkel lõpeb siis tavapäraselt; kõrgel võimsusel vaikima jäänud tsükkel peatatakse sunniviisiliselt alles siis, kui see on kestnud oodatust tublisti kauem. Vaikimisi 600 s arvestab pilve- või mesh-võrgu viivitustega.",
       "label": "Ilma Uuenduseta Aegumine"
     },
     "notify_before_end_minutes": {

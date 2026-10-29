@@ -889,7 +889,7 @@
         "no_settings_match": "Egy beállítás sem felel meg a következőnek: \"{q}\"",
         "no_split_points": "Még nincsenek megosztott pontok.",
         "no_suggestions": "Nincsenek aktív javaslatok.",
-        "notify_services_hint": "Használja a(z) {entity} szolgáltatásazonosítókat (több esetén vesszővel elválasztva). Sablonváltozók: {vars}.",
+        "notify_services_hint": "Adjon hozzá {entity} szolgáltatásokat az alábbi listák mindegyikéhez. Sablonváltozók: {vars}.",
         "old_actions_warning": "A régi műveletszerkesztővel konfigurálva (most eltávolítva). Továbbra is aktiválják a cikluseseményeket, de már nem szerkeszthetők itt. Alakítsa át őket normál automatizálássá, vagy távolítsa el őket.",
         "pending_feedback": "Függőben lévő észlelési visszajelzés",
         "performance_trend": "Teljesítménytrend ({n} ciklus)",
@@ -1299,7 +1299,7 @@
             "label": "Min. kikapcsolási rés"
         },
         "min_power": {
-            "doc": "Az ez alatti leolvasások 0 W-nak (készenlét) számítanak. Kiszűri az okoskonnektorok üresjárati fogyasztását és a készenléti LED-eket.",
+            "doc": "Az üresjárati alsó határ. Ha nem állítja be őket, az Indítási küszöb alapértéke kicsivel e fölött van, a Leállítási küszöbé pedig ennek 60%-a, így az ez alatti leolvasások nem indítanak ciklust. Emelje meg, ha a konnektor üresjárati fogyasztása vagy a készenléti LED-ek ciklust indítanak.",
             "label": "Minimális teljesítmény"
         },
         "ml_training_enabled": {
@@ -1311,7 +1311,7 @@
             "label": "Eszköz neve"
         },
         "no_update_active_timeout": {
-            "doc": "Ha ciklus közben ennyi ideig nem érkezik teljesítményfrissítés, a konnektort offline-nak tekinti, és kényszerrel leállítja a ciklust. Az alapértelmezett 600 mp a felhő- vagy mesh-hálózati késéseket is kibírja.",
+            "doc": "Ennyi ideig maradhat csendben a konnektor ciklus közben, mielőtt a WashData már nem bízik az utolsó leolvasásában. Ha alacsony teljesítménynél hallgat el, a ciklus ezután szabályosan véget ér; ha magas teljesítménynél, a ciklust csak jóval a várt hosszán túl állítja le kényszerrel. Az alapértelmezett 600 mp a felhő- vagy mesh-hálózati késéseket is kibírja.",
             "label": "Frissítés nélküli időtúllépés"
         },
         "notify_before_end_minutes": {

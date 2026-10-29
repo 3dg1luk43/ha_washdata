@@ -952,7 +952,7 @@
     "no_settings_match": "No settings match \"{q}\"",
     "no_split_points": "No split points yet.",
     "no_suggestions": "No active suggestions.",
-    "notify_services_hint": "Use {entity} service IDs (comma-separated for multiple). Template variables: {vars}.",
+    "notify_services_hint": "Add {entity} services to each list below. Template variables: {vars}.",
     "odometer_correct_hint": "Set this if WashData counted a run that never happened, or the appliance ran cycles before WashData was installed.",
     "odometer_intro": "This total only goes up. Deleting a cycle does not lower it, so service reminders stay correct.",
     "old_actions_warning": "Configured with the old actions editor (now removed). They still fire on cycle events but can no longer be edited here. Convert them into a normal automation, or remove them.",
@@ -1349,7 +1349,7 @@
       "label": "Min Off Gap"
     },
     "min_power": {
-      "doc": "Readings below this count as 0 W (standby). Filters out the idle draw of smart plugs and standby LEDs.",
+      "doc": "The idle floor. Unless you set them, the Start Threshold defaults just above it and the Stop Threshold to 60% of it, so readings below it do not start a cycle. Raise it if the idle draw of the plug or standby LEDs starts cycles.",
       "label": "Minimum Power"
     },
     "ml_training_enabled": {
@@ -1361,7 +1361,7 @@
       "label": "Device Name"
     },
     "no_update_active_timeout": {
-      "doc": "If no power update arrives for this long during a cycle, assume the plug went offline and force-stop the cycle. The default 600 s allows for cloud or mesh delays.",
+      "doc": "How long the plug may stay silent during a cycle before WashData stops trusting its last reading. A cycle silent at low power then ends normally; one silent at high power is force-stopped only well past its expected length. The default 600 s allows for cloud or mesh delays.",
       "label": "No-Update Timeout"
     },
     "notify_before_end_minutes": {

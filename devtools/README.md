@@ -80,7 +80,9 @@ python3 devtools/eval.py run --config-override '{"const": {"MATCH_DURATION_WEIGH
 - **Twin entries** (two config entries on one plug, e.g. a test clone: >= 5 runs and 50% of the
   smaller entry's runs start within 120 s of the other's) are scored once by default, keeping the
   entry with the most labelled traced cycles; `--include-twins` scores both; `meta.twin_entries` lists
-  them. Every replay harness runs `async_repair_profile_samples` first, as setup does.
+  them. `eval.py` runs `async_repair_profile_samples` first, as setup does (so do
+  `end_gate_eval.py`, `eta_eval.py`, `decisive_margin_eval.py`, `terminal_drop_plugpull_eval.py` and
+  `playground_parity_eval.py`, and every harness that loads through `eval.py`).
 - `const` overrides rebind module-level names only; a value captured at import time (default
   argument, derived dict) is not affected.
 - After a matcher change that is meant to move accuracy, re-cut the baseline:
@@ -97,6 +99,8 @@ All but `dtw_ab_eval.py` replay the shipped code; run with `--help` for options.
 | `decisive_margin_eval.py --loo` | the mid-cycle switch bypass; `--switching` adds commit and switch accuracy |
 | `prefix_guard_eval.py` | Smart-Termination split guards on genuine ends and random cuts (the #364 prefix term, removed in 0.5.8, is kept here only as a harness copy) |
 | `min_off_gap_eval.py` | `min_off_gap` split/merge bounds (replays unmatched) |
+| `lead_in_eval.py` | stored cycle start vs the raw onset, on the start-gate manifest |
+| `advisory_usefulness_eval.py` | whether a computed profile advisory is worth showing |
 | `start_gate_eval.py --manifest cycle_data/github_issues/start_gate_sources.jsonl` | start gates on raw continuous histories: missed, late, phantom starts per idle day, per device type |
 | `eta_eval.py --all-formats` | first-ETA timing and ETA error by elapsed fraction |
 | `energy_projection_eval.py` | projected-energy accuracy |
@@ -112,7 +116,8 @@ All but `dtw_ab_eval.py` replay the shipped code; run with `--help` for options.
 History CSVs, exports) live under `cycle_data/github_issues/<issue>/` and the maintainer's
 recorder snapshot under `cycle_data/me/recorder_<date>/`, every file gzipped and the
 manifest named `.jsonl`, so no `*.json`/`*.csv` glob of the harnesses above or the slow
-tests reads them. Only `start_gate_eval.py` does (it reads `*.gz`). Promoting an export
+tests reads them. Only `start_gate_eval.py` (it reads `*.gz`) and `lead_in_eval.py`
+(through its loaders) do. Promoting an export
 into the matcher corpus is a deliberate step: gunzip it into a corpus folder and re-cut
 the baselines.
 
