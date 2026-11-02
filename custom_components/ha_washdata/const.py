@@ -1510,6 +1510,11 @@ DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_WASHER_DRYER: 2.0,
     DEVICE_TYPE_DISHWASHER: 2.0,
     DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
+    # The catch-all types run anything from a 60 s coffee to a 3 h oven, so they must
+    # not drop a 3 s plug's readings for 30 s at a time (#493: 5 s gaps between short
+    # runs were invisible). The start debounce follows (resolve_start_duration_default).
+    DEVICE_TYPE_GENERIC: 5.0,
+    DEVICE_TYPE_OTHER: 5.0,
 }
 
 
