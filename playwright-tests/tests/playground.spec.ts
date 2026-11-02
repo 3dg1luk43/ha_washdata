@@ -127,6 +127,16 @@ test('workbench: editing a param reveals Save-to-settings and it persists', asyn
   await assertWsCalled(page, 'ha_washdata/set_options');
 });
 
+test('workbench: a value outside the setting\'s range says what it runs as (#487)', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const inp = page.locator('.wd-pg-param-inp[data-pgkey="smart_termination_duration_ratio"]');
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('2.0');
+  await expect(page.locator('.wd-pg-held')).toHaveText('runs as 1');
+  await page.locator('.wd-pg-param-inp[data-pgkey="smart_termination_duration_ratio"]').fill('0.95');
+  await expect(page.locator('.wd-pg-held')).toHaveCount(0);
+});
+
 // ─── Settings control panel: live source, presets, per-setting publish ───────
 
 test('control panel: loads the integration\'s live settings on tab entry', async ({ page }) => {

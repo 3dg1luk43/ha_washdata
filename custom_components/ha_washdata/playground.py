@@ -108,6 +108,7 @@ from .cycle_detector import (
     CycleDetector,
     CycleDetectorConfig,
     effective_anticrease_finalize_ratio,
+    effective_smart_termination_ratio,
     effective_curve_preroll_seconds,
     standby_near_stop_ceiling,
     terminal_high_for_guards,
@@ -1612,7 +1613,11 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
         "anti_wrinkle_max_duration": getattr(config, "anti_wrinkle_max_duration", None),
         "anti_wrinkle_idle_timeout": getattr(config, "anti_wrinkle_idle_timeout", None),
         "dishwasher_end_spike_quiet_release": getattr(config, "dishwasher_end_spike_quiet_release", None),
-        "smart_termination_duration_ratio": getattr(config, "smart_termination_duration_ratio", None),
+        "smart_termination_duration_ratio": (
+            effective_smart_termination_ratio(config.smart_termination_duration_ratio)
+            if isinstance(getattr(config, "smart_termination_duration_ratio", None), (int, float))
+            else None
+        ),
         # Both are clamped by the detector wherever it reads them, so report the
         # effective figure: a summary carrying an out-of-range override would
         # describe a sim that did not run.

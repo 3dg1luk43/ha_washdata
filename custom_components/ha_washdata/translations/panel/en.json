@@ -714,7 +714,8 @@
     "bp_needs": "Needs",
     "bp_needs_version": "WashData {version} or newer",
     "bp_author": "Author",
-    "bp_required": "required"
+    "bp_required": "required",
+    "pg_runs_as": "runs as {value}"
   },
   "log": {
     "all_levels": "All levels",
@@ -1135,7 +1136,7 @@
     "profile_match_min_duration_ratio": "Minimum cycle length as a fraction of the profile's duration; default 0.1 (10%)",
     "profile_match_max_duration_ratio": "Maximum cycle length as a fraction of the profile's duration; default 1.8 (180%)",
     "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
-    "dishwasher_end_spike_quiet_release": "Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released",
+    "dishwasher_end_spike_quiet_release": "Dishwasher: seconds below Stop since the last activity that end the wait for the final drain, once the expected duration is reached",
     "smart_termination_duration_ratio": "Fraction of the program's average duration a cycle must reach before Smart Termination may end it early; lower it if run times vary",
     "anti_crease_finalize_ratio": "Fraction of the program's average duration a cycle must reach before the anti-crease tail may finish it; lower it on dryers, keep washers at the default",
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
@@ -1285,7 +1286,7 @@
       "label": "Device Type"
     },
     "dishwasher_end_spike_quiet_release": {
-      "doc": "After the expected duration, how long the dishwasher must stay below the Stop Threshold before WashData stops waiting for the final drain. Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.",
+      "doc": "Once the expected duration is reached, WashData stops waiting for the final drain after the dishwasher has stayed below the Stop Threshold this long since its last activity (never less than the program's longest recorded drying pause). Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.",
       "label": "Passive-Dry Quiet Release"
     },
     "door_end_dwell_seconds": {

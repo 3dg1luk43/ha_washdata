@@ -324,7 +324,7 @@ const _SETTINGS_SECTIONS = [
   ] },
   { id: 'dishwasher', label: 'Dishwasher', intro: 'End handling for dishwashers, which often dry quietly for a long time before a short final drain.', onlyDeviceTypes: ['dishwasher'], fields: [
     { key: 'dishwasher_end_spike_quiet_release', label: 'Passive-Dry Quiet Release', unit: 's', type: 'number', step: 60, min: 0, def: 600,
-      doc: 'After the expected duration, how long the dishwasher must stay below the Stop Threshold before WashData stops waiting for the final drain. Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.' },
+      doc: 'Once the expected duration is reached, WashData stops waiting for the final drain after the dishwasher has stayed below the Stop Threshold this long since its last activity (never less than the program\'s longest recorded drying pause). Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.' },
   ] },
   { id: 'delay', label: 'Delay Start', intro: 'Detects an appliance that is on and waiting for a delayed start.', fields: [
     { key: 'delay_start_detect_enabled', label: 'Enable Delay-Start Detection', type: 'checkbox',
@@ -7583,7 +7583,7 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_max_power',  'Max Anti-Wrinkle Power','W', 'A pulse above this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_max_duration','Max Anti-Wrinkle Duration','s', 'A pulse longer than this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
-      ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
+      ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: seconds below Stop since the last activity that end the wait for the final drain, once the expected duration is reached', 'advanced'],
       ['smart_termination_duration_ratio', 'Smart Termination Ratio', '', 'Fraction of the program\'s average duration a cycle must reach before Smart Termination may end it early; lower it if run times vary', 'advanced'],
       ['anti_crease_finalize_ratio', 'Anti-Crease Finalize Ratio', '', 'Fraction of the program\'s average duration a cycle must reach before the anti-crease tail may finish it; lower it on dryers, keep washers at the default', 'advanced'],
       ['curve_preroll_seconds', 'Curve Pre-roll', 's', 'Seconds of readings from aborted start attempts carried into the front of a cycle\'s curve; 0 = off', 'timing'],
@@ -7675,7 +7675,19 @@ class HaWashdataPanel extends HTMLElement {
     if (this._pgThreshStart != null) out.start_threshold_w = this._pgThreshStart;
     if (this._pgThreshStop != null) out.stop_threshold_w = this._pgThreshStop;
     for (const [k, v] of Object.entries(this._pgParamOverrides || {})) out[k] = v;
+    // The sim runs on the settings form's range, as the saved option would (#487).
+    for (const k of Object.keys(out)) out[k] = this._pgHeld(k, out[k]);
     return out;
+  }
+
+  // A numeric Playground value held to its setting's min/max; anything else as is.
+  _pgHeld(key, val) {
+    if (typeof val !== 'number' || isNaN(val)) return val;
+    const f = _FIELD_BY_KEY[key] || {};
+    let held = val;
+    if (typeof f.min === 'number' && held < f.min) held = f.min;
+    if (typeof f.max === 'number' && held > f.max) held = f.max;
+    return held;
   }
 
   // Staged value for one key, or undefined when the field is at the live baseline.
@@ -8033,6 +8045,11 @@ class HaWashdataPanel extends HTMLElement {
       else curVal = this._pgParamOverrides[key] ?? liveVal;
       const isBool = type === 'bool';
       const isDrag = threshFields.has(key);
+      // A typed value outside the setting's range runs as the nearest end of it (#487).
+      const held = this._pgHeld(key, curVal);
+      const heldNote = (!isBool && typeof curVal === 'number' && held !== curVal)
+        ? `<span class="wd-pg-held" style="font-size:.72em;color:var(--warning-color,#eda100)">${this._t('lbl.pg_runs_as', {value: String(held)}, 'runs as {value}')}</span>`
+        : '';
       const unitTxt = unit ? unit : '';
       const gc = groupColors[group] || '#2a78d6';
       const gl = groupLabels[group] || '';
@@ -8063,6 +8080,7 @@ class HaWashdataPanel extends HTMLElement {
             ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" aria-label="${_esc(lbl)}" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
             : `<input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">`}
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
+          ${heldNote}
           ${pubBtn}
         </div>
       </div>`;

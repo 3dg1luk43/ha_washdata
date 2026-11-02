@@ -338,6 +338,14 @@ def effective_anticrease_finalize_ratio(value: Any) -> float:
     )
 
 
+def effective_smart_termination_ratio(value: float) -> float:
+    """The Smart Termination duration ratio the gate applies: held to the
+    documented [0.50, 1.00]. Shared with the Playground's config summary, which
+    reported a typed 2.0 that ran as 1.0 (#487).
+    """
+    return min(1.0, max(0.5, float(value)))
+
+
 def effective_curve_preroll_seconds(value: Any) -> float:
     """The pre-roll window actually applied for a stored value (0 = off).
 
@@ -2528,7 +2536,7 @@ class CycleDetector:
         # value persisted by an import or an older schema is read here unclamped): a
         # 0.0 would drop the duration floor entirely and let Smart Termination fire the
         # moment its other conditions pass.
-        configured_ratio = min(1.0, max(0.5, configured_ratio))
+        configured_ratio = effective_smart_termination_ratio(configured_ratio)
         if (
             device_type == "dishwasher"
             and end_spike_seen
@@ -3527,7 +3535,17 @@ class CycleDetector:
                 # matched profile (expected==0) the gating is bypassed so the
                 # legacy "any spike counts" behaviour is preserved for unmatched
                 # cycles (relied on by the dishwasher unmatched-cap path).
-                if (
+                # #487: and only on a reading that looks like a terminal event, at
+                # the level the profile's terminal quiet is measured at. A Siemens
+                # dries at 0.7-1.0 W; with Stop at 1.0 W one 1.0 W sample counted as
+                # "high" here while terminal_quiet_seen (strict >) called it quiet,
+                # so it armed the spike, the 0.90 ratio relief let Smart Termination
+                # through, and the cycle ended before its real pump-out.
+                spike_floor = max(
+                    float(self._config.stop_threshold_w),
+                    TERMINAL_EVENT_PEAK_FRAC * float(self._cycle_max_power),
+                )
+                if power > spike_floor and (
                     self._expected_duration <= 0
                     or current_duration
                     >= self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS
@@ -3542,8 +3560,10 @@ class CycleDetector:
                     )
                 else:
                     self._logger.debug(
-                        "Mid-cycle spike in ENDING ignored for end-spike "
-                        "tracking (%.0fs < %.0f%% of expected %.0fs)",
+                        "Spike in ENDING not counted as the end spike (%.1f W, "
+                        "floor %.1f W; %.0fs, needs %.0f%% of expected %.0fs)",
+                        power,
+                        spike_floor,
                         current_duration,
                         DISHWASHER_END_SPIKE_MIN_PROGRESS * 100,
                         self._expected_duration,
