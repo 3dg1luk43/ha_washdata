@@ -667,7 +667,8 @@
     "bp_needs": "Nécessite",
     "bp_needs_version": "WashData {version} ou plus récent",
     "bp_author": "Auteur",
-    "bp_required": "obligatoire"
+    "bp_required": "obligatoire",
+    "pg_runs_as": "simulé avec {value}"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -1077,7 +1078,7 @@
     "bp_needs_version": "Nécessite WashData {version} ou plus récent."
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
+    "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes sous le Seuil d'arrêt depuis la dernière activité qui mettent fin à l'attente de la vidange finale, une fois la durée attendue atteinte",
     "smart_termination_duration_ratio": "Fraction de la durée moyenne du programme qu'un cycle doit atteindre avant que la Terminaison intelligente puisse l'arrêter plus tôt ; baissez-la si les durées varient",
     "anti_crease_finalize_ratio": "Fraction de la durée moyenne du programme qu'un cycle doit atteindre avant que la traîne anti-froissement puisse le terminer ; baissez-la sur les sèche-linge, gardez la valeur par défaut sur les lave-linge",
     "anti_wrinkle_enabled": "Absorber les impulsions de rotation après la phase principale au lieu de les lire comme de nouveaux cycles",
@@ -1186,7 +1187,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Libération au silence du séchage passif",
-      "doc": "Après la durée attendue : temps pendant lequel le lave-vaisselle doit rester sous le Seuil d'arrêt avant que WashData cesse d'attendre la vidange finale. Augmentez-le si une vidange tardive après un long séchage est manquée. L'attente ne dépasse jamais 30 minutes."
+      "doc": "Une fois la durée attendue atteinte, WashData cesse d'attendre la vidange finale lorsque le lave-vaisselle est resté sous le Seuil d'arrêt pendant cette durée depuis sa dernière activité (jamais moins que la plus longue pause de séchage enregistrée du programme). Augmentez-le si une vidange tardive après un long séchage est manquée. L'attente ne dépasse jamais 30 minutes."
     },
     "anti_crease_finalize_ratio": {
       "label": "Ratio de finalisation anti-froissement",
@@ -1333,7 +1334,7 @@
       "label": "Icône de notification"
     },
     "notify_live_chronometer": {
-      "doc": "Android : ajoute un compte à rebours jusqu'à la fin estimée à côté du texte de notification. Utilisez {finish_time} dans Message de pré-achèvement pour afficher l'heure de fin à la place d'un second compte à rebours.",
+      "doc": "Android : ajoute un compte à rebours jusqu'à la fin estimée à côté du texte de notification. Utilisez {finish_time} dans Message de mise à jour en direct pour afficher l'heure de fin à la place d'un second compte à rebours.",
       "label": "Utiliser le chronomètre en direct"
     },
     "notify_live_interval_seconds": {
@@ -1358,11 +1359,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Texte de chaque mise à jour de progression en direct. Variables du modèle : {device}, {program}, {minutes} (minutes restantes), {finish_time} (heure de fin estimée, ex. 14:30). Avec toute autre variable, le texte par défaut est utilisé.",
-      "label": "Message de pré-achèvement"
+      "label": "Message de mise à jour en direct"
     },
     "notify_reminder_message": {
       "doc": "Texte de l'Alerte de pré-fin, envoyée une seule fois. Variables du modèle : {device}, {program}, {minutes} (le réglage Alerte de pré-fin). Avec toute autre variable, le texte par défaut est utilisé.",
-      "label": "Message de rappel"
+      "label": "Message de l'alerte de pré-fin"
     },
     "notify_start_message": {
       "doc": "Corps envoyé au démarrage d'un cycle. Variables du modèle : {device}, {program}. Avec toute autre variable, le texte par défaut est utilisé.",

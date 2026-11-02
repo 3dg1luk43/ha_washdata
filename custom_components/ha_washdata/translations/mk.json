@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Означи одржување како завршено",
+      "description": "Евидентирајте задача за одржување како завршена сега, исто како копчето Готово во панелот.",
+      "fields": {
+        "device_id": {
+          "name": "Уред",
+          "description": "Уредот WashData на кој му припаѓа задачата."
+        },
+        "task_id": {
+          "name": "ID на задача",
+          "description": "ID на задачата, како што е наведен во атрибутот due_task_ids на сензорот Треба одржување (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other или custom_ ID на сопствена задача)."
+        },
+        "notes": {
+          "name": "Забелешки",
+          "description": "Опционална забелешка зачувана со записот во дневникот."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Избриши циклус",
+      "description": "Избришете еден зачуван циклус. Неговата програма повторно се гради без него. Не може да се врати.",
+      "fields": {
+        "device_id": {
+          "name": "Уред",
+          "description": "Уредот WashData."
+        },
+        "cycle_id": {
+          "name": "ID на циклус",
+          "description": "ID на циклусот за бришење, на пр. променливата cycle_id на окидачот \"Циклусот завршен\"."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Покрени ML обука",
       "description": "Рачно обучете ги моделите ML на уредот од означените циклуси на овој уред (експериментални).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Не може да се додели профил: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Циклусот не е пронајден."
+    },
+    "maintenance_task_not_found": {
+      "message": "На овој уред нема задача за одржување со ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Потребен е валиден task_id."
     }
   },
   "device_automation": {

@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Markera underhåll som klart",
+      "description": "Logga en underhållsuppgift som klar nu, precis som panelens knapp Klar gör.",
+      "fields": {
+        "device_id": {
+          "name": "Enhet",
+          "description": "WashData-enheten som uppgiften hör till."
+        },
+        "task_id": {
+          "name": "Uppgifts-ID",
+          "description": "Uppgiftens ID, så som det anges i attributet due_task_ids på sensorn Dags för underhåll (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, eller en egen uppgifts custom_-ID)."
+        },
+        "notes": {
+          "name": "Anteckningar",
+          "description": "Valfri anteckning som sparas med loggposten."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Ta bort cykel",
+      "description": "Ta bort en sparad cykel. Dess program byggs om utan den. Kan inte ångras.",
+      "fields": {
+        "device_id": {
+          "name": "Enhet",
+          "description": "WashData-enheten."
+        },
+        "cycle_id": {
+          "name": "Cykel-ID",
+          "description": "ID för cykeln som ska tas bort, t.ex. variabeln cycle_id från utlösaren Cykel avslutad."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Starta ML-träning",
       "description": "Träna om ML-modellerna på enheten manuellt från enhetens egna märkta cykler (experimentell).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Det gick inte att tilldela profilen: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cykeln hittades inte."
+    },
+    "maintenance_task_not_found": {
+      "message": "Ingen underhållsuppgift med ID {task_id} på den här enheten."
+    },
+    "task_id_required": {
+      "message": "Ett giltigt task_id krävs."
     }
   },
   "device_automation": {

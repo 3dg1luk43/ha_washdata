@@ -714,7 +714,8 @@
     "bp_needs": "Benötigt",
     "bp_needs_version": "WashData {version} oder neuer",
     "bp_author": "Autor",
-    "bp_required": "erforderlich"
+    "bp_required": "erforderlich",
+    "pg_runs_as": "läuft mit {value}"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -1114,7 +1115,7 @@
     "bp_needs_version": "Benötigt WashData {version} oder neuer."
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
+    "dishwasher_end_spike_quiet_release": "Geschirrspüler: Sekunden unter dem Stoppschwellenwert seit der letzten Aktivität, nach denen das Warten auf das letzte Abpumpen endet, sobald die erwartete Dauer erreicht ist",
     "smart_termination_duration_ratio": "Anteil der durchschnittlichen Programmdauer, den ein Zyklus erreichen muss, bevor die intelligente Beendigung ihn vorzeitig beenden darf; senken, wenn die Laufzeiten schwanken",
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
     "interrupted_min_seconds": "Kurze Zyklen werden als unterbrochen markiert",
@@ -1223,7 +1224,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Ruhefreigabe nach Passivtrocknung",
-      "doc": "Nach der erwarteten Dauer: wie lange der Geschirrspüler unter dem Stoppschwellenwert bleiben muss, bevor WashData nicht mehr auf das letzte Abpumpen wartet. Erhöhen, wenn ein spätes Abpumpen nach langem Trocknen verpasst wird. Die Wartezeit überschreitet nie 30 Minuten."
+      "doc": "Nach Erreichen der erwarteten Dauer wartet WashData nicht mehr auf das letzte Abpumpen, sobald der Geschirrspüler seit seiner letzten Aktivität so lange unter dem Stoppschwellenwert geblieben ist (nie kürzer als die längste aufgezeichnete Trocknungspause des Programms). Erhöhen, wenn ein spätes Abpumpen nach langem Trocknen verpasst wird. Die Wartezeit überschreitet nie 30 Minuten."
     },
     "anti_crease_finalize_ratio": {
       "label": "Verhältnis für Knitterschutz-Abschluss",
@@ -1366,7 +1367,7 @@
       "label": "Benachrichtigungssymbol"
     },
     "notify_live_chronometer": {
-      "doc": "Android: Fügt der Benachrichtigung einen Countdown bis zum voraussichtlichen Ende hinzu. Mit {finish_time} in der Vorend-Nachricht wird die Endzeit statt eines zweiten Countdowns angezeigt.",
+      "doc": "Android: Fügt neben dem Benachrichtigungstext einen Countdown bis zum voraussichtlichen Ende hinzu. Mit {finish_time} in der Nachricht der Live-Aktualisierung wird die Endzeit statt eines zweiten Countdowns angezeigt.",
       "label": "Live-Chronometer verwenden"
     },
     "notify_live_interval_seconds": {
@@ -1391,11 +1392,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Text jedes Live-Fortschrittsupdates. Vorlagenvariablen: {device}, {program}, {minutes} (verbleibende Minuten), {finish_time} (voraussichtliche Endzeit, z. B. 14:30). Bei jeder anderen Variable wird der Standardtext verwendet.",
-      "label": "Vorend-Nachricht"
+      "label": "Nachricht der Live-Aktualisierung"
     },
     "notify_reminder_message": {
       "doc": "Text des einmaligen Vorend-Alarms. Vorlagenvariablen: {device}, {program}, {minutes} (die Einstellung Vorend-Alarm). Bei jeder anderen Variable wird der Standardtext verwendet.",
-      "label": "Erinnerungsnachricht"
+      "label": "Nachricht des Vorend-Alarms"
     },
     "notify_start_message": {
       "doc": "Text, der beim Start eines Zyklus gesendet wird. Vorlagenvariablen: {device}, {program}. Bei jeder anderen Variable wird der Standardtext verwendet.",

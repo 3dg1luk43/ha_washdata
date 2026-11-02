@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Marquer l'entretien comme fait",
+      "description": "Enregistrez une tâche d'entretien comme faite maintenant, comme le fait le bouton Fait du panneau.",
+      "fields": {
+        "device_id": {
+          "name": "Appareil",
+          "description": "L'appareil WashData auquel appartient la tâche."
+        },
+        "task_id": {
+          "name": "ID de la tâche",
+          "description": "L'ID de la tâche, tel qu'indiqué dans l'attribut due_task_ids du capteur Entretien à effectuer (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, ou l'ID custom_ d'une tâche personnalisée)."
+        },
+        "notes": {
+          "name": "Remarques",
+          "description": "Remarque facultative enregistrée avec l'entrée du journal."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Supprimer le cycle",
+      "description": "Supprimez un cycle enregistré. Son programme est reconstruit sans lui. Action irréversible.",
+      "fields": {
+        "device_id": {
+          "name": "Appareil",
+          "description": "L'appareil WashData."
+        },
+        "cycle_id": {
+          "name": "Identifiant du cycle",
+          "description": "L'ID du cycle à supprimer, par exemple la variable cycle_id du déclencheur Cycle terminé."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Déclencher la formation ML",
       "description": "Réentraîner manuellement les modèles ML sur l'appareil à partir des cycles étiquetés de cet appareil (expérimental).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Impossible d'attribuer le profil : {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cycle introuvable."
+    },
+    "maintenance_task_not_found": {
+      "message": "Aucune tâche d'entretien avec l'ID {task_id} sur cet appareil."
+    },
+    "task_id_required": {
+      "message": "Un task_id valide est requis."
     }
   },
   "device_automation": {

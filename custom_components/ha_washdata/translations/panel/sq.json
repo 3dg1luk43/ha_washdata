@@ -709,7 +709,8 @@
         "bp_needs": "Kërkon",
         "bp_needs_version": "WashData {version} ose më i ri",
         "bp_author": "Autori",
-        "bp_required": "i detyrueshëm"
+        "bp_required": "i detyrueshëm",
+        "pg_runs_as": "ekzekutohet me {value}"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -1342,7 +1343,7 @@
             "label": "Ikona e njoftimit"
         },
         "notify_live_chronometer": {
-            "doc": "Android: shton një numërim mbrapsht deri te fundi i vlerësuar pranë tekstit të njoftimit. Përdorni {finish_time} në Mesazh para-përfundimi për të treguar orën e mbarimit në vend të një numërimi mbrapsht të dytë.",
+            "doc": "Android: shton një numërim mbrapsht deri te fundi i vlerësuar pranë tekstit të njoftimit. Përdorni {finish_time} te Mesazhi i përditësimit live për të treguar orën e mbarimit në vend të një numërimi të dytë mbrapsht.",
             "label": "Përdor kronometër live"
         },
         "notify_live_interval_seconds": {
@@ -1367,11 +1368,11 @@
         },
         "notify_pre_complete_message": {
             "doc": "Teksti i çdo përditësimi live të progresit. Variablat shabllon: {device}, {program}, {minutes} (minutat e mbetura), {finish_time} (fundi i vlerësuar, p.sh. 14:30). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
-            "label": "Mesazh para-përfundimi"
+            "label": "Mesazhi i përditësimit live"
         },
         "notify_reminder_message": {
             "doc": "Teksti i Alarmit para fundit, që dërgohet një herë. Variablat shabllon: {device}, {program}, {minutes} (cilësimi Alarm para fundit). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
-            "label": "Mesazh kujtues"
+            "label": "Mesazhi i alarmit para fundit"
         },
         "notify_start_message": {
             "doc": "Teksti që dërgohet kur fillon një cikël. Variablat shabllon: {device}, {program}. Me çdo variabël tjetër përdoret teksti i paracaktuar.",
@@ -1534,7 +1535,7 @@
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "Lirim në qetësi gjatë tharjes pasive",
-            "doc": "Pas kohëzgjatjes së pritur, sa gjatë duhet të qëndrojë fuqia e pjatalarëses më e ulët se Pragu i ndalimit përpara se WashData të ndalojë pritjen për zbrazjen përfundimtare të ujit. Rriteni nëse humbet një zbrazje e vonë pas një tharjeje të gjatë. Pritja nuk i kalon kurrë 30 minuta."
+            "doc": "Pasi arrihet kohëzgjatja e pritshme, WashData ndalon pritjen për zbrazjen përfundimtare të ujit kur pjatalarësja ka qëndruar kaq gjatë nën Pragun e ndalimit që nga aktiviteti i saj i fundit (kurrë më pak se pauza më e gjatë e regjistruar e tharjes së programit). Rriteni nëse humbet një zbrazje e vonë pas një tharjeje të gjatë. Pritja nuk i kalon kurrë 30 minuta."
         },
         "profile_evidence_sources": {
             "label": "Ciklet që formojnë një program",
@@ -1981,7 +1982,7 @@
         "anti_wrinkle_max_power": "Një puls mbi këtë e mbaron modalitetin kundër rrudhave dhe hap një cikël të ri",
         "profile_match_min_duration_ratio": "Gjatësia minimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 0.1 (10%)",
         "profile_match_max_duration_ratio": "Gjatësia maksimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 1.8 (180%)",
-        "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda qetësie pas kohëzgjatjes së pritur para se të lirohet pritja e shkarkimit në fund të ciklit",
+        "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda nën Pragun e ndalimit që nga aktiviteti i fundit, që i japin fund pritjes për zbrazjen përfundimtare, pasi arrihet kohëzgjatja e pritshme",
         "smart_termination_duration_ratio": "Pjesa e kohëzgjatjes mesatare të programit që një cikël duhet të arrijë përpara se Përfundimi i Zgjuar ta mbyllë herët; uleni nëse kohëzgjatjet ndryshojnë",
         "anti_crease_finalize_ratio": "Pjesa e kohëzgjatjes mesatare të programit që një cikël duhet të arrijë përpara se bishti kundër rrudhave ta përfundojë; uleni te tharëset, makinat larëse lërini në vlerën e parazgjedhur",
         "curve_preroll_seconds": "Sekonda leximesh nga përpjekjet e ndërprera për nisje të bartura në fillim të kurbës së një cikli; 0 = joaktiv"

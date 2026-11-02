@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Marcați întreținerea ca efectuată",
+      "description": "Înregistrați acum o sarcină de întreținere ca efectuată, la fel ca butonul Terminat din panou.",
+      "fields": {
+        "device_id": {
+          "name": "Dispozitiv",
+          "description": "Dispozitivul WashData căruia îi aparține sarcina."
+        },
+        "task_id": {
+          "name": "ID sarcină",
+          "description": "ID-ul sarcinii, așa cum apare în atributul due_task_ids al senzorului Întreținere scadentă (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other sau ID-ul custom_ al unei sarcini personalizate)."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Notă opțională salvată împreună cu înregistrarea din jurnal."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Ștergeți ciclul",
+      "description": "Ștergeți un ciclu salvat. Programul său este reconstruit fără el. Acțiunea nu poate fi anulată.",
+      "fields": {
+        "device_id": {
+          "name": "Dispozitiv",
+          "description": "Dispozitivul WashData."
+        },
+        "cycle_id": {
+          "name": "ID-ul ciclului",
+          "description": "ID-ul ciclului de șters, de exemplu variabila cycle_id a declanșatorului Ciclu încheiat."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Porniți antrenarea ML",
       "description": "Reantrenați manual modelele ML de pe dispozitiv pe baza ciclurilor etichetate ale acestui dispozitiv (experimental).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Nu s-a putut atribui profilul: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Ciclul nu a fost găsit."
+    },
+    "maintenance_task_not_found": {
+      "message": "Nicio sarcină de întreținere cu ID-ul {task_id} pe acest dispozitiv."
+    },
+    "task_id_required": {
+      "message": "Este necesar un task_id valid."
     }
   },
   "device_automation": {

@@ -721,7 +721,8 @@
     "bp_needs": "Zahtjevi",
     "bp_needs_version": "WashData {version} ili noviji",
     "bp_author": "Autor",
-    "bp_required": "obavezno"
+    "bp_required": "obavezno",
+    "pg_runs_as": "simulacija koristi {value}"
   },
   "log": {
     "all_levels": "Sve razine",
@@ -1221,7 +1222,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Otpuštanje nakon tihe faze sušenja",
-      "doc": "Nakon očekivanog trajanja: koliko dugo perilica posuđa mora ostati ispod Praga zaustavljanja prije nego što WashData prestane čekati završno ispumpavanje. Povećajte ako se kasno ispumpavanje nakon dugog sušenja propusti. Čekanje nikad ne prelazi 30 minuta."
+      "doc": "Kad se dosegne očekivano trajanje, WashData prestaje čekati završno ispumpavanje nakon što perilica posuđa ostane ispod Praga zaustavljanja ovoliko dugo od svoje posljednje aktivnosti (nikad kraće od najduže zabilježene stanke za sušenje u programu). Povećajte ako se kasno ispumpavanje nakon dugog sušenja propusti. Čekanje nikad ne prelazi 30 minuta."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Udio prosječnog trajanja programa koji ciklus mora dosegnuti prije nego što se okretanje bubnja male snage računa kao rep anti-bore. Smanjite ga (npr. 0,75) kod sušilica koje se prilagođavaju količini rublja. Kod perilica ostavite zadano (0,98), inače pranje može završiti na pola.",
@@ -1368,7 +1369,7 @@
       "label": "Ikona obavijesti"
     },
     "notify_live_chronometer": {
-      "doc": "Android: dodaje odbrojavanje do procijenjenog završetka pored teksta obavijesti. Koristite {finish_time} u Poruci pred završetak da prikažete vrijeme završetka umjesto drugog odbrojavanja.",
+      "doc": "Android: dodaje odbrojavanje do procijenjenog završetka pored teksta obavijesti. Koristite {finish_time} u Poruci ažuriranja uživo da prikažete vrijeme završetka umjesto drugog odbrojavanja.",
       "label": "Koristi kronometar uživo"
     },
     "notify_live_interval_seconds": {
@@ -1393,11 +1394,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Tekst svakog ažuriranja napretka uživo. Varijable predloška: {device}, {program}, {minutes} (preostale minute), {finish_time} (procijenjeni završetak, npr. 14:30). Za svaku drugu varijablu koristi se zadani tekst.",
-      "label": "Poruka pred završetak"
+      "label": "Poruka ažuriranja uživo"
     },
     "notify_reminder_message": {
       "doc": "Tekst jednokratnog Upozorenja prije završetka. Varijable predloška: {device}, {program}, {minutes} (postavka Upozorenje prije završetka). Za svaku drugu varijablu koristi se zadani tekst.",
-      "label": "Poruka podsjetnika"
+      "label": "Poruka upozorenja prije završetka"
     },
     "notify_start_message": {
       "doc": "Tekst koji se šalje kada ciklus započne. Varijable predloška: {device}, {program}. Za svaku drugu varijablu koristi se zadani tekst.",
@@ -1992,7 +1993,7 @@
     "other": "Ostalo"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Perilica posuđa: sekunde tišine nakon očekivanog trajanja prije nego što se otpusti čekanje na završno ispumpavanje vode",
+    "dishwasher_end_spike_quiet_release": "Perilica posuđa: sekunde ispod Praga zaustavljanja od posljednje aktivnosti nakon kojih završava čekanje na završno ispumpavanje, kad se dosegne očekivano trajanje",
     "smart_termination_duration_ratio": "Udio prosječnog trajanja programa koji ciklus mora dosegnuti prije nego što ga Pametni završetak smije ranije završiti; smanjite ako vremena rada variraju",
     "anti_crease_finalize_ratio": "Udio prosječnog trajanja programa koji ciklus mora dosegnuti prije nego što ga rep anti-bore smije dovršiti; smanjite kod sušilica, kod perilica ostavite zadano",
     "anti_wrinkle_enabled": "Upij impulse bubnja nakon glavne faze, a ne čitaj ih kao nove cikluse",

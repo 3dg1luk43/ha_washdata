@@ -714,7 +714,8 @@
     "bp_needs": "Krefst",
     "bp_needs_version": "WashData {version} eða nýrra",
     "bp_author": "Höfundur",
-    "bp_required": "nauðsynlegt"
+    "bp_required": "nauðsynlegt",
+    "pg_runs_as": "notað sem {value}"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -1114,7 +1115,7 @@
     "bp_needs_version": "Krefst WashData {version} eða nýrra."
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
+    "dishwasher_end_spike_quiet_release": "Uppþvottavél: sekúndur undir Stöðvunarþröskuldi frá síðustu virkni sem ljúka biðinni eftir lokaútdælingu, þegar væntanlegri lengd er náð",
     "smart_termination_duration_ratio": "Hlutfall af meðallengd kerfisins sem lota þarf að ná áður en snjöll lokun má ljúka henni snemma; lækkaðu það ef keyrslutímar eru breytilegir",
     "completion_min_seconds": "Stysta keyrsla sem telst raunveruleg lota",
     "interrupted_min_seconds": "Stuttar lotur merktar sem truflaðar",
@@ -1223,7 +1224,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Losun eftir hljóðláta þurrkun",
-      "doc": "Eftir væntanlega lengd: hversu lengi uppþvottavélin þarf að vera undir Stöðvunarþröskuldi áður en WashData hættir að bíða eftir lokaútdælingunni. Hækkaðu það ef sein útdæling eftir langa þurrkun fer fram hjá. Biðin fer aldrei yfir 30 mínútur."
+      "doc": "Þegar væntanlegri lengd er náð hættir WashData að bíða eftir lokaútdælingunni ef uppþvottavélin hefur verið undir Stöðvunarþröskuldi svona lengi frá síðustu virkni (aldrei skemur en lengsta skráða þurrkhlé kerfisins). Hækkaðu það ef sein útdæling eftir langa þurrkun fer fram hjá. Biðin fer aldrei yfir 30 mínútur."
     },
     "anti_crease_finalize_ratio": {
       "label": "Hlutfall fyrir lok hrukkuvarnar",
@@ -1370,7 +1371,7 @@
       "label": "Tilkynningatákn"
     },
     "notify_live_chronometer": {
-      "doc": "Android: bætir við niðurtalningu að áætluðum lokum við hliðina á tilkynningartextanum. Notaðu {finish_time} í For-lokarskilaboðin til að sýna lokatímann í stað annarrar niðurtalningar.",
+      "doc": "Android: bætir við niðurtalningu að áætluðum lokum við hliðina á tilkynningartextanum. Notaðu {finish_time} í stillingunni Skilaboð uppfærslu í beinni til að sýna lokatímann í stað annarrar niðurtalningar.",
       "label": "Nota beina tímamæling"
     },
     "notify_live_interval_seconds": {
@@ -1395,11 +1396,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Texti hverrar framvinduuppfærslu í beinni. Sniðbreytur: {device}, {program}, {minutes} (mínútur eftir), {finish_time} (áætlaður lokatími, t.d. 14:30). Ef önnur breyta er notuð gildir sjálfgefni textinn.",
-      "label": "For-lokar­skilaboð"
+      "label": "Skilaboð uppfærslu í beinni"
     },
     "notify_reminder_message": {
       "doc": "Texti Forlokaviðvörunar, sem er send einu sinni. Sniðbreytur: {device}, {program}, {minutes} (stillingin Forlokaviðvörun). Ef önnur breyta er notuð gildir sjálfgefni textinn.",
-      "label": "Minningarboð"
+      "label": "Skilaboð forlokaviðvörunar"
     },
     "notify_start_message": {
       "doc": "Meginmál sent þegar lota hefst. Sniðbreytur: {device}, {program}. Ef önnur breyta er notuð gildir sjálfgefni textinn.",

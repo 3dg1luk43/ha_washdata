@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Atzīmēt apkopi kā veiktu",
+      "description": "Reģistrējiet apkopes uzdevumu kā veiktu tagad, tāpat kā paneļa poga Gatavs.",
+      "fields": {
+        "device_id": {
+          "name": "Ierīce",
+          "description": "WashData ierīce, kurai pieder uzdevums."
+        },
+        "task_id": {
+          "name": "Uzdevuma ID",
+          "description": "Uzdevuma ID, kā norādīts sensora Jāveic apkope atribūtā due_task_ids (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other vai pielāgota uzdevuma custom_ ID)."
+        },
+        "notes": {
+          "name": "Piezīmes",
+          "description": "Izvēles piezīme, kas tiek saglabāta kopā ar žurnāla ierakstu."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Dzēst ciklu",
+      "description": "Dzēsiet vienu saglabātu ciklu. Tā programma tiek pārbūvēta bez tā. To nevar atsaukt.",
+      "fields": {
+        "device_id": {
+          "name": "Ierīce",
+          "description": "WashData ierīce."
+        },
+        "cycle_id": {
+          "name": "Cikla ID",
+          "description": "Dzēšamā cikla ID, piem., aktivizētāja „Cikls beidzās“ mainīgais cycle_id."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Aktivizēt ML apmācību",
       "description": "Manuāli pārapmāciet ierīcē esošos ML modeļus, izmantojot šīs ierīces pašas iezīmētos ciklus (eksperimentāls).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Neizdevās piešķirt profilu: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cikls nav atrasts."
+    },
+    "maintenance_task_not_found": {
+      "message": "Šajā ierīcē nav apkopes uzdevuma ar ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Nepieciešams derīgs task_id."
     }
   },
   "device_automation": {

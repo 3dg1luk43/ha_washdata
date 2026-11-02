@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "유지보수 완료로 표시",
+      "description": "패널의 완료 버튼처럼 유지보수 작업을 지금 완료한 것으로 기록합니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "작업이 속한 WashData 장치입니다."
+        },
+        "task_id": {
+          "name": "작업 ID",
+          "description": "유지보수 예정 센서의 due_task_ids 속성에 나열된 작업 ID입니다(descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other 또는 사용자 지정 작업의 custom_ ID)."
+        },
+        "notes": {
+          "name": "메모",
+          "description": "기록 항목과 함께 저장되는 선택적 메모입니다."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "사이클 삭제",
+      "description": "저장된 사이클 하나를 삭제합니다. 해당 프로그램은 이 사이클을 빼고 다시 만들어집니다. 되돌릴 수 없습니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "WashData 장치입니다."
+        },
+        "cycle_id": {
+          "name": "사이클 ID",
+          "description": "삭제할 사이클의 ID입니다(예: 사이클 종료됨 트리거의 cycle_id 변수)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML 훈련 시작",
       "description": "이 기기의 자체 라벨이 지정된 주기에서 기기 내 ML 모델을 수동으로 재교육합니다(실험용).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "프로필을 할당할 수 없습니다: {error}"
+    },
+    "cycle_not_found": {
+      "message": "사이클을 찾을 수 없습니다."
+    },
+    "maintenance_task_not_found": {
+      "message": "이 장치에 ID가 {task_id}인 유지보수 작업이 없습니다."
+    },
+    "task_id_required": {
+      "message": "유효한 task_id가 필요합니다."
     }
   },
   "device_automation": {

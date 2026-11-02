@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Karbantartás megjelölése elvégzettként",
+      "description": "Elvégzettként naplóz egy karbantartási feladatot most, ahogy a panel Kész gombja is.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "A WashData eszköz, amelyhez a feladat tartozik."
+        },
+        "task_id": {
+          "name": "Feladatazonosító",
+          "description": "A feladat azonosítója, ahogy az Esedékes karbantartás érzékelő due_task_ids attribútumában szerepel (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, vagy egy egyéni feladat custom_ azonosítója)."
+        },
+        "notes": {
+          "name": "Megjegyzések",
+          "description": "Választható megjegyzés, amely a naplóbejegyzéssel együtt tárolódik."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Ciklus törlése",
+      "description": "Töröljön egy tárolt ciklust. A programja nélküle épül újra. Ez nem vonható vissza.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "A WashData eszköz."
+        },
+        "cycle_id": {
+          "name": "Ciklusazonosító",
+          "description": "A törlendő ciklus azonosítója, pl. a Ciklus véget ért eseményindító cycle_id változója."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML-tanítás indítása",
       "description": "Tanítsa újra kézzel az eszközön futó ML-modelleket az eszköz saját címkézett ciklusaiból (kísérleti).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "A profil hozzárendelése nem sikerült: {error}"
+    },
+    "cycle_not_found": {
+      "message": "A ciklus nem található."
+    },
+    "maintenance_task_not_found": {
+      "message": "Ezen az eszközön nincs {task_id} azonosítójú karbantartási feladat."
+    },
+    "task_id_required": {
+      "message": "Érvényes task_id megadása kötelező."
     }
   },
   "device_automation": {

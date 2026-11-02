@@ -714,7 +714,8 @@
     "bp_needs": "Vajab",
     "bp_needs_version": "WashData {version} või uuem",
     "bp_author": "Autor",
-    "bp_required": "kohustuslik"
+    "bp_required": "kohustuslik",
+    "pg_runs_as": "kasutatakse väärtust {value}"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -1114,7 +1115,7 @@
     "bp_needs_version": "Vajab WashData {version} või uuemat."
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Nõudepesumasin: vaiksed sekundid pärast eeldatavat kestust, enne kui tsükli lõpu tühjenduse ootamine vabastatakse",
+    "dishwasher_end_spike_quiet_release": "Nõudepesumasin: sekundid allpool Peatumise Läve alates viimasest tegevusest, mille järel lõpliku tühjenduse ootamine lõpeb, kui eeldatav kestus on täis",
     "smart_termination_duration_ratio": "Osa programmi keskmisest kestusest, milleni tsükkel peab jõudma, enne kui nutikas lõpetamine tohib selle varem lõpetada; vähendage, kui tööajad kõiguvad",
     "anti_wrinkle_enabled": "Neelab pärast põhifaasi trummelimpulsid, selle asemel et lugeda neid uute tsüklitena",
     "anti_wrinkle_idle_timeout": "Kahe trummelimpulsi vahel lubatud vaikuseaeg enne kortsudevastase režiimi lõppu",
@@ -1223,7 +1224,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Passiivkuivatuse vaikne vabastamine",
-      "doc": "Kui kaua peab nõudepesumasin pärast eeldatavat kestust püsima allpool seadet Peatumise Lävi, enne kui WashData lõpetab lõpliku tühjenduse ootamise. Suurendage seda, kui pika kuivatuse järel hiline tühjendus jääb märkamata. Ootamine ei ületa kunagi 30 minutit."
+      "doc": "Kui eeldatav kestus on täis, lõpetab WashData lõpliku tühjenduse ootamise, kui nõudepesumasin on oma viimasest tegevusest saadik püsinud nii kaua allpool seadet Peatumise Lävi (mitte kunagi vähem kui programmi pikim salvestatud kuivatuspaus). Suurendage seda, kui pika kuivatuse järel hiline tühjendus jääb märkamata. Ootamine ei ületa kunagi 30 minutit."
     },
     "anti_crease_finalize_ratio": {
       "label": "Kortsudevastase lõpetamise suhe",
@@ -1370,7 +1371,7 @@
       "label": "Teavituse Ikoon"
     },
     "notify_live_chronometer": {
-      "doc": "Android: lisab teavituse teksti kõrvale eeldatava lõpuni kuluva loenduri. Kasutage {finish_time} Eel-Lõpetamise Sõnumis, et näidata lõpuaega teise loenduri asemel.",
+      "doc": "Android: lisab teavituse teksti kõrvale eeldatava lõpuni kuluva loenduri. Kasutage {finish_time} Reaalajas Uuenduse Sõnumis, et näidata lõpuaega teise loenduri asemel.",
       "label": "Kasuta Elavat Kronomeetrit"
     },
     "notify_live_interval_seconds": {
@@ -1395,11 +1396,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Iga reaalajas edenemisuuenduse tekst. Malli muutujad: {device}, {program}, {minutes} (järelejäänud minutid), {finish_time} (eeldatav lõpp, nt 14:30). Muu muutuja korral kasutatakse vaiketeksti.",
-      "label": "Eel-Lõpetamise Sõnum"
+      "label": "Reaalajas Uuenduse Sõnum"
     },
     "notify_reminder_message": {
       "doc": "Ühekordse Eel-Lõpu Hoiatuse tekst. Malli muutujad: {device}, {program}, {minutes} (seade Eel-Lõpu Hoiatus). Muu muutuja korral kasutatakse vaiketeksti.",
-      "label": "Meeldetuletuse Sõnum"
+      "label": "Eel-Lõpu Hoiatuse Sõnum"
     },
     "notify_start_message": {
       "doc": "Tsükli alguses saadetav tekst. Malli muutujad: {device}, {program}. Muu muutuja korral kasutatakse vaiketeksti.",

@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Shëno mirëmbajtjen si të kryer",
+      "description": "Regjistro një detyrë mirëmbajtjeje si të kryer tani, ashtu si butoni Gatë i panelit.",
+      "fields": {
+        "device_id": {
+          "name": "Pajisja",
+          "description": "Pajisja WashData së cilës i përket detyra."
+        },
+        "task_id": {
+          "name": "ID e detyrës",
+          "description": "ID-ja e detyrës, siç shfaqet në atributin due_task_ids të sensorit Mirëmbajtje e nevojshme (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, ose ID-ja custom_ e një detyre të personalizuar)."
+        },
+        "notes": {
+          "name": "Shënime",
+          "description": "Shënim opsional që ruhet bashkë me regjistrimin."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Fshi ciklin",
+      "description": "Fshi një cikël të ruajtur. Programi i tij rindërtohet pa të. Nuk mund të zhbëhet.",
+      "fields": {
+        "device_id": {
+          "name": "Pajisja",
+          "description": "Pajisja WashData."
+        },
+        "cycle_id": {
+          "name": "ID e ciklit",
+          "description": "ID-ja e ciklit për t'u fshirë, p.sh. variabli cycle_id i aktivizuesit \"Cikli përfundoi\"."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Aktivizo trajnimin ML",
       "description": "Ritrajno manualisht modelet ML të pajisjes nga ciklet e etiketuara të kësaj pajisjeje (eksperimental).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Profili nuk mund të caktohej: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cikli nuk u gjet."
+    },
+    "maintenance_task_not_found": {
+      "message": "Nuk ka detyrë mirëmbajtjeje me ID-në {task_id} në këtë pajisje."
+    },
+    "task_id_required": {
+      "message": "Kërkohet një task_id i vlefshëm."
     }
   },
   "device_automation": {

@@ -667,7 +667,8 @@
     "bp_needs": "Requer",
     "bp_needs_version": "WashData {version} ou mais recente",
     "bp_author": "Autor",
-    "bp_required": "obrigatório"
+    "bp_required": "obrigatório",
+    "pg_runs_as": "simulado com {value}"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -1077,7 +1078,7 @@
     "bp_needs_version": "Requer o WashData {version} ou mais recente."
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Máquina de lavar louça: segundos de silêncio após a duração esperada antes de libertar a espera da descarga de fim de ciclo",
+    "dishwasher_end_spike_quiet_release": "Máquina de lavar loiça: segundos abaixo do Limiar de Paragem desde a última atividade que terminam a espera pelo escoamento final, quando a duração esperada é atingida",
     "smart_termination_duration_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de a Terminação inteligente o poder terminar mais cedo; reduza-a se os tempos de execução variarem",
     "anti_crease_finalize_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de a cauda anti-vincos o poder terminar; reduza-a em máquinas de secar, deixe as máquinas de lavar na predefinição",
     "anti_wrinkle_enabled": "Absorver os impulsos de rotação após a fase principal em vez de os ler como novos ciclos",
@@ -1186,7 +1187,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Libertação em silêncio da secagem passiva",
-      "doc": "Após a duração esperada: quanto tempo a máquina de lavar loiça tem de ficar abaixo do Limiar de Paragem antes de o WashData deixar de esperar pelo escoamento final. Aumente-o se um escoamento tardio após uma secagem longa for perdido. A espera nunca passa dos 30 minutos."
+      "doc": "Quando a duração esperada é atingida, o WashData deixa de esperar pelo escoamento final se a máquina de lavar loiça ficou abaixo do Limiar de Paragem durante este tempo desde a sua última atividade (nunca menos do que a pausa de secagem mais longa registada do programa). Aumente-o se um escoamento tardio após uma secagem longa for perdido. A espera nunca passa dos 30 minutos."
     },
     "anti_crease_finalize_ratio": {
       "label": "Rácio de finalização anti-vincos",
@@ -1333,7 +1334,7 @@
       "label": "Ícone da Notificação"
     },
     "notify_live_chronometer": {
-      "doc": "Android: adiciona uma contagem decrescente até ao fim estimado junto ao texto da notificação. Use {finish_time} em Mensagem Pré-Conclusão para mostrar a hora de fim em vez de uma segunda contagem.",
+      "doc": "Android: adiciona uma contagem decrescente até ao fim estimado junto ao texto da notificação. Use {finish_time} em Mensagem de Atualização em Tempo Real para mostrar a hora de fim em vez de uma segunda contagem.",
       "label": "Usar Cronómetro em Tempo Real"
     },
     "notify_live_interval_seconds": {
@@ -1358,11 +1359,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Texto de cada atualização de progresso ao vivo. Variáveis de modelo: {device}, {program}, {minutes} (minutos restantes), {finish_time} (hora de fim estimada, ex. 14:30). Com qualquer outra variável é usado o texto predefinido.",
-      "label": "Mensagem Pré-Conclusão"
+      "label": "Mensagem de Atualização em Tempo Real"
     },
     "notify_reminder_message": {
       "doc": "Texto do Alerta Pré-Fim, enviado uma única vez. Variáveis de modelo: {device}, {program}, {minutes} (a definição Alerta Pré-Fim). Com qualquer outra variável é usado o texto predefinido.",
-      "label": "Mensagem de Lembrete"
+      "label": "Mensagem do Alerta Pré-Fim"
     },
     "notify_start_message": {
       "doc": "Corpo enviado quando um ciclo começa. Variáveis de modelo: {device}, {program}. Com qualquer outra variável é usado o texto predefinido.",

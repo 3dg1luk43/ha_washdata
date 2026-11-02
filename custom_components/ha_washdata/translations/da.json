@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Markér vedligeholdelse som udført",
+      "description": "Log en vedligeholdelsesopgave som udført nu, ligesom panelets knap Færdig gør.",
+      "fields": {
+        "device_id": {
+          "name": "Enhed",
+          "description": "WashData-enheden, som opgaven hører til."
+        },
+        "task_id": {
+          "name": "Opgave-ID",
+          "description": "Opgavens id, som angivet i attributten due_task_ids på sensoren Vedligeholdelse forfalder (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other eller en brugerdefineret opgaves custom_-id)."
+        },
+        "notes": {
+          "name": "Noter",
+          "description": "Valgfri note, der gemmes sammen med logposten."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Slet cyklus",
+      "description": "Slet én gemt cyklus. Dens program genopbygges uden den. Kan ikke fortrydes.",
+      "fields": {
+        "device_id": {
+          "name": "Enhed",
+          "description": "WashData-enheden."
+        },
+        "cycle_id": {
+          "name": "Cyklus-ID",
+          "description": "ID'et for den cyklus, der skal slettes, f.eks. variablen cycle_id fra udløseren Cyklus afsluttet."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Start ML-træning",
       "description": "Gentræn ML-modellerne på enheden manuelt ud fra enhedens egne mærkede cyklusser (eksperimentel).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Kunne ikke tildele profil: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cyklus ikke fundet."
+    },
+    "maintenance_task_not_found": {
+      "message": "Ingen vedligeholdelsesopgave med id'et {task_id} på denne enhed."
+    },
+    "task_id_required": {
+      "message": "Et gyldigt task_id er påkrævet."
     }
   },
   "device_automation": {

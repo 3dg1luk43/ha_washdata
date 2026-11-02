@@ -714,7 +714,8 @@
         "bp_needs": "Gerekli",
         "bp_needs_version": "WashData {version} veya üzeri",
         "bp_author": "Yazar",
-        "bp_required": "zorunlu"
+        "bp_required": "zorunlu",
+        "pg_runs_as": "{value} olarak çalışır"
     },
     "log": {
         "all_levels": "Tüm seviyeler",
@@ -1127,7 +1128,7 @@
         "anti_wrinkle_max_power": "Bunun üzerindeki bir darbe kırışıklık önlemeyi bitirir ve yeni bir döngü açar",
         "profile_match_min_duration_ratio": "Profil süresinin kesri olarak en kısa döngü uzunluğu; varsayılan 0.1 (%10)",
         "profile_match_max_duration_ratio": "Profil süresinin kesri olarak en uzun döngü uzunluğu; varsayılan 1.8 (%180)",
-        "dishwasher_end_spike_quiet_release": "Bulaşık makinesi: beklenen süreden sonra döngü sonu tahliye beklemesi bırakılmadan önceki sessiz saniyeler",
+        "dishwasher_end_spike_quiet_release": "Bulaşık makinesi: beklenen süreye ulaşıldıktan sonra, son etkinlikten beri Durdurma Eşiği'nin altında geçen ve son tahliye beklemesini bitiren saniyeler",
         "smart_termination_duration_ratio": "Akıllı Sonlandırma'nın döngüyü erken bitirebilmesi için döngünün ulaşması gereken, programın ortalama süresine oranı; çalışma süreleri değişkense düşürün",
         "anti_crease_finalize_ratio": "Kırışıklık önleme kuyruğunun döngüyü bitirebilmesi için döngünün ulaşması gereken, programın ortalama süresine oranı; kurutucularda düşürün, çamaşır makinelerini varsayılanda bırakın",
         "curve_preroll_seconds": "İptal edilen başlatma denemelerinden bir döngünün eğrisinin başına taşınan okuma saniyesi; 0 = kapalı"
@@ -1358,7 +1359,7 @@
             "label": "Bildirim Simgesi"
         },
         "notify_live_chronometer": {
-            "doc": "Android: bildirim metninin yanına tahmini bitişe kadar geri sayım ekler. İkinci bir geri sayım yerine bitiş saatini göstermek için Bitiş Öncesi Mesaj'da {finish_time} kullanın.",
+            "doc": "Android: bildirim metninin yanına tahmini bitişe kadar geri sayım ekler. İkinci bir geri sayım yerine bitiş saatini göstermek için Canlı Güncelleme Mesajı'nda {finish_time} kullanın.",
             "label": "Canlı Kronometre Kullan"
         },
         "notify_live_interval_seconds": {
@@ -1383,11 +1384,11 @@
         },
         "notify_pre_complete_message": {
             "doc": "Her canlı ilerleme güncellemesinin metni. Şablon değişkenleri: {device}, {program}, {minutes} (kalan dakika), {finish_time} (tahmini bitiş, örn. 14:30). Başka bir değişken kullanılırsa varsayılan metin gönderilir.",
-            "label": "Bitiş Öncesi Mesaj"
+            "label": "Canlı Güncelleme Mesajı"
         },
         "notify_reminder_message": {
             "doc": "Tek seferlik Bitiş Öncesi Uyarı metni. Şablon değişkenleri: {device}, {program}, {minutes} (Bitiş Öncesi Uyarı ayarı). Başka bir değişken kullanılırsa varsayılan metin gönderilir.",
-            "label": "Hatırlatıcı Mesaj"
+            "label": "Bitiş Öncesi Uyarı Mesajı"
         },
         "notify_start_message": {
             "doc": "Döngü başladığında gönderilen metin. Şablon değişkenleri: {device}, {program}. Başka bir değişken kullanılırsa varsayılan metin gönderilir.",
@@ -1550,7 +1551,7 @@
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "Pasif Kurutma Sessiz Serbest Bırakma",
-            "doc": "Beklenen süreden sonra, WashData son tahliyeyi beklemeyi bırakmadan önce bulaşık makinesinin Durdurma Eşiği'nin altında ne kadar kalması gerektiği. Uzun bir kurutmadan sonraki geç tahliye kaçırılıyorsa yükseltin. Bekleme asla 30 dakikayı aşmaz."
+            "doc": "Beklenen süreye ulaşıldıktan sonra, bulaşık makinesi son etkinliğinden beri bu kadar süre Durdurma Eşiği'nin altında kaldığında WashData son tahliyeyi beklemeyi bırakır (bu süre programın kaydedilmiş en uzun kurutma duraklamasından asla kısa olmaz). Uzun bir kurutmadan sonraki geç tahliye kaçırılıyorsa yükseltin. Bekleme asla 30 dakikayı aşmaz."
         },
         "profile_evidence_sources": {
             "label": "Bir programı şekillendiren döngüler",

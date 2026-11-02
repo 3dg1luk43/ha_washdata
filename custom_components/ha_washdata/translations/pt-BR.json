@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Marcar manutenção como feita",
+      "description": "Registre uma tarefa de manutenção como feita agora, como faz o botão Concluído do painel.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "O dispositivo WashData ao qual a tarefa pertence."
+        },
+        "task_id": {
+          "name": "ID da tarefa",
+          "description": "O ID da tarefa, como listado no atributo due_task_ids do sensor Manutenção pendente (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, ou o ID custom_ de uma tarefa personalizada)."
+        },
+        "notes": {
+          "name": "Observações",
+          "description": "Observação opcional salva com o registro."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Excluir ciclo",
+      "description": "Exclua um ciclo salvo. Seu programa é reconstruído sem ele. Não pode ser desfeito.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "O dispositivo WashData."
+        },
+        "cycle_id": {
+          "name": "ID do ciclo",
+          "description": "O ID do ciclo a ser excluído, por exemplo a variável cycle_id do gatilho Ciclo encerrado."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Iniciar treinamento de ML",
       "description": "Retreine manualmente os modelos de ML no dispositivo a partir dos ciclos rotulados deste dispositivo (experimental).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Não foi possível atribuir o perfil: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Ciclo não encontrado."
+    },
+    "maintenance_task_not_found": {
+      "message": "Nenhuma tarefa de manutenção com o ID {task_id} neste dispositivo."
+    },
+    "task_id_required": {
+      "message": "É necessário um task_id válido."
     }
   },
   "device_automation": {

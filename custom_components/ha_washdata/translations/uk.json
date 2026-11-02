@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Позначити обслуговування виконаним",
+      "description": "Записує завдання обслуговування як виконане зараз, як кнопка Готово на панелі.",
+      "fields": {
+        "device_id": {
+          "name": "Пристрій",
+          "description": "Пристрій WashData, до якого належить завдання."
+        },
+        "task_id": {
+          "name": "Ідентифікатор завдання",
+          "description": "Ідентифікатор завдання з атрибута due_task_ids датчика «Потрібне обслуговування» (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other або custom_ ID власного завдання)."
+        },
+        "notes": {
+          "name": "Нотатки",
+          "description": "Необов'язкова нотатка, що зберігається разом із записом у журналі."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Видалити цикл",
+      "description": "Видаляє один збережений цикл. Його програма перебудовується без нього. Скасувати неможливо.",
+      "fields": {
+        "device_id": {
+          "name": "Пристрій",
+          "description": "Пристрій WashData."
+        },
+        "cycle_id": {
+          "name": "Ідентифікатор циклу",
+          "description": "Ідентифікатор циклу для видалення, напр. змінна cycle_id тригера «Цикл завершено»."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Запустити навчання ML",
       "description": "Вручну перенавчіть моделі ML на пристрої з власних позначених циклів цього пристрою (експериментальний).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Не вдалося призначити профіль: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Цикл не знайдено."
+    },
+    "maintenance_task_not_found": {
+      "message": "На цьому пристрої немає завдання обслуговування з ідентифікатором {task_id}."
+    },
+    "task_id_required": {
+      "message": "Потрібен дійсний task_id."
     }
   },
   "device_automation": {

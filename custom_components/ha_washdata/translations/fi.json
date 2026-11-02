@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Merkitse huolto tehdyksi",
+      "description": "Kirjaa huoltotehtävä tehdyksi nyt, kuten paneelin Tehty-painike tekee.",
+      "fields": {
+        "device_id": {
+          "name": "Laite",
+          "description": "WashData-laite, johon tehtävä kuuluu."
+        },
+        "task_id": {
+          "name": "Tehtävän tunnus",
+          "description": "Tehtävän tunnus sellaisena kuin se näkyy Huolto tarpeen -anturin due_task_ids-attribuutissa (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other tai mukautetun tehtävän custom_-tunnus)."
+        },
+        "notes": {
+          "name": "Huomautukset",
+          "description": "Valinnainen huomautus, joka tallennetaan lokimerkinnän mukana."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Poista sykli",
+      "description": "Poista yksi tallennettu sykli. Sen ohjelma muodostetaan uudelleen ilman sitä. Tätä ei voi kumota.",
+      "fields": {
+        "device_id": {
+          "name": "Laite",
+          "description": "WashData-laite."
+        },
+        "cycle_id": {
+          "name": "Syklin tunnus",
+          "description": "Poistettavan syklin tunnus, esim. Sykli päättyi -laukaisimen cycle_id-muuttuja."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Käynnistä ML-koulutus",
       "description": "Kouluta laitteen ML-mallit manuaalisesti uudelleen tämän laitteen omien merkittyjen syklien perusteella (kokeellinen).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Profiilin määrittäminen epäonnistui: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Sykliä ei löydy."
+    },
+    "maintenance_task_not_found": {
+      "message": "Tällä laitteella ei ole huoltotehtävää tunnuksella {task_id}."
+    },
+    "task_id_required": {
+      "message": "Kelvollinen task_id vaaditaan."
     }
   },
   "device_automation": {

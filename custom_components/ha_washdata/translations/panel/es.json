@@ -667,7 +667,8 @@
     "bp_needs": "Requiere",
     "bp_needs_version": "WashData {version} o posterior",
     "bp_author": "Autor",
-    "bp_required": "obligatorio"
+    "bp_required": "obligatorio",
+    "pg_runs_as": "se simula con {value}"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -1077,7 +1078,7 @@
     "bp_needs_version": "Requiere WashData {version} o posterior."
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
+    "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos por debajo del Umbral de parada desde la última actividad que terminan la espera del vaciado final, una vez alcanzada la duración esperada",
     "smart_termination_duration_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la Terminación inteligente pueda finalizarlo antes de tiempo; redúzcala si la duración varía",
     "anti_crease_finalize_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la cola antiarrugas pueda terminarlo; redúzcala en secadoras, deje las lavadoras en el valor predeterminado",
     "anti_wrinkle_enabled": "Absorber los pulsos de giro tras la fase principal en lugar de leerlos como nuevos ciclos",
@@ -1186,7 +1187,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Liberación en silencio del secado pasivo",
-      "doc": "Tras la duración esperada: cuánto tiempo debe quedarse el lavavajillas por debajo del Umbral de parada antes de que WashData deje de esperar el vaciado final. Súbalo si se pierde un vaciado tardío después de un secado largo. La espera nunca supera los 30 minutos."
+      "doc": "Una vez alcanzada la duración esperada, WashData deja de esperar el vaciado final cuando el lavavajillas lleva este tiempo por debajo del Umbral de parada desde su última actividad (nunca menos que la pausa de secado más larga registrada del programa). Súbalo si se pierde un vaciado tardío después de un secado largo. La espera nunca supera los 30 minutos."
     },
     "anti_crease_finalize_ratio": {
       "label": "Proporción de finalización antiarrugas",
@@ -1333,7 +1334,7 @@
       "label": "Icono de notificación"
     },
     "notify_live_chronometer": {
-      "doc": "Android: agrega una cuenta atrás hasta el fin estimado junto al texto de notificación. Use {finish_time} en Mensaje de pre-finalización para mostrar la hora de fin en lugar de una segunda cuenta atrás.",
+      "doc": "Android: agrega una cuenta atrás hasta el fin estimado junto al texto de notificación. Use {finish_time} en Mensaje de actualización en vivo para mostrar la hora de fin en lugar de una segunda cuenta atrás.",
       "label": "Usar cronómetro en vivo"
     },
     "notify_live_interval_seconds": {
@@ -1358,11 +1359,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Texto de cada actualización de progreso en vivo. Variables de plantilla: {device}, {program}, {minutes} (minutos restantes), {finish_time} (hora de finalización estimada, ej. 14:30). Cualquier otra variable hace que se use el texto predeterminado.",
-      "label": "Mensaje de pre-finalización"
+      "label": "Mensaje de actualización en vivo"
     },
     "notify_reminder_message": {
       "doc": "Texto de la Alerta previa al fin, que se envía una sola vez. Variables de plantilla: {device}, {program}, {minutes} (el ajuste Alerta previa al fin). Cualquier otra variable hace que se use el texto predeterminado.",
-      "label": "Mensaje de recordatorio"
+      "label": "Mensaje de la alerta previa al fin"
     },
     "notify_start_message": {
       "doc": "Cuerpo enviado cuando comienza un ciclo. Variables de plantilla: {device}, {program}. Cualquier otra variable hace que se use el texto predeterminado.",

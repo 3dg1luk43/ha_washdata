@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Bakımı Yapıldı Olarak İşaretle",
+      "description": "Bir bakım görevini, paneldeki Tamam düğmesi gibi, şu an yapıldı olarak kaydedin.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Görevin ait olduğu WashData cihazı."
+        },
+        "task_id": {
+          "name": "Görev Kimliği",
+          "description": "Bakım zamanı sensörünün due_task_ids özniteliğinde listelenen görev kimliği (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other veya özel bir görevin custom_ kimliği)."
+        },
+        "notes": {
+          "name": "Notlar",
+          "description": "Günlük kaydıyla birlikte saklanan isteğe bağlı not."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Döngüyü Sil",
+      "description": "Kaydedilmiş bir döngüyü silin. Programı bu döngü olmadan yeniden oluşturulur. Geri alınamaz.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "WashData cihazı."
+        },
+        "cycle_id": {
+          "name": "Döngü Kimliği",
+          "description": "Silinecek döngünün kimliği, örn. Döngü sona erdi tetikleyicisinin cycle_id değişkeni."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML Eğitimini Başlat",
       "description": "Cihazdaki ML modellerini bu cihazın kendi etiketlenmiş döngülerinden manuel olarak yeniden eğitin (deneysel).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Profil atanamadı: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Döngü bulunamadı."
+    },
+    "maintenance_task_not_found": {
+      "message": "Bu cihazda {task_id} kimlikli bakım görevi yok."
+    },
+    "task_id_required": {
+      "message": "Geçerli bir task_id gereklidir."
     }
   },
   "device_automation": {

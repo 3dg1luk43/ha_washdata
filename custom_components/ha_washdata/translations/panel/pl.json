@@ -728,7 +728,8 @@
     "bp_needs": "Wymagania",
     "bp_needs_version": "WashData {version} lub nowszy",
     "bp_author": "Autor",
-    "bp_required": "wymagane"
+    "bp_required": "wymagane",
+    "pg_runs_as": "symulacja używa {value}"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -1238,7 +1239,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Zwolnienie po cichej fazie suszenia",
-      "doc": "Po upływie oczekiwanego czasu trwania: jak długo zmywarka musi pozostać poniżej Progu Zatrzymania, zanim WashData przestanie czekać na końcowe odpompowanie. Zwiększ, jeśli późne odpompowanie po długim suszeniu jest pomijane. Oczekiwanie nigdy nie przekracza 30 minut."
+      "doc": "Po osiągnięciu oczekiwanego czasu trwania WashData przestaje czekać na końcowe odpompowanie, gdy zmywarka pozostaje poniżej Progu Zatrzymania tak długo od swojej ostatniej aktywności (nigdy krócej niż najdłuższa zapisana przerwa na suszenie w danym programie). Zwiększ, jeśli późne odpompowanie po długim suszeniu jest pomijane. Oczekiwanie nigdy nie przekracza 30 minut."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim obracanie bębna o niskiej mocy zostanie uznane za ogon antygniotowy. Obniż (np. 0,75) w suszarkach, które dostosowują czas do wsadu. W pralkach zostaw wartość domyślną (0,98), inaczej pranie może się skończyć w połowie.",
@@ -1381,7 +1382,7 @@
       "label": "Ikona Powiadomienia"
     },
     "notify_live_chronometer": {
-      "doc": "Android: dodaje odliczanie do szacowanego zakończenia obok tekstu powiadomienia. Użyj {finish_time} w Wiadomości Przed Zakończeniem, aby wyświetlić godzinę zakończenia zamiast drugiego odliczania.",
+      "doc": "Android: dodaje odliczanie do szacowanego zakończenia obok tekstu powiadomienia. Użyj {finish_time} w Wiadomości Aktualizacji na Żywo, aby wyświetlić godzinę zakończenia zamiast drugiego odliczania.",
       "label": "Używaj Chronometru na Żywo"
     },
     "notify_live_interval_seconds": {
@@ -1406,11 +1407,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Treść każdej aktualizacji postępu na żywo. Zmienne szablonu: {device}, {program}, {minutes} (pozostałe minuty), {finish_time} (szacowana godzina zakończenia, np. 14:30). Przy każdej innej zmiennej używany jest tekst domyślny.",
-      "label": "Wiadomość Przed Zakończeniem"
+      "label": "Wiadomość Aktualizacji na Żywo"
     },
     "notify_reminder_message": {
       "doc": "Treść jednorazowego Alertu Przed Zakończeniem. Zmienne szablonu: {device}, {program}, {minutes} (ustawienie Alert Przed Zakończeniem). Przy każdej innej zmiennej używany jest tekst domyślny.",
-      "label": "Wiadomość Przypomnienia"
+      "label": "Wiadomość Alertu Przed Zakończeniem"
     },
     "notify_start_message": {
       "doc": "Treść wysyłana po rozpoczęciu cyklu. Zmienne szablonu: {device}, {program}. Przy każdej innej zmiennej używany jest tekst domyślny.",
@@ -2011,7 +2012,7 @@
     "other": "Inne"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy ciszy po oczekiwanym czasie trwania, zanim zwolnione zostanie oczekiwanie na końcowe odpompowanie wody",
+    "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy poniżej Progu Zatrzymania od ostatniej aktywności, po których kończy się oczekiwanie na końcowe odpompowanie, gdy minie oczekiwany czas trwania",
     "smart_termination_duration_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż, jeśli czasy pracy się wahają",
     "anti_crease_finalize_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim ogon antygniotowy może go zakończyć; obniż w suszarkach, w pralkach zostaw wartość domyślną",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",

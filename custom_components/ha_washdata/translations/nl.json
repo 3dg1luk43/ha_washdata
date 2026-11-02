@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Onderhoud markeren als gedaan",
+      "description": "Registreer een onderhoudstaak nu als gedaan, net als de knop Klaar in het paneel.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat waar de taak bij hoort."
+        },
+        "task_id": {
+          "name": "Taak-ID",
+          "description": "De ID van de taak, zoals vermeld in het attribuut due_task_ids van de sensor Onderhoud nodig (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, of de custom_-ID van een eigen taak)."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Optionele notitie die bij de logboekregel wordt opgeslagen."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Cyclus verwijderen",
+      "description": "Verwijder één opgeslagen cyclus. Het programma ervan wordt zonder deze cyclus opnieuw opgebouwd. Kan niet ongedaan worden gemaakt.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat."
+        },
+        "cycle_id": {
+          "name": "Cyclus-ID",
+          "description": "De ID van de te verwijderen cyclus, bijv. de variabele cycle_id van de trigger Cyclus beëindigd."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML-training starten",
       "description": "Hertrein de ML-modellen op het apparaat handmatig op basis van gelabelde cycli van dit apparaat (experimenteel).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Kan profiel niet toewijzen: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cyclus niet gevonden."
+    },
+    "maintenance_task_not_found": {
+      "message": "Geen onderhoudstaak met de ID {task_id} op dit apparaat."
+    },
+    "task_id_required": {
+      "message": "Een geldige task_id is vereist."
     }
   },
   "device_automation": {

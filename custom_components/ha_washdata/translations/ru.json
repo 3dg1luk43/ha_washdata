@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Отметить обслуживание как выполненное",
+      "description": "Записывает задачу обслуживания как выполненную сейчас, как кнопка Готово в панели.",
+      "fields": {
+        "device_id": {
+          "name": "Устройство",
+          "description": "Устройство WashData, к которому относится задача."
+        },
+        "task_id": {
+          "name": "Идентификатор задачи",
+          "description": "Идентификатор задачи из атрибута due_task_ids датчика «Требуется обслуживание» (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other или custom_ ID пользовательской задачи)."
+        },
+        "notes": {
+          "name": "Заметки",
+          "description": "Необязательная заметка, сохраняемая вместе с записью в журнале."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Удалить цикл",
+      "description": "Удаляет один сохранённый цикл. Его программа перестраивается без него. Отменить нельзя.",
+      "fields": {
+        "device_id": {
+          "name": "Устройство",
+          "description": "Устройство WashData."
+        },
+        "cycle_id": {
+          "name": "Идентификатор цикла",
+          "description": "Идентификатор удаляемого цикла, например переменная cycle_id триггера «Цикл окончен»."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Запустить обучение ML",
       "description": "Вручную переобучите модели машинного обучения на устройстве из собственных помеченных циклов этого устройства (экспериментально).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Не удалось назначить профиль: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Цикл не найден."
+    },
+    "maintenance_task_not_found": {
+      "message": "На этом устройстве нет задачи обслуживания с идентификатором {task_id}."
+    },
+    "task_id_required": {
+      "message": "Требуется действительный task_id."
     }
   },
   "device_automation": {

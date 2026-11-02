@@ -714,7 +714,8 @@
     "bp_needs": "Vaatii",
     "bp_needs_version": "WashData {version} tai uudempi",
     "bp_author": "Tekijä",
-    "bp_required": "pakollinen"
+    "bp_required": "pakollinen",
+    "pg_runs_as": "ajetaan arvolla {value}"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -1114,7 +1115,7 @@
     "bp_needs_version": "Vaatii WashData {version} tai uudemman."
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
+    "dishwasher_end_spike_quiet_release": "Astianpesukone: sekunnit Pysäytyskynnyksen alapuolella viimeisestä toiminnasta, joiden jälkeen lopullisen vedenpoiston odotus päättyy, kun odotettu kesto on kulunut",
     "smart_termination_duration_ratio": "Osuus ohjelman keskimääräisestä kestosta, joka syklin on saavutettava ennen kuin älykäs lopetus voi päättää sen aikaisin; laske sitä, jos ajoajat vaihtelevat",
     "anti_wrinkle_enabled": "Sulauta päävaiheen jälkeiset rumpupulssit sen sijaan, että lukisit ne uusina sykleinä",
     "anti_wrinkle_idle_timeout": "Kahden rumpupulssin välillä sallittu hiljainen aika ennen kuin ryppyjenesto päättyy",
@@ -1223,7 +1224,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Passiivikuivauksen hiljainen vapautus",
-      "doc": "Kun odotettu kesto on ylitetty: kuinka kauan astianpesukoneen on pysyttävä Pysäytyskynnyksen alapuolella, ennen kuin WashData lakkaa odottamasta lopullista vedenpoistoa. Nosta arvoa, jos pitkän kuivauksen jälkeinen myöhäinen vedenpoisto jää huomaamatta. Odotus ei koskaan ylitä 30 minuuttia."
+      "doc": "Kun odotettu kesto on kulunut, WashData lakkaa odottamasta lopullista vedenpoistoa, jos astianpesukone on pysynyt Pysäytyskynnyksen alapuolella näin kauan viimeisestä toiminnastaan (vähintään ohjelman pisimmän tallennetun kuivaustauon ajan). Nosta arvoa, jos pitkän kuivauksen jälkeinen myöhäinen vedenpoisto jää huomaamatta. Odotus ei koskaan ylitä 30 minuuttia."
     },
     "anti_crease_finalize_ratio": {
       "label": "Ryppyjeneston lopetussuhde",
@@ -1370,7 +1371,7 @@
       "label": "Ilmoituksen kuvake"
     },
     "notify_live_chronometer": {
-      "doc": "Android: lisää ilmoitustekstin viereen laskevan ajastimen arvioituun valmistumiseen. Käytä {finish_time} Ennen valmistumista -viestissä, jos haluat näyttää valmistumisajan toisen laskevan ajastimen sijaan.",
+      "doc": "Android: lisää ilmoitustekstin viereen laskevan ajastimen arvioituun valmistumiseen. Käytä asetuksessa Live-päivityksen viesti muuttujaa {finish_time}, jos haluat näyttää valmistumisajan toisen laskevan ajastimen sijaan.",
       "label": "Käytä suoraa kronometriä"
     },
     "notify_live_interval_seconds": {
@@ -1395,11 +1396,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Jokaisen live-edistymispäivityksen teksti. Mallin muuttujat: {device}, {program}, {minutes} (jäljellä olevat minuutit), {finish_time} (arvioitu valmistumisaika, esim. 14:30). Muulla muuttujalla käytetään oletustekstiä.",
-      "label": "Ennen valmistumista -viesti"
+      "label": "Live-päivityksen viesti"
     },
     "notify_reminder_message": {
       "doc": "Kerran lähetettävän Lopetusennakkoilmoituksen teksti. Mallin muuttujat: {device}, {program}, {minutes} (Lopetusennakkoilmoitus-asetus). Muulla muuttujalla käytetään oletustekstiä.",
-      "label": "Muistutusviesti"
+      "label": "Lopetusennakkoilmoituksen viesti"
     },
     "notify_start_message": {
       "doc": "Syklin alkaessa lähetettävä teksti. Mallin muuttujat: {device}, {program}. Muulla muuttujalla käytetään oletustekstiä.",

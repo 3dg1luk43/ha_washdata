@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Märgi hooldus tehtuks",
+      "description": "Märkige hooldustöö praeguse ajaga tehtuks, nagu teeb paneeli nupp „Valmis“.",
+      "fields": {
+        "device_id": {
+          "name": "Seade",
+          "description": "WashData seade, millele ülesanne kuulub."
+        },
+        "task_id": {
+          "name": "Ülesande ID",
+          "description": "Ülesande ID, nagu see on toodud anduri „Hooldus vajalik“ atribuudis due_task_ids (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other või kohandatud ülesande custom_ ID)."
+        },
+        "notes": {
+          "name": "Märkmed",
+          "description": "Valikuline märkus, mis salvestatakse koos logikirjega."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Kustuta tsükkel",
+      "description": "Kustutage üks salvestatud tsükkel. Selle programm koostatakse ilma selleta uuesti. Seda ei saa tagasi võtta.",
+      "fields": {
+        "device_id": {
+          "name": "Seade",
+          "description": "WashData seade."
+        },
+        "cycle_id": {
+          "name": "Tsükli ID",
+          "description": "Kustutatava tsükli ID, nt päästiku „Tsükkel lõppes“ muutuja cycle_id."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Käivita ML koolitus",
       "description": "Treeni käsitsi seadme ML-mudeleid uuesti selle seadme enda märgistatud tsüklite põhjal (eksperimentaalne).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Profiili määramine ebaõnnestus: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Tsüklit ei leitud."
+    },
+    "maintenance_task_not_found": {
+      "message": "Selles seadmes pole hooldustööd ID-ga {task_id}."
+    },
+    "task_id_required": {
+      "message": "Nõutav on kehtiv task_id."
     }
   },
   "device_automation": {

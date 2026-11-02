@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Pažymėti priežiūrą kaip atliktą",
+      "description": "Užregistruoti priežiūros užduotį kaip atliktą dabar, kaip tai daro skydelio mygtukas „Atlikta“.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "WashData įrenginys, kuriam priklauso užduotis."
+        },
+        "task_id": {
+          "name": "Užduoties ID",
+          "description": "Užduoties ID, nurodytas jutiklio „Reikia priežiūros“ atribute due_task_ids (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other arba pasirinktinės užduoties custom_ ID)."
+        },
+        "notes": {
+          "name": "Pastabos",
+          "description": "Pasirenkama pastaba, išsaugoma kartu su žurnalo įrašu."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Ištrinti ciklą",
+      "description": "Ištrinti vieną išsaugotą ciklą. Jo programa perkuriama be jo. To atšaukti negalima.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "WashData įrenginys."
+        },
+        "cycle_id": {
+          "name": "Ciklo ID",
+          "description": "Trinamo ciklo ID, pvz., paleidiklio „Ciklas pasibaigė“ kintamasis cycle_id."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Paleisti ML mokymą",
       "description": "Rankiniu būdu iš naujo apmokyti įrenginyje esančius ML modelius naudojant šio įrenginio pažymėtus ciklus (eksperimentinis).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Nepavyko priskirti profilio: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Ciklas nerastas."
+    },
+    "maintenance_task_not_found": {
+      "message": "Šiame įrenginyje nėra priežiūros užduoties su ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Būtinas galiojantis task_id."
     }
   },
   "device_automation": {

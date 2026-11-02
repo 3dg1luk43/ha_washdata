@@ -667,7 +667,8 @@
     "bp_needs": "Richiede",
     "bp_needs_version": "WashData {version} o successivo",
     "bp_author": "Autore",
-    "bp_required": "obbligatorio"
+    "bp_required": "obbligatorio",
+    "pg_runs_as": "simulato con {value}"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -1077,7 +1078,7 @@
     "bp_needs_version": "Richiede WashData {version} o successivo."
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi di silenzio dopo la durata prevista prima che venga rilasciata l'attesa dello scarico di fine ciclo",
+    "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi sotto la Soglia di arresto dall'ultima attività che chiudono l'attesa dello scarico finale, una volta raggiunta la durata prevista",
     "smart_termination_duration_ratio": "Frazione della durata media del programma che un ciclo deve raggiungere prima che la Terminazione intelligente possa chiuderlo in anticipo; abbassala se le durate variano",
     "anti_crease_finalize_ratio": "Frazione della durata media del programma che un ciclo deve raggiungere prima che la coda antirughe possa concluderlo; abbassala sulle asciugatrici, lascia le lavatrici al valore predefinito",
     "anti_wrinkle_enabled": "Assorbire gli impulsi di rotazione dopo la fase principale invece di leggerli come nuovi cicli",
@@ -1186,7 +1187,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Rilascio al silenzio dell'asciugatura passiva",
-      "doc": "Dopo la durata prevista: quanto a lungo la lavastoviglie deve restare sotto la Soglia di arresto prima che WashData smetta di attendere lo scarico finale. Alzalo se uno scarico tardivo dopo una lunga asciugatura viene perso. L'attesa non supera mai i 30 minuti."
+      "doc": "Una volta raggiunta la durata prevista, WashData smette di attendere lo scarico finale quando la lavastoviglie è rimasta sotto la Soglia di arresto per questo tempo dalla sua ultima attività (mai meno della pausa di asciugatura più lunga registrata del programma). Alzalo se uno scarico tardivo dopo una lunga asciugatura viene perso. L'attesa non supera mai i 30 minuti."
     },
     "anti_crease_finalize_ratio": {
       "label": "Rapporto di finalizzazione antirughe",
@@ -1333,7 +1334,7 @@
       "label": "Icona notifica"
     },
     "notify_live_chronometer": {
-      "doc": "Android: aggiunge un conto alla rovescia fino al termine stimato accanto al testo della notifica. Usa {finish_time} in Messaggio pre-completamento per mostrare l'ora di fine invece di un secondo conto alla rovescia.",
+      "doc": "Android: aggiunge un conto alla rovescia fino al termine stimato accanto al testo della notifica. Usa {finish_time} in Messaggio di aggiornamento in tempo reale per mostrare l'ora di fine invece di un secondo conto alla rovescia.",
       "label": "Usa cronometro in tempo reale"
     },
     "notify_live_interval_seconds": {
@@ -1358,11 +1359,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Testo di ogni aggiornamento di avanzamento in tempo reale. Variabili di modello: {device}, {program}, {minutes} (minuti rimanenti), {finish_time} (ora di fine stimata, es. 14:30). Con qualsiasi altra variabile si usa il testo predefinito.",
-      "label": "Messaggio pre-completamento"
+      "label": "Messaggio di aggiornamento in tempo reale"
     },
     "notify_reminder_message": {
       "doc": "Testo dell'Avviso pre-fine, inviato una sola volta. Variabili di modello: {device}, {program}, {minutes} (l'impostazione Avviso pre-fine). Con qualsiasi altra variabile si usa il testo predefinito.",
-      "label": "Messaggio promemoria"
+      "label": "Messaggio dell'avviso pre-fine"
     },
     "notify_start_message": {
       "doc": "Testo inviato all'avvio di un ciclo. Variabili di modello: {device}, {program}. Con qualsiasi altra variabile si usa il testo predefinito.",

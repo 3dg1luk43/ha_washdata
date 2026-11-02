@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Маркирай поддръжката като извършена",
+      "description": "Записва задача за поддръжка като извършена сега, както бутонът Готово в панела.",
+      "fields": {
+        "device_id": {
+          "name": "Устройство",
+          "description": "Устройството WashData, към което принадлежи задачата."
+        },
+        "task_id": {
+          "name": "ИД на задача",
+          "description": "ID на задачата, както е посочено в атрибута due_task_ids на сензора Предстои поддръжка (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other или custom_ ID на собствена задача)."
+        },
+        "notes": {
+          "name": "Бележки",
+          "description": "Незадължителна бележка към записа в дневника."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Изтриване на цикъл",
+      "description": "Изтрива един запазен цикъл. Програмата му се изгражда наново без него. Не може да бъде отменено.",
+      "fields": {
+        "device_id": {
+          "name": "Устройство",
+          "description": "Устройството WashData."
+        },
+        "cycle_id": {
+          "name": "ИД на цикъл",
+          "description": "ID на цикъла за изтриване, напр. променливата cycle_id на тригера \"Цикълът приключи\"."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Стартиране на ML обучение",
       "description": "Ръчно преквалификация на моделите ML на устройство от собствените етикети на това устройство (експериментални).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Неуспешно присвояване на профил: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Цикълът не е намерен."
+    },
+    "maintenance_task_not_found": {
+      "message": "На това устройство няма задача за поддръжка с ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Изисква се валиден task_id."
     }
   },
   "device_automation": {

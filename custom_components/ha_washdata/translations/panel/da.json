@@ -714,7 +714,8 @@
     "bp_needs": "Kræver",
     "bp_needs_version": "WashData {version} eller nyere",
     "bp_author": "Forfatter",
-    "bp_required": "påkrævet"
+    "bp_required": "påkrævet",
+    "pg_runs_as": "bruges som {value}"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -1114,7 +1115,7 @@
     "bp_needs_version": "Kræver WashData {version} eller nyere."
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
+    "dishwasher_end_spike_quiet_release": "Opvaskemaskine: sekunder under Stoptærskel siden seneste aktivitet, der afslutter ventetiden på den sidste udpumpning, når den forventede varighed er nået",
     "smart_termination_duration_ratio": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før smart afslutning må afslutte den tidligt; sænk den, hvis køretiderne varierer",
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
     "interrupted_min_seconds": "Korte cyklusser markeres som afbrudt",
@@ -1223,7 +1224,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Frigivelse efter stille tørrefase",
-      "doc": "Efter den forventede varighed: hvor længe opvaskemaskinen skal blive under Stoptærskel, før WashData holder op med at vente på den sidste udpumpning. Hæv den, hvis en sen udpumpning efter lang tørring overses. Ventetiden er aldrig over 30 minutter."
+      "doc": "Når den forventede varighed er nået, stopper WashData med at vente på den sidste udpumpning, hvis opvaskemaskinen har været under Stoptærskel så længe siden sin seneste aktivitet (aldrig kortere end programmets længste registrerede tørrepause). Hæv den, hvis en sen udpumpning efter lang tørring overses. Ventetiden er aldrig over 30 minutter."
     },
     "anti_crease_finalize_ratio": {
       "label": "Forhold for anti-rynke-afslutning",
@@ -1370,7 +1371,7 @@
       "label": "Notifikationsikon"
     },
     "notify_live_chronometer": {
-      "doc": "Android: tilføjer en nedtælling til det forventede sluttidspunkt ved siden af notifikationsteksten. Brug {finish_time} i Besked om næsten færdig for at vise sluttidspunktet i stedet for en anden nedtælling.",
+      "doc": "Android: tilføjer en nedtælling til det forventede sluttidspunkt ved siden af notifikationsteksten. Brug {finish_time} i Besked til live-opdateringer for at vise sluttidspunktet i stedet for en anden nedtælling.",
       "label": "Brug live kronometer"
     },
     "notify_live_interval_seconds": {
@@ -1395,11 +1396,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Tekst i hver live-statusopdatering. Skabelonvariabler: {device}, {program}, {minutes} (minutter tilbage), {finish_time} (forventet sluttidspunkt, f.eks. 14:30). Med enhver anden variabel bruges standardteksten.",
-      "label": "Besked om næsten færdig"
+      "label": "Besked til live-opdateringer"
     },
     "notify_reminder_message": {
       "doc": "Tekst i Forhåndsadvarsel om afslutning, der sendes én gang. Skabelonvariabler: {device}, {program}, {minutes} (indstillingen Forhåndsadvarsel om afslutning). Med enhver anden variabel bruges standardteksten.",
-      "label": "Påmindelsesbesked"
+      "label": "Besked til forhåndsadvarsel om afslutning"
     },
     "notify_start_message": {
       "doc": "Tekst, der sendes, når en cyklus starter. Skabelonvariabler: {device}, {program}. Med enhver anden variabel bruges standardteksten.",

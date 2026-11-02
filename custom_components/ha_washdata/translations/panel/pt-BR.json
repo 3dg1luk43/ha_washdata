@@ -667,7 +667,8 @@
     "bp_needs": "Requer",
     "bp_needs_version": "WashData {version} ou mais recente",
     "bp_author": "Autor",
-    "bp_required": "obrigatório"
+    "bp_required": "obrigatório",
+    "pg_runs_as": "simulado com {value}"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -1167,7 +1168,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Liberação em silêncio da secagem passiva",
-      "doc": "Após a duração esperada: quanto tempo a lava-louças deve ficar abaixo do Limite de Parada antes de o WashData parar de esperar pelo escoamento final. Aumente se um escoamento tardio após uma secagem longa for perdido. A espera nunca passa de 30 minutos."
+      "doc": "Quando a duração esperada é atingida, o WashData para de esperar pelo escoamento final se a lava-louças ficou abaixo do Limite de Parada por esse tempo desde a última atividade (nunca menos que a pausa de secagem mais longa registrada do programa). Aumente se um escoamento tardio após uma secagem longa for perdido. A espera nunca passa de 30 minutos."
     },
     "anti_crease_finalize_ratio": {
       "label": "Proporção de finalização antiamasso",
@@ -1314,7 +1315,7 @@
       "label": "Ícone da Notificação"
     },
     "notify_live_chronometer": {
-      "doc": "Android: adiciona uma contagem regressiva até o fim estimado ao lado do texto da notificação. Use {finish_time} em Mensagem Pré-Conclusão para exibir a hora de término em vez de uma segunda contagem.",
+      "doc": "Android: adiciona uma contagem regressiva até o fim estimado ao lado do texto da notificação. Use {finish_time} em Mensagem de Atualização ao Vivo para exibir a hora de término em vez de uma segunda contagem.",
       "label": "Usar Cronômetro ao Vivo"
     },
     "notify_live_interval_seconds": {
@@ -1339,11 +1340,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Texto de cada atualização de progresso ao vivo. Variáveis de modelo: {device}, {program}, {minutes} (minutos restantes), {finish_time} (hora de término estimada, ex. 14:30). Com qualquer outra variável, é usado o texto padrão.",
-      "label": "Mensagem Pré-Conclusão"
+      "label": "Mensagem de Atualização ao Vivo"
     },
     "notify_reminder_message": {
       "doc": "Texto do Alerta Pré-Fim, enviado uma única vez. Variáveis de modelo: {device}, {program}, {minutes} (a configuração Alerta Pré-Fim). Com qualquer outra variável, é usado o texto padrão.",
-      "label": "Mensagem de Lembrete"
+      "label": "Mensagem do Alerta Pré-Fim"
     },
     "notify_start_message": {
       "doc": "Corpo enviado quando um ciclo começa. Variáveis de modelo: {device}, {program}. Com qualquer outra variável, é usado o texto padrão.",
@@ -1938,7 +1939,7 @@
     "other": "Outro"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lava-louças: segundos de silêncio após a duração esperada antes de liberar a espera da descarga de fim de ciclo",
+    "dishwasher_end_spike_quiet_release": "Lava-louças: segundos abaixo do Limite de Parada desde a última atividade que encerram a espera pelo escoamento final, quando a duração esperada é atingida",
     "smart_termination_duration_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de o Encerramento inteligente poder finalizá-lo mais cedo; reduza se os tempos de execução variarem",
     "anti_crease_finalize_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de a cauda antiamasso poder finalizá-lo; reduza em secadoras, deixe as lavadoras no padrão",
     "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",

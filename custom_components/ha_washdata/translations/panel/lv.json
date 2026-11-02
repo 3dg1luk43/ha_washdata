@@ -721,7 +721,8 @@
     "bp_needs": "Nepieciešams",
     "bp_needs_version": "WashData {version} vai jaunāks",
     "bp_author": "Autors",
-    "bp_required": "obligāts"
+    "bp_required": "obligāts",
+    "pg_runs_as": "tiek izmantots {value}"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -1221,7 +1222,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Pasīvās žāvēšanas klusā atbrīvošana",
-      "doc": "Pēc paredzētā ilguma: cik ilgi trauku mazgājamai mašīnai jāpaliek zem Apstāšanās sliekšņa, pirms WashData pārtrauc gaidīt beigu ūdens izvadīšanu. Palieliniet to, ja vēla izvadīšana pēc ilgas žāvēšanas tiek palaista garām. Gaidīšana nekad nepārsniedz 30 minūtes."
+      "doc": "Kad paredzētais ilgums ir sasniegts, WashData pārtrauc gaidīt beigu ūdens izvadīšanu, ja trauku mazgājamā mašīna kopš pēdējās darbības tik ilgi ir palikusi zem Apstāšanās sliekšņa (nekad ne īsāk par programmas garāko reģistrēto žāvēšanas pauzi). Palieliniet to, ja vēla izvadīšana pēc ilgas žāvēšanas tiek palaista garām. Gaidīšana nekad nepārsniedz 30 minūtes."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms tā zemas jaudas griešanās tiek uzskatīta par pretgrumbu asti. Žāvētājiem ar slodzes sensoru samaziniet to (piem., 0,75). Veļas mašīnām atstājiet noklusējumu (0,98), citādi mazgāšana var beigties pusceļā.",
@@ -1368,7 +1369,7 @@
       "label": "Paziņojuma ikona"
     },
     "notify_live_chronometer": {
-      "doc": "Android: pievieno atpakaļskaitīšanu līdz paredzamajam beigu laikam blakus paziņojuma tekstam. Lai beigu laiku rādītu otrās atpakaļskaitīšanas vietā, izmantojiet {finish_time} Gandrīz pabeigšanas ziņojumā.",
+      "doc": "Android: pievieno atpakaļskaitīšanu līdz paredzamajam beigu laikam blakus paziņojuma tekstam. Lai beigu laiku rādītu otrās atpakaļskaitīšanas vietā, izmantojiet {finish_time} iestatījumā Tiešraides atjauninājuma ziņojums.",
       "label": "Izmantot tiešraides hronometru"
     },
     "notify_live_interval_seconds": {
@@ -1393,11 +1394,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Katra tiešraides progresa atjauninājuma teksts. Veidnes mainīgie: {device}, {program}, {minutes} (atlikušās minūtes), {finish_time} (paredzamais beigu laiks, piem. 14:30). Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
-      "label": "Gandrīz pabeigšanas ziņojums"
+      "label": "Tiešraides atjauninājuma ziņojums"
     },
     "notify_reminder_message": {
       "doc": "Vienreizējā Brīdinājuma pirms beigām teksts. Veidnes mainīgie: {device}, {program}, {minutes} (iestatījums Brīdinājums pirms beigām). Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
-      "label": "Atgādinājuma ziņojums"
+      "label": "Brīdinājuma pirms beigām ziņojums"
     },
     "notify_start_message": {
       "doc": "Teksts, ko nosūta, kad cikls sākas. Veidnes mainīgie: {device}, {program}. Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
@@ -1992,7 +1993,7 @@
     "other": "Cits"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: klusās sekundes pēc paredzētā ilguma, pirms tiek atbrīvota cikla beigu ūdens izvadīšanas gaidīšana",
+    "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: sekundes zem Apstāšanās sliekšņa kopš pēdējās darbības, pēc kurām beidzas beigu ūdens izvadīšanas gaidīšana, kad sasniegts paredzētais ilgums",
     "smart_termination_duration_ratio": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms Viedā pabeigšana drīkst to beigt agrāk; samaziniet, ja darbības laiks mainās",
     "anti_crease_finalize_ratio": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms pretgrumbu aste drīkst to pabeigt; žāvētājiem samaziniet, veļas mašīnām atstājiet noklusējumu",
     "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",

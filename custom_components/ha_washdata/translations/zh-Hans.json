@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "标记维护已完成",
+      "description": "将一项维护任务记录为此刻已完成，与面板中的“完成”按钮作用相同。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "该任务所属的 WashData 设备。"
+        },
+        "task_id": {
+          "name": "任务 ID",
+          "description": "任务的 ID，即“需要维护”传感器的 due_task_ids 属性中列出的 ID（descale、filter_clean、drum_clean、bearing_service、salt、rinse_aid、lint_filter、condenser_clean、other，或自定义任务的 custom_ ID）。"
+        },
+        "notes": {
+          "name": "备注",
+          "description": "随日志条目一起保存的可选备注。"
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "删除周期",
+      "description": "删除一个已存储的周期。其程序将在去掉该周期后重建。此操作无法撤销。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "WashData 设备。"
+        },
+        "cycle_id": {
+          "name": "周期 ID",
+          "description": "要删除的周期的 ID，例如“周期已结束”触发器的 cycle_id 变量。"
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "触发 ML 训练",
       "description": "根据该设备自己的标记周期手动重新训练设备上的 ML 模型（实验）。",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "无法分配配置文件：{error}"
+    },
+    "cycle_not_found": {
+      "message": "未找到周期。"
+    },
+    "maintenance_task_not_found": {
+      "message": "此设备上没有 ID 为 {task_id} 的维护任务。"
+    },
+    "task_id_required": {
+      "message": "需要有效的 task_id。"
     }
   },
   "device_automation": {

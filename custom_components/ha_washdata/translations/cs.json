@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Označit údržbu jako hotovou",
+      "description": "Zapíše úkol údržby jako hotový nyní, stejně jako tlačítko Hotovo v panelu.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData, ke kterému úkol patří."
+        },
+        "task_id": {
+          "name": "ID úkolu",
+          "description": "ID úkolu uvedené v atributu due_task_ids senzoru Údržba na řadě (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other nebo custom_ ID vlastního úkolu)."
+        },
+        "notes": {
+          "name": "Poznámky",
+          "description": "Volitelná poznámka uložená se záznamem v protokolu."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Smazat cyklus",
+      "description": "Smaže jeden uložený cyklus. Jeho program se bez něj znovu sestaví. Nelze vrátit zpět.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData."
+        },
+        "cycle_id": {
+          "name": "ID cyklu",
+          "description": "ID cyklu ke smazání, např. proměnná cycle_id spouštěče „Cyklus ukončen“."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Spustit ML trénink",
       "description": "Ručně přetrénujte ML modely v zařízení z vlastních označených cyklů tohoto zařízení (experimentální).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Profil se nepodařilo přiřadit: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cyklus nenalezen."
+    },
+    "maintenance_task_not_found": {
+      "message": "Na tomto zařízení není žádný úkol údržby s ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Je vyžadován platný task_id."
     }
   },
   "device_automation": {

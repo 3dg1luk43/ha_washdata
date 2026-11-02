@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Segna manutenzione come fatta",
+      "description": "Registra ora un'attività di manutenzione come fatta, come fa il pulsante Fatto del pannello.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "Il dispositivo WashData a cui appartiene l'attività."
+        },
+        "task_id": {
+          "name": "ID attività",
+          "description": "L'ID dell'attività, come elencato nell'attributo due_task_ids del sensore Manutenzione in scadenza (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, oppure l'ID custom_ di un'attività personalizzata)."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Nota facoltativa salvata con la voce del registro."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Elimina ciclo",
+      "description": "Elimina un ciclo salvato. Il suo programma viene ricostruito senza di esso. Non può essere annullato.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "Il dispositivo WashData."
+        },
+        "cycle_id": {
+          "name": "ID ciclo",
+          "description": "L'ID del ciclo da eliminare, ad esempio la variabile cycle_id dell'attivazione Ciclo concluso."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Avvia addestramento ML",
       "description": "Riaddestra manualmente i modelli ML sul dispositivo usando i cicli etichettati di questo dispositivo (sperimentale).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Impossibile assegnare il profilo: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Ciclo non trovato."
+    },
+    "maintenance_task_not_found": {
+      "message": "Nessuna attività di manutenzione con ID {task_id} su questo dispositivo."
+    },
+    "task_id_required": {
+      "message": "È richiesto un task_id valido."
     }
   },
   "device_automation": {

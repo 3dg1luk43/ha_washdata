@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Označi vzdrževanje kot opravljeno",
+      "description": "Zabeležite vzdrževalno opravilo kot opravljeno zdaj, enako kot gumb Končano na plošči.",
+      "fields": {
+        "device_id": {
+          "name": "Naprava",
+          "description": "Naprava WashData, ki ji opravilo pripada."
+        },
+        "task_id": {
+          "name": "ID opravila",
+          "description": "ID opravila, kot je naveden v atributu due_task_ids senzorja Vzdrževanje na vrsti (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other ali custom_ ID opravila po meri)."
+        },
+        "notes": {
+          "name": "Opombe",
+          "description": "Neobvezna opomba, shranjena z vnosom v dnevniku."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Izbriši cikel",
+      "description": "Izbrišite en shranjen cikel. Njegov program se znova zgradi brez njega. Tega ni mogoče razveljaviti.",
+      "fields": {
+        "device_id": {
+          "name": "Naprava",
+          "description": "Naprava WashData."
+        },
+        "cycle_id": {
+          "name": "ID cikla",
+          "description": "ID cikla za brisanje, npr. spremenljivka cycle_id sprožilca „Cikel je zaključen“."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Sproži usposabljanje ML",
       "description": "Ročno ponovno usposobite modele ML v napravi iz lastnih označenih ciklov te naprave (eksperimentalno).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Profila ni bilo mogoče dodeliti: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cikla ni bilo mogoče najti."
+    },
+    "maintenance_task_not_found": {
+      "message": "Na tej napravi ni vzdrževalnega opravila z ID-jem {task_id}."
+    },
+    "task_id_required": {
+      "message": "Potreben je veljaven task_id."
     }
   },
   "device_automation": {

@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Označi održavanje kao obavljeno",
+      "description": "Zabeleži zadatak održavanja kao obavljen sada, kao što to radi dugme Gotovo u panelu.",
+      "fields": {
+        "device_id": {
+          "name": "Uređaj",
+          "description": "Uređaj WashData kome zadatak pripada."
+        },
+        "task_id": {
+          "name": "ID zadatka",
+          "description": "ID zadatka kako je naveden u atributu due_task_ids senzora Dospelo održavanje (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other ili custom_ ID prilagođenog zadatka)."
+        },
+        "notes": {
+          "name": "Beleške",
+          "description": "Opciona beleška sačuvana uz unos u dnevniku."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Izbriši ciklus",
+      "description": "Izbriši jedan sačuvani ciklus. Njegov program se ponovo gradi bez njega. Ne može se poništiti.",
+      "fields": {
+        "device_id": {
+          "name": "Uređaj",
+          "description": "Uređaj WashData."
+        },
+        "cycle_id": {
+          "name": "ID ciklusa",
+          "description": "ID ciklusa za brisanje, npr. promenljiva cycle_id okidača \"Ciklus okončan\"."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Pokreni ML obuku",
       "description": "Ručno ponovo obuči ML modele na uređaju koristeći označene cikluse ovog uređaja (eksperimentalno).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Nije moguće dodeliti profil: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Ciklus nije pronađen."
+    },
+    "maintenance_task_not_found": {
+      "message": "Na ovom uređaju nema zadatka održavanja sa ID-jem {task_id}."
+    },
+    "task_id_required": {
+      "message": "Potreban je važeći task_id."
     }
   },
   "device_automation": {

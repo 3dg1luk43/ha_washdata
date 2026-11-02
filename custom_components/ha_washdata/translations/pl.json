@@ -295,6 +295,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Oznacz konserwację jako wykonaną",
+      "description": "Zapisz zadanie konserwacyjne jako wykonane teraz, tak jak przycisk Zrobione w panelu.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData, do którego należy zadanie."
+        },
+        "task_id": {
+          "name": "Identyfikator zadania",
+          "description": "Identyfikator zadania z atrybutu due_task_ids czujnika wymaganej konserwacji (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other albo identyfikator custom_ zadania własnego)."
+        },
+        "notes": {
+          "name": "Notatki",
+          "description": "Opcjonalna notatka zapisywana razem z wpisem w dzienniku."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Usuń cykl",
+      "description": "Usuń jeden zapisany cykl. Jego program zostanie przebudowany bez niego. Tej operacji nie można cofnąć.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData."
+        },
+        "cycle_id": {
+          "name": "Identyfikator cyklu",
+          "description": "Identyfikator cyklu do usunięcia, np. zmienna cycle_id wyzwalacza „Cykl zakończony”."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Wyzwól trenowanie ML",
       "description": "Ręcznie przetrenuj modele ML na urządzeniu z własnych oznaczonych cykli (eksperymentalne).",
@@ -507,6 +539,15 @@
     },
     "assign_profile_failed": {
       "message": "Nie można przypisać profilu: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Nie znaleziono cyklu."
+    },
+    "maintenance_task_not_found": {
+      "message": "Na tym urządzeniu nie ma zadania konserwacyjnego o identyfikatorze {task_id}."
+    },
+    "task_id_required": {
+      "message": "Wymagany jest prawidłowy identyfikator zadania (task_id)."
     }
   },
   "device_automation": {
