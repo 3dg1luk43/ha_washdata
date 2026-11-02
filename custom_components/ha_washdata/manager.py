@@ -9240,6 +9240,9 @@ class WashDataManager:
         wh = self._cycle_report_energy_wh(cycle_data) if energy_wh is None else energy_wh
         anomaly = cycle_data.get("anomaly")
         return {
+            # The stored cycle's id, for ha_washdata.delete_cycle and friends
+            # (#492); None for an end that stored nothing (a ghost or pump-out).
+            "cycle_id": cycle_data.get("id"),
             "status": cycle_data.get("status"),
             "duration": cycle_data.get("duration"),
             "energy_kwh": round(wh / 1000, 3) if math.isfinite(wh) else None,

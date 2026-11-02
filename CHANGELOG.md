@@ -15,6 +15,12 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - Remaining time on washers with an anti-crease phase counts down to the program end.
 - Cycle and program energy are right on plugs that report only on change; history is recalculated.
 - A blank notification text sends the default instead of failing.
+- New actions: mark a maintenance task done, delete a cycle.
+
+### Features
+
+- **Mark a maintenance task done from a dashboard or automation** ([#490](https://github.com/3dg1luk43/ha_washdata/issues/490)): new action `ha_washdata.mark_maintenance_done` (device and task id, as in the Maintenance due sensor's `due_task_ids`), for a kiosk button or an NFC tag at the appliance. Thanks to @wizzzard1007
+- **Delete a cycle from an automation** ([#492](https://github.com/3dg1luk43/ha_washdata/issues/492)): new action `ha_washdata.delete_cycle`, and the Cycle finished and Cycle ended triggers now carry `trigger.cycle_id`, so an automation can drop short interrupted runs as they end. A ready-made template follows in the Automations tab. Thanks to @mbergmann26-droid
 
 ### Fixes
 

@@ -212,6 +212,9 @@ _SERVICE_SCHEMAS: dict[str, vol.Schema] = {
     "pause_cycle": _svc({}),
     "resume_cycle": _svc({}),
     "mark_unloaded": _svc({}),
+    "mark_maintenance_done": _svc({vol.Required("task_id"): cv.string,
+                                   vol.Optional("notes"): _OPT_STR}),
+    "delete_cycle": _svc({vol.Required("cycle_id"): cv.string}),
     "trigger_ml_training": _svc({}),
 }
 
@@ -1690,6 +1693,50 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.services.async_register(
             DOMAIN, "mark_unloaded", _guarded_service(hass, "mark_unloaded", handle_mark_unloaded),
             schema=_SERVICE_SCHEMAS["mark_unloaded"]
+        )
+
+    # Tick off a maintenance task from a dashboard button, an NFC tag or an
+    # automation (#490): the same log entry the panel's "done" writes.
+    if not hass.services.has_service(DOMAIN, "mark_maintenance_done"):
+        async def handle_mark_maintenance_done(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            task_id = _require_str(call.data.get("task_id"), "task_id")
+            _entry_id, manager = _service_manager(hass, device_id)
+            try:
+                await manager.profile_store.async_add_maintenance_event(
+                    task_id, None, call.data.get("notes") or ""
+                )
+            except ValueError as err:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="maintenance_task_not_found",
+                    translation_placeholders={"task_id": task_id},
+                ) from err
+            manager.notify_update()
+
+        hass.services.async_register(
+            DOMAIN, "mark_maintenance_done",
+            _guarded_service(hass, "mark_maintenance_done", handle_mark_maintenance_done),
+            schema=_SERVICE_SCHEMAS["mark_maintenance_done"]
+        )
+
+    # Delete one stored cycle (#492), e.g. from an automation on the cycle_ended
+    # trigger, whose variables carry the cycle_id. The panel's delete, same store call.
+    if not hass.services.has_service(DOMAIN, "delete_cycle"):
+        async def handle_delete_cycle(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
+            _entry_id, manager = _service_manager(hass, device_id)
+            if not await manager.profile_store.delete_cycle(cycle_id):
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="cycle_not_found",
+                )
+            manager.notify_update()
+
+        hass.services.async_register(
+            DOMAIN, "delete_cycle", _guarded_service(hass, "delete_cycle", handle_delete_cycle),
+            schema=_SERVICE_SCHEMAS["delete_cycle"]
         )
 
     return True

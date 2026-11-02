@@ -84,7 +84,7 @@ KEYS = (
     "status", "duration", "energy_kwh", "end_time", "label_applied", "anomaly",
     "minutes_since_finish", "bursts", "burst_seconds", "how", "minutes_waiting",
     "from_state", "to_state", "task", "task_name", "due_reason", "cycle_count",
-    "elapsed_seconds", "threshold_seconds",
+    "elapsed_seconds", "threshold_seconds", "cycle_id",
 )
 
 
@@ -382,6 +382,10 @@ async def test_a_cycle_fires_each_trigger_once_with_its_variables(
     finished = _of(calls, "finished")
     assert len(finished) == 1 and not _of(calls, "finished_cotton")
     assert finished[0]["status"] == "completed" and finished[0]["anomaly"] == "none"
+    # The stored cycle's id, for ha_washdata.delete_cycle (#492).
+    stored = _manager(hass, entry).profile_store.get_past_cycles()[-1]
+    assert finished[0]["cycle_id"] == stored["id"]
+    assert _of(calls, "ended_completed")[0]["cycle_id"] == stored["id"]
     assert len(_of(calls, "ended_completed")) == 1 and not _of(calls, "ended_interrupted")
     assert len(_of(calls, "unload_pending")) == 1
     assert len(_of(calls, "from_ending")) == 1

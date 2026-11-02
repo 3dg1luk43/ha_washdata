@@ -283,6 +283,48 @@ mark_unloaded:
         device:
           integration: ha_washdata
 
+mark_maintenance_done:
+  name: Mark Maintenance Done
+  description: Log a maintenance task as done now, as the panel's Done button does.
+  fields:
+    device_id:
+      name: Device
+      description: The WashData device the task belongs to.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+    task_id:
+      name: Task ID
+      description: The task's id, as listed in the maintenance-due sensor's due_task_ids attribute (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, or a custom task's custom_ id).
+      required: true
+      selector:
+        text:
+    notes:
+      name: Notes
+      description: Optional note stored with the log entry.
+      required: false
+      selector:
+        text:
+
+delete_cycle:
+  name: Delete Cycle
+  description: Delete one stored cycle. Its program is rebuilt without it. Cannot be undone.
+  fields:
+    device_id:
+      name: Device
+      description: The WashData device.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+    cycle_id:
+      name: Cycle ID
+      description: The ID of the cycle to delete, e.g. the cycle_id variable of the Cycle ended trigger.
+      required: true
+      selector:
+        text:
+
 trigger_ml_training:
   name: Trigger ML Training
   description: Manually retrain the on-device ML models from this device's own labelled cycles (experimental; requires ML training enabled).
