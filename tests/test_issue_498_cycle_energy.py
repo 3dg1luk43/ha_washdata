@@ -177,6 +177,9 @@ def _v17_store() -> dict[str, Any]:
                    energy_meter_wh=1700.0, cost=0.51, energy_price=0.30,
                    energy_price_mode="fixed"),
             {"id": "c3", "status": "completed", "duration": 60, "energy_wh": 12.0},
+            # Energy that did not come from this trace (an import of time-rescaled
+            # data, as the test box seeds): not ours to rewrite.
+            _cycle([[0.0, 100.0], [60.0, 100.0], [120.0, 0.0]], id="c4", energy_wh=318.0),
         ],
         "reference_cycles": [
             _cycle(pts, id="r1", profile_name="Eco 50", energy_wh=old_wh),
@@ -197,7 +200,8 @@ async def test_v17_to_v18_reintegrates_cycle_energy(hass: HomeAssistant) -> None
     expected = round(_hold_wh(before["past_cycles"][0]["power_data"]), 3)
     result = await _migrator(hass)._async_migrate_func(17, 1, copy.deepcopy(before))
 
-    c1, c2, c3 = result["past_cycles"]
+    c1, c2, c3, c4 = result["past_cycles"]
+    assert c4 == before["past_cycles"][3]
     assert c1["energy_wh"] == pytest.approx(expected, abs=0.001)
     assert c1["cost"] == pytest.approx(round(expected / 1000 * 0.30, 4))
     # A meter reading is what the cycle reports: its cost stays, its trace energy

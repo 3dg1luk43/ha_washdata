@@ -1332,9 +1332,10 @@ class WashDataStore(Store[JSONDict]):
             old_data[CYCLE_ENERGY_REBUILD_KEY] = True
             _LOGGER.info(
                 "Migrating storage from v%s to v18 (cycle energy re-integrated: "
-                "%d of %d cycles changed, %+.0f Wh in total)",
+                "%d of %d cycles changed, %+.0f Wh in total; %d kept, their energy "
+                "did not come from their trace)",
                 old_major_version, summary["changed"], summary["examined"],
-                summary["delta_wh"],
+                summary["delta_wh"], summary["kept"],
             )
 
         return old_data
@@ -1365,13 +1366,17 @@ def _recompute_cycle_energy(data: JSONDict) -> dict[str, Any]:
     """Re-integrate ``energy_wh`` of every past and backfill cycle (#498).
 
     Uses ``integrate_cycle_wh``, the integrator every stored-energy writer uses
-    since #498. A cycle without a usable trace keeps its figure. Where the cycle's
+    since #498. Only a figure the old rule (``integrate_wh`` +
+    ``energy_gap_threshold_s``) produced from this very trace is replaced: one that
+    came from anywhere else (an import of rescaled or hand-edited data, an older
+    integrator) is kept, as is a cycle without a usable trace. Where the cycle's
     reported energy is the integrated one (no meter reading), its cost moves with
     it. ``reference_cycles`` are left alone: a community download's trace is
     downsampled, and its energy is the uploader's. The lifetime odometer is not
-    touched. Idempotent; never raises.
+    touched. Idempotent (a replaced figure no longer matches the old rule); never
+    raises.
     """
-    summary: dict[str, Any] = {"examined": 0, "changed": 0, "delta_wh": 0.0}
+    summary: dict[str, Any] = {"examined": 0, "changed": 0, "kept": 0, "delta_wh": 0.0}
     for key in ("past_cycles", "backfill_cycles"):
         cycles = data.get(key)
         if not isinstance(cycles, list):
@@ -1384,19 +1389,22 @@ def _recompute_cycle_energy(data: JSONDict) -> dict[str, Any]:
                 if len(xy) < 2:
                     continue
                 summary["examined"] += 1
-                new = round(
-                    integrate_cycle_wh(
-                        np.asarray([t for t, _ in xy], dtype=float),
-                        np.asarray([pw for _, pw in xy], dtype=float),
-                    ),
-                    3,
-                )
+                ts = np.asarray([t for t, _ in xy], dtype=float)
+                pw = np.asarray([p for _, p in xy], dtype=float)
+                order = np.argsort(ts, kind="stable")
+                ts, pw = ts[order], pw[order]
+                new = round(integrate_cycle_wh(ts, pw), 3)
                 if not math.isfinite(new):
                     continue
                 raw_old = cycle.get("energy_wh")
                 old = float(raw_old) if isinstance(raw_old, (int, float)) else None
-                if old is not None and math.isfinite(old) and abs(new - old) < 0.001:
-                    continue
+                if old is not None and math.isfinite(old):
+                    if abs(new - old) < 0.001:
+                        continue
+                    old_rule = integrate_wh(ts, pw, max_gap_s=energy_gap_threshold_s(ts))
+                    if abs(old - old_rule) > max(0.5, 0.02 * abs(old_rule)):
+                        summary["kept"] += 1
+                        continue
                 cycle["energy_wh"] = new
                 summary["changed"] += 1
                 summary["delta_wh"] += new - (old if old is not None and math.isfinite(old) else 0.0)
