@@ -4441,6 +4441,7 @@ async def ws_import_config(
             # entry - so an import that carries no options would otherwise leave
             # the imported tails inflating avg_duration until the next restart.
             manager.async_schedule_banked_tail_repair()
+            manager.async_schedule_energy_rebuild()
             manager.notify_update()
             _send_result(connection, msg["id"], "import_config", result)
         except json.JSONDecodeError as exc:
@@ -4678,6 +4679,7 @@ async def ws_import_config_selective(
             # above, so nothing reloads the entry and the re-armed repair would
             # wait for a restart.
             manager.async_schedule_banked_tail_repair()
+            manager.async_schedule_energy_rebuild()
             manager.notify_update()
             _send_result(
                 connection, msg["id"], "import_config_selective",
@@ -4773,6 +4775,7 @@ async def ws_undo_import(
             if entry is not None and isinstance(snapshot_options, dict):
                 await _async_restore_entry_options(hass, entry, snapshot_options)
             manager.async_schedule_banked_tail_repair()
+            manager.async_schedule_energy_rebuild()
             manager.notify_update()
             _send_result(connection, msg["id"], "undo_import", result)
         except ValueError as exc:

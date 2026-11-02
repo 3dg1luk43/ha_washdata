@@ -1527,6 +1527,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # reloads the entry unless the payload brought settings with it, so
             # schedule it directly rather than leaving it for the next restart.
             manager.async_schedule_banked_tail_repair()
+            manager.async_schedule_energy_rebuild()
 
             manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 

@@ -1173,6 +1173,12 @@ TERMINAL_QUIET_MIN_CONSISTENCY = 0.6
 # where a cycle's real activity ended needs `stop_threshold_w`, and that lives
 # in entry.options. Same split as the v10->v11 marker-only bump.
 BANKED_TAIL_REPAIR_KEY = "_banked_tail_repair_pending"
+# Store key set by the v17->v18 migration (and an import of an older export) once
+# cycle energies were re-integrated (#498); cleared when every envelope has been
+# rebuilt, so `avg_energy` follows the cycles (#495). Rebuilding needs the matcher
+# config and can take minutes on a large store, so it runs after setup, not in the
+# migration.
+CYCLE_ENERGY_REBUILD_KEY = "_cycle_energy_rebuild_pending"
 # Don't churn a cycle for a few seconds of tail: only rewrite one whose banked
 # span is worth correcting. Measured median banking was 12.6 min, so this only
 # skips noise.
@@ -1777,7 +1783,11 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 # `live_match` / `quality` / `end` / `remaining_time` records in
 # `ml_model_versions` / `ml_training_history`. No cycle or label is touched.
 # Idempotent.
-STORAGE_VERSION = 17
+# v18: re-integrates `energy_wh` of past and backfill cycles from their stored trace
+# with the hold integrator (#498: the median gap rule dropped a change-only plug's
+# silent heater stretches) and arms `CYCLE_ENERGY_REBUILD_KEY` so every envelope's
+# `avg_energy` is rebuilt from the cycles (#495). Idempotent.
+STORAGE_VERSION = 18
 STORAGE_KEY = "ha_washdata"
 
 # Restore point for "Undo last import" (register item 195): the store as it was before

@@ -91,8 +91,7 @@ from .const import (
 from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .options_utils import option_float
 from .signal_processing import (
-    energy_gap_threshold_s,
-    integrate_wh,
+    integrate_cycle_wh,
     terminal_event_end,
     terminal_quiet_seen,
 )
@@ -966,7 +965,7 @@ def summarize_segment(
     status = str(cycle_data.get("status") or "")
     energy_wh = 0.0
     if len(offsets) >= 2:
-        energy_wh = integrate_wh(offsets, powers, max_gap_s=energy_gap_threshold_s(offsets))
+        energy_wh = integrate_cycle_wh(offsets, powers)
 
     if status == "completed":
         accept, reason = True, None

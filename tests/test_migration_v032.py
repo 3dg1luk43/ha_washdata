@@ -641,6 +641,11 @@ async def test_v16_to_v17_never_touches_cycles_or_labels():
     }
     expected = copy.deepcopy(expected)
     result = await store._async_migrate_func(16, 1, before)
+    # The later v18 step re-integrates every traced cycle's energy_wh (#498);
+    # nothing else about a cycle may change.
+    for key in ("past_cycles", "backfill_cycles"):
+        for cycle in result[key]:
+            cycle.pop("energy_wh", None)
     for key, value in expected.items():
         assert result[key] == value, key
 

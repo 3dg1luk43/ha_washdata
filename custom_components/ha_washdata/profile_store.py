@@ -55,6 +55,7 @@ from .const import (
     SELF_UNMATCHABLE_MIN_CYCLES,
     DEVICE_TYPE_DISHWASHER,
     BANKED_TAIL_REPAIR_KEY,
+    CYCLE_ENERGY_REBUILD_KEY,
     BANKED_TAIL_REPAIR_MIN_S,
     TERMINAL_QUIET_CAP_S,
     TERMINAL_QUIET_MIN_CONSISTENCY,
@@ -110,6 +111,7 @@ from .signal_processing import (
     resample_adaptive,
     Segment,
     integrate_wh,
+    integrate_cycle_wh,
     energy_gap_threshold_s,
     has_resumed_pause as _has_resumed_pause,
     resumed_pauses as _resumed_pauses,
@@ -1321,6 +1323,20 @@ class WashDataStore(Store[JSONDict]):
                 summary["model_records"] or "none",
             )
 
+        if old_major_version < 18:
+            # #498: stored energy dropped every interval over 10x the MEDIAN report
+            # gap, so a change-only plug's silent heater stretches counted as 0 W.
+            # Re-integrate from the stored trace (pure data, idempotent) and arm the
+            # envelope rebuild that refreshes avg_energy (#495) after setup.
+            summary = _recompute_cycle_energy(old_data)
+            old_data[CYCLE_ENERGY_REBUILD_KEY] = True
+            _LOGGER.info(
+                "Migrating storage from v%s to v18 (cycle energy re-integrated: "
+                "%d of %d cycles changed, %+.0f Wh in total)",
+                old_major_version, summary["changed"], summary["examined"],
+                summary["delta_wh"],
+            )
+
         return old_data
 
 #: Trained-model capabilities no longer trained on-device since 0.5.8: the early
@@ -1330,6 +1346,76 @@ class WashDataStore(Store[JSONDict]):
 #: the shipped quality / end baselines still score the panel's per-cycle health.
 #: Only ``total_energy`` is trained (and kept).
 _REMOVED_ML_CAPABILITIES = ("live_match", "quality", "end", "remaining_time")
+
+
+def _export_predates_energy_recompute(meta: dict[str, Any]) -> bool:
+    """Does this import payload predate the v18 energy re-integration (#498)?
+
+    The import paths never run `_async_migrate_func`, so an older export brings its
+    cycles' old energy with it. An unreadable version counts as old: the recompute
+    is idempotent.
+    """
+    try:
+        return int(meta.get("version") or 1) < 18
+    except (TypeError, ValueError, OverflowError):
+        return True
+
+
+def _recompute_cycle_energy(data: JSONDict) -> dict[str, Any]:
+    """Re-integrate ``energy_wh`` of every past and backfill cycle (#498).
+
+    Uses ``integrate_cycle_wh``, the integrator every stored-energy writer uses
+    since #498. A cycle without a usable trace keeps its figure. Where the cycle's
+    reported energy is the integrated one (no meter reading), its cost moves with
+    it. ``reference_cycles`` are left alone: a community download's trace is
+    downsampled, and its energy is the uploader's. The lifetime odometer is not
+    touched. Idempotent; never raises.
+    """
+    summary: dict[str, Any] = {"examined": 0, "changed": 0, "delta_wh": 0.0}
+    for key in ("past_cycles", "backfill_cycles"):
+        cycles = data.get(key)
+        if not isinstance(cycles, list):
+            continue
+        for cycle in cycles:
+            if not isinstance(cycle, dict):
+                continue
+            try:
+                xy = decompress_power_data(cycle)
+                if len(xy) < 2:
+                    continue
+                summary["examined"] += 1
+                new = round(
+                    integrate_cycle_wh(
+                        np.asarray([t for t, _ in xy], dtype=float),
+                        np.asarray([pw for _, pw in xy], dtype=float),
+                    ),
+                    3,
+                )
+                if not math.isfinite(new):
+                    continue
+                raw_old = cycle.get("energy_wh")
+                old = float(raw_old) if isinstance(raw_old, (int, float)) else None
+                if old is not None and math.isfinite(old) and abs(new - old) < 0.001:
+                    continue
+                cycle["energy_wh"] = new
+                summary["changed"] += 1
+                summary["delta_wh"] += new - (old if old is not None and math.isfinite(old) else 0.0)
+                if cycle.get("energy_meter_wh") is None and cycle.get("cost") is not None:
+                    _rescale_cycle_cost(cycle, old, new)
+            except Exception:  # noqa: BLE001 - one bad row must not stop the rest
+                _LOGGER.debug("Energy recompute skipped a cycle", exc_info=True)
+    return summary
+
+
+def _rescale_cycle_cost(cycle: CycleDict, old_wh: float | None, new_wh: float) -> None:
+    """Move a cycle's cost with its re-integrated energy. A time-weighted cost is
+    scaled (its prices are frozen with it); a fixed one is energy x price."""
+    cost = float(cycle["cost"])
+    price = cycle.get("energy_price")
+    if cycle.get("energy_price_mode") != "dynamic" and isinstance(price, (int, float)):
+        cycle["cost"] = round(new_wh / 1000.0 * float(price), 4)
+    elif old_wh is not None and math.isfinite(old_wh) and old_wh > 0:
+        cycle["cost"] = round(cost * new_wh / old_wh, 4)
 
 
 def _drop_removed_ml_state(data: JSONDict) -> dict[str, Any]:
@@ -5941,14 +6027,14 @@ class ProfileStore:
                 cycle_data["signature"] = dataclasses.asdict(sig)
 
             # Compute and store energy (Wh) if not already set (e.g. by manager).
-            # Shared trapezoidal integrator + data-driven outage gap (single source
-            # with manager._on_cycle_end).
+            # Shared stored-cycle integrator (#498; single source with
+            # manager._on_cycle_end).
             if "energy_wh" not in cycle_data and len(ts_arr) > 1:
                 sort_idx = np.argsort(ts_arr)
                 ts_s = ts_arr[sort_idx]
                 p_s = p_arr[sort_idx]
                 cycle_data["energy_wh"] = round(
-                    integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
+                    integrate_cycle_wh(ts_s, p_s), 3
                 )
 
             self._logger.debug(
@@ -6756,6 +6842,7 @@ class ProfileStore:
                     repr(pd[-1]) if has_pts else None,
                     c.get("id"), c.get("status"), c.get("duration"),
                     c.get("manual_duration"), c.get("energy_wh"), c.get("start_time"),
+                    c.get("energy_meter_wh"),
                     repr(rev.get("golden")) if isinstance(rev, dict) else None,
                     repr(meta.get("source")) if isinstance(meta, dict) else None,
                 ))
@@ -6925,21 +7012,24 @@ class ProfileStore:
 
         # Usage stats (avg_energy, cycle_count) come from REAL cycles only, so imported
         # reference cycles can shape the curve without ever inflating energy/count.
-        # When there are no reference cycles this is byte-identical to the prior behaviour
-        # (avg_energy from the avg curve, cycle_count = len(durations)).
-        if ref_cycles:
-            real_energies = [
-                float(c["energy_wh"])
-                for c in real_cycles
-                if isinstance(c.get("energy_wh"), (int, float))
+        # avg_energy is the mean of what each cycle reports (meter first), the figure
+        # the cycle list shows (#495). The averaged curve is a mean of DTW-warped
+        # members, which keeps the values but not the area: a dishwasher at 0.30 kWh
+        # a run showed 0.73 kWh. Reference/backfill energies stand in only for a
+        # profile with no real cycle, and the curve only when no cycle has an energy.
+        def _mean_report_kwh(cycles: list[CycleDict]) -> float | None:
+            values = [
+                wh for wh in (cycle_report_energy_wh(c) for c in cycles) if wh > 0
             ]
-            avg_energy = (sum(real_energies) / len(real_energies) / 1000.0) if real_energies else 0.0
-            cycle_count = len(real_cycles)
-        else:
-            # Average-curve energy (kWh) via the shared trapezoidal integrator.
+            return sum(values) / len(values) / 1000.0 if values else None
+
+        avg_energy = _mean_report_kwh(real_cycles)
+        if avg_energy is None:
+            avg_energy = _mean_report_kwh(ref_cycles)
+        if avg_energy is None:
             # avg_curve is in Watts, time_grid in seconds; integrate_wh returns Wh.
             avg_energy = integrate_wh(time_grid, avg_curve) / 1000.0
-            cycle_count = len(durations)
+        cycle_count = len(real_cycles) if ref_cycles else len(durations)
 
         envelope_data: dict[str, Any] = {
             "time_grid": time_grid,  # Time grid used by manager for phase estimation
@@ -7141,6 +7231,22 @@ class ProfileStore:
     def banked_tail_repair_pending(self) -> bool:
         """Whether the one-time banked-tail repair still has to run."""
         return bool(self._data.get(BANKED_TAIL_REPAIR_KEY))
+
+    def cycle_energy_rebuild_pending(self) -> bool:
+        """Whether the envelope rebuild armed by the v18 energy fix still has to run."""
+        return bool(self._data.get(CYCLE_ENERGY_REBUILD_KEY))
+
+    async def async_rebuild_envelopes_after_energy_fix(self) -> int:
+        """Rebuild every envelope once after the cycle energies were re-integrated
+        (#498), so each profile's avg_energy is the mean of its cycles (#495).
+
+        The marker is cleared only after the rebuild, so an interrupted run is
+        repeated at the next start. Returns the number of envelopes rebuilt.
+        """
+        count = await self.async_rebuild_all_envelopes()
+        self._data.pop(CYCLE_ENERGY_REBUILD_KEY, None)
+        await self.async_save()
+        return count
 
     async def async_repair_banked_tails(
         self, stop_threshold_w: float, device_type: str
@@ -10730,6 +10836,11 @@ class ProfileStore:
         # re-armed here for a payload old enough to carry banked tails.
         if _export_predates_banked_tail_repair(meta):
             self._data[BANKED_TAIL_REPAIR_KEY] = True
+        # ...and the v18 energy re-integration (#498), with the envelope rebuild
+        # it arms (the payload's avg_energy came from the old curve rule, #495).
+        if _export_predates_energy_recompute(meta):
+            _recompute_cycle_energy(self._data)
+            self._data[CYCLE_ENERGY_REBUILD_KEY] = True
         self._cached_sample_segments = {}
         # profile_groups may have been replaced under the same member names.
         self._cohesion_cache_generation += 1
@@ -11252,6 +11363,13 @@ class ProfileStore:
                 elif cur is None:
                     self._data[key] = src_val  # scalar: fill only when absent locally
 
+        # An older export's cycles carry the pre-#498 energy; re-integrate them before
+        # the rebuild below, and arm the full one for the carried envelopes (#495).
+        # Idempotent, so this device's own cycles come out as they were.
+        if _export_predates_energy_recompute(meta):
+            _recompute_cycle_energy(self._data)
+            self._data[CYCLE_ENERGY_REBUILD_KEY] = True
+
         # ── Step 5: envelopes -- carry for definition-only profiles, rebuild the rest ─
         src_envs = data_dict.get("envelopes") if isinstance(data_dict.get("envelopes"), dict) else {}
         local_envs = self._data.setdefault("envelopes", {})
@@ -11508,7 +11626,7 @@ class ProfileStore:
         p_s = np.array([r[1] for r in renorm], dtype=float)
         if len(ts_s) > 1:
             cycle["energy_wh"] = round(
-                integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
+                integrate_cycle_wh(ts_s, p_s), 3
             )
             cycle["max_power"] = round(float(np.max(p_s)), 1)
         elif len(ts_s) == 1:
@@ -11995,7 +12113,7 @@ class ProfileStore:
             p_s = np.array([pt[1] for pt in new_power_data], dtype=float)
             if len(ts_s) > 1:
                 c1["energy_wh"] = round(
-                    integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
+                    integrate_cycle_wh(ts_s, p_s), 3
                 )
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.warning("Energy recompute failed after cycle merge", exc_info=True)

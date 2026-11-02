@@ -101,6 +101,39 @@ def integrate_wh(
     return float(np.sum(avg_power[mask] * dt_hours[mask]))
 
 
+#: A stored cycle's interval longer than this is an outage, not a held reading.
+#: The top of ``energy_gap_threshold_s``'s range; 0.2% of 1018 recorded cycles have
+#: one (``devtools/cycle_energy_eval.py``).
+CYCLE_ENERGY_MAX_GAP_S = 3600.0
+
+
+def integrate_cycle_wh(timestamps: np.ndarray, power: np.ndarray) -> float:
+    """Energy (Wh) of a stored cycle trace: every stored-energy writer uses it.
+
+    Each reading holds until the next one, which is what a Home Assistant power
+    sensor means (a state lasts until it changes) and how the live accumulator
+    counts. Only an interval over ``CYCLE_ENERGY_MAX_GAP_S`` is left out.
+
+    The trapezoid with the median gap rule (``integrate_wh`` +
+    ``energy_gap_threshold_s``, kept for the end gates) stored 429 Wh for a 1566 Wh
+    dishwasher cycle (#498): the watchdog's 30 s keepalives in the quiet stretches
+    set the median, so a heater the plug did not re-report for 5 minutes counted as
+    nothing, and trimming the 0 W tail moved the figure. A cadence-derived ceiling
+    of any kind fails the same way on a change-only plug, whose silences are its
+    steady states; under the hold an interval after a low reading costs little
+    whichever way it is judged.
+    """
+    ts = np.asarray(timestamps, dtype=float)
+    pw = np.asarray(power, dtype=float)
+    if ts.size < 2 or pw.size != ts.size:
+        return 0.0
+    order = np.argsort(ts, kind="stable")
+    ts, pw = ts[order], pw[order]
+    dt = np.diff(ts)
+    mask = (dt > 0) & (dt <= CYCLE_ENERGY_MAX_GAP_S)
+    return float(np.sum(pw[:-1][mask] * dt[mask]) / 3600.0)
+
+
 
 # ─── Time-weighted energy cost (#426) ─────────────────────────────────────────
 #

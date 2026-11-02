@@ -266,6 +266,7 @@ from .signal_processing import (
     median_fast,
     percentile_linear,
     integrate_wh,
+    integrate_cycle_wh,
     energy_gap_threshold_s,
     compact_price_timeline,
     cycle_cost,
@@ -880,6 +881,7 @@ class WashDataManager:
         self._in_power_event = False
         self._cycle_end_task: Task[Any] | None = None
         self._banked_tail_repair_task: Task[Any] | None = None
+        self._energy_rebuild_task: Task[Any] | None = None
         # Detached store-touching tasks (matching trigger, active-cycle clear,
         # post-cycle processing) tracked so async_shutdown can cancel them before a
         # reload/unload swaps the ProfileStore out from under them.
@@ -2183,6 +2185,30 @@ class WashDataManager:
             self._async_repair_banked_tails()
         )
 
+    async def _async_rebuild_after_energy_fix(self) -> None:
+        """Rebuild every envelope once after the v18 cycle-energy re-integration
+        (#498), so profile averages follow the cycles (#495). Never raises."""
+        try:
+            count = await self.profile_store.async_rebuild_envelopes_after_energy_fix()
+            self._logger.info(
+                "Rebuilt %d profile envelopes after the cycle energy fix", count
+            )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            self._logger.warning("Envelope rebuild after the energy fix failed: %s", exc)
+
+    def async_schedule_energy_rebuild(self) -> None:
+        """Run the envelope rebuild armed by the v18 migration or an import of an
+        older export, in the background (it rebuilds every profile, which must not
+        bill the startup time, #408). A second call while one runs is a no-op."""
+        if self.profile_store.cycle_energy_rebuild_pending() is not True:
+            return
+        existing = self._energy_rebuild_task
+        if existing is not None and not existing.done():
+            return
+        self._energy_rebuild_task = self._spawn_tracked(
+            self._async_rebuild_after_energy_fix()
+        )
+
     def _terminal_high_for_guards(self, profile_name: str | None) -> Any:
         """Element 10: the matched profile's last high-power block, or None.
 
@@ -2461,6 +2487,7 @@ class WashDataManager:
         # ProfileStore: an untracked task would keep writing to the store a reload
         # had already swapped out.
         self.async_schedule_banked_tail_repair()
+        self.async_schedule_energy_rebuild()
 
     def _load_notify_services(self, config_entry: ConfigEntry) -> None:
         """Load the per-event notification service lists.
@@ -5427,11 +5454,9 @@ class WashDataManager:
                     valid.sort(key=lambda x: x[0])
                     ts = np.array([v[0] for v in valid])
                     ps = np.array([v[1] for v in valid])
-                    # Shared trapezoidal integrator with a data-driven outage gap
-                    # (single source with ProfileStore.async_add_cycle).
-                    cycle_energy_wh = integrate_wh(
-                        ts, ps, max_gap_s=energy_gap_threshold_s(ts)
-                    )
+                    # Shared stored-cycle integrator (#498; single source with
+                    # ProfileStore.async_add_cycle).
+                    cycle_energy_wh = integrate_cycle_wh(ts, ps)
                 except (TypeError, ValueError, ArithmeticError):
                     cycle_energy_wh = 0.0
 

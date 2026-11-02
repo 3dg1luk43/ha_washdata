@@ -366,9 +366,11 @@ any promotion. The integration is self-sufficient at test/run time (parity fixtu
   detector converts every reading to UTC at `process_reading`; keep `as_local` for display and
   quiet-hours only.
 - All time/energy calculations must be dt-aware (timestamps, not sample counts).
-- Energy integration: use the shared `signal_processing.integrate_wh(ts, power, max_gap_s=...)` +
-  `energy_gap_threshold_s(ts)`. Both persistence paths route through it - **do not reintroduce an
-  inline trapezoid**.
+- Energy integration: a **stored** cycle's `energy_wh` (cycle end, add, trim, merge, split, history
+  import, the v18 migration) goes through `signal_processing.integrate_cycle_wh` (each reading held
+  to the next, only gaps > 1 h dropped; #498: the median gap rule stored 429 Wh of a 1566 Wh cycle on
+  a change-only plug). The end gates, cost weighting and ML features keep `integrate_wh(ts, power,
+  max_gap_s=...)` + `energy_gap_threshold_s(ts)`. **Do not reintroduce an inline integral.**
 
 ### UI localization
 
@@ -430,7 +432,7 @@ old-schema fixtures. **Two separate layers, tested separately:**
    lives in `const.py` (`CONFIG_ENTRY_VERSION` / `CONFIG_ENTRY_MINOR_VERSION`), which the flow class,
    every stepwise block and the one-pass legacy migration all read: a bump is that constant plus one
    new migration step. Tested in `tests/test_migration_harness.py`.
-2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->17
+2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->18
    (`STORAGE_VERSION` in `const.py`). Tested in `tests/test_migration_v032.py`. Call
    `_async_migrate_func(old_version, 1, data)` **directly** - do not go through
    `ProfileStore.async_load()` (needs file I/O).
@@ -449,7 +451,10 @@ old-schema fixtures. **Two separate layers, tested separately:**
    MANAGER-01; idempotent), v15->v16 review-queue cleanup (drops pending requests the item-433
    rule would not raise; records no answer; idempotent), v16->v17 drops the state of the ML parts
    removed in 0.5.8 (`match_ranking_history`, `matching_config`, every model record but
-   `total_energy`'s; no cycle or label; idempotent).
+   `total_energy`'s; no cycle or label; idempotent), v17->v18 re-integrates past/backfill
+   `energy_wh` with `integrate_cycle_wh` (#498; cost follows, meter and lifetime untouched) and arms
+   `CYCLE_ENERGY_REBUILD_KEY`, which the manager consumes after setup by rebuilding every envelope
+   (#495 `avg_energy`); imports of older exports do the same.
 
 ## Matching Pipeline
 
