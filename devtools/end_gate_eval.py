@@ -26,6 +26,16 @@ What it measures, per replayed cycle:
   profile it is recorded against.
 * **split** - the trace did not survive as one cycle covering its active span.
 
+**Programme truth (register item 573).** The above-stop span counts a quiet tail that
+still reads above the Stop Threshold (a Miele anti-crease phase, a dryer's anti-wrinkle
+tumbles, a standby draw over a sub-watt Stop Threshold) as programme. On washers,
+washer-dryers and dryers each row also carries ``prog_end_s``: where such a tail begins
+(``spin_rhythm.active_end_s``), else the last above-stop reading; dishwashers keep the
+above-stop truth (drying is programme). The ``prog_*`` figures score the FIRST finish
+against it (early > 1 / > 5 min; a split = the programme cut before its end and
+continued, or the kept piece under 90% of it), and ``--check`` gates on them: on the
+2026-11-02 baseline 17 of 19 dryer early/split counts were tail artefacts.
+
 Replay is the real thing, not a model of it: every cycle goes through
 ``playground.simulate_cycle_detail``, which drives the real ``CycleDetector``
 and the real Stage 1-5 matcher over the cycle's own trace.  So
@@ -234,6 +244,31 @@ MIN_READINGS = 10
 MIN_CYCLES = 5
 #: Device types the anti-crease finalise can arm for (`_anticrease_gate_open`).
 AC_DEVICE_TYPES = ("washing_machine", "dryer", "washer_dryer")
+#: Device types whose trace can run on past the PROGRAMME in a quiet tail that still
+#: reads above the Stop Threshold (a Miele anti-crease phase, a dryer's anti-wrinkle
+#: tumbles, a door-lock/standby draw over a sub-watt Stop Threshold). For them the
+#: programme truth is where that tail starts (register item 573). Dishwashers are
+#: not here: drying is programme.
+PROGRAMME_TRUTH_TYPES = ("washing_machine", "washer_dryer", "dryer")
+
+
+def _programme_end(
+    work: list[tuple[float, float]], active: list[float], device_type: str
+) -> float | None:
+    """Offset where the programme ended: the last above-stop reading, or earlier,
+    where a quiet tail begins (``spin_rhythm.active_end_s``: the end of the last
+    60 s window at >= 8% of the sustained peak with nothing later above 4%), on
+    :data:`PROGRAMME_TRUTH_TYPES`. None without an above-stop reading."""
+    if not active:
+        return None
+    end = float(active[-1])
+    if device_type not in PROGRAMME_TRUTH_TYPES or len(work) < 8:
+        return end
+    from custom_components.ha_washdata import spin_rhythm  # noqa: PLC0415
+
+    t0 = min(t for t, _p in work)
+    quiet = spin_rhythm.active_end_s([t for t, _p in work], [p for _t, p in work])
+    return end if quiet is None else min(end, t0 + float(quiet))
 
 #: Anti-crease probe state for the replay in progress (one at a time).
 _AC: dict[str, Any] = {}
@@ -813,6 +848,7 @@ def _replay_export(
             work = [(t + shift if t >= halt_s[0] else t, p) for t, p in pts]
         highs = [t for t, p in work if p > level]
         active = [t for t, p in work if p > stop]
+        prog_end = _programme_end(work, active, device_type)
         ac_final = _AC.get("ac_final_ts")
         base_t = playground._cycle_base_time(replayed)  # noqa: SLF001
         ac_final_s = (ac_final - base_t).total_seconds() if ac_final is not None else None
@@ -873,6 +909,11 @@ def _replay_export(
             "tumble_tail": bool(tumble_tail and ac_device),
             "first_end_s": round(first_end, 1) if first_end is not None else None,
             "active_end_s": round(active[-1], 1) if active else None,
+            # Programme truth (register item 573): where a quiet tail begins.
+            "prog_end_s": round(prog_end, 1) if prog_end is not None else None,
+            "prog_span_s": (
+                round(prog_end - active[0], 1) if prog_end is not None and active else None
+            ),
             "last_high_s": round(highs[-1], 1) if highs else None,
             "ac_final_s": round(ac_final_s, 1) if ac_final_s is not None else None,
             "ac_held": bool(_AC.get("ac_held")),
@@ -911,8 +952,47 @@ def _summarise(rows: list[dict[str, Any]], device_type: str | None = None) -> di
         r for r in matched
         if r["confidence"] is not None and float(r["confidence"]) < 0.4
     ]
+    # Programme truth (item 573): lag of the close against the programme's own end,
+    # an early end = the FIRST finish more than 1 / 5 min before it, a split = the
+    # programme cut before its end and continued as another piece, or the kept
+    # piece covering under 90% of the programme. Rows from before item 573 lack
+    # the field and fall back to the above-stop truth.
+    def _pspan(r: dict[str, Any]) -> float:
+        v = r.get("prog_span_s")
+        return float(v) if v is not None else float(r["active_span_s"])
+
+    def _pend(r: dict[str, Any]) -> float | None:
+        v = r.get("prog_end_s")
+        return float(v) if v is not None else r.get("active_end_s")
+
+    def _first(r: dict[str, Any]) -> float:
+        """The first finish against the programme end; without a recorded first
+        finish, the close against the programme span (the pre-573 measure)."""
+        if r.get("first_end_s") is not None and _pend(r) is not None:
+            return float(r["first_end_s"]) - float(_pend(r))
+        return float(r["end_offset_s"]) - _pspan(r)
+
+    def _cut(r: dict[str, Any]) -> bool:
+        if r["detected_count"] <= 1:
+            return False
+        if r.get("first_end_s") is None or _pend(r) is None:
+            return True
+        return float(r["first_end_s"]) < float(_pend(r)) - 60.0
+
+    plags = [r["end_offset_s"] - _pspan(r) for r in finished]
+    pfirst = [_first(r) for r in finished]
+    psplits = sum(
+        1 for r in finished
+        if _cut(r) or (r["final_duration_s"] or 0.0) < 0.9 * _pspan(r)
+    )
     return {
         "n": len(finished),
+        "prog_median_lag_min": round(float(np.median(plags)) / 60.0, 2),
+        "prog_mean_lag_min": round(float(np.mean(plags)) / 60.0, 2),
+        "prog_p90_lag_min": round(float(np.percentile(plags, 90)) / 60.0, 2),
+        "prog_early_1min_n": sum(1 for x in pfirst if x < -60.0),
+        "prog_early_5min_n": sum(1 for x in pfirst if x < -300.0),
+        "prog_split_n": int(psplits),
         "median_lag_min": round(float(np.median(lags)) / 60.0, 2),
         "mean_lag_min": round(float(np.mean(lags)) / 60.0, 2),
         "p90_lag_min": round(float(np.percentile(lags, 90)) / 60.0, 2),
@@ -1192,13 +1272,17 @@ def _compare(before_path: str, after_path: str) -> None:
 #: ``--check`` regression tolerances (audit TESTING-09): how far a metric may move
 #: the wrong way, per device type, before the check fails. Lags in minutes;
 #: early ends and splits are cycle counts.
+#: Since item 573 the gate reads the PROGRAMME truth: the above-stop yardstick counts
+#: a quiet tail as programme, so on the 2026-11-02 baseline 17 of 19 dryer early/split
+#: counts were artefacts and the zero tolerance blocked any change that ends a tail
+#: device at its programme end. The above-stop figures are still summarised.
 BASELINE_TOLERANCE: dict[str, float] = {
-    "median_lag_min": 0.25,
-    "mean_lag_min": 0.5,
-    "p90_lag_min": 1.0,
-    "early_1min_n": 0,
-    "early_5min_n": 0,
-    "split_n": 0,
+    "prog_median_lag_min": 0.25,
+    "prog_mean_lag_min": 0.5,
+    "prog_p90_lag_min": 1.0,
+    "prog_early_1min_n": 0,
+    "prog_early_5min_n": 0,
+    "prog_split_n": 0,
 }
 #: The replay flags a baseline records and ``--check`` replays with.
 BASELINE_FLAGS = (
@@ -1226,6 +1310,10 @@ def _baseline_summary(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             "early_1min_pct": s["early_1min_pct"],
             "early_5min_pct": s["early_5min_pct"],
             "split_pct": s["split_pct"],
+            **{k: s[k] for k in (
+                "prog_median_lag_min", "prog_mean_lag_min", "prog_p90_lag_min",
+                "prog_early_1min_n", "prog_early_5min_n", "prog_split_n",
+            )},
         }
     return out
 
