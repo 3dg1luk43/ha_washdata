@@ -47,13 +47,20 @@ from .const import (
     MATCH_ENERGY_REF_MIN_CYCLES,
     MATCH_ENERGY_WEIGHT,
     MATCH_KEEP_MIN_SCORE,
+    MATCH_SPIN_WEIGHT,
+    MATCH_SPIN_WEIGHT_IN_PROGRESS,
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
+    MATCH_MEMBER_IN_PROGRESS,
+    MATCH_MEMBER_LIVE_GUARD,
+    MATCH_MEMBER_KEEP,
+    MATCH_MEMBER_TEMPLATES,
     MAX_ALIGN_GRID_POINTS,
     STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES,
 )
 from .signal_processing import integrate_wh
+from . import spin_rhythm
 
 
 def stage4_energy_mode(device_type: str | None) -> str:
@@ -505,13 +512,111 @@ def _rank_key(candidate: dict[str, Any]) -> float:
     return score if math.isfinite(score) else float("-inf")
 
 
+def _expand_member_templates(snapshots: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """One scoring item per template (#486).
+
+    A snapshot carrying ``members`` (its own cycles' traces on the query grid, see
+    ``ProfileStore.build_match_snapshots``) becomes its usual template (envelope
+    average or golden cycle) plus one item per member. Every item keeps the
+    PROFILE's name and ``avg_duration``, so Stage 1 accepts or rejects the profile
+    as a whole; ``_stage4_duration`` / ``_own_energy`` make Stage 4 grade a member
+    against that member's own duration and energy (nearest neighbour: a load or
+    inlet-temperature variant is judged against the cycle it resembles, not
+    against a median no member has).
+    """
+    items: list[dict[str, Any]] = []
+    for snap in snapshots:
+        members = snap.get("members") or []
+        if not members:
+            items.append(snap)
+            continue
+        base = {k: v for k, v in snap.items() if k != "members"}
+        items.append({**base, "_tpl": "envelope"})
+        for j, mem in enumerate(members):
+            try:
+                item = {
+                    **base,
+                    "sample_power": mem["sample_power"],
+                    "sample_span_s": float(
+                        mem.get("sample_span_s") or base.get("sample_span_s") or 0.0
+                    ),
+                    "_tpl": str(mem.get("id") or j),
+                    "_own_energy": True,
+                }
+                dur = float(mem.get("duration") or 0.0)
+                if math.isfinite(dur) and dur > 0:
+                    item["_stage4_duration"] = dur
+                items.append(item)
+            except (TypeError, ValueError, KeyError, OverflowError):
+                continue
+    return items
+
+
+def _collapse_member_templates(
+    candidates: list[dict[str, Any]], snapshots: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """One candidate per profile, scored by the mean of its best two templates (#486).
+
+    Runs before anything reads the ranking, so the margin and ambiguity are
+    between PROFILES, never between two cycles of one programme. The record is
+    the best template's, under the profile's own ``avg_duration`` and template
+    curve, so ETA and the end gates read what they always read. Mean of the top
+    two rather than the max: the max let a large profile win on one lucky member
+    (eval.py full, whole corpus: top-1 within 1pp either way, but margin AUC 0.826
+    -> 0.800 and profiles with one cycle 57.5 -> 52.8%).
+    """
+    by_snap = {str(s.get("name")): s for s in snapshots}
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for cand in candidates:  # already sorted best-first
+        grouped.setdefault(str(cand.get("name")), []).append(cand)
+    out: list[dict[str, Any]] = []
+    for name, group in grouped.items():
+        best = group[0]
+        rec = {k: v for k, v in best.items() if not k.startswith("_")}
+        rec["score"] = float(np.mean([float(c["score"]) for c in group[:2]]))
+        rec["member_template"] = best.get("_tpl")
+        snap = by_snap.get(name)
+        if snap:
+            rec["profile_duration"] = snap.get("avg_duration", rec.get("profile_duration"))
+            rec["sample"] = snap.get("sample_power", rec.get("sample"))
+            rec["sample_span_s"] = float(
+                snap.get("sample_span_s") or rec.get("profile_duration") or 0.0
+            )
+        out.append(rec)
+    out.sort(key=_rank_key, reverse=True)
+    return out
+
+
 def compute_matches_worker(
     current_power: list[float],
     current_duration: float,
     snapshots: list[dict[str, Any]],
     config: dict[str, Any]
 ) -> list[dict[str, Any]]:
-    """Worker function to compute matches against snapshots."""
+    """Worker function to compute matches against snapshots.
+
+    The public entry point, one call per match: harnesses wrap this name
+    (devtools/prefix_guard_eval.py, suggestion_loop_eval.py), so the live
+    single-template pass of the #486 guard runs through :func:`_compute_matches`
+    instead of re-entering it.
+    """
+    return _compute_matches(current_power, current_duration, snapshots, config)
+
+
+def _compute_matches(
+    current_power: list[float],
+    current_duration: float,
+    snapshots: list[dict[str, Any]],
+    config: dict[str, Any],
+    _stage2_memo: dict[tuple[int, float], tuple[Any, Any, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """The body of :func:`compute_matches_worker`.
+
+    ``_stage2_memo`` carries the Stage-2 results of one match's templates into the
+    #486 guard's single-template pass on the same query: the same template, query
+    and config give the same score, so it is not recomputed (Stage 2 is ~80% of a
+    live match). Keyed by the template list's identity and span, valid for one call.
+    """
     candidates: list[dict[str, Any]] = []
 
     min_duration_ratio = config.get("min_duration_ratio", DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
@@ -554,7 +659,28 @@ def compute_matches_worker(
 
     curr_arr = np.array(current_power)
 
-    for item in snapshots:
+    # Issue #486: a profile with enough cycles is also scored on its own member
+    # cycles (nearest neighbour), then collapsed to one candidate per profile
+    # before anything reads the ranking. Off, or no snapshot carrying members,
+    # leaves every line below on the single-template path.
+    members_on = (
+        bool(config.get("member_templates", MATCH_MEMBER_TEMPLATES))
+        and (
+            not in_progress
+            or bool(config.get("member_templates_in_progress", MATCH_MEMBER_IN_PROGRESS))
+        )
+        and any(s.get("members") for s in snapshots)
+    )
+    member_keep = int(config.get("member_keep", MATCH_MEMBER_KEEP))
+    items = _expand_member_templates(snapshots) if members_on else snapshots
+    # The live guard's single-template pass (below) re-scores the same templates.
+    live_guard = members_on and in_progress and bool(
+        config.get("member_live_guard", MATCH_MEMBER_LIVE_GUARD)
+    )
+    if live_guard and _stage2_memo is None:
+        _stage2_memo = {}
+
+    for item in items:
         name = item["name"]
         profile_duration = item["avg_duration"]
         sample_power = item["sample_power"]
@@ -575,25 +701,33 @@ def compute_matches_worker(
         # `sample` below stays the FULL template: Stage 4 takes its own prefix of it
         # (analysis.prefix_mean), and truncating it here would truncate twice.
         span_s = float(item.get("sample_span_s") or profile_duration or 0.0)
-        shape_pair = None
-        if (
-            prefix_shape_on
-            and span_s > 0
-            and current_duration <= span_s * prefix_shape_max_ratio
-        ):
-            shape_pair = prefix_shape_arrays(
-                curr_arr, sample_power, current_duration, span_s
-            )
-        # The alignment offset is not kept: nothing read it, and it was in different
-        # units on the two paths (shared-grid index vs native index; audit MR-12).
-        if shape_pair is not None:
-            score, metrics, _offset = find_best_alignment(
-                shape_pair[0], shape_pair[1], 1.0, corr_weight=corr_weight
-            )
+        memo_key = (id(sample_power), span_s) if _stage2_memo is not None else None
+        memo_hit = _stage2_memo.get(memo_key) if memo_key is not None else None
+        if memo_hit is not None:
+            score, metrics, shape_pair = memo_hit
         else:
-            score, metrics, _offset = find_best_alignment(
-                current_power, sample_power, 1.0, corr_weight=corr_weight
-            )
+            shape_pair = None
+            if (
+                prefix_shape_on
+                and span_s > 0
+                and current_duration <= span_s * prefix_shape_max_ratio
+            ):
+                shape_pair = prefix_shape_arrays(
+                    curr_arr, sample_power, current_duration, span_s
+                )
+            # The alignment offset is not kept: nothing read it, and it was in
+            # different units on the two paths (shared-grid index vs native index;
+            # audit MR-12).
+            if shape_pair is not None:
+                score, metrics, _offset = find_best_alignment(
+                    shape_pair[0], shape_pair[1], 1.0, corr_weight=corr_weight
+                )
+            else:
+                score, metrics, _offset = find_best_alignment(
+                    current_power, sample_power, 1.0, corr_weight=corr_weight
+                )
+            if memo_key is not None:
+                _stage2_memo[memo_key] = (score, metrics, shape_pair)
 
         if score > keep_min:
             candidates.append({
@@ -611,8 +745,22 @@ def compute_matches_worker(
                 # (devtools, playground) keep working unchanged.
                 "sample_span_s": float(item.get("sample_span_s") or profile_duration or 0.0),
             })
+            if members_on:
+                for key in ("_tpl", "_stage4_duration", "_own_energy"):
+                    if key in item:
+                        candidates[-1][key] = item[key]
 
     candidates.sort(key=_rank_key, reverse=True)
+    if members_on and member_keep > 0:
+        # Keep each profile's best `member_keep` templates (Stage 3 cost).
+        seen: dict[str, int] = {}
+        kept = []
+        for cand in candidates:
+            n = seen.get(cand["name"], 0)
+            if n < member_keep:
+                kept.append(cand)
+                seen[cand["name"]] = n + 1
+        candidates = kept
 
     # Stage 3: DTW Refinement on the top N candidates
     if dtw_bandwidth > 0.0 and len(candidates) > 0:
@@ -622,6 +770,17 @@ def compute_matches_worker(
         top_n = int(config.get("dtw_refine_top_n", MATCH_DTW_REFINE_TOP_N))
         blend = float(config.get("dtw_blend", MATCH_DTW_BLEND))
         to_refine = candidates[:top_n]
+        if members_on:
+            # Top-N PROFILES (by their best Stage-2 template), all their kept
+            # templates; an unrefined template of a refined profile is dropped so
+            # one profile never mixes refined and unrefined scores.
+            top_names: list[str] = []
+            for cand in candidates:
+                if cand["name"] not in top_names:
+                    if len(top_names) >= top_n:
+                        break
+                    top_names.append(cand["name"])
+            to_refine = [c for c in candidates if c["name"] in top_names]
         current_peak = float(np.max(curr_arr)) if curr_arr.size else 0.0
         l1_scale = float(config.get("dtw_l1_scale", MATCH_DTW_DIST_SCALE))
         ddtw_scale = float(config.get("dtw_ddtw_scale", MATCH_DDTW_DIST_SCALE))
@@ -704,6 +863,44 @@ def compute_matches_worker(
     if de_sum > 1.0:
         dur_w, en_w = dur_w / de_sum, en_w / de_sum
     shape_w = max(0.0, 1.0 - dur_w - en_w)
+    # Issue #486: spin/heat rhythm agreement (spin_rhythm.py), a fourth Stage-4
+    # term. Only when the caller supplied the query's raw trace (``spin_trace``,
+    # washers, see ProfileStore.async_match_profile) or its rhythm events
+    # (``spin_query``) and every candidate profile has a member reference
+    # (``spin_ref``) to grade them against.
+    sp_w = float(config.get(
+        "spin_weight_in_progress" if in_progress else "spin_weight",
+        MATCH_SPIN_WEIGHT_IN_PROGRESS if in_progress else MATCH_SPIN_WEIGHT,
+    ))
+    sp_w = min(1.0, max(0.0, sp_w)) if math.isfinite(sp_w) else 0.0
+    spin_ag: dict[str, float] = {}
+    if sp_w > 0 and candidates and (
+        config.get("spin_query") is not None or config.get("spin_trace") is not None
+    ):
+        horizon = current_duration if in_progress else None
+        events = config.get("spin_query")
+        if events is None:
+            try:
+                events = spin_rhythm.rhythm_events(*config["spin_trace"])
+            except (TypeError, ValueError):
+                events = None
+        query = spin_rhythm.rhythm_descriptor(events, horizon)
+        if query is not None:
+            refs = {str(s.get("name")): s.get("spin_ref") for s in snapshots}
+            names = {str(c["name"]) for c in candidates}
+            for name in names:
+                ag = spin_rhythm.rhythm_agreement(query, refs.get(name), horizon)
+                if ag is not None:
+                    spin_ag[name] = ag
+            # Every candidate or none: a profile whose envelope predates #486 has
+            # no reference until its next rebuild (nightly maintenance), and a
+            # neutral stand-in would grade half a ranking on a term the other
+            # half never gets. Same top-1 as a neutral 0.5 on eval.py full (every
+            # envelope rebuilt there), so nothing measured is lost.
+            if len(spin_ag) < len(names):
+                spin_ag = {}
+    if spin_ag:
+        shape_w, dur_w, en_w = shape_w * (1 - sp_w), dur_w * (1 - sp_w), en_w * (1 - sp_w)
     if (dur_w > 0 or en_w > 0) and candidates and current_duration > 0:
         # energy_mode: "mean" (default) compares whole-cycle mean power (W);
         # "integrated" compares true integrated energy (mean x duration). Opt-in so
@@ -716,7 +913,7 @@ def compute_matches_worker(
         cur_mean = float(np.mean(curr_arr))
         cur_energy = cur_mean * current_duration if integrated else cur_mean
         for cand in candidates:
-            prof_dur = float(cand.get("profile_duration") or 0.0)
+            prof_dur = float(cand.get("_stage4_duration") or cand.get("profile_duration") or 0.0)
             if in_progress and prof_dur > 0 and current_duration > prof_dur:
                 # The cycle has outlasted this candidate: real evidence against it,
                 # penalised on the sharper scale. Below a candidate's duration the
@@ -745,7 +942,7 @@ def compute_matches_worker(
             # time as cur_energy does, so a prefix mean is scaled by the elapsed
             # duration and a whole-template mean by the candidate's own duration.
             cand_energy = cand_mean * cand_span if integrated else cand_mean
-            if integrated and not in_progress:
+            if integrated and not in_progress and not cand.get("_own_energy"):
                 # A COMPLETED cycle is graded against the median energy of the
                 # profile's own cycles, not mean(template) x duration: on a warped
                 # envelope that inherits the reference cycle's heating length (w7g).
@@ -758,10 +955,15 @@ def compute_matches_worker(
                     cand_energy = own
             en_ag = _agreement(cur_energy, cand_energy, en_scale)
             cand["shape_score"] = float(cand["score"])
+            rhythm_term = 0.0
+            if spin_ag:
+                cand["spin_ag"] = spin_ag[str(cand["name"])]
+                rhythm_term = sp_w * cand["spin_ag"]
             cand["score"] = float(
                 shape_w * cand["score"]
                 + dur_w * dur_ag
                 + en_w * en_ag
+                + rhythm_term
             )
         candidates.sort(key=_rank_key, reverse=True)
 
@@ -769,6 +971,28 @@ def compute_matches_worker(
     # sort to rank 1 with a NaN margin that was never "ambiguous" (audit
     # MATCH-CORE-05). It carries no evidence: drop it.
     candidates[:] = [c for c in candidates if math.isfinite(_rank_key(c))]
+
+    if members_on:
+        candidates[:] = _collapse_member_templates(candidates, snapshots)
+        if live_guard:
+            # Live, the end gates read this match. Score the query on the
+            # single-template path too (exactly what runs with members off) and
+            # carry each profile's result, so the store can hand the end gates
+            # that ranking instead (ProfileStore._single_template_view).
+            single = _compute_matches(
+                current_power,
+                current_duration,
+                [{k: v for k, v in s.items() if k != "members"} for s in snapshots],
+                {**config, "member_templates": False},
+                _stage2_memo,
+            )
+            by_name = {str(c.get("name")): c for c in single}
+            for cand in candidates:
+                ref = by_name.get(str(cand.get("name")))
+                cand["single_score"] = float(ref["score"]) if ref else None
+                cand["single_shape"] = (
+                    float(ref.get("shape_score", ref["score"])) if ref else None
+                )
 
     # (Stage 6, the #364 prefix scores for the Smart-Termination guard, was removed
     # in 0.5.8: Stages 2/3 already score a running cycle on each candidate's

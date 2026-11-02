@@ -187,6 +187,9 @@ MIN_REPLAYABLE = 5
 MIN_READINGS = 10
 #: The engine reads at most the last 200 stored cycles (the retention cap).
 MAX_CYCLES = 200
+#: Per-device replay caps for a time-budgeted run (path substring -> most recent
+#: cycles replayed). Empty for the CLI; the slow test sets it (see there).
+CYCLE_CAPS: dict[str, int] = {}
 #: Applies in one direction, still moving at the end, before a key is a ladder.
 LADDER_MIN_APPLIES = 3
 LEGACY_RULES = ("sampling_interval", "completion_min", "confidence")
@@ -927,7 +930,8 @@ class DeviceLoop:
         self.idle_hold = idle_hold
         self.title = ev.public_key(dev.path)
         self.base = ev.base_data(dev)
-        self.past = list(self.base.get("past_cycles") or [])[-MAX_CYCLES:]
+        cap = min([MAX_CYCLES, *(n for key, n in CYCLE_CAPS.items() if key in path)])
+        self.past = list(self.base.get("past_cycles") or [])[-cap:]
         self.entry_data, self.options = ev.entry_dicts(dev, {})
         # Every envelope rebuilt once with the current code (exports carry the ones the
         # exporting version built): the fixed match evidence for every round.

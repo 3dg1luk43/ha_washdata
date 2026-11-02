@@ -68,6 +68,10 @@ from .const import (
     MAINTENANCE_INTERVAL_DAYS_MAX,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
+    MATCH_MEMBER_DEVICE_TYPES,
+    MATCH_MEMBER_MAX,
+    MATCH_MEMBER_MIN_CYCLES,
+    MATCH_MEMBER_TEMPLATES,
     MATCH_MIN_RESAMPLED_POINTS,
     PLAYGROUND_PRESET_MAX,
     PLAYGROUND_PRESET_NAME_MAX,
@@ -112,7 +116,7 @@ from .signal_processing import (
     terminal_event_end as _terminal_event_end,
     terminal_quiet_seen as _terminal_quiet_seen,
 )
-from . import analysis
+from . import analysis, spin_rhythm
 from .time_utils import (
     migrate_power_data_to_offsets,
     power_data_to_offsets,
@@ -547,6 +551,13 @@ class MatchResult:
     # The elapsed duration this match scored (the query's), so a candidate's
     # duration ratio can be stated against the cycle (audit MATCH-DECIDE-13).
     query_duration_s: float = 0.0
+    # Issue #486: with live member templates, the confidence the end gates read
+    # (the single-template ranking's top score); None everywhere else, where they
+    # read ``confidence``. See ``_single_template_view``.
+    gate_confidence: float | None = None
+    # ... and the expected duration they read: the longer of the winner's and the
+    # single-template winner's while the two rankings disagree; None otherwise.
+    gate_expected_duration: float | None = None
 
     @property
     def label_confidence(self) -> float:
@@ -1545,9 +1556,21 @@ class _EnvelopeBuild(tuple):  # type: ignore[type-arg]
     ``energy_ref``. Still unpacks as the 2-tuple every caller reads."""
 
     energy_ref: dict[str, Any] | None = None
+    spin_ref: dict[str, Any] | None = None
+    tail_ref: dict[str, Any] | None = None
 
 
 def collapse_group_candidates(
+    candidates: list[dict], group_members: dict[str, list[str]]
+) -> list[dict]:
+    """Collapse each cohesive group to one candidate: see
+    :func:`_collapse_group_candidates`. The public name runs once per match (on
+    the ranking the result is built from; devtools/eval.py records it); the #486
+    single-template view calls the implementation directly."""
+    return _collapse_group_candidates(candidates, group_members)
+
+
+def _collapse_group_candidates(
     candidates: list[dict], group_members: dict[str, list[str]]
 ) -> list[dict]:
     """Replace each cohesive group's scored members with ONE candidate carrying
@@ -1603,7 +1626,57 @@ def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     return margin, margin < MATCH_AMBIGUITY_MARGIN
 
 
+def _single_template_view(
+    candidates: list[dict], group_members: dict[str, list[str]]
+) -> list[dict] | None:
+    """The single-template ranking a live member match carries (#486).
+
+    Live member templates (``analysis._collapse_member_templates``) rank a
+    profile by its nearest member cycles, and a profile with many cycles wins a
+    prefix far more easily than one with a single template (it gets many draws),
+    so its score and margin are not the numbers the end gates were calibrated
+    on. ``compute_matches_worker`` therefore also scores the query on the
+    single-template path (what runs with members off) and carries each
+    profile's result as ``single_score`` / ``single_shape``. This rebuilds that
+    ranking, best first and collapsed into the same Stage-5 families. None when
+    no candidate carries it: members off, or a completed-cycle match.
+    """
+    if not any(isinstance(c, dict) and "single_score" in c for c in candidates):
+        return None
+    single: list[dict] = []
+    for cand in candidates:
+        try:
+            score = float(cand.get("single_score"))
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not math.isfinite(score):
+            continue
+        try:
+            shape = float(cand.get("single_shape"))
+        except (TypeError, ValueError, OverflowError):
+            shape = score
+        single.append({
+            "name": cand.get("name"),
+            "score": score,
+            "shape_score": shape if math.isfinite(shape) else score,
+            "profile_duration": cand.get("profile_duration"),
+        })
+    single.sort(key=lambda c: c["score"], reverse=True)
+    return _collapse_group_candidates(single, group_members)
+
+
 def _match_prefix_ambiguity(
+    candidates: list[dict],
+    best_duration: float,
+    pauses_below: Callable[[str], bool | None] | None = None,
+) -> bool:
+    """:func:`_prefix_landscape_ambiguity` on the ranking the result is built from,
+    once per match (devtools/prefix_guard_eval.py records this call); the #486
+    single-template view's verdict calls the implementation directly."""
+    return _prefix_landscape_ambiguity(candidates, best_duration, pauses_below)
+
+
+def _prefix_landscape_ambiguity(
     candidates: list[dict],
     best_duration: float,
     pauses_below: Callable[[str], bool | None] | None = None,
@@ -2245,6 +2318,9 @@ class ProfileStore:
         # from the device type via analysis.stage4_energy_mode. Default "mean"
         # keeps behaviour byte-identical until wired.
         self.energy_mode: str = "mean"
+        # The device type, pushed in by the manager like energy_mode. Scopes the
+        # nearest-member templates (MATCH_MEMBER_DEVICE_TYPES, #486); None = off.
+        self.device_type: str | None = None
         # Which cycle categories may shape a profile (see CONF_PROFILE_EVIDENCE_SOURCES).
         # Pushed in by the manager from entry options, the way energy_mode is; the store
         # has no access to them itself. Defaults to all three, i.e. pre-setting behaviour.
@@ -6437,6 +6513,10 @@ class ProfileStore:
         # Stage 4's expected energy, from the same members (w7g): the warped
         # average inherits the reference cycle's heating length.
         built.energy_ref = analysis.member_energy_reference(raw_cycles_data)
+        if self.energy_mode == "integrated":
+            built.spin_ref = spin_rhythm.member_rhythm_reference(raw_cycles_data)
+            # The quiet anti-crease tail after the programme end, for the ETA (#486).
+            built.tail_ref = spin_rhythm.member_tail_reference(raw_cycles_data)
         return built
 
     def _cycle_peak(self, cycle: CycleDict) -> float:
@@ -6800,6 +6880,8 @@ class ProfileStore:
 
         result, durations = result_pkg
         energy_ref = getattr(result_pkg, "energy_ref", None)
+        spin_ref = getattr(result_pkg, "spin_ref", None)
+        tail_ref = getattr(result_pkg, "tail_ref", None)
 
         # Update profile stats in storage (Fast metadata update)
         if durations and profile_name in self._data.get("profiles", {}):
@@ -6878,6 +6960,10 @@ class ProfileStore:
             # Stage 4's expected energy from the members' own traces
             # (analysis.member_energy_reference); absent on envelopes built before.
             envelope_data["energy_ref"] = energy_ref
+        if spin_ref:
+            envelope_data["spin_ref"] = spin_ref
+        if tail_ref:
+            envelope_data["tail_ref"] = tail_ref
 
         if "envelopes" not in self._data:
             self._data["envelopes"] = {}
@@ -8677,6 +8763,11 @@ class ProfileStore:
         cycles_by_id: dict[str, CycleDict] = {}
         labeled_by_profile: dict[str, CycleDict] = {}
         golden_profiles: set[str] = set()
+        # Issue #486: each profile's member cycles, for nearest-member templates.
+        members_on = bool(MATCH_MEMBER_TEMPLATES) and (
+            self.device_type in MATCH_MEMBER_DEVICE_TYPES
+        )
+        members_by_profile: dict[str, list[CycleDict]] = {}
         for c in all_cycles:
             cid = c.get("id")
             if cid is not None and cid not in cycles_by_id:
@@ -8689,6 +8780,13 @@ class ProfileStore:
                 and c.get("status") in ("completed", "force_stopped")
             ):
                 labeled_by_profile[pname] = c
+            if members_on and c.get("status") in ("completed", "force_stopped"):
+                try:
+                    long_enough = float(c.get("duration") or 0.0) > 60
+                except (TypeError, ValueError, OverflowError):
+                    long_enough = False
+                if long_enough:
+                    members_by_profile.setdefault(pname, []).append(c)
             rev = c.get("ml_review")
             if isinstance(rev, dict) and rev.get("golden"):
                 golden_profiles.add(pname)
@@ -8752,7 +8850,14 @@ class ProfileStore:
                     # elapsed duration for prefix scoring.
                     "sample_span_s": float(_env_ts_duration or avg_duration),
                     "energy_ref": envelope.get("energy_ref"),
+                    "spin_ref": envelope.get("spin_ref"),
                 })
+                if members_on and envelope_shape_count(envelope) >= MATCH_MEMBER_MIN_CYCLES:
+                    mems = self._member_templates(
+                        members_by_profile.get(name) or [], used_dt
+                    )
+                    if mems:
+                        snapshots[-1]["members"] = mems
                 continue
 
             if not sample_cycle:
@@ -8803,7 +8908,24 @@ class ProfileStore:
                 # Stage 4 still takes the expected energy from the profile's own
                 # cycles when it has them (a golden template, or one cycle).
                 "energy_ref": envelope.get("energy_ref") if isinstance(envelope, dict) else None,
+                "spin_ref": envelope.get("spin_ref") if isinstance(envelope, dict) else None,
             })
+            # Issue #486: a golden-pinned profile keeps its golden trace as its own
+            # template and gains its other members, like an envelope profile.
+            # Without them one pinned cycle stood for the whole programme: on the
+            # #486 Miele, a 142-min run for a 23-cycle Easy Care 40.
+            if (
+                members_on
+                and has_golden
+                and envelope_shape_count(envelope) >= MATCH_MEMBER_MIN_CYCLES
+            ):
+                mems = self._member_templates(
+                    [c for c in members_by_profile.get(name) or []
+                     if c.get("id") != sample_cycle.get("id")],
+                    used_dt,
+                )
+                if mems:
+                    snapshots[-1]["members"] = mems
 
         if skipped_profiles:
             self._logger.debug(
@@ -8813,6 +8935,50 @@ class ProfileStore:
             )
 
         return snapshots
+
+    def _member_templates(
+        self, cycles: list[CycleDict], used_dt: float
+    ) -> list[dict[str, Any]]:
+        """A profile's member cycles as matching templates on the query grid (#486).
+
+        The ``MATCH_MEMBER_MAX`` most recent, so the cost per match stays bounded
+        however long the history grows and a programme that drifts with the season
+        (inlet water temperature) is represented by how it runs now. Degenerate
+        members (peak under the envelope build's floor) are skipped, as the
+        envelope skips them. Re-gridded through the sample-segment cache, so a
+        live tick re-grids only when the query's step changes. Never raises.
+        """
+        try:
+            if not cycles:
+                return []
+            peaks = [self._cycle_peak(c) for c in cycles]
+            med = sorted(peaks)[len(peaks) // 2]
+            floor = max(_DEGENERATE_POWER_FLOOR, 0.10 * med)
+            pool = [c for c, pk in zip(cycles, peaks) if pk >= floor] or list(cycles)
+            cap = int(MATCH_MEMBER_MAX or 0)
+            if cap > 0 and len(pool) > cap:
+
+                def _started(c: CycleDict) -> float:
+                    parsed = _parse_start_dt(c.get("start_time"))
+                    return parsed.timestamp() if parsed is not None else float("-inf")
+
+                pool = sorted(pool, key=_started, reverse=True)[:cap]
+            out: list[dict[str, Any]] = []
+            for c in pool:
+                seg = self._get_cached_sample_segment(c, used_dt)
+                if not seg or len(seg.power) < 2:
+                    continue
+                span = float(seg.timestamps[-1]) - float(seg.timestamps[0])
+                dur = float(c.get("duration") or 0.0) or span
+                out.append({
+                    "id": c.get("id"),
+                    "sample_power": seg.power.tolist(),
+                    "sample_span_s": span or dur,
+                    "duration": dur,
+                })
+            return out
+        except Exception:  # noqa: BLE001 - members are optional, never fail a match
+            return []
 
     def _get_cached_sample_segment(
         self, sample_cycle: dict[str, Any], dt: float
@@ -8891,6 +9057,10 @@ class ProfileStore:
         """
         profiles = self._data.get("profiles") if isinstance(self._data, dict) else None
         count = len(profiles) if isinstance(profiles, dict) else 0
+        if MATCH_MEMBER_TEMPLATES and self.device_type in MATCH_MEMBER_DEVICE_TYPES:
+            # Member templates (#486) cache up to MATCH_MEMBER_MAX members' segments
+            # per profile as well.
+            count += count * max(0, int(MATCH_MEMBER_MAX or 0))
         return max(SAMPLE_SEGMENT_CACHE_MIN, 2 * count)
 
     def _drop_cached_sample_segments(self, cycle_id: str) -> None:
@@ -8978,6 +9148,12 @@ class ProfileStore:
                 "dtw_bandwidth": self.dtw_bandwidth,
                 "energy_mode": self.energy_mode,
                 "in_progress": bool(in_progress),
+                # Issue #486: the RAW trace for the washer rhythm term (the
+                # resampled grid smears seconds-long spin spikes). Extracted in the
+                # executor, not here on the loop.
+                "spin_trace": (
+                    (ts_arr, p_arr) if self.energy_mode == "integrated" else None
+                ),
                 # Empty live; the Playground's replay config (see _matching_overrides).
                 **self._matching_overrides(),
             }
@@ -9044,6 +9220,30 @@ class ProfileStore:
         # group-vs-runner-up call is flagged so it goes to the uncertain/feedback
         # path, not a confident commit.
         margin, is_ambiguous = _ambiguity_from_candidates(candidates)
+        # Issue #486, live member templates: the members choose the winner, the
+        # end gates read the single-template ranking's confidence and ambiguity,
+        # plus "ambiguous" whenever the members chose a different programme
+        # (see _single_template_view). Off (None) on every other path.
+        single_view = (
+            _single_template_view(pre_collapse_candidates, group_members)
+            if in_progress else None
+        )
+        gate_confidence: float | None = None
+        gate_expected: float | None = None
+        if single_view is not None:
+            if single_view:
+                gate_confidence = float(single_view[0]["score"])
+                if single_view[0]["name"] != best["name"]:
+                    try:
+                        gate_expected = float(single_view[0].get("profile_duration") or 0.0)
+                    except (TypeError, ValueError, OverflowError):
+                        gate_expected = None
+                is_ambiguous = (
+                    single_view[0]["name"] != best["name"]
+                    or _ambiguity_from_candidates(single_view)[1]
+                )
+            else:
+                gate_confidence, is_ambiguous = 0.0, True
 
         best_name = best["name"]
         best_duration = best["profile_duration"]
@@ -9143,6 +9343,13 @@ class ProfileStore:
         full_shape_hit = _match_prefix_ambiguity(
             candidates, best_duration or 0.0, pauses_fn
         )
+        if single_view and not full_shape_hit:
+            # Either ranking's prefix-landscape verdict blocks (#486, live members).
+            full_shape_hit = _prefix_landscape_ambiguity(
+                single_view,
+                float(single_view[0].get("profile_duration") or 0.0),
+                pauses_fn,
+            )
         # From the pre-collapse population, not just before the [:5] truncation
         # below: see `pre_collapse_candidates` above for why the collapse is the
         # more dangerous of the two filters here.
@@ -9161,6 +9368,11 @@ class ProfileStore:
             member_confidence=member_confidence,
             longest_candidate_duration_s=longest_candidate_s,
             query_duration_s=float(current_duration or 0.0),
+            gate_confidence=gate_confidence,
+            gate_expected_duration=(
+                max(float(best_duration or 0.0), gate_expected)
+                if gate_expected and math.isfinite(gate_expected) else None
+            ),
         )
 
     async def async_verify_alignment(

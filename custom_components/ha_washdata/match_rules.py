@@ -175,6 +175,26 @@ def program_is_committed(program: Any) -> bool:
     return program not in _NOT_COMMITTED_FOR_DETECTOR
 
 
+def detector_gate_inputs(
+    result: Any, confidence: float, expected_duration: Any
+) -> tuple[float, Any]:
+    """``(confidence, expected_duration)`` the detector's end gates read (#486).
+
+    With live member templates the result carries the single-template ranking's
+    confidence (``gate_confidence``) and, while that ranking picks a different
+    programme, the longer of the two durations (``gate_expected_duration``); the
+    end gates read those instead of the member scores. Every other result leaves
+    both as given. Shared by the manager and the Playground sim.
+    """
+    gate_conf = getattr(result, "gate_confidence", None)
+    gate_exp = getattr(result, "gate_expected_duration", None)
+    if isinstance(gate_conf, (int, float)) and not isinstance(gate_conf, bool):
+        confidence = float(gate_conf)
+    if isinstance(gate_exp, (int, float)) and not isinstance(gate_exp, bool):
+        expected_duration = float(gate_exp)
+    return confidence, expected_duration
+
+
 def detector_match(tick: "MatchTick", result: Any) -> tuple[str | None, bool]:
     """``(profile_name, revoke)`` for the detector's ``update_match`` this tick.
 

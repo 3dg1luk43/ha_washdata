@@ -74,6 +74,13 @@ _RATCHET_DEVICE = "01KGM619"
 
 needs_corpus = pytest.mark.skipif(not _CORPUS.is_dir(), reason="cycle_data/ corpus not present")
 
+#: The #486 Miele export replays its 20 most recent cycles here, as many as the July
+#: export of the same washer it superseded (dropped as a clone) did. All 98, at 2 s
+#: readings, cost 920 s before #486 and ~4200 CPU-s per round with live member
+#: templates, past this test's 1800 s budget in one xdist worker. Every cycle
+#: still shapes its envelopes; devtools/suggestion_loop_eval.py runs it in full.
+loop.CYCLE_CAPS["miele_washer_export_2026-10-30"] = 20
+
 _XDIST = bool(os.environ.get("PYTEST_XDIST_WORKER"))
 
 

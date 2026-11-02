@@ -181,6 +181,9 @@ measures absolute *level/spread*.
 ### Supporting modules
 
 - **`analysis.py`** - NumPy coarse-to-fine alignment, correlation scoring, `compute_dtw_lite`.
+- **`spin_rhythm.py`** (#486) - washer spin/heat rhythm events and descriptor (heater blocks,
+  mechanical events relative to the drum baseline) and their agreement with a profile's members.
+  Pure, NumPy only, never raises.
 - **`signal_processing.py`** - resampling + shared energy integration (`integrate_wh`,
   `energy_gap_threshold_s`) and the time-weighted cost math (`integrate_wh_by_price`, `cycle_cost`,
   `compact_price_timeline`; #426). No filtering, **no DTW** (that is in `analysis.py`).
@@ -188,7 +191,9 @@ measures absolute *level/spread*.
   projected-energy math. Pure, no HA. `manager.py`'s equivalents are thin wrappers and the Playground
   replay calls the same functions, so the what-if replay is byte-identical to the live estimator.
   Locked by `tests/test_progress_module.py` and the Playground parity tests (there is no separate
-  golden snapshot file); **never fork this math**.
+  golden snapshot file); **never fork this math**. On washers whose profile ends in a quiet
+  anti-crease tail (`envelope["tail_ref"]`, `programme_tail_s`, #486) only the countdown subtracts
+  it; progress %, phases, energy and every end gate keep the full expected duration.
 - **`notification_rules.py`** - pure notification *decision* predicates shared by `manager.py` and the
   Playground sim. **Delivery stays in the manager**; only thresholds/gating live here.
 - **`match_rules.py`** (audit F7) - the manager's post-match rules as pure functions: program
@@ -487,6 +492,24 @@ Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for
   candidate's expected energy is the median of its own cycles (`envelope["energy_ref"]`, item 497,
   `MATCH_ENERGY_REF_MIN_CYCLES`), not the warped envelope's mean x duration; mid-cycle keeps the
   template value (the prefix variant was measured and caused early washer ends).
+  **Washers only, completed cycles only (#486):** a fourth term, `MATCH_SPIN_WEIGHT` x the
+  spin/heat rhythm agreement (`spin_rhythm.py`: programme end, heater minutes, spike-pair vs
+  sustained intermediate spins, final spin), graded against the members' events stored on the
+  envelope as `spin_ref`; the other three weights scale by `1 - MATCH_SPIN_WEIGHT`. The query's
+  events come from the RAW trace (`spin_trace`; the 5 s grid smears 2 s spikes). Skipped unless
+  every candidate has a `spin_ref` (pre-#486 envelopes gain one at their next rebuild). Mid-cycle it is off: 0.2 moved 67 of 336 replayed washer ends.
+- **Nearest-member templates (#486, washers/washer-dryers/dryers):** a profile with >=
+  `MATCH_MEMBER_MIN_CYCLES` shape cycles is scored on its template AND its `MATCH_MEMBER_MAX` most
+  recent cycles (`build_match_snapshots` attaches them as `members`); the worker collapses them to
+  one candidate per profile (mean of the best two) **before** the margin is read, so the margin is
+  always between profiles. **Live, the end gates must not read the member scores**
+  (`MATCH_MEMBER_LIVE_GUARD`, register item 555): unguarded they added 3 washer splits and 2 dryer
+  ends > 5 min early, because a profile with many members wins a novel or thinly trained
+  programme's prefix. The worker re-scores the single-template path live; the store puts that
+  ranking's top score in `MatchResult.gate_confidence`, the longer of the two winners' durations
+  in `gate_expected_duration` while they disagree, and sets `is_ambiguous` unless the single
+  ranking clearly agrees. The manager and the Playground hand them to the detector through
+  `match_rules.detector_gate_inputs`; never feed `MatchContext` the member-based confidence.
 - **Stage 5 - profile groups (shipped, hierarchical):** the user groups near-duplicate profiles.
   `_grouped_snapshots` returns the snapshots **unchanged** and only maps each **cohesive** group
   (pairwise envelope correlation >= `GROUP_MIN_COHESION`) to its members; loose groups are not mapped

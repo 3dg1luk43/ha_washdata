@@ -915,6 +915,7 @@ class WashDataManager:
         # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
+        self.profile_store.device_type = self.device_type
         # Which cycle categories may shape a profile. The store cannot read entry
         # options, so the manager pushes this in (same as energy_mode above).
         self.profile_store.evidence_sources = config_entry.options.get(
@@ -1459,10 +1460,14 @@ class WashDataManager:
             self.detector.set_match_committed(
                 match_rules.program_is_committed(self._current_program)
             )
+            # Issue #486: what the end gates read when member templates ran.
+            gate_conf, gate_expected = match_rules.detector_gate_inputs(
+                result, confidence, matched_duration
+            )
             self.detector.update_match(MatchContext(
                 profile_name=profile_name,
-                confidence=confidence,
-                expected_duration=matched_duration,
+                confidence=gate_conf,
+                expected_duration=gate_expected,
                 phase_name=phase_name,
                 is_confident_mismatch=revoke,
                 is_ambiguous=result.is_ambiguous,
@@ -2535,6 +2540,7 @@ class WashDataManager:
         # Stage-4 energy discriminator: integrated energy for WM/washer-dryer,
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
+        self.profile_store.device_type = self.device_type
         # Which cycle categories may shape a profile. Changing it changes every
         # profile's curve, so rebuild them all now: envelopes are otherwise only rebuilt
         # on a cycle end or a label change, so the user would tick the box and see
@@ -8939,6 +8945,10 @@ class WashDataManager:
             # 30 s must not lag 6x further behind than one reporting every 5 s.
             dt_seconds=(
                 (now - prev_estimate_at).total_seconds() if prev_estimate_at else None
+            ),
+            # #486: count down to the programme end, not the anti-crease tail.
+            tail_s=progress_mod.programme_tail_s(
+                self.profile_store, self._current_program, self.device_type
             ),
         )
 

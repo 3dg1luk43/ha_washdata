@@ -876,6 +876,24 @@ MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
 # below it, and mid-cycle, the template's mean power x duration as before. 3 was
 # measured slightly worse than 2 (eval.py full, cut 1.0: +3/-4 folds).
 MATCH_ENERGY_REF_MIN_CYCLES = 2
+# Issue #486: spin/heat rhythm agreement (spin_rhythm.py), a fourth Stage-4 term
+# for washers (energy_mode "integrated"): when the last spin ended (the programme
+# end, so an anti-crease tail costs nothing), how long the heater ran, and whether
+# the intermediate spins are seconds-long spike pairs or sustained ramp+plateau
+# spins. Graded against the profile's own member cycles. Completed cycles only:
+# mid-cycle 0.2 lifted top-1 at 75% elapsed 59.3 -> 61.8 but moved 67 of 336
+# replayed washer ends (mean end lag +0.43 min, end_gate_eval --loo --all-formats).
+# Weight 0.35 (eval.py full, whole corpus, cut 1.0): 0.25 +3.25pp, 0.35 +3.98pp,
+# 0.45 +3.98pp but label precision -3.3pp. Re-ranking only inside the label
+# margin instead of a Stage-4 term was worse (learn-gate precision 31-67%).
+MATCH_SPIN_WEIGHT = 0.35
+MATCH_SPIN_WEIGHT_IN_PROGRESS = 0.0
+SPIN_HEAT_FRAC = 0.5                # heater = readings >= this x the trace's peak
+SPIN_LEVEL_K = 2.5                  # a spin event reaches this x the drum baseline
+SPIN_MIN_MEMBERS_TOP2 = 3           # from this many members, mean of the best two
+# Gaussian scales of [ln t_end, ln1p heat_min, ln1p sustained_inter_min,
+# spikes per intermediate episode, ln1p final_sustained_min].
+SPIN_FEATURE_SCALES = (0.06, 0.3, 0.35, 0.6, 0.2)
 # Issue #400: once a RUNNING cycle has outlasted a candidate, that is hard
 # evidence against it, and the penalty uses this sharper scale instead of
 # MATCH_DURATION_SCALE. Only reached when the caller opts in via
@@ -907,7 +925,58 @@ MATCH_PREFIX_SHAPE_MAX_RATIO = 0.7
 # matcher's >= 12-sample floor. Named SMART_TERM_PREFIX_MIN_POINTS while the
 # removed #364 prefix guard shared it.
 MATCH_PREFIX_MIN_POINTS = 12
+# Issue #486: a profile with at least MATCH_MEMBER_MIN_CYCLES shape cycles is
+# scored on its envelope (or golden) template AND on its most recent
+# MATCH_MEMBER_MAX member cycles, nearest-neighbour style, and collapsed to one
+# candidate per profile (mean of its best two templates) before the margin is
+# read. One averaged curve cannot represent a programme whose heater runs 3 min
+# on a full drum of warm water and 17 min on cold: on the #486 Miele the
+# 23-cycle Easy Care 40 lost 9 of 23 folds to a 2-cycle profile. Members for
+# 2-cycle profiles too was worse (whole corpus -0.5pp at cut 1.0).
+MATCH_MEMBER_TEMPLATES = True
+# Live too, unlike the rhythm term: at 75/50/25% elapsed they lift top-1
+# 59.3/51.3/48.1 -> 67.5/58.6/59.5 (eval.py full, whole corpus; #486 Miele
+# 25.6/15.6/17.8 -> 46.7/36.7/47.8). The end gates must not read the member
+# scores, though: a profile with 16 member prefixes wins a running cycle far more
+# easily than one with a single template (#486: a 1-cycle "Baumwolle 60 mit
+# Vorwaesche" and "Jeans 30" were pulled to the 18-23-cycle Easy Care profiles
+# and split), and the inflated confidence held a dryer's 80%-of-expected
+# deferral past its end. So with MATCH_MEMBER_LIVE_GUARD the worker also scores
+# the single-template path, and the store hands the end gates THAT ranking's
+# confidence, calls the match ambiguous unless that ranking clearly picks the
+# same programme, and while the two disagree waits for the longer programme
+# (MatchResult.gate_confidence / gate_expected_duration). end_gate_eval --loo
+# --all-formats vs members completed-only: early ends 26 -> 24 (> 1 min) and
+# 19 -> 18 (> 5 min), splits 20 -> 20, washer lag median/mean/p90 +0.15/+0.28/
+# +0.67 min; unguarded it was +3 splits and +2 dryer early ends. A contest zone
+# (members only within 0.10 of the single-template top) halved the gain instead.
+MATCH_MEMBER_IN_PROGRESS = True
+MATCH_MEMBER_LIVE_GUARD = True
+# Not dishwashers: they gained nothing (eval.py full, cut 1.0: 79.0 -> 79.6%) and
+# their end gates moved (end_gate_eval --loo --all-formats: 2 more splits, one
+# smart end lost, p90 lag 45.7 -> 56.5 min).
+MATCH_MEMBER_DEVICE_TYPES = ("washing_machine", "washer_dryer", "dryer")
+MATCH_MEMBER_MIN_CYCLES = 3
+MATCH_MEMBER_MAX = 16
+MATCH_MEMBER_KEEP = 3               # templates per profile kept after Stage 2 (Stage 3 cost)
 
+# Issue #486: remaining time counts down to the PROGRAMME end, not to the end of a
+# Miele-style anti-crease tail (base ~3 W, pulses above the Stop Threshold until the
+# door opens, up to ~36 min) that every stored duration of such a washer includes.
+# The tail is the profile's median time after its last heater block or spin
+# (spin_rhythm.member_tail_reference over the envelope's spin_ref), subtracted from
+# the remaining time when at least ETA_TAIL_MIN_SHARE of at least
+# ETA_TAIL_MIN_MEMBERS members have one and its median is >= ETA_TAIL_MIN_S.
+# Progress % and every end gate still read the full expected duration.
+# eta_eval --all-formats, LOO, against the programme end: #486 Miele MAE at
+# 10/25/50/75/90% 32.6/31.2/28.3/23.7/20.8 -> 26.5/24.5/22.3/17.3/11.9 min (bias
+# +16.8..+16.0 -> +2.3..+4.6); all washers 24.7/29.2/27.0/21.1/14.5 ->
+# 21.4/25.7/24.5/18.8/11.0; washers without a tail and dryers unchanged.
+ETA_PROGRAMME_END = True
+ETA_TAIL_DEVICE_TYPES = ("washing_machine", "washer_dryer")
+ETA_TAIL_MIN_S = 120.0
+ETA_TAIL_MIN_SHARE = 0.5
+ETA_TAIL_MIN_MEMBERS = 2
 
 # States
 STATE_OFF = "off"

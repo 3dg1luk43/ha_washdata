@@ -42,6 +42,13 @@ relative error divides that by the true remaining ``D - t``. Dishwasher drying
 tails sit past ``D``, so a dishwasher's positive bias is partly by design.
 ``stored_s`` (the repaired stored duration) is in the JSON for that re-cut.
 
+**Programme truth (#486).** ``P`` = when the PROGRAMME ended: on washing machines and
+washer-dryers whose trace ends in a quiet tail, the end of the last sustained activity
+before it (``spin_rhythm.active_end_s``), else ``D``. A Miele-style anti-crease tail (pulses above ``stop_threshold_w`` until the door
+opens, up to ~36 min) sits between ``P`` and ``D``, and the machine's own display counts
+down to ``P``. Every row carries both (``truth_s`` / ``prog_s``, ``at`` / ``at_prog``);
+the summary and ``--compare`` print the programme-truth table after the ``D`` one.
+
 **First ETA** = the replay offset of the first estimate with a remaining time,
 in minutes from the trace's first reading. The replay steps the estimator at most
 every 30 s of replay time (``_SIM_SERIES_THROTTLE_S``) and only at readings, so it
@@ -100,7 +107,7 @@ import numpy as np
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from custom_components.ha_washdata import playground  # noqa: E402
+from custom_components.ha_washdata import playground, spin_rhythm  # noqa: E402
 from custom_components.ha_washdata.const import (  # noqa: E402
     CONF_MATCH_PERSISTENCE,
     CONF_WATCHDOG_INTERVAL,
@@ -197,6 +204,21 @@ def truth_end(points: list[tuple[float, float]], stop: float) -> float:
     """Offset of the last reading above ``stop``: when the appliance stopped working."""
     active = [t for t, p in points if p > stop]
     return float(active[-1]) if active else 0.0
+
+
+#: Device types whose programme ends with a spin (the programme truth, #486).
+PROGRAMME_TRUTH_TYPES = ("washing_machine", "washer_dryer")
+
+
+def programme_end(points: list[tuple[float, float]], stop: float, device_type: str) -> float:
+    """When the programme ended: on a washer with a quiet tail after it
+    (``spin_rhythm.active_end_s``), the end of its last sustained activity, else
+    :func:`truth_end`. Never later than :func:`truth_end`."""
+    end = truth_end(points, stop)
+    if device_type not in PROGRAMME_TRUTH_TYPES or len(points) < 8:
+        return end
+    prog = spin_rhythm.active_end_s([p[0] for p in points], [p[1] for p in points])
+    return end if prog is None else min(end, float(points[0][0]) + prog)
 
 
 def cycle_metrics(series: list[dict[str, Any]], truth_s: float, label: str | None) -> dict[str, Any]:
@@ -357,6 +379,7 @@ def _replay_one(ctx: dict[str, Any], cyc: dict[str, Any], key: str,
         return None
     pts = decompress_power_data(replayed)
     truth_s = truth_end(pts, stop)
+    prog_s = programme_end(pts, stop, ctx["device_type"])
     out = sim.get("outcome") or {}
     n_other = sum(
         1 for k in ("past_cycles", "reference_cycles", "backfill_cycles")
@@ -374,12 +397,14 @@ def _replay_one(ctx: dict[str, Any], cyc: dict[str, Any], key: str,
         "n_other": n_other,
         "readings": len(pts),
         "truth_s": round(truth_s, 1),
+        "prog_s": round(prog_s, 1),
         "stored_s": round(stored, 1),
         "detected_count": int(out.get("detected_count") or 0),
         "final_program": out.get("matched_profile"),
         "expected_s": out.get("expected_s"),
         "first_commit_s": _first_event(sim.get("events") or [], "match_commit"),
         **cycle_metrics(sim.get("series") or [], truth_s, name),
+        "at_prog": cycle_metrics(sim.get("series") or [], prog_s, name)["at"],
         **(halt_metrics(sim.get("series") or [], truth_s, *halt_s) if halt_s else {}),
         "loo": flags["loo"],
         "repair": flags["repair"],
@@ -508,9 +533,14 @@ def _pct(num: float, den: float) -> float | None:
     return round(100.0 * num / den, 1) if den else None
 
 
-def summarise(rows: list[dict[str, Any]], device_type: str | None = None) -> dict[str, Any]:
-    """First-ETA timing, coverage and error figures over a set of replayed cycles."""
+def summarise(
+    rows: list[dict[str, Any]], device_type: str | None = None, at_key: str = "at",
+) -> dict[str, Any]:
+    """First-ETA timing, coverage and error figures over a set of replayed cycles
+    (``at_key="at_prog"``: against the programme truth)."""
     sel = [r for r in rows if device_type is None or r["device_type"] == device_type]
+    if at_key != "at":
+        sel = [dict(r, at=r.get(at_key) or {}) for r in sel if at_key in r]
     if not sel:
         return {"n": 0}
     first = [r["first_eta_s"] for r in sel if r["first_eta_s"] is not None]
@@ -524,7 +554,7 @@ def summarise(rows: list[dict[str, Any]], device_type: str | None = None) -> dic
         "at": {},
     }
     for f in FRACS:
-        shown = [r["at"][_fkey(f)] for r in sel if r["at"].get(_fkey(f)) is not None]
+        shown = [r["at"][_fkey(f)] for r in sel if (r["at"] or {}).get(_fkey(f)) is not None]
         errs = np.array([s["err_s"] for s in shown], dtype=float) / 60.0
         rels = np.array([abs(s["rel"]) for s in shown if s["rel"] is not None], dtype=float)
         out["at"][_fkey(f)] = {
@@ -558,22 +588,25 @@ def print_summary(rows: list[dict[str, Any]]) -> None:
     print("\n1st ETA in minutes from the trace's first reading (cycles that got one);"
           " never = no ETA at all.\nETA@x% = an ETA is shown at x% of the true duration;"
           " 1st right = the first ETA's programme is the cycle's label.\n")
-    hdr = (f"{'scope':<16}{'at':>5}{'shown':>8}{'MAE':>7}{'med|e|':>8}{'bias':>7}"
-           f"{'med rel':>9}{'right':>8}")
-    print(hdr)
-    print("-" * len(hdr))
-    for scope in scopes:
-        s = summarise(rows, scope)
-        if not s["n"]:
-            continue
-        for f in FRACS:
-            a = s["at"][_fkey(f)]
-            print(f"{(scope or 'ALL') if f == FRACS[0] else '':<16}{int(f * 100):>4}%"
-                  f"{_f(a['cov_pct'], 8, '%')}{_f(a['mae_min'], 7)}{_f(a['medae_min'], 8)}"
-                  f"{_f(a['bias_min'], 7)}{_f(a['rel_med_pct'], 9, '%')}{_f(a['right_pct'], 8, '%')}")
-    print("\nminutes; bias + = predicted more time left than there was; med rel = median"
-          " |error| / true remaining;\nright = the shown ETA's programme is the label."
-          " Truth = last reading above stop_threshold_w.")
+    for at_key, title in (("at", "last reading above stop_threshold_w"),
+                          ("at_prog", "programme end (washers: before a quiet tail)")):
+        print(f"Truth = {title}.")
+        hdr = (f"{'scope':<16}{'at':>5}{'shown':>8}{'MAE':>7}{'med|e|':>8}{'bias':>7}"
+               f"{'med rel':>9}{'right':>8}")
+        print(hdr)
+        print("-" * len(hdr))
+        for scope in scopes:
+            s = summarise(rows, scope, at_key)
+            if not s["n"]:
+                continue
+            for f in FRACS:
+                a = s["at"][_fkey(f)]
+                print(f"{(scope or 'ALL') if f == FRACS[0] else '':<16}{int(f * 100):>4}%"
+                      f"{_f(a['cov_pct'], 8, '%')}{_f(a['mae_min'], 7)}{_f(a['medae_min'], 8)}"
+                      f"{_f(a['bias_min'], 7)}{_f(a['rel_med_pct'], 9, '%')}{_f(a['right_pct'], 8, '%')}")
+        print()
+    print("minutes; bias + = predicted more time left than there was; med rel = median"
+          " |error| / true remaining;\nright = the shown ETA's programme is the label.")
 
 
 def summarise_halt(rows: list[dict[str, Any]], device_type: str | None = None) -> dict[str, Any]:
@@ -659,12 +692,16 @@ def compare(before_path: str, after_path: str) -> None:
                       f"{_f(a['bias_min'], 5)}")
         for key in ("never", "first_median_min", "first_p75_min", "first_right_pct"):
             print(f"    {key:<22}{_f(bs[key], 8)} -> {_f(as_[key], 8)}")
-        for f in FRACS:
-            b, a = bs["at"][_fkey(f)], as_["at"][_fkey(f)]
-            print(f"    @{int(f * 100):>2}%  shown {_f(b['cov_pct'], 6)} -> {_f(a['cov_pct'], 6)}"
-                  f"   MAE {_f(b['mae_min'], 5)} -> {_f(a['mae_min'], 5)}"
-                  f"   bias {_f(b['bias_min'], 5)} -> {_f(a['bias_min'], 5)}"
-                  f"   right {_f(b['right_pct'], 5)} -> {_f(a['right_pct'], 5)}")
+        for at_key, tag in (("at", "stop"), ("at_prog", "prog")):
+            bs_k, as_k = summarise(bs_rows, scope, at_key), summarise(as_rows, scope, at_key)
+            if not bs_k["n"] or not as_k["n"]:
+                continue
+            for f in FRACS:
+                b, a = bs_k["at"][_fkey(f)], as_k["at"][_fkey(f)]
+                print(f"    {tag} @{int(f * 100):>2}%  shown {_f(b['cov_pct'], 6)} -> {_f(a['cov_pct'], 6)}"
+                      f"   MAE {_f(b['mae_min'], 5)} -> {_f(a['mae_min'], 5)}"
+                      f"   bias {_f(b['bias_min'], 5)} -> {_f(a['bias_min'], 5)}"
+                      f"   right {_f(b['right_pct'], 5)} -> {_f(a['right_pct'], 5)}")
         print()
 
     def _first(r: dict[str, Any]) -> float:

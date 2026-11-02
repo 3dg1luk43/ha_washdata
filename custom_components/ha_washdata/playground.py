@@ -1169,10 +1169,14 @@ class _DetailSim:
                 return None
 
         stop_w = float(det.config.stop_threshold_w)
+        gate_conf, gate_expected = match_rules.detector_gate_inputs(
+            result, tick.confidence, tick.matched_duration
+        )
         return MatchContext(
             profile_name=name,
-            confidence=tick.confidence,
-            expected_duration=tick.matched_duration,
+            # Issue #486: what the end gates read when member templates ran.
+            confidence=gate_conf,
+            expected_duration=gate_expected,
             phase_name=phase_name,
             is_confident_mismatch=revoke,
             is_ambiguous=result.is_ambiguous,
@@ -1316,6 +1320,8 @@ class _DetailSim:
                 dt_seconds=(
                     offset - prev_sample_t if prev_sample_t >= 0.0 else None
                 ),
+                # #486, as live: count down to the programme end.
+                tail_s=progress_mod.programme_tail_s(self.store, program, self.device_type),
             )
             if result is not None:
                 self.smoothed["v"] = result.smoothed
