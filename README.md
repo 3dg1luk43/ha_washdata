@@ -66,8 +66,9 @@ reports often enough: see [Smart plugs](https://github.com/3dg1luk43/ha_washdata
 
 WashData ships no programs, because every machine is different. Teach it your 2-3 most common ones:
 
-- **Record:** on the panel's **Overview** tab, use **Manual Recording > Start Recording**, run the
-  program, stop the recording, then save it to a profile.
+- **Record:** open **WashData** in the Home Assistant sidebar and, on its **Overview** tab, press
+  **Manual Recording > Start Recording**. Run the program, stop the recording, then save it to a
+  profile.
 - **Or label afterwards:** just use the machine. Each run is stored as an unlabelled cycle; open it
   in **Cycles** and assign it to a new profile.
 
