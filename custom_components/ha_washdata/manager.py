@@ -7282,10 +7282,20 @@ class WashDataManager:
         fallback_template: str | None = None,
         **kwargs: Any,
     ) -> str:
-        """Format templates safely and return a resilient fallback on any error."""
-        text_template = str(template)
+        """Format templates safely and return a resilient fallback on any error.
+
+        A blank template, or one that fills in to blank, also gets the fallback:
+        a setting saved empty reached notify services as ``message=""``, which
+        Pushover refuses outright (#496).
+        """
+        text_template = "" if template is None else str(template)
         try:
-            return text_template.format(**kwargs)
+            text = text_template.format(**kwargs)
+            if text.strip():
+                return text
+            self._logger.debug(
+                "Notification text %r is blank; sending the default text", text_template
+            )
         except Exception as err:  # pylint: disable=broad-exception-caught
             # Once per template at warning level: a typo'd variable silently
             # sent the default text instead, and looked like the setting was
@@ -7444,6 +7454,10 @@ class WashDataManager:
         # a deferral as handled, otherwise they re-queue a duplicate on every retry
         # tick for the whole quiet/away window.
         self._last_dispatch_deferred = False
+        # Notify services reject a blank message (Pushover: "message cannot be
+        # blank", #496); the templates already fall back, this covers any caller.
+        if not str(message or "").strip():
+            message = str(self.config_entry.title)
         if not title:
             title_template = self.config_entry.options.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE)
             title = self._safe_format_template(

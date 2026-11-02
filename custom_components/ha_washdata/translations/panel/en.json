@@ -1397,7 +1397,7 @@
       "label": "Notification Colour"
     },
     "notify_live_chronometer": {
-      "doc": "Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Pre-Complete Message to show the finish time instead of a second countdown.",
+      "doc": "Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Live Update Message to show the finish time instead of a second countdown.",
       "label": "Use Live Chronometer"
     },
     "notify_live_click_action": {
@@ -1442,7 +1442,7 @@
     },
     "notify_pre_complete_message": {
       "doc": "Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left), {finish_time} (estimated finish, e.g. 14:30). Any other variable falls back to the default text.",
-      "label": "Pre-Complete Message"
+      "label": "Live Update Message"
     },
     "notify_quiet_end_hour": {
       "doc": "End of the do-not-disturb window (0-23); held notifications are sent then. Blank disables it.",
@@ -1454,7 +1454,7 @@
     },
     "notify_reminder_message": {
       "doc": "Text of the one-time Pre-End Alert. Template variables: {device}, {program}, {minutes} (the Pre-End Alert setting). Any other variable falls back to the default text.",
-      "label": "Reminder Message"
+      "label": "Pre-End Alert Message"
     },
     "notify_start_message": {
       "doc": "Body sent when a cycle starts. Template variables: {device}, {program}. Any other variable falls back to the default text.",
