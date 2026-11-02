@@ -1339,7 +1339,6 @@ class WashDataManager:
             _write_switch_state(self, switch_state, tick.log)
             profile_name = tick.profile_name
             confidence = tick.confidence
-            matched_duration = tick.matched_duration
             phase_name = tick.phase_name
 
             # Step 2 (match_rules.decide_switch): Case 1 initial commit, Case 2
@@ -1441,11 +1440,14 @@ class WashDataManager:
             )
             _write_switch_state(self, switch_state, override_log)
 
+            # Issue #486: what the end gates read this tick (the store's gate view
+            # with live member templates, else the tick itself).
+            gate = match_rules.detector_inputs(tick, result)
             # Register item 469(b): an ambiguous tick in ENDING engages no new
             # verified pause (the detector refuses its match if it would defer).
             pause = match_rules.hold_in_ending(
                 ending=self.detector.state == STATE_ENDING,
-                is_ambiguous=bool(result.is_ambiguous),
+                is_ambiguous=gate.is_ambiguous,
                 current_matched=current_matched,
                 prev_verified=getattr(self.detector, "_verified_pause", False),
                 verified_pause=verified_pause,
@@ -1455,25 +1457,21 @@ class WashDataManager:
             # Push updates to detector
             self.detector.set_verified_pause(pause.verified_pause)
             # A divergence revert revokes the detector's match (no name, revoke flag).
-            profile_name, revoke = match_rules.detector_match(tick, result)
+            profile_name, revoke = gate.profile_name, gate.revoke
             # Built by name (audit DETECT-15); see CycleDetector.MatchContext.
             terminal_high = self._terminal_high_for_guards(profile_name)
             # Half-interval matching until the first commit (audit LIVE-17).
             self.detector.set_match_committed(
                 match_rules.program_is_committed(self._current_program)
             )
-            # Issue #486: what the end gates read when member templates ran.
-            gate_conf, gate_expected = match_rules.detector_gate_inputs(
-                result, confidence, matched_duration
-            )
             self.detector.update_match(MatchContext(
                 profile_name=profile_name,
-                confidence=gate_conf,
-                expected_duration=gate_expected,
+                confidence=gate.confidence,
+                expected_duration=gate.expected_duration,
                 phase_name=phase_name,
                 is_confident_mismatch=revoke,
-                is_ambiguous=result.is_ambiguous,
-                is_prefix_ambiguous_full_shape=result.is_prefix_ambiguous_full_shape,
+                is_ambiguous=gate.is_ambiguous,
+                is_prefix_ambiguous_full_shape=gate.is_prefix_ambiguous_full_shape,
                 tail_power=(
                     self.profile_store.profile_tail_power(profile_name) if profile_name else None
                 ),

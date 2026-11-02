@@ -460,27 +460,115 @@ async def _live_match(store: ProfileStore, in_progress: bool = True) -> Any:
 async def test_a_member_winner_the_single_ranking_disputes_gates_like_the_single(
     store: ProfileStore,
 ) -> None:
-    """The members pick A clearly, the single-template ranking picks B: A is shown,
-    but the end gates read an ambiguous match at B's confidence and wait for the
-    longer of the two programmes."""
+    """The members pick A clearly, the single-template ranking picks B clearly: A is
+    shown and switched on at its own margin, the end gates read B as a match of its
+    own (programme, confidence, duration, margin), as with members off."""
     with _patched([_cand("A", 0.80, 0.50, 3600.0), _cand("B", 0.60, 0.70, 5400.0)]):
         res = await _live_match(store)
-    assert res.best_profile == "A"
+    assert (res.best_profile, res.is_ambiguous) == ("A", False)
     assert res.confidence == pytest.approx(0.80)
-    assert res.is_ambiguous is True
+    assert res.gate_profile == "B"
     assert res.gate_confidence == pytest.approx(0.70)
     assert res.gate_expected_duration == pytest.approx(5400.0)
+    assert res.gate_ambiguous is False
 
 
 async def test_an_agreed_member_winner_gates_on_the_single_ranking(store: ProfileStore) -> None:
     with _patched([_cand("A", 0.80, 0.70, 3600.0), _cand("B", 0.60, 0.50, 5400.0)]):
         res = await _live_match(store)
     assert (res.best_profile, res.is_ambiguous) == ("A", False)
+    assert (res.gate_profile, res.gate_ambiguous) == ("A", False)
     assert res.gate_confidence == pytest.approx(0.70)
-    assert res.gate_expected_duration is None
-    # ...and a single ranking within the ambiguity margin keeps it ambiguous.
+    assert res.gate_expected_duration == pytest.approx(3600.0)
+    # ...and a single ranking within the ambiguity margin is ambiguous for the gates
+    # only: the members' own margin is what the switching rules read.
     with _patched([_cand("A", 0.80, 0.70, 3600.0), _cand("B", 0.60, 0.68, 5400.0)]):
-        assert (await _live_match(store)).is_ambiguous is True
+        res = await _live_match(store)
+    assert (res.is_ambiguous, res.gate_ambiguous) == (False, True)
+
+
+async def test_the_gates_read_the_single_rankings_prefix_verdict(store: ProfileStore) -> None:
+    """A 2.5x longer programme that scores well on the member templates only: the
+    member ranking's #288 verdict would hold the anti-crease finalise, the single
+    ranking's (what the gates were calibrated on) does not."""
+    long_c = {**_cand("C", 0.60, 0.20, 9000.0), "shape_score": 0.60}
+    with _patched([_cand("A", 0.80, 0.70, 3600.0), long_c]):
+        res = await _live_match(store)
+    assert res.is_prefix_ambiguous_full_shape is True
+    assert res.gate_prefix_full_shape is False
+
+
+def test_a_single_template_family_win_gates_on_its_member(store: ProfileStore) -> None:
+    """A Stage-5 family winning the single ranking resolves to a member the way the
+    result's own winner does, with the overrun guard."""
+    view = [{"name": "__group__G", "score": 0.7, "shape_score": 0.7, "profile_duration": 4000.0,
+             "group_best_member": "G2"},
+            {"name": "B", "score": 0.5, "shape_score": 0.5, "profile_duration": 4000.0}]
+    pick = patch.object(store, "_stage5_pick_member", return_value=("G2", 0.7, 3000.0))
+    with pick as stage5:
+        gate = store._single_template_gate(  # noqa: SLF001
+            view, [1.0] * 20, 2000.0, {"__group__G": ["G1", "G2"]}, {}, None)
+    assert stage5.call_args.kwargs["preferred"] == "G2"
+    assert gate == {"profile": "G2", "confidence": 0.7, "expected": 3000.0,
+                    "ambiguous": False, "prefix": False}
+    with pick:
+        late = store._single_template_gate(  # noqa: SLF001
+            view, [1.0] * 20, 3300.0, {"__group__G": ["G1", "G2"]}, {}, None)
+    assert late["ambiguous"] is True
+    assert store._single_template_gate([], [], 0.0, {}, {}, None)["ambiguous"] is True  # noqa: SLF001
+
+
+def test_live_members_tag_the_rhythm_so_far_for_washers_only() -> None:
+    q = _prefix(_trace("ec", 80), 0.6)
+    snaps = [_snap("A", _heater(10), spin_ref=_refs("ec", 80),
+                   members=[_member(_heater(4), "a1"), _member(_heater(16), "a2"),
+                            _member(_heater(5), "a3")]),
+             _snap("B", _trace("cotton", 80), spin_ref=_refs("cotton", 80))]
+    live = dict(in_progress=True, member_templates_in_progress=True)
+    tagged = _rank(snaps, q, spin_trace=q, **live)
+    ag = {c["name"]: c["rhythm_live"] for c in tagged}
+    assert ag["A"] > ag["B"]
+    assert not any("rhythm_live" in c for c in _rank(snaps, q, **live))  # no raw trace
+
+
+def test_the_confirmation_is_off_by_default() -> None:
+    """MATCH_MEMBER_GATE_CONFIRM is off: it confirmed a 1-cycle programme's attractor
+    at the margin (#486 fb530e305617), so the end gates read the single ranking."""
+    from custom_components.ha_washdata.profile_store import _member_gate_confirmed as ok
+
+    best = {"name": "A", "score": 0.8, "single_score": 0.66, "rhythm_live": 0.7}
+    view = [{"name": "B", "score": 0.70}, {"name": "A", "score": 0.66}]
+    assert not ok(best, view, False, [best, {"name": "B", "rhythm_live": 0.72}])
+
+
+def test_the_gates_follow_a_member_winner_only_when_confirmed(monkeypatch) -> None:
+    from custom_components.ha_washdata import profile_store as ps
+    from custom_components.ha_washdata.profile_store import _member_gate_confirmed as ok
+
+    monkeypatch.setattr(ps, "MATCH_MEMBER_GATE_CONFIRM", True)
+    best = {"name": "A", "score": 0.8, "single_score": 0.66, "rhythm_live": 0.7}
+    view = [{"name": "B", "score": 0.70}, {"name": "A", "score": 0.66}]
+    ranked = [best, {"name": "B", "rhythm_live": 0.72}]
+    assert ok(best, view, False, ranked)
+    assert not ok(best, view, True, ranked)                              # its own margin
+    assert not ok({**best, "single_score": 0.60}, view, False, ranked)   # one lucky member
+    assert not ok(best, view, False, [best, {"name": "B", "rhythm_live": 0.80}])  # rhythm
+    assert not ok({k: v for k, v in best.items() if k != "rhythm_live"}, view, False, ranked)
+    assert not ok(best, [{"name": "A", "score": 0.7}], False, ranked)    # agreed: single stands
+    assert not ok(best, [], False, ranked)
+
+
+async def test_a_confirmed_member_winner_feeds_the_gates(store: ProfileStore, monkeypatch) -> None:
+    from custom_components.ha_washdata import profile_store as ps
+
+    monkeypatch.setattr(ps, "MATCH_MEMBER_GATE_CONFIRM", True)
+    a = {**_cand("A", 0.80, 0.68, 3600.0), "rhythm_live": 0.8}
+    b = {**_cand("B", 0.60, 0.70, 5400.0), "rhythm_live": 0.6}
+    with _patched([a, b]):
+        res = await _live_match(store)
+    assert (res.gate_profile, res.gate_ambiguous) == ("A", False)
+    assert res.gate_confidence == pytest.approx(0.80)
+    assert res.gate_expected_duration == pytest.approx(3600.0)
 
 
 async def test_no_single_template_scores_no_gate_fields(store: ProfileStore) -> None:
@@ -488,7 +576,9 @@ async def test_no_single_template_scores_no_gate_fields(store: ProfileStore) -> 
              for n, s, d in (("A", 0.8, 3600.0), ("B", 0.6, 5400.0))]
     with _patched(plain):
         res = await _live_match(store)
-    assert (res.is_ambiguous, res.gate_confidence, res.gate_expected_duration) == (False, None, None)
+    assert res.is_ambiguous is False
+    assert (res.gate_profile, res.gate_confidence, res.gate_expected_duration,
+            res.gate_ambiguous, res.gate_prefix_full_shape) == (None,) * 5
 
 
 def test_the_detector_reads_the_gate_inputs_when_present() -> None:
@@ -505,3 +595,123 @@ def test_the_detector_reads_the_gate_inputs_when_present() -> None:
     assert match_rules.detector_gate_inputs(plain, 0.8, 3600.0) == (0.8, 3600.0)
     # A test double's auto-attributes are not numbers: left as given.
     assert match_rules.detector_gate_inputs(MagicMock(), 0.8, 3600.0) == (0.8, 3600.0)
+
+
+def test_the_detector_reads_the_whole_gate_view() -> None:
+    """Programme, confidence, duration, ambiguity and prefix flag all come from the
+    gate view; a divergence revert still revokes; no gate view leaves the tick."""
+    from types import SimpleNamespace
+
+    from custom_components.ha_washdata import match_rules
+
+    tick = SimpleNamespace(profile_name="A", confidence=0.8, matched_duration=3600.0)
+    gated = SimpleNamespace(
+        is_confident_mismatch=False, is_ambiguous=False, is_prefix_ambiguous_full_shape=True,
+        gate_profile="B", gate_confidence=0.7, gate_expected_duration=5400.0,
+        gate_ambiguous=True, gate_prefix_full_shape=False,
+    )
+    assert match_rules.detector_inputs(tick, gated) == match_rules.GateInputs(
+        "B", False, 0.7, 5400.0, True, False)
+    reverted = SimpleNamespace(profile_name=match_rules.DETECTING, confidence=0.8,
+                               matched_duration=3600.0)
+    got = match_rules.detector_inputs(reverted, gated)
+    assert (got.profile_name, got.revoke) == (None, True)
+    plain = SimpleNamespace(is_confident_mismatch=False, is_ambiguous=True,
+                            is_prefix_ambiguous_full_shape=False)
+    assert match_rules.detector_inputs(tick, plain) == match_rules.GateInputs(
+        "A", False, 0.8, 3600.0, True, False)
+
+
+# ------------------------------------------------ live member-pass cost (#486)
+
+
+def _many_snaps() -> list[dict]:
+    heats = (3, 4, 5, 9, 12, 15, 17)
+    return [
+        _snap("A", _heater(10), members=[_member(_heater(h), f"a{h}") for h in heats]),
+        _snap("B", _heater(7, end=70),
+              members=[_member(_heater(h, end=70), f"b{h}") for h in heats[:4]]),
+    ]
+
+
+def _live_items(snaps: list[dict], query: tuple, keep: int) -> list[dict]:
+    curr = np.asarray(_grid(query))
+    dur = float(query[0][-1])
+    stage4 = {"dur_w": 0.15, "en_w": 0.22, "shape_w": 0.63, "dur_scale": 0.175,
+              "dur_overrun_scale": 0.05, "en_scale": 0.25, "integrated": True}
+    return analysis._prescreen_members(  # noqa: SLF001
+        analysis._expand_member_templates(snaps), keep,  # noqa: SLF001
+        lambda mems: analysis._member_prescores(  # noqa: SLF001
+            mems, curr, dur, True, 0.7, 0.45, stage4),
+    )
+
+
+def test_live_prescreen_keeps_the_members_closest_to_the_run() -> None:
+    kept = _live_items(_many_snaps(), _prefix(_heater(4), 0.6), keep=2)
+    a = {it["_tpl"] for it in kept if it["name"] == "A" and it.get("_member")}
+    assert len(a) == 2 and a <= {"a3", "a4", "a5"}
+    # Every profile keeps its own template, and at most `keep` members.
+    assert sum(1 for it in kept if not it.get("_member")) == 2
+    assert sum(1 for it in kept if it["name"] == "B" and it.get("_member")) == 2
+
+
+def test_live_members_get_stage2_on_a_cut_set_completed_on_all() -> None:
+    calls: list[tuple[int, int]] = []
+    real = analysis.find_best_alignment
+
+    def spy(c: Any, r: Any, *a: Any, **k: Any) -> Any:
+        calls.append((len(c), len(r)))
+        return real(c, r, *a, **k)
+
+    q = _prefix(_heater(4), 0.6)
+    with patch.object(analysis, "find_best_alignment", spy):
+        _rank(_many_snaps(), q, in_progress=True)
+        live = list(calls)
+        calls.clear()
+        _rank(_many_snaps(), _heater(4))
+    # 2 templates (the guard's single pass reuses them) + 3 of each profile's
+    # members, on both curves decimated by 2: A's prefix pair is 241 points.
+    assert live == [(241, 241), *[(121, 121)] * 3, (268, 268), *[(134, 134)] * 3]
+    assert len(calls) == 2 + 7 + 4      # cycle end: every member, full resolution
+    assert len({n for n, _ in calls}) == 1
+
+
+def test_live_cost_knobs_keeping_everything_change_nothing() -> None:
+    q = _prefix(_heater(4), 0.6)
+    full = _rank(_many_snaps(), q, in_progress=True, member_live_prescreen=0, member_live_decim=1)
+    assert _rank(_many_snaps(), q, in_progress=True, member_live_prescreen=99,
+                 member_live_decim=1) == full
+    assert _rank(_many_snaps(), q, in_progress=True) != full
+
+
+def test_the_guard_pass_shares_the_stage3_scan() -> None:
+    """One DTW scan per live match: the member pass also warps the templates the
+    guard's single-template pass refines, which then reuses them unchanged."""
+    q = _prefix(_heater(4), 0.6)
+    scans: list[int] = []
+    real = analysis._stage3_scores_batched  # noqa: SLF001
+
+    def spy(pairs: Any, *a: Any, **k: Any) -> Any:
+        scans.append(len(pairs))
+        return real(pairs, *a, **k)
+
+    with patch.object(analysis, "_stage3_scores_batched", spy):
+        ranked = _rank(_many_snaps(), q, in_progress=True)
+    assert len(scans) == 1
+    single = _rank(_many_snaps(), q, in_progress=True, member_templates=False)
+    assert {c["name"]: c["single_score"] for c in ranked} == {
+        c["name"]: c["score"] for c in single}
+
+
+def test_the_prescreen_never_breaks_a_match() -> None:
+    q = _prefix(_heater(4), 0.6)
+    bad = [_snap("A", _heater(10), members=[
+        {"id": "x", "sample_power": [float("nan")] * 50, "sample_span_s": 100.0, "duration": 100.0},
+        {"id": "y", "sample_power": [1.0], "sample_span_s": 0.0, "duration": 0.0},
+        _member(_heater(4), "a4")])]
+    kept = _live_items(bad, q, keep=1)
+    assert [it["_tpl"] for it in kept if it.get("_member")] == ["a4"]
+    assert _rank(bad, q, in_progress=True)
+    boom = patch.object(analysis, "_member_prescores", side_effect=ValueError("x"))
+    with boom:
+        assert len(_live_items(bad, q, keep=1)) == 4     # every item passes

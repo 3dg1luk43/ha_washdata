@@ -1099,7 +1099,7 @@ class _DetailSim:
         # The manager's ENDING pause hold (register item 469b).
         verified = match_rules.hold_in_ending(
             ending=det.state == STATE_ENDING,
-            is_ambiguous=bool(result.is_ambiguous),
+            is_ambiguous=match_rules.detector_inputs(tick, result).is_ambiguous,
             current_matched=current_matched,
             prev_verified=prev_verified,
             verified_pause=verified,
@@ -1158,8 +1158,10 @@ class _DetailSim:
         """The named context the manager builds for ``update_match`` (DETECT-15)."""
         store = self.store
         det = self.detector
-        # The manager's own rule: a divergence revert revokes the detector's match.
-        name, revoke = match_rules.detector_match(tick, result)
+        # The manager's own rule: a divergence revert revokes the detector's match;
+        # with live member templates the store's gate view (#486).
+        gate = match_rules.detector_inputs(tick, result)
+        name, revoke = gate.profile_name, gate.revoke
 
         def _ask(fn: Callable[[], Any]) -> Any:
             # Guarded like the rest of the sim: a partial test double without one
@@ -1170,18 +1172,15 @@ class _DetailSim:
                 return None
 
         stop_w = float(det.config.stop_threshold_w)
-        gate_conf, gate_expected = match_rules.detector_gate_inputs(
-            result, tick.confidence, tick.matched_duration
-        )
         return MatchContext(
             profile_name=name,
             # Issue #486: what the end gates read when member templates ran.
-            confidence=gate_conf,
-            expected_duration=gate_expected,
+            confidence=gate.confidence,
+            expected_duration=gate.expected_duration,
             phase_name=phase_name,
             is_confident_mismatch=revoke,
-            is_ambiguous=result.is_ambiguous,
-            is_prefix_ambiguous_full_shape=result.is_prefix_ambiguous_full_shape,
+            is_ambiguous=gate.is_ambiguous,
+            is_prefix_ambiguous_full_shape=gate.is_prefix_ambiguous_full_shape,
             tail_power=_ask(lambda: store.profile_tail_power(name)) if name else None,
             # One implementation with the manager's `_terminal_high_for_guards`.
             terminal_high=_ask(lambda: terminal_high_for_guards(

@@ -508,13 +508,19 @@ Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for
   recent cycles (`build_match_snapshots` attaches them as `members`); the worker collapses them to
   one candidate per profile (mean of the best two) **before** the margin is read, so the margin is
   always between profiles. **Live, the end gates must not read the member scores**
-  (`MATCH_MEMBER_LIVE_GUARD`, register item 555): unguarded they added 3 washer splits and 2 dryer
-  ends > 5 min early, because a profile with many members wins a novel or thinly trained
-  programme's prefix. The worker re-scores the single-template path live; the store puts that
-  ranking's top score in `MatchResult.gate_confidence`, the longer of the two winners' durations
-  in `gate_expected_duration` while they disagree, and sets `is_ambiguous` unless the single
-  ranking clearly agrees. The manager and the Playground hand them to the detector through
-  `match_rules.detector_gate_inputs`; never feed `MatchContext` the member-based confidence.
+  (`MATCH_MEMBER_LIVE_GUARD`, register items 555/567): unguarded they added 3 washer splits and 2
+  dryer ends > 5 min early, because a profile with many members wins a novel or thinly trained
+  programme's prefix; a guard that mixed the two rankings (forced ambiguity on disagreement, the
+  longer duration) ended 32 cycles later instead. The worker re-scores the single-template path
+  live and the store hands the end gates THAT ranking as a match of its own
+  (`ProfileStore._single_template_gate` -> `MatchResult.gate_profile` / `gate_confidence` /
+  `gate_expected_duration` / `gate_ambiguous` / `gate_prefix_full_shape`), i.e. what they read with
+  members off; `is_ambiguous` stays the member ranking's own margin for the switching rules. The
+  manager and the Playground both go through `match_rules.detector_inputs`; never feed
+  `MatchContext` member-based fields. Following a "confirmed" member winner
+  (`MATCH_MEMBER_GATE_CONFIRM`) is off: it split a 1-cycle programme at the margin. Live cost:
+  only `MATCH_MEMBER_LIVE_PRESCREEN` members per profile (cheap vectorised pre-score) get Stage 2,
+  decimated by `MATCH_MEMBER_LIVE_DECIM` (~1.8x a single-template match instead of ~4x).
 - **Stage 5 - profile groups (shipped, hierarchical):** the user groups near-duplicate profiles.
   `_grouped_snapshots` returns the snapshots **unchanged** and only maps each **cohesive** group
   (pairwise envelope correlation >= `GROUP_MIN_COHESION`) to its members; loose groups are not mapped

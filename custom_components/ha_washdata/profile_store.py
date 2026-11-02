@@ -70,6 +70,9 @@ from .const import (
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
     MATCH_MEMBER_DEVICE_TYPES,
+    MATCH_MEMBER_GATE_CONFIRM,
+    MATCH_MEMBER_GATE_RHYTHM_DELTA,
+    MATCH_MEMBER_GATE_SINGLE_DELTA,
     MATCH_MEMBER_MAX,
     MATCH_MEMBER_MIN_CYCLES,
     MATCH_MEMBER_TEMPLATES,
@@ -553,13 +556,17 @@ class MatchResult:
     # The elapsed duration this match scored (the query's), so a candidate's
     # duration ratio can be stated against the cycle (audit MATCH-DECIDE-13).
     query_duration_s: float = 0.0
-    # Issue #486: with live member templates, the confidence the end gates read
-    # (the single-template ranking's top score); None everywhere else, where they
-    # read ``confidence``. See ``_single_template_view``.
+    # Issue #486: with live member templates, what the end gates read: the
+    # single-template ranking's own winner, its confidence, expected duration,
+    # ambiguity and #288 prefix-landscape verdict (``_single_template_gate``).
+    # None everywhere else, where they read the result's own fields. The member
+    # ranking (best_profile, confidence, is_ambiguous) is what is displayed and
+    # what the switching rules read.
+    gate_profile: str | None = None
     gate_confidence: float | None = None
-    # ... and the expected duration they read: the longer of the winner's and the
-    # single-template winner's while the two rankings disagree; None otherwise.
     gate_expected_duration: float | None = None
+    gate_ambiguous: bool | None = None
+    gate_prefix_full_shape: bool | None = None
 
     @property
     def label_confidence(self) -> float:
@@ -1732,8 +1739,9 @@ def _single_template_view(
     on. ``compute_matches_worker`` therefore also scores the query on the
     single-template path (what runs with members off) and carries each
     profile's result as ``single_score`` / ``single_shape``. This rebuilds that
-    ranking, best first and collapsed into the same Stage-5 families. None when
-    no candidate carries it: members off, or a completed-cycle match.
+    ranking, best first and collapsed into the same Stage-5 families, for
+    :meth:`ProfileStore._single_template_gate`. None when no candidate carries
+    it: members off, or a completed-cycle match.
     """
     if not any(isinstance(c, dict) and "single_score" in c for c in candidates):
         return None
@@ -1757,6 +1765,40 @@ def _single_template_view(
         })
     single.sort(key=lambda c: c["score"], reverse=True)
     return _collapse_group_candidates(single, group_members)
+
+
+def _member_gate_confirmed(
+    best: dict, single_view: list[dict] | None, member_ambiguous: bool, ranked: list[dict]
+) -> bool:
+    """May the end gates follow the member winner on this live tick? (#486)
+
+    Only where the single-template ranking names a different programme and every
+    check confirms the member winner: it is clear by its own margin (and Stage 5's
+    safeguards), the single-template path scores it within
+    ``MATCH_MEMBER_GATE_SINGLE_DELTA`` of that ranking's own winner (not one lucky
+    member cycle), and the run's spin/heat rhythm so far agrees with its members
+    at least as well, within ``MATCH_MEMBER_GATE_RHYTHM_DELTA``, as with the single
+    winner's (``rhythm_live``, washers only). ``ranked`` is the member ranking the
+    rhythm tags are read from. When the two rankings agree the single ranking's
+    own confidence and margin stand. Pure, never raises.
+    """
+    try:
+        if not MATCH_MEMBER_GATE_CONFIRM or not single_view or member_ambiguous:
+            return False
+        top = single_view[0]
+        if top.get("name") == best.get("name"):
+            return False
+        own = best.get("single_score")
+        if own is None or float(own) < float(top["score"]) - MATCH_MEMBER_GATE_SINGLE_DELTA:
+            return False
+        rows = {str(c.get("name")): c for c in ranked}
+        rival = rows.get(str(top.get("group_best_member") or top.get("name"))) or {}
+        ours, theirs = best.get("rhythm_live"), rival.get("rhythm_live")
+        if ours is None or theirs is None:
+            return False
+        return float(ours) >= float(theirs) - MATCH_MEMBER_GATE_RHYTHM_DELTA
+    except (TypeError, ValueError, KeyError, OverflowError):
+        return False
 
 
 def _match_prefix_ambiguity(
@@ -3371,6 +3413,66 @@ class ProfileStore:
             for m in present:
                 member_snaps[m] = by_name[m]
         return snapshots, group_members, member_snaps
+
+    def _single_template_gate(
+        self,
+        single_view: list[dict],
+        current_power: list[float],
+        current_duration: float,
+        group_members: dict[str, list[str]],
+        member_snaps: dict[str, dict[str, Any]],
+        pauses_fn: Callable[[str], bool | None] | None,
+    ) -> dict[str, Any]:
+        """What the end gates read on a live member match (#486) unless the member
+        winner is confirmed (:func:`_member_gate_confirmed`): the single-template
+        ranking as a match of its own, i.e. exactly what they read with member
+        templates off.
+
+        Its winner (a Stage-5 family resolved to a member the way the result's own
+        winner is, with the same two safeguards), that winner's score as the
+        confidence and its expected duration, the ranking's own margin as the
+        ambiguity and its #288 prefix-landscape verdict. Every end gate - Smart
+        Termination, the anti-crease finalise, the late shortening, the deferral,
+        the per-profile tail, terminal-spin and pause statistics the detector looks
+        up by name - was calibrated on this ranking, and the member ranking moved
+        them both ways: unguarded it split three washer cycles and ended two dryers
+        early (register item 555), and reading only its confidence and duration
+        from here while calling every disagreement ambiguous (the first guard)
+        ended 32 cycles more than a minute later and 4 earlier (end_gate_eval
+        --loo --all-formats: the forced ambiguity blocked the anti-crease finalise
+        and Smart Termination, the member ranking's own prefix verdict blocked the
+        finalise where both agreed, and a family's member came from the member
+        ranking). An empty ranking reads as ambiguous at no confidence. Never
+        raises.
+        """
+        try:
+            if not single_view:
+                return {"profile": None, "confidence": 0.0, "expected": None,
+                        "ambiguous": True, "prefix": False}
+            top = single_view[0]
+            name = str(top.get("name"))
+            score = float(top.get("score") or 0.0)
+            expected = float(top.get("profile_duration") or 0.0)
+            ambiguous = _ambiguity_from_candidates(single_view)[1]
+            if name in group_members:
+                chosen, fit, member_dur = self._stage5_pick_member(
+                    current_power, current_duration, group_members[name], member_snaps,
+                    in_progress=True, preferred=top.get("group_best_member"),
+                )
+                name = chosen
+                if member_dur:
+                    expected = float(member_dur)
+                if fit is not None and score > 0 and fit < 0.55 * score:
+                    ambiguous = True
+                if expected and current_duration > expected * 1.05:
+                    ambiguous = True
+            prefix = _prefix_landscape_ambiguity(single_view, expected, pauses_fn)
+            return {"profile": name or None, "confidence": score,
+                    "expected": expected or None, "ambiguous": bool(ambiguous),
+                    "prefix": bool(prefix)}
+        except Exception:  # noqa: BLE001 - never fail a match over its gate view
+            return {"profile": None, "confidence": 0.0, "expected": None,
+                    "ambiguous": True, "prefix": False}
 
     def _stage5_pick_member(
         self, current_power: list[float], current_duration: float,
@@ -9334,30 +9436,14 @@ class ProfileStore:
         # group-vs-runner-up call is flagged so it goes to the uncertain/feedback
         # path, not a confident commit.
         margin, is_ambiguous = _ambiguity_from_candidates(candidates)
-        # Issue #486, live member templates: the members choose the winner, the
-        # end gates read the single-template ranking's confidence and ambiguity,
-        # plus "ambiguous" whenever the members chose a different programme
-        # (see _single_template_view). Off (None) on every other path.
+        # Issue #486, live member templates: the members choose the winner (and
+        # its own margin is the ambiguity the switching rules read); the end gates
+        # read the single-template ranking (_single_template_view,
+        # _single_template_gate). Off (None) on every other path.
         single_view = (
             _single_template_view(pre_collapse_candidates, group_members)
             if in_progress else None
         )
-        gate_confidence: float | None = None
-        gate_expected: float | None = None
-        if single_view is not None:
-            if single_view:
-                gate_confidence = float(single_view[0]["score"])
-                if single_view[0]["name"] != best["name"]:
-                    try:
-                        gate_expected = float(single_view[0].get("profile_duration") or 0.0)
-                    except (TypeError, ValueError, OverflowError):
-                        gate_expected = None
-                is_ambiguous = (
-                    single_view[0]["name"] != best["name"]
-                    or _ambiguity_from_candidates(single_view)[1]
-                )
-            else:
-                gate_confidence, is_ambiguous = 0.0, True
 
         best_name = best["name"]
         best_duration = best["profile_duration"]
@@ -9457,13 +9543,21 @@ class ProfileStore:
         full_shape_hit = _match_prefix_ambiguity(
             candidates, best_duration or 0.0, pauses_fn
         )
-        if single_view and not full_shape_hit:
-            # Either ranking's prefix-landscape verdict blocks (#486, live members).
-            full_shape_hit = _prefix_landscape_ambiguity(
-                single_view,
-                float(single_view[0].get("profile_duration") or 0.0),
-                pauses_fn,
-            )
+        # Issue #486: the end gates read the single-template ranking, whole, unless
+        # the member winner is confirmed (_member_gate_confirmed).
+        gate: dict[str, Any] | None = None
+        if single_view is not None:
+            if _member_gate_confirmed(
+                best, single_view, bool(is_ambiguous), pre_collapse_candidates
+            ):
+                gate = {"profile": best_name, "confidence": float(best["score"]),
+                        "expected": float(best_duration or 0.0) or None,
+                        "ambiguous": False, "prefix": bool(full_shape_hit)}
+            else:
+                gate = self._single_template_gate(
+                    single_view, current_power_list, float(current_duration or 0.0),
+                    group_members, member_snaps, pauses_fn,
+                )
         # From the pre-collapse population, not just before the [:5] truncation
         # below: see `pre_collapse_candidates` above for why the collapse is the
         # more dangerous of the two filters here.
@@ -9482,11 +9576,11 @@ class ProfileStore:
             member_confidence=member_confidence,
             longest_candidate_duration_s=longest_candidate_s,
             query_duration_s=float(current_duration or 0.0),
-            gate_confidence=gate_confidence,
-            gate_expected_duration=(
-                max(float(best_duration or 0.0), gate_expected)
-                if gate_expected and math.isfinite(gate_expected) else None
-            ),
+            gate_profile=gate["profile"] if gate else None,
+            gate_confidence=gate["confidence"] if gate else None,
+            gate_expected_duration=gate["expected"] if gate else None,
+            gate_ambiguous=gate["ambiguous"] if gate else None,
+            gate_prefix_full_shape=gate["prefix"] if gate else None,
         )
 
     async def async_verify_alignment(

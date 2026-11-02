@@ -55,6 +55,8 @@ from .const import (
     MATCH_MEMBER_IN_PROGRESS,
     MATCH_MEMBER_LIVE_GUARD,
     MATCH_MEMBER_KEEP,
+    MATCH_MEMBER_LIVE_DECIM,
+    MATCH_MEMBER_LIVE_PRESCREEN,
     MATCH_MEMBER_TEMPLATES,
     MAX_ALIGN_GRID_POINTS,
     STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES,
@@ -542,6 +544,7 @@ def _expand_member_templates(snapshots: list[dict[str, Any]]) -> list[dict[str, 
                     ),
                     "_tpl": str(mem.get("id") or j),
                     "_own_energy": True,
+                    "_member": True,
                 }
                 dur = float(mem.get("duration") or 0.0)
                 if math.isfinite(dur) and dur > 0:
@@ -550,6 +553,139 @@ def _expand_member_templates(snapshots: list[dict[str, Any]]) -> list[dict[str, 
             except (TypeError, ValueError, KeyError, OverflowError):
                 continue
     return items
+
+
+def _member_prescores(
+    members: list[dict[str, Any]],
+    curr_arr: np.ndarray,
+    current_duration: float,
+    prefix_shape_on: bool,
+    prefix_shape_max_ratio: float,
+    corr_weight: float,
+    stage4: dict[str, Any],
+) -> np.ndarray:
+    """Cheap live pre-scores for member items, one vectorised pass for all (#486).
+
+    Query and members are already on one grid, so they are compared as ~100-point
+    slices (every ``ds``-th sample): the stretch of the member Stage 2 would score
+    (its elapsed prefix while Stage 2 truncates it, else all of it) at the lag
+    where the centred cross-correlation peaks (find_best_alignment's coarse step),
+    graded with Stage 2's correlation/MAE blend, then blended with the live
+    Stage-4 duration and prefix-energy terms this member will get. It only ranks
+    the members of one profile against each other, so it need not equal the full
+    score. Non-finite scores come back as -inf.
+    """
+    m = len(members)
+    ds = max(1, int(math.ceil(curr_arr.size / 100.0)))
+    qa = np.asarray(curr_arr[::ds], dtype=float)
+    nq = int(qa.size)
+    lens = np.empty(m, dtype=np.intp)    # Stage-2 stretch, decimated points
+    elens = np.empty(m, dtype=np.intp)   # energy prefix, decimated points
+    prof = np.empty(m)
+    spans = np.empty(m)
+    rows: list[Any] = []
+    for i, item in enumerate(members):
+        sample = item["sample_power"]
+        n = len(sample)
+        span_s = float(item.get("sample_span_s") or item.get("avg_duration") or 0.0)
+        k = ke = n
+        if span_s > 0 and current_duration < span_s:
+            if prefix_shape_on and current_duration <= span_s * prefix_shape_max_ratio:
+                k = _prefix_point_count(n, current_duration, span_s) or n
+            ke = max(1, int(round(n * (current_duration / span_s))))
+        rows.append(sample[::ds])
+        lens[i] = -(-k // ds)
+        elens[i] = -(-ke // ds)
+        prof[i] = float(item.get("_stage4_duration") or item.get("avg_duration") or 0.0)
+        spans[i] = span_s
+    if m == 0 or nq < 5:
+        return np.zeros(m)
+    width = max(len(r) for r in rows)
+    w2 = int(lens.max())
+    if width < 5 or w2 < 1:
+        return np.zeros(m)
+    B = np.zeros((m, width))
+    for i, row in enumerate(rows):
+        B[i, : len(row)] = row
+    col = np.arange(width)
+    B2 = B[:, :w2]
+    s2 = col[None, :w2] < lens[:, None]
+    bmean = (B2 * s2).sum(axis=1) / np.maximum(s2.sum(axis=1), 1)
+    bc = np.where(s2, B2 - bmean[:, None], 0.0)
+    qc = qa - qa.mean() if np.ptp(qa) > 1e-6 else qa
+    # Every member's full cross-correlation by FFT (a matmul this size can spin up
+    # BLAS threads): lag l pairs qa[j + l] with b[j], l in -(w2-1) .. nq-1; lags
+    # beyond a member's own length only meet its zero padding and are masked.
+    nfft = 1 << int(nq + w2 - 1).bit_length()
+    circ = np.fft.irfft(
+        np.fft.rfft(qc, nfft)[None, :] * np.conj(np.fft.rfft(bc, nfft, axis=1)), nfft, axis=1
+    )
+    corr_all = np.concatenate((circ[:, nfft - (w2 - 1):], circ[:, :nq]), axis=1)
+    lags = np.arange(-(w2 - 1), nq)
+    corr_all[lags[None, :] < -(lens[:, None] - 1)] = -np.inf
+    off = lags[np.argmax(corr_all, axis=1)]
+    qi = col[None, :w2] + off[:, None]
+    valid = s2 & (qi >= 0) & (qi < nq)
+    x = qa[np.clip(qi, 0, nq - 1)]
+    nv = valid.sum(axis=1)
+    nvs = np.maximum(nv, 1)
+    mae = (np.abs(x - B2) * valid).sum(axis=1) / nvs
+    xm = (x - ((x * valid).sum(axis=1) / nvs)[:, None]) * valid
+    ym = (B2 - ((B2 * valid).sum(axis=1) / nvs)[:, None]) * valid
+    den = np.sqrt((xm * xm).sum(axis=1) * (ym * ym).sum(axis=1))
+    ok = den > 1e-12
+    corr = np.where(ok, (xm * ym).sum(axis=1) / np.where(ok, den, 1.0), 0.0)
+    peak = max(float(np.max(np.abs(curr_arr))), MATCH_MAE_PEAK_FLOOR)
+    mae_score = MATCH_MAE_SCALE / (MATCH_MAE_SCALE + mae * MATCH_MAE_REF_PEAK / peak)
+    score = corr_weight * np.maximum(corr, 0.0) + (1.0 - corr_weight) * mae_score
+    score = np.where(nv >= 5, score, 0.0)
+    if current_duration > 0:
+
+        def _ag(obs: Any, exp: np.ndarray, scale: Any) -> np.ndarray:
+            obs = np.asarray(obs, dtype=float)
+            with np.errstate(divide="ignore", invalid="ignore"):
+                out = 1.0 / (1.0 + np.abs(np.log(obs / exp)) / scale)
+            return np.where((exp > 0) & (obs > 0), out, 0.0)
+
+        over = (prof > 0) & (current_duration > prof)
+        dur_ag = _ag(
+            current_duration, prof,
+            np.where(over, stage4["dur_overrun_scale"], stage4["dur_scale"]),
+        )
+        em = col[None, :] < elens[:, None]
+        e_mean = (B * em).sum(axis=1) / np.maximum(em.sum(axis=1), 1)
+        e_span = np.where((spans > 0) & (current_duration < spans), current_duration, prof)
+        cur_mean = float(np.mean(curr_arr))
+        if stage4["integrated"]:
+            en_ag = _ag(cur_mean * current_duration, e_mean * e_span, stage4["en_scale"])
+        else:
+            en_ag = _ag(cur_mean, e_mean, stage4["en_scale"])
+        score = stage4["shape_w"] * score + stage4["dur_w"] * dur_ag + stage4["en_w"] * en_ag
+    return np.where(np.isfinite(score), score, -np.inf)
+
+
+def _prescreen_members(
+    items: list[dict[str, Any]], keep: int, prescore: Any
+) -> list[dict[str, Any]]:
+    """Each profile's ``keep`` member items with the best ``prescore(members)``;
+    every template passes. Never raises: on any error all items pass."""
+    try:
+        idx = [i for i, it in enumerate(items) if it.get("_member")]
+        if not idx:
+            return items
+        scores = prescore([items[i] for i in idx]).tolist()
+        by_profile: dict[str, list[tuple[float, int]]] = {}
+        for i, sc in zip(idx, scores):
+            by_profile.setdefault(str(items[i].get("name")), []).append((float(sc), i))
+        drop: set[int] = set()
+        for lst in by_profile.values():
+            lst.sort(key=lambda t: t[0], reverse=True)   # stable: ties keep member order
+            drop.update(i for _sc, i in lst[keep:])
+        return [it for i, it in enumerate(items) if i not in drop]
+    # A cost filter must never cost the match.
+    except Exception:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("member pre-screen failed; scoring every member", exc_info=True)
+        return items
 
 
 def _collapse_member_templates(
@@ -587,6 +723,33 @@ def _collapse_member_templates(
     return out
 
 
+def _tag_live_rhythm(
+    candidates: list[dict[str, Any]],
+    snapshots: list[dict[str, Any]],
+    config: dict[str, Any],
+    horizon: float,
+) -> None:
+    """Tag each candidate with ``rhythm_live``: the run's spin/heat rhythm over its
+    first ``horizon`` seconds against the profile's members over the same stretch
+    (``spin_rhythm.rhythm_agreement``), #486. Only with the raw trace (washers,
+    ``spin_trace``) and a profile reference; a candidate without one gets no tag.
+    Never raises."""
+    try:
+        trace = config.get("spin_trace")
+        if trace is None:
+            return
+        query = spin_rhythm.rhythm_descriptor(spin_rhythm.rhythm_events(*trace), horizon)
+        if query is None:
+            return
+        refs = {str(s.get("name")): s.get("spin_ref") for s in snapshots}
+        for cand in candidates:
+            ag = spin_rhythm.rhythm_agreement(query, refs.get(str(cand.get("name"))), horizon)
+            if ag is not None:
+                cand["rhythm_live"] = float(ag)
+    except Exception:  # noqa: BLE001 - a missing tag only means "not confirmed"
+        return
+
+
 def compute_matches_worker(
     current_power: list[float],
     current_duration: float,
@@ -609,6 +772,7 @@ def _compute_matches(
     snapshots: list[dict[str, Any]],
     config: dict[str, Any],
     _stage2_memo: dict[tuple[int, float], tuple[Any, Any, Any]] | None = None,
+    _stage3_memo: dict[tuple[int, float], float] | None = None,
 ) -> list[dict[str, Any]]:
     """The body of :func:`compute_matches_worker`.
 
@@ -616,6 +780,9 @@ def _compute_matches(
     #486 guard's single-template pass on the same query: the same template, query
     and config give the same score, so it is not recomputed (Stage 2 is ~80% of a
     live match). Keyed by the template list's identity and span, valid for one call.
+    ``_stage3_memo`` does the same for the Stage-3 DTW of the templates that pass
+    refines: the member pass scores them in its own batch, so the two passes share
+    one DP scan (each pair's DTW is independent of the batch, so this is exact).
     """
     candidates: list[dict[str, Any]] = []
 
@@ -679,6 +846,33 @@ def _compute_matches(
     )
     if live_guard and _stage2_memo is None:
         _stage2_memo = {}
+    if live_guard and _stage3_memo is None:
+        _stage3_memo = {}
+    # Live member-pass cost (MATCH_MEMBER_LIVE_PRESCREEN / _DECIM in const.py): a
+    # cheap pre-score picks which members get Stage 2, on decimated curves. The
+    # completed-cycle match keeps every member at full resolution.
+    live_decim = 1
+    if members_on and in_progress:
+        live_decim = max(1, int(config.get("member_live_decim", MATCH_MEMBER_LIVE_DECIM)))
+        prescreen = int(config.get("member_live_prescreen", MATCH_MEMBER_LIVE_PRESCREEN))
+        if prescreen > 0:
+            dw = max(0.0, dur_weight) if math.isfinite(dur_weight) else 0.0
+            ew = max(0.0, en_weight) if math.isfinite(en_weight) else 0.0
+            if dw + ew > 1.0:
+                dw, ew = dw / (dw + ew), ew / (dw + ew)
+            stage4 = {
+                "dur_w": dw, "en_w": ew, "shape_w": max(0.0, 1.0 - dw - ew),
+                "dur_scale": dur_scale, "dur_overrun_scale": dur_overrun_scale,
+                "en_scale": en_scale,
+                "integrated": config.get("energy_mode", "mean") == "integrated",
+            }
+            items = _prescreen_members(
+                items, prescreen,
+                lambda mems: _member_prescores(
+                    mems, curr_arr, current_duration, prefix_shape_on,
+                    prefix_shape_max_ratio, corr_weight, stage4,
+                ),
+            )
 
     for item in items:
         name = item["name"]
@@ -718,7 +912,19 @@ def _compute_matches(
             # The alignment offset is not kept: nothing read it, and it was in
             # different units on the two paths (shared-grid index vs native index;
             # audit MR-12).
-            if shape_pair is not None:
+            if live_decim > 1 and item.get("_member"):
+                # Live member: both curves decimated (Stage 3 still warps the
+                # full-resolution pair below).
+                a, b = (
+                    shape_pair if shape_pair is not None
+                    else (curr_arr, np.asarray(sample_power, dtype=float))
+                )
+                score, metrics, _offset = find_best_alignment(
+                    np.asarray(a, dtype=float)[::live_decim],
+                    np.asarray(b, dtype=float)[::live_decim],
+                    1.0, corr_weight=corr_weight,
+                )
+            elif shape_pair is not None:
                 score, metrics, _offset = find_best_alignment(
                     shape_pair[0], shape_pair[1], 1.0, corr_weight=corr_weight
                 )
@@ -746,11 +952,17 @@ def _compute_matches(
                 "sample_span_s": float(item.get("sample_span_s") or profile_duration or 0.0),
             })
             if members_on:
-                for key in ("_tpl", "_stage4_duration", "_own_energy"):
+                for key in ("_tpl", "_stage4_duration", "_own_energy", "_member"):
                     if key in item:
                         candidates[-1][key] = item[key]
 
     candidates.sort(key=_rank_key, reverse=True)
+    # The guard's single-template pass refines the top-N TEMPLATES of this same
+    # ranking (identical scores, same relative order); captured before the cut below.
+    single_refine = (
+        [c for c in candidates if not c.get("_member")]
+        if live_guard and _stage3_memo is not None else []
+    )
     if members_on and member_keep > 0:
         # Keep each profile's best `member_keep` templates (Stage 3 cost).
         seen: dict[str, int] = {}
@@ -793,8 +1005,20 @@ def _compute_matches(
             # One batched DTW for every refine (audit MR-05: Stage 3 was ~89% of
             # matcher CPU). Falls back to the per-candidate path on any error.
             try:
+
+                def _s3key(c: dict[str, Any]) -> tuple[int, float]:
+                    return (id(c["sample"]), float(c.get("sample_span_s") or 0.0))
+
+                # This scan also scores the templates the guard's single pass will
+                # refine, and hands them over through _stage3_memo.
+                refined = {id(c) for c in to_refine}
+                jobs = to_refine + [c for c in single_refine[:top_n] if id(c) not in refined]
+                todo = [
+                    c for c in jobs
+                    if _stage3_memo is None or c.get("_member") or _s3key(c) not in _stage3_memo
+                ]
                 grid_pairs = []
-                for cand in to_refine:
+                for cand in todo:
                     pair = cand.get("_shape_pair")
                     if pair is not None:
                         a = _resample_to(pair[0], MATCH_DTW_RESAMPLE_N)
@@ -803,11 +1027,19 @@ def _compute_matches(
                         a = curr_resampled
                         b = _resample_to(np.array(cand["sample"]), MATCH_DTW_RESAMPLE_N)
                     grid_pairs.append((a, b))
-                batched = _stage3_scores_batched(
+                scored = dict(zip(map(id, todo), _stage3_scores_batched(
                     grid_pairs, current_peak, dtw_mode=dtw_mode,
                     dtw_bandwidth=dtw_bandwidth, l1_scale=l1_scale,
                     ddtw_scale=ddtw_scale, ensemble_w=ensemble_w,
-                )
+                ) if grid_pairs else []))
+                if _stage3_memo is not None:
+                    for c in todo:
+                        if not c.get("_member"):
+                            _stage3_memo[_s3key(c)] = scored[id(c)]
+                batched = [
+                    scored[id(c)] if id(c) in scored else _stage3_memo[_s3key(c)]
+                    for c in to_refine
+                ]
             except Exception:  # pylint: disable=broad-exception-caught
                 _LOGGER.debug("batched Stage-3 DTW failed; per-candidate path", exc_info=True)
                 batched = None
@@ -985,6 +1217,7 @@ def _compute_matches(
                 [{k: v for k, v in s.items() if k != "members"} for s in snapshots],
                 {**config, "member_templates": False},
                 _stage2_memo,
+                _stage3_memo,
             )
             by_name = {str(c.get("name")): c for c in single}
             for cand in candidates:
@@ -993,6 +1226,10 @@ def _compute_matches(
                 cand["single_shape"] = (
                     float(ref.get("shape_score", ref["score"])) if ref else None
                 )
+            # ...and, for washers, how the run's spin/heat rhythm so far agrees with
+            # each profile's members over the same stretch (``rhythm_live``): the
+            # store lets the end gates follow a member winner the rhythm confirms.
+            _tag_live_rhythm(candidates, snapshots, config, current_duration)
 
     # (Stage 6, the #364 prefix scores for the Smart-Termination guard, was removed
     # in 0.5.8: Stages 2/3 already score a running cycle on each candidate's

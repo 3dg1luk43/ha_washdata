@@ -195,6 +195,42 @@ def detector_gate_inputs(
     return confidence, expected_duration
 
 
+@dataclass(frozen=True)
+class GateInputs:
+    """What the detector's end gates read from one live tick (#486)."""
+
+    profile_name: str | None
+    revoke: bool
+    confidence: float
+    expected_duration: Any
+    is_ambiguous: bool
+    is_prefix_ambiguous_full_shape: bool
+
+
+def detector_inputs(tick: "MatchTick", result: Any) -> GateInputs:
+    """The tick's detector inputs, from the result's gate view when it has one.
+
+    With live member templates the store decides per tick which ranking the end
+    gates read (``MatchResult.gate_*``); every other result hands the detector the
+    tick as before. A divergence revert still revokes (:func:`detector_match`).
+    Shared by the manager and the Playground sim.
+    """
+    name, revoke = detector_match(tick, result)
+    conf, expected = detector_gate_inputs(result, tick.confidence, tick.matched_duration)
+    ambiguous = bool(getattr(result, "is_ambiguous", False))
+    prefix = bool(getattr(result, "is_prefix_ambiguous_full_shape", False))
+    gate_name = getattr(result, "gate_profile", None)
+    if name is not None and isinstance(gate_name, str) and gate_name:
+        name = gate_name
+    gate_amb = getattr(result, "gate_ambiguous", None)
+    if isinstance(gate_amb, bool):
+        ambiguous = gate_amb
+    gate_pfs = getattr(result, "gate_prefix_full_shape", None)
+    if isinstance(gate_pfs, bool):
+        prefix = gate_pfs
+    return GateInputs(name, revoke, conf, expected, ambiguous, prefix)
+
+
 def detector_match(tick: "MatchTick", result: Any) -> tuple[str | None, bool]:
     """``(profile_name, revoke)`` for the detector's ``update_match`` this tick.
 

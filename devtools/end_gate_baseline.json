@@ -1,6 +1,6 @@
 {
  "about": "end_gate_eval baseline (audit TESTING-09). Regenerate with --write-baseline after an intended end-gate change; gate with --check.",
- "generated": "2026-11-02T08:35:16Z",
+ "generated": "2026-11-02T17:32:11Z",
  "flags": {
   "loo": true,
   "all_formats": true,
@@ -11,7 +11,7 @@
   "no_shortening": false
  },
  "tree": {
-  "head": "48503ae",
+  "head": "1a29cb8",
   "dirty": [
    " M CHANGELOG.md",
    " M CLAUDE.md",
@@ -21,14 +21,9 @@
    " M custom_components/ha_washdata/match_rules.py",
    " M custom_components/ha_washdata/playground.py",
    " M custom_components/ha_washdata/profile_store.py",
-   " M custom_components/ha_washdata/progress.py",
-   " M devtools/end_gate_baseline.json",
-   " M devtools/eta_eval.py",
-   " M devtools/eval_baseline.json",
-   "?? custom_components/ha_washdata/spin_rhythm.py",
-   "?? tests/test_issue_486_program_recognition.py"
+   " M tests/test_issue_486_program_recognition.py"
   ],
-  "integration_py_sha256": "d75ae78f979ea6a8"
+  "integration_py_sha256": "ec3de7a9d9c83e6d"
  },
  "tolerance": {
   "median_lag_min": 0.25,
@@ -40,16 +35,16 @@
  },
  "summary": {
   "ALL": {
-   "n": 594,
+   "n": 589,
    "median_lag_min": 6.5,
-   "mean_lag_min": 11.52,
-   "p90_lag_min": 27.5,
-   "early_1min_n": 24,
-   "early_5min_n": 18,
+   "mean_lag_min": 11.4,
+   "p90_lag_min": 26.6,
+   "early_1min_n": 26,
+   "early_5min_n": 19,
    "split_n": 20,
-   "early_1min_pct": 4.04,
-   "early_5min_pct": 3.03,
-   "split_pct": 3.37
+   "early_1min_pct": 4.41,
+   "early_5min_pct": 3.23,
+   "split_pct": 3.4
   },
   "dishwasher": {
    "n": 213,
@@ -66,7 +61,7 @@
   "dryer": {
    "n": 71,
    "median_lag_min": 3.5,
-   "mean_lag_min": 0.51,
+   "mean_lag_min": 0.46,
    "p90_lag_min": 6.0,
    "early_1min_n": 18,
    "early_5min_n": 13,
@@ -88,16 +83,16 @@
    "split_pct": 0.0
   },
   "washing_machine": {
-   "n": 286,
-   "median_lag_min": 8.0,
-   "mean_lag_min": 10.27,
-   "p90_lag_min": 24.42,
-   "early_1min_n": 5,
-   "early_5min_n": 5,
+   "n": 281,
+   "median_lag_min": 7.85,
+   "mean_lag_min": 10.01,
+   "p90_lag_min": 23.75,
+   "early_1min_n": 7,
+   "early_5min_n": 6,
    "split_n": 6,
-   "early_1min_pct": 1.75,
-   "early_5min_pct": 1.75,
-   "split_pct": 2.1
+   "early_1min_pct": 2.49,
+   "early_5min_pct": 2.14,
+   "split_pct": 2.14
   }
  }
 }

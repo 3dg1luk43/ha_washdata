@@ -942,16 +942,39 @@ MATCH_MEMBER_TEMPLATES = True
 # Vorwaesche" and "Jeans 30" were pulled to the 18-23-cycle Easy Care profiles
 # and split), and the inflated confidence held a dryer's 80%-of-expected
 # deferral past its end. So with MATCH_MEMBER_LIVE_GUARD the worker also scores
-# the single-template path, and the store hands the end gates THAT ranking's
-# confidence, calls the match ambiguous unless that ranking clearly picks the
-# same programme, and while the two disagree waits for the longer programme
-# (MatchResult.gate_confidence / gate_expected_duration). end_gate_eval --loo
-# --all-formats vs members completed-only: early ends 26 -> 24 (> 1 min) and
-# 19 -> 18 (> 5 min), splits 20 -> 20, washer lag median/mean/p90 +0.15/+0.28/
-# +0.67 min; unguarded it was +3 splits and +2 dryer early ends. A contest zone
-# (members only within 0.10 of the single-template top) halved the gain instead.
+# the single-template path and the store hands the end gates THAT ranking as a
+# match of its own: winner, confidence, expected duration, margin, #288 verdict
+# (ProfileStore._single_template_gate, MatchResult.gate_*); the member ranking's
+# own margin stays what the switching rules read. The first guard mixed the two
+# (member winner, single confidence, the longer duration, "ambiguous" on any
+# disagreement, both prefix verdicts OR'ed): vs members completed-only it ended
+# 32 washer/dryer cycles > 1 min later (9 Miele by 5-21 min, 7 losing the
+# anti-crease finalise) and 4 earlier. Single ranking whole: end_gate_eval --loo
+# --all-formats identical to members completed-only but one cycle (+3.5 min,
+# match cadence). Unguarded it was +3 splits and +2 dryer early ends. A contest
+# zone (members only within 0.10 of the single-template top) halved the gain.
 MATCH_MEMBER_IN_PROGRESS = True
 MATCH_MEMBER_LIVE_GUARD = True
+# Optional, OFF (MATCH_MEMBER_GATE_CONFIRM): let the end gates follow a CONFIRMED
+# member winner instead (ProfileStore._member_gate_confirmed):
+# the rankings name different programmes, the member winner is clear by its own
+# margin, the single-template path scores it within MATCH_MEMBER_GATE_SINGLE_DELTA
+# of its own winner, and the run's rhythm so far agrees with its members at least
+# as well (within MATCH_MEMBER_GATE_RHYTHM_DELTA) as with the single winner's.
+# Washers only: no other device type has a rhythm reference. end_gate_eval --loo
+# --all-formats vs the single ranking whole: 15 washer cycles end 3-20 min sooner
+# (Miele anti-crease finalise 44 -> 49 of 98, programme-end lag median/mean/p90
+# 24.6/25.7/39.3 -> 24.2/24.9/38.5 min), none later, no new early end or split;
+# trusting a longer member winner as well is part of that (never: 3 fewer).
+# OFF: it is fragile at the margin. With the live member pre-screen
+# (MATCH_MEMBER_LIVE_PRESCREEN) the #486 Miele fb530e305617 (a 1-cycle programme)
+# had Pflegeleicht 40 clear by 0.051 instead of 0.019 at 98 min, past that
+# profile's expected end, so the confirmation armed the anti-crease finalise and
+# split the run (anti-crease EARLY + cut + split vs members completed-only). The
+# single ranking whole is what the end gates were calibrated on.
+MATCH_MEMBER_GATE_CONFIRM = False
+MATCH_MEMBER_GATE_SINGLE_DELTA = 0.05
+MATCH_MEMBER_GATE_RHYTHM_DELTA = 0.05
 # Not dishwashers: they gained nothing (eval.py full, cut 1.0: 79.0 -> 79.6%) and
 # their end gates moved (end_gate_eval --loo --all-formats: 2 more splits, one
 # smart end lost, p90 lag 45.7 -> 56.5 min).
@@ -959,12 +982,31 @@ MATCH_MEMBER_DEVICE_TYPES = ("washing_machine", "washer_dryer", "dryer")
 MATCH_MEMBER_MIN_CYCLES = 3
 MATCH_MEMBER_MAX = 16
 MATCH_MEMBER_KEEP = 3               # templates per profile kept after Stage 2 (Stage 3 cost)
+# Live member-pass cost. Every member of every profile on the full Stage-2 shift
+# search made a live match ~4.5x a single-template one (#486 Miele, 77 member
+# templates: 116/90/72 vs 25/22/19 ms at 75/50/25% elapsed). Live only - the
+# completed-cycle match keeps every member at full resolution: per profile, only
+# the MATCH_MEMBER_LIVE_PRESCREEN members with the best cheap pre-score
+# (analysis._member_prescores: ~100-point slices at the coarse cross-correlation
+# lag, plus the member's own live Stage-4 duration/energy terms, one vectorised
+# pass) get Stage 2, on both curves decimated by MATCH_MEMBER_LIVE_DECIM.
+# 0 / 1 turn each off. eval.py full, whole corpus, top-1 at 75/50/25% elapsed:
+# 67.6/58.6/59.5 -> 68.3/58.7/59.1 (Miele 46.7/36.7/47.8 -> 46.7/36.7/48.9); CPU
+# ~3.4-4x -> ~1.8x a single-template match. Rejected: 2 members (Miele 41.1/
+# 33.3/42.2), a shape-only pre-score (41.1/31.1/51.1), the K best profiles of the
+# single ranking (K=3: 43.3/36.7/43.3 at 2.3x), 8 most recent members (35.6/33.3/
+# 41.1), skipping the pass when the single ranking is decisive (barely cheaper).
+# The two passes also share one Stage-3 scan (analysis._compute_matches, exact).
+MATCH_MEMBER_LIVE_PRESCREEN = 3
+MATCH_MEMBER_LIVE_DECIM = 2
 
 # Issue #486: remaining time counts down to the PROGRAMME end, not to the end of a
 # Miele-style anti-crease tail (base ~3 W, pulses above the Stop Threshold until the
 # door opens, up to ~36 min) that every stored duration of such a washer includes.
-# The tail is the profile's median time after its last heater block or spin
-# (spin_rhythm.member_tail_reference over the envelope's spin_ref), subtracted from
+# The tail is the profile's median quiet time after its programme end
+# (spin_rhythm.active_end_s / member_tail_reference, stored on the envelope as
+# tail_ref; "after the last spin" read 50-60 min fake tails on washers without
+# one), subtracted from
 # the remaining time when at least ETA_TAIL_MIN_SHARE of at least
 # ETA_TAIL_MIN_MEMBERS members have one and its median is >= ETA_TAIL_MIN_S.
 # Progress % and every end gate still read the full expected duration.
