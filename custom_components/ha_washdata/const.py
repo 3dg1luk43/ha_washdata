@@ -511,11 +511,11 @@ CONF_PROFILE_MIN_WARMUP_CYCLES = 2   # labeled cycles before auto-labelling is e
 # this many review requests that are still waiting or were answered without a
 # correction (confirmed, dismissed, or relabelled to that same programme). A
 # correction does not spend it: the matcher is still pulling other programmes'
-# cycles onto this one, which is where an answer helps. Chronological closed-loop
-# replay, 13 devices / 371 cycles, every request answered: asking every refused
-# cycle took 105 questions for +33 top-1 over never answering; this budget 60
-# for +34 (1: 45 for +23; 3: 75 for +32). With half the requests answered both
-# gain +21.6, from 58 raised instead of 105.
+# cycles onto this one, which is where an answer helps. Measured with
+# `devtools/closed_loop_eval.py --arms shipped` (13 devices, 371 cycles, every
+# request answered): no budget 105 questions, top-1 78.2%; this budget 60 questions,
+# 78.4% (1: 45, 75.5%; 3: 75, 77.9%; never answering: 69.3%). Half answered
+# (`shipped_p50`, answer seeds 0-2): 60 raised instead of 108, 75.1% vs 75.7%.
 REVIEW_BUDGET_PER_PROFILE = 2
 
 # Shape drift detection: compares the average power-curve envelope of the

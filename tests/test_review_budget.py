@@ -1,10 +1,11 @@
 """Review requests stop once a programme's budget is spent (2026-11-03 audit item 1).
 
 A cycle the label gate refused used to be queued every time. Replayed in
-chronological order over 13 devices, a programme's first answers and every
-correction carry the accuracy; asking only while fewer than
-``REVIEW_BUDGET_PER_PROFILE`` requests about it are waiting or were answered
-without a correction took 60 questions instead of 105 for the same top-1.
+chronological order over 13 devices (``devtools/closed_loop_eval.py --arms
+shipped``), a programme's first answers and every correction carry the accuracy;
+asking only while fewer than ``REVIEW_BUDGET_PER_PROFILE`` requests about it are
+waiting or were answered without a correction took 60 questions instead of 105
+for the same top-1.
 """
 
 from __future__ import annotations
@@ -34,7 +35,8 @@ def _answer(store, cid, *, confirmed=False, corrected=None, detected=_P):
 
 
 def test_budget_is_two():
-    # The constant the measurement chose (1: 45 questions for +23, 3: 75 for +32).
+    # The value closed_loop_eval.py --arms shipped chose (1: 45 questions, top-1
+    # 75.5%; 2: 60, 78.4%; 3: 75, 77.9%; no budget: 105, 78.2%).
     assert REVIEW_BUDGET_PER_PROFILE == 2
 
 

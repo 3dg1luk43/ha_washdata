@@ -6,7 +6,7 @@
 
     python3 devtools/closed_loop_eval.py [--jobs N] [--arms oracle,gate,review]
         [--device-types washing_machine,dryer] [--export SUBSTR] [--json OUT]
-        [--seeds N] [--config-override JSON|@FILE] [--corpus DIR]
+        [--seeds N] [--answer-seed S] [--config-override JSON|@FILE] [--corpus DIR]
     python3 devtools/closed_loop_eval.py --compare BEFORE.json AFTER.json
 
 ``eval.py`` scores every fold against a store in which every other cycle carries
@@ -29,14 +29,24 @@ envelope is rebuilt, as the manager does at cycle end):
           review request.
   review  gate, plus a refused cycle whose ``label_confidence`` reaches
           ``learning_confidence`` is labelled truthfully: the user answers every
-          review request ``learning.py`` raises for a refused gate (register
-          item 433).
+          review request the 0.5.8 rule raised for a refused gate (register
+          item 433), with no review budget.
+  shipped the REAL learning pass in the loop: the cycle is stored with the gate's
+          label, ``LearningManager.process_cycle_end`` runs on it as the manager
+          calls it (review budget, warm-up and auto-label included), and every
+          request it raises is answered truthfully through
+          ``async_submit_cycle_feedback``.
+  shipped_p50  the same, but each raised request is answered with probability
+          0.5 (``--answer-seed``, fixed per device); an unanswered one stays
+          waiting and spends its programme's budget.
 
 Each row: ``ok`` (complete-cycle top-1 == truth), ``ok50`` (top-1 at 50%),
 ``lab`` (the label stored, None = unlabelled), ``truth``, ``reason`` (the gate's
 reason), and the complete match's ``best`` / ``lc`` (label_confidence) / ``mg``
-(margin). The summary reports per device, per device type and in total: top-1 at
-the end and at 50%, the share of cycles labelled, and how many labels are wrong.
+(margin); the shipped arms add ``q`` (a review request was raised) and ``ans``
+(it was answered). The summary reports per device, per device type and in total:
+top-1 at the end and at 50%, the share of cycles labelled, how many labels are
+wrong, and for the shipped arms the questions raised and answered.
 
 Devices: observed cycles (``past_cycles``) only, so a store package (a download,
 not a chronology) is never replayed; at least 10 labelled traced cycles and 2
@@ -76,6 +86,7 @@ for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
 
 import argparse  # noqa: E402
 import json  # noqa: E402
+import random  # noqa: E402
 import sys  # noqa: E402
 from collections import defaultdict  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
@@ -85,8 +96,11 @@ from typing import Any, Callable, Iterable  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import eval as E  # noqa: E402
 
-ARMS = ("oracle", "gate", "review")
-MIN_CYCLES = 10          # labelled traced observed cycles a device needs
+ARMS = ("oracle", "gate", "review")            # the default run
+#: Arms that run the real learning pass; the share of raised requests answered.
+ANSWER_SHARE = {"shipped": 1.0, "shipped_p50": 0.5}
+ALL_ARMS = ARMS + tuple(ANSWER_SHARE)
+MIN_CYCLES = 10         # labelled traced observed cycles a device needs
 MIN_PROGRAMMES = 2
 MIN_POINTS = 8           # readings a replayed cycle needs (eval.MIN_TRACE_POINTS)
 HALF = 0.5               # the mid-cycle checkpoint
@@ -162,15 +176,37 @@ def arm_label(arm: str, verdict: str | None, best: str | None, conf: float,
     return None
 
 
+def answer_rng(seed: int, path: str) -> random.Random:
+    """The simulated user's coin for one device: fixed by seed and path, so every
+    process and every rerun answers the same requests."""
+    return random.Random(f"{seed}:{path}")
+
+
+def user_answers(arm: str, rng: random.Random) -> bool:
+    """Does the user answer a request the shipped arm ``arm`` raised?"""
+    share = ANSWER_SHARE[arm]
+    return share >= 1.0 or rng.random() < share
+
+
+def review_answer(detected: str | None, truth: str) -> tuple[bool, str | None]:
+    """The truthful answer, as ``async_submit_cycle_feedback`` arguments:
+    (user_confirmed, corrected_profile)."""
+    return (True, None) if detected == truth else (False, truth)
+
+
 def tally(rows: list[dict]) -> dict[str, int]:
-    """Counts behind every summary figure."""
-    return {
+    """Counts behind every summary figure (``q`` / ``ans`` only for rows that carry them)."""
+    t = {
         "n": len(rows),
         "ok": sum(1 for r in rows if r["ok"]),
         "ok50": sum(1 for r in rows if r["ok50"]),
         "lab": sum(1 for r in rows if r["lab"]),
         "wrong": sum(1 for r in rows if r["lab"] and r["lab"] != r["truth"]),
     }
+    if any("q" in r for r in rows):
+        t["q"] = sum(1 for r in rows if r.get("q"))
+        t["ans"] = sum(1 for r in rows if r.get("ans"))
+    return t
 
 
 def _add(a: dict[str, int], b: dict[str, int]) -> dict[str, int]:
@@ -185,7 +221,8 @@ def fmt_tally(t: dict[str, int]) -> str:
     n = t.get("n", 0)
     return (f"n {n} top1 {_pct(t.get('ok', 0), n):.1f}% top1@50 {_pct(t.get('ok50', 0), n):.1f}% "
             f"labelled {_pct(t.get('lab', 0), n):.1f}% wrong-labels {t.get('wrong', 0)} "
-            f"({_pct(t.get('wrong', 0), t.get('lab', 0)):.1f}% of labels)")
+            f"({_pct(t.get('wrong', 0), t.get('lab', 0)):.1f}% of labels)"
+            + (f" questions {t['q']} answered {t.get('ans', 0)}" if "q" in t else ""))
 
 
 def load_doc(path: str | Path) -> dict:
@@ -206,7 +243,8 @@ def summarize(doc: dict, out: Callable[[str], Any] = print) -> None:
             t = tally(rows)
             by_type[(d.get("dev", "?"), arm)] = _add(by_type[(d.get("dev", "?"), arm)], t)
             tot[arm] = _add(tot[arm], t)
-            line.append(f"{arm} {t['ok']}/{t['n']} @50 {t['ok50']} lab {t['lab']} wrong {t['wrong']}")
+            line.append(f"{arm} {t['ok']}/{t['n']} @50 {t['ok50']} lab {t['lab']} wrong {t['wrong']}"
+                        + (f" q {t['q']}" if "q" in t else ""))
         out(" | ".join(line))
     for (dtype, arm), t in sorted(by_type.items()):
         out(f"{dtype} {arm}: {fmt_tally(t)}")
@@ -232,7 +270,7 @@ def compare_docs(before: dict, after: dict, out: Callable[[str], Any] = print) -
                 continue
             pairs += 1
             tb, ta = tally(brows), tally(rows)
-            delta = {k: ta[k] - tb[k] for k in ta}
+            delta = {k: ta[k] - tb.get(k, 0) for k in ta}
             delta.update(
                 n=ta["n"],
                 fixed=sum(1 for x, y in zip(brows, rows) if not x["ok"] and y["ok"]),
@@ -254,24 +292,73 @@ def _fmt_delta(d: dict[str, int]) -> str:
     fx, br, fx50, br50 = (d.get(k, 0) for k in ("fixed", "broken", "fixed50", "broken50"))
     return (f"n {n} top1 {_pct(d.get('ok', 0), n):+.1f}pp (+{fx} -{br} p={E.mcnemar_p(fx, br):.2f}) "
             f"@50 {_pct(d.get('ok50', 0), n):+.1f}pp (+{fx50} -{br50} p={E.mcnemar_p(fx50, br50):.2f}) "
-            f"labelled {d.get('lab', 0):+d} wrong {d.get('wrong', 0):+d}")
+            f"labelled {d.get('lab', 0):+d} wrong {d.get('wrong', 0):+d}"
+            + (f" questions {d['q']:+d}" if "q" in d else ""))
 
 
 # --------------------------------------------------------------------- replay
 
+def _learning_pass(mgr: Any) -> Any:
+    """The manager's own LearningManager, made runnable without a running HA: the
+    entry it reads options from is the eval entry, its background jobs (store
+    saves, suggestion scans) are dropped, and its dispatcher signal goes nowhere."""
+    lm = mgr.learning_manager
+    lm.hass.config_entries.async_get_entry.return_value = mgr.config_entry
+    lm.hass.data = {}
+    lm._spawn_fn = lambda coro: coro.close()  # noqa: SLF001
+    return lm
+
+
+async def _shipped_step(lm: Any, st: Any, data: dict, c2: dict, idx: int, res: Any,
+                        verdict: str | None, conf: float, dur: float, truth: str,
+                        arm: str, rng: random.Random) -> tuple[str | None, bool, bool]:
+    """One cycle end as the manager runs it: stored with the gate's label (its
+    envelope rebuilt), then ``process_cycle_end`` with the manager's arguments
+    (manager.py ``_async_process_cycle_end``), then the user's answer, if any,
+    through ``async_submit_cycle_feedback``. Returns (label, raised, answered)."""
+    if not c2.get("id"):
+        c2["id"] = f"closed-loop-{idx}"
+    for key in ("label_source", "auto_labeled", "original_auto_label"):
+        c2.pop(key, None)     # the export's provenance: a hand label would skip the pass
+    if verdict:
+        c2["profile_name"] = verdict
+        c2["label_source"] = "auto_match"
+    else:
+        c2.pop("profile_name", None)
+    data["past_cycles"].append(c2)
+    if verdict:
+        await st.async_rebuild_envelope(verdict)
+    detected = verdict or res.best_profile
+    expected = (st.get_profiles().get(detected) or {}).get("avg_duration") if detected else None
+    lm.process_cycle_end(c2, detected_profile=detected, confidence=conf,
+                         predicted_duration=expected or dur, match_result=res,
+                         label_allowed=bool(verdict))
+    raised = c2["id"] in st.get_pending_feedback()
+    answered = raised and user_answers(arm, rng)
+    if answered:
+        confirmed, corrected = review_answer(detected, truth)
+        await lm.async_submit_cycle_feedback(c2["id"], confirmed, corrected_profile=corrected)
+    return c2.get("profile_name"), raised, answered
+
+
 async def run_arm(dev: E.Device, arm: str, seq: list[dict], seeds: list[dict],
-                  override: dict) -> tuple[str, list[dict]]:
+                  override: dict, answer_seed: int = 0) -> tuple[str, list[dict]]:
     from custom_components.ha_washdata import match_rules  # noqa: PLC0415
     data = E.base_data(dev)
     data["past_cycles"] = []
     data["envelopes"] = {}
+    # The export's own review queue and answers would spend the replay's budget.
+    data["pending_feedback"] = {}
+    data["feedback_history"] = {}
     st, mgr = E.fresh_store(dev, data, override)
     floor = float(mgr._learning_confidence or 0.0)  # noqa: SLF001
+    lm = _learning_pass(mgr) if arm in ANSWER_SHARE else None
+    rng = answer_rng(answer_seed, dev.path)
     data["past_cycles"].extend(seeds)
     for name in list(data["profiles"]):
         await st.async_rebuild_envelope(name)
     rows = []
-    for c in seq:
+    for idx, c in enumerate(seq):
         pts = E.query_points(c)
         dur = E.cycle_duration(c, pts)
         res = await st.async_match_profile([list(p) for p in pts], dur, in_progress=False)
@@ -282,28 +369,34 @@ async def run_arm(dev: E.Device, arm: str, seq: list[dict], seeds: list[dict],
         truth = c["profile_name"]
         verdict, reason = match_rules.cycle_end_label_verdict(res, floor, st.get_profiles())
         conf = float(getattr(res, "label_confidence", 0.0) or 0.0)
-        lab = arm_label(arm, verdict, res.best_profile, conf, floor, truth)
+        c2 = dict(c)
+        extra: dict[str, bool] = {}
+        if lm is not None:
+            lab, raised, answered = await _shipped_step(
+                lm, st, data, c2, idx, res, verdict, conf, dur, truth, arm, rng)
+            extra = {"q": raised, "ans": answered}
+        else:
+            lab = arm_label(arm, verdict, res.best_profile, conf, floor, truth)
+            if lab:
+                c2["profile_name"] = lab
+            else:
+                c2.pop("profile_name", None)
+            data["past_cycles"].append(c2)
+            if lab:
+                await st.async_rebuild_envelope(lab)
         rows.append({"ok": res.best_profile == truth,
                      "ok50": bool(res50 and res50.best_profile == truth),
                      "lab": lab, "truth": truth, "reason": reason,
                      "best": res.best_profile, "lc": round(conf, 4),
-                     "mg": round(float(res.ambiguity_margin or 0.0), 4)})
-        c2 = dict(c)
-        if lab:
-            c2["profile_name"] = lab
-        else:
-            c2.pop("profile_name", None)
-        data["past_cycles"].append(c2)
-        if lab:
-            await st.async_rebuild_envelope(lab)
+                     "mg": round(float(res.ambiguity_margin or 0.0), 4), **extra})
     return mgr.device_type, rows
 
 
 _W: dict[str, Any] = {}
 
 
-def _init(root: str, override: dict, seeds: int = 1) -> None:
-    _W.update(root=Path(root), override=override, seeds=seeds)
+def _init(root: str, override: dict, seeds: int = 1, answer_seed: int = 0) -> None:
+    _W.update(root=Path(root), override=override, seeds=seeds, answer_seed=answer_seed)
     E._quiet_logs()  # noqa: SLF001
     if override.get("const") and not _W.get("cm"):
         cm = E.const_overrides(override["const"])
@@ -316,12 +409,13 @@ def _job(args: tuple[str, str]) -> tuple[str, str, int, str, list[dict]]:
     dev = E.load_device(_W["root"], path)
     assert dev is not None, path
     seeds, seq = split_seeds(replay_cycles(dev), per_programme=_W.get("seeds", 1))
-    dtype, rows = E.run_coro(run_arm(dev, arm, seq, seeds, _W["override"]))
+    dtype, rows = E.run_coro(run_arm(dev, arm, seq, seeds, _W["override"], _W.get("answer_seed", 0)))
     return path, arm, len(seeds), dtype, rows
 
 
 def run(corpus: Path, arms: list[str], jobs: int, override: dict,
-        device_types: set[str] | None, export: str | None, seeds: int = 1) -> dict:
+        device_types: set[str] | None, export: str | None, seeds: int = 1,
+        answer_seed: int = 0) -> dict:
     devs, _ = E.load_corpus(corpus)
     twins = E.twin_entries([d for d in devs if not d.path.startswith("store/")])
     picked = select_devices(devs, twins, device_types, export)
@@ -329,7 +423,7 @@ def run(corpus: Path, arms: list[str], jobs: int, override: dict,
     if not work:
         return {"meta": {}, "devices": []}
     if jobs <= 1:
-        _init(str(corpus), override, seeds)
+        _init(str(corpus), override, seeds, answer_seed)
         try:
             results = [_job(w) for w in work]
         finally:
@@ -337,7 +431,8 @@ def run(corpus: Path, arms: list[str], jobs: int, override: dict,
             if cm is not None:
                 cm.__exit__(None, None, None)
     else:
-        with ProcessPoolExecutor(jobs, initializer=_init, initargs=(str(corpus), override, seeds)) as ex:
+        with ProcessPoolExecutor(jobs, initializer=_init,
+                                 initargs=(str(corpus), override, seeds, answer_seed)) as ex:
             results = list(ex.map(_job, work))
     by_path: dict[str, dict] = {}
     for path, arm, nseed, dtype, rows in results:
@@ -346,7 +441,7 @@ def run(corpus: Path, arms: list[str], jobs: int, override: dict,
         d["arms"][arm] = rows
     return {
         "meta": {"rev": E._git_rev(), "code_sha": E.code_sha(), "arms": arms,  # noqa: SLF001
-                 "override": override, "seeds_per_programme": seeds,
+                 "override": override, "seeds_per_programme": seeds, "answer_seed": answer_seed,
                  "twins_excluded": sorted(E.public_key(p) for p in twins)},
         "devices": [by_path[d.path] for d in picked if d.path in by_path],
     }
@@ -361,18 +456,20 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--export", default="", help="only exports whose path contains this")
     ap.add_argument("--json", type=Path, help="write the rows here")
     ap.add_argument("--seeds", type=int, default=1, help="hand-labelled first runs per programme")
+    ap.add_argument("--answer-seed", type=int, default=0,
+                    help="which requests shipped_p50's user answers (fixed per device)")
     ap.add_argument("--config-override", default=None, help="eval.py's override (JSON or @file)")
     ap.add_argument("--compare", nargs=2, metavar=("BEFORE", "AFTER"))
     a = ap.parse_args(argv)
     if a.compare:
         return compare_docs(load_doc(a.compare[0]), load_doc(a.compare[1]))
     arms = [x for x in a.arms.split(",") if x]
-    bad = set(arms) - set(ARMS)
+    bad = set(arms) - set(ALL_ARMS)
     if bad:
         ap.error(f"unknown arm(s): {', '.join(sorted(bad))}")
     types = {x for x in a.device_types.split(",") if x} or None
     doc = run(a.corpus, arms, a.jobs, E.parse_override(a.config_override), types, a.export or None,
-              max(1, a.seeds))
+              max(1, a.seeds), a.answer_seed)
     if not doc["devices"]:
         print("nothing to replay", file=sys.stderr)
         return 2
