@@ -61,6 +61,7 @@ python3 devtools/docs_check.py          # doc anchors/constants/register ids/dee
 
 python3 devtools/eval.py run --mode fast     # LOO matcher accuracy on the SHIPPED path (audit F1)
 python3 devtools/eval.py compare BASE.json NEW.json   # paired deltas, McNemar, guarded metrics
+python3 devtools/closed_loop_eval.py --json OUT.json  # chronological label loop: arms oracle / gate (nobody answers reviews) / review; --compare BEFORE AFTER
 python3 devtools/end_gate_eval.py --loo      # ENDING fallback-gate lag/early-end/split (item 329); add --all-formats (diagnostics dumps + user-Contributed, item 465) and --shipped-watchdog; --jobs N (default cpu-1, max 8; rows identical to --jobs 1)
 python3 devtools/energy_projection_eval.py   # projected-energy accuracy, LOO (audit PROGRESS-04)
 python3 devtools/ml_energy_gate_eval.py      # on-device total_energy promotion gate vs naive and incumbent (audit ML-12)

@@ -27,8 +27,8 @@ import pytest
 REPO = Path(__file__).resolve().parent.parent
 DEVTOOLS = REPO / "devtools"
 HARNESSES = (
-    "analyze_diag", "decisive_margin_eval", "dtw_ab_eval", "end_gate_eval",
-    "min_off_gap_eval", "prefix_guard_eval",
+    "analyze_diag", "closed_loop_eval", "decisive_margin_eval", "dtw_ab_eval",
+    "end_gate_eval", "min_off_gap_eval", "prefix_guard_eval",
 )
 
 
@@ -78,6 +78,7 @@ def _module(name: str):
         ("prefix_guard_eval", "decisive_margin_eval", []),
         ("min_off_gap_eval", "min_off_gap_eval", []),
         ("dtw_ab_eval", "dtw_ab_eval", []),
+        ("closed_loop_eval", "eval", ["--jobs", "1"]),
     ],
 )
 def test_no_corpus_exits_non_zero(
