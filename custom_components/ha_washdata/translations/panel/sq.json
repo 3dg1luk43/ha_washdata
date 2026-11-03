@@ -268,7 +268,9 @@
         "bp_hide_yaml": "Fshih YAML",
         "bp_show_yaml": "Shfaq YAML",
         "review_something_else": "Diçka tjetër…",
-        "review_not_sure": "Nuk e di"
+        "review_not_sure": "Nuk e di",
+        "review_prev": "Cikli i mëparshëm",
+        "review_next": "Cikli tjetër"
     },
     "conflict": {
         "anti_wrinkle_max": {

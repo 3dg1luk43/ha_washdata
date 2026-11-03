@@ -264,7 +264,9 @@
         "bp_hide_yaml": "隐藏 YAML",
         "bp_show_yaml": "显示 YAML",
         "review_something_else": "其他…",
-        "review_not_sure": "不确定"
+        "review_not_sure": "不确定",
+        "review_prev": "上一个周期",
+        "review_next": "下一个周期"
     },
     "note": {
         "off_delay": {

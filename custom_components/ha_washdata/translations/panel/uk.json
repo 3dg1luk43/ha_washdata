@@ -276,7 +276,9 @@
     "bp_hide_yaml": "Приховати YAML",
     "bp_show_yaml": "Показати YAML",
     "review_something_else": "Щось інше…",
-    "review_not_sure": "Не знаю"
+    "review_not_sure": "Не знаю",
+    "review_prev": "Попередній цикл",
+    "review_next": "Наступний цикл"
   },
   "note": {
     "off_delay": {

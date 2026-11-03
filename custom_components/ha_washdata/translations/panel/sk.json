@@ -276,7 +276,9 @@
     "bp_hide_yaml": "Skryť YAML",
     "bp_show_yaml": "Zobraziť YAML",
     "review_something_else": "Niečo iné…",
-    "review_not_sure": "Neviem s istotou"
+    "review_not_sure": "Neviem s istotou",
+    "review_prev": "Predchádzajúci cyklus",
+    "review_next": "Ďalší cyklus"
   },
   "note": {
     "off_delay": {

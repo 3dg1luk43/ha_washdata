@@ -276,7 +276,9 @@
     "bp_hide_yaml": "Slėpti YAML",
     "bp_show_yaml": "Rodyti YAML",
     "review_something_else": "Kažkas kita…",
-    "review_not_sure": "Nežinau"
+    "review_not_sure": "Nežinau",
+    "review_prev": "Ankstesnis ciklas",
+    "review_next": "Kitas ciklas"
   },
   "note": {
     "off_delay": {

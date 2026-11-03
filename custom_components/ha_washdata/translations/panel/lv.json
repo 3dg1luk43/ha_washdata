@@ -272,7 +272,9 @@
     "bp_hide_yaml": "Paslēpt YAML",
     "bp_show_yaml": "Rādīt YAML",
     "review_something_else": "Kaut kas cits…",
-    "review_not_sure": "Nezinu"
+    "review_not_sure": "Nezinu",
+    "review_prev": "Iepriekšējais cikls",
+    "review_next": "Nākamais cikls"
   },
   "note": {
     "off_delay": {

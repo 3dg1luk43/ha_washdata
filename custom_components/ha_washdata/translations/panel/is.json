@@ -268,7 +268,9 @@
     "bp_hide_yaml": "Fela YAML",
     "bp_show_yaml": "Sýna YAML",
     "review_something_else": "Eitthvað annað…",
-    "review_not_sure": "Veit ekki"
+    "review_not_sure": "Veit ekki",
+    "review_prev": "Fyrri lota",
+    "review_next": "Næsta lota"
   },
   "note": {
     "off_delay": {

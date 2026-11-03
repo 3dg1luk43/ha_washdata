@@ -223,7 +223,9 @@
     "bp_hide_yaml": "Ocultar o YAML",
     "bp_show_yaml": "Mostrar o YAML",
     "review_something_else": "Outra coisa…",
-    "review_not_sure": "Não sei"
+    "review_not_sure": "Não sei",
+    "review_prev": "Ciclo anterior",
+    "review_next": "Ciclo seguinte"
   },
   "conflict": {
     "anti_wrinkle_max": {

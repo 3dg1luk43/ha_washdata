@@ -2,7 +2,9 @@
  * Audit item 1 (review budget follow-up): getting the few review questions that
  * matter answered.
  *
- * 1. The waiting question is asked on the Overview itself: the cycle's trace with
+ * 1. The waiting questions are asked on the Overview itself, collapsed by default
+ *    to one line with the count (remembered once opened); opened, one tile per
+ *    request, side by side and stepped through sideways: the cycle's trace with
  *    both candidates' curves, when it started, and its duration and energy next
  *    to each candidate's usual values.
  * 2. One-tap answers named after the request's two candidates, then "Something
@@ -65,26 +67,55 @@ async function bootWithQuestion(page: Page, feedbacks: unknown[] = [REQUEST], de
   });
 }
 
-/** The review chart's drawn series (name + first y value), Power excluded. */
-async function drawnReviewSeries(page: Page): Promise<{ name: string; w: number }[]> {
+/** Open the collapsed question card (it starts collapsed). */
+async function openQuestion(page: Page) {
+  const toggle = page.locator('.wd-review-q-toggle');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false', { timeout: 8_000 });
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+}
+
+/** A tile's drawn series (name + first y value), Power excluded. */
+async function drawnReviewSeries(page: Page, i = 0): Promise<{ name: string; w: number }[]> {
   return page.evaluate(`(() => {
     const sr = document.querySelector('${PANEL}').shadowRoot;
-    const c = sr.getElementById('wd-review-canvas');
+    const c = sr.getElementById('wd-review-canvas-${i}');
     if (!c || !c._wd) return [];
     return c._wd.series.filter(s => s.stroke !== 'primary')
       .map(s => ({ name: s.name, w: s.points && s.points[0] ? s.points[0][1] : null }));
   })()`) as Promise<{ name: string; w: number }[]>;
 }
 
-test('the waiting question is asked on the Overview with both candidates', async ({ page }) => {
+/** A second request, a day older, on another stored cycle. */
+const SECOND = { ...REQUEST, cycle_id: 'cyc-004', created_at: '2026-07-07T12:00:00+00:00',
+  cycle: { ...REQUEST.cycle, start_time: '2026-07-07T11:00:00+00:00' } };
+
+test('the question starts collapsed to one line and fetches nothing until opened', async ({ page }) => {
   await bootWithQuestion(page);
   const q = page.locator('.wd-review-q');
   await expect(q).toBeVisible({ timeout: 8_000 });
-  await expect(q).toHaveAttribute('data-review-cid', 'cyc-003');
   await expect(q).toContainText('Which program was this?');
-  await expect(q).toContainText('Started');
+  await expect(q.locator('.wd-review-q-count')).toHaveText('To review: 1');
+  await expect(q.locator('.wd-review-tile')).toHaveCount(0);
+  await expect(q.locator('.wd-review-answers')).toHaveCount(0);
+  // The card stands in for the count card.
+  await expect(page.locator('.wd-attn-card[data-action="goto-feedbacks"]')).toHaveCount(0);
+  await assertWsNotCalled(page, 'ha_washdata/get_cycle_power_data');
+  await assertWsNotCalled(page, 'ha_washdata/get_profile_envelope');
+});
+
+test('the waiting question is asked on the Overview with both candidates', async ({ page }) => {
+  await bootWithQuestion(page);
+  await openQuestion(page);
+  const q = page.locator('.wd-review-q');
+  const tile = q.locator('.wd-review-tile');
+  await expect(tile).toHaveCount(1);
+  await expect(tile).toHaveAttribute('data-review-cid', 'cyc-003');
+  await expect(tile).toContainText('Started');
+  // A single request has no stepping buttons.
+  await expect(q.locator('.wd-review-q-step')).toHaveCount(0);
   // Duration and energy against each candidate's usual values.
-  const rows = q.locator('.wd-review-q-cmp tbody tr');
+  const rows = tile.locator('.wd-review-q-cmp tbody tr');
   await expect(rows).toHaveCount(3);
   await expect(rows.nth(0)).toContainText('This cycle');
   await expect(rows.nth(0)).toContainText('0.31');
@@ -93,7 +124,7 @@ test('the waiting question is asked on the Overview with both candidates', async
   await expect(rows.nth(2)).toContainText('Usual for Quick 30°C');
   await expect(rows.nth(2)).toContainText('0.22');
   // The #462 overlay: both candidates' curves behind the cycle's trace.
-  await expect(page.locator('#wd-review-canvas')).toBeVisible();
+  await expect(page.locator('#wd-review-canvas-0')).toBeVisible();
   await expect.poll(() => drawnReviewSeries(page)).toEqual([
     { name: 'Eco 60°C', w: 600 },
     { name: 'Quick 30°C', w: 600 },
@@ -101,36 +132,91 @@ test('the waiting question is asked on the Overview with both candidates', async
   const envCalls = await assertWsCalled(page, 'ha_washdata/get_profile_envelope', 2);
   expect(envCalls.map(c => c.profile_name).sort()).toEqual(['Eco 60°C', 'Quick 30°C']);
   // One-tap answers, named after the two candidates, and no confidence figure.
-  const answers = q.locator('.wd-review-answers button');
+  const answers = tile.locator('.wd-review-answers button');
   await expect(answers).toHaveText(['Eco 60°C', 'Quick 30°C', 'Something else…', 'Not sure']);
   await expect(q).not.toContainText('%');
-  // The count card is replaced by the question, which keeps a way to the queue.
-  await expect(page.locator('.wd-attn-card[data-action="goto-feedbacks"]')).toHaveCount(0);
-  await expect(q.locator('[data-action="goto-feedbacks"]')).toBeVisible();
+  await expect(q.locator('[data-action="goto-feedbacks"]')).toHaveText('Open the Cycles review queue');
 });
 
-test('picking the runner-up corrects to it and the next question takes its place', async ({ page }) => {
-  const second = { ...REQUEST, cycle_id: 'cyc-004', created_at: '2026-07-07T12:00:00+00:00',
-    cycle: { ...REQUEST.cycle, start_time: '2026-07-07T11:00:00+00:00' } };
-  await bootWithQuestion(page, [REQUEST, second]);
+test('opening is remembered, and closing hides the tiles again', async ({ page }) => {
+  await bootWithQuestion(page);
+  await openQuestion(page);
+  await expect(page.locator('.wd-review-tile')).toHaveCount(1);
+  await bootWithQuestion(page);
+  await expect(page.locator('.wd-review-q-toggle')).toHaveAttribute('aria-expanded', 'true', { timeout: 8_000 });
+  await expect(page.locator('.wd-review-tile')).toHaveCount(1);
+  await page.locator('.wd-review-q-toggle').click();
+  await expect(page.locator('.wd-review-q-toggle')).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('.wd-review-tile')).toHaveCount(0);
+  await bootWithQuestion(page);
+  await expect(page.locator('.wd-review-q-toggle')).toHaveAttribute('aria-expanded', 'false', { timeout: 8_000 });
+});
+
+test('several questions are tiles side by side, stepped through sideways', async ({ page }) => {
+  await page.setViewportSize({ width: 700, height: 900 });
+  const third = { ...REQUEST, cycle_id: 'cyc-005', created_at: '2026-07-06T12:00:00+00:00',
+    cycle: { ...REQUEST.cycle, start_time: '2026-07-06T11:00:00+00:00' } };
+  await bootWithQuestion(page, [REQUEST, SECOND, third]);
+  await openQuestion(page);
   const q = page.locator('.wd-review-q');
-  await expect(q).toHaveAttribute('data-review-cid', 'cyc-003', { timeout: 8_000 });
-  await expect(q.locator('[data-action="goto-feedbacks"]')).toHaveText('1 more to review');
+  await expect(q.locator('.wd-review-q-count')).toHaveText('To review: 3');
+  const tiles = q.locator('.wd-review-tile');
+  await expect(tiles).toHaveCount(3);
+  expect(await tiles.evaluateAll(els => els.map(e => e.getAttribute('data-review-cid'))))
+    .toEqual(['cyc-003', 'cyc-004', 'cyc-005']);
+  // Each tile draws its own chart; the envelopes are fetched once per programme.
+  await expect.poll(() => drawnReviewSeries(page, 2)).toHaveLength(2);
+  const envCalls = await assertWsCalled(page, 'ha_washdata/get_profile_envelope', 2);
+  expect(envCalls).toHaveLength(2);
+  await assertWsCalled(page, 'ha_washdata/get_cycle_power_data', 3);
+
+  const strip = q.locator('.wd-review-tiles');
+  const scrollLeft = () => strip.evaluate(el => el.scrollLeft);
+  expect(await strip.evaluate(el => el.scrollWidth > el.clientWidth)).toBe(true);
+  const prev = q.locator('.wd-review-q-step[data-dir="-1"]');
+  const next = q.locator('.wd-review-q-step[data-dir="1"]');
+  await expect(prev).toBeDisabled();
+  await expect(next).toBeEnabled();
+  await expect(next).toHaveAttribute('aria-label', 'Next cycle');
+  await next.click();
+  // Settled on the second tile (the step scrolls smoothly).
+  const settled = async () => {
+    const a = await scrollLeft();
+    await page.waitForTimeout(120);
+    return a > 100 && (await scrollLeft()) === a;
+  };
+  await expect.poll(settled).toBe(true);
+  await expect(prev).toBeEnabled();
+  // A re-render (the poll) keeps the strip where it was.
+  const before = await scrollLeft();
+  await page.evaluate(`document.querySelector('${PANEL}')._render()`);
+  expect(Math.abs((await scrollLeft()) - before)).toBeLessThanOrEqual(1);
+  await prev.click();
+  await expect.poll(scrollLeft).toBeLessThanOrEqual(1);
+});
+
+test('picking the runner-up corrects to it and its tile goes', async ({ page }) => {
+  await bootWithQuestion(page, [REQUEST, SECOND]);
+  await openQuestion(page);
+  const q = page.locator('.wd-review-q');
+  await expect(q.locator('.wd-review-tile')).toHaveCount(2);
 
   await setHandler(page, 'ha_washdata/resolve_feedback', { success: true });
-  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [second] });
-  await q.locator('.wd-review-answers button', { hasText: 'Quick 30°C' }).click();
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [SECOND] });
+  await q.locator('.wd-review-tile[data-review-cid="cyc-003"] .wd-review-answers button', { hasText: 'Quick 30°C' }).click();
 
   const calls = await assertWsCalled(page, 'ha_washdata/resolve_feedback', 1);
   expect(calls[0]).toMatchObject({ cycle_id: 'cyc-003', action: 'correct', corrected_profile: 'Quick 30°C' });
-  await expect(page.locator('.wd-review-q')).toHaveAttribute('data-review-cid', 'cyc-004', { timeout: 5_000 });
-  await expect(page.locator('.wd-review-q [data-action="goto-feedbacks"]')).toHaveText('Open the Cycles review queue');
+  const tiles = page.locator('.wd-review-q .wd-review-tile');
+  await expect(tiles).toHaveCount(1, { timeout: 5_000 });
+  await expect(tiles).toHaveAttribute('data-review-cid', 'cyc-004');
+  await expect(page.locator('.wd-review-q-count')).toHaveText('To review: 1');
 });
 
 test('picking the detected programme confirms it', async ({ page }) => {
   await bootWithQuestion(page);
+  await openQuestion(page);
   const q = page.locator('.wd-review-q');
-  await expect(q).toBeVisible({ timeout: 8_000 });
   await setHandler(page, 'ha_washdata/resolve_feedback', { success: true });
   await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [] });
   await q.locator('.wd-review-answers button', { hasText: 'Eco 60°C' }).click();
@@ -142,8 +228,8 @@ test('picking the detected programme confirms it', async ({ page }) => {
 
 test('"Not sure" dismisses and "Something else…" opens the Correct dialog', async ({ page }) => {
   await bootWithQuestion(page);
+  await openQuestion(page);
   const q = page.locator('.wd-review-q');
-  await expect(q).toBeVisible({ timeout: 8_000 });
   await q.locator('.wd-review-answers button', { hasText: 'Something else…' }).click();
   await expect(page.locator('.wd-modal #wd-fb-profile')).toBeVisible({ timeout: 5_000 });
   await page.keyboard.press('Escape');
@@ -175,18 +261,25 @@ test('while a cycle runs the live card comes first, the question below it', asyn
   expect(order).toBe('after');
 });
 
-test('the question fits a phone screen without horizontal overflow', async ({ page }) => {
+test('the questions fit a phone screen; only the tile strip scrolls sideways', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 780 });
-  await bootWithQuestion(page);
-  await expect(page.locator('.wd-review-q')).toBeVisible({ timeout: 8_000 });
-  const overflow = await page.evaluate(`(() => {
+  await bootWithQuestion(page, [REQUEST, SECOND]);
+  await openQuestion(page);
+  await expect(page.locator('.wd-review-tile')).toHaveCount(2);
+  const m = await page.evaluate(`(() => {
     const sr = document.querySelector('${PANEL}').shadowRoot;
     const body = sr.querySelector('.wd-body');
     const q = sr.querySelector('.wd-review-q');
-    return { body: body.scrollWidth - body.clientWidth, q: q.scrollWidth - q.clientWidth };
-  })()`) as { body: number; q: number };
-  expect(overflow.body).toBeLessThanOrEqual(1);
-  expect(overflow.q).toBeLessThanOrEqual(1);
+    const strip = q.querySelector('.wd-review-tiles');
+    const tile = strip.querySelector('.wd-review-tile');
+    return { body: body.scrollWidth - body.clientWidth, q: q.scrollWidth - q.clientWidth,
+      tileOverflow: tile.scrollWidth - tile.clientWidth, peek: strip.clientWidth - tile.offsetWidth };
+  })()`) as { body: number; q: number; tileOverflow: number; peek: number };
+  expect(m.body).toBeLessThanOrEqual(1);
+  expect(m.q).toBeLessThanOrEqual(1);
+  expect(m.tileOverflow).toBeLessThanOrEqual(1);
+  // The next tile peeks in, so the strip reads as scrollable.
+  expect(m.peek).toBeGreaterThan(20);
 });
 
 test('the cycle dialog banner offers the same answers without a confidence figure', async ({ page }) => {

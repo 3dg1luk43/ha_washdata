@@ -264,7 +264,9 @@
         "bp_hide_yaml": "YAML 숨기기",
         "bp_show_yaml": "YAML 보기",
         "review_something_else": "기타…",
-        "review_not_sure": "잘 모르겠음"
+        "review_not_sure": "잘 모르겠음",
+        "review_prev": "이전 사이클",
+        "review_next": "다음 사이클"
     },
     "note": {
         "off_delay": {

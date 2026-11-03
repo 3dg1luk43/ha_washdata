@@ -268,7 +268,9 @@
         "bp_hide_yaml": "YAML'ı gizle",
         "bp_show_yaml": "YAML'ı göster",
         "review_something_else": "Başka bir şey…",
-        "review_not_sure": "Emin değilim"
+        "review_not_sure": "Emin değilim",
+        "review_prev": "Önceki döngü",
+        "review_next": "Sonraki döngü"
     },
     "note": {
         "off_delay": {

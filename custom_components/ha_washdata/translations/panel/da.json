@@ -268,7 +268,9 @@
     "bp_hide_yaml": "Skjul YAML",
     "bp_show_yaml": "Vis YAML",
     "review_something_else": "Noget andet…",
-    "review_not_sure": "Ikke sikker"
+    "review_not_sure": "Ikke sikker",
+    "review_prev": "Forrige cyklus",
+    "review_next": "Næste cyklus"
   },
   "note": {
     "off_delay": {

@@ -272,7 +272,9 @@
     "bp_hide_yaml": "Sakrij YAML",
     "bp_show_yaml": "Prikaži YAML",
     "review_something_else": "Nešto drugo…",
-    "review_not_sure": "Ne znam sigurno"
+    "review_not_sure": "Ne znam sigurno",
+    "review_prev": "Prethodni ciklus",
+    "review_next": "Sledeći ciklus"
   },
   "note": {
     "off_delay": {

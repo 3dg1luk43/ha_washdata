@@ -264,7 +264,9 @@
         "bp_hide_yaml": "YAML を隠す",
         "bp_show_yaml": "YAML を表示",
         "review_something_else": "その他…",
-        "review_not_sure": "わからない"
+        "review_not_sure": "わからない",
+        "review_prev": "前のサイクル",
+        "review_next": "次のサイクル"
     },
     "note": {
         "off_delay": {

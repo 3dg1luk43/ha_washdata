@@ -223,7 +223,9 @@
     "bp_hide_yaml": "Ascundeți YAML-ul",
     "bp_show_yaml": "Afișați YAML-ul",
     "review_something_else": "Altceva…",
-    "review_not_sure": "Nu știu"
+    "review_not_sure": "Nu știu",
+    "review_prev": "Ciclul anterior",
+    "review_next": "Ciclul următor"
   },
   "conflict": {
     "anti_wrinkle_max": {

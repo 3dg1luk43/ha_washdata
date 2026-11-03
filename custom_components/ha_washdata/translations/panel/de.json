@@ -268,7 +268,9 @@
     "bp_hide_yaml": "YAML ausblenden",
     "bp_show_yaml": "YAML anzeigen",
     "review_something_else": "Etwas anderes…",
-    "review_not_sure": "Nicht sicher"
+    "review_not_sure": "Nicht sicher",
+    "review_prev": "Vorheriger Zyklus",
+    "review_next": "Nächster Zyklus"
   },
   "note": {
     "off_delay": {

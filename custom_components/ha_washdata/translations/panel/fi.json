@@ -268,7 +268,9 @@
     "bp_hide_yaml": "Piilota YAML",
     "bp_show_yaml": "Näytä YAML",
     "review_something_else": "Jokin muu…",
-    "review_not_sure": "En ole varma"
+    "review_not_sure": "En ole varma",
+    "review_prev": "Edellinen sykli",
+    "review_next": "Seuraava sykli"
   },
   "note": {
     "off_delay": {

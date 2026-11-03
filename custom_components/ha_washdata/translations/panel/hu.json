@@ -268,7 +268,9 @@
         "bp_hide_yaml": "YAML elrejtése",
         "bp_show_yaml": "YAML megjelenítése",
         "review_something_else": "Valami más…",
-        "review_not_sure": "Nem vagyok biztos"
+        "review_not_sure": "Nem vagyok biztos",
+        "review_prev": "Előző ciklus",
+        "review_next": "Következő ciklus"
     },
     "note": {
         "off_delay": {

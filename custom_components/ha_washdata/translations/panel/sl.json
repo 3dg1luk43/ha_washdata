@@ -276,7 +276,9 @@
     "bp_hide_yaml": "Skrij YAML",
     "bp_show_yaml": "Prikaži YAML",
     "review_something_else": "Nekaj drugega…",
-    "review_not_sure": "Ne vem"
+    "review_not_sure": "Ne vem",
+    "review_prev": "Prejšnji cikel",
+    "review_next": "Naslednji cikel"
   },
   "note": {
     "off_delay": {

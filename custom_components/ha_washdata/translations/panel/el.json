@@ -268,7 +268,9 @@
         "bp_hide_yaml": "Απόκρυψη του YAML",
         "bp_show_yaml": "Εμφάνιση του YAML",
         "review_something_else": "Κάτι άλλο…",
-        "review_not_sure": "Δεν ξέρω"
+        "review_not_sure": "Δεν ξέρω",
+        "review_prev": "Προηγούμενος κύκλος",
+        "review_next": "Επόμενος κύκλος"
     },
     "conflict": {
         "anti_wrinkle_max": {
