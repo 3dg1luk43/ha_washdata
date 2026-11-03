@@ -266,7 +266,9 @@
     "bp_details": "Detaljer",
     "bp_copy_yaml": "Kopiér YAML",
     "bp_hide_yaml": "Skjul YAML",
-    "bp_show_yaml": "Vis YAML"
+    "bp_show_yaml": "Vis YAML",
+    "review_something_else": "Noget andet…",
+    "review_not_sure": "Ikke sikker"
   },
   "note": {
     "off_delay": {
@@ -715,7 +717,9 @@
     "bp_needs_version": "WashData {version} eller nyere",
     "bp_author": "Forfatter",
     "bp_required": "påkrævet",
-    "pg_runs_as": "bruges som {value}"
+    "pg_runs_as": "bruges som {value}",
+    "review_this_cycle": "Denne cyklus",
+    "review_usual": "Normalt for {name}"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -1112,7 +1116,14 @@
     "bp_none_yet": "Ingen skabeloner til denne apparattype endnu. Del den første.",
     "bp_unreachable": "Det hentes fra GitHub. Kontrollér, at Home Assistant har forbindelse til internettet, og prøv igen.",
     "bp_library_intro": "Færdige automatiseringer delt af WashData-brugere på GitHub og gennemgået, før de vises. Kun tilgængeligt med onlinefunktioner slået til.",
-    "bp_needs_version": "Kræver WashData {version} eller nyere."
+    "bp_needs_version": "Kræver WashData {version} eller nyere.",
+    "review_q_title": "Hvilket program var det her?",
+    "review_q_intro": "WashData kunne ikke skelne mellem disse. Dit svar hjælper den med at lære.",
+    "review_q_started": "Startet {when}",
+    "review_q_more": "{count} mere at gennemgå",
+    "review_q_more_one": "{count} mere at gennemgå",
+    "review_q_more_other": "{count} mere at gennemgå",
+    "review_which_program": "Hvilket program var det?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: sekunder under Stoptærskel siden seneste aktivitet, der afslutter ventetiden på den sidste udpumpning, når den forventede varighed er nået",
@@ -1691,6 +1702,8 @@
     "preparing": "Forbereder…",
     "unlabelling": "Fjerner mærkning…",
     "working": "Arbejder…",
+    "torn_pick": "{a} eller {b}?",
+    "torn_tip": "WashData kan endnu ikke skelne mellem disse to, så denne cyklus ville ende med et gennemgangsspørgsmål. Vælg det program, der kører, så mærkes cyklussen med det. Automatisk registrering fortryder det.",
     "match_uncertain": "Usikker: {top} eller {runner}",
     "match_uncertain_single": "Usikker: måske {top}",
     "match_sure": "~{pct}% sikker",
@@ -1975,7 +1988,8 @@
     "bp_automation_created": "Automatisering oprettet med standardindstillinger; åbner",
     "copied": "Kopieret",
     "copy_failed": "Kopiering mislykkedes. Vælg teksten og kopiér manuelt.",
-    "automation_label_failed": "Automatisering oprettet, men WashData-etiketten eller kategorien kunne ikke tilføjes."
+    "automation_label_failed": "Automatisering oprettet, men WashData-etiketten eller kategorien kunne ikke tilføjes.",
+    "review_answered": "Gemt: {program}"
   },
   "trend": {
     "down": "Trend nedad",

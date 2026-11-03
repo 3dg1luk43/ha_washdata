@@ -266,7 +266,9 @@
         "bp_details": "Részletek",
         "bp_copy_yaml": "YAML másolása",
         "bp_hide_yaml": "YAML elrejtése",
-        "bp_show_yaml": "YAML megjelenítése"
+        "bp_show_yaml": "YAML megjelenítése",
+        "review_something_else": "Valami más…",
+        "review_not_sure": "Nem vagyok biztos"
     },
     "note": {
         "off_delay": {
@@ -715,7 +717,9 @@
         "bp_needs_version": "WashData {version} vagy újabb",
         "bp_author": "Szerző",
         "bp_required": "kötelező",
-        "pg_runs_as": "{value} értékkel fut"
+        "pg_runs_as": "{value} értékkel fut",
+        "review_this_cycle": "Ez a ciklus",
+        "review_usual": "{name} esetén szokásos"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -1112,7 +1116,14 @@
         "bp_none_yet": "Ehhez a készüléktípushoz még nincsenek sablonok. Ossza meg az elsőt.",
         "bp_unreachable": "A GitHubról töltődik le. Ellenőrizze, hogy a Home Assistant eléri-e az internetet, majd próbálja újra.",
         "bp_library_intro": "Kész automatizálások, amelyeket WashData-felhasználók osztanak meg a GitHubon, és listázás előtt átnézésre kerülnek. Csak bekapcsolt online funkciókkal érhető el.",
-        "bp_needs_version": "WashData {version} vagy újabb szükséges."
+        "bp_needs_version": "WashData {version} vagy újabb szükséges.",
+        "review_q_title": "Melyik program volt ez?",
+        "review_q_intro": "A WashData nem tudta megkülönböztetni őket. Az Ön válaszából tanul.",
+        "review_q_started": "Indult: {when}",
+        "review_q_more": "Még {count} vár felülvizsgálatra",
+        "review_q_more_one": "Még {count} vár felülvizsgálatra",
+        "review_q_more_other": "Még {count} vár felülvizsgálatra",
+        "review_which_program": "Melyik program volt?"
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid dobforgások a befejezés után a ráncok csökkentése érdekében.",
@@ -1675,7 +1686,9 @@
         "match_uncertain": "Bizonytalan: {top} vagy {runner}",
         "match_uncertain_single": "Bizonytalan: talán {top}",
         "match_sure": "~{pct}% biztos",
-        "match_uncertain_tip": "A WashData még nem döntött a programról. A szám azt mutatja, a korábbi ciklusokban milyen gyakran volt helyes a vezető tipp, {top}, amikor ennyivel vezetett. Csak tájékoztató."
+        "match_uncertain_tip": "A WashData még nem döntött a programról. A szám azt mutatja, a korábbi ciklusokban milyen gyakran volt helyes a vezető tipp, {top}, amikor ennyivel vezetett. Csak tájékoztató.",
+        "torn_pick": "{a} vagy {b}?",
+        "torn_tip": "A WashData még nem tudja megkülönböztetni ezt a kettőt, ezért ez a ciklus felülvizsgálati kérdéssel zárulna. Válassza ki a futó programot, és a ciklus azt a címkét kapja. Az Automatikus felismerés visszavonja ezt."
     },
     "tab": {
         "advanced": "Fejlett",
@@ -1868,7 +1881,8 @@
         "bp_automation_created": "Automatizálás létrehozva az alapértelmezett beállításokkal; megnyitás",
         "copied": "Másolva",
         "copy_failed": "Másolás sikertelen. Jelölje ki a szöveget, és másolja kézzel.",
-        "automation_label_failed": "Automatizálás létrehozva, de a WashData-címkét vagy -kategóriát nem sikerült hozzáadni."
+        "automation_label_failed": "Automatizálás létrehozva, de a WashData-címkét vagy -kategóriát nem sikerült hozzáadni.",
+        "review_answered": "Mentve: {program}"
     },
     "suggestion": {
         "observed_label": "Megfigyelt",

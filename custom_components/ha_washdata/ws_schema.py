@@ -100,6 +100,10 @@ class DeviceInfo(TypedDict):
     # Set while a cycle runs with no committed program, or with a runner-up within
     # the ambiguity margin; None otherwise. The program sensor keeps `detecting...`.
     match_uncertainty: MatchUncertainty | None
+    # [top, runner_up] while a live match is ambiguous or leads by less than
+    # MATCH_LABEL_MIN_MARGIN (the cycle would end in a review); None otherwise.
+    # The Status card offers both as a manual pick. Display only.
+    match_choices: list[str] | None
     suggestions_count: int
     suggestion_keys: list[str]
     feedback_count: int

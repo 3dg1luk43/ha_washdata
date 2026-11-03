@@ -266,7 +266,9 @@
     "bp_details": "Detaljer",
     "bp_copy_yaml": "Kopiera YAML",
     "bp_hide_yaml": "Dölj YAML",
-    "bp_show_yaml": "Visa YAML"
+    "bp_show_yaml": "Visa YAML",
+    "review_something_else": "Något annat…",
+    "review_not_sure": "Inte säker"
   },
   "note": {
     "off_delay": {
@@ -715,7 +717,9 @@
     "bp_needs_version": "WashData {version} eller senare",
     "bp_author": "Författare",
     "bp_required": "obligatorisk",
-    "pg_runs_as": "används som {value}"
+    "pg_runs_as": "används som {value}",
+    "review_this_cycle": "Denna cykel",
+    "review_usual": "Vanligt för {name}"
   },
   "log": {
     "all_levels": "Alla nivåer",
@@ -1112,7 +1116,14 @@
     "bp_none_yet": "Inga mallar för den här apparattypen än. Dela den första.",
     "bp_unreachable": "Det laddas ner från GitHub. Kontrollera att Home Assistant når internet och försök sedan igen.",
     "bp_library_intro": "Färdiga automatiseringar som WashData-användare delar på GitHub, granskade innan de listas. Bara tillgängligt med onlinefunktioner påslagna.",
-    "bp_needs_version": "Kräver WashData {version} eller senare."
+    "bp_needs_version": "Kräver WashData {version} eller senare.",
+    "review_q_title": "Vilket program var det här?",
+    "review_q_intro": "WashData kunde inte skilja dessa åt. Ditt svar hjälper den att lära sig.",
+    "review_q_started": "Startad {when}",
+    "review_q_more": "{count} till att granska",
+    "review_q_more_one": "{count} till att granska",
+    "review_q_more_other": "{count} till att granska",
+    "review_which_program": "Vilket program var det?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: sekunder under Stopptröskel sedan senaste aktiviteten som avslutar väntan på den sista tömningen, när den förväntade längden har nåtts",
@@ -1691,6 +1702,8 @@
     "preparing": "Förbereder…",
     "unlabelling": "Tar bort märkning…",
     "working": "Arbetar…",
+    "torn_pick": "{a} eller {b}?",
+    "torn_tip": "WashData kan ännu inte skilja dessa två åt, så den här cykeln skulle sluta med en granskningsfråga. Välj det program som körs så märks cykeln med det. Autoidentifiera ångrar det.",
     "match_uncertain": "Osäker: {top} eller {runner}",
     "match_uncertain_single": "Osäker: kanske {top}",
     "match_sure": "~{pct}% säker",
@@ -1975,7 +1988,8 @@
     "bp_automation_created": "Automatisering skapad med standardinställningar; öppnar den",
     "copied": "Kopierad",
     "copy_failed": "Kopiering misslyckades. Markera texten och kopiera manuellt.",
-    "automation_label_failed": "Automatisering skapad, men WashData-etiketten eller kategorin kunde inte läggas till."
+    "automation_label_failed": "Automatisering skapad, men WashData-etiketten eller kategorin kunde inte läggas till.",
+    "review_answered": "Sparat: {program}"
   },
   "trend": {
     "down": "Nedåtgående trend",

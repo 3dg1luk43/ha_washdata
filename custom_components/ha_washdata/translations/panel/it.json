@@ -221,7 +221,9 @@
     "bp_details": "Dettagli",
     "bp_copy_yaml": "Copia YAML",
     "bp_hide_yaml": "Nascondi lo YAML",
-    "bp_show_yaml": "Mostra lo YAML"
+    "bp_show_yaml": "Mostra lo YAML",
+    "review_something_else": "Altro…",
+    "review_not_sure": "Non lo so"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -668,7 +670,9 @@
     "bp_needs_version": "WashData {version} o successivo",
     "bp_author": "Autore",
     "bp_required": "obbligatorio",
-    "pg_runs_as": "simulato con {value}"
+    "pg_runs_as": "simulato con {value}",
+    "review_this_cycle": "Questo ciclo",
+    "review_usual": "Abituale per {name}"
   },
   "log": {
     "all_levels": "Tutti i livelli",
@@ -1075,7 +1079,15 @@
     "bp_none_yet": "Ancora nessun modello per questo tipo di elettrodomestico. Condividi il primo.",
     "bp_unreachable": "Viene scaricata da GitHub. Verifica che Home Assistant possa accedere a Internet, poi riprova.",
     "bp_library_intro": "Automazioni pronte all'uso condivise dagli utenti di WashData su GitHub, verificate prima di essere pubblicate. Disponibile solo con le funzionalità online attive.",
-    "bp_needs_version": "Richiede WashData {version} o successivo."
+    "bp_needs_version": "Richiede WashData {version} o successivo.",
+    "review_q_title": "Quale programma era?",
+    "review_q_intro": "WashData non è riuscito a distinguerli. La tua risposta lo aiuta a imparare.",
+    "review_q_started": "Avviato il {when}",
+    "review_q_more": "{count} altri da revisionare",
+    "review_q_more_one": "{count} altro da revisionare",
+    "review_q_more_many": "{count} altri da revisionare",
+    "review_q_more_other": "{count} altri da revisionare",
+    "review_which_program": "Di quale programma si trattava?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi sotto la Soglia di arresto dall'ultima attività che chiudono l'attesa dello scarico finale, una volta raggiunta la durata prevista",
@@ -1654,6 +1666,8 @@
     "preparing": "Preparazione…",
     "unlabelling": "Rimozione etichetta…",
     "working": "Elaborazione…",
+    "torn_pick": "{a} o {b}?",
+    "torn_tip": "WashData non riesce ancora a distinguere questi due programmi, quindi questo ciclo terminerebbe con una domanda di revisione. Scegli quello in corso e il ciclo verrà etichettato di conseguenza. L'opzione Rilevamento automatico annulla la scelta.",
     "match_uncertain": "Incerto: {top} o {runner}",
     "match_uncertain_single": "Incerto: forse {top}",
     "match_sure": "~{pct}% di certezza",
@@ -1852,7 +1866,8 @@
     "bp_automation_created": "Automazione creata con le impostazioni predefinite; apertura in corso",
     "copied": "Copiato",
     "copy_failed": "Copia non riuscita. Seleziona il testo e copialo manualmente.",
-    "automation_label_failed": "Automazione creata, ma l’etichetta o la categoria WashData non ha potuto essere aggiunta."
+    "automation_label_failed": "Automazione creata, ma l’etichetta o la categoria WashData non ha potuto essere aggiunta.",
+    "review_answered": "Salvato: {program}"
   },
   "suggestion": {
     "observed_label": "Osservato",

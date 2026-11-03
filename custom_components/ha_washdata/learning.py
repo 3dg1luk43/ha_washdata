@@ -80,6 +80,77 @@ def _ended_on_its_own(cycle: dict[str, Any]) -> bool:
     )
 
 
+def review_choices(pending: Any, profiles: Any) -> list[str]:
+    """The two programmes a review request offers as one-tap answers. Never raises.
+
+    The detected programme first, then the stored ranking's next distinct one (a
+    profile group named by its best member). Only names of existing profiles, at
+    most two, in that order. The panel's answer buttons, its chart overlay and the
+    finish notification's actions all read this, so they always name the same two;
+    answer one with :meth:`LearningManager.async_answer_review`.
+    """
+    out: list[str] = []
+    try:
+        if not isinstance(pending, dict):
+            return out
+        names = profiles if profiles is not None else {}
+
+        def _add(name: Any) -> None:
+            if (
+                isinstance(name, str) and name and name not in out
+                and name in names and len(out) < 2
+            ):
+                out.append(name)
+
+        _add(pending.get("detected_profile"))
+        ranking = pending.get("ranking")
+        for cand in ranking if isinstance(ranking, list) else []:
+            if len(out) >= 2:
+                break
+            if not isinstance(cand, dict):
+                continue
+            name = cand.get("name")
+            if isinstance(name, str) and name.startswith("__group__"):
+                name = cand.get("group_best_member")
+            _add(name)
+    except Exception:  # noqa: BLE001 - a display helper must never raise
+        return out
+    return out
+
+
+#: Answer key that confirms a review request's own programme.
+REVIEW_ANSWER_CONFIRM = "C"
+#: Prefix of the answer key ``R<i>``: the i-th of :func:`review_choices`.
+REVIEW_ANSWER_RANKED = "R"
+
+
+def review_answer_choices(request: Any, profile_names: Any) -> list[tuple[str, str]]:
+    """The finish notification's one-tap answers: ``[(key, programme)]``.
+
+    The same two programmes as the panel's buttons (:func:`review_choices`), keyed
+    so the phone carries a position, not a name: ``REVIEW_ANSWER_CONFIRM`` for the
+    request's own programme, ``R<i>`` for the i-th choice otherwise. The key is
+    resolved against the stored request when the tap arrives
+    (:func:`resolve_review_answer`). Pure, never raises.
+    """
+    try:
+        detected = request.get("detected_profile") if isinstance(request, dict) else None
+        return [
+            (REVIEW_ANSWER_CONFIRM if name == detected else f"{REVIEW_ANSWER_RANKED}{i}", name)
+            for i, name in enumerate(review_choices(request, profile_names))
+        ]
+    except Exception:  # noqa: BLE001 - a notification extra must never raise
+        return []
+
+
+def resolve_review_answer(request: Any, key: Any, profile_names: Any) -> str | None:
+    """The programme an answer key names on this request now, or None. Never raises."""
+    return next(
+        (name for k, name in review_answer_choices(request, profile_names) if k == key),
+        None,
+    )
+
+
 class StatisticalModel:
     """Helper to track running stats for a metric."""
 
@@ -797,12 +868,17 @@ class LearningManager:
         if match_result and hasattr(match_result, "ranking") and match_result.ranking:
             for cand in match_result.ranking[:5]:  # Store top 5
                 try:
-                    ranking_summary.append({
+                    entry: dict[str, Any] = {
                         "name": cand.get("name", "Unknown"),
                         "score": float(cand.get("score", 0.0)),
                         "metrics": cand.get("metrics", {}),
                         "profile_duration": float(cand.get("profile_duration", 0.0)),
-                    })
+                    }
+                    # A profile group ranks under its `__group__` key; the member
+                    # that scored is what a review answer can name (review_choices).
+                    if str(entry["name"]).startswith("__group__") and cand.get("group_best_member"):
+                        entry["group_best_member"] = str(cand["group_best_member"])
+                    ranking_summary.append(entry)
                 except (TypeError, ValueError, KeyError, AttributeError, OverflowError):
                     continue
 
@@ -968,6 +1044,26 @@ class LearningManager:
         async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
 
         return True
+
+    async def async_answer_review(self, cycle_id: str, profile_name: str) -> bool:
+        """Answer a review request with the programme the user picked.
+
+        The one-tap answer: the detected programme is a confirmation, any other
+        existing programme a correction to it. The panel's answer buttons send the
+        same two ``resolve_feedback`` actions by the same rule, so a button and a
+        notification action resolve a request identically. False when nothing is
+        waiting for ``cycle_id`` or ``profile_name`` is not a profile.
+        """
+        pending = self.profile_store.get_pending_feedback().get(cycle_id)
+        if not pending or not isinstance(profile_name, str) or not profile_name:
+            return False
+        if profile_name not in self.profile_store.get_profiles():
+            return False
+        if profile_name == pending.get("detected_profile"):
+            return await self.async_submit_cycle_feedback(cycle_id, user_confirmed=True)
+        return await self.async_submit_cycle_feedback(
+            cycle_id, user_confirmed=False, corrected_profile=profile_name
+        )
 
     def _build_feedback_record(
         self,

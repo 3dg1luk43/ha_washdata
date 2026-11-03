@@ -255,7 +255,7 @@ from .cycle_detector import (
     standby_near_stop_ceiling,
     terminal_high_for_guards,
 )
-from .learning import LearningManager
+from .learning import LearningManager, resolve_review_answer, review_answer_choices
 from .profile_store import (
     MatchResult,
     ProfileStore,
@@ -792,6 +792,8 @@ class WashDataManager:
         self._last_unload_nag_time: datetime | None = None
         self._unload_nag_count: int = 0  # repeat-mode safety bound (#374)
         self._remove_unload_action_listener: Any | None = None
+        # The finish notification's review answers (one listener per device).
+        self._remove_review_action_listener: Any | None = None
         self._live_notification_cap = 0
         self._last_live_notification_time: datetime | None = None
         self._live_waiting_notification_sent = False
@@ -1685,6 +1687,29 @@ class WashDataManager:
         except Exception:  # pylint: disable=broad-exception-caught
             return None
 
+    @property
+    def match_choices(self) -> list[str] | None:
+        """The two programmes the live match is torn between, for the Status card.
+
+        Display only (``match_rules.live_torn_choices``): the panel offers them as
+        a manual pick. None while idle, on a hand-picked program, or when the
+        winner leads clearly. Both must be profiles, since a chip pins one.
+        """
+        try:
+            if self.manual_program_active:
+                return None
+            if self.detector.state not in (
+                STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_USER_PAUSED, STATE_ENDING,
+            ):
+                return None
+            choices = match_rules.live_torn_choices(self._last_match_result)
+            profiles = self._resolve_profiles()  # what set_manual_program accepts
+            if not choices or not all(name in profiles for name in choices):
+                return None
+            return choices
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
     # Note: last_match_details property is defined later in the class
     # It returns MatchResult from _last_match_result
     async def _attempt_state_restoration(self) -> None:
@@ -2326,6 +2351,7 @@ class WashDataManager:
                     "timer_pause_action_title": "Resume Cycle",
                     "timer_pause_body_suffix": "The cycle is paused. Open the WashData panel to resume.",
                     "unload_dismiss_action_title": "Stop reminding",
+                    "review_action_title": "It was {program}",
                     "vs_typical_longer": "{pct}% longer than usual",
                     "vs_typical_shorter": "{pct}% shorter than usual",
                     "notify_live_waiting_message": "{device}: No profile matched yet.",
@@ -2459,6 +2485,12 @@ class WashDataManager:
 
         # Subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
+
+        # A review question asked before this setup can still be answered from its
+        # finish notification (already on the phone, or held for quiet hours and
+        # re-sent once HA has started).
+        if self.profile_store.get_pending_feedback():
+            self._ensure_review_action_listener()
 
         # HA does not unload entries on a stop, so the stop gets its own hook to keep
         # the held notifications and a fresh snapshot (audit MANAGER-16); what it
@@ -2977,6 +3009,7 @@ class WashDataManager:
         self._cancel_door_end_dwell()
         # Drop the repeat-unload-reminder dismiss action listener (#374).
         self._remove_unload_dismiss_listener()
+        self._remove_review_answer_listener()
         if self._remove_notify_people_listener:
             self._remove_notify_people_listener()
             self._remove_notify_people_listener = None
@@ -6675,6 +6708,40 @@ class WashDataManager:
         if not announce_finish and _same_cycle:
             self._send_tag_clear(self._lifecycle_tag)
 
+        # Request user feedback if we had a confident match.
+        # AND perform learning analysis on the completed cycle.
+        # IMPORTANT: this must happen before we clear match state.
+        # Only run when the cycle was actually persisted - an unpersisted cycle
+        # has no store entry to reference, so a pending-feedback record would
+        # dangle forever. Use THIS cycle's captured match context (not the live
+        # fields, which may already belong to a newly-started cycle after the awaits).
+        # Before the finish notification, so the review question this may raise
+        # rides on it as two one-tap answers (``_review_actions``).
+        if cycle_persisted:
+            # Ask about what the complete match picked, not the live tick's program.
+            feedback_profile = (
+                cycle_data.get("profile_name")
+                or getattr(match_result, "best_profile", None)
+                or program
+            )
+            feedback_duration = (
+                matched_profile_duration
+                if feedback_profile == program
+                else (profiles.get(feedback_profile) or {}).get("avg_duration")
+            )
+            try:
+                self.learning_manager.process_cycle_end(
+                    cycle_data,
+                    detected_profile=feedback_profile,
+                    confidence=label_confidence,
+                    predicted_duration=feedback_duration,
+                    match_result=match_result,
+                    label_allowed=label_gate_ok or bool(cycle_data.get("profile_name")),
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Never at the cost of the finish notification below.
+                self._logger.exception("Cycle-end learning pass failed")
+
         # Send notification if enabled
         if announce_finish and (self._notify_finish_services or self._notify_actions):
             msg_template = self.config_entry.options.get(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE)
@@ -6725,30 +6792,37 @@ class WashDataManager:
                 vs_typical=vs_typical,
                 status=status_str,
             )
+            finish_vars: dict[str, Any] = {
+                "duration_minutes": duration_min,
+                "duration_seconds": cycle_data["duration"],
+                "program": program_name,
+                "energy_kwh": energy_kwh,
+                "cost": cost_str,
+                "time_finished": time_finished,
+                "cycle_count": finished_cycle_count,
+                "vs_typical": vs_typical,
+                "status": status_str,
+                # Same lifecycle tag as start/live so the finished alert replaces
+                # the live notification in place. No live_update/alert_once here,
+                # so the companion app surfaces it with sound.
+                "tag": self._lifecycle_tag,
+                # C3: retained, but it is NOT what ends the activity - there is
+                # no `activity` key in the companion notification API and this
+                # was never acted on (#446). Kept because it is inert and this
+                # code cannot be exercised against a real device here; the
+                # documented clear below is the mechanism that works.
+                "activity": "end",
+            }
+            # The review question this cycle raised, as one-tap answers (mobile
+            # targets only: `actions` is a _MOBILE_ONLY_EXTRA_KEYS key).
+            review_actions = self._review_actions(cycle_data.get("id"))
+            if review_actions:
+                finish_vars["actions"] = review_actions
+                self._ensure_review_action_listener()
             self._dispatch_notification(
                 msg,
                 event_type=NOTIFY_EVENT_FINISH,
-                extra_vars={
-                    "duration_minutes": duration_min,
-                    "duration_seconds": cycle_data["duration"],
-                    "program": program_name,
-                    "energy_kwh": energy_kwh,
-                    "cost": cost_str,
-                    "time_finished": time_finished,
-                    "cycle_count": finished_cycle_count,
-                    "vs_typical": vs_typical,
-                    "status": status_str,
-                    # Same lifecycle tag as start/live so the finished alert replaces
-                    # the live notification in place. No live_update/alert_once here,
-                    # so the companion app surfaces it with sound.
-                    "tag": self._lifecycle_tag,
-                    # C3: retained, but it is NOT what ends the activity - there is
-                    # no `activity` key in the companion notification API and this
-                    # was never acted on (#446). Kept because it is inert and this
-                    # code cannot be exercised against a real device here; the
-                    # documented clear below is the mechanism that works.
-                    "activity": "end",
-                },
+                extra_vars=finish_vars,
             )
 
         # #446: end the iOS Live Activity now that the finished alert has gone out.
@@ -6766,34 +6840,6 @@ class WashDataManager:
                 prev_lifetime_count, cur_lifetime_count, program=trigger_program
             )
             self._maybe_notify_milestone(prev_lifetime_count, cur_lifetime_count)
-
-        # Request user feedback if we had a confident match.
-        # AND perform learning analysis on the completed cycle.
-        # IMPORTANT: this must happen before we clear match state.
-        # Only run when the cycle was actually persisted — an unpersisted cycle
-        # has no store entry to reference, so a pending-feedback record would
-        # dangle forever. Use THIS cycle's captured match context (not the live
-        # fields, which may already belong to a newly-started cycle after the awaits).
-        if cycle_persisted:
-            # Ask about what the complete match picked, not the live tick's program.
-            feedback_profile = (
-                cycle_data.get("profile_name")
-                or getattr(match_result, "best_profile", None)
-                or program
-            )
-            feedback_duration = (
-                matched_profile_duration
-                if feedback_profile == program
-                else (profiles.get(feedback_profile) or {}).get("avg_duration")
-            )
-            self.learning_manager.process_cycle_end(
-                cycle_data,
-                detected_profile=feedback_profile,
-                confidence=label_confidence,
-                predicted_duration=feedback_duration,
-                match_result=match_result,
-                label_allowed=label_gate_ok or bool(cycle_data.get("profile_name")),
-            )
 
     async def _async_close_cycle_end(
         self,
@@ -8750,6 +8796,92 @@ class WashDataManager:
         if self._remove_unload_action_listener is not None:
             self._remove_unload_action_listener()
             self._remove_unload_action_listener = None
+
+    @property
+    def _review_action_prefix(self) -> str:
+        """Prefix of the finish notification's review-answer action ids, per device.
+
+        A full id is ``<prefix><answer key>_<cycle id>``: the key from
+        ``learning.review_answer_choices`` and the cycle the question is about, so
+        an answer tapped hours later, or after a restart, still finds its request.
+        """
+        return f"REVIEW_WD_{self.entry_id[:8].upper()}_"
+
+    def _review_actions(self, cycle_id: Any) -> list[dict[str, str]]:
+        """Mobile actions answering this cycle's waiting review request, or [].
+
+        At most two, the same programmes as the panel's answer buttons
+        (``learning.review_choices``). Never raises: the finish notification then
+        goes out without them.
+        """
+        if not isinstance(cycle_id, str) or not cycle_id:
+            return []
+        try:
+            request = self.profile_store.get_pending_feedback().get(cycle_id)
+            choices = review_answer_choices(request, self.profile_store.get_profiles())
+        except Exception:  # noqa: BLE001
+            return []
+        template = self._timer_ui_strings.get("review_action_title", "It was {program}")
+        return [
+            {
+                "action": f"{self._review_action_prefix}{key}_{cycle_id}",
+                "title": self._safe_format_template(
+                    template, fallback_template="It was {program}", program=name
+                ),
+            }
+            for key, name in choices
+        ]
+
+    def _ensure_review_action_listener(self) -> None:
+        """Register the listener for the finish notification's review answers (once).
+
+        One ``mobile_app_notification_action`` listener per device, like the
+        unload-reminder dismiss. The answer is resolved from the stored request
+        when it arrives, so a request already answered in the panel makes the tap
+        a no-op. Removed on unload.
+        """
+        if self._remove_review_action_listener is not None:
+            return
+        prefix = self._review_action_prefix
+
+        @callback
+        def _on_review_action(event: Any) -> None:
+            action = event.data.get("action")
+            if not isinstance(action, str) or not action.startswith(prefix):
+                return
+            key, sep, cycle_id = action[len(prefix):].partition("_")
+            if sep and key and cycle_id:
+                self._spawn_tracked(self._async_answer_review_action(cycle_id, key))
+
+        self._remove_review_action_listener = self.hass.bus.async_listen(
+            "mobile_app_notification_action",
+            _on_review_action,
+        )
+
+    def _remove_review_answer_listener(self) -> None:
+        """Drop the review-answer action listener, if registered."""
+        if self._remove_review_action_listener is not None:
+            self._remove_review_action_listener()
+            self._remove_review_action_listener = None
+
+    async def _async_answer_review_action(self, cycle_id: str, key: str) -> None:
+        """Resolve a review request from its notification answer, as the panel does."""
+        if self._is_shutdown:
+            return
+        try:
+            request = self.profile_store.get_pending_feedback().get(cycle_id)
+            name = resolve_review_answer(request, key, self.profile_store.get_profiles())
+            answered = bool(name) and await self.learning_manager.async_answer_review(
+                cycle_id, name
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.exception(
+                "Answering the review of cycle %s from the notification failed", cycle_id
+            )
+            return
+        if answered:
+            self._logger.info("Review of cycle %s answered from the notification", cycle_id)
+            self.notify_update()
 
     def _reset_unload_nag_tracking(self) -> None:
         """Reset repeat-reminder tracking and drop the dismiss listener.

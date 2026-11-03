@@ -266,7 +266,9 @@
     "bp_details": "Details",
     "bp_copy_yaml": "Copy YAML",
     "bp_hide_yaml": "Hide the YAML",
-    "bp_show_yaml": "Show the YAML"
+    "bp_show_yaml": "Show the YAML",
+    "review_something_else": "Something else…",
+    "review_not_sure": "Not sure"
   },
   "note": {
     "off_delay": {
@@ -715,7 +717,9 @@
     "bp_needs_version": "WashData {version} or newer",
     "bp_author": "Author",
     "bp_required": "required",
-    "pg_runs_as": "runs as {value}"
+    "pg_runs_as": "runs as {value}",
+    "review_this_cycle": "This cycle",
+    "review_usual": "Usual for {name}"
   },
   "log": {
     "all_levels": "All levels",
@@ -1123,7 +1127,14 @@
     "bp_none_yet": "No templates for this appliance type yet. Share the first one.",
     "bp_unreachable": "It is downloaded from GitHub. Check that Home Assistant can reach the internet, then try again.",
     "bp_library_intro": "Ready-made automations shared by WashData users on GitHub, reviewed before they are listed. Available only with online features on.",
-    "bp_needs_version": "Needs WashData {version} or newer."
+    "bp_needs_version": "Needs WashData {version} or newer.",
+    "review_q_title": "Which program was this?",
+    "review_q_intro": "WashData could not tell these apart. Your answer teaches it.",
+    "review_q_started": "Started {when}",
+    "review_q_more": "{count} more to review",
+    "review_q_more_one": "{count} more to review",
+    "review_q_more_other": "{count} more to review",
+    "review_which_program": "Which program was it?"
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1705,7 +1716,9 @@
     "training": "Training…",
     "trimming": "Trimming…",
     "unlabelling": "Unlabelling…",
-    "working": "Working…"
+    "working": "Working…",
+    "torn_pick": "{a} or {b}?",
+    "torn_tip": "WashData cannot tell these two apart yet, so this cycle would end with a review question. Pick the one that is running and the cycle is labelled with it. Auto-detect undoes it."
   },
   "suggestion": {
     "observed_label": "Observed",
@@ -1986,7 +1999,8 @@
     "bp_automation_created": "Automation created with the default settings; opening it",
     "copied": "Copied",
     "copy_failed": "Copy failed. Select the text and copy it by hand.",
-    "automation_label_failed": "Automation created, but the WashData label or category could not be added."
+    "automation_label_failed": "Automation created, but the WashData label or category could not be added.",
+    "review_answered": "Saved: {program}"
   },
   "trend": {
     "down": "Trending down",

@@ -266,7 +266,9 @@
     "bp_details": "Üksikasjad",
     "bp_copy_yaml": "Kopeeri YAML",
     "bp_hide_yaml": "Peida YAML",
-    "bp_show_yaml": "Näita YAML-i"
+    "bp_show_yaml": "Näita YAML-i",
+    "review_something_else": "Midagi muud…",
+    "review_not_sure": "Pole kindel"
   },
   "note": {
     "off_delay": {
@@ -715,7 +717,9 @@
     "bp_needs_version": "WashData {version} või uuem",
     "bp_author": "Autor",
     "bp_required": "kohustuslik",
-    "pg_runs_as": "kasutatakse väärtust {value}"
+    "pg_runs_as": "kasutatakse väärtust {value}",
+    "review_this_cycle": "See tsükkel",
+    "review_usual": "{name} tavaliselt"
   },
   "log": {
     "all_levels": "Kõik tasemed",
@@ -1112,7 +1116,14 @@
     "bp_none_yet": "Selle seadmetüübi jaoks pole veel malle. Jaga esimest.",
     "bp_unreachable": "See laaditakse alla GitHubist. Kontrolli, et Home Assistant pääseb internetti, ja proovi uuesti.",
     "bp_library_intro": "Valmis automatiseerimised, mida WashData kasutajad GitHubis jagavad; need vaadatakse enne loendisse lisamist üle. Saadaval ainult sisselülitatud veebifunktsioonidega.",
-    "bp_needs_version": "Vajab WashData {version} või uuemat."
+    "bp_needs_version": "Vajab WashData {version} või uuemat.",
+    "review_q_title": "Mis programm see oli?",
+    "review_q_intro": "WashData ei suutnud neid eristada. Teie vastus aitab tal õppida.",
+    "review_q_started": "Algas {when}",
+    "review_q_more": "Veel {count} ootab ülevaatamist",
+    "review_q_more_one": "Veel {count} ootab ülevaatamist",
+    "review_q_more_other": "Veel {count} ootab ülevaatamist",
+    "review_which_program": "Milline programm see oli?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: sekundid allpool Peatumise Läve alates viimasest tegevusest, mille järel lõpliku tühjenduse ootamine lõpeb, kui eeldatav kestus on täis",
@@ -1694,7 +1705,9 @@
     "match_uncertain": "Ebakindel: {top} või {runner}",
     "match_uncertain_single": "Ebakindel: võib-olla {top}",
     "match_sure": "~{pct}% kindel",
-    "match_uncertain_tip": "WashData pole veel programmi valinud. Protsent näitab, kui sageli juhtiv oletus, {top}, oli varasemates tsüklites õige, kui see oli nii palju ees. Ainult teadmiseks."
+    "match_uncertain_tip": "WashData pole veel programmi valinud. Protsent näitab, kui sageli juhtiv oletus, {top}, oli varasemates tsüklites õige, kui see oli nii palju ees. Ainult teadmiseks.",
+    "torn_pick": "{a} või {b}?",
+    "torn_tip": "WashData ei suuda neid kahte veel eristada, seega lõpeks see tsükkel ülevaatusküsimusega. Valige programm, mis praegu töötab, ja tsükkel sildistatakse sellega. Valik Automaatne tuvastamine tühistab selle."
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -1887,7 +1900,8 @@
     "bp_automation_created": "Automatiseerimine loodud vaikesätetega; avatakse",
     "copied": "Kopeeritud",
     "copy_failed": "Kopeerimine ebaõnnestus. Vali tekst ja kopeeri käsitsi.",
-    "automation_label_failed": "Automatiseerimine loodud, kuid WashData silti või kategooriat ei saanud lisada."
+    "automation_label_failed": "Automatiseerimine loodud, kuid WashData silti või kategooriat ei saanud lisada.",
+    "review_answered": "Salvestatud: {program}"
   },
   "suggestion": {
     "observed_label": "Mõõdetud",

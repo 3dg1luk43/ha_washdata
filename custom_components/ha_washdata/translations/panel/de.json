@@ -266,7 +266,9 @@
     "bp_details": "Details",
     "bp_copy_yaml": "YAML kopieren",
     "bp_hide_yaml": "YAML ausblenden",
-    "bp_show_yaml": "YAML anzeigen"
+    "bp_show_yaml": "YAML anzeigen",
+    "review_something_else": "Etwas anderes…",
+    "review_not_sure": "Nicht sicher"
   },
   "note": {
     "off_delay": {
@@ -715,7 +717,9 @@
     "bp_needs_version": "WashData {version} oder neuer",
     "bp_author": "Autor",
     "bp_required": "erforderlich",
-    "pg_runs_as": "läuft mit {value}"
+    "pg_runs_as": "läuft mit {value}",
+    "review_this_cycle": "Dieser Zyklus",
+    "review_usual": "Üblich für {name}"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -1112,7 +1116,14 @@
     "bp_none_yet": "Noch keine Vorlagen für diesen Gerätetyp. Teilen Sie die erste.",
     "bp_unreachable": "Sie wird von GitHub heruntergeladen. Prüfen Sie, ob Home Assistant das Internet erreicht, und versuchen Sie es dann erneut.",
     "bp_library_intro": "Fertige Automatisierungen, die WashData-Nutzer auf GitHub teilen und die vor der Aufnahme geprüft werden. Nur mit eingeschalteten Onlinefunktionen verfügbar.",
-    "bp_needs_version": "Benötigt WashData {version} oder neuer."
+    "bp_needs_version": "Benötigt WashData {version} oder neuer.",
+    "review_q_title": "Welches Programm war das?",
+    "review_q_intro": "WashData konnte diese nicht unterscheiden. Mit Ihrer Antwort lernt es dazu.",
+    "review_q_started": "Gestartet: {when}",
+    "review_q_more": "Noch {count} zu bewerten",
+    "review_q_more_one": "Noch {count} zu bewerten",
+    "review_q_more_other": "Noch {count} zu bewerten",
+    "review_which_program": "Welches Programm war es?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Sekunden unter dem Stoppschwellenwert seit der letzten Aktivität, nach denen das Warten auf das letzte Abpumpen endet, sobald die erwartete Dauer erreicht ist",
@@ -1691,6 +1702,8 @@
     "preparing": "Wird vorbereitet…",
     "unlabelling": "Beschriftung wird entfernt…",
     "working": "Wird ausgeführt…",
+    "torn_pick": "{a} oder {b}?",
+    "torn_tip": "WashData kann diese beiden noch nicht unterscheiden, daher würde dieser Zyklus mit einer Bewertungsfrage enden. Wählen Sie das laufende Programm, dann wird der Zyklus damit beschriftet. Automatische Erkennung macht das rückgängig.",
     "match_uncertain": "Unsicher: {top} oder {runner}",
     "match_uncertain_single": "Unsicher: vielleicht {top}",
     "match_sure": "~{pct}% sicher",
@@ -1975,7 +1988,8 @@
     "bp_automation_created": "Automatisierung mit Standardeinstellungen erstellt; wird geöffnet",
     "copied": "Kopiert",
     "copy_failed": "Kopieren fehlgeschlagen. Text auswählen und manuell kopieren.",
-    "automation_label_failed": "Automatisierung erstellt, aber das WashData-Label oder die Kategorie konnte nicht hinzugefügt werden."
+    "automation_label_failed": "Automatisierung erstellt, aber das WashData-Label oder die Kategorie konnte nicht hinzugefügt werden.",
+    "review_answered": "Gespeichert: {program}"
   },
   "trend": {
     "down": "Abwärtstrend",

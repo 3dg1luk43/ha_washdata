@@ -64,6 +64,7 @@ Everything lives under `devtools/testbox/`:
 | `assert_run.py` | the acceptance checks, run by `smoke.sh` step 7 |
 | `check_notify_actions.sh` | the notification-ACTION delivery path, ~1 min, standalone |
 | `check_unload_confirm.sh` | unload confirmation without a door sensor (#451): the button entity, the service and the confirmation-entity listener, ~3 min, standalone |
+| `check_review_actions.sh` | the finish notification's review answers (audit item 1): two actions on the mobile target only, a tap resolves the request, a second tap does nothing, and the listener survives a restart, ~10 min, standalone |
 | `support/configuration.yaml` | baseline HA config, copied into `config/` on first start |
 | `config/.compressed_export.json` | the time-rescaled export `smoke.sh` seeds from |
 | `support/custom_components/testbox_notify/` | notify platform that records every payload |
@@ -311,3 +312,5 @@ there. Register item 320.
   still only verifiable on a phone.
 - `mobile_app:` is loaded so the `mobile_app_notification_action` event exists,
   but no device is registered, so mobile action round-trips are not covered.
+  `check_review_actions.sh` fires that event on the bus itself, with the action
+  id the notification carried: it proves the listener, not the phone.

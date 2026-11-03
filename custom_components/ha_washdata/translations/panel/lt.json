@@ -274,7 +274,9 @@
     "bp_details": "Išsami informacija",
     "bp_copy_yaml": "Kopijuoti YAML",
     "bp_hide_yaml": "Slėpti YAML",
-    "bp_show_yaml": "Rodyti YAML"
+    "bp_show_yaml": "Rodyti YAML",
+    "review_something_else": "Kažkas kita…",
+    "review_not_sure": "Nežinau"
   },
   "note": {
     "off_delay": {
@@ -729,7 +731,9 @@
     "bp_needs_version": "WashData {version} arba naujesnė",
     "bp_author": "Autorius",
     "bp_required": "privaloma",
-    "pg_runs_as": "naudojama reikšmė {value}"
+    "pg_runs_as": "naudojama reikšmė {value}",
+    "review_this_cycle": "Šis ciklas",
+    "review_usual": "Įprasta programai {name}"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -1146,7 +1150,16 @@
     "bp_none_yet": "Šiam prietaiso tipui šablonų dar nėra. Pasidalykite pirmuoju.",
     "bp_unreachable": "Ji atsisiunčiama iš GitHub. Patikrinkite, ar Home Assistant gali prisijungti prie interneto, ir bandykite dar kartą.",
     "bp_library_intro": "Paruoštos automatikos, kuriomis WashData naudotojai dalijasi GitHub; prieš įtraukiant į sąrašą jos peržiūrimos. Prieinama tik įjungus interneto funkcijas.",
-    "bp_needs_version": "Reikalinga WashData {version} arba naujesnė versija."
+    "bp_needs_version": "Reikalinga WashData {version} arba naujesnė versija.",
+    "review_q_title": "Kokia tai buvo programa?",
+    "review_q_intro": "WashData negalėjo jų atskirti. Jūsų atsakymas jį moko.",
+    "review_q_started": "Pradėtas {when}",
+    "review_q_more": "Dar {count} ciklų peržiūrai",
+    "review_q_more_one": "Dar {count} ciklas peržiūrai",
+    "review_q_more_few": "Dar {count} ciklai peržiūrai",
+    "review_q_more_many": "Dar {count} ciklo peržiūrai",
+    "review_q_more_other": "Dar {count} ciklų peržiūrai",
+    "review_which_program": "Kuri tai buvo programa?"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1709,7 +1722,9 @@
     "match_uncertain": "Neaišku: {top} ar {runner}",
     "match_uncertain_single": "Neaišku: galbūt {top}",
     "match_sure": "~{pct} % tikrumas",
-    "match_uncertain_tip": "WashData dar nenusprendė, kuri tai programa. Skaičius rodo, kaip dažnai pirmaujantis spėjimas, {top}, ankstesniuose cikluose pasitvirtindavo, kai pirmavo tiek pat. Tik informacija."
+    "match_uncertain_tip": "WashData dar nenusprendė, kuri tai programa. Skaičius rodo, kaip dažnai pirmaujantis spėjimas, {top}, ankstesniuose cikluose pasitvirtindavo, kai pirmavo tiek pat. Tik informacija.",
+    "torn_pick": "{a} ar {b}?",
+    "torn_tip": "WashData dar negali atskirti šių dviejų programų, todėl šis ciklas baigtųsi peržiūros klausimu. Pasirinkite tą, kuri dabar veikia, ir ciklas bus ja pažymėtas. Automatinis aptikimas tai atšaukia."
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1906,7 +1921,8 @@
     "bp_automation_created": "Automatika sukurta su numatytosiomis nuostatomis; atidaroma",
     "copied": "Nukopijuota",
     "copy_failed": "Kopijuoti nepavyko. Pasirinkite tekstą ir nukopijuokite rankiniu būdu.",
-    "automation_label_failed": "Automatizavimas sukurtas, tačiau WashData žymos ar kategorijos nepavyko pridėti."
+    "automation_label_failed": "Automatizavimas sukurtas, tačiau WashData žymos ar kategorijos nepavyko pridėti.",
+    "review_answered": "Išsaugota: {program}"
   },
   "suggestion": {
     "observed_label": "Pastebėta",

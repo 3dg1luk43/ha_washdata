@@ -126,6 +126,7 @@ from .detector_config import (
     effective_option_values,
     inverted_threshold_pair,
 )
+from .learning import review_choices
 from .maintenance import editor_types, effective_reminders
 from .options_utils import retire_device_type, strip_null_options
 from .setup_advisor import compute_setup_phase
@@ -1680,6 +1681,9 @@ def ws_get_devices(
             "envelope_position": None,
             # Top two of an undecided live match (MATCH-DECIDE-15): display only.
             "match_uncertainty": None,
+            # The two programmes a live match is torn between: the Status card's
+            # "X or Y?" manual pick (match_rules.live_torn_choices).
+            "match_choices": None,
             # Merged data+options, matching ``ws_get_options`` and the
             # options-first resolution in WashDataManager (#450). An entry added
             # after its last schema migration carries the structural keys in
@@ -1743,6 +1747,11 @@ def ws_get_devices(
                 # raw `detecting...` value, which automations compare against.
                 _unc = getattr(manager, "match_uncertainty", None)
                 info["match_uncertainty"] = _unc if isinstance(_unc, dict) else None
+                _choices = getattr(manager, "match_choices", None)
+                info["match_choices"] = (
+                    [str(n) for n in _choices[:2]]
+                    if isinstance(_choices, list) and len(_choices) >= 2 else None
+                )
 
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
@@ -3968,16 +3977,54 @@ def ws_get_feedbacks(
 
     feedbacks: list[dict[str, Any]] = []
     try:
-        pending: dict[str, Any] = manager.profile_store.get_pending_feedback()
+        store = manager.profile_store
+        pending: dict[str, Any] = store.get_pending_feedback()
         feedbacks = sorted(
             [{"cycle_id": cid, **item} for cid, item in pending.items()],
             key=lambda x: x.get("created_at", ""),
             reverse=True,
         )
+        _review_answer_fields(store, feedbacks)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error fetching feedbacks for %s: %s", entry_id, exc)
 
     _send_result(connection, msg["id"], "get_feedbacks", {"feedbacks": feedbacks})
+
+
+def _review_answer_fields(store: Any, feedbacks: list[dict[str, Any]]) -> None:
+    """Add what the panel's inline review question shows to each request, in place.
+
+    ``choices``: the one-tap answers (``learning.review_choices``) with each
+    programme's typical duration (s) and energy (kWh). ``cycle``: the cycle's
+    start, duration and energy, or None when it is no longer stored (an orphan
+    the device badge already leaves out, #362). Never raises.
+    """
+    try:
+        profiles = store.get_profiles() or {}
+        cycles = {c.get("id"): c for c in store.get_past_cycles() if isinstance(c, dict)}
+    except Exception:  # pylint: disable=broad-exception-caught
+        return
+    for fb in feedbacks:
+        try:
+            choices = []
+            for name in review_choices(fb, profiles):
+                prof = profiles.get(name) or {}
+                env = store.get_envelope(name) or {}
+                choices.append({
+                    "name": name,
+                    "avg_duration_s": prof.get("avg_duration") or None,
+                    "avg_energy_kwh": env.get("avg_energy"),
+                })
+            fb["choices"] = choices
+            cyc = cycles.get(fb.get("cycle_id"))
+            fb["cycle"] = None if cyc is None else {
+                "start_time": cyc.get("start_time"),
+                "duration_s": cyc.get("duration"),
+                "energy_kwh": _cycle_kwh(cyc),
+                "profile_name": cyc.get("profile_name"),
+            }
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Review answer fields failed for %s", fb.get("cycle_id"), exc_info=True)
 
 
 @websocket_api.websocket_command(

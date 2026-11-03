@@ -274,7 +274,9 @@
     "bp_details": "Podrobnosti",
     "bp_copy_yaml": "Kopírovat YAML",
     "bp_hide_yaml": "Skrýt YAML",
-    "bp_show_yaml": "Zobrazit YAML"
+    "bp_show_yaml": "Zobrazit YAML",
+    "review_something_else": "Něco jiného…",
+    "review_not_sure": "Nevím jistě"
   },
   "note": {
     "off_delay": {
@@ -729,7 +731,9 @@
     "bp_needs_version": "WashData {version} nebo novější",
     "bp_author": "Autor",
     "bp_required": "povinné",
-    "pg_runs_as": "simulace použije {value}"
+    "pg_runs_as": "simulace použije {value}",
+    "review_this_cycle": "Tento cyklus",
+    "review_usual": "Obvykle pro {name}"
   },
   "log": {
     "all_levels": "Všechny úrovně",
@@ -1146,7 +1150,16 @@
     "bp_none_yet": "Pro tento typ spotřebiče zatím nejsou žádné šablony. Sdílejte první.",
     "bp_unreachable": "Stahuje se z GitHubu. Zkontrolujte, že má Home Assistant přístup k internetu, a zkuste to znovu.",
     "bp_library_intro": "Hotové automatizace, které sdílejí uživatelé WashData na GitHubu a které se před zařazením do seznamu kontrolují. Dostupné jen se zapnutými online funkcemi.",
-    "bp_needs_version": "Vyžaduje WashData {version} nebo novější."
+    "bp_needs_version": "Vyžaduje WashData {version} nebo novější.",
+    "review_q_title": "Jaký to byl program?",
+    "review_q_intro": "WashData je nedokázal rozlišit. Vaše odpověď ho to naučí.",
+    "review_q_started": "Zahájeno {when}",
+    "review_q_more": "Ještě {count} cyklů ke kontrole",
+    "review_q_more_one": "Ještě {count} cyklus ke kontrole",
+    "review_q_more_few": "Ještě {count} cykly ke kontrole",
+    "review_q_more_many": "Ještě {count} cyklu ke kontrole",
+    "review_q_more_other": "Ještě {count} cyklů ke kontrole",
+    "review_which_program": "Který program to byl?"
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1709,7 +1722,9 @@
     "match_uncertain": "Nejisté: {top} nebo {runner}",
     "match_uncertain_single": "Nejisté: možná {top}",
     "match_sure": "jistota ~{pct} %",
-    "match_uncertain_tip": "WashData se zatím nerozhodl pro program. Číslo udává, jak často měl vedoucí odhad, {top}, v minulých cyklech pravdu při takovém náskoku. Jen pro informaci."
+    "match_uncertain_tip": "WashData se zatím nerozhodl pro program. Číslo udává, jak často měl vedoucí odhad, {top}, v minulých cyklech pravdu při takovém náskoku. Jen pro informaci.",
+    "torn_pick": "{a} nebo {b}?",
+    "torn_tip": "WashData zatím tyto dva programy nedokáže rozlišit, takže by tento cyklus skončil otázkou ke kontrole. Vyberte ten, který právě běží, a cyklus se jím označí. Automatická detekce to vrátí zpět."
   },
   "suggestion": {
     "observed_label": "Naměřeno",
@@ -1994,7 +2009,8 @@
     "bp_automation_created": "Automatizace vytvořena s výchozím nastavením; otevírám",
     "copied": "Zkopírováno",
     "copy_failed": "Kopírování se nezdařilo. Vyberte text a zkopírujte ho ručně.",
-    "automation_label_failed": "Automatizace vytvořena, ale štítek nebo kategorie WashData nemohly být přidány."
+    "automation_label_failed": "Automatizace vytvořena, ale štítek nebo kategorie WashData nemohly být přidány.",
+    "review_answered": "Uloženo: {program}"
   },
   "trend": {
     "down": "Klesající trend",

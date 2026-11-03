@@ -262,7 +262,9 @@
         "bp_details": "詳細",
         "bp_copy_yaml": "YAML をコピー",
         "bp_hide_yaml": "YAML を隠す",
-        "bp_show_yaml": "YAML を表示"
+        "bp_show_yaml": "YAML を表示",
+        "review_something_else": "その他…",
+        "review_not_sure": "わからない"
     },
     "note": {
         "off_delay": {
@@ -708,7 +710,9 @@
         "bp_needs_version": "WashData {version} 以降",
         "bp_author": "作成者",
         "bp_required": "必須",
-        "pg_runs_as": "{value} で実行"
+        "pg_runs_as": "{value} で実行",
+        "review_this_cycle": "このサイクル",
+        "review_usual": "{name} の通常値"
     },
     "log": {
         "all_levels": "すべてのレベル",
@@ -1095,7 +1099,13 @@
         "bp_none_yet": "この家電タイプのテンプレートはまだありません。最初の 1 つを共有しましょう。",
         "bp_unreachable": "ライブラリは GitHub からダウンロードされます。Home Assistant がインターネットに接続できることを確認してから、もう一度お試しください。",
         "bp_library_intro": "WashData ユーザーが GitHub で共有した既製のオートメーションで、掲載前にレビューされています。オンライン機能がオンのときだけ利用できます。",
-        "bp_needs_version": "WashData {version} 以降が必要です。"
+        "bp_needs_version": "WashData {version} 以降が必要です。",
+        "review_q_title": "これはどのプログラムでしたか？",
+        "review_q_intro": "WashData はこれらを区別できませんでした。回答は学習に使われます。",
+        "review_q_started": "開始: {when}",
+        "review_q_more": "ほか {count} 件がレビュー待ち",
+        "review_q_more_other": "ほか {count} 件がレビュー待ち",
+        "review_which_program": "どのプログラムでしたか？"
     },
     "pg_desc": {
         "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -1677,7 +1687,9 @@
         "match_uncertain": "不確定: {top} または {runner}",
         "match_uncertain_single": "不確定: {top} の可能性",
         "match_sure": "確度 約{pct}%",
-        "match_uncertain_tip": "WashData はまだプログラムを確定していません。この数値は、過去のサイクルで最有力候補の {top} がこれだけリードしていたときに正しかった割合です。参考情報です。"
+        "match_uncertain_tip": "WashData はまだプログラムを確定していません。この数値は、過去のサイクルで最有力候補の {top} がこれだけリードしていたときに正しかった割合です。参考情報です。",
+        "torn_pick": "{a} または {b}？",
+        "torn_tip": "WashData はまだこの 2 つを区別できないため、このサイクルは終了時にレビューの質問になります。実行中のプログラムを選ぶと、サイクルにそのラベルが付きます。「自動検出」を選ぶと元に戻ります。"
     },
     "tab": {
         "advanced": "高度な",
@@ -1868,7 +1880,8 @@
         "bp_automation_created": "デフォルト設定でオートメーションを作成しました; 開いています",
         "copied": "コピーしました",
         "copy_failed": "コピーできませんでした。テキストを選択して手動でコピーしてください。",
-        "automation_label_failed": "オートメーションを作成しましたが、WashDataのラベルまたはカテゴリを追加できませんでした。"
+        "automation_label_failed": "オートメーションを作成しましたが、WashDataのラベルまたはカテゴリを追加できませんでした。",
+        "review_answered": "保存しました: {program}"
     },
     "suggestion": {
         "observed_label": "観測値",

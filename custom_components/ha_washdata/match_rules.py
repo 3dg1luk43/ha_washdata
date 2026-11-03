@@ -58,6 +58,7 @@ from .const import (
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
     MATCH_AMBIGUOUS_COMMIT_FACTOR,
     MATCH_DECISIVE_MARGIN,
+    MATCH_LABEL_MIN_MARGIN,
     MATCH_SURE_KNOTS,
     MATCH_SURE_SINGLE_CANDIDATE,
     ORPHANED_PAUSE_MAX_WAIT_S,
@@ -1003,6 +1004,20 @@ def display_sure_pct(margin: float | None) -> int:
     return int(5 * round(p * 20))
 
 
+def _live_runner_up(result: Any, best: str) -> str | None:
+    """The live ranking's second programme, a profile group named by its best member."""
+    candidates = getattr(result, "candidates", None) or []
+    for cand in list(candidates)[1:2]:
+        if not isinstance(cand, dict):
+            continue
+        name = cand.get("group_best_member") or cand.get("name")
+        if isinstance(name, str) and name.startswith("__group__"):
+            name = name[len("__group__"):]
+        if name and name != best:
+            return str(name)
+    return None
+
+
 def live_match_uncertainty(result: Any, current_program: Any) -> dict[str, Any] | None:
     """Top two of an undecided live match, for the Status card (MATCH-DECIDE-15).
 
@@ -1017,16 +1032,7 @@ def live_match_uncertainty(result: Any, current_program: Any) -> dict[str, Any] 
         return None
     if program_is_committed(current_program) and getattr(result, "is_ambiguous", False) is not True:
         return None
-    runner_up: str | None = None
-    candidates = getattr(result, "candidates", None) or []
-    for cand in list(candidates)[1:2]:
-        if not isinstance(cand, dict):
-            continue
-        name = cand.get("group_best_member") or cand.get("name")
-        if isinstance(name, str) and name.startswith("__group__"):
-            name = name[len("__group__"):]
-        if name and name != best:
-            runner_up = str(name)
+    runner_up = _live_runner_up(result, str(best))
     margin: float | None = None
     if runner_up is not None:
         try:
@@ -1039,3 +1045,29 @@ def live_match_uncertainty(result: Any, current_program: Any) -> dict[str, Any] 
         "margin": margin,
         "sure_pct": display_sure_pct(margin),
     }
+
+
+def live_torn_choices(result: Any) -> list[str] | None:
+    """The two programmes a live match is torn between, or None. Never raises.
+
+    Torn: the latest tick's winner is flagged ambiguous, or leads its runner-up by
+    less than ``MATCH_LABEL_MIN_MARGIN``, the margin the cycle-end label verdict
+    needs. A cycle that ends like that is not labelled and asks for a review, so
+    the Status card offers both as a manual pick, which labels it by hand instead.
+    Display only, like :func:`live_match_uncertainty`; nothing that ends, labels
+    or switches a cycle reads it.
+    """
+    try:
+        best = getattr(result, "best_profile", None) if result is not None else None
+        if not best:
+            return None
+        runner_up = _live_runner_up(result, str(best))
+        if runner_up is None:
+            return None
+        if getattr(result, "is_ambiguous", False) is not True:
+            margin = getattr(result, "ambiguity_margin", None)
+            if margin is None or not float(margin) < MATCH_LABEL_MIN_MARGIN:
+                return None
+        return [str(best), runner_up]
+    except (TypeError, ValueError, OverflowError):
+        return None

@@ -22,6 +22,7 @@
       "armed_program": null,
       "envelope_position": null,
       "match_uncertainty": null,
+      "match_choices": null,
       "options": {
         "name": "Test Washer",
         "device_type": "washing_machine",

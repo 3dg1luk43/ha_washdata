@@ -221,7 +221,9 @@
     "bp_details": "Detalles",
     "bp_copy_yaml": "Copiar YAML",
     "bp_hide_yaml": "Ocultar el YAML",
-    "bp_show_yaml": "Mostrar el YAML"
+    "bp_show_yaml": "Mostrar el YAML",
+    "review_something_else": "Otra cosa…",
+    "review_not_sure": "No lo sé"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -668,7 +670,9 @@
     "bp_needs_version": "WashData {version} o posterior",
     "bp_author": "Autor",
     "bp_required": "obligatorio",
-    "pg_runs_as": "se simula con {value}"
+    "pg_runs_as": "se simula con {value}",
+    "review_this_cycle": "Este ciclo",
+    "review_usual": "Habitual para {name}"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -1075,7 +1079,15 @@
     "bp_none_yet": "Aún no hay plantillas para este tipo de electrodoméstico. Comparta la primera.",
     "bp_unreachable": "Se descarga de GitHub. Compruebe que Home Assistant tiene acceso a internet y vuelva a intentarlo.",
     "bp_library_intro": "Automatizaciones listas para usar compartidas por usuarios de WashData en GitHub, revisadas antes de publicarse. Disponible solo con las funciones en línea activadas.",
-    "bp_needs_version": "Requiere WashData {version} o posterior."
+    "bp_needs_version": "Requiere WashData {version} o posterior.",
+    "review_q_title": "¿Qué programa era?",
+    "review_q_intro": "WashData no pudo distinguirlos. Su respuesta le ayuda a aprender.",
+    "review_q_started": "Iniciado el {when}",
+    "review_q_more": "{count} más por revisar",
+    "review_q_more_one": "{count} más por revisar",
+    "review_q_more_many": "{count} más por revisar",
+    "review_q_more_other": "{count} más por revisar",
+    "review_which_program": "¿Qué programa fue?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos por debajo del Umbral de parada desde la última actividad que terminan la espera del vaciado final, una vez alcanzada la duración esperada",
@@ -1654,6 +1666,8 @@
     "preparing": "Preparando…",
     "unlabelling": "Quitando etiqueta…",
     "working": "Procesando…",
+    "torn_pick": "¿{a} o {b}?",
+    "torn_tip": "WashData todavía no distingue estos dos programas, así que este ciclo terminaría con una pregunta de revisión. Elija el que está en marcha y el ciclo se etiquetará con él. La opción Detección automática lo deshace.",
     "match_uncertain": "Incierto: {top} o {runner}",
     "match_uncertain_single": "Incierto: quizá {top}",
     "match_sure": "~{pct} % de certeza",
@@ -1852,7 +1866,8 @@
     "bp_automation_created": "Automatización creada con la configuración predeterminada; abriéndola",
     "copied": "Copiado",
     "copy_failed": "Error al copiar. Seleccione el texto y cópielo manualmente.",
-    "automation_label_failed": "Automatización creada, pero no se pudo añadir la etiqueta o categoría WashData."
+    "automation_label_failed": "Automatización creada, pero no se pudo añadir la etiqueta o categoría WashData.",
+    "review_answered": "Guardado: {program}"
   },
   "suggestion": {
     "observed_label": "Observado",

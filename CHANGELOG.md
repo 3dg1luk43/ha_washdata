@@ -15,12 +15,13 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - Washers report "finished" sooner after the program ends; with an anti-crease phase within minutes, not 20.
 - Remaining time on washers with an anti-crease phase counts down to the program end.
 - Cycle and program energy are right on plugs that report only on change; history is recalculated.
-- Fewer review questions, same accuracy.
+- Fewer review questions, answered in one tap on the Overview or the phone.
 - A blank notification text sends the default instead of failing.
 - New actions: mark a maintenance task done, delete a cycle.
 
 ### Features
 
+- **Answer a review question in one tap**: the newest question now shows on the Overview with the cycle's curve next to the two likely programs' usual ones, its start, and its duration and energy against what each program usually takes, with a button for each program, Something else... and Not sure. The cycle dialog asks the same way, without the confidence figure (it is a similarity score, not a probability). When a finished cycle raises a question, its finish notification on the phone carries the same two answers as buttons, also after a restart. While a cycle runs and WashData cannot tell two programs apart, the Overview offers "A or B?": picking one sets the program, so no question follows.
 - **Mark a maintenance task done from a dashboard or automation** ([#490](https://github.com/3dg1luk43/ha_washdata/issues/490)): new action `ha_washdata.mark_maintenance_done` (device and task id, as in the Maintenance due sensor's `due_task_ids`), for a kiosk button or an NFC tag at the appliance. Thanks to @wizzzard1007
 - **Delete a cycle from an automation** ([#492](https://github.com/3dg1luk43/ha_washdata/issues/492)): new action `ha_washdata.delete_cycle`, and the Cycle finished and Cycle ended triggers now carry `trigger.cycle_id`, so an automation can drop short interrupted runs as they end. A ready-made template follows in the Automations tab. Thanks to @mbergmann26-droid
 

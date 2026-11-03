@@ -266,7 +266,9 @@
     "bp_details": "Detaljer",
     "bp_copy_yaml": "Kopier YAML",
     "bp_hide_yaml": "Skjul YAML",
-    "bp_show_yaml": "Vis YAML"
+    "bp_show_yaml": "Vis YAML",
+    "review_something_else": "Noe annet…",
+    "review_not_sure": "Ikke sikker"
   },
   "note": {
     "off_delay": {
@@ -715,7 +717,9 @@
     "bp_needs_version": "WashData {version} eller nyere",
     "bp_author": "Forfatter",
     "bp_required": "påkrevd",
-    "pg_runs_as": "brukes som {value}"
+    "pg_runs_as": "brukes som {value}",
+    "review_this_cycle": "Denne syklusen",
+    "review_usual": "Vanlig for {name}"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -1112,7 +1116,14 @@
     "bp_none_yet": "Ingen maler for denne apparattypen ennå. Del den første.",
     "bp_unreachable": "Det lastes ned fra GitHub. Sjekk at Home Assistant når internett, og prøv igjen.",
     "bp_library_intro": "Ferdige automasjoner delt av WashData-brukere på GitHub og gjennomgått før de blir oppført. Bare tilgjengelig med nettfunksjoner slått på.",
-    "bp_needs_version": "Krever WashData {version} eller nyere."
+    "bp_needs_version": "Krever WashData {version} eller nyere.",
+    "review_q_title": "Hvilket program var dette?",
+    "review_q_intro": "WashData klarte ikke å skille disse fra hverandre. Svaret ditt hjelper den å lære.",
+    "review_q_started": "Startet {when}",
+    "review_q_more": "{count} til å vurdere",
+    "review_q_more_one": "{count} til å vurdere",
+    "review_q_more_other": "{count} til å vurdere",
+    "review_which_program": "Hvilket program var det?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: sekunder under Stoppterskel siden siste aktivitet som avslutter ventingen på siste tømming, når forventet varighet er nådd",
@@ -1691,6 +1702,8 @@
     "preparing": "Forbereder…",
     "unlabelling": "Fjerner merking…",
     "working": "Arbeider…",
+    "torn_pick": "{a} eller {b}?",
+    "torn_tip": "WashData klarer ennå ikke å skille disse to fra hverandre, så denne syklusen ville endt med et vurderingsspørsmål. Velg programmet som kjører, så merkes syklusen med det. Automatisk gjenkjenning angrer det.",
     "match_uncertain": "Usikker: {top} eller {runner}",
     "match_uncertain_single": "Usikker: kanskje {top}",
     "match_sure": "~{pct}% sikker",
@@ -1975,7 +1988,8 @@
     "bp_automation_created": "Automasjon opprettet med standardinnstillinger; åpner den",
     "copied": "Kopiert",
     "copy_failed": "Kopiering mislyktes. Velg teksten og kopier manuelt.",
-    "automation_label_failed": "Automatisering opprettet, men WashData-etiketten eller kategorien kunne ikke legges til."
+    "automation_label_failed": "Automatisering opprettet, men WashData-etiketten eller kategorien kunne ikke legges til.",
+    "review_answered": "Lagret: {program}"
   },
   "trend": {
     "down": "Trender nedover",

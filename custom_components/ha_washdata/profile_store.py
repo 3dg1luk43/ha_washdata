@@ -10394,6 +10394,15 @@ class ProfileStore:
             for req in pending.values():
                 if req.get("detected_profile") == old_name:
                     req["detected_profile"] = new_name
+                # The ranking names the one-tap review answers
+                # (learning.review_choices: the panel's buttons and the
+                # notification's actions), a group entry by its best member.
+                for cand in req.get("ranking") or []:
+                    if not isinstance(cand, dict):
+                        continue
+                    for key in ("name", "group_best_member"):
+                        if cand.get(key) == old_name:
+                            cand[key] = new_name
 
             # 3. Update feedback history
             history = self.get_feedback_history()

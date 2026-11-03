@@ -262,7 +262,9 @@
         "bp_details": "세부 정보",
         "bp_copy_yaml": "YAML 복사",
         "bp_hide_yaml": "YAML 숨기기",
-        "bp_show_yaml": "YAML 보기"
+        "bp_show_yaml": "YAML 보기",
+        "review_something_else": "기타…",
+        "review_not_sure": "잘 모르겠음"
     },
     "note": {
         "off_delay": {
@@ -708,7 +710,9 @@
         "bp_needs_version": "WashData {version} 이상",
         "bp_author": "작성자",
         "bp_required": "필수",
-        "pg_runs_as": "{value}(으)로 실행"
+        "pg_runs_as": "{value}(으)로 실행",
+        "review_this_cycle": "이 사이클",
+        "review_usual": "{name} 평소 값"
     },
     "log": {
         "all_levels": "모든 레벨",
@@ -1095,7 +1099,13 @@
         "bp_none_yet": "아직 이 가전제품 유형의 템플릿이 없습니다. 첫 번째 템플릿을 공유해 보세요.",
         "bp_unreachable": "라이브러리는 GitHub에서 다운로드됩니다. Home Assistant가 인터넷에 연결되어 있는지 확인한 후 다시 시도하세요.",
         "bp_library_intro": "WashData 사용자가 GitHub에서 공유한 기성 자동화로, 목록에 오르기 전에 검토를 거칩니다. 온라인 기능이 켜져 있을 때만 사용할 수 있습니다.",
-        "bp_needs_version": "WashData {version} 이상이 필요합니다."
+        "bp_needs_version": "WashData {version} 이상이 필요합니다.",
+        "review_q_title": "어떤 프로그램이었나요?",
+        "review_q_intro": "WashData가 이 프로그램들을 구분하지 못했습니다. 답변은 학습에 사용됩니다.",
+        "review_q_started": "시작: {when}",
+        "review_q_more": "{count}개 더 검토 대기 중",
+        "review_q_more_other": "{count}개 더 검토 대기 중",
+        "review_which_program": "어떤 프로그램이었나요?"
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -1677,7 +1687,9 @@
         "match_uncertain": "불확실: {top} 또는 {runner}",
         "match_uncertain_single": "불확실: 아마도 {top}",
         "match_sure": "약 {pct}% 확신",
-        "match_uncertain_tip": "WashData가 아직 프로그램을 확정하지 않았습니다. 이 수치는 과거 사이클에서 선두 후보인 {top}이(가) 이만큼 앞섰을 때 맞았던 비율입니다. 참고용입니다."
+        "match_uncertain_tip": "WashData가 아직 프로그램을 확정하지 않았습니다. 이 수치는 과거 사이클에서 선두 후보인 {top}이(가) 이만큼 앞섰을 때 맞았던 비율입니다. 참고용입니다.",
+        "torn_pick": "{a} 또는 {b}?",
+        "torn_tip": "WashData가 아직 이 둘을 구분하지 못하므로 이 사이클은 검토 질문으로 끝나게 됩니다. 실행 중인 프로그램을 선택하면 사이클에 그 라벨이 지정됩니다. '자동 감지'를 선택하면 취소됩니다."
     },
     "tab": {
         "advanced": "고급",
@@ -1868,7 +1880,8 @@
         "bp_automation_created": "기본 설정으로 자동화가 생성되었습니다; 여는 중",
         "copied": "복사됨",
         "copy_failed": "복사 실패. 텍스트를 선택하여 수동으로 복사하세요.",
-        "automation_label_failed": "자동화가 생성되었지만 WashData 라벨 또는 카테고리를 추가할 수 없었습니다."
+        "automation_label_failed": "자동화가 생성되었지만 WashData 라벨 또는 카테고리를 추가할 수 없었습니다.",
+        "review_answered": "저장됨: {program}"
     },
     "suggestion": {
         "observed_label": "관측값",

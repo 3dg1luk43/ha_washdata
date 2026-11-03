@@ -274,7 +274,9 @@
     "bp_details": "Szczegóły",
     "bp_copy_yaml": "Kopiuj YAML",
     "bp_hide_yaml": "Ukryj YAML",
-    "bp_show_yaml": "Pokaż YAML"
+    "bp_show_yaml": "Pokaż YAML",
+    "review_something_else": "Coś innego…",
+    "review_not_sure": "Nie mam pewności"
   },
   "note": {
     "off_delay": {
@@ -729,7 +731,9 @@
     "bp_needs_version": "WashData {version} lub nowszy",
     "bp_author": "Autor",
     "bp_required": "wymagane",
-    "pg_runs_as": "symulacja używa {value}"
+    "pg_runs_as": "symulacja używa {value}",
+    "review_this_cycle": "Ten cykl",
+    "review_usual": "Zwykle dla {name}"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -1146,7 +1150,16 @@
     "bp_none_yet": "Nie ma jeszcze szablonów dla tego typu urządzenia. Udostępnij pierwszy.",
     "bp_unreachable": "Jest pobierana z GitHuba. Sprawdź, czy Home Assistant ma dostęp do internetu, i spróbuj ponownie.",
     "bp_library_intro": "Gotowe automatyzacje udostępniane przez użytkowników WashData na GitHubie, sprawdzane przed dodaniem do listy. Dostępne tylko przy włączonych funkcjach online.",
-    "bp_needs_version": "Wymaga WashData {version} lub nowszego."
+    "bp_needs_version": "Wymaga WashData {version} lub nowszego.",
+    "review_q_title": "Jaki to był program?",
+    "review_q_intro": "WashData nie potrafił ich rozróżnić. Twoja odpowiedź go tego uczy.",
+    "review_q_started": "Rozpoczęto {when}",
+    "review_q_more": "Jeszcze {count} cykli do sprawdzenia",
+    "review_q_more_one": "Jeszcze {count} cykl do sprawdzenia",
+    "review_q_more_few": "Jeszcze {count} cykle do sprawdzenia",
+    "review_q_more_many": "Jeszcze {count} cykli do sprawdzenia",
+    "review_q_more_other": "Jeszcze {count} cyklu do sprawdzenia",
+    "review_which_program": "Który program to był?"
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1709,7 +1722,9 @@
     "match_uncertain": "Niepewne: {top} lub {runner}",
     "match_uncertain_single": "Niepewne: może {top}",
     "match_sure": "~{pct}% pewności",
-    "match_uncertain_tip": "WashData nie wybrał jeszcze programu. Liczba pokazuje, jak często wiodący kandydat, {top}, okazywał się trafny w poprzednich cyklach przy takiej przewadze. Tylko informacyjnie."
+    "match_uncertain_tip": "WashData nie wybrał jeszcze programu. Liczba pokazuje, jak często wiodący kandydat, {top}, okazywał się trafny w poprzednich cyklach przy takiej przewadze. Tylko informacyjnie.",
+    "torn_pick": "{a} czy {b}?",
+    "torn_tip": "WashData nie potrafi jeszcze rozróżnić tych dwóch programów, więc po tym cyklu pojawiłoby się pytanie do przeglądu. Wybierz ten, który właśnie działa, a cykl zostanie nim oznaczony. Automatyczne wykrywanie to cofa."
   },
   "suggestion": {
     "observed_label": "Zmierzono",
@@ -1994,7 +2009,8 @@
     "bp_automation_created": "Automatyzacja utworzona z ustawieniami domyślnymi; otwieram",
     "copied": "Skopiowano",
     "copy_failed": "Kopiowanie nie powiodło się. Zaznacz tekst i skopiuj go ręcznie.",
-    "automation_label_failed": "Automatyzacja utworzona, ale etykiety ani kategorii WashData nie można było dodać."
+    "automation_label_failed": "Automatyzacja utworzona, ale etykiety ani kategorii WashData nie można było dodać.",
+    "review_answered": "Zapisano: {program}"
   },
   "trend": {
     "down": "Trend w dół",

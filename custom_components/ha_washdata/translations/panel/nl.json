@@ -266,7 +266,9 @@
     "bp_details": "Details",
     "bp_copy_yaml": "YAML kopiëren",
     "bp_hide_yaml": "YAML verbergen",
-    "bp_show_yaml": "YAML tonen"
+    "bp_show_yaml": "YAML tonen",
+    "review_something_else": "Iets anders…",
+    "review_not_sure": "Niet zeker"
   },
   "note": {
     "off_delay": {
@@ -715,7 +717,9 @@
     "bp_needs_version": "WashData {version} of nieuwer",
     "bp_author": "Auteur",
     "bp_required": "verplicht",
-    "pg_runs_as": "rekent met {value}"
+    "pg_runs_as": "rekent met {value}",
+    "review_this_cycle": "Deze cyclus",
+    "review_usual": "Gebruikelijk voor {name}"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -1112,7 +1116,14 @@
     "bp_none_yet": "Nog geen sjablonen voor dit apparaattype. Deel het eerste.",
     "bp_unreachable": "Deze wordt van GitHub gedownload. Controleer of Home Assistant het internet kan bereiken en probeer het daarna opnieuw.",
     "bp_library_intro": "Kant-en-klare automatiseringen die WashData-gebruikers op GitHub delen, gecontroleerd voordat ze worden opgenomen. Alleen beschikbaar als onlinefuncties aan staan.",
-    "bp_needs_version": "Vereist WashData {version} of nieuwer."
+    "bp_needs_version": "Vereist WashData {version} of nieuwer.",
+    "review_q_title": "Welk programma was dit?",
+    "review_q_intro": "WashData kon deze niet van elkaar onderscheiden. Van uw antwoord leert het.",
+    "review_q_started": "Gestart: {when}",
+    "review_q_more": "Nog {count} te beoordelen",
+    "review_q_more_one": "Nog {count} te beoordelen",
+    "review_q_more_other": "Nog {count} te beoordelen",
+    "review_which_program": "Welk programma was het?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: seconden onder de Stopdrempel sinds de laatste activiteit waarna het wachten op het laatste wegpompen stopt, zodra de verwachte duur is bereikt",
@@ -1691,6 +1702,8 @@
     "preparing": "Voorbereiden…",
     "unlabelling": "Label verwijderen…",
     "working": "Bezig…",
+    "torn_pick": "{a} of {b}?",
+    "torn_tip": "WashData kan deze twee nog niet van elkaar onderscheiden, dus deze cyclus zou eindigen met een beoordelingsvraag. Kies het programma dat draait, dan wordt de cyclus daarmee gelabeld. Automatische detectie maakt dit ongedaan.",
     "match_uncertain": "Onzeker: {top} of {runner}",
     "match_uncertain_single": "Onzeker: misschien {top}",
     "match_sure": "~{pct}% zeker",
@@ -1975,7 +1988,8 @@
     "bp_automation_created": "Automatisering aangemaakt met standaardinstellingen; wordt geopend",
     "copied": "Gekopieerd",
     "copy_failed": "Kopiëren mislukt. Selecteer de tekst en kopieer het handmatig.",
-    "automation_label_failed": "Automatisering aangemaakt, maar het WashData-label of de categorie kon niet worden toegevoegd."
+    "automation_label_failed": "Automatisering aangemaakt, maar het WashData-label of de categorie kon niet worden toegevoegd.",
+    "review_answered": "Opgeslagen: {program}"
   },
   "trend": {
     "down": "Trend naar beneden",

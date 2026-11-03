@@ -266,7 +266,9 @@
     "bp_details": "Nánar",
     "bp_copy_yaml": "Afrita YAML",
     "bp_hide_yaml": "Fela YAML",
-    "bp_show_yaml": "Sýna YAML"
+    "bp_show_yaml": "Sýna YAML",
+    "review_something_else": "Eitthvað annað…",
+    "review_not_sure": "Veit ekki"
   },
   "note": {
     "off_delay": {
@@ -715,7 +717,9 @@
     "bp_needs_version": "WashData {version} eða nýrra",
     "bp_author": "Höfundur",
     "bp_required": "nauðsynlegt",
-    "pg_runs_as": "notað sem {value}"
+    "pg_runs_as": "notað sem {value}",
+    "review_this_cycle": "Þessi lota",
+    "review_usual": "Venjulegt fyrir {name}"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -1112,7 +1116,14 @@
     "bp_none_yet": "Engin sniðmát enn fyrir þessa tækjategund. Deildu því fyrsta.",
     "bp_unreachable": "Það er sótt frá GitHub. Gakktu úr skugga um að Home Assistant nái sambandi við internetið og reyndu svo aftur.",
     "bp_library_intro": "Tilbúin sjálfvirkni sem WashData-notendur deila á GitHub, yfirfarin áður en hún er birt. Aðeins í boði þegar kveikt er á nettengdum eiginleikum.",
-    "bp_needs_version": "Krefst WashData {version} eða nýrra."
+    "bp_needs_version": "Krefst WashData {version} eða nýrra.",
+    "review_q_title": "Hvaða kerfi var þetta?",
+    "review_q_intro": "WashData gat ekki greint þessi kerfi í sundur. Svarið þitt kennir því.",
+    "review_q_started": "Hófst {when}",
+    "review_q_more": "{count} í viðbót til yfirferðar",
+    "review_q_more_one": "{count} í viðbót til yfirferðar",
+    "review_q_more_other": "{count} í viðbót til yfirferðar",
+    "review_which_program": "Hvaða kerfi var það?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: sekúndur undir Stöðvunarþröskuldi frá síðustu virkni sem ljúka biðinni eftir lokaútdælingu, þegar væntanlegri lengd er náð",
@@ -1691,6 +1702,8 @@
     "preparing": "Undirbý…",
     "unlabelling": "Fjarlægi merkingu…",
     "working": "Í vinnslu…",
+    "torn_pick": "{a} eða {b}?",
+    "torn_tip": "WashData getur ekki enn greint þessi tvö kerfi í sundur, svo þessi lota myndi enda á yfirferðarspurningu. Veldu kerfið sem er í gangi og lotan verður merkt með því. Sjálfvirk skynjun afturkallar það.",
     "match_uncertain": "Óvíst: {top} eða {runner}",
     "match_uncertain_single": "Óvíst: kannski {top}",
     "match_sure": "~{pct}% vissa",
@@ -1975,7 +1988,8 @@
     "bp_automation_created": "Sjálfvirkni búin til með sjálfgefnum stillingum; opnar hana",
     "copied": "Afritað",
     "copy_failed": "Afritun mistókst. Veldu textann og afritu handvirkt.",
-    "automation_label_failed": "Sjálvvirkni búinn til, en WashData-merkimiðann eða flokkinn var ekki hægt að bæta við."
+    "automation_label_failed": "Sjálvvirkni búinn til, en WashData-merkimiðann eða flokkinn var ekki hægt að bæta við.",
+    "review_answered": "Vistað: {program}"
   },
   "trend": {
     "down": "Stefnir niður",

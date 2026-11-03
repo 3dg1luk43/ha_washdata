@@ -270,7 +270,9 @@
     "bp_details": "Detalji",
     "bp_copy_yaml": "Kopiraj YAML",
     "bp_hide_yaml": "Sakrij YAML",
-    "bp_show_yaml": "Prikaži YAML"
+    "bp_show_yaml": "Prikaži YAML",
+    "review_something_else": "Nešto drugo…",
+    "review_not_sure": "Ne znam sigurno"
   },
   "note": {
     "off_delay": {
@@ -722,7 +724,9 @@
     "bp_needs_version": "WashData {version} ili noviji",
     "bp_author": "Autor",
     "bp_required": "obavezno",
-    "pg_runs_as": "simulacija koristi {value}"
+    "pg_runs_as": "simulacija koristi {value}",
+    "review_this_cycle": "Ovaj ciklus",
+    "review_usual": "Uobičajeno za {name}"
   },
   "log": {
     "all_levels": "Sve razine",
@@ -1129,7 +1133,15 @@
     "bp_none_yet": "Za ovaj tip uređaja još nema predložaka. Podijelite prvi.",
     "bp_unreachable": "Preuzima se s GitHuba. Provjerite ima li Home Assistant pristup internetu pa pokušajte ponovno.",
     "bp_library_intro": "Gotove automatizacije koje korisnici WashData dijele na GitHubu, pregledane prije objave na popisu. Dostupno samo s uključenim online značajkama.",
-    "bp_needs_version": "Zahtijeva WashData {version} ili noviji."
+    "bp_needs_version": "Zahtijeva WashData {version} ili noviji.",
+    "review_q_title": "Koji je ovo bio program?",
+    "review_q_intro": "WashData ih nije mogao razlikovati. Vaš odgovor ga tome uči.",
+    "review_q_started": "Pokrenuto {when}",
+    "review_q_more": "Još {count} ciklusa za pregled",
+    "review_q_more_one": "Još {count} ciklus za pregled",
+    "review_q_more_few": "Još {count} ciklusa za pregled",
+    "review_q_more_other": "Još {count} ciklusa za pregled",
+    "review_which_program": "Koji je to bio program?"
   },
   "phase_desc": {
     "anti_crease": "Povremeno kratko okretanje bubnja nakon završetka kako bi se smanjile bore.",
@@ -1692,7 +1704,9 @@
     "match_uncertain": "Nesigurno: {top} ili {runner}",
     "match_uncertain_single": "Nesigurno: možda {top}",
     "match_sure": "~{pct}% sigurnosti",
-    "match_uncertain_tip": "WashData se još nije odlučio za program. Broj pokazuje koliko je često vodeća pretpostavka, {top}, bila točna u prošlim ciklusima uz ovakvu prednost. Samo informativno."
+    "match_uncertain_tip": "WashData se još nije odlučio za program. Broj pokazuje koliko je često vodeća pretpostavka, {top}, bila točna u prošlim ciklusima uz ovakvu prednost. Samo informativno.",
+    "torn_pick": "{a} ili {b}?",
+    "torn_tip": "WashData još ne može razlikovati ova dva programa, pa bi ovaj ciklus završio pitanjem za pregled. Odaberite onaj koji radi i ciklus će biti označen njime. Automatsko otkrivanje to poništava."
   },
   "suggestion": {
     "observed_label": "Izmjereno",
@@ -1975,7 +1989,8 @@
     "bp_automation_created": "Automatizacija stvorena s zadanim postavkama; otvaranje",
     "copied": "Kopirano",
     "copy_failed": "Kopiranje nije uspjelo. Odaberite tekst i kopirajte ga ručno.",
-    "automation_label_failed": "Automatizacija stvorena, ali se WashData oznaka ili kategorija nije mogla dodati."
+    "automation_label_failed": "Automatizacija stvorena, ali se WashData oznaka ili kategorija nije mogla dodati.",
+    "review_answered": "Spremljeno: {program}"
   },
   "trend": {
     "down": "Trend pada",

@@ -266,7 +266,9 @@
     "bp_details": "Tiedot",
     "bp_copy_yaml": "Kopioi YAML",
     "bp_hide_yaml": "Piilota YAML",
-    "bp_show_yaml": "Näytä YAML"
+    "bp_show_yaml": "Näytä YAML",
+    "review_something_else": "Jokin muu…",
+    "review_not_sure": "En ole varma"
   },
   "note": {
     "off_delay": {
@@ -715,7 +717,9 @@
     "bp_needs_version": "WashData {version} tai uudempi",
     "bp_author": "Tekijä",
     "bp_required": "pakollinen",
-    "pg_runs_as": "ajetaan arvolla {value}"
+    "pg_runs_as": "ajetaan arvolla {value}",
+    "review_this_cycle": "Tämä sykli",
+    "review_usual": "{name} tavallisesti"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -1112,7 +1116,14 @@
     "bp_none_yet": "Tälle laitetyypille ei ole vielä malleja. Jaa ensimmäinen.",
     "bp_unreachable": "Se ladataan GitHubista. Tarkista, että Home Assistant pääsee internetiin, ja yritä uudelleen.",
     "bp_library_intro": "Valmiita automaatioita, joita WashData-käyttäjät jakavat GitHubissa ja jotka tarkistetaan ennen listalle pääsyä. Käytettävissä vain, kun verkkotoiminnot ovat käytössä.",
-    "bp_needs_version": "Vaatii WashData {version} tai uudemman."
+    "bp_needs_version": "Vaatii WashData {version} tai uudemman.",
+    "review_q_title": "Mikä ohjelma tämä oli?",
+    "review_q_intro": "WashData ei osannut erottaa näitä toisistaan. Vastauksesi opettaa sitä.",
+    "review_q_started": "Alkoi {when}",
+    "review_q_more": "Vielä {count} tarkistettavana",
+    "review_q_more_one": "Vielä {count} tarkistettavana",
+    "review_q_more_other": "Vielä {count} tarkistettavana",
+    "review_which_program": "Mikä ohjelma se oli?"
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: sekunnit Pysäytyskynnyksen alapuolella viimeisestä toiminnasta, joiden jälkeen lopullisen vedenpoiston odotus päättyy, kun odotettu kesto on kulunut",
@@ -1694,7 +1705,9 @@
     "match_uncertain": "Epävarma: {top} tai {runner}",
     "match_uncertain_single": "Epävarma: ehkä {top}",
     "match_sure": "~{pct} % varma",
-    "match_uncertain_tip": "WashData ei ole vielä päättänyt ohjelmaa. Luku kertoo, kuinka usein johtava arvaus, {top}, osui oikeaan aiemmissa sykleissä, kun se johti näin paljon. Vain tiedoksi."
+    "match_uncertain_tip": "WashData ei ole vielä päättänyt ohjelmaa. Luku kertoo, kuinka usein johtava arvaus, {top}, osui oikeaan aiemmissa sykleissä, kun se johti näin paljon. Vain tiedoksi.",
+    "torn_pick": "{a} vai {b}?",
+    "torn_tip": "WashData ei vielä osaa erottaa näitä kahta toisistaan, joten tämä sykli päättyisi tarkistuskysymykseen. Valitse käynnissä oleva ohjelma, niin sykli merkitään sillä. Automaattinen tunnistus kumoaa valinnan."
   },
   "suggestion": {
     "observed_label": "Havaittu",
@@ -1975,7 +1988,8 @@
     "bp_automation_created": "Automaatio luotu oletusasetuksilla; avataan",
     "copied": "Kopioitu",
     "copy_failed": "Kopiointi epäonnistui. Valitse teksti ja kopioi käsin.",
-    "automation_label_failed": "Automaatio luotu, mutta WashData-etikettiä tai -luokkaa ei voitu lisätä."
+    "automation_label_failed": "Automaatio luotu, mutta WashData-etikettiä tai -luokkaa ei voitu lisätä.",
+    "review_answered": "Tallennettu: {program}"
   },
   "trend": {
     "down": "Trendikäs alaspäin",

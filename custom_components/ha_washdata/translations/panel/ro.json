@@ -221,7 +221,9 @@
     "bp_details": "Detalii",
     "bp_copy_yaml": "Copiați YAML-ul",
     "bp_hide_yaml": "Ascundeți YAML-ul",
-    "bp_show_yaml": "Afișați YAML-ul"
+    "bp_show_yaml": "Afișați YAML-ul",
+    "review_something_else": "Altceva…",
+    "review_not_sure": "Nu știu"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -668,7 +670,9 @@
     "bp_needs_version": "WashData {version} sau mai nou",
     "bp_author": "Autor",
     "bp_required": "obligatoriu",
-    "pg_runs_as": "simulat cu {value}"
+    "pg_runs_as": "simulat cu {value}",
+    "review_this_cycle": "Acest ciclu",
+    "review_usual": "Obișnuit pentru {name}"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -1075,7 +1079,15 @@
     "bp_none_yet": "Încă nu există șabloane pentru acest tip de aparat. Partajați-l pe primul.",
     "bp_unreachable": "Se descarcă de pe GitHub. Verificați dacă Home Assistant are acces la internet, apoi încercați din nou.",
     "bp_library_intro": "Automatizări gata făcute, partajate de utilizatorii WashData pe GitHub și verificate înainte de a fi listate. Disponibilă doar cu funcțiile online activate.",
-    "bp_needs_version": "Necesită WashData {version} sau mai nou."
+    "bp_needs_version": "Necesită WashData {version} sau mai nou.",
+    "review_q_title": "Ce program a fost acesta?",
+    "review_q_intro": "WashData nu le-a putut deosebi. Răspunsul dvs. îl ajută să învețe.",
+    "review_q_started": "Pornit la {when}",
+    "review_q_more": "Încă {count} de revizuit",
+    "review_q_more_one": "Încă {count} de revizuit",
+    "review_q_more_few": "Încă {count} de revizuit",
+    "review_q_more_other": "Încă {count} de revizuit",
+    "review_which_program": "Ce program a fost?"
   },
   "phase_desc": {
     "anti_crease": "Rotiri scurte ocazionale ale tamburului după finalizare pentru a reduce șifonarea.",
@@ -1635,6 +1647,8 @@
     "preparing": "Se pregătește…",
     "unlabelling": "Se elimină eticheta…",
     "working": "Se procesează…",
+    "torn_pick": "{a} sau {b}?",
+    "torn_tip": "WashData nu poate încă deosebi aceste două programe, așa că acest ciclu s-ar încheia cu o întrebare de revizuire. Alegeți programul care rulează și ciclul va fi etichetat cu el. Opțiunea Detectare automată anulează alegerea.",
     "match_uncertain": "Incert: {top} sau {runner}",
     "match_uncertain_single": "Incert: poate {top}",
     "match_sure": "~{pct}% certitudine",
@@ -1833,7 +1847,8 @@
     "bp_automation_created": "Automatizare creată cu setările implicite; deschidere în curs",
     "copied": "Copiat",
     "copy_failed": "Copiere eșuată. Selectați textul și copiați-l manual.",
-    "automation_label_failed": "Automatizare creată, dar eticheta sau categoria WashData nu a putut fi adăugată."
+    "automation_label_failed": "Automatizare creată, dar eticheta sau categoria WashData nu a putut fi adăugată.",
+    "review_answered": "Salvat: {program}"
   },
   "suggestion": {
     "observed_label": "Observat",

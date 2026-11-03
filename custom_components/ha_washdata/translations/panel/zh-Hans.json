@@ -262,7 +262,9 @@
         "bp_details": "详情",
         "bp_copy_yaml": "复制 YAML",
         "bp_hide_yaml": "隐藏 YAML",
-        "bp_show_yaml": "显示 YAML"
+        "bp_show_yaml": "显示 YAML",
+        "review_something_else": "其他…",
+        "review_not_sure": "不确定"
     },
     "note": {
         "off_delay": {
@@ -708,7 +710,9 @@
         "bp_needs_version": "WashData {version} 或更高版本",
         "bp_author": "作者",
         "bp_required": "必填",
-        "pg_runs_as": "按 {value} 运行"
+        "pg_runs_as": "按 {value} 运行",
+        "review_this_cycle": "此周期",
+        "review_usual": "{name} 的通常值"
     },
     "log": {
         "all_levels": "所有级别",
@@ -1095,7 +1099,13 @@
         "bp_none_yet": "此家电类型还没有模板。来分享第一个吧。",
         "bp_unreachable": "模板库从 GitHub 下载。请检查 Home Assistant 能否访问互联网，然后重试。",
         "bp_library_intro": "WashData 用户在 GitHub 上分享的现成自动化，上架前经过审核。仅在开启在线功能时可用。",
-        "bp_needs_version": "需要 WashData {version} 或更高版本。"
+        "bp_needs_version": "需要 WashData {version} 或更高版本。",
+        "review_q_title": "这是哪个程序？",
+        "review_q_intro": "WashData 无法区分这些程序。您的回答将帮助它学习。",
+        "review_q_started": "开始于 {when}",
+        "review_q_more": "还有 {count} 个待审查",
+        "review_q_more_other": "还有 {count} 个待审查",
+        "review_which_program": "是哪个程序？"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1677,7 +1687,9 @@
         "match_uncertain": "不确定：{top} 或 {runner}",
         "match_uncertain_single": "不确定：可能是 {top}",
         "match_sure": "约 {pct}% 把握",
-        "match_uncertain_tip": "WashData 尚未确定程序。该数值表示在过去的周期中，领先猜测 {top} 领先这么多时猜对的频率。仅供参考。"
+        "match_uncertain_tip": "WashData 尚未确定程序。该数值表示在过去的周期中，领先猜测 {top} 领先这么多时猜对的频率。仅供参考。",
+        "torn_pick": "{a} 还是 {b}？",
+        "torn_tip": "WashData 暂时还无法区分这两个程序，因此此周期结束时会提出审查问题。选择正在运行的程序，此周期就会标记为该程序。选择“自动检测”可撤销。"
     },
     "tab": {
         "advanced": "高级",
@@ -1868,7 +1880,8 @@
         "bp_automation_created": "已使用默认设置创建自动化; 正在打开",
         "copied": "已复制",
         "copy_failed": "复制失败。请选择文本并手动复制。",
-        "automation_label_failed": "自动化已创建，但无法添加 WashData 标签或类别。"
+        "automation_label_failed": "自动化已创建，但无法添加 WashData 标签或类别。",
+        "review_answered": "已保存：{program}"
     },
     "suggestion": {
         "observed_label": "观测值",

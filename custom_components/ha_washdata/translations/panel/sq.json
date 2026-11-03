@@ -266,7 +266,9 @@
         "bp_details": "Detaje",
         "bp_copy_yaml": "Kopjo YAML",
         "bp_hide_yaml": "Fshih YAML",
-        "bp_show_yaml": "Shfaq YAML"
+        "bp_show_yaml": "Shfaq YAML",
+        "review_something_else": "Diçka tjetër…",
+        "review_not_sure": "Nuk e di"
     },
     "conflict": {
         "anti_wrinkle_max": {
@@ -710,7 +712,9 @@
         "bp_needs_version": "WashData {version} ose më i ri",
         "bp_author": "Autori",
         "bp_required": "i detyrueshëm",
-        "pg_runs_as": "ekzekutohet me {value}"
+        "pg_runs_as": "ekzekutohet me {value}",
+        "review_this_cycle": "Ky cikël",
+        "review_usual": "E zakonshme për {name}"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -1107,7 +1111,14 @@
         "bp_none_yet": "Ende nuk ka shabllone për këtë lloj pajisjeje. Ndani të parin.",
         "bp_unreachable": "Ajo shkarkohet nga GitHub. Kontrolloni që Home Assistant të ketë qasje në internet, pastaj provoni përsëri.",
         "bp_library_intro": "Automatizime të gatshme të ndara nga përdoruesit e WashData në GitHub, të shqyrtuara para se të listohen. Të disponueshme vetëm me veçoritë online të aktivizuara.",
-        "bp_needs_version": "Kërkon WashData {version} ose më të ri."
+        "bp_needs_version": "Kërkon WashData {version} ose më të ri.",
+        "review_q_title": "Cili program ishte ky?",
+        "review_q_intro": "WashData nuk arriti t'i dallonte. Përgjigjja juaj e ndihmon të mësojë.",
+        "review_q_started": "Filloi më {when}",
+        "review_q_more": "Edhe {count} për rishikim",
+        "review_q_more_one": "Edhe {count} për rishikim",
+        "review_q_more_other": "Edhe {count} për rishikim",
+        "review_which_program": "Cili program ishte?"
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1667,6 +1678,8 @@
         "preparing": "Po përgatitet…",
         "unlabelling": "Po hiqet etiketa…",
         "working": "Po përpunohet…",
+        "torn_pick": "{a} apo {b}?",
+        "torn_tip": "WashData ende nuk i dallon dot këto dy programe, ndaj ky cikël do të përfundonte me një pyetje rishikimi. Zgjidhni atë që po punon dhe cikli etiketohet me të. Opsioni Zbulim automatik e anulon.",
         "match_uncertain": "E pasigurt: {top} ose {runner}",
         "match_uncertain_single": "E pasigurt: ndoshta {top}",
         "match_sure": "~{pct}% e sigurt",
@@ -1863,7 +1876,8 @@
         "bp_automation_created": "Automatizimi u krijua me cilësimet e parazgjedhura; po hapet",
         "copied": "Kopjuar",
         "copy_failed": "Kopjimi dështoi. Zgjidh tekstin dhe kopjoje me dorë.",
-        "automation_label_failed": "Automatizimi u krijua, por etiketa ose kategoria e WashData nuk mund të shtohej."
+        "automation_label_failed": "Automatizimi u krijua, por etiketa ose kategoria e WashData nuk mund të shtohej.",
+        "review_answered": "U ruajt: {program}"
     },
     "suggestion": {
         "observed_label": "I vëzhguar",

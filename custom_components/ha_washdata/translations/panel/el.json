@@ -266,7 +266,9 @@
         "bp_details": "Λεπτομέρειες",
         "bp_copy_yaml": "Αντιγραφή YAML",
         "bp_hide_yaml": "Απόκρυψη του YAML",
-        "bp_show_yaml": "Εμφάνιση του YAML"
+        "bp_show_yaml": "Εμφάνιση του YAML",
+        "review_something_else": "Κάτι άλλο…",
+        "review_not_sure": "Δεν ξέρω"
     },
     "conflict": {
         "anti_wrinkle_max": {
@@ -710,7 +712,9 @@
         "bp_needs_version": "WashData {version} ή νεότερο",
         "bp_author": "Δημιουργός",
         "bp_required": "υποχρεωτικό",
-        "pg_runs_as": "εκτελείται με {value}"
+        "pg_runs_as": "εκτελείται με {value}",
+        "review_this_cycle": "Αυτός ο κύκλος",
+        "review_usual": "Σύνηθες για {name}"
     },
     "log": {
         "all_levels": "Όλα τα επίπεδα",
@@ -1107,7 +1111,14 @@
         "bp_none_yet": "Δεν υπάρχουν ακόμη πρότυπα για αυτόν τον τύπο συσκευής. Μοιραστείτε το πρώτο.",
         "bp_unreachable": "Λαμβάνεται από το GitHub. Ελέγξτε ότι το Home Assistant έχει πρόσβαση στο διαδίκτυο και δοκιμάστε ξανά.",
         "bp_library_intro": "Έτοιμοι αυτοματισμοί που μοιράζονται χρήστες του WashData στο GitHub και ελέγχονται πριν καταχωριστούν. Διαθέσιμοι μόνο με ενεργές τις διαδικτυακές λειτουργίες.",
-        "bp_needs_version": "Απαιτεί WashData {version} ή νεότερο."
+        "bp_needs_version": "Απαιτεί WashData {version} ή νεότερο.",
+        "review_q_title": "Ποιο πρόγραμμα ήταν αυτό;",
+        "review_q_intro": "Το WashData δεν μπόρεσε να τα ξεχωρίσει. Η απάντησή σας το βοηθά να μάθει.",
+        "review_q_started": "Ξεκίνησε στις {when}",
+        "review_q_more": "Ακόμα {count} για έλεγχο",
+        "review_q_more_one": "Ακόμα {count} για έλεγχο",
+        "review_q_more_other": "Ακόμα {count} για έλεγχο",
+        "review_which_program": "Ποιο πρόγραμμα ήταν;"
     },
     "phase_desc": {
         "anti_crease": "Περιστασιακά σύντομες περιστροφές του κάδου μετά την ολοκλήρωση για μείωση των ρυτίδων.",
@@ -1667,6 +1678,8 @@
         "preparing": "Προετοιμασία…",
         "unlabelling": "Αφαίρεση επισήμανσης…",
         "working": "Επεξεργασία…",
+        "torn_pick": "{a} ή {b};",
+        "torn_tip": "Το WashData δεν μπορεί ακόμα να ξεχωρίσει αυτά τα δύο προγράμματα, οπότε αυτός ο κύκλος θα τελείωνε με ερώτηση ελέγχου. Επιλέξτε αυτό που εκτελείται και ο κύκλος θα επισημανθεί με αυτό. Η επιλογή Αυτόματος εντοπισμός το αναιρεί.",
         "match_uncertain": "Αβέβαιο: {top} ή {runner}",
         "match_uncertain_single": "Αβέβαιο: ίσως {top}",
         "match_sure": "~{pct}% βεβαιότητα",
@@ -1863,7 +1876,8 @@
         "bp_automation_created": "Αυτοματισμός δημιουργήθηκε με τις προεπιλεγμένες ρυθμίσεις; άνοιγμα",
         "copied": "Αντιγράφηκε",
         "copy_failed": "Αποτυχία αντιγραφής. Επιλέξτε το κείμενο και αντιγράψτε το χειροκίνητα.",
-        "automation_label_failed": "Ο αυτοματισμός δημιουργήθηκε, αλλά η ετικέτα ή η κατηγορία WashData δεν ήταν δυνατό να προστεθεί."
+        "automation_label_failed": "Ο αυτοματισμός δημιουργήθηκε, αλλά η ετικέτα ή η κατηγορία WashData δεν ήταν δυνατό να προστεθεί.",
+        "review_answered": "Αποθηκεύτηκε: {program}"
     },
     "suggestion": {
         "observed_label": "Παρατηρήθηκε",

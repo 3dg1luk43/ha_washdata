@@ -270,7 +270,9 @@
     "bp_details": "Sīkāka informācija",
     "bp_copy_yaml": "Kopēt YAML",
     "bp_hide_yaml": "Paslēpt YAML",
-    "bp_show_yaml": "Rādīt YAML"
+    "bp_show_yaml": "Rādīt YAML",
+    "review_something_else": "Kaut kas cits…",
+    "review_not_sure": "Nezinu"
   },
   "note": {
     "off_delay": {
@@ -722,7 +724,9 @@
     "bp_needs_version": "WashData {version} vai jaunāks",
     "bp_author": "Autors",
     "bp_required": "obligāts",
-    "pg_runs_as": "tiek izmantots {value}"
+    "pg_runs_as": "tiek izmantots {value}",
+    "review_this_cycle": "Šis cikls",
+    "review_usual": "Parasti programmai {name}"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -1129,7 +1133,15 @@
     "bp_none_yet": "Šim ierīces tipam veidņu vēl nav. Kopīgojiet pirmo.",
     "bp_unreachable": "Tā tiek lejupielādēta no GitHub. Pārbaudiet, vai Home Assistant var piekļūt internetam, un mēģiniet vēlreiz.",
     "bp_library_intro": "Gatavas automatizācijas, ko WashData lietotāji kopīgo GitHub un kas tiek pārskatītas pirms iekļaušanas sarakstā. Pieejamas tikai ar ieslēgtām tiešsaistes funkcijām.",
-    "bp_needs_version": "Nepieciešams WashData {version} vai jaunāks."
+    "bp_needs_version": "Nepieciešams WashData {version} vai jaunāks.",
+    "review_q_title": "Kāda programma tā bija?",
+    "review_q_intro": "WashData nespēja tās atšķirt. Jūsu atbilde to apmāca.",
+    "review_q_started": "Sākts {when}",
+    "review_q_more": "Vēl {count} cikli pārskatīšanai",
+    "review_q_more_zero": "Vēl {count} cikli pārskatīšanai",
+    "review_q_more_one": "Vēl {count} cikls pārskatīšanai",
+    "review_q_more_other": "Vēl {count} cikli pārskatīšanai",
+    "review_which_program": "Kura programma tā bija?"
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas trumulis īsi griežas, lai samazinātu grumbiņas.",
@@ -1692,7 +1704,9 @@
     "match_uncertain": "Nenoteikti: {top} vai {runner}",
     "match_uncertain_single": "Nenoteikti: varbūt {top}",
     "match_sure": "~{pct}% pārliecība",
-    "match_uncertain_tip": "WashData vēl nav izlēmis par programmu. Skaitlis rāda, cik bieži vadošais minējums, {top}, iepriekšējos ciklos bija pareizs, kad tas vadīja ar tik lielu pārsvaru. Tikai informācijai."
+    "match_uncertain_tip": "WashData vēl nav izlēmis par programmu. Skaitlis rāda, cik bieži vadošais minējums, {top}, iepriekšējos ciklos bija pareizs, kad tas vadīja ar tik lielu pārsvaru. Tikai informācijai.",
+    "torn_pick": "{a} vai {b}?",
+    "torn_tip": "WashData vēl nespēj atšķirt šīs divas programmas, tāpēc šis cikls beigtos ar pārskatīšanas jautājumu. Izvēlieties to, kas pašlaik darbojas, un cikls tiks ar to iezīmēts. Automātiska noteikšana to atceļ."
   },
   "tab": {
     "advanced": "Papildu",
@@ -1887,7 +1901,8 @@
     "bp_automation_created": "Automatizācija izveidota ar noklusējuma iestatījumiem; atvēršana",
     "copied": "Nokopēts",
     "copy_failed": "Kopēšana neizdevās. Atlasiet tekstu un kopējiet to manuāli.",
-    "automation_label_failed": "Automatizācija izveidota, bet WashData etiķeti vai kategoriju nevarēja pievienot."
+    "automation_label_failed": "Automatizācija izveidota, bet WashData etiķeti vai kategoriju nevarēja pievienot.",
+    "review_answered": "Saglabāts: {program}"
   },
   "suggestion": {
     "observed_label": "Novērotais",
