@@ -1206,6 +1206,12 @@ class _DetailSim:
                     name, gate.expected_duration, gate.is_ambiguous, gate.contenders, stop_w
                 ))) if name else None
             ),
+            # Element 17 (audit item 2), as the manager sends it.
+            run_expected_s=gate.run_expected if name else None,
+            # Element 18 (audit 2026-11-03 item 9), as the manager sends it.
+            programme_tail_s=progress_mod.anticrease_programme_tail(
+                store, name, self.device_type
+            ),
         )
 
     def _label_decision(self, cycle_data: dict[str, Any], live_result: Any) -> tuple[str | None, str]:

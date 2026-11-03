@@ -165,9 +165,9 @@ def test_the_ending_hold_reads_the_incoming_matchs_element_16() -> None:
     seen: list[Any] = []
     orig = det._ending_wait_left_s  # noqa: SLF001
 
-    def spy(*a: Any) -> float:
+    def spy(*a: Any, **k: Any) -> float:
         seen.append(a[5] if len(a) > 5 else None)
-        return orig(*a)
+        return orig(*a, **k)
 
     with patch.object(det, "_ending_wait_left_s", side_effect=spy):
         det.ambiguous_ending_match_defers(7200.0, 0.8, 0.0, CATALOGUE, UNION)
@@ -315,7 +315,7 @@ def test_both_producers_send_element_16() -> None:
         assert "hazard_catalogue=(" in src, module
         assert "hazard_pause_catalogue" in src, module
         assert "gate.contenders" in src, module
-    assert len(MatchContext("A", 0.5, 60.0)) == 16
+    assert len(MatchContext("A", 0.5, 60.0)) == 18
 
 
 def test_a_lazy_element_16_is_read_only_where_element_14_cannot_serve() -> None:

@@ -599,14 +599,24 @@ def _end_offset(events: list[dict[str, Any]]) -> float | None:
 
     This is the number the user experiences as "the wash is done" arriving late,
     and the only one the fallback end gate moves.
+
+    The anti-crease finalise can close a run straight from RUNNING or PAUSED into
+    anti-wrinkle, without ENDING; that finish is the close too. Without it those
+    rows had no offset and dropped out of every lag / early / split figure (36 of
+    the 98 #486 Miele runs once the finalise fires at the programme end, audit
+    2026-11-03 item 9), which also changed ``--check``'s per-type n.
     """
     for ev in reversed(events):
         if ev.get("type") != "state":
             continue
         detail = str(ev.get("detail") or "")
-        if detail.startswith("ending->"):
+        if detail.startswith("ending->") or detail in _DIRECT_CLOSES:
             return float(ev.get("t") or 0.0)
     return None
+
+
+#: State transitions that close a run without passing through ENDING.
+_DIRECT_CLOSES = frozenset({"running->anti_wrinkle", "paused->anti_wrinkle"})
 
 
 def _active_span(points: list[tuple[float, float]], stop: float) -> float:

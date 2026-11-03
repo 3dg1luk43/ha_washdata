@@ -163,6 +163,38 @@ def programme_tail_s(store: Any, program: str | None, device_type: str | None) -
         return 0.0
 
 
+def anticrease_programme_tail(
+    store: Any, program: str | None, device_type: str | None
+) -> float | None:
+    """MatchContext element 18 (audit 2026-11-03 item 9): the matched profile's
+    :func:`programme_tail_s` when it has one, 0.0 when only the DEVICE has the habit
+    (at least ``ETA_TAIL_MIN_SHARE`` of its profiles with a ``tail_ref`` of
+    ``ETA_TAIL_MIN_MEMBERS`` members), None when neither (the anti-crease finalise's
+    programme-end path is not armed). The device half is what keeps a match to a
+    tail-less programme (a mismatch, a cold wool wash) on the same event-only
+    finalise. Shared by the manager and the Playground; never raises.
+    """
+    try:
+        if not program:
+            return None
+        tail = programme_tail_s(store, program, device_type)
+        if tail > 0:
+            return tail
+        if not ETA_PROGRAMME_END or device_type not in ETA_TAIL_DEVICE_TYPES:
+            return None
+        rated = habit = 0
+        for name in store.get_profiles() or {}:
+            env = store.get_envelope(name)
+            ref = env.get("tail_ref") if isinstance(env, dict) else None
+            if not isinstance(ref, dict) or int(ref.get("n") or 0) < ETA_TAIL_MIN_MEMBERS:
+                continue
+            rated += 1
+            habit += programme_tail_s(store, name, device_type) > 0
+        return 0.0 if habit and habit >= ETA_TAIL_MIN_SHARE * rated else None
+    except Exception:  # noqa: BLE001 - a guard input must never break matching
+        return None
+
+
 def ml_energy_total(
     store: Any,
     options: Any,

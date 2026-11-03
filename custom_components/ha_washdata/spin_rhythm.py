@@ -267,6 +267,93 @@ def active_end_s(offsets: Any, watts: Any) -> float | None:
         return None
 
 
+def _tw_median(t: np.ndarray, p: np.ndarray, a: float, b: float) -> float | None:
+    """Time-weighted median of a step-hold trace over ``[a, b]``: the reading at or
+    before ``a`` holds into it. None when the window holds no time."""
+    i0 = max(0, int(np.searchsorted(t, a, side="right")) - 1)
+    i1 = int(np.searchsorted(t, b, side="left"))
+    seg_t = np.clip(np.append(t[i0:i1], b), a, b)
+    seg_p = p[i0:i1]
+    dt = np.diff(seg_t)
+    if dt.size == 0 or not float(dt.sum()) > 0:
+        return None
+    o = np.argsort(seg_p, kind="mergesort")
+    cum = np.cumsum(dt[o])
+    return float(seg_p[o][min(int(np.searchsorted(cum, 0.5 * cum[-1])), seg_p.size - 1)])
+
+
+def programme_end_quiet(
+    offsets: Any,
+    watts: Any,
+    quiet_w: float,
+    ceiling_w: float,
+    spin_gap_s: float,
+    head_s: float = 0.0,
+    head_w: float = math.inf,
+) -> tuple[float, float] | None:
+    """``(end_s, quiet_s)``: where a LIVE trace's programme ended and how long the
+    anti-crease tail after it has run, else None (audit 2026-11-03 item 9).
+
+    The end is :func:`active_end_s` of the trace so far, the definition every stored
+    cycle's ``tail_ref`` and the end-gate harness's programme truth use. Accepted
+    only when the stretch after it looks like a tail and the programme closed on
+    its final spin:
+
+    * its time-weighted median is at or below ``quiet_w`` (the Stop Threshold: a
+      Miele anti-crease tail is a ~3 W base with 5 s drum pulses; a rinse runs its
+      drum at 60-80 W and a wash after the heater at ~70 W, both far above), and so
+      is that of its first ``head_s`` against ``head_w``: a tail from its start,
+      not a rinse outlasted by a later quiet stretch (``active_end_s`` reads a
+      post-heater drum at under 4% of the heater as quiet, so its end can sit at
+      an intermediate spin);
+    * no reading in it exceeds ``ceiling_w`` (``anti_wrinkle_max_power``);
+    * a sustained mechanical event (:func:`rhythm_events`, >= 30 s) ends within
+      ``spin_gap_s`` before the end (60 s after it at most): the final spin. A
+      rinse hold, a soak or a pause has none.
+
+    ``quiet_s`` is measured from the end to the last reading. Pure, never raises.
+    """
+    try:
+        t = np.asarray(offsets, dtype=float)
+        p = np.asarray(watts, dtype=float)
+        if t.ndim != 1 or t.shape != p.shape or t.size < 8:
+            return None
+        ok = np.isfinite(t) & np.isfinite(p)
+        t, p = t[ok], p[ok]
+        if t.size < 8:
+            return None
+        order = np.argsort(t, kind="mergesort")
+        t, p = t[order] - t[order][0], p[order]
+        end = active_end_s(t, p)
+        if end is None:
+            return None
+        last = float(t[-1])
+        quiet = last - end
+        if not quiet > 0:
+            return None
+        if float(np.max(p[t > end], initial=0.0)) > float(ceiling_w):
+            return None
+        median = _tw_median(t, p, end, last)
+        if median is None or median > float(quiet_w):
+            return None
+        if head_s > 0:
+            head = _tw_median(t, p, end, min(last, end + float(head_s)))
+            if head is None or head > float(head_w):
+                return None
+        ev = rhythm_events(t, p)
+        if ev is None:
+            return None
+        spins = [
+            m for m in ev["mech"]
+            if float(m[1]) - float(m[0]) >= _SUSTAINED_S and float(m[1]) <= end + 60.0
+        ]
+        if not spins or end - float(spins[-1][1]) > float(spin_gap_s):
+            return None
+        return end, quiet
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
+
+
 def member_tail_reference(
     members: list[tuple[list[float], list[float], float]],
 ) -> dict[str, Any] | None:

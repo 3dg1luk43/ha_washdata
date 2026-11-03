@@ -1518,6 +1518,14 @@ class WashDataManager:
                         gate.contenders, float(self.detector.config.stop_threshold_w),
                     ) if profile_name else None
                 ),
+                # Element 17 (audit item 2): this run's own expected duration.
+                run_expected_s=gate.run_expected if profile_name else None,
+                # Audit 2026-11-03 item 9: the profile's anti-crease tail (0.0 when
+                # only the device has one), which arms the programme-end finalise
+                # (element 18). The Playground calls the same function.
+                programme_tail_s=progress_mod.anticrease_programme_tail(
+                    self.profile_store, profile_name, self.device_type
+                ),
             ))
 
             # --- LOGGING (Unified) ---

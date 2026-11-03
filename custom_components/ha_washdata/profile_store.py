@@ -577,6 +577,11 @@ class MatchResult:
     # ``gate_contenders`` is the same for the ranking the end gates read (#486).
     ambiguity_contenders: tuple[tuple[str, float], ...] | None = None
     gate_contenders: tuple[tuple[str, float], ...] | None = None
+    # Per-run expected duration (2026-11-03 audit, item 2): the gate profile's
+    # members nearest this run in energy over the elapsed stretch
+    # (``analysis.nearest_member_duration``), for the end gates; None unless they
+    # agree, and on every path without the live gate view.
+    gate_run_expected: float | None = None
 
     @property
     def label_confidence(self) -> float:
@@ -1669,6 +1674,28 @@ class _EnvelopeBuild(tuple):  # type: ignore[type-arg]
     energy_ref: dict[str, Any] | None = None
     spin_ref: dict[str, Any] | None = None
     tail_ref: dict[str, Any] | None = None
+    prog_ends: dict[str, float] | None = None
+
+
+def _member_programme_ends(
+    decoded: list[tuple[CycleDict, list[tuple[float, float]]]],
+) -> dict[str, float] | None:
+    """``{cycle id: programme end s}`` for the members whose trace ends in a quiet
+    tail (``spin_rhythm.active_end_s``); a member without one ends at its stored
+    duration and is left out. Executor-side, with the envelope build (audit item
+    2). Never raises."""
+    try:
+        out: dict[str, float] = {}
+        for cycle, pairs in decoded:
+            cid = cycle.get("id")
+            if not cid or len(pairs) < 3:
+                continue
+            end = spin_rhythm.active_end_s([p[0] for p in pairs], [p[1] for p in pairs])
+            if end is not None and math.isfinite(end) and end > 0:
+                out[str(cid)] = round(float(end), 1)
+        return out or None
+    except Exception:  # noqa: BLE001 - a statistic must never break the build
+        return None
 
 
 def collapse_group_candidates(
@@ -6805,6 +6832,10 @@ class ProfileStore:
             return None
 
         built = _EnvelopeBuild((result, durations))
+        # Audit item 2: each member's programme end (spin_rhythm.active_end_s, the
+        # #486 definition) by cycle id, for the per-run end expectation.
+        if self.device_type in MATCH_MEMBER_DEVICE_TYPES:
+            built.prog_ends = _member_programme_ends(decoded)
         # Stage 4's expected energy, from the same members (w7g): the warped
         # average inherits the reference cycle's heating length.
         built.energy_ref = analysis.member_energy_reference(raw_cycles_data)
@@ -7178,6 +7209,7 @@ class ProfileStore:
         energy_ref = getattr(result_pkg, "energy_ref", None)
         spin_ref = getattr(result_pkg, "spin_ref", None)
         tail_ref = getattr(result_pkg, "tail_ref", None)
+        prog_ends = getattr(result_pkg, "prog_ends", None)
 
         # Update profile stats in storage (Fast metadata update)
         if durations and profile_name in self._data.get("profiles", {}):
@@ -7263,6 +7295,10 @@ class ProfileStore:
             envelope_data["spin_ref"] = spin_ref
         if tail_ref:
             envelope_data["tail_ref"] = tail_ref
+        if prog_ends:
+            # Audit item 2: the members' programme ends, for the per-run end
+            # expectation (_member_templates); absent on envelopes built before.
+            envelope_data["member_prog_s"] = prog_ends
 
         if "envelopes" not in self._data:
             self._data["envelopes"] = {}
@@ -9299,7 +9335,8 @@ class ProfileStore:
                 })
                 if members_on and envelope_shape_count(envelope) >= MATCH_MEMBER_MIN_CYCLES:
                     mems = self._member_templates(
-                        members_by_profile.get(name) or [], used_dt
+                        members_by_profile.get(name) or [], used_dt,
+                        envelope.get("member_prog_s"),
                     )
                     if mems:
                         snapshots[-1]["members"] = mems
@@ -9368,6 +9405,7 @@ class ProfileStore:
                     [c for c in members_by_profile.get(name) or []
                      if c.get("id") != sample_cycle.get("id")],
                     used_dt,
+                    envelope.get("member_prog_s") if isinstance(envelope, dict) else None,
                 )
                 if mems:
                     snapshots[-1]["members"] = mems
@@ -9382,7 +9420,8 @@ class ProfileStore:
         return snapshots
 
     def _member_templates(
-        self, cycles: list[CycleDict], used_dt: float
+        self, cycles: list[CycleDict], used_dt: float,
+        prog_ends: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """A profile's member cycles as matching templates on the query grid (#486).
 
@@ -9421,6 +9460,14 @@ class ProfileStore:
                     "sample_span_s": span or dur,
                     "duration": dur,
                 })
+                # Audit item 2: its programme end, from the envelope build
+                # (`member_prog_s`); without one, the stored duration.
+                prog = (prog_ends or {}).get(str(c.get("id")))
+                out[-1]["prog_s"] = (
+                    float(prog)
+                    if isinstance(prog, (int, float)) and 0 < float(prog) < dur
+                    else dur
+                )
             return out
         except Exception:  # noqa: BLE001 - members are optional, never fail a match
             return []
@@ -9805,6 +9852,14 @@ class ProfileStore:
         # below: see `pre_collapse_candidates` above for why the collapse is the
         # more dangerous of the two filters here.
         longest_candidate_s = longest_candidate_duration(pre_collapse_candidates)
+        # Audit item 2: this run's own expected duration from the gate profile's
+        # nearest members, live member path only (the end gates' view).
+        gate_run_expected: float | None = None
+        if single_view is not None and gate:
+            gate_run_expected = self._run_expected_for(
+                gate.get("profile"), {str(s.get("name")): s for s in snapshots},
+                current_power_list, float(current_duration or 0.0),
+            )
 
         return MatchResult(
             best_name,
@@ -9829,7 +9884,28 @@ class ProfileStore:
                 stage5_doubt,
             ),
             gate_contenders=gate.get("contenders") if gate else None,
+            gate_run_expected=gate_run_expected,
         )
+
+    @staticmethod
+    def _run_expected_for(
+        name: str | None,
+        snap_by_name: dict[str, dict[str, Any]],
+        current_power: list[float],
+        current_duration: float,
+    ) -> float | None:
+        """``analysis.nearest_member_duration`` for profile ``name``'s member
+        templates (audit item 2); None without members. Never raises."""
+        try:
+            snap = snap_by_name.get(str(name)) if name else None
+            members = snap.get("members") if isinstance(snap, dict) else None
+            if not members:
+                return None
+            return analysis.nearest_member_duration(
+                current_power, current_duration, members, duration_key="prog_s",
+            )
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
+            return None
 
     async def async_verify_alignment(
         self,

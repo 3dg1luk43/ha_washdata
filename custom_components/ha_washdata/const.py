@@ -1030,6 +1030,51 @@ MATCH_MEMBER_KEEP = 3               # templates per profile kept after Stage 2 (
 MATCH_MEMBER_LIVE_PRESCREEN = 3
 MATCH_MEMBER_LIVE_DECIM = 2
 
+# Per-run end expectation (2026-11-03 audit, item 2). Every washer / washer-dryer /
+# dryer end gate keyed on one number, the single-template winner's expected
+# duration: tail-inclusive and blind to the load. On a live member match the store
+# also hands the end gates the gate profile's figure for THIS run
+# (analysis.nearest_member_duration -> MatchResult.gate_run_expected ->
+# match_rules.GateInputs.run_expected -> MatchContext element 17): the mean
+# PROGRAMME duration (spin_rhythm.active_end_s, recorded per member by the envelope
+# build as `member_prog_s`; the stored duration where a member has no quiet tail) of
+# the RUN_EXPECT_NEAREST members nearest the run in energy over the same elapsed
+# stretch (prefix energy, Stage 4 / Stage 5's pair), only with >=
+# RUN_EXPECT_MIN_MEMBERS members, each of the nearest within
+# RUN_EXPECT_MAX_ENERGY_LOG of the run and their durations within
+# RUN_EXPECT_MAX_SPREAD_LOG of each other. Smart Termination's duration bar, the
+# late shortening and the finish deferral (RUN_EXPECT_GATES) read it where it is
+# SHORTER, never below RUN_EXPECT_FLOOR_RATIO of the profile's, never on an
+# ambiguous match (CycleDetector._gate_expected_s); the anti-crease finalise, the
+# #399 spin guard, the hazard gate and the hard finalize keep the profile's.
+# end_gate_eval --loo --all-formats, programme truth, vs c42472e: 8 cycles end
+# sooner (-72.4 min: 6 #427 AEG Eco washes -2..-16 min via Smart Termination, whose
+# expected 129-131 min carries kept Smart-Termination tails over ~95 min programmes;
+# one AEG dryer -5.5 and one Miele -2.0 via the deferral), none later, no early
+# end, split, detected count, label or kept duration changed, Miele anti-crease
+# table identical; washing_machine prog lag median/mean 10.87/13.87 ->
+# 10.67/13.63, dryer 4.99/4.66 -> 4.95/4.58, dishwashers untouched (no members).
+# Coverage is the limit: a per-run figure exists at 97 of 304 washer finishes (the
+# gate profile is the label on ~52%, and a wrong profile's members are rarely near
+# in energy). Rejected: the members' stored durations instead of their programme
+# ends (2 sooner, -19.3 min: kept tails make neighbours disagree), floor 0.60 (the
+# same 8, only a wrong-profile Miele deferral -7.0 instead of -2.0), spread 0.20 +
+# energy 0.25 (11 sooner, -102.7 min, but Miele 2314861e5794's anti-crease tail
+# became a second detected cycle). Offline (labels, members' programme ends,
+# P + 3 min): |ln(min(R, mean) / programme)| washers 0.040 vs 0.143 for the mean.
+# Not for the ETA: the displayed programme's figure scaling the countdown
+# (x R / (expected - tail), eta_eval --all-formats, programme truth) moved the MAE
+# at 10/25/50/75/90% 18.5/20.4/20.7/16.2/11.9 -> 18.1/20.7/20.7/16.0/11.8 (dryers
+# +0.5 at 25%); only past 50% of expected 18.5/20.4/20.7/16.0/11.9 with dryers +0.3
+# at 50% (washers 15.8 -> 15.6 at 75%). Early in a run the prefix energies of all
+# members tie, so the nearest two are noise.
+RUN_EXPECT_GATES: tuple[str, ...] = ("smart", "late", "defer")
+RUN_EXPECT_NEAREST = 2
+RUN_EXPECT_MIN_MEMBERS = 3
+RUN_EXPECT_MAX_ENERGY_LOG = 0.15
+RUN_EXPECT_MAX_SPREAD_LOG = 0.10
+RUN_EXPECT_FLOOR_RATIO = 0.80
+
 # Issue #486: remaining time counts down to the PROGRAMME end, not to the end of a
 # Miele-style anti-crease tail (base ~3 W, pulses above the Stop Threshold until the
 # door opens, up to ~36 min) that every stored duration of such a washer includes.
@@ -1364,6 +1409,67 @@ ANTI_CREASE_SPIN_WAIT_MAX_RATIO = 1.25      # never block past this x expected
 # floor the band (or sample) decides alone, as before.
 ANTI_CREASE_SPIN_ARM_MIN_SHARE = 0.5
 ANTI_CREASE_SPIN_ARM_MIN_MEMBERS = 2
+
+# Audit 2026-11-03 item 9: on a washer whose programmes end in a quiet anti-crease
+# tail (#486 Miele: ~3 W base, 5 s drum pulses until the door opens, up to 36 min)
+# the finalise above fired at 0.98 x a TAIL-inclusive expected duration and the #399
+# guard never armed (the final spin sits at a median 0.73 of that span), so the
+# first finish came a median 19.6 min after the programme end, and 59 of 98 runs
+# never finalised at all (an ambiguous or #288-flagged match) but timed out after
+# the tail. Subtracting the profile's tail from expected split 5 runs: a run's
+# programme varies -24..+26% (p5..p95) around its profile's, and 180 s under
+# anti_wrinkle_max_power is a rinse as much as a tail. So on such a device the
+# finalise opens on the EVENT instead (spin_rhythm.programme_end_quiet): the live
+# trace's programme end (active_end_s, the definition tail_ref and the end-gate
+# harness's programme truth use) closed by a sustained final spin within
+# SPIN_GAP_S, then QUIET_S of tail (time-weighted median at or under QUIET_FACTOR x
+# the Stop Threshold, its first QUIET_S under HEAD_FACTOR x it, nothing above
+# anti_wrinkle_max_power), once programme time reaches MIN_RATIO x (expected - the
+# profile's tail). Armed by MatchContext element 18 (progress.anticrease_programme_
+# tail, manager and Playground: the profile's tail, 0.0 when only the device has
+# the habit). Armed, the 0.98 x expected clock does not open it at all: it is safe
+# only while every stored run carries its whole tail, and replayed against profiles
+# built from the runs this path stores (programme + ~5 min) it opened in a rinse on
+# 4 of 98 Miele runs, each split. The ambiguity and #288 flags do not apply either
+# (the event answers what they ask); confidence, verified pause, stall, the #399
+# guard, power plausibility and the 180 s window still do.
+# Offline over the 98 Miele traces: pre-end stretches that pass the tail test reach
+# 5.5 min without the spin test and stay under 2 min with it (both on truth
+# artefacts: a back-to-back pair recorded as one run, pulse holds read as
+# programme); QUIET_S 180 / 240 / 300 / 420 s: 0 early each, lag median 3.5 / 4.3 /
+# 5.3 / 7.2 min. end_gate_eval --loo --all-formats, programme truth, every row's
+# first finish: Miele first finish - programme end median/mean/p90 19.56/20.54/33.49
+# -> 5.67/7.92/16.23 min, finalises 39 -> 84, 74 runs sooner (-1269 min), 7 later
+# (+33 min: 6 by 1.2-2.5 min where the clock had fired 3-4 min after the programme,
+# and 32e43cf42ef8, which the clock had cut 16 min early); early > 1 / > 5 min, cuts,
+# short pieces 2/2/1/2 -> 1/1/1/1, pieces 100 -> 99, anti-crease EARLY 0; every
+# other export identical. Same replay against profiles built from the runs this
+# path stores (68 Miele runs cut at their new finish, -1255 min): 5.55/8.05/15.58
+# min, same flags as above, pieces 99. eta_eval (programme truth) unchanged.
+ANTI_CREASE_PROGRAMME_END = True
+ANTI_CREASE_PROGRAMME_END_DEVICE_TYPES = ("washing_machine", "washer_dryer")
+ANTI_CREASE_PROGRAMME_END_QUIET_S = 300.0
+ANTI_CREASE_PROGRAMME_END_SPIN_GAP_S = 120.0
+ANTI_CREASE_PROGRAMME_END_MIN_RATIO = 0.8
+# The tail's time-weighted median bar, x the Stop Threshold. 1.0 missed runs whose
+# base reads 6-11 W on a 5 W stop (6fc51f22cf49 then timed out 32.8 min after its
+# programme); the rinse drum at 60-80 W is far above either.
+ANTI_CREASE_PROGRAMME_END_QUIET_FACTOR = 2.0
+# The first QUIET_S after the end must be a tail too (time-weighted median at or
+# under this x the Stop Threshold; the drain-down after a spin reads ~16 W for a
+# minute): a rinse that a later quiet stretch outweighs is not one.
+ANTI_CREASE_PROGRAMME_END_HEAD_FACTOR = 4.0
+# After such a finalise the rest of the tail (up to 36 min after the programme end
+# on the corpus) is anti-wrinkle's to absorb. For this long only a reading above
+# anti_wrinkle_max_power opens the next cycle: neither a burst longer than the
+# configured length (a send-on-change plug holds a pulse level for minutes) nor,
+# after anti-wrinkle has left on idle (a pulse gap or dropout over its timeout: 5
+# of 87 tails, up to 938 s), the tail's next pulses from OFF. Fixed, not the
+# profile's tail: once runs end here the stored tails shrink to ~5 min. Cost: a
+# next wash without a heater is seen from its first spin.
+ANTI_CREASE_PROGRAMME_END_HOLD_S = 2700.0
+# The event is re-read at most this often (it walks the whole trace).
+ANTI_CREASE_PROGRAMME_END_EVAL_S = 30.0
 
 # Issue #474: a dryer's anti-crease tumble pulses (Miele T220A: ~125 W for 5-10 s
 # every ~70 s; #478 AEG TR719A4B: 130-300 W for 6-12 s every ~120 s) are above

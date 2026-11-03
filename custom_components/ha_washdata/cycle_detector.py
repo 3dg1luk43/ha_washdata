@@ -101,9 +101,21 @@ from .const import (
     ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC,
     ANTI_CREASE_TERMINAL_MATCH_FRAC,
     ANTI_CREASE_SPIN_WAIT_MAX_RATIO,
+    ANTI_CREASE_PROGRAMME_END,
+    ANTI_CREASE_PROGRAMME_END_DEVICE_TYPES,
+    ANTI_CREASE_PROGRAMME_END_QUIET_S,
+    ANTI_CREASE_PROGRAMME_END_SPIN_GAP_S,
+    ANTI_CREASE_PROGRAMME_END_MIN_RATIO,
+    ANTI_CREASE_PROGRAMME_END_QUIET_FACTOR,
+    ANTI_CREASE_PROGRAMME_END_HEAD_FACTOR,
+    ANTI_CREASE_PROGRAMME_END_HOLD_S,
+    ANTI_CREASE_PROGRAMME_END_EVAL_S,
     QUIET_PULSE_DEVICE_TYPES,
     QUIET_PULSE_MAX_S,
+    RUN_EXPECT_FLOOR_RATIO,
+    RUN_EXPECT_GATES,
 )
+from . import spin_rhythm
 
 # The dishwasher end-spike wait window is shared between two code paths
 # (Smart Termination's wait branch and _should_defer_finish's no-end-spike
@@ -420,12 +432,22 @@ class MatchContext:
     # ambiguous match (every contender's catalogue) or a profile with too few
     # traced cycles (the device's pooled one): `ProfileStore.hazard_pause_catalogue`.
     hazard_catalogue: Any = None
+    # 17 (audit item 2): this run's own expected duration from the matched
+    # profile's nearest members (`match_rules.GateInputs.run_expected`); the Smart
+    # Termination bar, the late shortening and the finish deferral may read it
+    # below `expected_duration` (`CycleDetector._gate_expected_s`).
+    run_expected_s: Any = None
+    # 18 (audit 2026-11-03 item 9): the matched profile's quiet tail after its
+    # programme end, 0.0 when only the device has one
+    # (`progress.anticrease_programme_tail`). Set, the anti-crease finalise opens
+    # only on the programme-end event. None: not armed.
+    programme_tail_s: Any = None
 
     def __getitem__(self, index: Any) -> Any:
         return self.as_sequence()[index]
 
     def __len__(self) -> int:
-        return 16
+        return 18
 
     def as_sequence(self) -> tuple[Any, ...]:
         return (
@@ -434,6 +456,8 @@ class MatchContext:
             self.is_prefix_ambiguous_full_shape, self.tail_power, self.terminal_high,
             self.terminal_quiet_s, self.longest_candidate_s, self.trusted_min_s,
             self.pause_catalogue, self.stall_catalogue, self.hazard_catalogue,
+            self.run_expected_s,
+            self.programme_tail_s,
         )
 
 
@@ -874,6 +898,18 @@ class CycleDetector:
         # traced profile (`_hazard_evidence`), or its lazy producer. None: element
         # 14's rule alone.
         self._matched_hazard_catalogue: Any = None
+        # Element 17 (audit item 2): this run's expected duration from the matched
+        # profile's nearest members, or None (`_gate_expected_s`).
+        self._matched_run_expected_s: float | None = None
+        # Element 18 (audit 2026-11-03 item 9): the matched profile's median quiet
+        # tail after its programme end (0.0: only the device has one). Set, the
+        # anti-crease finalise opens only on the programme end
+        # (`_anticrease_programme_ended`). None: not armed.
+        self._matched_programme_tail_s: float | None = None
+        # `_anticrease_programme_ended`'s throttle: (cycle start, the reading it
+        # last read the trace at, the programme end it found or None, whether that
+        # read opened the gate).
+        self._programme_end_memo: tuple[Any, datetime, datetime | None, bool] | None = None
         # Register item 498: the longest pause in the catalogue of every match
         # revoked this cycle, which bounds a verified pause the revoke orphaned
         # (`_release_orphaned_pause`). 0.0: no evidence, the floor applies.
@@ -886,6 +922,12 @@ class CycleDetector:
         # anti-crease finalise - the level at or under which a reading is that
         # tail's own baseline rather than a burst. None for every other entry.
         self._anticrease_tail_floor_w: float | None = None
+        # Audit 2026-11-03 item 9: set when that finalise came from the programme
+        # end (`_anticrease_programme_ended`), ANTI_CREASE_PROGRAMME_END_HOLD_S
+        # later. Until then a long burst is still the tail (`burst_limit` is not
+        # applied in anti-wrinkle, and OFF starts nothing at or under
+        # anti_wrinkle_max_power); a reading above it still opens the next cycle.
+        self._anticrease_tail_hold_until: datetime | None = None
         self._last_smart_term_block_reason: str | None = None  # #346 diagnostic throttle
 
         # Anti-wrinkle tracking (dryers only)
@@ -1765,6 +1807,18 @@ class CycleDetector:
         return min(value, TERMINAL_QUIET_CAP_S)
 
     @staticmethod
+    def _sanitize_programme_tail(raw: Any) -> float | None:
+        """Element 18 as a finite non-negative float (0.0: only the device has a
+        tail), else None (not armed)."""
+        if raw is None or isinstance(raw, bool):
+            return None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        return value if math.isfinite(value) and value >= 0 else None
+
+    @staticmethod
     def _sanitize_positive(raw: Any) -> float | None:
         """A finite positive float from a snapshot, else None."""
         if raw is None or isinstance(raw, bool):
@@ -1774,6 +1828,30 @@ class CycleDetector:
         except (TypeError, ValueError, OverflowError):
             return None
         return value if math.isfinite(value) and value > 0.0 else None
+
+    @staticmethod
+    def _sanitize_run_expected(raw: Any) -> float | None:
+        """Coerce element 17 to a positive duration or None (no per-run expectation)."""
+        return CycleDetector._sanitize_trusted_min(raw)
+
+    def _gate_expected_s(self, gate: str) -> float:
+        """The expected duration ``gate`` reads (audit item 2): the matched
+        profile's, or this run's own from its nearest members when that is
+        SHORTER, never below ``RUN_EXPECT_FLOOR_RATIO`` of it, never while the
+        match is ambiguous. ``gate`` is one of ``RUN_EXPECT_GATES``. Shorten-only.
+        """
+        exp = float(self._expected_duration)
+        run = self._matched_run_expected_s
+        if (
+            gate not in RUN_EXPECT_GATES
+            or run is None
+            or exp <= 0
+            or self._match_ambiguous
+            or not self._matched_profile
+            or not run < exp
+        ):
+            return exp
+        return max(float(run), RUN_EXPECT_FLOOR_RATIO * exp)
 
     @staticmethod
     def _sanitize_trusted_min(raw: Any) -> float | None:
@@ -2247,6 +2325,14 @@ class CycleDetector:
             self._matched_hazard_catalogue = (
                 _hz if callable(_hz) else self._sanitize_pause_catalogue(_hz)
             )
+            # Element 17 (audit item 2): likewise cleared by a shorter tuple.
+            self._matched_run_expected_s = self._sanitize_run_expected(
+                result_seq[16] if len(result_seq) >= 17 else None
+            )
+            # Element 18 (audit 2026-11-03 item 9): likewise.
+            self._matched_programme_tail_s = self._sanitize_programme_tail(
+                result_seq[17] if len(result_seq) >= 18 else None
+            )
             self._stall_now = None  # the current match is re-read for a run in progress
         else:
             # Assume MatchResult object or similar (future proofing)
@@ -2271,6 +2357,8 @@ class CycleDetector:
             self._matched_pause_catalogue = None
             self._matched_stall_catalogue = None
             self._matched_hazard_catalogue = None
+            self._matched_run_expected_s = None
+            self._matched_programme_tail_s = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -2459,6 +2547,9 @@ class CycleDetector:
         self._matched_pause_catalogue = None
         self._matched_stall_catalogue = None
         self._matched_hazard_catalogue = None
+        self._matched_run_expected_s = None
+        self._matched_programme_tail_s = None
+        self._programme_end_memo = None
         self._orphaned_pause_evidence_s = 0.0
         # Element 12 belongs with them: its own comment claims a stale value can
         # never license a shortening for a different match, and that was only
@@ -2484,6 +2575,7 @@ class CycleDetector:
         self._anti_wrinkle_candidate_peak = 0.0
         self._anti_wrinkle_candidate_start_power = 0.0
         self._anticrease_tail_floor_w = None
+        self._anticrease_tail_hold_until = None
         # Reset idle time tracker for anti-wrinkle
         self._anti_wrinkle_idle_time = 0.0
         # Reset delayed-start tracking
@@ -3099,11 +3191,24 @@ class CycleDetector:
                 burst_limit = float(self._config.anti_wrinkle_max_duration)
                 if tail_floor is not None:
                     burst_limit = max(burst_limit, ANTI_CREASE_CONFIRM_WINDOW_S)
+                # Audit 2026-11-03 item 9: a finalise at the programme end leaves
+                # the whole tail to absorb, and a send-on-change plug skips the base
+                # between pulses for minutes (#486 bca48d5907b7: 3.5 min of 14-83 W,
+                # which opened a phantom cycle from the tail). Within the hold only
+                # the power test opens the next one.
+                hold = self._anticrease_tail_hold_until
                 exceeds = (
                     self._anti_wrinkle_candidate_peak
                     > self._config.anti_wrinkle_max_power
                     or power > self._config.anti_wrinkle_max_power
-                    or candidate_duration > burst_limit
+                    or (
+                        candidate_duration > burst_limit
+                        and not (
+                            tail_floor is not None
+                            and hold is not None
+                            and timestamp < hold
+                        )
+                    )
                 )
 
                 if exceeds:
@@ -3115,6 +3220,7 @@ class CycleDetector:
                     self._anti_wrinkle_candidate_start_power = 0.0
                     self._transition_to(STATE_STARTING, timestamp)
                     started_from_anti_wrinkle = True
+                    self._anticrease_tail_hold_until = None
                     self._current_cycle_start = candidate_start or timestamp
 
                     # Preserve the anti-wrinkle candidate window instead of dropping ramp-up samples.
@@ -3173,6 +3279,17 @@ class CycleDetector:
                     # Safety timeout: 2 hours in anti-wrinkle
                     self._transition_to(STATE_OFF, timestamp)
                 return
+
+            # Audit 2026-11-03 item 9: anti-wrinkle left on idle inside the tail of
+            # a programme-end finalise (a pulse gap or a plug dropout longer than
+            # the idle timeout: 5 of 87 #486 tails, up to 938 s). The tail's next
+            # pulses are not a new cycle; only a reading above
+            # anti_wrinkle_max_power starts one until the hold is over.
+            hold = self._anticrease_tail_hold_until
+            if hold is not None and self._state == STATE_OFF and not started_from_anti_wrinkle:
+                if timestamp < hold and power <= float(self._config.anti_wrinkle_max_power):
+                    return
+                self._anticrease_tail_hold_until = None
 
             # Delayed-start "standby band" detection (only from STATE_OFF).
             #
@@ -3744,9 +3861,12 @@ class CycleDetector:
                     # Surface why the fast end-path is (not) firing, throttled to
                     # reason changes so a stuck cycle's cause is visible in the log
                     # without spamming every reading. Pure diagnostic (#346).
+                    # Audit item 2: this run's own expected duration where its
+                    # nearest members put it shorter (`_gate_expected_s`).
+                    _smart_expected = self._gate_expected_s("smart")
                     _block_reason = self._smart_term_block_reason(
                         current_duration,
-                        self._expected_duration,
+                        _smart_expected,
                         smart_ratio,
                         is_confident_match,
                         self._match_ambiguous,
@@ -3760,7 +3880,7 @@ class CycleDetector:
                                 "ambiguous=%s trailing_power=%s profile_tail=%s",
                                 _block_reason,
                                 current_duration,
-                                self._expected_duration * smart_ratio,
+                                _smart_expected * smart_ratio,
                                 getattr(self, "_last_match_confidence", 0.0),
                                 self._match_ambiguous,
                                 self._trailing_mean_power(timestamp, self._tail_window_s()),
@@ -3768,7 +3888,7 @@ class CycleDetector:
                             )
 
                     if (
-                        current_duration >= (self._expected_duration * smart_ratio)
+                        current_duration >= (_smart_expected * smart_ratio)
                         and is_confident_match
                         and not self._match_ambiguous
                         # A user pause is authoritative: every other finisher honours
@@ -4090,7 +4210,7 @@ class CycleDetector:
                     # cannot hide from the bar - which it could when this read
                     # `MatchResult.candidates`, i.e. `candidates[:5]`.
                     _bar_s = self._fallback_shortening_bar(
-                        self._expected_duration,
+                        self._gate_expected_s("late"),
                         self._match_ambiguous,
                         self._longest_candidate_duration,
                     )
@@ -4814,6 +4934,11 @@ class CycleDetector:
         matched profile's OWN tail level, which is equally low, and
         ``_anticrease_spin_pending`` fails open when the profile carries no
         terminal high block.
+
+        A washer whose programmes end in a quiet anti-crease tail (element 18 set)
+        does not use that fraction at all: it opens only on the observed programme
+        end (``_anticrease_programme_ended``, audit 2026-11-03 item 9), an event on
+        the trace (final spin, then minutes at the tail's base level), not a clock.
         """
         if not self._config.anti_wrinkle_enabled:
             return False
@@ -4828,13 +4953,6 @@ class CycleDetector:
         if not (self._matched_profile and self._expected_duration > 0):
             return False
         if self._last_match_confidence < self._config.match_confidence_threshold:
-            return False
-        # The #288 full-shape verdict only (the wider #364 prefix-fit flag never
-        # reached this gate, and was removed in 0.5.8): a false block here
-        # disables the finalise AND the match freeze, and because
-        # the tumble bursts recur faster than off_delay neither the fallback timeout
-        # nor ENDING_HARD_FINALIZE can close the cycle - that is the #296 hang.
-        if self._match_ambiguous or self._match_prefix_ambiguous_full_shape:
             return False
         if self._cycle_max_power <= float(self._config.anti_wrinkle_max_power):
             return False  # never a hot/energetic cycle - leave low-power programs alone
@@ -4852,7 +4970,29 @@ class CycleDetector:
         finalize_ratio = effective_anticrease_finalize_ratio(
             self._config.anti_crease_finalize_ratio
         )
-        if current_duration < self._expected_duration * finalize_ratio:
+        if self._anticrease_programme_end_armed():
+            # Audit 2026-11-03 item 9: on a washer whose programmes end in a quiet
+            # tail only the observed programme end opens it
+            # (`_anticrease_programme_ended`), not the clock below. That clock is
+            # safe there only while every stored run carries its whole tail: with
+            # the runs this path stores (programme + ~5 min) the profiles shrink
+            # and 0.98 x expected opened in a rinse on 4 of 98 replayed Miele runs
+            # (a shrunk Baumwolle 60, a tail-less Wolle kalt), each then split.
+            # The two flags below do not apply either: they ask whether "past
+            # expected" means past the wash, which the event answers on the trace
+            # itself, and most #486 Miele ticks are ambiguous between programmes
+            # that all end in the same tail (59 of 98 runs never finalised; keeping
+            # them, an earlier variant finalised 53 runs instead of 82).
+            if not self._anticrease_programme_ended(timestamp, current_duration):
+                return False
+        elif current_duration < self._expected_duration * finalize_ratio:
+            return False
+        # The #288 full-shape verdict only (the wider #364 prefix-fit flag never
+        # reached this gate, and was removed in 0.5.8): a false block here
+        # disables the finalise AND the match freeze, and because
+        # the tumble bursts recur faster than off_delay neither the fallback timeout
+        # nor ENDING_HARD_FINALIZE can close the cycle - that is the #296 hang.
+        elif self._match_ambiguous or self._match_prefix_ambiguous_full_shape:
             return False
         # #364: "past expected" only means "past the wash" when expected belongs to
         # the RIGHT profile. A whole washer wash phase sits below
@@ -4861,6 +5001,86 @@ class CycleDetector:
         # profile's own tail restores the guarantee the ratio alone used to give.
         if not self._smart_term_power_plausible(timestamp):
             return False
+        return True
+
+    def _anticrease_programme_end_armed(self) -> bool:
+        """Whether the finalise opens only on the programme end (element 18 set:
+        the matched profile, or at least the device, ends in a quiet tail)."""
+        return (
+            ANTI_CREASE_PROGRAMME_END
+            and self._config.device_type in ANTI_CREASE_PROGRAMME_END_DEVICE_TYPES
+            and self._matched_programme_tail_s is not None
+        )
+
+    def _anticrease_programme_ended(
+        self, timestamp: datetime, current_duration: float
+    ) -> bool:
+        """Whether the programme ended at least ``ANTI_CREASE_PROGRAMME_END_QUIET_S``
+        ago and the run has been in its anti-crease tail since (audit 2026-11-03
+        item 9): the clock half of ``_anticrease_gate_open`` when armed
+        (``_anticrease_programme_end_armed``).
+
+        Element 18 (``progress.anticrease_programme_tail``) is the matched
+        profile's tail, 0.0 when only the device has the habit. Not before
+        programme time reaches ``ANTI_CREASE_PROGRAMME_END_MIN_RATIO`` x that
+        profile's programme (expected less its tail). The event itself is
+        ``spin_rhythm.programme_end_quiet`` on the trace so far: the end closed on
+        a sustained final spin, then a stretch at or under the Stop Threshold
+        (time-weighted median) with nothing above ``anti_wrinkle_max_power``.
+
+        The trace is read at most every ``ANTI_CREASE_PROGRAMME_END_EVAL_S``, and
+        not again before a found end is ``..._QUIET_S`` old; a read's verdict holds
+        until the next one (never past a reading above ``anti_wrinkle_max_power``).
+        """
+        tail = self._matched_programme_tail_s
+        if tail is None or not self._anticrease_programme_end_armed():
+            return False
+        programme = self._expected_duration - tail
+        if programme <= 0 or current_duration < programme * ANTI_CREASE_PROGRAMME_END_MIN_RATIO:
+            return False
+        readings = self._power_readings
+        ceiling = float(self._config.anti_wrinkle_max_power)
+        if len(readings) < 8 or float(readings[-1][1]) > ceiling:
+            return False
+        start = self._current_cycle_start
+        memo = self._programme_end_memo
+        if memo is not None and memo[0] == start:
+            _start, last_read, end_ts, ok = memo
+            # An end found, its tail still short: read again when it can be long
+            # enough. Otherwise every EVAL_S, and a positive read holds until then:
+            # the 180 s window of `_is_anticrease_tail` passes or fails with the
+            # phase of a sparse plug's readings, so a verdict held only at the read
+            # instant finished 20 of the 98 Miele runs 0.2-12.3 min later (median
+            # first-finish lag 6.62 -> 7.39 min). A reading above the ceiling has
+            # already returned False above.
+            due = (
+                end_ts + timedelta(seconds=ANTI_CREASE_PROGRAMME_END_QUIET_S)
+                if end_ts is not None and not ok
+                else last_read + timedelta(seconds=ANTI_CREASE_PROGRAMME_END_EVAL_S)
+            )
+            if timestamp < due:
+                return ok
+        t0 = readings[0][0]
+        stop = float(self._config.stop_threshold_w)
+        found = spin_rhythm.programme_end_quiet(
+            [(ts - t0).total_seconds() for ts, _p in readings],
+            [float(p) for _ts, p in readings],
+            stop * ANTI_CREASE_PROGRAMME_END_QUIET_FACTOR,
+            ceiling,
+            ANTI_CREASE_PROGRAMME_END_SPIN_GAP_S,
+            head_s=ANTI_CREASE_PROGRAMME_END_QUIET_S,
+            head_w=stop * ANTI_CREASE_PROGRAMME_END_HEAD_FACTOR,
+        )
+        end_ts = t0 + timedelta(seconds=found[0]) if found is not None else None
+        ok = found is not None and found[1] >= ANTI_CREASE_PROGRAMME_END_QUIET_S
+        self._programme_end_memo = (start, timestamp, end_ts, ok)
+        if not ok:
+            return False
+        self._logger.debug(
+            "Programme end seen: '%s' ended at %.0fs, anti-crease tail for %.0fs "
+            "(expected %.0fs incl. a %.0fs tail).",
+            self._matched_profile, found[0], found[1], self._expected_duration, tail,
+        )
         return True
 
     def _in_anticrease_freeze(self, timestamp: datetime) -> bool:
@@ -5134,10 +5354,14 @@ class CycleDetector:
                 default=0.0,
             ),
         )
+        # Audit 2026-11-03 item 9: opened by the programme-end event rather than
+        # the tail-inclusive expected end; the rest of the tail is still ahead.
+        at_programme_end = self._anticrease_programme_end_armed()
         self._logger.info(
-            "Anti-crease finalize: matched '%s' past expected %.0fs (elapsed %.0fs), "
+            "Anti-crease finalize: matched '%s' %s (expected %.0fs, elapsed %.0fs), "
             "settled into the low-power tumble tail — finalizing into anti-wrinkle.",
             self._matched_profile,
+            "at its programme end" if at_programme_end else "past expected",
             self._expected_duration,
             current_duration,
         )
@@ -5174,6 +5398,10 @@ class CycleDetector:
         # After _finish_cycle, whose reset() clears it (register item 393a).
         if self._state == STATE_ANTI_WRINKLE:
             self._anticrease_tail_floor_w = tail_floor
+            if at_programme_end:
+                self._anticrease_tail_hold_until = timestamp + timedelta(
+                    seconds=ANTI_CREASE_PROGRAMME_END_HOLD_S
+                )
         return True
 
     def _is_terminal_drop(self) -> bool:
@@ -5389,13 +5617,15 @@ class CycleDetector:
             )
             return False
 
-        # Primary check: Is duration significantly below expectation?
-        if duration < (self._expected_duration * ratio):
+        # Primary check: Is duration significantly below expectation? (Audit item
+        # 2: this run's own expectation where its nearest members put it shorter.)
+        _defer_expected = self._gate_expected_s("defer")
+        if duration < (_defer_expected * ratio):
             self._logger.debug(
                 "Deferring cycle finish: duration %.0fs < %.0f%% of expected %.0fs (profile: %s, confidence %.2f)",
                 duration,
                 ratio * 100,
-                self._expected_duration,
+                _defer_expected,
                 self._matched_profile,
                 self._last_match_confidence,
             )
@@ -5434,7 +5664,8 @@ class CycleDetector:
 
     def _ending_wait_left_s(
         self, expected: float, ambiguous: bool, longest: float, confidence: float, cat: Any,
-        ext: Any = None,
+        ext: Any = None, late_expected: float | None = None,
+        defer_expected: float | None = None,
     ) -> float:
         """Seconds until the ENDING fallback would finish under continued quiet, for
         a match with these values (register item 469b).
@@ -5455,7 +5686,9 @@ class CycleDetector:
             ext,
         )
         left = max(0.0, hazard - quiet)
-        bar = self._fallback_shortening_bar(expected, ambiguous, longest)
+        bar = self._fallback_shortening_bar(
+            expected if late_expected is None else late_expected, ambiguous, longest
+        )
         if bar is not None and elapsed + left >= bar:
             short = min(hazard, max(
                 self._config.off_delay,
@@ -5463,7 +5696,8 @@ class CycleDetector:
             ))
             left = max(0.0, short - quiet, bar - elapsed)
         if confidence >= DEFAULT_DEFER_FINISH_CONFIDENCE:
-            left = max(left, expected * float(self._config.min_duration_ratio) - elapsed)
+            floor = expected if defer_expected is None else defer_expected
+            left = max(left, floor * float(self._config.min_duration_ratio) - elapsed)
         return left
 
     def ambiguous_ending_match_defers(
@@ -5519,6 +5753,8 @@ class CycleDetector:
             self._expected_duration, self._match_ambiguous,
             self._longest_candidate_duration, self._last_match_confidence,
             self._matched_pause_catalogue, self._matched_hazard,
+            late_expected=self._gate_expected_s("late"),
+            defer_expected=self._gate_expected_s("defer"),
         )
         if new_left > old_left + 1.0:
             return True
@@ -6040,6 +6276,10 @@ class CycleDetector:
                 if isinstance(self._matched_hazard_catalogue, tuple)
                 else None
             ),
+            # Element 17 (audit item 2); an older snapshot restores None.
+            "matched_run_expected_s": self._matched_run_expected_s,
+            # Element 18: a run restored into its match freeze never re-matches.
+            "matched_programme_tail_s": self._matched_programme_tail_s,
             "longest_candidate_duration": self._longest_candidate_duration,
             "ml_defer_start_duration": self._ml_defer_start_duration,
             # Without it a restart dropped the confidence to 0.0: Smart Termination
@@ -6050,6 +6290,10 @@ class CycleDetector:
             # the anti-wrinkle state. Without the floor a restart mid-tail fell
             # back to the configured burst length, which splits the tail again.
             "anticrease_tail_floor_w": self._anticrease_tail_floor_w,
+            "anticrease_tail_hold_until": (
+                self._anticrease_tail_hold_until.isoformat()
+                if self._anticrease_tail_hold_until else None
+            ),
             "anti_wrinkle_idle_time": self._anti_wrinkle_idle_time,
             # Item 511: the stalls already over, which the end gates' clock
             # excludes (the one in progress is re-derived from the trace).
@@ -6166,6 +6410,13 @@ class CycleDetector:
             self._matched_hazard_catalogue = self._sanitize_pause_catalogue(
                 snapshot.get("matched_hazard_catalogue")
             )
+            self._matched_run_expected_s = self._sanitize_run_expected(
+                snapshot.get("matched_run_expected_s")
+            )
+            self._matched_programme_tail_s = self._sanitize_programme_tail(
+                snapshot.get("matched_programme_tail_s")
+            )
+            self._programme_end_memo = None
             # Unconditionally, because the hazard is the value already on the
             # object, not the one in the snapshot: this restores the ambiguity
             # flags the ENDING gate reads, so leaving the bound untouched pairs
@@ -6192,6 +6443,15 @@ class CycleDetector:
             self._anti_wrinkle_idle_time = (
                 self._sanitize_positive(snapshot.get("anti_wrinkle_idle_time")) or 0.0
                 if in_tail else 0.0
+            )
+            _hold = snapshot.get("anticrease_tail_hold_until")
+            _hold_dt = (
+                dt_util.parse_datetime(_hold)
+                if self._state in (STATE_ANTI_WRINKLE, STATE_OFF) and isinstance(_hold, str)
+                else None
+            )
+            self._anticrease_tail_hold_until = (
+                dt_util.as_utc(_hold_dt) if _hold_dt is not None else None
             )
             self._anti_wrinkle_candidate_start = None
             self._anti_wrinkle_candidate_peak = 0.0

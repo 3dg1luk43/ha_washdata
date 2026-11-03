@@ -60,6 +60,10 @@ from .const import (
     MATCH_MEMBER_LIVE_PRESCREEN,
     MATCH_MEMBER_TEMPLATES,
     MAX_ALIGN_GRID_POINTS,
+    RUN_EXPECT_MAX_ENERGY_LOG,
+    RUN_EXPECT_MAX_SPREAD_LOG,
+    RUN_EXPECT_MIN_MEMBERS,
+    RUN_EXPECT_NEAREST,
     STAGE4_INTEGRATED_ENERGY_DEVICE_TYPES,
 )
 from .signal_processing import integrate_wh
@@ -1272,6 +1276,68 @@ def prefix_mean(
         k = max(1, int(round(len(sample) * (current_duration / sample_span_s))))
         return float(np.mean(sample[:k])), current_duration
     return float(np.mean(sample)), profile_duration
+
+
+def nearest_member_duration(
+    current_power: list[float] | np.ndarray,
+    current_duration: float,
+    members: list[dict[str, Any]],
+    *,
+    nearest: int = RUN_EXPECT_NEAREST,
+    min_members: int = RUN_EXPECT_MIN_MEMBERS,
+    max_energy_log: float = RUN_EXPECT_MAX_ENERGY_LOG,
+    max_spread_log: float = RUN_EXPECT_MAX_SPREAD_LOG,
+    duration_key: str = "duration",
+) -> float | None:
+    """This run's expected duration from the profile members nearest to it in
+    energy over the same elapsed stretch (2026-11-03 audit, item 2).
+
+    ``members`` are a profile's member templates on the query's grid
+    (``ProfileStore._member_templates``: ``sample_power``, ``sample_span_s``,
+    ``duration``). Each member's energy is taken over the run's elapsed time with
+    :func:`prefix_mean`, the Stage-4 / Stage-5 like-for-like pair, so a member that
+    ran longer is graded on its own prefix and one that finished sooner on its
+    whole trace. The mean ``duration_key`` of the ``nearest`` members by
+    ``|ln(E_run / E_member)|``, or None unless there are ``min_members``, each of
+    the nearest is within ``max_energy_log`` of the run and their durations agree
+    within ``max_spread_log``. Never raises.
+    """
+    try:
+        cur = np.asarray(current_power, dtype=float)
+        if cur.size == 0 or not (current_duration > 0) or len(members) < max(1, min_members):
+            return None
+        run_e = float(np.mean(cur)) * float(current_duration)
+        if not (math.isfinite(run_e) and run_e > 0):
+            return None
+        scored: list[tuple[float, float]] = []
+        for mem in members:
+            sp = mem.get("sample_power")
+            dur = float(mem.get(duration_key) or mem.get("duration") or 0.0)
+            if sp is None or len(sp) == 0 or not (math.isfinite(dur) and dur > 0):
+                continue
+            m_mean, m_span = prefix_mean(
+                sp, float(current_duration),
+                float(mem.get("sample_span_s") or mem.get("duration") or dur),
+                float(mem.get("duration") or dur),
+            )
+            e = m_mean * m_span
+            if not (math.isfinite(e) and e > 0):
+                continue
+            scored.append((abs(math.log(run_e / e)), dur))
+        k = max(1, int(nearest))
+        if len(scored) < max(k, int(min_members)):
+            return None
+        scored.sort(key=lambda t: t[0])
+        near = scored[:k]
+        if near[-1][0] > max_energy_log:
+            return None
+        durs = [d for _e, d in near]
+        if math.log(max(durs) / min(durs)) > max_spread_log:
+            return None
+        out = float(np.mean(durs))
+        return out if math.isfinite(out) and out > 0 else None
+    except Exception:  # noqa: BLE001 - a statistic must never break matching
+        return None
 
 
 def member_energy_reference(

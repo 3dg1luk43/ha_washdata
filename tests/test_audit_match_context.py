@@ -21,8 +21,11 @@ def test_every_named_field_reaches_its_detector_state() -> None:
         trusted_min_s=3000.0, pause_catalogue=(3, ((0.5, 120.0),)),
         stall_catalogue=(3, ((0.4, 900.0), (0.6, 60.0))),
         hazard_catalogue=(4, ((0.9, 300.0),)),
+        run_expected_s=3300.0,
+        programme_tail_s=1500.0,
     ))
     assert det._matched_profile == "Cotton"  # noqa: SLF001
+    assert det._matched_programme_tail_s == 1500.0  # noqa: SLF001
     assert det._expected_duration == 3600.0  # noqa: SLF001
     assert det._match_ambiguous is True  # noqa: SLF001
     assert det._match_prefix_ambiguous_full_shape is True  # noqa: SLF001
@@ -34,14 +37,15 @@ def test_every_named_field_reaches_its_detector_state() -> None:
     # Element 15 (#452) keeps only the stretches that can set a stall's wait.
     assert det._matched_stall_catalogue == (3, ((0.4, 900.0),))  # noqa: SLF001
     assert det._matched_hazard_catalogue == (4, ((0.9, 300.0),))  # noqa: SLF001
+    assert det._matched_run_expected_s == 3300.0  # noqa: SLF001
 
 
 def test_the_context_is_the_legacy_sequence() -> None:
     ctx = MatchContext("A", 0.5, 60.0)
-    assert len(ctx) == 16 and ctx[0] == "A" and ctx[11] == 0.0 and ctx[13] is None
+    assert len(ctx) == 18 and ctx[0] == "A" and ctx[11] == 0.0 and ctx[13] is None
     assert tuple(ctx.as_sequence()) == (
         "A", 0.5, 60.0, None, False, False, False, False, None, None, None, 0.0, None, None,
-        None, None,
+        None, None, None, None,
     )
 
 

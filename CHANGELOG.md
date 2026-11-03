@@ -12,8 +12,8 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 ### TL;DR
 
 - Washing machines and dryers recognise their program far more often, while running and at the end.
+- Washers report "finished" sooner after the program ends; with an anti-crease phase within minutes, not 20.
 - Remaining time on washers with an anti-crease phase counts down to the program end.
-- Washers and washer-dryers report "finished" sooner after the program ends.
 - Cycle and program energy are right on plugs that report only on change; history is recalculated.
 - A blank notification text sends the default instead of failing.
 - New actions: mark a maintenance task done, delete a cycle.
@@ -25,6 +25,8 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### Fixes
 
+- **"Finished" came 20 minutes after the program on washers with an anti-crease phase** ([#486](https://github.com/3dg1luk43/ha_washdata/issues/486)): the anti-crease end waited for 98% of the program's recorded length, which includes the anti-crease phase, and only on an unambiguous match. It now ends on the program's own end: the final spin, then 5 minutes of the anti-crease phase's drum pulses. On the reporter's Miele (98 runs) "finished" comes a median 5.7 minutes after the program ends instead of 19.6 (90% within 16 instead of 33); a cycle that ended 16 minutes early and one that was split in two are now right, and a dropout in the anti-crease phase does not start a new cycle. Other appliances are unchanged. Thanks to @TRON4R
+- **"Finished" came late on programs whose recorded cycles ran long**: the end waited for 98% of the program's average length, which includes kept waiting time and ignores the load. When the program's two recorded cycles closest to the running one agree on a shorter length, the end uses it (never longer, never below 80% of the average). Replayed, 8 cycles end 2 to 16 minutes sooner and none later.
 - **"Finished" came late when two programs looked alike or a program was new** ([#486](https://github.com/3dg1luk43/ha_washdata/issues/486)): the shortened end wait was switched off for an uncertain match and for programs with fewer than 3 recorded cycles, so those cycles waited the full Minimum Off Gap. It now uses the pauses of every likely program (or of the whole appliance for a new one), and washers past 80% of a program's length no longer wait the longer path. Replayed over 589 cycles, 116 end sooner and none later: the wait after the program end for washing machines is a median 10.9 min instead of 11.8 (mean 13.9 instead of 15.6), for washer-dryers 4.7 instead of 6.3.
 - **Old installs did not recognise the program until late in each cycle** ([#486](https://github.com/3dg1luk43/ha_washdata/issues/486)): a minimum match ratio stored by old versions or old suggestions (0.3 to 0.96 of a program's length) forbade any match before that point. It is reset to the default once on update (not on dishwashers, where it was measured to delay some ends). On the affected appliances the right program is shown half way through in 69% of cycles instead of 64%.
 - **An old imported store recording could replace your own program template**: a recording flagged by an old store version now only stands in for programs without cycles of your own.

@@ -193,7 +193,9 @@ measures absolute *level/spread*.
   Locked by `tests/test_progress_module.py` and the Playground parity tests (there is no separate
   golden snapshot file); **never fork this math**. On washers whose profile ends in a quiet
   anti-crease tail (`envelope["tail_ref"]`, `programme_tail_s`, #486) only the countdown subtracts
-  it; progress %, phases, energy and every end gate keep the full expected duration.
+  it; progress %, phases, energy and the end gates keep the full expected duration, except the
+  anti-crease finalise, which on such a profile opens only on the observed programme end
+  (`spin_rhythm.programme_end_quiet`: final spin + quiet tail; MatchContext element 18).
 - **`notification_rules.py`** - pure notification *decision* predicates shared by `manager.py` and the
   Playground sim. **Delivery stays in the manager**; only thresholds/gating live here.
 - **`match_rules.py`** (audit F7) - the manager's post-match rules as pure functions: program
@@ -517,7 +519,10 @@ Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for
   `gate_expected_duration` / `gate_ambiguous` / `gate_prefix_full_shape`), i.e. what they read with
   members off; `is_ambiguous` stays the member ranking's own margin for the switching rules. The
   manager and the Playground both go through `match_rules.detector_inputs`; never feed
-  `MatchContext` member-based fields. Following a "confirmed" member winner
+  `MatchContext` member-based fields. The one member-derived input is element 17
+  (`GateInputs.run_expected`): the GATE profile's two energy-nearest members' programme
+  durations, only when they agree, floored at 0.8x, never on an ambiguous match, and read
+  shorten-only by the Smart Termination bar, the late shortening and the deferral. Following a "confirmed" member winner
   (`MATCH_MEMBER_GATE_CONFIRM`) is off: it split a 1-cycle programme at the margin. Live cost:
   only `MATCH_MEMBER_LIVE_PRESCREEN` members per profile (cheap vectorised pre-score) get Stage 2,
   decimated by `MATCH_MEMBER_LIVE_DECIM` (~1.8x a single-template match instead of ~4x).

@@ -209,6 +209,9 @@ class GateInputs:
     # from the same ranking as ``is_ambiguous`` (``MatchResult.ambiguity_contenders``
     # / ``gate_contenders``): what the hazard end gate reads. None: no such set.
     contenders: Any = None
+    # This run's own expected duration from the gate profile's nearest members
+    # (``MatchResult.gate_run_expected``, audit item 2), None without one.
+    run_expected: Any = None
 
 
 def detector_inputs(tick: "MatchTick", result: Any) -> GateInputs:
@@ -234,7 +237,10 @@ def detector_inputs(tick: "MatchTick", result: Any) -> GateInputs:
     gate_pfs = getattr(result, "gate_prefix_full_shape", None)
     if isinstance(gate_pfs, bool):
         prefix = gate_pfs
-    return GateInputs(name, revoke, conf, expected, ambiguous, prefix, contenders)
+    run_expected = None
+    if isinstance(gate_amb, bool):
+        run_expected = profile_duration(getattr(result, "gate_run_expected", None))
+    return GateInputs(name, revoke, conf, expected, ambiguous, prefix, contenders, run_expected)
 
 
 def detector_match(tick: "MatchTick", result: Any) -> tuple[str | None, bool]:
