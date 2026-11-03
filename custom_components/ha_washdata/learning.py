@@ -38,6 +38,7 @@ from .const import (
     DEFAULT_LEARNING_CONFIDENCE,
     MIN_SUGGESTION_COOLDOWN_CYCLES,
     MIN_SUGGESTION_REL_DELTA,
+    REVIEW_BUDGET_PER_PROFILE,
     TerminationReason,
 )
 from .suggestion_engine import SuggestionEngine
@@ -723,6 +724,19 @@ class LearningManager:
             )
             return
 
+        # A refused gate asks only while this programme's review budget lasts
+        # (REVIEW_BUDGET_PER_PROFILE): the answers that move accuracy are a
+        # programme's first ones and every correction, not the tenth confirmation.
+        if not warmup_request:
+            spent = self._review_budget_spent(detected_profile)
+            if spent >= REVIEW_BUDGET_PER_PROFILE:
+                self._logger.debug(
+                    "Not asking about cycle %s: '%s' already has %d waiting or "
+                    "confirmed review requests",
+                    cycle_id, detected_profile, spent,
+                )
+                return
+
         actual_duration = cycle_data.get("duration", 0)
 
         # Request feedback via learning manager for moderate confidence
@@ -739,6 +753,30 @@ class LearningManager:
         # The pending review is surfaced in the panel's Cycles review queue;
         # WashData intentionally does not raise a persistent notification here.
         self._spawn(self.profile_store.async_save())
+
+    def _review_budget_spent(self, profile_name: str) -> int:
+        """Review requests about ``profile_name`` that spend its budget. Never raises.
+
+        Waiting requests, plus answers that did not correct it: a confirmation, a
+        dismissal, or a relabel to that same programme. A correction to another
+        programme does not count (see ``REVIEW_BUDGET_PER_PROFILE``). Counted from
+        the stored queue and answer history, so it survives a restart and follows
+        a profile rename, which rewrites both.
+        """
+        spent = 0
+        try:
+            for rec in (self.profile_store.get_pending_feedback() or {}).values():
+                if isinstance(rec, dict) and rec.get("detected_profile") == profile_name:
+                    spent += 1
+            for rec in (self.profile_store.get_feedback_history() or {}).values():
+                if not isinstance(rec, dict) or rec.get("original_detected_profile") != profile_name:
+                    continue
+                corrected = rec.get("corrected_profile")
+                if rec.get("user_confirmed") or not corrected or corrected == profile_name:
+                    spent += 1
+        except Exception:  # noqa: BLE001 - a count must never block a cycle end
+            self._logger.debug("Review budget count failed", exc_info=True)
+        return spent
 
     def request_cycle_verification(
         self,

@@ -506,6 +506,18 @@ ENERGY_ANOMALY_Z_THRESHOLD = 2.5   # |z-score| above this = energy anomaly
 # (margin, ambiguity, label_confidence) now carry what the extra prompts guarded.
 CONF_PROFILE_MIN_WARMUP_CYCLES = 2   # labeled cycles before auto-labelling is enabled
 
+# Review budget per programme (2026-11-03 audit item 1): a cycle the label gate
+# refused is queued for review only while its detected programme has fewer than
+# this many review requests that are still waiting or were answered without a
+# correction (confirmed, dismissed, or relabelled to that same programme). A
+# correction does not spend it: the matcher is still pulling other programmes'
+# cycles onto this one, which is where an answer helps. Chronological closed-loop
+# replay, 13 devices / 371 cycles, every request answered: asking every refused
+# cycle took 105 questions for +33 top-1 over never answering; this budget 60
+# for +34 (1: 45 for +23; 3: 75 for +32). With half the requests answered both
+# gain +21.6, from 58 raised instead of 105.
+REVIEW_BUDGET_PER_PROFILE = 2
+
 # Shape drift detection: compares the average power-curve envelope of the
 # earliest third of a profile's cycles against the most recent third.
 # A Pearson correlation below SHAPE_DRIFT_THRESHOLD signals drift.
