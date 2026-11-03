@@ -31,24 +31,45 @@ global sweep was a DISHWASHER. At 0.90, washers only: median end lag
 (The first cut of this read 13.69, but ~3.2 min of that came from applying the
 0.90 ratio to an ambiguity-RAISED bar, which defeats the bar's purpose and was
 corrected in round 33 - see register item 364.)
+
+2026-11-03: lowered to 0.80, the finish-deferral floor (``DEFAULT_DEFER_FINISH_RATIO``)
+below which a trusted match cannot finish anyway; 0.75 replayed byte-identical. On
+programme truth (end_gate_eval --loo --all-formats) 18 washer ends came sooner (-125
+min), none flagged. The late wait also became shorten-only against the hazard wait:
+swapping a shorter hazard wait for it at the bar ended 7 Miele washes 1-3 min later.
 """
 from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 
 from custom_components.ha_washdata.const import (
+    DEFAULT_DEFER_FINISH_RATIO,
     DEVICE_TYPE_DISHWASHER,
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_WASHER_DRYER,
     DEVICE_TYPE_WASHING_MACHINE,
     END_GATE_LATE_RATIO,
+    END_GATE_LATE_SECONDS,
+    STATE_ENDING,
     resolve_end_gate_late_ratio,
 )
 
 
 def test_washers_get_a_reachable_bar() -> None:
-    assert resolve_end_gate_late_ratio(DEVICE_TYPE_WASHING_MACHINE) == pytest.approx(0.90)
-    assert resolve_end_gate_late_ratio(DEVICE_TYPE_WASHER_DRYER) == pytest.approx(0.90)
+    assert resolve_end_gate_late_ratio(DEVICE_TYPE_WASHING_MACHINE) == pytest.approx(0.80)
+    assert resolve_end_gate_late_ratio(DEVICE_TYPE_WASHER_DRYER) == pytest.approx(0.80)
+
+
+def test_the_washer_bar_sits_on_the_finish_deferral_floor() -> None:
+    """Below DEFAULT_DEFER_FINISH_RATIO a trusted match (confidence >= 0.55) cannot
+    finish anyway, so a lower bar reaches only the matches the deferral distrusts:
+    0.75 replayed byte-identical to 0.80 on the whole corpus."""
+    for dt in (DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_WASHER_DRYER):
+        assert resolve_end_gate_late_ratio(dt) == pytest.approx(DEFAULT_DEFER_FINISH_RATIO)
 
 
 def test_every_other_device_type_is_unchanged() -> None:
@@ -136,3 +157,59 @@ def test_the_device_ratio_never_discounts_a_raised_ambiguity_bar() -> None:
     assert det._fallback_shortening_bar(5000.0, True, 4000.0) == pytest.approx(washer * 5000.0)
     # Ambiguous with no candidate durations at all: blocked.
     assert det._fallback_shortening_bar(5000.0, True, 0.0) is None
+
+
+# ------------------------------------------- the gate itself, driven (2026-11-03)
+
+T0 = datetime(2026, 5, 1, 8, 0, tzinfo=timezone.utc)
+EXPECTED_S = 7200.0
+
+
+def _quiet_to_end(stop_at: float, catalogue: Any) -> float:
+    """Seconds of 0 W after a washer ran at 500 W until ``stop_at`` x expected."""
+    from custom_components.ha_washdata.cycle_detector import CycleDetector, MatchContext
+    from custom_components.ha_washdata.detector_config import build_detector_config
+
+    det = CycleDetector(
+        build_detector_config(
+            {"off_delay": 60, "min_off_gap": 1647, "min_power": 2.0,
+             "stop_threshold_w": 2.0, "start_threshold_w": 5.0},
+            {}, DEVICE_TYPE_WASHING_MACHINE,
+        ),
+        MagicMock(), MagicMock(),
+    )
+    t = T0
+    while (t - T0).total_seconds() < stop_at * EXPECTED_S:
+        det.process_reading(500.0, t)
+        t += timedelta(seconds=30)
+    det.update_match(MatchContext(
+        profile_name="Cotton", confidence=0.8, expected_duration=EXPECTED_S,
+        pause_catalogue=catalogue,
+    ))
+    quiet_from = t
+    for _ in range(200):
+        det.process_reading(0.0, t)
+        if det.state not in (STATE_ENDING, "paused", "running"):
+            return (t - quiet_from).total_seconds()
+        t += timedelta(seconds=30)
+    raise AssertionError("never ended")
+
+
+def test_past_the_lowered_bar_a_washer_waits_the_late_seconds() -> None:
+    """At 0.85 of expected (under the old 0.90 bar) the blind min_off_gap is gone."""
+    quiet = _quiet_to_end(0.85, None)  # quiet is credited from the last 500 W reading
+    assert END_GATE_LATE_SECONDS - 30 <= quiet <= END_GATE_LATE_SECONDS + 30
+
+
+def test_a_quiet_from_below_the_bar_ends_at_the_bar() -> None:
+    """Gone quiet at 0.70: min_off_gap (1647 s) until the run reaches 0.80, where
+    the late wait (already served) applies. At 0.90 it waited to 0.90 (1440 s)."""
+    quiet = _quiet_to_end(0.70, None)
+    assert 0.10 * EXPECTED_S - 30 <= quiet <= 0.10 * EXPECTED_S + 30
+
+
+def test_the_late_wait_never_lengthens_a_shorter_hazard_wait() -> None:
+    """Three traced runs, none pausing longer than 160 s from 90% on: the hazard
+    wait is 200 s, and crossing the bar used to swap it for the 300 s late wait."""
+    quiet = _quiet_to_end(0.95, (3, ((0.97, 160.0),) * 3))
+    assert 200 - 30 <= quiet <= 200 + 30

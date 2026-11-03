@@ -243,7 +243,7 @@ def test_a_confident_mismatch_drops_the_displayed_program() -> None:
     result = _result(None, 0.0, mismatch=True)
     tick = match_rules.begin_tick(state, result, 3, 600.0)
     match_rules.decide_switch(state, tick, result, 3, 0.35)
-    match_rules.consistency_override(state, tick, result, False, lambda _n: None)
+    match_rules.consistency_override(state, tick, result, False)
     assert state.current_program == match_rules.DETECTING
     assert state.matched_duration is None
 

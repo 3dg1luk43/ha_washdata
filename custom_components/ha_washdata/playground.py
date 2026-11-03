@@ -1027,9 +1027,6 @@ class _DetailSim:
             _LOGGER.debug("Playground alignment check failed", exc_info=True)
             return False, 0.0
 
-    def _get_profile(self, name: str) -> Any:
-        return self.store.get_profile(name)
-
     def _matcher(self, det_readings: list[tuple[datetime, float]]) -> Any:
         """One live match tick: ``manager._async_do_perform_matching`` in sequence.
 
@@ -1095,7 +1092,7 @@ class _DetailSim:
             program=st.current_program,
         )
         verified = pause.verified_pause
-        match_rules.consistency_override(st, tick, result, verified, self._get_profile)
+        match_rules.consistency_override(st, tick, result, verified)
         # The manager's ENDING pause hold (register item 469b).
         verified = match_rules.hold_in_ending(
             ending=det.state == STATE_ENDING,
@@ -1201,6 +1198,12 @@ class _DetailSim:
             stall_catalogue=(
                 (lambda: _ask(lambda: store.profile_pause_catalogue(
                     name, standby_near_stop_ceiling(stop_w)
+                ))) if name else None
+            ),
+            # Element 16, lazy as the manager sends it.
+            hazard_catalogue=(
+                (lambda: _ask(lambda: store.hazard_pause_catalogue(
+                    name, gate.expected_duration, gate.is_ambiguous, gate.contenders, stop_w
                 ))) if name else None
             ),
         )

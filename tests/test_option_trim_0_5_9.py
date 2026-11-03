@@ -127,7 +127,7 @@ async def test_every_retired_key_goes_from_options_and_data(hass: HomeAssistant)
 
     assert await async_migrate_entry(hass, entry) is True
 
-    assert (entry.version, entry.minor_version) == (3, 12) == (
+    assert (entry.version, entry.minor_version) == (3, 13) == (
         CONFIG_ENTRY_VERSION, CONFIG_ENTRY_MINOR_VERSION,
     )
     _no_retired_keys(entry)
@@ -187,7 +187,7 @@ async def test_the_migration_is_idempotent(hass: HomeAssistant) -> None:
 async def test_a_clean_3_11_entry_only_advances(hass: HomeAssistant) -> None:
     entry = _entry(hass, dict(KEPT))
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 12
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert dict(entry.options) == KEPT
 
 

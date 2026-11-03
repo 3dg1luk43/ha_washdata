@@ -416,12 +416,16 @@ class MatchContext:
     # long enough to be judged, so the profile's traces are not walked for it on
     # every cycle (`test_perf_budgets`).
     stall_catalogue: Any = None
+    # 16 (hazard end gate): its evidence where element 14 cannot serve, an
+    # ambiguous match (every contender's catalogue) or a profile with too few
+    # traced cycles (the device's pooled one): `ProfileStore.hazard_pause_catalogue`.
+    hazard_catalogue: Any = None
 
     def __getitem__(self, index: Any) -> Any:
         return self.as_sequence()[index]
 
     def __len__(self) -> int:
-        return 15
+        return 16
 
     def as_sequence(self) -> tuple[Any, ...]:
         return (
@@ -429,7 +433,7 @@ class MatchContext:
             self.is_confident_mismatch, self.is_ambiguous, False,
             self.is_prefix_ambiguous_full_shape, self.tail_power, self.terminal_high,
             self.terminal_quiet_s, self.longest_candidate_s, self.trusted_min_s,
-            self.pause_catalogue, self.stall_catalogue,
+            self.pause_catalogue, self.stall_catalogue, self.hazard_catalogue,
         )
 
 
@@ -866,6 +870,10 @@ class CycleDetector:
         # (traced cycles, ((start_fraction, seconds), ...)), for the hazard end
         # gate. None: no catalogue, the fallback waits as before.
         self._matched_pause_catalogue: tuple[int, tuple[tuple[float, float], ...]] | None = None
+        # Element 16: the hazard gate's evidence for an ambiguous match or a thinly
+        # traced profile (`_hazard_evidence`), or its lazy producer. None: element
+        # 14's rule alone.
+        self._matched_hazard_catalogue: Any = None
         # Register item 498: the longest pause in the catalogue of every match
         # revoked this cycle, which bounds a verified pause the revoke orphaned
         # (`_release_orphaned_pause`). 0.0: no evidence, the floor applies.
@@ -1133,6 +1141,26 @@ class CycleDetector:
             except Exception:  # noqa: BLE001 - missing evidence, not an error
                 return None
         return cls._sanitize_stall_catalogue(raw) if raw is not None else None
+
+    @classmethod
+    def _resolve_hazard_catalogue(
+        cls, raw: Any
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """Element 16 as data: a lazy producer (the manager's and the Playground's
+        form, like element 15) is called here, only where the hazard gate needs it."""
+        if callable(raw):
+            try:
+                raw = raw()
+            except Exception:  # noqa: BLE001 - missing evidence, not an error
+                return None
+        return cls._sanitize_pause_catalogue(raw) if raw is not None else None
+
+    def _matched_hazard(self) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """The current match's element 16, resolved once and kept."""
+        raw = self._matched_hazard_catalogue
+        if callable(raw):
+            raw = self._matched_hazard_catalogue = self._resolve_hazard_catalogue(raw)
+        return raw
 
     def _seed_stall_run(self) -> None:
         """Re-derive the flat near-stop run in progress from the trace (#452)."""
@@ -1782,26 +1810,46 @@ class CycleDetector:
         soak this programme has ever shown from this position": END_GATE_HAZARD_
         MARGIN x the longest resumed pause its traced evidence began at or after
         this quiet's start (less a slack), clamped to [off_delay, base]. Shorten-
-        only, unambiguous matches only, and only with END_GATE_HAZARD_MIN_CYCLES
-        traced cycles; otherwise ``base``. Measured (prototype, 292 cycles): washer
-        median lag 16.17 -> 12.50 min, early ends 0 -> 0, splits unchanged.
+        only, and only with END_GATE_HAZARD_MIN_CYCLES traced cycles of evidence
+        (:meth:`_hazard_evidence`: an ambiguous match reads every contender's,
+        a thin profile the device's pool); otherwise ``base``. Measured (prototype,
+        292 cycles): washer median lag 16.17 -> 12.50 min, early ends 0 -> 0,
+        splits unchanged; the 2026-11-03 extension in const.py.
         """
         return self._hazard_wait_for(
             timestamp, base, self._matched_pause_catalogue,
-            self._expected_duration, self._match_ambiguous,
+            self._expected_duration, self._match_ambiguous, self._matched_hazard,
         )
 
+    @classmethod
+    def _hazard_evidence(cls, cat: Any, ambiguous: bool, ext: Any) -> Any:
+        """The catalogue the hazard gate reads, or None (no evidence: ``base``).
+
+        The matched profile's own (element 14) for an unambiguous match with
+        END_GATE_HAZARD_MIN_CYCLES traced cycles; otherwise element 16, which the
+        producer builds for exactly the cases element 14 cannot serve: an ambiguous
+        match (the catalogues of every programme within the ambiguity margin) and
+        a thinly traced profile (the device's pooled catalogue). ``ext`` may be
+        lazy; it is resolved only here, past element 14.
+        """
+        if not ambiguous and cat is not None and cat[0] >= END_GATE_HAZARD_MIN_CYCLES:
+            return cat
+        ext = cls._resolve_hazard_catalogue(ext)
+        if ext is not None and ext[0] >= END_GATE_HAZARD_MIN_CYCLES:
+            return ext
+        return None
+
     def _hazard_wait_for(
-        self, timestamp: datetime, base: float, cat: Any, expected: float, ambiguous: bool
+        self, timestamp: datetime, base: float, cat: Any, expected: float, ambiguous: bool,
+        ext: Any = None,
     ) -> float:
         """:meth:`_hazard_wait` for a match with these values (register item 469b)."""
+        cat = self._hazard_evidence(cat, ambiguous, ext)
         if (
             cat is None
-            or cat[0] < END_GATE_HAZARD_MIN_CYCLES
             or not self._matched_profile
             or expected <= 0
             or self._current_cycle_start is None
-            or ambiguous
         ):
             return base
         elapsed = self._gate_elapsed_s(timestamp)  # programme time (item 511)
@@ -2059,6 +2107,7 @@ class CycleDetector:
             and self.ambiguous_ending_match_defers(
                 result[2], result[1], result[11] if len(result) >= 12 else 0.0,
                 result[13] if len(result) >= 14 else None,
+                result[15] if len(result) >= 16 else None,
             )
         ):
             self._logger.debug(
@@ -2193,6 +2242,11 @@ class CycleDetector:
             self._matched_stall_catalogue = self._sanitize_stall_catalogue(
                 result_seq[14] if len(result_seq) >= 15 else None
             )
+            # Element 16: likewise; a lazy producer is kept as is (`_matched_hazard`).
+            _hz = result_seq[15] if len(result_seq) >= 16 else None
+            self._matched_hazard_catalogue = (
+                _hz if callable(_hz) else self._sanitize_pause_catalogue(_hz)
+            )
             self._stall_now = None  # the current match is re-read for a run in progress
         else:
             # Assume MatchResult object or similar (future proofing)
@@ -2216,6 +2270,7 @@ class CycleDetector:
             self._matched_trusted_min_s = None
             self._matched_pause_catalogue = None
             self._matched_stall_catalogue = None
+            self._matched_hazard_catalogue = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -2403,6 +2458,7 @@ class CycleDetector:
         self._matched_trusted_min_s = None
         self._matched_pause_catalogue = None
         self._matched_stall_catalogue = None
+        self._matched_hazard_catalogue = None
         self._orphaned_pause_evidence_s = 0.0
         # Element 12 belongs with them: its own comment claims a stale value can
         # never license a shortening for a different match, and that was only
@@ -3943,8 +3999,9 @@ class CycleDetector:
                 # the floor (only the blind prior shrinks), and is inert when
                 # nothing matched. The bar it waits for is DEVICE-RESOLVED, not a
                 # fixed 1.05x (register item 355): `resolve_end_gate_late_ratio`
-                # returns 0.90 for `washing_machine` / `washer_dryer` and
-                # `END_GATE_LATE_RATIO` (1.05) for everything else - so on a washer
+                # returns 0.80 for `washing_machine` / `washer_dryer` (the finish-
+                # deferral floor; 0.90 until 2026-11-03) and `END_GATE_LATE_RATIO`
+                # (1.05) for everything else - so on a washer
                 # the shortening starts BEFORE the expected end. That is the point:
                 # a washer's programme is load-adaptive, so a run sits below its
                 # profile mean about half the time by definition and the median
@@ -4046,19 +4103,26 @@ class CycleDetector:
                     # the expected duration - it is the longest plausible
                     # programme, and it was raised precisely to say "a much longer
                     # look-alike is still on the table, so past the expected end
-                    # does not mean done". Discounting that by 0.90 would shorten
-                    # the wait 10% BEFORE the candidate it represents could even
+                    # does not mean done". Discounting that by 0.80 would shorten
+                    # the wait 20% BEFORE the candidate it represents could even
                     # finish, and on the shipped washer defaults that drops the
                     # wait from `min_off_gap` to `max(off_delay, 300)` - one quiet
                     # interval away from finalising mid-programme and recording the
                     # rest as a second cycle, which is #288. The item-355 measurement
                     # was taken against the expected duration and says nothing about
                     # this case, so a raised bar keeps the original 1.05.
+                    #
+                    # Shorten-only against the hazard wait too: a hazard wait under
+                    # END_GATE_LATE_SECONDS is the profile's own evidence that no
+                    # pause that long is left from here, and swapping it for the
+                    # late wait at the bar ended cycles LATER (7 Miele washes by
+                    # 1-3 min at the 0.80 bar; with the min, 0 later and 45 ends
+                    # 0.5-3 min sooner, end_gate_eval --loo --all-formats).
                     if _bar_s is not None and _elapsed >= _bar_s:
-                        effective_off_delay = max(
+                        effective_off_delay = min(effective_off_delay, max(
                             self._config.off_delay,
                             min(self._config.min_off_gap, END_GATE_LATE_SECONDS),
-                        )
+                        ))
 
                 # Energy gate always looks back off_delay seconds by default;
                 # overridden below for the dishwasher cap case so the window
@@ -5369,14 +5433,15 @@ class CycleDetector:
         return ratio * bar
 
     def _ending_wait_left_s(
-        self, expected: float, ambiguous: bool, longest: float, confidence: float, cat: Any
+        self, expected: float, ambiguous: bool, longest: float, confidence: float, cat: Any,
+        ext: Any = None,
     ) -> float:
         """Seconds until the ENDING fallback would finish under continued quiet, for
         a match with these values (register item 469b).
 
         The fallback gate in ``process_reading``, run forward: the hazard wait
-        before the shortening bar, the shortened wait after it (the gate swaps one
-        for the other, so the shortening can also lengthen), then
+        before the shortening bar, the shorter of it and the late wait after it,
+        then
         ``_should_defer_finish``'s duration floor, which needs the confidence. The
         energy gate and Smart Termination are left out: neither depends on which
         programme is matched in a way an ambiguous tick changes, except that the
@@ -5386,22 +5451,24 @@ class CycleDetector:
         elapsed = self._gate_elapsed_s(now)  # the gate's own clock (item 511)
         quiet = float(self._time_below_threshold)
         hazard = self._hazard_wait_for(
-            now, max(self._config.off_delay, self._config.min_off_gap), cat, expected, ambiguous
+            now, max(self._config.off_delay, self._config.min_off_gap), cat, expected, ambiguous,
+            ext,
         )
         left = max(0.0, hazard - quiet)
         bar = self._fallback_shortening_bar(expected, ambiguous, longest)
         if bar is not None and elapsed + left >= bar:
-            short = max(
+            short = min(hazard, max(
                 self._config.off_delay,
                 min(self._config.min_off_gap, END_GATE_LATE_SECONDS),
-            )
+            ))
             left = max(0.0, short - quiet, bar - elapsed)
         if confidence >= DEFAULT_DEFER_FINISH_CONFIDENCE:
             left = max(left, expected * float(self._config.min_duration_ratio) - elapsed)
         return left
 
     def ambiguous_ending_match_defers(
-        self, expected: Any, confidence: Any, longest: Any, catalogue: Any = None
+        self, expected: Any, confidence: Any, longest: Any, catalogue: Any = None,
+        hazard_catalogue: Any = None,
     ) -> bool:
         """Would an AMBIGUOUS match with these values make this ENDING wait longer?
 
@@ -5446,12 +5513,12 @@ class CycleDetector:
             return True
         new_left = self._ending_wait_left_s(
             new_expected, True, new_longest, new_confidence,
-            self._sanitize_pause_catalogue(catalogue),
+            self._sanitize_pause_catalogue(catalogue), hazard_catalogue,
         )
         old_left = self._ending_wait_left_s(
             self._expected_duration, self._match_ambiguous,
             self._longest_candidate_duration, self._last_match_confidence,
-            self._matched_pause_catalogue,
+            self._matched_pause_catalogue, self._matched_hazard,
         )
         if new_left > old_left + 1.0:
             return True
@@ -5963,6 +6030,16 @@ class CycleDetector:
                 if self._matched_pause_catalogue is not None
                 else None
             ),
+            # Element 16 once resolved (a frontier of a few pairs); a producer not
+            # yet called is not, so a restore loses at most a shortening.
+            "matched_hazard_catalogue": (
+                [
+                    self._matched_hazard_catalogue[0],
+                    [list(p) for p in self._matched_hazard_catalogue[1]],
+                ]
+                if isinstance(self._matched_hazard_catalogue, tuple)
+                else None
+            ),
             "longest_candidate_duration": self._longest_candidate_duration,
             "ml_defer_start_duration": self._ml_defer_start_duration,
             # Without it a restart dropped the confidence to 0.0: Smart Termination
@@ -6085,6 +6162,9 @@ class CycleDetector:
             )
             self._matched_pause_catalogue = self._sanitize_pause_catalogue(
                 snapshot.get("matched_pause_catalogue")
+            )
+            self._matched_hazard_catalogue = self._sanitize_pause_catalogue(
+                snapshot.get("matched_hazard_catalogue")
             )
             # Unconditionally, because the hazard is the value already on the
             # object, not the one in the snapshot: this restores the ambiguity

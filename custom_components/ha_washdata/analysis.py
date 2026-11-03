@@ -49,6 +49,7 @@ from .const import (
     MATCH_KEEP_MIN_SCORE,
     MATCH_SPIN_WEIGHT,
     MATCH_SPIN_WEIGHT_IN_PROGRESS,
+    MATCH_SPIN_WEIGHT_IN_PROGRESS_DISPLAY,
     MATCH_MAE_PEAK_FLOOR,
     MATCH_MAE_REF_PEAK,
     MATCH_MAE_SCALE,
@@ -1104,6 +1105,13 @@ def _compute_matches(
         "spin_weight_in_progress" if in_progress else "spin_weight",
         MATCH_SPIN_WEIGHT_IN_PROGRESS if in_progress else MATCH_SPIN_WEIGHT,
     ))
+    if live_guard:
+        # A live member ranking the end gates do not read (they read the
+        # single-template pass below, which keeps MATCH_SPIN_WEIGHT_IN_PROGRESS):
+        # the display / switching ranking only.
+        sp_w = float(config.get(
+            "spin_weight_in_progress_display", MATCH_SPIN_WEIGHT_IN_PROGRESS_DISPLAY
+        ))
     sp_w = min(1.0, max(0.0, sp_w)) if math.isfinite(sp_w) else 0.0
     spin_ag: dict[str, float] = {}
     if sp_w > 0 and candidates and (

@@ -43,6 +43,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    END_GATE_HAZARD_MIN_CYCLES,
     PRICE_TIMELINE_MAX_POINTS,
     PRICE_TIMELINE_PRICE_DECIMALS,
     CLUSTER_RESAMPLE_N,
@@ -76,6 +77,7 @@ from .const import (
     MATCH_MEMBER_MAX,
     MATCH_MEMBER_MIN_CYCLES,
     MATCH_MEMBER_TEMPLATES,
+    MATCH_SPIN_DISPLAY_DEVICE_TYPES,
     MATCH_MIN_RESAMPLED_POINTS,
     PLAYGROUND_PRESET_MAX,
     PLAYGROUND_PRESET_NAME_MAX,
@@ -567,6 +569,14 @@ class MatchResult:
     gate_expected_duration: float | None = None
     gate_ambiguous: bool | None = None
     gate_prefix_full_shape: bool | None = None
+    # The programmes an ambiguous match is torn between, as ``(name, expected
+    # duration s)``: every candidate within MATCH_AMBIGUITY_MARGIN of the top
+    # (a Stage-5 family expanded to its members), winner first, for the hazard end
+    # gate (`hazard_pause_catalogue`). None when the ambiguity does not come from
+    # the margin (a Stage-5 safeguard), so no set of candidates explains it.
+    # ``gate_contenders`` is the same for the ranking the end gates read (#486).
+    ambiguity_contenders: tuple[tuple[str, float], ...] | None = None
+    gate_contenders: tuple[tuple[str, float], ...] | None = None
 
     @property
     def label_confidence(self) -> float:
@@ -1727,6 +1737,74 @@ def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     return margin, margin < MATCH_AMBIGUITY_MARGIN
 
 
+def _ambiguity_contenders(
+    ranking: list[dict],
+    group_members: dict[str, list[str]],
+    durations: dict[str, Any],
+    top_name: str | None,
+    top_expected: Any,
+    stage5_doubt: bool,
+) -> tuple[tuple[str, float], ...] | None:
+    """``(name, expected s)`` of every programme an ambiguous match is torn between.
+
+    The winner (as resolved, first), then every candidate of the collapsed,
+    score-sorted ``ranking`` within MATCH_AMBIGUITY_MARGIN of its top, a Stage-5
+    family expanded to its members (``durations``: each member's own expected
+    duration, from its pre-collapse record; a member Stage 1 rejected has none
+    and is not a contender). None when the ranking's own margin is clear, or a
+    Stage-5 safeguard (``stage5_doubt``) also doubts the pick: then no candidate
+    set explains the ambiguity and the hazard end gate keeps its old refusal.
+    Pure, never raises.
+    """
+    try:
+        if stage5_doubt or not ranking or not top_name:
+            return None
+        if not _ambiguity_from_candidates(ranking)[1]:
+            return None
+        floor = float(ranking[0]["score"]) - MATCH_AMBIGUITY_MARGIN
+        out: dict[str, float] = {}
+
+        def _add(name: Any, dur: Any) -> None:
+            try:
+                value = float(dur or 0.0)
+            except (TypeError, ValueError, OverflowError):
+                return
+            if name and math.isfinite(value) and value > 0:
+                out.setdefault(str(name), value)
+
+        _add(top_name, top_expected)
+        for cand in ranking:
+            if float(cand.get("score") or 0.0) < floor:
+                break
+            name = str(cand.get("name"))
+            if name in group_members:
+                for member in group_members[name]:
+                    _add(member, durations.get(member))
+            else:
+                _add(name, cand.get("profile_duration"))
+        return tuple(out.items()) or None
+    except Exception:  # noqa: BLE001 - a statistic must never break matching
+        return None
+
+
+def _pause_frontier(
+    pauses: Any,
+) -> tuple[tuple[float, float], ...]:
+    """The pauses no later-or-equal, longer-or-equal pause dominates, ascending.
+
+    Exact for the only question the hazard end gate asks of a catalogue - the
+    longest pause starting at or after a position - so a catalogue pooled over many
+    cycles stays a handful of pairs. Pure.
+    """
+    out: list[tuple[float, float]] = []
+    best = -1.0
+    for f, d in sorted(((float(f), float(d)) for f, d in pauses), reverse=True):
+        if d > best:
+            out.append((f, d))
+            best = d
+    return tuple(reversed(out))
+
+
 def _single_template_view(
     candidates: list[dict], group_members: dict[str, list[str]]
 ) -> list[dict] | None:
@@ -2313,6 +2391,21 @@ def _effective_golden_flags(cycles: list[Any]) -> list[bool]:
     if cycles and all(_is_store_import(c) for c in cycles):
         return [True] * len(cycles)
     return [False] * len(cycles)
+
+
+def _pins_golden_template(cycles: list[Any]) -> bool:
+    """Whether a profile's matching template is a pinned golden cycle, not its envelope.
+
+    Register item 570: by the envelope's own rule (`_effective_golden_flags`), and only
+    for a cycle flagged golden itself. The snapshot builder read the raw flag, so a
+    store import older versions forced golden replaced the envelope template of a
+    profile with 20 of the user's own cycles. A store-only profile keeps what it had
+    (its forced-golden import pinned, an unflagged one on the envelope).
+    """
+    return any(
+        eff and isinstance(c.get("ml_review"), dict) and bool(c["ml_review"].get("golden"))
+        for c, eff in zip(cycles, _effective_golden_flags(cycles))
+    )
 
 
 def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
@@ -3422,6 +3515,7 @@ class ProfileStore:
         group_members: dict[str, list[str]],
         member_snaps: dict[str, dict[str, Any]],
         pauses_fn: Callable[[str], bool | None] | None,
+        durations: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """What the end gates read on a live member match (#486) unless the member
         winner is confirmed (:func:`_member_gate_confirmed`): the single-template
@@ -3442,18 +3536,20 @@ class ProfileStore:
         --loo --all-formats: the forced ambiguity blocked the anti-crease finalise
         and Smart Termination, the member ranking's own prefix verdict blocked the
         finalise where both agreed, and a family's member came from the member
-        ranking). An empty ranking reads as ambiguous at no confidence. Never
+        ranking). An empty ranking reads as ambiguous at no confidence.
+        ``contenders`` is :func:`_ambiguity_contenders` on this ranking. Never
         raises.
         """
         try:
             if not single_view:
                 return {"profile": None, "confidence": 0.0, "expected": None,
-                        "ambiguous": True, "prefix": False}
+                        "ambiguous": True, "prefix": False, "contenders": None}
             top = single_view[0]
             name = str(top.get("name"))
             score = float(top.get("score") or 0.0)
             expected = float(top.get("profile_duration") or 0.0)
             ambiguous = _ambiguity_from_candidates(single_view)[1]
+            doubt = False
             if name in group_members:
                 chosen, fit, member_dur = self._stage5_pick_member(
                     current_power, current_duration, group_members[name], member_snaps,
@@ -3463,16 +3559,19 @@ class ProfileStore:
                 if member_dur:
                     expected = float(member_dur)
                 if fit is not None and score > 0 and fit < 0.55 * score:
-                    ambiguous = True
+                    ambiguous = doubt = True
                 if expected and current_duration > expected * 1.05:
-                    ambiguous = True
+                    ambiguous = doubt = True
             prefix = _prefix_landscape_ambiguity(single_view, expected, pauses_fn)
             return {"profile": name or None, "confidence": score,
                     "expected": expected or None, "ambiguous": bool(ambiguous),
-                    "prefix": bool(prefix)}
+                    "prefix": bool(prefix),
+                    "contenders": _ambiguity_contenders(
+                        single_view, group_members, durations or {}, name, expected, doubt
+                    )}
         except Exception:  # noqa: BLE001 - never fail a match over its gate view
             return {"profile": None, "confidence": 0.0, "expected": None,
-                    "ambiguous": True, "prefix": False}
+                    "ambiguous": True, "prefix": False, "contenders": None}
 
     def _stage5_pick_member(
         self, current_power: list[float], current_duration: float,
@@ -7873,6 +7972,136 @@ class ProfileStore:
         except Exception:  # noqa: BLE001 - a statistic must never break matching
             return None
 
+    def device_pause_catalogue(
+        self, stop_threshold_w: float
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """:meth:`profile_pause_catalogue` pooled over every labelled traced evidence
+        cycle of this device, reduced to its :func:`_pause_frontier`.
+
+        The hazard end gate's evidence for a programme with too few traced runs of
+        its own: "has this machine ever paused this long from this far into a
+        programme?". Cached on the device's evidence fingerprint and the
+        threshold; never raises.
+        """
+        try:
+            stop = float(stop_threshold_w)
+            if not math.isfinite(stop) or stop <= 0:
+                return None
+            cache = getattr(self, "_device_pause_cache", None)
+            if cache is None:
+                cache = self._device_pause_cache = {}
+            key = round(stop, 4)
+            labelled = [
+                c for c in self.iter_evidence_cycles()
+                if isinstance(c, dict) and c.get("profile_name")
+            ]
+            total = 0.0
+            for cycle in labelled:
+                try:
+                    total += float(cycle.get("duration") or 0.0)
+                except (TypeError, ValueError, OverflowError):
+                    continue
+            fingerprint = (
+                len(labelled), str(labelled[-1].get("id") or "") if labelled else "",
+                int(total),
+            )
+            hit = cache.get(key)
+            if hit is not None and hit[0] == fingerprint:
+                return hit[1]
+            # Per cycle too, so a new cycle costs one decompression, not the store's
+            # (this runs on the event loop, in ENDING).
+            per_cycle = getattr(self, "_cycle_pause_cache", {}).get(key, {})
+            kept: dict[tuple[str, int, str], Any] = {}
+            traced = 0
+            pauses: list[tuple[float, float]] = []
+            for cycle in labelled:
+                raw = cycle.get("power_data")
+                if not raw:
+                    continue
+                ckey = (str(cycle.get("id") or ""),
+                        len(raw) if hasattr(raw, "__len__") else 0,
+                        str(cycle.get("duration") or ""))
+                got = per_cycle.get(ckey)
+                if got is None:
+                    points = decompress_power_data(cast(Any, cycle))
+                    got = (len(points) >= 10,
+                           _resumed_pauses(points, stop) if len(points) >= 10 else [])
+                if ckey[0]:
+                    kept[ckey] = got
+                if got[0]:
+                    traced += 1
+                    pauses.extend(got[1])
+            if not hasattr(self, "_cycle_pause_cache"):
+                self._cycle_pause_cache = {}
+            self._cycle_pause_cache[key] = kept
+            value = (traced, _pause_frontier(pauses)) if traced else None
+            cache[key] = (fingerprint, value)
+            return value
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
+            return None
+
+    def hazard_pause_catalogue(
+        self,
+        profile_name: str | None,
+        expected_duration: Any,
+        ambiguous: bool,
+        contenders: Any,
+        stop_threshold_w: float,
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """Match element 16: the hazard end gate's evidence where the matched
+        profile's own catalogue (element 14) cannot serve, else None.
+
+        Element 14 serves an unambiguous match with END_GATE_HAZARD_MIN_CYCLES
+        traced cycles. For the rest:
+
+        * an ambiguous match: the catalogues of every contender (``contenders``,
+          :func:`_ambiguity_contenders`, plus the matched profile itself), each
+          rescaled onto ``expected_duration`` (the detector places the quiet as a
+          fraction of it), so a pause qualifies wherever ANY of the programmes the
+          match is torn between could still be soaking. Counted as the fewest
+          traced cycles among them; None when the ambiguity has no contender set.
+        * a programme (or contender) with fewer traced cycles: the device's pooled
+          catalogue (:meth:`device_pause_catalogue`) instead of its own.
+
+        None as soon as any programme in the set has no usable evidence: the gate
+        then waits as it always did. Never raises.
+        """
+        try:
+            if not profile_name:
+                return None
+            ref = float(expected_duration or 0.0)
+            stop = float(stop_threshold_w)
+            if not (math.isfinite(ref) and ref > 0 and math.isfinite(stop) and stop > 0):
+                return None
+            if ambiguous:
+                if not contenders:
+                    return None
+                members = {str(n): float(d) for n, d in contenders}
+                members[str(profile_name)] = ref
+            else:
+                own = self.profile_pause_catalogue(profile_name, stop)
+                if own is not None and own[0] >= END_GATE_HAZARD_MIN_CYCLES:
+                    return None
+                members = {str(profile_name): ref}
+            traced: int | None = None
+            pauses: list[tuple[float, float]] = []
+            for name, expected in members.items():
+                if not (math.isfinite(expected) and expected > 0):
+                    return None
+                cat = self.profile_pause_catalogue(name, stop)
+                if cat is None or cat[0] < END_GATE_HAZARD_MIN_CYCLES:
+                    cat = self.device_pause_catalogue(stop)
+                if cat is None or cat[0] < END_GATE_HAZARD_MIN_CYCLES:
+                    return None
+                traced = cat[0] if traced is None else min(traced, cat[0])
+                scale = expected / ref
+                pauses.extend((f * scale, d) for f, d in cat[1])
+            if traced is None:
+                return None
+            return (traced, _pause_frontier(pauses))
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
+            return None
+
     def _terminal_quiet_fingerprint(self, profile_name: str) -> tuple[int, str, int]:
         """Cheap stand-in for "has this profile's evidence changed?".
 
@@ -8631,13 +8860,10 @@ class ProfileStore:
         rejects. Returns 0.0 when nothing usable exists, which the caller skips.
         """
         try:
-            has_golden = any(
-                isinstance(c.get("ml_review"), dict)
-                and c["ml_review"].get("golden")
-                and c.get("power_data")
-                and c.get("profile_name") == name
-                for c in self.iter_evidence_cycles()
-            )
+            has_golden = _pins_golden_template([
+                c for c in self.iter_evidence_cycles()
+                if c.get("power_data") and c.get("profile_name") == name
+            ])
             envelope = (self._data.get("envelopes") or {}).get(name)
             if not has_golden and envelope and envelope_shape_count(envelope) >= 2:
                 env_avg = envelope.get("avg")
@@ -8975,10 +9201,11 @@ class ProfileStore:
         # auto-label (many matches x many cycles) - issue #311. Selections are
         # byte-identical: cycles_by_id keeps the FIRST occurrence (== next()),
         # labeled_by_profile keeps the first eligible cycle in all_cycles order,
-        # and golden_profiles mirrors the any(...) golden test.
+        # and golden_profiles is `_pins_golden_template` over each profile's traced
+        # cycles (register item 570).
         cycles_by_id: dict[str, CycleDict] = {}
         labeled_by_profile: dict[str, CycleDict] = {}
-        golden_profiles: set[str] = set()
+        traced_by_profile: dict[str, list[CycleDict]] = {}
         # Issue #486: each profile's member cycles, for nearest-member templates.
         members_on = bool(MATCH_MEMBER_TEMPLATES) and (
             self.device_type in MATCH_MEMBER_DEVICE_TYPES
@@ -8991,6 +9218,7 @@ class ProfileStore:
             pname = c.get("profile_name")
             if not pname or not c.get("power_data"):
                 continue
+            traced_by_profile.setdefault(pname, []).append(c)
             if (
                 pname not in labeled_by_profile
                 and c.get("status") in ("completed", "force_stopped")
@@ -9003,9 +9231,10 @@ class ProfileStore:
                     long_enough = False
                 if long_enough:
                     members_by_profile.setdefault(pname, []).append(c)
-            rev = c.get("ml_review")
-            if isinstance(rev, dict) and rev.get("golden"):
-                golden_profiles.add(pname)
+        golden_profiles = {
+            pname for pname, traced in traced_by_profile.items()
+            if _pins_golden_template(traced)
+        }
 
         snapshots: list[dict[str, Any]] = []
         skipped_profiles: list[str] = []
@@ -9370,6 +9599,12 @@ class ProfileStore:
                 "spin_trace": (
                     (ts_arr, p_arr) if self.energy_mode == "integrated" else None
                 ),
+                # The live display-only rhythm term (#486 follow-up) is washing
+                # machines only (MATCH_SPIN_DISPLAY_DEVICE_TYPES).
+                **(
+                    {} if self.device_type in MATCH_SPIN_DISPLAY_DEVICE_TYPES
+                    else {"spin_weight_in_progress_display": 0.0}
+                ),
                 # Empty live; the Playground's replay config (see _matching_overrides).
                 **self._matching_overrides(),
             }
@@ -9417,6 +9652,7 @@ class ProfileStore:
         # the selected member's own blended score still exists (see
         # MatchResult.label_confidence).
         scored_by_name = {str(c.get("name")): c for c in candidates}
+        durations = {k: c.get("profile_duration") for k, c in scored_by_name.items()}
         # Element 12's population, captured here for a related reason. The
         # collapse keeps only the best sibling of each cohesive family, so a
         # LONGER sibling's duration leaves the list entirely - and element 12 is
@@ -9429,6 +9665,9 @@ class ProfileStore:
         # RAISE the bar, so this defers ends, never hastens them.
         pre_collapse_candidates = list(candidates)
         candidates = collapse_group_candidates(candidates, group_members)
+        # The collapsed ranking before Stage 5 relabels its winner: a family keeps
+        # its group name here, which the hazard contenders expand to its members.
+        ranked_collapsed = candidates
 
         best = candidates[0]
 
@@ -9448,6 +9687,7 @@ class ProfileStore:
         best_name = best["name"]
         best_duration = best["profile_duration"]
         member_confidence: float | None = None
+        stage5_doubt = False
         # Stage 5: if a group won, pick the best-fitting member.
         if best_name in group_members:
             chosen, member_fit, member_dur = self._stage5_pick_member(
@@ -9491,11 +9731,13 @@ class ProfileStore:
             # like-for-like blended scores.
             if member_fit is not None and best["score"] > 0 and member_fit < 0.55 * best["score"]:
                 is_ambiguous = True
+                stage5_doubt = True
             # Overrun guard: if the cycle has already outlasted the chosen member's
             # expected duration we may be running the longer group member — downgrade
             # to ambiguous so Smart Termination falls back to the power timeout.
             if best_duration and current_duration > best_duration * 1.05:
                 is_ambiguous = True
+                stage5_doubt = True
             # Relabel the winning candidate for the ranking / diagnostics, and carry
             # the Stage-5 provenance with it. `score` deliberately stays the group's
             # (i.e. the best-scoring sibling's) blended score: that is the number the
@@ -9552,11 +9794,12 @@ class ProfileStore:
             ):
                 gate = {"profile": best_name, "confidence": float(best["score"]),
                         "expected": float(best_duration or 0.0) or None,
-                        "ambiguous": False, "prefix": bool(full_shape_hit)}
+                        "ambiguous": False, "prefix": bool(full_shape_hit),
+                        "contenders": None}
             else:
                 gate = self._single_template_gate(
                     single_view, current_power_list, float(current_duration or 0.0),
-                    group_members, member_snaps, pauses_fn,
+                    group_members, member_snaps, pauses_fn, durations,
                 )
         # From the pre-collapse population, not just before the [:5] truncation
         # below: see `pre_collapse_candidates` above for why the collapse is the
@@ -9581,6 +9824,11 @@ class ProfileStore:
             gate_expected_duration=gate["expected"] if gate else None,
             gate_ambiguous=gate["ambiguous"] if gate else None,
             gate_prefix_full_shape=gate["prefix"] if gate else None,
+            ambiguity_contenders=_ambiguity_contenders(
+                ranked_collapsed, group_members, durations, best_name, best_duration,
+                stage5_doubt,
+            ),
+            gate_contenders=gate.get("contenders") if gate else None,
         )
 
     async def async_verify_alignment(

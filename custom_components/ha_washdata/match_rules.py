@@ -205,6 +205,10 @@ class GateInputs:
     expected_duration: Any
     is_ambiguous: bool
     is_prefix_ambiguous_full_shape: bool
+    # The programmes an ambiguous match is torn between, ``(name, expected s)``,
+    # from the same ranking as ``is_ambiguous`` (``MatchResult.ambiguity_contenders``
+    # / ``gate_contenders``): what the hazard end gate reads. None: no such set.
+    contenders: Any = None
 
 
 def detector_inputs(tick: "MatchTick", result: Any) -> GateInputs:
@@ -222,13 +226,15 @@ def detector_inputs(tick: "MatchTick", result: Any) -> GateInputs:
     gate_name = getattr(result, "gate_profile", None)
     if name is not None and isinstance(gate_name, str) and gate_name:
         name = gate_name
+    contenders = getattr(result, "ambiguity_contenders", None)
     gate_amb = getattr(result, "gate_ambiguous", None)
     if isinstance(gate_amb, bool):
         ambiguous = gate_amb
+        contenders = getattr(result, "gate_contenders", None)
     gate_pfs = getattr(result, "gate_prefix_full_shape", None)
     if isinstance(gate_pfs, bool):
         prefix = gate_pfs
-    return GateInputs(name, revoke, conf, expected, ambiguous, prefix)
+    return GateInputs(name, revoke, conf, expected, ambiguous, prefix, contenders)
 
 
 def detector_match(tick: "MatchTick", result: Any) -> tuple[str | None, bool]:
@@ -822,7 +828,6 @@ def consistency_override(
     tick: MatchTick,
     result: Any,
     verified_pause: Any,
-    get_profile: Callable[[str], Any],
 ) -> list[LogLine]:
     """Align the displayed program with a verified pause or a confident mismatch.
 
@@ -832,6 +837,13 @@ def consistency_override(
     and non-ambiguity a normal switch needs. A confident mismatch (every candidate
     rejected) has no name, so it drops the program to "detecting..." - the
     manager-side half of the revoke the detector applies on element 5.
+
+    The adopted program's expected duration is the match's own
+    (``tick.matched_duration``, ``MatchResult.expected_duration``), as on every
+    other automatic switch (:func:`decide_switch`). It was the profile's
+    ``avg_duration`` (audit ML-15, register item 572), the rolling mean, where the
+    match sizes an envelope profile by its ``target_duration`` and a Stage-5 win by
+    the picked member's duration.
     """
     log: list[LogLine] = []
     profile_name = tick.profile_name
@@ -843,17 +855,11 @@ def consistency_override(
     if profile_name != state.current_program and (
         pause_switch_ok or result.is_confident_mismatch
     ):
-        if profile_name:
+        if profile_name and profile_name != DETECTING:
             state.current_program = profile_name
             state.last_confidence = tick.confidence
             state.last_member_confidence = result.member_confidence
-            # Try to fetch duration if we switched back to matched
-            try:
-                prof = get_profile(profile_name)
-                if prof:
-                    state.matched_duration = profile_duration(prof.get("avg_duration"))
-            except Exception as e:  # pylint: disable=broad-exception-caught
-                log.append((logging.DEBUG, "Failed to fetch profile duration on switch: %s", (e,)))
+            state.matched_duration = profile_duration(tick.matched_duration)
         else:
             state.current_program = DETECTING
             state.matched_duration = None

@@ -91,7 +91,7 @@ async def test_a_3_11_entry_becomes_generic_with_its_own_defaults(
 
     assert (entry.version, entry.minor_version) == (
         CONFIG_ENTRY_VERSION, CONFIG_ENTRY_MINOR_VERSION,
-    ) == (3, 12)
+    ) == (3, 13)
     assert dict(entry.options) == {
         CONF_DEVICE_TYPE: "generic", CONF_OFF_DELAY: 120, **FROZEN[device_type],
     }

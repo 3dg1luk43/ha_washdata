@@ -1436,7 +1436,7 @@ class WashDataManager:
             # --- Consistency Override (verified pause / confident mismatch) ---
             switch_state = _read_switch_state(self)
             override_log = match_rules.consistency_override(
-                switch_state, tick, result, verified_pause, self.profile_store.get_profile
+                switch_state, tick, result, verified_pause
             )
             _write_switch_state(self, switch_state, override_log)
 
@@ -1506,6 +1506,16 @@ class WashDataManager:
                         self.profile_store.profile_pause_catalogue,
                         profile_name,
                         standby_near_stop_ceiling(self.detector.config.stop_threshold_w),
+                    ) if profile_name else None
+                ),
+                # The hazard gate's evidence for an ambiguous match or a thinly
+                # traced profile (element 16). Lazy: read only in ENDING, where it
+                # can walk other programmes' traces.
+                hazard_catalogue=(
+                    functools.partial(
+                        self.profile_store.hazard_pause_catalogue,
+                        profile_name, gate.expected_duration, gate.is_ambiguous,
+                        gate.contenders, float(self.detector.config.stop_threshold_w),
                     ) if profile_name else None
                 ),
             ))

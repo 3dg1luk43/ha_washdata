@@ -510,7 +510,7 @@ def test_a_single_template_family_win_gates_on_its_member(store: ProfileStore) -
             view, [1.0] * 20, 2000.0, {"__group__G": ["G1", "G2"]}, {}, None)
     assert stage5.call_args.kwargs["preferred"] == "G2"
     assert gate == {"profile": "G2", "confidence": 0.7, "expected": 3000.0,
-                    "ambiguous": False, "prefix": False}
+                    "ambiguous": False, "prefix": False, "contenders": None}
     with pick:
         late = store._single_template_gate(  # noqa: SLF001
             view, [1.0] * 20, 3300.0, {"__group__G": ["G1", "G2"]}, {}, None)

@@ -845,11 +845,24 @@ MATCH_DURATION_WEIGHT_IN_PROGRESS = 0.15
 # longer programme stealing the match.
 MATCH_MIN_RATIO_GRACE_S = 900.0
 
-# Hazard end gate (audit DETECT-16). Past an unambiguous match the ENDING fallback
-# waits MARGIN x the longest below-stop pause the matched profile's traced
-# evidence ever resumed from at or after this quiet's position (less SLACK of the
-# run), never less than off_delay and never longer than before. Needs MIN_CYCLES
-# traced cycles: a catalogue of one or two runs has not seen the programme's soaks.
+# Hazard end gate (audit DETECT-16). Past a match the ENDING fallback waits MARGIN
+# x the longest below-stop pause the matched profile's traced evidence ever resumed
+# from at or after this quiet's position (less SLACK of the run), never less than
+# off_delay and never longer than before. Needs MIN_CYCLES traced cycles: a
+# catalogue of one or two runs has not seen the programme's soaks.
+# Until 2026-11-03 it was off for an ambiguous match and for a profile under
+# MIN_CYCLES. Now an ambiguous match reads the catalogues of every candidate within
+# MATCH_AMBIGUITY_MARGIN (a Stage-5 family's members; none while a Stage-5
+# safeguard doubts the pick), rescaled onto the matched duration, and a thin
+# profile the device's pooled catalogue (`ProfileStore.hazard_pause_catalogue`,
+# match element 16); any programme without evidence keeps the old wait. Measured on
+# programme truth (end_gate_eval --loo --all-formats, vs a378b5a): 47 ends sooner
+# (41 washer, 4 washer-dryer, 2 dishwasher; -358 min: the contender union alone 18 /
+# -175, the pool the other 29), 0 later, 0 new early ends or splits; washer lag
+# median/mean/p90 11.84/15.64/33.03 -> 11.05/14.42/32.47 min, washer-dryer
+# 6.25/8.22/15.75 -> 5.45/7.33/11.35. Switching the gate on for an
+# ambiguous match with the matched profile's catalogue alone (the audit arm) ends
+# 01KXGA3C a6c7a6a68c08 at the same point: 11 min after its programme, not a split.
 END_GATE_HAZARD_MARGIN = 1.25
 END_GATE_HAZARD_MIN_CYCLES = 3
 END_GATE_HAZARD_POSITION_SLACK = 0.05
@@ -888,6 +901,23 @@ MATCH_ENERGY_REF_MIN_CYCLES = 2
 # margin instead of a Stage-4 term was worse (learn-gate precision 31-67%).
 MATCH_SPIN_WEIGHT = 0.35
 MATCH_SPIN_WEIGHT_IN_PROGRESS = 0.0
+# ...but a live MEMBER ranking the end gates do not read (MATCH_MEMBER_LIVE_GUARD:
+# they read the single-template pass, which keeps the 0.0 above) takes the term at
+# this weight: the displayed programme and the switching rules only. 0.2 vs off:
+# eval.py full, whole corpus, top-1 at 75/50/25% elapsed 71.3/64.4/64.6 ->
+# 72.0/65.4/65.2 (folds 25/19, 17/7, 10/4; #486 Miele 46.7/36.7/48.9 ->
+# 55.6/44.4/54.4); switching replay over 360 washer/dryer cycles, programme right
+# first / at cycle end / in the finish notification 51.1/66.7/68.6 ->
+# 53.6/69.7/71.1%; end_gate_eval --loo --all-formats: no end moved on the 336
+# washer and washer-dryer cycles; eta_eval programme MAE (paired) at 50/75/90%
+# 21.5/17.0/11.5 -> 20.7/16.3/11.8 min. 0.35: top-1 +0.3pp more and 71.4/72.2% at
+# the end, but first programme 51.4% (Miele 31.1 -> 26.7%) and a later cut piece of
+# one already-split cycle ended 1.5 min later.
+MATCH_SPIN_WEIGHT_IN_PROGRESS_DISPLAY = 0.2
+# Washing machines only: washer-dryers lost 2/2/1 of 64 eval folds and one first-right
+# of 20 at 0.2 (their drying phase breaks the rhythm descriptor), dryers have no raw
+# trace for it.
+MATCH_SPIN_DISPLAY_DEVICE_TYPES = ("washing_machine",)
 SPIN_HEAT_FRAC = 0.5                # heater = readings >= this x the trace's peak
 SPIN_LEVEL_K = 2.5                  # a spin event reaches this x the drum baseline
 SPIN_MIN_MEMBERS_TOP2 = 3           # from this many members, mean of the best two
@@ -1733,9 +1763,20 @@ DEFAULT_SMART_TERMINATION_DURATION_RATIO_BY_DEVICE = {
 # 158 losing their auto-label (92.4% -> 91.1%) because ending ~11 min sooner can
 # skip a final match tick; they are still stored and offered for confirmation,
 # which this codebase already treats as much cheaper than a wrong label (#325).
+#
+# 2026-11-03: 0.80, the finish-deferral floor (DEFAULT_DEFER_FINISH_RATIO): below
+# it a trusted match (confidence >= 0.55) cannot finish anyway, so 0.75 replayed
+# byte-identical and a lower bar would reach only the matches the deferral
+# distrusts. Programme truth (end_gate_eval --loo --all-formats, vs a378b5a,
+# washers only): 0.85 / 0.80 moved 17 / 18 washer ends sooner (-79 / -125 min),
+# washer lag median/mean 11.84/15.64 -> 11.75/15.38 / 11.58/15.23 min, 0 new early
+# ends or splits. At 0.80 the bar's late wait also replaced a SHORTER hazard wait
+# (7 Miele washes 1-3 min later, p90 +0.29), so the gate now takes the shorter of
+# the two: with it, 56 ends sooner (-194 min, 1 dishwasher and 1 dryer), 0 later,
+# washer 11.84/15.64/33.03 -> 11.48/14.95/32.49, washer-dryer mean 8.22 -> 7.99.
 END_GATE_LATE_RATIO_BY_DEVICE = {
-    DEVICE_TYPE_WASHING_MACHINE: 0.90,
-    DEVICE_TYPE_WASHER_DRYER: 0.90,
+    DEVICE_TYPE_WASHING_MACHINE: 0.80,
+    DEVICE_TYPE_WASHER_DRYER: 0.80,
 }
 
 
@@ -1864,7 +1905,7 @@ FAILED_RESTORE_STORE_SUFFIX = "failed_restore"
 # leaves an entry a version short, which then re-migrates on every start - and repeating
 # the literals in three places is what made that easy to do.
 CONFIG_ENTRY_VERSION = 3
-CONFIG_ENTRY_MINOR_VERSION = 12
+CONFIG_ENTRY_MINOR_VERSION = 13
 
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"

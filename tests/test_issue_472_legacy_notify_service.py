@@ -110,7 +110,7 @@ async def test_service_without_events_goes_to_start_finish_and_live(
 
     assert await async_migrate_entry(hass, entry) is True
 
-    assert (entry.version, entry.minor_version) == (3, 12)
+    assert (entry.version, entry.minor_version) == (3, CONFIG_ENTRY_MINOR_VERSION)
     assert _lists(entry) == {k: [SVC] for k in LISTS}
     _no_retired_keys(entry)
     assert entry.options[CONF_OFF_DELAY] == 120
@@ -210,7 +210,7 @@ async def test_a_clean_3_11_entry_only_advances(hass: HomeAssistant) -> None:
 
     assert await async_migrate_entry(hass, entry) is True
 
-    assert entry.minor_version == 12
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert dict(entry.options) == before
 
 
