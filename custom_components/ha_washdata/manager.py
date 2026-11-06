@@ -10249,8 +10249,12 @@ class WashDataManager:
 
     def _longest_programme_s(self) -> float:
         """The device's longest learned programme for the detector's duration cap
-        (#502). Never raises (the detector also guards the call)."""
-        return match_rules.longest_programme_s(self._resolve_profiles())
+        (#502), from the cycles that shape its programmes. Never raises."""
+        try:
+            cycles = self.profile_store.iter_evidence_cycles()
+        except Exception:  # pylint: disable=broad-exception-caught
+            return 0.0
+        return match_rules.longest_programme_s(cycles)
 
     def _resolve_profiles(self) -> dict[str, Any]:
         """Return the stored profiles mapping, falling back to the raw store dict.

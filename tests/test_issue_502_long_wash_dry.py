@@ -20,8 +20,8 @@ Midea LSD12X1 on a ~1 s publish-on-change Zigbee plug, programmes of 7.9-8.5 h.
 
 1. The detector's flat 8 h cap cut two runs at exactly 8 h 00 m in their drying
    phase (1300 W heater pulses, ~50 W tumbling); the rest opened a second cycle
-   9-10 s later. The cap now scales on the device's longest learned programme
-   (and the match's expected duration): max(8 h, 1.5 x that), at most 24 h.
+   9-10 s later. The cap now scales on the device's longest learned programme,
+   max(8 h, 1.5 x that), at most 24 h, and never on a run the cap ended.
 2. The manager's unmatched idle guard force-ended a 7 h 55 min run 24 s after it
    dropped to 0 W at its real end, so a cycle the ENDING fallback was about to
    close as completed was stored force_stopped. It now waits out the detector's
@@ -65,14 +65,21 @@ OPTIONS: dict[str, Any] = {
     "profile_match_interval": 40,
 }
 
-#: The reporter's profiles as exported (durations in seconds).
-PROFILES: dict[str, Any] = {
-    "Normal + Dry": {"min_duration": 24206.0, "max_duration": 24899.7, "avg_duration": 24552.85},
-    "Conforter": {"avg_duration": 5691.4, "min_duration": 5691.4, "max_duration": 5691.4},
-    "Cotton + Dry": {"avg_duration": 28800.517669, "max_duration": 28800.517669},
-    "Dry Only": {"avg_duration": 12530.515362, "max_duration": 12530.515362},
-    "Towels + Dry": {"avg_duration": 28467.3, "max_duration": 28467.3},
-}
+def _cycle(name: str | None, duration: Any, status: str = "completed", **extra: Any) -> dict:
+    return {"profile_name": name, "duration": duration, "status": status, **extra}
+
+
+#: The reporter's labelled cycles as exported (past_cycles; durations in seconds).
+CYCLES: list[dict[str, Any]] = [
+    _cycle("Normal + Dry", 24206.0, "force_stopped"),  # unmatched guard, at its end
+    _cycle("Normal + Dry", 24899.677046, "force_stopped"),
+    _cycle("Cotton + Dry", 28800.517669, "force_stopped"),  # cut by the 8 h cap
+    _cycle("Conforter", 5691.4),
+    _cycle("Dry Only", 12530.515362),
+    _cycle("Towels + Dry", 28467.267189, "force_stopped"),  # the 24 s force-end
+    _cycle(None, 28800.623357, "force_stopped"),  # the other cut, never labelled
+    _cycle(None, 1159.717103, "force_stopped"),  # its drying remainder
+]
 
 PROGRAMME_S = 8.5 * 3600.0  # the longest run in the export: 8 h 18 min + 9 s + 19 min
 
@@ -122,20 +129,28 @@ def _detector(cycles: list[dict[str, Any]], provider=None) -> CycleDetector:
 
 def test_cap_is_8h_until_the_device_has_learned_a_long_programme() -> None:
     assert CYCLE_DURATION_CAP_BASE_S == 28800
-    assert match_rules.cycle_duration_cap_s(0.0, 0.0) == 28800.0
+    assert match_rules.cycle_duration_cap_s(0.0) == 28800.0
+    assert match_rules.longest_programme_s([]) == 0.0
     # A device whose programmes all run under 5 h 20 min keeps exactly 8 h.
-    assert match_rules.cycle_duration_cap_s(4 * 3600.0, 5.3 * 3600.0) == 28800.0
+    assert match_rules.cycle_duration_cap_s(5.3 * 3600.0) == 28800.0
 
 
-def test_cap_scales_on_the_longest_learned_programme_or_the_match() -> None:
-    longest = match_rules.longest_programme_s(PROFILES)
-    assert longest == pytest.approx(28800.517669)
-    assert match_rules.cycle_duration_cap_s(0.0, longest) == pytest.approx(43200.78, abs=0.01)
-    # Unmatched on 2026-10-25, the device's longest was Normal + Dry's 24899.7 s:
-    # 10.4 h, enough for the 8.3 h run the flat cap cut.
-    assert match_rules.cycle_duration_cap_s(0.0, 24899.7) == pytest.approx(37349.55)
-    # The match's own expected duration counts when it is the longer one.
-    assert match_rules.cycle_duration_cap_s(30000.0, 24899.7) == pytest.approx(45000.0)
+def test_cap_scales_on_the_mean_of_the_longest_programme() -> None:
+    """Per programme the mean of its runs; the cap-stopped Cotton + Dry run is out."""
+    longest = match_rules.longest_programme_s(CYCLES)
+    assert longest == pytest.approx(28467.267189)  # Towels + Dry
+    assert match_rules.cycle_duration_cap_s(longest) == pytest.approx(42700.9, abs=0.1)
+    # On 2026-10-25 (Normal + Dry's two runs only): 10.2 h, enough for the 8.3 h
+    # run the flat cap cut.
+    before = match_rules.longest_programme_s(CYCLES[:2])
+    assert before == pytest.approx(24552.84, abs=0.01)
+    assert match_rules.cycle_duration_cap_s(before) == pytest.approx(36829.3, abs=0.1)
+
+
+def test_interrupted_and_unlabelled_runs_do_not_count() -> None:
+    assert match_rules.longest_programme_s(
+        [_cycle(None, 30000.0), _cycle("P", 30000.0, "interrupted")]
+    ) == 0.0
 
 
 @pytest.mark.parametrize(
@@ -143,19 +158,65 @@ def test_cap_scales_on_the_longest_learned_programme_or_the_match() -> None:
 )
 def test_corrupt_or_implausible_lengths_do_not_stretch_the_cap(bad: Any) -> None:
     """A 53.8 h washer profile is in the corpus: never more than 1.5 x 16 h."""
-    assert match_rules.cycle_duration_cap_s(bad, bad) == 28800.0
-    assert match_rules.longest_programme_s({"p": {"avg_duration": bad}}) == 0.0
-    assert match_rules.cycle_duration_cap_s(16 * 3600.0, 0.0) == 24 * 3600.0
+    assert match_rules.cycle_duration_cap_s(bad) == 28800.0
+    assert match_rules.longest_programme_s([_cycle("p", bad)]) == 0.0
+    assert match_rules.cycle_duration_cap_s(16 * 3600.0) == 24 * 3600.0
 
 
-@pytest.mark.parametrize("profiles", [None, [], "x", {"p": None}, {"p": [1, 2]}])
-def test_longest_programme_never_raises(profiles: Any) -> None:
-    assert match_rules.longest_programme_s(profiles) == 0.0
+@pytest.mark.parametrize(
+    "cycles", [None, "x", {"p": 1}, 5, [None, "x", 3, ["p", 1.0]], [{"profile_name": 3}]]
+)
+def test_longest_programme_never_raises(cycles: Any) -> None:
+    assert match_rules.longest_programme_s(cycles) == 0.0
 
 
 def test_unmatched_guard_ceilings_stay_below_the_cap() -> None:
     for ceiling in DEFAULT_UNMATCHED_WATCHDOG_CEILING_BY_DEVICE.values():
         assert ceiling < CYCLE_DURATION_CAP_BASE_S
+
+
+# --- the cap cannot feed itself (the #404 loop) -------------------------------
+
+
+def test_a_cap_stop_is_recognised_marked_or_legacy() -> None:
+    marked = _cycle("P", 43000.0, "force_stopped", duration_capped=True)
+    assert match_rules.is_duration_cap_stop(marked)
+    # Stored before the mark: force-stopped at the flat 8 h cap.
+    assert match_rules.is_duration_cap_stop(_cycle("P", 28800.5, "force_stopped"))
+    assert match_rules.is_duration_cap_stop(_cycle("P", 28750.0, "force_stopped"))
+    # The unmatched guard's 7.9 h force stop at the real end is a real length.
+    assert not match_rules.is_duration_cap_stop(_cycle("P", 28467.3, "force_stopped"))
+    assert not match_rules.is_duration_cap_stop(_cycle("P", 30000.0, "completed"))
+
+
+def test_a_cap_stopped_cycle_labelled_into_a_programme_does_not_raise_the_next_cap() -> None:
+    """The detector's own cap stop, labelled into the device's longest programme,
+    leaves the next cap where it was, so repeated zombies cannot ratchet it to 24 h."""
+    learned = [_cycle("Cotton + Dry", 7.9 * 3600)]
+    cap = match_rules.cycle_duration_cap_s(match_rules.longest_programme_s(learned))
+    assert cap == pytest.approx(1.5 * 7.9 * 3600)
+
+    cycles: list[dict[str, Any]] = []
+    det = _detector(cycles, lambda: match_rules.longest_programme_s(learned))
+    t = 0.0
+    while not cycles and t < 25 * 3600:  # a zombie: 120 W that never ends
+        det.process_reading(120.0, T0 + timedelta(seconds=t))
+        t += 30.0
+    stop = cycles[0]
+    assert stop["status"] == "force_stopped" and stop["duration_capped"] is True
+    assert stop["duration"] == pytest.approx(cap, abs=31.0)
+
+    learned.append({**stop, "profile_name": "Cotton + Dry"})  # the user labels it
+    assert match_rules.cycle_duration_cap_s(match_rules.longest_programme_s(learned)) == cap
+    # Even as the programme's only run: the next cap is the base, not 1.5 x the stop.
+    assert match_rules.longest_programme_s([{**stop, "profile_name": "X"}]) == 0.0
+
+
+def test_only_a_cap_stop_carries_the_mark() -> None:
+    cycles: list[dict[str, Any]] = []
+    _run(_detector(cycles, lambda: match_rules.longest_programme_s(CYCLES)))
+    assert cycles[0]["status"] == "completed"
+    assert "duration_capped" not in cycles[0]
 
 
 # --- the cut (detector) -----------------------------------------------------
@@ -166,13 +227,14 @@ def test_without_a_learned_programme_an_8h_plus_run_is_cut_at_8h() -> None:
     cycles: list[dict[str, Any]] = []
     _run(_detector(cycles))
     assert cycles[0]["status"] == "force_stopped"
+    assert cycles[0]["duration_capped"] is True
     assert cycles[0]["duration"] == pytest.approx(28800.0, abs=10.0)
     assert len(cycles) == 2
 
 
 def test_a_learned_long_programme_lifts_the_cap_and_the_run_completes() -> None:
     cycles: list[dict[str, Any]] = []
-    _run(_detector(cycles, lambda: match_rules.longest_programme_s(PROFILES)))
+    _run(_detector(cycles, lambda: match_rules.longest_programme_s(CYCLES)))
     assert len(cycles) == 1
     assert cycles[0]["status"] == "completed"
     assert cycles[0]["duration"] == pytest.approx(PROGRAMME_S, abs=60.0)
@@ -304,4 +366,22 @@ async def test_unmatched_run_past_7h_that_finishes_is_stored_completed(
     assert [c["status"] for c in stored] == ["completed"]
     assert stored[0]["duration"] == pytest.approx(7.6 * 3600, abs=150)
     assert "Unmatched idle cycle" not in caplog.text
+    await mgr.async_shutdown()
+
+
+async def test_a_cap_stop_is_stored_with_its_mark(hass, freezer) -> None:
+    """The mark survives the cycle-end tail into the store, and the stored stop
+    does not count as a learned programme length once labelled."""
+    from .real_manager import boot, feed, make_entry, record_notify
+
+    record_notify(hass)
+    entry = make_entry(hass, {**OPTIONS, "min_off_gap": 600})
+    mgr = await boot(hass, entry)
+    await feed(hass, freezer, 300, int(8.1 * 3600), step=120)  # nothing learned: 8 h
+
+    stored = mgr.profile_store.get_past_cycles()
+    assert stored and stored[0]["status"] == "force_stopped"
+    assert stored[0]["duration_capped"] is True
+    stored[0]["profile_name"] = "Cotton + Dry"
+    assert mgr._longest_programme_s() == 0.0  # noqa: SLF001
     await mgr.async_shutdown()

@@ -119,6 +119,9 @@ from .const import (
 )
 from . import spin_rhythm
 
+#: How often a run past 8 h re-reads the device's longest learned programme (#502).
+_CAP_PROVIDER_REFRESH_S = 600.0
+
 # The dishwasher end-spike wait window is shared between two code paths
 # (Smart Termination's wait branch and _should_defer_finish's no-end-spike
 # branch).  They MUST release the cycle at the same instant - sanity-check
@@ -761,8 +764,11 @@ class CycleDetector:
         self._terminal_drop_provider = terminal_drop_provider
         # () -> the device's longest learned programme in seconds (#502), which the
         # duration cap scales on (`_duration_cap_s`). Read only once a run is past
-        # CYCLE_DURATION_CAP_BASE_S. None: the cap scales on the match alone.
+        # CYCLE_DURATION_CAP_BASE_S. None: the cap is the base.
         self._longest_programme_provider = longest_programme_provider
+        # (cycle start, when read, value): the provider walks the stored cycles, so
+        # it is read once per run and then every _CAP_PROVIDER_REFRESH_S.
+        self._longest_programme_cache: tuple[datetime, datetime, float] | None = None
         # Throttle caches for the two providers, scoped to the cycle + expectation:
         # (last_reading_ts, expected_duration, cycle_start, result). Reused only
         # within the recompute window when expected_duration and cycle_start match.
@@ -3640,6 +3646,7 @@ class CycleDetector:
                     timestamp,
                     status="force_stopped",
                     termination_reason=TerminationReason.FORCE_STOPPED,
+                    duration_capped=True,
                 )
 
         elif self._state == STATE_PAUSED:
@@ -3678,6 +3685,7 @@ class CycleDetector:
                     timestamp,
                     status="force_stopped",
                     termination_reason=TerminationReason.FORCE_STOPPED,
+                    duration_capped=True,
                 )
                 return
 
@@ -6061,6 +6069,7 @@ class CycleDetector:
         termination_reason: str = TerminationReason.TIMEOUT,
         keep_tail: bool = False,
         tail_cap: datetime | None = None,
+        duration_capped: bool = False,
     ) -> None:
         """Finalize cycle.
 
@@ -6158,6 +6167,11 @@ class CycleDetector:
             # Item 514: the finished stalls and user pauses, so the cycle-end label
             # match reads the trace in programme time (`match_rules.final_match_input`).
             cycle_data["halt_spans"] = spans
+        if duration_capped:
+            # #502: a run the duration cap ended never counts as a learned
+            # programme length (`match_rules.is_duration_cap_stop`), so a cap stop
+            # labelled into a programme cannot lengthen the next cap.
+            cycle_data["duration_capped"] = True
 
         self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)
@@ -6385,42 +6399,49 @@ class CycleDetector:
         )
         return self._time_below_threshold < wait + max(0.0, float(grace_s))
 
-    def _duration_cap_s(self) -> float:
+    def _duration_cap_s(self, timestamp: datetime) -> float:
         """This run's hard cap on wall-clock length (#502).
 
-        :func:`match_rules.cycle_duration_cap_s` on the match's expected duration
-        and the device's longest learned programme. A provider that raises reads
-        as no programme: the cap then falls back to the match and the base.
+        :func:`match_rules.cycle_duration_cap_s` on the device's longest learned
+        programme. Not on the match's expected duration: that is the profile's
+        average, which counts cap stops. A provider that raises reads as no
+        programme, so the cap falls back to the base.
         """
-        longest = 0.0
         provider = self._longest_programme_provider
-        if provider is not None:
+        if provider is None or self._current_cycle_start is None:
+            return match_rules.cycle_duration_cap_s(0.0)
+        cache = self._longest_programme_cache
+        if (
+            cache is None
+            or cache[0] != self._current_cycle_start
+            or (timestamp - cache[1]).total_seconds() >= _CAP_PROVIDER_REFRESH_S
+        ):
             try:
                 longest = float(provider() or 0.0)
             except Exception:  # pylint: disable=broad-exception-caught
                 longest = 0.0
-        return match_rules.cycle_duration_cap_s(self._expected_duration, longest)
+            cache = (self._current_cycle_start, timestamp, longest)
+            self._longest_programme_cache = cache
+        return match_rules.cycle_duration_cap_s(cache[2])
 
     def _past_duration_cap(self, timestamp: datetime) -> bool:
         """Whether this run has outlived :meth:`_duration_cap_s`.
 
         The cap is never below CYCLE_DURATION_CAP_BASE_S, so the provider is only
-        consulted past that (once per reading on a run longer than 8 h).
+        consulted past that.
         """
         if not self._current_cycle_start:
             return False
         elapsed = (timestamp - self._current_cycle_start).total_seconds()
         if elapsed <= CYCLE_DURATION_CAP_BASE_S:
             return False
-        cap = self._duration_cap_s()
+        cap = self._duration_cap_s(timestamp)
         if elapsed <= cap:
             return False
         self._logger.warning(
-            "Cycle ran %.1f h, past its %.1f h duration cap (expected %.0fs); "
-            "force-stopping",
+            "Cycle ran %.1f h, past its %.1f h duration cap; force-stopping",
             elapsed / 3600.0,
             cap / 3600.0,
-            self._expected_duration,
         )
         return True
 

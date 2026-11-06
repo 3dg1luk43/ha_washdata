@@ -906,8 +906,8 @@ class _DetailSim:
 
     def _longest_programme_s(self) -> float:
         """``manager._longest_programme_s`` for this replay: the duration cap (#502)
-        scales on the replayed store's profiles, as live does."""
-        getter = getattr(self.store, "get_profiles", None)
+        scales on the replayed store's cycles, as live does."""
+        getter = getattr(self.store, "iter_evidence_cycles", None)
         if not callable(getter):
             return 0.0
         return match_rules.longest_programme_s(getter())

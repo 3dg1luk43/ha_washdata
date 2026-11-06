@@ -1635,11 +1635,15 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
 # for a run that never reaches an end. It was a flat 8 h, which cut a real 8.3 h
 # wash+dry in two (the drying rest opened a second cycle 9 s later). The cap is now
 # the larger of CYCLE_DURATION_CAP_BASE_S and CYCLE_DURATION_CAP_PROGRAMME_FACTOR x
-# the longest programme the device has learned or the current match expects
-# (`match_rules.cycle_duration_cap_s`), so a device whose programmes all run under
-# 5 h 20 min keeps exactly 8 h.
+# the device's longest learned programme (`match_rules.cycle_duration_cap_s`), so a
+# device whose programmes all run under 5 h 20 min keeps exactly 8 h. Runs the cap
+# ended never count as learned (`match_rules.is_duration_cap_stop`), so it cannot
+# feed itself. CYCLE_DURATION_CAP_LEGACY_SLACK_S: how far below 8 h a cap stop
+# stored before the `duration_capped` mark may end (its end snaps back to the last
+# active reading, seconds earlier on a plug reporting every few seconds).
 CYCLE_DURATION_CAP_BASE_S = 28800  # 8 h
 CYCLE_DURATION_CAP_PROGRAMME_FACTOR = 1.5
+CYCLE_DURATION_CAP_LEGACY_SLACK_S = 60
 # Longest programme duration the detector accepts as an expected duration and the
 # duration cap scales on; anything longer is corrupt data (the corpus holds a 53.8 h
 # washer profile). Caps the duration cap at 1.5 x 16 h = 24 h. The detector's bound
