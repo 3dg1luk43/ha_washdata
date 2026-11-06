@@ -17,7 +17,7 @@ Tiers:
   fresh ``run --mode fast`` compared with ``eval_baseline.json``; nothing is
   rewritten).
 * ``--box`` adds the real-HA test box (``up.sh --fresh``, ``smoke.sh``, the
-  notification-action and unload checks). Never by default: it is minutes, it is
+  notification-action, unload and Clean-restart checks). Never by default: it is minutes, it is
   shared, and it only proves things a MagicMock cannot (CLAUDE.md). When the
   changed files touch setup, services, entities, the WS API or notifications the
   summary says so, so you can decide.
@@ -256,12 +256,13 @@ def _stages() -> list[Stage]:
             Command(["./smoke.sh"], cwd=REPO / "devtools" / "testbox"),
             Command(["./check_notify_actions.sh"], cwd=REPO / "devtools" / "testbox"),
             Command(["./check_unload_confirm.sh"], cwd=REPO / "devtools" / "testbox"),
+            Command(["./check_clean_restart.sh"], cwd=REPO / "devtools" / "testbox"),
         ], 1000, unavailable=lambda: _box_busy() or _need("docker")()),
     ]
 
 
 def _box_busy() -> str | None:
-    for pat in ("[s]moke.sh", "[c]heck_notify", "[c]heck_unload"):
+    for pat in ("[s]moke.sh", "[c]heck_notify", "[c]heck_unload", "[c]heck_clean_restart"):
         if subprocess.run(["pgrep", "-f", pat], capture_output=True).returncode == 0:
             return f"another test box run is active ({pat.replace('[', '').replace(']', '')})"
     return None
